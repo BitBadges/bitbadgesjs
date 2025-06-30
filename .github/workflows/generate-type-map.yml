@@ -1,0 +1,48 @@
+name: Generate AI Type Map
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  generate-type-map:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/bitbadgesjs-sdk
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Needed for pushing
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate AI type map
+        run: npm run generate-type-map
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add generated files
+        run: |
+          git add type-map/typedoc-output.json
+          git add type-map/all-types.d.ts
+          git add type-map/type-summary.md
+          git add type-map/types-schema.json
+          git add type-map/README.md
+
+      - name: Commit and push if there are changes
+        run: |
+          git diff --cached --quiet || git commit -m "chore: update AI type map [CI skip]"
+          git push origin main
