@@ -48,4 +48,3 @@ jobs:
           branch: update-ai-type-map
           delete-branch: true
           commit-message: 'chore: update AI type map [CI skip]'
-          path: packages/bitbadgesjs-sdk/type-map
