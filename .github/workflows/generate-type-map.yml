@@ -29,25 +29,6 @@ jobs:
       - name: Generate AI type map
         run: npm run generate-type-map
 
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Create branch and add files
-        run: |
-          git checkout -b update-ai-type-map-$(date +%Y%m%d-%H%M%S)
-          git add type-map/typedoc-output.json
-          git add type-map/all-types.d.ts
-          git add type-map/type-summary.md
-          git add type-map/types-schema.json
-          git add type-map/README.md
-
-      - name: Commit and push branch
-        run: |
-          git diff --cached --quiet || git commit -m "chore: update AI type map [CI skip]"
-          git push origin HEAD
-
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
@@ -67,3 +48,4 @@ jobs:
           branch: update-ai-type-map
           delete-branch: true
           commit-message: 'chore: update AI type map [CI skip]'
+          path: packages/bitbadgesjs-sdk/type-map
