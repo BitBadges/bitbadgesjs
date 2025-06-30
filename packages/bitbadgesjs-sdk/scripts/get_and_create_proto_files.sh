@@ -4,6 +4,15 @@ MYFOLDER=$(pwd)
 # rm -rf ./proto
 # mkdir ./proto
 
+# Fetch from bitbadgeschain
+cd ../../../bitbadgeschain
+cp -r ./proto/badges/* $MYFOLDER/proto/badges/
+cd ../bitbadgesjs/packages/bitbadgesjs-sdk
+
+# We have a v6 or v* folder for migration, lets delete that
+rm -rf ./proto/badges/v*
+
+
 # # BitBadges
 # cd /tmp
 # git clone https://github.com/bitbadges/bitbadgeschain/

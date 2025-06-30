@@ -1,0 +1,11 @@
+# Always use bun for package management and script execution
+
+- Use `bun` instead of `npm`, `yarn`, or `pnpm` for all package management operations
+- Use `bun run` for executing scripts defined in package.json
+- Use `bun install` for installing dependencies
+- Use `bun add` for adding new dependencies
+- Use `bun remove` for removing dependencies
+- Use `bun test` for running tests
+- Use `bun build` for building the project
+- Use `bun dev` for development mode
+- Use `bun run` followed by the script name for any custom scripts

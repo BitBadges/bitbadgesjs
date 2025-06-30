@@ -26,7 +26,7 @@ option go_package = "github.com/bitbadges/bitbadgeschain/x/badges/types";
   and autoApproveSelfInitiatedIncomingTransfers is set to true.
 
   Note that the user approved transfers are only checked if the collection approved transfers do not specify to override
-  the user approved transfers.
+  the user approved transfers. 
 
   The permissions are used to determine whether the user can update the approved incoming/outgoing transfers and auto approvals.
 */
@@ -46,7 +46,7 @@ message UserBalanceStore {
   // Whether to auto-approve self-initiated incoming transfers for this user (i.e. to == initiatedBy).
   bool autoApproveSelfInitiatedIncomingTransfers = 5;
 
-  // Whether to auto-approve all incoming transfers by default.
+  // Whether to auto-approve all incoming transfers by default. 
   // This is just shorthand for adding an accept everything incoming approval
   // with no restrictions.
   bool autoApproveAllIncomingTransfers = 6;
@@ -156,7 +156,7 @@ message UserIncomingApproval {
 
   // The criteria that must be met for this approval to be considered.
   IncomingApprovalCriteria approvalCriteria = 11;
-
+  
 
   // Version of the approval. Maintained internally.
   string version = 12 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
@@ -170,13 +170,13 @@ message UserIncomingApproval {
 // We check the approvals for first match of this tuple, using the approvals. Subsequent matches are ignored.
 //
 // If the first match is disallowed, the transfer is disallowed.
-// If the first match is allowed, then we check the rest of the restrictions. If any restrictions fail, then the transfer is disallowed.
+// If the first match is allowed, then we check the rest of the restrictions. If any restrictions fail, then the transfer is disallowed. 
 // We do not proceed to the next match.
 //
 // Challenges defines the challenges that must be met with valid solutions for the transfer to be approved.
 //
 // requireTo/From(DoesNot)EqualsInitiatedBy defines whether the to/from address must equal the initiatedBy address or not. If it doesn't, then the transfer is disallowed.
-//
+//  
 // overallApprovals defines the overall approvals for the transfer (i.e. the running tally of the number of transfers and amounts transferred by all addresses).
 // perAddressApprovals
 
@@ -186,13 +186,13 @@ message UserIncomingApproval {
 // We check the approvals for first match of this tuple, using the approvals. Subsequent matches are ignored.
 //
 // If the first match is disallowed, the transfer is disallowed.
-// If the first match is allowed, then we check the rest of the restrictions. If any restrictions fail, then the transfer is disallowed.
+// If the first match is allowed, then we check the rest of the restrictions. If any restrictions fail, then the transfer is disallowed. 
 // We do not proceed to the next match.
 //
 // Challenges defines the challenges that must be met with valid solutions for the transfer to be approved.
 //
 // requireTo/From(DoesNot)EqualsInitiatedBy defines whether the to/from address must equal the initiatedBy address or not. If it doesn't, then the transfer is disallowed.
-//
+//  
 // overallApprovals defines the overall approvals for the transfer (i.e. the running tally of the number of transfers and amounts transferred by all addresses).
 // perAddressApprovals defines the approvals per unique from, to, and/or initiatedBy address.
 // If any of these are nil, we assume unlimited approvals.
@@ -206,11 +206,11 @@ message UserIncomingApproval {
 //
 // Ex: If overallApprovals maxNumTransfers = 20 and trackerID = "abc", then the first 20 transfers that map to trackerID = "abc" will be approved. The 21st transfer will be disallowed.
 //
-// IMPORTANT: Be very careful when updating an approved transfer but keeping the same tracker ID.
+// IMPORTANT: Be very careful when updating an approved transfer but keeping the same tracker ID. 
 // For example, if you change the corresponding badge IDs and the old badge IDs overlap, then the overlapping badge IDs will already have existing tallies.
-//
+//    
 // Another common area of confusion is what is actually being tallied. The tally is based on the approved transfer rules that are set.
-// For example, if you don't have per address rules set and you update the approved transfer rules to include per address rules,
+// For example, if you don't have per address rules set and you update the approved transfer rules to include per address rules, 
 // then the tally doesn't retroactively apply the per address rules to the previous transfers. It starts at that time.
 //
 // Lastly, we have overridesFromOutgoingApprovals and overridesToIncomingApprovals.
@@ -219,7 +219,7 @@ message UserIncomingApproval {
 // If these are set to false, the transfer must also be approved by the from /to user's approved outgoing / incoming transfers, respectively.
 
 
-// ManualBalances represents a list of manual balances entered for the predetermined balances criteria. Order is calculated according to the calculation method set.
+// ManualBalances represents a list of manual balances entered for the predetermined balances criteria. Order is calculated according to the calculation method set. 
 message ManualBalances {
   repeated Balance balances = 1;
 }
@@ -285,7 +285,7 @@ message AutoDeletionOptions {
 
 // ApprovalAmounts defines approval amounts per unique "from," "to," and/or "initiated by" address.
 // If any of these are nil or "0", we assume unlimited approvals.
-// If they are set to a value, then the running tally of the amounts transferred for the specified badge IDs and ownership times
+// If they are set to a value, then the running tally of the amounts transferred for the specified badge IDs and ownership times 
 // must not exceed the corresponding value.
 message ApprovalAmounts {
   // Overall approval amount.
@@ -355,7 +355,7 @@ message CoinTransfer {
   bool overrideToWithInitiator = 4;
 }
 
-/*
+/* 
   MustOwnBadges represents a condition where a user must own specific badges
   to be approved to transfer.
 
@@ -539,17 +539,17 @@ message Transfer {
   // The prioritized approvals for the transfer. By default, we scan linearly through the approvals and use the first match.
   // This field can be used to prioritize specific approvals and scan through them first.
   repeated ApprovalIdentifierDetails prioritizedApprovals = 7;
-  // Whether to only check prioritized approvals for the transfer.
+  // Whether to only check prioritized approvals for the transfer. 
   // If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
-  // If false, we will check the prioritized approvals first and then scan through the rest of the approvals.
+  // If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
   bool onlyCheckPrioritizedCollectionApprovals = 8;
-  // Whether to only check prioritized approvals for the transfer.
+  // Whether to only check prioritized approvals for the transfer. 
   // If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
-  // If false, we will check the prioritized approvals first and then scan through the rest of the approvals.
+  // If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
   bool onlyCheckPrioritizedIncomingApprovals = 9;
-  // Whether to only check prioritized approvals for the transfer.
+  // Whether to only check prioritized approvals for the transfer. 
   // If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
-  // If false, we will check the prioritized approvals first and then scan through the rest of the approvals.
+  // If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
   bool onlyCheckPrioritizedOutgoingApprovals = 10;
   // The options for precalculating the balances.
   PrecalculationOptions precalculationOptions = 11;

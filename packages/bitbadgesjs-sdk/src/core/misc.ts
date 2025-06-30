@@ -8,6 +8,7 @@ import {
   CustomTypeClass,
   deepCopyPrimitives
 } from '@/common/base.js';
+import { DenomUnit } from '@/core/ibc-wrappers.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import type {
@@ -1412,7 +1413,6 @@ export function validateCollectionMetadataUpdate<T extends NumberType>(
           fromList: AddressList.AllAddresses(),
           initiatedByList: AddressList.AllAddresses(),
           approvalIdList: AddressList.AllAddresses(),
-
           permanentlyPermittedTimes: UintRangeArray.From([]),
           permanentlyForbiddenTimes: UintRangeArray.From([]),
           arbitraryValue: undefined
@@ -1477,7 +1477,6 @@ export function validateOffChainBalancesMetadataUpdate<T extends NumberType>(
         fromList: AddressList.AllAddresses(),
         initiatedByList: AddressList.AllAddresses(),
         approvalIdList: AddressList.AllAddresses(),
-
         permanentlyPermittedTimes: UintRangeArray.From([]),
         permanentlyForbiddenTimes: UintRangeArray.From([]),
         arbitraryValue: undefined
@@ -1496,7 +1495,6 @@ export function validateOffChainBalancesMetadataUpdate<T extends NumberType>(
           fromList: AddressList.AllAddresses(),
           initiatedByList: AddressList.AllAddresses(),
           approvalIdList: AddressList.AllAddresses(),
-
           permanentlyPermittedTimes: UintRangeArray.From([]),
           permanentlyForbiddenTimes: UintRangeArray.From([]),
           arbitraryValue: undefined
@@ -1536,7 +1534,6 @@ function getUpdatedStringCombinations(oldValue: any, newValue: any): UniversalPe
       fromList: AddressList.AllAddresses(),
       initiatedByList: AddressList.AllAddresses(),
       approvalIdList: AddressList.AllAddresses(),
-
       permanentlyPermittedTimes: UintRangeArray.From([]),
       permanentlyForbiddenTimes: UintRangeArray.From([]),
       arbitraryValue: undefined
@@ -1560,7 +1557,6 @@ function getUpdatedBoolCombinations(oldValue: any, newValue: any): UniversalPerm
         fromList: AddressList.AllAddresses(),
         initiatedByList: AddressList.AllAddresses(),
         approvalIdList: AddressList.AllAddresses(),
-
         permanentlyPermittedTimes: UintRangeArray.From([]),
         permanentlyForbiddenTimes: UintRangeArray.From([]),
         arbitraryValue: undefined
@@ -1673,7 +1669,6 @@ export function validateStandardsUpdate<T extends NumberType>(
             fromList: AddressList.AllAddresses(),
             initiatedByList: AddressList.AllAddresses(),
             approvalIdList: AddressList.AllAddresses(),
-
             permanentlyPermittedTimes: UintRangeArray.From([]),
             permanentlyForbiddenTimes: UintRangeArray.From([]),
             arbitraryValue: undefined
@@ -1690,7 +1685,6 @@ export function validateStandardsUpdate<T extends NumberType>(
             fromList: AddressList.AllAddresses(),
             initiatedByList: AddressList.AllAddresses(),
             approvalIdList: AddressList.AllAddresses(),
-
             permanentlyPermittedTimes: UintRangeArray.From([]),
             permanentlyForbiddenTimes: UintRangeArray.From([]),
             arbitraryValue: undefined
@@ -1709,7 +1703,6 @@ export function validateStandardsUpdate<T extends NumberType>(
                 fromList: AddressList.AllAddresses(),
                 initiatedByList: AddressList.AllAddresses(),
                 approvalIdList: AddressList.AllAddresses(),
-
                 permanentlyPermittedTimes: UintRangeArray.From([]),
                 permanentlyForbiddenTimes: UintRangeArray.From([]),
                 arbitraryValue: undefined
@@ -1864,6 +1857,8 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
   denom: string;
   ownershipTimes: UintRangeArray<T>;
   badgeIds: UintRangeArray<T>;
+  symbol: string;
+  denomUnits: DenomUnit<T>[];
 
   constructor(data: iCosmosCoinWrapperPath<T>) {
     super();
@@ -1871,6 +1866,8 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
     this.denom = data.denom;
     this.ownershipTimes = UintRangeArray.From(data.ownershipTimes);
     this.badgeIds = UintRangeArray.From(data.badgeIds);
+    this.symbol = data.symbol;
+    this.denomUnits = data.denomUnits.map((unit) => new DenomUnit(unit));
   }
 
   getNumberFieldNames(): string[] {
@@ -1882,11 +1879,14 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
   }
 
   static fromProto<U extends NumberType>(protoMsg: badges.CosmosCoinWrapperPath, convertFunction: (item: NumberType) => U): CosmosCoinWrapperPath<U> {
-    return new CosmosCoinWrapperPath({
+    const denomUnits = protoMsg.denomUnits.map((unit) => DenomUnit.fromProto(unit, convertFunction));
+    return new CosmosCoinWrapperPath<NumberType>({
       address: protoMsg.address,
       denom: protoMsg.denom,
       ownershipTimes: UintRangeArray.From(protoMsg.ownershipTimes),
-      badgeIds: UintRangeArray.From(protoMsg.badgeIds)
+      badgeIds: UintRangeArray.From(protoMsg.badgeIds),
+      symbol: protoMsg.symbol,
+      denomUnits: denomUnits
     }).convert(convertFunction);
   }
 }

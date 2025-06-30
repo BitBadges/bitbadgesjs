@@ -12,7 +12,7 @@ import { UintRange } from "./balances_pb.js";
 
 /**
  *
- * A BadgeCollection is the top-level object for a collection of badges.
+ * A BadgeCollection is the top-level object for a collection of badges. 
  * It defines everything about the collection, such as the manager, metadata, etc.
  *
  * All collections are identified by a collectionId assigned by the blockchain, which is a uint64 that increments (i.e. the first collection has ID 1).
@@ -20,7 +20,7 @@ import { UintRange } from "./balances_pb.js";
  * All collections can have a manager who is responsible for managing the collection and can be granted certain admin
  * permissions, such as the ability to mint new badges.
  *
- * Certain fields are timeline-based, which means they may have different values at different block heights.
+ * Certain fields are timeline-based, which means they may have different values at different block heights. 
  * We fetch the value according to the current time.
  * For example, we may set the manager to be Alice from Time1 to Time2, and then set the manager to be Bob from Time2 to Time3.
  *
@@ -141,7 +141,7 @@ export class BadgeCollection extends Message<BadgeCollection> {
   mintEscrowAddress = "";
 
   /**
-   * The IBC wrapper paths for the collection.
+   * The IBC wrapper (sdk.coin) paths for the collection.
    *
    * @generated from field: repeated badges.CosmosCoinWrapperPath cosmosCoinWrapperPaths = 17;
    */
@@ -214,6 +214,16 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
    */
   badgeIds: UintRange[] = [];
 
+  /**
+   * @generated from field: string symbol = 5;
+   */
+  symbol = "";
+
+  /**
+   * @generated from field: repeated badges.DenomUnit denomUnits = 6;
+   */
+  denomUnits: DenomUnit[] = [];
+
   constructor(data?: PartialMessage<CosmosCoinWrapperPath>) {
     super();
     proto3.util.initPartial(data, this);
@@ -226,6 +236,8 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
     { no: 2, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
     { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 5, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinWrapperPath {
@@ -242,6 +254,55 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
 
   static equals(a: CosmosCoinWrapperPath | PlainMessage<CosmosCoinWrapperPath> | undefined, b: CosmosCoinWrapperPath | PlainMessage<CosmosCoinWrapperPath> | undefined): boolean {
     return proto3.util.equals(CosmosCoinWrapperPath, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.DenomUnit
+ */
+export class DenomUnit extends Message<DenomUnit> {
+  /**
+   * @generated from field: string decimals = 1;
+   */
+  decimals = "";
+
+  /**
+   * @generated from field: string symbol = 2;
+   */
+  symbol = "";
+
+  /**
+   * @generated from field: bool isDefaultDisplay = 3;
+   */
+  isDefaultDisplay = false;
+
+  constructor(data?: PartialMessage<DenomUnit>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.DenomUnit";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "decimals", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "isDefaultDisplay", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DenomUnit {
+    return new DenomUnit().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DenomUnit {
+    return new DenomUnit().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DenomUnit {
+    return new DenomUnit().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DenomUnit | PlainMessage<DenomUnit> | undefined, b: DenomUnit | PlainMessage<DenomUnit> | undefined): boolean {
+    return proto3.util.equals(DenomUnit, a, b);
   }
 }
 

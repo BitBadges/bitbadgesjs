@@ -27,7 +27,7 @@ import { Coin } from "../cosmos/base/v1beta1/coin_pb.js";
  * and autoApproveSelfInitiatedIncomingTransfers is set to true.
  *
  * Note that the user approved transfers are only checked if the collection approved transfers do not specify to override
- * the user approved transfers.
+ * the user approved transfers. 
  *
  * The permissions are used to determine whether the user can update the approved incoming/outgoing transfers and auto approvals.
  *
@@ -70,7 +70,7 @@ export class UserBalanceStore extends Message<UserBalanceStore> {
   autoApproveSelfInitiatedIncomingTransfers = false;
 
   /**
-   * Whether to auto-approve all incoming transfers by default.
+   * Whether to auto-approve all incoming transfers by default. 
    * This is just shorthand for adding an accept everything incoming approval
    * with no restrictions.
    *
@@ -454,7 +454,7 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
 }
 
 /**
- * ManualBalances represents a list of manual balances entered for the predetermined balances criteria. Order is calculated according to the calculation method set.
+ * ManualBalances represents a list of manual balances entered for the predetermined balances criteria. Order is calculated according to the calculation method set. 
  *
  * @generated from message badges.ManualBalances
  */
@@ -818,7 +818,7 @@ export class AutoDeletionOptions extends Message<AutoDeletionOptions> {
 /**
  * ApprovalAmounts defines approval amounts per unique "from," "to," and/or "initiated by" address.
  * If any of these are nil or "0", we assume unlimited approvals.
- * If they are set to a value, then the running tally of the amounts transferred for the specified badge IDs and ownership times
+ * If they are set to a value, then the running tally of the amounts transferred for the specified badge IDs and ownership times 
  * must not exceed the corresponding value.
  *
  * @generated from message badges.ApprovalAmounts
@@ -1895,27 +1895,27 @@ export class Transfer extends Message<Transfer> {
   prioritizedApprovals: ApprovalIdentifierDetails[] = [];
 
   /**
-   * Whether to only check prioritized approvals for the transfer.
+   * Whether to only check prioritized approvals for the transfer. 
    * If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
-   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals.
+   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
    *
    * @generated from field: bool onlyCheckPrioritizedCollectionApprovals = 8;
    */
   onlyCheckPrioritizedCollectionApprovals = false;
 
   /**
-   * Whether to only check prioritized approvals for the transfer.
+   * Whether to only check prioritized approvals for the transfer. 
    * If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
-   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals.
+   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
    *
    * @generated from field: bool onlyCheckPrioritizedIncomingApprovals = 9;
    */
   onlyCheckPrioritizedIncomingApprovals = false;
 
   /**
-   * Whether to only check prioritized approvals for the transfer.
+   * Whether to only check prioritized approvals for the transfer. 
    * If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
-   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals.
+   * If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
    *
    * @generated from field: bool onlyCheckPrioritizedOutgoingApprovals = 10;
    */

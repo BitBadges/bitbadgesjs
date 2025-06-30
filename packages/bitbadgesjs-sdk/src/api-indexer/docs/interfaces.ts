@@ -21,6 +21,7 @@ import type {
   iBalance,
   iCollectionMetadataTimeline,
   iCustomDataTimeline,
+  iDenomUnit,
   iIsArchivedTimeline,
   iManagerTimeline,
   iOffChainBalancesMetadataTimeline,
@@ -527,6 +528,8 @@ export interface iCosmosCoinWrapperPath<T extends NumberType> {
   denom: string;
   ownershipTimes: iUintRange<T>[];
   badgeIds: iUintRange<T>[];
+  symbol: string;
+  denomUnits: iDenomUnit<T>[];
 }
 
 /**

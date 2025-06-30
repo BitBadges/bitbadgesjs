@@ -7,6 +7,7 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { Params } from "./params_pb.js";
 import { UintRange } from "./balances_pb.js";
+import { DenomUnit } from "./collections_pb.js";
 import { CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
 import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
@@ -117,6 +118,16 @@ export class CosmosCoinWrapperPathAddObject extends Message<CosmosCoinWrapperPat
    */
   badgeIds: UintRange[] = [];
 
+  /**
+   * @generated from field: string symbol = 4;
+   */
+  symbol = "";
+
+  /**
+   * @generated from field: repeated badges.DenomUnit denomUnits = 5;
+   */
+  denomUnits: DenomUnit[] = [];
+
   constructor(data?: PartialMessage<CosmosCoinWrapperPathAddObject>) {
     super();
     proto3.util.initPartial(data, this);
@@ -128,6 +139,8 @@ export class CosmosCoinWrapperPathAddObject extends Message<CosmosCoinWrapperPat
     { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
     { no: 3, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 4, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinWrapperPathAddObject {
@@ -1173,7 +1186,7 @@ export class MsgUpdateUserApprovals extends Message<MsgUpdateUserApprovals> {
   updateOutgoingApprovals = false;
 
   /**
-   * New outgoing approvals to set.
+   * New outgoing approvals to set. 
    *
    * @generated from field: repeated badges.UserOutgoingApproval outgoingApprovals = 4;
    */

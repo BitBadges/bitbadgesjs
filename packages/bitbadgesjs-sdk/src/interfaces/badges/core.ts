@@ -4,7 +4,6 @@ import type { iAttestationDoc, iPrecalculationOptions } from '@/api-indexer/docs
 import type { BitBadgesAddress, UNIXMilliTimestamp, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iCosmosCoin } from '@/core/coin.js';
-import { UintRange } from '@/proto/badges/balances_pb';
 
 /**
  * @category Interfaces
@@ -265,6 +264,18 @@ export interface iAddressList {
 /**
  * @category Interfaces
  */
+export interface iDenomUnit<T extends NumberType> {
+  /** The number of decimal places for this denomination unit. */
+  decimals: T;
+  /** The symbol for this denomination unit. */
+  symbol: string;
+  /** Whether this denomination unit is the default display unit. */
+  isDefaultDisplay: boolean;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
   /** The denom of the IBC wrapper path. */
   denom: string;
@@ -274,6 +285,12 @@ export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
 
   /** The times of the IBC wrapper path. */
   ownershipTimes: iUintRange<T>[];
+
+  /** The symbol for this IBC wrapper path. */
+  symbol: string;
+
+  /** The denomination units for this IBC wrapper path. */
+  denomUnits: iDenomUnit<T>[];
 }
 
 /**

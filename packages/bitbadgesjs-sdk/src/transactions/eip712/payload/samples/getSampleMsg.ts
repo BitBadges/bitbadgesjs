@@ -68,7 +68,8 @@ import {
   UserOutgoingApproval,
   UserOutgoingApprovalPermission,
   UserPermissions,
-  UserRoyalties
+  UserRoyalties,
+  DenomUnit
 } from '@/proto/badges/index.js';
 import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
@@ -700,7 +701,15 @@ const universalParams = {
     new CosmosCoinWrapperPathAddObject({
       denom: 'ibc:1234567890',
       badgeIds: [new UintRange()],
-      ownershipTimes: [new UintRange()]
+      ownershipTimes: [new UintRange()],
+      symbol: '',
+      denomUnits: [
+        new DenomUnit({
+          decimals: '0',
+          symbol: '',
+          isDefaultDisplay: false
+        })
+      ]
     })
   ]
 };

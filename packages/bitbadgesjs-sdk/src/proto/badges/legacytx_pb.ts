@@ -10,6 +10,7 @@ import { Balance, UintRange } from "./balances_pb.js";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
 import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { AddressList } from "./address_lists_pb.js";
+import { CosmosCoinWrapperPathAddObject } from "./tx_pb.js";
 
 /**
  * The types defined in these files are used to define the MsgServer types for all requests and responses for Msgs of the badges module.
@@ -242,6 +243,11 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
    */
   defaultBalances: Balance[] = [];
 
+  /**
+   * @generated from field: repeated badges.CosmosCoinWrapperPathAddObject cosmosCoinWrapperPathsToAdd = 19;
+   */
+  cosmosCoinWrapperPathsToAdd: CosmosCoinWrapperPathAddObject[] = [];
+
   constructor(data?: PartialMessage<MsgNewCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -267,6 +273,7 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
     { no: 16, name: "defaultIncomingApprovals", kind: "message", T: UserIncomingApproval, repeated: true },
     { no: 17, name: "defaultDisapproveSelfInitiated", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 18, name: "defaultBalances", kind: "message", T: Balance, repeated: true },
+    { no: 19, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgNewCollection {
