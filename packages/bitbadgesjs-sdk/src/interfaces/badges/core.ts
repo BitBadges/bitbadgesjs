@@ -362,6 +362,11 @@ export interface iTransfer<T extends NumberType> {
    * The affiliate address for the transfer.
    */
   affiliateAddress?: BitBadgesAddress;
+
+  /**
+   * The number of times to attempt approval validation. If 0 / not specified, we default to only one.
+   */
+  numAttempts?: T;
 }
 
 /**

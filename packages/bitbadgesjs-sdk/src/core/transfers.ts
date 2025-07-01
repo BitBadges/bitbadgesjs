@@ -30,6 +30,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
   precalculationOptions?: PrecalculationOptions<T>;
   affiliateAddress?: string;
+  numAttempts?: T;
 
   constructor(transfer: iTransfer<T>) {
     super();
@@ -50,10 +51,11 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
     this.onlyCheckPrioritizedOutgoingApprovals = transfer.onlyCheckPrioritizedOutgoingApprovals;
     this.precalculationOptions = transfer.precalculationOptions ? new PrecalculationOptions(transfer.precalculationOptions) : undefined;
     this.affiliateAddress = transfer.affiliateAddress;
+    this.numAttempts = transfer.numAttempts;
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['numAttempts'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Transfer<U> {
@@ -98,7 +100,8 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       onlyCheckPrioritizedIncomingApprovals: item.onlyCheckPrioritizedIncomingApprovals,
       onlyCheckPrioritizedOutgoingApprovals: item.onlyCheckPrioritizedOutgoingApprovals,
       precalculationOptions: item.precalculationOptions ? PrecalculationOptions.fromProto(item.precalculationOptions, convertFunction) : undefined,
-      affiliateAddress: item.affiliateAddress
+      affiliateAddress: item.affiliateAddress,
+      numAttempts: item.numAttempts ? convertFunction(item.numAttempts) : undefined
     });
   }
 
@@ -110,7 +113,8 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       precalculateBalancesFromApproval: this.precalculateBalancesFromApproval?.toBech32Addresses(prefix),
       prioritizedApprovals: this.prioritizedApprovals?.map((x) => x.toBech32Addresses(prefix)),
       precalculationOptions: this.precalculationOptions ? new PrecalculationOptions(this.precalculationOptions) : undefined,
-      affiliateAddress: this.affiliateAddress
+      affiliateAddress: this.affiliateAddress,
+      numAttempts: this.numAttempts
     });
   }
 }

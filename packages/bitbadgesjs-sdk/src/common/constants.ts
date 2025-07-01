@@ -44,7 +44,7 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
   chainId: 'bitbadges-1',
   chainName: 'BitBadges',
   chainSymbolImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
-  coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
+  coinImageUrl: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true',
   rpc: 'https://node.bitbadges.io/rpc',
   rest: 'https://node.bitbadges.io/api',
   bip44: {
@@ -63,8 +63,8 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
       coinDenom: 'BADGE',
       coinMinimalDenom: 'ubadge',
       coinDecimals: 9,
-      coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
-      icon: 'https://avatars.githubusercontent.com/u/86890740'
+      coinImageUrl: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true',
+      icon: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true'
     },
     {
       coinDenom: 'STAKE',
@@ -84,8 +84,8 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
         average: 0.000000000001,
         high: 0.000000000001
       },
-      coinImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
-      icon: 'https://avatars.githubusercontent.com/u/86890740'
+      coinImageUrl: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true',
+      icon: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true'
     }
   ],
   stakeCurrency: {

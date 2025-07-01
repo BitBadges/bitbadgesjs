@@ -308,7 +308,10 @@ function populateUserRoyalties(userRoyalties?: UserRoyalties) {
 
 function populateAutoDeletionOptions(autoDeletionOptions?: AutoDeletionOptions) {
   if (!autoDeletionOptions) {
-    return new AutoDeletionOptions({});
+    return new AutoDeletionOptions({
+      afterOneUse: false,
+      afterOverallMaxNumTransfers: false
+    });
   }
 
   return autoDeletionOptions;
@@ -783,7 +786,8 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               precalculationOptions: new PrecalculationOptions({
                 overrideTimestamp: '0',
                 badgeIdsOverride: [new UintRange()]
-              })
+              }),
+              numAttempts: '0'
             })
           ]
         }).toJson({ emitDefaultValues: true })

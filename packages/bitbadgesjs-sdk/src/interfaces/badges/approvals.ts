@@ -156,6 +156,8 @@ export interface iApprovalAmounts<T extends NumberType> {
 export interface iAutoDeletionOptions {
   /** Whether the approval should be deleted after one use. */
   afterOneUse: boolean;
+  /** Whether the approval should be deleted after the overall max number of transfers threshold is met. */
+  afterOverallMaxNumTransfers: boolean;
 }
 
 /**

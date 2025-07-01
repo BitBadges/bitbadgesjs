@@ -787,6 +787,13 @@ export class AutoDeletionOptions extends Message<AutoDeletionOptions> {
    */
   afterOneUse = false;
 
+  /**
+   * After overall max number of uses threshold is met?
+   *
+   * @generated from field: bool afterOverallMaxNumTransfers = 2;
+   */
+  afterOverallMaxNumTransfers = false;
+
   constructor(data?: PartialMessage<AutoDeletionOptions>) {
     super();
     proto3.util.initPartial(data, this);
@@ -796,6 +803,7 @@ export class AutoDeletionOptions extends Message<AutoDeletionOptions> {
   static readonly typeName = "badges.AutoDeletionOptions";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "afterOneUse", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: "afterOverallMaxNumTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AutoDeletionOptions {
@@ -1935,6 +1943,13 @@ export class Transfer extends Message<Transfer> {
    */
   affiliateAddress = "";
 
+  /**
+   * The number of times to attempt approval validation. If 0 / not specified, we default to only one.
+   *
+   * @generated from field: string numAttempts = 13;
+   */
+  numAttempts = "";
+
   constructor(data?: PartialMessage<Transfer>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1955,6 +1970,7 @@ export class Transfer extends Message<Transfer> {
     { no: 10, name: "onlyCheckPrioritizedOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 11, name: "precalculationOptions", kind: "message", T: PrecalculationOptions },
     { no: 12, name: "affiliateAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 13, name: "numAttempts", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Transfer {
