@@ -346,6 +346,17 @@ export class BitBadgesCollection<T extends NumberType>
     return UintRangeArray.From([{ start: 1n, end: this.getMaxBadgeId() }]);
   }
 
+  /**
+   * Gets default display currency, if set. Defaults to ubadge.
+   */
+  getDefaultDisplayCurrency() {
+    return (
+      this.getStandards()
+        ?.find((x) => x.startsWith('DefaultDisplayCurrency'))
+        ?.split(':')[1] ?? 'ubadge'
+    );
+  }
+
   private getBalanceInfo(address: NativeAddress, throwIfNotFound = true) {
     const convertedAddress = address === 'Mint' || address === 'Total' ? address : convertToBitBadgesAddress(address);
     const owner = this.owners.find((x) => x.bitbadgesAddress === convertedAddress);

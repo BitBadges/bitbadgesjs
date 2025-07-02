@@ -69,8 +69,10 @@ export interface iFilterBadgesInCollectionPayload {
     value: string | number | boolean;
   }[];
 
-  /** The listing prices ($BADGE) */
+  /** The listing prices */
   priceRange?: iUintRange<NumberType>;
+  /** Denom for the price range. Defaults to ubadge. */
+  denom?: string;
 }
 
 /**

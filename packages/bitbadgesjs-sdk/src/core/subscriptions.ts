@@ -1,7 +1,7 @@
+import { iCollectionDoc } from '@/api-indexer/docs/interfaces.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
 import type { iCollectionApproval, iPredeterminedBalances, iResetTimeIntervals, iUserIncomingApproval } from '@/interfaces/badges/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
-import { iCollectionDoc } from '@/api-indexer/docs/interfaces.js';
 
 export const getCurrentInterval = (resetTimeIntervals: iResetTimeIntervals<bigint> | undefined) => {
   // If no resets, we just treat it as one big interval
@@ -122,15 +122,12 @@ export const isSubscriptionFaucetApproval = (approval: iCollectionApproval<bigin
     return false;
   }
 
+  const allDenoms = approvalCriteria.coinTransfers.map((coinTransfer) => coinTransfer.coins.map((coin) => coin.denom)).flat();
+  if (allDenoms.length > 1) {
+    return false;
+  }
+
   for (const coinTransfer of approvalCriteria.coinTransfers) {
-    if (coinTransfer.coins.length !== 1) {
-      return false;
-    }
-
-    if (coinTransfer.coins[0].denom !== 'ubadge') {
-      return false;
-    }
-
     if (coinTransfer.overrideFromWithApproverAddress || coinTransfer.overrideToWithInitiator) {
       return false;
     }
@@ -254,7 +251,8 @@ export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>,
     return false;
   }
 
-  if (coinTransfer.coins[0].denom !== 'ubadge') {
+  //ensure denom is correct
+  if (coinTransfer.coins[0].denom !== subscriptionApproval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.denom) {
     return false;
   }
 

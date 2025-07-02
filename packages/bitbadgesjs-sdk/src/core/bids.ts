@@ -24,10 +24,6 @@ export const isBidOrListingApproval = (
     return false;
   }
 
-  if (coinTransfer.coins[0].denom !== 'ubadge') {
-    return false;
-  }
-
   //Make sure the to / from is correct
   if (approvalLevel === 'incoming' && !coinTransfer.overrideFromWithApproverAddress) {
     return false;
@@ -136,7 +132,7 @@ export const isBidOrListingApproval = (
     return false;
   }
 
-  if (approvalCriteria.maxNumTransfers?.overallMaxNumTransfers !== 1n) {
+  if ((approvalCriteria.maxNumTransfers?.overallMaxNumTransfers ?? 0n) === 0n) {
     return false;
   }
 

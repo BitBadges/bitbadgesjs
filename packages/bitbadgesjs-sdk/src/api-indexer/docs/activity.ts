@@ -129,6 +129,7 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
   badgeId?: T;
   price?: T;
   volume?: T;
+  denom?: string;
 
   constructor(data: iTransferActivityDoc<T>) {
     super(data);
@@ -150,6 +151,7 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
     this.badgeId = data.badgeId;
     this.price = data.price;
     this.volume = data.volume;
+    this.denom = data.denom;
   }
 
   getNumberFieldNames(): string[] {

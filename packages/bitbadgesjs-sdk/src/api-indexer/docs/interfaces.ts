@@ -315,6 +315,8 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
   price?: T;
   /** The volume of the transfer */
   volume?: T;
+  /** The denomination of the transfer */
+  denom?: string;
 }
 
 /**
@@ -388,15 +390,15 @@ export interface iClaimAlertDoc<T extends NumberType> extends iActivityDoc<T> {
  */
 export interface iBaseStats<T extends NumberType> extends Doc {
   /** The overall volume of the collection */
-  overallVolume: iCosmosCoin<T>;
+  overallVolume: iCosmosCoin<T>[];
   /** The daily volume of the collection */
-  dailyVolume: iCosmosCoin<T>;
+  dailyVolume: iCosmosCoin<T>[];
   /** The weekly volume of the collection */
-  weeklyVolume: iCosmosCoin<T>;
+  weeklyVolume: iCosmosCoin<T>[];
   /** The monthly volume of the collection */
-  monthlyVolume: iCosmosCoin<T>;
+  monthlyVolume: iCosmosCoin<T>[];
   /** The yearly volume of the collection */
-  yearlyVolume: iCosmosCoin<T>;
+  yearlyVolume: iCosmosCoin<T>[];
   /** Last set timestamp */
   lastUpdatedAt: UNIXMilliTimestamp<T>;
 }
@@ -408,13 +410,13 @@ export interface iCollectionStatsDoc<T extends NumberType> extends iBaseStats<T>
   /** The collection ID */
   collectionId: CollectionId;
   /** Floor price of the collection */
-  floorPrice?: iCosmosCoin<T>;
+  floorPrices?: iCosmosCoin<T>[];
   /** Number of unique owners by time */
   uniqueOwners: iBalance<T>[];
   /** Floor price history */
   floorPriceHistory?: iFloorPriceHistory<T>[];
   /** The payout reward */
-  payoutReward?: iCosmosCoin<T>;
+  payoutRewards?: iCosmosCoin<T>[];
 }
 
 /**
@@ -436,11 +438,9 @@ export interface iBadgeFloorPriceDoc<T extends NumberType> extends Doc {
   /** The badge ID */
   badgeId: T;
   /** The floor price */
-  floorPrice?: iCosmosCoin<T>;
+  floorPrices?: iCosmosCoin<T>[];
   /** Floor price history */
   floorPriceHistory?: iFloorPriceHistory<T>[];
-  /** The payout reward */
-  payoutReward?: iCosmosCoin<T>;
 }
 
 /**
@@ -474,6 +474,10 @@ export interface iApprovalItemDoc<T extends NumberType> extends Doc {
   deletedAt?: UNIXMilliTimestamp<T>;
   /** Next check time */
   nextCheckTime?: UNIXMilliTimestamp<T>;
+  /** Number of transfers left */
+  numTransfersLeft?: T;
+  /** Denom */
+  denom?: string;
 }
 
 /**
@@ -555,7 +559,7 @@ export interface iAccountDoc<T extends NumberType> extends Doc {
   /** The sequence of the account. This is the nonce for the blockchain for this account */
   sequence?: T;
   /** The $BADGE balance of the account */
-  balance?: iCosmosCoin<T>;
+  balances?: iCosmosCoin<T>[];
 }
 
 /**

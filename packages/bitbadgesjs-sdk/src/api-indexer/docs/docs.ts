@@ -122,15 +122,15 @@ export class BaseStatsDoc<T extends NumberType> extends BaseNumberTypeClass<Base
   _docId: string;
   _id?: string;
   /** The overall volume of the collection */
-  overallVolume: CosmosCoin<T>;
+  overallVolume: CosmosCoin<T>[];
   /** The daily volume of the collection */
-  dailyVolume: CosmosCoin<T>;
+  dailyVolume: CosmosCoin<T>[];
   /** The weekly volume of the collection */
-  weeklyVolume: CosmosCoin<T>;
+  weeklyVolume: CosmosCoin<T>[];
   /** The monthly volume of the collection */
-  monthlyVolume: CosmosCoin<T>;
+  monthlyVolume: CosmosCoin<T>[];
   /** The yearly volume of the collection */
-  yearlyVolume: CosmosCoin<T>;
+  yearlyVolume: CosmosCoin<T>[];
   /** Last set timestamp */
   lastUpdatedAt: UNIXMilliTimestamp<T>;
 
@@ -138,11 +138,11 @@ export class BaseStatsDoc<T extends NumberType> extends BaseNumberTypeClass<Base
     super();
     this._docId = data._docId;
     this._id = data._id;
-    this.overallVolume = new CosmosCoin(data.overallVolume);
-    this.dailyVolume = new CosmosCoin(data.dailyVolume);
-    this.weeklyVolume = new CosmosCoin(data.weeklyVolume);
-    this.monthlyVolume = new CosmosCoin(data.monthlyVolume);
-    this.yearlyVolume = new CosmosCoin(data.yearlyVolume);
+    this.overallVolume = data.overallVolume.map((coin) => new CosmosCoin(coin));
+    this.dailyVolume = data.dailyVolume.map((coin) => new CosmosCoin(coin));
+    this.weeklyVolume = data.weeklyVolume.map((coin) => new CosmosCoin(coin));
+    this.monthlyVolume = data.monthlyVolume.map((coin) => new CosmosCoin(coin));
+    this.yearlyVolume = data.yearlyVolume.map((coin) => new CosmosCoin(coin));
     this.lastUpdatedAt = data.lastUpdatedAt;
   }
 
@@ -161,20 +161,20 @@ export class BaseStatsDoc<T extends NumberType> extends BaseNumberTypeClass<Base
  */
 export class CollectionStatsDoc<T extends NumberType> extends BaseStatsDoc<T> implements iCollectionStatsDoc<T> {
   collectionId: CollectionId;
-  floorPrice?: CosmosCoin<T>;
+  floorPrices?: CosmosCoin<T>[];
   uniqueOwners: BalanceArray<T>;
   floorPriceHistory?: FloorPriceHistory<T>[];
-  payoutReward?: CosmosCoin<T>;
+  payoutRewards?: CosmosCoin<T>[];
 
   constructor(data: iCollectionStatsDoc<T>) {
     super(data);
     this.collectionId = data.collectionId;
-    this.floorPrice = data.floorPrice ? new CosmosCoin(data.floorPrice) : undefined;
+    this.floorPrices = data.floorPrices?.map((floorPrice) => new CosmosCoin(floorPrice)) ?? [];
     this.uniqueOwners = BalanceArray.From(data.uniqueOwners);
     this.floorPriceHistory = data.floorPriceHistory
       ? data.floorPriceHistory.map((floorPriceHistory) => new FloorPriceHistory(floorPriceHistory))
       : undefined;
-    this.payoutReward = data.payoutReward ? new CosmosCoin(data.payoutReward) : undefined;
+    this.payoutRewards = data.payoutRewards?.map((payoutReward) => new CosmosCoin(payoutReward)) ?? [];
   }
 
   getNumberFieldNames(): string[] {
@@ -218,9 +218,8 @@ export class BadgeFloorPriceDoc<T extends NumberType> extends BaseNumberTypeClas
   badgeId: T;
   _docId: string;
   _id?: string | undefined;
-  floorPrice?: CosmosCoin<T>;
+  floorPrices?: CosmosCoin<T>[];
   floorPriceHistory?: iFloorPriceHistory<T>[] | undefined;
-  payoutReward?: CosmosCoin<T>;
 
   constructor(data: iBadgeFloorPriceDoc<T>) {
     super();
@@ -228,11 +227,10 @@ export class BadgeFloorPriceDoc<T extends NumberType> extends BaseNumberTypeClas
     this._id = data._id;
     this.collectionId = data.collectionId;
     this.badgeId = data.badgeId;
-    this.floorPrice = data.floorPrice ? new CosmosCoin(data.floorPrice) : undefined;
+    this.floorPrices = data.floorPrices?.map((floorPrice) => new CosmosCoin(floorPrice)) ?? [];
     this.floorPriceHistory = data.floorPriceHistory
       ? data.floorPriceHistory.map((floorPriceHistory) => new FloorPriceHistory(floorPriceHistory))
       : undefined;
-    this.payoutReward = data.payoutReward ? new CosmosCoin(data.payoutReward) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -264,6 +262,8 @@ export class ApprovalItemDoc<T extends NumberType> extends BaseNumberTypeClass<A
   approval: CollectionApproval<T>;
   isActive?: boolean | undefined;
   nextCheckTime?: UNIXMilliTimestamp<T>;
+  numTransfersLeft?: T;
+  denom?: string;
 
   constructor(data: iApprovalItemDoc<T>) {
     super();
@@ -282,10 +282,12 @@ export class ApprovalItemDoc<T extends NumberType> extends BaseNumberTypeClass<A
     this.isActive = data.isActive;
     this.sufficientBalances = data.sufficientBalances;
     this.nextCheckTime = data.nextCheckTime;
+    this.numTransfersLeft = data.numTransfersLeft;
+    this.denom = data.denom;
   }
 
   getNumberFieldNames(): string[] {
-    return ['price', 'badgeId', 'deletedAt'];
+    return ['price', 'badgeId', 'deletedAt', 'numTransfersLeft'];
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): ApprovalItemDoc<U> {
@@ -455,7 +457,7 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
   btcAddress: string;
   thorAddress: string;
   sequence?: T;
-  balance?: CosmosCoin<T>;
+  balances?: CosmosCoin<T>[];
 
   constructor(data: iAccountDoc<T>) {
     super();
@@ -470,7 +472,7 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
     this.btcAddress = data.btcAddress;
     this.thorAddress = data.thorAddress;
     this.sequence = data.sequence;
-    this.balance = data.balance ? new CosmosCoin(data.balance) : undefined;
+    this.balances = data.balances?.map((balance) => new CosmosCoin(balance)) ?? [];
   }
 
   getNumberFieldNames(): string[] {

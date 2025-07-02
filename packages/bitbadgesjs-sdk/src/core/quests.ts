@@ -83,10 +83,6 @@ export const isQuestApproval = (approval: iCollectionApproval<bigint>) => {
       return false;
     }
 
-    if (coinTransfer.coins[0].denom !== 'ubadge') {
-      return false;
-    }
-
     if (!coinTransfer.overrideFromWithApproverAddress || !coinTransfer.overrideToWithInitiator) {
       return false;
     }

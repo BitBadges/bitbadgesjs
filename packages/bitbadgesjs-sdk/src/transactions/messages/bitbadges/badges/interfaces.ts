@@ -6,7 +6,6 @@ import type {
   CollectionId,
   iAddressList,
   iBadgeMetadataTimeline,
-  iBalance,
   iCollectionMetadataTimeline,
   iCosmosCoinWrapperPathAddObject,
   iCustomDataTimeline,

@@ -126,7 +126,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   thorAddress: string;
   accountNumber: T;
   sequence?: T;
-  balance?: CosmosCoin<T>;
+  balances?: CosmosCoin<T>[];
   pubKeyType: string;
   publicKey: string;
 
@@ -173,7 +173,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.thorAddress = data.thorAddress;
     this.accountNumber = data.accountNumber;
     this.sequence = data.sequence;
-    this.balance = data.balance ? new CosmosCoin(data.balance) : undefined;
+    this.balances = data.balances?.map((balance) => new CosmosCoin(balance)) ?? [];
     this.pubKeyType = data.pubKeyType;
     this.publicKey = data.publicKey;
     this.resolvedName = data.resolvedName;
