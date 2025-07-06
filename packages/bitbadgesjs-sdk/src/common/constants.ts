@@ -45,8 +45,8 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
   chainName: 'BitBadges',
   chainSymbolImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
   coinImageUrl: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true',
-  rpc: 'https://node.bitbadges.io/rpc',
-  rest: 'https://node.bitbadges.io/api',
+  rpc: 'https://rpc.bitbadges.io',
+  rest: 'https://lcd.bitbadges.io',
   bip44: {
     coinType: 118
   },
