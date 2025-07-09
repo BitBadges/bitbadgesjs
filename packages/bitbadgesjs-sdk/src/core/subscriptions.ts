@@ -122,7 +122,7 @@ export const isSubscriptionFaucetApproval = (approval: iCollectionApproval<bigin
     return false;
   }
 
-  const allDenoms = approvalCriteria.coinTransfers.map((coinTransfer) => coinTransfer.coins.map((coin) => coin.denom)).flat();
+  const allDenoms = [...new Set(approvalCriteria.coinTransfers.map((coinTransfer) => coinTransfer.coins.map((coin) => coin.denom)).flat())];
   if (allDenoms.length > 1) {
     return false;
   }

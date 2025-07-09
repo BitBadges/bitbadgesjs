@@ -2,30 +2,36 @@ import { iApprovalCriteria } from '@/interfaces/badges/approvals.js';
 import { CollectionApprovalWithDetails } from './approvals.js';
 import { CosmosCoinWrapperPath } from './misc.js';
 
-export const isWrapperApproval = (approval: CollectionApprovalWithDetails<bigint>, pathObj: CosmosCoinWrapperPath<bigint>) => {
+export const isWrapperApproval = (
+  approval: CollectionApprovalWithDetails<bigint>,
+  pathObj: CosmosCoinWrapperPath<bigint>,
+  options?: { skipPathValidation?: boolean }
+) => {
   const { address, badgeIds, ownershipTimes } = pathObj;
 
-  if (!approval.toList.checkAddress(address)) {
-    return false;
-  }
-
-  if (badgeIds.length !== approval.badgeIds.length) {
-    return false;
-  }
-
-  for (let i = 0; i < badgeIds.length; i++) {
-    if (badgeIds[i].start !== approval.badgeIds[i].start || badgeIds[i].end !== approval.badgeIds[i].end) {
+  if (!options?.skipPathValidation) {
+    if (!approval.toList.checkAddress(address)) {
       return false;
     }
-  }
 
-  if (ownershipTimes.length !== approval.ownershipTimes.length) {
-    return false;
-  }
-
-  for (let i = 0; i < ownershipTimes.length; i++) {
-    if (ownershipTimes[i].start !== approval.ownershipTimes[i].start || ownershipTimes[i].end !== approval.ownershipTimes[i].end) {
+    if (badgeIds.length !== approval.badgeIds.length) {
       return false;
+    }
+
+    for (let i = 0; i < badgeIds.length; i++) {
+      if (badgeIds[i].start !== approval.badgeIds[i].start || badgeIds[i].end !== approval.badgeIds[i].end) {
+        return false;
+      }
+    }
+
+    if (ownershipTimes.length !== approval.ownershipTimes.length) {
+      return false;
+    }
+
+    for (let i = 0; i < ownershipTimes.length; i++) {
+      if (ownershipTimes[i].start !== approval.ownershipTimes[i].start || ownershipTimes[i].end !== approval.ownershipTimes[i].end) {
+        return false;
+      }
     }
   }
 
@@ -45,30 +51,40 @@ export const isWrapperApproval = (approval: CollectionApprovalWithDetails<bigint
   return true;
 };
 
-export const isUnwrapperApproval = (approval: CollectionApprovalWithDetails<bigint>, pathObj: CosmosCoinWrapperPath<bigint>) => {
+export const isUnwrapperApproval = (
+  approval: CollectionApprovalWithDetails<bigint>,
+  pathObj: CosmosCoinWrapperPath<bigint>,
+  options?: { skipPathValidation?: boolean }
+) => {
   const { address, badgeIds, ownershipTimes } = pathObj;
 
-  if (!approval.fromList.checkAddress(address)) {
-    return false;
-  }
-
-  if (badgeIds.length !== approval.badgeIds.length) {
-    return false;
-  }
-
-  for (let i = 0; i < badgeIds.length; i++) {
-    if (badgeIds[i].start !== approval.badgeIds[i].start || badgeIds[i].end !== approval.badgeIds[i].end) {
+  if (!options?.skipPathValidation) {
+    if (!approval.fromList.checkAddress(address)) {
       return false;
     }
-  }
 
-  if (ownershipTimes.length !== approval.ownershipTimes.length) {
-    return false;
-  }
-
-  for (let i = 0; i < ownershipTimes.length; i++) {
-    if (ownershipTimes[i].start !== approval.ownershipTimes[i].start || ownershipTimes[i].end !== approval.ownershipTimes[i].end) {
+    if (badgeIds.length !== approval.badgeIds.length) {
       return false;
+    }
+
+    if (badgeIds.length !== approval.badgeIds.length) {
+      return false;
+    }
+
+    for (let i = 0; i < badgeIds.length; i++) {
+      if (badgeIds[i].start !== approval.badgeIds[i].start || badgeIds[i].end !== approval.badgeIds[i].end) {
+        return false;
+      }
+    }
+
+    if (ownershipTimes.length !== approval.ownershipTimes.length) {
+      return false;
+    }
+
+    for (let i = 0; i < ownershipTimes.length; i++) {
+      if (ownershipTimes[i].start !== approval.ownershipTimes[i].start || ownershipTimes[i].end !== approval.ownershipTimes[i].end) {
+        return false;
+      }
     }
   }
 
