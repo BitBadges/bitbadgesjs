@@ -196,12 +196,7 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
       intervalLength: '0'
     })
   }),
-  autoDeletionOptions: new AutoDeletionOptions({}),
-  dynamicStoreChallenges: [
-    new DynamicStoreChallenge({
-      storeId: '0'
-    })
-  ]
+  autoDeletionOptions: new AutoDeletionOptions({})
 }).toJson({ emitDefaultValues: true }) as object;
 
 function populateMerkleChallenges(merkleChallenges?: MerkleChallenge[]) {
@@ -489,6 +484,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
       approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
     }
   }
+
   for (const approval of msg.defaultBalances.incomingApprovals) {
     if (!approval.approvalCriteria) {
       approval.approvalCriteria = new IncomingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
