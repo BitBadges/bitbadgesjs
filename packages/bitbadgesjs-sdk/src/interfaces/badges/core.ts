@@ -2,6 +2,7 @@
 
 import type { iAttestationDoc, iPrecalculationOptions } from '@/api-indexer/docs/interfaces.js';
 import type { BitBadgesAddress, UNIXMilliTimestamp, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
+import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iCosmosCoin } from '@/core/coin.js';
 
@@ -276,15 +277,20 @@ export interface iDenomUnit<T extends NumberType> {
 /**
  * @category Interfaces
  */
+export interface iDenomUnitWithDetails<T extends NumberType> extends iDenomUnit<T> {
+  /** Optional metadata for this denomination unit. */
+  metadata?: iMetadata<T>;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
   /** The denom of the IBC wrapper path. */
   denom: string;
 
-  /** The path of the IBC wrapper path. */
-  badgeIds: iUintRange<T>[];
-
-  /** The times of the IBC wrapper path. */
-  ownershipTimes: iUintRange<T>[];
+  /** The balances for this IBC wrapper path. */
+  balances: iBalance<T>[];
 
   /** The symbol for this IBC wrapper path. */
   symbol: string;

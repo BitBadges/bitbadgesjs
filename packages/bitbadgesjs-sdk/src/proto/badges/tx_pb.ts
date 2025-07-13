@@ -6,13 +6,88 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { Params } from "./params_pb.js";
-import { UintRange } from "./balances_pb.js";
+import { Balance, UintRange } from "./balances_pb.js";
 import { DenomUnit } from "./collections_pb.js";
 import { CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
 import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
 import { Coin } from "../cosmos/base/v1beta1/coin_pb.js";
 import { AddressList } from "./address_lists_pb.js";
+
+/**
+ * Used for WASM bindings and JSON parsing
+ *
+ * @generated from message badges.BadgeCustomMsgType
+ */
+export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
+  /**
+   * @generated from field: badges.MsgCreateAddressLists createAddressListsMsg = 1;
+   */
+  createAddressListsMsg?: MsgCreateAddressLists;
+
+  /**
+   * @generated from field: badges.MsgUniversalUpdateCollection universalUpdateCollectionMsg = 2;
+   */
+  universalUpdateCollectionMsg?: MsgUniversalUpdateCollection;
+
+  /**
+   * @generated from field: badges.MsgDeleteCollection deleteCollectionMsg = 3;
+   */
+  deleteCollectionMsg?: MsgDeleteCollection;
+
+  /**
+   * @generated from field: badges.MsgTransferBadges transferBadgesMsg = 4;
+   */
+  transferBadgesMsg?: MsgTransferBadges;
+
+  /**
+   * @generated from field: badges.MsgUpdateUserApprovals updateUserApprovalsMsg = 5;
+   */
+  updateUserApprovalsMsg?: MsgUpdateUserApprovals;
+
+  /**
+   * @generated from field: badges.MsgUpdateCollection updateCollectionMsg = 6;
+   */
+  updateCollectionMsg?: MsgUpdateCollection;
+
+  /**
+   * @generated from field: badges.MsgCreateCollection createCollectionMsg = 7;
+   */
+  createCollectionMsg?: MsgCreateCollection;
+
+  constructor(data?: PartialMessage<BadgeCustomMsgType>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.BadgeCustomMsgType";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "createAddressListsMsg", kind: "message", T: MsgCreateAddressLists },
+    { no: 2, name: "universalUpdateCollectionMsg", kind: "message", T: MsgUniversalUpdateCollection },
+    { no: 3, name: "deleteCollectionMsg", kind: "message", T: MsgDeleteCollection },
+    { no: 4, name: "transferBadgesMsg", kind: "message", T: MsgTransferBadges },
+    { no: 5, name: "updateUserApprovalsMsg", kind: "message", T: MsgUpdateUserApprovals },
+    { no: 6, name: "updateCollectionMsg", kind: "message", T: MsgUpdateCollection },
+    { no: 7, name: "createCollectionMsg", kind: "message", T: MsgCreateCollection },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCustomMsgType {
+    return new BadgeCustomMsgType().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BadgeCustomMsgType {
+    return new BadgeCustomMsgType().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BadgeCustomMsgType {
+    return new BadgeCustomMsgType().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: BadgeCustomMsgType | PlainMessage<BadgeCustomMsgType> | undefined, b: BadgeCustomMsgType | PlainMessage<BadgeCustomMsgType> | undefined): boolean {
+    return proto3.util.equals(BadgeCustomMsgType, a, b);
+  }
+}
 
 /**
  * MsgUpdateParams is the Msg/UpdateParams request type.
@@ -109,22 +184,17 @@ export class CosmosCoinWrapperPathAddObject extends Message<CosmosCoinWrapperPat
   denom = "";
 
   /**
-   * @generated from field: repeated badges.UintRange ownershipTimes = 2;
+   * @generated from field: repeated badges.Balance balances = 2;
    */
-  ownershipTimes: UintRange[] = [];
+  balances: Balance[] = [];
 
   /**
-   * @generated from field: repeated badges.UintRange badgeIds = 3;
-   */
-  badgeIds: UintRange[] = [];
-
-  /**
-   * @generated from field: string symbol = 4;
+   * @generated from field: string symbol = 3;
    */
   symbol = "";
 
   /**
-   * @generated from field: repeated badges.DenomUnit denomUnits = 5;
+   * @generated from field: repeated badges.DenomUnit denomUnits = 4;
    */
   denomUnits: DenomUnit[] = [];
 
@@ -137,10 +207,9 @@ export class CosmosCoinWrapperPathAddObject extends Message<CosmosCoinWrapperPat
   static readonly typeName = "badges.CosmosCoinWrapperPathAddObject";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 3, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
-    { no: 4, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
+    { no: 2, name: "balances", kind: "message", T: Balance, repeated: true },
+    { no: 3, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinWrapperPathAddObject {

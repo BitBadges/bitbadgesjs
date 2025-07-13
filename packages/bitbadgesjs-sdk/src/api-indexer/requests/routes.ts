@@ -140,10 +140,10 @@ export class BitBadgesApiRoutes {
   static CalculatePointsRoute = () => '/api/v0/applications/points';
   static GetPointsActivityRoute = () => '/api/v0/applications/points/activity';
 
-  static GetUtilityListingRoute = (utilityListingId: string) => `/api/v0/utilityListing/${utilityListingId.toString()}`;
-  static GetUtilityListingsRoute = () => '/api/v0/utilityListings/fetch';
-  static SearchUtilityListingsRoute = () => '/api/v0/utilityListings/search';
-  static CRUDUtilityListingsRoute = () => '/api/v0/utilityListings';
+  static GetUtilityPageRoute = (utilityPageId: string) => `/api/v0/utilityPage/${utilityPageId.toString()}`;
+  static GetUtilityPagesRoute = () => '/api/v0/utilityPages/fetch';
+  static SearchUtilityPagesRoute = () => '/api/v0/utilityPages/search';
+  static CRUDUtilityPagesRoute = () => '/api/v0/utilityPages';
 
   static GetEmbeddedWalletRoute = () => '/api/v0/embeddedWallets';
   static SignWithEmbeddedWalletRoute = () => '/api/v0/embeddedWallets/signMessage';

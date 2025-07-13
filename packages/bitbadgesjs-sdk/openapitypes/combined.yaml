@@ -141,8 +141,8 @@ info:
     - **Manage Dynamic Stores** (`manageDynamicStores`)
       Create, update, and delete dynamic stores on behalf of the user.
 
-    - **Manage Utility Listings** (`manageUtilityListings`)
-      Create, update, and delete utility listings on behalf of the user.
+    - **Manage Utility Pages** (`manageUtilityPages`)
+      Create, update, and delete utility pages on behalf of the user.
 
     - **Approve Sign In With BitBadges Requests**
     (`approveSignInWithBitBadgesRequests`)
@@ -349,8 +349,8 @@ tags:
     description: Endpoints for the plugins for claims
   - name: Dynamic Stores
     description: Endpoints for managing dynamic data stores
-  - name: Utility Listings
-    description: Endpoints for managing utility listings
+  - name: Utility Pages
+    description: Endpoints for managing utility pages
   - name: Miscellaneous
 paths:
   /user:
@@ -1422,19 +1422,19 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-  /utilityListing/{utilityListingId}:
+  /utilityPage/{utilityPageId}:
     get:
-      operationId: getUtilityListing
-      summary: Get Utility Listing
+      operationId: getUtilityPage
+      summary: Get Utility Page
       tags:
-        - Utility Listings
+        - Utility Pages
       description: >-
-        Gets a utility listing by specific ID.
+        Gets a utility page by specific ID.
 
 
         ```tsx
 
-        await BitBadgesApi.getUtilityListing("utilityListing123", { ... });
+        await BitBadgesApi.getUtilityPage("utilityPage123", { ... });
 
         ```
 
@@ -1442,30 +1442,30 @@ paths:
         SDK Links:
 
         - **[Request
-        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityListingPayload)**
+        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityPagePayload)**
 
         - **[Response
-        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityListingSuccessResponse)**
+        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityPageSuccessResponse)**
 
         - **[SDK API
         Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getutilitylisting)**
 
 
         Scopes:
-          - `manageUtilityListings` - Required and must have view permissions for private listings
+          - `manageUtilityPages` - Required and must have view permissions for private listings
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetUtilityListingSuccessResponse'
+                $ref: '#/components/schemas/iGetUtilityPageSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
       parameters:
-        - name: utilityListingId
+        - name: utilityPageId
           in: path
           description: Utility listing ID
           required: true
@@ -1479,7 +1479,7 @@ paths:
             query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
-            $ref: '#/components/schemas/iGetUtilityListingPayload'
+            $ref: '#/components/schemas/iGetUtilityPagePayload'
       security:
         - apiKey: []
       x-internal: false
@@ -5755,14 +5755,14 @@ paths:
         - apiKey: []
           userMaybeSignedIn: []
       x-internal: false
-  /utilityListings/fetch:
+  /utilityPages/fetch:
     post:
-      operationId: getUtilityListings
-      summary: Get Utility Listings - Batch
+      operationId: getUtilityPages
+      summary: Get Utility Pages - Batch
       tags:
-        - Utility Listings
+        - Utility Pages
       description: >-
-        Fetches utility listings based on the provided criteria.
+        Fetches utility pages based on the provided criteria.
 
 
         Requires authentication for private listings.
@@ -5770,7 +5770,7 @@ paths:
 
         ```tsx
 
-        await BitBadgesApi.getUtilityListings(...);
+        await BitBadgesApi.getUtilityPages(...);
 
         ```
 
@@ -5778,10 +5778,10 @@ paths:
         SDK Links:
 
         - **[Request
-        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityListingsPayload)**
+        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityPagesPayload)**
 
         - **[Response
-        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityListingsSuccessResponse)**
+        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityPagesSuccessResponse)**
 
         - **[SDK API
         Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getutilitylistings)**
@@ -5789,14 +5789,14 @@ paths:
 
         Scopes:
 
-        - `manageUtilityListings` - Required for private listings
+        - `manageUtilityPages` - Required for private listings
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetUtilityListingsSuccessResponse'
+                $ref: '#/components/schemas/iGetUtilityPagesSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -5816,31 +5816,31 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/iGetUtilityListingsPayload'
-  /utilityListings/search:
+              $ref: '#/components/schemas/iGetUtilityPagesPayload'
+  /utilityPages/search:
     get:
-      operationId: searchUtilityListings
-      summary: Search Utility Listings
+      operationId: searchUtilityPages
+      summary: Search Utility Pages
       tags:
-        - Utility Listings
+        - Utility Pages
       description: >-
-        Searches for utility listings based on the provided criteria. Currently,
+        Searches for utility pages based on the provided criteria. Currently,
 
-        this only gets the signed in user's utility listings.
+        this only gets the signed in user's utility pages.
 
 
         ```tsx
-          await BitBadgesApi.searchUtilityListings(...);
+          await BitBadgesApi.searchUtilityPages(...);
         ```
 
 
         SDK Links:
 
         - **[Request
-        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchUtilityListingsPayload)**
+        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchUtilityPagesPayload)**
 
         - **[Response
-        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchUtilityListingsSuccessResponse)**
+        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchUtilityPagesSuccessResponse)**
 
         - **[SDK API
         Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchutilitylistings)**
@@ -5848,14 +5848,14 @@ paths:
 
         Scopes:
 
-        - `manageUtilityListings` - Required
+        - `manageUtilityPages` - Required
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iSearchUtilityListingsSuccessResponse'
+                $ref: '#/components/schemas/iSearchUtilityPagesSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -5875,25 +5875,25 @@ paths:
             query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
-            $ref: '#/components/schemas/iSearchUtilityListingsPayload'
+            $ref: '#/components/schemas/iSearchUtilityPagesPayload'
       security:
         - apiKey: []
           userSignedIn: []
       x-internal: false
-  /utilityListings:
+  /utilityPages:
     post:
-      operationId: createUtilityListing
-      summary: Create Utility Listing
+      operationId: createUtilityPage
+      summary: Create Utility Page
       tags:
-        - Utility Listings
+        - Utility Pages
       description: >-
-        Creates a new utility listing. This is also available in the developer
+        Creates a new utility page. This is also available in the developer
         portal.
 
 
         ```tsx
 
-        await BitBadgesApi.createUtilityListing(...);
+        await BitBadgesApi.createUtilityPage(...);
 
         ```
 
@@ -5901,10 +5901,10 @@ paths:
         SDK Links:
 
         - **[Request
-        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateUtilityListingPayload)**
+        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateUtilityPagePayload)**
 
         - **[Response
-        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateUtilityListingSuccessResponse)**
+        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateUtilityPageSuccessResponse)**
 
         - **[SDK API
         Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createutilitylisting)**
@@ -5912,14 +5912,14 @@ paths:
 
         Scopes:
 
-        - `manageUtilityListings` - Required
+        - `manageUtilityPages` - Required
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iCreateUtilityListingSuccessResponse'
+                $ref: '#/components/schemas/iCreateUtilityPageSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -5939,20 +5939,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/iCreateUtilityListingPayload'
+              $ref: '#/components/schemas/iCreateUtilityPagePayload'
     put:
-      operationId: updateUtilityListing
-      summary: Update Utility Listing
+      operationId: updateUtilityPage
+      summary: Update Utility Page
       tags:
-        - Utility Listings
+        - Utility Pages
       description: >-
-        Updates an existing utility listing. This is also available in the
+        Updates an existing utility page. This is also available in the
         developer portal.
 
 
         ```tsx
 
-        await BitBadgesApi.updateUtilityListing(...);
+        await BitBadgesApi.updateUtilityPage(...);
 
         ```
 
@@ -5960,10 +5960,10 @@ paths:
         SDK Links:
 
         - **[Request
-        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateUtilityListingPayload)**
+        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateUtilityPagePayload)**
 
         - **[Response
-        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateUtilityListingSuccessResponse)**
+        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateUtilityPageSuccessResponse)**
 
         - **[SDK API
         Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateutilitylisting)**
@@ -5971,14 +5971,14 @@ paths:
 
         Scopes:
 
-        - `manageUtilityListings` - Required
+        - `manageUtilityPages` - Required
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iUpdateUtilityListingSuccessResponse'
+                $ref: '#/components/schemas/iUpdateUtilityPageSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -5998,20 +5998,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/iUpdateUtilityListingPayload'
+              $ref: '#/components/schemas/iUpdateUtilityPagePayload'
     delete:
-      operationId: deleteUtilityListing
-      summary: Delete Utility Listing
+      operationId: deleteUtilityPage
+      summary: Delete Utility Page
       tags:
-        - Utility Listings
+        - Utility Pages
       description: >-
-        Deletes a utility listing. This is also available in the developer
+        Deletes a utility page. This is also available in the developer
         portal.
 
 
         ```tsx
 
-        await BitBadgesApi.deleteUtilityListing(...);
+        await BitBadgesApi.deleteUtilityPage(...);
 
         ```
 
@@ -6019,10 +6019,10 @@ paths:
         SDK Links:
 
         - **[Request
-        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteUtilityListingPayload)**
+        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteUtilityPagePayload)**
 
         - **[Response
-        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteUtilityListingSuccessResponse)**
+        Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteUtilityPageSuccessResponse)**
 
         - **[SDK API
         Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteutilitylisting)**
@@ -6030,14 +6030,14 @@ paths:
 
         Scopes:
 
-        - `manageUtilityListings` - Required
+        - `manageUtilityPages` - Required
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iDeleteUtilityListingSuccessResponse'
+                $ref: '#/components/schemas/iDeleteUtilityPageSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -6057,7 +6057,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/iDeleteUtilityListingPayload'
+              $ref: '#/components/schemas/iDeleteUtilityPagePayload'
   /auth/status:
     post:
       operationId: checkSignInStatus
@@ -10329,7 +10329,7 @@ components:
           type: string
       additionalProperties: false
       type: object
-    iUtilityListingDoc:
+    iUtilityPageDoc:
       properties:
         _docId:
           description: A unique stringified document ID
@@ -10369,12 +10369,12 @@ components:
           $ref: '#/components/schemas/iInheritMetadataFrom'
         content:
           items:
-            $ref: '#/components/schemas/iUtilityListingContent'
+            $ref: '#/components/schemas/iUtilityPageContent'
           description: The paginated content for the listing
           type: array
         links:
           items:
-            $ref: '#/components/schemas/iUtilityListingLink'
+            $ref: '#/components/schemas/iUtilityPageLink'
           description: The relevant links for the listing
           type: array
         displayTimes:
@@ -10508,7 +10508,7 @@ components:
           examples: *ref_11
       additionalProperties: false
       type: object
-    iUtilityListingContent:
+    iUtilityPageContent:
       properties:
         type:
           description: The type of content
@@ -10525,7 +10525,7 @@ components:
         - content
       additionalProperties: false
       type: object
-    iUtilityListingLink:
+    iUtilityPageLink:
       properties:
         url:
           description: The URL of the link
@@ -14207,7 +14207,7 @@ components:
       properties:
         listings:
           items:
-            $ref: '#/components/schemas/iUtilityListingDoc'
+            $ref: '#/components/schemas/iUtilityPageDoc'
           type: array
         pagination:
           $ref: '#/components/schemas/PaginationInfo'
@@ -14245,7 +14245,7 @@ components:
       properties:
         listings:
           items:
-            $ref: '#/components/schemas/iUtilityListingDoc'
+            $ref: '#/components/schemas/iUtilityPageDoc'
           type: array
         pagination:
           $ref: '#/components/schemas/PaginationInfo'
@@ -14796,9 +14796,9 @@ components:
           items:
             $ref: '#/components/schemas/iClaimDetails'
           type: array
-        utilityListings:
+        utilityPages:
           items:
-            $ref: '#/components/schemas/iUtilityListingDoc'
+            $ref: '#/components/schemas/iUtilityPageDoc'
           type: array
       required:
         - collections
@@ -16119,7 +16119,7 @@ components:
             - attestations
             - claims
             - activity
-            - utilityListings
+            - utilityPages
             - applications
             - claimActivity
             - pointsActivity
@@ -16205,10 +16205,10 @@ components:
           items:
             $ref: '#/components/schemas/iPointsActivityDoc'
           type: array
-        utilityListings:
+        utilityPages:
           additionalProperties:
             items:
-              $ref: '#/components/schemas/iUtilityListingDoc'
+              $ref: '#/components/schemas/iUtilityPageDoc'
             type: array
           type: object
       required:
@@ -18831,25 +18831,25 @@ components:
         - pagination
       additionalProperties: false
       type: object
-    iSearchUtilityListingsPayload:
+    iSearchUtilityPagesPayload:
       properties:
         bookmark:
           description: The pagination bookmark to start from
           type: string
       additionalProperties: false
       type: object
-    iGetUtilityListingPayload:
+    iGetUtilityPagePayload:
       additionalProperties: false
       type: object
-    iGetUtilityListingSuccessResponse:
+    iGetUtilityPageSuccessResponse:
       properties:
         listing:
-          $ref: '#/components/schemas/iUtilityListingDoc'
+          $ref: '#/components/schemas/iUtilityPageDoc'
       required:
         - listing
       additionalProperties: false
       type: object
-    iGetUtilityListingsPayload:
+    iGetUtilityPagesPayload:
       properties:
         listingIds:
           items:
@@ -18860,11 +18860,11 @@ components:
         - listingIds
       additionalProperties: false
       type: object
-    iGetUtilityListingsSuccessResponse:
+    iGetUtilityPagesSuccessResponse:
       properties:
         docs:
           items:
-            $ref: '#/components/schemas/iUtilityListingDoc'
+            $ref: '#/components/schemas/iUtilityPageDoc'
           type: array
         pagination:
           properties:
@@ -18882,11 +18882,11 @@ components:
         - pagination
       additionalProperties: false
       type: object
-    iSearchUtilityListingsSuccessResponse:
+    iSearchUtilityPagesSuccessResponse:
       properties:
         docs:
           items:
-            $ref: '#/components/schemas/iUtilityListingDoc'
+            $ref: '#/components/schemas/iUtilityPageDoc'
           type: array
         pagination:
           properties:
@@ -18904,19 +18904,19 @@ components:
         - pagination
       additionalProperties: false
       type: object
-    iCreateUtilityListingPayload:
+    iCreateUtilityPagePayload:
       properties:
         metadata:
           description: The overall metadata for the listing
           $ref: '#/components/schemas/iMetadataWithoutInternals'
         content:
           items:
-            $ref: '#/components/schemas/iUtilityListingContent'
+            $ref: '#/components/schemas/iUtilityPageContent'
           description: The content for the listing
           type: array
         links:
           items:
-            $ref: '#/components/schemas/iUtilityListingLink'
+            $ref: '#/components/schemas/iUtilityPageLink'
           description: The links for the listing
           type: array
         type:
@@ -18971,15 +18971,15 @@ components:
         - categories
       additionalProperties: false
       type: object
-    iCreateUtilityListingSuccessResponse:
+    iCreateUtilityPageSuccessResponse:
       properties:
         doc:
-          $ref: '#/components/schemas/iUtilityListingDoc'
+          $ref: '#/components/schemas/iUtilityPageDoc'
       required:
         - doc
       additionalProperties: false
       type: object
-    iUpdateUtilityListingPayload:
+    iUpdateUtilityPagePayload:
       properties:
         listingId:
           description: The listing ID to update
@@ -18989,7 +18989,7 @@ components:
           $ref: '#/components/schemas/iMetadataWithoutInternals'
         content:
           items:
-            $ref: '#/components/schemas/iUtilityListingContent'
+            $ref: '#/components/schemas/iUtilityPageContent'
           description: >-
             The content for the listing. This is only used for a dedicated
             listing page (not compatible with direct link or inherited
@@ -18997,7 +18997,7 @@ components:
           type: array
         links:
           items:
-            $ref: '#/components/schemas/iUtilityListingLink'
+            $ref: '#/components/schemas/iUtilityPageLink'
           description: >-
             The links for the listing. This is only used for a dedicated listing
             page (not compatible with direct link or inherited metadata).
@@ -19066,15 +19066,15 @@ components:
         - categories
       additionalProperties: false
       type: object
-    iUpdateUtilityListingSuccessResponse:
+    iUpdateUtilityPageSuccessResponse:
       properties:
         doc:
-          $ref: '#/components/schemas/iUtilityListingDoc'
+          $ref: '#/components/schemas/iUtilityPageDoc'
       required:
         - doc
       additionalProperties: false
       type: object
-    iDeleteUtilityListingPayload:
+    iDeleteUtilityPagePayload:
       properties:
         listingId:
           description: The listing ID to delete
@@ -19083,7 +19083,7 @@ components:
         - listingId
       additionalProperties: false
       type: object
-    iDeleteUtilityListingSuccessResponse:
+    iDeleteUtilityPageSuccessResponse:
       additionalProperties: false
       type: object
     iGetPostActionStatusesPayload:
@@ -19494,7 +19494,7 @@ components:
           type: array
         listings:
           items:
-            $ref: '#/components/schemas/iUtilityListingDoc'
+            $ref: '#/components/schemas/iUtilityPageDoc'
           description: The listings for this collection.
           type: array
         nsfw:

@@ -74,7 +74,7 @@ import {
   CreatePaymentIntentSuccessResponse,
   CreatePluginSuccessResponse,
   CreateSIWBBRequestSuccessResponse,
-  CreateUtilityListingSuccessResponse,
+  CreateUtilityPageSuccessResponse,
   DeleteApiKeySuccessResponse,
   DeleteApplicationSuccessResponse,
   DeleteAttestationSuccessResponse,
@@ -83,7 +83,7 @@ import {
   DeleteDynamicDataStoreSuccessResponse,
   DeletePluginSuccessResponse,
   DeleteSIWBBRequestSuccessResponse,
-  DeleteUtilityListingSuccessResponse,
+  DeleteUtilityPageSuccessResponse,
   ExchangeSIWBBAuthorizationCodeSuccessResponse,
   FetchMetadataDirectlySuccessResponse,
   GenerateAppleWalletPassSuccessResponse,
@@ -123,8 +123,8 @@ import {
   GetSignInChallengeSuccessResponse,
   GetStatusSuccessResponse,
   GetTokensFromFaucetSuccessResponse,
-  GetUtilityListingSuccessResponse,
-  GetUtilityListingsSuccessResponse,
+  GetUtilityPageSuccessResponse,
+  GetUtilityPagesSuccessResponse,
   OauthRevokeSuccessResponse,
   PerformStoreActionSuccessResponse,
   RotateApiKeySuccessResponse,
@@ -135,7 +135,7 @@ import {
   SearchDeveloperAppsSuccessResponse,
   SearchDynamicDataStoresSuccessResponse,
   SearchPluginsSuccessResponse,
-  SearchUtilityListingsSuccessResponse,
+  SearchUtilityPagesSuccessResponse,
   SendClaimAlertsSuccessResponse,
   SignOutSuccessResponse,
   SignWithEmbeddedWalletSuccessResponse,
@@ -148,7 +148,7 @@ import {
   UpdateDeveloperAppSuccessResponse,
   UpdateDynamicDataStoreSuccessResponse,
   UpdatePluginSuccessResponse,
-  UpdateUtilityListingSuccessResponse,
+  UpdateUtilityPageSuccessResponse,
   UploadBalancesSuccessResponse,
   VerifyAttestationSuccessResponse,
   VerifySignInSuccessResponse,
@@ -177,7 +177,7 @@ import {
   iCreatePluginPayload,
   iCreateSIWBBRequestPayload,
   iCreateSIWBBRequestSuccessResponse,
-  iCreateUtilityListingPayload,
+  iCreateUtilityPagePayload,
   iDeleteApiKeyPayload,
   iDeleteApplicationPayload,
   iDeleteAttestationPayload,
@@ -187,7 +187,7 @@ import {
   iDeletePluginPayload,
   iDeleteSIWBBRequestPayload,
   iDeleteSIWBBRequestSuccessResponse,
-  iDeleteUtilityListingPayload,
+  iDeleteUtilityPagePayload,
   iExchangeSIWBBAuthorizationCodePayload,
   iExchangeSIWBBAuthorizationCodeSuccessResponse,
   iFetchMetadataDirectlyPayload,
@@ -241,8 +241,8 @@ import {
   iGetStatusSuccessResponse,
   iGetTokensFromFaucetPayload,
   iGetTokensFromFaucetSuccessResponse,
-  iGetUtilityListingPayload,
-  iGetUtilityListingsPayload,
+  iGetUtilityPagePayload,
+  iGetUtilityPagesPayload,
   iOauthRevokePayload,
   iPerformStoreActionBatchWithBodyAuthPayload,
   iPerformStoreActionSingleWithBodyAuthPayload,
@@ -255,7 +255,7 @@ import {
   iSearchDeveloperAppsPayload,
   iSearchDynamicDataStoresPayload,
   iSearchPluginsPayload,
-  iSearchUtilityListingsPayload,
+  iSearchUtilityPagesPayload,
   iSendClaimAlertsPayload,
   iSendClaimAlertsSuccessResponse,
   iSignOutPayload,
@@ -274,7 +274,7 @@ import {
   iUpdateDynamicDataStorePayload,
   iUpdateDynamicDataStoreSuccessResponse,
   iUpdatePluginPayload,
-  iUpdateUtilityListingPayload,
+  iUpdateUtilityPagePayload,
   iUploadBalancesPayload,
   iVerifyAttestationPayload,
   iVerifySignInPayload,
@@ -1760,19 +1760,19 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets utility listings.
+   * Gets utility pages.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/utilityListings/fetch`
-   * - **SDK Function Call**: `await BitBadgesApi.getUtilityListings(payload);`
+   * - **API Route**: `POST /api/v0/utilityPages/fetch`
+   * - **SDK Function Call**: `await BitBadgesApi.getUtilityPages(payload);`
    */
-  public async getUtilityListings(payload: iGetUtilityListingsPayload): Promise<GetUtilityListingsSuccessResponse<T>> {
+  public async getUtilityPages(payload: iGetUtilityPagesPayload): Promise<GetUtilityPagesSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<GetUtilityListingsSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetUtilityListingsRoute()}`,
+      const response = await this.axios.post<GetUtilityPagesSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetUtilityPagesRoute()}`,
         payload
       );
-      return new GetUtilityListingsSuccessResponse<T>(response.data).convert(this.ConvertFunction);
+      return new GetUtilityPagesSuccessResponse<T>(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1780,19 +1780,19 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Searches for utility listings.
+   * Searches for utility pages.
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/utilityListings/search`
-   * - **SDK Function Call**: `await BitBadgesApi.searchUtilityListings(payload);`
+   * - **API Route**: `GET /api/v0/utilityPages/search`
+   * - **SDK Function Call**: `await BitBadgesApi.searchUtilityPages(payload);`
    */
-  public async searchUtilityListings(payload: iSearchUtilityListingsPayload): Promise<SearchUtilityListingsSuccessResponse<T>> {
+  public async searchUtilityPages(payload: iSearchUtilityPagesPayload): Promise<SearchUtilityPagesSuccessResponse<T>> {
     try {
-      const response = await this.axios.get<SearchUtilityListingsSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.SearchUtilityListingsRoute()}`,
+      const response = await this.axios.get<SearchUtilityPagesSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.SearchUtilityPagesRoute()}`,
         { params: payload }
       );
-      return new SearchUtilityListingsSuccessResponse<T>(response.data).convert(this.ConvertFunction);
+      return new SearchUtilityPagesSuccessResponse<T>(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1800,19 +1800,19 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Creates a utility listing.
+   * Creates a utility page.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/utilityListings`
-   * - **SDK Function Call**: `await BitBadgesApi.createUtilityListing(payload);`
+   * - **API Route**: `POST /api/v0/utilityPages`
+   * - **SDK Function Call**: `await BitBadgesApi.createUtilityPage(payload);`
    */
-  public async createUtilityListing(payload: iCreateUtilityListingPayload<T>): Promise<CreateUtilityListingSuccessResponse<T>> {
+  public async createUtilityPage(payload: iCreateUtilityPagePayload<T>): Promise<CreateUtilityPageSuccessResponse<T>> {
     try {
-      const response = await this.axios.post<CreateUtilityListingSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDUtilityListingsRoute()}`,
+      const response = await this.axios.post<CreateUtilityPageSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDUtilityPagesRoute()}`,
         payload
       );
-      return new CreateUtilityListingSuccessResponse<T>(response.data).convert(this.ConvertFunction);
+      return new CreateUtilityPageSuccessResponse<T>(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1820,19 +1820,19 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Updates a utility listing.
+   * Updates a utility page.
    *
    * @remarks
-   * - **API Route**: `PUT /api/v0/utilityListings`
-   * - **SDK Function Call**: `await BitBadgesApi.updateUtilityListing(payload);`
+   * - **API Route**: `PUT /api/v0/utilityPages`
+   * - **SDK Function Call**: `await BitBadgesApi.updateUtilityPage(payload);`
    */
-  public async updateUtilityListing(payload: iUpdateUtilityListingPayload<T>): Promise<UpdateUtilityListingSuccessResponse<T>> {
+  public async updateUtilityPage(payload: iUpdateUtilityPagePayload<T>): Promise<UpdateUtilityPageSuccessResponse<T>> {
     try {
-      const response = await this.axios.put<UpdateUtilityListingSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDUtilityListingsRoute()}`,
+      const response = await this.axios.put<UpdateUtilityPageSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDUtilityPagesRoute()}`,
         payload
       );
-      return new UpdateUtilityListingSuccessResponse<T>(response.data).convert(this.ConvertFunction);
+      return new UpdateUtilityPageSuccessResponse<T>(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1840,19 +1840,18 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Deletes a utility listing.
+   * Deletes a utility page.
    *
    * @remarks
-   * - **API Route**: `DELETE /api/v0/utilityListings`
-   * - **SDK Function Call**: `await BitBadgesApi.deleteUtilityListing(payload);`
+   * - **API Route**: `DELETE /api/v0/utilityPages`
+   * - **SDK Function Call**: `await BitBadgesApi.deleteUtilityPage(payload);`
    */
-  public async deleteUtilityListing(payload: iDeleteUtilityListingPayload): Promise<DeleteUtilityListingSuccessResponse> {
+  public async deleteUtilityPage(payload: iDeleteUtilityPagePayload): Promise<DeleteUtilityPageSuccessResponse> {
     try {
-      const response = await this.axios.delete<DeleteUtilityListingSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDUtilityListingsRoute()}`,
-        { data: payload }
-      );
-      return new DeleteUtilityListingSuccessResponse(response.data);
+      const response = await this.axios.delete<DeleteUtilityPageSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDUtilityPagesRoute()}`, {
+        data: payload
+      });
+      return new DeleteUtilityPageSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -2787,26 +2786,26 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Get utility listing by ID.
+   * Get utility page by ID.
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/utilityListing/:utilityListingId`
-   * - **SDK Function Call**: `await BitBadgesApi.getUtilityListing(utilityListingId, { ... });`
+   * - **API Route**: `GET /api/v0/utilityPage/:utilityPageId`
+   * - **SDK Function Call**: `await BitBadgesApi.getUtilityPage(utilityPageId, { ... });`
    *
    * @example
    */
-  public async getUtilityListing(utilityListingId: string, payload?: iGetUtilityListingPayload): Promise<GetUtilityListingSuccessResponse<T>> {
+  public async getUtilityPage(utilityPageId: string, payload?: iGetUtilityPagePayload): Promise<GetUtilityPageSuccessResponse<T>> {
     try {
-      const validateRes: typia.IValidation<iGetUtilityListingPayload> = typia.validate<iGetUtilityListingPayload>(payload ?? {});
+      const validateRes: typia.IValidation<iGetUtilityPagePayload> = typia.validate<iGetUtilityPagePayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.get<GetUtilityListingSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetUtilityListingRoute(utilityListingId)}`,
+      const response = await this.axios.get<GetUtilityPageSuccessResponse<T>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetUtilityPageRoute(utilityPageId)}`,
         { params: payload }
       );
-      return new GetUtilityListingSuccessResponse<T>(response.data).convert(this.ConvertFunction);
+      return new GetUtilityPageSuccessResponse<T>(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

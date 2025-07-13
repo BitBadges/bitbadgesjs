@@ -13,7 +13,7 @@ import {
   BalanceDocWithDetails,
   MerkleChallengeTrackerDoc,
   SIWBBRequestDoc,
-  UtilityListingDoc
+  UtilityPageDoc
 } from '../docs/docs.js';
 import {
   iApprovalTrackerDoc,
@@ -27,7 +27,7 @@ import {
   iMerkleChallengeTrackerDoc,
   iPointsActivityDoc,
   iTransferActivityDoc,
-  iUtilityListingDoc
+  iUtilityPageDoc
 } from '../docs/interfaces.js';
 import { iMetadata, Metadata } from '../metadata/metadata.js';
 import { CollectionViewKey } from './collections.js';
@@ -213,7 +213,7 @@ export interface iGetCollectionListingsPayload {
  * @category API Requests / Responses
  */
 export interface iGetCollectionListingsSuccessResponse<T extends NumberType> {
-  listings: Array<iUtilityListingDoc<T>>;
+  listings: Array<iUtilityPageDoc<T>>;
   pagination: PaginationInfo;
 }
 
@@ -224,12 +224,12 @@ export class GetCollectionListingsSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetCollectionListingsSuccessResponse<T>>
   implements iGetCollectionListingsSuccessResponse<T>
 {
-  listings: UtilityListingDoc<T>[];
+  listings: UtilityPageDoc<T>[];
   pagination: PaginationInfo;
 
   constructor(data: iGetCollectionListingsSuccessResponse<T>) {
     super();
-    this.listings = data.listings.map((listing) => new UtilityListingDoc(listing));
+    this.listings = data.listings.map((listing) => new UtilityPageDoc(listing));
     this.pagination = data.pagination;
   }
 
@@ -293,7 +293,7 @@ export interface iGetAddressListListingsPayload {
  * @category API Requests / Responses
  */
 export interface iGetAddressListListingsSuccessResponse<T extends NumberType> {
-  listings: Array<iUtilityListingDoc<T>>;
+  listings: Array<iUtilityPageDoc<T>>;
   pagination: PaginationInfo;
 }
 
@@ -304,12 +304,12 @@ export class GetAddressListListingsSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetAddressListListingsSuccessResponse<T>>
   implements iGetAddressListListingsSuccessResponse<T>
 {
-  listings: UtilityListingDoc<T>[];
+  listings: UtilityPageDoc<T>[];
   pagination: PaginationInfo;
 
   constructor(data: iGetAddressListListingsSuccessResponse<T>) {
     super();
-    this.listings = data.listings.map((listing) => new UtilityListingDoc(listing));
+    this.listings = data.listings.map((listing) => new UtilityPageDoc(listing));
     this.pagination = data.pagination;
   }
 

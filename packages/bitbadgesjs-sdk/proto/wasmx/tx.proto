@@ -7,7 +7,7 @@ import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "wasmx/params.proto";
 
-option go_package = "bitbadgeschain/x/wasmx/types";
+option go_package = "github.com/bitbadges/bitbadgeschain/x/wasmx/types";
 
 // Msg defines the Msg service.
 service Msg {
@@ -45,7 +45,7 @@ message MsgUpdateParamsResponse {}
 
 // MsgExecuteContractCompat submits the given message data to a smart contract, compatible with EIP712
 message MsgExecuteContractCompat {
-  option (amino.name) = "wasmx/MsgUpdateParams";
+  option (amino.name) = "wasmx/MsgExecuteContractCompat";
   option (cosmos.msg.v1.signer) = "sender";
 
   // Sender is the that actor that signed the messages

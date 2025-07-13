@@ -84,8 +84,8 @@ info:
     - **Manage Dynamic Stores** (`manageDynamicStores`)
       Create, update, and delete dynamic stores on behalf of the user.
 
-    - **Manage Utility Listings** (`manageUtilityListings`)
-      Create, update, and delete utility listings on behalf of the user.
+    - **Manage Utility Pages** (`manageUtilityPages`)
+      Create, update, and delete utility pages on behalf of the user.
 
     - **Approve Sign In With BitBadges Requests** (`approveSignInWithBitBadgesRequests`)
       Sign In with BitBadges on behalf of the user.
@@ -240,8 +240,8 @@ tags:
     description: Endpoints for the plugins for claims
   - name: Dynamic Stores
     description: Endpoints for managing dynamic data stores
-  - name: Utility Listings
-    description: Endpoints for managing utility listings
+  - name: Utility Pages
+    description: Endpoints for managing utility pages
   - name: Miscellaneous
 paths:
   /user:
@@ -1080,39 +1080,39 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-  /utilityListing/{utilityListingId}:
+  /utilityPage/{utilityPageId}:
     get:
-      operationId: getUtilityListing
-      summary: Get Utility Listing
+      operationId: getUtilityPage
+      summary: Get Utility Page
       tags:
-        - Utility Listings
+        - Utility Pages
       description: |-
-        Gets a utility listing by specific ID.
+        Gets a utility page by specific ID.
 
         ```tsx
-        await BitBadgesApi.getUtilityListing("utilityListing123", { ... });
+        await BitBadgesApi.getUtilityPage("utilityPage123", { ... });
         ```
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityListingPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityListingSuccessResponse)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityPagePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityPageSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getutilitylisting)**
 
         Scopes:
-          - `manageUtilityListings` - Required and must have view permissions for private listings
+          - `manageUtilityPages` - Required and must have view permissions for private listings
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetUtilityListingSuccessResponse'
+                $ref: '#/components/schemas/iGetUtilityPageSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
       parameters:
-        - name: utilityListingId
+        - name: utilityPageId
           in: path
           description: Utility listing ID
           required: true
@@ -1124,7 +1124,7 @@ paths:
           description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
-            $ref: '#/components/schemas/iGetUtilityListingPayload'
+            $ref: '#/components/schemas/iGetUtilityPagePayload'
       security:
         - apiKey: []
       x-internal: false
@@ -4472,35 +4472,35 @@ paths:
         - apiKey: []
           userMaybeSignedIn: []
       x-internal: false
-  /utilityListings/fetch:
+  /utilityPages/fetch:
     post:
-      operationId: getUtilityListings
-      summary: Get Utility Listings - Batch
+      operationId: getUtilityPages
+      summary: Get Utility Pages - Batch
       tags:
-        - Utility Listings
+        - Utility Pages
       description: |-
-        Fetches utility listings based on the provided criteria.
+        Fetches utility pages based on the provided criteria.
 
         Requires authentication for private listings.
 
         ```tsx
-        await BitBadgesApi.getUtilityListings(...);
+        await BitBadgesApi.getUtilityPages(...);
         ```
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityListingsPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityListingsSuccessResponse)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityPagesPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUtilityPagesSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getutilitylistings)**
 
         Scopes:
-        - `manageUtilityListings` - Required for private listings
+        - `manageUtilityPages` - Required for private listings
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetUtilityListingsSuccessResponse'
+                $ref: '#/components/schemas/iGetUtilityPagesSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -4520,35 +4520,35 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/iGetUtilityListingsPayload'
-  /utilityListings/search:
+              $ref: '#/components/schemas/iGetUtilityPagesPayload'
+  /utilityPages/search:
     get:
-      operationId: searchUtilityListings
-      summary: Search Utility Listings
+      operationId: searchUtilityPages
+      summary: Search Utility Pages
       tags:
-        - Utility Listings
+        - Utility Pages
       description: |-
-        Searches for utility listings based on the provided criteria. Currently,
-        this only gets the signed in user's utility listings.
+        Searches for utility pages based on the provided criteria. Currently,
+        this only gets the signed in user's utility pages.
 
         ```tsx
-          await BitBadgesApi.searchUtilityListings(...);
+          await BitBadgesApi.searchUtilityPages(...);
         ```
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchUtilityListingsPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchUtilityListingsSuccessResponse)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchUtilityPagesPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchUtilityPagesSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchutilitylistings)**
 
         Scopes:
-        - `manageUtilityListings` - Required
+        - `manageUtilityPages` - Required
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iSearchUtilityListingsSuccessResponse'
+                $ref: '#/components/schemas/iSearchUtilityPagesSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -4566,38 +4566,38 @@ paths:
           description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
-            $ref: '#/components/schemas/iSearchUtilityListingsPayload'
+            $ref: '#/components/schemas/iSearchUtilityPagesPayload'
       security:
         - apiKey: []
           userSignedIn: []
       x-internal: false
-  /utilityListings:
+  /utilityPages:
     post:
-      operationId: createUtilityListing
-      summary: Create Utility Listing
+      operationId: createUtilityPage
+      summary: Create Utility Page
       tags:
-        - Utility Listings
+        - Utility Pages
       description: |-
-        Creates a new utility listing. This is also available in the developer portal.
+        Creates a new utility page. This is also available in the developer portal.
 
         ```tsx
-        await BitBadgesApi.createUtilityListing(...);
+        await BitBadgesApi.createUtilityPage(...);
         ```
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateUtilityListingPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateUtilityListingSuccessResponse)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateUtilityPagePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateUtilityPageSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createutilitylisting)**
 
         Scopes:
-        - `manageUtilityListings` - Required
+        - `manageUtilityPages` - Required
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iCreateUtilityListingSuccessResponse'
+                $ref: '#/components/schemas/iCreateUtilityPageSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -4617,33 +4617,33 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/iCreateUtilityListingPayload'
+              $ref: '#/components/schemas/iCreateUtilityPagePayload'
     put:
-      operationId: updateUtilityListing
-      summary: Update Utility Listing
+      operationId: updateUtilityPage
+      summary: Update Utility Page
       tags:
-        - Utility Listings
+        - Utility Pages
       description: |-
-        Updates an existing utility listing. This is also available in the developer portal.
+        Updates an existing utility page. This is also available in the developer portal.
 
         ```tsx
-        await BitBadgesApi.updateUtilityListing(...);
+        await BitBadgesApi.updateUtilityPage(...);
         ```
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateUtilityListingPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateUtilityListingSuccessResponse)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateUtilityPagePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateUtilityPageSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateutilitylisting)**
 
         Scopes:
-        - `manageUtilityListings` - Required
+        - `manageUtilityPages` - Required
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iUpdateUtilityListingSuccessResponse'
+                $ref: '#/components/schemas/iUpdateUtilityPageSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -4663,34 +4663,34 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/iUpdateUtilityListingPayload'
+              $ref: '#/components/schemas/iUpdateUtilityPagePayload'
 
     delete:
-      operationId: deleteUtilityListing
-      summary: Delete Utility Listing
+      operationId: deleteUtilityPage
+      summary: Delete Utility Page
       tags:
-        - Utility Listings
+        - Utility Pages
       description: |-
-        Deletes a utility listing. This is also available in the developer portal.
+        Deletes a utility page. This is also available in the developer portal.
 
         ```tsx
-        await BitBadgesApi.deleteUtilityListing(...);
+        await BitBadgesApi.deleteUtilityPage(...);
         ```
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteUtilityListingPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteUtilityListingSuccessResponse)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteUtilityPagePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteUtilityPageSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteutilitylisting)**
 
         Scopes:
-        - `manageUtilityListings` - Required
+        - `manageUtilityPages` - Required
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iDeleteUtilityListingSuccessResponse'
+                $ref: '#/components/schemas/iDeleteUtilityPageSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -4710,7 +4710,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/iDeleteUtilityListingPayload'
+              $ref: '#/components/schemas/iDeleteUtilityPagePayload'
   /auth/status:
     post:
       operationId: checkSignInStatus

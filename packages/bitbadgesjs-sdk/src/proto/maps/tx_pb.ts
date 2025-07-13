@@ -95,8 +95,6 @@ export class MsgUpdateParamsResponse extends Message<MsgUpdateParamsResponse> {
 }
 
 /**
- * Used for WASM bindings and JSON parsing
- *
  * @generated from message maps.MapCustomMsgType
  */
 export class MapCustomMsgType extends Message<MapCustomMsgType> {

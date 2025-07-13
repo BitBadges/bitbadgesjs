@@ -7,8 +7,8 @@ import typia from 'typia';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { EmptyResponseClass } from './base.js';
 import { ListActivityDoc } from './docs/activity.js';
-import { AddressListDoc, UtilityListingDoc } from './docs/docs.js';
-import type { CreateClaimRequest, iAddressListDoc, iClaimDetails, iListActivityDoc, iUtilityListingDoc } from './docs/interfaces.js';
+import { AddressListDoc, UtilityPageDoc } from './docs/docs.js';
+import type { CreateClaimRequest, iAddressListDoc, iClaimDetails, iListActivityDoc, iUtilityPageDoc } from './docs/interfaces.js';
 import type { iMetadata, iMetadataWithoutInternals } from './metadata/metadata.js';
 import { Metadata } from './metadata/metadata.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
@@ -32,7 +32,7 @@ export interface iBitBadgesAddressList<T extends NumberType> extends iAddressLis
   /** The linked claims of the address list. */
   claims: iClaimDetails<T>[];
   /** The listings of the address list. */
-  listings?: iUtilityListingDoc<T>[];
+  listings?: iUtilityPageDoc<T>[];
 }
 
 /**
@@ -52,7 +52,7 @@ export class BitBadgesAddressList<T extends NumberType>
       pagination: PaginationInfo;
     };
   };
-  listings?: UtilityListingDoc<T>[];
+  listings?: UtilityPageDoc<T>[];
   claims: ClaimDetails<T>[];
 
   constructor(data: iBitBadgesAddressList<T>) {
@@ -61,7 +61,7 @@ export class BitBadgesAddressList<T extends NumberType>
     this.listActivity = data.listActivity.map((activity) => new ListActivityDoc(activity));
     this.views = data.views;
     this.claims = data.claims.map((claim) => new ClaimDetails(claim));
-    this.listings = data.listings?.map((listing) => new UtilityListingDoc(listing));
+    this.listings = data.listings?.map((listing) => new UtilityPageDoc(listing));
   }
 
   getNumberFieldNames(): string[] {
@@ -191,7 +191,7 @@ export class BitBadgesAddressList<T extends NumberType>
   /**
    * Type safe method to get the documents array for a specific view.
    */
-  getView(viewType: AddressListViewKey, viewId: string): ListActivityDoc<T>[] | UtilityListingDoc<T>[] {
+  getView(viewType: AddressListViewKey, viewId: string): ListActivityDoc<T>[] | UtilityPageDoc<T>[] {
     return viewType === 'listActivity' ? this.getActivityView(viewId) : this.getListingsView(viewId);
   }
 
@@ -207,7 +207,7 @@ export class BitBadgesAddressList<T extends NumberType>
   getListingsView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.listings?.find((y) => y._docId === x);
-    }) ?? []) as UtilityListingDoc<T>[];
+    }) ?? []) as UtilityPageDoc<T>[];
   }
 
   /**

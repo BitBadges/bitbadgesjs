@@ -22,6 +22,7 @@ import type {
   iCollectionMetadataTimeline,
   iCustomDataTimeline,
   iDenomUnit,
+  iDenomUnitWithDetails,
   iIsArchivedTimeline,
   iManagerTimeline,
   iOffChainBalancesMetadataTimeline,
@@ -530,10 +531,19 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
 export interface iCosmosCoinWrapperPath<T extends NumberType> {
   address: string;
   denom: string;
-  ownershipTimes: iUintRange<T>[];
-  badgeIds: iUintRange<T>[];
+  balances: iBalance<T>[];
   symbol: string;
   denomUnits: iDenomUnit<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iCosmosCoinWrapperPathWithDetails<T extends NumberType> extends iCosmosCoinWrapperPath<T> {
+  /** Optional base-level metadata for this cosmos coin wrapper path. */
+  metadata?: iMetadata<T>;
+  /** The denomination units with metadata details populated. */
+  denomUnits: iDenomUnitWithDetails<T>[];
 }
 
 /**
@@ -1401,7 +1411,7 @@ export interface iInheritMetadataFrom<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iUtilityListingDoc<T extends NumberType> extends Doc {
+export interface iUtilityPageDoc<T extends NumberType> extends Doc {
   /** The listing ID */
   listingId: string;
 
@@ -1432,10 +1442,10 @@ export interface iUtilityListingDoc<T extends NumberType> extends Doc {
   inheritMetadataFrom?: iInheritMetadataFrom<T>;
 
   /** The paginated content for the listing */
-  content: iUtilityListingContent[];
+  content: iUtilityPageContent[];
 
   /** The relevant links for the listing */
-  links: iUtilityListingLink<T>[];
+  links: iUtilityPageLink<T>[];
 
   /** Optional time range for when the listing should be shown */
   displayTimes?: iUintRange<T> | undefined;
@@ -1510,7 +1520,7 @@ export interface iLinkedTo<T extends NumberType> {
 
 /**
  * @category Interfaces */
-export interface iUtilityListingContent {
+export interface iUtilityPageContent {
   /** The type of content */
   type: string;
   /** Label for the content page */
@@ -1522,7 +1532,7 @@ export interface iUtilityListingContent {
 /**
  * @category Interfaces
  */
-export interface iUtilityListingLink<T extends NumberType> {
+export interface iUtilityPageLink<T extends NumberType> {
   /** The URL of the link */
   url: string;
   /** The claim ID to link to */

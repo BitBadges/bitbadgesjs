@@ -8,7 +8,7 @@ import { Message, proto3 } from "@bufbuild/protobuf";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
 import { CollectionPermissions } from "./permissions_pb.js";
 import { CollectionApproval, UserBalanceStore } from "./transfers_pb.js";
-import { UintRange } from "./balances_pb.js";
+import { Balance, UintRange } from "./balances_pb.js";
 
 /**
  *
@@ -205,22 +205,17 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
   denom = "";
 
   /**
-   * @generated from field: repeated badges.UintRange ownershipTimes = 3;
+   * @generated from field: repeated badges.Balance balances = 3;
    */
-  ownershipTimes: UintRange[] = [];
+  balances: Balance[] = [];
 
   /**
-   * @generated from field: repeated badges.UintRange badgeIds = 4;
-   */
-  badgeIds: UintRange[] = [];
-
-  /**
-   * @generated from field: string symbol = 5;
+   * @generated from field: string symbol = 4;
    */
   symbol = "";
 
   /**
-   * @generated from field: repeated badges.DenomUnit denomUnits = 6;
+   * @generated from field: repeated badges.DenomUnit denomUnits = 5;
    */
   denomUnits: DenomUnit[] = [];
 
@@ -234,10 +229,9 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
-    { no: 5, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
+    { no: 3, name: "balances", kind: "message", T: Balance, repeated: true },
+    { no: 4, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinWrapperPath {

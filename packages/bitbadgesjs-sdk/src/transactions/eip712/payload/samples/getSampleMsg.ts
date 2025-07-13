@@ -703,8 +703,13 @@ const universalParams = {
   cosmosCoinWrapperPathsToAdd: [
     new CosmosCoinWrapperPathAddObject({
       denom: 'ibc:1234567890',
-      badgeIds: [new UintRange()],
-      ownershipTimes: [new UintRange()],
+      balances: [
+        new Balance({
+          amount: '0',
+          badgeIds: [new UintRange()],
+          ownershipTimes: [new UintRange()]
+        })
+      ],
       symbol: '',
       denomUnits: [
         new DenomUnit({

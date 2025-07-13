@@ -7,7 +7,13 @@ export const isWrapperApproval = (
   pathObj: CosmosCoinWrapperPath<bigint>,
   options?: { skipPathValidation?: boolean }
 ) => {
-  const { address, badgeIds, ownershipTimes } = pathObj;
+  const { address, balances } = pathObj;
+
+  if (balances.length !== 1) {
+    return false;
+  }
+
+  const { badgeIds, ownershipTimes } = balances[0];
 
   if (!options?.skipPathValidation) {
     if (!approval.toList.checkAddress(address)) {
@@ -56,7 +62,13 @@ export const isUnwrapperApproval = (
   pathObj: CosmosCoinWrapperPath<bigint>,
   options?: { skipPathValidation?: boolean }
 ) => {
-  const { address, badgeIds, ownershipTimes } = pathObj;
+  const { address, balances } = pathObj;
+
+  if (balances.length !== 1) {
+    return false;
+  }
+
+  const { badgeIds, ownershipTimes } = balances[0];
 
   if (!options?.skipPathValidation) {
     if (!approval.fromList.checkAddress(address)) {

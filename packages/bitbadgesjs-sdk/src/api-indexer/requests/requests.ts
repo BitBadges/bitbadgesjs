@@ -19,7 +19,7 @@ import {
   PluginDoc,
   SIWBBRequestDoc,
   StatusDoc,
-  UtilityListingDoc
+  UtilityPageDoc
 } from '@/api-indexer/docs/docs.js';
 import {
   ClaimReward,
@@ -39,9 +39,9 @@ import {
   iLinkedTo,
   iPointsActivityDoc,
   iSIWBBRequestDoc,
-  iUtilityListingContent,
-  iUtilityListingDoc,
-  iUtilityListingLink,
+  iUtilityPageContent,
+  iUtilityPageDoc,
+  iUtilityPageLink,
   type BitBadgesAddress,
   type ClaimIntegrationPluginCustomBodyType,
   type ClaimIntegrationPluginType,
@@ -321,7 +321,7 @@ export interface iGetSearchSuccessResponse<T extends NumberType> {
   maps: iMapWithValues<T>[];
   applications?: iApplicationDoc<T>[];
   claims?: iClaimDetails<T>[];
-  utilityListings?: iUtilityListingDoc<T>[];
+  utilityPages?: iUtilityPageDoc<T>[];
 }
 
 /**
@@ -342,7 +342,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
   maps: MapWithValues<T>[];
   applications?: ApplicationDoc<T>[];
   claims?: ClaimDetails<T>[];
-  utilityListings?: UtilityListingDoc<T>[];
+  utilityPages?: UtilityPageDoc<T>[];
 
   constructor(data: iGetSearchSuccessResponse<T>) {
     super();
@@ -358,7 +358,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
     this.maps = data.maps.map((map) => new MapWithValues(map));
     this.applications = data.applications?.map((group) => new ApplicationDoc(group));
     this.claims = data.claims?.map((claim) => new ClaimDetails(claim));
-    this.utilityListings = data.utilityListings?.map((utilityListing) => new UtilityListingDoc(utilityListing));
+    this.utilityPages = data.utilityPages?.map((utilityPage) => new UtilityPageDoc(utilityPage));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetSearchSuccessResponse<U> {
@@ -1731,7 +1731,7 @@ export interface iGetBrowsePayload {
     | 'attestations'
     | 'claims'
     | 'activity'
-    | 'utilityListings'
+    | 'utilityPages'
     | 'applications'
     | 'claimActivity'
     | 'pointsActivity';
@@ -1754,7 +1754,7 @@ export class GetBrowsePayload extends CustomTypeClass<GetBrowsePayload> implemen
     | 'attestations'
     | 'claims'
     | 'activity'
-    | 'utilityListings'
+    | 'utilityPages'
     | 'applications'
     | 'claimActivity'
     | 'pointsActivity';
@@ -1805,7 +1805,7 @@ export interface iGetBrowseSuccessResponse<T extends NumberType> {
   claims?: { [category: string]: iClaimDetails<T>[] };
   claimActivity?: iClaimActivityDoc<T>[];
   pointsActivity?: iPointsActivityDoc<T>[];
-  utilityListings?: { [category: string]: iUtilityListingDoc<T>[] };
+  utilityPages?: { [category: string]: iUtilityPageDoc<T>[] };
 }
 
 /**
@@ -1830,7 +1830,7 @@ export class GetBrowseSuccessResponse<T extends NumberType>
   claims?: { [category: string]: ClaimDetails<T>[] };
   claimActivity?: ClaimActivityDoc<T>[];
   pointsActivity?: PointsActivityDoc<T>[];
-  utilityListings?: { [category: string]: UtilityListingDoc<T>[] };
+  utilityPages?: { [category: string]: UtilityPageDoc<T>[] };
 
   constructor(data: iGetBrowseSuccessResponse<T>) {
     super();
@@ -1875,12 +1875,12 @@ export class GetBrowseSuccessResponse<T extends NumberType>
       },
       {} as { [category: string]: ApplicationDoc<T>[] }
     );
-    this.utilityListings = Object.keys(data.utilityListings ?? {}).reduce(
+    this.utilityPages = Object.keys(data.utilityPages ?? {}).reduce(
       (acc, category) => {
-        acc[category] = (data.utilityListings ?? {})[category].map((utilityListing) => new UtilityListingDoc(utilityListing));
+        acc[category] = (data.utilityPages ?? {})[category].map((utilityPage) => new UtilityPageDoc(utilityPage));
         return acc;
       },
-      {} as { [category: string]: UtilityListingDoc<T>[] }
+      {} as { [category: string]: UtilityPageDoc<T>[] }
     );
     this.maps = Object.keys(data.maps).reduce(
       (acc, category) => {
@@ -4533,7 +4533,7 @@ export class GetPointsActivitySuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface iSearchUtilityListingsPayload {
+export interface iSearchUtilityPagesPayload {
   /** The pagination bookmark to start from */
   bookmark?: string;
 }
@@ -4541,16 +4541,16 @@ export interface iSearchUtilityListingsPayload {
 /**
  * @category API Requests / Responses
  */
-export class SearchUtilityListingsPayload extends CustomTypeClass<SearchUtilityListingsPayload> implements iSearchUtilityListingsPayload {
+export class SearchUtilityPagesPayload extends CustomTypeClass<SearchUtilityPagesPayload> implements iSearchUtilityPagesPayload {
   bookmark?: string;
 
-  constructor(payload: iSearchUtilityListingsPayload) {
+  constructor(payload: iSearchUtilityPagesPayload) {
     super();
     this.bookmark = payload.bookmark;
   }
 
-  static FromQuery(query: ParsedQs): SearchUtilityListingsPayload {
-    return new SearchUtilityListingsPayload({
+  static FromQuery(query: ParsedQs): SearchUtilityPagesPayload {
+    return new SearchUtilityPagesPayload({
       bookmark: query.bookmark?.toString()
     });
   }
@@ -4559,38 +4559,38 @@ export class SearchUtilityListingsPayload extends CustomTypeClass<SearchUtilityL
 /**
  * @category API Requests / Responses
  */
-export interface iGetUtilityListingPayload {}
+export interface iGetUtilityPagePayload {}
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetUtilityListingSuccessResponse<T extends NumberType> {
-  listing: iUtilityListingDoc<T> | undefined;
+export interface iGetUtilityPageSuccessResponse<T extends NumberType> {
+  listing: iUtilityPageDoc<T> | undefined;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetUtilityListingSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetUtilityListingSuccessResponse<T>>
-  implements iGetUtilityListingSuccessResponse<T>
+export class GetUtilityPageSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetUtilityPageSuccessResponse<T>>
+  implements iGetUtilityPageSuccessResponse<T>
 {
-  listing: UtilityListingDoc<T> | undefined;
+  listing: UtilityPageDoc<T> | undefined;
 
-  constructor(data: iGetUtilityListingSuccessResponse<T>) {
+  constructor(data: iGetUtilityPageSuccessResponse<T>) {
     super();
-    this.listing = data.listing ? new UtilityListingDoc<T>(data.listing) : undefined;
+    this.listing = data.listing ? new UtilityPageDoc<T>(data.listing) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetUtilityListingSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetUtilityListingSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetUtilityPageSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetUtilityPageSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetUtilityListingsPayload {
+export interface iGetUtilityPagesPayload {
   /** The specific IDs to fetch */
   listingIds: string[];
 }
@@ -4598,8 +4598,8 @@ export interface iGetUtilityListingsPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iGetUtilityListingsSuccessResponse<T extends NumberType> {
-  docs: (iUtilityListingDoc<T> | undefined)[];
+export interface iGetUtilityPagesSuccessResponse<T extends NumberType> {
+  docs: (iUtilityPageDoc<T> | undefined)[];
   pagination: {
     bookmark: string;
     hasMore: boolean;
@@ -4609,40 +4609,40 @@ export interface iGetUtilityListingsSuccessResponse<T extends NumberType> {
 /**
  * @category API Requests / Responses
  */
-export class GetUtilityListingsSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetUtilityListingsSuccessResponse<T>>
-  implements iGetUtilityListingsSuccessResponse<T>
+export class GetUtilityPagesSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetUtilityPagesSuccessResponse<T>>
+  implements iGetUtilityPagesSuccessResponse<T>
 {
-  docs: (UtilityListingDoc<T> | undefined)[];
+  docs: (UtilityPageDoc<T> | undefined)[];
   pagination: {
     bookmark: string;
     hasMore: boolean;
   };
 
-  constructor(data: iGetUtilityListingsSuccessResponse<T>) {
+  constructor(data: iGetUtilityPagesSuccessResponse<T>) {
     super();
-    this.docs = data.docs.map((doc) => (doc ? new UtilityListingDoc<T>(doc) : undefined));
+    this.docs = data.docs.map((doc) => (doc ? new UtilityPageDoc<T>(doc) : undefined));
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetUtilityListingsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetUtilityListingsSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetUtilityPagesSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetUtilityPagesSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iSearchUtilityListingsSuccessResponse<T extends NumberType> extends iGetUtilityListingsSuccessResponse<T> {}
+export interface iSearchUtilityPagesSuccessResponse<T extends NumberType> extends iGetUtilityPagesSuccessResponse<T> {}
 
 /**
  * @category API Requests / Responses
  */
-export class SearchUtilityListingsSuccessResponse<T extends NumberType>
-  extends GetUtilityListingsSuccessResponse<T>
-  implements iSearchUtilityListingsSuccessResponse<T>
+export class SearchUtilityPagesSuccessResponse<T extends NumberType>
+  extends GetUtilityPagesSuccessResponse<T>
+  implements iSearchUtilityPagesSuccessResponse<T>
 {
-  constructor(data: iSearchUtilityListingsSuccessResponse<T>) {
+  constructor(data: iSearchUtilityPagesSuccessResponse<T>) {
     super(data);
   }
 }
@@ -4650,15 +4650,15 @@ export class SearchUtilityListingsSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface iCreateUtilityListingPayload<T extends NumberType> {
+export interface iCreateUtilityPagePayload<T extends NumberType> {
   /** The overall metadata for the listing */
   metadata: iMetadataWithoutInternals<T>;
 
   /** The content for the listing */
-  content: iUtilityListingContent[];
+  content: iUtilityPageContent[];
 
   /** The links for the listing */
-  links: iUtilityListingLink<T>[];
+  links: iUtilityPageLink<T>[];
 
   /** The type of the listing */
   type: string;
@@ -4694,33 +4694,33 @@ export interface iCreateUtilityListingPayload<T extends NumberType> {
 /**
  * @category API Requests / Responses
  */
-export interface iCreateUtilityListingSuccessResponse<T extends NumberType> {
-  doc: iUtilityListingDoc<T>;
+export interface iCreateUtilityPageSuccessResponse<T extends NumberType> {
+  doc: iUtilityPageDoc<T>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class CreateUtilityListingSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<CreateUtilityListingSuccessResponse<T>>
-  implements iCreateUtilityListingSuccessResponse<T>
+export class CreateUtilityPageSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<CreateUtilityPageSuccessResponse<T>>
+  implements iCreateUtilityPageSuccessResponse<T>
 {
-  doc: UtilityListingDoc<T>;
+  doc: UtilityPageDoc<T>;
 
-  constructor(data: iCreateUtilityListingSuccessResponse<T>) {
+  constructor(data: iCreateUtilityPageSuccessResponse<T>) {
     super();
-    this.doc = new UtilityListingDoc<T>(data.doc);
+    this.doc = new UtilityPageDoc<T>(data.doc);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreateUtilityListingSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CreateUtilityListingSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreateUtilityPageSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CreateUtilityPageSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iUpdateUtilityListingPayload<T extends NumberType> {
+export interface iUpdateUtilityPagePayload<T extends NumberType> {
   /** The listing ID to update */
   listingId: string;
 
@@ -4728,10 +4728,10 @@ export interface iUpdateUtilityListingPayload<T extends NumberType> {
   metadata: iMetadataWithoutInternals<T>;
 
   /** The content for the listing. This is only used for a dedicated listing page (not compatible with direct link or inherited metadata). */
-  content: iUtilityListingContent[];
+  content: iUtilityPageContent[];
 
   /** The links for the listing. This is only used for a dedicated listing page (not compatible with direct link or inherited metadata). */
-  links: iUtilityListingLink<T>[];
+  links: iUtilityPageLink<T>[];
 
   /** The visibility of the listing */
   visibility: 'public' | 'private' | 'unlisted';
@@ -4775,33 +4775,33 @@ export interface iUpdateUtilityListingPayload<T extends NumberType> {
 /**
  * @category API Requests / Responses
  */
-export interface iUpdateUtilityListingSuccessResponse<T extends NumberType> {
-  doc: iUtilityListingDoc<T>;
+export interface iUpdateUtilityPageSuccessResponse<T extends NumberType> {
+  doc: iUtilityPageDoc<T>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class UpdateUtilityListingSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<UpdateUtilityListingSuccessResponse<T>>
-  implements iUpdateUtilityListingSuccessResponse<T>
+export class UpdateUtilityPageSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<UpdateUtilityPageSuccessResponse<T>>
+  implements iUpdateUtilityPageSuccessResponse<T>
 {
-  doc: UtilityListingDoc<T>;
+  doc: UtilityPageDoc<T>;
 
-  constructor(data: iUpdateUtilityListingSuccessResponse<T>) {
+  constructor(data: iUpdateUtilityPageSuccessResponse<T>) {
     super();
-    this.doc = new UtilityListingDoc<T>(data.doc);
+    this.doc = new UtilityPageDoc<T>(data.doc);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UpdateUtilityListingSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UpdateUtilityListingSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UpdateUtilityPageSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UpdateUtilityPageSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iDeleteUtilityListingPayload {
+export interface iDeleteUtilityPagePayload {
   /** The listing ID to delete */
   listingId: string;
 }
@@ -4809,12 +4809,12 @@ export interface iDeleteUtilityListingPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iDeleteUtilityListingSuccessResponse {}
+export interface iDeleteUtilityPageSuccessResponse {}
 
 /**
  * @category API Requests / Responses
  */
-export class DeleteUtilityListingSuccessResponse extends EmptyResponseClass {}
+export class DeleteUtilityPageSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses

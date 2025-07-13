@@ -10,6 +10,7 @@ import {
   BadgeMetadataTimeline,
   BadgeMetadataTimelineWithDetails,
   CollectionMetadataTimelineWithDetails,
+  CosmosCoinWrapperPathWithDetails,
   CustomDataTimeline,
   IsArchivedTimeline,
   ManagerTimeline,
@@ -46,7 +47,7 @@ import {
   CollectionDoc,
   CollectionStatsDoc,
   MerkleChallengeTrackerDoc,
-  UtilityListingDoc
+  UtilityPageDoc
 } from './docs/docs.js';
 import type {
   iApprovalTrackerDoc,
@@ -55,9 +56,10 @@ import type {
   iClaimDetails,
   iCollectionDoc,
   iCollectionStatsDoc,
+  iCosmosCoinWrapperPathWithDetails,
   iMerkleChallengeTrackerDoc,
   iTransferActivityDoc,
-  iUtilityListingDoc,
+  iUtilityPageDoc,
   NativeAddress
 } from './docs/interfaces.js';
 import { BadgeMetadataDetails, CollectionMetadataDetails } from './metadata/badgeMetadata.js';
@@ -121,7 +123,7 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   approvalTrackers: iApprovalTrackerDoc<T>[];
 
   /** The listings for this collection. */
-  listings: iUtilityListingDoc<T>[];
+  listings: iUtilityPageDoc<T>[];
 
   /** The badge IDs in this collection that are marked as NSFW. */
   nsfw?: iCollectionNSFW<T>;
@@ -147,6 +149,9 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
 
   /** The floor prices for this collection. */
   badgeFloorPrices?: iBadgeFloorPriceDoc<T>[];
+
+  /** The IBC wrapper paths for the collection, with off-chain metadata populated. */
+  cosmosCoinWrapperPaths: iCosmosCoinWrapperPathWithDetails<T>[];
 }
 
 /**
@@ -179,7 +184,7 @@ export class BitBadgesCollection<T extends NumberType>
   challengeTrackers: MerkleChallengeTrackerDoc<T>[];
   approvalTrackers: ApprovalTrackerDoc<T>[];
 
-  listings: UtilityListingDoc<T>[];
+  listings: UtilityPageDoc<T>[];
 
   claims: ClaimDetails<T>[];
 
@@ -200,6 +205,8 @@ export class BitBadgesCollection<T extends NumberType>
 
   badgeFloorPrices?: iBadgeFloorPriceDoc<T>[] | undefined;
 
+  cosmosCoinWrapperPaths: CosmosCoinWrapperPathWithDetails<T>[];
+
   constructor(data: iBitBadgesCollection<T>) {
     super(data);
     this.collectionApprovals = data.collectionApprovals.map((collectionApproval) => new CollectionApprovalWithDetails(collectionApproval));
@@ -213,13 +220,14 @@ export class BitBadgesCollection<T extends NumberType>
     this.owners = data.owners.map((balance) => new BalanceDocWithDetails(balance));
     this.challengeTrackers = data.challengeTrackers.map((merkleChallenge) => new MerkleChallengeTrackerDoc(merkleChallenge));
     this.approvalTrackers = data.approvalTrackers.map((approvalTracker) => new ApprovalTrackerDoc(approvalTracker));
-    this.listings = data.listings.map((listing) => new UtilityListingDoc(listing));
+    this.listings = data.listings.map((listing) => new UtilityPageDoc(listing));
     this.nsfw = data.nsfw ? { ...data.nsfw, badgeIds: UintRangeArray.From(data.nsfw.badgeIds) } : undefined;
     this.reported = data.reported ? { ...data.reported, badgeIds: UintRangeArray.From(data.reported.badgeIds) } : undefined;
     this.views = data.views;
     this.claims = data.claims.map((x) => new ClaimDetails(x));
     this.stats = data.stats ? new CollectionStatsDoc(data.stats) : undefined;
     this.badgeFloorPrices = data.badgeFloorPrices?.map((x) => new BadgeFloorPriceDoc(x));
+    this.cosmosCoinWrapperPaths = data.cosmosCoinWrapperPaths.map((x) => new CosmosCoinWrapperPathWithDetails(x));
   }
 
   getNumberFieldNames(): string[] {
@@ -1056,7 +1064,7 @@ export class BitBadgesCollection<T extends NumberType>
   getListingsView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.listings.find((y) => y._docId === x);
-    }) ?? []) as UtilityListingDoc<T>[];
+    }) ?? []) as UtilityPageDoc<T>[];
   }
 
   /**
@@ -1278,7 +1286,7 @@ type CollectionViewData<T extends NumberType> = {
   owners: BalanceDocWithDetails<T>[];
   amountTrackers: ApprovalTrackerDoc<T>[];
   challengeTrackers: MerkleChallengeTrackerDoc<T>[];
-  listings: UtilityListingDoc<T>[];
+  listings: UtilityPageDoc<T>[];
   badgeFloorPrices: BadgeFloorPriceDoc<T>[];
 };
 

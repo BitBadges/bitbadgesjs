@@ -66,9 +66,9 @@ import {
   iListingViewsDoc,
   iPointsDoc,
   iTierWithOptionalWeight,
-  iUtilityListingContent,
-  iUtilityListingDoc,
-  iUtilityListingLink,
+  iUtilityPageContent,
+  iUtilityPageDoc,
+  iUtilityPageLink,
   type BitBadgesAddress,
   type ClaimIntegrationPluginType,
   type IntegrationPluginParams,
@@ -1261,15 +1261,15 @@ export class ApplicationDoc<T extends NumberType> extends BaseNumberTypeClass<Ap
 }
 
 /**
- * @inheritDoc iUtilityListingContent
+ * @inheritDoc iUtilityPageContent
  * @category Indexer
  */
-export class UtilityListingContent extends CustomTypeClass<UtilityListingContent> implements iUtilityListingContent {
+export class UtilityPageContent extends CustomTypeClass<UtilityPageContent> implements iUtilityPageContent {
   label: string;
   content: string;
   type: string;
 
-  constructor(data: iUtilityListingContent) {
+  constructor(data: iUtilityPageContent) {
     super();
     this.label = data.label;
     this.content = data.content;
@@ -1280,16 +1280,16 @@ export class UtilityListingContent extends CustomTypeClass<UtilityListingContent
     return [];
   }
 
-  clone(): UtilityListingContent {
-    return super.clone() as UtilityListingContent;
+  clone(): UtilityPageContent {
+    return super.clone() as UtilityPageContent;
   }
 }
 
 /**
- * @inheritDoc iUtilityListingLink
+ * @inheritDoc iUtilityPageLink
  * @category Indexer
  */
-export class UtilityListingLink<T extends NumberType> extends CustomTypeClass<UtilityListingLink<T>> implements iUtilityListingLink<T> {
+export class UtilityPageLink<T extends NumberType> extends CustomTypeClass<UtilityPageLink<T>> implements iUtilityPageLink<T> {
   url: string;
   claimId?: string | undefined;
   applicationId?: string | undefined;
@@ -1298,7 +1298,7 @@ export class UtilityListingLink<T extends NumberType> extends CustomTypeClass<Ut
   mapId?: string | undefined;
   metadata?: iMetadata<T> | undefined;
 
-  constructor(data: iUtilityListingLink<T>) {
+  constructor(data: iUtilityPageLink<T>) {
     super();
     this.url = data.url;
     this.claimId = data.claimId;
@@ -1313,8 +1313,8 @@ export class UtilityListingLink<T extends NumberType> extends CustomTypeClass<Ut
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UtilityListingLink<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UtilityListingLink<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UtilityPageLink<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UtilityPageLink<U>;
   }
 }
 
@@ -1429,10 +1429,10 @@ export class EstimatedCost<T extends NumberType> extends CustomTypeClass<Estimat
 }
 
 /**
- * @inheritDoc iUtilityListingDoc
+ * @inheritDoc iUtilityPageDoc
  * @category Indexer
  */
-export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass<UtilityListingDoc<T>> implements iUtilityListingDoc<T> {
+export class UtilityPageDoc<T extends NumberType> extends BaseNumberTypeClass<UtilityPageDoc<T>> implements iUtilityPageDoc<T> {
   _docId: string;
   _id?: string;
   listingId: string;
@@ -1442,8 +1442,8 @@ export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass
   createdBy: BitBadgesAddress;
   managedBy: BitBadgesAddress;
   createdAt: UNIXMilliTimestamp<T>;
-  content: UtilityListingContent[];
-  links: UtilityListingLink<T>[];
+  content: UtilityPageContent[];
+  links: UtilityPageLink<T>[];
   metadata: iMetadata<T>;
   visibility: 'public' | 'private' | 'unlisted';
   lastUpdated?: UNIXMilliTimestamp<T>;
@@ -1468,7 +1468,7 @@ export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass
     category: string;
   };
 
-  constructor(data: iUtilityListingDoc<T>) {
+  constructor(data: iUtilityPageDoc<T>) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -1479,8 +1479,8 @@ export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass
     this.createdBy = data.createdBy;
     this.managedBy = data.managedBy;
     this.createdAt = data.createdAt;
-    this.content = data.content.map((content) => new UtilityListingContent(content));
-    this.links = data.links.map((link) => new UtilityListingLink(link));
+    this.content = data.content.map((content) => new UtilityPageContent(content));
+    this.links = data.links.map((link) => new UtilityPageLink(link));
     this.metadata = data.metadata;
     this.visibility = data.visibility;
     this.approvalStatus = data.approvalStatus;
@@ -1500,8 +1500,8 @@ export class UtilityListingDoc<T extends NumberType> extends BaseNumberTypeClass
     return ['createdAt', 'viewCount', 'lastUpdated'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UtilityListingDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UtilityListingDoc<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UtilityPageDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UtilityPageDoc<U>;
   }
 }
 

@@ -334,36 +334,6 @@ export function createTxBroadcastBody(txContext: TxContext, messages: Message | 
   }
 }
 
-//TODO: We should eventually get Cosmos keys via the signature itself
-//      but current Cosmos implementations are kinda stupid.
-//      The public key is in the sign doc, so you are signing your own public key
-//      which I think makes it impossible to recover the public key from just a signature
-//      because you do not know the message that was signed (since you dont know the pubkey).
-const getCosmosPublicKey = (txContext: TxContext, messages: Message | Message[], signature: string) => {
-  if (!signature) return '';
-
-  const wrappedTxContext = wrapExternalTxContext(txContext);
-
-  const signDoc = new SignDoc({
-    accountNumber: BigInt(txContext.sender.accountNumber),
-    chainId: wrappedTxContext.chain.cosmosChainId,
-    bodyBytes: createTransactionPayload(txContext, messages).signDirect.body.toBinary(),
-    authInfoBytes: createTransactionPayload(txContext, messages).signDirect.authInfo.toBinary()
-  });
-
-  return getCosmosPublicKeyFromSignDoc(signDoc, signature);
-};
-
-const getCosmosPublicKeyFromSignDoc = (signDoc: SignDoc, signature: string) => {
-  const msgHash = Buffer.from(sha256(signDoc.toBinary()).substring(2), 'hex');
-  const pubKey = SigningKey.recoverPublicKey(msgHash, '0x' + signature);
-  const pubKeyHex = pubKey.substring(2);
-  const compressedPublicKey = compressSecp256Pubkey(new Uint8Array(Buffer.from(pubKeyHex, 'hex')));
-  const base64PubKey = Buffer.from(compressedPublicKey).toString('base64');
-
-  return base64PubKey;
-};
-
 /**
  * Given the transaction context, payload, and signature, create the raw transaction to be sent to the blockchain.
  */

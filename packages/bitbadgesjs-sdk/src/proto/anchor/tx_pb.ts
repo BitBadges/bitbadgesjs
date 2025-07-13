@@ -91,8 +91,6 @@ export class MsgUpdateParamsResponse extends Message<MsgUpdateParamsResponse> {
 }
 
 /**
- * Used for WASM bindings and JSON parsing
- *
  * @generated from message anchor.AnchorCustomMsgType
  */
 export class AnchorCustomMsgType extends Message<AnchorCustomMsgType> {
