@@ -2,10 +2,14 @@ import { MsgAddCustomData } from '@/proto/anchor/tx_pb.js';
 import {
   MsgCreateAddressLists,
   MsgCreateCollection,
+  MsgCreateDynamicStore,
   MsgDeleteCollection,
+  MsgDeleteDynamicStore,
+  MsgSetDynamicStoreValue,
   MsgTransferBadges,
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
+  MsgUpdateDynamicStore,
   MsgUpdateUserApprovals
 } from '@/proto/badges/tx_pb.js';
 import { MsgExecuteContract, MsgInstantiateContract, MsgStoreCode } from '@/proto/cosmwasm/wasm/v1/tx_pb.js';
@@ -180,7 +184,11 @@ export function createBadgesAminoConverters(): AminoConverters {
     ...createAminoConverter(MsgUpdateUserApprovals, 'badges/UpdateUserApprovals'),
     ...createAminoConverter(MsgCreateAddressLists, 'badges/CreateAddressLists'),
     ...createAminoConverter(MsgCreateCollection, 'badges/CreateCollection'),
-    ...createAminoConverter(MsgUniversalUpdateCollection, 'badges/UniversalUpdateCollection')
+    ...createAminoConverter(MsgCreateDynamicStore, 'badges/CreateDynamicStore'),
+    ...createAminoConverter(MsgDeleteDynamicStore, 'badges/DeleteDynamicStore'),
+    ...createAminoConverter(MsgSetDynamicStoreValue, 'badges/SetDynamicStoreValue'),
+    ...createAminoConverter(MsgUniversalUpdateCollection, 'badges/UniversalUpdateCollection'),
+    ...createAminoConverter(MsgUpdateDynamicStore, 'badges/UpdateDynamicStore')
   };
 }
 

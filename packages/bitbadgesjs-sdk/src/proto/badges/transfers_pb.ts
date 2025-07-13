@@ -1256,6 +1256,47 @@ export class MustOwnBadges extends Message<MustOwnBadges> {
 }
 
 /**
+ * DynamicStoreChallenge defines a challenge that requires the initiator to pass a dynamic store check.
+ *
+ * @generated from message badges.DynamicStoreChallenge
+ */
+export class DynamicStoreChallenge extends Message<DynamicStoreChallenge> {
+  /**
+   * The ID of the dynamic store to check.
+   *
+   * @generated from field: string storeId = 1;
+   */
+  storeId = "";
+
+  constructor(data?: PartialMessage<DynamicStoreChallenge>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.DynamicStoreChallenge";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DynamicStoreChallenge {
+    return new DynamicStoreChallenge().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DynamicStoreChallenge {
+    return new DynamicStoreChallenge().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DynamicStoreChallenge {
+    return new DynamicStoreChallenge().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DynamicStoreChallenge | PlainMessage<DynamicStoreChallenge> | undefined, b: DynamicStoreChallenge | PlainMessage<DynamicStoreChallenge> | undefined): boolean {
+    return proto3.util.equals(DynamicStoreChallenge, a, b);
+  }
+}
+
+/**
  * ApprovalCriteria defines the criteria for approving transfers.
  *
  * @generated from message badges.ApprovalCriteria
@@ -1359,6 +1400,13 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
    */
   mustOwnBadges: MustOwnBadges[] = [];
 
+  /**
+   * Dynamic store challenges that the initiator must pass for approval.
+   *
+   * @generated from field: repeated badges.DynamicStoreChallenge dynamicStoreChallenges = 15;
+   */
+  dynamicStoreChallenges: DynamicStoreChallenge[] = [];
+
   constructor(data?: PartialMessage<ApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1381,6 +1429,7 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
     { no: 12, name: "autoDeletionOptions", kind: "message", T: AutoDeletionOptions },
     { no: 13, name: "userRoyalties", kind: "message", T: UserRoyalties },
     { no: 14, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
+    { no: 15, name: "dynamicStoreChallenges", kind: "message", T: DynamicStoreChallenge, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalCriteria {
@@ -1518,6 +1567,13 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
    */
   mustOwnBadges: MustOwnBadges[] = [];
 
+  /**
+   * Dynamic store challenges that the initiator must pass for approval.
+   *
+   * @generated from field: repeated badges.DynamicStoreChallenge dynamicStoreChallenges = 10;
+   */
+  dynamicStoreChallenges: DynamicStoreChallenge[] = [];
+
   constructor(data?: PartialMessage<OutgoingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1535,6 +1591,7 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
     { no: 7, name: "requireToDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "autoDeletionOptions", kind: "message", T: AutoDeletionOptions },
     { no: 9, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
+    { no: 10, name: "dynamicStoreChallenges", kind: "message", T: DynamicStoreChallenge, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OutgoingApprovalCriteria {
@@ -1623,6 +1680,13 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
    */
   mustOwnBadges: MustOwnBadges[] = [];
 
+  /**
+   * Dynamic store challenges that the initiator must pass for approval.
+   *
+   * @generated from field: repeated badges.DynamicStoreChallenge dynamicStoreChallenges = 10;
+   */
+  dynamicStoreChallenges: DynamicStoreChallenge[] = [];
+
   constructor(data?: PartialMessage<IncomingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1640,6 +1704,7 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
     { no: 7, name: "requireFromDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "autoDeletionOptions", kind: "message", T: AutoDeletionOptions },
     { no: 9, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
+    { no: 10, name: "dynamicStoreChallenges", kind: "message", T: DynamicStoreChallenge, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncomingApprovalCriteria {

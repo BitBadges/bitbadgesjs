@@ -6,10 +6,14 @@ import { generatePostBodyBroadcast } from '@/node-rest-api/broadcast.js';
 import {
   MsgCreateAddressLists,
   MsgCreateCollection,
+  MsgCreateDynamicStore,
   MsgDeleteCollection,
+  MsgDeleteDynamicStore,
+  MsgSetDynamicStoreValue,
   MsgTransferBadges,
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
+  MsgUpdateDynamicStore,
   MsgUpdateUserApprovals
 } from '@/proto/badges/tx_pb.js';
 import { type AuthInfo, type TxBody, type TxRaw, SignDoc } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
@@ -17,10 +21,14 @@ import { createTypedData } from '@/transactions/eip712/payload/createTypedData.j
 import {
   populateUndefinedForMsgCreateAddressLists,
   populateUndefinedForMsgCreateCollection,
+  populateUndefinedForMsgCreateDynamicStore,
   populateUndefinedForMsgDeleteCollection,
+  populateUndefinedForMsgDeleteDynamicStore,
+  populateUndefinedForMsgSetDynamicStoreValue,
   populateUndefinedForMsgTransferBadges,
   populateUndefinedForMsgUniversalUpdateCollection,
   populateUndefinedForMsgUpdateCollection,
+  populateUndefinedForMsgUpdateDynamicStore,
   populateUndefinedForMsgUpdateUserApprovals
 } from '@/transactions/eip712/payload/samples/getSampleMsg.js';
 import type { AnyMessage, Message } from '@bufbuild/protobuf';
@@ -270,8 +278,16 @@ export const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
       msg = createProtoMsg(populateUndefinedForMsgUniversalUpdateCollection(msgVal as MsgUniversalUpdateCollection));
     } else if (msgVal.getType().typeName === MsgCreateAddressLists.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgCreateAddressLists(msgVal as MsgCreateAddressLists));
+    } else if (msgVal.getType().typeName === MsgCreateDynamicStore.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgCreateDynamicStore(msgVal as MsgCreateDynamicStore));
     } else if (msgVal.getType().typeName === MsgDeleteCollection.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgDeleteCollection(msgVal as MsgDeleteCollection));
+    } else if (msgVal.getType().typeName === MsgDeleteDynamicStore.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgDeleteDynamicStore(msgVal as MsgDeleteDynamicStore));
+    } else if (msgVal.getType().typeName === MsgSetDynamicStoreValue.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSetDynamicStoreValue(msgVal as MsgSetDynamicStoreValue));
+    } else if (msgVal.getType().typeName === MsgUpdateDynamicStore.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgUpdateDynamicStore(msgVal as MsgUpdateDynamicStore));
     }
 
     //MsgCreateAddressLists and MsgDeleteCollection should be fine bc they are all primitive types and required

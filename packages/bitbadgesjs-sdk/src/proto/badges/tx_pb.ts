@@ -55,6 +55,26 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
    */
   createCollectionMsg?: MsgCreateCollection;
 
+  /**
+   * @generated from field: badges.MsgCreateDynamicStore createDynamicStoreMsg = 8;
+   */
+  createDynamicStoreMsg?: MsgCreateDynamicStore;
+
+  /**
+   * @generated from field: badges.MsgUpdateDynamicStore updateDynamicStoreMsg = 9;
+   */
+  updateDynamicStoreMsg?: MsgUpdateDynamicStore;
+
+  /**
+   * @generated from field: badges.MsgDeleteDynamicStore deleteDynamicStoreMsg = 10;
+   */
+  deleteDynamicStoreMsg?: MsgDeleteDynamicStore;
+
+  /**
+   * @generated from field: badges.MsgSetDynamicStoreValue setDynamicStoreValueMsg = 11;
+   */
+  setDynamicStoreValueMsg?: MsgSetDynamicStoreValue;
+
   constructor(data?: PartialMessage<BadgeCustomMsgType>) {
     super();
     proto3.util.initPartial(data, this);
@@ -70,6 +90,10 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
     { no: 5, name: "updateUserApprovalsMsg", kind: "message", T: MsgUpdateUserApprovals },
     { no: 6, name: "updateCollectionMsg", kind: "message", T: MsgUpdateCollection },
     { no: 7, name: "createCollectionMsg", kind: "message", T: MsgCreateCollection },
+    { no: 8, name: "createDynamicStoreMsg", kind: "message", T: MsgCreateDynamicStore },
+    { no: 9, name: "updateDynamicStoreMsg", kind: "message", T: MsgUpdateDynamicStore },
+    { no: 10, name: "deleteDynamicStoreMsg", kind: "message", T: MsgDeleteDynamicStore },
+    { no: 11, name: "setDynamicStoreValueMsg", kind: "message", T: MsgSetDynamicStoreValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCustomMsgType {
@@ -1402,6 +1426,366 @@ export class MsgUpdateUserApprovalsResponse extends Message<MsgUpdateUserApprova
 
   static equals(a: MsgUpdateUserApprovalsResponse | PlainMessage<MsgUpdateUserApprovalsResponse> | undefined, b: MsgUpdateUserApprovalsResponse | PlainMessage<MsgUpdateUserApprovalsResponse> | undefined): boolean {
     return proto3.util.equals(MsgUpdateUserApprovalsResponse, a, b);
+  }
+}
+
+/**
+ * MsgCreateDynamicStore is used to create a new dynamic store.
+ *
+ * @generated from message badges.MsgCreateDynamicStore
+ */
+export class MsgCreateDynamicStore extends Message<MsgCreateDynamicStore> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * The default value for uninitialized addresses.
+   *
+   * @generated from field: bool defaultValue = 2;
+   */
+  defaultValue = false;
+
+  constructor(data?: PartialMessage<MsgCreateDynamicStore>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgCreateDynamicStore";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "defaultValue", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateDynamicStore {
+    return new MsgCreateDynamicStore().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCreateDynamicStore {
+    return new MsgCreateDynamicStore().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCreateDynamicStore {
+    return new MsgCreateDynamicStore().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgCreateDynamicStore | PlainMessage<MsgCreateDynamicStore> | undefined, b: MsgCreateDynamicStore | PlainMessage<MsgCreateDynamicStore> | undefined): boolean {
+    return proto3.util.equals(MsgCreateDynamicStore, a, b);
+  }
+}
+
+/**
+ * MsgCreateDynamicStoreResponse is the response to MsgCreateDynamicStore.
+ *
+ * @generated from message badges.MsgCreateDynamicStoreResponse
+ */
+export class MsgCreateDynamicStoreResponse extends Message<MsgCreateDynamicStoreResponse> {
+  /**
+   * ID of the dynamic store.
+   *
+   * @generated from field: string storeId = 1;
+   */
+  storeId = "";
+
+  constructor(data?: PartialMessage<MsgCreateDynamicStoreResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgCreateDynamicStoreResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateDynamicStoreResponse {
+    return new MsgCreateDynamicStoreResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCreateDynamicStoreResponse {
+    return new MsgCreateDynamicStoreResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCreateDynamicStoreResponse {
+    return new MsgCreateDynamicStoreResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgCreateDynamicStoreResponse | PlainMessage<MsgCreateDynamicStoreResponse> | undefined, b: MsgCreateDynamicStoreResponse | PlainMessage<MsgCreateDynamicStoreResponse> | undefined): boolean {
+    return proto3.util.equals(MsgCreateDynamicStoreResponse, a, b);
+  }
+}
+
+/**
+ * MsgUpdateDynamicStore is used to update an existing dynamic store.
+ *
+ * @generated from message badges.MsgUpdateDynamicStore
+ */
+export class MsgUpdateDynamicStore extends Message<MsgUpdateDynamicStore> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the dynamic store to update.
+   *
+   * @generated from field: string storeId = 2;
+   */
+  storeId = "";
+
+  /**
+   * The new default value for uninitialized addresses (optional, only set if updating).
+   *
+   * @generated from field: bool defaultValue = 3;
+   */
+  defaultValue = false;
+
+  constructor(data?: PartialMessage<MsgUpdateDynamicStore>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgUpdateDynamicStore";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "defaultValue", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateDynamicStore {
+    return new MsgUpdateDynamicStore().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUpdateDynamicStore {
+    return new MsgUpdateDynamicStore().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUpdateDynamicStore {
+    return new MsgUpdateDynamicStore().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgUpdateDynamicStore | PlainMessage<MsgUpdateDynamicStore> | undefined, b: MsgUpdateDynamicStore | PlainMessage<MsgUpdateDynamicStore> | undefined): boolean {
+    return proto3.util.equals(MsgUpdateDynamicStore, a, b);
+  }
+}
+
+/**
+ * MsgUpdateDynamicStoreResponse is the response to MsgUpdateDynamicStore.
+ *
+ * @generated from message badges.MsgUpdateDynamicStoreResponse
+ */
+export class MsgUpdateDynamicStoreResponse extends Message<MsgUpdateDynamicStoreResponse> {
+  constructor(data?: PartialMessage<MsgUpdateDynamicStoreResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgUpdateDynamicStoreResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateDynamicStoreResponse {
+    return new MsgUpdateDynamicStoreResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUpdateDynamicStoreResponse {
+    return new MsgUpdateDynamicStoreResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUpdateDynamicStoreResponse {
+    return new MsgUpdateDynamicStoreResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgUpdateDynamicStoreResponse | PlainMessage<MsgUpdateDynamicStoreResponse> | undefined, b: MsgUpdateDynamicStoreResponse | PlainMessage<MsgUpdateDynamicStoreResponse> | undefined): boolean {
+    return proto3.util.equals(MsgUpdateDynamicStoreResponse, a, b);
+  }
+}
+
+/**
+ * MsgDeleteDynamicStore is used to delete a dynamic store.
+ *
+ * @generated from message badges.MsgDeleteDynamicStore
+ */
+export class MsgDeleteDynamicStore extends Message<MsgDeleteDynamicStore> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the dynamic store to delete.
+   *
+   * @generated from field: string storeId = 2;
+   */
+  storeId = "";
+
+  constructor(data?: PartialMessage<MsgDeleteDynamicStore>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgDeleteDynamicStore";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDeleteDynamicStore {
+    return new MsgDeleteDynamicStore().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDeleteDynamicStore {
+    return new MsgDeleteDynamicStore().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDeleteDynamicStore {
+    return new MsgDeleteDynamicStore().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgDeleteDynamicStore | PlainMessage<MsgDeleteDynamicStore> | undefined, b: MsgDeleteDynamicStore | PlainMessage<MsgDeleteDynamicStore> | undefined): boolean {
+    return proto3.util.equals(MsgDeleteDynamicStore, a, b);
+  }
+}
+
+/**
+ * MsgDeleteDynamicStoreResponse is the response to MsgDeleteDynamicStore.
+ *
+ * @generated from message badges.MsgDeleteDynamicStoreResponse
+ */
+export class MsgDeleteDynamicStoreResponse extends Message<MsgDeleteDynamicStoreResponse> {
+  constructor(data?: PartialMessage<MsgDeleteDynamicStoreResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgDeleteDynamicStoreResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDeleteDynamicStoreResponse {
+    return new MsgDeleteDynamicStoreResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDeleteDynamicStoreResponse {
+    return new MsgDeleteDynamicStoreResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDeleteDynamicStoreResponse {
+    return new MsgDeleteDynamicStoreResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgDeleteDynamicStoreResponse | PlainMessage<MsgDeleteDynamicStoreResponse> | undefined, b: MsgDeleteDynamicStoreResponse | PlainMessage<MsgDeleteDynamicStoreResponse> | undefined): boolean {
+    return proto3.util.equals(MsgDeleteDynamicStoreResponse, a, b);
+  }
+}
+
+/**
+ * MsgSetDynamicStoreValue is used to set a 0/1 flag for a specific address in a dynamic store.
+ *
+ * @generated from message badges.MsgSetDynamicStoreValue
+ */
+export class MsgSetDynamicStoreValue extends Message<MsgSetDynamicStoreValue> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the dynamic store.
+   *
+   * @generated from field: string storeId = 2;
+   */
+  storeId = "";
+
+  /**
+   * The address for which to set the value.
+   *
+   * @generated from field: string address = 3;
+   */
+  address = "";
+
+  /**
+   * The boolean value to set (true = 1, false = 0).
+   *
+   * @generated from field: bool value = 4;
+   */
+  value = false;
+
+  constructor(data?: PartialMessage<MsgSetDynamicStoreValue>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetDynamicStoreValue";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "value", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetDynamicStoreValue {
+    return new MsgSetDynamicStoreValue().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetDynamicStoreValue {
+    return new MsgSetDynamicStoreValue().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetDynamicStoreValue {
+    return new MsgSetDynamicStoreValue().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetDynamicStoreValue | PlainMessage<MsgSetDynamicStoreValue> | undefined, b: MsgSetDynamicStoreValue | PlainMessage<MsgSetDynamicStoreValue> | undefined): boolean {
+    return proto3.util.equals(MsgSetDynamicStoreValue, a, b);
+  }
+}
+
+/**
+ * MsgSetDynamicStoreValueResponse is the response to MsgSetDynamicStoreValue.
+ *
+ * @generated from message badges.MsgSetDynamicStoreValueResponse
+ */
+export class MsgSetDynamicStoreValueResponse extends Message<MsgSetDynamicStoreValueResponse> {
+  constructor(data?: PartialMessage<MsgSetDynamicStoreValueResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetDynamicStoreValueResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetDynamicStoreValueResponse {
+    return new MsgSetDynamicStoreValueResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetDynamicStoreValueResponse {
+    return new MsgSetDynamicStoreValueResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetDynamicStoreValueResponse {
+    return new MsgSetDynamicStoreValueResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetDynamicStoreValueResponse | PlainMessage<MsgSetDynamicStoreValueResponse> | undefined, b: MsgSetDynamicStoreValueResponse | PlainMessage<MsgSetDynamicStoreValueResponse> | undefined): boolean {
+    return proto3.util.equals(MsgSetDynamicStoreValueResponse, a, b);
   }
 }
 

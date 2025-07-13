@@ -167,3 +167,45 @@ export interface iMsgUpdateUserApprovals<T extends NumberType> {
   /** The new user permissions. Must have the necessary permissions to update. */
   userPermissions?: iUserPermissions<T>;
 }
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgCreateDynamicStore {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgUpdateDynamicStore<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the dynamic store to update. */
+  storeId: T;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgDeleteDynamicStore<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the dynamic store to delete. */
+  storeId: T;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgSetDynamicStoreValue<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the dynamic store. */
+  storeId: T;
+  /** The address for which to set the value. */
+  address: BitBadgesAddress;
+  /** The boolean value to set. */
+  value: boolean;
+}

@@ -12,6 +12,13 @@ import { Message, proto3 } from "@bufbuild/protobuf";
  * @generated from message badges.Params
  */
 export class Params extends Message<Params> {
+  /**
+   * allowed_denoms defines the list of denoms that are allowed to be used in coin_transfers
+   *
+   * @generated from field: repeated string allowed_denoms = 1;
+   */
+  allowedDenoms: string[] = [];
+
   constructor(data?: PartialMessage<Params>) {
     super();
     proto3.util.initPartial(data, this);
@@ -20,6 +27,7 @@ export class Params extends Message<Params> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "badges.Params";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "allowed_denoms", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Params {

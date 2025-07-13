@@ -5,6 +5,14 @@ import type { iAddressList, iBalance, iCoinTransfer, iMerkleChallenge, iMustOwnB
 /**
  * @category Interfaces
  */
+export interface iDynamicStoreChallenge<T extends NumberType> {
+  /** The ID of the dynamic store to check. */
+  storeId: T;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iUserOutgoingApproval<T extends NumberType> {
   /** The list ID for the user(s) who is sending the badges. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   toListId: string;
@@ -50,6 +58,8 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   requireToDoesNotEqualInitiatedBy?: boolean;
   /** Whether the approval should be deleted after one use. */
   autoDeletionOptions?: iAutoDeletionOptions;
+  /** The list of dynamic store challenges that the initiator must pass for approval. */
+  dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
 }
 
 /**
@@ -226,6 +236,8 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   requireFromEqualsInitiatedBy?: boolean;
   /** Whether the from address must not equal the initiatedBy address. */
   requireFromDoesNotEqualInitiatedBy?: boolean;
+  /** The list of dynamic store challenges that the initiator must pass for approval. */
+  dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
 }
 
 /**
@@ -288,6 +300,8 @@ export interface iApprovalCriteria<T extends NumberType> {
   overridesToIncomingApprovals?: boolean;
   /** The royalties to apply to the transfer. */
   userRoyalties?: iUserRoyalties<T>;
+  /** The list of dynamic store challenges that the initiator must pass for approval. */
+  dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
 }
 
 /**

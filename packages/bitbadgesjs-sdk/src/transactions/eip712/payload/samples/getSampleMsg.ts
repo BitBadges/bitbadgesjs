@@ -69,10 +69,12 @@ import {
   UserOutgoingApprovalPermission,
   UserPermissions,
   UserRoyalties,
-  DenomUnit
+  DenomUnit,
+  DynamicStoreChallenge
 } from '@/proto/badges/index.js';
 import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
+import { MsgCreateDynamicStore, MsgDeleteDynamicStore, MsgSetDynamicStoreValue, MsgUpdateDynamicStore } from '@/proto/badges/tx_pb.js';
 
 const approvalCriteria = new OutgoingApprovalCriteria({
   coinTransfers: [
@@ -151,7 +153,12 @@ const approvalCriteria = new OutgoingApprovalCriteria({
       intervalLength: '0'
     })
   }),
-  autoDeletionOptions: new AutoDeletionOptions({})
+  autoDeletionOptions: new AutoDeletionOptions({}),
+  dynamicStoreChallenges: [
+    new DynamicStoreChallenge({
+      storeId: '0'
+    })
+  ]
 }).toJson({ emitDefaultValues: true }) as object;
 
 const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
@@ -189,7 +196,12 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
       intervalLength: '0'
     })
   }),
-  autoDeletionOptions: new AutoDeletionOptions({})
+  autoDeletionOptions: new AutoDeletionOptions({}),
+  dynamicStoreChallenges: [
+    new DynamicStoreChallenge({
+      storeId: '0'
+    })
+  ]
 }).toJson({ emitDefaultValues: true }) as object;
 
 function populateMerkleChallenges(merkleChallenges?: MerkleChallenge[]) {
@@ -341,6 +353,10 @@ function populateMaxNumTransfers(maxNumTransfers?: MaxNumTransfers) {
   return maxNumTransfers;
 }
 
+function populateDynamicStoreChallenges(dynamicStoreChallenges?: DynamicStoreChallenge[]) {
+  return dynamicStoreChallenges || [];
+}
+
 export function populateUndefinedForMsgTransferBadges(msg: MsgTransferBadges) {
   for (const transfer of msg.transfers) {
     if (!transfer.precalculateBalancesFromApproval) {
@@ -364,6 +380,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
     approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
+    approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
   }
   for (const approval of msg.incomingApprovals) {
     if (!approval.approvalCriteria) {
@@ -375,6 +392,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
     approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
+    approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
   }
   return msg;
 }
@@ -417,6 +435,26 @@ export function populateUndefinedForMsgDeleteCollection(msg: MsgDeleteCollection
   });
 }
 
+export function populateUndefinedForMsgCreateDynamicStore(msg: MsgCreateDynamicStore) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgUpdateDynamicStore(msg: MsgUpdateDynamicStore) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgDeleteDynamicStore(msg: MsgDeleteDynamicStore) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgSetDynamicStoreValue(msg: MsgSetDynamicStoreValue) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
 export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUniversalUpdateCollection) {
   if (!msg.defaultBalances) {
     msg.defaultBalances = new UserBalanceStore();
@@ -448,6 +486,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
       approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
       approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
       approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
+      approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
     }
   }
   for (const approval of msg.defaultBalances.incomingApprovals) {
@@ -460,6 +499,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
     approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
+    approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
   }
 
   for (const approval of msg.collectionApprovals) {
@@ -473,6 +513,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
     approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
     approval.approvalCriteria.userRoyalties = populateUserRoyalties(approval.approvalCriteria.userRoyalties);
+    approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
   }
 
   for (const metadata of msg.collectionMetadataTimeline) {
@@ -761,6 +802,39 @@ export function getSampleMsg(msgType: string, currMsg: any) {
         type: msgType,
         value: new MsgCreateAddressLists({
           addressLists: [new AddressList()]
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/CreateDynamicStore':
+      return {
+        type: msgType,
+        value: new MsgCreateDynamicStore({
+          creator: ''
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/DeleteDynamicStore':
+      return {
+        type: msgType,
+        value: new MsgDeleteDynamicStore({
+          creator: '',
+          storeId: '0'
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/SetDynamicStoreValue':
+      return {
+        type: msgType,
+        value: new MsgSetDynamicStoreValue({
+          creator: '',
+          storeId: '0',
+          address: '',
+          value: false
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/UpdateDynamicStore':
+      return {
+        type: msgType,
+        value: new MsgUpdateDynamicStore({
+          creator: '',
+          storeId: '0'
         }).toJson({ emitDefaultValues: true })
       };
     case 'badges/TransferBadges':

@@ -9,6 +9,7 @@ import { Params } from "./params_pb.js";
 import { BadgeCollection } from "./collections_pb.js";
 import { ApprovalTracker, UserBalanceStore } from "./transfers_pb.js";
 import { AddressList } from "./address_lists_pb.js";
+import { DynamicStore, DynamicStoreValue } from "./dynamic_stores_pb.js";
 
 /**
  * QueryParamsRequest is request type for the Query/Params RPC method.
@@ -533,6 +534,160 @@ export class QueryGetChallengeTrackerResponse extends Message<QueryGetChallengeT
 
   static equals(a: QueryGetChallengeTrackerResponse | PlainMessage<QueryGetChallengeTrackerResponse> | undefined, b: QueryGetChallengeTrackerResponse | PlainMessage<QueryGetChallengeTrackerResponse> | undefined): boolean {
     return proto3.util.equals(QueryGetChallengeTrackerResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.QueryGetDynamicStoreRequest
+ */
+export class QueryGetDynamicStoreRequest extends Message<QueryGetDynamicStoreRequest> {
+  /**
+   * @generated from field: string storeId = 1;
+   */
+  storeId = "";
+
+  constructor(data?: PartialMessage<QueryGetDynamicStoreRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryGetDynamicStoreRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetDynamicStoreRequest {
+    return new QueryGetDynamicStoreRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetDynamicStoreRequest {
+    return new QueryGetDynamicStoreRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetDynamicStoreRequest {
+    return new QueryGetDynamicStoreRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetDynamicStoreRequest | PlainMessage<QueryGetDynamicStoreRequest> | undefined, b: QueryGetDynamicStoreRequest | PlainMessage<QueryGetDynamicStoreRequest> | undefined): boolean {
+    return proto3.util.equals(QueryGetDynamicStoreRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.QueryGetDynamicStoreResponse
+ */
+export class QueryGetDynamicStoreResponse extends Message<QueryGetDynamicStoreResponse> {
+  /**
+   * @generated from field: badges.DynamicStore store = 1;
+   */
+  store?: DynamicStore;
+
+  constructor(data?: PartialMessage<QueryGetDynamicStoreResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryGetDynamicStoreResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "store", kind: "message", T: DynamicStore },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetDynamicStoreResponse {
+    return new QueryGetDynamicStoreResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetDynamicStoreResponse {
+    return new QueryGetDynamicStoreResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetDynamicStoreResponse {
+    return new QueryGetDynamicStoreResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetDynamicStoreResponse | PlainMessage<QueryGetDynamicStoreResponse> | undefined, b: QueryGetDynamicStoreResponse | PlainMessage<QueryGetDynamicStoreResponse> | undefined): boolean {
+    return proto3.util.equals(QueryGetDynamicStoreResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.QueryGetDynamicStoreValueRequest
+ */
+export class QueryGetDynamicStoreValueRequest extends Message<QueryGetDynamicStoreValueRequest> {
+  /**
+   * @generated from field: string storeId = 1;
+   */
+  storeId = "";
+
+  /**
+   * @generated from field: string address = 2;
+   */
+  address = "";
+
+  constructor(data?: PartialMessage<QueryGetDynamicStoreValueRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryGetDynamicStoreValueRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetDynamicStoreValueRequest {
+    return new QueryGetDynamicStoreValueRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetDynamicStoreValueRequest {
+    return new QueryGetDynamicStoreValueRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetDynamicStoreValueRequest {
+    return new QueryGetDynamicStoreValueRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetDynamicStoreValueRequest | PlainMessage<QueryGetDynamicStoreValueRequest> | undefined, b: QueryGetDynamicStoreValueRequest | PlainMessage<QueryGetDynamicStoreValueRequest> | undefined): boolean {
+    return proto3.util.equals(QueryGetDynamicStoreValueRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.QueryGetDynamicStoreValueResponse
+ */
+export class QueryGetDynamicStoreValueResponse extends Message<QueryGetDynamicStoreValueResponse> {
+  /**
+   * @generated from field: badges.DynamicStoreValue value = 1;
+   */
+  value?: DynamicStoreValue;
+
+  constructor(data?: PartialMessage<QueryGetDynamicStoreValueResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryGetDynamicStoreValueResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "value", kind: "message", T: DynamicStoreValue },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetDynamicStoreValueResponse {
+    return new QueryGetDynamicStoreValueResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetDynamicStoreValueResponse {
+    return new QueryGetDynamicStoreValueResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetDynamicStoreValueResponse {
+    return new QueryGetDynamicStoreValueResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetDynamicStoreValueResponse | PlainMessage<QueryGetDynamicStoreValueResponse> | undefined, b: QueryGetDynamicStoreValueResponse | PlainMessage<QueryGetDynamicStoreValueResponse> | undefined): boolean {
+    return proto3.util.equals(QueryGetDynamicStoreValueResponse, a, b);
   }
 }
 

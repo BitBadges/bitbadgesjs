@@ -21,10 +21,14 @@ import { type AnyMessage, type JsonWriteOptions, type Message, type JsonReadOpti
 import {
   MsgCreateAddressLists,
   MsgCreateCollection,
+  MsgCreateDynamicStore,
   MsgDeleteCollection,
+  MsgDeleteDynamicStore,
+  MsgSetDynamicStoreValue,
   MsgTransferBadges,
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
+  MsgUpdateDynamicStore,
   MsgUpdateUserApprovals
 } from '@/proto/badges/tx_pb.js';
 
@@ -57,7 +61,11 @@ export const ProtoTypeRegistry = createRegistry(
   MsgUpdateUserApprovals,
   MsgCreateAddressLists,
   MsgCreateCollection,
+  MsgCreateDynamicStore,
+  MsgDeleteDynamicStore,
+  MsgSetDynamicStoreValue,
   MsgUniversalUpdateCollection,
+  MsgUpdateDynamicStore,
   MsgExecuteContractCompat,
   MsgInstantiateContractCompat,
   MsgExecuteContract,

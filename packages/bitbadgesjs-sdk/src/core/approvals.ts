@@ -23,6 +23,7 @@ import type {
   iApprovalCriteria,
   iAutoDeletionOptions,
   iCollectionApproval,
+  iDynamicStoreChallenge,
   iIncomingApprovalCriteria,
   iIncrementedBalances,
   iManualBalances,
@@ -314,6 +315,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   requireToEqualsInitiatedBy?: boolean;
   requireToDoesNotEqualInitiatedBy?: boolean;
   coinTransfers?: CoinTransfer<T>[] | undefined;
+  dynamicStoreChallenges?: DynamicStoreChallenge<T>[];
 
   constructor(msg: iOutgoingApprovalCriteria<T>) {
     super();
@@ -326,6 +328,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     this.requireToEqualsInitiatedBy = msg.requireToEqualsInitiatedBy;
     this.requireToDoesNotEqualInitiatedBy = msg.requireToDoesNotEqualInitiatedBy;
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
+    this.dynamicStoreChallenges = msg.dynamicStoreChallenges?.map((x) => new DynamicStoreChallenge(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteria<U> {
@@ -339,7 +342,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
         autoDeletionOptions: this.autoDeletionOptions?.convert(convertFunction),
         requireToEqualsInitiatedBy: this.requireToEqualsInitiatedBy,
         requireToDoesNotEqualInitiatedBy: this.requireToDoesNotEqualInitiatedBy,
-        coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction))
+        coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction)),
+        dynamicStoreChallenges: this.dynamicStoreChallenges?.map((x) => x.convert(convertFunction))
       })
     );
   }
@@ -377,7 +381,10 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       autoDeletionOptions: item.autoDeletionOptions ? AutoDeletionOptions.fromProto(item.autoDeletionOptions, convertFunction) : undefined,
       requireToEqualsInitiatedBy: item.requireToEqualsInitiatedBy,
       requireToDoesNotEqualInitiatedBy: item.requireToDoesNotEqualInitiatedBy,
-      coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined
+      coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined,
+      dynamicStoreChallenges: item.dynamicStoreChallenges
+        ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction))
+        : undefined
     });
   }
 
@@ -392,6 +399,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       merkleChallenges: this.merkleChallenges,
       mustOwnBadges: this.mustOwnBadges,
       coinTransfers: this.coinTransfers,
+      dynamicStoreChallenges: this.dynamicStoreChallenges,
 
       requireFromEqualsInitiatedBy: false,
       requireFromDoesNotEqualInitiatedBy: false,
@@ -1086,6 +1094,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   requireFromEqualsInitiatedBy?: boolean;
   requireFromDoesNotEqualInitiatedBy?: boolean;
   coinTransfers?: CoinTransfer<T>[] | undefined;
+  dynamicStoreChallenges?: DynamicStoreChallenge<T>[];
 
   constructor(msg: iIncomingApprovalCriteria<T>) {
     super();
@@ -1098,12 +1107,13 @@ export class IncomingApprovalCriteria<T extends NumberType>
     this.requireFromEqualsInitiatedBy = msg.requireFromEqualsInitiatedBy;
     this.requireFromDoesNotEqualInitiatedBy = msg.requireFromDoesNotEqualInitiatedBy;
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
+    this.dynamicStoreChallenges = msg.dynamicStoreChallenges?.map((x) => new DynamicStoreChallenge(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteria<U> {
     return new IncomingApprovalCriteria(
       deepCopyPrimitives({
-        merkleChallenge: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
+        merkleChallenges: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
         mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
         predeterminedBalances: this.predeterminedBalances ? this.predeterminedBalances.convert(convertFunction) : undefined,
         approvalAmounts: this.approvalAmounts ? this.approvalAmounts.convert(convertFunction) : undefined,
@@ -1111,7 +1121,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
         autoDeletionOptions: this.autoDeletionOptions ? this.autoDeletionOptions.convert(convertFunction) : undefined,
         requireFromEqualsInitiatedBy: this.requireFromEqualsInitiatedBy,
         requireFromDoesNotEqualInitiatedBy: this.requireFromDoesNotEqualInitiatedBy,
-        coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction))
+        coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction)),
+        dynamicStoreChallenges: this.dynamicStoreChallenges?.map((x) => x.convert(convertFunction))
       })
     );
   }
@@ -1149,7 +1160,10 @@ export class IncomingApprovalCriteria<T extends NumberType>
       requireFromEqualsInitiatedBy: item.requireFromEqualsInitiatedBy,
       requireFromDoesNotEqualInitiatedBy: item.requireFromDoesNotEqualInitiatedBy,
       autoDeletionOptions: item.autoDeletionOptions ? AutoDeletionOptions.fromProto(item.autoDeletionOptions, convertFunction) : undefined,
-      coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined
+      coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined,
+      dynamicStoreChallenges: item.dynamicStoreChallenges
+        ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction))
+        : undefined
     });
   }
 
@@ -1164,6 +1178,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
       coinTransfers: this.coinTransfers,
       autoDeletionOptions: this.autoDeletionOptions,
       mustOwnBadges: this.mustOwnBadges,
+      dynamicStoreChallenges: this.dynamicStoreChallenges,
 
       requireToEqualsInitiatedBy: false,
       requireToDoesNotEqualInitiatedBy: false,
@@ -1308,6 +1323,53 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
 }
 
 /**
+ * @inheritDoc iDynamicStoreChallenge
+ * @category Approvals / Transferability
+ */
+export class DynamicStoreChallenge<T extends NumberType> extends BaseNumberTypeClass<DynamicStoreChallenge<T>> implements iDynamicStoreChallenge<T> {
+  storeId: T;
+
+  constructor(msg: iDynamicStoreChallenge<T>) {
+    super();
+    this.storeId = msg.storeId;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['storeId'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DynamicStoreChallenge<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStoreChallenge<U>;
+  }
+
+  toProto(): badges.DynamicStoreChallenge {
+    return new badges.DynamicStoreChallenge(this.convert(Stringify));
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): DynamicStoreChallenge<U> {
+    return DynamicStoreChallenge.fromProto(badges.DynamicStoreChallenge.fromJson(jsonValue, options), convertFunction);
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): DynamicStoreChallenge<U> {
+    return DynamicStoreChallenge.fromProto(badges.DynamicStoreChallenge.fromJsonString(jsonString, options), convertFunction);
+  }
+
+  static fromProto<U extends NumberType>(item: badges.DynamicStoreChallenge, convertFunction: (item: NumberType) => U): DynamicStoreChallenge<U> {
+    return new DynamicStoreChallenge<U>({
+      storeId: convertFunction(item.storeId)
+    });
+  }
+}
+
+/**
  * @category Approvals / Transferability
  */
 export class UserRoyalties<T extends NumberType> extends BaseNumberTypeClass<UserRoyalties<T>> implements iUserRoyalties<T> {
@@ -1374,6 +1436,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   overridesToIncomingApprovals?: boolean;
   coinTransfers?: CoinTransfer<T>[] | undefined;
   userRoyalties?: UserRoyalties<T>;
+  dynamicStoreChallenges?: DynamicStoreChallenge<T>[];
 
   constructor(msg: iApprovalCriteria<T>) {
     super();
@@ -1391,6 +1454,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.overridesToIncomingApprovals = msg.overridesToIncomingApprovals;
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
     this.userRoyalties = msg.userRoyalties ? new UserRoyalties(msg.userRoyalties) : undefined;
+    this.dynamicStoreChallenges = msg.dynamicStoreChallenges?.map((x) => new DynamicStoreChallenge(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteria<U> {
@@ -1432,7 +1496,10 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       requireFromDoesNotEqualInitiatedBy: item.requireFromDoesNotEqualInitiatedBy,
       overridesFromOutgoingApprovals: item.overridesFromOutgoingApprovals,
       overridesToIncomingApprovals: item.overridesToIncomingApprovals,
-      userRoyalties: item.userRoyalties ? UserRoyalties.fromProto(item.userRoyalties, convertFunction) : undefined
+      userRoyalties: item.userRoyalties ? UserRoyalties.fromProto(item.userRoyalties, convertFunction) : undefined,
+      dynamicStoreChallenges: item.dynamicStoreChallenges
+        ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction))
+        : undefined
     });
   }
 
