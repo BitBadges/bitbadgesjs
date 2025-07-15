@@ -12,9 +12,17 @@ import {
   MsgDeleteIncomingApproval,
   MsgDeleteOutgoingApproval,
   MsgPurgeApprovals,
+  MsgSetBadgeMetadata,
+  MsgSetCollectionApprovals,
+  MsgSetCollectionMetadata,
+  MsgSetCustomData,
   MsgSetDynamicStoreValue,
   MsgSetIncomingApproval,
+  MsgSetIsArchived,
+  MsgSetManager,
   MsgSetOutgoingApproval,
+  MsgSetStandards,
+  MsgSetValidBadgeIds,
   MsgTransferBadges,
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
@@ -32,9 +40,17 @@ import {
   populateUndefinedForMsgDeleteIncomingApproval,
   populateUndefinedForMsgDeleteOutgoingApproval,
   populateUndefinedForMsgPurgeApprovals,
+  populateUndefinedForMsgSetBadgeMetadata,
+  populateUndefinedForMsgSetCollectionApprovals,
+  populateUndefinedForMsgSetCollectionMetadata,
+  populateUndefinedForMsgSetCustomData,
   populateUndefinedForMsgSetDynamicStoreValue,
   populateUndefinedForMsgSetIncomingApproval,
+  populateUndefinedForMsgSetIsArchived,
+  populateUndefinedForMsgSetManager,
   populateUndefinedForMsgSetOutgoingApproval,
+  populateUndefinedForMsgSetStandards,
+  populateUndefinedForMsgSetValidBadgeIds,
   populateUndefinedForMsgTransferBadges,
   populateUndefinedForMsgUniversalUpdateCollection,
   populateUndefinedForMsgUpdateCollection,
@@ -308,6 +324,22 @@ export const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
       msg = createProtoMsg(populateUndefinedForMsgSetIncomingApproval(msgVal as MsgSetIncomingApproval));
     } else if (msgVal.getType().typeName === MsgSetOutgoingApproval.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgSetOutgoingApproval(msgVal as MsgSetOutgoingApproval));
+    } else if (msgVal.getType().typeName === MsgSetValidBadgeIds.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSetValidBadgeIds(msgVal as MsgSetValidBadgeIds));
+    } else if (msgVal.getType().typeName === MsgSetManager.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSetManager(msgVal as MsgSetManager));
+    } else if (msgVal.getType().typeName === MsgSetCollectionMetadata.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSetCollectionMetadata(msgVal as MsgSetCollectionMetadata));
+    } else if (msgVal.getType().typeName === MsgSetBadgeMetadata.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSetBadgeMetadata(msgVal as MsgSetBadgeMetadata));
+    } else if (msgVal.getType().typeName === MsgSetCustomData.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSetCustomData(msgVal as MsgSetCustomData));
+    } else if (msgVal.getType().typeName === MsgSetStandards.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSetStandards(msgVal as MsgSetStandards));
+    } else if (msgVal.getType().typeName === MsgSetCollectionApprovals.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSetCollectionApprovals(msgVal as MsgSetCollectionApprovals));
+    } else if (msgVal.getType().typeName === MsgSetIsArchived.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSetIsArchived(msgVal as MsgSetIsArchived));
     }
 
     //MsgCreateAddressLists and MsgDeleteCollection should be fine bc they are all primitive types and required

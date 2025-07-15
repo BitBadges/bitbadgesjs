@@ -9,7 +9,7 @@ import { Params } from "./params_pb.js";
 import { Balance, UintRange } from "./balances_pb.js";
 import { DenomUnit } from "./collections_pb.js";
 import { ApprovalIdentifierDetails, CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
-import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
+import { BadgeIdsActionPermission, CollectionApprovalPermission, CollectionPermissions, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UserPermissions } from "./permissions_pb.js";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
 import { Coin } from "../cosmos/base/v1beta1/coin_pb.js";
 import { AddressList } from "./address_lists_pb.js";
@@ -100,6 +100,48 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
    */
   purgeApprovalsMsg?: MsgPurgeApprovals;
 
+  /**
+   * Helper message types for UniversalUpdateCollection subsets
+   *
+   * @generated from field: badges.MsgSetValidBadgeIds setValidBadgeIdsMsg = 17;
+   */
+  setValidBadgeIdsMsg?: MsgSetValidBadgeIds;
+
+  /**
+   * @generated from field: badges.MsgSetManager setManagerMsg = 18;
+   */
+  setManagerMsg?: MsgSetManager;
+
+  /**
+   * @generated from field: badges.MsgSetCollectionMetadata setCollectionMetadataMsg = 19;
+   */
+  setCollectionMetadataMsg?: MsgSetCollectionMetadata;
+
+  /**
+   * @generated from field: badges.MsgSetBadgeMetadata setBadgeMetadataMsg = 20;
+   */
+  setBadgeMetadataMsg?: MsgSetBadgeMetadata;
+
+  /**
+   * @generated from field: badges.MsgSetCustomData setCustomDataMsg = 21;
+   */
+  setCustomDataMsg?: MsgSetCustomData;
+
+  /**
+   * @generated from field: badges.MsgSetStandards setStandardsMsg = 22;
+   */
+  setStandardsMsg?: MsgSetStandards;
+
+  /**
+   * @generated from field: badges.MsgSetCollectionApprovals setCollectionApprovalsMsg = 23;
+   */
+  setCollectionApprovalsMsg?: MsgSetCollectionApprovals;
+
+  /**
+   * @generated from field: badges.MsgSetIsArchived setIsArchivedMsg = 24;
+   */
+  setIsArchivedMsg?: MsgSetIsArchived;
+
   constructor(data?: PartialMessage<BadgeCustomMsgType>) {
     super();
     proto3.util.initPartial(data, this);
@@ -124,6 +166,14 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
     { no: 14, name: "setOutgoingApprovalMsg", kind: "message", T: MsgSetOutgoingApproval },
     { no: 15, name: "deleteOutgoingApprovalMsg", kind: "message", T: MsgDeleteOutgoingApproval },
     { no: 16, name: "purgeApprovalsMsg", kind: "message", T: MsgPurgeApprovals },
+    { no: 17, name: "setValidBadgeIdsMsg", kind: "message", T: MsgSetValidBadgeIds },
+    { no: 18, name: "setManagerMsg", kind: "message", T: MsgSetManager },
+    { no: 19, name: "setCollectionMetadataMsg", kind: "message", T: MsgSetCollectionMetadata },
+    { no: 20, name: "setBadgeMetadataMsg", kind: "message", T: MsgSetBadgeMetadata },
+    { no: 21, name: "setCustomDataMsg", kind: "message", T: MsgSetCustomData },
+    { no: 22, name: "setStandardsMsg", kind: "message", T: MsgSetStandards },
+    { no: 23, name: "setCollectionApprovalsMsg", kind: "message", T: MsgSetCollectionApprovals },
+    { no: 24, name: "setIsArchivedMsg", kind: "message", T: MsgSetIsArchived },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCustomMsgType {
@@ -2298,6 +2348,854 @@ export class MsgSetDynamicStoreValueResponse extends Message<MsgSetDynamicStoreV
 
   static equals(a: MsgSetDynamicStoreValueResponse | PlainMessage<MsgSetDynamicStoreValueResponse> | undefined, b: MsgSetDynamicStoreValueResponse | PlainMessage<MsgSetDynamicStoreValueResponse> | undefined): boolean {
     return proto3.util.equals(MsgSetDynamicStoreValueResponse, a, b);
+  }
+}
+
+/**
+ * MsgSetValidBadgeIds sets the validBadgeIds and canUpdateValidBadgeIds permission
+ *
+ * @generated from message badges.MsgSetValidBadgeIds
+ */
+export class MsgSetValidBadgeIds extends Message<MsgSetValidBadgeIds> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the collection.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * New badge IDs to add to this collection
+   *
+   * @generated from field: repeated badges.UintRange validBadgeIds = 3;
+   */
+  validBadgeIds: UintRange[] = [];
+
+  /**
+   * Permission to update valid badge IDs
+   *
+   * @generated from field: repeated badges.BadgeIdsActionPermission canUpdateValidBadgeIds = 4;
+   */
+  canUpdateValidBadgeIds: BadgeIdsActionPermission[] = [];
+
+  constructor(data?: PartialMessage<MsgSetValidBadgeIds>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetValidBadgeIds";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 4, name: "canUpdateValidBadgeIds", kind: "message", T: BadgeIdsActionPermission, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetValidBadgeIds {
+    return new MsgSetValidBadgeIds().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetValidBadgeIds {
+    return new MsgSetValidBadgeIds().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetValidBadgeIds {
+    return new MsgSetValidBadgeIds().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetValidBadgeIds | PlainMessage<MsgSetValidBadgeIds> | undefined, b: MsgSetValidBadgeIds | PlainMessage<MsgSetValidBadgeIds> | undefined): boolean {
+    return proto3.util.equals(MsgSetValidBadgeIds, a, b);
+  }
+}
+
+/**
+ * MsgSetValidBadgeIdsResponse is the response to MsgSetValidBadgeIds.
+ *
+ * @generated from message badges.MsgSetValidBadgeIdsResponse
+ */
+export class MsgSetValidBadgeIdsResponse extends Message<MsgSetValidBadgeIdsResponse> {
+  /**
+   * ID of the badge collection.
+   *
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  constructor(data?: PartialMessage<MsgSetValidBadgeIdsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetValidBadgeIdsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetValidBadgeIdsResponse {
+    return new MsgSetValidBadgeIdsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetValidBadgeIdsResponse {
+    return new MsgSetValidBadgeIdsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetValidBadgeIdsResponse {
+    return new MsgSetValidBadgeIdsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetValidBadgeIdsResponse | PlainMessage<MsgSetValidBadgeIdsResponse> | undefined, b: MsgSetValidBadgeIdsResponse | PlainMessage<MsgSetValidBadgeIdsResponse> | undefined): boolean {
+    return proto3.util.equals(MsgSetValidBadgeIdsResponse, a, b);
+  }
+}
+
+/**
+ * MsgSetManager sets the manager timeline and canUpdateManager permission
+ *
+ * @generated from message badges.MsgSetManager
+ */
+export class MsgSetManager extends Message<MsgSetManager> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the collection.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * New manager timeline to set.
+   *
+   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 3;
+   */
+  managerTimeline: ManagerTimeline[] = [];
+
+  /**
+   * Permission to update manager timeline
+   *
+   * @generated from field: repeated badges.TimedUpdatePermission canUpdateManager = 4;
+   */
+  canUpdateManager: TimedUpdatePermission[] = [];
+
+  constructor(data?: PartialMessage<MsgSetManager>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetManager";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
+    { no: 4, name: "canUpdateManager", kind: "message", T: TimedUpdatePermission, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetManager {
+    return new MsgSetManager().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetManager {
+    return new MsgSetManager().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetManager {
+    return new MsgSetManager().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetManager | PlainMessage<MsgSetManager> | undefined, b: MsgSetManager | PlainMessage<MsgSetManager> | undefined): boolean {
+    return proto3.util.equals(MsgSetManager, a, b);
+  }
+}
+
+/**
+ * MsgSetManagerResponse is the response to MsgSetManager.
+ *
+ * @generated from message badges.MsgSetManagerResponse
+ */
+export class MsgSetManagerResponse extends Message<MsgSetManagerResponse> {
+  /**
+   * ID of the badge collection.
+   *
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  constructor(data?: PartialMessage<MsgSetManagerResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetManagerResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetManagerResponse {
+    return new MsgSetManagerResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetManagerResponse {
+    return new MsgSetManagerResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetManagerResponse {
+    return new MsgSetManagerResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetManagerResponse | PlainMessage<MsgSetManagerResponse> | undefined, b: MsgSetManagerResponse | PlainMessage<MsgSetManagerResponse> | undefined): boolean {
+    return proto3.util.equals(MsgSetManagerResponse, a, b);
+  }
+}
+
+/**
+ * MsgSetCollectionMetadata sets the collection metadata timeline and canUpdateCollectionMetadata permission
+ *
+ * @generated from message badges.MsgSetCollectionMetadata
+ */
+export class MsgSetCollectionMetadata extends Message<MsgSetCollectionMetadata> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the collection.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * New collection metadata timeline to set.
+   *
+   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 3;
+   */
+  collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
+
+  /**
+   * Permission to update collection metadata timeline
+   *
+   * @generated from field: repeated badges.TimedUpdatePermission canUpdateCollectionMetadata = 4;
+   */
+  canUpdateCollectionMetadata: TimedUpdatePermission[] = [];
+
+  constructor(data?: PartialMessage<MsgSetCollectionMetadata>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetCollectionMetadata";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
+    { no: 4, name: "canUpdateCollectionMetadata", kind: "message", T: TimedUpdatePermission, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetCollectionMetadata {
+    return new MsgSetCollectionMetadata().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCollectionMetadata {
+    return new MsgSetCollectionMetadata().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCollectionMetadata {
+    return new MsgSetCollectionMetadata().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetCollectionMetadata | PlainMessage<MsgSetCollectionMetadata> | undefined, b: MsgSetCollectionMetadata | PlainMessage<MsgSetCollectionMetadata> | undefined): boolean {
+    return proto3.util.equals(MsgSetCollectionMetadata, a, b);
+  }
+}
+
+/**
+ * MsgSetCollectionMetadataResponse is the response to MsgSetCollectionMetadata.
+ *
+ * @generated from message badges.MsgSetCollectionMetadataResponse
+ */
+export class MsgSetCollectionMetadataResponse extends Message<MsgSetCollectionMetadataResponse> {
+  /**
+   * ID of the badge collection.
+   *
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  constructor(data?: PartialMessage<MsgSetCollectionMetadataResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetCollectionMetadataResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetCollectionMetadataResponse {
+    return new MsgSetCollectionMetadataResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCollectionMetadataResponse {
+    return new MsgSetCollectionMetadataResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCollectionMetadataResponse {
+    return new MsgSetCollectionMetadataResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetCollectionMetadataResponse | PlainMessage<MsgSetCollectionMetadataResponse> | undefined, b: MsgSetCollectionMetadataResponse | PlainMessage<MsgSetCollectionMetadataResponse> | undefined): boolean {
+    return proto3.util.equals(MsgSetCollectionMetadataResponse, a, b);
+  }
+}
+
+/**
+ * MsgSetBadgeMetadata sets the badge metadata timeline and canUpdateBadgeMetadata permission
+ *
+ * @generated from message badges.MsgSetBadgeMetadata
+ */
+export class MsgSetBadgeMetadata extends Message<MsgSetBadgeMetadata> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the collection.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * New badge metadata timeline to set.
+   *
+   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 3;
+   */
+  badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
+
+  /**
+   * Permission to update badge metadata timeline
+   *
+   * @generated from field: repeated badges.TimedUpdateWithBadgeIdsPermission canUpdateBadgeMetadata = 4;
+   */
+  canUpdateBadgeMetadata: TimedUpdateWithBadgeIdsPermission[] = [];
+
+  constructor(data?: PartialMessage<MsgSetBadgeMetadata>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetBadgeMetadata";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
+    { no: 4, name: "canUpdateBadgeMetadata", kind: "message", T: TimedUpdateWithBadgeIdsPermission, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetBadgeMetadata {
+    return new MsgSetBadgeMetadata().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetBadgeMetadata {
+    return new MsgSetBadgeMetadata().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetBadgeMetadata {
+    return new MsgSetBadgeMetadata().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetBadgeMetadata | PlainMessage<MsgSetBadgeMetadata> | undefined, b: MsgSetBadgeMetadata | PlainMessage<MsgSetBadgeMetadata> | undefined): boolean {
+    return proto3.util.equals(MsgSetBadgeMetadata, a, b);
+  }
+}
+
+/**
+ * MsgSetBadgeMetadataResponse is the response to MsgSetBadgeMetadata.
+ *
+ * @generated from message badges.MsgSetBadgeMetadataResponse
+ */
+export class MsgSetBadgeMetadataResponse extends Message<MsgSetBadgeMetadataResponse> {
+  /**
+   * ID of the badge collection.
+   *
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  constructor(data?: PartialMessage<MsgSetBadgeMetadataResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetBadgeMetadataResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetBadgeMetadataResponse {
+    return new MsgSetBadgeMetadataResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetBadgeMetadataResponse {
+    return new MsgSetBadgeMetadataResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetBadgeMetadataResponse {
+    return new MsgSetBadgeMetadataResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetBadgeMetadataResponse | PlainMessage<MsgSetBadgeMetadataResponse> | undefined, b: MsgSetBadgeMetadataResponse | PlainMessage<MsgSetBadgeMetadataResponse> | undefined): boolean {
+    return proto3.util.equals(MsgSetBadgeMetadataResponse, a, b);
+  }
+}
+
+/**
+ * MsgSetCustomData sets the custom data timeline and canUpdateCustomData permission
+ *
+ * @generated from message badges.MsgSetCustomData
+ */
+export class MsgSetCustomData extends Message<MsgSetCustomData> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the collection.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * New custom data timeline to set.
+   *
+   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 3;
+   */
+  customDataTimeline: CustomDataTimeline[] = [];
+
+  /**
+   * Permission to update custom data timeline
+   *
+   * @generated from field: repeated badges.TimedUpdatePermission canUpdateCustomData = 4;
+   */
+  canUpdateCustomData: TimedUpdatePermission[] = [];
+
+  constructor(data?: PartialMessage<MsgSetCustomData>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetCustomData";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
+    { no: 4, name: "canUpdateCustomData", kind: "message", T: TimedUpdatePermission, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetCustomData {
+    return new MsgSetCustomData().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCustomData {
+    return new MsgSetCustomData().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCustomData {
+    return new MsgSetCustomData().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetCustomData | PlainMessage<MsgSetCustomData> | undefined, b: MsgSetCustomData | PlainMessage<MsgSetCustomData> | undefined): boolean {
+    return proto3.util.equals(MsgSetCustomData, a, b);
+  }
+}
+
+/**
+ * MsgSetCustomDataResponse is the response to MsgSetCustomData.
+ *
+ * @generated from message badges.MsgSetCustomDataResponse
+ */
+export class MsgSetCustomDataResponse extends Message<MsgSetCustomDataResponse> {
+  /**
+   * ID of the badge collection.
+   *
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  constructor(data?: PartialMessage<MsgSetCustomDataResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetCustomDataResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetCustomDataResponse {
+    return new MsgSetCustomDataResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCustomDataResponse {
+    return new MsgSetCustomDataResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCustomDataResponse {
+    return new MsgSetCustomDataResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetCustomDataResponse | PlainMessage<MsgSetCustomDataResponse> | undefined, b: MsgSetCustomDataResponse | PlainMessage<MsgSetCustomDataResponse> | undefined): boolean {
+    return proto3.util.equals(MsgSetCustomDataResponse, a, b);
+  }
+}
+
+/**
+ * MsgSetStandards sets the standards timeline and canUpdateStandards permission
+ *
+ * @generated from message badges.MsgSetStandards
+ */
+export class MsgSetStandards extends Message<MsgSetStandards> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the collection.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * New standards timeline to set.
+   *
+   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 3;
+   */
+  standardsTimeline: StandardsTimeline[] = [];
+
+  /**
+   * Permission to update standards timeline
+   *
+   * @generated from field: repeated badges.TimedUpdatePermission canUpdateStandards = 4;
+   */
+  canUpdateStandards: TimedUpdatePermission[] = [];
+
+  constructor(data?: PartialMessage<MsgSetStandards>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetStandards";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
+    { no: 4, name: "canUpdateStandards", kind: "message", T: TimedUpdatePermission, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetStandards {
+    return new MsgSetStandards().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetStandards {
+    return new MsgSetStandards().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetStandards {
+    return new MsgSetStandards().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetStandards | PlainMessage<MsgSetStandards> | undefined, b: MsgSetStandards | PlainMessage<MsgSetStandards> | undefined): boolean {
+    return proto3.util.equals(MsgSetStandards, a, b);
+  }
+}
+
+/**
+ * MsgSetStandardsResponse is the response to MsgSetStandards.
+ *
+ * @generated from message badges.MsgSetStandardsResponse
+ */
+export class MsgSetStandardsResponse extends Message<MsgSetStandardsResponse> {
+  /**
+   * ID of the badge collection.
+   *
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  constructor(data?: PartialMessage<MsgSetStandardsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetStandardsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetStandardsResponse {
+    return new MsgSetStandardsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetStandardsResponse {
+    return new MsgSetStandardsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetStandardsResponse {
+    return new MsgSetStandardsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetStandardsResponse | PlainMessage<MsgSetStandardsResponse> | undefined, b: MsgSetStandardsResponse | PlainMessage<MsgSetStandardsResponse> | undefined): boolean {
+    return proto3.util.equals(MsgSetStandardsResponse, a, b);
+  }
+}
+
+/**
+ * MsgSetCollectionApprovals sets the collection approvals and canUpdateCollectionApprovals permission
+ *
+ * @generated from message badges.MsgSetCollectionApprovals
+ */
+export class MsgSetCollectionApprovals extends Message<MsgSetCollectionApprovals> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the collection.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * New collection approvals to set.
+   *
+   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 3;
+   */
+  collectionApprovals: CollectionApproval[] = [];
+
+  /**
+   * Permission to update collection approvals
+   *
+   * @generated from field: repeated badges.CollectionApprovalPermission canUpdateCollectionApprovals = 4;
+   */
+  canUpdateCollectionApprovals: CollectionApprovalPermission[] = [];
+
+  constructor(data?: PartialMessage<MsgSetCollectionApprovals>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetCollectionApprovals";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
+    { no: 4, name: "canUpdateCollectionApprovals", kind: "message", T: CollectionApprovalPermission, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetCollectionApprovals {
+    return new MsgSetCollectionApprovals().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCollectionApprovals {
+    return new MsgSetCollectionApprovals().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCollectionApprovals {
+    return new MsgSetCollectionApprovals().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetCollectionApprovals | PlainMessage<MsgSetCollectionApprovals> | undefined, b: MsgSetCollectionApprovals | PlainMessage<MsgSetCollectionApprovals> | undefined): boolean {
+    return proto3.util.equals(MsgSetCollectionApprovals, a, b);
+  }
+}
+
+/**
+ * MsgSetCollectionApprovalsResponse is the response to MsgSetCollectionApprovals.
+ *
+ * @generated from message badges.MsgSetCollectionApprovalsResponse
+ */
+export class MsgSetCollectionApprovalsResponse extends Message<MsgSetCollectionApprovalsResponse> {
+  /**
+   * ID of the badge collection.
+   *
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  constructor(data?: PartialMessage<MsgSetCollectionApprovalsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetCollectionApprovalsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetCollectionApprovalsResponse {
+    return new MsgSetCollectionApprovalsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCollectionApprovalsResponse {
+    return new MsgSetCollectionApprovalsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCollectionApprovalsResponse {
+    return new MsgSetCollectionApprovalsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetCollectionApprovalsResponse | PlainMessage<MsgSetCollectionApprovalsResponse> | undefined, b: MsgSetCollectionApprovalsResponse | PlainMessage<MsgSetCollectionApprovalsResponse> | undefined): boolean {
+    return proto3.util.equals(MsgSetCollectionApprovalsResponse, a, b);
+  }
+}
+
+/**
+ * MsgSetIsArchived sets the isArchived timeline and canArchiveCollection permission
+ *
+ * @generated from message badges.MsgSetIsArchived
+ */
+export class MsgSetIsArchived extends Message<MsgSetIsArchived> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the collection.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * New isArchived timeline to set.
+   *
+   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 3;
+   */
+  isArchivedTimeline: IsArchivedTimeline[] = [];
+
+  /**
+   * Permission to archive collection
+   *
+   * @generated from field: repeated badges.TimedUpdatePermission canArchiveCollection = 4;
+   */
+  canArchiveCollection: TimedUpdatePermission[] = [];
+
+  constructor(data?: PartialMessage<MsgSetIsArchived>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetIsArchived";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 4, name: "canArchiveCollection", kind: "message", T: TimedUpdatePermission, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetIsArchived {
+    return new MsgSetIsArchived().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetIsArchived {
+    return new MsgSetIsArchived().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetIsArchived {
+    return new MsgSetIsArchived().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetIsArchived | PlainMessage<MsgSetIsArchived> | undefined, b: MsgSetIsArchived | PlainMessage<MsgSetIsArchived> | undefined): boolean {
+    return proto3.util.equals(MsgSetIsArchived, a, b);
+  }
+}
+
+/**
+ * MsgSetIsArchivedResponse is the response to MsgSetIsArchived.
+ *
+ * @generated from message badges.MsgSetIsArchivedResponse
+ */
+export class MsgSetIsArchivedResponse extends Message<MsgSetIsArchivedResponse> {
+  /**
+   * ID of the badge collection.
+   *
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  constructor(data?: PartialMessage<MsgSetIsArchivedResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetIsArchivedResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetIsArchivedResponse {
+    return new MsgSetIsArchivedResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetIsArchivedResponse {
+    return new MsgSetIsArchivedResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetIsArchivedResponse {
+    return new MsgSetIsArchivedResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetIsArchivedResponse | PlainMessage<MsgSetIsArchivedResponse> | undefined, b: MsgSetIsArchivedResponse | PlainMessage<MsgSetIsArchivedResponse> | undefined): boolean {
+    return proto3.util.equals(MsgSetIsArchivedResponse, a, b);
   }
 }
 

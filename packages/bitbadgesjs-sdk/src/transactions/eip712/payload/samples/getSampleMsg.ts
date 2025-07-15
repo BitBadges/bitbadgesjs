@@ -80,9 +80,17 @@ import {
   MsgDeleteIncomingApproval,
   MsgDeleteOutgoingApproval,
   MsgPurgeApprovals,
+  MsgSetBadgeMetadata,
+  MsgSetCollectionApprovals,
+  MsgSetCollectionMetadata,
+  MsgSetCustomData,
   MsgSetDynamicStoreValue,
   MsgSetIncomingApproval,
+  MsgSetIsArchived,
+  MsgSetManager,
   MsgSetOutgoingApproval,
+  MsgSetStandards,
+  MsgSetValidBadgeIds,
   MsgUpdateDynamicStore
 } from '@/proto/badges/tx_pb.js';
 
@@ -622,6 +630,86 @@ export function populateUndefinedForMsgSetOutgoingApproval(msg: MsgSetOutgoingAp
   return msg;
 }
 
+export function populateUndefinedForMsgSetValidBadgeIds(msg: MsgSetValidBadgeIds) {
+  // Merge with universal params and populate
+  const mergedMsg = deepCopyPrimitives({
+    ...universalParams,
+    ...msg
+  });
+  const populated = populateUndefinedForMsgUniversalUpdateCollection(mergedMsg as any);
+  return new MsgSetValidBadgeIds(extractSubsetFields(populated, msg));
+}
+
+export function populateUndefinedForMsgSetManager(msg: MsgSetManager) {
+  // Merge with universal params and populate
+  const mergedMsg = deepCopyPrimitives({
+    ...universalParams,
+    ...msg
+  });
+  const populated = populateUndefinedForMsgUniversalUpdateCollection(mergedMsg as any);
+  return new MsgSetManager(extractSubsetFields(populated, msg));
+}
+
+export function populateUndefinedForMsgSetCollectionMetadata(msg: MsgSetCollectionMetadata) {
+  // Merge with universal params and populate
+  const mergedMsg = deepCopyPrimitives({
+    ...universalParams,
+    ...msg
+  });
+  const populated = populateUndefinedForMsgUniversalUpdateCollection(mergedMsg as any);
+  return new MsgSetCollectionMetadata(extractSubsetFields(populated, msg));
+}
+
+export function populateUndefinedForMsgSetBadgeMetadata(msg: MsgSetBadgeMetadata) {
+  // Merge with universal params and populate
+  const mergedMsg = deepCopyPrimitives({
+    ...universalParams,
+    ...msg
+  });
+  const populated = populateUndefinedForMsgUniversalUpdateCollection(mergedMsg as any);
+  return new MsgSetBadgeMetadata(extractSubsetFields(populated, msg));
+}
+
+export function populateUndefinedForMsgSetCustomData(msg: MsgSetCustomData) {
+  // Merge with universal params and populate
+  const mergedMsg = deepCopyPrimitives({
+    ...universalParams,
+    ...msg
+  });
+  const populated = populateUndefinedForMsgUniversalUpdateCollection(mergedMsg as any);
+  return new MsgSetCustomData(extractSubsetFields(populated, msg));
+}
+
+export function populateUndefinedForMsgSetStandards(msg: MsgSetStandards) {
+  // Merge with universal params and populate
+  const mergedMsg = deepCopyPrimitives({
+    ...universalParams,
+    ...msg
+  });
+  const populated = populateUndefinedForMsgUniversalUpdateCollection(mergedMsg as any);
+  return new MsgSetStandards(extractSubsetFields(populated, msg));
+}
+
+export function populateUndefinedForMsgSetCollectionApprovals(msg: MsgSetCollectionApprovals) {
+  // Merge with universal params and populate
+  const mergedMsg = deepCopyPrimitives({
+    ...universalParams,
+    ...msg
+  });
+  const populated = populateUndefinedForMsgUniversalUpdateCollection(mergedMsg as any);
+  return new MsgSetCollectionApprovals(extractSubsetFields(populated, msg));
+}
+
+export function populateUndefinedForMsgSetIsArchived(msg: MsgSetIsArchived) {
+  // Merge with universal params and populate
+  const mergedMsg = deepCopyPrimitives({
+    ...universalParams,
+    ...msg
+  });
+  const populated = populateUndefinedForMsgUniversalUpdateCollection(mergedMsg as any);
+  return new MsgSetIsArchived(extractSubsetFields(populated, msg));
+}
+
 const universalParams = {
   defaultBalances: new UserBalanceStore({
     balances: [
@@ -1126,7 +1214,96 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           ...deepCopyPrimitives(universalParams)
         }).toJson({ emitDefaultValues: true })
       };
+    case 'badges/SetValidBadgeIds':
+      return {
+        type: msgType,
+        value: new MsgSetValidBadgeIds({
+          creator: '',
+          collectionId: '0',
+          validBadgeIds: [new UintRange()],
+          canUpdateValidBadgeIds: [new BadgeIdsActionPermission()]
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/SetManager':
+      return {
+        type: msgType,
+        value: new MsgSetManager({
+          creator: '',
+          collectionId: '0',
+          managerTimeline: [new ManagerTimeline()],
+          canUpdateManager: [new TimedUpdatePermission()]
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/SetCollectionMetadata':
+      return {
+        type: msgType,
+        value: new MsgSetCollectionMetadata({
+          creator: '',
+          collectionId: '0',
+          collectionMetadataTimeline: [new CollectionMetadataTimeline()],
+          canUpdateCollectionMetadata: [new TimedUpdatePermission()]
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/SetBadgeMetadata':
+      return {
+        type: msgType,
+        value: new MsgSetBadgeMetadata({
+          creator: '',
+          collectionId: '0',
+          badgeMetadataTimeline: [new BadgeMetadataTimeline()],
+          canUpdateBadgeMetadata: [new TimedUpdateWithBadgeIdsPermission()]
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/SetCustomData':
+      return {
+        type: msgType,
+        value: new MsgSetCustomData({
+          creator: '',
+          collectionId: '0',
+          customDataTimeline: [new CustomDataTimeline()],
+          canUpdateCustomData: [new TimedUpdatePermission()]
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/SetStandards':
+      return {
+        type: msgType,
+        value: new MsgSetStandards({
+          creator: '',
+          collectionId: '0',
+          standardsTimeline: [new StandardsTimeline()],
+          canUpdateStandards: [new TimedUpdatePermission()]
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/SetCollectionApprovals':
+      return {
+        type: msgType,
+        value: new MsgSetCollectionApprovals({
+          creator: '',
+          collectionId: '0',
+          collectionApprovals: [new CollectionApproval()],
+          canUpdateCollectionApprovals: [new CollectionApprovalPermission()]
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/SetIsArchived':
+      return {
+        type: msgType,
+        value: new MsgSetIsArchived({
+          creator: '',
+          collectionId: '0',
+          isArchivedTimeline: [new IsArchivedTimeline()],
+          canArchiveCollection: [new TimedUpdatePermission()]
+        }).toJson({ emitDefaultValues: true })
+      };
     default:
       return currMsg;
   }
+}
+
+// Helper to extract only the fields from the original msg (subset)
+function extractSubsetFields<T extends object>(populated: any, original: T): T {
+  const result: any = {};
+  for (const key of Object.keys(original)) {
+    result[key] = populated[key];
+  }
+  return result as T;
 }

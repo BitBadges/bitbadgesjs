@@ -17,7 +17,14 @@ import type {
   iTransfer,
   iUintRange
 } from '../../../../interfaces/badges/core.js';
-import type { iCollectionPermissions, iUserPermissions } from '../../../../interfaces/badges/permissions.js';
+import type {
+  iBadgeIdsActionPermission,
+  iCollectionApprovalPermission,
+  iCollectionPermissions,
+  iTimedUpdatePermission,
+  iTimedUpdateWithBadgeIdsPermission,
+  iUserPermissions
+} from '../../../../interfaces/badges/permissions.js';
 import type { iUserBalanceStore } from '../../../../interfaces/badges/userBalances.js';
 
 /**
@@ -275,4 +282,116 @@ export interface iMsgPurgeApprovals<T extends NumberType> {
   purgeCounterpartyApprovals: boolean;
   /** Specific approvals to purge. If empty, purges all applicable approvals based on other flags. */
   approvalsToPurge: iApprovalIdentifierDetails<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgSetValidBadgeIds<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the collection. */
+  collectionId: T;
+  /** New badge IDs to add to this collection. */
+  validBadgeIds: iUintRange<T>[];
+  /** Permission to update valid badge IDs. */
+  canUpdateValidBadgeIds: iBadgeIdsActionPermission<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgSetManager<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the collection. */
+  collectionId: T;
+  /** New manager timeline to set. */
+  managerTimeline: iManagerTimeline<T>[];
+  /** Permission to update manager timeline. */
+  canUpdateManager: iTimedUpdatePermission<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgSetCollectionMetadata<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the collection. */
+  collectionId: T;
+  /** New collection metadata timeline to set. */
+  collectionMetadataTimeline: iCollectionMetadataTimeline<T>[];
+  /** Permission to update collection metadata timeline. */
+  canUpdateCollectionMetadata: iTimedUpdatePermission<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgSetBadgeMetadata<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the collection. */
+  collectionId: T;
+  /** New badge metadata timeline to set. */
+  badgeMetadataTimeline: iBadgeMetadataTimeline<T>[];
+  /** Permission to update badge metadata timeline. */
+  canUpdateBadgeMetadata: iTimedUpdateWithBadgeIdsPermission<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgSetCustomData<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the collection. */
+  collectionId: T;
+  /** New custom data timeline to set. */
+  customDataTimeline: iCustomDataTimeline<T>[];
+  /** Permission to update custom data timeline. */
+  canUpdateCustomData: iTimedUpdatePermission<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgSetStandards<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the collection. */
+  collectionId: T;
+  /** New standards timeline to set. */
+  standardsTimeline: iStandardsTimeline<T>[];
+  /** Permission to update standards timeline. */
+  canUpdateStandards: iTimedUpdatePermission<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgSetCollectionApprovals<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the collection. */
+  collectionId: T;
+  /** New collection approvals to set. */
+  collectionApprovals: iCollectionApproval<T>[];
+  /** Permission to update collection approvals. */
+  canUpdateCollectionApprovals: iCollectionApprovalPermission<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgSetIsArchived<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the collection. */
+  collectionId: T;
+  /** New isArchived timeline to set. */
+  isArchivedTimeline: iIsArchivedTimeline<T>[];
+  /** Permission to archive collection. */
+  canArchiveCollection: iTimedUpdatePermission<T>[];
 }
