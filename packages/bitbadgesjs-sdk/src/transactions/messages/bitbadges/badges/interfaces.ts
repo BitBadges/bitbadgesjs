@@ -5,6 +5,7 @@ import type { iCollectionApproval, iUserIncomingApproval, iUserOutgoingApproval 
 import type {
   CollectionId,
   iAddressList,
+  iApprovalIdentifierDetails,
   iBadgeMetadataTimeline,
   iCollectionMetadataTimeline,
   iCosmosCoinWrapperPathAddObject,
@@ -208,4 +209,70 @@ export interface iMsgSetDynamicStoreValue<T extends NumberType> {
   address: BitBadgesAddress;
   /** The boolean value to set. */
   value: boolean;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgSetIncomingApproval<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the collection. */
+  collectionId: CollectionId;
+  /** The incoming approval to set. */
+  approval: iUserIncomingApproval<T>;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgDeleteIncomingApproval {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the collection. */
+  collectionId: CollectionId;
+  /** The ID of the approval to delete. */
+  approvalId: string;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgSetOutgoingApproval<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the collection. */
+  collectionId: CollectionId;
+  /** The outgoing approval to set. */
+  approval: iUserOutgoingApproval<T>;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgDeleteOutgoingApproval {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the collection. */
+  collectionId: CollectionId;
+  /** The ID of the approval to delete. */
+  approvalId: string;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgPurgeApprovals<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the collection. */
+  collectionId: CollectionId;
+  /** Whether to purge expired approvals (approvals with no future valid transfer times). */
+  purgeExpired: boolean;
+  /** Address of the user whose approvals to purge. If empty, defaults to creator. */
+  approverAddress: BitBadgesAddress;
+  /** Whether to purge counterparty approvals (approvals where the creator is the only initiator). */
+  purgeCounterpartyApprovals: boolean;
+  /** Specific approvals to purge. If empty, purges all applicable approvals based on other flags. */
+  approvalsToPurge: iApprovalIdentifierDetails<T>[];
 }

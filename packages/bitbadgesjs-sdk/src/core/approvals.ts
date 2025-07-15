@@ -941,11 +941,15 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
 export class AutoDeletionOptions<T extends NumberType> extends BaseNumberTypeClass<AutoDeletionOptions<T>> implements iAutoDeletionOptions {
   afterOneUse: boolean;
   afterOverallMaxNumTransfers: boolean;
+  allowCounterpartyPurge: boolean;
+  allowPurgeIfExpired: boolean;
 
   constructor(msg: iAutoDeletionOptions) {
     super();
     this.afterOneUse = msg.afterOneUse;
     this.afterOverallMaxNumTransfers = msg.afterOverallMaxNumTransfers;
+    this.allowCounterpartyPurge = msg.allowCounterpartyPurge;
+    this.allowPurgeIfExpired = msg.allowPurgeIfExpired;
   }
 
   getNumberFieldNames(): string[] {
@@ -979,7 +983,9 @@ export class AutoDeletionOptions<T extends NumberType> extends BaseNumberTypeCla
   static fromProto<U extends NumberType>(item: badges.AutoDeletionOptions, convertFunction: (item: NumberType) => U): AutoDeletionOptions<U> {
     return new AutoDeletionOptions<U>({
       afterOneUse: item.afterOneUse,
-      afterOverallMaxNumTransfers: item.afterOverallMaxNumTransfers
+      afterOverallMaxNumTransfers: item.afterOverallMaxNumTransfers,
+      allowCounterpartyPurge: item.allowCounterpartyPurge,
+      allowPurgeIfExpired: item.allowPurgeIfExpired
     });
   }
 }

@@ -794,6 +794,20 @@ export class AutoDeletionOptions extends Message<AutoDeletionOptions> {
    */
   afterOverallMaxNumTransfers = false;
 
+  /**
+   * Allow counterparty to purge this approval if they are the only initiator
+   *
+   * @generated from field: bool allowCounterpartyPurge = 3;
+   */
+  allowCounterpartyPurge = false;
+
+  /**
+   * Allow others to call PurgeApprovals on behalf of this approval owner
+   *
+   * @generated from field: bool allowPurgeIfExpired = 4;
+   */
+  allowPurgeIfExpired = false;
+
   constructor(data?: PartialMessage<AutoDeletionOptions>) {
     super();
     proto3.util.initPartial(data, this);
@@ -804,6 +818,8 @@ export class AutoDeletionOptions extends Message<AutoDeletionOptions> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "afterOneUse", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 2, name: "afterOverallMaxNumTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 3, name: "allowCounterpartyPurge", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "allowPurgeIfExpired", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AutoDeletionOptions {

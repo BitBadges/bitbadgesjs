@@ -9,6 +9,7 @@ import { Params } from "./params_pb.js";
 import { BadgeCollection } from "./collections_pb.js";
 import { ApprovalTracker, UserBalanceStore } from "./transfers_pb.js";
 import { AddressList } from "./address_lists_pb.js";
+import { DynamicStore, DynamicStoreValue } from "./dynamic_stores_pb.js";
 
 /**
  * GenesisState defines the badges module's genesis state.
@@ -77,11 +78,26 @@ export class GenesisState extends Message<GenesisState> {
   approvalTrackerVersions: string[] = [];
 
   /**
-   * this line is used by starport scaffolding # genesis/proto/state
-   *
    * @generated from field: repeated string approvalTrackerVersionsStoreKeys = 13;
    */
   approvalTrackerVersionsStoreKeys: string[] = [];
+
+  /**
+   * @generated from field: repeated badges.DynamicStore dynamicStores = 14;
+   */
+  dynamicStores: DynamicStore[] = [];
+
+  /**
+   * @generated from field: string nextDynamicStoreId = 15;
+   */
+  nextDynamicStoreId = "";
+
+  /**
+   * this line is used by starport scaffolding # genesis/proto/state
+   *
+   * @generated from field: repeated badges.DynamicStoreValue dynamicStoreValues = 16;
+   */
+  dynamicStoreValues: DynamicStoreValue[] = [];
 
   constructor(data?: PartialMessage<GenesisState>) {
     super();
@@ -104,6 +120,9 @@ export class GenesisState extends Message<GenesisState> {
     { no: 11, name: "approvalTrackerStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
     { no: 12, name: "approvalTrackerVersions", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
     { no: 13, name: "approvalTrackerVersionsStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 14, name: "dynamicStores", kind: "message", T: DynamicStore, repeated: true },
+    { no: 15, name: "nextDynamicStoreId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 16, name: "dynamicStoreValues", kind: "message", T: DynamicStoreValue, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisState {

@@ -74,7 +74,17 @@ import {
 } from '@/proto/badges/index.js';
 import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
-import { MsgCreateDynamicStore, MsgDeleteDynamicStore, MsgSetDynamicStoreValue, MsgUpdateDynamicStore } from '@/proto/badges/tx_pb.js';
+import {
+  MsgCreateDynamicStore,
+  MsgDeleteDynamicStore,
+  MsgDeleteIncomingApproval,
+  MsgDeleteOutgoingApproval,
+  MsgPurgeApprovals,
+  MsgSetDynamicStoreValue,
+  MsgSetIncomingApproval,
+  MsgSetOutgoingApproval,
+  MsgUpdateDynamicStore
+} from '@/proto/badges/tx_pb.js';
 
 const approvalCriteria = new OutgoingApprovalCriteria({
   coinTransfers: [
@@ -153,7 +163,12 @@ const approvalCriteria = new OutgoingApprovalCriteria({
       intervalLength: '0'
     })
   }),
-  autoDeletionOptions: new AutoDeletionOptions({}),
+  autoDeletionOptions: new AutoDeletionOptions({
+    afterOneUse: false,
+    afterOverallMaxNumTransfers: false,
+    allowCounterpartyPurge: false,
+    allowPurgeIfExpired: false
+  }),
   dynamicStoreChallenges: [
     new DynamicStoreChallenge({
       storeId: '0'
@@ -196,7 +211,12 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
       intervalLength: '0'
     })
   }),
-  autoDeletionOptions: new AutoDeletionOptions({})
+  autoDeletionOptions: new AutoDeletionOptions({
+    afterOneUse: false,
+    afterOverallMaxNumTransfers: false,
+    allowCounterpartyPurge: false,
+    allowPurgeIfExpired: false
+  })
 }).toJson({ emitDefaultValues: true }) as object;
 
 function populateMerkleChallenges(merkleChallenges?: MerkleChallenge[]) {
@@ -317,7 +337,9 @@ function populateAutoDeletionOptions(autoDeletionOptions?: AutoDeletionOptions) 
   if (!autoDeletionOptions) {
     return new AutoDeletionOptions({
       afterOneUse: false,
-      afterOverallMaxNumTransfers: false
+      afterOverallMaxNumTransfers: false,
+      allowCounterpartyPurge: false,
+      allowPurgeIfExpired: false
     });
   }
 
@@ -523,6 +545,79 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
       metadata.offChainBalancesMetadata = new OffChainBalancesMetadata();
     }
   }
+
+  return msg;
+}
+
+export function populateUndefinedForMsgDeleteIncomingApproval(msg: MsgDeleteIncomingApproval) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgDeleteOutgoingApproval(msg: MsgDeleteOutgoingApproval) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+function populateApprovalsToPurge(approvalsToPurge?: ApprovalIdentifierDetails[]) {
+  return (
+    approvalsToPurge?.map((approval) => {
+      if (!approval.approvalId) {
+        approval.approvalId = '';
+      }
+      if (!approval.approvalLevel) {
+        approval.approvalLevel = '';
+      }
+      if (!approval.approverAddress) {
+        approval.approverAddress = '';
+      }
+      if (!approval.version) {
+        approval.version = '0';
+      }
+      return approval;
+    }) || []
+  );
+}
+
+export function populateUndefinedForMsgPurgeApprovals(msg: MsgPurgeApprovals) {
+  msg.approvalsToPurge = populateApprovalsToPurge(msg.approvalsToPurge);
+  return msg;
+}
+
+export function populateUndefinedForMsgSetIncomingApproval(msg: MsgSetIncomingApproval) {
+  if (!msg.approval) {
+    throw new Error('Approval is undefined');
+  }
+
+  if (!msg.approval.approvalCriteria) {
+    msg.approval.approvalCriteria = new IncomingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
+  }
+  msg.approval.approvalCriteria.merkleChallenges = populateMerkleChallenges(msg.approval.approvalCriteria.merkleChallenges);
+  msg.approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(msg.approval.approvalCriteria.predeterminedBalances);
+  msg.approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(msg.approval.approvalCriteria.approvalAmounts);
+  msg.approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(msg.approval.approvalCriteria.maxNumTransfers);
+  msg.approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(msg.approval.approvalCriteria.autoDeletionOptions);
+  msg.approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(msg.approval.approvalCriteria.mustOwnBadges);
+  msg.approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(msg.approval.approvalCriteria.dynamicStoreChallenges);
+
+  return msg;
+}
+
+export function populateUndefinedForMsgSetOutgoingApproval(msg: MsgSetOutgoingApproval) {
+  if (!msg.approval) {
+    throw new Error('Approval is undefined');
+  }
+
+  if (!msg.approval.approvalCriteria) {
+    msg.approval.approvalCriteria = new OutgoingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
+  }
+  msg.approval.approvalCriteria.merkleChallenges = populateMerkleChallenges(msg.approval.approvalCriteria.merkleChallenges);
+  msg.approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(msg.approval.approvalCriteria.predeterminedBalances);
+  msg.approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(msg.approval.approvalCriteria.approvalAmounts);
+  msg.approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(msg.approval.approvalCriteria.maxNumTransfers);
+  msg.approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(msg.approval.approvalCriteria.autoDeletionOptions);
+  msg.approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(msg.approval.approvalCriteria.mustOwnBadges);
+  msg.approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(msg.approval.approvalCriteria.dynamicStoreChallenges);
 
   return msg;
 }
@@ -793,6 +888,24 @@ export function getSampleMsg(msgType: string, currMsg: any) {
       };
     case 'badges/DeleteCollection':
       return { type: msgType, value: new MsgDeleteCollection().toJson({ emitDefaultValues: true }) };
+    case 'badges/DeleteIncomingApproval':
+      return {
+        type: msgType,
+        value: new MsgDeleteIncomingApproval({
+          creator: '',
+          collectionId: '0',
+          approvalId: ''
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/DeleteOutgoingApproval':
+      return {
+        type: msgType,
+        value: new MsgDeleteOutgoingApproval({
+          creator: '',
+          collectionId: '0',
+          approvalId: ''
+        }).toJson({ emitDefaultValues: true })
+      };
     case 'badges/CreateAddressLists':
       return {
         type: msgType,
@@ -824,6 +937,65 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           address: '',
           value: false
         }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/SetIncomingApproval':
+      return {
+        type: msgType,
+        value: populateUndefinedForMsgSetIncomingApproval(
+          new MsgSetIncomingApproval({
+            creator: '',
+            collectionId: '0',
+            approval: new UserIncomingApproval({
+              transferTimes: [new UintRange()],
+              badgeIds: [new UintRange()],
+              ownershipTimes: [new UintRange()],
+              approvalCriteria: new IncomingApprovalCriteria({
+                ...approvalCriteria
+              }),
+              version: '0'
+            })
+          })
+        ).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/SetOutgoingApproval':
+      return {
+        type: msgType,
+        value: populateUndefinedForMsgSetOutgoingApproval(
+          new MsgSetOutgoingApproval({
+            creator: '',
+            collectionId: '0',
+            approval: new UserOutgoingApproval({
+              transferTimes: [new UintRange()],
+              badgeIds: [new UintRange()],
+              ownershipTimes: [new UintRange()],
+              approvalCriteria: new OutgoingApprovalCriteria({
+                ...approvalCriteria
+              }),
+              version: '0'
+            })
+          })
+        ).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/PurgeApprovals':
+      return {
+        type: msgType,
+        value: populateUndefinedForMsgPurgeApprovals(
+          new MsgPurgeApprovals({
+            creator: '',
+            collectionId: '0',
+            purgeExpired: false,
+            approverAddress: '',
+            purgeCounterpartyApprovals: false,
+            approvalsToPurge: [
+              new ApprovalIdentifierDetails({
+                approvalId: '',
+                approvalLevel: '',
+                approverAddress: '',
+                version: '0'
+              })
+            ]
+          })
+        ).toJson({ emitDefaultValues: true })
       };
     case 'badges/UpdateDynamicStore':
       return {

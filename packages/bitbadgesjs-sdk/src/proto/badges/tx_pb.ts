@@ -8,7 +8,7 @@ import { Message, proto3 } from "@bufbuild/protobuf";
 import { Params } from "./params_pb.js";
 import { Balance, UintRange } from "./balances_pb.js";
 import { DenomUnit } from "./collections_pb.js";
-import { CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
+import { ApprovalIdentifierDetails, CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
 import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
 import { Coin } from "../cosmos/base/v1beta1/coin_pb.js";
@@ -75,6 +75,31 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
    */
   setDynamicStoreValueMsg?: MsgSetDynamicStoreValue;
 
+  /**
+   * @generated from field: badges.MsgSetIncomingApproval setIncomingApprovalMsg = 12;
+   */
+  setIncomingApprovalMsg?: MsgSetIncomingApproval;
+
+  /**
+   * @generated from field: badges.MsgDeleteIncomingApproval deleteIncomingApprovalMsg = 13;
+   */
+  deleteIncomingApprovalMsg?: MsgDeleteIncomingApproval;
+
+  /**
+   * @generated from field: badges.MsgSetOutgoingApproval setOutgoingApprovalMsg = 14;
+   */
+  setOutgoingApprovalMsg?: MsgSetOutgoingApproval;
+
+  /**
+   * @generated from field: badges.MsgDeleteOutgoingApproval deleteOutgoingApprovalMsg = 15;
+   */
+  deleteOutgoingApprovalMsg?: MsgDeleteOutgoingApproval;
+
+  /**
+   * @generated from field: badges.MsgPurgeApprovals purgeApprovalsMsg = 16;
+   */
+  purgeApprovalsMsg?: MsgPurgeApprovals;
+
   constructor(data?: PartialMessage<BadgeCustomMsgType>) {
     super();
     proto3.util.initPartial(data, this);
@@ -94,6 +119,11 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
     { no: 9, name: "updateDynamicStoreMsg", kind: "message", T: MsgUpdateDynamicStore },
     { no: 10, name: "deleteDynamicStoreMsg", kind: "message", T: MsgDeleteDynamicStore },
     { no: 11, name: "setDynamicStoreValueMsg", kind: "message", T: MsgSetDynamicStoreValue },
+    { no: 12, name: "setIncomingApprovalMsg", kind: "message", T: MsgSetIncomingApproval },
+    { no: 13, name: "deleteIncomingApprovalMsg", kind: "message", T: MsgDeleteIncomingApproval },
+    { no: 14, name: "setOutgoingApprovalMsg", kind: "message", T: MsgSetOutgoingApproval },
+    { no: 15, name: "deleteOutgoingApprovalMsg", kind: "message", T: MsgDeleteOutgoingApproval },
+    { no: 16, name: "purgeApprovalsMsg", kind: "message", T: MsgPurgeApprovals },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCustomMsgType {
@@ -1426,6 +1456,488 @@ export class MsgUpdateUserApprovalsResponse extends Message<MsgUpdateUserApprova
 
   static equals(a: MsgUpdateUserApprovalsResponse | PlainMessage<MsgUpdateUserApprovalsResponse> | undefined, b: MsgUpdateUserApprovalsResponse | PlainMessage<MsgUpdateUserApprovalsResponse> | undefined): boolean {
     return proto3.util.equals(MsgUpdateUserApprovalsResponse, a, b);
+  }
+}
+
+/**
+ * MsgSetIncomingApproval is a helper message to set a single incoming approval.
+ *
+ * @generated from message badges.MsgSetIncomingApproval
+ */
+export class MsgSetIncomingApproval extends Message<MsgSetIncomingApproval> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the collection.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * The incoming approval to set.
+   *
+   * @generated from field: badges.UserIncomingApproval approval = 3;
+   */
+  approval?: UserIncomingApproval;
+
+  constructor(data?: PartialMessage<MsgSetIncomingApproval>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetIncomingApproval";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "approval", kind: "message", T: UserIncomingApproval },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetIncomingApproval {
+    return new MsgSetIncomingApproval().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetIncomingApproval {
+    return new MsgSetIncomingApproval().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetIncomingApproval {
+    return new MsgSetIncomingApproval().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetIncomingApproval | PlainMessage<MsgSetIncomingApproval> | undefined, b: MsgSetIncomingApproval | PlainMessage<MsgSetIncomingApproval> | undefined): boolean {
+    return proto3.util.equals(MsgSetIncomingApproval, a, b);
+  }
+}
+
+/**
+ * MsgSetIncomingApprovalResponse is the response to MsgSetIncomingApproval.
+ *
+ * @generated from message badges.MsgSetIncomingApprovalResponse
+ */
+export class MsgSetIncomingApprovalResponse extends Message<MsgSetIncomingApprovalResponse> {
+  constructor(data?: PartialMessage<MsgSetIncomingApprovalResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetIncomingApprovalResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetIncomingApprovalResponse {
+    return new MsgSetIncomingApprovalResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetIncomingApprovalResponse {
+    return new MsgSetIncomingApprovalResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetIncomingApprovalResponse {
+    return new MsgSetIncomingApprovalResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetIncomingApprovalResponse | PlainMessage<MsgSetIncomingApprovalResponse> | undefined, b: MsgSetIncomingApprovalResponse | PlainMessage<MsgSetIncomingApprovalResponse> | undefined): boolean {
+    return proto3.util.equals(MsgSetIncomingApprovalResponse, a, b);
+  }
+}
+
+/**
+ * MsgDeleteIncomingApproval is a helper message to delete a single incoming approval.
+ *
+ * @generated from message badges.MsgDeleteIncomingApproval
+ */
+export class MsgDeleteIncomingApproval extends Message<MsgDeleteIncomingApproval> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the collection.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * The ID of the approval to delete.
+   *
+   * @generated from field: string approvalId = 3;
+   */
+  approvalId = "";
+
+  constructor(data?: PartialMessage<MsgDeleteIncomingApproval>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgDeleteIncomingApproval";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDeleteIncomingApproval {
+    return new MsgDeleteIncomingApproval().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDeleteIncomingApproval {
+    return new MsgDeleteIncomingApproval().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDeleteIncomingApproval {
+    return new MsgDeleteIncomingApproval().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgDeleteIncomingApproval | PlainMessage<MsgDeleteIncomingApproval> | undefined, b: MsgDeleteIncomingApproval | PlainMessage<MsgDeleteIncomingApproval> | undefined): boolean {
+    return proto3.util.equals(MsgDeleteIncomingApproval, a, b);
+  }
+}
+
+/**
+ * MsgDeleteIncomingApprovalResponse is the response to MsgDeleteIncomingApproval.
+ *
+ * @generated from message badges.MsgDeleteIncomingApprovalResponse
+ */
+export class MsgDeleteIncomingApprovalResponse extends Message<MsgDeleteIncomingApprovalResponse> {
+  constructor(data?: PartialMessage<MsgDeleteIncomingApprovalResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgDeleteIncomingApprovalResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDeleteIncomingApprovalResponse {
+    return new MsgDeleteIncomingApprovalResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDeleteIncomingApprovalResponse {
+    return new MsgDeleteIncomingApprovalResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDeleteIncomingApprovalResponse {
+    return new MsgDeleteIncomingApprovalResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgDeleteIncomingApprovalResponse | PlainMessage<MsgDeleteIncomingApprovalResponse> | undefined, b: MsgDeleteIncomingApprovalResponse | PlainMessage<MsgDeleteIncomingApprovalResponse> | undefined): boolean {
+    return proto3.util.equals(MsgDeleteIncomingApprovalResponse, a, b);
+  }
+}
+
+/**
+ * MsgSetOutgoingApproval is a helper message to set a single outgoing approval.
+ *
+ * @generated from message badges.MsgSetOutgoingApproval
+ */
+export class MsgSetOutgoingApproval extends Message<MsgSetOutgoingApproval> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the collection.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * The outgoing approval to set.
+   *
+   * @generated from field: badges.UserOutgoingApproval approval = 3;
+   */
+  approval?: UserOutgoingApproval;
+
+  constructor(data?: PartialMessage<MsgSetOutgoingApproval>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetOutgoingApproval";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "approval", kind: "message", T: UserOutgoingApproval },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetOutgoingApproval {
+    return new MsgSetOutgoingApproval().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetOutgoingApproval {
+    return new MsgSetOutgoingApproval().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetOutgoingApproval {
+    return new MsgSetOutgoingApproval().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetOutgoingApproval | PlainMessage<MsgSetOutgoingApproval> | undefined, b: MsgSetOutgoingApproval | PlainMessage<MsgSetOutgoingApproval> | undefined): boolean {
+    return proto3.util.equals(MsgSetOutgoingApproval, a, b);
+  }
+}
+
+/**
+ * MsgSetOutgoingApprovalResponse is the response to MsgSetOutgoingApproval.
+ *
+ * @generated from message badges.MsgSetOutgoingApprovalResponse
+ */
+export class MsgSetOutgoingApprovalResponse extends Message<MsgSetOutgoingApprovalResponse> {
+  constructor(data?: PartialMessage<MsgSetOutgoingApprovalResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgSetOutgoingApprovalResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetOutgoingApprovalResponse {
+    return new MsgSetOutgoingApprovalResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetOutgoingApprovalResponse {
+    return new MsgSetOutgoingApprovalResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetOutgoingApprovalResponse {
+    return new MsgSetOutgoingApprovalResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSetOutgoingApprovalResponse | PlainMessage<MsgSetOutgoingApprovalResponse> | undefined, b: MsgSetOutgoingApprovalResponse | PlainMessage<MsgSetOutgoingApprovalResponse> | undefined): boolean {
+    return proto3.util.equals(MsgSetOutgoingApprovalResponse, a, b);
+  }
+}
+
+/**
+ * MsgDeleteOutgoingApproval is a helper message to delete a single outgoing approval.
+ *
+ * @generated from message badges.MsgDeleteOutgoingApproval
+ */
+export class MsgDeleteOutgoingApproval extends Message<MsgDeleteOutgoingApproval> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the collection.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * The ID of the approval to delete.
+   *
+   * @generated from field: string approvalId = 3;
+   */
+  approvalId = "";
+
+  constructor(data?: PartialMessage<MsgDeleteOutgoingApproval>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgDeleteOutgoingApproval";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDeleteOutgoingApproval {
+    return new MsgDeleteOutgoingApproval().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDeleteOutgoingApproval {
+    return new MsgDeleteOutgoingApproval().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDeleteOutgoingApproval {
+    return new MsgDeleteOutgoingApproval().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgDeleteOutgoingApproval | PlainMessage<MsgDeleteOutgoingApproval> | undefined, b: MsgDeleteOutgoingApproval | PlainMessage<MsgDeleteOutgoingApproval> | undefined): boolean {
+    return proto3.util.equals(MsgDeleteOutgoingApproval, a, b);
+  }
+}
+
+/**
+ * MsgDeleteOutgoingApprovalResponse is the response to MsgDeleteOutgoingApproval.
+ *
+ * @generated from message badges.MsgDeleteOutgoingApprovalResponse
+ */
+export class MsgDeleteOutgoingApprovalResponse extends Message<MsgDeleteOutgoingApprovalResponse> {
+  constructor(data?: PartialMessage<MsgDeleteOutgoingApprovalResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgDeleteOutgoingApprovalResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDeleteOutgoingApprovalResponse {
+    return new MsgDeleteOutgoingApprovalResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDeleteOutgoingApprovalResponse {
+    return new MsgDeleteOutgoingApprovalResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDeleteOutgoingApprovalResponse {
+    return new MsgDeleteOutgoingApprovalResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgDeleteOutgoingApprovalResponse | PlainMessage<MsgDeleteOutgoingApprovalResponse> | undefined, b: MsgDeleteOutgoingApprovalResponse | PlainMessage<MsgDeleteOutgoingApprovalResponse> | undefined): boolean {
+    return proto3.util.equals(MsgDeleteOutgoingApprovalResponse, a, b);
+  }
+}
+
+/**
+ * MsgPurgeApprovals is a helper message to purge expired approvals.
+ *
+ * @generated from message badges.MsgPurgeApprovals
+ */
+export class MsgPurgeApprovals extends Message<MsgPurgeApprovals> {
+  /**
+   * Address of the creator.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * ID of the collection.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * Whether to purge expired approvals (approvals with no future valid transfer times).
+   *
+   * @generated from field: bool purgeExpired = 3;
+   */
+  purgeExpired = false;
+
+  /**
+   * Address of the user whose approvals to purge. If empty, defaults to creator.
+   *
+   * @generated from field: string approverAddress = 4;
+   */
+  approverAddress = "";
+
+  /**
+   * Whether to purge counterparty approvals (approvals where the creator is the only initiator).
+   *
+   * @generated from field: bool purgeCounterpartyApprovals = 5;
+   */
+  purgeCounterpartyApprovals = false;
+
+  /**
+   * Specific approvals to purge. If empty, purges all applicable approvals based on other flags.
+   *
+   * @generated from field: repeated badges.ApprovalIdentifierDetails approvalsToPurge = 6;
+   */
+  approvalsToPurge: ApprovalIdentifierDetails[] = [];
+
+  constructor(data?: PartialMessage<MsgPurgeApprovals>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgPurgeApprovals";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "purgeExpired", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "purgeCounterpartyApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: "approvalsToPurge", kind: "message", T: ApprovalIdentifierDetails, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgPurgeApprovals {
+    return new MsgPurgeApprovals().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgPurgeApprovals {
+    return new MsgPurgeApprovals().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgPurgeApprovals {
+    return new MsgPurgeApprovals().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgPurgeApprovals | PlainMessage<MsgPurgeApprovals> | undefined, b: MsgPurgeApprovals | PlainMessage<MsgPurgeApprovals> | undefined): boolean {
+    return proto3.util.equals(MsgPurgeApprovals, a, b);
+  }
+}
+
+/**
+ * MsgPurgeApprovalsResponse is the response to MsgPurgeApprovals.
+ *
+ * @generated from message badges.MsgPurgeApprovalsResponse
+ */
+export class MsgPurgeApprovalsResponse extends Message<MsgPurgeApprovalsResponse> {
+  /**
+   * Number of approvals purged.
+   *
+   * @generated from field: string numPurged = 1;
+   */
+  numPurged = "";
+
+  constructor(data?: PartialMessage<MsgPurgeApprovalsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgPurgeApprovalsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "numPurged", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgPurgeApprovalsResponse {
+    return new MsgPurgeApprovalsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgPurgeApprovalsResponse {
+    return new MsgPurgeApprovalsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgPurgeApprovalsResponse {
+    return new MsgPurgeApprovalsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgPurgeApprovalsResponse | PlainMessage<MsgPurgeApprovalsResponse> | undefined, b: MsgPurgeApprovalsResponse | PlainMessage<MsgPurgeApprovalsResponse> | undefined): boolean {
+    return proto3.util.equals(MsgPurgeApprovalsResponse, a, b);
   }
 }
 

@@ -9,7 +9,12 @@ import {
   MsgCreateDynamicStore,
   MsgDeleteCollection,
   MsgDeleteDynamicStore,
+  MsgDeleteIncomingApproval,
+  MsgDeleteOutgoingApproval,
+  MsgPurgeApprovals,
   MsgSetDynamicStoreValue,
+  MsgSetIncomingApproval,
+  MsgSetOutgoingApproval,
   MsgTransferBadges,
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
@@ -24,7 +29,12 @@ import {
   populateUndefinedForMsgCreateDynamicStore,
   populateUndefinedForMsgDeleteCollection,
   populateUndefinedForMsgDeleteDynamicStore,
+  populateUndefinedForMsgDeleteIncomingApproval,
+  populateUndefinedForMsgDeleteOutgoingApproval,
+  populateUndefinedForMsgPurgeApprovals,
   populateUndefinedForMsgSetDynamicStoreValue,
+  populateUndefinedForMsgSetIncomingApproval,
+  populateUndefinedForMsgSetOutgoingApproval,
   populateUndefinedForMsgTransferBadges,
   populateUndefinedForMsgUniversalUpdateCollection,
   populateUndefinedForMsgUpdateCollection,
@@ -288,6 +298,16 @@ export const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
       msg = createProtoMsg(populateUndefinedForMsgSetDynamicStoreValue(msgVal as MsgSetDynamicStoreValue));
     } else if (msgVal.getType().typeName === MsgUpdateDynamicStore.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgUpdateDynamicStore(msgVal as MsgUpdateDynamicStore));
+    } else if (msgVal.getType().typeName === MsgDeleteIncomingApproval.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgDeleteIncomingApproval(msgVal as MsgDeleteIncomingApproval));
+    } else if (msgVal.getType().typeName === MsgDeleteOutgoingApproval.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgDeleteOutgoingApproval(msgVal as MsgDeleteOutgoingApproval));
+    } else if (msgVal.getType().typeName === MsgPurgeApprovals.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgPurgeApprovals(msgVal as MsgPurgeApprovals));
+    } else if (msgVal.getType().typeName === MsgSetIncomingApproval.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSetIncomingApproval(msgVal as MsgSetIncomingApproval));
+    } else if (msgVal.getType().typeName === MsgSetOutgoingApproval.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSetOutgoingApproval(msgVal as MsgSetOutgoingApproval));
     }
 
     //MsgCreateAddressLists and MsgDeleteCollection should be fine bc they are all primitive types and required

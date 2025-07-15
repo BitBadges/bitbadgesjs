@@ -168,6 +168,10 @@ export interface iAutoDeletionOptions {
   afterOneUse: boolean;
   /** Whether the approval should be deleted after the overall max number of transfers threshold is met. */
   afterOverallMaxNumTransfers: boolean;
+  /** Allow counterparty to purge this approval if they are the only initiator */
+  allowCounterpartyPurge: boolean;
+  /** Allow others to call PurgeApprovals on behalf of this approval owner */
+  allowPurgeIfExpired: boolean;
 }
 
 /**
