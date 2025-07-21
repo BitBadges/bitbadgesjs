@@ -42,6 +42,7 @@ fs.readFile(filePath, 'utf8', (err, data) => {
       { route: '/claims/fetch', schema: 'iGetClaimsPayload' },
       { route: '/siwbb/token', schema: 'iOauthTokenPayload' }
     ];
+
     for (const obj of postToGetRoutes) {
       if ((yamlData as any).paths[obj.route]) {
         convertToGetRequestParams((yamlData as any).paths[obj.route], obj.schema, yamlData);
@@ -117,6 +118,7 @@ function removeTitleProperties(obj: any, parentKey: string) {
 
 function convertToGetRequestParams(obj: any, schemaName: string, originalObj: any) {
   const postObj = obj.post;
+  if (!postObj) return;
   console.log(schemaName, obj);
 
   // requestBody:
