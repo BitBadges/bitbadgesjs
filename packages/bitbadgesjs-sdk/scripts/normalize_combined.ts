@@ -33,14 +33,15 @@ const withDetailsInterfaces = [
   'iCollectionApproval',
   'iCollectionPermissions',
   'iUserBalanceStore',
-
   'iOutgoingApprovalCriteria',
   'iIncomingApprovalCriteria',
   'iApprovalCriteria',
   'iMerkleChallenge',
   'iUserOutgoingApprovalPermission',
   'iUserIncomingApprovalPermission',
-  'iCollectionApprovalPermission'
+  'iCollectionApprovalPermission',
+  'iCosmosCoinWrapperPath',
+  'iDenomUnit'
 ];
 
 function removeClasses(data: string): string {
