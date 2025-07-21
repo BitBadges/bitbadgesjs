@@ -40,7 +40,7 @@ export const THORCHAIN_CHAIN_DETAILS = {
  *
  * @category Chain Details
  */
-export const BitBadgesKeplrSuggestBetanetChainInfo = {
+export const BitBadgesKeplrSuggestMainnetChainInfo = {
   chainId: 'bitbadges-1',
   chainName: 'BitBadges',
   chainSymbolImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
@@ -97,7 +97,7 @@ export const BitBadgesKeplrSuggestBetanetChainInfo = {
  * @category Chain Details
  */
 export const BitBadgesKeplrSuggestTestnetChainInfo = {
-  ...BitBadgesKeplrSuggestBetanetChainInfo,
+  ...BitBadgesKeplrSuggestMainnetChainInfo,
   chainId: 'bitbadges-2',
   chainName: 'BitBadges Testnet',
 

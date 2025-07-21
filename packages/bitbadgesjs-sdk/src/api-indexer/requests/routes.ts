@@ -89,10 +89,6 @@ export class BitBadgesApiRoutes {
   static GenerateAppleWalletPassRoute = () => '/api/v0/siwbbRequest/appleWalletPass';
   static GenerateGoogleWalletPassRoute = () => '/api/v0/siwbbRequest/googleWalletPass';
 
-  static GetAttestationRoute = (attestationId: string) => `/api/v0/attestation/${attestationId.toString()}`;
-  static GetAttestationsRoute = () => '/api/v0/attestations/fetch';
-  static CRUDAttestationRoute = () => '/api/v0/attestations';
-
   static GetDeveloperAppRoute = (developerAppId: string) => `/api/v0/developerApp/${developerAppId.toString()}`;
   static GetDeveloperAppsRoute = () => '/api/v0/developerApps/fetch';
   static SearchDeveloperAppsRoute = () => '/api/v0/developerApps/search';
@@ -116,8 +112,6 @@ export class BitBadgesApiRoutes {
 
   static GetConnectedAccountsRoute = () => '/api/v0/stripe/connected-accounts';
   static DeleteConnectedAccountRoute = (accountId: string) => `/api/v0/stripe/connected-accounts/${accountId}`;
-
-  static VerifyAttestationRoute = () => '/api/v0/attestations/verify';
 
   static GetCodesFromSeedHelperRoute = () => '/api/v0/codes';
 
@@ -157,7 +151,6 @@ export class BitBadgesApiRoutes {
   static GetTransferActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/badges`;
   static GetBadgesByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/badges`;
   static GetListActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/lists`;
-  static GetAttestationsByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/attestations`;
   static GetClaimActivityByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/claims`;
   static GetPointsActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/points`;
   static GetClaimAlertsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/claimAlerts`;

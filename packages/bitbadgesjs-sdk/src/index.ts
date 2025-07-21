@@ -21,7 +21,6 @@ export * from './common/index.js';
 export * from './interfaces/index.js';
 export * as proto from './proto/index.js';
 export * from './proto/index.js';
-export * from './attestations/index.js';
 
 export * from './transactions/index.js';
 export * from './address-converter/index.js';

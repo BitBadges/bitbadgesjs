@@ -12,7 +12,6 @@ export * from './timelines.js';
 export * from './transfers.js';
 export * from './uintRanges.js';
 export * from './userBalances.js';
-export * from './secrets.js';
 export * from './overlaps.js';
 
 export * from './blockin.js';

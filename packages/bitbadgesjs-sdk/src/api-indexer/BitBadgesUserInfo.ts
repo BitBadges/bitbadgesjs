@@ -12,21 +12,12 @@ import { BitBadgesAddressList } from './BitBadgesAddressList.js';
 import { BitBadgesCollection } from './BitBadgesCollection.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, PointsActivityDoc, TransferActivityDoc } from './docs/activity.js';
-import {
-  ApprovalTrackerDoc,
-  AttestationDoc,
-  BalanceDocWithDetails,
-  CreatorCreditsDoc,
-  MerkleChallengeTrackerDoc,
-  ProfileDoc,
-  SIWBBRequestDoc
-} from './docs/docs.js';
+import { ApprovalTrackerDoc, BalanceDocWithDetails, CreatorCreditsDoc, MerkleChallengeTrackerDoc, ProfileDoc, SIWBBRequestDoc } from './docs/docs.js';
 import type {
   BitBadgesAddress,
   NativeAddress,
   iAccountDoc,
   iApprovalTrackerDoc,
-  iAttestationDoc,
   iBalanceDocWithDetails,
   iClaimActivityDoc,
   iClaimAlertDoc,
@@ -74,8 +65,6 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   claimAlerts: iClaimAlertDoc<T>[];
   /** A list of SIWBB requests for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   siwbbRequests: iSIWBBRequestDoc<T>[];
-  /** A list of user attestations for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  attestations: iAttestationDoc<T>[];
 
   /** The native address of the account */
   address: NativeAddress;
@@ -144,7 +133,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   addressLists: BitBadgesAddressList<T>[];
   claimAlerts: ClaimAlertDoc<T>[];
   siwbbRequests: SIWBBRequestDoc<T>[];
-  attestations: iAttestationDoc<T>[];
 
   address: NativeAddress;
   nsfw?: { reason: string };
@@ -190,7 +178,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.addressLists = data.addressLists.map((list) => new BitBadgesAddressList(list));
     this.claimAlerts = data.claimAlerts.map((alert) => new ClaimAlertDoc(alert));
     this.siwbbRequests = data.siwbbRequests.map((auth) => new SIWBBRequestDoc(auth));
-    this.attestations = data.attestations.map((attestation) => new AttestationDoc(attestation));
     this.address = data.address;
     this.nsfw = data.nsfw;
     this.reported = data.reported;
@@ -493,12 +480,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
         return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
       case 'listActivity':
         return this.getAccountListActivityView(viewId) as AccountViewData<T>[KeyType];
-      case 'createdAttestations':
-        return this.getAttestationsView(viewId) as AccountViewData<T>[KeyType];
-      case 'receivedAttestations':
-        return this.getAttestationsView(viewId) as AccountViewData<T>[KeyType];
-      case 'attestations':
-        return this.getAttestationsView(viewId) as AccountViewData<T>[KeyType];
       case 'publicClaimActivity':
         return this.getClaimActivityView(viewId) as AccountViewData<T>[KeyType];
       case 'allClaimActivity':
@@ -508,12 +489,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       default:
         throw new Error('Invalid view type');
     }
-  }
-
-  getAttestationsView(viewId: string) {
-    return (this.views[viewId]?.ids.map((x) => {
-      return this.attestations.find((y) => y._docId === x);
-    }) ?? []) as AttestationDoc<T>[];
   }
 
   getClaimActivityView(viewId: string) {
@@ -593,7 +568,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       collected: [],
       activity: [],
       listActivity: [],
-      attestations: [],
       addressLists: [],
       claimAlerts: [],
       challengeTrackers: [],
@@ -630,7 +604,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       accountNumber: -1n,
       collected: [],
       activity: [],
-      attestations: [],
       claimAlerts: [],
       challengeTrackers: [],
       approvalTrackers: [],
@@ -659,9 +632,6 @@ type AccountViewData<T extends NumberType> = {
   createdBadges: BalanceDocWithDetails<T>[];
   managingBadges: BalanceDocWithDetails<T>[];
   listActivity: ListActivityDoc<T>[];
-  createdAttestations: AttestationDoc<T>[];
-  receivedAttestations: AttestationDoc<T>[];
-  attestations: AttestationDoc<T>[];
   publicClaimActivity: ClaimActivityDoc<T>[];
   allClaimActivity: ClaimActivityDoc<T>[];
   pointsActivity: PointsActivityDoc<T>[];
@@ -728,7 +698,6 @@ function updateAccountWithResponse<T extends NumberType>(
     listActivity: [...(cachedAccount?.listActivity || []), ...(account.listActivity || [])],
     pointsActivity: [...(cachedAccount?.pointsActivity || []), ...(account.pointsActivity || [])],
     claimActivity: [...(cachedAccount?.claimActivity || []), ...(account.claimActivity || [])],
-    attestations: [...(cachedAccount?.attestations || []), ...(account.attestations || [])],
     views: views,
     publicKey,
     airdropped: account.airdropped ? account.airdropped : cachedAccount?.airdropped ? cachedAccount.airdropped : false,
@@ -754,7 +723,6 @@ function updateAccountWithResponse<T extends NumberType>(
   newAccount.claimAlerts = newAccount.claimAlerts.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.siwbbRequests = newAccount.siwbbRequests.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.listActivity = newAccount.listActivity.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
-  newAccount.attestations = newAccount.attestations.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.claimActivity = newAccount.claimActivity?.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.pointsActivity = newAccount.pointsActivity?.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
 
@@ -786,9 +754,6 @@ export type AccountViewKey =
   | 'createdBadges'
   | 'managingBadges'
   | 'listActivity'
-  | 'createdAttestations'
-  | 'receivedAttestations'
-  | 'attestations'
   | 'publicClaimActivity'
   | 'allClaimActivity'
   | 'pointsActivity';

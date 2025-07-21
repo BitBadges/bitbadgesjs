@@ -3,9 +3,7 @@ import { SiwbbAndGroup, SiwbbAssetConditionGroup, SiwbbOrGroup, OwnershipRequire
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import { NumberType } from '@/common/string-numbers.js';
 import { SupportedChain } from '@/common/types.js';
-import { iAttestationsProof } from '@/interfaces/badges/core.js';
 import { AndGroup, AssetConditionGroup, OrGroup } from 'blockin';
-import { AttestationsProof } from './secrets.js';
 
 /**
  * @category Interfaces
@@ -36,11 +34,6 @@ export interface iSiwbbChallenge<T extends NumberType> {
      */
     errorMessage?: string;
   };
-
-  /**
-   * Derived data integrity proofs for any attestations requested.
-   */
-  attestations?: iAttestationsProof<T>[];
 }
 
 /**
@@ -55,7 +48,6 @@ export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<Si
     success: boolean;
     errorMessage?: string;
   };
-  attestations?: AttestationsProof<T>[];
 
   constructor(data: iSiwbbChallenge<T>) {
     super();
@@ -63,7 +55,6 @@ export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<Si
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.chain = data.chain;
     this.verificationResponse = data.verificationResponse;
-    this.attestations = data.attestations?.map((proof) => new AttestationsProof(proof));
     if (data.ownershipRequirements) {
       if ((data.ownershipRequirements as AndGroup<T>)['$and']) {
         this.ownershipRequirements = new SiwbbAndGroup(data.ownershipRequirements as AndGroup<T>);
@@ -106,13 +97,6 @@ export interface AdditionalQueryParams {
    * Note: This is not a replacement for checking the claim on your side because users can manipulate the client-side URL parameters.
    */
   expectVerifySuccess?: boolean;
-  /**
-   * We will expect the user to provide attestations. Consider adding an additional instructions to the user for which ones
-   * to present. You still need to check the attestations on your side.
-   *
-   * @deprecated It is preferred to receive attestations via claims instead.
-   */
-  expectAttestations?: boolean;
 }
 
 /**

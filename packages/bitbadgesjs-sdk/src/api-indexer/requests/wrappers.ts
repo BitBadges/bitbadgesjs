@@ -5,10 +5,10 @@ import { BitBadgesAddressList, iBitBadgesAddressList } from '../BitBadgesAddress
 import { BitBadgesCollection, iBitBadgesCollection } from '../BitBadgesCollection.js';
 
 import { ClaimDetails } from '@/core/approvals.js';
+import { CollectionId } from '@/interfaces/index.js';
 import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, PointsActivityDoc, TransferActivityDoc } from '../docs/activity.js';
 import {
   ApprovalTrackerDoc,
-  AttestationDoc,
   BalanceDoc,
   BalanceDocWithDetails,
   MerkleChallengeTrackerDoc,
@@ -17,7 +17,6 @@ import {
 } from '../docs/docs.js';
 import {
   iApprovalTrackerDoc,
-  iAttestationDoc,
   iBalanceDoc,
   iBalanceDocWithDetails,
   iClaimActivityDoc,
@@ -30,8 +29,6 @@ import {
   iUtilityPageDoc
 } from '../docs/interfaces.js';
 import { iMetadata, Metadata } from '../metadata/metadata.js';
-import { CollectionViewKey } from './collections.js';
-import { CollectionId } from '@/interfaces/index.js';
 
 /**
  * @category API Requests / Responses
@@ -462,52 +459,6 @@ export class GetAddressListsForUserSuccessResponse<T extends NumberType>
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetAddressListsForUserSuccessResponse<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAddressListsForUserSuccessResponse<U>;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetAttestationsForUserPayload extends iBaseQueryParams {
-  /**
-   * The view type to search for. Default is 'all'
-   *
-   * - 'all' will return all attestations the user has
-   * - 'created' will return all attestations the user has created
-   * - 'received' will return all attestations the user has received
-   */
-  viewType?: 'all' | 'created' | 'received';
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetAttestationsForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  attestations: Array<iAttestationDoc<T>>;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetAttestationsForUserSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetAttestationsForUserSuccessResponse<T>>
-  implements iGetAttestationsForUserSuccessResponse<T>
-{
-  attestations: AttestationDoc<T>[];
-  pagination: PaginationInfo;
-
-  constructor(data: iGetAttestationsForUserSuccessResponse<T>) {
-    super();
-    this.attestations = data.attestations.map((attestation) => new AttestationDoc(attestation));
-    this.pagination = data.pagination;
-  }
-
-  getNumberFieldNames(): string[] {
-    return [];
-  }
-
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetAttestationsForUserSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAttestationsForUserSuccessResponse<U>;
   }
 }
 

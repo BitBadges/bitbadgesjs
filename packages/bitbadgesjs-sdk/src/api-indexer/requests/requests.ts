@@ -12,7 +12,6 @@ import {
   ApiKeyDoc,
   ApplicationDoc,
   ApprovalTrackerDoc,
-  AttestationDoc,
   DeveloperAppDoc,
   DynamicDataDoc,
   MapWithValues,
@@ -31,7 +30,6 @@ import {
   iApplicationDoc,
   iApplicationPage,
   iApprovalTrackerDoc,
-  iAttestationDoc,
   iClaimActivityDoc,
   iDynamicDataDoc,
   iEstimatedCost,
@@ -68,24 +66,15 @@ import {
 import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 import type { iMetadata, iMetadataWithoutInternals } from '@/api-indexer/metadata/metadata.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
-import { VerifyAttestationSignaturesParameters } from '@/attestations/attestations.js';
-import {
-  BaseNumberTypeClass,
-  ConvertOptions,
-  CustomTypeClass,
-  ParsedQs,
-  convertClassPropertiesAndMaintainNumberTypes,
-  parseArrayString
-} from '@/common/base.js';
+import { BaseNumberTypeClass, ConvertOptions, CustomTypeClass, ParsedQs, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import { type NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
 import { ClaimDetails, iChallengeDetails, iChallengeInfoDetailsUpdate } from '@/core/approvals.js';
 import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
 import { VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
-import { AttestationsProof } from '@/core/secrets.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
-import type { CollectionId, iAttestation, iAttestationsProof, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
+import type { CollectionId, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
 import { BroadcastPostBody } from '@/node-rest-api/index.js';
 import { type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
 import { SiwbbChallengeParams } from './blockin.js';
@@ -926,7 +915,6 @@ export interface iUpdateAccountInfoPayload {
   customPages?: {
     badges: iCustomPage<NumberType>[];
     lists: iCustomListPage[];
-    attestations: iCustomListPage[];
   };
 
   /**
@@ -935,7 +923,6 @@ export interface iUpdateAccountInfoPayload {
   watchlists?: {
     badges: iCustomPage<NumberType>[];
     lists: iCustomListPage[];
-    attestations: iCustomListPage[];
   };
 
   /**
@@ -1728,7 +1715,6 @@ export interface iGetBrowsePayload {
     | 'badges'
     | 'addressLists'
     | 'maps'
-    | 'attestations'
     | 'claims'
     | 'activity'
     | 'utilityPages'
@@ -1751,7 +1737,6 @@ export class GetBrowsePayload extends CustomTypeClass<GetBrowsePayload> implemen
     | 'badges'
     | 'addressLists'
     | 'maps'
-    | 'attestations'
     | 'claims'
     | 'activity'
     | 'utilityPages'
@@ -2159,11 +2144,6 @@ export interface iGenericBlockinVerifyPayload extends iVerifySignInPayload {
    * Additional options for verifying the challenge.
    */
   options?: VerifyChallengeOptions;
-
-  /**
-   * Additional attestations to verify in the challenge.
-   */
-  attestations?: iAttestationsProof<NumberType>[];
 }
 
 /**
@@ -2181,289 +2161,6 @@ export class GenericBlockinVerifySuccessResponse extends VerifySignInSuccessResp
 /**
  * @category API Requests / Responses
  */
-export type iCreateAttestationPayload = Pick<
-  iAttestation<NumberType>,
-  | 'originalProvider'
-  | 'proofOfIssuance'
-  | 'messageFormat'
-  | 'scheme'
-  | 'messages'
-  | 'dataIntegrityProof'
-  | 'name'
-  | 'image'
-  | 'description'
-  | 'publicVisibility'
-  | 'anchors'
->;
-
-/**
- * @category API Requests / Responses
- */
-export interface iCreateAttestationSuccessResponse {
-  /** The attestation invite code to give to others to add / view / query (where applicable) */
-  inviteCode: string;
-
-  /** The attestation ID. */
-  id: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class CreateAttestationSuccessResponse extends CustomTypeClass<CreateAttestationSuccessResponse> implements iCreateAttestationSuccessResponse {
-  inviteCode: string;
-  id: string;
-
-  constructor(data: iCreateAttestationSuccessResponse) {
-    super();
-    this.inviteCode = data.inviteCode;
-    this.id = data.id;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetAttestationPayload {}
-
-/**
- * @category API Requests / Responses
- */
-export class GetAttestationPayload extends CustomTypeClass<GetAttestationPayload> implements iGetAttestationPayload {
-  constructor() {
-    super();
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetAttestationSuccessResponse<T extends NumberType> {
-  attestation: iAttestationDoc<T>;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetAttestationSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetAttestationSuccessResponse<T>>
-  implements iGetAttestationSuccessResponse<T>
-{
-  attestation: AttestationDoc<T>;
-
-  constructor(data: iGetAttestationSuccessResponse<T>) {
-    super();
-    this.attestation = new AttestationDoc<T>(data.attestation);
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetAttestationSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAttestationSuccessResponse<U>;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetAttestationsPayload {
-  /** The attestation key received from the original attestation creation.  */
-  inviteCode?: string;
-
-  /** The attestation ID. You can use this if you are the creator or a holder of the attestation. */
-  attestationIds?: string[];
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetAttestationsPayload extends CustomTypeClass<GetAttestationsPayload> implements iGetAttestationsPayload {
-  inviteCode?: string;
-  attestationIds?: string[];
-
-  constructor(payload: iGetAttestationsPayload) {
-    super();
-    this.inviteCode = payload.inviteCode;
-    this.attestationIds = payload.attestationIds;
-  }
-
-  static FromQuery(query: ParsedQs): GetAttestationsPayload {
-    return new GetAttestationsPayload({
-      inviteCode: query.inviteCode?.toString(),
-      attestationIds: parseArrayString(query.attestationIds)
-    });
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetAttestationsSuccessResponse<T extends NumberType> {
-  attestations: (AttestationDoc<T> | undefined)[];
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetAttestationsSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetAttestationsSuccessResponse<T>>
-  implements iGetAttestationsSuccessResponse<T>
-{
-  attestations: (AttestationDoc<T> | undefined)[];
-
-  constructor(data: iGetAttestationsSuccessResponse<T>) {
-    super();
-    this.attestations = data.attestations.map((attestation) => (attestation ? new AttestationDoc<T>(attestation) : undefined));
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetAttestationsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAttestationsSuccessResponse<U>;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iDeleteAttestationPayload {
-  /** The attestation ID. This is the ID that is given to the user to query the attestation. Anyone with the ID can query it, so keep this safe and secure. */
-  attestationId: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iDeleteAttestationSuccessResponse {}
-
-/**
- * @category API Requests / Responses
- */
-export class DeleteAttestationSuccessResponse extends EmptyResponseClass {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iUpdateAttestationPayload {
-  /** The attestation ID. If you are the owner, you can simply use the attestationId to update the attestation. One of inviteCode or attestationId must be provided. */
-  attestationId?: string;
-
-  /** The key to add oneself as a holder to the attestation. This is given to the holder themselves. One of inviteCode or attestationId must be provided. */
-  inviteCode?: string;
-
-  /** Whether or not to rotate the invite code. */
-  rotateInviteCode?: boolean;
-
-  /** Holders can use the attestation to prove something about themselves. This is a list of holders that have added this attestation to their profile. */
-  holdersToSet?: {
-    bitbadgesAddress: BitBadgesAddress;
-    delete?: boolean;
-  }[];
-
-  /** Blockchain anchors to add to the attestation. These are on-chain transactions that can be used to prove stuff about the attestation, like
-   * existence at a certain point in time or to maintain data integrity. */
-  anchorsToAdd?: {
-    txHash?: string;
-    message?: string;
-  }[];
-
-  /**
-   * Proof of issuance is used for BBS+ signatures (scheme = bbs) only.
-   * BBS+ signatures are signed with a BBS+ key pair, but you would often want the issuer to be a native address.
-   * The prooofOfIssuance establishes a link saying that "I am the issuer of this attestation signed with BBS+ key pair ___".
-   *
-   * Fields can be left blank for standard signatures.
-   */
-  proofOfIssuance?: {
-    message: string;
-    signer: string;
-    signature: string;
-    publicKey?: string;
-  };
-
-  /** The message format of the messages. */
-  messageFormat?: 'plaintext' | 'json';
-  /**
-   * The scheme of the attestation. BBS+ signatures are supported and can be used where selective disclosure is a requirement.
-   * Otherwise, you can simply use your native blockchain's signature scheme.
-   */
-  scheme?: 'bbs' | 'standard' | 'custom' | string;
-
-  /** The original provider of the attestation. Used for third-party attestation providers. */
-  originalProvider?: string;
-
-  /**
-   * Thesse are the attestations that are signed.
-   * For BBS+ signatures, there can be >1 messages, and the signer can selectively disclose the attestations.
-   * For standard signatures, there is only 1 attestationMessage.
-   */
-  messages?: string[];
-
-  /**
-   * This is the signature and accompanying details of the messages. The siganture maintains the integrity of the messages.
-   *
-   * This should match the expected scheme. For example, if the scheme is BBS+, the signature should be a BBS+ signature and signer should be a BBS+ public key.
-   */
-  dataIntegrityProof?: {
-    signature: string;
-    signer: string;
-    publicKey?: string;
-    derivedProof?: boolean;
-  };
-
-  /** Whether or not the attestation is displayable on the user's profile. if true, the attestation can be queried by anyone with the ID. */
-  publicVisibility?: boolean;
-
-  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
-  name?: string;
-  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
-  image?: string;
-  /** Metadata for the attestation for display purposes. Note this should not contain anything sensitive. It may be displayed to verifiers. */
-  description?: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iUpdateAttestationSuccessResponse {
-  inviteCode: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class UpdateAttestationSuccessResponse extends CustomTypeClass<UpdateAttestationSuccessResponse> implements iUpdateAttestationSuccessResponse {
-  inviteCode: string;
-
-  constructor(data: iUpdateAttestationSuccessResponse) {
-    super();
-    this.inviteCode = data.inviteCode;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iVerifyAttestationPayload extends VerifyAttestationSignaturesParameters {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iVerifyAttestationSuccessResponse {
-  success: boolean;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class VerifyAttestationSuccessResponse extends CustomTypeClass<VerifyAttestationSuccessResponse> implements iVerifyAttestationSuccessResponse {
-  success: boolean;
-
-  constructor(data: iVerifyAttestationSuccessResponse) {
-    super();
-    this.success = data.success;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
 export interface iCreateSIWBBRequestPayload {
   /** The response type for the SIWBB request. */
   response_type: string;
@@ -2476,12 +2173,6 @@ export interface iCreateSIWBBRequestPayload {
   description?: string;
   /** The image of the SIWBB request for display purposes. */
   image?: string;
-
-  /**
-   * If required, you can additionally add proof of attestations to the authentication flow.
-   * This proves sensitive information (e.g. GPAs, SAT scores, etc.) without revealing the information itself.
-   */
-  attestations?: iAttestationsProof<NumberType>[];
 
   /** Client ID for the SIWBB request. */
   client_id: string;
@@ -2657,7 +2348,6 @@ export class ExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType>
     success: boolean;
     errorMessage?: string;
   };
-  attestations?: AttestationsProof<T>[];
 
   access_token: string;
   token_type: string = 'Bearer';
@@ -2677,7 +2367,6 @@ export class ExchangeSIWBBAuthorizationCodeSuccessResponse<T extends NumberType>
     this.chain = data.chain;
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.verificationResponse = data.verificationResponse;
-    this.attestations = data.attestations?.map((proof) => new AttestationsProof(proof));
   }
 
   getNumberFieldNames(): string[] {

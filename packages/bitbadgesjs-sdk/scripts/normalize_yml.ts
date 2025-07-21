@@ -37,7 +37,6 @@ fs.readFile(filePath, 'utf8', (err, data) => {
       { route: '/verifyOwnershipRequirements', schema: 'iGenericVerifyAssetsPayload' },
       { route: '/collection/{collectionId}/refreshStatus', schema: '' },
       { route: '/maps', schema: 'iGetMapsPayload' },
-      { route: '/attestations/fetch', schema: 'iGetAttestationPayload' },
       { route: '/collection/{collectionId}/filter', schema: 'iFilterBadgesInCollectionPayload' },
       { route: '/siwbbRequest/appleWalletPass', schema: 'iGenerateAppleWalletPassPayload' },
       { route: '/claims/fetch', schema: 'iGetClaimsPayload' },

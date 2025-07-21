@@ -5,7 +5,7 @@ import type { iMetadata, iMetadataWithoutInternals } from '@/api-indexer/metadat
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { JSPrimitiveNumberType, NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
-import type { iApprovalInfoDetails, iChallengeDetails, iCollectionApprovalWithDetails, iUserOutgoingApprovalWithDetails } from '@/core/approvals.js';
+import type { iApprovalInfoDetails, iChallengeDetails, iUserOutgoingApprovalWithDetails } from '@/core/approvals.js';
 import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
 import type { iCosmosCoin } from '@/core/coin.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
@@ -15,8 +15,6 @@ import type {
   iAddressList,
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
-  iAttestation,
-  iAttestationsProof,
   iBadgeMetadataTimeline,
   iBalance,
   iCollectionMetadataTimeline,
@@ -652,14 +650,12 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   customPages?: {
     badges: iCustomPage<T>[];
     lists: iCustomListPage[];
-    attestations: iCustomListPage[];
   };
 
   /** The watched lists of the account's portfolio */
   watchlists?: {
     badges: iCustomPage<T>[];
     lists: iCustomListPage[];
-    attestations: iCustomListPage[];
   };
 
   /** The profile picture URL of the account */
@@ -2237,9 +2233,6 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
   scopes: OAuthScopeDetails[];
   expiresAt: UNIXMilliTimestamp<T>;
 
-  /** If required, you can additionally attach proof of attestations ot the auth flow. These can be used to prove sensitive information to verifiers. */
-  attestations: iAttestationsProof<T>[];
-
   /** The timestamp of when the signature was created (milliseconds since epoch) */
   createdAt: UNIXMilliTimestamp<T>;
   /** If deleted, we still store temporarily for a period of time. We use a deletedAt timestamp to determine when to delete. */
@@ -2256,13 +2249,6 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
 
   /** The code challenge method for the SIWBB request (if used with PKCE). */
   codeChallengeMethod?: 'S256' | 'plain';
-}
-
-/**
- * @category Interfaces
- */
-export interface iAttestationDoc<T extends NumberType> extends Doc, iAttestation<T> {
-  updateHistory: iUpdateHistory<T>[];
 }
 
 /**

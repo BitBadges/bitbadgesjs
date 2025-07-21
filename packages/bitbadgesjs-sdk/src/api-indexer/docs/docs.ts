@@ -25,8 +25,8 @@ import { CosmosCoin } from '@/core/coin.js';
 import {
   BadgeMetadataTimeline,
   CollectionMetadataTimeline,
-  CustomDataTimeline,
   CosmosCoinWrapperPath,
+  CustomDataTimeline,
   IsArchivedTimeline,
   ManagerTimeline,
   OffChainBalancesMetadataTimeline,
@@ -34,7 +34,6 @@ import {
   UpdateHistory
 } from '@/core/misc.js';
 import { CollectionPermissions, UserPermissions, UserPermissionsWithDetails } from '@/core/permissions.js';
-import { AttestationsProof } from '@/core/secrets.js';
 import { getValueAtTimeForTimeline } from '@/core/timelines.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
@@ -83,7 +82,6 @@ import {
   type iAddressListDoc,
   type iAirdropDoc,
   type iApprovalTrackerDoc,
-  type iAttestationDoc,
   type iBalanceDoc,
   type iBalanceDocWithDetails,
   type iClaimBuilderDoc,
@@ -690,9 +688,8 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   customPages?: {
     badges: CustomPage<T>[];
     lists: CustomListPage[];
-    attestations: CustomListPage[];
   };
-  watchlists?: { badges: CustomPage<T>[]; lists: CustomListPage[]; attestations: CustomListPage[] };
+  watchlists?: { badges: CustomPage<T>[]; lists: CustomListPage[] };
   profilePicUrl?: string;
   username?: string;
   latestSignedInChain?: SupportedChain;
@@ -740,15 +737,13 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.customPages = data.customPages
       ? {
           badges: data.customPages.badges.map((customPage) => new CustomPage(customPage)),
-          lists: data.customPages.lists.map((customListPage) => new CustomListPage(customListPage)),
-          attestations: data.customPages.attestations.map((customListPage) => new CustomListPage(customListPage))
+          lists: data.customPages.lists.map((customListPage) => new CustomListPage(customListPage))
         }
       : undefined;
     this.watchlists = data.watchlists
       ? {
           badges: data.watchlists.badges.map((customPage) => new CustomPage(customPage)),
-          lists: data.watchlists.lists.map((customListPage) => new CustomListPage(customListPage)),
-          attestations: data.watchlists.attestations.map((customListPage) => new CustomListPage(customListPage))
+          lists: data.watchlists.lists.map((customListPage) => new CustomListPage(customListPage))
         }
       : undefined;
     this.profilePicUrl = data.profilePicUrl;
@@ -2256,7 +2251,6 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
   description?: string;
   image?: string;
   bitbadgesAddress: BitBadgesAddress;
-  attestations: AttestationsProof<T>[];
   createdAt: UNIXMilliTimestamp<T>;
   scopes: OAuthScopeDetails[];
   expiresAt: UNIXMilliTimestamp<T>;
@@ -2279,7 +2273,6 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
     this.image = data.image;
     this._docId = data._docId;
     this._id = data._id;
-    this.attestations = data.attestations.map((attestationsProof) => new AttestationsProof(attestationsProof));
     this.clientId = data.clientId;
     this.scopes = data.scopes;
     this.expiresAt = data.expiresAt;
@@ -2295,88 +2288,6 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): SIWBBRequestDoc<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SIWBBRequestDoc<U>;
-  }
-}
-
-/**
- * @inheritDoc iAttestationDoc
- * @category Off-Chain Attestations
- */
-export class AttestationDoc<T extends NumberType> extends BaseNumberTypeClass<AttestationDoc<T>> implements iAttestationDoc<T> {
-  _docId: string;
-  _id?: string;
-  messageFormat: 'plaintext' | 'json';
-  updateHistory: UpdateHistory<T>[];
-
-  createdBy: BitBadgesAddress;
-  createdAt: UNIXMilliTimestamp<T>;
-
-  proofOfIssuance?: {
-    message: string;
-    signature: string;
-    signer: string;
-    publicKey?: string;
-  };
-
-  attestationId: string;
-  inviteCode: string;
-
-  originalProvider?: string;
-  scheme: 'bbs' | 'standard' | 'custom' | string;
-  messages: string[];
-
-  dataIntegrityProof?: {
-    signature: string;
-    signer: string;
-    publicKey?: string;
-    isDerived?: boolean;
-  };
-
-  name: string;
-  image: string;
-  description: string;
-
-  holders: string[];
-  allHolders?: string[];
-  anchors: {
-    txHash?: string;
-    message?: string;
-  }[];
-
-  entropies: string[];
-  publicVisibility?: boolean | undefined;
-
-  constructor(data: iAttestationDoc<T>) {
-    super();
-    this.allHolders = data.allHolders;
-    this.updateHistory = data.updateHistory?.map((updateHistory) => new UpdateHistory(updateHistory));
-    this._docId = data._docId;
-    this._id = data._id;
-    this.createdBy = data.createdBy;
-    this.messageFormat = data.messageFormat;
-    this.attestationId = data.attestationId;
-    this.inviteCode = data.inviteCode;
-    this.scheme = data.scheme;
-    this.dataIntegrityProof = data.dataIntegrityProof;
-    this.holders = data.holders;
-    this.name = data.name;
-    this.image = data.image;
-    this.description = data.description;
-    this.proofOfIssuance = data.proofOfIssuance;
-    this.anchors = data.anchors;
-    this.messages = data.messages;
-    this.createdAt = data.createdAt;
-    this.originalProvider = data.originalProvider;
-    this.entropies = data.entropies;
-    this.publicVisibility = data.publicVisibility;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['createdAt'];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AttestationDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AttestationDoc<U>;
   }
 }
 
