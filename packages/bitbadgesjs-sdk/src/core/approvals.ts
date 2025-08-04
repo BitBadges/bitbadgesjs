@@ -1706,13 +1706,8 @@ export interface iChallengeInfoDetailsUpdate<T extends NumberType> {
  * @category Interfaces
  */
 export interface iApprovalInfoDetails {
-  /** The name of the claim */
   name: string;
-
-  /** The description of the claim. This describes how to earn and claim the badge. */
   description: string;
-
-  /** The image of the claim */
   image: string;
 }
 
