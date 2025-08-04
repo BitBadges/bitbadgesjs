@@ -24,6 +24,7 @@ import { BatchBadgeDetailsArray } from '@/core/batch-utils.js';
 import { CosmosCoin } from '@/core/coin.js';
 import {
   BadgeMetadataTimeline,
+  CollectionInvariants,
   CollectionMetadataTimeline,
   CosmosCoinWrapperPath,
   CustomDataTimeline,
@@ -322,6 +323,7 @@ export class CollectionDoc<T extends NumberType>
   validBadgeIds: UintRangeArray<T>;
   mintEscrowAddress: string;
   cosmosCoinWrapperPaths: CosmosCoinWrapperPath<T>[];
+  invariants: CollectionInvariants;
 
   constructor(data: iCollectionDoc<T>) {
     super();
@@ -351,6 +353,7 @@ export class CollectionDoc<T extends NumberType>
     this.mintEscrowAddress = data.mintEscrowAddress;
     this.validBadgeIds = UintRangeArray.From(data.validBadgeIds);
     this.cosmosCoinWrapperPaths = data.cosmosCoinWrapperPaths.map((cosmosCoinWrapperPaths) => new CosmosCoinWrapperPath(cosmosCoinWrapperPaths));
+    this.invariants = new CollectionInvariants(data.invariants);
   }
 
   private getTimelineValuesAtTime(time?: NumberType) {

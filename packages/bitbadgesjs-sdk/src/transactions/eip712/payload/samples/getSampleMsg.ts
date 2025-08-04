@@ -27,6 +27,7 @@ import {
   CoinTransfer,
   CollectionApproval,
   CollectionApprovalPermission,
+  CollectionInvariants,
   CollectionMetadata,
   CollectionMetadataTimeline,
   CollectionPermissions,
@@ -70,7 +71,9 @@ import {
   UserPermissions,
   UserRoyalties,
   DenomUnit,
-  DynamicStoreChallenge
+  DynamicStoreChallenge,
+  ETHSignatureChallenge,
+  ETHSignatureProof
 } from '@/proto/badges/index.js';
 import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
@@ -79,6 +82,8 @@ import {
   MsgDeleteDynamicStore,
   MsgDeleteIncomingApproval,
   MsgDeleteOutgoingApproval,
+  MsgDecrementStoreValue,
+  MsgIncrementStoreValue,
   MsgPurgeApprovals,
   MsgSetBadgeMetadata,
   MsgSetCollectionApprovals,
@@ -120,6 +125,14 @@ const approvalCriteria = new OutgoingApprovalCriteria({
       badgeIds: [new UintRange()],
       amountRange: new UintRange(),
       ownershipTimes: [new UintRange()]
+    })
+  ],
+  ethSignatureChallenges: [
+    new ETHSignatureChallenge({
+      signer: '',
+      challengeTrackerId: '',
+      uri: '',
+      customData: ''
     })
   ],
   predeterminedBalances: new PredeterminedBalances({
@@ -224,7 +237,15 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
     afterOverallMaxNumTransfers: false,
     allowCounterpartyPurge: false,
     allowPurgeIfExpired: false
-  })
+  }),
+  ethSignatureChallenges: [
+    new ETHSignatureChallenge({
+      signer: '',
+      challengeTrackerId: '',
+      uri: '',
+      customData: ''
+    })
+  ]
 }).toJson({ emitDefaultValues: true }) as object;
 
 function populateMerkleChallenges(merkleChallenges?: MerkleChallenge[]) {
@@ -382,12 +403,24 @@ function populateDynamicStoreChallenges(dynamicStoreChallenges?: DynamicStoreCha
   return dynamicStoreChallenges || [];
 }
 
+function populateETHSignatureChallenges(ethSignatureChallenges?: ETHSignatureChallenge[]) {
+  return ethSignatureChallenges || [];
+}
+
 export function populateUndefinedForMsgTransferBadges(msg: MsgTransferBadges) {
   for (const transfer of msg.transfers) {
     if (!transfer.precalculateBalancesFromApproval) {
       transfer.precalculateBalancesFromApproval = new ApprovalIdentifierDetails({
         version: '0'
       });
+    }
+    if (!transfer.ethSignatureProofs) {
+      transfer.ethSignatureProofs = [
+        new ETHSignatureProof({
+          nonce: '',
+          signature: ''
+        })
+      ];
     }
   }
 
@@ -406,6 +439,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
     approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
     approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
+    approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
   }
   for (const approval of msg.incomingApprovals) {
     if (!approval.approvalCriteria) {
@@ -418,6 +452,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
     approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
     approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
+    approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
   }
   return msg;
 }
@@ -480,6 +515,16 @@ export function populateUndefinedForMsgSetDynamicStoreValue(msg: MsgSetDynamicSt
   return msg;
 }
 
+export function populateUndefinedForMsgIncrementStoreValue(msg: MsgIncrementStoreValue) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgDecrementStoreValue(msg: MsgDecrementStoreValue) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
 export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUniversalUpdateCollection) {
   if (!msg.defaultBalances) {
     msg.defaultBalances = new UserBalanceStore();
@@ -512,6 +557,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
       approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
       approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
       approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
+      approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
     }
   }
 
@@ -526,6 +572,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
     approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
     approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
+    approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
   }
 
   for (const approval of msg.collectionApprovals) {
@@ -540,6 +587,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
     approval.approvalCriteria.userRoyalties = populateUserRoyalties(approval.approvalCriteria.userRoyalties);
     approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
+    approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
   }
 
   for (const metadata of msg.collectionMetadataTimeline) {
@@ -552,6 +600,10 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     if (!metadata.offChainBalancesMetadata) {
       metadata.offChainBalancesMetadata = new OffChainBalancesMetadata();
     }
+  }
+
+  if (!msg.invariants) {
+    msg.invariants = new CollectionInvariants();
   }
 
   return msg;
@@ -607,6 +659,7 @@ export function populateUndefinedForMsgSetIncomingApproval(msg: MsgSetIncomingAp
   msg.approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(msg.approval.approvalCriteria.autoDeletionOptions);
   msg.approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(msg.approval.approvalCriteria.mustOwnBadges);
   msg.approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(msg.approval.approvalCriteria.dynamicStoreChallenges);
+  msg.approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(msg.approval.approvalCriteria.ethSignatureChallenges);
 
   return msg;
 }
@@ -626,6 +679,7 @@ export function populateUndefinedForMsgSetOutgoingApproval(msg: MsgSetOutgoingAp
   msg.approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(msg.approval.approvalCriteria.autoDeletionOptions);
   msg.approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(msg.approval.approvalCriteria.mustOwnBadges);
   msg.approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(msg.approval.approvalCriteria.dynamicStoreChallenges);
+  msg.approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(msg.approval.approvalCriteria.ethSignatureChallenges);
 
   return msg;
 }
@@ -1023,7 +1077,27 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           creator: '',
           storeId: '0',
           address: '',
-          value: false
+          value: '0'
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/IncrementStoreValue':
+      return {
+        type: msgType,
+        value: new MsgIncrementStoreValue({
+          creator: '',
+          storeId: '0',
+          address: '',
+          amount: '0'
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'badges/DecrementStoreValue':
+      return {
+        type: msgType,
+        value: new MsgDecrementStoreValue({
+          creator: '',
+          storeId: '0',
+          address: '',
+          amount: '0'
         }).toJson({ emitDefaultValues: true })
       };
     case 'badges/SetIncomingApproval':
@@ -1116,6 +1190,12 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               merkleProofs: [
                 new MerkleProof({
                   aunts: [new MerklePathItem()]
+                })
+              ],
+              ethSignatureProofs: [
+                new ETHSignatureProof({
+                  nonce: '',
+                  signature: ''
                 })
               ],
               precalculationOptions: new PrecalculationOptions({

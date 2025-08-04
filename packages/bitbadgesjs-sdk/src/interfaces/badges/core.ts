@@ -228,6 +228,11 @@ export interface iTransfer<T extends NumberType> {
   merkleProofs?: iMerkleProof[];
 
   /**
+   * The ETH signature proofs that satisfy the ETH signature challenges in the approvals. If the transfer deducts from multiple approvals, we check all the ETH signature proofs and assert at least one is valid for every challenge.
+   */
+  ethSignatureProofs?: iETHSignatureProof[];
+
+  /**
    * Arbitrary memo for the transfer.
    */
   memo?: string;
@@ -482,6 +487,46 @@ export interface iMerkleProof {
 /**
  * @category Interfaces
  */
+export interface iETHSignatureChallenge {
+  /**
+   * The Ethereum address that must sign the nonce for verification.
+   */
+  signer: string;
+
+  /**
+   * The ID of this ETH signature challenge for tracking the number of uses per signature.
+   */
+  challengeTrackerId: string;
+
+  /**
+   * The URI associated with this ETH signature challenge, optionally providing metadata about the challenge.
+   */
+  uri: string;
+
+  /**
+   * Arbitrary custom data associated with this ETH signature challenge.
+   */
+  customData: string;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iETHSignatureProof {
+  /**
+   * The nonce that was signed. The signature scheme is ETHSign(nonce + "-" + creatorAddress).
+   */
+  nonce: string;
+
+  /**
+   * The Ethereum signature of the nonce.
+   */
+  signature: string;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iTimelineItem<T extends NumberType> {
   /**
    * The times of the timeline item. Times in a timeline cannot overlap.
@@ -577,4 +622,18 @@ export interface iIsArchivedTimeline<T extends NumberType> extends iTimelineItem
    * Whether the collection is archived.
    */
   isArchived: boolean;
+}
+
+/**
+ * CollectionInvariants defines the invariants that apply to a collection.
+ * These are set upon genesis and cannot be modified.
+ *
+ * @category Interfaces
+ */
+export interface iCollectionInvariants {
+  /**
+   * If true, all ownership times must be full ranges [{ start: 1, end: GoMaxUInt64 }].
+   * This prevents time-based restrictions on badge ownership.
+   */
+  noCustomOwnershipTimes: boolean;
 }

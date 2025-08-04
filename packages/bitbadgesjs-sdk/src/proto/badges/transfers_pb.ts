@@ -228,6 +228,80 @@ export class MerkleChallenge extends Message<MerkleChallenge> {
 }
 
 /**
+ *
+ * ETHSignatureChallenge defines a rule for the approval in the form of an Ethereum signature challenge.
+ *
+ * An ETH signature challenge is a challenge where the user must provide a valid Ethereum signature for a specific nonce.
+ * The signature scheme is ETHSign(nonce + "-" + creatorAddress) and each signature can only be used once.
+ * All challenges must be met with valid solutions for the transfer to be approved.
+ *
+ * IMPORTANT: We track the usage of each signature to prevent replay attacks. Each signature can only be used once.
+ * If you update the challenge ID, then the used signatures tracker will reset and start a new tally.
+ * We recommend using a unique challenge ID for each challenge to prevent overlap and unexpected behavior.
+ *
+ * @generated from message badges.ETHSignatureChallenge
+ */
+export class ETHSignatureChallenge extends Message<ETHSignatureChallenge> {
+  /**
+   * The Ethereum address that must sign the nonce for verification.
+   *
+   * @generated from field: string signer = 1;
+   */
+  signer = "";
+
+  /**
+   * The ID of this ETH signature challenge for tracking the number of uses per signature.
+   *
+   * @generated from field: string challengeTrackerId = 2;
+   */
+  challengeTrackerId = "";
+
+  /**
+   * The URI associated with this ETH signature challenge, optionally providing metadata about the challenge.
+   *
+   * @generated from field: string uri = 3;
+   */
+  uri = "";
+
+  /**
+   * Arbitrary custom data associated with this ETH signature challenge.
+   *
+   * @generated from field: string customData = 4;
+   */
+  customData = "";
+
+  constructor(data?: PartialMessage<ETHSignatureChallenge>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.ETHSignatureChallenge";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "signer", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ETHSignatureChallenge {
+    return new ETHSignatureChallenge().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ETHSignatureChallenge {
+    return new ETHSignatureChallenge().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ETHSignatureChallenge {
+    return new ETHSignatureChallenge().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ETHSignatureChallenge | PlainMessage<ETHSignatureChallenge> | undefined, b: ETHSignatureChallenge | PlainMessage<ETHSignatureChallenge> | undefined): boolean {
+    return proto3.util.equals(ETHSignatureChallenge, a, b);
+  }
+}
+
+/**
  * UserOutgoingApproval defines the rules for the approval of an outgoing transfer from a user.
  *
  * @generated from message badges.UserOutgoingApproval
@@ -1423,6 +1497,13 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
    */
   dynamicStoreChallenges: DynamicStoreChallenge[] = [];
 
+  /**
+   * ETH signature challenges that the initiator must pass for approval.
+   *
+   * @generated from field: repeated badges.ETHSignatureChallenge ethSignatureChallenges = 16;
+   */
+  ethSignatureChallenges: ETHSignatureChallenge[] = [];
+
   constructor(data?: PartialMessage<ApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1446,6 +1527,7 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
     { no: 13, name: "userRoyalties", kind: "message", T: UserRoyalties },
     { no: 14, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
     { no: 15, name: "dynamicStoreChallenges", kind: "message", T: DynamicStoreChallenge, repeated: true },
+    { no: 16, name: "ethSignatureChallenges", kind: "message", T: ETHSignatureChallenge, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalCriteria {
@@ -1590,6 +1672,13 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
    */
   dynamicStoreChallenges: DynamicStoreChallenge[] = [];
 
+  /**
+   * ETH signature challenges that the initiator must pass for approval.
+   *
+   * @generated from field: repeated badges.ETHSignatureChallenge ethSignatureChallenges = 11;
+   */
+  ethSignatureChallenges: ETHSignatureChallenge[] = [];
+
   constructor(data?: PartialMessage<OutgoingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1608,6 +1697,7 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
     { no: 8, name: "autoDeletionOptions", kind: "message", T: AutoDeletionOptions },
     { no: 9, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
     { no: 10, name: "dynamicStoreChallenges", kind: "message", T: DynamicStoreChallenge, repeated: true },
+    { no: 11, name: "ethSignatureChallenges", kind: "message", T: ETHSignatureChallenge, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OutgoingApprovalCriteria {
@@ -1703,6 +1793,13 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
    */
   dynamicStoreChallenges: DynamicStoreChallenge[] = [];
 
+  /**
+   * ETH signature challenges that the initiator must pass for approval.
+   *
+   * @generated from field: repeated badges.ETHSignatureChallenge ethSignatureChallenges = 11;
+   */
+  ethSignatureChallenges: ETHSignatureChallenge[] = [];
+
   constructor(data?: PartialMessage<IncomingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1721,6 +1818,7 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
     { no: 8, name: "autoDeletionOptions", kind: "message", T: AutoDeletionOptions },
     { no: 9, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
     { no: 10, name: "dynamicStoreChallenges", kind: "message", T: DynamicStoreChallenge, repeated: true },
+    { no: 11, name: "ethSignatureChallenges", kind: "message", T: ETHSignatureChallenge, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncomingApprovalCriteria {
@@ -1969,9 +2067,16 @@ export class Transfer extends Message<Transfer> {
   merkleProofs: MerkleProof[] = [];
 
   /**
+   * The ETH signature proofs / solutions for all ETH signature challenges required for the transfer.
+   *
+   * @generated from field: repeated badges.ETHSignatureProof ethSignatureProofs = 6;
+   */
+  ethSignatureProofs: ETHSignatureProof[] = [];
+
+  /**
    * The memo for the transfer.
    *
-   * @generated from field: string memo = 6;
+   * @generated from field: string memo = 7;
    */
   memo = "";
 
@@ -1979,7 +2084,7 @@ export class Transfer extends Message<Transfer> {
    * The prioritized approvals for the transfer. By default, we scan linearly through the approvals and use the first match.
    * This field can be used to prioritize specific approvals and scan through them first.
    *
-   * @generated from field: repeated badges.ApprovalIdentifierDetails prioritizedApprovals = 7;
+   * @generated from field: repeated badges.ApprovalIdentifierDetails prioritizedApprovals = 8;
    */
   prioritizedApprovals: ApprovalIdentifierDetails[] = [];
 
@@ -1988,7 +2093,7 @@ export class Transfer extends Message<Transfer> {
    * If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
    * If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
    *
-   * @generated from field: bool onlyCheckPrioritizedCollectionApprovals = 8;
+   * @generated from field: bool onlyCheckPrioritizedCollectionApprovals = 9;
    */
   onlyCheckPrioritizedCollectionApprovals = false;
 
@@ -1997,7 +2102,7 @@ export class Transfer extends Message<Transfer> {
    * If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
    * If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
    *
-   * @generated from field: bool onlyCheckPrioritizedIncomingApprovals = 9;
+   * @generated from field: bool onlyCheckPrioritizedIncomingApprovals = 10;
    */
   onlyCheckPrioritizedIncomingApprovals = false;
 
@@ -2006,28 +2111,28 @@ export class Transfer extends Message<Transfer> {
    * If true, we will only check the prioritized approvals and fail if none of them match (i.e. do not check any non-prioritized approvals).
    * If false, we will check the prioritized approvals first and then scan through the rest of the approvals. 
    *
-   * @generated from field: bool onlyCheckPrioritizedOutgoingApprovals = 10;
+   * @generated from field: bool onlyCheckPrioritizedOutgoingApprovals = 11;
    */
   onlyCheckPrioritizedOutgoingApprovals = false;
 
   /**
    * The options for precalculating the balances.
    *
-   * @generated from field: badges.PrecalculationOptions precalculationOptions = 11;
+   * @generated from field: badges.PrecalculationOptions precalculationOptions = 12;
    */
   precalculationOptions?: PrecalculationOptions;
 
   /**
    * Affiliate address for the transfer.
    *
-   * @generated from field: string affiliateAddress = 12;
+   * @generated from field: string affiliateAddress = 13;
    */
   affiliateAddress = "";
 
   /**
    * The number of times to attempt approval validation. If 0 / not specified, we default to only one.
    *
-   * @generated from field: string numAttempts = 13;
+   * @generated from field: string numAttempts = 14;
    */
   numAttempts = "";
 
@@ -2044,14 +2149,15 @@ export class Transfer extends Message<Transfer> {
     { no: 3, name: "balances", kind: "message", T: Balance, repeated: true },
     { no: 4, name: "precalculateBalancesFromApproval", kind: "message", T: ApprovalIdentifierDetails },
     { no: 5, name: "merkleProofs", kind: "message", T: MerkleProof, repeated: true },
-    { no: 6, name: "memo", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "prioritizedApprovals", kind: "message", T: ApprovalIdentifierDetails, repeated: true },
-    { no: 8, name: "onlyCheckPrioritizedCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 9, name: "onlyCheckPrioritizedIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 10, name: "onlyCheckPrioritizedOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 11, name: "precalculationOptions", kind: "message", T: PrecalculationOptions },
-    { no: 12, name: "affiliateAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 13, name: "numAttempts", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "ethSignatureProofs", kind: "message", T: ETHSignatureProof, repeated: true },
+    { no: 7, name: "memo", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "prioritizedApprovals", kind: "message", T: ApprovalIdentifierDetails, repeated: true },
+    { no: 9, name: "onlyCheckPrioritizedCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 10, name: "onlyCheckPrioritizedIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 11, name: "onlyCheckPrioritizedOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 12, name: "precalculationOptions", kind: "message", T: PrecalculationOptions },
+    { no: 13, name: "affiliateAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 14, name: "numAttempts", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Transfer {
@@ -2223,6 +2329,55 @@ export class MerkleProof extends Message<MerkleProof> {
 
   static equals(a: MerkleProof | PlainMessage<MerkleProof> | undefined, b: MerkleProof | PlainMessage<MerkleProof> | undefined): boolean {
     return proto3.util.equals(MerkleProof, a, b);
+  }
+}
+
+/**
+ * ETHSignatureProof represents an Ethereum signature proof for a challenge.
+ *
+ * @generated from message badges.ETHSignatureProof
+ */
+export class ETHSignatureProof extends Message<ETHSignatureProof> {
+  /**
+   * The nonce that was signed. The signature scheme is ETHSign(nonce + "-" + creatorAddress).
+   *
+   * @generated from field: string nonce = 1;
+   */
+  nonce = "";
+
+  /**
+   * The Ethereum signature of the nonce.
+   *
+   * @generated from field: string signature = 2;
+   */
+  signature = "";
+
+  constructor(data?: PartialMessage<ETHSignatureProof>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.ETHSignatureProof";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "nonce", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "signature", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ETHSignatureProof {
+    return new ETHSignatureProof().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ETHSignatureProof {
+    return new ETHSignatureProof().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ETHSignatureProof {
+    return new ETHSignatureProof().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ETHSignatureProof | PlainMessage<ETHSignatureProof> | undefined, b: ETHSignatureProof | PlainMessage<ETHSignatureProof> | undefined): boolean {
+    return proto3.util.equals(ETHSignatureProof, a, b);
   }
 }
 

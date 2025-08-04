@@ -1,12 +1,13 @@
 import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
-import { iCosmosCoin } from '@/core/coin.js';
+import type { iCosmosCoin } from '@/core/coin.js';
 import type { iCollectionApproval, iUserIncomingApproval, iUserOutgoingApproval } from '../../../../interfaces/badges/approvals.js';
 import type {
-  CollectionId,
   iAddressList,
   iApprovalIdentifierDetails,
   iBadgeMetadataTimeline,
+  iBalance,
+  iCollectionInvariants,
   iCollectionMetadataTimeline,
   iCosmosCoinWrapperPathAddObject,
   iCustomDataTimeline,
@@ -15,7 +16,8 @@ import type {
   iOffChainBalancesMetadataTimeline,
   iStandardsTimeline,
   iTransfer,
-  iUintRange
+  iUintRange,
+  CollectionId
 } from '../../../../interfaces/badges/core.js';
 import type {
   iBadgeIdsActionPermission,
@@ -85,6 +87,9 @@ export interface iMsgCreateCollection<T extends NumberType> {
 
   /** The IBC wrapper paths to add. */
   cosmosCoinWrapperPathsToAdd?: iCosmosCoinWrapperPathAddObject<T>[];
+
+  /** Collection-level invariants that cannot be broken. These are set upon genesis and cannot be modified. */
+  invariants?: iCollectionInvariants;
 }
 
 /**
@@ -214,8 +219,36 @@ export interface iMsgSetDynamicStoreValue<T extends NumberType> {
   storeId: T;
   /** The address for which to set the value. */
   address: BitBadgesAddress;
-  /** The boolean value to set. */
-  value: boolean;
+  /** The usage count to set (number of times this address can use the approval). */
+  value: T;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgIncrementStoreValue<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the dynamic store. */
+  storeId: T;
+  /** The address for which to increment the value. */
+  address: BitBadgesAddress;
+  /** The amount to increment by. */
+  amount: T;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgDecrementStoreValue<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The ID of the dynamic store. */
+  storeId: T;
+  /** The address for which to decrement the value. */
+  address: BitBadgesAddress;
+  /** The amount to decrement by. */
+  amount: T;
 }
 
 /**

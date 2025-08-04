@@ -31,11 +31,11 @@ export class DynamicStore extends Message<DynamicStore> {
   createdBy = "";
 
   /**
-   * The default value for uninitialized addresses.
+   * The default value for uninitialized addresses (number of uses).
    *
-   * @generated from field: bool defaultValue = 3;
+   * @generated from field: string defaultValue = 3;
    */
-  defaultValue = false;
+  defaultValue = "";
 
   constructor(data?: PartialMessage<DynamicStore>) {
     super();
@@ -47,7 +47,7 @@ export class DynamicStore extends Message<DynamicStore> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "defaultValue", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 3, name: "defaultValue", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DynamicStore {
@@ -69,8 +69,8 @@ export class DynamicStore extends Message<DynamicStore> {
 
 /**
  *
- * A DynamicStoreValue stores a 0/1 flag for a specific address in a dynamic store.
- * This allows the creator to set boolean values per address.
+ * A DynamicStoreValue stores a usage count for a specific address in a dynamic store.
+ * This allows the creator to set usage counts per address that can be decremented on use.
  *
  * @generated from message badges.DynamicStoreValue
  */
@@ -90,11 +90,11 @@ export class DynamicStoreValue extends Message<DynamicStoreValue> {
   address = "";
 
   /**
-   * The boolean value (0 or 1).
+   * The usage count (number of times this address can use the approval).
    *
-   * @generated from field: bool value = 3;
+   * @generated from field: string value = 3;
    */
-  value = false;
+  value = "";
 
   constructor(data?: PartialMessage<DynamicStoreValue>) {
     super();
@@ -106,7 +106,7 @@ export class DynamicStoreValue extends Message<DynamicStoreValue> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "value", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 3, name: "value", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DynamicStoreValue {

@@ -19,20 +19,6 @@ export class Module extends Message<Module> {
    */
   authority = "";
 
-  /**
-   * payout_address defines where to send the revenue from the module
-   *
-   * @generated from field: string payout_address = 2;
-   */
-  payoutAddress = "";
-
-  /**
-   * fixed_cost_per_transfer defines the fixed cost per transfer
-   *
-   * @generated from field: string fixed_cost_per_transfer = 3;
-   */
-  fixedCostPerTransfer = "";
-
   constructor(data?: PartialMessage<Module>) {
     super();
     proto3.util.initPartial(data, this);
@@ -42,8 +28,6 @@ export class Module extends Message<Module> {
   static readonly typeName = "badges.module.v1.Module";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "authority", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "payout_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "fixed_cost_per_transfer", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Module {

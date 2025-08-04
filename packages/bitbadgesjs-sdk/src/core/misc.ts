@@ -41,7 +41,10 @@ import type {
   iOffChainBalancesMetadata,
   iOffChainBalancesMetadataTimeline,
   iStandardsTimeline,
-  iTimelineItem
+  iTimelineItem,
+  iETHSignatureChallenge,
+  iETHSignatureProof,
+  iCollectionInvariants
 } from '../interfaces/badges/core.js';
 import * as badges from '../proto/badges/index.js';
 import { AddressList } from './addressLists.js';
@@ -1953,5 +1956,153 @@ export class UpdateHistory<T extends NumberType> extends BaseNumberTypeClass<Upd
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UpdateHistory<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UpdateHistory<U>;
+  }
+}
+
+/**
+ * ETHSignatureChallenge is used to represent an Ethereum signature challenge for an approval.
+ *
+ * @category Approvals / Transferability
+ */
+export class ETHSignatureChallenge extends CustomTypeClass<ETHSignatureChallenge> implements iETHSignatureChallenge {
+  signer: string;
+  challengeTrackerId: string;
+  uri: string;
+  customData: string;
+
+  constructor(ethSignatureChallenge: iETHSignatureChallenge) {
+    super();
+    this.signer = ethSignatureChallenge.signer;
+    this.challengeTrackerId = ethSignatureChallenge.challengeTrackerId;
+    this.uri = ethSignatureChallenge.uri;
+    this.customData = ethSignatureChallenge.customData;
+  }
+
+  static required(): ETHSignatureChallenge {
+    return new ETHSignatureChallenge({
+      signer: '',
+      challengeTrackerId: '',
+      uri: '',
+      customData: ''
+    });
+  }
+
+  toProto(): badges.ETHSignatureChallenge {
+    return new badges.ETHSignatureChallenge(this.clone().toJson());
+  }
+
+  clone(): ETHSignatureChallenge {
+    return new ETHSignatureChallenge({ ...this });
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ETHSignatureChallenge {
+    // ETHSignatureChallenge doesn't have number fields, so conversion is a no-op
+    return new ETHSignatureChallenge({ ...this });
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ETHSignatureChallenge {
+    return ETHSignatureChallenge.fromProto(badges.ETHSignatureChallenge.fromJson(jsonValue, options));
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ETHSignatureChallenge {
+    return ETHSignatureChallenge.fromProto(badges.ETHSignatureChallenge.fromJsonString(jsonString, options));
+  }
+
+  static fromProto(item: badges.ETHSignatureChallenge): ETHSignatureChallenge {
+    return new ETHSignatureChallenge({
+      signer: item.signer,
+      challengeTrackerId: item.challengeTrackerId,
+      uri: item.uri,
+      customData: item.customData
+    });
+  }
+}
+
+/**
+ * ETHSignatureProof is used to represent an Ethereum signature proof.
+ * The ETH signature proof is used to prove that a specific nonce was signed by an Ethereum address.
+ *
+ * @category Approvals / Transferability
+ */
+export class ETHSignatureProof extends CustomTypeClass<ETHSignatureProof> implements iETHSignatureProof {
+  nonce: string;
+  signature: string;
+
+  constructor(ethSignatureProof: iETHSignatureProof) {
+    super();
+    this.nonce = ethSignatureProof.nonce;
+    this.signature = ethSignatureProof.signature;
+  }
+
+  static required(): ETHSignatureProof {
+    return new ETHSignatureProof({
+      nonce: '',
+      signature: ''
+    });
+  }
+
+  toProto(): badges.ETHSignatureProof {
+    return new badges.ETHSignatureProof(this.clone().toJson());
+  }
+
+  clone(): ETHSignatureProof {
+    return new ETHSignatureProof({ ...this });
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ETHSignatureProof {
+    // ETHSignatureProof doesn't have number fields, so conversion is a no-op
+    return new ETHSignatureProof({ ...this });
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ETHSignatureProof {
+    return ETHSignatureProof.fromProto(badges.ETHSignatureProof.fromJson(jsonValue, options));
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ETHSignatureProof {
+    return ETHSignatureProof.fromProto(badges.ETHSignatureProof.fromJsonString(jsonString, options));
+  }
+
+  static fromProto(item: badges.ETHSignatureProof): ETHSignatureProof {
+    return new ETHSignatureProof({
+      nonce: item.nonce,
+      signature: item.signature
+    });
+  }
+}
+
+/**
+ * CollectionInvariants defines the invariants that apply to a collection.
+ * These are set upon genesis and cannot be modified.
+ *
+ * @category Interfaces
+ */
+export class CollectionInvariants extends CustomTypeClass<CollectionInvariants> implements iCollectionInvariants {
+  /**
+   * If true, all ownership times must be full ranges [{ start: 1, end: GoMaxUInt64 }].
+   * This prevents time-based restrictions on badge ownership.
+   */
+  noCustomOwnershipTimes: boolean;
+
+  constructor(data: iCollectionInvariants) {
+    super();
+    this.noCustomOwnershipTimes = data.noCustomOwnershipTimes;
+  }
+
+  toProto(): badges.CollectionInvariants {
+    return new badges.CollectionInvariants(this.toJson());
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CollectionInvariants {
+    return CollectionInvariants.fromProto(badges.CollectionInvariants.fromJson(jsonValue, options));
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CollectionInvariants {
+    return CollectionInvariants.fromProto(badges.CollectionInvariants.fromJsonString(jsonString, options));
+  }
+
+  static fromProto(item: badges.CollectionInvariants): CollectionInvariants {
+    return new CollectionInvariants({
+      noCustomOwnershipTimes: item.noCustomOwnershipTimes
+    });
   }
 }

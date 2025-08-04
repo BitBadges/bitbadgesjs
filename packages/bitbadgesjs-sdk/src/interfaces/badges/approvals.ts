@@ -1,6 +1,6 @@
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iApprovalInfoDetails, iIncomingApprovalCriteriaWithDetails } from '@/core/approvals.js';
-import type { iAddressList, iBalance, iCoinTransfer, iMerkleChallenge, iMustOwnBadge, iUintRange } from './core.js';
+import type { iAddressList, iBalance, iCoinTransfer, iETHSignatureChallenge, iMerkleChallenge, iMustOwnBadge, iUintRange } from './core.js';
 
 /**
  * @category Interfaces
@@ -60,6 +60,8 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   autoDeletionOptions?: iAutoDeletionOptions;
   /** The list of dynamic store challenges that the initiator must pass for approval. */
   dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
+  /** The list of ETH signature challenges that the initiator must pass for approval. */
+  ethSignatureChallenges?: iETHSignatureChallenge[];
 }
 
 /**
@@ -242,6 +244,8 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   requireFromDoesNotEqualInitiatedBy?: boolean;
   /** The list of dynamic store challenges that the initiator must pass for approval. */
   dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
+  /** The list of ETH signature challenges that the initiator must pass for approval. */
+  ethSignatureChallenges?: iETHSignatureChallenge[];
 }
 
 /**
@@ -306,6 +310,8 @@ export interface iApprovalCriteria<T extends NumberType> {
   userRoyalties?: iUserRoyalties<T>;
   /** The list of dynamic store challenges that the initiator must pass for approval. */
   dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
+  /** The list of ETH signature challenges that the initiator must pass for approval. */
+  ethSignatureChallenges?: iETHSignatureChallenge[];
 }
 
 /**

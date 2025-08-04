@@ -46,7 +46,7 @@ import type { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTre
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import { AddressList, convertListIdToBech32 } from './addressLists.js';
 import { Balance, BalanceArray } from './balances.js';
-import { CoinTransfer, MerkleChallenge, MustOwnBadges } from './misc.js';
+import { CoinTransfer, MerkleChallenge, MustOwnBadges, ETHSignatureChallenge } from './misc.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
 import { GetListIdWithOptions, GetListWithOptions, GetUintRangesWithOptions, getOverlapsAndNonOverlaps } from './overlaps.js';
 import type { CollectionApprovalPermissionWithDetails } from './permissions.js';
@@ -316,6 +316,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   requireToDoesNotEqualInitiatedBy?: boolean;
   coinTransfers?: CoinTransfer<T>[] | undefined;
   dynamicStoreChallenges?: DynamicStoreChallenge<T>[];
+  ethSignatureChallenges?: ETHSignatureChallenge[];
 
   constructor(msg: iOutgoingApprovalCriteria<T>) {
     super();
@@ -324,28 +325,28 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
-    this.autoDeletionOptions = msg.autoDeletionOptions ? new AutoDeletionOptions(msg.autoDeletionOptions) : undefined;
     this.requireToEqualsInitiatedBy = msg.requireToEqualsInitiatedBy;
     this.requireToDoesNotEqualInitiatedBy = msg.requireToDoesNotEqualInitiatedBy;
+    this.autoDeletionOptions = msg.autoDeletionOptions ? new AutoDeletionOptions(msg.autoDeletionOptions) : undefined;
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
     this.dynamicStoreChallenges = msg.dynamicStoreChallenges?.map((x) => new DynamicStoreChallenge(x));
+    this.ethSignatureChallenges = msg.ethSignatureChallenges?.map((x) => new ETHSignatureChallenge(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteria<U> {
-    return new OutgoingApprovalCriteria(
-      deepCopyPrimitives({
-        merkleChallenges: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
-        mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
-        predeterminedBalances: this.predeterminedBalances?.convert(convertFunction),
-        approvalAmounts: this.approvalAmounts?.convert(convertFunction),
-        maxNumTransfers: this.maxNumTransfers?.convert(convertFunction),
-        autoDeletionOptions: this.autoDeletionOptions?.convert(convertFunction),
-        requireToEqualsInitiatedBy: this.requireToEqualsInitiatedBy,
-        requireToDoesNotEqualInitiatedBy: this.requireToDoesNotEqualInitiatedBy,
-        coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction)),
-        dynamicStoreChallenges: this.dynamicStoreChallenges?.map((x) => x.convert(convertFunction))
-      })
-    );
+    return new OutgoingApprovalCriteria<U>({
+      merkleChallenges: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
+      mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
+      predeterminedBalances: this.predeterminedBalances?.convert(convertFunction),
+      approvalAmounts: this.approvalAmounts?.convert(convertFunction),
+      maxNumTransfers: this.maxNumTransfers?.convert(convertFunction),
+      requireToEqualsInitiatedBy: this.requireToEqualsInitiatedBy,
+      requireToDoesNotEqualInitiatedBy: this.requireToDoesNotEqualInitiatedBy,
+      autoDeletionOptions: this.autoDeletionOptions?.convert(convertFunction),
+      coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction)),
+      dynamicStoreChallenges: this.dynamicStoreChallenges?.map((x) => x.convert(convertFunction)),
+      ethSignatureChallenges: this.ethSignatureChallenges
+    });
   }
 
   toProto(): badges.OutgoingApprovalCriteria {
@@ -384,7 +385,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined,
       dynamicStoreChallenges: item.dynamicStoreChallenges
         ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction))
-        : undefined
+        : undefined,
+      ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined
     });
   }
 
@@ -400,6 +402,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       mustOwnBadges: this.mustOwnBadges,
       coinTransfers: this.coinTransfers,
       dynamicStoreChallenges: this.dynamicStoreChallenges,
+      ethSignatureChallenges: this.ethSignatureChallenges,
 
       requireFromEqualsInitiatedBy: false,
       requireFromDoesNotEqualInitiatedBy: false,
@@ -1101,6 +1104,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   requireFromDoesNotEqualInitiatedBy?: boolean;
   coinTransfers?: CoinTransfer<T>[] | undefined;
   dynamicStoreChallenges?: DynamicStoreChallenge<T>[];
+  ethSignatureChallenges?: ETHSignatureChallenge[];
 
   constructor(msg: iIncomingApprovalCriteria<T>) {
     super();
@@ -1114,23 +1118,23 @@ export class IncomingApprovalCriteria<T extends NumberType>
     this.requireFromDoesNotEqualInitiatedBy = msg.requireFromDoesNotEqualInitiatedBy;
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
     this.dynamicStoreChallenges = msg.dynamicStoreChallenges?.map((x) => new DynamicStoreChallenge(x));
+    this.ethSignatureChallenges = msg.ethSignatureChallenges?.map((x) => new ETHSignatureChallenge(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteria<U> {
-    return new IncomingApprovalCriteria(
-      deepCopyPrimitives({
-        merkleChallenges: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
-        mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
-        predeterminedBalances: this.predeterminedBalances ? this.predeterminedBalances.convert(convertFunction) : undefined,
-        approvalAmounts: this.approvalAmounts ? this.approvalAmounts.convert(convertFunction) : undefined,
-        maxNumTransfers: this.maxNumTransfers ? this.maxNumTransfers.convert(convertFunction) : undefined,
-        autoDeletionOptions: this.autoDeletionOptions ? this.autoDeletionOptions.convert(convertFunction) : undefined,
-        requireFromEqualsInitiatedBy: this.requireFromEqualsInitiatedBy,
-        requireFromDoesNotEqualInitiatedBy: this.requireFromDoesNotEqualInitiatedBy,
-        coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction)),
-        dynamicStoreChallenges: this.dynamicStoreChallenges?.map((x) => x.convert(convertFunction))
-      })
-    );
+    return new IncomingApprovalCriteria<U>({
+      merkleChallenges: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
+      mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
+      predeterminedBalances: this.predeterminedBalances?.convert(convertFunction),
+      approvalAmounts: this.approvalAmounts?.convert(convertFunction),
+      maxNumTransfers: this.maxNumTransfers?.convert(convertFunction),
+      autoDeletionOptions: this.autoDeletionOptions?.convert(convertFunction),
+      requireFromEqualsInitiatedBy: this.requireFromEqualsInitiatedBy,
+      requireFromDoesNotEqualInitiatedBy: this.requireFromDoesNotEqualInitiatedBy,
+      coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction)),
+      dynamicStoreChallenges: this.dynamicStoreChallenges?.map((x) => x.convert(convertFunction)),
+      ethSignatureChallenges: this.ethSignatureChallenges
+    });
   }
 
   toProto(): badges.IncomingApprovalCriteria {
@@ -1163,13 +1167,14 @@ export class IncomingApprovalCriteria<T extends NumberType>
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
+      autoDeletionOptions: item.autoDeletionOptions ? AutoDeletionOptions.fromProto(item.autoDeletionOptions, convertFunction) : undefined,
       requireFromEqualsInitiatedBy: item.requireFromEqualsInitiatedBy,
       requireFromDoesNotEqualInitiatedBy: item.requireFromDoesNotEqualInitiatedBy,
-      autoDeletionOptions: item.autoDeletionOptions ? AutoDeletionOptions.fromProto(item.autoDeletionOptions, convertFunction) : undefined,
       coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined,
       dynamicStoreChallenges: item.dynamicStoreChallenges
         ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction))
-        : undefined
+        : undefined,
+      ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined
     });
   }
 
@@ -1185,6 +1190,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
       autoDeletionOptions: this.autoDeletionOptions,
       mustOwnBadges: this.mustOwnBadges,
       dynamicStoreChallenges: this.dynamicStoreChallenges,
+      ethSignatureChallenges: this.ethSignatureChallenges,
 
       requireToEqualsInitiatedBy: false,
       requireToDoesNotEqualInitiatedBy: false,
@@ -1443,6 +1449,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   coinTransfers?: CoinTransfer<T>[] | undefined;
   userRoyalties?: UserRoyalties<T>;
   dynamicStoreChallenges?: DynamicStoreChallenge<T>[];
+  ethSignatureChallenges?: ETHSignatureChallenge[];
 
   constructor(msg: iApprovalCriteria<T>) {
     super();
@@ -1461,6 +1468,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
     this.userRoyalties = msg.userRoyalties ? new UserRoyalties(msg.userRoyalties) : undefined;
     this.dynamicStoreChallenges = msg.dynamicStoreChallenges?.map((x) => new DynamicStoreChallenge(x));
+    this.ethSignatureChallenges = msg.ethSignatureChallenges?.map((x) => new ETHSignatureChallenge(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteria<U> {
@@ -1505,7 +1513,8 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       userRoyalties: item.userRoyalties ? UserRoyalties.fromProto(item.userRoyalties, convertFunction) : undefined,
       dynamicStoreChallenges: item.dynamicStoreChallenges
         ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction))
-        : undefined
+        : undefined,
+      ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined
     });
   }
 

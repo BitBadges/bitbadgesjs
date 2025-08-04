@@ -11,6 +11,8 @@ export * from './msgSetCollectionApprovals.js';
 export * from './msgSetCollectionMetadata.js';
 export * from './msgSetCustomData.js';
 export * from './msgSetDynamicStoreValue.js';
+export * from './msgIncrementStoreValue.js';
+export * from './msgDecrementStoreValue.js';
 export * from './msgSetIncomingApproval.js';
 export * from './msgSetIsArchived.js';
 export * from './msgSetManager.js';

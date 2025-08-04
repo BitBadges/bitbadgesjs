@@ -147,6 +147,14 @@ export class BadgeCollection extends Message<BadgeCollection> {
    */
   cosmosCoinWrapperPaths: CosmosCoinWrapperPath[] = [];
 
+  /**
+   * Collection-level invariants that cannot be broken.
+   * These are set upon genesis and cannot be modified.
+   *
+   * @generated from field: badges.CollectionInvariants invariants = 18;
+   */
+  invariants?: CollectionInvariants;
+
   constructor(data?: PartialMessage<BadgeCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -171,6 +179,7 @@ export class BadgeCollection extends Message<BadgeCollection> {
     { no: 15, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 16, name: "mintEscrowAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 17, name: "cosmosCoinWrapperPaths", kind: "message", T: CosmosCoinWrapperPath, repeated: true },
+    { no: 18, name: "invariants", kind: "message", T: CollectionInvariants },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCollection {
@@ -297,6 +306,48 @@ export class DenomUnit extends Message<DenomUnit> {
 
   static equals(a: DenomUnit | PlainMessage<DenomUnit> | undefined, b: DenomUnit | PlainMessage<DenomUnit> | undefined): boolean {
     return proto3.util.equals(DenomUnit, a, b);
+  }
+}
+
+/**
+ * CollectionInvariants defines the invariants that apply to a collection.
+ *
+ * @generated from message badges.CollectionInvariants
+ */
+export class CollectionInvariants extends Message<CollectionInvariants> {
+  /**
+   * If true, all ownership times must be full ranges [{ start: 1, end: GoMaxUInt64 }].
+   * This prevents time-based restrictions on badge ownership.
+   *
+   * @generated from field: bool noCustomOwnershipTimes = 1;
+   */
+  noCustomOwnershipTimes = false;
+
+  constructor(data?: PartialMessage<CollectionInvariants>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.CollectionInvariants";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "noCustomOwnershipTimes", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionInvariants {
+    return new CollectionInvariants().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CollectionInvariants {
+    return new CollectionInvariants().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CollectionInvariants {
+    return new CollectionInvariants().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CollectionInvariants | PlainMessage<CollectionInvariants> | undefined, b: CollectionInvariants | PlainMessage<CollectionInvariants> | undefined): boolean {
+    return proto3.util.equals(CollectionInvariants, a, b);
   }
 }
 

@@ -22,6 +22,7 @@ import type { iMsgCreateCollection } from './interfaces.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
 import { CosmosCoin } from '@/core/coin.js';
 import { CosmosCoinWrapperPathAddObject } from '@/core/ibc-wrappers.js';
+import { CollectionInvariants } from '@/core/misc.js';
 
 /**
  * MsgCreateCollection is a transaction that can be used to create a collection.
@@ -47,6 +48,7 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
   isArchivedTimeline?: IsArchivedTimeline<T>[];
   mintEscrowCoinsToTransfer?: CosmosCoin<T>[];
   cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject<T>[];
+  invariants?: CollectionInvariants;
 
   constructor(msg: iMsgCreateCollection<T>) {
     super();
@@ -64,6 +66,8 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
     this.standardsTimeline = msg.standardsTimeline?.map((x) => new StandardsTimeline(x));
     this.isArchivedTimeline = msg.isArchivedTimeline?.map((x) => new IsArchivedTimeline(x));
     this.mintEscrowCoinsToTransfer = msg.mintEscrowCoinsToTransfer ? msg.mintEscrowCoinsToTransfer.map((x) => new CosmosCoin(x)) : undefined;
+    this.cosmosCoinWrapperPathsToAdd = msg.cosmosCoinWrapperPathsToAdd?.map((x) => new CosmosCoinWrapperPathAddObject(x));
+    this.invariants = msg.invariants ? new CollectionInvariants(msg.invariants) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgCreateCollection<U> {
@@ -110,7 +114,8 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
       standardsTimeline: protoMsg.standardsTimeline?.map((x) => StandardsTimeline.fromProto(x, convertFunction)),
       isArchivedTimeline: protoMsg.isArchivedTimeline?.map((x) => IsArchivedTimeline.fromProto(x, convertFunction)),
       mintEscrowCoinsToTransfer: protoMsg.mintEscrowCoinsToTransfer?.map((x) => CosmosCoin.fromProto(x, convertFunction)),
-      cosmosCoinWrapperPathsToAdd: protoMsg.cosmosCoinWrapperPathsToAdd?.map((x) => CosmosCoinWrapperPathAddObject.fromProto(x, convertFunction))
+      cosmosCoinWrapperPathsToAdd: protoMsg.cosmosCoinWrapperPathsToAdd?.map((x) => CosmosCoinWrapperPathAddObject.fromProto(x, convertFunction)),
+      invariants: protoMsg.invariants ? CollectionInvariants.fromProto(protoMsg.invariants) : undefined
     });
   }
 

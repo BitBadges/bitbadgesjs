@@ -8,7 +8,7 @@ import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft, safeSubtractKeep
 import type { NumberType } from '../common/string-numbers.js';
 import { BigIntify, Stringify } from '../common/string-numbers.js';
 import { Balance, BalanceArray, cleanBalances } from './balances.js';
-import { ApprovalIdentifierDetails, MerkleProof } from './misc.js';
+import { ApprovalIdentifierDetails, MerkleProof, ETHSignatureProof } from './misc.js';
 import { UintRangeArray } from './uintRanges.js';
 import { PrecalculationOptions } from '@/api-indexer/docs/activity.js';
 
@@ -23,6 +23,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
   balances: BalanceArray<T>;
   precalculateBalancesFromApproval?: ApprovalIdentifierDetails<T>;
   merkleProofs?: MerkleProof[];
+  ethSignatureProofs?: ETHSignatureProof[];
   memo?: string;
   prioritizedApprovals?: ApprovalIdentifierDetails<T>[];
   onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
@@ -41,6 +42,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       ? new ApprovalIdentifierDetails(transfer.precalculateBalancesFromApproval)
       : undefined;
     this.merkleProofs = transfer.merkleProofs ? transfer.merkleProofs.map((b) => new MerkleProof(b)) : undefined;
+    this.ethSignatureProofs = transfer.ethSignatureProofs ? transfer.ethSignatureProofs.map((b) => new ETHSignatureProof(b)) : undefined;
     this.memo = transfer.memo;
     this.prioritizedApprovals = transfer.prioritizedApprovals
       ? transfer.prioritizedApprovals.map((b) => new ApprovalIdentifierDetails(b))
@@ -91,6 +93,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
         ? ApprovalIdentifierDetails.fromProto(item.precalculateBalancesFromApproval, convertFunction)
         : undefined,
       merkleProofs: item.merkleProofs ? item.merkleProofs.map((b) => MerkleProof.fromProto(b)) : undefined,
+      ethSignatureProofs: item.ethSignatureProofs ? item.ethSignatureProofs.map((b) => ETHSignatureProof.fromProto(b)) : undefined,
       memo: item.memo ? item.memo : undefined,
       prioritizedApprovals: item.prioritizedApprovals
         ? item.prioritizedApprovals.map((b) => ApprovalIdentifierDetails.fromProto(b, convertFunction))

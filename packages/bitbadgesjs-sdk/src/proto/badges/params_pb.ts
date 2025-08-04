@@ -19,6 +19,13 @@ export class Params extends Message<Params> {
    */
   allowedDenoms: string[] = [];
 
+  /**
+   * affiliate_percentage defines the percentage of the transfer amount that goes to the affiliate
+   *
+   * @generated from field: string affiliate_percentage = 2;
+   */
+  affiliatePercentage = "";
+
   constructor(data?: PartialMessage<Params>) {
     super();
     proto3.util.initPartial(data, this);
@@ -28,6 +35,7 @@ export class Params extends Message<Params> {
   static readonly typeName = "badges.Params";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "allowed_denoms", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 2, name: "affiliate_percentage", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Params {

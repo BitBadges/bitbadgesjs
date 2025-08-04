@@ -1,4 +1,5 @@
 import { ApprovalCriteria, OutgoingApprovalCriteria, IncomingApprovalCriteria, DynamicStoreChallenge } from './approvals.js';
+import { ETHSignatureChallenge } from './misc.js';
 import { BigIntify, Stringify } from '../common/string-numbers.js';
 
 describe('DynamicStoreChallenges', () => {
@@ -81,5 +82,142 @@ describe('DynamicStoreChallenges', () => {
     expect(casted.dynamicStoreChallenges).toHaveLength(2);
     expect(casted.dynamicStoreChallenges![0].storeId).toBe(1n);
     expect(casted.dynamicStoreChallenges![1].storeId).toBe(2n);
+  });
+});
+
+describe('ETHSignatureChallenges', () => {
+  it('should create ETHSignatureChallenge instances', () => {
+    const ethSignatureChallenge = new ETHSignatureChallenge({
+      signer: '0x1234567890123456789012345678901234567890',
+      challengeTrackerId: 'test-tracker',
+      uri: 'https://example.com',
+      customData: 'test-data'
+    });
+
+    expect(ethSignatureChallenge.signer).toBe('0x1234567890123456789012345678901234567890');
+    expect(ethSignatureChallenge.challengeTrackerId).toBe('test-tracker');
+    expect(ethSignatureChallenge.uri).toBe('https://example.com');
+    expect(ethSignatureChallenge.customData).toBe('test-data');
+  });
+
+  it('should convert ETHSignatureChallenge between number types', () => {
+    const ethSignatureChallenge = new ETHSignatureChallenge({
+      signer: '0x1234567890123456789012345678901234567890',
+      challengeTrackerId: 'test-tracker',
+      uri: 'https://example.com',
+      customData: 'test-data'
+    });
+
+    // ETHSignatureChallenge doesn't have number fields, so conversion should be a no-op
+    const converted = ethSignatureChallenge.convert(BigIntify);
+    expect(converted.signer).toBe('0x1234567890123456789012345678901234567890');
+    expect(converted.challengeTrackerId).toBe('test-tracker');
+    expect(converted.uri).toBe('https://example.com');
+    expect(converted.customData).toBe('test-data');
+  });
+
+  it('should include ethSignatureChallenges in ApprovalCriteria', () => {
+    const approvalCriteria = new ApprovalCriteria({
+      ethSignatureChallenges: [
+        new ETHSignatureChallenge({
+          signer: '0x1234567890123456789012345678901234567890',
+          challengeTrackerId: 'test-tracker',
+          uri: 'https://example.com',
+          customData: 'test-data'
+        })
+      ]
+    });
+
+    expect(approvalCriteria.ethSignatureChallenges).toBeDefined();
+    expect(approvalCriteria.ethSignatureChallenges?.length).toBe(1);
+    expect(approvalCriteria.ethSignatureChallenges?.[0].signer).toBe('0x1234567890123456789012345678901234567890');
+  });
+
+  it('should include ethSignatureChallenges in OutgoingApprovalCriteria', () => {
+    const outgoingApprovalCriteria = new OutgoingApprovalCriteria({
+      ethSignatureChallenges: [
+        new ETHSignatureChallenge({
+          signer: '0x1234567890123456789012345678901234567890',
+          challengeTrackerId: 'test-tracker',
+          uri: 'https://example.com',
+          customData: 'test-data'
+        })
+      ]
+    });
+
+    expect(outgoingApprovalCriteria.ethSignatureChallenges).toBeDefined();
+    expect(outgoingApprovalCriteria.ethSignatureChallenges?.length).toBe(1);
+    expect(outgoingApprovalCriteria.ethSignatureChallenges?.[0].signer).toBe('0x1234567890123456789012345678901234567890');
+  });
+
+  it('should include ethSignatureChallenges in IncomingApprovalCriteria', () => {
+    const incomingApprovalCriteria = new IncomingApprovalCriteria({
+      ethSignatureChallenges: [
+        new ETHSignatureChallenge({
+          signer: '0x1234567890123456789012345678901234567890',
+          challengeTrackerId: 'test-tracker',
+          uri: 'https://example.com',
+          customData: 'test-data'
+        })
+      ]
+    });
+
+    expect(incomingApprovalCriteria.ethSignatureChallenges).toBeDefined();
+    expect(incomingApprovalCriteria.ethSignatureChallenges?.length).toBe(1);
+    expect(incomingApprovalCriteria.ethSignatureChallenges?.[0].signer).toBe('0x1234567890123456789012345678901234567890');
+  });
+
+  it('should convert approval criteria with ethSignatureChallenges', () => {
+    const approvalCriteria = new ApprovalCriteria({
+      ethSignatureChallenges: [
+        new ETHSignatureChallenge({
+          signer: '0x1234567890123456789012345678901234567890',
+          challengeTrackerId: 'test-tracker',
+          uri: 'https://example.com',
+          customData: 'test-data'
+        })
+      ]
+    });
+
+    const converted = approvalCriteria.convert(BigIntify);
+    expect(converted.ethSignatureChallenges).toBeDefined();
+    expect(converted.ethSignatureChallenges?.length).toBe(1);
+    expect(converted.ethSignatureChallenges?.[0].signer).toBe('0x1234567890123456789012345678901234567890');
+  });
+
+  it('should cast OutgoingApprovalCriteria to ApprovalCriteria with ethSignatureChallenges', () => {
+    const outgoingApprovalCriteria = new OutgoingApprovalCriteria({
+      ethSignatureChallenges: [
+        new ETHSignatureChallenge({
+          signer: '0x1234567890123456789012345678901234567890',
+          challengeTrackerId: 'test-tracker',
+          uri: 'https://example.com',
+          customData: 'test-data'
+        })
+      ]
+    });
+
+    const approvalCriteria = outgoingApprovalCriteria.castToCollectionApprovalCriteria();
+    expect(approvalCriteria.ethSignatureChallenges).toBeDefined();
+    expect(approvalCriteria.ethSignatureChallenges?.length).toBe(1);
+    expect(approvalCriteria.ethSignatureChallenges?.[0].signer).toBe('0x1234567890123456789012345678901234567890');
+  });
+
+  it('should cast IncomingApprovalCriteria to ApprovalCriteria with ethSignatureChallenges', () => {
+    const incomingApprovalCriteria = new IncomingApprovalCriteria({
+      ethSignatureChallenges: [
+        new ETHSignatureChallenge({
+          signer: '0x1234567890123456789012345678901234567890',
+          challengeTrackerId: 'test-tracker',
+          uri: 'https://example.com',
+          customData: 'test-data'
+        })
+      ]
+    });
+
+    const approvalCriteria = incomingApprovalCriteria.castToCollectionApprovalCriteria();
+    expect(approvalCriteria.ethSignatureChallenges).toBeDefined();
+    expect(approvalCriteria.ethSignatureChallenges?.length).toBe(1);
+    expect(approvalCriteria.ethSignatureChallenges?.[0].signer).toBe('0x1234567890123456789012345678901234567890');
   });
 });

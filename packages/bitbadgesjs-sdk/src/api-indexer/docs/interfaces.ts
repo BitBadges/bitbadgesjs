@@ -17,6 +17,7 @@ import type {
   iApprovalIdentifierDetails,
   iBadgeMetadataTimeline,
   iBalance,
+  iCollectionInvariants,
   iCollectionMetadataTimeline,
   iCustomDataTimeline,
   iDenomUnit,
@@ -521,6 +522,8 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   mintEscrowAddress: string;
   /** The IBC wrapper paths for the collection */
   cosmosCoinWrapperPaths: iCosmosCoinWrapperPath<T>[];
+  /** Collection-level invariants that cannot be broken. These are set upon genesis and cannot be modified. */
+  invariants: iCollectionInvariants;
 }
 
 /**

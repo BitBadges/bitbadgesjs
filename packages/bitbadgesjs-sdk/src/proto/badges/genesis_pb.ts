@@ -93,11 +93,21 @@ export class GenesisState extends Message<GenesisState> {
   nextDynamicStoreId = "";
 
   /**
-   * this line is used by starport scaffolding # genesis/proto/state
-   *
    * @generated from field: repeated badges.DynamicStoreValue dynamicStoreValues = 16;
    */
   dynamicStoreValues: DynamicStoreValue[] = [];
+
+  /**
+   * @generated from field: repeated string ethSignatureTrackers = 17;
+   */
+  ethSignatureTrackers: string[] = [];
+
+  /**
+   * this line is used by starport scaffolding # genesis/proto/state
+   *
+   * @generated from field: repeated string ethSignatureTrackerStoreKeys = 18;
+   */
+  ethSignatureTrackerStoreKeys: string[] = [];
 
   constructor(data?: PartialMessage<GenesisState>) {
     super();
@@ -123,6 +133,8 @@ export class GenesisState extends Message<GenesisState> {
     { no: 14, name: "dynamicStores", kind: "message", T: DynamicStore, repeated: true },
     { no: 15, name: "nextDynamicStoreId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 16, name: "dynamicStoreValues", kind: "message", T: DynamicStoreValue, repeated: true },
+    { no: 17, name: "ethSignatureTrackers", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 18, name: "ethSignatureTrackerStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisState {
