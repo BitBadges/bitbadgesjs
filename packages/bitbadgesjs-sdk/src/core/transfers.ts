@@ -1,4 +1,4 @@
-import type { BitBadgesAddress, UNIXMilliTimestamp } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress, UNIXMilliTimestamp } from '@/api-indexer/docs-types/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, getConverterFunction } from '@/common/base.js';
 import type { iBalance, iTransfer } from '@/interfaces/badges/core.js';
 import * as badges from '@/proto/badges/transfers_pb.js';
@@ -10,7 +10,7 @@ import { BigIntify, Stringify } from '../common/string-numbers.js';
 import { Balance, BalanceArray, cleanBalances } from './balances.js';
 import { ApprovalIdentifierDetails, MerkleProof, ETHSignatureProof } from './misc.js';
 import { UintRangeArray } from './uintRanges.js';
-import { PrecalculationOptions } from '@/api-indexer/docs/activity.js';
+import { PrecalculationOptions } from '@/api-indexer/docs-types/activity.js';
 
 /**
  * Transfer is used to represent a transfer of badges. This is compatible with the MsgTransferBadges message.

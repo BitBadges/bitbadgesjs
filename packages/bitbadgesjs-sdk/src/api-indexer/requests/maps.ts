@@ -2,8 +2,8 @@ import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, CustomTypeClass, parseArrayString, ParsedQs } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { iValueStore, ValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
-import { MapWithValues } from '../docs/docs.js';
-import { iMapWithValues } from '../docs/interfaces.js';
+import { MapWithValues } from '../docs-types/docs.js';
+import { iMapWithValues } from '../docs-types/interfaces.js';
 
 /**
  * @category API Requests / Responses

@@ -7,7 +7,7 @@ import type { NumberType } from '../common/string-numbers.js';
 export interface iCosmosCoin<T extends NumberType> {
   /** The amount of the coin. */
   amount: T;
-  /** The denomination of the coin (e.g. "badge"). */
+  /** The denomination of the coin (e.g. "ubadge"). */
   denom: string;
 }
 

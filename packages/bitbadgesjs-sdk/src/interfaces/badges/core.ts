@@ -1,6 +1,6 @@
 //IMPORTANT: Keep all imports type-safe by using the `type` keyword. If not, this will mess up the circular dependency check.
 
-import type { iPrecalculationOptions } from '@/api-indexer/docs/interfaces.js';
+import type { iPrecalculationOptions } from '@/api-indexer/docs-types/interfaces.js';
 import type { BitBadgesAddress, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
 import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
 import type { NumberType } from '@/common/string-numbers.js';

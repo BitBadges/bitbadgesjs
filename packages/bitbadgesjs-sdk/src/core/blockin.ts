@@ -1,4 +1,4 @@
-import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { SiwbbAndGroup, SiwbbAssetConditionGroup, SiwbbOrGroup, OwnershipRequirements } from '@/api-indexer/requests/blockin.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import { NumberType } from '@/common/string-numbers.js';

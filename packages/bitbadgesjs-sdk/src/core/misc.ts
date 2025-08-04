@@ -5,7 +5,7 @@ import type {
   iCosmosCoinWrapperPathWithDetails,
   iUpdateHistory,
   UNIXMilliTimestamp
-} from '@/api-indexer/docs/interfaces.js';
+} from '@/api-indexer/docs-types/interfaces.js';
 import { BadgeMetadataDetails, CollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
 import {

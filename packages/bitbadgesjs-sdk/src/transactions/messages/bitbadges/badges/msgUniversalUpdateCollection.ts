@@ -15,7 +15,7 @@ import { CollectionPermissions } from '@/core/permissions.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
-import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
 import { CosmosCoin } from '@/core/coin.js';

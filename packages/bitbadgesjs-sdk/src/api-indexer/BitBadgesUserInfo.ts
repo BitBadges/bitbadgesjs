@@ -11,8 +11,15 @@ import type { iBitBadgesAddressList } from './BitBadgesAddressList.js';
 import { BitBadgesAddressList } from './BitBadgesAddressList.js';
 import { BitBadgesCollection } from './BitBadgesCollection.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
-import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, PointsActivityDoc, TransferActivityDoc } from './docs/activity.js';
-import { ApprovalTrackerDoc, BalanceDocWithDetails, CreatorCreditsDoc, MerkleChallengeTrackerDoc, ProfileDoc, SIWBBRequestDoc } from './docs/docs.js';
+import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, PointsActivityDoc, TransferActivityDoc } from './docs-types/activity.js';
+import {
+  ApprovalTrackerDoc,
+  BalanceDocWithDetails,
+  CreatorCreditsDoc,
+  MerkleChallengeTrackerDoc,
+  ProfileDoc,
+  SIWBBRequestDoc
+} from './docs-types/docs.js';
 import type {
   BitBadgesAddress,
   NativeAddress,
@@ -28,7 +35,7 @@ import type {
   iProfileDoc,
   iSIWBBRequestDoc,
   iTransferActivityDoc
-} from './docs/interfaces.js';
+} from './docs-types/interfaces.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
 
 /**

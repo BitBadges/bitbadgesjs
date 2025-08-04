@@ -1,4 +1,4 @@
-import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, CustomTypeClass } from '@/common/base.js';
 import { NumberType, Stringify } from '@/common/string-numbers.js';
 import { CollectionMetadata, ManagerTimeline } from '@/core/misc.js';

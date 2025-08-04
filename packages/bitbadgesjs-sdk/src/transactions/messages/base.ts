@@ -1,5 +1,5 @@
 import { convertToBitBadgesAddress, getChainForAddress } from '@/address-converter/converter.js';
-import type { NativeAddress } from '@/api-indexer/docs/interfaces.js';
+import type { NativeAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { MAINNET_CHAIN_DETAILS, TESTNET_CHAIN_DETAILS } from '@/common/constants.js';
 import { SupportedChain } from '@/common/types.js';
 import { generatePostBodyBroadcast } from '@/node-rest-api/broadcast.js';

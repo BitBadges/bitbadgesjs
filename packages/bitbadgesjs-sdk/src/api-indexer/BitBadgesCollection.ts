@@ -39,7 +39,7 @@ import type {
 import type { iCollectionPermissionsWithDetails } from '@/interfaces/badges/permissions.js';
 import type { iUserBalanceStoreWithDetails } from '@/interfaces/badges/userBalances.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
-import { TransferActivityDoc } from './docs/activity.js';
+import { TransferActivityDoc } from './docs-types/activity.js';
 import {
   ApprovalTrackerDoc,
   BadgeFloorPriceDoc,
@@ -48,7 +48,7 @@ import {
   CollectionStatsDoc,
   MerkleChallengeTrackerDoc,
   UtilityPageDoc
-} from './docs/docs.js';
+} from './docs-types/docs.js';
 import type {
   iApprovalTrackerDoc,
   iBadgeFloorPriceDoc,
@@ -61,7 +61,7 @@ import type {
   iTransferActivityDoc,
   iUtilityPageDoc,
   NativeAddress
-} from './docs/interfaces.js';
+} from './docs-types/interfaces.js';
 import { BadgeMetadataDetails, CollectionMetadataDetails } from './metadata/badgeMetadata.js';
 
 import { convertToBitBadgesAddress } from '@/address-converter/converter.js';

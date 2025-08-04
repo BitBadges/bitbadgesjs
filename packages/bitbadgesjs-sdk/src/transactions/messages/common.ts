@@ -1,5 +1,5 @@
 import type { SupportedChain } from '@/common/types.js';
-import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 
 /**
  * EI712ToSign represents a signable EIP-712 payload that can be signed using MetaMask or Keplr.

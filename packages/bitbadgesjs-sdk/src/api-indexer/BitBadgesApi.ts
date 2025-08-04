@@ -24,7 +24,7 @@ import type { GetAccountSuccessResponse, GetAccountsSuccessResponse, iGetAccount
 import { BitBadgesUserInfo } from './BitBadgesUserInfo.js';
 import type { iBitBadgesApi } from './base.js';
 import { BaseBitBadgesApi } from './base.js';
-import type { DynamicDataHandlerType, NativeAddress, iChallengeTrackerIdDetails } from './docs/interfaces.js';
+import type { DynamicDataHandlerType, NativeAddress, iChallengeTrackerIdDetails } from './docs-types/interfaces.js';
 import {
   FilterBadgesInCollectionSuccessResponse,
   FilterSuggestionsSuccessResponse,

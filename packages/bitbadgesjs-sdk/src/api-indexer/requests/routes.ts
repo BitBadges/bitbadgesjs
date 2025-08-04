@@ -1,5 +1,5 @@
 import type { NumberType } from '@/common/string-numbers.js';
-import type { NativeAddress } from '../docs/index.js';
+import type { NativeAddress } from '../docs-types/index.js';
 import { CollectionId } from '@/interfaces/index.js';
 
 /**

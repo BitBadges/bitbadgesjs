@@ -11,9 +11,9 @@ import { UintRangeArray } from '@/core/uintRanges.js';
 import type { CollectionId, iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/core.js';
 import type { PaginationInfo } from '../base.js';
 import { EmptyResponseClass } from '../base.js';
-import { TransferActivityDoc } from '../docs/activity.js';
-import { BalanceDocWithDetails, QueueDoc, RefreshDoc } from '../docs/docs.js';
-import type { iBalanceDocWithDetails, iChallengeTrackerIdDetails, iQueueDoc, iRefreshDoc, iTransferActivityDoc } from '../docs/interfaces.js';
+import { TransferActivityDoc } from '../docs-types/activity.js';
+import { BalanceDocWithDetails, QueueDoc, RefreshDoc } from '../docs-types/docs.js';
+import type { iBalanceDocWithDetails, iChallengeTrackerIdDetails, iQueueDoc, iRefreshDoc, iTransferActivityDoc } from '../docs-types/interfaces.js';
 
 /**
  * @category API Requests / Responses

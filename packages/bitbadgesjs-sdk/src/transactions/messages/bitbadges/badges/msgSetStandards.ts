@@ -4,7 +4,7 @@ import * as badges from '@/proto/badges/tx_pb.js';
 import { CustomTypeClass } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iMsgSetStandards } from './interfaces.js';
-import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
 import { StandardsTimeline } from '@/core/misc.js';
@@ -31,19 +31,19 @@ export class MsgSetStandards<T extends NumberType> extends CustomTypeClass<MsgSe
   }
 
   toProto(): badges.MsgSetStandards {
-      return new badges.MsgSetStandards({
-        creator: this.creator,
-        collectionId: this.collectionId.toString(),
-        standardsTimeline: this.standardsTimeline.map((timeline) => timeline.toProto()),
-        canUpdateStandards: this.canUpdateStandards.map((permission) => permission.toProto())
-      });
-    }
+    return new badges.MsgSetStandards({
+      creator: this.creator,
+      collectionId: this.collectionId.toString(),
+      standardsTimeline: this.standardsTimeline.map((timeline) => timeline.toProto()),
+      canUpdateStandards: this.canUpdateStandards.map((permission) => permission.toProto())
+    });
+  }
 
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetStandards<NumberType> {
-      return MsgSetStandards.fromProto(badges.MsgSetStandards.fromJson(jsonValue, options));
-    }
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetStandards<NumberType> {
+    return MsgSetStandards.fromProto(badges.MsgSetStandards.fromJson(jsonValue, options));
+  }
 
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetStandards<NumberType> {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetStandards<NumberType> {
     return MsgSetStandards.fromProto(badges.MsgSetStandards.fromJsonString(jsonString, options));
   }
 

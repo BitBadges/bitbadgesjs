@@ -6,7 +6,7 @@ import type { iBitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo.js';
 import { BitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo.js';
 import type { PaginationInfo } from '@/api-indexer/base.js';
 import { EmptyResponseClass } from '@/api-indexer/base.js';
-import { ClaimActivityDoc, PointsActivityDoc, TransferActivityDoc } from '@/api-indexer/docs/activity.js';
+import { ClaimActivityDoc, PointsActivityDoc, TransferActivityDoc } from '@/api-indexer/docs-types/activity.js';
 import {
   AccessTokenDoc,
   ApiKeyDoc,
@@ -19,7 +19,7 @@ import {
   SIWBBRequestDoc,
   StatusDoc,
   UtilityPageDoc
-} from '@/api-indexer/docs/docs.js';
+} from '@/api-indexer/docs-types/docs.js';
 import {
   ClaimReward,
   CreateClaimRequest,
@@ -62,7 +62,7 @@ import {
   type iSocialConnections,
   type iStatusDoc,
   type iTransferActivityDoc
-} from '@/api-indexer/docs/interfaces.js';
+} from '@/api-indexer/docs-types/interfaces.js';
 import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 import type { iMetadata, iMetadataWithoutInternals } from '@/api-indexer/metadata/metadata.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';

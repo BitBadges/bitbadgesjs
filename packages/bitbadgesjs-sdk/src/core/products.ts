@@ -1,4 +1,4 @@
-import { iCollectionDoc } from '@/api-indexer/docs/interfaces.js';
+import { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 import type { iCollectionApproval, iUserOutgoingApproval } from '@/interfaces/badges/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
 

@@ -35,7 +35,7 @@
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
     "format-ci": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc-ci.json",
     "prepare": "ts-patch install && typia patch",
-    "dep-check": "madge --circular ./src/index.ts --warning --ts-config ./tsconfig.json --exclude 'api-indexer/docs/interfaces.ts|interfaces/badges/*'",
+    "dep-check": "madge --circular ./src/index.ts --warning --ts-config ./tsconfig.json --exclude 'api-indexer/docs-types/interfaces.ts|interfaces/badges/*'",
     "publish-w-docs": "bash ./scripts/check_and_publish.sh",
     "generate-type-map": "./scripts/generate-type-map.sh"
   },

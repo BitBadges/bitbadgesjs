@@ -3,7 +3,7 @@ import { Stringify } from '@/common/string-numbers.js';
 import * as badges from '@/proto/badges/tx_pb.js';
 
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
-import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import { CollectionApproval } from '@/core/approvals.js';
 import { CosmosCoin } from '@/core/coin.js';

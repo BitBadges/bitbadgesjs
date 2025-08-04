@@ -3,7 +3,7 @@ import * as badges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { iMsgSetOutgoingApproval } from './interfaces.js';
-import type { BitBadgesAddress } from '@/api-indexer/docs/interfaces.js';
+import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
 import { UserOutgoingApproval } from '@/core/approvals.js';

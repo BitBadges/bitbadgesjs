@@ -8,7 +8,7 @@ import type {
   OrGroup,
   OwnershipRequirements as BlockinOwnershipRequirements
 } from 'blockin/dist/types/verify.types';
-import { NativeAddress } from '../docs/interfaces.js';
+import { NativeAddress } from '../docs-types/interfaces.js';
 
 /**
  * @category SIWBB

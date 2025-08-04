@@ -6,7 +6,7 @@ import { BitBadgesCollection, iBitBadgesCollection } from '../BitBadgesCollectio
 
 import { ClaimDetails } from '@/core/approvals.js';
 import { CollectionId } from '@/interfaces/index.js';
-import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, PointsActivityDoc, TransferActivityDoc } from '../docs/activity.js';
+import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, PointsActivityDoc, TransferActivityDoc } from '../docs-types/activity.js';
 import {
   ApprovalTrackerDoc,
   BalanceDoc,
@@ -14,7 +14,7 @@ import {
   MerkleChallengeTrackerDoc,
   SIWBBRequestDoc,
   UtilityPageDoc
-} from '../docs/docs.js';
+} from '../docs-types/docs.js';
 import {
   iApprovalTrackerDoc,
   iBalanceDoc,
@@ -27,7 +27,7 @@ import {
   iPointsActivityDoc,
   iTransferActivityDoc,
   iUtilityPageDoc
-} from '../docs/interfaces.js';
+} from '../docs-types/interfaces.js';
 import { iMetadata, Metadata } from '../metadata/metadata.js';
 
 /**
