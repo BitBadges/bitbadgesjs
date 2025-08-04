@@ -569,7 +569,7 @@ export interface iAccountDoc<T extends NumberType> extends Doc {
   thorAddress: string;
   /** The sequence of the account. This is the nonce for the blockchain for this account */
   sequence?: T;
-  /** The $BADGE balance of the account */
+  /** The BADGE balance of the account and other sdk.coin balances */
   balances?: iCosmosCoin<T>[];
 }
 

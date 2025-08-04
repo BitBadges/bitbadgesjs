@@ -240,7 +240,7 @@ const wrapExternalTxContext = (context: TxContext): LegacyTxContext => {
 
   if (txContext.sender.accountNumber <= 0) {
     throw new Error(
-      'Account number must be greater than 0. This means the user is unregistered on the blockchain. Users can be registered by sending them any amount of $BADGE.'
+      'Account number must be greater than 0. This means the user is unregistered on the blockchain. Users can be registered by sending them any amount of BADGE.'
     );
   }
 

@@ -12,7 +12,7 @@ export interface iCosmosCoin<T extends NumberType> {
 }
 
 /**
- * Type for Cosmos SDK Coin information with support for bigint amounts (e.g. { amount: 1000000, denom: 'badge' }).
+ * Type for Cosmos SDK Coin information with support for bigint amounts (e.g. { amount: 1000000, denom: 'ubadge' }).
  *
  * @category Balances
  */

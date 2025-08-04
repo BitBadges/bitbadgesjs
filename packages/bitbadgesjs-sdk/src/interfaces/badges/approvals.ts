@@ -40,7 +40,7 @@ export interface iUserOutgoingApproval<T extends NumberType> {
  * @category Interfaces
  */
 export interface iOutgoingApprovalCriteria<T extends NumberType> {
-  /** The $BADGE transfers to be executed upon every approval. */
+  /** The BADGE or sdk.coin transfers to be executed upon every approval. */
   coinTransfers?: iCoinTransfer<T>[];
   /** The list of must own badges that need valid proofs to be approved. */
   mustOwnBadges?: iMustOwnBadge<T>[];
@@ -224,7 +224,7 @@ export interface iUserIncomingApproval<T extends NumberType> {
  * @category Interfaces
  */
 export interface iIncomingApprovalCriteria<T extends NumberType> {
-  /** The $BADGE transfers to be executed upon every approval. */
+  /** The BADGE or sdk.coin transfers to be executed upon every approval. */
   coinTransfers?: iCoinTransfer<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenges?: iMerkleChallenge<T>[];
@@ -280,7 +280,7 @@ export interface iCollectionApproval<T extends NumberType> {
  * @category Interfaces
  */
 export interface iApprovalCriteria<T extends NumberType> {
-  /** The $BADGE transfers to be executed upon every approval. */
+  /** The BADGE or sdk.coin transfers to be executed upon every approval. */
   coinTransfers?: iCoinTransfer<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenges?: iMerkleChallenge<T>[];
