@@ -770,6 +770,18 @@ export interface iIndexerStatus {
 /**
  * @category Interfaces
  */
+export interface iTransactionEntry<T extends NumberType> {
+  /** The amount of the transaction */
+  amount: T;
+  /** The gas limit of the transaction */
+  limit: T;
+  /** The timestamp when the transaction occurred (milliseconds since epoch) */
+  timestamp: UNIXMilliTimestamp<T>;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iLatestBlockStatus<T extends NumberType> {
   /** The height of the latest block */
   height: T;
@@ -787,12 +799,10 @@ export interface iStatusDoc<T extends NumberType> extends Doc {
   block: iLatestBlockStatus<T>;
   /** The next collection ID to be used */
   nextCollectionId: T;
-  /** The current gas price based on the average of the lastXGasAmounts */
+  /** The current gas price based on the average of recent transactions */
   gasPrice: number;
-  /** The last X gas prices (internal use only) */
-  lastXGasAmounts: T[];
-  /** The last X gas limits (internal use only) */
-  lastXGasLimits: T[];
+  /** The last X transactions with timestamps for dynamic reset functionality */
+  lastXTxs?: iTransactionEntry<T>[];
 }
 
 /**

@@ -110,7 +110,8 @@ import {
   type iSocialConnections,
   type iStatusDoc,
   type iUpdateHistory,
-  type iUsedLeafStatus
+  type iUsedLeafStatus,
+  type iTransactionEntry
 } from './interfaces.js';
 
 /**
@@ -865,6 +866,39 @@ export class LatestBlockStatus<T extends NumberType> extends BaseNumberTypeClass
 /**
  * @inheritDoc iStatusDoc
  * @category Indexer
+ *
+ * @example
+ * ```typescript
+ * // Create a new StatusDoc with transaction tracking
+ * const statusDoc = new StatusDoc({
+ *   _docId: 'status',
+ *   block: { height: 1000, txIndex: 5, timestamp: Date.now() },
+ *   nextCollectionId: 123,
+ *   gasPrice: 0.001,
+ *   lastXGasAmounts: [0.001, 0.002, 0.0015],
+ *   lastXGasLimits: [100000, 150000, 120000],
+ *   lastXTxs: []
+ * });
+ *
+ * // Add transactions with timestamps
+ * statusDoc.addTransaction(0.001, 100000); // Uses current timestamp
+ * statusDoc.addTransaction(0.002, 150000, Date.now() - 60000); // 1 minute ago
+ *
+ * // Get transactions in the last 5 minutes
+ * const recentTxs = statusDoc.getTransactionsInWindow(5 * 60 * 1000);
+ *
+ * // Calculate average gas price in the last hour
+ * const avgGasPrice = statusDoc.getAverageGasPriceInWindow(60 * 60 * 1000);
+ *
+ * // Get transaction statistics
+ * const stats = statusDoc.getTransactionStats(24 * 60 * 60 * 1000); // Last 24 hours
+ * console.log(`Total transactions: ${stats.count}`);
+ * console.log(`Average amount: ${stats.averageAmount}`);
+ *
+ * // Clean up old transactions (older than 1 day)
+ * const removed = statusDoc.cleanupOldTransactions(24 * 60 * 60 * 1000);
+ * console.log(`Removed ${removed} old transactions`);
+ * ```
  */
 export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusDoc<T>> implements iStatusDoc<T> {
   _docId: string;
@@ -872,8 +906,7 @@ export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusD
   block: LatestBlockStatus<T>;
   nextCollectionId: T;
   gasPrice: number;
-  lastXGasAmounts: T[];
-  lastXGasLimits: T[];
+  lastXTxs?: TransactionEntry<T>[];
 
   constructor(data: iStatusDoc<T>) {
     super();
@@ -882,16 +915,157 @@ export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusD
     this.block = new LatestBlockStatus(data.block);
     this.nextCollectionId = data.nextCollectionId;
     this.gasPrice = data.gasPrice;
-    this.lastXGasAmounts = data.lastXGasAmounts;
-    this.lastXGasLimits = data.lastXGasLimits;
+    this.lastXTxs = data.lastXTxs?.map((tx) => new TransactionEntry(tx));
   }
 
   getNumberFieldNames(): string[] {
-    return ['nextCollectionId', 'lastXGasAmounts', 'lastXGasLimits'];
+    return ['nextCollectionId'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): StatusDoc<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as StatusDoc<U>;
+  }
+
+  /**
+   * Add a new transaction entry to the lastXTxs array
+   * @param amount - The transaction amount
+   * @param limit - The gas limit
+   * @param timestamp - The timestamp (optional, defaults to current time)
+   * @param maxEntries - Maximum number of entries to keep (optional, defaults to 100)
+   */
+  addTransaction(amount: T, limit: T, timestamp?: number, maxEntries: number = 100): void {
+    const now = timestamp ?? Date.now();
+    const entry = new TransactionEntry({
+      amount,
+      limit,
+      timestamp: now as UNIXMilliTimestamp<T>
+    });
+
+    if (!this.lastXTxs) {
+      this.lastXTxs = [];
+    }
+
+    this.lastXTxs.push(entry);
+
+    // Keep only the last maxEntries
+    if (this.lastXTxs.length > maxEntries) {
+      this.lastXTxs = this.lastXTxs.slice(-maxEntries);
+    }
+  }
+
+  /**
+   * Get transactions within a time window
+   * @param windowMs - Time window in milliseconds
+   * @param currentTime - Current timestamp (optional, defaults to Date.now())
+   * @returns Array of transactions within the time window
+   */
+  getTransactionsInWindow(windowMs: number, currentTime?: number): TransactionEntry<T>[] {
+    if (!this.lastXTxs) {
+      return [];
+    }
+
+    const now = currentTime ?? Date.now();
+    const cutoffTime = now - windowMs;
+
+    return this.lastXTxs.filter((tx) => Number(tx.timestamp) >= cutoffTime);
+  }
+
+  /**
+   * Calculate average gas price from transactions in a time window
+   * @param windowMs - Time window in milliseconds
+   * @param currentTime - Current timestamp (optional, defaults to Date.now())
+   * @returns Average gas price or 0 if no transactions
+   */
+  getAverageGasPriceInWindow(windowMs: number, currentTime?: number): number {
+    const transactions = this.getTransactionsInWindow(windowMs, currentTime);
+
+    if (transactions.length === 0) {
+      return 0;
+    }
+
+    const totalAmount = transactions.reduce((sum, tx) => sum + Number(tx.amount), 0);
+    return totalAmount / transactions.length;
+  }
+
+  /**
+   * Clean up old transactions beyond a certain age
+   * @param maxAgeMs - Maximum age in milliseconds
+   * @param currentTime - Current timestamp (optional, defaults to Date.now())
+   * @returns Number of transactions removed
+   */
+  cleanupOldTransactions(maxAgeMs: number, currentTime?: number): number {
+    if (!this.lastXTxs) {
+      return 0;
+    }
+
+    const now = currentTime ?? Date.now();
+    const cutoffTime = now - maxAgeMs;
+    const initialLength = this.lastXTxs.length;
+
+    this.lastXTxs = this.lastXTxs.filter((tx) => Number(tx.timestamp) >= cutoffTime);
+
+    return initialLength - this.lastXTxs.length;
+  }
+
+  /**
+   * Get the most recent transaction
+   * @returns The most recent transaction entry or null if none exist
+   */
+  getLatestTransaction(): TransactionEntry<T> | null {
+    if (!this.lastXTxs || this.lastXTxs.length === 0) {
+      return null;
+    }
+
+    return this.lastXTxs[this.lastXTxs.length - 1];
+  }
+
+  /**
+   * Get transaction statistics in a time window
+   * @param windowMs - Time window in milliseconds
+   * @param currentTime - Current timestamp (optional, defaults to Date.now())
+   * @returns Object with transaction statistics
+   */
+  getTransactionStats(
+    windowMs: number,
+    currentTime?: number
+  ): {
+    count: number;
+    totalAmount: number;
+    totalLimit: number;
+    averageAmount: number;
+    averageLimit: number;
+    minAmount: number;
+    maxAmount: number;
+  } {
+    const transactions = this.getTransactionsInWindow(windowMs, currentTime);
+
+    if (transactions.length === 0) {
+      return {
+        count: 0,
+        totalAmount: 0,
+        totalLimit: 0,
+        averageAmount: 0,
+        averageLimit: 0,
+        minAmount: 0,
+        maxAmount: 0
+      };
+    }
+
+    const amounts = transactions.map((tx) => Number(tx.amount));
+    const limits = transactions.map((tx) => Number(tx.limit));
+
+    const totalAmount = amounts.reduce((sum, amount) => sum + amount, 0);
+    const totalLimit = limits.reduce((sum, limit) => sum + limit, 0);
+
+    return {
+      count: transactions.length,
+      totalAmount,
+      totalLimit,
+      averageAmount: totalAmount / transactions.length,
+      averageLimit: totalLimit / transactions.length,
+      minAmount: Math.min(...amounts),
+      maxAmount: Math.max(...amounts)
+    };
   }
 }
 
@@ -2349,5 +2523,30 @@ export class MapDoc<T extends NumberType> extends MapWithValues<T> implements iM
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MapDoc<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapDoc<U>;
+  }
+}
+
+/**
+ * @inheritDoc iTransactionEntry
+ * @category Transaction Tracking
+ */
+export class TransactionEntry<T extends NumberType> extends BaseNumberTypeClass<TransactionEntry<T>> implements iTransactionEntry<T> {
+  amount: T;
+  limit: T;
+  timestamp: UNIXMilliTimestamp<T>;
+
+  constructor(data: iTransactionEntry<T>) {
+    super();
+    this.amount = data.amount;
+    this.limit = data.limit;
+    this.timestamp = data.timestamp;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['amount', 'limit', 'timestamp'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransactionEntry<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TransactionEntry<U>;
   }
 }
