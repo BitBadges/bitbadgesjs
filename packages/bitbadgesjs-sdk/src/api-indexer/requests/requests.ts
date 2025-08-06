@@ -3251,6 +3251,8 @@ export interface iCreateDynamicDataStorePayload {
   handlerId: string;
   /** The label of the dynamic data store */
   label: string;
+  /** Whether the dynamic data store should be public. If true, the data can be accessed without authentication. Defaults to false (private). */
+  publicUseInClaims?: boolean;
 }
 
 /**
@@ -3309,7 +3311,7 @@ export class SearchDynamicDataStoresPayload extends CustomTypeClass<SearchDynami
  * @category API Requests / Responses
  */
 export interface iGetDynamicDataStoreValuesPaginatedPayload {
-  /** The data secret to fetch. Only needed if you are not signed in as creator. */
+  /** The data secret to fetch. Only needed if you are not signed in as creator. Not applicable to public stores */
   dataSecret?: string;
   /** The pagination bookmark to start from */
   bookmark?: string;
@@ -3369,7 +3371,7 @@ export class GetDynamicDataStoreValuesPaginatedSuccessResponse<Q extends Dynamic
 export interface iGetDynamicDataStoreValuePayload {
   /** The key to fetch. */
   key: string;
-  /** The data secret to fetch. Only needed if you are not signed in as creator. */
+  /** The data secret to fetch. Only needed if you are not signed in as creator. Not applicable to public stores */
   dataSecret?: string;
   /** The lookup type to fetch (if you need to specify). */
   lookupType?: 'id' | 'username';
@@ -3407,7 +3409,7 @@ export class GetDynamicDataStoreValueSuccessResponse
  * @category API Requests / Responses
  */
 export interface iGetDynamicDataStorePayload {
-  /** The data secret to fetch. Only needed if you are not signed in as creator. */
+  /** The data secret to fetch. Only needed if you are not signed in as creator. Not applicable to public stores */
   dataSecret?: string;
 }
 
@@ -3443,7 +3445,7 @@ export class GetDynamicDataStoreSuccessResponse<Q extends DynamicDataHandlerType
 export interface iGetDynamicDataStoresPayload {
   /** The IDs to fetch. If not provided, all dynamic data stores will be fetched for the current signed in address without any data populated. */
   dynamicDataIds: string[];
-  /** The data secret to fetch. Only needed if you are not signed in as creator. */
+  /** The data secret to fetch. Only needed if you are not signed in as creator. Not applicable to public stores */
   dataSecret?: string;
 }
 
@@ -3576,7 +3578,7 @@ export interface iPerformStoreActionSingleWithBodyAuthPayload {
   _isSimulation?: boolean;
   /** The dynamic data ID */
   dynamicDataId: string;
-  /** The data secret. Needed if you are not signed in as creator. */
+  /** The data secret. Needed if you are not signed in as creator. Not applicable to public stores */
   dataSecret?: string;
   /** The name of the action to perform */
   actionName: string;
@@ -3602,7 +3604,7 @@ export interface iPerformStoreActionBatchWithBodyAuthPayload {
   _isSimulation?: boolean;
   /** The dynamic data ID */
   dynamicDataId: string;
-  /** The data secret. Needed if you are not signed in as creator. */
+  /** The data secret. Needed if you are not signed in as creator. Not applicable to public stores */
   dataSecret?: string;
   /** The actions to perform */
   actions: {
@@ -3659,7 +3661,7 @@ export interface iGetDynamicDataActivityPayload {
   dynamicDataId: string;
   /** The pagination bookmark to start from */
   bookmark?: string;
-  /** The data secret to fetch activity for. Needed if you are not signed in as creator. */
+  /** The data secret to fetch activity for. Needed if you are not signed in as creator. Not applicable to public stores */
   dataSecret?: string;
 }
 

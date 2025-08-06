@@ -2145,6 +2145,7 @@ export class DynamicDataDoc<Q extends DynamicDataHandlerType, T extends NumberTy
   data: DynamicDataHandlerData<Q>;
   createdBy: BitBadgesAddress;
   managedBy: BitBadgesAddress;
+  publicUseInClaims?: boolean;
   createdAt?: UNIXMilliTimestamp<T>;
   lastUpdated?: UNIXMilliTimestamp<T>;
 
@@ -2159,6 +2160,7 @@ export class DynamicDataDoc<Q extends DynamicDataHandlerType, T extends NumberTy
     this.data = data.data;
     this.createdBy = data.createdBy;
     this.managedBy = data.managedBy;
+    this.publicUseInClaims = data.publicUseInClaims;
     this.createdAt = data.createdAt;
     this.lastUpdated = data.lastUpdated;
   }

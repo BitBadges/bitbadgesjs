@@ -2010,7 +2010,7 @@ export interface iDynamicDataDoc<Q extends DynamicDataHandlerType, T extends Num
   dynamicDataId: string;
   /** The label of the data store */
   label: string;
-  /** The data secret. Used in cases where you are not signed in as creator. This authenticates the request. */
+  /** The data secret. Used in cases where you are not signed in as creator. This authenticates the request. Not applicable to public stores */
   dataSecret: string;
   /** The data itself. */
   data: DynamicDataHandlerData<Q>;
@@ -2018,6 +2018,8 @@ export interface iDynamicDataDoc<Q extends DynamicDataHandlerType, T extends Num
   createdBy: BitBadgesAddress;
   /** The manager of the dynamic data store */
   managedBy: BitBadgesAddress;
+  /** Whether the dynamic data store is public. If true, the data can be accessed without authentication. */
+  publicUseInClaims?: boolean;
   /** The time the dynamic data store was created */
   createdAt?: UNIXMilliTimestamp<T>;
   /** The time the dynamic data store was last updated */
