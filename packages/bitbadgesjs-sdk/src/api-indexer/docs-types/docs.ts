@@ -39,7 +39,7 @@ import { getValueAtTimeForTimeline } from '@/core/timelines.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
-import type { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/badges/core.js';
+import type { CollectionId, iAmountTrackerIdDetails, iMustOwnBadges } from '@/interfaces/badges/core.js';
 import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
 import { Map, ValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
 import type { Doc } from '../base.js';
@@ -64,6 +64,8 @@ import {
   iInheritMetadataFrom,
   iLinkedTo,
   iListingViewsDoc,
+  iOnChainTemplateDoc,
+  iOnChainTemplateConfig,
   iPointsDoc,
   iTierWithOptionalWeight,
   iUtilityPageContent,
@@ -2550,5 +2552,67 @@ export class TransactionEntry<T extends NumberType> extends BaseNumberTypeClass<
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransactionEntry<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TransactionEntry<U>;
+  }
+}
+
+/**
+ * @inheritDoc iOnChainTemplateConfig
+ * @category Indexer
+ */
+export class OnChainTemplateConfig<T extends NumberType> extends BaseNumberTypeClass<OnChainTemplateConfig<T>> implements iOnChainTemplateConfig<T> {
+  mustOwnBadges: iMustOwnBadges<T>[];
+
+  constructor(data: iOnChainTemplateConfig<T>) {
+    super();
+    this.mustOwnBadges = data.mustOwnBadges;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OnChainTemplateConfig<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as OnChainTemplateConfig<U>;
+  }
+}
+
+/**
+ * @inheritDoc iOnChainTemplateDoc
+ * @category Indexer
+ */
+export class OnChainTemplateDoc<T extends NumberType> extends BaseNumberTypeClass<OnChainTemplateDoc<T>> implements iOnChainTemplateDoc<T> {
+  _docId: string;
+  _id?: string;
+  locale: string;
+  templateId: string;
+  createdBy: BitBadgesAddress;
+  createdAt: UNIXMilliTimestamp<T>;
+  deletedAt?: UNIXMilliTimestamp<T>;
+  lastUpdated: UNIXMilliTimestamp<T>;
+  metadata: iMetadata<T>;
+  config: OnChainTemplateConfig<T>;
+  verified: boolean;
+
+  constructor(data: iOnChainTemplateDoc<T>) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.locale = data.locale;
+    this.templateId = data.templateId;
+    this.createdBy = data.createdBy;
+    this.createdAt = data.createdAt;
+    this.deletedAt = data.deletedAt;
+    this.lastUpdated = data.lastUpdated;
+    this.metadata = data.metadata;
+    this.config = new OnChainTemplateConfig(data.config);
+    this.verified = data.verified;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['createdAt', 'deletedAt', 'lastUpdated'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OnChainTemplateDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as OnChainTemplateDoc<U>;
   }
 }

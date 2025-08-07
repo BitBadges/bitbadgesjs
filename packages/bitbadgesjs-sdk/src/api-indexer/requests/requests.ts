@@ -15,6 +15,7 @@ import {
   DeveloperAppDoc,
   DynamicDataDoc,
   MapWithValues,
+  OnChainTemplateDoc,
   PluginDoc,
   SIWBBRequestDoc,
   StatusDoc,
@@ -35,6 +36,7 @@ import {
   iEstimatedCost,
   iInheritMetadataFrom,
   iLinkedTo,
+  iOnChainTemplateDoc,
   iPointsActivityDoc,
   iSIWBBRequestDoc,
   iUtilityPageContent,
@@ -74,7 +76,7 @@ import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
 import { VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
-import type { CollectionId, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
+import type { CollectionId, iMustOwnBadges, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
 import { BroadcastPostBody } from '@/node-rest-api/index.js';
 import { type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
 import { SiwbbChallengeParams } from './blockin.js';
@@ -4810,5 +4812,241 @@ export class GetCollectionChallengeTrackerByIdSuccessResponse<T extends NumberTy
     options?: ConvertOptions
   ): GetCollectionChallengeTrackerByIdSuccessResponse<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionChallengeTrackerByIdSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateOnChainTemplatePayload {
+  /** The locale of the template */
+  locale: string;
+  /** The unique template ID */
+  templateId: string;
+  /** The metadata for the template */
+  metadata: iMetadataWithoutInternals<NumberType>;
+  /** The configuration for the template */
+  config: {
+    /** The requirements for badges that must be owned */
+    mustOwnBadges: iMustOwnBadges<NumberType>[];
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreateOnChainTemplateSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreateOnChainTemplateSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateOnChainTemplatePayload {
+  /** The unique template ID */
+  templateId: string;
+  /** The locale of the template */
+  locale?: string;
+  /** The metadata for the template */
+  metadata?: iMetadataWithoutInternals<NumberType>;
+  /** The configuration for the template */
+  config?: {
+    /** The requirements for badges that must be owned */
+    mustOwnBadges: iMustOwnBadges<NumberType>[];
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateOnChainTemplateSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UpdateOnChainTemplateSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeleteOnChainTemplatePayload {
+  /** The unique template ID */
+  templateId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeleteOnChainTemplateSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class DeleteOnChainTemplateSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetOnChainTemplatePayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOnChainTemplatePayload extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetOnChainTemplateSuccessResponse<T extends NumberType> {
+  template: iOnChainTemplateDoc<T>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOnChainTemplateSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetOnChainTemplateSuccessResponse<T>>
+  implements iGetOnChainTemplateSuccessResponse<T>
+{
+  template: OnChainTemplateDoc<T>;
+
+  constructor(data: iGetOnChainTemplateSuccessResponse<T>) {
+    super();
+    this.template = new OnChainTemplateDoc(data.template);
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetOnChainTemplateSuccessResponse<U> {
+    return new GetOnChainTemplateSuccessResponse({
+      template: this.template.convert(convertFunction, options)
+    });
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetOnChainTemplatesPayload {
+  /** The specific template IDs to fetch */
+  templateIds: string[];
+  /** The locale to filter by */
+  locale?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOnChainTemplatesPayload extends CustomTypeClass<GetOnChainTemplatesPayload> implements iGetOnChainTemplatesPayload {
+  templateIds: string[];
+  locale?: string;
+
+  constructor(payload: iGetOnChainTemplatesPayload) {
+    super();
+    this.templateIds = payload.templateIds;
+    this.locale = payload.locale;
+  }
+
+  static FromQuery(query: ParsedQs): GetOnChainTemplatesPayload {
+    return new GetOnChainTemplatesPayload({
+      templateIds: Array.isArray(query.templateIds)
+        ? query.templateIds.map((id) => String(id))
+        : query.templateIds
+          ? [String(query.templateIds)]
+          : [],
+      locale: query.locale as string
+    });
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetOnChainTemplatesSuccessResponse<T extends NumberType> {
+  templates: iOnChainTemplateDoc<T>[];
+  pagination: {
+    bookmark: string;
+    hasMore: boolean;
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOnChainTemplatesSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetOnChainTemplatesSuccessResponse<T>>
+  implements iGetOnChainTemplatesSuccessResponse<T>
+{
+  templates: OnChainTemplateDoc<T>[];
+  pagination: {
+    bookmark: string;
+    hasMore: boolean;
+  };
+
+  constructor(data: iGetOnChainTemplatesSuccessResponse<T>) {
+    super();
+    this.templates = data.templates.map((template) => new OnChainTemplateDoc(template));
+    this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetOnChainTemplatesSuccessResponse<U> {
+    return new GetOnChainTemplatesSuccessResponse({
+      templates: this.templates.map((template) => template.convert(convertFunction, options)),
+      pagination: this.pagination
+    });
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iSearchOnChainTemplatesPayload {
+  /** The search value to search for */
+  searchValue?: string;
+  /** The locale to filter by */
+  locale?: string;
+  /** The pagination bookmark to start from */
+  bookmark?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class SearchOnChainTemplatesPayload extends CustomTypeClass<SearchOnChainTemplatesPayload> implements iSearchOnChainTemplatesPayload {
+  searchValue?: string;
+  locale?: string;
+  bookmark?: string;
+
+  constructor(payload: iSearchOnChainTemplatesPayload) {
+    super();
+    this.searchValue = payload.searchValue;
+    this.locale = payload.locale;
+    this.bookmark = payload.bookmark;
+  }
+
+  static FromQuery(query: ParsedQs): SearchOnChainTemplatesPayload {
+    return new SearchOnChainTemplatesPayload({
+      searchValue: query.searchValue as string,
+      locale: query.locale as string,
+      bookmark: query.bookmark as string
+    });
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iSearchOnChainTemplatesSuccessResponse<T extends NumberType> extends iGetOnChainTemplatesSuccessResponse<T> {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class SearchOnChainTemplatesSuccessResponse<T extends NumberType>
+  extends GetOnChainTemplatesSuccessResponse<T>
+  implements iSearchOnChainTemplatesSuccessResponse<T>
+{
+  constructor(data: iSearchOnChainTemplatesSuccessResponse<T>) {
+    super(data);
   }
 }
