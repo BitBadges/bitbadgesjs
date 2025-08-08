@@ -2406,35 +2406,3 @@ export interface iEstimatedCost<T extends NumberType> {
   /** The denomination of the cost (e.g. 'USD', 'ETH', etc.) */
   denom: string;
 }
-
-/**
- * @category Interfaces
- */
-export interface iOnChainTemplateConfig<T extends NumberType> {
-  /** The requirements for badges that must be owned */
-  mustOwnBadges: iMustOwnBadges<T>[];
-}
-
-/**
- * @category Interfaces
- */
-export interface iOnChainTemplateDoc<T extends NumberType> extends Doc {
-  /** The locale of the template */
-  locale: string;
-  /** The unique template ID */
-  templateId: string;
-  /** The BitBadges address of the user who created this template */
-  createdBy: BitBadgesAddress;
-  /** The timestamp when this template was created (milliseconds since epoch) */
-  createdAt: UNIXMilliTimestamp<T>;
-  /** The timestamp when this template was deleted (milliseconds since epoch) */
-  deletedAt?: UNIXMilliTimestamp<T>;
-  /** The timestamp when this template was last updated (milliseconds since epoch) */
-  lastUpdated: UNIXMilliTimestamp<T>;
-  /** The metadata for the template */
-  metadata: iMetadata<T>;
-  /** The configuration for the template */
-  config: iOnChainTemplateConfig<T>;
-  /** Whether this template has been verified by the platform (managed behind the scenes) */
-  verified: boolean;
-}

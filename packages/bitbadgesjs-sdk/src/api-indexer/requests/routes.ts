@@ -139,11 +139,6 @@ export class BitBadgesApiRoutes {
   static SearchUtilityPagesRoute = () => '/api/v0/utilityPages/search';
   static CRUDUtilityPagesRoute = () => '/api/v0/utilityPages';
 
-  static GetOnChainTemplateRoute = (templateId: string) => `/api/v0/onChainTemplate/${templateId.toString()}`;
-  static GetOnChainTemplatesRoute = () => '/api/v0/onChainTemplates/fetch';
-  static SearchOnChainTemplatesRoute = () => '/api/v0/onChainTemplates/search';
-  static CRUDOnChainTemplatesRoute = () => '/api/v0/onChainTemplates';
-
   static GetEmbeddedWalletRoute = () => '/api/v0/embeddedWallets';
   static SignWithEmbeddedWalletRoute = () => '/api/v0/embeddedWallets/signMessage';
 
