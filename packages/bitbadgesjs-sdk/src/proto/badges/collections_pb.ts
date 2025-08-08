@@ -12,13 +12,13 @@ import { Balance, UintRange } from "./balances_pb.js";
 
 /**
  *
- * A BadgeCollection is the top-level object for a collection of badges. 
+ * A BadgeCollection is the top-level object for a collection of tokens. 
  * It defines everything about the collection, such as the manager, metadata, etc.
  *
  * All collections are identified by a collectionId assigned by the blockchain, which is a uint64 that increments (i.e. the first collection has ID 1).
  *
  * All collections can have a manager who is responsible for managing the collection and can be granted certain admin
- * permissions, such as the ability to mint new badges.
+ * permissions, such as the ability to mint new tokens.
  *
  * Certain fields are timeline-based, which means they may have different values at different block heights. 
  * We fetch the value according to the current time.
@@ -46,7 +46,7 @@ export class BadgeCollection extends Message<BadgeCollection> {
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
-   * The metadata for each badge in the collection, also subject to changes over time.
+   * The metadata for each token in the collection, also subject to changes over time.
    *
    * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 3;
    */
@@ -120,21 +120,21 @@ export class BadgeCollection extends Message<BadgeCollection> {
   defaultBalances?: UserBalanceStore;
 
   /**
-   * The user or entity who created the badge collection.
+   * The user or entity who created the collection.
    *
    * @generated from field: string createdBy = 14;
    */
   createdBy = "";
 
   /**
-   * The valid badge IDs for this collection.
+   * The valid token IDs for this collection.
    *
    * @generated from field: repeated badges.UintRange validBadgeIds = 15;
    */
   validBadgeIds: UintRange[] = [];
 
   /**
-   * The generated address of the badge collection. Also used to escrow Mint balances.
+   * The generated address of the collection. Also used to escrow Mint balances.
    *
    * @generated from field: string mintEscrowAddress = 16;
    */
@@ -317,7 +317,7 @@ export class DenomUnit extends Message<DenomUnit> {
 export class CollectionInvariants extends Message<CollectionInvariants> {
   /**
    * If true, all ownership times must be full ranges [{ start: 1, end: GoMaxUInt64 }].
-   * This prevents time-based restrictions on badge ownership.
+   * This prevents time-based restrictions on token ownership.
    *
    * @generated from field: bool noCustomOwnershipTimes = 1;
    */

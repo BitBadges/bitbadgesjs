@@ -210,7 +210,7 @@ export class MapUpdateCriteria extends Message<MapUpdateCriteria> {
   managerOnly = false;
 
   /**
-   * ID slots are only updatable by badge ID owner of this collection (>1 balance at current time)
+   * ID slots are only updatable by token ID owner of this collection (>1 balance at current time)
    *
    * @generated from field: string collectionId = 2;
    */

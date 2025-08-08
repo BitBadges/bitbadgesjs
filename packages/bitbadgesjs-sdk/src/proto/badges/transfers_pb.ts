@@ -329,7 +329,7 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
   transferTimes: UintRange[] = [];
 
   /**
-   * The allowed range of badge IDs for approval.
+   * The allowed range of token IDs for approval.
    *
    * @generated from field: repeated badges.UintRange badgeIds = 4;
    */
@@ -442,7 +442,7 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
   transferTimes: UintRange[] = [];
 
   /**
-   * The allowed range of badge IDs for approval.
+   * The allowed range of token IDs for approval.
    *
    * @generated from field: repeated badges.UintRange badgeIds = 4;
    */
@@ -635,7 +635,7 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
   startBalances: Balance[] = [];
 
   /**
-   * The amount by which to increment badge IDs.
+   * The amount by which to increment token IDs.
    *
    * @generated from field: string incrementBadgeIdsBy = 2;
    */
@@ -670,7 +670,7 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
   recurringOwnershipTimes?: RecurringOwnershipTimes;
 
   /**
-   * Allow override of any valid badge
+   * Allow override of any valid ID
    *
    * @generated from field: bool allowOverrideWithAnyValidBadge = 7;
    */
@@ -916,7 +916,7 @@ export class AutoDeletionOptions extends Message<AutoDeletionOptions> {
 /**
  * ApprovalAmounts defines approval amounts per unique "from," "to," and/or "initiated by" address.
  * If any of these are nil or "0", we assume unlimited approvals.
- * If they are set to a value, then the running tally of the amounts transferred for the specified badge IDs and ownership times 
+ * If they are set to a value, then the running tally of the amounts transferred for the specified token IDs and ownership times 
  * must not exceed the corresponding value.
  *
  * @generated from message badges.ApprovalAmounts
@@ -1050,7 +1050,7 @@ export class ResetTimeIntervals extends Message<ResetTimeIntervals> {
 /**
  * MaxNumTransfers defines the maximum number of transfers per unique "from," "to," and/or "initiated by" address.
  * If any of these are nil or "0", we assume unlimited approvals.
- * If they are set to a value, then the running tally of the number of transfers for the specified badge IDs and ownership times
+ * If they are set to a value, then the running tally of the number of transfers for the specified token IDs and ownership times
  * must not exceed the corresponding value.
  *
  * @generated from message badges.MaxNumTransfers
@@ -1257,42 +1257,42 @@ export class CoinTransfer extends Message<CoinTransfer> {
 
 /**
  *
- * MustOwnBadges represents a condition where a user must own specific badges
+ * MustOwnBadges represents a condition where a user must own specific tokens
  * to be approved to transfer.
  *
- * - collectionId: The ID of the badge collection for the badges that must be owned
- * - amountRange: The range of badge amounts the user must own (min to max)
- * - ownershipTimes: The time ranges during which the user must own the badges.
- * - badgeIds: The badge IDs the user must own.
+ * - collectionId: The ID of the collection for the tokens that must be owned
+ * - amountRange: The range of amounts the user must own (min to max)
+ * - ownershipTimes: The time ranges during which the user must own the tokens.
+ * - badgeIds: The token IDs the user must own.
  * - overrideWithCurrentTime: If true, auto override ownershipTimes with the current time.
- * - mustSatisfyForAllAssets: If true, the user must own all specified badges; otherwise, owning any one for >= 1 millisecond is sufficient.
+ * - mustSatisfyForAllAssets: If true, the user must own all specified tokens; otherwise, owning any one for >= 1 millisecond is sufficient.
  *
  * @generated from message badges.MustOwnBadges
  */
 export class MustOwnBadges extends Message<MustOwnBadges> {
   /**
-   * The ID of the badge collection.
+   * The ID of the collection.
    *
    * @generated from field: string collectionId = 1;
    */
   collectionId = "";
 
   /**
-   * The range of badge amounts the user must own (min to max).
+   * The range of amounts the user must own (min to max).
    *
    * @generated from field: badges.UintRange amountRange = 2;
    */
   amountRange?: UintRange;
 
   /**
-   * The time ranges during which the user must own the badges.
+   * The time ranges during which the user must own the tokens.
    *
    * @generated from field: repeated badges.UintRange ownershipTimes = 3;
    */
   ownershipTimes: UintRange[] = [];
 
   /**
-   * The badge IDs the user must own.
+   * The token IDs the user must own.
    *
    * @generated from field: repeated badges.UintRange badgeIds = 4;
    */
@@ -1306,7 +1306,7 @@ export class MustOwnBadges extends Message<MustOwnBadges> {
   overrideWithCurrentTime = false;
 
   /**
-   * If true, the user must meet ownership requirements for all specified badges; else, must meet requirements for any single badge.
+   * If true, the user must meet ownership requirements for all specified tokens; else, must meet requirements for any single token.
    *
    * @generated from field: bool mustSatisfyForAllAssets = 6;
    */
@@ -1484,7 +1484,7 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
   userRoyalties?: UserRoyalties;
 
   /**
-   * Must own badges for approval.
+   * Must own tokens for approval.
    *
    * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 14;
    */
@@ -1659,7 +1659,7 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
   autoDeletionOptions?: AutoDeletionOptions;
 
   /**
-   * Must own badges for approval.
+   * Must own tokens for approval.
    *
    * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 9;
    */
@@ -1780,7 +1780,7 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
   autoDeletionOptions?: AutoDeletionOptions;
 
   /**
-   * Must own badges for approval.
+   * Must own tokens for approval.
    *
    * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 9;
    */
@@ -1873,7 +1873,7 @@ export class CollectionApproval extends Message<CollectionApproval> {
   transferTimes: UintRange[] = [];
 
   /**
-   * The allowed range of badge IDs for approval.
+   * The allowed range of token IDs for approval.
    *
    * @generated from field: repeated badges.UintRange badgeIds = 5;
    */
@@ -2025,7 +2025,7 @@ export class ApprovalIdentifierDetails extends Message<ApprovalIdentifierDetails
 }
 
 /**
- * Transfer defines the details of a transfer of badges.
+ * Transfer defines the details of a transfer of tokens.
  *
  * @generated from message badges.Transfer
  */
@@ -2191,7 +2191,7 @@ export class PrecalculationOptions extends Message<PrecalculationOptions> {
   overrideTimestamp = "";
 
   /**
-   * The badgeIdsOverride to use for the transfer.
+   * The IDs to override for the transfer. Only applicable if using this option in precalculation.
    *
    * @generated from field: repeated badges.UintRange badgeIdsOverride = 2;
    */

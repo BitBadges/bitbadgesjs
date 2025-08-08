@@ -58,20 +58,20 @@ export class CollectionMetadataTimeline extends Message<CollectionMetadataTimeli
 }
 
 /**
- * BadgeMetadataTimeline defines the metadata for badges at different timeline times.
+ * BadgeMetadataTimeline defines the metadata for tokens at different timeline times.
  *
  * @generated from message badges.BadgeMetadataTimeline
  */
 export class BadgeMetadataTimeline extends Message<BadgeMetadataTimeline> {
   /**
-   * The badge metadata for a specific timeline element.
+   * The token metadata for a specific timeline element.
    *
    * @generated from field: repeated badges.BadgeMetadata badgeMetadata = 1;
    */
   badgeMetadata: BadgeMetadata[] = [];
 
   /**
-   * The timeline times when the badge metadata is valid. Can not overlap with other timeline elements in same array.
+   * The timeline times when the token metadata is valid. Can not overlap with other timeline elements in same array.
    *
    * @generated from field: repeated badges.UintRange timelineTimes = 2;
    */

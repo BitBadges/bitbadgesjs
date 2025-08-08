@@ -11,7 +11,7 @@ import { Message, proto3 } from "@bufbuild/protobuf";
  * The UintRange is a range of IDs from some start to some end (inclusive).
  *
  * uintRanges are one of the core types used in the BitBadgesChain module.
- * They are used for everything from badge IDs to time ranges to min/max balance amounts.
+ * They are used for everything from token IDs to time ranges to min/max balance amounts.
  *
  * See the BitBadges documentation for more information.
  *

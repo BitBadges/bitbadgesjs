@@ -16,15 +16,15 @@ import { UintRange } from "./balances_pb.js";
  * The permission type allows fine-grained access control for each action.
  * - ActionPermission: defines when the manager can perform an action.
  * - TimedUpdatePermission: defines when the manager can update a timeline-based field and what times of the timeline can be updated.
- * - TimedUpdateWithBadgeIdsPermission: defines when the manager can update a timeline-based field for specific badges and what times of the timeline can be updated.
- * - BadgeIdsActionPermission: defines when the manager can perform an action for specific badges
+ * - TimedUpdateWithBadgeIdsPermission: defines when the manager can update a timeline-based field for specific tokens and what times of the timeline can be updated.
+ * - BadgeIdsActionPermission: defines when the manager can perform an action for specific tokens
  * - CollectionApprovalPermission: defines when the manager can update the transferability of the collection and what transfers can be updated vs. locked.
  *
  * Note there are a few different times here which could get confusing:
  * - timelineTimes: the times when a timeline-based field is a specific value
  * - permanentlyPermitted/ForbiddenTimes - the times that a permission can be performed
  * - transferTimes - the times that a transfer occurs
- * - ownershipTimes - the times when a badge is owned by a user
+ * - ownershipTimes - the times when a token is owned by a user
  *
  * The permitted/permanentlyForbiddenTimes are used to determine when a permission can be executed.
  * Once a time is set to be permitted or forbidden, it is PERMANENT and cannot be changed.
@@ -86,14 +86,14 @@ export class CollectionPermissions extends Message<CollectionPermissions> {
   canUpdateCollectionMetadata: TimedUpdatePermission[] = [];
 
   /**
-   * Permissions related to creating more badges for the collection.
+   * Permissions related to creating more tokens for the collection.
    *
    * @generated from field: repeated badges.BadgeIdsActionPermission canUpdateValidBadgeIds = 8;
    */
   canUpdateValidBadgeIds: BadgeIdsActionPermission[] = [];
 
   /**
-   * Permissions related to updating badge metadata for specific badges.
+   * Permissions related to updating token metadata for specific tokens.
    *
    * @generated from field: repeated badges.TimedUpdateWithBadgeIdsPermission canUpdateBadgeMetadata = 9;
    */
@@ -238,7 +238,7 @@ export class UserPermissions extends Message<UserPermissions> {
  * We would check to find the FIRST CollectionApprovalPermission that matches this combination.
  * If we find a match, we would check the permitted/forbidden times to see if we can execute this permission (default is ALLOWED).
  *
- * Ex: So if you wanted to freeze the transferability to enforce that badge ID 1 will always be transferable, you could set
+ * Ex: So if you wanted to freeze the transferability to enforce that token ID 1 will always be transferable, you could set
  * the combination ("AllWithoutMint", "AllWithoutMint", "AllWithoutMint", "All Transfer Times", 1) to always be forbidden at all timelineTimes.
  *
  * @generated from message badges.CollectionApprovalPermission
@@ -273,14 +273,14 @@ export class CollectionApprovalPermission extends Message<CollectionApprovalPerm
   transferTimes: UintRange[] = [];
 
   /**
-   * Specifies the badge IDs involved in the transfer.
+   * Specifies the token IDs involved in the transfer.
    *
    * @generated from field: repeated badges.UintRange badgeIds = 5;
    */
   badgeIds: UintRange[] = [];
 
   /**
-   * Specifies the ownership times for the badges in the transfer.
+   * Specifies the ownership times for the tokens in the transfer.
    *
    * @generated from field: repeated badges.UintRange ownershipTimes = 6;
    */
@@ -375,14 +375,14 @@ export class UserOutgoingApprovalPermission extends Message<UserOutgoingApproval
   transferTimes: UintRange[] = [];
 
   /**
-   * Specifies the badge IDs involved in the transfer.
+   * Specifies the token IDs involved in the transfer.
    *
    * @generated from field: repeated badges.UintRange badgeIds = 4;
    */
   badgeIds: UintRange[] = [];
 
   /**
-   * Specifies the ownership times for the badges in the transfer.
+   * Specifies the ownership times for the tokens in the transfer.
    *
    * @generated from field: repeated badges.UintRange ownershipTimes = 5;
    */
@@ -478,14 +478,14 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
   transferTimes: UintRange[] = [];
 
   /**
-   * Specifies the badge IDs involved in the transfer.
+   * Specifies the token IDs involved in the transfer.
    *
    * @generated from field: repeated badges.UintRange badgeIds = 4;
    */
   badgeIds: UintRange[] = [];
 
   /**
-   * Specifies the ownership times for the badges in the transfer.
+   * Specifies the ownership times for the tokens in the transfer.
    *
    * @generated from field: repeated badges.UintRange ownershipTimes = 5;
    */
@@ -552,17 +552,17 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
 
 /**
  *
- * BadgeIdsActionPermission defines the permissions for updating a timeline-based field for specific badges and specific badge ownership times.
- * Currently, this is only used for creating new badges.
+ * BadgeIdsActionPermission defines the permissions for updating a timeline-based field for specific tokens and specific token ownership times.
+ * Currently, this is only used for creating new tokens.
  *
- * Ex: If you want to lock the ability to create new badges for badgeIds [1,2] at ownershipTimes 1/1/2020 - 1/1/2021, 
+ * Ex: If you want to lock the ability to create new tokens for badgeIds [1,2] at ownershipTimes 1/1/2020 - 1/1/2021, 
  * you could set the combination (badgeIds: [1,2], ownershipTimelineTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
  *
  * @generated from message badges.BadgeIdsActionPermission
  */
 export class BadgeIdsActionPermission extends Message<BadgeIdsActionPermission> {
   /**
-   * Specifies the badge IDs involved in the transfer.
+   * Specifies the token IDs involved in the transfer.
    *
    * @generated from field: repeated badges.UintRange badgeIds = 1;
    */
@@ -727,7 +727,7 @@ export class TimedUpdatePermission extends Message<TimedUpdatePermission> {
 
 /**
  *
- * TimedUpdateWithBadgeIdsPermission defines the permissions for updating a timeline-based field for specific badges.
+ * TimedUpdateWithBadgeIdsPermission defines the permissions for updating a timeline-based field for specific tokens.
  *
  * Ex: If you want to lock the ability to update the metadata for badgeIds [1,2] for timelineTimes 1/1/2020 - 1/1/2021,
  * you could set the combination (badgeIds: [1,2], TimelineTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
@@ -736,7 +736,7 @@ export class TimedUpdatePermission extends Message<TimedUpdatePermission> {
  */
 export class TimedUpdateWithBadgeIdsPermission extends Message<TimedUpdateWithBadgeIdsPermission> {
   /**
-   * Specifies the badge IDs involved in the transfer.
+   * Specifies the token IDs involved in the transfer.
    *
    * @generated from field: repeated badges.UintRange badgeIds = 1;
    */

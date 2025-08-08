@@ -9,28 +9,28 @@ import { UintRange } from "./balances_pb.js";
 
 /**
  *
- * This message defines the metadata for specific badge IDs.
+ * This message defines the metadata for specific token IDs.
  * The interpretation of this metadata should follow the collection standard.
  *
  * @generated from message badges.BadgeMetadata
  */
 export class BadgeMetadata extends Message<BadgeMetadata> {
   /**
-   * The URI (Uniform Resource Identifier) associated with the badge metadata.
+   * The URI (Uniform Resource Identifier) associated with the token metadata.
    *
    * @generated from field: string uri = 1;
    */
   uri = "";
 
   /**
-   * Custom data or additional information related to the badge metadata.
+   * Custom data or additional information related to the token metadata.
    *
    * @generated from field: string customData = 2;
    */
   customData = "";
 
   /**
-   * The badge IDs to which this metadata applies.
+   * The token IDs to which this metadata applies.
    *
    * @generated from field: repeated badges.UintRange badgeIds = 3;
    */

@@ -691,3 +691,111 @@ export class QueryGetDynamicStoreValueResponse extends Message<QueryGetDynamicSt
   }
 }
 
+/**
+ * @generated from message badges.QueryGetETHSignatureTrackerRequest
+ */
+export class QueryGetETHSignatureTrackerRequest extends Message<QueryGetETHSignatureTrackerRequest> {
+  /**
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  /**
+   * "collection" or "incoming" or "outgoing"
+   *
+   * @generated from field: string approvalLevel = 2;
+   */
+  approvalLevel = "";
+
+  /**
+   * if approvalLevel is "collection", leave blank
+   *
+   * @generated from field: string approverAddress = 3;
+   */
+  approverAddress = "";
+
+  /**
+   * @generated from field: string approvalId = 4;
+   */
+  approvalId = "";
+
+  /**
+   * @generated from field: string challengeTrackerId = 5;
+   */
+  challengeTrackerId = "";
+
+  /**
+   * @generated from field: string signature = 6;
+   */
+  signature = "";
+
+  constructor(data?: PartialMessage<QueryGetETHSignatureTrackerRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryGetETHSignatureTrackerRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "approvalLevel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "signature", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetETHSignatureTrackerRequest {
+    return new QueryGetETHSignatureTrackerRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetETHSignatureTrackerRequest {
+    return new QueryGetETHSignatureTrackerRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetETHSignatureTrackerRequest {
+    return new QueryGetETHSignatureTrackerRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetETHSignatureTrackerRequest | PlainMessage<QueryGetETHSignatureTrackerRequest> | undefined, b: QueryGetETHSignatureTrackerRequest | PlainMessage<QueryGetETHSignatureTrackerRequest> | undefined): boolean {
+    return proto3.util.equals(QueryGetETHSignatureTrackerRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.QueryGetETHSignatureTrackerResponse
+ */
+export class QueryGetETHSignatureTrackerResponse extends Message<QueryGetETHSignatureTrackerResponse> {
+  /**
+   * @generated from field: string numUsed = 1;
+   */
+  numUsed = "";
+
+  constructor(data?: PartialMessage<QueryGetETHSignatureTrackerResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryGetETHSignatureTrackerResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "numUsed", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetETHSignatureTrackerResponse {
+    return new QueryGetETHSignatureTrackerResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetETHSignatureTrackerResponse {
+    return new QueryGetETHSignatureTrackerResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetETHSignatureTrackerResponse {
+    return new QueryGetETHSignatureTrackerResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetETHSignatureTrackerResponse | PlainMessage<QueryGetETHSignatureTrackerResponse> | undefined, b: QueryGetETHSignatureTrackerResponse | PlainMessage<QueryGetETHSignatureTrackerResponse> | undefined): boolean {
+    return proto3.util.equals(QueryGetETHSignatureTrackerResponse, a, b);
+  }
+}
+

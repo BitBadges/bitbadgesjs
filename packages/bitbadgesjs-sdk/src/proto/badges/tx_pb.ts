@@ -382,14 +382,14 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   defaultBalances?: UserBalanceStore;
 
   /**
-   * Indicates if the valid badge IDs should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the valid token IDs should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
    * @generated from field: bool updateValidBadgeIds = 5;
    */
   updateValidBadgeIds = false;
 
   /**
-   * New badge IDs to add to this collection
+   * New token IDs to add to this collection
    *
    * @generated from field: repeated badges.UintRange validBadgeIds = 6;
    */
@@ -438,14 +438,14 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
-   * Indicates if the badge metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the token metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
    * @generated from field: bool updateBadgeMetadataTimeline = 13;
    */
   updateBadgeMetadataTimeline = false;
 
   /**
-   * New badge metadata timeline to set.
+   * New token metadata timeline to set.
    *
    * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 14;
    */
@@ -604,7 +604,7 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
  */
 export class MsgUniversalUpdateCollectionResponse extends Message<MsgUniversalUpdateCollectionResponse> {
   /**
-   * ID of the badge collection.
+   * ID of the collection.
    *
    * @generated from field: string collectionId = 1;
    */
@@ -659,14 +659,14 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   collectionId = "";
 
   /**
-   * Indicates if the valid badge IDs should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the valid token IDs should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
    * @generated from field: bool updateValidBadgeIds = 3;
    */
   updateValidBadgeIds = false;
 
   /**
-   * New badge IDs to add to this collection
+   * New token IDs to add to this collection
    *
    * @generated from field: repeated badges.UintRange validBadgeIds = 4;
    */
@@ -715,14 +715,14 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
-   * Indicates if the badge metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the token metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
    * @generated from field: bool updateBadgeMetadataTimeline = 13;
    */
   updateBadgeMetadataTimeline = false;
 
   /**
-   * New badge metadata timeline to set.
+   * New token metadata timeline to set.
    *
    * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 14;
    */
@@ -879,7 +879,7 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
  */
 export class MsgUpdateCollectionResponse extends Message<MsgUpdateCollectionResponse> {
   /**
-   * ID of the badge collection.
+   * ID of the collection.
    *
    * @generated from field: string collectionId = 1;
    */
@@ -941,7 +941,7 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   defaultBalances?: UserBalanceStore;
 
   /**
-   * New badge IDs to add to this collection
+   * New token IDs to add to this collection
    *
    * @generated from field: repeated badges.UintRange validBadgeIds = 5;
    */
@@ -969,7 +969,7 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
-   * Badge metadata timeline entries.
+   * Token metadata timeline entries.
    *
    * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 9;
    */
@@ -1081,7 +1081,7 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
  */
 export class MsgCreateCollectionResponse extends Message<MsgCreateCollectionResponse> {
   /**
-   * ID of the badge collection.
+   * ID of the collection.
    *
    * @generated from field: string collectionId = 1;
    */
@@ -1198,7 +1198,7 @@ export class MsgCreateAddressListsResponse extends Message<MsgCreateAddressLists
 }
 
 /**
- * MsgTransferBadges is used to transfer badges.
+ * MsgTransferBadges is used to transfer tokens.
  *
  * @generated from message badges.MsgTransferBadges
  */
@@ -2614,14 +2614,14 @@ export class MsgSetValidBadgeIds extends Message<MsgSetValidBadgeIds> {
   collectionId = "";
 
   /**
-   * New badge IDs to add to this collection
+   * New token IDs to add to this collection
    *
    * @generated from field: repeated badges.UintRange validBadgeIds = 3;
    */
   validBadgeIds: UintRange[] = [];
 
   /**
-   * Permission to update valid badge IDs
+   * Permission to update valid token IDs
    *
    * @generated from field: repeated badges.BadgeIdsActionPermission canUpdateValidBadgeIds = 4;
    */
@@ -2665,7 +2665,7 @@ export class MsgSetValidBadgeIds extends Message<MsgSetValidBadgeIds> {
  */
 export class MsgSetValidBadgeIdsResponse extends Message<MsgSetValidBadgeIdsResponse> {
   /**
-   * ID of the badge collection.
+   * ID of the collection.
    *
    * @generated from field: string collectionId = 1;
    */
@@ -2771,7 +2771,7 @@ export class MsgSetManager extends Message<MsgSetManager> {
  */
 export class MsgSetManagerResponse extends Message<MsgSetManagerResponse> {
   /**
-   * ID of the badge collection.
+   * ID of the collection.
    *
    * @generated from field: string collectionId = 1;
    */
@@ -2877,7 +2877,7 @@ export class MsgSetCollectionMetadata extends Message<MsgSetCollectionMetadata> 
  */
 export class MsgSetCollectionMetadataResponse extends Message<MsgSetCollectionMetadataResponse> {
   /**
-   * ID of the badge collection.
+   * ID of the collection.
    *
    * @generated from field: string collectionId = 1;
    */
@@ -2912,7 +2912,7 @@ export class MsgSetCollectionMetadataResponse extends Message<MsgSetCollectionMe
 }
 
 /**
- * MsgSetBadgeMetadata sets the badge metadata timeline and canUpdateBadgeMetadata permission
+ * MsgSetBadgeMetadata sets the token metadata timeline and canUpdateBadgeMetadata permission
  *
  * @generated from message badges.MsgSetBadgeMetadata
  */
@@ -2932,14 +2932,14 @@ export class MsgSetBadgeMetadata extends Message<MsgSetBadgeMetadata> {
   collectionId = "";
 
   /**
-   * New badge metadata timeline to set.
+   * New token metadata timeline to set.
    *
    * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 3;
    */
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
-   * Permission to update badge metadata timeline
+   * Permission to update token metadata timeline
    *
    * @generated from field: repeated badges.TimedUpdateWithBadgeIdsPermission canUpdateBadgeMetadata = 4;
    */
@@ -2983,7 +2983,7 @@ export class MsgSetBadgeMetadata extends Message<MsgSetBadgeMetadata> {
  */
 export class MsgSetBadgeMetadataResponse extends Message<MsgSetBadgeMetadataResponse> {
   /**
-   * ID of the badge collection.
+   * ID of the collection.
    *
    * @generated from field: string collectionId = 1;
    */
@@ -3089,7 +3089,7 @@ export class MsgSetCustomData extends Message<MsgSetCustomData> {
  */
 export class MsgSetCustomDataResponse extends Message<MsgSetCustomDataResponse> {
   /**
-   * ID of the badge collection.
+   * ID of the collection.
    *
    * @generated from field: string collectionId = 1;
    */
@@ -3195,7 +3195,7 @@ export class MsgSetStandards extends Message<MsgSetStandards> {
  */
 export class MsgSetStandardsResponse extends Message<MsgSetStandardsResponse> {
   /**
-   * ID of the badge collection.
+   * ID of the collection.
    *
    * @generated from field: string collectionId = 1;
    */
@@ -3301,7 +3301,7 @@ export class MsgSetCollectionApprovals extends Message<MsgSetCollectionApprovals
  */
 export class MsgSetCollectionApprovalsResponse extends Message<MsgSetCollectionApprovalsResponse> {
   /**
-   * ID of the badge collection.
+   * ID of the collection.
    *
    * @generated from field: string collectionId = 1;
    */
@@ -3407,7 +3407,7 @@ export class MsgSetIsArchived extends Message<MsgSetIsArchived> {
  */
 export class MsgSetIsArchivedResponse extends Message<MsgSetIsArchivedResponse> {
   /**
-   * ID of the badge collection.
+   * ID of the collection.
    *
    * @generated from field: string collectionId = 1;
    */

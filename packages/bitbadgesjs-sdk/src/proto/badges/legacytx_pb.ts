@@ -148,7 +148,7 @@ export class CollectionApprovalTimeline extends Message<CollectionApprovalTimeli
  */
 export class MsgNewCollection extends Message<MsgNewCollection> {
   /**
-   * See collections.proto for more details about these MsgNewBadge fields. Defines the badge details. Leave unneeded fields empty.
+   * See collections.proto for more details about these MsgNewBadge fields. Defines the token details. Leave unneeded fields empty.
    *
    * @generated from field: string creator = 1;
    */
@@ -195,7 +195,7 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
   standardsTimeline: StandardsTimeline[] = [];
 
   /**
-   * Badge supplys and amounts to create. For each idx, we create amounts[idx] badges each with a supply of supplys[idx].
+   * Token supplys and amounts to create. For each idx, we create amounts[idx] badges each with a supply of supplys[idx].
    * If supply[idx] == 0, we assume default supply. amountsToCreate[idx] can't equal 0.
    *
    * @generated from field: repeated badges.Balance badgesToCreate = 11;
@@ -218,14 +218,14 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
   addressLists: AddressList[] = [];
 
   /**
-   * The user's approved transfers for each badge ID.
+   * The user's approved transfers for each token ID.
    *
    * @generated from field: repeated badges.UserOutgoingApproval defaultOutgoingApprovals = 15;
    */
   defaultOutgoingApprovals: UserOutgoingApproval[] = [];
 
   /**
-   * The user's approved incoming transfers for each badge ID.
+   * The user's approved incoming transfers for each token ID.
    *
    * @generated from field: repeated badges.UserIncomingApproval defaultIncomingApprovals = 16;
    */
@@ -333,7 +333,7 @@ export class MsgNewCollectionResponse extends Message<MsgNewCollectionResponse> 
 }
 
 /**
- * This handles both minting more of existing badges and creating new badges.
+ * This handles both minting more of existing badges and creating new tokens.
  *
  * @generated from message badges.MsgMintAndDistributeBadges
  */
