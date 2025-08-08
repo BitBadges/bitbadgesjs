@@ -469,7 +469,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
         return this.getSIWBBRequestsView(viewId) as AccountViewData<T>[KeyType];
       case 'transferActivity':
         return this.getAccountActivityView(viewId) as AccountViewData<T>[KeyType];
-      case 'badgesCollected':
+      case 'tokensCollected':
         return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
       case 'sentClaimAlerts':
         return this.getAccountClaimAlertsView(viewId) as AccountViewData<T>[KeyType];
@@ -481,9 +481,9 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
         return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
       case 'blacklists':
         return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
-      case 'createdBadges':
+      case 'createdTokens':
         return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
-      case 'managingBadges':
+      case 'managingTokens':
         return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
       case 'listActivity':
         return this.getAccountListActivityView(viewId) as AccountViewData<T>[KeyType];
@@ -630,14 +630,14 @@ type AccountViewData<T extends NumberType> = {
   createdLists: BitBadgesAddressList<T>[];
   siwbbRequests: SIWBBRequestDoc<T>[];
   transferActivity: TransferActivityDoc<T>[];
-  badgesCollected: BalanceDocWithDetails<T>[];
+  tokensCollected: BalanceDocWithDetails<T>[];
   sentClaimAlerts: ClaimAlertDoc<T>[];
   claimAlerts: ClaimAlertDoc<T>[];
   allLists: BitBadgesAddressList<T>[];
   whitelists: BitBadgesAddressList<T>[];
   blacklists: BitBadgesAddressList<T>[];
-  createdBadges: BalanceDocWithDetails<T>[];
-  managingBadges: BalanceDocWithDetails<T>[];
+  createdTokens: BalanceDocWithDetails<T>[];
+  managingTokens: BalanceDocWithDetails<T>[];
   listActivity: ListActivityDoc<T>[];
   publicClaimActivity: ClaimActivityDoc<T>[];
   allClaimActivity: ClaimActivityDoc<T>[];
@@ -752,14 +752,14 @@ export type AccountViewKey =
   | 'createdLists'
   | 'siwbbRequests'
   | 'transferActivity'
-  | 'badgesCollected'
+  | 'tokensCollected'
   | 'sentClaimAlerts'
   | 'claimAlerts'
   | 'allLists'
   | 'whitelists'
   | 'blacklists'
-  | 'createdBadges'
-  | 'managingBadges'
+  | 'createdTokens'
+  | 'managingTokens'
   | 'listActivity'
   | 'publicClaimActivity'
   | 'allClaimActivity'

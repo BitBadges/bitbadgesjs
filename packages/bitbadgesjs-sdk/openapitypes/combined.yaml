@@ -409,7 +409,7 @@ paths:
         Algorithm](https://docs.bitbadges.io/for-developers/bitbadges-api/concepts/native-chain-algorithm)**
 
 
-        Note: The `views` and corresponding fields like `badgesCollected`,
+        Note: The `views` and corresponding fields like `tokensCollected`,
         `claimAlerts`, etc will be blank with this simple
 
         GET but are provided in the response for compatibility with the SDK. To
@@ -469,8 +469,8 @@ paths:
               address: 'bb1...',
               viewsToFetch: [
                 {
-                  viewType: 'badgesCollected',
-                  viewId: 'badgesCollected',
+                  viewType: 'tokensCollected',
+                  viewId: 'tokensCollected',
                   bookmark: '',
                 },
               ],
@@ -13383,14 +13383,14 @@ components:
         - createdLists
         - siwbbRequests
         - transferActivity
-        - badgesCollected
+        - tokensCollected
         - sentClaimAlerts
         - claimAlerts
         - allLists
         - whitelists
         - blacklists
-        - createdBadges
-        - managingBadges
+        - createdTokens
+        - managingTokens
         - listActivity
         - createdAttestations
         - receivedAttestations
