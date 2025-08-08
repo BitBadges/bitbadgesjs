@@ -565,7 +565,7 @@ paths:
               $ref: '#/components/schemas/iGetCollectionsPayload'
   '/collection/{collectionId}/balance/{address}/{badgeId}':
     get:
-      operationId: getBadgeBalanceByAddressSpecificBadge
+      operationId: getBalanceByAddressSpecificBadge
       summary: Get Badge Balance By Address - Specific Badge
       description: |
         Retrieves the balance of a specific badge for a specific address at the current time.
@@ -573,14 +573,14 @@ paths:
         For more advanced queries returning the whole balance document, please use the POST `/collection/{collectionId}/balance/{address}` endpoint.
 
         ```tsx
-        const res = await BitBadgesApi.getBadgeBalanceByAddressSpecificBadge(collectionId, address, badgeId);
+        const res = await BitBadgesApi.getBalanceByAddressSpecificBadge(collectionId, address, badgeId);
         console.log(res);
         ```
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressSpecificBadgePayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressSpecificBadgeSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getbadgebalancebyaddressspecificbadge)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBalanceByAddressSpecificBadgePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBalanceByAddressSpecificBadgeSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getbalancebyaddressspecificbadge)**
 
         Alternative Flow: Note that you can also set up a claim that checks badge ownership and check the success per user of that claim as well
       tags:
@@ -616,7 +616,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetBadgeBalanceByAddressSpecificBadgeSuccessResponse'
+                $ref: '#/components/schemas/iGetBalanceByAddressSpecificBadgeSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '401':
@@ -628,7 +628,7 @@ paths:
           userMaybeSignedIn: []
   '/collection/{collectionId}/balance/{address}':
     get:
-      operationId: getBadgeBalanceByAddress
+      operationId: getBalanceByAddress
       tags:
         - Badges
       summary: Get Badge Balances By Address
@@ -636,15 +636,15 @@ paths:
         Retrieves the balances of a specific address for a collection.
 
         ```tsx
-        const res = await BitBadgesApi.getBadgeBalanceByAddress(collectionId, address, { ...options });
+        const res = await BitBadgesApi.getBalanceByAddress(collectionId, address, { ...options });
         console.log(res);
         ```
 
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getbadgebalancebyaddress)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBalanceByAddressPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBalanceByAddressSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getbalancebyaddress)**
 
         Scopes:
         - `readPrivateClaimData` - Required if fetching private claim data (user-level approvals)
@@ -675,14 +675,14 @@ paths:
           description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
-            $ref: '#/components/schemas/iGetBadgeBalanceByAddressPayload'
+            $ref: '#/components/schemas/iGetBalanceByAddressPayload'
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetBadgeBalanceByAddressSuccessResponse'
+                $ref: '#/components/schemas/iGetBalanceByAddressSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '401':

@@ -24,7 +24,7 @@ fs.readFile(filePath, 'utf8', (err, data) => {
       { route: '/status', schema: '' },
       { route: '/search/{searchValue}', schema: 'iGetSearchPayload' },
       { route: '/collections', schema: 'iGetCollectionsPayload' },
-      { route: '/collection/{collectionId}/balance/{address}', schema: 'iGetBadgeBalanceByAddressPayload' },
+      { route: '/collection/{collectionId}/balance/{address}', schema: 'iGetBalanceByAddressPayload' },
       { route: '/collection/{collectionId}/{badgeId}/activity', schema: 'iGetBadgeActivityPayload' },
       { route: '/collection/{collectionId}/{badgeId}/owners', schema: 'iGetOwnersForBadgePayload' },
       { route: '/claims/reserved/{claimId}/{address}', schema: 'iGetReservedCodesPayload' },

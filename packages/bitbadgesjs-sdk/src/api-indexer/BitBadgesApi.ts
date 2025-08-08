@@ -29,7 +29,7 @@ import {
   FilterBadgesInCollectionSuccessResponse,
   FilterSuggestionsSuccessResponse,
   GetBadgeActivitySuccessResponse,
-  GetBadgeBalanceByAddressSuccessResponse,
+  GetBalanceByAddressSuccessResponse,
   GetOwnersForBadgeSuccessResponse,
   RefreshMetadataSuccessResponse,
   RefreshStatusSuccessResponse,
@@ -37,8 +37,8 @@ import {
   iFilterSuggestionsPayload,
   iFilterSuggestionsSuccessResponse,
   iGetBadgeActivityPayload,
-  iGetBadgeBalanceByAddressPayload,
-  iGetBadgeBalanceByAddressSuccessResponse,
+  iGetBalanceByAddressPayload,
+  iGetBalanceByAddressSuccessResponse,
   iGetOwnersForBadgePayload,
   iRefreshMetadataPayload
 } from './requests/collections.js';
@@ -454,52 +454,52 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/collection/:collectionId/balance/:address`
-   * - **SDK Function Call**: `await BitBadgesApi.getBadgeBalanceByAddress(collectionId, address);`
+   * - **SDK Function Call**: `await BitBadgesApi.getBalanceByAddress(collectionId, address);`
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getBadgeBalanceByAddress(collectionId, address);
+   * const res = await BitBadgesApi.getBalanceByAddress(collectionId, address);
    * console.log(res);
    * ```
    */
-  public async getBadgeBalanceByAddress(
+  public async getBalanceByAddress(
     collectionId: CollectionId,
     address: NativeAddress,
-    payload?: iGetBadgeBalanceByAddressPayload
-  ): Promise<GetBadgeBalanceByAddressSuccessResponse<T>> {
-    return await BitBadgesCollection.GetBadgeBalanceByAddress(this, collectionId, address, payload);
+    payload?: iGetBalanceByAddressPayload
+  ): Promise<GetBalanceByAddressSuccessResponse<T>> {
+    return await BitBadgesCollection.GetBalanceByAddress(this, collectionId, address, payload);
   }
 
   /**
    * Gets the badge balance for an address at the current time. This is a streamlined version of
-   * getBadgeBalanceByAddress.
+   * getBalanceByAddress.
    *
    * @remarks
    * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/balance/:address`
-   * - **SDK Function Call**: `await BitBadgesApi.getBadgeBalanceByAddress(collectionId, badgeId, address);`
+   * - **SDK Function Call**: `await BitBadgesApi.getBalanceByAddress(collectionId, badgeId, address);`
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getBadgeBalanceByAddress(collectionId, badgeId, address);
+   * const res = await BitBadgesApi.getBalanceByAddress(collectionId, badgeId, address);
    * console.log(res);
    * ```
    */
-  public async getBadgeBalanceByAddressSpecificBadge(
+  public async getBalanceByAddressSpecificBadge(
     collectionId: CollectionId,
     badgeId: NumberType,
     address: NativeAddress,
-    payload?: iGetBadgeBalanceByAddressPayload
-  ): Promise<GetBadgeBalanceByAddressSuccessResponse<T>> {
+    payload?: iGetBalanceByAddressPayload
+  ): Promise<GetBalanceByAddressSuccessResponse<T>> {
     try {
-      const validateRes: typia.IValidation<iGetBadgeBalanceByAddressPayload> = typia.validate<iGetBadgeBalanceByAddressPayload>(payload ?? {});
+      const validateRes: typia.IValidation<iGetBalanceByAddressPayload> = typia.validate<iGetBalanceByAddressPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.get<iGetBadgeBalanceByAddressSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBadgeBalanceByAddressSpecificBadgeRoute(collectionId, address, badgeId)}`
+      const response = await this.axios.get<iGetBalanceByAddressSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBalanceByAddressSpecificBadgeRoute(collectionId, address, badgeId)}`
       );
-      return new GetBadgeBalanceByAddressSuccessResponse(response.data).convert(this.ConvertFunction);
+      return new GetBalanceByAddressSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

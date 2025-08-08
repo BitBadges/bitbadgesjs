@@ -262,7 +262,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     }
   }
 
-  private getBalanceInfo(collectionId: CollectionId, throwIfNotFound?: boolean) {
+  private getBalanceInfoHelper(collectionId: CollectionId, throwIfNotFound?: boolean) {
     const balance = this.collected.find((x) => x.collectionId === collectionId);
     if (!balance && throwIfNotFound) throw new Error('Balance not found');
 
@@ -272,44 +272,44 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   /**
    * Gets the badge balance doc for a user by address.
    *
-   * This returns the cached data if it exists. If you want to fetch, use fetchBadgeBalances.
+   * This returns the cached data if it exists. If you want to fetch, use fetchBalances.
    *
    * @example
    * ```ts
-   * const res = user.getBadgeBalanceInfo(123n);
+   * const res = user.getBalanceInfo(123n);
    * console.log(res.balances);
    * ```
    */
-  getBadgeBalanceInfo(collectionId: CollectionId) {
-    return this.getBalanceInfo(collectionId);
+  getBalanceInfo(collectionId: CollectionId) {
+    return this.getBalanceInfoHelper(collectionId);
   }
 
   /**
-   * Wrapper for {@link getBadgeBalanceInfo} that throws if not fetched yet.
+   * Wrapper for {@link getBalanceInfo} that throws if not fetched yet.
    *
    * @example
    * ```ts
-   * const res = user.mustGetBadgeBalanceInfo(123n);
+   * const res = user.mustGetBalanceInfo(123n);
    * console.log(res.balances);
    * ```
    */
-  mustGetBadgeBalanceInfo(collectionId: CollectionId) {
-    const balance = this.getBalanceInfo(collectionId, true);
+  mustGetBalanceInfo(collectionId: CollectionId) {
+    const balance = this.getBalanceInfoHelper(collectionId, true);
     return balance as BalanceDocWithDetails<T>;
   }
 
   /**
-   * Gets the badge balances for a user by address. Throws if not fetched yet. To fetch, use fetchBadgeBalances.
+   * Gets the badge balances for a user by address. Throws if not fetched yet. To fetch, use fetchBalances.
    *
-   * Wrapper for {@link getBadgeBalances} that throws if not fetched yet.
+   * Wrapper for {@link getBalances} that throws if not fetched yet.
    *
    * @example
    * ```ts
-   * const res = user.mustGetBadgeBalances(123n);
+   * const res = user.mustGetBalances(123n);
    * console.log(res); // [{ ... }] Balances
    */
-  mustGetBadgeBalances(collectionId: CollectionId) {
-    return this.mustGetBadgeBalanceInfo(collectionId).balances;
+  mustGetBalances(collectionId: CollectionId) {
+    return this.mustGetBalanceInfo(collectionId).balances;
   }
 
   /**
@@ -317,23 +317,23 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    *
    * @example
    * ```ts
-   * const res = await user.fetchBadgeBalances(api, 123n);
+   * const res = await user.fetchBalances(api, 123n);
    * console.log(res.balances);
    * ```
    */
-  getBadgeBalances(collectionId: CollectionId) {
-    return this.getBadgeBalanceInfo(collectionId)?.balances;
+  getBalances(collectionId: CollectionId) {
+    return this.getBalanceInfo(collectionId)?.balances;
   }
 
   /**
    * Fetch badge balances for a collection and updates the user's collected array. Must pass in a valid API instance.
    * If forceful is true, it will fetch regardless of if it is already fetched. Else, it will only fetch if it is not already cached.
    */
-  async fetchBadgeBalances(api: BaseBitBadgesApi<T>, collectionId: CollectionId, forceful?: boolean) {
+  async fetchBalances(api: BaseBitBadgesApi<T>, collectionId: CollectionId, forceful?: boolean) {
     const currOwnerInfo = this.collected.find((x) => x.collectionId === collectionId);
     if (currOwnerInfo && !forceful) return currOwnerInfo;
 
-    const newOwnerInfo = await BitBadgesCollection.GetBadgeBalanceByAddress(api, collectionId, this.address);
+    const newOwnerInfo = await BitBadgesCollection.GetBalanceByAddress(api, collectionId, this.address);
     if (currOwnerInfo) {
       Object.assign(currOwnerInfo, newOwnerInfo);
       return currOwnerInfo;

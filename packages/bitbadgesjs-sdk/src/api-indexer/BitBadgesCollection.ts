@@ -74,7 +74,7 @@ import {
   FilterBadgesInCollectionSuccessResponse,
   GetAdditionalCollectionDetailsPayload,
   GetBadgeActivitySuccessResponse,
-  GetBadgeBalanceByAddressSuccessResponse,
+  GetBalanceByAddressSuccessResponse,
   GetCollectionRequestBody,
   GetMetadataForCollectionPayload,
   GetOwnersForBadgeSuccessResponse,
@@ -82,8 +82,8 @@ import {
   iFilterBadgesInCollectionSuccessResponse,
   iGetBadgeActivityPayload,
   iGetBadgeActivitySuccessResponse,
-  iGetBadgeBalanceByAddressPayload,
-  iGetBadgeBalanceByAddressSuccessResponse,
+  iGetBalanceByAddressPayload,
+  iGetBalanceByAddressSuccessResponse,
   iGetOwnersForBadgePayload,
   iGetOwnersForBadgeSuccessResponse,
   iRefreshMetadataPayload,
@@ -365,7 +365,7 @@ export class BitBadgesCollection<T extends NumberType>
     );
   }
 
-  private getBalanceInfo(address: NativeAddress, throwIfNotFound = true) {
+  private getBalanceInfoHelper(address: NativeAddress, throwIfNotFound = true) {
     const convertedAddress = address === 'Mint' || address === 'Total' ? address : convertToBitBadgesAddress(address);
     const owner = this.owners.find((x) => x.bitbadgesAddress === convertedAddress);
     if (!owner && throwIfNotFound)
@@ -376,7 +376,7 @@ export class BitBadgesCollection<T extends NumberType>
 
   /**
    * Gets the badge balance document for a specific address from the cached owners array. Returns undefined if not fetched yet.
-   * The balance document includes the balances, outgoing approvals, and other details. Use getBadgeBalances to only get the balances.
+   * The balance document includes the balances, outgoing approvals, and other details. Use getBalances to only get the balances.
    *
    * @remarks
    * This does not fetch the balance from the API. It only returns the cached balance. To fetch the balance, this
@@ -387,25 +387,25 @@ export class BitBadgesCollection<T extends NumberType>
    * ```ts
    * const collection: BitBadgesCollection<bigint> = { ... }
    * const address = 'bb1...'
-   * const balance = collection.getBadgeBalance(address)
+   * const balance = collection.getBalance(address)
    * console.log(balance?.balances)
    * console.log(balance?.outgoingApprovals)
    * ```
    */
-  getBadgeBalanceInfo(address: string) {
-    return this.getBalanceInfo(address, false);
+  getBalanceInfo(address: string) {
+    return this.getBalanceInfoHelper(address, false);
   }
 
   /**
-   * Wrapper for {@link getBadgeBalanceInfo} that throws an error if the balance is not found in the document.
+   * Wrapper for {@link getBalanceInfo} that throws an error if the balance is not found in the document.
    */
-  mustGetBadgeBalanceInfo(address: string) {
-    return this.getBalanceInfo(address, true) as BalanceDocWithDetails<T>;
+  mustGetBalanceInfo(address: string) {
+    return this.getBalanceInfoHelper(address, true) as BalanceDocWithDetails<T>;
   }
 
   /**
    * Gets the badge balances for a specific address from the cached owners array. Returns undefined if not fetched yet.
-   * This returns the balances only, not the other details. Use getBadgeBalanceInfo to get the other details for a user balance store
+   * This returns the balances only, not the other details. Use getBalanceInfo to get the other details for a user balance store
    * (approvals, etc.).
    *
    * @remarks
@@ -417,19 +417,19 @@ export class BitBadgesCollection<T extends NumberType>
    * ```ts
    * const collection: BitBadgesCollection<bigint> = { ... }
    * const address = 'bb1...'
-   * const balances = collection.getBadgeBalances(address)
+   * const balances = collection.getBalances(address)
    * console.log(balances)
    * ```
    */
-  getBadgeBalances(address: string) {
-    return this.getBadgeBalanceInfo(address)?.balances;
+  getBalances(address: string) {
+    return this.getBalanceInfo(address)?.balances;
   }
 
   /**
-   * Wrapper for {@link getBadgeBalances} that throws an error if the balance is not found in the document.
+   * Wrapper for {@link getBalances} that throws an error if the balance is not found in the document.
    */
-  mustGetBadgeBalances(address: string) {
-    return this.mustGetBadgeBalanceInfo(address).balances;
+  mustGetBalances(address: string) {
+    return this.mustGetBalanceInfo(address).balances;
   }
 
   /**
@@ -767,25 +767,25 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets the badge balance for a specific address for a specific collection. Must pass in a valid API instance.
    */
-  static async GetBadgeBalanceByAddress<T extends NumberType>(
+  static async GetBalanceByAddress<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
     collectionId: CollectionId,
     address: string,
-    payload?: iGetBadgeBalanceByAddressPayload
-  ): Promise<GetBadgeBalanceByAddressSuccessResponse<T>> {
+    payload?: iGetBalanceByAddressPayload
+  ): Promise<GetBalanceByAddressSuccessResponse<T>> {
     try {
-      const validateRes: typia.IValidation<iGetBadgeBalanceByAddressPayload> = typia.validate<iGetBadgeBalanceByAddressPayload>(payload ?? {});
+      const validateRes: typia.IValidation<iGetBalanceByAddressPayload> = typia.validate<iGetBalanceByAddressPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
       api.assertPositiveCollectionId(collectionId);
 
-      const response = await api.axios.get<iGetBadgeBalanceByAddressSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetBadgeBalanceByAddressRoute(collectionId, address)}`,
+      const response = await api.axios.get<iGetBalanceByAddressSuccessResponse<string>>(
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetBalanceByAddressRoute(collectionId, address)}`,
         { params: payload }
       );
-      return new GetBadgeBalanceByAddressSuccessResponse(response.data).convert(api.ConvertFunction);
+      return new GetBalanceByAddressSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -809,11 +809,11 @@ export class BitBadgesCollection<T extends NumberType>
    * @remarks
    * Returns the cached value if already fetched. Use forceful to force a new fetch.
    */
-  async fetchBadgeBalances(api: BaseBitBadgesApi<T>, address: NativeAddress, forceful?: boolean) {
-    const currOwnerInfo = this.getBadgeBalanceInfo(address);
+  async fetchBalances(api: BaseBitBadgesApi<T>, address: NativeAddress, forceful?: boolean) {
+    const currOwnerInfo = this.getBalanceInfo(address);
     if (currOwnerInfo && !forceful) return currOwnerInfo;
 
-    const newOwnerInfo = await BitBadgesCollection.GetBadgeBalanceByAddress(api, this.collectionId, address);
+    const newOwnerInfo = await BitBadgesCollection.GetBalanceByAddress(api, this.collectionId, address);
     this.owners = this.owners.filter((x) => x.bitbadgesAddress !== newOwnerInfo.bitbadgesAddress);
     this.owners.push(newOwnerInfo);
     return newOwnerInfo;

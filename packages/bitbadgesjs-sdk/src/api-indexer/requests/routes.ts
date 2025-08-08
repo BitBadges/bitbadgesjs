@@ -20,9 +20,9 @@ export class BitBadgesApiRoutes {
 
   static GetOwnersForBadgeRoute = (collectionId: CollectionId, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/owners`;
-  static GetBadgeBalanceByAddressRoute = (collectionId: CollectionId, bitbadgesAddress: string) =>
+  static GetBalanceByAddressRoute = (collectionId: CollectionId, bitbadgesAddress: string) =>
     `/api/v0/collection/${collectionId.toString()}/balance/${bitbadgesAddress}`;
-  static GetBadgeBalanceByAddressSpecificBadgeRoute = (collectionId: CollectionId, bitbadgesAddress: string, badgeId: NumberType) =>
+  static GetBalanceByAddressSpecificBadgeRoute = (collectionId: CollectionId, bitbadgesAddress: string, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/balance/${bitbadgesAddress}`;
   static GetBadgeActivityRoute = (collectionId: CollectionId, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/activity`;

@@ -29,6 +29,7 @@ export interface iFilterSuggestionsSuccessResponse {
     value: string | number | boolean;
     count: number;
     type: string;
+    floorPrice?: { amount: NumberType; denom: string };
   }[];
 }
 
@@ -39,7 +40,7 @@ export class FilterSuggestionsSuccessResponse
   extends BaseNumberTypeClass<FilterSuggestionsSuccessResponse>
   implements iFilterSuggestionsSuccessResponse
 {
-  attributes: { name: string; value: string | number | boolean; count: number; type: string }[];
+  attributes: { name: string; value: string | number | boolean; count: number; type: string; floorPrice?: { amount: NumberType; denom: string } }[];
 
   constructor(data: iFilterSuggestionsSuccessResponse) {
     super();
@@ -182,24 +183,24 @@ export class GetOwnersForBadgeSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface iGetBadgeBalanceByAddressSpecificBadgePayload {}
+export interface iGetBalanceByAddressSpecificBadgePayload {}
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetBadgeBalanceByAddressSpecificBadgeSuccessResponse<T extends NumberType> {
+export interface iGetBalanceByAddressSpecificBadgeSuccessResponse<T extends NumberType> {
   balance: T;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetBadgeBalanceByAddressSpecificBadgeSuccessResponse<T extends NumberType> extends BaseNumberTypeClass<
-  GetBadgeBalanceByAddressSpecificBadgeSuccessResponse<T>
+export class GetBalanceByAddressSpecificBadgeSuccessResponse<T extends NumberType> extends BaseNumberTypeClass<
+  GetBalanceByAddressSpecificBadgeSuccessResponse<T>
 > {
   balance: T;
 
-  constructor(data: iGetBadgeBalanceByAddressSpecificBadgeSuccessResponse<T>) {
+  constructor(data: iGetBalanceByAddressSpecificBadgeSuccessResponse<T>) {
     super();
     this.balance = data.balance;
   }
@@ -211,15 +212,15 @@ export class GetBadgeBalanceByAddressSpecificBadgeSuccessResponse<T extends Numb
   convert<U extends NumberType>(
     convertFunction: (item: NumberType) => U,
     options?: ConvertOptions
-  ): GetBadgeBalanceByAddressSpecificBadgeSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetBadgeBalanceByAddressSpecificBadgeSuccessResponse<U>;
+  ): GetBalanceByAddressSpecificBadgeSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetBalanceByAddressSpecificBadgeSuccessResponse<U>;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetBadgeBalanceByAddressPayload {
+export interface iGetBalanceByAddressPayload {
   /**
    * If true, we will fetch private parameters for any claims / approvals. Must be creator.
    *
@@ -236,18 +237,18 @@ export interface iGetBadgeBalanceByAddressPayload {
 /**
  * @category API Requests / Responses
  */
-export class GetBadgeBalanceByAddressPayload extends CustomTypeClass<GetBadgeBalanceByAddressPayload> implements iGetBadgeBalanceByAddressPayload {
+export class GetBalanceByAddressPayload extends CustomTypeClass<GetBalanceByAddressPayload> implements iGetBalanceByAddressPayload {
   fetchPrivateParams?: boolean;
   forceful?: boolean;
 
-  constructor(payload: iGetBadgeBalanceByAddressPayload) {
+  constructor(payload: iGetBalanceByAddressPayload) {
     super();
     this.fetchPrivateParams = payload.fetchPrivateParams;
     this.forceful = payload.forceful;
   }
 
-  static FromQuery(query: ParsedQs): GetBadgeBalanceByAddressPayload {
-    return new GetBadgeBalanceByAddressPayload({
+  static FromQuery(query: ParsedQs): GetBalanceByAddressPayload {
+    return new GetBalanceByAddressPayload({
       fetchPrivateParams: query.fetchPrivateParams === 'true',
       forceful: query.forceful === 'true'
     });
@@ -257,9 +258,9 @@ export class GetBadgeBalanceByAddressPayload extends CustomTypeClass<GetBadgeBal
 /**
  * @category API Requests / Responses
  */
-export interface iGetBadgeBalanceByAddressSuccessResponse<T extends NumberType> extends iBalanceDocWithDetails<T> {}
+export interface iGetBalanceByAddressSuccessResponse<T extends NumberType> extends iBalanceDocWithDetails<T> {}
 
-export class GetBadgeBalanceByAddressSuccessResponse<T extends NumberType> extends BalanceDocWithDetails<T> {}
+export class GetBalanceByAddressSuccessResponse<T extends NumberType> extends BalanceDocWithDetails<T> {}
 
 /**
  * @category API Requests / Responses

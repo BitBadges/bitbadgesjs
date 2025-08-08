@@ -15,8 +15,6 @@ export interface iMetadata<T extends NumberType> {
   image: string;
   /** The banner image for this item. */
   bannerImage?: string;
-  /** The video for this item. If a standard video is used, this should be a link to the video. We will use image as the poster image. If a youtube video is used, we embed it as an iframe. */
-  video?: string;
   /** The category for this item (e.g. "Education", "Attendance"). */
   category?: string;
   /** The external URL for this item. */
@@ -75,7 +73,6 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
   description: string;
   image: string;
   bannerImage?: string;
-  video?: string;
   category?: string;
   externalUrl?: string;
   tags?: string[];
@@ -111,7 +108,6 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
     this.description = data.description;
     this.image = data.image;
     this.bannerImage = data.bannerImage;
-    this.video = data.video;
     this.category = data.category;
     this.externalUrl = data.externalUrl;
     this.tags = data.tags;
