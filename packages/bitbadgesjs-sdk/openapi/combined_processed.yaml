@@ -573,7 +573,7 @@ paths:
               $ref: '#/components/schemas/iGetCollectionsPayload'
   '/collection/{collectionId}/balance/{address}/{badgeId}':
     get:
-      operationId: getBadgeBalanceByAddressSpecificBadge
+      operationId: getTokenBalanceByAddressSpecificToken
       summary: Get Badge Balance By Address - Specific Badge
       description: |
         Retrieves the balance of a specific token for a specific address at the current time.
@@ -581,13 +581,13 @@ paths:
         For more advanced queries returning the whole balance document, please use the POST `/collection/{collectionId}/balance/{address}` endpoint.
 
         ```tsx
-        const res = await BitBadgesApi.getBadgeBalanceByAddressSpecificBadge(collectionId, address, badgeId);
+        const res = await BitBadgesApi.getTokenBalanceByAddressSpecificToken(collectionId, address, badgeId);
         console.log(res);
         ```
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressSpecificBadgePayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressSpecificBadgeSuccessResponse)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTokenBalanceByAddressSpecificTokenPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTokenBalanceByAddressSpecificTokenSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getbadgebalancebyaddressspecificbadge)**
 
         Alternative Flow: Note that you can also set up a claim that checks token ownership and check the success per user of that claim as well
@@ -624,7 +624,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetBadgeBalanceByAddressSpecificBadgeSuccessResponse'
+                $ref: '#/components/schemas/iGetTokenBalanceByAddressSpecificTokenSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '401':
@@ -636,7 +636,7 @@ paths:
           userMaybeSignedIn: []
   '/collection/{collectionId}/balance/{address}':
     get:
-      operationId: getBadgeBalanceByAddress
+      operationId: getTokenBalanceByAddress
       tags:
         - Badges
       summary: Get Badge Balances By Address
@@ -644,14 +644,14 @@ paths:
         Retrieves the balances of a specific address for a collection.
 
         ```tsx
-        const res = await BitBadgesApi.getBadgeBalanceByAddress(collectionId, address, { ...options });
+        const res = await BitBadgesApi.getTokenBalanceByAddress(collectionId, address, { ...options });
         console.log(res);
         ```
 
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressSuccessResponse)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTokenBalanceByAddressPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTokenBalanceByAddressSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getbadgebalancebyaddress)**
 
         Scopes:
@@ -698,7 +698,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetBadgeBalanceByAddressSuccessResponse'
+                $ref: '#/components/schemas/iGetTokenBalanceByAddressSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '401':
@@ -1557,7 +1557,7 @@ paths:
         - apiKey: []
   '/collection/{collectionId}/{badgeId}/owners':
     get:
-      operationId: getOwnersForBadge
+      operationId: getOwners
       summary: Get Badge Owners
       tags:
         - Badges
@@ -1566,7 +1566,7 @@ paths:
         Returns a list of addresses and their corresponding balances for the specified token ID.
 
         ```tsx
-        const res = await BitBadgesApi.getOwnersForBadge(
+        const res = await BitBadgesApi.getOwners(
           collectionId,
           badgeId,
           {
@@ -1577,8 +1577,8 @@ paths:
 
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOwnersForBadgePayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOwnersForBadgeSuccessResponse)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOwnersPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOwnersSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getownersforbadge)**
       parameters:
         - name: collectionId
@@ -1619,7 +1619,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetOwnersForBadgeSuccessResponse'
+                $ref: '#/components/schemas/iGetOwnersSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '401':
@@ -1630,13 +1630,13 @@ paths:
         - apiKey: []
   '/collection/{collectionId}/{badgeId}/activity':
     get:
-      operationId: getBadgeActivity
+      operationId: getTokenActivity
       summary: Get Badge Activity
       description: |
         Retrieves the activity in a paginated format for a specific token in a collection.
 
         ```tsx
-        const res = await BitBadgesApi.getBadgeActivity(
+        const res = await BitBadgesApi.getTokenActivity(
           collectionId,
           badgeId,
           {
@@ -1646,8 +1646,8 @@ paths:
         ```
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeActivityPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeActivitySuccessResponse)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTokenActivityPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTokenActivitySuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getbadgeactivity)**
       tags:
         - Badges
@@ -1690,7 +1690,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetBadgeActivitySuccessResponse'
+                $ref: '#/components/schemas/iGetTokenActivitySuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '401':
@@ -6505,7 +6505,7 @@ components:
           type: array
         hiddenBadges:
           items:
-            $ref: '#/components/schemas/iBatchBadgeDetails'
+            $ref: '#/components/schemas/iBatchTokenDetails'
           description: The hidden badges of the account
           type: array
         hiddenLists:
@@ -6907,7 +6907,7 @@ components:
                   - viewKey
               specificCollections:
                 items:
-                  $ref: '#/components/schemas/iBatchBadgeDetails'
+                  $ref: '#/components/schemas/iBatchTokenDetails'
                 description: 'If defined, we will filter the view to only include the specified collections.'
                 type: array
               specificLists:
@@ -7812,7 +7812,7 @@ components:
         - pagination
       additionalProperties: false
       type: object
-    iGetOwnersForBadgePayload:
+    iGetOwnersPayload:
       properties:
         bookmark:
           description: The pagination bookmark for where to start the request. Bookmarks are obtained via the previous response. "" for first request.
@@ -7824,7 +7824,7 @@ components:
           type: string
       additionalProperties: false
       type: object
-    iGetOwnersForBadgeSuccessResponse:
+    iGetOwnersSuccessResponse:
       properties:
         owners:
           items:
@@ -7839,10 +7839,10 @@ components:
         - pagination
       additionalProperties: false
       type: object
-    iGetBadgeBalanceByAddressSpecificBadgePayload:
+    iGetTokenBalanceByAddressSpecificTokenPayload:
       additionalProperties: false
       type: object
-    iGetBadgeBalanceByAddressSpecificBadgeSuccessResponse:
+    iGetTokenBalanceByAddressSpecificTokenSuccessResponse:
       properties:
         balance:
           $ref: '#/components/schemas/NumberType'
@@ -7850,7 +7850,7 @@ components:
         - balance
       additionalProperties: false
       type: object
-    iGetBadgeBalanceByAddressPayload:
+    iGetTokenBalanceByAddressPayload:
       properties:
         fetchPrivateParams:
           description: |-
@@ -7863,7 +7863,7 @@ components:
           type: boolean
       additionalProperties: false
       type: object
-    iGetBadgeBalanceByAddressSuccessResponse:
+    iGetTokenBalanceByAddressSuccessResponse:
       properties:
         balances:
           items:
@@ -7946,7 +7946,7 @@ components:
         This stores everythign about a user's balances for a specific collection ID.
         This includes their balances, incoming approvals, outgoing approvals, and permissions.
       type: object
-    iGetBadgeActivityPayload:
+    iGetTokenActivityPayload:
       properties:
         bookmark:
           description: An optional bookmark for pagination. Bookmarks are obtained via the previous response. "" for first request.
@@ -7958,7 +7958,7 @@ components:
             - bb1...
       additionalProperties: false
       type: object
-    iGetBadgeActivitySuccessResponse:
+    iGetTokenActivitySuccessResponse:
       properties:
         activity:
           items:
@@ -9269,7 +9269,7 @@ components:
           type: string
         hiddenBadges:
           items:
-            $ref: '#/components/schemas/iBatchBadgeDetails'
+            $ref: '#/components/schemas/iBatchTokenDetails'
           description: The tokens to hide and not view for this profile's portfolio
           type: array
         hiddenLists:
@@ -14092,7 +14092,7 @@ components:
             - Brief description.
         items:
           items:
-            $ref: '#/components/schemas/iBatchBadgeDetails'
+            $ref: '#/components/schemas/iBatchTokenDetails'
           description: The token IDs to display on the custom page
           type: array
       required:
@@ -14171,7 +14171,7 @@ components:
           type: array
         hiddenBadges:
           items:
-            $ref: '#/components/schemas/iBatchBadgeDetails'
+            $ref: '#/components/schemas/iBatchTokenDetails'
           description: The hidden badges of the account
           type: array
         hiddenLists:
@@ -16164,11 +16164,11 @@ components:
           properties:
             nsfw:
               items:
-                $ref: '#/components/schemas/iBatchBadgeDetails'
+                $ref: '#/components/schemas/iBatchTokenDetails'
               type: array
             reported:
               items:
-                $ref: '#/components/schemas/iBatchBadgeDetails'
+                $ref: '#/components/schemas/iBatchTokenDetails'
               type: array
           required:
             - nsfw
@@ -18023,7 +18023,7 @@ components:
         - image
       additionalProperties: false
       type: object
-    iBatchBadgeDetails:
+    iBatchTokenDetails:
       properties:
         collectionId:
           description: The collection ID of this element's token details.

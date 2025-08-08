@@ -73,19 +73,19 @@ import {
   CollectionViewKey,
   FilterBadgesInCollectionSuccessResponse,
   GetAdditionalCollectionDetailsPayload,
-  GetBadgeActivitySuccessResponse,
+  GetTokenActivitySuccessResponse,
   GetBalanceByAddressSuccessResponse,
   GetCollectionRequestBody,
   GetMetadataForCollectionPayload,
-  GetOwnersForBadgeSuccessResponse,
+  GetOwnersSuccessResponse,
   iFilterBadgesInCollectionPayload,
   iFilterBadgesInCollectionSuccessResponse,
-  iGetBadgeActivityPayload,
-  iGetBadgeActivitySuccessResponse,
+  iGetTokenActivityPayload,
+  iGetTokenActivitySuccessResponse,
   iGetBalanceByAddressPayload,
   iGetBalanceByAddressSuccessResponse,
-  iGetOwnersForBadgePayload,
-  iGetOwnersForBadgeSuccessResponse,
+  iGetOwnersPayload,
+  iGetOwnersSuccessResponse,
   iRefreshMetadataPayload,
   iRefreshMetadataSuccessResponse,
   iRefreshStatusSuccessResponse,
@@ -1179,14 +1179,14 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets activity for a specific token ID. You have to handle the pagination yourself.
    */
-  static async GetBadgeActivity<T extends NumberType>(
+  static async GetTokenActivity<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
     collectionId: CollectionId,
     badgeId: NumberType,
-    payload?: iGetBadgeActivityPayload
+    payload?: iGetTokenActivityPayload
   ) {
     try {
-      const validateRes: typia.IValidation<iGetBadgeActivityPayload> = typia.validate<iGetBadgeActivityPayload>(payload ?? {});
+      const validateRes: typia.IValidation<iGetTokenActivityPayload> = typia.validate<iGetTokenActivityPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -1194,11 +1194,11 @@ export class BitBadgesCollection<T extends NumberType>
       api.assertPositiveCollectionId(collectionId);
       api.assertPositiveInteger(badgeId);
 
-      const response = await api.axios.get<iGetBadgeActivitySuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetBadgeActivityRoute(collectionId, badgeId)}`,
+      const response = await api.axios.get<iGetTokenActivitySuccessResponse<string>>(
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetTokenActivityRoute(collectionId, badgeId)}`,
         { params: payload }
       );
-      return new GetBadgeActivitySuccessResponse(response.data).convert(api.ConvertFunction);
+      return new GetTokenActivitySuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -1208,21 +1208,21 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Get the token activity for a specific token ID. You have to handle the pagination yourself.
    */
-  async getBadgeActivity(api: BaseBitBadgesApi<T>, badgeId: T, body: iGetBadgeActivityPayload) {
-    return await BitBadgesCollection.GetBadgeActivity(api, this.collectionId, badgeId, body);
+  async getTokenActivity(api: BaseBitBadgesApi<T>, badgeId: T, body: iGetTokenActivityPayload) {
+    return await BitBadgesCollection.GetTokenActivity(api, this.collectionId, badgeId, body);
   }
 
   /**
    * Gets owners for a specific token ID. You have to handle the pagination yourself.
    */
-  static async GetOwnersForBadge<T extends NumberType>(
+  static async GetOwners<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
     collectionId: CollectionId,
     badgeId: NumberType,
-    payload?: iGetOwnersForBadgePayload
+    payload?: iGetOwnersPayload
   ) {
     try {
-      const validateRes: typia.IValidation<iGetOwnersForBadgePayload> = typia.validate<iGetOwnersForBadgePayload>(payload ?? {});
+      const validateRes: typia.IValidation<iGetOwnersPayload> = typia.validate<iGetOwnersPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
@@ -1230,11 +1230,11 @@ export class BitBadgesCollection<T extends NumberType>
       api.assertPositiveCollectionId(collectionId);
       api.assertPositiveInteger(badgeId);
 
-      const response = await api.axios.get<iGetOwnersForBadgeSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetOwnersForBadgeRoute(collectionId, badgeId)}`,
+      const response = await api.axios.get<iGetOwnersSuccessResponse<string>>(
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetOwnersRoute(collectionId, badgeId)}`,
         { params: payload }
       );
-      return new GetOwnersForBadgeSuccessResponse(response.data).convert(api.ConvertFunction);
+      return new GetOwnersSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -1244,8 +1244,8 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets the owners for a specific token. You have to handle the pagination yourself.
    */
-  async getOwnersForBadge(api: BaseBitBadgesApi<T>, badgeId: T, body: iGetOwnersForBadgePayload) {
-    return await BitBadgesCollection.GetOwnersForBadge(api, this.collectionId, badgeId, body);
+  async getOwners(api: BaseBitBadgesApi<T>, badgeId: T, body: iGetOwnersPayload) {
+    return await BitBadgesCollection.GetOwners(api, this.collectionId, badgeId, body);
   }
 
   /**

@@ -6,7 +6,7 @@ import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, Conv
 import type { JSPrimitiveNumberType, NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
 import type { iApprovalInfoDetails, iChallengeDetails, iUserOutgoingApprovalWithDetails } from '@/core/approvals.js';
-import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
+import type { iBatchTokenDetails } from '@/core/batch-utils.js';
 import type { iCosmosCoin } from '@/core/coin.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import type { iCollectionApproval, iPredeterminedBalances, iUserIncomingApprovalWithDetails } from '@/interfaces/types/approvals.js';
@@ -597,7 +597,7 @@ export interface iCustomPage<T extends NumberType> {
   /** The description of the custom page */
   description: string;
   /** The token IDs to display on the custom page */
-  items: iBatchBadgeDetails<T>[];
+  items: iBatchTokenDetails<T>[];
 }
 
 /**
@@ -646,7 +646,7 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   customLinks?: iCustomLink[];
 
   /** The hidden badges of the account */
-  hiddenBadges?: iBatchBadgeDetails<T>[];
+  hiddenBadges?: iBatchTokenDetails<T>[];
   /** The hidden lists of the account */
   hiddenLists?: string[];
 
@@ -1914,8 +1914,8 @@ export interface iCreatorCreditsDoc<T extends NumberType> extends Doc {
  */
 export interface iComplianceDoc<T extends NumberType> extends Doc {
   badges: {
-    nsfw: iBatchBadgeDetails<T>[];
-    reported: iBatchBadgeDetails<T>[];
+    nsfw: iBatchTokenDetails<T>[];
+    reported: iBatchTokenDetails<T>[];
   };
   addressLists: {
     nsfw: { listId: string; reason: string }[];

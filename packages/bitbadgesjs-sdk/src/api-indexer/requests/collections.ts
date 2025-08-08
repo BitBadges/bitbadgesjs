@@ -108,7 +108,7 @@ export class FilterBadgesInCollectionSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface iGetOwnersForBadgePayload {
+export interface iGetOwnersPayload {
   /**
    * The pagination bookmark for where to start the request. Bookmarks are obtained via the previous response. "" for first request.
    */
@@ -122,18 +122,18 @@ export interface iGetOwnersForBadgePayload {
 /**
  * @category API Requests / Responses
  */
-export class GetOwnersForBadgePayload extends CustomTypeClass<GetOwnersForBadgePayload> implements iGetOwnersForBadgePayload {
+export class GetOwnersPayload extends CustomTypeClass<GetOwnersPayload> implements iGetOwnersPayload {
   bookmark?: string;
   sortBy?: 'amount';
 
-  constructor(payload: iGetOwnersForBadgePayload) {
+  constructor(payload: iGetOwnersPayload) {
     super();
     this.bookmark = payload.bookmark;
     this.sortBy = payload.sortBy;
   }
 
-  static FromQuery(query: ParsedQs): GetOwnersForBadgePayload {
-    return new GetOwnersForBadgePayload({
+  static FromQuery(query: ParsedQs): GetOwnersPayload {
+    return new GetOwnersPayload({
       bookmark: query.bookmark?.toString(),
       sortBy: query.sortBy === 'amount' ? 'amount' : undefined
     });
@@ -143,7 +143,7 @@ export class GetOwnersForBadgePayload extends CustomTypeClass<GetOwnersForBadgeP
 /**
  * @category API Requests / Responses
  */
-export interface iGetOwnersForBadgeSuccessResponse<T extends NumberType> {
+export interface iGetOwnersSuccessResponse<T extends NumberType> {
   /**
    * Represents a list of owners balance details.
    */
@@ -157,21 +157,21 @@ export interface iGetOwnersForBadgeSuccessResponse<T extends NumberType> {
 /**
  * @category API Requests / Responses
  */
-export class GetOwnersForBadgeSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetOwnersForBadgeSuccessResponse<T>>
-  implements iGetOwnersForBadgeSuccessResponse<T>
+export class GetOwnersSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetOwnersSuccessResponse<T>>
+  implements iGetOwnersSuccessResponse<T>
 {
   owners: BalanceDocWithDetails<T>[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetOwnersForBadgeSuccessResponse<T>) {
+  constructor(data: iGetOwnersSuccessResponse<T>) {
     super();
     this.owners = data.owners.map((balance) => new BalanceDocWithDetails(balance));
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetOwnersForBadgeSuccessResponse<U> {
-    return new GetOwnersForBadgeSuccessResponse(
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetOwnersSuccessResponse<U> {
+    return new GetOwnersSuccessResponse(
       deepCopyPrimitives({
         owners: this.owners.map((balance) => balance.convert(convertFunction)),
         pagination: this.pagination
@@ -183,24 +183,24 @@ export class GetOwnersForBadgeSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface iGetBalanceByAddressSpecificBadgePayload {}
+export interface iGetBalanceByAddressSpecificTokenPayload {}
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetBalanceByAddressSpecificBadgeSuccessResponse<T extends NumberType> {
+export interface iGetBalanceByAddressSpecificTokenSuccessResponse<T extends NumberType> {
   balance: T;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetBalanceByAddressSpecificBadgeSuccessResponse<T extends NumberType> extends BaseNumberTypeClass<
-  GetBalanceByAddressSpecificBadgeSuccessResponse<T>
+export class GetBalanceByAddressSpecificTokenSuccessResponse<T extends NumberType> extends BaseNumberTypeClass<
+  GetBalanceByAddressSpecificTokenSuccessResponse<T>
 > {
   balance: T;
 
-  constructor(data: iGetBalanceByAddressSpecificBadgeSuccessResponse<T>) {
+  constructor(data: iGetBalanceByAddressSpecificTokenSuccessResponse<T>) {
     super();
     this.balance = data.balance;
   }
@@ -212,8 +212,8 @@ export class GetBalanceByAddressSpecificBadgeSuccessResponse<T extends NumberTyp
   convert<U extends NumberType>(
     convertFunction: (item: NumberType) => U,
     options?: ConvertOptions
-  ): GetBalanceByAddressSpecificBadgeSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetBalanceByAddressSpecificBadgeSuccessResponse<U>;
+  ): GetBalanceByAddressSpecificTokenSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetBalanceByAddressSpecificTokenSuccessResponse<U>;
   }
 }
 
@@ -265,7 +265,7 @@ export class GetBalanceByAddressSuccessResponse<T extends NumberType> extends Ba
 /**
  * @category API Requests / Responses
  */
-export interface iGetBadgeActivityPayload {
+export interface iGetTokenActivityPayload {
   /**
    * An optional bookmark for pagination. Bookmarks are obtained via the previous response. "" for first request.
    */
@@ -279,18 +279,18 @@ export interface iGetBadgeActivityPayload {
 /**
  * @category API Requests / Responses
  */
-export class GetBadgeActivityPayload extends CustomTypeClass<GetBadgeActivityPayload> implements iGetBadgeActivityPayload {
+export class GetTokenActivityPayload extends CustomTypeClass<GetTokenActivityPayload> implements iGetTokenActivityPayload {
   bookmark?: string;
   bitbadgesAddress?: string;
 
-  constructor(payload: iGetBadgeActivityPayload) {
+  constructor(payload: iGetTokenActivityPayload) {
     super();
     this.bookmark = payload.bookmark;
     this.bitbadgesAddress = payload.bitbadgesAddress;
   }
 
-  static FromQuery(query: ParsedQs): GetBadgeActivityPayload {
-    return new GetBadgeActivityPayload({
+  static FromQuery(query: ParsedQs): GetTokenActivityPayload {
+    return new GetTokenActivityPayload({
       bookmark: query.bookmark?.toString(),
       bitbadgesAddress: query.bitbadgesAddress?.toString()
     });
@@ -300,7 +300,7 @@ export class GetBadgeActivityPayload extends CustomTypeClass<GetBadgeActivityPay
 /**
  * @category API Requests / Responses
  */
-export interface iGetBadgeActivitySuccessResponse<T extends NumberType> {
+export interface iGetTokenActivitySuccessResponse<T extends NumberType> {
   /**
    * Array of transfer activity information.
    */
@@ -311,21 +311,21 @@ export interface iGetBadgeActivitySuccessResponse<T extends NumberType> {
   pagination: PaginationInfo;
 }
 
-export class GetBadgeActivitySuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetBadgeActivitySuccessResponse<T>>
-  implements iGetBadgeActivitySuccessResponse<T>
+export class GetTokenActivitySuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetTokenActivitySuccessResponse<T>>
+  implements iGetTokenActivitySuccessResponse<T>
 {
   activity: TransferActivityDoc<T>[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetBadgeActivitySuccessResponse<T>) {
+  constructor(data: iGetTokenActivitySuccessResponse<T>) {
     super();
     this.activity = data.activity.map((activity) => new TransferActivityDoc(activity));
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetBadgeActivitySuccessResponse<U> {
-    return new GetBadgeActivitySuccessResponse(
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetTokenActivitySuccessResponse<U> {
+    return new GetTokenActivitySuccessResponse(
       deepCopyPrimitives({
         activity: this.activity.map((activity) => activity.convert(convertFunction)),
         pagination: this.pagination

@@ -18,13 +18,13 @@ export class BitBadgesApiRoutes {
   static SearchRoute = (searchValue: string) => `/api/v0/search/${searchValue}`;
   static GetCollectionsRoute = () => '/api/v0/collections';
 
-  static GetOwnersForBadgeRoute = (collectionId: CollectionId, badgeId: NumberType) =>
+  static GetOwnersRoute = (collectionId: CollectionId, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/owners`;
   static GetBalanceByAddressRoute = (collectionId: CollectionId, bitbadgesAddress: string) =>
     `/api/v0/collection/${collectionId.toString()}/balance/${bitbadgesAddress}`;
-  static GetBalanceByAddressSpecificBadgeRoute = (collectionId: CollectionId, bitbadgesAddress: string, badgeId: NumberType) =>
+  static GetBalanceByAddressSpecificTokenRoute = (collectionId: CollectionId, bitbadgesAddress: string, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/balance/${bitbadgesAddress}`;
-  static GetBadgeActivityRoute = (collectionId: CollectionId, badgeId: NumberType) =>
+  static GetTokenActivityRoute = (collectionId: CollectionId, badgeId: NumberType) =>
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/activity`;
   static RefreshMetadataRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/refresh`;
   static GetRefreshStatusRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/refreshStatus`;

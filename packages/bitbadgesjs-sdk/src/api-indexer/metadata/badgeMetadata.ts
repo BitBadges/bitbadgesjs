@@ -281,7 +281,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
    * @example
    * Use this function to set the "name" property of all tokens to "test" via setMetadataPropertyForAll(metadataArr, badgeIds, uri, "name", "test")
    */
-  static setMetadataPropertyForSpecificBadgeIds = <T extends NumberType>(
+  static setMetadataPropertyForSpecificIds = <T extends NumberType>(
     metadataArr: BadgeMetadataDetails<T>[],
     badgeIds: UintRange<T>[],
     key: string,

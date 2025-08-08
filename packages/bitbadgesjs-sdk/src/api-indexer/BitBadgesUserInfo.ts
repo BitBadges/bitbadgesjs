@@ -2,7 +2,7 @@ import type { ConvertOptions, CustomType, ParsedQs } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { AddressList } from '@/core/addressLists.js';
-import type { BatchBadgeDetails, iBatchBadgeDetails } from '@/core/batch-utils.js';
+import type { BatchTokenDetails, iBatchTokenDetails } from '@/core/batch-utils.js';
 import { CosmosCoin } from '@/core/coin.js';
 import type { CollectionId, iAddressList } from '@/interfaces/types/core.js';
 import typia from 'typia';
@@ -428,7 +428,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     api: BaseBitBadgesApi<T>,
     viewType: AccountViewKey,
     viewId: string,
-    specificCollections?: BatchBadgeDetails<NumberType>[],
+    specificCollections?: BatchTokenDetails<NumberType>[],
     specificLists?: string[],
     oldestFirst?: boolean
   ) {
@@ -804,7 +804,7 @@ export type AccountFetchDetails = {
     /** The base view type to fetch. */
     viewType: AccountViewKey;
     /** If defined, we will filter the view to only include the specified collections. */
-    specificCollections?: iBatchBadgeDetails<NumberType>[];
+    specificCollections?: iBatchTokenDetails<NumberType>[];
     /** If defined, we will filter the view to only include the specified lists. */
     specificLists?: string[];
     /** Oldest first. By default, we fetch newest */

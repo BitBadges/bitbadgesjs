@@ -20,7 +20,7 @@ import {
   iChallengeDetails
 } from '@/core/approvals.js';
 import { BalanceArray } from '@/core/balances.js';
-import { BatchBadgeDetailsArray } from '@/core/batch-utils.js';
+import { BatchTokenDetailsArray } from '@/core/batch-utils.js';
 import { CosmosCoin } from '@/core/coin.js';
 import {
   BadgeMetadataTimeline,
@@ -638,13 +638,13 @@ export class EmailVerificationStatus<T extends NumberType>
 export class CustomPage<T extends NumberType> extends BaseNumberTypeClass<CustomPage<T>> implements iCustomPage<T> {
   title: string;
   description: string;
-  items: BatchBadgeDetailsArray<T>;
+  items: BatchTokenDetailsArray<T>;
 
   constructor(data: iCustomPage<T>) {
     super();
     this.title = data.title;
     this.description = data.description;
-    this.items = BatchBadgeDetailsArray.From(data.items);
+    this.items = BatchTokenDetailsArray.From(data.items);
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CustomPage<U> {
@@ -687,7 +687,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   bluesky?: string;
   readme?: string;
   customLinks?: iCustomLink[];
-  hiddenBadges?: BatchBadgeDetailsArray<T>;
+  hiddenBadges?: BatchTokenDetailsArray<T>;
   hiddenLists?: string[];
   customPages?: {
     badges: CustomPage<T>[];
@@ -736,7 +736,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.bluesky = data.bluesky;
     this.readme = data.readme;
     this.customLinks = data.customLinks;
-    this.hiddenBadges = data.hiddenBadges ? BatchBadgeDetailsArray.From(data.hiddenBadges) : undefined;
+    this.hiddenBadges = data.hiddenBadges ? BatchTokenDetailsArray.From(data.hiddenBadges) : undefined;
     this.hiddenLists = data.hiddenLists;
     this.customPages = data.customPages
       ? {
@@ -2043,8 +2043,8 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
   _docId: string;
   _id?: string;
   badges: {
-    nsfw: BatchBadgeDetailsArray<T>;
-    reported: BatchBadgeDetailsArray<T>;
+    nsfw: BatchTokenDetailsArray<T>;
+    reported: BatchTokenDetailsArray<T>;
   };
   addressLists: {
     nsfw: { listId: string; reason: string }[];
@@ -2070,8 +2070,8 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
   constructor(data: iComplianceDoc<T>) {
     super();
     this.badges = {
-      nsfw: BatchBadgeDetailsArray.From(data.badges.nsfw),
-      reported: BatchBadgeDetailsArray.From(data.badges.reported)
+      nsfw: BatchTokenDetailsArray.From(data.badges.nsfw),
+      reported: BatchTokenDetailsArray.From(data.badges.reported)
     };
     this.addressLists = data.addressLists;
     this.accounts = data.accounts;

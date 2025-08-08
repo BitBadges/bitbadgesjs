@@ -28,18 +28,18 @@ import type { DynamicDataHandlerType, NativeAddress, iChallengeTrackerIdDetails 
 import {
   FilterBadgesInCollectionSuccessResponse,
   FilterSuggestionsSuccessResponse,
-  GetBadgeActivitySuccessResponse,
+  GetTokenActivitySuccessResponse,
   GetBalanceByAddressSuccessResponse,
-  GetOwnersForBadgeSuccessResponse,
+  GetOwnersSuccessResponse,
   RefreshMetadataSuccessResponse,
   RefreshStatusSuccessResponse,
   iFilterBadgesInCollectionPayload,
   iFilterSuggestionsPayload,
   iFilterSuggestionsSuccessResponse,
-  iGetBadgeActivityPayload,
+  iGetTokenActivityPayload,
   iGetBalanceByAddressPayload,
   iGetBalanceByAddressSuccessResponse,
-  iGetOwnersForBadgePayload,
+  iGetOwnersPayload,
   iRefreshMetadataPayload
 } from './requests/collections.js';
 import {
@@ -433,20 +433,20 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/owners`
-   * - **SDK Function Call**: `await BitBadgesApi.getOwnersForBadge(collectionId, badgeId, payload);`
+   * - **SDK Function Call**: `await BitBadgesApi.getOwners(collectionId, badgeId, payload);`
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getOwnersForBadge(collectionId, badgeId, { bookmark: 'prev' });
+   * const res = await BitBadgesApi.getOwners(collectionId, badgeId, { bookmark: 'prev' });
    * console.log(res);
    * ```
    */
-  public async getOwnersForBadge(
+  public async getOwners(
     collectionId: CollectionId,
     badgeId: NumberType,
-    payload: iGetOwnersForBadgePayload
-  ): Promise<GetOwnersForBadgeSuccessResponse<T>> {
-    return await BitBadgesCollection.GetOwnersForBadge<T>(this, collectionId, badgeId, payload);
+    payload: iGetOwnersPayload
+  ): Promise<GetOwnersSuccessResponse<T>> {
+    return await BitBadgesCollection.GetOwners<T>(this, collectionId, badgeId, payload);
   }
 
   /**
@@ -484,7 +484,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    */
-  public async getBalanceByAddressSpecificBadge(
+  public async getBalanceByAddressSpecificToken(
     collectionId: CollectionId,
     badgeId: NumberType,
     address: NativeAddress,
@@ -497,7 +497,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
       }
 
       const response = await this.axios.get<iGetBalanceByAddressSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBalanceByAddressSpecificBadgeRoute(collectionId, address, badgeId)}`
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBalanceByAddressSpecificTokenRoute(collectionId, address, badgeId)}`
       );
       return new GetBalanceByAddressSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
@@ -511,20 +511,20 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/activity`
-   * - **SDK Function Call**: `await BitBadgesApi.getBadgeActivity(collectionId, badgeId, payload);`
+   * - **SDK Function Call**: `await BitBadgesApi.getTokenActivity(collectionId, badgeId, payload);`
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getBadgeActivity(collectionId, badgeId, { bookmark: 'prev' });
+   * const res = await BitBadgesApi.getTokenActivity(collectionId, badgeId, { bookmark: 'prev' });
    * console.log(res);
    * ```
    */
-  public async getBadgeActivity(
+  public async getTokenActivity(
     collectionId: CollectionId,
     badgeId: NumberType,
-    payload: iGetBadgeActivityPayload
-  ): Promise<GetBadgeActivitySuccessResponse<T>> {
-    return await BitBadgesCollection.GetBadgeActivity<T>(this, collectionId, badgeId, payload);
+    payload: iGetTokenActivityPayload
+  ): Promise<GetTokenActivitySuccessResponse<T>> {
+    return await BitBadgesCollection.GetTokenActivity<T>(this, collectionId, badgeId, payload);
   }
 
   /**

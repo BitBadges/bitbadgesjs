@@ -70,7 +70,7 @@ import { BaseNumberTypeClass, ConvertOptions, CustomTypeClass, ParsedQs, convert
 import { type NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
 import { ClaimDetails, iChallengeDetails, iChallengeInfoDetailsUpdate } from '@/core/approvals.js';
-import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
+import type { iBatchTokenDetails } from '@/core/batch-utils.js';
 import { VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
@@ -897,7 +897,7 @@ export interface iUpdateAccountInfoPayload {
   /**
    * The tokens to hide and not view for this profile's portfolio
    */
-  hiddenBadges?: iBatchBadgeDetails<NumberType>[];
+  hiddenBadges?: iBatchTokenDetails<NumberType>[];
 
   /**
    * The lists to hide and not view for this profile's portfolio
