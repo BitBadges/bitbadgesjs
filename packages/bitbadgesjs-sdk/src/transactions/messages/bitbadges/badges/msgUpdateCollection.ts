@@ -1,6 +1,6 @@
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
@@ -102,8 +102,8 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUpdateCollection<U>;
   }
 
-  toProto(): badges.MsgUpdateCollection {
-    return new badges.MsgUpdateCollection(this.convert(Stringify));
+  toProto(): protobadges.MsgUpdateCollection {
+    return new protobadges.MsgUpdateCollection(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -111,7 +111,7 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgUpdateCollection<U> {
-    return MsgUpdateCollection.fromProto(badges.MsgUpdateCollection.fromJson(jsonValue, options), convertFunction);
+    return MsgUpdateCollection.fromProto(protobadges.MsgUpdateCollection.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -119,10 +119,13 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgUpdateCollection<U> {
-    return MsgUpdateCollection.fromProto(badges.MsgUpdateCollection.fromJsonString(jsonString, options), convertFunction);
+    return MsgUpdateCollection.fromProto(protobadges.MsgUpdateCollection.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(protoMsg: badges.MsgUpdateCollection, convertFunction: (item: NumberType) => U): MsgUpdateCollection<U> {
+  static fromProto<U extends NumberType>(
+    protoMsg: protobadges.MsgUpdateCollection,
+    convertFunction: (item: NumberType) => U
+  ): MsgUpdateCollection<U> {
     return new MsgUpdateCollection({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,

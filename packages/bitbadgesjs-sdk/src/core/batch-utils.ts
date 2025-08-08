@@ -1,7 +1,7 @@
 import type { NumberType } from '../common/string-numbers.js';
 import { BigIntify } from '../common/string-numbers.js';
 
-import type { CollectionId, iUintRange } from '@/interfaces/badges/core.js';
+import type { CollectionId, iUintRange } from '@/interfaces/types/core.js';
 import { bigIntMin } from '../common/math.js';
 import { BaseNumberTypeClass, ConvertOptions, getConverterFunction } from '@/common/base.js';
 import { UintRangeArray, UintRange } from './uintRanges.js';

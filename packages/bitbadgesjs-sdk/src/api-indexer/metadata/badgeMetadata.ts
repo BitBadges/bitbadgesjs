@@ -2,8 +2,8 @@ import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, Conv
 import { bigIntMin, safeAddKeepLeft } from '@/common/math.js';
 import { Stringify, type NumberType } from '@/common/string-numbers.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
-import * as badges from '@/proto/badges/metadata_pb.js';
-import type { iUintRange } from '@/interfaces/badges/core.js';
+import * as protobadges from '@/proto/badges/metadata_pb.js';
+import type { iUintRange } from '@/interfaces/types/core.js';
 import type { iMetadata } from './metadata.js';
 import { Metadata } from './metadata.js';
 
@@ -91,8 +91,8 @@ export class CollectionMetadataDetails<T extends NumberType>
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionMetadataDetails<U>;
   }
 
-  toProto(): badges.CollectionMetadata {
-    return new badges.CollectionMetadata(this.convert(Stringify));
+  toProto(): protobadges.CollectionMetadata {
+    return new protobadges.CollectionMetadata(this.convert(Stringify));
   }
 }
 
@@ -334,7 +334,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
     return metadataArr;
   };
 
-  toProto(): badges.BadgeMetadata {
-    return new badges.BadgeMetadata(this.convert(Stringify));
+  toProto(): protobadges.BadgeMetadata {
+    return new protobadges.BadgeMetadata(this.convert(Stringify));
   }
 }

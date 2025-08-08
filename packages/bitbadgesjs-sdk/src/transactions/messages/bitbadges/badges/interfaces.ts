@@ -1,7 +1,7 @@
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iCosmosCoin } from '@/core/coin.js';
-import type { iCollectionApproval, iUserIncomingApproval, iUserOutgoingApproval } from '../../../../interfaces/badges/approvals.js';
+import type { iCollectionApproval, iUserIncomingApproval, iUserOutgoingApproval } from '../../../../interfaces/types/approvals.js';
 import type {
   iAddressList,
   iApprovalIdentifierDetails,
@@ -18,7 +18,7 @@ import type {
   iTransfer,
   iUintRange,
   CollectionId
-} from '../../../../interfaces/badges/core.js';
+} from '../../../../interfaces/types/core.js';
 import type {
   iBadgeIdsActionPermission,
   iCollectionApprovalPermission,
@@ -26,8 +26,8 @@ import type {
   iTimedUpdatePermission,
   iTimedUpdateWithBadgeIdsPermission,
   iUserPermissions
-} from '../../../../interfaces/badges/permissions.js';
-import type { iUserBalanceStore } from '../../../../interfaces/badges/userBalances.js';
+} from '../../../../interfaces/types/permissions.js';
+import type { iUserBalanceStore } from '../../../../interfaces/types/userBalances.js';
 
 /**
  * @category Interfaces

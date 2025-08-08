@@ -1,5 +1,5 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
@@ -30,8 +30,8 @@ export class MsgSetValidBadgeIds<T extends NumberType> extends CustomTypeClass<M
     this.canUpdateValidBadgeIds = msg.canUpdateValidBadgeIds.map((permission) => new BadgeIdsActionPermission(permission));
   }
 
-  toProto(): badges.MsgSetValidBadgeIds {
-    return new badges.MsgSetValidBadgeIds({
+  toProto(): protobadges.MsgSetValidBadgeIds {
+    return new protobadges.MsgSetValidBadgeIds({
       creator: this.creator,
       collectionId: this.collectionId.toString(),
       validBadgeIds: this.validBadgeIds.map((range) => range.toProto()),
@@ -40,14 +40,14 @@ export class MsgSetValidBadgeIds<T extends NumberType> extends CustomTypeClass<M
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetValidBadgeIds<NumberType> {
-    return MsgSetValidBadgeIds.fromProto(badges.MsgSetValidBadgeIds.fromJson(jsonValue, options));
+    return MsgSetValidBadgeIds.fromProto(protobadges.MsgSetValidBadgeIds.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetValidBadgeIds<NumberType> {
-    return MsgSetValidBadgeIds.fromProto(badges.MsgSetValidBadgeIds.fromJsonString(jsonString, options));
+    return MsgSetValidBadgeIds.fromProto(protobadges.MsgSetValidBadgeIds.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: badges.MsgSetValidBadgeIds): MsgSetValidBadgeIds<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetValidBadgeIds): MsgSetValidBadgeIds<NumberType> {
     return new MsgSetValidBadgeIds({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,

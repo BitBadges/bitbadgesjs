@@ -1,5 +1,5 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { iMsgIncrementStoreValue } from './interfaces.js';
@@ -27,8 +27,8 @@ export class MsgIncrementStoreValue<T extends NumberType> extends CustomTypeClas
     this.amount = msg.amount;
   }
 
-  toProto(): badges.MsgIncrementStoreValue {
-    return new badges.MsgIncrementStoreValue({
+  toProto(): protobadges.MsgIncrementStoreValue {
+    return new protobadges.MsgIncrementStoreValue({
       creator: this.creator,
       storeId: this.storeId.toString(),
       address: this.address,
@@ -37,14 +37,14 @@ export class MsgIncrementStoreValue<T extends NumberType> extends CustomTypeClas
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgIncrementStoreValue<NumberType> {
-    return MsgIncrementStoreValue.fromProto(badges.MsgIncrementStoreValue.fromJson(jsonValue, options));
+    return MsgIncrementStoreValue.fromProto(protobadges.MsgIncrementStoreValue.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgIncrementStoreValue<NumberType> {
-    return MsgIncrementStoreValue.fromProto(badges.MsgIncrementStoreValue.fromJsonString(jsonString, options));
+    return MsgIncrementStoreValue.fromProto(protobadges.MsgIncrementStoreValue.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: badges.MsgIncrementStoreValue): MsgIncrementStoreValue<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgIncrementStoreValue): MsgIncrementStoreValue<NumberType> {
     return new MsgIncrementStoreValue({
       creator: protoMsg.creator,
       storeId: protoMsg.storeId,

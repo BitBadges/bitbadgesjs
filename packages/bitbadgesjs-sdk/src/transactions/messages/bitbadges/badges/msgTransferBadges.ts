@@ -1,7 +1,7 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 import type { iMsgTransferBadges } from './interfaces.js';
 
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
@@ -44,8 +44,8 @@ export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass
     return [];
   }
 
-  toProto(): badges.MsgTransferBadges {
-    return new badges.MsgTransferBadges(this.convert(Stringify));
+  toProto(): protobadges.MsgTransferBadges {
+    return new protobadges.MsgTransferBadges(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -53,7 +53,7 @@ export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgTransferBadges<U> {
-    return MsgTransferBadges.fromProto(badges.MsgTransferBadges.fromJson(jsonValue, options), convertFunction);
+    return MsgTransferBadges.fromProto(protobadges.MsgTransferBadges.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -61,10 +61,10 @@ export class MsgTransferBadges<T extends NumberType> extends BaseNumberTypeClass
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgTransferBadges<U> {
-    return MsgTransferBadges.fromProto(badges.MsgTransferBadges.fromJsonString(jsonString, options), convertFunction);
+    return MsgTransferBadges.fromProto(protobadges.MsgTransferBadges.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(protoMsg: badges.MsgTransferBadges, convertFunction: (item: NumberType) => U): MsgTransferBadges<U> {
+  static fromProto<U extends NumberType>(protoMsg: protobadges.MsgTransferBadges, convertFunction: (item: NumberType) => U): MsgTransferBadges<U> {
     return new MsgTransferBadges({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,

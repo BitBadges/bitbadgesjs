@@ -1,5 +1,5 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
@@ -33,8 +33,8 @@ export class MsgSetCollectionMetadata<T extends NumberType>
     this.canUpdateCollectionMetadata = msg.canUpdateCollectionMetadata.map((permission) => new TimedUpdatePermission(permission));
   }
 
-  toProto(): badges.MsgSetCollectionMetadata {
-    return new badges.MsgSetCollectionMetadata({
+  toProto(): protobadges.MsgSetCollectionMetadata {
+    return new protobadges.MsgSetCollectionMetadata({
       creator: this.creator,
       collectionId: this.collectionId.toString(),
       collectionMetadataTimeline: this.collectionMetadataTimeline.map((timeline) => timeline.toProto()),
@@ -43,14 +43,14 @@ export class MsgSetCollectionMetadata<T extends NumberType>
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCollectionMetadata<NumberType> {
-    return MsgSetCollectionMetadata.fromProto(badges.MsgSetCollectionMetadata.fromJson(jsonValue, options));
+    return MsgSetCollectionMetadata.fromProto(protobadges.MsgSetCollectionMetadata.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCollectionMetadata<NumberType> {
-    return MsgSetCollectionMetadata.fromProto(badges.MsgSetCollectionMetadata.fromJsonString(jsonString, options));
+    return MsgSetCollectionMetadata.fromProto(protobadges.MsgSetCollectionMetadata.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: badges.MsgSetCollectionMetadata): MsgSetCollectionMetadata<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetCollectionMetadata): MsgSetCollectionMetadata<NumberType> {
     return new MsgSetCollectionMetadata({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,

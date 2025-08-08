@@ -1,4 +1,4 @@
-import { iApprovalCriteria } from '@/interfaces/badges/approvals.js';
+import { iApprovalCriteria } from '@/interfaces/types/approvals.js';
 import { CollectionApprovalWithDetails } from './approvals.js';
 import { CosmosCoinWrapperPath } from './misc.js';
 

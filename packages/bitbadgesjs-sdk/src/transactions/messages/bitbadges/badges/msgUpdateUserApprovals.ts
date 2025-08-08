@@ -1,4 +1,4 @@
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
@@ -74,8 +74,8 @@ export class MsgUpdateUserApprovals<T extends NumberType>
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUpdateUserApprovals<U>;
   }
 
-  toProto(): badges.MsgUpdateUserApprovals {
-    return new badges.MsgUpdateUserApprovals(this.convert(Stringify));
+  toProto(): protobadges.MsgUpdateUserApprovals {
+    return new protobadges.MsgUpdateUserApprovals(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -83,7 +83,7 @@ export class MsgUpdateUserApprovals<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgUpdateUserApprovals<U> {
-    return MsgUpdateUserApprovals.fromProto(badges.MsgUpdateUserApprovals.fromJson(jsonValue, options), convertFunction);
+    return MsgUpdateUserApprovals.fromProto(protobadges.MsgUpdateUserApprovals.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -91,11 +91,11 @@ export class MsgUpdateUserApprovals<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgUpdateUserApprovals<U> {
-    return MsgUpdateUserApprovals.fromProto(badges.MsgUpdateUserApprovals.fromJsonString(jsonString, options), convertFunction);
+    return MsgUpdateUserApprovals.fromProto(protobadges.MsgUpdateUserApprovals.fromJsonString(jsonString, options), convertFunction);
   }
 
   static fromProto<U extends NumberType>(
-    protoMsg: badges.MsgUpdateUserApprovals,
+    protoMsg: protobadges.MsgUpdateUserApprovals,
     convertFunction: (item: NumberType) => U
   ): MsgUpdateUserApprovals<U> {
     return new MsgUpdateUserApprovals({

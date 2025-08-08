@@ -16,7 +16,7 @@ import {
 import { CollectionPermissions } from '@/core/permissions.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iMsgCreateCollection } from './interfaces.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
@@ -74,8 +74,8 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgCreateCollection<U>;
   }
 
-  toProto(): badges.MsgCreateCollection {
-    return new badges.MsgCreateCollection(this.convert(Stringify));
+  toProto(): protobadges.MsgCreateCollection {
+    return new protobadges.MsgCreateCollection(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -83,7 +83,7 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgCreateCollection<U> {
-    return MsgCreateCollection.fromProto(badges.MsgCreateCollection.fromJson(jsonValue, options), convertFunction);
+    return MsgCreateCollection.fromProto(protobadges.MsgCreateCollection.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -91,10 +91,13 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgCreateCollection<U> {
-    return MsgCreateCollection.fromProto(badges.MsgCreateCollection.fromJsonString(jsonString, options), convertFunction);
+    return MsgCreateCollection.fromProto(protobadges.MsgCreateCollection.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(protoMsg: badges.MsgCreateCollection, convertFunction: (item: NumberType) => U): MsgCreateCollection<U> {
+  static fromProto<U extends NumberType>(
+    protoMsg: protobadges.MsgCreateCollection,
+    convertFunction: (item: NumberType) => U
+  ): MsgCreateCollection<U> {
     return new MsgCreateCollection({
       creator: protoMsg.creator,
       balancesType: protoMsg.balancesType,

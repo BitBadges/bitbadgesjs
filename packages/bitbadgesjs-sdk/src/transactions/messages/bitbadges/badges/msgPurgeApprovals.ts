@@ -1,5 +1,5 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { iMsgPurgeApprovals } from './interfaces.js';
@@ -32,8 +32,8 @@ export class MsgPurgeApprovals<T extends NumberType> extends CustomTypeClass<Msg
     this.approvalsToPurge = msg.approvalsToPurge.map((approval) => new ApprovalIdentifierDetails(approval));
   }
 
-  toProto(): badges.MsgPurgeApprovals {
-    return new badges.MsgPurgeApprovals({
+  toProto(): protobadges.MsgPurgeApprovals {
+    return new protobadges.MsgPurgeApprovals({
       creator: this.creator,
       collectionId: this.collectionId,
       purgeExpired: this.purgeExpired,
@@ -48,7 +48,7 @@ export class MsgPurgeApprovals<T extends NumberType> extends CustomTypeClass<Msg
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgPurgeApprovals<U> {
-    return MsgPurgeApprovals.fromProto(badges.MsgPurgeApprovals.fromJson(jsonValue, options), convertFunction);
+    return MsgPurgeApprovals.fromProto(protobadges.MsgPurgeApprovals.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -56,10 +56,10 @@ export class MsgPurgeApprovals<T extends NumberType> extends CustomTypeClass<Msg
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgPurgeApprovals<U> {
-    return MsgPurgeApprovals.fromProto(badges.MsgPurgeApprovals.fromJsonString(jsonString, options), convertFunction);
+    return MsgPurgeApprovals.fromProto(protobadges.MsgPurgeApprovals.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(protoMsg: badges.MsgPurgeApprovals, convertFunction: (item: NumberType) => U): MsgPurgeApprovals<U> {
+  static fromProto<U extends NumberType>(protoMsg: protobadges.MsgPurgeApprovals, convertFunction: (item: NumberType) => U): MsgPurgeApprovals<U> {
     return new MsgPurgeApprovals({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,

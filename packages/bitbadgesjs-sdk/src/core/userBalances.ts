@@ -1,7 +1,7 @@
-import type { iUserBalanceStore, iUserBalanceStoreWithDetails } from '@/interfaces/badges/userBalances.js';
+import type { iUserBalanceStore, iUserBalanceStoreWithDetails } from '@/interfaces/types/userBalances.js';
 import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
-import * as badges from '@/proto/badges/transfers_pb.js';
+import * as protobadges from '@/proto/badges/transfers_pb.js';
 import { UserIncomingApproval, UserIncomingApprovalWithDetails, UserOutgoingApproval, UserOutgoingApprovalWithDetails } from './approvals.js';
 import { UserPermissions, UserPermissionsWithDetails } from './permissions.js';
 import type { NumberType } from '../common/string-numbers.js';
@@ -36,10 +36,10 @@ export class UserBalanceStore<T extends NumberType> extends BaseNumberTypeClass<
   }
 
   toProto() {
-    return new badges.UserBalanceStore(this.convert(Stringify));
+    return new protobadges.UserBalanceStore(this.convert(Stringify));
   }
 
-  static fromProto<T extends NumberType>(item: badges.UserBalanceStore, convertFunction: (item: NumberType) => T): UserBalanceStore<T> {
+  static fromProto<T extends NumberType>(item: protobadges.UserBalanceStore, convertFunction: (item: NumberType) => T): UserBalanceStore<T> {
     return new UserBalanceStore({
       balances: item.balances.map((x) => Balance.fromProto(x, convertFunction)),
       incomingApprovals: item.incomingApprovals.map((x) => UserIncomingApproval.fromProto(x, convertFunction)),

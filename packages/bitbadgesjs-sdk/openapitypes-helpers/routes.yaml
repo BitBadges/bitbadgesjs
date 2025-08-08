@@ -218,8 +218,8 @@ security:
 tags:
   - name: Accounts
     description: Endpoints for managing user accounts and profiles
-  - name: Badges
-    description: Endpoints for badge and collection operations
+  - name: Tokens
+    description: Endpoints for token and collection operations
   - name: Claims
     description: Endpoints for managing claims
   - name: Sign In with BitBadges
@@ -397,7 +397,7 @@ paths:
       operationId: getCollection
       summary: Get Collection
       tags:
-        - Badges
+        - Tokens
       description: |-
         Gets a specific collection.
 
@@ -445,7 +445,7 @@ paths:
       operationId: getBadgeMetadata
       summary: Get Token Metadata
       tags:
-        - Badges
+        - Tokens
       description: |-
         Gets current metadata for a specific token in a collection.
 
@@ -494,7 +494,7 @@ paths:
       operationId: getCollectionsBatch
       summary: Get Collections - Batch
       tags:
-        - Badges
+        - Tokens
       description: |
         Retrieves collections and associated details. This route is all-inclusive and uses a view-based approach to fetch specific data about collections, including metadata, balances, owners, and more.
 
@@ -566,7 +566,7 @@ paths:
   '/collection/{collectionId}/balance/{address}/{badgeId}':
     get:
       operationId: getBalanceByAddressSpecificBadge
-      summary: Get Badge Balance By Address - Specific Badge
+      summary: Get Balance By Address - Specific Token
       description: |
         Retrieves the balance of a specific token for a specific address at the current time.
 
@@ -584,11 +584,11 @@ paths:
 
         Alternative Flow: Note that you can also set up a claim that checks token ownership and check the success per user of that claim as well
       tags:
-        - Badges
+        - Tokens
       parameters:
         - name: collectionId
           in: path
-          description: The ID of the collection containing the badge.
+          description: The ID of the collection.
           required: true
           schema:
             type: integer
@@ -630,8 +630,8 @@ paths:
     get:
       operationId: getBalanceByAddress
       tags:
-        - Badges
-      summary: Get Badge Balances By Address
+        - Tokens
+      summary: Get Balances By Address
       description: |
         Retrieves the balances of a specific address for a collection.
 
@@ -653,7 +653,7 @@ paths:
       parameters:
         - name: collectionId
           in: path
-          description: The ID of the collection containing the badge.
+          description: The ID of the collection.
           required: true
           schema:
             type: integer
@@ -1499,9 +1499,9 @@ paths:
   '/collection/{collectionId}/{badgeId}/owners':
     get:
       operationId: getOwnersForBadge
-      summary: Get Badge Owners
+      summary: Get Token Owners
       tags:
-        - Badges
+        - Tokens
       description: |
         Retrieves the owners in a paginated format for a specific token in a collection.
         Returns a list of addresses and their corresponding balances for the specified token ID.
@@ -1566,7 +1566,7 @@ paths:
   '/collection/{collectionId}/{badgeId}/activity':
     get:
       operationId: getBadgeActivity
-      summary: Get Badge Activity
+      summary: Get Token Activity
       description: |
         Retrieves the activity in a paginated format for a specific token in a collection.
 
@@ -1585,11 +1585,11 @@ paths:
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeActivitySuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getbadgeactivity)**
       tags:
-        - Badges
+        - Tokens
       parameters:
         - name: collectionId
           in: path
-          description: The ID of the collection containing the badge.
+          description: The ID of the collection.
           required: true
           schema:
             type: integer
@@ -1632,7 +1632,7 @@ paths:
       operationId: refreshMetadata
       summary: Refresh Metadata
       tags:
-        - Badges
+        - Tokens
       description: |
         Triggers a metadata refresh for a specific collection. BitBadges API uses a refresh queue system for fetching anything off-chain.
         This will refetch any details for the collection (such as metadata, balances if applicable, approval details, etc).
@@ -2757,7 +2757,7 @@ paths:
       operationId: getRefreshStatus
       summary: Get Refresh Status
       tags:
-        - Badges
+        - Tokens
       description: |-
         Gets the refresh status for a collection. Used to track if any errors occur during a refresh, or if it is in the queue or not.
 
@@ -5017,7 +5017,7 @@ paths:
       operationId: getCollectionOwners
       summary: Get Collection Owners
       tags:
-        - Badges
+        - Tokens
       description: |-
         Gets owners for a specific collection.
 
@@ -5069,7 +5069,7 @@ paths:
       operationId: getCollectionTransferActivity
       summary: Get Collection Transfer Activity
       tags:
-        - Badges
+        - Tokens
       description: |-
         Gets transfer activity for a specific collection.
 
@@ -5121,7 +5121,7 @@ paths:
       operationId: getCollectionChallengeTrackers
       summary: Get Collection Challenge Trackers
       tags:
-        - Badges
+        - Tokens
       description: |-
         Gets challenge trackers for a specific collection.
 
@@ -5172,7 +5172,7 @@ paths:
       operationId: getCollectionAmountTrackers
       summary: Get Collection Amount Trackers
       tags:
-        - Badges
+        - Tokens
       description: |-
         Gets amount trackers for a specific collection.
 
@@ -5223,7 +5223,7 @@ paths:
       operationId: getCollectionAmountTrackerById
       summary: Get Collection Amount Tracker By ID
       tags:
-        - Badges
+        - Tokens
       description: |-
         Gets an amount tracker by ID for a collection.
 
@@ -5262,7 +5262,7 @@ paths:
       operationId: getCollectionChallengeTrackerById
       summary: Get Collection Challenge Tracker By ID
       tags:
-        - Badges
+        - Tokens
       description: |-
         Gets a challenge tracker by ID for a collection.
 
@@ -5300,7 +5300,7 @@ paths:
       operationId: getCollectionListings
       summary: Get Collection Listings
       tags:
-        - Badges
+        - Tokens
       description: |-
         Gets listings for a specific collection.
 
@@ -5352,7 +5352,7 @@ paths:
       operationId: getCollectionClaims
       summary: Get Collection Claims
       tags:
-        - Badges
+        - Tokens
       description: |-
         Gets claims for a specific collection.
 
@@ -5506,7 +5506,7 @@ paths:
       operationId: uploadBalances
       summary: Upload Balances
       tags:
-        - Badges
+        - Tokens
       description: |-
         Uploads balances for off-chain indexed balances managed by BitBadges. Note: This only applies to
         collections with off-chain balances, and the tokens must not be frozen / immutable yet.

@@ -3,8 +3,8 @@ import type { NumberType } from '@/common/string-numbers.js';
 import { BalanceArray } from '@/core/balances.js';
 import { ApprovalIdentifierDetails } from '@/core/misc.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
-import { CollectionId } from '@/interfaces/badges/core.js';
-import { badges } from '@/proto/index.js';
+import { CollectionId } from '@/interfaces/types/core.js';
+import { badges as protobadges } from '@/proto/index.js';
 import type {
   BitBadgesAddress,
   iActivityDoc,
@@ -98,7 +98,7 @@ export class PrecalculationOptions<T extends NumberType> extends BaseNumberTypeC
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PrecalculationOptions<U>;
   }
 
-  static fromProto<U extends NumberType>(proto: badges.PrecalculationOptions, convertFunction: (item: NumberType) => U): PrecalculationOptions<U> {
+  static fromProto<U extends NumberType>(proto: protobadges.PrecalculationOptions, convertFunction: (item: NumberType) => U): PrecalculationOptions<U> {
     return new PrecalculationOptions({
       overrideTimestamp: convertFunction(proto.overrideTimestamp),
       badgeIdsOverride: proto.badgeIdsOverride ? UintRangeArray.From(proto.badgeIdsOverride).convert(convertFunction) : undefined

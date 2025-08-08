@@ -4,7 +4,7 @@ import type { NumberType } from '@/common/string-numbers.js';
 import { AddressList } from '@/core/addressLists.js';
 import type { BatchBadgeDetails, iBatchBadgeDetails } from '@/core/batch-utils.js';
 import { CosmosCoin } from '@/core/coin.js';
-import type { CollectionId, iAddressList } from '@/interfaces/badges/core.js';
+import type { CollectionId, iAddressList } from '@/interfaces/types/core.js';
 import typia from 'typia';
 import { SupportedChain } from '../common/types.js';
 import type { iBitBadgesAddressList } from './BitBadgesAddressList.js';

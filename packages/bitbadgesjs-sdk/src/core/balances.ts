@@ -1,7 +1,7 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import type { iBalance, iUintRange } from '@/interfaces/badges/core.js';
+import type { iBalance, iUintRange } from '@/interfaces/types/core.js';
 import { BaseNumberTypeClass, ConvertOptions, deepCopyPrimitives, getConverterFunction } from '@/common/base.js';
-import * as badges from '@/proto/badges/balances_pb.js';
+import * as protobadges from '@/proto/badges/balances_pb.js';
 import { AddressList } from './addressLists.js';
 import { castNumberType, safeAdd, safeSubtract } from '../common/math.js';
 import type { UniversalPermissionDetails } from './overlaps.js';
@@ -45,8 +45,8 @@ export class Balance<T extends NumberType> extends BaseNumberTypeClass<Balance<T
     );
   }
 
-  toProto(): badges.Balance {
-    return new badges.Balance(this.convert(Stringify));
+  toProto(): protobadges.Balance {
+    return new protobadges.Balance(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -54,7 +54,7 @@ export class Balance<T extends NumberType> extends BaseNumberTypeClass<Balance<T
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): Balance<U> {
-    return Balance.fromProto(badges.Balance.fromJson(jsonValue, options), convertFunction);
+    return Balance.fromProto(protobadges.Balance.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -62,10 +62,10 @@ export class Balance<T extends NumberType> extends BaseNumberTypeClass<Balance<T
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): Balance<U> {
-    return Balance.fromProto(badges.Balance.fromJsonString(jsonString, options), convertFunction);
+    return Balance.fromProto(protobadges.Balance.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: badges.Balance, convertFunction: (item: NumberType) => U): Balance<U> {
+  static fromProto<U extends NumberType>(item: protobadges.Balance, convertFunction: (item: NumberType) => U): Balance<U> {
     return new Balance<U>({
       amount: convertFunction(BigInt(item.amount)),
       badgeIds: item.badgeIds.map((b) => UintRange.fromProto(b, convertFunction)),

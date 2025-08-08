@@ -1,6 +1,6 @@
 import { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
-import type { iCollectionApproval, iPredeterminedBalances, iResetTimeIntervals, iUserIncomingApproval } from '@/interfaces/badges/approvals.js';
+import type { iCollectionApproval, iPredeterminedBalances, iResetTimeIntervals, iUserIncomingApproval } from '@/interfaces/types/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
 
 export const getCurrentInterval = (resetTimeIntervals: iResetTimeIntervals<bigint> | undefined) => {

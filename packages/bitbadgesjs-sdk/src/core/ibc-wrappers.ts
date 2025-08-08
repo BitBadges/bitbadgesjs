@@ -1,6 +1,6 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
-import { iCosmosCoinWrapperPathAddObject, iDenomUnit, iDenomUnitWithDetails } from '@/interfaces/badges/core.js';
-import { badges } from '@/proto/index.js';
+import { iCosmosCoinWrapperPathAddObject, iDenomUnit, iDenomUnitWithDetails } from '@/interfaces/types/core.js';
+import { badges as protobadges } from '@/proto/index.js';
 import type { NumberType } from '../common/string-numbers.js';
 import { Balance } from './balances.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
@@ -28,7 +28,7 @@ export class DenomUnit<T extends NumberType> extends BaseNumberTypeClass<DenomUn
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DenomUnit<U>;
   }
 
-  static fromProto<T extends NumberType>(data: badges.DenomUnit, convertFunction: (val: NumberType) => T): DenomUnit<T> {
+  static fromProto<T extends NumberType>(data: protobadges.DenomUnit, convertFunction: (val: NumberType) => T): DenomUnit<T> {
     return new DenomUnit({
       decimals: convertFunction(data.decimals),
       symbol: data.symbol,
@@ -53,7 +53,7 @@ export class DenomUnitWithDetails<T extends NumberType> extends DenomUnit<T> imp
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DenomUnitWithDetails<U>;
   }
 
-  static fromProto<T extends NumberType>(data: badges.DenomUnit, convertFunction: (val: NumberType) => T): DenomUnitWithDetails<T> {
+  static fromProto<T extends NumberType>(data: protobadges.DenomUnit, convertFunction: (val: NumberType) => T): DenomUnitWithDetails<T> {
     return new DenomUnitWithDetails({
       decimals: convertFunction(data.decimals),
       symbol: data.symbol,
@@ -93,7 +93,7 @@ export class CosmosCoinWrapperPathAddObject<T extends NumberType>
   }
 
   static fromProto<T extends NumberType>(
-    data: badges.CosmosCoinWrapperPathAddObject,
+    data: protobadges.CosmosCoinWrapperPathAddObject,
     convertFunction: (val: NumberType) => T
   ): CosmosCoinWrapperPathAddObject<T> {
     return new CosmosCoinWrapperPathAddObject({

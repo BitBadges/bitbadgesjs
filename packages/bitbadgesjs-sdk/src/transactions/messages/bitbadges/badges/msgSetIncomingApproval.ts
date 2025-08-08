@@ -1,5 +1,5 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { iMsgSetIncomingApproval } from './interfaces.js';
@@ -26,8 +26,8 @@ export class MsgSetIncomingApproval<T extends NumberType> extends CustomTypeClas
     this.approval = new UserIncomingApproval(msg.approval);
   }
 
-  toProto(): badges.MsgSetIncomingApproval {
-    return new badges.MsgSetIncomingApproval({
+  toProto(): protobadges.MsgSetIncomingApproval {
+    return new protobadges.MsgSetIncomingApproval({
       creator: this.creator,
       collectionId: this.collectionId,
       approval: this.approval.toProto()
@@ -39,7 +39,7 @@ export class MsgSetIncomingApproval<T extends NumberType> extends CustomTypeClas
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgSetIncomingApproval<U> {
-    return MsgSetIncomingApproval.fromProto(badges.MsgSetIncomingApproval.fromJson(jsonValue, options), convertFunction);
+    return MsgSetIncomingApproval.fromProto(protobadges.MsgSetIncomingApproval.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -47,11 +47,11 @@ export class MsgSetIncomingApproval<T extends NumberType> extends CustomTypeClas
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgSetIncomingApproval<U> {
-    return MsgSetIncomingApproval.fromProto(badges.MsgSetIncomingApproval.fromJsonString(jsonString, options), convertFunction);
+    return MsgSetIncomingApproval.fromProto(protobadges.MsgSetIncomingApproval.fromJsonString(jsonString, options), convertFunction);
   }
 
   static fromProto<U extends NumberType>(
-    protoMsg: badges.MsgSetIncomingApproval,
+    protoMsg: protobadges.MsgSetIncomingApproval,
     convertFunction: (item: NumberType) => U
   ): MsgSetIncomingApproval<U> {
     return new MsgSetIncomingApproval({

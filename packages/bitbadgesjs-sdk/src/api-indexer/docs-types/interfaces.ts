@@ -9,7 +9,7 @@ import type { iApprovalInfoDetails, iChallengeDetails, iUserOutgoingApprovalWith
 import type { iBatchBadgeDetails } from '@/core/batch-utils.js';
 import type { iCosmosCoin } from '@/core/coin.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
-import type { iCollectionApproval, iPredeterminedBalances, iUserIncomingApprovalWithDetails } from '@/interfaces/badges/approvals.js';
+import type { iCollectionApproval, iPredeterminedBalances, iUserIncomingApprovalWithDetails } from '@/interfaces/types/approvals.js';
 import type {
   CollectionId,
   iAddressList,
@@ -28,9 +28,9 @@ import type {
   iOffChainBalancesMetadataTimeline,
   iStandardsTimeline,
   iUintRange
-} from '@/interfaces/badges/core.js';
-import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/badges/permissions.js';
-import type { iUserBalanceStore } from '@/interfaces/badges/userBalances.js';
+} from '@/interfaces/types/core.js';
+import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/types/permissions.js';
+import type { iUserBalanceStore } from '@/interfaces/types/userBalances.js';
 import type { iMap, iValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
 
 /**

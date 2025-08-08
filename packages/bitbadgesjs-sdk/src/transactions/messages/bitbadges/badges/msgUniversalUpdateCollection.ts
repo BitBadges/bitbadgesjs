@@ -1,4 +1,4 @@
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import { CollectionApproval } from '@/core/approvals.js';
@@ -116,8 +116,8 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUniversalUpdateCollection<U>;
   }
 
-  toProto(): badges.MsgUniversalUpdateCollection {
-    return new badges.MsgUniversalUpdateCollection(this.convert(Stringify));
+  toProto(): protobadges.MsgUniversalUpdateCollection {
+    return new protobadges.MsgUniversalUpdateCollection(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -125,7 +125,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgUniversalUpdateCollection<U> {
-    return MsgUniversalUpdateCollection.fromProto(badges.MsgUniversalUpdateCollection.fromJson(jsonValue, options), convertFunction);
+    return MsgUniversalUpdateCollection.fromProto(protobadges.MsgUniversalUpdateCollection.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -133,11 +133,11 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgUniversalUpdateCollection<U> {
-    return MsgUniversalUpdateCollection.fromProto(badges.MsgUniversalUpdateCollection.fromJsonString(jsonString, options), convertFunction);
+    return MsgUniversalUpdateCollection.fromProto(protobadges.MsgUniversalUpdateCollection.fromJsonString(jsonString, options), convertFunction);
   }
 
   static fromProto<U extends NumberType>(
-    protoMsg: badges.MsgUniversalUpdateCollection,
+    protoMsg: protobadges.MsgUniversalUpdateCollection,
     convertFunction: (item: NumberType) => U
   ): MsgUniversalUpdateCollection<U> {
     return new MsgUniversalUpdateCollection({

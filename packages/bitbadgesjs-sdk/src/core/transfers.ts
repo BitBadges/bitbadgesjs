@@ -1,7 +1,7 @@
 import type { BitBadgesAddress, UNIXMilliTimestamp } from '@/api-indexer/docs-types/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, getConverterFunction } from '@/common/base.js';
-import type { iBalance, iTransfer } from '@/interfaces/badges/core.js';
-import * as badges from '@/proto/badges/transfers_pb.js';
+import type { iBalance, iTransfer } from '@/interfaces/types/core.js';
+import * as protobadges from '@/proto/badges/transfers_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { convertToBitBadgesAddress, getConvertFunctionFromPrefix } from '../address-converter/converter.js';
 import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft, safeSubtractKeepLeft } from '../common/math.js';
@@ -64,8 +64,8 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Transfer<U>;
   }
 
-  toProto(): badges.Transfer {
-    return new badges.Transfer(this.convert(Stringify));
+  toProto(): protobadges.Transfer {
+    return new protobadges.Transfer(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -73,7 +73,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): Transfer<U> {
-    return Transfer.fromProto(badges.Transfer.fromJson(jsonValue, options), convertFunction);
+    return Transfer.fromProto(protobadges.Transfer.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -81,10 +81,10 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): Transfer<U> {
-    return Transfer.fromProto(badges.Transfer.fromJsonString(jsonString, options), convertFunction);
+    return Transfer.fromProto(protobadges.Transfer.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: badges.Transfer, convertFunction: (item: NumberType) => U): Transfer<U> {
+  static fromProto<U extends NumberType>(item: protobadges.Transfer, convertFunction: (item: NumberType) => U): Transfer<U> {
     return new Transfer<U>({
       from: item.from,
       toAddresses: item.toAddresses,

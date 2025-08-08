@@ -1,5 +1,5 @@
 import { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
-import type { iCollectionApproval } from '@/interfaces/badges/approvals.js';
+import type { iCollectionApproval } from '@/interfaces/types/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
 
 export const doesCollectionFollowQuestProtocol = (collection?: Readonly<iCollectionDoc<bigint>>) => {

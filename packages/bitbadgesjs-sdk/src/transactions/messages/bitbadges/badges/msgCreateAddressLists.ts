@@ -1,5 +1,5 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import { AddressList } from '@/core/addressLists.js';
@@ -25,19 +25,19 @@ export class MsgCreateAddressLists extends CustomTypeClass<MsgCreateAddressLists
     this.addressLists = msg.addressLists.map((x) => new AddressList(x));
   }
 
-  toProto(): badges.MsgCreateAddressLists {
-    return new badges.MsgCreateAddressLists({ ...this });
+  toProto(): protobadges.MsgCreateAddressLists {
+    return new protobadges.MsgCreateAddressLists({ ...this });
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCreateAddressLists {
-    return MsgCreateAddressLists.fromProto(badges.MsgCreateAddressLists.fromJson(jsonValue, options));
+    return MsgCreateAddressLists.fromProto(protobadges.MsgCreateAddressLists.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCreateAddressLists {
-    return MsgCreateAddressLists.fromProto(badges.MsgCreateAddressLists.fromJsonString(jsonString, options));
+    return MsgCreateAddressLists.fromProto(protobadges.MsgCreateAddressLists.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: badges.MsgCreateAddressLists): MsgCreateAddressLists {
+  static fromProto(protoMsg: protobadges.MsgCreateAddressLists): MsgCreateAddressLists {
     return new MsgCreateAddressLists({
       creator: protoMsg.creator,
       addressLists: protoMsg.addressLists.map((x) => AddressList.fromProto(x))

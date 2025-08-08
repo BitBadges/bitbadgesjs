@@ -1,5 +1,5 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
@@ -30,8 +30,8 @@ export class MsgSetManager<T extends NumberType> extends CustomTypeClass<MsgSetM
     this.canUpdateManager = msg.canUpdateManager.map((permission) => new TimedUpdatePermission(permission));
   }
 
-  toProto(): badges.MsgSetManager {
-    return new badges.MsgSetManager({
+  toProto(): protobadges.MsgSetManager {
+    return new protobadges.MsgSetManager({
       creator: this.creator,
       collectionId: this.collectionId.toString(),
       managerTimeline: this.managerTimeline.map((timeline) => timeline.toProto()),
@@ -40,14 +40,14 @@ export class MsgSetManager<T extends NumberType> extends CustomTypeClass<MsgSetM
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetManager<NumberType> {
-    return MsgSetManager.fromProto(badges.MsgSetManager.fromJson(jsonValue, options));
+    return MsgSetManager.fromProto(protobadges.MsgSetManager.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetManager<NumberType> {
-    return MsgSetManager.fromProto(badges.MsgSetManager.fromJsonString(jsonString, options));
+    return MsgSetManager.fromProto(protobadges.MsgSetManager.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: badges.MsgSetManager): MsgSetManager<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetManager): MsgSetManager<NumberType> {
     return new MsgSetManager({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,

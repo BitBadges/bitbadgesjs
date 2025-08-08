@@ -2,7 +2,7 @@ import type { ConvertOptions, CustomType, ParsedQs } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, getConverterFunction } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { ClaimDetails } from '@/core/approvals.js';
-import type { iAddressList } from '@/interfaces/badges/core.js';
+import type { iAddressList } from '@/interfaces/types/core.js';
 import typia from 'typia';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { EmptyResponseClass } from './base.js';

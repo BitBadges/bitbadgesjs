@@ -1,4 +1,4 @@
-import { iCollectionApproval } from '@/interfaces/badges/approvals.js';
+import { iCollectionApproval } from '@/interfaces/types/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
 
 export const isOrderbookBidOrListingApproval = (approval: iCollectionApproval<bigint>, approvalLevel: 'incoming' | 'outgoing') => {

@@ -35,9 +35,9 @@ import type {
   iBadgeMetadataTimelineWithDetails,
   iCollectionMetadataTimelineWithDetails,
   iUintRange
-} from '@/interfaces/badges/core.js';
-import type { iCollectionPermissionsWithDetails } from '@/interfaces/badges/permissions.js';
-import type { iUserBalanceStoreWithDetails } from '@/interfaces/badges/userBalances.js';
+} from '@/interfaces/types/core.js';
+import type { iCollectionPermissionsWithDetails } from '@/interfaces/types/permissions.js';
+import type { iUserBalanceStoreWithDetails } from '@/interfaces/types/userBalances.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { TransferActivityDoc } from './docs-types/activity.js';
 import {

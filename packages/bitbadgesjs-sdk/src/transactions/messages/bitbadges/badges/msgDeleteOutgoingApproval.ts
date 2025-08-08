@@ -1,5 +1,5 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { iMsgDeleteOutgoingApproval } from './interfaces.js';
@@ -25,8 +25,8 @@ export class MsgDeleteOutgoingApproval extends CustomTypeClass<MsgDeleteOutgoing
     this.approvalId = msg.approvalId;
   }
 
-  toProto(): badges.MsgDeleteOutgoingApproval {
-    return new badges.MsgDeleteOutgoingApproval({
+  toProto(): protobadges.MsgDeleteOutgoingApproval {
+    return new protobadges.MsgDeleteOutgoingApproval({
       creator: this.creator,
       collectionId: this.collectionId,
       approvalId: this.approvalId
@@ -34,14 +34,14 @@ export class MsgDeleteOutgoingApproval extends CustomTypeClass<MsgDeleteOutgoing
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDeleteOutgoingApproval {
-    return MsgDeleteOutgoingApproval.fromProto(badges.MsgDeleteOutgoingApproval.fromJson(jsonValue, options));
+    return MsgDeleteOutgoingApproval.fromProto(protobadges.MsgDeleteOutgoingApproval.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDeleteOutgoingApproval {
-    return MsgDeleteOutgoingApproval.fromProto(badges.MsgDeleteOutgoingApproval.fromJsonString(jsonString, options));
+    return MsgDeleteOutgoingApproval.fromProto(protobadges.MsgDeleteOutgoingApproval.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: badges.MsgDeleteOutgoingApproval): MsgDeleteOutgoingApproval {
+  static fromProto(protoMsg: protobadges.MsgDeleteOutgoingApproval): MsgDeleteOutgoingApproval {
     return new MsgDeleteOutgoingApproval({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,

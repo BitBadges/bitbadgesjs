@@ -96,7 +96,7 @@ Create a new file in `src/transactions/messages/bitbadges/badges/` directory:
 ```typescript
 // src/transactions/messages/bitbadges/badges/msgNewMessageType.ts
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { iMsgNewMessageType } from './interfaces.js';
@@ -119,22 +119,22 @@ export class MsgNewMessageType<T extends NumberType> extends CustomTypeClass<Msg
     this.fieldName = msg.fieldName;
   }
 
-  toProto(): badges.MsgNewMessageType {
-    return new badges.MsgNewMessageType({
+  toProto(): protobadges.MsgNewMessageType {
+    return new protobadges.MsgNewMessageType({
       creator: this.creator,
       fieldName: this.fieldName.toString() // Convert NumberType to string for proto
     });
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgNewMessageType<NumberType> {
-    return MsgNewMessageType.fromProto(badges.MsgNewMessageType.fromJson(jsonValue, options));
+    return MsgNewMessageType.fromProto(protobadges.MsgNewMessageType.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgNewMessageType<NumberType> {
-    return MsgNewMessageType.fromProto(badges.MsgNewMessageType.fromJsonString(jsonString, options));
+    return MsgNewMessageType.fromProto(protobadges.MsgNewMessageType.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: badges.MsgNewMessageType): MsgNewMessageType<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgNewMessageType): MsgNewMessageType<NumberType> {
     return new MsgNewMessageType({
       creator: protoMsg.creator,
       fieldName: protoMsg.fieldName // Convert string to NumberType
@@ -434,11 +434,11 @@ export class MsgCreateDynamicStore extends CustomTypeClass<MsgCreateDynamicStore
     this.creator = msg.creator;
   }
 
-  toProto(): badges.MsgCreateDynamicStore {
-    return new badges.MsgCreateDynamicStore({ creator: this.creator });
+  toProto(): protobadges.MsgCreateDynamicStore {
+    return new protobadges.MsgCreateDynamicStore({ creator: this.creator });
   }
 
-  static fromProto(protoMsg: badges.MsgCreateDynamicStore): MsgCreateDynamicStore {
+  static fromProto(protoMsg: protobadges.MsgCreateDynamicStore): MsgCreateDynamicStore {
     return new MsgCreateDynamicStore({ creator: protoMsg.creator });
   }
 
@@ -571,14 +571,14 @@ export class MsgSimple<T extends NumberType> extends CustomTypeClass<MsgSimple<T
     this.fieldName = msg.fieldName;
   }
 
-  toProto(): badges.MsgSimple {
-    return new badges.MsgSimple({
+  toProto(): protobadges.MsgSimple {
+    return new protobadges.MsgSimple({
       creator: this.creator,
       fieldName: this.fieldName.toString()
     });
   }
 
-  static fromProto(protoMsg: badges.MsgSimple): MsgSimple<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSimple): MsgSimple<NumberType> {
     return new MsgSimple({
       creator: protoMsg.creator,
       fieldName: protoMsg.fieldName
@@ -609,14 +609,14 @@ export class MsgComplex<T extends NumberType> extends CustomTypeClass<MsgComplex
     this.complexObject = new ComplexObject(msg.complexObject);
   }
 
-  toProto(): badges.MsgComplex {
-    return new badges.MsgComplex({
+  toProto(): protobadges.MsgComplex {
+    return new protobadges.MsgComplex({
       creator: this.creator,
       complexObject: this.complexObject.toProto()
     });
   }
 
-  static fromProto(protoMsg: badges.MsgComplex): MsgComplex<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgComplex): MsgComplex<NumberType> {
     return new MsgComplex({
       creator: protoMsg.creator,
       complexObject: ComplexObject.fromProto(protoMsg.complexObject)
@@ -671,13 +671,13 @@ export class MsgComplex<T extends NumberType> extends CustomTypeClass<MsgComplex
 **Solution**: Always convert `NumberType` to string in `toProto()` and vice versa in `fromProto()`:
 
 ```typescript
-toProto(): badges.MsgExample {
-  return new badges.MsgExample({
+toProto(): protobadges.MsgExample {
+  return new protobadges.MsgExample({
     amount: this.amount.toString() // Convert NumberType to string
   });
 }
 
-static fromProto(protoMsg: badges.MsgExample): MsgExample<NumberType> {
+static fromProto(protoMsg: protobadges.MsgExample): MsgExample<NumberType> {
   return new MsgExample({
     amount: protoMsg.amount // Convert string to NumberType
   });

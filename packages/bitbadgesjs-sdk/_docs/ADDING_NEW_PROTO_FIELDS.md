@@ -168,7 +168,7 @@ If the new fields are used in transaction messages, update the corresponding mes
 ```typescript
 // In src/transactions/messages/bitbadges/badges/
 export function buildNewMessage(data: iNewMessage<NumberType>): badges.NewMessage {
-  return new badges.NewMessage({
+  return new protobadges.NewMessage({
     fieldName: data.fieldName.toString()
   });
 }

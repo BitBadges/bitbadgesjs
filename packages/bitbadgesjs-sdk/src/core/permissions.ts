@@ -15,10 +15,10 @@ import type {
   iUserOutgoingApprovalPermissionWithDetails,
   iUserPermissions,
   iUserPermissionsWithDetails
-} from '@/interfaces/badges/permissions.js';
+} from '@/interfaces/types/permissions.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
-import * as badges from '../proto/badges/permissions_pb.js';
+import * as protobadges from '../proto/badges/permissions_pb.js';
 import { AddressList, convertListIdToBech32 } from './addressLists.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
 import { GetFirstMatchOnly, getOverlapsAndNonOverlaps, universalRemoveOverlaps } from './overlaps.js';
@@ -54,8 +54,8 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserPermissions<U>;
   }
 
-  toProto(): badges.UserPermissions {
-    return new badges.UserPermissions(this.convert(Stringify));
+  toProto(): protobadges.UserPermissions {
+    return new protobadges.UserPermissions(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -63,7 +63,7 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): UserPermissions<U> {
-    return UserPermissions.fromProto(badges.UserPermissions.fromJson(jsonValue, options), convertFunction);
+    return UserPermissions.fromProto(protobadges.UserPermissions.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -71,10 +71,10 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): UserPermissions<U> {
-    return UserPermissions.fromProto(badges.UserPermissions.fromJsonString(jsonString, options), convertFunction);
+    return UserPermissions.fromProto(protobadges.UserPermissions.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(protoMsg: badges.UserPermissions, convertFunction: (item: NumberType) => U): UserPermissions<U> {
+  static fromProto<U extends NumberType>(protoMsg: protobadges.UserPermissions, convertFunction: (item: NumberType) => U): UserPermissions<U> {
     return new UserPermissions({
       canUpdateOutgoingApprovals: protoMsg.canUpdateOutgoingApprovals.map((x) => UserOutgoingApprovalPermission.fromProto(x, convertFunction)),
       canUpdateIncomingApprovals: protoMsg.canUpdateIncomingApprovals.map((x) => UserIncomingApprovalPermission.fromProto(x, convertFunction)),
@@ -170,8 +170,8 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserOutgoingApprovalPermission<U>;
   }
 
-  toProto(): badges.UserOutgoingApprovalPermission {
-    return new badges.UserOutgoingApprovalPermission(this.convert(Stringify));
+  toProto(): protobadges.UserOutgoingApprovalPermission {
+    return new protobadges.UserOutgoingApprovalPermission(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -179,7 +179,7 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): UserOutgoingApprovalPermission<U> {
-    return UserOutgoingApprovalPermission.fromProto(badges.UserOutgoingApprovalPermission.fromJson(jsonValue, options), convertFunction);
+    return UserOutgoingApprovalPermission.fromProto(protobadges.UserOutgoingApprovalPermission.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -187,11 +187,11 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): UserOutgoingApprovalPermission<U> {
-    return UserOutgoingApprovalPermission.fromProto(badges.UserOutgoingApprovalPermission.fromJsonString(jsonString, options), convertFunction);
+    return UserOutgoingApprovalPermission.fromProto(protobadges.UserOutgoingApprovalPermission.fromJsonString(jsonString, options), convertFunction);
   }
 
   static fromProto<U extends NumberType>(
-    protoMsg: badges.UserOutgoingApprovalPermission,
+    protoMsg: protobadges.UserOutgoingApprovalPermission,
     convertFunction: (item: NumberType) => U
   ): UserOutgoingApprovalPermission<U> {
     return new UserOutgoingApprovalPermission({
@@ -301,8 +301,8 @@ export class UserIncomingApprovalPermission<T extends NumberType>
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserIncomingApprovalPermission<U>;
   }
 
-  toProto(): badges.UserIncomingApprovalPermission {
-    return new badges.UserIncomingApprovalPermission(this.convert(Stringify));
+  toProto(): protobadges.UserIncomingApprovalPermission {
+    return new protobadges.UserIncomingApprovalPermission(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -310,7 +310,7 @@ export class UserIncomingApprovalPermission<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): UserIncomingApprovalPermission<U> {
-    return UserIncomingApprovalPermission.fromProto(badges.UserIncomingApprovalPermission.fromJson(jsonValue, options), convertFunction);
+    return UserIncomingApprovalPermission.fromProto(protobadges.UserIncomingApprovalPermission.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -318,11 +318,11 @@ export class UserIncomingApprovalPermission<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): UserIncomingApprovalPermission<U> {
-    return UserIncomingApprovalPermission.fromProto(badges.UserIncomingApprovalPermission.fromJsonString(jsonString, options), convertFunction);
+    return UserIncomingApprovalPermission.fromProto(protobadges.UserIncomingApprovalPermission.fromJsonString(jsonString, options), convertFunction);
   }
 
   static fromProto<U extends NumberType>(
-    protoMsg: badges.UserIncomingApprovalPermission,
+    protoMsg: protobadges.UserIncomingApprovalPermission,
     convertFunction: (item: NumberType) => U
   ): UserIncomingApprovalPermission<U> {
     return new UserIncomingApprovalPermission({
@@ -439,8 +439,8 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
     );
   }
 
-  toProto(): badges.CollectionPermissions {
-    return new badges.CollectionPermissions(this.convert(Stringify));
+  toProto(): protobadges.CollectionPermissions {
+    return new protobadges.CollectionPermissions(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -448,7 +448,7 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): CollectionPermissions<U> {
-    return CollectionPermissions.fromProto(badges.CollectionPermissions.fromJson(jsonValue, options), convertFunction);
+    return CollectionPermissions.fromProto(protobadges.CollectionPermissions.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -456,10 +456,13 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): CollectionPermissions<U> {
-    return CollectionPermissions.fromProto(badges.CollectionPermissions.fromJsonString(jsonString, options), convertFunction);
+    return CollectionPermissions.fromProto(protobadges.CollectionPermissions.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(protoMsg: badges.CollectionPermissions, convertFunction: (item: NumberType) => U): CollectionPermissions<U> {
+  static fromProto<U extends NumberType>(
+    protoMsg: protobadges.CollectionPermissions,
+    convertFunction: (item: NumberType) => U
+  ): CollectionPermissions<U> {
     return new CollectionPermissions({
       canDeleteCollection: protoMsg.canDeleteCollection.map((x) => ActionPermission.fromProto(x, convertFunction)),
       canArchiveCollection: protoMsg.canArchiveCollection.map((x) => TimedUpdatePermission.fromProto(x, convertFunction)),
@@ -541,8 +544,8 @@ export class ActionPermission<T extends NumberType> extends BaseNumberTypeClass<
     );
   }
 
-  toProto(): badges.ActionPermission {
-    return new badges.ActionPermission(this.convert(Stringify));
+  toProto(): protobadges.ActionPermission {
+    return new protobadges.ActionPermission(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -550,7 +553,7 @@ export class ActionPermission<T extends NumberType> extends BaseNumberTypeClass<
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): ActionPermission<U> {
-    return ActionPermission.fromProto(badges.ActionPermission.fromJson(jsonValue, options), convertFunction);
+    return ActionPermission.fromProto(protobadges.ActionPermission.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -558,10 +561,10 @@ export class ActionPermission<T extends NumberType> extends BaseNumberTypeClass<
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): ActionPermission<U> {
-    return ActionPermission.fromProto(badges.ActionPermission.fromJsonString(jsonString, options), convertFunction);
+    return ActionPermission.fromProto(protobadges.ActionPermission.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(protoMsg: badges.ActionPermission, convertFunction: (item: NumberType) => U): ActionPermission<U> {
+  static fromProto<U extends NumberType>(protoMsg: protobadges.ActionPermission, convertFunction: (item: NumberType) => U): ActionPermission<U> {
     return new ActionPermission({
       permanentlyPermittedTimes: protoMsg.permanentlyPermittedTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       permanentlyForbiddenTimes: protoMsg.permanentlyForbiddenTimes.map((x) => UintRange.fromProto(x, convertFunction))
@@ -627,8 +630,8 @@ export class TimedUpdatePermission<T extends NumberType> extends BaseNumberTypeC
     );
   }
 
-  toProto(): badges.TimedUpdatePermission {
-    return new badges.TimedUpdatePermission(this.convert(Stringify));
+  toProto(): protobadges.TimedUpdatePermission {
+    return new protobadges.TimedUpdatePermission(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -636,7 +639,7 @@ export class TimedUpdatePermission<T extends NumberType> extends BaseNumberTypeC
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): TimedUpdatePermission<U> {
-    return TimedUpdatePermission.fromProto(badges.TimedUpdatePermission.fromJson(jsonValue, options), convertFunction);
+    return TimedUpdatePermission.fromProto(protobadges.TimedUpdatePermission.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -644,10 +647,13 @@ export class TimedUpdatePermission<T extends NumberType> extends BaseNumberTypeC
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): TimedUpdatePermission<U> {
-    return TimedUpdatePermission.fromProto(badges.TimedUpdatePermission.fromJsonString(jsonString, options), convertFunction);
+    return TimedUpdatePermission.fromProto(protobadges.TimedUpdatePermission.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(protoMsg: badges.TimedUpdatePermission, convertFunction: (item: NumberType) => U): TimedUpdatePermission<U> {
+  static fromProto<U extends NumberType>(
+    protoMsg: protobadges.TimedUpdatePermission,
+    convertFunction: (item: NumberType) => U
+  ): TimedUpdatePermission<U> {
     return new TimedUpdatePermission({
       timelineTimes: protoMsg.timelineTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       permanentlyPermittedTimes: protoMsg.permanentlyPermittedTimes.map((x) => UintRange.fromProto(x, convertFunction)),
@@ -744,8 +750,8 @@ export class BadgeIdsActionPermission<T extends NumberType>
     );
   }
 
-  toProto(): badges.BadgeIdsActionPermission {
-    return new badges.BadgeIdsActionPermission(this.convert(Stringify));
+  toProto(): protobadges.BadgeIdsActionPermission {
+    return new protobadges.BadgeIdsActionPermission(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -753,7 +759,7 @@ export class BadgeIdsActionPermission<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): BadgeIdsActionPermission<U> {
-    return BadgeIdsActionPermission.fromProto(badges.BadgeIdsActionPermission.fromJson(jsonValue, options), convertFunction);
+    return BadgeIdsActionPermission.fromProto(protobadges.BadgeIdsActionPermission.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -761,11 +767,11 @@ export class BadgeIdsActionPermission<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): BadgeIdsActionPermission<U> {
-    return BadgeIdsActionPermission.fromProto(badges.BadgeIdsActionPermission.fromJsonString(jsonString, options), convertFunction);
+    return BadgeIdsActionPermission.fromProto(protobadges.BadgeIdsActionPermission.fromJsonString(jsonString, options), convertFunction);
   }
 
   static fromProto<U extends NumberType>(
-    protoMsg: badges.BadgeIdsActionPermission,
+    protoMsg: protobadges.BadgeIdsActionPermission,
     convertFunction: (item: NumberType) => U
   ): BadgeIdsActionPermission<U> {
     return new BadgeIdsActionPermission({
@@ -851,8 +857,8 @@ export class TimedUpdateWithBadgeIdsPermission<T extends NumberType>
     );
   }
 
-  toProto(): badges.TimedUpdateWithBadgeIdsPermission {
-    return new badges.TimedUpdateWithBadgeIdsPermission(this.convert(Stringify));
+  toProto(): protobadges.TimedUpdateWithBadgeIdsPermission {
+    return new protobadges.TimedUpdateWithBadgeIdsPermission(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -860,7 +866,7 @@ export class TimedUpdateWithBadgeIdsPermission<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): TimedUpdateWithBadgeIdsPermission<U> {
-    return TimedUpdateWithBadgeIdsPermission.fromProto(badges.TimedUpdateWithBadgeIdsPermission.fromJson(jsonValue, options), convertFunction);
+    return TimedUpdateWithBadgeIdsPermission.fromProto(protobadges.TimedUpdateWithBadgeIdsPermission.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -868,11 +874,14 @@ export class TimedUpdateWithBadgeIdsPermission<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): TimedUpdateWithBadgeIdsPermission<U> {
-    return TimedUpdateWithBadgeIdsPermission.fromProto(badges.TimedUpdateWithBadgeIdsPermission.fromJsonString(jsonString, options), convertFunction);
+    return TimedUpdateWithBadgeIdsPermission.fromProto(
+      protobadges.TimedUpdateWithBadgeIdsPermission.fromJsonString(jsonString, options),
+      convertFunction
+    );
   }
 
   static fromProto<U extends NumberType>(
-    protoMsg: badges.TimedUpdateWithBadgeIdsPermission,
+    protoMsg: protobadges.TimedUpdateWithBadgeIdsPermission,
     convertFunction: (item: NumberType) => U
   ): TimedUpdateWithBadgeIdsPermission<U> {
     return new TimedUpdateWithBadgeIdsPermission({
@@ -981,8 +990,8 @@ export class CollectionApprovalPermission<T extends NumberType>
     );
   }
 
-  toProto(): badges.CollectionApprovalPermission {
-    return new badges.CollectionApprovalPermission(this.convert(Stringify));
+  toProto(): protobadges.CollectionApprovalPermission {
+    return new protobadges.CollectionApprovalPermission(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -990,7 +999,7 @@ export class CollectionApprovalPermission<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): CollectionApprovalPermission<U> {
-    return CollectionApprovalPermission.fromProto(badges.CollectionApprovalPermission.fromJson(jsonValue, options), convertFunction);
+    return CollectionApprovalPermission.fromProto(protobadges.CollectionApprovalPermission.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -998,11 +1007,11 @@ export class CollectionApprovalPermission<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): CollectionApprovalPermission<U> {
-    return CollectionApprovalPermission.fromProto(badges.CollectionApprovalPermission.fromJsonString(jsonString, options), convertFunction);
+    return CollectionApprovalPermission.fromProto(protobadges.CollectionApprovalPermission.fromJsonString(jsonString, options), convertFunction);
   }
 
   static fromProto<U extends NumberType>(
-    protoMsg: badges.CollectionApprovalPermission,
+    protoMsg: protobadges.CollectionApprovalPermission,
     convertFunction: (item: NumberType) => U
   ): CollectionApprovalPermission<U> {
     return new CollectionApprovalPermission({
@@ -1251,7 +1260,7 @@ export class UserPermissionsWithDetails<T extends NumberType> extends UserPermis
     this.canUpdateAutoApproveAllIncomingTransfers = data.canUpdateAutoApproveAllIncomingTransfers.map(
       (actionPermission) => new ActionPermission(actionPermission)
     );
-    }
+  }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserPermissionsWithDetails<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserPermissionsWithDetails<U>;

@@ -1,7 +1,7 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iMsgDeleteCollection } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
@@ -35,8 +35,8 @@ export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeCla
     return [];
   }
 
-  toProto(): badges.MsgDeleteCollection {
-    return new badges.MsgDeleteCollection(this.convert(Stringify));
+  toProto(): protobadges.MsgDeleteCollection {
+    return new protobadges.MsgDeleteCollection(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -44,7 +44,7 @@ export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeCla
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgDeleteCollection<U> {
-    return MsgDeleteCollection.fromProto(badges.MsgDeleteCollection.fromJson(jsonValue, options));
+    return MsgDeleteCollection.fromProto(protobadges.MsgDeleteCollection.fromJson(jsonValue, options));
   }
 
   static fromJsonString<U extends NumberType>(
@@ -52,10 +52,10 @@ export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeCla
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgDeleteCollection<U> {
-    return MsgDeleteCollection.fromProto(badges.MsgDeleteCollection.fromJsonString(jsonString, options));
+    return MsgDeleteCollection.fromProto(protobadges.MsgDeleteCollection.fromJsonString(jsonString, options));
   }
 
-  static fromProto<U extends NumberType>(protoMsg: badges.MsgDeleteCollection): MsgDeleteCollection<U> {
+  static fromProto<U extends NumberType>(protoMsg: protobadges.MsgDeleteCollection): MsgDeleteCollection<U> {
     return new MsgDeleteCollection({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId

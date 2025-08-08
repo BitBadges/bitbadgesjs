@@ -8,7 +8,7 @@ import {
 } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
-import type { CollectionId, iAmountTrackerIdDetails, iUintRange } from '@/interfaces/badges/core.js';
+import type { CollectionId, iAmountTrackerIdDetails, iUintRange } from '@/interfaces/types/core.js';
 import type { PaginationInfo } from '../base.js';
 import { EmptyResponseClass } from '../base.js';
 import { TransferActivityDoc } from '../docs-types/activity.js';

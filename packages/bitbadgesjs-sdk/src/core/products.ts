@@ -1,5 +1,5 @@
 import { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
-import type { iCollectionApproval, iUserOutgoingApproval } from '@/interfaces/badges/approvals.js';
+import type { iCollectionApproval, iUserOutgoingApproval } from '@/interfaces/types/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
 
 export const doesCollectionFollowProductProtocol = (collection?: Readonly<iCollectionDoc<bigint>>) => {

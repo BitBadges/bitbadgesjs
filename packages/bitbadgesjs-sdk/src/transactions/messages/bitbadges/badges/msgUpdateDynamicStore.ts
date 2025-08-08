@@ -1,5 +1,5 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { iMsgUpdateDynamicStore } from './interfaces.js';
@@ -23,22 +23,22 @@ export class MsgUpdateDynamicStore<T extends NumberType> extends CustomTypeClass
     this.storeId = msg.storeId;
   }
 
-  toProto(): badges.MsgUpdateDynamicStore {
-    return new badges.MsgUpdateDynamicStore({
+  toProto(): protobadges.MsgUpdateDynamicStore {
+    return new protobadges.MsgUpdateDynamicStore({
       creator: this.creator,
       storeId: this.storeId.toString()
     });
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUpdateDynamicStore<NumberType> {
-    return MsgUpdateDynamicStore.fromProto(badges.MsgUpdateDynamicStore.fromJson(jsonValue, options));
+    return MsgUpdateDynamicStore.fromProto(protobadges.MsgUpdateDynamicStore.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUpdateDynamicStore<NumberType> {
-    return MsgUpdateDynamicStore.fromProto(badges.MsgUpdateDynamicStore.fromJsonString(jsonString, options));
+    return MsgUpdateDynamicStore.fromProto(protobadges.MsgUpdateDynamicStore.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: badges.MsgUpdateDynamicStore): MsgUpdateDynamicStore<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgUpdateDynamicStore): MsgUpdateDynamicStore<NumberType> {
     return new MsgUpdateDynamicStore({
       creator: protoMsg.creator,
       storeId: protoMsg.storeId

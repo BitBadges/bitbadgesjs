@@ -1,5 +1,5 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
@@ -30,8 +30,8 @@ export class MsgSetCustomData<T extends NumberType> extends CustomTypeClass<MsgS
     this.canUpdateCustomData = msg.canUpdateCustomData.map((permission) => new TimedUpdatePermission(permission));
   }
 
-  toProto(): badges.MsgSetCustomData {
-    return new badges.MsgSetCustomData({
+  toProto(): protobadges.MsgSetCustomData {
+    return new protobadges.MsgSetCustomData({
       creator: this.creator,
       collectionId: this.collectionId.toString(),
       customDataTimeline: this.customDataTimeline.map((timeline) => timeline.toProto()),
@@ -40,14 +40,14 @@ export class MsgSetCustomData<T extends NumberType> extends CustomTypeClass<MsgS
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCustomData<NumberType> {
-    return MsgSetCustomData.fromProto(badges.MsgSetCustomData.fromJson(jsonValue, options));
+    return MsgSetCustomData.fromProto(protobadges.MsgSetCustomData.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCustomData<NumberType> {
-    return MsgSetCustomData.fromProto(badges.MsgSetCustomData.fromJsonString(jsonString, options));
+    return MsgSetCustomData.fromProto(protobadges.MsgSetCustomData.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: badges.MsgSetCustomData): MsgSetCustomData<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetCustomData): MsgSetCustomData<NumberType> {
     return new MsgSetCustomData({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,

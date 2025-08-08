@@ -1,5 +1,5 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
@@ -30,8 +30,8 @@ export class MsgSetBadgeMetadata<T extends NumberType> extends CustomTypeClass<M
     this.canUpdateBadgeMetadata = msg.canUpdateBadgeMetadata.map((permission) => new TimedUpdateWithBadgeIdsPermission(permission));
   }
 
-  toProto(): badges.MsgSetBadgeMetadata {
-    return new badges.MsgSetBadgeMetadata({
+  toProto(): protobadges.MsgSetBadgeMetadata {
+    return new protobadges.MsgSetBadgeMetadata({
       creator: this.creator,
       collectionId: this.collectionId.toString(),
       badgeMetadataTimeline: this.badgeMetadataTimeline.map((timeline) => timeline.toProto()),
@@ -40,14 +40,14 @@ export class MsgSetBadgeMetadata<T extends NumberType> extends CustomTypeClass<M
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetBadgeMetadata<NumberType> {
-    return MsgSetBadgeMetadata.fromProto(badges.MsgSetBadgeMetadata.fromJson(jsonValue, options));
+    return MsgSetBadgeMetadata.fromProto(protobadges.MsgSetBadgeMetadata.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetBadgeMetadata<NumberType> {
-    return MsgSetBadgeMetadata.fromProto(badges.MsgSetBadgeMetadata.fromJsonString(jsonString, options));
+    return MsgSetBadgeMetadata.fromProto(protobadges.MsgSetBadgeMetadata.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: badges.MsgSetBadgeMetadata): MsgSetBadgeMetadata<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetBadgeMetadata): MsgSetBadgeMetadata<NumberType> {
     return new MsgSetBadgeMetadata({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,

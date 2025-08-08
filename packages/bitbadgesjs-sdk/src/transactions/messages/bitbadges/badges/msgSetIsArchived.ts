@@ -1,5 +1,5 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
@@ -30,8 +30,8 @@ export class MsgSetIsArchived<T extends NumberType> extends CustomTypeClass<MsgS
     this.canArchiveCollection = msg.canArchiveCollection.map((permission) => new TimedUpdatePermission(permission));
   }
 
-  toProto(): badges.MsgSetIsArchived {
-    return new badges.MsgSetIsArchived({
+  toProto(): protobadges.MsgSetIsArchived {
+    return new protobadges.MsgSetIsArchived({
       creator: this.creator,
       collectionId: this.collectionId.toString(),
       isArchivedTimeline: this.isArchivedTimeline.map((timeline) => timeline.toProto()),
@@ -40,14 +40,14 @@ export class MsgSetIsArchived<T extends NumberType> extends CustomTypeClass<MsgS
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetIsArchived<NumberType> {
-    return MsgSetIsArchived.fromProto(badges.MsgSetIsArchived.fromJson(jsonValue, options));
+    return MsgSetIsArchived.fromProto(protobadges.MsgSetIsArchived.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetIsArchived<NumberType> {
-    return MsgSetIsArchived.fromProto(badges.MsgSetIsArchived.fromJsonString(jsonString, options));
+    return MsgSetIsArchived.fromProto(protobadges.MsgSetIsArchived.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: badges.MsgSetIsArchived): MsgSetIsArchived<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetIsArchived): MsgSetIsArchived<NumberType> {
     return new MsgSetIsArchived({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,

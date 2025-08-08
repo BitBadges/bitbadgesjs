@@ -1,5 +1,5 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { iMsgDeleteDynamicStore } from './interfaces.js';
@@ -23,22 +23,22 @@ export class MsgDeleteDynamicStore<T extends NumberType> extends CustomTypeClass
     this.storeId = msg.storeId;
   }
 
-  toProto(): badges.MsgDeleteDynamicStore {
-    return new badges.MsgDeleteDynamicStore({
+  toProto(): protobadges.MsgDeleteDynamicStore {
+    return new protobadges.MsgDeleteDynamicStore({
       creator: this.creator,
       storeId: this.storeId.toString()
     });
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDeleteDynamicStore<NumberType> {
-    return MsgDeleteDynamicStore.fromProto(badges.MsgDeleteDynamicStore.fromJson(jsonValue, options));
+    return MsgDeleteDynamicStore.fromProto(protobadges.MsgDeleteDynamicStore.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDeleteDynamicStore<NumberType> {
-    return MsgDeleteDynamicStore.fromProto(badges.MsgDeleteDynamicStore.fromJsonString(jsonString, options));
+    return MsgDeleteDynamicStore.fromProto(protobadges.MsgDeleteDynamicStore.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: badges.MsgDeleteDynamicStore): MsgDeleteDynamicStore<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgDeleteDynamicStore): MsgDeleteDynamicStore<NumberType> {
     return new MsgDeleteDynamicStore({
       creator: protoMsg.creator,
       storeId: protoMsg.storeId

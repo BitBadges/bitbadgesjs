@@ -1,5 +1,5 @@
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as badges from '@/proto/badges/tx_pb.js';
+import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
@@ -33,8 +33,8 @@ export class MsgSetCollectionApprovals<T extends NumberType>
     this.canUpdateCollectionApprovals = msg.canUpdateCollectionApprovals.map((permission) => new CollectionApprovalPermission(permission));
   }
 
-  toProto(): badges.MsgSetCollectionApprovals {
-    return new badges.MsgSetCollectionApprovals({
+  toProto(): protobadges.MsgSetCollectionApprovals {
+    return new protobadges.MsgSetCollectionApprovals({
       creator: this.creator,
       collectionId: this.collectionId.toString(),
       collectionApprovals: this.collectionApprovals.map((approval) => approval.toProto()),
@@ -43,14 +43,14 @@ export class MsgSetCollectionApprovals<T extends NumberType>
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCollectionApprovals<NumberType> {
-    return MsgSetCollectionApprovals.fromProto(badges.MsgSetCollectionApprovals.fromJson(jsonValue, options));
+    return MsgSetCollectionApprovals.fromProto(protobadges.MsgSetCollectionApprovals.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCollectionApprovals<NumberType> {
-    return MsgSetCollectionApprovals.fromProto(badges.MsgSetCollectionApprovals.fromJsonString(jsonString, options));
+    return MsgSetCollectionApprovals.fromProto(protobadges.MsgSetCollectionApprovals.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: badges.MsgSetCollectionApprovals): MsgSetCollectionApprovals<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetCollectionApprovals): MsgSetCollectionApprovals<NumberType> {
     return new MsgSetCollectionApprovals({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
