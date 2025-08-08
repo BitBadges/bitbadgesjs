@@ -3,7 +3,7 @@ info:
   title: BitBadges API
   description: |-
     # Introduction
-    The BitBadges API is a RESTful API that enables developers to interact with the BitBadges blockchain and indexer. This API provides comprehensive access to the BitBadges ecosystem, allowing you to query and interact with digital badges, collections, accounts, blockchain data, and more.
+    The BitBadges API is a RESTful API that enables developers to interact with the BitBadges blockchain and indexer. This API provides comprehensive access to the BitBadges ecosystem, allowing you to query and interact with digital tokens, collections, accounts, blockchain data, and more.
     For complete documentation, see the [BitBadges Documentation](https://docs.bitbadges.io/for-developers/bitbadges-api/api)
     and use along with this reference.
 
@@ -337,7 +337,7 @@ paths:
         ## Authentication Details
         - **Public Data**: Available with API key only
           - Basic profile information
-          - Public badge balances
+          - Public balances
           - Public activity
           - Etc
 
@@ -443,11 +443,11 @@ paths:
   /collection/{collectionId}/{badgeId}/metadata:
     get:
       operationId: getBadgeMetadata
-      summary: Get Badge Metadata
+      summary: Get Token Metadata
       tags:
         - Badges
       description: |-
-        Gets current metadata for a specific badge in a collection.
+        Gets current metadata for a specific token in a collection.
 
         ```tsx
         await BitBadgesApi.getBadgeMetadata("123", "1");
@@ -482,7 +482,7 @@ paths:
             type: string
         - name: badgeId
           in: path
-          description: Badge ID
+          description: Token ID
           required: true
           schema:
             type: string
@@ -496,7 +496,7 @@ paths:
       tags:
         - Badges
       description: |
-        Retrieves badge collections and associated details. This route is all-inclusive and uses a view-based approach to fetch specific data about collections, including metadata, balances, owners, and more.
+        Retrieves collections and associated details. This route is all-inclusive and uses a view-based approach to fetch specific data about collections, including metadata, balances, owners, and more.
 
         ```tsx
         const res = await BitBadgesApi.getCollections({
@@ -568,7 +568,7 @@ paths:
       operationId: getBalanceByAddressSpecificBadge
       summary: Get Badge Balance By Address - Specific Badge
       description: |
-        Retrieves the balance of a specific badge for a specific address at the current time.
+        Retrieves the balance of a specific token for a specific address at the current time.
 
         For more advanced queries returning the whole balance document, please use the POST `/collection/{collectionId}/balance/{address}` endpoint.
 
@@ -582,7 +582,7 @@ paths:
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBalanceByAddressSpecificBadgeSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getbalancebyaddressspecificbadge)**
 
-        Alternative Flow: Note that you can also set up a claim that checks badge ownership and check the success per user of that claim as well
+        Alternative Flow: Note that you can also set up a claim that checks token ownership and check the success per user of that claim as well
       tags:
         - Badges
       parameters:
@@ -594,13 +594,13 @@ paths:
             type: integer
         - name: address
           in: path
-          description: The address for which the badge balance is to be retrieved. Can be "Total" for the circulating supply.
+          description: The address for which the balance is to be retrieved. Can be "Total" for the circulating supply.
           required: true
           schema:
             type: string
         - name: badgeId
           in: path
-          description: The ID of the badge for which the balance is to be retrieved.
+          description: The ID for which the balance is to be retrieved.
           required: true
           schema:
             type: integer
@@ -649,7 +649,7 @@ paths:
         Scopes:
         - `readPrivateClaimData` - Required if fetching private claim data (user-level approvals)
 
-        Alternative Flow: Note that you can also set up a claim that checks badge ownership and check the success per user of that claim as well
+        Alternative Flow: Note that you can also set up a claim that checks token ownership and check the success per user of that claim as well
       parameters:
         - name: collectionId
           in: path
@@ -659,7 +659,7 @@ paths:
             type: integer
         - name: address
           in: path
-          description: The address for which the badge balance is to be retrieved. Can be "Total" for the circulating supply.
+          description: The address for which the balance is to be retrieved. Can be "Total" for the circulating supply.
           required: true
           schema:
             type: string
@@ -1503,8 +1503,8 @@ paths:
       tags:
         - Badges
       description: |
-        Retrieves the owners in a paginated format for a specific badge in a collection.
-        Returns a list of addresses and their corresponding balances for the specified badge ID.
+        Retrieves the owners in a paginated format for a specific token in a collection.
+        Returns a list of addresses and their corresponding balances for the specified token ID.
 
         ```tsx
         const res = await BitBadgesApi.getOwnersForBadge(
@@ -1530,7 +1530,7 @@ paths:
             type: integer
         - name: badgeId
           in: path
-          description: The numeric badge ID to retrieve owners for.
+          description: The numeric token ID to retrieve owners for.
           required: true
           schema:
             type: integer
@@ -1568,7 +1568,7 @@ paths:
       operationId: getBadgeActivity
       summary: Get Badge Activity
       description: |
-        Retrieves the activity in a paginated format for a specific badge in a collection.
+        Retrieves the activity in a paginated format for a specific token in a collection.
 
         ```tsx
         const res = await BitBadgesApi.getBadgeActivity(
@@ -1595,7 +1595,7 @@ paths:
             type: integer
         - name: badgeId
           in: path
-          description: The ID of the badge for which activity is to be retrieved.
+          description: The ID for which activity is to be retrieved.
           required: true
           schema:
             type: integer
@@ -3086,7 +3086,7 @@ paths:
         - Standalone (default) - Not attached to anything
         - Test claims - Used for frontend claim tester
         - Linked to address lists - Specify the valid `listId` within the request. Must be list creator.
-        - Linked to off-chain balances - Specify the valid `collectionId` + `balancesToSet` within the request. `balancesToSet` determine what badges are allocated.
+        - Linked to off-chain balances - Specify the valid `collectionId` + `balancesToSet` within the request. `balancesToSet` determine what tokens are allocated.
         - Linked to on-chain approvals (user or collection level) - This is advanced. If you need this, please reach out to us. Updates are fine, but creation uses an advanced processs that is undocumented currently.
 
         ```tsx
@@ -3150,7 +3150,7 @@ paths:
         - Standalone (default) - Not attached to anything
         - Test claims - Used for frontend claim tester
         - Linked to address lists - Specify the valid `listId` within the request. Must be list creator.
-        - Linked to off-chain balances - Specify the valid `collectionId` + `balancesToSet` within the request. `balancesToSet` determine what badges are allocated per claim.
+        - Linked to off-chain balances - Specify the valid `collectionId` + `balancesToSet` within the request. `balancesToSet` determine what tokens are allocated per claim.
         - Linked to on-chain approvals (user or collection level) - Specify the valid collectionId. Note: This is advanced. Please reach out if you need this.
 
         ```tsx
@@ -4641,12 +4641,12 @@ paths:
   /account/{address}/badges/:
     get:
       operationId: GetBadgesViewForUser
-      summary: Get Badges For User
+      summary: Get Tokens For User
       tags:
         - Accounts
       description: |-
-        Gets badges for a specific user. Specify the viewType to determine what
-        badges to retrieve. Default is 'collected'.
+        Gets tokens for a specific user. Specify the viewType to determine what
+        tokens to retrieve. Default is 'collected'.
 
         ```tsx
         await BitBadgesApi.getBadgesViewForUser(address, { viewType: "collected" });
@@ -5509,7 +5509,7 @@ paths:
         - Badges
       description: |-
         Uploads balances for off-chain indexed balances managed by BitBadges. Note: This only applies to
-        collections with off-chain balances, and the badges must not be frozen / immutable yet.
+        collections with off-chain balances, and the tokens must not be frozen / immutable yet.
 
         This uses a queue-system, so it may take a few minutes to process and display in-site.
 

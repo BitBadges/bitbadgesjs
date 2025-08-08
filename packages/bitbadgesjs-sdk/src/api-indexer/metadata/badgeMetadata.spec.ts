@@ -8,7 +8,7 @@ describe('BadgeMetadataDetails', () => {
       const existingMetadata = [
         new BadgeMetadataDetails({
           badgeIds: [{ start: 1n, end: 5n }],
-          metadata: new Metadata({ name: 'Existing Badge', description: 'Existing description', image: '' }),
+          metadata: new Metadata({ name: 'Existing Token', description: 'Existing description', image: '' }),
           uri: 'https://example.com/existing',
           customData: 'existing'
         })
@@ -18,13 +18,13 @@ describe('BadgeMetadataDetails', () => {
       const newMetadata = [
         new BadgeMetadataDetails({
           badgeIds: [{ start: 3n, end: 7n }],
-          metadata: new Metadata({ name: 'Updated Badge', description: 'Updated description', image: '' }),
+          metadata: new Metadata({ name: 'Updated Token', description: 'Updated description', image: '' }),
           uri: 'https://example.com/updated',
           customData: 'updated'
         }),
         new BadgeMetadataDetails({
           badgeIds: [{ start: 8n, end: 10n }],
-          metadata: new Metadata({ name: 'New Badge', description: 'New description', image: '' }),
+          metadata: new Metadata({ name: 'New Token', description: 'New description', image: '' }),
           uri: 'https://example.com/new',
           customData: 'new'
         })
@@ -37,17 +37,17 @@ describe('BadgeMetadataDetails', () => {
       // Check the updated existing metadata
       expect(result[0].badgeIds[0].start).toBe(1n);
       expect(result[0].badgeIds[0].end).toBe(2n);
-      expect(result[0].metadata?.name).toBe('Existing Badge');
+      expect(result[0].metadata?.name).toBe('Existing Token');
 
       // Check the new metadata that partially overlapped with existing
       expect(result[1].badgeIds[0].start).toBe(3n);
       expect(result[1].badgeIds[0].end).toBe(7n);
-      expect(result[1].metadata?.name).toBe('Updated Badge');
+      expect(result[1].metadata?.name).toBe('Updated Token');
 
       // Check the completely new metadata
       expect(result[2].badgeIds[0].start).toBe(8n);
       expect(result[2].badgeIds[0].end).toBe(10n);
-      expect(result[2].metadata?.name).toBe('New Badge');
+      expect(result[2].metadata?.name).toBe('New Token');
     });
 
     it('should handle empty input arrays', () => {
@@ -59,7 +59,7 @@ describe('BadgeMetadataDetails', () => {
       const existingMetadata = [
         new BadgeMetadataDetails({
           badgeIds: [{ start: 1n, end: 5n }],
-          metadata: new Metadata({ name: 'Existing Badge', description: 'Existing description', image: '' }),
+          metadata: new Metadata({ name: 'Existing Token', description: 'Existing description', image: '' }),
           uri: 'https://example.com/existing',
           customData: 'existing'
         })
@@ -84,11 +84,11 @@ describe('BadgeMetadataDetails', () => {
       expect(result[1].metadata).toBeUndefined();
     });
 
-    it('should merge overlapping badge ranges', () => {
+    it('should merge overlapping token ranges', () => {
       const existingMetadata = [
         new BadgeMetadataDetails({
           badgeIds: [{ start: 1n, end: 5n }],
-          metadata: new Metadata({ name: 'Existing Badge', description: 'Existing description', image: '' }),
+          metadata: new Metadata({ name: 'Existing Token', description: 'Existing description', image: '' }),
           uri: 'https://example.com/existing',
           customData: 'existing'
         })
@@ -100,7 +100,7 @@ describe('BadgeMetadataDetails', () => {
             { start: 4n, end: 6n },
             { start: 8n, end: 10n }
           ],
-          metadata: new Metadata({ name: 'New Badge', description: 'New description', image: '' }),
+          metadata: new Metadata({ name: 'New Token', description: 'New description', image: '' }),
           uri: 'https://example.com/new',
           customData: 'new'
         })
@@ -115,7 +115,7 @@ describe('BadgeMetadataDetails', () => {
       expect(result[1].badgeIds[0].end).toBe(6n);
       expect(result[1].badgeIds[1].start).toBe(8n);
       expect(result[1].badgeIds[1].end).toBe(10n);
-      expect(result[1].metadata?.name).toBe('New Badge');
+      expect(result[1].metadata?.name).toBe('New Token');
     });
   });
 });

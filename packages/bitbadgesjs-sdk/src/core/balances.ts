@@ -12,8 +12,8 @@ import { UintRange, UintRangeArray } from './uintRanges.js';
 import { BaseTypedArray } from '@/common/typed-arrays.js';
 
 /**
- * Balance is used to represent a balance of a badge.
- * A user owns x(amount) of the badge IDs (badgeIds) from a specific collection (collectionId) for a range of times (ownershipTimes).
+ * Balance is used to represent a balance of a token.
+ * A user owns x(amount) of the token IDs (badgeIds) from a specific collection (collectionId) for a range of times (ownershipTimes).
  *
  * @category Balances
  *
@@ -131,12 +131,12 @@ export const applyIncrementsToBalances = <T extends NumberType>(
 };
 
 /**
- * Find the balance amount for a specific badge ID at a specific time within a set of balances. Returns x0 if not found.
+ * Find the balance amount for a specific token ID at a specific time within a set of balances. Returns x0 if not found.
  *
  * @remarks
  * Can also be used via the corresponding method with same name on {@link BalanceArray}
  *
- * @param id - The Badge ID to search for.
+ * @param id - The Token ID to search for.
  * @param time - The time to search for.
  * @param balances - The set of balances to search.
  * @category Balances
@@ -155,7 +155,7 @@ export const getBalanceForIdAndTime = <T extends NumberType>(id: T, time: T, bal
 };
 
 /**
- * Returns all matching balances for a specific badge ID. Returns a new BalanceArray.
+ * Returns all matching balances for a specific token ID. Returns a new BalanceArray.
  *
  * @remarks
  * Can also be used via the corresponding method with same name on {@link BalanceArray}
@@ -932,7 +932,7 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
   }
 
   /**
-   * Gets all badge IDs from the balances (sorted and merged).
+   * Gets all token IDs from the balances (sorted and merged).
    */
   getAllBadgeIds() {
     const badgeIds = new UintRangeArray<T>();

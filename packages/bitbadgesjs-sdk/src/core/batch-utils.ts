@@ -11,9 +11,9 @@ import { BaseTypedArray } from '@/common/typed-arrays.js';
  * @category Interfaces
  */
 export interface iBatchBadgeDetails<T extends NumberType> {
-  /** The collection ID of this element's badge details. */
+  /** The collection ID of this element's token details. */
   collectionId: CollectionId;
-  /** The corresponding badge IDs for this collection ID. */
+  /** The corresponding token IDs for this collection ID. */
   badgeIds: iUintRange<T>[];
 }
 
@@ -43,7 +43,7 @@ export class BatchBadgeDetails<T extends NumberType> extends BaseNumberTypeClass
   }
 
   /**
-   * Checks if the badge details overlap with another set of badge details.
+   * Checks if the token details overlap with another set of token details.
    */
   doesNotOverlap(other: iBatchBadgeDetails<T>[] | iBatchBadgeDetails<T>) {
     const otherArr: BatchBadgeDetailsArray<T> = BatchBadgeDetailsArray.From(Array.isArray(other) ? other : [other]);
@@ -55,7 +55,7 @@ export class BatchBadgeDetails<T extends NumberType> extends BaseNumberTypeClass
   }
 
   /**
-   * Checks if the badge details are a subset of another set of badge details (i.e. all badgeIds are in the other set).
+   * Checks if the token details are a subset of another set of token details (i.e. all badgeIds are in the other set).
    */
   isSubsetOf(other: iBatchBadgeDetails<T>[] | iBatchBadgeDetails<T>): boolean {
     const otherArr: BatchBadgeDetailsArray<T> = BatchBadgeDetailsArray.From(Array.isArray(other) ? other : [other]);
@@ -68,7 +68,7 @@ export class BatchBadgeDetails<T extends NumberType> extends BaseNumberTypeClass
   }
 
   /**
-   * Checks if the badge details are not in another set of badge details (i.e. none of the badgeIds are in the other set).
+   * Checks if the token details are not in another set of token details (i.e. none of the token IDs are in the other set).
    */
   noneIn(other: iBatchBadgeDetails<T>[] | iBatchBadgeDetails<T>): boolean {
     const otherArr: BatchBadgeDetailsArray<T> = BatchBadgeDetailsArray.From(Array.isArray(other) ? other : [other]);
@@ -126,7 +126,7 @@ export class BatchBadgeDetailsArray<T extends NumberType> extends BaseTypedArray
   }
 
   /**
-   * Adds badge details to the batch details array. If the collectionId already exists, it will merge the badgeIds.
+   * Adds token details to the batch details array. If the collectionId already exists, it will merge the badgeIds.
    */
   add(other: iBatchBadgeDetails<T>[] | iBatchBadgeDetails<T> | BatchBadgeDetailsArray<T>) {
     const otherArr: BatchBadgeDetails<T>[] = BatchBadgeDetailsArray.From(Array.isArray(other) ? other : [other]);
@@ -153,7 +153,7 @@ export class BatchBadgeDetailsArray<T extends NumberType> extends BaseTypedArray
   }
 
   /**
-   * Removes badge details from the batch details array. If the collectionId already exists, it will remove the badgeIds.
+   * Removes token details from the batch details array. If the collectionId already exists, it will remove the badgeIds.
    */
   remove(other: iBatchBadgeDetails<T>[] | iBatchBadgeDetails<T> | BatchBadgeDetailsArray<T>) {
     const otherArr: BatchBadgeDetails<T>[] = BatchBadgeDetailsArray.From(Array.isArray(other) ? other : [other]);
@@ -174,7 +174,7 @@ export class BatchBadgeDetailsArray<T extends NumberType> extends BaseTypedArray
   }
 
   /**
-   * Checks if the badge details completely overlap with another set of badge details (i.e. all badgeIds are in the other set).
+   * Checks if the token details completely overlap with another set of token details (i.e. all badgeIds are in the other set).
    */
   isSubsetOf(other: iBatchBadgeDetails<T>[] | iBatchBadgeDetails<T> | BatchBadgeDetailsArray<T>) {
     const otherArr: BatchBadgeDetails<T>[] = BatchBadgeDetailsArray.From(Array.isArray(other) ? other : [other]);
@@ -183,7 +183,7 @@ export class BatchBadgeDetailsArray<T extends NumberType> extends BaseTypedArray
   }
 
   /**
-   * Checks if the badge details do not overlap with another set of badge details (i.e. none of the badgeIds are in the other set).
+   * Checks if the token details do not overlap with another set of token details (i.e. none of the token IDs are in the other set).
    */
   noneIn(other: iBatchBadgeDetails<T>[] | iBatchBadgeDetails<T> | BatchBadgeDetailsArray<T>) {
     const otherArr: BatchBadgeDetails<T>[] = BatchBadgeDetailsArray.From(Array.isArray(other) ? other : [other]);
@@ -192,7 +192,7 @@ export class BatchBadgeDetailsArray<T extends NumberType> extends BaseTypedArray
   }
 
   /**
-   * Get specific badges for the batch details. Useful for displaying badges on a page.
+   * Get specific tokens for the batch details. Useful for displaying tokens on a page.
    *
    * Assums that badgeIds are sorted, merged, and non-overlapping.
    */
@@ -231,7 +231,7 @@ export class BatchBadgeDetailsArray<T extends NumberType> extends BaseTypedArray
 
         // If we have reached the start of the page, handle this range
         if (currIdx + numBadgesInRange >= startIdxNum) {
-          //Find badge ID to start at
+          //Find token ID to start at
           let currBadgeId = range.start;
           if (currIdx < startIdxNum) {
             currBadgeId = range.start + (startIdxNum - currIdx);

@@ -52,7 +52,7 @@ export interface iMsgCreateCollection<T extends NumberType> {
   /** The default balances for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type. */
   defaultBalances?: iUserBalanceStore<T>;
 
-  /** The badges to create. Newly created badges will be sent to the "Mint" address. Must have necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if collection has "Standard" balance type. */
+  /** The tokens to create. Newly created tokens will be sent to the "Mint" address. Must have necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if collection has "Standard" balance type. */
   validBadgeIds?: iUintRange<T>[];
 
   /** The new collection permissions. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. */
@@ -64,7 +64,7 @@ export interface iMsgCreateCollection<T extends NumberType> {
   /** The new collection metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. */
   collectionMetadataTimeline?: iCollectionMetadataTimeline<T>[];
 
-  /** The new badge metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Note we take first-match only for badge IDs, so do not define duplicates. */
+  /** The new token metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Note we take first-match only for token IDs, so do not define duplicates. */
   badgeMetadataTimeline?: iBadgeMetadataTimeline<T>[];
 
   /** The new off-chain balances metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if "Off-Chain - Indexed" or "Off-Chain - Non-Indexed" balance type. */
@@ -108,7 +108,7 @@ export interface iMsgDeleteCollection<T extends NumberType> {
 export interface iMsgTransferBadges<T extends NumberType> {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
-  /** The ID of the collection to transfer badges from. */
+  /** The ID of the collection to transfer tokens from. */
   collectionId: CollectionId;
   /** The transfers to perform. */
   transfers: iTransfer<T>[];
@@ -126,7 +126,7 @@ export interface iMsgUniversalUpdateCollection<T extends NumberType> extends iMs
   updateManagerTimeline?: boolean;
   /** Whether or not to update the collection metadata timeline. */
   updateCollectionMetadataTimeline?: boolean;
-  /** Whether or not to update the badge metadata timeline. */
+  /** Whether or not to update the token metadata timeline. */
   updateBadgeMetadataTimeline?: boolean;
   /** Whether or not to update the off-chain balances metadata timeline. */
   updateOffChainBalancesMetadataTimeline?: boolean;
@@ -138,7 +138,7 @@ export interface iMsgUniversalUpdateCollection<T extends NumberType> extends iMs
   updateStandardsTimeline?: boolean;
   /** Whether or not to update the is archived timeline. */
   updateIsArchivedTimeline?: boolean;
-  /** Whether or not to update the valid badge IDs. */
+  /** Whether or not to update the valid token IDs. */
   updateValidBadgeIds?: boolean;
 }
 
@@ -153,7 +153,7 @@ export interface iMsgUpdateCollection<T extends NumberType> extends Omit<iMsgUni
 export interface iMsgUpdateUserApprovals<T extends NumberType> {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
-  /** The ID of the collection to transfer badges from. */
+  /** The ID of the collection to transfer tokens from. */
   collectionId: CollectionId;
   /** Whether or not to update the outgoing approvals. */
   updateOutgoingApprovals?: boolean;
@@ -325,9 +325,9 @@ export interface iMsgSetValidBadgeIds<T extends NumberType> {
   creator: BitBadgesAddress;
   /** The ID of the collection. */
   collectionId: T;
-  /** New badge IDs to add to this collection. */
+  /** New token IDs to add to this collection. */
   validBadgeIds: iUintRange<T>[];
-  /** Permission to update valid badge IDs. */
+  /** Permission to update valid token IDs. */
   canUpdateValidBadgeIds: iBadgeIdsActionPermission<T>[];
 }
 
@@ -367,9 +367,9 @@ export interface iMsgSetBadgeMetadata<T extends NumberType> {
   creator: BitBadgesAddress;
   /** The ID of the collection. */
   collectionId: T;
-  /** New badge metadata timeline to set. */
+  /** New token metadata timeline to set. */
   badgeMetadataTimeline: iBadgeMetadataTimeline<T>[];
-  /** Permission to update badge metadata timeline. */
+  /** Permission to update token metadata timeline. */
   canUpdateBadgeMetadata: iTimedUpdateWithBadgeIdsPermission<T>[];
 }
 

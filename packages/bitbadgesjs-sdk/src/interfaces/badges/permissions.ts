@@ -45,7 +45,7 @@ export interface iUserOutgoingApprovalPermission<T extends NumberType> {
   initiatedByListId: string;
   /** The transfer times of the approved outgoing transfers. */
   transferTimes: iUintRange<T>[];
-  /** The badge IDs of the approved outgoing transfers. */
+  /** The token IDs of the approved outgoing transfers. */
   badgeIds: iUintRange<T>[];
   /** The owned times of the approved outgoing transfers. */
   ownershipTimes: iUintRange<T>[];
@@ -67,7 +67,7 @@ export interface iUserIncomingApprovalPermission<T extends NumberType> {
   initiatedByListId: string;
   /** The transfer times of the approved incoming transfers. */
   transferTimes: iUintRange<T>[];
-  /** The badge IDs of the approved incoming transfers. */
+  /** The token IDs of the approved incoming transfers. */
   badgeIds: iUintRange<T>[];
   /** The owned times of the approved incoming transfers. */
   ownershipTimes: iUintRange<T>[];
@@ -97,9 +97,9 @@ export interface iCollectionPermissions<T extends NumberType> {
   canUpdateManager: iTimedUpdatePermission<T>[];
   /** The permissions for updating the collection metadata. */
   canUpdateCollectionMetadata: iTimedUpdatePermission<T>[];
-  /** The permissions for creating more badges. */
+  /** The permissions for creating more tokens. */
   canUpdateValidBadgeIds: iBadgeIdsActionPermission<T>[];
-  /** The permissions for updating the badge metadata. */
+  /** The permissions for updating the token metadata. */
   canUpdateBadgeMetadata: iTimedUpdateWithBadgeIdsPermission<T>[];
   /** The permissions for updating the collection approved transfers. */
   canUpdateCollectionApprovals: iCollectionApprovalPermission<T>[];
@@ -131,7 +131,7 @@ export interface iTimedUpdatePermission<T extends NumberType> {
  * @category Interfaces
  */
 export interface iBadgeIdsActionPermission<T extends NumberType> {
-  /** The badge IDs that the permission applies to. */
+  /** The token IDs that the permission applies to. */
   badgeIds: iUintRange<T>[];
   /** The permitted times of the permission. */
   permanentlyPermittedTimes: iUintRange<T>[];
@@ -145,7 +145,7 @@ export interface iBadgeIdsActionPermission<T extends NumberType> {
 export interface iTimedUpdateWithBadgeIdsPermission<T extends NumberType> {
   /** The timeline times that the permission applies to. */
   timelineTimes: iUintRange<T>[];
-  /** The badge IDs that the permission applies to. */
+  /** The token IDs that the permission applies to. */
   badgeIds: iUintRange<T>[];
   /** The permitted times of the permission. */
   permanentlyPermittedTimes: iUintRange<T>[];
@@ -165,7 +165,7 @@ export interface iCollectionApprovalPermission<T extends NumberType> {
   initiatedByListId: string;
   /** The transfer times of the approved transfers. */
   transferTimes: iUintRange<T>[];
-  /** The badge IDs of the approved transfers. */
+  /** The token IDs of the approved transfers. */
   badgeIds: iUintRange<T>[];
   /** The owned times of the approved transfers. */
   ownershipTimes: iUintRange<T>[];

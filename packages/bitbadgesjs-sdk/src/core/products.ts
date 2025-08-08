@@ -25,7 +25,7 @@ export const doesCollectionFollowProductProtocol = (collection?: Readonly<iColle
     return false;
   }
 
-  // Assert valid badge IDs are only 1n-1n
+  // Assert valid token IDs are only 1n-1n
   const badgeIds = UintRangeArray.From(collection.validBadgeIds).sortAndMerge().convert(BigInt);
   if (badgeIds.length !== 1 || badgeIds.size() !== 1n) {
     return false;

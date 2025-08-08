@@ -7,10 +7,10 @@ import { getConverterFunction } from '@/common/base.js';
 
 /**
  * This function returns the [Metadata ID](https://docs.bitbadges.io/for-developers/bitbadges-sdk/common-snippets/metadata-ids)
- * for a specific badge ID. Returns -1 if not found.
+ * for a specific token ID. Returns -1 if not found.
  *
  * @remarks
- * The badge metadata array is the timeline values (BadgeMetadataTimeline.badgeMetadata), not the cached fetched values
+ * The token metadata array is the timeline values (BadgeMetadataTimeline.badgeMetadata), not the cached fetched values
  * from the API.
  *
  * @example
@@ -58,10 +58,10 @@ export const getMetadataIdForBadgeId = <T extends NumberType>(badgeId: T, badgeM
 
 /**
  * This function returns the [Metadata IDs](https://docs.bitbadges.io/for-developers/bitbadges-sdk/common-snippets/metadata-ids)
- * for a specific badge URI. Returns an empty array if not found.
+ * for a specific token URI. Returns an empty array if not found.
  *
  * @remarks
- * The badge metadata array is the timeline values (BadgeMetadataTimeline.badgeMetadata), not the cached fetched values
+ * The token metadata array is the timeline values (BadgeMetadataTimeline.badgeMetadata), not the cached fetched values
  * from the API.
  *
  * @example
@@ -153,7 +153,7 @@ export function getMaxMetadataId<T extends NumberType>(badgeMetadata: BadgeMetad
 
   let metadataId = 0n;
   for (const badgeUri of badgeMetadata) {
-    // If the URI contains {id}, each badge ID will belong to its own private batch
+    // If the URI contains {id}, each token ID will belong to its own private batch
     if (badgeUri.uri.includes('{id}')) {
       metadataId = safeAddKeepLeft(metadataId, badgeUri.badgeIds.size());
     } else {
@@ -169,7 +169,7 @@ export function getMaxMetadataId<T extends NumberType>(badgeMetadata: BadgeMetad
  * Returns an empty array if not found.
  *
  * @remarks
- * The badge metadata array is the timeline values (BadgeMetadataTimeline.badgeMetadata), not the cached fetched values
+ * The token metadata array is the timeline values (BadgeMetadataTimeline.badgeMetadata), not the cached fetched values
  * from the API.
  *
  * @example
@@ -226,11 +226,11 @@ export function getUrisForMetadataIds<T extends NumberType>(metadataIds: T[], co
 }
 
 /**
- * This return the badge IDs for a specific [Metadata ID](https://docs.bitbadges.io/for-developers/bitbadges-sdk/common-snippets/metadata-ids).
+ * This return the token IDs for a specific [Metadata ID](https://docs.bitbadges.io/for-developers/bitbadges-sdk/common-snippets/metadata-ids).
  * Returns an empty array if not found.
  *
  * @remarks
- * The badge metadata array is the timeline values (BadgeMetadataTimeline.badgeMetadata), not the cached fetched values
+ * The token metadata array is the timeline values (BadgeMetadataTimeline.badgeMetadata), not the cached fetched values
  * from the API.
  *
  * @example

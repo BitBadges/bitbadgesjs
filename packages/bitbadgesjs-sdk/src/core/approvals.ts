@@ -608,7 +608,7 @@ export class RecurringOwnershipTimes<T extends NumberType>
 
 /**
  * IncrementedBalances represents predetermined incremented balances for transfers of an approval.
- * You can define a starting balance and increment the badge IDs and owned times by a certain amount.
+ * You can define a starting balance and increment the token IDs and owned times by a certain amount.
  *
  * @category Approvals / Transferability
  */
@@ -738,9 +738,9 @@ export class PredeterminedOrderCalculationMethod
 }
 
 /**
- * ApprovalAmounts represents the maximum approved amounts for the badge IDs / ownership times of this approval.
+ * ApprovalAmounts represents the maximum approved amounts for the token IDs / ownership times of this approval.
  * Can be set to 0 to represent an unlimited amount is approved.
- * If set to non-zero value, we track the running tally of the amount approved for each badge ID / ownership time.
+ * If set to non-zero value, we track the running tally of the amount approved for each token ID / ownership time.
  * Once it reaches the max, no more transfers are allowed.
  *
  * Note that we only track the approval amounts if the approval is defined and not unlimited. If it is unlimited, we do not tally.
@@ -868,10 +868,10 @@ export class ResetTimeIntervals<T extends NumberType> extends BaseNumberTypeClas
 }
 
 /**
- * MaxNumTransfers represents the maximum number of transfers for the badge IDs and ownershipTimes of this approval.
+ * MaxNumTransfers represents the maximum number of transfers for the token IDs and ownershipTimes of this approval.
  *
  * Can be set to 0 to represent an unlimited number of transfers.
- * If set to non-zero value, we track the running tally of the number of transfers for each badge ID / ownership time. Once it reaches the max, no more transfers are allowed.
+ * If set to non-zero value, we track the running tally of the number of transfers for each token ID / ownership time. Once it reaches the max, no more transfers are allowed.
  *
  * Note that we only track the max num transfers if a) the max num transfers here is defined and not unlimited OR b) we need it for calculating the predetermined balances order (i.e. useXYZNumTransfers is set in the PredeterminedOrderCalculationMethod).
  * Otherwise, we do not track the respective number of transfers

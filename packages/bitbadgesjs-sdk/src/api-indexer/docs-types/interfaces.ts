@@ -278,7 +278,7 @@ export interface iCoinTransferItem<T extends NumberType> {
 export interface iPrecalculationOptions<T extends NumberType> {
   /** The timestamp to use for the transfer. */
   overrideTimestamp?: T;
-  /** The badge IDs to use for the transfer. */
+  /** The token IDs to use for the transfer. */
   badgeIdsOverride?: iUintRange<T>[];
 }
 
@@ -288,11 +288,11 @@ export interface iPrecalculationOptions<T extends NumberType> {
 export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc<T> {
   /** The list of recipients. */
   to: BitBadgesAddress[];
-  /** The sender of the badges. */
+  /** The sender of the tokens. */
   from: BitBadgesAddress;
-  /** The list of balances and badge IDs that were transferred. */
+  /** The list of balances and token IDs that were transferred. */
   balances: iBalance<T>[];
-  /** The collection ID for the badges that was transferred. */
+  /** The collection ID for the tokens that was transferred. */
   collectionId: CollectionId;
   /** The memo of the transfer. */
   memo?: string;
@@ -310,7 +310,7 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
   coinTransfers?: iCoinTransferItem<T>[];
   /** Approvals used for the transfer */
   approvalsUsed?: iApprovalIdentifierDetails<T>[];
-  /** The badge ID for the transfer */
+  /** The token ID for the transfer */
   badgeId?: T;
   /** The price of the transfer */
   price?: T;
@@ -436,7 +436,7 @@ export interface iFloorPriceHistory<T extends NumberType> {
 export interface iBadgeFloorPriceDoc<T extends NumberType> extends Doc {
   /** The collection ID */
   collectionId: CollectionId;
-  /** The badge ID */
+  /** The token ID */
   badgeId: T;
   /** The floor price */
   floorPrices?: iCosmosCoin<T>[];
@@ -467,7 +467,7 @@ export interface iApprovalItemDoc<T extends NumberType> extends Doc {
   /** Is active currently */
   isActive?: boolean;
 
-  /** The badge ID */
+  /** The token ID */
   badgeId?: T;
   /** Approval itself */
   approval: iCollectionApproval<T>;
@@ -489,7 +489,7 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   collectionId: CollectionId;
   /** The collection metadata timeline */
   collectionMetadataTimeline: iCollectionMetadataTimeline<T>[];
-  /** The badge metadata timeline */
+  /** The token metadata timeline */
   badgeMetadataTimeline: iBadgeMetadataTimeline<T>[];
   /** The type of balances (i.e. "Standard", "Off-Chain - Indexed", "Non-Public, "Off-Chain - Non-Indexed") */
   balancesType: 'Standard' | 'Off-Chain - Indexed' | 'Non-Public' | 'Off-Chain - Non-Indexed';
@@ -517,7 +517,7 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   createdTimestamp: UNIXMilliTimestamp<T>;
   /** The update history of this collection */
   updateHistory: iUpdateHistory<T>[];
-  /** Valid badge IDs for the collection */
+  /** Valid token IDs for the collection */
   validBadgeIds: iUintRange<T>[];
   /** Mint escrow address */
   mintEscrowAddress: string;
@@ -596,7 +596,7 @@ export interface iCustomPage<T extends NumberType> {
   title: string;
   /** The description of the custom page */
   description: string;
-  /** The badge IDs to display on the custom page */
+  /** The token IDs to display on the custom page */
   items: iBatchBadgeDetails<T>[];
 }
 
@@ -1414,7 +1414,7 @@ export interface iInheritMetadataFrom<T extends NumberType> {
   listId?: string;
   /** The map ID to link to */
   mapId?: string;
-  /** The badge ID to link to "collectionId: CollectionId<T>dgeId" */
+  /** The token ID to link to "collectionId: CollectionId<T>dgeId" */
   badgeId?: string;
 }
 
@@ -1522,7 +1522,7 @@ export interface iUtilityPageDoc<T extends NumberType> extends Doc {
 export interface iLinkedTo<T extends NumberType> {
   /** The collection ID */
   collectionId?: CollectionId;
-  /** The badge IDs */
+  /** The token IDs */
   badgeIds?: iUintRange<T>[];
   /** The list ID */
   listId?: string;
@@ -2313,7 +2313,7 @@ export interface iClaimDetails<T extends NumberType> {
   managedBy?: BitBadgesAddress;
   /** Collection ID that the claim is for (if applicable - collection claims). */
   collectionId?: CollectionId;
-  /** Standalone claims are not linked with a badge or list. */
+  /** Standalone claims are not linked with a token or list. */
   standaloneClaim?: boolean;
   /** Address list ID that the claim is for (if applicable - list claims). */
   listId?: string;
@@ -2340,7 +2340,7 @@ export interface iClaimDetails<T extends NumberType> {
   /** If manual distribution is enabled, we do not handle any distribution of claim codes.
    * We leave that up to the claim creator.
    *
-   * Only applicable for on-chain badge claims. This is only used in advanced self-hosted cases.
+   * Only applicable for on-chain token claims. This is only used in advanced self-hosted cases.
    */
   manualDistribution?: boolean;
   /**
@@ -2355,7 +2355,7 @@ export interface iClaimDetails<T extends NumberType> {
    */
   approach?: string;
   /**
-   * Seed code for the claim. Only used for on-chain badge claims.
+   * Seed code for the claim. Only used for on-chain token claims.
    *
    * This is how we produce all reserved codes for the on-chain merkle challenge / proofs.
    */

@@ -26,12 +26,12 @@ export interface iUintRange<T extends NumberType> {
  */
 export interface iBadgeMetadata<T extends NumberType> {
   /**
-   * The URI where to fetch the badge metadata from.
+   * The URI where to fetch the token metadata from.
    */
   uri: string;
 
   /**
-   * The badge IDs corresponding to the URI.
+   * The token IDs corresponding to the URI.
    */
   badgeIds: iUintRange<T>[];
 
@@ -76,22 +76,22 @@ export interface iOffChainBalancesMetadata {
  */
 export interface iMustOwnBadges<T extends NumberType> {
   /**
-   * The collection ID of the badges to own.
+   * The collection IDs to own.
    */
   collectionId: CollectionId;
 
   /**
-   * The min/max acceptable amount of badges that must be owned (can be any values, including 0-0).
+   * The min/max acceptable amount of tokens that must be owned (can be any values, including 0-0).
    */
   amountRange: iUintRange<T>;
 
   /**
-   * The range of the times that the badges must be owned.
+   * The range of the times that the tokens must be owned.
    */
   ownershipTimes: iUintRange<T>[];
 
   /**
-   * The range of the badge IDs that must be owned.
+   * The range of the token IDs that must be owned.
    */
   badgeIds: iUintRange<T>[];
 
@@ -101,7 +101,7 @@ export interface iMustOwnBadges<T extends NumberType> {
   overrideWithCurrentTime: boolean;
 
   /**
-   * Whether or not the user must own all the specified badges. If false, we will accept if they meet criteria for at least one badge.
+   * Whether or not the user must own all the specified tokens. If false, we will accept if they meet criteria for at least one token.
    */
   mustSatisfyForAllAssets: boolean;
 }
@@ -111,17 +111,17 @@ export interface iMustOwnBadges<T extends NumberType> {
  */
 export interface iBalance<T extends NumberType> {
   /**
-   * The amount or balance of the owned badge.
+   * The amount or balance of the owned token.
    */
   amount: T;
 
   /**
-   * The badge IDs corresponding to the balance.
+   * The token IDs corresponding to the balance.
    */
   badgeIds: iUintRange<T>[];
 
   /**
-   * The times that the badge is owned from.
+   * The times that the token is owned from.
    */
   ownershipTimes: iUintRange<T>[];
 }
@@ -374,22 +374,22 @@ export interface iAmountTrackerIdDetails<T extends NumberType> {
  */
 export interface iMustOwnBadge<T extends NumberType> {
   /**
-   * The ID of the badge collection.
+   * The ID of the collection.
    */
   collectionId: CollectionId;
 
   /**
-   * The range of badge amounts the user must own (min to max).
+   * The range of amounts the user must own (min to max).
    */
   amountRange: iUintRange<T>;
 
   /**
-   * The time ranges during which the user must own the badges.
+   * The time ranges during which the user must own the tokens.
    */
   ownershipTimes: iUintRange<T>[];
 
   /**
-   * The badge IDs the user must own.
+   * The token IDs the user must own.
    */
   badgeIds: iUintRange<T>[];
 
@@ -399,7 +399,7 @@ export interface iMustOwnBadge<T extends NumberType> {
   overrideWithCurrentTime: boolean;
 
   /**
-   * If true, the user must meet ownership requirements for all specified badges; else, must meet requirements for any single badge.
+   * If true, the user must meet ownership requirements for all specified tokens; else, must meet requirements for any single token.
    */
   mustSatisfyForAllAssets: boolean;
 }
@@ -569,7 +569,7 @@ export interface iCollectionMetadataTimelineWithDetails<T extends NumberType> ex
  */
 export interface iBadgeMetadataTimeline<T extends NumberType> extends iTimelineItem<T> {
   /**
-   * The badge metadata.
+   * The token metadata.
    */
   badgeMetadata: iBadgeMetadata<T>[];
 }
@@ -579,7 +579,7 @@ export interface iBadgeMetadataTimeline<T extends NumberType> extends iTimelineI
  */
 export interface iBadgeMetadataTimelineWithDetails<T extends NumberType> extends iTimelineItem<T> {
   /**
-   * The badge metadata, with off-chain details populated.
+   * The token metadata, with off-chain details populated.
    */
   badgeMetadata: iBadgeMetadataDetails<T>[];
 }
@@ -633,7 +633,7 @@ export interface iIsArchivedTimeline<T extends NumberType> extends iTimelineItem
 export interface iCollectionInvariants {
   /**
    * If true, all ownership times must be full ranges [{ start: 1, end: GoMaxUInt64 }].
-   * This prevents time-based restrictions on badge ownership.
+   * This prevents time-based restrictions on token ownership.
    */
   noCustomOwnershipTimes: boolean;
 }

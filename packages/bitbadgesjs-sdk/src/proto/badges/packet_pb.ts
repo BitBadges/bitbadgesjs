@@ -11,7 +11,7 @@ import { Message, proto3 } from "@bufbuild/protobuf";
  */
 export class BadgesPacketData extends Message<BadgesPacketData> {
   /**
-   * @generated from oneof badges.BadgesPacketData.packet
+   * @generated from oneof tokens.BadgesPacketData.packet
    */
   packet: {
     /**

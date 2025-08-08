@@ -56,11 +56,11 @@ import { UintRange, UintRangeArray } from './uintRanges.js';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils.js';
 
 /**
- * BadgeMetadata is used to represent the metadata for a range of badge IDs.
+ * BadgeMetadata is used to represent the metadata for a range of token IDs.
  * The metadata can be hosted via a URI (via uri) or stored on-chain (via customData).
  *
- * We take first-match only for the badge IDs.
- * If a badge ID is in multiple BadgeMetadata, we take the first match in a linear search.
+ * We take first-match only for the token IDs.
+ * If a token ID is in multiple BadgeMetadata, we take the first match in a linear search.
  *
  * @category Collections
  */
@@ -119,7 +119,7 @@ export class BadgeMetadata<T extends NumberType> extends BaseNumberTypeClass<Bad
   }
 
   /**
-   * Get first matches for the badge metadata (i.e. if there are duplicated badge IDs, we take the first match in a linear search).
+   * Get first matches for the token metadata (i.e. if there are duplicated token IDs, we take the first match in a linear search).
    */
   static getFirstMatches<T extends NumberType>(badgeMetadata: BadgeMetadata<T>[]): BadgeMetadata<T>[] {
     const metadataArr = badgeMetadata.map((b) => b.clone());
@@ -388,7 +388,7 @@ export class AmountTrackerIdDetails<T extends NumberType>
 }
 
 /**
- * MustOwnBadge is used to represent a must own badge for an approval.
+ * MustOwnBadge is used to represent a must own token for an approval.
  *
  * @category Approvals / Transferability
  */
@@ -880,7 +880,7 @@ export class BadgeMetadataTimelineWithDetails<T extends NumberType>
 }
 
 /**
- * BadgeMetadataTimeline represents the value of the badge metadata over time
+ * BadgeMetadataTimeline represents the value of the token metadata over time
  *
  * @category Timelines
  */
@@ -2079,7 +2079,7 @@ export class ETHSignatureProof extends CustomTypeClass<ETHSignatureProof> implem
 export class CollectionInvariants extends CustomTypeClass<CollectionInvariants> implements iCollectionInvariants {
   /**
    * If true, all ownership times must be full ranges [{ start: 1, end: GoMaxUInt64 }].
-   * This prevents time-based restrictions on badge ownership.
+   * This prevents time-based restrictions on token ownership.
    */
   noCustomOwnershipTimes: boolean;
 

@@ -13,7 +13,7 @@ import { AddressList } from "./address_lists_pb.js";
 import { CosmosCoinWrapperPathAddObject } from "./tx_pb.js";
 
 /**
- * The types defined in these files are used to define the MsgServer types for all requests and responses for Msgs of the badges module.
+ * The types defined in these files are used to define the MsgServer types for all requests and responses for Msgs of the tokens module.
  *
  * @generated from message badges.UserOutgoingApprovalTimeline
  */

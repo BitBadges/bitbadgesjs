@@ -817,9 +817,9 @@ export class BadgeIdsActionPermission<T extends NumberType>
 }
 
 /**
- * TimedUpdateWithBadgeIdsPermission represents a permission that allows updating a timeline-based value time with bagde IDS. For example, updating the badge metadata.
+ * TimedUpdateWithBadgeIdsPermission represents a permission that allows updating a timeline-based value time with bagde IDS. For example, updating the token metadata.
  *
- * This permission allows you to define when the value can be updated, and what times the value can be updated for, and for what badges the value can be updated for. Or any combination of these.
+ * This permission allows you to define when the value can be updated, and what times the value can be updated for, and for what tokens the value can be updated for. Or any combination of these.
  *
  * @category Permissions
  */
@@ -1351,7 +1351,7 @@ function checkNotForbiddenForAllOverlaps(
           }
 
           if (usesBadgeIds) {
-            errStr += ` for the badge ids ${permissionDetail.badgeId.start} to ${permissionDetail.badgeId.end}`;
+            errStr += ` for the token ids ${permissionDetail.badgeId.start} to ${permissionDetail.badgeId.end}`;
           }
 
           if (usesOwnershipTimes) {

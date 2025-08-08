@@ -346,7 +346,7 @@ export class CosmosCoinWrapperPathAddObject extends Message<CosmosCoinWrapperPat
 }
 
 /**
- * MsgUniversalUpdateCollection is used to define MsgServer types for all requests and responses for Msgs of the badges module.
+ * MsgUniversalUpdateCollection is used to define MsgServer types for all requests and responses for Msgs of the tokens module.
  * It is a universal interface that can be used for both creating and updating collections.
  * We have it defined for legacy purposes, but it is recommended to use MsgCreateCollection and MsgUpdateCollection instead.
  *

@@ -43,7 +43,7 @@ describe('Transfers', () => {
     expect(balanceMap[testAddress2][0].badgeIds[0].end == 101n).toBe(true);
   });
 
-  it('should get all badge ids to be transferred', () => {
+  it('should get all token ids to be transferred', () => {
     const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
       {
         from: 'Mint', // replace with your address

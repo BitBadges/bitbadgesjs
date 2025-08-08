@@ -27,7 +27,7 @@ export interface iMetadata<T extends NumberType> {
     [key: string]: string;
   };
 
-  /** The off-chain transferability info for this item (used for badges - off-chain, disregard for others) */
+  /** The off-chain transferability info for this item (used for tokens - off-chain, disregard for others) */
   offChainTransferabilityInfo?: {
     host: string;
     assignMethod: string;

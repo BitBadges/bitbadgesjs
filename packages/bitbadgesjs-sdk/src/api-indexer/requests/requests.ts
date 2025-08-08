@@ -597,7 +597,7 @@ export class GetClaimAttemptStatusPayload extends EmptyResponseClass {}
 export interface iGetClaimAttemptStatusSuccessResponse {
   success: boolean;
   error: string;
-  /** The code for the on-chain transaction. Only provided if you have permissions and this is an on-chain badge claim. */
+  /** The code for the on-chain transaction. Only provided if you have permissions and this is an on-chain token claim. */
   code?: string;
   bitbadgesAddress: string;
 }
@@ -895,7 +895,7 @@ export interface iUpdateAccountInfoPayload {
   readme?: string;
 
   /**
-   * The badges to hide and not view for this profile's portfolio
+   * The tokens to hide and not view for this profile's portfolio
    */
   hiddenBadges?: iBatchBadgeDetails<NumberType>[];
 
@@ -918,7 +918,7 @@ export interface iUpdateAccountInfoPayload {
   };
 
   /**
-   * The watchlist of badges / lists
+   * The watchlist of tokens / lists
    */
   watchlists?: {
     badges: iCustomPage<NumberType>[];
@@ -1167,7 +1167,7 @@ export interface iAddToIpfsPayload {
  */
 export interface iAddToIpfsSuccessResponse {
   /**
-   * An array of badge metadata results, if applicable.
+   * An array of token metadata results, if applicable.
    */
   results: {
     cid: string;

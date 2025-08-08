@@ -387,7 +387,7 @@ export class CollectionDoc<T extends NumberType>
   }
 
   /**
-   * Gets the badge metadata at a specific time (Date.now() by default).
+   * Gets the token metadata at a specific time (Date.now() by default).
    *
    * This gets the timeline value. For the actual fetched value, use `getBadgeMetadata()` instead.
    */

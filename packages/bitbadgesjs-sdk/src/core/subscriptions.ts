@@ -76,7 +76,7 @@ export const doesCollectionFollowSubscriptionProtocol = (collection?: Readonly<i
     return false;
   }
 
-  // Assert valid badge IDs are only 1n-1n
+  // Assert valid token IDs are only 1n-1n
   const allSubscriptionBadgeIds = [];
   for (const approval of subscriptionApprovals) {
     const badgeIds = UintRangeArray.From(approval.badgeIds).sortAndMerge().convert(BigInt);
@@ -219,7 +219,7 @@ export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>,
   const subscriptionAmount = subscriptionApproval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount ?? 0n;
   const approvalAmount = approval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount ?? 0n;
 
-  //Ensure badge IDs match
+  //Ensure token IDs match
   const approvalBadgeIds = UintRangeArray.From(approval.badgeIds).sortAndMerge().convert(BigInt);
   const subscriptionBadgeIds = UintRangeArray.From(subscriptionApproval.badgeIds).sortAndMerge().convert(BigInt);
 

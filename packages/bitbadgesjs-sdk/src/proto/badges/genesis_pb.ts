@@ -12,7 +12,7 @@ import { AddressList } from "./address_lists_pb.js";
 import { DynamicStore, DynamicStoreValue } from "./dynamic_stores_pb.js";
 
 /**
- * GenesisState defines the badges module's genesis state.
+ * GenesisState defines the tokens module's genesis state.
  *
  * @generated from message badges.GenesisState
  */

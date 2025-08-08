@@ -52,7 +52,7 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   chain: SupportedChain;
   /** Indicates whether the account has claimed their airdrop. */
   airdropped?: boolean;
-  /** A list of badges that the account has collected. Paginated and fetched as needed. To be used in conjunction with views. */
+  /** A list of tokens that the account has collected. Paginated and fetched as needed. To be used in conjunction with views. */
   collected: iBalanceDocWithDetails<T>[];
   /** A list of transfer activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   activity: iTransferActivityDoc<T>[];
@@ -270,7 +270,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   }
 
   /**
-   * Gets the badge balance doc for a user by address.
+   * Gets the balance doc for a user by address.
    *
    * This returns the cached data if it exists. If you want to fetch, use fetchBalances.
    *
@@ -299,7 +299,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   }
 
   /**
-   * Gets the badge balances for a user by address. Throws if not fetched yet. To fetch, use fetchBalances.
+   * Gets the balances for a user by address. Throws if not fetched yet. To fetch, use fetchBalances.
    *
    * Wrapper for {@link getBalances} that throws if not fetched yet.
    *
@@ -313,7 +313,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   }
 
   /**
-   * Fetch badge balances for a collection and updates the user's collected array. Must pass in a valid API instance.
+   * Fetch balances for a collection and updates the user's collected array. Must pass in a valid API instance.
    *
    * @example
    * ```ts
@@ -326,7 +326,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   }
 
   /**
-   * Fetch badge balances for a collection and updates the user's collected array. Must pass in a valid API instance.
+   * Fetch balances for a collection and updates the user's collected array. Must pass in a valid API instance.
    * If forceful is true, it will fetch regardless of if it is already fetched. Else, it will only fetch if it is not already cached.
    */
   async fetchBalances(api: BaseBitBadgesApi<T>, collectionId: CollectionId, forceful?: boolean) {

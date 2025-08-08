@@ -10,7 +10,7 @@ import { Metadata } from './metadata.js';
 //TODO: Make an Array wrapper class for the util functions? Also add to BitBadgesCollection?
 
 /**
- * To keep track of metadata for badges and load it dynamically, we store it in an array: BadgeMetadataDetails<T>[].
+ * To keep track of metadata for tokens and load it dynamically, we store it in an array: BadgeMetadataDetails<T>[].
  *
  * The values are { metadata, uri, badgeIds, } where this object represents the metadata fetched by a uri
  * which correspond to the badgeIds.
@@ -30,7 +30,7 @@ import { Metadata } from './metadata.js';
  * @category Interfaces
  */
 export interface iBadgeMetadataDetails<T extends NumberType> {
-  /** The badge IDs that correspond to the metadata */
+  /** The token IDs that correspond to the metadata */
   badgeIds: iUintRange<T>[];
   /** The metadata fetched by the URI */
   metadata?: iMetadata<T>;
@@ -127,7 +127,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
   }
 
   /**
-   * Removes the metadata from the BadgeMetadataDetails<bigint>[] for specific badgeIds.
+   * Removes the metadata from the BadgeMetadataDetails<bigint>[] for specific token IDs.
    *
    * Note that this function does not mutate the metadataArr, but instead returns a new one.
    */
@@ -186,7 +186,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
         const startBadgeId = badgeUintRange.start;
         const endBadgeId = badgeUintRange.end;
 
-        //If the metadata we are updating is already in the array (with matching uri and id), we can just insert the badge IDs
+        //If the metadata we are updating is already in the array (with matching uri and id), we can just insert the token IDs
         let currBadgeMetadataExists = false;
         const currStr = JSON.stringify(currentMetadata);
         const idx = currMetadataStrs.indexOf(currStr);
@@ -213,8 +213,8 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
           }
         }
 
-        //Recreate the array with the updated badge IDs
-        //If some metadata object no longer has any corresponding badge IDs, we can remove it from the array
+        //Recreate the array with the updated token IDs
+        //If some metadata object no longer has any corresponding token IDs, we can remove it from the array
 
         //If we did not find the metadata in the array and metadata !== undefined, we need to add it
         if (!currBadgeMetadataExists) {
@@ -246,7 +246,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
   };
 
   /**
-   * Returns the { metadata, uri, badgeIds, customData } metadata object from the BadgeMetadataDetails<bigint>[] for a specific badgeId.
+   * Returns the { metadata, uri, badgeIds, customData } metadata object from the BadgeMetadataDetails<bigint>[] for a specific tokenId.
    *
    * If the badgeId does not exist in the BadgeMetadataDetails<bigint>[], returns undefined.
    */
@@ -263,7 +263,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
   }
 
   /**
-   * Returns the metadata from the BadgeMetadataDetails<bigint>[] for a specific badgeId.
+   * Returns the metadata from the BadgeMetadataDetails<bigint>[] for a specific tokenId.
    *
    * If the badgeId does not exist in the BadgeMetadataDetails<bigint>[], returns undefined.
    */
@@ -272,14 +272,14 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
   }
 
   /**
-   * For each badgeId in badgeIds, populates the metadata array with the given key, value JSON property pair.
+   * For each tokenId in badgeIds, populates the metadata array with the given key, value JSON property pair.
    *
    * If you want to update the entire metadata (not just a specific key value pair), use updateBadgeMetadata instead.
    *
-   * This is typically used when customizing or creating a badge.
+   * This is typically used when customizing or creating a token.
    *
    * @example
-   * Use this function to set the "name" property of all badges to "test" via setMetadataPropertyForAll(metadataArr, badgeIds, uri, "name", "test")
+   * Use this function to set the "name" property of all tokens to "test" via setMetadataPropertyForAll(metadataArr, badgeIds, uri, "name", "test")
    */
   static setMetadataPropertyForSpecificBadgeIds = <T extends NumberType>(
     metadataArr: BadgeMetadataDetails<T>[],
@@ -303,7 +303,7 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
           //Find the idx where id is in the badgeIds array
           const [idx, found] = val.badgeIds.search(id);
           if (found) {
-            //If multiple sequential badge IDs have the same metadata and are in the ranges we want to update,
+            //If multiple sequential token IDs have the same metadata and are in the ranges we want to update,
             //we can batch update all these together
             const foundUintRange = val.badgeIds[Number(idx)];
             const endIdToUpdate = bigIntMin(foundUintRange.end, badgeUintRange.end);

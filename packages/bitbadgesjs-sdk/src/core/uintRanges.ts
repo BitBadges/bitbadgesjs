@@ -75,7 +75,7 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
   /**
    * Returns true if the range is full (i.e. start = 1 and end = 18446744073709551615).
    *
-   * This is considered full in the context of badge IDs and times.
+   * This is considered full in the context of token IDs and times.
    */
   isFull() {
     return BigInt(this.start) == 1n && BigInt(this.end) == GO_MAX_UINT_64;

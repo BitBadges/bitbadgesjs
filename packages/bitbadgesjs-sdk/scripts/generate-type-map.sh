@@ -67,7 +67,7 @@ This document provides a comprehensive overview of all types, interfaces, classe
 ## Type Categories
 
 ### Core Badge Types (`src/interfaces/badges/core.ts`)
-Main badge types and structures including:
+Main token types and structures including:
 - Badge definitions
 - Collection metadata
 - Transfer configurations
@@ -242,7 +242,7 @@ cat > "$OUTPUT_DIR/types-schema.json" << 'EOF'
       "properties": {
         "core": {
           "type": "object",
-          "description": "Core badge types and interfaces"
+          "description": "Core token types and interfaces"
         },
         "api": {
           "type": "object",
@@ -333,7 +333,7 @@ Use `all-types.d.ts` for TypeScript intellisense and type checking.
 ## Key Type Categories
 
 ### Core Types (`src/interfaces/badges/`)
-- **core.ts**: Main badge types and structures
+- **core.ts**: Main token types and structures
 - **approvals.ts**: Approval and authorization types
 - **permissions.ts**: Permission and access control types
 - **userBalances.ts**: User balance and ownership types

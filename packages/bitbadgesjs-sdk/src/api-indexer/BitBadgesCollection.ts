@@ -108,7 +108,7 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
 
   /** The collection metadata timeline for this collection, with off-chain metadata populated. */
   collectionMetadataTimeline: iCollectionMetadataTimelineWithDetails<T>[];
-  /** The badge metadata timeline for this collection, with off-chain metadata populated. */
+  /** The token metadata timeline for this collection, with off-chain metadata populated. */
   badgeMetadataTimeline: iBadgeMetadataTimelineWithDetails<T>[];
 
   /** The default balances for users upon genesis, with off-chain metadata populated. */
@@ -125,9 +125,9 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   /** The listings for this collection. */
   listings: iUtilityPageDoc<T>[];
 
-  /** The badge IDs in this collection that are marked as NSFW. */
+  /** The token IDs in this collection that are marked as NSFW. */
   nsfw?: iCollectionNSFW<T>;
-  /** The badge IDs in this collection that have been reported. */
+  /** The token IDs in this collection that have been reported. */
   reported?: iCollectionNSFW<T>;
 
   /** The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs. */
@@ -289,7 +289,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Sets the badge metadata for certain times (defaults to all times).
+   * Sets the token metadata for certain times (defaults to all times).
    */
   setBadgeMetadataForTimes(metadata: BadgeMetadataDetails<T>[], timelineTimesToSet?: iUintRange<T>[]) {
     const converterFunction = getConverterFunction(this.createdBlock);
@@ -321,7 +321,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Get the metadata for a specific badge ID. This is the fetched metadata, not the timeline values.
+   * Get the metadata for a specific token ID. This is the fetched metadata, not the timeline values.
    *
    * This only returns the metadata object (name, image, etc.) and not the URI or other accompanying details.
    * For those, use getBadgeMetadataDetails.
@@ -339,7 +339,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Gets the details for a specific badge ID. This includes the metadata, URI, and custom data.
+   * Gets the details for a specific token ID. This includes the metadata, URI, and custom data.
    *
    * If you only want the metadata, use getBadgeMetadata, or you can access it via result.metadata.
    */
@@ -348,7 +348,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Gets a UintRangeArray of 1 - Max Badge ID for the collection (i.e. [{ start: 1n, end: maxBadgeId }]).
+   * Gets a UintRangeArray of 1 - Max Token ID for the collection (i.e. [{ start: 1n, end: maxBadgeId }]).
    */
   getBadgeIdRange() {
     return UintRangeArray.From([{ start: 1n, end: this.getMaxBadgeId() }]);
@@ -375,7 +375,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Gets the badge balance document for a specific address from the cached owners array. Returns undefined if not fetched yet.
+   * Gets the balance document for a specific address from the cached owners array. Returns undefined if not fetched yet.
    * The balance document includes the balances, outgoing approvals, and other details. Use getBalances to only get the balances.
    *
    * @remarks
@@ -404,7 +404,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Gets the badge balances for a specific address from the cached owners array. Returns undefined if not fetched yet.
+   * Gets the balances for a specific address from the cached owners array. Returns undefined if not fetched yet.
    * This returns the balances only, not the other details. Use getBalanceInfo to get the other details for a user balance store
    * (approvals, etc.).
    *
@@ -433,7 +433,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Gets the maximum badge ID for the collection. Checks both the circulating supplys + genesis default balances.
+   * Gets the maximum token ID for the collection. Checks both the circulating supplys + genesis default balances.
    *
    * Precondition: The Total balance must be fetched.
    */
@@ -509,7 +509,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Validates if a state transition (old badge metadata -> new badge metadata) is valid, given the current state of the collection and its permissions.
+   * Validates if a state transition (old token metadata -> new token metadata) is valid, given the current state of the collection and its permissions.
    *
    * Wrapper for {@link BadgeMetadataTimeline.validateUpdate}.
    */
@@ -765,7 +765,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Gets the badge balance for a specific address for a specific collection. Must pass in a valid API instance.
+   * Gets the balance for a specific address for a specific collection. Must pass in a valid API instance.
    */
   static async GetBalanceByAddress<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
@@ -1085,7 +1085,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Generates the alias for a specific badge ID. Collection alias is stored in the root of the collection.
+   * Generates the alias for a specific token ID. Collection alias is stored in the root of the collection.
    *
    * Wrapper for {@link generateAlias}.
    */
@@ -1177,7 +1177,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Gets activity for a specific badge ID. You have to handle the pagination yourself.
+   * Gets activity for a specific token ID. You have to handle the pagination yourself.
    */
   static async GetBadgeActivity<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
@@ -1206,14 +1206,14 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Get the badge activity for a specific badge ID. You have to handle the pagination yourself.
+   * Get the token activity for a specific token ID. You have to handle the pagination yourself.
    */
   async getBadgeActivity(api: BaseBitBadgesApi<T>, badgeId: T, body: iGetBadgeActivityPayload) {
     return await BitBadgesCollection.GetBadgeActivity(api, this.collectionId, badgeId, body);
   }
 
   /**
-   * Gets owners for a specific badge ID. You have to handle the pagination yourself.
+   * Gets owners for a specific token ID. You have to handle the pagination yourself.
    */
   static async GetOwnersForBadge<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
@@ -1242,7 +1242,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Gets the owners for a specific badge. You have to handle the pagination yourself.
+   * Gets the owners for a specific token. You have to handle the pagination yourself.
    */
   async getOwnersForBadge(api: BaseBitBadgesApi<T>, badgeId: T, body: iGetOwnersForBadgePayload) {
     return await BitBadgesCollection.GetOwnersForBadge(api, this.collectionId, badgeId, body);
@@ -1372,7 +1372,7 @@ const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesC
         badgeIdsLeft.sortAndMerge();
 
         let infiniteLoopPreventer = 0;
-        //Intutition: check singular, starting badge ID. If it is same as others, handle all together. Else, just handle that and continue
+        //Intutition: check singular, starting token ID. If it is same as others, handle all together. Else, just handle that and continue
         while (badgeIdsLeft.length > 0) {
           const currBadgeUintRange = badgeIdsLeft[0];
           if (infiniteLoopPreventer++ > 1000) throw new Error('Infinite loop detected'); //Should never happen
@@ -1386,8 +1386,8 @@ const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesC
               handled = true;
 
               if (metadataDetails.metadata == undefined) {
-                //We do not have metadata for this badgeId yet
-                //If it has a placeholder, the URI only applies to this badgeId. Else, we can apply it to all badgeIds that map to this metadataId
+                //We do not have metadata for this tokenId yet
+                //If it has a placeholder, the URI only applies to this tokenId. Else, we can apply it to all badgeIds that map to this metadataId
                 if (metadataDetails.uri.includes('{id}')) {
                   metadataToFetch.uris.push(metadataDetails.uri.replace('{id}', currBadgeUintRange.start.toString()));
                   badgeIdsLeft.remove(allMatchingBadgeUintRanges);
@@ -1404,13 +1404,13 @@ const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesC
                 badgeIdsLeft.remove(allMatchingBadgeUintRanges);
               }
 
-              //else we don't have a metadataId for this badge which means its manually updated and thus doesn't need to be fetched
+              //else we don't have a metadataId for this token which means its manually updated and thus doesn't need to be fetched
               break; //First match only
             }
           }
 
           if (!handled) {
-            throw new Error('Badge ID not found in metadata'); //Shouldn't reach here since we handled above
+            throw new Error('Token ID not found in metadata'); //Shouldn't reach here since we handled above
           }
 
           badgeIdsLeft.sortAndMerge();

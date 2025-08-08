@@ -3,7 +3,7 @@ info:
   title: BitBadges API
   description: |-
     # Introduction
-    The BitBadges API is a RESTful API that enables developers to interact with the BitBadges blockchain and indexer. This API provides comprehensive access to the BitBadges ecosystem, allowing you to query and interact with digital badges, collections, accounts, blockchain data, and more.
+    The BitBadges API is a RESTful API that enables developers to interact with the BitBadges blockchain and indexer. This API provides comprehensive access to the BitBadges ecosystem, allowing you to query and interact with digital tokens, collections, accounts, blockchain data, and more.
     For complete documentation, see the [BitBadges Documentation](https://docs.bitbadges.io/for-developers/bitbadges-api/api)
     and use along with this reference.
 
@@ -346,7 +346,7 @@ paths:
         ## Authentication Details
         - **Public Data**: Available with API key only
           - Basic profile information
-          - Public badge balances
+          - Public balances
           - Public activity
           - Etc
 
@@ -451,11 +451,11 @@ paths:
   '/collection/{collectionId}/{badgeId}/metadata':
     get:
       operationId: getBadgeMetadata
-      summary: Get Badge Metadata
+      summary: Get Token Metadata
       tags:
         - Badges
       description: |-
-        Gets current metadata for a specific badge in a collection.
+        Gets current metadata for a specific token in a collection.
 
         ```tsx
         await BitBadgesApi.getBadgeMetadata("123", "1");
@@ -490,7 +490,7 @@ paths:
             type: string
         - name: badgeId
           in: path
-          description: Badge ID
+          description: Token ID
           required: true
           schema:
             type: string
@@ -504,7 +504,7 @@ paths:
       tags:
         - Badges
       description: |
-        Retrieves badge collections and associated details. This route is all-inclusive and uses a view-based approach to fetch specific data about collections, including metadata, balances, owners, and more.
+        Retrieves collections and associated details. This route is all-inclusive and uses a view-based approach to fetch specific data about collections, including metadata, balances, owners, and more.
 
         ```tsx
         const res = await BitBadgesApi.getCollections({
@@ -576,7 +576,7 @@ paths:
       operationId: getBadgeBalanceByAddressSpecificBadge
       summary: Get Badge Balance By Address - Specific Badge
       description: |
-        Retrieves the balance of a specific badge for a specific address at the current time.
+        Retrieves the balance of a specific token for a specific address at the current time.
 
         For more advanced queries returning the whole balance document, please use the POST `/collection/{collectionId}/balance/{address}` endpoint.
 
@@ -590,7 +590,7 @@ paths:
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeBalanceByAddressSpecificBadgeSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getbadgebalancebyaddressspecificbadge)**
 
-        Alternative Flow: Note that you can also set up a claim that checks badge ownership and check the success per user of that claim as well
+        Alternative Flow: Note that you can also set up a claim that checks token ownership and check the success per user of that claim as well
       tags:
         - Badges
       parameters:
@@ -602,13 +602,13 @@ paths:
             type: integer
         - name: address
           in: path
-          description: The address for which the badge balance is to be retrieved. Can be "Total" for the circulating supply.
+          description: The address for which the balance is to be retrieved. Can be "Total" for the circulating supply.
           required: true
           schema:
             type: string
         - name: badgeId
           in: path
-          description: The ID of the badge for which the balance is to be retrieved.
+          description: The ID for which the balance is to be retrieved.
           required: true
           schema:
             type: integer
@@ -657,7 +657,7 @@ paths:
         Scopes:
         - `readPrivateClaimData` - Required if fetching private claim data (user-level approvals)
 
-        Alternative Flow: Note that you can also set up a claim that checks badge ownership and check the success per user of that claim as well
+        Alternative Flow: Note that you can also set up a claim that checks token ownership and check the success per user of that claim as well
       parameters:
         - name: collectionId
           in: path
@@ -667,7 +667,7 @@ paths:
             type: integer
         - name: address
           in: path
-          description: The address for which the badge balance is to be retrieved. Can be "Total" for the circulating supply.
+          description: The address for which the balance is to be retrieved. Can be "Total" for the circulating supply.
           required: true
           schema:
             type: string
@@ -1562,8 +1562,8 @@ paths:
       tags:
         - Badges
       description: |
-        Retrieves the owners in a paginated format for a specific badge in a collection.
-        Returns a list of addresses and their corresponding balances for the specified badge ID.
+        Retrieves the owners in a paginated format for a specific token in a collection.
+        Returns a list of addresses and their corresponding balances for the specified token ID.
 
         ```tsx
         const res = await BitBadgesApi.getOwnersForBadge(
@@ -1589,7 +1589,7 @@ paths:
             type: integer
         - name: badgeId
           in: path
-          description: The numeric badge ID to retrieve owners for.
+          description: The numeric token ID to retrieve owners for.
           required: true
           schema:
             type: integer
@@ -1633,7 +1633,7 @@ paths:
       operationId: getBadgeActivity
       summary: Get Badge Activity
       description: |
-        Retrieves the activity in a paginated format for a specific badge in a collection.
+        Retrieves the activity in a paginated format for a specific token in a collection.
 
         ```tsx
         const res = await BitBadgesApi.getBadgeActivity(
@@ -1660,7 +1660,7 @@ paths:
             type: integer
         - name: badgeId
           in: path
-          description: The ID of the badge for which activity is to be retrieved.
+          description: The ID for which activity is to be retrieved.
           required: true
           schema:
             type: integer
@@ -3218,7 +3218,7 @@ paths:
         - Standalone (default) - Not attached to anything
         - Test claims - Used for frontend claim tester
         - Linked to address lists - Specify the valid `listId` within the request. Must be list creator.
-        - Linked to off-chain balances - Specify the valid `collectionId` + `balancesToSet` within the request. `balancesToSet` determine what badges are allocated.
+        - Linked to off-chain balances - Specify the valid `collectionId` + `balancesToSet` within the request. `balancesToSet` determine what tokens are allocated.
         - Linked to on-chain approvals (user or collection level) - This is advanced. If you need this, please reach out to us. Updates are fine, but creation uses an advanced processs that is undocumented currently.
 
         ```tsx
@@ -3282,7 +3282,7 @@ paths:
         - Standalone (default) - Not attached to anything
         - Test claims - Used for frontend claim tester
         - Linked to address lists - Specify the valid `listId` within the request. Must be list creator.
-        - Linked to off-chain balances - Specify the valid `collectionId` + `balancesToSet` within the request. `balancesToSet` determine what badges are allocated per claim.
+        - Linked to off-chain balances - Specify the valid `collectionId` + `balancesToSet` within the request. `balancesToSet` determine what tokens are allocated per claim.
         - Linked to on-chain approvals (user or collection level) - Specify the valid collectionId. Note: This is advanced. Please reach out if you need this.
 
         ```tsx
@@ -4902,12 +4902,12 @@ paths:
   '/account/{address}/badges/':
     get:
       operationId: GetBadgesViewForUser
-      summary: Get Badges For User
+      summary: Get Tokens For User
       tags:
         - Accounts
       description: |-
-        Gets badges for a specific user. Specify the viewType to determine what
-        badges to retrieve. Default is 'collected'.
+        Gets tokens for a specific user. Specify the viewType to determine what
+        tokens to retrieve. Default is 'collected'.
 
         ```tsx
         await BitBadgesApi.getBadgesViewForUser(address, { viewType: "collected" });
@@ -4968,9 +4968,9 @@ paths:
             description: |-
               The view type to search for. Default is 'collected'
 
-              - 'collected' will return the badges the user has a balance of
-              - 'managing' will return the badges the user is managing
-              - 'created' will return the badges the user has created
+              - 'collected' will return the tokens the user has a balance of
+              - 'managing' will return the tokens the user is managing
+              - 'created' will return the tokens the user has created
             type: string
             examples:
               - viewKey
@@ -5832,7 +5832,7 @@ paths:
           name: badgeId
           required: false
           schema:
-            description: Optional badge ID to filter listings by
+            description: Optional token ID to filter listings by
             $ref: '#/components/schemas/NumberType'
       security:
         - apiKey: []
@@ -6000,7 +6000,7 @@ paths:
         - Badges
       description: |-
         Uploads balances for off-chain indexed balances managed by BitBadges. Note: This only applies to
-        collections with off-chain balances, and the badges must not be frozen / immutable yet.
+        collections with off-chain balances, and the tokens must not be frozen / immutable yet.
 
         This uses a queue-system, so it may take a few minutes to process and display in-site.
 
@@ -6722,7 +6722,7 @@ components:
         collected:
           items:
             $ref: '#/components/schemas/iBalanceDoc'
-          description: A list of badges that the account has collected. Paginated and fetched as needed. To be used in conjunction with views.
+          description: A list of tokens that the account has collected. Paginated and fetched as needed. To be used in conjunction with views.
           type: array
         activity:
           items:
@@ -7203,7 +7203,7 @@ components:
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The badge IDs that correspond to the metadata
+          description: The token IDs that correspond to the metadata
           type: array
           examples:
             - - start: '1'
@@ -7313,7 +7313,7 @@ components:
             - host
             - assignMethod
           additionalProperties: false
-          description: 'The off-chain transferability info for this item (used for badges - off-chain, disregard for others)'
+          description: 'The off-chain transferability info for this item (used for tokens - off-chain, disregard for others)'
           type: object
         attributes:
           items:
@@ -7434,7 +7434,7 @@ components:
             - host
             - assignMethod
           additionalProperties: false
-          description: 'The off-chain transferability info for this item (used for badges - off-chain, disregard for others)'
+          description: 'The off-chain transferability info for this item (used for tokens - off-chain, disregard for others)'
           type: object
         attributes:
           items:
@@ -7515,11 +7515,11 @@ components:
           allOf:
             - items:
                 $ref: '#/components/schemas/iBadgeMetadataTimeline'
-              description: The badge metadata timeline
+              description: The token metadata timeline
               type: array
             - items:
                 $ref: '#/components/schemas/iBadgeMetadataTimeline'
-              description: 'The badge metadata timeline for this collection, with off-chain metadata populated.'
+              description: 'The token metadata timeline for this collection, with off-chain metadata populated.'
               type: array
         balancesType:
           enum:
@@ -7590,7 +7590,7 @@ components:
         validBadgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: Valid badge IDs for the collection
+          description: Valid token IDs for the collection
           type: array
         activity:
           items:
@@ -7618,10 +7618,10 @@ components:
           description: The listings for this collection.
           type: array
         nsfw:
-          description: The badge IDs in this collection that are marked as NSFW.
+          description: The token IDs in this collection that are marked as NSFW.
           $ref: '#/components/schemas/iCollectionNSFW'
         reported:
-          description: The badge IDs in this collection that have been reported.
+          description: The token IDs in this collection that have been reported.
           $ref: '#/components/schemas/iCollectionNSFW'
         views:
           additionalProperties:
@@ -7748,7 +7748,7 @@ components:
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: Limit to specific badge IDs. Leave undefined to not filter by badge ID.
+          description: Limit to specific token IDs. Leave undefined to not filter by token ID.
           type: array
           examples:
             - - start: '1'
@@ -7770,7 +7770,7 @@ components:
             - weekly
             - monthly
             - yearly
-          description: mostViewed is a special view that sorts by most viewed badges. May be incompatible with other filters.
+          description: mostViewed is a special view that sorts by most viewed tokens. May be incompatible with other filters.
           type: string
         bookmark:
           description: Pagination bookmark. Leave undefined or "" for first request.
@@ -7992,7 +7992,7 @@ components:
             - items:
                 $ref: '#/components/schemas/iUintRange'
               type: array
-          description: 'If present, the metadata corresponding to the specified badge IDs will be fetched.'
+          description: 'If present, the metadata corresponding to the specified token IDs will be fetched.'
           examples:
             - - start: '1'
                 end: '10'
@@ -8280,7 +8280,7 @@ components:
         oldestFirst:
           type: boolean
         badgeId:
-          description: Optional badge ID to filter listings by
+          description: Optional token ID to filter listings by
           $ref: '#/components/schemas/NumberType'
       additionalProperties: false
       type: object
@@ -8360,9 +8360,9 @@ components:
           description: |-
             The view type to search for. Default is 'collected'
 
-            - 'collected' will return the badges the user has a balance of
-            - 'managing' will return the badges the user is managing
-            - 'created' will return the badges the user has created
+            - 'collected' will return the tokens the user has a balance of
+            - 'managing' will return the tokens the user is managing
+            - 'created' will return the tokens the user has created
           type: string
           examples:
             - viewKey
@@ -9094,7 +9094,7 @@ components:
         error:
           type: string
         code:
-          description: The code for the on-chain transaction. Only provided if you have permissions and this is an on-chain badge claim.
+          description: The code for the on-chain transaction. Only provided if you have permissions and this is an on-chain token claim.
           type: string
         bitbadgesAddress:
           type: string
@@ -9270,7 +9270,7 @@ components:
         hiddenBadges:
           items:
             $ref: '#/components/schemas/iBatchBadgeDetails'
-          description: The badges to hide and not view for this profile's portfolio
+          description: The tokens to hide and not view for this profile's portfolio
           type: array
         hiddenLists:
           items:
@@ -9322,7 +9322,7 @@ components:
             - lists
             - attestations
           additionalProperties: false
-          description: The watchlist of badges / lists
+          description: The watchlist of tokens / lists
           type: object
         profilePicUrl:
           description: The profile picture URL.
@@ -9678,7 +9678,7 @@ components:
               - cid
             additionalProperties: false
             type: object
-          description: 'An array of badge metadata results, if applicable.'
+          description: 'An array of token metadata results, if applicable.'
           type: array
       required:
         - results
@@ -13651,15 +13651,15 @@ components:
           description: The list of recipients.
           type: array
         from:
-          description: The sender of the badges.
+          description: The sender of the tokens.
           $ref: '#/components/schemas/BitBadgesAddress'
         balances:
           items:
             $ref: '#/components/schemas/iBalance'
-          description: The list of balances and badge IDs that were transferred.
+          description: The list of balances and token IDs that were transferred.
           type: array
         collectionId:
-          description: The collection ID for the badges that was transferred.
+          description: The collection ID for the tokens that was transferred.
           $ref: '#/components/schemas/NumberType'
         memo:
           description: The memo of the transfer.
@@ -13911,7 +13911,7 @@ components:
         badgeMetadataTimeline:
           items:
             $ref: '#/components/schemas/iBadgeMetadataTimeline'
-          description: The badge metadata timeline
+          description: The token metadata timeline
           type: array
         balancesType:
           enum:
@@ -13977,7 +13977,7 @@ components:
         validBadgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: Valid badge IDs for the collection
+          description: Valid token IDs for the collection
           type: array
       required:
         - _docId
@@ -14093,7 +14093,7 @@ components:
         items:
           items:
             $ref: '#/components/schemas/iBatchBadgeDetails'
-          description: The badge IDs to display on the custom page
+          description: The token IDs to display on the custom page
           type: array
       required:
         - title
@@ -15072,7 +15072,7 @@ components:
             If manual distribution is enabled, we do not handle any distribution of claim codes.
             We leave that up to the claim creator.
 
-            Only applicable for on-chain badge claims. This is only used in advanced self-hosted cases.
+            Only applicable for on-chain token claims. This is only used in advanced self-hosted cases.
           type: boolean
         approach:
           description: |-
@@ -15087,7 +15087,7 @@ components:
           type: string
         seedCode:
           description: |-
-            Seed code for the claim. Only used for on-chain badge claims.
+            Seed code for the claim. Only used for on-chain token claims.
 
             This is how we produce all reserved codes for the on-chain merkle challenge / proofs.
           type: string
@@ -15166,7 +15166,7 @@ components:
             If manual distribution is enabled, we do not handle any distribution of claim codes.
             We leave that up to the claim creator.
 
-            Only applicable for on-chain badge claims. This is only used in advanced self-hosted cases.
+            Only applicable for on-chain token claims. This is only used in advanced self-hosted cases.
           type: boolean
         approach:
           description: |-
@@ -15424,7 +15424,7 @@ components:
           description: The map ID to link to
           type: string
         badgeId:
-          description: 'The badge ID to link to "collectionId:badgeId"'
+          description: 'The token ID to link to "collectionId:badgeId"'
           type: string
       additionalProperties: false
       type: object
@@ -15591,7 +15591,7 @@ components:
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The badge IDs
+          description: The token IDs
           type: array
           examples:
             - - start: '1'
@@ -17228,7 +17228,7 @@ components:
           description: Collection ID that the claim is for (if applicable - collection claims).
           $ref: '#/components/schemas/NumberType'
         standaloneClaim:
-          description: Standalone claims are not linked with a badge or list.
+          description: Standalone claims are not linked with a token or list.
           type: boolean
         listId:
           description: Address list ID that the claim is for (if applicable - list claims).
@@ -17276,7 +17276,7 @@ components:
             If manual distribution is enabled, we do not handle any distribution of claim codes.
             We leave that up to the claim creator.
 
-            Only applicable for on-chain badge claims. This is only used in advanced self-hosted cases.
+            Only applicable for on-chain token claims. This is only used in advanced self-hosted cases.
           type: boolean
         approach:
           description: |-
@@ -17291,7 +17291,7 @@ components:
           type: string
         seedCode:
           description: |-
-            Seed code for the claim. Only used for on-chain badge claims.
+            Seed code for the claim. Only used for on-chain token claims.
 
             This is how we produce all reserved codes for the on-chain merkle challenge / proofs.
           type: string
@@ -17917,7 +17917,7 @@ components:
           description: The zk proof solutions for approvals.
           type: array
         toAddressesLength:
-          description: The number of addresses to send the badges to. This takes priority over toAddresses.length (used when you don't know exact addresses (i.e. you know number of codes)).
+          description: The number of addresses to send the tokens to. This takes priority over toAddresses.length (used when you don't know exact addresses (i.e. you know number of codes)).
           $ref: '#/components/schemas/NumberType'
         incrementBadgeIdsBy:
           description: The number to increment the badgeIDs by for each transfer.
@@ -18007,7 +18007,7 @@ components:
           examples:
             - Name
         description:
-          description: The description of the claim. This describes how to earn and claim the badge.
+          description: The description of the claim. This describes how to earn and claim the token.
           type: string
           examples:
             - Brief description.
@@ -18026,12 +18026,12 @@ components:
     iBatchBadgeDetails:
       properties:
         collectionId:
-          description: The collection ID of this element's badge details.
+          description: The collection ID of this element's token details.
           $ref: '#/components/schemas/NumberType'
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The corresponding badge IDs for this collection ID.
+          description: The corresponding token IDs for this collection ID.
           type: array
           examples:
             - - start: '1'
@@ -18070,7 +18070,7 @@ components:
         badgeIdsToAdd:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: 'The badges to create. Newly created badges will be sent to the "Mint" address. Must have necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if collection has "Standard" balance type.'
+          description: 'The tokens to create. Newly created tokens will be sent to the "Mint" address. Must have necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if collection has "Standard" balance type.'
           type: array
         collectionPermissions:
           description: 'The new collection permissions. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.'
@@ -18088,7 +18088,7 @@ components:
         badgeMetadataTimeline:
           items:
             $ref: '#/components/schemas/iBadgeMetadataTimeline'
-          description: 'The new badge metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Note we take first-match only for badge IDs, so do not define duplicates.'
+          description: 'The new token metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Note we take first-match only for token IDs, so do not define duplicates.'
           type: array
         offChainBalancesMetadataTimeline:
           items:
@@ -18138,7 +18138,7 @@ components:
           description: The creator of the transaction.
           $ref: '#/components/schemas/BitBadgesAddress'
         collectionId:
-          description: The ID of the collection to transfer badges from.
+          description: The ID of the collection to transfer tokens from.
           $ref: '#/components/schemas/NumberType'
         transfers:
           items:
@@ -18165,7 +18165,7 @@ components:
         badgeIdsToAdd:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: 'The badges to create. Newly created badges will be sent to the "Mint" address. Must have necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if collection has "Standard" balance type.'
+          description: 'The tokens to create. Newly created tokens will be sent to the "Mint" address. Must have necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if collection has "Standard" balance type.'
           type: array
         collectionPermissions:
           description: 'The new collection permissions. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.'
@@ -18183,7 +18183,7 @@ components:
         badgeMetadataTimeline:
           items:
             $ref: '#/components/schemas/iBadgeMetadataTimeline'
-          description: 'The new badge metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Note we take first-match only for badge IDs, so do not define duplicates.'
+          description: 'The new token metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Note we take first-match only for token IDs, so do not define duplicates.'
           type: array
         offChainBalancesMetadataTimeline:
           items:
@@ -18223,7 +18223,7 @@ components:
           description: Whether or not to update the collection metadata timeline.
           type: boolean
         updateBadgeMetadataTimeline:
-          description: Whether or not to update the badge metadata timeline.
+          description: Whether or not to update the token metadata timeline.
           type: boolean
         updateOffChainBalancesMetadataTimeline:
           description: Whether or not to update the off-chain balances metadata timeline.
@@ -18254,7 +18254,7 @@ components:
           description: The creator of the transaction.
           $ref: '#/components/schemas/BitBadgesAddress'
         collectionId:
-          description: The ID of the collection to transfer badges from.
+          description: The ID of the collection to transfer tokens from.
           $ref: '#/components/schemas/NumberType'
         updateOutgoingApprovals:
           description: Whether or not to update the outgoing approvals.
@@ -18816,7 +18816,7 @@ components:
     iBadgeMetadata:
       properties:
         uri:
-          description: The URI where to fetch the badge metadata from.
+          description: The URI where to fetch the token metadata from.
           type: string
           examples:
             - 'https://example.com'
@@ -18824,7 +18824,7 @@ components:
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The badge IDs corresponding to the URI.
+          description: The token IDs corresponding to the URI.
           type: array
           examples:
             - - start: '1'
@@ -19255,15 +19255,15 @@ components:
     iMustOwnBadges:
       properties:
         collectionId:
-          description: The collection ID of the badges to own.
+          description: The collection IDs to own.
           $ref: '#/components/schemas/NumberType'
         amountRange:
-          description: 'The min/max acceptable amount of badges that must be owned (can be any values, including 0-0).'
+          description: 'The min/max acceptable amount of tokens that must be owned (can be any values, including 0-0).'
           $ref: '#/components/schemas/iUintRange'
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The range of the times that the badges must be owned.
+          description: The range of the times that the tokens must be owned.
           type: array
           examples:
             - - start: '1713301889'
@@ -19273,7 +19273,7 @@ components:
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The range of the badge IDs that must be owned.
+          description: The range of the token IDs that must be owned.
           type: array
           examples:
             - - start: '1'
@@ -19282,7 +19282,7 @@ components:
           description: Whether or not to override the ownershipTimes with the current time.
           type: boolean
         mustSatisfyForAllAssets:
-          description: 'Whether or not the user must own all the specified badges. If false, we will accept if they meet criteria for at least one badge.'
+          description: 'Whether or not the user must own all the specified tokens. If false, we will accept if they meet criteria for at least one token.'
           type: boolean
       required:
         - collectionId
@@ -19296,12 +19296,12 @@ components:
     iBalance:
       properties:
         amount:
-          description: The amount or balance of the owned badge.
+          description: The amount or balance of the owned token.
           $ref: '#/components/schemas/NumberType'
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The badge IDs corresponding to the balance.
+          description: The token IDs corresponding to the balance.
           type: array
           examples:
             - - start: '1'
@@ -19309,7 +19309,7 @@ components:
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The times that the badge is owned from.
+          description: The times that the token is owned from.
           type: array
           examples:
             - - start: '1713301889'
@@ -19631,7 +19631,7 @@ components:
         badgeMetadata:
           items:
             $ref: '#/components/schemas/iBadgeMetadataDetails'
-          description: 'The badge metadata, with off-chain details populated.'
+          description: 'The token metadata, with off-chain details populated.'
           type: array
       required:
         - timelineTimes
@@ -19784,7 +19784,7 @@ components:
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The badge IDs of the approved outgoing transfers.
+          description: The token IDs of the approved outgoing transfers.
           type: array
           examples:
             - - start: '1'
@@ -19870,7 +19870,7 @@ components:
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The badge IDs of the approved incoming transfers.
+          description: The token IDs of the approved incoming transfers.
           type: array
           examples:
             - - start: '1'
@@ -19961,12 +19961,12 @@ components:
         canUpdateValidBadgeIds:
           items:
             $ref: '#/components/schemas/iBadgeIdsActionPermission'
-          description: The permissions for creating more badges.
+          description: The permissions for creating more tokens.
           type: array
         canUpdateBadgeMetadata:
           items:
             $ref: '#/components/schemas/iTimedUpdateWithBadgeIdsPermission'
-          description: The permissions for updating the badge metadata.
+          description: The permissions for updating the token metadata.
           type: array
         canUpdateCollectionApprovals:
           items:
@@ -20056,7 +20056,7 @@ components:
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The badge IDs that the permission applies to.
+          description: The token IDs that the permission applies to.
           type: array
           examples:
             - - start: '1'
@@ -20102,7 +20102,7 @@ components:
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The badge IDs that the permission applies to.
+          description: The token IDs that the permission applies to.
           type: array
           examples:
             - - start: '1'
@@ -20179,7 +20179,7 @@ components:
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The badge IDs of the approved transfers.
+          description: The token IDs of the approved transfers.
           type: array
           examples:
             - - start: '1'
@@ -20235,7 +20235,7 @@ components:
     iUserOutgoingApproval:
       properties:
         toListId:
-          description: The list ID for the user(s) who is sending the badges. The ID is either registered on-chain for reusability or follows the reserved ID system.
+          description: The list ID for the user(s) who is sending the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system.
           type: string
           examples:
             - customOrReservedListId
@@ -20267,7 +20267,7 @@ components:
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The badge IDs to be transferred.
+          description: The token IDs to be transferred.
           type: array
           examples:
             - - start: '1'
@@ -20275,7 +20275,7 @@ components:
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The ownership times of the badges being transferred.
+          description: The ownership times of the tokens being transferred.
           type: array
           examples:
             - - start: '1713301889'
@@ -20295,7 +20295,7 @@ components:
           description: Arbitrary custom data of the approval
           type: string
         approvalCriteria:
-          description: 'The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc.'
+          description: 'The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own tokens, etc.'
           $ref: '#/components/schemas/iOutgoingApprovalCriteria'
       required:
         - toListId
@@ -20313,7 +20313,7 @@ components:
         mustOwnBadges:
           items:
             $ref: '#/components/schemas/iMustOwnBadges'
-          description: The list of badges to be owned to be approved. Must have on-chain balances.
+          description: The list of tokens to be owned to be approved. Must have on-chain balances.
           type: array
         zkProofs:
           items:
@@ -20355,7 +20355,7 @@ components:
           description: Manually define the balances for each transfer. Cannot be used with incrementedBalances. Order number corresponds to the index of the balance in the array.
           type: array
         incrementedBalances:
-          description: Define a starting balance and increment the badge IDs and owned times by a certain amount after each transfer. Cannot be used with manualBalances. Order number corresponds to number of times we increment.
+          description: Define a starting balance and increment the token IDs and owned times by a certain amount after each transfer. Cannot be used with manualBalances. Order number corresponds to number of times we increment.
           $ref: '#/components/schemas/iIncrementedBalances'
         orderCalculationMethod:
           description: The order calculation method.
@@ -20385,7 +20385,7 @@ components:
           description: The starting balances for each transfer. Order number corresponds to the number of times we increment.
           type: array
         incrementBadgeIdsBy:
-          description: The amount to increment the badge IDs by after each transfer.
+          description: The amount to increment the token IDs by after each transfer.
           $ref: '#/components/schemas/NumberType'
         incrementOwnershipTimesBy:
           description: The amount to increment the owned times by after each transfer.
@@ -20478,7 +20478,7 @@ components:
     iUserIncomingApproval:
       properties:
         fromListId:
-          description: The list ID for the user(s) who is sending the badges. The ID is either registered on-chain for reusability or follows the reserved ID system.
+          description: The list ID for the user(s) who is sending the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system.
           type: string
           examples:
             - customOrReservedListId
@@ -20510,7 +20510,7 @@ components:
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The badge IDs to be transferred.
+          description: The token IDs to be transferred.
           type: array
           examples:
             - - start: '1'
@@ -20518,7 +20518,7 @@ components:
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The ownership times of the badges being transferred.
+          description: The ownership times of the tokens being transferred.
           type: array
           examples:
             - - start: '1713301889'
@@ -20538,7 +20538,7 @@ components:
           description: Arbitrary custom data of the approval
           type: string
         approvalCriteria:
-          description: 'The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc.'
+          description: 'The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own tokens, etc.'
           $ref: '#/components/schemas/iIncomingApprovalCriteria'
       required:
         - fromListId
@@ -20556,7 +20556,7 @@ components:
         mustOwnBadges:
           items:
             $ref: '#/components/schemas/iMustOwnBadges'
-          description: The list of badges to be owned to be approved. Must have on-chain balances.
+          description: The list of tokens to be owned to be approved. Must have on-chain balances.
           type: array
         zkProofs:
           items:
@@ -20593,7 +20593,7 @@ components:
     iCollectionApproval:
       properties:
         toListId:
-          description: The list ID for the user(s) who is receiving the badges. The ID is either registered on-chain for reusability or follows the reserved ID system.
+          description: The list ID for the user(s) who is receiving the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system.
           type: string
           examples:
             - customOrReservedListId
@@ -20603,7 +20603,7 @@ components:
         toList:
           $ref: '#/components/schemas/iAddressList'
         fromListId:
-          description: The list ID for the user(s) who is sending the badges. The ID is either registered on-chain for reusability or follows the reserved ID system.
+          description: The list ID for the user(s) who is sending the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system.
           type: string
           examples:
             - customOrReservedListId
@@ -20635,7 +20635,7 @@ components:
         badgeIds:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The badge IDs to be transferred.
+          description: The token IDs to be transferred.
           type: array
           examples:
             - - start: '1'
@@ -20643,7 +20643,7 @@ components:
         ownershipTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
-          description: The ownership times of the badges being transferred.
+          description: The ownership times of the tokens being transferred.
           type: array
           examples:
             - - start: '1713301889'
@@ -20663,7 +20663,7 @@ components:
           description: Arbitrary custom data of the approval
           type: string
         approvalCriteria:
-          description: 'The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc.'
+          description: 'The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own tokens, etc.'
           $ref: '#/components/schemas/iApprovalCriteria'
       required:
         - toListId
@@ -20683,7 +20683,7 @@ components:
         mustOwnBadges:
           items:
             $ref: '#/components/schemas/iMustOwnBadges'
-          description: The list of badges to be owned to be approved. Must have on-chain balances.
+          description: The list of tokens to be owned to be approved. Must have on-chain balances.
           type: array
         zkProofs:
           items:

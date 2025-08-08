@@ -202,7 +202,7 @@ export class GetCollectionAmountTrackersSuccessResponse<T extends NumberType>
 export interface iGetCollectionListingsPayload {
   bookmark?: string;
   oldestFirst?: boolean;
-  /** Optional badge ID to filter listings by */
+  /** Optional token ID to filter listings by */
   badgeId?: NumberType;
 }
 
@@ -341,9 +341,9 @@ export interface iGetBadgesViewForUserPayload extends iBaseQueryParams {
   /**
    * The view type to search for. Default is 'collected'
    *
-   * - 'collected' will return the badges the user has a balance of
-   * - 'managing' will return the badges the user is managing
-   * - 'created' will return the badges the user has created
+   * - 'collected' will return the tokens the user has a balance of
+   * - 'managing' will return the tokens the user is managing
+   * - 'created' will return the tokens the user has created
    */
   viewType?: 'collected' | 'managing' | 'created';
 }

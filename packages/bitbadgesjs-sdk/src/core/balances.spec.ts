@@ -213,7 +213,7 @@ describe('BalancesWithTimesFuzz', () => {
     expect(addBalancesAndCheckIfExceedsThreshold(balances, threshold, threshold)).toBeTruthy();
   });
 
-  it('should handle duplicate badge ids', () => {
+  it('should handle duplicate token ids', () => {
     const balances = BalanceArray.From<bigint>([
       {
         amount: 1n,

@@ -19,7 +19,7 @@ import { normalizeMessagesIfNecessary } from '../../base.js';
  * - Be approved on the collection level
  * - Be approved by the recipient's incoming transfers (if not forcefully overriden by the collection)
  * - Be approved by the sender's outgoing transfers (if not forcefully overriden by the collection)
- * - The sender must have enough badges to transfer
+ * - The sender must have enough tokens to transfer
  * - All restrictions and challenges for each approval must be satisfied (merkle challenges, approved amounts, max num transfers, ...)
  *
  * For successful execution, the user must have the necessary permissions to update the corresponding fields. If not, it will throw an error.

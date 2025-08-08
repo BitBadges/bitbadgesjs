@@ -52,14 +52,14 @@ export class FilterSuggestionsSuccessResponse
  * @category API Requests / Responses
  */
 export interface iFilterBadgesInCollectionPayload {
-  /** Limit to specific badge IDs. Leave undefined to not filter by badge ID. */
+  /** Limit to specific token IDs. Leave undefined to not filter by token ID. */
   badgeIds?: iUintRange<NumberType>[];
   /** Limit to specific lists. Leave undefined to not filter by list. */
   categories?: string[];
   /** Limit to specific lists. Leave undefined to not filter by list. */
   tags?: string[];
 
-  /** mostViewed is a special view that sorts by most viewed badges. May be incompatible with other filters. */
+  /** mostViewed is a special view that sorts by most viewed tokens. May be incompatible with other filters. */
   mostViewed?: 'daily' | 'allTime' | 'weekly' | 'monthly' | 'yearly';
   /** Pagination bookmark. Leave undefined or "" for first request. */
   bookmark?: string;
@@ -341,7 +341,7 @@ export class GetBadgeActivitySuccessResponse<T extends NumberType>
  * @property {boolean} [doNotFetchCollectionMetadata] - If true, collection metadata will not be fetched.
  * @property {NumberType[] | UintRange<NumberType>[]} [metadataIds] - If present, the metadata corresponding to the specified metadata IDs will be fetched. See documentation for how to determine metadata IDs.
  * @property {string[]} [uris] - If present, the metadata corresponding to the specified URIs will be fetched.
- * @property {NumberType[] | UintRange<NumberType>[]} [badgeIds] - If present, the metadata corresponding to the specified badge IDs will be fetched.
+ * @property {NumberType[] | UintRange<NumberType>[]} [badgeIds] - If present, the metadata corresponding to the specified token IDs will be fetched.
  *
  * @category API Requests / Responses
  */
@@ -355,7 +355,7 @@ export interface MetadataFetchOptions {
    */
   uris?: string[];
   /**
-   * If present, the metadata corresponding to the specified badge IDs will be fetched.
+   * If present, the metadata corresponding to the specified token IDs will be fetched.
    */
   badgeIds?: NumberType[] | iUintRange<NumberType>[];
 }
@@ -436,7 +436,7 @@ export interface GetMetadataForCollectionPayload {
   metadataToFetch?: MetadataFetchOptions;
 
   /**
-   * If present, we will fetch the floor price for the specified badge IDs.
+   * If present, we will fetch the floor price for the specified token IDs.
    */
   badgeFloorPricesToFetch?: NumberType[] | iUintRange<NumberType>[];
 }

@@ -120,10 +120,10 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
       question = 'Can update the collection metadata?';
       break;
     case 'canUpdateValidBadgeIds':
-      question = 'Can create more badges?';
+      question = 'Can create more tokens?';
       break;
     case 'canUpdateBadgeMetadata':
-      question = 'Can update the badge metadata?';
+      question = 'Can update the token metadata?';
       break;
     case 'canUpdateCollectionApprovals':
       question = 'Can update collection approvals?';

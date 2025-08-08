@@ -14,15 +14,15 @@ export interface iDynamicStoreChallenge<T extends NumberType> {
  * @category Interfaces
  */
 export interface iUserOutgoingApproval<T extends NumberType> {
-  /** The list ID for the user(s) who is sending the badges. The ID is either registered on-chain for reusability or follows the reserved ID system. */
+  /** The list ID for the user(s) who is sending the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   toListId: string;
   /** The list ID for the user(s) who initiate the transfer. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   initiatedByListId: string;
   /** The times allowed for the transfer transaction. */
   transferTimes: iUintRange<T>[];
-  /** The badge IDs to be transferred. */
+  /** The token IDs to be transferred. */
   badgeIds: iUintRange<T>[];
-  /** The ownership times of the badges being transferred. */
+  /** The ownership times of the tokens being transferred. */
   ownershipTimes: iUintRange<T>[];
   /** The ID of the approval. Must not be a duplicate of another approval ID in the same timeline. */
   approvalId: string;
@@ -30,7 +30,7 @@ export interface iUserOutgoingApproval<T extends NumberType> {
   uri?: string;
   /** Arbitrary custom data of the approval */
   customData?: string;
-  /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc. */
+  /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own tokens, etc. */
   approvalCriteria?: iOutgoingApprovalCriteria<T>;
   /** The version of the approval. */
   version: T;
@@ -42,7 +42,7 @@ export interface iUserOutgoingApproval<T extends NumberType> {
 export interface iOutgoingApprovalCriteria<T extends NumberType> {
   /** The BADGE or sdk.coin transfers to be executed upon every approval. */
   coinTransfers?: iCoinTransfer<T>[];
-  /** The list of must own badges that need valid proofs to be approved. */
+  /** The list of must own tokens that need valid proofs to be approved. */
   mustOwnBadges?: iMustOwnBadge<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenges?: iMerkleChallenge<T>[];
@@ -70,7 +70,7 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
 export interface iPredeterminedBalances<T extends NumberType> {
   /** Manually define the balances for each transfer. Cannot be used with incrementedBalances. Order number corresponds to the index of the balance in the array. */
   manualBalances: iManualBalances<T>[];
-  /** Define a starting balance and increment the badge IDs and owned times by a certain amount after each transfer. Cannot be used with manualBalances. Order number corresponds to number of times we increment. */
+  /** Define a starting balance and increment the token IDs and owned times by a certain amount after each transfer. Cannot be used with manualBalances. Order number corresponds to number of times we increment. */
   incrementedBalances: iIncrementedBalances<T>;
   /** The order calculation method. */
   orderCalculationMethod: iPredeterminedOrderCalculationMethod;
@@ -102,7 +102,7 @@ export interface iRecurringOwnershipTimes<T extends NumberType> {
 export interface iIncrementedBalances<T extends NumberType> {
   /** The starting balances for each transfer. Order number corresponds to the number of times we increment. */
   startBalances: iBalance<T>[];
-  /** The amount to increment the badge IDs by after each transfer. */
+  /** The amount to increment the token IDs by after each transfer. */
   incrementBadgeIdsBy: T;
   /** The amount to increment the owned times by after each transfer. Incompatible with durationFromTimestamp. */
   incrementOwnershipTimesBy: T;
@@ -112,7 +112,7 @@ export interface iIncrementedBalances<T extends NumberType> {
   allowOverrideTimestamp: boolean;
   /** The recurring ownership times for the approval. */
   recurringOwnershipTimes: iRecurringOwnershipTimes<T>;
-  /** Whether to allow the override with any valid badge. */
+  /** Whether to allow the override with any valid ID. */
   allowOverrideWithAnyValidBadge: boolean;
 }
 
@@ -198,15 +198,15 @@ export interface iMaxNumTransfers<T extends NumberType> {
  * @category Interfaces
  */
 export interface iUserIncomingApproval<T extends NumberType> {
-  /** The list ID for the user(s) who is sending the badges. The ID is either registered on-chain for reusability or follows the reserved ID system. */
+  /** The list ID for the user(s) who is sending the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   fromListId: string;
   /** The list ID for the user(s) who initiate the transfer. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   initiatedByListId: string;
   /** The times allowed for the transfer transaction. */
   transferTimes: iUintRange<T>[];
-  /** The badge IDs to be transferred. */
+  /** The token IDs to be transferred. */
   badgeIds: iUintRange<T>[];
-  /** The ownership times of the badges being transferred. */
+  /** The ownership times of the tokens being transferred. */
   ownershipTimes: iUintRange<T>[];
   /** The ID of the approval. Must not be a duplicate of another approval ID in the same timeline. */
   approvalId: string;
@@ -214,7 +214,7 @@ export interface iUserIncomingApproval<T extends NumberType> {
   uri?: string;
   /** Arbitrary custom data of the approval */
   customData?: string;
-  /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc. */
+  /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own tokens, etc. */
   approvalCriteria?: iIncomingApprovalCriteria<T>;
   /** The version of the approval. */
   version: T;
@@ -228,7 +228,7 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   coinTransfers?: iCoinTransfer<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenges?: iMerkleChallenge<T>[];
-  /** The list of must own badges that need valid proofs to be approved. */
+  /** The list of must own tokens that need valid proofs to be approved. */
   mustOwnBadges?: iMustOwnBadge<T>[];
   /** The predetermined balances for each transfer using this approval. */
   predeterminedBalances?: iPredeterminedBalances<T>;
@@ -252,17 +252,17 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
  * @category Interfaces
  */
 export interface iCollectionApproval<T extends NumberType> {
-  /** The list ID for the user(s) who is receiving the badges. The ID is either registered on-chain for reusability or follows the reserved ID system. */
+  /** The list ID for the user(s) who is receiving the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   toListId: string;
-  /** The list ID for the user(s) who is sending the badges. The ID is either registered on-chain for reusability or follows the reserved ID system. */
+  /** The list ID for the user(s) who is sending the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   fromListId: string;
   /** The list ID for the user(s) who initiate the transfer. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   initiatedByListId: string;
   /** The times allowed for the transfer transaction. */
   transferTimes: iUintRange<T>[];
-  /** The badge IDs to be transferred. */
+  /** The token IDs to be transferred. */
   badgeIds: iUintRange<T>[];
-  /** The ownership times of the badges being transferred. */
+  /** The ownership times of the tokens being transferred. */
   ownershipTimes: iUintRange<T>[];
   /** The ID of the approval. Must not be a duplicate of another approval ID in the same timeline. */
   approvalId: string;
@@ -270,7 +270,7 @@ export interface iCollectionApproval<T extends NumberType> {
   uri?: string;
   /** Arbitrary custom data of the approval */
   customData?: string;
-  /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own badges, etc. */
+  /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own tokens, etc. */
   approvalCriteria?: iApprovalCriteria<T>;
   /** The version of the approval.0 */
   version: T;
@@ -284,7 +284,7 @@ export interface iApprovalCriteria<T extends NumberType> {
   coinTransfers?: iCoinTransfer<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenges?: iMerkleChallenge<T>[];
-  /** The list of must own badges that need valid proofs to be approved. */
+  /** The list of must own tokens that need valid proofs to be approved. */
   mustOwnBadges?: iMustOwnBadge<T>[];
   /** The predetermined balances for each transfer. These allow approvals to use predetermined balance amounts rather than an incrementing tally system. */
   predeterminedBalances?: iPredeterminedBalances<T>;

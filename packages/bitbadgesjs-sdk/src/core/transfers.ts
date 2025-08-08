@@ -13,7 +13,7 @@ import { UintRangeArray } from './uintRanges.js';
 import { PrecalculationOptions } from '@/api-indexer/docs-types/activity.js';
 
 /**
- * Transfer is used to represent a transfer of badges. This is compatible with the MsgTransferBadges message.
+ * Transfer is used to represent a transfer of tokens. This is compatible with the MsgTransferBadges message.
  *
  * @category Approvals / Transferability
  */
@@ -160,7 +160,7 @@ export function convertOffChainBalancesMap<T extends NumberType, U extends Numbe
  * @category Interfaces
  */
 export interface iTransferWithIncrements<T extends NumberType> extends iTransfer<T> {
-  /** The number of addresses to send the badges to. This takes priority over toAddresses.length (used when you don't know exact addresses (i.e. you know number of codes)). */
+  /** The number of addresses to send the tokens to. This takes priority over toAddresses.length (used when you don't know exact addresses (i.e. you know number of codes)). */
   toAddressesLength?: T;
 
   /** The number to increment the badgeIDs by for each transfer. */
@@ -177,8 +177,8 @@ export interface iTransferWithIncrements<T extends NumberType> extends iTransfer
  * TransferWithIncrements is a type that is used to better handle batch transfers, potentially with incremented badgeIDs.
  *
  * @remarks
- * For example, if you have 100 addresses and want to send 1 badge to each address,
- * you would set toAddressesLength to 100 and incrementIdsBy to 1. This would send badgeIDs 1 to the first address,
+ * For example, if you have 100 addresses and want to send 1 token to each address,
+ * you would set toAddressesLength to 100 and incrementIdsBy to 1. This would send token IDs 1 to the first address,
  * 2 to the second, and so on.
  *
  * @see
@@ -267,7 +267,7 @@ export const createBalanceMapForOffChainBalances = <T extends NumberType>(transf
 };
 
 /**
- * Gets the badge IDs to be transferred for a given transfer with increments.
+ * Gets the token IDs to be transferred for a given transfer with increments.
  * @example
  * For a transfer with balances: [{ badgeIds: [{ start: 1n, end: 1n }], amount: 1n }], incrementIdsBy: 1n, toAddressesLength: 1000
  * We return { badgeIds: [{ start: 1n, end: 1000n }] because we increment the badgeIds by 1 each time.
@@ -318,7 +318,7 @@ export const getAllBadgeIdsToBeTransferred = <T extends NumberType>(transfers: i
  * Gets the balances to be transferred for a given transfer with increments.
  * @example
  * For a transfer with balances: [{ badgeIds: [{ start: 1n, end: 1n }], amount: 1n }], incrementIdsBy: 1n, toAddressesLength: 1000
- * We return [{ badgeIds: [{ start: 1n, end: 1000n }], amount: 1n }] because we transfer x1 badge to 1000 addresses
+ * We return [{ badgeIds: [{ start: 1n, end: 1000n }], amount: 1n }] because we transfer x1 token to 1000 addresses
  * and increment the badgeIds by 1 each time.
  *
  *
@@ -363,7 +363,7 @@ export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(
     const { toAddressesLength, incrementBadgeIdsBy, incrementOwnershipTimesBy, durationFromTimestamp, ...transfer } = transferExtended;
     const length = toAddressesLength ? Number(toAddressesLength) : transfer.toAddresses.length;
 
-    //If badges are incremented, we create N unique transfers (one to each address).
+    //If tokens are incremented, we create N unique transfers (one to each address).
     //Else, we can create one transfer with N addresses
     if (incrementBadgeIdsBy || incrementOwnershipTimesBy || durationFromTimestamp) {
       const currBalances = transfer.balances.clone();
@@ -407,8 +407,8 @@ export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(
  * Returns the post balance after a transfer of x(amountToTransfer * numRecipients) from startBadgeId to endBadgeId
  *
  * @param {Balance<bigint>[]} balance - The balance to subtract from.
- * @param {bigint} startBadgeId - The start badge ID to subtract from.
- * @param {bigint} endBadgeId - The end badge ID to subtract from.
+ * @param {bigint} startBadgeId - The start token ID to subtract from.
+ * @param {bigint} endBadgeId - The end token ID to subtract from.
  * @param {bigint} amountToTransfer - The amount to subtract.
  * @param {bigint} numRecipients - The number of recipients to subtract from.
  *

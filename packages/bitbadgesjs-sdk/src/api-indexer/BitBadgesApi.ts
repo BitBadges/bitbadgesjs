@@ -381,7 +381,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Search collections, badges, accounts, address lists based on a search value.
+   * Search collections, tokens, accounts, address lists based on a search value.
    *
    * @remarks
    * - **API Route**: `POST /api/v0/search/:searchValue`
@@ -412,7 +412,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * This function retrieves badge collections and accompanying details. Consider using the `getCollectionsAndUpdate` function instead for native support in handling paginations, appending metadata, and more.
+   * This function retrieves collections and accompanying details. Consider using the `getCollectionsAndUpdate` function instead for native support in handling paginations, appending metadata, and more.
    *
    * @remarks
    * - **API Route**: `POST /api/v0/collections`
@@ -429,7 +429,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets the owners for a specific badge in a collection
+   * Gets the owners for a specific token in a collection
    *
    * @remarks
    * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/owners`
@@ -450,7 +450,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets the balance of a specific badge for a specific address
+   * Gets the balance of a specific token for a specific address
    *
    * @remarks
    * - **API Route**: `POST /api/v0/collection/:collectionId/balance/:address`
@@ -471,7 +471,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets the badge balance for an address at the current time. This is a streamlined version of
+   * Gets the balance for an address at the current time. This is a streamlined version of
    * getBalanceByAddress.
    *
    * @remarks
@@ -507,7 +507,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets the activity for a specific badge in a collection
+   * Gets the activity for a specific token in a collection
    *
    * @remarks
    * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/activity`
@@ -1127,7 +1127,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Filters badges in a collection based on multiple filter values.
+   * Filters tokens in a collection based on multiple filter values.
    *
    * @remarks
    * - **API Route**: `POST /api/v0/collection/:collectionId/filter`
@@ -1871,8 +1871,8 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets badges for a specific user. Specify the viewType to determine what
-   * badges to retrieve.
+   * Gets tokens for a specific user. Specify the viewType to determine what
+   * tokens to retrieve.
    *
    * @remarks
    * - **API Route**: `GET /api/v0/account/:address/badges`
@@ -2176,7 +2176,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets current metadata for a specific badge in a collection.
+   * Gets current metadata for a specific token in a collection.
    *
    * @remarks
    * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/metadata`

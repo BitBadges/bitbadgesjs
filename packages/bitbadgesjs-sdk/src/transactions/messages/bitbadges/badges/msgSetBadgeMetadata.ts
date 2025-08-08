@@ -12,7 +12,7 @@ import { TimedUpdateWithBadgeIdsPermission } from '@/core/permissions.js';
 import { Stringify } from '@/common/string-numbers.js';
 
 /**
- * MsgSetBadgeMetadata sets the badge metadata timeline and canUpdateBadgeMetadata permission.
+ * MsgSetBadgeMetadata sets the token metadata timeline and canUpdateBadgeMetadata permission.
  *
  * @category Transactions
  */
