@@ -3,70 +3,70 @@ import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
-import type { iMsgSetBadgeMetadata } from './interfaces.js';
+import type { iMsgSetTokenMetadata } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
-import { BadgeMetadataTimeline } from '@/core/misc.js';
-import { TimedUpdateWithBadgeIdsPermission } from '@/core/permissions.js';
+import { TokenMetadataTimeline } from '@/core/misc.js';
+import { TimedUpdateWithTokenIdsPermission } from '@/core/permissions.js';
 import { Stringify } from '@/common/string-numbers.js';
 
 /**
- * MsgSetBadgeMetadata sets the token metadata timeline and canUpdateBadgeMetadata permission.
+ * MsgSetTokenMetadata sets the token metadata timeline and canUpdateTokenMetadata permission.
  *
  * @category Transactions
  */
-export class MsgSetBadgeMetadata<T extends NumberType> extends CustomTypeClass<MsgSetBadgeMetadata<T>> implements iMsgSetBadgeMetadata<T> {
+export class MsgSetTokenMetadata<T extends NumberType> extends CustomTypeClass<MsgSetTokenMetadata<T>> implements iMsgSetTokenMetadata<T> {
   creator: BitBadgesAddress;
   collectionId: T;
-  badgeMetadataTimeline: BadgeMetadataTimeline<T>[];
-  canUpdateBadgeMetadata: TimedUpdateWithBadgeIdsPermission<T>[];
+  tokenMetadataTimeline: TokenMetadataTimeline<T>[];
+  canUpdateTokenMetadata: TimedUpdateWithTokenIdsPermission<T>[];
 
-  constructor(msg: iMsgSetBadgeMetadata<T>) {
+  constructor(msg: iMsgSetTokenMetadata<T>) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
-    this.badgeMetadataTimeline = msg.badgeMetadataTimeline.map((timeline) => new BadgeMetadataTimeline(timeline));
-    this.canUpdateBadgeMetadata = msg.canUpdateBadgeMetadata.map((permission) => new TimedUpdateWithBadgeIdsPermission(permission));
+    this.tokenMetadataTimeline = msg.tokenMetadataTimeline.map((timeline) => new TokenMetadataTimeline(timeline));
+    this.canUpdateTokenMetadata = msg.canUpdateTokenMetadata.map((permission) => new TimedUpdateWithTokenIdsPermission(permission));
   }
 
-  toProto(): protobadges.MsgSetBadgeMetadata {
-    return new protobadges.MsgSetBadgeMetadata({
+  toProto(): protobadges.MsgSetTokenMetadata {
+    return new protobadges.MsgSetTokenMetadata({
       creator: this.creator,
       collectionId: this.collectionId.toString(),
-      badgeMetadataTimeline: this.badgeMetadataTimeline.map((timeline) => timeline.toProto()),
-      canUpdateBadgeMetadata: this.canUpdateBadgeMetadata.map((permission) => permission.toProto())
+      tokenMetadataTimeline: this.tokenMetadataTimeline.map((timeline) => timeline.toProto()),
+      canUpdateTokenMetadata: this.canUpdateTokenMetadata.map((permission) => permission.toProto())
     });
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetBadgeMetadata<NumberType> {
-    return MsgSetBadgeMetadata.fromProto(protobadges.MsgSetBadgeMetadata.fromJson(jsonValue, options));
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetTokenMetadata<NumberType> {
+    return MsgSetTokenMetadata.fromProto(protobadges.MsgSetTokenMetadata.fromJson(jsonValue, options));
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetBadgeMetadata<NumberType> {
-    return MsgSetBadgeMetadata.fromProto(protobadges.MsgSetBadgeMetadata.fromJsonString(jsonString, options));
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetTokenMetadata<NumberType> {
+    return MsgSetTokenMetadata.fromProto(protobadges.MsgSetTokenMetadata.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: protobadges.MsgSetBadgeMetadata): MsgSetBadgeMetadata<NumberType> {
-    return new MsgSetBadgeMetadata({
+  static fromProto(protoMsg: protobadges.MsgSetTokenMetadata): MsgSetTokenMetadata<NumberType> {
+    return new MsgSetTokenMetadata({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
-      badgeMetadataTimeline: protoMsg.badgeMetadataTimeline.map((timeline) => BadgeMetadataTimeline.fromProto(timeline, Stringify)),
-      canUpdateBadgeMetadata: protoMsg.canUpdateBadgeMetadata.map((permission) => TimedUpdateWithBadgeIdsPermission.fromProto(permission, Stringify))
+      tokenMetadataTimeline: protoMsg.tokenMetadataTimeline.map((timeline) => TokenMetadataTimeline.fromProto(timeline, Stringify)),
+      canUpdateTokenMetadata: protoMsg.canUpdateTokenMetadata.map((permission) => TimedUpdateWithTokenIdsPermission.fromProto(permission, Stringify))
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSetBadgeMetadata<T> {
-    return new MsgSetBadgeMetadata({
+  toBech32Addresses(prefix: string): MsgSetTokenMetadata<T> {
+    return new MsgSetTokenMetadata({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,
-      badgeMetadataTimeline: this.badgeMetadataTimeline,
-      canUpdateBadgeMetadata: this.canUpdateBadgeMetadata
+      tokenMetadataTimeline: this.tokenMetadataTimeline,
+      canUpdateTokenMetadata: this.canUpdateTokenMetadata
     });
   }
 
   toCosmWasmPayloadString(): string {
-    return `{"setBadgeMetadataMsg":${normalizeMessagesIfNecessary([
+    return `{"setTokenMetadataMsg":${normalizeMessagesIfNecessary([
       {
         message: this.toProto(),
         path: this.toProto().getType().typeName

@@ -18,14 +18,14 @@ export class BitBadgesApiRoutes {
   static SearchRoute = (searchValue: string) => `/api/v0/search/${searchValue}`;
   static GetCollectionsRoute = () => '/api/v0/collections';
 
-  static GetOwnersRoute = (collectionId: CollectionId, badgeId: NumberType) =>
-    `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/owners`;
+  static GetOwnersRoute = (collectionId: CollectionId, tokenId: NumberType) =>
+    `/api/v0/collection/${collectionId.toString()}/${tokenId.toString()}/owners`;
   static GetBalanceByAddressRoute = (collectionId: CollectionId, bitbadgesAddress: string) =>
     `/api/v0/collection/${collectionId.toString()}/balance/${bitbadgesAddress}`;
-  static GetBalanceByAddressSpecificTokenRoute = (collectionId: CollectionId, bitbadgesAddress: string, badgeId: NumberType) =>
-    `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/balance/${bitbadgesAddress}`;
-  static GetTokenActivityRoute = (collectionId: CollectionId, badgeId: NumberType) =>
-    `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/activity`;
+  static GetBalanceByAddressSpecificTokenRoute = (collectionId: CollectionId, bitbadgesAddress: string, tokenId: NumberType) =>
+    `/api/v0/collection/${collectionId.toString()}/${tokenId.toString()}/balance/${bitbadgesAddress}`;
+  static GetTokenActivityRoute = (collectionId: CollectionId, tokenId: NumberType) =>
+    `/api/v0/collection/${collectionId.toString()}/${tokenId.toString()}/activity`;
   static RefreshMetadataRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/refresh`;
   static GetRefreshStatusRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/refreshStatus`;
   static FilterTokensInCollectionRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/filter`;
@@ -148,8 +148,8 @@ export class BitBadgesApiRoutes {
 
   static GetAddressListsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/lists`;
   static GetSiwbbRequestsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/requests/siwbb`;
-  static GetTransferActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/badges`;
-  static GetBadgesByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/badges`;
+  static GetTransferActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/tokens`;
+  static GetTokensByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/tokens`;
   static GetListActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/lists`;
   static GetClaimActivityByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/claims`;
   static GetPointsActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/points`;
@@ -161,8 +161,8 @@ export class BitBadgesApiRoutes {
 
   static GetCollectionOwnersRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/owners`;
   static GetCollectionRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}`;
-  static GetBadgeMetadataRoute = (collectionId: CollectionId, badgeId: NumberType) =>
-    `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/metadata`;
+  static GetTokenMetadataRoute = (collectionId: CollectionId, tokenId: NumberType) =>
+    `/api/v0/collection/${collectionId.toString()}/${tokenId.toString()}/metadata`;
   static GetCollectionClaimsRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/claims`;
 
   static GetCollectionTransferActivityRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/activity`;

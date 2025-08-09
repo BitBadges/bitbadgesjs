@@ -6,13 +6,13 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { Params } from "./params_pb.js";
-import { BadgeCollection } from "./collections_pb.js";
+import { TokenCollection } from "./collections_pb.js";
 import { ApprovalTracker, UserBalanceStore } from "./transfers_pb.js";
 import { AddressList } from "./address_lists_pb.js";
 import { DynamicStore, DynamicStoreValue } from "./dynamic_stores_pb.js";
 
 /**
- * GenesisState defines the tokens module's genesis state.
+ * GenesisState defines the badges module's genesis state.
  *
  * @generated from message badges.GenesisState
  */
@@ -28,9 +28,9 @@ export class GenesisState extends Message<GenesisState> {
   portId = "";
 
   /**
-   * @generated from field: repeated badges.BadgeCollection collections = 3;
+   * @generated from field: repeated badges.TokenCollection collections = 3;
    */
-  collections: BadgeCollection[] = [];
+  collections: TokenCollection[] = [];
 
   /**
    * @generated from field: string nextCollectionId = 4;
@@ -119,7 +119,7 @@ export class GenesisState extends Message<GenesisState> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "params", kind: "message", T: Params },
     { no: 2, name: "port_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "collections", kind: "message", T: BadgeCollection, repeated: true },
+    { no: 3, name: "collections", kind: "message", T: TokenCollection, repeated: true },
     { no: 4, name: "nextCollectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "balances", kind: "message", T: UserBalanceStore, repeated: true },
     { no: 6, name: "balanceStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },

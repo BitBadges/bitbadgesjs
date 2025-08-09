@@ -20,9 +20,9 @@ import {
   ApprovalCriteria,
   ApprovalIdentifierDetails,
   AutoDeletionOptions,
-  BadgeIdsActionPermission,
-  BadgeMetadata,
-  BadgeMetadataTimeline,
+  TokenIdsActionPermission,
+  TokenMetadata,
+  TokenMetadataTimeline,
   Balance,
   CoinTransfer,
   CollectionApproval,
@@ -45,11 +45,11 @@ import {
   MsgCreateAddressLists,
   MsgCreateCollection,
   MsgDeleteCollection,
-  MsgTransferBadges,
+  MsgTransferTokens,
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
   MsgUpdateUserApprovals,
-  MustOwnBadges,
+  MustOwnTokens,
   OffChainBalancesMetadata,
   OffChainBalancesMetadataTimeline,
   OutgoingApprovalCriteria,
@@ -60,7 +60,7 @@ import {
   ResetTimeIntervals,
   StandardsTimeline,
   TimedUpdatePermission,
-  TimedUpdateWithBadgeIdsPermission,
+  TimedUpdateWithTokenIdsPermission,
   Transfer,
   UintRange,
   UserBalanceStore,
@@ -85,7 +85,7 @@ import {
   MsgDecrementStoreValue,
   MsgIncrementStoreValue,
   MsgPurgeApprovals,
-  MsgSetBadgeMetadata,
+  MsgSetTokenMetadata,
   MsgSetCollectionApprovals,
   MsgSetCollectionMetadata,
   MsgSetCustomData,
@@ -95,7 +95,7 @@ import {
   MsgSetManager,
   MsgSetOutgoingApproval,
   MsgSetStandards,
-  MsgSetValidBadgeIds,
+  MsgSetValidTokenIds,
   MsgUpdateDynamicStore
 } from '@/proto/badges/tx_pb.js';
 
@@ -120,9 +120,9 @@ const approvalCriteria = new OutgoingApprovalCriteria({
       maxUsesPerLeaf: '0'
     })
   ],
-  mustOwnBadges: [
-    new MustOwnBadges({
-      badgeIds: [new UintRange()],
+  mustOwnTokens: [
+    new MustOwnTokens({
+      tokenIds: [new UintRange()],
       amountRange: new UintRange(),
       ownershipTimes: [new UintRange()]
     })
@@ -141,7 +141,7 @@ const approvalCriteria = new OutgoingApprovalCriteria({
         balances: [
           new Balance({
             ownershipTimes: [new UintRange()],
-            badgeIds: [new UintRange()]
+            tokenIds: [new UintRange()]
           })
         ]
       })
@@ -151,11 +151,11 @@ const approvalCriteria = new OutgoingApprovalCriteria({
       startBalances: [
         new Balance({
           ownershipTimes: [new UintRange()],
-          badgeIds: [new UintRange()]
+          tokenIds: [new UintRange()]
         })
       ],
       incrementOwnershipTimesBy: '0',
-      incrementBadgeIdsBy: '0',
+      incrementTokenIdsBy: '0',
       durationFromTimestamp: '0',
       recurringOwnershipTimes: new RecurringOwnershipTimes({
         startTime: '0',
@@ -202,7 +202,7 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
     orderCalculationMethod: new PredeterminedOrderCalculationMethod(),
     incrementedBalances: new IncrementedBalances({
       startBalances: [],
-      incrementBadgeIdsBy: '0',
+      incrementTokenIdsBy: '0',
       incrementOwnershipTimesBy: '0',
       durationFromTimestamp: '0',
       recurringOwnershipTimes: new RecurringOwnershipTimes({
@@ -258,13 +258,13 @@ function populateMerkleChallenges(merkleChallenges?: MerkleChallenge[]) {
   );
 }
 
-function populateMustOwnBadges(mustOwnBadges?: MustOwnBadges[]) {
+function populateMustOwnTokens(mustOwnTokens?: MustOwnTokens[]) {
   return (
-    mustOwnBadges?.map((mustOwnBadge) => {
-      mustOwnBadge.badgeIds = mustOwnBadge.badgeIds || [new UintRange()];
-      mustOwnBadge.amountRange = mustOwnBadge.amountRange || new UintRange();
-      mustOwnBadge.ownershipTimes = mustOwnBadge.ownershipTimes || [new UintRange()];
-      return mustOwnBadge;
+    mustOwnTokens?.map((mustOwnToken) => {
+      mustOwnToken.tokenIds = mustOwnToken.tokenIds || [new UintRange()];
+      mustOwnToken.amountRange = mustOwnToken.amountRange || new UintRange();
+      mustOwnToken.ownershipTimes = mustOwnToken.ownershipTimes || [new UintRange()];
+      return mustOwnToken;
     }) || []
   );
 }
@@ -275,7 +275,7 @@ function populatePredeterminedBalances(predeterminedBalances?: PredeterminedBala
       orderCalculationMethod: new PredeterminedOrderCalculationMethod(),
       incrementedBalances: new IncrementedBalances({
         startBalances: [],
-        incrementBadgeIdsBy: '0',
+        incrementTokenIdsBy: '0',
         incrementOwnershipTimesBy: '0',
         durationFromTimestamp: '0',
         allowOverrideTimestamp: false,
@@ -295,7 +295,7 @@ function populatePredeterminedBalances(predeterminedBalances?: PredeterminedBala
   if (!predeterminedBalances.incrementedBalances) {
     predeterminedBalances.incrementedBalances = new IncrementedBalances({
       startBalances: [],
-      incrementBadgeIdsBy: '0',
+      incrementTokenIdsBy: '0',
       incrementOwnershipTimesBy: '0',
       durationFromTimestamp: '0',
       allowOverrideTimestamp: false,
@@ -407,7 +407,7 @@ function populateETHSignatureChallenges(ethSignatureChallenges?: ETHSignatureCha
   return ethSignatureChallenges || [];
 }
 
-export function populateUndefinedForMsgTransferBadges(msg: MsgTransferBadges) {
+export function populateUndefinedForMsgTransferTokens(msg: MsgTransferTokens) {
   for (const transfer of msg.transfers) {
     if (!transfer.precalculateBalancesFromApproval) {
       transfer.precalculateBalancesFromApproval = new ApprovalIdentifierDetails({
@@ -437,7 +437,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
-    approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
+    approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(approval.approvalCriteria.mustOwnTokens);
     approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
     approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
   }
@@ -450,7 +450,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
-    approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
+    approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(approval.approvalCriteria.mustOwnTokens);
     approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
     approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
   }
@@ -542,7 +542,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     msg.defaultBalances.balances = [
       new Balance({
         ownershipTimes: [new UintRange()],
-        badgeIds: [new UintRange()]
+        tokenIds: [new UintRange()]
       })
     ];
   }
@@ -555,7 +555,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
       approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
       approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
       approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
-      approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
+      approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(approval.approvalCriteria.mustOwnTokens);
       approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
       approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
     }
@@ -570,7 +570,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
-    approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
+    approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(approval.approvalCriteria.mustOwnTokens);
     approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
     approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
   }
@@ -584,7 +584,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
     approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
     approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
-    approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(approval.approvalCriteria.mustOwnBadges);
+    approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(approval.approvalCriteria.mustOwnTokens);
     approval.approvalCriteria.userRoyalties = populateUserRoyalties(approval.approvalCriteria.userRoyalties);
     approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
     approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
@@ -657,7 +657,7 @@ export function populateUndefinedForMsgSetIncomingApproval(msg: MsgSetIncomingAp
   msg.approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(msg.approval.approvalCriteria.approvalAmounts);
   msg.approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(msg.approval.approvalCriteria.maxNumTransfers);
   msg.approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(msg.approval.approvalCriteria.autoDeletionOptions);
-  msg.approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(msg.approval.approvalCriteria.mustOwnBadges);
+  msg.approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(msg.approval.approvalCriteria.mustOwnTokens);
   msg.approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(msg.approval.approvalCriteria.dynamicStoreChallenges);
   msg.approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(msg.approval.approvalCriteria.ethSignatureChallenges);
 
@@ -677,21 +677,21 @@ export function populateUndefinedForMsgSetOutgoingApproval(msg: MsgSetOutgoingAp
   msg.approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(msg.approval.approvalCriteria.approvalAmounts);
   msg.approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(msg.approval.approvalCriteria.maxNumTransfers);
   msg.approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(msg.approval.approvalCriteria.autoDeletionOptions);
-  msg.approval.approvalCriteria.mustOwnBadges = populateMustOwnBadges(msg.approval.approvalCriteria.mustOwnBadges);
+  msg.approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(msg.approval.approvalCriteria.mustOwnTokens);
   msg.approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(msg.approval.approvalCriteria.dynamicStoreChallenges);
   msg.approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(msg.approval.approvalCriteria.ethSignatureChallenges);
 
   return msg;
 }
 
-export function populateUndefinedForMsgSetValidBadgeIds(msg: MsgSetValidBadgeIds) {
+export function populateUndefinedForMsgSetValidTokenIds(msg: MsgSetValidTokenIds) {
   // Merge with universal params and populate
   const mergedMsg = deepCopyPrimitives({
     ...universalParams,
     ...msg
   });
   const populated = populateUndefinedForMsgUniversalUpdateCollection(mergedMsg as any);
-  return new MsgSetValidBadgeIds(extractSubsetFields(populated, msg));
+  return new MsgSetValidTokenIds(extractSubsetFields(populated, msg));
 }
 
 export function populateUndefinedForMsgSetManager(msg: MsgSetManager) {
@@ -714,14 +714,14 @@ export function populateUndefinedForMsgSetCollectionMetadata(msg: MsgSetCollecti
   return new MsgSetCollectionMetadata(extractSubsetFields(populated, msg));
 }
 
-export function populateUndefinedForMsgSetBadgeMetadata(msg: MsgSetBadgeMetadata) {
+export function populateUndefinedForMsgSetTokenMetadata(msg: MsgSetTokenMetadata) {
   // Merge with universal params and populate
   const mergedMsg = deepCopyPrimitives({
     ...universalParams,
     ...msg
   });
   const populated = populateUndefinedForMsgUniversalUpdateCollection(mergedMsg as any);
-  return new MsgSetBadgeMetadata(extractSubsetFields(populated, msg));
+  return new MsgSetTokenMetadata(extractSubsetFields(populated, msg));
 }
 
 export function populateUndefinedForMsgSetCustomData(msg: MsgSetCustomData) {
@@ -769,13 +769,13 @@ const universalParams = {
     balances: [
       new Balance({
         ownershipTimes: [new UintRange()],
-        badgeIds: [new UintRange()]
+        tokenIds: [new UintRange()]
       })
     ],
     outgoingApprovals: [
       new UserOutgoingApproval({
         transferTimes: [new UintRange()],
-        badgeIds: [new UintRange()],
+        tokenIds: [new UintRange()],
         ownershipTimes: [new UintRange()],
         approvalCriteria: new OutgoingApprovalCriteria({
           ...approvalCriteria
@@ -786,7 +786,7 @@ const universalParams = {
     incomingApprovals: [
       new UserIncomingApproval({
         transferTimes: [new UintRange()],
-        badgeIds: [new UintRange()],
+        tokenIds: [new UintRange()],
         ownershipTimes: [new UintRange()],
         approvalCriteria: new IncomingApprovalCriteria({
           ...approvalCriteria
@@ -798,7 +798,7 @@ const universalParams = {
       canUpdateOutgoingApprovals: [
         new UserOutgoingApprovalPermission({
           transferTimes: [new UintRange()],
-          badgeIds: [new UintRange()],
+          tokenIds: [new UintRange()],
           ownershipTimes: [new UintRange()],
           permanentlyPermittedTimes: [new UintRange()],
           permanentlyForbiddenTimes: [new UintRange()]
@@ -807,7 +807,7 @@ const universalParams = {
       canUpdateIncomingApprovals: [
         new UserIncomingApprovalPermission({
           transferTimes: [new UintRange()],
-          badgeIds: [new UintRange()],
+          tokenIds: [new UintRange()],
           ownershipTimes: [new UintRange()],
           permanentlyPermittedTimes: [new UintRange()],
           permanentlyForbiddenTimes: [new UintRange()]
@@ -836,7 +836,7 @@ const universalParams = {
   badgesToCreate: [
     new Balance({
       ownershipTimes: [new UintRange()],
-      badgeIds: [new UintRange()]
+      tokenIds: [new UintRange()]
     })
   ],
 
@@ -851,12 +851,12 @@ const universalParams = {
       collectionMetadata: new CollectionMetadata()
     })
   ],
-  badgeMetadataTimeline: [
-    new BadgeMetadataTimeline({
+  tokenMetadataTimeline: [
+    new TokenMetadataTimeline({
       timelineTimes: [new UintRange()],
-      badgeMetadata: [
-        new BadgeMetadata({
-          badgeIds: [new UintRange()]
+      tokenMetadata: [
+        new TokenMetadata({
+          tokenIds: [new UintRange()]
         })
       ]
     })
@@ -886,7 +886,7 @@ const universalParams = {
   collectionApprovals: [
     new CollectionApproval({
       transferTimes: [new UintRange()],
-      badgeIds: [new UintRange()],
+      tokenIds: [new UintRange()],
       ownershipTimes: [new UintRange()],
       approvalCriteria: new ApprovalCriteria({
         ...approvalCriteria
@@ -943,25 +943,25 @@ const universalParams = {
         timelineTimes: [new UintRange()]
       })
     ],
-    canUpdateValidBadgeIds: [
-      new BadgeIdsActionPermission({
+    canUpdateValidTokenIds: [
+      new TokenIdsActionPermission({
         permanentlyPermittedTimes: [new UintRange()],
         permanentlyForbiddenTimes: [new UintRange()],
-        badgeIds: [new UintRange()]
+        tokenIds: [new UintRange()]
       })
     ],
-    canUpdateBadgeMetadata: [
-      new TimedUpdateWithBadgeIdsPermission({
+    canUpdateTokenMetadata: [
+      new TimedUpdateWithTokenIdsPermission({
         permanentlyPermittedTimes: [new UintRange()],
         permanentlyForbiddenTimes: [new UintRange()],
-        badgeIds: [new UintRange()],
+        tokenIds: [new UintRange()],
         timelineTimes: [new UintRange()]
       })
     ],
     canUpdateCollectionApprovals: [
       new CollectionApprovalPermission({
         transferTimes: [new UintRange()],
-        badgeIds: [new UintRange()],
+        tokenIds: [new UintRange()],
         ownershipTimes: [new UintRange()],
         permanentlyPermittedTimes: [new UintRange()],
         permanentlyForbiddenTimes: [new UintRange()]
@@ -980,7 +980,7 @@ const universalParams = {
       balances: [
         new Balance({
           amount: '0',
-          badgeIds: [new UintRange()],
+          tokenIds: [new UintRange()],
           ownershipTimes: [new UintRange()]
         })
       ],
@@ -1109,7 +1109,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
             collectionId: '0',
             approval: new UserIncomingApproval({
               transferTimes: [new UintRange()],
-              badgeIds: [new UintRange()],
+              tokenIds: [new UintRange()],
               ownershipTimes: [new UintRange()],
               approvalCriteria: new IncomingApprovalCriteria({
                 ...approvalCriteria
@@ -1128,7 +1128,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
             collectionId: '0',
             approval: new UserOutgoingApproval({
               transferTimes: [new UintRange()],
-              badgeIds: [new UintRange()],
+              tokenIds: [new UintRange()],
               ownershipTimes: [new UintRange()],
               approvalCriteria: new OutgoingApprovalCriteria({
                 ...approvalCriteria
@@ -1167,16 +1167,16 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           storeId: '0'
         }).toJson({ emitDefaultValues: true })
       };
-    case 'badges/TransferBadges':
+    case 'badges/TransferTokens':
       return {
         type: msgType,
-        value: new MsgTransferBadges({
+        value: new MsgTransferTokens({
           transfers: [
             new Transfer({
               balances: [
                 new Balance({
                   ownershipTimes: [new UintRange()],
-                  badgeIds: [new UintRange()]
+                  tokenIds: [new UintRange()]
                 })
               ],
               precalculateBalancesFromApproval: new ApprovalIdentifierDetails({
@@ -1200,7 +1200,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               ],
               precalculationOptions: new PrecalculationOptions({
                 overrideTimestamp: '0',
-                badgeIdsOverride: [new UintRange()]
+                tokenIdsOverride: [new UintRange()]
               }),
               numAttempts: '0'
             })
@@ -1214,7 +1214,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           outgoingApprovals: [
             new UserOutgoingApproval({
               transferTimes: [new UintRange()],
-              badgeIds: [new UintRange()],
+              tokenIds: [new UintRange()],
               ownershipTimes: [new UintRange()],
               approvalCriteria: new OutgoingApprovalCriteria({
                 ...approvalCriteria
@@ -1225,7 +1225,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           incomingApprovals: [
             new UserIncomingApproval({
               transferTimes: [new UintRange()],
-              badgeIds: [new UintRange()],
+              tokenIds: [new UintRange()],
               ownershipTimes: [new UintRange()],
               approvalCriteria: new IncomingApprovalCriteria({
                 ...approvalCriteria
@@ -1237,7 +1237,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
             canUpdateOutgoingApprovals: [
               new UserOutgoingApprovalPermission({
                 transferTimes: [new UintRange()],
-                badgeIds: [new UintRange()],
+                tokenIds: [new UintRange()],
                 ownershipTimes: [new UintRange()],
                 permanentlyPermittedTimes: [new UintRange()],
                 permanentlyForbiddenTimes: [new UintRange()]
@@ -1246,7 +1246,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
             canUpdateIncomingApprovals: [
               new UserIncomingApprovalPermission({
                 transferTimes: [new UintRange()],
-                badgeIds: [new UintRange()],
+                tokenIds: [new UintRange()],
                 ownershipTimes: [new UintRange()],
                 permanentlyPermittedTimes: [new UintRange()],
                 permanentlyForbiddenTimes: [new UintRange()]
@@ -1294,14 +1294,14 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           ...deepCopyPrimitives(universalParams)
         }).toJson({ emitDefaultValues: true })
       };
-    case 'badges/SetValidBadgeIds':
+    case 'badges/SetValidTokenIds':
       return {
         type: msgType,
-        value: new MsgSetValidBadgeIds({
+        value: new MsgSetValidTokenIds({
           creator: '',
           collectionId: '0',
-          validBadgeIds: [new UintRange()],
-          canUpdateValidBadgeIds: [new BadgeIdsActionPermission()]
+          validTokenIds: [new UintRange()],
+          canUpdateValidTokenIds: [new TokenIdsActionPermission()]
         }).toJson({ emitDefaultValues: true })
       };
     case 'badges/SetManager':
@@ -1324,14 +1324,14 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           canUpdateCollectionMetadata: [new TimedUpdatePermission()]
         }).toJson({ emitDefaultValues: true })
       };
-    case 'badges/SetBadgeMetadata':
+    case 'badges/SetTokenMetadata':
       return {
         type: msgType,
-        value: new MsgSetBadgeMetadata({
+        value: new MsgSetTokenMetadata({
           creator: '',
           collectionId: '0',
-          badgeMetadataTimeline: [new BadgeMetadataTimeline()],
-          canUpdateBadgeMetadata: [new TimedUpdateWithBadgeIdsPermission()]
+          tokenMetadataTimeline: [new TokenMetadataTimeline()],
+          canUpdateTokenMetadata: [new TimedUpdateWithTokenIdsPermission()]
         }).toJson({ emitDefaultValues: true })
       };
     case 'badges/SetCustomData':

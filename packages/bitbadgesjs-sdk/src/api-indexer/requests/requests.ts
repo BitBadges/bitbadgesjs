@@ -63,7 +63,7 @@ import {
   type iStatusDoc,
   type iTransferActivityDoc
 } from '@/api-indexer/docs-types/interfaces.js';
-import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
+import type { iTokenMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 import type { iMetadata, iMetadataWithoutInternals } from '@/api-indexer/metadata/metadata.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
 import { BaseNumberTypeClass, ConvertOptions, CustomTypeClass, ParsedQs, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
@@ -237,7 +237,7 @@ export interface iGetSearchPayload<T extends NumberType> {
   /** If true, we will skip all address list queries. */
   noAddressLists?: boolean;
   /** If true, we will skip all badge queries. */
-  noBadges?: boolean;
+  noTokens?: boolean;
   /** If true, we will skip all map queries. */
   noMaps?: boolean;
   /** If true, we will skip all application queries. */
@@ -255,7 +255,7 @@ export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<
   noCollections?: boolean;
   noAccounts?: boolean;
   noAddressLists?: boolean;
-  noBadges?: boolean;
+  noTokens?: boolean;
   noMaps?: boolean;
   noApplications?: boolean;
   noClaims?: boolean;
@@ -266,7 +266,7 @@ export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<
     this.noCollections = payload.noCollections;
     this.noAccounts = payload.noAccounts;
     this.noAddressLists = payload.noAddressLists;
-    this.noBadges = payload.noBadges;
+    this.noTokens = payload.noTokens;
     this.noMaps = payload.noMaps;
     this.noApplications = payload.noApplications;
     this.noClaims = payload.noClaims;
@@ -278,7 +278,7 @@ export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<
       noCollections: query.noCollections === 'true',
       noAccounts: query.noAccounts === 'true',
       noAddressLists: query.noAddressLists === 'true',
-      noBadges: query.noBadges === 'true',
+      noTokens: query.noTokens === 'true',
       noMaps: query.noMaps === 'true',
       noApplications: query.noApplications === 'true',
       noClaims: query.noClaims === 'true',
@@ -303,9 +303,9 @@ export interface iGetSearchSuccessResponse<T extends NumberType> {
   collections: iBitBadgesCollection<T>[];
   accounts: iBitBadgesUserInfo<T>[];
   addressLists: iBitBadgesAddressList<T>[];
-  badges: {
+  tokens: {
     collection: iBitBadgesCollection<T>;
-    badgeIds: iUintRange<T>[];
+    tokenIds: iUintRange<T>[];
   }[];
   maps: iMapWithValues<T>[];
   applications?: iApplicationDoc<T>[];
@@ -324,9 +324,9 @@ export class GetSearchSuccessResponse<T extends NumberType>
   collections: BitBadgesCollection<T>[];
   accounts: BitBadgesUserInfo<T>[];
   addressLists: BitBadgesAddressList<T>[];
-  badges: {
+  tokens: {
     collection: BitBadgesCollection<T>;
-    badgeIds: UintRangeArray<T>;
+    tokenIds: UintRangeArray<T>;
   }[];
   maps: MapWithValues<T>[];
   applications?: ApplicationDoc<T>[];
@@ -338,10 +338,10 @@ export class GetSearchSuccessResponse<T extends NumberType>
     this.collections = data.collections.map((collection) => new BitBadgesCollection(collection));
     this.accounts = data.accounts.map((account) => new BitBadgesUserInfo(account));
     this.addressLists = data.addressLists.map((addressList) => new BitBadgesAddressList(addressList));
-    this.badges = data.badges.map((badge) => {
+    this.tokens = data.tokens.map((badge) => {
       return {
         collection: new BitBadgesCollection(badge.collection),
-        badgeIds: UintRangeArray.From(badge.badgeIds)
+        tokenIds: UintRangeArray.From(badge.tokenIds)
       };
     });
     this.maps = data.maps.map((map) => new MapWithValues(map));
@@ -897,7 +897,7 @@ export interface iUpdateAccountInfoPayload {
   /**
    * The tokens to hide and not view for this profile's portfolio
    */
-  hiddenBadges?: iBatchTokenDetails<NumberType>[];
+  hiddenTokens?: iBatchTokenDetails<NumberType>[];
 
   /**
    * The lists to hide and not view for this profile's portfolio
@@ -913,7 +913,7 @@ export interface iUpdateAccountInfoPayload {
    * An array of custom pages on the user's portolio. Used to customize, sort, and group badges / lists into pages.
    */
   customPages?: {
-    badges: iCustomPage<NumberType>[];
+    tokens: iCustomPage<NumberType>[];
     lists: iCustomListPage[];
   };
 
@@ -921,7 +921,7 @@ export interface iUpdateAccountInfoPayload {
    * The watchlist of tokens / lists
    */
   watchlists?: {
-    badges: iCustomPage<NumberType>[];
+    tokens: iCustomPage<NumberType>[];
     lists: iCustomListPage[];
   };
 
@@ -1157,7 +1157,7 @@ export interface iAddToIpfsPayload {
   /**
    * The stuff to add to IPFS
    */
-  contents?: (iBadgeMetadataDetails<NumberType> | iMetadata<NumberType> | iCollectionMetadataDetails<NumberType> | iChallengeDetails<NumberType>)[];
+  contents?: (iTokenMetadataDetails<NumberType> | iMetadata<NumberType> | iCollectionMetadataDetails<NumberType> | iChallengeDetails<NumberType>)[];
 
   method: 'ipfs' | 'centralized';
 }
@@ -1712,7 +1712,7 @@ export class SignOutSuccessResponse extends EmptyResponseClass {}
 export interface iGetBrowsePayload {
   type:
     | 'collections'
-    | 'badges'
+    | 'tokens'
     | 'addressLists'
     | 'maps'
     | 'claims'
@@ -1734,7 +1734,7 @@ export interface iGetBrowsePayload {
 export class GetBrowsePayload extends CustomTypeClass<GetBrowsePayload> implements iGetBrowsePayload {
   type:
     | 'collections'
-    | 'badges'
+    | 'tokens'
     | 'addressLists'
     | 'maps'
     | 'claims'
@@ -1779,10 +1779,10 @@ export interface iGetBrowseSuccessResponse<T extends NumberType> {
   addressLists: { [category: string]: iBitBadgesAddressList<T>[] };
   profiles: { [category: string]: iBitBadgesUserInfo<T>[] };
   activity: iTransferActivityDoc<T>[];
-  badges: {
+  tokens: {
     [category: string]: {
       collection: iBitBadgesCollection<T>;
-      badgeIds: iUintRange<T>[];
+      tokenIds: iUintRange<T>[];
     }[];
   };
   applications?: { [category: string]: iApplicationDoc<T>[] };
@@ -1804,10 +1804,10 @@ export class GetBrowseSuccessResponse<T extends NumberType>
   addressLists: { [category: string]: BitBadgesAddressList<T>[] };
   profiles: { [category: string]: BitBadgesUserInfo<T>[] };
   activity: TransferActivityDoc<T>[];
-  badges: {
+  tokens: {
     [category: string]: {
       collection: BitBadgesCollection<T>;
-      badgeIds: UintRangeArray<T>;
+      tokenIds: UintRangeArray<T>;
     }[];
   };
   applications?: { [category: string]: ApplicationDoc<T>[] };
@@ -1841,17 +1841,17 @@ export class GetBrowseSuccessResponse<T extends NumberType>
       {} as { [category: string]: BitBadgesUserInfo<T>[] }
     );
     this.activity = data.activity.map((activity) => new TransferActivityDoc(activity));
-    this.badges = Object.keys(data.badges).reduce(
+    this.tokens = Object.keys(data.tokens).reduce(
       (acc, category) => {
-        acc[category] = data.badges[category].map((badge) => {
+        acc[category] = data.tokens[category].map((badge) => {
           return {
             collection: new BitBadgesCollection(badge.collection),
-            badgeIds: UintRangeArray.From(badge.badgeIds)
+            tokenIds: UintRangeArray.From(badge.tokenIds)
           };
         });
         return acc;
       },
-      {} as { [category: string]: { collection: BitBadgesCollection<T>; badgeIds: UintRangeArray<T> }[] }
+      {} as { [category: string]: { collection: BitBadgesCollection<T>; tokenIds: UintRangeArray<T> }[] }
     );
     this.applications = Object.keys(data.applications ?? {}).reduce(
       (acc, category) => {

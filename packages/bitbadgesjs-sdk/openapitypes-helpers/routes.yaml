@@ -133,7 +133,7 @@ info:
       collectionsToFetch: [{
         collectionId: 1n,
         metadataToFetch: {
-          badgeIds: [{ start: 1n, end: 10n }]
+          tokenIds: [{ start: 1n, end: 10n }]
         }
       }]
     });
@@ -440,9 +440,9 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /collection/{collectionId}/{badgeId}/metadata:
+  /collection/{collectionId}/{tokenId}/metadata:
     get:
-      operationId: getBadgeMetadata
+      operationId: getTokenMetadata
       summary: Get Token Metadata
       tags:
         - Tokens
@@ -450,19 +450,19 @@ paths:
         Gets current metadata for a specific token in a collection.
 
         ```tsx
-        await BitBadgesApi.getBadgeMetadata("123", "1");
+        await BitBadgesApi.getTokenMetadata("123", "1");
         ```
 
         SDK Links:
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeMetadataSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getbadgeMetadata)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTokenMetadataSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#gettokenMetadata)**
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetBadgeMetadataSuccessResponse'
+                $ref: '#/components/schemas/iGetTokenMetadataSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -480,7 +480,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: badgeId
+        - name: tokenId
           in: path
           description: Token ID
           required: true
@@ -504,7 +504,7 @@ paths:
             {
               collectionId: 1n,
               metadataToFetch: {
-                badgeIds: [{ start: 1n, end: 10n }],
+                tokenIds: [{ start: 1n, end: 10n }],
               },
               fetchTotalAndMintBalances: true,
               viewsToFetch: [
@@ -563,7 +563,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/iGetCollectionsPayload'
-  '/collection/{collectionId}/balance/{address}/{badgeId}':
+  '/collection/{collectionId}/balance/{address}/{tokenId}':
     get:
       operationId: getBalanceByAddressSpecificToken
       summary: Get Balance By Address - Specific Token
@@ -573,7 +573,7 @@ paths:
         For more advanced queries returning the whole balance document, please use the POST `/collection/{collectionId}/balance/{address}` endpoint.
 
         ```tsx
-        const res = await BitBadgesApi.getBalanceByAddressSpecificToken(collectionId, address, badgeId);
+        const res = await BitBadgesApi.getBalanceByAddressSpecificToken(collectionId, address, tokenId);
         console.log(res);
         ```
 
@@ -598,7 +598,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: badgeId
+        - name: tokenId
           in: path
           description: The ID for which the balance is to be retrieved.
           required: true
@@ -1496,7 +1496,7 @@ paths:
             $ref: '#/components/schemas/iGetStatusPayload'
       security:
         - apiKey: []
-  '/collection/{collectionId}/{badgeId}/owners':
+  '/collection/{collectionId}/{tokenId}/owners':
     get:
       operationId: getOwners
       summary: Get Token Owners
@@ -1509,7 +1509,7 @@ paths:
         ```tsx
         const res = await BitBadgesApi.getOwners(
           collectionId,
-          badgeId,
+          tokenId,
           {
             bookmark: '...'
           }
@@ -1528,7 +1528,7 @@ paths:
           required: true
           schema:
             type: integer
-        - name: badgeId
+        - name: tokenId
           in: path
           description: The numeric token ID to retrieve owners for.
           required: true
@@ -1563,7 +1563,7 @@ paths:
       security:
         - apiKey: []
 
-  '/collection/{collectionId}/{badgeId}/activity':
+  '/collection/{collectionId}/{tokenId}/activity':
     get:
       operationId: getTokenActivity
       summary: Get Token Activity
@@ -1573,7 +1573,7 @@ paths:
         ```tsx
         const res = await BitBadgesApi.getTokenActivity(
           collectionId,
-          badgeId,
+          tokenId,
           {
             bookmark: '...'
           }
@@ -1593,7 +1593,7 @@ paths:
           required: true
           schema:
             type: integer
-        - name: badgeId
+        - name: tokenId
           in: path
           description: The ID for which activity is to be retrieved.
           required: true
@@ -4586,7 +4586,7 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-  /account/{address}/activity/badges:
+  /account/{address}/activity/tokens:
     get:
       operationId: getTransferActivityForUser
       summary: Get Transfer Activity For User
@@ -4638,9 +4638,9 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /account/{address}/badges/:
+  /account/{address}/tokens:
     get:
-      operationId: GetBadgesViewForUser
+      operationId: GetTokensViewForUser
       summary: Get Tokens For User
       tags:
         - Accounts
@@ -4649,20 +4649,20 @@ paths:
         tokens to retrieve. Default is 'collected'.
 
         ```tsx
-        await BitBadgesApi.getBadgesViewForUser(address, { viewType: "collected" });
+        await BitBadgesApi.getTokensViewForUser(address, { viewType: "collected" });
         ```
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgesViewForUserPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgesViewForUserSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getbadgesviewforuser)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTokensViewForUserPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTokensViewForUserSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getTokensViewForUser)**
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetBadgesViewForUserSuccessResponse'
+                $ref: '#/components/schemas/iGetTokensViewForUserSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -4686,7 +4686,7 @@ paths:
           description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
-            $ref: '#/components/schemas/iGetBadgesViewForUserPayload'
+            $ref: '#/components/schemas/iGetTokensViewForUserPayload'
       security:
         - apiKey: []
       x-internal: false

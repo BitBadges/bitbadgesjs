@@ -13,19 +13,19 @@ export const isWrapperApproval = (
     return false;
   }
 
-  const { badgeIds, ownershipTimes } = balances[0];
+  const { tokenIds, ownershipTimes } = balances[0];
 
   if (!options?.skipPathValidation) {
     if (!approval.toList.checkAddress(address)) {
       return false;
     }
 
-    if (badgeIds.length !== approval.badgeIds.length) {
+    if (tokenIds.length !== approval.tokenIds.length) {
       return false;
     }
 
-    for (let i = 0; i < badgeIds.length; i++) {
-      if (badgeIds[i].start !== approval.badgeIds[i].start || badgeIds[i].end !== approval.badgeIds[i].end) {
+    for (let i = 0; i < tokenIds.length; i++) {
+      if (tokenIds[i].start !== approval.tokenIds[i].start || tokenIds[i].end !== approval.tokenIds[i].end) {
         return false;
       }
     }
@@ -68,23 +68,23 @@ export const isUnwrapperApproval = (
     return false;
   }
 
-  const { badgeIds, ownershipTimes } = balances[0];
+  const { tokenIds, ownershipTimes } = balances[0];
 
   if (!options?.skipPathValidation) {
     if (!approval.fromList.checkAddress(address)) {
       return false;
     }
 
-    if (badgeIds.length !== approval.badgeIds.length) {
+    if (tokenIds.length !== approval.tokenIds.length) {
       return false;
     }
 
-    if (badgeIds.length !== approval.badgeIds.length) {
+    if (tokenIds.length !== approval.tokenIds.length) {
       return false;
     }
 
-    for (let i = 0; i < badgeIds.length; i++) {
-      if (badgeIds[i].start !== approval.badgeIds[i].start || badgeIds[i].end !== approval.badgeIds[i].end) {
+    for (let i = 0; i < tokenIds.length; i++) {
+      if (tokenIds[i].start !== approval.tokenIds[i].start || tokenIds[i].end !== approval.tokenIds[i].end) {
         return false;
       }
     }
@@ -129,6 +129,6 @@ export function approvalCriteriaHasNoAdditionalRestrictions(approvalCriteria?: i
       (approvalCriteria.coinTransfers ?? []).length === 0 &&
       (approvalCriteria.userRoyalties?.percentage ?? 0n) === 0n &&
       (approvalCriteria.userRoyalties?.payoutAddress ?? '') === '' &&
-      (approvalCriteria.mustOwnBadges ?? []).length === 0)
+      (approvalCriteria.mustOwnTokens ?? []).length === 0)
   );
 }

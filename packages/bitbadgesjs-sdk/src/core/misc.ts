@@ -6,7 +6,7 @@ import type {
   iUpdateHistory,
   UNIXMilliTimestamp
 } from '@/api-indexer/docs-types/interfaces.js';
-import { BadgeMetadataDetails, CollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
+import { TokenMetadataDetails, CollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
 import {
   BaseNumberTypeClass,
@@ -23,9 +23,9 @@ import type {
   CollectionId,
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
-  iBadgeMetadata,
-  iBadgeMetadataTimeline,
-  iBadgeMetadataTimelineWithDetails,
+  iTokenMetadata,
+  iTokenMetadataTimeline,
+  iTokenMetadataTimelineWithDetails,
   iCoinTransfer,
   iCollectionMetadata,
   iCollectionMetadataTimeline,
@@ -36,8 +36,8 @@ import type {
   iMerkleChallenge,
   iMerklePathItem,
   iMerkleProof,
-  iMustOwnBadge,
-  iMustOwnBadges,
+  iMustOwnToken,
+  iMustOwnTokens,
   iOffChainBalancesMetadata,
   iOffChainBalancesMetadataTimeline,
   iStandardsTimeline,
@@ -51,45 +51,45 @@ import { AddressList } from './addressLists.js';
 import { CosmosCoin } from './coin.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
 import { GetFirstMatchOnly, getOverlapsAndNonOverlaps } from './overlaps.js';
-import { TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission } from './permissions.js';
+import { TimedUpdatePermission, TimedUpdateWithTokenIdsPermission } from './permissions.js';
 import { UintRange, UintRangeArray } from './uintRanges.js';
 import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils.js';
 
 /**
- * BadgeMetadata is used to represent the metadata for a range of token IDs.
+ * TokenMetadata is used to represent the metadata for a range of token IDs.
  * The metadata can be hosted via a URI (via uri) or stored on-chain (via customData).
  *
  * We take first-match only for the token IDs.
- * If a token ID is in multiple BadgeMetadata, we take the first match in a linear search.
+ * If a token ID is in multiple TokenMetadata, we take the first match in a linear search.
  *
  * @category Collections
  */
-export class BadgeMetadata<T extends NumberType> extends BaseNumberTypeClass<BadgeMetadata<T>> implements iBadgeMetadata<T> {
+export class TokenMetadata<T extends NumberType> extends BaseNumberTypeClass<TokenMetadata<T>> implements iTokenMetadata<T> {
   uri: string;
-  badgeIds: UintRangeArray<T>;
+  tokenIds: UintRangeArray<T>;
   customData: string;
 
-  constructor(badgeMetadata: iBadgeMetadata<T>) {
+  constructor(tokenMetadata: iTokenMetadata<T>) {
     super();
-    this.uri = badgeMetadata.uri;
-    this.badgeIds = UintRangeArray.From(badgeMetadata.badgeIds);
-    this.customData = badgeMetadata.customData;
+    this.uri = tokenMetadata.uri;
+    this.tokenIds = UintRangeArray.From(tokenMetadata.tokenIds);
+    this.customData = tokenMetadata.customData;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BadgeMetadata<U> {
-    return new BadgeMetadata<U>(
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TokenMetadata<U> {
+    return new TokenMetadata<U>(
       deepCopyPrimitives({
         uri: this.uri,
-        badgeIds: this.badgeIds.map((b) => b.convert(convertFunction)),
+        tokenIds: this.tokenIds.map((b) => b.convert(convertFunction)),
         customData: this.customData
       })
     );
   }
 
-  toProto(): protobadges.BadgeMetadata {
-    return new protobadges.BadgeMetadata({
+  toProto(): protobadges.TokenMetadata {
+    return new protobadges.TokenMetadata({
       uri: this.uri,
-      badgeIds: this.badgeIds.map((b) => b.toProto()),
+      tokenIds: this.tokenIds.map((b) => b.toProto()),
       customData: this.customData
     });
   }
@@ -98,22 +98,22 @@ export class BadgeMetadata<T extends NumberType> extends BaseNumberTypeClass<Bad
     jsonValue: JsonValue,
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
-  ): BadgeMetadata<U> {
-    return BadgeMetadata.fromProto(protobadges.BadgeMetadata.fromJson(jsonValue, options), convertFunction);
+  ): TokenMetadata<U> {
+    return TokenMetadata.fromProto(protobadges.TokenMetadata.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
     jsonString: string,
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
-  ): BadgeMetadata<U> {
-    return BadgeMetadata.fromProto(protobadges.BadgeMetadata.fromJsonString(jsonString, options), convertFunction);
+  ): TokenMetadata<U> {
+    return TokenMetadata.fromProto(protobadges.TokenMetadata.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.BadgeMetadata, convertFunction: (item: NumberType) => U): BadgeMetadata<U> {
-    return new BadgeMetadata<U>({
+  static fromProto<U extends NumberType>(item: protobadges.TokenMetadata, convertFunction: (item: NumberType) => U): TokenMetadata<U> {
+    return new TokenMetadata<U>({
       uri: item.uri,
-      badgeIds: item.badgeIds.map((b) => UintRange.fromProto(b, convertFunction)),
+      tokenIds: item.tokenIds.map((b) => UintRange.fromProto(b, convertFunction)),
       customData: item.customData
     });
   }
@@ -121,13 +121,13 @@ export class BadgeMetadata<T extends NumberType> extends BaseNumberTypeClass<Bad
   /**
    * Get first matches for the token metadata (i.e. if there are duplicated token IDs, we take the first match in a linear search).
    */
-  static getFirstMatches<T extends NumberType>(badgeMetadata: BadgeMetadata<T>[]): BadgeMetadata<T>[] {
-    const metadataArr = badgeMetadata.map((b) => b.clone());
+  static getFirstMatches<T extends NumberType>(tokenMetadata: TokenMetadata<T>[]): TokenMetadata<T>[] {
+    const metadataArr = tokenMetadata.map((b) => b.clone());
     for (let i = 0; i < metadataArr.length; i++) {
       const metadata = metadataArr[i];
       for (let j = i + 1; j < metadataArr.length; j++) {
         const otherMetadata = metadataArr[j];
-        otherMetadata.badgeIds.remove(metadata.badgeIds);
+        otherMetadata.tokenIds.remove(metadata.tokenIds);
       }
     }
 
@@ -388,62 +388,62 @@ export class AmountTrackerIdDetails<T extends NumberType>
 }
 
 /**
- * MustOwnBadge is used to represent a must own token for an approval.
+ * MustOwnToken is used to represent a must own token for an approval.
  *
  * @category Approvals / Transferability
  */
-export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<MustOwnBadges<T>> implements iMustOwnBadges<T> {
+export class MustOwnTokens<T extends NumberType> extends BaseNumberTypeClass<MustOwnTokens<T>> implements iMustOwnTokens<T> {
   amountRange: UintRange<T>;
-  badgeIds: UintRangeArray<T>;
+  tokenIds: UintRangeArray<T>;
   overrideWithCurrentTime: boolean;
   mustSatisfyForAllAssets: boolean;
   ownershipTimes: UintRangeArray<T>;
 
   collectionId: string;
-  constructor(mustOwnBadge: iMustOwnBadge<T>) {
+  constructor(mustOwnToken: iMustOwnToken<T>) {
     super();
-    this.amountRange = new UintRange<T>(mustOwnBadge.amountRange);
-    this.badgeIds = UintRangeArray.From(mustOwnBadge.badgeIds);
-    this.overrideWithCurrentTime = mustOwnBadge.overrideWithCurrentTime;
-    this.mustSatisfyForAllAssets = mustOwnBadge.mustSatisfyForAllAssets;
-    this.ownershipTimes = UintRangeArray.From(mustOwnBadge.ownershipTimes);
-    this.collectionId = mustOwnBadge.collectionId;
+    this.amountRange = new UintRange<T>(mustOwnToken.amountRange);
+    this.tokenIds = UintRangeArray.From(mustOwnToken.tokenIds);
+    this.overrideWithCurrentTime = mustOwnToken.overrideWithCurrentTime;
+    this.mustSatisfyForAllAssets = mustOwnToken.mustSatisfyForAllAssets;
+    this.ownershipTimes = UintRangeArray.From(mustOwnToken.ownershipTimes);
+    this.collectionId = mustOwnToken.collectionId;
   }
 
   getNumberFieldNames(): string[] {
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MustOwnBadges<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MustOwnBadges<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MustOwnTokens<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MustOwnTokens<U>;
   }
 
-  toProto(): protobadges.MustOwnBadges {
-    return new protobadges.MustOwnBadges(this.convert(Stringify));
+  toProto(): protobadges.MustOwnTokens {
+    return new protobadges.MustOwnTokens(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
     jsonValue: JsonValue,
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
-  ): MustOwnBadges<U> {
-    return MustOwnBadges.fromProto(protobadges.MustOwnBadges.fromJson(jsonValue, options), convertFunction);
+  ): MustOwnTokens<U> {
+    return MustOwnTokens.fromProto(protobadges.MustOwnTokens.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
     jsonString: string,
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
-  ): MustOwnBadges<U> {
-    return MustOwnBadges.fromProto(protobadges.MustOwnBadges.fromJsonString(jsonString, options), convertFunction);
+  ): MustOwnTokens<U> {
+    return MustOwnTokens.fromProto(protobadges.MustOwnTokens.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.MustOwnBadges, convertFunction: (item: NumberType) => U): MustOwnBadges<U> {
-    return new MustOwnBadges<U>({
+  static fromProto<U extends NumberType>(item: protobadges.MustOwnTokens, convertFunction: (item: NumberType) => U): MustOwnTokens<U> {
+    return new MustOwnTokens<U>({
       amountRange: item.amountRange
         ? new UintRange(item.amountRange).convert(convertFunction)
         : new UintRange({ start: 0n, end: 0n }).convert(convertFunction),
-      badgeIds: item.badgeIds ? UintRangeArray.From(item.badgeIds).convert(convertFunction) : new UintRangeArray<U>(),
+      tokenIds: item.tokenIds ? UintRangeArray.From(item.tokenIds).convert(convertFunction) : new UintRangeArray<U>(),
       overrideWithCurrentTime: item.overrideWithCurrentTime,
       mustSatisfyForAllAssets: item.mustSatisfyForAllAssets,
       ownershipTimes: item.ownershipTimes ? UintRangeArray.From(item.ownershipTimes).convert(convertFunction) : new UintRangeArray<U>(),
@@ -852,106 +852,106 @@ export class CollectionMetadataTimeline<T extends NumberType>
 /**
  * @category Timelines
  */
-export class BadgeMetadataTimelineWithDetails<T extends NumberType>
-  extends BaseNumberTypeClass<BadgeMetadataTimelineWithDetails<T>>
-  implements iBadgeMetadataTimelineWithDetails<T>
+export class TokenMetadataTimelineWithDetails<T extends NumberType>
+  extends BaseNumberTypeClass<TokenMetadataTimelineWithDetails<T>>
+  implements iTokenMetadataTimelineWithDetails<T>
 {
-  badgeMetadata: BadgeMetadataDetails<T>[];
+  tokenMetadata: TokenMetadataDetails<T>[];
   timelineTimes: UintRangeArray<T>;
 
-  constructor(badgeMetadataTimeline: iBadgeMetadataTimelineWithDetails<T>) {
+  constructor(tokenMetadataTimeline: iTokenMetadataTimelineWithDetails<T>) {
     super();
-    this.timelineTimes = UintRangeArray.From(badgeMetadataTimeline.timelineTimes);
-    this.badgeMetadata = badgeMetadataTimeline.badgeMetadata.map((b) => new BadgeMetadataDetails(b));
+    this.timelineTimes = UintRangeArray.From(tokenMetadataTimeline.timelineTimes);
+    this.tokenMetadata = tokenMetadataTimeline.tokenMetadata.map((b) => new TokenMetadataDetails(b));
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): BadgeMetadataTimelineWithDetails<U> {
-    return new BadgeMetadataTimelineWithDetails<U>(
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): TokenMetadataTimelineWithDetails<U> {
+    return new TokenMetadataTimelineWithDetails<U>(
       deepCopyPrimitives({
-        badgeMetadata: this.badgeMetadata.map((b) => b.convert(convertFunction)),
+        tokenMetadata: this.tokenMetadata.map((b) => b.convert(convertFunction)),
         timelineTimes: this.timelineTimes.map((b) => b.convert(convertFunction))
       })
     );
   }
 
-  toProto(): protobadges.BadgeMetadataTimeline {
-    return new protobadges.BadgeMetadataTimeline(this.convert(Stringify));
+  toProto(): protobadges.TokenMetadataTimeline {
+    return new protobadges.TokenMetadataTimeline(this.convert(Stringify));
   }
 }
 
 /**
- * BadgeMetadataTimeline represents the value of the token metadata over time
+ * TokenMetadataTimeline represents the value of the token metadata over time
  *
  * @category Timelines
  */
-export class BadgeMetadataTimeline<T extends NumberType> extends BaseNumberTypeClass<BadgeMetadataTimeline<T>> implements iBadgeMetadataTimeline<T> {
-  badgeMetadata: BadgeMetadata<T>[];
+export class TokenMetadataTimeline<T extends NumberType> extends BaseNumberTypeClass<TokenMetadataTimeline<T>> implements iTokenMetadataTimeline<T> {
+  tokenMetadata: TokenMetadata<T>[];
   timelineTimes: UintRangeArray<T>;
 
-  constructor(badgeMetadataTimeline: iBadgeMetadataTimeline<T>) {
+  constructor(tokenMetadataTimeline: iTokenMetadataTimeline<T>) {
     super();
-    this.timelineTimes = UintRangeArray.From(badgeMetadataTimeline.timelineTimes);
-    this.badgeMetadata = badgeMetadataTimeline.badgeMetadata.map((b) => new BadgeMetadata(b));
+    this.timelineTimes = UintRangeArray.From(tokenMetadataTimeline.timelineTimes);
+    this.tokenMetadata = tokenMetadataTimeline.tokenMetadata.map((b) => new TokenMetadata(b));
   }
 
-  static required(): BadgeMetadataTimeline<NumberType> {
-    return new BadgeMetadataTimeline({
-      badgeMetadata: [],
+  static required(): TokenMetadataTimeline<NumberType> {
+    return new TokenMetadataTimeline({
+      tokenMetadata: [],
       timelineTimes: []
     });
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BadgeMetadataTimeline<U> {
-    return new BadgeMetadataTimeline<U>(
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TokenMetadataTimeline<U> {
+    return new TokenMetadataTimeline<U>(
       deepCopyPrimitives({
-        badgeMetadata: this.badgeMetadata.map((b) => b.convert(convertFunction)),
+        tokenMetadata: this.tokenMetadata.map((b) => b.convert(convertFunction)),
         timelineTimes: this.timelineTimes.map((b) => b.convert(convertFunction))
       })
     );
   }
 
-  toProto(): protobadges.BadgeMetadataTimeline {
-    return new protobadges.BadgeMetadataTimeline(this.convert(Stringify));
+  toProto(): protobadges.TokenMetadataTimeline {
+    return new protobadges.TokenMetadataTimeline(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
     jsonValue: JsonValue,
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
-  ): BadgeMetadataTimeline<U> {
-    return BadgeMetadataTimeline.fromProto(protobadges.BadgeMetadataTimeline.fromJson(jsonValue, options), convertFunction);
+  ): TokenMetadataTimeline<U> {
+    return TokenMetadataTimeline.fromProto(protobadges.TokenMetadataTimeline.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
     jsonString: string,
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
-  ): BadgeMetadataTimeline<U> {
-    return BadgeMetadataTimeline.fromProto(protobadges.BadgeMetadataTimeline.fromJsonString(jsonString, options), convertFunction);
+  ): TokenMetadataTimeline<U> {
+    return TokenMetadataTimeline.fromProto(protobadges.TokenMetadataTimeline.fromJsonString(jsonString, options), convertFunction);
   }
 
   static fromProto<U extends NumberType>(
-    item: protobadges.BadgeMetadataTimeline,
+    item: protobadges.TokenMetadataTimeline,
     convertFunction: (item: NumberType) => U
-  ): BadgeMetadataTimeline<U> {
-    return new BadgeMetadataTimeline<U>({
-      badgeMetadata: item.badgeMetadata.map((b) => BadgeMetadata.fromProto(b, convertFunction)),
+  ): TokenMetadataTimeline<U> {
+    return new TokenMetadataTimeline<U>({
+      tokenMetadata: item.tokenMetadata.map((b) => TokenMetadata.fromProto(b, convertFunction)),
       timelineTimes: item.timelineTimes.map((b) => UintRange.fromProto(b, convertFunction))
     });
   }
 
   /**
-   * Wrapper for {@link validateBadgeMetadataUpdate}
+   * Wrapper for {@link validateTokenMetadataUpdate}
    */
   static validateUpdate<T extends NumberType>(
-    oldBadgeMetadata: BadgeMetadataTimeline<T>[],
-    newBadgeMetadata: BadgeMetadataTimeline<T>[],
-    canUpdateBadgeMetadata: TimedUpdateWithBadgeIdsPermission<T>[]
+    oldTokenMetadata: TokenMetadataTimeline<T>[],
+    newTokenMetadata: TokenMetadataTimeline<T>[],
+    canUpdateTokenMetadata: TimedUpdateWithTokenIdsPermission<T>[]
   ): Error | null {
-    return validateBadgeMetadataUpdate(
-      oldBadgeMetadata.map((b) => b.convert(BigIntify)),
-      newBadgeMetadata.map((b) => b.convert(BigIntify)),
-      canUpdateBadgeMetadata.map((b) => b.convert(BigIntify))
+    return validateTokenMetadataUpdate(
+      oldTokenMetadata.map((b) => b.convert(BigIntify)),
+      newTokenMetadata.map((b) => b.convert(BigIntify)),
+      canUpdateTokenMetadata.map((b) => b.convert(BigIntify))
     );
   }
 }
@@ -1286,17 +1286,17 @@ export function validateIsArchivedUpdate<T extends NumberType>(
   );
 }
 
-const castBadgeMetadataToUniversalPermission = <T extends NumberType>(badgeMetadata: BadgeMetadata<T>[]): UniversalPermission[] => {
-  if (badgeMetadata.length === 0) {
+const castTokenMetadataToUniversalPermission = <T extends NumberType>(tokenMetadata: TokenMetadata<T>[]): UniversalPermission[] => {
+  if (tokenMetadata.length === 0) {
     return [];
   }
 
   const castedPermissions: UniversalPermission[] = [];
-  for (const metadata of badgeMetadata) {
+  for (const metadata of tokenMetadata) {
     castedPermissions.push({
       ...AllDefaultValues,
-      badgeIds: metadata.badgeIds.convert(BigIntify),
-      usesBadgeIds: true,
+      tokenIds: metadata.tokenIds.convert(BigIntify),
+      usesTokenIds: true,
       arbitraryValue: metadata.uri + '<><><>' + metadata.customData
     });
   }
@@ -1311,23 +1311,23 @@ const castBadgeMetadataToUniversalPermission = <T extends NumberType>(badgeMetad
  *
  * @category Timelines
  */
-export function validateBadgeMetadataUpdate<T extends NumberType>(
-  oldBadgeMetadata: BadgeMetadataTimeline<T>[],
-  newBadgeMetadata: BadgeMetadataTimeline<T>[],
-  canUpdateBadgeMetadata: TimedUpdateWithBadgeIdsPermission<T>[]
+export function validateTokenMetadataUpdate<T extends NumberType>(
+  oldTokenMetadata: TokenMetadataTimeline<T>[],
+  newTokenMetadata: TokenMetadataTimeline<T>[],
+  canUpdateTokenMetadata: TimedUpdateWithTokenIdsPermission<T>[]
 ): Error | null {
-  const { times: oldTimes, values: oldValues } = getBadgeMetadataTimesAndValues(oldBadgeMetadata.map((b) => b.convert(BigIntify)));
+  const { times: oldTimes, values: oldValues } = getTokenMetadataTimesAndValues(oldTokenMetadata.map((b) => b.convert(BigIntify)));
   const oldTimelineFirstMatches = getPotentialUpdatesForTimelineValues(oldTimes, oldValues);
 
-  const { times: newTimes, values: newValues } = getBadgeMetadataTimesAndValues(newBadgeMetadata.map((b) => b.convert(BigIntify)));
+  const { times: newTimes, values: newValues } = getTokenMetadataTimesAndValues(newTokenMetadata.map((b) => b.convert(BigIntify)));
   const newTimelineFirstMatches = getPotentialUpdatesForTimelineValues(newTimes, newValues);
 
   const detailsToCheck = getUpdateCombinationsToCheck(oldTimelineFirstMatches, newTimelineFirstMatches, [], function (oldValue: any, newValue: any) {
-    const oldBadgeMetadata = oldValue as BadgeMetadata<T>[];
-    const firstMatchesForOld = GetFirstMatchOnly(castBadgeMetadataToUniversalPermission(oldBadgeMetadata));
+    const oldTokenMetadata = oldValue as TokenMetadata<T>[];
+    const firstMatchesForOld = GetFirstMatchOnly(castTokenMetadataToUniversalPermission(oldTokenMetadata));
 
-    const newBadgeMetadata = newValue as BadgeMetadata<T>[];
-    const firstMatchesForNew = GetFirstMatchOnly(castBadgeMetadataToUniversalPermission(newBadgeMetadata));
+    const newTokenMetadata = newValue as TokenMetadata<T>[];
+    const firstMatchesForNew = GetFirstMatchOnly(castTokenMetadataToUniversalPermission(newTokenMetadata));
 
     const detailsToReturn: UniversalPermissionDetails[] = [];
     const [overlapObjects, inOldButNotNew, inNewButNotOld] = getOverlapsAndNonOverlaps(firstMatchesForOld, firstMatchesForNew);
@@ -1360,7 +1360,7 @@ export function validateBadgeMetadataUpdate<T extends NumberType>(
   const details = detailsToCheck.map((x) => {
     const result = {
       timelineTimes: UintRangeArray.From([x.timelineTime]),
-      badgeIds: UintRangeArray.From([x.badgeId]),
+      tokenIds: UintRangeArray.From([x.tokenId]),
       ownershipTimes: UintRangeArray.From([x.ownershipTime]),
       transferTimes: UintRangeArray.From([x.transferTime]),
       toList: x.toList,
@@ -1370,9 +1370,9 @@ export function validateBadgeMetadataUpdate<T extends NumberType>(
     return result;
   });
 
-  const err = TimedUpdateWithBadgeIdsPermission.check(
+  const err = TimedUpdateWithTokenIdsPermission.check(
     details,
-    canUpdateBadgeMetadata.map((b) => b.convert(BigIntify))
+    canUpdateTokenMetadata.map((b) => b.convert(BigIntify))
   );
   if (err) {
     return err;
@@ -1405,7 +1405,7 @@ export function validateCollectionMetadataUpdate<T extends NumberType>(
     if (oldValue === null && newValue !== null) {
       detailsToCheck.push({
         timelineTime: new UintRange({ start: 1n, end: 1n }),
-        badgeId: new UintRange({ start: 1n, end: 1n }),
+        tokenId: new UintRange({ start: 1n, end: 1n }),
         ownershipTime: new UintRange({ start: 1n, end: 1n }),
         transferTime: new UintRange({ start: 1n, end: 1n }),
         toList: AddressList.AllAddresses(),
@@ -1423,7 +1423,7 @@ export function validateCollectionMetadataUpdate<T extends NumberType>(
       if (oldVal.uri !== newVal.uri || oldVal.customData !== newVal.customData) {
         detailsToCheck.push({
           timelineTime: new UintRange({ start: 1n, end: 1n }),
-          badgeId: new UintRange({ start: 1n, end: 1n }),
+          tokenId: new UintRange({ start: 1n, end: 1n }),
           ownershipTime: new UintRange({ start: 1n, end: 1n }),
           transferTime: new UintRange({ start: 1n, end: 1n }),
           toList: AddressList.AllAddresses(),
@@ -1487,7 +1487,7 @@ export function validateOffChainBalancesMetadataUpdate<T extends NumberType>(
     if (oldValue === null && newValue !== null) {
       detailsToCheck.push({
         timelineTime: new UintRange({ start: 1n, end: 1n }),
-        badgeId: new UintRange({ start: 1n, end: 1n }),
+        tokenId: new UintRange({ start: 1n, end: 1n }),
         ownershipTime: new UintRange({ start: 1n, end: 1n }),
         transferTime: new UintRange({ start: 1n, end: 1n }),
         toList: AddressList.AllAddresses(),
@@ -1505,7 +1505,7 @@ export function validateOffChainBalancesMetadataUpdate<T extends NumberType>(
       if (oldVal.uri !== newVal.uri || oldVal.customData !== newVal.customData) {
         detailsToCheck.push({
           timelineTime: new UintRange({ start: 1n, end: 1n }),
-          badgeId: new UintRange({ start: 1n, end: 1n }),
+          tokenId: new UintRange({ start: 1n, end: 1n }),
           ownershipTime: new UintRange({ start: 1n, end: 1n }),
           transferTime: new UintRange({ start: 1n, end: 1n }),
           toList: AddressList.AllAddresses(),
@@ -1544,7 +1544,7 @@ function getUpdatedStringCombinations(oldValue: any, newValue: any): UniversalPe
   if ((oldValue === null && newValue !== null) || (oldValue !== null && newValue === null) || oldValue !== newValue) {
     x.push({
       timelineTime: new UintRange({ start: 1n, end: 1n }),
-      badgeId: new UintRange({ start: 1n, end: 1n }),
+      tokenId: new UintRange({ start: 1n, end: 1n }),
       ownershipTime: new UintRange({ start: 1n, end: 1n }),
       transferTime: new UintRange({ start: 1n, end: 1n }),
       toList: AddressList.AllAddresses(),
@@ -1567,7 +1567,7 @@ function getUpdatedBoolCombinations(oldValue: any, newValue: any): UniversalPerm
     return [
       {
         timelineTime: new UintRange({ start: 1n, end: 1n }),
-        badgeId: new UintRange({ start: 1n, end: 1n }),
+        tokenId: new UintRange({ start: 1n, end: 1n }),
         ownershipTime: new UintRange({ start: 1n, end: 1n }),
         transferTime: new UintRange({ start: 1n, end: 1n }),
         toList: AddressList.AllAddresses(),
@@ -1679,7 +1679,7 @@ export function validateStandardsUpdate<T extends NumberType>(
         return [
           {
             timelineTime: new UintRange({ start: 1n, end: 1n }),
-            badgeId: new UintRange({ start: 1n, end: 1n }),
+            tokenId: new UintRange({ start: 1n, end: 1n }),
             ownershipTime: new UintRange({ start: 1n, end: 1n }),
             transferTime: new UintRange({ start: 1n, end: 1n }),
             toList: AddressList.AllAddresses(),
@@ -1695,7 +1695,7 @@ export function validateStandardsUpdate<T extends NumberType>(
         return [
           {
             timelineTime: new UintRange({ start: 1n, end: 1n }),
-            badgeId: new UintRange({ start: 1n, end: 1n }),
+            tokenId: new UintRange({ start: 1n, end: 1n }),
             ownershipTime: new UintRange({ start: 1n, end: 1n }),
             transferTime: new UintRange({ start: 1n, end: 1n }),
             toList: AddressList.AllAddresses(),
@@ -1713,7 +1713,7 @@ export function validateStandardsUpdate<T extends NumberType>(
             return [
               {
                 timelineTime: new UintRange({ start: 1n, end: 1n }),
-                badgeId: new UintRange({ start: 1n, end: 1n }),
+                tokenId: new UintRange({ start: 1n, end: 1n }),
                 ownershipTime: new UintRange({ start: 1n, end: 1n }),
                 transferTime: new UintRange({ start: 1n, end: 1n }),
                 toList: AddressList.AllAddresses(),
@@ -1800,15 +1800,15 @@ export function getCollectionMetadataTimesAndValues<T extends NumberType>(
 /**
  * @category Timelines
  */
-export function getBadgeMetadataTimesAndValues<T extends NumberType>(
-  timeline: BadgeMetadataTimeline<T>[]
-): { times: UintRangeArray<T>[]; values: BadgeMetadata<T>[][] } {
+export function getTokenMetadataTimesAndValues<T extends NumberType>(
+  timeline: TokenMetadataTimeline<T>[]
+): { times: UintRangeArray<T>[]; values: TokenMetadata<T>[][] } {
   const times: UintRangeArray<T>[] = [];
-  const values: BadgeMetadata<T>[][] = [];
+  const values: TokenMetadata<T>[][] = [];
 
   for (const timelineVal of timeline) {
     times.push(timelineVal.timelineTimes);
-    values.push(timelineVal.badgeMetadata);
+    values.push(timelineVal.tokenMetadata);
   }
 
   return { times, values };

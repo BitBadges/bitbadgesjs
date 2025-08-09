@@ -11,13 +11,13 @@ import { UintRange } from "./balances_pb.js";
  *
  * CollectionPermissions defines the permissions for the collection (i.e., what the manager can and cannot do).
  *
- * There are five types of permissions for a collection: ActionPermission, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, BadgeIdsActionPermission, and CollectionApprovalPermission.
+ * There are five types of permissions for a collection: ActionPermission, TimedUpdatePermission, TimedUpdateWithTokenIdsPermission, TokenIdsActionPermission, and CollectionApprovalPermission.
  *
  * The permission type allows fine-grained access control for each action.
  * - ActionPermission: defines when the manager can perform an action.
  * - TimedUpdatePermission: defines when the manager can update a timeline-based field and what times of the timeline can be updated.
- * - TimedUpdateWithBadgeIdsPermission: defines when the manager can update a timeline-based field for specific tokens and what times of the timeline can be updated.
- * - BadgeIdsActionPermission: defines when the manager can perform an action for specific tokens
+ * - TimedUpdateWithTokenIdsPermission: defines when the manager can update a timeline-based field for specific tokens and what times of the timeline can be updated.
+ * - TokenIdsActionPermission: defines when the manager can perform an action for specific tokens
  * - CollectionApprovalPermission: defines when the manager can update the transferability of the collection and what transfers can be updated vs. locked.
  *
  * Note there are a few different times here which could get confusing:
@@ -88,16 +88,16 @@ export class CollectionPermissions extends Message<CollectionPermissions> {
   /**
    * Permissions related to creating more tokens for the collection.
    *
-   * @generated from field: repeated badges.BadgeIdsActionPermission canUpdateValidBadgeIds = 8;
+   * @generated from field: repeated badges.TokenIdsActionPermission canUpdateValidTokenIds = 8;
    */
-  canUpdateValidBadgeIds: BadgeIdsActionPermission[] = [];
+  canUpdateValidTokenIds: TokenIdsActionPermission[] = [];
 
   /**
    * Permissions related to updating token metadata for specific tokens.
    *
-   * @generated from field: repeated badges.TimedUpdateWithBadgeIdsPermission canUpdateBadgeMetadata = 9;
+   * @generated from field: repeated badges.TimedUpdateWithTokenIdsPermission canUpdateTokenMetadata = 9;
    */
-  canUpdateBadgeMetadata: TimedUpdateWithBadgeIdsPermission[] = [];
+  canUpdateTokenMetadata: TimedUpdateWithTokenIdsPermission[] = [];
 
   /**
    * Permissions related to updating collection approvals.
@@ -121,8 +121,8 @@ export class CollectionPermissions extends Message<CollectionPermissions> {
     { no: 5, name: "canUpdateCustomData", kind: "message", T: TimedUpdatePermission, repeated: true },
     { no: 6, name: "canUpdateManager", kind: "message", T: TimedUpdatePermission, repeated: true },
     { no: 7, name: "canUpdateCollectionMetadata", kind: "message", T: TimedUpdatePermission, repeated: true },
-    { no: 8, name: "canUpdateValidBadgeIds", kind: "message", T: BadgeIdsActionPermission, repeated: true },
-    { no: 9, name: "canUpdateBadgeMetadata", kind: "message", T: TimedUpdateWithBadgeIdsPermission, repeated: true },
+    { no: 8, name: "canUpdateValidTokenIds", kind: "message", T: TokenIdsActionPermission, repeated: true },
+    { no: 9, name: "canUpdateTokenMetadata", kind: "message", T: TimedUpdateWithTokenIdsPermission, repeated: true },
     { no: 10, name: "canUpdateCollectionApprovals", kind: "message", T: CollectionApprovalPermission, repeated: true },
   ]);
 
@@ -226,9 +226,9 @@ export class UserPermissions extends Message<UserPermissions> {
  *
  * CollectionApprovalPermission defines what collection approved transfers can be updated vs. are locked.
  *
- * Each transfer is broken down to a (from, to, initiatedBy, transferTime, badgeId) tuple.
+ * Each transfer is broken down to a (from, to, initiatedBy, transferTime, tokenId) tuple.
  * For a transfer to match, we need to match ALL of the fields in the combination. 
- * These are determined by the fromListId, toListId, initiatedByListId, transferTimes, badgeIds fields.
+ * These are determined by the fromListId, toListId, initiatedByListId, transferTimes, tokenIds fields.
  * AddressLists are used for (from, to, initiatedBy) which are a permanent list of addresses identified by an ID (see AddressLists). 
  *
  * TimelineTimes: which timeline times of the collection's approvalsTimeline field can be updated or not?
@@ -275,9 +275,9 @@ export class CollectionApprovalPermission extends Message<CollectionApprovalPerm
   /**
    * Specifies the token IDs involved in the transfer.
    *
-   * @generated from field: repeated badges.UintRange badgeIds = 5;
+   * @generated from field: repeated badges.UintRange tokenIds = 5;
    */
-  badgeIds: UintRange[] = [];
+  tokenIds: UintRange[] = [];
 
   /**
    * Specifies the ownership times for the tokens in the transfer.
@@ -322,7 +322,7 @@ export class CollectionApprovalPermission extends Message<CollectionApprovalPerm
     { no: 2, name: "toListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "initiatedByListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 5, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 5, name: "tokenIds", kind: "message", T: UintRange, repeated: true },
     { no: 6, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
     { no: 9, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 10, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
@@ -377,9 +377,9 @@ export class UserOutgoingApprovalPermission extends Message<UserOutgoingApproval
   /**
    * Specifies the token IDs involved in the transfer.
    *
-   * @generated from field: repeated badges.UintRange badgeIds = 4;
+   * @generated from field: repeated badges.UintRange tokenIds = 4;
    */
-  badgeIds: UintRange[] = [];
+  tokenIds: UintRange[] = [];
 
   /**
    * Specifies the ownership times for the tokens in the transfer.
@@ -423,7 +423,7 @@ export class UserOutgoingApprovalPermission extends Message<UserOutgoingApproval
     { no: 1, name: "toListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "initiatedByListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 4, name: "tokenIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
     { no: 8, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 9, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
@@ -480,9 +480,9 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
   /**
    * Specifies the token IDs involved in the transfer.
    *
-   * @generated from field: repeated badges.UintRange badgeIds = 4;
+   * @generated from field: repeated badges.UintRange tokenIds = 4;
    */
-  badgeIds: UintRange[] = [];
+  tokenIds: UintRange[] = [];
 
   /**
    * Specifies the ownership times for the tokens in the transfer.
@@ -526,7 +526,7 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
     { no: 1, name: "fromListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "initiatedByListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 4, name: "tokenIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
     { no: 8, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 9, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
@@ -552,21 +552,21 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
 
 /**
  *
- * BadgeIdsActionPermission defines the permissions for updating a timeline-based field for specific tokens and specific token ownership times.
+ * TokenIdsActionPermission defines the permissions for updating a timeline-based field for specific tokens and specific token ownership times.
  * Currently, this is only used for creating new tokens.
  *
- * Ex: If you want to lock the ability to create new tokens for badgeIds [1,2] at ownershipTimes 1/1/2020 - 1/1/2021, 
- * you could set the combination (badgeIds: [1,2], ownershipTimelineTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
+ * Ex: If you want to lock the ability to create new tokens for tokenIds [1,2] at ownershipTimes 1/1/2020 - 1/1/2021, 
+ * you could set the combination (tokenIds: [1,2], ownershipTimelineTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
  *
- * @generated from message badges.BadgeIdsActionPermission
+ * @generated from message badges.TokenIdsActionPermission
  */
-export class BadgeIdsActionPermission extends Message<BadgeIdsActionPermission> {
+export class TokenIdsActionPermission extends Message<TokenIdsActionPermission> {
   /**
    * Specifies the token IDs involved in the transfer.
    *
-   * @generated from field: repeated badges.UintRange badgeIds = 1;
+   * @generated from field: repeated badges.UintRange tokenIds = 1;
    */
-  badgeIds: UintRange[] = [];
+  tokenIds: UintRange[] = [];
 
   /**
    * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
@@ -582,33 +582,33 @@ export class BadgeIdsActionPermission extends Message<BadgeIdsActionPermission> 
    */
   permanentlyForbiddenTimes: UintRange[] = [];
 
-  constructor(data?: PartialMessage<BadgeIdsActionPermission>) {
+  constructor(data?: PartialMessage<TokenIdsActionPermission>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.BadgeIdsActionPermission";
+  static readonly typeName = "badges.TokenIdsActionPermission";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 1, name: "tokenIds", kind: "message", T: UintRange, repeated: true },
     { no: 2, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
     { no: 3, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeIdsActionPermission {
-    return new BadgeIdsActionPermission().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TokenIdsActionPermission {
+    return new TokenIdsActionPermission().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BadgeIdsActionPermission {
-    return new BadgeIdsActionPermission().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): TokenIdsActionPermission {
+    return new TokenIdsActionPermission().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BadgeIdsActionPermission {
-    return new BadgeIdsActionPermission().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): TokenIdsActionPermission {
+    return new TokenIdsActionPermission().fromJsonString(jsonString, options);
   }
 
-  static equals(a: BadgeIdsActionPermission | PlainMessage<BadgeIdsActionPermission> | undefined, b: BadgeIdsActionPermission | PlainMessage<BadgeIdsActionPermission> | undefined): boolean {
-    return proto3.util.equals(BadgeIdsActionPermission, a, b);
+  static equals(a: TokenIdsActionPermission | PlainMessage<TokenIdsActionPermission> | undefined, b: TokenIdsActionPermission | PlainMessage<TokenIdsActionPermission> | undefined): boolean {
+    return proto3.util.equals(TokenIdsActionPermission, a, b);
   }
 }
 
@@ -727,20 +727,20 @@ export class TimedUpdatePermission extends Message<TimedUpdatePermission> {
 
 /**
  *
- * TimedUpdateWithBadgeIdsPermission defines the permissions for updating a timeline-based field for specific tokens.
+ * TimedUpdateWithTokenIdsPermission defines the permissions for updating a timeline-based field for specific tokens.
  *
- * Ex: If you want to lock the ability to update the metadata for badgeIds [1,2] for timelineTimes 1/1/2020 - 1/1/2021,
- * you could set the combination (badgeIds: [1,2], TimelineTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
+ * Ex: If you want to lock the ability to update the metadata for tokenIds [1,2] for timelineTimes 1/1/2020 - 1/1/2021,
+ * you could set the combination (tokenIds: [1,2], TimelineTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
  *
- * @generated from message badges.TimedUpdateWithBadgeIdsPermission
+ * @generated from message badges.TimedUpdateWithTokenIdsPermission
  */
-export class TimedUpdateWithBadgeIdsPermission extends Message<TimedUpdateWithBadgeIdsPermission> {
+export class TimedUpdateWithTokenIdsPermission extends Message<TimedUpdateWithTokenIdsPermission> {
   /**
    * Specifies the token IDs involved in the transfer.
    *
-   * @generated from field: repeated badges.UintRange badgeIds = 1;
+   * @generated from field: repeated badges.UintRange tokenIds = 1;
    */
-  badgeIds: UintRange[] = [];
+  tokenIds: UintRange[] = [];
 
   /**
    * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
@@ -763,34 +763,34 @@ export class TimedUpdateWithBadgeIdsPermission extends Message<TimedUpdateWithBa
    */
   timelineTimes: UintRange[] = [];
 
-  constructor(data?: PartialMessage<TimedUpdateWithBadgeIdsPermission>) {
+  constructor(data?: PartialMessage<TimedUpdateWithTokenIdsPermission>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.TimedUpdateWithBadgeIdsPermission";
+  static readonly typeName = "badges.TimedUpdateWithTokenIdsPermission";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 1, name: "tokenIds", kind: "message", T: UintRange, repeated: true },
     { no: 2, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
     { no: 3, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
     { no: 4, name: "timelineTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TimedUpdateWithBadgeIdsPermission {
-    return new TimedUpdateWithBadgeIdsPermission().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TimedUpdateWithTokenIdsPermission {
+    return new TimedUpdateWithTokenIdsPermission().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): TimedUpdateWithBadgeIdsPermission {
-    return new TimedUpdateWithBadgeIdsPermission().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): TimedUpdateWithTokenIdsPermission {
+    return new TimedUpdateWithTokenIdsPermission().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): TimedUpdateWithBadgeIdsPermission {
-    return new TimedUpdateWithBadgeIdsPermission().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): TimedUpdateWithTokenIdsPermission {
+    return new TimedUpdateWithTokenIdsPermission().fromJsonString(jsonString, options);
   }
 
-  static equals(a: TimedUpdateWithBadgeIdsPermission | PlainMessage<TimedUpdateWithBadgeIdsPermission> | undefined, b: TimedUpdateWithBadgeIdsPermission | PlainMessage<TimedUpdateWithBadgeIdsPermission> | undefined): boolean {
-    return proto3.util.equals(TimedUpdateWithBadgeIdsPermission, a, b);
+  static equals(a: TimedUpdateWithTokenIdsPermission | PlainMessage<TimedUpdateWithTokenIdsPermission> | undefined, b: TimedUpdateWithTokenIdsPermission | PlainMessage<TimedUpdateWithTokenIdsPermission> | undefined): boolean {
+    return proto3.util.equals(TimedUpdateWithTokenIdsPermission, a, b);
   }
 }
 

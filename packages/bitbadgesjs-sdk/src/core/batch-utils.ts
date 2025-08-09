@@ -14,7 +14,7 @@ export interface iBatchTokenDetails<T extends NumberType> {
   /** The collection ID of this element's token details. */
   collectionId: CollectionId;
   /** The corresponding token IDs for this collection ID. */
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
 }
 
 /**
@@ -22,12 +22,12 @@ export interface iBatchTokenDetails<T extends NumberType> {
  */
 export class BatchTokenDetails<T extends NumberType> extends BaseNumberTypeClass<BatchTokenDetails<T>> implements iBatchTokenDetails<T> {
   collectionId: CollectionId;
-  badgeIds: UintRangeArray<T>;
+  tokenIds: UintRangeArray<T>;
 
   constructor(data: iBatchTokenDetails<T>) {
     super();
     this.collectionId = data.collectionId;
-    this.badgeIds = UintRangeArray.From(data.badgeIds);
+    this.tokenIds = UintRangeArray.From(data.tokenIds);
   }
 
   getNumberFieldNames(): string[] {
@@ -38,7 +38,7 @@ export class BatchTokenDetails<T extends NumberType> extends BaseNumberTypeClass
     return new BatchTokenDetails<U>({
       ...this,
       collectionId: this.collectionId,
-      badgeIds: this.badgeIds.map((x) => x.convert(convertFunction))
+      tokenIds: this.tokenIds.map((x) => x.convert(convertFunction))
     });
   }
 
@@ -51,11 +51,11 @@ export class BatchTokenDetails<T extends NumberType> extends BaseNumberTypeClass
     const matchingElem = otherArr.find((x) => x.collectionId === this.collectionId);
     if (!matchingElem) return true;
 
-    return this.badgeIds.getOverlaps(matchingElem.badgeIds).length === 0;
+    return this.tokenIds.getOverlaps(matchingElem.tokenIds).length === 0;
   }
 
   /**
-   * Checks if the token details are a subset of another set of token details (i.e. all badgeIds are in the other set).
+   * Checks if the token details are a subset of another set of token details (i.e. all tokenIds are in the other set).
    */
   isSubsetOf(other: iBatchTokenDetails<T>[] | iBatchTokenDetails<T>): boolean {
     const otherArr: BatchTokenDetailsArray<T> = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
@@ -63,7 +63,7 @@ export class BatchTokenDetails<T extends NumberType> extends BaseNumberTypeClass
     const matchingElem = otherArr.find((x) => x.collectionId === this.collectionId);
     if (!matchingElem) return false;
 
-    const [remaining] = this.badgeIds.getOverlapDetails(matchingElem.badgeIds);
+    const [remaining] = this.tokenIds.getOverlapDetails(matchingElem.tokenIds);
     return remaining.length == 0;
   }
 
@@ -76,7 +76,7 @@ export class BatchTokenDetails<T extends NumberType> extends BaseNumberTypeClass
     const matchingElem = otherArr.find((x) => x.collectionId === this.collectionId);
     if (!matchingElem) return true;
 
-    return this.badgeIds.getOverlaps(matchingElem.badgeIds).length === 0;
+    return this.tokenIds.getOverlaps(matchingElem.tokenIds).length === 0;
   }
 
   toArray(): BatchTokenDetailsArray<T> {
@@ -126,55 +126,55 @@ export class BatchTokenDetailsArray<T extends NumberType> extends BaseTypedArray
   }
 
   /**
-   * Adds token details to the batch details array. If the collectionId already exists, it will merge the badgeIds.
+   * Adds token details to the batch details array. If the collectionId already exists, it will merge the tokenIds.
    */
   add(other: iBatchTokenDetails<T>[] | iBatchTokenDetails<T> | BatchTokenDetailsArray<T>) {
     const otherArr: BatchTokenDetails<T>[] = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
 
     let arr = BatchTokenDetailsArray.From(this);
-    for (const badgeIdObj of otherArr) {
-      const badgeIdsToAdd = badgeIdObj.badgeIds;
-      const existingIdx = arr.findIndex((x) => x.collectionId == badgeIdObj.collectionId);
+    for (const tokenIdObj of otherArr) {
+      const tokenIdsToAdd = tokenIdObj.tokenIds;
+      const existingIdx = arr.findIndex((x) => x.collectionId == tokenIdObj.collectionId);
       if (existingIdx != -1) {
-        arr[existingIdx].badgeIds = UintRangeArray.From([...arr[existingIdx].badgeIds, ...badgeIdsToAdd]).sortAndMerge();
+        arr[existingIdx].tokenIds = UintRangeArray.From([...arr[existingIdx].tokenIds, ...tokenIdsToAdd]).sortAndMerge();
       } else {
         arr.push(
           new BatchTokenDetails({
-            collectionId: badgeIdObj.collectionId,
-            badgeIds: badgeIdsToAdd
+            collectionId: tokenIdObj.collectionId,
+            tokenIds: tokenIdsToAdd
           })
         );
       }
     }
 
-    arr = BatchTokenDetailsArray.From(arr.filter((x) => x.badgeIds.length > 0));
+    arr = BatchTokenDetailsArray.From(arr.filter((x) => x.tokenIds.length > 0));
     this.length = 0;
     this.push(...arr);
   }
 
   /**
-   * Removes token details from the batch details array. If the collectionId already exists, it will remove the badgeIds.
+   * Removes token details from the batch details array. If the collectionId already exists, it will remove the tokenIds.
    */
   remove(other: iBatchTokenDetails<T>[] | iBatchTokenDetails<T> | BatchTokenDetailsArray<T>) {
     const otherArr: BatchTokenDetails<T>[] = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
 
     let arr = BatchTokenDetailsArray.From(this);
-    for (const badgeIdObj of otherArr) {
-      const badgeIdsToRemove = badgeIdObj.badgeIds;
+    for (const tokenIdObj of otherArr) {
+      const tokenIdsToRemove = tokenIdObj.tokenIds;
 
-      const existingIdx = arr.findIndex((x) => x.collectionId == badgeIdObj.collectionId);
+      const existingIdx = arr.findIndex((x) => x.collectionId == tokenIdObj.collectionId);
       if (existingIdx != -1) {
-        arr[existingIdx].badgeIds.remove(badgeIdsToRemove);
+        arr[existingIdx].tokenIds.remove(tokenIdsToRemove);
       }
     }
 
-    arr = BatchTokenDetailsArray.From(arr.filter((x) => x.badgeIds.length > 0));
+    arr = BatchTokenDetailsArray.From(arr.filter((x) => x.tokenIds.length > 0));
     this.length = 0;
     this.push(...arr);
   }
 
   /**
-   * Checks if the token details completely overlap with another set of token details (i.e. all badgeIds are in the other set).
+   * Checks if the token details completely overlap with another set of token details (i.e. all tokenIds are in the other set).
    */
   isSubsetOf(other: iBatchTokenDetails<T>[] | iBatchTokenDetails<T> | BatchTokenDetailsArray<T>) {
     const otherArr: BatchTokenDetails<T>[] = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
@@ -194,13 +194,13 @@ export class BatchTokenDetailsArray<T extends NumberType> extends BaseTypedArray
   /**
    * Get specific tokens for the batch details. Useful for displaying tokens on a page.
    *
-   * Assums that badgeIds are sorted, merged, and non-overlapping.
+   * Assums that tokenIds are sorted, merged, and non-overlapping.
    */
   getPage(_pageNumber: number, _pageSize: number, sortBy?: 'newest' | 'oldest' | undefined): BatchTokenDetailsArray<T> {
     if (this.length === 0) return BatchTokenDetailsArray.From<T>([]);
-    if (this[0].badgeIds.length === 0) return BatchTokenDetailsArray.From<T>([]);
+    if (this[0].tokenIds.length === 0) return BatchTokenDetailsArray.From<T>([]);
 
-    const converterFunction = getConverterFunction(this[0].badgeIds[0].start);
+    const converterFunction = getConverterFunction(this[0].tokenIds[0].start);
 
     const collectionObjectsToDisplay = BatchTokenDetailsArray.From(this.map((x) => x.convert(BigIntify)));
     const pageNumber = BigInt(_pageNumber);
@@ -210,7 +210,7 @@ export class BatchTokenDetailsArray<T extends NumberType> extends BaseTypedArray
       const totalNumPages = Math.ceil(
         Number(
           collectionObjectsToDisplay.reduce((acc, curr) => {
-            const numBadges = curr.badgeIds.reduce((acc, curr) => acc + (curr.end - curr.start + 1n), 0n);
+            const numBadges = curr.tokenIds.reduce((acc, curr) => acc + (curr.end - curr.start + 1n), 0n);
             return acc + numBadges;
           }, 0n)
         ) / _pageSize
@@ -220,42 +220,42 @@ export class BatchTokenDetailsArray<T extends NumberType> extends BaseTypedArray
     }
 
     const startIdxNum = BigInt((pageNumber - 1n) * pageSize);
-    const badgeIdsToDisplay = BatchTokenDetailsArray.From<bigint>([]);
+    const tokenIdsToDisplay = BatchTokenDetailsArray.From<bigint>([]);
 
     let currIdx = 0n;
     let numEntriesLeftToHandle = pageSize;
 
     for (const collectionObj of collectionObjectsToDisplay) {
-      for (const range of collectionObj.badgeIds) {
+      for (const range of collectionObj.tokenIds) {
         const numBadgesInRange = range.end - range.start + 1n;
 
         // If we have reached the start of the page, handle this range
         if (currIdx + numBadgesInRange >= startIdxNum) {
           //Find token ID to start at
-          let currBadgeId = range.start;
+          let currTokenId = range.start;
           if (currIdx < startIdxNum) {
-            currBadgeId = range.start + (startIdxNum - currIdx);
+            currTokenId = range.start + (startIdxNum - currIdx);
           }
 
-          //Iterate through the range and add badgeIds to the array, until we have added enough
-          const badgeIdsToDisplayIds = UintRangeArray.From<bigint>([]);
+          //Iterate through the range and add tokenIds to the array, until we have added enough
+          const tokenIdsToDisplayIds = UintRangeArray.From<bigint>([]);
           if (numEntriesLeftToHandle > 0) {
-            const endBadgeId = bigIntMin(currBadgeId + numEntriesLeftToHandle - 1n, range.end);
-            if (currBadgeId <= endBadgeId) {
-              badgeIdsToDisplayIds.push(new UintRange({ start: currBadgeId, end: endBadgeId }));
+            const endTokenId = bigIntMin(currTokenId + numEntriesLeftToHandle - 1n, range.end);
+            if (currTokenId <= endTokenId) {
+              tokenIdsToDisplayIds.push(new UintRange({ start: currTokenId, end: endTokenId }));
             }
           }
 
-          const badgeIdsToAdd = badgeIdsToDisplayIds.clone().sortAndMerge();
+          const tokenIdsToAdd = tokenIdsToDisplayIds.clone().sortAndMerge();
 
-          badgeIdsToDisplay.push(
+          tokenIdsToDisplay.push(
             new BatchTokenDetails({
               collectionId: collectionObj.collectionId,
-              badgeIds: badgeIdsToAdd
+              tokenIds: tokenIdsToAdd
             })
           );
 
-          const numBadgesAdded = badgeIdsToAdd.reduce((acc, curr) => acc + (curr.end - curr.start + 1n), 0n);
+          const numBadgesAdded = tokenIdsToAdd.reduce((acc, curr) => acc + (curr.end - curr.start + 1n), 0n);
 
           numEntriesLeftToHandle -= numBadgesAdded;
 
@@ -266,6 +266,6 @@ export class BatchTokenDetailsArray<T extends NumberType> extends BaseTypedArray
       }
     }
 
-    return badgeIdsToDisplay.convert(converterFunction);
+    return tokenIdsToDisplay.convert(converterFunction);
   }
 }

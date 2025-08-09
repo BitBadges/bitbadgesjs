@@ -7,8 +7,8 @@ import { generateAlias, getAliasDerivationKeysForBadge } from '@/core/aliases.js
 import { getMintApprovals, getNonMintApprovals, getUnhandledCollectionApprovals } from '@/core/approval-utils.js';
 import { CollectionApprovalWithDetails, iCollectionApprovalWithDetails } from '@/core/approvals.js';
 import {
-  BadgeMetadataTimeline,
-  BadgeMetadataTimelineWithDetails,
+  TokenMetadataTimeline,
+  TokenMetadataTimelineWithDetails,
   CollectionMetadataTimelineWithDetails,
   CosmosCoinWrapperPathWithDetails,
   CustomDataTimeline,
@@ -21,18 +21,18 @@ import type { PermissionNameString } from '@/core/permission-utils.js';
 import { getPermissionVariablesFromName } from '@/core/permission-utils.js';
 import {
   ActionPermission,
-  BadgeIdsActionPermission,
+  TokenIdsActionPermission,
   CollectionApprovalPermissionWithDetails,
   CollectionPermissionsWithDetails,
   TimedUpdatePermission,
-  TimedUpdateWithBadgeIdsPermission
+  TimedUpdateWithTokenIdsPermission
 } from '@/core/permissions.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStoreWithDetails } from '@/core/userBalances.js';
 import type {
   CollectionId,
   iAddressList,
-  iBadgeMetadataTimelineWithDetails,
+  iTokenMetadataTimelineWithDetails,
   iCollectionMetadataTimelineWithDetails,
   iUintRange
 } from '@/interfaces/types/core.js';
@@ -42,7 +42,7 @@ import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { TransferActivityDoc } from './docs-types/activity.js';
 import {
   ApprovalTrackerDoc,
-  BadgeFloorPriceDoc,
+  TokenFloorPriceDoc,
   BalanceDocWithDetails,
   CollectionDoc,
   CollectionStatsDoc,
@@ -51,7 +51,7 @@ import {
 } from './docs-types/docs.js';
 import type {
   iApprovalTrackerDoc,
-  iBadgeFloorPriceDoc,
+  iTokenFloorPriceDoc,
   iBalanceDocWithDetails,
   iClaimDetails,
   iCollectionDoc,
@@ -62,7 +62,7 @@ import type {
   iUtilityPageDoc,
   NativeAddress
 } from './docs-types/interfaces.js';
-import { BadgeMetadataDetails, CollectionMetadataDetails } from './metadata/badgeMetadata.js';
+import { TokenMetadataDetails, CollectionMetadataDetails } from './metadata/badgeMetadata.js';
 
 import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
@@ -109,7 +109,7 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   /** The collection metadata timeline for this collection, with off-chain metadata populated. */
   collectionMetadataTimeline: iCollectionMetadataTimelineWithDetails<T>[];
   /** The token metadata timeline for this collection, with off-chain metadata populated. */
-  badgeMetadataTimeline: iBadgeMetadataTimelineWithDetails<T>[];
+  tokenMetadataTimeline: iTokenMetadataTimelineWithDetails<T>[];
 
   /** The default balances for users upon genesis, with off-chain metadata populated. */
   defaultBalances: iUserBalanceStoreWithDetails<T>;
@@ -148,7 +148,7 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   stats?: iCollectionStatsDoc<T>;
 
   /** The floor prices for this collection. */
-  badgeFloorPrices?: iBadgeFloorPriceDoc<T>[];
+  tokenFloorPrices?: iTokenFloorPriceDoc<T>[];
 
   /** The IBC wrapper paths for the collection, with off-chain metadata populated. */
   cosmosCoinWrapperPaths: iCosmosCoinWrapperPathWithDetails<T>[];
@@ -158,7 +158,7 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
  * @category Collections
  */
 export interface iCollectionNSFW<T extends NumberType> {
-  badgeIds: UintRangeArray<T>;
+  tokenIds: UintRangeArray<T>;
   reason: string;
 }
 
@@ -177,7 +177,7 @@ export class BitBadgesCollection<T extends NumberType>
   defaultBalances: UserBalanceStoreWithDetails<T>;
 
   collectionMetadataTimeline: CollectionMetadataTimelineWithDetails<T>[];
-  badgeMetadataTimeline: BadgeMetadataTimelineWithDetails<T>[];
+  tokenMetadataTimeline: TokenMetadataTimelineWithDetails<T>[];
 
   activity: TransferActivityDoc<T>[];
   owners: BalanceDocWithDetails<T>[];
@@ -188,8 +188,8 @@ export class BitBadgesCollection<T extends NumberType>
 
   claims: ClaimDetails<T>[];
 
-  nsfw?: { badgeIds: UintRangeArray<T>; reason: string };
-  reported?: { badgeIds: UintRangeArray<T>; reason: string };
+  nsfw?: { tokenIds: UintRangeArray<T>; reason: string };
+  reported?: { tokenIds: UintRangeArray<T>; reason: string };
 
   views: {
     [viewId: string]:
@@ -203,7 +203,7 @@ export class BitBadgesCollection<T extends NumberType>
 
   stats?: CollectionStatsDoc<T>;
 
-  badgeFloorPrices?: iBadgeFloorPriceDoc<T>[] | undefined;
+  tokenFloorPrices?: iTokenFloorPriceDoc<T>[] | undefined;
 
   cosmosCoinWrapperPaths: CosmosCoinWrapperPathWithDetails<T>[];
 
@@ -215,18 +215,18 @@ export class BitBadgesCollection<T extends NumberType>
     this.collectionMetadataTimeline = data.collectionMetadataTimeline.map(
       (collectionMetadata) => new CollectionMetadataTimelineWithDetails(collectionMetadata)
     );
-    this.badgeMetadataTimeline = data.badgeMetadataTimeline.map((badgeMetadata) => new BadgeMetadataTimelineWithDetails(badgeMetadata));
+    this.tokenMetadataTimeline = data.tokenMetadataTimeline.map((tokenMetadata) => new TokenMetadataTimelineWithDetails(tokenMetadata));
     this.activity = data.activity.map((activityItem) => new TransferActivityDoc(activityItem));
     this.owners = data.owners.map((balance) => new BalanceDocWithDetails(balance));
     this.challengeTrackers = data.challengeTrackers.map((merkleChallenge) => new MerkleChallengeTrackerDoc(merkleChallenge));
     this.approvalTrackers = data.approvalTrackers.map((approvalTracker) => new ApprovalTrackerDoc(approvalTracker));
     this.listings = data.listings.map((listing) => new UtilityPageDoc(listing));
-    this.nsfw = data.nsfw ? { ...data.nsfw, badgeIds: UintRangeArray.From(data.nsfw.badgeIds) } : undefined;
-    this.reported = data.reported ? { ...data.reported, badgeIds: UintRangeArray.From(data.reported.badgeIds) } : undefined;
+    this.nsfw = data.nsfw ? { ...data.nsfw, tokenIds: UintRangeArray.From(data.nsfw.tokenIds) } : undefined;
+    this.reported = data.reported ? { ...data.reported, tokenIds: UintRangeArray.From(data.reported.tokenIds) } : undefined;
     this.views = data.views;
     this.claims = data.claims.map((x) => new ClaimDetails(x));
     this.stats = data.stats ? new CollectionStatsDoc(data.stats) : undefined;
-    this.badgeFloorPrices = data.badgeFloorPrices?.map((x) => new BadgeFloorPriceDoc(x));
+    this.tokenFloorPrices = data.tokenFloorPrices?.map((x) => new TokenFloorPriceDoc(x));
     this.cosmosCoinWrapperPaths = data.cosmosCoinWrapperPaths.map((x) => new CosmosCoinWrapperPathWithDetails(x));
   }
 
@@ -291,14 +291,14 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Sets the token metadata for certain times (defaults to all times).
    */
-  setBadgeMetadataForTimes(metadata: BadgeMetadataDetails<T>[], timelineTimesToSet?: iUintRange<T>[]) {
+  setTokenMetadataForTimes(metadata: TokenMetadataDetails<T>[], timelineTimesToSet?: iUintRange<T>[]) {
     const converterFunction = getConverterFunction(this.createdBlock);
-    const fullTimeline: BadgeMetadataTimelineWithDetails<T>[] = timelineTimesToSet
-      ? this.badgeMetadataTimeline
+    const fullTimeline: TokenMetadataTimelineWithDetails<T>[] = timelineTimesToSet
+      ? this.tokenMetadataTimeline
           .map((x) => x.clone())
           .map((x) => {
             const newTimes = x.timelineTimes.clone().remove(timelineTimesToSet);
-            return new BadgeMetadataTimelineWithDetails({
+            return new TokenMetadataTimelineWithDetails({
               ...x,
               timelineTimes: newTimes
             });
@@ -307,8 +307,8 @@ export class BitBadgesCollection<T extends NumberType>
       : [];
 
     fullTimeline.push(
-      new BadgeMetadataTimelineWithDetails<NumberType>({
-        badgeMetadata: metadata,
+      new TokenMetadataTimelineWithDetails<NumberType>({
+        tokenMetadata: metadata,
         timelineTimes: timelineTimesToSet ? UintRangeArray.From(timelineTimesToSet ?? []) : UintRangeArray.FullRanges()
       }).convert(converterFunction)
     );
@@ -316,42 +316,42 @@ export class BitBadgesCollection<T extends NumberType>
     return fullTimeline;
   }
 
-  getCurrentBadgeMetadata() {
-    return getCurrentValueForTimeline(this.badgeMetadataTimeline)?.badgeMetadata.map((x) => x.clone()) ?? [];
+  getCurrentTokenMetadata() {
+    return getCurrentValueForTimeline(this.tokenMetadataTimeline)?.tokenMetadata.map((x) => x.clone()) ?? [];
   }
 
   /**
    * Get the metadata for a specific token ID. This is the fetched metadata, not the timeline values.
    *
    * This only returns the metadata object (name, image, etc.) and not the URI or other accompanying details.
-   * For those, use getBadgeMetadataDetails.
+   * For those, use getTokenMetadataDetails.
    *
    * @example
    * ```ts
    * const collection: BitBadgesCollection<bigint> = { ... }
-   * const badgeId = 123n
-   * const metadata = collection.getBadgeMetadata(badgeId)
+   * const tokenId = 123n
+   * const metadata = collection.getTokenMetadata(tokenId)
    * const metadataImage = metadata.image
    * ```
    */
-  getBadgeMetadata(badgeId: T) {
-    return BadgeMetadataDetails.getMetadataForBadgeId(badgeId, this.getCurrentBadgeMetadata());
+  getTokenMetadata(tokenId: T) {
+    return TokenMetadataDetails.getMetadataForTokenId(tokenId, this.getCurrentTokenMetadata());
   }
 
   /**
    * Gets the details for a specific token ID. This includes the metadata, URI, and custom data.
    *
-   * If you only want the metadata, use getBadgeMetadata, or you can access it via result.metadata.
+   * If you only want the metadata, use getTokenMetadata, or you can access it via result.metadata.
    */
-  getBadgeMetadataDetails(badgeId: T) {
-    return BadgeMetadataDetails.getMetadataDetailsForBadgeId(badgeId, this.getCurrentBadgeMetadata());
+  getTokenMetadataDetails(tokenId: T) {
+    return TokenMetadataDetails.getMetadataDetailsForTokenId(tokenId, this.getCurrentTokenMetadata());
   }
 
   /**
-   * Gets a UintRangeArray of 1 - Max Token ID for the collection (i.e. [{ start: 1n, end: maxBadgeId }]).
+   * Gets a UintRangeArray of 1 - Max Token ID for the collection (i.e. [{ start: 1n, end: maxTokenId }]).
    */
-  getBadgeIdRange() {
-    return UintRangeArray.From([{ start: 1n, end: this.getMaxBadgeId() }]);
+  getTokenIdRange() {
+    return UintRangeArray.From([{ start: 1n, end: this.getMaxTokenId() }]);
   }
 
   /**
@@ -437,15 +437,15 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * Precondition: The Total balance must be fetched.
    */
-  getMaxBadgeId(): bigint {
-    let maxBadgeId = 0n;
-    for (const badgeIdRange of this.validBadgeIds.convert(BigIntify)) {
-      if (badgeIdRange.end > maxBadgeId) {
-        maxBadgeId = badgeIdRange.end;
+  getMaxTokenId(): bigint {
+    let maxTokenId = 0n;
+    for (const tokenIdRange of this.validTokenIds.convert(BigIntify)) {
+      if (tokenIdRange.end > maxTokenId) {
+        maxTokenId = tokenIdRange.end;
       }
     }
 
-    return maxBadgeId;
+    return maxTokenId;
   }
 
   /**
@@ -454,7 +454,7 @@ export class BitBadgesCollection<T extends NumberType>
    * @example
    * ```ts
    * const collection: BitBadgesCollection<bigint> = { ... }
-   * const metadataToFetch = collection.pruneMetadataToFetch({ badgeIds: [1n, 2n, 3n], uris: ['ipfs://...'] })
+   * const metadataToFetch = collection.pruneMetadataToFetch({ tokenIds: [1n, 2n, 3n], uris: ['ipfs://...'] })
    * console.log(metadataToFetch)
    * ```
    */
@@ -511,13 +511,13 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Validates if a state transition (old token metadata -> new token metadata) is valid, given the current state of the collection and its permissions.
    *
-   * Wrapper for {@link BadgeMetadataTimeline.validateUpdate}.
+   * Wrapper for {@link TokenMetadataTimeline.validateUpdate}.
    */
-  validateBadgeMetadataUpdate(newBadgeMetadata: BadgeMetadataTimeline<T>[]): Error | null {
-    const result = BadgeMetadataTimeline.validateUpdate(
-      this.badgeMetadataTimeline,
-      newBadgeMetadata,
-      this.collectionPermissions.canUpdateBadgeMetadata
+  validateTokenMetadataUpdate(newTokenMetadata: TokenMetadataTimeline<T>[]): Error | null {
+    const result = TokenMetadataTimeline.validateUpdate(
+      this.tokenMetadataTimeline,
+      newTokenMetadata,
+      this.collectionPermissions.canUpdateTokenMetadata
     );
     return result;
   }
@@ -664,28 +664,28 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * Wrapper for {@link TimedUpdatePermission.check}.
    */
-  checkCanUpdateValidBadgeIds(badgeIds: iUintRange<T>[], time?: NumberType) {
-    return BadgeIdsActionPermission.check(
-      badgeIds.map((x) => {
-        return { badgeIds: UintRangeArray.From([x]).convert(BigIntify) };
+  checkCanUpdateValidTokenIds(tokenIds: iUintRange<T>[], time?: NumberType) {
+    return TokenIdsActionPermission.check(
+      tokenIds.map((x) => {
+        return { tokenIds: UintRangeArray.From([x]).convert(BigIntify) };
       }),
-      this.convert(BigIntify).collectionPermissions.canUpdateValidBadgeIds,
+      this.convert(BigIntify).collectionPermissions.canUpdateValidTokenIds,
       time ? BigInt(time) : BigInt(Date.now())
     );
   }
   /**
    * Checks if this permission is executable for the provided values at a specific time (Date.now() by default).
    */
-  checkCanUpdateBadgeMetadata(details: { timelineTimes: iUintRange<NumberType>[]; badgeIds: iUintRange<NumberType>[] }[], time?: NumberType) {
-    return TimedUpdateWithBadgeIdsPermission.check(
+  checkCanUpdateTokenMetadata(details: { timelineTimes: iUintRange<NumberType>[]; tokenIds: iUintRange<NumberType>[] }[], time?: NumberType) {
+    return TimedUpdateWithTokenIdsPermission.check(
       details.map((x) => {
         return {
           ...x,
           timelineTimes: UintRangeArray.From(x.timelineTimes).convert(BigIntify),
-          badgeIds: UintRangeArray.From(x.badgeIds).convert(BigIntify)
+          tokenIds: UintRangeArray.From(x.tokenIds).convert(BigIntify)
         };
       }),
-      this.convert(BigIntify).collectionPermissions.canUpdateBadgeMetadata,
+      this.convert(BigIntify).collectionPermissions.canUpdateTokenMetadata,
       time ? BigInt(time) : BigInt(Date.now())
     );
   }
@@ -698,7 +698,7 @@ export class BitBadgesCollection<T extends NumberType>
   checkCanUpdateCollectionApprovals(
     details: {
       timelineTimes: iUintRange<NumberType>[];
-      badgeIds: iUintRange<NumberType>[];
+      tokenIds: iUintRange<NumberType>[];
       ownershipTimes: iUintRange<NumberType>[];
       transferTimes: iUintRange<NumberType>[];
       toList: iAddressList;
@@ -715,7 +715,7 @@ export class BitBadgesCollection<T extends NumberType>
         return {
           ...x,
           timelineTimes: UintRangeArray.From(x.timelineTimes).convert(BigIntify),
-          badgeIds: UintRangeArray.From(x.badgeIds).convert(BigIntify),
+          tokenIds: UintRangeArray.From(x.tokenIds).convert(BigIntify),
           ownershipTimes: UintRangeArray.From(x.ownershipTimes).convert(BigIntify),
           transferTimes: UintRangeArray.From(x.transferTimes).convert(BigIntify),
           toList: new AddressList(x.toList),
@@ -864,7 +864,7 @@ export class BitBadgesCollection<T extends NumberType>
       shouldFetchMerklechallengeTrackerIds ||
       shouldFetchAmountTrackerIds ||
       options.fetchPrivateParams ||
-      options.badgeFloorPricesToFetch
+      options.tokenFloorPricesToFetch
     );
   }
 
@@ -1024,8 +1024,8 @@ export class BitBadgesCollection<T extends NumberType>
         return this.getChallengeTrackersView(viewId) as CollectionViewData<T>[KeyType];
       case 'listings':
         return this.getListingsView(viewId) as CollectionViewData<T>[KeyType];
-      case 'badgeFloorPrices':
-        return this.getBadgeFloorPricesView(viewId) as CollectionViewData<T>[KeyType];
+      case 'tokenFloorPrices':
+        return this.getTokenFloorPricesView(viewId) as CollectionViewData<T>[KeyType];
       default:
         throw new Error(`Unknown view type: ${viewType}`);
     }
@@ -1078,10 +1078,10 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets the documents for a specific view.
    */
-  getBadgeFloorPricesView(viewId: string) {
+  getTokenFloorPricesView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
-      return this.badgeFloorPrices?.find((y) => y._docId === x);
-    }) ?? []) as BadgeFloorPriceDoc<T>[];
+      return this.tokenFloorPrices?.find((y) => y._docId === x);
+    }) ?? []) as TokenFloorPriceDoc<T>[];
   }
 
   /**
@@ -1089,9 +1089,9 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * Wrapper for {@link generateAlias}.
    */
-  generateAliasForBadgeId(badgeId: T) {
+  generateAliasForTokenId(tokenId: T) {
     const moduleName = 'badges';
-    const derivationKeys = getAliasDerivationKeysForBadge(this.collectionId, badgeId);
+    const derivationKeys = getAliasDerivationKeysForBadge(this.collectionId, tokenId);
     return generateAlias(moduleName, derivationKeys);
   }
 
@@ -1182,7 +1182,7 @@ export class BitBadgesCollection<T extends NumberType>
   static async GetTokenActivity<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
     collectionId: CollectionId,
-    badgeId: NumberType,
+    tokenId: NumberType,
     payload?: iGetTokenActivityPayload
   ) {
     try {
@@ -1192,10 +1192,10 @@ export class BitBadgesCollection<T extends NumberType>
       }
 
       api.assertPositiveCollectionId(collectionId);
-      api.assertPositiveInteger(badgeId);
+      api.assertPositiveInteger(tokenId);
 
       const response = await api.axios.get<iGetTokenActivitySuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetTokenActivityRoute(collectionId, badgeId)}`,
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetTokenActivityRoute(collectionId, tokenId)}`,
         { params: payload }
       );
       return new GetTokenActivitySuccessResponse(response.data).convert(api.ConvertFunction);
@@ -1208,8 +1208,8 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Get the token activity for a specific token ID. You have to handle the pagination yourself.
    */
-  async getTokenActivity(api: BaseBitBadgesApi<T>, badgeId: T, body: iGetTokenActivityPayload) {
-    return await BitBadgesCollection.GetTokenActivity(api, this.collectionId, badgeId, body);
+  async getTokenActivity(api: BaseBitBadgesApi<T>, tokenId: T, body: iGetTokenActivityPayload) {
+    return await BitBadgesCollection.GetTokenActivity(api, this.collectionId, tokenId, body);
   }
 
   /**
@@ -1218,7 +1218,7 @@ export class BitBadgesCollection<T extends NumberType>
   static async GetOwners<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
     collectionId: CollectionId,
-    badgeId: NumberType,
+    tokenId: NumberType,
     payload?: iGetOwnersPayload
   ) {
     try {
@@ -1228,10 +1228,10 @@ export class BitBadgesCollection<T extends NumberType>
       }
 
       api.assertPositiveCollectionId(collectionId);
-      api.assertPositiveInteger(badgeId);
+      api.assertPositiveInteger(tokenId);
 
       const response = await api.axios.get<iGetOwnersSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetOwnersRoute(collectionId, badgeId)}`,
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetOwnersRoute(collectionId, tokenId)}`,
         { params: payload }
       );
       return new GetOwnersSuccessResponse(response.data).convert(api.ConvertFunction);
@@ -1244,8 +1244,8 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets the owners for a specific token. You have to handle the pagination yourself.
    */
-  async getOwners(api: BaseBitBadgesApi<T>, badgeId: T, body: iGetOwnersPayload) {
-    return await BitBadgesCollection.GetOwners(api, this.collectionId, badgeId, body);
+  async getOwners(api: BaseBitBadgesApi<T>, tokenId: T, body: iGetOwnersPayload) {
+    return await BitBadgesCollection.GetOwners(api, this.collectionId, tokenId, body);
   }
 
   /**
@@ -1287,7 +1287,7 @@ type CollectionViewData<T extends NumberType> = {
   amountTrackers: ApprovalTrackerDoc<T>[];
   challengeTrackers: MerkleChallengeTrackerDoc<T>[];
   listings: UtilityPageDoc<T>[];
-  badgeFloorPrices: BadgeFloorPriceDoc<T>[];
+  tokenFloorPrices: TokenFloorPriceDoc<T>[];
 };
 
 /**
@@ -1320,29 +1320,29 @@ const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesC
   const metadataToFetch: Required<MetadataFetchOptions> = {
     doNotFetchCollectionMetadata: cachedCollection.getCollectionMetadata() !== undefined || metadataFetchReq?.doNotFetchCollectionMetadata || false,
     uris: [],
-    badgeIds: []
+    tokenIds: []
   };
 
-  const allBadgeIdsInMetadata = UintRangeArray.From(
+  const allTokenIdsInMetadata = UintRangeArray.From(
     cachedCollection
-      .getCurrentBadgeMetadata()
-      .map((x) => x.badgeIds)
+      .getCurrentTokenMetadata()
+      .map((x) => x.tokenIds)
       .flat()
   ).convert(BigIntify);
-  allBadgeIdsInMetadata.sortAndMerge();
-  const allBadgeIdsNotInMetadata = allBadgeIdsInMetadata.toInverted({ start: 1n, end: GO_MAX_UINT_64 });
+  allTokenIdsInMetadata.sortAndMerge();
+  const allTokenIdsNotInMetadata = allTokenIdsInMetadata.toInverted({ start: 1n, end: GO_MAX_UINT_64 });
 
   if (metadataFetchReq) {
-    const badgeMetadata = cachedCollection.getCurrentBadgeMetadata();
+    const tokenMetadata = cachedCollection.getCurrentTokenMetadata();
 
     //See if we already have the metadata corresponding to the uris
     if (metadataFetchReq.uris) {
       for (const uri of metadataFetchReq.uris) {
         if (!uri) continue;
 
-        const currentBadgeMetadata = cachedCollection.getCurrentBadgeMetadata();
+        const currentTokenMetadata = cachedCollection.getCurrentTokenMetadata();
         let hasMetadata = false;
-        for (const metadataDetails of currentBadgeMetadata) {
+        for (const metadataDetails of currentTokenMetadata) {
           if (metadataDetails.fetchedUri === uri && metadataDetails.metadata !== undefined) {
             hasMetadata = true;
             break;
@@ -1355,53 +1355,53 @@ const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesC
       }
     }
 
-    //Check if we have all metadata corresponding to the badgeIds
-    if (metadataFetchReq.badgeIds) {
-      for (const badgeId of metadataFetchReq.badgeIds) {
-        const badgeIdCastedAsUintRange = new UintRange(badgeId as iUintRange<NumberType>);
-        const badgeIdCastedAsNumber = badgeId as NumberType;
+    //Check if we have all metadata corresponding to the tokenIds
+    if (metadataFetchReq.tokenIds) {
+      for (const tokenId of metadataFetchReq.tokenIds) {
+        const tokenIdCastedAsUintRange = new UintRange(tokenId as iUintRange<NumberType>);
+        const tokenIdCastedAsNumber = tokenId as NumberType;
 
-        let badgeIdsLeft: UintRangeArray<bigint>;
-        if (typeof badgeIdCastedAsNumber === 'object' && badgeIdCastedAsUintRange.start && badgeIdCastedAsUintRange.end) {
-          badgeIdsLeft = UintRangeArray.From([badgeIdCastedAsUintRange.convert(BigIntify)]);
+        let tokenIdsLeft: UintRangeArray<bigint>;
+        if (typeof tokenIdCastedAsNumber === 'object' && tokenIdCastedAsUintRange.start && tokenIdCastedAsUintRange.end) {
+          tokenIdsLeft = UintRangeArray.From([tokenIdCastedAsUintRange.convert(BigIntify)]);
         } else {
-          badgeIdsLeft = UintRangeArray.From([{ start: BigInt(badgeIdCastedAsNumber), end: BigInt(badgeIdCastedAsNumber) }]);
+          tokenIdsLeft = UintRangeArray.From([{ start: BigInt(tokenIdCastedAsNumber), end: BigInt(tokenIdCastedAsNumber) }]);
         }
 
-        badgeIdsLeft.remove(allBadgeIdsNotInMetadata);
-        badgeIdsLeft.sortAndMerge();
+        tokenIdsLeft.remove(allTokenIdsNotInMetadata);
+        tokenIdsLeft.sortAndMerge();
 
         let infiniteLoopPreventer = 0;
         //Intutition: check singular, starting token ID. If it is same as others, handle all together. Else, just handle that and continue
-        while (badgeIdsLeft.length > 0) {
-          const currBadgeUintRange = badgeIdsLeft[0];
+        while (tokenIdsLeft.length > 0) {
+          const currBadgeUintRange = tokenIdsLeft[0];
           if (infiniteLoopPreventer++ > 1000) throw new Error('Infinite loop detected'); //Should never happen
 
-          //At any point, we should only have one badgeId to check because we remove the others
+          //At any point, we should only have one tokenId to check because we remove the others
           //And, we should always have it because it will be there even if unpopulated
           const allMatchingBadgeUintRanges = UintRangeArray.From({ start: currBadgeUintRange.start, end: currBadgeUintRange.start });
           let handled = false;
-          for (const metadataDetails of badgeMetadata) {
-            if (metadataDetails.badgeIds.searchIfExists(BigInt(currBadgeUintRange.start))) {
+          for (const metadataDetails of tokenMetadata) {
+            if (metadataDetails.tokenIds.searchIfExists(BigInt(currBadgeUintRange.start))) {
               handled = true;
 
               if (metadataDetails.metadata == undefined) {
                 //We do not have metadata for this tokenId yet
-                //If it has a placeholder, the URI only applies to this tokenId. Else, we can apply it to all badgeIds that map to this metadataId
+                //If it has a placeholder, the URI only applies to this tokenId. Else, we can apply it to all tokenIds that map to this metadataId
                 if (metadataDetails.uri.includes('{id}')) {
                   metadataToFetch.uris.push(metadataDetails.uri.replace('{id}', currBadgeUintRange.start.toString()));
-                  badgeIdsLeft.remove(allMatchingBadgeUintRanges);
+                  tokenIdsLeft.remove(allMatchingBadgeUintRanges);
                 } else {
                   metadataToFetch.uris.push(metadataDetails.uri);
-                  allMatchingBadgeUintRanges.push(...UintRangeArray.From(metadataDetails.badgeIds).convert(BigIntify));
+                  allMatchingBadgeUintRanges.push(...UintRangeArray.From(metadataDetails.tokenIds).convert(BigIntify));
                   allMatchingBadgeUintRanges.sortAndMerge();
-                  badgeIdsLeft.remove(allMatchingBadgeUintRanges);
+                  tokenIdsLeft.remove(allMatchingBadgeUintRanges);
                 }
               } else {
-                //We have metadata already and the fetchedUri applys to all these badgeIds so we can remove them all at once
-                allMatchingBadgeUintRanges.push(...UintRangeArray.From(metadataDetails.badgeIds).convert(BigIntify));
+                //We have metadata already and the fetchedUri applys to all these tokenIds so we can remove them all at once
+                allMatchingBadgeUintRanges.push(...UintRangeArray.From(metadataDetails.tokenIds).convert(BigIntify));
                 allMatchingBadgeUintRanges.sortAndMerge();
-                badgeIdsLeft.remove(allMatchingBadgeUintRanges);
+                tokenIdsLeft.remove(allMatchingBadgeUintRanges);
               }
 
               //else we don't have a metadataId for this token which means its manually updated and thus doesn't need to be fetched
@@ -1413,7 +1413,7 @@ const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesC
             throw new Error('Token ID not found in metadata'); //Shouldn't reach here since we handled above
           }
 
-          badgeIdsLeft.sortAndMerge();
+          tokenIdsLeft.sortAndMerge();
         }
       }
     }
@@ -1430,7 +1430,7 @@ function updateCollectionWithResponse<T extends NumberType>(
   newCollectionResponse: BitBadgesCollection<T>
 ): BitBadgesCollection<T> {
   //TODO: No idea why the deep copy is necessary but it breaks the timeline batch updates for existing collections if not
-  //      One place to look: somehow, I think that the indivudal elements in .badgeIds are the same object (cached[0].badgeIds === new[0].badgeIds)
+  //      One place to look: somehow, I think that the indivudal elements in .tokenIds are the same object (cached[0].tokenIds === new[0].tokenIds)
   //      I think the cachedCollection deepCopyPrimitives is the important one, but I'm not sure
 
   const convertFunction = getConverterFunction(newCollectionResponse.createdBlock);
@@ -1439,16 +1439,16 @@ function updateCollectionWithResponse<T extends NumberType>(
 
   const newCollection = newCollectionResponse;
 
-  const newBadgeMetadata =
-    newCollection.getCurrentBadgeMetadata() && newCollection.getCurrentBadgeMetadata().length > 0
-      ? BadgeMetadataDetails.batchUpdateBadgeMetadata(
-          cachedCollection.getCurrentBadgeMetadata(),
+  const newTokenMetadata =
+    newCollection.getCurrentTokenMetadata() && newCollection.getCurrentTokenMetadata().length > 0
+      ? TokenMetadataDetails.batchUpdateTokenMetadata(
+          cachedCollection.getCurrentTokenMetadata(),
           newCollection
-            .getCurrentBadgeMetadata()
+            .getCurrentTokenMetadata()
             .map((x) => x.convert(convertFunction))
             .filter((x) => x.metadata) //only update if we have new metadata
         )
-      : cachedCollection.getCurrentBadgeMetadata();
+      : cachedCollection.getCurrentTokenMetadata();
 
   const newViews = cachedCollection?.views || {};
 
@@ -1521,14 +1521,14 @@ function updateCollectionWithResponse<T extends NumberType>(
     }
   }
 
-  const badgeFloorPrices = cachedCollection.badgeFloorPrices || [];
-  for (const newBadgeFloorPrice of newCollection.badgeFloorPrices || []) {
-    //If we already have the badgeFloorPrice, replace it (we want newer data)
-    const existingBadgeFloorPrice = badgeFloorPrices.findIndex((x) => x._docId === newBadgeFloorPrice._docId);
-    if (existingBadgeFloorPrice !== -1) {
-      badgeFloorPrices[existingBadgeFloorPrice] = newBadgeFloorPrice;
+  const tokenFloorPrices = cachedCollection.tokenFloorPrices || [];
+  for (const newTokenFloorPrice of newCollection.tokenFloorPrices || []) {
+    //If we already have the tokenFloorPrice, replace it (we want newer data)
+    const existingTokenFloorPrice = tokenFloorPrices.findIndex((x) => x._docId === newTokenFloorPrice._docId);
+    if (existingTokenFloorPrice !== -1) {
+      tokenFloorPrices[existingTokenFloorPrice] = newTokenFloorPrice;
     } else {
-      badgeFloorPrices.push(newBadgeFloorPrice);
+      tokenFloorPrices.push(newTokenFloorPrice);
     }
   }
 
@@ -1540,26 +1540,26 @@ function updateCollectionWithResponse<T extends NumberType>(
     }
   }
 
-  const newBadgeMetadataTimeline = newCollection.badgeMetadataTimeline || cachedCollection?.badgeMetadataTimeline;
-  for (const timelineTime of newBadgeMetadataTimeline) {
+  const newTokenMetadataTimeline = newCollection.tokenMetadataTimeline || cachedCollection?.tokenMetadataTimeline;
+  for (const timelineTime of newTokenMetadataTimeline) {
     if (timelineTime.timelineTimes.searchIfExists(BigInt(Date.now()))) {
-      timelineTime.badgeMetadata = newBadgeMetadata;
+      timelineTime.tokenMetadata = newTokenMetadata;
     }
   }
 
-  //Update details accordingly. Note that there are certain fields which are always returned like collectionId, collectionUri, badgeUris, etc. We just ...spread these from the new response.
+  //Update details accordingly. Note that there are certain fields which are always returned like collectionId, collectionUri, tokenUris, etc. We just ...spread these from the new response.
   cachedCollection = new BitBadgesCollection({
     ...cachedCollection,
     ...newCollection,
     collectionMetadataTimeline: newCollectionMetadataTimeline,
-    badgeMetadataTimeline: newBadgeMetadataTimeline,
+    tokenMetadataTimeline: newTokenMetadataTimeline,
     activity,
     owners,
     challengeTrackers,
     approvalTrackers,
     listings,
     views: newViews,
-    badgeFloorPrices
+    tokenFloorPrices
   });
 
   if (cachedCollection.collectionId === NEW_COLLECTION_ID) {
@@ -1568,8 +1568,8 @@ function updateCollectionWithResponse<T extends NumberType>(
       delete timelineItem.collectionMetadata?.metadata?.fetchedAtBlock;
     }
 
-    for (const metadataDetails of cachedCollection.badgeMetadataTimeline) {
-      for (const metadata of metadataDetails.badgeMetadata) {
+    for (const metadataDetails of cachedCollection.tokenMetadataTimeline) {
+      for (const metadata of metadataDetails.tokenMetadata) {
         delete metadata.metadata?.fetchedAt;
         delete metadata.metadata?.fetchedAtBlock;
       }

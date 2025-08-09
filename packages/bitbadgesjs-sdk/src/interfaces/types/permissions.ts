@@ -46,7 +46,7 @@ export interface iUserOutgoingApprovalPermission<T extends NumberType> {
   /** The transfer times of the approved outgoing transfers. */
   transferTimes: iUintRange<T>[];
   /** The token IDs of the approved outgoing transfers. */
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
   /** The owned times of the approved outgoing transfers. */
   ownershipTimes: iUintRange<T>[];
   /** The approval ID of the approved outgoing transfers. Can use "All" to represent all IDs, "!approvalId" to represent all IDs except approvalId, or "approvalId" to represent only approvalId. */
@@ -68,7 +68,7 @@ export interface iUserIncomingApprovalPermission<T extends NumberType> {
   /** The transfer times of the approved incoming transfers. */
   transferTimes: iUintRange<T>[];
   /** The token IDs of the approved incoming transfers. */
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
   /** The owned times of the approved incoming transfers. */
   ownershipTimes: iUintRange<T>[];
   /** The approval ID of the approved incoming transfers. Can use "All" to represent all IDs, "!approvalId" to represent all IDs except approvalId, or "approvalId" to represent only approvalId. */
@@ -98,9 +98,9 @@ export interface iCollectionPermissions<T extends NumberType> {
   /** The permissions for updating the collection metadata. */
   canUpdateCollectionMetadata: iTimedUpdatePermission<T>[];
   /** The permissions for creating more tokens. */
-  canUpdateValidBadgeIds: iBadgeIdsActionPermission<T>[];
+  canUpdateValidTokenIds: iTokenIdsActionPermission<T>[];
   /** The permissions for updating the token metadata. */
-  canUpdateBadgeMetadata: iTimedUpdateWithBadgeIdsPermission<T>[];
+  canUpdateTokenMetadata: iTimedUpdateWithTokenIdsPermission<T>[];
   /** The permissions for updating the collection approved transfers. */
   canUpdateCollectionApprovals: iCollectionApprovalPermission<T>[];
 }
@@ -130,9 +130,9 @@ export interface iTimedUpdatePermission<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iBadgeIdsActionPermission<T extends NumberType> {
+export interface iTokenIdsActionPermission<T extends NumberType> {
   /** The token IDs that the permission applies to. */
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
   /** The permitted times of the permission. */
   permanentlyPermittedTimes: iUintRange<T>[];
   /** The forbidden times of the permission. */
@@ -142,11 +142,11 @@ export interface iBadgeIdsActionPermission<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iTimedUpdateWithBadgeIdsPermission<T extends NumberType> {
+export interface iTimedUpdateWithTokenIdsPermission<T extends NumberType> {
   /** The timeline times that the permission applies to. */
   timelineTimes: iUintRange<T>[];
   /** The token IDs that the permission applies to. */
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
   /** The permitted times of the permission. */
   permanentlyPermittedTimes: iUintRange<T>[];
   /** The forbidden times of the permission. */
@@ -166,7 +166,7 @@ export interface iCollectionApprovalPermission<T extends NumberType> {
   /** The transfer times of the approved transfers. */
   transferTimes: iUintRange<T>[];
   /** The token IDs of the approved transfers. */
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
   /** The owned times of the approved transfers. */
   ownershipTimes: iUintRange<T>[];
   /** The approval ID of the approved transfers. Can use "All" to represent all IDs, "!approvalId" to represent all IDs except approvalId, or "approvalId" to represent only approvalId. */

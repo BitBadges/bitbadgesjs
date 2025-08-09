@@ -46,7 +46,7 @@ import type { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTre
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import { AddressList, convertListIdToBech32 } from './addressLists.js';
 import { Balance, BalanceArray } from './balances.js';
-import { CoinTransfer, MerkleChallenge, MustOwnBadges, ETHSignatureChallenge } from './misc.js';
+import { CoinTransfer, MerkleChallenge, MustOwnTokens, ETHSignatureChallenge } from './misc.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
 import { GetListIdWithOptions, GetListWithOptions, GetUintRangesWithOptions, getOverlapsAndNonOverlaps } from './overlaps.js';
 import type { CollectionApprovalPermissionWithDetails } from './permissions.js';
@@ -213,7 +213,7 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
   toListId: string;
   initiatedByListId: string;
   transferTimes: UintRangeArray<T>;
-  badgeIds: UintRangeArray<T>;
+  tokenIds: UintRangeArray<T>;
   ownershipTimes: UintRangeArray<T>;
   approvalId: string;
   uri?: string;
@@ -226,7 +226,7 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
     this.toListId = msg.toListId;
     this.initiatedByListId = msg.initiatedByListId;
     this.transferTimes = UintRangeArray.From(msg.transferTimes);
-    this.badgeIds = UintRangeArray.From(msg.badgeIds);
+    this.tokenIds = UintRangeArray.From(msg.tokenIds);
     this.ownershipTimes = UintRangeArray.From(msg.ownershipTimes);
     this.approvalId = msg.approvalId;
     this.uri = msg.uri;
@@ -268,7 +268,7 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
       toListId: item.toListId,
       initiatedByListId: item.initiatedByListId,
       transferTimes: item.transferTimes.map((x) => UintRange.fromProto(x, convertFunction)),
-      badgeIds: item.badgeIds.map((x) => UintRange.fromProto(x, convertFunction)),
+      tokenIds: item.tokenIds.map((x) => UintRange.fromProto(x, convertFunction)),
       ownershipTimes: item.ownershipTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       approvalId: item.approvalId,
       uri: item.uri,
@@ -306,7 +306,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   implements iOutgoingApprovalCriteria<T>
 {
   merkleChallenges?: MerkleChallenge<T>[];
-  mustOwnBadges?: MustOwnBadges<T>[];
+  mustOwnTokens?: MustOwnTokens<T>[];
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
   maxNumTransfers?: MaxNumTransfers<T>;
@@ -321,7 +321,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   constructor(msg: iOutgoingApprovalCriteria<T>) {
     super();
     this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
-    this.mustOwnBadges = msg.mustOwnBadges?.map((x) => new MustOwnBadges(x));
+    this.mustOwnTokens = msg.mustOwnTokens?.map((x) => new MustOwnTokens(x));
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
@@ -336,7 +336,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteria<U> {
     return new OutgoingApprovalCriteria<U>({
       merkleChallenges: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
-      mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
+      mustOwnTokens: this.mustOwnTokens?.map((x) => x.convert(convertFunction)),
       predeterminedBalances: this.predeterminedBalances?.convert(convertFunction),
       approvalAmounts: this.approvalAmounts?.convert(convertFunction),
       maxNumTransfers: this.maxNumTransfers?.convert(convertFunction),
@@ -375,7 +375,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   ): OutgoingApprovalCriteria<U> {
     return new OutgoingApprovalCriteria<U>({
       merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
-      mustOwnBadges: item.mustOwnBadges.map((x) => MustOwnBadges.fromProto(x, convertFunction)),
+      mustOwnTokens: item.mustOwnTokens.map((x) => MustOwnTokens.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
@@ -399,7 +399,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       requireToEqualsInitiatedBy: this.requireToEqualsInitiatedBy,
       requireToDoesNotEqualInitiatedBy: this.requireToDoesNotEqualInitiatedBy,
       merkleChallenges: this.merkleChallenges,
-      mustOwnBadges: this.mustOwnBadges,
+      mustOwnTokens: this.mustOwnTokens,
       coinTransfers: this.coinTransfers,
       dynamicStoreChallenges: this.dynamicStoreChallenges,
       ethSignatureChallenges: this.ethSignatureChallenges,
@@ -480,14 +480,14 @@ export class PredeterminedBalances<T extends NumberType> extends BaseNumberTypeC
         ? IncrementedBalances.fromProto(item.incrementedBalances, convertFunction)
         : new IncrementedBalances({
             startBalances: [],
-            incrementBadgeIdsBy: convertFunction(0),
+            incrementTokenIdsBy: convertFunction(0),
             incrementOwnershipTimesBy: convertFunction(0),
             durationFromTimestamp: convertFunction(0),
             allowOverrideTimestamp: false,
             recurringOwnershipTimes: new RecurringOwnershipTimes({ startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }).convert(
               convertFunction
             ),
-            allowOverrideWithAnyValidBadge: false
+            allowOverrideWithAnyValidToken: false
           }),
       orderCalculationMethod: item.orderCalculationMethod
         ? PredeterminedOrderCalculationMethod.fromProto(item.orderCalculationMethod)
@@ -620,38 +620,38 @@ export class RecurringOwnershipTimes<T extends NumberType>
  */
 export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeClass<IncrementedBalances<T>> implements iIncrementedBalances<T> {
   startBalances: BalanceArray<T>;
-  incrementBadgeIdsBy: T;
+  incrementTokenIdsBy: T;
   incrementOwnershipTimesBy: T;
   durationFromTimestamp: T;
   allowOverrideTimestamp: boolean;
   recurringOwnershipTimes: RecurringOwnershipTimes<T>;
-  allowOverrideWithAnyValidBadge: boolean;
+  allowOverrideWithAnyValidToken: boolean;
 
   constructor(msg: iIncrementedBalances<T>) {
     super();
     this.startBalances = BalanceArray.From(msg.startBalances);
-    this.incrementBadgeIdsBy = msg.incrementBadgeIdsBy;
+    this.incrementTokenIdsBy = msg.incrementTokenIdsBy;
     this.incrementOwnershipTimesBy = msg.incrementOwnershipTimesBy;
     this.durationFromTimestamp = msg.durationFromTimestamp;
     this.allowOverrideTimestamp = msg.allowOverrideTimestamp;
     this.recurringOwnershipTimes = new RecurringOwnershipTimes(msg.recurringOwnershipTimes);
-    this.allowOverrideWithAnyValidBadge = msg.allowOverrideWithAnyValidBadge;
+    this.allowOverrideWithAnyValidToken = msg.allowOverrideWithAnyValidToken;
   }
 
   getNumberFieldNames(): string[] {
-    return ['incrementBadgeIdsBy', 'incrementOwnershipTimesBy', 'durationFromTimestamp'];
+    return ['incrementTokenIdsBy', 'incrementOwnershipTimesBy', 'durationFromTimestamp'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncrementedBalances<U> {
     return new IncrementedBalances(
       deepCopyPrimitives({
         startBalances: this.startBalances.map((x) => x.convert(convertFunction)),
-        incrementBadgeIdsBy: convertFunction(this.incrementBadgeIdsBy),
+        incrementTokenIdsBy: convertFunction(this.incrementTokenIdsBy),
         incrementOwnershipTimesBy: convertFunction(this.incrementOwnershipTimesBy),
         durationFromTimestamp: convertFunction(this.durationFromTimestamp),
         allowOverrideTimestamp: this.allowOverrideTimestamp,
         recurringOwnershipTimes: this.recurringOwnershipTimes.convert(convertFunction),
-        allowOverrideWithAnyValidBadge: this.allowOverrideWithAnyValidBadge
+        allowOverrideWithAnyValidToken: this.allowOverrideWithAnyValidToken
       })
     );
   }
@@ -679,11 +679,11 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
   static fromProto<U extends NumberType>(item: protobadges.IncrementedBalances, convertFunction: (item: NumberType) => U): IncrementedBalances<U> {
     return new IncrementedBalances<U>({
       startBalances: item.startBalances.map((x) => Balance.fromProto(x, convertFunction)),
-      incrementBadgeIdsBy: convertFunction(item.incrementBadgeIdsBy),
+      incrementTokenIdsBy: convertFunction(item.incrementTokenIdsBy),
       incrementOwnershipTimesBy: convertFunction(item.incrementOwnershipTimesBy),
       durationFromTimestamp: convertFunction(item.durationFromTimestamp),
       allowOverrideTimestamp: item.allowOverrideTimestamp,
-      allowOverrideWithAnyValidBadge: item.allowOverrideWithAnyValidBadge,
+      allowOverrideWithAnyValidToken: item.allowOverrideWithAnyValidToken,
       recurringOwnershipTimes: item.recurringOwnershipTimes
         ? new RecurringOwnershipTimes(item.recurringOwnershipTimes).convert(convertFunction)
         : new RecurringOwnershipTimes({ startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }).convert(convertFunction)
@@ -1008,7 +1008,7 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
   fromListId: string;
   initiatedByListId: string;
   transferTimes: UintRangeArray<T>;
-  badgeIds: UintRangeArray<T>;
+  tokenIds: UintRangeArray<T>;
   ownershipTimes: UintRangeArray<T>;
   approvalId: string;
   uri?: string;
@@ -1021,7 +1021,7 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
     this.fromListId = msg.fromListId;
     this.initiatedByListId = msg.initiatedByListId;
     this.transferTimes = UintRangeArray.From(msg.transferTimes);
-    this.badgeIds = UintRangeArray.From(msg.badgeIds);
+    this.tokenIds = UintRangeArray.From(msg.tokenIds);
     this.ownershipTimes = UintRangeArray.From(msg.ownershipTimes);
     this.approvalId = msg.approvalId;
     this.uri = msg.uri;
@@ -1063,7 +1063,7 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
       fromListId: item.fromListId,
       initiatedByListId: item.initiatedByListId,
       transferTimes: item.transferTimes.map((x) => UintRange.fromProto(x, convertFunction)),
-      badgeIds: item.badgeIds.map((x) => UintRange.fromProto(x, convertFunction)),
+      tokenIds: item.tokenIds.map((x) => UintRange.fromProto(x, convertFunction)),
       ownershipTimes: item.ownershipTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       approvalId: item.approvalId,
       uri: item.uri,
@@ -1101,7 +1101,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   implements iIncomingApprovalCriteria<T>
 {
   merkleChallenges?: MerkleChallenge<T>[];
-  mustOwnBadges?: MustOwnBadges<T>[];
+  mustOwnTokens?: MustOwnTokens<T>[];
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
   maxNumTransfers?: MaxNumTransfers<T>;
@@ -1115,7 +1115,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   constructor(msg: iIncomingApprovalCriteria<T>) {
     super();
     this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
-    this.mustOwnBadges = msg.mustOwnBadges?.map((x) => new MustOwnBadges(x));
+    this.mustOwnTokens = msg.mustOwnTokens?.map((x) => new MustOwnTokens(x));
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
@@ -1130,7 +1130,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteria<U> {
     return new IncomingApprovalCriteria<U>({
       merkleChallenges: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
-      mustOwnBadges: this.mustOwnBadges?.map((x) => x.convert(convertFunction)),
+      mustOwnTokens: this.mustOwnTokens?.map((x) => x.convert(convertFunction)),
       predeterminedBalances: this.predeterminedBalances?.convert(convertFunction),
       approvalAmounts: this.approvalAmounts?.convert(convertFunction),
       maxNumTransfers: this.maxNumTransfers?.convert(convertFunction),
@@ -1169,7 +1169,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   ): IncomingApprovalCriteria<U> {
     return new IncomingApprovalCriteria<U>({
       merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
-      mustOwnBadges: item.mustOwnBadges.map((x) => MustOwnBadges.fromProto(x, convertFunction)),
+      mustOwnTokens: item.mustOwnTokens.map((x) => MustOwnTokens.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
@@ -1194,7 +1194,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
       merkleChallenges: this.merkleChallenges,
       coinTransfers: this.coinTransfers,
       autoDeletionOptions: this.autoDeletionOptions,
-      mustOwnBadges: this.mustOwnBadges,
+      mustOwnTokens: this.mustOwnTokens,
       dynamicStoreChallenges: this.dynamicStoreChallenges,
       ethSignatureChallenges: this.ethSignatureChallenges,
 
@@ -1223,7 +1223,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
   fromListId: string;
   initiatedByListId: string;
   transferTimes: UintRangeArray<T>;
-  badgeIds: UintRangeArray<T>;
+  tokenIds: UintRangeArray<T>;
   ownershipTimes: UintRangeArray<T>;
   approvalId: string;
   uri?: string;
@@ -1237,7 +1237,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
     this.fromListId = msg.fromListId;
     this.initiatedByListId = msg.initiatedByListId;
     this.transferTimes = UintRangeArray.From(msg.transferTimes);
-    this.badgeIds = UintRangeArray.From(msg.badgeIds);
+    this.tokenIds = UintRangeArray.From(msg.tokenIds);
     this.ownershipTimes = UintRangeArray.From(msg.ownershipTimes);
     this.approvalId = msg.approvalId;
     this.uri = msg.uri;
@@ -1292,7 +1292,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
       fromListId: item.fromListId,
       initiatedByListId: item.initiatedByListId,
       transferTimes: item.transferTimes.map((x) => UintRange.fromProto(x, convertFunction)),
-      badgeIds: item.badgeIds.map((x) => UintRange.fromProto(x, convertFunction)),
+      tokenIds: item.tokenIds.map((x) => UintRange.fromProto(x, convertFunction)),
       ownershipTimes: item.ownershipTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       approvalId: item.approvalId,
       uri: item.uri,
@@ -1308,7 +1308,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
       toListId: this.toListId,
       initiatedByListId: this.initiatedByListId,
       transferTimes: this.transferTimes,
-      badgeIds: this.badgeIds,
+      tokenIds: this.tokenIds,
       ownershipTimes: this.ownershipTimes,
       approvalCriteria: this.approvalCriteria,
       version: this.version
@@ -1321,7 +1321,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
       fromListId: this.fromListId,
       initiatedByListId: this.initiatedByListId,
       transferTimes: this.transferTimes,
-      badgeIds: this.badgeIds,
+      tokenIds: this.tokenIds,
       ownershipTimes: this.ownershipTimes,
       approvalCriteria: this.approvalCriteria,
       version: this.version
@@ -1444,7 +1444,7 @@ export class UserRoyalties<T extends NumberType> extends BaseNumberTypeClass<Use
  */
 export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<ApprovalCriteria<T>> implements iApprovalCriteria<T> {
   merkleChallenges?: MerkleChallenge<T>[];
-  mustOwnBadges?: MustOwnBadges<T>[];
+  mustOwnTokens?: MustOwnTokens<T>[];
   predeterminedBalances?: PredeterminedBalances<T>;
   approvalAmounts?: ApprovalAmounts<T>;
   maxNumTransfers?: MaxNumTransfers<T>;
@@ -1463,7 +1463,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   constructor(msg: iApprovalCriteria<T>) {
     super();
     this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
-    this.mustOwnBadges = msg.mustOwnBadges?.map((x) => new MustOwnBadges(x));
+    this.mustOwnTokens = msg.mustOwnTokens?.map((x) => new MustOwnTokens(x));
     this.predeterminedBalances = msg.predeterminedBalances ? new PredeterminedBalances(msg.predeterminedBalances) : undefined;
     this.approvalAmounts = msg.approvalAmounts ? new ApprovalAmounts(msg.approvalAmounts) : undefined;
     this.maxNumTransfers = msg.maxNumTransfers ? new MaxNumTransfers(msg.maxNumTransfers) : undefined;
@@ -1507,7 +1507,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   static fromProto<U extends NumberType>(item: protobadges.ApprovalCriteria, convertFunction: (item: NumberType) => U): ApprovalCriteria<U> {
     return new ApprovalCriteria<U>({
       merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
-      mustOwnBadges: item.mustOwnBadges.map((x) => MustOwnBadges.fromProto(x, convertFunction)),
+      mustOwnTokens: item.mustOwnTokens.map((x) => MustOwnTokens.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
       approvalAmounts: item.approvalAmounts ? ApprovalAmounts.fromProto(item.approvalAmounts, convertFunction) : undefined,
       maxNumTransfers: item.maxNumTransfers ? MaxNumTransfers.fromProto(item.maxNumTransfers, convertFunction) : undefined,
@@ -1857,7 +1857,7 @@ export class IncomingApprovalCriteriaWithDetails<T extends NumberType>
       maxNumTransfers: this.maxNumTransfers,
       predeterminedBalances: this.predeterminedBalances,
       merkleChallenges: this.merkleChallenges,
-      mustOwnBadges: this.mustOwnBadges,
+      mustOwnTokens: this.mustOwnTokens,
       coinTransfers: this.coinTransfers,
       autoDeletionOptions: this.autoDeletionOptions,
 
@@ -1904,7 +1904,7 @@ export class OutgoingApprovalCriteriaWithDetails<T extends NumberType>
       maxNumTransfers: this.maxNumTransfers,
       predeterminedBalances: this.predeterminedBalances,
       merkleChallenges: this.merkleChallenges,
-      mustOwnBadges: this.mustOwnBadges,
+      mustOwnTokens: this.mustOwnTokens,
       coinTransfers: this.coinTransfers,
       autoDeletionOptions: this.autoDeletionOptions,
       requireToEqualsInitiatedBy: false,
@@ -1960,7 +1960,7 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
   castToUniversalPermission(): UniversalPermission {
     return {
       ...AllDefaultValues,
-      badgeIds: this.badgeIds.convert(BigIntify),
+      tokenIds: this.tokenIds.convert(BigIntify),
       transferTimes: this.transferTimes.convert(BigIntify),
       ownershipTimes: this.ownershipTimes.convert(BigIntify),
       fromList: this.fromList,
@@ -1968,7 +1968,7 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
       initiatedByList: this.initiatedByList,
       approvalIdList: getReservedTrackerList(this.approvalId),
       usesApprovalIdList: true,
-      usesBadgeIds: true,
+      usesTokenIds: true,
       usesTransferTimes: true,
       usesToList: true,
       usesFromList: true,
@@ -2002,7 +2002,7 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
       initiatedByList: this.initiatedByList,
       initiatedByListId: this.initiatedByListId,
       transferTimes: this.transferTimes,
-      badgeIds: this.badgeIds,
+      tokenIds: this.tokenIds,
       ownershipTimes: this.ownershipTimes,
       approvalCriteria: this.approvalCriteria
     });
@@ -2015,7 +2015,7 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
       fromListId: this.fromListId,
       initiatedByListId: this.initiatedByListId,
       transferTimes: this.transferTimes,
-      badgeIds: this.badgeIds,
+      tokenIds: this.tokenIds,
       ownershipTimes: this.ownershipTimes,
       approvalCriteria: this.approvalCriteria
     });
@@ -2048,14 +2048,14 @@ export function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPerm
   let handled: UniversalPermissionDetails[] = [];
 
   for (const permission of permissions) {
-    const badgeIds = GetUintRangesWithOptions(permission.badgeIds, permission.usesBadgeIds);
+    const tokenIds = GetUintRangesWithOptions(permission.tokenIds, permission.usesTokenIds);
     const timelineTimes = GetUintRangesWithOptions(permission.timelineTimes, permission.usesTimelineTimes);
     const transferTimes = GetUintRangesWithOptions(permission.transferTimes, permission.usesTransferTimes);
     const ownershipTimes = GetUintRangesWithOptions(permission.ownershipTimes, permission.usesOwnershipTimes);
     const permanentlyPermittedTimes = GetUintRangesWithOptions(permission.permanentlyPermittedTimes, true);
     const permanentlyForbiddenTimes = GetUintRangesWithOptions(permission.permanentlyForbiddenTimes, true);
 
-    for (const badgeId of badgeIds) {
+    for (const tokenId of tokenIds) {
       for (const timelineTime of timelineTimes) {
         for (const transferTime of transferTimes) {
           for (const ownershipTime of ownershipTimes) {
@@ -2069,7 +2069,7 @@ export function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPerm
 
             const brokenDown: UniversalPermissionDetails[] = [
               {
-                badgeId: badgeId,
+                tokenId: tokenId,
                 timelineTime: timelineTime,
                 transferTime: transferTime,
                 ownershipTime: ownershipTime,
@@ -2105,7 +2105,7 @@ export function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPerm
 
               handled.push({
                 timelineTime: overlap.overlap.timelineTime,
-                badgeId: overlap.overlap.badgeId,
+                tokenId: overlap.overlap.tokenId,
                 transferTime: overlap.overlap.transferTime,
                 ownershipTime: overlap.overlap.ownershipTime,
                 toList: overlap.overlap.toList,
@@ -2128,7 +2128,7 @@ export function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPerm
   for (const handledItem of handled) {
     let idxToInsert: number = 0;
 
-    while (idxToInsert < returnArr.length && handledItem.badgeId.start > returnArr[idxToInsert].badgeId.start) {
+    while (idxToInsert < returnArr.length && handledItem.tokenId.start > returnArr[idxToInsert].tokenId.start) {
       idxToInsert++;
     }
 
@@ -2223,7 +2223,7 @@ export function validateCollectionApprovalsUpdate<T extends NumberType>(
 
   const details = detailsToCheck.map((x) => {
     const result = {
-      badgeIds: UintRangeArray.From([x.badgeId]),
+      tokenIds: UintRangeArray.From([x.tokenId]),
       ownershipTimes: UintRangeArray.From([x.ownershipTime]),
       transferTimes: UintRangeArray.From([x.transferTime]),
       toList: x.toList,
@@ -2254,7 +2254,7 @@ export function validateCollectionApprovalsUpdate<T extends NumberType>(
 export function expandCollectionApprovals(approvals: CollectionApprovalWithDetails<bigint>[]): CollectionApprovalWithDetails<bigint>[] {
   const newCurrApprovals: CollectionApprovalWithDetails<bigint>[] = [];
   for (const approval of approvals) {
-    const badgeIds = GetUintRangesWithOptions(approval.badgeIds, true);
+    const tokenIds = GetUintRangesWithOptions(approval.tokenIds, true);
     const ownershipTimes = GetUintRangesWithOptions(approval.ownershipTimes, true);
     const times = GetUintRangesWithOptions(approval.transferTimes, true);
     const toListId = GetListIdWithOptions(approval.toListId, true);
@@ -2272,7 +2272,7 @@ export function expandCollectionApprovals(approvals: CollectionApprovalWithDetai
         fromListId: fromListId,
         initiatedByListId: initiatedByListId,
         transferTimes: times,
-        badgeIds: badgeIds,
+        tokenIds: tokenIds,
         ownershipTimes: ownershipTimes,
         toList: toList,
         fromList: fromList,

@@ -1,19 +1,19 @@
 import { CollectionApprovalWithDetails } from './approvals.js';
-import { BadgeMetadataTimeline, CollectionMetadataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline } from './misc.js';
+import { TokenMetadataTimeline, CollectionMetadataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline } from './misc.js';
 import type { UsedFlags } from './overlaps.js';
 import {
   ActionPermissionUsedFlags,
   ApprovalPermissionUsedFlags,
-  BadgeIdsActionPermissionUsedFlags,
+  TokenIdsActionPermissionUsedFlags,
   TimedUpdatePermissionUsedFlags,
-  TimedUpdateWithBadgeIdsPermissionUsedFlags
+  TimedUpdateWithTokenIdsPermissionUsedFlags
 } from './overlaps.js';
 import {
   ActionPermission,
-  BadgeIdsActionPermission,
+  TokenIdsActionPermission,
   CollectionApprovalPermission,
   TimedUpdatePermission,
-  TimedUpdateWithBadgeIdsPermission
+  TimedUpdateWithTokenIdsPermission
 } from './permissions.js';
 
 /**
@@ -23,9 +23,9 @@ export type PermissionNameString =
   | 'canDeleteCollection'
   | 'canArchiveCollection'
   | 'canUpdateOffChainBalancesMetadata'
-  | 'canUpdateBadgeMetadata'
+  | 'canUpdateTokenMetadata'
   | 'canUpdateCollectionMetadata'
-  | 'canUpdateValidBadgeIds'
+  | 'canUpdateValidTokenIds'
   | 'canUpdateCollectionApprovals'
   | 'canUpdateAutoApproveSelfInitiatedIncomingTransfers'
   | 'canUpdateAutoApproveSelfInitiatedOutgoingTransfers'
@@ -60,8 +60,8 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canUpdateCollectionMetadata':
       validateFunction = CollectionMetadataTimeline.validateUpdate;
       break;
-    case 'canUpdateBadgeMetadata':
-      validateFunction = BadgeMetadataTimeline.validateUpdate;
+    case 'canUpdateTokenMetadata':
+      validateFunction = TokenMetadataTimeline.validateUpdate;
       break;
     case 'canUpdateCollectionApprovals':
       validateFunction = CollectionApprovalWithDetails.validateUpdate;
@@ -82,13 +82,13 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canUpdateCollectionMetadata':
       validatePermissionUpdateFunction = TimedUpdatePermission.validateUpdate;
       break;
-    case 'canUpdateValidBadgeIds':
-      validatePermissionUpdateFunction = BadgeIdsActionPermission.validateUpdate;
+    case 'canUpdateValidTokenIds':
+      validatePermissionUpdateFunction = TokenIdsActionPermission.validateUpdate;
 
       break;
-    case 'canUpdateBadgeMetadata':
+    case 'canUpdateTokenMetadata':
       // case 'canUpdateInheritedBalances':
-      validatePermissionUpdateFunction = TimedUpdateWithBadgeIdsPermission.validateUpdate;
+      validatePermissionUpdateFunction = TimedUpdateWithTokenIdsPermission.validateUpdate;
 
       break;
     case 'canUpdateCollectionApprovals':
@@ -119,10 +119,10 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canUpdateCollectionMetadata':
       question = 'Can update the collection metadata?';
       break;
-    case 'canUpdateValidBadgeIds':
+    case 'canUpdateValidTokenIds':
       question = 'Can create more tokens?';
       break;
-    case 'canUpdateBadgeMetadata':
+    case 'canUpdateTokenMetadata':
       question = 'Can update the token metadata?';
       break;
     case 'canUpdateCollectionApprovals':
@@ -155,12 +155,12 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canUpdateCollectionMetadata':
       flags = TimedUpdatePermissionUsedFlags;
       break;
-    case 'canUpdateValidBadgeIds':
-      flags = BadgeIdsActionPermissionUsedFlags;
+    case 'canUpdateValidTokenIds':
+      flags = TokenIdsActionPermissionUsedFlags;
       break;
-    case 'canUpdateBadgeMetadata':
+    case 'canUpdateTokenMetadata':
       // case 'canUpdateInheritedBalances':
-      flags = TimedUpdateWithBadgeIdsPermissionUsedFlags;
+      flags = TimedUpdateWithTokenIdsPermissionUsedFlags;
       break;
     case 'canUpdateCollectionApprovals':
       flags = ApprovalPermissionUsedFlags;

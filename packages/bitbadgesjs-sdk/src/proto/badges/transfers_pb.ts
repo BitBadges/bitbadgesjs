@@ -331,9 +331,9 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
   /**
    * The allowed range of token IDs for approval.
    *
-   * @generated from field: repeated badges.UintRange badgeIds = 4;
+   * @generated from field: repeated badges.UintRange tokenIds = 4;
    */
-  badgeIds: UintRange[] = [];
+  tokenIds: UintRange[] = [];
 
   /**
    * The allowed range of ownership times for approval.
@@ -388,7 +388,7 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
     { no: 1, name: "toListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "initiatedByListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 4, name: "tokenIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
     { no: 8, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 9, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
@@ -444,9 +444,9 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
   /**
    * The allowed range of token IDs for approval.
    *
-   * @generated from field: repeated badges.UintRange badgeIds = 4;
+   * @generated from field: repeated badges.UintRange tokenIds = 4;
    */
-  badgeIds: UintRange[] = [];
+  tokenIds: UintRange[] = [];
 
   /**
    * The allowed range of ownership times for approval.
@@ -501,7 +501,7 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
     { no: 1, name: "fromListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "initiatedByListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 4, name: "tokenIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
     { no: 8, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 9, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
@@ -637,9 +637,9 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
   /**
    * The amount by which to increment token IDs.
    *
-   * @generated from field: string incrementBadgeIdsBy = 2;
+   * @generated from field: string incrementTokenIdsBy = 2;
    */
-  incrementBadgeIdsBy = "";
+  incrementTokenIdsBy = "";
 
   /**
    * The amount by which to increment ownership times. Incompatible with approveStartingFromNowBy.
@@ -672,9 +672,9 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
   /**
    * Allow override of any valid ID
    *
-   * @generated from field: bool allowOverrideWithAnyValidBadge = 7;
+   * @generated from field: bool allowOverrideWithAnyValidToken = 7;
    */
-  allowOverrideWithAnyValidBadge = false;
+  allowOverrideWithAnyValidToken = false;
 
   constructor(data?: PartialMessage<IncrementedBalances>) {
     super();
@@ -685,12 +685,12 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
   static readonly typeName = "badges.IncrementedBalances";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "startBalances", kind: "message", T: Balance, repeated: true },
-    { no: 2, name: "incrementBadgeIdsBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "incrementTokenIdsBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "incrementOwnershipTimesBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "durationFromTimestamp", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "allowOverrideTimestamp", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 6, name: "recurringOwnershipTimes", kind: "message", T: RecurringOwnershipTimes },
-    { no: 7, name: "allowOverrideWithAnyValidBadge", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 7, name: "allowOverrideWithAnyValidToken", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncrementedBalances {
@@ -1257,19 +1257,19 @@ export class CoinTransfer extends Message<CoinTransfer> {
 
 /**
  *
- * MustOwnBadges represents a condition where a user must own specific tokens
+ * MustOwnTokens represents a condition where a user must own specific tokens
  * to be approved to transfer.
  *
  * - collectionId: The ID of the collection for the tokens that must be owned
  * - amountRange: The range of amounts the user must own (min to max)
  * - ownershipTimes: The time ranges during which the user must own the tokens.
- * - badgeIds: The token IDs the user must own.
+ * - tokenIds: The token IDs the user must own.
  * - overrideWithCurrentTime: If true, auto override ownershipTimes with the current time.
  * - mustSatisfyForAllAssets: If true, the user must own all specified tokens; otherwise, owning any one for >= 1 millisecond is sufficient.
  *
- * @generated from message badges.MustOwnBadges
+ * @generated from message badges.MustOwnTokens
  */
-export class MustOwnBadges extends Message<MustOwnBadges> {
+export class MustOwnTokens extends Message<MustOwnTokens> {
   /**
    * The ID of the collection.
    *
@@ -1294,9 +1294,9 @@ export class MustOwnBadges extends Message<MustOwnBadges> {
   /**
    * The token IDs the user must own.
    *
-   * @generated from field: repeated badges.UintRange badgeIds = 4;
+   * @generated from field: repeated badges.UintRange tokenIds = 4;
    */
-  badgeIds: UintRange[] = [];
+  tokenIds: UintRange[] = [];
 
   /**
    * If true, override ownershipTimes with the current time.
@@ -1312,36 +1312,44 @@ export class MustOwnBadges extends Message<MustOwnBadges> {
    */
   mustSatisfyForAllAssets = false;
 
-  constructor(data?: PartialMessage<MustOwnBadges>) {
+  /**
+   * The party to check ownership for. Options are "initiator", "sender", or "recipient". Defaults to "initiator" if empty.
+   *
+   * @generated from field: string ownershipCheckParty = 7;
+   */
+  ownershipCheckParty = "";
+
+  constructor(data?: PartialMessage<MustOwnTokens>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MustOwnBadges";
+  static readonly typeName = "badges.MustOwnTokens";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "amountRange", kind: "message", T: UintRange },
     { no: 3, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 4, name: "tokenIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "overrideWithCurrentTime", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 6, name: "mustSatisfyForAllAssets", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 7, name: "ownershipCheckParty", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MustOwnBadges {
-    return new MustOwnBadges().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MustOwnTokens {
+    return new MustOwnTokens().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MustOwnBadges {
-    return new MustOwnBadges().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MustOwnTokens {
+    return new MustOwnTokens().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MustOwnBadges {
-    return new MustOwnBadges().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MustOwnTokens {
+    return new MustOwnTokens().fromJsonString(jsonString, options);
   }
 
-  static equals(a: MustOwnBadges | PlainMessage<MustOwnBadges> | undefined, b: MustOwnBadges | PlainMessage<MustOwnBadges> | undefined): boolean {
-    return proto3.util.equals(MustOwnBadges, a, b);
+  static equals(a: MustOwnTokens | PlainMessage<MustOwnTokens> | undefined, b: MustOwnTokens | PlainMessage<MustOwnTokens> | undefined): boolean {
+    return proto3.util.equals(MustOwnTokens, a, b);
   }
 }
 
@@ -1486,9 +1494,9 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
   /**
    * Must own tokens for approval.
    *
-   * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 14;
+   * @generated from field: repeated badges.MustOwnTokens mustOwnTokens = 14;
    */
-  mustOwnBadges: MustOwnBadges[] = [];
+  mustOwnTokens: MustOwnTokens[] = [];
 
   /**
    * Dynamic store challenges that the initiator must pass for approval.
@@ -1525,7 +1533,7 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
     { no: 11, name: "overridesToIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 12, name: "autoDeletionOptions", kind: "message", T: AutoDeletionOptions },
     { no: 13, name: "userRoyalties", kind: "message", T: UserRoyalties },
-    { no: 14, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
+    { no: 14, name: "mustOwnTokens", kind: "message", T: MustOwnTokens, repeated: true },
     { no: 15, name: "dynamicStoreChallenges", kind: "message", T: DynamicStoreChallenge, repeated: true },
     { no: 16, name: "ethSignatureChallenges", kind: "message", T: ETHSignatureChallenge, repeated: true },
   ]);
@@ -1661,9 +1669,9 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
   /**
    * Must own tokens for approval.
    *
-   * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 9;
+   * @generated from field: repeated badges.MustOwnTokens mustOwnTokens = 9;
    */
-  mustOwnBadges: MustOwnBadges[] = [];
+  mustOwnTokens: MustOwnTokens[] = [];
 
   /**
    * Dynamic store challenges that the initiator must pass for approval.
@@ -1695,7 +1703,7 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
     { no: 6, name: "requireToEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 7, name: "requireToDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "autoDeletionOptions", kind: "message", T: AutoDeletionOptions },
-    { no: 9, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
+    { no: 9, name: "mustOwnTokens", kind: "message", T: MustOwnTokens, repeated: true },
     { no: 10, name: "dynamicStoreChallenges", kind: "message", T: DynamicStoreChallenge, repeated: true },
     { no: 11, name: "ethSignatureChallenges", kind: "message", T: ETHSignatureChallenge, repeated: true },
   ]);
@@ -1782,9 +1790,9 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
   /**
    * Must own tokens for approval.
    *
-   * @generated from field: repeated badges.MustOwnBadges mustOwnBadges = 9;
+   * @generated from field: repeated badges.MustOwnTokens mustOwnTokens = 9;
    */
-  mustOwnBadges: MustOwnBadges[] = [];
+  mustOwnTokens: MustOwnTokens[] = [];
 
   /**
    * Dynamic store challenges that the initiator must pass for approval.
@@ -1816,7 +1824,7 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
     { no: 6, name: "requireFromEqualsInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 7, name: "requireFromDoesNotEqualInitiatedBy", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 8, name: "autoDeletionOptions", kind: "message", T: AutoDeletionOptions },
-    { no: 9, name: "mustOwnBadges", kind: "message", T: MustOwnBadges, repeated: true },
+    { no: 9, name: "mustOwnTokens", kind: "message", T: MustOwnTokens, repeated: true },
     { no: 10, name: "dynamicStoreChallenges", kind: "message", T: DynamicStoreChallenge, repeated: true },
     { no: 11, name: "ethSignatureChallenges", kind: "message", T: ETHSignatureChallenge, repeated: true },
   ]);
@@ -1875,9 +1883,9 @@ export class CollectionApproval extends Message<CollectionApproval> {
   /**
    * The allowed range of token IDs for approval.
    *
-   * @generated from field: repeated badges.UintRange badgeIds = 5;
+   * @generated from field: repeated badges.UintRange tokenIds = 5;
    */
-  badgeIds: UintRange[] = [];
+  tokenIds: UintRange[] = [];
 
   /**
    * The allowed range of ownership times for approval.
@@ -1933,7 +1941,7 @@ export class CollectionApproval extends Message<CollectionApproval> {
     { no: 2, name: "toListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "initiatedByListId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 5, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 5, name: "tokenIds", kind: "message", T: UintRange, repeated: true },
     { no: 6, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
     { no: 9, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 10, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
@@ -2193,9 +2201,9 @@ export class PrecalculationOptions extends Message<PrecalculationOptions> {
   /**
    * The IDs to override for the transfer. Only applicable if using this option in precalculation.
    *
-   * @generated from field: repeated badges.UintRange badgeIdsOverride = 2;
+   * @generated from field: repeated badges.UintRange tokenIdsOverride = 2;
    */
-  badgeIdsOverride: UintRange[] = [];
+  tokenIdsOverride: UintRange[] = [];
 
   constructor(data?: PartialMessage<PrecalculationOptions>) {
     super();
@@ -2206,7 +2214,7 @@ export class PrecalculationOptions extends Message<PrecalculationOptions> {
   static readonly typeName = "badges.PrecalculationOptions";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "overrideTimestamp", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "badgeIdsOverride", kind: "message", T: UintRange, repeated: true },
+    { no: 2, name: "tokenIdsOverride", kind: "message", T: UintRange, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PrecalculationOptions {

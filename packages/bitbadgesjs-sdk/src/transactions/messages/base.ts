@@ -14,7 +14,7 @@ import {
   MsgDecrementStoreValue,
   MsgIncrementStoreValue,
   MsgPurgeApprovals,
-  MsgSetBadgeMetadata,
+  MsgSetTokenMetadata,
   MsgSetCollectionApprovals,
   MsgSetCollectionMetadata,
   MsgSetCustomData,
@@ -24,8 +24,8 @@ import {
   MsgSetManager,
   MsgSetOutgoingApproval,
   MsgSetStandards,
-  MsgSetValidBadgeIds,
-  MsgTransferBadges,
+  MsgSetValidTokenIds,
+  MsgTransferTokens,
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
   MsgUpdateDynamicStore,
@@ -44,7 +44,7 @@ import {
   populateUndefinedForMsgDecrementStoreValue,
   populateUndefinedForMsgIncrementStoreValue,
   populateUndefinedForMsgPurgeApprovals,
-  populateUndefinedForMsgSetBadgeMetadata,
+  populateUndefinedForMsgSetTokenMetadata,
   populateUndefinedForMsgSetCollectionApprovals,
   populateUndefinedForMsgSetCollectionMetadata,
   populateUndefinedForMsgSetCustomData,
@@ -54,8 +54,8 @@ import {
   populateUndefinedForMsgSetManager,
   populateUndefinedForMsgSetOutgoingApproval,
   populateUndefinedForMsgSetStandards,
-  populateUndefinedForMsgSetValidBadgeIds,
-  populateUndefinedForMsgTransferBadges,
+  populateUndefinedForMsgSetValidTokenIds,
+  populateUndefinedForMsgTransferTokens,
   populateUndefinedForMsgUniversalUpdateCollection,
   populateUndefinedForMsgUpdateCollection,
   populateUndefinedForMsgUpdateDynamicStore,
@@ -300,8 +300,8 @@ export const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
       msg = createProtoMsg(populateUndefinedForMsgUpdateCollection(msgVal as MsgUpdateCollection));
     } else if (msgVal.getType().typeName === MsgUpdateUserApprovals.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgUpdateUserApprovals(msgVal as MsgUpdateUserApprovals));
-    } else if (msgVal.getType().typeName === MsgTransferBadges.typeName) {
-      msg = createProtoMsg(populateUndefinedForMsgTransferBadges(msgVal as MsgTransferBadges));
+    } else if (msgVal.getType().typeName === MsgTransferTokens.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgTransferTokens(msgVal as MsgTransferTokens));
     } else if (msgVal.getType().typeName === MsgCreateCollection.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgCreateCollection(msgVal as MsgCreateCollection));
     } else if (msgVal.getType().typeName === MsgUniversalUpdateCollection.typeName) {
@@ -332,14 +332,14 @@ export const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
       msg = createProtoMsg(populateUndefinedForMsgSetIncomingApproval(msgVal as MsgSetIncomingApproval));
     } else if (msgVal.getType().typeName === MsgSetOutgoingApproval.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgSetOutgoingApproval(msgVal as MsgSetOutgoingApproval));
-    } else if (msgVal.getType().typeName === MsgSetValidBadgeIds.typeName) {
-      msg = createProtoMsg(populateUndefinedForMsgSetValidBadgeIds(msgVal as MsgSetValidBadgeIds));
+    } else if (msgVal.getType().typeName === MsgSetValidTokenIds.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSetValidTokenIds(msgVal as MsgSetValidTokenIds));
     } else if (msgVal.getType().typeName === MsgSetManager.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgSetManager(msgVal as MsgSetManager));
     } else if (msgVal.getType().typeName === MsgSetCollectionMetadata.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgSetCollectionMetadata(msgVal as MsgSetCollectionMetadata));
-    } else if (msgVal.getType().typeName === MsgSetBadgeMetadata.typeName) {
-      msg = createProtoMsg(populateUndefinedForMsgSetBadgeMetadata(msgVal as MsgSetBadgeMetadata));
+    } else if (msgVal.getType().typeName === MsgSetTokenMetadata.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSetTokenMetadata(msgVal as MsgSetTokenMetadata));
     } else if (msgVal.getType().typeName === MsgSetCustomData.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgSetCustomData(msgVal as MsgSetCustomData));
     } else if (msgVal.getType().typeName === MsgSetStandards.typeName) {

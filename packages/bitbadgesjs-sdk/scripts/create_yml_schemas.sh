@@ -76,7 +76,7 @@ main() {
     replace_text_in_directory "$directory" "extends IntegrationPluginParams {" "extends IntegrationPluginParams<T> {"
     replace_text_in_directory "$directory" "ClaimIntegrationPublicStateType;" "ClaimIntegrationPublicStateType<T>;"
     replace_text_in_directory "$directory" "ClaimIntegrationPrivateStateType;" "ClaimIntegrationPrivateStateType<T>;"
-    replace_text_in_directory "$directory" " iBadgeMetadata<T>\[\];" " iBadgeMetadaataDetails<T>\[\];"
+    replace_text_in_directory "$directory" " iTokenMetadata<T>\[\];" " iBadgeMetadaataDetails<T>\[\];"
     replace_text_in_directory "$directory" " iCollectionMetadata<T>\[\];" " iCollectionMetadataDetails<T>\[\];"
     replace_text_in_directory "$directory" "<Q extends DynamicDataHandlerType, T extends NumberType>" ""
     replace_text_in_directory "$directory" "<Q extends DynamicDataHandlerType>" ""

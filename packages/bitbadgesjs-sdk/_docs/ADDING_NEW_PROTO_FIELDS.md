@@ -206,7 +206,7 @@ Update `src/transactions/eip712/payload/samples/getSampleMsg.ts`:
 cosmosCoinWrapperPathsToAdd: [
   new CosmosCoinWrapperPathAddObject({
     denom: 'ibc:1234567890',
-    badgeIds: [new UintRange()],
+    tokenIds: [new UintRange()],
     ownershipTimes: [new UintRange()],
     symbol: '', // Add new field
     denomUnits: [

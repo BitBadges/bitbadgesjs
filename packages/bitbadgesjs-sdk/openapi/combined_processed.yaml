@@ -139,7 +139,7 @@ info:
       collectionsToFetch: [{
         collectionId: 1n,
         metadataToFetch: {
-          badgeIds: [{ start: 1n, end: 10n }]
+          tokenIds: [{ start: 1n, end: 10n }]
         }
       }]
     });
@@ -448,9 +448,9 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-  '/collection/{collectionId}/{badgeId}/metadata':
+  '/collection/{collectionId}/{tokenId}/metadata':
     get:
-      operationId: getBadgeMetadata
+      operationId: getTokenMetadata
       summary: Get Token Metadata
       tags:
         - Badges
@@ -458,19 +458,19 @@ paths:
         Gets current metadata for a specific token in a collection.
 
         ```tsx
-        await BitBadgesApi.getBadgeMetadata("123", "1");
+        await BitBadgesApi.getTokenMetadata("123", "1");
         ```
 
         SDK Links:
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgeMetadataSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getbadgeMetadata)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTokenMetadataSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#gettokenMetadata)**
       responses:
         '200':
           description: Success response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetBadgeMetadataSuccessResponse'
+                $ref: '#/components/schemas/iGetTokenMetadataSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -488,7 +488,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: badgeId
+        - name: tokenId
           in: path
           description: Token ID
           required: true
@@ -512,7 +512,7 @@ paths:
             {
               collectionId: 1n,
               metadataToFetch: {
-                badgeIds: [{ start: 1n, end: 10n }],
+                tokenIds: [{ start: 1n, end: 10n }],
               },
               fetchTotalAndMintBalances: true,
               viewsToFetch: [
@@ -571,7 +571,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/iGetCollectionsPayload'
-  '/collection/{collectionId}/balance/{address}/{badgeId}':
+  '/collection/{collectionId}/balance/{address}/{tokenId}':
     get:
       operationId: getTokenBalanceByAddressSpecificToken
       summary: Get Badge Balance By Address - Specific Badge
@@ -581,7 +581,7 @@ paths:
         For more advanced queries returning the whole balance document, please use the POST `/collection/{collectionId}/balance/{address}` endpoint.
 
         ```tsx
-        const res = await BitBadgesApi.getTokenBalanceByAddressSpecificToken(collectionId, address, badgeId);
+        const res = await BitBadgesApi.getTokenBalanceByAddressSpecificToken(collectionId, address, tokenId);
         console.log(res);
         ```
 
@@ -606,7 +606,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: badgeId
+        - name: tokenId
           in: path
           description: The ID for which the balance is to be retrieved.
           required: true
@@ -1555,7 +1555,7 @@ paths:
             type: boolean
       security:
         - apiKey: []
-  '/collection/{collectionId}/{badgeId}/owners':
+  '/collection/{collectionId}/{tokenId}/owners':
     get:
       operationId: getOwners
       summary: Get Badge Owners
@@ -1568,7 +1568,7 @@ paths:
         ```tsx
         const res = await BitBadgesApi.getOwners(
           collectionId,
-          badgeId,
+          tokenId,
           {
             bookmark: '...'
           }
@@ -1587,7 +1587,7 @@ paths:
           required: true
           schema:
             type: integer
-        - name: badgeId
+        - name: tokenId
           in: path
           description: The numeric token ID to retrieve owners for.
           required: true
@@ -1628,7 +1628,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-  '/collection/{collectionId}/{badgeId}/activity':
+  '/collection/{collectionId}/{tokenId}/activity':
     get:
       operationId: getTokenActivity
       summary: Get Badge Activity
@@ -1638,7 +1638,7 @@ paths:
         ```tsx
         const res = await BitBadgesApi.getTokenActivity(
           collectionId,
-          badgeId,
+          tokenId,
           {
             bookmark: '...'
           }
@@ -1658,7 +1658,7 @@ paths:
           required: true
           schema:
             type: integer
-        - name: badgeId
+        - name: tokenId
           in: path
           description: The ID for which activity is to be retrieved.
           required: true
@@ -5829,7 +5829,7 @@ paths:
           schema:
             type: boolean
         - in: query
-          name: badgeId
+          name: tokenId
           required: false
           schema:
             description: Optional token ID to filter listings by
@@ -7198,9 +7198,9 @@ components:
     iUpdateAddressListAddressesSuccessResponse:
       additionalProperties: false
       type: object
-    iBadgeMetadataDetails:
+    iTokenMetadataDetails:
       properties:
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The token IDs that correspond to the metadata
@@ -7227,7 +7227,7 @@ components:
           description: Flag to denote if the metadata is new and should be updated. Used internally.
           type: boolean
       required:
-        - badgeIds
+        - tokenIds
         - uri
         - customData
       additionalProperties: false
@@ -7511,14 +7511,14 @@ components:
                 $ref: '#/components/schemas/iCollectionMetadataTimeline'
               description: 'The collection metadata timeline for this collection, with off-chain metadata populated.'
               type: array
-        badgeMetadataTimeline:
+        tokenMetadataTimeline:
           allOf:
             - items:
-                $ref: '#/components/schemas/iBadgeMetadataTimeline'
+                $ref: '#/components/schemas/iTokenMetadataTimeline'
               description: The token metadata timeline
               type: array
             - items:
-                $ref: '#/components/schemas/iBadgeMetadataTimeline'
+                $ref: '#/components/schemas/iTokenMetadataTimeline'
               description: 'The token metadata timeline for this collection, with off-chain metadata populated.'
               type: array
         balancesType:
@@ -7587,7 +7587,7 @@ components:
         aliasAddress:
           description: The alias BitBadges address for the collection
           $ref: '#/components/schemas/BitBadgesAddress'
-        validBadgeIds:
+        validTokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: Valid token IDs for the collection
@@ -7651,7 +7651,7 @@ components:
         - _docId
         - collectionId
         - collectionMetadataTimeline
-        - badgeMetadataTimeline
+        - tokenMetadataTimeline
         - balancesType
         - offChainBalancesMetadataTimeline
         - customDataTimeline
@@ -7666,7 +7666,7 @@ components:
         - createdTimestamp
         - updateHistory
         - aliasAddress
-        - validBadgeIds
+        - validTokenIds
         - activity
         - owners
         - challengeTrackers
@@ -7679,14 +7679,14 @@ components:
       type: object
     iCollectionNSFW:
       properties:
-        badgeIds:
+        tokenIds:
           examples:
             - - start: '1'
                 end: '10'
         reason:
           type: string
       required:
-        - badgeIds
+        - tokenIds
         - reason
       additionalProperties: false
       type: object
@@ -7745,7 +7745,7 @@ components:
       type: object
     iFilterBadgesInCollectionPayload:
       properties:
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: Limit to specific token IDs. Leave undefined to not filter by token ID.
@@ -7798,7 +7798,7 @@ components:
       type: object
     iFilterBadgesInCollectionSuccessResponse:
       properties:
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
@@ -7808,7 +7808,7 @@ components:
         pagination:
           $ref: '#/components/schemas/PaginationInfo'
       required:
-        - badgeIds
+        - tokenIds
         - pagination
       additionalProperties: false
       type: object
@@ -7983,7 +7983,7 @@ components:
             type: string
           description: 'If present, the metadata corresponding to the specified URIs will be fetched.'
           type: array
-        badgeIds:
+        tokenIds:
           anyOf:
             - type: string
             - items:
@@ -8032,7 +8032,7 @@ components:
               address:
                 description: "If specified, we will only fetch this users' activity."
                 type: string
-              badgeId:
+              tokenId:
                 description: 'IF specified, we will filter to this abdge ID (only applicable to utiity listings view currently)'
                 $ref: '#/components/schemas/NumberType'
             required:
@@ -8107,7 +8107,7 @@ components:
               address:
                 description: "If specified, we will only fetch this users' activity."
                 type: string
-              badgeId:
+              tokenId:
                 description: 'IF specified, we will filter to this abdge ID (only applicable to utiity listings view currently)'
                 $ref: '#/components/schemas/NumberType'
             required:
@@ -8279,7 +8279,7 @@ components:
           type: string
         oldestFirst:
           type: boolean
-        badgeId:
+        tokenId:
           description: Optional token ID to filter listings by
           $ref: '#/components/schemas/NumberType'
       additionalProperties: false
@@ -8608,10 +8608,10 @@ components:
         - metadata
       additionalProperties: false
       type: object
-    iGetBadgeMetadataPayload:
+    iGetTokenMetadataPayload:
       additionalProperties: false
       type: object
-    iGetBadgeMetadataSuccessResponse:
+    iGetTokenMetadataSuccessResponse:
       properties:
         metadata:
           $ref: '#/components/schemas/iMetadata'
@@ -8898,7 +8898,7 @@ components:
             properties:
               collection:
                 $ref: '#/components/schemas/iBitBadgesCollection'
-              badgeIds:
+              tokenIds:
                 items:
                   $ref: '#/components/schemas/iUintRange'
                 type: array
@@ -8907,7 +8907,7 @@ components:
                       end: '10'
             required:
               - collection
-              - badgeIds
+              - tokenIds
             additionalProperties: false
             type: object
           type: array
@@ -9647,7 +9647,7 @@ components:
         contents:
           items:
             anyOf:
-              - $ref: '#/components/schemas/iBadgeMetadataDetails'
+              - $ref: '#/components/schemas/iTokenMetadataDetails'
               - $ref: '#/components/schemas/iMetadata'
               - $ref: '#/components/schemas/iCollectionMetadataDetails'
               - $ref: '#/components/schemas/iChallengeDetails'
@@ -10221,7 +10221,7 @@ components:
               properties:
                 collection:
                   $ref: '#/components/schemas/iBitBadgesCollection'
-                badgeIds:
+                tokenIds:
                   items:
                     $ref: '#/components/schemas/iUintRange'
                   type: array
@@ -10230,7 +10230,7 @@ components:
                         end: '10'
               required:
                 - collection
-                - badgeIds
+                - tokenIds
               additionalProperties: false
               type: object
             type: array
@@ -13908,9 +13908,9 @@ components:
             $ref: '#/components/schemas/iCollectionMetadataTimeline'
           description: The collection metadata timeline
           type: array
-        badgeMetadataTimeline:
+        tokenMetadataTimeline:
           items:
-            $ref: '#/components/schemas/iBadgeMetadataTimeline'
+            $ref: '#/components/schemas/iTokenMetadataTimeline'
           description: The token metadata timeline
           type: array
         balancesType:
@@ -13974,7 +13974,7 @@ components:
         aliasAddress:
           description: The alias BitBadges address for the collection
           $ref: '#/components/schemas/BitBadgesAddress'
-        validBadgeIds:
+        validTokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: Valid token IDs for the collection
@@ -13983,7 +13983,7 @@ components:
         - _docId
         - collectionId
         - collectionMetadataTimeline
-        - badgeMetadataTimeline
+        - tokenMetadataTimeline
         - balancesType
         - offChainBalancesMetadataTimeline
         - customDataTimeline
@@ -13998,7 +13998,7 @@ components:
         - createdTimestamp
         - updateHistory
         - aliasAddress
-        - validBadgeIds
+        - validTokenIds
       additionalProperties: false
       description: ''
       type: object
@@ -14387,7 +14387,7 @@ components:
           description: A unique document ID (Mongo DB ObjectID)
           type: string
         uri:
-          description: 'The URI of the metadata to be fetched. If {id} is present, it will be replaced with each individual ID in badgeIds'
+          description: 'The URI of the metadata to be fetched. If {id} is present, it will be replaced with each individual ID in tokenIds'
           type: string
           examples:
             - 'https://example.com'
@@ -15423,8 +15423,8 @@ components:
         mapId:
           description: The map ID to link to
           type: string
-        badgeId:
-          description: 'The token ID to link to "collectionId:badgeId"'
+        tokenId:
+          description: 'The token ID to link to "collectionId:tokenId"'
           type: string
       additionalProperties: false
       type: object
@@ -15588,7 +15588,7 @@ components:
         collectionId:
           description: The collection ID
           $ref: '#/components/schemas/NumberType'
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The token IDs
@@ -17846,9 +17846,9 @@ components:
         - canDeleteCollection
         - canArchiveCollection
         - canUpdateOffChainBalancesMetadata
-        - canUpdateBadgeMetadata
+        - canUpdateTokenMetadata
         - canUpdateCollectionMetadata
-        - canUpdateValidBadgeIds
+        - canUpdateValidTokenIds
         - canUpdateCollectionApprovals
         - canUpdateAutoApproveSelfInitiatedIncomingTransfers
         - canUpdateAutoApproveSelfInitiatedOutgoingTransfers
@@ -17919,8 +17919,8 @@ components:
         toAddressesLength:
           description: The number of addresses to send the tokens to. This takes priority over toAddresses.length (used when you don't know exact addresses (i.e. you know number of codes)).
           $ref: '#/components/schemas/NumberType'
-        incrementBadgeIdsBy:
-          description: The number to increment the badgeIDs by for each transfer.
+        incrementTokenIdsBy:
+          description: The number to increment the tokenIDs by for each transfer.
           $ref: '#/components/schemas/NumberType'
         incrementOwnershipTimesBy:
           description: The number to increment the ownershipTimes by for each transfer.
@@ -18028,7 +18028,7 @@ components:
         collectionId:
           description: The collection ID of this element's token details.
           $ref: '#/components/schemas/NumberType'
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The corresponding token IDs for this collection ID.
@@ -18038,7 +18038,7 @@ components:
                 end: '10'
       required:
         - collectionId
-        - badgeIds
+        - tokenIds
       additionalProperties: false
       type: object
     iMsgCreateAddressLists:
@@ -18067,7 +18067,7 @@ components:
         defaultBalances:
           description: The default balances for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
           $ref: '#/components/schemas/iUserBalanceStore'
-        badgeIdsToAdd:
+        tokenIdsToAdd:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: 'The tokens to create. Newly created tokens will be sent to the "Mint" address. Must have necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if collection has "Standard" balance type.'
@@ -18085,9 +18085,9 @@ components:
             $ref: '#/components/schemas/iCollectionMetadataTimeline'
           description: 'The new collection metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.'
           type: array
-        badgeMetadataTimeline:
+        tokenMetadataTimeline:
           items:
-            $ref: '#/components/schemas/iBadgeMetadataTimeline'
+            $ref: '#/components/schemas/iTokenMetadataTimeline'
           description: 'The new token metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Note we take first-match only for token IDs, so do not define duplicates.'
           type: array
         offChainBalancesMetadataTimeline:
@@ -18132,7 +18132,7 @@ components:
         - collectionId
       additionalProperties: false
       type: object
-    iMsgTransferBadges:
+    iMsgTransferTokens:
       properties:
         creator:
           description: The creator of the transaction.
@@ -18162,7 +18162,7 @@ components:
         defaultBalances:
           description: The default balances for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type.
           $ref: '#/components/schemas/iUserBalanceStore'
-        badgeIdsToAdd:
+        tokenIdsToAdd:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: 'The tokens to create. Newly created tokens will be sent to the "Mint" address. Must have necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if collection has "Standard" balance type.'
@@ -18180,9 +18180,9 @@ components:
             $ref: '#/components/schemas/iCollectionMetadataTimeline'
           description: 'The new collection metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg.'
           type: array
-        badgeMetadataTimeline:
+        tokenMetadataTimeline:
           items:
-            $ref: '#/components/schemas/iBadgeMetadataTimeline'
+            $ref: '#/components/schemas/iTokenMetadataTimeline'
           description: 'The new token metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Note we take first-match only for token IDs, so do not define duplicates.'
           type: array
         offChainBalancesMetadataTimeline:
@@ -18222,7 +18222,7 @@ components:
         updateCollectionMetadataTimeline:
           description: Whether or not to update the collection metadata timeline.
           type: boolean
-        updateBadgeMetadataTimeline:
+        updateTokenMetadataTimeline:
           description: Whether or not to update the token metadata timeline.
           type: boolean
         updateOffChainBalancesMetadataTimeline:
@@ -18813,7 +18813,7 @@ components:
         - end
       additionalProperties: false
       type: object
-    iBadgeMetadata:
+    iTokenMetadata:
       properties:
         uri:
           description: The URI where to fetch the token metadata from.
@@ -18821,7 +18821,7 @@ components:
           examples:
             - 'https://example.com'
             - 'ipfs://Qm...'
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The token IDs corresponding to the URI.
@@ -18834,7 +18834,7 @@ components:
           type: string
       required:
         - uri
-        - badgeIds
+        - tokenIds
         - customData
       additionalProperties: false
       type: object
@@ -19252,7 +19252,7 @@ components:
         - publicInputs
       additionalProperties: false
       type: object
-    iMustOwnBadges:
+    iMustOwnTokens:
       properties:
         collectionId:
           description: The collection IDs to own.
@@ -19270,7 +19270,7 @@ components:
                 end: '2000000000'
             - - start: '1'
                 end: '18446744073709551615'
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The range of the token IDs that must be owned.
@@ -19288,7 +19288,7 @@ components:
         - collectionId
         - amountRange
         - ownershipTimes
-        - badgeIds
+        - tokenIds
         - overrideWithCurrentTime
         - mustSatisfyForAllAssets
       additionalProperties: false
@@ -19298,7 +19298,7 @@ components:
         amount:
           description: The amount or balance of the owned token.
           $ref: '#/components/schemas/NumberType'
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The token IDs corresponding to the balance.
@@ -19318,7 +19318,7 @@ components:
                 end: '18446744073709551615'
       required:
         - amount
-        - badgeIds
+        - tokenIds
         - ownershipTimes
       additionalProperties: false
       type: object
@@ -19616,7 +19616,7 @@ components:
         - collectionMetadata
       additionalProperties: false
       type: object
-    iBadgeMetadataTimeline:
+    iTokenMetadataTimeline:
       properties:
         timelineTimes:
           items:
@@ -19628,14 +19628,14 @@ components:
                 end: '2000000000'
             - - start: '1'
                 end: '18446744073709551615'
-        badgeMetadata:
+        tokenMetadata:
           items:
-            $ref: '#/components/schemas/iBadgeMetadataDetails'
+            $ref: '#/components/schemas/iTokenMetadataDetails'
           description: 'The token metadata, with off-chain details populated.'
           type: array
       required:
         - timelineTimes
-        - badgeMetadata
+        - tokenMetadata
       additionalProperties: false
       type: object
     iOffChainBalancesMetadataTimeline:
@@ -19781,7 +19781,7 @@ components:
                 end: '2000000000'
             - - start: '1'
                 end: '18446744073709551615'
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The token IDs of the approved outgoing transfers.
@@ -19828,7 +19828,7 @@ components:
         - initiatedByListId
         - initiatedByList
         - transferTimes
-        - badgeIds
+        - tokenIds
         - ownershipTimes
         - approvalId
         - permanentlyPermittedTimes
@@ -19867,7 +19867,7 @@ components:
                 end: '2000000000'
             - - start: '1'
                 end: '18446744073709551615'
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The token IDs of the approved incoming transfers.
@@ -19914,7 +19914,7 @@ components:
         - initiatedByListId
         - initiatedByList
         - transferTimes
-        - badgeIds
+        - tokenIds
         - ownershipTimes
         - approvalId
         - permanentlyPermittedTimes
@@ -19958,14 +19958,14 @@ components:
             $ref: '#/components/schemas/iTimedUpdatePermission'
           description: The permissions for updating the collection metadata.
           type: array
-        canUpdateValidBadgeIds:
+        canUpdateValidTokenIds:
           items:
-            $ref: '#/components/schemas/iBadgeIdsActionPermission'
+            $ref: '#/components/schemas/iTokenIdsActionPermission'
           description: The permissions for creating more tokens.
           type: array
-        canUpdateBadgeMetadata:
+        canUpdateTokenMetadata:
           items:
-            $ref: '#/components/schemas/iTimedUpdateWithBadgeIdsPermission'
+            $ref: '#/components/schemas/iTimedUpdateWithTokenIdsPermission'
           description: The permissions for updating the token metadata.
           type: array
         canUpdateCollectionApprovals:
@@ -19981,8 +19981,8 @@ components:
         - canUpdateCustomData
         - canUpdateManager
         - canUpdateCollectionMetadata
-        - canUpdateValidBadgeIds
-        - canUpdateBadgeMetadata
+        - canUpdateValidTokenIds
+        - canUpdateTokenMetadata
         - canUpdateCollectionApprovals
       additionalProperties: false
       type: object
@@ -20051,9 +20051,9 @@ components:
         - permanentlyForbiddenTimes
       additionalProperties: false
       type: object
-    iBadgeIdsActionPermission:
+    iTokenIdsActionPermission:
       properties:
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The token IDs that the permission applies to.
@@ -20082,12 +20082,12 @@ components:
             - - start: '1'
                 end: '18446744073709551615'
       required:
-        - badgeIds
+        - tokenIds
         - permanentlyPermittedTimes
         - permanentlyForbiddenTimes
       additionalProperties: false
       type: object
-    iTimedUpdateWithBadgeIdsPermission:
+    iTimedUpdateWithTokenIdsPermission:
       properties:
         timelineTimes:
           items:
@@ -20099,7 +20099,7 @@ components:
                 end: '2000000000'
             - - start: '1'
                 end: '18446744073709551615'
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The token IDs that the permission applies to.
@@ -20129,7 +20129,7 @@ components:
                 end: '18446744073709551615'
       required:
         - timelineTimes
-        - badgeIds
+        - tokenIds
         - permanentlyPermittedTimes
         - permanentlyForbiddenTimes
       additionalProperties: false
@@ -20176,7 +20176,7 @@ components:
                 end: '2000000000'
             - - start: '1'
                 end: '18446744073709551615'
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The token IDs of the approved transfers.
@@ -20225,7 +20225,7 @@ components:
         - initiatedByListId
         - initiatedByList
         - transferTimes
-        - badgeIds
+        - tokenIds
         - ownershipTimes
         - approvalId
         - permanentlyPermittedTimes
@@ -20264,7 +20264,7 @@ components:
                 end: '2000000000'
             - - start: '1'
                 end: '18446744073709551615'
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The token IDs to be transferred.
@@ -20303,16 +20303,16 @@ components:
         - initiatedByListId
         - initiatedByList
         - transferTimes
-        - badgeIds
+        - tokenIds
         - ownershipTimes
         - approvalId
       additionalProperties: false
       type: object
     iOutgoingApprovalCriteria:
       properties:
-        mustOwnBadges:
+        mustOwnTokens:
           items:
-            $ref: '#/components/schemas/iMustOwnBadges'
+            $ref: '#/components/schemas/iMustOwnTokens'
           description: The list of tokens to be owned to be approved. Must have on-chain balances.
           type: array
         zkProofs:
@@ -20384,7 +20384,7 @@ components:
             $ref: '#/components/schemas/iBalance'
           description: The starting balances for each transfer. Order number corresponds to the number of times we increment.
           type: array
-        incrementBadgeIdsBy:
+        incrementTokenIdsBy:
           description: The amount to increment the token IDs by after each transfer.
           $ref: '#/components/schemas/NumberType'
         incrementOwnershipTimesBy:
@@ -20392,7 +20392,7 @@ components:
           $ref: '#/components/schemas/NumberType'
       required:
         - startBalances
-        - incrementBadgeIdsBy
+        - incrementTokenIdsBy
         - incrementOwnershipTimesBy
       additionalProperties: false
       type: object
@@ -20428,16 +20428,16 @@ components:
     iApprovalAmounts:
       properties:
         overallApprovalAmount:
-          description: The overall maximum amount approved for the badgeIDs and ownershipTimes. Running tally that includes all transfers that match this approval.
+          description: The overall maximum amount approved for the tokenIDs and ownershipTimes. Running tally that includes all transfers that match this approval.
           $ref: '#/components/schemas/NumberType'
         perToAddressApprovalAmount:
-          description: The maximum amount approved for the badgeIDs and ownershipTimes for each to address. Running tally that includes all transfers from each unique to address that match this approval.
+          description: The maximum amount approved for the tokenIDs and ownershipTimes for each to address. Running tally that includes all transfers from each unique to address that match this approval.
           $ref: '#/components/schemas/NumberType'
         perFromAddressApprovalAmount:
-          description: The maximum amount approved for the badgeIDs and ownershipTimes for each from address. Running tally that includes all transfers from each unique from address that match this approval.
+          description: The maximum amount approved for the tokenIDs and ownershipTimes for each from address. Running tally that includes all transfers from each unique from address that match this approval.
           $ref: '#/components/schemas/NumberType'
         perInitiatedByAddressApprovalAmount:
-          description: The maximum amount approved for the badgeIDs and ownershipTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval.
+          description: The maximum amount approved for the tokenIDs and ownershipTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval.
           $ref: '#/components/schemas/NumberType'
         amountTrackerId:
           description: The ID of the approval tracker. This is the key used to track tallies.
@@ -20453,16 +20453,16 @@ components:
     iMaxNumTransfers:
       properties:
         overallMaxNumTransfers:
-          description: The overall maximum number of transfers for the badgeIDs and ownershipTimes. Running tally that includes all transfers that match this approval.
+          description: The overall maximum number of transfers for the tokenIDs and ownershipTimes. Running tally that includes all transfers that match this approval.
           $ref: '#/components/schemas/NumberType'
         perToAddressMaxNumTransfers:
-          description: The maximum number of transfers for the badgeIDs and ownershipTimes for each to address. Running tally that includes all transfers from each unique to address that match this approval.
+          description: The maximum number of transfers for the tokenIDs and ownershipTimes for each to address. Running tally that includes all transfers from each unique to address that match this approval.
           $ref: '#/components/schemas/NumberType'
         perFromAddressMaxNumTransfers:
-          description: The maximum number of transfers for the badgeIDs and ownershipTimes for each from address. Running tally that includes all transfers from each unique from address that match this approval.
+          description: The maximum number of transfers for the tokenIDs and ownershipTimes for each from address. Running tally that includes all transfers from each unique from address that match this approval.
           $ref: '#/components/schemas/NumberType'
         perInitiatedByAddressMaxNumTransfers:
-          description: The maximum number of transfers for the badgeIDs and ownershipTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval.
+          description: The maximum number of transfers for the tokenIDs and ownershipTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval.
           $ref: '#/components/schemas/NumberType'
         amountTrackerId:
           description: The ID of the approval tracker. This is the key used to track tallies.
@@ -20507,7 +20507,7 @@ components:
                 end: '2000000000'
             - - start: '1'
                 end: '18446744073709551615'
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The token IDs to be transferred.
@@ -20546,16 +20546,16 @@ components:
         - initiatedByListId
         - initiatedByList
         - transferTimes
-        - badgeIds
+        - tokenIds
         - ownershipTimes
         - approvalId
       additionalProperties: false
       type: object
     iIncomingApprovalCriteria:
       properties:
-        mustOwnBadges:
+        mustOwnTokens:
           items:
-            $ref: '#/components/schemas/iMustOwnBadges'
+            $ref: '#/components/schemas/iMustOwnTokens'
           description: The list of tokens to be owned to be approved. Must have on-chain balances.
           type: array
         zkProofs:
@@ -20632,7 +20632,7 @@ components:
                 end: '2000000000'
             - - start: '1'
                 end: '18446744073709551615'
-        badgeIds:
+        tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The token IDs to be transferred.
@@ -20673,16 +20673,16 @@ components:
         - initiatedByListId
         - initiatedByList
         - transferTimes
-        - badgeIds
+        - tokenIds
         - ownershipTimes
         - approvalId
       additionalProperties: false
       type: object
     iApprovalCriteria:
       properties:
-        mustOwnBadges:
+        mustOwnTokens:
           items:
-            $ref: '#/components/schemas/iMustOwnBadges'
+            $ref: '#/components/schemas/iMustOwnTokens'
           description: The list of tokens to be owned to be approved. Must have on-chain balances.
           type: array
         zkProofs:

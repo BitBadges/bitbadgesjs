@@ -409,7 +409,7 @@ const updateAddressListWithResponse = <T extends NumberType>(
     }
   }
 
-  //Update details accordingly. Note that there are certain fields which are always returned like collectionId, collectionUri, badgeUris, etc. We just ...spread these from the new response.
+  //Update details accordingly. Note that there are certain fields which are always returned like collectionId, collectionUri, tokenUris, etc. We just ...spread these from the new response.
   cachedList = new BitBadgesAddressList({
     ...cachedList,
     ...newCollection,

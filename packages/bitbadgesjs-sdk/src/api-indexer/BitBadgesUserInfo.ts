@@ -777,7 +777,7 @@ export type AccountViewKey =
  * @property {string} [address] - If present, the account corresponding to the specified address will be fetched. Please only specify one of `address` or `username`.
  * @property {string} [username] - If present, the account corresponding to the specified username will be fetched. Please only specify one of `address` or `username`.
  * @property {boolean} [fetchSequence] - If true, the sequence will be fetched from the blockchain.
- * @property {boolean} [fetchBalance] - If true, the $BADGE balance will be fetched from the blockchain.
+ * @property {boolean} [fetchBalance] - If true, the BADGE balance will be fetched from the blockchain.
  * @property {boolean} [noExternalCalls] - If true, only fetches local information stored in DB. Nothing external like resolved names, avatars, etc.
  * @property {Array<{ viewType: string, bookmark: string }>} [viewsToFetch] - An array of views to fetch with associated bookmarks.
  *

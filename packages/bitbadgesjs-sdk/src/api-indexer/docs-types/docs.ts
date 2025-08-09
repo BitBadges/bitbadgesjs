@@ -20,10 +20,10 @@ import {
   iChallengeDetails
 } from '@/core/approvals.js';
 import { BalanceArray } from '@/core/balances.js';
-import { BatchTokenDetailsArray } from '@/core/batch-utils.js';
+import { BatchTokenDetailsArray, iBatchTokenDetails } from '@/core/batch-utils.js';
 import { CosmosCoin } from '@/core/coin.js';
 import {
-  BadgeMetadataTimeline,
+  TokenMetadataTimeline,
   CollectionInvariants,
   CollectionMetadataTimeline,
   CosmosCoinWrapperPath,
@@ -53,7 +53,7 @@ import {
   iApplicationDoc,
   iApplicationPage,
   iApprovalItemDoc,
-  iBadgeFloorPriceDoc,
+  iTokenFloorPriceDoc,
   iBaseStats,
   iCollectionStatsDoc,
   iCreatorCreditsDoc,
@@ -213,20 +213,20 @@ export class FloorPriceHistory<T extends NumberType> extends BaseNumberTypeClass
  * @inheritDoc iApprovalItemDoc
  * @category Approvals
  */
-export class BadgeFloorPriceDoc<T extends NumberType> extends BaseNumberTypeClass<BadgeFloorPriceDoc<T>> implements iBadgeFloorPriceDoc<T> {
+export class TokenFloorPriceDoc<T extends NumberType> extends BaseNumberTypeClass<TokenFloorPriceDoc<T>> implements iTokenFloorPriceDoc<T> {
   collectionId: CollectionId;
-  badgeId: T;
+  tokenId: T;
   _docId: string;
   _id?: string | undefined;
   floorPrices?: CosmosCoin<T>[];
   floorPriceHistory?: iFloorPriceHistory<T>[] | undefined;
 
-  constructor(data: iBadgeFloorPriceDoc<T>) {
+  constructor(data: iTokenFloorPriceDoc<T>) {
     super();
     this._docId = data._docId;
     this._id = data._id;
     this.collectionId = data.collectionId;
-    this.badgeId = data.badgeId;
+    this.tokenId = data.tokenId;
     this.floorPrices = data.floorPrices?.map((floorPrice) => new CosmosCoin(floorPrice)) ?? [];
     this.floorPriceHistory = data.floorPriceHistory
       ? data.floorPriceHistory.map((floorPriceHistory) => new FloorPriceHistory(floorPriceHistory))
@@ -234,11 +234,11 @@ export class BadgeFloorPriceDoc<T extends NumberType> extends BaseNumberTypeClas
   }
 
   getNumberFieldNames(): string[] {
-    return ['badgeId'];
+    return ['tokenId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): BadgeFloorPriceDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BadgeFloorPriceDoc<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): TokenFloorPriceDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TokenFloorPriceDoc<U>;
   }
 }
 
@@ -255,7 +255,7 @@ export class ApprovalItemDoc<T extends NumberType> extends BaseNumberTypeClass<A
   approverAddress: BitBadgesAddress;
   approvalType: string;
   price?: T;
-  badgeId?: T;
+  tokenId?: T;
   used?: boolean;
   sufficientBalances?: boolean;
   deletedAt?: UNIXMilliTimestamp<T>;
@@ -275,7 +275,7 @@ export class ApprovalItemDoc<T extends NumberType> extends BaseNumberTypeClass<A
     this.approverAddress = data.approverAddress;
     this.approvalType = data.approvalType;
     this.price = data.price;
-    this.badgeId = data.badgeId;
+    this.tokenId = data.tokenId;
     this.deletedAt = data.deletedAt;
     this.approval = new CollectionApproval<T>(data.approval);
     this.used = data.used;
@@ -287,7 +287,7 @@ export class ApprovalItemDoc<T extends NumberType> extends BaseNumberTypeClass<A
   }
 
   getNumberFieldNames(): string[] {
-    return ['price', 'badgeId', 'deletedAt', 'numTransfersLeft'];
+    return ['price', 'tokenId', 'deletedAt', 'numTransfersLeft'];
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): ApprovalItemDoc<U> {
@@ -307,7 +307,7 @@ export class CollectionDoc<T extends NumberType>
   _id?: string;
   collectionId: CollectionId;
   collectionMetadataTimeline: CollectionMetadataTimeline<T>[];
-  badgeMetadataTimeline: BadgeMetadataTimeline<T>[];
+  tokenMetadataTimeline: TokenMetadataTimeline<T>[];
   balancesType: 'Standard' | 'Off-Chain - Indexed' | 'Non-Public' | 'Off-Chain - Non-Indexed';
   offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline<T>[];
   customDataTimeline: CustomDataTimeline<T>[];
@@ -321,7 +321,7 @@ export class CollectionDoc<T extends NumberType>
   createdBlock: T;
   createdTimestamp: UNIXMilliTimestamp<T>;
   updateHistory: UpdateHistory<T>[];
-  validBadgeIds: UintRangeArray<T>;
+  validTokenIds: UintRangeArray<T>;
   mintEscrowAddress: string;
   cosmosCoinWrapperPaths: CosmosCoinWrapperPath<T>[];
   invariants: CollectionInvariants;
@@ -334,7 +334,7 @@ export class CollectionDoc<T extends NumberType>
     this.collectionMetadataTimeline = data.collectionMetadataTimeline.map(
       (collectionMetadataTimeline) => new CollectionMetadataTimeline(collectionMetadataTimeline)
     );
-    this.badgeMetadataTimeline = data.badgeMetadataTimeline.map((badgeMetadataTimeline) => new BadgeMetadataTimeline(badgeMetadataTimeline));
+    this.tokenMetadataTimeline = data.tokenMetadataTimeline.map((tokenMetadataTimeline) => new TokenMetadataTimeline(tokenMetadataTimeline));
     this.balancesType = data.balancesType;
     this.offChainBalancesMetadataTimeline = data.offChainBalancesMetadataTimeline.map(
       (offChainBalancesMetadataTimeline) => new OffChainBalancesMetadataTimeline(offChainBalancesMetadataTimeline)
@@ -352,7 +352,7 @@ export class CollectionDoc<T extends NumberType>
     this.updateHistory = data.updateHistory.map((updateHistory) => new UpdateHistory(updateHistory));
 
     this.mintEscrowAddress = data.mintEscrowAddress;
-    this.validBadgeIds = UintRangeArray.From(data.validBadgeIds);
+    this.validTokenIds = UintRangeArray.From(data.validTokenIds);
     this.cosmosCoinWrapperPaths = data.cosmosCoinWrapperPaths.map((cosmosCoinWrapperPaths) => new CosmosCoinWrapperPath(cosmosCoinWrapperPaths));
     this.invariants = new CollectionInvariants(data.invariants);
   }
@@ -362,7 +362,7 @@ export class CollectionDoc<T extends NumberType>
     return {
       manager: getValueAtTimeForTimeline(coll.managerTimeline, time)?.manager,
       collectionMetadata: getValueAtTimeForTimeline(coll.collectionMetadataTimeline, time)?.collectionMetadata,
-      badgeMetadata: getValueAtTimeForTimeline(coll.badgeMetadataTimeline, time)?.badgeMetadata ?? [],
+      tokenMetadata: getValueAtTimeForTimeline(coll.tokenMetadataTimeline, time)?.tokenMetadata ?? [],
       offChainBalancesMetadata: getValueAtTimeForTimeline(coll.offChainBalancesMetadataTimeline, time)?.offChainBalancesMetadata,
       customData: getValueAtTimeForTimeline(coll.customDataTimeline, time)?.customData,
       standards: getValueAtTimeForTimeline(coll.standardsTimeline, time)?.standards,
@@ -389,10 +389,10 @@ export class CollectionDoc<T extends NumberType>
   /**
    * Gets the token metadata at a specific time (Date.now() by default).
    *
-   * This gets the timeline value. For the actual fetched value, use `getBadgeMetadata()` instead.
+   * This gets the timeline value. For the actual fetched value, use `getTokenMetadata()` instead.
    */
-  getBadgeMetadataTimelineValue(time?: NumberType) {
-    return this.getTimelineValuesAtTime(time).badgeMetadata;
+  getTokenMetadataTimelineValue(time?: NumberType) {
+    return this.getTimelineValuesAtTime(time).tokenMetadata;
   }
 
   /**
@@ -687,13 +687,13 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   bluesky?: string;
   readme?: string;
   customLinks?: iCustomLink[];
-  hiddenBadges?: BatchTokenDetailsArray<T>;
+  hiddenTokens?: BatchTokenDetailsArray<T>;
   hiddenLists?: string[];
   customPages?: {
-    badges: CustomPage<T>[];
+    tokens: CustomPage<T>[];
     lists: CustomListPage[];
   };
-  watchlists?: { badges: CustomPage<T>[]; lists: CustomListPage[] };
+  watchlists?: { tokens: CustomPage<T>[]; lists: CustomListPage[] };
   profilePicUrl?: string;
   username?: string;
   latestSignedInChain?: SupportedChain;
@@ -736,17 +736,17 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.bluesky = data.bluesky;
     this.readme = data.readme;
     this.customLinks = data.customLinks;
-    this.hiddenBadges = data.hiddenBadges ? BatchTokenDetailsArray.From(data.hiddenBadges) : undefined;
+    this.hiddenTokens = data.hiddenTokens ? BatchTokenDetailsArray.From(data.hiddenTokens) : undefined;
     this.hiddenLists = data.hiddenLists;
     this.customPages = data.customPages
       ? {
-          badges: data.customPages.badges.map((customPage) => new CustomPage(customPage)),
+          tokens: data.customPages.tokens.map((customPage) => new CustomPage(customPage)),
           lists: data.customPages.lists.map((customListPage) => new CustomListPage(customListPage))
         }
       : undefined;
     this.watchlists = data.watchlists
       ? {
-          badges: data.watchlists.badges.map((customPage) => new CustomPage(customPage)),
+          tokens: data.watchlists.tokens.map((customPage) => new CustomPage(customPage)),
           lists: data.watchlists.lists.map((customListPage) => new CustomListPage(customListPage))
         }
       : undefined;
@@ -1527,13 +1527,13 @@ export class ListingViewsDoc<T extends NumberType> extends BaseNumberTypeClass<L
  */
 export class LinkedTo<T extends NumberType> extends CustomTypeClass<LinkedTo<T>> implements iLinkedTo<T> {
   collectionId?: CollectionId;
-  badgeIds?: UintRangeArray<T>;
+  tokenIds?: UintRangeArray<T>;
   listId?: string;
 
   constructor(data: iLinkedTo<T>) {
     super();
     this.collectionId = data.collectionId;
-    this.badgeIds = data.badgeIds ? UintRangeArray.From(data.badgeIds) : undefined;
+    this.tokenIds = data.tokenIds ? UintRangeArray.From(data.tokenIds) : undefined;
     this.listId = data.listId;
   }
 
@@ -1556,7 +1556,7 @@ export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<I
   collectionId?: CollectionId;
   listId?: string;
   mapId?: string;
-  badgeId?: string;
+  tokenId?: string;
 
   constructor(data: iInheritMetadataFrom<T>) {
     super();
@@ -1565,7 +1565,7 @@ export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<I
     this.collectionId = data.collectionId;
     this.listId = data.listId;
     this.mapId = data.mapId;
-    this.badgeId = data.badgeId;
+    this.tokenId = data.tokenId;
   }
 
   getNumberFieldNames(): string[] {
@@ -1636,7 +1636,7 @@ export class UtilityPageDoc<T extends NumberType> extends BaseNumberTypeClass<Ut
   estimatedCost?: EstimatedCost<T>;
   estimatedTime?: string;
   homePageView?: {
-    type: 'badges' | 'lists' | 'claims' | 'applications';
+    type: 'tokens' | 'lists' | 'claims' | 'applications';
     category: string;
   };
 
@@ -2042,7 +2042,7 @@ export class IPFSTotalsDoc<T extends NumberType> extends BaseNumberTypeClass<IPF
 export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<ComplianceDoc<T>> implements iComplianceDoc<T> {
   _docId: string;
   _id?: string;
-  badges: {
+  tokens: {
     nsfw: BatchTokenDetailsArray<T>;
     reported: BatchTokenDetailsArray<T>;
   };
@@ -2069,9 +2069,9 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
 
   constructor(data: iComplianceDoc<T>) {
     super();
-    this.badges = {
-      nsfw: BatchTokenDetailsArray.From(data.badges.nsfw),
-      reported: BatchTokenDetailsArray.From(data.badges.reported)
+    this.tokens = {
+      nsfw: BatchTokenDetailsArray.From(data.tokens.nsfw),
+      reported: BatchTokenDetailsArray.From(data.tokens.reported)
     };
     this.addressLists = data.addressLists;
     this.accounts = data.accounts;

@@ -77,29 +77,29 @@ export const doesCollectionFollowSubscriptionProtocol = (collection?: Readonly<i
   }
 
   // Assert valid token IDs are only 1n-1n
-  const allSubscriptionBadgeIds = [];
+  const allSubscriptionTokenIds = [];
   for (const approval of subscriptionApprovals) {
-    const badgeIds = UintRangeArray.From(approval.badgeIds).sortAndMerge().convert(BigInt);
-    allSubscriptionBadgeIds.push(...badgeIds);
+    const tokenIds = UintRangeArray.From(approval.tokenIds).sortAndMerge().convert(BigInt);
+    allSubscriptionTokenIds.push(...tokenIds);
   }
-  const allSubscriptionBadgeIdsSorted = UintRangeArray.From(allSubscriptionBadgeIds).sortAndMerge().convert(BigInt);
+  const allSubscriptionTokenIdsSorted = UintRangeArray.From(allSubscriptionTokenIds).sortAndMerge().convert(BigInt);
 
-  if (allSubscriptionBadgeIdsSorted.length !== 1) {
+  if (allSubscriptionTokenIdsSorted.length !== 1) {
     return false;
   }
 
-  if (collection.validBadgeIds.length !== 1) {
+  if (collection.validTokenIds.length !== 1) {
     return false;
   }
 
-  if (collection.validBadgeIds.length !== allSubscriptionBadgeIdsSorted.length) {
+  if (collection.validTokenIds.length !== allSubscriptionTokenIdsSorted.length) {
     return false;
   }
 
-  for (let i = 0; i < collection.validBadgeIds.length; i++) {
+  for (let i = 0; i < collection.validTokenIds.length; i++) {
     if (
-      collection.validBadgeIds[i].start !== allSubscriptionBadgeIdsSorted[i].start ||
-      collection.validBadgeIds[i].end !== allSubscriptionBadgeIdsSorted[i].end
+      collection.validTokenIds[i].start !== allSubscriptionTokenIdsSorted[i].start ||
+      collection.validTokenIds[i].end !== allSubscriptionTokenIdsSorted[i].end
     ) {
       return false;
     }
@@ -142,13 +142,13 @@ export const isSubscriptionFaucetApproval = (approval: iCollectionApproval<bigin
     return false;
   }
 
-  const approvalBadgeIds = approval.badgeIds;
-  if (approvalBadgeIds.length !== 1 || UintRangeArray.From(approvalBadgeIds).sortAndMerge().convert(BigInt).size() !== 1n) {
+  const approvalTokenIds = approval.tokenIds;
+  if (approvalTokenIds.length !== 1 || UintRangeArray.From(approvalTokenIds).sortAndMerge().convert(BigInt).size() !== 1n) {
     return false;
   }
 
-  const allBadgeIds = UintRangeArray.From(incrementedBalances.startBalances[0].badgeIds).sortAndMerge().convert(BigInt);
-  if (allBadgeIds.length !== 1 || allBadgeIds.size() !== 1n) {
+  const allTokenIds = UintRangeArray.From(incrementedBalances.startBalances[0].tokenIds).sortAndMerge().convert(BigInt);
+  if (allTokenIds.length !== 1 || allTokenIds.size() !== 1n) {
     return false;
   }
 
@@ -157,7 +157,7 @@ export const isSubscriptionFaucetApproval = (approval: iCollectionApproval<bigin
     return false;
   }
 
-  if (incrementedBalances.incrementBadgeIdsBy !== 0n) {
+  if (incrementedBalances.incrementTokenIdsBy !== 0n) {
     return false;
   }
 
@@ -202,7 +202,7 @@ export const isSubscriptionFaucetApproval = (approval: iCollectionApproval<bigin
     return false;
   }
 
-  if (approvalCriteria.mustOwnBadges?.length) {
+  if (approvalCriteria.mustOwnTokens?.length) {
     return false;
   }
 
@@ -220,15 +220,15 @@ export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>,
   const approvalAmount = approval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount ?? 0n;
 
   //Ensure token IDs match
-  const approvalBadgeIds = UintRangeArray.From(approval.badgeIds).sortAndMerge().convert(BigInt);
-  const subscriptionBadgeIds = UintRangeArray.From(subscriptionApproval.badgeIds).sortAndMerge().convert(BigInt);
+  const approvalTokenIds = UintRangeArray.From(approval.tokenIds).sortAndMerge().convert(BigInt);
+  const subscriptionTokenIds = UintRangeArray.From(subscriptionApproval.tokenIds).sortAndMerge().convert(BigInt);
 
-  if (approvalBadgeIds.length !== subscriptionBadgeIds.length) {
+  if (approvalTokenIds.length !== subscriptionTokenIds.length) {
     return false;
   }
 
-  for (let i = 0; i < approvalBadgeIds.length; i++) {
-    if (approvalBadgeIds[i].start !== subscriptionBadgeIds[i].start || approvalBadgeIds[i].end !== subscriptionBadgeIds[i].end) {
+  for (let i = 0; i < approvalTokenIds.length; i++) {
+    if (approvalTokenIds[i].start !== subscriptionTokenIds[i].start || approvalTokenIds[i].end !== subscriptionTokenIds[i].end) {
       return false;
     }
   }
@@ -237,7 +237,7 @@ export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>,
     return false;
   }
 
-  if (approval.badgeIds.length !== 1 || UintRangeArray.From(approval.badgeIds).sortAndMerge().convert(BigInt).size() !== 1n) {
+  if (approval.tokenIds.length !== 1 || UintRangeArray.From(approval.tokenIds).sortAndMerge().convert(BigInt).size() !== 1n) {
     return false;
   }
 
@@ -274,13 +274,13 @@ export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>,
   }
 
   if (
-    incrementedBalances.startBalances[0].badgeIds.length !== 1 ||
-    UintRangeArray.From(incrementedBalances.startBalances[0].badgeIds).sortAndMerge().convert(BigInt).size() !== 1n
+    incrementedBalances.startBalances[0].tokenIds.length !== 1 ||
+    UintRangeArray.From(incrementedBalances.startBalances[0].tokenIds).sortAndMerge().convert(BigInt).size() !== 1n
   ) {
     return false;
   }
 
-  if (incrementedBalances.incrementBadgeIdsBy !== 0n) {
+  if (incrementedBalances.incrementTokenIdsBy !== 0n) {
     return false;
   }
 
@@ -330,7 +330,7 @@ export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>,
     return false;
   }
 
-  if (approvalCriteria.mustOwnBadges?.length) {
+  if (approvalCriteria.mustOwnTokens?.length) {
     return false;
   }
 

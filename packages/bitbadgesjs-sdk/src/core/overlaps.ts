@@ -16,7 +16,7 @@ const { getReservedTrackerList } = AddressList;
 //TODO: This file was created with AI from the Go equivalent in github.com/bitbadges/bitbadgeschain. It should be cleaned up to be more idiomatic TypeScript.
 
 export interface UniversalPermission {
-  badgeIds: UintRangeArray<bigint>;
+  tokenIds: UintRangeArray<bigint>;
   timelineTimes: UintRangeArray<bigint>;
   transferTimes: UintRangeArray<bigint>;
   ownershipTimes: UintRangeArray<bigint>;
@@ -28,7 +28,7 @@ export interface UniversalPermission {
   permanentlyPermittedTimes: UintRangeArray<bigint>;
   permanentlyForbiddenTimes: UintRangeArray<bigint>;
 
-  usesBadgeIds: boolean;
+  usesTokenIds: boolean;
   usesTimelineTimes: boolean;
   usesTransferTimes: boolean;
   usesToList: boolean;
@@ -41,7 +41,7 @@ export interface UniversalPermission {
 }
 
 export interface UniversalPermissionDetails {
-  badgeId: UintRange<bigint>;
+  tokenId: UintRange<bigint>;
   timelineTime: UintRange<bigint>;
   transferTime: UintRange<bigint>;
   ownershipTime: UintRange<bigint>;
@@ -114,7 +114,7 @@ export function universalRemoveOverlaps(
   valueToCheck: UniversalPermissionDetails
 ): [UniversalPermissionDetails[], UniversalPermissionDetails[]] {
   const [timelineTimesAfterRemoval, removedTimelineTimes] = valueToCheck.timelineTime.getOverlapDetails(handled.timelineTime);
-  const [badgesAfterRemoval, removedBadges] = valueToCheck.badgeId.getOverlapDetails(handled.badgeId);
+  const [badgesAfterRemoval, removedBadges] = valueToCheck.tokenId.getOverlapDetails(handled.tokenId);
   const [transferTimesAfterRemoval, removedTransferTimes] = valueToCheck.transferTime.getOverlapDetails(handled.transferTime);
   const [ownershipTimesAfterRemoval, removedOwnershipTimes] = valueToCheck.ownershipTime.getOverlapDetails(handled.ownershipTime);
 
@@ -147,7 +147,7 @@ export function universalRemoveOverlaps(
   for (const timelineTimeAfterRemoval of timelineTimesAfterRemoval) {
     remaining.push({
       timelineTime: timelineTimeAfterRemoval,
-      badgeId: valueToCheck.badgeId,
+      tokenId: valueToCheck.tokenId,
       transferTime: valueToCheck.transferTime,
       ownershipTime: valueToCheck.ownershipTime,
       toList: valueToCheck.toList,
@@ -165,7 +165,7 @@ export function universalRemoveOverlaps(
   for (const badgeAfterRemoval of badgesAfterRemoval) {
     remaining.push({
       timelineTime: removedTimelineTimes[0],
-      badgeId: badgeAfterRemoval,
+      tokenId: badgeAfterRemoval,
       transferTime: valueToCheck.transferTime,
       ownershipTime: valueToCheck.ownershipTime,
       toList: valueToCheck.toList,
@@ -182,7 +182,7 @@ export function universalRemoveOverlaps(
   for (const transferTimeAfterRemoval of transferTimesAfterRemoval) {
     remaining.push({
       timelineTime: removedTimelineTimes[0],
-      badgeId: removedBadges[0],
+      tokenId: removedBadges[0],
       transferTime: transferTimeAfterRemoval,
       ownershipTime: valueToCheck.ownershipTime,
       toList: valueToCheck.toList,
@@ -199,7 +199,7 @@ export function universalRemoveOverlaps(
   for (const ownershipTimeAfterRemoval of ownershipTimesAfterRemoval) {
     remaining.push({
       timelineTime: removedTimelineTimes[0],
-      badgeId: removedBadges[0],
+      tokenId: removedBadges[0],
       transferTime: removedTransferTimes[0],
       ownershipTime: ownershipTimeAfterRemoval,
       toList: valueToCheck.toList,
@@ -216,7 +216,7 @@ export function universalRemoveOverlaps(
   if (!toListAfterRemoval.isEmpty()) {
     remaining.push({
       timelineTime: removedTimelineTimes[0],
-      badgeId: removedBadges[0],
+      tokenId: removedBadges[0],
       transferTime: removedTransferTimes[0],
       ownershipTime: removedOwnershipTimes[0],
       toList: toListAfterRemoval,
@@ -232,7 +232,7 @@ export function universalRemoveOverlaps(
   if (!fromListAfterRemoval.isEmpty()) {
     remaining.push({
       timelineTime: removedTimelineTimes[0],
-      badgeId: removedBadges[0],
+      tokenId: removedBadges[0],
       transferTime: removedTransferTimes[0],
       ownershipTime: removedOwnershipTimes[0],
       toList: removedToList,
@@ -249,7 +249,7 @@ export function universalRemoveOverlaps(
   if (!initiatedByListAfterRemoval.isEmpty()) {
     remaining.push({
       timelineTime: removedTimelineTimes[0],
-      badgeId: removedBadges[0],
+      tokenId: removedBadges[0],
       transferTime: removedTransferTimes[0],
       ownershipTime: removedOwnershipTimes[0],
       toList: removedToList,
@@ -266,7 +266,7 @@ export function universalRemoveOverlaps(
   if (!approvalIdListAfterRemoval.isEmpty()) {
     remaining.push({
       timelineTime: removedTimelineTimes[0],
-      badgeId: removedBadges[0],
+      tokenId: removedBadges[0],
       transferTime: removedTransferTimes[0],
       ownershipTime: removedOwnershipTimes[0],
       toList: removedToList,
@@ -287,7 +287,7 @@ export function universalRemoveOverlaps(
         for (const removedOwnershipTime of removedOwnershipTimes) {
           removed.push({
             timelineTime: removedTimelineTime,
-            badgeId: removedBadge,
+            tokenId: removedBadge,
             transferTime: removedTransferTime,
             ownershipTime: removedOwnershipTime,
             toList: removedToList,
@@ -341,7 +341,7 @@ export function GetListWithOptions(_list: AddressList, uses: boolean): AddressLi
 //TODO: This is a mess and is not needed but requires some refactoring.
 
 export interface UsedFlags {
-  usesBadgeIds: boolean;
+  usesTokenIds: boolean;
   usesTimelineTimes: boolean;
   usesTransferTimes: boolean;
   usesToList: boolean;
@@ -353,7 +353,7 @@ export interface UsedFlags {
   usesChallengeTrackerIdList: boolean;
 }
 export const ActionPermissionUsedFlags: UsedFlags = {
-  usesBadgeIds: false,
+  usesTokenIds: false,
   usesTimelineTimes: false,
   usesTransferTimes: false,
   usesToList: false,
@@ -366,7 +366,7 @@ export const ActionPermissionUsedFlags: UsedFlags = {
 };
 
 export const TimedUpdatePermissionUsedFlags: UsedFlags = {
-  usesBadgeIds: false,
+  usesTokenIds: false,
   usesTimelineTimes: true,
   usesTransferTimes: false,
   usesToList: false,
@@ -378,8 +378,8 @@ export const TimedUpdatePermissionUsedFlags: UsedFlags = {
   usesChallengeTrackerIdList: false
 };
 
-export const TimedUpdateWithBadgeIdsPermissionUsedFlags: UsedFlags = {
-  usesBadgeIds: true,
+export const TimedUpdateWithTokenIdsPermissionUsedFlags: UsedFlags = {
+  usesTokenIds: true,
   usesTimelineTimes: true,
   usesTransferTimes: false,
   usesToList: false,
@@ -391,8 +391,8 @@ export const TimedUpdateWithBadgeIdsPermissionUsedFlags: UsedFlags = {
   usesChallengeTrackerIdList: false
 };
 
-export const BadgeIdsActionPermissionUsedFlags: UsedFlags = {
-  usesBadgeIds: true,
+export const TokenIdsActionPermissionUsedFlags: UsedFlags = {
+  usesTokenIds: true,
   usesTimelineTimes: false,
   usesTransferTimes: false,
   usesToList: false,
@@ -405,7 +405,7 @@ export const BadgeIdsActionPermissionUsedFlags: UsedFlags = {
 };
 
 export const ApprovalPermissionUsedFlags: UsedFlags = {
-  usesBadgeIds: true,
+  usesTokenIds: true,
   usesTimelineTimes: false,
   usesTransferTimes: true,
   usesToList: true,
@@ -436,7 +436,7 @@ export function GetFirstMatchOnly(
       initiatedByList: AddressList.AllAddresses(),
       approvalIdList: getReservedTrackerList('All') as AddressList,
       transferTimes: UintRangeArray.FullRanges(),
-      badgeIds: UintRangeArray.FullRanges(),
+      tokenIds: UintRangeArray.FullRanges(),
       ownershipTimes: UintRangeArray.FullRanges(),
 
       permanentlyPermittedTimes: UintRangeArray.From([]),
@@ -449,7 +449,7 @@ export function GetFirstMatchOnly(
   }
 
   for (const permission of permissions) {
-    const badgeIds = GetUintRangesWithOptions(permission.badgeIds, permission.usesBadgeIds);
+    const tokenIds = GetUintRangesWithOptions(permission.tokenIds, permission.usesTokenIds);
     const timelineTimes = GetUintRangesWithOptions(permission.timelineTimes, permission.usesTimelineTimes);
     const transferTimes = GetUintRangesWithOptions(permission.transferTimes, permission.usesTransferTimes);
     const ownershipTimes = GetUintRangesWithOptions(permission.ownershipTimes, permission.usesOwnershipTimes);
@@ -462,13 +462,13 @@ export function GetFirstMatchOnly(
     const initiatedByList = GetListWithOptions(permission.initiatedByList, permission.usesInitiatedByList);
     const approvalIdList = GetListWithOptions(permission.approvalIdList, permission.usesApprovalIdList);
 
-    for (const badgeId of badgeIds) {
+    for (const tokenId of tokenIds) {
       for (const timelineTime of timelineTimes) {
         for (const transferTime of transferTimes) {
           for (const ownershipTime of ownershipTimes) {
             const brokenDown: UniversalPermissionDetails[] = [
               {
-                badgeId: badgeId,
+                tokenId: tokenId,
                 timelineTime: timelineTime,
                 transferTime: transferTime,
                 ownershipTime: ownershipTime,
@@ -488,7 +488,7 @@ export function GetFirstMatchOnly(
             for (const remaining of remainingAfterHandledIsRemoved) {
               handled.push({
                 timelineTime: remaining.timelineTime,
-                badgeId: remaining.badgeId,
+                tokenId: remaining.tokenId,
                 transferTime: remaining.transferTime,
                 ownershipTime: remaining.ownershipTime,
                 toList: remaining.toList,
@@ -510,7 +510,7 @@ export function GetFirstMatchOnly(
 }
 
 export interface MergedUniversalPermissionDetails {
-  badgeIds: UintRangeArray<bigint>;
+  tokenIds: UintRangeArray<bigint>;
   timelineTimes: UintRangeArray<bigint>;
   transferTimes: UintRangeArray<bigint>;
   ownershipTimes: UintRangeArray<bigint>;
@@ -530,7 +530,7 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
   //We can merge two values if N - 1 fields are the same (note currently we only merge uint ranges)
   let merged: MergedUniversalPermissionDetails[] = permissions.map((permission) => {
     return {
-      badgeIds: UintRangeArray.From([permission.badgeId]),
+      tokenIds: UintRangeArray.From([permission.tokenId]),
       timelineTimes: UintRangeArray.From([permission.timelineTime]),
       transferTimes: UintRangeArray.From([permission.transferTime]),
       ownershipTimes: UintRangeArray.From([permission.ownershipTime]),
@@ -560,7 +560,7 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
         const first = merged[i];
         const second = merged[j];
 
-        const badgeIdsAreSame = JSON.stringify(first.badgeIds) === JSON.stringify(second.badgeIds);
+        const tokenIdsAreSame = JSON.stringify(first.tokenIds) === JSON.stringify(second.tokenIds);
         const timelineTimesAreSame = JSON.stringify(first.timelineTimes) === JSON.stringify(second.timelineTimes);
         const transferTimesAreSame = JSON.stringify(first.transferTimes) === JSON.stringify(second.transferTimes);
         const ownershipTimesAreSame = JSON.stringify(first.ownershipTimes) === JSON.stringify(second.ownershipTimes);
@@ -580,23 +580,23 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
         const forbiddenTimesAreSame = JSON.stringify(first.permanentlyForbiddenTimes) === JSON.stringify(second.permanentlyForbiddenTimes);
         const arbitraryValuesAreSame = JSON.stringify(first.arbitraryValue) === JSON.stringify(second.arbitraryValue);
 
-        if (badgeIdsAreSame) first.badgeIds.push(...second.badgeIds);
+        if (tokenIdsAreSame) first.tokenIds.push(...second.tokenIds);
         if (timelineTimesAreSame) first.timelineTimes.push(...second.timelineTimes);
         if (transferTimesAreSame) first.transferTimes.push(...second.transferTimes);
         if (ownershipTimesAreSame) first.ownershipTimes.push(...second.ownershipTimes);
 
-        first.badgeIds.sortAndMerge();
+        first.tokenIds.sortAndMerge();
         first.timelineTimes.sortAndMerge();
         first.transferTimes.sortAndMerge();
         first.ownershipTimes.sortAndMerge();
 
-        const newBadgeIds = first.badgeIds;
+        const newTokenIds = first.tokenIds;
         const newTimelineTimes = first.timelineTimes;
         const newTransferTimes = first.transferTimes;
         const newOwnershipTimes = first.ownershipTimes;
 
         let sameCount = 0;
-        if (badgeIdsAreSame) sameCount++;
+        if (tokenIdsAreSame) sameCount++;
         if (timelineTimesAreSame) sameCount++;
         if (transferTimesAreSame) sameCount++;
         if (ownershipTimesAreSame) sameCount++;
@@ -618,7 +618,7 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
           arbitraryValuesAreSame
         ) {
           merged.push({
-            badgeIds: newBadgeIds,
+            tokenIds: newTokenIds,
             timelineTimes: newTimelineTimes,
             transferTimes: newTransferTimes,
             ownershipTimes: newOwnershipTimes,
@@ -639,7 +639,7 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
         } else if (sameCount === 4 && addressSameCount == 3 && permittedTimesAreSame && forbiddenTimesAreSame && arbitraryValuesAreSame) {
           //TODO: Merge address lists if whitelist is not the same
           merged.push({
-            badgeIds: newBadgeIds,
+            tokenIds: newTokenIds,
             timelineTimes: newTimelineTimes,
             transferTimes: newTransferTimes,
             ownershipTimes: newOwnershipTimes,
@@ -690,8 +690,8 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
 
 function GetPermissionString(permission: UniversalPermissionDetails): string {
   let str = '(';
-  if (permission.badgeId.start === BigInt('18446744073709551615') || permission.badgeId.end === BigInt('18446744073709551615')) {
-    str += 'badgeId: ' + permission.badgeId.start.toString() + ' ';
+  if (permission.tokenId.start === BigInt('18446744073709551615') || permission.tokenId.end === BigInt('18446744073709551615')) {
+    str += 'tokenId: ' + permission.tokenId.start.toString() + ' ';
   }
 
   if (permission.timelineTime.start === BigInt('18446744073709551615') || permission.timelineTime.end === BigInt('18446744073709551615')) {

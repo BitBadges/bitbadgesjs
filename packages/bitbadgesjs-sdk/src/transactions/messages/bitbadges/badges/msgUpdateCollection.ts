@@ -9,7 +9,7 @@ import { CollectionApproval } from '@/core/approvals.js';
 import { CosmosCoin } from '@/core/coin.js';
 import { CosmosCoinWrapperPathAddObject } from '@/core/ibc-wrappers.js';
 import {
-  BadgeMetadataTimeline,
+  TokenMetadataTimeline,
   CollectionMetadataTimeline,
   CustomDataTimeline,
   IsArchivedTimeline,
@@ -37,16 +37,16 @@ import type { iMsgUpdateCollection } from './interfaces.js';
 export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeClass<MsgUpdateCollection<T>> implements iMsgUpdateCollection<T> {
   creator: BitBadgesAddress;
   collectionId: CollectionId;
-  updateValidBadgeIds?: boolean;
-  validBadgeIds?: UintRangeArray<T>;
+  updateValidTokenIds?: boolean;
+  validTokenIds?: UintRangeArray<T>;
   updateCollectionPermissions?: boolean;
   collectionPermissions?: CollectionPermissions<T>;
   updateManagerTimeline?: boolean;
   managerTimeline?: ManagerTimeline<T>[];
   updateCollectionMetadataTimeline?: boolean;
   collectionMetadataTimeline?: CollectionMetadataTimeline<T>[];
-  updateBadgeMetadataTimeline?: boolean;
-  badgeMetadataTimeline?: BadgeMetadataTimeline<T>[];
+  updateTokenMetadataTimeline?: boolean;
+  tokenMetadataTimeline?: TokenMetadataTimeline<T>[];
   updateOffChainBalancesMetadataTimeline?: boolean;
   offChainBalancesMetadataTimeline?: OffChainBalancesMetadataTimeline<T>[];
   updateCustomDataTimeline?: boolean;
@@ -64,8 +64,8 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
-    this.updateValidBadgeIds = msg.updateValidBadgeIds;
-    this.validBadgeIds = msg.validBadgeIds ? UintRangeArray.From(msg.validBadgeIds) : undefined;
+    this.updateValidTokenIds = msg.updateValidTokenIds;
+    this.validTokenIds = msg.validTokenIds ? UintRangeArray.From(msg.validTokenIds) : undefined;
     this.updateCollectionPermissions = msg.updateCollectionPermissions;
     this.collectionPermissions = msg.collectionPermissions ? new CollectionPermissions(msg.collectionPermissions) : undefined;
     this.updateManagerTimeline = msg.updateManagerTimeline;
@@ -74,8 +74,8 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     this.collectionMetadataTimeline = msg.collectionMetadataTimeline
       ? msg.collectionMetadataTimeline.map((x) => new CollectionMetadataTimeline(x))
       : undefined;
-    this.updateBadgeMetadataTimeline = msg.updateBadgeMetadataTimeline;
-    this.badgeMetadataTimeline = msg.badgeMetadataTimeline ? msg.badgeMetadataTimeline.map((x) => new BadgeMetadataTimeline(x)) : undefined;
+    this.updateTokenMetadataTimeline = msg.updateTokenMetadataTimeline;
+    this.tokenMetadataTimeline = msg.tokenMetadataTimeline ? msg.tokenMetadataTimeline.map((x) => new TokenMetadataTimeline(x)) : undefined;
     this.updateOffChainBalancesMetadataTimeline = msg.updateOffChainBalancesMetadataTimeline;
     this.offChainBalancesMetadataTimeline = msg.offChainBalancesMetadataTimeline
       ? msg.offChainBalancesMetadataTimeline.map((x) => new OffChainBalancesMetadataTimeline(x))
@@ -129,8 +129,8 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     return new MsgUpdateCollection({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
-      updateValidBadgeIds: protoMsg.updateValidBadgeIds,
-      validBadgeIds: protoMsg.validBadgeIds?.map((x) => UintRange.fromProto(x, convertFunction)),
+      updateValidTokenIds: protoMsg.updateValidTokenIds,
+      validTokenIds: protoMsg.validTokenIds?.map((x) => UintRange.fromProto(x, convertFunction)),
       updateCollectionPermissions: protoMsg.updateCollectionPermissions,
       collectionPermissions: protoMsg.collectionPermissions
         ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction)
@@ -139,8 +139,8 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
       managerTimeline: protoMsg.managerTimeline?.map((x) => ManagerTimeline.fromProto(x, convertFunction)),
       updateCollectionMetadataTimeline: protoMsg.updateCollectionMetadataTimeline,
       collectionMetadataTimeline: protoMsg.collectionMetadataTimeline?.map((x) => CollectionMetadataTimeline.fromProto(x, convertFunction)),
-      updateBadgeMetadataTimeline: protoMsg.updateBadgeMetadataTimeline,
-      badgeMetadataTimeline: protoMsg.badgeMetadataTimeline?.map((x) => BadgeMetadataTimeline.fromProto(x, convertFunction)),
+      updateTokenMetadataTimeline: protoMsg.updateTokenMetadataTimeline,
+      tokenMetadataTimeline: protoMsg.tokenMetadataTimeline?.map((x) => TokenMetadataTimeline.fromProto(x, convertFunction)),
       updateOffChainBalancesMetadataTimeline: protoMsg.updateOffChainBalancesMetadataTimeline,
       offChainBalancesMetadataTimeline: protoMsg.offChainBalancesMetadataTimeline?.map((x) =>
         OffChainBalancesMetadataTimeline.fromProto(x, convertFunction)

@@ -7,13 +7,13 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { CollectionApproval, Transfer, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
 import { Balance, UintRange } from "./balances_pb.js";
-import { BadgeMetadataTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
+import { CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline, TokenMetadataTimeline } from "./timelines_pb.js";
 import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { AddressList } from "./address_lists_pb.js";
 import { CosmosCoinWrapperPathAddObject } from "./tx_pb.js";
 
 /**
- * The types defined in these files are used to define the MsgServer types for all requests and responses for Msgs of the tokens module.
+ * The types defined in these files are used to define the MsgServer types for all requests and responses for Msgs of the badges module.
  *
  * @generated from message badges.UserOutgoingApprovalTimeline
  */
@@ -160,9 +160,9 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
-   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 3;
+   * @generated from field: repeated badges.TokenMetadataTimeline tokenMetadataTimeline = 3;
    */
-  badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
+  tokenMetadataTimeline: TokenMetadataTimeline[] = [];
 
   /**
    * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 4;
@@ -258,7 +258,7 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 3, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
+    { no: 3, name: "tokenMetadataTimeline", kind: "message", T: TokenMetadataTimeline, repeated: true },
     { no: 4, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
     { no: 5, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
     { no: 6, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
@@ -364,9 +364,9 @@ export class MsgMintAndDistributeBadges extends Message<MsgMintAndDistributeBadg
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
-   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 7;
+   * @generated from field: repeated badges.TokenMetadataTimeline tokenMetadataTimeline = 7;
    */
-  badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
+  tokenMetadataTimeline: TokenMetadataTimeline[] = [];
 
   /**
    * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 8;
@@ -396,7 +396,7 @@ export class MsgMintAndDistributeBadges extends Message<MsgMintAndDistributeBadg
     { no: 3, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
     { no: 4, name: "transfers", kind: "message", T: Transfer, repeated: true },
     { no: 6, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 7, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
+    { no: 7, name: "tokenMetadataTimeline", kind: "message", T: TokenMetadataTimeline, repeated: true },
     { no: 8, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
     { no: 9, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
     { no: 10, name: "addressLists", kind: "message", T: AddressList, repeated: true },
@@ -558,9 +558,9 @@ export class MsgUpdateMetadata extends Message<MsgUpdateMetadata> {
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
-   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 4;
+   * @generated from field: repeated badges.TokenMetadataTimeline tokenMetadataTimeline = 4;
    */
-  badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
+  tokenMetadataTimeline: TokenMetadataTimeline[] = [];
 
   /**
    * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 5;
@@ -593,7 +593,7 @@ export class MsgUpdateMetadata extends Message<MsgUpdateMetadata> {
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 4, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
+    { no: 4, name: "tokenMetadataTimeline", kind: "message", T: TokenMetadataTimeline, repeated: true },
     { no: 5, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
     { no: 6, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
     { no: 7, name: "contractAddressTimeline", kind: "message", T: ContractAddressTimeline, repeated: true },

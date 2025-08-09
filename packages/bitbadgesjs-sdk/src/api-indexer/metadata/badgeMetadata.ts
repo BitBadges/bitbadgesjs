@@ -10,18 +10,18 @@ import { Metadata } from './metadata.js';
 //TODO: Make an Array wrapper class for the util functions? Also add to BitBadgesCollection?
 
 /**
- * To keep track of metadata for tokens and load it dynamically, we store it in an array: BadgeMetadataDetails<T>[].
+ * To keep track of metadata for tokens and load it dynamically, we store it in an array: TokenMetadataDetails<T>[].
  *
- * The values are { metadata, uri, badgeIds, } where this object represents the metadata fetched by a uri
- * which correspond to the badgeIds.
+ * The values are { metadata, uri, tokenIds, } where this object represents the metadata fetched by a uri
+ * which correspond to the tokenIds.
  *
  * Keeping track of metadata in this way allows us to load metadata dynamically and only when needed.
  * However, it does get confusing when we need to update this array. This file contains the logic
  * for updating the metadata in an efficient way.
  *
- * updateBadgeMetadata - updates the metadata array to include the given metadata and badgeIds fetched from the given uri. Replaces existing metadata for badgeIds, if any.
- * getMetadataForBadgeId - returns just the metadata for a given badgeId
- * getMetadataddDetailsForBadgeId - returns the { metadata, uri, badgeIds, metadata } object for a given badgeId
+ * updateTokenMetadata - updates the metadata array to include the given metadata and tokenIds fetched from the given uri. Replaces existing metadata for tokenIds, if any.
+ * getMetadataForTokenId - returns just the metadata for a given tokenId
+ * getMetadataddDetailsForTokenId - returns the { metadata, uri, tokenIds, metadata } object for a given tokenId
  *
  * setMetadataPropertyForAll - sets a specific (key, value) pair for all metadata entries in the array
  */
@@ -29,9 +29,9 @@ import { Metadata } from './metadata.js';
 /**
  * @category Interfaces
  */
-export interface iBadgeMetadataDetails<T extends NumberType> {
+export interface iTokenMetadataDetails<T extends NumberType> {
   /** The token IDs that correspond to the metadata */
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
   /** The metadata fetched by the URI */
   metadata?: iMetadata<T>;
   /** The URI that the metadata was fetched from. This is the original on-chain URI, so may still have placeholders (i.e. {id} or {address}) */
@@ -97,20 +97,20 @@ export class CollectionMetadataDetails<T extends NumberType>
 }
 
 /**
- * @inheritDoc iBadgeMetadataDetails
+ * @inheritDoc iTokenMetadataDetails
  * @category Collections
  */
-export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeClass<BadgeMetadataDetails<T>> implements iBadgeMetadataDetails<T> {
-  badgeIds: UintRangeArray<T>;
+export class TokenMetadataDetails<T extends NumberType> extends BaseNumberTypeClass<TokenMetadataDetails<T>> implements iTokenMetadataDetails<T> {
+  tokenIds: UintRangeArray<T>;
   metadata?: Metadata<T>;
   uri: string;
   fetchedUri?: string | undefined;
   customData: string;
   toUploadToIpfs?: boolean;
 
-  constructor(data: iBadgeMetadataDetails<T>) {
+  constructor(data: iTokenMetadataDetails<T>) {
     super();
-    this.badgeIds = UintRangeArray.From(data.badgeIds);
+    this.tokenIds = UintRangeArray.From(data.tokenIds);
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
     this.uri = data.uri;
     this.fetchedUri = data.fetchedUri;
@@ -122,93 +122,93 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BadgeMetadataDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BadgeMetadataDetails<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TokenMetadataDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TokenMetadataDetails<U>;
   }
 
   /**
-   * Removes the metadata from the BadgeMetadataDetails<bigint>[] for specific token IDs.
+   * Removes the metadata from the TokenMetadataDetails<bigint>[] for specific token IDs.
    *
    * Note that this function does not mutate the metadataArr, but instead returns a new one.
    */
-  static removeBadgeMetadata = <T extends NumberType>(currBadgeMetadata: BadgeMetadataDetails<T>[], badgeIds: UintRange<T>[]) => {
+  static removeTokenMetadata = <T extends NumberType>(currTokenMetadata: TokenMetadataDetails<T>[], tokenIds: UintRange<T>[]) => {
     const dummyMetadata = new Metadata<T>({
       name: 'metadataToRemove',
       description: 'metadataToRemove',
       image: 'metadataToRemove'
     });
-    const uniqueBadgeMetadataDetails = new BadgeMetadataDetails<T>({
+    const uniqueTokenMetadataDetails = new TokenMetadataDetails<T>({
       metadata: dummyMetadata,
-      badgeIds,
+      tokenIds,
       uri: '',
       customData: ''
     });
-    const newBadgeMetadata = BadgeMetadataDetails.updateBadgeMetadata(currBadgeMetadata, uniqueBadgeMetadataDetails);
+    const newTokenMetadata = TokenMetadataDetails.updateTokenMetadata(currTokenMetadata, uniqueTokenMetadataDetails);
 
-    return newBadgeMetadata.filter((val) => val && val.metadata?.name !== 'metadataToRemove');
+    return newTokenMetadata.filter((val) => val && val.metadata?.name !== 'metadataToRemove');
   };
 
   /**
-   * Update the metadataArr with the given metadata and badgeIds fetched from the given uri.
+   * Update the metadataArr with the given metadata and tokenIds fetched from the given uri.
    *
    * Note that this function does not mutate the metadataArr, but instead returns a new one.
    */
-  static updateBadgeMetadata = <T extends NumberType>(
-    currBadgeMetadata: BadgeMetadataDetails<T>[],
-    newBadgeMetadataDetails: BadgeMetadataDetails<T>
+  static updateTokenMetadata = <T extends NumberType>(
+    currTokenMetadata: TokenMetadataDetails<T>[],
+    newTokenMetadataDetails: TokenMetadataDetails<T>
   ) => {
-    return BadgeMetadataDetails.batchUpdateBadgeMetadata(currBadgeMetadata, [newBadgeMetadataDetails]);
+    return TokenMetadataDetails.batchUpdateTokenMetadata(currTokenMetadata, [newTokenMetadataDetails]);
   };
 
   /**
-   * Batch update the metadataArr with the given metadata and badgeIds fetched from the given
+   * Batch update the metadataArr with the given metadata and tokenIds fetched from the given
    */
-  static batchUpdateBadgeMetadata = <T extends NumberType>(
-    currBadgeMetadata: BadgeMetadataDetails<T>[],
-    newBadgeMetadataDetailsArr: BadgeMetadataDetails<T>[]
+  static batchUpdateTokenMetadata = <T extends NumberType>(
+    currTokenMetadata: TokenMetadataDetails<T>[],
+    newTokenMetadataDetailsArr: TokenMetadataDetails<T>[]
   ) => {
-    const allBadgeIdsToBeUpdated = UintRangeArray.From(newBadgeMetadataDetailsArr.map((x) => x.badgeIds).flat()).sortAndMerge();
-    for (let i = 0; i < currBadgeMetadata.length; i++) {
-      const val = currBadgeMetadata[i];
+    const allTokenIdsToBeUpdated = UintRangeArray.From(newTokenMetadataDetailsArr.map((x) => x.tokenIds).flat()).sortAndMerge();
+    for (let i = 0; i < currTokenMetadata.length; i++) {
+      const val = currTokenMetadata[i];
       if (!val) continue; //For TS
 
-      val.badgeIds.remove(allBadgeIdsToBeUpdated);
+      val.tokenIds.remove(allTokenIdsToBeUpdated);
     }
 
-    currBadgeMetadata = currBadgeMetadata.filter((val) => val && val.badgeIds.length > 0);
+    currTokenMetadata = currTokenMetadata.filter((val) => val && val.tokenIds.length > 0);
 
-    const currMetadataStrs = currBadgeMetadata.map((x) => JSON.stringify(x.metadata)).sort((a, b) => a.localeCompare(b));
+    const currMetadataStrs = currTokenMetadata.map((x) => JSON.stringify(x.metadata)).sort((a, b) => a.localeCompare(b));
 
-    for (const newBadgeMetadataDetails of newBadgeMetadataDetailsArr) {
-      const currentMetadata = newBadgeMetadataDetails.metadata;
+    for (const newTokenMetadataDetails of newTokenMetadataDetailsArr) {
+      const currentMetadata = newTokenMetadataDetails.metadata;
 
-      for (const badgeUintRange of newBadgeMetadataDetails.badgeIds) {
-        const startBadgeId = badgeUintRange.start;
-        const endBadgeId = badgeUintRange.end;
+      for (const tokenUintRange of newTokenMetadataDetails.tokenIds) {
+        const startTokenId = tokenUintRange.start;
+        const endTokenId = tokenUintRange.end;
 
         //If the metadata we are updating is already in the array (with matching uri and id), we can just insert the token IDs
-        let currBadgeMetadataExists = false;
+        let currTokenMetadataExists = false;
         const currStr = JSON.stringify(currentMetadata);
         const idx = currMetadataStrs.indexOf(currStr);
 
         if (idx !== -1) {
-          const val = currBadgeMetadata[idx];
+          const val = currTokenMetadata[idx];
           if (!val) continue; //For TS
 
           if (
-            val.uri === newBadgeMetadataDetails.uri &&
-            val.customData === newBadgeMetadataDetails.customData &&
-            val.toUploadToIpfs === newBadgeMetadataDetails.toUploadToIpfs &&
-            val.fetchedUri === newBadgeMetadataDetails.fetchedUri &&
+            val.uri === newTokenMetadataDetails.uri &&
+            val.customData === newTokenMetadataDetails.customData &&
+            val.toUploadToIpfs === newTokenMetadataDetails.toUploadToIpfs &&
+            val.fetchedUri === newTokenMetadataDetails.fetchedUri &&
             ((currentMetadata === undefined && undefined === val.metadata) || val.metadata?.equals(currentMetadata))
           ) {
-            currBadgeMetadataExists = true;
-            const newUintRange = new UintRange({ start: startBadgeId, end: endBadgeId });
-            if (val.badgeIds.length > 0) {
-              val.badgeIds.push(newUintRange);
-              val.badgeIds.sortAndMerge();
+            currTokenMetadataExists = true;
+            const newUintRange = new UintRange({ start: startTokenId, end: endTokenId });
+            if (val.tokenIds.length > 0) {
+              val.tokenIds.push(newUintRange);
+              val.tokenIds.sortAndMerge();
             } else {
-              val.badgeIds = UintRangeArray.From([newUintRange]);
+              val.tokenIds = UintRangeArray.From([newUintRange]);
             }
           }
         }
@@ -217,44 +217,44 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
         //If some metadata object no longer has any corresponding token IDs, we can remove it from the array
 
         //If we did not find the metadata in the array and metadata !== undefined, we need to add it
-        if (!currBadgeMetadataExists) {
-          currBadgeMetadata.push(
-            new BadgeMetadataDetails({
+        if (!currTokenMetadataExists) {
+          currTokenMetadata.push(
+            new TokenMetadataDetails({
               metadata: currentMetadata ? { ...currentMetadata } : undefined,
-              badgeIds: [
+              tokenIds: [
                 {
-                  start: startBadgeId,
-                  end: endBadgeId
+                  start: startTokenId,
+                  end: endTokenId
                 }
               ],
-              uri: newBadgeMetadataDetails.uri,
-              fetchedUri: newBadgeMetadataDetails.fetchedUri,
-              customData: newBadgeMetadataDetails.customData,
-              toUploadToIpfs: newBadgeMetadataDetails.toUploadToIpfs
+              uri: newTokenMetadataDetails.uri,
+              fetchedUri: newTokenMetadataDetails.fetchedUri,
+              customData: newTokenMetadataDetails.customData,
+              toUploadToIpfs: newTokenMetadataDetails.toUploadToIpfs
             })
           );
 
-          const hashedMetadataStr = JSON.stringify(newBadgeMetadataDetails.metadata);
+          const hashedMetadataStr = JSON.stringify(newTokenMetadataDetails.metadata);
           currMetadataStrs.push(hashedMetadataStr);
           currMetadataStrs.sort((a, b) => a.localeCompare(b));
         }
       }
     }
 
-    currBadgeMetadata = currBadgeMetadata.filter((val) => val && val.badgeIds.length > 0);
-    return currBadgeMetadata;
+    currTokenMetadata = currTokenMetadata.filter((val) => val && val.tokenIds.length > 0);
+    return currTokenMetadata;
   };
 
   /**
-   * Returns the { metadata, uri, badgeIds, customData } metadata object from the BadgeMetadataDetails<bigint>[] for a specific tokenId.
+   * Returns the { metadata, uri, tokenIds, customData } metadata object from the TokenMetadataDetails<bigint>[] for a specific tokenId.
    *
-   * If the badgeId does not exist in the BadgeMetadataDetails<bigint>[], returns undefined.
+   * If the tokenId does not exist in the TokenMetadataDetails<bigint>[], returns undefined.
    */
-  static getMetadataDetailsForBadgeId<T extends NumberType>(badgeId: T, metadataArr: BadgeMetadataDetails<T>[]): BadgeMetadataDetails<T> | undefined {
+  static getMetadataDetailsForTokenId<T extends NumberType>(tokenId: T, metadataArr: TokenMetadataDetails<T>[]): TokenMetadataDetails<T> | undefined {
     for (const val of Object.values(metadataArr)) {
       if (!val) continue; //For TS
 
-      if (val.badgeIds.searchIfExists(badgeId)) {
+      if (val.tokenIds.searchIfExists(tokenId)) {
         return val;
       }
     }
@@ -263,34 +263,34 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
   }
 
   /**
-   * Returns the metadata from the BadgeMetadataDetails<bigint>[] for a specific tokenId.
+   * Returns the metadata from the TokenMetadataDetails<bigint>[] for a specific tokenId.
    *
-   * If the badgeId does not exist in the BadgeMetadataDetails<bigint>[], returns undefined.
+   * If the tokenId does not exist in the TokenMetadataDetails<bigint>[], returns undefined.
    */
-  static getMetadataForBadgeId<T extends NumberType>(badgeId: T, metadataArr: BadgeMetadataDetails<T>[]) {
-    return BadgeMetadataDetails.getMetadataDetailsForBadgeId(badgeId, metadataArr)?.metadata;
+  static getMetadataForTokenId<T extends NumberType>(tokenId: T, metadataArr: TokenMetadataDetails<T>[]) {
+    return TokenMetadataDetails.getMetadataDetailsForTokenId(tokenId, metadataArr)?.metadata;
   }
 
   /**
-   * For each tokenId in badgeIds, populates the metadata array with the given key, value JSON property pair.
+   * For each tokenId in tokenIds, populates the metadata array with the given key, value JSON property pair.
    *
-   * If you want to update the entire metadata (not just a specific key value pair), use updateBadgeMetadata instead.
+   * If you want to update the entire metadata (not just a specific key value pair), use updateTokenMetadata instead.
    *
    * This is typically used when customizing or creating a token.
    *
    * @example
-   * Use this function to set the "name" property of all tokens to "test" via setMetadataPropertyForAll(metadataArr, badgeIds, uri, "name", "test")
+   * Use this function to set the "name" property of all tokens to "test" via setMetadataPropertyForAll(metadataArr, tokenIds, uri, "name", "test")
    */
   static setMetadataPropertyForSpecificIds = <T extends NumberType>(
-    metadataArr: BadgeMetadataDetails<T>[],
-    badgeIds: UintRange<T>[],
+    metadataArr: TokenMetadataDetails<T>[],
+    tokenIds: UintRange<T>[],
     key: string,
     value: any
   ) => {
-    const toUploadToIpfsDetails: BadgeMetadataDetails<T>[] = [];
-    for (const badgeUintRange of badgeIds) {
+    const toUploadToIpfsDetails: TokenMetadataDetails<T>[] = [];
+    for (const tokenUintRange of tokenIds) {
       //We are updating a specific key value pair for each
-      for (let id = badgeUintRange.start; id <= badgeUintRange.end; id = safeAddKeepLeft(id, 1)) {
+      for (let id = tokenUintRange.start; id <= tokenUintRange.end; id = safeAddKeepLeft(id, 1)) {
         let newMetadata = {} as Metadata<T>;
         let uri = '';
         let customData = '';
@@ -300,13 +300,13 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
           const val = metadataArr[i];
           if (!val || !val.metadata) continue; //For TS
 
-          //Find the idx where id is in the badgeIds array
-          const [idx, found] = val.badgeIds.search(id);
+          //Find the idx where id is in the tokenIds array
+          const [idx, found] = val.tokenIds.search(id);
           if (found) {
             //If multiple sequential token IDs have the same metadata and are in the ranges we want to update,
             //we can batch update all these together
-            const foundUintRange = val.badgeIds[Number(idx)];
-            const endIdToUpdate = bigIntMin(foundUintRange.end, badgeUintRange.end);
+            const foundUintRange = val.tokenIds[Number(idx)];
+            const endIdToUpdate = bigIntMin(foundUintRange.end, tokenUintRange.end);
             uintRangeToUpdate.end = endIdToUpdate;
 
             id = endIdToUpdate; //Set id to the end of the range we are updating so we can skip to the next range (will be incremented by 1 at the end of the loop)
@@ -319,9 +319,9 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
         }
         // console.log(metadataArr);
         toUploadToIpfsDetails.push(
-          new BadgeMetadataDetails<T>({
+          new TokenMetadataDetails<T>({
             metadata: newMetadata,
-            badgeIds: [uintRangeToUpdate],
+            tokenIds: [uintRangeToUpdate],
             uri,
             customData,
             toUploadToIpfs: true
@@ -329,12 +329,12 @@ export class BadgeMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
         );
       }
     }
-    metadataArr = BadgeMetadataDetails.batchUpdateBadgeMetadata<T>(metadataArr, toUploadToIpfsDetails);
+    metadataArr = TokenMetadataDetails.batchUpdateTokenMetadata<T>(metadataArr, toUploadToIpfsDetails);
 
     return metadataArr;
   };
 
-  toProto(): protobadges.BadgeMetadata {
-    return new protobadges.BadgeMetadata(this.convert(Stringify));
+  toProto(): protobadges.TokenMetadata {
+    return new protobadges.TokenMetadata(this.convert(Stringify));
   }
 }

@@ -22,7 +22,7 @@ export function appendAllIncomingTransfersApproval(
     initiatedByListId: 'All',
     transferTimes: [UintRange.FullRange()],
     ownershipTimes: [UintRange.FullRange()],
-    badgeIds: [UintRange.FullRange()],
+    tokenIds: [UintRange.FullRange()],
     approvalId: 'all-incoming-transfers',
     version: 0n
   });
@@ -54,7 +54,7 @@ export function appendSelfInitiatedIncomingApproval(
     initiatedByListId: userAddress,
     transferTimes: [UintRange.FullRange()],
     ownershipTimes: [UintRange.FullRange()],
-    badgeIds: [UintRange.FullRange()],
+    tokenIds: [UintRange.FullRange()],
     approvalId: 'self-initiated-incoming',
     version: 0n
   });
@@ -86,7 +86,7 @@ export function appendSelfInitiatedOutgoingApproval(
     initiatedByList: getReservedAddressList(userAddress) as AddressList,
     transferTimes: [UintRange.FullRange()],
     ownershipTimes: [UintRange.FullRange()],
-    badgeIds: [UintRange.FullRange()],
+    tokenIds: [UintRange.FullRange()],
     approvalId: 'self-initiated-outgoing',
     version: 0n
   });
@@ -101,7 +101,7 @@ export function appendSelfInitiatedOutgoingApproval(
  * Returns all the approvals that are not handled by the inputted collectionApprovals.
  * All returned approvals will have the ID "__disapproved__".
  *
- * @param ignoreTrackerIds If true, any combination of (from, to, initiatedBy, badgeIds, transferTimes, ownershipTimes) will be considered handled if
+ * @param ignoreTrackerIds If true, any combination of (from, to, initiatedBy, tokenIds, transferTimes, ownershipTimes) will be considered handled if
  * it has a single match (regardless of the IDs). For example, if we have a transfer ('Bob', 'Alice', 'Bob', 1, 1, 1) with IDs ('A', 'B', 'C'),
  * we won't return that ('Bob', 'Alice', 'Bob', 1, 1, 1) with IDs ('D', 'E', 'F') is unhandled.
  * @param doNotMerge If true, we will not attempt to merge the returned approvals.
@@ -126,7 +126,7 @@ export function getUnhandledCollectionApprovals(
       initiatedByListId: 'All',
       approvalId: '__disapproved__',
       transferTimes: [UintRange.FullRange()],
-      badgeIds: [UintRange.FullRange()],
+      tokenIds: [UintRange.FullRange()],
       ownershipTimes: [UintRange.FullRange()],
       version: 0n
     })
@@ -162,7 +162,7 @@ export function getUnhandledCollectionApprovals(
         toListId: match.toList.listId,
         initiatedByList: match.initiatedByList,
         initiatedByListId: match.initiatedByList.listId,
-        badgeIds: match.badgeIds,
+        tokenIds: match.tokenIds,
         transferTimes: match.transferTimes,
         ownershipTimes: match.ownershipTimes,
         version: 0n,

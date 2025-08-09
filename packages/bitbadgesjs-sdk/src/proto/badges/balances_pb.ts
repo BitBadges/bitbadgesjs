@@ -68,7 +68,7 @@ export class UintRange extends Message<UintRange> {
  *
  * Example: User A owns x10 of token IDs 1-10 from 1/1/2020 to 1/1/2021.
  *
- * If times or badgeIDs have len > 1, then the user owns all token IDs specified for all time ranges specified.
+ * If times or tokenIDs have len > 1, then the user owns all token IDs specified for all time ranges specified.
  *
  * @generated from message badges.Balance
  */
@@ -90,9 +90,9 @@ export class Balance extends Message<Balance> {
   /**
    * The token IDs for which the user owns the token.
    *
-   * @generated from field: repeated badges.UintRange badgeIds = 3;
+   * @generated from field: repeated badges.UintRange tokenIds = 3;
    */
-  badgeIds: UintRange[] = [];
+  tokenIds: UintRange[] = [];
 
   constructor(data?: PartialMessage<Balance>) {
     super();
@@ -104,7 +104,7 @@ export class Balance extends Message<Balance> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 3, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 3, name: "tokenIds", kind: "message", T: UintRange, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Balance {

@@ -5,14 +5,14 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
-import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
+import { CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline, TokenMetadataTimeline } from "./timelines_pb.js";
 import { CollectionPermissions } from "./permissions_pb.js";
 import { CollectionApproval, UserBalanceStore } from "./transfers_pb.js";
 import { Balance, UintRange } from "./balances_pb.js";
 
 /**
  *
- * A BadgeCollection is the top-level object for a collection of tokens. 
+ * A TokenCollection is the top-level object for a collection of tokens. 
  * It defines everything about the collection, such as the manager, metadata, etc.
  *
  * All collections are identified by a collectionId assigned by the blockchain, which is a uint64 that increments (i.e. the first collection has ID 1).
@@ -28,9 +28,9 @@ import { Balance, UintRange } from "./balances_pb.js";
  *
  * See documentation for more details.
  *
- * @generated from message badges.BadgeCollection
+ * @generated from message badges.TokenCollection
  */
-export class BadgeCollection extends Message<BadgeCollection> {
+export class TokenCollection extends Message<TokenCollection> {
   /**
    * The unique identifier for this collection. This is assigned by the blockchain. First collection has ID 1.
    *
@@ -48,9 +48,9 @@ export class BadgeCollection extends Message<BadgeCollection> {
   /**
    * The metadata for each token in the collection, also subject to changes over time.
    *
-   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 3;
+   * @generated from field: repeated badges.TokenMetadataTimeline tokenMetadataTimeline = 3;
    */
-  badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
+  tokenMetadataTimeline: TokenMetadataTimeline[] = [];
 
   /**
    * The type of balances this collection uses ("Standard", "Off-Chain - Indexed", "Off-Chain - Non-Indexed", or "Non-Public").
@@ -129,9 +129,9 @@ export class BadgeCollection extends Message<BadgeCollection> {
   /**
    * The valid token IDs for this collection.
    *
-   * @generated from field: repeated badges.UintRange validBadgeIds = 15;
+   * @generated from field: repeated badges.UintRange validTokenIds = 15;
    */
-  validBadgeIds: UintRange[] = [];
+  validTokenIds: UintRange[] = [];
 
   /**
    * The generated address of the collection. Also used to escrow Mint balances.
@@ -155,17 +155,17 @@ export class BadgeCollection extends Message<BadgeCollection> {
    */
   invariants?: CollectionInvariants;
 
-  constructor(data?: PartialMessage<BadgeCollection>) {
+  constructor(data?: PartialMessage<TokenCollection>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.BadgeCollection";
+  static readonly typeName = "badges.TokenCollection";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 3, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
+    { no: 3, name: "tokenMetadataTimeline", kind: "message", T: TokenMetadataTimeline, repeated: true },
     { no: 4, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
     { no: 7, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
@@ -176,26 +176,26 @@ export class BadgeCollection extends Message<BadgeCollection> {
     { no: 12, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
     { no: 13, name: "defaultBalances", kind: "message", T: UserBalanceStore },
     { no: 14, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 15, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 15, name: "validTokenIds", kind: "message", T: UintRange, repeated: true },
     { no: 16, name: "mintEscrowAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 17, name: "cosmosCoinWrapperPaths", kind: "message", T: CosmosCoinWrapperPath, repeated: true },
     { no: 18, name: "invariants", kind: "message", T: CollectionInvariants },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCollection {
-    return new BadgeCollection().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TokenCollection {
+    return new TokenCollection().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BadgeCollection {
-    return new BadgeCollection().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): TokenCollection {
+    return new TokenCollection().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BadgeCollection {
-    return new BadgeCollection().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): TokenCollection {
+    return new TokenCollection().fromJsonString(jsonString, options);
   }
 
-  static equals(a: BadgeCollection | PlainMessage<BadgeCollection> | undefined, b: BadgeCollection | PlainMessage<BadgeCollection> | undefined): boolean {
-    return proto3.util.equals(BadgeCollection, a, b);
+  static equals(a: TokenCollection | PlainMessage<TokenCollection> | undefined, b: TokenCollection | PlainMessage<TokenCollection> | undefined): boolean {
+    return proto3.util.equals(TokenCollection, a, b);
   }
 }
 

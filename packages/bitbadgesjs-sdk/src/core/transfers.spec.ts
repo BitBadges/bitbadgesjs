@@ -1,7 +1,7 @@
 import { genTestAddress } from './addressLists.spec.js';
 import {
   createBalanceMapForOffChainBalances,
-  getAllBadgeIdsToBeTransferred,
+  getAllTokenIdsToBeTransferred,
   getAllBalancesToBeTransferred,
   getBalancesAfterTransfers,
   iTransferWithIncrements
@@ -22,12 +22,12 @@ describe('Transfers', () => {
         balances: [
           {
             amount: 100n,
-            badgeIds: [{ start: 1n, end: 100n }],
+            tokenIds: [{ start: 1n, end: 100n }],
             ownershipTimes: [{ start: 1628770800000n, end: 1628857200000n }]
           }
         ],
         toAddresses: [testAddress1, testAddress2], // replace with your address
-        incrementBadgeIdsBy: 1n,
+        incrementTokenIdsBy: 1n,
         durationFromTimestamp: 0n, // assuming this is 1 day in milliseconds in BigInt form
         incrementOwnershipTimesBy: 86400000n // assuming this is 1 day in milliseconds in BigInt form
       }
@@ -37,10 +37,10 @@ describe('Transfers', () => {
     expect(balanceMap).toBeTruthy();
     expect(balanceMap[testAddress1][0].amount == 100n).toBe(true);
     expect(balanceMap[testAddress2][0].amount == 100n).toBe(true);
-    expect(balanceMap[testAddress1][0].badgeIds[0].start == 1n).toBe(true);
-    expect(balanceMap[testAddress1][0].badgeIds[0].end == 100n).toBe(true);
-    expect(balanceMap[testAddress2][0].badgeIds[0].start == 2n).toBe(true);
-    expect(balanceMap[testAddress2][0].badgeIds[0].end == 101n).toBe(true);
+    expect(balanceMap[testAddress1][0].tokenIds[0].start == 1n).toBe(true);
+    expect(balanceMap[testAddress1][0].tokenIds[0].end == 100n).toBe(true);
+    expect(balanceMap[testAddress2][0].tokenIds[0].start == 2n).toBe(true);
+    expect(balanceMap[testAddress2][0].tokenIds[0].end == 101n).toBe(true);
   });
 
   it('should get all token ids to be transferred', () => {
@@ -50,26 +50,26 @@ describe('Transfers', () => {
         balances: [
           {
             amount: 100n,
-            badgeIds: [{ start: 1n, end: 1n }],
+            tokenIds: [{ start: 1n, end: 1n }],
             ownershipTimes: UintRangeArray.FullRanges()
           }
         ],
         toAddresses: [],
         toAddressesLength: 100n,
-        incrementBadgeIdsBy: 1n,
+        incrementTokenIdsBy: 1n,
         incrementOwnershipTimesBy: 0n,
         durationFromTimestamp: 0n // assuming this is 1 day in milliseconds in BigInt form
       }
     ];
 
-    const allBadgeIds = getAllBadgeIdsToBeTransferred(transfersWithIncrements);
-    expect(allBadgeIds[0].start == 1n).toBe(true);
-    expect(allBadgeIds[0].end == 100n).toBe(true);
+    const allTokenIds = getAllTokenIdsToBeTransferred(transfersWithIncrements);
+    expect(allTokenIds[0].start == 1n).toBe(true);
+    expect(allTokenIds[0].end == 100n).toBe(true);
 
     const allBalances = getAllBalancesToBeTransferred(transfersWithIncrements, 0n);
     expect(allBalances[0].amount == 100n).toBe(true);
-    expect(allBalances[0].badgeIds[0].start == 1n).toBe(true);
-    expect(allBalances[0].badgeIds[0].end == 100n).toBe(true);
+    expect(allBalances[0].tokenIds[0].start == 1n).toBe(true);
+    expect(allBalances[0].tokenIds[0].end == 100n).toBe(true);
     expect(allBalances[0].ownershipTimes.isFull()).toBe(true);
   });
 
@@ -77,7 +77,7 @@ describe('Transfers', () => {
     const startingBalances = [
       {
         amount: 1n,
-        badgeIds: [{ start: 1n, end: 100n }],
+        tokenIds: [{ start: 1n, end: 100n }],
         ownershipTimes: UintRangeArray.FullRanges()
       }
     ];
@@ -88,13 +88,13 @@ describe('Transfers', () => {
         balances: [
           {
             amount: 1n,
-            badgeIds: [{ start: 1n, end: 1n }],
+            tokenIds: [{ start: 1n, end: 1n }],
             ownershipTimes: UintRangeArray.FullRanges()
           }
         ],
         toAddresses: [], // this will be empty because we're using `toAddressesLength`
         toAddressesLength: 100n,
-        incrementBadgeIdsBy: 1n,
+        incrementTokenIdsBy: 1n,
         incrementOwnershipTimesBy: 0n,
         durationFromTimestamp: 0n // assuming this is 1 day in milliseconds in BigInt form
       }
@@ -108,7 +108,7 @@ describe('Transfers', () => {
     const startingBalances = [
       {
         amount: 1n,
-        badgeIds: [{ start: 1n, end: 100n }],
+        tokenIds: [{ start: 1n, end: 100n }],
         ownershipTimes: UintRangeArray.FullRanges()
       }
     ];
@@ -119,13 +119,13 @@ describe('Transfers', () => {
         balances: [
           {
             amount: 100n,
-            badgeIds: [{ start: 1n, end: 1n }],
+            tokenIds: [{ start: 1n, end: 1n }],
             ownershipTimes: UintRangeArray.FullRanges()
           }
         ],
         toAddresses: [], // this will be empty because we're using `toAddressesLength`
         toAddressesLength: 100n,
-        incrementBadgeIdsBy: 1n,
+        incrementTokenIdsBy: 1n,
         incrementOwnershipTimesBy: 0n,
         durationFromTimestamp: 0n // assuming this is 1 day in milliseconds in BigInt form
       }
