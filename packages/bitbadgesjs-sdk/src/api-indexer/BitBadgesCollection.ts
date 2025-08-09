@@ -71,15 +71,15 @@ import { getCurrentValueForTimeline } from '@/core/timelines.js';
 import typia from 'typia';
 import {
   CollectionViewKey,
-  FilterBadgesInCollectionSuccessResponse,
+  FilterTokensInCollectionSuccessResponse,
   GetAdditionalCollectionDetailsPayload,
   GetTokenActivitySuccessResponse,
   GetBalanceByAddressSuccessResponse,
   GetCollectionRequestBody,
   GetMetadataForCollectionPayload,
   GetOwnersSuccessResponse,
-  iFilterBadgesInCollectionPayload,
-  iFilterBadgesInCollectionSuccessResponse,
+  iFilterTokensInCollectionPayload,
+  iFilterTokensInCollectionSuccessResponse,
   iGetTokenActivityPayload,
   iGetTokenActivitySuccessResponse,
   iGetBalanceByAddressPayload,
@@ -1251,22 +1251,22 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Execute a filter query for the collection. You have to handle the pagination yourself.
    */
-  static async FilterBadgesInCollection<T extends NumberType>(
+  static async FilterTokensInCollection<T extends NumberType>(
     api: BaseBitBadgesApi<T>,
     collectionId: string,
-    body: iFilterBadgesInCollectionPayload
+    body: iFilterTokensInCollectionPayload
   ) {
     try {
-      const validateRes: typia.IValidation<iFilterBadgesInCollectionPayload> = typia.validate<iFilterBadgesInCollectionPayload>(body ?? {});
+      const validateRes: typia.IValidation<iFilterTokensInCollectionPayload> = typia.validate<iFilterTokensInCollectionPayload>(body ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await api.axios.post<iFilterBadgesInCollectionSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.FilterBadgesInCollectionRoute(collectionId)}`,
+      const response = await api.axios.post<iFilterTokensInCollectionSuccessResponse<string>>(
+        `${api.BACKEND_URL}${BitBadgesApiRoutes.FilterTokensInCollectionRoute(collectionId)}`,
         body
       );
-      return new FilterBadgesInCollectionSuccessResponse(response.data).convert(api.ConvertFunction);
+      return new FilterTokensInCollectionSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
       return Promise.reject(error);
@@ -1276,8 +1276,8 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Execute a filter query for the collection. You have to handle the pagination yourself.
    */
-  async filterBadgesInCollection(api: BaseBitBadgesApi<T>, bodyOptions: Omit<iFilterBadgesInCollectionPayload, 'collectionId'>) {
-    return await BitBadgesCollection.FilterBadgesInCollection(api, this.collectionId, bodyOptions);
+  async FilterTokensInCollection(api: BaseBitBadgesApi<T>, bodyOptions: Omit<iFilterTokensInCollectionPayload, 'collectionId'>) {
+    return await BitBadgesCollection.FilterTokensInCollection(api, this.collectionId, bodyOptions);
   }
 }
 

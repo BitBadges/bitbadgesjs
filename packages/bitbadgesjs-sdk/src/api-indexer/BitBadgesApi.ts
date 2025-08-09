@@ -26,14 +26,14 @@ import type { iBitBadgesApi } from './base.js';
 import { BaseBitBadgesApi } from './base.js';
 import type { DynamicDataHandlerType, NativeAddress, iChallengeTrackerIdDetails } from './docs-types/interfaces.js';
 import {
-  FilterBadgesInCollectionSuccessResponse,
+  FilterTokensInCollectionSuccessResponse,
   FilterSuggestionsSuccessResponse,
   GetTokenActivitySuccessResponse,
   GetBalanceByAddressSuccessResponse,
   GetOwnersSuccessResponse,
   RefreshMetadataSuccessResponse,
   RefreshStatusSuccessResponse,
-  iFilterBadgesInCollectionPayload,
+  iFilterTokensInCollectionPayload,
   iFilterSuggestionsPayload,
   iFilterSuggestionsSuccessResponse,
   iGetTokenActivityPayload,
@@ -441,11 +441,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    */
-  public async getOwners(
-    collectionId: CollectionId,
-    badgeId: NumberType,
-    payload: iGetOwnersPayload
-  ): Promise<GetOwnersSuccessResponse<T>> {
+  public async getOwners(collectionId: CollectionId, badgeId: NumberType, payload: iGetOwnersPayload): Promise<GetOwnersSuccessResponse<T>> {
     return await BitBadgesCollection.GetOwners<T>(this, collectionId, badgeId, payload);
   }
 
@@ -1131,13 +1127,13 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/collection/:collectionId/filter`
-   * - **SDK Function Call**: `await BitBadgesApi.filterBadgesInCollection(payload);`
+   * - **SDK Function Call**: `await BitBadgesApi.FilterTokensInCollection(payload);`
    */
-  public async filterBadgesInCollection(
+  public async FilterTokensInCollection(
     collectionId: CollectionId,
-    payload: iFilterBadgesInCollectionPayload
-  ): Promise<FilterBadgesInCollectionSuccessResponse<T>> {
-    return await BitBadgesCollection.FilterBadgesInCollection(this, collectionId, payload);
+    payload: iFilterTokensInCollectionPayload
+  ): Promise<FilterTokensInCollectionSuccessResponse<T>> {
+    return await BitBadgesCollection.FilterTokensInCollection(this, collectionId, payload);
   }
 
   /**

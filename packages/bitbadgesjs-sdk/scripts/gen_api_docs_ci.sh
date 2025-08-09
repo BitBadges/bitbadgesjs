@@ -14,8 +14,6 @@ npm run format-ci || echo "Format failed, continuing anyway..."
 tsx ./scripts/normalize_yml.ts ./openapitypes/combined.yaml
 tsx ./scripts/spread_explodes.ts ./openapitypes/combined.yaml
 
-source ./scripts/bump_python_sdk.sh
-
-cd ..
+cd ../../
 rm ./openapitypes/combined.yaml
 rm ./src/combined.ts

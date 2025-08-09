@@ -28,7 +28,7 @@ export class BitBadgesApiRoutes {
     `/api/v0/collection/${collectionId.toString()}/${badgeId.toString()}/activity`;
   static RefreshMetadataRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/refresh`;
   static GetRefreshStatusRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/refreshStatus`;
-  static FilterBadgesInCollectionRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/filter`;
+  static FilterTokensInCollectionRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/filter`;
   static FilterSuggestionsRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/filterSuggestions`;
 
   static CompleteClaimRoute = (claimId: string, address: NativeAddress) => `/api/v0/claims/complete/${claimId.toString()}/${address}`;

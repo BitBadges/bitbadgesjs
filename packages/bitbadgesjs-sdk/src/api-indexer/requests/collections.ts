@@ -51,7 +51,7 @@ export class FilterSuggestionsSuccessResponse
 /**
  * @category API Requests / Responses
  */
-export interface iFilterBadgesInCollectionPayload {
+export interface iFilterTokensInCollectionPayload {
   /** Limit to specific token IDs. Leave undefined to not filter by token ID. */
   badgeIds?: iUintRange<NumberType>[];
   /** Limit to specific lists. Leave undefined to not filter by list. */
@@ -79,7 +79,7 @@ export interface iFilterBadgesInCollectionPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iFilterBadgesInCollectionSuccessResponse<T extends NumberType> {
+export interface iFilterTokensInCollectionSuccessResponse<T extends NumberType> {
   badgeIds: iUintRange<T>[];
   pagination: PaginationInfo;
 }
@@ -87,21 +87,21 @@ export interface iFilterBadgesInCollectionSuccessResponse<T extends NumberType> 
 /**
  * @category API Requests / Responses
  */
-export class FilterBadgesInCollectionSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<FilterBadgesInCollectionSuccessResponse<T>>
-  implements iFilterBadgesInCollectionSuccessResponse<T>
+export class FilterTokensInCollectionSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<FilterTokensInCollectionSuccessResponse<T>>
+  implements iFilterTokensInCollectionSuccessResponse<T>
 {
   badgeIds: UintRangeArray<T>;
   pagination: PaginationInfo;
 
-  constructor(data: iFilterBadgesInCollectionSuccessResponse<T>) {
+  constructor(data: iFilterTokensInCollectionSuccessResponse<T>) {
     super();
     this.badgeIds = UintRangeArray.From(data.badgeIds);
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): FilterBadgesInCollectionSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FilterBadgesInCollectionSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): FilterTokensInCollectionSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FilterTokensInCollectionSuccessResponse<U>;
   }
 }
 
