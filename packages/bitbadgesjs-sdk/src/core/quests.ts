@@ -2,7 +2,7 @@ import { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 import type { iCollectionApproval } from '@/interfaces/types/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
 
-export const doesCollectionFollowQuestProtocol = (collection?: Readonly<iCollectionDoc<bigint>>) => {
+export const doesCollectionFollowProtocol = (collection: Readonly<iCollectionDoc<bigint>>, protocol: string) => {
   if (!collection) {
     return false;
   }
@@ -14,7 +14,7 @@ export const doesCollectionFollowQuestProtocol = (collection?: Readonly<iCollect
       continue;
     }
 
-    if (!standard.standards.includes('Quests')) {
+    if (!standard.standards.includes(protocol)) {
       continue;
     }
 
@@ -22,6 +22,14 @@ export const doesCollectionFollowQuestProtocol = (collection?: Readonly<iCollect
   }
 
   if (!found) {
+    return false;
+  }
+
+  return true;
+};
+
+export const doesCollectionFollowQuestProtocol = (collection: Readonly<iCollectionDoc<bigint>>) => {
+  if (!doesCollectionFollowProtocol(collection, 'Quests')) {
     return false;
   }
 

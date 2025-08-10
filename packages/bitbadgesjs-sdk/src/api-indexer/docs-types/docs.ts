@@ -984,7 +984,10 @@ export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusD
     }
 
     const totalAmount = transactions.reduce((sum, tx) => sum + Number(tx.amount), 0);
-    return totalAmount / transactions.length;
+    const totalLimit = transactions.reduce((sum, tx) => sum + Number(tx.limit), 0);
+
+    // Gas price = total amount / total gas limit
+    return totalLimit > 0 ? totalAmount / totalLimit : 0;
   }
 
   /**
