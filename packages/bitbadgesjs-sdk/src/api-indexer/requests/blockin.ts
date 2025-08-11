@@ -1,12 +1,12 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { UintRange } from '@/core/uintRanges.js';
+import { iUintRange } from '@/interfaces/index.js';
 import type {
   AndGroup,
-  AssetDetails,
+  OwnershipRequirements as BlockinOwnershipRequirements,
   ChallengeParams,
-  OrGroup,
-  OwnershipRequirements as BlockinOwnershipRequirements
+  OrGroup
 } from 'blockin/dist/types/verify.types';
 import { NativeAddress } from '../docs-types/interfaces.js';
 
@@ -61,17 +61,31 @@ export class SiwbbChallengeParams<T extends NumberType> extends BaseNumberTypeCl
 }
 
 /**
+ * @category Interfaces
+ */
+export interface iAssetDetails<T extends NumberType> {
+  chain: string;
+  collectionId: T | string;
+  assetIds: (string | iUintRange<T>)[];
+  ownershipTimes: iUintRange<T>[];
+  mustOwnAmounts: iUintRange<T>;
+  additionalCriteria?: string;
+  ownershipPartyCheck?: string;
+}
+
+/**
  * @category SIWBB
  */
-export class SiwbbAssetDetails<T extends NumberType> extends BaseNumberTypeClass<SiwbbAssetDetails<T>> implements AssetDetails<T> {
+export class SiwbbAssetDetails<T extends NumberType> extends BaseNumberTypeClass<SiwbbAssetDetails<T>> implements iAssetDetails<T> {
   chain: string;
   collectionId: T | string;
   assetIds: (string | UintRange<T>)[];
   ownershipTimes: UintRange<T>[];
   mustOwnAmounts: UintRange<T>;
   additionalCriteria?: string;
+  ownershipPartyCheck?: string;
 
-  constructor(data: AssetDetails<T>) {
+  constructor(data: iAssetDetails<T> & { ownershipPartyCheck?: string }) {
     super();
     this.chain = data.chain;
     this.collectionId = data.collectionId;
@@ -84,6 +98,7 @@ export class SiwbbAssetDetails<T extends NumberType> extends BaseNumberTypeClass
     }) as (string | UintRange<T>)[];
     this.ownershipTimes = data.ownershipTimes.map((item) => new UintRange(item));
     this.mustOwnAmounts = new UintRange(data.mustOwnAmounts);
+    this.ownershipPartyCheck = data.ownershipPartyCheck;
   }
 
   getNumberFieldNames(): string[] {

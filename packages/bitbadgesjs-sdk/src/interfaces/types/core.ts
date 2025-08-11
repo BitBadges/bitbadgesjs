@@ -104,6 +104,15 @@ export interface iMustOwnTokens<T extends NumberType> {
    * Whether or not the user must own all the specified tokens. If false, we will accept if they meet criteria for at least one token.
    */
   mustSatisfyForAllAssets: boolean;
+
+  /**
+   * The party to check ownership against. This field specifies which address or entity should be verified for token ownership.
+   * Currently only supports three values: "sender", "initiator", and "recipient".
+   * - "sender": checks ownership against the fromAddress
+   * - "initiator": checks ownership against the initiatedBy address
+   * - "recipient": checks ownership against the toAddress
+   */
+  ownershipCheckParty?: string;
 }
 
 /**
@@ -196,6 +205,9 @@ export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
 
   /** The denomination units for this IBC wrapper path. */
   denomUnits: iDenomUnit<T>[];
+
+  /** If true, allows overriding with any valid badge ID for conversion to IBC denomination */
+  allowOverrideWithAnyValidToken?: boolean;
 }
 
 /**
@@ -402,6 +414,11 @@ export interface iMustOwnToken<T extends NumberType> {
    * If true, the user must meet ownership requirements for all specified tokens; else, must meet requirements for any single token.
    */
   mustSatisfyForAllAssets: boolean;
+
+  /**
+   * The party to check ownership against. This field specifies which address or entity should be verified for token ownership.
+   */
+  ownershipCheckParty?: string;
 }
 
 /**

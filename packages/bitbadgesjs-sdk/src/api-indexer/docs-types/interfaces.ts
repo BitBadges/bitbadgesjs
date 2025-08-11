@@ -536,6 +536,7 @@ export interface iCosmosCoinWrapperPath<T extends NumberType> {
   balances: iBalance<T>[];
   symbol: string;
   denomUnits: iDenomUnit<T>[];
+  allowOverrideWithAnyValidToken: boolean;
 }
 
 /**

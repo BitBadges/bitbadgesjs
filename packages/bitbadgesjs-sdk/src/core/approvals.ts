@@ -35,6 +35,7 @@ import type {
   iResetTimeIntervals,
   iUserIncomingApproval,
   iUserIncomingApprovalWithDetails,
+  iUserLevelRestrictions,
   iUserOutgoingApproval,
   iUserRoyalties
 } from '@/interfaces/types/approvals.js';
@@ -1459,6 +1460,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   userRoyalties?: UserRoyalties<T>;
   dynamicStoreChallenges?: DynamicStoreChallenge<T>[];
   ethSignatureChallenges?: ETHSignatureChallenge[];
+  userLevelRestrictions?: UserLevelRestrictions<T>;
 
   constructor(msg: iApprovalCriteria<T>) {
     super();
@@ -1478,6 +1480,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.userRoyalties = msg.userRoyalties ? new UserRoyalties(msg.userRoyalties) : undefined;
     this.dynamicStoreChallenges = msg.dynamicStoreChallenges?.map((x) => new DynamicStoreChallenge(x));
     this.ethSignatureChallenges = msg.ethSignatureChallenges?.map((x) => new ETHSignatureChallenge(x));
+    this.userLevelRestrictions = msg.userLevelRestrictions ? new UserLevelRestrictions(msg.userLevelRestrictions) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteria<U> {
@@ -1523,7 +1526,8 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       dynamicStoreChallenges: item.dynamicStoreChallenges
         ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction))
         : undefined,
-      ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined
+      ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined,
+      userLevelRestrictions: item.userLevelRestrictions ? UserLevelRestrictions.fromProto(item.userLevelRestrictions, convertFunction) : undefined
     });
   }
 
@@ -1531,6 +1535,54 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     return new ApprovalCriteria({
       ...this,
       coinTransfers: this.coinTransfers?.map((x) => x.toBech32Addresses(prefix))
+    });
+  }
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export class UserLevelRestrictions<T extends NumberType> extends BaseNumberTypeClass<UserLevelRestrictions<T>> implements iUserLevelRestrictions<T> {
+  allowAllDenoms?: boolean;
+  allowedDenoms?: string[];
+
+  constructor(data: iUserLevelRestrictions<T>) {
+    super();
+    this.allowAllDenoms = data.allowAllDenoms;
+    this.allowedDenoms = data.allowedDenoms;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserLevelRestrictions<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserLevelRestrictions<U>;
+  }
+
+  toProto(): protobadges.UserLevelRestrictions {
+    return new protobadges.UserLevelRestrictions(this.convert(Stringify));
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): UserLevelRestrictions<U> {
+    return UserLevelRestrictions.fromProto(protobadges.UserLevelRestrictions.fromJson(jsonValue, options), convertFunction);
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): UserLevelRestrictions<U> {
+    return UserLevelRestrictions.fromProto(protobadges.UserLevelRestrictions.fromJsonString(jsonString, options), convertFunction);
+  }
+
+  static fromProto<U extends NumberType>(
+    item: protobadges.UserLevelRestrictions,
+    convertFunction: (item: NumberType) => U
+  ): UserLevelRestrictions<U> {
+    return new UserLevelRestrictions<U>({
+      allowAllDenoms: item.allowAllDenoms,
+      allowedDenoms: item.allowedDenoms
     });
   }
 }
@@ -1889,6 +1941,7 @@ export class OutgoingApprovalCriteriaWithDetails<T extends NumberType>
     super(data);
     this.merkleChallenges = data.merkleChallenges?.map((x) => new MerkleChallengeWithDetails(x));
   }
+  userLevelRestrictions?: iUserLevelRestrictions<T> | undefined;
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteriaWithDetails<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as OutgoingApprovalCriteriaWithDetails<U>;

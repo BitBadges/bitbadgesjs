@@ -1512,6 +1512,13 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
    */
   ethSignatureChallenges: ETHSignatureChallenge[] = [];
 
+  /**
+   * User level payments configuration for approval.
+   *
+   * @generated from field: badges.UserLevelRestrictions userLevelRestrictions = 17;
+   */
+  userLevelRestrictions?: UserLevelRestrictions;
+
   constructor(data?: PartialMessage<ApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1536,6 +1543,7 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
     { no: 14, name: "mustOwnTokens", kind: "message", T: MustOwnTokens, repeated: true },
     { no: 15, name: "dynamicStoreChallenges", kind: "message", T: DynamicStoreChallenge, repeated: true },
     { no: 16, name: "ethSignatureChallenges", kind: "message", T: ETHSignatureChallenge, repeated: true },
+    { no: 17, name: "userLevelRestrictions", kind: "message", T: UserLevelRestrictions },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalCriteria {
@@ -1601,6 +1609,55 @@ export class UserRoyalties extends Message<UserRoyalties> {
 
   static equals(a: UserRoyalties | PlainMessage<UserRoyalties> | undefined, b: UserRoyalties | PlainMessage<UserRoyalties> | undefined): boolean {
     return proto3.util.equals(UserRoyalties, a, b);
+  }
+}
+
+/**
+ * UserLevelRestrictions defines which denoms users can use for their approvals.
+ *
+ * @generated from message badges.UserLevelRestrictions
+ */
+export class UserLevelRestrictions extends Message<UserLevelRestrictions> {
+  /**
+   * If true, ignore the allowedDenoms field and allow all denoms.
+   *
+   * @generated from field: bool allowAllDenoms = 1;
+   */
+  allowAllDenoms = false;
+
+  /**
+   * List of allowed denoms if allowAllDenoms is false.
+   *
+   * @generated from field: repeated string allowedDenoms = 2;
+   */
+  allowedDenoms: string[] = [];
+
+  constructor(data?: PartialMessage<UserLevelRestrictions>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.UserLevelRestrictions";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "allowAllDenoms", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: "allowedDenoms", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserLevelRestrictions {
+    return new UserLevelRestrictions().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UserLevelRestrictions {
+    return new UserLevelRestrictions().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UserLevelRestrictions {
+    return new UserLevelRestrictions().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: UserLevelRestrictions | PlainMessage<UserLevelRestrictions> | undefined, b: UserLevelRestrictions | PlainMessage<UserLevelRestrictions> | undefined): boolean {
+    return proto3.util.equals(UserLevelRestrictions, a, b);
   }
 }
 

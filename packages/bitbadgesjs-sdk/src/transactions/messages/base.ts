@@ -178,7 +178,32 @@ function recursivelySort(obj: any): any {
     return obj.map(recursivelySort);
   } else if (typeof obj === 'object' && obj !== null) {
     return Object.keys(obj)
-      .sort((a, b) => a.localeCompare(b))
+      .sort((a, b) => {
+        // Compare letter by letter, prioritizing capitals over lowercase
+        // This is a weird edge case with the chains sdk.SortJson
+        // I think proto.marshal is the culprit and prioritizes capital letters over lowercase
+        const minLength = Math.min(a.length, b.length);
+
+        for (let i = 0; i < minLength; i++) {
+          const aChar = a[i];
+          const bChar = b[i];
+
+          // If characters are different, prioritize capital over lowercase
+          if (aChar !== bChar) {
+            const aIsCapital = aChar >= 'A' && aChar <= 'Z';
+            const bIsCapital = bChar >= 'A' && bChar <= 'Z';
+
+            if (aIsCapital && !bIsCapital) return -1;
+            if (!aIsCapital && bIsCapital) return 1;
+
+            // If same case, compare alphabetically
+            return aChar.localeCompare(bChar);
+          }
+        }
+
+        // If all characters match up to minLength, shorter string comes first
+        return a.length - b.length;
+      })
       .reduce((result, key) => {
         result[key] = recursivelySort(obj[key] as any);
         return result;

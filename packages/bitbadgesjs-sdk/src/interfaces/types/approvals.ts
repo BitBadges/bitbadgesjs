@@ -5,6 +5,17 @@ import type { iAddressList, iBalance, iCoinTransfer, iETHSignatureChallenge, iMe
 /**
  * @category Interfaces
  */
+export interface iUserLevelRestrictions<T extends NumberType> {
+  /** If true, ignore the allowedDenoms field and allow all denoms. */
+  allowAllDenoms?: boolean;
+
+  /** List of allowed denoms if allowAllDenoms is false. */
+  allowedDenoms?: string[];
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iDynamicStoreChallenge<T extends NumberType> {
   /** The ID of the dynamic store to check. */
   storeId: T;
@@ -62,6 +73,8 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
   /** The list of ETH signature challenges that the initiator must pass for approval. */
   ethSignatureChallenges?: iETHSignatureChallenge[];
+  /** User-level restrictions for this approval criteria */
+  userLevelRestrictions?: iUserLevelRestrictions<T>;
 }
 
 /**
@@ -312,6 +325,8 @@ export interface iApprovalCriteria<T extends NumberType> {
   dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
   /** The list of ETH signature challenges that the initiator must pass for approval. */
   ethSignatureChallenges?: iETHSignatureChallenge[];
+  /** User-level restrictions for this approval criteria */
+  userLevelRestrictions?: iUserLevelRestrictions<T>;
 }
 
 /**

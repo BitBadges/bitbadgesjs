@@ -73,7 +73,8 @@ import {
   DenomUnit,
   DynamicStoreChallenge,
   ETHSignatureChallenge,
-  ETHSignatureProof
+  ETHSignatureProof,
+  UserLevelRestrictions
 } from '@/proto/badges/index.js';
 import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
@@ -197,7 +198,7 @@ const approvalCriteria = new OutgoingApprovalCriteria({
   ]
 }).toJson({ emitDefaultValues: true }) as object;
 
-const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
+const approvalCriteriaForPopulatingUndefined = new ApprovalCriteria({
   predeterminedBalances: new PredeterminedBalances({
     orderCalculationMethod: new PredeterminedOrderCalculationMethod(),
     incrementedBalances: new IncrementedBalances({
@@ -237,15 +238,7 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
     afterOverallMaxNumTransfers: false,
     allowCounterpartyPurge: false,
     allowPurgeIfExpired: false
-  }),
-  ethSignatureChallenges: [
-    new ETHSignatureChallenge({
-      signer: '',
-      challengeTrackerId: '',
-      uri: '',
-      customData: ''
-    })
-  ]
+  })
 }).toJson({ emitDefaultValues: true }) as object;
 
 function populateMerkleChallenges(merkleChallenges?: MerkleChallenge[]) {
@@ -341,6 +334,17 @@ function populateApprovalAmounts(approvalAmounts?: ApprovalAmounts) {
   }
 
   return approvalAmounts;
+}
+
+function populateUserLevelRestrictions(userLevelRestrictions?: UserLevelRestrictions) {
+  if (!userLevelRestrictions) {
+    return new UserLevelRestrictions({
+      allowAllDenoms: false,
+      allowedDenoms: []
+    });
+  }
+
+  return userLevelRestrictions;
 }
 
 function populateUserRoyalties(userRoyalties?: UserRoyalties) {
@@ -588,6 +592,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.userRoyalties = populateUserRoyalties(approval.approvalCriteria.userRoyalties);
     approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
     approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
+    approval.approvalCriteria.userLevelRestrictions = populateUserLevelRestrictions(approval.approvalCriteria.userLevelRestrictions);
   }
 
   for (const metadata of msg.collectionMetadataTimeline) {

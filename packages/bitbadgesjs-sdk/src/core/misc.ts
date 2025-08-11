@@ -398,8 +398,9 @@ export class MustOwnTokens<T extends NumberType> extends BaseNumberTypeClass<Mus
   overrideWithCurrentTime: boolean;
   mustSatisfyForAllAssets: boolean;
   ownershipTimes: UintRangeArray<T>;
-
   collectionId: string;
+  ownershipCheckParty?: string;
+
   constructor(mustOwnToken: iMustOwnToken<T>) {
     super();
     this.amountRange = new UintRange<T>(mustOwnToken.amountRange);
@@ -408,6 +409,7 @@ export class MustOwnTokens<T extends NumberType> extends BaseNumberTypeClass<Mus
     this.mustSatisfyForAllAssets = mustOwnToken.mustSatisfyForAllAssets;
     this.ownershipTimes = UintRangeArray.From(mustOwnToken.ownershipTimes);
     this.collectionId = mustOwnToken.collectionId;
+    this.ownershipCheckParty = mustOwnToken.ownershipCheckParty;
   }
 
   getNumberFieldNames(): string[] {
@@ -447,7 +449,8 @@ export class MustOwnTokens<T extends NumberType> extends BaseNumberTypeClass<Mus
       overrideWithCurrentTime: item.overrideWithCurrentTime,
       mustSatisfyForAllAssets: item.mustSatisfyForAllAssets,
       ownershipTimes: item.ownershipTimes ? UintRangeArray.From(item.ownershipTimes).convert(convertFunction) : new UintRangeArray<U>(),
-      collectionId: item.collectionId
+      collectionId: item.collectionId,
+      ownershipCheckParty: item.ownershipCheckParty
     });
   }
 }
@@ -1875,6 +1878,7 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
   balances: Balance<T>[];
   symbol: string;
   denomUnits: DenomUnit<T>[];
+  allowOverrideWithAnyValidToken: boolean;
 
   constructor(data: iCosmosCoinWrapperPath<T>) {
     super();
@@ -1883,6 +1887,7 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
     this.balances = data.balances.map((balance) => new Balance(balance));
     this.symbol = data.symbol;
     this.denomUnits = data.denomUnits.map((unit) => new DenomUnit(unit));
+    this.allowOverrideWithAnyValidToken = data.allowOverrideWithAnyValidToken;
   }
 
   getNumberFieldNames(): string[] {
@@ -1903,7 +1908,8 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
       denom: protoMsg.denom,
       balances: protoMsg.balances.map((balance) => Balance.fromProto(balance, convertFunction)),
       symbol: protoMsg.symbol,
-      denomUnits: denomUnits
+      denomUnits: denomUnits,
+      allowOverrideWithAnyValidToken: protoMsg.allowOverrideWithAnyValidToken
     }).convert(convertFunction);
   }
 }
@@ -1936,7 +1942,8 @@ export class CosmosCoinWrapperPathWithDetails<T extends NumberType> extends Cosm
       denom: protoMsg.denom,
       balances: protoMsg.balances.map((balance) => Balance.fromProto(balance, convertFunction)),
       symbol: protoMsg.symbol,
-      denomUnits: denomUnits
+      denomUnits: denomUnits,
+      allowOverrideWithAnyValidToken: protoMsg.allowOverrideWithAnyValidToken
     }).convert(convertFunction);
   }
 }

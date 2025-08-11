@@ -228,6 +228,13 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
    */
   denomUnits: DenomUnit[] = [];
 
+  /**
+   * If true, allows overriding with any valid badge ID for conversion to IBC denomination
+   *
+   * @generated from field: bool allowOverrideWithAnyValidToken = 6;
+   */
+  allowOverrideWithAnyValidToken = false;
+
   constructor(data?: PartialMessage<CosmosCoinWrapperPath>) {
     super();
     proto3.util.initPartial(data, this);
@@ -241,6 +248,7 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
     { no: 3, name: "balances", kind: "message", T: Balance, repeated: true },
     { no: 4, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
+    { no: 6, name: "allowOverrideWithAnyValidToken", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinWrapperPath {
