@@ -959,7 +959,7 @@ export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusD
    * @param currentTime - Current timestamp (optional, defaults to Date.now())
    * @returns Array of transactions within the time window
    */
-  getTransactionsInWindow(windowMs: number, currentTime?: number): TransactionEntry<T>[] {
+  getTransactionsInWindow(windowMs: number, currentTime?: number, defaultMinimumTxs?: number): TransactionEntry<T>[] {
     if (!this.lastXTxs) {
       return [];
     }
@@ -967,7 +967,19 @@ export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusD
     const now = currentTime ?? Date.now();
     const cutoffTime = now - windowMs;
 
-    return this.lastXTxs.filter((tx) => Number(tx.timestamp) >= cutoffTime);
+    const txsInWindow = this.lastXTxs.filter((tx) => Number(tx.timestamp) >= cutoffTime);
+
+    if (!defaultMinimumTxs) {
+      return txsInWindow;
+    }
+
+    if (txsInWindow.length >= defaultMinimumTxs) {
+      return txsInWindow;
+    }
+
+    // Default to latest defaultMinimumTxs
+    const txsToReturn = Math.min(defaultMinimumTxs, txsInWindow.length);
+    return txsInWindow.slice(-txsToReturn);
   }
 
   /**
@@ -977,7 +989,7 @@ export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusD
    * @returns Average gas price or 0 if no transactions
    */
   getAverageGasPriceInWindow(windowMs: number, currentTime?: number): number {
-    const transactions = this.getTransactionsInWindow(windowMs, currentTime);
+    const transactions = this.getTransactionsInWindow(windowMs, currentTime, 10);
 
     if (transactions.length === 0) {
       return 0;
