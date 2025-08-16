@@ -361,7 +361,9 @@ export class BitBadgesCollection<T extends NumberType>
     return (
       this.getStandards()
         ?.find((x) => x.startsWith('DefaultDisplayCurrency'))
-        ?.split(':')[1] ?? 'ubadge'
+        ?.split(':')
+        .slice(1)
+        .join(':') ?? 'ubadge'
     );
   }
 
