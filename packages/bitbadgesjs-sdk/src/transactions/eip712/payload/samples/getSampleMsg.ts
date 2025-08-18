@@ -264,6 +264,7 @@ function populateMustOwnBadges(mustOwnBadges?: MustOwnBadges[]) {
       mustOwnBadge.badgeIds = mustOwnBadge.badgeIds || [new UintRange()];
       mustOwnBadge.amountRange = mustOwnBadge.amountRange || new UintRange();
       mustOwnBadge.ownershipTimes = mustOwnBadge.ownershipTimes || [new UintRange()];
+      mustOwnBadge.ownershipCheckParty = mustOwnBadge.ownershipCheckParty || '';
       return mustOwnBadge;
     }) || []
   );

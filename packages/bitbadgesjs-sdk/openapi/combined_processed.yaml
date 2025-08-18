@@ -19284,6 +19284,9 @@ components:
         mustSatisfyForAllAssets:
           description: 'Whether or not the user must own all the specified tokens. If false, we will accept if they meet criteria for at least one token.'
           type: boolean
+        ownershipCheckParty:
+          description: The party to check ownership for. Options are "initiator", "sender", or "recipient". Defaults to "initiator" if empty.
+          type: string
       required:
         - collectionId
         - amountRange

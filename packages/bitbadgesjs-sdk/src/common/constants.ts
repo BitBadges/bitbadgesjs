@@ -73,9 +73,9 @@ export const BitBadgesKeplrSuggestMainnetChainInfo = {
       coinMinimalDenom: 'ubadge',
       coinDecimals: 9,
       gasPriceStep: {
-        low: 0.000000000001,
-        average: 0.000000000001,
-        high: 0.000000000001
+        low: 0.01,
+        average: 0.025,
+        high: 0.03
       },
       coinImageUrl: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true',
       icon: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true'

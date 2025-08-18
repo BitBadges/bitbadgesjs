@@ -104,6 +104,11 @@ export interface iMustOwnBadges<T extends NumberType> {
    * Whether or not the user must own all the specified tokens. If false, we will accept if they meet criteria for at least one token.
    */
   mustSatisfyForAllAssets: boolean;
+
+  /**
+   * The party to check ownership for. Options are "initiator", "sender", or "recipient". Defaults to "initiator" if empty.
+   */
+  ownershipCheckParty?: string;
 }
 
 /**
@@ -402,6 +407,11 @@ export interface iMustOwnBadge<T extends NumberType> {
    * If true, the user must meet ownership requirements for all specified tokens; else, must meet requirements for any single token.
    */
   mustSatisfyForAllAssets: boolean;
+
+  /**
+   * The party to check ownership for. Options are "initiator", "sender", or "recipient". Defaults to "initiator" if empty.
+   */
+  ownershipCheckParty?: string;
 }
 
 /**

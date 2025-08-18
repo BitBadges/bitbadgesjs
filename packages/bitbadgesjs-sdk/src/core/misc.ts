@@ -398,6 +398,7 @@ export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<Mus
   overrideWithCurrentTime: boolean;
   mustSatisfyForAllAssets: boolean;
   ownershipTimes: UintRangeArray<T>;
+  ownershipCheckParty?: string;
 
   collectionId: string;
   constructor(mustOwnBadge: iMustOwnBadge<T>) {
@@ -407,6 +408,7 @@ export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<Mus
     this.overrideWithCurrentTime = mustOwnBadge.overrideWithCurrentTime;
     this.mustSatisfyForAllAssets = mustOwnBadge.mustSatisfyForAllAssets;
     this.ownershipTimes = UintRangeArray.From(mustOwnBadge.ownershipTimes);
+    this.ownershipCheckParty = mustOwnBadge.ownershipCheckParty;
     this.collectionId = mustOwnBadge.collectionId;
   }
 
@@ -447,6 +449,7 @@ export class MustOwnBadges<T extends NumberType> extends BaseNumberTypeClass<Mus
       overrideWithCurrentTime: item.overrideWithCurrentTime,
       mustSatisfyForAllAssets: item.mustSatisfyForAllAssets,
       ownershipTimes: item.ownershipTimes ? UintRangeArray.From(item.ownershipTimes).convert(convertFunction) : new UintRangeArray<U>(),
+      ownershipCheckParty: item.ownershipCheckParty,
       collectionId: item.collectionId
     });
   }
