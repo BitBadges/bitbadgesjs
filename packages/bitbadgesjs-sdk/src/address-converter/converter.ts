@@ -120,6 +120,11 @@ const solanaToBitBadges = (solanaAddress: string) => {
  */
 export function convertToBitBadgesAddress(address: string) {
   let bech32Address = '';
+
+  if (address.startsWith('bbvaloper')) {
+    return address;
+  }
+
   try {
     bitbadgesToEth(address); //throws on failure
     bech32Address = address;
@@ -349,6 +354,8 @@ export function isAddressValid(address: string, chain?: SupportedChain) {
   }
 
   if (address === 'Mint') {
+    isValidAddress = true;
+  } else if (address.startsWith('bbvaloper')) {
     isValidAddress = true;
   }
 
