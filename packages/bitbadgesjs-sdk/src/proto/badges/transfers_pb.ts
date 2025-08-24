@@ -1312,6 +1312,13 @@ export class MustOwnBadges extends Message<MustOwnBadges> {
    */
   mustSatisfyForAllAssets = false;
 
+  /**
+   * The party to check ownership for. Options are "initiator", "sender", or "recipient". Defaults to "initiator" if empty.
+   *
+   * @generated from field: string ownershipCheckParty = 7;
+   */
+  ownershipCheckParty = "";
+
   constructor(data?: PartialMessage<MustOwnBadges>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1326,6 +1333,7 @@ export class MustOwnBadges extends Message<MustOwnBadges> {
     { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "overrideWithCurrentTime", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 6, name: "mustSatisfyForAllAssets", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 7, name: "ownershipCheckParty", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MustOwnBadges {

@@ -24,7 +24,6 @@ import type {
   iDenomUnitWithDetails,
   iIsArchivedTimeline,
   iManagerTimeline,
-  iMustOwnBadges,
   iOffChainBalancesMetadataTimeline,
   iStandardsTimeline,
   iUintRange

@@ -3184,8 +3184,7 @@ paths:
         Revokes the authorization. The token can either be an access token or a
         refresh token.
 
-        This endpoint revokes all tokens associated with the procided token
-        (thus revoking the entire authorization).
+        This endpoint revokes all tokens associated with the procided token (thus revoking the entire authorization).
 
         This can be called by the user or the authorized application.
 
@@ -7463,8 +7462,7 @@ paths:
       tags:
         - Badges
       description: >-
-        Uploads balances for off-chain indexed balances managed by BitBadges.
-        Note: This only applies to
+        Uploads balances for off-chain indexed balances managed by BitBadges. Note: This only applies to
 
         collections with off-chain balances, and the tokens must not be frozen /
         immutable yet.
@@ -10499,9 +10497,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The token IDs
           type: array
-          examples: &ref_18
-            - - start: '1'
-                end: '10'
+          examples: *ref_18
         listId:
           description: The list ID
           type: string
@@ -12265,7 +12261,6 @@ components:
         balancesToSet:
           description: >-
             The balances to set for the claim.
-
 
             Only used for claims for collections that have off-chain indexed
             balances and are assigning balances based on the claim.
@@ -17922,7 +17917,6 @@ components:
             If true, we will fetch all plugins for the authenticated user (with
             plugin secrets).
 
-
             This will include plugins created by the signed in user and also
             those where they are explicitly approved / invited.
           type: boolean
@@ -22226,6 +22220,9 @@ components:
             Whether or not the user must own all the specified tokens. If false,
             we will accept if they meet criteria for at least one token.
           type: boolean
+        ownershipCheckParty:
+          description: The party to check ownership for. Options are "initiator", "sender", or "recipient". Defaults to "initiator" if empty.
+          type: string
       required:
         - collectionId
         - amountRange
