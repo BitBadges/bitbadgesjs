@@ -11,8 +11,30 @@ Reference repositories that use the SDK:
 
 See [full documentation](full-documentation.md) for complete documentation on each library. Also, the BitBadges official indexer source code and BitBadges official frontend code both use the SDK, so please feel free to reference them.
 
-```
-npm install bitbadgesjs-sdk
+## Version Compatibility
+
+This SDK is designed to be compatible with specific BitBadges chain versions. Use the following mapping to ensure compatibility:
+
+| BitBadges Chain Version | SDK Version Range | Status         |
+| ----------------------- | ----------------- | -------------- |
+| v12                     | 0.18.x            | ✅ Current     |
+| v13                     | 0.19.x            | 🔄 Coming Soon |
+
+**Current SDK Version:** `0.18.7`
+
+**Recommendation:** Always use the latest patch version within your compatible major.minor version range. For example, if you're using BitBadges v12, use the latest `0.18.x` version.
+
+> 📖 **For detailed version information, see [VERSION_COMPATIBILITY.md](./VERSION_COMPATIBILITY.md)**
+
+
+### Installation
+
+```bash
+# For BitBadges v12 (current)
+npm install bitbadgesjs-sdk@^0.18.0
+
+# For BitBadges v13 (when available)
+npm install bitbadgesjs-sdk@^0.19.0
 ```
 
 This library provides miscellaneous functionality to help you interact with BitBadges, such as types, API routes, managing metadata requests, logic with ID ranges and balances, etc.

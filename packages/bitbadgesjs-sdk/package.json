@@ -1,8 +1,25 @@
 {
   "name": "bitbadgesjs-sdk",
-  "description": "SDK for BitBadges development",
-  "version": "0.18.7",
+  "description": "SDK for BitBadges development - Compatible with BitBadges v12 (SDK 0.18.x) and v13 (SDK 0.19.x)",
+  "version": "0.18.8",
   "license": "MIT",
+  "keywords": [
+    "bitbadges",
+    "blockchain",
+    "sdk",
+    "typescript",
+    "cosmos",
+    "badges",
+    "nft"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bitbadges/bitbadgesjs.git"
+  },
+  "homepage": "https://github.com/bitbadges/bitbadgesjs#readme",
+  "bugs": {
+    "url": "https://github.com/bitbadges/bitbadgesjs/issues"
+  },
   "eslintIgnore": [
     "src/proto/**/*.ts"
   ],
