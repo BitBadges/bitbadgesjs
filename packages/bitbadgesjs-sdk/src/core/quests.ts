@@ -48,7 +48,7 @@ export const doesCollectionFollowQuestProtocol = (collection: Readonly<iCollecti
 
 export const isQuestApproval = (approval: iCollectionApproval<bigint>) => {
   const approvalCriteria = approval.approvalCriteria;
-  if (!approvalCriteria?.coinTransfers) {
+  if (!approvalCriteria) {
     return false;
   }
 
@@ -82,11 +82,11 @@ export const isQuestApproval = (approval: iCollectionApproval<bigint>) => {
     return false;
   }
 
-  if (approvalCriteria.coinTransfers.length !== 1) {
+  if ((approvalCriteria.coinTransfers ?? []).length > 1) {
     return false;
   }
 
-  for (const coinTransfer of approvalCriteria.coinTransfers) {
+  for (const coinTransfer of approvalCriteria.coinTransfers ?? []) {
     if (coinTransfer.coins.length !== 1) {
       return false;
     }
