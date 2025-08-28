@@ -885,6 +885,11 @@ export interface iUpdateAccountInfoPayload {
   bluesky?: string;
 
   /**
+   * The affiliate code of the referrer  that sent them?
+   */
+  affiliateCode?: string;
+
+  /**
    * The last seen activity timestamp.
    */
   seenActivity?: UNIXMilliTimestamp<NumberType>;

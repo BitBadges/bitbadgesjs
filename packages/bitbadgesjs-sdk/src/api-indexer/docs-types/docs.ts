@@ -686,6 +686,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   telegram?: string;
   bluesky?: string;
   readme?: string;
+  affiliateCode?: string;
   customLinks?: iCustomLink[];
   hiddenBadges?: BatchTokenDetailsArray<T>;
   hiddenLists?: string[];
@@ -735,7 +736,8 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.telegram = data.telegram;
     this.bluesky = data.bluesky;
     this.readme = data.readme;
-    this.customLinks = data.customLinks;
+    this.affiliateCode = data.affiliateCode;
+      this.customLinks = data.customLinks;
     this.hiddenBadges = data.hiddenBadges ? BatchTokenDetailsArray.From(data.hiddenBadges) : undefined;
     this.hiddenLists = data.hiddenLists;
     this.customPages = data.customPages

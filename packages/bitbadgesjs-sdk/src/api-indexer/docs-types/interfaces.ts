@@ -641,6 +641,9 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   /** The readme of the account */
   readme?: string;
 
+  /** Affiliate code */
+  affiliateCode?: string;
+
   /** The custom links of the account */
   customLinks?: iCustomLink[];
 
