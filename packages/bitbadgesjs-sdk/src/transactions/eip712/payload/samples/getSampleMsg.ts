@@ -75,6 +75,7 @@ import {
   ETHSignatureChallenge,
   ETHSignatureProof
 } from '@/proto/badges/index.js';
+
 import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
 import {
@@ -604,7 +605,10 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
   }
 
   if (!msg.invariants) {
-    msg.invariants = new CollectionInvariants();
+    msg.invariants = new CollectionInvariants({
+      noCustomOwnershipTimes: false,
+      maxSupplyPerId: '0'
+    });
   }
 
   return msg;
@@ -992,7 +996,8 @@ const universalParams = {
           symbol: '',
           isDefaultDisplay: false
         })
-      ]
+      ],
+      allowOverrideWithAnyValidToken: false
     })
   ]
 };

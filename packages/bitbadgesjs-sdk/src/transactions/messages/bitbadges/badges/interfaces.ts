@@ -89,7 +89,7 @@ export interface iMsgCreateCollection<T extends NumberType> {
   cosmosCoinWrapperPathsToAdd?: iCosmosCoinWrapperPathAddObject<T>[];
 
   /** Collection-level invariants that cannot be broken. These are set upon genesis and cannot be modified. */
-  invariants?: iCollectionInvariants;
+  invariants?: iCollectionInvariants<T>;
 }
 
 /**

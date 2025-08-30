@@ -1878,6 +1878,7 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
   balances: Balance<T>[];
   symbol: string;
   denomUnits: DenomUnit<T>[];
+  allowOverrideWithAnyValidToken: boolean;
 
   constructor(data: iCosmosCoinWrapperPath<T>) {
     super();
@@ -1886,6 +1887,7 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
     this.balances = data.balances.map((balance) => new Balance(balance));
     this.symbol = data.symbol;
     this.denomUnits = data.denomUnits.map((unit) => new DenomUnit(unit));
+    this.allowOverrideWithAnyValidToken = data.allowOverrideWithAnyValidToken;
   }
 
   getNumberFieldNames(): string[] {
@@ -1906,7 +1908,8 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
       denom: protoMsg.denom,
       balances: protoMsg.balances.map((balance) => Balance.fromProto(balance, convertFunction)),
       symbol: protoMsg.symbol,
-      denomUnits: denomUnits
+      denomUnits: denomUnits,
+      allowOverrideWithAnyValidToken: protoMsg.allowOverrideWithAnyValidToken
     }).convert(convertFunction);
   }
 }
@@ -1939,7 +1942,8 @@ export class CosmosCoinWrapperPathWithDetails<T extends NumberType> extends Cosm
       denom: protoMsg.denom,
       balances: protoMsg.balances.map((balance) => Balance.fromProto(balance, convertFunction)),
       symbol: protoMsg.symbol,
-      denomUnits: denomUnits
+      denomUnits: denomUnits,
+      allowOverrideWithAnyValidToken: protoMsg.allowOverrideWithAnyValidToken
     }).convert(convertFunction);
   }
 }
@@ -2088,33 +2092,49 @@ export class ETHSignatureProof extends CustomTypeClass<ETHSignatureProof> implem
  *
  * @category Interfaces
  */
-export class CollectionInvariants extends CustomTypeClass<CollectionInvariants> implements iCollectionInvariants {
+export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeClass<CollectionInvariants<T>> implements iCollectionInvariants<T> {
   /**
    * If true, all ownership times must be full ranges [{ start: 1, end: GoMaxUInt64 }].
    * This prevents time-based restrictions on token ownership.
    */
   noCustomOwnershipTimes: boolean;
 
-  constructor(data: iCollectionInvariants) {
+  /**
+   * Maximum supply per token ID. If set, no balance can exceed this amount.
+   * This prevents any single token ID from having more than the specified supply.
+   */
+  maxSupplyPerId: T;
+
+  constructor(data: iCollectionInvariants<T>) {
     super();
     this.noCustomOwnershipTimes = data.noCustomOwnershipTimes;
+    this.maxSupplyPerId = data.maxSupplyPerId;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['maxSupplyPerId']; // Include number fields
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionInvariants<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionInvariants<U>;
   }
 
   toProto(): protobadges.CollectionInvariants {
     return new protobadges.CollectionInvariants(this.toJson());
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CollectionInvariants {
-    return CollectionInvariants.fromProto(protobadges.CollectionInvariants.fromJson(jsonValue, options));
+  static fromJson<T extends NumberType>(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CollectionInvariants<T> {
+    return CollectionInvariants.fromProto(protobadges.CollectionInvariants.fromJson(jsonValue, options), (val: NumberType) => val as T);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CollectionInvariants {
-    return CollectionInvariants.fromProto(protobadges.CollectionInvariants.fromJsonString(jsonString, options));
+  static fromJsonString<T extends NumberType>(jsonString: string, options?: Partial<JsonReadOptions>): CollectionInvariants<T> {
+    return CollectionInvariants.fromProto(protobadges.CollectionInvariants.fromJsonString(jsonString, options), (val: NumberType) => val as T);
   }
 
-  static fromProto(item: protobadges.CollectionInvariants): CollectionInvariants {
+  static fromProto<T extends NumberType>(item: protobadges.CollectionInvariants, convertFunction: (val: NumberType) => T): CollectionInvariants<T> {
     return new CollectionInvariants({
-      noCustomOwnershipTimes: item.noCustomOwnershipTimes
+      noCustomOwnershipTimes: item.noCustomOwnershipTimes,
+      maxSupplyPerId: convertFunction(item.maxSupplyPerId)
     });
   }
 }

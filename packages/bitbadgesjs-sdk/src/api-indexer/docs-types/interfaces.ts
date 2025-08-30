@@ -523,7 +523,7 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   /** The IBC wrapper paths for the collection */
   cosmosCoinWrapperPaths: iCosmosCoinWrapperPath<T>[];
   /** Collection-level invariants that cannot be broken. These are set upon genesis and cannot be modified. */
-  invariants: iCollectionInvariants;
+  invariants: iCollectionInvariants<T>;
 }
 
 /**
@@ -535,6 +535,7 @@ export interface iCosmosCoinWrapperPath<T extends NumberType> {
   balances: iBalance<T>[];
   symbol: string;
   denomUnits: iDenomUnit<T>[];
+  allowOverrideWithAnyValidToken: boolean;
 }
 
 /**

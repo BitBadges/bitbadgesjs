@@ -324,7 +324,7 @@ export class CollectionDoc<T extends NumberType>
   validBadgeIds: UintRangeArray<T>;
   mintEscrowAddress: string;
   cosmosCoinWrapperPaths: CosmosCoinWrapperPath<T>[];
-  invariants: CollectionInvariants;
+  invariants: CollectionInvariants<T>;
 
   constructor(data: iCollectionDoc<T>) {
     super();
@@ -737,7 +737,7 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.bluesky = data.bluesky;
     this.readme = data.readme;
     this.affiliateCode = data.affiliateCode;
-      this.customLinks = data.customLinks;
+    this.customLinks = data.customLinks;
     this.hiddenBadges = data.hiddenBadges ? BatchTokenDetailsArray.From(data.hiddenBadges) : undefined;
     this.hiddenLists = data.hiddenLists;
     this.customPages = data.customPages

@@ -201,6 +201,9 @@ export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
 
   /** The denomination units for this IBC wrapper path. */
   denomUnits: iDenomUnit<T>[];
+
+  /** Whether to allow override with any valid token. */
+  allowOverrideWithAnyValidToken: boolean;
 }
 
 /**
@@ -640,10 +643,16 @@ export interface iIsArchivedTimeline<T extends NumberType> extends iTimelineItem
  *
  * @category Interfaces
  */
-export interface iCollectionInvariants {
+export interface iCollectionInvariants<T extends NumberType> {
   /**
    * If true, all ownership times must be full ranges [{ start: 1, end: GoMaxUInt64 }].
    * This prevents time-based restrictions on token ownership.
    */
   noCustomOwnershipTimes: boolean;
+
+  /**
+   * Maximum supply per token ID. If set, no balance can exceed this amount.
+   * This prevents any single token ID from having more than the specified supply.
+   */
+  maxSupplyPerId: T;
 }

@@ -48,7 +48,7 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
   isArchivedTimeline?: IsArchivedTimeline<T>[];
   mintEscrowCoinsToTransfer?: CosmosCoin<T>[];
   cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject<T>[];
-  invariants?: CollectionInvariants;
+  invariants?: CollectionInvariants<T>;
 
   constructor(msg: iMsgCreateCollection<T>) {
     super();
@@ -118,7 +118,7 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
       isArchivedTimeline: protoMsg.isArchivedTimeline?.map((x) => IsArchivedTimeline.fromProto(x, convertFunction)),
       mintEscrowCoinsToTransfer: protoMsg.mintEscrowCoinsToTransfer?.map((x) => CosmosCoin.fromProto(x, convertFunction)),
       cosmosCoinWrapperPathsToAdd: protoMsg.cosmosCoinWrapperPathsToAdd?.map((x) => CosmosCoinWrapperPathAddObject.fromProto(x, convertFunction)),
-      invariants: protoMsg.invariants ? CollectionInvariants.fromProto(protoMsg.invariants) : undefined
+      invariants: protoMsg.invariants ? CollectionInvariants.fromProto(protoMsg.invariants, convertFunction) : undefined
     });
   }
 

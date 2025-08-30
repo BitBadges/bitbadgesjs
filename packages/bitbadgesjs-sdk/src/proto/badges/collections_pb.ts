@@ -228,6 +228,11 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
    */
   denomUnits: DenomUnit[] = [];
 
+  /**
+   * @generated from field: bool allowOverrideWithAnyValidToken = 6;
+   */
+  allowOverrideWithAnyValidToken = false;
+
   constructor(data?: PartialMessage<CosmosCoinWrapperPath>) {
     super();
     proto3.util.initPartial(data, this);
@@ -241,6 +246,7 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
     { no: 3, name: "balances", kind: "message", T: Balance, repeated: true },
     { no: 4, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
+    { no: 6, name: "allowOverrideWithAnyValidToken", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinWrapperPath {
@@ -323,6 +329,14 @@ export class CollectionInvariants extends Message<CollectionInvariants> {
    */
   noCustomOwnershipTimes = false;
 
+  /**
+   * Maximum supply per token ID. If set, no balance can exceed this amount.
+   * This prevents any single token ID from having more than the specified supply.
+   *
+   * @generated from field: string maxSupplyPerId = 2;
+   */
+  maxSupplyPerId = "";
+
   constructor(data?: PartialMessage<CollectionInvariants>) {
     super();
     proto3.util.initPartial(data, this);
@@ -332,6 +346,7 @@ export class CollectionInvariants extends Message<CollectionInvariants> {
   static readonly typeName = "badges.CollectionInvariants";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "noCustomOwnershipTimes", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: "maxSupplyPerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionInvariants {

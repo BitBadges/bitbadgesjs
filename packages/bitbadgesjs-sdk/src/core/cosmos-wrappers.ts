@@ -1,11 +1,26 @@
 import { iApprovalCriteria } from '@/interfaces/types/approvals.js';
 import { CollectionApprovalWithDetails } from './approvals.js';
 import { CosmosCoinWrapperPath } from './misc.js';
+import { iUintRange } from '@/interfaces/index.js';
+
+function validateBadgeIds(badgeIds: iUintRange<bigint>[], approvalTokenIds: iUintRange<bigint>[]) {
+  if (badgeIds.length !== approvalTokenIds.length) {
+    return false;
+  }
+
+  for (let i = 0; i < badgeIds.length; i++) {
+    if (badgeIds[i].start !== approvalTokenIds[i].start || badgeIds[i].end !== approvalTokenIds[i].end) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 export const isWrapperApproval = (
   approval: CollectionApprovalWithDetails<bigint>,
   pathObj: CosmosCoinWrapperPath<bigint>,
-  options?: { skipPathValidation?: boolean }
+  options?: { skipPathValidation?: boolean; validBadgeIds?: iUintRange<bigint>[] }
 ) => {
   const { address, balances } = pathObj;
 
@@ -20,12 +35,16 @@ export const isWrapperApproval = (
       return false;
     }
 
-    if (badgeIds.length !== approval.badgeIds.length) {
-      return false;
-    }
+    const allowOverrideWithAnyValidToken = pathObj.allowOverrideWithAnyValidToken;
 
-    for (let i = 0; i < badgeIds.length; i++) {
-      if (badgeIds[i].start !== approval.badgeIds[i].start || badgeIds[i].end !== approval.badgeIds[i].end) {
+    if (allowOverrideWithAnyValidToken) {
+      if (options?.validBadgeIds) {
+        if (!validateBadgeIds(options?.validBadgeIds ?? [], approval.badgeIds)) {
+          return false;
+        }
+      }
+    } else {
+      if (!validateBadgeIds(badgeIds, approval.badgeIds)) {
         return false;
       }
     }
@@ -60,7 +79,7 @@ export const isWrapperApproval = (
 export const isUnwrapperApproval = (
   approval: CollectionApprovalWithDetails<bigint>,
   pathObj: CosmosCoinWrapperPath<bigint>,
-  options?: { skipPathValidation?: boolean }
+  options?: { skipPathValidation?: boolean; validBadgeIds?: iUintRange<bigint>[] }
 ) => {
   const { address, balances } = pathObj;
 
@@ -75,16 +94,16 @@ export const isUnwrapperApproval = (
       return false;
     }
 
-    if (badgeIds.length !== approval.badgeIds.length) {
-      return false;
-    }
+    const allowOverrideWithAnyValidToken = pathObj.allowOverrideWithAnyValidToken;
 
-    if (badgeIds.length !== approval.badgeIds.length) {
-      return false;
-    }
-
-    for (let i = 0; i < badgeIds.length; i++) {
-      if (badgeIds[i].start !== approval.badgeIds[i].start || badgeIds[i].end !== approval.badgeIds[i].end) {
+    if (allowOverrideWithAnyValidToken) {
+      if (options?.validBadgeIds) {
+        if (!validateBadgeIds(options?.validBadgeIds ?? [], approval.badgeIds)) {
+          return false;
+        }
+      }
+    } else {
+      if (!validateBadgeIds(badgeIds, approval.badgeIds)) {
         return false;
       }
     }

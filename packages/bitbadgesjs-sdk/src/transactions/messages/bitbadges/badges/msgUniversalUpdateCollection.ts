@@ -73,7 +73,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   isArchivedTimeline?: IsArchivedTimeline<T>[];
   mintEscrowCoinsToTransfer?: CosmosCoin<T>[];
   cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject<T>[];
-  invariants?: CollectionInvariants;
+  invariants?: CollectionInvariants<T>;
 
   constructor(msg: iMsgUniversalUpdateCollection<T>) {
     super();
@@ -183,7 +183,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
         : undefined,
       mintEscrowCoinsToTransfer: protoMsg.mintEscrowCoinsToTransfer?.map((x) => CosmosCoin.fromProto(x, convertFunction)),
       cosmosCoinWrapperPathsToAdd: protoMsg.cosmosCoinWrapperPathsToAdd?.map((x) => CosmosCoinWrapperPathAddObject.fromProto(x, convertFunction)),
-      invariants: protoMsg.invariants ? CollectionInvariants.fromProto(protoMsg.invariants) : undefined
+      invariants: protoMsg.invariants ? CollectionInvariants.fromProto(protoMsg.invariants, convertFunction) : undefined
     });
   }
 
