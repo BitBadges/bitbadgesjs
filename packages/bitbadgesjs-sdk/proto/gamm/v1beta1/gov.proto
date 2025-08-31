@@ -1,0 +1,31 @@
+syntax = "proto3";
+package gamm.v1beta1;
+
+import "gogoproto/gogo.proto";
+import "gamm/v1beta1/genesis.proto";
+import "cosmos_proto/cosmos.proto";
+import "amino/amino.proto";
+
+option go_package = "github.com/bitbadges/bitbadgeschain/x/gamm/types";
+
+message PoolRecordWithCFMMLink {
+  option (gogoproto.equal) = true;
+
+  string denom0 = 1 [ (gogoproto.moretags) = "yaml:\"denom0\"" ];
+  string denom1 = 2 [ (gogoproto.moretags) = "yaml:\"denom1\"" ];
+  uint64 tick_spacing = 3 [ (gogoproto.moretags) = "yaml:\"tick_spacing\"" ];
+  string exponent_at_price_one = 4 [
+
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.moretags) = "yaml:\"exponent_at_price_one\"",
+    (gogoproto.nullable) = false
+  ];
+  string spread_factor = 5 [
+
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.moretags) = "yaml:\"spread_factor\"",
+    (gogoproto.nullable) = false
+  ];
+  uint64 balancer_pool_id = 6
+      [ (gogoproto.moretags) = "yaml:\"balancer_pool_id\"" ];
+}

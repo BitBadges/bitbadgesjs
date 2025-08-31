@@ -10,6 +10,9 @@ cp -r ./proto/badges/* $MYFOLDER/proto/badges/
 cp -r ./proto/wasmx/* $MYFOLDER/proto/wasmx/
 cp -r ./proto/anchor/* $MYFOLDER/proto/anchor/
 cp -r ./proto/maps/* $MYFOLDER/proto/maps/
+cp -r ./proto/gamm/* $MYFOLDER/proto/gamm/
+cp -r ./proto/poolmanager/* $MYFOLDER/proto/poolmanager/
+
 cd ../bitbadgesjs/packages/bitbadgesjs-sdk
 
 # We have a v6 or v* folder for migration, lets delete that
