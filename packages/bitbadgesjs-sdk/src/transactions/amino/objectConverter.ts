@@ -51,6 +51,25 @@ import { MsgExecuteContract, MsgInstantiateContract, MsgStoreCode } from '@/prot
 import { MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap } from '@/proto/maps/index.js';
 import { MsgExecuteContractCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/index.js';
 import { MsgTransfer } from '@/proto/ibc/index.js';
+import {
+  MsgJoinPool,
+  MsgJoinPoolResponse,
+  MsgExitPool,
+  MsgExitPoolResponse,
+  MsgSwapExactAmountIn,
+  MsgSwapExactAmountInResponse,
+  MsgSwapExactAmountOut,
+  MsgSwapExactAmountOutResponse,
+  MsgJoinSwapExternAmountIn,
+  MsgJoinSwapExternAmountInResponse,
+  MsgJoinSwapShareAmountOut,
+  MsgJoinSwapShareAmountOutResponse,
+  MsgExitSwapShareAmountIn,
+  MsgExitSwapShareAmountInResponse,
+  MsgExitSwapExternAmountOut,
+  MsgExitSwapExternAmountOutResponse
+} from '@/proto/gamm/v1beta1/tx_pb.js';
+import { MsgCreateBalancerPool, MsgCreateBalancerPoolResponse } from '@/proto/gamm/poolmodels/balancer/tx_pb.js';
 
 export const ProtoTypeRegistry = createRegistry(
   MsgSend,
@@ -111,7 +130,25 @@ export const ProtoTypeRegistry = createRegistry(
   GenericAuthorization,
   SendAuthorization,
   StakeAuthorization,
-  MsgTransfer
+  MsgTransfer,
+  MsgJoinPool,
+  MsgJoinPoolResponse,
+  MsgExitPool,
+  MsgExitPoolResponse,
+  MsgSwapExactAmountIn,
+  MsgSwapExactAmountInResponse,
+  MsgSwapExactAmountOut,
+  MsgSwapExactAmountOutResponse,
+  MsgJoinSwapExternAmountIn,
+  MsgJoinSwapExternAmountInResponse,
+  MsgJoinSwapShareAmountOut,
+  MsgJoinSwapShareAmountOutResponse,
+  MsgExitSwapShareAmountIn,
+  MsgExitSwapShareAmountInResponse,
+  MsgExitSwapExternAmountOut,
+  MsgExitSwapExternAmountOutResponse,
+  MsgCreateBalancerPool,
+  MsgCreateBalancerPoolResponse
 );
 
 /**

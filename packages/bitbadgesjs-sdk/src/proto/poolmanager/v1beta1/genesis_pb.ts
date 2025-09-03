@@ -5,9 +5,9 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { Coin } from "../../cosmos/base/v1beta1/coin_pb.js";
 import { ModuleRoute } from "./module_route_pb.js";
 import { DenomPairTakerFee } from "./tx_pb.js";
+import { Coin } from "../../cosmos/base/v1beta1/coin_pb.js";
 
 /**
  * Params holds parameters for the poolmanager module
@@ -16,34 +16,11 @@ import { DenomPairTakerFee } from "./tx_pb.js";
  */
 export class Params extends Message<Params> {
   /**
-   * @generated from field: repeated cosmos.base.v1beta1.Coin pool_creation_fee = 1;
-   */
-  poolCreationFee: Coin[] = [];
-
-  /**
    * taker_fee_params is the container of taker fee parameters.
    *
-   * @generated from field: poolmanager.v1beta1.TakerFeeParams taker_fee_params = 2;
+   * @generated from field: poolmanager.v1beta1.TakerFeeParams taker_fee_params = 1;
    */
   takerFeeParams?: TakerFeeParams;
-
-  /**
-   * authorized_quote_denoms is a list of quote denoms that can be used as
-   * token1 when creating a concentrated pool. We limit the quote assets to a
-   * small set for the purposes of having convenient price increments stemming
-   * from tick to price conversion. These increments are in a human readable
-   * magnitude only for token1 as a quote. For limit orders in the future, this
-   * will be a desirable property in terms of UX as to allow users to set limit
-   * orders at prices in terms of token1 (quote asset) that are easy to reason
-   * about.
-   * DEPRECATED: Quote asset whitelisting requirement removed as per Proposal
-   * 819. Any asset can now be used as a quote asset in concentrated liquidity
-   * pools.
-   *
-   * @generated from field: repeated string authorized_quote_denoms = 3 [deprecated = true];
-   * @deprecated
-   */
-  authorizedQuoteDenoms: string[] = [];
 
   constructor(data?: PartialMessage<Params>) {
     super();
@@ -53,9 +30,7 @@ export class Params extends Message<Params> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "poolmanager.v1beta1.Params";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "pool_creation_fee", kind: "message", T: Coin, repeated: true },
-    { no: 2, name: "taker_fee_params", kind: "message", T: TakerFeeParams },
-    { no: 3, name: "authorized_quote_denoms", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 1, name: "taker_fee_params", kind: "message", T: TakerFeeParams },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Params {

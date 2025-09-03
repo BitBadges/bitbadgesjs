@@ -319,6 +319,11 @@ export class CosmosCoinWrapperPathAddObject extends Message<CosmosCoinWrapperPat
    */
   allowOverrideWithAnyValidToken = false;
 
+  /**
+   * @generated from field: bool allowCosmosWrapping = 6;
+   */
+  allowCosmosWrapping = false;
+
   constructor(data?: PartialMessage<CosmosCoinWrapperPathAddObject>) {
     super();
     proto3.util.initPartial(data, this);
@@ -332,6 +337,7 @@ export class CosmosCoinWrapperPathAddObject extends Message<CosmosCoinWrapperPat
     { no: 3, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
     { no: 5, name: "allowOverrideWithAnyValidToken", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: "allowCosmosWrapping", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinWrapperPathAddObject {

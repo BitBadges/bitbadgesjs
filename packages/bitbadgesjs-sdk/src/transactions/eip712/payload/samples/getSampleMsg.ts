@@ -33,6 +33,10 @@ import {
   CollectionPermissions,
   CosmosCoinWrapperPathAddObject,
   CustomDataTimeline,
+  DenomUnit,
+  DynamicStoreChallenge,
+  ETHSignatureChallenge,
+  ETHSignatureProof,
   IncomingApprovalCriteria,
   IncrementedBalances,
   IsArchivedTimeline,
@@ -69,21 +73,15 @@ import {
   UserOutgoingApproval,
   UserOutgoingApprovalPermission,
   UserPermissions,
-  UserRoyalties,
-  DenomUnit,
-  DynamicStoreChallenge,
-  ETHSignatureChallenge,
-  ETHSignatureProof
+  UserRoyalties
 } from '@/proto/badges/index.js';
 
-import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
-import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
 import {
   MsgCreateDynamicStore,
+  MsgDecrementStoreValue,
   MsgDeleteDynamicStore,
   MsgDeleteIncomingApproval,
   MsgDeleteOutgoingApproval,
-  MsgDecrementStoreValue,
   MsgIncrementStoreValue,
   MsgPurgeApprovals,
   MsgSetBadgeMetadata,
@@ -99,6 +97,22 @@ import {
   MsgSetValidBadgeIds,
   MsgUpdateDynamicStore
 } from '@/proto/badges/tx_pb.js';
+import { Coin } from '@/proto/cosmos/base/v1beta1/coin_pb.js';
+import { PoolAsset, PoolParams } from '@/proto/gamm/poolmodels/balancer/balancerPool_pb.js';
+import { MsgCreateBalancerPool } from '@/proto/gamm/poolmodels/balancer/tx_pb.js';
+import {
+  MsgExitPool,
+  MsgExitSwapExternAmountOut,
+  MsgExitSwapShareAmountIn,
+  MsgJoinPool,
+  MsgJoinSwapExternAmountIn,
+  MsgJoinSwapShareAmountOut,
+  MsgSwapExactAmountIn,
+  MsgSwapExactAmountOut
+} from '@/proto/gamm/v1beta1/tx_pb.js';
+import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
+import { SwapAmountInRoute, SwapAmountOutRoute } from '@/proto/poolmanager/v1beta1/swap_route_pb.js';
+import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
 
 const approvalCriteria = new OutgoingApprovalCriteria({
   coinTransfers: [
@@ -769,6 +783,62 @@ export function populateUndefinedForMsgSetIsArchived(msg: MsgSetIsArchived) {
   return new MsgSetIsArchived(extractSubsetFields(populated, msg));
 }
 
+// GAMM Message Population Functions
+export function populateUndefinedForMsgJoinPool(msg: MsgJoinPool) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgExitPool(msg: MsgExitPool) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgSwapExactAmountIn(msg: MsgSwapExactAmountIn) {
+  if (!msg.tokenIn) {
+    throw new Error('MsgSwapExactAmountIn.tokenIn is required but was undefined');
+  }
+  return msg;
+}
+
+export function populateUndefinedForMsgSwapExactAmountOut(msg: MsgSwapExactAmountOut) {
+  if (!msg.tokenOut) {
+    throw new Error('MsgSwapExactAmountOut.tokenOut is required but was undefined');
+  }
+  return msg;
+}
+
+export function populateUndefinedForMsgJoinSwapExternAmountIn(msg: MsgJoinSwapExternAmountIn) {
+  if (!msg.tokenIn) {
+    throw new Error('MsgJoinSwapExternAmountIn.tokenIn is required but was undefined');
+  }
+  return msg;
+}
+
+export function populateUndefinedForMsgJoinSwapShareAmountOut(msg: MsgJoinSwapShareAmountOut) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgExitSwapShareAmountIn(msg: MsgExitSwapShareAmountIn) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgExitSwapExternAmountOut(msg: MsgExitSwapExternAmountOut) {
+  if (!msg.tokenOut) {
+    throw new Error('MsgExitSwapExternAmountOut.tokenOut is required but was undefined');
+  }
+  return msg;
+}
+
+export function populateUndefinedForMsgCreateBalancerPool(msg: MsgCreateBalancerPool) {
+  if (!msg.poolParams) {
+    throw new Error('MsgCreateBalancerPool.poolParams is required but was undefined');
+  }
+  return msg;
+}
+
 const universalParams = {
   defaultBalances: new UserBalanceStore({
     balances: [
@@ -997,7 +1067,8 @@ const universalParams = {
           isDefaultDisplay: false
         })
       ],
-      allowOverrideWithAnyValidToken: false
+      allowOverrideWithAnyValidToken: false,
+      allowCosmosWrapping: false
     })
   ]
 };
@@ -1378,6 +1449,140 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           collectionId: '0',
           isArchivedTimeline: [new IsArchivedTimeline()],
           canArchiveCollection: [new TimedUpdatePermission()]
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'gamm/JoinPool':
+      return {
+        type: msgType,
+        value: new MsgJoinPool({
+          sender: '',
+          poolId: 0n,
+          shareOutAmount: '0',
+          tokenInMaxs: [
+            new Coin({
+              amount: '0',
+              denom: ''
+            })
+          ]
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'gamm/ExitPool':
+      return {
+        type: msgType,
+        value: new MsgExitPool({
+          sender: '',
+          poolId: 0n,
+          shareInAmount: '0',
+          tokenOutMins: [
+            new Coin({
+              amount: '0',
+              denom: ''
+            })
+          ]
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'gamm/SwapExactAmountIn':
+      return {
+        type: msgType,
+        value: new MsgSwapExactAmountIn({
+          sender: '',
+          routes: [
+            new SwapAmountInRoute({
+              poolId: 0n,
+              tokenOutDenom: ''
+            })
+          ],
+          tokenIn: new Coin({
+            amount: '0',
+            denom: ''
+          }),
+          tokenOutMinAmount: '0'
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'gamm/SwapExactAmountOut':
+      return {
+        type: msgType,
+        value: new MsgSwapExactAmountOut({
+          sender: '',
+          routes: [
+            new SwapAmountOutRoute({
+              poolId: 0n,
+              tokenInDenom: ''
+            })
+          ],
+          tokenInMaxAmount: '0',
+          tokenOut: new Coin({
+            amount: '0',
+            denom: ''
+          })
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'gamm/JoinSwapExternAmountIn':
+      return {
+        type: msgType,
+        value: new MsgJoinSwapExternAmountIn({
+          sender: '',
+          poolId: 0n,
+          tokenIn: new Coin({
+            amount: '0',
+            denom: ''
+          }),
+          shareOutMinAmount: '0'
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'gamm/JoinSwapShareAmountOut':
+      return {
+        type: msgType,
+        value: new MsgJoinSwapShareAmountOut({
+          sender: '',
+          poolId: 0n,
+          tokenInDenom: '',
+          shareOutAmount: '0',
+          tokenInMaxAmount: '0'
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'gamm/ExitSwapShareAmountIn':
+      return {
+        type: msgType,
+        value: new MsgExitSwapShareAmountIn({
+          sender: '',
+          poolId: 0n,
+          tokenOutDenom: '',
+          shareInAmount: '0',
+          tokenOutMinAmount: '0'
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'gamm/ExitSwapExternAmountOut':
+      return {
+        type: msgType,
+        value: new MsgExitSwapExternAmountOut({
+          sender: '',
+          poolId: 0n,
+          tokenOut: new Coin({
+            amount: '0',
+            denom: ''
+          }),
+          shareInMaxAmount: '0'
+        }).toJson({ emitDefaultValues: true })
+      };
+    case 'gamm/CreateBalancerPool':
+      return {
+        type: msgType,
+        value: new MsgCreateBalancerPool({
+          sender: '',
+          poolParams: new PoolParams({
+            swapFee: '0',
+            exitFee: '0'
+          }),
+          poolAssets: [
+            new PoolAsset({
+              token: new Coin({
+                amount: '0',
+                denom: ''
+              }),
+              weight: '0'
+            })
+          ]
         }).toJson({ emitDefaultValues: true })
       };
     default:

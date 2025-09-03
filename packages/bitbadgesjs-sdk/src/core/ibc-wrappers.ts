@@ -76,6 +76,7 @@ export class CosmosCoinWrapperPathAddObject<T extends NumberType>
   symbol: string;
   denomUnits: DenomUnit<T>[];
   allowOverrideWithAnyValidToken: boolean;
+  allowCosmosWrapping: boolean;
 
   constructor(data: iCosmosCoinWrapperPathAddObject<T>) {
     super();
@@ -84,6 +85,7 @@ export class CosmosCoinWrapperPathAddObject<T extends NumberType>
     this.symbol = data.symbol;
     this.denomUnits = data.denomUnits.map((unit) => new DenomUnit(unit));
     this.allowOverrideWithAnyValidToken = data.allowOverrideWithAnyValidToken;
+    this.allowCosmosWrapping = data.allowCosmosWrapping;
   }
 
   getNumberFieldNames(): string[] {
@@ -103,7 +105,8 @@ export class CosmosCoinWrapperPathAddObject<T extends NumberType>
       balances: data.balances.map((balance) => Balance.fromProto(balance, convertFunction)),
       symbol: data.symbol,
       denomUnits: data.denomUnits.map((unit) => DenomUnit.fromProto(unit, convertFunction)),
-      allowOverrideWithAnyValidToken: data.allowOverrideWithAnyValidToken
+      allowOverrideWithAnyValidToken: data.allowOverrideWithAnyValidToken,
+      allowCosmosWrapping: data.allowCosmosWrapping
     });
   }
 }

@@ -26,7 +26,6 @@ This SDK is designed to be compatible with specific BitBadges chain versions. Us
 
 > 📖 **For detailed version information, see [VERSION_COMPATIBILITY.md](./VERSION_COMPATIBILITY.md)**
 
-
 ### Installation
 
 ```bash

@@ -25,3 +25,4 @@ export * from './proto/index.js';
 export * from './transactions/index.js';
 export * from './address-converter/index.js';
 export * from './node-rest-api/index.js';
+export * from './gamm/index.js';

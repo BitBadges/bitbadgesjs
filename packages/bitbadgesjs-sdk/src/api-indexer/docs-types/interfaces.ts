@@ -536,6 +536,26 @@ export interface iCosmosCoinWrapperPath<T extends NumberType> {
   symbol: string;
   denomUnits: iDenomUnit<T>[];
   allowOverrideWithAnyValidToken: boolean;
+  allowCosmosWrapping: boolean;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iPoolInfo<T extends NumberType> {
+  poolId: string;
+  collectionId: string;
+  denom: string;
+  address: string;
+  allAssetDenoms: string[];
+  poolParams?: {
+    swapFee: string;
+    exitFee: string;
+  };
+  volume: iPoolInfoVolume<T>;
+  lastVolumeUpdate: number;
+  liquidity: iCosmosCoin<T>[];
+  lastLiquidityUpdate: number;
 }
 
 /**
@@ -546,6 +566,18 @@ export interface iCosmosCoinWrapperPathWithDetails<T extends NumberType> extends
   metadata?: iMetadata<T>;
   /** The denomination units with metadata details populated. */
   denomUnits: iDenomUnitWithDetails<T>[];
+  /** Pool Infos */
+  poolInfos?: iPoolInfo<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iPoolInfoVolume<T extends NumberType> {
+  daily: iCosmosCoin<T>[];
+  weekly: iCosmosCoin<T>[];
+  monthly: iCosmosCoin<T>[];
+  allTime: iCosmosCoin<T>[];
 }
 
 /**

@@ -3,6 +3,8 @@ import type {
   BitBadgesAddress,
   iCosmosCoinWrapperPath,
   iCosmosCoinWrapperPathWithDetails,
+  iPoolInfo,
+  iPoolInfoVolume,
   iUpdateHistory,
   UNIXMilliTimestamp
 } from '@/api-indexer/docs-types/interfaces.js';
@@ -48,7 +50,7 @@ import type {
 } from '../interfaces/types/core.js';
 import * as protobadges from '../proto/badges/index.js';
 import { AddressList } from './addressLists.js';
-import { CosmosCoin } from './coin.js';
+import { CosmosCoin, iCosmosCoin } from './coin.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
 import { GetFirstMatchOnly, getOverlapsAndNonOverlaps } from './overlaps.js';
 import { TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission } from './permissions.js';
@@ -1879,6 +1881,7 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
   symbol: string;
   denomUnits: DenomUnit<T>[];
   allowOverrideWithAnyValidToken: boolean;
+  allowCosmosWrapping: boolean;
 
   constructor(data: iCosmosCoinWrapperPath<T>) {
     super();
@@ -1888,6 +1891,7 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
     this.symbol = data.symbol;
     this.denomUnits = data.denomUnits.map((unit) => new DenomUnit(unit));
     this.allowOverrideWithAnyValidToken = data.allowOverrideWithAnyValidToken;
+    this.allowCosmosWrapping = data.allowCosmosWrapping;
   }
 
   getNumberFieldNames(): string[] {
@@ -1909,8 +1913,78 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
       balances: protoMsg.balances.map((balance) => Balance.fromProto(balance, convertFunction)),
       symbol: protoMsg.symbol,
       denomUnits: denomUnits,
-      allowOverrideWithAnyValidToken: protoMsg.allowOverrideWithAnyValidToken
+      allowOverrideWithAnyValidToken: protoMsg.allowOverrideWithAnyValidToken,
+      allowCosmosWrapping: protoMsg.allowCosmosWrapping
     }).convert(convertFunction);
+  }
+}
+
+/**
+ * @inheritDoc iPoolInfoVolume
+ * @category Indexer
+ */
+export class PoolInfoVolume<T extends NumberType> extends CustomTypeClass<PoolInfoVolume<T>> implements iPoolInfoVolume<T> {
+  daily: CosmosCoin<T>[];
+  weekly: CosmosCoin<T>[];
+  monthly: CosmosCoin<T>[];
+  allTime: CosmosCoin<T>[];
+
+  constructor(data: iPoolInfoVolume<T>) {
+    super();
+    this.daily = data.daily.map((coin) => new CosmosCoin(coin));
+    this.weekly = data.weekly.map((coin) => new CosmosCoin(coin));
+    this.monthly = data.monthly.map((coin) => new CosmosCoin(coin));
+    this.allTime = data.allTime.map((coin) => new CosmosCoin(coin));
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PoolInfoVolume<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PoolInfoVolume<U>;
+  }
+}
+
+/**
+ * @inheritDoc iPoolInfo
+ * @category Indexer
+ */
+export class PoolInfo<T extends NumberType> extends CustomTypeClass<PoolInfo<T>> implements iPoolInfo<T> {
+  poolId: string;
+  collectionId: string;
+  denom: string;
+  address: string;
+  allAssetDenoms: string[];
+  poolParams?: {
+    swapFee: string;
+    exitFee: string;
+  };
+  volume: PoolInfoVolume<T>;
+  lastVolumeUpdate: number;
+  liquidity: CosmosCoin<T>[];
+  lastLiquidityUpdate: number;
+
+  constructor(data: iPoolInfo<T>) {
+    super();
+    this.poolId = data.poolId;
+    this.collectionId = data.collectionId;
+    this.denom = data.denom;
+    this.address = data.address;
+    this.allAssetDenoms = data.allAssetDenoms;
+    this.poolParams = data.poolParams;
+    this.volume = new PoolInfoVolume(data.volume);
+    this.lastVolumeUpdate = data.lastVolumeUpdate;
+    this.liquidity = data.liquidity.map((coin) => new CosmosCoin(coin));
+    this.lastLiquidityUpdate = data.lastLiquidityUpdate;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PoolInfo<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PoolInfo<U>;
   }
 }
 
@@ -1921,11 +1995,15 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
 export class CosmosCoinWrapperPathWithDetails<T extends NumberType> extends CosmosCoinWrapperPath<T> implements iCosmosCoinWrapperPathWithDetails<T> {
   metadata?: Metadata<T>;
   denomUnits: DenomUnitWithDetails<T>[];
+  poolInfos?: PoolInfo<T>[] | undefined;
 
   constructor(data: iCosmosCoinWrapperPathWithDetails<T>) {
     super(data);
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
     this.denomUnits = data.denomUnits.map((unit) => new DenomUnitWithDetails(unit));
+    this.poolInfos = data.poolInfos?.map((poolInfo) => {
+      return new PoolInfo(poolInfo);
+    });
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CosmosCoinWrapperPathWithDetails<U> {
@@ -1943,7 +2021,8 @@ export class CosmosCoinWrapperPathWithDetails<T extends NumberType> extends Cosm
       balances: protoMsg.balances.map((balance) => Balance.fromProto(balance, convertFunction)),
       symbol: protoMsg.symbol,
       denomUnits: denomUnits,
-      allowOverrideWithAnyValidToken: protoMsg.allowOverrideWithAnyValidToken
+      allowOverrideWithAnyValidToken: protoMsg.allowOverrideWithAnyValidToken,
+      allowCosmosWrapping: protoMsg.allowCosmosWrapping
     }).convert(convertFunction);
   }
 }

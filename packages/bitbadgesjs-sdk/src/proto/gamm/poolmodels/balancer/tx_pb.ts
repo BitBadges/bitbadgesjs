@@ -28,11 +28,6 @@ export class MsgCreateBalancerPool extends Message<MsgCreateBalancerPool> {
    */
   poolAssets: PoolAsset[] = [];
 
-  /**
-   * @generated from field: string future_pool_governor = 4;
-   */
-  futurePoolGovernor = "";
-
   constructor(data?: PartialMessage<MsgCreateBalancerPool>) {
     super();
     proto3.util.initPartial(data, this);
@@ -44,7 +39,6 @@ export class MsgCreateBalancerPool extends Message<MsgCreateBalancerPool> {
     { no: 1, name: "sender", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "pool_params", kind: "message", T: PoolParams },
     { no: 3, name: "pool_assets", kind: "message", T: PoolAsset, repeated: true },
-    { no: 4, name: "future_pool_governor", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateBalancerPool {

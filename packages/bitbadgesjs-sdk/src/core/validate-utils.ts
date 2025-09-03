@@ -30,7 +30,7 @@ export function getPotentialUpdatesForTimelineValues(times: UintRangeArray<bigin
       toList: AddressList.AllAddresses(),
       fromList: AddressList.AllAddresses(),
       initiatedByList: AddressList.AllAddresses(),
-      approvalIdList: AddressList.AllAddresses(),
+      approvalIdList: AddressList.AllAddresses()
     });
   }
 

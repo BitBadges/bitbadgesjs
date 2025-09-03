@@ -31,6 +31,17 @@ import {
   MsgUpdateDynamicStore,
   MsgUpdateUserApprovals
 } from '@/proto/badges/tx_pb.js';
+import {
+  MsgJoinPool,
+  MsgExitPool,
+  MsgSwapExactAmountIn,
+  MsgSwapExactAmountOut,
+  MsgJoinSwapExternAmountIn,
+  MsgJoinSwapShareAmountOut,
+  MsgExitSwapShareAmountIn,
+  MsgExitSwapExternAmountOut
+} from '@/proto/gamm/v1beta1/tx_pb.js';
+import { MsgCreateBalancerPool } from '@/proto/gamm/poolmodels/balancer/tx_pb.js';
 import { type AuthInfo, type TxBody, type TxRaw, SignDoc } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
 import { createTypedData } from '@/transactions/eip712/payload/createTypedData.js';
 import {
@@ -59,7 +70,16 @@ import {
   populateUndefinedForMsgUniversalUpdateCollection,
   populateUndefinedForMsgUpdateCollection,
   populateUndefinedForMsgUpdateDynamicStore,
-  populateUndefinedForMsgUpdateUserApprovals
+  populateUndefinedForMsgUpdateUserApprovals,
+  populateUndefinedForMsgJoinPool,
+  populateUndefinedForMsgExitPool,
+  populateUndefinedForMsgSwapExactAmountIn,
+  populateUndefinedForMsgSwapExactAmountOut,
+  populateUndefinedForMsgJoinSwapExternAmountIn,
+  populateUndefinedForMsgJoinSwapShareAmountOut,
+  populateUndefinedForMsgExitSwapShareAmountIn,
+  populateUndefinedForMsgExitSwapExternAmountOut,
+  populateUndefinedForMsgCreateBalancerPool
 } from '@/transactions/eip712/payload/samples/getSampleMsg.js';
 import type { AnyMessage, Message } from '@bufbuild/protobuf';
 import bs58 from 'bs58';
@@ -348,6 +368,24 @@ export const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
       msg = createProtoMsg(populateUndefinedForMsgSetCollectionApprovals(msgVal as MsgSetCollectionApprovals));
     } else if (msgVal.getType().typeName === MsgSetIsArchived.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgSetIsArchived(msgVal as MsgSetIsArchived));
+    } else if (msgVal.getType().typeName === MsgJoinPool.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgJoinPool(msgVal as MsgJoinPool));
+    } else if (msgVal.getType().typeName === MsgExitPool.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgExitPool(msgVal as MsgExitPool));
+    } else if (msgVal.getType().typeName === MsgSwapExactAmountIn.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSwapExactAmountIn(msgVal as MsgSwapExactAmountIn));
+    } else if (msgVal.getType().typeName === MsgSwapExactAmountOut.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSwapExactAmountOut(msgVal as MsgSwapExactAmountOut));
+    } else if (msgVal.getType().typeName === MsgJoinSwapExternAmountIn.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgJoinSwapExternAmountIn(msgVal as MsgJoinSwapExternAmountIn));
+    } else if (msgVal.getType().typeName === MsgJoinSwapShareAmountOut.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgJoinSwapShareAmountOut(msgVal as MsgJoinSwapShareAmountOut));
+    } else if (msgVal.getType().typeName === MsgExitSwapShareAmountIn.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgExitSwapShareAmountIn(msgVal as MsgExitSwapShareAmountIn));
+    } else if (msgVal.getType().typeName === MsgExitSwapExternAmountOut.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgExitSwapExternAmountOut(msgVal as MsgExitSwapExternAmountOut));
+    } else if (msgVal.getType().typeName === MsgCreateBalancerPool.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgCreateBalancerPool(msgVal as MsgCreateBalancerPool));
     }
 
     //MsgCreateAddressLists and MsgDeleteCollection should be fine bc they are all primitive types and required

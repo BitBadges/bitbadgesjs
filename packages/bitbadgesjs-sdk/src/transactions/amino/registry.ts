@@ -55,6 +55,25 @@ import { MsgExec, MsgGrant, MsgRevoke } from '@/proto/cosmos/authz/v1beta1/tx_pb
 import { MsgCreateVestingAccount } from '@/proto/cosmos/vesting/v1beta1/index.js';
 
 import { MsgTransfer } from '@/proto/ibc/index.js';
+import {
+  MsgJoinPool,
+  MsgJoinPoolResponse,
+  MsgExitPool,
+  MsgExitPoolResponse,
+  MsgSwapExactAmountIn,
+  MsgSwapExactAmountInResponse,
+  MsgSwapExactAmountOut,
+  MsgSwapExactAmountOutResponse,
+  MsgJoinSwapExternAmountIn,
+  MsgJoinSwapExternAmountInResponse,
+  MsgJoinSwapShareAmountOut,
+  MsgJoinSwapShareAmountOutResponse,
+  MsgExitSwapShareAmountIn,
+  MsgExitSwapShareAmountInResponse,
+  MsgExitSwapExternAmountOut,
+  MsgExitSwapExternAmountOutResponse
+} from '@/proto/gamm/v1beta1/tx_pb.js';
+import { MsgCreateBalancerPool, MsgCreateBalancerPoolResponse } from '@/proto/gamm/poolmodels/balancer/tx_pb.js';
 
 export interface EncodeObject {
   readonly typeUrl: string;
@@ -253,6 +272,29 @@ export function createIBCAminoConverters(): AminoConverters {
   };
 }
 
+export function createGAMMAminoConverters(): AminoConverters {
+  return {
+    ...createAminoConverter(MsgJoinPool, 'gamm/join-pool'),
+    ...createAminoConverter(MsgJoinPoolResponse, 'gamm/join-pool-response'),
+    ...createAminoConverter(MsgExitPool, 'gamm/exit-pool'),
+    ...createAminoConverter(MsgExitPoolResponse, 'gamm/exit-pool-response'),
+    ...createAminoConverter(MsgSwapExactAmountIn, 'gamm/swap-exact-amount-in'),
+    ...createAminoConverter(MsgSwapExactAmountInResponse, 'gamm/swap-exact-amount-in-response'),
+    ...createAminoConverter(MsgSwapExactAmountOut, 'gamm/swap-exact-amount-out'),
+    ...createAminoConverter(MsgSwapExactAmountOutResponse, 'gamm/swap-exact-amount-out-response'),
+    ...createAminoConverter(MsgJoinSwapExternAmountIn, 'gamm/join-swap-extern-amount-in'),
+    ...createAminoConverter(MsgJoinSwapExternAmountInResponse, 'gamm/join-swap-extern-amount-in-response'),
+    ...createAminoConverter(MsgJoinSwapShareAmountOut, 'gamm/join-swap-share-amount-out'),
+    ...createAminoConverter(MsgJoinSwapShareAmountOutResponse, 'gamm/join-swap-share-amount-out-response'),
+    ...createAminoConverter(MsgExitSwapShareAmountIn, 'gamm/exit-swap-share-amount-in'),
+    ...createAminoConverter(MsgExitSwapShareAmountInResponse, 'gamm/exit-swap-share-amount-in-response'),
+    ...createAminoConverter(MsgExitSwapExternAmountOut, 'gamm/exit-swap-extern-amount-out'),
+    ...createAminoConverter(MsgExitSwapExternAmountOutResponse, 'gamm/exit-swap-extern-amount-out-response'),
+    ...createAminoConverter(MsgCreateBalancerPool, 'gamm/create-balancer-pool'),
+    ...createAminoConverter(MsgCreateBalancerPoolResponse, 'gamm/create-balancer-pool-response')
+  };
+}
+
 export function createDefaultAminoConverters() {
   return {
     ...createDefaultCosmosAminoConverters(),
@@ -260,7 +302,8 @@ export function createDefaultAminoConverters() {
     ...createWasmXAminoConverters(),
     ...createAnchorAminoConverters(),
     ...createMapsAminoConverters(),
-    ...createIBCAminoConverters()
+    ...createIBCAminoConverters(),
+    ...createGAMMAminoConverters()
   };
 }
 

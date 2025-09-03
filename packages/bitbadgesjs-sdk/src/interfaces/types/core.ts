@@ -204,6 +204,9 @@ export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
 
   /** Whether to allow override with any valid token. */
   allowOverrideWithAnyValidToken: boolean;
+
+  /** Whether to allow cosmos wrapping. */
+  allowCosmosWrapping: boolean;
 }
 
 /**
