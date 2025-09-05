@@ -252,15 +252,7 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
     afterOverallMaxNumTransfers: false,
     allowCounterpartyPurge: false,
     allowPurgeIfExpired: false
-  }),
-  ethSignatureChallenges: [
-    new ETHSignatureChallenge({
-      signer: '',
-      challengeTrackerId: '',
-      uri: '',
-      customData: ''
-    })
-  ]
+  })
 }).toJson({ emitDefaultValues: true }) as object;
 
 function populateMerkleChallenges(merkleChallenges?: MerkleChallenge[]) {

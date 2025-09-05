@@ -561,6 +561,19 @@ export interface iPoolInfo<T extends NumberType> {
 /**
  * @category Interfaces
  */
+export interface iAssetPairInfo<T extends NumberType> {
+  asset1Denom: string;
+  asset2Denom: string;
+  price: T;
+  lastUpdated: T;
+  totalLiquidity: iCosmosCoin<T>[];
+  poolIds: string[];
+  volume24h: T;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iCosmosCoinWrapperPathWithDetails<T extends NumberType> extends iCosmosCoinWrapperPath<T> {
   /** Optional base-level metadata for this cosmos coin wrapper path. */
   metadata?: iMetadata<T>;
@@ -568,6 +581,8 @@ export interface iCosmosCoinWrapperPathWithDetails<T extends NumberType> extends
   denomUnits: iDenomUnitWithDetails<T>[];
   /** Pool Infos */
   poolInfos?: iPoolInfo<T>[];
+  /** Asset Pair Infos */
+  assetPairInfos?: iAssetPairInfo<T>[];
 }
 
 /**

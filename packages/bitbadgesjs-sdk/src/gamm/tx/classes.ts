@@ -1414,8 +1414,8 @@ export class MsgCreateBalancerPool<T extends NumberType> extends BaseNumberTypeC
       poolParams: item.poolParams
         ? PoolParams.fromProto(item.poolParams, convertFunction)
         : {
-            swapFee: 0,
-            exitFee: 0
+            swapFee: '0',
+            exitFee: '0'
           },
       poolAssets: item.poolAssets.map((asset) => PoolAsset.fromProto(asset, convertFunction))
     });

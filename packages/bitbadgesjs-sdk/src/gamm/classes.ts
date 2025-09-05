@@ -7,8 +7,8 @@ import { CosmosCoin, iCosmosCoin } from '@/core/coin.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 
 export class PoolParams<T extends NumberType> extends BaseNumberTypeClass<PoolParams<T>> implements iPoolParams<T> {
-  swapFee: number;
-  exitFee: number;
+  swapFee: string;
+  exitFee: string;
 
   constructor(data: iPoolParams<T>) {
     super();
@@ -50,8 +50,8 @@ export class PoolParams<T extends NumberType> extends BaseNumberTypeClass<PoolPa
 
   static fromProto<U extends NumberType>(item: protogamm.PoolParams, convertFunction: (item: NumberType) => U): PoolParams<U> {
     return new PoolParams<U>({
-      swapFee: Number(item.swapFee),
-      exitFee: Number(item.exitFee)
+      swapFee: item.swapFee,
+      exitFee: item.exitFee
     });
   }
 }
@@ -163,8 +163,8 @@ export class Pool<T extends NumberType> extends BaseNumberTypeClass<Pool<T>> imp
       poolParams: item.poolParams
         ? PoolParams.fromProto(item.poolParams, convertFunction)
         : {
-            swapFee: 0,
-            exitFee: 0
+            swapFee: '0',
+            exitFee: '0'
           },
       totalShares: item.totalShares
         ? new CosmosCoin<U>({

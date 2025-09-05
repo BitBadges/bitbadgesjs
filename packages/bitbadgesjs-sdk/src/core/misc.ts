@@ -1,6 +1,7 @@
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import type {
   BitBadgesAddress,
+  iAssetPairInfo,
   iCosmosCoinWrapperPath,
   iCosmosCoinWrapperPathWithDetails,
   iPoolInfo,
@@ -1989,6 +1990,39 @@ export class PoolInfo<T extends NumberType> extends CustomTypeClass<PoolInfo<T>>
 }
 
 /**
+ * @inheritDoc iAssetPairInfo
+ * @category Indexer
+ */
+export class AssetPairInfo<T extends NumberType> extends CustomTypeClass<AssetPairInfo<T>> implements iAssetPairInfo<T> {
+  asset1Denom: string;
+  asset2Denom: string;
+  price: T;
+  lastUpdated: T;
+  totalLiquidity: CosmosCoin<T>[];
+  poolIds: string[];
+  volume24h: T;
+
+  constructor(data: iAssetPairInfo<T>) {
+    super();
+    this.asset1Denom = data.asset1Denom;
+    this.asset2Denom = data.asset2Denom;
+    this.price = data.price;
+    this.lastUpdated = data.lastUpdated;
+    this.totalLiquidity = data.totalLiquidity.map((coin) => new CosmosCoin(coin));
+    this.poolIds = data.poolIds;
+    this.volume24h = data.volume24h;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['price', 'lastUpdated', 'volume24h'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AssetPairInfo<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AssetPairInfo<U>;
+  }
+}
+
+/**
  * @inheritDoc iCosmosCoinWrapperPathWithDetails
  * @category Indexer
  */
@@ -1996,6 +2030,7 @@ export class CosmosCoinWrapperPathWithDetails<T extends NumberType> extends Cosm
   metadata?: Metadata<T>;
   denomUnits: DenomUnitWithDetails<T>[];
   poolInfos?: PoolInfo<T>[] | undefined;
+  assetPairInfos?: AssetPairInfo<T>[] | undefined;
 
   constructor(data: iCosmosCoinWrapperPathWithDetails<T>) {
     super(data);
@@ -2003,6 +2038,9 @@ export class CosmosCoinWrapperPathWithDetails<T extends NumberType> extends Cosm
     this.denomUnits = data.denomUnits.map((unit) => new DenomUnitWithDetails(unit));
     this.poolInfos = data.poolInfos?.map((poolInfo) => {
       return new PoolInfo(poolInfo);
+    });
+    this.assetPairInfos = data.assetPairInfos?.map((assetPairInfo) => {
+      return new AssetPairInfo(assetPairInfo);
     });
   }
 

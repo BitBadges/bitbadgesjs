@@ -2,8 +2,8 @@ import { NumberType } from '@/common/string-numbers.js';
 import { iCosmosCoin } from '@/core/coin.js';
 
 export interface iPoolParams<T extends NumberType> {
-  swapFee: number;
-  exitFee: number;
+  swapFee: string;
+  exitFee: string;
 }
 
 export interface iPoolAsset<T extends NumberType> {
