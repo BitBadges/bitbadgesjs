@@ -202,6 +202,11 @@ export interface iGetStatusSuccessResponse<T extends NumberType> {
    * If undefined, we did not check for out of sync.
    */
   outOfSync?: boolean;
+
+  /**
+   * Prices for the assets
+   */
+  prices?: Record<string, number>;
 }
 
 /**
@@ -214,11 +219,13 @@ export class GetStatusSuccessResponse<T extends NumberType>
 {
   status: StatusDoc<T>;
   outOfSync?: boolean;
-
+  prices?: Record<string, number>;
+  
   constructor(data: iGetStatusSuccessResponse<T>) {
     super();
     this.status = new StatusDoc(data.status);
     this.outOfSync = data.outOfSync;
+    this.prices = data.prices;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetStatusSuccessResponse<U> {

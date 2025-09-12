@@ -1,7 +1,7 @@
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import type {
   BitBadgesAddress,
-  iAssetPairInfo,
+  iAssetInfoDoc,
   iCosmosCoinWrapperPath,
   iCosmosCoinWrapperPathWithDetails,
   iPoolInfo,
@@ -1953,8 +1953,6 @@ export class PoolInfoVolume<T extends NumberType> extends CustomTypeClass<PoolIn
  */
 export class PoolInfo<T extends NumberType> extends CustomTypeClass<PoolInfo<T>> implements iPoolInfo<T> {
   poolId: string;
-  collectionId: string;
-  denom: string;
   address: string;
   allAssetDenoms: string[];
   poolParams?: {
@@ -1969,8 +1967,6 @@ export class PoolInfo<T extends NumberType> extends CustomTypeClass<PoolInfo<T>>
   constructor(data: iPoolInfo<T>) {
     super();
     this.poolId = data.poolId;
-    this.collectionId = data.collectionId;
-    this.denom = data.denom;
     this.address = data.address;
     this.allAssetDenoms = data.allAssetDenoms;
     this.poolParams = data.poolParams;
@@ -1993,28 +1989,34 @@ export class PoolInfo<T extends NumberType> extends CustomTypeClass<PoolInfo<T>>
  * @inheritDoc iAssetPairInfo
  * @category Indexer
  */
-export class AssetPairInfo<T extends NumberType> extends CustomTypeClass<AssetPairInfo<T>> implements iAssetPairInfo<T> {
-  asset1Denom: string;
-  asset2Denom: string;
-  price: T;
+export class AssetPairInfo<T extends NumberType> extends CustomTypeClass<AssetPairInfo<T>> implements iAssetInfoDoc<T> {
+  _docId: string;
+  _id?: string;
+  asset: string;
+  price: number;
   lastUpdated: T;
-  totalLiquidity: CosmosCoin<T>[];
-  poolIds: string[];
-  volume24h: T;
+  totalLiquidity: iCosmosCoin<bigint>[];
+  volume7d: number;
+  percentageChange24h: number;
+  percentageChange7d: number;
+  volume24h: number;
 
-  constructor(data: iAssetPairInfo<T>) {
+  constructor(data: iAssetInfoDoc<T>) {
     super();
-    this.asset1Denom = data.asset1Denom;
-    this.asset2Denom = data.asset2Denom;
+    this._docId = data._docId;
+    this._id = data._id;
+    this.asset = data.asset;
     this.price = data.price;
     this.lastUpdated = data.lastUpdated;
     this.totalLiquidity = data.totalLiquidity.map((coin) => new CosmosCoin(coin));
-    this.poolIds = data.poolIds;
+    this.volume7d = data.volume7d;
     this.volume24h = data.volume24h;
+    this.percentageChange24h = data.percentageChange24h;
+    this.percentageChange7d = data.percentageChange7d;
   }
 
   getNumberFieldNames(): string[] {
-    return ['price', 'lastUpdated', 'volume24h'];
+    return ['lastUpdated'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AssetPairInfo<U> {

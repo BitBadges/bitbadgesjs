@@ -17,7 +17,6 @@ import type {
   iTransferActivityDoc,
   UNIXMilliTimestamp
 } from './interfaces.js';
-import { CollectionApprovalWithDetails, iCollectionApprovalWithDetails } from '@/core/approvals.js';
 
 /**
  * @inheritDoc iActivityDoc

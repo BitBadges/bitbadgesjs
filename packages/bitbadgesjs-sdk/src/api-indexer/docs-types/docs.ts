@@ -1283,31 +1283,6 @@ export class PointsDoc<T extends NumberType> extends BaseNumberTypeClass<PointsD
 }
 
 /**
- * @inheritDoc iEvent
- * @category Indexer
- */
-export class Event<T extends NumberType> extends BaseNumberTypeClass<Event<T>> implements iEvent<T> {
-  metadata: iMetadata<T>;
-  eventTimes: UintRangeArray<T>;
-  eventId: string;
-
-  constructor(data: iEvent<T>) {
-    super();
-    this.metadata = data.metadata;
-    this.eventTimes = UintRangeArray.From(data.eventTimes);
-    this.eventId = data.eventId;
-  }
-
-  getNumberFieldNames(): string[] {
-    return [];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Event<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Event<U>;
-  }
-}
-
-/**
  * @inheritDoc iTierWithOptionalWeight
  * @category Indexer
  */

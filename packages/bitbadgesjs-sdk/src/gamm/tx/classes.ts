@@ -165,7 +165,7 @@ export class SwapAmountOutRoute<T extends NumberType> extends BaseNumberTypeClas
 export class MsgJoinPool<T extends NumberType> extends BaseNumberTypeClass<MsgJoinPool<T>> implements iMsgJoinPool<T> {
   sender: string;
   poolId: T;
-  shareOutAmount: string;
+  shareOutAmount: T;
   tokenInMaxs: CosmosCoin<T>[];
 
   constructor(data: iMsgJoinPool<T>) {
@@ -177,7 +177,7 @@ export class MsgJoinPool<T extends NumberType> extends BaseNumberTypeClass<MsgJo
   }
 
   getNumberFieldNames(): string[] {
-    return ['poolId'];
+    return ['poolId', 'shareOutAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgJoinPool<U> {
@@ -188,7 +188,7 @@ export class MsgJoinPool<T extends NumberType> extends BaseNumberTypeClass<MsgJo
     return new protogamm.MsgJoinPool({
       sender: this.sender,
       poolId: BigIntify(this.poolId),
-      shareOutAmount: this.shareOutAmount,
+      shareOutAmount: Stringify(this.shareOutAmount),
       tokenInMaxs: this.tokenInMaxs.map((coin) => new CosmosCoin(coin).convert(Stringify))
     });
   }
@@ -213,7 +213,7 @@ export class MsgJoinPool<T extends NumberType> extends BaseNumberTypeClass<MsgJo
     return new MsgJoinPool<U>({
       sender: item.sender,
       poolId: convertFunction(BigInt(item.poolId)),
-      shareOutAmount: item.shareOutAmount,
+      shareOutAmount: convertFunction(BigInt(item.shareOutAmount)),
       tokenInMaxs: item.tokenInMaxs.map((coin) =>
         new CosmosCoin<U>({
           amount: convertFunction(BigInt(coin.amount)),
@@ -243,7 +243,7 @@ export class MsgJoinPool<T extends NumberType> extends BaseNumberTypeClass<MsgJo
 }
 
 export class MsgJoinPoolResponse<T extends NumberType> extends BaseNumberTypeClass<MsgJoinPoolResponse<T>> implements iMsgJoinPoolResponse<T> {
-  shareOutAmount: string;
+  shareOutAmount: T;
   tokenIn: CosmosCoin<T>[];
 
   constructor(data: iMsgJoinPoolResponse<T>) {
@@ -253,7 +253,7 @@ export class MsgJoinPoolResponse<T extends NumberType> extends BaseNumberTypeCla
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['shareOutAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgJoinPoolResponse<U> {
@@ -262,7 +262,7 @@ export class MsgJoinPoolResponse<T extends NumberType> extends BaseNumberTypeCla
 
   toProto(): protogamm.MsgJoinPoolResponse {
     return new protogamm.MsgJoinPoolResponse({
-      shareOutAmount: this.shareOutAmount,
+      shareOutAmount: Stringify(this.shareOutAmount),
       tokenIn: this.tokenIn.map((coin) => new CosmosCoin(coin).convert(Stringify))
     });
   }
@@ -285,7 +285,7 @@ export class MsgJoinPoolResponse<T extends NumberType> extends BaseNumberTypeCla
 
   static fromProto<U extends NumberType>(item: protogamm.MsgJoinPoolResponse, convertFunction: (item: NumberType) => U): MsgJoinPoolResponse<U> {
     return new MsgJoinPoolResponse<U>({
-      shareOutAmount: item.shareOutAmount,
+      shareOutAmount: convertFunction(BigInt(item.shareOutAmount)),
       tokenIn: item.tokenIn.map((coin) =>
         new CosmosCoin<U>({
           amount: convertFunction(BigInt(coin.amount)),
@@ -315,7 +315,7 @@ export class MsgJoinPoolResponse<T extends NumberType> extends BaseNumberTypeCla
 export class MsgExitPool<T extends NumberType> extends BaseNumberTypeClass<MsgExitPool<T>> implements iMsgExitPool<T> {
   sender: string;
   poolId: T;
-  shareInAmount: string;
+  shareInAmount: T;
   tokenOutMins: CosmosCoin<T>[];
 
   constructor(data: iMsgExitPool<T>) {
@@ -327,7 +327,7 @@ export class MsgExitPool<T extends NumberType> extends BaseNumberTypeClass<MsgEx
   }
 
   getNumberFieldNames(): string[] {
-    return ['poolId'];
+    return ['poolId', 'shareInAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgExitPool<U> {
@@ -338,7 +338,7 @@ export class MsgExitPool<T extends NumberType> extends BaseNumberTypeClass<MsgEx
     return new protogamm.MsgExitPool({
       sender: this.sender,
       poolId: BigIntify(this.poolId),
-      shareInAmount: this.shareInAmount,
+      shareInAmount: Stringify(this.shareInAmount),
       tokenOutMins: this.tokenOutMins.map((coin) => new CosmosCoin(coin).convert(Stringify))
     });
   }
@@ -363,7 +363,7 @@ export class MsgExitPool<T extends NumberType> extends BaseNumberTypeClass<MsgEx
     return new MsgExitPool<U>({
       sender: item.sender,
       poolId: convertFunction(BigInt(item.poolId)),
-      shareInAmount: item.shareInAmount,
+      shareInAmount: convertFunction(BigInt(item.shareInAmount)),
       tokenOutMins: item.tokenOutMins.map((coin) =>
         new CosmosCoin<U>({
           amount: convertFunction(BigInt(coin.amount)),
@@ -461,7 +461,7 @@ export class MsgSwapExactAmountIn<T extends NumberType> extends BaseNumberTypeCl
   sender: string;
   routes: SwapAmountInRoute<T>[];
   tokenIn: CosmosCoin<T>;
-  tokenOutMinAmount: string;
+  tokenOutMinAmount: T;
 
   constructor(data: iMsgSwapExactAmountIn<T>) {
     super();
@@ -472,7 +472,7 @@ export class MsgSwapExactAmountIn<T extends NumberType> extends BaseNumberTypeCl
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['tokenOutMinAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgSwapExactAmountIn<U> {
@@ -484,7 +484,7 @@ export class MsgSwapExactAmountIn<T extends NumberType> extends BaseNumberTypeCl
       sender: this.sender,
       routes: this.routes.map((route) => new SwapAmountInRoute(route).toProto()),
       tokenIn: new CosmosCoin(this.tokenIn).convert(Stringify),
-      tokenOutMinAmount: this.tokenOutMinAmount
+      tokenOutMinAmount: Stringify(this.tokenOutMinAmount)
     });
   }
 
@@ -512,7 +512,7 @@ export class MsgSwapExactAmountIn<T extends NumberType> extends BaseNumberTypeCl
         amount: convertFunction(BigInt(item.tokenIn!.amount)),
         denom: item.tokenIn!.denom
       }).convert(convertFunction),
-      tokenOutMinAmount: item.tokenOutMinAmount
+      tokenOutMinAmount: convertFunction(BigInt(item.tokenOutMinAmount))
     });
   }
 
@@ -539,7 +539,7 @@ export class MsgSwapExactAmountInResponse<T extends NumberType>
   extends BaseNumberTypeClass<MsgSwapExactAmountInResponse<T>>
   implements iMsgSwapExactAmountInResponse<T>
 {
-  tokenOutAmount: string;
+  tokenOutAmount: T;
 
   constructor(data: iMsgSwapExactAmountInResponse<T>) {
     super();
@@ -547,7 +547,7 @@ export class MsgSwapExactAmountInResponse<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['tokenOutAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgSwapExactAmountInResponse<U> {
@@ -556,7 +556,7 @@ export class MsgSwapExactAmountInResponse<T extends NumberType>
 
   toProto(): protogamm.MsgSwapExactAmountInResponse {
     return new protogamm.MsgSwapExactAmountInResponse({
-      tokenOutAmount: this.tokenOutAmount
+      tokenOutAmount: Stringify(this.tokenOutAmount)
     });
   }
 
@@ -581,7 +581,7 @@ export class MsgSwapExactAmountInResponse<T extends NumberType>
     convertFunction: (item: NumberType) => U
   ): MsgSwapExactAmountInResponse<U> {
     return new MsgSwapExactAmountInResponse<U>({
-      tokenOutAmount: item.tokenOutAmount
+      tokenOutAmount: convertFunction(BigInt(item.tokenOutAmount))
     });
   }
 
@@ -604,7 +604,7 @@ export class MsgSwapExactAmountInResponse<T extends NumberType>
 export class MsgSwapExactAmountOut<T extends NumberType> extends BaseNumberTypeClass<MsgSwapExactAmountOut<T>> implements iMsgSwapExactAmountOut<T> {
   sender: string;
   routes: SwapAmountOutRoute<T>[];
-  tokenInMaxAmount: string;
+  tokenInMaxAmount: T;
   tokenOut: CosmosCoin<T>;
 
   constructor(data: iMsgSwapExactAmountOut<T>) {
@@ -616,7 +616,7 @@ export class MsgSwapExactAmountOut<T extends NumberType> extends BaseNumberTypeC
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['tokenInMaxAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgSwapExactAmountOut<U> {
@@ -627,7 +627,7 @@ export class MsgSwapExactAmountOut<T extends NumberType> extends BaseNumberTypeC
     return new protogamm.MsgSwapExactAmountOut({
       sender: this.sender,
       routes: this.routes.map((route) => new SwapAmountOutRoute(route).toProto()),
-      tokenInMaxAmount: this.tokenInMaxAmount,
+      tokenInMaxAmount: Stringify(this.tokenInMaxAmount),
       tokenOut: new CosmosCoin(this.tokenOut).convert(Stringify)
     });
   }
@@ -652,7 +652,7 @@ export class MsgSwapExactAmountOut<T extends NumberType> extends BaseNumberTypeC
     return new MsgSwapExactAmountOut<U>({
       sender: item.sender,
       routes: item.routes.map((route) => SwapAmountOutRoute.fromProto(route, convertFunction)),
-      tokenInMaxAmount: item.tokenInMaxAmount,
+      tokenInMaxAmount: convertFunction(BigInt(item.tokenInMaxAmount)),
       tokenOut: new CosmosCoin<U>({
         amount: convertFunction(BigInt(item.tokenOut!.amount)),
         denom: item.tokenOut!.denom
@@ -683,7 +683,7 @@ export class MsgSwapExactAmountOutResponse<T extends NumberType>
   extends BaseNumberTypeClass<MsgSwapExactAmountOutResponse<T>>
   implements iMsgSwapExactAmountOutResponse<T>
 {
-  tokenInAmount: string;
+  tokenInAmount: T;
 
   constructor(data: iMsgSwapExactAmountOutResponse<T>) {
     super();
@@ -691,7 +691,7 @@ export class MsgSwapExactAmountOutResponse<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['tokenInAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgSwapExactAmountOutResponse<U> {
@@ -700,7 +700,7 @@ export class MsgSwapExactAmountOutResponse<T extends NumberType>
 
   toProto(): protogamm.MsgSwapExactAmountOutResponse {
     return new protogamm.MsgSwapExactAmountOutResponse({
-      tokenInAmount: this.tokenInAmount
+      tokenInAmount: Stringify(this.tokenInAmount)
     });
   }
 
@@ -725,7 +725,7 @@ export class MsgSwapExactAmountOutResponse<T extends NumberType>
     convertFunction: (item: NumberType) => U
   ): MsgSwapExactAmountOutResponse<U> {
     return new MsgSwapExactAmountOutResponse<U>({
-      tokenInAmount: item.tokenInAmount
+      tokenInAmount: convertFunction(BigInt(item.tokenInAmount))
     });
   }
 
@@ -752,7 +752,7 @@ export class MsgJoinSwapExternAmountIn<T extends NumberType>
   sender: string;
   poolId: T;
   tokenIn: CosmosCoin<T>;
-  shareOutMinAmount: string;
+  shareOutMinAmount: T;
 
   constructor(data: iMsgJoinSwapExternAmountIn<T>) {
     super();
@@ -763,7 +763,7 @@ export class MsgJoinSwapExternAmountIn<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return ['poolId'];
+    return ['poolId', 'shareOutMinAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgJoinSwapExternAmountIn<U> {
@@ -775,7 +775,7 @@ export class MsgJoinSwapExternAmountIn<T extends NumberType>
       sender: this.sender,
       poolId: BigIntify(this.poolId),
       tokenIn: new CosmosCoin(this.tokenIn).convert(Stringify),
-      shareOutMinAmount: this.shareOutMinAmount
+      shareOutMinAmount: Stringify(this.shareOutMinAmount)
     });
   }
 
@@ -806,7 +806,7 @@ export class MsgJoinSwapExternAmountIn<T extends NumberType>
         amount: convertFunction(BigInt(item.tokenIn!.amount)),
         denom: item.tokenIn!.denom
       }).convert(convertFunction),
-      shareOutMinAmount: item.shareOutMinAmount
+      shareOutMinAmount: convertFunction(BigInt(item.shareOutMinAmount))
     });
   }
 
@@ -833,7 +833,7 @@ export class MsgJoinSwapExternAmountInResponse<T extends NumberType>
   extends BaseNumberTypeClass<MsgJoinSwapExternAmountInResponse<T>>
   implements iMsgJoinSwapExternAmountInResponse<T>
 {
-  shareOutAmount: string;
+  shareOutAmount: T;
 
   constructor(data: iMsgJoinSwapExternAmountInResponse<T>) {
     super();
@@ -841,7 +841,7 @@ export class MsgJoinSwapExternAmountInResponse<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['shareOutAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgJoinSwapExternAmountInResponse<U> {
@@ -850,7 +850,7 @@ export class MsgJoinSwapExternAmountInResponse<T extends NumberType>
 
   toProto(): protogamm.MsgJoinSwapExternAmountInResponse {
     return new protogamm.MsgJoinSwapExternAmountInResponse({
-      shareOutAmount: this.shareOutAmount
+      shareOutAmount: Stringify(this.shareOutAmount)
     });
   }
 
@@ -878,7 +878,7 @@ export class MsgJoinSwapExternAmountInResponse<T extends NumberType>
     convertFunction: (item: NumberType) => U
   ): MsgJoinSwapExternAmountInResponse<U> {
     return new MsgJoinSwapExternAmountInResponse<U>({
-      shareOutAmount: item.shareOutAmount
+      shareOutAmount: convertFunction(BigInt(item.shareOutAmount))
     });
   }
 
@@ -905,8 +905,8 @@ export class MsgJoinSwapShareAmountOut<T extends NumberType>
   sender: string;
   poolId: T;
   tokenInDenom: string;
-  shareOutAmount: string;
-  tokenInMaxAmount: string;
+  shareOutAmount: T;
+  tokenInMaxAmount: T;
 
   constructor(data: iMsgJoinSwapShareAmountOut<T>) {
     super();
@@ -918,7 +918,7 @@ export class MsgJoinSwapShareAmountOut<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return ['poolId'];
+    return ['poolId', 'shareOutAmount', 'tokenInMaxAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgJoinSwapShareAmountOut<U> {
@@ -930,8 +930,8 @@ export class MsgJoinSwapShareAmountOut<T extends NumberType>
       sender: this.sender,
       poolId: BigIntify(this.poolId),
       tokenInDenom: this.tokenInDenom,
-      shareOutAmount: this.shareOutAmount,
-      tokenInMaxAmount: this.tokenInMaxAmount
+      shareOutAmount: Stringify(this.shareOutAmount),
+      tokenInMaxAmount: Stringify(this.tokenInMaxAmount)
     });
   }
 
@@ -959,8 +959,8 @@ export class MsgJoinSwapShareAmountOut<T extends NumberType>
       sender: item.sender,
       poolId: convertFunction(BigInt(item.poolId)),
       tokenInDenom: item.tokenInDenom,
-      shareOutAmount: item.shareOutAmount,
-      tokenInMaxAmount: item.tokenInMaxAmount
+      shareOutAmount: convertFunction(BigInt(item.shareOutAmount)),
+      tokenInMaxAmount: convertFunction(BigInt(item.tokenInMaxAmount))
     });
   }
 
@@ -988,7 +988,7 @@ export class MsgJoinSwapShareAmountOutResponse<T extends NumberType>
   extends BaseNumberTypeClass<MsgJoinSwapShareAmountOutResponse<T>>
   implements iMsgJoinSwapShareAmountOutResponse<T>
 {
-  tokenInAmount: string;
+  tokenInAmount: T;
 
   constructor(data: iMsgJoinSwapShareAmountOutResponse<T>) {
     super();
@@ -996,7 +996,7 @@ export class MsgJoinSwapShareAmountOutResponse<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['tokenInAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgJoinSwapShareAmountOutResponse<U> {
@@ -1005,7 +1005,7 @@ export class MsgJoinSwapShareAmountOutResponse<T extends NumberType>
 
   toProto(): protogamm.MsgJoinSwapShareAmountOutResponse {
     return new protogamm.MsgJoinSwapShareAmountOutResponse({
-      tokenInAmount: this.tokenInAmount
+      tokenInAmount: Stringify(this.tokenInAmount)
     });
   }
 
@@ -1033,7 +1033,7 @@ export class MsgJoinSwapShareAmountOutResponse<T extends NumberType>
     convertFunction: (item: NumberType) => U
   ): MsgJoinSwapShareAmountOutResponse<U> {
     return new MsgJoinSwapShareAmountOutResponse<U>({
-      tokenInAmount: item.tokenInAmount
+      tokenInAmount: convertFunction(BigInt(item.tokenInAmount))
     });
   }
 
@@ -1060,8 +1060,8 @@ export class MsgExitSwapShareAmountIn<T extends NumberType>
   sender: string;
   poolId: T;
   tokenOutDenom: string;
-  shareInAmount: string;
-  tokenOutMinAmount: string;
+  shareInAmount: T;
+  tokenOutMinAmount: T;
 
   constructor(data: iMsgExitSwapShareAmountIn<T>) {
     super();
@@ -1073,7 +1073,7 @@ export class MsgExitSwapShareAmountIn<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return ['poolId'];
+    return ['poolId', 'shareInAmount', 'tokenOutMinAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgExitSwapShareAmountIn<U> {
@@ -1085,8 +1085,8 @@ export class MsgExitSwapShareAmountIn<T extends NumberType>
       sender: this.sender,
       poolId: BigIntify(this.poolId),
       tokenOutDenom: this.tokenOutDenom,
-      shareInAmount: this.shareInAmount,
-      tokenOutMinAmount: this.tokenOutMinAmount
+      shareInAmount: Stringify(this.shareInAmount),
+      tokenOutMinAmount: Stringify(this.tokenOutMinAmount)
     });
   }
 
@@ -1114,8 +1114,8 @@ export class MsgExitSwapShareAmountIn<T extends NumberType>
       sender: item.sender,
       poolId: convertFunction(BigInt(item.poolId)),
       tokenOutDenom: item.tokenOutDenom,
-      shareInAmount: item.shareInAmount,
-      tokenOutMinAmount: item.tokenOutMinAmount
+      shareInAmount: convertFunction(BigInt(item.shareInAmount)),
+      tokenOutMinAmount: convertFunction(BigInt(item.tokenOutMinAmount))
     });
   }
 
@@ -1143,7 +1143,7 @@ export class MsgExitSwapShareAmountInResponse<T extends NumberType>
   extends BaseNumberTypeClass<MsgExitSwapShareAmountInResponse<T>>
   implements iMsgExitSwapShareAmountInResponse<T>
 {
-  tokenOutAmount: string;
+  tokenOutAmount: T;
 
   constructor(data: iMsgExitSwapShareAmountInResponse<T>) {
     super();
@@ -1151,7 +1151,7 @@ export class MsgExitSwapShareAmountInResponse<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['tokenOutAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgExitSwapShareAmountInResponse<U> {
@@ -1160,7 +1160,7 @@ export class MsgExitSwapShareAmountInResponse<T extends NumberType>
 
   toProto(): protogamm.MsgExitSwapShareAmountInResponse {
     return new protogamm.MsgExitSwapShareAmountInResponse({
-      tokenOutAmount: this.tokenOutAmount
+      tokenOutAmount: Stringify(this.tokenOutAmount)
     });
   }
 
@@ -1188,7 +1188,7 @@ export class MsgExitSwapShareAmountInResponse<T extends NumberType>
     convertFunction: (item: NumberType) => U
   ): MsgExitSwapShareAmountInResponse<U> {
     return new MsgExitSwapShareAmountInResponse<U>({
-      tokenOutAmount: item.tokenOutAmount
+      tokenOutAmount: convertFunction(BigInt(item.tokenOutAmount))
     });
   }
 
@@ -1215,7 +1215,7 @@ export class MsgExitSwapExternAmountOut<T extends NumberType>
   sender: string;
   poolId: T;
   tokenOut: CosmosCoin<T>;
-  shareInMaxAmount: string;
+  shareInMaxAmount: T;
 
   constructor(data: iMsgExitSwapExternAmountOut<T>) {
     super();
@@ -1226,7 +1226,7 @@ export class MsgExitSwapExternAmountOut<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return ['poolId'];
+    return ['poolId', 'shareInMaxAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgExitSwapExternAmountOut<U> {
@@ -1238,7 +1238,7 @@ export class MsgExitSwapExternAmountOut<T extends NumberType>
       sender: this.sender,
       poolId: BigIntify(this.poolId),
       tokenOut: new CosmosCoin(this.tokenOut).convert(Stringify),
-      shareInMaxAmount: this.shareInMaxAmount
+      shareInMaxAmount: Stringify(this.shareInMaxAmount)
     });
   }
 
@@ -1269,7 +1269,7 @@ export class MsgExitSwapExternAmountOut<T extends NumberType>
         amount: convertFunction(BigInt(item.tokenOut!.amount)),
         denom: item.tokenOut!.denom
       }).convert(convertFunction),
-      shareInMaxAmount: item.shareInMaxAmount
+      shareInMaxAmount: convertFunction(BigInt(item.shareInMaxAmount))
     });
   }
 
@@ -1296,7 +1296,7 @@ export class MsgExitSwapExternAmountOutResponse<T extends NumberType>
   extends BaseNumberTypeClass<MsgExitSwapExternAmountOutResponse<T>>
   implements iMsgExitSwapExternAmountOutResponse<T>
 {
-  shareInAmount: string;
+  shareInAmount: T;
 
   constructor(data: iMsgExitSwapExternAmountOutResponse<T>) {
     super();
@@ -1304,7 +1304,7 @@ export class MsgExitSwapExternAmountOutResponse<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['shareInAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgExitSwapExternAmountOutResponse<U> {
@@ -1313,7 +1313,7 @@ export class MsgExitSwapExternAmountOutResponse<T extends NumberType>
 
   toProto(): protogamm.MsgExitSwapExternAmountOutResponse {
     return new protogamm.MsgExitSwapExternAmountOutResponse({
-      shareInAmount: this.shareInAmount
+      shareInAmount: Stringify(this.shareInAmount)
     });
   }
 
@@ -1341,7 +1341,7 @@ export class MsgExitSwapExternAmountOutResponse<T extends NumberType>
     convertFunction: (item: NumberType) => U
   ): MsgExitSwapExternAmountOutResponse<U> {
     return new MsgExitSwapExternAmountOutResponse<U>({
-      shareInAmount: item.shareInAmount
+      shareInAmount: convertFunction(BigInt(item.shareInAmount))
     });
   }
 

@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.0]
+
+### Version Compatibility
+
+- **BitBadges Chain v14**: 0.20.0 corresponds to BitBadges chain v14 upgrades
+
+### What's New
+
+- See [BitBadges Chain v14 release information](https://github.com/BitBadges/bitbadgeschain/releases/tag/v14) for more details.
+
+### Installation
+
+```bash
+npm install bitbadgesjs-sdk@^0.20.0
+```
+
 ## [0.19.0]
 
 ### Version Compatibility

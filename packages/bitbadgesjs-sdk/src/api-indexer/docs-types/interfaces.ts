@@ -544,8 +544,6 @@ export interface iCosmosCoinWrapperPath<T extends NumberType> {
  */
 export interface iPoolInfo<T extends NumberType> {
   poolId: string;
-  collectionId: string;
-  denom: string;
   address: string;
   allAssetDenoms: string[];
   poolParams?: {
@@ -561,14 +559,17 @@ export interface iPoolInfo<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iAssetPairInfo<T extends NumberType> {
-  asset1Denom: string;
-  asset2Denom: string;
-  price: T;
+export interface iAssetInfoDoc<T extends NumberType> extends Doc {
+  _docId: string;
+  _id?: string;
+  asset: string;
+  price: number;
   lastUpdated: T;
-  totalLiquidity: iCosmosCoin<T>[];
-  poolIds: string[];
-  volume24h: T;
+  totalLiquidity: iCosmosCoin<bigint>[];
+  volume24h: number;
+  volume7d: number;
+  percentageChange24h: number;
+  percentageChange7d: number;
 }
 
 /**
@@ -582,7 +583,7 @@ export interface iCosmosCoinWrapperPathWithDetails<T extends NumberType> extends
   /** Pool Infos */
   poolInfos?: iPoolInfo<T>[];
   /** Asset Pair Infos */
-  assetPairInfos?: iAssetPairInfo<T>[];
+  assetPairInfos?: iAssetInfoDoc<T>[];
 }
 
 /**
