@@ -560,8 +560,6 @@ export interface iPoolInfo<T extends NumberType> {
  * @category Interfaces
  */
 export interface iAssetInfoDoc<T extends NumberType> extends Doc {
-  _docId: string;
-  _id?: string;
   asset: string;
   price: number;
   lastUpdated: T;
