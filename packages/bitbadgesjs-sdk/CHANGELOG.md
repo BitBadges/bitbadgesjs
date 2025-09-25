@@ -8,10 +8,12 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Version Compatibility
 
 - **BitBadges Chain v14**: 0.20.0 corresponds to BitBadges chain v14 upgrades
+- **BitBadges Chain v15**: 0.20.0 corresponds to BitBadges chain v15 upgrades
 
 ### What's New
 
 - See [BitBadges Chain v14 release information](https://github.com/BitBadges/bitbadgeschain/releases/tag/v14) for more details.
+- See [BitBadges Chain v15 release information](https://github.com/BitBadges/bitbadgeschain/releases/tag/v15) for more details.
 
 ### Installation
 

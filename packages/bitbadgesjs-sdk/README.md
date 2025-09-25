@@ -20,6 +20,7 @@ This SDK is designed to be compatible with specific BitBadges chain versions. Us
 | v12                     | 0.18.x            | ✅ Current |
 | v13                     | 0.19.x            | ✅ Current |
 | v14                     | 0.20.x            | ✅ Current |
+| v15                     | 0.20.x            | ✅ Current |
 
 **Recommendation:** Always use the latest patch version within your compatible major.minor version range. For example, if you're using BitBadges v12, use the latest `0.18.x` version.
 
@@ -28,11 +29,11 @@ This SDK is designed to be compatible with specific BitBadges chain versions. Us
 ### Installation
 
 ```bash
-# For BitBadges v13
+# For specific version
 npm install bitbadgesjs-sdk@^0.19.0
 
-# For BitBadges v14 (current)
-npm install bitbadgesjs-sdk@^0.20.0
+# For latest version
+npm install bitbadgesjs-sdk
 ```
 
 This library provides miscellaneous functionality to help you interact with BitBadges, such as types, API routes, managing metadata requests, logic with ID ranges and balances, etc.
