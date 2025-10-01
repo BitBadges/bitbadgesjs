@@ -53,8 +53,7 @@
     "format-ci": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc-ci.json",
     "prepare": "ts-patch install && typia patch",
     "dep-check": "madge --circular ./src/index.ts --warning --ts-config ./tsconfig.json --exclude 'api-indexer/docs-types/interfaces.ts|interfaces/badges/*|interfaces/types/*'",
-    "publish-w-docs": "bash ./scripts/check_and_publish.sh",
-    "generate-type-map": "./scripts/generate-type-map.sh"
+    "publish-w-docs": "bash ./scripts/check_and_publish.sh"
   },
   "devDependencies": {
     "@babel/core": "^7.24.8",
@@ -97,7 +96,6 @@
     "tsconfig-paths": "^3.11.0",
     "tsoa": "^6.1.5",
     "tsup": "^8.1.0",
-    "typedoc": "^0.27.9",
     "typescript": "~5.8.2"
   },
   "dependencies": {
