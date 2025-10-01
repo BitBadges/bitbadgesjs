@@ -220,7 +220,7 @@ export class GetStatusSuccessResponse<T extends NumberType>
   status: StatusDoc<T>;
   outOfSync?: boolean;
   prices?: Record<string, number>;
-  
+
   constructor(data: iGetStatusSuccessResponse<T>) {
     super();
     this.status = new StatusDoc(data.status);
@@ -1018,112 +1018,6 @@ export class UpdateAccountInfoSuccessResponse extends CustomTypeClass<UpdateAcco
     this.verificationEmailSent = data.verificationEmailSent;
   }
 }
-
-/**
- * @category API Requests / Responses
- */
-export interface iAddBalancesToOffChainStoragePayload {
-  /**
-   * A map of BitBadges addresses or list IDs -> Balance<NumberType>[].
-   * This will be set first. If undefined, we leave the existing balances map as is.
-   * For genesis, this must be set (even if empty {}), so we create the unique URL.
-   *
-   * If defined, this will overwrite for the entire collection. You must provide ALL balances for the collection.
-   */
-  balances?: iOffChainBalancesMap<NumberType>;
-
-  /**
-   * The new set of claims for the collection. This should be ALL claims. We currently do not support fine-grained claim updates.
-   *
-   * If undefined, we leave the existing claims as is. If defined, we set the new claims to what is provided.
-   *
-   * If a claim has existing state, you can reset the individual plugin's state
-   * with plugin.resetState = true. Or, claims with new, unique IDs have blank state for all plugins.
-   *
-   * We soft delete any claims that are no longer in the claims array. By soft delete, we mean that we will flag it as deleted,
-   * but if you want to reinstate it, you can do so by adding it back with the same claim ID.
-   */
-  claims?: {
-    claimId: string;
-    plugins: IntegrationPluginDetailsUpdate<ClaimIntegrationPluginType>[];
-    rewards?: iClaimReward<NumberType>[];
-    estimatedCost?: string;
-    estimatedTime?: string;
-    showInSearchResults?: boolean;
-    categories?: string[];
-    balancesToSet?: iPredeterminedBalances<NumberType>;
-    approach?: string;
-  }[];
-
-  /**
-   * The method for storing balances (ipfs or centralized).
-   */
-  method: 'ipfs' | 'centralized';
-
-  /**
-   * The collection ID.
-   */
-  collectionId: CollectionId;
-
-  /**
-   * Whether this is for a non-indexed collection. Bypasses some validation.
-   */
-  isNonIndexed?: boolean;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iAddBalancesToOffChainStorageSuccessResponse {
-  /**
-   * The URI of the stored data.
-   */
-  uri?: string;
-}
-
-/**
- * @inheritDoc iAddBalancesToOffChainStorageSuccessResponse
- * @category API Requests / Responses
- */
-export class AddBalancesToOffChainStorageSuccessResponse
-  extends CustomTypeClass<AddBalancesToOffChainStorageSuccessResponse>
-  implements iAddBalancesToOffChainStorageSuccessResponse
-{
-  uri?: string;
-
-  constructor(data: iAddBalancesToOffChainStorageSuccessResponse) {
-    super();
-    this.uri = data.uri;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iUploadBalancesPayload {
-  /**
-   * A JSON map of BitBadges addresses or list IDs -> iBalance<NumberType>[].
-   * This will overwrite ALL balances for the collection.
-   *
-   * IMPORTANT: Ensure the keys are BitBadges converted addresses, not native addresses.
-   */
-  balances: iOffChainBalancesMap<NumberType>;
-
-  /**
-   * The collection ID to update balances for.
-   */
-  collectionId: CollectionId;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iUploadBalancesSuccessResponse {}
-
-/**
- * @category API Requests / Responses
- */
-export class UploadBalancesSuccessResponse extends EmptyResponseClass {}
 
 /**
  * @category API Requests / Responses
@@ -2431,65 +2325,6 @@ export interface iDeleteSIWBBRequestSuccessResponse {}
  * @category API Requests / Responses
  */
 export class DeleteSIWBBRequestSuccessResponse extends EmptyResponseClass {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGenerateAppleWalletPassPayload {
-  /** The authentication code. */
-  code: string;
-}
-/**
- * @category API Requests / Responses
- */
-export interface iGenerateAppleWalletPassSuccessResponse {
-  type: string;
-  data: string;
-}
-/**
- * @category API Requests / Responses
- */
-export class GenerateAppleWalletPassSuccessResponse
-  extends CustomTypeClass<GenerateAppleWalletPassSuccessResponse>
-  implements iGenerateAppleWalletPassSuccessResponse
-{
-  type: string;
-  data: string;
-
-  constructor(data: iGenerateAppleWalletPassSuccessResponse) {
-    super();
-    this.type = data.type;
-    this.data = data.data;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGenerateGoogleWalletPayload {
-  /** The authentication code. */
-  code: string;
-}
-/**
- * @category API Requests / Responses
- */
-export interface iGenerateGoogleWalletSuccessResponse {
-  saveUrl: string;
-}
-/**
- * @category API Requests / Responses
- */
-export class GenerateGoogleWalletSuccessResponse
-  extends CustomTypeClass<GenerateGoogleWalletSuccessResponse>
-  implements iGenerateGoogleWalletSuccessResponse
-{
-  saveUrl: string;
-
-  constructor(data: iGenerateGoogleWalletSuccessResponse) {
-    super();
-    this.saveUrl = data.saveUrl;
-  }
-}
 
 /**
  * @category API Requests / Responses

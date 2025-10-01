@@ -57,7 +57,6 @@ import {
 } from './requests/maps.js';
 import {
   AddApprovalDetailsToOffChainStorageSuccessResponse,
-  AddBalancesToOffChainStorageSuccessResponse,
   AddToIpfsSuccessResponse,
   BatchStoreActionSuccessResponse,
   BroadcastTxSuccessResponse,
@@ -84,8 +83,6 @@ import {
   DeleteUtilityPageSuccessResponse,
   ExchangeSIWBBAuthorizationCodeSuccessResponse,
   FetchMetadataDirectlySuccessResponse,
-  GenerateAppleWalletPassSuccessResponse,
-  GenerateGoogleWalletSuccessResponse,
   GenericBlockinVerifySuccessResponse,
   GenericVerifyAssetsSuccessResponse,
   GetActiveAuthorizationsSuccessResponse,
@@ -144,12 +141,9 @@ import {
   UpdateDynamicDataStoreSuccessResponse,
   UpdatePluginSuccessResponse,
   UpdateUtilityPageSuccessResponse,
-  UploadBalancesSuccessResponse,
   VerifySignInSuccessResponse,
   iAddApprovalDetailsToOffChainStoragePayload,
   iAddApprovalDetailsToOffChainStorageSuccessResponse,
-  iAddBalancesToOffChainStoragePayload,
-  iAddBalancesToOffChainStorageSuccessResponse,
   iAddToIpfsPayload,
   iAddToIpfsSuccessResponse,
   iBroadcastTxPayload,
@@ -184,8 +178,6 @@ import {
   iExchangeSIWBBAuthorizationCodeSuccessResponse,
   iFetchMetadataDirectlyPayload,
   iFetchMetadataDirectlySuccessResponse,
-  iGenerateAppleWalletPassPayload,
-  iGenerateGoogleWalletPayload,
   iGenericBlockinVerifyPayload,
   iGenericBlockinVerifySuccessResponse,
   iGenericVerifyAssetsPayload,
@@ -264,7 +256,6 @@ import {
   iUpdateDynamicDataStoreSuccessResponse,
   iUpdatePluginPayload,
   iUpdateUtilityPagePayload,
-  iUploadBalancesPayload,
   iVerifySignInPayload,
   iVerifySignInSuccessResponse
 } from './requests/requests.js';
@@ -2685,84 +2676,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Generates an Google wallet pass for a code. Returns a saveUrl to be opened.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/siwbbRequest/googleWalletPass`
-   * - **SDK Function Call**: `await BitBadgesApi.generateGoogleWallet(payload);`
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.generateGoogleWallet(payload);
-   * console.log(res);
-   * ```
-   */
-  public async generateGoogleWallet(payload: iGenerateGoogleWalletPayload): Promise<GenerateGoogleWalletSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iGenerateGoogleWalletPayload> = typia.validate<iGenerateGoogleWalletPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<GenerateGoogleWalletSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GenerateGoogleWalletPassRoute()}`,
-        payload
-      );
-      return new GenerateGoogleWalletSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Generates an Apple wallet pass for a code.
-   *
-   * Returns application/vnd.apple.pkpass content type.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/siwbbRequest/appleWalletPass`
-   * - **SDK Function Call**: `await BitBadgesApi.generateAppleWalletPass(payload);`
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.generateAppleWalletPass(payload);
-   * console.log(res);
-   * ```
-   *
-   * @example
-   * ```typescript
-   * const pass = Buffer.from(res.data);
-   *
-   * const blob = new Blob([pass], { type: 'application/vnd.apple.pkpass' });
-   * const url = window.URL.createObjectURL(blob);
-   * if (url) {
-   *    const link = document.createElement('a');
-   *    link.href = url;
-   *    link.download = 'bitbadges.pkpass';
-   *    link.click()
-   * }
-   * ```
-   */
-  public async generateAppleWalletPass(payload: iGenerateAppleWalletPassPayload): Promise<GenerateAppleWalletPassSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iGenerateAppleWalletPassPayload> = typia.validate<iGenerateAppleWalletPassPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<GenerateAppleWalletPassSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GenerateAppleWalletPassRoute()}`,
-        payload
-      );
-      return new GenerateAppleWalletPassSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
    * A generic route for verifying asset ownership requirements. Asset requirements support AND / OR / NOT logic.
    *
    * @remarks
@@ -3056,26 +2969,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         { params: payload }
       );
       return new GetAttemptDataFromRequestBinSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Uploads balances for off-chain indexed balances managed by BitBadges.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/uploadBalances`
-   * - **SDK Function Call**: `await BitBadgesApi.uploadBalances(payload);`
-   */
-  public async uploadBalances(payload: iUploadBalancesPayload): Promise<UploadBalancesSuccessResponse> {
-    try {
-      const response = await this.axios.post<UploadBalancesSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.UploadBalancesRoute()}`,
-        payload
-      );
-      return new UploadBalancesSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -3515,40 +3408,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         `${this.BACKEND_URL}${BitBadgesApiRoutes.DeleteConnectedAccountRoute(accountId)}`
       );
       return new DeleteConnectedAccountSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Adds a balance map to off-chain storage. Mode can either be 'ipfs" for storing on IPFS or 'centralized' for storing on DigitalOcean.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/addBalancesToOffChainStorage`
-   * - **SDK Function Call**: `await BitBadgesApi.addBalancesToOffChainStorage(payload);`
-   * - **CORS**: Restricted to only BitBadges official site. Otherwise, you will need to self-host.
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.addBalancesToOffChainStorage(payload);
-   * console.log(res);
-   * ```
-   */
-  public async addBalancesToOffChainStorage(payload: iAddBalancesToOffChainStoragePayload): Promise<AddBalancesToOffChainStorageSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iAddBalancesToOffChainStoragePayload> = typia.validate<iAddBalancesToOffChainStoragePayload>(
-        payload ?? {}
-      );
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iAddBalancesToOffChainStorageSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.AddBalancesToOffChainStorageRoute()}`,
-        payload
-      );
-      return new AddBalancesToOffChainStorageSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

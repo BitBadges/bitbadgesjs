@@ -61,11 +61,9 @@ export class BitBadgesApiRoutes {
   static RotateApiKeyRoute = () => '/api/v0/apiKeys/rotate';
   static AddToIpfsRoute = () => '/api/v0/addToIpfs';
   static AddApprovalDetailsToOffChainStorageRoute = () => '/api/v0/addApprovalDetailsToOffChainStorage';
-  static AddBalancesToOffChainStorageRoute = () => '/api/v0/addBalancesToOffChainStorage';
 
   static GetAttemptDataFromRequestBinRoute = (claimId: string, claimAttemptId: string) =>
     `/api/v0/requestBin/attemptData/${claimId.toString()}/${claimAttemptId.toString()}`;
-  static UploadBalancesRoute = () => '/api/v0/uploadBalances';
 
   static GetSignInChallengeRoute = () => '/api/v0/auth/getChallenge';
   static VerifySignInRoute = () => '/api/v0/auth/verify';
@@ -85,9 +83,6 @@ export class BitBadgesApiRoutes {
   static CRUDSIWBBRequestRoute = () => '/api/v0/siwbbRequest';
   static RotateSIWBBRequestRoute = () => '/api/v0/siwbbRequest/rotate';
   static GenericVerifyRoute = () => '/api/v0/siwbbRequest/verify';
-
-  static GenerateAppleWalletPassRoute = () => '/api/v0/siwbbRequest/appleWalletPass';
-  static GenerateGoogleWalletPassRoute = () => '/api/v0/siwbbRequest/googleWalletPass';
 
   static GetDeveloperAppRoute = (developerAppId: string) => `/api/v0/developerApp/${developerAppId.toString()}`;
   static GetDeveloperAppsRoute = () => '/api/v0/developerApps/fetch';
