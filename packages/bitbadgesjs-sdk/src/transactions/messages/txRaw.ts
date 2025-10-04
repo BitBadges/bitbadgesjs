@@ -22,8 +22,8 @@ export function bytesToAuthInfo(bytes: Uint8Array) {
  */
 export function createTxRaw(bodyBytes: Uint8Array, authInfoBytes: Uint8Array, signatures: Uint8Array[]) {
   const message = new TxRaw({
-    bodyBytes,
-    authInfoBytes,
+    bodyBytes: bodyBytes as Uint8Array<ArrayBuffer>,
+    authInfoBytes: authInfoBytes as Uint8Array<ArrayBuffer>,
     signatures
   });
   return {

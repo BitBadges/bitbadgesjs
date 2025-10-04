@@ -97,7 +97,10 @@ export class PrecalculationOptions<T extends NumberType> extends BaseNumberTypeC
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PrecalculationOptions<U>;
   }
 
-  static fromProto<U extends NumberType>(proto: protobadges.PrecalculationOptions, convertFunction: (item: NumberType) => U): PrecalculationOptions<U> {
+  static fromProto<U extends NumberType>(
+    proto: protobadges.PrecalculationOptions,
+    convertFunction: (item: NumberType) => U
+  ): PrecalculationOptions<U> {
     return new PrecalculationOptions({
       overrideTimestamp: convertFunction(proto.overrideTimestamp),
       badgeIdsOverride: proto.badgeIdsOverride ? UintRangeArray.From(proto.badgeIdsOverride).convert(convertFunction) : undefined

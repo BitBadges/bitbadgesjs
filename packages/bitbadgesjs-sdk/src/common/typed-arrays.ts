@@ -152,7 +152,6 @@ export class BaseTypedArray<ArrayType extends ElementType[], ElementType> extend
     return super.flatMap(callback as any, thisArg) as U[];
   }
 
-
   /**
    * @hidden
    */

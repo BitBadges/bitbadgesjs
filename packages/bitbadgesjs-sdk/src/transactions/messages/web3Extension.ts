@@ -70,7 +70,7 @@ export function createWeb3ExtensionEthereum(chainId: number | bigint, feePayer: 
   const message = new web3.ExtensionOptionsWeb3Tx({
     typedDataChainId: BigInt(chainId),
     feePayer: feePayer,
-    feePayerSig: feePayerSig
+    feePayerSig: feePayerSig as Uint8Array<ArrayBuffer>
   });
   return {
     message,
@@ -92,7 +92,7 @@ export function createWeb3ExtensionSolana(chainId: number | bigint, feePayer: st
   const message = new web3Sol.ExtensionOptionsWeb3TxSolana({
     typedDataChainId: BigInt(chainId),
     feePayer: feePayer,
-    feePayerSig: feePayerSig,
+    feePayerSig: feePayerSig as Uint8Array<ArrayBuffer>,
     chain: 'Solana',
     solAddress: solanaAddress
   });
@@ -115,7 +115,7 @@ export function createWeb3ExtensionBitcoin(chainId: number | bigint, feePayer: s
   const message = new web3Btc.ExtensionOptionsWeb3TxBitcoin({
     typedDataChainId: BigInt(chainId),
     feePayer: feePayer,
-    feePayerSig: feePayerSig,
+    feePayerSig: feePayerSig as Uint8Array<ArrayBuffer>,
     chain: 'Bitcoin'
   });
   return {

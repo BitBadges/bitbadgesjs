@@ -1,7 +1,7 @@
 {
   "name": "bitbadgesjs-sdk",
   "description": "SDK for BitBadges development - Compatible with BitBadges v12 (SDK 0.18.x), v13 (SDK 0.19.x), and v14 (SDK 0.20.x)",
-  "version": "0.20.1",
+  "version": "0.20.2",
   "license": "MIT",
   "keywords": [
     "bitbadges",
@@ -37,7 +37,7 @@
   "sideEffects": false,
   "scripts": {
     "alias": "tsc-alias -p tsconfig.build.json && tsc-alias -p tsconfig-esm.build.json",
-    "build": "rm -rf dist && tsc --build tsconfig.build.json && tsc --build tsconfig-esm.build.json && npm run alias && npm run fixup && npm run dep-check",
+    "build": "rm -rf dist && tsc --build tsconfig.build.json && tsc --build tsconfig-esm.build.json && bun run alias && bun run fixup && bun run dep-check",
     "routes-check": "ts-node ./scripts/check_routes_consistency.ts ../../../bitbadges-indexer/src/indexer.ts  ./openapitypes-helpers/routes.yaml",
     "clean": "tsc --build tsconfig.build.json --clean  && shx rm -rf coverage *.log junit.xml dist && jest --clearCache",
     "fixup": "./scripts/fixup.sh",

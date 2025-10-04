@@ -68,21 +68,21 @@ export function createSignerInfo(algo: string, publicKey: Uint8Array, sequence: 
   if (algo === 'secp256k1') {
     pubkey = {
       message: new SECP256k1({
-        key: publicKey
+        key: publicKey as Uint8Array<ArrayBuffer>
       }),
       path: 'cosmos.crypto.secp256k1.PubKey'
     };
   } else if (algo === 'ed25519') {
     pubkey = {
       message: new PubKeySolana({
-        key: publicKey
+        key: publicKey as Uint8Array<ArrayBuffer>
       }),
       path: 'cosmos.crypto.ed25519.PubKey'
     };
   } else {
     pubkey = {
       message: new PubKey({
-        key: publicKey
+        key: publicKey as Uint8Array<ArrayBuffer>
       }),
       path: 'ethereum.PubKey'
     };
@@ -113,8 +113,8 @@ export function createAuthInfo(signerInfo: SignerInfo, fee: Fee) {
 
 export function createSignDoc(bodyBytes: Uint8Array, authInfoBytes: Uint8Array, chainId: string, accountNumber: number) {
   return new SignDoc({
-    bodyBytes,
-    authInfoBytes,
+    bodyBytes: bodyBytes as Uint8Array<ArrayBuffer>,
+    authInfoBytes: authInfoBytes as Uint8Array<ArrayBuffer>,
     chainId,
     accountNumber: BigInt(accountNumber)
   });
