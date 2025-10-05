@@ -38,8 +38,6 @@ export class LiquidityPoolInfoVolume<T extends NumberType>
 }
 
 export interface iLiquidityPoolInfoDoc<T extends NumberType> extends Doc {
-  _docId: string;
-  _id?: string;
   poolId: string;
   collectionId: string;
   address: string;
@@ -104,8 +102,6 @@ export class LiquidityPoolInfoDoc<T extends NumberType> extends BaseNumberTypeCl
 }
 
 export interface iAssetPriceHistoryDoc<T extends NumberType> extends Doc {
-  _docId: string;
-  _id?: string;
   asset: string;
   price: number;
   timestamp: T;
@@ -416,8 +412,6 @@ export interface iGetByDenomsSuccessResponse<T extends NumberType> {
 }
 
 export interface iWrappedCosmosAssetMetadataDoc<T extends NumberType> extends Doc {
-  _docId: string;
-  _id?: string;
   collectionId: string;
   baseDenom: string;
   symbol: string;
