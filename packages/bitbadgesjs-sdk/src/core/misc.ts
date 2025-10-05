@@ -1986,16 +1986,16 @@ export class PoolInfo<T extends NumberType> extends CustomTypeClass<PoolInfo<T>>
 }
 
 /**
- * @inheritDoc iAssetPairInfo
+ * @inheritDoc iAssetInfoDoc
  * @category Indexer
  */
-export class AssetPairInfo<T extends NumberType> extends CustomTypeClass<AssetPairInfo<T>> implements iAssetInfoDoc<T> {
+export class AssetInfoDoc<T extends NumberType> extends CustomTypeClass<AssetInfoDoc<T>> implements iAssetInfoDoc<T> {
   _docId: string;
   _id?: string;
   asset: string;
   price: number;
   lastUpdated: T;
-  totalLiquidity: iCosmosCoin<bigint>[];
+  totalLiquidity: iCosmosCoin<T>[];
   volume7d: number;
   percentageChange24h: number;
   percentageChange7d: number;
@@ -2019,8 +2019,8 @@ export class AssetPairInfo<T extends NumberType> extends CustomTypeClass<AssetPa
     return ['lastUpdated'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AssetPairInfo<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AssetPairInfo<U>;
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AssetInfoDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AssetInfoDoc<U>;
   }
 }
 
@@ -2032,7 +2032,7 @@ export class CosmosCoinWrapperPathWithDetails<T extends NumberType> extends Cosm
   metadata?: Metadata<T>;
   denomUnits: DenomUnitWithDetails<T>[];
   poolInfos?: PoolInfo<T>[] | undefined;
-  assetPairInfos?: AssetPairInfo<T>[] | undefined;
+  assetPairInfos?: AssetInfoDoc<T>[] | undefined;
 
   constructor(data: iCosmosCoinWrapperPathWithDetails<T>) {
     super(data);
@@ -2042,7 +2042,7 @@ export class CosmosCoinWrapperPathWithDetails<T extends NumberType> extends Cosm
       return new PoolInfo(poolInfo);
     });
     this.assetPairInfos = data.assetPairInfos?.map((assetPairInfo) => {
-      return new AssetPairInfo(assetPairInfo);
+      return new AssetInfoDoc(assetPairInfo);
     });
   }
 

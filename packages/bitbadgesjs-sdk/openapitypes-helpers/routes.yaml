@@ -237,6 +237,8 @@ tags:
   - name: Utility Pages
     description: Endpoints for managing utility pages
   - name: Miscellaneous
+  - name: Assets
+    description: Endpoints for asset pair operations, liquidity pools, and swap analytics
 paths:
   /user:
     get:
@@ -5401,6 +5403,417 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/iGetAttemptDataFromRequestBinSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/pools:
+    get:
+      operationId: getAllPools
+      summary: Get All Pools
+      description: |
+        Retrieves all available liquidity pools.
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAllPoolsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAllPoolsSuccessResponse)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/pools/byDenom:
+    get:
+      operationId: getPoolInfosByDenom
+      summary: Get Pool Infos by Denom
+      description: |
+        Retrieves pool information filtered by denomination.
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPoolInfosByDenomPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPoolInfosByDenomSuccessResponse)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/pools/byAssets:
+    get:
+      operationId: getPoolInfosByAssets
+      summary: Get Pool Infos by Assets
+      description: |
+        Retrieves pool information filtered by specific assets.
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPoolInfosByAssetsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPoolInfosByAssetsSuccessResponse)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/pools/{poolId}:
+    get:
+      operationId: getPoolInfoById
+      summary: Get Pool Info by ID
+      description: |
+        Retrieves detailed information for a specific pool by its ID.
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPoolInfoByIdPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPoolInfoByIdSuccessResponse)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: poolId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/swaps/estimate:
+    post:
+      operationId: estimateSwap
+      summary: Estimate Swap
+      description: |
+        Estimates the output amount for a swap operation.
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iEstimateSwapPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iEstimateSwapSuccessResponse)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/assetPairs:
+    get:
+      operationId: getAssetPairs
+      summary: Get Asset Pairs
+      description: |
+        Retrieves all available asset pairs.
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAssetPairsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAssetPairsSuccessResponse)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/assetPairs/topGainers:
+    get:
+      operationId: getTopGainers
+      summary: Get Top Gainers
+      description: |
+        Retrieves asset pairs with the highest price gains.
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTopGainersPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTopGainersSuccessResponse)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/assetPairs/topLosers:
+    get:
+      operationId: getTopLosers
+      summary: Get Top Losers
+      description: |
+        Retrieves asset pairs with the highest price losses.
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTopLosersPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTopLosersSuccessResponse)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/assetPairs/highestVolume:
+    get:
+      operationId: getHighestVolume
+      summary: Get Highest Volume
+      description: |
+        Retrieves asset pairs with the highest trading volume.
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetHighestVolumePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetHighestVolumeSuccessResponse)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/assetPairs/priceSorted:
+    get:
+      operationId: getByPrice
+      summary: Get by Price
+      description: |
+        Retrieves asset pairs sorted by price.
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetByPricePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetByPriceSuccessResponse)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/assetPairs/weeklyTopGainers:
+    get:
+      operationId: getWeeklyTopGainers
+      summary: Get Weekly Top Gainers
+      description: |
+        Retrieves asset pairs with the highest weekly price gains.
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetWeeklyTopGainersPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetWeeklyTopGainersSuccessResponse)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/assetPairs/weeklyTopLosers:
+    get:
+      operationId: getWeeklyTopLosers
+      summary: Get Weekly Top Losers
+      description: |
+        Retrieves asset pairs with the highest weekly price losses.
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetWeeklyTopLosersPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetWeeklyTopLosersSuccessResponse)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/assetPairs/search:
+    get:
+      operationId: searchAssetPairsByText
+      summary: Search Asset Pairs by Text
+      description: |
+        Searches asset pairs by text query.
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchAssetPairsByTextPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchAssetPairsByTextSuccessResponse)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/assetPairs/byDenoms:
+    post:
+      operationId: getByDenoms
+      summary: Get Asset Pairs by Denoms
+      description: |
+        Retrieves asset pairs filtered by specific denominations.
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetByDenomsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetByDenomsSuccessResponse)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
