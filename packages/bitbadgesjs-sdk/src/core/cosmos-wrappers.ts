@@ -322,6 +322,14 @@ export function collectionApprovalHasNoSideEffects(approvalCriteria?: iApprovalC
     return false;
   }
 
+  if (approvalCriteria.ethSignatureChallenges && approvalCriteria.ethSignatureChallenges.length > 0) {
+    return false;
+  }
+
+  if (approvalCriteria.dynamicStoreChallenges && approvalCriteria.dynamicStoreChallenges.length > 0) {
+    return false;
+  }
+
   // Check for max num transfers
   if (approvalCriteria.maxNumTransfers && !maxNumTransfersIsBasicallyNil(approvalCriteria.maxNumTransfers)) {
     return false;
