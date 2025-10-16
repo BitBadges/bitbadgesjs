@@ -97,3 +97,42 @@ export class MsgCreateBalancerPoolResponse extends Message<MsgCreateBalancerPool
   }
 }
 
+/**
+ * Used for WASM bindings and JSON parsing
+ *
+ * @generated from message gamm.poolmodels.balancer.BalancerCustomMsgType
+ */
+export class BalancerCustomMsgType extends Message<BalancerCustomMsgType> {
+  /**
+   * @generated from field: gamm.poolmodels.balancer.MsgCreateBalancerPool createBalancerPoolMsg = 1;
+   */
+  createBalancerPoolMsg?: MsgCreateBalancerPool;
+
+  constructor(data?: PartialMessage<BalancerCustomMsgType>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "gamm.poolmodels.balancer.BalancerCustomMsgType";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "createBalancerPoolMsg", kind: "message", T: MsgCreateBalancerPool },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BalancerCustomMsgType {
+    return new BalancerCustomMsgType().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BalancerCustomMsgType {
+    return new BalancerCustomMsgType().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BalancerCustomMsgType {
+    return new BalancerCustomMsgType().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: BalancerCustomMsgType | PlainMessage<BalancerCustomMsgType> | undefined, b: BalancerCustomMsgType | PlainMessage<BalancerCustomMsgType> | undefined): boolean {
+    return proto3.util.equals(BalancerCustomMsgType, a, b);
+  }
+}
+

@@ -51,58 +51,51 @@ export class CollectionPermissions extends Message<CollectionPermissions> {
   canArchiveCollection: TimedUpdatePermission[] = [];
 
   /**
-   * Permissions related to updating off-chain balances metadata.
-   *
-   * @generated from field: repeated badges.TimedUpdatePermission canUpdateOffChainBalancesMetadata = 3;
-   */
-  canUpdateOffChainBalancesMetadata: TimedUpdatePermission[] = [];
-
-  /**
    * Permissions related to updating standards for the collection.
    *
-   * @generated from field: repeated badges.TimedUpdatePermission canUpdateStandards = 4;
+   * @generated from field: repeated badges.TimedUpdatePermission canUpdateStandards = 3;
    */
   canUpdateStandards: TimedUpdatePermission[] = [];
 
   /**
    * Permissions related to updating custom data for the collection.
    *
-   * @generated from field: repeated badges.TimedUpdatePermission canUpdateCustomData = 5;
+   * @generated from field: repeated badges.TimedUpdatePermission canUpdateCustomData = 4;
    */
   canUpdateCustomData: TimedUpdatePermission[] = [];
 
   /**
    * Permissions related to updating the collection's manager.
    *
-   * @generated from field: repeated badges.TimedUpdatePermission canUpdateManager = 6;
+   * @generated from field: repeated badges.TimedUpdatePermission canUpdateManager = 5;
    */
   canUpdateManager: TimedUpdatePermission[] = [];
 
   /**
    * Permissions related to updating the metadata of the collection.
    *
-   * @generated from field: repeated badges.TimedUpdatePermission canUpdateCollectionMetadata = 7;
+   * @generated from field: repeated badges.TimedUpdatePermission canUpdateCollectionMetadata = 6;
    */
   canUpdateCollectionMetadata: TimedUpdatePermission[] = [];
 
   /**
    * Permissions related to creating more tokens for the collection.
    *
-   * @generated from field: repeated badges.BadgeIdsActionPermission canUpdateValidBadgeIds = 8;
+   * @generated from field: repeated badges.BadgeIdsActionPermission canUpdateValidBadgeIds = 7;
    */
   canUpdateValidBadgeIds: BadgeIdsActionPermission[] = [];
 
   /**
    * Permissions related to updating token metadata for specific tokens.
    *
-   * @generated from field: repeated badges.TimedUpdateWithBadgeIdsPermission canUpdateBadgeMetadata = 9;
+   * @generated from field: repeated badges.TimedUpdateWithBadgeIdsPermission canUpdateBadgeMetadata = 8;
    */
   canUpdateBadgeMetadata: TimedUpdateWithBadgeIdsPermission[] = [];
 
   /**
    * Permissions related to updating collection approvals.
    *
-   * @generated from field: repeated badges.CollectionApprovalPermission canUpdateCollectionApprovals = 10;
+   * @generated from field: repeated badges.CollectionApprovalPermission canUpdateCollectionApprovals = 9;
    */
   canUpdateCollectionApprovals: CollectionApprovalPermission[] = [];
 
@@ -116,14 +109,13 @@ export class CollectionPermissions extends Message<CollectionPermissions> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "canDeleteCollection", kind: "message", T: ActionPermission, repeated: true },
     { no: 2, name: "canArchiveCollection", kind: "message", T: TimedUpdatePermission, repeated: true },
-    { no: 3, name: "canUpdateOffChainBalancesMetadata", kind: "message", T: TimedUpdatePermission, repeated: true },
-    { no: 4, name: "canUpdateStandards", kind: "message", T: TimedUpdatePermission, repeated: true },
-    { no: 5, name: "canUpdateCustomData", kind: "message", T: TimedUpdatePermission, repeated: true },
-    { no: 6, name: "canUpdateManager", kind: "message", T: TimedUpdatePermission, repeated: true },
-    { no: 7, name: "canUpdateCollectionMetadata", kind: "message", T: TimedUpdatePermission, repeated: true },
-    { no: 8, name: "canUpdateValidBadgeIds", kind: "message", T: BadgeIdsActionPermission, repeated: true },
-    { no: 9, name: "canUpdateBadgeMetadata", kind: "message", T: TimedUpdateWithBadgeIdsPermission, repeated: true },
-    { no: 10, name: "canUpdateCollectionApprovals", kind: "message", T: CollectionApprovalPermission, repeated: true },
+    { no: 3, name: "canUpdateStandards", kind: "message", T: TimedUpdatePermission, repeated: true },
+    { no: 4, name: "canUpdateCustomData", kind: "message", T: TimedUpdatePermission, repeated: true },
+    { no: 5, name: "canUpdateManager", kind: "message", T: TimedUpdatePermission, repeated: true },
+    { no: 6, name: "canUpdateCollectionMetadata", kind: "message", T: TimedUpdatePermission, repeated: true },
+    { no: 7, name: "canUpdateValidBadgeIds", kind: "message", T: BadgeIdsActionPermission, repeated: true },
+    { no: 8, name: "canUpdateBadgeMetadata", kind: "message", T: TimedUpdateWithBadgeIdsPermission, repeated: true },
+    { no: 9, name: "canUpdateCollectionApprovals", kind: "message", T: CollectionApprovalPermission, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionPermissions {
@@ -292,21 +284,21 @@ export class CollectionApprovalPermission extends Message<CollectionApprovalPerm
    * If you use "!approvalId", this approval will match to all approvalIds except for approvalId.
    * If you use "approvalId", this approval will match to only the specified approvalId and fail on all others.
    *
-   * @generated from field: string approvalId = 9;
+   * @generated from field: string approvalId = 7;
    */
   approvalId = "";
 
   /**
    * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
    *
-   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 10;
+   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 8;
    */
   permanentlyPermittedTimes: UintRange[] = [];
 
   /**
    * Specifies the times when this permission is forbidden. Can not overlap with permanentlyPermittedTimes.
    *
-   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 11;
+   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 9;
    */
   permanentlyForbiddenTimes: UintRange[] = [];
 
@@ -324,9 +316,9 @@ export class CollectionApprovalPermission extends Message<CollectionApprovalPerm
     { no: 4, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 6, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 9, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 10, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 11, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 7, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 9, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionApprovalPermission {
@@ -394,21 +386,21 @@ export class UserOutgoingApprovalPermission extends Message<UserOutgoingApproval
    * If you use "!approvalId", this approval will match to all approvalIds except for approvalId.
    * If you use "approvalId", this approval will match to only the specified approvalId and fail on all others.
    *
-   * @generated from field: string approvalId = 8;
+   * @generated from field: string approvalId = 6;
    */
   approvalId = "";
 
   /**
    * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
    *
-   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 9;
+   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 7;
    */
   permanentlyPermittedTimes: UintRange[] = [];
 
   /**
    * Specifies the times when this permission is forbidden. Can not overlap with permanentlyPermittedTimes.
    *
-   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 10;
+   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 8;
    */
   permanentlyForbiddenTimes: UintRange[] = [];
 
@@ -425,9 +417,9 @@ export class UserOutgoingApprovalPermission extends Message<UserOutgoingApproval
     { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 8, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 9, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 10, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 6, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 8, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserOutgoingApprovalPermission {
@@ -497,21 +489,21 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
    * If you use "!approvalId", this approval will match to all approvalIds except for approvalId.
    * If you use "approvalId", this approval will match to only the specified approvalId and fail on all others.
    *
-   * @generated from field: string approvalId = 8;
+   * @generated from field: string approvalId = 6;
    */
   approvalId = "";
 
   /**
    * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
    *
-   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 9;
+   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 7;
    */
   permanentlyPermittedTimes: UintRange[] = [];
 
   /**
    * Specifies the times when this permission is forbidden. Can not overlap with permanentlyPermittedTimes.
    *
-   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 10;
+   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 8;
    */
   permanentlyForbiddenTimes: UintRange[] = [];
 
@@ -528,9 +520,9 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
     { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 8, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 9, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 10, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 6, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
+    { no: 8, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserIncomingApprovalPermission {

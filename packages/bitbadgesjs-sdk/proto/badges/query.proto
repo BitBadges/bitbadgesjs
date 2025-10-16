@@ -63,6 +63,11 @@ service Query {
     option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_dynamic_store_value/{storeId}/{address}";
 	}
 
+  // Queries the maximum wrappable amount for a given denom and user address.
+  rpc GetWrappableBalances(QueryGetWrappableBalancesRequest) returns (QueryGetWrappableBalancesResponse) {
+    option (google.api.http).get = "/bitbadges/bitbadgeschain/badges/get_wrappable_balances/{denom}/{address}";
+	}
+
   // this line is used by starport scaffolding # 2
 }
 
@@ -101,13 +106,13 @@ message QueryGetAddressListResponse {
 }
 
 message QueryGetApprovalTrackerRequest {
-  string collectionId = 5 ;
+  string amountTrackerId = 1; 
   string approvalLevel = 2; //"collection" or "incoming" or "outgoing"
   string approverAddress = 3; //if approvalLevel is "collection", leave blank
-  string approvalId = 7;
-  string amountTrackerId = 1; 
   string trackerType = 4;; //"overall", "to", "from", "initiatedBy"
+  string collectionId = 5 ;
   string approvedAddress = 6; //if trackerType is "overall", leave blank
+  string approvalId = 7;
 }
 
 message QueryGetApprovalTrackerResponse {
@@ -118,9 +123,9 @@ message QueryGetChallengeTrackerRequest {
   string collectionId = 1 ;
   string approvalLevel = 2; //"collection" or "incoming" or "outgoing"
   string approverAddress = 3; //if approvalLevel is "collection", leave blank
-  string approvalId = 6;
   string challengeTrackerId = 4;
   string leafIndex = 5 ; 
+  string approvalId = 6;
 }
 
 message QueryGetChallengeTrackerResponse {
@@ -155,6 +160,15 @@ message QueryGetETHSignatureTrackerRequest {
 
 message QueryGetETHSignatureTrackerResponse {
   string numUsed = 1;
+}
+
+message QueryGetWrappableBalancesRequest {
+  string denom = 1;
+  string address = 2;
+}
+
+message QueryGetWrappableBalancesResponse {
+  string maxWrappableAmount = 1 [(gogoproto.customtype) = "Uint", (gogoproto.nullable) = false];
 }
 
 // this line is used by starport scaffolding # 3

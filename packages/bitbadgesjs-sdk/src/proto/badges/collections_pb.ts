@@ -5,7 +5,7 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
-import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
+import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, StandardsTimeline } from "./timelines_pb.js";
 import { CollectionPermissions } from "./permissions_pb.js";
 import { CollectionApproval, UserBalanceStore } from "./transfers_pb.js";
 import { Balance, UintRange } from "./balances_pb.js";
@@ -53,37 +53,23 @@ export class BadgeCollection extends Message<BadgeCollection> {
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
-   * The type of balances this collection uses ("Standard", "Off-Chain - Indexed", "Off-Chain - Non-Indexed", or "Non-Public").
-   *
-   * @generated from field: string balancesType = 4;
-   */
-  balancesType = "";
-
-  /**
-   * Metadata for fetching balances for collections with off-chain balances, subject to changes over time.
-   *
-   * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 5;
-   */
-  offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline[] = [];
-
-  /**
    * An arbitrary field that can store any data, subject to changes over time.
    *
-   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 7;
+   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 4;
    */
   customDataTimeline: CustomDataTimeline[] = [];
 
   /**
    * The address of the manager of this collection, subject to changes over time.
    *
-   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 8;
+   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 5;
    */
   managerTimeline: ManagerTimeline[] = [];
 
   /**
    * Permissions that define what the manager of the collection can do or not do.
    *
-   * @generated from field: badges.CollectionPermissions collectionPermissions = 9;
+   * @generated from field: badges.CollectionPermissions collectionPermissions = 6;
    */
   collectionPermissions?: CollectionPermissions;
 
@@ -93,14 +79,14 @@ export class BadgeCollection extends Message<BadgeCollection> {
    * Transfer must satisfy both user and collection-level approvals.
    * Only applicable to on-chain balances.
    *
-   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 10;
+   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 7;
    */
   collectionApprovals: CollectionApproval[] = [];
 
   /**
    * Standards that define how to interpret the fields of the collection, subject to changes over time.
    *
-   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 11;
+   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 8;
    */
   standardsTimeline: StandardsTimeline[] = [];
 
@@ -108,42 +94,42 @@ export class BadgeCollection extends Message<BadgeCollection> {
    * Whether the collection is archived or not, subject to changes over time.
    * When archived, it becomes read-only, and no transactions can be processed until it is unarchived.
    *
-   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 12;
+   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 9;
    */
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
-   * The default store of a balance for a user, upon genesis.
+   * The default store of a balance / approvals for a user, upon genesis.
    *
-   * @generated from field: badges.UserBalanceStore defaultBalances = 13;
+   * @generated from field: badges.UserBalanceStore defaultBalances = 10;
    */
   defaultBalances?: UserBalanceStore;
 
   /**
    * The user or entity who created the collection.
    *
-   * @generated from field: string createdBy = 14;
+   * @generated from field: string createdBy = 11;
    */
   createdBy = "";
 
   /**
    * The valid token IDs for this collection.
    *
-   * @generated from field: repeated badges.UintRange validBadgeIds = 15;
+   * @generated from field: repeated badges.UintRange validBadgeIds = 12;
    */
   validBadgeIds: UintRange[] = [];
 
   /**
    * The generated address of the collection. Also used to escrow Mint balances.
    *
-   * @generated from field: string mintEscrowAddress = 16;
+   * @generated from field: string mintEscrowAddress = 13;
    */
   mintEscrowAddress = "";
 
   /**
    * The IBC wrapper (sdk.coin) paths for the collection.
    *
-   * @generated from field: repeated badges.CosmosCoinWrapperPath cosmosCoinWrapperPaths = 17;
+   * @generated from field: repeated badges.CosmosCoinWrapperPath cosmosCoinWrapperPaths = 14;
    */
   cosmosCoinWrapperPaths: CosmosCoinWrapperPath[] = [];
 
@@ -151,7 +137,7 @@ export class BadgeCollection extends Message<BadgeCollection> {
    * Collection-level invariants that cannot be broken.
    * These are set upon genesis and cannot be modified.
    *
-   * @generated from field: badges.CollectionInvariants invariants = 18;
+   * @generated from field: badges.CollectionInvariants invariants = 15;
    */
   invariants?: CollectionInvariants;
 
@@ -166,20 +152,18 @@ export class BadgeCollection extends Message<BadgeCollection> {
     { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
     { no: 3, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
-    { no: 4, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
-    { no: 7, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
-    { no: 8, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
-    { no: 9, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
-    { no: 10, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 11, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 12, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
-    { no: 13, name: "defaultBalances", kind: "message", T: UserBalanceStore },
-    { no: 14, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 15, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
-    { no: 16, name: "mintEscrowAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 17, name: "cosmosCoinWrapperPaths", kind: "message", T: CosmosCoinWrapperPath, repeated: true },
-    { no: 18, name: "invariants", kind: "message", T: CollectionInvariants },
+    { no: 4, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
+    { no: 5, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
+    { no: 6, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
+    { no: 7, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
+    { no: 8, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
+    { no: 9, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 10, name: "defaultBalances", kind: "message", T: UserBalanceStore },
+    { no: 11, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 12, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 13, name: "mintEscrowAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 14, name: "cosmosCoinWrapperPaths", kind: "message", T: CosmosCoinWrapperPath, repeated: true },
+    { no: 15, name: "invariants", kind: "message", T: CollectionInvariants },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCollection {

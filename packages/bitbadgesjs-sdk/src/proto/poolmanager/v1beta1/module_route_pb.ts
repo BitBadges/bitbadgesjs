@@ -23,32 +23,21 @@ export enum PoolType {
    * Stableswap is the Solidly cfmm stable swap curve. Its pool model is defined
    * in x/gamm.
    *
+   * // Concentrated is the pool model specific to concentrated liquidity. It is
+   * // defined in x/concentrated-liquidity.
+   * Concentrated = 2;
+   * // CosmWasm is the pool model specific to CosmWasm. It is defined in
+   * // x/cosmwasmpool.
+   * CosmWasm = 3;
+   *
    * @generated from enum value: Stableswap = 1;
    */
   Stableswap = 1,
-
-  /**
-   * Concentrated is the pool model specific to concentrated liquidity. It is
-   * defined in x/concentrated-liquidity.
-   *
-   * @generated from enum value: Concentrated = 2;
-   */
-  Concentrated = 2,
-
-  /**
-   * CosmWasm is the pool model specific to CosmWasm. It is defined in
-   * x/cosmwasmpool.
-   *
-   * @generated from enum value: CosmWasm = 3;
-   */
-  CosmWasm = 3,
 }
 // Retrieve enum metadata with: proto3.getEnumType(PoolType)
 proto3.util.setEnumType(PoolType, "poolmanager.v1beta1.PoolType", [
   { no: 0, name: "Balancer" },
   { no: 1, name: "Stableswap" },
-  { no: 2, name: "Concentrated" },
-  { no: 3, name: "CosmWasm" },
 ]);
 
 /**

@@ -318,9 +318,9 @@ export class QueryGetAddressListResponse extends Message<QueryGetAddressListResp
  */
 export class QueryGetApprovalTrackerRequest extends Message<QueryGetApprovalTrackerRequest> {
   /**
-   * @generated from field: string collectionId = 5;
+   * @generated from field: string amountTrackerId = 1;
    */
-  collectionId = "";
+  amountTrackerId = "";
 
   /**
    * "collection" or "incoming" or "outgoing"
@@ -337,19 +337,14 @@ export class QueryGetApprovalTrackerRequest extends Message<QueryGetApprovalTrac
   approverAddress = "";
 
   /**
-   * @generated from field: string approvalId = 7;
-   */
-  approvalId = "";
-
-  /**
-   * @generated from field: string amountTrackerId = 1;
-   */
-  amountTrackerId = "";
-
-  /**
    * @generated from field: string trackerType = 4;
    */
   trackerType = "";
+
+  /**
+   * @generated from field: string collectionId = 5;
+   */
+  collectionId = "";
 
   /**
    * if trackerType is "overall", leave blank
@@ -357,6 +352,11 @@ export class QueryGetApprovalTrackerRequest extends Message<QueryGetApprovalTrac
    * @generated from field: string approvedAddress = 6;
    */
   approvedAddress = "";
+
+  /**
+   * @generated from field: string approvalId = 7;
+   */
+  approvalId = "";
 
   constructor(data?: PartialMessage<QueryGetApprovalTrackerRequest>) {
     super();
@@ -366,13 +366,13 @@ export class QueryGetApprovalTrackerRequest extends Message<QueryGetApprovalTrac
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "badges.QueryGetApprovalTrackerRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 5, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "approvalLevel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 1, name: "amountTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "trackerType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "approvedAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetApprovalTrackerRequest {
@@ -453,11 +453,6 @@ export class QueryGetChallengeTrackerRequest extends Message<QueryGetChallengeTr
   approverAddress = "";
 
   /**
-   * @generated from field: string approvalId = 6;
-   */
-  approvalId = "";
-
-  /**
    * @generated from field: string challengeTrackerId = 4;
    */
   challengeTrackerId = "";
@@ -466,6 +461,11 @@ export class QueryGetChallengeTrackerRequest extends Message<QueryGetChallengeTr
    * @generated from field: string leafIndex = 5;
    */
   leafIndex = "";
+
+  /**
+   * @generated from field: string approvalId = 6;
+   */
+  approvalId = "";
 
   constructor(data?: PartialMessage<QueryGetChallengeTrackerRequest>) {
     super();
@@ -478,9 +478,9 @@ export class QueryGetChallengeTrackerRequest extends Message<QueryGetChallengeTr
     { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "approvalLevel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "challengeTrackerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "leafIndex", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetChallengeTrackerRequest {
@@ -796,6 +796,86 @@ export class QueryGetETHSignatureTrackerResponse extends Message<QueryGetETHSign
 
   static equals(a: QueryGetETHSignatureTrackerResponse | PlainMessage<QueryGetETHSignatureTrackerResponse> | undefined, b: QueryGetETHSignatureTrackerResponse | PlainMessage<QueryGetETHSignatureTrackerResponse> | undefined): boolean {
     return proto3.util.equals(QueryGetETHSignatureTrackerResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.QueryGetWrappableBalancesRequest
+ */
+export class QueryGetWrappableBalancesRequest extends Message<QueryGetWrappableBalancesRequest> {
+  /**
+   * @generated from field: string denom = 1;
+   */
+  denom = "";
+
+  /**
+   * @generated from field: string address = 2;
+   */
+  address = "";
+
+  constructor(data?: PartialMessage<QueryGetWrappableBalancesRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryGetWrappableBalancesRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetWrappableBalancesRequest {
+    return new QueryGetWrappableBalancesRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetWrappableBalancesRequest {
+    return new QueryGetWrappableBalancesRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetWrappableBalancesRequest {
+    return new QueryGetWrappableBalancesRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetWrappableBalancesRequest | PlainMessage<QueryGetWrappableBalancesRequest> | undefined, b: QueryGetWrappableBalancesRequest | PlainMessage<QueryGetWrappableBalancesRequest> | undefined): boolean {
+    return proto3.util.equals(QueryGetWrappableBalancesRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.QueryGetWrappableBalancesResponse
+ */
+export class QueryGetWrappableBalancesResponse extends Message<QueryGetWrappableBalancesResponse> {
+  /**
+   * @generated from field: string maxWrappableAmount = 1;
+   */
+  maxWrappableAmount = "";
+
+  constructor(data?: PartialMessage<QueryGetWrappableBalancesResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryGetWrappableBalancesResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "maxWrappableAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetWrappableBalancesResponse {
+    return new QueryGetWrappableBalancesResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetWrappableBalancesResponse {
+    return new QueryGetWrappableBalancesResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetWrappableBalancesResponse {
+    return new QueryGetWrappableBalancesResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetWrappableBalancesResponse | PlainMessage<QueryGetWrappableBalancesResponse> | undefined, b: QueryGetWrappableBalancesResponse | PlainMessage<QueryGetWrappableBalancesResponse> | undefined): boolean {
+    return proto3.util.equals(QueryGetWrappableBalancesResponse, a, b);
   }
 }
 

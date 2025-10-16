@@ -345,35 +345,35 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
   /**
    * The URI associated with this approval, optionally providing metadata about the approval.
    *
-   * @generated from field: string uri = 8;
+   * @generated from field: string uri = 6;
    */
   uri = "";
 
   /**
    * Arbitrary custom data associated with this approval.
    *
-   * @generated from field: string customData = 9;
+   * @generated from field: string customData = 7;
    */
   customData = "";
 
   /**
    * The ID of this approval. Must be unique per level (i.e. collection, outgoing, incoming).
    *
-   * @generated from field: string approvalId = 10;
+   * @generated from field: string approvalId = 8;
    */
   approvalId = "";
 
   /**
    * The criteria that must be met for this approval to be considered.
    *
-   * @generated from field: badges.OutgoingApprovalCriteria approvalCriteria = 11;
+   * @generated from field: badges.OutgoingApprovalCriteria approvalCriteria = 9;
    */
   approvalCriteria?: OutgoingApprovalCriteria;
 
   /**
    * Version of the approval. Maintained internally.
    *
-   * @generated from field: string version = 12;
+   * @generated from field: string version = 10;
    */
   version = "";
 
@@ -390,11 +390,11 @@ export class UserOutgoingApproval extends Message<UserOutgoingApproval> {
     { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 8, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 9, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 10, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 11, name: "approvalCriteria", kind: "message", T: OutgoingApprovalCriteria },
-    { no: 12, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: "approvalCriteria", kind: "message", T: OutgoingApprovalCriteria },
+    { no: 10, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserOutgoingApproval {
@@ -458,35 +458,35 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
   /**
    * The URI associated with this approval, optionally providing metadata about the approval.
    *
-   * @generated from field: string uri = 8;
+   * @generated from field: string uri = 6;
    */
   uri = "";
 
   /**
    * Arbitrary custom data associated with this approval.
    *
-   * @generated from field: string customData = 9;
+   * @generated from field: string customData = 7;
    */
   customData = "";
 
   /**
    * The ID of this approval. Must be unique per level (i.e. collection, outgoing, incoming).
    *
-   * @generated from field: string approvalId = 10;
+   * @generated from field: string approvalId = 8;
    */
   approvalId = "";
 
   /**
    * The criteria that must be met for this approval to be considered.
    *
-   * @generated from field: badges.IncomingApprovalCriteria approvalCriteria = 11;
+   * @generated from field: badges.IncomingApprovalCriteria approvalCriteria = 9;
    */
   approvalCriteria?: IncomingApprovalCriteria;
 
   /**
    * Version of the approval. Maintained internally.
    *
-   * @generated from field: string version = 12;
+   * @generated from field: string version = 10;
    */
   version = "";
 
@@ -503,11 +503,11 @@ export class UserIncomingApproval extends Message<UserIncomingApproval> {
     { no: 3, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 4, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 8, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 9, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 10, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 11, name: "approvalCriteria", kind: "message", T: IncomingApprovalCriteria },
-    { no: 12, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: "approvalCriteria", kind: "message", T: IncomingApprovalCriteria },
+    { no: 10, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserIncomingApproval {
@@ -1897,35 +1897,35 @@ export class CollectionApproval extends Message<CollectionApproval> {
   /**
    * The URI associated with this approval, optionally providing metadata about the approval.
    *
-   * @generated from field: string uri = 9;
+   * @generated from field: string uri = 7;
    */
   uri = "";
 
   /**
    * Arbitrary custom data associated with this approval.
    *
-   * @generated from field: string customData = 10;
+   * @generated from field: string customData = 8;
    */
   customData = "";
 
   /**
    * The ID of this approval. Must be unique per level (i.e. collection, outgoing, incoming).
    *
-   * @generated from field: string approvalId = 11;
+   * @generated from field: string approvalId = 9;
    */
   approvalId = "";
 
   /**
    * The criteria that must be met for this approval to be considered.
    *
-   * @generated from field: badges.ApprovalCriteria approvalCriteria = 12;
+   * @generated from field: badges.ApprovalCriteria approvalCriteria = 10;
    */
   approvalCriteria?: ApprovalCriteria;
 
   /**
    * Version of the approval. Maintained internally.
    *
-   * @generated from field: string version = 13;
+   * @generated from field: string version = 11;
    */
   version = "";
 
@@ -1943,11 +1943,11 @@ export class CollectionApproval extends Message<CollectionApproval> {
     { no: 4, name: "transferTimes", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "badgeIds", kind: "message", T: UintRange, repeated: true },
     { no: 6, name: "ownershipTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 9, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 10, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 11, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 12, name: "approvalCriteria", kind: "message", T: ApprovalCriteria },
-    { no: 13, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 10, name: "approvalCriteria", kind: "message", T: ApprovalCriteria },
+    { no: 11, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionApproval {

@@ -1348,3 +1348,96 @@ export class QueryTotalLiquidityResponse extends Message<QueryTotalLiquidityResp
   }
 }
 
+/**
+ * Used for WASM bindings and JSON parsing
+ *
+ * @generated from message gamm.v1beta1.GammCustomQueryType
+ */
+export class GammCustomQueryType extends Message<GammCustomQueryType> {
+  /**
+   * @generated from field: gamm.v1beta1.QueryPoolRequest queryPool = 1;
+   */
+  queryPool?: QueryPoolRequest;
+
+  /**
+   * @generated from field: gamm.v1beta1.QueryPoolsRequest queryPools = 2;
+   */
+  queryPools?: QueryPoolsRequest;
+
+  /**
+   * @generated from field: gamm.v1beta1.QueryPoolTypeRequest queryPoolType = 3;
+   */
+  queryPoolType?: QueryPoolTypeRequest;
+
+  /**
+   * @generated from field: gamm.v1beta1.QueryPoolsWithFilterRequest queryPoolsWithFilter = 4;
+   */
+  queryPoolsWithFilter?: QueryPoolsWithFilterRequest;
+
+  /**
+   * @generated from field: gamm.v1beta1.QueryNumPoolsRequest queryNumPools = 5;
+   */
+  queryNumPools?: QueryNumPoolsRequest;
+
+  /**
+   * @generated from field: gamm.v1beta1.QueryTotalLiquidityRequest queryTotalLiquidity = 6;
+   */
+  queryTotalLiquidity?: QueryTotalLiquidityRequest;
+
+  /**
+   * @generated from field: gamm.v1beta1.QueryTotalPoolLiquidityRequest queryTotalPoolLiquidity = 7;
+   */
+  queryTotalPoolLiquidity?: QueryTotalPoolLiquidityRequest;
+
+  /**
+   * @generated from field: gamm.v1beta1.QuerySpotPriceRequest querySpotPrice = 8;
+   */
+  querySpotPrice?: QuerySpotPriceRequest;
+
+  /**
+   * @generated from field: gamm.v1beta1.QueryPoolParamsRequest queryPoolParams = 9;
+   */
+  queryPoolParams?: QueryPoolParamsRequest;
+
+  /**
+   * @generated from field: gamm.v1beta1.QueryTotalSharesRequest queryTotalShares = 10;
+   */
+  queryTotalShares?: QueryTotalSharesRequest;
+
+  constructor(data?: PartialMessage<GammCustomQueryType>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "gamm.v1beta1.GammCustomQueryType";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "queryPool", kind: "message", T: QueryPoolRequest },
+    { no: 2, name: "queryPools", kind: "message", T: QueryPoolsRequest },
+    { no: 3, name: "queryPoolType", kind: "message", T: QueryPoolTypeRequest },
+    { no: 4, name: "queryPoolsWithFilter", kind: "message", T: QueryPoolsWithFilterRequest },
+    { no: 5, name: "queryNumPools", kind: "message", T: QueryNumPoolsRequest },
+    { no: 6, name: "queryTotalLiquidity", kind: "message", T: QueryTotalLiquidityRequest },
+    { no: 7, name: "queryTotalPoolLiquidity", kind: "message", T: QueryTotalPoolLiquidityRequest },
+    { no: 8, name: "querySpotPrice", kind: "message", T: QuerySpotPriceRequest },
+    { no: 9, name: "queryPoolParams", kind: "message", T: QueryPoolParamsRequest },
+    { no: 10, name: "queryTotalShares", kind: "message", T: QueryTotalSharesRequest },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GammCustomQueryType {
+    return new GammCustomQueryType().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GammCustomQueryType {
+    return new GammCustomQueryType().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GammCustomQueryType {
+    return new GammCustomQueryType().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GammCustomQueryType | PlainMessage<GammCustomQueryType> | undefined, b: GammCustomQueryType | PlainMessage<GammCustomQueryType> | undefined): boolean {
+    return proto3.util.equals(GammCustomQueryType, a, b);
+  }
+}
+

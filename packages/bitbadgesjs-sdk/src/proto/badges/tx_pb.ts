@@ -10,7 +10,7 @@ import { Balance, UintRange } from "./balances_pb.js";
 import { CollectionInvariants, DenomUnit } from "./collections_pb.js";
 import { ApprovalIdentifierDetails, CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
 import { BadgeIdsActionPermission, CollectionApprovalPermission, CollectionPermissions, TimedUpdatePermission, TimedUpdateWithBadgeIdsPermission, UserPermissions } from "./permissions_pb.js";
-import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
+import { BadgeMetadataTimeline, CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, StandardsTimeline } from "./timelines_pb.js";
 import { Coin } from "../cosmos/base/v1beta1/coin_pb.js";
 import { AddressList } from "./address_lists_pb.js";
 
@@ -380,170 +380,149 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   collectionId = "";
 
   /**
-   * Type of balances "Standard" or "Off-Chain - Indexed" or "Off-Chain - Non-Indexed" or "Non-Public".
-   *
-   * @generated from field: string balancesType = 3;
-   */
-  balancesType = "";
-
-  /**
    * The default balances for the user
    *
-   * @generated from field: badges.UserBalanceStore defaultBalances = 4;
+   * @generated from field: badges.UserBalanceStore defaultBalances = 3;
    */
   defaultBalances?: UserBalanceStore;
 
   /**
    * Indicates if the valid token IDs should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateValidBadgeIds = 5;
+   * @generated from field: bool updateValidBadgeIds = 4;
    */
   updateValidBadgeIds = false;
 
   /**
    * New token IDs to add to this collection
    *
-   * @generated from field: repeated badges.UintRange validBadgeIds = 6;
+   * @generated from field: repeated badges.UintRange validBadgeIds = 5;
    */
   validBadgeIds: UintRange[] = [];
 
   /**
    * Indicates if collection permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateCollectionPermissions = 7;
+   * @generated from field: bool updateCollectionPermissions = 6;
    */
   updateCollectionPermissions = false;
 
   /**
    * New collection permissions to set.
    *
-   * @generated from field: badges.CollectionPermissions collectionPermissions = 8;
+   * @generated from field: badges.CollectionPermissions collectionPermissions = 7;
    */
   collectionPermissions?: CollectionPermissions;
 
   /**
    * Indicates if the manager timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateManagerTimeline = 9;
+   * @generated from field: bool updateManagerTimeline = 8;
    */
   updateManagerTimeline = false;
 
   /**
    * New manager timeline to set.
    *
-   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 10;
+   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 9;
    */
   managerTimeline: ManagerTimeline[] = [];
 
   /**
    * Indicates if the collection metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateCollectionMetadataTimeline = 11;
+   * @generated from field: bool updateCollectionMetadataTimeline = 10;
    */
   updateCollectionMetadataTimeline = false;
 
   /**
    * New collection metadata timeline to set.
    *
-   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 12;
+   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 11;
    */
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
    * Indicates if the token metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateBadgeMetadataTimeline = 13;
+   * @generated from field: bool updateBadgeMetadataTimeline = 12;
    */
   updateBadgeMetadataTimeline = false;
 
   /**
    * New token metadata timeline to set.
    *
-   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 14;
+   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 13;
    */
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
-   * Indicates if the off-chain balances metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
-   *
-   * @generated from field: bool updateOffChainBalancesMetadataTimeline = 15;
-   */
-  updateOffChainBalancesMetadataTimeline = false;
-
-  /**
-   * New off-chain balances metadata timeline to set.
-   *
-   * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 16;
-   */
-  offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline[] = [];
-
-  /**
    * Indicates if the custom data timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateCustomDataTimeline = 17;
+   * @generated from field: bool updateCustomDataTimeline = 14;
    */
   updateCustomDataTimeline = false;
 
   /**
    * New custom data timeline to set.
    *
-   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 18;
+   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 15;
    */
   customDataTimeline: CustomDataTimeline[] = [];
 
   /**
    * Indicates if collection approvals should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateCollectionApprovals = 21;
+   * @generated from field: bool updateCollectionApprovals = 16;
    */
   updateCollectionApprovals = false;
 
   /**
    * New collection approvals to set.
    *
-   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 22;
+   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 17;
    */
   collectionApprovals: CollectionApproval[] = [];
 
   /**
    * Indicates if the standards timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateStandardsTimeline = 23;
+   * @generated from field: bool updateStandardsTimeline = 18;
    */
   updateStandardsTimeline = false;
 
   /**
    * New standards timeline to set.
    *
-   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 24;
+   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 19;
    */
   standardsTimeline: StandardsTimeline[] = [];
 
   /**
    * Indicates if the isArchived timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateIsArchivedTimeline = 25;
+   * @generated from field: bool updateIsArchivedTimeline = 20;
    */
   updateIsArchivedTimeline = false;
 
   /**
    * New isArchived timeline to set.
    *
-   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 26;
+   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 21;
    */
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
    * Coins to be transferred to the mint escrow address.
    *
-   * @generated from field: repeated cosmos.base.v1beta1.Coin mintEscrowCoinsToTransfer = 27;
+   * @generated from field: repeated cosmos.base.v1beta1.Coin mintEscrowCoinsToTransfer = 22;
    */
   mintEscrowCoinsToTransfer: Coin[] = [];
 
   /**
    * IBC wrapper paths to add.
    *
-   * @generated from field: repeated badges.CosmosCoinWrapperPathAddObject cosmosCoinWrapperPathsToAdd = 28;
+   * @generated from field: repeated badges.CosmosCoinWrapperPathAddObject cosmosCoinWrapperPathsToAdd = 23;
    */
   cosmosCoinWrapperPathsToAdd: CosmosCoinWrapperPathAddObject[] = [];
 
@@ -551,7 +530,7 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
    * Collection-level invariants that cannot be broken.
    * These are set upon genesis and cannot be modified.
    *
-   * @generated from field: badges.CollectionInvariants invariants = 29;
+   * @generated from field: badges.CollectionInvariants invariants = 24;
    */
   invariants?: CollectionInvariants;
 
@@ -565,31 +544,28 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "defaultBalances", kind: "message", T: UserBalanceStore },
-    { no: 5, name: "updateValidBadgeIds", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 6, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
-    { no: 7, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 8, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
-    { no: 9, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 10, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
-    { no: 11, name: "updateCollectionMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 12, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 13, name: "updateBadgeMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 14, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
-    { no: 15, name: "updateOffChainBalancesMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 16, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
-    { no: 17, name: "updateCustomDataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 18, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
-    { no: 21, name: "updateCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 22, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 23, name: "updateStandardsTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 24, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 25, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 26, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
-    { no: 27, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
-    { no: 28, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
-    { no: 29, name: "invariants", kind: "message", T: CollectionInvariants },
+    { no: 3, name: "defaultBalances", kind: "message", T: UserBalanceStore },
+    { no: 4, name: "updateValidBadgeIds", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 5, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 6, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 7, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
+    { no: 8, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 9, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
+    { no: 10, name: "updateCollectionMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 11, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
+    { no: 12, name: "updateBadgeMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 13, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
+    { no: 14, name: "updateCustomDataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 15, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
+    { no: 16, name: "updateCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 17, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
+    { no: 18, name: "updateStandardsTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 19, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
+    { no: 20, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 21, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 22, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
+    { no: 23, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
+    { no: 24, name: "invariants", kind: "message", T: CollectionInvariants },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollection {
@@ -687,140 +663,126 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   /**
    * Indicates if collection permissions should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateCollectionPermissions = 7;
+   * @generated from field: bool updateCollectionPermissions = 5;
    */
   updateCollectionPermissions = false;
 
   /**
    * New collection permissions to set.
    *
-   * @generated from field: badges.CollectionPermissions collectionPermissions = 8;
+   * @generated from field: badges.CollectionPermissions collectionPermissions = 6;
    */
   collectionPermissions?: CollectionPermissions;
 
   /**
    * Indicates if the manager timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateManagerTimeline = 9;
+   * @generated from field: bool updateManagerTimeline = 7;
    */
   updateManagerTimeline = false;
 
   /**
    * New manager timeline to set.
    *
-   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 10;
+   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 8;
    */
   managerTimeline: ManagerTimeline[] = [];
 
   /**
    * Indicates if the collection metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateCollectionMetadataTimeline = 11;
+   * @generated from field: bool updateCollectionMetadataTimeline = 9;
    */
   updateCollectionMetadataTimeline = false;
 
   /**
    * New collection metadata timeline to set.
    *
-   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 12;
+   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 10;
    */
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
    * Indicates if the token metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateBadgeMetadataTimeline = 13;
+   * @generated from field: bool updateBadgeMetadataTimeline = 11;
    */
   updateBadgeMetadataTimeline = false;
 
   /**
    * New token metadata timeline to set.
    *
-   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 14;
+   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 12;
    */
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
-   * Indicates if the off-chain balances metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
-   *
-   * @generated from field: bool updateOffChainBalancesMetadataTimeline = 15;
-   */
-  updateOffChainBalancesMetadataTimeline = false;
-
-  /**
-   * New off-chain balances metadata timeline to set.
-   *
-   * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 16;
-   */
-  offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline[] = [];
-
-  /**
    * Indicates if the custom data timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateCustomDataTimeline = 17;
+   * @generated from field: bool updateCustomDataTimeline = 13;
    */
   updateCustomDataTimeline = false;
 
   /**
    * New custom data timeline to set.
    *
-   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 18;
+   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 14;
    */
   customDataTimeline: CustomDataTimeline[] = [];
 
   /**
    * Indicates if collection approvals should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateCollectionApprovals = 21;
+   * @generated from field: bool updateCollectionApprovals = 15;
    */
   updateCollectionApprovals = false;
 
   /**
    * New collection approvals to set.
    *
-   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 22;
+   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 16;
    */
   collectionApprovals: CollectionApproval[] = [];
 
   /**
    * Indicates if the standards timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateStandardsTimeline = 23;
+   * @generated from field: bool updateStandardsTimeline = 17;
    */
   updateStandardsTimeline = false;
 
   /**
    * New standards timeline to set.
    *
-   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 24;
+   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 18;
    */
   standardsTimeline: StandardsTimeline[] = [];
 
   /**
    * Indicates if the isArchived timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateIsArchivedTimeline = 27;
+   * @generated from field: bool updateIsArchivedTimeline = 19;
    */
   updateIsArchivedTimeline = false;
 
   /**
    * New isArchived timeline to set.
    *
-   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 28;
+   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 20;
    */
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
    * Coins to be transferred to the mint escrow address.
    *
-   * @generated from field: repeated cosmos.base.v1beta1.Coin mintEscrowCoinsToTransfer = 29;
+   * @generated from field: repeated cosmos.base.v1beta1.Coin mintEscrowCoinsToTransfer = 21;
    */
   mintEscrowCoinsToTransfer: Coin[] = [];
 
   /**
    * IBC wrapper paths to add.
    *
-   * @generated from field: repeated badges.CosmosCoinWrapperPathAddObject cosmosCoinWrapperPathsToAdd = 30;
+   * @generated from field: repeated badges.CosmosCoinWrapperPathAddObject cosmosCoinWrapperPathsToAdd = 22;
    */
   cosmosCoinWrapperPathsToAdd: CosmosCoinWrapperPathAddObject[] = [];
 
@@ -828,7 +790,7 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
    * Collection-level invariants that cannot be broken.
    * These are set upon genesis and cannot be modified.
    *
-   * @generated from field: badges.CollectionInvariants invariants = 31;
+   * @generated from field: badges.CollectionInvariants invariants = 23;
    */
   invariants?: CollectionInvariants;
 
@@ -844,27 +806,25 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "updateValidBadgeIds", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 4, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
-    { no: 7, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 8, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
-    { no: 9, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 10, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
-    { no: 11, name: "updateCollectionMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 12, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 13, name: "updateBadgeMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 14, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
-    { no: 15, name: "updateOffChainBalancesMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 16, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
-    { no: 17, name: "updateCustomDataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 18, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
-    { no: 21, name: "updateCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 22, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 23, name: "updateStandardsTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 24, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 27, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 28, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
-    { no: 29, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
-    { no: 30, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
-    { no: 31, name: "invariants", kind: "message", T: CollectionInvariants },
+    { no: 5, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
+    { no: 7, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 8, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
+    { no: 9, name: "updateCollectionMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 10, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
+    { no: 11, name: "updateBadgeMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 12, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
+    { no: 13, name: "updateCustomDataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 14, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
+    { no: 15, name: "updateCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 16, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
+    { no: 17, name: "updateStandardsTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 18, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
+    { no: 19, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 20, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 21, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
+    { no: 22, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
+    { no: 23, name: "invariants", kind: "message", T: CollectionInvariants },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateCollection {
@@ -939,107 +899,93 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   creator = "";
 
   /**
-   * Type of balances "Standard" or "Off-Chain - Indexed" or "Off-Chain - Non-Indexed" or "Non-Public".
-   *
-   * @generated from field: string balancesType = 2;
-   */
-  balancesType = "";
-
-  /**
    * The default balances for the user
    *
-   * @generated from field: badges.UserBalanceStore defaultBalances = 4;
+   * @generated from field: badges.UserBalanceStore defaultBalances = 2;
    */
   defaultBalances?: UserBalanceStore;
 
   /**
    * New token IDs to add to this collection
    *
-   * @generated from field: repeated badges.UintRange validBadgeIds = 5;
+   * @generated from field: repeated badges.UintRange validBadgeIds = 3;
    */
   validBadgeIds: UintRange[] = [];
 
   /**
    * Collection permissions.
    *
-   * @generated from field: badges.CollectionPermissions collectionPermissions = 6;
+   * @generated from field: badges.CollectionPermissions collectionPermissions = 4;
    */
   collectionPermissions?: CollectionPermissions;
 
   /**
    * Manager timeline entries.
    *
-   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 7;
+   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 5;
    */
   managerTimeline: ManagerTimeline[] = [];
 
   /**
    * Collection metadata timeline entries.
    *
-   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 8;
+   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 6;
    */
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
    * Token metadata timeline entries.
    *
-   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 9;
+   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 7;
    */
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
-   * Off-chain balances metadata timeline entries.
-   *
-   * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 10;
-   */
-  offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline[] = [];
-
-  /**
    * Custom data timeline entries.
    *
-   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 11;
+   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 8;
    */
   customDataTimeline: CustomDataTimeline[] = [];
 
   /**
    * Collection approvals.
    *
-   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 12;
+   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 9;
    */
   collectionApprovals: CollectionApproval[] = [];
 
   /**
    * Standards timeline entries.
    *
-   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 13;
+   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 10;
    */
   standardsTimeline: StandardsTimeline[] = [];
 
   /**
    * isArchived timeline entries.
    *
-   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 14;
+   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 11;
    */
   isArchivedTimeline: IsArchivedTimeline[] = [];
 
   /**
    * Coins to be transferred to the mint escrow address.
    *
-   * @generated from field: repeated cosmos.base.v1beta1.Coin mintEscrowCoinsToTransfer = 16;
+   * @generated from field: repeated cosmos.base.v1beta1.Coin mintEscrowCoinsToTransfer = 12;
    */
   mintEscrowCoinsToTransfer: Coin[] = [];
 
   /**
    * IBC wrapper paths to add.
    *
-   * @generated from field: repeated badges.CosmosCoinWrapperPathAddObject cosmosCoinWrapperPathsToAdd = 17;
+   * @generated from field: repeated badges.CosmosCoinWrapperPathAddObject cosmosCoinWrapperPathsToAdd = 13;
    */
   cosmosCoinWrapperPathsToAdd: CosmosCoinWrapperPathAddObject[] = [];
 
   /**
    * Collection-level invariants that cannot be broken.
    *
-   * @generated from field: badges.CollectionInvariants invariants = 18;
+   * @generated from field: badges.CollectionInvariants invariants = 14;
    */
   invariants?: CollectionInvariants;
 
@@ -1052,21 +998,19 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   static readonly typeName = "badges.MsgCreateCollection";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "defaultBalances", kind: "message", T: UserBalanceStore },
-    { no: 5, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
-    { no: 6, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
-    { no: 7, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
-    { no: 8, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 9, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
-    { no: 10, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
-    { no: 11, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
-    { no: 12, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 13, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 14, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
-    { no: 16, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
-    { no: 17, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
-    { no: 18, name: "invariants", kind: "message", T: CollectionInvariants },
+    { no: 2, name: "defaultBalances", kind: "message", T: UserBalanceStore },
+    { no: 3, name: "validBadgeIds", kind: "message", T: UintRange, repeated: true },
+    { no: 4, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
+    { no: 5, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
+    { no: 6, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
+    { no: 7, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
+    { no: 8, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
+    { no: 9, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
+    { no: 10, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
+    { no: 11, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 12, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
+    { no: 13, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
+    { no: 14, name: "invariants", kind: "message", T: CollectionInvariants },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateCollection {

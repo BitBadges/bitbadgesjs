@@ -5,7 +5,7 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
-import { BadgeMetadata, CollectionMetadata, OffChainBalancesMetadata } from "./metadata_pb.js";
+import { BadgeMetadata, CollectionMetadata } from "./metadata_pb.js";
 import { UintRange } from "./balances_pb.js";
 
 /**
@@ -103,55 +103,6 @@ export class BadgeMetadataTimeline extends Message<BadgeMetadataTimeline> {
 
   static equals(a: BadgeMetadataTimeline | PlainMessage<BadgeMetadataTimeline> | undefined, b: BadgeMetadataTimeline | PlainMessage<BadgeMetadataTimeline> | undefined): boolean {
     return proto3.util.equals(BadgeMetadataTimeline, a, b);
-  }
-}
-
-/**
- * OffChainBalancesMetadataTimeline defines the metadata for off-chain balances at different timeline times.
- *
- * @generated from message badges.OffChainBalancesMetadataTimeline
- */
-export class OffChainBalancesMetadataTimeline extends Message<OffChainBalancesMetadataTimeline> {
-  /**
-   * The off-chain balances metadata for a specific timeline element.
-   *
-   * @generated from field: badges.OffChainBalancesMetadata offChainBalancesMetadata = 1;
-   */
-  offChainBalancesMetadata?: OffChainBalancesMetadata;
-
-  /**
-   * The timeline times when the off-chain balances metadata is valid. Can not overlap with other timeline elements in same array.
-   *
-   * @generated from field: repeated badges.UintRange timelineTimes = 2;
-   */
-  timelineTimes: UintRange[] = [];
-
-  constructor(data?: PartialMessage<OffChainBalancesMetadataTimeline>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.OffChainBalancesMetadataTimeline";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "offChainBalancesMetadata", kind: "message", T: OffChainBalancesMetadata },
-    { no: 2, name: "timelineTimes", kind: "message", T: UintRange, repeated: true },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OffChainBalancesMetadataTimeline {
-    return new OffChainBalancesMetadataTimeline().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OffChainBalancesMetadataTimeline {
-    return new OffChainBalancesMetadataTimeline().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OffChainBalancesMetadataTimeline {
-    return new OffChainBalancesMetadataTimeline().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: OffChainBalancesMetadataTimeline | PlainMessage<OffChainBalancesMetadataTimeline> | undefined, b: OffChainBalancesMetadataTimeline | PlainMessage<OffChainBalancesMetadataTimeline> | undefined): boolean {
-    return proto3.util.equals(OffChainBalancesMetadataTimeline, a, b);
   }
 }
 

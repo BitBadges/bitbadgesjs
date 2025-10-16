@@ -783,3 +783,84 @@ export class MsgExitSwapExternAmountOutResponse extends Message<MsgExitSwapExter
   }
 }
 
+/**
+ * Used for WASM bindings and JSON parsing
+ *
+ * @generated from message gamm.v1beta1.GammCustomMsgType
+ */
+export class GammCustomMsgType extends Message<GammCustomMsgType> {
+  /**
+   * @generated from field: gamm.v1beta1.MsgJoinPool joinPoolMsg = 1;
+   */
+  joinPoolMsg?: MsgJoinPool;
+
+  /**
+   * @generated from field: gamm.v1beta1.MsgExitPool exitPoolMsg = 2;
+   */
+  exitPoolMsg?: MsgExitPool;
+
+  /**
+   * @generated from field: gamm.v1beta1.MsgSwapExactAmountIn swapExactAmountInMsg = 3;
+   */
+  swapExactAmountInMsg?: MsgSwapExactAmountIn;
+
+  /**
+   * @generated from field: gamm.v1beta1.MsgSwapExactAmountOut swapExactAmountOutMsg = 4;
+   */
+  swapExactAmountOutMsg?: MsgSwapExactAmountOut;
+
+  /**
+   * @generated from field: gamm.v1beta1.MsgJoinSwapExternAmountIn joinSwapExternAmountInMsg = 5;
+   */
+  joinSwapExternAmountInMsg?: MsgJoinSwapExternAmountIn;
+
+  /**
+   * @generated from field: gamm.v1beta1.MsgJoinSwapShareAmountOut joinSwapShareAmountOutMsg = 6;
+   */
+  joinSwapShareAmountOutMsg?: MsgJoinSwapShareAmountOut;
+
+  /**
+   * @generated from field: gamm.v1beta1.MsgExitSwapShareAmountIn exitSwapShareAmountInMsg = 7;
+   */
+  exitSwapShareAmountInMsg?: MsgExitSwapShareAmountIn;
+
+  /**
+   * @generated from field: gamm.v1beta1.MsgExitSwapExternAmountOut exitSwapExternAmountOutMsg = 8;
+   */
+  exitSwapExternAmountOutMsg?: MsgExitSwapExternAmountOut;
+
+  constructor(data?: PartialMessage<GammCustomMsgType>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "gamm.v1beta1.GammCustomMsgType";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "joinPoolMsg", kind: "message", T: MsgJoinPool },
+    { no: 2, name: "exitPoolMsg", kind: "message", T: MsgExitPool },
+    { no: 3, name: "swapExactAmountInMsg", kind: "message", T: MsgSwapExactAmountIn },
+    { no: 4, name: "swapExactAmountOutMsg", kind: "message", T: MsgSwapExactAmountOut },
+    { no: 5, name: "joinSwapExternAmountInMsg", kind: "message", T: MsgJoinSwapExternAmountIn },
+    { no: 6, name: "joinSwapShareAmountOutMsg", kind: "message", T: MsgJoinSwapShareAmountOut },
+    { no: 7, name: "exitSwapShareAmountInMsg", kind: "message", T: MsgExitSwapShareAmountIn },
+    { no: 8, name: "exitSwapExternAmountOutMsg", kind: "message", T: MsgExitSwapExternAmountOut },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GammCustomMsgType {
+    return new GammCustomMsgType().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GammCustomMsgType {
+    return new GammCustomMsgType().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GammCustomMsgType {
+    return new GammCustomMsgType().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GammCustomMsgType | PlainMessage<GammCustomMsgType> | undefined, b: GammCustomMsgType | PlainMessage<GammCustomMsgType> | undefined): boolean {
+    return proto3.util.equals(GammCustomMsgType, a, b);
+  }
+}
+

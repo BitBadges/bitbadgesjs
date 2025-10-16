@@ -7,7 +7,7 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { CollectionApproval, Transfer, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
 import { Balance, UintRange } from "./balances_pb.js";
-import { BadgeMetadataTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline, StandardsTimeline } from "./timelines_pb.js";
+import { BadgeMetadataTimeline, CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, StandardsTimeline } from "./timelines_pb.js";
 import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { AddressList } from "./address_lists_pb.js";
 import { CosmosCoinWrapperPathAddObject } from "./tx_pb.js";
@@ -165,32 +165,22 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
-   * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 4;
-   */
-  offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline[] = [];
-
-  /**
-   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 5;
+   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 4;
    */
   customDataTimeline: CustomDataTimeline[] = [];
 
   /**
-   * @generated from field: string balancesType = 6;
-   */
-  balancesType = "";
-
-  /**
-   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 8;
+   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 5;
    */
   collectionApprovals: CollectionApproval[] = [];
 
   /**
-   * @generated from field: badges.CollectionPermissions permissions = 9;
+   * @generated from field: badges.CollectionPermissions permissions = 6;
    */
   permissions?: CollectionPermissions;
 
   /**
-   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 10;
+   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 7;
    */
   standardsTimeline: StandardsTimeline[] = [];
 
@@ -198,53 +188,53 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
    * Token supplys and amounts to create. For each idx, we create amounts[idx] badges each with a supply of supplys[idx].
    * If supply[idx] == 0, we assume default supply. amountsToCreate[idx] can't equal 0.
    *
-   * @generated from field: repeated badges.Balance badgesToCreate = 11;
+   * @generated from field: repeated badges.Balance badgesToCreate = 8;
    */
   badgesToCreate: Balance[] = [];
 
   /**
-   * @generated from field: repeated badges.Transfer transfers = 12;
+   * @generated from field: repeated badges.Transfer transfers = 9;
    */
   transfers: Transfer[] = [];
 
   /**
-   * @generated from field: repeated badges.ContractAddressTimeline contractAddressTimeline = 13;
+   * @generated from field: repeated badges.ContractAddressTimeline contractAddressTimeline = 10;
    */
   contractAddressTimeline: ContractAddressTimeline[] = [];
 
   /**
-   * @generated from field: repeated badges.AddressList addressLists = 14;
+   * @generated from field: repeated badges.AddressList addressLists = 11;
    */
   addressLists: AddressList[] = [];
 
   /**
    * The user's approved transfers for each token ID.
    *
-   * @generated from field: repeated badges.UserOutgoingApproval defaultOutgoingApprovals = 15;
+   * @generated from field: repeated badges.UserOutgoingApproval defaultOutgoingApprovals = 12;
    */
   defaultOutgoingApprovals: UserOutgoingApproval[] = [];
 
   /**
    * The user's approved incoming transfers for each token ID.
    *
-   * @generated from field: repeated badges.UserIncomingApproval defaultIncomingApprovals = 16;
+   * @generated from field: repeated badges.UserIncomingApproval defaultIncomingApprovals = 13;
    */
   defaultIncomingApprovals: UserIncomingApproval[] = [];
 
   /**
-   * @generated from field: bool defaultDisapproveSelfInitiated = 17;
+   * @generated from field: bool defaultDisapproveSelfInitiated = 14;
    */
   defaultDisapproveSelfInitiated = false;
 
   /**
    * The default balances for the user
    *
-   * @generated from field: repeated badges.Balance defaultBalances = 18;
+   * @generated from field: repeated badges.Balance defaultBalances = 15;
    */
   defaultBalances: Balance[] = [];
 
   /**
-   * @generated from field: repeated badges.CosmosCoinWrapperPathAddObject cosmosCoinWrapperPathsToAdd = 19;
+   * @generated from field: repeated badges.CosmosCoinWrapperPathAddObject cosmosCoinWrapperPathsToAdd = 16;
    */
   cosmosCoinWrapperPathsToAdd: CosmosCoinWrapperPathAddObject[] = [];
 
@@ -259,21 +249,19 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
     { no: 3, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
-    { no: 4, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
-    { no: 5, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
-    { no: 6, name: "balancesType", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 8, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 9, name: "permissions", kind: "message", T: CollectionPermissions },
-    { no: 10, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 11, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
-    { no: 12, name: "transfers", kind: "message", T: Transfer, repeated: true },
-    { no: 13, name: "contractAddressTimeline", kind: "message", T: ContractAddressTimeline, repeated: true },
-    { no: 14, name: "addressLists", kind: "message", T: AddressList, repeated: true },
-    { no: 15, name: "defaultOutgoingApprovals", kind: "message", T: UserOutgoingApproval, repeated: true },
-    { no: 16, name: "defaultIncomingApprovals", kind: "message", T: UserIncomingApproval, repeated: true },
-    { no: 17, name: "defaultDisapproveSelfInitiated", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 18, name: "defaultBalances", kind: "message", T: Balance, repeated: true },
-    { no: 19, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
+    { no: 4, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
+    { no: 5, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
+    { no: 6, name: "permissions", kind: "message", T: CollectionPermissions },
+    { no: 7, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
+    { no: 8, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
+    { no: 9, name: "transfers", kind: "message", T: Transfer, repeated: true },
+    { no: 10, name: "contractAddressTimeline", kind: "message", T: ContractAddressTimeline, repeated: true },
+    { no: 11, name: "addressLists", kind: "message", T: AddressList, repeated: true },
+    { no: 12, name: "defaultOutgoingApprovals", kind: "message", T: UserOutgoingApproval, repeated: true },
+    { no: 13, name: "defaultIncomingApprovals", kind: "message", T: UserIncomingApproval, repeated: true },
+    { no: 14, name: "defaultDisapproveSelfInitiated", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 15, name: "defaultBalances", kind: "message", T: Balance, repeated: true },
+    { no: 16, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgNewCollection {
@@ -359,27 +347,22 @@ export class MsgMintAndDistributeBadges extends Message<MsgMintAndDistributeBadg
   transfers: Transfer[] = [];
 
   /**
-   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 6;
+   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 5;
    */
   collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
 
   /**
-   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 7;
+   * @generated from field: repeated badges.BadgeMetadataTimeline badgeMetadataTimeline = 6;
    */
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
-   * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 8;
-   */
-  offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline[] = [];
-
-  /**
-   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 9;
+   * @generated from field: repeated badges.CollectionApproval collectionApprovals = 7;
    */
   collectionApprovals: CollectionApproval[] = [];
 
   /**
-   * @generated from field: repeated badges.AddressList addressLists = 10;
+   * @generated from field: repeated badges.AddressList addressLists = 8;
    */
   addressLists: AddressList[] = [];
 
@@ -395,11 +378,10 @@ export class MsgMintAndDistributeBadges extends Message<MsgMintAndDistributeBadg
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "badgesToCreate", kind: "message", T: Balance, repeated: true },
     { no: 4, name: "transfers", kind: "message", T: Transfer, repeated: true },
-    { no: 6, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 7, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
-    { no: 8, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
-    { no: 9, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 10, name: "addressLists", kind: "message", T: AddressList, repeated: true },
+    { no: 5, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
+    { no: 6, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
+    { no: 7, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
+    { no: 8, name: "addressLists", kind: "message", T: AddressList, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgMintAndDistributeBadges {
@@ -563,22 +545,17 @@ export class MsgUpdateMetadata extends Message<MsgUpdateMetadata> {
   badgeMetadataTimeline: BadgeMetadataTimeline[] = [];
 
   /**
-   * @generated from field: repeated badges.OffChainBalancesMetadataTimeline offChainBalancesMetadataTimeline = 5;
-   */
-  offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline[] = [];
-
-  /**
-   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 6;
+   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 5;
    */
   customDataTimeline: CustomDataTimeline[] = [];
 
   /**
-   * @generated from field: repeated badges.ContractAddressTimeline contractAddressTimeline = 7;
+   * @generated from field: repeated badges.ContractAddressTimeline contractAddressTimeline = 6;
    */
   contractAddressTimeline: ContractAddressTimeline[] = [];
 
   /**
-   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 8;
+   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 7;
    */
   standardsTimeline: StandardsTimeline[] = [];
 
@@ -594,10 +571,9 @@ export class MsgUpdateMetadata extends Message<MsgUpdateMetadata> {
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
     { no: 4, name: "badgeMetadataTimeline", kind: "message", T: BadgeMetadataTimeline, repeated: true },
-    { no: 5, name: "offChainBalancesMetadataTimeline", kind: "message", T: OffChainBalancesMetadataTimeline, repeated: true },
-    { no: 6, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
-    { no: 7, name: "contractAddressTimeline", kind: "message", T: ContractAddressTimeline, repeated: true },
-    { no: 8, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
+    { no: 5, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
+    { no: 6, name: "contractAddressTimeline", kind: "message", T: ContractAddressTimeline, repeated: true },
+    { no: 7, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateMetadata {
