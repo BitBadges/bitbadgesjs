@@ -30,7 +30,6 @@ import {
   CustomDataTimeline,
   IsArchivedTimeline,
   ManagerTimeline,
-  OffChainBalancesMetadataTimeline,
   StandardsTimeline,
   UpdateHistory
 } from '@/core/misc.js';
@@ -59,7 +58,6 @@ import {
   iCreatorCreditsDoc,
   iDynamicDataDoc,
   iEstimatedCost,
-  iEvent,
   iFloorPriceHistory,
   iInheritMetadataFrom,
   iLinkedTo,
@@ -308,8 +306,6 @@ export class CollectionDoc<T extends NumberType>
   collectionId: CollectionId;
   collectionMetadataTimeline: CollectionMetadataTimeline<T>[];
   badgeMetadataTimeline: BadgeMetadataTimeline<T>[];
-  balancesType: 'Standard' | 'Off-Chain - Indexed' | 'Non-Public' | 'Off-Chain - Non-Indexed';
-  offChainBalancesMetadataTimeline: OffChainBalancesMetadataTimeline<T>[];
   customDataTimeline: CustomDataTimeline<T>[];
   managerTimeline: ManagerTimeline<T>[];
   collectionPermissions: CollectionPermissions<T>;
@@ -335,10 +331,7 @@ export class CollectionDoc<T extends NumberType>
       (collectionMetadataTimeline) => new CollectionMetadataTimeline(collectionMetadataTimeline)
     );
     this.badgeMetadataTimeline = data.badgeMetadataTimeline.map((badgeMetadataTimeline) => new BadgeMetadataTimeline(badgeMetadataTimeline));
-    this.balancesType = data.balancesType;
-    this.offChainBalancesMetadataTimeline = data.offChainBalancesMetadataTimeline.map(
-      (offChainBalancesMetadataTimeline) => new OffChainBalancesMetadataTimeline(offChainBalancesMetadataTimeline)
-    );
+
     this.customDataTimeline = data.customDataTimeline.map((customDataTimeline) => new CustomDataTimeline(customDataTimeline));
     this.managerTimeline = data.managerTimeline.map((managerTimeline) => new ManagerTimeline(managerTimeline));
     this.collectionPermissions = new CollectionPermissions(data.collectionPermissions);
@@ -363,7 +356,6 @@ export class CollectionDoc<T extends NumberType>
       manager: getValueAtTimeForTimeline(coll.managerTimeline, time)?.manager,
       collectionMetadata: getValueAtTimeForTimeline(coll.collectionMetadataTimeline, time)?.collectionMetadata,
       badgeMetadata: getValueAtTimeForTimeline(coll.badgeMetadataTimeline, time)?.badgeMetadata ?? [],
-      offChainBalancesMetadata: getValueAtTimeForTimeline(coll.offChainBalancesMetadataTimeline, time)?.offChainBalancesMetadata,
       customData: getValueAtTimeForTimeline(coll.customDataTimeline, time)?.customData,
       standards: getValueAtTimeForTimeline(coll.standardsTimeline, time)?.standards,
       isArchived: getValueAtTimeForTimeline(coll.isArchivedTimeline, time)?.isArchived
@@ -393,13 +385,6 @@ export class CollectionDoc<T extends NumberType>
    */
   getBadgeMetadataTimelineValue(time?: NumberType) {
     return this.getTimelineValuesAtTime(time).badgeMetadata;
-  }
-
-  /**
-   * Gets the off-chain balances metadata at a specific time (Date.now() by default).
-   */
-  getOffChainBalancesMetadata(time?: NumberType) {
-    return this.getTimelineValuesAtTime(time).offChainBalancesMetadata;
   }
 
   /**

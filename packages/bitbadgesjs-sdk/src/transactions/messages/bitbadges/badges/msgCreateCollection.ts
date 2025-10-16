@@ -10,7 +10,6 @@ import {
   CustomDataTimeline,
   IsArchivedTimeline,
   ManagerTimeline,
-  OffChainBalancesMetadataTimeline,
   StandardsTimeline
 } from '@/core/misc.js';
 import { CollectionPermissions } from '@/core/permissions.js';
@@ -34,14 +33,12 @@ import { CollectionInvariants } from '@/core/misc.js';
  */
 export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeClass<MsgCreateCollection<T>> implements iMsgCreateCollection<T> {
   creator: BitBadgesAddress;
-  balancesType?: string;
   defaultBalances?: UserBalanceStore<T>;
   validBadgeIds?: UintRangeArray<T>;
   collectionPermissions?: CollectionPermissions<T>;
   managerTimeline?: ManagerTimeline<T>[];
   collectionMetadataTimeline?: CollectionMetadataTimeline<T>[];
   badgeMetadataTimeline?: BadgeMetadataTimeline<T>[];
-  offChainBalancesMetadataTimeline?: OffChainBalancesMetadataTimeline<T>[];
   customDataTimeline?: CustomDataTimeline<T>[];
   collectionApprovals?: CollectionApproval<T>[];
   standardsTimeline?: StandardsTimeline<T>[];
@@ -53,14 +50,12 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
   constructor(msg: iMsgCreateCollection<T>) {
     super();
     this.creator = msg.creator;
-    this.balancesType = msg.balancesType;
     this.defaultBalances = msg.defaultBalances ? new UserBalanceStore(msg.defaultBalances) : undefined;
     this.validBadgeIds = msg.validBadgeIds ? UintRangeArray.From(msg.validBadgeIds) : undefined;
     this.collectionPermissions = msg.collectionPermissions ? new CollectionPermissions(msg.collectionPermissions) : undefined;
     this.managerTimeline = msg.managerTimeline?.map((x) => new ManagerTimeline(x));
     this.collectionMetadataTimeline = msg.collectionMetadataTimeline?.map((x) => new CollectionMetadataTimeline(x));
     this.badgeMetadataTimeline = msg.badgeMetadataTimeline?.map((x) => new BadgeMetadataTimeline(x));
-    this.offChainBalancesMetadataTimeline = msg.offChainBalancesMetadataTimeline?.map((x) => new OffChainBalancesMetadataTimeline(x));
     this.customDataTimeline = msg.customDataTimeline?.map((x) => new CustomDataTimeline(x));
     this.collectionApprovals = msg.collectionApprovals?.map((x) => new CollectionApproval(x));
     this.standardsTimeline = msg.standardsTimeline?.map((x) => new StandardsTimeline(x));
@@ -100,7 +95,6 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
   ): MsgCreateCollection<U> {
     return new MsgCreateCollection({
       creator: protoMsg.creator,
-      balancesType: protoMsg.balancesType,
       defaultBalances: protoMsg.defaultBalances ? UserBalanceStore.fromProto(protoMsg.defaultBalances, convertFunction) : undefined,
       validBadgeIds: protoMsg.validBadgeIds?.map((x) => UintRange.fromProto(x, convertFunction)),
       collectionPermissions: protoMsg.collectionPermissions
@@ -109,9 +103,6 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
       managerTimeline: protoMsg.managerTimeline?.map((x) => ManagerTimeline.fromProto(x, convertFunction)),
       collectionMetadataTimeline: protoMsg.collectionMetadataTimeline?.map((x) => CollectionMetadataTimeline.fromProto(x, convertFunction)),
       badgeMetadataTimeline: protoMsg.badgeMetadataTimeline?.map((x) => BadgeMetadataTimeline.fromProto(x, convertFunction)),
-      offChainBalancesMetadataTimeline: protoMsg.offChainBalancesMetadataTimeline?.map((x) =>
-        OffChainBalancesMetadataTimeline.fromProto(x, convertFunction)
-      ),
       customDataTimeline: protoMsg.customDataTimeline?.map((x) => CustomDataTimeline.fromProto(x, convertFunction)),
       collectionApprovals: protoMsg.collectionApprovals?.map((x) => CollectionApproval.fromProto(x, convertFunction)),
       standardsTimeline: protoMsg.standardsTimeline?.map((x) => StandardsTimeline.fromProto(x, convertFunction)),

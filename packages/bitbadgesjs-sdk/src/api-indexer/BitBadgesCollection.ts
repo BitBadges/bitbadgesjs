@@ -14,7 +14,6 @@ import {
   CustomDataTimeline,
   IsArchivedTimeline,
   ManagerTimeline,
-  OffChainBalancesMetadataTimeline,
   StandardsTimeline
 } from '@/core/misc.js';
 import type { PermissionNameString } from '@/core/permission-utils.js';
@@ -525,20 +524,6 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Validates if a state transition (old off-chain balances metadata -> new off-chain balances metadata) is valid, given the current state of the collection and its permissions.
-   *
-   * Wrapper for {@link OffChainBalancesMetadataTimeline.validateUpdate}.
-   */
-  validateOffChainBalancesMetadataUpdate(newOffChainBalancesMetadata: OffChainBalancesMetadataTimeline<T>[]): Error | null {
-    const result = OffChainBalancesMetadataTimeline.validateUpdate(
-      this.offChainBalancesMetadataTimeline,
-      newOffChainBalancesMetadata,
-      this.collectionPermissions.canUpdateOffChainBalancesMetadata
-    );
-    return result;
-  }
-
-  /**
    * Validates if a state transition (old custom data -> new custom data) is valid, given the current state of the collection and its permissions.
    *
    * Wrapper for {@link CustomDataTimeline.validateUpdate}.
@@ -613,18 +598,6 @@ export class BitBadgesCollection<T extends NumberType>
     );
   }
 
-  /**
-   * Checks if this permission is executable for the provided values at a specific time (Date.now() by default).
-   *
-   * Wrapper for {@link TimedUpdatePermission.check}.
-   */
-  checkCanUpdateOffChainBalancesMetadata(timelineTimes: iUintRange<T>[], time?: NumberType) {
-    return TimedUpdatePermission.check(
-      UintRangeArray.From(timelineTimes.map((x) => new UintRange(x).convert(BigIntify))),
-      this.convert(BigIntify).collectionPermissions.canUpdateOffChainBalancesMetadata,
-      time ? BigInt(time) : BigInt(Date.now())
-    );
-  }
   /**
    * Checks if this permission is executable for the provided values at a specific time (Date.now() by default).
    *

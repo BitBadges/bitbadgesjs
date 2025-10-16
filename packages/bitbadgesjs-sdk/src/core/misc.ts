@@ -18,8 +18,8 @@ import {
   CustomTypeClass,
   deepCopyPrimitives
 } from '@/common/base.js';
-import { DenomUnit, DenomUnitWithDetails } from '@/core/ibc-wrappers.js';
 import { Balance } from '@/core/balances.js';
+import { DenomUnit, DenomUnitWithDetails } from '@/core/ibc-wrappers.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import type {
@@ -30,10 +30,13 @@ import type {
   iBadgeMetadataTimeline,
   iBadgeMetadataTimelineWithDetails,
   iCoinTransfer,
+  iCollectionInvariants,
   iCollectionMetadata,
   iCollectionMetadataTimeline,
   iCollectionMetadataTimelineWithDetails,
   iCustomDataTimeline,
+  iETHSignatureChallenge,
+  iETHSignatureProof,
   iIsArchivedTimeline,
   iManagerTimeline,
   iMerkleChallenge,
@@ -41,13 +44,8 @@ import type {
   iMerkleProof,
   iMustOwnBadge,
   iMustOwnBadges,
-  iOffChainBalancesMetadata,
-  iOffChainBalancesMetadataTimeline,
   iStandardsTimeline,
-  iTimelineItem,
-  iETHSignatureChallenge,
-  iETHSignatureProof,
-  iCollectionInvariants
+  iTimelineItem
 } from '../interfaces/types/core.js';
 import * as protobadges from '../proto/badges/index.js';
 import { AddressList } from './addressLists.js';
@@ -170,44 +168,6 @@ export class CollectionMetadata extends CustomTypeClass<CollectionMetadata> impl
 
   static fromProto(item: protobadges.CollectionMetadata): CollectionMetadata {
     return new CollectionMetadata({
-      uri: item.uri,
-      customData: item.customData
-    });
-  }
-}
-
-/**
- * OffChainBalancesMetadata represents the metadata of the off-chain balances
- *
- * @category Balances
- */
-export class OffChainBalancesMetadata extends CustomTypeClass<OffChainBalancesMetadata> implements OffChainBalancesMetadata {
-  uri: string;
-  customData: string;
-
-  constructor(offChainBalancesMetadata: iOffChainBalancesMetadata) {
-    super();
-    this.uri = offChainBalancesMetadata.uri;
-    this.customData = offChainBalancesMetadata.customData;
-  }
-
-  toProto(): protobadges.OffChainBalancesMetadata {
-    return new protobadges.OffChainBalancesMetadata({
-      uri: this.uri,
-      customData: this.customData
-    });
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OffChainBalancesMetadata {
-    return OffChainBalancesMetadata.fromProto(protobadges.OffChainBalancesMetadata.fromJson(jsonValue, options));
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OffChainBalancesMetadata {
-    return OffChainBalancesMetadata.fromProto(protobadges.OffChainBalancesMetadata.fromJsonString(jsonString, options));
-  }
-
-  static fromProto(item: protobadges.OffChainBalancesMetadata): OffChainBalancesMetadata {
-    return new OffChainBalancesMetadata({
       uri: item.uri,
       customData: item.customData
     });
@@ -963,86 +923,6 @@ export class BadgeMetadataTimeline<T extends NumberType> extends BaseNumberTypeC
 }
 
 /**
- * OffChainBalancesMetadataTimeline represents the value of the off-chain balances metadata over time
- *
- * @category Timelines
- */
-export class OffChainBalancesMetadataTimeline<T extends NumberType>
-  extends BaseNumberTypeClass<OffChainBalancesMetadataTimeline<T>>
-  implements iOffChainBalancesMetadataTimeline<T>
-{
-  offChainBalancesMetadata: OffChainBalancesMetadata;
-  timelineTimes: UintRangeArray<T>;
-
-  constructor(offChainBalancesMetadataTimeline: iOffChainBalancesMetadataTimeline<T>) {
-    super();
-    this.offChainBalancesMetadata = new OffChainBalancesMetadata(offChainBalancesMetadataTimeline.offChainBalancesMetadata);
-    this.timelineTimes = UintRangeArray.From(offChainBalancesMetadataTimeline.timelineTimes);
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OffChainBalancesMetadataTimeline<U> {
-    return new OffChainBalancesMetadataTimeline<U>(
-      deepCopyPrimitives({
-        offChainBalancesMetadata: this.offChainBalancesMetadata,
-        timelineTimes: this.timelineTimes.map((b) => b.convert(convertFunction))
-      })
-    );
-  }
-
-  toProto(): protobadges.OffChainBalancesMetadataTimeline {
-    return new protobadges.OffChainBalancesMetadataTimeline(this.convert(Stringify));
-  }
-
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): OffChainBalancesMetadataTimeline<U> {
-    return OffChainBalancesMetadataTimeline.fromProto(protobadges.OffChainBalancesMetadataTimeline.fromJson(jsonValue, options), convertFunction);
-  }
-
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): OffChainBalancesMetadataTimeline<U> {
-    return OffChainBalancesMetadataTimeline.fromProto(
-      protobadges.OffChainBalancesMetadataTimeline.fromJsonString(jsonString, options),
-      convertFunction
-    );
-  }
-
-  static fromProto<U extends NumberType>(
-    item: protobadges.OffChainBalancesMetadataTimeline,
-    convertFunction: (item: NumberType) => U
-  ): OffChainBalancesMetadataTimeline<U> {
-    if (!item.offChainBalancesMetadata) {
-      throw new Error('OffChainBalancesMetadataTimeline: offChainBalancesMetadata is required');
-    }
-
-    return new OffChainBalancesMetadataTimeline<U>({
-      offChainBalancesMetadata: OffChainBalancesMetadata.fromProto(item.offChainBalancesMetadata),
-      timelineTimes: item.timelineTimes.map((b) => UintRange.fromProto(b, convertFunction))
-    });
-  }
-
-  /**
-   * Wrapper for {@link validateOffChainBalancesMetadataUpdate}
-   */
-  static validateUpdate<T extends NumberType>(
-    oldOffChainBalancesMetadata: OffChainBalancesMetadataTimeline<T>[],
-    newOffChainBalancesMetadata: OffChainBalancesMetadataTimeline<T>[],
-    canUpdateOffChainBalancesMetadata: TimedUpdatePermission<T>[]
-  ): Error | null {
-    return validateOffChainBalancesMetadataUpdate(
-      oldOffChainBalancesMetadata.map((b) => b.convert(BigIntify)),
-      newOffChainBalancesMetadata.map((b) => b.convert(BigIntify)),
-      canUpdateOffChainBalancesMetadata.map((b) => b.convert(BigIntify))
-    );
-  }
-}
-
-/**
  * CustomDataTimeline represents the value of some arbitrary custom data over time
  *
  * @category Timelines
@@ -1465,82 +1345,6 @@ export function validateCollectionMetadataUpdate<T extends NumberType>(
 }
 
 /**
- * Validates a state transition (old to new) for the timeline, given the current permissions that are set.
- *
- * @remarks
- * Can also be used via the corresponding wrapper function in BitBadgesCollection
- *
- * @category Timelines
- */
-export function validateOffChainBalancesMetadataUpdate<T extends NumberType>(
-  oldOffChainBalancesMetadata: OffChainBalancesMetadataTimeline<T>[],
-  newOffChainBalancesMetadata: OffChainBalancesMetadataTimeline<T>[],
-  canUpdateOffChainBalancesMetadata: TimedUpdatePermission<T>[]
-): Error | null {
-  const { times: oldTimes, values: oldValues } = getOffChainBalancesMetadataTimesAndValues(
-    oldOffChainBalancesMetadata.map((b) => b.convert(BigIntify))
-  );
-  const oldTimelineFirstMatches = getPotentialUpdatesForTimelineValues(oldTimes, oldValues);
-
-  const { times: newTimes, values: newValues } = getOffChainBalancesMetadataTimesAndValues(
-    newOffChainBalancesMetadata.map((b) => b.convert(BigIntify))
-  );
-  const newTimelineFirstMatches = getPotentialUpdatesForTimelineValues(newTimes, newValues);
-
-  const detailsToCheck = getUpdateCombinationsToCheck(oldTimelineFirstMatches, newTimelineFirstMatches, {}, function (oldValue: any, newValue: any) {
-    const detailsToCheck: UniversalPermissionDetails[] = [];
-
-    if (oldValue === null && newValue !== null) {
-      detailsToCheck.push({
-        timelineTime: new UintRange({ start: 1n, end: 1n }),
-        badgeId: new UintRange({ start: 1n, end: 1n }),
-        ownershipTime: new UintRange({ start: 1n, end: 1n }),
-        transferTime: new UintRange({ start: 1n, end: 1n }),
-        toList: AddressList.AllAddresses(),
-        fromList: AddressList.AllAddresses(),
-        initiatedByList: AddressList.AllAddresses(),
-        approvalIdList: AddressList.AllAddresses(),
-        permanentlyPermittedTimes: UintRangeArray.From([]),
-        permanentlyForbiddenTimes: UintRangeArray.From([]),
-        arbitraryValue: undefined
-      });
-    } else {
-      const oldVal = oldValue as OffChainBalancesMetadata;
-      const newVal = newValue as OffChainBalancesMetadata;
-
-      if (oldVal.uri !== newVal.uri || oldVal.customData !== newVal.customData) {
-        detailsToCheck.push({
-          timelineTime: new UintRange({ start: 1n, end: 1n }),
-          badgeId: new UintRange({ start: 1n, end: 1n }),
-          ownershipTime: new UintRange({ start: 1n, end: 1n }),
-          transferTime: new UintRange({ start: 1n, end: 1n }),
-          toList: AddressList.AllAddresses(),
-          fromList: AddressList.AllAddresses(),
-          initiatedByList: AddressList.AllAddresses(),
-          approvalIdList: AddressList.AllAddresses(),
-          permanentlyPermittedTimes: UintRangeArray.From([]),
-          permanentlyForbiddenTimes: UintRangeArray.From([]),
-          arbitraryValue: undefined
-        });
-      }
-    }
-    return detailsToCheck;
-  });
-
-  const details = UintRangeArray.From(detailsToCheck.map((x) => x.timelineTime));
-
-  const err = TimedUpdatePermission.check(
-    details,
-    canUpdateOffChainBalancesMetadata.map((b) => b.convert(BigIntify))
-  );
-  if (err) {
-    return err;
-  }
-
-  return null;
-}
-
-/**
  * Validates if an update of standards (old -> new) is valid according to the permissions
  *
  * @category Validate Updates
@@ -1764,23 +1568,6 @@ export function getIsArchivedTimesAndValues<T extends NumberType>(
   for (const timelineVal of isArchivedTimeline) {
     times.push(timelineVal.timelineTimes);
     values.push(timelineVal.isArchived);
-  }
-
-  return { times, values };
-}
-
-/**
- * @category Timelines
- */
-export function getOffChainBalancesMetadataTimesAndValues<T extends NumberType>(
-  inheritedBalancesMetadata: OffChainBalancesMetadataTimeline<T>[]
-): { times: UintRangeArray<T>[]; values: OffChainBalancesMetadata[] } {
-  const times: UintRangeArray<T>[] = [];
-  const values: OffChainBalancesMetadata[] = [];
-
-  for (const timelineVal of inheritedBalancesMetadata) {
-    times.push(timelineVal.timelineTimes);
-    values.push(timelineVal.offChainBalancesMetadata);
   }
 
   return { times, values };

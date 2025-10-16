@@ -87,8 +87,6 @@ export interface iCollectionPermissions<T extends NumberType> {
   canDeleteCollection: iActionPermission<T>[];
   /** The permissions for archiving the collection. */
   canArchiveCollection: iTimedUpdatePermission<T>[];
-  /** The permissions for updating the off-chain balances metadata. */
-  canUpdateOffChainBalancesMetadata: iTimedUpdatePermission<T>[];
   /** The permissions for updating the standards. */
   canUpdateStandards: iTimedUpdatePermission<T>[];
   /** The permissions for updating the custom data. */

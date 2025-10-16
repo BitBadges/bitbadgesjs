@@ -1,14 +1,4 @@
 /**
- * BitBadges Betanet chain details.
- *
- * @category Chain Details
- */
-export const BETANET_CHAIN_DETAILS = {
-  chainId: 1,
-  cosmosChainId: 'bitbadges-1'
-};
-
-/**
  * BitBadges Testnet chain details.
  *
  * @category Chain Details
@@ -23,16 +13,9 @@ export const TESTNET_CHAIN_DETAILS = {
  *
  * @category Chain Details
  */
-export const MAINNET_CHAIN_DETAILS = BETANET_CHAIN_DETAILS;
-
-/**
- * Thorchain chain details.
- *
- * @category Chain Details
- */
-export const THORCHAIN_CHAIN_DETAILS = {
+export const MAINNET_CHAIN_DETAILS = {
   chainId: 1,
-  cosmosChainId: 'thorchain'
+  cosmosChainId: 'bitbadges-1'
 };
 
 /**
@@ -148,7 +131,8 @@ export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
     symbol: 'CHAOS',
     decimals: '9',
     baseDenom: 'badges:49:chaosnet',
-    image: 'https://bitbadges.io/_next/image?url=https%3A%2F%2Fbitbadges-ipfs.infura-ipfs.io%2Fipfs%2FQmdRQUvQBo6p24RQ7AS7RD6srqyUjoHJ5Cjs4p22zie9bQ&w=1920&q=75'
+    image:
+      'https://bitbadges.io/_next/image?url=https%3A%2F%2Fbitbadges-ipfs.infura-ipfs.io%2Fipfs%2FQmdRQUvQBo6p24RQ7AS7RD6srqyUjoHJ5Cjs4p22zie9bQ&w=1920&q=75'
   },
   'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349': {
     skipGoSupported: true,

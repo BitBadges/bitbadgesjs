@@ -4,7 +4,6 @@ import type {
   CustomDataTimeline,
   IsArchivedTimeline,
   ManagerTimeline,
-  OffChainBalancesMetadataTimeline,
   StandardsTimeline,
   TimelineItem
 } from './misc.js';
@@ -122,18 +121,6 @@ export function getFullCollectionMetadataTimeline<U extends bigint>(timeline: Co
  */
 export function getFullBadgeMetadataTimeline<U extends bigint>(timeline: BadgeMetadataTimeline<U>[]): BadgeMetadataTimeline<U>[] {
   return getFullTimeline(timeline, 'badgeMetadata', []);
-}
-
-/**
- * @category Timelines
- */
-export function getOffChainBalancesMetadataTimeline<U extends bigint>(
-  timeline: OffChainBalancesMetadataTimeline<U>[]
-): OffChainBalancesMetadataTimeline<U>[] {
-  return getFullTimeline(timeline, 'offChainBalancesMetadata', {
-    uri: '',
-    customData: ''
-  });
 }
 
 /**

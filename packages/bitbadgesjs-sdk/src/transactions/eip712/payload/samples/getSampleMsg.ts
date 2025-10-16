@@ -54,8 +54,6 @@ import {
   MsgUpdateCollection,
   MsgUpdateUserApprovals,
   MustOwnBadges,
-  OffChainBalancesMetadata,
-  OffChainBalancesMetadataTimeline,
   OutgoingApprovalCriteria,
   PrecalculationOptions,
   PredeterminedBalances,
@@ -417,6 +415,10 @@ function populateETHSignatureChallenges(ethSignatureChallenges?: ETHSignatureCha
 
 export function populateUndefinedForMsgTransferBadges(msg: MsgTransferBadges) {
   for (const transfer of msg.transfers) {
+    if (!transfer.numAttempts) {
+      transfer.numAttempts = '0';
+    }
+
     if (!transfer.precalculateBalancesFromApproval) {
       transfer.precalculateBalancesFromApproval = new ApprovalIdentifierDetails({
         version: '0'
@@ -601,12 +603,6 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
   for (const metadata of msg.collectionMetadataTimeline) {
     if (!metadata.collectionMetadata) {
       metadata.collectionMetadata = new CollectionMetadata();
-    }
-  }
-
-  for (const metadata of msg.offChainBalancesMetadataTimeline) {
-    if (!metadata.offChainBalancesMetadata) {
-      metadata.offChainBalancesMetadata = new OffChainBalancesMetadata();
     }
   }
 
@@ -928,12 +924,6 @@ const universalParams = {
       ]
     })
   ],
-  offChainBalancesMetadataTimeline: [
-    new OffChainBalancesMetadataTimeline({
-      timelineTimes: [new UintRange()],
-      offChainBalancesMetadata: new OffChainBalancesMetadata()
-    })
-  ],
   customDataTimeline: [
     new CustomDataTimeline({
       timelineTimes: [new UintRange()]
@@ -969,13 +959,6 @@ const universalParams = {
       })
     ],
     canArchiveCollection: [
-      new TimedUpdatePermission({
-        permanentlyPermittedTimes: [new UintRange()],
-        permanentlyForbiddenTimes: [new UintRange()],
-        timelineTimes: [new UintRange()]
-      })
-    ],
-    canUpdateOffChainBalancesMetadata: [
       new TimedUpdatePermission({
         permanentlyPermittedTimes: [new UintRange()],
         permanentlyForbiddenTimes: [new UintRange()],

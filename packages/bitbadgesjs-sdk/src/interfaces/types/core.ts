@@ -59,21 +59,6 @@ export interface iCollectionMetadata {
 /**
  * @category Interfaces
  */
-export interface iOffChainBalancesMetadata {
-  /**
-   * The URI where to fetch the off-chain balances metadata from.
-   */
-  uri: string;
-
-  /**
-   * Arbitrary custom data that can be stored on-chain
-   */
-  customData: string;
-}
-
-/**
- * @category Interfaces
- */
 export interface iMustOwnBadges<T extends NumberType> {
   /**
    * The collection IDs to own.
@@ -598,16 +583,6 @@ export interface iBadgeMetadataTimelineWithDetails<T extends NumberType> extends
    * The token metadata, with off-chain details populated.
    */
   badgeMetadata: iBadgeMetadataDetails<T>[];
-}
-
-/**
- * @category Interfaces
- */
-export interface iOffChainBalancesMetadataTimeline<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * The off-chain balances metadata.
-   */
-  offChainBalancesMetadata: iOffChainBalancesMetadata;
 }
 
 /**

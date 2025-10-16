@@ -14,7 +14,6 @@ import {
   CustomDataTimeline,
   IsArchivedTimeline,
   ManagerTimeline,
-  OffChainBalancesMetadataTimeline,
   StandardsTimeline
 } from '@/core/misc.js';
 import { CollectionPermissions } from '@/core/permissions.js';
@@ -47,8 +46,6 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
   collectionMetadataTimeline?: CollectionMetadataTimeline<T>[];
   updateBadgeMetadataTimeline?: boolean;
   badgeMetadataTimeline?: BadgeMetadataTimeline<T>[];
-  updateOffChainBalancesMetadataTimeline?: boolean;
-  offChainBalancesMetadataTimeline?: OffChainBalancesMetadataTimeline<T>[];
   updateCustomDataTimeline?: boolean;
   customDataTimeline?: CustomDataTimeline<T>[];
   updateCollectionApprovals?: boolean;
@@ -76,10 +73,6 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
       : undefined;
     this.updateBadgeMetadataTimeline = msg.updateBadgeMetadataTimeline;
     this.badgeMetadataTimeline = msg.badgeMetadataTimeline ? msg.badgeMetadataTimeline.map((x) => new BadgeMetadataTimeline(x)) : undefined;
-    this.updateOffChainBalancesMetadataTimeline = msg.updateOffChainBalancesMetadataTimeline;
-    this.offChainBalancesMetadataTimeline = msg.offChainBalancesMetadataTimeline
-      ? msg.offChainBalancesMetadataTimeline.map((x) => new OffChainBalancesMetadataTimeline(x))
-      : undefined;
     this.updateCustomDataTimeline = msg.updateCustomDataTimeline;
     this.customDataTimeline = msg.customDataTimeline ? msg.customDataTimeline.map((x) => new CustomDataTimeline(x)) : undefined;
     this.updateCollectionApprovals = msg.updateCollectionApprovals;
@@ -141,10 +134,6 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
       collectionMetadataTimeline: protoMsg.collectionMetadataTimeline?.map((x) => CollectionMetadataTimeline.fromProto(x, convertFunction)),
       updateBadgeMetadataTimeline: protoMsg.updateBadgeMetadataTimeline,
       badgeMetadataTimeline: protoMsg.badgeMetadataTimeline?.map((x) => BadgeMetadataTimeline.fromProto(x, convertFunction)),
-      updateOffChainBalancesMetadataTimeline: protoMsg.updateOffChainBalancesMetadataTimeline,
-      offChainBalancesMetadataTimeline: protoMsg.offChainBalancesMetadataTimeline?.map((x) =>
-        OffChainBalancesMetadataTimeline.fromProto(x, convertFunction)
-      ),
       updateCustomDataTimeline: protoMsg.updateCustomDataTimeline,
       customDataTimeline: protoMsg.customDataTimeline?.map((x) => CustomDataTimeline.fromProto(x, convertFunction)),
       updateCollectionApprovals: protoMsg.updateCollectionApprovals,

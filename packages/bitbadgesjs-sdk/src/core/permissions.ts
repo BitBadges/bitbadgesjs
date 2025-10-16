@@ -399,7 +399,6 @@ export class UserIncomingApprovalPermission<T extends NumberType>
 export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeClass<CollectionPermissions<T>> implements iCollectionPermissions<T> {
   canDeleteCollection: ActionPermission<T>[];
   canArchiveCollection: TimedUpdatePermission<T>[];
-  canUpdateOffChainBalancesMetadata: TimedUpdatePermission<T>[];
   canUpdateStandards: TimedUpdatePermission<T>[];
   canUpdateCustomData: TimedUpdatePermission<T>[];
   canUpdateManager: TimedUpdatePermission<T>[];
@@ -412,7 +411,6 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
     super();
     this.canDeleteCollection = msg.canDeleteCollection.map((x) => new ActionPermission(x));
     this.canArchiveCollection = msg.canArchiveCollection.map((x) => new TimedUpdatePermission(x));
-    this.canUpdateOffChainBalancesMetadata = msg.canUpdateOffChainBalancesMetadata.map((x) => new TimedUpdatePermission(x));
     this.canUpdateStandards = msg.canUpdateStandards.map((x) => new TimedUpdatePermission(x));
     this.canUpdateCustomData = msg.canUpdateCustomData.map((x) => new TimedUpdatePermission(x));
     this.canUpdateManager = msg.canUpdateManager.map((x) => new TimedUpdatePermission(x));
@@ -427,7 +425,6 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
       deepCopyPrimitives({
         canDeleteCollection: this.canDeleteCollection.map((x) => x.convert(convertFunction)),
         canArchiveCollection: this.canArchiveCollection.map((x) => x.convert(convertFunction)),
-        canUpdateOffChainBalancesMetadata: this.canUpdateOffChainBalancesMetadata.map((x) => x.convert(convertFunction)),
         canUpdateStandards: this.canUpdateStandards.map((x) => x.convert(convertFunction)),
         canUpdateCustomData: this.canUpdateCustomData.map((x) => x.convert(convertFunction)),
         canUpdateManager: this.canUpdateManager.map((x) => x.convert(convertFunction)),
@@ -466,7 +463,6 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
     return new CollectionPermissions({
       canDeleteCollection: protoMsg.canDeleteCollection.map((x) => ActionPermission.fromProto(x, convertFunction)),
       canArchiveCollection: protoMsg.canArchiveCollection.map((x) => TimedUpdatePermission.fromProto(x, convertFunction)),
-      canUpdateOffChainBalancesMetadata: protoMsg.canUpdateOffChainBalancesMetadata.map((x) => TimedUpdatePermission.fromProto(x, convertFunction)),
       canUpdateStandards: protoMsg.canUpdateStandards.map((x) => TimedUpdatePermission.fromProto(x, convertFunction)),
       canUpdateCustomData: protoMsg.canUpdateCustomData.map((x) => TimedUpdatePermission.fromProto(x, convertFunction)),
       canUpdateManager: protoMsg.canUpdateManager.map((x) => TimedUpdatePermission.fromProto(x, convertFunction)),
@@ -487,7 +483,6 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
       TimedUpdatePermission.validateUpdate(oldPermissions.canUpdateCustomData, newPermissions.canUpdateCustomData),
       TimedUpdatePermission.validateUpdate(oldPermissions.canUpdateStandards, newPermissions.canUpdateStandards),
       TimedUpdatePermission.validateUpdate(oldPermissions.canArchiveCollection, newPermissions.canArchiveCollection),
-      TimedUpdatePermission.validateUpdate(oldPermissions.canUpdateOffChainBalancesMetadata, newPermissions.canUpdateOffChainBalancesMetadata),
       TimedUpdatePermission.validateUpdate(oldPermissions.canUpdateCollectionMetadata, newPermissions.canUpdateCollectionMetadata),
       BadgeIdsActionPermission.validateUpdate(oldPermissions.canUpdateValidBadgeIds, newPermissions.canUpdateValidBadgeIds),
       TimedUpdateWithBadgeIdsPermission.validateUpdate(oldPermissions.canUpdateBadgeMetadata, newPermissions.canUpdateBadgeMetadata),
@@ -501,7 +496,6 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
     return new CollectionPermissions({
       canDeleteCollection: [],
       canArchiveCollection: [],
-      canUpdateOffChainBalancesMetadata: [],
       canUpdateStandards: [],
       canUpdateCustomData: [],
       canUpdateManager: [],

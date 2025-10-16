@@ -13,7 +13,6 @@ import type {
   iCustomDataTimeline,
   iIsArchivedTimeline,
   iManagerTimeline,
-  iOffChainBalancesMetadataTimeline,
   iStandardsTimeline,
   iTransfer,
   iUintRange,
@@ -46,9 +45,6 @@ export interface iMsgCreateCollection<T extends NumberType> {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
 
-  /** The balances type. Either "Standard", "Off-Chain - Indexed", "Off-Chain - Non-Indexed" or "Non-Public" */
-  balancesType?: string;
-
   /** The default balances for users who have not interacted with the collection yet. Only can be set on initial creation. Only used if collection has "Standard" balance type. */
   defaultBalances?: iUserBalanceStore<T>;
 
@@ -66,9 +62,6 @@ export interface iMsgCreateCollection<T extends NumberType> {
 
   /** The new token metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Note we take first-match only for token IDs, so do not define duplicates. */
   badgeMetadataTimeline?: iBadgeMetadataTimeline<T>[];
-
-  /** The new off-chain balances metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if "Off-Chain - Indexed" or "Off-Chain - Non-Indexed" balance type. */
-  offChainBalancesMetadataTimeline?: iOffChainBalancesMetadataTimeline<T>[];
 
   /** The new custom data timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. */
   customDataTimeline?: iCustomDataTimeline<T>[];
@@ -128,8 +121,6 @@ export interface iMsgUniversalUpdateCollection<T extends NumberType> extends iMs
   updateCollectionMetadataTimeline?: boolean;
   /** Whether or not to update the token metadata timeline. */
   updateBadgeMetadataTimeline?: boolean;
-  /** Whether or not to update the off-chain balances metadata timeline. */
-  updateOffChainBalancesMetadataTimeline?: boolean;
   /** Whether or not to update the custom data timeline. */
   updateCustomDataTimeline?: boolean;
   /** Whether or not to update the collection approved transfers timeline. */
@@ -145,7 +136,7 @@ export interface iMsgUniversalUpdateCollection<T extends NumberType> extends iMs
 /**
  * @category Interfaces
  */
-export interface iMsgUpdateCollection<T extends NumberType> extends Omit<iMsgUniversalUpdateCollection<T>, 'defaultBalances' | 'balancesType'> {}
+export interface iMsgUpdateCollection<T extends NumberType> extends Omit<iMsgUniversalUpdateCollection<T>, 'defaultBalances'> {}
 
 /**
  * @category Interfaces

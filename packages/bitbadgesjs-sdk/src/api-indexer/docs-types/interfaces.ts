@@ -24,7 +24,6 @@ import type {
   iDenomUnitWithDetails,
   iIsArchivedTimeline,
   iManagerTimeline,
-  iOffChainBalancesMetadataTimeline,
   iStandardsTimeline,
   iUintRange
 } from '@/interfaces/types/core.js';
@@ -490,10 +489,6 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   collectionMetadataTimeline: iCollectionMetadataTimeline<T>[];
   /** The token metadata timeline */
   badgeMetadataTimeline: iBadgeMetadataTimeline<T>[];
-  /** The type of balances (i.e. "Standard", "Off-Chain - Indexed", "Non-Public, "Off-Chain - Non-Indexed") */
-  balancesType: 'Standard' | 'Off-Chain - Indexed' | 'Non-Public' | 'Off-Chain - Non-Indexed';
-  /** The off-chain balances metadata timeline */
-  offChainBalancesMetadataTimeline: iOffChainBalancesMetadataTimeline<T>[];
   /** The custom data timeline */
   customDataTimeline: iCustomDataTimeline<T>[];
   /** The manager timeline */

@@ -8,7 +8,6 @@ import {
   CustomDataTimeline,
   IsArchivedTimeline,
   ManagerTimeline,
-  OffChainBalancesMetadataTimeline,
   StandardsTimeline
 } from '@/core/misc.js';
 import { CollectionPermissions } from '@/core/permissions.js';
@@ -49,7 +48,6 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
 {
   creator: BitBadgesAddress;
   collectionId: CollectionId;
-  balancesType?: string;
   defaultBalances?: UserBalanceStore<T>;
   updateValidBadgeIds?: boolean;
   validBadgeIds?: UintRangeArray<T>;
@@ -61,8 +59,6 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   collectionMetadataTimeline?: CollectionMetadataTimeline<T>[];
   updateBadgeMetadataTimeline?: boolean;
   badgeMetadataTimeline?: BadgeMetadataTimeline<T>[];
-  updateOffChainBalancesMetadataTimeline?: boolean;
-  offChainBalancesMetadataTimeline?: OffChainBalancesMetadataTimeline<T>[];
   updateCustomDataTimeline?: boolean;
   customDataTimeline?: CustomDataTimeline<T>[];
   updateCollectionApprovals?: boolean;
@@ -79,7 +75,6 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
-    this.balancesType = msg.balancesType;
     this.defaultBalances = msg.defaultBalances ? new UserBalanceStore(msg.defaultBalances) : undefined;
     this.updateValidBadgeIds = msg.updateValidBadgeIds;
     this.validBadgeIds = msg.validBadgeIds ? UintRangeArray.From(msg.validBadgeIds) : undefined;
@@ -91,8 +86,6 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     this.collectionMetadataTimeline = msg.collectionMetadataTimeline?.map((x) => new CollectionMetadataTimeline(x));
     this.updateBadgeMetadataTimeline = msg.updateBadgeMetadataTimeline;
     this.badgeMetadataTimeline = msg.badgeMetadataTimeline?.map((x) => new BadgeMetadataTimeline(x));
-    this.updateOffChainBalancesMetadataTimeline = msg.updateOffChainBalancesMetadataTimeline;
-    this.offChainBalancesMetadataTimeline = msg.offChainBalancesMetadataTimeline?.map((x) => new OffChainBalancesMetadataTimeline(x));
     this.updateCustomDataTimeline = msg.updateCustomDataTimeline;
     this.customDataTimeline = msg.customDataTimeline?.map((x) => new CustomDataTimeline(x));
     this.updateCollectionApprovals = msg.updateCollectionApprovals;
@@ -143,7 +136,6 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     return new MsgUniversalUpdateCollection({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
-      balancesType: protoMsg.balancesType,
       defaultBalances: protoMsg.defaultBalances ? UserBalanceStore.fromProto(protoMsg.defaultBalances, convertFunction) : undefined,
       validBadgeIds: protoMsg.validBadgeIds ? protoMsg.validBadgeIds.map((x) => UintRange.fromProto(x, convertFunction)) : undefined,
       updateValidBadgeIds: protoMsg.updateValidBadgeIds,
@@ -160,10 +152,6 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
       updateBadgeMetadataTimeline: protoMsg.updateBadgeMetadataTimeline,
       badgeMetadataTimeline: protoMsg.badgeMetadataTimeline
         ? protoMsg.badgeMetadataTimeline.map((x) => BadgeMetadataTimeline.fromProto(x, convertFunction))
-        : undefined,
-      updateOffChainBalancesMetadataTimeline: protoMsg.updateOffChainBalancesMetadataTimeline,
-      offChainBalancesMetadataTimeline: protoMsg.offChainBalancesMetadataTimeline
-        ? protoMsg.offChainBalancesMetadataTimeline.map((x) => OffChainBalancesMetadataTimeline.fromProto(x, convertFunction))
         : undefined,
       updateCustomDataTimeline: protoMsg.updateCustomDataTimeline,
       customDataTimeline: protoMsg.customDataTimeline

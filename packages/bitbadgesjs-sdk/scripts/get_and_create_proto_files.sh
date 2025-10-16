@@ -30,7 +30,7 @@ rm -rf ./proto/badges/v*
 
 # #Cosmos SDK
 # cd /tmp
-# git clone --branch v0.47.5 https://github.com/cosmos/cosmos-sdk.git
+# git clone --branch v0.53.4 https://github.com/cosmos/cosmos-sdk.git
 # cd cosmos-sdk/
 # cp -r ./proto/* $MYFOLDER/proto
 # # cp -r ./third_party/proto/* $MYFOLDER/proto

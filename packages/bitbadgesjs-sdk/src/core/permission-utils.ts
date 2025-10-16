@@ -1,5 +1,5 @@
 import { CollectionApprovalWithDetails } from './approvals.js';
-import { BadgeMetadataTimeline, CollectionMetadataTimeline, IsArchivedTimeline, ManagerTimeline, OffChainBalancesMetadataTimeline } from './misc.js';
+import { BadgeMetadataTimeline, CollectionMetadataTimeline, IsArchivedTimeline, ManagerTimeline } from './misc.js';
 import type { UsedFlags } from './overlaps.js';
 import {
   ActionPermissionUsedFlags,
@@ -22,7 +22,6 @@ import {
 export type PermissionNameString =
   | 'canDeleteCollection'
   | 'canArchiveCollection'
-  | 'canUpdateOffChainBalancesMetadata'
   | 'canUpdateBadgeMetadata'
   | 'canUpdateCollectionMetadata'
   | 'canUpdateValidBadgeIds'
@@ -49,9 +48,7 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canArchiveCollection':
       validateFunction = IsArchivedTimeline.validateUpdate;
       break;
-    case 'canUpdateOffChainBalancesMetadata':
-      validateFunction = OffChainBalancesMetadataTimeline.validateUpdate;
-      break;
+
     // case 'canUpdateStandards':
     // case 'canUpdateCustomData':
     case 'canUpdateManager':
@@ -75,7 +72,6 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
       validatePermissionUpdateFunction = ActionPermission.validateUpdate;
       break;
     case 'canArchiveCollection':
-    case 'canUpdateOffChainBalancesMetadata':
     case 'canUpdateStandards':
     case 'canUpdateCustomData':
     case 'canUpdateManager':
@@ -103,9 +99,6 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
       break;
     case 'canArchiveCollection':
       question = 'Can archive the collection?';
-      break;
-    case 'canUpdateOffChainBalancesMetadata':
-      question = 'Can update the off-chain balances metadata?';
       break;
     case 'canUpdateStandards':
       question = 'Can update the standards?';
@@ -148,7 +141,6 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
       flags = ActionPermissionUsedFlags;
       break;
     case 'canArchiveCollection':
-    case 'canUpdateOffChainBalancesMetadata':
     case 'canUpdateStandards':
     case 'canUpdateCustomData':
     case 'canUpdateManager':
