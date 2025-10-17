@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.21.0]
+
+### Version Compatibility
+
+- **BitBadges Chain v16**: 0.21.0 corresponds to BitBadges chain v16 upgrades
+
+### What's New
+
+- See [BitBadges Chain v16 release information](https://github.com/BitBadges/bitbadgeschain/releases/tag/v16) for more details.
+
+### Installation
+
+```bash
+npm install bitbadgesjs-sdk@^0.21.0
+```
+
 ## [0.20.0]
 
 ### Version Compatibility
