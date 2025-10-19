@@ -563,6 +563,14 @@ export interface iAssetInfoDoc<T extends NumberType> extends Doc {
   volume7d: number;
   percentageChange24h: number;
   percentageChange7d: number;
+  /** Recent price trend data points for charting (last 7 days) */
+  recentPriceTrend?: {
+    /** Array of price data points with timestamps */
+    pricePoints: Array<{
+      price: number;
+      timestamp: T;
+    }>;
+  };
 }
 
 /**

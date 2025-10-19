@@ -1787,6 +1787,12 @@ export class AssetInfoDoc<T extends NumberType> extends CustomTypeClass<AssetInf
   percentageChange24h: number;
   percentageChange7d: number;
   volume24h: number;
+  recentPriceTrend?: {
+    pricePoints: Array<{
+      price: number;
+      timestamp: T;
+    }>;
+  };
 
   constructor(data: iAssetInfoDoc<T>) {
     super();
@@ -1800,6 +1806,7 @@ export class AssetInfoDoc<T extends NumberType> extends CustomTypeClass<AssetInf
     this.volume24h = data.volume24h;
     this.percentageChange24h = data.percentageChange24h;
     this.percentageChange7d = data.percentageChange7d;
+    this.recentPriceTrend = data.recentPriceTrend;
   }
 
   getNumberFieldNames(): string[] {
