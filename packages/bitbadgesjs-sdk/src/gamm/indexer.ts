@@ -205,6 +205,7 @@ export interface iEstimateSwapSuccessResponse {
     tokenOutAmount: string;
     tokenInAmount: string;
     allRoutes: any[];
+    lowLiqudiityWarning?: boolean;
   };
 }
 
