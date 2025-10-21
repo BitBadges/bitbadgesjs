@@ -130,7 +130,7 @@ import {
   DecisionPolicyWindows,
   MemberRequest
 } from '@/proto/cosmos/group/v1/index.js';
-import { ProtoTypeRegistry } from '@/transactions/amino/objectConverter';
+import { ProtoTypeRegistry } from '@/transactions/amino/objectConverter.js';
 
 const approvalCriteria = new OutgoingApprovalCriteria({
   coinTransfers: [
