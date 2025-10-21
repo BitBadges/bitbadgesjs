@@ -111,6 +111,26 @@ import {
 import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
 import { SwapAmountInRoute, SwapAmountOutRoute } from '@/proto/poolmanager/v1beta1/swap_route_pb.js';
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
+import {
+  MsgCreateGroup,
+  MsgUpdateGroupMembers,
+  MsgUpdateGroupAdmin,
+  MsgUpdateGroupMetadata,
+  MsgCreateGroupPolicy,
+  MsgCreateGroupWithPolicy,
+  MsgUpdateGroupPolicyAdmin,
+  MsgUpdateGroupPolicyDecisionPolicy,
+  MsgUpdateGroupPolicyMetadata,
+  MsgSubmitProposal as MsgGroupSubmitProposal,
+  MsgWithdrawProposal,
+  MsgVote as MsgGroupVote,
+  MsgExec as MsgGroupExec,
+  MsgLeaveGroup,
+  ThresholdDecisionPolicy,
+  DecisionPolicyWindows,
+  MemberRequest
+} from '@/proto/cosmos/group/v1/index.js';
+import { ProtoTypeRegistry } from '@/transactions/amino/objectConverter';
 
 const approvalCriteria = new OutgoingApprovalCriteria({
   coinTransfers: [
@@ -208,7 +228,7 @@ const approvalCriteria = new OutgoingApprovalCriteria({
       storeId: '0'
     })
   ]
-}).toJson({ emitDefaultValues: true }) as object;
+}).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) as object;
 
 const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
   predeterminedBalances: new PredeterminedBalances({
@@ -251,7 +271,7 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
     allowCounterpartyPurge: false,
     allowPurgeIfExpired: false
   })
-}).toJson({ emitDefaultValues: true }) as object;
+}).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) as object;
 
 function populateMerkleChallenges(merkleChallenges?: MerkleChallenge[]) {
   return (
@@ -827,6 +847,77 @@ export function populateUndefinedForMsgCreateBalancerPool(msg: MsgCreateBalancer
   return msg;
 }
 
+// Group Message Population Functions
+export function populateUndefinedForMsgCreateGroup(msg: MsgCreateGroup) {
+  // Simple message with only primitive types and MemberRequest array, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgUpdateGroupMembers(msg: MsgUpdateGroupMembers) {
+  // Simple message with only primitive types and MemberRequest array, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgUpdateGroupAdmin(msg: MsgUpdateGroupAdmin) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgUpdateGroupMetadata(msg: MsgUpdateGroupMetadata) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgCreateGroupPolicy(msg: MsgCreateGroupPolicy) {
+  // Simple message with only primitive types and Any decision_policy, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgUpdateGroupPolicyAdmin(msg: MsgUpdateGroupPolicyAdmin) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgCreateGroupWithPolicy(msg: MsgCreateGroupWithPolicy) {
+  // Simple message with only primitive types, MemberRequest array, and Any decision_policy, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgUpdateGroupPolicyDecisionPolicy(msg: MsgUpdateGroupPolicyDecisionPolicy) {
+  // Simple message with only primitive types and Any decision_policy, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgUpdateGroupPolicyMetadata(msg: MsgUpdateGroupPolicyMetadata) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgGroupSubmitProposal(msg: MsgGroupSubmitProposal) {
+  // Simple message with only primitive types and Any messages array, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgWithdrawProposal(msg: MsgWithdrawProposal) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgGroupVote(msg: MsgGroupVote) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgGroupExec(msg: MsgGroupExec) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgLeaveGroup(msg: MsgLeaveGroup) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
 const universalParams = {
   defaultBalances: new UserBalanceStore({
     balances: [
@@ -1053,13 +1144,13 @@ export function getSampleMsg(msgType: string, currMsg: any) {
     case 'badges/GlobalArchive':
       return { type: msgType, value: { creator: '', archive: true } };
     case 'protocols/CreateProtocol':
-      return { type: msgType, value: new MsgCreateProtocol().toJson({ emitDefaultValues: true }) };
+      return { type: msgType, value: new MsgCreateProtocol().toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) };
     case 'protocols/DeleteProtocol':
-      return { type: msgType, value: new MsgDeleteProtocol().toJson({ emitDefaultValues: true }) };
+      return { type: msgType, value: new MsgDeleteProtocol().toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) };
     case 'protocols/SetCollectionForProtocol':
-      return { type: msgType, value: new MsgSetCollectionForProtocol().toJson({ emitDefaultValues: true }) };
+      return { type: msgType, value: new MsgSetCollectionForProtocol().toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) };
     case 'protocols/UpdateProtocol':
-      return { type: msgType, value: new MsgUpdateProtocol().toJson({ emitDefaultValues: true }) };
+      return { type: msgType, value: new MsgUpdateProtocol().toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) };
     case 'maps/CreateMap':
       return {
         type: msgType,
@@ -1067,21 +1158,21 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           valueOptions: new ValueOptions(),
           updateCriteria: new MapUpdateCriteria(),
           permissions: new MapPermissions()
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/DeleteMap':
-      return { type: msgType, value: new MsgDeleteMap().toJson({ emitDefaultValues: true }) };
+      return { type: msgType, value: new MsgDeleteMap().toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) };
     case 'badges/SetValue':
-      return { type: msgType, value: new MsgSetValue().toJson({ emitDefaultValues: true }) };
+      return { type: msgType, value: new MsgSetValue().toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) };
     case 'badges/UpdateMap':
       return {
         type: msgType,
         value: new MsgUpdateMap({
           permissions: new MapPermissions()
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/DeleteCollection':
-      return { type: msgType, value: new MsgDeleteCollection().toJson({ emitDefaultValues: true }) };
+      return { type: msgType, value: new MsgDeleteCollection().toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) };
     case 'badges/DeleteIncomingApproval':
       return {
         type: msgType,
@@ -1089,7 +1180,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           creator: '',
           collectionId: '0',
           approvalId: ''
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/DeleteOutgoingApproval':
       return {
@@ -1098,21 +1189,21 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           creator: '',
           collectionId: '0',
           approvalId: ''
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/CreateAddressLists':
       return {
         type: msgType,
         value: new MsgCreateAddressLists({
           addressLists: [new AddressList()]
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/CreateDynamicStore':
       return {
         type: msgType,
         value: new MsgCreateDynamicStore({
           creator: ''
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/DeleteDynamicStore':
       return {
@@ -1120,7 +1211,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
         value: new MsgDeleteDynamicStore({
           creator: '',
           storeId: '0'
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetDynamicStoreValue':
       return {
@@ -1130,7 +1221,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           storeId: '0',
           address: '',
           value: '0'
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/IncrementStoreValue':
       return {
@@ -1140,7 +1231,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           storeId: '0',
           address: '',
           amount: '0'
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/DecrementStoreValue':
       return {
@@ -1150,7 +1241,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           storeId: '0',
           address: '',
           amount: '0'
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetIncomingApproval':
       return {
@@ -1169,7 +1260,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               version: '0'
             })
           })
-        ).toJson({ emitDefaultValues: true })
+        ).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetOutgoingApproval':
       return {
@@ -1188,7 +1279,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               version: '0'
             })
           })
-        ).toJson({ emitDefaultValues: true })
+        ).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/PurgeApprovals':
       return {
@@ -1209,7 +1300,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               })
             ]
           })
-        ).toJson({ emitDefaultValues: true })
+        ).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/UpdateDynamicStore':
       return {
@@ -1217,7 +1308,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
         value: new MsgUpdateDynamicStore({
           creator: '',
           storeId: '0'
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/TransferBadges':
       return {
@@ -1257,7 +1348,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               numAttempts: '0'
             })
           ]
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/UpdateUserApprovals':
       return {
@@ -1323,28 +1414,28 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               })
             ]
           })
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/CreateCollection':
       return {
         type: msgType,
         value: new MsgCreateCollection({
           ...deepCopyPrimitives(universalParams)
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/UpdateCollection':
       return {
         type: msgType,
         value: new MsgUpdateCollection({
           ...deepCopyPrimitives(universalParams)
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/UniversalUpdateCollection':
       return {
         type: msgType,
         value: new MsgUniversalUpdateCollection({
           ...deepCopyPrimitives(universalParams)
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetValidBadgeIds':
       return {
@@ -1354,7 +1445,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           collectionId: '0',
           validBadgeIds: [new UintRange()],
           canUpdateValidBadgeIds: [new BadgeIdsActionPermission()]
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetManager':
       return {
@@ -1364,7 +1455,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           collectionId: '0',
           managerTimeline: [new ManagerTimeline()],
           canUpdateManager: [new TimedUpdatePermission()]
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetCollectionMetadata':
       return {
@@ -1374,7 +1465,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           collectionId: '0',
           collectionMetadataTimeline: [new CollectionMetadataTimeline()],
           canUpdateCollectionMetadata: [new TimedUpdatePermission()]
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetBadgeMetadata':
       return {
@@ -1384,7 +1475,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           collectionId: '0',
           badgeMetadataTimeline: [new BadgeMetadataTimeline()],
           canUpdateBadgeMetadata: [new TimedUpdateWithBadgeIdsPermission()]
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetCustomData':
       return {
@@ -1394,7 +1485,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           collectionId: '0',
           customDataTimeline: [new CustomDataTimeline()],
           canUpdateCustomData: [new TimedUpdatePermission()]
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetStandards':
       return {
@@ -1404,7 +1495,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           collectionId: '0',
           standardsTimeline: [new StandardsTimeline()],
           canUpdateStandards: [new TimedUpdatePermission()]
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetCollectionApprovals':
       return {
@@ -1414,7 +1505,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           collectionId: '0',
           collectionApprovals: [new CollectionApproval()],
           canUpdateCollectionApprovals: [new CollectionApprovalPermission()]
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetIsArchived':
       return {
@@ -1424,7 +1515,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           collectionId: '0',
           isArchivedTimeline: [new IsArchivedTimeline()],
           canArchiveCollection: [new TimedUpdatePermission()]
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'gamm/JoinPool':
       return {
@@ -1439,7 +1530,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               denom: ''
             })
           ]
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'gamm/ExitPool':
       return {
@@ -1454,7 +1545,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               denom: ''
             })
           ]
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'gamm/SwapExactAmountIn':
       return {
@@ -1472,7 +1563,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
             denom: ''
           }),
           tokenOutMinAmount: '0'
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'gamm/SwapExactAmountOut':
       return {
@@ -1490,7 +1581,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
             amount: '0',
             denom: ''
           })
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'gamm/JoinSwapExternAmountIn':
       return {
@@ -1503,7 +1594,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
             denom: ''
           }),
           shareOutMinAmount: '0'
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'gamm/JoinSwapShareAmountOut':
       return {
@@ -1514,7 +1605,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           tokenInDenom: '',
           shareOutAmount: '0',
           tokenInMaxAmount: '0'
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'gamm/ExitSwapShareAmountIn':
       return {
@@ -1525,7 +1616,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           tokenOutDenom: '',
           shareInAmount: '0',
           tokenOutMinAmount: '0'
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'gamm/ExitSwapExternAmountOut':
       return {
@@ -1538,7 +1629,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
             denom: ''
           }),
           shareInMaxAmount: '0'
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'gamm/CreateBalancerPool':
       return {
@@ -1558,7 +1649,185 @@ export function getSampleMsg(msgType: string, currMsg: any) {
               weight: '0'
             })
           ]
-        }).toJson({ emitDefaultValues: true })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'cosmos-sdk/MsgCreateGroup':
+      return {
+        type: msgType,
+        value: new MsgCreateGroup({
+          admin: '',
+          members: [
+            new MemberRequest({
+              address: '',
+              weight: '0',
+              metadata: ''
+            })
+          ],
+          metadata: ''
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'cosmos-sdk/MsgUpdateGroupMembers':
+      return {
+        type: msgType,
+        value: new MsgUpdateGroupMembers({
+          admin: '',
+          groupId: 0n,
+          memberUpdates: [
+            new MemberRequest({
+              address: '',
+              weight: '0',
+              metadata: ''
+            })
+          ]
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'cosmos-sdk/MsgUpdateGroupAdmin':
+      return {
+        type: msgType,
+        value: new MsgUpdateGroupAdmin({
+          admin: '',
+          groupId: 0n,
+          newAdmin: ''
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'cosmos-sdk/MsgUpdateGroupMetadata':
+      return {
+        type: msgType,
+        value: new MsgUpdateGroupMetadata({
+          admin: '',
+          groupId: 0n,
+          metadata: ''
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'cosmos-sdk/MsgCreateGroupPolicy':
+      return {
+        type: msgType,
+        value: new MsgCreateGroupPolicy({
+          admin: '',
+          groupId: 0n,
+          metadata: '',
+          decisionPolicy: {
+            typeUrl: '/cosmos.group.v1.ThresholdDecisionPolicy',
+            value: new ThresholdDecisionPolicy({
+              threshold: '1',
+              windows: new DecisionPolicyWindows({
+                votingPeriod: { seconds: 0n, nanos: 0 },
+                minExecutionPeriod: { seconds: 0n, nanos: 0 }
+              })
+            }).toBinary()
+          }
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'cosmos-sdk/MsgUpdateGroupPolicyAdmin':
+      return {
+        type: msgType,
+        value: new MsgUpdateGroupPolicyAdmin({
+          admin: '',
+          groupPolicyAddress: '',
+          newAdmin: ''
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'cosmos-sdk/MsgCreateGroupWithPolicy':
+      return {
+        type: msgType,
+        value: new MsgCreateGroupWithPolicy({
+          admin: '',
+          members: [
+            new MemberRequest({
+              address: '',
+              weight: '0',
+              metadata: ''
+            })
+          ],
+          groupMetadata: '',
+          groupPolicyMetadata: '',
+          groupPolicyAsAdmin: false,
+          decisionPolicy: {
+            typeUrl: '/cosmos.group.v1.ThresholdDecisionPolicy',
+            value: new ThresholdDecisionPolicy({
+              threshold: '1',
+              windows: new DecisionPolicyWindows({
+                votingPeriod: { seconds: 0n, nanos: 0 },
+                minExecutionPeriod: { seconds: 0n, nanos: 0 }
+              })
+            }).toBinary()
+          }
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'cosmos-sdk/MsgUpdateGroupDecisionPolicy':
+      return {
+        type: msgType,
+        value: new MsgUpdateGroupPolicyDecisionPolicy({
+          admin: '',
+          groupPolicyAddress: '',
+          decisionPolicy: {
+            typeUrl: '/cosmos.group.v1.ThresholdDecisionPolicy',
+            value: new ThresholdDecisionPolicy({
+              threshold: '1',
+              windows: new DecisionPolicyWindows({
+                votingPeriod: { seconds: 0n, nanos: 0 },
+                minExecutionPeriod: { seconds: 0n, nanos: 0 }
+              })
+            }).toBinary()
+          }
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'cosmos-sdk/MsgUpdateGroupPolicyMetadata':
+      return {
+        type: msgType,
+        value: new MsgUpdateGroupPolicyMetadata({
+          admin: '',
+          groupPolicyAddress: '',
+          metadata: ''
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'cosmos-sdk/group/MsgSubmitProposal':
+      return {
+        type: msgType,
+        value: new MsgGroupSubmitProposal({
+          groupPolicyAddress: '',
+          proposers: [],
+          metadata: '',
+          messages: [],
+          exec: 0,
+          title: '',
+          summary: ''
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'cosmos-sdk/group/MsgWithdrawProposal':
+      return {
+        type: msgType,
+        value: new MsgWithdrawProposal({
+          proposalId: 0n,
+          address: ''
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'cosmos-sdk/group/MsgVote':
+      return {
+        type: msgType,
+        value: new MsgGroupVote({
+          proposalId: 0n,
+          voter: '',
+          option: 0,
+          metadata: '',
+          exec: 0
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'cosmos-sdk/group/MsgExec':
+      return {
+        type: msgType,
+        value: new MsgGroupExec({
+          proposalId: 0n,
+          executor: ''
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'cosmos-sdk/group/MsgLeaveGroup':
+      return {
+        type: msgType,
+        value: new MsgLeaveGroup({
+          address: '',
+          groupId: 0n
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     default:
       return currMsg;

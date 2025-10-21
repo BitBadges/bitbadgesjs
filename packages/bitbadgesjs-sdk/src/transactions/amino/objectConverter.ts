@@ -17,6 +17,38 @@ import {
   StakeAuthorization
 } from '@/proto/cosmos/staking/v1beta1/index.js';
 import { MsgCreateVestingAccount } from '@/proto/cosmos/vesting/v1beta1/index.js';
+import {
+  MsgCreateGroup,
+  MsgCreateGroupResponse,
+  MsgUpdateGroupMembers,
+  MsgUpdateGroupMembersResponse,
+  MsgUpdateGroupAdmin,
+  MsgUpdateGroupAdminResponse,
+  MsgUpdateGroupMetadata,
+  MsgUpdateGroupMetadataResponse,
+  MsgCreateGroupPolicy,
+  MsgCreateGroupPolicyResponse,
+  MsgUpdateGroupPolicyAdmin,
+  MsgUpdateGroupPolicyAdminResponse,
+  MsgCreateGroupWithPolicy,
+  MsgCreateGroupWithPolicyResponse,
+  MsgUpdateGroupPolicyDecisionPolicy,
+  MsgUpdateGroupPolicyDecisionPolicyResponse,
+  MsgUpdateGroupPolicyMetadata,
+  MsgUpdateGroupPolicyMetadataResponse,
+  MsgSubmitProposal as MsgGroupSubmitProposal,
+  MsgSubmitProposalResponse,
+  MsgWithdrawProposal,
+  MsgWithdrawProposalResponse,
+  MsgVote as MsgGroupVote,
+  MsgVoteResponse,
+  MsgExec as MsgGroupExec,
+  MsgExecResponse,
+  MsgLeaveGroup,
+  MsgLeaveGroupResponse,
+  ThresholdDecisionPolicy,
+  PercentageDecisionPolicy
+} from '@/proto/cosmos/group/v1/index.js';
 import { type AnyMessage, type JsonWriteOptions, type Message, type JsonReadOptions, createRegistry } from '@bufbuild/protobuf';
 import {
   MsgCreateAddressLists,
@@ -148,7 +180,37 @@ export const ProtoTypeRegistry = createRegistry(
   MsgExitSwapExternAmountOut,
   MsgExitSwapExternAmountOutResponse,
   MsgCreateBalancerPool,
-  MsgCreateBalancerPoolResponse
+  MsgCreateBalancerPoolResponse,
+  MsgCreateGroup,
+  MsgCreateGroupResponse,
+  MsgUpdateGroupMembers,
+  MsgUpdateGroupMembersResponse,
+  MsgUpdateGroupAdmin,
+  MsgUpdateGroupAdminResponse,
+  MsgUpdateGroupMetadata,
+  MsgUpdateGroupMetadataResponse,
+  MsgCreateGroupPolicy,
+  MsgCreateGroupPolicyResponse,
+  MsgUpdateGroupPolicyAdmin,
+  MsgUpdateGroupPolicyAdminResponse,
+  MsgCreateGroupWithPolicy,
+  MsgCreateGroupWithPolicyResponse,
+  MsgUpdateGroupPolicyDecisionPolicy,
+  MsgUpdateGroupPolicyDecisionPolicyResponse,
+  MsgUpdateGroupPolicyMetadata,
+  MsgUpdateGroupPolicyMetadataResponse,
+  MsgGroupSubmitProposal,
+  MsgSubmitProposalResponse,
+  MsgWithdrawProposal,
+  MsgWithdrawProposalResponse,
+  MsgGroupVote,
+  MsgVoteResponse,
+  MsgGroupExec,
+  MsgExecResponse,
+  MsgLeaveGroup,
+  MsgLeaveGroupResponse,
+  ThresholdDecisionPolicy,
+  PercentageDecisionPolicy
 );
 
 /**

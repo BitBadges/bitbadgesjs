@@ -7,11 +7,11 @@ import {
   MsgCreateAddressLists,
   MsgCreateCollection,
   MsgCreateDynamicStore,
+  MsgDecrementStoreValue,
   MsgDeleteCollection,
   MsgDeleteDynamicStore,
   MsgDeleteIncomingApproval,
   MsgDeleteOutgoingApproval,
-  MsgDecrementStoreValue,
   MsgIncrementStoreValue,
   MsgPurgeApprovals,
   MsgSetBadgeMetadata,
@@ -31,29 +31,36 @@ import {
   MsgUpdateDynamicStore,
   MsgUpdateUserApprovals
 } from '@/proto/badges/tx_pb.js';
+import { type AuthInfo, type TxBody, type TxRaw } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
+import { MsgCreateBalancerPool } from '@/proto/gamm/poolmodels/balancer/tx_pb.js';
 import {
-  MsgJoinPool,
   MsgExitPool,
-  MsgSwapExactAmountIn,
-  MsgSwapExactAmountOut,
+  MsgExitSwapExternAmountOut,
+  MsgExitSwapShareAmountIn,
+  MsgJoinPool,
   MsgJoinSwapExternAmountIn,
   MsgJoinSwapShareAmountOut,
-  MsgExitSwapShareAmountIn,
-  MsgExitSwapExternAmountOut
+  MsgSwapExactAmountIn,
+  MsgSwapExactAmountOut
 } from '@/proto/gamm/v1beta1/tx_pb.js';
-import { MsgCreateBalancerPool } from '@/proto/gamm/poolmodels/balancer/tx_pb.js';
-import { type AuthInfo, type TxBody, type TxRaw, SignDoc } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
 import { createTypedData } from '@/transactions/eip712/payload/createTypedData.js';
 import {
   populateUndefinedForMsgCreateAddressLists,
+  populateUndefinedForMsgCreateBalancerPool,
   populateUndefinedForMsgCreateCollection,
   populateUndefinedForMsgCreateDynamicStore,
+  populateUndefinedForMsgDecrementStoreValue,
   populateUndefinedForMsgDeleteCollection,
   populateUndefinedForMsgDeleteDynamicStore,
   populateUndefinedForMsgDeleteIncomingApproval,
   populateUndefinedForMsgDeleteOutgoingApproval,
-  populateUndefinedForMsgDecrementStoreValue,
+  populateUndefinedForMsgExitPool,
+  populateUndefinedForMsgExitSwapExternAmountOut,
+  populateUndefinedForMsgExitSwapShareAmountIn,
   populateUndefinedForMsgIncrementStoreValue,
+  populateUndefinedForMsgJoinPool,
+  populateUndefinedForMsgJoinSwapExternAmountIn,
+  populateUndefinedForMsgJoinSwapShareAmountOut,
   populateUndefinedForMsgPurgeApprovals,
   populateUndefinedForMsgSetBadgeMetadata,
   populateUndefinedForMsgSetCollectionApprovals,
@@ -66,26 +73,19 @@ import {
   populateUndefinedForMsgSetOutgoingApproval,
   populateUndefinedForMsgSetStandards,
   populateUndefinedForMsgSetValidBadgeIds,
+  populateUndefinedForMsgSwapExactAmountIn,
+  populateUndefinedForMsgSwapExactAmountOut,
   populateUndefinedForMsgTransferBadges,
   populateUndefinedForMsgUniversalUpdateCollection,
   populateUndefinedForMsgUpdateCollection,
   populateUndefinedForMsgUpdateDynamicStore,
-  populateUndefinedForMsgUpdateUserApprovals,
-  populateUndefinedForMsgJoinPool,
-  populateUndefinedForMsgExitPool,
-  populateUndefinedForMsgSwapExactAmountIn,
-  populateUndefinedForMsgSwapExactAmountOut,
-  populateUndefinedForMsgJoinSwapExternAmountIn,
-  populateUndefinedForMsgJoinSwapShareAmountOut,
-  populateUndefinedForMsgExitSwapShareAmountIn,
-  populateUndefinedForMsgExitSwapExternAmountOut,
-  populateUndefinedForMsgCreateBalancerPool
+  populateUndefinedForMsgUpdateUserApprovals
 } from '@/transactions/eip712/payload/samples/getSampleMsg.js';
 import type { AnyMessage, Message } from '@bufbuild/protobuf';
 import bs58 from 'bs58';
-import elliptic from 'elliptic';
 import CryptoJS from 'crypto-js';
-import { SigningKey, getBytes, hashMessage, sha256 } from 'ethers';
+import elliptic from 'elliptic';
+import { SigningKey, getBytes, hashMessage } from 'ethers';
 import type { Chain, Fee, Sender } from './common.js';
 import { createStdFee, createStdSignDocFromProto, createTransactionWithMultipleMessages } from './transaction.js';
 import { createTxRaw, createTxRawWithExtension } from './txRaw.js';
@@ -297,7 +297,12 @@ const createTransactionPayloadFromTxContext = (txContext: LegacyTxContext, messa
   generatedMsgs = normalizeMessagesIfNecessary(generatedMsgs);
 
   const eipTxn = createEIP712TypedData(txContext, generatedMsgs);
-  const sortedEipMessage = recursivelySort(eipTxn.message);
+  let sortedEipMessage = recursivelySort(eipTxn.message);
+
+  // For certain messages, we need to post-process for JSON stringification to work properly
+  sortedEipMessage = postProcessMessagesForJsonStringification(sortedEipMessage);
+  sortedEipMessage = recursivelySort(sortedEipMessage);
+
   const message = JSON.stringify(sortedEipMessage);
   const sha256Message = CryptoJS.SHA256(message).toString();
   const humanReadableMessage = 'This is a BitBadges transaction with the content hash: ' + sha256Message;
@@ -308,6 +313,89 @@ const createTransactionPayloadFromTxContext = (txContext: LegacyTxContext, messa
     txnString: humanReadableMessage,
     txnJson: sortedEipMessage
   };
+};
+
+const convertDurationToJson = (duration: string) => {
+  //We need to convert from the "100s" format to "100000000000" format
+  let numStr = '';
+  let unitStr = '';
+  for (const char of duration) {
+    if (!isNaN(Number(char))) {
+      numStr += char;
+    } else {
+      unitStr += char;
+    }
+  }
+
+  const valueNum = BigInt(numStr);
+  const unit = unitStr.toLowerCase();
+  if (unit === 's') {
+    return (valueNum * BigInt(1000000000)).toString();
+  } else if (unit === 'ms') {
+    return (valueNum * BigInt(1000000)).toString();
+  } else if (unit === 'us') {
+    return (valueNum * BigInt(1000)).toString();
+  } else if (unit === 'ns') {
+    return valueNum.toString();
+  } else {
+    throw new Error('Invalid duration unit');
+  }
+};
+
+// Certain fields get serialized differently in typescript vs on-chain
+export const postProcessMessagesForJsonStringification = (sortedMsgObj: any) => {
+  const entries: [string, any][] = Object.entries(sortedMsgObj);
+  for (const [key, value] of entries) {
+    if (key.startsWith('msg')) {
+      const msgType = value.type;
+      const msgValue = value.value;
+      if (msgType === 'cosmos-sdk/MsgCreateGroupPolicy') {
+        sortedMsgObj[key].value = {
+          ...msgValue,
+          decision_policy: {
+            ...msgValue.decision_policy,
+            value: {
+              ...msgValue.decision_policy.value,
+              windows: {
+                voting_period: convertDurationToJson(msgValue.decision_policy.value.windows.voting_period),
+                min_execution_period: convertDurationToJson(msgValue.decision_policy.value.windows.min_execution_period)
+              }
+            }
+          }
+        };
+      } else if (msgType === 'cosmos-sdk/MsgCreateGroupWithPolicy') {
+        sortedMsgObj[key].value = {
+          ...msgValue,
+          decision_policy: {
+            ...msgValue.decision_policy,
+            value: {
+              ...msgValue.decision_policy.value,
+              windows: {
+                voting_period: convertDurationToJson(msgValue.decision_policy.value.windows.voting_period),
+                min_execution_period: convertDurationToJson(msgValue.decision_policy.value.windows.min_execution_period)
+              }
+            }
+          }
+        };
+      } else if (msgType === 'cosmos-sdk/MsgUpdateGroupDecisionPolicy') {
+        sortedMsgObj[key].value = {
+          ...msgValue,
+          decision_policy: {
+            ...msgValue.decision_policy,
+            value: {
+              ...msgValue.decision_policy.value,
+              windows: {
+                voting_period: convertDurationToJson(msgValue.decision_policy.value.windows.voting_period),
+                min_execution_period: convertDurationToJson(msgValue.decision_policy.value.windows.min_execution_period)
+              }
+            }
+          }
+        };
+      }
+    }
+  }
+
+  return sortedMsgObj;
 };
 
 //Because the current and other code doesn't support Msgs with optional / empty fields,

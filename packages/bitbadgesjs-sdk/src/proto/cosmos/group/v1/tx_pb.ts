@@ -1412,4 +1412,3 @@ export class MsgLeaveGroupResponse extends Message<MsgLeaveGroupResponse> {
     return proto3.util.equals(MsgLeaveGroupResponse, a, b);
   }
 }
-

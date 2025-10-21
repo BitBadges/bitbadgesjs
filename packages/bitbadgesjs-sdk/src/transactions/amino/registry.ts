@@ -53,6 +53,24 @@ import {
 import { GenericAuthorization } from '@/proto/cosmos/authz/v1beta1/authz_pb.js';
 import { MsgExec, MsgGrant, MsgRevoke } from '@/proto/cosmos/authz/v1beta1/tx_pb.js';
 import { MsgCreateVestingAccount } from '@/proto/cosmos/vesting/v1beta1/index.js';
+import {
+  MsgCreateGroup,
+  MsgUpdateGroupMembers,
+  MsgUpdateGroupAdmin,
+  MsgUpdateGroupMetadata,
+  MsgCreateGroupPolicy,
+  MsgUpdateGroupPolicyAdmin,
+  MsgCreateGroupWithPolicy,
+  MsgUpdateGroupPolicyDecisionPolicy,
+  MsgUpdateGroupPolicyMetadata,
+  MsgSubmitProposal as MsgGroupSubmitProposal,
+  MsgWithdrawProposal,
+  MsgVote as MsgGroupVote,
+  MsgExec as MsgGroupExec,
+  MsgLeaveGroup,
+  ThresholdDecisionPolicy,
+  PercentageDecisionPolicy
+} from '@/proto/cosmos/group/v1/index.js';
 
 import { MsgTransfer } from '@/proto/ibc/index.js';
 import {
@@ -105,7 +123,23 @@ export function createDefaultCosmosAminoConverters(): AminoConverters {
     ...createAminoConverter(GenericAuthorization, 'cosmos-sdk/GenericAuthorization'),
     ...createAminoConverter(SendAuthorization, 'cosmos-sdk/SendAuthorization'),
     ...createAminoConverter(StakeAuthorization, 'cosmos-sdk/StakeAuthorization'),
-    ...createAminoConverter(MsgTransfer, 'ibc/MsgTransfer')
+    ...createAminoConverter(MsgTransfer, 'ibc/MsgTransfer'),
+    ...createAminoConverter(MsgCreateGroup, 'cosmos-sdk/MsgCreateGroup'),
+    ...createAminoConverter(MsgUpdateGroupMembers, 'cosmos-sdk/MsgUpdateGroupMembers'),
+    ...createAminoConverter(MsgUpdateGroupAdmin, 'cosmos-sdk/MsgUpdateGroupAdmin'),
+    ...createAminoConverter(MsgUpdateGroupMetadata, 'cosmos-sdk/MsgUpdateGroupMetadata'),
+    ...createAminoConverter(MsgCreateGroupPolicy, 'cosmos-sdk/MsgCreateGroupPolicy'),
+    ...createAminoConverter(MsgUpdateGroupPolicyAdmin, 'cosmos-sdk/MsgUpdateGroupPolicyAdmin'),
+    ...createAminoConverter(MsgCreateGroupWithPolicy, 'cosmos-sdk/MsgCreateGroupWithPolicy'),
+    ...createAminoConverter(MsgUpdateGroupPolicyDecisionPolicy, 'cosmos-sdk/MsgUpdateGroupDecisionPolicy'),
+    ...createAminoConverter(MsgUpdateGroupPolicyMetadata, 'cosmos-sdk/MsgUpdateGroupPolicyMetadata'),
+    ...createAminoConverter(MsgGroupSubmitProposal, 'cosmos-sdk/group/MsgSubmitProposal'),
+    ...createAminoConverter(MsgWithdrawProposal, 'cosmos-sdk/group/MsgWithdrawProposal'),
+    ...createAminoConverter(MsgGroupVote, 'cosmos-sdk/group/MsgVote'),
+    ...createAminoConverter(MsgGroupExec, 'cosmos-sdk/group/MsgExec'),
+    ...createAminoConverter(MsgLeaveGroup, 'cosmos-sdk/group/MsgLeaveGroup'),
+    ...createAminoConverter(ThresholdDecisionPolicy, 'cosmos-sdk/ThresholdDecisionPolicy'),
+    ...createAminoConverter(PercentageDecisionPolicy, 'cosmos-sdk/PercentageDecisionPolicy')
   };
 }
 
