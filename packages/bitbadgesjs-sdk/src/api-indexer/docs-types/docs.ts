@@ -35,7 +35,6 @@ import {
 } from '@/core/misc.js';
 import { CollectionPermissions, UserPermissions, UserPermissionsWithDetails } from '@/core/permissions.js';
 import { getValueAtTimeForTimeline } from '@/core/timelines.js';
-import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
 import type { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/types/core.js';
@@ -662,7 +661,6 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   _docId: string;
   _id?: string;
   fetchedProfile?: 'full' | 'partial';
-  embeddedWalletAddress?: string;
   seenActivity?: UNIXMilliTimestamp<T>;
   createdAt?: UNIXMilliTimestamp<T>;
   discord?: string;
@@ -712,7 +710,6 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this._docId = data._docId;
     this._id = data._id;
     this.fetchedProfile = data.fetchedProfile;
-    this.embeddedWalletAddress = data.embeddedWalletAddress;
     this.seenActivity = data.seenActivity;
     this.createdAt = data.createdAt;
     this.discord = data.discord;
@@ -1874,7 +1871,7 @@ export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc
             ? Object.keys(data.content ?? {}).reduce(
                 (acc, key) => {
                   if (data.content) {
-                    acc[key] = BalanceArray.From((data.content as iOffChainBalancesMap<T>)[key]);
+                    acc[key] = BalanceArray.From((data.content as any)[key]);
                     return acc;
                   }
 

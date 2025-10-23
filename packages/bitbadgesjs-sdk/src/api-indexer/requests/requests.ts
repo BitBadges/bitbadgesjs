@@ -24,7 +24,6 @@ import {
   ClaimReward,
   CreateClaimRequest,
   DynamicDataHandlerType,
-  IntegrationPluginDetailsUpdate,
   UpdateClaimRequest,
   iApiKeyDoc,
   iApplicationDoc,
@@ -72,9 +71,8 @@ import type { SupportedChain } from '@/common/types.js';
 import { ClaimDetails, iChallengeDetails, iChallengeInfoDetailsUpdate } from '@/core/approvals.js';
 import type { iBatchTokenDetails } from '@/core/batch-utils.js';
 import { VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
-import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
-import type { CollectionId, iPredeterminedBalances, iUintRange } from '@/interfaces/index.js';
+import type { CollectionId, iUintRange } from '@/interfaces/index.js';
 import { BroadcastPostBody } from '@/node-rest-api/index.js';
 import { type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
 import { SiwbbChallengeParams } from './blockin.js';
@@ -4470,38 +4468,6 @@ export class GetPluginErrorsSuccessResponse extends CustomTypeClass<GetPluginErr
 /**
  * @category API Requests / Responses
  */
-export interface iGetOrCreateEmbeddedWalletPayload {}
-
-/**
- * @category API Requests / Responses
- */
-export class GetOrCreateEmbeddedWalletPayload extends EmptyResponseClass {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetOrCreateEmbeddedWalletSuccessResponse {
-  address: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetOrCreateEmbeddedWalletSuccessResponse
-  extends CustomTypeClass<GetOrCreateEmbeddedWalletSuccessResponse>
-  implements iGetOrCreateEmbeddedWalletSuccessResponse
-{
-  address: string;
-
-  constructor(data: iGetOrCreateEmbeddedWalletSuccessResponse) {
-    super();
-    this.address = data.address;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
 export interface iScheduleTokenRefreshPayload {
   provider: string;
   claimId?: string;
@@ -4530,35 +4496,6 @@ export class ScheduleTokenRefreshSuccessResponse
     super();
     this.message = data.message;
     this.docId = data.docId;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iSignWithEmbeddedWalletPayload {
-  message: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iSignWithEmbeddedWalletSuccessResponse {
-  signature: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class SignWithEmbeddedWalletSuccessResponse
-  extends CustomTypeClass<SignWithEmbeddedWalletSuccessResponse>
-  implements iSignWithEmbeddedWalletSuccessResponse
-{
-  signature: string;
-
-  constructor(data: iSignWithEmbeddedWalletSuccessResponse) {
-    super();
-    this.signature = data.signature;
   }
 }
 

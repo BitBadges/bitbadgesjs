@@ -134,9 +134,6 @@ export class BitBadgesApiRoutes {
   static SearchUtilityPagesRoute = () => '/api/v0/utilityPages/search';
   static CRUDUtilityPagesRoute = () => '/api/v0/utilityPages';
 
-  static GetEmbeddedWalletRoute = () => '/api/v0/embeddedWallets';
-  static SignWithEmbeddedWalletRoute = () => '/api/v0/embeddedWallets/signMessage';
-
   static ScheduleTokenRefreshRoute = () => '/api/v0/oauth-token-refresh-schedule';
 
   static CheckClaimSuccessRoute = (claimId: string, address: NativeAddress) => `/api/v0/claims/success/${claimId}/${address}`;

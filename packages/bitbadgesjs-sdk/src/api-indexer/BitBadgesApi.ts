@@ -105,7 +105,6 @@ import {
   GetDynamicDataStoreValuesPaginatedSuccessResponse,
   GetDynamicDataStoresSuccessResponse,
   GetGatedContentForClaimSuccessResponse,
-  GetOrCreateEmbeddedWalletSuccessResponse,
   GetPluginErrorsSuccessResponse,
   GetPluginSuccessResponse,
   GetPluginsSuccessResponse,
@@ -131,7 +130,6 @@ import {
   SearchUtilityPagesSuccessResponse,
   SendClaimAlertsSuccessResponse,
   SignOutSuccessResponse,
-  SignWithEmbeddedWalletSuccessResponse,
   SimulateClaimSuccessResponse,
   SimulateTxSuccessResponse,
   UpdateAccountInfoSuccessResponse,
@@ -205,7 +203,6 @@ import {
   iGetDynamicDataStoresPayload,
   iGetDynamicDataStoresSuccessResponse,
   iGetGatedContentForClaimPayload,
-  iGetOrCreateEmbeddedWalletPayload,
   iGetPluginErrorsPayload,
   iGetPluginPayload,
   iGetPluginsPayload,
@@ -242,7 +239,6 @@ import {
   iSendClaimAlertsSuccessResponse,
   iSignOutPayload,
   iSignOutSuccessResponse,
-  iSignWithEmbeddedWalletPayload,
   iSimulateClaimPayload,
   iSimulateClaimSuccessResponse,
   iSimulateTxPayload,
@@ -3337,19 +3333,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
     }
   }
 
-  public async getEmbeddedWallet(payload?: iGetOrCreateEmbeddedWalletPayload): Promise<GetOrCreateEmbeddedWalletSuccessResponse> {
-    try {
-      const response = await this.axios.post<GetOrCreateEmbeddedWalletSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetEmbeddedWalletRoute()}`,
-        payload
-      );
-      return new GetOrCreateEmbeddedWalletSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
   public async scheduleTokenRefresh(payload: iScheduleTokenRefreshPayload): Promise<ScheduleTokenRefreshSuccessResponse> {
     try {
       const response = await this.axios.post<ScheduleTokenRefreshSuccessResponse>(
@@ -3357,19 +3340,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         payload
       );
       return new ScheduleTokenRefreshSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  public async signWithEmbeddedWallet(payload: iSignWithEmbeddedWalletPayload): Promise<SignWithEmbeddedWalletSuccessResponse> {
-    try {
-      const response = await this.axios.post<SignWithEmbeddedWalletSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.SignWithEmbeddedWalletRoute()}`,
-        payload
-      );
-      return new SignWithEmbeddedWalletSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

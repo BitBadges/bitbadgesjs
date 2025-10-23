@@ -670,9 +670,6 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   /** Whether we have already fetched the profile or not */
   fetchedProfile?: 'full' | 'partial';
 
-  /** Embedded wallet address */
-  embeddedWalletAddress?: string;
-
   /** The timestamp of the last activity seen for this account (milliseconds since epoch) */
   seenActivity?: UNIXMilliTimestamp<T>;
   /** The timestamp of when this account was created (milliseconds since epoch) */
