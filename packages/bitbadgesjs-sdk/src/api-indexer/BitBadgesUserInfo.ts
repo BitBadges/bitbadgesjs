@@ -7,11 +7,9 @@ import { CosmosCoin } from '@/core/coin.js';
 import type { CollectionId, iAddressList } from '@/interfaces/types/core.js';
 import typia from 'typia';
 import { SupportedChain } from '../common/types.js';
-import type { iBitBadgesAddressList } from './BitBadgesAddressList.js';
-import { BitBadgesAddressList } from './BitBadgesAddressList.js';
 import { BitBadgesCollection } from './BitBadgesCollection.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
-import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, PointsActivityDoc, TransferActivityDoc } from './docs-types/activity.js';
+import { ClaimActivityDoc, ClaimAlertDoc, PointsActivityDoc, TransferActivityDoc } from './docs-types/activity.js';
 import {
   ApprovalTrackerDoc,
   BalanceDocWithDetails,
@@ -29,7 +27,6 @@ import type {
   iClaimActivityDoc,
   iClaimAlertDoc,
   iCreatorCreditsDoc,
-  iListActivityDoc,
   iMerkleChallengeTrackerDoc,
   iPointsActivityDoc,
   iProfileDoc,
@@ -56,8 +53,6 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   collected: iBalanceDocWithDetails<T>[];
   /** A list of transfer activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   activity: iTransferActivityDoc<T>[];
-  /** A list of list activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  listActivity: iListActivityDoc<T>[];
   /** A list of claim activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   claimActivity?: iClaimActivityDoc<T>[];
   /** A list of points activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
@@ -66,8 +61,6 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   challengeTrackers: iMerkleChallengeTrackerDoc<T>[];
   /** A list of approvals tracker activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   approvalTrackers: iApprovalTrackerDoc<T>[];
-  /** A list of address lists for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  addressLists: iBitBadgesAddressList<T>[];
   /** A list of claim alerts for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   claimAlerts: iClaimAlertDoc<T>[];
   /** A list of SIWBB requests for the account. Paginated and fetched as needed. To be used in conjunction with views. */
@@ -99,7 +92,6 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
    */
   alias?: {
     collectionId?: CollectionId;
-    listId?: string;
   };
 
   /** The credits for the account. */
@@ -132,12 +124,10 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   airdropped?: boolean;
   collected: BalanceDocWithDetails<T>[];
   activity: TransferActivityDoc<T>[];
-  listActivity: ListActivityDoc<T>[];
   claimActivity?: ClaimActivityDoc<T>[];
   pointsActivity?: PointsActivityDoc<T>[];
   challengeTrackers: MerkleChallengeTrackerDoc<T>[];
   approvalTrackers: ApprovalTrackerDoc<T>[];
-  addressLists: BitBadgesAddressList<T>[];
   claimAlerts: ClaimAlertDoc<T>[];
   siwbbRequests: SIWBBRequestDoc<T>[];
 
@@ -155,7 +145,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   };
   alias?: {
     collectionId?: CollectionId;
-    listId?: string;
   };
   creatorCredits?: CreatorCreditsDoc<T>;
 
@@ -177,12 +166,10 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.airdropped = data.airdropped;
     this.collected = data.collected.map((balance) => new BalanceDocWithDetails(balance));
     this.activity = data.activity.map((activity) => new TransferActivityDoc(activity));
-    this.listActivity = data.listActivity.map((activity) => new ListActivityDoc(activity));
     this.claimActivity = data.claimActivity?.map((activity) => new ClaimActivityDoc(activity));
     this.pointsActivity = data.pointsActivity?.map((activity) => new PointsActivityDoc(activity));
     this.challengeTrackers = data.challengeTrackers.map((challenge) => new MerkleChallengeTrackerDoc(challenge));
     this.approvalTrackers = data.approvalTrackers.map((tracker) => new ApprovalTrackerDoc(tracker));
-    this.addressLists = data.addressLists.map((list) => new BitBadgesAddressList(list));
     this.claimAlerts = data.claimAlerts.map((alert) => new ClaimAlertDoc(alert));
     this.siwbbRequests = data.siwbbRequests.map((auth) => new SIWBBRequestDoc(auth));
     this.address = data.address;
@@ -429,7 +416,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     viewType: AccountViewKey,
     viewId: string,
     specificCollections?: BatchTokenDetails<NumberType>[],
-    specificLists?: string[],
     oldestFirst?: boolean
   ) {
     if (!this.viewHasMore(viewId)) return;
@@ -438,7 +424,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       viewsToFetch: [
         {
           viewId: viewId,
-          specificLists,
           viewType,
           specificCollections,
           bookmark: this.views[viewId]?.pagination?.bookmark || '',
@@ -463,8 +448,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    */
   getView<KeyType extends AccountViewKey>(viewType: KeyType, viewId: string): AccountViewData<T>[KeyType] {
     switch (viewType) {
-      case 'createdLists':
-        return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
       case 'siwbbRequests':
         return this.getSIWBBRequestsView(viewId) as AccountViewData<T>[KeyType];
       case 'transferActivity':
@@ -475,18 +458,12 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
         return this.getAccountClaimAlertsView(viewId) as AccountViewData<T>[KeyType];
       case 'claimAlerts':
         return this.getAccountClaimAlertsView(viewId) as AccountViewData<T>[KeyType];
-      case 'allLists':
-        return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
-      case 'whitelists':
-        return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
-      case 'blacklists':
-        return this.getAccountAddressListsView(viewId) as AccountViewData<T>[KeyType];
+
       case 'createdTokens':
         return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
       case 'managingTokens':
         return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
-      case 'listActivity':
-        return this.getAccountListActivityView(viewId) as AccountViewData<T>[KeyType];
+
       case 'publicClaimActivity':
         return this.getClaimActivityView(viewId) as AccountViewData<T>[KeyType];
       case 'allClaimActivity':
@@ -522,22 +499,10 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     }) ?? []) as TransferActivityDoc<T>[];
   }
 
-  getAccountListActivityView(viewId: string) {
-    return (this.views[viewId]?.ids.map((x) => {
-      return this.listActivity.find((y) => y._docId === x);
-    }) ?? []) as ListActivityDoc<T>[];
-  }
-
   getAccountBalancesView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.collected.find((y) => y._docId === x);
     }) ?? []) as BalanceDocWithDetails<T>[];
-  }
-
-  getAccountAddressListsView(viewId: string) {
-    return (this.views[viewId]?.ids.map((x) => {
-      return this.addressLists.find((y) => y.listId === x);
-    }) ?? []) as BitBadgesAddressList<T>[];
   }
 
   getAccountClaimAlertsView(viewId: string) {
@@ -574,8 +539,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       sequence: 0n,
       collected: [],
       activity: [],
-      listActivity: [],
-      addressLists: [],
       claimAlerts: [],
       challengeTrackers: [],
       approvalTrackers: [],
@@ -614,8 +577,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       claimAlerts: [],
       challengeTrackers: [],
       approvalTrackers: [],
-      addressLists: [],
-      listActivity: [],
       siwbbRequests: [],
       seenActivity: 0n,
       createdAt: 0n,
@@ -627,18 +588,13 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
 }
 
 type AccountViewData<T extends NumberType> = {
-  createdLists: BitBadgesAddressList<T>[];
   siwbbRequests: SIWBBRequestDoc<T>[];
   transferActivity: TransferActivityDoc<T>[];
   tokensCollected: BalanceDocWithDetails<T>[];
   sentClaimAlerts: ClaimAlertDoc<T>[];
   claimAlerts: ClaimAlertDoc<T>[];
-  allLists: BitBadgesAddressList<T>[];
-  whitelists: BitBadgesAddressList<T>[];
-  blacklists: BitBadgesAddressList<T>[];
   createdTokens: BalanceDocWithDetails<T>[];
   managingTokens: BalanceDocWithDetails<T>[];
-  listActivity: ListActivityDoc<T>[];
   publicClaimActivity: ClaimActivityDoc<T>[];
   allClaimActivity: ClaimActivityDoc<T>[];
   pointsActivity: PointsActivityDoc<T>[];
@@ -699,10 +655,8 @@ function updateAccountWithResponse<T extends NumberType>(
 
     collected: [...(cachedAccount?.collected || []), ...(account.collected || [])],
     activity: [...(cachedAccount?.activity || []), ...(account.activity || [])],
-    addressLists: [...(cachedAccount?.addressLists || []), ...(account.addressLists || [])],
     claimAlerts: [...(cachedAccount?.claimAlerts || []), ...(account.claimAlerts || [])],
     siwbbRequests: [...(cachedAccount?.siwbbRequests || []), ...(account.siwbbRequests || [])],
-    listActivity: [...(cachedAccount?.listActivity || []), ...(account.listActivity || [])],
     pointsActivity: [...(cachedAccount?.pointsActivity || []), ...(account.pointsActivity || [])],
     claimActivity: [...(cachedAccount?.claimActivity || []), ...(account.claimActivity || [])],
     views: views,
@@ -726,10 +680,8 @@ function updateAccountWithResponse<T extends NumberType>(
   //Filter duplicates
   newAccount.collected = newAccount.collected.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.activity = newAccount.activity.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
-  newAccount.addressLists = newAccount.addressLists.filter((x, index, self) => index === self.findIndex((t) => t.listId === x.listId));
   newAccount.claimAlerts = newAccount.claimAlerts.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.siwbbRequests = newAccount.siwbbRequests.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
-  newAccount.listActivity = newAccount.listActivity.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.claimActivity = newAccount.claimActivity?.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.pointsActivity = newAccount.pointsActivity?.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
 
@@ -737,7 +689,6 @@ function updateAccountWithResponse<T extends NumberType>(
   newAccount.activity = newAccount.activity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.claimAlerts = newAccount.claimAlerts.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.siwbbRequests = newAccount.siwbbRequests.sort((a, b) => (BigInt(b.createdAt) - BigInt(a.createdAt) > 0 ? -1 : 1));
-  newAccount.listActivity = newAccount.listActivity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.claimActivity = newAccount.claimActivity?.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.pointsActivity = newAccount.pointsActivity?.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   return newAccount;
@@ -749,18 +700,13 @@ function updateAccountWithResponse<T extends NumberType>(
  * @category API Requests / Responses
  */
 export type AccountViewKey =
-  | 'createdLists'
   | 'siwbbRequests'
   | 'transferActivity'
   | 'tokensCollected'
   | 'sentClaimAlerts'
   | 'claimAlerts'
-  | 'allLists'
-  | 'whitelists'
-  | 'blacklists'
   | 'createdTokens'
   | 'managingTokens'
-  | 'listActivity'
   | 'publicClaimActivity'
   | 'allClaimActivity'
   | 'pointsActivity';
@@ -805,8 +751,6 @@ export type AccountFetchDetails = {
     viewType: AccountViewKey;
     /** If defined, we will filter the view to only include the specified collections. */
     specificCollections?: iBatchTokenDetails<NumberType>[];
-    /** If defined, we will filter the view to only include the specified lists. */
-    specificLists?: string[];
     /** Oldest first. By default, we fetch newest */
     oldestFirst?: boolean;
     /** A bookmark to pass in for pagination. "" for first request. */

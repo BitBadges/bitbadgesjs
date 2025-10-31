@@ -46,7 +46,7 @@ import type { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTre
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import { AddressList, convertListIdToBech32 } from './addressLists.js';
 import { Balance, BalanceArray } from './balances.js';
-import { CoinTransfer, MerkleChallenge, MustOwnBadges, ETHSignatureChallenge } from './misc.js';
+import { CoinTransfer, ETHSignatureChallenge, MerkleChallenge, MustOwnBadges } from './misc.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
 import { GetListIdWithOptions, GetListWithOptions, GetUintRangesWithOptions, getOverlapsAndNonOverlaps } from './overlaps.js';
 import type { CollectionApprovalPermissionWithDetails } from './permissions.js';
@@ -137,7 +137,6 @@ export class SatisfyMethod implements iSatisfyMethod {
  */
 export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<ClaimDetails<T>> implements iClaimDetails<T> {
   claimId: string;
-  balancesToSet?: PredeterminedBalances<T>;
   plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
   manualDistribution?: boolean;
   approach?: string;
@@ -149,7 +148,6 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
   version: T;
   collectionId?: CollectionId;
   standaloneClaim?: boolean;
-  listId?: string;
   rewards?: ClaimReward<T>[];
   estimatedCost?: string;
   estimatedTime?: string;
@@ -171,7 +169,6 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     this._templateInfo = data._templateInfo;
     this._includesPrivateParams = data._includesPrivateParams;
     this.claimId = data.claimId;
-    this.balancesToSet = data.balancesToSet ? new PredeterminedBalances(data.balancesToSet) : undefined;
     this.plugins = data.plugins;
     this.manualDistribution = data.manualDistribution;
     this.approach = data.approach;
@@ -182,7 +179,6 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.version = data.version;
     this.collectionId = data.collectionId;
     this.standaloneClaim = data.standaloneClaim;
-    this.listId = data.listId;
     this.rewards = data.rewards?.map((reward) => new ClaimReward(reward));
     this.estimatedCost = data.estimatedCost;
     this.estimatedTime = data.estimatedTime;

@@ -1,5 +1,3 @@
-import type { iBitBadgesAddressList } from '@/api-indexer/BitBadgesAddressList.js';
-import { BitBadgesAddressList } from '@/api-indexer/BitBadgesAddressList.js';
 import type { iBitBadgesCollection } from '@/api-indexer/BitBadgesCollection.js';
 import { BitBadgesCollection } from '@/api-indexer/BitBadgesCollection.js';
 import type { iBitBadgesUserInfo } from '@/api-indexer/BitBadgesUserInfo.js';
@@ -53,7 +51,6 @@ import {
   type iClaimDetails,
   type iClaimReward,
   type iCustomLink,
-  type iCustomListPage,
   type iCustomPage,
   type iDeveloperAppDoc,
   type iMapWithValues,
@@ -239,8 +236,6 @@ export interface iGetSearchPayload<T extends NumberType> {
   noCollections?: boolean;
   /** If true, we will skip all account queries. */
   noAccounts?: boolean;
-  /** If true, we will skip all address list queries. */
-  noAddressLists?: boolean;
   /** If true, we will skip all badge queries. */
   noBadges?: boolean;
   /** If true, we will skip all map queries. */
@@ -259,7 +254,6 @@ export interface iGetSearchPayload<T extends NumberType> {
 export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<GetSearchPayload<T>> implements iGetSearchPayload<T> {
   noCollections?: boolean;
   noAccounts?: boolean;
-  noAddressLists?: boolean;
   noBadges?: boolean;
   noMaps?: boolean;
   noApplications?: boolean;
@@ -270,7 +264,6 @@ export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<
     super();
     this.noCollections = payload.noCollections;
     this.noAccounts = payload.noAccounts;
-    this.noAddressLists = payload.noAddressLists;
     this.noBadges = payload.noBadges;
     this.noMaps = payload.noMaps;
     this.noApplications = payload.noApplications;
@@ -282,7 +275,6 @@ export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<
     return new GetSearchPayload<NumberType>({
       noCollections: query.noCollections === 'true',
       noAccounts: query.noAccounts === 'true',
-      noAddressLists: query.noAddressLists === 'true',
       noBadges: query.noBadges === 'true',
       noMaps: query.noMaps === 'true',
       noApplications: query.noApplications === 'true',
@@ -307,7 +299,6 @@ export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<
 export interface iGetSearchSuccessResponse<T extends NumberType> {
   collections: iBitBadgesCollection<T>[];
   accounts: iBitBadgesUserInfo<T>[];
-  addressLists: iBitBadgesAddressList<T>[];
   badges: {
     collection: iBitBadgesCollection<T>;
     badgeIds: iUintRange<T>[];
@@ -328,7 +319,6 @@ export class GetSearchSuccessResponse<T extends NumberType>
 {
   collections: BitBadgesCollection<T>[];
   accounts: BitBadgesUserInfo<T>[];
-  addressLists: BitBadgesAddressList<T>[];
   badges: {
     collection: BitBadgesCollection<T>;
     badgeIds: UintRangeArray<T>;
@@ -342,7 +332,6 @@ export class GetSearchSuccessResponse<T extends NumberType>
     super();
     this.collections = data.collections.map((collection) => new BitBadgesCollection(collection));
     this.accounts = data.accounts.map((account) => new BitBadgesUserInfo(account));
-    this.addressLists = data.addressLists.map((addressList) => new BitBadgesAddressList(addressList));
     this.badges = data.badges.map((badge) => {
       return {
         collection: new BitBadgesCollection(badge.collection),
@@ -924,7 +913,6 @@ export interface iUpdateAccountInfoPayload {
    */
   customPages?: {
     badges: iCustomPage<NumberType>[];
-    lists: iCustomListPage[];
   };
 
   /**
@@ -932,7 +920,6 @@ export interface iUpdateAccountInfoPayload {
    */
   watchlists?: {
     badges: iCustomPage<NumberType>[];
-    lists: iCustomListPage[];
   };
 
   /**
@@ -962,7 +949,7 @@ export interface iUpdateAccountInfoPayload {
     email?: string;
     discord?: { id: string; username: string; discriminator: string | undefined } | undefined;
     antiPhishingCode?: string;
-    preferences?: { listActivity?: boolean; transferActivity?: boolean; claimAlerts?: boolean; ignoreIfInitiator?: boolean };
+    preferences?: { transferActivity?: boolean; claimAlerts?: boolean; ignoreIfInitiator?: boolean };
   };
 
   /**
@@ -1680,7 +1667,6 @@ export class GetBrowsePayload extends CustomTypeClass<GetBrowsePayload> implemen
  */
 export interface iGetBrowseSuccessResponse<T extends NumberType> {
   collections: { [category: string]: iBitBadgesCollection<T>[] };
-  addressLists: { [category: string]: iBitBadgesAddressList<T>[] };
   profiles: { [category: string]: iBitBadgesUserInfo<T>[] };
   activity: iTransferActivityDoc<T>[];
   badges: {
@@ -1705,7 +1691,6 @@ export class GetBrowseSuccessResponse<T extends NumberType>
   implements iGetBrowseSuccessResponse<T>
 {
   collections: { [category: string]: BitBadgesCollection<T>[] };
-  addressLists: { [category: string]: BitBadgesAddressList<T>[] };
   profiles: { [category: string]: BitBadgesUserInfo<T>[] };
   activity: TransferActivityDoc<T>[];
   badges: {
@@ -1729,13 +1714,6 @@ export class GetBrowseSuccessResponse<T extends NumberType>
         return acc;
       },
       {} as { [category: string]: BitBadgesCollection<T>[] }
-    );
-    this.addressLists = Object.keys(data.addressLists).reduce(
-      (acc, category) => {
-        acc[category] = data.addressLists[category].map((addressList) => new BitBadgesAddressList(addressList));
-        return acc;
-      },
-      {} as { [category: string]: BitBadgesAddressList<T>[] }
     );
     this.profiles = Object.keys(data.profiles).reduce(
       (acc, category) => {
@@ -3010,8 +2988,8 @@ export interface iCreateClaimPayload {
   /**
    * The claims to create.
    *
-   * By default, it will create standalone (non-test claims) or list / collection linked claims if the
-   * corresponding fields are specified in the claim (listId, collectionId, ...).
+   * By default, it will create standalone (non-test claims) or  collection linked claims if the
+   * corresponding fields are specified in the claim.
    *
    * Note that collection / list linked claims require the proper permissions and have special setup
    * required.

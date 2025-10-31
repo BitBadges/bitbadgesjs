@@ -1,7 +1,7 @@
 {
   "name": "bitbadgesjs-sdk",
   "description": "SDK for BitBadges development - Compatible with BitBadges v12 (SDK 0.18.x), v13 (SDK 0.19.x), and v14 (SDK 0.20.x)",
-  "version": "0.21.4",
+  "version": "0.22.0",
   "license": "MIT",
   "keywords": [
     "bitbadges",
@@ -93,6 +93,7 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^1.1.8",
     "ts-patch": "^3.3.0",
+    "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^3.11.0",
     "tsoa": "^6.1.5",
     "tsup": "^8.1.0",

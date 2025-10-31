@@ -10,7 +10,6 @@ import {
   ChallengeTrackerIdDetails,
   ClaimCachePolicy,
   CollectionApproval,
-  PredeterminedBalances,
   SatisfyMethod,
   UserIncomingApproval,
   UserIncomingApprovalWithDetails,
@@ -86,7 +85,6 @@ import {
   type iCollectionDoc,
   type iComplianceDoc,
   type iCustomLink,
-  type iCustomListPage,
   type iCustomPage,
   type iDepositBalanceDoc,
   type iDeveloperAppDoc,
@@ -563,7 +561,6 @@ export class NotificationPreferences<T extends NumberType>
   discord?: { id: string; username: string; discriminator: string | undefined; token: string } | undefined;
   emailVerification?: EmailVerificationStatus<T>;
   preferences?: {
-    listActivity?: boolean;
     transferActivity?: boolean;
     claimAlerts?: boolean;
     claimActivity?: boolean;
@@ -637,23 +634,6 @@ export class CustomPage<T extends NumberType> extends BaseNumberTypeClass<Custom
 }
 
 /**
- * @inheritDoc iCustomListPage
- * @category Accounts
- */
-export class CustomListPage extends CustomTypeClass<CustomListPage> implements iCustomListPage {
-  title: string;
-  description: string;
-  items: string[];
-
-  constructor(data: iCustomListPage) {
-    super();
-    this.title = data.title;
-    this.description = data.description;
-    this.items = data.items;
-  }
-}
-
-/**
  * @inheritDoc iProfileDoc
  * @category Accounts
  */
@@ -672,12 +652,10 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   affiliateCode?: string;
   customLinks?: iCustomLink[];
   hiddenBadges?: BatchTokenDetailsArray<T>;
-  hiddenLists?: string[];
   customPages?: {
     badges: CustomPage<T>[];
-    lists: CustomListPage[];
   };
-  watchlists?: { badges: CustomPage<T>[]; lists: CustomListPage[] };
+  watchlists?: { badges: CustomPage<T>[] };
   profilePicUrl?: string;
   username?: string;
   latestSignedInChain?: SupportedChain;
@@ -721,17 +699,14 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.affiliateCode = data.affiliateCode;
     this.customLinks = data.customLinks;
     this.hiddenBadges = data.hiddenBadges ? BatchTokenDetailsArray.From(data.hiddenBadges) : undefined;
-    this.hiddenLists = data.hiddenLists;
     this.customPages = data.customPages
       ? {
-          badges: data.customPages.badges.map((customPage) => new CustomPage(customPage)),
-          lists: data.customPages.lists.map((customListPage) => new CustomListPage(customListPage))
+          badges: data.customPages.badges.map((customPage) => new CustomPage(customPage))
         }
       : undefined;
     this.watchlists = data.watchlists
       ? {
-          badges: data.watchlists.badges.map((customPage) => new CustomPage(customPage)),
-          lists: data.watchlists.lists.map((customListPage) => new CustomListPage(customListPage))
+          badges: data.watchlists.badges.map((customPage) => new CustomPage(customPage))
         }
       : undefined;
     this.profilePicUrl = data.profilePicUrl;
@@ -1128,12 +1103,6 @@ export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<Balanc
   _id?: string;
   collectionId: CollectionId;
   bitbadgesAddress: BitBadgesAddress;
-  onChain: boolean;
-  uri?: string;
-  fetchedAt?: UNIXMilliTimestamp<T>;
-  fetchedAtBlock?: T;
-  isPermanent?: boolean;
-  contentHash?: string;
   updateHistory: UpdateHistory<T>[];
   balances: BalanceArray<T>;
   incomingApprovals: UserIncomingApproval<T>[];
@@ -1149,12 +1118,6 @@ export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<Balanc
     this._id = data._id;
     this.collectionId = data.collectionId;
     this.bitbadgesAddress = data.bitbadgesAddress;
-    this.onChain = data.onChain;
-    this.uri = data.uri;
-    this.fetchedAt = data.fetchedAt;
-    this.fetchedAtBlock = data.fetchedAtBlock;
-    this.isPermanent = data.isPermanent;
-    this.contentHash = data.contentHash;
     this.updateHistory = data.updateHistory.map((updateHistory) => new UpdateHistory(updateHistory));
     this.balances = BalanceArray.From(data.balances);
     this.incomingApprovals = data.incomingApprovals.map((incomingApproval) => new UserIncomingApproval(incomingApproval));
@@ -1186,12 +1149,6 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
   _id?: string;
   collectionId: CollectionId;
   bitbadgesAddress: BitBadgesAddress;
-  onChain: boolean;
-  uri?: string;
-  fetchedAt?: UNIXMilliTimestamp<T>;
-  fetchedAtBlock?: T;
-  isPermanent?: boolean;
-  contentHash?: string;
   updateHistory: UpdateHistory<T>[];
   balances: BalanceArray<T>;
   autoApproveSelfInitiatedIncomingTransfers: boolean;
@@ -1207,12 +1164,6 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
     this.userPermissions = new UserPermissionsWithDetails(data.userPermissions);
     this.collectionId = data.collectionId;
     this.bitbadgesAddress = data.bitbadgesAddress;
-    this.onChain = data.onChain;
-    this.uri = data.uri;
-    this.fetchedAt = data.fetchedAt;
-    this.fetchedAtBlock = data.fetchedAtBlock;
-    this.isPermanent = data.isPermanent;
-    this.contentHash = data.contentHash;
     this.updateHistory = data.updateHistory.map((updateHistory) => new UpdateHistory(updateHistory));
     this.balances = BalanceArray.From(data.balances);
     this.autoApproveSelfInitiatedIncomingTransfers = data.autoApproveSelfInitiatedIncomingTransfers;
@@ -1440,7 +1391,6 @@ export class UtilityPageLink<T extends NumberType> extends CustomTypeClass<Utili
   claimId?: string | undefined;
   applicationId?: string | undefined;
   collectionId?: CollectionId | undefined;
-  listId?: string | undefined;
   mapId?: string | undefined;
   metadata?: iMetadata<T> | undefined;
 
@@ -1450,7 +1400,6 @@ export class UtilityPageLink<T extends NumberType> extends CustomTypeClass<Utili
     this.claimId = data.claimId;
     this.applicationId = data.applicationId;
     this.collectionId = data.collectionId;
-    this.listId = data.listId;
     this.mapId = data.mapId;
     this.metadata = data.metadata;
   }
@@ -1502,13 +1451,11 @@ export class ListingViewsDoc<T extends NumberType> extends BaseNumberTypeClass<L
 export class LinkedTo<T extends NumberType> extends CustomTypeClass<LinkedTo<T>> implements iLinkedTo<T> {
   collectionId?: CollectionId;
   badgeIds?: UintRangeArray<T>;
-  listId?: string;
 
   constructor(data: iLinkedTo<T>) {
     super();
     this.collectionId = data.collectionId;
     this.badgeIds = data.badgeIds ? UintRangeArray.From(data.badgeIds) : undefined;
-    this.listId = data.listId;
   }
 
   getNumberFieldNames(): string[] {
@@ -1528,7 +1475,6 @@ export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<I
   claimId?: string;
   applicationId?: string;
   collectionId?: CollectionId;
-  listId?: string;
   mapId?: string;
   badgeId?: string;
 
@@ -1537,7 +1483,6 @@ export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<I
     this.claimId = data.claimId;
     this.applicationId = data.applicationId;
     this.collectionId = data.collectionId;
-    this.listId = data.listId;
     this.mapId = data.mapId;
     this.badgeId = data.badgeId;
   }
@@ -1672,8 +1617,6 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   action: {
     seedCode?: string;
     siwbbClaim?: boolean;
-    balancesToSet?: PredeterminedBalances<T> | undefined;
-    listId?: string;
   };
   trackerDetails?: ChallengeTrackerIdDetails<T> | undefined;
   metadata?: Metadata<T> | undefined;
@@ -1707,9 +1650,7 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
     this.lastUpdated = data.lastUpdated;
     this.manualDistribution = data.manualDistribution;
     this.action = {
-      balancesToSet: data.action.balancesToSet ? new PredeterminedBalances(data.action.balancesToSet) : undefined,
       seedCode: data.action.seedCode,
-      listId: data.action.listId,
       siwbbClaim: data.action.siwbbClaim
     };
     this.trackerDetails = data.trackerDetails ? new ChallengeTrackerIdDetails(data.trackerDetails) : undefined;
@@ -2020,10 +1961,6 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
     nsfw: BatchTokenDetailsArray<T>;
     reported: BatchTokenDetailsArray<T>;
   };
-  addressLists: {
-    nsfw: { listId: string; reason: string }[];
-    reported: { listId: string; reason: string }[];
-  };
   accounts: {
     nsfw: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
     reported: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
@@ -2047,7 +1984,6 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
       nsfw: BatchTokenDetailsArray.From(data.badges.nsfw),
       reported: BatchTokenDetailsArray.From(data.badges.reported)
     };
-    this.addressLists = data.addressLists;
     this.accounts = data.accounts;
     this.applications = data.applications ?? { nsfw: [], reported: [] };
     this._docId = data._docId;

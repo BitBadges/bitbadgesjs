@@ -1,12 +1,11 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, ParsedQs } from '@/common/base.js';
 import { NumberType } from '@/common/string-numbers.js';
 import { PaginationInfo } from '../base.js';
-import { BitBadgesAddressList, iBitBadgesAddressList } from '../BitBadgesAddressList.js';
 import { BitBadgesCollection, iBitBadgesCollection } from '../BitBadgesCollection.js';
 
 import { ClaimDetails } from '@/core/approvals.js';
 import { CollectionId } from '@/interfaces/index.js';
-import { ClaimActivityDoc, ClaimAlertDoc, ListActivityDoc, PointsActivityDoc, TransferActivityDoc } from '../docs-types/activity.js';
+import { ClaimActivityDoc, ClaimAlertDoc, PointsActivityDoc, TransferActivityDoc } from '../docs-types/activity.js';
 import {
   ApprovalTrackerDoc,
   BalanceDoc,
@@ -22,7 +21,6 @@ import {
   iClaimActivityDoc,
   iClaimAlertDoc,
   iClaimDetails,
-  iListActivityDoc,
   iMerkleChallengeTrackerDoc,
   iPointsActivityDoc,
   iTransferActivityDoc,
@@ -242,86 +240,6 @@ export class GetCollectionListingsSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface iGetAddressListActivityPayload {
-  bookmark?: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetAddressListActivitySuccessResponse<T extends NumberType> {
-  activity: Array<iListActivityDoc<T>>;
-  pagination: PaginationInfo;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetAddressListActivitySuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetAddressListActivitySuccessResponse<T>>
-  implements iGetAddressListActivitySuccessResponse<T>
-{
-  activity: ListActivityDoc<T>[];
-  pagination: PaginationInfo;
-
-  constructor(data: iGetAddressListActivitySuccessResponse<T>) {
-    super();
-    this.activity = data.activity.map((activity) => new ListActivityDoc(activity));
-    this.pagination = data.pagination;
-  }
-
-  getNumberFieldNames(): string[] {
-    return [];
-  }
-
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetAddressListActivitySuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAddressListActivitySuccessResponse<U>;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetAddressListListingsPayload {
-  bookmark?: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetAddressListListingsSuccessResponse<T extends NumberType> {
-  listings: Array<iUtilityPageDoc<T>>;
-  pagination: PaginationInfo;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetAddressListListingsSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetAddressListListingsSuccessResponse<T>>
-  implements iGetAddressListListingsSuccessResponse<T>
-{
-  listings: UtilityPageDoc<T>[];
-  pagination: PaginationInfo;
-
-  constructor(data: iGetAddressListListingsSuccessResponse<T>) {
-    super();
-    this.listings = data.listings.map((listing) => new UtilityPageDoc(listing));
-    this.pagination = data.pagination;
-  }
-
-  getNumberFieldNames(): string[] {
-    return [];
-  }
-
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetAddressListListingsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAddressListListingsSuccessResponse<U>;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
 interface iBaseQueryParams {
   bookmark?: string;
   oldestFirst?: boolean;
@@ -346,20 +264,6 @@ export interface iGetBadgesViewForUserPayload extends iBaseQueryParams {
    * - 'created' will return the tokens the user has created
    */
   viewType?: 'collected' | 'managing' | 'created';
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetAddressListsForUserPayload extends iBaseQueryParams {
-  /**
-   * The view type to search for. Default is 'all'
-   * - 'all' will return all address lists the user is a member of (both on whitelist or on blacklist)
-   * - 'created' will return all address lists the user has created
-   * - 'whitelists' will return all address lists the user is on the whitelist of
-   * - 'blacklists' will return all address lists the user is on the blacklist of
-   */
-  viewType?: 'all' | 'created' | 'whitelists' | 'blacklists';
 }
 
 // Success response interfaces
@@ -427,38 +331,6 @@ export class GetBadgesViewForUserSuccessResponse<T extends NumberType>
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetBadgesViewForUserSuccessResponse<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetBadgesViewForUserSuccessResponse<U>;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetAddressListsForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  lists: Array<iBitBadgesAddressList<T>>;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetAddressListsForUserSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetAddressListsForUserSuccessResponse<T>>
-  implements iGetAddressListsForUserSuccessResponse<T>
-{
-  lists: BitBadgesAddressList<T>[];
-  pagination: PaginationInfo;
-
-  constructor(data: iGetAddressListsForUserSuccessResponse<T>) {
-    super();
-    this.lists = data.lists.map((list) => new BitBadgesAddressList(list));
-    this.pagination = data.pagination;
-  }
-
-  getNumberFieldNames(): string[] {
-    return [];
-  }
-
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetAddressListsForUserSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAddressListsForUserSuccessResponse<U>;
   }
 }
 
@@ -541,43 +413,6 @@ export class GetSiwbbRequestsForUserSuccessResponse<T extends NumberType>
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetSiwbbRequestsForUserSuccessResponse<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetSiwbbRequestsForUserSuccessResponse<U>;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetListActivityForUserPayload extends iBaseQueryParams {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetListActivityForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  listActivity: Array<iListActivityDoc<T>>;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetListActivityForUserSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetListActivityForUserSuccessResponse<T>>
-  implements iGetListActivityForUserSuccessResponse<T>
-{
-  listActivity: ListActivityDoc<T>[];
-  pagination: PaginationInfo;
-
-  constructor(data: iGetListActivityForUserSuccessResponse<T>) {
-    super();
-    this.listActivity = data.listActivity.map((activity) => new ListActivityDoc(activity));
-    this.pagination = data.pagination;
-  }
-
-  getNumberFieldNames(): string[] {
-    return [];
-  }
-
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetListActivityForUserSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetListActivityForUserSuccessResponse<U>;
   }
 }
 

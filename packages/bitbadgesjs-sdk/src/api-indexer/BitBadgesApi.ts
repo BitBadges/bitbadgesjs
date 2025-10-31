@@ -3,43 +3,26 @@ import { BitBadgesCollection, GetCollectionsSuccessResponse, iGetCollectionsPayl
 
 import type { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/index.js';
 import typia from 'typia';
-import {
-  BitBadgesAddressList,
-  CreateAddressListsSuccessResponse,
-  DeleteAddressListsSuccessResponse,
-  GetAddressListSuccessResponse,
-  GetAddressListsSuccessResponse,
-  UpdateAddressListAddressesSuccessResponse,
-  UpdateAddressListCoreDetailsSuccessResponse,
-  UpdateAddressListsSuccessResponse,
-  iCreateAddressListsPayload,
-  iDeleteAddressListsPayload,
-  iGetAddressListPayload,
-  iGetAddressListsPayload,
-  iUpdateAddressListAddressesPayload,
-  iUpdateAddressListCoreDetailsPayload,
-  iUpdateAddressListsPayload
-} from './BitBadgesAddressList.js';
 import type { GetAccountSuccessResponse, GetAccountsSuccessResponse, iGetAccountPayload, iGetAccountsPayload } from './BitBadgesUserInfo.js';
 import { BitBadgesUserInfo } from './BitBadgesUserInfo.js';
 import type { iBitBadgesApi } from './base.js';
 import { BaseBitBadgesApi } from './base.js';
 import type { DynamicDataHandlerType, NativeAddress, iChallengeTrackerIdDetails } from './docs-types/interfaces.js';
 import {
-  FilterTokensInCollectionSuccessResponse,
   FilterSuggestionsSuccessResponse,
-  GetTokenActivitySuccessResponse,
+  FilterTokensInCollectionSuccessResponse,
   GetBalanceByAddressSuccessResponse,
   GetOwnersSuccessResponse,
+  GetTokenActivitySuccessResponse,
   RefreshMetadataSuccessResponse,
   RefreshStatusSuccessResponse,
-  iFilterTokensInCollectionPayload,
   iFilterSuggestionsPayload,
   iFilterSuggestionsSuccessResponse,
-  iGetTokenActivityPayload,
+  iFilterTokensInCollectionPayload,
   iGetBalanceByAddressPayload,
   iGetBalanceByAddressSuccessResponse,
   iGetOwnersPayload,
+  iGetTokenActivityPayload,
   iRefreshMetadataPayload
 } from './requests/collections.js';
 import {
@@ -257,10 +240,6 @@ import {
 } from './requests/requests.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
 import {
-  GetAddressListActivitySuccessResponse,
-  GetAddressListClaimsSuccessResponse,
-  GetAddressListListingsSuccessResponse,
-  GetAddressListsForUserSuccessResponse,
   GetBadgeMetadataSuccessResponse,
   GetBadgesViewForUserSuccessResponse,
   GetClaimActivityForUserSuccessResponse,
@@ -272,17 +251,9 @@ import {
   GetCollectionOwnersSuccessResponse,
   GetCollectionSuccessResponse,
   GetCollectionTransferActivitySuccessResponse,
-  GetListActivityForUserSuccessResponse,
   GetPointsActivityForUserSuccessResponse,
   GetSiwbbRequestsForUserSuccessResponse,
   GetTransferActivityForUserSuccessResponse,
-  iGetAddressListActivityPayload,
-  iGetAddressListActivitySuccessResponse,
-  iGetAddressListClaimsSuccessResponse,
-  iGetAddressListListingsPayload,
-  iGetAddressListListingsSuccessResponse,
-  iGetAddressListsForUserPayload,
-  iGetAddressListsForUserSuccessResponse,
   iGetBadgeMetadataSuccessResponse,
   iGetBadgesViewForUserPayload,
   iGetBadgesViewForUserSuccessResponse,
@@ -303,8 +274,6 @@ import {
   iGetCollectionSuccessResponse,
   iGetCollectionTransferActivityPayload,
   iGetCollectionTransferActivitySuccessResponse,
-  iGetListActivityForUserPayload,
-  iGetListActivityForUserSuccessResponse,
   iGetPointsActivityForUserPayload,
   iGetPointsActivityForUserSuccessResponse,
   iGetSiwbbRequestsForUserPayload,
@@ -368,7 +337,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Search collections, tokens, accounts, address lists based on a search value.
+   * Search collections, tokens, accounts based on a search value.
    *
    * @remarks
    * - **API Route**: `POST /api/v0/search/:searchValue`
@@ -376,7 +345,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getSearchResults('vitalik.eth', { noAddressLists: true, noCollections: true, noBadges: true });
+   * const res = await BitBadgesApi.getSearchResults('vitalik.eth', {  noCollections: true, noBadges: true });
    * console.log(res);
    * ```
    */
@@ -788,68 +757,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
       await this.handleApiError(error);
       return Promise.reject(error);
     }
-  }
-
-  /**
-   * Creates address lists stored by BitBadges centralized servers.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/addressLists`
-   * - **SDK Function Call**: `await BitBadgesApi.updateAddressLists(payload);`
-   *
-   * Must be created off-chain. For on-chain, they must be created through MsgCreateAddressMappings. Creator can update their created lists with no restrictions. Else, requires an edit key.
-   */
-  public async createAddressLists(payload: iCreateAddressListsPayload<T>): Promise<CreateAddressListsSuccessResponse> {
-    return await BitBadgesAddressList.CreateAddressList(this, payload);
-  }
-
-  /**
-   * Updates the core details of an address list.
-   *
-   * @remarks
-   * - **API Route**: `PUT /api/v0/addressLists/coreDetails`
-   * - **SDK Function Call**: `await BitBadgesApi.updateAddressListCoreDetails(payload);`
-   */
-  public async updateAddressListCoreDetails<T extends NumberType>(
-    payload: iUpdateAddressListCoreDetailsPayload<T>
-  ): Promise<UpdateAddressListCoreDetailsSuccessResponse> {
-    return await BitBadgesAddressList.UpdateAddressListCoreDetails(this, payload);
-  }
-
-  /**
-   * Updates the addresses of an address list.
-   *
-   * @remarks
-   * - **API Route**: `PUT /api/v0/addressLists/addresses`
-   * - **SDK Function Call**: `await BitBadgesApi.updateAddressListAddresses(payload);`
-   */
-  public async updateAddressListAddresses(payload: iUpdateAddressListAddressesPayload): Promise<UpdateAddressListAddressesSuccessResponse> {
-    return await BitBadgesAddressList.UpdateAddressListAddresses(this, payload);
-  }
-
-  /**
-   * Gets address lists. Can be on-chain or off-chain.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/addressLists`
-   * - **SDK Function Call**: `await BitBadgesApi.getAddressLists(payload);`
-   *
-   * Note for reserved lists, you can use getReservedAddressList from the SDK.
-   */
-  public async getAddressLists(payload: iGetAddressListsPayload): Promise<GetAddressListsSuccessResponse<T>> {
-    return await BitBadgesAddressList.GetAddressLists(this, payload);
-  }
-
-  /**
-   * Deletes address lists. Must be created off-chain.
-   *
-   * @remarks
-   * - **API Route**: `DELETE /api/v0/addressLists`
-   * - **SDK Function Call**: `await BitBadgesApi.deleteAddressLists(payload);`
-   * - **Authentication**: Must be signed in and the creator of the address list.
-   */
-  public async deleteAddressLists(payload: iDeleteAddressListsPayload): Promise<DeleteAddressListsSuccessResponse> {
-    return await BitBadgesAddressList.DeleteAddressList(this, payload);
   }
 
   /**
@@ -1742,44 +1649,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
       return Promise.reject(error);
     }
   }
-
-  /**
-   * Get address lists for a specific account. Specify the viewType to determine what
-   * address lists to retrieve.
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/account/:address/lists`
-   * - **SDK Function Call**: `await BitBadgesApi.getAddressListsForUser(address, { viewType });`
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.getAddressListsForUser("bb1...", { viewType: "all" });
-   * console.log(res);
-   * ```
-   * */
-  public async getAddressListsForUser(
-    address: NativeAddress,
-    payload: iGetAddressListsForUserPayload
-  ): Promise<GetAddressListsForUserSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetAddressListsForUserPayload> = typia.validate<iGetAddressListsForUserPayload>(payload);
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<iGetAddressListsForUserSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAddressListsForUserRoute(address)}`,
-        {
-          params: payload
-        }
-      );
-      return new GetAddressListsForUserSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
   /**
    * Gets Sign-In with BitBadges (SIWBB) requests (authentication requests)
    * for a user.
@@ -1888,42 +1757,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets lists activity for a specific user.
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/account/:address/activity/lists`
-   * - **SDK Function Call**: `await BitBadgesApi.getListActivityForUser(address, { ... });`
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.getListActivityForUser("bb1...", { ... });
-   * console.log(res);
-   * ```
-   * */
-  public async getListActivityForUser(
-    address: NativeAddress,
-    payload: iGetListActivityForUserPayload
-  ): Promise<GetListActivityForUserSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetListActivityForUserPayload> = typia.validate<iGetListActivityForUserPayload>(payload);
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<iGetListActivityForUserSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetListActivityForUserRoute(address)}`,
-        {
-          params: payload
-        }
-      );
-      return new GetListActivityForUserSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
    * Gets claim activity by type for a specific user. Specify the viewType to determine what
    * claim activity to retrieve.
    *
@@ -2021,78 +1854,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         { params: payload }
       );
       return new GetClaimAlertsForUserSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Gets activity for a specific address list.
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/addressLists/:addressListId/activity`
-   * - **SDK Function Call**: `await BitBadgesApi.getAddressListActivity(addressListId, { ... });`
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.getAddressListActivity("list123", { ... });
-   * console.log(res);
-   * ```
-   * */
-  public async getAddressListActivity(
-    addressListId: string,
-    payload: iGetAddressListActivityPayload
-  ): Promise<GetAddressListActivitySuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetAddressListActivityPayload> = typia.validate<iGetAddressListActivityPayload>(payload);
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<iGetAddressListActivitySuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAddressListActivityRoute(addressListId)}`,
-        {
-          params: payload
-        }
-      );
-      return new GetAddressListActivitySuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Gets listings for a specific address list.
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/addressLists/:addressListId/listings`
-   * - **SDK Function Call**: `await BitBadgesApi.getAddressListListings(addressListId, { bookmark });`
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.getAddressListListings("list123", { bookmark: "123" });
-   * console.log(res);
-   * ```
-   * */
-  public async getAddressListListings(
-    addressListId: string,
-    payload: iGetAddressListListingsPayload
-  ): Promise<GetAddressListListingsSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetAddressListListingsPayload> = typia.validate<iGetAddressListListingsPayload>(payload);
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<iGetAddressListListingsSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAddressListListingsRoute(addressListId)}`,
-        {
-          params: payload
-        }
-      );
-      return new GetAddressListListingsSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -2353,31 +2114,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets claims for a specific address list.
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/addressLists/:addressListId/claims`
-   * - **SDK Function Call**: `await BitBadgesApi.getAddressListClaims(addressListId);`
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.getAddressListClaims("list123");
-   * console.log(res);
-   * ```
-   * */
-  public async getAddressListClaims(addressListId: string): Promise<GetAddressListClaimsSuccessResponse<T>> {
-    try {
-      const response = await this.axios.get<iGetAddressListClaimsSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAddressListClaimsRoute(addressListId)}`
-      );
-      return new GetAddressListClaimsSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
    * Get a claim by ID.
    *
    * @remarks
@@ -2401,37 +2137,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         params: payload
       });
       return new GetClaimSuccessResponse<T>(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Get an address list by ID.
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/addressList/:addressListId`
-   * - **SDK Function Call**: `await BitBadgesApi.getAddressList(addressListId, { ... });`
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.getAddressList("list123", { ... });
-   * console.log(res);
-   * ```
-   */
-  public async getAddressList(addressListId: string, payload?: iGetAddressListPayload): Promise<GetAddressListSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetAddressListPayload> = typia.validate<iGetAddressListPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<GetAddressListSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAddressListRoute(addressListId)}`,
-        { params: payload }
-      );
-      return new GetAddressListSuccessResponse<T>(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -3570,24 +3275,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
       await this.handleApiError(error);
       return Promise.reject(error);
     }
-  }
-
-  /**
-   * Updates address lists stored by BitBadges centralized servers.
-   *
-   * Warning: This is legacy and an all-inclusive route used by the frontend. Please opt for more fine-grained routes/
-   *
-   * Warning: This route requires ALL claims to be provided. If any are not provided, they will not be included moving forward and will
-   * be deleted. To update an individual claim, you can use the update claim endpoint.
-   *
-   * @remarks
-   * - **API Route**: `PUT /api/v0/addressLists`
-   * - **SDK Function Call**: `await BitBadgesApi.updateAddressLists(payload);`
-   *
-   * @deprecated
-   */
-  public async updateAddressLists(payload: iUpdateAddressListsPayload<T>): Promise<UpdateAddressListsSuccessResponse> {
-    return await BitBadgesAddressList.UpdateAddressList(this, payload);
   }
 }
 

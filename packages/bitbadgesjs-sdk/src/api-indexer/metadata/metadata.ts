@@ -27,12 +27,6 @@ export interface iMetadata<T extends NumberType> {
     [key: string]: string;
   };
 
-  /** The off-chain transferability info for this item (used for tokens - off-chain, disregard for others) */
-  offChainTransferabilityInfo?: {
-    host: string;
-    assignMethod: string;
-  };
-
   /** The attributes for this item */
   attributes?: {
     type: string;
@@ -94,11 +88,6 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
     url?: string;
   }[];
 
-  offChainTransferabilityInfo?: {
-    host: string;
-    assignMethod: string;
-  };
-
   constructor(data: iMetadata<T>) {
     super();
     this.fetchedAt = data.fetchedAt;
@@ -112,7 +101,6 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
     this.externalUrl = data.externalUrl;
     this.tags = data.tags;
     this.socials = data.socials;
-    this.offChainTransferabilityInfo = data.offChainTransferabilityInfo;
     this.attributes = data.attributes;
     this.additionalInfo = data.additionalInfo;
   }
@@ -136,7 +124,7 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
     new Metadata({
       name: 'Untitled',
       description: 'No description provided.',
-      image: 'ipfs://QmNytJNN44stkMndshtdfcCW2mzaCm6A23maiKaQvUqoj8'
+      image: 'ipfs://QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E'
     }).convert(BigIntify);
 
   /**

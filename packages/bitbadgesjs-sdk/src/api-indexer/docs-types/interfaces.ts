@@ -9,7 +9,7 @@ import type { iApprovalInfoDetails, iChallengeDetails, iUserOutgoingApprovalWith
 import type { iBatchTokenDetails } from '@/core/batch-utils.js';
 import type { iCosmosCoin } from '@/core/coin.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
-import type { iCollectionApproval, iPredeterminedBalances, iUserIncomingApprovalWithDetails } from '@/interfaces/types/approvals.js';
+import type { iCollectionApproval, iUserIncomingApprovalWithDetails } from '@/interfaces/types/approvals.js';
 import type {
   CollectionId,
   iAddressList,
@@ -196,7 +196,6 @@ export interface iNotificationPreferences<T extends NumberType> {
   emailVerification?: iEmailVerificationStatus<T>;
   /** The preferences for the notifications. What type of notifications does the user want to receive? */
   preferences?: {
-    listActivity?: boolean;
     transferActivity?: boolean;
     claimAlerts?: boolean;
     claimActivity?: boolean;
@@ -316,22 +315,6 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
   volume?: T;
   /** The denomination of the transfer */
   denom?: string;
-}
-
-/**
- * @category Interfaces
- */
-export interface iListActivityDoc<T extends NumberType> extends iActivityDoc<T> {
-  /** The list ID. */
-  listId: string;
-  /** Initiator of the list activity. */
-  initiatedBy: BitBadgesAddress;
-  /** Whether or not the address was added to the list or removed. */
-  addedToList?: boolean;
-  /** The list of addresses that were added or removed from the list. */
-  addresses?: BitBadgesAddress[];
-  /** The transaction hash of the activity. */
-  txHash?: string;
 }
 
 /**
@@ -650,20 +633,6 @@ export interface iCustomPage<T extends NumberType> {
 }
 
 /**
- * CustomListPage is a custom list page that can be added to a profile. The items are valid list IDs.
- *
- * @category Interfaces
- */
-export interface iCustomListPage {
-  /** The title of the custom list page */
-  title: string;
-  /** The description of the custom list page */
-  description: string;
-  /** The list IDs to display on the custom list page */
-  items: string[];
-}
-
-/**
  * @category Interfaces
  */
 export interface iProfileDoc<T extends NumberType> extends Doc {
@@ -696,19 +665,15 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
 
   /** The hidden badges of the account */
   hiddenBadges?: iBatchTokenDetails<T>[];
-  /** The hidden lists of the account */
-  hiddenLists?: string[];
 
   /** The custom pages of the account */
   customPages?: {
     badges: iCustomPage<T>[];
-    lists: iCustomListPage[];
   };
 
   /** The watched lists of the account's portfolio */
   watchlists?: {
     badges: iCustomPage<T>[];
-    lists: iCustomListPage[];
   };
 
   /** The profile picture URL of the account */
@@ -858,18 +823,6 @@ export interface iStatusDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iAddressListEditKey<T extends NumberType> {
-  /** The key that can be used to edit the address list */
-  key: string;
-  /** The expiration date of the key (milliseconds since epoch) */
-  expirationDate: UNIXMilliTimestamp<T>;
-  /** True if the user can only add their signed in address to the list */
-  mustSignIn?: boolean;
-}
-
-/**
- * @category Interfaces
- */
 export interface iAddressListDoc<T extends NumberType> extends iAddressList, Doc {
   /** The BitBadges address of the user who created this list */
   createdBy: BitBadgesAddress;
@@ -896,24 +849,6 @@ export interface iBalanceDoc<T extends NumberType> extends iUserBalanceStore<T>,
 
   /** The BitBadges address of the user */
   bitbadgesAddress: BitBadgesAddress;
-
-  /** True if the balances are on-chain */
-  onChain: boolean;
-
-  /** The URI of the off-chain balances */
-  uri?: string;
-
-  /** The timestamp of when the off-chain balances were fetched (milliseconds since epoch). For BitBadges indexer, we only populate this for the Total docs. */
-  fetchedAt?: UNIXMilliTimestamp<T>;
-
-  /** The block number of when the off-chain balances were fetched. For BitBadges indexer, we only populate this for the Total docs. */
-  fetchedAtBlock?: T;
-
-  /** True if the off-chain balances are using permanent storage */
-  isPermanent?: boolean;
-
-  /** The content hash of the off-chain balances */
-  contentHash?: string;
 
   /** The update history of this balance */
   updateHistory: iUpdateHistory<T>[];
@@ -1459,8 +1394,6 @@ export interface iInheritMetadataFrom<T extends NumberType> {
   applicationId?: string;
   /** The collection ID to link to */
   collectionId?: CollectionId;
-  /** The address list ID to link to */
-  listId?: string;
   /** The map ID to link to */
   mapId?: string;
   /** The token ID to link to "collectionId: CollectionId<T>dgeId" */
@@ -1573,8 +1506,6 @@ export interface iLinkedTo<T extends NumberType> {
   collectionId?: CollectionId;
   /** The token IDs */
   badgeIds?: iUintRange<T>[];
-  /** The list ID */
-  listId?: string;
 }
 
 /**
@@ -1600,8 +1531,6 @@ export interface iUtilityPageLink<T extends NumberType> {
   applicationId?: string;
   /** The collection ID to link to */
   collectionId?: CollectionId;
-  /** The address list ID to link to */
-  listId?: string;
   /** The map ID to link to */
   mapId?: string;
   /** Metadata for the link. Only applicable if the link is to a non-BitBadges entity. In other words, not tied to a specific claim, application, collection, etc. */
@@ -1699,8 +1628,6 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   /** Details for the action to perform if the criteria is correct */
   action: {
     seedCode?: string;
-    balancesToSet?: iPredeterminedBalances<T>;
-    listId?: string;
     siwbbClaim?: boolean;
   };
 
@@ -1965,10 +1892,6 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
   badges: {
     nsfw: iBatchTokenDetails<T>[];
     reported: iBatchTokenDetails<T>[];
-  };
-  addressLists: {
-    nsfw: { listId: string; reason: string }[];
-    reported: { listId: string; reason: string }[];
   };
   accounts: {
     nsfw: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
@@ -2364,16 +2287,8 @@ export interface iClaimDetails<T extends NumberType> {
   collectionId?: CollectionId;
   /** Standalone claims are not linked with a token or list. */
   standaloneClaim?: boolean;
-  /** Address list ID that the claim is for (if applicable - list claims). */
-  listId?: string;
   /** The tracker details for the claim (if applicable - collection claims). */
   trackerDetails?: iChallengeTrackerIdDetails<T>;
-  /**
-   * The balances to set for the claim.
-   *
-   * Only used for claims for collections that have off-chain indexed balances and are assigning balances based on the claim.
-   */
-  balancesToSet?: iPredeterminedBalances<T>;
   /** Claim plugins. These are the criteria that must pass for a user to claim. */
   plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
   /** Rewards for the claim. */

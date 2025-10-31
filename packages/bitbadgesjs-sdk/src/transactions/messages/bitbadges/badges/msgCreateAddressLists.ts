@@ -9,7 +9,7 @@ import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
 
 /**
- * MsgCreateAddressLists defines address lists on-chain. For off-chain lists, use the API, not this Msg.
+ * MsgCreateAddressLists defines address lists on-chain.
  *
  * AddressLists must be validly formatted and have a unique ID not used before. Note that some such as ("Mint", etc) are reserved as well.
  *

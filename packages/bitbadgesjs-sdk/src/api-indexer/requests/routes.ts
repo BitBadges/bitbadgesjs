@@ -46,12 +46,6 @@ export class BitBadgesApiRoutes {
   static SearchClaimsRoute = () => '/api/v0/claims/search';
   static CRUDClaimsRoute = () => `/api/v0/claims`;
 
-  static GetAddressListRoute = (addressListId: string) => `/api/v0/addressList/${addressListId.toString()}`;
-  static GetAddressListsRoute = () => '/api/v0/addressLists/fetch';
-  static CRUDAddressListsRoute = () => '/api/v0/addressLists';
-  static UpdateAddressListCoreDetailsRoute = () => '/api/v0/addressLists/coreDetails';
-  static UpdateAddressListAddressesRoute = () => '/api/v0/addressLists/addresses';
-
   static GetAccountsRoute = () => '/api/v0/users';
   static GetAccountRoute = () => '/api/v0/user';
   static UpdateAccountInfoRoute = () => '/api/v0/user/updateAccount';
@@ -138,18 +132,13 @@ export class BitBadgesApiRoutes {
 
   static CheckClaimSuccessRoute = (claimId: string, address: NativeAddress) => `/api/v0/claims/success/${claimId}/${address}`;
 
-  static GetAddressListsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/lists`;
   static GetSiwbbRequestsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/requests/siwbb`;
   static GetTransferActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/badges`;
   static GetBadgesByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/badges`;
-  static GetListActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/lists`;
+
   static GetClaimActivityByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/claims`;
   static GetPointsActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/points`;
   static GetClaimAlertsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/claimAlerts`;
-
-  static GetAddressListActivityRoute = (addressListId: string) => `/api/v0/addressLists/${addressListId}/activity`;
-  static GetAddressListListingsRoute = (addressListId: string) => `/api/v0/addressLists/${addressListId}/listings`;
-  static GetAddressListClaimsRoute = (addressListId: string) => `/api/v0/addressLists/${addressListId}/claims`;
 
   static GetCollectionOwnersRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/owners`;
   static GetCollectionRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}`;

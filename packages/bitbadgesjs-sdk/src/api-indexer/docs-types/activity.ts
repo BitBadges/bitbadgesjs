@@ -11,7 +11,6 @@ import type {
   iClaimActivityDoc,
   iClaimAlertDoc,
   iCoinTransferItem,
-  iListActivityDoc,
   iPointsActivityDoc,
   iPrecalculationOptions,
   iTransferActivityDoc,
@@ -162,31 +161,6 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferActivityDoc<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TransferActivityDoc<U>;
-  }
-}
-
-/**
- * @inheritDoc iListActivityDoc
- * @category Indexer
- */
-export class ListActivityDoc<T extends NumberType> extends ActivityDoc<T> implements iListActivityDoc<T> {
-  listId: string;
-  addedToList?: boolean;
-  addresses?: string[];
-  txHash?: string;
-  initiatedBy: BitBadgesAddress;
-
-  constructor(data: iListActivityDoc<T>) {
-    super(data);
-    this.listId = data.listId;
-    this.addedToList = data.addedToList;
-    this.addresses = data.addresses;
-    this.txHash = data.txHash;
-    this.initiatedBy = data.initiatedBy;
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ListActivityDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ListActivityDoc<U>;
   }
 }
 
