@@ -11,9 +11,9 @@ import { BitBadgesCollection } from './BitBadgesCollection.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { ClaimActivityDoc, ClaimAlertDoc, PointsActivityDoc, TransferActivityDoc } from './docs-types/activity.js';
 import {
+  CreatorCreditsDoc,
   ApprovalTrackerDoc,
   BalanceDocWithDetails,
-  CreatorCreditsDoc,
   MerkleChallengeTrackerDoc,
   ProfileDoc,
   SIWBBRequestDoc

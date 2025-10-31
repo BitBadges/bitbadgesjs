@@ -899,11 +899,6 @@ export interface iUpdateAccountInfoPayload {
   hiddenBadges?: iBatchTokenDetails<NumberType>[];
 
   /**
-   * The lists to hide and not view for this profile's portfolio
-   */
-  hiddenLists?: string[];
-
-  /**
    * Custom URL links to display on the user's portfolio.
    */
   customLinks?: iCustomLink[];
@@ -950,27 +945,6 @@ export interface iUpdateAccountInfoPayload {
     discord?: { id: string; username: string; discriminator: string | undefined } | undefined;
     antiPhishingCode?: string;
     preferences?: { transferActivity?: boolean; claimAlerts?: boolean; ignoreIfInitiator?: boolean };
-  };
-
-  /**
-   * Approved sign in methods. Only returned if user is authenticated with full access.
-   */
-  approvedSignInMethods?: {
-    discord?: { scopes: OAuthScopeDetails[]; username: string; discriminator?: string | undefined; id: string } | undefined;
-    github?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
-    google?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
-    twitter?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
-    facebook?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
-    addresses?: {
-      address: NativeAddress;
-      scopes: OAuthScopeDetails[];
-    }[];
-    passwords?: {
-      passwordHash: string;
-      salt: string;
-      password?: string;
-      scopes: OAuthScopeDetails[];
-    }[];
   };
 
   /**
@@ -1249,21 +1223,6 @@ export interface iVerifySignInPayload {
    * The signature of the message
    */
   signature: string;
-
-  /**
-   * The address that signed the message on behalf of another address.
-   */
-  altSigner?: NativeAddress;
-
-  /**
-   * Selected social to attempt to sign in with.
-   */
-  socialSignIn?: string;
-
-  /**
-   * The password to sign in with.
-   */
-  password?: string;
 
   /**
    * Required for some chains (Cosmos) to verify signature. The public key of the signer.

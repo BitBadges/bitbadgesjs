@@ -663,24 +663,6 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   notifications?: NotificationPreferences<T>;
   socialConnections?: SocialConnections<T>;
   publicSocialConnections?: SocialConnections<T>;
-  approvedSignInMethods?:
-    | {
-        discord?: { scopes: OAuthScopeDetails[]; username: string; discriminator?: string | undefined; id: string } | undefined;
-        github?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
-        google?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
-        twitter?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
-        facebook?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
-        addresses?: {
-          address: NativeAddress;
-          scopes: OAuthScopeDetails[];
-        }[];
-        passwords?: {
-          passwordHash: string;
-          salt: string;
-          scopes: OAuthScopeDetails[];
-        }[];
-      }
-    | undefined;
   bannerImage?: string;
 
   constructor(data: iProfileDoc<T>) {
@@ -714,7 +696,6 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.latestSignedInChain = data.latestSignedInChain;
     this.solAddress = data.solAddress;
     this.notifications = data.notifications ? new NotificationPreferences(data.notifications) : undefined;
-    this.approvedSignInMethods = data.approvedSignInMethods;
     this.socialConnections = data.socialConnections ? new SocialConnections(data.socialConnections) : undefined;
     this.publicSocialConnections = data.publicSocialConnections ? new SocialConnections(data.publicSocialConnections) : undefined;
     this.bannerImage = data.bannerImage;

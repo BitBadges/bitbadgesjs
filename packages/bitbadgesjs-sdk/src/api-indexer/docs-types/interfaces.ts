@@ -698,24 +698,6 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
 
   /** Public social connections stored for the account */
   publicSocialConnections?: iSocialConnections<T>;
-
-  /** Approved ways to sign in */
-  approvedSignInMethods?: {
-    discord?: { scopes: OAuthScopeDetails[]; username: string; discriminator?: string | undefined; id: string } | undefined;
-    github?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
-    google?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
-    twitter?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
-    facebook?: { scopes: OAuthScopeDetails[]; username: string; id: string } | undefined;
-    addresses?: {
-      address: NativeAddress;
-      scopes: OAuthScopeDetails[];
-    }[];
-    passwords?: {
-      passwordHash: string;
-      salt: string;
-      scopes: OAuthScopeDetails[];
-    }[];
-  };
 }
 
 /**
