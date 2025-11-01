@@ -5,7 +5,7 @@ import { BitBadgesCollection, iBitBadgesCollection } from '../BitBadgesCollectio
 
 import { ClaimDetails } from '@/core/approvals.js';
 import { CollectionId } from '@/interfaces/index.js';
-import { ClaimActivityDoc, ClaimAlertDoc, PointsActivityDoc, TransferActivityDoc } from '../docs-types/activity.js';
+import { ClaimActivityDoc, PointsActivityDoc, TransferActivityDoc } from '../docs-types/activity.js';
 import {
   ApprovalTrackerDoc,
   BalanceDoc,
@@ -19,7 +19,6 @@ import {
   iBalanceDoc,
   iBalanceDocWithDetails,
   iClaimActivityDoc,
-  iClaimAlertDoc,
   iClaimDetails,
   iMerkleChallengeTrackerDoc,
   iPointsActivityDoc,
@@ -413,50 +412,6 @@ export class GetSiwbbRequestsForUserSuccessResponse<T extends NumberType>
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetSiwbbRequestsForUserSuccessResponse<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetSiwbbRequestsForUserSuccessResponse<U>;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetClaimAlertsForUserPayload extends iBaseQueryParams {
-  /**
-   * The view type to search for. Default is 'received'
-   *
-   * - 'received' will return all claim alerts the user has received
-   * - 'sent' will return all claim alerts the user has sent
-   */
-  viewType?: 'received' | 'sent';
-}
-/**
- * @category API Requests / Responses
- */
-export interface iGetClaimAlertsForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  claimAlerts: Array<iClaimAlertDoc<T>>;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetClaimAlertsForUserSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetClaimAlertsForUserSuccessResponse<T>>
-  implements iGetClaimAlertsForUserSuccessResponse<T>
-{
-  claimAlerts: ClaimAlertDoc<T>[];
-  pagination: PaginationInfo;
-
-  constructor(data: iGetClaimAlertsForUserSuccessResponse<T>) {
-    super();
-    this.claimAlerts = data.claimAlerts.map((alert) => new ClaimAlertDoc(alert));
-    this.pagination = data.pagination;
-  }
-
-  getNumberFieldNames(): string[] {
-    return [];
-  }
-
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetClaimAlertsForUserSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetClaimAlertsForUserSuccessResponse<U>;
   }
 }
 

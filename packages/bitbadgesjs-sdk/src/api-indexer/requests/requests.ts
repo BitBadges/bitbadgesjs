@@ -944,7 +944,7 @@ export interface iUpdateAccountInfoPayload {
     email?: string;
     discord?: { id: string; username: string; discriminator: string | undefined } | undefined;
     antiPhishingCode?: string;
-    preferences?: { transferActivity?: boolean; claimAlerts?: boolean; ignoreIfInitiator?: boolean };
+    preferences?: { transferActivity?: boolean; ignoreIfInitiator?: boolean };
   };
 
   /**
@@ -1887,29 +1887,6 @@ export interface iGetTokensFromFaucetSuccessResponse {}
  * @category API Requests / Responses
  */
 export class GetTokensFromFaucetSuccessResponse extends EmptyResponseClass {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iSendClaimAlertsPayload {
-  /** The claim alerts to send to users. */
-  claimAlerts: {
-    /** The message to send to the user. */
-    message: string;
-    /** The addresses to send the claim alert to. */
-    bitbadgesAddresses: BitBadgesAddress[];
-  }[];
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iSendClaimAlertsSuccessResponse {}
-
-/**
- * @category API Requests / Responses
- */
-export class SendClaimAlertsSuccessResponse extends EmptyResponseClass {}
 
 /**
  * Information returned by the REST API getAccount route.

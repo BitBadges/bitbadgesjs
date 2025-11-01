@@ -9,7 +9,6 @@ import type {
   BitBadgesAddress,
   iActivityDoc,
   iClaimActivityDoc,
-  iClaimAlertDoc,
   iCoinTransferItem,
   iPointsActivityDoc,
   iPrecalculationOptions,
@@ -161,33 +160,6 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferActivityDoc<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TransferActivityDoc<U>;
-  }
-}
-
-/**
- * @inheritDoc iClaimAlertDoc
- * @category Indexer
- */
-export class ClaimAlertDoc<T extends NumberType> extends ActivityDoc<T> implements iClaimAlertDoc<T> {
-  collectionId: CollectionId;
-  from: BitBadgesAddress;
-  bitbadgesAddresses: BitBadgesAddress[];
-  message?: string;
-
-  constructor(data: iClaimAlertDoc<T>) {
-    super(data);
-    this.collectionId = data.collectionId;
-    this.from = data.from;
-    this.bitbadgesAddresses = data.bitbadgesAddresses;
-    this.message = data.message;
-  }
-
-  getNumberFieldNames(): string[] {
-    return [...super.getNumberFieldNames()];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimAlertDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimAlertDoc<U>;
   }
 }
 

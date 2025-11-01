@@ -90,12 +90,6 @@ info:
     - **Delete Authentication Codes** (`deleteAuthenticationCodes`)
       Delete Authentication Codes on behalf of the user.
 
-    - **Send Claim Alerts** (`sendClaimAlerts`)
-      Send claim alerts on behalf of the user.
-
-    - **Read Claim Alerts** (`readClaimAlerts`)
-      Read claim alerts on behalf of the user. Note that claim alerts may contain sensitive information like claim codes, attestation IDs, etc.
-
     - **Read Private Claim Data** (`readPrivateClaimData`)
       Read private claim data on behalf of the user (e.g. codes, passwords, private user lists, etc.).
 
@@ -261,7 +255,7 @@ paths:
         Couple Notes:
         - **[Native Chain Algorithm](https://docs.bitbadges.io/for-developers/bitbadges-api/concepts/native-chain-algorithm)**
 
-        Note: The `views` and corresponding fields like `tokensCollected`, `claimAlerts`, etc will be blank with this simple
+        Note: The `views` and corresponding fields like `tokensCollected`, etc will be blank with this simple
         GET but are provided in the response for compatibility with the SDK. To actually fetch these views, use the POST
         batch route or the individual view routes.
       tags:
@@ -337,7 +331,6 @@ paths:
 
         Scopes
         - `readProfile` - Required for private profile information like notification preferences, social connections, etc.
-        - `readClaimAlerts` - Required if fetching private claim alerts
         - `readAuthenticationCodes` - Required if fetching private authentication codes
 
         Documentation References / Tutorials:
@@ -2320,56 +2313,6 @@ paths:
       security:
         - apiKey: []
           userSignedIn: []
-  /claimAlerts/send:
-    post:
-      operationId: sendClaimAlert
-      summary: Sends Claim Alert
-      tags:
-        - Claim Alerts
-      description: |-
-        Sends claim alert notifications out. Claim alerts are in-app notifications to alert a user.
-        You can send from an address or anonymously (no sender).
-
-        ```tsx
-        const res = await BitBadgesApi.sendClaimAlert(...);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSendClaimAlertsPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSendClaimAlertsSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#sendclaimalert)**
-
-        Scopes:
-          - `sendClaimAlerts` - Required (if sending on behalf of a user). Set address to blank if anonymous.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iSendClaimAlertsPayload'
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iSendClaimAlertsSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '401':
-          $ref: '#/components/responses/UnauthorizedResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: x-api-key
-          in: header
-          description: BitBadges API Key for authentication
-          required: true
-          schema:
-            type: string
-      security:
-        - apiKey: []
-          userSignedIn: []
   '/collection/{collectionId}/refreshStatus':
     get:
       operationId: getRefreshStatus
@@ -4264,61 +4207,6 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/iGetPointsActivityForUserPayload'
-      security:
-        - apiKey: []
-      x-internal: false
-  /account/{address}/claimAlerts:
-    get:
-      operationId: getClaimAlertsForUser
-      summary: Get Claim Alerts For User
-      tags:
-        - Accounts
-      description: |-
-        Gets claim alerts for a specific user. Specify the viewType 'received' or 'sent' to determine what
-        claim alerts to retrieve.
-
-        ```tsx
-        await BitBadgesApi.getClaimAlertsForUser(address, { viewType: 'received' });
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAlertsForUserPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAlertsForUserSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getclaimalertsforuser)**
-
-        Scopes:
-          - `readClaimAlerts` - Required
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iGetClaimAlertsForUserSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: x-api-key
-          in: header
-          description: BitBadges API Key for authentication
-          required: true
-          schema:
-            type: string
-        - name: address
-          in: path
-          description: Account address
-          required: true
-          schema:
-            type: string
-        - in: query
-          explode: true
-          name: payload
-          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
-          required: false
-          schema:
-            $ref: '#/components/schemas/iGetClaimAlertsForUserPayload'
       security:
         - apiKey: []
       x-internal: false

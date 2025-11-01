@@ -71,8 +71,6 @@ export class BitBadgesApiRoutes {
   static FetchMetadataDirectlyRoute = () => '/api/v0/metadata';
   static GetTokensFromFaucetRoute = () => '/api/v0/faucet';
 
-  static SendClaimAlertRoute = () => '/api/v0/claimAlerts/send';
-
   static ExchangeSIWBBAuthorizationCodesRoute = () => '/api/v0/siwbb/token';
   static CRUDSIWBBRequestRoute = () => '/api/v0/siwbbRequest';
   static RotateSIWBBRequestRoute = () => '/api/v0/siwbbRequest/rotate';
@@ -138,7 +136,6 @@ export class BitBadgesApiRoutes {
 
   static GetClaimActivityByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/claims`;
   static GetPointsActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/points`;
-  static GetClaimAlertsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/claimAlerts`;
 
   static GetCollectionOwnersRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/owners`;
   static GetCollectionRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}`;

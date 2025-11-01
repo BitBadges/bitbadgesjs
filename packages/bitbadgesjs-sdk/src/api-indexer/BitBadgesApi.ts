@@ -111,7 +111,6 @@ import {
   SearchDynamicDataStoresSuccessResponse,
   SearchPluginsSuccessResponse,
   SearchUtilityPagesSuccessResponse,
-  SendClaimAlertsSuccessResponse,
   SignOutSuccessResponse,
   SimulateClaimSuccessResponse,
   SimulateTxSuccessResponse,
@@ -218,8 +217,6 @@ import {
   iSearchDynamicDataStoresPayload,
   iSearchPluginsPayload,
   iSearchUtilityPagesPayload,
-  iSendClaimAlertsPayload,
-  iSendClaimAlertsSuccessResponse,
   iSignOutPayload,
   iSignOutSuccessResponse,
   iSimulateClaimPayload,
@@ -243,7 +240,6 @@ import {
   GetBadgeMetadataSuccessResponse,
   GetBadgesViewForUserSuccessResponse,
   GetClaimActivityForUserSuccessResponse,
-  GetClaimAlertsForUserSuccessResponse,
   GetCollectionAmountTrackersSuccessResponse,
   GetCollectionChallengeTrackersSuccessResponse,
   GetCollectionClaimsSuccessResponse,
@@ -259,8 +255,6 @@ import {
   iGetBadgesViewForUserSuccessResponse,
   iGetClaimActivityForUserPayload,
   iGetClaimActivityForUserSuccessResponse,
-  iGetClaimAlertsForUserPayload,
-  iGetClaimAlertsForUserSuccessResponse,
   iGetCollectionAmountTrackersPayload,
   iGetCollectionAmountTrackersSuccessResponse,
   iGetCollectionChallengeTrackersPayload,
@@ -887,33 +881,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         { data: payload }
       );
       return new DeleteSIWBBRequestSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Sends claim alert notifications out.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/claimAlerts/send`
-   * - **SDK Function Call**: `await BitBadgesApi.sendClaimAlert(payload);`
-   * - **Authentication**: Must be signed in and the manager of the collection.
-   * - **CORS**: Restricted to only BitBadges official site.
-   */
-  public async sendClaimAlert(payload: iSendClaimAlertsPayload): Promise<SendClaimAlertsSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iSendClaimAlertsPayload> = typia.validate<iSendClaimAlertsPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iSendClaimAlertsSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.SendClaimAlertRoute()}`,
-        payload
-      );
-      return new SendClaimAlertsSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -1819,41 +1786,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         { params: payload }
       );
       return new GetPointsActivityForUserSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Gets claim alerts for a specific user. Specify viewType 'received' or 'sent' to determine what
-   * claim alerts to retrieve.
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/account/:address/claimAlerts`
-   * - **SDK Function Call**: `await BitBadgesApi.getClaimAlertsForUser(address, { viewType: 'received' });`
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.getClaimAlertsForUser("bb1...", { viewType: 'received' });
-   * console.log(res);
-   * ```
-   * */
-  public async getClaimAlertsForUser(
-    address: NativeAddress,
-    payload: iGetClaimAlertsForUserPayload
-  ): Promise<GetClaimAlertsForUserSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetClaimAlertsForUserPayload> = typia.validate<iGetClaimAlertsForUserPayload>(payload);
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<iGetClaimAlertsForUserSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetClaimAlertsForUserRoute(address)}`,
-        { params: payload }
-      );
-      return new GetClaimAlertsForUserSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

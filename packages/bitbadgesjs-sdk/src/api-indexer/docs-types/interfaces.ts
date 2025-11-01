@@ -197,7 +197,6 @@ export interface iNotificationPreferences<T extends NumberType> {
   /** The preferences for the notifications. What type of notifications does the user want to receive? */
   preferences?: {
     transferActivity?: boolean;
-    claimAlerts?: boolean;
     claimActivity?: boolean;
     ignoreIfInitiator?: boolean;
   };
@@ -347,24 +346,6 @@ export interface iPointsActivityDoc<T extends NumberType> extends iActivityDoc<T
   applicationId: string;
   /** The page ID of the points activity */
   pageId: string;
-}
-
-/**
- * @category Interfaces
- */
-export interface iClaimAlertDoc<T extends NumberType> extends iActivityDoc<T> {
-  /** The sender */
-  from: string;
-  /** The BitBadges addresses of the users that have been alerted. */
-  bitbadgesAddresses: BitBadgesAddress[];
-  /**
-   * The collection ID of the claim alert.
-   *
-   * @deprecated Not supported anymore.
-   */
-  collectionId: CollectionId;
-  /** The message of the claim alert. */
-  message?: string;
 }
 
 /**
@@ -1094,11 +1075,7 @@ export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginTy
                 instructions: string;
                 apiKey: string;
               }
-            : T extends 'claimAlerts'
-              ? {
-                  message: string;
-                }
-              : Record<string, any>;
+            : Record<string, any>;
 
 /**
  * Public state is the current state of the claim integration that is visible to the public. For example, the number of times a claim code has been used.

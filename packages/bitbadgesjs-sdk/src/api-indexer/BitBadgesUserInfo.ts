@@ -9,11 +9,11 @@ import typia from 'typia';
 import { SupportedChain } from '../common/types.js';
 import { BitBadgesCollection } from './BitBadgesCollection.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
-import { ClaimActivityDoc, ClaimAlertDoc, PointsActivityDoc, TransferActivityDoc } from './docs-types/activity.js';
+import { ClaimActivityDoc, PointsActivityDoc, TransferActivityDoc } from './docs-types/activity.js';
 import {
-  CreatorCreditsDoc,
   ApprovalTrackerDoc,
   BalanceDocWithDetails,
+  CreatorCreditsDoc,
   MerkleChallengeTrackerDoc,
   ProfileDoc,
   SIWBBRequestDoc
@@ -25,7 +25,6 @@ import type {
   iApprovalTrackerDoc,
   iBalanceDocWithDetails,
   iClaimActivityDoc,
-  iClaimAlertDoc,
   iCreatorCreditsDoc,
   iMerkleChallengeTrackerDoc,
   iPointsActivityDoc,
@@ -61,8 +60,6 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   challengeTrackers: iMerkleChallengeTrackerDoc<T>[];
   /** A list of approvals tracker activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   approvalTrackers: iApprovalTrackerDoc<T>[];
-  /** A list of claim alerts for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  claimAlerts: iClaimAlertDoc<T>[];
   /** A list of SIWBB requests for the account. Paginated and fetched as needed. To be used in conjunction with views. */
   siwbbRequests: iSIWBBRequestDoc<T>[];
 
@@ -128,7 +125,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   pointsActivity?: PointsActivityDoc<T>[];
   challengeTrackers: MerkleChallengeTrackerDoc<T>[];
   approvalTrackers: ApprovalTrackerDoc<T>[];
-  claimAlerts: ClaimAlertDoc<T>[];
   siwbbRequests: SIWBBRequestDoc<T>[];
 
   address: NativeAddress;
@@ -170,7 +166,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.pointsActivity = data.pointsActivity?.map((activity) => new PointsActivityDoc(activity));
     this.challengeTrackers = data.challengeTrackers.map((challenge) => new MerkleChallengeTrackerDoc(challenge));
     this.approvalTrackers = data.approvalTrackers.map((tracker) => new ApprovalTrackerDoc(tracker));
-    this.claimAlerts = data.claimAlerts.map((alert) => new ClaimAlertDoc(alert));
     this.siwbbRequests = data.siwbbRequests.map((auth) => new SIWBBRequestDoc(auth));
     this.address = data.address;
     this.nsfw = data.nsfw;
@@ -454,10 +449,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
         return this.getAccountActivityView(viewId) as AccountViewData<T>[KeyType];
       case 'tokensCollected':
         return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
-      case 'sentClaimAlerts':
-        return this.getAccountClaimAlertsView(viewId) as AccountViewData<T>[KeyType];
-      case 'claimAlerts':
-        return this.getAccountClaimAlertsView(viewId) as AccountViewData<T>[KeyType];
 
       case 'createdTokens':
         return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
@@ -505,12 +496,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     }) ?? []) as BalanceDocWithDetails<T>[];
   }
 
-  getAccountClaimAlertsView(viewId: string) {
-    return (this.views[viewId]?.ids.map((x) => {
-      return this.claimAlerts.find((y) => y._docId === x);
-    }) ?? []) as ClaimAlertDoc<T>[];
-  }
-
   /**
    * Checks if this user is on a given address list.
    */
@@ -539,7 +524,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       sequence: 0n,
       collected: [],
       activity: [],
-      claimAlerts: [],
       challengeTrackers: [],
       approvalTrackers: [],
       siwbbRequests: [],
@@ -574,7 +558,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
       accountNumber: -1n,
       collected: [],
       activity: [],
-      claimAlerts: [],
       challengeTrackers: [],
       approvalTrackers: [],
       siwbbRequests: [],
@@ -591,8 +574,6 @@ type AccountViewData<T extends NumberType> = {
   siwbbRequests: SIWBBRequestDoc<T>[];
   transferActivity: TransferActivityDoc<T>[];
   tokensCollected: BalanceDocWithDetails<T>[];
-  sentClaimAlerts: ClaimAlertDoc<T>[];
-  claimAlerts: ClaimAlertDoc<T>[];
   createdTokens: BalanceDocWithDetails<T>[];
   managingTokens: BalanceDocWithDetails<T>[];
   publicClaimActivity: ClaimActivityDoc<T>[];
@@ -655,7 +636,6 @@ function updateAccountWithResponse<T extends NumberType>(
 
     collected: [...(cachedAccount?.collected || []), ...(account.collected || [])],
     activity: [...(cachedAccount?.activity || []), ...(account.activity || [])],
-    claimAlerts: [...(cachedAccount?.claimAlerts || []), ...(account.claimAlerts || [])],
     siwbbRequests: [...(cachedAccount?.siwbbRequests || []), ...(account.siwbbRequests || [])],
     pointsActivity: [...(cachedAccount?.pointsActivity || []), ...(account.pointsActivity || [])],
     claimActivity: [...(cachedAccount?.claimActivity || []), ...(account.claimActivity || [])],
@@ -680,14 +660,12 @@ function updateAccountWithResponse<T extends NumberType>(
   //Filter duplicates
   newAccount.collected = newAccount.collected.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.activity = newAccount.activity.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
-  newAccount.claimAlerts = newAccount.claimAlerts.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.siwbbRequests = newAccount.siwbbRequests.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.claimActivity = newAccount.claimActivity?.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
   newAccount.pointsActivity = newAccount.pointsActivity?.filter((x, index, self) => index === self.findIndex((t) => t._docId === x._docId));
 
   //sort in descending order
   newAccount.activity = newAccount.activity.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
-  newAccount.claimAlerts = newAccount.claimAlerts.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.siwbbRequests = newAccount.siwbbRequests.sort((a, b) => (BigInt(b.createdAt) - BigInt(a.createdAt) > 0 ? -1 : 1));
   newAccount.claimActivity = newAccount.claimActivity?.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
   newAccount.pointsActivity = newAccount.pointsActivity?.sort((a, b) => (BigInt(b.timestamp) - BigInt(a.timestamp) > 0 ? -1 : 1));
@@ -703,8 +681,6 @@ export type AccountViewKey =
   | 'siwbbRequests'
   | 'transferActivity'
   | 'tokensCollected'
-  | 'sentClaimAlerts'
-  | 'claimAlerts'
   | 'createdTokens'
   | 'managingTokens'
   | 'publicClaimActivity'

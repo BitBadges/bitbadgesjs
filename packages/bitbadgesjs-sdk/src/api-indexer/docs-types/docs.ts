@@ -562,7 +562,6 @@ export class NotificationPreferences<T extends NumberType>
   emailVerification?: EmailVerificationStatus<T>;
   preferences?: {
     transferActivity?: boolean;
-    claimAlerts?: boolean;
     claimActivity?: boolean;
     ignoreIfInitiator?: boolean;
   };
