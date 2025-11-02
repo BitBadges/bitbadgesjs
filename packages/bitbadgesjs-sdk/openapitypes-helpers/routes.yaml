@@ -551,6 +551,8 @@ paths:
       description: |
         Retrieves the balance of a specific token for a specific address at the current time.
 
+        **Note:** This endpoint fetches balances from the BitBadges standard only. If you need core x/bank or IBC balances (including BitBadges tokens wrapped to x/bank format), please use the [blockchain API](https://lcd.bitbadges.io/#/).
+
         For more advanced queries returning the whole balance document, please use the POST `/collection/{collectionId}/balance/{address}` endpoint.
 
         ```tsx
@@ -615,6 +617,8 @@ paths:
       summary: Get Balances By Address
       description: |
         Retrieves the balances of a specific address for a collection.
+
+        **Note:** This endpoint fetches balances from the BitBadges standard only. If you need core x/bank or IBC balances (including BitBadges tokens wrapped to x/bank format), please use the [blockchain API](https://lcd.bitbadges.io/#/).
 
         ```tsx
         const res = await BitBadgesApi.getBalanceByAddress(collectionId, address, { ...options });
