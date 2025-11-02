@@ -535,6 +535,8 @@ export interface iAssetInfoDoc<T extends NumberType> extends Doc {
       timestamp: T;
     }>;
   };
+  /** Whether this asset is verified */
+  verified?: boolean;
 }
 
 /**

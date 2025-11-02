@@ -1793,6 +1793,7 @@ export class AssetInfoDoc<T extends NumberType> extends CustomTypeClass<AssetInf
       timestamp: T;
     }>;
   };
+  verified?: boolean;
 
   constructor(data: iAssetInfoDoc<T>) {
     super();
@@ -1807,6 +1808,7 @@ export class AssetInfoDoc<T extends NumberType> extends CustomTypeClass<AssetInf
     this.percentageChange24h = data.percentageChange24h;
     this.percentageChange7d = data.percentageChange7d;
     this.recentPriceTrend = data.recentPriceTrend;
+    this.verified = data.verified;
   }
 
   getNumberFieldNames(): string[] {
