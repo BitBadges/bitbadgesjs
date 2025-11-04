@@ -18,6 +18,7 @@ export * from './blockin.js';
 export * from './subscriptions.js';
 export * from './bids.js';
 export * from './quests.js';
+export * from './invoices.js';
 export * from './products.js';
 export * from './ibc-wrappers.js';
 
