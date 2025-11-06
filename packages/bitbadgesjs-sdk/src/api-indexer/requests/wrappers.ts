@@ -263,6 +263,8 @@ export interface iGetBadgesViewForUserPayload extends iBaseQueryParams {
    * - 'created' will return the tokens the user has created
    */
   viewType?: 'collected' | 'managing' | 'created';
+  /** The standard to filter by for the view. */
+  standard?: string;
 }
 
 // Success response interfaces

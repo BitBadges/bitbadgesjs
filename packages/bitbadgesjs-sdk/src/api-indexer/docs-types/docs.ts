@@ -1091,6 +1091,7 @@ export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<Balanc
   autoApproveSelfInitiatedIncomingTransfers: boolean;
   autoApproveSelfInitiatedOutgoingTransfers: boolean;
   autoApproveAllIncomingTransfers: boolean;
+  tags?: string[];
 
   constructor(data: iBalanceDoc<T> & Doc & iUserBalanceStore<T>) {
     super();
@@ -1106,6 +1107,7 @@ export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<Balanc
     this.autoApproveSelfInitiatedIncomingTransfers = data.autoApproveSelfInitiatedIncomingTransfers;
     this.autoApproveSelfInitiatedOutgoingTransfers = data.autoApproveSelfInitiatedOutgoingTransfers;
     this.autoApproveAllIncomingTransfers = data.autoApproveAllIncomingTransfers;
+    this.tags = data.tags;
   }
 
   getNumberFieldNames(): string[] {
@@ -1134,6 +1136,7 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
   autoApproveSelfInitiatedIncomingTransfers: boolean;
   autoApproveSelfInitiatedOutgoingTransfers: boolean;
   autoApproveAllIncomingTransfers: boolean;
+  tags?: string[];
 
   constructor(data: iBalanceDocWithDetails<T>) {
     super();
@@ -1149,6 +1152,7 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
     this.autoApproveSelfInitiatedIncomingTransfers = data.autoApproveSelfInitiatedIncomingTransfers;
     this.autoApproveSelfInitiatedOutgoingTransfers = data.autoApproveSelfInitiatedOutgoingTransfers;
     this.autoApproveAllIncomingTransfers = data.autoApproveAllIncomingTransfers;
+    this.tags = data.tags;
   }
 
   getNumberFieldNames(): string[] {

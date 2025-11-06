@@ -817,6 +817,9 @@ export interface iBalanceDoc<T extends NumberType> extends iUserBalanceStore<T>,
 
   /** The update history of this balance */
   updateHistory: iUpdateHistory<T>[];
+
+  /** Optional tags for this balance */
+  tags?: string[];
 }
 
 /**

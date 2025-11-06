@@ -411,7 +411,8 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     viewType: AccountViewKey,
     viewId: string,
     specificCollections?: BatchTokenDetails<NumberType>[],
-    oldestFirst?: boolean
+    oldestFirst?: boolean,
+    standard?: string
   ) {
     if (!this.viewHasMore(viewId)) return;
 
@@ -422,7 +423,8 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
           viewType,
           specificCollections,
           bookmark: this.views[viewId]?.pagination?.bookmark || '',
-          oldestFirst
+          oldestFirst,
+          standard
         }
       ]
     });
@@ -731,6 +733,8 @@ export type AccountFetchDetails = {
     oldestFirst?: boolean;
     /** A bookmark to pass in for pagination. "" for first request. */
     bookmark: string;
+    /** The standard to filter by for the view. */
+    standard?: string;
   }[];
 };
 
