@@ -20,6 +20,7 @@ export * from './bids.js';
 export * from './quests.js';
 export * from './invoices.js';
 export * from './products.js';
+export * from './scheduled-payments.js';
 export * from './ibc-wrappers.js';
 
 export * from './cosmos-wrappers.js';

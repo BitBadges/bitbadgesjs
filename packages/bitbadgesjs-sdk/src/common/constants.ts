@@ -84,8 +84,8 @@ export const BitBadgesKeplrSuggestTestnetChainInfo = {
   chainId: 'bitbadges-2',
   chainName: 'BitBadges Testnet',
 
-  rpc: 'http://138.197.10.8:26657',
-  rest: 'http://138.197.10.8:1317'
+  rpc: 'https://rpc-testnet.bitbadges.io',
+  rest: 'https://lcd-testnet.bitbadges.io'
 };
 
 /**

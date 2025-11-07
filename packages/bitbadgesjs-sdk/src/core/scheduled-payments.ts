@@ -1,27 +1,7 @@
-import { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 import type { iCollectionApproval } from '@/interfaces/types/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
-import { doesCollectionFollowProtocol } from './quests.js';
 
-export const doesCollectionFollowInvoiceProtocol = (collection: Readonly<iCollectionDoc<bigint>>) => {
-  if (!doesCollectionFollowProtocol(collection, 'Invoices')) {
-    return false;
-  }
-
-  // Assert valid token IDs are only 1n-1n
-  const badgeIds = UintRangeArray.From(collection.validBadgeIds).sortAndMerge().convert(BigInt);
-  if (badgeIds.length !== 1 || badgeIds.size() !== 1n) {
-    return false;
-  }
-
-  if (badgeIds[0].start !== 1n || badgeIds[0].end !== 1n) {
-    return false;
-  }
-
-  return true;
-};
-
-export const isInvoiceApproval = (approval: iCollectionApproval<bigint>) => {
+export const isScheduledPaymentApproval = (approval: iCollectionApproval<bigint>) => {
   const approvalCriteria = approval.approvalCriteria;
   if (!approvalCriteria) {
     return false;
@@ -51,23 +31,37 @@ export const isInvoiceApproval = (approval: iCollectionApproval<bigint>) => {
     return false;
   }
 
-  if (maxNumTransfers <= 0n) {
+  // Scheduled payments are one-time use
+  if (maxNumTransfers !== 1n) {
     return false;
   }
 
-  if ((approvalCriteria.coinTransfers ?? []).length > 1) {
+  // Can have 1 or 2 coin transfers (payment + optional tip)
+  const coinTransfers = approvalCriteria.coinTransfers ?? [];
+  if (coinTransfers.length === 0 || coinTransfers.length > 2) {
     return false;
   }
 
-  for (const coinTransfer of approvalCriteria.coinTransfers ?? []) {
-    if (coinTransfer.coins.length !== 1) {
+  // First transfer should be the payment (to paymentAddress)
+  const paymentTransfer = coinTransfers[0];
+  if (paymentTransfer.coins.length !== 1) {
+    return false;
+  }
+
+  // Payment transfer: overrideFromWithApproverAddress = true, overrideToWithInitiator = false
+  if (!paymentTransfer.overrideFromWithApproverAddress || paymentTransfer.overrideToWithInitiator) {
+    return false;
+  }
+
+  // If there's a second transfer, it should be the tip
+  if (coinTransfers.length === 2) {
+    const tipTransfer = coinTransfers[1];
+    if (tipTransfer.coins.length !== 1) {
       return false;
     }
 
-    // For invoices, payments are initiator -> address
-    // So we should NOT override from with approver address (from = initiator)
-    // And we should NOT override to with initiator (to = address)
-    if (coinTransfer.overrideFromWithApproverAddress || coinTransfer.overrideToWithInitiator) {
+    // Tip transfer: overrideFromWithApproverAddress = true, overrideToWithInitiator = true
+    if (!tipTransfer.overrideFromWithApproverAddress || !tipTransfer.overrideToWithInitiator) {
       return false;
     }
   }
@@ -107,7 +101,6 @@ export const isInvoiceApproval = (approval: iCollectionApproval<bigint>) => {
     return false;
   }
 
-  //Needs this to be true for the subscription faucet to work
   if (incrementedBalances.allowOverrideTimestamp) {
     return false;
   }
@@ -124,9 +117,16 @@ export const isInvoiceApproval = (approval: iCollectionApproval<bigint>) => {
     return false;
   }
 
+  // Scheduled payments should override from outgoing approvals
+  if (!approvalCriteria.overridesFromOutgoingApprovals) {
+    return false;
+  }
+
   if (approvalCriteria.requireToEqualsInitiatedBy) {
     return false;
   }
 
   return true;
 };
+
+
