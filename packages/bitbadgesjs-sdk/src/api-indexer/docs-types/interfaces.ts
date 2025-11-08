@@ -649,16 +649,6 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   /** The hidden badges of the account */
   hiddenTokens?: iBatchTokenDetails<T>[];
 
-  /** The custom pages of the account */
-  customPages?: {
-    badges: iCustomPage<T>[];
-  };
-
-  /** The watched lists of the account's portfolio */
-  watchlists?: {
-    badges: iCustomPage<T>[];
-  };
-
   /** The profile picture URL of the account */
   profilePicUrl?: string;
   /** The banner image URL of the account */
@@ -1457,7 +1447,7 @@ export interface iUtilityPageDoc<T extends NumberType> extends Doc {
 
   /** Home page view */
   homePageView?: {
-    type: 'badges' | 'lists' | 'claims' | 'applications';
+    type: 'tokens' | 'lists' | 'claims' | 'applications';
     category: string;
   };
 }
@@ -1853,7 +1843,7 @@ export interface iCreatorCreditsDoc<T extends NumberType> extends Doc {
  * @category Interfaces
  */
 export interface iComplianceDoc<T extends NumberType> extends Doc {
-  badges: {
+  tokens: {
     nsfw: iBatchTokenDetails<T>[];
     reported: iBatchTokenDetails<T>[];
   };

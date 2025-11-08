@@ -307,7 +307,7 @@ export class GetTransferActivityForUserSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses */
 export interface iGetTokensViewForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  badges: Array<iBalanceDocWithDetails<T>>;
+  tokens: Array<iBalanceDocWithDetails<T>>;
 }
 
 /**
@@ -317,12 +317,12 @@ export class GetTokensViewForUserSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetTokensViewForUserSuccessResponse<T>>
   implements iGetTokensViewForUserSuccessResponse<T>
 {
-  badges: BalanceDocWithDetails<T>[];
+  tokens: BalanceDocWithDetails<T>[];
   pagination: PaginationInfo;
 
   constructor(data: iGetTokensViewForUserSuccessResponse<T>) {
     super();
-    this.badges = data.badges.map((badge) => new BalanceDocWithDetails(badge));
+    this.tokens = data.tokens.map((token) => new BalanceDocWithDetails(token));
     this.pagination = data.pagination;
   }
 

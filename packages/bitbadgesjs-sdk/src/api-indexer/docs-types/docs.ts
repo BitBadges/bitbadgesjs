@@ -22,7 +22,6 @@ import { BalanceArray } from '@/core/balances.js';
 import { BatchTokenDetailsArray } from '@/core/batch-utils.js';
 import { CosmosCoin } from '@/core/coin.js';
 import {
-  TokenMetadataTimeline,
   CollectionInvariants,
   CollectionMetadataTimeline,
   CosmosCoinWrapperPath,
@@ -30,6 +29,7 @@ import {
   IsArchivedTimeline,
   ManagerTimeline,
   StandardsTimeline,
+  TokenMetadataTimeline,
   UpdateHistory
 } from '@/core/misc.js';
 import { CollectionPermissions, UserPermissions, UserPermissionsWithDetails } from '@/core/permissions.js';
@@ -50,7 +50,6 @@ import {
   iApplicationDoc,
   iApplicationPage,
   iApprovalItemDoc,
-  iTokenFloorPriceDoc,
   iBaseStats,
   iCollectionStatsDoc,
   iCreatorCreditsDoc,
@@ -62,6 +61,7 @@ import {
   iListingViewsDoc,
   iPointsDoc,
   iTierWithOptionalWeight,
+  iTokenFloorPriceDoc,
   iUtilityPageContent,
   iUtilityPageDoc,
   iUtilityPageLink,
@@ -651,10 +651,6 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   affiliateCode?: string;
   customLinks?: iCustomLink[];
   hiddenTokens?: BatchTokenDetailsArray<T>;
-  customPages?: {
-    badges: CustomPage<T>[];
-  };
-  watchlists?: { badges: CustomPage<T>[] };
   profilePicUrl?: string;
   username?: string;
   latestSignedInChain?: SupportedChain;
@@ -680,16 +676,6 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.affiliateCode = data.affiliateCode;
     this.customLinks = data.customLinks;
     this.hiddenTokens = data.hiddenTokens ? BatchTokenDetailsArray.From(data.hiddenTokens) : undefined;
-    this.customPages = data.customPages
-      ? {
-          badges: data.customPages.badges.map((customPage) => new CustomPage(customPage))
-        }
-      : undefined;
-    this.watchlists = data.watchlists
-      ? {
-          badges: data.watchlists.badges.map((customPage) => new CustomPage(customPage))
-        }
-      : undefined;
     this.profilePicUrl = data.profilePicUrl;
     this.username = data.username;
     this.latestSignedInChain = data.latestSignedInChain;
@@ -1539,7 +1525,7 @@ export class UtilityPageDoc<T extends NumberType> extends BaseNumberTypeClass<Ut
   estimatedCost?: EstimatedCost<T>;
   estimatedTime?: string;
   homePageView?: {
-    type: 'badges' | 'lists' | 'claims' | 'applications';
+    type: 'tokens' | 'lists' | 'claims' | 'applications';
     category: string;
   };
 
@@ -1941,7 +1927,7 @@ export class IPFSTotalsDoc<T extends NumberType> extends BaseNumberTypeClass<IPF
 export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<ComplianceDoc<T>> implements iComplianceDoc<T> {
   _docId: string;
   _id?: string;
-  badges: {
+  tokens: {
     nsfw: BatchTokenDetailsArray<T>;
     reported: BatchTokenDetailsArray<T>;
   };
@@ -1964,9 +1950,9 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
 
   constructor(data: iComplianceDoc<T>) {
     super();
-    this.badges = {
-      nsfw: BatchTokenDetailsArray.From(data.badges.nsfw),
-      reported: BatchTokenDetailsArray.From(data.badges.reported)
+    this.tokens = {
+      nsfw: BatchTokenDetailsArray.From(data.tokens.nsfw),
+      reported: BatchTokenDetailsArray.From(data.tokens.reported)
     };
     this.accounts = data.accounts;
     this.applications = data.applications ?? { nsfw: [], reported: [] };

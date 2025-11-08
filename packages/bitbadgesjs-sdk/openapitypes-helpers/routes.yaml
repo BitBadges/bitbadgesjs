@@ -3999,7 +3999,7 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-  /account/{address}/activity/badges:
+  /account/{address}/activity/tokens:
     get:
       operationId: getTransferActivityForUser
       summary: Get Transfer Activity For User
@@ -4051,7 +4051,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /account/{address}/badges/:
+  /account/{address}/tokens:
     get:
       operationId: GetTokensViewForUser
       summary: Get Tokens For User

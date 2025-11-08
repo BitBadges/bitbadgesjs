@@ -339,7 +339,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getSearchResults('vitalik.eth', {  noCollections: true, noBadges: true });
+   * const res = await BitBadgesApi.getSearchResults('vitalik.eth', {  noCollections: true });
    * console.log(res);
    * ```
    */

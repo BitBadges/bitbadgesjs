@@ -51,7 +51,6 @@ import {
   type iClaimDetails,
   type iClaimReward,
   type iCustomLink,
-  type iCustomPage,
   type iDeveloperAppDoc,
   type iMapWithValues,
   type iPluginDoc,
@@ -59,9 +58,9 @@ import {
   type iStatusDoc,
   type iTransferActivityDoc
 } from '@/api-indexer/docs-types/interfaces.js';
-import type { iTokenMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/tokenMetadata.js';
 import type { iMetadata, iMetadataWithoutInternals } from '@/api-indexer/metadata/metadata.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
+import type { iCollectionMetadataDetails, iTokenMetadataDetails } from '@/api-indexer/metadata/tokenMetadata.js';
 import { BaseNumberTypeClass, ConvertOptions, CustomTypeClass, ParsedQs, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import { type NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
@@ -237,7 +236,7 @@ export interface iGetSearchPayload<T extends NumberType> {
   /** If true, we will skip all account queries. */
   noAccounts?: boolean;
   /** If true, we will skip all badge queries. */
-  noBadges?: boolean;
+  noTokens?: boolean;
   /** If true, we will skip all map queries. */
   noMaps?: boolean;
   /** If true, we will skip all application queries. */
@@ -254,7 +253,7 @@ export interface iGetSearchPayload<T extends NumberType> {
 export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<GetSearchPayload<T>> implements iGetSearchPayload<T> {
   noCollections?: boolean;
   noAccounts?: boolean;
-  noBadges?: boolean;
+  noTokens?: boolean;
   noMaps?: boolean;
   noApplications?: boolean;
   noClaims?: boolean;
@@ -264,7 +263,7 @@ export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<
     super();
     this.noCollections = payload.noCollections;
     this.noAccounts = payload.noAccounts;
-    this.noBadges = payload.noBadges;
+    this.noTokens = payload.noTokens;
     this.noMaps = payload.noMaps;
     this.noApplications = payload.noApplications;
     this.noClaims = payload.noClaims;
@@ -275,7 +274,7 @@ export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<
     return new GetSearchPayload<NumberType>({
       noCollections: query.noCollections === 'true',
       noAccounts: query.noAccounts === 'true',
-      noBadges: query.noBadges === 'true',
+      noTokens: query.noTokens === 'true',
       noMaps: query.noMaps === 'true',
       noApplications: query.noApplications === 'true',
       noClaims: query.noClaims === 'true',
@@ -299,7 +298,7 @@ export class GetSearchPayload<T extends NumberType> extends BaseNumberTypeClass<
 export interface iGetSearchSuccessResponse<T extends NumberType> {
   collections: iBitBadgesCollection<T>[];
   accounts: iBitBadgesUserInfo<T>[];
-  badges: {
+  tokens: {
     collection: iBitBadgesCollection<T>;
     tokenIds: iUintRange<T>[];
   }[];
@@ -319,7 +318,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
 {
   collections: BitBadgesCollection<T>[];
   accounts: BitBadgesUserInfo<T>[];
-  badges: {
+  tokens: {
     collection: BitBadgesCollection<T>;
     tokenIds: UintRangeArray<T>;
   }[];
@@ -332,10 +331,10 @@ export class GetSearchSuccessResponse<T extends NumberType>
     super();
     this.collections = data.collections.map((collection) => new BitBadgesCollection(collection));
     this.accounts = data.accounts.map((account) => new BitBadgesUserInfo(account));
-    this.badges = data.badges.map((badge) => {
+    this.tokens = data.tokens.map((token) => {
       return {
-        collection: new BitBadgesCollection(badge.collection),
-        tokenIds: UintRangeArray.From(badge.tokenIds)
+        collection: new BitBadgesCollection(token.collection),
+        tokenIds: UintRangeArray.From(token.tokenIds)
       };
     });
     this.maps = data.maps.map((map) => new MapWithValues(map));
@@ -902,20 +901,6 @@ export interface iUpdateAccountInfoPayload {
    * Custom URL links to display on the user's portfolio.
    */
   customLinks?: iCustomLink[];
-
-  /**
-   * An array of custom pages on the user's portolio. Used to customize, sort, and group badges / lists into pages.
-   */
-  customPages?: {
-    badges: iCustomPage<NumberType>[];
-  };
-
-  /**
-   * The watchlist of tokens / lists
-   */
-  watchlists?: {
-    badges: iCustomPage<NumberType>[];
-  };
 
   /**
    * The profile picture URL.
@@ -1562,7 +1547,7 @@ export class SignOutSuccessResponse extends EmptyResponseClass {}
 export interface iGetBrowsePayload {
   type:
     | 'collections'
-    | 'badges'
+    | 'tokens'
     | 'addressLists'
     | 'maps'
     | 'claims'
@@ -1584,7 +1569,7 @@ export interface iGetBrowsePayload {
 export class GetBrowsePayload extends CustomTypeClass<GetBrowsePayload> implements iGetBrowsePayload {
   type:
     | 'collections'
-    | 'badges'
+    | 'tokens'
     | 'addressLists'
     | 'maps'
     | 'claims'
@@ -1628,7 +1613,7 @@ export interface iGetBrowseSuccessResponse<T extends NumberType> {
   collections: { [category: string]: iBitBadgesCollection<T>[] };
   profiles: { [category: string]: iBitBadgesUserInfo<T>[] };
   activity: iTransferActivityDoc<T>[];
-  badges: {
+  tokens: {
     [category: string]: {
       collection: iBitBadgesCollection<T>;
       tokenIds: iUintRange<T>[];
@@ -1652,7 +1637,7 @@ export class GetBrowseSuccessResponse<T extends NumberType>
   collections: { [category: string]: BitBadgesCollection<T>[] };
   profiles: { [category: string]: BitBadgesUserInfo<T>[] };
   activity: TransferActivityDoc<T>[];
-  badges: {
+  tokens: {
     [category: string]: {
       collection: BitBadgesCollection<T>;
       tokenIds: UintRangeArray<T>;
@@ -1682,12 +1667,12 @@ export class GetBrowseSuccessResponse<T extends NumberType>
       {} as { [category: string]: BitBadgesUserInfo<T>[] }
     );
     this.activity = data.activity.map((activity) => new TransferActivityDoc(activity));
-    this.badges = Object.keys(data.badges).reduce(
+    this.tokens = Object.keys(data.tokens).reduce(
       (acc, category) => {
-        acc[category] = data.badges[category].map((badge) => {
+        acc[category] = data.tokens[category].map((token) => {
           return {
-            collection: new BitBadgesCollection(badge.collection),
-            tokenIds: UintRangeArray.From(badge.tokenIds)
+            collection: new BitBadgesCollection(token.collection),
+            tokenIds: UintRangeArray.From(token.tokenIds)
           };
         });
         return acc;
