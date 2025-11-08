@@ -198,7 +198,20 @@ function recursivelySort(obj: any): any {
     return obj.map(recursivelySort);
   } else if (typeof obj === 'object' && obj !== null) {
     return Object.keys(obj)
-      .sort((a, b) => a.localeCompare(b))
+      .sort((a, b) => {
+        // Compare character by character, prioritizing capitals over lowercase
+        // This matches proto marshal's byte-order comparison
+        const minLength = Math.min(a.length, b.length);
+        for (let i = 0; i < minLength; i++) {
+          const charA = a.charCodeAt(i);
+          const charB = b.charCodeAt(i);
+          if (charA !== charB) {
+            return charA - charB;
+          }
+        }
+        // If all characters match up to minLength, shorter string comes first
+        return a.length - b.length;
+      })
       .reduce((result, key) => {
         result[key] = recursivelySort(obj[key] as any);
         return result;
