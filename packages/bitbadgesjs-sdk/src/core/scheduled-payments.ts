@@ -38,32 +38,8 @@ export const isScheduledPaymentApproval = (approval: iCollectionApproval<bigint>
 
   // Can have 1 or 2 coin transfers (payment + optional tip)
   const coinTransfers = approvalCriteria.coinTransfers ?? [];
-  if (coinTransfers.length === 0 || coinTransfers.length > 2) {
+  if (coinTransfers.length === 0) {
     return false;
-  }
-
-  // First transfer should be the payment (to paymentAddress)
-  const paymentTransfer = coinTransfers[0];
-  if (paymentTransfer.coins.length !== 1) {
-    return false;
-  }
-
-  // Payment transfer: overrideFromWithApproverAddress = true, overrideToWithInitiator = false
-  if (!paymentTransfer.overrideFromWithApproverAddress || paymentTransfer.overrideToWithInitiator) {
-    return false;
-  }
-
-  // If there's a second transfer, it should be the tip
-  if (coinTransfers.length === 2) {
-    const tipTransfer = coinTransfers[1];
-    if (tipTransfer.coins.length !== 1) {
-      return false;
-    }
-
-    // Tip transfer: overrideFromWithApproverAddress = true, overrideToWithInitiator = true
-    if (!tipTransfer.overrideFromWithApproverAddress || !tipTransfer.overrideToWithInitiator) {
-      return false;
-    }
   }
 
   const incrementedBalances = approvalCriteria.predeterminedBalances?.incrementedBalances;
@@ -128,5 +104,3 @@ export const isScheduledPaymentApproval = (approval: iCollectionApproval<bigint>
 
   return true;
 };
-
-
