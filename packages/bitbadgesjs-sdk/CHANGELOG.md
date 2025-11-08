@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.23.0]
+
+### Version Compatibility
+
+- **BitBadges Chain v18**: 0.23.0 corresponds to BitBadges chain v18 upgrades
+
+### What's New
+
+- Updated sorting logic to match proto marshal's byte-order comparison (prioritizing capital letters over lowercase)
+- See [BitBadges Chain v18 release information](https://github.com/BitBadges/bitbadgeschain/releases/tag/v18) for more details.
+
+### Installation
+
+```bash
+npm install bitbadgesjs-sdk@^0.23.0
+```
+
 ## [0.21.0]
 
 ### Version Compatibility
