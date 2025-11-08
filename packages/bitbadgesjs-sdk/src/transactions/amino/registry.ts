@@ -10,7 +10,7 @@ import {
   MsgDecrementStoreValue,
   MsgIncrementStoreValue,
   MsgPurgeApprovals,
-  MsgSetBadgeMetadata,
+  MsgSetTokenMetadata,
   MsgSetCollectionApprovals,
   MsgSetCollectionMetadata,
   MsgSetCustomData,
@@ -20,8 +20,8 @@ import {
   MsgSetManager,
   MsgSetOutgoingApproval,
   MsgSetStandards,
-  MsgSetValidBadgeIds,
-  MsgTransferBadges,
+  MsgSetValidTokenIds,
+  MsgTransferTokens,
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
   MsgUpdateDynamicStore,
@@ -247,7 +247,7 @@ export class AminoTypesClass {
 export function createBadgesAminoConverters(): AminoConverters {
   return {
     ...createAminoConverter(MsgDeleteCollection, 'badges/DeleteCollection'),
-    ...createAminoConverter(MsgTransferBadges, 'badges/TransferBadges'),
+    ...createAminoConverter(MsgTransferTokens, 'badges/TransferTokens'),
     ...createAminoConverter(MsgUpdateCollection, 'badges/UpdateCollection'),
     ...createAminoConverter(MsgUpdateUserApprovals, 'badges/UpdateUserApprovals'),
     ...createAminoConverter(MsgCreateAddressLists, 'badges/CreateAddressLists'),
@@ -259,7 +259,7 @@ export function createBadgesAminoConverters(): AminoConverters {
     ...createAminoConverter(MsgDecrementStoreValue, 'badges/DecrementStoreValue'),
     ...createAminoConverter(MsgIncrementStoreValue, 'badges/IncrementStoreValue'),
     ...createAminoConverter(MsgPurgeApprovals, 'badges/PurgeApprovals'),
-    ...createAminoConverter(MsgSetBadgeMetadata, 'badges/SetBadgeMetadata'),
+    ...createAminoConverter(MsgSetTokenMetadata, 'badges/SetTokenMetadata'),
     ...createAminoConverter(MsgSetCollectionApprovals, 'badges/SetCollectionApprovals'),
     ...createAminoConverter(MsgSetCollectionMetadata, 'badges/SetCollectionMetadata'),
     ...createAminoConverter(MsgSetCustomData, 'badges/SetCustomData'),
@@ -269,7 +269,7 @@ export function createBadgesAminoConverters(): AminoConverters {
     ...createAminoConverter(MsgSetManager, 'badges/SetManager'),
     ...createAminoConverter(MsgSetOutgoingApproval, 'badges/SetOutgoingApproval'),
     ...createAminoConverter(MsgSetStandards, 'badges/SetStandards'),
-    ...createAminoConverter(MsgSetValidBadgeIds, 'badges/SetValidBadgeIds'),
+    ...createAminoConverter(MsgSetValidTokenIds, 'badges/SetValidTokenIds'),
     ...createAminoConverter(MsgUniversalUpdateCollection, 'badges/UniversalUpdateCollection'),
     ...createAminoConverter(MsgUpdateDynamicStore, 'badges/UpdateDynamicStore')
   };

@@ -51,12 +51,12 @@ export const isScheduledPaymentApproval = (approval: iCollectionApproval<bigint>
     return false;
   }
 
-  const allBadgeIds = UintRangeArray.From(incrementedBalances.startBalances[0].badgeIds).sortAndMerge().convert(BigInt);
-  if (allBadgeIds.length !== 1 || allBadgeIds.size() !== 1n) {
+  const allTokenIds = UintRangeArray.From(incrementedBalances.startBalances[0].tokenIds).sortAndMerge().convert(BigInt);
+  if (allTokenIds.length !== 1 || allTokenIds.size() !== 1n) {
     return false;
   }
 
-  if (allBadgeIds[0].start !== 1n || allBadgeIds[0].end !== 1n) {
+  if (allTokenIds[0].start !== 1n || allTokenIds[0].end !== 1n) {
     return false;
   }
 
@@ -65,7 +65,7 @@ export const isScheduledPaymentApproval = (approval: iCollectionApproval<bigint>
     return false;
   }
 
-  if (incrementedBalances.incrementBadgeIdsBy !== 0n) {
+  if (incrementedBalances.incrementTokenIdsBy !== 0n) {
     return false;
   }
 

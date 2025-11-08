@@ -34,12 +34,12 @@ export const doesCollectionFollowQuestProtocol = (collection: Readonly<iCollecti
   }
 
   // Assert valid token IDs are only 1n-1n
-  const badgeIds = UintRangeArray.From(collection.validBadgeIds).sortAndMerge().convert(BigInt);
-  if (badgeIds.length !== 1 || badgeIds.size() !== 1n) {
+  const tokenIds = UintRangeArray.From(collection.validTokenIds).sortAndMerge().convert(BigInt);
+  if (tokenIds.length !== 1 || tokenIds.size() !== 1n) {
     return false;
   }
 
-  if (badgeIds[0].start !== 1n || badgeIds[0].end !== 1n) {
+  if (tokenIds[0].start !== 1n || tokenIds[0].end !== 1n) {
     return false;
   }
 
@@ -65,7 +65,7 @@ export const isQuestApproval = (approval: iCollectionApproval<bigint>) => {
     return false;
   }
 
-  if (approvalCriteria.mustOwnBadges?.length) {
+  if (approvalCriteria.mustOwnTokens?.length) {
     return false;
   }
 
@@ -105,12 +105,12 @@ export const isQuestApproval = (approval: iCollectionApproval<bigint>) => {
     return false;
   }
 
-  const allBadgeIds = UintRangeArray.From(incrementedBalances.startBalances[0].badgeIds).sortAndMerge().convert(BigInt);
-  if (allBadgeIds.length !== 1 || allBadgeIds.size() !== 1n) {
+  const allTokenIds = UintRangeArray.From(incrementedBalances.startBalances[0].tokenIds).sortAndMerge().convert(BigInt);
+  if (allTokenIds.length !== 1 || allTokenIds.size() !== 1n) {
     return false;
   }
 
-  if (allBadgeIds[0].start !== 1n || allBadgeIds[0].end !== 1n) {
+  if (allTokenIds[0].start !== 1n || allTokenIds[0].end !== 1n) {
     return false;
   }
 
@@ -119,7 +119,7 @@ export const isQuestApproval = (approval: iCollectionApproval<bigint>) => {
     return false;
   }
 
-  if (incrementedBalances.incrementBadgeIdsBy !== 0n) {
+  if (incrementedBalances.incrementTokenIdsBy !== 0n) {
     return false;
   }
 

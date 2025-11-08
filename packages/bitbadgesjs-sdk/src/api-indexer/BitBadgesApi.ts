@@ -237,7 +237,7 @@ import {
 } from './requests/requests.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
 import {
-  GetBadgeMetadataSuccessResponse,
+  GetTokenMetadataSuccessResponse,
   GetBadgesViewForUserSuccessResponse,
   GetClaimActivityForUserSuccessResponse,
   GetCollectionAmountTrackersSuccessResponse,
@@ -250,7 +250,7 @@ import {
   GetPointsActivityForUserSuccessResponse,
   GetSiwbbRequestsForUserSuccessResponse,
   GetTransferActivityForUserSuccessResponse,
-  iGetBadgeMetadataSuccessResponse,
+  iGetTokenMetadataSuccessResponse,
   iGetBadgesViewForUserPayload,
   iGetBadgesViewForUserSuccessResponse,
   iGetClaimActivityForUserPayload,
@@ -370,7 +370,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getCollections([{ collectionId, metadataToFetch: { badgeIds: [{ start: 1n, end: 10n }] } }]);
+   * const res = await BitBadgesApi.getCollections([{ collectionId, metadataToFetch: { tokenIds: [{ start: 1n, end: 10n }] } }]);
    * const collection = res.collections[0];
    * ```
    */
@@ -382,17 +382,17 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Gets the owners for a specific token in a collection
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/owners`
-   * - **SDK Function Call**: `await BitBadgesApi.getOwners(collectionId, badgeId, payload);`
+   * - **API Route**: `GET /api/v0/collection/:collectionId/:tokenId/owners`
+   * - **SDK Function Call**: `await BitBadgesApi.getOwners(collectionId, tokenId, payload);`
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getOwners(collectionId, badgeId, { bookmark: 'prev' });
+   * const res = await BitBadgesApi.getOwners(collectionId, tokenId, { bookmark: 'prev' });
    * console.log(res);
    * ```
    */
-  public async getOwners(collectionId: CollectionId, badgeId: NumberType, payload: iGetOwnersPayload): Promise<GetOwnersSuccessResponse<T>> {
-    return await BitBadgesCollection.GetOwners<T>(this, collectionId, badgeId, payload);
+  public async getOwners(collectionId: CollectionId, tokenId: NumberType, payload: iGetOwnersPayload): Promise<GetOwnersSuccessResponse<T>> {
+    return await BitBadgesCollection.GetOwners<T>(this, collectionId, tokenId, payload);
   }
 
   /**
@@ -421,18 +421,18 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * getBalanceByAddress.
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/balance/:address`
-   * - **SDK Function Call**: `await BitBadgesApi.getBalanceByAddress(collectionId, badgeId, address);`
+   * - **API Route**: `GET /api/v0/collection/:collectionId/:tokenId/balance/:address`
+   * - **SDK Function Call**: `await BitBadgesApi.getBalanceByAddress(collectionId, tokenId, address);`
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getBalanceByAddress(collectionId, badgeId, address);
+   * const res = await BitBadgesApi.getBalanceByAddress(collectionId, tokenId, address);
    * console.log(res);
    * ```
    */
   public async getBalanceByAddressSpecificToken(
     collectionId: CollectionId,
-    badgeId: NumberType,
+    tokenId: NumberType,
     address: NativeAddress,
     payload?: iGetBalanceByAddressPayload
   ): Promise<GetBalanceByAddressSuccessResponse<T>> {
@@ -443,7 +443,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
       }
 
       const response = await this.axios.get<iGetBalanceByAddressSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBalanceByAddressSpecificTokenRoute(collectionId, address, badgeId)}`
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBalanceByAddressSpecificTokenRoute(collectionId, address, tokenId)}`
       );
       return new GetBalanceByAddressSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
@@ -456,21 +456,21 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Gets the activity for a specific token in a collection
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/activity`
-   * - **SDK Function Call**: `await BitBadgesApi.getTokenActivity(collectionId, badgeId, payload);`
+   * - **API Route**: `GET /api/v0/collection/:collectionId/:tokenId/activity`
+   * - **SDK Function Call**: `await BitBadgesApi.getTokenActivity(collectionId, tokenId, payload);`
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getTokenActivity(collectionId, badgeId, { bookmark: 'prev' });
+   * const res = await BitBadgesApi.getTokenActivity(collectionId, tokenId, { bookmark: 'prev' });
    * console.log(res);
    * ```
    */
   public async getTokenActivity(
     collectionId: CollectionId,
-    badgeId: NumberType,
+    tokenId: NumberType,
     payload: iGetTokenActivityPayload
   ): Promise<GetTokenActivitySuccessResponse<T>> {
-    return await BitBadgesCollection.GetTokenActivity<T>(this, collectionId, badgeId, payload);
+    return await BitBadgesCollection.GetTokenActivity<T>(this, collectionId, tokenId, payload);
   }
 
   /**
@@ -1711,7 +1711,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
       }
 
       const response = await this.axios.get<iGetBadgesViewForUserSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBadgesByTypeForUserRoute(address)}`,
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetTokensByTypeForUserRoute(address)}`,
         {
           params: payload
         }
@@ -1855,21 +1855,21 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Gets current metadata for a specific token in a collection.
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/collection/:collectionId/:badgeId/metadata`
-   * - **SDK Function Call**: `await BitBadgesApi.getBadgeMetadata(collectionId, badgeId);`
+   * - **API Route**: `GET /api/v0/collection/:collectionId/:tokenId/metadata`
+   * - **SDK Function Call**: `await BitBadgesApi.getTokenMetadata(collectionId, tokenId);`
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getBadgeMetadata("123", "456");
+   * const res = await BitBadgesApi.getTokenMetadata("123", "456");
    * console.log(res);
    * ```
    * */
-  public async getBadgeMetadata(collectionId: CollectionId, badgeId: NumberType): Promise<GetBadgeMetadataSuccessResponse<T>> {
+  public async getTokenMetadata(collectionId: CollectionId, tokenId: NumberType): Promise<GetTokenMetadataSuccessResponse<T>> {
     try {
-      const response = await this.axios.get<iGetBadgeMetadataSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBadgeMetadataRoute(collectionId, badgeId)}`
+      const response = await this.axios.get<iGetTokenMetadataSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetTokenMetadataRoute(collectionId, tokenId)}`
       );
-      return new GetBadgeMetadataSuccessResponse(response.data).convert(this.ConvertFunction);
+      return new GetTokenMetadataSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

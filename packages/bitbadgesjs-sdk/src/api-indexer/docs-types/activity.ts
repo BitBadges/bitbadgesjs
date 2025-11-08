@@ -79,12 +79,12 @@ export class CoinTransferItem<T extends NumberType> extends BaseNumberTypeClass<
  */
 export class PrecalculationOptions<T extends NumberType> extends BaseNumberTypeClass<PrecalculationOptions<T>> implements iPrecalculationOptions<T> {
   overrideTimestamp?: T;
-  badgeIdsOverride?: UintRangeArray<T>;
+  tokenIdsOverride?: UintRangeArray<T>;
 
   constructor(data: iPrecalculationOptions<T>) {
     super();
     this.overrideTimestamp = data.overrideTimestamp;
-    this.badgeIdsOverride = data.badgeIdsOverride ? UintRangeArray.From(data.badgeIdsOverride) : undefined;
+    this.tokenIdsOverride = data.tokenIdsOverride ? UintRangeArray.From(data.tokenIdsOverride) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -101,7 +101,7 @@ export class PrecalculationOptions<T extends NumberType> extends BaseNumberTypeC
   ): PrecalculationOptions<U> {
     return new PrecalculationOptions({
       overrideTimestamp: convertFunction(proto.overrideTimestamp),
-      badgeIdsOverride: proto.badgeIdsOverride ? UintRangeArray.From(proto.badgeIdsOverride).convert(convertFunction) : undefined
+      tokenIdsOverride: proto.tokenIdsOverride ? UintRangeArray.From(proto.tokenIdsOverride).convert(convertFunction) : undefined
     });
   }
 }
@@ -126,7 +126,7 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
   precalculationOptions?: PrecalculationOptions<T>;
   coinTransfers?: CoinTransferItem<T>[];
   approvalsUsed?: ApprovalIdentifierDetails<T>[];
-  badgeId?: T;
+  tokenId?: T;
   price?: T;
   volume?: T;
   denom?: string;
@@ -148,14 +148,14 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
     this.precalculationOptions = data.precalculationOptions ? new PrecalculationOptions(data.precalculationOptions) : undefined;
     this.coinTransfers = data.coinTransfers ? data.coinTransfers.map((x) => new CoinTransferItem(x)) : undefined;
     this.approvalsUsed = data.approvalsUsed ? data.approvalsUsed.map((x) => new ApprovalIdentifierDetails(x)) : undefined;
-    this.badgeId = data.badgeId;
+    this.tokenId = data.tokenId;
     this.price = data.price;
     this.volume = data.volume;
     this.denom = data.denom;
   }
 
   getNumberFieldNames(): string[] {
-    return [...super.getNumberFieldNames(), 'badgeId', 'price', 'volume'];
+    return [...super.getNumberFieldNames(), 'tokenId', 'price', 'volume'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferActivityDoc<U> {

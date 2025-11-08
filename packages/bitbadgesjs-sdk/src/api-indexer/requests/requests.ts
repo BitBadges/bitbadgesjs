@@ -59,7 +59,7 @@ import {
   type iStatusDoc,
   type iTransferActivityDoc
 } from '@/api-indexer/docs-types/interfaces.js';
-import type { iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/badgeMetadata.js';
+import type { iTokenMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/metadata/tokenMetadata.js';
 import type { iMetadata, iMetadataWithoutInternals } from '@/api-indexer/metadata/metadata.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
 import { BaseNumberTypeClass, ConvertOptions, CustomTypeClass, ParsedQs, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
@@ -301,7 +301,7 @@ export interface iGetSearchSuccessResponse<T extends NumberType> {
   accounts: iBitBadgesUserInfo<T>[];
   badges: {
     collection: iBitBadgesCollection<T>;
-    badgeIds: iUintRange<T>[];
+    tokenIds: iUintRange<T>[];
   }[];
   maps: iMapWithValues<T>[];
   applications?: iApplicationDoc<T>[];
@@ -321,7 +321,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
   accounts: BitBadgesUserInfo<T>[];
   badges: {
     collection: BitBadgesCollection<T>;
-    badgeIds: UintRangeArray<T>;
+    tokenIds: UintRangeArray<T>;
   }[];
   maps: MapWithValues<T>[];
   applications?: ApplicationDoc<T>[];
@@ -335,7 +335,7 @@ export class GetSearchSuccessResponse<T extends NumberType>
     this.badges = data.badges.map((badge) => {
       return {
         collection: new BitBadgesCollection(badge.collection),
-        badgeIds: UintRangeArray.From(badge.badgeIds)
+        tokenIds: UintRangeArray.From(badge.tokenIds)
       };
     });
     this.maps = data.maps.map((map) => new MapWithValues(map));
@@ -896,7 +896,7 @@ export interface iUpdateAccountInfoPayload {
   /**
    * The tokens to hide and not view for this profile's portfolio
    */
-  hiddenBadges?: iBatchTokenDetails<NumberType>[];
+  hiddenTokens?: iBatchTokenDetails<NumberType>[];
 
   /**
    * Custom URL links to display on the user's portfolio.
@@ -1022,7 +1022,7 @@ export interface iAddToIpfsPayload {
   /**
    * The stuff to add to IPFS
    */
-  contents?: (iBadgeMetadataDetails<NumberType> | iMetadata<NumberType> | iCollectionMetadataDetails<NumberType> | iChallengeDetails<NumberType>)[];
+  contents?: (iTokenMetadataDetails<NumberType> | iMetadata<NumberType> | iCollectionMetadataDetails<NumberType> | iChallengeDetails<NumberType>)[];
 
   method: 'ipfs' | 'centralized';
 }
@@ -1631,7 +1631,7 @@ export interface iGetBrowseSuccessResponse<T extends NumberType> {
   badges: {
     [category: string]: {
       collection: iBitBadgesCollection<T>;
-      badgeIds: iUintRange<T>[];
+      tokenIds: iUintRange<T>[];
     }[];
   };
   applications?: { [category: string]: iApplicationDoc<T>[] };
@@ -1655,7 +1655,7 @@ export class GetBrowseSuccessResponse<T extends NumberType>
   badges: {
     [category: string]: {
       collection: BitBadgesCollection<T>;
-      badgeIds: UintRangeArray<T>;
+      tokenIds: UintRangeArray<T>;
     }[];
   };
   applications?: { [category: string]: ApplicationDoc<T>[] };
@@ -1687,12 +1687,12 @@ export class GetBrowseSuccessResponse<T extends NumberType>
         acc[category] = data.badges[category].map((badge) => {
           return {
             collection: new BitBadgesCollection(badge.collection),
-            badgeIds: UintRangeArray.From(badge.badgeIds)
+            tokenIds: UintRangeArray.From(badge.tokenIds)
           };
         });
         return acc;
       },
-      {} as { [category: string]: { collection: BitBadgesCollection<T>; badgeIds: UintRangeArray<T> }[] }
+      {} as { [category: string]: { collection: BitBadgesCollection<T>; tokenIds: UintRangeArray<T> }[] }
     );
     this.applications = Object.keys(data.applications ?? {}).reduce(
       (acc, category) => {

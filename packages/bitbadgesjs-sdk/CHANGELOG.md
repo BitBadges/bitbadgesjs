@@ -47,7 +47,7 @@ npm install bitbadgesjs-sdk@^0.20.0
 
 - See [BitBadges Chain v13 release information](https://github.com/BitBadges/bitbadgeschain/releases/tag/v13) for more details.
 
-TLDR: We expanded the functionality of mustOwnBadges to include different checks and handled some edge cases.
+TLDR: We expanded the functionality of mustOwnTokens to include different checks and handled some edge cases.
 
 ### Installation
 

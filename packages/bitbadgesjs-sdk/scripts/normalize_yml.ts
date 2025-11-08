@@ -25,8 +25,8 @@ fs.readFile(filePath, 'utf8', (err, data) => {
       { route: '/search/{searchValue}', schema: 'iGetSearchPayload' },
       { route: '/collections', schema: 'iGetCollectionsPayload' },
       { route: '/collection/{collectionId}/balance/{address}', schema: 'iGetBalanceByAddressPayload' },
-      { route: '/collection/{collectionId}/{badgeId}/activity', schema: 'iGetTokenActivityPayload' },
-      { route: '/collection/{collectionId}/{badgeId}/owners', schema: 'iGetOwnersPayload' },
+      { route: '/collection/{collectionId}/{tokenId}/activity', schema: 'iGetTokenActivityPayload' },
+      { route: '/collection/{collectionId}/{tokenId}/owners', schema: 'iGetOwnersPayload' },
       { route: '/claims/reserved/{claimId}/{address}', schema: 'iGetReservedCodesPayload' },
       { route: '/claims/status/{claimAttemptId}', schema: '' },
       { route: '/browse', schema: 'iGetBrowsePayload' },
@@ -184,7 +184,7 @@ function addExamples(obj: any) {
   addExamples(obj, 'profilePicUrl', ['https://example.com', 'ipfs://Qm...']);
   addExamples(obj, 'bannerImage', ['https://example.com', 'ipfs://Qm...']);
   addExamples(obj, 'domain', ['https://example.com', 'ipfs://Qm...']);
-  addExamples(obj, 'badgeIds', [[{ start: '1', end: '10' }]]);
+  addExamples(obj, 'tokenIds', [[{ start: '1', end: '10' }]]);
   addExamples(obj, 'metadataIds', [[{ start: '1', end: '10' }]]);
   addExamples(obj, 'ownershipTimes', [[{ start: '1713301889', end: '2000000000' }], [{ start: '1', end: '18446744073709551615' }]]);
   addExamples(obj, 'timelineTimes', [[{ start: '1713301889', end: '2000000000' }], [{ start: '1', end: '18446744073709551615' }]]);

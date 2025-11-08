@@ -5,7 +5,7 @@ import {
   getBalancesForIds,
   doBalancesExceedThreshold,
   addBalancesAndCheckIfExceedsThreshold,
-  handleDuplicateBadgeIdsInBalances
+  handleDuplicateTokenIdsInBalances
 } from './balances.js';
 import { UserPermissions } from './permissions.js';
 import { UintRangeArray } from './uintRanges.js';
@@ -22,7 +22,7 @@ describe('areBalancesEqual', () => {
   const balancesOne = BalanceArray.From([
     {
       amount: 3n,
-      badgeIds: [{ start: 1n, end: 10000n }],
+      tokenIds: [{ start: 1n, end: 10000n }],
       ownershipTimes: UintRangeArray.FullRanges()
     }
   ]);
@@ -30,17 +30,17 @@ describe('areBalancesEqual', () => {
   const balancesTwo = BalanceArray.From([
     {
       amount: 1n,
-      badgeIds: [{ start: 1n, end: 10000n }],
+      tokenIds: [{ start: 1n, end: 10000n }],
       ownershipTimes: UintRangeArray.FullRanges()
     },
     {
       amount: 2n,
-      badgeIds: [{ start: 1n, end: 5000n }],
+      tokenIds: [{ start: 1n, end: 5000n }],
       ownershipTimes: UintRangeArray.FullRanges()
     },
     {
       amount: 2n,
-      badgeIds: [{ start: 5001n, end: 10000n }],
+      tokenIds: [{ start: 5001n, end: 10000n }],
       ownershipTimes: UintRangeArray.FullRanges()
     }
   ]);
@@ -117,7 +117,7 @@ describe('BalancesWithTimesFuzz', () => {
         const result = addBalances(userBalance.balances, [
           {
             amount,
-            badgeIds: [{ start: start, end: end }],
+            tokenIds: [{ start: start, end: end }],
             ownershipTimes: [{ start: startTime, end: endTime }]
           }
         ]);
@@ -148,7 +148,7 @@ describe('BalancesWithTimesFuzz', () => {
     const startBalances = BalanceArray.From<bigint>([
       {
         amount: 1n,
-        badgeIds: [{ start: 1n, end: 1n }],
+        tokenIds: [{ start: 1n, end: 1n }],
         ownershipTimes: [{ start: 1n, end: 10000n }]
       }
     ]);
@@ -162,7 +162,7 @@ describe('BalancesWithTimesFuzz', () => {
         BalanceArray.From<bigint>([
           {
             amount: 1n,
-            badgeIds: [{ start: 1001n, end: 1001n }],
+            tokenIds: [{ start: 1001n, end: 1001n }],
             ownershipTimes: [{ start: 1n, end: 10000n }]
           }
         ]),
@@ -175,12 +175,12 @@ describe('BalancesWithTimesFuzz', () => {
     const balances = BalanceArray.From<bigint>([
       {
         amount: 0n,
-        badgeIds: [{ start: 1n, end: 1n }],
+        tokenIds: [{ start: 1n, end: 1n }],
         ownershipTimes: [{ start: 1n, end: 10000n }]
       },
       {
         amount: 1n,
-        badgeIds: [{ start: 1n, end: 1n }],
+        tokenIds: [{ start: 1n, end: 1n }],
         ownershipTimes: [{ start: 1n, end: 10000n }]
       }
     ]);
@@ -194,7 +194,7 @@ describe('BalancesWithTimesFuzz', () => {
     const balances = BalanceArray.From<bigint>([
       {
         amount: 5n,
-        badgeIds: [{ start: 1n, end: 1n }],
+        tokenIds: [{ start: 1n, end: 1n }],
         ownershipTimes: [{ start: 1n, end: 10000n }]
       }
     ]);
@@ -202,7 +202,7 @@ describe('BalancesWithTimesFuzz', () => {
     const threshold = BalanceArray.From<bigint>([
       {
         amount: 1n,
-        badgeIds: [{ start: 1n, end: 1n }],
+        tokenIds: [{ start: 1n, end: 1n }],
         ownershipTimes: [{ start: 1n, end: 10000n }]
       }
     ]);
@@ -217,17 +217,17 @@ describe('BalancesWithTimesFuzz', () => {
     const balances = BalanceArray.From<bigint>([
       {
         amount: 1n,
-        badgeIds: [{ start: 1n, end: 1n }],
+        tokenIds: [{ start: 1n, end: 1n }],
         ownershipTimes: [{ start: 1n, end: 10000n }]
       },
       {
         amount: 1n,
-        badgeIds: [{ start: 1n, end: 1n }],
+        tokenIds: [{ start: 1n, end: 1n }],
         ownershipTimes: [{ start: 1n, end: 10000n }]
       }
     ]);
 
-    const handled = handleDuplicateBadgeIdsInBalances(balances);
+    const handled = handleDuplicateTokenIdsInBalances(balances);
 
     expect(handled.length).toEqual(1);
     expect(handled[0].amount).toEqual(2n);

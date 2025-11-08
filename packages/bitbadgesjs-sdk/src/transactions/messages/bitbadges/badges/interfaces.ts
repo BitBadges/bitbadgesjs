@@ -5,7 +5,7 @@ import type { iCollectionApproval, iUserIncomingApproval, iUserOutgoingApproval 
 import type {
   iAddressList,
   iApprovalIdentifierDetails,
-  iBadgeMetadataTimeline,
+  iTokenMetadataTimeline,
   iBalance,
   iCollectionInvariants,
   iCollectionMetadataTimeline,
@@ -19,11 +19,11 @@ import type {
   CollectionId
 } from '../../../../interfaces/types/core.js';
 import type {
-  iBadgeIdsActionPermission,
+  iTokenIdsActionPermission,
   iCollectionApprovalPermission,
   iCollectionPermissions,
   iTimedUpdatePermission,
-  iTimedUpdateWithBadgeIdsPermission,
+  iTimedUpdateWithTokenIdsPermission,
   iUserPermissions
 } from '../../../../interfaces/types/permissions.js';
 import type { iUserBalanceStore } from '../../../../interfaces/types/userBalances.js';
@@ -49,7 +49,7 @@ export interface iMsgCreateCollection<T extends NumberType> {
   defaultBalances?: iUserBalanceStore<T>;
 
   /** The tokens to create. Newly created tokens will be sent to the "Mint" address. Must have necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Only used if collection has "Standard" balance type. */
-  validBadgeIds?: iUintRange<T>[];
+  validTokenIds?: iUintRange<T>[];
 
   /** The new collection permissions. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. */
   collectionPermissions?: iCollectionPermissions<T>;
@@ -61,7 +61,7 @@ export interface iMsgCreateCollection<T extends NumberType> {
   collectionMetadataTimeline?: iCollectionMetadataTimeline<T>[];
 
   /** The new token metadata timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. Note we take first-match only for token IDs, so do not define duplicates. */
-  badgeMetadataTimeline?: iBadgeMetadataTimeline<T>[];
+  tokenMetadataTimeline?: iTokenMetadataTimeline<T>[];
 
   /** The new custom data timeline. Must have the necessary permissions in future transactions to update. However, no restrictions in this genesis Msg. */
   customDataTimeline?: iCustomDataTimeline<T>[];
@@ -98,7 +98,7 @@ export interface iMsgDeleteCollection<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iMsgTransferBadges<T extends NumberType> {
+export interface iMsgTransferTokens<T extends NumberType> {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
   /** The ID of the collection to transfer tokens from. */
@@ -120,7 +120,7 @@ export interface iMsgUniversalUpdateCollection<T extends NumberType> extends iMs
   /** Whether or not to update the collection metadata timeline. */
   updateCollectionMetadataTimeline?: boolean;
   /** Whether or not to update the token metadata timeline. */
-  updateBadgeMetadataTimeline?: boolean;
+  updateTokenMetadataTimeline?: boolean;
   /** Whether or not to update the custom data timeline. */
   updateCustomDataTimeline?: boolean;
   /** Whether or not to update the collection approved transfers timeline. */
@@ -130,7 +130,7 @@ export interface iMsgUniversalUpdateCollection<T extends NumberType> extends iMs
   /** Whether or not to update the is archived timeline. */
   updateIsArchivedTimeline?: boolean;
   /** Whether or not to update the valid token IDs. */
-  updateValidBadgeIds?: boolean;
+  updateValidTokenIds?: boolean;
 }
 
 /**
@@ -311,15 +311,15 @@ export interface iMsgPurgeApprovals<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iMsgSetValidBadgeIds<T extends NumberType> {
+export interface iMsgSetValidTokenIds<T extends NumberType> {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
   /** The ID of the collection. */
   collectionId: T;
   /** New token IDs to add to this collection. */
-  validBadgeIds: iUintRange<T>[];
+  validTokenIds: iUintRange<T>[];
   /** Permission to update valid token IDs. */
-  canUpdateValidBadgeIds: iBadgeIdsActionPermission<T>[];
+  canUpdateValidTokenIds: iTokenIdsActionPermission<T>[];
 }
 
 /**
@@ -353,15 +353,15 @@ export interface iMsgSetCollectionMetadata<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iMsgSetBadgeMetadata<T extends NumberType> {
+export interface iMsgSetTokenMetadata<T extends NumberType> {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
   /** The ID of the collection. */
   collectionId: T;
   /** New token metadata timeline to set. */
-  badgeMetadataTimeline: iBadgeMetadataTimeline<T>[];
+  tokenMetadataTimeline: iTokenMetadataTimeline<T>[];
   /** Permission to update token metadata timeline. */
-  canUpdateBadgeMetadata: iTimedUpdateWithBadgeIdsPermission<T>[];
+  canUpdateTokenMetadata: iTimedUpdateWithTokenIdsPermission<T>[];
 }
 
 /**

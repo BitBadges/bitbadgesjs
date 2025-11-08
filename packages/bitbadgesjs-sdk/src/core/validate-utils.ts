@@ -13,7 +13,7 @@ export function getPotentialUpdatesForTimelineValues(times: UintRangeArray<bigin
       timelineTimes: times[idx],
       arbitraryValue: values[idx],
       usesTimelineTimes: true,
-      usesBadgeIds: false,
+      usesTokenIds: false,
       usesOwnershipTimes: false,
       usesTransferTimes: false,
       usesToList: false,
@@ -24,7 +24,7 @@ export function getPotentialUpdatesForTimelineValues(times: UintRangeArray<bigin
       permanentlyPermittedTimes: UintRangeArray.From([]),
       permanentlyForbiddenTimes: UintRangeArray.From([]),
 
-      badgeIds: UintRangeArray.From([]),
+      tokenIds: UintRangeArray.From([]),
       ownershipTimes: UintRangeArray.From([]),
       transferTimes: UintRangeArray.From([]),
       toList: AddressList.AllAddresses(),
@@ -59,7 +59,7 @@ export function getUpdateCombinationsToCheck(
     for (const detailToAdd of detailsToAdd) {
       detailsToCheck.push({
         timelineTime: detail.timelineTime,
-        badgeId: detailToAdd.badgeId,
+        tokenId: detailToAdd.tokenId,
         transferTime: detailToAdd.transferTime,
         toList: detailToAdd.toList,
         fromList: detailToAdd.fromList,
@@ -80,7 +80,7 @@ export function getUpdateCombinationsToCheck(
     for (const detailToAdd of detailsToAdd) {
       detailsToCheck.push({
         timelineTime: detail.timelineTime,
-        badgeId: detailToAdd.badgeId,
+        tokenId: detailToAdd.tokenId,
         transferTime: detailToAdd.transferTime,
         toList: detailToAdd.toList,
         fromList: detailToAdd.fromList,
@@ -105,7 +105,7 @@ export function getUpdateCombinationsToCheck(
     for (const detailToAdd of detailsToAdd) {
       detailsToCheck.push({
         timelineTime: overlap.timelineTime,
-        badgeId: detailToAdd.badgeId,
+        tokenId: detailToAdd.tokenId,
         transferTime: detailToAdd.transferTime,
         toList: detailToAdd.toList,
         fromList: detailToAdd.fromList,
@@ -126,7 +126,7 @@ export function getUpdateCombinationsToCheck(
 export const AllDefaultValues: UniversalPermission = {
   permanentlyPermittedTimes: UintRangeArray.From<bigint>([]),
   permanentlyForbiddenTimes: UintRangeArray.From<bigint>([]),
-  badgeIds: UintRangeArray.From<bigint>([]),
+  tokenIds: UintRangeArray.From<bigint>([]),
   timelineTimes: UintRangeArray.From<bigint>([]),
   transferTimes: UintRangeArray.From<bigint>([]),
   ownershipTimes: UintRangeArray.From<bigint>([]),
@@ -135,7 +135,7 @@ export const AllDefaultValues: UniversalPermission = {
   initiatedByList: AddressList.AllAddresses(),
   approvalIdList: AddressList.AllAddresses(),
   usesApprovalIdList: false,
-  usesBadgeIds: false,
+  usesTokenIds: false,
   usesTimelineTimes: false,
   usesTransferTimes: false, // Replace this with the actual usesTransferTimes property from actionPermission
   usesToList: false, // Replace this with the actual usesToList property from actionPermission

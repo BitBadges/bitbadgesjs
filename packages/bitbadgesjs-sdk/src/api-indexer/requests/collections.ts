@@ -53,7 +53,7 @@ export class FilterSuggestionsSuccessResponse
  */
 export interface iFilterTokensInCollectionPayload {
   /** Limit to specific token IDs. Leave undefined to not filter by token ID. */
-  badgeIds?: iUintRange<NumberType>[];
+  tokenIds?: iUintRange<NumberType>[];
   /** Limit to specific lists. Leave undefined to not filter by list. */
   categories?: string[];
   /** Limit to specific lists. Leave undefined to not filter by list. */
@@ -80,7 +80,7 @@ export interface iFilterTokensInCollectionPayload {
  * @category API Requests / Responses
  */
 export interface iFilterTokensInCollectionSuccessResponse<T extends NumberType> {
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
   pagination: PaginationInfo;
 }
 
@@ -91,12 +91,12 @@ export class FilterTokensInCollectionSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<FilterTokensInCollectionSuccessResponse<T>>
   implements iFilterTokensInCollectionSuccessResponse<T>
 {
-  badgeIds: UintRangeArray<T>;
+  tokenIds: UintRangeArray<T>;
   pagination: PaginationInfo;
 
   constructor(data: iFilterTokensInCollectionSuccessResponse<T>) {
     super();
-    this.badgeIds = UintRangeArray.From(data.badgeIds);
+    this.tokenIds = UintRangeArray.From(data.tokenIds);
     this.pagination = data.pagination;
   }
 
@@ -341,7 +341,7 @@ export class GetTokenActivitySuccessResponse<T extends NumberType>
  * @property {boolean} [doNotFetchCollectionMetadata] - If true, collection metadata will not be fetched.
  * @property {NumberType[] | UintRange<NumberType>[]} [metadataIds] - If present, the metadata corresponding to the specified metadata IDs will be fetched. See documentation for how to determine metadata IDs.
  * @property {string[]} [uris] - If present, the metadata corresponding to the specified URIs will be fetched.
- * @property {NumberType[] | UintRange<NumberType>[]} [badgeIds] - If present, the metadata corresponding to the specified token IDs will be fetched.
+ * @property {NumberType[] | UintRange<NumberType>[]} [tokenIds] - If present, the metadata corresponding to the specified token IDs will be fetched.
  *
  * @category API Requests / Responses
  */
@@ -357,7 +357,7 @@ export interface MetadataFetchOptions {
   /**
    * If present, the metadata corresponding to the specified token IDs will be fetched.
    */
-  badgeIds?: NumberType[] | iUintRange<NumberType>[];
+  tokenIds?: NumberType[] | iUintRange<NumberType>[];
 }
 
 /**
@@ -365,7 +365,7 @@ export interface MetadataFetchOptions {
  *
  * @category API Requests / Responses
  */
-export type CollectionViewKey = 'transferActivity' | 'owners' | 'amountTrackers' | 'challengeTrackers' | 'listings' | 'badgeFloorPrices';
+export type CollectionViewKey = 'transferActivity' | 'owners' | 'amountTrackers' | 'challengeTrackers' | 'listings' | 'tokenFloorPrices';
 
 /**
  * Defines the options for fetching additional collection details.
@@ -397,7 +397,7 @@ export interface GetAdditionalCollectionDetailsPayload {
     /** If specified, we will only fetch this users' activity. */
     address?: string;
     /** IF specified, we will filter to this abdge ID (only applicable to utiity listings view currently) */
-    badgeId?: NumberType;
+    tokenId?: NumberType;
   }[];
 
   /**
@@ -438,7 +438,7 @@ export interface GetMetadataForCollectionPayload {
   /**
    * If present, we will fetch the floor price for the specified token IDs.
    */
-  badgeFloorPricesToFetch?: NumberType[] | iUintRange<NumberType>[];
+  tokenFloorPricesToFetch?: NumberType[] | iUintRange<NumberType>[];
 }
 
 /**

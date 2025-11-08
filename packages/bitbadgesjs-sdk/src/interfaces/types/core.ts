@@ -1,7 +1,7 @@
 //IMPORTANT: Keep all imports type-safe by using the `type` keyword. If not, this will mess up the circular dependency check.
 
 import type { iPrecalculationOptions } from '@/api-indexer/docs-types/interfaces.js';
-import type { BitBadgesAddress, iBadgeMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
+import type { BitBadgesAddress, iTokenMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
 import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iCosmosCoin } from '@/core/coin.js';
@@ -24,7 +24,7 @@ export interface iUintRange<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iBadgeMetadata<T extends NumberType> {
+export interface iTokenMetadata<T extends NumberType> {
   /**
    * The URI where to fetch the token metadata from.
    */
@@ -33,7 +33,7 @@ export interface iBadgeMetadata<T extends NumberType> {
   /**
    * The token IDs corresponding to the URI.
    */
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
 
   /**
    * Arbitrary custom data that can be stored on-chain
@@ -59,7 +59,7 @@ export interface iCollectionMetadata {
 /**
  * @category Interfaces
  */
-export interface iMustOwnBadges<T extends NumberType> {
+export interface iMustOwnTokens<T extends NumberType> {
   /**
    * The collection IDs to own.
    */
@@ -78,7 +78,7 @@ export interface iMustOwnBadges<T extends NumberType> {
   /**
    * The range of the token IDs that must be owned.
    */
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
 
   /**
    * Whether or not to override the ownershipTimes with the current time.
@@ -108,7 +108,7 @@ export interface iBalance<T extends NumberType> {
   /**
    * The token IDs corresponding to the balance.
    */
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
 
   /**
    * The times that the token is owned from.
@@ -368,7 +368,7 @@ export interface iAmountTrackerIdDetails<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iMustOwnBadge<T extends NumberType> {
+export interface iMustOwnToken<T extends NumberType> {
   /**
    * The ID of the collection.
    */
@@ -387,7 +387,7 @@ export interface iMustOwnBadge<T extends NumberType> {
   /**
    * The token IDs the user must own.
    */
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
 
   /**
    * If true, override ownershipTimes with the current time.
@@ -568,21 +568,21 @@ export interface iCollectionMetadataTimelineWithDetails<T extends NumberType> ex
 /**
  * @category Interfaces
  */
-export interface iBadgeMetadataTimeline<T extends NumberType> extends iTimelineItem<T> {
+export interface iTokenMetadataTimeline<T extends NumberType> extends iTimelineItem<T> {
   /**
    * The token metadata.
    */
-  badgeMetadata: iBadgeMetadata<T>[];
+  tokenMetadata: iTokenMetadata<T>[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iBadgeMetadataTimelineWithDetails<T extends NumberType> extends iTimelineItem<T> {
+export interface iTokenMetadataTimelineWithDetails<T extends NumberType> extends iTimelineItem<T> {
   /**
    * The token metadata, with off-chain details populated.
    */
-  badgeMetadata: iBadgeMetadataDetails<T>[];
+  tokenMetadata: iTokenMetadataDetails<T>[];
 }
 
 /**

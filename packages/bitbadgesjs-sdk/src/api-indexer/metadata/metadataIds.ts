@@ -1,6 +1,6 @@
 import { safeSubtractKeepLeft, safeAddKeepRight, safeAddKeepLeft } from '@/common/math.js';
 import { BigIntify, NumberType } from '@/common/string-numbers.js';
-import type { BadgeMetadata } from '@/core/misc.js';
+import type { TokenMetadata } from '@/core/misc.js';
 import type { UintRange } from '@/core/uintRanges.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
 import { getConverterFunction } from '@/common/base.js';
@@ -10,15 +10,15 @@ import { getConverterFunction } from '@/common/base.js';
  * for a specific token ID. Returns -1 if not found.
  *
  * @remarks
- * The token metadata array is the timeline values (BadgeMetadataTimeline.badgeMetadata), not the cached fetched values
+ * The token metadata array is the timeline values (TokenMetadataTimeline.tokenMetadata), not the cached fetched values
  * from the API.
  *
  * @example
  * ```ts
- * import { getMetadataIdForBadgeId } from 'bitbadgesjs-sdk'
+ * import { getMetadataIdForTokenId } from 'bitbadgesjs-sdk'
  * const collection: BitBadgesCollection<bigint> = { ... }
- * const badgeId = 123n
- * const metadataId = getMetadataIdForBadgeId(badgeId, collection.getBadgeMetadataTimelineValue())
+ * const tokenId = 123n
+ * const metadataId = getMetadataIdForTokenId(tokenId, collection.getTokenMetadataTimelineValue())
  * ```
  *
  * @example
@@ -26,26 +26,26 @@ import { getConverterFunction } from '@/common/base.js';
  * ```ts
  * import { BitBadgesCollection } from 'bitbadgesjs-sdk'
  * const collection: BitBadgesCollection<bigint> = { ... }
- * const badgeId = 123n
- * const metadataId = collection.getMetadataIdForBadgeId(badgeId)
+ * const tokenId = 123n
+ * const metadataId = collection.getMetadataIdForTokenId(tokenId)
  * ```
  *
  * @category Metadata IDs
  */
-export const getMetadataIdForBadgeId = <T extends NumberType>(badgeId: T, badgeMetadata: BadgeMetadata<T>[]) => {
+export const getMetadataIdForTokenId = <T extends NumberType>(tokenId: T, tokenMetadata: TokenMetadata<T>[]) => {
   let batchIdx = 1n;
 
-  for (const badgeUri of badgeMetadata) {
-    if (badgeUri.uri.includes('{id}')) {
-      const [idx, found] = badgeUri.badgeIds.search(badgeId);
+  for (const tokenUri of tokenMetadata) {
+    if (tokenUri.uri.includes('{id}')) {
+      const [idx, found] = tokenUri.tokenIds.search(tokenId);
       if (found) {
-        const badgeUintRange = badgeUri.badgeIds[Number(idx)];
-        return safeSubtractKeepLeft(safeAddKeepRight(batchIdx, badgeId), badgeUintRange.start);
+        const tokenUintRange = tokenUri.tokenIds[Number(idx)];
+        return safeSubtractKeepLeft(safeAddKeepRight(batchIdx, tokenId), tokenUintRange.start);
       }
 
-      batchIdx = safeAddKeepLeft(batchIdx, badgeUri.badgeIds.size());
+      batchIdx = safeAddKeepLeft(batchIdx, tokenUri.tokenIds.size());
     } else {
-      const found = badgeUri.badgeIds.searchIfExists(badgeId);
+      const found = tokenUri.tokenIds.searchIfExists(tokenId);
       if (found) {
         return batchIdx;
       }
@@ -61,7 +61,7 @@ export const getMetadataIdForBadgeId = <T extends NumberType>(badgeId: T, badgeM
  * for a specific token URI. Returns an empty array if not found.
  *
  * @remarks
- * The token metadata array is the timeline values (BadgeMetadataTimeline.badgeMetadata), not the cached fetched values
+ * The token metadata array is the timeline values (TokenMetadataTimeline.tokenMetadata), not the cached fetched values
  * from the API.
  *
  * @example
@@ -69,7 +69,7 @@ export const getMetadataIdForBadgeId = <T extends NumberType>(badgeId: T, badgeM
  * import { getMetadataIdsForUri } from 'bitbadgesjs-sdk'
  * const collection: BitBadgesCollection<bigint> = { ... }
  * const uri = 'https://bitbadges.io/collection/1/badge/1'
- * const metadataIds = getMetadataIdsForUri(uri, collection.getBadgeMetadataTimelineValue())
+ * const metadataIds = getMetadataIdsForUri(uri, collection.getTokenMetadataTimelineValue())
  * ```
  *
  * @example
@@ -83,19 +83,19 @@ export const getMetadataIdForBadgeId = <T extends NumberType>(badgeId: T, badgeM
  *
  * @category Metadata IDs
  */
-export const getMetadataIdsForUri = <T extends NumberType>(uri: string, badgeMetadata: BadgeMetadata<T>[]) => {
-  if (badgeMetadata.length === 0) {
+export const getMetadataIdsForUri = <T extends NumberType>(uri: string, tokenMetadata: TokenMetadata<T>[]) => {
+  if (tokenMetadata.length === 0) {
     return [];
   }
 
-  const converterFunction = getConverterFunction(badgeMetadata[0].badgeIds[0].start);
-  const converted = badgeMetadata.map((x) => x.convert(BigIntify));
+  const converterFunction = getConverterFunction(tokenMetadata[0].tokenIds[0].start);
+  const converted = tokenMetadata.map((x) => x.convert(BigIntify));
 
   let batchIdx = 1n;
   const metadataIds: bigint[] = [];
-  for (const badgeUri of converted) {
-    if (badgeUri.uri.includes('{id}')) {
-      if (badgeUri.uri === uri) {
+  for (const tokenUri of converted) {
+    if (tokenUri.uri.includes('{id}')) {
+      if (tokenUri.uri === uri) {
         metadataIds.push(batchIdx);
         continue;
       }
@@ -103,33 +103,33 @@ export const getMetadataIdsForUri = <T extends NumberType>(uri: string, badgeMet
       //Check if uri has a number value that replaces {id}
 
       //Check if everythin up to {id} is the same
-      const uriPrefix = badgeUri.uri.split('{id}')[0];
+      const uriPrefix = tokenUri.uri.split('{id}')[0];
       const numSubstringIdxStart = uriPrefix.length;
       if (uri.startsWith(uriPrefix)) {
         //Check if everything after {id} is the same
-        const uriSuffix = badgeUri.uri.split('{id}')[1];
+        const uriSuffix = tokenUri.uri.split('{id}')[1];
         const numSubstringIdxEnd = uri.length - uriSuffix.length;
         if (uri.endsWith(uriSuffix)) {
-          //Check if the number value is within the range of badgeIds
+          //Check if the number value is within the range of tokenIds
           const numSubstring = uri.substring(numSubstringIdxStart, numSubstringIdxEnd);
           const num = BigInt(numSubstring);
 
-          for (const badgeUintRange of badgeUri.badgeIds) {
-            if (num >= badgeUintRange.start && num <= badgeUintRange.end) {
-              // return batchIdx + num - badgeUintRange.start;
-              metadataIds.push(batchIdx + num - badgeUintRange.start);
+          for (const tokenUintRange of tokenUri.tokenIds) {
+            if (num >= tokenUintRange.start && num <= tokenUintRange.end) {
+              // return batchIdx + num - tokenUintRange.start;
+              metadataIds.push(batchIdx + num - tokenUintRange.start);
             }
 
-            batchIdx += badgeUintRange.end - badgeUintRange.start + 1n;
+            batchIdx += tokenUintRange.end - tokenUintRange.start + 1n;
           }
         }
       } else {
-        for (const badgeUintRange of badgeUri.badgeIds) {
-          batchIdx += badgeUintRange.end - badgeUintRange.start + 1n;
+        for (const tokenUintRange of tokenUri.tokenIds) {
+          batchIdx += tokenUintRange.end - tokenUintRange.start + 1n;
         }
       }
     } else {
-      if (badgeUri.uri === uri) {
+      if (tokenUri.uri === uri) {
         // return batchIdx;
         metadataIds.push(batchIdx);
       }
@@ -146,16 +146,16 @@ export const getMetadataIdsForUri = <T extends NumberType>(uri: string, badgeMet
  *
  * @category Metadata IDs
  */
-export function getMaxMetadataId<T extends NumberType>(badgeMetadata: BadgeMetadata<T>[]) {
-  if (badgeMetadata.length === 0) {
+export function getMaxMetadataId<T extends NumberType>(tokenMetadata: TokenMetadata<T>[]) {
+  if (tokenMetadata.length === 0) {
     return 0n;
   }
 
   let metadataId = 0n;
-  for (const badgeUri of badgeMetadata) {
+  for (const tokenUri of tokenMetadata) {
     // If the URI contains {id}, each token ID will belong to its own private batch
-    if (badgeUri.uri.includes('{id}')) {
-      metadataId = safeAddKeepLeft(metadataId, badgeUri.badgeIds.size());
+    if (tokenUri.uri.includes('{id}')) {
+      metadataId = safeAddKeepLeft(metadataId, tokenUri.tokenIds.size());
     } else {
       metadataId++;
     }
@@ -169,7 +169,7 @@ export function getMaxMetadataId<T extends NumberType>(badgeMetadata: BadgeMetad
  * Returns an empty array if not found.
  *
  * @remarks
- * The token metadata array is the timeline values (BadgeMetadataTimeline.badgeMetadata), not the cached fetched values
+ * The token metadata array is the timeline values (TokenMetadataTimeline.tokenMetadata), not the cached fetched values
  * from the API.
  *
  * @example
@@ -177,7 +177,7 @@ export function getMaxMetadataId<T extends NumberType>(badgeMetadata: BadgeMetad
  * import { getUrisForMetadataId } from 'bitbadgesjs-sdk'
  * const collection: BitBadgesCollection<bigint> = { ... }
  * const metadataId = 123n
- * const uris = getUrisForMetadataId(metadataId, collection.getBadgeMetadataTimelineValue())
+ * const uris = getUrisForMetadataId(metadataId, collection.getTokenMetadataTimelineValue())
  * ```
  *
  * @example
@@ -191,32 +191,32 @@ export function getMaxMetadataId<T extends NumberType>(badgeMetadata: BadgeMetad
  *
  * @category Metadata IDs
  */
-export function getUrisForMetadataIds<T extends NumberType>(metadataIds: T[], collectionUri: string, _badgeUris: BadgeMetadata<T>[]) {
+export function getUrisForMetadataIds<T extends NumberType>(metadataIds: T[], collectionUri: string, _tokenUris: TokenMetadata<T>[]) {
   const uris: string[] = [];
   if (metadataIds.find((id) => id === 0n)) {
     uris.push(collectionUri);
   }
 
-  const badgeMetadata = _badgeUris.map((x) => x.convert(BigIntify));
+  const tokenMetadata = _tokenUris.map((x) => x.convert(BigIntify));
 
   let batchIdx = 1n;
 
-  for (const badgeUri of badgeMetadata) {
-    if (badgeUri.uri.includes('{id}')) {
-      for (const badgeUintRange of badgeUri.badgeIds) {
+  for (const tokenUri of tokenMetadata) {
+    if (tokenUri.uri.includes('{id}')) {
+      for (const tokenUintRange of tokenUri.tokenIds) {
         const start = batchIdx;
-        const end = batchIdx + badgeUintRange.end - badgeUintRange.start;
+        const end = batchIdx + tokenUintRange.end - tokenUintRange.start;
         for (const metadataId of metadataIds.map((x) => BigInt(x))) {
           if (metadataId >= start && metadataId <= end) {
-            uris.push(badgeUri.uri.replace('{id}', (metadataId - start + badgeUintRange.start).toString()));
+            uris.push(tokenUri.uri.replace('{id}', (metadataId - start + tokenUintRange.start).toString()));
           }
         }
 
-        batchIdx += badgeUintRange.end - badgeUintRange.start + 1n;
+        batchIdx += tokenUintRange.end - tokenUintRange.start + 1n;
       }
     } else {
       if (metadataIds.find((id) => id === batchIdx)) {
-        uris.push(badgeUri.uri);
+        uris.push(tokenUri.uri);
       }
       batchIdx++;
     }
@@ -230,15 +230,15 @@ export function getUrisForMetadataIds<T extends NumberType>(metadataIds: T[], co
  * Returns an empty array if not found.
  *
  * @remarks
- * The token metadata array is the timeline values (BadgeMetadataTimeline.badgeMetadata), not the cached fetched values
+ * The token metadata array is the timeline values (TokenMetadataTimeline.tokenMetadata), not the cached fetched values
  * from the API.
  *
  * @example
  * ```ts
- * import { getBadgeIdsForMetadataId } from 'bitbadgesjs-sdk'
+ * import { getTokenIdsForMetadataId } from 'bitbadgesjs-sdk'
  * const collection: BitBadgesCollection<bigint> = { ... }
  * const metadataId = 123n
- * const badgeIds = getBadgeIdsForMetadataId(metadataId, collection.getBadgeMetadataTimelineValue())
+ * const tokenIds = getTokenIdsForMetadataId(metadataId, collection.getTokenMetadataTimelineValue())
  * ```
  *
  * @example
@@ -247,34 +247,34 @@ export function getUrisForMetadataIds<T extends NumberType>(metadataIds: T[], co
  * import { BitBadgesCollection } from 'bitbadgesjs-sdk'
  * const collection: BitBadgesCollection<bigint> = { ... }
  * const metadataId = 123n
- * const badgeIds = collection.getBadgeIdsForMetadataId(metadataId)
+ * const tokenIds = collection.getTokenIdsForMetadataId(metadataId)
  * ```
  *
  * @category Metadata IDs
  */
-export function getBadgeIdsForMetadataId<T extends NumberType>(_metadataId: T, _badgeUris: BadgeMetadata<T>[]): UintRange<T>[] {
+export function getTokenIdsForMetadataId<T extends NumberType>(_metadataId: T, _tokenUris: TokenMetadata<T>[]): UintRange<T>[] {
   let batchIdx = 1n;
 
   const metadataId = BigInt(_metadataId);
-  const badgeMetadata = _badgeUris.map((x) => x.convert(BigIntify));
-  const converter = getConverterFunction(_badgeUris[0].badgeIds[0].start);
+  const tokenMetadata = _tokenUris.map((x) => x.convert(BigIntify));
+  const converter = getConverterFunction(_tokenUris[0].tokenIds[0].start);
 
-  for (const badgeUri of badgeMetadata) {
-    if (badgeUri.uri.includes('{id}')) {
-      for (const badgeUintRange of badgeUri.badgeIds) {
+  for (const tokenUri of tokenMetadata) {
+    if (tokenUri.uri.includes('{id}')) {
+      for (const tokenUintRange of tokenUri.tokenIds) {
         const start = batchIdx;
-        const end = batchIdx + badgeUintRange.end - badgeUintRange.start;
+        const end = batchIdx + tokenUintRange.end - tokenUintRange.start;
         if (metadataId >= start && metadataId <= end) {
-          return UintRangeArray.From([{ start: metadataId - start + badgeUintRange.start, end: metadataId - start + badgeUintRange.start }]).convert(
+          return UintRangeArray.From([{ start: metadataId - start + tokenUintRange.start, end: metadataId - start + tokenUintRange.start }]).convert(
             converter
           );
         }
 
-        batchIdx += badgeUintRange.end - badgeUintRange.start + 1n;
+        batchIdx += tokenUintRange.end - tokenUintRange.start + 1n;
       }
     } else {
       if (metadataId === batchIdx) {
-        return badgeUri.badgeIds.convert(converter);
+        return tokenUri.tokenIds.convert(converter);
       }
       batchIdx++;
     }

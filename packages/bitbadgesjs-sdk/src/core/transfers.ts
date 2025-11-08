@@ -13,7 +13,7 @@ import { ApprovalIdentifierDetails, ETHSignatureProof, MerkleProof } from './mis
 import { UintRangeArray } from './uintRanges.js';
 
 /**
- * Transfer is used to represent a transfer of tokens. This is compatible with the MsgTransferBadges message.
+ * Transfer is used to represent a transfer of tokens. This is compatible with the MsgTransferTokens message.
  *
  * @category Approvals / Transferability
  */
@@ -163,8 +163,8 @@ export interface iTransferWithIncrements<T extends NumberType> extends iTransfer
   /** The number of addresses to send the tokens to. This takes priority over toAddresses.length (used when you don't know exact addresses (i.e. you know number of codes)). */
   toAddressesLength?: T;
 
-  /** The number to increment the badgeIDs by for each transfer. */
-  incrementBadgeIdsBy?: T;
+  /** The number to increment the tokenIDs by for each transfer. */
+  incrementTokenIdsBy?: T;
 
   /** The number to increment the ownershipTimes by for each transfer. */
   incrementOwnershipTimesBy?: T;
@@ -174,7 +174,7 @@ export interface iTransferWithIncrements<T extends NumberType> extends iTransfer
 }
 
 /**
- * TransferWithIncrements is a type that is used to better handle batch transfers, potentially with incremented badgeIDs.
+ * TransferWithIncrements is a type that is used to better handle batch transfers, potentially with incremented tokenIDs.
  *
  * @remarks
  * For example, if you have 100 addresses and want to send 1 token to each address,
@@ -191,7 +191,7 @@ export class TransferWithIncrements<T extends NumberType>
   implements iTransferWithIncrements<T>
 {
   toAddressesLength?: T;
-  incrementBadgeIdsBy?: T;
+  incrementTokenIdsBy?: T;
   incrementOwnershipTimesBy?: T;
   durationFromTimestamp?: T;
   from: BitBadgesAddress;
@@ -209,7 +209,7 @@ export class TransferWithIncrements<T extends NumberType>
   constructor(data: iTransferWithIncrements<T>) {
     super();
     this.toAddressesLength = data.toAddressesLength;
-    this.incrementBadgeIdsBy = data.incrementBadgeIdsBy;
+    this.incrementTokenIdsBy = data.incrementTokenIdsBy;
     this.incrementOwnershipTimesBy = data.incrementOwnershipTimesBy;
     this.durationFromTimestamp = data.durationFromTimestamp;
     this.from = data.from;
@@ -228,7 +228,7 @@ export class TransferWithIncrements<T extends NumberType>
   }
 
   getNumberFieldNames(): string[] {
-    return ['toAddressesLength', 'incrementBadgeIdsBy', 'incrementOwnershipTimesBy', 'durationFromTimestamp'];
+    return ['toAddressesLength', 'incrementTokenIdsBy', 'incrementOwnershipTimesBy', 'durationFromTimestamp'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferWithIncrements<U> {
@@ -269,15 +269,15 @@ export const createBalanceMapForOffChainBalances = <T extends NumberType>(transf
 /**
  * Gets the token IDs to be transferred for a given transfer with increments.
  * @example
- * For a transfer with balances: [{ badgeIds: [{ start: 1n, end: 1n }], amount: 1n }], incrementIdsBy: 1n, toAddressesLength: 1000
- * We return { badgeIds: [{ start: 1n, end: 1000n }] because we increment the badgeIds by 1 each time.
+ * For a transfer with balances: [{ tokenIds: [{ start: 1n, end: 1n }], amount: 1n }], incrementIdsBy: 1n, toAddressesLength: 1000
+ * We return { tokenIds: [{ start: 1n, end: 1000n }] because we increment the tokenIds by 1 each time.
  *
  * @category Balances
  */
-export const getAllBadgeIdsToBeTransferred = <T extends NumberType>(transfers: iTransferWithIncrements<T>[]) => {
-  //NOTE: We do not support durationFromTimestamp in this function since we just return the badgeIds
+export const getAllTokenIdsToBeTransferred = <T extends NumberType>(transfers: iTransferWithIncrements<T>[]) => {
+  //NOTE: We do not support durationFromTimestamp in this function since we just return the tokenIds
 
-  const allBadgeIds: UintRangeArray<T> = UintRangeArray.From([]);
+  const allTokenIds: UintRangeArray<T> = UintRangeArray.From([]);
   const transfersConverted = transfers.map((transfer) => new TransferWithIncrements(transfer));
 
   for (const transfer of transfersConverted) {
@@ -286,20 +286,20 @@ export const getAllBadgeIdsToBeTransferred = <T extends NumberType>(transfers: i
       const _numRecipients = transfer.toAddressesLength ? transfer.toAddressesLength : transfer.toAddresses ? transfer.toAddresses.length : 0;
       const numRecipients = BigInt(_numRecipients);
 
-      const badgeIds = balance.badgeIds.clone();
+      const tokenIds = balance.tokenIds.clone();
       const ownershipTimes = balance.ownershipTimes.clone();
 
-      //If incrementIdsBy is not set, then we are not incrementing badgeIds and we can just batch calculate the balance
-      if (!transfer.incrementBadgeIdsBy && !transfer.incrementOwnershipTimesBy) {
-        allBadgeIds.push(...badgeIds.clone());
+      //If incrementIdsBy is not set, then we are not incrementing tokenIds and we can just batch calculate the balance
+      if (!transfer.incrementTokenIdsBy && !transfer.incrementOwnershipTimesBy) {
+        allTokenIds.push(...tokenIds.clone());
       } else {
         for (let i = 0; i < numRecipients; i++) {
-          allBadgeIds.push(...badgeIds.clone());
-          allBadgeIds.sortAndMerge();
+          allTokenIds.push(...tokenIds.clone());
+          allTokenIds.sortAndMerge();
 
-          for (const badgeId of badgeIds) {
-            badgeId.start = safeAddKeepLeft(badgeId.start, transfer.incrementBadgeIdsBy || 0n);
-            badgeId.end = safeAddKeepLeft(badgeId.end, transfer.incrementBadgeIdsBy || 0n);
+          for (const tokenId of tokenIds) {
+            tokenId.start = safeAddKeepLeft(tokenId.start, transfer.incrementTokenIdsBy || 0n);
+            tokenId.end = safeAddKeepLeft(tokenId.end, transfer.incrementTokenIdsBy || 0n);
           }
 
           for (const ownershipTime of ownershipTimes) {
@@ -311,15 +311,15 @@ export const getAllBadgeIdsToBeTransferred = <T extends NumberType>(transfers: i
     }
   }
 
-  return allBadgeIds;
+  return allTokenIds;
 };
 
 /**
  * Gets the balances to be transferred for a given transfer with increments.
  * @example
- * For a transfer with balances: [{ badgeIds: [{ start: 1n, end: 1n }], amount: 1n }], incrementIdsBy: 1n, toAddressesLength: 1000
- * We return [{ badgeIds: [{ start: 1n, end: 1000n }], amount: 1n }] because we transfer x1 token to 1000 addresses
- * and increment the badgeIds by 1 each time.
+ * For a transfer with balances: [{ tokenIds: [{ start: 1n, end: 1n }], amount: 1n }], incrementIdsBy: 1n, toAddressesLength: 1000
+ * We return [{ tokenIds: [{ start: 1n, end: 1000n }], amount: 1n }] because we transfer x1 token to 1000 addresses
+ * and increment the tokenIds by 1 each time.
  *
  *
  * This is really inefficient and should be optimized for large N.
@@ -330,7 +330,7 @@ export const getAllBalancesToBeTransferred = <T extends NumberType>(transfers: i
   const allBalances = BalanceArray.From([
     {
       amount: GO_MAX_UINT_64,
-      badgeIds: UintRangeArray.FullRanges(),
+      tokenIds: UintRangeArray.FullRanges(),
       ownershipTimes: UintRangeArray.FullRanges()
     }
   ]);
@@ -360,12 +360,12 @@ export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(
 
   const transfersConverted = transfersWithIncrements.map((transfer) => new TransferWithIncrements(transfer));
   for (const transferExtended of transfersConverted) {
-    const { toAddressesLength, incrementBadgeIdsBy, incrementOwnershipTimesBy, durationFromTimestamp, ...transfer } = transferExtended;
+    const { toAddressesLength, incrementTokenIdsBy, incrementOwnershipTimesBy, durationFromTimestamp, ...transfer } = transferExtended;
     const length = toAddressesLength ? Number(toAddressesLength) : transfer.toAddresses.length;
 
     //If tokens are incremented, we create N unique transfers (one to each address).
     //Else, we can create one transfer with N addresses
-    if (incrementBadgeIdsBy || incrementOwnershipTimesBy || durationFromTimestamp) {
+    if (incrementTokenIdsBy || incrementOwnershipTimesBy || durationFromTimestamp) {
       const currBalances = transfer.balances.clone();
       for (let i = 0; i < length; i++) {
         transfers.push(
@@ -377,9 +377,9 @@ export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(
         );
 
         for (const balance of currBalances) {
-          for (const badgeId of balance.badgeIds) {
-            badgeId.start = safeAddKeepLeft(badgeId.start, incrementBadgeIdsBy || 0n);
-            badgeId.end = safeAddKeepLeft(badgeId.end, incrementBadgeIdsBy || 0n);
+          for (const tokenId of balance.tokenIds) {
+            tokenId.start = safeAddKeepLeft(tokenId.start, incrementTokenIdsBy || 0n);
+            tokenId.end = safeAddKeepLeft(tokenId.end, incrementTokenIdsBy || 0n);
           }
 
           if (durationFromTimestamp) {
@@ -404,11 +404,11 @@ export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(
 };
 
 /**
- * Returns the post balance after a transfer of x(amountToTransfer * numRecipients) from startBadgeId to endBadgeId
+ * Returns the post balance after a transfer of x(amountToTransfer * numRecipients) from startTokenId to endTokenId
  *
  * @param {Balance<bigint>[]} balance - The balance to subtract from.
- * @param {bigint} startBadgeId - The start token ID to subtract from.
- * @param {bigint} endBadgeId - The end token ID to subtract from.
+ * @param {bigint} startTokenId - The start token ID to subtract from.
+ * @param {bigint} endTokenId - The end token ID to subtract from.
  * @param {bigint} amountToTransfer - The amount to subtract.
  * @param {bigint} numRecipients - The number of recipients to subtract from.
  *
@@ -416,21 +416,21 @@ export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(
  */
 export const getBalanceAfterTransfer = <T extends NumberType>(
   balance: iBalance<T>[],
-  startBadgeId: T,
-  endBadgeId: T,
+  startTokenId: T,
+  endTokenId: T,
   ownershipTimeStart: T,
   ownershipTimeEnd: T,
   amountToTransfer: T,
   numRecipients: T,
   allowUnderflow?: boolean
 ) => {
-  const convertFunction = getConverterFunction(startBadgeId);
+  const convertFunction = getConverterFunction(startTokenId);
   const balanceCopy = BalanceArray.From(balance.map((balance) => new Balance(balance))).clone();
   balanceCopy.subtractBalances(
     [
       {
         amount: convertFunction(BigInt(amountToTransfer) * BigInt(numRecipients)),
-        badgeIds: [{ start: startBadgeId, end: endBadgeId }],
+        tokenIds: [{ start: startTokenId, end: endTokenId }],
         ownershipTimes: [{ start: ownershipTimeStart, end: ownershipTimeEnd }]
       }
     ],
@@ -462,17 +462,17 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
       const _numRecipients = transfer.toAddressesLength ? transfer.toAddressesLength : transfer.toAddresses ? transfer.toAddresses.length : 0;
       const numRecipients = BigInt(_numRecipients);
 
-      const badgeIds = balance.badgeIds.clone();
+      const tokenIds = balance.tokenIds.clone();
       let ownershipTimes = balance.ownershipTimes.clone();
 
-      //If incrementIdsBy is not set, then we are not incrementing badgeIds and we can just batch calculate the balance
-      if (!transfer.incrementBadgeIdsBy && !transfer.incrementOwnershipTimesBy && !transfer.durationFromTimestamp) {
-        for (const badgeId of badgeIds) {
+      //If incrementIdsBy is not set, then we are not incrementing tokenIds and we can just batch calculate the balance
+      if (!transfer.incrementTokenIdsBy && !transfer.incrementOwnershipTimesBy && !transfer.durationFromTimestamp) {
+        for (const tokenId of tokenIds) {
           for (const ownershipTime of ownershipTimes) {
             endBalances = getBalanceAfterTransfer(
               endBalances,
-              badgeId.start,
-              badgeId.end,
+              tokenId.start,
+              tokenId.end,
               ownershipTime.start,
               ownershipTime.end,
               balance.amount,
@@ -482,7 +482,7 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
           }
         }
       } else {
-        const fastIncrementBadges = !transfer.incrementBadgeIdsBy || badgeIds.every((x) => x.size() === transfer.incrementBadgeIdsBy);
+        const fastIncrementBadges = !transfer.incrementTokenIdsBy || tokenIds.every((x) => x.size() === transfer.incrementTokenIdsBy);
         const fastIncrementOwnershipTimes =
           !transfer.incrementOwnershipTimesBy ||
           BigInt(transfer.durationFromTimestamp || 0n) > 0n ||
@@ -490,8 +490,8 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
 
         //If we are incrementing with no gaps (e.g. end IDs will be 1-1000 or start with x1 and increment x1 10000 times)
         if (fastIncrementBadges && fastIncrementOwnershipTimes) {
-          for (const badgeId of badgeIds) {
-            badgeId.end = safeAddKeepLeft(badgeId.end, safeMultiplyKeepLeft(transfer.incrementBadgeIdsBy || 0n, numRecipients - 1n));
+          for (const tokenId of tokenIds) {
+            tokenId.end = safeAddKeepLeft(tokenId.end, safeMultiplyKeepLeft(transfer.incrementTokenIdsBy || 0n, numRecipients - 1n));
           }
 
           if (transfer.durationFromTimestamp) {
@@ -508,12 +508,12 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
             }
           }
 
-          for (const badgeId of badgeIds) {
+          for (const tokenId of tokenIds) {
             for (const ownershipTime of ownershipTimes) {
               endBalances = getBalanceAfterTransfer(
                 endBalances,
-                badgeId.start,
-                badgeId.end,
+                tokenId.start,
+                tokenId.end,
                 ownershipTime.start,
                 ownershipTime.end,
                 balance.amount,
@@ -523,15 +523,15 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
             }
           }
         } else {
-          //If incrementIdsBy is set, then we need to increment the badgeIds after each transfer
+          //If incrementIdsBy is set, then we need to increment the tokenIds after each transfer
           //TODO: This is not efficient, we should be able to LeetCode optimize this somehow. Imagine a claim with 100000000 possible claims.
           for (let i = 0; i < numRecipients; i++) {
-            for (const badgeId of badgeIds) {
+            for (const tokenId of tokenIds) {
               for (const ownershipTime of ownershipTimes) {
                 endBalances = getBalanceAfterTransfer(
                   endBalances,
-                  badgeId.start,
-                  badgeId.end,
+                  tokenId.start,
+                  tokenId.end,
                   ownershipTime.start,
                   ownershipTime.end,
                   balance.amount,
@@ -541,10 +541,10 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
               }
             }
 
-            if (transfer.incrementBadgeIdsBy) {
-              for (const badgeId of badgeIds) {
-                badgeId.start = safeAddKeepLeft(badgeId.start, transfer.incrementBadgeIdsBy || 0n);
-                badgeId.end = safeAddKeepLeft(badgeId.end, transfer.incrementBadgeIdsBy || 0n);
+            if (transfer.incrementTokenIdsBy) {
+              for (const tokenId of tokenIds) {
+                tokenId.start = safeAddKeepLeft(tokenId.start, transfer.incrementTokenIdsBy || 0n);
+                tokenId.end = safeAddKeepLeft(tokenId.end, transfer.incrementTokenIdsBy || 0n);
               }
             }
 

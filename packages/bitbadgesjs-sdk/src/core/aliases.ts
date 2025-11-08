@@ -67,10 +67,10 @@ export function generateAlias(moduleName: string, derivationKeys: Buffer[]) {
  *
  * @category Aliases
  */
-export function getAliasDerivationKeysForBadge(collectionId: CollectionId, badgeId: NumberType) {
+export function getAliasDerivationKeysForBadge(collectionId: CollectionId, tokenId: NumberType) {
   const collectionIdNum = Number(collectionId.split('-')[0]);
 
-  const derivationKey = [Buffer.from([AccountGenerationPrefix]), uint64ToBufferBE(collectionIdNum), uint64ToBufferBE(badgeId)];
+  const derivationKey = [Buffer.from([AccountGenerationPrefix]), uint64ToBufferBE(collectionIdNum), uint64ToBufferBE(tokenId)];
   return derivationKey;
 }
 

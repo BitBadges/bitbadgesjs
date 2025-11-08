@@ -1,5 +1,5 @@
 import type {
-  BadgeMetadataTimeline,
+  TokenMetadataTimeline,
   CollectionMetadataTimeline,
   CustomDataTimeline,
   IsArchivedTimeline,
@@ -119,8 +119,8 @@ export function getFullCollectionMetadataTimeline<U extends bigint>(timeline: Co
 /**
  * @category Timelines
  */
-export function getFullBadgeMetadataTimeline<U extends bigint>(timeline: BadgeMetadataTimeline<U>[]): BadgeMetadataTimeline<U>[] {
-  return getFullTimeline(timeline, 'badgeMetadata', []);
+export function getFullTokenMetadataTimeline<U extends bigint>(timeline: TokenMetadataTimeline<U>[]): TokenMetadataTimeline<U>[] {
+  return getFullTimeline(timeline, 'tokenMetadata', []);
 }
 
 /**

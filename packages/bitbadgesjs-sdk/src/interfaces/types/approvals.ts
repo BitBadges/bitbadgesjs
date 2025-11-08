@@ -1,6 +1,6 @@
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iApprovalInfoDetails, iIncomingApprovalCriteriaWithDetails } from '@/core/approvals.js';
-import type { iAddressList, iBalance, iCoinTransfer, iETHSignatureChallenge, iMerkleChallenge, iMustOwnBadge, iUintRange } from './core.js';
+import type { iAddressList, iBalance, iCoinTransfer, iETHSignatureChallenge, iMerkleChallenge, iMustOwnToken, iUintRange } from './core.js';
 
 /**
  * @category Interfaces
@@ -21,7 +21,7 @@ export interface iUserOutgoingApproval<T extends NumberType> {
   /** The times allowed for the transfer transaction. */
   transferTimes: iUintRange<T>[];
   /** The token IDs to be transferred. */
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
   /** The ownership times of the tokens being transferred. */
   ownershipTimes: iUintRange<T>[];
   /** The ID of the approval. Must not be a duplicate of another approval ID in the same timeline. */
@@ -43,7 +43,7 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   /** The BADGE or sdk.coin transfers to be executed upon every approval. */
   coinTransfers?: iCoinTransfer<T>[];
   /** The list of must own tokens that need valid proofs to be approved. */
-  mustOwnBadges?: iMustOwnBadge<T>[];
+  mustOwnTokens?: iMustOwnToken<T>[];
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenges?: iMerkleChallenge<T>[];
   /** The predetermined balances for each transfer. These allow approvals to use predetermined balance amounts rather than an incrementing tally system. */
@@ -103,7 +103,7 @@ export interface iIncrementedBalances<T extends NumberType> {
   /** The starting balances for each transfer. Order number corresponds to the number of times we increment. */
   startBalances: iBalance<T>[];
   /** The amount to increment the token IDs by after each transfer. */
-  incrementBadgeIdsBy: T;
+  incrementTokenIdsBy: T;
   /** The amount to increment the owned times by after each transfer. Incompatible with durationFromTimestamp. */
   incrementOwnershipTimesBy: T;
   /** The number of unix milliseconds to approve starting from now. Incompatible with incrementOwnershipTimesBy. */
@@ -113,7 +113,7 @@ export interface iIncrementedBalances<T extends NumberType> {
   /** The recurring ownership times for the approval. */
   recurringOwnershipTimes: iRecurringOwnershipTimes<T>;
   /** Whether to allow the override with any valid ID. */
-  allowOverrideWithAnyValidBadge: boolean;
+  allowOverrideWithAnyValidToken: boolean;
 }
 
 /**
@@ -148,13 +148,13 @@ export interface iResetTimeIntervals<T extends NumberType> {
  * @category Interfaces
  */
 export interface iApprovalAmounts<T extends NumberType> {
-  /** The overall maximum amount approved for the badgeIDs and ownershipTimes. Running tally that includes all transfers that match this approval. */
+  /** The overall maximum amount approved for the tokenIDs and ownershipTimes. Running tally that includes all transfers that match this approval. */
   overallApprovalAmount: T;
-  /** The maximum amount approved for the badgeIDs and ownershipTimes for each to address. Running tally that includes all transfers from each unique to address that match this approval. */
+  /** The maximum amount approved for the tokenIDs and ownershipTimes for each to address. Running tally that includes all transfers from each unique to address that match this approval. */
   perToAddressApprovalAmount: T;
-  /** The maximum amount approved for the badgeIDs and ownershipTimes for each from address. Running tally that includes all transfers from each unique from address that match this approval. */
+  /** The maximum amount approved for the tokenIDs and ownershipTimes for each from address. Running tally that includes all transfers from each unique from address that match this approval. */
   perFromAddressApprovalAmount: T;
-  /** The maximum amount approved for the badgeIDs and ownershipTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval. */
+  /** The maximum amount approved for the tokenIDs and ownershipTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval. */
   perInitiatedByAddressApprovalAmount: T;
   /** The ID of the approval tracker. This is the key used to track tallies. */
   amountTrackerId: string;
@@ -180,13 +180,13 @@ export interface iAutoDeletionOptions {
  * @category Interfaces
  */
 export interface iMaxNumTransfers<T extends NumberType> {
-  /** The overall maximum number of transfers for the badgeIDs and ownershipTimes. Running tally that includes all transfers that match this approval. */
+  /** The overall maximum number of transfers for the tokenIDs and ownershipTimes. Running tally that includes all transfers that match this approval. */
   overallMaxNumTransfers: T;
-  /** The maximum number of transfers for the badgeIDs and ownershipTimes for each to address. Running tally that includes all transfers from each unique to address that match this approval. */
+  /** The maximum number of transfers for the tokenIDs and ownershipTimes for each to address. Running tally that includes all transfers from each unique to address that match this approval. */
   perToAddressMaxNumTransfers: T;
-  /** The maximum number of transfers for the badgeIDs and ownershipTimes for each from address. Running tally that includes all transfers from each unique from address that match this approval. */
+  /** The maximum number of transfers for the tokenIDs and ownershipTimes for each from address. Running tally that includes all transfers from each unique from address that match this approval. */
   perFromAddressMaxNumTransfers: T;
-  /** The maximum number of transfers for the badgeIDs and ownershipTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval. */
+  /** The maximum number of transfers for the tokenIDs and ownershipTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval. */
   perInitiatedByAddressMaxNumTransfers: T;
   /** The ID of the approval tracker. This is the key used to track tallies. */
   amountTrackerId: string;
@@ -205,7 +205,7 @@ export interface iUserIncomingApproval<T extends NumberType> {
   /** The times allowed for the transfer transaction. */
   transferTimes: iUintRange<T>[];
   /** The token IDs to be transferred. */
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
   /** The ownership times of the tokens being transferred. */
   ownershipTimes: iUintRange<T>[];
   /** The ID of the approval. Must not be a duplicate of another approval ID in the same timeline. */
@@ -229,7 +229,7 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenges?: iMerkleChallenge<T>[];
   /** The list of must own tokens that need valid proofs to be approved. */
-  mustOwnBadges?: iMustOwnBadge<T>[];
+  mustOwnTokens?: iMustOwnToken<T>[];
   /** The predetermined balances for each transfer using this approval. */
   predeterminedBalances?: iPredeterminedBalances<T>;
   /** The maximum approved amounts for this approval. */
@@ -261,7 +261,7 @@ export interface iCollectionApproval<T extends NumberType> {
   /** The times allowed for the transfer transaction. */
   transferTimes: iUintRange<T>[];
   /** The token IDs to be transferred. */
-  badgeIds: iUintRange<T>[];
+  tokenIds: iUintRange<T>[];
   /** The ownership times of the tokens being transferred. */
   ownershipTimes: iUintRange<T>[];
   /** The ID of the approval. Must not be a duplicate of another approval ID in the same timeline. */
@@ -285,7 +285,7 @@ export interface iApprovalCriteria<T extends NumberType> {
   /** The list of merkle challenges that need valid proofs to be approved. */
   merkleChallenges?: iMerkleChallenge<T>[];
   /** The list of must own tokens that need valid proofs to be approved. */
-  mustOwnBadges?: iMustOwnBadge<T>[];
+  mustOwnTokens?: iMustOwnToken<T>[];
   /** The predetermined balances for each transfer. These allow approvals to use predetermined balance amounts rather than an incrementing tally system. */
   predeterminedBalances?: iPredeterminedBalances<T>;
   /** The maximum approved amounts for this approval. */

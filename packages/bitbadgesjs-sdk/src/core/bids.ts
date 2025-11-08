@@ -57,16 +57,16 @@ export const isBidOrListingApproval = (
   }
 
   if (options?.isCollectionBid) {
-    if (!incrementedBalances.allowOverrideWithAnyValidBadge) {
+    if (!incrementedBalances.allowOverrideWithAnyValidToken) {
       return false;
     }
   } else {
-    const allBadgeIds = UintRangeArray.From(incrementedBalances.startBalances[0].badgeIds).sortAndMerge().convert(BigInt);
-    if (allBadgeIds.length !== 1 || allBadgeIds.size() !== 1n) {
+    const allTokenIds = UintRangeArray.From(incrementedBalances.startBalances[0].tokenIds).sortAndMerge().convert(BigInt);
+    if (allTokenIds.length !== 1 || allTokenIds.size() !== 1n) {
       return false;
     }
 
-    if (incrementedBalances.allowOverrideWithAnyValidBadge) {
+    if (incrementedBalances.allowOverrideWithAnyValidToken) {
       return false;
     }
   }
@@ -83,7 +83,7 @@ export const isBidOrListingApproval = (
     return false;
   }
 
-  if (incrementedBalances.incrementBadgeIdsBy !== 0n) {
+  if (incrementedBalances.incrementTokenIdsBy !== 0n) {
     return false;
   }
 
@@ -128,7 +128,7 @@ export const isBidOrListingApproval = (
     return false;
   }
 
-  if (approvalCriteria.mustOwnBadges?.length) {
+  if (approvalCriteria.mustOwnTokens?.length) {
     return false;
   }
 

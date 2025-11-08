@@ -200,7 +200,7 @@ export interface iGetCollectionListingsPayload {
   bookmark?: string;
   oldestFirst?: boolean;
   /** Optional token ID to filter listings by */
-  badgeId?: NumberType;
+  tokenId?: NumberType;
 }
 
 /**
@@ -508,25 +508,25 @@ export class GetCollectionSuccessResponse<T extends NumberType>
 /**
  * @category API Requests / Responses
  */
-export interface iGetBadgeMetadataPayload {}
+export interface iGetTokenMetadataPayload {}
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetBadgeMetadataSuccessResponse<T extends NumberType> {
+export interface iGetTokenMetadataSuccessResponse<T extends NumberType> {
   metadata: iMetadata<T>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetBadgeMetadataSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetBadgeMetadataSuccessResponse<T>>
-  implements iGetBadgeMetadataSuccessResponse<T>
+export class GetTokenMetadataSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetTokenMetadataSuccessResponse<T>>
+  implements iGetTokenMetadataSuccessResponse<T>
 {
   metadata: Metadata<T>;
 
-  constructor(data: iGetBadgeMetadataSuccessResponse<T>) {
+  constructor(data: iGetTokenMetadataSuccessResponse<T>) {
     super();
     this.metadata = new Metadata(data.metadata);
   }
@@ -535,8 +535,8 @@ export class GetBadgeMetadataSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetBadgeMetadataSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetBadgeMetadataSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetTokenMetadataSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetTokenMetadataSuccessResponse<U>;
   }
 }
 

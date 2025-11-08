@@ -13,7 +13,7 @@ import { BaseTypedArray } from '@/common/typed-arrays.js';
 
 /**
  * Balance is used to represent a balance of a token.
- * A user owns x(amount) of the token IDs (badgeIds) from a specific collection (collectionId) for a range of times (ownershipTimes).
+ * A user owns x(amount) of the token IDs (tokenIds) from a specific collection (collectionId) for a range of times (ownershipTimes).
  *
  * @category Balances
  *
@@ -21,13 +21,13 @@ import { BaseTypedArray } from '@/common/typed-arrays.js';
  */
 export class Balance<T extends NumberType> extends BaseNumberTypeClass<Balance<T>> implements iBalance<T> {
   amount: T;
-  badgeIds: UintRangeArray<T>;
+  tokenIds: UintRangeArray<T>;
   ownershipTimes: UintRangeArray<T>;
 
   constructor(balance: iBalance<T>) {
     super();
     this.amount = balance.amount;
-    this.badgeIds = UintRangeArray.From(balance.badgeIds);
+    this.tokenIds = UintRangeArray.From(balance.tokenIds);
     this.ownershipTimes = UintRangeArray.From(balance.ownershipTimes);
   }
 
@@ -39,7 +39,7 @@ export class Balance<T extends NumberType> extends BaseNumberTypeClass<Balance<T
     return new Balance<U>(
       deepCopyPrimitives({
         amount: convertFunction(this.amount),
-        badgeIds: this.badgeIds.map((b) => b.convert(convertFunction)),
+        tokenIds: this.tokenIds.map((b) => b.convert(convertFunction)),
         ownershipTimes: this.ownershipTimes.map((b) => b.convert(convertFunction))
       })
     );
@@ -68,7 +68,7 @@ export class Balance<T extends NumberType> extends BaseNumberTypeClass<Balance<T
   static fromProto<U extends NumberType>(item: protobadges.Balance, convertFunction: (item: NumberType) => U): Balance<U> {
     return new Balance<U>({
       amount: convertFunction(BigInt(item.amount)),
-      badgeIds: item.badgeIds.map((b) => UintRange.fromProto(b, convertFunction)),
+      tokenIds: item.tokenIds.map((b) => UintRange.fromProto(b, convertFunction)),
       ownershipTimes: item.ownershipTimes.map((b) => UintRange.fromProto(b, convertFunction))
     });
   }
@@ -88,7 +88,7 @@ export class Balance<T extends NumberType> extends BaseNumberTypeClass<Balance<T
  */
 export const applyIncrementsToBalances = <T extends NumberType>(
   startBalances: iBalance<T>[],
-  incrementBadgeIdsBy: T,
+  incrementTokenIdsBy: T,
   incrementOwnershipTimesBy: T,
   numIncrements: T,
   durationFromTimestamp: T,
@@ -98,15 +98,15 @@ export const applyIncrementsToBalances = <T extends NumberType>(
 
   balancesToReturn = BalanceArray.From(
     startBalances.map((x) => {
-      const badgeIdsIncrement = castNumberType(incrementBadgeIdsBy, BigInt(incrementBadgeIdsBy) * BigInt(numIncrements));
+      const tokenIdsIncrement = castNumberType(incrementTokenIdsBy, BigInt(incrementTokenIdsBy) * BigInt(numIncrements));
       const ownershipTimesIncrement = castNumberType(incrementOwnershipTimesBy, BigInt(incrementOwnershipTimesBy) * BigInt(numIncrements));
 
       return new Balance({
         ...x,
-        badgeIds: x.badgeIds.map((y) => {
+        tokenIds: x.tokenIds.map((y) => {
           return {
-            start: safeAdd(y.start, badgeIdsIncrement),
-            end: safeAdd(y.end, badgeIdsIncrement)
+            start: safeAdd(y.start, tokenIdsIncrement),
+            end: safeAdd(y.end, tokenIdsIncrement)
           };
         }),
         ownershipTimes:
@@ -145,7 +145,7 @@ export const getBalanceForIdAndTime = <T extends NumberType>(id: T, time: T, bal
   const convertFunction = getConverterFunction(id);
   let amount = 0n;
   for (const balance of BalanceArray.From(balances)) {
-    const found = balance.badgeIds.searchIfExists(id);
+    const found = balance.tokenIds.searchIfExists(id);
     const foundTime = balance.ownershipTimes.searchIfExists(time);
     if (found && foundTime) {
       amount += BigInt(balance.amount);
@@ -162,15 +162,15 @@ export const getBalanceForIdAndTime = <T extends NumberType>(id: T, time: T, bal
  *
  * @category Balances
  */
-export function getBalancesForId<T extends NumberType>(badgeId: T, balances: iBalance<T>[]): BalanceArray<T> {
+export function getBalancesForId<T extends NumberType>(tokenId: T, balances: iBalance<T>[]): BalanceArray<T> {
   const matchingBalances: BalanceArray<T> = BalanceArray.From([]);
 
   for (const balance of BalanceArray.From(balances)) {
-    if (balance.badgeIds.searchIfExists(badgeId)) {
+    if (balance.tokenIds.searchIfExists(tokenId)) {
       matchingBalances.push(
         new Balance({
           ...balance,
-          badgeIds: [{ start: badgeId, end: badgeId }]
+          tokenIds: [{ start: tokenId, end: tokenId }]
         })
       );
     }
@@ -213,7 +213,7 @@ export function filterZeroBalances<T extends NumberType>(balances: iBalance<T>[]
   const balanceArr = BalanceArray.From(balances);
   for (let i = 0; i < balanceArr.length; i++) {
     const balance = balanceArr[i];
-    if (BigInt(balance.amount) > 0 && balance.badgeIds.length > 0 && balance.ownershipTimes.length > 0) {
+    if (BigInt(balance.amount) > 0 && balance.tokenIds.length > 0 && balance.ownershipTimes.length > 0) {
       newBalances.push(balance);
     }
   }
@@ -287,8 +287,8 @@ export function areBalancesEqual<T extends NumberType>(expected: iBalance<T>[], 
     actual = filterZeroBalances(actual);
   }
 
-  expected = handleDuplicateBadgeIdsInBalances(expected);
-  actual = handleDuplicateBadgeIdsInBalances(actual);
+  expected = handleDuplicateTokenIdsInBalances(expected);
+  actual = handleDuplicateTokenIdsInBalances(actual);
 
   try {
     actual = subtractBalances(expected, actual, false);
@@ -317,7 +317,7 @@ export function updateBalances<T extends NumberType>(newBalance: iBalance<T>, ba
   let balanceArr = BalanceArray.From(balances).clone();
 
   // We do a delete then set. Can maybe optimize in future.
-  balanceArr = deleteBalances(newBalance.badgeIds, newBalance.ownershipTimes, balanceArr);
+  balanceArr = deleteBalances(newBalance.tokenIds, newBalance.ownershipTimes, balanceArr);
   balanceArr = setBalance(newBalance, balanceArr);
 
   return balanceArr;
@@ -341,9 +341,9 @@ function getConverterFunctionForBalances<T extends NumberType>(balance: iBalance
  * @category Balances
  */
 export function addBalance<T extends NumberType>(existingBalances: iBalance<T>[], balanceToAdd: iBalance<T>): BalanceArray<T> {
-  const currBalances = getBalancesForIds(balanceToAdd.badgeIds, balanceToAdd.ownershipTimes, existingBalances);
+  const currBalances = getBalancesForIds(balanceToAdd.tokenIds, balanceToAdd.ownershipTimes, existingBalances);
   let existing = BalanceArray.From(existingBalances).clone();
-  existing = deleteBalances(balanceToAdd.badgeIds, balanceToAdd.ownershipTimes, existing);
+  existing = deleteBalances(balanceToAdd.tokenIds, balanceToAdd.ownershipTimes, existing);
   for (const balance of currBalances) {
     balance.amount = safeAdd(balance.amount, balanceToAdd.amount);
   }
@@ -386,10 +386,10 @@ export function subtractBalance<T extends NumberType>(
   balanceToRemove: iBalance<T>,
   allowUnderflow?: boolean
 ): BalanceArray<T> {
-  const currBalances = getBalancesForIds(balanceToRemove.badgeIds, balanceToRemove.ownershipTimes, balances);
+  const currBalances = getBalancesForIds(balanceToRemove.tokenIds, balanceToRemove.ownershipTimes, balances);
   let balancesArr = BalanceArray.From(balances).clone();
 
-  balancesArr = deleteBalances(balanceToRemove.badgeIds, balanceToRemove.ownershipTimes, balancesArr);
+  balancesArr = deleteBalances(balanceToRemove.tokenIds, balanceToRemove.ownershipTimes, balancesArr);
 
   for (const currBalanceObj of currBalances) {
     currBalanceObj.amount = safeSubtract(currBalanceObj.amount, balanceToRemove.amount, allowUnderflow);
@@ -482,10 +482,10 @@ export function getBalancesForIds<T extends NumberType>(idRanges: iUintRange<T>[
   const currPermissionDetails: UniversalPermissionDetails[] = [];
   //assumes balances are sorted and non-overlapping
   for (const balanceObj of balances) {
-    for (const currRange of balanceObj.badgeIds) {
+    for (const currRange of balanceObj.tokenIds) {
       for (const currTime of balanceObj.ownershipTimes) {
         currPermissionDetails.push({
-          badgeId: new UintRange(currRange).convert(BigIntify),
+          tokenId: new UintRange(currRange).convert(BigIntify),
           ownershipTime: new UintRange(currTime).convert(BigIntify),
           transferTime: UintRange.FullRange(), // dummy range
           timelineTime: UintRange.FullRange(), // dummy range
@@ -507,7 +507,7 @@ export function getBalancesForIds<T extends NumberType>(idRanges: iUintRange<T>[
   for (const rangeToFetch of idRanges) {
     for (const timeToFetch of times) {
       toFetchPermissionDetails.push({
-        badgeId: new UintRange(rangeToFetch).convert(BigIntify),
+        tokenId: new UintRange(rangeToFetch).convert(BigIntify),
         ownershipTime: new UintRange(timeToFetch).convert(BigIntify),
         transferTime: UintRange.FullRange(), //dummy range
         timelineTime: UintRange.FullRange(), // dummy range
@@ -533,7 +533,7 @@ export function getBalancesForIds<T extends NumberType>(idRanges: iUintRange<T>[
     fetchedBalances.push(
       new Balance({
         amount: amount,
-        badgeIds: [overlap.badgeId],
+        tokenIds: [overlap.tokenId],
         ownershipTimes: [overlap.ownershipTime]
       })
     );
@@ -544,7 +544,7 @@ export function getBalancesForIds<T extends NumberType>(idRanges: iUintRange<T>[
     fetchedBalances.push(
       new Balance({
         amount: 0n,
-        badgeIds: [detail.badgeId],
+        tokenIds: [detail.tokenId],
         ownershipTimes: [detail.ownershipTime]
       })
     );
@@ -580,7 +580,7 @@ function deleteBalances<T extends NumberType>(
   for (const rangeToDelete of rangesToDelete) {
     for (const timeToDelete of timesToDelete) {
       toDeletePermissionDetails.push({
-        badgeId: new UintRange(rangeToDelete).convert(BigIntify),
+        tokenId: new UintRange(rangeToDelete).convert(BigIntify),
         ownershipTime: new UintRange(timeToDelete).convert(BigIntify),
         transferTime: UintRange.FullRange(), //dummy range
         timelineTime: UintRange.FullRange(), //dummy range
@@ -598,10 +598,10 @@ function deleteBalances<T extends NumberType>(
 
   for (const balanceObj of balances) {
     const currPermissionDetails: UniversalPermissionDetails[] = [];
-    for (const currRange of balanceObj.badgeIds) {
+    for (const currRange of balanceObj.tokenIds) {
       for (const currTime of balanceObj.ownershipTimes) {
         currPermissionDetails.push({
-          badgeId: new UintRange(currRange).convert(BigIntify),
+          tokenId: new UintRange(currRange).convert(BigIntify),
           ownershipTime: new UintRange(currTime).convert(BigIntify),
           transferTime: UintRange.FullRange(), //dummy range
           timelineTime: UintRange.FullRange(), //dummy range
@@ -622,7 +622,7 @@ function deleteBalances<T extends NumberType>(
       newBalances.push(
         new Balance<bigint>({
           amount: BigInt(balanceObj.amount),
-          badgeIds: [remainingBalance.badgeId],
+          tokenIds: [remainingBalance.tokenId],
           ownershipTimes: [remainingBalance.ownershipTime]
         })
       );
@@ -649,14 +649,14 @@ export function sortBalancesByAmount<T extends NumberType>(balances: iBalance<T>
 }
 
 /**
- * Cleans balances. Merges overlapping badgeIds and ownershipTimes, sorts by amounts, and handles duplicate badgeIds.
+ * Cleans balances. Merges overlapping tokenIds and ownershipTimes, sorts by amounts, and handles duplicate tokenIds.
  *
  * @category Balances
  */
 export function cleanBalances<T extends NumberType>(balancesArr: iBalance<T>[]) {
   let balances = BalanceArray.From(balancesArr);
   for (const balance of balances) {
-    balance.badgeIds.sortAndMerge();
+    balance.tokenIds.sortAndMerge();
     balance.ownershipTimes.sortAndMerge();
   }
   balances = sortBalancesByAmount(balances);
@@ -673,14 +673,14 @@ export function cleanBalances<T extends NumberType>(balancesArr: iBalance<T>[]) 
       //If the balances are equal, we merge them
       if (currBalance.amount == newBalance.amount) {
         //If the balances are equal, we merge them
-        if (uintRangeArrsEqual(currBalance.badgeIds, newBalance.badgeIds)) {
+        if (uintRangeArrsEqual(currBalance.tokenIds, newBalance.tokenIds)) {
           newBalance.ownershipTimes.push(...currBalance.ownershipTimes);
           newBalance.ownershipTimes.sortAndMerge();
           merged = true;
           break;
         } else if (uintRangeArrsEqual(currBalance.ownershipTimes, newBalance.ownershipTimes)) {
-          newBalance.badgeIds.push(...currBalance.badgeIds);
-          newBalance.badgeIds.sortAndMerge();
+          newBalance.tokenIds.push(...currBalance.tokenIds);
+          newBalance.tokenIds.sortAndMerge();
           merged = true;
           break;
         }
@@ -716,14 +716,14 @@ export function uintRangeArrsEqual<T extends NumberType>(arr1: UintRangeArray<T>
 }
 
 /**
- * Sorts and merges balances. Precondition that all badgeIds and ownershipTimes are non-overlapping.
+ * Sorts and merges balances. Precondition that all tokenIds and ownershipTimes are non-overlapping.
  *
  * @param balances - The balances to sort and merge.
  *
  * @category Balances
  */
 export function sortAndMergeBalances<T extends NumberType>(balances: iBalance<T>[]) {
-  balances = handleDuplicateBadgeIdsInBalances(balances);
+  balances = handleDuplicateTokenIdsInBalances(balances);
   balances = cleanBalances(balances);
   balances = sortBalancesByAmount(balances);
 
@@ -731,21 +731,21 @@ export function sortAndMergeBalances<T extends NumberType>(balances: iBalance<T>
 }
 
 /**
- * Handles duplicate badgeIds in balances. Returns a new BalanceArray.
+ * Handles duplicate tokenIds in balances. Returns a new BalanceArray.
  *
  * For example, if we have x1 of ID 1 and x1 of ID 1, we will return x2 of ID 1.
  *
  * @category Balances
  */
-export function handleDuplicateBadgeIdsInBalances<T extends NumberType>(balances: iBalance<T>[]) {
+export function handleDuplicateTokenIdsInBalances<T extends NumberType>(balances: iBalance<T>[]) {
   let newBalances: BalanceArray<T> = BalanceArray.From([]);
   newBalances.addBalances(balances);
   return newBalances;
 }
 
 interface BalanceFunctions<T extends NumberType> {
-  getBalanceForIdAndTime: (badgeId: T, ownedTime: T) => T;
-  getBalancesForId: (badgeId: T) => BalanceArray<T>;
+  getBalanceForIdAndTime: (tokenId: T, ownedTime: T) => T;
+  getBalancesForId: (tokenId: T) => BalanceArray<T>;
   getBalancesForTime: (ownedTime: T) => BalanceArray<T>;
   filterZeroBalances: () => void;
   subsetOf: (threshold: iBalance<T>[]) => boolean;
@@ -756,7 +756,7 @@ interface BalanceFunctions<T extends NumberType> {
   subtractBalances: (balancesToSubtract: iBalance<T>[], allowUnderflow: boolean) => void;
   subtractBalance: (balanceToSubtract: iBalance<T>, allowUnderflow: boolean) => void;
   sortBalancesByAmount: () => void;
-  applyIncrements: (incrementBadgeIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T, durationFromTimestamp: T, blockTime: T) => void;
+  applyIncrements: (incrementTokenIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T, durationFromTimestamp: T, blockTime: T) => void;
 }
 
 /**
@@ -807,15 +807,15 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
   /**
    * {@inheritDoc getBalanceForIdAndTime}
    */
-  getBalanceForIdAndTime(badgeId: T, ownedTime: T) {
-    return getBalanceForIdAndTime(badgeId, ownedTime, this);
+  getBalanceForIdAndTime(tokenId: T, ownedTime: T) {
+    return getBalanceForIdAndTime(tokenId, ownedTime, this);
   }
 
   /**
    * {@inheritDoc getBalancesForId}
    */
-  getBalancesForId(badgeId: T) {
-    return getBalancesForId(badgeId, this);
+  getBalancesForId(tokenId: T) {
+    return getBalancesForId(tokenId, this);
   }
 
   /**
@@ -829,7 +829,7 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
    * {@inheritDoc filterZeroBalances}
    */
   filterZeroBalances(): this {
-    const newBalances = this.filter((x) => BigInt(x.amount) !== BigInt(0) && x.badgeIds.length > 0 && x.ownershipTimes.length > 0);
+    const newBalances = this.filter((x) => BigInt(x.amount) !== BigInt(0) && x.tokenIds.length > 0 && x.ownershipTimes.length > 0);
     this.length = 0;
     this.push(...newBalances);
     return this;
@@ -917,10 +917,10 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
   /**
    * {@inheritDoc applyIncrementsToBalances}
    */
-  applyIncrements(incrementBadgeIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T, durationFromTimestamp: T, blockTime: T) {
+  applyIncrements(incrementTokenIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T, durationFromTimestamp: T, blockTime: T) {
     const newBalances = applyIncrementsToBalances(
       this,
-      incrementBadgeIdsBy,
+      incrementTokenIdsBy,
       incrementOwnershipTimesBy,
       numIncrements,
       durationFromTimestamp,
@@ -934,11 +934,11 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
   /**
    * Gets all token IDs from the balances (sorted and merged).
    */
-  getAllBadgeIds() {
-    const badgeIds = new UintRangeArray<T>();
+  getAllTokenIds() {
+    const tokenIds = new UintRangeArray<T>();
     for (const balance of this) {
-      badgeIds.push(...balance.badgeIds);
+      tokenIds.push(...balance.tokenIds);
     }
-    return badgeIds.clone().sortAndMerge();
+    return tokenIds.clone().sortAndMerge();
   }
 }

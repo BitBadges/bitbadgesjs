@@ -15,7 +15,7 @@ import type {
   iAddressList,
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
-  iBadgeMetadataTimeline,
+  iTokenMetadataTimeline,
   iBalance,
   iCollectionInvariants,
   iCollectionMetadataTimeline,
@@ -275,7 +275,7 @@ export interface iPrecalculationOptions<T extends NumberType> {
   /** The timestamp to use for the transfer. */
   overrideTimestamp?: T;
   /** The token IDs to use for the transfer. */
-  badgeIdsOverride?: iUintRange<T>[];
+  tokenIdsOverride?: iUintRange<T>[];
 }
 
 /**
@@ -307,7 +307,7 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
   /** Approvals used for the transfer */
   approvalsUsed?: iApprovalIdentifierDetails<T>[];
   /** The token ID for the transfer */
-  badgeId?: T;
+  tokenId?: T;
   /** The price of the transfer */
   price?: T;
   /** The volume of the transfer */
@@ -395,11 +395,11 @@ export interface iFloorPriceHistory<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iBadgeFloorPriceDoc<T extends NumberType> extends Doc {
+export interface iTokenFloorPriceDoc<T extends NumberType> extends Doc {
   /** The collection ID */
   collectionId: CollectionId;
   /** The token ID */
-  badgeId: T;
+  tokenId: T;
   /** The floor price */
   floorPrices?: iCosmosCoin<T>[];
   /** Floor price history */
@@ -430,7 +430,7 @@ export interface iApprovalItemDoc<T extends NumberType> extends Doc {
   isActive?: boolean;
 
   /** The token ID */
-  badgeId?: T;
+  tokenId?: T;
   /** Approval itself */
   approval: iCollectionApproval<T>;
   /** Deleted at timestamp */
@@ -452,7 +452,7 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   /** The collection metadata timeline */
   collectionMetadataTimeline: iCollectionMetadataTimeline<T>[];
   /** The token metadata timeline */
-  badgeMetadataTimeline: iBadgeMetadataTimeline<T>[];
+  tokenMetadataTimeline: iTokenMetadataTimeline<T>[];
   /** The custom data timeline */
   customDataTimeline: iCustomDataTimeline<T>[];
   /** The manager timeline */
@@ -476,7 +476,7 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   /** The update history of this collection */
   updateHistory: iUpdateHistory<T>[];
   /** Valid token IDs for the collection */
-  validBadgeIds: iUintRange<T>[];
+  validTokenIds: iUintRange<T>[];
   /** Mint escrow address */
   mintEscrowAddress: string;
   /** The IBC wrapper paths for the collection */
@@ -647,7 +647,7 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   customLinks?: iCustomLink[];
 
   /** The hidden badges of the account */
-  hiddenBadges?: iBatchTokenDetails<T>[];
+  hiddenTokens?: iBatchTokenDetails<T>[];
 
   /** The custom pages of the account */
   customPages?: {
@@ -687,7 +687,7 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
  * @category Interfaces
  */
 export interface iQueueDoc<T extends NumberType> extends Doc {
-  /** The URI of the metadata to be fetched. If {id} is present, it will be replaced with each individual ID in badgeIds */
+  /** The URI of the metadata to be fetched. If {id} is present, it will be replaced with each individual ID in tokenIds */
   uri: string;
   /** The collection ID of the metadata to be fetched */
   collectionId: CollectionId;
@@ -1361,7 +1361,7 @@ export interface iInheritMetadataFrom<T extends NumberType> {
   /** The map ID to link to */
   mapId?: string;
   /** The token ID to link to "collectionId: CollectionId<T>dgeId" */
-  badgeId?: string;
+  tokenId?: string;
 }
 
 /**
@@ -1469,7 +1469,7 @@ export interface iLinkedTo<T extends NumberType> {
   /** The collection ID */
   collectionId?: CollectionId;
   /** The token IDs */
-  badgeIds?: iUintRange<T>[];
+  tokenIds?: iUintRange<T>[];
 }
 
 /**

@@ -790,7 +790,7 @@ import {
   MsgDeleteCollection,
   MsgDeleteDynamicStore,
   MsgSetDynamicStoreValue,
-  MsgTransferBadges,
+  MsgTransferTokens,
   MsgUniversalUpdateCollection,
   MsgUpdateCollection,
   MsgUpdateDynamicStore,

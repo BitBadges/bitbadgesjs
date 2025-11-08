@@ -11,13 +11,13 @@ import { CollectionApprovalWithDetails } from './approvals.js';
 import { CosmosCoinWrapperPath } from './misc.js';
 import { iUintRange } from '@/interfaces/index.js';
 
-function validateBadgeIds(badgeIds: iUintRange<bigint>[], approvalTokenIds: iUintRange<bigint>[]) {
-  if (badgeIds.length !== approvalTokenIds.length) {
+function validateTokenIds(tokenIds: iUintRange<bigint>[], approvalTokenIds: iUintRange<bigint>[]) {
+  if (tokenIds.length !== approvalTokenIds.length) {
     return false;
   }
 
-  for (let i = 0; i < badgeIds.length; i++) {
-    if (badgeIds[i].start !== approvalTokenIds[i].start || badgeIds[i].end !== approvalTokenIds[i].end) {
+  for (let i = 0; i < tokenIds.length; i++) {
+    if (tokenIds[i].start !== approvalTokenIds[i].start || tokenIds[i].end !== approvalTokenIds[i].end) {
       return false;
     }
   }
@@ -28,7 +28,7 @@ function validateBadgeIds(badgeIds: iUintRange<bigint>[], approvalTokenIds: iUin
 export const isWrapperApproval = (
   approval: CollectionApprovalWithDetails<bigint>,
   pathObj: CosmosCoinWrapperPath<bigint>,
-  options?: { skipPathValidation?: boolean; validBadgeIds?: iUintRange<bigint>[] }
+  options?: { skipPathValidation?: boolean; validTokenIds?: iUintRange<bigint>[] }
 ) => {
   if (!pathObj.allowCosmosWrapping) {
     return false;
@@ -40,7 +40,7 @@ export const isWrapperApproval = (
     return false;
   }
 
-  const { badgeIds, ownershipTimes } = balances[0];
+  const { tokenIds, ownershipTimes } = balances[0];
 
   if (!options?.skipPathValidation) {
     if (!approval.toList.checkAddress(address)) {
@@ -50,13 +50,13 @@ export const isWrapperApproval = (
     const allowOverrideWithAnyValidToken = pathObj.allowOverrideWithAnyValidToken;
 
     if (allowOverrideWithAnyValidToken) {
-      if (options?.validBadgeIds) {
-        if (!validateBadgeIds(options?.validBadgeIds ?? [], approval.badgeIds)) {
+      if (options?.validTokenIds) {
+        if (!validateTokenIds(options?.validTokenIds ?? [], approval.tokenIds)) {
           return false;
         }
       }
     } else {
-      if (!validateBadgeIds(badgeIds, approval.badgeIds)) {
+      if (!validateTokenIds(tokenIds, approval.tokenIds)) {
         return false;
       }
     }
@@ -91,7 +91,7 @@ export const isWrapperApproval = (
 export const isUnwrapperApproval = (
   approval: CollectionApprovalWithDetails<bigint>,
   pathObj: CosmosCoinWrapperPath<bigint>,
-  options?: { skipPathValidation?: boolean; validBadgeIds?: iUintRange<bigint>[] }
+  options?: { skipPathValidation?: boolean; validTokenIds?: iUintRange<bigint>[] }
 ) => {
   const { address, balances } = pathObj;
 
@@ -103,7 +103,7 @@ export const isUnwrapperApproval = (
     return false;
   }
 
-  const { badgeIds, ownershipTimes } = balances[0];
+  const { tokenIds, ownershipTimes } = balances[0];
 
   if (!options?.skipPathValidation) {
     if (!approval.fromList.checkAddress(address)) {
@@ -113,13 +113,13 @@ export const isUnwrapperApproval = (
     const allowOverrideWithAnyValidToken = pathObj.allowOverrideWithAnyValidToken;
 
     if (allowOverrideWithAnyValidToken) {
-      if (options?.validBadgeIds) {
-        if (!validateBadgeIds(options?.validBadgeIds ?? [], approval.badgeIds)) {
+      if (options?.validTokenIds) {
+        if (!validateTokenIds(options?.validTokenIds ?? [], approval.tokenIds)) {
           return false;
         }
       }
     } else {
-      if (!validateBadgeIds(badgeIds, approval.badgeIds)) {
+      if (!validateTokenIds(tokenIds, approval.tokenIds)) {
         return false;
       }
     }
@@ -168,7 +168,7 @@ export function approvalCriteriaHasNoAdditionalRestrictions(
       (approvalCriteria.coinTransfers ?? []).length === 0 &&
       (approvalCriteria.userRoyalties?.percentage ?? 0n) === 0n &&
       (approvalCriteria.userRoyalties?.payoutAddress ?? '') === '' &&
-      (approvalCriteria.mustOwnBadges ?? []).length === 0 &&
+      (approvalCriteria.mustOwnTokens ?? []).length === 0 &&
       (approvalCriteria.dynamicStoreChallenges ?? []).length === 0 &&
       (approvalCriteria.ethSignatureChallenges ?? []).length === 0)
   );
@@ -271,9 +271,9 @@ function predeterminedBalancesIsBasicallyNil(predeterminedBalances?: iPredetermi
   const sequentialTransferIsBasicallyNil =
     !predeterminedBalances.incrementedBalances ||
     (predeterminedBalances.incrementedBalances.startBalances.length === 0 &&
-      !predeterminedBalances.incrementedBalances.allowOverrideWithAnyValidBadge &&
+      !predeterminedBalances.incrementedBalances.allowOverrideWithAnyValidToken &&
       !predeterminedBalances.incrementedBalances.allowOverrideTimestamp &&
-      predeterminedBalances.incrementedBalances.incrementBadgeIdsBy === 0n &&
+      predeterminedBalances.incrementedBalances.incrementTokenIdsBy === 0n &&
       predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy === 0n &&
       predeterminedBalances.incrementedBalances.durationFromTimestamp === 0n &&
       (!predeterminedBalances.incrementedBalances.recurringOwnershipTimes ||
@@ -317,7 +317,7 @@ export function collectionApprovalHasNoSideEffects(approvalCriteria?: iApprovalC
   // Check for merkle challenges
   // Theoretically, we might be able to remove this but two things:
   // 1. It could potentially change which IDs are received (but that only makes sense if predetermined balances is true)
-  // 2. We need to pass stuff to MsgTransferBadges so this doesn't really make sense for auto-scanning
+  // 2. We need to pass stuff to MsgTransferTokens so this doesn't really make sense for auto-scanning
   if (approvalCriteria.merkleChallenges && approvalCriteria.merkleChallenges.length > 0) {
     return false;
   }
