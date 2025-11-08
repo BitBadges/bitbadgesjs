@@ -238,7 +238,7 @@ import {
 import { BitBadgesApiRoutes } from './requests/routes.js';
 import {
   GetTokenMetadataSuccessResponse,
-  GetBadgesViewForUserSuccessResponse,
+  GetTokensViewForUserSuccessResponse,
   GetClaimActivityForUserSuccessResponse,
   GetCollectionAmountTrackersSuccessResponse,
   GetCollectionChallengeTrackersSuccessResponse,
@@ -251,8 +251,8 @@ import {
   GetSiwbbRequestsForUserSuccessResponse,
   GetTransferActivityForUserSuccessResponse,
   iGetTokenMetadataSuccessResponse,
-  iGetBadgesViewForUserPayload,
-  iGetBadgesViewForUserSuccessResponse,
+  iGetTokensViewForUserPayload,
+  iGetTokensViewForUserSuccessResponse,
   iGetClaimActivityForUserPayload,
   iGetClaimActivityForUserSuccessResponse,
   iGetCollectionAmountTrackersPayload,
@@ -1695,28 +1695,28 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `GET /api/v0/account/:address/badges`
-   * - **SDK Function Call**: `await BitBadgesApi.getBadgesViewForUser(address, { viewType });`
+   * - **SDK Function Call**: `await BitBadgesApi.getTokensViewForUser(address, { viewType });`
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getBadgesViewForUser("bb1...", { viewType: "collected" });
+   * const res = await BitBadgesApi.getTokensViewForUser("bb1...", { viewType: "collected" });
    * console.log(res);
    * ```
    * */
-  public async getBadgesViewForUser(address: NativeAddress, payload: iGetBadgesViewForUserPayload): Promise<GetBadgesViewForUserSuccessResponse<T>> {
+  public async getTokensViewForUser(address: NativeAddress, payload: iGetTokensViewForUserPayload): Promise<GetTokensViewForUserSuccessResponse<T>> {
     try {
-      const validateRes: typia.IValidation<iGetBadgesViewForUserPayload> = typia.validate<iGetBadgesViewForUserPayload>(payload);
+      const validateRes: typia.IValidation<iGetTokensViewForUserPayload> = typia.validate<iGetTokensViewForUserPayload>(payload);
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.get<iGetBadgesViewForUserSuccessResponse<string>>(
+      const response = await this.axios.get<iGetTokensViewForUserSuccessResponse<string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetTokensByTypeForUserRoute(address)}`,
         {
           params: payload
         }
       );
-      return new GetBadgesViewForUserSuccessResponse(response.data).convert(this.ConvertFunction);
+      return new GetTokensViewForUserSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

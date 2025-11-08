@@ -252,7 +252,7 @@ export interface iGetTransferActivityForUserPayload extends iBaseQueryParams {}
 /**
  * @category API Requests / Responses
  */
-export interface iGetBadgesViewForUserPayload extends iBaseQueryParams {
+export interface iGetTokensViewForUserPayload extends iBaseQueryParams {
   /** Optional collection ID to filter by */
   collectionId?: CollectionId;
   /**
@@ -306,21 +306,21 @@ export class GetTransferActivityForUserSuccessResponse<T extends NumberType>
 
 /**
  * @category API Requests / Responses */
-export interface iGetBadgesViewForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
+export interface iGetTokensViewForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
   badges: Array<iBalanceDocWithDetails<T>>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetBadgesViewForUserSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetBadgesViewForUserSuccessResponse<T>>
-  implements iGetBadgesViewForUserSuccessResponse<T>
+export class GetTokensViewForUserSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetTokensViewForUserSuccessResponse<T>>
+  implements iGetTokensViewForUserSuccessResponse<T>
 {
   badges: BalanceDocWithDetails<T>[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetBadgesViewForUserSuccessResponse<T>) {
+  constructor(data: iGetTokensViewForUserSuccessResponse<T>) {
     super();
     this.badges = data.badges.map((badge) => new BalanceDocWithDetails(badge));
     this.pagination = data.pagination;
@@ -330,8 +330,8 @@ export class GetBadgesViewForUserSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetBadgesViewForUserSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetBadgesViewForUserSuccessResponse<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetTokensViewForUserSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetTokensViewForUserSuccessResponse<U>;
   }
 }
 

@@ -4053,7 +4053,7 @@ paths:
 
   /account/{address}/badges/:
     get:
-      operationId: GetBadgesViewForUser
+      operationId: GetTokensViewForUser
       summary: Get Tokens For User
       tags:
         - Accounts
@@ -4062,12 +4062,12 @@ paths:
         tokens to retrieve. Default is 'collected'.
 
         ```tsx
-        await BitBadgesApi.getBadgesViewForUser(address, { viewType: "collected" });
+        await BitBadgesApi.getTokensViewForUser(address, { viewType: "collected" });
         ```
 
         SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgesViewForUserPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBadgesViewForUserSuccessResponse)**
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTokensViewForUserPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetTokensViewForUserSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getbadgesviewforuser)**
       responses:
         '200':
@@ -4075,7 +4075,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetBadgesViewForUserSuccessResponse'
+                $ref: '#/components/schemas/iGetTokensViewForUserSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
@@ -4099,7 +4099,7 @@ paths:
           description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
           required: false
           schema:
-            $ref: '#/components/schemas/iGetBadgesViewForUserPayload'
+            $ref: '#/components/schemas/iGetTokensViewForUserPayload'
       security:
         - apiKey: []
       x-internal: false
