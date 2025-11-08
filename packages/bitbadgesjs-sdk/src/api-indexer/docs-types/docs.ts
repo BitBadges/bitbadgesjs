@@ -84,7 +84,6 @@ import {
   type iClaimBuilderDoc,
   type iCollectionDoc,
   type iComplianceDoc,
-  type iCustomLink,
   type iCustomPage,
   type iDepositBalanceDoc,
   type iDeveloperAppDoc,
@@ -646,10 +645,8 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   twitter?: string;
   github?: string;
   telegram?: string;
-  bluesky?: string;
   readme?: string;
   affiliateCode?: string;
-  customLinks?: iCustomLink[];
   hiddenTokens?: BatchTokenDetailsArray<T>;
   profilePicUrl?: string;
   username?: string;
@@ -671,10 +668,8 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.twitter = data.twitter;
     this.github = data.github;
     this.telegram = data.telegram;
-    this.bluesky = data.bluesky;
     this.readme = data.readme;
     this.affiliateCode = data.affiliateCode;
-    this.customLinks = data.customLinks;
     this.hiddenTokens = data.hiddenTokens ? BatchTokenDetailsArray.From(data.hiddenTokens) : undefined;
     this.profilePicUrl = data.profilePicUrl;
     this.username = data.username;

@@ -50,7 +50,6 @@ import {
   type iAccessTokenDoc,
   type iClaimDetails,
   type iClaimReward,
-  type iCustomLink,
   type iDeveloperAppDoc,
   type iMapWithValues,
   type iPluginDoc,
@@ -896,11 +895,6 @@ export interface iUpdateAccountInfoPayload {
    * The tokens to hide and not view for this profile's portfolio
    */
   hiddenTokens?: iBatchTokenDetails<NumberType>[];
-
-  /**
-   * Custom URL links to display on the user's portfolio.
-   */
-  customLinks?: iCustomLink[];
 
   /**
    * The profile picture URL.

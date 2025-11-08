@@ -590,20 +590,6 @@ export interface iAccountDoc<T extends NumberType> extends Doc {
 }
 
 /**
- * CustomLinks are custom links that can be added to a profile.
- *
- * @category Interfaces
- */
-export interface iCustomLink {
-  /** Title of the link */
-  title: string;
-  /** URL of the link */
-  url: string;
-  /** Description of the link */
-  image: string;
-}
-
-/**
  * @category Interfaces
  */
 export interface iCustomPage<T extends NumberType> {
@@ -635,16 +621,11 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   github?: string;
   /** The Telegram username of the account */
   telegram?: string;
-  /** The Bluesky username of the account */
-  bluesky?: string;
   /** The readme of the account */
   readme?: string;
 
   /** Affiliate code */
   affiliateCode?: string;
-
-  /** The custom links of the account */
-  customLinks?: iCustomLink[];
 
   /** The hidden badges of the account */
   hiddenTokens?: iBatchTokenDetails<T>[];
