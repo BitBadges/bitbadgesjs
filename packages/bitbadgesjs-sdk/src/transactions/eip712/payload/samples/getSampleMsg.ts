@@ -20,9 +20,6 @@ import {
   ApprovalCriteria,
   ApprovalIdentifierDetails,
   AutoDeletionOptions,
-  TokenIdsActionPermission,
-  TokenMetadata,
-  TokenMetadataTimeline,
   Balance,
   CoinTransfer,
   CollectionApproval,
@@ -63,6 +60,9 @@ import {
   StandardsTimeline,
   TimedUpdatePermission,
   TimedUpdateWithTokenIdsPermission,
+  TokenIdsActionPermission,
+  TokenMetadata,
+  TokenMetadataTimeline,
   Transfer,
   UintRange,
   UserBalanceStore,
@@ -82,7 +82,6 @@ import {
   MsgDeleteOutgoingApproval,
   MsgIncrementStoreValue,
   MsgPurgeApprovals,
-  MsgSetTokenMetadata,
   MsgSetCollectionApprovals,
   MsgSetCollectionMetadata,
   MsgSetCustomData,
@@ -92,10 +91,30 @@ import {
   MsgSetManager,
   MsgSetOutgoingApproval,
   MsgSetStandards,
+  MsgSetTokenMetadata,
   MsgSetValidTokenIds,
   MsgUpdateDynamicStore
 } from '@/proto/badges/tx_pb.js';
 import { Coin } from '@/proto/cosmos/base/v1beta1/coin_pb.js';
+import {
+  DecisionPolicyWindows,
+  MemberRequest,
+  MsgCreateGroup,
+  MsgCreateGroupPolicy,
+  MsgCreateGroupWithPolicy,
+  MsgExec as MsgGroupExec,
+  MsgSubmitProposal as MsgGroupSubmitProposal,
+  MsgVote as MsgGroupVote,
+  MsgLeaveGroup,
+  MsgUpdateGroupAdmin,
+  MsgUpdateGroupMembers,
+  MsgUpdateGroupMetadata,
+  MsgUpdateGroupPolicyAdmin,
+  MsgUpdateGroupPolicyDecisionPolicy,
+  MsgUpdateGroupPolicyMetadata,
+  MsgWithdrawProposal,
+  ThresholdDecisionPolicy
+} from '@/proto/cosmos/group/v1/index.js';
 import { PoolAsset, PoolParams } from '@/proto/gamm/poolmodels/balancer/balancerPool_pb.js';
 import { MsgCreateBalancerPool } from '@/proto/gamm/poolmodels/balancer/tx_pb.js';
 import {
@@ -106,30 +125,12 @@ import {
   MsgJoinSwapExternAmountIn,
   MsgJoinSwapShareAmountOut,
   MsgSwapExactAmountIn,
+  MsgSwapExactAmountInWithIBCTransfer,
   MsgSwapExactAmountOut
 } from '@/proto/gamm/v1beta1/tx_pb.js';
 import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
 import { SwapAmountInRoute, SwapAmountOutRoute } from '@/proto/poolmanager/v1beta1/swap_route_pb.js';
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
-import {
-  MsgCreateGroup,
-  MsgUpdateGroupMembers,
-  MsgUpdateGroupAdmin,
-  MsgUpdateGroupMetadata,
-  MsgCreateGroupPolicy,
-  MsgCreateGroupWithPolicy,
-  MsgUpdateGroupPolicyAdmin,
-  MsgUpdateGroupPolicyDecisionPolicy,
-  MsgUpdateGroupPolicyMetadata,
-  MsgSubmitProposal as MsgGroupSubmitProposal,
-  MsgWithdrawProposal,
-  MsgVote as MsgGroupVote,
-  MsgExec as MsgGroupExec,
-  MsgLeaveGroup,
-  ThresholdDecisionPolicy,
-  DecisionPolicyWindows,
-  MemberRequest
-} from '@/proto/cosmos/group/v1/index.js';
 import { ProtoTypeRegistry } from '@/transactions/amino/objectConverter.js';
 
 const approvalCriteria = new OutgoingApprovalCriteria({
@@ -805,6 +806,16 @@ export function populateUndefinedForMsgExitPool(msg: MsgExitPool) {
 export function populateUndefinedForMsgSwapExactAmountIn(msg: MsgSwapExactAmountIn) {
   if (!msg.tokenIn) {
     throw new Error('MsgSwapExactAmountIn.tokenIn is required but was undefined');
+  }
+  return msg;
+}
+
+export function populateUndefinedForMsgSwapExactAmountInWithIBCTransfer(msg: MsgSwapExactAmountInWithIBCTransfer) {
+  if (!msg.tokenIn) {
+    throw new Error('MsgSwapExactAmountInWithIBCTransfer.tokenIn is required but was undefined');
+  }
+  if (!msg.ibcTransferInfo) {
+    throw new Error('MsgSwapExactAmountInWithIBCTransfer.ibcTransferInfo is required but was undefined');
   }
   return msg;
 }
@@ -1563,6 +1574,30 @@ export function getSampleMsg(msgType: string, currMsg: any) {
             denom: ''
           }),
           tokenOutMinAmount: '0'
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'gamm/swap-exact-amount-in-with-ibc-transfer':
+      return {
+        type: msgType,
+        value: new MsgSwapExactAmountInWithIBCTransfer({
+          sender: '',
+          routes: [
+            new SwapAmountInRoute({
+              poolId: 0n,
+              tokenOutDenom: ''
+            })
+          ],
+          tokenIn: new Coin({
+            amount: '0',
+            denom: ''
+          }),
+          tokenOutMinAmount: '0',
+          ibcTransferInfo: {
+            sourceChannel: '',
+            receiver: '',
+            memo: '',
+            timeoutTimestamp: 0n
+          }
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'gamm/SwapExactAmountOut':

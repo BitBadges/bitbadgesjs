@@ -8,11 +8,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Version Compatibility
 
 - **BitBadges Chain v18**: 0.23.0 corresponds to BitBadges chain v18 upgrades
+- **BitBadges Chain v19**: 0.23.0 corresponds to BitBadges chain v19 upgrades
 
 ### What's New
 
 - Updated sorting logic to match proto marshal's byte-order comparison (prioritizing capital letters over lowercase)
+- Added support for `MsgSwapExactAmountInWithIBCTransfer` message type
 - See [BitBadges Chain v18 release information](https://github.com/BitBadges/bitbadgeschain/releases/tag/v18) for more details.
+- See [BitBadges Chain v19 release information](https://github.com/BitBadges/bitbadgeschain/releases/tag/v19) for more details.
 
 ### Installation
 

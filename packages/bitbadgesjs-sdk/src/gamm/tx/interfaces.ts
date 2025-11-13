@@ -46,6 +46,25 @@ export interface iMsgSwapExactAmountInResponse<T extends NumberType> {
   tokenOutAmount: T;
 }
 
+export interface iIBCTransferInfo<T extends NumberType> {
+  sourceChannel: string;
+  receiver: string;
+  memo: string;
+  timeoutTimestamp: T;
+}
+
+export interface iMsgSwapExactAmountInWithIBCTransfer<T extends NumberType> {
+  sender: string;
+  routes: iSwapAmountInRoute<T>[];
+  tokenIn: iCosmosCoin<T>;
+  tokenOutMinAmount: T;
+  ibcTransferInfo: iIBCTransferInfo<T>;
+}
+
+export interface iMsgSwapExactAmountInWithIBCTransferResponse<T extends NumberType> {
+  tokenOutAmount: T;
+}
+
 export interface iMsgSwapExactAmountOut<T extends NumberType> {
   sender: string;
   routes: iSwapAmountOutRoute<T>[];

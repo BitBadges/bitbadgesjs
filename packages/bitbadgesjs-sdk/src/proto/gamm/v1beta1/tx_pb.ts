@@ -298,6 +298,163 @@ export class MsgSwapExactAmountInResponse extends Message<MsgSwapExactAmountInRe
 }
 
 /**
+ * ===================== IBC Transfer Info
+ *
+ * @generated from message gamm.v1beta1.IBCTransferInfo
+ */
+export class IBCTransferInfo extends Message<IBCTransferInfo> {
+  /**
+   * @generated from field: string source_channel = 1;
+   */
+  sourceChannel = "";
+
+  /**
+   * @generated from field: string receiver = 2;
+   */
+  receiver = "";
+
+  /**
+   * @generated from field: string memo = 3;
+   */
+  memo = "";
+
+  /**
+   * @generated from field: uint64 timeout_timestamp = 4;
+   */
+  timeoutTimestamp = protoInt64.zero;
+
+  constructor(data?: PartialMessage<IBCTransferInfo>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "gamm.v1beta1.IBCTransferInfo";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "source_channel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "receiver", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "memo", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "timeout_timestamp", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IBCTransferInfo {
+    return new IBCTransferInfo().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): IBCTransferInfo {
+    return new IBCTransferInfo().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): IBCTransferInfo {
+    return new IBCTransferInfo().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: IBCTransferInfo | PlainMessage<IBCTransferInfo> | undefined, b: IBCTransferInfo | PlainMessage<IBCTransferInfo> | undefined): boolean {
+    return proto3.util.equals(IBCTransferInfo, a, b);
+  }
+}
+
+/**
+ * ===================== MsgSwapExactAmountInWithIBCTransfer
+ *
+ * @generated from message gamm.v1beta1.MsgSwapExactAmountInWithIBCTransfer
+ */
+export class MsgSwapExactAmountInWithIBCTransfer extends Message<MsgSwapExactAmountInWithIBCTransfer> {
+  /**
+   * @generated from field: string sender = 1;
+   */
+  sender = "";
+
+  /**
+   * @generated from field: repeated poolmanager.v1beta1.SwapAmountInRoute routes = 2;
+   */
+  routes: SwapAmountInRoute[] = [];
+
+  /**
+   * @generated from field: cosmos.base.v1beta1.Coin token_in = 3;
+   */
+  tokenIn?: Coin;
+
+  /**
+   * @generated from field: string token_out_min_amount = 4;
+   */
+  tokenOutMinAmount = "";
+
+  /**
+   * @generated from field: gamm.v1beta1.IBCTransferInfo ibc_transfer_info = 5;
+   */
+  ibcTransferInfo?: IBCTransferInfo;
+
+  constructor(data?: PartialMessage<MsgSwapExactAmountInWithIBCTransfer>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "gamm.v1beta1.MsgSwapExactAmountInWithIBCTransfer";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "sender", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "routes", kind: "message", T: SwapAmountInRoute, repeated: true },
+    { no: 3, name: "token_in", kind: "message", T: Coin },
+    { no: 4, name: "token_out_min_amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "ibc_transfer_info", kind: "message", T: IBCTransferInfo },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSwapExactAmountInWithIBCTransfer {
+    return new MsgSwapExactAmountInWithIBCTransfer().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSwapExactAmountInWithIBCTransfer {
+    return new MsgSwapExactAmountInWithIBCTransfer().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSwapExactAmountInWithIBCTransfer {
+    return new MsgSwapExactAmountInWithIBCTransfer().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSwapExactAmountInWithIBCTransfer | PlainMessage<MsgSwapExactAmountInWithIBCTransfer> | undefined, b: MsgSwapExactAmountInWithIBCTransfer | PlainMessage<MsgSwapExactAmountInWithIBCTransfer> | undefined): boolean {
+    return proto3.util.equals(MsgSwapExactAmountInWithIBCTransfer, a, b);
+  }
+}
+
+/**
+ * @generated from message gamm.v1beta1.MsgSwapExactAmountInWithIBCTransferResponse
+ */
+export class MsgSwapExactAmountInWithIBCTransferResponse extends Message<MsgSwapExactAmountInWithIBCTransferResponse> {
+  /**
+   * @generated from field: string token_out_amount = 1;
+   */
+  tokenOutAmount = "";
+
+  constructor(data?: PartialMessage<MsgSwapExactAmountInWithIBCTransferResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "gamm.v1beta1.MsgSwapExactAmountInWithIBCTransferResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "token_out_amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSwapExactAmountInWithIBCTransferResponse {
+    return new MsgSwapExactAmountInWithIBCTransferResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSwapExactAmountInWithIBCTransferResponse {
+    return new MsgSwapExactAmountInWithIBCTransferResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSwapExactAmountInWithIBCTransferResponse {
+    return new MsgSwapExactAmountInWithIBCTransferResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgSwapExactAmountInWithIBCTransferResponse | PlainMessage<MsgSwapExactAmountInWithIBCTransferResponse> | undefined, b: MsgSwapExactAmountInWithIBCTransferResponse | PlainMessage<MsgSwapExactAmountInWithIBCTransferResponse> | undefined): boolean {
+    return proto3.util.equals(MsgSwapExactAmountInWithIBCTransferResponse, a, b);
+  }
+}
+
+/**
  * @generated from message gamm.v1beta1.MsgSwapExactAmountOut
  */
 export class MsgSwapExactAmountOut extends Message<MsgSwapExactAmountOut> {
@@ -829,6 +986,11 @@ export class GammCustomMsgType extends Message<GammCustomMsgType> {
    */
   exitSwapExternAmountOutMsg?: MsgExitSwapExternAmountOut;
 
+  /**
+   * @generated from field: gamm.v1beta1.MsgSwapExactAmountInWithIBCTransfer swapExactAmountInWithIBCTransferMsg = 9;
+   */
+  swapExactAmountInWithIBCTransferMsg?: MsgSwapExactAmountInWithIBCTransfer;
+
   constructor(data?: PartialMessage<GammCustomMsgType>) {
     super();
     proto3.util.initPartial(data, this);
@@ -845,6 +1007,7 @@ export class GammCustomMsgType extends Message<GammCustomMsgType> {
     { no: 6, name: "joinSwapShareAmountOutMsg", kind: "message", T: MsgJoinSwapShareAmountOut },
     { no: 7, name: "exitSwapShareAmountInMsg", kind: "message", T: MsgExitSwapShareAmountIn },
     { no: 8, name: "exitSwapExternAmountOutMsg", kind: "message", T: MsgExitSwapExternAmountOut },
+    { no: 9, name: "swapExactAmountInWithIBCTransferMsg", kind: "message", T: MsgSwapExactAmountInWithIBCTransfer },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GammCustomMsgType {

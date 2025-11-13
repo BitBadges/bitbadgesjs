@@ -41,6 +41,7 @@ import {
   MsgJoinSwapExternAmountIn,
   MsgJoinSwapShareAmountOut,
   MsgSwapExactAmountIn,
+  MsgSwapExactAmountInWithIBCTransfer,
   MsgSwapExactAmountOut
 } from '@/proto/gamm/v1beta1/tx_pb.js';
 import { createTypedData } from '@/transactions/eip712/payload/createTypedData.js';
@@ -74,6 +75,7 @@ import {
   populateUndefinedForMsgSetStandards,
   populateUndefinedForMsgSetValidTokenIds,
   populateUndefinedForMsgSwapExactAmountIn,
+  populateUndefinedForMsgSwapExactAmountInWithIBCTransfer,
   populateUndefinedForMsgSwapExactAmountOut,
   populateUndefinedForMsgTransferTokens,
   populateUndefinedForMsgUniversalUpdateCollection,
@@ -475,6 +477,8 @@ export const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
       msg = createProtoMsg(populateUndefinedForMsgExitPool(msgVal as MsgExitPool));
     } else if (msgVal.getType().typeName === MsgSwapExactAmountIn.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgSwapExactAmountIn(msgVal as MsgSwapExactAmountIn));
+    } else if (msgVal.getType().typeName === MsgSwapExactAmountInWithIBCTransfer.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgSwapExactAmountInWithIBCTransfer(msgVal as MsgSwapExactAmountInWithIBCTransfer));
     } else if (msgVal.getType().typeName === MsgSwapExactAmountOut.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgSwapExactAmountOut(msgVal as MsgSwapExactAmountOut));
     } else if (msgVal.getType().typeName === MsgJoinSwapExternAmountIn.typeName) {

@@ -26,6 +26,9 @@ import type {
   iMsgJoinSwapShareAmountOutResponse,
   iMsgSwapExactAmountIn,
   iMsgSwapExactAmountInResponse,
+  iIBCTransferInfo,
+  iMsgSwapExactAmountInWithIBCTransfer,
+  iMsgSwapExactAmountInWithIBCTransferResponse,
   iMsgSwapExactAmountOut,
   iMsgSwapExactAmountOutResponse,
   iSwapAmountInRoute,
@@ -593,6 +596,250 @@ export class MsgSwapExactAmountInResponse<T extends NumberType>
 
   toCosmWasmPayloadString(): string {
     return `{"swapExactAmountInResponseMsg":${normalizeMessagesIfNecessary([
+      {
+        message: this.toProto(),
+        path: this.toProto().getType().typeName
+      }
+    ])[0].message.toJsonString({ emitDefaultValues: true })} }`;
+  }
+}
+
+export class IBCTransferInfo<T extends NumberType> extends BaseNumberTypeClass<IBCTransferInfo<T>> implements iIBCTransferInfo<T> {
+  sourceChannel: string;
+  receiver: string;
+  memo: string;
+  timeoutTimestamp: T;
+
+  constructor(data: iIBCTransferInfo<T>) {
+    super();
+    this.sourceChannel = data.sourceChannel;
+    this.receiver = data.receiver;
+    this.memo = data.memo;
+    this.timeoutTimestamp = data.timeoutTimestamp;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['timeoutTimestamp'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IBCTransferInfo<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as IBCTransferInfo<U>;
+  }
+
+  toProto(): protogamm.IBCTransferInfo {
+    return new protogamm.IBCTransferInfo({
+      sourceChannel: this.sourceChannel,
+      receiver: this.receiver,
+      memo: this.memo,
+      timeoutTimestamp: BigIntify(this.timeoutTimestamp)
+    });
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): IBCTransferInfo<U> {
+    return IBCTransferInfo.fromProto(protogamm.IBCTransferInfo.fromJson(jsonValue, options), convertFunction);
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): IBCTransferInfo<U> {
+    return IBCTransferInfo.fromProto(protogamm.IBCTransferInfo.fromJsonString(jsonString, options), convertFunction);
+  }
+
+  static fromProto<U extends NumberType>(item: protogamm.IBCTransferInfo, convertFunction: (item: NumberType) => U): IBCTransferInfo<U> {
+    return new IBCTransferInfo<U>({
+      sourceChannel: item.sourceChannel,
+      receiver: item.receiver,
+      memo: item.memo,
+      timeoutTimestamp: convertFunction(BigInt(item.timeoutTimestamp))
+    });
+  }
+
+  toBech32Addresses(prefix: string): IBCTransferInfo<T> {
+    return new IBCTransferInfo<T>({
+      sourceChannel: this.sourceChannel,
+      receiver: this.receiver,
+      memo: this.memo,
+      timeoutTimestamp: this.timeoutTimestamp
+    });
+  }
+
+  toCosmWasmPayloadString(): string {
+    return `{"ibcTransferInfo":${normalizeMessagesIfNecessary([
+      {
+        message: this.toProto(),
+        path: this.toProto().getType().typeName
+      }
+    ])[0].message.toJsonString({ emitDefaultValues: true })} }`;
+  }
+}
+
+export class MsgSwapExactAmountInWithIBCTransfer<T extends NumberType>
+  extends BaseNumberTypeClass<MsgSwapExactAmountInWithIBCTransfer<T>>
+  implements iMsgSwapExactAmountInWithIBCTransfer<T>
+{
+  sender: string;
+  routes: SwapAmountInRoute<T>[];
+  tokenIn: CosmosCoin<T>;
+  tokenOutMinAmount: T;
+  ibcTransferInfo: IBCTransferInfo<T>;
+
+  constructor(data: iMsgSwapExactAmountInWithIBCTransfer<T>) {
+    super();
+    this.sender = data.sender;
+    this.routes = data.routes.map((route) => new SwapAmountInRoute(route));
+    this.tokenIn = new CosmosCoin<T>(data.tokenIn);
+    this.tokenOutMinAmount = data.tokenOutMinAmount;
+    this.ibcTransferInfo = new IBCTransferInfo<T>(data.ibcTransferInfo);
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['tokenOutMinAmount'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgSwapExactAmountInWithIBCTransfer<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountInWithIBCTransfer<U>;
+  }
+
+  toProto(): protogamm.MsgSwapExactAmountInWithIBCTransfer {
+    return new protogamm.MsgSwapExactAmountInWithIBCTransfer({
+      sender: this.sender,
+      routes: this.routes.map((route) => new SwapAmountInRoute(route).toProto()),
+      tokenIn: new CosmosCoin(this.tokenIn).convert(Stringify),
+      tokenOutMinAmount: Stringify(this.tokenOutMinAmount),
+      ibcTransferInfo: this.ibcTransferInfo.toProto()
+    });
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): MsgSwapExactAmountInWithIBCTransfer<U> {
+    return MsgSwapExactAmountInWithIBCTransfer.fromProto(protogamm.MsgSwapExactAmountInWithIBCTransfer.fromJson(jsonValue, options), convertFunction);
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): MsgSwapExactAmountInWithIBCTransfer<U> {
+    return MsgSwapExactAmountInWithIBCTransfer.fromProto(protogamm.MsgSwapExactAmountInWithIBCTransfer.fromJsonString(jsonString, options), convertFunction);
+  }
+
+  static fromProto<U extends NumberType>(
+    item: protogamm.MsgSwapExactAmountInWithIBCTransfer,
+    convertFunction: (item: NumberType) => U
+  ): MsgSwapExactAmountInWithIBCTransfer<U> {
+    return new MsgSwapExactAmountInWithIBCTransfer<U>({
+      sender: item.sender,
+      routes: item.routes.map((route) => SwapAmountInRoute.fromProto(route, convertFunction)),
+      tokenIn: new CosmosCoin<U>({
+        amount: convertFunction(BigInt(item.tokenIn!.amount)),
+        denom: item.tokenIn!.denom
+      }).convert(convertFunction),
+      tokenOutMinAmount: convertFunction(BigInt(item.tokenOutMinAmount)),
+      ibcTransferInfo: item.ibcTransferInfo ? IBCTransferInfo.fromProto(item.ibcTransferInfo, convertFunction) : {
+        sourceChannel: '',
+        receiver: '',
+        memo: '',
+        timeoutTimestamp: convertFunction(0n)
+      }
+    });
+  }
+
+  toBech32Addresses(prefix: string): MsgSwapExactAmountInWithIBCTransfer<T> {
+    return new MsgSwapExactAmountInWithIBCTransfer<T>({
+      sender: getConvertFunctionFromPrefix(prefix)(this.sender),
+      routes: this.routes,
+      tokenIn: this.tokenIn,
+      tokenOutMinAmount: this.tokenOutMinAmount,
+      ibcTransferInfo: this.ibcTransferInfo
+    });
+  }
+
+  toCosmWasmPayloadString(): string {
+    return `{"swapExactAmountInWithIBCTransferMsg":${normalizeMessagesIfNecessary([
+      {
+        message: this.toProto(),
+        path: this.toProto().getType().typeName
+      }
+    ])[0].message.toJsonString({ emitDefaultValues: true })} }`;
+  }
+}
+
+export class MsgSwapExactAmountInWithIBCTransferResponse<T extends NumberType>
+  extends BaseNumberTypeClass<MsgSwapExactAmountInWithIBCTransferResponse<T>>
+  implements iMsgSwapExactAmountInWithIBCTransferResponse<T>
+{
+  tokenOutAmount: T;
+
+  constructor(data: iMsgSwapExactAmountInWithIBCTransferResponse<T>) {
+    super();
+    this.tokenOutAmount = data.tokenOutAmount;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['tokenOutAmount'];
+  }
+
+  convert<U extends NumberType>(
+    convertFunction: (item: NumberType) => U,
+    options?: ConvertOptions
+  ): MsgSwapExactAmountInWithIBCTransferResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountInWithIBCTransferResponse<U>;
+  }
+
+  toProto(): protogamm.MsgSwapExactAmountInWithIBCTransferResponse {
+    return new protogamm.MsgSwapExactAmountInWithIBCTransferResponse({
+      tokenOutAmount: Stringify(this.tokenOutAmount)
+    });
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): MsgSwapExactAmountInWithIBCTransferResponse<U> {
+    return MsgSwapExactAmountInWithIBCTransferResponse.fromProto(
+      protogamm.MsgSwapExactAmountInWithIBCTransferResponse.fromJson(jsonValue, options),
+      convertFunction
+    );
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): MsgSwapExactAmountInWithIBCTransferResponse<U> {
+    return MsgSwapExactAmountInWithIBCTransferResponse.fromProto(
+      protogamm.MsgSwapExactAmountInWithIBCTransferResponse.fromJsonString(jsonString, options),
+      convertFunction
+    );
+  }
+
+  static fromProto<U extends NumberType>(
+    item: protogamm.MsgSwapExactAmountInWithIBCTransferResponse,
+    convertFunction: (item: NumberType) => U
+  ): MsgSwapExactAmountInWithIBCTransferResponse<U> {
+    return new MsgSwapExactAmountInWithIBCTransferResponse<U>({
+      tokenOutAmount: convertFunction(BigInt(item.tokenOutAmount))
+    });
+  }
+
+  toBech32Addresses(prefix: string): MsgSwapExactAmountInWithIBCTransferResponse<T> {
+    return new MsgSwapExactAmountInWithIBCTransferResponse<T>({
+      tokenOutAmount: this.tokenOutAmount
+    });
+  }
+
+  toCosmWasmPayloadString(): string {
+    return `{"swapExactAmountInWithIBCTransferResponseMsg":${normalizeMessagesIfNecessary([
       {
         message: this.toProto(),
         path: this.toProto().getType().typeName
