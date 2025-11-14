@@ -1,3 +1,4 @@
+import { iUintRange } from '@/interfaces/index.js';
 import {
   iApprovalAmounts,
   iApprovalCriteria,
@@ -9,7 +10,6 @@ import {
 } from '@/interfaces/types/approvals.js';
 import { CollectionApprovalWithDetails } from './approvals.js';
 import { CosmosCoinWrapperPath } from './misc.js';
-import { iUintRange } from '@/interfaces/index.js';
 
 function validateTokenIds(tokenIds: iUintRange<bigint>[], approvalTokenIds: iUintRange<bigint>[]) {
   if (tokenIds.length !== approvalTokenIds.length) {
@@ -72,7 +72,8 @@ export const isWrapperApproval = (
     }
   }
 
-  if (!approval.approvalCriteria?.overridesToIncomingApprovals) {
+  // This is actually reserved and will fail
+  if (approval.approvalCriteria?.overridesToIncomingApprovals) {
     return false;
   }
 
@@ -135,7 +136,8 @@ export const isUnwrapperApproval = (
     }
   }
 
-  if (!approval.approvalCriteria?.overridesFromOutgoingApprovals) {
+  if (approval.approvalCriteria?.overridesFromOutgoingApprovals) {
+    // This is actually reserved and will fail
     return false;
   }
 
