@@ -81,6 +81,12 @@ import {
 
 import { MsgExecuteContract, MsgInstantiateContract, MsgStoreCode } from '@/proto/cosmwasm/wasm/v1/index.js';
 import { MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap } from '@/proto/maps/index.js';
+import {
+  MsgCreateManagerSplitter,
+  MsgDeleteManagerSplitter,
+  MsgExecuteUniversalUpdateCollection,
+  MsgUpdateManagerSplitter
+} from '@/proto/managersplitter/tx_pb.js';
 import { MsgExecuteContractCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/index.js';
 import { MsgTransfer } from '@/proto/ibc/index.js';
 import {
@@ -158,6 +164,10 @@ export const ProtoTypeRegistry = createRegistry(
   MsgDeleteMap,
   MsgSetValue,
   MsgUpdateMap,
+  MsgCreateManagerSplitter,
+  MsgUpdateManagerSplitter,
+  MsgDeleteManagerSplitter,
+  MsgExecuteUniversalUpdateCollection,
   MsgAddCustomData,
   MsgGrant,
   MsgRevoke,

@@ -129,6 +129,13 @@ import {
   MsgSwapExactAmountOut
 } from '@/proto/gamm/v1beta1/tx_pb.js';
 import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
+import {
+  MsgCreateManagerSplitter,
+  MsgDeleteManagerSplitter,
+  MsgExecuteUniversalUpdateCollection,
+  MsgUpdateManagerSplitter
+} from '@/proto/managersplitter/tx_pb.js';
+import { ManagerSplitterPermissions, PermissionCriteria } from '@/proto/managersplitter/permissions_pb.js';
 import { SwapAmountInRoute, SwapAmountOutRoute } from '@/proto/poolmanager/v1beta1/swap_route_pb.js';
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
 import { ProtoTypeRegistry } from '@/transactions/amino/objectConverter.js';
@@ -840,6 +847,26 @@ export function populateUndefinedForMsgJoinSwapShareAmountOut(msg: MsgJoinSwapSh
   return msg;
 }
 
+export function populateUndefinedForMsgCreateManagerSplitter(msg: MsgCreateManagerSplitter) {
+  // Simple message with only primitive types and optional permissions, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgUpdateManagerSplitter(msg: MsgUpdateManagerSplitter) {
+  // Simple message with only primitive types and optional permissions, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgDeleteManagerSplitter(msg: MsgDeleteManagerSplitter) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgExecuteUniversalUpdateCollection(msg: MsgExecuteUniversalUpdateCollection) {
+  // The nested universalUpdateCollectionMsg will be handled by its own populate function
+  return msg;
+}
+
 export function populateUndefinedForMsgExitSwapShareAmountIn(msg: MsgExitSwapShareAmountIn) {
   // Simple message with only primitive types, no population needed
   return msg;
@@ -1181,6 +1208,50 @@ export function getSampleMsg(msgType: string, currMsg: any) {
         type: msgType,
         value: new MsgUpdateMap({
           permissions: new MapPermissions()
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'managersplitter/CreateManagerSplitter':
+      return {
+        type: msgType,
+        value: new MsgCreateManagerSplitter({
+          admin: '',
+          permissions: new ManagerSplitterPermissions({
+            canDeleteCollection: new PermissionCriteria({
+              approvedAddresses: ['']
+            })
+          })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'managersplitter/UpdateManagerSplitter':
+      return {
+        type: msgType,
+        value: new MsgUpdateManagerSplitter({
+          admin: '',
+          address: '',
+          permissions: new ManagerSplitterPermissions({
+            canDeleteCollection: new PermissionCriteria({
+              approvedAddresses: ['']
+            })
+          })
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'managersplitter/DeleteManagerSplitter':
+      return {
+        type: msgType,
+        value: new MsgDeleteManagerSplitter({
+          admin: '',
+          address: ''
+        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
+      };
+    case 'managersplitter/ExecuteUniversalUpdateCollection':
+      return {
+        type: msgType,
+        value: new MsgExecuteUniversalUpdateCollection({
+          executor: '',
+          managerSplitterAddress: '',
+          universalUpdateCollectionMsg: new MsgUniversalUpdateCollection({
+            ...deepCopyPrimitives(universalParams)
+          })
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/DeleteCollection':

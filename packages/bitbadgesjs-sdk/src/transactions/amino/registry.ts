@@ -29,6 +29,12 @@ import {
 } from '@/proto/badges/tx_pb.js';
 import { MsgExecuteContract, MsgInstantiateContract, MsgStoreCode } from '@/proto/cosmwasm/wasm/v1/tx_pb.js';
 import { MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap } from '@/proto/maps/tx_pb.js';
+import {
+  MsgCreateManagerSplitter,
+  MsgDeleteManagerSplitter,
+  MsgExecuteUniversalUpdateCollection,
+  MsgUpdateManagerSplitter
+} from '@/proto/managersplitter/tx_pb.js';
 import { MsgExecuteContractCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/tx_pb.js';
 import { AminoMsg } from '../messages/signDoc.js';
 import { createAminoConverter } from './objectConverter.js';
@@ -277,6 +283,15 @@ export function createBadgesAminoConverters(): AminoConverters {
   };
 }
 
+export function createManagerSplitterAminoConverters(): AminoConverters {
+  return {
+    ...createAminoConverter(MsgCreateManagerSplitter, 'managersplitter/CreateManagerSplitter'),
+    ...createAminoConverter(MsgUpdateManagerSplitter, 'managersplitter/UpdateManagerSplitter'),
+    ...createAminoConverter(MsgDeleteManagerSplitter, 'managersplitter/DeleteManagerSplitter'),
+    ...createAminoConverter(MsgExecuteUniversalUpdateCollection, 'managersplitter/ExecuteUniversalUpdateCollection')
+  };
+}
+
 export function createWasmXAminoConverters(): AminoConverters {
   return {
     ...createAminoConverter(MsgExecuteContractCompat, 'wasmx/MsgExecuteContractCompat'),
@@ -340,6 +355,7 @@ export function createDefaultAminoConverters() {
     ...createWasmXAminoConverters(),
     ...createAnchorAminoConverters(),
     ...createMapsAminoConverters(),
+    ...createManagerSplitterAminoConverters(),
     ...createIBCAminoConverters(),
     ...createGAMMAminoConverters()
   };

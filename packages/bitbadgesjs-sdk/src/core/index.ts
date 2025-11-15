@@ -8,6 +8,7 @@ export * from './coin.js';
 export * from './misc.js';
 export * from './permissions.js';
 export * from './permission-utils.js';
+export * from './managersplitter.js';
 export * from './timelines.js';
 export * from './transfers.js';
 export * from './uintRanges.js';

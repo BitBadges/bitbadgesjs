@@ -31,6 +31,12 @@ import {
   MsgUpdateDynamicStore,
   MsgUpdateUserApprovals
 } from '@/proto/badges/tx_pb.js';
+import {
+  MsgCreateManagerSplitter,
+  MsgDeleteManagerSplitter,
+  MsgExecuteUniversalUpdateCollection,
+  MsgUpdateManagerSplitter
+} from '@/proto/managersplitter/tx_pb.js';
 import { type AuthInfo, type TxBody, type TxRaw } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
 import { MsgCreateBalancerPool } from '@/proto/gamm/poolmodels/balancer/tx_pb.js';
 import {
@@ -50,11 +56,14 @@ import {
   populateUndefinedForMsgCreateBalancerPool,
   populateUndefinedForMsgCreateCollection,
   populateUndefinedForMsgCreateDynamicStore,
+  populateUndefinedForMsgCreateManagerSplitter,
   populateUndefinedForMsgDecrementStoreValue,
   populateUndefinedForMsgDeleteCollection,
   populateUndefinedForMsgDeleteDynamicStore,
   populateUndefinedForMsgDeleteIncomingApproval,
+  populateUndefinedForMsgDeleteManagerSplitter,
   populateUndefinedForMsgDeleteOutgoingApproval,
+  populateUndefinedForMsgExecuteUniversalUpdateCollection,
   populateUndefinedForMsgExitPool,
   populateUndefinedForMsgExitSwapExternAmountOut,
   populateUndefinedForMsgExitSwapShareAmountIn,
@@ -81,6 +90,7 @@ import {
   populateUndefinedForMsgUniversalUpdateCollection,
   populateUndefinedForMsgUpdateCollection,
   populateUndefinedForMsgUpdateDynamicStore,
+  populateUndefinedForMsgUpdateManagerSplitter,
   populateUndefinedForMsgUpdateUserApprovals
 } from '@/transactions/eip712/payload/samples/getSampleMsg.js';
 import type { AnyMessage, Message } from '@bufbuild/protobuf';
@@ -491,6 +501,14 @@ export const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
       msg = createProtoMsg(populateUndefinedForMsgExitSwapExternAmountOut(msgVal as MsgExitSwapExternAmountOut));
     } else if (msgVal.getType().typeName === MsgCreateBalancerPool.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgCreateBalancerPool(msgVal as MsgCreateBalancerPool));
+    } else if (msgVal.getType().typeName === MsgCreateManagerSplitter.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgCreateManagerSplitter(msgVal as MsgCreateManagerSplitter));
+    } else if (msgVal.getType().typeName === MsgUpdateManagerSplitter.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgUpdateManagerSplitter(msgVal as MsgUpdateManagerSplitter));
+    } else if (msgVal.getType().typeName === MsgDeleteManagerSplitter.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgDeleteManagerSplitter(msgVal as MsgDeleteManagerSplitter));
+    } else if (msgVal.getType().typeName === MsgExecuteUniversalUpdateCollection.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgExecuteUniversalUpdateCollection(msgVal as MsgExecuteUniversalUpdateCollection));
     }
 
     //MsgCreateAddressLists and MsgDeleteCollection should be fine bc they are all primitive types and required
