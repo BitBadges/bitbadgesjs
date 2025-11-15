@@ -7,32 +7,32 @@ import { generateAlias, getAliasDerivationKeysForBadge } from '@/core/aliases.js
 import { getMintApprovals, getNonMintApprovals, getUnhandledCollectionApprovals } from '@/core/approval-utils.js';
 import { CollectionApprovalWithDetails, iCollectionApprovalWithDetails } from '@/core/approvals.js';
 import {
-  TokenMetadataTimeline,
-  TokenMetadataTimelineWithDetails,
   CollectionMetadataTimelineWithDetails,
   CosmosCoinWrapperPathWithDetails,
   CustomDataTimeline,
   IsArchivedTimeline,
   ManagerTimeline,
-  StandardsTimeline
+  StandardsTimeline,
+  TokenMetadataTimeline,
+  TokenMetadataTimelineWithDetails
 } from '@/core/misc.js';
 import type { PermissionNameString } from '@/core/permission-utils.js';
 import { getPermissionVariablesFromName } from '@/core/permission-utils.js';
 import {
   ActionPermission,
-  TokenIdsActionPermission,
   CollectionApprovalPermissionWithDetails,
   CollectionPermissionsWithDetails,
   TimedUpdatePermission,
-  TimedUpdateWithTokenIdsPermission
+  TimedUpdateWithTokenIdsPermission,
+  TokenIdsActionPermission
 } from '@/core/permissions.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStoreWithDetails } from '@/core/userBalances.js';
 import type {
   CollectionId,
   iAddressList,
-  iTokenMetadataTimelineWithDetails,
   iCollectionMetadataTimelineWithDetails,
+  iTokenMetadataTimelineWithDetails,
   iUintRange
 } from '@/interfaces/types/core.js';
 import type { iCollectionPermissionsWithDetails } from '@/interfaces/types/permissions.js';
@@ -41,27 +41,27 @@ import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { TransferActivityDoc } from './docs-types/activity.js';
 import {
   ApprovalTrackerDoc,
-  TokenFloorPriceDoc,
   BalanceDocWithDetails,
   CollectionDoc,
   CollectionStatsDoc,
   MerkleChallengeTrackerDoc,
+  TokenFloorPriceDoc,
   UtilityPageDoc
 } from './docs-types/docs.js';
 import type {
   iApprovalTrackerDoc,
-  iTokenFloorPriceDoc,
   iBalanceDocWithDetails,
   iClaimDetails,
   iCollectionDoc,
   iCollectionStatsDoc,
   iCosmosCoinWrapperPathWithDetails,
   iMerkleChallengeTrackerDoc,
+  iTokenFloorPriceDoc,
   iTransferActivityDoc,
   iUtilityPageDoc,
   NativeAddress
 } from './docs-types/interfaces.js';
-import { TokenMetadataDetails, CollectionMetadataDetails } from './metadata/tokenMetadata.js';
+import { CollectionMetadataDetails, TokenMetadataDetails } from './metadata/tokenMetadata.js';
 
 import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
@@ -72,19 +72,19 @@ import {
   CollectionViewKey,
   FilterTokensInCollectionSuccessResponse,
   GetAdditionalCollectionDetailsPayload,
-  GetTokenActivitySuccessResponse,
   GetBalanceByAddressSuccessResponse,
   GetCollectionRequestBody,
   GetMetadataForCollectionPayload,
   GetOwnersSuccessResponse,
+  GetTokenActivitySuccessResponse,
   iFilterTokensInCollectionPayload,
   iFilterTokensInCollectionSuccessResponse,
-  iGetTokenActivityPayload,
-  iGetTokenActivitySuccessResponse,
   iGetBalanceByAddressPayload,
   iGetBalanceByAddressSuccessResponse,
   iGetOwnersPayload,
   iGetOwnersSuccessResponse,
+  iGetTokenActivityPayload,
+  iGetTokenActivitySuccessResponse,
   iRefreshMetadataPayload,
   iRefreshMetadataSuccessResponse,
   iRefreshStatusSuccessResponse,

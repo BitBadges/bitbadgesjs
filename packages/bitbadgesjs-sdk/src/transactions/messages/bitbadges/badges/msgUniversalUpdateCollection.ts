@@ -23,8 +23,7 @@ import { UserBalanceStore } from '@/core/userBalances.js';
 import { CollectionId } from '@/interfaces/index.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
 import type { iMsgUniversalUpdateCollection } from './interfaces.js';
-import { CosmosCoinWrapperPathAddObject } from '@/core/ibc-wrappers.js';
-import { CollectionInvariants } from '@/core/misc.js';
+import { CosmosCoinWrapperPathAddObject, InvariantsAddObject } from '@/core/ibc-wrappers.js';
 /**
  * MsgUniversalUpdateCollection is a universal transaction that can be used to create / update any collection. It is only executable by the manager.
  * MsgCreateCollection and MsgUpdateCollection are special cases of this message.
@@ -69,7 +68,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   isArchivedTimeline?: IsArchivedTimeline<T>[];
   mintEscrowCoinsToTransfer?: CosmosCoin<T>[];
   cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject<T>[];
-  invariants?: CollectionInvariants<T>;
+  invariants?: InvariantsAddObject<T>;
 
   constructor(msg: iMsgUniversalUpdateCollection<T>) {
     super();
@@ -98,7 +97,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     this.cosmosCoinWrapperPathsToAdd = msg.cosmosCoinWrapperPathsToAdd
       ? msg.cosmosCoinWrapperPathsToAdd.map((x) => new CosmosCoinWrapperPathAddObject(x))
       : undefined;
-    this.invariants = msg.invariants ? new CollectionInvariants(msg.invariants) : undefined;
+    this.invariants = msg.invariants ? new InvariantsAddObject(msg.invariants) : undefined;
   }
 
   getNumberFieldNames(): string[] {
@@ -171,7 +170,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
         : undefined,
       mintEscrowCoinsToTransfer: protoMsg.mintEscrowCoinsToTransfer?.map((x) => CosmosCoin.fromProto(x, convertFunction)),
       cosmosCoinWrapperPathsToAdd: protoMsg.cosmosCoinWrapperPathsToAdd?.map((x) => CosmosCoinWrapperPathAddObject.fromProto(x, convertFunction)),
-      invariants: protoMsg.invariants ? CollectionInvariants.fromProto(protoMsg.invariants, convertFunction) : undefined
+      invariants: protoMsg.invariants ? InvariantsAddObject.fromProto(protoMsg.invariants, convertFunction) : undefined
     });
   }
 

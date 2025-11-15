@@ -7,7 +7,7 @@ import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import { CollectionApproval } from '@/core/approvals.js';
 import { CosmosCoin } from '@/core/coin.js';
-import { CosmosCoinWrapperPathAddObject } from '@/core/ibc-wrappers.js';
+import { CosmosCoinWrapperPathAddObject, InvariantsAddObject } from '@/core/ibc-wrappers.js';
 import {
   TokenMetadataTimeline,
   CollectionMetadataTimeline,
@@ -56,6 +56,7 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
   isArchivedTimeline?: IsArchivedTimeline<T>[];
   mintEscrowCoinsToTransfer?: CosmosCoin<T>[];
   cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject<T>[];
+  invariants?: InvariantsAddObject<T>;
 
   constructor(msg: iMsgUpdateCollection<T>) {
     super();
@@ -143,7 +144,8 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
       updateIsArchivedTimeline: protoMsg.updateIsArchivedTimeline,
       isArchivedTimeline: protoMsg.isArchivedTimeline?.map((x) => IsArchivedTimeline.fromProto(x, convertFunction)),
       mintEscrowCoinsToTransfer: protoMsg.mintEscrowCoinsToTransfer?.map((x) => CosmosCoin.fromProto(x, convertFunction)),
-      cosmosCoinWrapperPathsToAdd: protoMsg.cosmosCoinWrapperPathsToAdd?.map((x) => CosmosCoinWrapperPathAddObject.fromProto(x, convertFunction))
+      cosmosCoinWrapperPathsToAdd: protoMsg.cosmosCoinWrapperPathsToAdd?.map((x) => CosmosCoinWrapperPathAddObject.fromProto(x, convertFunction)),
+      invariants: protoMsg.invariants ? InvariantsAddObject.fromProto(protoMsg.invariants, convertFunction) : undefined
     });
   }
 

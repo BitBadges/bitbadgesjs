@@ -15,7 +15,6 @@ import type {
   iAddressList,
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
-  iTokenMetadataTimeline,
   iBalance,
   iCollectionInvariants,
   iCollectionMetadataTimeline,
@@ -25,6 +24,7 @@ import type {
   iIsArchivedTimeline,
   iManagerTimeline,
   iStandardsTimeline,
+  iTokenMetadataTimeline,
   iUintRange
 } from '@/interfaces/types/core.js';
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/types/permissions.js';

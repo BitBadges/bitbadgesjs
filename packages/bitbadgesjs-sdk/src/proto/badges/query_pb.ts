@@ -879,3 +879,145 @@ export class QueryGetWrappableBalancesResponse extends Message<QueryGetWrappable
   }
 }
 
+/**
+ * @generated from message badges.QueryIsAddressReservedProtocolRequest
+ */
+export class QueryIsAddressReservedProtocolRequest extends Message<QueryIsAddressReservedProtocolRequest> {
+  /**
+   * @generated from field: string address = 1;
+   */
+  address = "";
+
+  constructor(data?: PartialMessage<QueryIsAddressReservedProtocolRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryIsAddressReservedProtocolRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryIsAddressReservedProtocolRequest {
+    return new QueryIsAddressReservedProtocolRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryIsAddressReservedProtocolRequest {
+    return new QueryIsAddressReservedProtocolRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryIsAddressReservedProtocolRequest {
+    return new QueryIsAddressReservedProtocolRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryIsAddressReservedProtocolRequest | PlainMessage<QueryIsAddressReservedProtocolRequest> | undefined, b: QueryIsAddressReservedProtocolRequest | PlainMessage<QueryIsAddressReservedProtocolRequest> | undefined): boolean {
+    return proto3.util.equals(QueryIsAddressReservedProtocolRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.QueryIsAddressReservedProtocolResponse
+ */
+export class QueryIsAddressReservedProtocolResponse extends Message<QueryIsAddressReservedProtocolResponse> {
+  /**
+   * @generated from field: bool isReservedProtocol = 1;
+   */
+  isReservedProtocol = false;
+
+  constructor(data?: PartialMessage<QueryIsAddressReservedProtocolResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryIsAddressReservedProtocolResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "isReservedProtocol", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryIsAddressReservedProtocolResponse {
+    return new QueryIsAddressReservedProtocolResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryIsAddressReservedProtocolResponse {
+    return new QueryIsAddressReservedProtocolResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryIsAddressReservedProtocolResponse {
+    return new QueryIsAddressReservedProtocolResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryIsAddressReservedProtocolResponse | PlainMessage<QueryIsAddressReservedProtocolResponse> | undefined, b: QueryIsAddressReservedProtocolResponse | PlainMessage<QueryIsAddressReservedProtocolResponse> | undefined): boolean {
+    return proto3.util.equals(QueryIsAddressReservedProtocolResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.QueryGetAllReservedProtocolAddressesRequest
+ */
+export class QueryGetAllReservedProtocolAddressesRequest extends Message<QueryGetAllReservedProtocolAddressesRequest> {
+  constructor(data?: PartialMessage<QueryGetAllReservedProtocolAddressesRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryGetAllReservedProtocolAddressesRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetAllReservedProtocolAddressesRequest {
+    return new QueryGetAllReservedProtocolAddressesRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetAllReservedProtocolAddressesRequest {
+    return new QueryGetAllReservedProtocolAddressesRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetAllReservedProtocolAddressesRequest {
+    return new QueryGetAllReservedProtocolAddressesRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetAllReservedProtocolAddressesRequest | PlainMessage<QueryGetAllReservedProtocolAddressesRequest> | undefined, b: QueryGetAllReservedProtocolAddressesRequest | PlainMessage<QueryGetAllReservedProtocolAddressesRequest> | undefined): boolean {
+    return proto3.util.equals(QueryGetAllReservedProtocolAddressesRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.QueryGetAllReservedProtocolAddressesResponse
+ */
+export class QueryGetAllReservedProtocolAddressesResponse extends Message<QueryGetAllReservedProtocolAddressesResponse> {
+  /**
+   * @generated from field: repeated string addresses = 1;
+   */
+  addresses: string[] = [];
+
+  constructor(data?: PartialMessage<QueryGetAllReservedProtocolAddressesResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryGetAllReservedProtocolAddressesResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "addresses", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetAllReservedProtocolAddressesResponse {
+    return new QueryGetAllReservedProtocolAddressesResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetAllReservedProtocolAddressesResponse {
+    return new QueryGetAllReservedProtocolAddressesResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetAllReservedProtocolAddressesResponse {
+    return new QueryGetAllReservedProtocolAddressesResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetAllReservedProtocolAddressesResponse | PlainMessage<QueryGetAllReservedProtocolAddressesResponse> | undefined, b: QueryGetAllReservedProtocolAddressesResponse | PlainMessage<QueryGetAllReservedProtocolAddressesResponse> | undefined): boolean {
+    return proto3.util.equals(QueryGetAllReservedProtocolAddressesResponse, a, b);
+  }
+}
+

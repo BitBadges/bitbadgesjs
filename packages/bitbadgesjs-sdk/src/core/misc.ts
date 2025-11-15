@@ -34,6 +34,7 @@ import type {
   iCollectionMetadata,
   iCollectionMetadataTimeline,
   iCollectionMetadataTimelineWithDetails,
+  iCosmosCoinBackedPath,
   iCustomDataTimeline,
   iETHSignatureChallenge,
   iETHSignatureProof,
@@ -1708,6 +1709,45 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
 }
 
 /**
+ * @inheritDoc iCosmosCoinBackedPath
+ * @category Core
+ */
+export class CosmosCoinBackedPath<T extends NumberType> extends CustomTypeClass<CosmosCoinBackedPath<T>> implements iCosmosCoinBackedPath<T> {
+  address: string;
+  ibcDenom: string;
+  balances: Balance<T>[];
+  ibcAmount: T;
+
+  constructor(data: iCosmosCoinBackedPath<T>) {
+    super();
+    this.address = data.address;
+    this.ibcDenom = data.ibcDenom;
+    this.balances = data.balances.map((balance) => new Balance(balance));
+    this.ibcAmount = data.ibcAmount;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['ibcAmount'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CosmosCoinBackedPath<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CosmosCoinBackedPath<U>;
+  }
+
+  static fromProto<U extends NumberType>(
+    protoMsg: protobadges.CosmosCoinBackedPath,
+    convertFunction: (item: NumberType) => U
+  ): CosmosCoinBackedPath<U> {
+    return new CosmosCoinBackedPath<NumberType>({
+      address: protoMsg.address,
+      ibcDenom: protoMsg.ibcDenom,
+      balances: protoMsg.balances.map((balance) => Balance.fromProto(balance, convertFunction)),
+      ibcAmount: convertFunction(protoMsg.ibcAmount)
+    }).convert(convertFunction);
+  }
+}
+
+/**
  * @inheritDoc iPoolInfoVolume
  * @category Indexer
  */
@@ -2020,10 +2060,23 @@ export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeCl
    */
   maxSupplyPerId: T;
 
+  /**
+   * The IBC backed (sdk.coin) path for the collection. Only one path is allowed.
+   */
+  cosmosCoinBackedPath?: CosmosCoinBackedPath<T>;
+
+  /**
+   * If true, disallows any collection approvals that have overridesFromOutgoingApprovals or overridesToIncomingApprovals set to true.
+   * This prevents forceful post-mint transfers that bypass user-level approvals.
+   */
+  noForcefulPostMintTransfers: boolean;
+
   constructor(data: iCollectionInvariants<T>) {
     super();
     this.noCustomOwnershipTimes = data.noCustomOwnershipTimes;
     this.maxSupplyPerId = data.maxSupplyPerId;
+    this.cosmosCoinBackedPath = data.cosmosCoinBackedPath ? new CosmosCoinBackedPath(data.cosmosCoinBackedPath) : undefined;
+    this.noForcefulPostMintTransfers = data.noForcefulPostMintTransfers;
   }
 
   getNumberFieldNames(): string[] {
@@ -2035,7 +2088,19 @@ export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeCl
   }
 
   toProto(): protobadges.CollectionInvariants {
-    return new protobadges.CollectionInvariants(this.toJson());
+    return new protobadges.CollectionInvariants({
+      noCustomOwnershipTimes: this.noCustomOwnershipTimes,
+      maxSupplyPerId: this.maxSupplyPerId.toString(),
+      cosmosCoinBackedPath: this.cosmosCoinBackedPath
+        ? new protobadges.CosmosCoinBackedPath({
+            address: this.cosmosCoinBackedPath.address,
+            ibcDenom: this.cosmosCoinBackedPath.ibcDenom,
+            balances: this.cosmosCoinBackedPath.balances.map((balance) => balance.toProto()),
+            ibcAmount: this.cosmosCoinBackedPath.ibcAmount.toString()
+          })
+        : undefined,
+      noForcefulPostMintTransfers: this.noForcefulPostMintTransfers
+    });
   }
 
   static fromJson<T extends NumberType>(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CollectionInvariants<T> {
@@ -2049,7 +2114,9 @@ export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeCl
   static fromProto<T extends NumberType>(item: protobadges.CollectionInvariants, convertFunction: (val: NumberType) => T): CollectionInvariants<T> {
     return new CollectionInvariants({
       noCustomOwnershipTimes: item.noCustomOwnershipTimes,
-      maxSupplyPerId: convertFunction(item.maxSupplyPerId)
+      maxSupplyPerId: convertFunction(item.maxSupplyPerId),
+      cosmosCoinBackedPath: item.cosmosCoinBackedPath ? CosmosCoinBackedPath.fromProto(item.cosmosCoinBackedPath, convertFunction) : undefined,
+      noForcefulPostMintTransfers: item.noForcefulPostMintTransfers
     });
   }
 }

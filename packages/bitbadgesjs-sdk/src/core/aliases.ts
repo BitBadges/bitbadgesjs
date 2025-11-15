@@ -6,6 +6,7 @@ import type { NumberType } from '../common/string-numbers.js';
 const AddressGenerationPrefix = 0x09;
 const AccountGenerationPrefix = 0x08;
 const DenomGenerationPrefix = 0x0c;
+const BackedPathGenerationPrefix = 0x12;
 
 function Module(moduleName: string, ...derivationKeys: Buffer[]) {
   let mKey = Buffer.from(moduleName);
@@ -114,5 +115,25 @@ export function getAliasDerivationKeysForDenom(denom: string) {
  */
 export function generateAliasAddressForDenom(denom: string) {
   const derivationKey = getAliasDerivationKeysForDenom(denom);
+  return generateAlias('badges', derivationKey);
+}
+
+/**
+ * Derivation keys for an IBC backed denom alias to be used in `generateAlias`.
+ *
+ * @category Aliases
+ */
+export function getAliasDerivationKeysForIBCBackedDenom(ibcDenom: string) {
+  const derivationKey = [Buffer.from([BackedPathGenerationPrefix]), Buffer.from(ibcDenom, 'utf8')];
+  return derivationKey;
+}
+
+/**
+ * Generate IBC backed denom alias address for account
+ *
+ * @category Aliases
+ */
+export function generateAliasAddressForIBCBackedDenom(ibcDenom: string) {
+  const derivationKey = getAliasDerivationKeysForIBCBackedDenom(ibcDenom);
   return generateAlias('badges', derivationKey);
 }

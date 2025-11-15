@@ -12,6 +12,7 @@ cp -r ./proto/anchor/* $MYFOLDER/proto/anchor/
 cp -r ./proto/maps/* $MYFOLDER/proto/maps/
 cp -r ./proto/gamm/* $MYFOLDER/proto/gamm/
 cp -r ./proto/poolmanager/* $MYFOLDER/proto/poolmanager/
+cp -r ./proto/managersplitter/* $MYFOLDER/proto/managersplitter/
 
 cd ../bitbadgesjs/packages/bitbadgesjs-sdk
 
@@ -69,6 +70,8 @@ rm -f ./proto/*.yaml
 rm -f ./proto/*.md
 rm -f ./proto/*.yml
 rm -f ./proto/*.lock
+rm -rf *.pb.go
+
 
 cd $MYFOLDER
 

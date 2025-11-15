@@ -24,7 +24,6 @@ import {
   CoinTransfer,
   CollectionApproval,
   CollectionApprovalPermission,
-  CollectionInvariants,
   CollectionMetadata,
   CollectionMetadataTimeline,
   CollectionPermissions,
@@ -75,6 +74,7 @@ import {
 } from '@/proto/badges/index.js';
 
 import {
+  InvariantsAddObject,
   MsgCreateDynamicStore,
   MsgDecrementStoreValue,
   MsgDeleteDynamicStore,
@@ -628,9 +628,10 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
   }
 
   if (!msg.invariants) {
-    msg.invariants = new CollectionInvariants({
+    msg.invariants = new InvariantsAddObject({
       noCustomOwnershipTimes: false,
-      maxSupplyPerId: '0'
+      maxSupplyPerId: '0',
+      noForcefulPostMintTransfers: false
     });
   }
 

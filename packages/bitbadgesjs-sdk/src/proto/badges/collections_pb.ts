@@ -257,6 +257,61 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
 }
 
 /**
+ * @generated from message badges.CosmosCoinBackedPath
+ */
+export class CosmosCoinBackedPath extends Message<CosmosCoinBackedPath> {
+  /**
+   * @generated from field: string address = 1;
+   */
+  address = "";
+
+  /**
+   * @generated from field: string ibcDenom = 2;
+   */
+  ibcDenom = "";
+
+  /**
+   * @generated from field: repeated badges.Balance balances = 3;
+   */
+  balances: Balance[] = [];
+
+  /**
+   * @generated from field: string ibcAmount = 4;
+   */
+  ibcAmount = "";
+
+  constructor(data?: PartialMessage<CosmosCoinBackedPath>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.CosmosCoinBackedPath";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "ibcDenom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "balances", kind: "message", T: Balance, repeated: true },
+    { no: 4, name: "ibcAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinBackedPath {
+    return new CosmosCoinBackedPath().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CosmosCoinBackedPath {
+    return new CosmosCoinBackedPath().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CosmosCoinBackedPath {
+    return new CosmosCoinBackedPath().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CosmosCoinBackedPath | PlainMessage<CosmosCoinBackedPath> | undefined, b: CosmosCoinBackedPath | PlainMessage<CosmosCoinBackedPath> | undefined): boolean {
+    return proto3.util.equals(CosmosCoinBackedPath, a, b);
+  }
+}
+
+/**
  * @generated from message badges.DenomUnit
  */
 export class DenomUnit extends Message<DenomUnit> {
@@ -327,6 +382,22 @@ export class CollectionInvariants extends Message<CollectionInvariants> {
    */
   maxSupplyPerId = "";
 
+  /**
+   * The IBC backed (sdk.coin) path for the collection. Only one path is allowed.
+   *
+   * @generated from field: badges.CosmosCoinBackedPath cosmosCoinBackedPath = 3;
+   */
+  cosmosCoinBackedPath?: CosmosCoinBackedPath;
+
+  /**
+   * If true, disallows any collection approvals that have overridesFromOutgoingApprovals or overridesToIncomingApprovals set to true.
+   * This prevents forceful transfers that bypass user-level approvals.
+   * This only applies to transfers where the from address does not equal "Mint".
+   *
+   * @generated from field: bool noForcefulPostMintTransfers = 4;
+   */
+  noForcefulPostMintTransfers = false;
+
   constructor(data?: PartialMessage<CollectionInvariants>) {
     super();
     proto3.util.initPartial(data, this);
@@ -337,6 +408,8 @@ export class CollectionInvariants extends Message<CollectionInvariants> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "noCustomOwnershipTimes", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 2, name: "maxSupplyPerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "cosmosCoinBackedPath", kind: "message", T: CosmosCoinBackedPath },
+    { no: 4, name: "noForcefulPostMintTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionInvariants {
