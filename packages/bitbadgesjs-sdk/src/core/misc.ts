@@ -2071,12 +2071,19 @@ export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeCl
    */
   noForcefulPostMintTransfers: boolean;
 
+  /**
+   * If true, disallows pool creation with this collection's assets.
+   * When true, any attempt to create a pool with badges assets from this collection will fail.
+   */
+  disablePoolCreation: boolean;
+
   constructor(data: iCollectionInvariants<T>) {
     super();
     this.noCustomOwnershipTimes = data.noCustomOwnershipTimes;
     this.maxSupplyPerId = data.maxSupplyPerId;
     this.cosmosCoinBackedPath = data.cosmosCoinBackedPath ? new CosmosCoinBackedPath(data.cosmosCoinBackedPath) : undefined;
     this.noForcefulPostMintTransfers = data.noForcefulPostMintTransfers;
+    this.disablePoolCreation = data.disablePoolCreation;
   }
 
   getNumberFieldNames(): string[] {
@@ -2099,7 +2106,8 @@ export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeCl
             ibcAmount: this.cosmosCoinBackedPath.ibcAmount.toString()
           })
         : undefined,
-      noForcefulPostMintTransfers: this.noForcefulPostMintTransfers
+      noForcefulPostMintTransfers: this.noForcefulPostMintTransfers,
+      disablePoolCreation: this.disablePoolCreation
     });
   }
 
@@ -2116,7 +2124,8 @@ export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeCl
       noCustomOwnershipTimes: item.noCustomOwnershipTimes,
       maxSupplyPerId: convertFunction(item.maxSupplyPerId),
       cosmosCoinBackedPath: item.cosmosCoinBackedPath ? CosmosCoinBackedPath.fromProto(item.cosmosCoinBackedPath, convertFunction) : undefined,
-      noForcefulPostMintTransfers: item.noForcefulPostMintTransfers
+      noForcefulPostMintTransfers: item.noForcefulPostMintTransfers,
+      disablePoolCreation: item.disablePoolCreation
     });
   }
 }

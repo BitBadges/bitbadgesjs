@@ -176,6 +176,7 @@ export class InvariantsAddObject<T extends NumberType> extends BaseNumberTypeCla
   maxSupplyPerId: T;
   cosmosCoinBackedPath?: CosmosCoinBackedPathAddObject<T>;
   noForcefulPostMintTransfers: boolean;
+  disablePoolCreation: boolean;
 
   constructor(data: iInvariantsAddObject<T>) {
     super();
@@ -183,6 +184,7 @@ export class InvariantsAddObject<T extends NumberType> extends BaseNumberTypeCla
     this.maxSupplyPerId = data.maxSupplyPerId;
     this.cosmosCoinBackedPath = data.cosmosCoinBackedPath ? new CosmosCoinBackedPathAddObject(data.cosmosCoinBackedPath) : undefined;
     this.noForcefulPostMintTransfers = data.noForcefulPostMintTransfers;
+    this.disablePoolCreation = data.disablePoolCreation;
   }
 
   getNumberFieldNames(): string[] {
@@ -200,7 +202,8 @@ export class InvariantsAddObject<T extends NumberType> extends BaseNumberTypeCla
       cosmosCoinBackedPath: data.cosmosCoinBackedPath
         ? CosmosCoinBackedPathAddObject.fromProto(data.cosmosCoinBackedPath, convertFunction)
         : undefined,
-      noForcefulPostMintTransfers: data.noForcefulPostMintTransfers
+      noForcefulPostMintTransfers: data.noForcefulPostMintTransfers,
+      disablePoolCreation: data.disablePoolCreation
     });
   }
 
@@ -209,7 +212,8 @@ export class InvariantsAddObject<T extends NumberType> extends BaseNumberTypeCla
       noCustomOwnershipTimes: this.noCustomOwnershipTimes,
       maxSupplyPerId: this.maxSupplyPerId.toString(),
       cosmosCoinBackedPath: this.cosmosCoinBackedPath ? this.cosmosCoinBackedPath.toProto() : undefined,
-      noForcefulPostMintTransfers: this.noForcefulPostMintTransfers
+      noForcefulPostMintTransfers: this.noForcefulPostMintTransfers,
+      disablePoolCreation: this.disablePoolCreation
     });
   }
 }

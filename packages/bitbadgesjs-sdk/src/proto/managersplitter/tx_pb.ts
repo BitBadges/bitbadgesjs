@@ -512,3 +512,60 @@ export class MsgExecuteUniversalUpdateCollectionResponse extends Message<MsgExec
   }
 }
 
+/**
+ * Used for WASM bindings and JSON parsing
+ *
+ * @generated from message managersplitter.ManagersplitterCustomMsgType
+ */
+export class ManagersplitterCustomMsgType extends Message<ManagersplitterCustomMsgType> {
+  /**
+   * @generated from field: managersplitter.MsgCreateManagerSplitter createManagerSplitterMsg = 1;
+   */
+  createManagerSplitterMsg?: MsgCreateManagerSplitter;
+
+  /**
+   * @generated from field: managersplitter.MsgUpdateManagerSplitter updateManagerSplitterMsg = 2;
+   */
+  updateManagerSplitterMsg?: MsgUpdateManagerSplitter;
+
+  /**
+   * @generated from field: managersplitter.MsgDeleteManagerSplitter deleteManagerSplitterMsg = 3;
+   */
+  deleteManagerSplitterMsg?: MsgDeleteManagerSplitter;
+
+  /**
+   * @generated from field: managersplitter.MsgExecuteUniversalUpdateCollection executeUniversalUpdateCollectionMsg = 4;
+   */
+  executeUniversalUpdateCollectionMsg?: MsgExecuteUniversalUpdateCollection;
+
+  constructor(data?: PartialMessage<ManagersplitterCustomMsgType>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "managersplitter.ManagersplitterCustomMsgType";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "createManagerSplitterMsg", kind: "message", T: MsgCreateManagerSplitter },
+    { no: 2, name: "updateManagerSplitterMsg", kind: "message", T: MsgUpdateManagerSplitter },
+    { no: 3, name: "deleteManagerSplitterMsg", kind: "message", T: MsgDeleteManagerSplitter },
+    { no: 4, name: "executeUniversalUpdateCollectionMsg", kind: "message", T: MsgExecuteUniversalUpdateCollection },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ManagersplitterCustomMsgType {
+    return new ManagersplitterCustomMsgType().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ManagersplitterCustomMsgType {
+    return new ManagersplitterCustomMsgType().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ManagersplitterCustomMsgType {
+    return new ManagersplitterCustomMsgType().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ManagersplitterCustomMsgType | PlainMessage<ManagersplitterCustomMsgType> | undefined, b: ManagersplitterCustomMsgType | PlainMessage<ManagersplitterCustomMsgType> | undefined): boolean {
+    return proto3.util.equals(ManagersplitterCustomMsgType, a, b);
+  }
+}
+

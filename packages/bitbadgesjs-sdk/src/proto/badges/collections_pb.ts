@@ -398,6 +398,14 @@ export class CollectionInvariants extends Message<CollectionInvariants> {
    */
   noForcefulPostMintTransfers = false;
 
+  /**
+   * If true, disallows pool creation with this collection's assets.
+   * When true, any attempt to create a pool with badges assets from this collection will fail.
+   *
+   * @generated from field: bool disablePoolCreation = 5;
+   */
+  disablePoolCreation = false;
+
   constructor(data?: PartialMessage<CollectionInvariants>) {
     super();
     proto3.util.initPartial(data, this);
@@ -410,6 +418,7 @@ export class CollectionInvariants extends Message<CollectionInvariants> {
     { no: 2, name: "maxSupplyPerId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "cosmosCoinBackedPath", kind: "message", T: CosmosCoinBackedPath },
     { no: 4, name: "noForcefulPostMintTransfers", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 5, name: "disablePoolCreation", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionInvariants {

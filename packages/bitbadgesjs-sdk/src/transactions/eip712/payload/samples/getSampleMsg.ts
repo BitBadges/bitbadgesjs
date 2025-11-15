@@ -638,7 +638,8 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     msg.invariants = new InvariantsAddObject({
       noCustomOwnershipTimes: false,
       maxSupplyPerId: '0',
-      noForcefulPostMintTransfers: false
+      noForcefulPostMintTransfers: false,
+      disablePoolCreation: false
     });
   }
 
