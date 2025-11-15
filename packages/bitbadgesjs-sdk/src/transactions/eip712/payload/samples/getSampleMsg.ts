@@ -15,6 +15,7 @@ import { deepCopyPrimitives } from '@/common/base.js';
 import { CosmosCoin } from '@/core/coin.js';
 import {
   ActionPermission,
+  AddressChecks,
   AddressList,
   ApprovalAmounts,
   ApprovalCriteria,
@@ -235,7 +236,19 @@ const approvalCriteria = new OutgoingApprovalCriteria({
     new DynamicStoreChallenge({
       storeId: '0'
     })
-  ]
+  ],
+  recipientChecks: new AddressChecks({
+    mustBeWasmContract: false,
+    mustNotBeWasmContract: false,
+    mustBeLiquidityPool: false,
+    mustNotBeLiquidityPool: false
+  }),
+  initiatorChecks: new AddressChecks({
+    mustBeWasmContract: false,
+    mustNotBeWasmContract: false,
+    mustBeLiquidityPool: false,
+    mustNotBeLiquidityPool: false
+  })
 }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) as object;
 
 const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
@@ -441,6 +454,18 @@ function populateETHSignatureChallenges(ethSignatureChallenges?: ETHSignatureCha
   return ethSignatureChallenges || [];
 }
 
+function populateAddressChecks(addressChecks?: AddressChecks): AddressChecks {
+  if (!addressChecks) {
+    return new AddressChecks({
+      mustBeWasmContract: false,
+      mustNotBeWasmContract: false,
+      mustBeLiquidityPool: false,
+      mustNotBeLiquidityPool: false
+    });
+  }
+  return addressChecks;
+}
+
 export function populateUndefinedForMsgTransferTokens(msg: MsgTransferTokens) {
   for (const transfer of msg.transfers) {
     if (!transfer.numAttempts) {
@@ -478,6 +503,8 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(approval.approvalCriteria.mustOwnTokens);
     approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
     approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
+    approval.approvalCriteria.recipientChecks = populateAddressChecks(approval.approvalCriteria.recipientChecks);
+    approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
   }
   for (const approval of msg.incomingApprovals) {
     if (!approval.approvalCriteria) {
@@ -491,6 +518,8 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(approval.approvalCriteria.mustOwnTokens);
     approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
     approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
+    approval.approvalCriteria.senderChecks = populateAddressChecks(approval.approvalCriteria.senderChecks);
+    approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
   }
   return msg;
 }
@@ -596,6 +625,8 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
       approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(approval.approvalCriteria.mustOwnTokens);
       approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
       approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
+      approval.approvalCriteria.recipientChecks = populateAddressChecks(approval.approvalCriteria.recipientChecks);
+      approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
     }
   }
 
@@ -611,6 +642,8 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(approval.approvalCriteria.mustOwnTokens);
     approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
     approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
+    approval.approvalCriteria.senderChecks = populateAddressChecks(approval.approvalCriteria.senderChecks);
+    approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
   }
 
   for (const approval of msg.collectionApprovals) {
@@ -626,6 +659,9 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.userRoyalties = populateUserRoyalties(approval.approvalCriteria.userRoyalties);
     approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
     approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
+    approval.approvalCriteria.senderChecks = populateAddressChecks(approval.approvalCriteria.senderChecks);
+    approval.approvalCriteria.recipientChecks = populateAddressChecks(approval.approvalCriteria.recipientChecks);
+    approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
   }
 
   for (const metadata of msg.collectionMetadataTimeline) {
@@ -697,6 +733,8 @@ export function populateUndefinedForMsgSetIncomingApproval(msg: MsgSetIncomingAp
   msg.approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(msg.approval.approvalCriteria.mustOwnTokens);
   msg.approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(msg.approval.approvalCriteria.dynamicStoreChallenges);
   msg.approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(msg.approval.approvalCriteria.ethSignatureChallenges);
+  msg.approval.approvalCriteria.senderChecks = populateAddressChecks(msg.approval.approvalCriteria.senderChecks);
+  msg.approval.approvalCriteria.initiatorChecks = populateAddressChecks(msg.approval.approvalCriteria.initiatorChecks);
 
   return msg;
 }
@@ -717,6 +755,8 @@ export function populateUndefinedForMsgSetOutgoingApproval(msg: MsgSetOutgoingAp
   msg.approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(msg.approval.approvalCriteria.mustOwnTokens);
   msg.approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(msg.approval.approvalCriteria.dynamicStoreChallenges);
   msg.approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(msg.approval.approvalCriteria.ethSignatureChallenges);
+  msg.approval.approvalCriteria.recipientChecks = populateAddressChecks(msg.approval.approvalCriteria.recipientChecks);
+  msg.approval.approvalCriteria.initiatorChecks = populateAddressChecks(msg.approval.approvalCriteria.initiatorChecks);
 
   return msg;
 }
