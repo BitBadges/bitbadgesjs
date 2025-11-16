@@ -19,6 +19,7 @@ import {
   deepCopyPrimitives
 } from '@/common/base.js';
 import type {
+  iAddressChecks,
   iApprovalAmounts,
   iApprovalCriteria,
   iAutoDeletionOptions,
@@ -313,6 +314,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   coinTransfers?: CoinTransfer<T>[] | undefined;
   dynamicStoreChallenges?: DynamicStoreChallenge<T>[];
   ethSignatureChallenges?: ETHSignatureChallenge[];
+  recipientChecks?: AddressChecks;
+  initiatorChecks?: AddressChecks;
 
   constructor(msg: iOutgoingApprovalCriteria<T>) {
     super();
@@ -327,6 +330,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
     this.dynamicStoreChallenges = msg.dynamicStoreChallenges?.map((x) => new DynamicStoreChallenge(x));
     this.ethSignatureChallenges = msg.ethSignatureChallenges?.map((x) => new ETHSignatureChallenge(x));
+    this.recipientChecks = msg.recipientChecks ? new AddressChecks(msg.recipientChecks) : undefined;
+    this.initiatorChecks = msg.initiatorChecks ? new AddressChecks(msg.initiatorChecks) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteria<U> {
@@ -341,7 +346,9 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       autoDeletionOptions: this.autoDeletionOptions?.convert(convertFunction),
       coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction)),
       dynamicStoreChallenges: this.dynamicStoreChallenges?.map((x) => x.convert(convertFunction)),
-      ethSignatureChallenges: this.ethSignatureChallenges
+      ethSignatureChallenges: this.ethSignatureChallenges,
+      recipientChecks: this.recipientChecks?.convert(convertFunction),
+      initiatorChecks: this.initiatorChecks?.convert(convertFunction)
     });
   }
 
@@ -382,7 +389,9 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       dynamicStoreChallenges: item.dynamicStoreChallenges
         ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction))
         : undefined,
-      ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined
+      ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined,
+      recipientChecks: item.recipientChecks ? AddressChecks.fromProto(item.recipientChecks) : undefined,
+      initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined
     });
   }
 
@@ -399,6 +408,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       coinTransfers: this.coinTransfers,
       dynamicStoreChallenges: this.dynamicStoreChallenges,
       ethSignatureChallenges: this.ethSignatureChallenges,
+      recipientChecks: this.recipientChecks,
+      initiatorChecks: this.initiatorChecks,
 
       requireFromEqualsInitiatedBy: false,
       requireFromDoesNotEqualInitiatedBy: false,
@@ -1107,6 +1118,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
   coinTransfers?: CoinTransfer<T>[] | undefined;
   dynamicStoreChallenges?: DynamicStoreChallenge<T>[];
   ethSignatureChallenges?: ETHSignatureChallenge[];
+  senderChecks?: AddressChecks;
+  initiatorChecks?: AddressChecks;
 
   constructor(msg: iIncomingApprovalCriteria<T>) {
     super();
@@ -1121,6 +1134,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
     this.dynamicStoreChallenges = msg.dynamicStoreChallenges?.map((x) => new DynamicStoreChallenge(x));
     this.ethSignatureChallenges = msg.ethSignatureChallenges?.map((x) => new ETHSignatureChallenge(x));
+    this.senderChecks = msg.senderChecks ? new AddressChecks(msg.senderChecks) : undefined;
+    this.initiatorChecks = msg.initiatorChecks ? new AddressChecks(msg.initiatorChecks) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteria<U> {
@@ -1135,7 +1150,9 @@ export class IncomingApprovalCriteria<T extends NumberType>
       requireFromDoesNotEqualInitiatedBy: this.requireFromDoesNotEqualInitiatedBy,
       coinTransfers: this.coinTransfers?.map((x) => x.convert(convertFunction)),
       dynamicStoreChallenges: this.dynamicStoreChallenges?.map((x) => x.convert(convertFunction)),
-      ethSignatureChallenges: this.ethSignatureChallenges
+      ethSignatureChallenges: this.ethSignatureChallenges,
+      senderChecks: this.senderChecks?.convert(convertFunction),
+      initiatorChecks: this.initiatorChecks?.convert(convertFunction)
     });
   }
 
@@ -1176,7 +1193,9 @@ export class IncomingApprovalCriteria<T extends NumberType>
       dynamicStoreChallenges: item.dynamicStoreChallenges
         ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction))
         : undefined,
-      ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined
+      ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined,
+      senderChecks: item.senderChecks ? AddressChecks.fromProto(item.senderChecks) : undefined,
+      initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined
     });
   }
 
@@ -1193,6 +1212,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
       mustOwnTokens: this.mustOwnTokens,
       dynamicStoreChallenges: this.dynamicStoreChallenges,
       ethSignatureChallenges: this.ethSignatureChallenges,
+      senderChecks: this.senderChecks,
+      initiatorChecks: this.initiatorChecks,
 
       requireToEqualsInitiatedBy: false,
       requireToDoesNotEqualInitiatedBy: false,
@@ -1387,6 +1408,61 @@ export class DynamicStoreChallenge<T extends NumberType> extends BaseNumberTypeC
 }
 
 /**
+ * AddressChecks defines checks for address types (WASM contract, liquidity pool, etc.)
+ *
+ * @category Approvals / Transferability
+ */
+export class AddressChecks extends CustomTypeClass<AddressChecks> implements iAddressChecks {
+  mustBeWasmContract?: boolean;
+  mustNotBeWasmContract?: boolean;
+  mustBeLiquidityPool?: boolean;
+  mustNotBeLiquidityPool?: boolean;
+
+  constructor(msg: iAddressChecks) {
+    super();
+    this.mustBeWasmContract = msg.mustBeWasmContract;
+    this.mustNotBeWasmContract = msg.mustNotBeWasmContract;
+    this.mustBeLiquidityPool = msg.mustBeLiquidityPool;
+    this.mustNotBeLiquidityPool = msg.mustNotBeLiquidityPool;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AddressChecks {
+    return new AddressChecks({
+      mustBeWasmContract: this.mustBeWasmContract,
+      mustNotBeWasmContract: this.mustNotBeWasmContract,
+      mustBeLiquidityPool: this.mustBeLiquidityPool,
+      mustNotBeLiquidityPool: this.mustNotBeLiquidityPool
+    });
+  }
+
+  toProto(): protobadges.AddressChecks {
+    return new protobadges.AddressChecks({
+      mustBeWasmContract: this.mustBeWasmContract ?? false,
+      mustNotBeWasmContract: this.mustNotBeWasmContract ?? false,
+      mustBeLiquidityPool: this.mustBeLiquidityPool ?? false,
+      mustNotBeLiquidityPool: this.mustNotBeLiquidityPool ?? false
+    });
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AddressChecks {
+    return AddressChecks.fromProto(protobadges.AddressChecks.fromJson(jsonValue, options));
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AddressChecks {
+    return AddressChecks.fromProto(protobadges.AddressChecks.fromJsonString(jsonString, options));
+  }
+
+  static fromProto(item: protobadges.AddressChecks): AddressChecks {
+    return new AddressChecks({
+      mustBeWasmContract: item.mustBeWasmContract,
+      mustNotBeWasmContract: item.mustNotBeWasmContract,
+      mustBeLiquidityPool: item.mustBeLiquidityPool,
+      mustNotBeLiquidityPool: item.mustNotBeLiquidityPool
+    });
+  }
+}
+
+/**
  * @category Approvals / Transferability
  */
 export class UserRoyalties<T extends NumberType> extends BaseNumberTypeClass<UserRoyalties<T>> implements iUserRoyalties<T> {
@@ -1455,6 +1531,9 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   userRoyalties?: UserRoyalties<T>;
   dynamicStoreChallenges?: DynamicStoreChallenge<T>[];
   ethSignatureChallenges?: ETHSignatureChallenge[];
+  senderChecks?: AddressChecks;
+  recipientChecks?: AddressChecks;
+  initiatorChecks?: AddressChecks;
 
   constructor(msg: iApprovalCriteria<T>) {
     super();
@@ -1474,6 +1553,9 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.userRoyalties = msg.userRoyalties ? new UserRoyalties(msg.userRoyalties) : undefined;
     this.dynamicStoreChallenges = msg.dynamicStoreChallenges?.map((x) => new DynamicStoreChallenge(x));
     this.ethSignatureChallenges = msg.ethSignatureChallenges?.map((x) => new ETHSignatureChallenge(x));
+    this.senderChecks = msg.senderChecks ? new AddressChecks(msg.senderChecks) : undefined;
+    this.recipientChecks = msg.recipientChecks ? new AddressChecks(msg.recipientChecks) : undefined;
+    this.initiatorChecks = msg.initiatorChecks ? new AddressChecks(msg.initiatorChecks) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteria<U> {
@@ -1519,7 +1601,10 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       dynamicStoreChallenges: item.dynamicStoreChallenges
         ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction))
         : undefined,
-      ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined
+      ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined,
+      senderChecks: item.senderChecks ? AddressChecks.fromProto(item.senderChecks) : undefined,
+      recipientChecks: item.recipientChecks ? AddressChecks.fromProto(item.recipientChecks) : undefined,
+      initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined
     });
   }
 

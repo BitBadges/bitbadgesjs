@@ -194,8 +194,21 @@ export interface iGetPoolInfoByIdSuccessResponse {
 // SWAP TYPES
 // ============================================================================
 
+interface MultiChainMsg {
+  chain_id: string;
+  path: string[];
+  msg: string;
+  msg_type_url: string;
+}
+
+interface SkipGoMessage {
+  multi_chain_msg: MultiChainMsg;
+}
+
 export interface iEstimateSwapPayload {
-  tokenIn: string; // Format: "amount:X,denom:Y"
+  /** The token in to swap. Format: "amount:X,denom:Y" */
+  tokenIn: string;
+  /** The token out denom to swap to. */
   tokenOutDenom: string;
 }
 
@@ -204,8 +217,9 @@ export interface iEstimateSwapSuccessResponse {
   estimate: {
     tokenOutAmount: string;
     tokenInAmount: string;
-    allRoutes: any[];
-    lowLiqudiityWarning?: boolean;
+    skipGoMsgs: SkipGoMessage[];
+    doesSwap: boolean;
+    lowLiquidityWarning?: boolean;
   };
 }
 

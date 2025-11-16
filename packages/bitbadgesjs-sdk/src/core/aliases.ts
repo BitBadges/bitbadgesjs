@@ -137,3 +137,60 @@ export function generateAliasAddressForIBCBackedDenom(ibcDenom: string) {
   const derivationKey = getAliasDerivationKeysForIBCBackedDenom(ibcDenom);
   return generateAlias('badges', derivationKey);
 }
+
+const SenderPrefix = 'ibc-hook-intermediary';
+
+/**
+ * SHA256 hash function using Node.js crypto.
+ * Takes a Uint8Array and returns a Uint8Array of the hash.
+ */
+function sha256(data: Uint8Array): Uint8Array {
+  const hash = crypto.createHash('sha256');
+  hash.update(Buffer.from(data));
+  return new Uint8Array(hash.digest());
+}
+
+/**
+ * Convert bytes to bech32 address using the bech32 library.
+ * Takes a prefix string and Uint8Array bytes, returns bech32 encoded string.
+ */
+function toBech32(prefix: string, data: Uint8Array): string {
+  const words = bech32.toWords(Buffer.from(data));
+  return bech32.encode(prefix, words);
+}
+
+/**
+ * Derive an intermediate sender address for an IBC transfer hook.
+ *
+ * @category Aliases
+ */
+export function deriveIntermediateSender(channel: string, originalSender: string, bech32Prefix: string): string {
+  try {
+    // Step 1: Format as "channel/originalSender" (matching Go's fmt.Sprintf("%s/%s", channel, originalSender))
+    const senderStr = `${channel}/${originalSender}`;
+
+    // Step 2: Hash with prefix (matching Go's address.Hash(SenderPrefix, []byte(senderStr)))
+    // address.Hash does: sha256(sha256(prefix) + data)
+    // First hash the prefix, then concatenate with data, then hash again
+    const prefixBytes = new Uint8Array(Buffer.from(SenderPrefix, 'utf8'));
+    const senderStrBytes = new Uint8Array(Buffer.from(senderStr, 'utf8'));
+    const hashedPrefix = sha256(prefixBytes);
+    const combined = new Uint8Array(hashedPrefix.length + senderStrBytes.length);
+    combined.set(hashedPrefix, 0);
+    combined.set(senderStrBytes, hashedPrefix.length);
+    const hash = sha256(combined);
+
+    // Step 3: Use full 32-byte hash for address
+    // Note: While Go's types.AccAddress is typically 20 bytes, the bech32 encoding
+    // of the full hash matches the expected output
+    const addressBytes = hash;
+
+    // Step 4: Convert to bech32 (matching Go's types.Bech32ifyAddressBytes)
+    const intermediateSenderBech32 = toBech32(bech32Prefix, addressBytes);
+
+    return intermediateSenderBech32;
+  } catch (error) {
+    console.error('Failed to derive intermediate sender:', error);
+    throw new Error(`Failed to derive intermediate sender: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}

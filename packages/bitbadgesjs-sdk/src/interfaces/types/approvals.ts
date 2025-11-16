@@ -13,6 +13,20 @@ export interface iDynamicStoreChallenge<T extends NumberType> {
 /**
  * @category Interfaces
  */
+export interface iAddressChecks {
+  /** Require the address to be a WASM contract. */
+  mustBeWasmContract?: boolean;
+  /** Require the address to not be a WASM contract. */
+  mustNotBeWasmContract?: boolean;
+  /** Require the address to be a liquidity pool. */
+  mustBeLiquidityPool?: boolean;
+  /** Require the address to not be a liquidity pool. */
+  mustNotBeLiquidityPool?: boolean;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iUserOutgoingApproval<T extends NumberType> {
   /** The list ID for the user(s) who is sending the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   toListId: string;
@@ -62,6 +76,10 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
   /** The list of ETH signature challenges that the initiator must pass for approval. */
   ethSignatureChallenges?: iETHSignatureChallenge[];
+  /** Address checks for recipient */
+  recipientChecks?: iAddressChecks;
+  /** Address checks for initiator */
+  initiatorChecks?: iAddressChecks;
 }
 
 /**
@@ -246,6 +264,10 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
   /** The list of ETH signature challenges that the initiator must pass for approval. */
   ethSignatureChallenges?: iETHSignatureChallenge[];
+  /** Address checks for sender */
+  senderChecks?: iAddressChecks;
+  /** Address checks for initiator */
+  initiatorChecks?: iAddressChecks;
 }
 
 /**
@@ -312,6 +334,12 @@ export interface iApprovalCriteria<T extends NumberType> {
   dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
   /** The list of ETH signature challenges that the initiator must pass for approval. */
   ethSignatureChallenges?: iETHSignatureChallenge[];
+  /** Address checks for sender */
+  senderChecks?: iAddressChecks;
+  /** Address checks for recipient */
+  recipientChecks?: iAddressChecks;
+  /** Address checks for initiator */
+  initiatorChecks?: iAddressChecks;
 }
 
 /**

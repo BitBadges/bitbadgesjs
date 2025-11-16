@@ -1395,6 +1395,71 @@ export class DynamicStoreChallenge extends Message<DynamicStoreChallenge> {
 }
 
 /**
+ * AddressChecks defines checks for address types (WASM contract, liquidity pool, etc.)
+ *
+ * @generated from message badges.AddressChecks
+ */
+export class AddressChecks extends Message<AddressChecks> {
+  /**
+   * Require the address to be a WASM contract.
+   *
+   * @generated from field: bool mustBeWasmContract = 1;
+   */
+  mustBeWasmContract = false;
+
+  /**
+   * Require the address to not be a WASM contract.
+   *
+   * @generated from field: bool mustNotBeWasmContract = 2;
+   */
+  mustNotBeWasmContract = false;
+
+  /**
+   * Require the address to be a liquidity pool.
+   *
+   * @generated from field: bool mustBeLiquidityPool = 3;
+   */
+  mustBeLiquidityPool = false;
+
+  /**
+   * Require the address to not be a liquidity pool.
+   *
+   * @generated from field: bool mustNotBeLiquidityPool = 4;
+   */
+  mustNotBeLiquidityPool = false;
+
+  constructor(data?: PartialMessage<AddressChecks>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.AddressChecks";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "mustBeWasmContract", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: "mustNotBeWasmContract", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 3, name: "mustBeLiquidityPool", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "mustNotBeLiquidityPool", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AddressChecks {
+    return new AddressChecks().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AddressChecks {
+    return new AddressChecks().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AddressChecks {
+    return new AddressChecks().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AddressChecks | PlainMessage<AddressChecks> | undefined, b: AddressChecks | PlainMessage<AddressChecks> | undefined): boolean {
+    return proto3.util.equals(AddressChecks, a, b);
+  }
+}
+
+/**
  * ApprovalCriteria defines the criteria for approving transfers.
  *
  * @generated from message badges.ApprovalCriteria
@@ -1512,6 +1577,23 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
    */
   ethSignatureChallenges: ETHSignatureChallenge[] = [];
 
+  /**
+   * Address checks for sender, recipient, and initiator.
+   *
+   * @generated from field: badges.AddressChecks senderChecks = 17;
+   */
+  senderChecks?: AddressChecks;
+
+  /**
+   * @generated from field: badges.AddressChecks recipientChecks = 18;
+   */
+  recipientChecks?: AddressChecks;
+
+  /**
+   * @generated from field: badges.AddressChecks initiatorChecks = 19;
+   */
+  initiatorChecks?: AddressChecks;
+
   constructor(data?: PartialMessage<ApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1536,6 +1618,9 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
     { no: 14, name: "mustOwnTokens", kind: "message", T: MustOwnTokens, repeated: true },
     { no: 15, name: "dynamicStoreChallenges", kind: "message", T: DynamicStoreChallenge, repeated: true },
     { no: 16, name: "ethSignatureChallenges", kind: "message", T: ETHSignatureChallenge, repeated: true },
+    { no: 17, name: "senderChecks", kind: "message", T: AddressChecks },
+    { no: 18, name: "recipientChecks", kind: "message", T: AddressChecks },
+    { no: 19, name: "initiatorChecks", kind: "message", T: AddressChecks },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalCriteria {
@@ -1687,6 +1772,18 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
    */
   ethSignatureChallenges: ETHSignatureChallenge[] = [];
 
+  /**
+   * Address checks for recipient and initiator (no sender checks for outgoing approvals).
+   *
+   * @generated from field: badges.AddressChecks recipientChecks = 12;
+   */
+  recipientChecks?: AddressChecks;
+
+  /**
+   * @generated from field: badges.AddressChecks initiatorChecks = 13;
+   */
+  initiatorChecks?: AddressChecks;
+
   constructor(data?: PartialMessage<OutgoingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1706,6 +1803,8 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
     { no: 9, name: "mustOwnTokens", kind: "message", T: MustOwnTokens, repeated: true },
     { no: 10, name: "dynamicStoreChallenges", kind: "message", T: DynamicStoreChallenge, repeated: true },
     { no: 11, name: "ethSignatureChallenges", kind: "message", T: ETHSignatureChallenge, repeated: true },
+    { no: 12, name: "recipientChecks", kind: "message", T: AddressChecks },
+    { no: 13, name: "initiatorChecks", kind: "message", T: AddressChecks },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OutgoingApprovalCriteria {
@@ -1808,6 +1907,18 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
    */
   ethSignatureChallenges: ETHSignatureChallenge[] = [];
 
+  /**
+   * Address checks for sender and initiator (no recipient checks for incoming approvals).
+   *
+   * @generated from field: badges.AddressChecks senderChecks = 12;
+   */
+  senderChecks?: AddressChecks;
+
+  /**
+   * @generated from field: badges.AddressChecks initiatorChecks = 13;
+   */
+  initiatorChecks?: AddressChecks;
+
   constructor(data?: PartialMessage<IncomingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1827,6 +1938,8 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
     { no: 9, name: "mustOwnTokens", kind: "message", T: MustOwnTokens, repeated: true },
     { no: 10, name: "dynamicStoreChallenges", kind: "message", T: DynamicStoreChallenge, repeated: true },
     { no: 11, name: "ethSignatureChallenges", kind: "message", T: ETHSignatureChallenge, repeated: true },
+    { no: 12, name: "senderChecks", kind: "message", T: AddressChecks },
+    { no: 13, name: "initiatorChecks", kind: "message", T: AddressChecks },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncomingApprovalCriteria {
