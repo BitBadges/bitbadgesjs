@@ -218,6 +218,11 @@ export interface iEstimateSwapSuccessResponse {
     tokenOutAmount: string;
     tokenInAmount: string;
     skipGoMsgs: SkipGoMessage[];
+    assetPath: {
+      denom: string;
+      chainId: string;
+      how: 'genesis' | 'swap' | 'transfer';
+    }[];
     doesSwap: boolean;
     lowLiquidityWarning?: boolean;
     complianceNotPassedWarning?: boolean;
