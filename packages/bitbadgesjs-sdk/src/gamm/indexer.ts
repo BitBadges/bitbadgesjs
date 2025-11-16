@@ -220,6 +220,7 @@ export interface iEstimateSwapSuccessResponse {
     skipGoMsgs: SkipGoMessage[];
     doesSwap: boolean;
     lowLiquidityWarning?: boolean;
+    complianceNotPassedWarning?: boolean;
   };
 }
 
