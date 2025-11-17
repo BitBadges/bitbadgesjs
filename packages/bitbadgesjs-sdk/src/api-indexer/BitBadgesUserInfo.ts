@@ -93,6 +93,9 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
 
   /** The credits for the account. */
   creatorCredits?: iCreatorCreditsDoc<T>;
+
+  /** The tags for the account. Extra descriptors for what this address is used for (e.g. "Pool", "Governance",  etc). */
+  tags?: string[];
 }
 
 /**
@@ -143,6 +146,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     collectionId?: CollectionId;
   };
   creatorCredits?: CreatorCreditsDoc<T>;
+  tags?: string[];
 
   constructor(data: iBitBadgesUserInfo<T>) {
     super(data);
@@ -173,6 +177,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.views = data.views;
     this.alias = data.alias;
     this.creatorCredits = data.creatorCredits ? new CreatorCreditsDoc(data.creatorCredits) : undefined;
+    this.tags = data.tags;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BitBadgesUserInfo<U> {
