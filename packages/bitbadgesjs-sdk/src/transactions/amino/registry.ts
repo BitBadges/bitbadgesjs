@@ -325,26 +325,26 @@ export function createIBCAminoConverters(): AminoConverters {
 
 export function createGAMMAminoConverters(): AminoConverters {
   return {
-    ...createAminoConverter(MsgJoinPool, 'gamm/join-pool'),
-    ...createAminoConverter(MsgJoinPoolResponse, 'gamm/join-pool-response'),
-    ...createAminoConverter(MsgExitPool, 'gamm/exit-pool'),
-    ...createAminoConverter(MsgExitPoolResponse, 'gamm/exit-pool-response'),
-    ...createAminoConverter(MsgSwapExactAmountIn, 'gamm/swap-exact-amount-in'),
-    ...createAminoConverter(MsgSwapExactAmountInResponse, 'gamm/swap-exact-amount-in-response'),
-    ...createAminoConverter(MsgSwapExactAmountInWithIBCTransfer, 'gamm/swap-exact-amount-in-with-ibc-transfer'),
-    ...createAminoConverter(MsgSwapExactAmountInWithIBCTransferResponse, 'gamm/swap-exact-amount-in-with-ibc-transfer-response'),
-    ...createAminoConverter(MsgSwapExactAmountOut, 'gamm/swap-exact-amount-out'),
-    ...createAminoConverter(MsgSwapExactAmountOutResponse, 'gamm/swap-exact-amount-out-response'),
-    ...createAminoConverter(MsgJoinSwapExternAmountIn, 'gamm/join-swap-extern-amount-in'),
-    ...createAminoConverter(MsgJoinSwapExternAmountInResponse, 'gamm/join-swap-extern-amount-in-response'),
-    ...createAminoConverter(MsgJoinSwapShareAmountOut, 'gamm/join-swap-share-amount-out'),
-    ...createAminoConverter(MsgJoinSwapShareAmountOutResponse, 'gamm/join-swap-share-amount-out-response'),
-    ...createAminoConverter(MsgExitSwapShareAmountIn, 'gamm/exit-swap-share-amount-in'),
-    ...createAminoConverter(MsgExitSwapShareAmountInResponse, 'gamm/exit-swap-share-amount-in-response'),
-    ...createAminoConverter(MsgExitSwapExternAmountOut, 'gamm/exit-swap-extern-amount-out'),
-    ...createAminoConverter(MsgExitSwapExternAmountOutResponse, 'gamm/exit-swap-extern-amount-out-response'),
-    ...createAminoConverter(MsgCreateBalancerPool, 'gamm/create-balancer-pool'),
-    ...createAminoConverter(MsgCreateBalancerPoolResponse, 'gamm/create-balancer-pool-response')
+    ...createAminoConverter(MsgJoinPool, 'gamm/JoinPool'),
+    ...createAminoConverter(MsgJoinPoolResponse, 'gamm/JoinPoolResponse'),
+    ...createAminoConverter(MsgExitPool, 'gamm/ExitPool'),
+    ...createAminoConverter(MsgExitPoolResponse, 'gamm/ExitPoolResponse'),
+    ...createAminoConverter(MsgSwapExactAmountIn, 'gamm/SwapExactAmountIn'),
+    ...createAminoConverter(MsgSwapExactAmountInResponse, 'gamm/SwapExactAmountInResponse'),
+    ...createAminoConverter(MsgSwapExactAmountInWithIBCTransfer, 'gamm/SwapExactAmountInWithIBCTransfer'),
+    ...createAminoConverter(MsgSwapExactAmountInWithIBCTransferResponse, 'gamm/SwapExactAmountInWithIBCTransferResponse'),
+    ...createAminoConverter(MsgSwapExactAmountOut, 'gamm/SwapExactAmountOut'),
+    ...createAminoConverter(MsgSwapExactAmountOutResponse, 'gamm/SwapExactAmountOutResponse'),
+    ...createAminoConverter(MsgJoinSwapExternAmountIn, 'gamm/JoinSwapExternAmountIn'),
+    ...createAminoConverter(MsgJoinSwapExternAmountInResponse, 'gamm/JoinSwapExternAmountInResponse'),
+    ...createAminoConverter(MsgJoinSwapShareAmountOut, 'gamm/JoinSwapShareAmountOut'),
+    ...createAminoConverter(MsgJoinSwapShareAmountOutResponse, 'gamm/JoinSwapShareAmountOutResponse'),
+    ...createAminoConverter(MsgExitSwapShareAmountIn, 'gamm/ExitSwapShareAmountIn'),
+    ...createAminoConverter(MsgExitSwapShareAmountInResponse, 'gamm/ExitSwapShareAmountInResponse'),
+    ...createAminoConverter(MsgExitSwapExternAmountOut, 'gamm/ExitSwapExternAmountOut'),
+    ...createAminoConverter(MsgExitSwapExternAmountOutResponse, 'gamm/ExitSwapExternAmountOutResponse'),
+    ...createAminoConverter(MsgCreateBalancerPool, 'gamm/CreateBalancerPool'),
+    ...createAminoConverter(MsgCreateBalancerPoolResponse, 'gamm/CreateBalancerPoolResponse')
   };
 }
 

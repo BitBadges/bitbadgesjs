@@ -1460,6 +1460,59 @@ export class AddressChecks extends Message<AddressChecks> {
 }
 
 /**
+ * AltTimeChecks defines alternative time-based checks for approval denial.
+ * If the transfer time falls within any of the specified offline hours or days, the approval is denied.
+ * Uses UTC timezone for neutral timezone approach.
+ * offlineHours: ranges of hours (0-23) when transfers should be denied
+ * offlineDays: ranges of days (0-6, where 0=Sunday, 1=Monday, ..., 6=Saturday) when transfers should be denied
+ *
+ * @generated from message badges.AltTimeChecks
+ */
+export class AltTimeChecks extends Message<AltTimeChecks> {
+  /**
+   * Hours (0-23) when transfers should be denied. Uses UTC timezone.
+   *
+   * @generated from field: repeated badges.UintRange offlineHours = 1;
+   */
+  offlineHours: UintRange[] = [];
+
+  /**
+   * Days (0-6, where 0=Sunday, 1=Monday, ..., 6=Saturday) when transfers should be denied. Uses UTC timezone.
+   *
+   * @generated from field: repeated badges.UintRange offlineDays = 2;
+   */
+  offlineDays: UintRange[] = [];
+
+  constructor(data?: PartialMessage<AltTimeChecks>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.AltTimeChecks";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "offlineHours", kind: "message", T: UintRange, repeated: true },
+    { no: 2, name: "offlineDays", kind: "message", T: UintRange, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AltTimeChecks {
+    return new AltTimeChecks().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AltTimeChecks {
+    return new AltTimeChecks().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AltTimeChecks {
+    return new AltTimeChecks().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AltTimeChecks | PlainMessage<AltTimeChecks> | undefined, b: AltTimeChecks | PlainMessage<AltTimeChecks> | undefined): boolean {
+    return proto3.util.equals(AltTimeChecks, a, b);
+  }
+}
+
+/**
  * ApprovalCriteria defines the criteria for approving transfers.
  *
  * @generated from message badges.ApprovalCriteria
@@ -1594,6 +1647,13 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
    */
   initiatorChecks?: AddressChecks;
 
+  /**
+   * Alternative time-based checks for approval denial (offline hours/days).
+   *
+   * @generated from field: badges.AltTimeChecks altTimeChecks = 20;
+   */
+  altTimeChecks?: AltTimeChecks;
+
   constructor(data?: PartialMessage<ApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1621,6 +1681,7 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
     { no: 17, name: "senderChecks", kind: "message", T: AddressChecks },
     { no: 18, name: "recipientChecks", kind: "message", T: AddressChecks },
     { no: 19, name: "initiatorChecks", kind: "message", T: AddressChecks },
+    { no: 20, name: "altTimeChecks", kind: "message", T: AltTimeChecks },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalCriteria {
@@ -1784,6 +1845,13 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
    */
   initiatorChecks?: AddressChecks;
 
+  /**
+   * Alternative time-based checks for approval denial (offline hours/days).
+   *
+   * @generated from field: badges.AltTimeChecks altTimeChecks = 14;
+   */
+  altTimeChecks?: AltTimeChecks;
+
   constructor(data?: PartialMessage<OutgoingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1805,6 +1873,7 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
     { no: 11, name: "ethSignatureChallenges", kind: "message", T: ETHSignatureChallenge, repeated: true },
     { no: 12, name: "recipientChecks", kind: "message", T: AddressChecks },
     { no: 13, name: "initiatorChecks", kind: "message", T: AddressChecks },
+    { no: 14, name: "altTimeChecks", kind: "message", T: AltTimeChecks },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OutgoingApprovalCriteria {
@@ -1919,6 +1988,13 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
    */
   initiatorChecks?: AddressChecks;
 
+  /**
+   * Alternative time-based checks for approval denial (offline hours/days).
+   *
+   * @generated from field: badges.AltTimeChecks altTimeChecks = 14;
+   */
+  altTimeChecks?: AltTimeChecks;
+
   constructor(data?: PartialMessage<IncomingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1940,6 +2016,7 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
     { no: 11, name: "ethSignatureChallenges", kind: "message", T: ETHSignatureChallenge, repeated: true },
     { no: 12, name: "senderChecks", kind: "message", T: AddressChecks },
     { no: 13, name: "initiatorChecks", kind: "message", T: AddressChecks },
+    { no: 14, name: "altTimeChecks", kind: "message", T: AltTimeChecks },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncomingApprovalCriteria {
@@ -2244,16 +2321,9 @@ export class Transfer extends Message<Transfer> {
   precalculationOptions?: PrecalculationOptions;
 
   /**
-   * Affiliate address for the transfer.
-   *
-   * @generated from field: string affiliateAddress = 13;
-   */
-  affiliateAddress = "";
-
-  /**
    * The number of times to attempt approval validation. If 0 / not specified, we default to only one.
    *
-   * @generated from field: string numAttempts = 14;
+   * @generated from field: string numAttempts = 13;
    */
   numAttempts = "";
 
@@ -2277,8 +2347,7 @@ export class Transfer extends Message<Transfer> {
     { no: 10, name: "onlyCheckPrioritizedIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 11, name: "onlyCheckPrioritizedOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 12, name: "precalculationOptions", kind: "message", T: PrecalculationOptions },
-    { no: 13, name: "affiliateAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 14, name: "numAttempts", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 13, name: "numAttempts", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Transfer {

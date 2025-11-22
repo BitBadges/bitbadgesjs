@@ -12,6 +12,13 @@ export interface iSwapAmountOutRoute<T extends NumberType> {
   tokenInDenom: string;
 }
 
+export interface iAffiliate {
+  /** basis_points_fee is the fee in basis points (1/10000, e.g., 100 = 1%) */
+  basisPointsFee: string;
+  /** address is the affiliate recipient address */
+  address: string;
+}
+
 export interface iMsgJoinPool<T extends NumberType> {
   sender: string;
   poolId: T;
@@ -40,6 +47,7 @@ export interface iMsgSwapExactAmountIn<T extends NumberType> {
   routes: iSwapAmountInRoute<T>[];
   tokenIn: iCosmosCoin<T>;
   tokenOutMinAmount: T;
+  affiliates: iAffiliate[];
 }
 
 export interface iMsgSwapExactAmountInResponse<T extends NumberType> {
@@ -59,6 +67,8 @@ export interface iMsgSwapExactAmountInWithIBCTransfer<T extends NumberType> {
   tokenIn: iCosmosCoin<T>;
   tokenOutMinAmount: T;
   ibcTransferInfo: iIBCTransferInfo<T>;
+  /** affiliates are fee recipients that receive fees calculated from token_out_min_amount */
+  affiliates: iAffiliate[];
 }
 
 export interface iMsgSwapExactAmountInWithIBCTransferResponse<T extends NumberType> {

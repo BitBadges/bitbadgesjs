@@ -32,7 +32,8 @@ import type {
   iMsgSwapExactAmountOut,
   iMsgSwapExactAmountOutResponse,
   iSwapAmountInRoute,
-  iSwapAmountOutRoute
+  iSwapAmountOutRoute,
+  iAffiliate
 } from './interfaces.js';
 
 export class SwapAmountInRoute<T extends NumberType> extends BaseNumberTypeClass<SwapAmountInRoute<T>> implements iSwapAmountInRoute<T> {
@@ -92,6 +93,65 @@ export class SwapAmountInRoute<T extends NumberType> extends BaseNumberTypeClass
 
   toCosmWasmPayloadString(): string {
     return `{"swapAmountInRoute":${normalizeMessagesIfNecessary([
+      {
+        message: this.toProto(),
+        path: this.toProto().getType().typeName
+      }
+    ])[0].message.toJsonString({ emitDefaultValues: true })} }`;
+  }
+}
+
+export class Affiliate extends BaseNumberTypeClass<Affiliate> implements iAffiliate {
+  /** basis_points_fee is the fee in basis points (1/10000, e.g., 100 = 1%) */
+  basisPointsFee: string;
+  /** address is the affiliate recipient address */
+  address: string;
+
+  constructor(data: iAffiliate) {
+    super();
+    this.basisPointsFee = data.basisPointsFee;
+    this.address = data.address;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Affiliate {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Affiliate;
+  }
+
+  toProto(): protopoolmanager.Affiliate {
+    return new protopoolmanager.Affiliate({
+      basisPointsFee: this.basisPointsFee,
+      address: this.address
+    });
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Affiliate {
+    return Affiliate.fromProto(protopoolmanager.Affiliate.fromJson(jsonValue, options));
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Affiliate {
+    return Affiliate.fromProto(protopoolmanager.Affiliate.fromJsonString(jsonString, options));
+  }
+
+  static fromProto(item: protopoolmanager.Affiliate): Affiliate {
+    return new Affiliate({
+      basisPointsFee: item.basisPointsFee,
+      address: item.address
+    });
+  }
+
+  toBech32Addresses(prefix: string): Affiliate {
+    return new Affiliate({
+      basisPointsFee: this.basisPointsFee,
+      address: getConvertFunctionFromPrefix(prefix)(this.address)
+    });
+  }
+
+  toCosmWasmPayloadString(): string {
+    return `{"affiliate":${normalizeMessagesIfNecessary([
       {
         message: this.toProto(),
         path: this.toProto().getType().typeName
@@ -465,6 +525,7 @@ export class MsgSwapExactAmountIn<T extends NumberType> extends BaseNumberTypeCl
   routes: SwapAmountInRoute<T>[];
   tokenIn: CosmosCoin<T>;
   tokenOutMinAmount: T;
+  affiliates: Affiliate[];
 
   constructor(data: iMsgSwapExactAmountIn<T>) {
     super();
@@ -472,6 +533,7 @@ export class MsgSwapExactAmountIn<T extends NumberType> extends BaseNumberTypeCl
     this.routes = data.routes.map((route) => new SwapAmountInRoute(route));
     this.tokenIn = new CosmosCoin<T>(data.tokenIn);
     this.tokenOutMinAmount = data.tokenOutMinAmount;
+    this.affiliates = (data.affiliates || []).map((affiliate) => new Affiliate(affiliate));
   }
 
   getNumberFieldNames(): string[] {
@@ -487,7 +549,8 @@ export class MsgSwapExactAmountIn<T extends NumberType> extends BaseNumberTypeCl
       sender: this.sender,
       routes: this.routes.map((route) => new SwapAmountInRoute(route).toProto()),
       tokenIn: new CosmosCoin(this.tokenIn).convert(Stringify),
-      tokenOutMinAmount: Stringify(this.tokenOutMinAmount)
+      tokenOutMinAmount: Stringify(this.tokenOutMinAmount),
+      affiliates: this.affiliates.map((affiliate) => affiliate.toProto())
     });
   }
 
@@ -515,7 +578,8 @@ export class MsgSwapExactAmountIn<T extends NumberType> extends BaseNumberTypeCl
         amount: convertFunction(BigInt(item.tokenIn!.amount)),
         denom: item.tokenIn!.denom
       }).convert(convertFunction),
-      tokenOutMinAmount: convertFunction(BigInt(item.tokenOutMinAmount))
+      tokenOutMinAmount: convertFunction(BigInt(item.tokenOutMinAmount)),
+      affiliates: (item.affiliates || []).map((affiliate) => Affiliate.fromProto(affiliate))
     });
   }
 
@@ -524,7 +588,8 @@ export class MsgSwapExactAmountIn<T extends NumberType> extends BaseNumberTypeCl
       sender: getConvertFunctionFromPrefix(prefix)(this.sender),
       routes: this.routes,
       tokenIn: this.tokenIn,
-      tokenOutMinAmount: this.tokenOutMinAmount
+      tokenOutMinAmount: this.tokenOutMinAmount,
+      affiliates: this.affiliates.map((affiliate) => affiliate.toBech32Addresses(prefix))
     });
   }
 
@@ -688,6 +753,7 @@ export class MsgSwapExactAmountInWithIBCTransfer<T extends NumberType>
   tokenIn: CosmosCoin<T>;
   tokenOutMinAmount: T;
   ibcTransferInfo: IBCTransferInfo<T>;
+  affiliates: Affiliate[];
 
   constructor(data: iMsgSwapExactAmountInWithIBCTransfer<T>) {
     super();
@@ -696,6 +762,7 @@ export class MsgSwapExactAmountInWithIBCTransfer<T extends NumberType>
     this.tokenIn = new CosmosCoin<T>(data.tokenIn);
     this.tokenOutMinAmount = data.tokenOutMinAmount;
     this.ibcTransferInfo = new IBCTransferInfo<T>(data.ibcTransferInfo);
+    this.affiliates = (data.affiliates || []).map((affiliate) => new Affiliate(affiliate));
   }
 
   getNumberFieldNames(): string[] {
@@ -712,7 +779,8 @@ export class MsgSwapExactAmountInWithIBCTransfer<T extends NumberType>
       routes: this.routes.map((route) => new SwapAmountInRoute(route).toProto()),
       tokenIn: new CosmosCoin(this.tokenIn).convert(Stringify),
       tokenOutMinAmount: Stringify(this.tokenOutMinAmount),
-      ibcTransferInfo: this.ibcTransferInfo.toProto()
+      ibcTransferInfo: this.ibcTransferInfo.toProto(),
+      affiliates: this.affiliates.map((affiliate) => affiliate.toProto())
     });
   }
 
@@ -729,7 +797,10 @@ export class MsgSwapExactAmountInWithIBCTransfer<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MsgSwapExactAmountInWithIBCTransfer<U> {
-    return MsgSwapExactAmountInWithIBCTransfer.fromProto(protogamm.MsgSwapExactAmountInWithIBCTransfer.fromJsonString(jsonString, options), convertFunction);
+    return MsgSwapExactAmountInWithIBCTransfer.fromProto(
+      protogamm.MsgSwapExactAmountInWithIBCTransfer.fromJsonString(jsonString, options),
+      convertFunction
+    );
   }
 
   static fromProto<U extends NumberType>(
@@ -744,12 +815,15 @@ export class MsgSwapExactAmountInWithIBCTransfer<T extends NumberType>
         denom: item.tokenIn!.denom
       }).convert(convertFunction),
       tokenOutMinAmount: convertFunction(BigInt(item.tokenOutMinAmount)),
-      ibcTransferInfo: item.ibcTransferInfo ? IBCTransferInfo.fromProto(item.ibcTransferInfo, convertFunction) : {
-        sourceChannel: '',
-        receiver: '',
-        memo: '',
-        timeoutTimestamp: convertFunction(0n)
-      }
+      ibcTransferInfo: item.ibcTransferInfo
+        ? IBCTransferInfo.fromProto(item.ibcTransferInfo, convertFunction)
+        : {
+            sourceChannel: '',
+            receiver: '',
+            memo: '',
+            timeoutTimestamp: convertFunction(0n)
+          },
+      affiliates: (item.affiliates || []).map((affiliate) => Affiliate.fromProto(affiliate))
     });
   }
 
@@ -759,7 +833,8 @@ export class MsgSwapExactAmountInWithIBCTransfer<T extends NumberType>
       routes: this.routes,
       tokenIn: this.tokenIn,
       tokenOutMinAmount: this.tokenOutMinAmount,
-      ibcTransferInfo: this.ibcTransferInfo
+      ibcTransferInfo: this.ibcTransferInfo,
+      affiliates: this.affiliates.map((affiliate) => affiliate.toBech32Addresses(prefix))
     });
   }
 
@@ -788,10 +863,7 @@ export class MsgSwapExactAmountInWithIBCTransferResponse<T extends NumberType>
     return ['tokenOutAmount'];
   }
 
-  convert<U extends NumberType>(
-    convertFunction: (item: NumberType) => U,
-    options?: ConvertOptions
-  ): MsgSwapExactAmountInWithIBCTransferResponse<U> {
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgSwapExactAmountInWithIBCTransferResponse<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountInWithIBCTransferResponse<U>;
   }
 
