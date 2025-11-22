@@ -27,6 +27,16 @@ export interface iAddressChecks {
 /**
  * @category Interfaces
  */
+export interface iAltTimeChecks<T extends NumberType> {
+  /** Hours (0-23) when transfers should be denied. Uses UTC timezone. */
+  offlineHours?: iUintRange<T>[];
+  /** Days (0-6, where 0=Sunday, 1=Monday, ..., 6=Saturday) when transfers should be denied. Uses UTC timezone. */
+  offlineDays?: iUintRange<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iUserOutgoingApproval<T extends NumberType> {
   /** The list ID for the user(s) who is sending the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   toListId: string;
@@ -80,6 +90,8 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   recipientChecks?: iAddressChecks;
   /** Address checks for initiator */
   initiatorChecks?: iAddressChecks;
+  /** Alternative time-based checks for approval denial (offline hours/days). */
+  altTimeChecks?: iAltTimeChecks<T>;
 }
 
 /**
@@ -268,6 +280,8 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   senderChecks?: iAddressChecks;
   /** Address checks for initiator */
   initiatorChecks?: iAddressChecks;
+  /** Alternative time-based checks for approval denial (offline hours/days). */
+  altTimeChecks?: iAltTimeChecks<T>;
 }
 
 /**
@@ -340,6 +354,8 @@ export interface iApprovalCriteria<T extends NumberType> {
   recipientChecks?: iAddressChecks;
   /** Address checks for initiator */
   initiatorChecks?: iAddressChecks;
+  /** Alternative time-based checks for approval denial (offline hours/days). */
+  altTimeChecks?: iAltTimeChecks<T>;
 }
 
 /**

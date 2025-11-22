@@ -30,7 +30,6 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
   onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
   precalculationOptions?: PrecalculationOptions<T>;
-  affiliateAddress?: string;
   numAttempts?: T;
 
   constructor(transfer: iTransfer<T>) {
@@ -52,7 +51,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
     this.onlyCheckPrioritizedIncomingApprovals = transfer.onlyCheckPrioritizedIncomingApprovals;
     this.onlyCheckPrioritizedOutgoingApprovals = transfer.onlyCheckPrioritizedOutgoingApprovals;
     this.precalculationOptions = transfer.precalculationOptions ? new PrecalculationOptions(transfer.precalculationOptions) : undefined;
-    this.affiliateAddress = transfer.affiliateAddress;
+
     this.numAttempts = transfer.numAttempts;
   }
 
@@ -103,7 +102,6 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       onlyCheckPrioritizedIncomingApprovals: item.onlyCheckPrioritizedIncomingApprovals,
       onlyCheckPrioritizedOutgoingApprovals: item.onlyCheckPrioritizedOutgoingApprovals,
       precalculationOptions: item.precalculationOptions ? PrecalculationOptions.fromProto(item.precalculationOptions, convertFunction) : undefined,
-      affiliateAddress: item.affiliateAddress,
       numAttempts: item.numAttempts ? convertFunction(item.numAttempts) : undefined
     });
   }
@@ -116,7 +114,6 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       precalculateBalancesFromApproval: this.precalculateBalancesFromApproval?.toBech32Addresses(prefix),
       prioritizedApprovals: this.prioritizedApprovals?.map((x) => x.toBech32Addresses(prefix)),
       precalculationOptions: this.precalculationOptions ? new PrecalculationOptions(this.precalculationOptions) : undefined,
-      affiliateAddress: this.affiliateAddress,
       numAttempts: this.numAttempts
     });
   }

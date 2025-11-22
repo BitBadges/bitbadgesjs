@@ -17,6 +17,7 @@ import {
   ActionPermission,
   AddressChecks,
   AddressList,
+  AltTimeChecks,
   ApprovalAmounts,
   ApprovalCriteria,
   ApprovalIdentifierDetails,
@@ -137,7 +138,7 @@ import {
   MsgUpdateManagerSplitter
 } from '@/proto/managersplitter/tx_pb.js';
 import { ManagerSplitterPermissions, PermissionCriteria } from '@/proto/managersplitter/permissions_pb.js';
-import { SwapAmountInRoute, SwapAmountOutRoute } from '@/proto/poolmanager/v1beta1/swap_route_pb.js';
+import { Affiliate, SwapAmountInRoute, SwapAmountOutRoute } from '@/proto/poolmanager/v1beta1/swap_route_pb.js';
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
 import { ProtoTypeRegistry } from '@/transactions/amino/objectConverter.js';
 
@@ -254,6 +255,10 @@ const approvalCriteria = new ApprovalCriteria({
     mustNotBeWasmContract: false,
     mustBeLiquidityPool: false,
     mustNotBeLiquidityPool: false
+  }),
+  altTimeChecks: new AltTimeChecks({
+    offlineHours: [new UintRange()],
+    offlineDays: [new UintRange()]
   })
 }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) as object;
 
@@ -297,6 +302,10 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
     afterOverallMaxNumTransfers: false,
     allowCounterpartyPurge: false,
     allowPurgeIfExpired: false
+  }),
+  altTimeChecks: new AltTimeChecks({
+    offlineHours: [],
+    offlineDays: []
   })
 }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) as object;
 
@@ -472,6 +481,16 @@ function populateAddressChecks(addressChecks?: AddressChecks): AddressChecks {
   return addressChecks;
 }
 
+function populateAltTimeChecks(altTimeChecks?: AltTimeChecks): AltTimeChecks {
+  if (!altTimeChecks) {
+    return new AltTimeChecks({
+      offlineHours: [],
+      offlineDays: []
+    });
+  }
+  return altTimeChecks;
+}
+
 export function populateUndefinedForMsgTransferTokens(msg: MsgTransferTokens) {
   for (const transfer of msg.transfers) {
     if (!transfer.numAttempts) {
@@ -511,6 +530,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
     approval.approvalCriteria.recipientChecks = populateAddressChecks(approval.approvalCriteria.recipientChecks);
     approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
+    approval.approvalCriteria.altTimeChecks = populateAltTimeChecks(approval.approvalCriteria.altTimeChecks);
   }
   for (const approval of msg.incomingApprovals) {
     if (!approval.approvalCriteria) {
@@ -526,6 +546,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
     approval.approvalCriteria.senderChecks = populateAddressChecks(approval.approvalCriteria.senderChecks);
     approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
+    approval.approvalCriteria.altTimeChecks = populateAltTimeChecks(approval.approvalCriteria.altTimeChecks);
   }
   return msg;
 }
@@ -633,6 +654,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
       approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
       approval.approvalCriteria.recipientChecks = populateAddressChecks(approval.approvalCriteria.recipientChecks);
       approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
+      approval.approvalCriteria.altTimeChecks = populateAltTimeChecks(approval.approvalCriteria.altTimeChecks);
     }
   }
 
@@ -650,6 +672,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
     approval.approvalCriteria.senderChecks = populateAddressChecks(approval.approvalCriteria.senderChecks);
     approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
+    approval.approvalCriteria.altTimeChecks = populateAltTimeChecks(approval.approvalCriteria.altTimeChecks);
   }
 
   for (const approval of msg.collectionApprovals) {
@@ -668,6 +691,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     approval.approvalCriteria.senderChecks = populateAddressChecks(approval.approvalCriteria.senderChecks);
     approval.approvalCriteria.recipientChecks = populateAddressChecks(approval.approvalCriteria.recipientChecks);
     approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
+    approval.approvalCriteria.altTimeChecks = populateAltTimeChecks(approval.approvalCriteria.altTimeChecks);
   }
 
   for (const metadata of msg.collectionMetadataTimeline) {
@@ -741,6 +765,7 @@ export function populateUndefinedForMsgSetIncomingApproval(msg: MsgSetIncomingAp
   msg.approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(msg.approval.approvalCriteria.ethSignatureChallenges);
   msg.approval.approvalCriteria.senderChecks = populateAddressChecks(msg.approval.approvalCriteria.senderChecks);
   msg.approval.approvalCriteria.initiatorChecks = populateAddressChecks(msg.approval.approvalCriteria.initiatorChecks);
+  msg.approval.approvalCriteria.altTimeChecks = populateAltTimeChecks(msg.approval.approvalCriteria.altTimeChecks);
 
   return msg;
 }
@@ -763,6 +788,7 @@ export function populateUndefinedForMsgSetOutgoingApproval(msg: MsgSetOutgoingAp
   msg.approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(msg.approval.approvalCriteria.ethSignatureChallenges);
   msg.approval.approvalCriteria.recipientChecks = populateAddressChecks(msg.approval.approvalCriteria.recipientChecks);
   msg.approval.approvalCriteria.initiatorChecks = populateAddressChecks(msg.approval.approvalCriteria.initiatorChecks);
+  msg.approval.approvalCriteria.altTimeChecks = populateAltTimeChecks(msg.approval.approvalCriteria.altTimeChecks);
 
   return msg;
 }
@@ -1692,10 +1718,16 @@ export function getSampleMsg(msgType: string, currMsg: any) {
             amount: '0',
             denom: ''
           }),
-          tokenOutMinAmount: '0'
+          tokenOutMinAmount: '0',
+          affiliates: [
+            new Affiliate({
+              basisPointsFee: '0',
+              address: ''
+            })
+          ]
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
-    case 'gamm/swap-exact-amount-in-with-ibc-transfer':
+    case 'gamm/SwapExactAmountInWithIBCTransfer':
       return {
         type: msgType,
         value: new MsgSwapExactAmountInWithIBCTransfer({
@@ -1716,7 +1748,13 @@ export function getSampleMsg(msgType: string, currMsg: any) {
             receiver: '',
             memo: '',
             timeoutTimestamp: 0n
-          }
+          },
+          affiliates: [
+            new Affiliate({
+              basisPointsFee: '0',
+              address: ''
+            })
+          ]
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'gamm/SwapExactAmountOut':

@@ -208,8 +208,24 @@ interface SkipGoMessage {
 export interface iEstimateSwapPayload {
   /** The token in to swap. Format: "amount:X,denom:Y" */
   tokenIn: string;
+  /** Optional chain ID for the token in. Defaults to "bitbadges-1" if not provided. */
+  tokenInChainId?: string;
   /** The token out denom to swap to. */
   tokenOutDenom: string;
+  /** Optional chain ID for the token out. Defaults to "bitbadges-1" if not provided. */
+  tokenOutChainId?: string;
+  /**
+   * Mapping of chain IDs to addresses. Must include "bitbadges-1" with a valid BitBadges address.
+   * Other chain addresses will be generated automatically from the bitbadges-1 address.
+   */
+  chainIdsToAddresses: Record<string, string>;
+  /**
+   * Optional mapping of chain IDs to affiliate fee recipients.
+   * Structure: { [chainId]: { affiliates: Array<{ address: string; basis_points_fee: string }> } }
+   */
+  chainIdsToAffiliates?: Record<string, { affiliates: Array<{ address: string; basis_points_fee: string }> }>;
+  /** Slippage tolerance as a percentage (0-100). Can be a string or number. */
+  slippageTolerancePercent: string | number;
 }
 
 export interface iEstimateSwapSuccessResponse {

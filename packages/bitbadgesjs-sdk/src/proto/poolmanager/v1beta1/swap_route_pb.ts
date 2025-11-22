@@ -178,3 +178,53 @@ export class SwapAmountOutSplitRoute extends Message<SwapAmountOutSplitRoute> {
   }
 }
 
+/**
+ * ===================== Affiliate
+ * Affiliate represents an affiliate fee recipient
+ *
+ * @generated from message poolmanager.v1beta1.Affiliate
+ */
+export class Affiliate extends Message<Affiliate> {
+  /**
+   * basis_points_fee is the fee in basis points (1/10000, e.g., 100 = 1%)
+   *
+   * @generated from field: string basis_points_fee = 1;
+   */
+  basisPointsFee = "";
+
+  /**
+   * address is the affiliate recipient address
+   *
+   * @generated from field: string address = 2;
+   */
+  address = "";
+
+  constructor(data?: PartialMessage<Affiliate>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "poolmanager.v1beta1.Affiliate";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "basis_points_fee", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Affiliate {
+    return new Affiliate().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Affiliate {
+    return new Affiliate().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Affiliate {
+    return new Affiliate().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Affiliate | PlainMessage<Affiliate> | undefined, b: Affiliate | PlainMessage<Affiliate> | undefined): boolean {
+    return proto3.util.equals(Affiliate, a, b);
+  }
+}
+

@@ -6,7 +6,7 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
 import { Coin } from "../../cosmos/base/v1beta1/coin_pb.js";
-import { SwapAmountInRoute, SwapAmountOutRoute } from "../../poolmanager/v1beta1/swap_route_pb.js";
+import { Affiliate, SwapAmountInRoute, SwapAmountOutRoute } from "../../poolmanager/v1beta1/swap_route_pb.js";
 
 /**
  * ===================== MsgJoinPool
@@ -229,6 +229,13 @@ export class MsgSwapExactAmountIn extends Message<MsgSwapExactAmountIn> {
    */
   tokenOutMinAmount = "";
 
+  /**
+   * affiliates are optional fee recipients that receive fees calculated from token_out_min_amount
+   *
+   * @generated from field: repeated poolmanager.v1beta1.Affiliate affiliates = 5;
+   */
+  affiliates: Affiliate[] = [];
+
   constructor(data?: PartialMessage<MsgSwapExactAmountIn>) {
     super();
     proto3.util.initPartial(data, this);
@@ -241,6 +248,7 @@ export class MsgSwapExactAmountIn extends Message<MsgSwapExactAmountIn> {
     { no: 2, name: "routes", kind: "message", T: SwapAmountInRoute, repeated: true },
     { no: 3, name: "token_in", kind: "message", T: Coin },
     { no: 4, name: "token_out_min_amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "affiliates", kind: "message", T: Affiliate, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSwapExactAmountIn {
@@ -385,6 +393,13 @@ export class MsgSwapExactAmountInWithIBCTransfer extends Message<MsgSwapExactAmo
    */
   ibcTransferInfo?: IBCTransferInfo;
 
+  /**
+   * affiliates are optional fee recipients that receive fees calculated from token_out_min_amount
+   *
+   * @generated from field: repeated poolmanager.v1beta1.Affiliate affiliates = 6;
+   */
+  affiliates: Affiliate[] = [];
+
   constructor(data?: PartialMessage<MsgSwapExactAmountInWithIBCTransfer>) {
     super();
     proto3.util.initPartial(data, this);
@@ -398,6 +413,7 @@ export class MsgSwapExactAmountInWithIBCTransfer extends Message<MsgSwapExactAmo
     { no: 3, name: "token_in", kind: "message", T: Coin },
     { no: 4, name: "token_out_min_amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "ibc_transfer_info", kind: "message", T: IBCTransferInfo },
+    { no: 6, name: "affiliates", kind: "message", T: Affiliate, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSwapExactAmountInWithIBCTransfer {

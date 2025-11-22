@@ -20,6 +20,7 @@ import {
 } from '@/common/base.js';
 import type {
   iAddressChecks,
+  iAltTimeChecks,
   iApprovalAmounts,
   iApprovalCriteria,
   iAutoDeletionOptions,
@@ -241,7 +242,7 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
   }
 
   toProto(): protobadges.UserOutgoingApproval {
-    return new protobadges.UserOutgoingApproval(this.convert(Stringify));
+    return new protobadges.UserOutgoingApproval(this.convert(Stringify) as any);
   }
 
   static fromJson<U extends NumberType>(
@@ -316,6 +317,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   ethSignatureChallenges?: ETHSignatureChallenge[];
   recipientChecks?: AddressChecks;
   initiatorChecks?: AddressChecks;
+  altTimeChecks?: AltTimeChecks<T>;
 
   constructor(msg: iOutgoingApprovalCriteria<T>) {
     super();
@@ -332,6 +334,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     this.ethSignatureChallenges = msg.ethSignatureChallenges?.map((x) => new ETHSignatureChallenge(x));
     this.recipientChecks = msg.recipientChecks ? new AddressChecks(msg.recipientChecks) : undefined;
     this.initiatorChecks = msg.initiatorChecks ? new AddressChecks(msg.initiatorChecks) : undefined;
+    this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks(msg.altTimeChecks) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteria<U> {
@@ -348,12 +351,13 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       dynamicStoreChallenges: this.dynamicStoreChallenges?.map((x) => x.convert(convertFunction)),
       ethSignatureChallenges: this.ethSignatureChallenges,
       recipientChecks: this.recipientChecks?.convert(convertFunction),
-      initiatorChecks: this.initiatorChecks?.convert(convertFunction)
+      initiatorChecks: this.initiatorChecks?.convert(convertFunction),
+      altTimeChecks: this.altTimeChecks?.convert(convertFunction)
     });
   }
 
   toProto(): protobadges.OutgoingApprovalCriteria {
-    return new protobadges.OutgoingApprovalCriteria(this.convert(Stringify));
+    return new protobadges.OutgoingApprovalCriteria(this.convert(Stringify) as any);
   }
 
   static fromJson<U extends NumberType>(
@@ -391,7 +395,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
         : undefined,
       ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined,
       recipientChecks: item.recipientChecks ? AddressChecks.fromProto(item.recipientChecks) : undefined,
-      initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined
+      initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined,
+      altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined
     });
   }
 
@@ -410,6 +415,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       ethSignatureChallenges: this.ethSignatureChallenges,
       recipientChecks: this.recipientChecks,
       initiatorChecks: this.initiatorChecks,
+      altTimeChecks: this.altTimeChecks,
 
       requireFromEqualsInitiatedBy: false,
       requireFromDoesNotEqualInitiatedBy: false,
@@ -1046,7 +1052,7 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
   }
 
   toProto(): protobadges.UserIncomingApproval {
-    return new protobadges.UserIncomingApproval(this.convert(Stringify));
+    return new protobadges.UserIncomingApproval(this.convert(Stringify) as any);
   }
 
   static fromJson<U extends NumberType>(
@@ -1120,6 +1126,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   ethSignatureChallenges?: ETHSignatureChallenge[];
   senderChecks?: AddressChecks;
   initiatorChecks?: AddressChecks;
+  altTimeChecks?: AltTimeChecks<T>;
 
   constructor(msg: iIncomingApprovalCriteria<T>) {
     super();
@@ -1136,6 +1143,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
     this.ethSignatureChallenges = msg.ethSignatureChallenges?.map((x) => new ETHSignatureChallenge(x));
     this.senderChecks = msg.senderChecks ? new AddressChecks(msg.senderChecks) : undefined;
     this.initiatorChecks = msg.initiatorChecks ? new AddressChecks(msg.initiatorChecks) : undefined;
+    this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks(msg.altTimeChecks) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteria<U> {
@@ -1152,12 +1160,13 @@ export class IncomingApprovalCriteria<T extends NumberType>
       dynamicStoreChallenges: this.dynamicStoreChallenges?.map((x) => x.convert(convertFunction)),
       ethSignatureChallenges: this.ethSignatureChallenges,
       senderChecks: this.senderChecks?.convert(convertFunction),
-      initiatorChecks: this.initiatorChecks?.convert(convertFunction)
+      initiatorChecks: this.initiatorChecks?.convert(convertFunction),
+      altTimeChecks: this.altTimeChecks?.convert(convertFunction)
     });
   }
 
   toProto(): protobadges.IncomingApprovalCriteria {
-    return new protobadges.IncomingApprovalCriteria(this.convert(Stringify));
+    return new protobadges.IncomingApprovalCriteria(this.convert(Stringify) as any);
   }
 
   static fromJson<U extends NumberType>(
@@ -1195,7 +1204,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
         : undefined,
       ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined,
       senderChecks: item.senderChecks ? AddressChecks.fromProto(item.senderChecks) : undefined,
-      initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined
+      initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined,
+      altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined
     });
   }
 
@@ -1214,6 +1224,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
       ethSignatureChallenges: this.ethSignatureChallenges,
       senderChecks: this.senderChecks,
       initiatorChecks: this.initiatorChecks,
+      altTimeChecks: this.altTimeChecks,
 
       requireToEqualsInitiatedBy: false,
       requireToDoesNotEqualInitiatedBy: false,
@@ -1284,7 +1295,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
   }
 
   toProto(): protobadges.CollectionApproval {
-    return new protobadges.CollectionApproval(this.convert(Stringify));
+    return new protobadges.CollectionApproval(this.convert(Stringify) as any);
   }
 
   static fromJson<U extends NumberType>(
@@ -1463,6 +1474,61 @@ export class AddressChecks extends CustomTypeClass<AddressChecks> implements iAd
 }
 
 /**
+ * AltTimeChecks defines alternative time-based checks for approval denial.
+ * If the transfer time falls within any of the specified offline hours or days, the approval is denied.
+ * Uses UTC timezone for neutral timezone approach.
+ *
+ * @category Approvals / Transferability
+ */
+export class AltTimeChecks<T extends NumberType> extends BaseNumberTypeClass<AltTimeChecks<T>> implements iAltTimeChecks<T> {
+  offlineHours?: UintRangeArray<T>;
+  offlineDays?: UintRangeArray<T>;
+
+  constructor(msg: iAltTimeChecks<T>) {
+    super();
+    this.offlineHours = msg.offlineHours ? UintRangeArray.From(msg.offlineHours) : undefined;
+    this.offlineDays = msg.offlineDays ? UintRangeArray.From(msg.offlineDays) : undefined;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AltTimeChecks<U> {
+    return new AltTimeChecks<U>({
+      offlineHours: this.offlineHours?.map((x) => x.convert(convertFunction)),
+      offlineDays: this.offlineDays?.map((x) => x.convert(convertFunction))
+    });
+  }
+
+  toProto(): protobadges.AltTimeChecks {
+    return new protobadges.AltTimeChecks({
+      offlineHours: this.offlineHours?.map((x) => x.convert(Stringify).toProto()) ?? [],
+      offlineDays: this.offlineDays?.map((x) => x.convert(Stringify).toProto()) ?? []
+    });
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): AltTimeChecks<U> {
+    return AltTimeChecks.fromProto(protobadges.AltTimeChecks.fromJson(jsonValue, options), convertFunction);
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): AltTimeChecks<U> {
+    return AltTimeChecks.fromProto(protobadges.AltTimeChecks.fromJsonString(jsonString, options), convertFunction);
+  }
+
+  static fromProto<U extends NumberType>(item: protobadges.AltTimeChecks, convertFunction: (item: NumberType) => U): AltTimeChecks<U> {
+    return new AltTimeChecks({
+      offlineHours: item.offlineHours.map((x) => UintRange.fromProto(x, convertFunction)),
+      offlineDays: item.offlineDays.map((x) => UintRange.fromProto(x, convertFunction))
+    });
+  }
+}
+
+/**
  * @category Approvals / Transferability
  */
 export class UserRoyalties<T extends NumberType> extends BaseNumberTypeClass<UserRoyalties<T>> implements iUserRoyalties<T> {
@@ -1534,6 +1600,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   senderChecks?: AddressChecks;
   recipientChecks?: AddressChecks;
   initiatorChecks?: AddressChecks;
+  altTimeChecks?: AltTimeChecks<T>;
 
   constructor(msg: iApprovalCriteria<T>) {
     super();
@@ -1556,6 +1623,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.senderChecks = msg.senderChecks ? new AddressChecks(msg.senderChecks) : undefined;
     this.recipientChecks = msg.recipientChecks ? new AddressChecks(msg.recipientChecks) : undefined;
     this.initiatorChecks = msg.initiatorChecks ? new AddressChecks(msg.initiatorChecks) : undefined;
+    this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks<T>(msg.altTimeChecks) : undefined;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteria<U> {
@@ -1563,7 +1631,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   }
 
   toProto(): protobadges.ApprovalCriteria {
-    return new protobadges.ApprovalCriteria(this.convert(Stringify));
+    return new protobadges.ApprovalCriteria(this.convert(Stringify) as any);
   }
 
   static fromJson<U extends NumberType>(
@@ -1604,7 +1672,8 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined,
       senderChecks: item.senderChecks ? AddressChecks.fromProto(item.senderChecks) : undefined,
       recipientChecks: item.recipientChecks ? AddressChecks.fromProto(item.recipientChecks) : undefined,
-      initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined
+      initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined,
+      altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined
     });
   }
 
@@ -1936,14 +2005,21 @@ export class IncomingApprovalCriteriaWithDetails<T extends NumberType>
     return new ApprovalCriteriaWithDetails({
       approvalAmounts: this.approvalAmounts,
       maxNumTransfers: this.maxNumTransfers,
+      requireFromEqualsInitiatedBy: this.requireFromEqualsInitiatedBy,
+      requireFromDoesNotEqualInitiatedBy: this.requireFromDoesNotEqualInitiatedBy,
       predeterminedBalances: this.predeterminedBalances,
       merkleChallenges: this.merkleChallenges,
-      mustOwnTokens: this.mustOwnTokens,
       coinTransfers: this.coinTransfers,
       autoDeletionOptions: this.autoDeletionOptions,
+      mustOwnTokens: this.mustOwnTokens,
+      dynamicStoreChallenges: this.dynamicStoreChallenges,
+      ethSignatureChallenges: this.ethSignatureChallenges,
+      senderChecks: this.senderChecks,
+      initiatorChecks: this.initiatorChecks,
+      altTimeChecks: this.altTimeChecks,
 
-      requireFromEqualsInitiatedBy: false,
-      requireFromDoesNotEqualInitiatedBy: false,
+      requireToEqualsInitiatedBy: false,
+      requireToDoesNotEqualInitiatedBy: false,
       overridesFromOutgoingApprovals: false,
       overridesToIncomingApprovals: false
     });
@@ -1981,15 +2057,23 @@ export class OutgoingApprovalCriteriaWithDetails<T extends NumberType>
 
   castToCollectionApprovalCriteria(): ApprovalCriteriaWithDetails<T> {
     return new ApprovalCriteriaWithDetails({
+      predeterminedBalances: this.predeterminedBalances,
       approvalAmounts: this.approvalAmounts,
       maxNumTransfers: this.maxNumTransfers,
-      predeterminedBalances: this.predeterminedBalances,
+      autoDeletionOptions: this.autoDeletionOptions,
+      requireToEqualsInitiatedBy: this.requireToEqualsInitiatedBy,
+      requireToDoesNotEqualInitiatedBy: this.requireToDoesNotEqualInitiatedBy,
       merkleChallenges: this.merkleChallenges,
       mustOwnTokens: this.mustOwnTokens,
       coinTransfers: this.coinTransfers,
-      autoDeletionOptions: this.autoDeletionOptions,
-      requireToEqualsInitiatedBy: false,
-      requireToDoesNotEqualInitiatedBy: false,
+      dynamicStoreChallenges: this.dynamicStoreChallenges,
+      ethSignatureChallenges: this.ethSignatureChallenges,
+      recipientChecks: this.recipientChecks,
+      initiatorChecks: this.initiatorChecks,
+      altTimeChecks: this.altTimeChecks,
+
+      requireFromEqualsInitiatedBy: false,
+      requireFromDoesNotEqualInitiatedBy: false,
       overridesFromOutgoingApprovals: false,
       overridesToIncomingApprovals: false
     });
