@@ -1834,6 +1834,7 @@ export class AssetInfoDoc<T extends NumberType> extends CustomTypeClass<AssetInf
     }>;
   };
   verified?: boolean;
+  calculationType?: string;
 
   constructor(data: iAssetInfoDoc<T>) {
     super();
@@ -1849,6 +1850,7 @@ export class AssetInfoDoc<T extends NumberType> extends CustomTypeClass<AssetInf
     this.percentageChange7d = data.percentageChange7d;
     this.recentPriceTrend = data.recentPriceTrend;
     this.verified = data.verified;
+    this.calculationType = data.calculationType;
   }
 
   getNumberFieldNames(): string[] {

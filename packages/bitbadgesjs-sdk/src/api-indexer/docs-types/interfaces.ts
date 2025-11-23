@@ -537,6 +537,8 @@ export interface iAssetInfoDoc<T extends NumberType> extends Doc {
   };
   /** Whether this asset is verified */
   verified?: boolean;
+  /** Calculation type for the asset */
+  calculationType?: string;
 }
 
 /**
