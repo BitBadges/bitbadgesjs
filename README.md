@@ -12,7 +12,7 @@ Reference repositories that use the SDK:
 See [full documentation](full-documentation.md) for complete documentation on each library. Also, the BitBadges official indexer source code and BitBadges official frontend code both use the SDK, so please feel free to reference them.
 
 ```
-npm install bitbadgesjs-sdk@^0.21.0
+npm install bitbadgesjs-sdk@^0.26.0
 ```
 
 This library provides miscellaneous functionality to help you interact with BitBadges, such as types, API routes, managing metadata requests, logic with ID ranges and balances, etc.
