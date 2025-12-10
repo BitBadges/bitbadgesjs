@@ -92,6 +92,8 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   initiatorChecks?: iAddressChecks;
   /** Alternative time-based checks for approval denial (offline hours/days). */
   altTimeChecks?: iAltTimeChecks<T>;
+  /** If true, this approval must be explicitly prioritized in PrioritizedApprovals to be used. */
+  mustPrioritize?: boolean;
 }
 
 /**
@@ -282,6 +284,8 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   initiatorChecks?: iAddressChecks;
   /** Alternative time-based checks for approval denial (offline hours/days). */
   altTimeChecks?: iAltTimeChecks<T>;
+  /** If true, this approval must be explicitly prioritized in PrioritizedApprovals to be used. */
+  mustPrioritize?: boolean;
 }
 
 /**
@@ -356,6 +360,8 @@ export interface iApprovalCriteria<T extends NumberType> {
   initiatorChecks?: iAddressChecks;
   /** Alternative time-based checks for approval denial (offline hours/days). */
   altTimeChecks?: iAltTimeChecks<T>;
+  /** If true, this approval must be explicitly prioritized in PrioritizedApprovals to be used. */
+  mustPrioritize?: boolean;
 }
 
 /**

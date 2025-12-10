@@ -226,6 +226,8 @@ export interface iEstimateSwapPayload {
   chainIdsToAffiliates?: Record<string, { affiliates: Array<{ address: string; basis_points_fee: string }> }>;
   /** Slippage tolerance as a percentage (0-100). Can be a string or number. */
   slippageTolerancePercent: string | number;
+  /** Forcefully recheck compliance and avoid cache (5 minutes) */
+  forcefulRecheckCompliance?: boolean;
 }
 
 export interface iEstimateSwapSuccessResponse {
@@ -242,6 +244,7 @@ export interface iEstimateSwapSuccessResponse {
     doesSwap: boolean;
     lowLiquidityWarning?: boolean;
     complianceNotPassedWarning?: boolean;
+    complianceErrorMessage?: string;
   };
 }
 

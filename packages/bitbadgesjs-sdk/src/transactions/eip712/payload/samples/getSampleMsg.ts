@@ -259,7 +259,8 @@ const approvalCriteria = new ApprovalCriteria({
   altTimeChecks: new AltTimeChecks({
     offlineHours: [new UintRange()],
     offlineDays: [new UintRange()]
-  })
+  }),
+  mustPrioritize: false
 }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) as object;
 
 const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
@@ -306,7 +307,8 @@ const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
   altTimeChecks: new AltTimeChecks({
     offlineHours: [],
     offlineDays: []
-  })
+  }),
+  mustPrioritize: false
 }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) as object;
 
 function populateMerkleChallenges(merkleChallenges?: MerkleChallenge[]) {

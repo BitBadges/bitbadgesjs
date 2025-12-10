@@ -291,19 +291,16 @@ function predeterminedBalancesIsBasicallyNil(predeterminedBalances?: iPredetermi
 /**
  * Checks if a collection approval has no side effects.
  *
- * An approval has no side effects if:
- * - It has no coin transfers
- * - It has no predetermined balances (or they are basically nil)
- * - It has no merkle challenges
- * - It has no max num transfers (or they are basically nil)
- * - It has no approval amounts (or they are basically nil)
- *
  * @param approvalCriteria - The approval criteria to check
  * @returns true if the approval has no side effects, false otherwise
  */
-export function collectionApprovalHasNoSideEffects(approvalCriteria?: iApprovalCriteria<bigint>): boolean {
+function collectionApprovalHasNoSideEffects(approvalCriteria?: iApprovalCriteria<bigint>): boolean {
   if (!approvalCriteria) {
     return true;
+  }
+
+  if (approvalCriteria.mustPrioritize) {
+    return false;
   }
 
   // Check for coin transfers
@@ -328,19 +325,19 @@ export function collectionApprovalHasNoSideEffects(approvalCriteria?: iApprovalC
     return false;
   }
 
-  if (approvalCriteria.dynamicStoreChallenges && approvalCriteria.dynamicStoreChallenges.length > 0) {
-    return false;
-  }
+  // if (approvalCriteria.dynamicStoreChallenges && approvalCriteria.dynamicStoreChallenges.length > 0) {
+  //   return false;
+  // }
 
-  // Check for max num transfers
-  if (approvalCriteria.maxNumTransfers && !maxNumTransfersIsBasicallyNil(approvalCriteria.maxNumTransfers)) {
-    return false;
-  }
+  // // Check for max num transfers
+  // if (approvalCriteria.maxNumTransfers && !maxNumTransfersIsBasicallyNil(approvalCriteria.maxNumTransfers)) {
+  //   return false;
+  // }
 
-  // Check for approval amounts
-  if (approvalCriteria.approvalAmounts && !approvalAmountsIsBasicallyNil(approvalCriteria.approvalAmounts)) {
-    return false;
-  }
+  // // Check for approval amounts
+  // if (approvalCriteria.approvalAmounts && !approvalAmountsIsBasicallyNil(approvalCriteria.approvalAmounts)) {
+  //   return false;
+  // }
 
   return true;
 }

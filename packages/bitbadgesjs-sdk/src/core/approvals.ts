@@ -318,6 +318,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   recipientChecks?: AddressChecks;
   initiatorChecks?: AddressChecks;
   altTimeChecks?: AltTimeChecks<T>;
+  mustPrioritize?: boolean;
 
   constructor(msg: iOutgoingApprovalCriteria<T>) {
     super();
@@ -335,6 +336,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     this.recipientChecks = msg.recipientChecks ? new AddressChecks(msg.recipientChecks) : undefined;
     this.initiatorChecks = msg.initiatorChecks ? new AddressChecks(msg.initiatorChecks) : undefined;
     this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks(msg.altTimeChecks) : undefined;
+    this.mustPrioritize = msg.mustPrioritize;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteria<U> {
@@ -352,7 +354,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       ethSignatureChallenges: this.ethSignatureChallenges,
       recipientChecks: this.recipientChecks?.convert(convertFunction),
       initiatorChecks: this.initiatorChecks?.convert(convertFunction),
-      altTimeChecks: this.altTimeChecks?.convert(convertFunction)
+      altTimeChecks: this.altTimeChecks?.convert(convertFunction),
+      mustPrioritize: this.mustPrioritize
     });
   }
 
@@ -396,7 +399,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined,
       recipientChecks: item.recipientChecks ? AddressChecks.fromProto(item.recipientChecks) : undefined,
       initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined,
-      altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined
+      altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined,
+      mustPrioritize: item.mustPrioritize
     });
   }
 
@@ -416,6 +420,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       recipientChecks: this.recipientChecks,
       initiatorChecks: this.initiatorChecks,
       altTimeChecks: this.altTimeChecks,
+      mustPrioritize: this.mustPrioritize,
 
       requireFromEqualsInitiatedBy: false,
       requireFromDoesNotEqualInitiatedBy: false,
@@ -1127,6 +1132,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   senderChecks?: AddressChecks;
   initiatorChecks?: AddressChecks;
   altTimeChecks?: AltTimeChecks<T>;
+  mustPrioritize?: boolean;
 
   constructor(msg: iIncomingApprovalCriteria<T>) {
     super();
@@ -1144,6 +1150,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
     this.senderChecks = msg.senderChecks ? new AddressChecks(msg.senderChecks) : undefined;
     this.initiatorChecks = msg.initiatorChecks ? new AddressChecks(msg.initiatorChecks) : undefined;
     this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks(msg.altTimeChecks) : undefined;
+    this.mustPrioritize = msg.mustPrioritize;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteria<U> {
@@ -1161,7 +1168,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
       ethSignatureChallenges: this.ethSignatureChallenges,
       senderChecks: this.senderChecks?.convert(convertFunction),
       initiatorChecks: this.initiatorChecks?.convert(convertFunction),
-      altTimeChecks: this.altTimeChecks?.convert(convertFunction)
+      altTimeChecks: this.altTimeChecks?.convert(convertFunction),
+      mustPrioritize: this.mustPrioritize
     });
   }
 
@@ -1205,7 +1213,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
       ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined,
       senderChecks: item.senderChecks ? AddressChecks.fromProto(item.senderChecks) : undefined,
       initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined,
-      altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined
+      altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined,
+      mustPrioritize: item.mustPrioritize
     });
   }
 
@@ -1225,6 +1234,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
       senderChecks: this.senderChecks,
       initiatorChecks: this.initiatorChecks,
       altTimeChecks: this.altTimeChecks,
+      mustPrioritize: this.mustPrioritize,
 
       requireToEqualsInitiatedBy: false,
       requireToDoesNotEqualInitiatedBy: false,
@@ -1601,6 +1611,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   recipientChecks?: AddressChecks;
   initiatorChecks?: AddressChecks;
   altTimeChecks?: AltTimeChecks<T>;
+  mustPrioritize?: boolean;
 
   constructor(msg: iApprovalCriteria<T>) {
     super();
@@ -1624,6 +1635,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.recipientChecks = msg.recipientChecks ? new AddressChecks(msg.recipientChecks) : undefined;
     this.initiatorChecks = msg.initiatorChecks ? new AddressChecks(msg.initiatorChecks) : undefined;
     this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks<T>(msg.altTimeChecks) : undefined;
+    this.mustPrioritize = msg.mustPrioritize;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteria<U> {
@@ -1673,7 +1685,8 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       senderChecks: item.senderChecks ? AddressChecks.fromProto(item.senderChecks) : undefined,
       recipientChecks: item.recipientChecks ? AddressChecks.fromProto(item.recipientChecks) : undefined,
       initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined,
-      altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined
+      altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined,
+      mustPrioritize: item.mustPrioritize
     });
   }
 

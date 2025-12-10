@@ -1654,6 +1654,13 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
    */
   altTimeChecks?: AltTimeChecks;
 
+  /**
+   * If true, this approval must be explicitly prioritized in PrioritizedApprovals to be used.
+   *
+   * @generated from field: bool mustPrioritize = 21;
+   */
+  mustPrioritize = false;
+
   constructor(data?: PartialMessage<ApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1682,6 +1689,7 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
     { no: 18, name: "recipientChecks", kind: "message", T: AddressChecks },
     { no: 19, name: "initiatorChecks", kind: "message", T: AddressChecks },
     { no: 20, name: "altTimeChecks", kind: "message", T: AltTimeChecks },
+    { no: 21, name: "mustPrioritize", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalCriteria {
@@ -1852,6 +1860,13 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
    */
   altTimeChecks?: AltTimeChecks;
 
+  /**
+   * If true, this approval must be explicitly prioritized in PrioritizedApprovals to be used.
+   *
+   * @generated from field: bool mustPrioritize = 15;
+   */
+  mustPrioritize = false;
+
   constructor(data?: PartialMessage<OutgoingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1874,6 +1889,7 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
     { no: 12, name: "recipientChecks", kind: "message", T: AddressChecks },
     { no: 13, name: "initiatorChecks", kind: "message", T: AddressChecks },
     { no: 14, name: "altTimeChecks", kind: "message", T: AltTimeChecks },
+    { no: 15, name: "mustPrioritize", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OutgoingApprovalCriteria {
@@ -1995,6 +2011,13 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
    */
   altTimeChecks?: AltTimeChecks;
 
+  /**
+   * If true, this approval must be explicitly prioritized in PrioritizedApprovals to be used.
+   *
+   * @generated from field: bool mustPrioritize = 15;
+   */
+  mustPrioritize = false;
+
   constructor(data?: PartialMessage<IncomingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2017,6 +2040,7 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
     { no: 12, name: "senderChecks", kind: "message", T: AddressChecks },
     { no: 13, name: "initiatorChecks", kind: "message", T: AddressChecks },
     { no: 14, name: "altTimeChecks", kind: "message", T: AltTimeChecks },
+    { no: 15, name: "mustPrioritize", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncomingApprovalCriteria {
