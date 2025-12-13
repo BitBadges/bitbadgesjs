@@ -111,7 +111,7 @@ import {
 } from '@/proto/gamm/v1beta1/tx_pb.js';
 import { MsgCreateBalancerPool, MsgCreateBalancerPoolResponse } from '@/proto/gamm/poolmodels/balancer/tx_pb.js';
 
-export const ProtoTypeRegistry = createRegistry(
+export const ProtoTypeRegistry: ReturnType<typeof createRegistry> = createRegistry(
   MsgSend,
   MsgMultiSend,
   MsgFundCommunityPool,

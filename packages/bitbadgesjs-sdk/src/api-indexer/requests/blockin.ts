@@ -1,13 +1,7 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { UintRange } from '@/core/uintRanges.js';
-import type {
-  AndGroup,
-  AssetDetails,
-  ChallengeParams,
-  OrGroup,
-  OwnershipRequirements as BlockinOwnershipRequirements
-} from 'blockin/dist/types/verify.types';
+import type { AndGroup, AssetConditionGroup, ChallengeParams, OrGroup, OwnershipRequirements as BlockinOwnershipRequirements } from 'blockin';
 import { NativeAddress } from '../docs-types/interfaces.js';
 import { iUintRange } from '@/interfaces/types/core.js';
 
@@ -131,7 +125,7 @@ export class SiwbbAndGroup<T extends NumberType> extends BaseNumberTypeClass<Siw
 
   constructor(data: AndGroup<T>) {
     super();
-    this.$and = data.$and.map((item) => {
+    this.$and = data.$and.map((item: AssetConditionGroup<T>) => {
       if ((item as AndGroup<T>)['$and']) {
         return new SiwbbAndGroup(item as AndGroup<T>);
       } else if ((item as OrGroup<T>)['$or']) {
@@ -159,7 +153,7 @@ export class SiwbbOrGroup<T extends NumberType> extends BaseNumberTypeClass<Siwb
 
   constructor(data: OrGroup<T>) {
     super();
-    this.$or = data.$or.map((item) => {
+    this.$or = data.$or.map((item: AssetConditionGroup<T>) => {
       if ((item as AndGroup<T>)['$and']) {
         return new SiwbbAndGroup(item as AndGroup<T>);
       } else if ((item as OrGroup<T>)['$or']) {
