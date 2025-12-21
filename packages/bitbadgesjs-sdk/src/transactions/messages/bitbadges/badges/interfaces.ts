@@ -211,36 +211,8 @@ export interface iMsgSetDynamicStoreValue<T extends NumberType> {
   storeId: T;
   /** The address for which to set the value. */
   address: BitBadgesAddress;
-  /** The usage count to set (number of times this address can use the approval). */
-  value: T;
-}
-
-/**
- * @category Interfaces
- */
-export interface iMsgIncrementStoreValue<T extends NumberType> {
-  /** The creator of the transaction. */
-  creator: BitBadgesAddress;
-  /** The ID of the dynamic store. */
-  storeId: T;
-  /** The address for which to increment the value. */
-  address: BitBadgesAddress;
-  /** The amount to increment by. */
-  amount: T;
-}
-
-/**
- * @category Interfaces
- */
-export interface iMsgDecrementStoreValue<T extends NumberType> {
-  /** The creator of the transaction. */
-  creator: BitBadgesAddress;
-  /** The ID of the dynamic store. */
-  storeId: T;
-  /** The address for which to decrement the value. */
-  address: BitBadgesAddress;
-  /** The amount to decrement by. */
-  amount: T;
+  /** The boolean value to set (true/false). */
+  value: boolean;
 }
 
 /**

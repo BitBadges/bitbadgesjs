@@ -8,11 +8,13 @@ import { Message, proto3 } from "@bufbuild/protobuf";
 import { Params } from "./params_pb.js";
 import { Balance, UintRange } from "./balances_pb.js";
 import { DenomUnit } from "./collections_pb.js";
-import { ApprovalIdentifierDetails, CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
+import { UserBalanceStore } from "./user_balance_store_pb.js";
 import { CollectionApprovalPermission, CollectionPermissions, TimedUpdatePermission, TimedUpdateWithTokenIdsPermission, TokenIdsActionPermission, UserPermissions } from "./permissions_pb.js";
 import { CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, StandardsTimeline, TokenMetadataTimeline } from "./timelines_pb.js";
+import { ApprovalIdentifierDetails, CollectionApproval, UserIncomingApproval, UserOutgoingApproval } from "./approvals_pb.js";
 import { Coin } from "../cosmos/base/v1beta1/coin_pb.js";
-import { AddressList } from "./address_lists_pb.js";
+import { AddressListInput } from "./address_lists_pb.js";
+import { Transfer } from "./transfers_pb.js";
 
 /**
  * Used for WASM bindings and JSON parsing
@@ -74,16 +76,6 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
    * @generated from field: badges.MsgSetDynamicStoreValue setDynamicStoreValueMsg = 11;
    */
   setDynamicStoreValueMsg?: MsgSetDynamicStoreValue;
-
-  /**
-   * @generated from field: badges.MsgIncrementStoreValue incrementStoreValueMsg = 12;
-   */
-  incrementStoreValueMsg?: MsgIncrementStoreValue;
-
-  /**
-   * @generated from field: badges.MsgDecrementStoreValue decrementStoreValueMsg = 13;
-   */
-  decrementStoreValueMsg?: MsgDecrementStoreValue;
 
   /**
    * @generated from field: badges.MsgSetIncomingApproval setIncomingApprovalMsg = 14;
@@ -176,8 +168,6 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
     { no: 9, name: "updateDynamicStoreMsg", kind: "message", T: MsgUpdateDynamicStore },
     { no: 10, name: "deleteDynamicStoreMsg", kind: "message", T: MsgDeleteDynamicStore },
     { no: 11, name: "setDynamicStoreValueMsg", kind: "message", T: MsgSetDynamicStoreValue },
-    { no: 12, name: "incrementStoreValueMsg", kind: "message", T: MsgIncrementStoreValue },
-    { no: 13, name: "decrementStoreValueMsg", kind: "message", T: MsgDecrementStoreValue },
     { no: 14, name: "setIncomingApprovalMsg", kind: "message", T: MsgSetIncomingApproval },
     { no: 15, name: "deleteIncomingApprovalMsg", kind: "message", T: MsgDeleteIncomingApproval },
     { no: 16, name: "setOutgoingApprovalMsg", kind: "message", T: MsgSetOutgoingApproval },
@@ -1223,11 +1213,11 @@ export class MsgCreateAddressLists extends Message<MsgCreateAddressLists> {
   creator = "";
 
   /**
-   * Address lists to create.
+   * Address lists to create. The createdBy field will be automatically set to the creator address.
    *
-   * @generated from field: repeated badges.AddressList addressLists = 2;
+   * @generated from field: repeated badges.AddressListInput addressLists = 2;
    */
-  addressLists: AddressList[] = [];
+  addressLists: AddressListInput[] = [];
 
   constructor(data?: PartialMessage<MsgCreateAddressLists>) {
     super();
@@ -1238,7 +1228,7 @@ export class MsgCreateAddressLists extends Message<MsgCreateAddressLists> {
   static readonly typeName = "badges.MsgCreateAddressLists";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "addressLists", kind: "message", T: AddressList, repeated: true },
+    { no: 2, name: "addressLists", kind: "message", T: AddressListInput, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateAddressLists {
@@ -2137,11 +2127,11 @@ export class MsgCreateDynamicStore extends Message<MsgCreateDynamicStore> {
   creator = "";
 
   /**
-   * The default value for uninitialized addresses (number of uses).
+   * The default value for uninitialized addresses (true/false).
    *
-   * @generated from field: string defaultValue = 2;
+   * @generated from field: bool defaultValue = 2;
    */
-  defaultValue = "";
+  defaultValue = false;
 
   constructor(data?: PartialMessage<MsgCreateDynamicStore>) {
     super();
@@ -2152,7 +2142,7 @@ export class MsgCreateDynamicStore extends Message<MsgCreateDynamicStore> {
   static readonly typeName = "badges.MsgCreateDynamicStore";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "defaultValue", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "defaultValue", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateDynamicStore {
@@ -2234,11 +2224,11 @@ export class MsgUpdateDynamicStore extends Message<MsgUpdateDynamicStore> {
   storeId = "";
 
   /**
-   * The new default value for uninitialized addresses (optional, only set if updating).
+   * The new default value for uninitialized addresses (true/false).
    *
-   * @generated from field: string defaultValue = 3;
+   * @generated from field: bool defaultValue = 3;
    */
-  defaultValue = "";
+  defaultValue = false;
 
   constructor(data?: PartialMessage<MsgUpdateDynamicStore>) {
     super();
@@ -2250,7 +2240,7 @@ export class MsgUpdateDynamicStore extends Message<MsgUpdateDynamicStore> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "defaultValue", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "defaultValue", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateDynamicStore {
@@ -2386,7 +2376,7 @@ export class MsgDeleteDynamicStoreResponse extends Message<MsgDeleteDynamicStore
 }
 
 /**
- * MsgSetDynamicStoreValue is used to set a usage count for a specific address in a dynamic store.
+ * MsgSetDynamicStoreValue is used to set a boolean value for a specific address in a dynamic store.
  *
  * @generated from message badges.MsgSetDynamicStoreValue
  */
@@ -2413,11 +2403,11 @@ export class MsgSetDynamicStoreValue extends Message<MsgSetDynamicStoreValue> {
   address = "";
 
   /**
-   * The usage count to set (number of times this address can use the approval).
+   * The boolean value to set (true/false).
    *
-   * @generated from field: string value = 4;
+   * @generated from field: bool value = 4;
    */
-  value = "";
+  value = false;
 
   constructor(data?: PartialMessage<MsgSetDynamicStoreValue>) {
     super();
@@ -2430,7 +2420,7 @@ export class MsgSetDynamicStoreValue extends Message<MsgSetDynamicStoreValue> {
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "value", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "value", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetDynamicStoreValue {
@@ -2480,210 +2470,6 @@ export class MsgSetDynamicStoreValueResponse extends Message<MsgSetDynamicStoreV
 
   static equals(a: MsgSetDynamicStoreValueResponse | PlainMessage<MsgSetDynamicStoreValueResponse> | undefined, b: MsgSetDynamicStoreValueResponse | PlainMessage<MsgSetDynamicStoreValueResponse> | undefined): boolean {
     return proto3.util.equals(MsgSetDynamicStoreValueResponse, a, b);
-  }
-}
-
-/**
- * MsgIncrementStoreValue is used to increment a usage count for a specific address in a dynamic store.
- *
- * @generated from message badges.MsgIncrementStoreValue
- */
-export class MsgIncrementStoreValue extends Message<MsgIncrementStoreValue> {
-  /**
-   * Address of the creator.
-   *
-   * @generated from field: string creator = 1;
-   */
-  creator = "";
-
-  /**
-   * ID of the dynamic store.
-   *
-   * @generated from field: string storeId = 2;
-   */
-  storeId = "";
-
-  /**
-   * The address for which to increment the value.
-   *
-   * @generated from field: string address = 3;
-   */
-  address = "";
-
-  /**
-   * The amount to increment by.
-   *
-   * @generated from field: string amount = 4;
-   */
-  amount = "";
-
-  constructor(data?: PartialMessage<MsgIncrementStoreValue>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgIncrementStoreValue";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgIncrementStoreValue {
-    return new MsgIncrementStoreValue().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgIncrementStoreValue {
-    return new MsgIncrementStoreValue().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgIncrementStoreValue {
-    return new MsgIncrementStoreValue().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: MsgIncrementStoreValue | PlainMessage<MsgIncrementStoreValue> | undefined, b: MsgIncrementStoreValue | PlainMessage<MsgIncrementStoreValue> | undefined): boolean {
-    return proto3.util.equals(MsgIncrementStoreValue, a, b);
-  }
-}
-
-/**
- * MsgIncrementStoreValueResponse is the response to MsgIncrementStoreValue.
- *
- * @generated from message badges.MsgIncrementStoreValueResponse
- */
-export class MsgIncrementStoreValueResponse extends Message<MsgIncrementStoreValueResponse> {
-  constructor(data?: PartialMessage<MsgIncrementStoreValueResponse>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgIncrementStoreValueResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgIncrementStoreValueResponse {
-    return new MsgIncrementStoreValueResponse().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgIncrementStoreValueResponse {
-    return new MsgIncrementStoreValueResponse().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgIncrementStoreValueResponse {
-    return new MsgIncrementStoreValueResponse().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: MsgIncrementStoreValueResponse | PlainMessage<MsgIncrementStoreValueResponse> | undefined, b: MsgIncrementStoreValueResponse | PlainMessage<MsgIncrementStoreValueResponse> | undefined): boolean {
-    return proto3.util.equals(MsgIncrementStoreValueResponse, a, b);
-  }
-}
-
-/**
- * MsgDecrementStoreValue is used to decrement a usage count for a specific address in a dynamic store.
- *
- * @generated from message badges.MsgDecrementStoreValue
- */
-export class MsgDecrementStoreValue extends Message<MsgDecrementStoreValue> {
-  /**
-   * Address of the creator.
-   *
-   * @generated from field: string creator = 1;
-   */
-  creator = "";
-
-  /**
-   * ID of the dynamic store.
-   *
-   * @generated from field: string storeId = 2;
-   */
-  storeId = "";
-
-  /**
-   * The address for which to decrement the value.
-   *
-   * @generated from field: string address = 3;
-   */
-  address = "";
-
-  /**
-   * The amount to decrement by.
-   *
-   * @generated from field: string amount = 4;
-   */
-  amount = "";
-
-  /**
-   * If true, set to zero on underflow. If false, throw error on underflow.
-   *
-   * @generated from field: bool setToZeroOnUnderflow = 5;
-   */
-  setToZeroOnUnderflow = false;
-
-  constructor(data?: PartialMessage<MsgDecrementStoreValue>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgDecrementStoreValue";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "setToZeroOnUnderflow", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDecrementStoreValue {
-    return new MsgDecrementStoreValue().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDecrementStoreValue {
-    return new MsgDecrementStoreValue().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDecrementStoreValue {
-    return new MsgDecrementStoreValue().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: MsgDecrementStoreValue | PlainMessage<MsgDecrementStoreValue> | undefined, b: MsgDecrementStoreValue | PlainMessage<MsgDecrementStoreValue> | undefined): boolean {
-    return proto3.util.equals(MsgDecrementStoreValue, a, b);
-  }
-}
-
-/**
- * MsgDecrementStoreValueResponse is the response to MsgDecrementStoreValue.
- *
- * @generated from message badges.MsgDecrementStoreValueResponse
- */
-export class MsgDecrementStoreValueResponse extends Message<MsgDecrementStoreValueResponse> {
-  constructor(data?: PartialMessage<MsgDecrementStoreValueResponse>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgDecrementStoreValueResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDecrementStoreValueResponse {
-    return new MsgDecrementStoreValueResponse().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDecrementStoreValueResponse {
-    return new MsgDecrementStoreValueResponse().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDecrementStoreValueResponse {
-    return new MsgDecrementStoreValueResponse().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: MsgDecrementStoreValueResponse | PlainMessage<MsgDecrementStoreValueResponse> | undefined, b: MsgDecrementStoreValueResponse | PlainMessage<MsgDecrementStoreValueResponse> | undefined): boolean {
-    return proto3.util.equals(MsgDecrementStoreValueResponse, a, b);
   }
 }
 

@@ -90,3 +90,78 @@ export class AddressList extends Message<AddressList> {
   }
 }
 
+/**
+ *
+ * AddressListInput is used for creating address lists via MsgCreateAddressLists.
+ * It contains all fields from AddressList except createdBy, which is automatically set from the message creator.
+ *
+ * @generated from message badges.AddressListInput
+ */
+export class AddressListInput extends Message<AddressListInput> {
+  /**
+   * Unique identifier for the address list.
+   *
+   * @generated from field: string listId = 1;
+   */
+  listId = "";
+
+  /**
+   * List of addresses included in the list.
+   *
+   * @generated from field: repeated string addresses = 2;
+   */
+  addresses: string[] = [];
+
+  /**
+   * Indicates whether the list includes the specified addresses (true) or excludes them (false).
+   *
+   * @generated from field: bool whitelist = 3;
+   */
+  whitelist = false;
+
+  /**
+   * URI (Uniform Resource Identifier) associated with the address list to provide metadata, if applicable.
+   *
+   * @generated from field: string uri = 4;
+   */
+  uri = "";
+
+  /**
+   * Custom arbitrary data or additional information related to the address list.
+   *
+   * @generated from field: string customData = 5;
+   */
+  customData = "";
+
+  constructor(data?: PartialMessage<AddressListInput>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.AddressListInput";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "listId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "addresses", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 3, name: "whitelist", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AddressListInput {
+    return new AddressListInput().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AddressListInput {
+    return new AddressListInput().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AddressListInput {
+    return new AddressListInput().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AddressListInput | PlainMessage<AddressListInput> | undefined, b: AddressListInput | PlainMessage<AddressListInput> | undefined): boolean {
+    return proto3.util.equals(AddressListInput, a, b);
+  }
+}
+

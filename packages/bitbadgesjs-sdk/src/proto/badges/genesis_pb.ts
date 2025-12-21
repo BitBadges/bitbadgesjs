@@ -7,8 +7,9 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { Params } from "./params_pb.js";
 import { TokenCollection } from "./collections_pb.js";
-import { ApprovalTracker, UserBalanceStore } from "./transfers_pb.js";
+import { UserBalanceStore } from "./user_balance_store_pb.js";
 import { AddressList } from "./address_lists_pb.js";
+import { ApprovalTracker } from "./approval_tracking_pb.js";
 import { DynamicStore, DynamicStoreValue } from "./dynamic_stores_pb.js";
 
 /**

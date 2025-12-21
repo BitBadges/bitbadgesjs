@@ -9,7 +9,7 @@ import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
 
 /**
- * MsgSetDynamicStoreValue is used to set a usage count for a specific address in a dynamic store.
+ * MsgSetDynamicStoreValue is used to set a boolean value for a specific address in a dynamic store.
  *
  * @category Transactions
  */
@@ -20,7 +20,7 @@ export class MsgSetDynamicStoreValue<T extends NumberType>
   creator: BitBadgesAddress;
   storeId: T;
   address: BitBadgesAddress;
-  value: T;
+  value: boolean;
 
   constructor(msg: iMsgSetDynamicStoreValue<T>) {
     super();
@@ -35,7 +35,7 @@ export class MsgSetDynamicStoreValue<T extends NumberType>
       creator: this.creator,
       storeId: this.storeId.toString(),
       address: this.address,
-      value: this.value.toString()
+      value: this.value
     });
   }
 

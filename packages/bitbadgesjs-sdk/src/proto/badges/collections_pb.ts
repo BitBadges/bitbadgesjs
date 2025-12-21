@@ -7,7 +7,8 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, StandardsTimeline, TokenMetadataTimeline } from "./timelines_pb.js";
 import { CollectionPermissions } from "./permissions_pb.js";
-import { CollectionApproval, UserBalanceStore } from "./transfers_pb.js";
+import { CollectionApproval } from "./approvals_pb.js";
+import { UserBalanceStore } from "./user_balance_store_pb.js";
 import { Balance, UintRange } from "./balances_pb.js";
 
 /**
@@ -188,36 +189,51 @@ export class TokenCollection extends Message<TokenCollection> {
  */
 export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
   /**
+   * The BitBadges address associated with this wrapper path. Used for routing and identifying the wrapper.
+   *
    * @generated from field: string address = 1;
    */
   address = "";
 
   /**
+   * The denomination (denom) to be used for the wrapped coin or the alias denom.
+   *
    * @generated from field: string denom = 2;
    */
   denom = "";
 
   /**
+   * The token balances that correspond to this wrapper path. Defines how much you have to wrap to get x1 of corresponding base level unit.
+   *
    * @generated from field: repeated badges.Balance balances = 3;
    */
   balances: Balance[] = [];
 
   /**
+   * The symbol for the wrapped coin (e.g., "BADGE", "NFT"). Used for display purposes. Note that this may not be the default.
+   *
    * @generated from field: string symbol = 4;
    */
   symbol = "";
 
   /**
+   * Denomination units for the wrapped coin. Defines how the coin can be displayed with different
+   * decimal places and symbols (e.g., base unit, display unit). You can specify which is the default display unit (base level or one of these).
+   *
    * @generated from field: repeated badges.DenomUnit denomUnits = 5;
    */
   denomUnits: DenomUnit[] = [];
 
   /**
+   * If true, allows this wrapper path to be used with any valid token ID in the collection via an {id} placeholder.
+   *
    * @generated from field: bool allowOverrideWithAnyValidToken = 6;
    */
   allowOverrideWithAnyValidToken = false;
 
   /**
+   * If true, allows tokens to be wrapped into Cosmos SDK coins. When false, this path is just an alias
+   *
    * @generated from field: bool allowCosmosWrapping = 7;
    */
   allowCosmosWrapping = false;
@@ -261,21 +277,32 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
  */
 export class CosmosCoinBackedPath extends Message<CosmosCoinBackedPath> {
   /**
+   * The address associated with this backed path. Used for routing and escrowing IBC tokens.
+   *
    * @generated from field: string address = 1;
    */
   address = "";
 
   /**
+   * The IBC denomination of the backing token. This identifies which IBC token backs the badges
+   * (e.g., "ibc/..." or "ubadge"). Conversion is Balances[] = sdk.Coins([{ amount: ibcAmount, denom: ibcDenom }])
+   *
    * @generated from field: string ibcDenom = 2;
    */
   ibcDenom = "";
 
   /**
+   * The token balances that correspond to this backed path. Defines which token IDs and amounts
+   * are backed by the IBC tokens. Conversion is Balances[] = sdk.Coins([{ amount: ibcAmount, denom: ibcDenom }])
+   *
    * @generated from field: repeated badges.Balance balances = 3;
    */
   balances: Balance[] = [];
 
   /**
+   * The amount of IBC tokens that back the tokens. This defines the exchange rate or backing amount
+   * for the tokens in this path. Conversion is Balances[] = sdk.Coins([{ amount: ibcAmount, denom: ibcDenom }])
+   *
    * @generated from field: string ibcAmount = 4;
    */
   ibcAmount = "";
@@ -316,16 +343,23 @@ export class CosmosCoinBackedPath extends Message<CosmosCoinBackedPath> {
  */
 export class DenomUnit extends Message<DenomUnit> {
   /**
+   * The number of decimal places for this unit. Defines the precision of the unit.
+   *
    * @generated from field: string decimals = 1;
    */
   decimals = "";
 
   /**
+   * The symbol for this unit (e.g., "BADGE", "nBADGE"). Used for display purposes.
+   *
    * @generated from field: string symbol = 2;
    */
   symbol = "";
 
   /**
+   * If true, this is the default display unit. Only one unit should be marked as the default display unit.
+   * This unit will be used by default when displaying the coin amount. If none are marked default, we use the base level.
+   *
    * @generated from field: bool isDefaultDisplay = 3;
    */
   isDefaultDisplay = false;

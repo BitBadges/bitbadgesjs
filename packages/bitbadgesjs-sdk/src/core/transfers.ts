@@ -30,7 +30,6 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
   onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
   precalculationOptions?: PrecalculationOptions<T>;
-  numAttempts?: T;
 
   constructor(transfer: iTransfer<T>) {
     super();
@@ -51,12 +50,10 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
     this.onlyCheckPrioritizedIncomingApprovals = transfer.onlyCheckPrioritizedIncomingApprovals;
     this.onlyCheckPrioritizedOutgoingApprovals = transfer.onlyCheckPrioritizedOutgoingApprovals;
     this.precalculationOptions = transfer.precalculationOptions ? new PrecalculationOptions(transfer.precalculationOptions) : undefined;
-
-    this.numAttempts = transfer.numAttempts;
   }
 
   getNumberFieldNames(): string[] {
-    return ['numAttempts'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Transfer<U> {
@@ -101,8 +98,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       onlyCheckPrioritizedCollectionApprovals: item.onlyCheckPrioritizedCollectionApprovals,
       onlyCheckPrioritizedIncomingApprovals: item.onlyCheckPrioritizedIncomingApprovals,
       onlyCheckPrioritizedOutgoingApprovals: item.onlyCheckPrioritizedOutgoingApprovals,
-      precalculationOptions: item.precalculationOptions ? PrecalculationOptions.fromProto(item.precalculationOptions, convertFunction) : undefined,
-      numAttempts: item.numAttempts ? convertFunction(item.numAttempts) : undefined
+      precalculationOptions: item.precalculationOptions ? PrecalculationOptions.fromProto(item.precalculationOptions, convertFunction) : undefined
     });
   }
 
@@ -113,8 +109,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       toAddresses: this.toAddresses.map((x) => getConvertFunctionFromPrefix(prefix)(x)),
       precalculateBalancesFromApproval: this.precalculateBalancesFromApproval?.toBech32Addresses(prefix),
       prioritizedApprovals: this.prioritizedApprovals?.map((x) => x.toBech32Addresses(prefix)),
-      precalculationOptions: this.precalculationOptions ? new PrecalculationOptions(this.precalculationOptions) : undefined,
-      numAttempts: this.numAttempts
+      precalculationOptions: this.precalculationOptions ? new PrecalculationOptions(this.precalculationOptions) : undefined
     });
   }
 }

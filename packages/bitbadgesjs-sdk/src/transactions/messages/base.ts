@@ -7,12 +7,10 @@ import {
   MsgCreateAddressLists,
   MsgCreateCollection,
   MsgCreateDynamicStore,
-  MsgDecrementStoreValue,
   MsgDeleteCollection,
   MsgDeleteDynamicStore,
   MsgDeleteIncomingApproval,
   MsgDeleteOutgoingApproval,
-  MsgIncrementStoreValue,
   MsgPurgeApprovals,
   MsgSetTokenMetadata,
   MsgSetCollectionApprovals,
@@ -57,7 +55,6 @@ import {
   populateUndefinedForMsgCreateCollection,
   populateUndefinedForMsgCreateDynamicStore,
   populateUndefinedForMsgCreateManagerSplitter,
-  populateUndefinedForMsgDecrementStoreValue,
   populateUndefinedForMsgDeleteCollection,
   populateUndefinedForMsgDeleteDynamicStore,
   populateUndefinedForMsgDeleteIncomingApproval,
@@ -67,7 +64,6 @@ import {
   populateUndefinedForMsgExitPool,
   populateUndefinedForMsgExitSwapExternAmountOut,
   populateUndefinedForMsgExitSwapShareAmountIn,
-  populateUndefinedForMsgIncrementStoreValue,
   populateUndefinedForMsgJoinPool,
   populateUndefinedForMsgJoinSwapExternAmountIn,
   populateUndefinedForMsgJoinSwapShareAmountOut,
@@ -447,10 +443,6 @@ export const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
       msg = createProtoMsg(populateUndefinedForMsgDeleteCollection(msgVal as MsgDeleteCollection));
     } else if (msgVal.getType().typeName === MsgDeleteDynamicStore.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgDeleteDynamicStore(msgVal as MsgDeleteDynamicStore));
-    } else if (msgVal.getType().typeName === MsgDecrementStoreValue.typeName) {
-      msg = createProtoMsg(populateUndefinedForMsgDecrementStoreValue(msgVal as MsgDecrementStoreValue));
-    } else if (msgVal.getType().typeName === MsgIncrementStoreValue.typeName) {
-      msg = createProtoMsg(populateUndefinedForMsgIncrementStoreValue(msgVal as MsgIncrementStoreValue));
     } else if (msgVal.getType().typeName === MsgSetDynamicStoreValue.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgSetDynamicStoreValue(msgVal as MsgSetDynamicStoreValue));
     } else if (msgVal.getType().typeName === MsgUpdateDynamicStore.typeName) {

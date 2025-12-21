@@ -5,10 +5,11 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
-import { CollectionApproval, Transfer, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
+import { CollectionApproval, UserIncomingApproval, UserOutgoingApproval } from "./approvals_pb.js";
 import { Balance, UintRange } from "./balances_pb.js";
 import { CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, StandardsTimeline, TokenMetadataTimeline } from "./timelines_pb.js";
 import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
+import { Transfer } from "./transfers_pb.js";
 import { AddressList } from "./address_lists_pb.js";
 import { CosmosCoinWrapperPathAddObject, InvariantsAddObject } from "./tx_pb.js";
 

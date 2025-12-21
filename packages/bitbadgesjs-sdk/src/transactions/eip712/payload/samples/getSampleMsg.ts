@@ -78,11 +78,9 @@ import {
 import {
   InvariantsAddObject,
   MsgCreateDynamicStore,
-  MsgDecrementStoreValue,
   MsgDeleteDynamicStore,
   MsgDeleteIncomingApproval,
   MsgDeleteOutgoingApproval,
-  MsgIncrementStoreValue,
   MsgPurgeApprovals,
   MsgSetCollectionApprovals,
   MsgSetCollectionMetadata,
@@ -495,10 +493,6 @@ function populateAltTimeChecks(altTimeChecks?: AltTimeChecks): AltTimeChecks {
 
 export function populateUndefinedForMsgTransferTokens(msg: MsgTransferTokens) {
   for (const transfer of msg.transfers) {
-    if (!transfer.numAttempts) {
-      transfer.numAttempts = '0';
-    }
-
     if (!transfer.precalculateBalancesFromApproval) {
       transfer.precalculateBalancesFromApproval = new ApprovalIdentifierDetails({
         version: '0'
@@ -522,33 +516,35 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     if (!approval.approvalCriteria) {
       approval.approvalCriteria = new OutgoingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
     }
-    approval.approvalCriteria.merkleChallenges = populateMerkleChallenges(approval.approvalCriteria.merkleChallenges);
-    approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
-    approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
-    approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
-    approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
-    approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(approval.approvalCriteria.mustOwnTokens);
-    approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
-    approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
-    approval.approvalCriteria.recipientChecks = populateAddressChecks(approval.approvalCriteria.recipientChecks);
-    approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
-    approval.approvalCriteria.altTimeChecks = populateAltTimeChecks(approval.approvalCriteria.altTimeChecks);
+    const criteria = approval.approvalCriteria!;
+    criteria.merkleChallenges = populateMerkleChallenges(criteria.merkleChallenges);
+    criteria.predeterminedBalances = populatePredeterminedBalances(criteria.predeterminedBalances);
+    criteria.approvalAmounts = populateApprovalAmounts(criteria.approvalAmounts);
+    criteria.maxNumTransfers = populateMaxNumTransfers(criteria.maxNumTransfers);
+    criteria.autoDeletionOptions = populateAutoDeletionOptions(criteria.autoDeletionOptions);
+    criteria.mustOwnTokens = populateMustOwnTokens(criteria.mustOwnTokens);
+    criteria.dynamicStoreChallenges = populateDynamicStoreChallenges(criteria.dynamicStoreChallenges);
+    criteria.ethSignatureChallenges = populateETHSignatureChallenges(criteria.ethSignatureChallenges);
+    criteria.recipientChecks = populateAddressChecks(criteria.recipientChecks);
+    criteria.initiatorChecks = populateAddressChecks(criteria.initiatorChecks);
+    criteria.altTimeChecks = populateAltTimeChecks(criteria.altTimeChecks);
   }
   for (const approval of msg.incomingApprovals) {
     if (!approval.approvalCriteria) {
       approval.approvalCriteria = new IncomingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
     }
-    approval.approvalCriteria.merkleChallenges = populateMerkleChallenges(approval.approvalCriteria.merkleChallenges);
-    approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
-    approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
-    approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
-    approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
-    approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(approval.approvalCriteria.mustOwnTokens);
-    approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
-    approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
-    approval.approvalCriteria.senderChecks = populateAddressChecks(approval.approvalCriteria.senderChecks);
-    approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
-    approval.approvalCriteria.altTimeChecks = populateAltTimeChecks(approval.approvalCriteria.altTimeChecks);
+    const criteria = approval.approvalCriteria!;
+    criteria.merkleChallenges = populateMerkleChallenges(criteria.merkleChallenges);
+    criteria.predeterminedBalances = populatePredeterminedBalances(criteria.predeterminedBalances);
+    criteria.approvalAmounts = populateApprovalAmounts(criteria.approvalAmounts);
+    criteria.maxNumTransfers = populateMaxNumTransfers(criteria.maxNumTransfers);
+    criteria.autoDeletionOptions = populateAutoDeletionOptions(criteria.autoDeletionOptions);
+    criteria.mustOwnTokens = populateMustOwnTokens(criteria.mustOwnTokens);
+    criteria.dynamicStoreChallenges = populateDynamicStoreChallenges(criteria.dynamicStoreChallenges);
+    criteria.ethSignatureChallenges = populateETHSignatureChallenges(criteria.ethSignatureChallenges);
+    criteria.senderChecks = populateAddressChecks(criteria.senderChecks);
+    criteria.initiatorChecks = populateAddressChecks(criteria.initiatorChecks);
+    criteria.altTimeChecks = populateAltTimeChecks(criteria.altTimeChecks);
   }
   return msg;
 }
@@ -611,31 +607,23 @@ export function populateUndefinedForMsgSetDynamicStoreValue(msg: MsgSetDynamicSt
   return msg;
 }
 
-export function populateUndefinedForMsgIncrementStoreValue(msg: MsgIncrementStoreValue) {
-  // Simple message with only primitive types, no population needed
-  return msg;
-}
-
-export function populateUndefinedForMsgDecrementStoreValue(msg: MsgDecrementStoreValue) {
-  // Simple message with only primitive types, no population needed
-  return msg;
-}
 
 export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUniversalUpdateCollection) {
   if (!msg.defaultBalances) {
     msg.defaultBalances = new UserBalanceStore();
   }
 
-  if (!msg.defaultBalances.userPermissions) {
-    msg.defaultBalances.userPermissions = new UserPermissions();
+  const defaultBalances = msg.defaultBalances!;
+  if (!defaultBalances.userPermissions) {
+    defaultBalances.userPermissions = new UserPermissions();
   }
 
   if (!msg.collectionPermissions) {
     msg.collectionPermissions = new CollectionPermissions();
   }
 
-  if (!msg.defaultBalances.balances) {
-    msg.defaultBalances.balances = [
+  if (!defaultBalances.balances) {
+    defaultBalances.balances = [
       new Balance({
         ownershipTimes: [new UintRange()],
         tokenIds: [new UintRange()]
@@ -643,57 +631,60 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     ];
   }
 
-  for (const approval of msg.defaultBalances.outgoingApprovals) {
-    if (!approval.approvalCriteria) {
-      approval.approvalCriteria = new OutgoingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
-      approval.approvalCriteria.merkleChallenges = populateMerkleChallenges(approval.approvalCriteria.merkleChallenges);
-      approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
-      approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
-      approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
-      approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
-      approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(approval.approvalCriteria.mustOwnTokens);
-      approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
-      approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
-      approval.approvalCriteria.recipientChecks = populateAddressChecks(approval.approvalCriteria.recipientChecks);
-      approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
-      approval.approvalCriteria.altTimeChecks = populateAltTimeChecks(approval.approvalCriteria.altTimeChecks);
+  for (const approval of defaultBalances.outgoingApprovals) {
+      if (!approval.approvalCriteria) {
+        approval.approvalCriteria = new OutgoingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
+      }
+      const criteria = approval.approvalCriteria!;
+      criteria.merkleChallenges = populateMerkleChallenges(criteria.merkleChallenges);
+      criteria.predeterminedBalances = populatePredeterminedBalances(criteria.predeterminedBalances);
+      criteria.approvalAmounts = populateApprovalAmounts(criteria.approvalAmounts);
+      criteria.maxNumTransfers = populateMaxNumTransfers(criteria.maxNumTransfers);
+      criteria.autoDeletionOptions = populateAutoDeletionOptions(criteria.autoDeletionOptions);
+      criteria.mustOwnTokens = populateMustOwnTokens(criteria.mustOwnTokens);
+      criteria.dynamicStoreChallenges = populateDynamicStoreChallenges(criteria.dynamicStoreChallenges);
+      criteria.ethSignatureChallenges = populateETHSignatureChallenges(criteria.ethSignatureChallenges);
+      criteria.recipientChecks = populateAddressChecks(criteria.recipientChecks);
+      criteria.initiatorChecks = populateAddressChecks(criteria.initiatorChecks);
+      criteria.altTimeChecks = populateAltTimeChecks(criteria.altTimeChecks);
     }
-  }
 
-  for (const approval of msg.defaultBalances.incomingApprovals) {
+  for (const approval of defaultBalances.incomingApprovals) {
     if (!approval.approvalCriteria) {
       approval.approvalCriteria = new IncomingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
     }
-    approval.approvalCriteria.merkleChallenges = populateMerkleChallenges(approval.approvalCriteria.merkleChallenges);
-    approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
-    approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
-    approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
-    approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
-    approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(approval.approvalCriteria.mustOwnTokens);
-    approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
-    approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
-    approval.approvalCriteria.senderChecks = populateAddressChecks(approval.approvalCriteria.senderChecks);
-    approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
-    approval.approvalCriteria.altTimeChecks = populateAltTimeChecks(approval.approvalCriteria.altTimeChecks);
+    const criteria = approval.approvalCriteria!;
+    criteria.merkleChallenges = populateMerkleChallenges(criteria.merkleChallenges);
+    criteria.predeterminedBalances = populatePredeterminedBalances(criteria.predeterminedBalances);
+    criteria.approvalAmounts = populateApprovalAmounts(criteria.approvalAmounts);
+    criteria.maxNumTransfers = populateMaxNumTransfers(criteria.maxNumTransfers);
+    criteria.autoDeletionOptions = populateAutoDeletionOptions(criteria.autoDeletionOptions);
+    criteria.mustOwnTokens = populateMustOwnTokens(criteria.mustOwnTokens);
+    criteria.dynamicStoreChallenges = populateDynamicStoreChallenges(criteria.dynamicStoreChallenges);
+    criteria.ethSignatureChallenges = populateETHSignatureChallenges(criteria.ethSignatureChallenges);
+    criteria.senderChecks = populateAddressChecks(criteria.senderChecks);
+    criteria.initiatorChecks = populateAddressChecks(criteria.initiatorChecks);
+    criteria.altTimeChecks = populateAltTimeChecks(criteria.altTimeChecks);
   }
 
   for (const approval of msg.collectionApprovals) {
     if (!approval.approvalCriteria) {
       approval.approvalCriteria = new ApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
     }
-    approval.approvalCriteria.merkleChallenges = populateMerkleChallenges(approval.approvalCriteria.merkleChallenges);
-    approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(approval.approvalCriteria.predeterminedBalances);
-    approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(approval.approvalCriteria.approvalAmounts);
-    approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(approval.approvalCriteria.maxNumTransfers);
-    approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(approval.approvalCriteria.autoDeletionOptions);
-    approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(approval.approvalCriteria.mustOwnTokens);
-    approval.approvalCriteria.userRoyalties = populateUserRoyalties(approval.approvalCriteria.userRoyalties);
-    approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(approval.approvalCriteria.dynamicStoreChallenges);
-    approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(approval.approvalCriteria.ethSignatureChallenges);
-    approval.approvalCriteria.senderChecks = populateAddressChecks(approval.approvalCriteria.senderChecks);
-    approval.approvalCriteria.recipientChecks = populateAddressChecks(approval.approvalCriteria.recipientChecks);
-    approval.approvalCriteria.initiatorChecks = populateAddressChecks(approval.approvalCriteria.initiatorChecks);
-    approval.approvalCriteria.altTimeChecks = populateAltTimeChecks(approval.approvalCriteria.altTimeChecks);
+    const criteria = approval.approvalCriteria!;
+    criteria.merkleChallenges = populateMerkleChallenges(criteria.merkleChallenges);
+    criteria.predeterminedBalances = populatePredeterminedBalances(criteria.predeterminedBalances);
+    criteria.approvalAmounts = populateApprovalAmounts(criteria.approvalAmounts);
+    criteria.maxNumTransfers = populateMaxNumTransfers(criteria.maxNumTransfers);
+    criteria.autoDeletionOptions = populateAutoDeletionOptions(criteria.autoDeletionOptions);
+    criteria.mustOwnTokens = populateMustOwnTokens(criteria.mustOwnTokens);
+    criteria.userRoyalties = populateUserRoyalties(criteria.userRoyalties);
+    criteria.dynamicStoreChallenges = populateDynamicStoreChallenges(criteria.dynamicStoreChallenges);
+    criteria.ethSignatureChallenges = populateETHSignatureChallenges(criteria.ethSignatureChallenges);
+    criteria.senderChecks = populateAddressChecks(criteria.senderChecks);
+    criteria.recipientChecks = populateAddressChecks(criteria.recipientChecks);
+    criteria.initiatorChecks = populateAddressChecks(criteria.initiatorChecks);
+    criteria.altTimeChecks = populateAltTimeChecks(criteria.altTimeChecks);
   }
 
   for (const metadata of msg.collectionMetadataTimeline) {
@@ -757,17 +748,18 @@ export function populateUndefinedForMsgSetIncomingApproval(msg: MsgSetIncomingAp
   if (!msg.approval.approvalCriteria) {
     msg.approval.approvalCriteria = new IncomingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
   }
-  msg.approval.approvalCriteria.merkleChallenges = populateMerkleChallenges(msg.approval.approvalCriteria.merkleChallenges);
-  msg.approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(msg.approval.approvalCriteria.predeterminedBalances);
-  msg.approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(msg.approval.approvalCriteria.approvalAmounts);
-  msg.approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(msg.approval.approvalCriteria.maxNumTransfers);
-  msg.approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(msg.approval.approvalCriteria.autoDeletionOptions);
-  msg.approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(msg.approval.approvalCriteria.mustOwnTokens);
-  msg.approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(msg.approval.approvalCriteria.dynamicStoreChallenges);
-  msg.approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(msg.approval.approvalCriteria.ethSignatureChallenges);
-  msg.approval.approvalCriteria.senderChecks = populateAddressChecks(msg.approval.approvalCriteria.senderChecks);
-  msg.approval.approvalCriteria.initiatorChecks = populateAddressChecks(msg.approval.approvalCriteria.initiatorChecks);
-  msg.approval.approvalCriteria.altTimeChecks = populateAltTimeChecks(msg.approval.approvalCriteria.altTimeChecks);
+  const criteria = msg.approval.approvalCriteria!;
+  criteria.merkleChallenges = populateMerkleChallenges(criteria.merkleChallenges);
+  criteria.predeterminedBalances = populatePredeterminedBalances(criteria.predeterminedBalances);
+  criteria.approvalAmounts = populateApprovalAmounts(criteria.approvalAmounts);
+  criteria.maxNumTransfers = populateMaxNumTransfers(criteria.maxNumTransfers);
+  criteria.autoDeletionOptions = populateAutoDeletionOptions(criteria.autoDeletionOptions);
+  criteria.mustOwnTokens = populateMustOwnTokens(criteria.mustOwnTokens);
+  criteria.dynamicStoreChallenges = populateDynamicStoreChallenges(criteria.dynamicStoreChallenges);
+  criteria.ethSignatureChallenges = populateETHSignatureChallenges(criteria.ethSignatureChallenges);
+  criteria.senderChecks = populateAddressChecks(criteria.senderChecks);
+  criteria.initiatorChecks = populateAddressChecks(criteria.initiatorChecks);
+  criteria.altTimeChecks = populateAltTimeChecks(criteria.altTimeChecks);
 
   return msg;
 }
@@ -780,17 +772,18 @@ export function populateUndefinedForMsgSetOutgoingApproval(msg: MsgSetOutgoingAp
   if (!msg.approval.approvalCriteria) {
     msg.approval.approvalCriteria = new OutgoingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
   }
-  msg.approval.approvalCriteria.merkleChallenges = populateMerkleChallenges(msg.approval.approvalCriteria.merkleChallenges);
-  msg.approval.approvalCriteria.predeterminedBalances = populatePredeterminedBalances(msg.approval.approvalCriteria.predeterminedBalances);
-  msg.approval.approvalCriteria.approvalAmounts = populateApprovalAmounts(msg.approval.approvalCriteria.approvalAmounts);
-  msg.approval.approvalCriteria.maxNumTransfers = populateMaxNumTransfers(msg.approval.approvalCriteria.maxNumTransfers);
-  msg.approval.approvalCriteria.autoDeletionOptions = populateAutoDeletionOptions(msg.approval.approvalCriteria.autoDeletionOptions);
-  msg.approval.approvalCriteria.mustOwnTokens = populateMustOwnTokens(msg.approval.approvalCriteria.mustOwnTokens);
-  msg.approval.approvalCriteria.dynamicStoreChallenges = populateDynamicStoreChallenges(msg.approval.approvalCriteria.dynamicStoreChallenges);
-  msg.approval.approvalCriteria.ethSignatureChallenges = populateETHSignatureChallenges(msg.approval.approvalCriteria.ethSignatureChallenges);
-  msg.approval.approvalCriteria.recipientChecks = populateAddressChecks(msg.approval.approvalCriteria.recipientChecks);
-  msg.approval.approvalCriteria.initiatorChecks = populateAddressChecks(msg.approval.approvalCriteria.initiatorChecks);
-  msg.approval.approvalCriteria.altTimeChecks = populateAltTimeChecks(msg.approval.approvalCriteria.altTimeChecks);
+  const criteria = msg.approval.approvalCriteria!;
+  criteria.merkleChallenges = populateMerkleChallenges(criteria.merkleChallenges);
+  criteria.predeterminedBalances = populatePredeterminedBalances(criteria.predeterminedBalances);
+  criteria.approvalAmounts = populateApprovalAmounts(criteria.approvalAmounts);
+  criteria.maxNumTransfers = populateMaxNumTransfers(criteria.maxNumTransfers);
+  criteria.autoDeletionOptions = populateAutoDeletionOptions(criteria.autoDeletionOptions);
+  criteria.mustOwnTokens = populateMustOwnTokens(criteria.mustOwnTokens);
+  criteria.dynamicStoreChallenges = populateDynamicStoreChallenges(criteria.dynamicStoreChallenges);
+  criteria.ethSignatureChallenges = populateETHSignatureChallenges(criteria.ethSignatureChallenges);
+  criteria.recipientChecks = populateAddressChecks(criteria.recipientChecks);
+  criteria.initiatorChecks = populateAddressChecks(criteria.initiatorChecks);
+  criteria.altTimeChecks = populateAltTimeChecks(criteria.altTimeChecks);
 
   return msg;
 }
@@ -1378,27 +1371,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           creator: '',
           storeId: '0',
           address: '',
-          value: '0'
-        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
-      };
-    case 'badges/IncrementStoreValue':
-      return {
-        type: msgType,
-        value: new MsgIncrementStoreValue({
-          creator: '',
-          storeId: '0',
-          address: '',
-          amount: '0'
-        }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
-      };
-    case 'badges/DecrementStoreValue':
-      return {
-        type: msgType,
-        value: new MsgDecrementStoreValue({
-          creator: '',
-          storeId: '0',
-          address: '',
-          amount: '0'
+          value: false
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetIncomingApproval':
@@ -1503,7 +1476,6 @@ export function getSampleMsg(msgType: string, currMsg: any) {
                 overrideTimestamp: '0',
                 tokenIdsOverride: [new UintRange()]
               }),
-              numAttempts: '0'
             })
           ]
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })

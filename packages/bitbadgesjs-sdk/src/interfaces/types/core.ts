@@ -332,11 +332,6 @@ export interface iTransfer<T extends NumberType> {
    * The precalculation options for the transfer.
    */
   precalculationOptions?: iPrecalculationOptions<T>;
-
-  /**
-   * The number of times to attempt approval validation. If 0 / not specified, we default to only one.
-   */
-  numAttempts?: T;
 }
 
 /**
