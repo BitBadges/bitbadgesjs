@@ -37,9 +37,9 @@
   "sideEffects": false,
   "scripts": {
     "alias": "tsc-alias -p tsconfig.build.json && tsc-alias -p tsconfig-esm.build.json",
-    "build": "rm -rf dist && tsgo --build tsconfig.build.json && tsgo --build tsconfig-esm.build.json && bun run alias && bun run fixup && bun run dep-check",
+    "build": "rm -rf dist && tsc --build tsconfig.build.json && tsc --build tsconfig-esm.build.json && bun run alias && bun run fixup && bun run dep-check",
     "routes-check": "ts-node ./scripts/check_routes_consistency.ts ../../../bitbadges-indexer/src/indexer.ts  ./openapitypes-helpers/routes.yaml",
-    "clean": "tsgo --build tsconfig.build.json --clean  && shx rm -rf coverage *.log junit.xml dist && jest --clearCache",
+    "clean": "tsc --build tsconfig.build.json --clean  && shx rm -rf coverage *.log junit.xml dist && jest --clearCache",
     "fixup": "./scripts/fixup.sh",
     "test": "jest ./src/**/*.spec.ts --setupFiles ./jest.setup.js",
     "test:unit": "jest test/unit",
@@ -97,7 +97,7 @@
     "tsconfig-paths": "^3.11.0",
     "tsoa": "^6.1.5",
     "tsup": "^8.1.0",
-    "@typescript/native-preview": "latest"
+    "typescript": "~5.8.2"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^1.10.1",
