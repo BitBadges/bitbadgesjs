@@ -2,6 +2,7 @@ import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, Conv
 import {
   iCosmosCoinBackedPathAddObject,
   iCosmosCoinWrapperPathAddObject,
+  iAliasPathAddObject,
   iDenomUnit,
   iDenomUnitWithDetails,
   iInvariantsAddObject
@@ -79,23 +80,23 @@ export class CosmosCoinWrapperPathAddObject<T extends NumberType>
 {
   denom: string;
   balances: Balance<T>[];
+  amount: T;
   symbol: string;
   denomUnits: DenomUnit<T>[];
   allowOverrideWithAnyValidToken: boolean;
-  allowCosmosWrapping: boolean;
 
   constructor(data: iCosmosCoinWrapperPathAddObject<T>) {
     super();
     this.denom = data.denom;
     this.balances = data.balances.map((balance) => new Balance(balance));
+    this.amount = data.amount;
     this.symbol = data.symbol;
     this.denomUnits = data.denomUnits.map((unit) => new DenomUnit(unit));
     this.allowOverrideWithAnyValidToken = data.allowOverrideWithAnyValidToken;
-    this.allowCosmosWrapping = data.allowCosmosWrapping;
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['amount'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CosmosCoinWrapperPathAddObject<U> {
@@ -109,10 +110,50 @@ export class CosmosCoinWrapperPathAddObject<T extends NumberType>
     return new CosmosCoinWrapperPathAddObject({
       denom: data.denom,
       balances: data.balances.map((balance) => Balance.fromProto(balance, convertFunction)),
+      amount: convertFunction(data.amount || '0'),
       symbol: data.symbol,
       denomUnits: data.denomUnits.map((unit) => DenomUnit.fromProto(unit, convertFunction)),
-      allowOverrideWithAnyValidToken: data.allowOverrideWithAnyValidToken,
-      allowCosmosWrapping: data.allowCosmosWrapping
+      allowOverrideWithAnyValidToken: data.allowOverrideWithAnyValidToken
+    });
+  }
+}
+
+/**
+ * Alias (non-wrapping) path add object.
+ *
+ * @category Balances
+ */
+export class AliasPathAddObject<T extends NumberType> extends BaseNumberTypeClass<AliasPathAddObject<T>> implements iAliasPathAddObject<T> {
+  denom: string;
+  balances: Balance<T>[];
+  amount: T;
+  symbol: string;
+  denomUnits: DenomUnit<T>[];
+
+  constructor(data: iAliasPathAddObject<T>) {
+    super();
+    this.denom = data.denom;
+    this.balances = data.balances.map((balance) => new Balance(balance));
+    this.amount = data.amount;
+    this.symbol = data.symbol;
+    this.denomUnits = data.denomUnits.map((unit) => new DenomUnit(unit));
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['amount'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AliasPathAddObject<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AliasPathAddObject<U>;
+  }
+
+  static fromProto<T extends NumberType>(data: protobadges.AliasPathAddObject, convertFunction: (val: NumberType) => T): AliasPathAddObject<T> {
+    return new AliasPathAddObject({
+      denom: data.denom,
+      balances: data.balances.map((balance) => Balance.fromProto(balance, convertFunction)),
+      amount: convertFunction(data.amount || '0'),
+      symbol: data.symbol,
+      denomUnits: data.denomUnits.map((unit) => DenomUnit.fromProto(unit, convertFunction))
     });
   }
 }

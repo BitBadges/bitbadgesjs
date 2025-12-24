@@ -7,8 +7,8 @@ import type { iMsgSetTokenMetadata } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
-import { TokenMetadataTimeline } from '@/core/misc.js';
-import { TimedUpdateWithTokenIdsPermission } from '@/core/permissions.js';
+import { TokenMetadata } from '@/core/misc.js';
+import { TokenIdsActionPermission } from '@/core/permissions.js';
 import { Stringify } from '@/common/string-numbers.js';
 
 /**
@@ -19,22 +19,22 @@ import { Stringify } from '@/common/string-numbers.js';
 export class MsgSetTokenMetadata<T extends NumberType> extends CustomTypeClass<MsgSetTokenMetadata<T>> implements iMsgSetTokenMetadata<T> {
   creator: BitBadgesAddress;
   collectionId: T;
-  tokenMetadataTimeline: TokenMetadataTimeline<T>[];
-  canUpdateTokenMetadata: TimedUpdateWithTokenIdsPermission<T>[];
+  tokenMetadata: TokenMetadata<T>[];
+  canUpdateTokenMetadata: TokenIdsActionPermission<T>[];
 
   constructor(msg: iMsgSetTokenMetadata<T>) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
-    this.tokenMetadataTimeline = msg.tokenMetadataTimeline.map((timeline) => new TokenMetadataTimeline(timeline));
-    this.canUpdateTokenMetadata = msg.canUpdateTokenMetadata.map((permission) => new TimedUpdateWithTokenIdsPermission(permission));
+    this.tokenMetadata = msg.tokenMetadata.map((tm) => new TokenMetadata(tm));
+    this.canUpdateTokenMetadata = msg.canUpdateTokenMetadata.map((permission) => new TokenIdsActionPermission(permission));
   }
 
   toProto(): protobadges.MsgSetTokenMetadata {
     return new protobadges.MsgSetTokenMetadata({
       creator: this.creator,
       collectionId: this.collectionId.toString(),
-      tokenMetadataTimeline: this.tokenMetadataTimeline.map((timeline) => timeline.toProto()),
+      tokenMetadata: this.tokenMetadata.map((tm) => tm.toProto()),
       canUpdateTokenMetadata: this.canUpdateTokenMetadata.map((permission) => permission.toProto())
     });
   }
@@ -48,11 +48,12 @@ export class MsgSetTokenMetadata<T extends NumberType> extends CustomTypeClass<M
   }
 
   static fromProto(protoMsg: protobadges.MsgSetTokenMetadata): MsgSetTokenMetadata<NumberType> {
+    const tokenMetadata = protoMsg.tokenMetadata.map((tm) => TokenMetadata.fromProto(tm, Stringify));
     return new MsgSetTokenMetadata({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
-      tokenMetadataTimeline: protoMsg.tokenMetadataTimeline.map((timeline) => TokenMetadataTimeline.fromProto(timeline, Stringify)),
-      canUpdateTokenMetadata: protoMsg.canUpdateTokenMetadata.map((permission) => TimedUpdateWithTokenIdsPermission.fromProto(permission, Stringify))
+      tokenMetadata: tokenMetadata,
+      canUpdateTokenMetadata: protoMsg.canUpdateTokenMetadata.map((permission) => TokenIdsActionPermission.fromProto(permission, Stringify))
     });
   }
 
@@ -60,7 +61,7 @@ export class MsgSetTokenMetadata<T extends NumberType> extends CustomTypeClass<M
     return new MsgSetTokenMetadata({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,
-      tokenMetadataTimeline: this.tokenMetadataTimeline,
+      tokenMetadata: this.tokenMetadata,
       canUpdateTokenMetadata: this.canUpdateTokenMetadata
     });
   }

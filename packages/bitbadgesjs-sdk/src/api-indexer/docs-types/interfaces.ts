@@ -15,16 +15,14 @@ import type {
   iAddressList,
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
+  iPrecalculateBalancesFromApprovalDetails,
+  iPrecalculationOptions,
   iBalance,
   iCollectionInvariants,
-  iCollectionMetadataTimeline,
-  iCustomDataTimeline,
+  iCollectionMetadata,
   iDenomUnit,
   iDenomUnitWithDetails,
-  iIsArchivedTimeline,
-  iManagerTimeline,
-  iStandardsTimeline,
-  iTokenMetadataTimeline,
+  iTokenMetadata,
   iUintRange
 } from '@/interfaces/types/core.js';
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/types/permissions.js';
@@ -271,16 +269,6 @@ export interface iCoinTransferItem<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iPrecalculationOptions<T extends NumberType> {
-  /** The timestamp to use for the transfer. */
-  overrideTimestamp?: T;
-  /** The token IDs to use for the transfer. */
-  tokenIdsOverride?: iUintRange<T>[];
-}
-
-/**
- * @category Interfaces
- */
 export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc<T> {
   /** The list of recipients. */
   to: BitBadgesAddress[];
@@ -293,7 +281,7 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
   /** The memo of the transfer. */
   memo?: string;
   /** Which approval to use to precalculate the balances? */
-  precalculateBalancesFromApproval?: iApprovalIdentifierDetails<T>;
+  precalculateBalancesFromApproval?: iPrecalculateBalancesFromApprovalDetails<T>;
   /** The prioritized approvals of the transfer. This is used to check certain approvals before others to ensure intended behavior. */
   prioritizedApprovals?: iApprovalIdentifierDetails<T>[];
   /** The user who initiated the transfer transaction. */
@@ -449,22 +437,22 @@ export interface iApprovalItemDoc<T extends NumberType> extends Doc {
 export interface iCollectionDoc<T extends NumberType> extends Doc {
   /** The collection ID */
   collectionId: CollectionId;
-  /** The collection metadata timeline */
-  collectionMetadataTimeline: iCollectionMetadataTimeline<T>[];
-  /** The token metadata timeline */
-  tokenMetadataTimeline: iTokenMetadataTimeline<T>[];
-  /** The custom data timeline */
-  customDataTimeline: iCustomDataTimeline<T>[];
-  /** The manager timeline */
-  managerTimeline: iManagerTimeline<T>[];
+  /** The collection metadata */
+  collectionMetadata: iCollectionMetadata;
+  /** The token metadata */
+  tokenMetadata: iTokenMetadata<T>[];
+  /** The custom data */
+  customData: string;
+  /** The manager */
+  manager: BitBadgesAddress;
   /** The collection permissions */
   collectionPermissions: iCollectionPermissions<T>;
   /** The collection approved transfers timeline */
   collectionApprovals: iCollectionApproval<T>[];
-  /** The standards timeline */
-  standardsTimeline: iStandardsTimeline<T>[];
-  /** The is archived timeline */
-  isArchivedTimeline: iIsArchivedTimeline<T>[];
+  /** The standards */
+  standards: string[];
+  /** The is archived flag */
+  isArchived: boolean;
   /** The default balances for users who have not interacted with the collection yet. Only used if collection has "Standard" balance type. */
   defaultBalances: iUserBalanceStore<T>;
   /** The BitBadges address of the user who created this collection */
@@ -481,6 +469,8 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
   mintEscrowAddress: string;
   /** The IBC wrapper paths for the collection */
   cosmosCoinWrapperPaths: iCosmosCoinWrapperPath<T>[];
+  /** The alias (non-wrapping) paths for the collection */
+  aliasPaths: iAliasPath<T>[];
   /** Collection-level invariants that cannot be broken. These are set upon genesis and cannot be modified. */
   invariants: iCollectionInvariants<T>;
 }
@@ -492,10 +482,10 @@ export interface iCosmosCoinWrapperPath<T extends NumberType> {
   address: string;
   denom: string;
   balances: iBalance<T>[];
+  amount: T;
   symbol: string;
   denomUnits: iDenomUnit<T>[];
   allowOverrideWithAnyValidToken: boolean;
-  allowCosmosWrapping: boolean;
 }
 
 /**
@@ -546,6 +536,31 @@ export interface iAssetInfoDoc<T extends NumberType> extends Doc {
  */
 export interface iCosmosCoinWrapperPathWithDetails<T extends NumberType> extends iCosmosCoinWrapperPath<T> {
   /** Optional base-level metadata for this cosmos coin wrapper path. */
+  metadata?: iMetadata<T>;
+  /** The denomination units with metadata details populated. */
+  denomUnits: iDenomUnitWithDetails<T>[];
+  /** Pool Infos */
+  poolInfos?: iPoolInfo<T>[];
+  /** Asset Pair Infos */
+  assetPairInfos?: iAssetInfoDoc<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iAliasPath<T extends NumberType> {
+  denom: string;
+  balances: iBalance<T>[];
+  amount: T;
+  symbol: string;
+  denomUnits: iDenomUnit<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iAliasPathWithDetails<T extends NumberType> extends iAliasPath<T> {
+  /** Optional base-level metadata for this alias path. */
   metadata?: iMetadata<T>;
   /** The denomination units with metadata details populated. */
   denomUnits: iDenomUnitWithDetails<T>[];
@@ -2202,8 +2217,8 @@ export interface iUpdateHistory<T extends NumberType> {
 export interface iMapWithValues<T extends NumberType> extends iMap<T> {
   /** The (key, value) pairs for the maps that are set. */
   values: { [key: string]: iValueStore };
-  /** The fetched metadata for the map (if any). */
-  metadata?: iMetadata<T>;
+  /** The fetched/populated metadata for the map (if any). This is the actual metadata object with name, image, description, etc. */
+  populatedMetadata?: iMetadata<T>;
   /** The update history for the map. Maps are maintained through blockchain transactions. */
   updateHistory: iUpdateHistory<T>[];
 }

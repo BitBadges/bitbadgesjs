@@ -1,11 +1,9 @@
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, CustomTypeClass } from '@/common/base.js';
 import { NumberType, Stringify } from '@/common/string-numbers.js';
-import { CollectionMetadata, ManagerTimeline } from '@/core/misc.js';
+import { CollectionMetadata } from '@/core';
 import { ActionPermission } from '@/core/permissions.js';
-import { TimedUpdatePermission } from '@/core/permissions.js';
-import { UintRangeArray } from '@/core/uintRanges.js';
-import type { iActionPermission, iCollectionMetadata, iManagerTimeline, iTimedUpdatePermission, iUintRange } from '@/interfaces/index.js';
+import type { iActionPermission, iCollectionMetadata } from '@/interfaces/index.js';
 import * as maps from '@/proto/maps/tx_pb.js';
 
 /**
@@ -43,8 +41,8 @@ export interface iValueOptions {
  * @category Interfaces
  */
 export interface iMapPermissions<T extends NumberType> {
-  canUpdateMetadata: iTimedUpdatePermission<T>[];
-  canUpdateManager: iTimedUpdatePermission<T>[];
+  canUpdateMetadata: iActionPermission<T>[];
+  canUpdateManager: iActionPermission<T>[];
   canDeleteMap: iActionPermission<T>[];
 }
 
@@ -55,8 +53,8 @@ export interface iMap<T extends NumberType> {
   creator: BitBadgesAddress;
   mapId: string;
 
-  inheritManagerTimelineFrom: T;
-  managerTimeline: iManagerTimeline<T>[];
+  inheritManagerFrom: T;
+  manager: string;
 
   updateCriteria: iMapUpdateCriteria<T>;
 
@@ -65,14 +63,6 @@ export interface iMap<T extends NumberType> {
 
   permissions: iMapPermissions<T>;
 
-  metadataTimeline: iMapMetadataTimeline<T>[];
-}
-
-/**
- * @category Interfaces
- */
-export interface iMapMetadataTimeline<T extends NumberType> {
-  timelineTimes: iUintRange<T>[];
   metadata: iCollectionMetadata;
 }
 
@@ -83,14 +73,14 @@ export interface iMsgCreateMap<T extends NumberType> {
   creator: BitBadgesAddress;
   mapId: string;
 
-  inheritManagerTimelineFrom: T;
-  managerTimeline: iManagerTimeline<T>[];
+  inheritManagerFrom: T;
+  manager: string;
 
   updateCriteria: iMapUpdateCriteria<T>;
   valueOptions: iValueOptions;
   defaultValue: string;
 
-  metadataTimeline: iMapMetadataTimeline<T>[];
+  metadata: iCollectionMetadata;
 
   permissions: iMapPermissions<T>;
 }
@@ -102,11 +92,11 @@ export interface iMsgUpdateMap<T extends NumberType> {
   creator: BitBadgesAddress;
   mapId: string;
 
-  updateManagerTimeline: boolean;
-  managerTimeline: iManagerTimeline<T>[];
+  updateManager: boolean;
+  manager: string;
 
-  updateMetadataTimeline: boolean;
-  metadataTimeline: iMapMetadataTimeline<T>[];
+  updateMetadata: boolean;
+  metadata: iCollectionMetadata;
 
   updatePermissions: boolean;
   permissions: iMapPermissions<T>;
@@ -206,14 +196,14 @@ export class ValueOptions extends CustomTypeClass<ValueOptions> implements iValu
  * @category Maps
  */
 export class MapPermissions<T extends NumberType> extends BaseNumberTypeClass<MapPermissions<T>> implements iMapPermissions<T> {
-  canUpdateMetadata: TimedUpdatePermission<T>[];
-  canUpdateManager: TimedUpdatePermission<T>[];
+  canUpdateMetadata: ActionPermission<T>[];
+  canUpdateManager: ActionPermission<T>[];
   canDeleteMap: ActionPermission<T>[];
 
   constructor(msg: iMapPermissions<T>) {
     super();
-    this.canUpdateMetadata = msg.canUpdateMetadata.map((item) => new TimedUpdatePermission(item));
-    this.canUpdateManager = msg.canUpdateManager.map((item) => new TimedUpdatePermission(item));
+    this.canUpdateMetadata = msg.canUpdateMetadata.map((item) => new ActionPermission(item));
+    this.canUpdateManager = msg.canUpdateManager.map((item) => new ActionPermission(item));
     this.canDeleteMap = msg.canDeleteMap.map((item) => new ActionPermission(item));
   }
 
@@ -229,34 +219,12 @@ export class MapPermissions<T extends NumberType> extends BaseNumberTypeClass<Ma
 /**
  * @category Maps
  */
-export class MapMetadataTimeline<T extends NumberType> extends BaseNumberTypeClass<MapMetadataTimeline<T>> implements iMapMetadataTimeline<T> {
-  timelineTimes: UintRangeArray<T>;
-  metadata: CollectionMetadata;
-
-  constructor(msg: iMapMetadataTimeline<T>) {
-    super();
-    this.timelineTimes = UintRangeArray.From(msg.timelineTimes);
-    this.metadata = new CollectionMetadata(msg.metadata);
-  }
-
-  getNumberFieldNames(): string[] {
-    return [];
-  }
-
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): MapMetadataTimeline<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapMetadataTimeline<U>;
-  }
-}
-
-/**
- * @category Maps
- */
 export class Map<T extends NumberType> extends BaseNumberTypeClass<Map<T>> implements iMap<T> {
   creator: BitBadgesAddress;
   mapId: string;
 
-  inheritManagerTimelineFrom: T;
-  managerTimeline: ManagerTimeline<T>[];
+  inheritManagerFrom: T;
+  manager: string;
 
   updateCriteria: MapUpdateCriteria<T>;
 
@@ -264,23 +232,23 @@ export class Map<T extends NumberType> extends BaseNumberTypeClass<Map<T>> imple
   defaultValue: string;
   permissions: MapPermissions<T>;
 
-  metadataTimeline: MapMetadataTimeline<T>[];
+  metadata: iCollectionMetadata;
 
   constructor(msg: iMap<T>) {
     super();
     this.creator = msg.creator;
     this.mapId = msg.mapId;
-    this.inheritManagerTimelineFrom = msg.inheritManagerTimelineFrom;
-    this.managerTimeline = msg.managerTimeline.map((item) => new ManagerTimeline(item));
+    this.inheritManagerFrom = msg.inheritManagerFrom;
+    this.manager = msg.manager;
     this.updateCriteria = new MapUpdateCriteria(msg.updateCriteria);
     this.valueOptions = new ValueOptions(msg.valueOptions);
     this.defaultValue = msg.defaultValue;
     this.permissions = new MapPermissions(msg.permissions);
-    this.metadataTimeline = msg.metadataTimeline.map((item) => new MapMetadataTimeline(item));
+    this.metadata = new CollectionMetadata(msg.metadata);
   }
 
   getNumberFieldNames(): string[] {
-    return ['inheritManagerTimelineFrom'];
+    return ['inheritManagerFrom'];
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): Map<U> {
@@ -295,14 +263,14 @@ export class MsgCreateMap<T extends NumberType> extends BaseNumberTypeClass<MsgC
   creator: BitBadgesAddress;
   mapId: string;
 
-  inheritManagerTimelineFrom: T;
-  managerTimeline: ManagerTimeline<T>[];
+  inheritManagerFrom: T;
+  manager: string;
 
   updateCriteria: MapUpdateCriteria<T>;
   valueOptions: ValueOptions;
   defaultValue: string;
 
-  metadataTimeline: MapMetadataTimeline<T>[];
+  metadata: iCollectionMetadata;
 
   permissions: MapPermissions<T>;
 
@@ -310,17 +278,17 @@ export class MsgCreateMap<T extends NumberType> extends BaseNumberTypeClass<MsgC
     super();
     this.creator = msg.creator;
     this.mapId = msg.mapId;
-    this.inheritManagerTimelineFrom = msg.inheritManagerTimelineFrom;
-    this.managerTimeline = msg.managerTimeline.map((item) => new ManagerTimeline(item));
+    this.inheritManagerFrom = msg.inheritManagerFrom;
+    this.manager = msg.manager;
     this.updateCriteria = new MapUpdateCriteria(msg.updateCriteria);
     this.valueOptions = new ValueOptions(msg.valueOptions);
     this.defaultValue = msg.defaultValue;
-    this.metadataTimeline = msg.metadataTimeline.map((item) => new MapMetadataTimeline(item));
+    this.metadata = new CollectionMetadata(msg.metadata);
     this.permissions = new MapPermissions(msg.permissions);
   }
 
   getNumberFieldNames(): string[] {
-    return ['inheritManagerTimelineFrom'];
+    return ['inheritManagerFrom'];
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): MsgCreateMap<U> {
@@ -339,11 +307,11 @@ export class MsgUpdateMap<T extends NumberType> extends BaseNumberTypeClass<MsgU
   creator: BitBadgesAddress;
   mapId: string;
 
-  updateManagerTimeline: boolean;
-  managerTimeline: ManagerTimeline<T>[];
+  updateManager: boolean;
+  manager: string;
 
-  updateMetadataTimeline: boolean;
-  metadataTimeline: MapMetadataTimeline<T>[];
+  updateMetadata: boolean;
+  metadata: iCollectionMetadata;
 
   updatePermissions: boolean;
   permissions: MapPermissions<T>;
@@ -352,10 +320,10 @@ export class MsgUpdateMap<T extends NumberType> extends BaseNumberTypeClass<MsgU
     super();
     this.creator = msg.creator;
     this.mapId = msg.mapId;
-    this.updateManagerTimeline = msg.updateManagerTimeline;
-    this.managerTimeline = msg.managerTimeline.map((item) => new ManagerTimeline(item));
-    this.updateMetadataTimeline = msg.updateMetadataTimeline;
-    this.metadataTimeline = msg.metadataTimeline.map((item) => new MapMetadataTimeline(item));
+    this.updateManager = msg.updateManager;
+    this.manager = msg.manager;
+    this.updateMetadata = msg.updateMetadata;
+    this.metadata = new CollectionMetadata(msg.metadata);
     this.updatePermissions = msg.updatePermissions;
     this.permissions = new MapPermissions(msg.permissions);
   }

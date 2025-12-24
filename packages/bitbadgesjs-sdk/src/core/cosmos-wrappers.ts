@@ -30,10 +30,6 @@ export const isWrapperApproval = (
   pathObj: CosmosCoinWrapperPath<bigint>,
   options?: { skipPathValidation?: boolean; validTokenIds?: iUintRange<bigint>[] }
 ) => {
-  if (!pathObj.allowCosmosWrapping) {
-    return false;
-  }
-
   const { address, balances } = pathObj;
 
   if (balances.length !== 1) {
@@ -95,10 +91,6 @@ export const isUnwrapperApproval = (
   options?: { skipPathValidation?: boolean; validTokenIds?: iUintRange<bigint>[] }
 ) => {
   const { address, balances } = pathObj;
-
-  if (!pathObj.allowCosmosWrapping) {
-    return false;
-  }
 
   if (balances.length !== 1) {
     return false;

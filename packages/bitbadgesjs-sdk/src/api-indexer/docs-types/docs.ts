@@ -1,7 +1,7 @@
+import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
-import { BigIntify } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
 import { AddressList } from '@/core/addressLists.js';
 import {
@@ -21,22 +21,11 @@ import {
 import { BalanceArray } from '@/core/balances.js';
 import { BatchTokenDetailsArray } from '@/core/batch-utils.js';
 import { CosmosCoin } from '@/core/coin.js';
-import {
-  CollectionInvariants,
-  CollectionMetadataTimeline,
-  CosmosCoinWrapperPath,
-  CustomDataTimeline,
-  IsArchivedTimeline,
-  ManagerTimeline,
-  StandardsTimeline,
-  TokenMetadataTimeline,
-  UpdateHistory
-} from '@/core/misc.js';
+import { AliasPath, CollectionInvariants, CollectionMetadata, CosmosCoinWrapperPath, TokenMetadata, UpdateHistory } from '@/core/misc.js';
 import { CollectionPermissions, UserPermissions, UserPermissionsWithDetails } from '@/core/permissions.js';
-import { getValueAtTimeForTimeline } from '@/core/timelines.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
-import type { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/types/core.js';
+import type { CollectionId, iAmountTrackerIdDetails, iCollectionMetadata, iTokenMetadata } from '@/interfaces/types/core.js';
 import type { iUserBalanceStore } from '@/interfaces/types/userBalances.js';
 import { Map, ValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
 import type { Doc } from '../base.js';
@@ -65,7 +54,6 @@ import {
   iUtilityPageContent,
   iUtilityPageDoc,
   iUtilityPageLink,
-  type BitBadgesAddress,
   type ClaimIntegrationPluginType,
   type IntegrationPluginParams,
   type JsonBodyInputSchema,
@@ -300,14 +288,14 @@ export class CollectionDoc<T extends NumberType>
   _docId: string;
   _id?: string;
   collectionId: CollectionId;
-  collectionMetadataTimeline: CollectionMetadataTimeline<T>[];
-  tokenMetadataTimeline: TokenMetadataTimeline<T>[];
-  customDataTimeline: CustomDataTimeline<T>[];
-  managerTimeline: ManagerTimeline<T>[];
+  collectionMetadata: CollectionMetadata;
+  tokenMetadata: TokenMetadata<T>[];
+  customData: string;
+  manager: BitBadgesAddress;
   collectionPermissions: CollectionPermissions<T>;
   collectionApprovals: CollectionApproval<T>[];
-  standardsTimeline: StandardsTimeline<T>[];
-  isArchivedTimeline: IsArchivedTimeline<T>[];
+  standards: string[];
+  isArchived: boolean;
   defaultBalances: UserBalanceStore<T>;
   createdBy: BitBadgesAddress;
   createdBlock: T;
@@ -316,6 +304,7 @@ export class CollectionDoc<T extends NumberType>
   validTokenIds: UintRangeArray<T>;
   mintEscrowAddress: string;
   cosmosCoinWrapperPaths: CosmosCoinWrapperPath<T>[];
+  aliasPaths: AliasPath<T>[];
   invariants: CollectionInvariants<T>;
 
   constructor(data: iCollectionDoc<T>) {
@@ -323,17 +312,14 @@ export class CollectionDoc<T extends NumberType>
     this._docId = data._docId;
     this._id = data._id;
     this.collectionId = data.collectionId;
-    this.collectionMetadataTimeline = data.collectionMetadataTimeline.map(
-      (collectionMetadataTimeline) => new CollectionMetadataTimeline(collectionMetadataTimeline)
-    );
-    this.tokenMetadataTimeline = data.tokenMetadataTimeline.map((tokenMetadataTimeline) => new TokenMetadataTimeline(tokenMetadataTimeline));
-
-    this.customDataTimeline = data.customDataTimeline.map((customDataTimeline) => new CustomDataTimeline(customDataTimeline));
-    this.managerTimeline = data.managerTimeline.map((managerTimeline) => new ManagerTimeline(managerTimeline));
+    this.collectionMetadata = new CollectionMetadata(data.collectionMetadata);
+    this.tokenMetadata = data.tokenMetadata.map((tokenMetadata) => new TokenMetadata(tokenMetadata));
+    this.customData = data.customData;
+    this.manager = data.manager;
     this.collectionPermissions = new CollectionPermissions(data.collectionPermissions);
     this.collectionApprovals = data.collectionApprovals.map((collectionApproval) => new CollectionApproval(collectionApproval));
-    this.standardsTimeline = data.standardsTimeline.map((standardsTimeline) => new StandardsTimeline(standardsTimeline));
-    this.isArchivedTimeline = data.isArchivedTimeline.map((isArchivedTimeline) => new IsArchivedTimeline(isArchivedTimeline));
+    this.standards = data.standards;
+    this.isArchived = data.isArchived;
     this.defaultBalances = new UserBalanceStore(data.defaultBalances);
     this.createdBy = data.createdBy;
     this.createdBlock = data.createdBlock;
@@ -343,65 +329,8 @@ export class CollectionDoc<T extends NumberType>
     this.mintEscrowAddress = data.mintEscrowAddress;
     this.validTokenIds = UintRangeArray.From(data.validTokenIds);
     this.cosmosCoinWrapperPaths = data.cosmosCoinWrapperPaths.map((cosmosCoinWrapperPaths) => new CosmosCoinWrapperPath(cosmosCoinWrapperPaths));
+    this.aliasPaths = data.aliasPaths.map((aliasPath) => new AliasPath(aliasPath));
     this.invariants = new CollectionInvariants(data.invariants);
-  }
-
-  private getTimelineValuesAtTime(time?: NumberType) {
-    const coll = this.convert(BigIntify);
-    return {
-      manager: getValueAtTimeForTimeline(coll.managerTimeline, time)?.manager,
-      collectionMetadata: getValueAtTimeForTimeline(coll.collectionMetadataTimeline, time)?.collectionMetadata,
-      tokenMetadata: getValueAtTimeForTimeline(coll.tokenMetadataTimeline, time)?.tokenMetadata ?? [],
-      customData: getValueAtTimeForTimeline(coll.customDataTimeline, time)?.customData,
-      standards: getValueAtTimeForTimeline(coll.standardsTimeline, time)?.standards,
-      isArchived: getValueAtTimeForTimeline(coll.isArchivedTimeline, time)?.isArchived
-    };
-  }
-
-  /**
-   * Gets the manager at a specific time (Date.now() by default).
-   */
-  getManager(time?: NumberType) {
-    return this.getTimelineValuesAtTime(time).manager;
-  }
-
-  /**
-   * Gets the collection metadata at a specific time (Date.now() by default).
-   *
-   * This gets the timeline value. For the actual fetched value, use `getCollectionMetadata()` instead.
-   */
-  getCollectionMetadataTimelineValue(time?: NumberType) {
-    return this.getTimelineValuesAtTime(time).collectionMetadata;
-  }
-
-  /**
-   * Gets the token metadata at a specific time (Date.now() by default).
-   *
-   * This gets the timeline value. For the actual fetched value, use `getTokenMetadata()` instead.
-   */
-  getTokenMetadataTimelineValue(time?: NumberType) {
-    return this.getTimelineValuesAtTime(time).tokenMetadata;
-  }
-
-  /**
-   * Gets the custom data at a specific time (Date.now() by default).
-   */
-  getCustomData(time?: NumberType) {
-    return this.getTimelineValuesAtTime(time).customData;
-  }
-
-  /**
-   * Gets the standards at a specific time (Date.now() by default).
-   */
-  getStandards(time?: NumberType) {
-    return this.getTimelineValuesAtTime(time).standards;
-  }
-
-  /**
-   * Gets the is archived at a specific time (Date.now() by default).
-   */
-  getIsArchived(time?: NumberType) {
-    return this.getTimelineValuesAtTime(time).isArchived;
   }
 
   /**
@@ -2361,13 +2290,13 @@ export interface ErrorDoc {
  */
 export class MapWithValues<T extends NumberType> extends Map<T> implements iMapWithValues<T> {
   values: { [key: string]: ValueStore };
-  metadata?: Metadata<T>;
+  populatedMetadata?: Metadata<T>;
   updateHistory: UpdateHistory<T>[];
 
   constructor(data: iMapWithValues<T>) {
     super(data);
     this.values = Object.fromEntries(Object.entries(data.values).map(([key, value]) => [key, new ValueStore(value)]));
-    this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
+    this.populatedMetadata = data.populatedMetadata ? new Metadata(data.populatedMetadata) : undefined;
     this.updateHistory = data.updateHistory.map((update) => new UpdateHistory(update));
   }
 

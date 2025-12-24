@@ -1,6 +1,5 @@
 //IMPORTANT: Keep all imports type-safe by using the `type` keyword. If not, this will mess up the circular dependency check.
 
-import type { iPrecalculationOptions } from '@/api-indexer/docs-types/interfaces.js';
 import type { BitBadgesAddress, iTokenMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
 import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
 import type { NumberType } from '@/common/string-numbers.js';
@@ -181,6 +180,9 @@ export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
   /** The balances for this IBC wrapper path. */
   balances: iBalance<T>[];
 
+  /** The base amount of the wrapped denom (0 decimals) that maps to balances[] for conversions. */
+  amount: T;
+
   /** The symbol for this IBC wrapper path. */
   symbol: string;
 
@@ -189,9 +191,6 @@ export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
 
   /** Whether to allow override with any valid token. */
   allowOverrideWithAnyValidToken: boolean;
-
-  /** Whether to allow cosmos wrapping. */
-  allowCosmosWrapping: boolean;
 }
 
 /**
@@ -266,6 +265,26 @@ export interface iInvariantsAddObject<T extends NumberType> {
 /**
  * @category Interfaces
  */
+export interface iAliasPathAddObject<T extends NumberType> {
+  /** The denomination (denom) to be used for the alias. */
+  denom: string;
+
+  /** The token balances that correspond to this alias path. Defines how much of the base level unit the alias maps to. */
+  balances: iBalance<T>[];
+
+  /** The base amount of the alias denom (0 decimals) that maps to balances[] for conversions. */
+  amount: T;
+
+  /** The symbol for the alias (e.g., "BADGE", "NFT"). */
+  symbol: string;
+
+  /** Denomination units for the alias. Defines how the coin can be displayed with different decimal places and symbols. */
+  denomUnits: iDenomUnit<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iTransfer<T extends NumberType> {
   /**
    * The address to transfer from.
@@ -285,7 +304,7 @@ export interface iTransfer<T extends NumberType> {
   /**
    * If specified, we will precalculate from this approval and override the balances. This can only be used when the specified approval has predeterminedBalances set.
    */
-  precalculateBalancesFromApproval?: iApprovalIdentifierDetails<T>;
+  precalculateBalancesFromApproval?: iPrecalculateBalancesFromApprovalDetails<T>;
 
   /**
    * The merkle proofs that satisfy the mkerkle challenges in the approvals. If the transfer deducts from multiple approvals, we check all the merkle proofs and assert at least one is valid for every challenge.
@@ -327,11 +346,6 @@ export interface iTransfer<T extends NumberType> {
    * This only applies to the "outgoing" level approvals specified.
    */
   onlyCheckPrioritizedOutgoingApprovals?: boolean;
-
-  /**
-   * The precalculation options for the transfer.
-   */
-  precalculationOptions?: iPrecalculationOptions<T>;
 }
 
 /**
@@ -357,6 +371,46 @@ export interface iApprovalIdentifierDetails<T extends NumberType> {
    * The version of the approval.
    */
   version: T;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iPrecalculationOptions<T extends NumberType> {
+  /** The timestamp to use for the transfer. */
+  overrideTimestamp?: T;
+  /** The token IDs to use for the transfer. */
+  tokenIdsOverride?: iUintRange<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iPrecalculateBalancesFromApprovalDetails<T extends NumberType> {
+  /**
+   * The approval ID of the approval.
+   */
+  approvalId: string;
+
+  /**
+   * The approval level of the approval "collection", "incoming", or "outgoing".
+   */
+  approvalLevel: string;
+
+  /**
+   * The address of the approval to check. If approvalLevel is "collection", this is blank "".
+   */
+  approverAddress: BitBadgesAddress;
+
+  /**
+   * The version of the approval.
+   */
+  version: T;
+
+  /**
+   * The options for precalculating the balances.
+   */
+  precalculationOptions?: iPrecalculationOptions<T>;
 }
 
 /**
@@ -587,92 +641,6 @@ export interface iETHSignatureProof {
 /**
  * @category Interfaces
  */
-export interface iTimelineItem<T extends NumberType> {
-  /**
-   * The times of the timeline item. Times in a timeline cannot overlap.
-   */
-  timelineTimes: iUintRange<T>[];
-}
-
-/**
- * @category Interfaces
- */
-export interface iManagerTimeline<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * The manager of the collection.
-   */
-  manager: BitBadgesAddress;
-}
-
-/**
- * @category Interfaces
- */
-export interface iCollectionMetadataTimeline<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * The collection metadata.
-   */
-  collectionMetadata: iCollectionMetadata;
-}
-
-/**
- * @category Interfaces
- */
-export interface iCollectionMetadataTimelineWithDetails<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * The collection metadata, with off-chain details populated.
-   */
-  collectionMetadata: iCollectionMetadataDetails<T>;
-}
-
-/**
- * @category Interfaces
- */
-export interface iTokenMetadataTimeline<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * The token metadata.
-   */
-  tokenMetadata: iTokenMetadata<T>[];
-}
-
-/**
- * @category Interfaces
- */
-export interface iTokenMetadataTimelineWithDetails<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * The token metadata, with off-chain details populated.
-   */
-  tokenMetadata: iTokenMetadataDetails<T>[];
-}
-
-/**
- * @category Interfaces
- */
-export interface iCustomDataTimeline<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * Arbitrary custom data.
-   */
-  customData: string;
-}
-
-/**
- * @category Interfaces
- */
-export interface iStandardsTimeline<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * The standards.
-   */
-  standards: string[];
-}
-
-/**
- * @category Interfaces
- */
-export interface iIsArchivedTimeline<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * Whether the collection is archived.
-   */
-  isArchived: boolean;
-}
 
 /**
  * CollectionInvariants defines the invariants that apply to a collection.

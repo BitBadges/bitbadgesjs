@@ -21,24 +21,22 @@ import {
   ApprovalAmounts,
   ApprovalCriteria,
   ApprovalIdentifierDetails,
+  PrecalculateBalancesFromApprovalDetails,
   AutoDeletionOptions,
   Balance,
   CoinTransfer,
   CollectionApproval,
   CollectionApprovalPermission,
   CollectionMetadata,
-  CollectionMetadataTimeline,
   CollectionPermissions,
+  AliasPathAddObject,
   CosmosCoinWrapperPathAddObject,
-  CustomDataTimeline,
   DenomUnit,
   DynamicStoreChallenge,
   ETHSignatureChallenge,
   ETHSignatureProof,
   IncomingApprovalCriteria,
   IncrementedBalances,
-  IsArchivedTimeline,
-  ManagerTimeline,
   ManualBalances,
   MaxNumTransfers,
   MerkleChallenge,
@@ -58,12 +56,8 @@ import {
   PredeterminedOrderCalculationMethod,
   RecurringOwnershipTimes,
   ResetTimeIntervals,
-  StandardsTimeline,
-  TimedUpdatePermission,
-  TimedUpdateWithTokenIdsPermission,
   TokenIdsActionPermission,
   TokenMetadata,
-  TokenMetadataTimeline,
   Transfer,
   UintRange,
   UserBalanceStore,
@@ -494,7 +488,10 @@ function populateAltTimeChecks(altTimeChecks?: AltTimeChecks): AltTimeChecks {
 export function populateUndefinedForMsgTransferTokens(msg: MsgTransferTokens) {
   for (const transfer of msg.transfers) {
     if (!transfer.precalculateBalancesFromApproval) {
-      transfer.precalculateBalancesFromApproval = new ApprovalIdentifierDetails({
+      transfer.precalculateBalancesFromApproval = new PrecalculateBalancesFromApprovalDetails({
+        approvalId: '',
+        approvalLevel: '',
+        approverAddress: '',
         version: '0'
       });
     }
@@ -607,7 +604,6 @@ export function populateUndefinedForMsgSetDynamicStoreValue(msg: MsgSetDynamicSt
   return msg;
 }
 
-
 export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUniversalUpdateCollection) {
   if (!msg.defaultBalances) {
     msg.defaultBalances = new UserBalanceStore();
@@ -632,22 +628,22 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
   }
 
   for (const approval of defaultBalances.outgoingApprovals) {
-      if (!approval.approvalCriteria) {
-        approval.approvalCriteria = new OutgoingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
-      }
-      const criteria = approval.approvalCriteria!;
-      criteria.merkleChallenges = populateMerkleChallenges(criteria.merkleChallenges);
-      criteria.predeterminedBalances = populatePredeterminedBalances(criteria.predeterminedBalances);
-      criteria.approvalAmounts = populateApprovalAmounts(criteria.approvalAmounts);
-      criteria.maxNumTransfers = populateMaxNumTransfers(criteria.maxNumTransfers);
-      criteria.autoDeletionOptions = populateAutoDeletionOptions(criteria.autoDeletionOptions);
-      criteria.mustOwnTokens = populateMustOwnTokens(criteria.mustOwnTokens);
-      criteria.dynamicStoreChallenges = populateDynamicStoreChallenges(criteria.dynamicStoreChallenges);
-      criteria.ethSignatureChallenges = populateETHSignatureChallenges(criteria.ethSignatureChallenges);
-      criteria.recipientChecks = populateAddressChecks(criteria.recipientChecks);
-      criteria.initiatorChecks = populateAddressChecks(criteria.initiatorChecks);
-      criteria.altTimeChecks = populateAltTimeChecks(criteria.altTimeChecks);
+    if (!approval.approvalCriteria) {
+      approval.approvalCriteria = new OutgoingApprovalCriteria({ ...approvalCriteriaForPopulatingUndefined });
     }
+    const criteria = approval.approvalCriteria!;
+    criteria.merkleChallenges = populateMerkleChallenges(criteria.merkleChallenges);
+    criteria.predeterminedBalances = populatePredeterminedBalances(criteria.predeterminedBalances);
+    criteria.approvalAmounts = populateApprovalAmounts(criteria.approvalAmounts);
+    criteria.maxNumTransfers = populateMaxNumTransfers(criteria.maxNumTransfers);
+    criteria.autoDeletionOptions = populateAutoDeletionOptions(criteria.autoDeletionOptions);
+    criteria.mustOwnTokens = populateMustOwnTokens(criteria.mustOwnTokens);
+    criteria.dynamicStoreChallenges = populateDynamicStoreChallenges(criteria.dynamicStoreChallenges);
+    criteria.ethSignatureChallenges = populateETHSignatureChallenges(criteria.ethSignatureChallenges);
+    criteria.recipientChecks = populateAddressChecks(criteria.recipientChecks);
+    criteria.initiatorChecks = populateAddressChecks(criteria.initiatorChecks);
+    criteria.altTimeChecks = populateAltTimeChecks(criteria.altTimeChecks);
+  }
 
   for (const approval of defaultBalances.incomingApprovals) {
     if (!approval.approvalCriteria) {
@@ -687,10 +683,9 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     criteria.altTimeChecks = populateAltTimeChecks(criteria.altTimeChecks);
   }
 
-  for (const metadata of msg.collectionMetadataTimeline) {
-    if (!metadata.collectionMetadata) {
-      metadata.collectionMetadata = new CollectionMetadata();
-    }
+  // Since we removed timelines, collectionMetadata is now a direct value
+  if (!msg.collectionMetadata) {
+    msg.collectionMetadata = new CollectionMetadata();
   }
 
   if (!msg.invariants) {
@@ -1101,42 +1096,16 @@ const universalParams = {
     })
   ],
 
-  managerTimeline: [
-    new ManagerTimeline({
-      timelineTimes: [new UintRange()]
+  manager: '',
+  collectionMetadata: new CollectionMetadata(),
+  tokenMetadata: [
+    new TokenMetadata({
+      tokenIds: [new UintRange()]
     })
   ],
-  collectionMetadataTimeline: [
-    new CollectionMetadataTimeline({
-      timelineTimes: [new UintRange()],
-      collectionMetadata: new CollectionMetadata()
-    })
-  ],
-  tokenMetadataTimeline: [
-    new TokenMetadataTimeline({
-      timelineTimes: [new UintRange()],
-      tokenMetadata: [
-        new TokenMetadata({
-          tokenIds: [new UintRange()]
-        })
-      ]
-    })
-  ],
-  customDataTimeline: [
-    new CustomDataTimeline({
-      timelineTimes: [new UintRange()]
-    })
-  ],
-  standardsTimeline: [
-    new StandardsTimeline({
-      timelineTimes: [new UintRange()]
-    })
-  ],
-  isArchivedTimeline: [
-    new IsArchivedTimeline({
-      timelineTimes: [new UintRange()]
-    })
-  ],
+  customData: '',
+  standards: [],
+  isArchived: false,
 
   collectionApprovals: [
     new CollectionApproval({
@@ -1157,38 +1126,33 @@ const universalParams = {
       })
     ],
     canArchiveCollection: [
-      new TimedUpdatePermission({
+      new ActionPermission({
         permanentlyPermittedTimes: [new UintRange()],
-        permanentlyForbiddenTimes: [new UintRange()],
-        timelineTimes: [new UintRange()]
+        permanentlyForbiddenTimes: [new UintRange()]
       })
     ],
     canUpdateStandards: [
-      new TimedUpdatePermission({
+      new ActionPermission({
         permanentlyPermittedTimes: [new UintRange()],
-        permanentlyForbiddenTimes: [new UintRange()],
-        timelineTimes: [new UintRange()]
+        permanentlyForbiddenTimes: [new UintRange()]
       })
     ],
     canUpdateCustomData: [
-      new TimedUpdatePermission({
+      new ActionPermission({
         permanentlyPermittedTimes: [new UintRange()],
-        permanentlyForbiddenTimes: [new UintRange()],
-        timelineTimes: [new UintRange()]
+        permanentlyForbiddenTimes: [new UintRange()]
       })
     ],
     canUpdateManager: [
-      new TimedUpdatePermission({
+      new ActionPermission({
         permanentlyPermittedTimes: [new UintRange()],
-        permanentlyForbiddenTimes: [new UintRange()],
-        timelineTimes: [new UintRange()]
+        permanentlyForbiddenTimes: [new UintRange()]
       })
     ],
     canUpdateCollectionMetadata: [
-      new TimedUpdatePermission({
+      new ActionPermission({
         permanentlyPermittedTimes: [new UintRange()],
-        permanentlyForbiddenTimes: [new UintRange()],
-        timelineTimes: [new UintRange()]
+        permanentlyForbiddenTimes: [new UintRange()]
       })
     ],
     canUpdateValidTokenIds: [
@@ -1199,11 +1163,10 @@ const universalParams = {
       })
     ],
     canUpdateTokenMetadata: [
-      new TimedUpdateWithTokenIdsPermission({
+      new TokenIdsActionPermission({
         permanentlyPermittedTimes: [new UintRange()],
         permanentlyForbiddenTimes: [new UintRange()],
-        tokenIds: [new UintRange()],
-        timelineTimes: [new UintRange()]
+        tokenIds: [new UintRange()]
       })
     ],
     canUpdateCollectionApprovals: [
@@ -1232,6 +1195,7 @@ const universalParams = {
           ownershipTimes: [new UintRange()]
         })
       ],
+      amount: '0',
       symbol: '',
       denomUnits: [
         new DenomUnit({
@@ -1240,8 +1204,28 @@ const universalParams = {
           isDefaultDisplay: false
         })
       ],
-      allowOverrideWithAnyValidToken: false,
-      allowCosmosWrapping: false
+      allowOverrideWithAnyValidToken: false
+    })
+  ],
+  aliasPathsToAdd: [
+    new AliasPathAddObject({
+      denom: 'ibc:alias123',
+      balances: [
+        new Balance({
+          amount: '0',
+          tokenIds: [new UintRange()],
+          ownershipTimes: [new UintRange()]
+        })
+      ],
+      amount: '0',
+      symbol: '',
+      denomUnits: [
+        new DenomUnit({
+          decimals: '0',
+          symbol: '',
+          isDefaultDisplay: false
+        })
+      ]
     })
   ]
 };
@@ -1453,8 +1437,15 @@ export function getSampleMsg(msgType: string, currMsg: any) {
                   tokenIds: [new UintRange()]
                 })
               ],
-              precalculateBalancesFromApproval: new ApprovalIdentifierDetails({
-                version: '0'
+              precalculateBalancesFromApproval: new PrecalculateBalancesFromApprovalDetails({
+                approvalId: '',
+                approvalLevel: '',
+                approverAddress: '',
+                version: '0',
+                precalculationOptions: new PrecalculationOptions({
+                  overrideTimestamp: '0',
+                  tokenIdsOverride: [new UintRange()]
+                })
               }),
               prioritizedApprovals: [
                 new ApprovalIdentifierDetails({
@@ -1471,11 +1462,7 @@ export function getSampleMsg(msgType: string, currMsg: any) {
                   nonce: '',
                   signature: ''
                 })
-              ],
-              precalculationOptions: new PrecalculationOptions({
-                overrideTimestamp: '0',
-                tokenIdsOverride: [new UintRange()]
-              }),
+              ]
             })
           ]
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
@@ -1583,8 +1570,8 @@ export function getSampleMsg(msgType: string, currMsg: any) {
         value: new MsgSetManager({
           creator: '',
           collectionId: '0',
-          managerTimeline: [new ManagerTimeline()],
-          canUpdateManager: [new TimedUpdatePermission()]
+          manager: '',
+          canUpdateManager: [new ActionPermission()]
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetCollectionMetadata':
@@ -1593,8 +1580,8 @@ export function getSampleMsg(msgType: string, currMsg: any) {
         value: new MsgSetCollectionMetadata({
           creator: '',
           collectionId: '0',
-          collectionMetadataTimeline: [new CollectionMetadataTimeline()],
-          canUpdateCollectionMetadata: [new TimedUpdatePermission()]
+          collectionMetadata: { uri: '', customData: '' },
+          canUpdateCollectionMetadata: [new ActionPermission()]
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetTokenMetadata':
@@ -1603,8 +1590,8 @@ export function getSampleMsg(msgType: string, currMsg: any) {
         value: new MsgSetTokenMetadata({
           creator: '',
           collectionId: '0',
-          tokenMetadataTimeline: [new TokenMetadataTimeline()],
-          canUpdateTokenMetadata: [new TimedUpdateWithTokenIdsPermission()]
+          tokenMetadata: [],
+          canUpdateTokenMetadata: [new TokenIdsActionPermission()]
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetCustomData':
@@ -1613,8 +1600,8 @@ export function getSampleMsg(msgType: string, currMsg: any) {
         value: new MsgSetCustomData({
           creator: '',
           collectionId: '0',
-          customDataTimeline: [new CustomDataTimeline()],
-          canUpdateCustomData: [new TimedUpdatePermission()]
+          customData: '',
+          canUpdateCustomData: [new ActionPermission()]
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetStandards':
@@ -1623,8 +1610,8 @@ export function getSampleMsg(msgType: string, currMsg: any) {
         value: new MsgSetStandards({
           creator: '',
           collectionId: '0',
-          standardsTimeline: [new StandardsTimeline()],
-          canUpdateStandards: [new TimedUpdatePermission()]
+          standards: [],
+          canUpdateStandards: [new ActionPermission()]
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/SetCollectionApprovals':
@@ -1643,8 +1630,8 @@ export function getSampleMsg(msgType: string, currMsg: any) {
         value: new MsgSetIsArchived({
           creator: '',
           collectionId: '0',
-          isArchivedTimeline: [new IsArchivedTimeline()],
-          canArchiveCollection: [new TimedUpdatePermission()]
+          isArchived: false,
+          canArchiveCollection: [new ActionPermission()]
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'gamm/JoinPool':

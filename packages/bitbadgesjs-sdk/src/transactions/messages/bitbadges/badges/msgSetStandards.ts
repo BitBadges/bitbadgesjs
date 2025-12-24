@@ -7,8 +7,7 @@ import type { iMsgSetStandards } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
-import { StandardsTimeline } from '@/core/misc.js';
-import { TimedUpdatePermission } from '@/core/permissions.js';
+import { ActionPermission } from '@/core/permissions.js';
 import { Stringify } from '@/common/string-numbers.js';
 
 /**
@@ -19,22 +18,22 @@ import { Stringify } from '@/common/string-numbers.js';
 export class MsgSetStandards<T extends NumberType> extends CustomTypeClass<MsgSetStandards<T>> implements iMsgSetStandards<T> {
   creator: BitBadgesAddress;
   collectionId: T;
-  standardsTimeline: StandardsTimeline<T>[];
-  canUpdateStandards: TimedUpdatePermission<T>[];
+  standards: string[];
+  canUpdateStandards: ActionPermission<T>[];
 
   constructor(msg: iMsgSetStandards<T>) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
-    this.standardsTimeline = msg.standardsTimeline.map((timeline) => new StandardsTimeline(timeline));
-    this.canUpdateStandards = msg.canUpdateStandards.map((permission) => new TimedUpdatePermission(permission));
+    this.standards = msg.standards;
+    this.canUpdateStandards = msg.canUpdateStandards.map((permission) => new ActionPermission(permission));
   }
 
   toProto(): protobadges.MsgSetStandards {
     return new protobadges.MsgSetStandards({
       creator: this.creator,
       collectionId: this.collectionId.toString(),
-      standardsTimeline: this.standardsTimeline.map((timeline) => timeline.toProto()),
+      standards: this.standards,
       canUpdateStandards: this.canUpdateStandards.map((permission) => permission.toProto())
     });
   }
@@ -51,8 +50,8 @@ export class MsgSetStandards<T extends NumberType> extends CustomTypeClass<MsgSe
     return new MsgSetStandards({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
-      standardsTimeline: protoMsg.standardsTimeline.map((timeline) => StandardsTimeline.fromProto(timeline, Stringify)),
-      canUpdateStandards: protoMsg.canUpdateStandards.map((permission) => TimedUpdatePermission.fromProto(permission, Stringify))
+      standards: protoMsg.standards,
+      canUpdateStandards: protoMsg.canUpdateStandards.map((permission) => ActionPermission.fromProto(permission, Stringify))
     });
   }
 
@@ -60,7 +59,7 @@ export class MsgSetStandards<T extends NumberType> extends CustomTypeClass<MsgSe
     return new MsgSetStandards({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,
-      standardsTimeline: this.standardsTimeline,
+      standards: this.standards,
       canUpdateStandards: this.canUpdateStandards
     });
   }

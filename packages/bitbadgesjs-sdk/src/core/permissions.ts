@@ -7,8 +7,6 @@ import type {
   iCollectionApprovalPermissionWithDetails,
   iCollectionPermissions,
   iCollectionPermissionsWithDetails,
-  iTimedUpdatePermission,
-  iTimedUpdateWithTokenIdsPermission,
   iUserIncomingApprovalPermission,
   iUserIncomingApprovalPermissionWithDetails,
   iUserOutgoingApprovalPermission,
@@ -398,25 +396,25 @@ export class UserIncomingApprovalPermission<T extends NumberType>
  */
 export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeClass<CollectionPermissions<T>> implements iCollectionPermissions<T> {
   canDeleteCollection: ActionPermission<T>[];
-  canArchiveCollection: TimedUpdatePermission<T>[];
-  canUpdateStandards: TimedUpdatePermission<T>[];
-  canUpdateCustomData: TimedUpdatePermission<T>[];
-  canUpdateManager: TimedUpdatePermission<T>[];
-  canUpdateCollectionMetadata: TimedUpdatePermission<T>[];
+  canArchiveCollection: ActionPermission<T>[];
+  canUpdateStandards: ActionPermission<T>[];
+  canUpdateCustomData: ActionPermission<T>[];
+  canUpdateManager: ActionPermission<T>[];
+  canUpdateCollectionMetadata: ActionPermission<T>[];
   canUpdateValidTokenIds: TokenIdsActionPermission<T>[];
-  canUpdateTokenMetadata: TimedUpdateWithTokenIdsPermission<T>[];
+  canUpdateTokenMetadata: TokenIdsActionPermission<T>[];
   canUpdateCollectionApprovals: CollectionApprovalPermission<T>[];
 
   constructor(msg: iCollectionPermissions<T>) {
     super();
     this.canDeleteCollection = msg.canDeleteCollection.map((x) => new ActionPermission(x));
-    this.canArchiveCollection = msg.canArchiveCollection.map((x) => new TimedUpdatePermission(x));
-    this.canUpdateStandards = msg.canUpdateStandards.map((x) => new TimedUpdatePermission(x));
-    this.canUpdateCustomData = msg.canUpdateCustomData.map((x) => new TimedUpdatePermission(x));
-    this.canUpdateManager = msg.canUpdateManager.map((x) => new TimedUpdatePermission(x));
-    this.canUpdateCollectionMetadata = msg.canUpdateCollectionMetadata.map((x) => new TimedUpdatePermission(x));
+    this.canArchiveCollection = msg.canArchiveCollection.map((x) => new ActionPermission(x));
+    this.canUpdateStandards = msg.canUpdateStandards.map((x) => new ActionPermission(x));
+    this.canUpdateCustomData = msg.canUpdateCustomData.map((x) => new ActionPermission(x));
+    this.canUpdateManager = msg.canUpdateManager.map((x) => new ActionPermission(x));
+    this.canUpdateCollectionMetadata = msg.canUpdateCollectionMetadata.map((x) => new ActionPermission(x));
     this.canUpdateValidTokenIds = msg.canUpdateValidTokenIds.map((x) => new TokenIdsActionPermission(x));
-    this.canUpdateTokenMetadata = msg.canUpdateTokenMetadata.map((x) => new TimedUpdateWithTokenIdsPermission(x));
+    this.canUpdateTokenMetadata = msg.canUpdateTokenMetadata.map((x) => new TokenIdsActionPermission(x));
     this.canUpdateCollectionApprovals = msg.canUpdateCollectionApprovals.map((x) => new CollectionApprovalPermission(x));
   }
 
@@ -462,13 +460,13 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
   ): CollectionPermissions<U> {
     return new CollectionPermissions({
       canDeleteCollection: protoMsg.canDeleteCollection.map((x) => ActionPermission.fromProto(x, convertFunction)),
-      canArchiveCollection: protoMsg.canArchiveCollection.map((x) => TimedUpdatePermission.fromProto(x, convertFunction)),
-      canUpdateStandards: protoMsg.canUpdateStandards.map((x) => TimedUpdatePermission.fromProto(x, convertFunction)),
-      canUpdateCustomData: protoMsg.canUpdateCustomData.map((x) => TimedUpdatePermission.fromProto(x, convertFunction)),
-      canUpdateManager: protoMsg.canUpdateManager.map((x) => TimedUpdatePermission.fromProto(x, convertFunction)),
-      canUpdateCollectionMetadata: protoMsg.canUpdateCollectionMetadata.map((x) => TimedUpdatePermission.fromProto(x, convertFunction)),
+      canArchiveCollection: protoMsg.canArchiveCollection.map((x) => ActionPermission.fromProto(x, convertFunction)),
+      canUpdateStandards: protoMsg.canUpdateStandards.map((x) => ActionPermission.fromProto(x, convertFunction)),
+      canUpdateCustomData: protoMsg.canUpdateCustomData.map((x) => ActionPermission.fromProto(x, convertFunction)),
+      canUpdateManager: protoMsg.canUpdateManager.map((x) => ActionPermission.fromProto(x, convertFunction)),
+      canUpdateCollectionMetadata: protoMsg.canUpdateCollectionMetadata.map((x) => ActionPermission.fromProto(x, convertFunction)),
       canUpdateValidTokenIds: protoMsg.canUpdateValidTokenIds.map((x) => TokenIdsActionPermission.fromProto(x, convertFunction)),
-      canUpdateTokenMetadata: protoMsg.canUpdateTokenMetadata.map((x) => TimedUpdateWithTokenIdsPermission.fromProto(x, convertFunction)),
+      canUpdateTokenMetadata: protoMsg.canUpdateTokenMetadata.map((x) => TokenIdsActionPermission.fromProto(x, convertFunction)),
       canUpdateCollectionApprovals: protoMsg.canUpdateCollectionApprovals.map((x) => CollectionApprovalPermission.fromProto(x, convertFunction))
     });
   }
@@ -479,13 +477,13 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
   ): Error | null {
     const responses = [
       ActionPermission.validateUpdate(oldPermissions.canDeleteCollection, newPermissions.canDeleteCollection),
-      TimedUpdatePermission.validateUpdate(oldPermissions.canUpdateManager, newPermissions.canUpdateManager),
-      TimedUpdatePermission.validateUpdate(oldPermissions.canUpdateCustomData, newPermissions.canUpdateCustomData),
-      TimedUpdatePermission.validateUpdate(oldPermissions.canUpdateStandards, newPermissions.canUpdateStandards),
-      TimedUpdatePermission.validateUpdate(oldPermissions.canArchiveCollection, newPermissions.canArchiveCollection),
-      TimedUpdatePermission.validateUpdate(oldPermissions.canUpdateCollectionMetadata, newPermissions.canUpdateCollectionMetadata),
+      ActionPermission.validateUpdate(oldPermissions.canUpdateManager, newPermissions.canUpdateManager),
+      ActionPermission.validateUpdate(oldPermissions.canUpdateCustomData, newPermissions.canUpdateCustomData),
+      ActionPermission.validateUpdate(oldPermissions.canUpdateStandards, newPermissions.canUpdateStandards),
+      ActionPermission.validateUpdate(oldPermissions.canArchiveCollection, newPermissions.canArchiveCollection),
+      ActionPermission.validateUpdate(oldPermissions.canUpdateCollectionMetadata, newPermissions.canUpdateCollectionMetadata),
       TokenIdsActionPermission.validateUpdate(oldPermissions.canUpdateValidTokenIds, newPermissions.canUpdateValidTokenIds),
-      TimedUpdateWithTokenIdsPermission.validateUpdate(oldPermissions.canUpdateTokenMetadata, newPermissions.canUpdateTokenMetadata),
+      TokenIdsActionPermission.validateUpdate(oldPermissions.canUpdateTokenMetadata, newPermissions.canUpdateTokenMetadata),
       CollectionApprovalPermission.validateUpdate(oldPermissions.canUpdateCollectionApprovals, newPermissions.canUpdateCollectionApprovals)
     ];
 
@@ -596,95 +594,6 @@ function checkUniversalPermissionPermits<T extends NumberType>(permissions: Univ
   return null;
 }
 
-/**
- * TimedUpdatePermission represents a permission that allows updating a timeline-based value time. For example, updating the collection metadata.
- * This permission allows you to define when the value can be updated, and what times the value can be updated for.
- *
- * @category Permissions
- */
-export class TimedUpdatePermission<T extends NumberType> extends BaseNumberTypeClass<TimedUpdatePermission<T>> implements iTimedUpdatePermission<T> {
-  timelineTimes: UintRangeArray<T>;
-  permanentlyPermittedTimes: UintRangeArray<T>;
-  permanentlyForbiddenTimes: UintRangeArray<T>;
-
-  constructor(msg: iTimedUpdatePermission<T>) {
-    super();
-    this.timelineTimes = UintRangeArray.From(msg.timelineTimes);
-    this.permanentlyPermittedTimes = UintRangeArray.From(msg.permanentlyPermittedTimes);
-    this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TimedUpdatePermission<U> {
-    return new TimedUpdatePermission(
-      deepCopyPrimitives({
-        timelineTimes: this.timelineTimes.map((x) => x.convert(convertFunction)),
-        permanentlyPermittedTimes: this.permanentlyPermittedTimes.map((x) => x.convert(convertFunction)),
-        permanentlyForbiddenTimes: this.permanentlyForbiddenTimes.map((x) => x.convert(convertFunction))
-      })
-    );
-  }
-
-  toProto(): protobadges.TimedUpdatePermission {
-    return new protobadges.TimedUpdatePermission(this.convert(Stringify));
-  }
-
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): TimedUpdatePermission<U> {
-    return TimedUpdatePermission.fromProto(protobadges.TimedUpdatePermission.fromJson(jsonValue, options), convertFunction);
-  }
-
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): TimedUpdatePermission<U> {
-    return TimedUpdatePermission.fromProto(protobadges.TimedUpdatePermission.fromJsonString(jsonString, options), convertFunction);
-  }
-
-  static fromProto<U extends NumberType>(
-    protoMsg: protobadges.TimedUpdatePermission,
-    convertFunction: (item: NumberType) => U
-  ): TimedUpdatePermission<U> {
-    return new TimedUpdatePermission({
-      timelineTimes: protoMsg.timelineTimes.map((x) => UintRange.fromProto(x, convertFunction)),
-      permanentlyPermittedTimes: protoMsg.permanentlyPermittedTimes.map((x) => UintRange.fromProto(x, convertFunction)),
-      permanentlyForbiddenTimes: protoMsg.permanentlyForbiddenTimes.map((x) => UintRange.fromProto(x, convertFunction))
-    });
-  }
-
-  castToUniversalPermission(): UniversalPermission {
-    return {
-      ...AllDefaultValues,
-      timelineTimes: this.timelineTimes.convert(BigIntify),
-      permanentlyPermittedTimes: this.permanentlyPermittedTimes.convert(BigIntify),
-      permanentlyForbiddenTimes: this.permanentlyForbiddenTimes.convert(BigIntify),
-      usesTimelineTimes: true
-    };
-  }
-
-  static validateUpdate<U extends NumberType>(permissions: TimedUpdatePermission<U>[], newPermission: TimedUpdatePermission<U>[]): Error | null {
-    const castedPermissions: UniversalPermission[] = permissions.map((x) => x.castToUniversalPermission());
-    const castedNewPermissions: UniversalPermission[] = newPermission.map((x) => x.castToUniversalPermission());
-    return validateUniversalPermissionUpdate(GetFirstMatchOnly(castedPermissions), GetFirstMatchOnly(castedNewPermissions));
-  }
-
-  static check<U extends NumberType>(timelineTimes: UintRangeArray<U>, permissions: TimedUpdatePermission<U>[], time?: U): Error | null {
-    const detailsToCheck: UniversalPermissionDetails[] = [];
-    for (const timelineTime of timelineTimes) {
-      detailsToCheck.push({
-        ...AllDefaultDetailsValues,
-        timelineTime: timelineTime.convert(BigIntify)
-      });
-    }
-
-    const castedPermissions = permissions.map((x) => x.castToUniversalPermission());
-    const permissionDetails = GetFirstMatchOnly(castedPermissions);
-    return checkNotForbiddenForAllOverlaps(permissionDetails, detailsToCheck, time ? BigInt(time) : undefined);
-  }
-}
 
 const AllDefaultDetailsValues: UniversalPermissionDetails = {
   timelineTime: new UintRange({ start: -1n, end: -1n }),
@@ -816,123 +725,6 @@ export class TokenIdsActionPermission<T extends NumberType>
   }
 }
 
-/**
- * TimedUpdateWithTokenIdsPermission represents a permission that allows updating a timeline-based value time with bagde IDS. For example, updating the token metadata.
- *
- * This permission allows you to define when the value can be updated, and what times the value can be updated for, and for what tokens the value can be updated for. Or any combination of these.
- *
- * @category Permissions
- */
-export class TimedUpdateWithTokenIdsPermission<T extends NumberType>
-  extends BaseNumberTypeClass<TimedUpdateWithTokenIdsPermission<T>>
-  implements iTimedUpdateWithTokenIdsPermission<T>
-{
-  timelineTimes: UintRangeArray<T>;
-  tokenIds: UintRangeArray<T>;
-  permanentlyPermittedTimes: UintRangeArray<T>;
-  permanentlyForbiddenTimes: UintRangeArray<T>;
-
-  constructor(msg: iTimedUpdateWithTokenIdsPermission<T>) {
-    super();
-    this.timelineTimes = UintRangeArray.From(msg.timelineTimes);
-    this.tokenIds = UintRangeArray.From(msg.tokenIds);
-    this.permanentlyPermittedTimes = UintRangeArray.From(msg.permanentlyPermittedTimes);
-    this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TimedUpdateWithTokenIdsPermission<U> {
-    return new TimedUpdateWithTokenIdsPermission(
-      deepCopyPrimitives({
-        timelineTimes: this.timelineTimes.map((x) => x.convert(convertFunction)),
-        tokenIds: this.tokenIds.map((x) => x.convert(convertFunction)),
-        permanentlyPermittedTimes: this.permanentlyPermittedTimes.map((x) => x.convert(convertFunction)),
-        permanentlyForbiddenTimes: this.permanentlyForbiddenTimes.map((x) => x.convert(convertFunction))
-      })
-    );
-  }
-
-  toProto(): protobadges.TimedUpdateWithTokenIdsPermission {
-    return new protobadges.TimedUpdateWithTokenIdsPermission(this.convert(Stringify));
-  }
-
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): TimedUpdateWithTokenIdsPermission<U> {
-    return TimedUpdateWithTokenIdsPermission.fromProto(protobadges.TimedUpdateWithTokenIdsPermission.fromJson(jsonValue, options), convertFunction);
-  }
-
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): TimedUpdateWithTokenIdsPermission<U> {
-    return TimedUpdateWithTokenIdsPermission.fromProto(
-      protobadges.TimedUpdateWithTokenIdsPermission.fromJsonString(jsonString, options),
-      convertFunction
-    );
-  }
-
-  static fromProto<U extends NumberType>(
-    protoMsg: protobadges.TimedUpdateWithTokenIdsPermission,
-    convertFunction: (item: NumberType) => U
-  ): TimedUpdateWithTokenIdsPermission<U> {
-    return new TimedUpdateWithTokenIdsPermission({
-      timelineTimes: protoMsg.timelineTimes.map((x) => UintRange.fromProto(x, convertFunction)),
-      tokenIds: protoMsg.tokenIds.map((x) => UintRange.fromProto(x, convertFunction)),
-      permanentlyPermittedTimes: protoMsg.permanentlyPermittedTimes.map((x) => UintRange.fromProto(x, convertFunction)),
-      permanentlyForbiddenTimes: protoMsg.permanentlyForbiddenTimes.map((x) => UintRange.fromProto(x, convertFunction))
-    });
-  }
-
-  castToUniversalPermission(): UniversalPermission {
-    return {
-      ...AllDefaultValues,
-      timelineTimes: this.timelineTimes.convert(BigIntify),
-      tokenIds: this.tokenIds.convert(BigIntify),
-      permanentlyPermittedTimes: this.permanentlyPermittedTimes.convert(BigIntify),
-      permanentlyForbiddenTimes: this.permanentlyForbiddenTimes.convert(BigIntify),
-      usesTimelineTimes: true,
-      usesTokenIds: true
-    };
-  }
-
-  static validateUpdate<U extends NumberType>(
-    permissions: TimedUpdateWithTokenIdsPermission<U>[],
-    newPermission: TimedUpdateWithTokenIdsPermission<U>[]
-  ): Error | null {
-    const castedPermissions: UniversalPermission[] = permissions.map((x) => x.castToUniversalPermission());
-    const castedNewPermissions: UniversalPermission[] = newPermission.map((x) => x.castToUniversalPermission());
-    return validateUniversalPermissionUpdate(GetFirstMatchOnly(castedPermissions), GetFirstMatchOnly(castedNewPermissions));
-  }
-
-  static check<U extends NumberType>(
-    details: {
-      timelineTimes: UintRangeArray<U>;
-      tokenIds: UintRangeArray<U>;
-    }[],
-    permissions: TimedUpdateWithTokenIdsPermission<U>[],
-    time?: U
-  ): Error | null {
-    const detailsToCheck: UniversalPermissionDetails[] = [];
-    for (const detail of details) {
-      for (const timelineTime of detail.timelineTimes) {
-        for (const tokenId of detail.tokenIds) {
-          detailsToCheck.push({
-            ...AllDefaultDetailsValues,
-            timelineTime: timelineTime.convert(BigIntify),
-            tokenId: tokenId.convert(BigIntify)
-          });
-        }
-      }
-    }
-
-    const castedPermissions = permissions.map((x) => x.castToUniversalPermission());
-    const permissionDetails = GetFirstMatchOnly(castedPermissions);
-    return checkNotForbiddenForAllOverlaps(permissionDetails, detailsToCheck, time ? BigInt(time) : undefined);
-  }
-}
 
 /**
  * CollectionApprovalPermission represents a permission that allows updating the collection approved transfers.

@@ -5,9 +5,9 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
-import { Balance, UintRange } from "./balances_pb.js";
-import { ApprovalIdentifierDetails } from "./approvals_pb.js";
+import { Balance, PrecalculationOptions } from "./balances_pb.js";
 import { ETHSignatureProof, MerkleProof } from "./challenges_pb.js";
+import { ApprovalIdentifierDetails } from "./approvals_pb.js";
 
 /**
  * Transfer defines the details of a transfer of tokens.
@@ -40,9 +40,9 @@ export class Transfer extends Message<Transfer> {
    * If defined, we will use the predeterminedBalances from the specified approval to calculate the balances at execution time.
    * We will override the balances field with the precalculated balances. Only applicable for approvals with predeterminedBalances set.
    *
-   * @generated from field: badges.ApprovalIdentifierDetails precalculateBalancesFromApproval = 4;
+   * @generated from field: badges.PrecalculateBalancesFromApprovalDetails precalculateBalancesFromApproval = 4;
    */
-  precalculateBalancesFromApproval?: ApprovalIdentifierDetails;
+  precalculateBalancesFromApproval?: PrecalculateBalancesFromApprovalDetails;
 
   /**
    * The Merkle proofs / solutions for all Merkle challenges required for the transfer.
@@ -100,13 +100,6 @@ export class Transfer extends Message<Transfer> {
    */
   onlyCheckPrioritizedOutgoingApprovals = false;
 
-  /**
-   * The options for precalculating the balances.
-   *
-   * @generated from field: badges.PrecalculationOptions precalculationOptions = 12;
-   */
-  precalculationOptions?: PrecalculationOptions;
-
   constructor(data?: PartialMessage<Transfer>) {
     super();
     proto3.util.initPartial(data, this);
@@ -118,7 +111,7 @@ export class Transfer extends Message<Transfer> {
     { no: 1, name: "from", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "toAddresses", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
     { no: 3, name: "balances", kind: "message", T: Balance, repeated: true },
-    { no: 4, name: "precalculateBalancesFromApproval", kind: "message", T: ApprovalIdentifierDetails },
+    { no: 4, name: "precalculateBalancesFromApproval", kind: "message", T: PrecalculateBalancesFromApprovalDetails },
     { no: 5, name: "merkleProofs", kind: "message", T: MerkleProof, repeated: true },
     { no: 6, name: "ethSignatureProofs", kind: "message", T: ETHSignatureProof, repeated: true },
     { no: 7, name: "memo", kind: "scalar", T: 9 /* ScalarType.STRING */ },
@@ -126,7 +119,6 @@ export class Transfer extends Message<Transfer> {
     { no: 9, name: "onlyCheckPrioritizedCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 10, name: "onlyCheckPrioritizedIncomingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 11, name: "onlyCheckPrioritizedOutgoingApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 12, name: "precalculationOptions", kind: "message", T: PrecalculationOptions },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Transfer {
@@ -147,51 +139,75 @@ export class Transfer extends Message<Transfer> {
 }
 
 /**
- * PrecalculationOptions defines the options for precalculating the balances.
+ * PrecalculateBalancesFromApprovalDetails defines the details for precalculating balances from an approval.
  *
- * @generated from message badges.PrecalculationOptions
+ * @generated from message badges.PrecalculateBalancesFromApprovalDetails
  */
-export class PrecalculationOptions extends Message<PrecalculationOptions> {
+export class PrecalculateBalancesFromApprovalDetails extends Message<PrecalculateBalancesFromApprovalDetails> {
   /**
-   * The timestamp to override with when calculating the balances.
+   * The ID of the approval.
    *
-   * @generated from field: string overrideTimestamp = 1;
+   * @generated from field: string approvalId = 1;
    */
-  overrideTimestamp = "";
+  approvalId = "";
 
   /**
-   * The IDs to override for the transfer. Only applicable if using this option in precalculation.
+   * The level of the approval. Can be "collection", "incoming", or "outgoing".
    *
-   * @generated from field: repeated badges.UintRange tokenIdsOverride = 2;
+   * @generated from field: string approvalLevel = 2;
    */
-  tokenIdsOverride: UintRange[] = [];
+  approvalLevel = "";
 
-  constructor(data?: PartialMessage<PrecalculationOptions>) {
+  /**
+   * The address of the approver. Leave blank "" if approvalLevel == "collection".
+   *
+   * @generated from field: string approverAddress = 3;
+   */
+  approverAddress = "";
+
+  /**
+   * The version of the approval.
+   *
+   * @generated from field: string version = 4;
+   */
+  version = "";
+
+  /**
+   * The options for precalculating the balances.
+   *
+   * @generated from field: badges.PrecalculationOptions precalculationOptions = 5;
+   */
+  precalculationOptions?: PrecalculationOptions;
+
+  constructor(data?: PartialMessage<PrecalculateBalancesFromApprovalDetails>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.PrecalculationOptions";
+  static readonly typeName = "badges.PrecalculateBalancesFromApprovalDetails";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "overrideTimestamp", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "tokenIdsOverride", kind: "message", T: UintRange, repeated: true },
+    { no: 1, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "approvalLevel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "precalculationOptions", kind: "message", T: PrecalculationOptions },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PrecalculationOptions {
-    return new PrecalculationOptions().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PrecalculateBalancesFromApprovalDetails {
+    return new PrecalculateBalancesFromApprovalDetails().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PrecalculationOptions {
-    return new PrecalculationOptions().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PrecalculateBalancesFromApprovalDetails {
+    return new PrecalculateBalancesFromApprovalDetails().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PrecalculationOptions {
-    return new PrecalculationOptions().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PrecalculateBalancesFromApprovalDetails {
+    return new PrecalculateBalancesFromApprovalDetails().fromJsonString(jsonString, options);
   }
 
-  static equals(a: PrecalculationOptions | PlainMessage<PrecalculationOptions> | undefined, b: PrecalculationOptions | PlainMessage<PrecalculationOptions> | undefined): boolean {
-    return proto3.util.equals(PrecalculationOptions, a, b);
+  static equals(a: PrecalculateBalancesFromApprovalDetails | PlainMessage<PrecalculateBalancesFromApprovalDetails> | undefined, b: PrecalculateBalancesFromApprovalDetails | PlainMessage<PrecalculateBalancesFromApprovalDetails> | undefined): boolean {
+    return proto3.util.equals(PrecalculateBalancesFromApprovalDetails, a, b);
   }
 }
 

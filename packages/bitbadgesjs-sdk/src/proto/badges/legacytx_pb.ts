@@ -11,7 +11,7 @@ import { CollectionMetadataTimeline, ContractAddressTimeline, CustomDataTimeline
 import { CollectionPermissions, UserPermissions } from "./permissions_pb.js";
 import { Transfer } from "./transfers_pb.js";
 import { AddressList } from "./address_lists_pb.js";
-import { CosmosCoinWrapperPathAddObject, InvariantsAddObject } from "./tx_pb.js";
+import { AliasPathAddObject, CosmosCoinWrapperPathAddObject, InvariantsAddObject } from "./tx_pb.js";
 
 /**
  * The types defined in these files are used to define the MsgServer types for all requests and responses for Msgs of the tokens module.
@@ -248,6 +248,11 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
    */
   invariants?: InvariantsAddObject;
 
+  /**
+   * @generated from field: repeated badges.AliasPathAddObject aliasPathsToAdd = 18;
+   */
+  aliasPathsToAdd: AliasPathAddObject[] = [];
+
   constructor(data?: PartialMessage<MsgNewCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -273,6 +278,7 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
     { no: 15, name: "defaultBalances", kind: "message", T: Balance, repeated: true },
     { no: 16, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
     { no: 17, name: "invariants", kind: "message", T: InvariantsAddObject },
+    { no: 18, name: "aliasPathsToAdd", kind: "message", T: AliasPathAddObject, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgNewCollection {
