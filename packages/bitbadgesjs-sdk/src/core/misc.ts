@@ -1,9 +1,9 @@
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import type {
   BitBadgesAddress,
-  iAssetInfoDoc,
   iAliasPath,
   iAliasPathWithDetails,
+  iAssetInfoDoc,
   iCosmosCoinWrapperPath,
   iCosmosCoinWrapperPathWithDetails,
   iPoolInfo,
@@ -11,8 +11,6 @@ import type {
   iUpdateHistory,
   UNIXMilliTimestamp
 } from '@/api-indexer/docs-types/interfaces.js';
-import { TokenMetadataDetails, CollectionMetadataDetails } from '@/api-indexer/metadata/tokenMetadata.js';
-import { Metadata } from '@/api-indexer/metadata/metadata.js';
 import {
   BaseNumberTypeClass,
   convertClassPropertiesAndMaintainNumberTypes,
@@ -20,17 +18,13 @@ import {
   CustomTypeClass,
   deepCopyPrimitives
 } from '@/common/base.js';
-import { Balance } from '@/core/balances.js';
-import { DenomUnit, DenomUnitWithDetails } from '@/core/ibc-wrappers.js';
+import { Conversion, ConversionWithoutDenom, DenomUnit, DenomUnitWithDetails, PathMetadata, PathMetadataWithDetails } from '@/core/ibc-wrappers.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import type {
   CollectionId,
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
-  iPrecalculateBalancesFromApprovalDetails,
-  iPrecalculationOptions,
-  iTokenMetadata,
   iCoinTransfer,
   iCollectionInvariants,
   iCollectionMetadata,
@@ -41,16 +35,22 @@ import type {
   iMerklePathItem,
   iMerkleProof,
   iMustOwnToken,
-  iMustOwnTokens
+  iMustOwnTokens,
+  iPathMetadata,
+  iPrecalculateBalancesFromApprovalDetails,
+  iPrecalculationOptions,
+  iTokenMetadata,
+  iVoter,
+  iVoteProof,
+  iVotingChallenge
 } from '../interfaces/types/core.js';
 import * as protobadges from '../proto/badges/index.js';
-import { AddressList } from './addressLists.js';
 import { CosmosCoin, iCosmosCoin } from './coin.js';
-import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
+import type { UniversalPermission } from './overlaps.js';
 import { GetFirstMatchOnly, getOverlapsAndNonOverlaps } from './overlaps.js';
 import { ActionPermission, TokenIdsActionPermission } from './permissions.js';
 import { UintRange, UintRangeArray } from './uintRanges.js';
-import { AllDefaultValues, getPotentialUpdatesForTimelineValues, getUpdateCombinationsToCheck } from './validate-utils.js';
+import { AllDefaultValues } from './validate-utils.js';
 
 /**
  * TokenMetadata is used to represent the metadata for a range of token IDs.
@@ -894,25 +894,25 @@ export function validateStandardsUpdate<T extends NumberType>(
 export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass<CosmosCoinWrapperPath<T>> implements iCosmosCoinWrapperPath<T> {
   address: string;
   denom: string;
-  balances: Balance<T>[];
-  amount: T;
+  conversion: ConversionWithoutDenom<T>;
   symbol: string;
   denomUnits: DenomUnit<T>[];
   allowOverrideWithAnyValidToken: boolean;
+  metadata: PathMetadata;
 
   constructor(data: iCosmosCoinWrapperPath<T>) {
     super();
     this.address = data.address;
     this.denom = data.denom;
-    this.balances = data.balances.map((balance) => new Balance(balance));
-    this.amount = data.amount;
+    this.conversion = new ConversionWithoutDenom(data.conversion);
     this.symbol = data.symbol;
     this.denomUnits = data.denomUnits.map((unit) => new DenomUnit(unit));
     this.allowOverrideWithAnyValidToken = data.allowOverrideWithAnyValidToken;
+    this.metadata = new PathMetadata(data.metadata);
   }
 
   getNumberFieldNames(): string[] {
-    return ['amount'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CosmosCoinWrapperPath<U> {
@@ -927,11 +927,13 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
     return new CosmosCoinWrapperPath<NumberType>({
       address: protoMsg.address,
       denom: protoMsg.denom,
-      balances: protoMsg.balances.map((balance) => Balance.fromProto(balance, convertFunction)),
-      amount: convertFunction(protoMsg.amount || '0'),
+      conversion: protoMsg.conversion
+        ? ConversionWithoutDenom.fromProto(protoMsg.conversion, convertFunction)
+        : { sideA: { amount: convertFunction('0') }, sideB: [] },
       symbol: protoMsg.symbol,
       denomUnits: denomUnits,
-      allowOverrideWithAnyValidToken: protoMsg.allowOverrideWithAnyValidToken
+      allowOverrideWithAnyValidToken: protoMsg.allowOverrideWithAnyValidToken,
+      metadata: protoMsg.metadata ? PathMetadata.fromProto(protoMsg.metadata) : { uri: '', customData: '' }
     }).convert(convertFunction);
   }
 }
@@ -942,22 +944,22 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
  */
 export class AliasPath<T extends NumberType> extends CustomTypeClass<AliasPath<T>> implements iAliasPath<T> {
   denom: string;
-  balances: Balance<T>[];
-  amount: T;
+  conversion: ConversionWithoutDenom<T>;
   symbol: string;
   denomUnits: DenomUnit<T>[];
+  metadata: PathMetadata;
 
   constructor(data: iAliasPath<T>) {
     super();
     this.denom = data.denom;
-    this.balances = data.balances.map((balance) => new Balance(balance));
-    this.amount = data.amount;
+    this.conversion = new ConversionWithoutDenom(data.conversion);
     this.symbol = data.symbol;
     this.denomUnits = data.denomUnits.map((unit) => new DenomUnit(unit));
+    this.metadata = new PathMetadata(data.metadata);
   }
 
   getNumberFieldNames(): string[] {
-    return ['amount'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AliasPath<U> {
@@ -968,10 +970,12 @@ export class AliasPath<T extends NumberType> extends CustomTypeClass<AliasPath<T
     const denomUnits = protoMsg.denomUnits.map((unit) => DenomUnit.fromProto(unit, convertFunction));
     return new AliasPath<NumberType>({
       denom: protoMsg.denom,
-      balances: protoMsg.balances.map((balance) => Balance.fromProto(balance, convertFunction)),
-      amount: convertFunction(protoMsg.amount || '0'),
+      conversion: protoMsg.conversion
+        ? ConversionWithoutDenom.fromProto(protoMsg.conversion, convertFunction)
+        : { sideA: { amount: convertFunction('0') }, sideB: [] },
       symbol: protoMsg.symbol,
-      denomUnits: denomUnits
+      denomUnits: denomUnits,
+      metadata: protoMsg.metadata ? PathMetadata.fromProto(protoMsg.metadata) : { uri: '', customData: '' }
     }).convert(convertFunction);
   }
 }
@@ -981,14 +985,14 @@ export class AliasPath<T extends NumberType> extends CustomTypeClass<AliasPath<T
  * @category Indexer
  */
 export class AliasPathWithDetails<T extends NumberType> extends AliasPath<T> implements iAliasPathWithDetails<T> {
-  metadata?: Metadata<T>;
-  denomUnits: DenomUnitWithDetails<T>[];
+  override metadata: PathMetadataWithDetails<T>;
+  override denomUnits: DenomUnitWithDetails<T>[];
   poolInfos?: PoolInfo<T>[] | undefined;
   assetPairInfos?: AssetInfoDoc<T>[] | undefined;
 
   constructor(data: iAliasPathWithDetails<T>) {
     super(data);
-    this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
+    this.metadata = new PathMetadataWithDetails(data.metadata);
     this.denomUnits = data.denomUnits.map((unit) => new DenomUnitWithDetails(unit));
     this.poolInfos = data.poolInfos?.map((poolInfo) => {
       return new PoolInfo(poolInfo);
@@ -1009,20 +1013,16 @@ export class AliasPathWithDetails<T extends NumberType> extends AliasPath<T> imp
  */
 export class CosmosCoinBackedPath<T extends NumberType> extends CustomTypeClass<CosmosCoinBackedPath<T>> implements iCosmosCoinBackedPath<T> {
   address: string;
-  ibcDenom: string;
-  balances: Balance<T>[];
-  ibcAmount: T;
+  conversion: Conversion<T>;
 
   constructor(data: iCosmosCoinBackedPath<T>) {
     super();
     this.address = data.address;
-    this.ibcDenom = data.ibcDenom;
-    this.balances = data.balances.map((balance) => new Balance(balance));
-    this.ibcAmount = data.ibcAmount;
+    this.conversion = new Conversion(data.conversion);
   }
 
   getNumberFieldNames(): string[] {
-    return ['ibcAmount'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CosmosCoinBackedPath<U> {
@@ -1035,9 +1035,9 @@ export class CosmosCoinBackedPath<T extends NumberType> extends CustomTypeClass<
   ): CosmosCoinBackedPath<U> {
     return new CosmosCoinBackedPath<NumberType>({
       address: protoMsg.address,
-      ibcDenom: protoMsg.ibcDenom,
-      balances: protoMsg.balances.map((balance) => Balance.fromProto(balance, convertFunction)),
-      ibcAmount: convertFunction(protoMsg.ibcAmount)
+      conversion: protoMsg.conversion
+        ? Conversion.fromProto(protoMsg.conversion, convertFunction)
+        : { sideA: { amount: convertFunction('0'), denom: '' }, sideB: [] }
     }).convert(convertFunction);
   }
 }
@@ -1115,6 +1115,7 @@ export class AssetInfoDoc<T extends NumberType> extends CustomTypeClass<AssetInf
   _docId: string;
   _id?: string;
   asset: string;
+  symbol: string;
   price: number;
   lastUpdated: T;
   totalLiquidity: iCosmosCoin<T>[];
@@ -1136,6 +1137,7 @@ export class AssetInfoDoc<T extends NumberType> extends CustomTypeClass<AssetInf
     this._docId = data._docId;
     this._id = data._id;
     this.asset = data.asset;
+    this.symbol = data.symbol;
     this.price = data.price;
     this.lastUpdated = data.lastUpdated;
     this.totalLiquidity = data.totalLiquidity.map((coin) => new CosmosCoin(coin));
@@ -1162,14 +1164,14 @@ export class AssetInfoDoc<T extends NumberType> extends CustomTypeClass<AssetInf
  * @category Indexer
  */
 export class CosmosCoinWrapperPathWithDetails<T extends NumberType> extends CosmosCoinWrapperPath<T> implements iCosmosCoinWrapperPathWithDetails<T> {
-  metadata?: Metadata<T>;
-  denomUnits: DenomUnitWithDetails<T>[];
+  override metadata: PathMetadataWithDetails<T>;
+  override denomUnits: DenomUnitWithDetails<T>[];
   poolInfos?: PoolInfo<T>[] | undefined;
   assetPairInfos?: AssetInfoDoc<T>[] | undefined;
 
   constructor(data: iCosmosCoinWrapperPathWithDetails<T>) {
     super(data);
-    this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
+    this.metadata = new PathMetadataWithDetails(data.metadata);
     this.denomUnits = data.denomUnits.map((unit) => new DenomUnitWithDetails(unit));
     this.poolInfos = data.poolInfos?.map((poolInfo) => {
       return new PoolInfo(poolInfo);
@@ -1191,11 +1193,13 @@ export class CosmosCoinWrapperPathWithDetails<T extends NumberType> extends Cosm
     return new CosmosCoinWrapperPathWithDetails<NumberType>({
       address: protoMsg.address,
       denom: protoMsg.denom,
-      balances: protoMsg.balances.map((balance) => Balance.fromProto(balance, convertFunction)),
-      amount: convertFunction(protoMsg.amount || '0'),
+      conversion: protoMsg.conversion
+        ? ConversionWithoutDenom.fromProto(protoMsg.conversion, convertFunction)
+        : { sideA: { amount: convertFunction('0') }, sideB: [] },
       symbol: protoMsg.symbol,
       denomUnits: denomUnits,
-      allowOverrideWithAnyValidToken: protoMsg.allowOverrideWithAnyValidToken
+      allowOverrideWithAnyValidToken: protoMsg.allowOverrideWithAnyValidToken,
+      metadata: protoMsg.metadata ? PathMetadata.fromProto(protoMsg.metadata) : { uri: '', customData: '' }
     }).convert(convertFunction);
   }
 }
@@ -1339,6 +1343,118 @@ export class ETHSignatureProof extends CustomTypeClass<ETHSignatureProof> implem
 }
 
 /**
+ * Voter defines a voter with their address and weight.
+ *
+ * @category Approvals / Transferability
+ */
+export class Voter<T extends NumberType> extends BaseNumberTypeClass<Voter<T>> implements iVoter<T> {
+  address: string;
+  weight: T;
+
+  constructor(voter: iVoter<T>) {
+    super();
+    this.address = voter.address;
+    this.weight = voter.weight;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['weight'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Voter<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Voter<U>;
+  }
+
+  static fromProto<U extends NumberType>(item: protobadges.Voter, convertFunction: (item: NumberType) => U): Voter<U> {
+    return new Voter<U>({
+      address: item.address,
+      weight: convertFunction(item.weight)
+    });
+  }
+}
+
+/**
+ * VotingChallenge defines a rule for approval in the form of a voting/multi-sig challenge.
+ * Requires a weighted quorum threshold to be met through votes from specified voters.
+ * All challenges must be met with valid solutions for the transfer to be approved.
+ *
+ * IMPORTANT: Votes are stored separately and can be updated. The threshold is calculated as a percentage
+ * of total possible weight (all voters), not just voted weight. If you update the proposal ID, then the
+ * vote tracker will reset and start a new tally. We recommend using a unique proposal ID for each challenge
+ * to prevent overlap and unexpected behavior.
+ *
+ * @category Approvals / Transferability
+ */
+export class VotingChallenge<T extends NumberType> extends BaseNumberTypeClass<VotingChallenge<T>> implements iVotingChallenge<T> {
+  proposalId: string;
+  quorumThreshold: T;
+  voters: Voter<T>[];
+  uri?: string;
+  customData?: string;
+
+  constructor(votingChallenge: iVotingChallenge<T>) {
+    super();
+    this.proposalId = votingChallenge.proposalId;
+    this.quorumThreshold = votingChallenge.quorumThreshold;
+    this.voters = votingChallenge.voters.map((voter) => new Voter(voter));
+    this.uri = votingChallenge.uri;
+    this.customData = votingChallenge.customData;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['quorumThreshold'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): VotingChallenge<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as VotingChallenge<U>;
+  }
+
+  static fromProto<U extends NumberType>(item: protobadges.VotingChallenge, convertFunction: (item: NumberType) => U): VotingChallenge<U> {
+    return new VotingChallenge<U>({
+      proposalId: item.proposalId,
+      quorumThreshold: convertFunction(item.quorumThreshold),
+      voters: item.voters.map((voter) => Voter.fromProto(voter, convertFunction)),
+      uri: item.uri || undefined,
+      customData: item.customData || undefined
+    });
+  }
+}
+
+/**
+ * VoteProof represents a vote cast for a voting challenge.
+ *
+ * @category Approvals / Transferability
+ */
+export class VoteProof<T extends NumberType> extends BaseNumberTypeClass<VoteProof<T>> implements iVoteProof<T> {
+  proposalId: string;
+  voter: string;
+  yesWeight: T;
+
+  constructor(voteProof: iVoteProof<T>) {
+    super();
+    this.proposalId = voteProof.proposalId;
+    this.voter = voteProof.voter;
+    this.yesWeight = voteProof.yesWeight;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['yesWeight'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): VoteProof<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as VoteProof<U>;
+  }
+
+  static fromProto<U extends NumberType>(item: protobadges.VoteProof, convertFunction: (item: NumberType) => U): VoteProof<U> {
+    return new VoteProof<U>({
+      proposalId: item.proposalId,
+      voter: item.voter,
+      yesWeight: convertFunction(item.yesWeight)
+    });
+  }
+}
+
+/**
  * CollectionInvariants defines the invariants that apply to a collection.
  * These are set upon genesis and cannot be modified.
  *
@@ -1398,9 +1514,7 @@ export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeCl
       cosmosCoinBackedPath: this.cosmosCoinBackedPath
         ? new protobadges.CosmosCoinBackedPath({
             address: this.cosmosCoinBackedPath.address,
-            ibcDenom: this.cosmosCoinBackedPath.ibcDenom,
-            balances: this.cosmosCoinBackedPath.balances.map((balance) => balance.toProto()),
-            ibcAmount: this.cosmosCoinBackedPath.ibcAmount.toString()
+            conversion: this.cosmosCoinBackedPath.conversion ? this.cosmosCoinBackedPath.conversion.toProto() : undefined
           })
         : undefined,
       noForcefulPostMintTransfers: this.noForcefulPostMintTransfers,

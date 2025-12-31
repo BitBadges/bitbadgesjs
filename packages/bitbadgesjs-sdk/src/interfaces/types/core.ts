@@ -58,6 +58,31 @@ export interface iCollectionMetadata {
 /**
  * @category Interfaces
  */
+export interface iPathMetadata {
+  /**
+   * The URI (Uniform Resource Identifier) associated with the path metadata.
+   */
+  uri: string;
+
+  /**
+   * Custom data or additional information related to the path metadata.
+   */
+  customData: string;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iPathMetadataWithDetails<T extends NumberType> extends iPathMetadata {
+  /**
+   * The fetched metadata from the URI.
+   */
+  metadata?: iMetadata<T>;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iMustOwnTokens<T extends NumberType> {
   /**
    * The collection IDs to own.
@@ -153,6 +178,44 @@ export interface iAddressList {
 /**
  * @category Interfaces
  */
+export interface iConversionSideAWithDenom<T extends NumberType> {
+  /** The amount of the cosmos coin (0 decimals). */
+  amount: T;
+  /** The denomination of the cosmos coin. */
+  denom: string;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iConversionSideA<T extends NumberType> {
+  /** The amount of the cosmos coin (0 decimals). */
+  amount: T;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iConversion<T extends NumberType> {
+  /** Side A: The cosmos coin side of the conversion (amount + denom). */
+  sideA: iConversionSideAWithDenom<T>;
+  /** Side B: The badge balances side of the conversion. */
+  sideB: iBalance<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iConversionWithoutDenom<T extends NumberType> {
+  /** Side A: The cosmos coin amount side of the conversion (amount only, denom stored separately). */
+  sideA: iConversionSideA<T>;
+  /** Side B: The badge balances side of the conversion. */
+  sideB: iBalance<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iDenomUnit<T extends NumberType> {
   /** The number of decimal places for this denomination unit. */
   decimals: T;
@@ -160,14 +223,16 @@ export interface iDenomUnit<T extends NumberType> {
   symbol: string;
   /** Whether this denomination unit is the default display unit. */
   isDefaultDisplay: boolean;
+  /** The metadata for this denomination unit. */
+  metadata: iPathMetadata;
 }
 
 /**
  * @category Interfaces
  */
 export interface iDenomUnitWithDetails<T extends NumberType> extends iDenomUnit<T> {
-  /** Optional metadata for this denomination unit. */
-  metadata?: iMetadata<T>;
+  /** Metadata object containing uri, customData, and fetched metadata. */
+  metadata: iPathMetadataWithDetails<T>;
 }
 
 /**
@@ -177,11 +242,8 @@ export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
   /** The denom of the IBC wrapper path. */
   denom: string;
 
-  /** The balances for this IBC wrapper path. */
-  balances: iBalance<T>[];
-
-  /** The base amount of the wrapped denom (0 decimals) that maps to balances[] for conversions. */
-  amount: T;
+  /** The conversion between cosmos coin and badge balances. */
+  conversion: iConversionWithoutDenom<T>;
 
   /** The symbol for this IBC wrapper path. */
   symbol: string;
@@ -191,20 +253,17 @@ export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
 
   /** Whether to allow override with any valid token. */
   allowOverrideWithAnyValidToken: boolean;
+
+  /** The metadata for this wrapper path. */
+  metadata: iPathMetadata;
 }
 
 /**
  * @category Interfaces
  */
 export interface iCosmosCoinBackedPathAddObject<T extends NumberType> {
-  /** The IBC denom of the backed path. */
-  ibcDenom: string;
-
-  /** The balances for this IBC backed path. */
-  balances: iBalance<T>[];
-
-  /** The IBC amount for this backed path. */
-  ibcAmount: T;
+  /** The conversion between IBC cosmos coin and badge balances. */
+  conversion: iConversion<T>;
 }
 
 /**
@@ -214,14 +273,8 @@ export interface iCosmosCoinBackedPath<T extends NumberType> {
   /** The address for this IBC backed path. */
   address: string;
 
-  /** The IBC denom of the backed path. */
-  ibcDenom: string;
-
-  /** The balances for this IBC backed path. */
-  balances: iBalance<T>[];
-
-  /** The IBC amount for this backed path. */
-  ibcAmount: T;
+  /** The conversion between IBC cosmos coin and badge balances. */
+  conversion: iConversion<T>;
 }
 
 /**
@@ -269,17 +322,17 @@ export interface iAliasPathAddObject<T extends NumberType> {
   /** The denomination (denom) to be used for the alias. */
   denom: string;
 
-  /** The token balances that correspond to this alias path. Defines how much of the base level unit the alias maps to. */
-  balances: iBalance<T>[];
-
-  /** The base amount of the alias denom (0 decimals) that maps to balances[] for conversions. */
-  amount: T;
+  /** The conversion between cosmos coin and badge balances. */
+  conversion: iConversionWithoutDenom<T>;
 
   /** The symbol for the alias (e.g., "BADGE", "NFT"). */
   symbol: string;
 
   /** Denomination units for the alias. Defines how the coin can be displayed with different decimal places and symbols. */
   denomUnits: iDenomUnit<T>[];
+
+  /** The metadata for this alias path. */
+  metadata: iPathMetadata;
 }
 
 /**
@@ -636,6 +689,77 @@ export interface iETHSignatureProof {
    * The Ethereum signature of the nonce.
    */
   signature: string;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iVoter<T extends NumberType> {
+  /**
+   * The address of the voter.
+   */
+  address: string;
+
+  /**
+   * The weight of this voter's vote.
+   */
+  weight: T;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iVotingChallenge<T extends NumberType> {
+  /**
+   * The ID of this voting challenge for tracking votes (scoped like challengeTrackerId).
+   * Format: collectionId-approverAddress-approvalLevel-approvalId-challengeId
+   */
+  proposalId: string;
+
+  /**
+   * The quorum threshold as a percentage (0-100) of total possible weight that must vote "yes".
+   * Example: 50 means 50% of total voter weight must vote yes for approval.
+   */
+  quorumThreshold: T;
+
+  /**
+   * List of voters with their weights. Each voter can cast a weighted vote.
+   */
+  voters: iVoter<T>[];
+
+  /**
+   * The URI associated with this voting challenge.
+   */
+  uri?: string;
+
+  /**
+   * Arbitrary custom data associated with this voting challenge.
+   */
+  customData?: string;
+}
+
+/**
+ * VoteProof represents a vote cast for a voting challenge.
+ *
+ * @category Interfaces
+ */
+export interface iVoteProof<T extends NumberType> {
+  /**
+   * The proposal ID this vote is for.
+   */
+  proposalId: string;
+
+  /**
+   * The address of the voter casting the vote.
+   */
+  voter: string;
+
+  /**
+   * The percentage weight (0-100) allocated to "yes" vote.
+   * The remaining percentage (100 - yesWeight) is allocated to "no" vote.
+   * Example: yesWeight=70 means 70% yes, 30% no.
+   */
+  yesWeight: T;
 }
 
 /**

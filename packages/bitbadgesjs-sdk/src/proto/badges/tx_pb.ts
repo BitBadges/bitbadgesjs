@@ -6,11 +6,11 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { Params } from "./params_pb.js";
-import { Balance, UintRange } from "./balances_pb.js";
-import { DenomUnit } from "./collections_pb.js";
+import { Conversion, ConversionWithoutDenom, DenomUnit } from "./collections_pb.js";
+import { CollectionMetadata, PathMetadata, TokenMetadata } from "./metadata_pb.js";
 import { UserBalanceStore } from "./user_balance_store_pb.js";
+import { UintRange } from "./balances_pb.js";
 import { ActionPermission, CollectionApprovalPermission, CollectionPermissions, TokenIdsActionPermission, UserPermissions } from "./permissions_pb.js";
-import { CollectionMetadata, TokenMetadata } from "./metadata_pb.js";
 import { ApprovalIdentifierDetails, CollectionApproval, UserIncomingApproval, UserOutgoingApproval } from "./approvals_pb.js";
 import { Coin } from "../cosmos/base/v1beta1/coin_pb.js";
 import { AddressListInput } from "./address_lists_pb.js";
@@ -149,6 +149,11 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
    */
   setReservedProtocolAddressMsg?: MsgSetReservedProtocolAddress;
 
+  /**
+   * @generated from field: badges.MsgCastVote castVoteMsg = 28;
+   */
+  castVoteMsg?: MsgCastVote;
+
   constructor(data?: PartialMessage<BadgeCustomMsgType>) {
     super();
     proto3.util.initPartial(data, this);
@@ -182,6 +187,7 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
     { no: 25, name: "setCollectionApprovalsMsg", kind: "message", T: MsgSetCollectionApprovals },
     { no: 26, name: "setIsArchivedMsg", kind: "message", T: MsgSetIsArchived },
     { no: 27, name: "setReservedProtocolAddressMsg", kind: "message", T: MsgSetReservedProtocolAddress },
+    { no: 28, name: "castVoteMsg", kind: "message", T: MsgCastVote },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCustomMsgType {
@@ -296,29 +302,31 @@ export class CosmosCoinWrapperPathAddObject extends Message<CosmosCoinWrapperPat
   denom = "";
 
   /**
-   * @generated from field: repeated badges.Balance balances = 2;
+   * @generated from field: badges.ConversionWithoutDenom conversion = 2;
    */
-  balances: Balance[] = [];
+  conversion?: ConversionWithoutDenom;
 
   /**
-   * @generated from field: string amount = 3;
-   */
-  amount = "";
-
-  /**
-   * @generated from field: string symbol = 4;
+   * @generated from field: string symbol = 3;
    */
   symbol = "";
 
   /**
-   * @generated from field: repeated badges.DenomUnit denomUnits = 5;
+   * @generated from field: repeated badges.DenomUnit denomUnits = 4;
    */
   denomUnits: DenomUnit[] = [];
 
   /**
-   * @generated from field: bool allowOverrideWithAnyValidToken = 6;
+   * @generated from field: bool allowOverrideWithAnyValidToken = 5;
    */
   allowOverrideWithAnyValidToken = false;
+
+  /**
+   * The metadata for this wrapper path.
+   *
+   * @generated from field: badges.PathMetadata metadata = 6;
+   */
+  metadata?: PathMetadata;
 
   constructor(data?: PartialMessage<CosmosCoinWrapperPathAddObject>) {
     super();
@@ -329,11 +337,11 @@ export class CosmosCoinWrapperPathAddObject extends Message<CosmosCoinWrapperPat
   static readonly typeName = "badges.CosmosCoinWrapperPathAddObject";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "balances", kind: "message", T: Balance, repeated: true },
-    { no: 3, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
-    { no: 6, name: "allowOverrideWithAnyValidToken", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: "conversion", kind: "message", T: ConversionWithoutDenom },
+    { no: 3, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
+    { no: 5, name: "allowOverrideWithAnyValidToken", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: "metadata", kind: "message", T: PathMetadata },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinWrapperPathAddObject {
@@ -363,24 +371,26 @@ export class AliasPathAddObject extends Message<AliasPathAddObject> {
   denom = "";
 
   /**
-   * @generated from field: repeated badges.Balance balances = 2;
+   * @generated from field: badges.ConversionWithoutDenom conversion = 2;
    */
-  balances: Balance[] = [];
+  conversion?: ConversionWithoutDenom;
 
   /**
-   * @generated from field: string amount = 3;
-   */
-  amount = "";
-
-  /**
-   * @generated from field: string symbol = 4;
+   * @generated from field: string symbol = 3;
    */
   symbol = "";
 
   /**
-   * @generated from field: repeated badges.DenomUnit denomUnits = 5;
+   * @generated from field: repeated badges.DenomUnit denomUnits = 4;
    */
   denomUnits: DenomUnit[] = [];
+
+  /**
+   * The metadata for this alias path.
+   *
+   * @generated from field: badges.PathMetadata metadata = 5;
+   */
+  metadata?: PathMetadata;
 
   constructor(data?: PartialMessage<AliasPathAddObject>) {
     super();
@@ -391,10 +401,10 @@ export class AliasPathAddObject extends Message<AliasPathAddObject> {
   static readonly typeName = "badges.AliasPathAddObject";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "balances", kind: "message", T: Balance, repeated: true },
-    { no: 3, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
+    { no: 2, name: "conversion", kind: "message", T: ConversionWithoutDenom },
+    { no: 3, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
+    { no: 5, name: "metadata", kind: "message", T: PathMetadata },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AliasPathAddObject {
@@ -419,19 +429,9 @@ export class AliasPathAddObject extends Message<AliasPathAddObject> {
  */
 export class CosmosCoinBackedPathAddObject extends Message<CosmosCoinBackedPathAddObject> {
   /**
-   * @generated from field: string ibcDenom = 1;
+   * @generated from field: badges.Conversion conversion = 1;
    */
-  ibcDenom = "";
-
-  /**
-   * @generated from field: repeated badges.Balance balances = 2;
-   */
-  balances: Balance[] = [];
-
-  /**
-   * @generated from field: string ibcAmount = 3;
-   */
-  ibcAmount = "";
+  conversion?: Conversion;
 
   constructor(data?: PartialMessage<CosmosCoinBackedPathAddObject>) {
     super();
@@ -441,9 +441,7 @@ export class CosmosCoinBackedPathAddObject extends Message<CosmosCoinBackedPathA
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "badges.CosmosCoinBackedPathAddObject";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "ibcDenom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "balances", kind: "message", T: Balance, repeated: true },
-    { no: 3, name: "ibcAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "conversion", kind: "message", T: Conversion },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinBackedPathAddObject {
@@ -3493,6 +3491,128 @@ export class MsgSetReservedProtocolAddressResponse extends Message<MsgSetReserve
 
   static equals(a: MsgSetReservedProtocolAddressResponse | PlainMessage<MsgSetReservedProtocolAddressResponse> | undefined, b: MsgSetReservedProtocolAddressResponse | PlainMessage<MsgSetReservedProtocolAddressResponse> | undefined): boolean {
     return proto3.util.equals(MsgSetReservedProtocolAddressResponse, a, b);
+  }
+}
+
+/**
+ * MsgCastVote allows a voter to cast or update their vote for a voting challenge.
+ *
+ * @generated from message badges.MsgCastVote
+ */
+export class MsgCastVote extends Message<MsgCastVote> {
+  /**
+   * The address of the voter casting the vote.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * The collection ID for the voting challenge.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * The approval level ("collection", "incoming", or "outgoing").
+   *
+   * @generated from field: string approvalLevel = 3;
+   */
+  approvalLevel = "";
+
+  /**
+   * The approver address (empty string for collection-level approvals).
+   *
+   * @generated from field: string approverAddress = 4;
+   */
+  approverAddress = "";
+
+  /**
+   * The approval ID.
+   *
+   * @generated from field: string approvalId = 5;
+   */
+  approvalId = "";
+
+  /**
+   * The proposal ID (challenge ID) from the VotingChallenge.
+   *
+   * @generated from field: string proposalId = 6;
+   */
+  proposalId = "";
+
+  /**
+   * The percentage weight (0-100) allocated to "yes" vote.
+   * The remaining percentage (100 - yesWeight) is allocated to "no" vote.
+   * Example: yesWeight=70 means 70% yes, 30% no.
+   *
+   * @generated from field: string yesWeight = 7;
+   */
+  yesWeight = "";
+
+  constructor(data?: PartialMessage<MsgCastVote>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgCastVote";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "approvalLevel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "proposalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "yesWeight", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCastVote {
+    return new MsgCastVote().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCastVote {
+    return new MsgCastVote().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCastVote {
+    return new MsgCastVote().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgCastVote | PlainMessage<MsgCastVote> | undefined, b: MsgCastVote | PlainMessage<MsgCastVote> | undefined): boolean {
+    return proto3.util.equals(MsgCastVote, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.MsgCastVoteResponse
+ */
+export class MsgCastVoteResponse extends Message<MsgCastVoteResponse> {
+  constructor(data?: PartialMessage<MsgCastVoteResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgCastVoteResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCastVoteResponse {
+    return new MsgCastVoteResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCastVoteResponse {
+    return new MsgCastVoteResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCastVoteResponse {
+    return new MsgCastVoteResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgCastVoteResponse | PlainMessage<MsgCastVoteResponse> | undefined, b: MsgCastVoteResponse | PlainMessage<MsgCastVoteResponse> | undefined): boolean {
+    return proto3.util.equals(MsgCastVoteResponse, a, b);
   }
 }
 

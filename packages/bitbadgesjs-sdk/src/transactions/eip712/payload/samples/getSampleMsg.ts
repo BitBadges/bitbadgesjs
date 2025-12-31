@@ -17,11 +17,11 @@ import {
   ActionPermission,
   AddressChecks,
   AddressList,
+  AliasPathAddObject,
   AltTimeChecks,
   ApprovalAmounts,
   ApprovalCriteria,
   ApprovalIdentifierDetails,
-  PrecalculateBalancesFromApprovalDetails,
   AutoDeletionOptions,
   Balance,
   CoinTransfer,
@@ -29,7 +29,7 @@ import {
   CollectionApprovalPermission,
   CollectionMetadata,
   CollectionPermissions,
-  AliasPathAddObject,
+  ConversionWithoutDenom,
   CosmosCoinWrapperPathAddObject,
   DenomUnit,
   DynamicStoreChallenge,
@@ -51,6 +51,8 @@ import {
   MsgUpdateUserApprovals,
   MustOwnTokens,
   OutgoingApprovalCriteria,
+  PathMetadata,
+  PrecalculateBalancesFromApprovalDetails,
   PrecalculationOptions,
   PredeterminedBalances,
   PredeterminedOrderCalculationMethod,
@@ -66,11 +68,14 @@ import {
   UserOutgoingApproval,
   UserOutgoingApprovalPermission,
   UserPermissions,
-  UserRoyalties
+  UserRoyalties,
+  Voter,
+  VotingChallenge
 } from '@/proto/badges/index.js';
 
 import {
   InvariantsAddObject,
+  MsgCastVote,
   MsgCreateDynamicStore,
   MsgDeleteDynamicStore,
   MsgDeleteIncomingApproval,
@@ -122,14 +127,14 @@ import {
   MsgSwapExactAmountInWithIBCTransfer,
   MsgSwapExactAmountOut
 } from '@/proto/gamm/v1beta1/tx_pb.js';
-import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
+import { ManagerSplitterPermissions, PermissionCriteria } from '@/proto/managersplitter/permissions_pb.js';
 import {
   MsgCreateManagerSplitter,
   MsgDeleteManagerSplitter,
   MsgExecuteUniversalUpdateCollection,
   MsgUpdateManagerSplitter
 } from '@/proto/managersplitter/tx_pb.js';
-import { ManagerSplitterPermissions, PermissionCriteria } from '@/proto/managersplitter/permissions_pb.js';
+import { MapPermissions, MapUpdateCriteria, MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap, ValueOptions } from '@/proto/maps/tx_pb.js';
 import { Affiliate, SwapAmountInRoute, SwapAmountOutRoute } from '@/proto/poolmanager/v1beta1/swap_route_pb.js';
 import { MsgCreateProtocol, MsgDeleteProtocol, MsgSetCollectionForProtocol, MsgUpdateProtocol } from '@/proto/protocols/tx_pb.js';
 import { ProtoTypeRegistry } from '@/transactions/amino/objectConverter.js';
@@ -252,7 +257,21 @@ const approvalCriteria = new ApprovalCriteria({
     offlineHours: [new UintRange()],
     offlineDays: [new UintRange()]
   }),
-  mustPrioritize: false
+  mustPrioritize: false,
+  votingChallenges: [
+    new VotingChallenge({
+      proposalId: '',
+      quorumThreshold: '0',
+      voters: [
+        new Voter({
+          address: '',
+          weight: '0'
+        })
+      ],
+      uri: '',
+      customData: ''
+    })
+  ]
 }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) as object;
 
 const approvalCriteriaForPopulatingUndefined = new OutgoingApprovalCriteria({
@@ -463,6 +482,10 @@ function populateETHSignatureChallenges(ethSignatureChallenges?: ETHSignatureCha
   return ethSignatureChallenges || [];
 }
 
+function populateVotingChallenges(votingChallenges?: VotingChallenge[]): VotingChallenge[] {
+  return votingChallenges || [];
+}
+
 function populateAddressChecks(addressChecks?: AddressChecks): AddressChecks {
   if (!addressChecks) {
     return new AddressChecks({
@@ -522,6 +545,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     criteria.mustOwnTokens = populateMustOwnTokens(criteria.mustOwnTokens);
     criteria.dynamicStoreChallenges = populateDynamicStoreChallenges(criteria.dynamicStoreChallenges);
     criteria.ethSignatureChallenges = populateETHSignatureChallenges(criteria.ethSignatureChallenges);
+    criteria.votingChallenges = populateVotingChallenges(criteria.votingChallenges);
     criteria.recipientChecks = populateAddressChecks(criteria.recipientChecks);
     criteria.initiatorChecks = populateAddressChecks(criteria.initiatorChecks);
     criteria.altTimeChecks = populateAltTimeChecks(criteria.altTimeChecks);
@@ -539,6 +563,7 @@ export function populateUndefinedForMsgUpdateUserApprovals(msg: MsgUpdateUserApp
     criteria.mustOwnTokens = populateMustOwnTokens(criteria.mustOwnTokens);
     criteria.dynamicStoreChallenges = populateDynamicStoreChallenges(criteria.dynamicStoreChallenges);
     criteria.ethSignatureChallenges = populateETHSignatureChallenges(criteria.ethSignatureChallenges);
+    criteria.votingChallenges = populateVotingChallenges(criteria.votingChallenges);
     criteria.senderChecks = populateAddressChecks(criteria.senderChecks);
     criteria.initiatorChecks = populateAddressChecks(criteria.initiatorChecks);
     criteria.altTimeChecks = populateAltTimeChecks(criteria.altTimeChecks);
@@ -585,6 +610,11 @@ export function populateUndefinedForMsgDeleteCollection(msg: MsgDeleteCollection
 }
 
 export function populateUndefinedForMsgCreateDynamicStore(msg: MsgCreateDynamicStore) {
+  // Simple message with only primitive types, no population needed
+  return msg;
+}
+
+export function populateUndefinedForMsgCastVote(msg: MsgCastVote) {
   // Simple message with only primitive types, no population needed
   return msg;
 }
@@ -640,6 +670,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     criteria.mustOwnTokens = populateMustOwnTokens(criteria.mustOwnTokens);
     criteria.dynamicStoreChallenges = populateDynamicStoreChallenges(criteria.dynamicStoreChallenges);
     criteria.ethSignatureChallenges = populateETHSignatureChallenges(criteria.ethSignatureChallenges);
+    criteria.votingChallenges = populateVotingChallenges(criteria.votingChallenges);
     criteria.recipientChecks = populateAddressChecks(criteria.recipientChecks);
     criteria.initiatorChecks = populateAddressChecks(criteria.initiatorChecks);
     criteria.altTimeChecks = populateAltTimeChecks(criteria.altTimeChecks);
@@ -658,6 +689,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     criteria.mustOwnTokens = populateMustOwnTokens(criteria.mustOwnTokens);
     criteria.dynamicStoreChallenges = populateDynamicStoreChallenges(criteria.dynamicStoreChallenges);
     criteria.ethSignatureChallenges = populateETHSignatureChallenges(criteria.ethSignatureChallenges);
+    criteria.votingChallenges = populateVotingChallenges(criteria.votingChallenges);
     criteria.senderChecks = populateAddressChecks(criteria.senderChecks);
     criteria.initiatorChecks = populateAddressChecks(criteria.initiatorChecks);
     criteria.altTimeChecks = populateAltTimeChecks(criteria.altTimeChecks);
@@ -677,6 +709,7 @@ export function populateUndefinedForMsgUniversalUpdateCollection(msg: MsgUnivers
     criteria.userRoyalties = populateUserRoyalties(criteria.userRoyalties);
     criteria.dynamicStoreChallenges = populateDynamicStoreChallenges(criteria.dynamicStoreChallenges);
     criteria.ethSignatureChallenges = populateETHSignatureChallenges(criteria.ethSignatureChallenges);
+    criteria.votingChallenges = populateVotingChallenges(criteria.votingChallenges);
     criteria.senderChecks = populateAddressChecks(criteria.senderChecks);
     criteria.recipientChecks = populateAddressChecks(criteria.recipientChecks);
     criteria.initiatorChecks = populateAddressChecks(criteria.initiatorChecks);
@@ -1188,52 +1221,74 @@ const universalParams = {
   cosmosCoinWrapperPathsToAdd: [
     new CosmosCoinWrapperPathAddObject({
       denom: 'ibc:1234567890',
-      balances: [
-        new Balance({
-          amount: '0',
-          tokenIds: [new UintRange()],
-          ownershipTimes: [new UintRange()]
-        })
-      ],
-      amount: '0',
+      conversion: new ConversionWithoutDenom({
+        sideA: {
+          amount: '0'
+        },
+        sideB: [
+          new Balance({
+            amount: '0',
+            tokenIds: [new UintRange()],
+            ownershipTimes: [new UintRange()]
+          })
+        ]
+      }),
       symbol: '',
       denomUnits: [
         new DenomUnit({
           decimals: '0',
           symbol: '',
-          isDefaultDisplay: false
+          isDefaultDisplay: false,
+          metadata: new PathMetadata({
+            uri: '',
+            customData: ''
+          })
         })
       ],
-      allowOverrideWithAnyValidToken: false
+      allowOverrideWithAnyValidToken: false,
+      metadata: new PathMetadata({
+        uri: '',
+        customData: ''
+      })
     })
   ],
   aliasPathsToAdd: [
     new AliasPathAddObject({
       denom: 'ibc:alias123',
-      balances: [
-        new Balance({
-          amount: '0',
-          tokenIds: [new UintRange()],
-          ownershipTimes: [new UintRange()]
-        })
-      ],
-      amount: '0',
+      conversion: new ConversionWithoutDenom({
+        sideA: {
+          amount: '0'
+        },
+        sideB: [
+          new Balance({
+            amount: '0',
+            tokenIds: [new UintRange()],
+            ownershipTimes: [new UintRange()]
+          })
+        ]
+      }),
       symbol: '',
       denomUnits: [
         new DenomUnit({
           decimals: '0',
           symbol: '',
-          isDefaultDisplay: false
+          isDefaultDisplay: false,
+          metadata: new PathMetadata({
+            uri: '',
+            customData: ''
+          })
         })
-      ]
+      ],
+      metadata: new PathMetadata({
+        uri: '',
+        customData: ''
+      })
     })
   ]
 };
 
 export function getSampleMsg(msgType: string, currMsg: any) {
   switch (msgType) {
-    case 'badges/GlobalArchive':
-      return { type: msgType, value: { creator: '', archive: true } };
     case 'protocols/CreateProtocol':
       return { type: msgType, value: new MsgCreateProtocol().toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry }) };
     case 'protocols/DeleteProtocol':

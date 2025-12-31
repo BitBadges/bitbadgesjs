@@ -4,6 +4,7 @@ import { MAINNET_CHAIN_DETAILS, TESTNET_CHAIN_DETAILS } from '@/common/constants
 import { SupportedChain } from '@/common/types.js';
 import { generatePostBodyBroadcast } from '@/node-rest-api/broadcast.js';
 import {
+  MsgCastVote,
   MsgCreateAddressLists,
   MsgCreateCollection,
   MsgCreateDynamicStore,
@@ -50,6 +51,7 @@ import {
 } from '@/proto/gamm/v1beta1/tx_pb.js';
 import { createTypedData } from '@/transactions/eip712/payload/createTypedData.js';
 import {
+  populateUndefinedForMsgCastVote,
   populateUndefinedForMsgCreateAddressLists,
   populateUndefinedForMsgCreateBalancerPool,
   populateUndefinedForMsgCreateCollection,
@@ -439,6 +441,8 @@ export const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
       msg = createProtoMsg(populateUndefinedForMsgCreateAddressLists(msgVal as MsgCreateAddressLists));
     } else if (msgVal.getType().typeName === MsgCreateDynamicStore.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgCreateDynamicStore(msgVal as MsgCreateDynamicStore));
+    } else if (msgVal.getType().typeName === MsgCastVote.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgCastVote(msgVal as MsgCastVote));
     } else if (msgVal.getType().typeName === MsgDeleteCollection.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgDeleteCollection(msgVal as MsgDeleteCollection));
     } else if (msgVal.getType().typeName === MsgDeleteDynamicStore.typeName) {

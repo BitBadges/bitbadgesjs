@@ -5,7 +5,7 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
-import { CollectionMetadata, TokenMetadata } from "./metadata_pb.js";
+import { CollectionMetadata, PathMetadata, TokenMetadata } from "./metadata_pb.js";
 import { CollectionPermissions } from "./permissions_pb.js";
 import { CollectionApproval } from "./approvals_pb.js";
 import { UserBalanceStore } from "./user_balance_store_pb.js";
@@ -189,6 +189,195 @@ export class TokenCollection extends Message<TokenCollection> {
 }
 
 /**
+ * Conversion defines a bidirectional conversion between a cosmos coin (with denom) and badge balances.
+ *
+ * @generated from message badges.Conversion
+ */
+export class Conversion extends Message<Conversion> {
+  /**
+   * Side A: The cosmos coin side of the conversion (amount + denom).
+   *
+   * @generated from field: badges.ConversionSideAWithDenom sideA = 1;
+   */
+  sideA?: ConversionSideAWithDenom;
+
+  /**
+   * Side B: The badge balances side of the conversion.
+   *
+   * @generated from field: repeated badges.Balance sideB = 2;
+   */
+  sideB: Balance[] = [];
+
+  constructor(data?: PartialMessage<Conversion>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.Conversion";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "sideA", kind: "message", T: ConversionSideAWithDenom },
+    { no: 2, name: "sideB", kind: "message", T: Balance, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Conversion {
+    return new Conversion().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Conversion {
+    return new Conversion().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Conversion {
+    return new Conversion().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Conversion | PlainMessage<Conversion> | undefined, b: Conversion | PlainMessage<Conversion> | undefined): boolean {
+    return proto3.util.equals(Conversion, a, b);
+  }
+}
+
+/**
+ * ConversionSideAWithDenom represents the cosmos coin side of a conversion with denomination.
+ *
+ * @generated from message badges.ConversionSideAWithDenom
+ */
+export class ConversionSideAWithDenom extends Message<ConversionSideAWithDenom> {
+  /**
+   * The amount of the cosmos coin (0 decimals).
+   *
+   * @generated from field: string amount = 1;
+   */
+  amount = "";
+
+  /**
+   * The denomination of the cosmos coin.
+   *
+   * @generated from field: string denom = 2;
+   */
+  denom = "";
+
+  constructor(data?: PartialMessage<ConversionSideAWithDenom>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.ConversionSideAWithDenom";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ConversionSideAWithDenom {
+    return new ConversionSideAWithDenom().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ConversionSideAWithDenom {
+    return new ConversionSideAWithDenom().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ConversionSideAWithDenom {
+    return new ConversionSideAWithDenom().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ConversionSideAWithDenom | PlainMessage<ConversionSideAWithDenom> | undefined, b: ConversionSideAWithDenom | PlainMessage<ConversionSideAWithDenom> | undefined): boolean {
+    return proto3.util.equals(ConversionSideAWithDenom, a, b);
+  }
+}
+
+/**
+ * ConversionWithoutDenom defines a bidirectional conversion between a cosmos coin amount (without denom) and badge balances.
+ * The denom is stored at the base level (e.g., in AliasPath or CosmosCoinWrapperPath).
+ *
+ * @generated from message badges.ConversionWithoutDenom
+ */
+export class ConversionWithoutDenom extends Message<ConversionWithoutDenom> {
+  /**
+   * Side A: The cosmos coin amount side of the conversion (amount only, denom stored separately).
+   *
+   * @generated from field: badges.ConversionSideA sideA = 1;
+   */
+  sideA?: ConversionSideA;
+
+  /**
+   * Side B: The badge balances side of the conversion.
+   *
+   * @generated from field: repeated badges.Balance sideB = 2;
+   */
+  sideB: Balance[] = [];
+
+  constructor(data?: PartialMessage<ConversionWithoutDenom>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.ConversionWithoutDenom";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "sideA", kind: "message", T: ConversionSideA },
+    { no: 2, name: "sideB", kind: "message", T: Balance, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ConversionWithoutDenom {
+    return new ConversionWithoutDenom().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ConversionWithoutDenom {
+    return new ConversionWithoutDenom().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ConversionWithoutDenom {
+    return new ConversionWithoutDenom().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ConversionWithoutDenom | PlainMessage<ConversionWithoutDenom> | undefined, b: ConversionWithoutDenom | PlainMessage<ConversionWithoutDenom> | undefined): boolean {
+    return proto3.util.equals(ConversionWithoutDenom, a, b);
+  }
+}
+
+/**
+ * ConversionSideA represents the cosmos coin amount side of a conversion without denomination.
+ *
+ * @generated from message badges.ConversionSideA
+ */
+export class ConversionSideA extends Message<ConversionSideA> {
+  /**
+   * The amount of the cosmos coin (0 decimals).
+   *
+   * @generated from field: string amount = 1;
+   */
+  amount = "";
+
+  constructor(data?: PartialMessage<ConversionSideA>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.ConversionSideA";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ConversionSideA {
+    return new ConversionSideA().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ConversionSideA {
+    return new ConversionSideA().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ConversionSideA {
+    return new ConversionSideA().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ConversionSideA | PlainMessage<ConversionSideA> | undefined, b: ConversionSideA | PlainMessage<ConversionSideA> | undefined): boolean {
+    return proto3.util.equals(ConversionSideA, a, b);
+  }
+}
+
+/**
  * @generated from message badges.CosmosCoinWrapperPath
  */
 export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
@@ -207,11 +396,11 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
   denom = "";
 
   /**
-   * The token balances that correspond to this wrapper path. Defines how much you have to wrap to get the corresponding base level unit.
+   * The conversion between cosmos coin and badge balances.
    *
-   * @generated from field: repeated badges.Balance balances = 3;
+   * @generated from field: badges.ConversionWithoutDenom conversion = 3;
    */
-  balances: Balance[] = [];
+  conversion?: ConversionWithoutDenom;
 
   /**
    * The symbol for the wrapped coin (e.g., "BADGE", "NFT"). Used for display purposes. Note that this may not be the default.
@@ -236,11 +425,11 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
   allowOverrideWithAnyValidToken = false;
 
   /**
-   * The base amount of the wrapped denom (0 decimals) that maps to balances[] for conversions.
+   * The metadata for this wrapper path.
    *
-   * @generated from field: string amount = 7;
+   * @generated from field: badges.PathMetadata metadata = 7;
    */
-  amount = "";
+  metadata?: PathMetadata;
 
   constructor(data?: PartialMessage<CosmosCoinWrapperPath>) {
     super();
@@ -252,11 +441,11 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "balances", kind: "message", T: Balance, repeated: true },
+    { no: 3, name: "conversion", kind: "message", T: ConversionWithoutDenom },
     { no: 4, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
     { no: 6, name: "allowOverrideWithAnyValidToken", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 7, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "metadata", kind: "message", T: PathMetadata },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinWrapperPath {
@@ -288,11 +477,11 @@ export class AliasPath extends Message<AliasPath> {
   denom = "";
 
   /**
-   * The token balances that correspond to this alias path. Defines how much of the base level unit the alias maps to.
+   * The conversion between cosmos coin and badge balances.
    *
-   * @generated from field: repeated badges.Balance balances = 2;
+   * @generated from field: badges.ConversionWithoutDenom conversion = 2;
    */
-  balances: Balance[] = [];
+  conversion?: ConversionWithoutDenom;
 
   /**
    * The symbol for the alias (e.g., "BADGE", "NFT"). Used for display purposes. Note that this may not be the default.
@@ -309,11 +498,11 @@ export class AliasPath extends Message<AliasPath> {
   denomUnits: DenomUnit[] = [];
 
   /**
-   * The base amount of the alias denom (0 decimals) that maps to balances[] for conversions.
+   * The metadata for this alias path.
    *
-   * @generated from field: string amount = 5;
+   * @generated from field: badges.PathMetadata metadata = 5;
    */
-  amount = "";
+  metadata?: PathMetadata;
 
   constructor(data?: PartialMessage<AliasPath>) {
     super();
@@ -324,10 +513,10 @@ export class AliasPath extends Message<AliasPath> {
   static readonly typeName = "badges.AliasPath";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "balances", kind: "message", T: Balance, repeated: true },
+    { no: 2, name: "conversion", kind: "message", T: ConversionWithoutDenom },
     { no: 3, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
-    { no: 5, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "metadata", kind: "message", T: PathMetadata },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AliasPath {
@@ -359,28 +548,11 @@ export class CosmosCoinBackedPath extends Message<CosmosCoinBackedPath> {
   address = "";
 
   /**
-   * The IBC denomination of the backing token. This identifies which IBC token backs the badges
-   * (e.g., "ibc/..." or "ubadge"). Conversion is Balances[] = sdk.Coins([{ amount: ibcAmount, denom: ibcDenom }])
+   * The conversion between IBC cosmos coin and badge balances.
    *
-   * @generated from field: string ibcDenom = 2;
+   * @generated from field: badges.Conversion conversion = 2;
    */
-  ibcDenom = "";
-
-  /**
-   * The token balances that correspond to this backed path. Defines which token IDs and amounts
-   * are backed by the IBC tokens. Conversion is Balances[] = sdk.Coins([{ amount: ibcAmount, denom: ibcDenom }])
-   *
-   * @generated from field: repeated badges.Balance balances = 3;
-   */
-  balances: Balance[] = [];
-
-  /**
-   * The amount of IBC tokens that back the tokens. This defines the exchange rate or backing amount
-   * for the tokens in this path. Conversion is Balances[] = sdk.Coins([{ amount: ibcAmount, denom: ibcDenom }])
-   *
-   * @generated from field: string ibcAmount = 4;
-   */
-  ibcAmount = "";
+  conversion?: Conversion;
 
   constructor(data?: PartialMessage<CosmosCoinBackedPath>) {
     super();
@@ -391,9 +563,7 @@ export class CosmosCoinBackedPath extends Message<CosmosCoinBackedPath> {
   static readonly typeName = "badges.CosmosCoinBackedPath";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "ibcDenom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "balances", kind: "message", T: Balance, repeated: true },
-    { no: 4, name: "ibcAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "conversion", kind: "message", T: Conversion },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinBackedPath {
@@ -439,6 +609,13 @@ export class DenomUnit extends Message<DenomUnit> {
    */
   isDefaultDisplay = false;
 
+  /**
+   * The metadata for this denomination unit.
+   *
+   * @generated from field: badges.PathMetadata metadata = 4;
+   */
+  metadata?: PathMetadata;
+
   constructor(data?: PartialMessage<DenomUnit>) {
     super();
     proto3.util.initPartial(data, this);
@@ -450,6 +627,7 @@ export class DenomUnit extends Message<DenomUnit> {
     { no: 1, name: "decimals", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "isDefaultDisplay", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "metadata", kind: "message", T: PathMetadata },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DenomUnit {

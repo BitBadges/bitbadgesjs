@@ -389,3 +389,23 @@ export interface iMsgSetIsArchived<T extends NumberType> {
   /** Permission to archive collection. */
   canArchiveCollection: iActionPermission<T>[];
 }
+
+/**
+ * @category Interfaces
+ */
+export interface iMsgCastVote<T extends NumberType> {
+  /** The creator of the transaction. */
+  creator: BitBadgesAddress;
+  /** The collection ID for the voting challenge. */
+  collectionId: T;
+  /** The approval level ("collection", "incoming", or "outgoing"). */
+  approvalLevel: string;
+  /** The approver address (empty string for collection-level approvals). */
+  approverAddress: BitBadgesAddress;
+  /** The approval ID. */
+  approvalId: string;
+  /** The proposal ID (challenge ID) from the VotingChallenge. */
+  proposalId: string;
+  /** The percentage weight (0-100) allocated to "yes" vote. The remaining percentage (100 - yesWeight) is allocated to "no" vote. */
+  yesWeight: T;
+}

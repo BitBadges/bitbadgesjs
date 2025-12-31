@@ -7,14 +7,15 @@ import { generateAlias, getAliasDerivationKeysForBadge } from '@/core/aliases.js
 import { getMintApprovals, getNonMintApprovals, getUnhandledCollectionApprovals } from '@/core/approval-utils.js';
 import { CollectionApprovalWithDetails, iCollectionApprovalWithDetails } from '@/core/approvals.js';
 import {
-  CollectionMetadataTimelineWithDetails,
+  AliasPathWithDetails,
   CosmosCoinWrapperPathWithDetails,
-  CustomDataTimeline,
-  IsArchivedTimeline,
-  ManagerTimeline,
-  StandardsTimeline,
-  TokenMetadataTimeline,
-  TokenMetadataTimelineWithDetails
+  TokenMetadata,
+  validateCollectionMetadataUpdate,
+  validateCustomDataUpdate,
+  validateIsArchivedUpdate,
+  validateManagerUpdate,
+  validateStandardsUpdate,
+  validateTokenMetadataUpdate
 } from '@/core/misc.js';
 import type { PermissionNameString } from '@/core/permission-utils.js';
 import { getPermissionVariablesFromName } from '@/core/permission-utils.js';
@@ -22,19 +23,11 @@ import {
   ActionPermission,
   CollectionApprovalPermissionWithDetails,
   CollectionPermissionsWithDetails,
-  TimedUpdatePermission,
-  TimedUpdateWithTokenIdsPermission,
   TokenIdsActionPermission
 } from '@/core/permissions.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStoreWithDetails } from '@/core/userBalances.js';
-import type {
-  CollectionId,
-  iAddressList,
-  iCollectionMetadataTimelineWithDetails,
-  iTokenMetadataTimelineWithDetails,
-  iUintRange
-} from '@/interfaces/types/core.js';
+import type { CollectionId, iAddressList, iCollectionMetadata, iTokenMetadata, iUintRange } from '@/interfaces/types/core.js';
 import type { iCollectionPermissionsWithDetails } from '@/interfaces/types/permissions.js';
 import type { iUserBalanceStoreWithDetails } from '@/interfaces/types/userBalances.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
@@ -49,6 +42,8 @@ import {
   UtilityPageDoc
 } from './docs-types/docs.js';
 import type {
+  BitBadgesAddress,
+  iAliasPathWithDetails,
   iApprovalTrackerDoc,
   iBalanceDocWithDetails,
   iClaimDetails,
@@ -61,12 +56,16 @@ import type {
   iUtilityPageDoc,
   NativeAddress
 } from './docs-types/interfaces.js';
-import { CollectionMetadataDetails, TokenMetadataDetails } from './metadata/tokenMetadata.js';
+import {
+  CollectionMetadataDetails,
+  TokenMetadataDetails,
+  type iCollectionMetadataDetails,
+  type iTokenMetadataDetails
+} from './metadata/tokenMetadata.js';
 
 import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
 import { ClaimDetails } from '@/core/approvals.js';
-import { getCurrentValueForTimeline } from '@/core/timelines.js';
 import typia from 'typia';
 import {
   CollectionViewKey,
@@ -105,10 +104,10 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   /** The collection permissions for this collection, with off-chain metadata populated. */
   collectionPermissions: iCollectionPermissionsWithDetails<T>;
 
-  /** The collection metadata timeline for this collection, with off-chain metadata populated. */
-  collectionMetadataTimeline: iCollectionMetadataTimelineWithDetails<T>[];
-  /** The token metadata timeline for this collection, with off-chain metadata populated. */
-  tokenMetadataTimeline: iTokenMetadataTimelineWithDetails<T>[];
+  /** The collection metadata for this collection, with off-chain metadata populated. */
+  collectionMetadata: iCollectionMetadata;
+  /** The token metadata for this collection, with off-chain metadata populated. */
+  tokenMetadata: iTokenMetadata<T>[];
 
   /** The default balances for users upon genesis, with off-chain metadata populated. */
   defaultBalances: iUserBalanceStoreWithDetails<T>;
@@ -151,6 +150,9 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
 
   /** The IBC wrapper paths for the collection, with off-chain metadata populated. */
   cosmosCoinWrapperPaths: iCosmosCoinWrapperPathWithDetails<T>[];
+
+  /** The alias (non-wrapping) paths for the collection, with off-chain metadata populated. */
+  aliasPaths: iAliasPathWithDetails<T>[];
 }
 
 /**
@@ -175,9 +177,8 @@ export class BitBadgesCollection<T extends NumberType>
   collectionPermissions: CollectionPermissionsWithDetails<T>;
   defaultBalances: UserBalanceStoreWithDetails<T>;
 
-  collectionMetadataTimeline: CollectionMetadataTimelineWithDetails<T>[];
-  tokenMetadataTimeline: TokenMetadataTimelineWithDetails<T>[];
-
+  collectionMetadata: CollectionMetadataDetails<T>;
+  tokenMetadata: TokenMetadataDetails<T>[];
   activity: TransferActivityDoc<T>[];
   owners: BalanceDocWithDetails<T>[];
   challengeTrackers: MerkleChallengeTrackerDoc<T>[];
@@ -206,15 +207,15 @@ export class BitBadgesCollection<T extends NumberType>
 
   cosmosCoinWrapperPaths: CosmosCoinWrapperPathWithDetails<T>[];
 
+  aliasPaths: AliasPathWithDetails<T>[];
+
   constructor(data: iBitBadgesCollection<T>) {
     super(data);
     this.collectionApprovals = data.collectionApprovals.map((collectionApproval) => new CollectionApprovalWithDetails(collectionApproval));
     this.collectionPermissions = new CollectionPermissionsWithDetails(data.collectionPermissions);
     this.defaultBalances = new UserBalanceStoreWithDetails(data.defaultBalances);
-    this.collectionMetadataTimeline = data.collectionMetadataTimeline.map(
-      (collectionMetadata) => new CollectionMetadataTimelineWithDetails(collectionMetadata)
-    );
-    this.tokenMetadataTimeline = data.tokenMetadataTimeline.map((tokenMetadata) => new TokenMetadataTimelineWithDetails(tokenMetadata));
+    this.collectionMetadata = new CollectionMetadataDetails(data.collectionMetadata);
+    this.tokenMetadata = data.tokenMetadata.map((x) => new TokenMetadataDetails(x));
     this.activity = data.activity.map((activityItem) => new TransferActivityDoc(activityItem));
     this.owners = data.owners.map((balance) => new BalanceDocWithDetails(balance));
     this.challengeTrackers = data.challengeTrackers.map((merkleChallenge) => new MerkleChallengeTrackerDoc(merkleChallenge));
@@ -227,6 +228,7 @@ export class BitBadgesCollection<T extends NumberType>
     this.stats = data.stats ? new CollectionStatsDoc(data.stats) : undefined;
     this.tokenFloorPrices = data.tokenFloorPrices?.map((x) => new TokenFloorPriceDoc(x));
     this.cosmosCoinWrapperPaths = data.cosmosCoinWrapperPaths.map((x) => new CosmosCoinWrapperPathWithDetails(x));
+    this.aliasPaths = data.aliasPaths.map((x) => new AliasPathWithDetails(x));
   }
 
   getNumberFieldNames(): string[] {
@@ -252,71 +254,20 @@ export class BitBadgesCollection<T extends NumberType>
    * ```
    */
   getCollectionMetadata() {
-    return getCurrentValueForTimeline(this.collectionMetadataTimeline)?.collectionMetadata.metadata;
+    return this.collectionMetadata.metadata;
   }
 
   getCollectionMetadataDetails() {
-    return getCurrentValueForTimeline(this.collectionMetadataTimeline)?.collectionMetadata;
+    return this.collectionMetadata;
   }
 
   /**
-   * Sets the collection metadata for certain times (defaults to all times).
+   * Gets the token metadata at a specific time (Date.now() by default).
+   *
+   * This gets the timeline value. For the actual fetched value, use `getTokenMetadataForTokenId()` instead.
    */
-  setCollectionMetadataForTimes(metadata: CollectionMetadataDetails<T>, timelineTimesToSet?: iUintRange<T>[]) {
-    const converterFunction = getConverterFunction(this.createdBlock);
-    const fullTimeline: CollectionMetadataTimelineWithDetails<T>[] = timelineTimesToSet
-      ? this.collectionMetadataTimeline
-          .map((x) => x.clone())
-          .map((x) => {
-            const newTimes = x.timelineTimes.clone().remove(timelineTimesToSet);
-            return new CollectionMetadataTimelineWithDetails({
-              ...x,
-              timelineTimes: newTimes
-            });
-          })
-          .filter((x) => x.timelineTimes.length > 0)
-      : [];
-
-    fullTimeline.push(
-      new CollectionMetadataTimelineWithDetails<NumberType>({
-        collectionMetadata: metadata,
-        timelineTimes: timelineTimesToSet ? UintRangeArray.From(timelineTimesToSet ?? []) : UintRangeArray.FullRanges()
-      }).convert(converterFunction)
-    );
-
-    return fullTimeline;
-  }
-
-  /**
-   * Sets the token metadata for certain times (defaults to all times).
-   */
-  setTokenMetadataForTimes(metadata: TokenMetadataDetails<T>[], timelineTimesToSet?: iUintRange<T>[]) {
-    const converterFunction = getConverterFunction(this.createdBlock);
-    const fullTimeline: TokenMetadataTimelineWithDetails<T>[] = timelineTimesToSet
-      ? this.tokenMetadataTimeline
-          .map((x) => x.clone())
-          .map((x) => {
-            const newTimes = x.timelineTimes.clone().remove(timelineTimesToSet);
-            return new TokenMetadataTimelineWithDetails({
-              ...x,
-              timelineTimes: newTimes
-            });
-          })
-          .filter((x) => x.timelineTimes.length > 0)
-      : [];
-
-    fullTimeline.push(
-      new TokenMetadataTimelineWithDetails<NumberType>({
-        tokenMetadata: metadata,
-        timelineTimes: timelineTimesToSet ? UintRangeArray.From(timelineTimesToSet ?? []) : UintRangeArray.FullRanges()
-      }).convert(converterFunction)
-    );
-
-    return fullTimeline;
-  }
-
-  getCurrentTokenMetadata() {
-    return getCurrentValueForTimeline(this.tokenMetadataTimeline)?.tokenMetadata.map((x) => x.clone()) ?? [];
+  getTokenMetadata() {
+    return this.tokenMetadata;
   }
 
   /**
@@ -329,12 +280,12 @@ export class BitBadgesCollection<T extends NumberType>
    * ```ts
    * const collection: BitBadgesCollection<bigint> = { ... }
    * const tokenId = 123n
-   * const metadata = collection.getTokenMetadata(tokenId)
+   * const metadata = collection.getTokenMetadataForTokenId(tokenId)
    * const metadataImage = metadata.image
    * ```
    */
-  getTokenMetadata(tokenId: T) {
-    return TokenMetadataDetails.getMetadataForTokenId(tokenId, this.getCurrentTokenMetadata());
+  getTokenMetadataForTokenId(tokenId: T) {
+    return TokenMetadataDetails.getMetadataForTokenId(tokenId, this.getTokenMetadata());
   }
 
   /**
@@ -343,7 +294,7 @@ export class BitBadgesCollection<T extends NumberType>
    * If you only want the metadata, use getTokenMetadata, or you can access it via result.metadata.
    */
   getTokenMetadataDetails(tokenId: T) {
-    return TokenMetadataDetails.getMetadataDetailsForTokenId(tokenId, this.getCurrentTokenMetadata());
+    return TokenMetadataDetails.getMetadataDetailsForTokenId(tokenId, this.getTokenMetadata());
   }
 
   /**
@@ -358,7 +309,7 @@ export class BitBadgesCollection<T extends NumberType>
    */
   getDefaultDisplayCurrency() {
     return (
-      this.getStandards()
+      this.standards
         ?.find((x) => x.startsWith('DefaultDisplayCurrency'))
         ?.split(':')
         .slice(1)
@@ -512,55 +463,58 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Validates if a state transition (old token metadata -> new token metadata) is valid, given the current state of the collection and its permissions.
    *
-   * Wrapper for {@link TokenMetadataTimeline.validateUpdate}.
+   * Wrapper for {@link validateTokenMetadataUpdate}.
    */
-  validateTokenMetadataUpdate(newTokenMetadata: TokenMetadataTimeline<T>[]): Error | null {
-    const result = TokenMetadataTimeline.validateUpdate(
-      this.tokenMetadataTimeline,
-      newTokenMetadata,
-      this.collectionPermissions.canUpdateTokenMetadata
-    );
-    return result;
+  validateTokenMetadataUpdate(newTokenMetadata: iTokenMetadata<T>[]): Error | null {
+    const oldTokenMetadata = this.tokenMetadata.map((x) => new TokenMetadata({ uri: x.uri, tokenIds: x.tokenIds, customData: x.customData }));
+    const newTokenMetadataConverted = newTokenMetadata.map((x) => new TokenMetadata(x));
+    return validateTokenMetadataUpdate(oldTokenMetadata, newTokenMetadataConverted, this.collectionPermissions.canUpdateTokenMetadata);
   }
 
   /**
    * Validates if a state transition (old custom data -> new custom data) is valid, given the current state of the collection and its permissions.
    *
-   * Wrapper for {@link CustomDataTimeline.validateUpdate}.
+   * Wrapper for {@link validateCustomDataUpdate}.
    */
-  validateCustomDataUpdate(newCustomData: CustomDataTimeline<T>[]): Error | null {
-    const result = CustomDataTimeline.validateUpdate(this.customDataTimeline, newCustomData, this.collectionPermissions.canUpdateCustomData);
-    return result;
+  validateCustomDataUpdate(newCustomData: string): Error | null {
+    return validateCustomDataUpdate(this.customData, newCustomData, this.collectionPermissions.canUpdateCustomData);
   }
 
   /**
    * Validates if a state transition (old standards -> new standards) is valid, given the current state of the collection and its permissions.
    *
-   * Wrapper for {@link StandardsTimeline.validateUpdate}.
+   * Wrapper for {@link validateStandardsUpdate}.
    */
-  validateStandardsUpdate(newStandards: StandardsTimeline<T>[]): Error | null {
-    const result = StandardsTimeline.validateUpdate(this.standardsTimeline, newStandards, this.collectionPermissions.canUpdateStandards);
-    return result;
+  validateStandardsUpdate(newStandards: string[]): Error | null {
+    return validateStandardsUpdate(this.standards, newStandards, this.collectionPermissions.canUpdateStandards);
   }
 
   /**
    * Validates if a state transition (old isArchived -> new isArchived) is valid, given the current state of the collection and its permissions.
    *
-   * Wrapper for {@link IsArchivedTimeline.validateUpdate}.
+   * Wrapper for {@link validateIsArchivedUpdate}.
    */
-  validateIsArchivedUpdate(newIsArchived: IsArchivedTimeline<T>[]): Error | null {
-    const result = IsArchivedTimeline.validateUpdate(this.isArchivedTimeline, newIsArchived, this.collectionPermissions.canArchiveCollection);
-    return result;
+  validateIsArchivedUpdate(newIsArchived: boolean): Error | null {
+    return validateIsArchivedUpdate(this.isArchived, newIsArchived, this.collectionPermissions.canArchiveCollection);
   }
 
   /**
    * Validates if a state transition (old manager -> new manager) is valid, given the current state of the collection and its permissions.
    *
-   * Wrapper for {@link ManagerTimeline.validateUpdate}.
+   * Wrapper for {@link validateManagerUpdate}.
    */
-  validateManagerUpdate(newManager: ManagerTimeline<T>[]): Error | null {
-    const result = ManagerTimeline.validateUpdate(this.managerTimeline, newManager, this.collectionPermissions.canUpdateManager);
-    return result;
+  validateManagerUpdate(newManager: BitBadgesAddress): Error | null {
+    return validateManagerUpdate(this.manager, newManager, this.collectionPermissions.canUpdateManager);
+  }
+
+  /**
+   * Validates if a state transition (old collection metadata -> new collection metadata) is valid, given the current state of the collection and its permissions.
+   *
+   * Wrapper for {@link validateCollectionMetadataUpdate}.
+   */
+  validateCollectionMetadataUpdate(newCollectionMetadata: iCollectionMetadata): Error | null {
+    const oldCollectionMetadata = { uri: this.collectionMetadata.uri, customData: this.collectionMetadata.customData };
+    return validateCollectionMetadataUpdate(oldCollectionMetadata, newCollectionMetadata, this.collectionPermissions.canUpdateCollectionMetadata);
   }
 
   /**
@@ -575,61 +529,44 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Checks if this permission is executable for the provided values at a specific time (Date.now() by default).
    *
-   * Wrapper for {@link TimedUpdatePermission.check}.
+   * Wrapper for {@link ActionPermission.check}.
    */
-  checkCanArchiveCollection(timelineTimes: iUintRange<T>[], time?: NumberType) {
-    return TimedUpdatePermission.check(
-      UintRangeArray.From(timelineTimes.map((x) => new UintRange(x).convert(BigIntify))),
-      this.convert(BigIntify).collectionPermissions.canArchiveCollection,
-      time ? BigInt(time) : BigInt(Date.now())
-    );
+  checkCanArchiveCollection(time?: NumberType) {
+    return ActionPermission.check(this.convert(BigIntify).collectionPermissions.canArchiveCollection, time ? BigInt(time) : BigInt(Date.now()));
   }
 
   /**
    * Checks if this permission is executable for the provided values at a specific time (Date.now() by default).
    *
-   * Wrapper for {@link TimedUpdatePermission.check}.
+   * Wrapper for {@link ActionPermission.check}.
    */
-  checkCanUpdateManager(timelineTimes: iUintRange<T>[], time?: NumberType) {
-    return TimedUpdatePermission.check(
-      UintRangeArray.From(timelineTimes.map((x) => new UintRange(x).convert(BigIntify))),
-      this.convert(BigIntify).collectionPermissions.canUpdateManager,
-      time ? BigInt(time) : BigInt(Date.now())
-    );
+  checkCanUpdateManager(time?: NumberType) {
+    return ActionPermission.check(this.convert(BigIntify).collectionPermissions.canUpdateManager, time ? BigInt(time) : BigInt(Date.now()));
   }
 
   /**
    * Checks if this permission is executable for the provided values at a specific time (Date.now() by default).
    *
-   * Wrapper for {@link TimedUpdatePermission.check}.
+   * Wrapper for {@link ActionPermission.check}.
    */
-  checkCanUpdateStandards(timelineTimes: iUintRange<T>[], time?: NumberType) {
-    return TimedUpdatePermission.check(
-      UintRangeArray.From(timelineTimes.map((x) => new UintRange(x).convert(BigIntify))),
-      this.convert(BigIntify).collectionPermissions.canUpdateStandards,
-      time ? BigInt(time) : BigInt(Date.now())
-    );
+  checkCanUpdateStandards(time?: NumberType) {
+    return ActionPermission.check(this.convert(BigIntify).collectionPermissions.canUpdateStandards, time ? BigInt(time) : BigInt(Date.now()));
   }
   /**
    * Checks if this permission is executable for the provided values at a specific time (Date.now() by default).
    *
-   * Wrapper for {@link TimedUpdatePermission.check}.
+   * Wrapper for {@link ActionPermission.check}.
    */
-  checkCanUpdateCustomData(timelineTimes: iUintRange<T>[], time?: NumberType) {
-    return TimedUpdatePermission.check(
-      UintRangeArray.From(timelineTimes.map((x) => new UintRange(x).convert(BigIntify))),
-      this.convert(BigIntify).collectionPermissions.canUpdateCustomData,
-      time ? BigInt(time) : BigInt(Date.now())
-    );
+  checkCanUpdateCustomData(time?: NumberType) {
+    return ActionPermission.check(this.convert(BigIntify).collectionPermissions.canUpdateCustomData, time ? BigInt(time) : BigInt(Date.now()));
   }
   /**
    * Checks if this permission is executable for the provided values at a specific time (Date.now() by default).
    *
-   * Wrapper for {@link TimedUpdatePermission.check}.
+   * Wrapper for {@link ActionPermission.check}.
    */
-  checkCanUpdateCollectionMetadata(timelineTimes: iUintRange<T>[], time?: NumberType) {
-    return TimedUpdatePermission.check(
-      UintRangeArray.From(timelineTimes.map((x) => new UintRange(x).convert(BigIntify))),
+  checkCanUpdateCollectionMetadata(time?: NumberType) {
+    return ActionPermission.check(
       this.convert(BigIntify).collectionPermissions.canUpdateCollectionMetadata,
       time ? BigInt(time) : BigInt(Date.now())
     );
@@ -651,15 +588,11 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Checks if this permission is executable for the provided values at a specific time (Date.now() by default).
    */
-  checkCanUpdateTokenMetadata(details: { timelineTimes: iUintRange<NumberType>[]; tokenIds: iUintRange<NumberType>[] }[], time?: NumberType) {
-    return TimedUpdateWithTokenIdsPermission.check(
-      details.map((x) => {
-        return {
-          ...x,
-          timelineTimes: UintRangeArray.From(x.timelineTimes).convert(BigIntify),
-          tokenIds: UintRangeArray.From(x.tokenIds).convert(BigIntify)
-        };
-      }),
+  checkCanUpdateTokenMetadata(tokenIds: iUintRange<T>[], time?: NumberType) {
+    return TokenIdsActionPermission.check(
+      tokenIds.map((x) => ({
+        tokenIds: UintRangeArray.From([x]).convert(BigIntify)
+      })),
       this.convert(BigIntify).collectionPermissions.canUpdateTokenMetadata,
       time ? BigInt(time) : BigInt(Date.now())
     );
@@ -668,7 +601,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Checks if this permission is executable for the provided values at a specific time (Date.now() by default).
    *
-   * Wrapper for {@link TimedUpdatePermission.check}.
+   * Wrapper for {@link CollectionApprovalPermission.check}.
    */
   checkCanUpdateCollectionApprovals(
     details: {
@@ -1300,7 +1233,7 @@ const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesC
 
   const allTokenIdsInMetadata = UintRangeArray.From(
     cachedCollection
-      .getCurrentTokenMetadata()
+      .getTokenMetadata()
       .map((x) => x.tokenIds)
       .flat()
   ).convert(BigIntify);
@@ -1308,14 +1241,14 @@ const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesC
   const allTokenIdsNotInMetadata = allTokenIdsInMetadata.toInverted({ start: 1n, end: GO_MAX_UINT_64 });
 
   if (metadataFetchReq) {
-    const tokenMetadata = cachedCollection.getCurrentTokenMetadata();
+    const tokenMetadata = cachedCollection.getTokenMetadata();
 
     //See if we already have the metadata corresponding to the uris
     if (metadataFetchReq.uris) {
       for (const uri of metadataFetchReq.uris) {
         if (!uri) continue;
 
-        const currentTokenMetadata = cachedCollection.getCurrentTokenMetadata();
+        const currentTokenMetadata = cachedCollection.getTokenMetadata();
         let hasMetadata = false;
         for (const metadataDetails of currentTokenMetadata) {
           if (metadataDetails.fetchedUri === uri && metadataDetails.metadata !== undefined) {
@@ -1357,7 +1290,7 @@ const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesC
           const allMatchingBadgeUintRanges = UintRangeArray.From({ start: currBadgeUintRange.start, end: currBadgeUintRange.start });
           let handled = false;
           for (const metadataDetails of tokenMetadata) {
-            if (metadataDetails.tokenIds.searchIfExists(BigInt(currBadgeUintRange.start))) {
+            if (UintRangeArray.From(metadataDetails.tokenIds).searchIfExists(BigInt(currBadgeUintRange.start))) {
               handled = true;
 
               if (metadataDetails.metadata == undefined) {
@@ -1415,15 +1348,15 @@ function updateCollectionWithResponse<T extends NumberType>(
   const newCollection = newCollectionResponse;
 
   const newTokenMetadata =
-    newCollection.getCurrentTokenMetadata() && newCollection.getCurrentTokenMetadata().length > 0
+    newCollection.getTokenMetadata() && newCollection.getTokenMetadata().length > 0
       ? TokenMetadataDetails.batchUpdateTokenMetadata(
-          cachedCollection.getCurrentTokenMetadata(),
+          cachedCollection.getTokenMetadata(),
           newCollection
-            .getCurrentTokenMetadata()
+            .getTokenMetadata()
             .map((x) => x.convert(convertFunction))
             .filter((x) => x.metadata) //only update if we have new metadata
         )
-      : cachedCollection.getCurrentTokenMetadata();
+      : cachedCollection.getTokenMetadata();
 
   const newViews = cachedCollection?.views || {};
 
@@ -1508,26 +1441,15 @@ function updateCollectionWithResponse<T extends NumberType>(
   }
 
   const newCollectionMetadata = newCollection.getCollectionMetadata() || cachedCollection?.getCollectionMetadata();
-  const newCollectionMetadataTimeline = newCollection.collectionMetadataTimeline || cachedCollection?.collectionMetadataTimeline;
-  for (const timelineTime of newCollectionMetadataTimeline) {
-    if (timelineTime.timelineTimes.searchIfExists(BigInt(Date.now()))) {
-      timelineTime.collectionMetadata.metadata = newCollectionMetadata;
-    }
-  }
-
-  const newTokenMetadataTimeline = newCollection.tokenMetadataTimeline || cachedCollection?.tokenMetadataTimeline;
-  for (const timelineTime of newTokenMetadataTimeline) {
-    if (timelineTime.timelineTimes.searchIfExists(BigInt(Date.now()))) {
-      timelineTime.tokenMetadata = newTokenMetadata;
-    }
-  }
+  const newCollectionMetadataToSet = newCollection.collectionMetadata || cachedCollection?.collectionMetadata;
+  newCollectionMetadataToSet.metadata = newCollectionMetadata;
 
   //Update details accordingly. Note that there are certain fields which are always returned like collectionId, collectionUri, tokenUris, etc. We just ...spread these from the new response.
   cachedCollection = new BitBadgesCollection({
     ...cachedCollection,
     ...newCollection,
-    collectionMetadataTimeline: newCollectionMetadataTimeline,
-    tokenMetadataTimeline: newTokenMetadataTimeline,
+    collectionMetadata: newCollectionMetadataToSet,
+    tokenMetadata: newTokenMetadata,
     activity,
     owners,
     challengeTrackers,
@@ -1538,15 +1460,17 @@ function updateCollectionWithResponse<T extends NumberType>(
   });
 
   if (cachedCollection.collectionId === NEW_COLLECTION_ID) {
-    for (const timelineItem of cachedCollection.collectionMetadataTimeline) {
-      delete timelineItem.collectionMetadata?.metadata?.fetchedAt;
-      delete timelineItem.collectionMetadata?.metadata?.fetchedAtBlock;
+    if (cachedCollection.collectionMetadata?.metadata) {
+      delete cachedCollection.collectionMetadata.metadata.fetchedAt;
+      delete cachedCollection.collectionMetadata.metadata.fetchedAtBlock;
     }
 
-    for (const metadataDetails of cachedCollection.tokenMetadataTimeline) {
-      for (const metadata of metadataDetails.tokenMetadata) {
-        delete metadata.metadata?.fetchedAt;
-        delete metadata.metadata?.fetchedAtBlock;
+    if (cachedCollection.tokenMetadata) {
+      for (const metadata of cachedCollection.tokenMetadata) {
+        if (metadata.metadata) {
+          delete metadata.metadata.fetchedAt;
+          delete metadata.metadata.fetchedAtBlock;
+        }
       }
     }
   }

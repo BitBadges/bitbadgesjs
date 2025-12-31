@@ -1,6 +1,7 @@
 export * from './msgCreateAddressLists.js';
 export * from './msgCreateCollection.js';
 export * from './msgCreateDynamicStore.js';
+export * from './msgCastVote.js';
 export * from './msgDeleteCollection.js';
 export * from './msgDeleteDynamicStore.js';
 export * from './msgDeleteIncomingApproval.js';

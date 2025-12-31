@@ -5,7 +5,7 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
-import { ETHSignatureChallenge, MerkleChallenge } from "./challenges_pb.js";
+import { ETHSignatureChallenge, MerkleChallenge, VotingChallenge } from "./challenges_pb.js";
 import { PredeterminedBalances } from "./predetermined_balances_pb.js";
 import { ApprovalAmounts, AutoDeletionOptions, MaxNumTransfers } from "./approval_tracking_pb.js";
 import { AddressChecks, AltTimeChecks, CoinTransfer, DynamicStoreChallenge, MustOwnTokens, UserRoyalties } from "./approval_conditions_pb.js";
@@ -187,6 +187,14 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
    */
   mustPrioritize = false;
 
+  /**
+   * Voting challenges that must be satisfied for approval. The initiator must provide
+   * valid votes that meet the quorum threshold for all specified challenges.
+   *
+   * @generated from field: repeated badges.VotingChallenge votingChallenges = 22;
+   */
+  votingChallenges: VotingChallenge[] = [];
+
   constructor(data?: PartialMessage<ApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -216,6 +224,7 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
     { no: 19, name: "initiatorChecks", kind: "message", T: AddressChecks },
     { no: 20, name: "altTimeChecks", kind: "message", T: AltTimeChecks },
     { no: 21, name: "mustPrioritize", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 22, name: "votingChallenges", kind: "message", T: VotingChallenge, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalCriteria {
@@ -364,6 +373,14 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
    */
   mustPrioritize = false;
 
+  /**
+   * Voting challenges that must be satisfied for approval. The initiator must provide
+   * valid votes that meet the quorum threshold for all specified challenges.
+   *
+   * @generated from field: repeated badges.VotingChallenge votingChallenges = 16;
+   */
+  votingChallenges: VotingChallenge[] = [];
+
   constructor(data?: PartialMessage<OutgoingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -387,6 +404,7 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
     { no: 13, name: "initiatorChecks", kind: "message", T: AddressChecks },
     { no: 14, name: "altTimeChecks", kind: "message", T: AltTimeChecks },
     { no: 15, name: "mustPrioritize", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 16, name: "votingChallenges", kind: "message", T: VotingChallenge, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OutgoingApprovalCriteria {
@@ -535,6 +553,14 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
    */
   mustPrioritize = false;
 
+  /**
+   * Voting challenges that must be satisfied for approval. The initiator must provide
+   * valid votes that meet the quorum threshold for all specified challenges.
+   *
+   * @generated from field: repeated badges.VotingChallenge votingChallenges = 16;
+   */
+  votingChallenges: VotingChallenge[] = [];
+
   constructor(data?: PartialMessage<IncomingApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -558,6 +584,7 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
     { no: 13, name: "initiatorChecks", kind: "message", T: AddressChecks },
     { no: 14, name: "altTimeChecks", kind: "message", T: AltTimeChecks },
     { no: 15, name: "mustPrioritize", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 16, name: "votingChallenges", kind: "message", T: VotingChallenge, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncomingApprovalCriteria {

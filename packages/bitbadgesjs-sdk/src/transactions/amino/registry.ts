@@ -1,5 +1,6 @@
 import { MsgAddCustomData } from '@/proto/anchor/tx_pb.js';
 import {
+  MsgCastVote,
   MsgCreateAddressLists,
   MsgCreateCollection,
   MsgCreateDynamicStore,
@@ -259,6 +260,7 @@ export function createBadgesAminoConverters(): AminoConverters {
     ...createAminoConverter(MsgCreateAddressLists, 'badges/CreateAddressLists'),
     ...createAminoConverter(MsgCreateCollection, 'badges/CreateCollection'),
     ...createAminoConverter(MsgCreateDynamicStore, 'badges/CreateDynamicStore'),
+    ...createAminoConverter(MsgCastVote, 'badges/CastVote'),
     ...createAminoConverter(MsgDeleteDynamicStore, 'badges/DeleteDynamicStore'),
     ...createAminoConverter(MsgDeleteIncomingApproval, 'badges/DeleteIncomingApproval'),
     ...createAminoConverter(MsgDeleteOutgoingApproval, 'badges/DeleteOutgoingApproval'),

@@ -20,8 +20,11 @@ import type {
   iBalance,
   iCollectionInvariants,
   iCollectionMetadata,
+  iConversionWithoutDenom,
   iDenomUnit,
   iDenomUnitWithDetails,
+  iPathMetadata,
+  iPathMetadataWithDetails,
   iTokenMetadata,
   iUintRange
 } from '@/interfaces/types/core.js';
@@ -481,11 +484,12 @@ export interface iCollectionDoc<T extends NumberType> extends Doc {
 export interface iCosmosCoinWrapperPath<T extends NumberType> {
   address: string;
   denom: string;
-  balances: iBalance<T>[];
-  amount: T;
+  conversion: iConversionWithoutDenom<T>;
   symbol: string;
   denomUnits: iDenomUnit<T>[];
   allowOverrideWithAnyValidToken: boolean;
+  /** The metadata for this wrapper path. */
+  metadata: iPathMetadata;
 }
 
 /**
@@ -510,6 +514,7 @@ export interface iPoolInfo<T extends NumberType> {
  */
 export interface iAssetInfoDoc<T extends NumberType> extends Doc {
   asset: string;
+  symbol: string;
   price: number;
   lastUpdated: T;
   totalLiquidity: iCosmosCoin<T>[];
@@ -535,8 +540,8 @@ export interface iAssetInfoDoc<T extends NumberType> extends Doc {
  * @category Interfaces
  */
 export interface iCosmosCoinWrapperPathWithDetails<T extends NumberType> extends iCosmosCoinWrapperPath<T> {
-  /** Optional base-level metadata for this cosmos coin wrapper path. */
-  metadata?: iMetadata<T>;
+  /** Metadata object containing uri, customData, and fetched metadata. */
+  metadata: iPathMetadataWithDetails<T>;
   /** The denomination units with metadata details populated. */
   denomUnits: iDenomUnitWithDetails<T>[];
   /** Pool Infos */
@@ -550,18 +555,19 @@ export interface iCosmosCoinWrapperPathWithDetails<T extends NumberType> extends
  */
 export interface iAliasPath<T extends NumberType> {
   denom: string;
-  balances: iBalance<T>[];
-  amount: T;
+  conversion: iConversionWithoutDenom<T>;
   symbol: string;
   denomUnits: iDenomUnit<T>[];
+  /** The metadata for this alias path. */
+  metadata: iPathMetadata;
 }
 
 /**
  * @category Interfaces
  */
 export interface iAliasPathWithDetails<T extends NumberType> extends iAliasPath<T> {
-  /** Optional base-level metadata for this alias path. */
-  metadata?: iMetadata<T>;
+  /** Metadata object containing uri, customData, and fetched metadata. */
+  metadata: iPathMetadataWithDetails<T>;
   /** The denomination units with metadata details populated. */
   denomUnits: iDenomUnitWithDetails<T>[];
   /** Pool Infos */

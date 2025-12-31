@@ -1,6 +1,6 @@
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iApprovalInfoDetails, iIncomingApprovalCriteriaWithDetails } from '@/core/approvals.js';
-import type { iAddressList, iBalance, iCoinTransfer, iETHSignatureChallenge, iMerkleChallenge, iMustOwnToken, iUintRange } from './core.js';
+import type { iAddressList, iBalance, iCoinTransfer, iETHSignatureChallenge, iMerkleChallenge, iMustOwnToken, iUintRange, iVotingChallenge } from './core.js';
 
 /**
  * @category Interfaces
@@ -94,6 +94,8 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   altTimeChecks?: iAltTimeChecks<T>;
   /** If true, this approval must be explicitly prioritized in PrioritizedApprovals to be used. */
   mustPrioritize?: boolean;
+  /** The list of voting challenges that must be satisfied for approval. */
+  votingChallenges?: iVotingChallenge<T>[];
 }
 
 /**
@@ -286,6 +288,8 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   altTimeChecks?: iAltTimeChecks<T>;
   /** If true, this approval must be explicitly prioritized in PrioritizedApprovals to be used. */
   mustPrioritize?: boolean;
+  /** The list of voting challenges that must be satisfied for approval. */
+  votingChallenges?: iVotingChallenge<T>[];
 }
 
 /**
@@ -362,6 +366,8 @@ export interface iApprovalCriteria<T extends NumberType> {
   altTimeChecks?: iAltTimeChecks<T>;
   /** If true, this approval must be explicitly prioritized in PrioritizedApprovals to be used. */
   mustPrioritize?: boolean;
+  /** The list of voting challenges that must be satisfied for approval. */
+  votingChallenges?: iVotingChallenge<T>[];
 }
 
 /**

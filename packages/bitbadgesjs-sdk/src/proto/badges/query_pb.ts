@@ -11,6 +11,7 @@ import { UserBalanceStore } from "./user_balance_store_pb.js";
 import { AddressList } from "./address_lists_pb.js";
 import { ApprovalTracker } from "./approval_tracking_pb.js";
 import { DynamicStore, DynamicStoreValue } from "./dynamic_stores_pb.js";
+import { VoteProof } from "./challenges_pb.js";
 
 /**
  * QueryParamsRequest is request type for the Query/Params RPC method.
@@ -1019,6 +1020,216 @@ export class QueryGetAllReservedProtocolAddressesResponse extends Message<QueryG
 
   static equals(a: QueryGetAllReservedProtocolAddressesResponse | PlainMessage<QueryGetAllReservedProtocolAddressesResponse> | undefined, b: QueryGetAllReservedProtocolAddressesResponse | PlainMessage<QueryGetAllReservedProtocolAddressesResponse> | undefined): boolean {
     return proto3.util.equals(QueryGetAllReservedProtocolAddressesResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.QueryGetVoteRequest
+ */
+export class QueryGetVoteRequest extends Message<QueryGetVoteRequest> {
+  /**
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  /**
+   * "collection" or "incoming" or "outgoing"
+   *
+   * @generated from field: string approvalLevel = 2;
+   */
+  approvalLevel = "";
+
+  /**
+   * if approvalLevel is "collection", leave blank
+   *
+   * @generated from field: string approverAddress = 3;
+   */
+  approverAddress = "";
+
+  /**
+   * @generated from field: string approvalId = 4;
+   */
+  approvalId = "";
+
+  /**
+   * @generated from field: string proposalId = 5;
+   */
+  proposalId = "";
+
+  /**
+   * @generated from field: string voterAddress = 6;
+   */
+  voterAddress = "";
+
+  constructor(data?: PartialMessage<QueryGetVoteRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryGetVoteRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "approvalLevel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "proposalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "voterAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetVoteRequest {
+    return new QueryGetVoteRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetVoteRequest {
+    return new QueryGetVoteRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetVoteRequest {
+    return new QueryGetVoteRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetVoteRequest | PlainMessage<QueryGetVoteRequest> | undefined, b: QueryGetVoteRequest | PlainMessage<QueryGetVoteRequest> | undefined): boolean {
+    return proto3.util.equals(QueryGetVoteRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.QueryGetVoteResponse
+ */
+export class QueryGetVoteResponse extends Message<QueryGetVoteResponse> {
+  /**
+   * @generated from field: badges.VoteProof vote = 1;
+   */
+  vote?: VoteProof;
+
+  constructor(data?: PartialMessage<QueryGetVoteResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryGetVoteResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "vote", kind: "message", T: VoteProof },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetVoteResponse {
+    return new QueryGetVoteResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetVoteResponse {
+    return new QueryGetVoteResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetVoteResponse {
+    return new QueryGetVoteResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetVoteResponse | PlainMessage<QueryGetVoteResponse> | undefined, b: QueryGetVoteResponse | PlainMessage<QueryGetVoteResponse> | undefined): boolean {
+    return proto3.util.equals(QueryGetVoteResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.QueryGetVotesRequest
+ */
+export class QueryGetVotesRequest extends Message<QueryGetVotesRequest> {
+  /**
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  /**
+   * "collection" or "incoming" or "outgoing"
+   *
+   * @generated from field: string approvalLevel = 2;
+   */
+  approvalLevel = "";
+
+  /**
+   * if approvalLevel is "collection", leave blank
+   *
+   * @generated from field: string approverAddress = 3;
+   */
+  approverAddress = "";
+
+  /**
+   * @generated from field: string approvalId = 4;
+   */
+  approvalId = "";
+
+  /**
+   * @generated from field: string proposalId = 5;
+   */
+  proposalId = "";
+
+  constructor(data?: PartialMessage<QueryGetVotesRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryGetVotesRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "approvalLevel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "proposalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetVotesRequest {
+    return new QueryGetVotesRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetVotesRequest {
+    return new QueryGetVotesRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetVotesRequest {
+    return new QueryGetVotesRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetVotesRequest | PlainMessage<QueryGetVotesRequest> | undefined, b: QueryGetVotesRequest | PlainMessage<QueryGetVotesRequest> | undefined): boolean {
+    return proto3.util.equals(QueryGetVotesRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.QueryGetVotesResponse
+ */
+export class QueryGetVotesResponse extends Message<QueryGetVotesResponse> {
+  /**
+   * @generated from field: repeated badges.VoteProof votes = 1;
+   */
+  votes: VoteProof[] = [];
+
+  constructor(data?: PartialMessage<QueryGetVotesResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.QueryGetVotesResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "votes", kind: "message", T: VoteProof, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetVotesResponse {
+    return new QueryGetVotesResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetVotesResponse {
+    return new QueryGetVotesResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetVotesResponse {
+    return new QueryGetVotesResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetVotesResponse | PlainMessage<QueryGetVotesResponse> | undefined, b: QueryGetVotesResponse | PlainMessage<QueryGetVotesResponse> | undefined): boolean {
+    return proto3.util.equals(QueryGetVotesResponse, a, b);
   }
 }
 

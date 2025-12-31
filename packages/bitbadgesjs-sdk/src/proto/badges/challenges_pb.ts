@@ -119,7 +119,7 @@ export class MerkleChallenge extends Message<MerkleChallenge> {
  * ETHSignatureChallenge defines a rule for the approval in the form of an Ethereum signature challenge.
  *
  * An ETH signature challenge is a challenge where the user must provide a valid Ethereum signature for a specific nonce.
- * The signature scheme is ETHSign(nonce + "-" + creatorAddress) and each signature can only be used once.
+ * The signature scheme is ETHSign(nonce + "-" + initiatorAddress + "-" + collectionId + "-" + approverAddress + "-" + approvalLevel + "-" + approvalId + "-" + challengeId) and each signature can only be used once.
  * All challenges must be met with valid solutions for the transfer to be approved.
  *
  * IMPORTANT: We track the usage of each signature to prevent replay attacks. Each signature can only be used once.
@@ -301,7 +301,7 @@ export class MerkleProof extends Message<MerkleProof> {
  */
 export class ETHSignatureProof extends Message<ETHSignatureProof> {
   /**
-   * The nonce that was signed. The signature scheme is ETHSign(nonce + "-" + creatorAddress).
+   * The nonce that was signed. The signature scheme is ETHSign(nonce + "-" + initiatorAddress + "-" + collectionId + "-" + approverAddress + "-" + approvalLevel + "-" + approvalId + "-" + challengeId).
    *
    * @generated from field: string nonce = 1;
    */
@@ -340,6 +340,197 @@ export class ETHSignatureProof extends Message<ETHSignatureProof> {
 
   static equals(a: ETHSignatureProof | PlainMessage<ETHSignatureProof> | undefined, b: ETHSignatureProof | PlainMessage<ETHSignatureProof> | undefined): boolean {
     return proto3.util.equals(ETHSignatureProof, a, b);
+  }
+}
+
+/**
+ *
+ * VotingChallenge defines a rule for approval in the form of a voting/multi-sig challenge.
+ * Requires a weighted quorum threshold to be met through votes from specified voters.
+ * All challenges must be met with valid solutions for the transfer to be approved.
+ *
+ * IMPORTANT: Votes are stored separately and can be updated. The threshold is calculated as a percentage
+ * of total possible weight (all voters), not just voted weight. If you update the proposal ID, then the
+ * vote tracker will reset and start a new tally. We recommend using a unique proposal ID for each challenge
+ * to prevent overlap and unexpected behavior.
+ *
+ * @generated from message badges.VotingChallenge
+ */
+export class VotingChallenge extends Message<VotingChallenge> {
+  /**
+   * The ID of this voting challenge for tracking votes (scoped like challengeTrackerId).
+   * Format: collectionId-approverAddress-approvalLevel-approvalId-challengeId
+   *
+   * @generated from field: string proposalId = 1;
+   */
+  proposalId = "";
+
+  /**
+   * The quorum threshold as a percentage (0-100) of total possible weight that must vote "yes".
+   * Example: 50 means 50% of total voter weight must vote yes for approval.
+   *
+   * @generated from field: string quorumThreshold = 2;
+   */
+  quorumThreshold = "";
+
+  /**
+   * List of voters with their weights. Each voter can cast a weighted vote.
+   *
+   * @generated from field: repeated badges.Voter voters = 3;
+   */
+  voters: Voter[] = [];
+
+  /**
+   * The URI associated with this voting challenge.
+   *
+   * @generated from field: string uri = 4;
+   */
+  uri = "";
+
+  /**
+   * Arbitrary custom data associated with this voting challenge.
+   *
+   * @generated from field: string customData = 5;
+   */
+  customData = "";
+
+  constructor(data?: PartialMessage<VotingChallenge>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.VotingChallenge";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "proposalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "quorumThreshold", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "voters", kind: "message", T: Voter, repeated: true },
+    { no: 4, name: "uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VotingChallenge {
+    return new VotingChallenge().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VotingChallenge {
+    return new VotingChallenge().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VotingChallenge {
+    return new VotingChallenge().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: VotingChallenge | PlainMessage<VotingChallenge> | undefined, b: VotingChallenge | PlainMessage<VotingChallenge> | undefined): boolean {
+    return proto3.util.equals(VotingChallenge, a, b);
+  }
+}
+
+/**
+ * Voter defines a voter with their address and weight.
+ *
+ * @generated from message badges.Voter
+ */
+export class Voter extends Message<Voter> {
+  /**
+   * The address of the voter.
+   *
+   * @generated from field: string address = 1;
+   */
+  address = "";
+
+  /**
+   * The weight of this voter's vote.
+   *
+   * @generated from field: string weight = 2;
+   */
+  weight = "";
+
+  constructor(data?: PartialMessage<Voter>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.Voter";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "weight", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Voter {
+    return new Voter().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Voter {
+    return new Voter().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Voter {
+    return new Voter().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Voter | PlainMessage<Voter> | undefined, b: Voter | PlainMessage<Voter> | undefined): boolean {
+    return proto3.util.equals(Voter, a, b);
+  }
+}
+
+/**
+ * VoteProof represents a vote cast for a voting challenge.
+ *
+ * @generated from message badges.VoteProof
+ */
+export class VoteProof extends Message<VoteProof> {
+  /**
+   * The proposal ID this vote is for.
+   *
+   * @generated from field: string proposalId = 1;
+   */
+  proposalId = "";
+
+  /**
+   * The address of the voter casting the vote.
+   *
+   * @generated from field: string voter = 2;
+   */
+  voter = "";
+
+  /**
+   * The percentage weight (0-100) allocated to "yes" vote.
+   * The remaining percentage (100 - yesWeight) is allocated to "no" vote.
+   * Example: yesWeight=70 means 70% yes, 30% no.
+   *
+   * @generated from field: string yesWeight = 3;
+   */
+  yesWeight = "";
+
+  constructor(data?: PartialMessage<VoteProof>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.VoteProof";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "proposalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "voter", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "yesWeight", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VoteProof {
+    return new VoteProof().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VoteProof {
+    return new VoteProof().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VoteProof {
+    return new VoteProof().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: VoteProof | PlainMessage<VoteProof> | undefined, b: VoteProof | PlainMessage<VoteProof> | undefined): boolean {
+    return proto3.util.equals(VoteProof, a, b);
   }
 }
 
