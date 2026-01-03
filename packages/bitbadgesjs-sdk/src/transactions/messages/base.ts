@@ -4,15 +4,14 @@ import { MAINNET_CHAIN_DETAILS, TESTNET_CHAIN_DETAILS } from '@/common/constants
 import { SupportedChain } from '@/common/types.js';
 import { generatePostBodyBroadcast } from '@/node-rest-api/broadcast.js';
 import {
+  MsgCastVote,
   MsgCreateAddressLists,
   MsgCreateCollection,
   MsgCreateDynamicStore,
-  MsgDecrementStoreValue,
   MsgDeleteCollection,
   MsgDeleteDynamicStore,
   MsgDeleteIncomingApproval,
   MsgDeleteOutgoingApproval,
-  MsgIncrementStoreValue,
   MsgPurgeApprovals,
   MsgSetTokenMetadata,
   MsgSetCollectionApprovals,
@@ -52,12 +51,12 @@ import {
 } from '@/proto/gamm/v1beta1/tx_pb.js';
 import { createTypedData } from '@/transactions/eip712/payload/createTypedData.js';
 import {
+  populateUndefinedForMsgCastVote,
   populateUndefinedForMsgCreateAddressLists,
   populateUndefinedForMsgCreateBalancerPool,
   populateUndefinedForMsgCreateCollection,
   populateUndefinedForMsgCreateDynamicStore,
   populateUndefinedForMsgCreateManagerSplitter,
-  populateUndefinedForMsgDecrementStoreValue,
   populateUndefinedForMsgDeleteCollection,
   populateUndefinedForMsgDeleteDynamicStore,
   populateUndefinedForMsgDeleteIncomingApproval,
@@ -67,7 +66,6 @@ import {
   populateUndefinedForMsgExitPool,
   populateUndefinedForMsgExitSwapExternAmountOut,
   populateUndefinedForMsgExitSwapShareAmountIn,
-  populateUndefinedForMsgIncrementStoreValue,
   populateUndefinedForMsgJoinPool,
   populateUndefinedForMsgJoinSwapExternAmountIn,
   populateUndefinedForMsgJoinSwapShareAmountOut,
@@ -443,14 +441,12 @@ export const normalizeMessagesIfNecessary = (messages: MessageGenerated[]) => {
       msg = createProtoMsg(populateUndefinedForMsgCreateAddressLists(msgVal as MsgCreateAddressLists));
     } else if (msgVal.getType().typeName === MsgCreateDynamicStore.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgCreateDynamicStore(msgVal as MsgCreateDynamicStore));
+    } else if (msgVal.getType().typeName === MsgCastVote.typeName) {
+      msg = createProtoMsg(populateUndefinedForMsgCastVote(msgVal as MsgCastVote));
     } else if (msgVal.getType().typeName === MsgDeleteCollection.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgDeleteCollection(msgVal as MsgDeleteCollection));
     } else if (msgVal.getType().typeName === MsgDeleteDynamicStore.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgDeleteDynamicStore(msgVal as MsgDeleteDynamicStore));
-    } else if (msgVal.getType().typeName === MsgDecrementStoreValue.typeName) {
-      msg = createProtoMsg(populateUndefinedForMsgDecrementStoreValue(msgVal as MsgDecrementStoreValue));
-    } else if (msgVal.getType().typeName === MsgIncrementStoreValue.typeName) {
-      msg = createProtoMsg(populateUndefinedForMsgIncrementStoreValue(msgVal as MsgIncrementStoreValue));
     } else if (msgVal.getType().typeName === MsgSetDynamicStoreValue.typeName) {
       msg = createProtoMsg(populateUndefinedForMsgSetDynamicStoreValue(msgVal as MsgSetDynamicStoreValue));
     } else if (msgVal.getType().typeName === MsgUpdateDynamicStore.typeName) {

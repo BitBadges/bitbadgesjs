@@ -1,6 +1,5 @@
 //IMPORTANT: Keep all imports type-safe by using the `type` keyword. If not, this will mess up the circular dependency check.
 
-import type { iPrecalculationOptions } from '@/api-indexer/docs-types/interfaces.js';
 import type { BitBadgesAddress, iTokenMetadataDetails, iCollectionMetadataDetails } from '@/api-indexer/index.js';
 import type { iMetadata } from '@/api-indexer/metadata/metadata.js';
 import type { NumberType } from '@/common/string-numbers.js';
@@ -54,6 +53,31 @@ export interface iCollectionMetadata {
    * Arbitrary custom data that can be stored on-chain
    */
   customData: string;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iPathMetadata {
+  /**
+   * The URI (Uniform Resource Identifier) associated with the path metadata.
+   */
+  uri: string;
+
+  /**
+   * Custom data or additional information related to the path metadata.
+   */
+  customData: string;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iPathMetadataWithDetails<T extends NumberType> extends iPathMetadata {
+  /**
+   * The fetched metadata from the URI.
+   */
+  metadata?: iMetadata<T>;
 }
 
 /**
@@ -154,6 +178,44 @@ export interface iAddressList {
 /**
  * @category Interfaces
  */
+export interface iConversionSideAWithDenom<T extends NumberType> {
+  /** The amount of the cosmos coin (0 decimals). */
+  amount: T;
+  /** The denomination of the cosmos coin. */
+  denom: string;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iConversionSideA<T extends NumberType> {
+  /** The amount of the cosmos coin (0 decimals). */
+  amount: T;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iConversion<T extends NumberType> {
+  /** Side A: The cosmos coin side of the conversion (amount + denom). */
+  sideA: iConversionSideAWithDenom<T>;
+  /** Side B: The badge balances side of the conversion. */
+  sideB: iBalance<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iConversionWithoutDenom<T extends NumberType> {
+  /** Side A: The cosmos coin amount side of the conversion (amount only, denom stored separately). */
+  sideA: iConversionSideA<T>;
+  /** Side B: The badge balances side of the conversion. */
+  sideB: iBalance<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iDenomUnit<T extends NumberType> {
   /** The number of decimal places for this denomination unit. */
   decimals: T;
@@ -161,14 +223,16 @@ export interface iDenomUnit<T extends NumberType> {
   symbol: string;
   /** Whether this denomination unit is the default display unit. */
   isDefaultDisplay: boolean;
+  /** The metadata for this denomination unit. */
+  metadata: iPathMetadata;
 }
 
 /**
  * @category Interfaces
  */
 export interface iDenomUnitWithDetails<T extends NumberType> extends iDenomUnit<T> {
-  /** Optional metadata for this denomination unit. */
-  metadata?: iMetadata<T>;
+  /** Metadata object containing uri, customData, and fetched metadata. */
+  metadata: iPathMetadataWithDetails<T>;
 }
 
 /**
@@ -178,8 +242,8 @@ export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
   /** The denom of the IBC wrapper path. */
   denom: string;
 
-  /** The balances for this IBC wrapper path. */
-  balances: iBalance<T>[];
+  /** The conversion between cosmos coin and badge balances. */
+  conversion: iConversionWithoutDenom<T>;
 
   /** The symbol for this IBC wrapper path. */
   symbol: string;
@@ -190,22 +254,16 @@ export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
   /** Whether to allow override with any valid token. */
   allowOverrideWithAnyValidToken: boolean;
 
-  /** Whether to allow cosmos wrapping. */
-  allowCosmosWrapping: boolean;
+  /** The metadata for this wrapper path. */
+  metadata: iPathMetadata;
 }
 
 /**
  * @category Interfaces
  */
 export interface iCosmosCoinBackedPathAddObject<T extends NumberType> {
-  /** The IBC denom of the backed path. */
-  ibcDenom: string;
-
-  /** The balances for this IBC backed path. */
-  balances: iBalance<T>[];
-
-  /** The IBC amount for this backed path. */
-  ibcAmount: T;
+  /** The conversion between IBC cosmos coin and badge balances. */
+  conversion: iConversion<T>;
 }
 
 /**
@@ -215,14 +273,8 @@ export interface iCosmosCoinBackedPath<T extends NumberType> {
   /** The address for this IBC backed path. */
   address: string;
 
-  /** The IBC denom of the backed path. */
-  ibcDenom: string;
-
-  /** The balances for this IBC backed path. */
-  balances: iBalance<T>[];
-
-  /** The IBC amount for this backed path. */
-  ibcAmount: T;
+  /** The conversion between IBC cosmos coin and badge balances. */
+  conversion: iConversion<T>;
 }
 
 /**
@@ -266,6 +318,26 @@ export interface iInvariantsAddObject<T extends NumberType> {
 /**
  * @category Interfaces
  */
+export interface iAliasPathAddObject<T extends NumberType> {
+  /** The denomination (denom) to be used for the alias. */
+  denom: string;
+
+  /** The conversion between cosmos coin and badge balances. */
+  conversion: iConversionWithoutDenom<T>;
+
+  /** The symbol for the alias (e.g., "BADGE", "NFT"). */
+  symbol: string;
+
+  /** Denomination units for the alias. Defines how the coin can be displayed with different decimal places and symbols. */
+  denomUnits: iDenomUnit<T>[];
+
+  /** The metadata for this alias path. */
+  metadata: iPathMetadata;
+}
+
+/**
+ * @category Interfaces
+ */
 export interface iTransfer<T extends NumberType> {
   /**
    * The address to transfer from.
@@ -285,7 +357,7 @@ export interface iTransfer<T extends NumberType> {
   /**
    * If specified, we will precalculate from this approval and override the balances. This can only be used when the specified approval has predeterminedBalances set.
    */
-  precalculateBalancesFromApproval?: iApprovalIdentifierDetails<T>;
+  precalculateBalancesFromApproval?: iPrecalculateBalancesFromApprovalDetails<T>;
 
   /**
    * The merkle proofs that satisfy the mkerkle challenges in the approvals. If the transfer deducts from multiple approvals, we check all the merkle proofs and assert at least one is valid for every challenge.
@@ -327,16 +399,6 @@ export interface iTransfer<T extends NumberType> {
    * This only applies to the "outgoing" level approvals specified.
    */
   onlyCheckPrioritizedOutgoingApprovals?: boolean;
-
-  /**
-   * The precalculation options for the transfer.
-   */
-  precalculationOptions?: iPrecalculationOptions<T>;
-
-  /**
-   * The number of times to attempt approval validation. If 0 / not specified, we default to only one.
-   */
-  numAttempts?: T;
 }
 
 /**
@@ -362,6 +424,46 @@ export interface iApprovalIdentifierDetails<T extends NumberType> {
    * The version of the approval.
    */
   version: T;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iPrecalculationOptions<T extends NumberType> {
+  /** The timestamp to use for the transfer. */
+  overrideTimestamp?: T;
+  /** The token IDs to use for the transfer. */
+  tokenIdsOverride?: iUintRange<T>[];
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iPrecalculateBalancesFromApprovalDetails<T extends NumberType> {
+  /**
+   * The approval ID of the approval.
+   */
+  approvalId: string;
+
+  /**
+   * The approval level of the approval "collection", "incoming", or "outgoing".
+   */
+  approvalLevel: string;
+
+  /**
+   * The address of the approval to check. If approvalLevel is "collection", this is blank "".
+   */
+  approverAddress: BitBadgesAddress;
+
+  /**
+   * The version of the approval.
+   */
+  version: T;
+
+  /**
+   * The options for precalculating the balances.
+   */
+  precalculationOptions?: iPrecalculationOptions<T>;
 }
 
 /**
@@ -592,92 +694,131 @@ export interface iETHSignatureProof {
 /**
  * @category Interfaces
  */
-export interface iTimelineItem<T extends NumberType> {
+export interface iVoter<T extends NumberType> {
   /**
-   * The times of the timeline item. Times in a timeline cannot overlap.
+   * The address of the voter.
    */
-  timelineTimes: iUintRange<T>[];
+  address: string;
+
+  /**
+   * The weight of this voter's vote.
+   */
+  weight: T;
 }
 
 /**
  * @category Interfaces
  */
-export interface iManagerTimeline<T extends NumberType> extends iTimelineItem<T> {
+export interface iVotingChallenge<T extends NumberType> {
   /**
-   * The manager of the collection.
+   * The ID of this voting challenge for tracking votes (scoped like challengeTrackerId).
+   * Format: collectionId-approverAddress-approvalLevel-approvalId-challengeId
    */
-  manager: BitBadgesAddress;
+  proposalId: string;
+
+  /**
+   * The quorum threshold as a percentage (0-100) of total possible weight that must vote "yes".
+   * Example: 50 means 50% of total voter weight must vote yes for approval.
+   */
+  quorumThreshold: T;
+
+  /**
+   * List of voters with their weights. Each voter can cast a weighted vote.
+   */
+  voters: iVoter<T>[];
+
+  /**
+   * The URI associated with this voting challenge.
+   */
+  uri?: string;
+
+  /**
+   * Arbitrary custom data associated with this voting challenge.
+   */
+  customData?: string;
+}
+
+/**
+ * VoteProof represents a vote cast for a voting challenge.
+ *
+ * @category Interfaces
+ */
+export interface iVoteProof<T extends NumberType> {
+  /**
+   * The proposal ID this vote is for.
+   */
+  proposalId: string;
+
+  /**
+   * The address of the voter casting the vote.
+   */
+  voter: string;
+
+  /**
+   * The percentage weight (0-100) allocated to "yes" vote.
+   * The remaining percentage (100 - yesWeight) is allocated to "no" vote.
+   * Example: yesWeight=70 means 70% yes, 30% no.
+   */
+  yesWeight: T;
+}
+
+/**
+ * DynamicStore is a flexible storage object that can store arbitrary data.
+ * It is identified by a unique ID assigned by the blockchain, which is a uint64 that increments.
+ * Dynamic stores are created by users and can only be updated or deleted by their creator.
+ * They provide a way to store custom data on-chain with proper access control.
+ *
+ * @category Interfaces
+ */
+export interface iDynamicStore<T extends NumberType> {
+  /**
+   * The unique identifier for this dynamic store. This is assigned by the blockchain.
+   */
+  storeId: T;
+
+  /**
+   * The address of the creator of this dynamic store.
+   */
+  createdBy: string;
+
+  /**
+   * The default value for uninitialized addresses (true/false).
+   */
+  defaultValue: boolean;
+
+  /**
+   * Global kill switch state (defaults to true on creation, can be toggled via UpdateDynamicStore).
+   * When false, all approvals using this store via DynamicStoreChallenge will fail immediately.
+   */
+  globalEnabled: boolean;
+}
+
+/**
+ * DynamicStoreValue stores a boolean value for a specific address in a dynamic store.
+ * This allows the creator to set true/false values per address that can be checked during approval.
+ *
+ * @category Interfaces
+ */
+export interface iDynamicStoreValue<T extends NumberType> {
+  /**
+   * The unique identifier for this dynamic store.
+   */
+  storeId: T;
+
+  /**
+   * The address for which this value is stored.
+   */
+  address: string;
+
+  /**
+   * The boolean value (true/false).
+   */
+  value: boolean;
 }
 
 /**
  * @category Interfaces
  */
-export interface iCollectionMetadataTimeline<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * The collection metadata.
-   */
-  collectionMetadata: iCollectionMetadata;
-}
-
-/**
- * @category Interfaces
- */
-export interface iCollectionMetadataTimelineWithDetails<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * The collection metadata, with off-chain details populated.
-   */
-  collectionMetadata: iCollectionMetadataDetails<T>;
-}
-
-/**
- * @category Interfaces
- */
-export interface iTokenMetadataTimeline<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * The token metadata.
-   */
-  tokenMetadata: iTokenMetadata<T>[];
-}
-
-/**
- * @category Interfaces
- */
-export interface iTokenMetadataTimelineWithDetails<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * The token metadata, with off-chain details populated.
-   */
-  tokenMetadata: iTokenMetadataDetails<T>[];
-}
-
-/**
- * @category Interfaces
- */
-export interface iCustomDataTimeline<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * Arbitrary custom data.
-   */
-  customData: string;
-}
-
-/**
- * @category Interfaces
- */
-export interface iStandardsTimeline<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * The standards.
-   */
-  standards: string[];
-}
-
-/**
- * @category Interfaces
- */
-export interface iIsArchivedTimeline<T extends NumberType> extends iTimelineItem<T> {
-  /**
-   * Whether the collection is archived.
-   */
-  isArchived: boolean;
-}
 
 /**
  * CollectionInvariants defines the invariants that apply to a collection.

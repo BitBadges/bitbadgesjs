@@ -124,3 +124,52 @@ export class Balance extends Message<Balance> {
   }
 }
 
+/**
+ * PrecalculationOptions defines the options for precalculating the balances.
+ *
+ * @generated from message badges.PrecalculationOptions
+ */
+export class PrecalculationOptions extends Message<PrecalculationOptions> {
+  /**
+   * The timestamp to override with when calculating the balances.
+   *
+   * @generated from field: string overrideTimestamp = 1;
+   */
+  overrideTimestamp = "";
+
+  /**
+   * The IDs to override for the transfer. Only applicable if using this option in precalculation.
+   *
+   * @generated from field: repeated badges.UintRange tokenIdsOverride = 2;
+   */
+  tokenIdsOverride: UintRange[] = [];
+
+  constructor(data?: PartialMessage<PrecalculationOptions>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.PrecalculationOptions";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "overrideTimestamp", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "tokenIdsOverride", kind: "message", T: UintRange, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PrecalculationOptions {
+    return new PrecalculationOptions().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PrecalculationOptions {
+    return new PrecalculationOptions().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PrecalculationOptions {
+    return new PrecalculationOptions().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PrecalculationOptions | PlainMessage<PrecalculationOptions> | undefined, b: PrecalculationOptions | PlainMessage<PrecalculationOptions> | undefined): boolean {
+    return proto3.util.equals(PrecalculationOptions, a, b);
+  }
+}
+

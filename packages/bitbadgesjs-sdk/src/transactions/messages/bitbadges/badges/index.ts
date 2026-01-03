@@ -1,6 +1,7 @@
 export * from './msgCreateAddressLists.js';
 export * from './msgCreateCollection.js';
 export * from './msgCreateDynamicStore.js';
+export * from './msgCastVote.js';
 export * from './msgDeleteCollection.js';
 export * from './msgDeleteDynamicStore.js';
 export * from './msgDeleteIncomingApproval.js';
@@ -11,8 +12,6 @@ export * from './msgSetCollectionApprovals.js';
 export * from './msgSetCollectionMetadata.js';
 export * from './msgSetCustomData.js';
 export * from './msgSetDynamicStoreValue.js';
-export * from './msgIncrementStoreValue.js';
-export * from './msgDecrementStoreValue.js';
 export * from './msgSetIncomingApproval.js';
 export * from './msgSetIsArchived.js';
 export * from './msgSetManager.js';

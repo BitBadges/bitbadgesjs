@@ -5,9 +5,10 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
-import { CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, StandardsTimeline, TokenMetadataTimeline } from "./timelines_pb.js";
+import { CollectionMetadata, PathMetadata, TokenMetadata } from "./metadata_pb.js";
 import { CollectionPermissions } from "./permissions_pb.js";
-import { CollectionApproval, UserBalanceStore } from "./transfers_pb.js";
+import { CollectionApproval } from "./approvals_pb.js";
+import { UserBalanceStore } from "./user_balance_store_pb.js";
 import { Balance, UintRange } from "./balances_pb.js";
 
 /**
@@ -19,10 +20,6 @@ import { Balance, UintRange } from "./balances_pb.js";
  *
  * All collections can have a manager who is responsible for managing the collection and can be granted certain admin
  * permissions, such as the ability to mint new tokens.
- *
- * Certain fields are timeline-based, which means they may have different values at different block heights. 
- * We fetch the value according to the current time.
- * For example, we may set the manager to be Alice from Time1 to Time2, and then set the manager to be Bob from Time2 to Time3.
  *
  * Collections may have different balance types: standard vs. off-chain - indexed vs. inherited.vs off-chain - non-indexed vs non-public.
  *
@@ -39,32 +36,32 @@ export class TokenCollection extends Message<TokenCollection> {
   collectionId = "";
 
   /**
-   * The metadata for the collection itself, which can vary over time.
+   * The metadata for the collection itself.
    *
-   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 2;
+   * @generated from field: badges.CollectionMetadata collectionMetadata = 2;
    */
-  collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
+  collectionMetadata?: CollectionMetadata;
 
   /**
-   * The metadata for each token in the collection, also subject to changes over time.
+   * The metadata for each token in the collection.
    *
-   * @generated from field: repeated badges.TokenMetadataTimeline tokenMetadataTimeline = 3;
+   * @generated from field: repeated badges.TokenMetadata tokenMetadata = 3;
    */
-  tokenMetadataTimeline: TokenMetadataTimeline[] = [];
+  tokenMetadata: TokenMetadata[] = [];
 
   /**
-   * An arbitrary field that can store any data, subject to changes over time.
+   * An arbitrary field that can store any data.
    *
-   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 4;
+   * @generated from field: string customData = 4;
    */
-  customDataTimeline: CustomDataTimeline[] = [];
+  customData = "";
 
   /**
-   * The address of the manager of this collection, subject to changes over time.
+   * The address of the manager of this collection.
    *
-   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 5;
+   * @generated from field: string manager = 5;
    */
-  managerTimeline: ManagerTimeline[] = [];
+  manager = "";
 
   /**
    * Permissions that define what the manager of the collection can do or not do.
@@ -84,19 +81,19 @@ export class TokenCollection extends Message<TokenCollection> {
   collectionApprovals: CollectionApproval[] = [];
 
   /**
-   * Standards that define how to interpret the fields of the collection, subject to changes over time.
+   * Standards that define how to interpret the fields of the collection.
    *
-   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 8;
+   * @generated from field: repeated string standards = 8;
    */
-  standardsTimeline: StandardsTimeline[] = [];
+  standards: string[] = [];
 
   /**
-   * Whether the collection is archived or not, subject to changes over time.
+   * Whether the collection is archived or not.
    * When archived, it becomes read-only, and no transactions can be processed until it is unarchived.
    *
-   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 9;
+   * @generated from field: bool isArchived = 9;
    */
-  isArchivedTimeline: IsArchivedTimeline[] = [];
+  isArchived = false;
 
   /**
    * The default store of a balance / approvals for a user, upon genesis.
@@ -141,6 +138,13 @@ export class TokenCollection extends Message<TokenCollection> {
    */
   invariants?: CollectionInvariants;
 
+  /**
+   * The alias (non-wrapping) paths for the collection.
+   *
+   * @generated from field: repeated badges.AliasPath aliasPaths = 16;
+   */
+  aliasPaths: AliasPath[] = [];
+
   constructor(data?: PartialMessage<TokenCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -150,20 +154,21 @@ export class TokenCollection extends Message<TokenCollection> {
   static readonly typeName = "badges.TokenCollection";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 3, name: "tokenMetadataTimeline", kind: "message", T: TokenMetadataTimeline, repeated: true },
-    { no: 4, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
-    { no: 5, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
+    { no: 2, name: "collectionMetadata", kind: "message", T: CollectionMetadata },
+    { no: 3, name: "tokenMetadata", kind: "message", T: TokenMetadata, repeated: true },
+    { no: 4, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "manager", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
     { no: 7, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 8, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 9, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 8, name: "standards", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 9, name: "isArchived", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 10, name: "defaultBalances", kind: "message", T: UserBalanceStore },
     { no: 11, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 12, name: "validTokenIds", kind: "message", T: UintRange, repeated: true },
     { no: 13, name: "mintEscrowAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 14, name: "cosmosCoinWrapperPaths", kind: "message", T: CosmosCoinWrapperPath, repeated: true },
     { no: 15, name: "invariants", kind: "message", T: CollectionInvariants },
+    { no: 16, name: "aliasPaths", kind: "message", T: AliasPath, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TokenCollection {
@@ -184,43 +189,247 @@ export class TokenCollection extends Message<TokenCollection> {
 }
 
 /**
+ * Conversion defines a bidirectional conversion between a cosmos coin (with denom) and badge balances.
+ *
+ * @generated from message badges.Conversion
+ */
+export class Conversion extends Message<Conversion> {
+  /**
+   * Side A: The cosmos coin side of the conversion (amount + denom).
+   *
+   * @generated from field: badges.ConversionSideAWithDenom sideA = 1;
+   */
+  sideA?: ConversionSideAWithDenom;
+
+  /**
+   * Side B: The badge balances side of the conversion.
+   *
+   * @generated from field: repeated badges.Balance sideB = 2;
+   */
+  sideB: Balance[] = [];
+
+  constructor(data?: PartialMessage<Conversion>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.Conversion";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "sideA", kind: "message", T: ConversionSideAWithDenom },
+    { no: 2, name: "sideB", kind: "message", T: Balance, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Conversion {
+    return new Conversion().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Conversion {
+    return new Conversion().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Conversion {
+    return new Conversion().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Conversion | PlainMessage<Conversion> | undefined, b: Conversion | PlainMessage<Conversion> | undefined): boolean {
+    return proto3.util.equals(Conversion, a, b);
+  }
+}
+
+/**
+ * ConversionSideAWithDenom represents the cosmos coin side of a conversion with denomination.
+ *
+ * @generated from message badges.ConversionSideAWithDenom
+ */
+export class ConversionSideAWithDenom extends Message<ConversionSideAWithDenom> {
+  /**
+   * The amount of the cosmos coin (0 decimals).
+   *
+   * @generated from field: string amount = 1;
+   */
+  amount = "";
+
+  /**
+   * The denomination of the cosmos coin.
+   *
+   * @generated from field: string denom = 2;
+   */
+  denom = "";
+
+  constructor(data?: PartialMessage<ConversionSideAWithDenom>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.ConversionSideAWithDenom";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ConversionSideAWithDenom {
+    return new ConversionSideAWithDenom().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ConversionSideAWithDenom {
+    return new ConversionSideAWithDenom().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ConversionSideAWithDenom {
+    return new ConversionSideAWithDenom().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ConversionSideAWithDenom | PlainMessage<ConversionSideAWithDenom> | undefined, b: ConversionSideAWithDenom | PlainMessage<ConversionSideAWithDenom> | undefined): boolean {
+    return proto3.util.equals(ConversionSideAWithDenom, a, b);
+  }
+}
+
+/**
+ * ConversionWithoutDenom defines a bidirectional conversion between a cosmos coin amount (without denom) and badge balances.
+ * The denom is stored at the base level (e.g., in AliasPath or CosmosCoinWrapperPath).
+ *
+ * @generated from message badges.ConversionWithoutDenom
+ */
+export class ConversionWithoutDenom extends Message<ConversionWithoutDenom> {
+  /**
+   * Side A: The cosmos coin amount side of the conversion (amount only, denom stored separately).
+   *
+   * @generated from field: badges.ConversionSideA sideA = 1;
+   */
+  sideA?: ConversionSideA;
+
+  /**
+   * Side B: The badge balances side of the conversion.
+   *
+   * @generated from field: repeated badges.Balance sideB = 2;
+   */
+  sideB: Balance[] = [];
+
+  constructor(data?: PartialMessage<ConversionWithoutDenom>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.ConversionWithoutDenom";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "sideA", kind: "message", T: ConversionSideA },
+    { no: 2, name: "sideB", kind: "message", T: Balance, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ConversionWithoutDenom {
+    return new ConversionWithoutDenom().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ConversionWithoutDenom {
+    return new ConversionWithoutDenom().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ConversionWithoutDenom {
+    return new ConversionWithoutDenom().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ConversionWithoutDenom | PlainMessage<ConversionWithoutDenom> | undefined, b: ConversionWithoutDenom | PlainMessage<ConversionWithoutDenom> | undefined): boolean {
+    return proto3.util.equals(ConversionWithoutDenom, a, b);
+  }
+}
+
+/**
+ * ConversionSideA represents the cosmos coin amount side of a conversion without denomination.
+ *
+ * @generated from message badges.ConversionSideA
+ */
+export class ConversionSideA extends Message<ConversionSideA> {
+  /**
+   * The amount of the cosmos coin (0 decimals).
+   *
+   * @generated from field: string amount = 1;
+   */
+  amount = "";
+
+  constructor(data?: PartialMessage<ConversionSideA>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.ConversionSideA";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ConversionSideA {
+    return new ConversionSideA().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ConversionSideA {
+    return new ConversionSideA().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ConversionSideA {
+    return new ConversionSideA().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ConversionSideA | PlainMessage<ConversionSideA> | undefined, b: ConversionSideA | PlainMessage<ConversionSideA> | undefined): boolean {
+    return proto3.util.equals(ConversionSideA, a, b);
+  }
+}
+
+/**
  * @generated from message badges.CosmosCoinWrapperPath
  */
 export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
   /**
+   * The BitBadges address associated with this wrapper path. Used for routing and identifying the wrapper.
+   *
    * @generated from field: string address = 1;
    */
   address = "";
 
   /**
+   * The denomination (denom) to be used for the wrapped coin or the alias denom.
+   *
    * @generated from field: string denom = 2;
    */
   denom = "";
 
   /**
-   * @generated from field: repeated badges.Balance balances = 3;
+   * The conversion between cosmos coin and badge balances.
+   *
+   * @generated from field: badges.ConversionWithoutDenom conversion = 3;
    */
-  balances: Balance[] = [];
+  conversion?: ConversionWithoutDenom;
 
   /**
+   * The symbol for the wrapped coin (e.g., "BADGE", "NFT"). Used for display purposes. Note that this may not be the default.
+   *
    * @generated from field: string symbol = 4;
    */
   symbol = "";
 
   /**
+   * Denomination units for the wrapped coin. Defines how the coin can be displayed with different
+   * decimal places and symbols (e.g., base unit, display unit). You can specify which is the default display unit (base level or one of these).
+   *
    * @generated from field: repeated badges.DenomUnit denomUnits = 5;
    */
   denomUnits: DenomUnit[] = [];
 
   /**
+   * If true, allows this wrapper path to be used with any valid token ID in the collection via an {id} placeholder.
+   *
    * @generated from field: bool allowOverrideWithAnyValidToken = 6;
    */
   allowOverrideWithAnyValidToken = false;
 
   /**
-   * @generated from field: bool allowCosmosWrapping = 7;
+   * The metadata for this wrapper path.
+   *
+   * @generated from field: badges.PathMetadata metadata = 7;
    */
-  allowCosmosWrapping = false;
+  metadata?: PathMetadata;
 
   constructor(data?: PartialMessage<CosmosCoinWrapperPath>) {
     super();
@@ -232,11 +441,11 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "balances", kind: "message", T: Balance, repeated: true },
+    { no: 3, name: "conversion", kind: "message", T: ConversionWithoutDenom },
     { no: 4, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
     { no: 6, name: "allowOverrideWithAnyValidToken", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 7, name: "allowCosmosWrapping", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 7, name: "metadata", kind: "message", T: PathMetadata },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinWrapperPath {
@@ -257,28 +466,93 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
 }
 
 /**
+ * @generated from message badges.AliasPath
+ */
+export class AliasPath extends Message<AliasPath> {
+  /**
+   * The denomination (denom) to be used for the alias.
+   *
+   * @generated from field: string denom = 1;
+   */
+  denom = "";
+
+  /**
+   * The conversion between cosmos coin and badge balances.
+   *
+   * @generated from field: badges.ConversionWithoutDenom conversion = 2;
+   */
+  conversion?: ConversionWithoutDenom;
+
+  /**
+   * The symbol for the alias (e.g., "BADGE", "NFT"). Used for display purposes. Note that this may not be the default.
+   *
+   * @generated from field: string symbol = 3;
+   */
+  symbol = "";
+
+  /**
+   * Denomination units for the alias. Defines how the coin can be displayed with different decimal places and symbols.
+   *
+   * @generated from field: repeated badges.DenomUnit denomUnits = 4;
+   */
+  denomUnits: DenomUnit[] = [];
+
+  /**
+   * The metadata for this alias path.
+   *
+   * @generated from field: badges.PathMetadata metadata = 5;
+   */
+  metadata?: PathMetadata;
+
+  constructor(data?: PartialMessage<AliasPath>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.AliasPath";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "conversion", kind: "message", T: ConversionWithoutDenom },
+    { no: 3, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
+    { no: 5, name: "metadata", kind: "message", T: PathMetadata },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AliasPath {
+    return new AliasPath().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AliasPath {
+    return new AliasPath().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AliasPath {
+    return new AliasPath().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AliasPath | PlainMessage<AliasPath> | undefined, b: AliasPath | PlainMessage<AliasPath> | undefined): boolean {
+    return proto3.util.equals(AliasPath, a, b);
+  }
+}
+
+/**
  * @generated from message badges.CosmosCoinBackedPath
  */
 export class CosmosCoinBackedPath extends Message<CosmosCoinBackedPath> {
   /**
+   * The address associated with this backed path. Used for routing and escrowing IBC tokens.
+   *
    * @generated from field: string address = 1;
    */
   address = "";
 
   /**
-   * @generated from field: string ibcDenom = 2;
+   * The conversion between IBC cosmos coin and badge balances.
+   *
+   * @generated from field: badges.Conversion conversion = 2;
    */
-  ibcDenom = "";
-
-  /**
-   * @generated from field: repeated badges.Balance balances = 3;
-   */
-  balances: Balance[] = [];
-
-  /**
-   * @generated from field: string ibcAmount = 4;
-   */
-  ibcAmount = "";
+  conversion?: Conversion;
 
   constructor(data?: PartialMessage<CosmosCoinBackedPath>) {
     super();
@@ -289,9 +563,7 @@ export class CosmosCoinBackedPath extends Message<CosmosCoinBackedPath> {
   static readonly typeName = "badges.CosmosCoinBackedPath";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "ibcDenom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "balances", kind: "message", T: Balance, repeated: true },
-    { no: 4, name: "ibcAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "conversion", kind: "message", T: Conversion },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinBackedPath {
@@ -316,19 +588,33 @@ export class CosmosCoinBackedPath extends Message<CosmosCoinBackedPath> {
  */
 export class DenomUnit extends Message<DenomUnit> {
   /**
+   * The number of decimal places for this unit. Defines the precision of the unit.
+   *
    * @generated from field: string decimals = 1;
    */
   decimals = "";
 
   /**
+   * The symbol for this unit (e.g., "BADGE", "nBADGE"). Used for display purposes.
+   *
    * @generated from field: string symbol = 2;
    */
   symbol = "";
 
   /**
+   * If true, this is the default display unit. Only one unit should be marked as the default display unit.
+   * This unit will be used by default when displaying the coin amount. If none are marked default, we use the base level.
+   *
    * @generated from field: bool isDefaultDisplay = 3;
    */
   isDefaultDisplay = false;
+
+  /**
+   * The metadata for this denomination unit.
+   *
+   * @generated from field: badges.PathMetadata metadata = 4;
+   */
+  metadata?: PathMetadata;
 
   constructor(data?: PartialMessage<DenomUnit>) {
     super();
@@ -341,6 +627,7 @@ export class DenomUnit extends Message<DenomUnit> {
     { no: 1, name: "decimals", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "isDefaultDisplay", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "metadata", kind: "message", T: PathMetadata },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DenomUnit {

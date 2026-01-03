@@ -450,7 +450,6 @@ export interface iGetByDenomsSuccessResponse<T extends NumberType> {
   }>;
   pagination: PaginationInfo;
 }
-
 export interface iWrappedCosmosAssetMetadataDoc<T extends NumberType> extends Doc {
   collectionId: string;
   baseDenom: string;

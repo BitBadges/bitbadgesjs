@@ -4,14 +4,7 @@ import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, Conv
 import type { NumberType } from '@/common/string-numbers.js';
 import { Stringify } from '@/common/string-numbers.js';
 import { CollectionApproval } from '@/core/approvals.js';
-import {
-  TokenMetadataTimeline,
-  CollectionMetadataTimeline,
-  CustomDataTimeline,
-  IsArchivedTimeline,
-  ManagerTimeline,
-  StandardsTimeline
-} from '@/core/misc.js';
+import { CollectionMetadata, TokenMetadata } from '@/core/misc.js';
 import { CollectionPermissions } from '@/core/permissions.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
@@ -20,7 +13,8 @@ import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iMsgCreateCollection } from './interfaces.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
 import { CosmosCoin } from '@/core/coin.js';
-import { CosmosCoinWrapperPathAddObject, InvariantsAddObject } from '@/core/ibc-wrappers.js';
+import { AliasPathAddObject, CosmosCoinWrapperPathAddObject, InvariantsAddObject } from '@/core/ibc-wrappers.js';
+import type { iCollectionMetadata } from '@/interfaces/types/core.js';
 
 /**
  * MsgCreateCollection is a transaction that can be used to create a collection.
@@ -35,15 +29,16 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
   defaultBalances?: UserBalanceStore<T>;
   validTokenIds?: UintRangeArray<T>;
   collectionPermissions?: CollectionPermissions<T>;
-  managerTimeline?: ManagerTimeline<T>[];
-  collectionMetadataTimeline?: CollectionMetadataTimeline<T>[];
-  tokenMetadataTimeline?: TokenMetadataTimeline<T>[];
-  customDataTimeline?: CustomDataTimeline<T>[];
+  manager?: BitBadgesAddress;
+  collectionMetadata?: CollectionMetadata;
+  tokenMetadata?: TokenMetadata<T>[];
+  customData?: string;
   collectionApprovals?: CollectionApproval<T>[];
-  standardsTimeline?: StandardsTimeline<T>[];
-  isArchivedTimeline?: IsArchivedTimeline<T>[];
+  standards?: string[];
+  isArchived?: boolean;
   mintEscrowCoinsToTransfer?: CosmosCoin<T>[];
   cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject<T>[];
+  aliasPathsToAdd?: AliasPathAddObject<T>[];
   invariants?: InvariantsAddObject<T>;
 
   constructor(msg: iMsgCreateCollection<T>) {
@@ -52,15 +47,16 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
     this.defaultBalances = msg.defaultBalances ? new UserBalanceStore(msg.defaultBalances) : undefined;
     this.validTokenIds = msg.validTokenIds ? UintRangeArray.From(msg.validTokenIds) : undefined;
     this.collectionPermissions = msg.collectionPermissions ? new CollectionPermissions(msg.collectionPermissions) : undefined;
-    this.managerTimeline = msg.managerTimeline?.map((x) => new ManagerTimeline(x));
-    this.collectionMetadataTimeline = msg.collectionMetadataTimeline?.map((x) => new CollectionMetadataTimeline(x));
-    this.tokenMetadataTimeline = msg.tokenMetadataTimeline?.map((x) => new TokenMetadataTimeline(x));
-    this.customDataTimeline = msg.customDataTimeline?.map((x) => new CustomDataTimeline(x));
+    this.manager = msg.manager;
+    this.collectionMetadata = msg.collectionMetadata ? new CollectionMetadata(msg.collectionMetadata) : undefined;
+    this.tokenMetadata = msg.tokenMetadata?.map((x) => new TokenMetadata(x));
+    this.customData = msg.customData;
     this.collectionApprovals = msg.collectionApprovals?.map((x) => new CollectionApproval(x));
-    this.standardsTimeline = msg.standardsTimeline?.map((x) => new StandardsTimeline(x));
-    this.isArchivedTimeline = msg.isArchivedTimeline?.map((x) => new IsArchivedTimeline(x));
+    this.standards = msg.standards;
+    this.isArchived = msg.isArchived;
     this.mintEscrowCoinsToTransfer = msg.mintEscrowCoinsToTransfer ? msg.mintEscrowCoinsToTransfer.map((x) => new CosmosCoin(x)) : undefined;
     this.cosmosCoinWrapperPathsToAdd = msg.cosmosCoinWrapperPathsToAdd?.map((x) => new CosmosCoinWrapperPathAddObject(x));
+    this.aliasPathsToAdd = msg.aliasPathsToAdd?.map((x) => new AliasPathAddObject(x));
     this.invariants = msg.invariants ? new InvariantsAddObject(msg.invariants) : undefined;
   }
 
@@ -99,15 +95,16 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
       collectionPermissions: protoMsg.collectionPermissions
         ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction)
         : undefined,
-      managerTimeline: protoMsg.managerTimeline?.map((x) => ManagerTimeline.fromProto(x, convertFunction)),
-      collectionMetadataTimeline: protoMsg.collectionMetadataTimeline?.map((x) => CollectionMetadataTimeline.fromProto(x, convertFunction)),
-      tokenMetadataTimeline: protoMsg.tokenMetadataTimeline?.map((x) => TokenMetadataTimeline.fromProto(x, convertFunction)),
-      customDataTimeline: protoMsg.customDataTimeline?.map((x) => CustomDataTimeline.fromProto(x, convertFunction)),
+      manager: protoMsg.manager || undefined,
+      collectionMetadata: protoMsg.collectionMetadata ? CollectionMetadata.fromProto(protoMsg.collectionMetadata) : undefined,
+      tokenMetadata: protoMsg.tokenMetadata.length > 0 ? protoMsg.tokenMetadata.map((tm) => TokenMetadata.fromProto(tm, convertFunction)) : undefined,
+      customData: protoMsg.customData || undefined,
       collectionApprovals: protoMsg.collectionApprovals?.map((x) => CollectionApproval.fromProto(x, convertFunction)),
-      standardsTimeline: protoMsg.standardsTimeline?.map((x) => StandardsTimeline.fromProto(x, convertFunction)),
-      isArchivedTimeline: protoMsg.isArchivedTimeline?.map((x) => IsArchivedTimeline.fromProto(x, convertFunction)),
+      standards: protoMsg.standards.length > 0 ? protoMsg.standards : undefined,
+      isArchived: protoMsg.isArchived,
       mintEscrowCoinsToTransfer: protoMsg.mintEscrowCoinsToTransfer?.map((x) => CosmosCoin.fromProto(x, convertFunction)),
       cosmosCoinWrapperPathsToAdd: protoMsg.cosmosCoinWrapperPathsToAdd?.map((x) => CosmosCoinWrapperPathAddObject.fromProto(x, convertFunction)),
+      aliasPathsToAdd: protoMsg.aliasPathsToAdd?.map((x) => AliasPathAddObject.fromProto(x, convertFunction)),
       invariants: protoMsg.invariants ? InvariantsAddObject.fromProto(protoMsg.invariants, convertFunction) : undefined
     });
   }
@@ -118,7 +115,7 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       defaultBalances: this.defaultBalances?.toBech32Addresses(prefix),
       collectionPermissions: this.collectionPermissions?.toBech32Addresses(prefix),
-      managerTimeline: this.managerTimeline?.map((x) => x.toBech32Addresses(prefix)),
+      manager: this.manager ? getConvertFunctionFromPrefix(prefix)(this.manager) : undefined,
       collectionApprovals: this.collectionApprovals?.map((x) => x.toBech32Addresses(prefix))
     });
   }

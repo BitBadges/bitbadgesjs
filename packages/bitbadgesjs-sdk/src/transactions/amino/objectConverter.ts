@@ -51,6 +51,7 @@ import {
 } from '@/proto/cosmos/group/v1/index.js';
 import { type AnyMessage, type JsonWriteOptions, type Message, type JsonReadOptions, createRegistry } from '@bufbuild/protobuf';
 import {
+  MsgCastVote,
   MsgCreateAddressLists,
   MsgCreateCollection,
   MsgCreateDynamicStore,
@@ -58,8 +59,6 @@ import {
   MsgDeleteDynamicStore,
   MsgDeleteIncomingApproval,
   MsgDeleteOutgoingApproval,
-  MsgDecrementStoreValue,
-  MsgIncrementStoreValue,
   MsgPurgeApprovals,
   MsgSetTokenMetadata,
   MsgSetCollectionApprovals,
@@ -133,14 +132,13 @@ export const ProtoTypeRegistry: ReturnType<typeof createRegistry> = createRegist
   MsgTransferTokens,
   MsgUpdateCollection,
   MsgUpdateUserApprovals,
+  MsgCastVote,
   MsgCreateAddressLists,
   MsgCreateCollection,
   MsgCreateDynamicStore,
   MsgDeleteDynamicStore,
   MsgDeleteIncomingApproval,
   MsgDeleteOutgoingApproval,
-  MsgDecrementStoreValue,
-  MsgIncrementStoreValue,
   MsgPurgeApprovals,
   MsgSetTokenMetadata,
   MsgSetCollectionApprovals,

@@ -7,9 +7,11 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { Params } from "./params_pb.js";
 import { TokenCollection } from "./collections_pb.js";
-import { ApprovalTracker, UserBalanceStore } from "./transfers_pb.js";
+import { UserBalanceStore } from "./user_balance_store_pb.js";
 import { AddressList } from "./address_lists_pb.js";
+import { ApprovalTracker } from "./approval_tracking_pb.js";
 import { DynamicStore, DynamicStoreValue } from "./dynamic_stores_pb.js";
+import { VoteProof } from "./challenges_pb.js";
 
 /**
  * GenesisState defines the tokens module's genesis state.
@@ -103,11 +105,21 @@ export class GenesisState extends Message<GenesisState> {
   ethSignatureTrackers: string[] = [];
 
   /**
-   * this line is used by starport scaffolding # genesis/proto/state
-   *
    * @generated from field: repeated string ethSignatureTrackerStoreKeys = 18;
    */
   ethSignatureTrackerStoreKeys: string[] = [];
+
+  /**
+   * @generated from field: repeated badges.VoteProof votingTrackers = 19;
+   */
+  votingTrackers: VoteProof[] = [];
+
+  /**
+   * this line is used by starport scaffolding # genesis/proto/state
+   *
+   * @generated from field: repeated string votingTrackerStoreKeys = 20;
+   */
+  votingTrackerStoreKeys: string[] = [];
 
   constructor(data?: PartialMessage<GenesisState>) {
     super();
@@ -135,6 +147,8 @@ export class GenesisState extends Message<GenesisState> {
     { no: 16, name: "dynamicStoreValues", kind: "message", T: DynamicStoreValue, repeated: true },
     { no: 17, name: "ethSignatureTrackers", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
     { no: 18, name: "ethSignatureTrackerStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 19, name: "votingTrackers", kind: "message", T: VoteProof, repeated: true },
+    { no: 20, name: "votingTrackerStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisState {

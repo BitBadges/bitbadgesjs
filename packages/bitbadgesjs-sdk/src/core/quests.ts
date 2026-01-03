@@ -7,19 +7,8 @@ export const doesCollectionFollowProtocol = (collection: Readonly<iCollectionDoc
     return false;
   }
 
-  let found = false;
-  for (const standard of collection.standardsTimeline) {
-    const isCurrentTime = UintRangeArray.From(standard.timelineTimes).searchIfExists(BigInt(Date.now()));
-    if (!isCurrentTime) {
-      continue;
-    }
-
-    if (!standard.standards.includes(protocol)) {
-      continue;
-    }
-
-    found = true;
-  }
+  // Since we removed timelineTimes, we just check if the standard exists
+  const found = collection.standards.includes(protocol);
 
   if (!found) {
     return false;

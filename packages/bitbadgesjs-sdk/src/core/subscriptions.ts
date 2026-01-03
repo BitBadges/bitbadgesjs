@@ -58,19 +58,8 @@ export const doesCollectionFollowSubscriptionProtocol = (collection?: Readonly<i
     return false;
   }
 
-  let found = false;
-  for (const standard of collection.standardsTimeline) {
-    const isCurrentTime = UintRangeArray.From(standard.timelineTimes).searchIfExists(BigInt(Date.now()));
-    if (!isCurrentTime) {
-      continue;
-    }
-
-    if (!standard.standards.includes('Subscriptions')) {
-      continue;
-    }
-
-    found = true;
-  }
+  // Since we removed timelineTimes, we just check if the standard exists
+  const found = collection.standards.includes('Subscriptions');
 
   if (!found) {
     return false;

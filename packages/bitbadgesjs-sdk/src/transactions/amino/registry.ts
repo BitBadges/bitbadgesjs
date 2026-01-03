@@ -1,5 +1,6 @@
 import { MsgAddCustomData } from '@/proto/anchor/tx_pb.js';
 import {
+  MsgCastVote,
   MsgCreateAddressLists,
   MsgCreateCollection,
   MsgCreateDynamicStore,
@@ -7,8 +8,6 @@ import {
   MsgDeleteDynamicStore,
   MsgDeleteIncomingApproval,
   MsgDeleteOutgoingApproval,
-  MsgDecrementStoreValue,
-  MsgIncrementStoreValue,
   MsgPurgeApprovals,
   MsgSetTokenMetadata,
   MsgSetCollectionApprovals,
@@ -261,11 +260,10 @@ export function createBadgesAminoConverters(): AminoConverters {
     ...createAminoConverter(MsgCreateAddressLists, 'badges/CreateAddressLists'),
     ...createAminoConverter(MsgCreateCollection, 'badges/CreateCollection'),
     ...createAminoConverter(MsgCreateDynamicStore, 'badges/CreateDynamicStore'),
+    ...createAminoConverter(MsgCastVote, 'badges/CastVote'),
     ...createAminoConverter(MsgDeleteDynamicStore, 'badges/DeleteDynamicStore'),
     ...createAminoConverter(MsgDeleteIncomingApproval, 'badges/DeleteIncomingApproval'),
     ...createAminoConverter(MsgDeleteOutgoingApproval, 'badges/DeleteOutgoingApproval'),
-    ...createAminoConverter(MsgDecrementStoreValue, 'badges/DecrementStoreValue'),
-    ...createAminoConverter(MsgIncrementStoreValue, 'badges/IncrementStoreValue'),
     ...createAminoConverter(MsgPurgeApprovals, 'badges/PurgeApprovals'),
     ...createAminoConverter(MsgSetTokenMetadata, 'badges/SetTokenMetadata'),
     ...createAminoConverter(MsgSetCollectionApprovals, 'badges/SetCollectionApprovals'),

@@ -1,4 +1,3 @@
-import { PrecalculationOptions } from '@/api-indexer/docs-types/activity.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, getConverterFunction } from '@/common/base.js';
 import type { iBalance, iTransfer } from '@/interfaces/types/core.js';
@@ -9,7 +8,7 @@ import { GO_MAX_UINT_64, safeAddKeepLeft, safeMultiplyKeepLeft, safeSubtractKeep
 import type { NumberType } from '../common/string-numbers.js';
 import { BigIntify, Stringify } from '../common/string-numbers.js';
 import { Balance, BalanceArray, cleanBalances } from './balances.js';
-import { ApprovalIdentifierDetails, ETHSignatureProof, MerkleProof } from './misc.js';
+import { ApprovalIdentifierDetails, PrecalculateBalancesFromApprovalDetails, PrecalculationOptions, ETHSignatureProof, MerkleProof } from './misc.js';
 import { UintRangeArray } from './uintRanges.js';
 
 /**
@@ -21,7 +20,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
   from: BitBadgesAddress;
   toAddresses: BitBadgesAddress[];
   balances: BalanceArray<T>;
-  precalculateBalancesFromApproval?: ApprovalIdentifierDetails<T>;
+  precalculateBalancesFromApproval?: PrecalculateBalancesFromApprovalDetails<T>;
   merkleProofs?: MerkleProof[];
   ethSignatureProofs?: ETHSignatureProof[];
   memo?: string;
@@ -29,8 +28,6 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
   onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
   onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
-  precalculationOptions?: PrecalculationOptions<T>;
-  numAttempts?: T;
 
   constructor(transfer: iTransfer<T>) {
     super();
@@ -38,7 +35,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
     this.toAddresses = transfer.toAddresses;
     this.balances = BalanceArray.From(transfer.balances);
     this.precalculateBalancesFromApproval = transfer.precalculateBalancesFromApproval
-      ? new ApprovalIdentifierDetails(transfer.precalculateBalancesFromApproval)
+      ? new PrecalculateBalancesFromApprovalDetails(transfer.precalculateBalancesFromApproval)
       : undefined;
     this.merkleProofs = transfer.merkleProofs ? transfer.merkleProofs.map((b) => new MerkleProof(b)) : undefined;
     this.ethSignatureProofs = transfer.ethSignatureProofs ? transfer.ethSignatureProofs.map((b) => new ETHSignatureProof(b)) : undefined;
@@ -50,13 +47,10 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
 
     this.onlyCheckPrioritizedIncomingApprovals = transfer.onlyCheckPrioritizedIncomingApprovals;
     this.onlyCheckPrioritizedOutgoingApprovals = transfer.onlyCheckPrioritizedOutgoingApprovals;
-    this.precalculationOptions = transfer.precalculationOptions ? new PrecalculationOptions(transfer.precalculationOptions) : undefined;
-
-    this.numAttempts = transfer.numAttempts;
   }
 
   getNumberFieldNames(): string[] {
-    return ['numAttempts'];
+    return [];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Transfer<U> {
@@ -89,7 +83,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       toAddresses: item.toAddresses,
       balances: item.balances.map((b) => Balance.fromProto(b, convertFunction)),
       precalculateBalancesFromApproval: item.precalculateBalancesFromApproval
-        ? ApprovalIdentifierDetails.fromProto(item.precalculateBalancesFromApproval, convertFunction)
+        ? PrecalculateBalancesFromApprovalDetails.fromProto(item.precalculateBalancesFromApproval, convertFunction)
         : undefined,
       merkleProofs: item.merkleProofs ? item.merkleProofs.map((b) => MerkleProof.fromProto(b)) : undefined,
       ethSignatureProofs: item.ethSignatureProofs ? item.ethSignatureProofs.map((b) => ETHSignatureProof.fromProto(b)) : undefined,
@@ -100,9 +94,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
 
       onlyCheckPrioritizedCollectionApprovals: item.onlyCheckPrioritizedCollectionApprovals,
       onlyCheckPrioritizedIncomingApprovals: item.onlyCheckPrioritizedIncomingApprovals,
-      onlyCheckPrioritizedOutgoingApprovals: item.onlyCheckPrioritizedOutgoingApprovals,
-      precalculationOptions: item.precalculationOptions ? PrecalculationOptions.fromProto(item.precalculationOptions, convertFunction) : undefined,
-      numAttempts: item.numAttempts ? convertFunction(item.numAttempts) : undefined
+      onlyCheckPrioritizedOutgoingApprovals: item.onlyCheckPrioritizedOutgoingApprovals
     });
   }
 
@@ -112,9 +104,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
       from: getConvertFunctionFromPrefix(prefix)(this.from),
       toAddresses: this.toAddresses.map((x) => getConvertFunctionFromPrefix(prefix)(x)),
       precalculateBalancesFromApproval: this.precalculateBalancesFromApproval?.toBech32Addresses(prefix),
-      prioritizedApprovals: this.prioritizedApprovals?.map((x) => x.toBech32Addresses(prefix)),
-      precalculationOptions: this.precalculationOptions ? new PrecalculationOptions(this.precalculationOptions) : undefined,
-      numAttempts: this.numAttempts
+      prioritizedApprovals: this.prioritizedApprovals?.map((x) => x.toBech32Addresses(prefix))
     });
   }
 }
@@ -194,14 +184,13 @@ export class TransferWithIncrements<T extends NumberType>
   from: BitBadgesAddress;
   toAddresses: BitBadgesAddress[];
   balances: BalanceArray<T>;
-  precalculateBalancesFromApproval?: ApprovalIdentifierDetails<T>;
+  precalculateBalancesFromApproval?: PrecalculateBalancesFromApprovalDetails<T>;
   merkleProofs?: MerkleProof[];
   memo?: string;
   prioritizedApprovals?: ApprovalIdentifierDetails<T>[];
   onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
   onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
-  precalculationOptions?: PrecalculationOptions<T>;
 
   constructor(data: iTransferWithIncrements<T>) {
     super();
@@ -213,7 +202,7 @@ export class TransferWithIncrements<T extends NumberType>
     this.toAddresses = data.toAddresses;
     this.balances = BalanceArray.From(data.balances);
     this.precalculateBalancesFromApproval = data.precalculateBalancesFromApproval
-      ? new ApprovalIdentifierDetails(data.precalculateBalancesFromApproval)
+      ? new PrecalculateBalancesFromApprovalDetails(data.precalculateBalancesFromApproval)
       : undefined;
     this.merkleProofs = data.merkleProofs ? data.merkleProofs.map((b) => new MerkleProof(b)) : undefined;
     this.memo = data.memo;
@@ -221,7 +210,6 @@ export class TransferWithIncrements<T extends NumberType>
     this.onlyCheckPrioritizedCollectionApprovals = data.onlyCheckPrioritizedCollectionApprovals;
     this.onlyCheckPrioritizedIncomingApprovals = data.onlyCheckPrioritizedIncomingApprovals;
     this.onlyCheckPrioritizedOutgoingApprovals = data.onlyCheckPrioritizedOutgoingApprovals;
-    this.precalculationOptions = data.precalculationOptions ? new PrecalculationOptions(data.precalculationOptions) : undefined;
   }
 
   getNumberFieldNames(): string[] {

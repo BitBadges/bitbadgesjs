@@ -1,7 +1,7 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { BalanceArray } from '@/core/balances.js';
-import { ApprovalIdentifierDetails } from '@/core/misc.js';
+import { ApprovalIdentifierDetails, PrecalculateBalancesFromApprovalDetails, PrecalculationOptions } from '@/core/misc.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
 import { CollectionId } from '@/interfaces/types/core.js';
 import { badges as protobadges } from '@/proto/index.js';
@@ -11,10 +11,10 @@ import type {
   iClaimActivityDoc,
   iCoinTransferItem,
   iPointsActivityDoc,
-  iPrecalculationOptions,
   iTransferActivityDoc,
   UNIXMilliTimestamp
 } from './interfaces.js';
+import type { iPrecalculationOptions } from '@/interfaces/types/core.js';
 
 /**
  * @inheritDoc iActivityDoc
@@ -74,39 +74,6 @@ export class CoinTransferItem<T extends NumberType> extends BaseNumberTypeClass<
 }
 
 /**
- * @inheritDoc iPrecalculationOptions
- * @category Indexer
- */
-export class PrecalculationOptions<T extends NumberType> extends BaseNumberTypeClass<PrecalculationOptions<T>> implements iPrecalculationOptions<T> {
-  overrideTimestamp?: T;
-  tokenIdsOverride?: UintRangeArray<T>;
-
-  constructor(data: iPrecalculationOptions<T>) {
-    super();
-    this.overrideTimestamp = data.overrideTimestamp;
-    this.tokenIdsOverride = data.tokenIdsOverride ? UintRangeArray.From(data.tokenIdsOverride) : undefined;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['overrideTimestamp'];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PrecalculationOptions<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PrecalculationOptions<U>;
-  }
-
-  static fromProto<U extends NumberType>(
-    proto: protobadges.PrecalculationOptions,
-    convertFunction: (item: NumberType) => U
-  ): PrecalculationOptions<U> {
-    return new PrecalculationOptions({
-      overrideTimestamp: convertFunction(proto.overrideTimestamp),
-      tokenIdsOverride: proto.tokenIdsOverride ? UintRangeArray.From(proto.tokenIdsOverride).convert(convertFunction) : undefined
-    });
-  }
-}
-
-/**
  * @inheritDoc iTransferActivityDoc
  * @category Indexer
  */
@@ -119,7 +86,7 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
   txHash?: string;
 
   memo?: string;
-  precalculateBalancesFromApproval?: ApprovalIdentifierDetails<T>;
+  precalculateBalancesFromApproval?: PrecalculateBalancesFromApprovalDetails<T>;
   prioritizedApprovals?: ApprovalIdentifierDetails<T>[];
 
   private?: boolean | undefined;
@@ -139,7 +106,7 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
     this.collectionId = data.collectionId;
     this.memo = data.memo;
     this.precalculateBalancesFromApproval = data.precalculateBalancesFromApproval
-      ? new ApprovalIdentifierDetails(data.precalculateBalancesFromApproval)
+      ? new PrecalculateBalancesFromApprovalDetails(data.precalculateBalancesFromApproval)
       : undefined;
     this.prioritizedApprovals = data.prioritizedApprovals ? data.prioritizedApprovals.map((x) => new ApprovalIdentifierDetails(x)) : undefined;
     this.initiatedBy = data.initiatedBy;

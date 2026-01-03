@@ -7,6 +7,7 @@ import type { iMsgCreateAddressLists } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
+import { AddressListInput } from '@/proto/badges/address_lists_pb.js';
 
 /**
  * MsgCreateAddressLists defines address lists on-chain.
@@ -26,7 +27,19 @@ export class MsgCreateAddressLists extends CustomTypeClass<MsgCreateAddressLists
   }
 
   toProto(): protobadges.MsgCreateAddressLists {
-    return new protobadges.MsgCreateAddressLists({ ...this });
+    return new protobadges.MsgCreateAddressLists({
+      creator: this.creator,
+      addressLists: this.addressLists.map(
+        (x) =>
+          new AddressListInput({
+            listId: x.listId,
+            addresses: x.addresses,
+            whitelist: x.whitelist,
+            uri: x.uri,
+            customData: x.customData
+          })
+      )
+    });
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCreateAddressLists {
@@ -40,7 +53,16 @@ export class MsgCreateAddressLists extends CustomTypeClass<MsgCreateAddressLists
   static fromProto(protoMsg: protobadges.MsgCreateAddressLists): MsgCreateAddressLists {
     return new MsgCreateAddressLists({
       creator: protoMsg.creator,
-      addressLists: protoMsg.addressLists.map((x) => AddressList.fromProto(x))
+      addressLists: protoMsg.addressLists.map(
+        (x) =>
+          new AddressList({
+            listId: x.listId,
+            addresses: x.addresses,
+            whitelist: x.whitelist,
+            uri: x.uri,
+            customData: x.customData
+          })
+      )
     });
   }
 
@@ -50,9 +72,11 @@ export class MsgCreateAddressLists extends CustomTypeClass<MsgCreateAddressLists
       addressLists: this.addressLists.map(
         (x) =>
           new AddressList({
-            ...x,
-            createdBy: getConvertFunctionFromPrefix(prefix)(x.createdBy ?? ''),
-            addresses: x.addresses.map((y) => getConvertFunctionFromPrefix(prefix)(y))
+            listId: x.listId,
+            addresses: x.addresses.map((y) => getConvertFunctionFromPrefix(prefix)(y)),
+            whitelist: x.whitelist,
+            uri: x.uri,
+            customData: x.customData
           })
       )
     });

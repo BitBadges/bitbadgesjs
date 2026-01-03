@@ -86,21 +86,25 @@ export interface iCollectionPermissions<T extends NumberType> {
   /** The permissions for deleting the collection. */
   canDeleteCollection: iActionPermission<T>[];
   /** The permissions for archiving the collection. */
-  canArchiveCollection: iTimedUpdatePermission<T>[];
+  canArchiveCollection: iActionPermission<T>[];
   /** The permissions for updating the standards. */
-  canUpdateStandards: iTimedUpdatePermission<T>[];
+  canUpdateStandards: iActionPermission<T>[];
   /** The permissions for updating the custom data. */
-  canUpdateCustomData: iTimedUpdatePermission<T>[];
+  canUpdateCustomData: iActionPermission<T>[];
   /** The permissions for updating the manager. */
-  canUpdateManager: iTimedUpdatePermission<T>[];
+  canUpdateManager: iActionPermission<T>[];
   /** The permissions for updating the collection metadata. */
-  canUpdateCollectionMetadata: iTimedUpdatePermission<T>[];
+  canUpdateCollectionMetadata: iActionPermission<T>[];
   /** The permissions for creating more tokens. */
   canUpdateValidTokenIds: iTokenIdsActionPermission<T>[];
   /** The permissions for updating the token metadata. */
-  canUpdateTokenMetadata: iTimedUpdateWithTokenIdsPermission<T>[];
+  canUpdateTokenMetadata: iTokenIdsActionPermission<T>[];
   /** The permissions for updating the collection approved transfers. */
   canUpdateCollectionApprovals: iCollectionApprovalPermission<T>[];
+  /** The permissions for adding more alias paths to the collection. */
+  canAddMoreAliasPaths: iActionPermission<T>[];
+  /** The permissions for adding more cosmos coin wrapper paths to the collection. */
+  canAddMoreCosmosCoinWrapperPaths: iActionPermission<T>[];
 }
 
 /**
@@ -116,33 +120,7 @@ export interface iActionPermission<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iTimedUpdatePermission<T extends NumberType> {
-  /** The timeline times that the permission applies to. */
-  timelineTimes: iUintRange<T>[];
-  /** The permitted times of the permission. */
-  permanentlyPermittedTimes: iUintRange<T>[];
-  /** The forbidden times of the permission. */
-  permanentlyForbiddenTimes: iUintRange<T>[];
-}
-
-/**
- * @category Interfaces
- */
 export interface iTokenIdsActionPermission<T extends NumberType> {
-  /** The token IDs that the permission applies to. */
-  tokenIds: iUintRange<T>[];
-  /** The permitted times of the permission. */
-  permanentlyPermittedTimes: iUintRange<T>[];
-  /** The forbidden times of the permission. */
-  permanentlyForbiddenTimes: iUintRange<T>[];
-}
-
-/**
- * @category Interfaces
- */
-export interface iTimedUpdateWithTokenIdsPermission<T extends NumberType> {
-  /** The timeline times that the permission applies to. */
-  timelineTimes: iUintRange<T>[];
   /** The token IDs that the permission applies to. */
   tokenIds: iUintRange<T>[];
   /** The permitted times of the permission. */

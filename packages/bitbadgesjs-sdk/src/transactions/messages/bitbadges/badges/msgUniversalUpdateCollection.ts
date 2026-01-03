@@ -2,14 +2,8 @@ import * as protobadges from '@/proto/badges/tx_pb.js';
 
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import { CollectionApproval } from '@/core/approvals.js';
-import {
-  TokenMetadataTimeline,
-  CollectionMetadataTimeline,
-  CustomDataTimeline,
-  IsArchivedTimeline,
-  ManagerTimeline,
-  StandardsTimeline
-} from '@/core/misc.js';
+import { TokenMetadata, CollectionMetadata } from '@/core/misc.js';
+import type { iCollectionMetadata } from '@/interfaces/types/core.js';
 import { CollectionPermissions } from '@/core/permissions.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 
@@ -23,7 +17,7 @@ import { UserBalanceStore } from '@/core/userBalances.js';
 import { CollectionId } from '@/interfaces/index.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
 import type { iMsgUniversalUpdateCollection } from './interfaces.js';
-import { CosmosCoinWrapperPathAddObject, InvariantsAddObject } from '@/core/ibc-wrappers.js';
+import { AliasPathAddObject, CosmosCoinWrapperPathAddObject, InvariantsAddObject } from '@/core/ibc-wrappers.js';
 /**
  * MsgUniversalUpdateCollection is a universal transaction that can be used to create / update any collection. It is only executable by the manager.
  * MsgCreateCollection and MsgUpdateCollection are special cases of this message.
@@ -52,22 +46,23 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   validTokenIds?: UintRangeArray<T>;
   updateCollectionPermissions?: boolean;
   collectionPermissions?: CollectionPermissions<T>;
-  updateManagerTimeline?: boolean;
-  managerTimeline?: ManagerTimeline<T>[];
-  updateCollectionMetadataTimeline?: boolean;
-  collectionMetadataTimeline?: CollectionMetadataTimeline<T>[];
-  updateTokenMetadataTimeline?: boolean;
-  tokenMetadataTimeline?: TokenMetadataTimeline<T>[];
-  updateCustomDataTimeline?: boolean;
-  customDataTimeline?: CustomDataTimeline<T>[];
+  updateManager?: boolean;
+  manager?: BitBadgesAddress;
+  updateCollectionMetadata?: boolean;
+  collectionMetadata?: CollectionMetadata;
+  updateTokenMetadata?: boolean;
+  tokenMetadata?: TokenMetadata<T>[];
+  updateCustomData?: boolean;
+  customData?: string;
   updateCollectionApprovals?: boolean;
   collectionApprovals?: CollectionApproval<T>[];
-  updateStandardsTimeline?: boolean;
-  standardsTimeline?: StandardsTimeline<T>[];
-  updateIsArchivedTimeline?: boolean;
-  isArchivedTimeline?: IsArchivedTimeline<T>[];
+  updateStandards?: boolean;
+  standards?: string[];
+  updateIsArchived?: boolean;
+  isArchived?: boolean;
   mintEscrowCoinsToTransfer?: CosmosCoin<T>[];
   cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject<T>[];
+  aliasPathsToAdd?: AliasPathAddObject<T>[];
   invariants?: InvariantsAddObject<T>;
 
   constructor(msg: iMsgUniversalUpdateCollection<T>) {
@@ -79,24 +74,25 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     this.validTokenIds = msg.validTokenIds ? UintRangeArray.From(msg.validTokenIds) : undefined;
     this.updateCollectionPermissions = msg.updateCollectionPermissions;
     this.collectionPermissions = msg.collectionPermissions ? new CollectionPermissions(msg.collectionPermissions) : undefined;
-    this.updateManagerTimeline = msg.updateManagerTimeline;
-    this.managerTimeline = msg.managerTimeline?.map((x) => new ManagerTimeline(x));
-    this.updateCollectionMetadataTimeline = msg.updateCollectionMetadataTimeline;
-    this.collectionMetadataTimeline = msg.collectionMetadataTimeline?.map((x) => new CollectionMetadataTimeline(x));
-    this.updateTokenMetadataTimeline = msg.updateTokenMetadataTimeline;
-    this.tokenMetadataTimeline = msg.tokenMetadataTimeline?.map((x) => new TokenMetadataTimeline(x));
-    this.updateCustomDataTimeline = msg.updateCustomDataTimeline;
-    this.customDataTimeline = msg.customDataTimeline?.map((x) => new CustomDataTimeline(x));
+    this.updateManager = msg.updateManager;
+    this.manager = msg.manager;
+    this.updateCollectionMetadata = msg.updateCollectionMetadata;
+    this.collectionMetadata = msg.collectionMetadata ? new CollectionMetadata(msg.collectionMetadata) : undefined;
+    this.updateTokenMetadata = msg.updateTokenMetadata;
+    this.tokenMetadata = msg.tokenMetadata?.map((x) => new TokenMetadata(x));
+    this.updateCustomData = msg.updateCustomData;
+    this.customData = msg.customData;
     this.updateCollectionApprovals = msg.updateCollectionApprovals;
     this.collectionApprovals = msg.collectionApprovals?.map((x) => new CollectionApproval(x));
-    this.updateStandardsTimeline = msg.updateStandardsTimeline;
-    this.standardsTimeline = msg.standardsTimeline?.map((x) => new StandardsTimeline(x));
-    this.updateIsArchivedTimeline = msg.updateIsArchivedTimeline;
-    this.isArchivedTimeline = msg.isArchivedTimeline?.map((x) => new IsArchivedTimeline(x));
+    this.updateStandards = msg.updateStandards;
+    this.standards = msg.standards;
+    this.updateIsArchived = msg.updateIsArchived;
+    this.isArchived = msg.isArchived;
     this.mintEscrowCoinsToTransfer = msg.mintEscrowCoinsToTransfer ? msg.mintEscrowCoinsToTransfer.map((x) => new CosmosCoin(x)) : undefined;
     this.cosmosCoinWrapperPathsToAdd = msg.cosmosCoinWrapperPathsToAdd
       ? msg.cosmosCoinWrapperPathsToAdd.map((x) => new CosmosCoinWrapperPathAddObject(x))
       : undefined;
+    this.aliasPathsToAdd = msg.aliasPathsToAdd ? msg.aliasPathsToAdd.map((x) => new AliasPathAddObject(x)) : undefined;
     this.invariants = msg.invariants ? new InvariantsAddObject(msg.invariants) : undefined;
   }
 
@@ -111,7 +107,6 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
   toProto(): protobadges.MsgUniversalUpdateCollection {
     return new protobadges.MsgUniversalUpdateCollection(this.convert(Stringify));
   }
-
   static fromJson<U extends NumberType>(
     jsonValue: JsonValue,
     convertFunction: (item: NumberType) => U,
@@ -142,34 +137,25 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
       collectionPermissions: protoMsg.collectionPermissions
         ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction)
         : undefined,
-      updateManagerTimeline: protoMsg.updateManagerTimeline,
-      managerTimeline: protoMsg.managerTimeline ? protoMsg.managerTimeline.map((x) => ManagerTimeline.fromProto(x, convertFunction)) : undefined,
-      updateCollectionMetadataTimeline: protoMsg.updateCollectionMetadataTimeline,
-      collectionMetadataTimeline: protoMsg.collectionMetadataTimeline
-        ? protoMsg.collectionMetadataTimeline.map((x) => CollectionMetadataTimeline.fromProto(x, convertFunction))
-        : undefined,
-      updateTokenMetadataTimeline: protoMsg.updateTokenMetadataTimeline,
-      tokenMetadataTimeline: protoMsg.tokenMetadataTimeline
-        ? protoMsg.tokenMetadataTimeline.map((x) => TokenMetadataTimeline.fromProto(x, convertFunction))
-        : undefined,
-      updateCustomDataTimeline: protoMsg.updateCustomDataTimeline,
-      customDataTimeline: protoMsg.customDataTimeline
-        ? protoMsg.customDataTimeline.map((x) => CustomDataTimeline.fromProto(x, convertFunction))
-        : undefined,
+      updateManager: protoMsg.updateManager,
+      manager: protoMsg.manager || undefined,
+      updateCollectionMetadata: protoMsg.updateCollectionMetadata,
+      collectionMetadata: protoMsg.collectionMetadata ? CollectionMetadata.fromProto(protoMsg.collectionMetadata) : undefined,
+      updateTokenMetadata: protoMsg.updateTokenMetadata,
+      tokenMetadata: protoMsg.tokenMetadata.length > 0 ? protoMsg.tokenMetadata.map((tm) => TokenMetadata.fromProto(tm, convertFunction)) : undefined,
+      updateCustomData: protoMsg.updateCustomData,
+      customData: protoMsg.customData || undefined,
       updateCollectionApprovals: protoMsg.updateCollectionApprovals,
       collectionApprovals: protoMsg.collectionApprovals
         ? protoMsg.collectionApprovals.map((x) => CollectionApproval.fromProto(x, convertFunction))
         : undefined,
-      updateStandardsTimeline: protoMsg.updateStandardsTimeline,
-      standardsTimeline: protoMsg.standardsTimeline
-        ? protoMsg.standardsTimeline.map((x) => StandardsTimeline.fromProto(x, convertFunction))
-        : undefined,
-      updateIsArchivedTimeline: protoMsg.updateIsArchivedTimeline,
-      isArchivedTimeline: protoMsg.isArchivedTimeline
-        ? protoMsg.isArchivedTimeline.map((x) => IsArchivedTimeline.fromProto(x, convertFunction))
-        : undefined,
+      updateStandards: protoMsg.updateStandards,
+      standards: protoMsg.standards.length > 0 ? protoMsg.standards : undefined,
+      updateIsArchived: protoMsg.updateIsArchived,
+      isArchived: protoMsg.isArchived,
       mintEscrowCoinsToTransfer: protoMsg.mintEscrowCoinsToTransfer?.map((x) => CosmosCoin.fromProto(x, convertFunction)),
       cosmosCoinWrapperPathsToAdd: protoMsg.cosmosCoinWrapperPathsToAdd?.map((x) => CosmosCoinWrapperPathAddObject.fromProto(x, convertFunction)),
+      aliasPathsToAdd: protoMsg.aliasPathsToAdd?.map((x) => AliasPathAddObject.fromProto(x, convertFunction)),
       invariants: protoMsg.invariants ? InvariantsAddObject.fromProto(protoMsg.invariants, convertFunction) : undefined
     });
   }
@@ -180,7 +166,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       defaultBalances: this.defaultBalances?.toBech32Addresses(prefix),
       collectionPermissions: this.collectionPermissions?.toBech32Addresses(prefix),
-      managerTimeline: this.managerTimeline?.map((x) => x.toBech32Addresses(prefix)),
+      manager: this.manager ? getConvertFunctionFromPrefix(prefix)(this.manager) : undefined,
       collectionApprovals: this.collectionApprovals?.map((x) => x.toBech32Addresses(prefix))
     });
   }

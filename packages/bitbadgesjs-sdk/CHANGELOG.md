@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.27.0]
+
+### Version Compatibility
+
+- **BitBadges Chain v22**: 0.27.0 corresponds to BitBadges chain v22 upgrades
+
+### What's New
+
+- Added support for swap activities API endpoints
+- Added support for on-chain dynamic store API endpoints
+- See [BitBadges Chain v22 release information](https://github.com/BitBadges/bitbadgeschain/releases/tag/v22) for more details.
+
+### Installation
+
+```bash
+npm install bitbadgesjs-sdk@^0.27.0
+```
+
 ## [0.26.0]
 
 ### Version Compatibility

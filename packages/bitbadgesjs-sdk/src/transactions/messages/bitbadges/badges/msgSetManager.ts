@@ -7,8 +7,7 @@ import type { iMsgSetManager } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
-import { ManagerTimeline } from '@/core/misc.js';
-import { TimedUpdatePermission } from '@/core/permissions.js';
+import { ActionPermission } from '@/core/permissions.js';
 import { Stringify } from '@/common/string-numbers.js';
 
 /**
@@ -19,22 +18,22 @@ import { Stringify } from '@/common/string-numbers.js';
 export class MsgSetManager<T extends NumberType> extends CustomTypeClass<MsgSetManager<T>> implements iMsgSetManager<T> {
   creator: BitBadgesAddress;
   collectionId: T;
-  managerTimeline: ManagerTimeline<T>[];
-  canUpdateManager: TimedUpdatePermission<T>[];
+  manager: BitBadgesAddress;
+  canUpdateManager: ActionPermission<T>[];
 
   constructor(msg: iMsgSetManager<T>) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
-    this.managerTimeline = msg.managerTimeline.map((timeline) => new ManagerTimeline(timeline));
-    this.canUpdateManager = msg.canUpdateManager.map((permission) => new TimedUpdatePermission(permission));
+    this.manager = msg.manager;
+    this.canUpdateManager = msg.canUpdateManager.map((permission) => new ActionPermission(permission));
   }
 
   toProto(): protobadges.MsgSetManager {
     return new protobadges.MsgSetManager({
       creator: this.creator,
       collectionId: this.collectionId.toString(),
-      managerTimeline: this.managerTimeline.map((timeline) => timeline.toProto()),
+      manager: this.manager,
       canUpdateManager: this.canUpdateManager.map((permission) => permission.toProto())
     });
   }
@@ -51,8 +50,8 @@ export class MsgSetManager<T extends NumberType> extends CustomTypeClass<MsgSetM
     return new MsgSetManager({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
-      managerTimeline: protoMsg.managerTimeline.map((timeline) => ManagerTimeline.fromProto(timeline, Stringify)),
-      canUpdateManager: protoMsg.canUpdateManager.map((permission) => TimedUpdatePermission.fromProto(permission, Stringify))
+      manager: protoMsg.manager,
+      canUpdateManager: protoMsg.canUpdateManager.map((permission) => ActionPermission.fromProto(permission, Stringify))
     });
   }
 
@@ -60,7 +59,7 @@ export class MsgSetManager<T extends NumberType> extends CustomTypeClass<MsgSetM
     return new MsgSetManager({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,
-      managerTimeline: this.managerTimeline,
+      manager: getConvertFunctionFromPrefix(prefix)(this.manager),
       canUpdateManager: this.canUpdateManager
     });
   }

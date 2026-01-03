@@ -213,7 +213,9 @@ tags:
   - name: Plugins
     description: Endpoints for the plugins for claims
   - name: Dynamic Stores
-    description: Endpoints for managing dynamic data stores
+    description: Endpoints for managing off-chain dynamic data stores
+  - name: On-Chain Dynamic Stores
+    description: Endpoints for querying on-chain dynamic stores (stored on the blockchain)
   - name: Utility Pages
     description: Endpoints for managing utility pages
   - name: Miscellaneous
@@ -5303,6 +5305,506 @@ paths:
       security:
         - apiKey: []
       x-internal: false
+
+  /swapActivities:
+    get:
+      operationId: getSwapActivities
+      summary: Get Swap Activities
+      tags:
+        - Assets
+      description: |
+        Retrieves swap activities with pagination. Returns the latest swap activities sorted by block height descending.
+
+        ```tsx
+        const res = await BitBadgesApi.getSwapActivities({ bookmark: '', limit: 25 });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSwapActivitiesPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSwapActivitiesSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getswapactivities)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: bookmark
+          in: query
+          description: Pagination bookmark
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Number of results to return (1-100)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetSwapActivitiesSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /onChainDynamicStore/{storeId}:
+    get:
+      operationId: getOnChainDynamicStore
+      summary: Get On-Chain Dynamic Store
+      tags:
+        - On-Chain Dynamic Stores
+      description: |
+        Retrieves an on-chain dynamic store by its ID. On-chain dynamic stores are key-value stores stored on the blockchain.
+
+        ```tsx
+        const res = await BitBadgesApi.getOnChainDynamicStore(storeId);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOnChainDynamicStorePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOnChainDynamicStoreSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getonchaindynamicstore)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: storeId
+          in: path
+          description: Store ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetOnChainDynamicStoreSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /onChainDynamicStores/by-creator/{address}:
+    get:
+      operationId: getOnChainDynamicStoresByCreator
+      summary: Get On-Chain Dynamic Stores by Creator
+      tags:
+        - On-Chain Dynamic Stores
+      description: |
+        Retrieves all on-chain dynamic stores created by a specific address.
+
+        ```tsx
+        const res = await BitBadgesApi.getOnChainDynamicStoresByCreator(address);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOnChainDynamicStoresByCreatorPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOnChainDynamicStoresByCreatorSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getonchaindynamicstoresbycreator)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: address
+          in: path
+          description: Creator address
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetOnChainDynamicStoresByCreatorSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /onChainDynamicStore/{storeId}/value/{address}:
+    get:
+      operationId: getOnChainDynamicStoreValue
+      summary: Get On-Chain Dynamic Store Value
+      tags:
+        - On-Chain Dynamic Stores
+      description: |
+        Retrieves the value for a specific address in an on-chain dynamic store. Returns the store's default value if no specific value is set for the address.
+
+        ```tsx
+        const res = await BitBadgesApi.getOnChainDynamicStoreValue(storeId, address);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOnChainDynamicStoreValuePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOnChainDynamicStoreValueSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getonchaindynamicstorevalue)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: storeId
+          in: path
+          description: Store ID
+          required: true
+          schema:
+            type: string
+        - name: address
+          in: path
+          description: Address to get value for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetOnChainDynamicStoreValueSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /onChainDynamicStore/{storeId}/values:
+    get:
+      operationId: getOnChainDynamicStoreValuesPaginated
+      summary: Get On-Chain Dynamic Store Values (Paginated)
+      tags:
+        - On-Chain Dynamic Stores
+      description: |
+        Retrieves a paginated list of all values in an on-chain dynamic store.
+
+        ```tsx
+        const res = await BitBadgesApi.getOnChainDynamicStoreValuesPaginated(storeId, {
+          bookmark: '',
+          limit: 25
+        });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOnChainDynamicStoreValuesPaginatedPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOnChainDynamicStoreValuesPaginatedSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getonchaindynamicstorevaluespaginated)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: storeId
+          in: path
+          description: Store ID
+          required: true
+          schema:
+            type: string
+        - name: bookmark
+          in: query
+          description: Pagination bookmark
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Number of results to return (1-100)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetOnChainDynamicStoreValuesPaginatedSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  # /merkleProofInfo:
+  #   post:
+  #     operationId: getMerkleProofInfo
+  #     summary: Get Merkle Proof Info
+  #     tags:
+  #       - Tokens
+  #     description: |
+  #       Generates merkle proofs for leaves in a merkle challenge. Used for on-chain approvals that use merkle challenges.
+
+  #       ```tsx
+  #       const res = await BitBadgesApi.getMerkleProofInfo({
+  #         collectionId: 1n,
+  #         approvalId: 'approval123',
+  #         approvalLevel: 'collection',
+  #         approverAddress: 'bb1...',
+  #         leaves: ['leaf1', 'leaf2'],
+  #         challengeTrackerId: 'tracker123',
+  #         bitbadgesAddress: 'bb1...',
+  #         claimCodes: ['code1', 'code2']
+  #       });
+  #       ```
+
+  #       SDK Links:
+  #       - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMerkleProofInfoPayload)**
+  #       - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMerkleProofInfoSuccessResponse)**
+  #       - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getmerkleproofinfo)**
+  #     parameters:
+  #       - name: x-api-key
+  #         in: header
+  #         description: BitBadges API Key for authentication
+  #         required: true
+  #         schema:
+  #           type: string
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             $ref: '#/components/schemas/iGetMerkleProofInfoPayload'
+  #     responses:
+  #       '200':
+  #         description: Success response
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/iGetMerkleProofInfoSuccessResponse'
+  #       '400':
+  #         $ref: '#/components/responses/BadRequestResponse'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerErrorResponse'
+  #     security:
+  #       - apiKey: []
+  #     x-internal: false
+
+  # /claims/backlinks:
+  #   get:
+  #     operationId: getClaimsBacklinks
+  #     summary: Get Claims Backlinks
+  #     tags:
+  #       - Claims
+  #     description: |
+  #       Retrieves applications that reference a specific claim (backlinks). Useful for finding where a claim is used.
+
+  #       ```tsx
+  #       const res = await BitBadgesApi.getClaimsBacklinks({ claimId: 'claim123' });
+  #       ```
+
+  #       SDK Links:
+  #       - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimsBacklinksPayload)**
+  #       - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimsBacklinksSuccessResponse)**
+  #       - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getclaimsbacklinks)**
+  #     parameters:
+  #       - name: x-api-key
+  #         in: header
+  #         description: BitBadges API Key for authentication
+  #         required: true
+  #         schema:
+  #           type: string
+  #       - name: claimId
+  #         in: query
+  #         description: Claim ID to find backlinks for
+  #         required: true
+  #         schema:
+  #           type: string
+  #     responses:
+  #       '200':
+  #         description: Success response
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/iGetClaimsBacklinksSuccessResponse'
+  #       '400':
+  #         $ref: '#/components/responses/BadRequestResponse'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerErrorResponse'
+  #     security:
+  #       - apiKey: []
+  #     x-internal: false
+
+  # /claims/{claimId}/postActions:
+  #   get:
+  #     operationId: getPostActionStatuses
+  #     summary: Get Post Action Statuses
+  #     tags:
+  #       - Claims
+  #     description: |
+  #       Retrieves the status of post-claim actions (webhooks, integrations, etc.) for a specific claim.
+
+  #       ```tsx
+  #       const res = await BitBadgesApi.getPostActionStatuses(claimId);
+  #       ```
+
+  #       SDK Links:
+  #       - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPostActionStatusesPayload)**
+  #       - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPostActionStatusesSuccessResponse)**
+  #       - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getpostactionstatuses)**
+  #     parameters:
+  #       - name: x-api-key
+  #         in: header
+  #         description: BitBadges API Key for authentication
+  #         required: true
+  #         schema:
+  #           type: string
+  #       - name: claimId
+  #         in: path
+  #         description: Claim ID
+  #         required: true
+  #         schema:
+  #           type: string
+  #     responses:
+  #       '200':
+  #         description: Success response
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/iGetPostActionStatusesSuccessResponse'
+  #       '400':
+  #         $ref: '#/components/responses/BadRequestResponse'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerErrorResponse'
+  #     security:
+  #       - apiKey: []
+  #     x-internal: false
+
+  # '/collection/{collectionId}/filter':
+  #   post:
+  #     operationId: filterTokensInCollection
+  #     summary: Filter Tokens in Collection
+  #     tags:
+  #       - Tokens
+  #     description: |
+  #       Filters tokens in a collection based on various criteria (attributes, tags, etc.).
+
+  #       ```tsx
+  #       const res = await BitBadgesApi.filterTokensInCollection(collectionId, {
+  #         filters: { tags: ['rare'] },
+  #         bookmark: '',
+  #         sortBy: { tokenId: 1 }
+  #       });
+  #       ```
+
+  #       SDK Links:
+  #       - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterTokensInCollectionPayload)**
+  #       - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterTokensInCollectionSuccessResponse)**
+  #       - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#filtertokensincollection)**
+  #     parameters:
+  #       - name: x-api-key
+  #         in: header
+  #         description: BitBadges API Key for authentication
+  #         required: true
+  #         schema:
+  #           type: string
+  #       - name: collectionId
+  #         in: path
+  #         description: Collection ID
+  #         required: true
+  #         schema:
+  #           type: string
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             $ref: '#/components/schemas/iFilterTokensInCollectionPayload'
+  #     responses:
+  #       '200':
+  #         description: Success response
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/iFilterTokensInCollectionSuccessResponse'
+  #       '400':
+  #         $ref: '#/components/responses/BadRequestResponse'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerErrorResponse'
+  #     security:
+  #       - apiKey: []
+  #     x-internal: false
+
+  # '/collection/{collectionId}/filterSuggestions':
+  #   post:
+  #     operationId: getFilterSuggestions
+  #     summary: Get Filter Suggestions
+  #     tags:
+  #       - Tokens
+  #     description: |
+  #       Gets filter suggestions (tags, attributes, etc.) for a collection. Useful for building filter UIs.
+
+  #       ```tsx
+  #       const res = await BitBadgesApi.getFilterSuggestions(collectionId);
+  #       ```
+
+  #       SDK Links:
+  #       - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetFilterSuggestionsPayload)**
+  #       - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterSuggestionsSuccessResponse)**
+  #       - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getfiltersuggestions)**
+  #     parameters:
+  #       - name: x-api-key
+  #         in: header
+  #         description: BitBadges API Key for authentication
+  #         required: true
+  #         schema:
+  #           type: string
+  #       - name: collectionId
+  #         in: path
+  #         description: Collection ID
+  #         required: true
+  #         schema:
+  #           type: string
+  #     responses:
+  #       '200':
+  #         description: Success response
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/iFilterSuggestionsSuccessResponse'
+  #       '400':
+  #         $ref: '#/components/responses/BadRequestResponse'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerErrorResponse'
+  #     security:
+  #       - apiKey: []
+  #     x-internal: false
 
 components:
   responses:

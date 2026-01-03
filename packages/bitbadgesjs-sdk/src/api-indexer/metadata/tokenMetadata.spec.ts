@@ -1,5 +1,5 @@
-import { TokenMetadataDetails } from './tokenMetadata';
-import { Metadata } from '.';
+import { TokenMetadataDetails } from './tokenMetadata.js';
+import { Metadata } from './index.js';
 
 describe('TokenMetadataDetails', () => {
   describe('batchUpdateTokenMetadata', () => {

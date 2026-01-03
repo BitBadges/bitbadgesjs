@@ -1,20 +1,15 @@
 import { CollectionApprovalWithDetails } from './approvals.js';
-import { TokenMetadataTimeline, CollectionMetadataTimeline, IsArchivedTimeline, ManagerTimeline } from './misc.js';
+import {
+  validateIsArchivedUpdate,
+  validateManagerUpdate,
+  validateCollectionMetadataUpdate,
+  validateTokenMetadataUpdate,
+  validateCustomDataUpdate,
+  validateStandardsUpdate
+} from './misc.js';
 import type { UsedFlags } from './overlaps.js';
-import {
-  ActionPermissionUsedFlags,
-  ApprovalPermissionUsedFlags,
-  TokenIdsActionPermissionUsedFlags,
-  TimedUpdatePermissionUsedFlags,
-  TimedUpdateWithTokenIdsPermissionUsedFlags
-} from './overlaps.js';
-import {
-  ActionPermission,
-  TokenIdsActionPermission,
-  CollectionApprovalPermission,
-  TimedUpdatePermission,
-  TimedUpdateWithTokenIdsPermission
-} from './permissions.js';
+import { ActionPermissionUsedFlags, ApprovalPermissionUsedFlags, TokenIdsActionPermissionUsedFlags } from './overlaps.js';
+import { ActionPermission, CollectionApprovalPermission, TokenIdsActionPermission } from './permissions.js';
 
 /**
  * @category Permissions
@@ -31,7 +26,9 @@ export type PermissionNameString =
   | 'canUpdateAutoApproveAllIncomingTransfers'
   | 'canUpdateStandards'
   | 'canUpdateCustomData'
-  | 'canUpdateManager';
+  | 'canUpdateManager'
+  | 'canAddMoreAliasPaths'
+  | 'canAddMoreCosmosCoinWrapperPaths';
 
 /**
  * Gets the permission variables from a permission name. Variables include the flags, question, and validation function.
@@ -46,19 +43,22 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
   let validatePermissionUpdateFunction: any = undefined;
   switch (permissionName) {
     case 'canArchiveCollection':
-      validateFunction = IsArchivedTimeline.validateUpdate;
+      validateFunction = validateIsArchivedUpdate;
       break;
-
-    // case 'canUpdateStandards':
-    // case 'canUpdateCustomData':
+    case 'canUpdateStandards':
+      validateFunction = validateStandardsUpdate;
+      break;
+    case 'canUpdateCustomData':
+      validateFunction = validateCustomDataUpdate;
+      break;
     case 'canUpdateManager':
-      validateFunction = ManagerTimeline.validateUpdate;
+      validateFunction = validateManagerUpdate;
       break;
     case 'canUpdateCollectionMetadata':
-      validateFunction = CollectionMetadataTimeline.validateUpdate;
+      validateFunction = validateCollectionMetadataUpdate;
       break;
     case 'canUpdateTokenMetadata':
-      validateFunction = TokenMetadataTimeline.validateUpdate;
+      validateFunction = validateTokenMetadataUpdate;
       break;
     case 'canUpdateCollectionApprovals':
       validateFunction = CollectionApprovalWithDetails.validateUpdate;
@@ -76,7 +76,9 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canUpdateCustomData':
     case 'canUpdateManager':
     case 'canUpdateCollectionMetadata':
-      validatePermissionUpdateFunction = TimedUpdatePermission.validateUpdate;
+    case 'canAddMoreAliasPaths':
+    case 'canAddMoreCosmosCoinWrapperPaths':
+      validatePermissionUpdateFunction = ActionPermission.validateUpdate;
       break;
     case 'canUpdateValidTokenIds':
       validatePermissionUpdateFunction = TokenIdsActionPermission.validateUpdate;
@@ -84,7 +86,7 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
       break;
     case 'canUpdateTokenMetadata':
       // case 'canUpdateInheritedBalances':
-      validatePermissionUpdateFunction = TimedUpdateWithTokenIdsPermission.validateUpdate;
+      validatePermissionUpdateFunction = TokenIdsActionPermission.validateUpdate;
 
       break;
     case 'canUpdateCollectionApprovals':
@@ -130,6 +132,12 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canUpdateAutoApproveAllIncomingTransfers':
       question = 'Can update auto approve all incoming transfers?';
       break;
+    case 'canAddMoreAliasPaths':
+      question = 'Can add more alias paths?';
+      break;
+    case 'canAddMoreCosmosCoinWrapperPaths':
+      question = 'Can add more cosmos coin wrapper paths?';
+      break;
     // Add custom questions for other permissions as needed
   }
 
@@ -145,14 +153,16 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canUpdateCustomData':
     case 'canUpdateManager':
     case 'canUpdateCollectionMetadata':
-      flags = TimedUpdatePermissionUsedFlags;
+    case 'canAddMoreAliasPaths':
+    case 'canAddMoreCosmosCoinWrapperPaths':
+      flags = ActionPermissionUsedFlags;
       break;
     case 'canUpdateValidTokenIds':
       flags = TokenIdsActionPermissionUsedFlags;
       break;
     case 'canUpdateTokenMetadata':
       // case 'canUpdateInheritedBalances':
-      flags = TimedUpdateWithTokenIdsPermissionUsedFlags;
+      flags = TokenIdsActionPermissionUsedFlags;
       break;
     case 'canUpdateCollectionApprovals':
       flags = ApprovalPermissionUsedFlags;

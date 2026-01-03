@@ -2,6 +2,8 @@ import type { iUserBalanceStore, iUserBalanceStoreWithDetails } from '@/interfac
 import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import * as protobadges from '@/proto/badges/transfers_pb.js';
+import { UserBalanceStore as ProtoUserBalanceStore } from '@/proto/badges/user_balance_store_pb.js';
+import { UserIncomingApproval as ProtoUserIncomingApproval, UserOutgoingApproval as ProtoUserOutgoingApproval } from '@/proto/badges/approvals_pb.js';
 import { UserIncomingApproval, UserIncomingApprovalWithDetails, UserOutgoingApproval, UserOutgoingApprovalWithDetails } from './approvals.js';
 import { UserPermissions, UserPermissionsWithDetails } from './permissions.js';
 import type { NumberType } from '../common/string-numbers.js';
@@ -36,14 +38,14 @@ export class UserBalanceStore<T extends NumberType> extends BaseNumberTypeClass<
   }
 
   toProto() {
-    return new protobadges.UserBalanceStore(this.convert(Stringify));
+    return new ProtoUserBalanceStore(this.convert(Stringify));
   }
 
-  static fromProto<T extends NumberType>(item: protobadges.UserBalanceStore, convertFunction: (item: NumberType) => T): UserBalanceStore<T> {
+  static fromProto<T extends NumberType>(item: ProtoUserBalanceStore, convertFunction: (item: NumberType) => T): UserBalanceStore<T> {
     return new UserBalanceStore({
       balances: item.balances.map((x) => Balance.fromProto(x, convertFunction)),
-      incomingApprovals: item.incomingApprovals.map((x) => UserIncomingApproval.fromProto(x, convertFunction)),
-      outgoingApprovals: item.outgoingApprovals.map((x) => UserOutgoingApproval.fromProto(x, convertFunction)),
+      incomingApprovals: item.incomingApprovals.map((x: ProtoUserIncomingApproval) => UserIncomingApproval.fromProto(x, convertFunction)),
+      outgoingApprovals: item.outgoingApprovals.map((x: ProtoUserOutgoingApproval) => UserOutgoingApproval.fromProto(x, convertFunction)),
       userPermissions: item.userPermissions
         ? UserPermissions.fromProto(item.userPermissions, convertFunction)
         : new UserPermissions({

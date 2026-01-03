@@ -16,17 +16,23 @@ import { normalizeMessagesIfNecessary } from '../../base.js';
 export class MsgUpdateDynamicStore<T extends NumberType> extends CustomTypeClass<MsgUpdateDynamicStore<T>> implements iMsgUpdateDynamicStore<T> {
   creator: BitBadgesAddress;
   storeId: T;
+  defaultValue?: boolean;
+  globalEnabled?: boolean;
 
   constructor(msg: iMsgUpdateDynamicStore<T>) {
     super();
     this.creator = msg.creator;
     this.storeId = msg.storeId;
+    this.defaultValue = msg.defaultValue;
+    this.globalEnabled = msg.globalEnabled;
   }
 
   toProto(): protobadges.MsgUpdateDynamicStore {
     return new protobadges.MsgUpdateDynamicStore({
       creator: this.creator,
-      storeId: this.storeId.toString()
+      storeId: this.storeId.toString(),
+      defaultValue: this.defaultValue,
+      globalEnabled: this.globalEnabled
     });
   }
 
@@ -41,14 +47,18 @@ export class MsgUpdateDynamicStore<T extends NumberType> extends CustomTypeClass
   static fromProto(protoMsg: protobadges.MsgUpdateDynamicStore): MsgUpdateDynamicStore<NumberType> {
     return new MsgUpdateDynamicStore({
       creator: protoMsg.creator,
-      storeId: protoMsg.storeId
+      storeId: protoMsg.storeId,
+      defaultValue: protoMsg.defaultValue,
+      globalEnabled: protoMsg.globalEnabled
     });
   }
 
   toBech32Addresses(prefix: string): MsgUpdateDynamicStore<T> {
     return new MsgUpdateDynamicStore({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
-      storeId: this.storeId
+      storeId: this.storeId,
+      defaultValue: this.defaultValue,
+      globalEnabled: this.globalEnabled
     });
   }
 

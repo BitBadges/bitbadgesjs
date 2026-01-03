@@ -7,8 +7,7 @@ import type { iMsgSetIsArchived } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
-import { IsArchivedTimeline } from '@/core/misc.js';
-import { TimedUpdatePermission } from '@/core/permissions.js';
+import { ActionPermission } from '@/core/permissions.js';
 import { Stringify } from '@/common/string-numbers.js';
 
 /**
@@ -19,22 +18,22 @@ import { Stringify } from '@/common/string-numbers.js';
 export class MsgSetIsArchived<T extends NumberType> extends CustomTypeClass<MsgSetIsArchived<T>> implements iMsgSetIsArchived<T> {
   creator: BitBadgesAddress;
   collectionId: T;
-  isArchivedTimeline: IsArchivedTimeline<T>[];
-  canArchiveCollection: TimedUpdatePermission<T>[];
+  isArchived: boolean;
+  canArchiveCollection: ActionPermission<T>[];
 
   constructor(msg: iMsgSetIsArchived<T>) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
-    this.isArchivedTimeline = msg.isArchivedTimeline.map((timeline) => new IsArchivedTimeline(timeline));
-    this.canArchiveCollection = msg.canArchiveCollection.map((permission) => new TimedUpdatePermission(permission));
+    this.isArchived = msg.isArchived;
+    this.canArchiveCollection = msg.canArchiveCollection.map((permission) => new ActionPermission(permission));
   }
 
   toProto(): protobadges.MsgSetIsArchived {
     return new protobadges.MsgSetIsArchived({
       creator: this.creator,
       collectionId: this.collectionId.toString(),
-      isArchivedTimeline: this.isArchivedTimeline.map((timeline) => timeline.toProto()),
+      isArchived: this.isArchived,
       canArchiveCollection: this.canArchiveCollection.map((permission) => permission.toProto())
     });
   }
@@ -51,8 +50,8 @@ export class MsgSetIsArchived<T extends NumberType> extends CustomTypeClass<MsgS
     return new MsgSetIsArchived({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
-      isArchivedTimeline: protoMsg.isArchivedTimeline.map((timeline) => IsArchivedTimeline.fromProto(timeline, Stringify)),
-      canArchiveCollection: protoMsg.canArchiveCollection.map((permission) => TimedUpdatePermission.fromProto(permission, Stringify))
+      isArchived: protoMsg.isArchived,
+      canArchiveCollection: protoMsg.canArchiveCollection.map((permission) => ActionPermission.fromProto(permission, Stringify))
     });
   }
 
@@ -60,7 +59,7 @@ export class MsgSetIsArchived<T extends NumberType> extends CustomTypeClass<MsgS
     return new MsgSetIsArchived({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,
-      isArchivedTimeline: this.isArchivedTimeline,
+      isArchived: this.isArchived,
       canArchiveCollection: this.canArchiveCollection
     });
   }

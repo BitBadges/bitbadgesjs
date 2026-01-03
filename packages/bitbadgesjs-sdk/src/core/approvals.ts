@@ -48,7 +48,7 @@ import type { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTre
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import { AddressList, convertListIdToBech32 } from './addressLists.js';
 import { Balance, BalanceArray } from './balances.js';
-import { CoinTransfer, ETHSignatureChallenge, MerkleChallenge, MustOwnTokens } from './misc.js';
+import { CoinTransfer, ETHSignatureChallenge, MerkleChallenge, MustOwnTokens, VotingChallenge } from './misc.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
 import { GetListIdWithOptions, GetListWithOptions, GetUintRangesWithOptions, getOverlapsAndNonOverlaps } from './overlaps.js';
 import type { CollectionApprovalPermissionWithDetails } from './permissions.js';
@@ -319,6 +319,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   initiatorChecks?: AddressChecks;
   altTimeChecks?: AltTimeChecks<T>;
   mustPrioritize?: boolean;
+  votingChallenges?: VotingChallenge<T>[];
 
   constructor(msg: iOutgoingApprovalCriteria<T>) {
     super();
@@ -337,6 +338,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     this.initiatorChecks = msg.initiatorChecks ? new AddressChecks(msg.initiatorChecks) : undefined;
     this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks(msg.altTimeChecks) : undefined;
     this.mustPrioritize = msg.mustPrioritize;
+    this.votingChallenges = msg.votingChallenges?.map((x) => new VotingChallenge(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteria<U> {
@@ -400,7 +402,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       recipientChecks: item.recipientChecks ? AddressChecks.fromProto(item.recipientChecks) : undefined,
       initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined,
       altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined,
-      mustPrioritize: item.mustPrioritize
+      mustPrioritize: item.mustPrioritize,
+      votingChallenges: item.votingChallenges ? item.votingChallenges.map((x) => VotingChallenge.fromProto(x, convertFunction)) : undefined
     });
   }
 
@@ -421,6 +424,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       initiatorChecks: this.initiatorChecks,
       altTimeChecks: this.altTimeChecks,
       mustPrioritize: this.mustPrioritize,
+      votingChallenges: this.votingChallenges,
 
       requireFromEqualsInitiatedBy: false,
       requireFromDoesNotEqualInitiatedBy: false,
@@ -1133,6 +1137,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   initiatorChecks?: AddressChecks;
   altTimeChecks?: AltTimeChecks<T>;
   mustPrioritize?: boolean;
+  votingChallenges?: VotingChallenge<T>[];
 
   constructor(msg: iIncomingApprovalCriteria<T>) {
     super();
@@ -1151,6 +1156,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
     this.initiatorChecks = msg.initiatorChecks ? new AddressChecks(msg.initiatorChecks) : undefined;
     this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks(msg.altTimeChecks) : undefined;
     this.mustPrioritize = msg.mustPrioritize;
+    this.votingChallenges = msg.votingChallenges?.map((x) => new VotingChallenge(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteria<U> {
@@ -1214,7 +1220,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
       senderChecks: item.senderChecks ? AddressChecks.fromProto(item.senderChecks) : undefined,
       initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined,
       altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined,
-      mustPrioritize: item.mustPrioritize
+      mustPrioritize: item.mustPrioritize,
+      votingChallenges: item.votingChallenges ? item.votingChallenges.map((x) => VotingChallenge.fromProto(x, convertFunction)) : undefined
     });
   }
 
@@ -1235,6 +1242,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
       initiatorChecks: this.initiatorChecks,
       altTimeChecks: this.altTimeChecks,
       mustPrioritize: this.mustPrioritize,
+      votingChallenges: this.votingChallenges,
 
       requireToEqualsInitiatedBy: false,
       requireToDoesNotEqualInitiatedBy: false,
@@ -1612,6 +1620,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   initiatorChecks?: AddressChecks;
   altTimeChecks?: AltTimeChecks<T>;
   mustPrioritize?: boolean;
+  votingChallenges?: VotingChallenge<T>[];
 
   constructor(msg: iApprovalCriteria<T>) {
     super();
@@ -1636,6 +1645,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.initiatorChecks = msg.initiatorChecks ? new AddressChecks(msg.initiatorChecks) : undefined;
     this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks<T>(msg.altTimeChecks) : undefined;
     this.mustPrioritize = msg.mustPrioritize;
+    this.votingChallenges = msg.votingChallenges?.map((x) => new VotingChallenge(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteria<U> {
@@ -1686,7 +1696,8 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       recipientChecks: item.recipientChecks ? AddressChecks.fromProto(item.recipientChecks) : undefined,
       initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined,
       altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined,
-      mustPrioritize: item.mustPrioritize
+      mustPrioritize: item.mustPrioritize,
+      votingChallenges: item.votingChallenges ? item.votingChallenges.map((x) => VotingChallenge.fromProto(x, convertFunction)) : undefined
     });
   }
 

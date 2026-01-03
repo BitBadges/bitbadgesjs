@@ -923,7 +923,7 @@ export interface iUpdateAccountInfoPayload {
     email?: string;
     discord?: { id: string; username: string; discriminator: string | undefined } | undefined;
     antiPhishingCode?: string;
-    preferences?: { transferActivity?: boolean; ignoreIfInitiator?: boolean };
+    preferences?: { transferActivity?: boolean; ignoreIfInitiator?: boolean; signInAlertsEnabled?: boolean };
   };
 
   /**
@@ -1212,12 +1212,32 @@ export interface iVerifySignInPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iVerifySignInSuccessResponse {}
+export interface iVerifySignInSuccessResponse {
+  /**
+   * True if 2FA is set up and verification is required.
+   */
+  requires2FA?: boolean;
+
+  /**
+   * Message indicating 2FA is required.
+   */
+  message?: string;
+}
 
 /**
+ * @inheritDoc iVerifySignInSuccessResponse
  * @category API Requests / Responses
  */
-export class VerifySignInSuccessResponse extends EmptyResponseClass {}
+export class VerifySignInSuccessResponse extends CustomTypeClass<VerifySignInSuccessResponse> implements iVerifySignInSuccessResponse {
+  requires2FA?: boolean;
+  message?: string;
+
+  constructor(data: iVerifySignInSuccessResponse) {
+    super();
+    this.requires2FA = data.requires2FA;
+    this.message = data.message;
+  }
+}
 
 /**
  * @category API Requests / Responses
@@ -1232,7 +1252,6 @@ export interface iCheckSignInStatusSuccessResponse {
    * Indicates whether the user is signed in.
    */
   signedIn: boolean;
-
   address: NativeAddress;
   bitbadgesAddress: BitBadgesAddress;
   chain: SupportedChain;
@@ -1396,6 +1415,21 @@ export interface iCheckSignInStatusSuccessResponse {
     id: string;
     username: string;
   };
+
+  /**
+   * True if 2FA is verified in session.
+   */
+  twoFAVerified?: boolean;
+
+  /**
+   * True if 2FA is set up but not verified.
+   */
+  requires2FA?: boolean;
+
+  /**
+   * Timestamp when 2FA was verified.
+   */
+  twoFAVerifiedAt?: number;
 }
 
 /**
@@ -1449,6 +1483,9 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
   address: string;
   bitbadgesAddress: string;
   chain: SupportedChain;
+  twoFAVerified?: boolean;
+  requires2FA?: boolean;
+  twoFAVerifiedAt?: number;
 
   constructor(data: iCheckSignInStatusSuccessResponse) {
     super();
@@ -1478,6 +1515,9 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     this.address = data.address;
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.chain = data.chain;
+    this.twoFAVerified = data.twoFAVerified;
+    this.requires2FA = data.requires2FA;
+    this.twoFAVerifiedAt = data.twoFAVerifiedAt;
   }
 }
 
@@ -4487,5 +4527,304 @@ export class GetCollectionChallengeTrackerByIdSuccessResponse<T extends NumberTy
     options?: ConvertOptions
   ): GetCollectionChallengeTrackerByIdSuccessResponse<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionChallengeTrackerByIdSuccessResponse<U>;
+  }
+}
+
+/**
+ * Get Swap Activities
+ * Route: GET /api/:version/swapActivities
+ * @category API Requests / Responses
+ */
+export interface iGetSwapActivitiesPayload {
+  bookmark?: string;
+  limit?: number;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetSwapActivitiesPayload extends CustomTypeClass<GetSwapActivitiesPayload> implements iGetSwapActivitiesPayload {
+  bookmark?: string;
+  limit?: number;
+
+  constructor(data: iGetSwapActivitiesPayload = {}) {
+    super();
+    this.bookmark = data.bookmark;
+    this.limit = data.limit;
+  }
+
+  static FromQuery(query: ParsedQs): GetSwapActivitiesPayload {
+    return new GetSwapActivitiesPayload({
+      bookmark: query.bookmark?.toString(),
+      limit: query.limit ? Number(query.limit) : undefined
+    });
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetSwapActivitiesSuccessResponse<T extends NumberType = NumberType> {
+  swapActivities: Array<{
+    _docId: string;
+    blockHeight: T;
+    timestamp: T;
+    txHash: string;
+    [key: string]: any;
+  }>;
+  pagination: PaginationInfo;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetSwapActivitiesSuccessResponse<T extends NumberType = NumberType>
+  extends BaseNumberTypeClass<GetSwapActivitiesSuccessResponse<T>>
+  implements iGetSwapActivitiesSuccessResponse<T>
+{
+  swapActivities: Array<{
+    _docId: string;
+    blockHeight: T;
+    timestamp: T;
+    txHash: string;
+    [key: string]: any;
+  }>;
+  pagination: PaginationInfo;
+
+  constructor(data: iGetSwapActivitiesSuccessResponse<T>) {
+    super();
+    this.swapActivities = data.swapActivities;
+    this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetSwapActivitiesSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetSwapActivitiesSuccessResponse<U>;
+  }
+}
+
+/**
+ * Get On-Chain Dynamic Store by ID
+ * Route: GET /api/:version/onChainDynamicStore/:storeId
+ * @category API Requests / Responses
+ */
+export interface iGetOnChainDynamicStorePayload {
+  // No query parameters - storeId is in path
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOnChainDynamicStorePayload extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetOnChainDynamicStoreSuccessResponse<T extends NumberType = NumberType> {
+  store: {
+    _docId: string;
+    storeId: T;
+    createdBy: string;
+    defaultValue: boolean;
+    [key: string]: any;
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOnChainDynamicStoreSuccessResponse<T extends NumberType = NumberType>
+  extends BaseNumberTypeClass<GetOnChainDynamicStoreSuccessResponse<T>>
+  implements iGetOnChainDynamicStoreSuccessResponse<T>
+{
+  store: {
+    _docId: string;
+    storeId: T;
+    createdBy: string;
+    defaultValue: boolean;
+    [key: string]: any;
+  };
+
+  constructor(data: iGetOnChainDynamicStoreSuccessResponse<T>) {
+    super();
+    this.store = data.store;
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetOnChainDynamicStoreSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetOnChainDynamicStoreSuccessResponse<U>;
+  }
+}
+
+/**
+ * Get On-Chain Dynamic Stores by Creator
+ * Route: GET /api/:version/onChainDynamicStores/by-creator/:address
+ * @category API Requests / Responses
+ */
+export interface iGetOnChainDynamicStoresByCreatorPayload {
+  // No query parameters - address is in path
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOnChainDynamicStoresByCreatorPayload extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetOnChainDynamicStoresByCreatorSuccessResponse<T extends NumberType = NumberType> {
+  stores: Array<{
+    _docId: string;
+    storeId: T;
+    createdBy: string;
+    defaultValue: boolean;
+    [key: string]: any;
+  }>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOnChainDynamicStoresByCreatorSuccessResponse<T extends NumberType = NumberType>
+  extends BaseNumberTypeClass<GetOnChainDynamicStoresByCreatorSuccessResponse<T>>
+  implements iGetOnChainDynamicStoresByCreatorSuccessResponse<T>
+{
+  stores: Array<{
+    _docId: string;
+    storeId: T;
+    createdBy: string;
+    defaultValue: boolean;
+    [key: string]: any;
+  }>;
+
+  constructor(data: iGetOnChainDynamicStoresByCreatorSuccessResponse<T>) {
+    super();
+    this.stores = data.stores;
+  }
+
+  convert<U extends NumberType>(
+    convertFunction: (val: NumberType) => U,
+    options?: ConvertOptions
+  ): GetOnChainDynamicStoresByCreatorSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetOnChainDynamicStoresByCreatorSuccessResponse<U>;
+  }
+}
+
+/**
+ * Get On-Chain Dynamic Store Value
+ * Route: GET /api/:version/onChainDynamicStore/:storeId/value/:address
+ * @category API Requests / Responses
+ */
+export interface iGetOnChainDynamicStoreValuePayload {
+  // No query parameters - storeId and address are in path
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOnChainDynamicStoreValuePayload extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetOnChainDynamicStoreValueSuccessResponse {
+  storeId: string;
+  address: string;
+  value: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOnChainDynamicStoreValueSuccessResponse
+  extends CustomTypeClass<GetOnChainDynamicStoreValueSuccessResponse>
+  implements iGetOnChainDynamicStoreValueSuccessResponse
+{
+  storeId: string;
+  address: string;
+  value: boolean;
+
+  constructor(data: iGetOnChainDynamicStoreValueSuccessResponse) {
+    super();
+    this.storeId = data.storeId;
+    this.address = data.address;
+    this.value = data.value;
+  }
+}
+
+/**
+ * Get On-Chain Dynamic Store Values (Paginated)
+ * Route: GET /api/:version/onChainDynamicStore/:storeId/values
+ * @category API Requests / Responses
+ */
+export interface iGetOnChainDynamicStoreValuesPaginatedPayload {
+  bookmark?: string;
+  limit?: number;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOnChainDynamicStoreValuesPaginatedPayload
+  extends CustomTypeClass<GetOnChainDynamicStoreValuesPaginatedPayload>
+  implements iGetOnChainDynamicStoreValuesPaginatedPayload
+{
+  bookmark?: string;
+  limit?: number;
+
+  constructor(data: iGetOnChainDynamicStoreValuesPaginatedPayload = {}) {
+    super();
+    this.bookmark = data.bookmark;
+    this.limit = data.limit;
+  }
+
+  static FromQuery(query: ParsedQs): GetOnChainDynamicStoreValuesPaginatedPayload {
+    return new GetOnChainDynamicStoreValuesPaginatedPayload({
+      bookmark: query.bookmark?.toString(),
+      limit: query.limit ? Number(query.limit) : undefined
+    });
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetOnChainDynamicStoreValuesPaginatedSuccessResponse<T extends NumberType = NumberType> {
+  values: Array<{
+    _docId: string;
+    storeId: T;
+    address: string;
+    value: boolean;
+    [key: string]: any;
+  }>;
+  pagination: PaginationInfo;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOnChainDynamicStoreValuesPaginatedSuccessResponse<T extends NumberType = NumberType>
+  extends BaseNumberTypeClass<GetOnChainDynamicStoreValuesPaginatedSuccessResponse<T>>
+  implements iGetOnChainDynamicStoreValuesPaginatedSuccessResponse<T>
+{
+  values: Array<{
+    _docId: string;
+    storeId: T;
+    address: string;
+    value: boolean;
+    [key: string]: any;
+  }>;
+  pagination: PaginationInfo;
+
+  constructor(data: iGetOnChainDynamicStoreValuesPaginatedSuccessResponse<T>) {
+    super();
+    this.values = data.values;
+    this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(
+    convertFunction: (val: NumberType) => U,
+    options?: ConvertOptions
+  ): GetOnChainDynamicStoreValuesPaginatedSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetOnChainDynamicStoreValuesPaginatedSuccessResponse<U>;
   }
 }

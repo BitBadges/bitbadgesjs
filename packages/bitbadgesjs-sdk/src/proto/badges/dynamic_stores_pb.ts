@@ -31,11 +31,19 @@ export class DynamicStore extends Message<DynamicStore> {
   createdBy = "";
 
   /**
-   * The default value for uninitialized addresses (number of uses).
+   * The default value for uninitialized addresses (true/false).
    *
-   * @generated from field: string defaultValue = 3;
+   * @generated from field: bool defaultValue = 3;
    */
-  defaultValue = "";
+  defaultValue = false;
+
+  /**
+   * Global kill switch state (defaults to true on creation, can be toggled via UpdateDynamicStore).
+   * When false, all approvals using this store via DynamicStoreChallenge will fail immediately.
+   *
+   * @generated from field: bool globalEnabled = 4;
+   */
+  globalEnabled = false;
 
   constructor(data?: PartialMessage<DynamicStore>) {
     super();
@@ -47,7 +55,8 @@ export class DynamicStore extends Message<DynamicStore> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "defaultValue", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "defaultValue", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "globalEnabled", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DynamicStore {
@@ -69,8 +78,8 @@ export class DynamicStore extends Message<DynamicStore> {
 
 /**
  *
- * A DynamicStoreValue stores a usage count for a specific address in a dynamic store.
- * This allows the creator to set usage counts per address that can be decremented on use.
+ * A DynamicStoreValue stores a boolean value for a specific address in a dynamic store.
+ * This allows the creator to set true/false values per address that can be checked during approval.
  *
  * @generated from message badges.DynamicStoreValue
  */
@@ -90,11 +99,11 @@ export class DynamicStoreValue extends Message<DynamicStoreValue> {
   address = "";
 
   /**
-   * The usage count (number of times this address can use the approval).
+   * The boolean value (true/false).
    *
-   * @generated from field: string value = 3;
+   * @generated from field: bool value = 3;
    */
-  value = "";
+  value = false;
 
   constructor(data?: PartialMessage<DynamicStoreValue>) {
     super();
@@ -106,7 +115,7 @@ export class DynamicStoreValue extends Message<DynamicStoreValue> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "value", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "value", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DynamicStoreValue {

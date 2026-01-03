@@ -7,8 +7,7 @@ import type { iMsgSetCustomData } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
-import { CustomDataTimeline } from '@/core/misc.js';
-import { TimedUpdatePermission } from '@/core/permissions.js';
+import { ActionPermission } from '@/core/permissions.js';
 import { Stringify } from '@/common/string-numbers.js';
 
 /**
@@ -19,22 +18,22 @@ import { Stringify } from '@/common/string-numbers.js';
 export class MsgSetCustomData<T extends NumberType> extends CustomTypeClass<MsgSetCustomData<T>> implements iMsgSetCustomData<T> {
   creator: BitBadgesAddress;
   collectionId: T;
-  customDataTimeline: CustomDataTimeline<T>[];
-  canUpdateCustomData: TimedUpdatePermission<T>[];
+  customData: string;
+  canUpdateCustomData: ActionPermission<T>[];
 
   constructor(msg: iMsgSetCustomData<T>) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
-    this.customDataTimeline = msg.customDataTimeline.map((timeline) => new CustomDataTimeline(timeline));
-    this.canUpdateCustomData = msg.canUpdateCustomData.map((permission) => new TimedUpdatePermission(permission));
+    this.customData = msg.customData;
+    this.canUpdateCustomData = msg.canUpdateCustomData.map((permission) => new ActionPermission(permission));
   }
 
   toProto(): protobadges.MsgSetCustomData {
     return new protobadges.MsgSetCustomData({
       creator: this.creator,
       collectionId: this.collectionId.toString(),
-      customDataTimeline: this.customDataTimeline.map((timeline) => timeline.toProto()),
+      customData: this.customData,
       canUpdateCustomData: this.canUpdateCustomData.map((permission) => permission.toProto())
     });
   }
@@ -51,8 +50,8 @@ export class MsgSetCustomData<T extends NumberType> extends CustomTypeClass<MsgS
     return new MsgSetCustomData({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
-      customDataTimeline: protoMsg.customDataTimeline.map((timeline) => CustomDataTimeline.fromProto(timeline, Stringify)),
-      canUpdateCustomData: protoMsg.canUpdateCustomData.map((permission) => TimedUpdatePermission.fromProto(permission, Stringify))
+      customData: protoMsg.customData,
+      canUpdateCustomData: protoMsg.canUpdateCustomData.map((permission) => ActionPermission.fromProto(permission, Stringify))
     });
   }
 
@@ -60,7 +59,7 @@ export class MsgSetCustomData<T extends NumberType> extends CustomTypeClass<MsgS
     return new MsgSetCustomData({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,
-      customDataTimeline: this.customDataTimeline,
+      customData: this.customData,
       canUpdateCustomData: this.canUpdateCustomData
     });
   }

@@ -11,17 +11,14 @@ import { UintRange } from "./balances_pb.js";
  *
  * CollectionPermissions defines the permissions for the collection (i.e., what the manager can and cannot do).
  *
- * There are five types of permissions for a collection: ActionPermission, TimedUpdatePermission, TimedUpdateWithTokenIdsPermission, TokenIdsActionPermission, and CollectionApprovalPermission.
+ * There are three types of permissions for a collection: ActionPermission, TokenIdsActionPermission, and CollectionApprovalPermission.
  *
  * The permission type allows fine-grained access control for each action.
- * - ActionPermission: defines when the manager can perform an action.
- * - TimedUpdatePermission: defines when the manager can update a timeline-based field and what times of the timeline can be updated.
- * - TimedUpdateWithTokenIdsPermission: defines when the manager can update a timeline-based field for specific tokens and what times of the timeline can be updated.
+ * - ActionPermission: defines when the manager can perform an action or update a field.
  * - TokenIdsActionPermission: defines when the manager can perform an action for specific tokens
  * - CollectionApprovalPermission: defines when the manager can update the transferability of the collection and what transfers can be updated vs. locked.
  *
  * Note there are a few different times here which could get confusing:
- * - timelineTimes: the times when a timeline-based field is a specific value
  * - permanentlyPermitted/ForbiddenTimes - the times that a permission can be performed
  * - transferTimes - the times that a transfer occurs
  * - ownershipTimes - the times when a token is owned by a user
@@ -46,37 +43,37 @@ export class CollectionPermissions extends Message<CollectionPermissions> {
   /**
    * Permissions related to archiving the collection.
    *
-   * @generated from field: repeated badges.TimedUpdatePermission canArchiveCollection = 2;
+   * @generated from field: repeated badges.ActionPermission canArchiveCollection = 2;
    */
-  canArchiveCollection: TimedUpdatePermission[] = [];
+  canArchiveCollection: ActionPermission[] = [];
 
   /**
    * Permissions related to updating standards for the collection.
    *
-   * @generated from field: repeated badges.TimedUpdatePermission canUpdateStandards = 3;
+   * @generated from field: repeated badges.ActionPermission canUpdateStandards = 3;
    */
-  canUpdateStandards: TimedUpdatePermission[] = [];
+  canUpdateStandards: ActionPermission[] = [];
 
   /**
    * Permissions related to updating custom data for the collection.
    *
-   * @generated from field: repeated badges.TimedUpdatePermission canUpdateCustomData = 4;
+   * @generated from field: repeated badges.ActionPermission canUpdateCustomData = 4;
    */
-  canUpdateCustomData: TimedUpdatePermission[] = [];
+  canUpdateCustomData: ActionPermission[] = [];
 
   /**
    * Permissions related to updating the collection's manager.
    *
-   * @generated from field: repeated badges.TimedUpdatePermission canUpdateManager = 5;
+   * @generated from field: repeated badges.ActionPermission canUpdateManager = 5;
    */
-  canUpdateManager: TimedUpdatePermission[] = [];
+  canUpdateManager: ActionPermission[] = [];
 
   /**
    * Permissions related to updating the metadata of the collection.
    *
-   * @generated from field: repeated badges.TimedUpdatePermission canUpdateCollectionMetadata = 6;
+   * @generated from field: repeated badges.ActionPermission canUpdateCollectionMetadata = 6;
    */
-  canUpdateCollectionMetadata: TimedUpdatePermission[] = [];
+  canUpdateCollectionMetadata: ActionPermission[] = [];
 
   /**
    * Permissions related to creating more tokens for the collection.
@@ -88,9 +85,9 @@ export class CollectionPermissions extends Message<CollectionPermissions> {
   /**
    * Permissions related to updating token metadata for specific tokens.
    *
-   * @generated from field: repeated badges.TimedUpdateWithTokenIdsPermission canUpdateTokenMetadata = 8;
+   * @generated from field: repeated badges.TokenIdsActionPermission canUpdateTokenMetadata = 8;
    */
-  canUpdateTokenMetadata: TimedUpdateWithTokenIdsPermission[] = [];
+  canUpdateTokenMetadata: TokenIdsActionPermission[] = [];
 
   /**
    * Permissions related to updating collection approvals.
@@ -98,6 +95,20 @@ export class CollectionPermissions extends Message<CollectionPermissions> {
    * @generated from field: repeated badges.CollectionApprovalPermission canUpdateCollectionApprovals = 9;
    */
   canUpdateCollectionApprovals: CollectionApprovalPermission[] = [];
+
+  /**
+   * Permissions related to adding more alias paths to the collection.
+   *
+   * @generated from field: repeated badges.ActionPermission canAddMoreAliasPaths = 10;
+   */
+  canAddMoreAliasPaths: ActionPermission[] = [];
+
+  /**
+   * Permissions related to adding more cosmos coin wrapper paths to the collection.
+   *
+   * @generated from field: repeated badges.ActionPermission canAddMoreCosmosCoinWrapperPaths = 11;
+   */
+  canAddMoreCosmosCoinWrapperPaths: ActionPermission[] = [];
 
   constructor(data?: PartialMessage<CollectionPermissions>) {
     super();
@@ -108,14 +119,16 @@ export class CollectionPermissions extends Message<CollectionPermissions> {
   static readonly typeName = "badges.CollectionPermissions";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "canDeleteCollection", kind: "message", T: ActionPermission, repeated: true },
-    { no: 2, name: "canArchiveCollection", kind: "message", T: TimedUpdatePermission, repeated: true },
-    { no: 3, name: "canUpdateStandards", kind: "message", T: TimedUpdatePermission, repeated: true },
-    { no: 4, name: "canUpdateCustomData", kind: "message", T: TimedUpdatePermission, repeated: true },
-    { no: 5, name: "canUpdateManager", kind: "message", T: TimedUpdatePermission, repeated: true },
-    { no: 6, name: "canUpdateCollectionMetadata", kind: "message", T: TimedUpdatePermission, repeated: true },
+    { no: 2, name: "canArchiveCollection", kind: "message", T: ActionPermission, repeated: true },
+    { no: 3, name: "canUpdateStandards", kind: "message", T: ActionPermission, repeated: true },
+    { no: 4, name: "canUpdateCustomData", kind: "message", T: ActionPermission, repeated: true },
+    { no: 5, name: "canUpdateManager", kind: "message", T: ActionPermission, repeated: true },
+    { no: 6, name: "canUpdateCollectionMetadata", kind: "message", T: ActionPermission, repeated: true },
     { no: 7, name: "canUpdateValidTokenIds", kind: "message", T: TokenIdsActionPermission, repeated: true },
-    { no: 8, name: "canUpdateTokenMetadata", kind: "message", T: TimedUpdateWithTokenIdsPermission, repeated: true },
+    { no: 8, name: "canUpdateTokenMetadata", kind: "message", T: TokenIdsActionPermission, repeated: true },
     { no: 9, name: "canUpdateCollectionApprovals", kind: "message", T: CollectionApprovalPermission, repeated: true },
+    { no: 10, name: "canAddMoreAliasPaths", kind: "message", T: ActionPermission, repeated: true },
+    { no: 11, name: "canAddMoreCosmosCoinWrapperPaths", kind: "message", T: ActionPermission, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionPermissions {
@@ -223,15 +236,14 @@ export class UserPermissions extends Message<UserPermissions> {
  * These are determined by the fromListId, toListId, initiatedByListId, transferTimes, tokenIds fields.
  * AddressLists are used for (from, to, initiatedBy) which are a permanent list of addresses identified by an ID (see AddressLists). 
  *
- * TimelineTimes: which timeline times of the collection's approvalsTimeline field can be updated or not?
  * permanentlyPermitted/ForbiddenTimes: when can the manager execute this permission?
  *
- * Ex: Let's say we are updating the transferability for timelineTime 1 and the transfer tuple ("AllWithoutMint", "AllWithoutMint", "AllWithoutMint", 10, 1000).
+ * Ex: Let's say we are updating the transferability for the transfer tuple ("AllWithoutMint", "AllWithoutMint", "AllWithoutMint", 10, 1000).
  * We would check to find the FIRST CollectionApprovalPermission that matches this combination.
  * If we find a match, we would check the permitted/forbidden times to see if we can execute this permission (default is ALLOWED).
  *
  * Ex: So if you wanted to freeze the transferability to enforce that token ID 1 will always be transferable, you could set
- * the combination ("AllWithoutMint", "AllWithoutMint", "AllWithoutMint", "All Transfer Times", 1) to always be forbidden at all timelineTimes.
+ * the combination ("AllWithoutMint", "AllWithoutMint", "AllWithoutMint", "All Transfer Times", 1) to always be forbidden.
  *
  * @generated from message badges.CollectionApprovalPermission
  */
@@ -544,11 +556,11 @@ export class UserIncomingApprovalPermission extends Message<UserIncomingApproval
 
 /**
  *
- * TokenIdsActionPermission defines the permissions for updating a timeline-based field for specific tokens and specific token ownership times.
+ * TokenIdsActionPermission defines the permissions for performing an action for specific tokens.
  * Currently, this is only used for creating new tokens.
  *
  * Ex: If you want to lock the ability to create new tokens for tokenIds [1,2] at ownershipTimes 1/1/2020 - 1/1/2021, 
- * you could set the combination (tokenIds: [1,2], ownershipTimelineTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
+ * you could set the combination (tokenIds: [1,2], ownershipTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
  *
  * @generated from message badges.TokenIdsActionPermission
  */
@@ -653,136 +665,6 @@ export class ActionPermission extends Message<ActionPermission> {
 
   static equals(a: ActionPermission | PlainMessage<ActionPermission> | undefined, b: ActionPermission | PlainMessage<ActionPermission> | undefined): boolean {
     return proto3.util.equals(ActionPermission, a, b);
-  }
-}
-
-/**
- *
- * TimedUpdatePermission defines the permissions for updating a timeline-based field.
- *
- * Ex: If you want to lock the ability to update the collection's metadata for timelineTimes 1/1/2020 - 1/1/2021,
- * you could set the combination (TimelineTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
- *
- * @generated from message badges.TimedUpdatePermission
- */
-export class TimedUpdatePermission extends Message<TimedUpdatePermission> {
-  /**
-   * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
-   *
-   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 1;
-   */
-  permanentlyPermittedTimes: UintRange[] = [];
-
-  /**
-   * Specifies the times when this permission is forbidden. Can not overlap with permanentlyPermittedTimes.
-   *
-   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 2;
-   */
-  permanentlyForbiddenTimes: UintRange[] = [];
-
-  /**
-   * Specifies the times when the timeline-based field is a specific value.
-   *
-   * @generated from field: repeated badges.UintRange timelineTimes = 3;
-   */
-  timelineTimes: UintRange[] = [];
-
-  constructor(data?: PartialMessage<TimedUpdatePermission>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.TimedUpdatePermission";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 2, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 3, name: "timelineTimes", kind: "message", T: UintRange, repeated: true },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TimedUpdatePermission {
-    return new TimedUpdatePermission().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): TimedUpdatePermission {
-    return new TimedUpdatePermission().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): TimedUpdatePermission {
-    return new TimedUpdatePermission().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: TimedUpdatePermission | PlainMessage<TimedUpdatePermission> | undefined, b: TimedUpdatePermission | PlainMessage<TimedUpdatePermission> | undefined): boolean {
-    return proto3.util.equals(TimedUpdatePermission, a, b);
-  }
-}
-
-/**
- *
- * TimedUpdateWithTokenIdsPermission defines the permissions for updating a timeline-based field for specific tokens.
- *
- * Ex: If you want to lock the ability to update the metadata for tokenIds [1,2] for timelineTimes 1/1/2020 - 1/1/2021,
- * you could set the combination (tokenIds: [1,2], TimelineTimes: [1/1/2020 - 1/1/2021]) to always be forbidden.
- *
- * @generated from message badges.TimedUpdateWithTokenIdsPermission
- */
-export class TimedUpdateWithTokenIdsPermission extends Message<TimedUpdateWithTokenIdsPermission> {
-  /**
-   * Specifies the token IDs involved in the transfer.
-   *
-   * @generated from field: repeated badges.UintRange tokenIds = 1;
-   */
-  tokenIds: UintRange[] = [];
-
-  /**
-   * Specifies the times when this permission is permitted. Can not overlap with permanentlyForbiddenTimes.
-   *
-   * @generated from field: repeated badges.UintRange permanentlyPermittedTimes = 2;
-   */
-  permanentlyPermittedTimes: UintRange[] = [];
-
-  /**
-   * Specifies the times when this permission is forbidden. Can not overlap with permanentlyPermittedTimes.
-   *
-   * @generated from field: repeated badges.UintRange permanentlyForbiddenTimes = 3;
-   */
-  permanentlyForbiddenTimes: UintRange[] = [];
-
-  /**
-   * Specifies the times when the timeline-based field is a specific value.
-   *
-   * @generated from field: repeated badges.UintRange timelineTimes = 4;
-   */
-  timelineTimes: UintRange[] = [];
-
-  constructor(data?: PartialMessage<TimedUpdateWithTokenIdsPermission>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.TimedUpdateWithTokenIdsPermission";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "tokenIds", kind: "message", T: UintRange, repeated: true },
-    { no: 2, name: "permanentlyPermittedTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 3, name: "permanentlyForbiddenTimes", kind: "message", T: UintRange, repeated: true },
-    { no: 4, name: "timelineTimes", kind: "message", T: UintRange, repeated: true },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TimedUpdateWithTokenIdsPermission {
-    return new TimedUpdateWithTokenIdsPermission().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): TimedUpdateWithTokenIdsPermission {
-    return new TimedUpdateWithTokenIdsPermission().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): TimedUpdateWithTokenIdsPermission {
-    return new TimedUpdateWithTokenIdsPermission().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: TimedUpdateWithTokenIdsPermission | PlainMessage<TimedUpdateWithTokenIdsPermission> | undefined, b: TimedUpdateWithTokenIdsPermission | PlainMessage<TimedUpdateWithTokenIdsPermission> | undefined): boolean {
-    return proto3.util.equals(TimedUpdateWithTokenIdsPermission, a, b);
   }
 }
 

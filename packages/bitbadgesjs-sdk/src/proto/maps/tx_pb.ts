@@ -6,8 +6,8 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { Params } from "./params_pb.js";
-import { ActionPermission, TimedUpdatePermission } from "./permissions_pb.js";
-import { ManagerTimeline, MapMetadataTimeline } from "./timelines_pb.js";
+import { ActionPermission } from "./permissions_pb.js";
+import { Metadata } from "./metadata_pb.js";
 
 /**
  * MsgUpdateParams is the Msg/UpdateParams request type.
@@ -333,14 +333,14 @@ export class ValueOptions extends Message<ValueOptions> {
  */
 export class MapPermissions extends Message<MapPermissions> {
   /**
-   * @generated from field: repeated maps.TimedUpdatePermission canUpdateMetadata = 1;
+   * @generated from field: repeated maps.ActionPermission canUpdateMetadata = 1;
    */
-  canUpdateMetadata: TimedUpdatePermission[] = [];
+  canUpdateMetadata: ActionPermission[] = [];
 
   /**
-   * @generated from field: repeated maps.TimedUpdatePermission canUpdateManager = 2;
+   * @generated from field: repeated maps.ActionPermission canUpdateManager = 2;
    */
-  canUpdateManager: TimedUpdatePermission[] = [];
+  canUpdateManager: ActionPermission[] = [];
 
   /**
    * @generated from field: repeated maps.ActionPermission canDeleteMap = 3;
@@ -355,8 +355,8 @@ export class MapPermissions extends Message<MapPermissions> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "maps.MapPermissions";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "canUpdateMetadata", kind: "message", T: TimedUpdatePermission, repeated: true },
-    { no: 2, name: "canUpdateManager", kind: "message", T: TimedUpdatePermission, repeated: true },
+    { no: 1, name: "canUpdateMetadata", kind: "message", T: ActionPermission, repeated: true },
+    { no: 2, name: "canUpdateManager", kind: "message", T: ActionPermission, repeated: true },
     { no: 3, name: "canDeleteMap", kind: "message", T: ActionPermission, repeated: true },
   ]);
 
@@ -392,14 +392,14 @@ export class Map extends Message<Map> {
   mapId = "";
 
   /**
-   * @generated from field: string inheritManagerTimelineFrom = 3;
+   * @generated from field: string inheritManagerFrom = 3;
    */
-  inheritManagerTimelineFrom = "";
+  inheritManagerFrom = "";
 
   /**
-   * @generated from field: repeated maps.ManagerTimeline managerTimeline = 4;
+   * @generated from field: string manager = 4;
    */
-  managerTimeline: ManagerTimeline[] = [];
+  manager = "";
 
   /**
    * config options that will not change at all
@@ -419,9 +419,9 @@ export class Map extends Message<Map> {
   defaultValue = "";
 
   /**
-   * @generated from field: repeated maps.MapMetadataTimeline metadataTimeline = 10;
+   * @generated from field: maps.Metadata metadata = 10;
    */
-  metadataTimeline: MapMetadataTimeline[] = [];
+  metadata?: Metadata;
 
   /**
    * @generated from field: maps.MapPermissions permissions = 11;
@@ -438,12 +438,12 @@ export class Map extends Message<Map> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "mapId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "inheritManagerTimelineFrom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
+    { no: 3, name: "inheritManagerFrom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "manager", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "updateCriteria", kind: "message", T: MapUpdateCriteria },
     { no: 6, name: "valueOptions", kind: "message", T: ValueOptions },
     { no: 7, name: "defaultValue", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 10, name: "metadataTimeline", kind: "message", T: MapMetadataTimeline, repeated: true },
+    { no: 10, name: "metadata", kind: "message", T: Metadata },
     { no: 11, name: "permissions", kind: "message", T: MapPermissions },
   ]);
 
@@ -479,14 +479,14 @@ export class MsgCreateMap extends Message<MsgCreateMap> {
   mapId = "";
 
   /**
-   * @generated from field: string inheritManagerTimelineFrom = 3;
+   * @generated from field: string inheritManagerFrom = 3;
    */
-  inheritManagerTimelineFrom = "";
+  inheritManagerFrom = "";
 
   /**
-   * @generated from field: repeated maps.ManagerTimeline managerTimeline = 4;
+   * @generated from field: string manager = 4;
    */
-  managerTimeline: ManagerTimeline[] = [];
+  manager = "";
 
   /**
    * config options that will not change at all
@@ -506,9 +506,9 @@ export class MsgCreateMap extends Message<MsgCreateMap> {
   defaultValue = "";
 
   /**
-   * @generated from field: repeated maps.MapMetadataTimeline metadataTimeline = 9;
+   * @generated from field: maps.Metadata metadata = 9;
    */
-  metadataTimeline: MapMetadataTimeline[] = [];
+  metadata?: Metadata;
 
   /**
    * @generated from field: maps.MapPermissions permissions = 10;
@@ -525,12 +525,12 @@ export class MsgCreateMap extends Message<MsgCreateMap> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "mapId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "inheritManagerTimelineFrom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
+    { no: 3, name: "inheritManagerFrom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "manager", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "updateCriteria", kind: "message", T: MapUpdateCriteria },
     { no: 6, name: "valueOptions", kind: "message", T: ValueOptions },
     { no: 7, name: "defaultValue", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 9, name: "metadataTimeline", kind: "message", T: MapMetadataTimeline, repeated: true },
+    { no: 9, name: "metadata", kind: "message", T: Metadata },
     { no: 10, name: "permissions", kind: "message", T: MapPermissions },
   ]);
 
@@ -597,24 +597,24 @@ export class MsgUpdateMap extends Message<MsgUpdateMap> {
   mapId = "";
 
   /**
-   * @generated from field: bool updateManagerTimeline = 3;
+   * @generated from field: bool updateManager = 3;
    */
-  updateManagerTimeline = false;
+  updateManager = false;
 
   /**
-   * @generated from field: repeated maps.ManagerTimeline managerTimeline = 4;
+   * @generated from field: string manager = 4;
    */
-  managerTimeline: ManagerTimeline[] = [];
+  manager = "";
 
   /**
-   * @generated from field: bool updateMetadataTimeline = 7;
+   * @generated from field: bool updateMetadata = 7;
    */
-  updateMetadataTimeline = false;
+  updateMetadata = false;
 
   /**
-   * @generated from field: repeated maps.MapMetadataTimeline metadataTimeline = 8;
+   * @generated from field: maps.Metadata metadata = 8;
    */
-  metadataTimeline: MapMetadataTimeline[] = [];
+  metadata?: Metadata;
 
   /**
    * @generated from field: bool updatePermissions = 9;
@@ -636,10 +636,10 @@ export class MsgUpdateMap extends Message<MsgUpdateMap> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "mapId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 4, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
-    { no: 7, name: "updateMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 8, name: "metadataTimeline", kind: "message", T: MapMetadataTimeline, repeated: true },
+    { no: 3, name: "updateManager", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "manager", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "updateMetadata", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 8, name: "metadata", kind: "message", T: Metadata },
     { no: 9, name: "updatePermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 10, name: "permissions", kind: "message", T: MapPermissions },
   ]);

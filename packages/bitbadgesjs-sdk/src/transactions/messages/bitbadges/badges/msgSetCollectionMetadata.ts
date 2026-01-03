@@ -7,9 +7,10 @@ import type { iMsgSetCollectionMetadata } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
-import { CollectionMetadataTimeline } from '@/core/misc.js';
-import { TimedUpdatePermission } from '@/core/permissions.js';
+import { CollectionMetadata } from '@/core/misc.js';
+import { ActionPermission } from '@/core/permissions.js';
 import { Stringify } from '@/common/string-numbers.js';
+import type { iCollectionMetadata } from '@/interfaces/types/core.js';
 
 /**
  * MsgSetCollectionMetadata sets the collection metadata timeline and canUpdateCollectionMetadata permission.
@@ -22,22 +23,23 @@ export class MsgSetCollectionMetadata<T extends NumberType>
 {
   creator: BitBadgesAddress;
   collectionId: T;
-  collectionMetadataTimeline: CollectionMetadataTimeline<T>[];
-  canUpdateCollectionMetadata: TimedUpdatePermission<T>[];
+  collectionMetadata: iCollectionMetadata;
+  canUpdateCollectionMetadata: ActionPermission<T>[];
 
   constructor(msg: iMsgSetCollectionMetadata<T>) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
-    this.collectionMetadataTimeline = msg.collectionMetadataTimeline.map((timeline) => new CollectionMetadataTimeline(timeline));
-    this.canUpdateCollectionMetadata = msg.canUpdateCollectionMetadata.map((permission) => new TimedUpdatePermission(permission));
+    this.collectionMetadata = msg.collectionMetadata;
+    this.canUpdateCollectionMetadata = msg.canUpdateCollectionMetadata.map((permission) => new ActionPermission(permission));
   }
 
   toProto(): protobadges.MsgSetCollectionMetadata {
+    const collectionMetadata = new CollectionMetadata(this.collectionMetadata).toProto();
     return new protobadges.MsgSetCollectionMetadata({
       creator: this.creator,
       collectionId: this.collectionId.toString(),
-      collectionMetadataTimeline: this.collectionMetadataTimeline.map((timeline) => timeline.toProto()),
+      collectionMetadata: collectionMetadata,
       canUpdateCollectionMetadata: this.canUpdateCollectionMetadata.map((permission) => permission.toProto())
     });
   }
@@ -51,11 +53,14 @@ export class MsgSetCollectionMetadata<T extends NumberType>
   }
 
   static fromProto(protoMsg: protobadges.MsgSetCollectionMetadata): MsgSetCollectionMetadata<NumberType> {
+    const collectionMetadata = protoMsg.collectionMetadata
+      ? CollectionMetadata.fromProto(protoMsg.collectionMetadata)
+      : new CollectionMetadata({ uri: '', customData: '' });
     return new MsgSetCollectionMetadata({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
-      collectionMetadataTimeline: protoMsg.collectionMetadataTimeline.map((timeline) => CollectionMetadataTimeline.fromProto(timeline, Stringify)),
-      canUpdateCollectionMetadata: protoMsg.canUpdateCollectionMetadata.map((permission) => TimedUpdatePermission.fromProto(permission, Stringify))
+      collectionMetadata: collectionMetadata,
+      canUpdateCollectionMetadata: protoMsg.canUpdateCollectionMetadata.map((permission) => ActionPermission.fromProto(permission, Stringify))
     });
   }
 
@@ -63,7 +68,7 @@ export class MsgSetCollectionMetadata<T extends NumberType>
     return new MsgSetCollectionMetadata({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,
-      collectionMetadataTimeline: this.collectionMetadataTimeline,
+      collectionMetadata: this.collectionMetadata,
       canUpdateCollectionMetadata: this.canUpdateCollectionMetadata
     });
   }

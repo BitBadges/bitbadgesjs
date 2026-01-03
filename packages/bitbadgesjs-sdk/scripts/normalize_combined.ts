@@ -41,6 +41,7 @@ const withDetailsInterfaces = [
   'iUserIncomingApprovalPermission',
   'iCollectionApprovalPermission',
   'iCosmosCoinWrapperPath',
+  'iAliasPath',
   'iDenomUnit'
 ];
 

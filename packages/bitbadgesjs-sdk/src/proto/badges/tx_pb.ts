@@ -6,13 +6,15 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { Params } from "./params_pb.js";
-import { Balance, UintRange } from "./balances_pb.js";
-import { DenomUnit } from "./collections_pb.js";
-import { ApprovalIdentifierDetails, CollectionApproval, Transfer, UserBalanceStore, UserIncomingApproval, UserOutgoingApproval } from "./transfers_pb.js";
-import { CollectionApprovalPermission, CollectionPermissions, TimedUpdatePermission, TimedUpdateWithTokenIdsPermission, TokenIdsActionPermission, UserPermissions } from "./permissions_pb.js";
-import { CollectionMetadataTimeline, CustomDataTimeline, IsArchivedTimeline, ManagerTimeline, StandardsTimeline, TokenMetadataTimeline } from "./timelines_pb.js";
+import { Conversion, ConversionWithoutDenom, DenomUnit } from "./collections_pb.js";
+import { CollectionMetadata, PathMetadata, TokenMetadata } from "./metadata_pb.js";
+import { UserBalanceStore } from "./user_balance_store_pb.js";
+import { UintRange } from "./balances_pb.js";
+import { ActionPermission, CollectionApprovalPermission, CollectionPermissions, TokenIdsActionPermission, UserPermissions } from "./permissions_pb.js";
+import { ApprovalIdentifierDetails, CollectionApproval, UserIncomingApproval, UserOutgoingApproval } from "./approvals_pb.js";
 import { Coin } from "../cosmos/base/v1beta1/coin_pb.js";
-import { AddressList } from "./address_lists_pb.js";
+import { AddressListInput } from "./address_lists_pb.js";
+import { Transfer } from "./transfers_pb.js";
 
 /**
  * Used for WASM bindings and JSON parsing
@@ -74,16 +76,6 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
    * @generated from field: badges.MsgSetDynamicStoreValue setDynamicStoreValueMsg = 11;
    */
   setDynamicStoreValueMsg?: MsgSetDynamicStoreValue;
-
-  /**
-   * @generated from field: badges.MsgIncrementStoreValue incrementStoreValueMsg = 12;
-   */
-  incrementStoreValueMsg?: MsgIncrementStoreValue;
-
-  /**
-   * @generated from field: badges.MsgDecrementStoreValue decrementStoreValueMsg = 13;
-   */
-  decrementStoreValueMsg?: MsgDecrementStoreValue;
 
   /**
    * @generated from field: badges.MsgSetIncomingApproval setIncomingApprovalMsg = 14;
@@ -157,6 +149,11 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
    */
   setReservedProtocolAddressMsg?: MsgSetReservedProtocolAddress;
 
+  /**
+   * @generated from field: badges.MsgCastVote castVoteMsg = 28;
+   */
+  castVoteMsg?: MsgCastVote;
+
   constructor(data?: PartialMessage<BadgeCustomMsgType>) {
     super();
     proto3.util.initPartial(data, this);
@@ -176,8 +173,6 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
     { no: 9, name: "updateDynamicStoreMsg", kind: "message", T: MsgUpdateDynamicStore },
     { no: 10, name: "deleteDynamicStoreMsg", kind: "message", T: MsgDeleteDynamicStore },
     { no: 11, name: "setDynamicStoreValueMsg", kind: "message", T: MsgSetDynamicStoreValue },
-    { no: 12, name: "incrementStoreValueMsg", kind: "message", T: MsgIncrementStoreValue },
-    { no: 13, name: "decrementStoreValueMsg", kind: "message", T: MsgDecrementStoreValue },
     { no: 14, name: "setIncomingApprovalMsg", kind: "message", T: MsgSetIncomingApproval },
     { no: 15, name: "deleteIncomingApprovalMsg", kind: "message", T: MsgDeleteIncomingApproval },
     { no: 16, name: "setOutgoingApprovalMsg", kind: "message", T: MsgSetOutgoingApproval },
@@ -192,6 +187,7 @@ export class BadgeCustomMsgType extends Message<BadgeCustomMsgType> {
     { no: 25, name: "setCollectionApprovalsMsg", kind: "message", T: MsgSetCollectionApprovals },
     { no: 26, name: "setIsArchivedMsg", kind: "message", T: MsgSetIsArchived },
     { no: 27, name: "setReservedProtocolAddressMsg", kind: "message", T: MsgSetReservedProtocolAddress },
+    { no: 28, name: "castVoteMsg", kind: "message", T: MsgCastVote },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgeCustomMsgType {
@@ -306,9 +302,9 @@ export class CosmosCoinWrapperPathAddObject extends Message<CosmosCoinWrapperPat
   denom = "";
 
   /**
-   * @generated from field: repeated badges.Balance balances = 2;
+   * @generated from field: badges.ConversionWithoutDenom conversion = 2;
    */
-  balances: Balance[] = [];
+  conversion?: ConversionWithoutDenom;
 
   /**
    * @generated from field: string symbol = 3;
@@ -326,9 +322,11 @@ export class CosmosCoinWrapperPathAddObject extends Message<CosmosCoinWrapperPat
   allowOverrideWithAnyValidToken = false;
 
   /**
-   * @generated from field: bool allowCosmosWrapping = 6;
+   * The metadata for this wrapper path.
+   *
+   * @generated from field: badges.PathMetadata metadata = 6;
    */
-  allowCosmosWrapping = false;
+  metadata?: PathMetadata;
 
   constructor(data?: PartialMessage<CosmosCoinWrapperPathAddObject>) {
     super();
@@ -339,11 +337,11 @@ export class CosmosCoinWrapperPathAddObject extends Message<CosmosCoinWrapperPat
   static readonly typeName = "badges.CosmosCoinWrapperPathAddObject";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "balances", kind: "message", T: Balance, repeated: true },
+    { no: 2, name: "conversion", kind: "message", T: ConversionWithoutDenom },
     { no: 3, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
     { no: 5, name: "allowOverrideWithAnyValidToken", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 6, name: "allowCosmosWrapping", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: "metadata", kind: "message", T: PathMetadata },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinWrapperPathAddObject {
@@ -364,23 +362,76 @@ export class CosmosCoinWrapperPathAddObject extends Message<CosmosCoinWrapperPat
 }
 
 /**
+ * @generated from message badges.AliasPathAddObject
+ */
+export class AliasPathAddObject extends Message<AliasPathAddObject> {
+  /**
+   * @generated from field: string denom = 1;
+   */
+  denom = "";
+
+  /**
+   * @generated from field: badges.ConversionWithoutDenom conversion = 2;
+   */
+  conversion?: ConversionWithoutDenom;
+
+  /**
+   * @generated from field: string symbol = 3;
+   */
+  symbol = "";
+
+  /**
+   * @generated from field: repeated badges.DenomUnit denomUnits = 4;
+   */
+  denomUnits: DenomUnit[] = [];
+
+  /**
+   * The metadata for this alias path.
+   *
+   * @generated from field: badges.PathMetadata metadata = 5;
+   */
+  metadata?: PathMetadata;
+
+  constructor(data?: PartialMessage<AliasPathAddObject>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.AliasPathAddObject";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "denom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "conversion", kind: "message", T: ConversionWithoutDenom },
+    { no: 3, name: "symbol", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "denomUnits", kind: "message", T: DenomUnit, repeated: true },
+    { no: 5, name: "metadata", kind: "message", T: PathMetadata },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AliasPathAddObject {
+    return new AliasPathAddObject().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AliasPathAddObject {
+    return new AliasPathAddObject().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AliasPathAddObject {
+    return new AliasPathAddObject().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AliasPathAddObject | PlainMessage<AliasPathAddObject> | undefined, b: AliasPathAddObject | PlainMessage<AliasPathAddObject> | undefined): boolean {
+    return proto3.util.equals(AliasPathAddObject, a, b);
+  }
+}
+
+/**
  * @generated from message badges.CosmosCoinBackedPathAddObject
  */
 export class CosmosCoinBackedPathAddObject extends Message<CosmosCoinBackedPathAddObject> {
   /**
-   * @generated from field: string ibcDenom = 1;
+   * @generated from field: badges.Conversion conversion = 1;
    */
-  ibcDenom = "";
-
-  /**
-   * @generated from field: repeated badges.Balance balances = 2;
-   */
-  balances: Balance[] = [];
-
-  /**
-   * @generated from field: string ibcAmount = 3;
-   */
-  ibcAmount = "";
+  conversion?: Conversion;
 
   constructor(data?: PartialMessage<CosmosCoinBackedPathAddObject>) {
     super();
@@ -390,9 +441,7 @@ export class CosmosCoinBackedPathAddObject extends Message<CosmosCoinBackedPathA
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "badges.CosmosCoinBackedPathAddObject";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "ibcDenom", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "balances", kind: "message", T: Balance, repeated: true },
-    { no: 3, name: "ibcAmount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "conversion", kind: "message", T: Conversion },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CosmosCoinBackedPathAddObject {
@@ -550,60 +599,60 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   collectionPermissions?: CollectionPermissions;
 
   /**
-   * Indicates if the manager timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the manager should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateManagerTimeline = 8;
+   * @generated from field: bool updateManager = 8;
    */
-  updateManagerTimeline = false;
+  updateManager = false;
 
   /**
-   * New manager timeline to set.
+   * New manager to set.
    *
-   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 9;
+   * @generated from field: string manager = 9;
    */
-  managerTimeline: ManagerTimeline[] = [];
+  manager = "";
 
   /**
-   * Indicates if the collection metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the collection metadata should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateCollectionMetadataTimeline = 10;
+   * @generated from field: bool updateCollectionMetadata = 10;
    */
-  updateCollectionMetadataTimeline = false;
+  updateCollectionMetadata = false;
 
   /**
-   * New collection metadata timeline to set.
+   * New collection metadata to set.
    *
-   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 11;
+   * @generated from field: badges.CollectionMetadata collectionMetadata = 11;
    */
-  collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
+  collectionMetadata?: CollectionMetadata;
 
   /**
-   * Indicates if the token metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the token metadata should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateTokenMetadataTimeline = 12;
+   * @generated from field: bool updateTokenMetadata = 12;
    */
-  updateTokenMetadataTimeline = false;
+  updateTokenMetadata = false;
 
   /**
-   * New token metadata timeline to set.
+   * New token metadata to set.
    *
-   * @generated from field: repeated badges.TokenMetadataTimeline tokenMetadataTimeline = 13;
+   * @generated from field: repeated badges.TokenMetadata tokenMetadata = 13;
    */
-  tokenMetadataTimeline: TokenMetadataTimeline[] = [];
+  tokenMetadata: TokenMetadata[] = [];
 
   /**
-   * Indicates if the custom data timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the custom data should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateCustomDataTimeline = 14;
+   * @generated from field: bool updateCustomData = 14;
    */
-  updateCustomDataTimeline = false;
+  updateCustomData = false;
 
   /**
-   * New custom data timeline to set.
+   * New custom data to set.
    *
-   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 15;
+   * @generated from field: string customData = 15;
    */
-  customDataTimeline: CustomDataTimeline[] = [];
+  customData = "";
 
   /**
    * Indicates if collection approvals should be updated. If true, we set to value in this Msg. If false, we keep existing value.
@@ -620,32 +669,32 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
   collectionApprovals: CollectionApproval[] = [];
 
   /**
-   * Indicates if the standards timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the standards should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateStandardsTimeline = 18;
+   * @generated from field: bool updateStandards = 18;
    */
-  updateStandardsTimeline = false;
+  updateStandards = false;
 
   /**
-   * New standards timeline to set.
+   * New standards to set.
    *
-   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 19;
+   * @generated from field: repeated string standards = 19;
    */
-  standardsTimeline: StandardsTimeline[] = [];
+  standards: string[] = [];
 
   /**
-   * Indicates if the isArchived timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the isArchived should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateIsArchivedTimeline = 20;
+   * @generated from field: bool updateIsArchived = 20;
    */
-  updateIsArchivedTimeline = false;
+  updateIsArchived = false;
 
   /**
-   * New isArchived timeline to set.
+   * New isArchived to set.
    *
-   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 21;
+   * @generated from field: bool isArchived = 21;
    */
-  isArchivedTimeline: IsArchivedTimeline[] = [];
+  isArchived = false;
 
   /**
    * Coins to be transferred to the mint escrow address.
@@ -670,6 +719,13 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
    */
   invariants?: InvariantsAddObject;
 
+  /**
+   * Alias (non-wrapping) paths to add.
+   *
+   * @generated from field: repeated badges.AliasPathAddObject aliasPathsToAdd = 25;
+   */
+  aliasPathsToAdd: AliasPathAddObject[] = [];
+
   constructor(data?: PartialMessage<MsgUniversalUpdateCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -685,23 +741,24 @@ export class MsgUniversalUpdateCollection extends Message<MsgUniversalUpdateColl
     { no: 5, name: "validTokenIds", kind: "message", T: UintRange, repeated: true },
     { no: 6, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 7, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
-    { no: 8, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 9, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
-    { no: 10, name: "updateCollectionMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 11, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 12, name: "updateTokenMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 13, name: "tokenMetadataTimeline", kind: "message", T: TokenMetadataTimeline, repeated: true },
-    { no: 14, name: "updateCustomDataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 15, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
+    { no: 8, name: "updateManager", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 9, name: "manager", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 10, name: "updateCollectionMetadata", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 11, name: "collectionMetadata", kind: "message", T: CollectionMetadata },
+    { no: 12, name: "updateTokenMetadata", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 13, name: "tokenMetadata", kind: "message", T: TokenMetadata, repeated: true },
+    { no: 14, name: "updateCustomData", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 15, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 16, name: "updateCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 17, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 18, name: "updateStandardsTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 19, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 20, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 21, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 18, name: "updateStandards", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 19, name: "standards", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 20, name: "updateIsArchived", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 21, name: "isArchived", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 22, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
     { no: 23, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
     { no: 24, name: "invariants", kind: "message", T: InvariantsAddObject },
+    { no: 25, name: "aliasPathsToAdd", kind: "message", T: AliasPathAddObject, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUniversalUpdateCollection {
@@ -811,60 +868,60 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   collectionPermissions?: CollectionPermissions;
 
   /**
-   * Indicates if the manager timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the manager should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateManagerTimeline = 7;
+   * @generated from field: bool updateManager = 7;
    */
-  updateManagerTimeline = false;
+  updateManager = false;
 
   /**
-   * New manager timeline to set.
+   * New manager to set.
    *
-   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 8;
+   * @generated from field: string manager = 8;
    */
-  managerTimeline: ManagerTimeline[] = [];
+  manager = "";
 
   /**
-   * Indicates if the collection metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the collection metadata should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateCollectionMetadataTimeline = 9;
+   * @generated from field: bool updateCollectionMetadata = 9;
    */
-  updateCollectionMetadataTimeline = false;
+  updateCollectionMetadata = false;
 
   /**
-   * New collection metadata timeline to set.
+   * New collection metadata to set.
    *
-   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 10;
+   * @generated from field: badges.CollectionMetadata collectionMetadata = 10;
    */
-  collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
+  collectionMetadata?: CollectionMetadata;
 
   /**
-   * Indicates if the token metadata timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the token metadata should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateTokenMetadataTimeline = 11;
+   * @generated from field: bool updateTokenMetadata = 11;
    */
-  updateTokenMetadataTimeline = false;
+  updateTokenMetadata = false;
 
   /**
-   * New token metadata timeline to set.
+   * New token metadata to set.
    *
-   * @generated from field: repeated badges.TokenMetadataTimeline tokenMetadataTimeline = 12;
+   * @generated from field: repeated badges.TokenMetadata tokenMetadata = 12;
    */
-  tokenMetadataTimeline: TokenMetadataTimeline[] = [];
+  tokenMetadata: TokenMetadata[] = [];
 
   /**
-   * Indicates if the custom data timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the custom data should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateCustomDataTimeline = 13;
+   * @generated from field: bool updateCustomData = 13;
    */
-  updateCustomDataTimeline = false;
+  updateCustomData = false;
 
   /**
-   * New custom data timeline to set.
+   * New custom data to set.
    *
-   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 14;
+   * @generated from field: string customData = 14;
    */
-  customDataTimeline: CustomDataTimeline[] = [];
+  customData = "";
 
   /**
    * Indicates if collection approvals should be updated. If true, we set to value in this Msg. If false, we keep existing value.
@@ -881,32 +938,32 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
   collectionApprovals: CollectionApproval[] = [];
 
   /**
-   * Indicates if the standards timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the standards should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateStandardsTimeline = 17;
+   * @generated from field: bool updateStandards = 17;
    */
-  updateStandardsTimeline = false;
+  updateStandards = false;
 
   /**
-   * New standards timeline to set.
+   * New standards to set.
    *
-   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 18;
+   * @generated from field: repeated string standards = 18;
    */
-  standardsTimeline: StandardsTimeline[] = [];
+  standards: string[] = [];
 
   /**
-   * Indicates if the isArchived timeline should be updated. If true, we set to value in this Msg. If false, we keep existing value.
+   * Indicates if the isArchived should be updated. If true, we set to value in this Msg. If false, we keep existing value.
    *
-   * @generated from field: bool updateIsArchivedTimeline = 19;
+   * @generated from field: bool updateIsArchived = 19;
    */
-  updateIsArchivedTimeline = false;
+  updateIsArchived = false;
 
   /**
-   * New isArchived timeline to set.
+   * New isArchived to set.
    *
-   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 20;
+   * @generated from field: bool isArchived = 20;
    */
-  isArchivedTimeline: IsArchivedTimeline[] = [];
+  isArchived = false;
 
   /**
    * Coins to be transferred to the mint escrow address.
@@ -931,6 +988,13 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
    */
   invariants?: InvariantsAddObject;
 
+  /**
+   * Alias (non-wrapping) paths to add.
+   *
+   * @generated from field: repeated badges.AliasPathAddObject aliasPathsToAdd = 24;
+   */
+  aliasPathsToAdd: AliasPathAddObject[] = [];
+
   constructor(data?: PartialMessage<MsgUpdateCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -945,23 +1009,24 @@ export class MsgUpdateCollection extends Message<MsgUpdateCollection> {
     { no: 4, name: "validTokenIds", kind: "message", T: UintRange, repeated: true },
     { no: 5, name: "updateCollectionPermissions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 6, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
-    { no: 7, name: "updateManagerTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 8, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
-    { no: 9, name: "updateCollectionMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 10, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 11, name: "updateTokenMetadataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 12, name: "tokenMetadataTimeline", kind: "message", T: TokenMetadataTimeline, repeated: true },
-    { no: 13, name: "updateCustomDataTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 14, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
+    { no: 7, name: "updateManager", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 8, name: "manager", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: "updateCollectionMetadata", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 10, name: "collectionMetadata", kind: "message", T: CollectionMetadata },
+    { no: 11, name: "updateTokenMetadata", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 12, name: "tokenMetadata", kind: "message", T: TokenMetadata, repeated: true },
+    { no: 13, name: "updateCustomData", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 14, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 15, name: "updateCollectionApprovals", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 16, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 17, name: "updateStandardsTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 18, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 19, name: "updateIsArchivedTimeline", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 20, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 17, name: "updateStandards", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 18, name: "standards", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 19, name: "updateIsArchived", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 20, name: "isArchived", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 21, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
     { no: 22, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
     { no: 23, name: "invariants", kind: "message", T: InvariantsAddObject },
+    { no: 24, name: "aliasPathsToAdd", kind: "message", T: AliasPathAddObject, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateCollection {
@@ -1057,32 +1122,32 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   collectionPermissions?: CollectionPermissions;
 
   /**
-   * Manager timeline entries.
+   * Manager address.
    *
-   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 5;
+   * @generated from field: string manager = 5;
    */
-  managerTimeline: ManagerTimeline[] = [];
+  manager = "";
 
   /**
-   * Collection metadata timeline entries.
+   * Collection metadata.
    *
-   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 6;
+   * @generated from field: badges.CollectionMetadata collectionMetadata = 6;
    */
-  collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
+  collectionMetadata?: CollectionMetadata;
 
   /**
-   * Token metadata timeline entries.
+   * Token metadata entries.
    *
-   * @generated from field: repeated badges.TokenMetadataTimeline tokenMetadataTimeline = 7;
+   * @generated from field: repeated badges.TokenMetadata tokenMetadata = 7;
    */
-  tokenMetadataTimeline: TokenMetadataTimeline[] = [];
+  tokenMetadata: TokenMetadata[] = [];
 
   /**
-   * Custom data timeline entries.
+   * Custom data.
    *
-   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 8;
+   * @generated from field: string customData = 8;
    */
-  customDataTimeline: CustomDataTimeline[] = [];
+  customData = "";
 
   /**
    * Collection approvals.
@@ -1092,18 +1157,18 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
   collectionApprovals: CollectionApproval[] = [];
 
   /**
-   * Standards timeline entries.
+   * Standards entries.
    *
-   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 10;
+   * @generated from field: repeated string standards = 10;
    */
-  standardsTimeline: StandardsTimeline[] = [];
+  standards: string[] = [];
 
   /**
-   * isArchived timeline entries.
+   * isArchived flag.
    *
-   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 11;
+   * @generated from field: bool isArchived = 11;
    */
-  isArchivedTimeline: IsArchivedTimeline[] = [];
+  isArchived = false;
 
   /**
    * Coins to be transferred to the mint escrow address.
@@ -1127,6 +1192,13 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
    */
   invariants?: InvariantsAddObject;
 
+  /**
+   * Alias (non-wrapping) paths to add.
+   *
+   * @generated from field: repeated badges.AliasPathAddObject aliasPathsToAdd = 15;
+   */
+  aliasPathsToAdd: AliasPathAddObject[] = [];
+
   constructor(data?: PartialMessage<MsgCreateCollection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1139,16 +1211,17 @@ export class MsgCreateCollection extends Message<MsgCreateCollection> {
     { no: 2, name: "defaultBalances", kind: "message", T: UserBalanceStore },
     { no: 3, name: "validTokenIds", kind: "message", T: UintRange, repeated: true },
     { no: 4, name: "collectionPermissions", kind: "message", T: CollectionPermissions },
-    { no: 5, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
-    { no: 6, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 7, name: "tokenMetadataTimeline", kind: "message", T: TokenMetadataTimeline, repeated: true },
-    { no: 8, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
+    { no: 5, name: "manager", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "collectionMetadata", kind: "message", T: CollectionMetadata },
+    { no: 7, name: "tokenMetadata", kind: "message", T: TokenMetadata, repeated: true },
+    { no: 8, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 9, name: "collectionApprovals", kind: "message", T: CollectionApproval, repeated: true },
-    { no: 10, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 11, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
+    { no: 10, name: "standards", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 11, name: "isArchived", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 12, name: "mintEscrowCoinsToTransfer", kind: "message", T: Coin, repeated: true },
     { no: 13, name: "cosmosCoinWrapperPathsToAdd", kind: "message", T: CosmosCoinWrapperPathAddObject, repeated: true },
     { no: 14, name: "invariants", kind: "message", T: InvariantsAddObject },
+    { no: 15, name: "aliasPathsToAdd", kind: "message", T: AliasPathAddObject, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateCollection {
@@ -1223,11 +1296,11 @@ export class MsgCreateAddressLists extends Message<MsgCreateAddressLists> {
   creator = "";
 
   /**
-   * Address lists to create.
+   * Address lists to create. The createdBy field will be automatically set to the creator address.
    *
-   * @generated from field: repeated badges.AddressList addressLists = 2;
+   * @generated from field: repeated badges.AddressListInput addressLists = 2;
    */
-  addressLists: AddressList[] = [];
+  addressLists: AddressListInput[] = [];
 
   constructor(data?: PartialMessage<MsgCreateAddressLists>) {
     super();
@@ -1238,7 +1311,7 @@ export class MsgCreateAddressLists extends Message<MsgCreateAddressLists> {
   static readonly typeName = "badges.MsgCreateAddressLists";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "addressLists", kind: "message", T: AddressList, repeated: true },
+    { no: 2, name: "addressLists", kind: "message", T: AddressListInput, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateAddressLists {
@@ -2137,11 +2210,11 @@ export class MsgCreateDynamicStore extends Message<MsgCreateDynamicStore> {
   creator = "";
 
   /**
-   * The default value for uninitialized addresses (number of uses).
+   * The default value for uninitialized addresses (true/false).
    *
-   * @generated from field: string defaultValue = 2;
+   * @generated from field: bool defaultValue = 2;
    */
-  defaultValue = "";
+  defaultValue = false;
 
   constructor(data?: PartialMessage<MsgCreateDynamicStore>) {
     super();
@@ -2152,7 +2225,7 @@ export class MsgCreateDynamicStore extends Message<MsgCreateDynamicStore> {
   static readonly typeName = "badges.MsgCreateDynamicStore";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "defaultValue", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "defaultValue", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateDynamicStore {
@@ -2234,11 +2307,19 @@ export class MsgUpdateDynamicStore extends Message<MsgUpdateDynamicStore> {
   storeId = "";
 
   /**
-   * The new default value for uninitialized addresses (optional, only set if updating).
+   * The new default value for uninitialized addresses (true/false).
    *
-   * @generated from field: string defaultValue = 3;
+   * @generated from field: bool defaultValue = 3;
    */
-  defaultValue = "";
+  defaultValue = false;
+
+  /**
+   * The global kill switch state (true = enabled, false = disabled/halted).
+   * Callers should query the current value first if they want to keep it unchanged.
+   *
+   * @generated from field: bool globalEnabled = 4;
+   */
+  globalEnabled = false;
 
   constructor(data?: PartialMessage<MsgUpdateDynamicStore>) {
     super();
@@ -2250,7 +2331,8 @@ export class MsgUpdateDynamicStore extends Message<MsgUpdateDynamicStore> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "defaultValue", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "defaultValue", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "globalEnabled", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateDynamicStore {
@@ -2386,7 +2468,7 @@ export class MsgDeleteDynamicStoreResponse extends Message<MsgDeleteDynamicStore
 }
 
 /**
- * MsgSetDynamicStoreValue is used to set a usage count for a specific address in a dynamic store.
+ * MsgSetDynamicStoreValue is used to set a boolean value for a specific address in a dynamic store.
  *
  * @generated from message badges.MsgSetDynamicStoreValue
  */
@@ -2413,11 +2495,11 @@ export class MsgSetDynamicStoreValue extends Message<MsgSetDynamicStoreValue> {
   address = "";
 
   /**
-   * The usage count to set (number of times this address can use the approval).
+   * The boolean value to set (true/false).
    *
-   * @generated from field: string value = 4;
+   * @generated from field: bool value = 4;
    */
-  value = "";
+  value = false;
 
   constructor(data?: PartialMessage<MsgSetDynamicStoreValue>) {
     super();
@@ -2430,7 +2512,7 @@ export class MsgSetDynamicStoreValue extends Message<MsgSetDynamicStoreValue> {
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "value", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "value", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetDynamicStoreValue {
@@ -2480,210 +2562,6 @@ export class MsgSetDynamicStoreValueResponse extends Message<MsgSetDynamicStoreV
 
   static equals(a: MsgSetDynamicStoreValueResponse | PlainMessage<MsgSetDynamicStoreValueResponse> | undefined, b: MsgSetDynamicStoreValueResponse | PlainMessage<MsgSetDynamicStoreValueResponse> | undefined): boolean {
     return proto3.util.equals(MsgSetDynamicStoreValueResponse, a, b);
-  }
-}
-
-/**
- * MsgIncrementStoreValue is used to increment a usage count for a specific address in a dynamic store.
- *
- * @generated from message badges.MsgIncrementStoreValue
- */
-export class MsgIncrementStoreValue extends Message<MsgIncrementStoreValue> {
-  /**
-   * Address of the creator.
-   *
-   * @generated from field: string creator = 1;
-   */
-  creator = "";
-
-  /**
-   * ID of the dynamic store.
-   *
-   * @generated from field: string storeId = 2;
-   */
-  storeId = "";
-
-  /**
-   * The address for which to increment the value.
-   *
-   * @generated from field: string address = 3;
-   */
-  address = "";
-
-  /**
-   * The amount to increment by.
-   *
-   * @generated from field: string amount = 4;
-   */
-  amount = "";
-
-  constructor(data?: PartialMessage<MsgIncrementStoreValue>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgIncrementStoreValue";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgIncrementStoreValue {
-    return new MsgIncrementStoreValue().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgIncrementStoreValue {
-    return new MsgIncrementStoreValue().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgIncrementStoreValue {
-    return new MsgIncrementStoreValue().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: MsgIncrementStoreValue | PlainMessage<MsgIncrementStoreValue> | undefined, b: MsgIncrementStoreValue | PlainMessage<MsgIncrementStoreValue> | undefined): boolean {
-    return proto3.util.equals(MsgIncrementStoreValue, a, b);
-  }
-}
-
-/**
- * MsgIncrementStoreValueResponse is the response to MsgIncrementStoreValue.
- *
- * @generated from message badges.MsgIncrementStoreValueResponse
- */
-export class MsgIncrementStoreValueResponse extends Message<MsgIncrementStoreValueResponse> {
-  constructor(data?: PartialMessage<MsgIncrementStoreValueResponse>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgIncrementStoreValueResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgIncrementStoreValueResponse {
-    return new MsgIncrementStoreValueResponse().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgIncrementStoreValueResponse {
-    return new MsgIncrementStoreValueResponse().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgIncrementStoreValueResponse {
-    return new MsgIncrementStoreValueResponse().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: MsgIncrementStoreValueResponse | PlainMessage<MsgIncrementStoreValueResponse> | undefined, b: MsgIncrementStoreValueResponse | PlainMessage<MsgIncrementStoreValueResponse> | undefined): boolean {
-    return proto3.util.equals(MsgIncrementStoreValueResponse, a, b);
-  }
-}
-
-/**
- * MsgDecrementStoreValue is used to decrement a usage count for a specific address in a dynamic store.
- *
- * @generated from message badges.MsgDecrementStoreValue
- */
-export class MsgDecrementStoreValue extends Message<MsgDecrementStoreValue> {
-  /**
-   * Address of the creator.
-   *
-   * @generated from field: string creator = 1;
-   */
-  creator = "";
-
-  /**
-   * ID of the dynamic store.
-   *
-   * @generated from field: string storeId = 2;
-   */
-  storeId = "";
-
-  /**
-   * The address for which to decrement the value.
-   *
-   * @generated from field: string address = 3;
-   */
-  address = "";
-
-  /**
-   * The amount to decrement by.
-   *
-   * @generated from field: string amount = 4;
-   */
-  amount = "";
-
-  /**
-   * If true, set to zero on underflow. If false, throw error on underflow.
-   *
-   * @generated from field: bool setToZeroOnUnderflow = 5;
-   */
-  setToZeroOnUnderflow = false;
-
-  constructor(data?: PartialMessage<MsgDecrementStoreValue>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgDecrementStoreValue";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "amount", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "setToZeroOnUnderflow", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDecrementStoreValue {
-    return new MsgDecrementStoreValue().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDecrementStoreValue {
-    return new MsgDecrementStoreValue().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDecrementStoreValue {
-    return new MsgDecrementStoreValue().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: MsgDecrementStoreValue | PlainMessage<MsgDecrementStoreValue> | undefined, b: MsgDecrementStoreValue | PlainMessage<MsgDecrementStoreValue> | undefined): boolean {
-    return proto3.util.equals(MsgDecrementStoreValue, a, b);
-  }
-}
-
-/**
- * MsgDecrementStoreValueResponse is the response to MsgDecrementStoreValue.
- *
- * @generated from message badges.MsgDecrementStoreValueResponse
- */
-export class MsgDecrementStoreValueResponse extends Message<MsgDecrementStoreValueResponse> {
-  constructor(data?: PartialMessage<MsgDecrementStoreValueResponse>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "badges.MsgDecrementStoreValueResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDecrementStoreValueResponse {
-    return new MsgDecrementStoreValueResponse().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDecrementStoreValueResponse {
-    return new MsgDecrementStoreValueResponse().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDecrementStoreValueResponse {
-    return new MsgDecrementStoreValueResponse().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: MsgDecrementStoreValueResponse | PlainMessage<MsgDecrementStoreValueResponse> | undefined, b: MsgDecrementStoreValueResponse | PlainMessage<MsgDecrementStoreValueResponse> | undefined): boolean {
-    return proto3.util.equals(MsgDecrementStoreValueResponse, a, b);
   }
 }
 
@@ -2794,7 +2672,7 @@ export class MsgSetValidTokenIdsResponse extends Message<MsgSetValidTokenIdsResp
 }
 
 /**
- * MsgSetManager sets the manager timeline and canUpdateManager permission
+ * MsgSetManager sets the manager and canUpdateManager permission
  *
  * @generated from message badges.MsgSetManager
  */
@@ -2814,18 +2692,18 @@ export class MsgSetManager extends Message<MsgSetManager> {
   collectionId = "";
 
   /**
-   * New manager timeline to set.
+   * New manager to set.
    *
-   * @generated from field: repeated badges.ManagerTimeline managerTimeline = 3;
+   * @generated from field: string manager = 3;
    */
-  managerTimeline: ManagerTimeline[] = [];
+  manager = "";
 
   /**
-   * Permission to update manager timeline
+   * Permission to update manager
    *
-   * @generated from field: repeated badges.TimedUpdatePermission canUpdateManager = 4;
+   * @generated from field: repeated badges.ActionPermission canUpdateManager = 4;
    */
-  canUpdateManager: TimedUpdatePermission[] = [];
+  canUpdateManager: ActionPermission[] = [];
 
   constructor(data?: PartialMessage<MsgSetManager>) {
     super();
@@ -2837,8 +2715,8 @@ export class MsgSetManager extends Message<MsgSetManager> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "managerTimeline", kind: "message", T: ManagerTimeline, repeated: true },
-    { no: 4, name: "canUpdateManager", kind: "message", T: TimedUpdatePermission, repeated: true },
+    { no: 3, name: "manager", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "canUpdateManager", kind: "message", T: ActionPermission, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetManager {
@@ -2900,7 +2778,7 @@ export class MsgSetManagerResponse extends Message<MsgSetManagerResponse> {
 }
 
 /**
- * MsgSetCollectionMetadata sets the collection metadata timeline and canUpdateCollectionMetadata permission
+ * MsgSetCollectionMetadata sets the collection metadata and canUpdateCollectionMetadata permission
  *
  * @generated from message badges.MsgSetCollectionMetadata
  */
@@ -2920,18 +2798,18 @@ export class MsgSetCollectionMetadata extends Message<MsgSetCollectionMetadata> 
   collectionId = "";
 
   /**
-   * New collection metadata timeline to set.
+   * New collection metadata to set.
    *
-   * @generated from field: repeated badges.CollectionMetadataTimeline collectionMetadataTimeline = 3;
+   * @generated from field: badges.CollectionMetadata collectionMetadata = 3;
    */
-  collectionMetadataTimeline: CollectionMetadataTimeline[] = [];
+  collectionMetadata?: CollectionMetadata;
 
   /**
-   * Permission to update collection metadata timeline
+   * Permission to update collection metadata
    *
-   * @generated from field: repeated badges.TimedUpdatePermission canUpdateCollectionMetadata = 4;
+   * @generated from field: repeated badges.ActionPermission canUpdateCollectionMetadata = 4;
    */
-  canUpdateCollectionMetadata: TimedUpdatePermission[] = [];
+  canUpdateCollectionMetadata: ActionPermission[] = [];
 
   constructor(data?: PartialMessage<MsgSetCollectionMetadata>) {
     super();
@@ -2943,8 +2821,8 @@ export class MsgSetCollectionMetadata extends Message<MsgSetCollectionMetadata> 
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "collectionMetadataTimeline", kind: "message", T: CollectionMetadataTimeline, repeated: true },
-    { no: 4, name: "canUpdateCollectionMetadata", kind: "message", T: TimedUpdatePermission, repeated: true },
+    { no: 3, name: "collectionMetadata", kind: "message", T: CollectionMetadata },
+    { no: 4, name: "canUpdateCollectionMetadata", kind: "message", T: ActionPermission, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetCollectionMetadata {
@@ -3006,7 +2884,7 @@ export class MsgSetCollectionMetadataResponse extends Message<MsgSetCollectionMe
 }
 
 /**
- * MsgSetTokenMetadata sets the token metadata timeline and canUpdateTokenMetadata permission
+ * MsgSetTokenMetadata sets the token metadata and canUpdateTokenMetadata permission
  *
  * @generated from message badges.MsgSetTokenMetadata
  */
@@ -3026,18 +2904,18 @@ export class MsgSetTokenMetadata extends Message<MsgSetTokenMetadata> {
   collectionId = "";
 
   /**
-   * New token metadata timeline to set.
+   * New token metadata to set.
    *
-   * @generated from field: repeated badges.TokenMetadataTimeline tokenMetadataTimeline = 3;
+   * @generated from field: repeated badges.TokenMetadata tokenMetadata = 3;
    */
-  tokenMetadataTimeline: TokenMetadataTimeline[] = [];
+  tokenMetadata: TokenMetadata[] = [];
 
   /**
-   * Permission to update token metadata timeline
+   * Permission to update token metadata
    *
-   * @generated from field: repeated badges.TimedUpdateWithTokenIdsPermission canUpdateTokenMetadata = 4;
+   * @generated from field: repeated badges.TokenIdsActionPermission canUpdateTokenMetadata = 4;
    */
-  canUpdateTokenMetadata: TimedUpdateWithTokenIdsPermission[] = [];
+  canUpdateTokenMetadata: TokenIdsActionPermission[] = [];
 
   constructor(data?: PartialMessage<MsgSetTokenMetadata>) {
     super();
@@ -3049,8 +2927,8 @@ export class MsgSetTokenMetadata extends Message<MsgSetTokenMetadata> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "tokenMetadataTimeline", kind: "message", T: TokenMetadataTimeline, repeated: true },
-    { no: 4, name: "canUpdateTokenMetadata", kind: "message", T: TimedUpdateWithTokenIdsPermission, repeated: true },
+    { no: 3, name: "tokenMetadata", kind: "message", T: TokenMetadata, repeated: true },
+    { no: 4, name: "canUpdateTokenMetadata", kind: "message", T: TokenIdsActionPermission, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetTokenMetadata {
@@ -3112,7 +2990,7 @@ export class MsgSetTokenMetadataResponse extends Message<MsgSetTokenMetadataResp
 }
 
 /**
- * MsgSetCustomData sets the custom data timeline and canUpdateCustomData permission
+ * MsgSetCustomData sets the custom data and canUpdateCustomData permission
  *
  * @generated from message badges.MsgSetCustomData
  */
@@ -3132,18 +3010,18 @@ export class MsgSetCustomData extends Message<MsgSetCustomData> {
   collectionId = "";
 
   /**
-   * New custom data timeline to set.
+   * New custom data to set.
    *
-   * @generated from field: repeated badges.CustomDataTimeline customDataTimeline = 3;
+   * @generated from field: string customData = 3;
    */
-  customDataTimeline: CustomDataTimeline[] = [];
+  customData = "";
 
   /**
-   * Permission to update custom data timeline
+   * Permission to update custom data
    *
-   * @generated from field: repeated badges.TimedUpdatePermission canUpdateCustomData = 4;
+   * @generated from field: repeated badges.ActionPermission canUpdateCustomData = 4;
    */
-  canUpdateCustomData: TimedUpdatePermission[] = [];
+  canUpdateCustomData: ActionPermission[] = [];
 
   constructor(data?: PartialMessage<MsgSetCustomData>) {
     super();
@@ -3155,8 +3033,8 @@ export class MsgSetCustomData extends Message<MsgSetCustomData> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "customDataTimeline", kind: "message", T: CustomDataTimeline, repeated: true },
-    { no: 4, name: "canUpdateCustomData", kind: "message", T: TimedUpdatePermission, repeated: true },
+    { no: 3, name: "customData", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "canUpdateCustomData", kind: "message", T: ActionPermission, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetCustomData {
@@ -3218,7 +3096,7 @@ export class MsgSetCustomDataResponse extends Message<MsgSetCustomDataResponse> 
 }
 
 /**
- * MsgSetStandards sets the standards timeline and canUpdateStandards permission
+ * MsgSetStandards sets the standards and canUpdateStandards permission
  *
  * @generated from message badges.MsgSetStandards
  */
@@ -3238,18 +3116,18 @@ export class MsgSetStandards extends Message<MsgSetStandards> {
   collectionId = "";
 
   /**
-   * New standards timeline to set.
+   * New standards to set.
    *
-   * @generated from field: repeated badges.StandardsTimeline standardsTimeline = 3;
+   * @generated from field: repeated string standards = 3;
    */
-  standardsTimeline: StandardsTimeline[] = [];
+  standards: string[] = [];
 
   /**
-   * Permission to update standards timeline
+   * Permission to update standards
    *
-   * @generated from field: repeated badges.TimedUpdatePermission canUpdateStandards = 4;
+   * @generated from field: repeated badges.ActionPermission canUpdateStandards = 4;
    */
-  canUpdateStandards: TimedUpdatePermission[] = [];
+  canUpdateStandards: ActionPermission[] = [];
 
   constructor(data?: PartialMessage<MsgSetStandards>) {
     super();
@@ -3261,8 +3139,8 @@ export class MsgSetStandards extends Message<MsgSetStandards> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "standardsTimeline", kind: "message", T: StandardsTimeline, repeated: true },
-    { no: 4, name: "canUpdateStandards", kind: "message", T: TimedUpdatePermission, repeated: true },
+    { no: 3, name: "standards", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 4, name: "canUpdateStandards", kind: "message", T: ActionPermission, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetStandards {
@@ -3430,7 +3308,7 @@ export class MsgSetCollectionApprovalsResponse extends Message<MsgSetCollectionA
 }
 
 /**
- * MsgSetIsArchived sets the isArchived timeline and canArchiveCollection permission
+ * MsgSetIsArchived sets the isArchived and canArchiveCollection permission
  *
  * @generated from message badges.MsgSetIsArchived
  */
@@ -3450,18 +3328,18 @@ export class MsgSetIsArchived extends Message<MsgSetIsArchived> {
   collectionId = "";
 
   /**
-   * New isArchived timeline to set.
+   * New isArchived to set.
    *
-   * @generated from field: repeated badges.IsArchivedTimeline isArchivedTimeline = 3;
+   * @generated from field: bool isArchived = 3;
    */
-  isArchivedTimeline: IsArchivedTimeline[] = [];
+  isArchived = false;
 
   /**
    * Permission to archive collection
    *
-   * @generated from field: repeated badges.TimedUpdatePermission canArchiveCollection = 4;
+   * @generated from field: repeated badges.ActionPermission canArchiveCollection = 4;
    */
-  canArchiveCollection: TimedUpdatePermission[] = [];
+  canArchiveCollection: ActionPermission[] = [];
 
   constructor(data?: PartialMessage<MsgSetIsArchived>) {
     super();
@@ -3473,8 +3351,8 @@ export class MsgSetIsArchived extends Message<MsgSetIsArchived> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "isArchivedTimeline", kind: "message", T: IsArchivedTimeline, repeated: true },
-    { no: 4, name: "canArchiveCollection", kind: "message", T: TimedUpdatePermission, repeated: true },
+    { no: 3, name: "isArchived", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "canArchiveCollection", kind: "message", T: ActionPermission, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSetIsArchived {
@@ -3622,6 +3500,128 @@ export class MsgSetReservedProtocolAddressResponse extends Message<MsgSetReserve
 
   static equals(a: MsgSetReservedProtocolAddressResponse | PlainMessage<MsgSetReservedProtocolAddressResponse> | undefined, b: MsgSetReservedProtocolAddressResponse | PlainMessage<MsgSetReservedProtocolAddressResponse> | undefined): boolean {
     return proto3.util.equals(MsgSetReservedProtocolAddressResponse, a, b);
+  }
+}
+
+/**
+ * MsgCastVote allows a voter to cast or update their vote for a voting challenge.
+ *
+ * @generated from message badges.MsgCastVote
+ */
+export class MsgCastVote extends Message<MsgCastVote> {
+  /**
+   * The address of the voter casting the vote.
+   *
+   * @generated from field: string creator = 1;
+   */
+  creator = "";
+
+  /**
+   * The collection ID for the voting challenge.
+   *
+   * @generated from field: string collectionId = 2;
+   */
+  collectionId = "";
+
+  /**
+   * The approval level ("collection", "incoming", or "outgoing").
+   *
+   * @generated from field: string approvalLevel = 3;
+   */
+  approvalLevel = "";
+
+  /**
+   * The approver address (empty string for collection-level approvals).
+   *
+   * @generated from field: string approverAddress = 4;
+   */
+  approverAddress = "";
+
+  /**
+   * The approval ID.
+   *
+   * @generated from field: string approvalId = 5;
+   */
+  approvalId = "";
+
+  /**
+   * The proposal ID (challenge ID) from the VotingChallenge.
+   *
+   * @generated from field: string proposalId = 6;
+   */
+  proposalId = "";
+
+  /**
+   * The percentage weight (0-100) allocated to "yes" vote.
+   * The remaining percentage (100 - yesWeight) is allocated to "no" vote.
+   * Example: yesWeight=70 means 70% yes, 30% no.
+   *
+   * @generated from field: string yesWeight = 7;
+   */
+  yesWeight = "";
+
+  constructor(data?: PartialMessage<MsgCastVote>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgCastVote";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "approvalLevel", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "approverAddress", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "approvalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "proposalId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "yesWeight", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCastVote {
+    return new MsgCastVote().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCastVote {
+    return new MsgCastVote().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCastVote {
+    return new MsgCastVote().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgCastVote | PlainMessage<MsgCastVote> | undefined, b: MsgCastVote | PlainMessage<MsgCastVote> | undefined): boolean {
+    return proto3.util.equals(MsgCastVote, a, b);
+  }
+}
+
+/**
+ * @generated from message badges.MsgCastVoteResponse
+ */
+export class MsgCastVoteResponse extends Message<MsgCastVoteResponse> {
+  constructor(data?: PartialMessage<MsgCastVoteResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "badges.MsgCastVoteResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCastVoteResponse {
+    return new MsgCastVoteResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCastVoteResponse {
+    return new MsgCastVoteResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCastVoteResponse {
+    return new MsgCastVoteResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgCastVoteResponse | PlainMessage<MsgCastVoteResponse> | undefined, b: MsgCastVoteResponse | PlainMessage<MsgCastVoteResponse> | undefined): boolean {
+    return proto3.util.equals(MsgCastVoteResponse, a, b);
   }
 }
 
