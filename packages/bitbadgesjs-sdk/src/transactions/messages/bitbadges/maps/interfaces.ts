@@ -1,7 +1,7 @@
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, CustomTypeClass } from '@/common/base.js';
 import { NumberType, Stringify } from '@/common/string-numbers.js';
-import { CollectionMetadata } from '@/core';
+import { CollectionMetadata } from '@/core/misc.js';
 import { ActionPermission } from '@/core/permissions.js';
 import type { iActionPermission, iCollectionMetadata } from '@/interfaces/index.js';
 import * as maps from '@/proto/maps/tx_pb.js';

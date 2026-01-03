@@ -1,7 +1,7 @@
 import type { CustomType } from '@/common/base.js';
 import { CustomTypeClass } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
-import { CollectionId } from '@/interfaces/types/core';
+import { CollectionId } from '@/interfaces/types/core.js';
 
 import axios from 'axios';
 
