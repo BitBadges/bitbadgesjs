@@ -200,6 +200,7 @@ export interface iNotificationPreferences<T extends NumberType> {
     transferActivity?: boolean;
     claimActivity?: boolean;
     ignoreIfInitiator?: boolean;
+    signInAlertsEnabled?: boolean;
   };
 }
 

@@ -29,6 +29,8 @@ import type {
   iCollectionInvariants,
   iCollectionMetadata,
   iCosmosCoinBackedPath,
+  iDynamicStore,
+  iDynamicStoreValue,
   iETHSignatureChallenge,
   iETHSignatureProof,
   iMerkleChallenge,
@@ -45,6 +47,7 @@ import type {
   iVotingChallenge
 } from '../interfaces/types/core.js';
 import * as protobadges from '../proto/badges/index.js';
+import * as protobadgesDynamicStores from '../proto/badges/dynamic_stores_pb.js';
 import { CosmosCoin, iCosmosCoin } from './coin.js';
 import type { UniversalPermission } from './overlaps.js';
 import { GetFirstMatchOnly, getOverlapsAndNonOverlaps } from './overlaps.js';
@@ -1451,6 +1454,89 @@ export class VoteProof<T extends NumberType> extends BaseNumberTypeClass<VotePro
       voter: item.voter,
       yesWeight: convertFunction(item.yesWeight)
     });
+  }
+}
+
+/**
+ * DynamicStore is a flexible storage object that can store arbitrary data.
+ * It is identified by a unique ID assigned by the blockchain, which is a uint64 that increments.
+ * Dynamic stores are created by users and can only be updated or deleted by their creator.
+ * They provide a way to store custom data on-chain with proper access control.
+ *
+ * @category Collections
+ */
+export class DynamicStore<T extends NumberType> extends BaseNumberTypeClass<DynamicStore<T>> implements iDynamicStore<T> {
+  storeId: T;
+  createdBy: string;
+  defaultValue: boolean;
+  globalEnabled: boolean;
+
+  constructor(dynamicStore: iDynamicStore<T>) {
+    super();
+    this.storeId = dynamicStore.storeId;
+    this.createdBy = dynamicStore.createdBy;
+    this.defaultValue = dynamicStore.defaultValue;
+    this.globalEnabled = dynamicStore.globalEnabled;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['storeId'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DynamicStore<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStore<U>;
+  }
+
+  static fromProto<U extends NumberType>(item: protobadgesDynamicStores.DynamicStore, convertFunction: (item: NumberType) => U): DynamicStore<U> {
+    return new DynamicStore<U>({
+      storeId: convertFunction(item.storeId),
+      createdBy: item.createdBy,
+      defaultValue: item.defaultValue,
+      globalEnabled: item.globalEnabled
+    });
+  }
+
+  toProto(): protobadgesDynamicStores.DynamicStore {
+    return new protobadgesDynamicStores.DynamicStore(this.convert(Stringify));
+  }
+}
+
+/**
+ * DynamicStoreValue stores a boolean value for a specific address in a dynamic store.
+ * This allows the creator to set true/false values per address that can be checked during approval.
+ *
+ * @category Collections
+ */
+export class DynamicStoreValue<T extends NumberType> extends BaseNumberTypeClass<DynamicStoreValue<T>> implements iDynamicStoreValue<T> {
+  storeId: T;
+  address: string;
+  value: boolean;
+
+  constructor(dynamicStoreValue: iDynamicStoreValue<T>) {
+    super();
+    this.storeId = dynamicStoreValue.storeId;
+    this.address = dynamicStoreValue.address;
+    this.value = dynamicStoreValue.value;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['storeId'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DynamicStoreValue<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStoreValue<U>;
+  }
+
+  static fromProto<U extends NumberType>(item: protobadgesDynamicStores.DynamicStoreValue, convertFunction: (item: NumberType) => U): DynamicStoreValue<U> {
+    return new DynamicStoreValue<U>({
+      storeId: convertFunction(item.storeId),
+      address: item.address,
+      value: item.value
+    });
+  }
+
+  toProto(): protobadgesDynamicStores.DynamicStoreValue {
+    return new protobadgesDynamicStores.DynamicStoreValue(this.convert(Stringify));
   }
 }
 

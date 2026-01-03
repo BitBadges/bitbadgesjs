@@ -101,6 +101,10 @@ export interface iCollectionPermissions<T extends NumberType> {
   canUpdateTokenMetadata: iTokenIdsActionPermission<T>[];
   /** The permissions for updating the collection approved transfers. */
   canUpdateCollectionApprovals: iCollectionApprovalPermission<T>[];
+  /** The permissions for adding more alias paths to the collection. */
+  canAddMoreAliasPaths: iActionPermission<T>[];
+  /** The permissions for adding more cosmos coin wrapper paths to the collection. */
+  canAddMoreCosmosCoinWrapperPaths: iActionPermission<T>[];
 }
 
 /**

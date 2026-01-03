@@ -404,6 +404,8 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
   canUpdateValidTokenIds: TokenIdsActionPermission<T>[];
   canUpdateTokenMetadata: TokenIdsActionPermission<T>[];
   canUpdateCollectionApprovals: CollectionApprovalPermission<T>[];
+  canAddMoreAliasPaths: ActionPermission<T>[];
+  canAddMoreCosmosCoinWrapperPaths: ActionPermission<T>[];
 
   constructor(msg: iCollectionPermissions<T>) {
     super();
@@ -416,6 +418,8 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
     this.canUpdateValidTokenIds = msg.canUpdateValidTokenIds.map((x) => new TokenIdsActionPermission(x));
     this.canUpdateTokenMetadata = msg.canUpdateTokenMetadata.map((x) => new TokenIdsActionPermission(x));
     this.canUpdateCollectionApprovals = msg.canUpdateCollectionApprovals.map((x) => new CollectionApprovalPermission(x));
+    this.canAddMoreAliasPaths = msg.canAddMoreAliasPaths.map((x) => new ActionPermission(x));
+    this.canAddMoreCosmosCoinWrapperPaths = msg.canAddMoreCosmosCoinWrapperPaths.map((x) => new ActionPermission(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionPermissions<U> {
@@ -429,7 +433,9 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
         canUpdateCollectionMetadata: this.canUpdateCollectionMetadata.map((x) => x.convert(convertFunction)),
         canUpdateValidTokenIds: this.canUpdateValidTokenIds.map((x) => x.convert(convertFunction)),
         canUpdateTokenMetadata: this.canUpdateTokenMetadata.map((x) => x.convert(convertFunction)),
-        canUpdateCollectionApprovals: this.canUpdateCollectionApprovals.map((x) => x.convert(convertFunction))
+        canUpdateCollectionApprovals: this.canUpdateCollectionApprovals.map((x) => x.convert(convertFunction)),
+        canAddMoreAliasPaths: this.canAddMoreAliasPaths.map((x) => x.convert(convertFunction)),
+        canAddMoreCosmosCoinWrapperPaths: this.canAddMoreCosmosCoinWrapperPaths.map((x) => x.convert(convertFunction))
       })
     );
   }
@@ -467,7 +473,9 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
       canUpdateCollectionMetadata: protoMsg.canUpdateCollectionMetadata.map((x) => ActionPermission.fromProto(x, convertFunction)),
       canUpdateValidTokenIds: protoMsg.canUpdateValidTokenIds.map((x) => TokenIdsActionPermission.fromProto(x, convertFunction)),
       canUpdateTokenMetadata: protoMsg.canUpdateTokenMetadata.map((x) => TokenIdsActionPermission.fromProto(x, convertFunction)),
-      canUpdateCollectionApprovals: protoMsg.canUpdateCollectionApprovals.map((x) => CollectionApprovalPermission.fromProto(x, convertFunction))
+      canUpdateCollectionApprovals: protoMsg.canUpdateCollectionApprovals.map((x) => CollectionApprovalPermission.fromProto(x, convertFunction)),
+      canAddMoreAliasPaths: protoMsg.canAddMoreAliasPaths.map((x) => ActionPermission.fromProto(x, convertFunction)),
+      canAddMoreCosmosCoinWrapperPaths: protoMsg.canAddMoreCosmosCoinWrapperPaths.map((x) => ActionPermission.fromProto(x, convertFunction))
     });
   }
 
@@ -484,7 +492,9 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
       ActionPermission.validateUpdate(oldPermissions.canUpdateCollectionMetadata, newPermissions.canUpdateCollectionMetadata),
       TokenIdsActionPermission.validateUpdate(oldPermissions.canUpdateValidTokenIds, newPermissions.canUpdateValidTokenIds),
       TokenIdsActionPermission.validateUpdate(oldPermissions.canUpdateTokenMetadata, newPermissions.canUpdateTokenMetadata),
-      CollectionApprovalPermission.validateUpdate(oldPermissions.canUpdateCollectionApprovals, newPermissions.canUpdateCollectionApprovals)
+      CollectionApprovalPermission.validateUpdate(oldPermissions.canUpdateCollectionApprovals, newPermissions.canUpdateCollectionApprovals),
+      ActionPermission.validateUpdate(oldPermissions.canAddMoreAliasPaths, newPermissions.canAddMoreAliasPaths),
+      ActionPermission.validateUpdate(oldPermissions.canAddMoreCosmosCoinWrapperPaths, newPermissions.canAddMoreCosmosCoinWrapperPaths)
     ];
 
     return responses.find((x) => x !== null) ?? null;
@@ -500,7 +510,9 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
       canUpdateCollectionMetadata: [],
       canUpdateValidTokenIds: [],
       canUpdateTokenMetadata: [],
-      canUpdateCollectionApprovals: []
+      canUpdateCollectionApprovals: [],
+      canAddMoreAliasPaths: [],
+      canAddMoreCosmosCoinWrapperPaths: []
     });
   }
 

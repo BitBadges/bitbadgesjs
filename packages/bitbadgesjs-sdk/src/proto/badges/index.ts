@@ -6,6 +6,7 @@ export * from './approvals_pb.js';
 export * from './balances_pb.js';
 export * from './challenges_pb.js';
 export * from './collections_pb.js';
+export * from './dynamic_stores_pb.js';
 export * from './genesis_pb.js';
 
 export * from './legacytx_pb.js';

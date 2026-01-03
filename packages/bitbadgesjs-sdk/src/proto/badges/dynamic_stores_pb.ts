@@ -37,6 +37,14 @@ export class DynamicStore extends Message<DynamicStore> {
    */
   defaultValue = false;
 
+  /**
+   * Global kill switch state (defaults to true on creation, can be toggled via UpdateDynamicStore).
+   * When false, all approvals using this store via DynamicStoreChallenge will fail immediately.
+   *
+   * @generated from field: bool globalEnabled = 4;
+   */
+  globalEnabled = false;
+
   constructor(data?: PartialMessage<DynamicStore>) {
     super();
     proto3.util.initPartial(data, this);
@@ -48,6 +56,7 @@ export class DynamicStore extends Message<DynamicStore> {
     { no: 1, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "createdBy", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "defaultValue", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "globalEnabled", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DynamicStore {

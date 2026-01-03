@@ -2313,6 +2313,14 @@ export class MsgUpdateDynamicStore extends Message<MsgUpdateDynamicStore> {
    */
   defaultValue = false;
 
+  /**
+   * The global kill switch state (true = enabled, false = disabled/halted).
+   * Callers should query the current value first if they want to keep it unchanged.
+   *
+   * @generated from field: bool globalEnabled = 4;
+   */
+  globalEnabled = false;
+
   constructor(data?: PartialMessage<MsgUpdateDynamicStore>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2324,6 +2332,7 @@ export class MsgUpdateDynamicStore extends Message<MsgUpdateDynamicStore> {
     { no: 1, name: "creator", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "storeId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "defaultValue", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "globalEnabled", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgUpdateDynamicStore {

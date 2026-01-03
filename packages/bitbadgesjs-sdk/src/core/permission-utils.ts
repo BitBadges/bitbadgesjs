@@ -26,7 +26,9 @@ export type PermissionNameString =
   | 'canUpdateAutoApproveAllIncomingTransfers'
   | 'canUpdateStandards'
   | 'canUpdateCustomData'
-  | 'canUpdateManager';
+  | 'canUpdateManager'
+  | 'canAddMoreAliasPaths'
+  | 'canAddMoreCosmosCoinWrapperPaths';
 
 /**
  * Gets the permission variables from a permission name. Variables include the flags, question, and validation function.
@@ -74,6 +76,8 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canUpdateCustomData':
     case 'canUpdateManager':
     case 'canUpdateCollectionMetadata':
+    case 'canAddMoreAliasPaths':
+    case 'canAddMoreCosmosCoinWrapperPaths':
       validatePermissionUpdateFunction = ActionPermission.validateUpdate;
       break;
     case 'canUpdateValidTokenIds':
@@ -128,6 +132,12 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canUpdateAutoApproveAllIncomingTransfers':
       question = 'Can update auto approve all incoming transfers?';
       break;
+    case 'canAddMoreAliasPaths':
+      question = 'Can add more alias paths?';
+      break;
+    case 'canAddMoreCosmosCoinWrapperPaths':
+      question = 'Can add more cosmos coin wrapper paths?';
+      break;
     // Add custom questions for other permissions as needed
   }
 
@@ -143,6 +153,8 @@ export const getPermissionVariablesFromName = (permissionName: PermissionNameStr
     case 'canUpdateCustomData':
     case 'canUpdateManager':
     case 'canUpdateCollectionMetadata':
+    case 'canAddMoreAliasPaths':
+    case 'canAddMoreCosmosCoinWrapperPaths':
       flags = ActionPermissionUsedFlags;
       break;
     case 'canUpdateValidTokenIds':

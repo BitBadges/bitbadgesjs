@@ -132,7 +132,10 @@ export class MustOwnTokens extends Message<MustOwnTokens> {
   mustSatisfyForAllAssets = false;
 
   /**
-   * The party to check ownership for. Options are "initiator", "sender", or "recipient". Defaults to "initiator" if empty.
+   * The party to check ownership for. Options are "initiator", "sender", "recipient", or any valid bb1 address.
+   * If a valid bb1 address is provided, ownership will be checked for that specific address.
+   * This enables use cases like halt tokens where ownership is checked for an arbitrary address (e.g., halt token owner).
+   * Defaults to "initiator" if empty or if the value is not a recognized option or valid bb1 address.
    *
    * @generated from field: string ownershipCheckParty = 7;
    */

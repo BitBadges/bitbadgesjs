@@ -763,6 +763,60 @@ export interface iVoteProof<T extends NumberType> {
 }
 
 /**
+ * DynamicStore is a flexible storage object that can store arbitrary data.
+ * It is identified by a unique ID assigned by the blockchain, which is a uint64 that increments.
+ * Dynamic stores are created by users and can only be updated or deleted by their creator.
+ * They provide a way to store custom data on-chain with proper access control.
+ *
+ * @category Interfaces
+ */
+export interface iDynamicStore<T extends NumberType> {
+  /**
+   * The unique identifier for this dynamic store. This is assigned by the blockchain.
+   */
+  storeId: T;
+
+  /**
+   * The address of the creator of this dynamic store.
+   */
+  createdBy: string;
+
+  /**
+   * The default value for uninitialized addresses (true/false).
+   */
+  defaultValue: boolean;
+
+  /**
+   * Global kill switch state (defaults to true on creation, can be toggled via UpdateDynamicStore).
+   * When false, all approvals using this store via DynamicStoreChallenge will fail immediately.
+   */
+  globalEnabled: boolean;
+}
+
+/**
+ * DynamicStoreValue stores a boolean value for a specific address in a dynamic store.
+ * This allows the creator to set true/false values per address that can be checked during approval.
+ *
+ * @category Interfaces
+ */
+export interface iDynamicStoreValue<T extends NumberType> {
+  /**
+   * The unique identifier for this dynamic store.
+   */
+  storeId: T;
+
+  /**
+   * The address for which this value is stored.
+   */
+  address: string;
+
+  /**
+   * The boolean value (true/false).
+   */
+  value: boolean;
+}
+
+/**
  * @category Interfaces
  */
 

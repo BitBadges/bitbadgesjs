@@ -1210,6 +1210,18 @@ const universalParams = {
         permanentlyPermittedTimes: [new UintRange()],
         permanentlyForbiddenTimes: [new UintRange()]
       })
+    ],
+    canAddMoreAliasPaths: [
+      new ActionPermission({
+        permanentlyPermittedTimes: [new UintRange()],
+        permanentlyForbiddenTimes: [new UintRange()]
+      })
+    ],
+    canAddMoreCosmosCoinWrapperPaths: [
+      new ActionPermission({
+        permanentlyPermittedTimes: [new UintRange()],
+        permanentlyForbiddenTimes: [new UintRange()]
+      })
     ]
   }),
   mintEscrowCoinsToTransfer: [
@@ -1477,7 +1489,9 @@ export function getSampleMsg(msgType: string, currMsg: any) {
         type: msgType,
         value: new MsgUpdateDynamicStore({
           creator: '',
-          storeId: '0'
+          storeId: '0',
+          defaultValue: false,
+          globalEnabled: true
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/TransferTokens':

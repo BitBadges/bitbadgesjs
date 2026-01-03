@@ -14,14 +14,19 @@ import { normalizeMessagesIfNecessary } from '../../base.js';
  */
 export class MsgCreateDynamicStore extends CustomTypeClass<MsgCreateDynamicStore> implements iMsgCreateDynamicStore {
   creator: BitBadgesAddress;
+  defaultValue: boolean;
 
   constructor(msg: iMsgCreateDynamicStore) {
     super();
     this.creator = msg.creator;
+    this.defaultValue = msg.defaultValue;
   }
 
   toProto(): protobadges.MsgCreateDynamicStore {
-    return new protobadges.MsgCreateDynamicStore({ creator: this.creator });
+    return new protobadges.MsgCreateDynamicStore({
+      creator: this.creator,
+      defaultValue: this.defaultValue
+    });
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCreateDynamicStore {
@@ -33,12 +38,16 @@ export class MsgCreateDynamicStore extends CustomTypeClass<MsgCreateDynamicStore
   }
 
   static fromProto(protoMsg: protobadges.MsgCreateDynamicStore): MsgCreateDynamicStore {
-    return new MsgCreateDynamicStore({ creator: protoMsg.creator });
+    return new MsgCreateDynamicStore({
+      creator: protoMsg.creator,
+      defaultValue: protoMsg.defaultValue
+    });
   }
 
   toBech32Addresses(prefix: string): MsgCreateDynamicStore {
     return new MsgCreateDynamicStore({
-      creator: getConvertFunctionFromPrefix(prefix)(this.creator)
+      creator: getConvertFunctionFromPrefix(prefix)(this.creator),
+      defaultValue: this.defaultValue
     });
   }
 

@@ -96,6 +96,20 @@ export class CollectionPermissions extends Message<CollectionPermissions> {
    */
   canUpdateCollectionApprovals: CollectionApprovalPermission[] = [];
 
+  /**
+   * Permissions related to adding more alias paths to the collection.
+   *
+   * @generated from field: repeated badges.ActionPermission canAddMoreAliasPaths = 10;
+   */
+  canAddMoreAliasPaths: ActionPermission[] = [];
+
+  /**
+   * Permissions related to adding more cosmos coin wrapper paths to the collection.
+   *
+   * @generated from field: repeated badges.ActionPermission canAddMoreCosmosCoinWrapperPaths = 11;
+   */
+  canAddMoreCosmosCoinWrapperPaths: ActionPermission[] = [];
+
   constructor(data?: PartialMessage<CollectionPermissions>) {
     super();
     proto3.util.initPartial(data, this);
@@ -113,6 +127,8 @@ export class CollectionPermissions extends Message<CollectionPermissions> {
     { no: 7, name: "canUpdateValidTokenIds", kind: "message", T: TokenIdsActionPermission, repeated: true },
     { no: 8, name: "canUpdateTokenMetadata", kind: "message", T: TokenIdsActionPermission, repeated: true },
     { no: 9, name: "canUpdateCollectionApprovals", kind: "message", T: CollectionApprovalPermission, repeated: true },
+    { no: 10, name: "canAddMoreAliasPaths", kind: "message", T: ActionPermission, repeated: true },
+    { no: 11, name: "canAddMoreCosmosCoinWrapperPaths", kind: "message", T: ActionPermission, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CollectionPermissions {

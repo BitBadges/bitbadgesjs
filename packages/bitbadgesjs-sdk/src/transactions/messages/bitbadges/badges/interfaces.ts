@@ -176,6 +176,8 @@ export interface iMsgUpdateUserApprovals<T extends NumberType> {
 export interface iMsgCreateDynamicStore {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
+  /** The default value for uninitialized addresses (true/false). */
+  defaultValue: boolean;
 }
 
 /**
@@ -186,6 +188,10 @@ export interface iMsgUpdateDynamicStore<T extends NumberType> {
   creator: BitBadgesAddress;
   /** The ID of the dynamic store to update. */
   storeId: T;
+  /** The new default value for uninitialized addresses (true/false). */
+  defaultValue?: boolean;
+  /** The global kill switch state (true = enabled, false = disabled/halted). Callers should query the current value first if they want to keep it unchanged. */
+  globalEnabled?: boolean;
 }
 
 /**

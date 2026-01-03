@@ -923,7 +923,7 @@ export interface iUpdateAccountInfoPayload {
     email?: string;
     discord?: { id: string; username: string; discriminator: string | undefined } | undefined;
     antiPhishingCode?: string;
-    preferences?: { transferActivity?: boolean; ignoreIfInitiator?: boolean };
+    preferences?: { transferActivity?: boolean; ignoreIfInitiator?: boolean; signInAlertsEnabled?: boolean };
   };
 
   /**
@@ -1212,12 +1212,32 @@ export interface iVerifySignInPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iVerifySignInSuccessResponse {}
+export interface iVerifySignInSuccessResponse {
+  /**
+   * True if 2FA is set up and verification is required.
+   */
+  requires2FA?: boolean;
+
+  /**
+   * Message indicating 2FA is required.
+   */
+  message?: string;
+}
 
 /**
+ * @inheritDoc iVerifySignInSuccessResponse
  * @category API Requests / Responses
  */
-export class VerifySignInSuccessResponse extends EmptyResponseClass {}
+export class VerifySignInSuccessResponse extends CustomTypeClass<VerifySignInSuccessResponse> implements iVerifySignInSuccessResponse {
+  requires2FA?: boolean;
+  message?: string;
+
+  constructor(data: iVerifySignInSuccessResponse) {
+    super();
+    this.requires2FA = data.requires2FA;
+    this.message = data.message;
+  }
+}
 
 /**
  * @category API Requests / Responses
@@ -1232,7 +1252,6 @@ export interface iCheckSignInStatusSuccessResponse {
    * Indicates whether the user is signed in.
    */
   signedIn: boolean;
-
   address: NativeAddress;
   bitbadgesAddress: BitBadgesAddress;
   chain: SupportedChain;
@@ -1396,6 +1415,21 @@ export interface iCheckSignInStatusSuccessResponse {
     id: string;
     username: string;
   };
+
+  /**
+   * True if 2FA is verified in session.
+   */
+  twoFAVerified?: boolean;
+
+  /**
+   * True if 2FA is set up but not verified.
+   */
+  requires2FA?: boolean;
+
+  /**
+   * Timestamp when 2FA was verified.
+   */
+  twoFAVerifiedAt?: number;
 }
 
 /**
@@ -1449,6 +1483,9 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
   address: string;
   bitbadgesAddress: string;
   chain: SupportedChain;
+  twoFAVerified?: boolean;
+  requires2FA?: boolean;
+  twoFAVerifiedAt?: number;
 
   constructor(data: iCheckSignInStatusSuccessResponse) {
     super();
@@ -1478,6 +1515,9 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     this.address = data.address;
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.chain = data.chain;
+    this.twoFAVerified = data.twoFAVerified;
+    this.requires2FA = data.requires2FA;
+    this.twoFAVerifiedAt = data.twoFAVerifiedAt;
   }
 }
 

@@ -640,6 +640,27 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
+   * Checks if this permission is executable at a specific time (Date.now() by default).
+   *
+   * Wrapper for {@link ActionPermission.check}.
+   */
+  checkCanAddMoreAliasPaths(time?: NumberType) {
+    return ActionPermission.check(this.convert(BigIntify).collectionPermissions.canAddMoreAliasPaths, time ? BigInt(time) : BigInt(Date.now()));
+  }
+
+  /**
+   * Checks if this permission is executable at a specific time (Date.now() by default).
+   *
+   * Wrapper for {@link ActionPermission.check}.
+   */
+  checkCanAddMoreCosmosCoinWrapperPaths(time?: NumberType) {
+    return ActionPermission.check(
+      this.convert(BigIntify).collectionPermissions.canAddMoreCosmosCoinWrapperPaths,
+      time ? BigInt(time) : BigInt(Date.now())
+    );
+  }
+
+  /**
    * Fetches and initializes a new BitBadgesCollection object from an API request. Must pass in a valid API instance.
    */
   static async FetchAndInitialize<T extends NumberType>(
