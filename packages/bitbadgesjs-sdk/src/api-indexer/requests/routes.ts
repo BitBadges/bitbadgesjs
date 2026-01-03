@@ -150,4 +150,11 @@ export class BitBadgesApiRoutes {
 
   static GetCollectionAmountTrackerByIdRoute = () => `/api/v0/collection/amountTracker`;
   static GetCollectionChallengeTrackerByIdRoute = () => `/api/v0/collection/challengeTracker`;
+
+  static GetSwapActivitiesRoute = () => '/api/v0/swapActivities';
+  static GetOnChainDynamicStoreRoute = (storeId: string) => `/api/v0/onChainDynamicStore/${storeId.toString()}`;
+  static GetOnChainDynamicStoresByCreatorRoute = (address: NativeAddress) => `/api/v0/onChainDynamicStores/by-creator/${address}`;
+  static GetOnChainDynamicStoreValueRoute = (storeId: string, address: NativeAddress) =>
+    `/api/v0/onChainDynamicStore/${storeId.toString()}/value/${address}`;
+  static GetOnChainDynamicStoreValuesPaginatedRoute = (storeId: string) => `/api/v0/onChainDynamicStore/${storeId.toString()}/values`;
 }

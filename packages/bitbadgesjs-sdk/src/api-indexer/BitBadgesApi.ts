@@ -87,6 +87,11 @@ import {
   GetDynamicDataStoreValueSuccessResponse,
   GetDynamicDataStoreValuesPaginatedSuccessResponse,
   GetDynamicDataStoresSuccessResponse,
+  GetSwapActivitiesSuccessResponse,
+  GetOnChainDynamicStoreSuccessResponse,
+  GetOnChainDynamicStoresByCreatorSuccessResponse,
+  GetOnChainDynamicStoreValueSuccessResponse,
+  GetOnChainDynamicStoreValuesPaginatedSuccessResponse,
   GetGatedContentForClaimSuccessResponse,
   GetPluginErrorsSuccessResponse,
   GetPluginSuccessResponse,
@@ -184,6 +189,16 @@ import {
   iGetDynamicDataStoreValuesPaginatedPayload,
   iGetDynamicDataStoresPayload,
   iGetDynamicDataStoresSuccessResponse,
+  iGetSwapActivitiesPayload,
+  iGetSwapActivitiesSuccessResponse,
+  iGetOnChainDynamicStorePayload,
+  iGetOnChainDynamicStoreSuccessResponse,
+  iGetOnChainDynamicStoresByCreatorPayload,
+  iGetOnChainDynamicStoresByCreatorSuccessResponse,
+  iGetOnChainDynamicStoreValuePayload,
+  iGetOnChainDynamicStoreValueSuccessResponse,
+  iGetOnChainDynamicStoreValuesPaginatedPayload,
+  iGetOnChainDynamicStoreValuesPaginatedSuccessResponse,
   iGetGatedContentForClaimPayload,
   iGetPluginErrorsPayload,
   iGetPluginPayload,
@@ -2602,6 +2617,150 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         { params: payload }
       );
       return new GetAttemptDataFromRequestBinSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get Swap Activities
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/swapActivities`
+   * - **SDK Function Call**: `await BitBadgesApi.getSwapActivities({ bookmark: '', limit: 25 });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getSwapActivities({ bookmark: '', limit: 25 });
+   * console.log(res);
+   * ```
+   */
+  public async getSwapActivities(payload?: iGetSwapActivitiesPayload): Promise<GetSwapActivitiesSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetSwapActivitiesPayload> = typia.validate<iGetSwapActivitiesPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetSwapActivitiesSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSwapActivitiesRoute()}`,
+        { params: payload }
+      );
+      return new GetSwapActivitiesSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get On-Chain Dynamic Store by ID
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/onChainDynamicStore/:storeId`
+   * - **SDK Function Call**: `await BitBadgesApi.getOnChainDynamicStore(storeId);`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getOnChainDynamicStore(storeId);
+   * console.log(res);
+   * ```
+   */
+  public async getOnChainDynamicStore(storeId: string): Promise<GetOnChainDynamicStoreSuccessResponse<T>> {
+    try {
+      const response = await this.axios.get<iGetOnChainDynamicStoreSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetOnChainDynamicStoreRoute(storeId)}`
+      );
+      return new GetOnChainDynamicStoreSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get On-Chain Dynamic Stores by Creator
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/onChainDynamicStores/by-creator/:address`
+   * - **SDK Function Call**: `await BitBadgesApi.getOnChainDynamicStoresByCreator(address);`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getOnChainDynamicStoresByCreator(address);
+   * console.log(res);
+   * ```
+   */
+  public async getOnChainDynamicStoresByCreator(address: NativeAddress): Promise<GetOnChainDynamicStoresByCreatorSuccessResponse<T>> {
+    try {
+      const response = await this.axios.get<iGetOnChainDynamicStoresByCreatorSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetOnChainDynamicStoresByCreatorRoute(address)}`
+      );
+      return new GetOnChainDynamicStoresByCreatorSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get On-Chain Dynamic Store Value
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/onChainDynamicStore/:storeId/value/:address`
+   * - **SDK Function Call**: `await BitBadgesApi.getOnChainDynamicStoreValue(storeId, address);`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getOnChainDynamicStoreValue(storeId, address);
+   * console.log(res);
+   * ```
+   */
+  public async getOnChainDynamicStoreValue(storeId: string, address: NativeAddress): Promise<GetOnChainDynamicStoreValueSuccessResponse> {
+    try {
+      const response = await this.axios.get<iGetOnChainDynamicStoreValueSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetOnChainDynamicStoreValueRoute(storeId, address)}`
+      );
+      return new GetOnChainDynamicStoreValueSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get On-Chain Dynamic Store Values (Paginated)
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/onChainDynamicStore/:storeId/values`
+   * - **SDK Function Call**: `await BitBadgesApi.getOnChainDynamicStoreValuesPaginated(storeId, { bookmark: '', limit: 25 });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getOnChainDynamicStoreValuesPaginated(storeId, {
+   *   bookmark: '',
+   *   limit: 25
+   * });
+   * console.log(res);
+   * ```
+   */
+  public async getOnChainDynamicStoreValuesPaginated(
+    storeId: string,
+    payload?: iGetOnChainDynamicStoreValuesPaginatedPayload
+  ): Promise<GetOnChainDynamicStoreValuesPaginatedSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetOnChainDynamicStoreValuesPaginatedPayload> =
+        typia.validate<iGetOnChainDynamicStoreValuesPaginatedPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetOnChainDynamicStoreValuesPaginatedSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetOnChainDynamicStoreValuesPaginatedRoute(storeId)}`,
+        { params: payload }
+      );
+      return new GetOnChainDynamicStoreValuesPaginatedSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
