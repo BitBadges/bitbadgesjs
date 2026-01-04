@@ -3,7 +3,7 @@ name: Generate API Documentation
 on:
   push:
     paths:
-      - 'packages/bitbadgesjs-sdk/**'
+      - "packages/bitbadgesjs-sdk/**"
   workflow_dispatch:
 
 jobs:
@@ -25,11 +25,16 @@ jobs:
         with:
           node-version: 18
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
       - name: Install dependencies
         run: |
-          npm install
-          npm install -g tsx typescript ts-node @stoplight/cli
-          npm install -D @types/node
+          bun install
+          bun install -g typescript ts-node @stoplight/cli
+          bun install -d @types/node
           python -m pip install --upgrade pip
           python -m pip install --upgrade build twine setuptools wheel
           pip install pydantic urllib3 python-dateutil requests pytest
@@ -47,4 +52,4 @@ jobs:
         env:
           STOPLIGHT_TOKEN: ${{ secrets.STOPLIGHT_TOKEN }}
         run: |
-          npx @stoplight/cli@6 push --ci-token "$STOPLIGHT_TOKEN" --branch main --directory ./openapitypes
+          bunx @stoplight/cli@6 push --ci-token "$STOPLIGHT_TOKEN" --branch main --directory ./openapitypes
