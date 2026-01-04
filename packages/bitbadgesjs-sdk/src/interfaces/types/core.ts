@@ -791,6 +791,16 @@ export interface iDynamicStore<T extends NumberType> {
    * When false, all approvals using this store via DynamicStoreChallenge will fail immediately.
    */
   globalEnabled: boolean;
+
+  /**
+   * URI for additional metadata or resources associated with this dynamic store.
+   */
+  uri: string;
+
+  /**
+   * Custom data field for storing arbitrary data associated with this dynamic store.
+   */
+  customData: string;
 }
 
 /**

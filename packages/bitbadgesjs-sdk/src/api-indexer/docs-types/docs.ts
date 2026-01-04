@@ -75,6 +75,9 @@ import {
   type iCustomPage,
   type iDepositBalanceDoc,
   type iDeveloperAppDoc,
+  type iDynamicStoreDoc,
+  type iDynamicStoreDocWithDetails,
+  type iDynamicStoreValueDoc,
   type iEmailVerificationStatus,
   type iFetchDoc,
   type iIPFSTotalsDoc,
@@ -2355,5 +2358,109 @@ export class TransactionEntry<T extends NumberType> extends BaseNumberTypeClass<
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransactionEntry<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TransactionEntry<U>;
+  }
+}
+
+/**
+ * @inheritDoc iDynamicStoreDoc
+ * @category Collections
+ */
+export class DynamicStoreDoc<T extends NumberType> extends BaseNumberTypeClass<DynamicStoreDoc<T>> implements iDynamicStoreDoc<T> {
+  _id?: string;
+  _docId: string;
+  storeId: T;
+  createdBy: string;
+  defaultValue: boolean;
+  globalEnabled: boolean;
+  uri?: string;
+  customData?: string;
+
+  constructor(doc: iDynamicStoreDoc<T>) {
+    super();
+    this._id = doc._id;
+    this._docId = doc._docId;
+    this.storeId = doc.storeId;
+    this.createdBy = doc.createdBy;
+    this.defaultValue = doc.defaultValue;
+    this.globalEnabled = doc.globalEnabled;
+    this.uri = doc.uri;
+    this.customData = doc.customData;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['storeId'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): DynamicStoreDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStoreDoc<U>;
+  }
+}
+
+/**
+ * @inheritDoc iDynamicStoreDocWithDetails
+ * @category Collections
+ */
+export class DynamicStoreDocWithDetails<T extends NumberType>
+  extends BaseNumberTypeClass<DynamicStoreDocWithDetails<T>>
+  implements iDynamicStoreDocWithDetails<T>
+{
+  _id?: string;
+  _docId: string;
+  storeId: T;
+  createdBy: string;
+  defaultValue: boolean;
+  globalEnabled: boolean;
+  uri?: string;
+  customData?: string;
+  metadata?: Metadata<T>;
+
+  constructor(doc: iDynamicStoreDocWithDetails<T>) {
+    super();
+    this._id = doc._id;
+    this._docId = doc._docId;
+    this.storeId = doc.storeId;
+    this.createdBy = doc.createdBy;
+    this.defaultValue = doc.defaultValue;
+    this.globalEnabled = doc.globalEnabled;
+    this.uri = doc.uri;
+    this.customData = doc.customData;
+    this.metadata = doc.metadata ? new Metadata(doc.metadata) : undefined;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['storeId'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): DynamicStoreDocWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStoreDocWithDetails<U>;
+  }
+}
+
+/**
+ * @inheritDoc iDynamicStoreValueDoc
+ * @category Collections
+ */
+export class DynamicStoreValueDoc<T extends NumberType> extends BaseNumberTypeClass<DynamicStoreValueDoc<T>> implements iDynamicStoreValueDoc<T> {
+  _id?: string;
+  _docId: string;
+  storeId: T;
+  address: string;
+  value: boolean;
+
+  constructor(doc: iDynamicStoreValueDoc<T>) {
+    super();
+    this._id = doc._id;
+    this._docId = doc._docId;
+    this.storeId = doc.storeId;
+    this.address = doc.address;
+    this.value = doc.value;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['storeId'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): DynamicStoreValueDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStoreValueDoc<U>;
   }
 }

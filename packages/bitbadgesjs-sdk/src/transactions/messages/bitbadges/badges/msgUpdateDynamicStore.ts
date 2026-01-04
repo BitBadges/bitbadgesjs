@@ -18,6 +18,8 @@ export class MsgUpdateDynamicStore<T extends NumberType> extends CustomTypeClass
   storeId: T;
   defaultValue?: boolean;
   globalEnabled?: boolean;
+  uri?: string;
+  customData?: string;
 
   constructor(msg: iMsgUpdateDynamicStore<T>) {
     super();
@@ -25,6 +27,8 @@ export class MsgUpdateDynamicStore<T extends NumberType> extends CustomTypeClass
     this.storeId = msg.storeId;
     this.defaultValue = msg.defaultValue;
     this.globalEnabled = msg.globalEnabled;
+    this.uri = msg.uri;
+    this.customData = msg.customData;
   }
 
   toProto(): protobadges.MsgUpdateDynamicStore {
@@ -32,7 +36,9 @@ export class MsgUpdateDynamicStore<T extends NumberType> extends CustomTypeClass
       creator: this.creator,
       storeId: this.storeId.toString(),
       defaultValue: this.defaultValue,
-      globalEnabled: this.globalEnabled
+      globalEnabled: this.globalEnabled,
+      uri: this.uri,
+      customData: this.customData
     });
   }
 
@@ -49,7 +55,9 @@ export class MsgUpdateDynamicStore<T extends NumberType> extends CustomTypeClass
       creator: protoMsg.creator,
       storeId: protoMsg.storeId,
       defaultValue: protoMsg.defaultValue,
-      globalEnabled: protoMsg.globalEnabled
+      globalEnabled: protoMsg.globalEnabled,
+      uri: protoMsg.uri,
+      customData: protoMsg.customData
     });
   }
 
@@ -58,7 +66,9 @@ export class MsgUpdateDynamicStore<T extends NumberType> extends CustomTypeClass
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       storeId: this.storeId,
       defaultValue: this.defaultValue,
-      globalEnabled: this.globalEnabled
+      globalEnabled: this.globalEnabled,
+      uri: this.uri,
+      customData: this.customData
     });
   }
 

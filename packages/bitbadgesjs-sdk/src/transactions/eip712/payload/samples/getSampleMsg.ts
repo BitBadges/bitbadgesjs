@@ -1404,7 +1404,10 @@ export function getSampleMsg(msgType: string, currMsg: any) {
       return {
         type: msgType,
         value: new MsgCreateDynamicStore({
-          creator: ''
+          creator: '',
+          defaultValue: false,
+          uri: '',
+          customData: ''
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/DeleteDynamicStore':
@@ -1491,7 +1494,9 @@ export function getSampleMsg(msgType: string, currMsg: any) {
           creator: '',
           storeId: '0',
           defaultValue: false,
-          globalEnabled: true
+          globalEnabled: true,
+          uri: '',
+          customData: ''
         }).toJson({ emitDefaultValues: true, typeRegistry: ProtoTypeRegistry })
       };
     case 'badges/TransferTokens':

@@ -12,6 +12,8 @@ import {
   ApprovalTrackerDoc,
   DeveloperAppDoc,
   DynamicDataDoc,
+  DynamicStoreDocWithDetails,
+  DynamicStoreValueDoc,
   MapWithValues,
   PluginDoc,
   SIWBBRequestDoc,
@@ -29,6 +31,8 @@ import {
   iApprovalTrackerDoc,
   iClaimActivityDoc,
   iDynamicDataDoc,
+  iDynamicStoreDocWithDetails,
+  iDynamicStoreValueDoc,
   iEstimatedCost,
   iInheritMetadataFrom,
   iLinkedTo,
@@ -4616,13 +4620,7 @@ export class GetOnChainDynamicStorePayload extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface iGetOnChainDynamicStoreSuccessResponse<T extends NumberType = NumberType> {
-  store: {
-    _docId: string;
-    storeId: T;
-    createdBy: string;
-    defaultValue: boolean;
-    [key: string]: any;
-  };
+  store: iDynamicStoreDocWithDetails<T>;
 }
 
 /**
@@ -4632,17 +4630,11 @@ export class GetOnChainDynamicStoreSuccessResponse<T extends NumberType = Number
   extends BaseNumberTypeClass<GetOnChainDynamicStoreSuccessResponse<T>>
   implements iGetOnChainDynamicStoreSuccessResponse<T>
 {
-  store: {
-    _docId: string;
-    storeId: T;
-    createdBy: string;
-    defaultValue: boolean;
-    [key: string]: any;
-  };
+  store: DynamicStoreDocWithDetails<T>;
 
   constructor(data: iGetOnChainDynamicStoreSuccessResponse<T>) {
     super();
-    this.store = data.store;
+    this.store = new DynamicStoreDocWithDetails(data.store);
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetOnChainDynamicStoreSuccessResponse<U> {
@@ -4668,13 +4660,7 @@ export class GetOnChainDynamicStoresByCreatorPayload extends EmptyResponseClass 
  * @category API Requests / Responses
  */
 export interface iGetOnChainDynamicStoresByCreatorSuccessResponse<T extends NumberType = NumberType> {
-  stores: Array<{
-    _docId: string;
-    storeId: T;
-    createdBy: string;
-    defaultValue: boolean;
-    [key: string]: any;
-  }>;
+  stores: iDynamicStoreDocWithDetails<T>[];
 }
 
 /**
@@ -4684,17 +4670,11 @@ export class GetOnChainDynamicStoresByCreatorSuccessResponse<T extends NumberTyp
   extends BaseNumberTypeClass<GetOnChainDynamicStoresByCreatorSuccessResponse<T>>
   implements iGetOnChainDynamicStoresByCreatorSuccessResponse<T>
 {
-  stores: Array<{
-    _docId: string;
-    storeId: T;
-    createdBy: string;
-    defaultValue: boolean;
-    [key: string]: any;
-  }>;
+  stores: DynamicStoreDocWithDetails<T>[];
 
   constructor(data: iGetOnChainDynamicStoresByCreatorSuccessResponse<T>) {
     super();
-    this.stores = data.stores;
+    this.stores = data.stores.map((store) => new DynamicStoreDocWithDetails(store));
   }
 
   convert<U extends NumberType>(
@@ -4722,28 +4702,17 @@ export class GetOnChainDynamicStoreValuePayload extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface iGetOnChainDynamicStoreValueSuccessResponse {
-  storeId: string;
-  address: string;
-  value: boolean;
-}
+export interface iGetOnChainDynamicStoreValueSuccessResponse<T extends NumberType = NumberType> extends iDynamicStoreValueDoc<T> {}
 
 /**
  * @category API Requests / Responses
  */
-export class GetOnChainDynamicStoreValueSuccessResponse
-  extends CustomTypeClass<GetOnChainDynamicStoreValueSuccessResponse>
-  implements iGetOnChainDynamicStoreValueSuccessResponse
+export class GetOnChainDynamicStoreValueSuccessResponse<T extends NumberType = NumberType>
+  extends DynamicStoreValueDoc<T>
+  implements iGetOnChainDynamicStoreValueSuccessResponse<T>
 {
-  storeId: string;
-  address: string;
-  value: boolean;
-
-  constructor(data: iGetOnChainDynamicStoreValueSuccessResponse) {
-    super();
-    this.storeId = data.storeId;
-    this.address = data.address;
-    this.value = data.value;
+  constructor(data: iGetOnChainDynamicStoreValueSuccessResponse<T>) {
+    super(data);
   }
 }
 
@@ -4781,13 +4750,7 @@ export class GetOnChainDynamicStoreValuesPaginatedPayload
  * @category API Requests / Responses
  */
 export interface iGetOnChainDynamicStoreValuesPaginatedSuccessResponse<T extends NumberType = NumberType> {
-  values: Array<{
-    _docId: string;
-    storeId: T;
-    address: string;
-    value: boolean;
-    [key: string]: any;
-  }>;
+  values: iDynamicStoreValueDoc<T>[];
   pagination: PaginationInfo;
 }
 
@@ -4798,18 +4761,12 @@ export class GetOnChainDynamicStoreValuesPaginatedSuccessResponse<T extends Numb
   extends BaseNumberTypeClass<GetOnChainDynamicStoreValuesPaginatedSuccessResponse<T>>
   implements iGetOnChainDynamicStoreValuesPaginatedSuccessResponse<T>
 {
-  values: Array<{
-    _docId: string;
-    storeId: T;
-    address: string;
-    value: boolean;
-    [key: string]: any;
-  }>;
+  values: DynamicStoreValueDoc<T>[];
   pagination: PaginationInfo;
 
   constructor(data: iGetOnChainDynamicStoreValuesPaginatedSuccessResponse<T>) {
     super();
-    this.values = data.values;
+    this.values = data.values.map((value) => new DynamicStoreValueDoc(value));
     this.pagination = data.pagination;
   }
 

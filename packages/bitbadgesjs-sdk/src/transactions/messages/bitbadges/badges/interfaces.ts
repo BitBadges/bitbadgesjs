@@ -178,6 +178,10 @@ export interface iMsgCreateDynamicStore {
   creator: BitBadgesAddress;
   /** The default value for uninitialized addresses (true/false). */
   defaultValue: boolean;
+  /** URI for additional metadata or resources associated with this dynamic store. */
+  uri?: string;
+  /** Custom data field for storing arbitrary data associated with this dynamic store. */
+  customData?: string;
 }
 
 /**
@@ -192,6 +196,10 @@ export interface iMsgUpdateDynamicStore<T extends NumberType> {
   defaultValue?: boolean;
   /** The global kill switch state (true = enabled, false = disabled/halted). Callers should query the current value first if they want to keep it unchanged. */
   globalEnabled?: boolean;
+  /** URI for additional metadata or resources associated with this dynamic store. */
+  uri?: string;
+  /** Custom data field for storing arbitrary data associated with this dynamic store. */
+  customData?: string;
 }
 
 /**

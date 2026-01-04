@@ -2329,3 +2329,41 @@ export interface iEstimatedCost<T extends NumberType> {
   /** The denomination of the cost (e.g. 'USD', 'ETH', etc.) */
   denom: string;
 }
+
+/**
+ * DynamicStoreDoc represents an on-chain dynamic store document from the API indexer.
+ *
+ * @category Interfaces
+ */
+export interface iDynamicStoreDoc<T extends NumberType> extends Doc {
+  _docId: string;
+  _id?: string;
+  storeId: T;
+  createdBy: string;
+  defaultValue: boolean;
+  globalEnabled: boolean;
+  uri?: string;
+  customData?: string;
+}
+
+/**
+ * DynamicStoreDocWithDetails extends DynamicStoreDoc with populated metadata.
+ *
+ * @category Interfaces
+ */
+export interface iDynamicStoreDocWithDetails<T extends NumberType> extends iDynamicStoreDoc<T> {
+  metadata?: iMetadata<T>;
+}
+
+/**
+ * DynamicStoreValueDoc represents a value stored in an on-chain dynamic store for a specific address.
+ *
+ * @category Interfaces
+ */
+export interface iDynamicStoreValueDoc<T extends NumberType> extends Doc {
+  _docId: string;
+  _id?: string;
+  storeId: T;
+  address: string;
+  value: boolean;
+}

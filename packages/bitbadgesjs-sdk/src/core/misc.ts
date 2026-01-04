@@ -1470,6 +1470,8 @@ export class DynamicStore<T extends NumberType> extends BaseNumberTypeClass<Dyna
   createdBy: string;
   defaultValue: boolean;
   globalEnabled: boolean;
+  uri: string;
+  customData: string;
 
   constructor(dynamicStore: iDynamicStore<T>) {
     super();
@@ -1477,6 +1479,8 @@ export class DynamicStore<T extends NumberType> extends BaseNumberTypeClass<Dyna
     this.createdBy = dynamicStore.createdBy;
     this.defaultValue = dynamicStore.defaultValue;
     this.globalEnabled = dynamicStore.globalEnabled;
+    this.uri = dynamicStore.uri;
+    this.customData = dynamicStore.customData;
   }
 
   getNumberFieldNames(): string[] {
@@ -1492,7 +1496,9 @@ export class DynamicStore<T extends NumberType> extends BaseNumberTypeClass<Dyna
       storeId: convertFunction(item.storeId),
       createdBy: item.createdBy,
       defaultValue: item.defaultValue,
-      globalEnabled: item.globalEnabled
+      globalEnabled: item.globalEnabled,
+      uri: item.uri,
+      customData: item.customData
     });
   }
 
@@ -1527,7 +1533,10 @@ export class DynamicStoreValue<T extends NumberType> extends BaseNumberTypeClass
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStoreValue<U>;
   }
 
-  static fromProto<U extends NumberType>(item: protobadgesDynamicStores.DynamicStoreValue, convertFunction: (item: NumberType) => U): DynamicStoreValue<U> {
+  static fromProto<U extends NumberType>(
+    item: protobadgesDynamicStores.DynamicStoreValue,
+    convertFunction: (item: NumberType) => U
+  ): DynamicStoreValue<U> {
     return new DynamicStoreValue<U>({
       storeId: convertFunction(item.storeId),
       address: item.address,

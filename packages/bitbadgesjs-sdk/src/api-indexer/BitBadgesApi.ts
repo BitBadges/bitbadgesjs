@@ -2717,12 +2717,12 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    */
-  public async getOnChainDynamicStoreValue(storeId: string, address: NativeAddress): Promise<GetOnChainDynamicStoreValueSuccessResponse> {
+  public async getOnChainDynamicStoreValue(storeId: string, address: NativeAddress): Promise<GetOnChainDynamicStoreValueSuccessResponse<T>> {
     try {
-      const response = await this.axios.get<iGetOnChainDynamicStoreValueSuccessResponse>(
+      const response = await this.axios.get<iGetOnChainDynamicStoreValueSuccessResponse<string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetOnChainDynamicStoreValueRoute(storeId, address)}`
       );
-      return new GetOnChainDynamicStoreValueSuccessResponse(response.data);
+      return new GetOnChainDynamicStoreValueSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
