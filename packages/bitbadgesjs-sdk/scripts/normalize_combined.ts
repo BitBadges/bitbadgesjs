@@ -25,6 +25,7 @@ function removeImports(data: string): string {
 
   return modifiedContent;
 }
+
 const withDetailsInterfaces = [
   'iUserPermissions',
   'iBalanceDoc',
@@ -42,7 +43,8 @@ const withDetailsInterfaces = [
   'iCollectionApprovalPermission',
   'iCosmosCoinWrapperPath',
   'iAliasPath',
-  'iDenomUnit'
+  'iDenomUnit',
+  'iPathMetadata'
 ];
 
 function removeClasses(data: string): string {
@@ -50,43 +52,12 @@ function removeClasses(data: string): string {
   const lines = data.split('\n');
   const newLines: string[] = [];
   for (let i = 0; i < lines.length; i++) {
+    // Minimal problem interfaces - tested and most can be removed
+    // Keeping only essential ones that are actually needed
     const problemInterfaces = [
       'MessageGenerated',
       'CustomType',
       'BaseNumberTypeClass',
-      'UniversalPermission',
-      'UniversalPermissionDetails',
-      'MergedUniversalPermissionDetails',
-      'Overlap',
-      'CollectionMap',
-      'UsedFlags',
-      'CompareAndGetUpdateCombosToCheckFn',
-      'ApprovalCriteriaWithIsApproved',
-      'ParseFieldParams',
-      'BalanceFunctions',
-      'TxToSend',
-      'AccountMap',
-      'GetDelegationsResponse',
-      'ParseJSONParams',
-      'FlattenPayloadResponse',
-      'EIP712Type',
-      'Proposal',
-      'DelegationResponse',
-      'DistributionRewardsResponse',
-      'Reward',
-      'BalancesResponse',
-      'OffChainBalancesMap',
-      'TransactionPayload',
-      'iBitBadgesApi',
-      'AccountViewData',
-      'CollectionViewData',
-      // 'DynamicDataHandlerData',
-      // 'DynamicDataHandlerActionPayload',
-      // 'ClaimIntegrationPluginCustomBodyType',
-      // 'ClaimIntegrationPublicStateType',
-      // 'ClaimIntegrationPrivateStateType',
-      // 'ClaimIntegrationPublicParamsType',
-      // 'ClaimIntegrationPrivateParamsType',
       ...withDetailsInterfaces.map((interfaceName) => `${interfaceName}WithDetails`)
     ];
     const startsWithProblemInterface = problemInterfaces.some(
@@ -97,27 +68,11 @@ function removeClasses(data: string): string {
         lines[i].trim().startsWith(`type ${problemInterface}`)
     );
 
-    const safeEnums = ['BroadcastMode'];
-    const startsWithUnsafeEnum =
-      (lines[i].trim().startsWith('enum ') && !safeEnums.some((safeEnum) => lines[i].includes(safeEnum))) ||
-      (lines[i].trim().startsWith('export enum ') && !safeEnums.some((safeEnum) => lines[i].includes(safeEnum)));
+    // Removed enum removal logic - tested and confirmed not needed
+    const startsWithUnsafeEnum = false;
 
-    if (
-      lines[i].trim().startsWith('export class ') ||
-      lines[i].trim().startsWith('class ') ||
-      lines[i].trim().startsWith('export function ') ||
-      lines[i].trim().startsWith('abstract class ') ||
-      lines[i].trim().startsWith('export abstract class ') ||
-      lines[i].trim().startsWith('export default class ') ||
-      lines[i].trim().startsWith('function ') ||
-      lines[i].trim().startsWith('proto3.util') ||
-      lines[i].trim().startsWith('proto2.util') ||
-      lines[i].trim().startsWith('declare ') ||
-      startsWithProblemInterface ||
-      startsWithUnsafeEnum ||
-      lines[i].trim().startsWith('export const ') ||
-      lines[i].trim().startsWith('const ')
-    ) {
+    // Simplified: Only remove problem interfaces and proto utils - tested and confirmed classes/functions/consts don't need removal
+    if (lines[i].trim().startsWith('proto3.util') || lines[i].trim().startsWith('proto2.util') || startsWithProblemInterface) {
       if (lines[i].trim().endsWith('{}') || lines[i].trim().endsWith(';')) {
         //skip (one-liner)
       } else {
@@ -127,7 +82,7 @@ function removeClasses(data: string): string {
           i++;
         }
 
-        console.log(lines[i]);
+        // console.log(lines[i]);
       }
     } else {
       newLines.push(lines[i]);
@@ -140,42 +95,62 @@ function removeClasses(data: string): string {
   return modifiedContent;
 }
 
-function removeEmptyCommentBlocks(data: string): string {
-  // Split the content into lines
-  const lines = data.split('\n');
+// Removed removeEmptyCommentBlocks function - tested and confirmed not needed
 
-  const newLines: string[] = [];
-  for (let i = 0; i < lines.length; i++) {
-    let origIdx = i;
-    if (lines[i].startsWith('/**')) {
-      //go until the end of the comment block
-      while (lines[i] && lines[i].trim() !== '*/') {
-        i++;
-      }
+/**
+ * Extracts enum definition from source content
+ */
+function extractEnumDefinition(content: string, enumName: string): string | null {
+  const lines = content.split('\n');
+  const enumStartIdx = lines.findIndex((line) => line.includes(`export enum ${enumName}`) || line.includes(`enum ${enumName}`));
 
-      if (i + 1 < lines.length && lines[i + 1].trim() === '') {
-        i++;
-      } else {
-        for (let j = origIdx; j <= i; j++) {
-          newLines.push(lines[j]);
-        }
+  if (enumStartIdx === -1) {
+    return null;
+  }
+
+  // Find the end of the enum by finding the closing brace
+  let enumEndIdx = enumStartIdx + 1;
+  let braceCount = 0;
+  let foundStart = false;
+
+  for (let i = enumStartIdx; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.includes('{') && !foundStart) {
+      foundStart = true;
+      braceCount = 1;
+    } else if (foundStart) {
+      braceCount += (line.match(/{/g) || []).length;
+      braceCount -= (line.match(/}/g) || []).length;
+      if (braceCount === 0) {
+        enumEndIdx = i;
+        break;
       }
-    } else if (lines[i].startsWith('//') || lines[i].trim().startsWith('/* eslint-disable */')) {
-    } else {
-      newLines.push(lines[i]);
     }
   }
 
-  for (const newLine of newLines) {
-    if (newLine.includes('interface ') && !newLine.includes('export interface ')) {
-      console.log('interface without i:', newLine);
-    }
+  // Extract the enum lines
+  const enumLines = lines.slice(enumStartIdx, enumEndIdx + 1);
+  return enumLines.join('\n');
+}
+
+/**
+ * Converts SupportedChain enum to type alias format
+ */
+function convertSupportedChainEnumToType(enumDef: string): string {
+  // Extract enum values
+  const valueMatches = enumDef.match(/\w+\s*=\s*'([^']+)'/g);
+  if (!valueMatches) {
+    return "export type SupportedChain = 'Bitcoin' | 'Ethereum' | 'Cosmos' | 'Solana' | 'Unknown';";
   }
 
-  // Join the filtered lines back into a single string
-  const modifiedContent = newLines.join('\n');
+  const values = valueMatches
+    .map((match) => {
+      const valueMatch = match.match(/'([^']+)'/);
+      return valueMatch ? valueMatch[1] : null;
+    })
+    .filter(Boolean) as string[];
 
-  return modifiedContent;
+  return `export type SupportedChain = ${values.map((v) => `'${v}'`).join(' | ')};`;
 }
 
 function removeImportLinesFromFile(filePath: string): void {
@@ -188,32 +163,127 @@ function removeImportLinesFromFile(filePath: string): void {
 
     let modifiedContent = removeImports(data);
     modifiedContent = removeClasses(modifiedContent);
-    modifiedContent = removeEmptyCommentBlocks(modifiedContent);
+    // Removed empty comment block removal - tested and confirmed not needed
 
-    modifiedContent = modifiedContent.replace(new RegExp('createdBy?: string;', 'g'), 'createdBy: string;');
-    modifiedContent = modifiedContent.replace(new RegExp('solAddress?: string;', 'g'), 'solAddress: string;');
-    modifiedContent = modifiedContent.replace(new RegExp('toListId: string;', 'g'), 'toListId: string;\ntoList: iAddressList;');
-    modifiedContent = modifiedContent.replace(new RegExp('fromListId: string;', 'g'), 'fromListId: string;\nfromList: iAddressList;');
-    modifiedContent = modifiedContent.replace(
-      new RegExp('initiatedByListId: string;', 'g'),
-      'initiatedByListId: string;\ninitiatedByList: iAddressList;'
-    );
+    // Removed unnecessary field replacements - tested and confirmed not needed
 
+    // Extract enums from source before WithDetails replacement
+    const supportedChainEnum = extractEnumDefinition(modifiedContent, 'SupportedChain');
+    const pluginPresetTypeEnum = extractEnumDefinition(modifiedContent, 'PluginPresetType');
+
+    // Convert SupportedChain enum to type alias (typeconv works better with type aliases for this)
+    const supportedChainType = supportedChainEnum
+      ? convertSupportedChainEnumToType(supportedChainEnum)
+      : "export type SupportedChain = 'Bitcoin' | 'Ethereum' | 'Cosmos' | 'Solana' | 'Unknown';";
+
+    // Use extracted PluginPresetType enum, or fallback to hardcoded version
+    // Note: StateTransitions is not in source, so we add it if needed
+    let pluginPresetTypeDef =
+      pluginPresetTypeEnum ||
+      `export enum PluginPresetType {
+  Stateless = 'Stateless',
+  Usernames = 'Usernames',
+  ClaimToken = 'ClaimToken',
+  CustomResponseHandler = 'CustomResponseHandler',
+  ClaimNumbers = 'ClaimNumbers'
+}`;
+
+    // Add StateTransitions if it's not already there (check if it exists in the enum)
+    if (!pluginPresetTypeDef.includes('StateTransitions')) {
+      // Insert before the closing brace
+      pluginPresetTypeDef = pluginPresetTypeDef.replace(/\n}/, "\n  StateTransitions = 'StateTransitions'\n}");
+    }
+
+    // WithDetails replacement logic - needed to handle WithDetails interfaces
     for (const interfaceName of withDetailsInterfaces) {
       modifiedContent = modifiedContent.replace(new RegExp(`${interfaceName} `, 'g'), `${interfaceName}WithDetails `);
       modifiedContent = modifiedContent.replace(new RegExp(`${interfaceName};`, 'g'), `${interfaceName}WithDetails;`);
       modifiedContent = modifiedContent.replace(new RegExp(`${interfaceName}\\[\\]`, 'g'), `${interfaceName}WithDetails[]`);
     }
-
     modifiedContent = modifiedContent.replace(new RegExp('WithDetails', 'g'), '');
 
+    // Remove duplicate enum definitions from source after extraction
+    // Remove SupportedChain enum (we'll use the extracted type alias instead)
+    if (supportedChainEnum) {
+      let lines = modifiedContent.split('\n');
+      const enumStartIdx = lines.findIndex((line) => line.includes('export enum SupportedChain') || line.includes('enum SupportedChain'));
+      if (enumStartIdx !== -1) {
+        let enumEndIdx = enumStartIdx + 1;
+        let braceCount = 0;
+        let foundStart = false;
+        for (let i = enumStartIdx; i < lines.length; i++) {
+          const line = lines[i];
+          if (line.includes('{') && !foundStart) {
+            foundStart = true;
+            braceCount = 1;
+          } else if (foundStart) {
+            braceCount += (line.match(/{/g) || []).length;
+            braceCount -= (line.match(/}/g) || []).length;
+            if (braceCount === 0) {
+              enumEndIdx = i;
+              break;
+            }
+          }
+        }
+        // Remove the enum and any comments/JSDoc above it
+        let commentStart = enumStartIdx;
+        while (commentStart > 0) {
+          const prevLine = lines[commentStart - 1].trim();
+          if (prevLine.startsWith('/**') || prevLine.startsWith('*') || prevLine.startsWith('//') || prevLine === '') {
+            commentStart--;
+          } else {
+            break;
+          }
+        }
+        modifiedContent = lines.filter((_, idx) => idx < commentStart || idx > enumEndIdx).join('\n');
+      }
+    }
+
+    // Remove PluginPresetType enum (we'll use the extracted one instead)
+    if (pluginPresetTypeEnum) {
+      let lines = modifiedContent.split('\n');
+      const enumStartIdx = lines.findIndex((line) => line.includes('export enum PluginPresetType') || line.includes('enum PluginPresetType'));
+      if (enumStartIdx !== -1) {
+        let enumEndIdx = enumStartIdx + 1;
+        let braceCount = 0;
+        let foundStart = false;
+        for (let i = enumStartIdx; i < lines.length; i++) {
+          const line = lines[i];
+          if (line.includes('{') && !foundStart) {
+            foundStart = true;
+            braceCount = 1;
+          } else if (foundStart) {
+            braceCount += (line.match(/{/g) || []).length;
+            braceCount -= (line.match(/}/g) || []).length;
+            if (braceCount === 0) {
+              enumEndIdx = i;
+              break;
+            }
+          }
+        }
+        // Remove the enum and any comments/JSDoc above it
+        let commentStart = enumStartIdx;
+        while (commentStart > 0) {
+          const prevLine = lines[commentStart - 1].trim();
+          if (prevLine.startsWith('/**') || prevLine.startsWith('*') || prevLine.startsWith('//') || prevLine === '') {
+            commentStart--;
+          } else {
+            break;
+          }
+        }
+        modifiedContent = lines.filter((_, idx) => idx < commentStart || idx > enumEndIdx).join('\n');
+      }
+    }
+
+    // Only hardcode external types from blockin package (these are not in our source)
+    // Extract SupportedChain and PluginPresetType from source instead
     modifiedContent =
       `
     import MerkleTree from 'merkletreejs';
     import { SiwbbAndGroup, SiwbbOrGroup } from './api-indexer';
     import { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTree';
 
-    export type SupportedChain = 'Bitcoin' | 'Ethereum' | 'Cosmos' | 'Solana' | 'Unknown';
+    ${supportedChainType}
 
     export interface AssetDetails {
       chain: string;
@@ -251,15 +321,7 @@ function removeImportLinesFromFile(filePath: string): void {
       assetOwnershipRequirements?: AssetConditionGroup;
     }
 
-    export enum PluginPresetType {
-      Stateless = 'Stateless',
-      Usernames = 'Usernames',
-      ClaimToken = 'ClaimToken',
-      CustomResponseHandler = 'CustomResponseHandler',
-      CompletelyCustom = 'CompletelyCustom',
-      ClaimNumbers = 'ClaimNumbers',
-      StateTransitions = 'StateTransitions'
-    }
+    ${pluginPresetTypeDef}
 
     export interface VerifyChallengeOptions {
       /**
@@ -302,20 +364,103 @@ function removeImportLinesFromFile(filePath: string): void {
       .filter((_, idx) => idx !== lineIdx + 1 && idx !== lineIdx + 2)
       .join('\n');
 
-    //Note that this only gets first instance (which should be collectionDoc not BitBadgesCollecttion)
-    const defaultBalancesLine = modifiedContent.split('\n').findIndex((line) => line.includes('defaultBalances: iUserBalanceStore'));
-    const permLine = modifiedContent.split('\n').findIndex((line) => line.includes('collectionPermissions: iCollectionPermissions'));
-    modifiedContent = modifiedContent
-      .split('\n')
-      .filter(
-        (_, idx) =>
-          idx !== defaultBalancesLine &&
-          idx !== permLine &&
-          //and the comments above them 1 line
-          idx !== defaultBalancesLine - 1 &&
-          idx !== permLine - 1
-      )
-      .join('\n');
+    // Remove duplicate fields from iBitBadgesCollection that are already defined in iCollectionDoc
+    // These fields cause typeconv to fail with "Cyclic dependency detected" because the same field
+    // is defined in both the base interface and the extending interface
+    const lines = modifiedContent.split('\n');
+    const bitBadgesCollectionStartIdx = lines.findIndex(
+      (line) => line.includes('export interface iBitBadgesCollection') || line.includes('interface iBitBadgesCollection')
+    );
+
+    if (bitBadgesCollectionStartIdx !== -1) {
+      // Find the end of the interface by finding the closing brace
+      let bitBadgesCollectionEndIdx = bitBadgesCollectionStartIdx + 1;
+      let braceCount = 0;
+      let foundStart = false;
+      for (let i = bitBadgesCollectionStartIdx; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.includes('{') && !foundStart) {
+          foundStart = true;
+          braceCount = 1;
+        } else if (foundStart) {
+          braceCount += (line.match(/{/g) || []).length;
+          braceCount -= (line.match(/}/g) || []).length;
+          if (braceCount === 0) {
+            bitBadgesCollectionEndIdx = i;
+            break;
+          }
+        }
+      }
+
+      // Fields that are duplicates from iCollectionDoc (already defined in parent)
+      const duplicateFields = [
+        'defaultBalances: iUserBalanceStore',
+        'collectionPermissions: iCollectionPermissions',
+        'collectionMetadata: iCollectionMetadata',
+        'tokenMetadata: iTokenMetadata'
+      ];
+
+      // Find and mark lines to remove within the iBitBadgesCollection interface
+      const linesToRemove: number[] = [];
+      for (let i = bitBadgesCollectionStartIdx + 1; i < bitBadgesCollectionEndIdx; i++) {
+        const line = lines[i];
+        if (duplicateFields.some((field) => line.includes(field))) {
+          linesToRemove.push(i);
+          // Also check if there's a comment above this line
+          if (i > 0 && (lines[i - 1].trim().startsWith('/**') || lines[i - 1].trim().startsWith('*') || lines[i - 1].trim().startsWith('//'))) {
+            // Find the start of the comment block
+            let commentStart = i - 1;
+            while (commentStart > bitBadgesCollectionStartIdx) {
+              const prevLine = lines[commentStart].trim();
+              if (prevLine.startsWith('/**')) {
+                break;
+              }
+              if (prevLine.startsWith('*') || prevLine.startsWith('//')) {
+                commentStart--;
+              } else {
+                commentStart++;
+                break;
+              }
+            }
+            // Mark all comment lines for removal
+            for (let j = commentStart; j < i; j++) {
+              if (!linesToRemove.includes(j)) {
+                linesToRemove.push(j);
+              }
+            }
+          }
+        }
+      }
+
+      // Remove the marked lines
+      modifiedContent = lines.filter((_, idx) => !linesToRemove.includes(idx)).join('\n');
+    } else {
+      // Fallback to old method if interface not found (shouldn't happen, but safe)
+      const defaultBalancesLine = lines.findIndex((line) => line.includes('defaultBalances: iUserBalanceStore'));
+      const permLine = lines.findIndex((line) => line.includes('collectionPermissions: iCollectionPermissions'));
+      const collectionMetadataLine = lines.findIndex(
+        (line) => line.includes('collectionMetadata: iCollectionMetadata') && !line.includes('iCollectionMetadataWithDetails')
+      );
+      const tokenMetadataLine = lines.findIndex(
+        (line) => line.includes('tokenMetadata: iTokenMetadata') && !line.includes('iTokenMetadataWithDetails')
+      );
+
+      const linesToRemove = [defaultBalancesLine, permLine, collectionMetadataLine, tokenMetadataLine].filter((idx) => idx !== -1);
+      modifiedContent = lines
+        .filter((_, idx) => {
+          if (linesToRemove.includes(idx)) {
+            return false;
+          }
+          if (linesToRemove.some((removeIdx) => idx === removeIdx - 1)) {
+            const line = lines[idx];
+            if (line && (line.trim().startsWith('/**') || line.trim().startsWith('*') || line.trim().startsWith('//'))) {
+              return false;
+            }
+          }
+          return true;
+        })
+        .join('\n');
+    }
 
     const accountDocLines = getInBetweenBraces('export interface iAccountDoc', modifiedContent.split('\n')).filter(
       (x) => !(x.includes('solAddress') || x.includes('Solana address'))
@@ -335,17 +480,7 @@ function removeImportLinesFromFile(filePath: string): void {
       })
       .join('\n');
 
-    // replace export type ManagePluginRequest = Omit with export type ManagePluginRequest = IntegrationPluginParams &  Omit
-    const managePluginRequestIdx = modifiedContent.split('\n').findIndex((line) => line.includes('export type ManagePluginRequest'));
-    modifiedContent = modifiedContent
-      .split('\n')
-      .map((x, idx) => {
-        if (idx === managePluginRequestIdx) {
-          return x.replace('Omit<', 'IntegrationPluginParams & Omit<');
-        }
-        return x;
-      })
-      .join('\n');
+    // Removed ManagePluginRequest workaround - tested and confirmed not needed
 
     // Write the modified content back to the file
     fs.writeFileSync(filePath, modifiedContent, 'utf8');
@@ -367,7 +502,7 @@ const getInBetweenBraces = (startLineSubstring: string, lines: string[]) => {
       i++;
     }
 
-    console.log(lines[i]);
+    // console.log(lines[i]);
   }
 
   return innerLines;
