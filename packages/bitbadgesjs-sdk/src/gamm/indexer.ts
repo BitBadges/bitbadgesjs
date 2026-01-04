@@ -151,7 +151,6 @@ export interface iGetAllPoolsPayload {
   bookmark?: string;
   sortBy?: 'liquidity' | 'volume' | 'dailyVolume' | 'weeklyVolume' | 'monthlyVolume' | 'allTimeVolume' | 'lastLiquidityUpdate' | 'lastVolumeUpdate';
   sortOrder?: 'asc' | 'desc';
-  limit?: number;
 }
 
 export interface iGetAllPoolsSuccessResponse<T extends NumberType> {
@@ -256,7 +255,6 @@ export interface iGetAssetPairsPayload {
   bookmark?: string;
   sortBy?: 'volume24h' | 'volume7d' | 'percentageChange24h' | 'percentageChange7d' | 'price';
   sortDirection?: 'asc' | 'desc';
-  limit?: number;
 }
 
 export interface iGetAssetPairsSuccessResponse<T extends NumberType> {
@@ -278,7 +276,6 @@ export interface iGetAssetPairsSuccessResponse<T extends NumberType> {
 
 export interface iGetTopGainersPayload {
   bookmark?: string;
-  limit?: number;
 }
 
 export interface iGetTopGainersSuccessResponse<T extends NumberType> {
@@ -300,7 +297,6 @@ export interface iGetTopGainersSuccessResponse<T extends NumberType> {
 
 export interface iGetTopLosersPayload {
   bookmark?: string;
-  limit?: number;
 }
 
 export interface iGetTopLosersSuccessResponse<T extends NumberType> {
@@ -322,7 +318,6 @@ export interface iGetTopLosersSuccessResponse<T extends NumberType> {
 
 export interface iGetHighestVolumePayload {
   bookmark?: string;
-  limit?: number;
 }
 
 export interface iGetHighestVolumeSuccessResponse<T extends NumberType> {
@@ -345,7 +340,6 @@ export interface iGetHighestVolumeSuccessResponse<T extends NumberType> {
 export interface iGetByPricePayload {
   bookmark?: string;
   sortDirection?: 'asc' | 'desc';
-  limit?: number;
 }
 
 export interface iGetByPriceSuccessResponse<T extends NumberType> {
@@ -367,7 +361,6 @@ export interface iGetByPriceSuccessResponse<T extends NumberType> {
 
 export interface iGetWeeklyTopGainersPayload {
   bookmark?: string;
-  limit?: number;
 }
 
 export interface iGetWeeklyTopGainersSuccessResponse<T extends NumberType> {
@@ -389,7 +382,6 @@ export interface iGetWeeklyTopGainersSuccessResponse<T extends NumberType> {
 
 export interface iGetWeeklyTopLosersPayload {
   bookmark?: string;
-  limit?: number;
 }
 
 export interface iGetWeeklyTopLosersSuccessResponse<T extends NumberType> {

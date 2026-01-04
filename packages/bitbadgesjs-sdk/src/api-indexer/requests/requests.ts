@@ -4537,7 +4537,6 @@ export class GetCollectionChallengeTrackerByIdSuccessResponse<T extends NumberTy
  */
 export interface iGetSwapActivitiesPayload {
   bookmark?: string;
-  limit?: number;
 }
 
 /**
@@ -4545,18 +4544,15 @@ export interface iGetSwapActivitiesPayload {
  */
 export class GetSwapActivitiesPayload extends CustomTypeClass<GetSwapActivitiesPayload> implements iGetSwapActivitiesPayload {
   bookmark?: string;
-  limit?: number;
 
   constructor(data: iGetSwapActivitiesPayload = {}) {
     super();
     this.bookmark = data.bookmark;
-    this.limit = data.limit;
   }
 
   static FromQuery(query: ParsedQs): GetSwapActivitiesPayload {
     return new GetSwapActivitiesPayload({
-      bookmark: query.bookmark?.toString(),
-      limit: query.limit ? Number(query.limit) : undefined
+      bookmark: query.bookmark?.toString()
     });
   }
 }
@@ -4758,7 +4754,6 @@ export class GetOnChainDynamicStoreValueSuccessResponse
  */
 export interface iGetOnChainDynamicStoreValuesPaginatedPayload {
   bookmark?: string;
-  limit?: number;
 }
 
 /**
@@ -4769,18 +4764,15 @@ export class GetOnChainDynamicStoreValuesPaginatedPayload
   implements iGetOnChainDynamicStoreValuesPaginatedPayload
 {
   bookmark?: string;
-  limit?: number;
 
   constructor(data: iGetOnChainDynamicStoreValuesPaginatedPayload = {}) {
     super();
     this.bookmark = data.bookmark;
-    this.limit = data.limit;
   }
 
   static FromQuery(query: ParsedQs): GetOnChainDynamicStoreValuesPaginatedPayload {
     return new GetOnChainDynamicStoreValuesPaginatedPayload({
-      bookmark: query.bookmark?.toString(),
-      limit: query.limit ? Number(query.limit) : undefined
+      bookmark: query.bookmark?.toString()
     });
   }
 }
