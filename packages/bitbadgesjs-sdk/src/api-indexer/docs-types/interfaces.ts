@@ -2336,8 +2336,6 @@ export interface iEstimatedCost<T extends NumberType> {
  * @category Interfaces
  */
 export interface iDynamicStoreDoc<T extends NumberType> extends Doc {
-  _docId: string;
-  _id?: string;
   storeId: T;
   createdBy: string;
   defaultValue: boolean;
@@ -2361,8 +2359,6 @@ export interface iDynamicStoreDocWithDetails<T extends NumberType> extends iDyna
  * @category Interfaces
  */
 export interface iDynamicStoreValueDoc<T extends NumberType> extends Doc {
-  _docId: string;
-  _id?: string;
   storeId: T;
   address: string;
   value: boolean;
