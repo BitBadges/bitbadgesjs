@@ -25,7 +25,7 @@ import { AliasPath, CollectionInvariants, CollectionMetadata, CosmosCoinWrapperP
 import { CollectionPermissions, UserPermissions, UserPermissionsWithDetails } from '@/core/permissions.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
-import type { CollectionId, iAmountTrackerIdDetails, iCollectionMetadata, iTokenMetadata } from '@/interfaces/types/core.js';
+import type { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/types/core.js';
 import type { iUserBalanceStore } from '@/interfaces/types/userBalances.js';
 import { Map, ValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
 import type { Doc } from '../base.js';

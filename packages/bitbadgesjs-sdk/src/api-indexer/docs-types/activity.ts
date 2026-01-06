@@ -2,9 +2,7 @@ import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, Conv
 import type { NumberType } from '@/common/string-numbers.js';
 import { BalanceArray } from '@/core/balances.js';
 import { ApprovalIdentifierDetails, PrecalculateBalancesFromApprovalDetails, PrecalculationOptions } from '@/core/misc.js';
-import { UintRangeArray } from '@/core/uintRanges.js';
 import { CollectionId } from '@/interfaces/types/core.js';
-import { badges as protobadges } from '@/proto/index.js';
 import type {
   BitBadgesAddress,
   iActivityDoc,
@@ -14,7 +12,6 @@ import type {
   iTransferActivityDoc,
   UNIXMilliTimestamp
 } from './interfaces.js';
-import type { iPrecalculationOptions } from '@/interfaces/types/core.js';
 
 /**
  * @inheritDoc iActivityDoc
