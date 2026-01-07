@@ -1,6 +1,15 @@
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iApprovalInfoDetails, iIncomingApprovalCriteriaWithDetails } from '@/core/approvals.js';
-import type { iAddressList, iBalance, iCoinTransfer, iETHSignatureChallenge, iMerkleChallenge, iMustOwnToken, iUintRange, iVotingChallenge } from './core.js';
+import type {
+  iAddressList,
+  iBalance,
+  iCoinTransfer,
+  iETHSignatureChallenge,
+  iMerkleChallenge,
+  iMustOwnToken,
+  iUintRange,
+  iVotingChallenge
+} from './core.js';
 
 /**
  * @category Interfaces
@@ -8,6 +17,8 @@ import type { iAddressList, iBalance, iCoinTransfer, iETHSignatureChallenge, iMe
 export interface iDynamicStoreChallenge<T extends NumberType> {
   /** The ID of the dynamic store to check. */
   storeId: T;
+  /** The party to check ownership for. Options are "initiator", "sender", "recipient", or any valid bb1 address. If a valid bb1 address is provided, ownership will be checked for that specific address. This enables use cases like halt tokens where ownership is checked for an arbitrary address (e.g., halt token owner). Defaults to "initiator" if empty or if the value is not a recognized option or valid bb1 address. */
+  ownershipCheckParty?: string;
 }
 
 /**

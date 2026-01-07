@@ -217,7 +217,8 @@ const approvalCriteria = new ApprovalCriteria({
   }),
   dynamicStoreChallenges: [
     new DynamicStoreChallenge({
-      storeId: '0'
+      storeId: '0',
+      ownershipCheckParty: ''
     })
   ],
   recipientChecks: new AddressChecks({

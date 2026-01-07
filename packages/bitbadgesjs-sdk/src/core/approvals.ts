@@ -1392,10 +1392,12 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
  */
 export class DynamicStoreChallenge<T extends NumberType> extends BaseNumberTypeClass<DynamicStoreChallenge<T>> implements iDynamicStoreChallenge<T> {
   storeId: T;
+  ownershipCheckParty?: string;
 
   constructor(msg: iDynamicStoreChallenge<T>) {
     super();
     this.storeId = msg.storeId;
+    this.ownershipCheckParty = msg.ownershipCheckParty;
   }
 
   getNumberFieldNames(): string[] {
@@ -1431,7 +1433,8 @@ export class DynamicStoreChallenge<T extends NumberType> extends BaseNumberTypeC
     convertFunction: (item: NumberType) => U
   ): DynamicStoreChallenge<U> {
     return new DynamicStoreChallenge<U>({
-      storeId: convertFunction(item.storeId)
+      storeId: convertFunction(item.storeId),
+      ownershipCheckParty: item.ownershipCheckParty
     });
   }
 }
