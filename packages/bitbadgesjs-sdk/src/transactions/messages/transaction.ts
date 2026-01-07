@@ -1,9 +1,7 @@
 import { Coin } from '@/proto/cosmos/base/v1beta1/coin_pb.js';
-import { PubKey as PubKeySolana } from '@/proto/cosmos/crypto/ed25519/keys_pb.js';
 import { PubKey as SECP256k1 } from '@/proto/cosmos/crypto/secp256k1/keys_pb.js';
 import { SignMode } from '@/proto/cosmos/tx/signing/v1beta1/signing_pb.js';
 import { AuthInfo, Fee, ModeInfo, ModeInfo_Single, SignDoc, SignerInfo, TxBody } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
-import { PubKey } from '@/proto/ethereum/ethsecp256k1/keys_pb.js';
 import { convertProtoMessageToObject } from '@/transactions/amino/objectConverter.js';
 import { AminoTypes } from '@/transactions/amino/registry.js';
 import type { Any } from '@bufbuild/protobuf';
@@ -63,30 +61,13 @@ export function createFee(fee: string, denom: string, gasLimit: number) {
   });
 }
 
-export function createSignerInfo(algo: string, publicKey: Uint8Array, sequence: number, mode: number) {
-  let pubkey: MessageGenerated;
-  if (algo === 'secp256k1') {
-    pubkey = {
-      message: new SECP256k1({
-        key: publicKey as Uint8Array<ArrayBuffer>
-      }),
-      path: 'cosmos.crypto.secp256k1.PubKey'
-    };
-  } else if (algo === 'ed25519') {
-    pubkey = {
-      message: new PubKeySolana({
-        key: publicKey as Uint8Array<ArrayBuffer>
-      }),
-      path: 'cosmos.crypto.ed25519.PubKey'
-    };
-  } else {
-    pubkey = {
-      message: new PubKey({
-        key: publicKey as Uint8Array<ArrayBuffer>
-      }),
-      path: 'ethereum.PubKey'
-    };
-  }
+export function createSignerInfo(publicKey: Uint8Array, sequence: number, mode: number) {
+  const pubkey: MessageGenerated = {
+    message: new SECP256k1({
+      key: publicKey as Uint8Array<ArrayBuffer>
+    }),
+    path: 'cosmos.crypto.secp256k1.PubKey'
+  };
 
   const signerInfo = new SignerInfo({
     publicKey: createAnyMessage(pubkey),
@@ -166,7 +147,6 @@ export function createTransactionWithMultipleMessages(
   fee: string,
   denom: string,
   gasLimit: number,
-  algo: string,
   pubKey: string,
   sequence: number,
   accountNumber: number,
@@ -176,11 +156,11 @@ export function createTransactionWithMultipleMessages(
   const feeMessage = createFee(fee, denom, gasLimit);
   const pubKeyDecoded = Buffer.from(pubKey, 'base64');
 
-  const aminoSignerInfo = createSignerInfo(algo, new Uint8Array(pubKeyDecoded), sequence, LEGACY_AMINO);
+  const aminoSignerInfo = createSignerInfo(new Uint8Array(pubKeyDecoded), sequence, LEGACY_AMINO);
   const aminoAuthInfo = createAuthInfo(aminoSignerInfo, feeMessage);
   const aminoSignDigest = createStdSignDigestFromProto(messages, memo, fee, denom, gasLimit, sequence, accountNumber, chainId);
 
-  const directSignerInfo = createSignerInfo(algo, new Uint8Array(pubKeyDecoded), sequence, SIGN_DIRECT);
+  const directSignerInfo = createSignerInfo(new Uint8Array(pubKeyDecoded), sequence, SIGN_DIRECT);
   const directAuthInfo = createAuthInfo(directSignerInfo, feeMessage);
   const directSignDoc = createSignDoc(body.toBinary(), directAuthInfo.toBinary(), chainId, accountNumber);
 
@@ -206,11 +186,10 @@ export function createTransaction(
   fee: string,
   denom: string,
   gasLimit: number,
-  algo: string,
   pubKey: string,
   sequence: number,
   accountNumber: number,
   chainId: string
 ) {
-  return createTransactionWithMultipleMessages([message], memo, fee, denom, gasLimit, algo, pubKey, sequence, accountNumber, chainId);
+  return createTransactionWithMultipleMessages([message], memo, fee, denom, gasLimit, pubKey, sequence, accountNumber, chainId);
 }

@@ -2,24 +2,6 @@ import type { SupportedChain } from '@/common/types.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 
 /**
- * EI712ToSign represents a signable EIP-712 payload that can be signed using MetaMask or Keplr.
- *
- * @category Transactions
- */
-export interface EIP712ToSign {
-  types: object;
-  primaryType: string;
-  domain: {
-    name: string;
-    version: string;
-    chainId: number;
-    verifyingContract: string;
-    salt: string;
-  };
-  message: object;
-}
-
-/**
  * Fee represents a Cosmos SDK transaction fee object.
  *
  * @category Transactions

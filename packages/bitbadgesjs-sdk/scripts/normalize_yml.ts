@@ -270,11 +270,12 @@ function addExamples(obj: any) {
     },
     {
       key: 'NativeAddress',
-      examples: ['0x...', 'bc1...', 'bb1...']
+      // examples: ['0x...', 'bc1...', 'bb1...']
+      example: 'bb1...'
     },
     {
       key: 'SiwbbMessage',
-      example: 'https://bitbadges.io wants you to sign in with your Ethereum address....'
+      example: 'https://bitbadges.io wants you to sign in....'
     }
   ];
 

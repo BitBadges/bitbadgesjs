@@ -1,7 +1,4 @@
-import { AuthInfo, TxBody } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
-import { TxRaw } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
-import type { MessageGenerated } from './utils.js';
-import { createAnyMessage } from './utils.js';
+import { AuthInfo, TxBody, TxRaw } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
 
 export function bytesToTxRaw(bytes: Uint8Array) {
   return TxRaw.fromBinary(bytes);
@@ -30,13 +27,4 @@ export function createTxRaw(bodyBytes: Uint8Array, authInfoBytes: Uint8Array, si
     message,
     path: TxRaw.typeName
   };
-}
-
-/**
- * This function is used to create the raw transaction to be sent to the blockchain for Ethereum transactions.
- */
-export function createTxRawWithExtension(body: TxBody, authInfo: AuthInfo, extension: MessageGenerated) {
-  body.extensionOptions.push(createAnyMessage(extension));
-
-  return createTxRaw(body.toBinary(), authInfo.toBinary(), [new Uint8Array()]);
 }

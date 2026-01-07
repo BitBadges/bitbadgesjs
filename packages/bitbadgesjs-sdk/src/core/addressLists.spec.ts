@@ -1,10 +1,15 @@
-import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
-import { ethers } from 'ethers';
+import { bech32 } from 'bech32';
 import { AddressList } from './addressLists.js';
 
 export const genTestAddress = () => {
-  const ethAddress = ethers.Wallet.createRandom().address;
-  return convertToBitBadgesAddress(ethAddress);
+  // Generate a random 20-byte buffer (standard Cosmos address length)
+  const randomBytes = Buffer.allocUnsafe(20);
+  for (let i = 0; i < 20; i++) {
+    randomBytes[i] = Math.floor(Math.random() * 256);
+  }
+  // Encode as bech32 with 'bb' prefix
+  const words = bech32.toWords(randomBytes);
+  return bech32.encode('bb', words);
 };
 
 describe('AddressList', () => {

@@ -189,7 +189,7 @@ function removeImportLinesFromFile(filePath: string): void {
     import { SiwbbAndGroup, SiwbbOrGroup } from './api-indexer';
     import { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTree';
 
-    export type SupportedChain = 'Bitcoin' | 'Ethereum' | 'Cosmos' | 'Solana' | 'Unknown';
+    export type SupportedChain = 'Cosmos' | 'Unknown';
 
     export interface AssetDetails {
       chain: string;

@@ -15,8 +15,6 @@ import type {
   iAddressList,
   iAmountTrackerIdDetails,
   iApprovalIdentifierDetails,
-  iPrecalculateBalancesFromApprovalDetails,
-  iPrecalculationOptions,
   iBalance,
   iCollectionInvariants,
   iCollectionMetadata,
@@ -25,6 +23,8 @@ import type {
   iDenomUnitWithDetails,
   iPathMetadata,
   iPathMetadataWithDetails,
+  iPrecalculateBalancesFromApprovalDetails,
+  iPrecalculationOptions,
   iTokenMetadata,
   iUintRange
 } from '@/interfaces/types/core.js';
@@ -75,8 +75,8 @@ export type BitBadgesAddress = string; // `bb1${string}`;
 export type SiwbbMessage = string;
 
 /**
- * A native address is an address that is native to the user's chain. For example, an Ethereum address is native to Ethereum (0x...).
- * If this type is used, we support any native address type. We do not require conversion to a BitBadges address like the BitBadgesAddress type.
+ * A native address is an address that is native to the user's chain.
+ * For now, we only support Cosmos / BitBadges 'bb1...' addresses.
  *
  * @category Interfaces
  */
@@ -599,14 +599,6 @@ export interface iAccountDoc<T extends NumberType> extends Doc {
   pubKeyType: string;
   /** The BitBadges address of the account */
   bitbadgesAddress: BitBadgesAddress;
-  /** The Eth address of the account */
-  ethAddress: string;
-  /** The Solana address of the account. Note: This may be empty if we do not have it yet. Solana -> BitBadges address conversions are one-way, and we cannot convert a BitBadges address to a Solana address without prior knowledge. */
-  solAddress: string;
-  /** The Bitcoin address of the account */
-  btcAddress: string;
-  /** The Thorchain address of the account */
-  thorAddress: string;
   /** The sequence of the account. This is the nonce for the blockchain for this account */
   sequence?: T;
   /** The BADGE balance of the account and other sdk.coin balances */
@@ -664,9 +656,6 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
 
   /** The latest chain the user signed in with */
   latestSignedInChain?: SupportedChain;
-
-  /** The Solana address of the profile, if applicable (bc we need it to convert) */
-  solAddress?: string;
 
   /** The notifications of the account */
   notifications?: iNotificationPreferences<T>;

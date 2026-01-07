@@ -24,7 +24,7 @@ The BitBadges SDK (`bitbadgesjs-sdk`) is a TypeScript library that provides tool
 
 - **Type-safe API client** for interacting with the BitBadges indexer/API
 - **Transaction building** for creating and broadcasting blockchain transactions
-- **Address conversion** between different blockchain address formats
+- **Address utilities** for working with BitBadges addresses (Cosmos-based, bb-prefixed)
 - **Core utilities** for badges, balances, approvals, permissions, and more
 - **Protocol buffer support** for blockchain message types
 - **Number type flexibility** supporting `bigint`, `number`, and `string`
@@ -593,24 +593,20 @@ To broadcast a transaction, you need to create a transaction context and sign it
 
 ```typescript
 import { createTxBroadcastBody, TxContext } from 'bitbadgesjs-sdk';
-import { SupportedChain } from 'bitbadgesjs-sdk';
 
 // Create transaction context
 const txContext: TxContext = {
-  chain: {
-    chain: SupportedChain.COSMOS,
-    chainId: 'bitbadges_1-1'
-  },
+  testnet: false, // Use mainnet by default
   sender: {
-    accountAddress: 'bb1abc...',
+    address: 'bb1abc...', // Must be a BitBadges address (bb-prefixed)
     accountNumber: 0,
     sequence: 0,
-    pubkey: 'base64-encoded-public-key'
+    publicKey: 'base64-encoded-public-key' // Required for Cosmos signatures
   },
   fee: {
     amount: '1000',
     denom: 'badge',
-    gasLimit: 200000
+    gas: '200000'
   },
   memo: 'My transaction memo'
 };
@@ -659,7 +655,7 @@ import { createTransactionPayload } from 'bitbadgesjs-sdk';
 const payload = createTransactionPayload(txContext, [transferMsg.toProto()]);
 
 // Sign the payload with your private key/wallet
-// This step depends on your signing method (Keplr, MetaMask, etc.)
+// This step depends on your signing method (Keplr, Cosmos wallet, etc.)
 const signature = await signTransaction(payload);
 
 // Create broadcast body
@@ -670,37 +666,20 @@ const broadcastBody = createTxBroadcastBody(txContext, [transferMsg.toProto()], 
 
 ## Address Conversion
 
-The SDK provides utilities for converting addresses between different blockchain formats.
+The SDK provides utilities for working with BitBadges addresses (Cosmos-based, `bb`-prefixed addresses).
 
 ### Converting to BitBadges Address
 
 ```typescript
 import { convertToBitBadgesAddress } from 'bitbadgesjs-sdk';
 
-// Convert Ethereum address to BitBadges address
-const ethAddress = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb';
-const bitbadgesAddress = convertToBitBadgesAddress(ethAddress);
-// Result: 'bb1...' (bech32 encoded)
+// Only accepts addresses that already start with 'bb' or 'bbvaloper'
+const bitbadgesAddress = convertToBitBadgesAddress('bb1abc...');
+// Result: 'bb1abc...' (if valid) or '' (if invalid)
 
-// Convert Cosmos address to BitBadges address
-const cosmosAddress = 'cosmos1abc...';
-const bitbadgesAddr = convertToBitBadgesAddress(cosmosAddress);
-```
-
-### Converting from BitBadges Address
-
-```typescript
-import { bitbadgesToEth, bitbadgesToCosmos } from 'bitbadgesjs-sdk';
-
-const bitbadgesAddr = 'bb1abc...';
-
-// Convert to Ethereum format
-const ethAddr = bitbadgesToEth(bitbadgesAddr);
-// Result: '0x...'
-
-// Convert to Cosmos format
-const cosmosAddr = bitbadgesToCosmos(bitbadgesAddr);
-// Result: 'cosmos1...'
+// For validator addresses
+const validatorAddress = convertToBitBadgesAddress('bbvaloper1abc...');
+// Result: 'bbvaloper1abc...'
 ```
 
 ### Address Validation
@@ -714,15 +693,9 @@ console.log('Address valid:', isValid);
 
 ### Supported Chains
 
-The SDK supports address conversion for:
+The SDK only supports Cosmos-based BitBadges addresses:
 
-- BitBadges (bb)
-- Ethereum (0x)
-- Cosmos (cosmos)
-- Bitcoin (bc)
-- Solana
-- Thorchain (tthor)
-- And more...
+- BitBadges (bb-prefixed addresses)
 
 ---
 
@@ -894,21 +867,18 @@ async function transferBadges(from: string, to: string, collectionId: string, to
     address: from
   });
 
-  const txContext = {
-    chain: {
-      chain: 'COSMOS' as const,
-      chainId: 'bitbadges_1-1'
-    },
+  const txContext: TxContext = {
+    testnet: false, // Use mainnet by default
     sender: {
-      accountAddress: from,
+      address: from, // Must be a BitBadges address (bb-prefixed)
       accountNumber: Number(accountInfo.account.accountNumber), // Convert to number
       sequence: accountInfo.account.sequence ? Number(accountInfo.account.sequence) : 0,
-      pubkey: accountInfo.account.publicKey // Base64 encoded public key
+      publicKey: accountInfo.account.publicKey // Base64 encoded public key, required for Cosmos signatures
     },
     fee: {
       amount: '1000',
       denom: 'badge',
-      gasLimit: 200000
+      gas: '200000'
     },
     memo: ''
   };
@@ -1139,7 +1109,7 @@ import { BitBadgesAPI, BaseBitBadgesApi } from 'bitbadgesjs-sdk';
 import { BigIntify, Stringify, Numberify } from 'bitbadgesjs-sdk';
 
 // Address Conversion
-import { convertToBitBadgesAddress, bitbadgesToEth, bitbadgesToCosmos, isAddressValid } from 'bitbadgesjs-sdk';
+import { convertToBitBadgesAddress, isAddressValid } from 'bitbadgesjs-sdk';
 
 // Core Classes
 import { Balance, UintRange, AddressList, Transfer, CollectionApproval } from 'bitbadgesjs-sdk';
@@ -1179,7 +1149,8 @@ import type { NumberType, CollectionId, BitBadgesAddress } from 'bitbadgesjs-sdk
    - Ensure transaction is properly signed
 
 4. **Address Format Issues**
-   - Use `convertToBitBadgesAddress` to normalize addresses
+   - Only BitBadges addresses (bb-prefixed) are supported
+   - Use `convertToBitBadgesAddress` to validate addresses
    - Validate addresses with `isAddressValid` before use
 
 ---

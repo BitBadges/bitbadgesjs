@@ -1,14 +1,11 @@
 export * as badges from './badges/index.js';
-export * as bitcoin from './bitcoin/index.js';
 export * as cosmos from './cosmos/index.js';
 export * as cosmos_proto from './cosmos_proto/index.js';
 export * as cosmwasm from './cosmwasm/index.js';
-export * as ethereum from './ethereum/index.js';
 export * as anchor from './anchor/index.js';
 export * as google from './google/index.js';
 export * from './proofs_pb.js';
 export * as protocols from './protocols/index.js';
-export * as solana from './solana/index.js';
 export * as tendermint from './tendermint/index.js';
 export * as wasmx from './wasmx/index.js';
 export * as maps from './maps/index.js';

@@ -367,10 +367,6 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
   accountNumber: T;
   pubKeyType: string;
   bitbadgesAddress: BitBadgesAddress;
-  ethAddress: string;
-  solAddress: string;
-  btcAddress: string;
-  thorAddress: string;
   sequence?: T;
   balances?: CosmosCoin<T>[];
 
@@ -382,10 +378,6 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
     this.accountNumber = data.accountNumber;
     this.pubKeyType = data.pubKeyType;
     this.bitbadgesAddress = data.bitbadgesAddress;
-    this.ethAddress = data.ethAddress;
-    this.solAddress = data.solAddress;
-    this.btcAddress = data.btcAddress;
-    this.thorAddress = data.thorAddress;
     this.sequence = data.sequence;
     this.balances = data.balances?.map((balance) => new CosmosCoin(balance)) ?? [];
   }
@@ -584,7 +576,6 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   profilePicUrl?: string;
   username?: string;
   latestSignedInChain?: SupportedChain;
-  solAddress?: string;
   notifications?: NotificationPreferences<T>;
   socialConnections?: SocialConnections<T>;
   publicSocialConnections?: SocialConnections<T>;
@@ -607,7 +598,6 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.profilePicUrl = data.profilePicUrl;
     this.username = data.username;
     this.latestSignedInChain = data.latestSignedInChain;
-    this.solAddress = data.solAddress;
     this.notifications = data.notifications ? new NotificationPreferences(data.notifications) : undefined;
     this.socialConnections = data.socialConnections ? new SocialConnections(data.socialConnections) : undefined;
     this.publicSocialConnections = data.publicSocialConnections ? new SocialConnections(data.publicSocialConnections) : undefined;

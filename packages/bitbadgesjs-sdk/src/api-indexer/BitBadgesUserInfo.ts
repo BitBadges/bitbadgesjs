@@ -42,8 +42,6 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   resolvedName?: string;
   /** The avatar of the account. */
   avatar?: string;
-  /** The Solana address of the account. Note: This may be empty if we do not have it yet. Solana -> BitBadges address conversions are one-way, and we cannot convert a BitBadges address to a Solana address without prior knowledge. */
-  solAddress: string;
   /** The chain of the account. */
   chain: SupportedChain;
   /** Indicates whether the account has claimed their airdrop. */
@@ -108,10 +106,6 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
  */
 export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> implements iBitBadgesUserInfo<T>, CustomType<BitBadgesUserInfo<T>> {
   bitbadgesAddress: BitBadgesAddress;
-  ethAddress: string;
-  btcAddress: string;
-  solAddress: string;
-  thorAddress: string;
   accountNumber: T;
   sequence?: T;
   balances?: CosmosCoin<T>[];
@@ -151,10 +145,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   constructor(data: iBitBadgesUserInfo<T>) {
     super(data);
     this.bitbadgesAddress = data.bitbadgesAddress;
-    this.ethAddress = data.ethAddress;
-    this.btcAddress = data.btcAddress;
-    this.solAddress = data.solAddress;
-    this.thorAddress = data.thorAddress;
     this.accountNumber = data.accountNumber;
     this.sequence = data.sequence;
     this.balances = data.balances?.map((balance) => new CosmosCoin(balance)) ?? [];
@@ -519,10 +509,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   static MintAccount() {
     return new BitBadgesUserInfo<bigint>({
       bitbadgesAddress: 'Mint',
-      ethAddress: 'Mint',
-      solAddress: 'Mint',
-      btcAddress: 'Mint',
-      thorAddress: 'Mint',
       address: 'Mint',
       chain: SupportedChain.COSMOS,
       pubKeyType: 'secp256k1',
@@ -553,10 +539,6 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     return new BitBadgesUserInfo<bigint>({
       _docId: '',
       bitbadgesAddress: '',
-      ethAddress: '',
-      solAddress: '',
-      btcAddress: '',
-      thorAddress: '',
       address: '',
       chain: SupportedChain.UNKNOWN,
       pubKeyType: '',
@@ -720,7 +702,7 @@ export type AccountFetchDetails = {
   /**
    * If true, we will only fetch a partial set of the document for the user.
    *
-   * Currently includes: solAddress, username, profile pic, and latest signed in chain
+   * Currently includes: username, profile pic, and latest signed in chain
    *
    * Pretty much, anything you need to display the address but not the full profile
    */
