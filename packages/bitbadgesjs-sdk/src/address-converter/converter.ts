@@ -126,6 +126,7 @@ export function isAddressValid(address: string, chain?: SupportedChain) {
     return true;
   }
 
+  //TODO:
   if (address.startsWith('bbvaloper')) {
     return true;
   }

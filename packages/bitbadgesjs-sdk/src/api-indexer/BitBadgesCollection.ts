@@ -58,9 +58,7 @@ import type {
 } from './docs-types/interfaces.js';
 import {
   CollectionMetadataDetails,
-  TokenMetadataDetails,
-  type iCollectionMetadataDetails,
-  type iTokenMetadataDetails
+  TokenMetadataDetails
 } from './metadata/tokenMetadata.js';
 
 import { convertToBitBadgesAddress } from '@/address-converter/converter.js';

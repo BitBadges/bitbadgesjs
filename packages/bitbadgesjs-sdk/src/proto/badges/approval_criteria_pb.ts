@@ -195,6 +195,24 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
    */
   votingChallenges: VotingChallenge[] = [];
 
+  /**
+   * If true, this collection approval allows backed minting operations (CosmosCoinBackedPath).
+   * When false, this approval cannot be used for transfers involving backed minting addresses.
+   * This prevents accidental allowances when toListIds is "All".
+   *
+   * @generated from field: bool allowBackedMinting = 23;
+   */
+  allowBackedMinting = false;
+
+  /**
+   * If true, this collection approval allows special wrapping operations (CosmosCoinWrapperPath).
+   * When false, this approval cannot be used for transfers involving wrapping addresses.
+   * This prevents accidental allowances when toListIds is "All".
+   *
+   * @generated from field: bool allowSpecialWrapping = 24;
+   */
+  allowSpecialWrapping = false;
+
   constructor(data?: PartialMessage<ApprovalCriteria>) {
     super();
     proto3.util.initPartial(data, this);
@@ -225,6 +243,8 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
     { no: 20, name: "altTimeChecks", kind: "message", T: AltTimeChecks },
     { no: 21, name: "mustPrioritize", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 22, name: "votingChallenges", kind: "message", T: VotingChallenge, repeated: true },
+    { no: 23, name: "allowBackedMinting", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 24, name: "allowSpecialWrapping", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ApprovalCriteria {

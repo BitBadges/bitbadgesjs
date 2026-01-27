@@ -1624,6 +1624,8 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   altTimeChecks?: AltTimeChecks<T>;
   mustPrioritize?: boolean;
   votingChallenges?: VotingChallenge<T>[];
+  allowBackedMinting?: boolean;
+  allowSpecialWrapping?: boolean;
 
   constructor(msg: iApprovalCriteria<T>) {
     super();
@@ -1649,6 +1651,8 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks<T>(msg.altTimeChecks) : undefined;
     this.mustPrioritize = msg.mustPrioritize;
     this.votingChallenges = msg.votingChallenges?.map((x) => new VotingChallenge(x));
+    this.allowBackedMinting = msg.allowBackedMinting;
+    this.allowSpecialWrapping = msg.allowSpecialWrapping;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteria<U> {
@@ -1700,7 +1704,9 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined,
       altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined,
       mustPrioritize: item.mustPrioritize,
-      votingChallenges: item.votingChallenges ? item.votingChallenges.map((x) => VotingChallenge.fromProto(x, convertFunction)) : undefined
+      votingChallenges: item.votingChallenges ? item.votingChallenges.map((x) => VotingChallenge.fromProto(x, convertFunction)) : undefined,
+      allowBackedMinting: item.allowBackedMinting,
+      allowSpecialWrapping: item.allowSpecialWrapping
     });
   }
 

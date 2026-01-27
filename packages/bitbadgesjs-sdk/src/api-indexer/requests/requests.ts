@@ -73,7 +73,7 @@ import { VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
 import type { CollectionId, iUintRange } from '@/interfaces/index.js';
 import { BroadcastPostBody } from '@/node-rest-api/index.js';
-import { type AssetConditionGroup, type ChallengeParams, type VerifyChallengeOptions } from 'blockin';
+import type { AssetConditionGroup, ChallengeParams, VerifyChallengeOptions } from '@/blockin/index.js';
 import { SiwbbChallengeParams } from './blockin.js';
 
 /**

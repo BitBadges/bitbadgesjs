@@ -74,6 +74,11 @@ export const isWrapperApproval = (
     return false;
   }
 
+  // Check if the approval allows special wrapping operations
+  if (approval.approvalCriteria?.allowSpecialWrapping === false) {
+    return false;
+  }
+
   const approvalCriteriaWithoutOverrides = {
     ...approval.approvalCriteria,
     overridesToIncomingApprovals: undefined
@@ -132,6 +137,11 @@ export const isUnwrapperApproval = (
 
   if (approval.approvalCriteria?.overridesFromOutgoingApprovals) {
     // This is actually reserved and will fail
+    return false;
+  }
+
+  // Check if the approval allows special wrapping operations
+  if (approval.approvalCriteria?.allowSpecialWrapping === false) {
     return false;
   }
 

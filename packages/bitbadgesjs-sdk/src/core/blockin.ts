@@ -3,7 +3,7 @@ import { SiwbbAndGroup, SiwbbAssetConditionGroup, SiwbbOrGroup, OwnershipRequire
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import { NumberType } from '@/common/string-numbers.js';
 import { SupportedChain } from '@/common/types.js';
-import { AndGroup, AssetConditionGroup, OrGroup } from 'blockin';
+import type { AndGroup, AssetConditionGroup, OrGroup } from '@/blockin/index.js';
 
 /**
  * @category Interfaces

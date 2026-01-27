@@ -379,6 +379,10 @@ export interface iApprovalCriteria<T extends NumberType> {
   mustPrioritize?: boolean;
   /** The list of voting challenges that must be satisfied for approval. */
   votingChallenges?: iVotingChallenge<T>[];
+  /** If true, this collection approval allows backed minting operations (CosmosCoinBackedPath). When false, this approval cannot be used for transfers involving backed minting addresses. This prevents accidental allowances when toListIds is "All". */
+  allowBackedMinting?: boolean;
+  /** If true, this collection approval allows special wrapping operations (CosmosCoinWrapperPath). When false, this approval cannot be used for transfers involving wrapping addresses. This prevents accidental allowances when toListIds is "All". */
+  allowSpecialWrapping?: boolean;
 }
 
 /**

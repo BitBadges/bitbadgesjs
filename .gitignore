@@ -31,3 +31,4 @@ build/Release
 .idea
 test/
 coverage
+.gitignored

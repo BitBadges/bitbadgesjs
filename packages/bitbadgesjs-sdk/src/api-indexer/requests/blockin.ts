@@ -1,7 +1,7 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { UintRange } from '@/core/uintRanges.js';
-import type { AndGroup, AssetConditionGroup, ChallengeParams, OrGroup, OwnershipRequirements as BlockinOwnershipRequirements } from 'blockin';
+import type { AndGroup, AssetConditionGroup, ChallengeParams, OrGroup, OwnershipRequirements as BlockinOwnershipRequirements } from '@/blockin/index.js';
 import { NativeAddress } from '../docs-types/interfaces.js';
 import { iUintRange } from '@/interfaces/types/core.js';
 
@@ -184,7 +184,7 @@ export class OwnershipRequirements<T extends NumberType> extends BaseNumberTypeC
 
   constructor(data: BlockinOwnershipRequirements<T>) {
     super();
-    this.assets = data.assets.map((item) => new SiwbbAssetDetails(item));
+    this.assets = data.assets.map((item: BlockinOwnershipRequirements<T>['assets'][0]) => new SiwbbAssetDetails(item));
     this.options = data.options;
   }
 
