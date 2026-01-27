@@ -45,8 +45,9 @@ The SDK is versioned to match BitBadges chain versions:
 | v20                     | 0.25.x            |
 | v21                     | 0.26.x            |
 | v22                     | 0.27.x            |
+| v23                     | 0.28.x            |
 
-**Current SDK Version**: 0.27.2 (compatible with BitBadges v22)
+**Current SDK Version**: 0.28.0 (compatible with BitBadges v23)
 
 ---
 
@@ -56,10 +57,10 @@ The SDK is versioned to match BitBadges chain versions:
 
 ```bash
 # Using npm
-npm install bitbadgesjs-sdk@^0.27.0
+npm install bitbadgesjs-sdk@^0.28.0
 
 # Using bun (recommended for this repository)
-bun add bitbadgesjs-sdk@^0.27.0
+bun add bitbadgesjs-sdk@^0.28.0
 ```
 
 ### Basic Import

@@ -27,6 +27,7 @@ This SDK is designed to be compatible with specific BitBadges chain versions. Us
 | v20                     | 0.25.x            | ✅ Current |
 | v21                     | 0.26.x            | ✅ Current |
 | v22                     | 0.27.x            | ✅ Current |
+| v23                     | 0.28.x            | ✅ Current |
 
 **Recommendation:** Always use the latest patch version within your compatible major.minor version range. For example, if you're using BitBadges v12, use the latest `0.18.x` version.
 
