@@ -258,7 +258,7 @@ export const getNonMintApprovals = <T extends NumberType>(collectionApprovals: C
         return x;
       }
     })
-    .filter((x) => x !== undefined) as CollectionApprovalWithDetails<T>[];
+    .filter((x) => x !== undefined).map((x) => new CollectionApprovalWithDetails(x));
 
   return existingNonMint;
 };
@@ -282,7 +282,7 @@ export const getMintApprovals = <T extends NumberType>(collectionApprovals: Coll
         return undefined;
       }
     })
-    .filter((x) => x !== undefined) as CollectionApprovalWithDetails<T>[];
+    .filter((x) => x !== undefined).map((x) => new CollectionApprovalWithDetails(x));
 
   return newApprovals;
 };
