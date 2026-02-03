@@ -6,9 +6,10 @@ on:
       - "packages/bitbadgesjs-sdk/**"
   workflow_dispatch:
 
-# Sets permissions for GITHUB_TOKEN to allow pushing changes
+# Sets permissions for GITHUB_TOKEN to allow creating PRs
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   generate-docs:
@@ -60,20 +61,50 @@ jobs:
 
       - name: Host OpenAPI spec for LLMs
         run: |
-          # Configure git
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-          # Navigate back to repo root to add files
+          # Navigate back to repo root
           cd ../..
 
-          # Add the openapi-hosted directory
-          git add packages/bitbadgesjs-sdk/openapi-hosted/
+          # Unstage everything first to ensure clean state
+          git reset HEAD . 2>/dev/null || true
 
-          # Commit if there are changes
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "chore: update hosted OpenAPI spec for LLMs [skip ci]"
-            git push
-          fi
+          # Discard any changes from the generation process
+          # Restore package.json if it was modified (generation script modifies it)
+          git restore packages/bitbadgesjs-sdk/package.json 2>/dev/null || true
+          # Restore any changes in openapitypes directory
+          git restore packages/bitbadgesjs-sdk/openapitypes/ 2>/dev/null || true
+          # Restore any other tracked files that were modified
+          git restore . 2>/dev/null || true
+
+          # Now stage ONLY the openapi-hosted files we want to commit
+          # (openapi-hosted is a new untracked directory, so restore won't affect it)
+          git add packages/bitbadgesjs-sdk/openapi-hosted/openapi.json
+          git add packages/bitbadgesjs-sdk/openapi-hosted/openapi.yaml
+          git add packages/bitbadgesjs-sdk/openapi-hosted/README.md
+
+          # Verify only the intended files are staged
+          echo "=== Staged files (should only be openapi-hosted files) ==="
+          git diff --cached --name-only
+
+          # Show status for debugging
+          echo "=== Git status ==="
+          git status --short
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update hosted OpenAPI spec for LLMs"
+          title: "chore: update hosted OpenAPI spec for LLMs"
+          body: |
+            Auto-generated PR to update the hosted OpenAPI specification for LLM access.
+
+            This PR is automatically created when the API documentation changes.
+
+            Files updated:
+            - `packages/bitbadgesjs-sdk/openapi-hosted/openapi.json`
+            - `packages/bitbadgesjs-sdk/openapi-hosted/openapi.yaml`
+          branch: update-openapi-hosted
+          delete-branch: true
+          # Only commit the files we explicitly staged
+          author: GitHub Actions <action@github.com>
+          committer: GitHub Actions <action@github.com>
