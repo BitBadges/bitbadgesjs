@@ -1,7 +1,7 @@
 import type { iCollectionApproval } from '@/interfaces/types/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
 
-export const isScheduledPaymentApproval = (approval: iCollectionApproval<bigint>) => {
+export const isScheduledPaymentApproval = (approval: iCollectionApproval) => {
   const approvalCriteria = approval.approvalCriteria;
   if (!approvalCriteria) {
     return false;

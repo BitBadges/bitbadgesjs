@@ -43,10 +43,10 @@ export interface ErrorResponse {
 /**
  * @category Interfaces
  */
-export interface iBitBadgesApi<T extends NumberType> {
+export interface iBitBadgesApi {
   apiUrl?: string;
   apiKey?: string;
-  convertFunction: (num: NumberType) => T;
+  convertFunction: (num: string | number) => T;
   appendedHeaders?: Record<string, string>;
 }
 
@@ -55,7 +55,7 @@ export interface iBitBadgesApi<T extends NumberType> {
  *
  * @category API
  */
-export class BaseBitBadgesApi<T extends NumberType> {
+export class BaseBitBadgesApi {
   axios = axios.create({
     withCredentials: true,
     headers: {
@@ -64,12 +64,12 @@ export class BaseBitBadgesApi<T extends NumberType> {
     }
   });
   BACKEND_URL = process.env.BITBADGES_API_URL || 'https://api.bitbadges.io';
-  ConvertFunction: (num: NumberType) => T;
+  ConvertFunction: (num: string | number) => T;
   apiKey = process.env.BITBADGES_API_KEY;
   accessToken = '';
   appendedHeaders: Record<string, string> = {};
 
-  constructor(apiDetails: iBitBadgesApi<T>) {
+  constructor(apiDetails: iBitBadgesApi) {
     this.BACKEND_URL = apiDetails.apiUrl || this.BACKEND_URL;
     this.ConvertFunction = apiDetails.convertFunction;
     this.apiKey = apiDetails.apiKey || this.apiKey;
@@ -106,7 +106,7 @@ export class BaseBitBadgesApi<T extends NumberType> {
     }
   }
 
-  assertPositiveInteger(num: NumberType) {
+  assertPositiveInteger(num: string | number) {
     try {
       BigInt(num);
     } catch (e) {

@@ -16,33 +16,29 @@ import { UintRangeArray } from './uintRanges.js';
  *
  * @category Approvals / Transferability
  */
-export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer<T>> implements iTransfer<T> {
+export class Transfer extends BaseNumberTypeClass<Transfer> implements iTransfer {
   from: BitBadgesAddress;
   toAddresses: BitBadgesAddress[];
-  balances: BalanceArray<T>;
-  precalculateBalancesFromApproval?: PrecalculateBalancesFromApprovalDetails<T>;
+  balances: BalanceArray;
+  precalculateBalancesFromApproval?: PrecalculateBalancesFromApprovalDetails;
   merkleProofs?: MerkleProof[];
   ethSignatureProofs?: ETHSignatureProof[];
   memo?: string;
-  prioritizedApprovals?: ApprovalIdentifierDetails<T>[];
+  prioritizedApprovals?: ApprovalIdentifierDetails[];
   onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
   onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
 
-  constructor(transfer: iTransfer<T>) {
+  constructor(transfer: iTransfer) {
     super();
     this.from = transfer.from;
     this.toAddresses = transfer.toAddresses;
     this.balances = BalanceArray.From(transfer.balances);
-    this.precalculateBalancesFromApproval = transfer.precalculateBalancesFromApproval
-      ? new PrecalculateBalancesFromApprovalDetails(transfer.precalculateBalancesFromApproval)
-      : undefined;
+    this.precalculateBalancesFromApproval = transfer.precalculateBalancesFromApproval ? new PrecalculateBalancesFromApprovalDetails(transfer.precalculateBalancesFromApproval) : undefined;
     this.merkleProofs = transfer.merkleProofs ? transfer.merkleProofs.map((b) => new MerkleProof(b)) : undefined;
     this.ethSignatureProofs = transfer.ethSignatureProofs ? transfer.ethSignatureProofs.map((b) => new ETHSignatureProof(b)) : undefined;
     this.memo = transfer.memo;
-    this.prioritizedApprovals = transfer.prioritizedApprovals
-      ? transfer.prioritizedApprovals.map((b) => new ApprovalIdentifierDetails(b))
-      : undefined;
+    this.prioritizedApprovals = transfer.prioritizedApprovals ? transfer.prioritizedApprovals.map((b) => new ApprovalIdentifierDetails(b)) : undefined;
     this.onlyCheckPrioritizedCollectionApprovals = transfer.onlyCheckPrioritizedCollectionApprovals;
 
     this.onlyCheckPrioritizedIncomingApprovals = transfer.onlyCheckPrioritizedIncomingApprovals;
@@ -53,44 +49,32 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Transfer<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Transfer<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): Transfer {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Transfer;
   }
 
   toProto(): protobadges.Transfer {
     return new protobadges.Transfer(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): Transfer<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): Transfer {
     return Transfer.fromProto(protobadges.Transfer.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): Transfer<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): Transfer {
     return Transfer.fromProto(protobadges.Transfer.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.Transfer, convertFunction: (item: NumberType) => U): Transfer<U> {
-    return new Transfer<U>({
+  static fromProto(item: protobadges.Transfer, convertFunction: (item: string | number) => U): Transfer {
+    return new Transfer({
       from: item.from,
       toAddresses: item.toAddresses,
       balances: item.balances.map((b) => Balance.fromProto(b, convertFunction)),
-      precalculateBalancesFromApproval: item.precalculateBalancesFromApproval
-        ? PrecalculateBalancesFromApprovalDetails.fromProto(item.precalculateBalancesFromApproval, convertFunction)
-        : undefined,
+      precalculateBalancesFromApproval: item.precalculateBalancesFromApproval ? PrecalculateBalancesFromApprovalDetails.fromProto(item.precalculateBalancesFromApproval, convertFunction) : undefined,
       merkleProofs: item.merkleProofs ? item.merkleProofs.map((b) => MerkleProof.fromProto(b)) : undefined,
       ethSignatureProofs: item.ethSignatureProofs ? item.ethSignatureProofs.map((b) => ETHSignatureProof.fromProto(b)) : undefined,
       memo: item.memo ? item.memo : undefined,
-      prioritizedApprovals: item.prioritizedApprovals
-        ? item.prioritizedApprovals.map((b) => ApprovalIdentifierDetails.fromProto(b, convertFunction))
-        : undefined,
+      prioritizedApprovals: item.prioritizedApprovals ? item.prioritizedApprovals.map((b) => ApprovalIdentifierDetails.fromProto(b, convertFunction)) : undefined,
 
       onlyCheckPrioritizedCollectionApprovals: item.onlyCheckPrioritizedCollectionApprovals,
       onlyCheckPrioritizedIncomingApprovals: item.onlyCheckPrioritizedIncomingApprovals,
@@ -98,7 +82,7 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
     });
   }
 
-  toBech32Addresses(prefix: string): Transfer<T> {
+  toBech32Addresses(prefix: string): Transfer {
     return new Transfer({
       ...this,
       from: getConvertFunctionFromPrefix(prefix)(this.from),
@@ -112,8 +96,8 @@ export class Transfer<T extends NumberType> extends BaseNumberTypeClass<Transfer
 /**
  * @category Interfaces
  */
-export interface iOffChainBalancesMap<T extends NumberType> {
-  [bitbadgesAddressOrListId: string]: iBalance<T>[];
+export interface iOffChainBalancesMap {
+  [bitbadgesAddressOrListId: string]: iBalance[];
 }
 
 /**
@@ -124,18 +108,15 @@ export interface iOffChainBalancesMap<T extends NumberType> {
  * OffChainBalancesMap is a map of BitBadges addresses or listIDs to an array of balances. This is the expected format
  * for collections with off-chain balances. Host this on your server in JSON format.
  */
-export interface OffChainBalancesMap<T extends NumberType> {
-  [bitbadgesAddressOrListId: string]: BalanceArray<T>;
+export interface OffChainBalancesMap {
+  [bitbadgesAddressOrListId: string]: BalanceArray;
 }
 
 /**
  * @category Balances
  */
-export function convertOffChainBalancesMap<T extends NumberType, U extends NumberType>(
-  item: iOffChainBalancesMap<T>,
-  convertFunction: (item: NumberType) => U
-): OffChainBalancesMap<U> {
-  const newMap: OffChainBalancesMap<U> = {};
+export function convertOffChainBalancesMap<T extends NumberType, U extends NumberType>(item: iOffChainBalancesMap, convertFunction: (item: string | number) => U): OffChainBalancesMap {
+  const newMap: OffChainBalancesMap = {};
   for (const [key, value] of Object.entries(item)) {
     newMap[key] = BalanceArray.From(value).convert(convertFunction);
   }
@@ -146,18 +127,18 @@ export function convertOffChainBalancesMap<T extends NumberType, U extends Numbe
 /**
  * @category Interfaces
  */
-export interface iTransferWithIncrements<T extends NumberType> extends iTransfer<T> {
+export interface iTransferWithIncrements extends iTransfer {
   /** The number of addresses to send the tokens to. This takes priority over toAddresses.length (used when you don't know exact addresses (i.e. you know number of codes)). */
-  toAddressesLength?: T;
+  toAddressesLength?: string | number;
 
   /** The number to increment the tokenIDs by for each transfer. */
-  incrementTokenIdsBy?: T;
+  incrementTokenIdsBy?: string | number;
 
   /** The number to increment the ownershipTimes by for each transfer. */
-  incrementOwnershipTimesBy?: T;
+  incrementOwnershipTimesBy?: string | number;
 
   /** The number of unix milliseconds to approve starting from now. */
-  durationFromTimestamp?: T;
+  durationFromTimestamp?: string | number;
 }
 
 /**
@@ -173,26 +154,23 @@ export interface iTransferWithIncrements<T extends NumberType> extends iTransfer
  *
  * @category Approvals / Transferability
  */
-export class TransferWithIncrements<T extends NumberType>
-  extends BaseNumberTypeClass<TransferWithIncrements<T>>
-  implements iTransferWithIncrements<T>
-{
-  toAddressesLength?: T;
-  incrementTokenIdsBy?: T;
-  incrementOwnershipTimesBy?: T;
-  durationFromTimestamp?: T;
+export class TransferWithIncrements extends BaseNumberTypeClass<TransferWithIncrements> implements iTransferWithIncrements {
+  toAddressesLength?: string | number;
+  incrementTokenIdsBy?: string | number;
+  incrementOwnershipTimesBy?: string | number;
+  durationFromTimestamp?: string | number;
   from: BitBadgesAddress;
   toAddresses: BitBadgesAddress[];
-  balances: BalanceArray<T>;
-  precalculateBalancesFromApproval?: PrecalculateBalancesFromApprovalDetails<T>;
+  balances: BalanceArray;
+  precalculateBalancesFromApproval?: PrecalculateBalancesFromApprovalDetails;
   merkleProofs?: MerkleProof[];
   memo?: string;
-  prioritizedApprovals?: ApprovalIdentifierDetails<T>[];
+  prioritizedApprovals?: ApprovalIdentifierDetails[];
   onlyCheckPrioritizedCollectionApprovals?: boolean | undefined;
   onlyCheckPrioritizedIncomingApprovals?: boolean | undefined;
   onlyCheckPrioritizedOutgoingApprovals?: boolean | undefined;
 
-  constructor(data: iTransferWithIncrements<T>) {
+  constructor(data: iTransferWithIncrements) {
     super();
     this.toAddressesLength = data.toAddressesLength;
     this.incrementTokenIdsBy = data.incrementTokenIdsBy;
@@ -201,9 +179,7 @@ export class TransferWithIncrements<T extends NumberType>
     this.from = data.from;
     this.toAddresses = data.toAddresses;
     this.balances = BalanceArray.From(data.balances);
-    this.precalculateBalancesFromApproval = data.precalculateBalancesFromApproval
-      ? new PrecalculateBalancesFromApprovalDetails(data.precalculateBalancesFromApproval)
-      : undefined;
+    this.precalculateBalancesFromApproval = data.precalculateBalancesFromApproval ? new PrecalculateBalancesFromApprovalDetails(data.precalculateBalancesFromApproval) : undefined;
     this.merkleProofs = data.merkleProofs ? data.merkleProofs.map((b) => new MerkleProof(b)) : undefined;
     this.memo = data.memo;
     this.prioritizedApprovals = data.prioritizedApprovals ? data.prioritizedApprovals.map((b) => new ApprovalIdentifierDetails(b)) : undefined;
@@ -216,8 +192,8 @@ export class TransferWithIncrements<T extends NumberType>
     return ['toAddressesLength', 'incrementTokenIdsBy', 'incrementOwnershipTimesBy', 'durationFromTimestamp'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferWithIncrements<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TransferWithIncrements<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): TransferWithIncrements {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TransferWithIncrements;
   }
 }
 
@@ -226,8 +202,8 @@ export class TransferWithIncrements<T extends NumberType>
  *
  * @category Balances
  */
-export const createBalanceMapForOffChainBalances = <T extends NumberType>(transfersWithIncrements: iTransferWithIncrements<T>[]) => {
-  const balanceMap: OffChainBalancesMap<T> = {};
+export const createBalanceMapForOffChainBalances = (transfersWithIncrements: iTransferWithIncrements[]) => {
+  const balanceMap: OffChainBalancesMap = {};
 
   if (transfersWithIncrements.some((x) => x.durationFromTimestamp)) {
     throw new Error('durationFromTimestamp is not supported in createBalanceMapForOffChainBalances');
@@ -242,7 +218,7 @@ export const createBalanceMapForOffChainBalances = <T extends NumberType>(transf
       const bitbadgesAddress = convertToBitBadgesAddress(address);
 
       //currBalance is used as a Balance[] type to be compatible with addBalancesForUintRanges
-      const currBalances = balanceMap[bitbadgesAddress] ? balanceMap[bitbadgesAddress] : BalanceArray.From<T>([]);
+      const currBalances = balanceMap[bitbadgesAddress] ? balanceMap[bitbadgesAddress] : BalanceArray.From([]);
       currBalances.addBalances(transfer.balances);
       balanceMap[bitbadgesAddress] = BalanceArray.From(currBalances);
     }
@@ -259,10 +235,10 @@ export const createBalanceMapForOffChainBalances = <T extends NumberType>(transf
  *
  * @category Balances
  */
-export const getAllTokenIdsToBeTransferred = <T extends NumberType>(transfers: iTransferWithIncrements<T>[]) => {
+export const getAllTokenIdsToBeTransferred = (transfers: iTransferWithIncrements[]) => {
   //NOTE: We do not support durationFromTimestamp in this function since we just return the tokenIds
 
-  const allTokenIds: UintRangeArray<T> = UintRangeArray.From([]);
+  const allTokenIds: UintRangeArray = UintRangeArray.From([]);
   const transfersConverted = transfers.map((transfer) => new TransferWithIncrements(transfer));
 
   for (const transfer of transfersConverted) {
@@ -311,7 +287,7 @@ export const getAllTokenIdsToBeTransferred = <T extends NumberType>(transfers: i
  *
  * @category Balances
  */
-export const getAllBalancesToBeTransferred = <T extends NumberType>(transfers: iTransferWithIncrements<T>[], blockTime: T) => {
+export const getAllBalancesToBeTransferred = (transfers: iTransferWithIncrements[], blockTime: T) => {
   const allBalances = BalanceArray.From([
     {
       amount: GO_MAX_UINT_64,
@@ -329,19 +305,16 @@ export const getAllBalancesToBeTransferred = <T extends NumberType>(transfers: i
 };
 
 /**
- * Converts a TransferWithIncrements<bigint>[] to a Transfer<bigint>[].
+ * Converts a TransferWithIncrements[] to a Transfer[].
  *
  * Note that if there are N increments, this will create N transfers.
  *
- * @param {TransferWithIncrements<bigint>[]} transfersWithIncrements - The list of transfers with increments.
+ * @param {TransferWithIncrements[]} transfersWithIncrements - The list of transfers with increments.
  *
  * @category Balances
  */
-export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(
-  transfersWithIncrements: iTransferWithIncrements<T>[],
-  blockTime: T
-) => {
-  const transfers: Transfer<T>[] = [];
+export const getTransfersFromTransfersWithIncrements = (transfersWithIncrements: iTransferWithIncrements[], blockTime: T) => {
+  const transfers: Transfer[] = [];
 
   const transfersConverted = transfersWithIncrements.map((transfer) => new TransferWithIncrements(transfer));
   for (const transferExtended of transfersConverted) {
@@ -391,7 +364,7 @@ export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(
 /**
  * Returns the post balance after a transfer of x(amountToTransfer * numRecipients) from startTokenId to endTokenId
  *
- * @param {Balance<bigint>[]} balance - The balance to subtract from.
+ * @param {Balance[]} balance - The balance to subtract from.
  * @param {bigint} startTokenId - The start token ID to subtract from.
  * @param {bigint} endTokenId - The end token ID to subtract from.
  * @param {bigint} amountToTransfer - The amount to subtract.
@@ -399,16 +372,7 @@ export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(
  *
  * @category Balances
  */
-export const getBalanceAfterTransfer = <T extends NumberType>(
-  balance: iBalance<T>[],
-  startTokenId: T,
-  endTokenId: T,
-  ownershipTimeStart: T,
-  ownershipTimeEnd: T,
-  amountToTransfer: T,
-  numRecipients: T,
-  allowUnderflow?: boolean
-) => {
+export const getBalanceAfterTransfer = (balance: iBalance[], startTokenId: T, endTokenId: T, ownershipTimeStart: T, ownershipTimeEnd: T, amountToTransfer: T, numRecipients: T, allowUnderflow?: boolean) => {
   const convertFunction = getConverterFunction(startTokenId);
   const balanceCopy = BalanceArray.From(balance.map((balance) => new Balance(balance))).clone();
   balanceCopy.subtractBalances(
@@ -426,19 +390,14 @@ export const getBalanceAfterTransfer = <T extends NumberType>(
 };
 
 /**
- * Returns the balance after a set of TransferWithIncrements<bigint>[].
+ * Returns the balance after a set of TransferWithIncrements[].
  *
- * @param {Balance<bigint>[]} startBalance - The balance to subtract from.
- * @param {TransferWithIncrements<bigint>[]} transfers - The transfers that are being sent.
+ * @param {Balance[]} startBalance - The balance to subtract from.
+ * @param {TransferWithIncrements[]} transfers - The transfers that are being sent.
  *
  * @category Balances
  */
-export const getBalancesAfterTransfers = <T extends NumberType>(
-  startBalance: iBalance<T>[],
-  transfersArr: iTransferWithIncrements<T>[],
-  blockTime: T,
-  allowUnderflow?: boolean
-) => {
+export const getBalancesAfterTransfers = (startBalance: iBalance[], transfersArr: iTransferWithIncrements[], blockTime: T, allowUnderflow?: boolean) => {
   let endBalances = BalanceArray.From(startBalance.map((balance) => new Balance(balance))).clone();
   const transfers = transfersArr.map((transfer) => new TransferWithIncrements(transfer));
   for (const transfer of transfers) {
@@ -454,24 +413,12 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
       if (!transfer.incrementTokenIdsBy && !transfer.incrementOwnershipTimesBy && !transfer.durationFromTimestamp) {
         for (const tokenId of tokenIds) {
           for (const ownershipTime of ownershipTimes) {
-            endBalances = getBalanceAfterTransfer(
-              endBalances,
-              tokenId.start,
-              tokenId.end,
-              ownershipTime.start,
-              ownershipTime.end,
-              balance.amount,
-              numRecipients as T,
-              allowUnderflow
-            );
+            endBalances = getBalanceAfterTransfer(endBalances, tokenId.start, tokenId.end, ownershipTime.start, ownershipTime.end, balance.amount, numRecipients as T, allowUnderflow);
           }
         }
       } else {
         const fastIncrementBadges = !transfer.incrementTokenIdsBy || tokenIds.every((x) => x.size() === transfer.incrementTokenIdsBy);
-        const fastIncrementOwnershipTimes =
-          !transfer.incrementOwnershipTimesBy ||
-          BigInt(transfer.durationFromTimestamp || 0n) > 0n ||
-          ownershipTimes.every((x) => x.size() === transfer.incrementOwnershipTimesBy);
+        const fastIncrementOwnershipTimes = !transfer.incrementOwnershipTimesBy || BigInt(transfer.durationFromTimestamp || 0n) > 0n || ownershipTimes.every((x) => x.size() === transfer.incrementOwnershipTimesBy);
 
         //If we are incrementing with no gaps (e.g. end IDs will be 1-1000 or start with x1 and increment x1 10000 times)
         if (fastIncrementBadges && fastIncrementOwnershipTimes) {
@@ -486,25 +433,13 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
             ownershipTimes = UintRangeArray.From([{ start: blockTime, end: endTime }]);
           } else {
             for (const ownershipTime of ownershipTimes) {
-              ownershipTime.end = safeAddKeepLeft(
-                ownershipTime.end,
-                safeMultiplyKeepLeft(transfer.incrementOwnershipTimesBy || 0n, numRecipients - 1n)
-              );
+              ownershipTime.end = safeAddKeepLeft(ownershipTime.end, safeMultiplyKeepLeft(transfer.incrementOwnershipTimesBy || 0n, numRecipients - 1n));
             }
           }
 
           for (const tokenId of tokenIds) {
             for (const ownershipTime of ownershipTimes) {
-              endBalances = getBalanceAfterTransfer(
-                endBalances,
-                tokenId.start,
-                tokenId.end,
-                ownershipTime.start,
-                ownershipTime.end,
-                balance.amount,
-                1n as T,
-                allowUnderflow
-              );
+              endBalances = getBalanceAfterTransfer(endBalances, tokenId.start, tokenId.end, ownershipTime.start, ownershipTime.end, balance.amount, 1n as T, allowUnderflow);
             }
           }
         } else {
@@ -513,16 +448,7 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
           for (let i = 0; i < numRecipients; i++) {
             for (const tokenId of tokenIds) {
               for (const ownershipTime of ownershipTimes) {
-                endBalances = getBalanceAfterTransfer(
-                  endBalances,
-                  tokenId.start,
-                  tokenId.end,
-                  ownershipTime.start,
-                  ownershipTime.end,
-                  balance.amount,
-                  1n as T,
-                  allowUnderflow
-                );
+                endBalances = getBalanceAfterTransfer(endBalances, tokenId.start, tokenId.end, ownershipTime.start, ownershipTime.end, balance.amount, 1n as T, allowUnderflow);
               }
             }
 

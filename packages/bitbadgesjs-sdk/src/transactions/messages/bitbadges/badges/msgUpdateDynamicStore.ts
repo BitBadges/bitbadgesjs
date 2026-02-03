@@ -13,15 +13,15 @@ import { normalizeMessagesIfNecessary } from '../../base.js';
  *
  * @category Transactions
  */
-export class MsgUpdateDynamicStore<T extends NumberType> extends CustomTypeClass<MsgUpdateDynamicStore<T>> implements iMsgUpdateDynamicStore<T> {
+export class MsgUpdateDynamicStore extends CustomTypeClass<MsgUpdateDynamicStore> implements iMsgUpdateDynamicStore {
   creator: BitBadgesAddress;
-  storeId: T;
+  storeId: string | number;
   defaultValue?: boolean;
   globalEnabled?: boolean;
   uri?: string;
   customData?: string;
 
-  constructor(msg: iMsgUpdateDynamicStore<T>) {
+  constructor(msg: iMsgUpdateDynamicStore) {
     super();
     this.creator = msg.creator;
     this.storeId = msg.storeId;
@@ -42,15 +42,15 @@ export class MsgUpdateDynamicStore<T extends NumberType> extends CustomTypeClass
     });
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUpdateDynamicStore<NumberType> {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgUpdateDynamicStore {
     return MsgUpdateDynamicStore.fromProto(protobadges.MsgUpdateDynamicStore.fromJson(jsonValue, options));
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUpdateDynamicStore<NumberType> {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgUpdateDynamicStore {
     return MsgUpdateDynamicStore.fromProto(protobadges.MsgUpdateDynamicStore.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: protobadges.MsgUpdateDynamicStore): MsgUpdateDynamicStore<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgUpdateDynamicStore): MsgUpdateDynamicStore {
     return new MsgUpdateDynamicStore({
       creator: protoMsg.creator,
       storeId: protoMsg.storeId,
@@ -61,7 +61,7 @@ export class MsgUpdateDynamicStore<T extends NumberType> extends CustomTypeClass
     });
   }
 
-  toBech32Addresses(prefix: string): MsgUpdateDynamicStore<T> {
+  toBech32Addresses(prefix: string): MsgUpdateDynamicStore {
     return new MsgUpdateDynamicStore({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       storeId: this.storeId,

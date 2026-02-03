@@ -15,15 +15,12 @@ import { MsgUniversalUpdateCollection } from '../badges/msgUniversalUpdateCollec
  *
  * @category Transactions
  */
-export class MsgExecuteUniversalUpdateCollection<T extends NumberType>
-  extends CustomTypeClass<MsgExecuteUniversalUpdateCollection<T>>
-  implements iMsgExecuteUniversalUpdateCollection<T>
-{
+export class MsgExecuteUniversalUpdateCollection extends CustomTypeClass<MsgExecuteUniversalUpdateCollection> implements iMsgExecuteUniversalUpdateCollection {
   executor: BitBadgesAddress;
   managerSplitterAddress: BitBadgesAddress;
-  universalUpdateCollectionMsg: MsgUniversalUpdateCollection<T>;
+  universalUpdateCollectionMsg: MsgUniversalUpdateCollection;
 
-  constructor(msg: iMsgExecuteUniversalUpdateCollection<T>) {
+  constructor(msg: iMsgExecuteUniversalUpdateCollection) {
     super();
     this.executor = msg.executor;
     this.managerSplitterAddress = msg.managerSplitterAddress;
@@ -38,32 +35,15 @@ export class MsgExecuteUniversalUpdateCollection<T extends NumberType>
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgExecuteUniversalUpdateCollection<U> {
-    return MsgExecuteUniversalUpdateCollection.fromProto(
-      protomanagersplitter.MsgExecuteUniversalUpdateCollection.fromJson(jsonValue, options),
-      convertFunction
-    );
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgExecuteUniversalUpdateCollection {
+    return MsgExecuteUniversalUpdateCollection.fromProto(protomanagersplitter.MsgExecuteUniversalUpdateCollection.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgExecuteUniversalUpdateCollection<U> {
-    return MsgExecuteUniversalUpdateCollection.fromProto(
-      protomanagersplitter.MsgExecuteUniversalUpdateCollection.fromJsonString(jsonString, options),
-      convertFunction
-    );
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgExecuteUniversalUpdateCollection {
+    return MsgExecuteUniversalUpdateCollection.fromProto(protomanagersplitter.MsgExecuteUniversalUpdateCollection.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    protoMsg: protomanagersplitter.MsgExecuteUniversalUpdateCollection,
-    convertFunction: (item: NumberType) => U
-  ): MsgExecuteUniversalUpdateCollection<U> {
+  static fromProto(protoMsg: protomanagersplitter.MsgExecuteUniversalUpdateCollection, convertFunction: (item: string | number) => U): MsgExecuteUniversalUpdateCollection {
     return new MsgExecuteUniversalUpdateCollection({
       executor: protoMsg.executor,
       managerSplitterAddress: protoMsg.managerSplitterAddress,
@@ -71,7 +51,7 @@ export class MsgExecuteUniversalUpdateCollection<T extends NumberType>
     });
   }
 
-  toBech32Addresses(prefix: string): MsgExecuteUniversalUpdateCollection<T> {
+  toBech32Addresses(prefix: string): MsgExecuteUniversalUpdateCollection {
     return new MsgExecuteUniversalUpdateCollection({
       executor: getConvertFunctionFromPrefix(prefix)(this.executor),
       managerSplitterAddress: getConvertFunctionFromPrefix(prefix)(this.managerSplitterAddress),

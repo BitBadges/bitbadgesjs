@@ -14,10 +14,7 @@ export interface iGetConnectedAccountsSuccessResponse {
   }>;
 }
 
-export class GetConnectedAccountsSuccessResponse
-  extends CustomTypeClass<GetConnectedAccountsSuccessResponse>
-  implements iGetConnectedAccountsSuccessResponse
-{
+export class GetConnectedAccountsSuccessResponse extends CustomTypeClass<GetConnectedAccountsSuccessResponse> implements iGetConnectedAccountsSuccessResponse {
   accounts: Array<{
     id: string;
     object: string;
@@ -40,10 +37,7 @@ export interface iDeleteConnectedAccountSuccessResponse {
   deleted: boolean;
 }
 
-export class DeleteConnectedAccountSuccessResponse
-  extends CustomTypeClass<DeleteConnectedAccountSuccessResponse>
-  implements iDeleteConnectedAccountSuccessResponse
-{
+export class DeleteConnectedAccountSuccessResponse extends CustomTypeClass<DeleteConnectedAccountSuccessResponse> implements iDeleteConnectedAccountSuccessResponse {
   deleted: boolean;
 
   constructor(response: iDeleteConnectedAccountSuccessResponse) {

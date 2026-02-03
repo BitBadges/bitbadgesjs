@@ -17,18 +17,18 @@ import { normalizeMessagesIfNecessary } from '../../base.js';
  *
  * @category Transactions
  */
-export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeClass<MsgDeleteCollection<T>> implements iMsgDeleteCollection<T> {
+export class MsgDeleteCollection extends BaseNumberTypeClass<MsgDeleteCollection> implements iMsgDeleteCollection {
   creator: BitBadgesAddress;
   collectionId: CollectionId;
 
-  constructor(msg: iMsgDeleteCollection<T>) {
+  constructor(msg: iMsgDeleteCollection) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgDeleteCollection<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgDeleteCollection<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgDeleteCollection {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgDeleteCollection;
   }
 
   getNumberFieldNames(): string[] {
@@ -39,30 +39,22 @@ export class MsgDeleteCollection<T extends NumberType> extends BaseNumberTypeCla
     return new protobadges.MsgDeleteCollection(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgDeleteCollection<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgDeleteCollection {
     return MsgDeleteCollection.fromProto(protobadges.MsgDeleteCollection.fromJson(jsonValue, options));
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgDeleteCollection<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgDeleteCollection {
     return MsgDeleteCollection.fromProto(protobadges.MsgDeleteCollection.fromJsonString(jsonString, options));
   }
 
-  static fromProto<U extends NumberType>(protoMsg: protobadges.MsgDeleteCollection): MsgDeleteCollection<U> {
+  static fromProto(protoMsg: protobadges.MsgDeleteCollection): MsgDeleteCollection {
     return new MsgDeleteCollection({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId
     });
   }
 
-  toBech32Addresses(prefix: string): MsgDeleteCollection<T> {
+  toBech32Addresses(prefix: string): MsgDeleteCollection {
     return new MsgDeleteCollection({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId

@@ -6,7 +6,7 @@ import { UintRangeArray } from './uintRanges.js';
 /**
  * @category Validate Updates
  */
-export function getPotentialUpdatesForTimelineValues(times: UintRangeArray<bigint>[], values: any[]): UniversalPermissionDetails[] {
+export function getPotentialUpdatesForTimelineValues(times: UintRangeArray[], values: any[]): UniversalPermissionDetails[] {
   const castedPermissions: UniversalPermission[] = [];
   for (let idx = 0; idx < times.length; idx++) {
     castedPermissions.push({
@@ -43,12 +43,7 @@ interface CompareAndGetUpdateCombosToCheckFn {
   (oldValue: unknown, newValue: unknown): UniversalPermissionDetails[];
 }
 
-export function getUpdateCombinationsToCheck(
-  firstMatchesForOld: UniversalPermissionDetails[],
-  firstMatchesForNew: UniversalPermissionDetails[],
-  emptyValue: unknown,
-  compareAndGetUpdateCombosToCheck: CompareAndGetUpdateCombosToCheckFn
-): UniversalPermissionDetails[] {
+export function getUpdateCombinationsToCheck(firstMatchesForOld: UniversalPermissionDetails[], firstMatchesForNew: UniversalPermissionDetails[], emptyValue: unknown, compareAndGetUpdateCombosToCheck: CompareAndGetUpdateCombosToCheckFn): UniversalPermissionDetails[] {
   const detailsToCheck: UniversalPermissionDetails[] = [];
 
   const [overlapObjects, inOldButNotNew, inNewButNotOld] = getOverlapsAndNonOverlaps(firstMatchesForOld, firstMatchesForNew);
@@ -124,12 +119,12 @@ export function getUpdateCombinationsToCheck(
 }
 
 export const AllDefaultValues: UniversalPermission = {
-  permanentlyPermittedTimes: UintRangeArray.From<bigint>([]),
-  permanentlyForbiddenTimes: UintRangeArray.From<bigint>([]),
-  tokenIds: UintRangeArray.From<bigint>([]),
-  timelineTimes: UintRangeArray.From<bigint>([]),
-  transferTimes: UintRangeArray.From<bigint>([]),
-  ownershipTimes: UintRangeArray.From<bigint>([]),
+  permanentlyPermittedTimes: UintRangeArray.From([]),
+  permanentlyForbiddenTimes: UintRangeArray.From([]),
+  tokenIds: UintRangeArray.From([]),
+  timelineTimes: UintRangeArray.From([]),
+  transferTimes: UintRangeArray.From([]),
+  ownershipTimes: UintRangeArray.From([]),
   fromList: AddressList.AllAddresses(),
   toList: AddressList.AllAddresses(),
   initiatedByList: AddressList.AllAddresses(),

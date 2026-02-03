@@ -861,31 +861,26 @@ The Dynamic Store message types have been fully implemented in the SDK as a comp
 ### Files Created/Modified:
 
 1. **Interfaces** (`src/transactions/messages/bitbadges/badges/interfaces.ts`):
-
    - `iMsgCreateDynamicStore`
    - `iMsgUpdateDynamicStore<T extends NumberType>`
    - `iMsgDeleteDynamicStore<T extends NumberType>`
    - `iMsgSetDynamicStoreValue<T extends NumberType>`
 
 2. **Message Classes**:
-
    - `src/transactions/messages/bitbadges/badges/msgCreateDynamicStore.ts`
    - `src/transactions/messages/bitbadges/badges/msgUpdateDynamicStore.ts`
    - `src/transactions/messages/bitbadges/badges/msgDeleteDynamicStore.ts`
    - `src/transactions/messages/bitbadges/badges/msgSetDynamicStoreValue.ts`
 
 3. **Registry Updates**:
-
    - `src/transactions/amino/objectConverter.ts` - Added to `ProtoTypeRegistry`
    - `src/transactions/amino/registry.ts` - Added to `createBadgesAminoConverters()`
 
 4. **Sample Messages** (`src/transactions/eip712/payload/samples/getSampleMsg.ts`):
-
    - Added sample message cases for all four message types
    - Added population functions for message normalization
 
 5. **Message Normalization** (`src/transactions/messages/base.ts`):
-
    - Added normalization conditions for all four message types
    - Added imports for population functions
 

@@ -10,24 +10,7 @@ import type { iBatchTokenDetails } from '@/core/batch-utils.js';
 import type { iCosmosCoin } from '@/core/coin.js';
 import type { iOffChainBalancesMap } from '@/core/transfers.js';
 import type { iCollectionApproval, iUserIncomingApprovalWithDetails } from '@/interfaces/types/approvals.js';
-import type {
-  CollectionId,
-  iAddressList,
-  iAmountTrackerIdDetails,
-  iApprovalIdentifierDetails,
-  iBalance,
-  iCollectionInvariants,
-  iCollectionMetadata,
-  iConversionWithoutDenom,
-  iDenomUnit,
-  iDenomUnitWithDetails,
-  iPathMetadata,
-  iPathMetadataWithDetails,
-  iPrecalculateBalancesFromApprovalDetails,
-  iPrecalculationOptions,
-  iTokenMetadata,
-  iUintRange
-} from '@/interfaces/types/core.js';
+import type { CollectionId, iAddressList, iAmountTrackerIdDetails, iApprovalIdentifierDetails, iBalance, iCollectionInvariants, iCollectionMetadata, iConversionWithoutDenom, iDenomUnit, iDenomUnitWithDetails, iPathMetadata, iPathMetadataWithDetails, iPrecalculateBalancesFromApprovalDetails, iPrecalculationOptions, iTokenMetadata, iUintRange } from '@/interfaces/types/core.js';
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/types/permissions.js';
 import type { iUserBalanceStore } from '@/interfaces/types/userBalances.js';
 import type { iMap, iValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
@@ -53,7 +36,7 @@ export interface OAuthScopeDetails {
  *
  * @category Interfaces
  */
-export type UNIXMilliTimestamp<T extends NumberType> = T;
+export type UNIXMilliTimestamp = string | number;
 
 /**
  *
@@ -89,97 +72,97 @@ export type NativeAddress = string;
  *
  * @category Interfaces
  */
-export interface iSocialConnections<T extends NumberType> {
+export interface iSocialConnections {
   discord?: {
     username: string;
     id: string;
     discriminator?: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   twitter?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   google?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   github?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   twitch?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   strava?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   reddit?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   meetup?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   bluesky?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   mailchimp?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   facebook?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   googleCalendar?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   youtube?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   linkedIn?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   shopify?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   telegram?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   farcaster?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
   slack?: {
     username: string;
     id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
+    lastUpdated: UNIXMilliTimestamp;
   };
 }
 
@@ -188,13 +171,13 @@ export interface iSocialConnections<T extends NumberType> {
  *
  * @category Interfaces
  */
-export interface iNotificationPreferences<T extends NumberType> {
+export interface iNotificationPreferences {
   /** The email to receive push notifications. */
   email?: string;
   /** The Discord ID to receive push notifications. */
   discord?: { id: string; username: string; discriminator: string | undefined; token: string } | undefined;
   /** The verification status of the email. */
-  emailVerification?: iEmailVerificationStatus<T>;
+  emailVerification?: iEmailVerificationStatus;
   /** The preferences for the notifications. What type of notifications does the user want to receive? */
   preferences?: {
     transferActivity?: boolean;
@@ -209,15 +192,15 @@ export interface iNotificationPreferences<T extends NumberType> {
  *
  * @category Interfaces
  */
-export interface iEmailVerificationStatus<T extends NumberType> {
+export interface iEmailVerificationStatus {
   /** Whether or not the email has been verified. */
   verified?: boolean;
   /** Verified at timestamp. */
-  verifiedAt?: UNIXMilliTimestamp<T>;
+  verifiedAt?: UNIXMilliTimestamp;
   /** The email verification token. This is used for verification and unsubscription. */
   token?: string;
   /** The expiry of the token for verification purposes. */
-  expiry?: UNIXMilliTimestamp<T>;
+  expiry?: UNIXMilliTimestamp;
   /** A unique code that we will send with all emails to verify that BitBadges is the one sending the email. */
   antiPhishingCode?: string;
 }
@@ -227,11 +210,11 @@ export interface iEmailVerificationStatus<T extends NumberType> {
  *
  * @category Interfaces
  */
-export interface iActivityDoc<T extends NumberType> extends Doc {
+export interface iActivityDoc extends Doc {
   /** The timestamp of the activity. */
-  timestamp: UNIXMilliTimestamp<T>;
+  timestamp: UNIXMilliTimestamp;
   /** The block number of the activity. */
-  block: T;
+  block: string | number;
   /** Whether or not the notifications have been handled by the indexer or not. */
   _notificationsHandled?: boolean;
   /** Only for private purposes? */
@@ -241,11 +224,11 @@ export interface iActivityDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iReviewDoc<T extends NumberType> extends iActivityDoc<T> {
+export interface iReviewDoc extends iActivityDoc {
   /** The review text (max 2048 characters). */
   review: string;
   /** The number of stars given (1-5). */
-  stars: T;
+  stars: string | number;
   /** The user who gave the review. */
   from: BitBadgesAddress;
   /** The collection ID of the collection that was reviewed. Only applicable to collection reviews. */
@@ -257,13 +240,13 @@ export interface iReviewDoc<T extends NumberType> extends iActivityDoc<T> {
 /**
  * @category Interfaces
  */
-export interface iCoinTransferItem<T extends NumberType> {
+export interface iCoinTransferItem {
   /** The type of the coin transfer. */
   from: BitBadgesAddress;
   /** The type of the coin transfer. */
   to: BitBadgesAddress;
   /** The amount of the coin transfer. */
-  amount: T;
+  amount: string | number;
   /** The denom of the coin transfer. */
   denom: string;
   /** Is protocol fee? */
@@ -273,37 +256,37 @@ export interface iCoinTransferItem<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc<T> {
+export interface iTransferActivityDoc extends iActivityDoc {
   /** The list of recipients. */
   to: BitBadgesAddress[];
   /** The sender of the tokens. */
   from: BitBadgesAddress;
   /** The list of balances and token IDs that were transferred. */
-  balances: iBalance<T>[];
+  balances: iBalance[];
   /** The collection ID for the tokens that was transferred. */
   collectionId: CollectionId;
   /** The memo of the transfer. */
   memo?: string;
   /** Which approval to use to precalculate the balances? */
-  precalculateBalancesFromApproval?: iPrecalculateBalancesFromApprovalDetails<T>;
+  precalculateBalancesFromApproval?: iPrecalculateBalancesFromApprovalDetails;
   /** The prioritized approvals of the transfer. This is used to check certain approvals before others to ensure intended behavior. */
-  prioritizedApprovals?: iApprovalIdentifierDetails<T>[];
+  prioritizedApprovals?: iApprovalIdentifierDetails[];
   /** The user who initiated the transfer transaction. */
   initiatedBy: BitBadgesAddress;
   /** The transaction hash of the activity. */
   txHash?: string;
   /** Precalculation options */
-  precalculationOptions?: iPrecalculationOptions<T>;
+  precalculationOptions?: iPrecalculationOptions;
   /** Coin transfers details */
-  coinTransfers?: iCoinTransferItem<T>[];
+  coinTransfers?: iCoinTransferItem[];
   /** Approvals used for the transfer */
-  approvalsUsed?: iApprovalIdentifierDetails<T>[];
+  approvalsUsed?: iApprovalIdentifierDetails[];
   /** The token ID for the transfer */
-  tokenId?: T;
+  tokenId?: string | number;
   /** The price of the transfer */
-  price?: T;
+  price?: string | number;
   /** The volume of the transfer */
-  volume?: T;
+  volume?: string | number;
   /** The denomination of the transfer */
   denom?: string;
 }
@@ -311,7 +294,7 @@ export interface iTransferActivityDoc<T extends NumberType> extends iActivityDoc
 /**
  * @category Interfaces
  */
-export interface iClaimActivityDoc<T extends NumberType> extends iActivityDoc<T> {
+export interface iClaimActivityDoc extends iActivityDoc {
   /** Whether the claim attempt was successful or not */
   success: boolean;
   /** The claim ID of the claim attempt */
@@ -327,13 +310,13 @@ export interface iClaimActivityDoc<T extends NumberType> extends iActivityDoc<T>
 /**
  * @category Interfaces
  */
-export interface iPointsActivityDoc<T extends NumberType> extends iActivityDoc<T> {
+export interface iPointsActivityDoc extends iActivityDoc {
   /** The BitBadges address of the user who earned the points */
   bitbadgesAddress: BitBadgesAddress;
   /** The amount of points before the activity */
-  oldPoints: T;
+  oldPoints: string | number;
   /** The amount of points after the activity */
-  newPoints: T;
+  newPoints: string | number;
   /** The application ID of the points activity */
   applicationId: string;
   /** The page ID of the points activity */
@@ -343,64 +326,64 @@ export interface iPointsActivityDoc<T extends NumberType> extends iActivityDoc<T
 /**
  * @category Interfaces
  */
-export interface iBaseStats<T extends NumberType> extends Doc {
+export interface iBaseStats extends Doc {
   /** The overall volume of the collection */
-  overallVolume: iCosmosCoin<T>[];
+  overallVolume: iCosmosCoin[];
   /** The daily volume of the collection */
-  dailyVolume: iCosmosCoin<T>[];
+  dailyVolume: iCosmosCoin[];
   /** The weekly volume of the collection */
-  weeklyVolume: iCosmosCoin<T>[];
+  weeklyVolume: iCosmosCoin[];
   /** The monthly volume of the collection */
-  monthlyVolume: iCosmosCoin<T>[];
+  monthlyVolume: iCosmosCoin[];
   /** The yearly volume of the collection */
-  yearlyVolume: iCosmosCoin<T>[];
+  yearlyVolume: iCosmosCoin[];
   /** Last set timestamp */
-  lastUpdatedAt: UNIXMilliTimestamp<T>;
+  lastUpdatedAt: UNIXMilliTimestamp;
 }
 
 /**
  * @category Interfaces
  */
-export interface iCollectionStatsDoc<T extends NumberType> extends iBaseStats<T> {
+export interface iCollectionStatsDoc extends iBaseStats {
   /** The collection ID */
   collectionId: CollectionId;
   /** Floor price of the collection */
-  floorPrices?: iCosmosCoin<T>[];
+  floorPrices?: iCosmosCoin[];
   /** Number of unique owners by time */
-  uniqueOwners: iBalance<T>[];
+  uniqueOwners: iBalance[];
   /** Floor price history */
-  floorPriceHistory?: iFloorPriceHistory<T>[];
+  floorPriceHistory?: iFloorPriceHistory[];
   /** The payout reward */
-  payoutRewards?: iCosmosCoin<T>[];
+  payoutRewards?: iCosmosCoin[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iFloorPriceHistory<T extends NumberType> {
+export interface iFloorPriceHistory {
   /** The floor price */
-  floorPrice?: iCosmosCoin<T>;
+  floorPrice?: iCosmosCoin;
   /** Updated at tiemstamp */
-  updatedAt: UNIXMilliTimestamp<T>;
+  updatedAt: UNIXMilliTimestamp;
 }
 
 /**
  * @category Interfaces
  */
-export interface iTokenFloorPriceDoc<T extends NumberType> extends Doc {
+export interface iTokenFloorPriceDoc extends Doc {
   /** The collection ID */
   collectionId: CollectionId;
   /** The token ID */
-  tokenId: T;
+  tokenId: string | number;
   /** The floor price */
-  floorPrices?: iCosmosCoin<T>[];
+  floorPrices?: iCosmosCoin[];
   /** Floor price history */
-  floorPriceHistory?: iFloorPriceHistory<T>[];
+  floorPriceHistory?: iFloorPriceHistory[];
 }
 
 /**
  * @category Interfaces */
-export interface iApprovalItemDoc<T extends NumberType> extends Doc {
+export interface iApprovalItemDoc extends Doc {
   /** The collection ID */
   collectionId: CollectionId;
   /** The approval ID */
@@ -417,20 +400,20 @@ export interface iApprovalItemDoc<T extends NumberType> extends Doc {
   /** Owner has sufficient balances */
   sufficientBalances?: boolean;
   /** The price of the listing */
-  price?: T;
+  price?: string | number;
   /** Is active currently */
   isActive?: boolean;
 
   /** The token ID */
-  tokenId?: T;
+  tokenId?: string | number;
   /** Approval itself */
-  approval: iCollectionApproval<T>;
+  approval: iCollectionApproval;
   /** Deleted at timestamp */
-  deletedAt?: UNIXMilliTimestamp<T>;
+  deletedAt?: UNIXMilliTimestamp;
   /** Next check time */
-  nextCheckTime?: UNIXMilliTimestamp<T>;
+  nextCheckTime?: UNIXMilliTimestamp;
   /** Number of transfers left */
-  numTransfersLeft?: T;
+  numTransfersLeft?: string | number;
   /** Denom */
   denom?: string;
 }
@@ -438,56 +421,56 @@ export interface iApprovalItemDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iCollectionDoc<T extends NumberType> extends Doc {
+export interface iCollectionDoc extends Doc {
   /** The collection ID */
   collectionId: CollectionId;
   /** The collection metadata */
   collectionMetadata: iCollectionMetadata;
   /** The token metadata */
-  tokenMetadata: iTokenMetadata<T>[];
+  tokenMetadata: iTokenMetadata[];
   /** The custom data */
   customData: string;
   /** The manager */
   manager: BitBadgesAddress;
   /** The collection permissions */
-  collectionPermissions: iCollectionPermissions<T>;
+  collectionPermissions: iCollectionPermissions;
   /** The collection approved transfers timeline */
-  collectionApprovals: iCollectionApproval<T>[];
+  collectionApprovals: iCollectionApproval[];
   /** The standards */
   standards: string[];
   /** The is archived flag */
   isArchived: boolean;
   /** The default balances for users who have not interacted with the collection yet. Only used if collection has "Standard" balance type. */
-  defaultBalances: iUserBalanceStore<T>;
+  defaultBalances: iUserBalanceStore;
   /** The BitBadges address of the user who created this collection */
   createdBy: BitBadgesAddress;
   /** The block number when this collection was created */
-  createdBlock: T;
+  createdBlock: string | number;
   /** The timestamp when this collection was created (milliseconds since epoch) */
-  createdTimestamp: UNIXMilliTimestamp<T>;
+  createdTimestamp: UNIXMilliTimestamp;
   /** The update history of this collection */
-  updateHistory: iUpdateHistory<T>[];
+  updateHistory: iUpdateHistory[];
   /** Valid token IDs for the collection */
-  validTokenIds: iUintRange<T>[];
+  validTokenIds: iUintRange[];
   /** Mint escrow address */
   mintEscrowAddress: string;
   /** The IBC wrapper paths for the collection */
-  cosmosCoinWrapperPaths: iCosmosCoinWrapperPath<T>[];
+  cosmosCoinWrapperPaths: iCosmosCoinWrapperPath[];
   /** The alias (non-wrapping) paths for the collection */
-  aliasPaths: iAliasPath<T>[];
+  aliasPaths: iAliasPath[];
   /** Collection-level invariants that cannot be broken. These are set upon genesis and cannot be modified. */
-  invariants: iCollectionInvariants<T>;
+  invariants: iCollectionInvariants;
 }
 
 /**
  * @category Interfaces
  */
-export interface iCosmosCoinWrapperPath<T extends NumberType> {
+export interface iCosmosCoinWrapperPath {
   address: string;
   denom: string;
-  conversion: iConversionWithoutDenom<T>;
+  conversion: iConversionWithoutDenom;
   symbol: string;
-  denomUnits: iDenomUnit<T>[];
+  denomUnits: iDenomUnit[];
   allowOverrideWithAnyValidToken: boolean;
   /** The metadata for this wrapper path. */
   metadata: iPathMetadata;
@@ -496,7 +479,7 @@ export interface iCosmosCoinWrapperPath<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iPoolInfo<T extends NumberType> {
+export interface iPoolInfo {
   poolId: string;
   address: string;
   allAssetDenoms: string[];
@@ -504,21 +487,21 @@ export interface iPoolInfo<T extends NumberType> {
     swapFee: string;
     exitFee: string;
   };
-  volume: iPoolInfoVolume<T>;
+  volume: iPoolInfoVolume;
   lastVolumeUpdate: number;
-  liquidity: iCosmosCoin<T>[];
+  liquidity: iCosmosCoin[];
   lastLiquidityUpdate: number;
 }
 
 /**
  * @category Interfaces
  */
-export interface iAssetInfoDoc<T extends NumberType> extends Doc {
+export interface iAssetInfoDoc extends Doc {
   asset: string;
   symbol: string;
   price: number;
-  lastUpdated: T;
-  totalLiquidity: iCosmosCoin<T>[];
+  lastUpdated: string | number;
+  totalLiquidity: iCosmosCoin[];
   volume24h: number;
   volume7d: number;
   percentageChange24h: number;
@@ -528,7 +511,7 @@ export interface iAssetInfoDoc<T extends NumberType> extends Doc {
     /** Array of price data points with timestamps */
     pricePoints: Array<{
       price: number;
-      timestamp: T;
+      timestamp: string | number;
     }>;
   };
   /** Whether this asset is verified */
@@ -540,25 +523,25 @@ export interface iAssetInfoDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iCosmosCoinWrapperPathWithDetails<T extends NumberType> extends iCosmosCoinWrapperPath<T> {
+export interface iCosmosCoinWrapperPathWithDetails extends iCosmosCoinWrapperPath {
   /** Metadata object containing uri, customData, and fetched metadata. */
-  metadata: iPathMetadataWithDetails<T>;
+  metadata: iPathMetadataWithDetails;
   /** The denomination units with metadata details populated. */
-  denomUnits: iDenomUnitWithDetails<T>[];
+  denomUnits: iDenomUnitWithDetails[];
   /** Pool Infos */
-  poolInfos?: iPoolInfo<T>[];
+  poolInfos?: iPoolInfo[];
   /** Asset Pair Infos */
-  assetPairInfos?: iAssetInfoDoc<T>[];
+  assetPairInfos?: iAssetInfoDoc[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iAliasPath<T extends NumberType> {
+export interface iAliasPath {
   denom: string;
-  conversion: iConversionWithoutDenom<T>;
+  conversion: iConversionWithoutDenom;
   symbol: string;
-  denomUnits: iDenomUnit<T>[];
+  denomUnits: iDenomUnit[];
   /** The metadata for this alias path. */
   metadata: iPathMetadata;
 }
@@ -566,68 +549,68 @@ export interface iAliasPath<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iAliasPathWithDetails<T extends NumberType> extends iAliasPath<T> {
+export interface iAliasPathWithDetails extends iAliasPath {
   /** Metadata object containing uri, customData, and fetched metadata. */
-  metadata: iPathMetadataWithDetails<T>;
+  metadata: iPathMetadataWithDetails;
   /** The denomination units with metadata details populated. */
-  denomUnits: iDenomUnitWithDetails<T>[];
+  denomUnits: iDenomUnitWithDetails[];
   /** Pool Infos */
-  poolInfos?: iPoolInfo<T>[];
+  poolInfos?: iPoolInfo[];
   /** Asset Pair Infos */
-  assetPairInfos?: iAssetInfoDoc<T>[];
+  assetPairInfos?: iAssetInfoDoc[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iPoolInfoVolume<T extends NumberType> {
-  daily: iCosmosCoin<T>[];
-  weekly: iCosmosCoin<T>[];
-  monthly: iCosmosCoin<T>[];
-  allTime: iCosmosCoin<T>[];
+export interface iPoolInfoVolume {
+  daily: iCosmosCoin[];
+  weekly: iCosmosCoin[];
+  monthly: iCosmosCoin[];
+  allTime: iCosmosCoin[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iAccountDoc<T extends NumberType> extends Doc {
+export interface iAccountDoc extends Doc {
   /** The public key of the account */
   publicKey: string;
   /** The account number of the account. This is the account number registered on the BitBadges blockchain.*/
-  accountNumber: T;
+  accountNumber: string | number;
   /** The public key type of the account */
   pubKeyType: string;
   /** The BitBadges address of the account */
   bitbadgesAddress: BitBadgesAddress;
   /** The sequence of the account. This is the nonce for the blockchain for this account */
-  sequence?: T;
+  sequence?: string | number;
   /** The BADGE balance of the account and other sdk.coin balances */
-  balances?: iCosmosCoin<T>[];
+  balances?: iCosmosCoin[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iCustomPage<T extends NumberType> {
+export interface iCustomPage {
   /** The title of the custom page */
   title: string;
   /** The description of the custom page */
   description: string;
   /** The token IDs to display on the custom page */
-  items: iBatchTokenDetails<T>[];
+  items: iBatchTokenDetails[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iProfileDoc<T extends NumberType> extends Doc {
+export interface iProfileDoc extends Doc {
   /** Whether we have already fetched the profile or not */
   fetchedProfile?: 'full' | 'partial';
 
   /** The timestamp of the last activity seen for this account (milliseconds since epoch) */
-  seenActivity?: UNIXMilliTimestamp<T>;
+  seenActivity?: UNIXMilliTimestamp;
   /** The timestamp of when this account was created (milliseconds since epoch) */
-  createdAt?: UNIXMilliTimestamp<T>;
+  createdAt?: UNIXMilliTimestamp;
 
   /** The Discord username of the account */
   discord?: string;
@@ -644,7 +627,7 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   affiliateCode?: string;
 
   /** The hidden badges of the account */
-  hiddenTokens?: iBatchTokenDetails<T>[];
+  hiddenTokens?: iBatchTokenDetails[];
 
   /** The profile picture URL of the account */
   profilePicUrl?: string;
@@ -658,37 +641,37 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   latestSignedInChain?: SupportedChain;
 
   /** The notifications of the account */
-  notifications?: iNotificationPreferences<T>;
+  notifications?: iNotificationPreferences;
 
   /** Social connections stored for the account */
-  socialConnections?: iSocialConnections<T>;
+  socialConnections?: iSocialConnections;
 
   /** Public social connections stored for the account */
-  publicSocialConnections?: iSocialConnections<T>;
+  publicSocialConnections?: iSocialConnections;
 }
 
 /**
  * @category Interfaces
  */
-export interface iQueueDoc<T extends NumberType> extends Doc {
+export interface iQueueDoc extends Doc {
   /** The URI of the metadata to be fetched. If {id} is present, it will be replaced with each individual ID in tokenIds */
   uri: string;
   /** The collection ID of the metadata to be fetched */
   collectionId: CollectionId;
   /** The load balance ID of the metadata to be fetched. Only the node with the same load balance ID will fetch this metadata */
-  loadBalanceId: T;
+  loadBalanceId: string | number;
   /** The timestamp of when this metadata was requested to be refreshed (milliseconds since epoch) */
-  refreshRequestTime: UNIXMilliTimestamp<T>;
+  refreshRequestTime: UNIXMilliTimestamp;
   /** The number of times this metadata has been tried to be fetched but failed */
-  numRetries: T;
+  numRetries: string | number;
   /** The timestamp of when this metadata was last fetched (milliseconds since epoch) */
-  lastFetchedAt?: UNIXMilliTimestamp<T>;
+  lastFetchedAt?: UNIXMilliTimestamp;
   /** The error message if this metadata failed to be fetched */
   error?: string;
   /** The timestamp of when this document was deleted (milliseconds since epoch) */
-  deletedAt?: UNIXMilliTimestamp<T>;
+  deletedAt?: UNIXMilliTimestamp;
   /** The timestamp of when this document should be fetched next (milliseconds since epoch) */
-  nextFetchTime?: UNIXMilliTimestamp<T>;
+  nextFetchTime?: UNIXMilliTimestamp;
   /** Whether this document is pending to be fetched or not */
   pending?: boolean;
 
@@ -718,7 +701,7 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
   /** For use for airdrops */
   faucetInfo?: {
     txHash: string;
-    amount: NumberType;
+    amount: string | number;
     recipient: BitBadgesAddress;
     denom: string;
   };
@@ -728,61 +711,61 @@ export interface iQueueDoc<T extends NumberType> extends Doc {
  * @category Interfaces
  */
 export interface iIndexerStatus {
-  status: iStatusDoc<bigint>;
+  status: iStatusDoc;
 }
 
 /**
  * @category Interfaces
  */
-export interface iTransactionEntry<T extends NumberType> {
+export interface iTransactionEntry {
   /** The amount of the transaction */
-  amount: T;
+  amount: string | number;
   /** The gas limit of the transaction */
-  limit: T;
+  limit: string | number;
   /** The timestamp when the transaction occurred (milliseconds since epoch) */
-  timestamp: UNIXMilliTimestamp<T>;
+  timestamp: UNIXMilliTimestamp;
 }
 
 /**
  * @category Interfaces
  */
-export interface iLatestBlockStatus<T extends NumberType> {
+export interface iLatestBlockStatus {
   /** The height of the latest block */
-  height: T;
+  height: string | number;
   /** The transaction index of the latest block */
-  txIndex: T;
+  txIndex: string | number;
   /** The timestamp of the latest block (milliseconds since epoch) */
-  timestamp: UNIXMilliTimestamp<T>;
+  timestamp: UNIXMilliTimestamp;
 }
 
 /**
  * @category Interfaces
  */
-export interface iStatusDoc<T extends NumberType> extends Doc {
+export interface iStatusDoc extends Doc {
   /** The latest synced block status (i.e. height, txIndex, timestamp) */
-  block: iLatestBlockStatus<T>;
+  block: iLatestBlockStatus;
   /** The next collection ID to be used */
-  nextCollectionId: T;
+  nextCollectionId: string | number;
   /** The current gas price based on the average of recent transactions */
   gasPrice: number;
   /** The last X transactions with timestamps for dynamic reset functionality */
-  lastXTxs?: iTransactionEntry<T>[];
+  lastXTxs?: iTransactionEntry[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iAddressListDoc<T extends NumberType> extends iAddressList, Doc {
+export interface iAddressListDoc extends iAddressList, Doc {
   /** The BitBadges address of the user who created this list */
   createdBy: BitBadgesAddress;
   /** The BitBadges address of the user who is currently managing this */
   managedBy: BitBadgesAddress;
   /** The update history of this list */
-  updateHistory: iUpdateHistory<T>[];
+  updateHistory: iUpdateHistory[];
   /** The block number when this list was created */
-  createdBlock: T;
+  createdBlock: string | number;
   /** The timestamp of when this list was last updated (milliseconds since epoch) */
-  lastUpdated: UNIXMilliTimestamp<T>;
+  lastUpdated: UNIXMilliTimestamp;
   /** The NSFW reason if this list is NSFW */
   nsfw?: { reason: string };
   /** The reported reason if this list is reported */
@@ -792,7 +775,7 @@ export interface iAddressListDoc<T extends NumberType> extends iAddressList, Doc
 /**
  * @category Interfaces
  */
-export interface iBalanceDoc<T extends NumberType> extends iUserBalanceStore<T>, Doc {
+export interface iBalanceDoc extends iUserBalanceStore, Doc {
   /** The collection ID */
   collectionId: CollectionId;
 
@@ -800,7 +783,7 @@ export interface iBalanceDoc<T extends NumberType> extends iUserBalanceStore<T>,
   bitbadgesAddress: BitBadgesAddress;
 
   /** The update history of this balance */
-  updateHistory: iUpdateHistory<T>[];
+  updateHistory: iUpdateHistory[];
 
   /** Optional tags for this balance */
   tags?: string[];
@@ -809,13 +792,13 @@ export interface iBalanceDoc<T extends NumberType> extends iUserBalanceStore<T>,
 /**
  * @category Interfaces
  */
-export interface iPointsDoc<T extends NumberType> extends Doc {
+export interface iPointsDoc extends Doc {
   /** The address to calculate points for */
   address: BitBadgesAddress;
   /** The points for the address */
-  points: T;
+  points: string | number;
   /** The timestamp of when the points were last calculated (milliseconds since epoch) */
-  lastCalculatedAt: UNIXMilliTimestamp<T>;
+  lastCalculatedAt: UNIXMilliTimestamp;
   /** The application ID */
   applicationId: string;
   /** The page ID */
@@ -827,48 +810,19 @@ export interface iPointsDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iBalanceDocWithDetails<T extends NumberType> extends iBalanceDoc<T> {
+export interface iBalanceDocWithDetails extends iBalanceDoc {
   /** The outgoing approvals with details like metadata and address lists. */
-  outgoingApprovals: iUserOutgoingApprovalWithDetails<T>[];
+  outgoingApprovals: iUserOutgoingApprovalWithDetails[];
   /** The incoming approvals with details like metadata and address lists. */
-  incomingApprovals: iUserIncomingApprovalWithDetails<T>[];
+  incomingApprovals: iUserIncomingApprovalWithDetails[];
   /** The user permissions with details like metadata and address lists. */
-  userPermissions: iUserPermissionsWithDetails<T>;
+  userPermissions: iUserPermissionsWithDetails;
 }
 
 /**
  * @category Claims
  */
-export type ClaimIntegrationPluginType =
-  | 'password'
-  | 'numUses'
-  | 'discord'
-  | 'codes'
-  | 'github'
-  | 'google'
-  | 'twitch'
-  | 'twitter'
-  | 'strava'
-  | 'googleCalendar'
-  | 'youtube'
-  | 'reddit'
-  | 'bluesky'
-  | 'mailchimp'
-  | 'facebook'
-  | 'linkedIn'
-  | 'telegram'
-  | 'shopify'
-  | 'farcaster'
-  | 'slack'
-  | 'transferTimes'
-  | 'initiatedBy'
-  | 'whitelist'
-  | 'email'
-  | 'ip'
-  | 'webhooks'
-  | 'successWebhooks'
-  | 'payments'
-  | string;
+export type ClaimIntegrationPluginType = 'password' | 'numUses' | 'discord' | 'codes' | 'github' | 'google' | 'twitch' | 'twitter' | 'strava' | 'googleCalendar' | 'youtube' | 'reddit' | 'bluesky' | 'mailchimp' | 'facebook' | 'linkedIn' | 'telegram' | 'shopify' | 'farcaster' | 'slack' | 'transferTimes' | 'initiatedBy' | 'whitelist' | 'email' | 'ip' | 'webhooks' | 'successWebhooks' | 'payments' | string;
 
 /**
  * @category Claims
@@ -907,30 +861,12 @@ export type JsonBodyInputSchema = {
   arrayField?: boolean;
 };
 
-type OauthAppName =
-  | 'twitter'
-  | 'github'
-  | 'google'
-  | 'email'
-  | 'discord'
-  | 'twitch'
-  | 'strava'
-  | 'youtube'
-  | 'reddit'
-  | 'facebook'
-  | 'mailchimp'
-  | 'bluesky'
-  | 'googleCalendar'
-  | 'telegram'
-  | 'farcaster'
-  | 'slack'
-  | 'linkedIn'
-  | 'shopify';
+type OauthAppName = 'twitter' | 'github' | 'google' | 'email' | 'discord' | 'twitch' | 'strava' | 'youtube' | 'reddit' | 'facebook' | 'mailchimp' | 'bluesky' | 'googleCalendar' | 'telegram' | 'farcaster' | 'slack' | 'linkedIn' | 'shopify';
 
 /**
  * @category Claims
  */
-export type ClaimIntegrationPluginCustomBodyType<T extends ClaimIntegrationPluginType> = T extends 'codes'
+export type any = T extends 'codes'
   ? {
       code: string;
     }
@@ -959,7 +895,7 @@ interface OAuthAppParams {
  *
  * @category Claims
  */
-export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginType> = T extends 'numUses'
+export type any = T extends 'numUses'
   ? {
       maxUses: number;
       hideCurrentState?: boolean;
@@ -980,7 +916,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
           ? OAuthAppParams
           : T extends 'transferTimes'
             ? {
-                transferTimes: iUintRange<JSPrimitiveNumberType>[];
+                transferTimes: iUintRange[];
               }
             : T extends 'whitelist'
               ? {
@@ -1026,7 +962,7 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
  *
  * @category Claims
  */
-export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginType> = T extends 'password'
+export type any = T extends 'password'
   ? {
       password: string;
     }
@@ -1071,10 +1007,10 @@ export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginTy
  *
  * @category Claims
  */
-export type ClaimIntegrationPublicStateType<T extends ClaimIntegrationPluginType> = T extends 'numUses'
+export type any = T extends 'numUses'
   ? {
       numUses?: number;
-      usedClaimNumbers?: iUintRange<JSPrimitiveNumberType>[];
+      usedClaimNumbers?: iUintRange[];
       /**
        * Note: This currently returns all users, but in the future, we will only return relevant users requested.
        */
@@ -1085,7 +1021,7 @@ export type ClaimIntegrationPublicStateType<T extends ClaimIntegrationPluginType
   : T extends 'codes'
     ? {
         /** The ranges of the codes that have been used */
-        usedCodeRanges?: iUintRange<JSPrimitiveNumberType>[];
+        usedCodeRanges?: iUintRange[];
       }
     : Record<string, any>;
 
@@ -1094,7 +1030,7 @@ export type ClaimIntegrationPublicStateType<T extends ClaimIntegrationPluginType
  *
  * @category Claims
  */
-export type ClaimIntegrationPrivateStateType<T extends ClaimIntegrationPluginType> = T extends OauthAppName
+export type any = T extends OauthAppName
   ? {
       ids: { [id: string]: number };
       usernames: { [username: string]: string };
@@ -1108,7 +1044,7 @@ export type ClaimIntegrationPrivateStateType<T extends ClaimIntegrationPluginTyp
 /**
  * @category Claims
  */
-export interface IntegrationPluginParams<T extends ClaimIntegrationPluginType> {
+export interface IntegrationPluginParams {
   /**
    * The ID of the plugin instance. This is a unique identifier for referencing this instance of the plugin within this claim
    * (e.g. differentiate between duplicates of the same plugin type).
@@ -1121,13 +1057,13 @@ export interface IntegrationPluginParams<T extends ClaimIntegrationPluginType> {
    * The ID of the plugin (e.g. "numUses"). This is the reusable plugin ID.
    * Do not use this as a unique identifier for the plugin instance as there could be duplicate pluginIds. Use instanceId instead.
    */
-  pluginId: T;
+  pluginId: string | number;
   /** The version of the plugin */
   version: string;
   /** The parameters of the plugin that are visible to the public. These are custom per plugin type. */
-  publicParams: ClaimIntegrationPublicParamsType<T>;
+  publicParams: any;
   /** The parameters of the plugin that are not visible to the public. These are custom per plugin type. */
-  privateParams: ClaimIntegrationPrivateParamsType<T>;
+  privateParams: any;
   /** Custom display metadata for the plugin. This will override the default metadata for the plugin. */
   metadata?: { name: string; description: string; image?: string };
 }
@@ -1135,17 +1071,17 @@ export interface IntegrationPluginParams<T extends ClaimIntegrationPluginType> {
 /**
  * @category Claims
  */
-export interface IntegrationPluginDetails<T extends ClaimIntegrationPluginType> extends IntegrationPluginParams<T> {
+export interface IntegrationPluginDetails extends IntegrationPluginParams {
   /** The current state of the plugin. This is returned by BitBadges for information purposes. This is altered to not reveal sensitive information. */
-  publicState: ClaimIntegrationPublicStateType<T>;
+  publicState: any;
   /** The private state of the plugin. This is the exact state used by BitBadges behind the scenes. */
-  privateState?: ClaimIntegrationPrivateStateType<T>;
+  privateState?: any;
 }
 
 /**
  * @category Claims
  */
-export interface IntegrationPluginDetailsUpdate<T extends ClaimIntegrationPluginType> extends IntegrationPluginParams<T> {
+export interface IntegrationPluginDetailsUpdate extends IntegrationPluginParams {
   /** If resetState = true, we will reset the state of the plugin back to default. If false, we will keep the current state. Incompatible with newState. */
   resetState?: boolean;
   /**
@@ -1156,7 +1092,7 @@ export interface IntegrationPluginDetailsUpdate<T extends ClaimIntegrationPlugin
    *
    * Note: Each plugin may have different state schemas. Please refer to the documentation of the plugin you are updating for more information.
    */
-  newState?: ClaimIntegrationPublicStateType<T>;
+  newState?: any;
   /**
    * If true, we will only update the specific fields provided in newState. If falsy, we will overwrite the whole state with newState.
    *
@@ -1171,47 +1107,24 @@ export interface IntegrationPluginDetailsUpdate<T extends ClaimIntegrationPlugin
 /**
  * @category Interfaces
  */
-export type ManagePluginRequest = IntegrationPluginDetailsUpdate<ClaimIntegrationPluginType>;
+export type ManagePluginRequest = IntegrationPluginDetailsUpdate;
 
 /**
  * @category Interfaces
  */
-export type CreateClaimRequest<T extends NumberType> = Omit<
-  iClaimDetails<T>,
-  | 'plugins'
-  | 'version'
-  | 'trackerDetails'
-  | '_includesPrivateParams'
-  | '_templateInfo'
-  | 'managedBy'
-  | 'createdBy'
-  | 'standaloneClaim'
-  | 'lastUpdated'
-> & {
+export type CreateClaimRequest = Omit<iClaimDetails, 'plugins' | 'version' | 'trackerDetails' | '_includesPrivateParams' | '_templateInfo' | 'managedBy' | 'createdBy' | 'standaloneClaim' | 'lastUpdated'> & {
   cid?: string;
   plugins: ManagePluginRequest[];
-  metadata?: iMetadataWithoutInternals<T>;
+  metadata?: iMetadataWithoutInternals;
 };
 
 /**
  * @category Interfaces
  */
-export type UpdateClaimRequest<T extends NumberType> = Omit<
-  iClaimDetails<T>,
-  | 'plugins'
-  | 'version'
-  | 'trackerDetails'
-  | '_includesPrivateParams'
-  | '_templateInfo'
-  | 'managedBy'
-  | 'createdBy'
-  | 'standaloneClaim'
-  | 'lastUpdated'
-  | 'seedCode'
-> & {
+export type UpdateClaimRequest = Omit<iClaimDetails, 'plugins' | 'version' | 'trackerDetails' | '_includesPrivateParams' | '_templateInfo' | 'managedBy' | 'createdBy' | 'standaloneClaim' | 'lastUpdated' | 'seedCode'> & {
   cid?: string;
   plugins: ManagePluginRequest[];
-  metadata?: iMetadataWithoutInternals<T>;
+  metadata?: iMetadataWithoutInternals;
 };
 
 /**
@@ -1230,25 +1143,25 @@ export interface iSatisfyMethod {
 /**
  * @category Interfaces
  */
-export interface iEvent<T extends NumberType> {
+export interface iEvent {
   /** The event ID */
   eventId: string;
 
   /** The event metadata */
-  metadata: iMetadata<T>;
+  metadata: iMetadata;
 
   /** Other event specific metadata */
-  eventTimes: iUintRange<T>[];
+  eventTimes: iUintRange[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iTierWithOptionalWeight<T extends NumberType> {
+export interface iTierWithOptionalWeight {
   /** The claim ID to satisfy the tier */
   claimId: string;
   /** The weight of the tier */
-  weight?: T;
+  weight?: string | number;
   /**
    * Uncheckable? If so, we will not display success or failure for this tier.
    *
@@ -1266,7 +1179,7 @@ export interface iTierWithOptionalWeight<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iApplicationPage<T extends NumberType> {
+export interface iApplicationPage {
   /** The page ID */
   pageId: string;
 
@@ -1274,10 +1187,10 @@ export interface iApplicationPage<T extends NumberType> {
   type?: string;
 
   /** Metadata for the page */
-  metadata: iMetadata<T>;
+  metadata: iMetadata;
 
   /** Points to display in the page */
-  points?: iTierWithOptionalWeight<T>[];
+  points?: iTierWithOptionalWeight[];
 }
 
 /**
@@ -1304,7 +1217,7 @@ export interface iApiKeyDoc extends Doc {
 /**
  * @category Interfaces
  */
-export interface iApplicationDoc<T extends NumberType> extends Doc {
+export interface iApplicationDoc extends Doc {
   /** The application ID */
   applicationId: string;
 
@@ -1320,22 +1233,22 @@ export interface iApplicationDoc<T extends NumberType> extends Doc {
   managedBy: BitBadgesAddress;
 
   /** The time the application was created */
-  createdAt: UNIXMilliTimestamp<T>;
+  createdAt: UNIXMilliTimestamp;
 
   /** The last updated timestamp */
-  lastUpdated?: UNIXMilliTimestamp<T>;
+  lastUpdated?: UNIXMilliTimestamp;
 
   /** The overall metadata for the application */
-  metadata: iMetadata<T>;
+  metadata: iMetadata;
 
   /** The pages for the application */
-  pages: iApplicationPage<T>[];
+  pages: iApplicationPage[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iInheritMetadataFrom<T extends NumberType> {
+export interface iInheritMetadataFrom {
   /** The claim ID to link to */
   claimId?: string;
   /** The application ID to link to */
@@ -1344,14 +1257,14 @@ export interface iInheritMetadataFrom<T extends NumberType> {
   collectionId?: CollectionId;
   /** The map ID to link to */
   mapId?: string;
-  /** The token ID to link to "collectionId: CollectionId<T>dgeId" */
+  /** The token ID to link to "collectionId: CollectionIddgeId" */
   tokenId?: string;
 }
 
 /**
  * @category Interfaces
  */
-export interface iUtilityPageDoc<T extends NumberType> extends Doc {
+export interface iUtilityPageDoc extends Doc {
   /** The listing ID */
   listingId: string;
 
@@ -1370,25 +1283,25 @@ export interface iUtilityPageDoc<T extends NumberType> extends Doc {
   directLink?: string | undefined;
 
   /** The time the listing was created */
-  createdAt: UNIXMilliTimestamp<T>;
+  createdAt: UNIXMilliTimestamp;
 
   /** The last updated timestamp */
-  lastUpdated?: UNIXMilliTimestamp<T>;
+  lastUpdated?: UNIXMilliTimestamp;
 
   /** The overall metadata for the listing */
-  metadata: iMetadata<T>;
+  metadata: iMetadata;
 
   /** Where to inherit metadata from? Only one can be specified. */
-  inheritMetadataFrom?: iInheritMetadataFrom<T>;
+  inheritMetadataFrom?: iInheritMetadataFrom;
 
   /** The paginated content for the listing */
   content: iUtilityPageContent[];
 
   /** The relevant links for the listing */
-  links: iUtilityPageLink<T>[];
+  links: iUtilityPageLink[];
 
   /** Optional time range for when the listing should be shown */
-  displayTimes?: iUintRange<T> | undefined;
+  displayTimes?: iUintRange | undefined;
 
   /** Visibility state of the listing */
   visibility: 'public' | 'private' | 'unlisted';
@@ -1413,10 +1326,10 @@ export interface iUtilityPageDoc<T extends NumberType> extends Doc {
   };
 
   /** The total view count for this listing. This is updated periodically from the view tracking document. */
-  viewCount?: T;
+  viewCount?: string | number;
 
   /** The estimated cost for this utility/service */
-  estimatedCost?: iEstimatedCost<T>;
+  estimatedCost?: iEstimatedCost;
 
   /** The estimated time to complete or deliver this utility/service */
   estimatedTime?: string;
@@ -1434,7 +1347,7 @@ export interface iUtilityPageDoc<T extends NumberType> extends Doc {
   };
 
   /** Linked details */
-  linkedTo?: iLinkedTo<T>;
+  linkedTo?: iLinkedTo;
 
   /** Locale (ex: es, fr, etc.). If not specified, we assume en. */
   locale?: string;
@@ -1449,11 +1362,11 @@ export interface iUtilityPageDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iLinkedTo<T extends NumberType> {
+export interface iLinkedTo {
   /** The collection ID */
   collectionId?: CollectionId;
   /** The token IDs */
-  tokenIds?: iUintRange<T>[];
+  tokenIds?: iUintRange[];
 }
 
 /**
@@ -1470,7 +1383,7 @@ export interface iUtilityPageContent {
 /**
  * @category Interfaces
  */
-export interface iUtilityPageLink<T extends NumberType> {
+export interface iUtilityPageLink {
   /** The URL of the link */
   url: string;
   /** The claim ID to link to */
@@ -1482,21 +1395,21 @@ export interface iUtilityPageLink<T extends NumberType> {
   /** The map ID to link to */
   mapId?: string;
   /** Metadata for the link. Only applicable if the link is to a non-BitBadges entity. In other words, not tied to a specific claim, application, collection, etc. */
-  metadata?: iMetadata<T>;
+  metadata?: iMetadata;
 }
 
 /**
  * @category Interfaces
  */
-export interface iListingViewsDoc<T extends NumberType> extends Doc {
+export interface iListingViewsDoc extends Doc {
   /** The listing ID this view count is for */
   listingId: string;
 
   /** The total number of views */
-  viewCount: T;
+  viewCount: string | number;
 
   /** The last time this view count was updated */
-  lastUpdated: UNIXMilliTimestamp<T>;
+  lastUpdated: UNIXMilliTimestamp;
 
   /** Optional breakdown of views by time period for trending calculations */
   viewsByPeriod?: {
@@ -1514,7 +1427,7 @@ export interface iListingViewsDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
+export interface iClaimBuilderDoc extends Doc {
   /** The CID (content ID) of the document. This is used behind the scenes to handle off-chain vs on-chain data races. */
   cid: string;
 
@@ -1530,13 +1443,13 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   managedBy: BitBadgesAddress;
 
   /** Which challenge tracker is it tied to */
-  trackerDetails?: iChallengeTrackerIdDetails<T>;
+  trackerDetails?: iChallengeTrackerIdDetails;
 
   /** Deleted at timestamp */
-  deletedAt?: UNIXMilliTimestamp<T>;
+  deletedAt?: UNIXMilliTimestamp;
 
   /** Dynamic checks to run in the form of plugins */
-  plugins: IntegrationPluginParams<ClaimIntegrationPluginType>[];
+  plugins: IntegrationPluginParams[];
 
   /** For query purposes, the plugin IDs */
   pluginIds?: string[];
@@ -1560,7 +1473,7 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   approach?: string;
 
   /** Metadata for the claim */
-  metadata?: iMetadata<T>;
+  metadata?: iMetadata;
 
   /** The current state of each plugin */
   state: {
@@ -1582,7 +1495,7 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   /**
    * Rewards to be shown upon a successful claim. If you need further gating, you can do this in two-steps.
    */
-  rewards?: iClaimReward<T>[];
+  rewards?: iClaimReward[];
 
   /** Estimated cost for the user */
   estimatedCost?: string;
@@ -1594,10 +1507,10 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
   /** The categories of the claim */
   categories?: string[];
 
-  lastUpdated: UNIXMilliTimestamp<T>;
-  createdAt: UNIXMilliTimestamp<T>;
+  lastUpdated: UNIXMilliTimestamp;
+  createdAt: UNIXMilliTimestamp;
 
-  version: T;
+  version: string | number;
 
   testOnly?: boolean;
 
@@ -1608,19 +1521,19 @@ export interface iClaimBuilderDoc<T extends NumberType> extends Doc {
    *
    * This is only applicable to on-demand claims.
    */
-  cachePolicy?: iClaimCachePolicy<T>;
+  cachePolicy?: iClaimCachePolicy;
 }
 
 /**
  * @category Interfaces
  */
-export interface iClaimCachePolicy<T extends NumberType> {
+export interface iClaimCachePolicy {
   /**
    * The number of seconds to cache the result. Default is 5 minutes (300 seconds) if none is specified.
    *
    * Note: This may be overridden by other options
    */
-  ttl?: T;
+  ttl?: string | number;
   /**
    * Permanent once the claim is calculated once. We will cache results indefinitely.
    */
@@ -1628,12 +1541,12 @@ export interface iClaimCachePolicy<T extends NumberType> {
   /**
    * Permanent after a specific timestamp. Until then, we use the ttl. We will cache results indefinitely after this timestamp.
    */
-  permanentAfter?: UNIXMilliTimestamp<T>;
+  permanentAfter?: UNIXMilliTimestamp;
 }
 
 /**
  * @category Interfaces */
-export interface iClaimReward<T extends NumberType> {
+export interface iClaimReward {
   /** The ID of the reward (either a pre-configured one or "custom"). Currently, this is not used for anything. */
   rewardId: string;
 
@@ -1683,7 +1596,7 @@ export interface iClaimGatedContent {
  * @inheritDoc iClaimReward
  * @category Indexer
  */
-export class ClaimReward<T extends NumberType> extends BaseNumberTypeClass<ClaimReward<T>> implements iClaimReward<T> {
+export class ClaimReward extends BaseNumberTypeClass<ClaimReward> implements iClaimReward {
   rewardId: string;
   instanceId: string;
   metadata?: {
@@ -1698,7 +1611,7 @@ export class ClaimReward<T extends NumberType> extends BaseNumberTypeClass<Claim
     minClaimSuccesses?: number;
   };
 
-  constructor(data: iClaimReward<T>) {
+  constructor(data: iClaimReward) {
     super();
     this.rewardId = data.rewardId;
     this.instanceId = data.instanceId;
@@ -1712,27 +1625,27 @@ export class ClaimReward<T extends NumberType> extends BaseNumberTypeClass<Claim
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimReward<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimReward<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ClaimReward {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimReward;
   }
 }
 
 /**
  * @category Interfaces
  */
-export interface iApprovalTrackerDoc<T extends NumberType> extends iAmountTrackerIdDetails<T>, Doc {
+export interface iApprovalTrackerDoc extends iAmountTrackerIdDetails, Doc {
   /** The number of transfers. Is an incrementing tally. */
-  numTransfers: T;
+  numTransfers: string | number;
   /** A tally of the amounts transferred for this approval. */
-  amounts: iBalance<T>[];
+  amounts: iBalance[];
   /** Last updated timestamp */
-  lastUpdatedAt: UNIXMilliTimestamp<T>;
+  lastUpdatedAt: UNIXMilliTimestamp;
 }
 
 /**
  * @category Interfaces
  */
-export interface iChallengeTrackerIdDetails<T extends NumberType> {
+export interface iChallengeTrackerIdDetails {
   /** The collection ID */
   collectionId: CollectionId;
   /**
@@ -1750,7 +1663,7 @@ export interface iChallengeTrackerIdDetails<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iMerkleChallengeTrackerDoc<T extends NumberType> extends Doc {
+export interface iMerkleChallengeTrackerDoc extends Doc {
   /** The collection ID */
   collectionId: CollectionId;
   /** The challenge ID */
@@ -1762,15 +1675,15 @@ export interface iMerkleChallengeTrackerDoc<T extends NumberType> extends Doc {
   /** The approver address (leave blank if approvalLevel = "collection") */
   approverAddress: BitBadgesAddress;
   /** The used leaf indices for each challenge. A leaf index is the leaf location in the bottommost layer of the Merkle tree */
-  usedLeafIndices: iUsedLeafStatus<T>[];
+  usedLeafIndices: iUsedLeafStatus[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iUsedLeafStatus<T extends NumberType> {
+export interface iUsedLeafStatus {
   /** The leaf index */
-  leafIndex: T;
+  leafIndex: string | number;
   /** The address that used the leaf */
   usedBy: BitBadgesAddress;
 }
@@ -1778,13 +1691,13 @@ export interface iUsedLeafStatus<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iFetchDoc<T extends NumberType> extends Doc {
+export interface iFetchDoc extends Doc {
   /** The content of the fetch document. Note that we store balances in BALANCES_DB and not here to avoid double storage. */
-  content?: iMetadata<T> | iApprovalInfoDetails | iOffChainBalancesMap<T> | iChallengeDetails<T>;
+  content?: iMetadata | iApprovalInfoDetails | iOffChainBalancesMap | iChallengeDetails;
   /** The time the document was fetched */
-  fetchedAt: UNIXMilliTimestamp<T>;
+  fetchedAt: UNIXMilliTimestamp;
   /** The block the document was fetched */
-  fetchedAtBlock: T;
+  fetchedAtBlock: string | number;
   /** The type of content fetched. This is used for querying purposes */
   db: 'ApprovalInfo' | 'Metadata' | 'Balances' | 'ChallengeInfo';
   /** True if the document is permanent (i.e. fetched from a permanent URI like IPFS) */
@@ -1794,21 +1707,21 @@ export interface iFetchDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iRefreshDoc<T extends NumberType> extends Doc {
+export interface iRefreshDoc extends Doc {
   /** The collection ID */
   collectionId: CollectionId;
   /** The time the refresh was requested (Unix timestamp in milliseconds) */
-  refreshRequestTime: UNIXMilliTimestamp<T>;
+  refreshRequestTime: UNIXMilliTimestamp;
 }
 
 /**
  * @category Interfaces
  */
-export interface iAirdropDoc<T extends NumberType> extends Doc {
+export interface iAirdropDoc extends Doc {
   /** True if the airdrop has been completed */
   airdropped: boolean;
   /** The timestamp of when the airdrop was completed (milliseconds since epoch) */
-  timestamp: UNIXMilliTimestamp<T>;
+  timestamp: UNIXMilliTimestamp;
   /** The hash of the airdrop transaction */
   hash?: string;
 
@@ -1818,28 +1731,28 @@ export interface iAirdropDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iIPFSTotalsDoc<T extends NumberType> extends Doc {
+export interface iIPFSTotalsDoc extends Doc {
   /** The total bytes uploaded */
-  bytesUploaded: T;
+  bytesUploaded: string | number;
 }
 
 /**
  * @category Interfaces
  */
-export interface iCreatorCreditsDoc<T extends NumberType> extends Doc {
+export interface iCreatorCreditsDoc extends Doc {
   /** The total credits */
-  credits: T;
+  credits: string | number;
   /** The limit of credits */
-  creditsLimit?: T;
+  creditsLimit?: string | number;
 }
 
 /**
  * @category Interfaces
  */
-export interface iComplianceDoc<T extends NumberType> extends Doc {
+export interface iComplianceDoc extends Doc {
   tokens: {
-    nsfw: iBatchTokenDetails<T>[];
-    reported: iBatchTokenDetails<T>[];
+    nsfw: iBatchTokenDetails[];
+    reported: iBatchTokenDetails[];
   };
   accounts: {
     nsfw: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
@@ -1862,7 +1775,7 @@ export interface iComplianceDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iDeveloperAppDoc<T extends NumberType> extends Doc {
+export interface iDeveloperAppDoc extends Doc {
   /** Creator of the app */
   createdBy: BitBadgesAddress;
   /** The BitBadges address of the user who is currently managing this */
@@ -1880,9 +1793,9 @@ export interface iDeveloperAppDoc<T extends NumberType> extends Doc {
   /** The redirect URI of the app */
   redirectUris: string[];
   /** The last updated timestamp */
-  lastUpdated?: UNIXMilliTimestamp<T>;
+  lastUpdated?: UNIXMilliTimestamp;
   /** The time the app was created */
-  createdAt?: UNIXMilliTimestamp<T>;
+  createdAt?: UNIXMilliTimestamp;
 }
 
 /**
@@ -1893,24 +1806,12 @@ export type DynamicDataHandlerType = OauthAppName | 'addresses';
 /**
  * @category Interfaces
  */
-export type DynamicDataHandlerData<Q extends DynamicDataHandlerType> = Q extends 'email'
-  ? { emails: string[] }
-  : Q extends OauthAppName
-    ? { ids: string[]; usernames: string[] }
-    : Q extends 'addresses'
-      ? { addresses: string[] }
-      : never;
+export type any = Q extends 'email' ? { emails: string[] } : Q extends OauthAppName ? { ids: string[]; usernames: string[] } : Q extends 'addresses' ? { addresses: string[] } : never;
 
 /**
  * @category Interfaces
  */
-export type DynamicDataHandlerActionPayload<Q extends DynamicDataHandlerType> = Q extends 'email'
-  ? { email: string }
-  : Q extends OauthAppName
-    ? { id: string; username: string }
-    : Q extends 'addresses'
-      ? { address: string }
-      : never;
+export type any = Q extends 'email' ? { email: string } : Q extends OauthAppName ? { id: string; username: string } : Q extends 'addresses' ? { address: string } : never;
 
 /**
  * @category Interfaces
@@ -1919,14 +1820,14 @@ export type ActionName = string;
 /**
  * @category Interfaces
  */
-export type DynamicDataHandlerActionRequest = { actionName: ActionName; payload: DynamicDataHandlerActionPayload<DynamicDataHandlerType> };
+export type DynamicDataHandlerActionRequest = { actionName: ActionName; payload: any<DynamicDataHandlerType> };
 
 /**
  * @category Interfaces
  */
-export interface iDynamicDataDoc<Q extends DynamicDataHandlerType, T extends NumberType> extends Doc {
+export interface iDynamicDataDoc extends Doc {
   /** The handler ID. Can also be thought of as the type of dynamic data ("addresses", "email", ...) */
-  handlerId: Q;
+  handlerId: string;
   /** The dynamic data ID. The ID of the store. */
   dynamicDataId: string;
   /** The label of the data store */
@@ -1934,7 +1835,7 @@ export interface iDynamicDataDoc<Q extends DynamicDataHandlerType, T extends Num
   /** The data secret. Used in cases where you are not signed in as creator. This authenticates the request. Not applicable to public stores */
   dataSecret: string;
   /** The data itself. */
-  data: DynamicDataHandlerData<Q>;
+  data: any;
   /** The creator of the dynamic data store */
   createdBy: BitBadgesAddress;
   /** The manager of the dynamic data store */
@@ -1942,9 +1843,9 @@ export interface iDynamicDataDoc<Q extends DynamicDataHandlerType, T extends Num
   /** Whether the dynamic data store is public. If true, the data can be accessed without authentication. */
   publicUseInClaims?: boolean;
   /** The time the dynamic data store was created */
-  createdAt?: UNIXMilliTimestamp<T>;
+  createdAt?: UNIXMilliTimestamp;
   /** The time the dynamic data store was last updated */
-  lastUpdated?: UNIXMilliTimestamp<T>;
+  lastUpdated?: UNIXMilliTimestamp;
 }
 
 /**
@@ -1978,7 +1879,7 @@ export enum PluginPresetType {
 /**
  * @category Interfaces
  */
-export interface iPluginDoc<T extends NumberType> extends Doc {
+export interface iPluginDoc extends Doc {
   /** The BitBadges address who created the plugin doc */
   createdBy: BitBadgesAddress;
 
@@ -2022,32 +1923,32 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
   /** Locale that is supported by the plugin. By default, we assume 'en' is supported if not specified. */
   locale?: string;
 
-  lastUpdated: UNIXMilliTimestamp<T>;
+  lastUpdated: UNIXMilliTimestamp;
 
-  createdAt: UNIXMilliTimestamp<T>;
-  deletedAt?: UNIXMilliTimestamp<T>;
+  createdAt: UNIXMilliTimestamp;
+  deletedAt?: UNIXMilliTimestamp;
 
   approvedUsers: NativeAddress[];
 
   /** Array of version-controlled plugin configurations */
-  versions: iPluginVersionConfig<T>[];
+  versions: iPluginVersionConfig[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iPluginVersionConfig<T extends NumberType> {
+export interface iPluginVersionConfig {
   /** Version of the plugin */
-  version: T;
+  version: string | number;
 
   /** True if the version is finalized */
   finalized: boolean;
 
   /** The time the version was created */
-  createdAt: UNIXMilliTimestamp<T>;
+  createdAt: UNIXMilliTimestamp;
 
   /** The time the version was last updated */
-  lastUpdated: UNIXMilliTimestamp<T>;
+  lastUpdated: UNIXMilliTimestamp;
 
   /** Reuse for nonindexed balances? Only applicable if is stateless, requires no user inputs, and requires no sessions. */
   reuseForNonIndexed: boolean;
@@ -2143,7 +2044,7 @@ export interface iPluginVersionConfig<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iDepositBalanceDoc<T extends NumberType> extends Doc {
+export interface iDepositBalanceDoc extends Doc {
   /** The BitBadges address of the user */
   bitbadgesAddress: BitBadgesAddress;
 }
@@ -2151,7 +2052,7 @@ export interface iDepositBalanceDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
+export interface iSIWBBRequestDoc extends Doc {
   /** The actual code itself */
   code: string;
 
@@ -2167,12 +2068,12 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
   image?: string;
 
   scopes: OAuthScopeDetails[];
-  expiresAt: UNIXMilliTimestamp<T>;
+  expiresAt: UNIXMilliTimestamp;
 
   /** The timestamp of when the signature was created (milliseconds since epoch) */
-  createdAt: UNIXMilliTimestamp<T>;
+  createdAt: UNIXMilliTimestamp;
   /** If deleted, we still store temporarily for a period of time. We use a deletedAt timestamp to determine when to delete. */
-  deletedAt?: UNIXMilliTimestamp<T>;
+  deletedAt?: UNIXMilliTimestamp;
 
   /** The client ID of the app that requested the signature */
   clientId: string;
@@ -2190,39 +2091,39 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iMapDoc<T extends NumberType> extends Doc, iMapWithValues<T> {}
+export interface iMapDoc extends Doc, iMapWithValues {}
 
 /**
  * @category Interfaces
  */
-export interface iUpdateHistory<T extends NumberType> {
+export interface iUpdateHistory {
   /** The transaction hash of the on-chain transaction that updated this. */
   txHash: string;
   /** The block number of the on-chain transaction that updated this. */
-  block: T;
+  block: string | number;
   /** The timestamp of the block of the on-chain transaction that updated this. */
-  blockTimestamp: UNIXMilliTimestamp<T>;
+  blockTimestamp: UNIXMilliTimestamp;
   /** The indexer's timestamp of the update. This is provided in some cases because the time of indexing may be inconsistent with the time of the block. */
-  timestamp: UNIXMilliTimestamp<T>;
+  timestamp: UNIXMilliTimestamp;
 }
 
 /**
  * @inheritDoc iMap
  * @category Interfaces
  */
-export interface iMapWithValues<T extends NumberType> extends iMap<T> {
+export interface iMapWithValues extends iMap {
   /** The (key, value) pairs for the maps that are set. */
   values: { [key: string]: iValueStore };
   /** The fetched/populated metadata for the map (if any). This is the actual metadata object with name, image, description, etc. */
-  populatedMetadata?: iMetadata<T>;
+  populatedMetadata?: iMetadata;
   /** The update history for the map. Maps are maintained through blockchain transactions. */
-  updateHistory: iUpdateHistory<T>[];
+  updateHistory: iUpdateHistory[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iClaimDetails<T extends NumberType> {
+export interface iClaimDetails {
   /** Whether the claim fetch includes private params */
   _includesPrivateParams: boolean;
   /** Unique claim ID. */
@@ -2236,11 +2137,11 @@ export interface iClaimDetails<T extends NumberType> {
   /** Standalone claims are not linked with a token or list. */
   standaloneClaim?: boolean;
   /** The tracker details for the claim (if applicable - collection claims). */
-  trackerDetails?: iChallengeTrackerIdDetails<T>;
+  trackerDetails?: iChallengeTrackerIdDetails;
   /** Claim plugins. These are the criteria that must pass for a user to claim. */
-  plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+  plugins: IntegrationPluginDetails[];
   /** Rewards for the claim. */
-  rewards?: iClaimReward<T>[];
+  rewards?: iClaimReward[];
   /** Estimated cost for the claim. */
   estimatedCost?: string;
   /** If true, the claim will be shown in search results */
@@ -2273,7 +2174,7 @@ export interface iClaimDetails<T extends NumberType> {
    */
   seedCode?: string;
   /** Metadata for the claim. */
-  metadata?: iMetadata<T>;
+  metadata?: iMetadata;
   /**
    * Algorithm to determine the claim number order. Blank is just incrementing claim numbers.
    *
@@ -2281,9 +2182,9 @@ export interface iClaimDetails<T extends NumberType> {
    */
   assignMethod?: string;
   /** Last updated timestamp for the claim. */
-  lastUpdated?: T;
+  lastUpdated?: string | number;
   /** The version of the claim. */
-  version: T;
+  version: string | number;
   /**
    * Custom satisfaction logic.
    *
@@ -2294,7 +2195,7 @@ export interface iClaimDetails<T extends NumberType> {
   /**
    * Cache policy for the claim. Only needed for on-demand claims.
    */
-  cachePolicy?: iClaimCachePolicy<T>;
+  cachePolicy?: iClaimCachePolicy;
   /**
    * For internal use by the frontend.
    *
@@ -2312,9 +2213,9 @@ export interface iClaimDetails<T extends NumberType> {
  *
  * @category Interfaces
  */
-export interface iEstimatedCost<T extends NumberType> {
+export interface iEstimatedCost {
   /** The amount of the cost */
-  amount: T;
+  amount: string | number;
   /** The denomination of the cost (e.g. 'USD', 'ETH', etc.) */
   denom: string;
 }
@@ -2324,8 +2225,8 @@ export interface iEstimatedCost<T extends NumberType> {
  *
  * @category Interfaces
  */
-export interface iDynamicStoreDoc<T extends NumberType> extends Doc {
-  storeId: T;
+export interface iDynamicStoreDoc extends Doc {
+  storeId: string | number;
   createdBy: string;
   defaultValue: boolean;
   globalEnabled: boolean;
@@ -2338,8 +2239,8 @@ export interface iDynamicStoreDoc<T extends NumberType> extends Doc {
  *
  * @category Interfaces
  */
-export interface iDynamicStoreDocWithDetails<T extends NumberType> extends iDynamicStoreDoc<T> {
-  metadata?: iMetadata<T>;
+export interface iDynamicStoreDocWithDetails extends iDynamicStoreDoc {
+  metadata?: iMetadata;
 }
 
 /**
@@ -2347,8 +2248,8 @@ export interface iDynamicStoreDocWithDetails<T extends NumberType> extends iDyna
  *
  * @category Interfaces
  */
-export interface iDynamicStoreValueDoc<T extends NumberType> extends Doc {
-  storeId: T;
+export interface iDynamicStoreValueDoc extends Doc {
+  storeId: string | number;
   address: string;
   value: boolean;
 }

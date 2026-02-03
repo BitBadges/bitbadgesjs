@@ -1,18 +1,5 @@
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, CustomTypeClass } from '@/common/base.js';
-import {
-  iConversion,
-  iConversionSideA,
-  iConversionSideAWithDenom,
-  iConversionWithoutDenom,
-  iCosmosCoinBackedPathAddObject,
-  iCosmosCoinWrapperPathAddObject,
-  iAliasPathAddObject,
-  iDenomUnit,
-  iDenomUnitWithDetails,
-  iInvariantsAddObject,
-  iPathMetadata,
-  iPathMetadataWithDetails
-} from '@/interfaces/types/core.js';
+import { iConversion, iConversionSideA, iConversionSideAWithDenom, iConversionWithoutDenom, iCosmosCoinBackedPathAddObject, iCosmosCoinWrapperPathAddObject, iAliasPathAddObject, iDenomUnit, iDenomUnitWithDetails, iInvariantsAddObject, iPathMetadata, iPathMetadataWithDetails } from '@/interfaces/types/core.js';
 import { badges as protobadges } from '@/proto/index.js';
 import type { NumberType } from '../common/string-numbers.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
@@ -22,14 +9,11 @@ import { Metadata } from '@/api-indexer/metadata/metadata.js';
 /**
  * @category Interfaces
  */
-export class ConversionSideAWithDenom<T extends NumberType>
-  extends BaseNumberTypeClass<ConversionSideAWithDenom<T>>
-  implements iConversionSideAWithDenom<T>
-{
-  amount: T;
+export class ConversionSideAWithDenom extends BaseNumberTypeClass<ConversionSideAWithDenom> implements iConversionSideAWithDenom {
+  amount: string | number;
   denom: string;
 
-  constructor(data: iConversionSideAWithDenom<T>) {
+  constructor(data: iConversionSideAWithDenom) {
     super();
     this.amount = data.amount;
     this.denom = data.denom;
@@ -39,14 +23,11 @@ export class ConversionSideAWithDenom<T extends NumberType>
     return ['amount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ConversionSideAWithDenom<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ConversionSideAWithDenom<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ConversionSideAWithDenom {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ConversionSideAWithDenom;
   }
 
-  static fromProto<T extends NumberType>(
-    data: protobadges.ConversionSideAWithDenom,
-    convertFunction: (val: NumberType) => T
-  ): ConversionSideAWithDenom<T> {
+  static fromProto(data: protobadges.ConversionSideAWithDenom, convertFunction: (val: string | number) => T): ConversionSideAWithDenom {
     return new ConversionSideAWithDenom({
       amount: convertFunction(data.amount),
       denom: data.denom
@@ -57,10 +38,10 @@ export class ConversionSideAWithDenom<T extends NumberType>
 /**
  * @category Interfaces
  */
-export class ConversionSideA<T extends NumberType> extends BaseNumberTypeClass<ConversionSideA<T>> implements iConversionSideA<T> {
-  amount: T;
+export class ConversionSideA extends BaseNumberTypeClass<ConversionSideA> implements iConversionSideA {
+  amount: string | number;
 
-  constructor(data: iConversionSideA<T>) {
+  constructor(data: iConversionSideA) {
     super();
     this.amount = data.amount;
   }
@@ -69,11 +50,11 @@ export class ConversionSideA<T extends NumberType> extends BaseNumberTypeClass<C
     return ['amount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ConversionSideA<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ConversionSideA<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ConversionSideA {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ConversionSideA;
   }
 
-  static fromProto<T extends NumberType>(data: protobadges.ConversionSideA, convertFunction: (val: NumberType) => T): ConversionSideA<T> {
+  static fromProto(data: protobadges.ConversionSideA, convertFunction: (val: string | number) => T): ConversionSideA {
     return new ConversionSideA({
       amount: convertFunction(data.amount)
     });
@@ -83,11 +64,11 @@ export class ConversionSideA<T extends NumberType> extends BaseNumberTypeClass<C
 /**
  * @category Interfaces
  */
-export class Conversion<T extends NumberType> extends BaseNumberTypeClass<Conversion<T>> implements iConversion<T> {
-  sideA: ConversionSideAWithDenom<T>;
-  sideB: Balance<T>[];
+export class Conversion extends BaseNumberTypeClass<Conversion> implements iConversion {
+  sideA: ConversionSideAWithDenom;
+  sideB: Balance[];
 
-  constructor(data: iConversion<T>) {
+  constructor(data: iConversion) {
     super();
     this.sideA = new ConversionSideAWithDenom(data.sideA);
     this.sideB = data.sideB.map((balance) => new Balance(balance));
@@ -97,11 +78,11 @@ export class Conversion<T extends NumberType> extends BaseNumberTypeClass<Conver
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Conversion<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Conversion<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): Conversion {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Conversion;
   }
 
-  static fromProto<T extends NumberType>(data: protobadges.Conversion, convertFunction: (val: NumberType) => T): Conversion<T> {
+  static fromProto(data: protobadges.Conversion, convertFunction: (val: string | number) => T): Conversion {
     return new Conversion({
       sideA: data.sideA ? ConversionSideAWithDenom.fromProto(data.sideA, convertFunction) : { amount: convertFunction('0'), denom: '' },
       sideB: data.sideB.map((balance) => Balance.fromProto(balance, convertFunction))
@@ -124,14 +105,11 @@ export class Conversion<T extends NumberType> extends BaseNumberTypeClass<Conver
 /**
  * @category Interfaces
  */
-export class ConversionWithoutDenom<T extends NumberType>
-  extends BaseNumberTypeClass<ConversionWithoutDenom<T>>
-  implements iConversionWithoutDenom<T>
-{
-  sideA: ConversionSideA<T>;
-  sideB: Balance<T>[];
+export class ConversionWithoutDenom extends BaseNumberTypeClass<ConversionWithoutDenom> implements iConversionWithoutDenom {
+  sideA: ConversionSideA;
+  sideB: Balance[];
 
-  constructor(data: iConversionWithoutDenom<T>) {
+  constructor(data: iConversionWithoutDenom) {
     super();
     this.sideA = new ConversionSideA(data.sideA);
     this.sideB = data.sideB.map((balance) => new Balance(balance));
@@ -141,14 +119,11 @@ export class ConversionWithoutDenom<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ConversionWithoutDenom<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ConversionWithoutDenom<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ConversionWithoutDenom {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ConversionWithoutDenom;
   }
 
-  static fromProto<T extends NumberType>(
-    data: protobadges.ConversionWithoutDenom,
-    convertFunction: (val: NumberType) => T
-  ): ConversionWithoutDenom<T> {
+  static fromProto(data: protobadges.ConversionWithoutDenom, convertFunction: (val: string | number) => T): ConversionWithoutDenom {
     return new ConversionWithoutDenom({
       sideA: data.sideA ? ConversionSideA.fromProto(data.sideA, convertFunction) : { amount: convertFunction('0') },
       sideB: data.sideB.map((balance) => Balance.fromProto(balance, convertFunction))
@@ -170,13 +145,13 @@ export class ConversionWithoutDenom<T extends NumberType>
 /**
  * @category Interfaces
  */
-export class DenomUnit<T extends NumberType> extends BaseNumberTypeClass<DenomUnit<T>> implements iDenomUnit<T> {
-  decimals: T;
+export class DenomUnit extends BaseNumberTypeClass<DenomUnit> implements iDenomUnit {
+  decimals: string | number;
   symbol: string;
   isDefaultDisplay: boolean;
   metadata: PathMetadata;
 
-  constructor(data: iDenomUnit<T>) {
+  constructor(data: iDenomUnit) {
     super();
     this.decimals = data.decimals;
     this.symbol = data.symbol;
@@ -188,11 +163,11 @@ export class DenomUnit<T extends NumberType> extends BaseNumberTypeClass<DenomUn
     return ['decimals'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DenomUnit<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DenomUnit<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): DenomUnit {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DenomUnit;
   }
 
-  static fromProto<T extends NumberType>(data: protobadges.DenomUnit, convertFunction: (val: NumberType) => T): DenomUnit<T> {
+  static fromProto(data: protobadges.DenomUnit, convertFunction: (val: string | number) => T): DenomUnit {
     return new DenomUnit({
       decimals: convertFunction(data.decimals),
       symbol: data.symbol,
@@ -245,16 +220,16 @@ export class PathMetadata extends CustomTypeClass<PathMetadata> implements iPath
  *
  * @category Collections
  */
-export class PathMetadataWithDetails<T extends NumberType> extends PathMetadata implements iPathMetadataWithDetails<T> {
-  metadata?: Metadata<T>;
+export class PathMetadataWithDetails extends PathMetadata implements iPathMetadataWithDetails {
+  metadata?: Metadata;
 
-  constructor(pathMetadata: iPathMetadataWithDetails<T>) {
+  constructor(pathMetadata: iPathMetadataWithDetails) {
     super(pathMetadata);
     this.metadata = pathMetadata.metadata ? new Metadata(pathMetadata.metadata) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PathMetadataWithDetails<U> {
-    return new PathMetadataWithDetails<U>({
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): PathMetadataWithDetails {
+    return new PathMetadataWithDetails({
       uri: this.uri,
       customData: this.customData,
       metadata: this.metadata ? this.metadata.convert(convertFunction, options) : undefined
@@ -266,19 +241,19 @@ export class PathMetadataWithDetails<T extends NumberType> extends PathMetadata 
  * @inheritDoc iDenomUnitWithDetails
  * @category Interfaces
  */
-export class DenomUnitWithDetails<T extends NumberType> extends DenomUnit<T> implements iDenomUnitWithDetails<T> {
-  override metadata: PathMetadataWithDetails<T>;
+export class DenomUnitWithDetails extends DenomUnit implements iDenomUnitWithDetails {
+  override metadata: PathMetadataWithDetails;
 
-  constructor(data: iDenomUnitWithDetails<T>) {
+  constructor(data: iDenomUnitWithDetails) {
     super(data);
     this.metadata = new PathMetadataWithDetails(data.metadata);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DenomUnitWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DenomUnitWithDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): DenomUnitWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DenomUnitWithDetails;
   }
 
-  static fromProto<T extends NumberType>(data: protobadges.DenomUnit, convertFunction: (val: NumberType) => T): DenomUnitWithDetails<T> {
+  static fromProto(data: protobadges.DenomUnit, convertFunction: (val: string | number) => T): DenomUnitWithDetails {
     return new DenomUnitWithDetails({
       decimals: convertFunction(data.decimals),
       symbol: data.symbol,
@@ -299,18 +274,15 @@ export class DenomUnitWithDetails<T extends NumberType> extends DenomUnit<T> imp
  *
  * @category Balances
  */
-export class CosmosCoinWrapperPathAddObject<T extends NumberType>
-  extends BaseNumberTypeClass<CosmosCoinWrapperPathAddObject<T>>
-  implements iCosmosCoinWrapperPathAddObject<T>
-{
+export class CosmosCoinWrapperPathAddObject extends BaseNumberTypeClass<CosmosCoinWrapperPathAddObject> implements iCosmosCoinWrapperPathAddObject {
   denom: string;
-  conversion: ConversionWithoutDenom<T>;
+  conversion: ConversionWithoutDenom;
   symbol: string;
-  denomUnits: DenomUnit<T>[];
+  denomUnits: DenomUnit[];
   allowOverrideWithAnyValidToken: boolean;
   metadata: PathMetadata;
 
-  constructor(data: iCosmosCoinWrapperPathAddObject<T>) {
+  constructor(data: iCosmosCoinWrapperPathAddObject) {
     super();
     this.denom = data.denom;
     this.conversion = new ConversionWithoutDenom(data.conversion);
@@ -324,19 +296,14 @@ export class CosmosCoinWrapperPathAddObject<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CosmosCoinWrapperPathAddObject<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CosmosCoinWrapperPathAddObject<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): CosmosCoinWrapperPathAddObject {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CosmosCoinWrapperPathAddObject;
   }
 
-  static fromProto<T extends NumberType>(
-    data: protobadges.CosmosCoinWrapperPathAddObject,
-    convertFunction: (val: NumberType) => T
-  ): CosmosCoinWrapperPathAddObject<T> {
+  static fromProto(data: protobadges.CosmosCoinWrapperPathAddObject, convertFunction: (val: string | number) => T): CosmosCoinWrapperPathAddObject {
     return new CosmosCoinWrapperPathAddObject({
       denom: data.denom,
-      conversion: data.conversion
-        ? ConversionWithoutDenom.fromProto(data.conversion, convertFunction)
-        : { sideA: { amount: convertFunction('0') }, sideB: [] },
+      conversion: data.conversion ? ConversionWithoutDenom.fromProto(data.conversion, convertFunction) : { sideA: { amount: convertFunction('0') }, sideB: [] },
       symbol: data.symbol,
       denomUnits: data.denomUnits.map((unit) => DenomUnit.fromProto(unit, convertFunction)),
       allowOverrideWithAnyValidToken: data.allowOverrideWithAnyValidToken,
@@ -369,14 +336,14 @@ export class CosmosCoinWrapperPathAddObject<T extends NumberType>
  *
  * @category Balances
  */
-export class AliasPathAddObject<T extends NumberType> extends BaseNumberTypeClass<AliasPathAddObject<T>> implements iAliasPathAddObject<T> {
+export class AliasPathAddObject extends BaseNumberTypeClass<AliasPathAddObject> implements iAliasPathAddObject {
   denom: string;
-  conversion: ConversionWithoutDenom<T>;
+  conversion: ConversionWithoutDenom;
   symbol: string;
-  denomUnits: DenomUnit<T>[];
+  denomUnits: DenomUnit[];
   metadata: PathMetadata;
 
-  constructor(data: iAliasPathAddObject<T>) {
+  constructor(data: iAliasPathAddObject) {
     super();
     this.denom = data.denom;
     this.conversion = new ConversionWithoutDenom(data.conversion);
@@ -389,16 +356,14 @@ export class AliasPathAddObject<T extends NumberType> extends BaseNumberTypeClas
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AliasPathAddObject<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AliasPathAddObject<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): AliasPathAddObject {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AliasPathAddObject;
   }
 
-  static fromProto<T extends NumberType>(data: protobadges.AliasPathAddObject, convertFunction: (val: NumberType) => T): AliasPathAddObject<T> {
+  static fromProto(data: protobadges.AliasPathAddObject, convertFunction: (val: string | number) => T): AliasPathAddObject {
     return new AliasPathAddObject({
       denom: data.denom,
-      conversion: data.conversion
-        ? ConversionWithoutDenom.fromProto(data.conversion, convertFunction)
-        : { sideA: { amount: convertFunction('0') }, sideB: [] },
+      conversion: data.conversion ? ConversionWithoutDenom.fromProto(data.conversion, convertFunction) : { sideA: { amount: convertFunction('0') }, sideB: [] },
       symbol: data.symbol,
       denomUnits: data.denomUnits.map((unit) => DenomUnit.fromProto(unit, convertFunction)),
       metadata: data.metadata ? PathMetadata.fromProto(data.metadata) : { uri: '', customData: '' }
@@ -429,13 +394,10 @@ export class AliasPathAddObject<T extends NumberType> extends BaseNumberTypeClas
  *
  * @category Balances
  */
-export class CosmosCoinBackedPathAddObject<T extends NumberType>
-  extends BaseNumberTypeClass<CosmosCoinBackedPathAddObject<T>>
-  implements iCosmosCoinBackedPathAddObject<T>
-{
-  conversion: Conversion<T>;
+export class CosmosCoinBackedPathAddObject extends BaseNumberTypeClass<CosmosCoinBackedPathAddObject> implements iCosmosCoinBackedPathAddObject {
+  conversion: Conversion;
 
-  constructor(data: iCosmosCoinBackedPathAddObject<T>) {
+  constructor(data: iCosmosCoinBackedPathAddObject) {
     super();
     this.conversion = new Conversion(data.conversion);
   }
@@ -444,18 +406,13 @@ export class CosmosCoinBackedPathAddObject<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CosmosCoinBackedPathAddObject<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CosmosCoinBackedPathAddObject<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): CosmosCoinBackedPathAddObject {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CosmosCoinBackedPathAddObject;
   }
 
-  static fromProto<T extends NumberType>(
-    data: protobadges.CosmosCoinBackedPathAddObject,
-    convertFunction: (val: NumberType) => T
-  ): CosmosCoinBackedPathAddObject<T> {
+  static fromProto(data: protobadges.CosmosCoinBackedPathAddObject, convertFunction: (val: string | number) => T): CosmosCoinBackedPathAddObject {
     return new CosmosCoinBackedPathAddObject({
-      conversion: data.conversion
-        ? Conversion.fromProto(data.conversion, convertFunction)
-        : { sideA: { amount: convertFunction('0'), denom: '' }, sideB: [] }
+      conversion: data.conversion ? Conversion.fromProto(data.conversion, convertFunction) : { sideA: { amount: convertFunction('0'), denom: '' }, sideB: [] }
     });
   }
 
@@ -482,14 +439,14 @@ export class CosmosCoinBackedPathAddObject<T extends NumberType>
  *
  * @category Balances
  */
-export class InvariantsAddObject<T extends NumberType> extends BaseNumberTypeClass<InvariantsAddObject<T>> implements iInvariantsAddObject<T> {
+export class InvariantsAddObject extends BaseNumberTypeClass<InvariantsAddObject> implements iInvariantsAddObject {
   noCustomOwnershipTimes: boolean;
-  maxSupplyPerId: T;
-  cosmosCoinBackedPath?: CosmosCoinBackedPathAddObject<T>;
+  maxSupplyPerId: string | number;
+  cosmosCoinBackedPath?: CosmosCoinBackedPathAddObject;
   noForcefulPostMintTransfers: boolean;
   disablePoolCreation: boolean;
 
-  constructor(data: iInvariantsAddObject<T>) {
+  constructor(data: iInvariantsAddObject) {
     super();
     this.noCustomOwnershipTimes = data.noCustomOwnershipTimes;
     this.maxSupplyPerId = data.maxSupplyPerId;
@@ -502,17 +459,15 @@ export class InvariantsAddObject<T extends NumberType> extends BaseNumberTypeCla
     return ['maxSupplyPerId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): InvariantsAddObject<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as InvariantsAddObject<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): InvariantsAddObject {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as InvariantsAddObject;
   }
 
-  static fromProto<T extends NumberType>(data: protobadges.InvariantsAddObject, convertFunction: (val: NumberType) => T): InvariantsAddObject<T> {
+  static fromProto(data: protobadges.InvariantsAddObject, convertFunction: (val: string | number) => T): InvariantsAddObject {
     return new InvariantsAddObject({
       noCustomOwnershipTimes: data.noCustomOwnershipTimes,
       maxSupplyPerId: convertFunction(data.maxSupplyPerId),
-      cosmosCoinBackedPath: data.cosmosCoinBackedPath
-        ? CosmosCoinBackedPathAddObject.fromProto(data.cosmosCoinBackedPath, convertFunction)
-        : undefined,
+      cosmosCoinBackedPath: data.cosmosCoinBackedPath ? CosmosCoinBackedPathAddObject.fromProto(data.cosmosCoinBackedPath, convertFunction) : undefined,
       noForcefulPostMintTransfers: data.noForcefulPostMintTransfers,
       disablePoolCreation: data.disablePoolCreation
     });

@@ -13,11 +13,11 @@ import { normalizeMessagesIfNecessary } from '../../base.js';
  *
  * @category Transactions
  */
-export class MsgDeleteDynamicStore<T extends NumberType> extends CustomTypeClass<MsgDeleteDynamicStore<T>> implements iMsgDeleteDynamicStore<T> {
+export class MsgDeleteDynamicStore extends CustomTypeClass<MsgDeleteDynamicStore> implements iMsgDeleteDynamicStore {
   creator: BitBadgesAddress;
-  storeId: T;
+  storeId: string | number;
 
-  constructor(msg: iMsgDeleteDynamicStore<T>) {
+  constructor(msg: iMsgDeleteDynamicStore) {
     super();
     this.creator = msg.creator;
     this.storeId = msg.storeId;
@@ -30,22 +30,22 @@ export class MsgDeleteDynamicStore<T extends NumberType> extends CustomTypeClass
     });
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDeleteDynamicStore<NumberType> {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDeleteDynamicStore {
     return MsgDeleteDynamicStore.fromProto(protobadges.MsgDeleteDynamicStore.fromJson(jsonValue, options));
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDeleteDynamicStore<NumberType> {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDeleteDynamicStore {
     return MsgDeleteDynamicStore.fromProto(protobadges.MsgDeleteDynamicStore.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: protobadges.MsgDeleteDynamicStore): MsgDeleteDynamicStore<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgDeleteDynamicStore): MsgDeleteDynamicStore {
     return new MsgDeleteDynamicStore({
       creator: protoMsg.creator,
       storeId: protoMsg.storeId
     });
   }
 
-  toBech32Addresses(prefix: string): MsgDeleteDynamicStore<T> {
+  toBech32Addresses(prefix: string): MsgDeleteDynamicStore {
     return new MsgDeleteDynamicStore({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       storeId: this.storeId

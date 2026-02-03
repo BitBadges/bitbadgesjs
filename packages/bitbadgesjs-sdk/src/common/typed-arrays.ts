@@ -28,7 +28,7 @@ export class BaseTypedArray<ArrayType extends ElementType[], ElementType> extend
   /**
    * @hidden
    */
-  map<U>(callbackfn: (value: ElementType, index: number, array: ElementType[]) => U, thisArg?: any): U[] {
+  map(callbackfn: (value: ElementType, index: number, array: ElementType[]) => U, thisArg?: any): U[] {
     return super.map(callbackfn as any, thisArg);
   }
 
@@ -145,10 +145,7 @@ export class BaseTypedArray<ArrayType extends ElementType[], ElementType> extend
   /**
    * @hidden
    */
-  flatMap<U, This = undefined>(
-    callback: (this: This, value: ElementType, index: number, array: ElementType[]) => U | readonly U[],
-    thisArg?: This | undefined
-  ): U[] {
+  flatMap<U, This = undefined>(callback: (this: This, value: ElementType, index: number, array: ElementType[]) => U | readonly U[], thisArg?: This | undefined): U[] {
     return super.flatMap(callback as any, thisArg) as U[];
   }
 

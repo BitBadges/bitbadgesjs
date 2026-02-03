@@ -6,25 +6,10 @@ import { AddressList } from '@/core/addressLists.js';
 import { generateAlias, getAliasDerivationKeysForBadge } from '@/core/aliases.js';
 import { getMintApprovals, getNonMintApprovals, getUnhandledCollectionApprovals } from '@/core/approval-utils.js';
 import { CollectionApprovalWithDetails, iCollectionApprovalWithDetails } from '@/core/approvals.js';
-import {
-  AliasPathWithDetails,
-  CosmosCoinWrapperPathWithDetails,
-  TokenMetadata,
-  validateCollectionMetadataUpdate,
-  validateCustomDataUpdate,
-  validateIsArchivedUpdate,
-  validateManagerUpdate,
-  validateStandardsUpdate,
-  validateTokenMetadataUpdate
-} from '@/core/misc.js';
+import { AliasPathWithDetails, CosmosCoinWrapperPathWithDetails, TokenMetadata, validateCollectionMetadataUpdate, validateCustomDataUpdate, validateIsArchivedUpdate, validateManagerUpdate, validateStandardsUpdate, validateTokenMetadataUpdate } from '@/core/misc.js';
 import type { PermissionNameString } from '@/core/permission-utils.js';
 import { getPermissionVariablesFromName } from '@/core/permission-utils.js';
-import {
-  ActionPermission,
-  CollectionApprovalPermissionWithDetails,
-  CollectionPermissionsWithDetails,
-  TokenIdsActionPermission
-} from '@/core/permissions.js';
+import { ActionPermission, CollectionApprovalPermissionWithDetails, CollectionPermissionsWithDetails, TokenIdsActionPermission } from '@/core/permissions.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStoreWithDetails } from '@/core/userBalances.js';
 import type { CollectionId, iAddressList, iCollectionMetadata, iTokenMetadata, iUintRange } from '@/interfaces/types/core.js';
@@ -32,63 +17,15 @@ import type { iCollectionPermissionsWithDetails } from '@/interfaces/types/permi
 import type { iUserBalanceStoreWithDetails } from '@/interfaces/types/userBalances.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { TransferActivityDoc } from './docs-types/activity.js';
-import {
-  ApprovalTrackerDoc,
-  BalanceDocWithDetails,
-  CollectionDoc,
-  CollectionStatsDoc,
-  MerkleChallengeTrackerDoc,
-  TokenFloorPriceDoc,
-  UtilityPageDoc
-} from './docs-types/docs.js';
-import type {
-  BitBadgesAddress,
-  iAliasPathWithDetails,
-  iApprovalTrackerDoc,
-  iBalanceDocWithDetails,
-  iClaimDetails,
-  iCollectionDoc,
-  iCollectionStatsDoc,
-  iCosmosCoinWrapperPathWithDetails,
-  iMerkleChallengeTrackerDoc,
-  iTokenFloorPriceDoc,
-  iTransferActivityDoc,
-  iUtilityPageDoc,
-  NativeAddress
-} from './docs-types/interfaces.js';
-import {
-  CollectionMetadataDetails,
-  TokenMetadataDetails
-} from './metadata/tokenMetadata.js';
+import { ApprovalTrackerDoc, BalanceDocWithDetails, CollectionDoc, CollectionStatsDoc, MerkleChallengeTrackerDoc, TokenFloorPriceDoc, UtilityPageDoc } from './docs-types/docs.js';
+import type { BitBadgesAddress, iAliasPathWithDetails, iApprovalTrackerDoc, iBalanceDocWithDetails, iClaimDetails, iCollectionDoc, iCollectionStatsDoc, iCosmosCoinWrapperPathWithDetails, iMerkleChallengeTrackerDoc, iTokenFloorPriceDoc, iTransferActivityDoc, iUtilityPageDoc, NativeAddress } from './docs-types/interfaces.js';
+import { CollectionMetadataDetails, TokenMetadataDetails } from './metadata/tokenMetadata.js';
 
 import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
 import { ClaimDetails } from '@/core/approvals.js';
 import typia from 'typia';
-import {
-  CollectionViewKey,
-  FilterTokensInCollectionSuccessResponse,
-  GetAdditionalCollectionDetailsPayload,
-  GetBalanceByAddressSuccessResponse,
-  GetCollectionRequestBody,
-  GetMetadataForCollectionPayload,
-  GetOwnersSuccessResponse,
-  GetTokenActivitySuccessResponse,
-  iFilterTokensInCollectionPayload,
-  iFilterTokensInCollectionSuccessResponse,
-  iGetBalanceByAddressPayload,
-  iGetBalanceByAddressSuccessResponse,
-  iGetOwnersPayload,
-  iGetOwnersSuccessResponse,
-  iGetTokenActivityPayload,
-  iGetTokenActivitySuccessResponse,
-  iRefreshMetadataPayload,
-  iRefreshMetadataSuccessResponse,
-  iRefreshStatusSuccessResponse,
-  MetadataFetchOptions,
-  RefreshMetadataSuccessResponse,
-  RefreshStatusSuccessResponse
-} from './requests/collections.js';
+import { CollectionViewKey, FilterTokensInCollectionSuccessResponse, GetAdditionalCollectionDetailsPayload, GetBalanceByAddressSuccessResponse, GetCollectionRequestBody, GetMetadataForCollectionPayload, GetOwnersSuccessResponse, GetTokenActivitySuccessResponse, iFilterTokensInCollectionPayload, iFilterTokensInCollectionSuccessResponse, iGetBalanceByAddressPayload, iGetBalanceByAddressSuccessResponse, iGetOwnersPayload, iGetOwnersSuccessResponse, iGetTokenActivityPayload, iGetTokenActivitySuccessResponse, iRefreshMetadataPayload, iRefreshMetadataSuccessResponse, iRefreshStatusSuccessResponse, MetadataFetchOptions, RefreshMetadataSuccessResponse, RefreshStatusSuccessResponse } from './requests/collections.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
 
 const NEW_COLLECTION_ID = '0';
@@ -96,35 +33,35 @@ const NEW_COLLECTION_ID = '0';
 /**
  * @category Interfaces
  */
-export interface iBitBadgesCollection<T extends NumberType> extends iCollectionDoc<T> {
+export interface iBitBadgesCollection extends iCollectionDoc {
   /** The collection approvals for this collection, with off-chain metadata populated. */
-  collectionApprovals: iCollectionApprovalWithDetails<T>[];
+  collectionApprovals: iCollectionApprovalWithDetails[];
   /** The collection permissions for this collection, with off-chain metadata populated. */
-  collectionPermissions: iCollectionPermissionsWithDetails<T>;
+  collectionPermissions: iCollectionPermissionsWithDetails;
 
   /** The collection metadata for this collection, with off-chain metadata populated. */
   collectionMetadata: iCollectionMetadata;
   /** The token metadata for this collection, with off-chain metadata populated. */
-  tokenMetadata: iTokenMetadata<T>[];
+  tokenMetadata: iTokenMetadata[];
 
   /** The default balances for users upon genesis, with off-chain metadata populated. */
-  defaultBalances: iUserBalanceStoreWithDetails<T>;
+  defaultBalances: iUserBalanceStoreWithDetails;
   /** The fetched activity for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
-  activity: iTransferActivityDoc<T>[];
+  activity: iTransferActivityDoc[];
   /** The fetched owners of this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
-  owners: iBalanceDocWithDetails<T>[];
+  owners: iBalanceDocWithDetails[];
   /** The fetched merkle challenge trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
-  challengeTrackers: iMerkleChallengeTrackerDoc<T>[];
+  challengeTrackers: iMerkleChallengeTrackerDoc[];
   /** The fetched approval trackers for this collection. Returned collections will only fetch the current page. Use the pagination to fetch more. To be used in conjunction with views. */
-  approvalTrackers: iApprovalTrackerDoc<T>[];
+  approvalTrackers: iApprovalTrackerDoc[];
 
   /** The listings for this collection. */
-  listings: iUtilityPageDoc<T>[];
+  listings: iUtilityPageDoc[];
 
   /** The token IDs in this collection that are marked as NSFW. */
-  nsfw?: iCollectionNSFW<T>;
+  nsfw?: iCollectionNSFW;
   /** The token IDs in this collection that have been reported. */
-  reported?: iCollectionNSFW<T>;
+  reported?: iCollectionNSFW;
 
   /** The views for this collection and their pagination Doc. Views will only include the doc _ids. Use the pagination to fetch more. For example, if you want to fetch the activity for a view, you would use the view's pagination to fetch the doc _ids, then use the corresponding activity array to find the matching docs. */
   views: {
@@ -138,26 +75,26 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
   };
 
   /** Details about any off-chain claims for this collection. Only applicable when outsourced to BitBadges. */
-  claims: iClaimDetails<T>[];
+  claims: iClaimDetails[];
 
   /** The stats for this collection. */
-  stats?: iCollectionStatsDoc<T>;
+  stats?: iCollectionStatsDoc;
 
   /** The floor prices for this collection. */
-  tokenFloorPrices?: iTokenFloorPriceDoc<T>[];
+  tokenFloorPrices?: iTokenFloorPriceDoc[];
 
   /** The IBC wrapper paths for the collection, with off-chain metadata populated. */
-  cosmosCoinWrapperPaths: iCosmosCoinWrapperPathWithDetails<T>[];
+  cosmosCoinWrapperPaths: iCosmosCoinWrapperPathWithDetails[];
 
   /** The alias (non-wrapping) paths for the collection, with off-chain metadata populated. */
-  aliasPaths: iAliasPathWithDetails<T>[];
+  aliasPaths: iAliasPathWithDetails[];
 }
 
 /**
  * @category Collections
  */
-export interface iCollectionNSFW<T extends NumberType> {
-  tokenIds: UintRangeArray<T>;
+export interface iCollectionNSFW {
+  tokenIds: UintRangeArray;
   reason: string;
 }
 
@@ -167,27 +104,24 @@ export interface iCollectionNSFW<T extends NumberType> {
  *
  * @category Collections
  */
-export class BitBadgesCollection<T extends NumberType>
-  extends CollectionDoc<T>
-  implements iBitBadgesCollection<T>, CustomType<BitBadgesCollection<T>>
-{
-  collectionApprovals: CollectionApprovalWithDetails<T>[];
-  collectionPermissions: CollectionPermissionsWithDetails<T>;
-  defaultBalances: UserBalanceStoreWithDetails<T>;
+export class BitBadgesCollection extends CollectionDoc implements iBitBadgesCollection, CustomType<BitBadgesCollection> {
+  collectionApprovals: CollectionApprovalWithDetails[];
+  collectionPermissions: CollectionPermissionsWithDetails;
+  defaultBalances: UserBalanceStoreWithDetails;
 
-  collectionMetadata: CollectionMetadataDetails<T>;
-  tokenMetadata: TokenMetadataDetails<T>[];
-  activity: TransferActivityDoc<T>[];
-  owners: BalanceDocWithDetails<T>[];
-  challengeTrackers: MerkleChallengeTrackerDoc<T>[];
-  approvalTrackers: ApprovalTrackerDoc<T>[];
+  collectionMetadata: CollectionMetadataDetails;
+  tokenMetadata: TokenMetadataDetails[];
+  activity: TransferActivityDoc[];
+  owners: BalanceDocWithDetails[];
+  challengeTrackers: MerkleChallengeTrackerDoc[];
+  approvalTrackers: ApprovalTrackerDoc[];
 
-  listings: UtilityPageDoc<T>[];
+  listings: UtilityPageDoc[];
 
-  claims: ClaimDetails<T>[];
+  claims: ClaimDetails[];
 
-  nsfw?: { tokenIds: UintRangeArray<T>; reason: string };
-  reported?: { tokenIds: UintRangeArray<T>; reason: string };
+  nsfw?: { tokenIds: UintRangeArray; reason: string };
+  reported?: { tokenIds: UintRangeArray; reason: string };
 
   views: {
     [viewId: string]:
@@ -199,15 +133,15 @@ export class BitBadgesCollection<T extends NumberType>
       | undefined;
   };
 
-  stats?: CollectionStatsDoc<T>;
+  stats?: CollectionStatsDoc;
 
-  tokenFloorPrices?: iTokenFloorPriceDoc<T>[] | undefined;
+  tokenFloorPrices?: iTokenFloorPriceDoc[] | undefined;
 
-  cosmosCoinWrapperPaths: CosmosCoinWrapperPathWithDetails<T>[];
+  cosmosCoinWrapperPaths: CosmosCoinWrapperPathWithDetails[];
 
-  aliasPaths: AliasPathWithDetails<T>[];
+  aliasPaths: AliasPathWithDetails[];
 
-  constructor(data: iBitBadgesCollection<T>) {
+  constructor(data: iBitBadgesCollection) {
     super(data);
     this.collectionApprovals = data.collectionApprovals.map((collectionApproval) => new CollectionApprovalWithDetails(collectionApproval));
     this.collectionPermissions = new CollectionPermissionsWithDetails(data.collectionPermissions);
@@ -233,12 +167,12 @@ export class BitBadgesCollection<T extends NumberType>
     return [...super.getNumberFieldNames()];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BitBadgesCollection<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BitBadgesCollection<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): BitBadgesCollection {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BitBadgesCollection;
   }
 
-  clone(): BitBadgesCollection<T> {
-    return super.clone() as BitBadgesCollection<T>;
+  clone(): BitBadgesCollection {
+    return super.clone() as BitBadgesCollection;
   }
 
   /**
@@ -246,7 +180,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * @example
    * ```ts
-   * const collection: BitBadgesCollection<bigint> = { ... }
+   * const collection: BitBadgesCollection = { ... }
    * const metadata = collection.getCollectionMetadata()
    * const metadataImage = metadata.image
    * ```
@@ -276,7 +210,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * @example
    * ```ts
-   * const collection: BitBadgesCollection<bigint> = { ... }
+   * const collection: BitBadgesCollection = { ... }
    * const tokenId = 123n
    * const metadata = collection.getTokenMetadataForTokenId(tokenId)
    * const metadataImage = metadata.image
@@ -318,8 +252,7 @@ export class BitBadgesCollection<T extends NumberType>
   private getBalanceInfoHelper(address: NativeAddress, throwIfNotFound = true) {
     const convertedAddress = address === 'Mint' || address === 'Total' ? address : convertToBitBadgesAddress(address);
     const owner = this.owners.find((x) => x.bitbadgesAddress === convertedAddress);
-    if (!owner && throwIfNotFound)
-      throw new Error(`Owner not found for address ${address}. Balance not fetched yet. Missing doc for '${address}' in owners.`);
+    if (!owner && throwIfNotFound) throw new Error(`Owner not found for address ${address}. Balance not fetched yet. Missing doc for '${address}' in owners.`);
 
     return owner;
   }
@@ -335,7 +268,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * @example
    * ```ts
-   * const collection: BitBadgesCollection<bigint> = { ... }
+   * const collection: BitBadgesCollection = { ... }
    * const address = 'bb1...'
    * const balance = collection.getBalance(address)
    * console.log(balance?.balances)
@@ -350,7 +283,7 @@ export class BitBadgesCollection<T extends NumberType>
    * Wrapper for {@link getBalanceInfo} that throws an error if the balance is not found in the document.
    */
   mustGetBalanceInfo(address: string) {
-    return this.getBalanceInfoHelper(address, true) as BalanceDocWithDetails<T>;
+    return this.getBalanceInfoHelper(address, true) as BalanceDocWithDetails;
   }
 
   /**
@@ -365,7 +298,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * @example
    * ```ts
-   * const collection: BitBadgesCollection<bigint> = { ... }
+   * const collection: BitBadgesCollection = { ... }
    * const address = 'bb1...'
    * const balances = collection.getBalances(address)
    * console.log(balances)
@@ -403,7 +336,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * @example
    * ```ts
-   * const collection: BitBadgesCollection<bigint> = { ... }
+   * const collection: BitBadgesCollection = { ... }
    * const metadataToFetch = collection.pruneMetadataToFetch({ tokenIds: [1n, 2n, 3n], uris: ['ipfs://...'] })
    * console.log(metadataToFetch)
    * ```
@@ -424,7 +357,7 @@ export class BitBadgesCollection<T extends NumberType>
    * This is validating the updatability of the permissions. To validate whether a permission is executable,
    * use the checkCan* functions.
    */
-  validatePermissionsUpdate(newPermissions: CollectionPermissionsWithDetails<T>): Error | null {
+  validatePermissionsUpdate(newPermissions: CollectionPermissionsWithDetails): Error | null {
     const result = CollectionPermissionsWithDetails.validateUpdate(this.collectionPermissions, newPermissions);
     return result;
   }
@@ -439,7 +372,7 @@ export class BitBadgesCollection<T extends NumberType>
    */
   validatePermissionUpdate(permissionName: PermissionNameString, newPermissions: any[]): Error | null {
     const { validatePermissionUpdateFunction } = getPermissionVariablesFromName(permissionName);
-    const oldPermissions = this.collectionPermissions[permissionName as keyof CollectionPermissionsWithDetails<T>];
+    const oldPermissions = this.collectionPermissions[permissionName as keyof CollectionPermissionsWithDetails];
     const result: Error | null = validatePermissionUpdateFunction(oldPermissions, newPermissions);
     return result;
   }
@@ -449,12 +382,8 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * Wrapper for {@link CollectionApprovalWithDetails.validateUpdate}.
    */
-  validateCollectionApprovalsUpdate(newApprovals: CollectionApprovalWithDetails<T>[]): Error | null {
-    const result = CollectionApprovalWithDetails.validateUpdate(
-      this.collectionApprovals,
-      newApprovals,
-      this.collectionPermissions.canUpdateCollectionApprovals
-    );
+  validateCollectionApprovalsUpdate(newApprovals: CollectionApprovalWithDetails[]): Error | null {
+    const result = CollectionApprovalWithDetails.validateUpdate(this.collectionApprovals, newApprovals, this.collectionPermissions.canUpdateCollectionApprovals);
     return result;
   }
 
@@ -463,7 +392,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * Wrapper for {@link validateTokenMetadataUpdate}.
    */
-  validateTokenMetadataUpdate(newTokenMetadata: iTokenMetadata<T>[]): Error | null {
+  validateTokenMetadataUpdate(newTokenMetadata: iTokenMetadata[]): Error | null {
     const oldTokenMetadata = this.tokenMetadata.map((x) => new TokenMetadata({ uri: x.uri, tokenIds: x.tokenIds, customData: x.customData }));
     const newTokenMetadataConverted = newTokenMetadata.map((x) => new TokenMetadata(x));
     return validateTokenMetadataUpdate(oldTokenMetadata, newTokenMetadataConverted, this.collectionPermissions.canUpdateTokenMetadata);
@@ -520,7 +449,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * Wrapper for {@link ActionPermission.check}.
    */
-  checkCanDeleteCollection(time?: NumberType) {
+  checkCanDeleteCollection(time?: string | number) {
     return ActionPermission.check(this.convert(BigIntify).collectionPermissions.canDeleteCollection, time ? BigInt(time) : BigInt(Date.now()));
   }
 
@@ -529,7 +458,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * Wrapper for {@link ActionPermission.check}.
    */
-  checkCanArchiveCollection(time?: NumberType) {
+  checkCanArchiveCollection(time?: string | number) {
     return ActionPermission.check(this.convert(BigIntify).collectionPermissions.canArchiveCollection, time ? BigInt(time) : BigInt(Date.now()));
   }
 
@@ -538,7 +467,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * Wrapper for {@link ActionPermission.check}.
    */
-  checkCanUpdateManager(time?: NumberType) {
+  checkCanUpdateManager(time?: string | number) {
     return ActionPermission.check(this.convert(BigIntify).collectionPermissions.canUpdateManager, time ? BigInt(time) : BigInt(Date.now()));
   }
 
@@ -547,7 +476,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * Wrapper for {@link ActionPermission.check}.
    */
-  checkCanUpdateStandards(time?: NumberType) {
+  checkCanUpdateStandards(time?: string | number) {
     return ActionPermission.check(this.convert(BigIntify).collectionPermissions.canUpdateStandards, time ? BigInt(time) : BigInt(Date.now()));
   }
   /**
@@ -555,7 +484,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * Wrapper for {@link ActionPermission.check}.
    */
-  checkCanUpdateCustomData(time?: NumberType) {
+  checkCanUpdateCustomData(time?: string | number) {
     return ActionPermission.check(this.convert(BigIntify).collectionPermissions.canUpdateCustomData, time ? BigInt(time) : BigInt(Date.now()));
   }
   /**
@@ -563,18 +492,15 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * Wrapper for {@link ActionPermission.check}.
    */
-  checkCanUpdateCollectionMetadata(time?: NumberType) {
-    return ActionPermission.check(
-      this.convert(BigIntify).collectionPermissions.canUpdateCollectionMetadata,
-      time ? BigInt(time) : BigInt(Date.now())
-    );
+  checkCanUpdateCollectionMetadata(time?: string | number) {
+    return ActionPermission.check(this.convert(BigIntify).collectionPermissions.canUpdateCollectionMetadata, time ? BigInt(time) : BigInt(Date.now()));
   }
   /**
    * Checks if this permission is executable for the provided values at a specific time (Date.now() by default).
    *
    * Wrapper for {@link TimedUpdatePermission.check}.
    */
-  checkCanUpdateValidTokenIds(tokenIds: iUintRange<T>[], time?: NumberType) {
+  checkCanUpdateValidTokenIds(tokenIds: iUintRange[], time?: string | number) {
     return TokenIdsActionPermission.check(
       tokenIds.map((x) => {
         return { tokenIds: UintRangeArray.From([x]).convert(BigIntify) };
@@ -586,7 +512,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Checks if this permission is executable for the provided values at a specific time (Date.now() by default).
    */
-  checkCanUpdateTokenMetadata(tokenIds: iUintRange<T>[], time?: NumberType) {
+  checkCanUpdateTokenMetadata(tokenIds: iUintRange[], time?: string | number) {
     return TokenIdsActionPermission.check(
       tokenIds.map((x) => ({
         tokenIds: UintRangeArray.From([x]).convert(BigIntify)
@@ -603,10 +529,10 @@ export class BitBadgesCollection<T extends NumberType>
    */
   checkCanUpdateCollectionApprovals(
     details: {
-      timelineTimes: iUintRange<NumberType>[];
-      tokenIds: iUintRange<NumberType>[];
-      ownershipTimes: iUintRange<NumberType>[];
-      transferTimes: iUintRange<NumberType>[];
+      timelineTimes: iUintRange[];
+      tokenIds: iUintRange[];
+      ownershipTimes: iUintRange[];
+      transferTimes: iUintRange[];
       toList: iAddressList;
       fromList: iAddressList;
       initiatedByList: iAddressList;
@@ -614,7 +540,7 @@ export class BitBadgesCollection<T extends NumberType>
       amountTrackerIdList: iAddressList;
       challengeTrackerIdList: iAddressList;
     }[],
-    time?: NumberType
+    time?: string | number
   ) {
     return CollectionApprovalPermissionWithDetails.check(
       details.map((x) => {
@@ -642,7 +568,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * Wrapper for {@link ActionPermission.check}.
    */
-  checkCanAddMoreAliasPaths(time?: NumberType) {
+  checkCanAddMoreAliasPaths(time?: string | number) {
     return ActionPermission.check(this.convert(BigIntify).collectionPermissions.canAddMoreAliasPaths, time ? BigInt(time) : BigInt(Date.now()));
   }
 
@@ -651,20 +577,14 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * Wrapper for {@link ActionPermission.check}.
    */
-  checkCanAddMoreCosmosCoinWrapperPaths(time?: NumberType) {
-    return ActionPermission.check(
-      this.convert(BigIntify).collectionPermissions.canAddMoreCosmosCoinWrapperPaths,
-      time ? BigInt(time) : BigInt(Date.now())
-    );
+  checkCanAddMoreCosmosCoinWrapperPaths(time?: string | number) {
+    return ActionPermission.check(this.convert(BigIntify).collectionPermissions.canAddMoreCosmosCoinWrapperPaths, time ? BigInt(time) : BigInt(Date.now()));
   }
 
   /**
    * Fetches and initializes a new BitBadgesCollection object from an API request. Must pass in a valid API instance.
    */
-  static async FetchAndInitialize<T extends NumberType>(
-    api: BaseBitBadgesApi<T>,
-    options: { collectionId: CollectionId } & GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload
-  ) {
+  static async FetchAndInitialize(api: BaseBitBadgesApi, options: { collectionId: CollectionId } & GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload) {
     const collection = await BitBadgesCollection.GetCollections(api, { collectionsToFetch: [options] }).then((x) => x.collections[0]);
     if (!collection) throw new Error('No collection found');
     return new BitBadgesCollection(collection);
@@ -673,17 +593,14 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets collections from the API. Must pass in a valid API instance.
    */
-  static async GetCollections<T extends NumberType>(api: BaseBitBadgesApi<T>, body: iGetCollectionsPayload) {
+  static async GetCollections(api: BaseBitBadgesApi, body: iGetCollectionsPayload) {
     try {
       const validateRes: typia.IValidation<iGetCollectionsPayload> = typia.validate<iGetCollectionsPayload>(body ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await api.axios.post<iGetCollectionsSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionsRoute()}`,
-        body
-      );
+      const response = await api.axios.post<iGetCollectionsSuccessResponse<string>>(`${api.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionsRoute()}`, body);
       return new GetCollectionsSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
@@ -694,12 +611,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets the balance for a specific address for a specific collection. Must pass in a valid API instance.
    */
-  static async GetBalanceByAddress<T extends NumberType>(
-    api: BaseBitBadgesApi<T>,
-    collectionId: CollectionId,
-    address: string,
-    payload?: iGetBalanceByAddressPayload
-  ): Promise<GetBalanceByAddressSuccessResponse<T>> {
+  static async GetBalanceByAddress(api: BaseBitBadgesApi, collectionId: CollectionId, address: string, payload?: iGetBalanceByAddressPayload): Promise<GetBalanceByAddressSuccessResponse> {
     try {
       const validateRes: typia.IValidation<iGetBalanceByAddressPayload> = typia.validate<iGetBalanceByAddressPayload>(payload ?? {});
       if (!validateRes.success) {
@@ -708,10 +620,7 @@ export class BitBadgesCollection<T extends NumberType>
 
       api.assertPositiveCollectionId(collectionId);
 
-      const response = await api.axios.get<iGetBalanceByAddressSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetBalanceByAddressRoute(collectionId, address)}`,
-        { params: payload }
-      );
+      const response = await api.axios.get<iGetBalanceByAddressSuccessResponse<string>>(`${api.BACKEND_URL}${BitBadgesApiRoutes.GetBalanceByAddressRoute(collectionId, address)}`, { params: payload });
       return new GetBalanceByAddressSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
@@ -722,10 +631,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Fetches and initializes a batch of new BitBadgesCollection objects from an API request. Must pass in a valid API instance.
    */
-  static async FetchAndInitializeBatch<T extends NumberType>(
-    api: BaseBitBadgesApi<T>,
-    collectionsToFetch: ({ collectionId: CollectionId } & GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload)[]
-  ) {
+  static async FetchAndInitializeBatch(api: BaseBitBadgesApi, collectionsToFetch: ({ collectionId: CollectionId } & GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload)[]) {
     const collection = await BitBadgesCollection.GetCollections(api, { collectionsToFetch: collectionsToFetch });
     return collection.collections.map((x) => (x ? new BitBadgesCollection(x) : undefined));
   }
@@ -736,7 +642,7 @@ export class BitBadgesCollection<T extends NumberType>
    * @remarks
    * Returns the cached value if already fetched. Use forceful to force a new fetch.
    */
-  async fetchBalances(api: BaseBitBadgesApi<T>, address: NativeAddress, forceful?: boolean) {
+  async fetchBalances(api: BaseBitBadgesApi, address: NativeAddress, forceful?: boolean) {
     const currOwnerInfo = this.getBalanceInfo(address);
     if (currOwnerInfo && !forceful) return currOwnerInfo;
 
@@ -754,45 +660,23 @@ export class BitBadgesCollection<T extends NumberType>
     const cachedCollection = this.convert(BigIntify);
 
     const prunedMetadataToFetch: MetadataFetchOptions = pruneMetadataToFetch(cachedCollection, options.metadataToFetch);
-    const shouldFetchMetadata =
-      (prunedMetadataToFetch.uris && prunedMetadataToFetch.uris.length > 0) || !prunedMetadataToFetch.doNotFetchCollectionMetadata;
+    const shouldFetchMetadata = (prunedMetadataToFetch.uris && prunedMetadataToFetch.uris.length > 0) || !prunedMetadataToFetch.doNotFetchCollectionMetadata;
     const viewsToFetch = (options.viewsToFetch || []).filter((x) => this.viewHasMore(x.viewId));
     const hasTotal = cachedCollection.owners.find((x) => x.bitbadgesAddress === 'Total');
     const shouldFetchTotal = !hasTotal && options.fetchTotalBalances;
 
     const shouldFetchMerklechallengeTrackerIds =
       (options.challengeTrackersToFetch ?? []).find((x) => {
-        const match = cachedCollection.challengeTrackers.find(
-          (y) =>
-            y.challengeTrackerId === x.challengeTrackerId &&
-            x.approverAddress === y.approverAddress &&
-            x.collectionId === y.collectionId &&
-            x.approvalLevel === y.approvalLevel
-        );
+        const match = cachedCollection.challengeTrackers.find((y) => y.challengeTrackerId === x.challengeTrackerId && x.approverAddress === y.approverAddress && x.collectionId === y.collectionId && x.approvalLevel === y.approvalLevel);
         return !match;
       }) !== undefined;
     const shouldFetchAmountTrackerIds =
       (options.approvalTrackersToFetch ?? []).find((x) => {
-        const match = cachedCollection.approvalTrackers.find(
-          (y) =>
-            y.amountTrackerId === x.amountTrackerId &&
-            x.approverAddress === y.approverAddress &&
-            x.collectionId === y.collectionId &&
-            y.approvedAddress === x.approvedAddress &&
-            y.trackerType === x.trackerType
-        );
+        const match = cachedCollection.approvalTrackers.find((y) => y.amountTrackerId === x.amountTrackerId && x.approverAddress === y.approverAddress && x.collectionId === y.collectionId && y.approvedAddress === x.approvedAddress && y.trackerType === x.trackerType);
         return !match;
       }) !== undefined;
 
-    return !(
-      shouldFetchMetadata ||
-      viewsToFetch.length > 0 ||
-      shouldFetchTotal ||
-      shouldFetchMerklechallengeTrackerIds ||
-      shouldFetchAmountTrackerIds ||
-      options.fetchPrivateParams ||
-      options.tokenFloorPricesToFetch
-    );
+    return !(shouldFetchMetadata || viewsToFetch.length > 0 || shouldFetchTotal || shouldFetchMerklechallengeTrackerIds || shouldFetchAmountTrackerIds || options.fetchPrivateParams || options.tokenFloorPricesToFetch);
   }
 
   /**
@@ -802,23 +686,10 @@ export class BitBadgesCollection<T extends NumberType>
     const prunedMetadataToFetch: MetadataFetchOptions = pruneMetadataToFetch(this.convert(BigIntify), options.metadataToFetch);
     const prunedViewsToFetch = (options.viewsToFetch || []).filter((x) => this.viewHasMore(x.viewId));
     const prunedChallengeTrackersToFetch = (options.challengeTrackersToFetch || []).filter((x) => {
-      return !this.challengeTrackers.find(
-        (y) =>
-          y.challengeTrackerId === x.challengeTrackerId &&
-          x.approverAddress === y.approverAddress &&
-          x.collectionId === y.collectionId &&
-          x.approvalLevel === y.approvalLevel
-      );
+      return !this.challengeTrackers.find((y) => y.challengeTrackerId === x.challengeTrackerId && x.approverAddress === y.approverAddress && x.collectionId === y.collectionId && x.approvalLevel === y.approvalLevel);
     });
     const prunedApprovalTrackersToFetch = (options.approvalTrackersToFetch || []).filter((x) => {
-      return !this.approvalTrackers.find(
-        (y) =>
-          y.amountTrackerId === x.amountTrackerId &&
-          x.approverAddress === y.approverAddress &&
-          x.collectionId === y.collectionId &&
-          y.approvedAddress === x.approvedAddress &&
-          y.trackerType === x.trackerType
-      );
+      return !this.approvalTrackers.find((y) => y.amountTrackerId === x.amountTrackerId && x.approverAddress === y.approverAddress && x.collectionId === y.collectionId && y.approvedAddress === x.approvedAddress && y.trackerType === x.trackerType);
     });
     const shouldFetchTotal = !this.owners.find((x) => x.bitbadgesAddress === 'Total') && options.fetchTotalBalances;
 
@@ -837,11 +708,7 @@ export class BitBadgesCollection<T extends NumberType>
    * Specify a new fetch request for the current collection. This will update the current collection with the new response information.
    * For example, paginations, metadata, views, etc. will all be handled automatically.
    */
-  async fetchAndUpdate(
-    api: BaseBitBadgesApi<T>,
-    options: GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload,
-    forceful?: boolean
-  ) {
+  async fetchAndUpdate(api: BaseBitBadgesApi, options: GetMetadataForCollectionPayload & GetAdditionalCollectionDetailsPayload, forceful?: boolean) {
     if (!forceful) {
       if (this.isRedundantRequest(options)) return;
       options = this.prunePayload(options);
@@ -859,7 +726,7 @@ export class BitBadgesCollection<T extends NumberType>
    * Updates the current collection with a new response from the API. If forceful is true, we fully overwrite the current collection with the new response.
    * Else, we will append the new response to the current collection while handling duplicates, paginations, etc.
    */
-  updateWithNewResponse(newResponse: BitBadgesCollection<T>, forceful?: boolean) {
+  updateWithNewResponse(newResponse: BitBadgesCollection, forceful?: boolean) {
     if (forceful) {
       const newCollectionInfo = new BitBadgesCollection(newResponse);
       Object.assign(this, newCollectionInfo);
@@ -874,7 +741,7 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Wrapper for {@link fetchAndUpdate} that fetches collection metadata.
    */
-  async fetchMetadata(api: BaseBitBadgesApi<T>, options: GetMetadataForCollectionPayload, forceful?: boolean) {
+  async fetchMetadata(api: BaseBitBadgesApi, options: GetMetadataForCollectionPayload, forceful?: boolean) {
     if (!forceful) {
       if (options.metadataToFetch) options.metadataToFetch = this.pruneMetadataToFetch(options.metadataToFetch);
     }
@@ -908,7 +775,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * If the view has no more pages, this will do nothing.
    */
-  async fetchNextForView(api: BaseBitBadgesApi<T>, viewType: CollectionViewKey, viewId: string, oldestFirst?: boolean, address?: string) {
+  async fetchNextForView(api: BaseBitBadgesApi, viewType: CollectionViewKey, viewId: string, oldestFirst?: boolean, address?: string) {
     if (!this.viewHasMore(viewId)) return;
 
     await this.fetchAndUpdate(api, {
@@ -929,7 +796,7 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * There is a 1 second delay between each page fetch to prevent rate limiting.
    */
-  async fetchAllForView(api: BaseBitBadgesApi<T>, viewType: CollectionViewKey, viewId: string, oldestFirst?: boolean, address?: string) {
+  async fetchAllForView(api: BaseBitBadgesApi, viewType: CollectionViewKey, viewId: string, oldestFirst?: boolean, address?: string) {
     while (this.viewHasMore(viewId)) {
       await this.fetchNextForView(api, viewType, viewId, oldestFirst, address);
       await new Promise((r) => setTimeout(r, 1000));
@@ -939,20 +806,20 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Type agnostic get view function. Uses the viewType to determine the type of view to fetch.
    */
-  getView<KeyType extends CollectionViewKey>(viewType: KeyType, viewId: string): CollectionViewData<T>[KeyType] {
+  getView<KeyType extends CollectionViewKey>(viewType: KeyType, viewId: string): CollectionViewData[KeyType] {
     switch (viewType) {
       case 'transferActivity':
-        return this.getActivityView(viewId) as CollectionViewData<T>[KeyType];
+        return this.getActivityView(viewId) as CollectionViewData[KeyType];
       case 'owners':
-        return this.getOwnersView(viewId) as CollectionViewData<T>[KeyType];
+        return this.getOwnersView(viewId) as CollectionViewData[KeyType];
       case 'amountTrackers':
-        return this.getApprovalTrackersView(viewId) as CollectionViewData<T>[KeyType];
+        return this.getApprovalTrackersView(viewId) as CollectionViewData[KeyType];
       case 'challengeTrackers':
-        return this.getChallengeTrackersView(viewId) as CollectionViewData<T>[KeyType];
+        return this.getChallengeTrackersView(viewId) as CollectionViewData[KeyType];
       case 'listings':
-        return this.getListingsView(viewId) as CollectionViewData<T>[KeyType];
+        return this.getListingsView(viewId) as CollectionViewData[KeyType];
       case 'tokenFloorPrices':
-        return this.getTokenFloorPricesView(viewId) as CollectionViewData<T>[KeyType];
+        return this.getTokenFloorPricesView(viewId) as CollectionViewData[KeyType];
       default:
         throw new Error(`Unknown view type: ${viewType}`);
     }
@@ -964,7 +831,7 @@ export class BitBadgesCollection<T extends NumberType>
   getActivityView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.activity.find((y) => y._docId === x);
-    }) ?? []) as TransferActivityDoc<T>[];
+    }) ?? []) as TransferActivityDoc[];
   }
 
   /**
@@ -973,7 +840,7 @@ export class BitBadgesCollection<T extends NumberType>
   getOwnersView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.owners.find((y) => y._docId === x);
-    }) ?? []) as BalanceDocWithDetails<T>[];
+    }) ?? []) as BalanceDocWithDetails[];
   }
 
   /**
@@ -982,7 +849,7 @@ export class BitBadgesCollection<T extends NumberType>
   getChallengeTrackersView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.challengeTrackers.find((y) => y._docId === x);
-    }) ?? []) as MerkleChallengeTrackerDoc<T>[];
+    }) ?? []) as MerkleChallengeTrackerDoc[];
   }
 
   /**
@@ -991,7 +858,7 @@ export class BitBadgesCollection<T extends NumberType>
   getListingsView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.listings.find((y) => y._docId === x);
-    }) ?? []) as UtilityPageDoc<T>[];
+    }) ?? []) as UtilityPageDoc[];
   }
 
   /**
@@ -999,7 +866,7 @@ export class BitBadgesCollection<T extends NumberType>
   getApprovalTrackersView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.approvalTrackers.find((y) => y._docId === x);
-    }) ?? []) as ApprovalTrackerDoc<T>[];
+    }) ?? []) as ApprovalTrackerDoc[];
   }
 
   /**
@@ -1008,7 +875,7 @@ export class BitBadgesCollection<T extends NumberType>
   getTokenFloorPricesView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.tokenFloorPrices?.find((y) => y._docId === x);
-    }) ?? []) as TokenFloorPriceDoc<T>[];
+    }) ?? []) as TokenFloorPriceDoc[];
   }
 
   /**
@@ -1052,13 +919,11 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Returns the status of this collection in the refresh queue.
    */
-  static async GetRefreshStatus<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: string) {
+  static async GetRefreshStatus(api: BaseBitBadgesApi, collectionId: string) {
     try {
       api.assertPositiveCollectionId(collectionId);
 
-      const response = await api.axios.get<iRefreshStatusSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetRefreshStatusRoute(collectionId)}`
-      );
+      const response = await api.axios.get<iRefreshStatusSuccessResponse<string>>(`${api.BACKEND_URL}${BitBadgesApiRoutes.GetRefreshStatusRoute(collectionId)}`);
       return new RefreshStatusSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
@@ -1069,14 +934,14 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Check the refresh queue status for the collection via the API.
    */
-  async getRefreshStatus(api: BaseBitBadgesApi<T>) {
+  async getRefreshStatus(api: BaseBitBadgesApi) {
     return await BitBadgesCollection.GetRefreshStatus(api, this.collectionId);
   }
 
   /**
    * Trigger a refresh for the collection via the API. Note there is a cooldown period for refreshing.
    */
-  static async RefreshMetadata<T extends NumberType>(api: BaseBitBadgesApi<T>, collectionId: string, body?: iRefreshMetadataPayload) {
+  static async RefreshMetadata(api: BaseBitBadgesApi, collectionId: string, body?: iRefreshMetadataPayload) {
     try {
       const validateRes: typia.IValidation<iRefreshMetadataPayload> = typia.validate<iRefreshMetadataPayload>(body ?? {});
       if (!validateRes.success) {
@@ -1085,10 +950,7 @@ export class BitBadgesCollection<T extends NumberType>
 
       api.assertPositiveCollectionId(collectionId);
 
-      const response = await api.axios.post<iRefreshMetadataSuccessResponse>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.RefreshMetadataRoute(collectionId)}`,
-        body
-      );
+      const response = await api.axios.post<iRefreshMetadataSuccessResponse>(`${api.BACKEND_URL}${BitBadgesApiRoutes.RefreshMetadataRoute(collectionId)}`, body);
       return new RefreshMetadataSuccessResponse(response.data);
     } catch (error) {
       await api.handleApiError(error);
@@ -1099,19 +961,14 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Trigger a refresh for the collection via the API. Note there is a cooldown period for refreshing.
    */
-  async refresh(api: BaseBitBadgesApi<T>) {
+  async refresh(api: BaseBitBadgesApi) {
     return await BitBadgesCollection.RefreshMetadata(api, this.collectionId);
   }
 
   /**
    * Gets activity for a specific token ID. You have to handle the pagination yourself.
    */
-  static async GetTokenActivity<T extends NumberType>(
-    api: BaseBitBadgesApi<T>,
-    collectionId: CollectionId,
-    tokenId: NumberType,
-    payload?: iGetTokenActivityPayload
-  ) {
+  static async GetTokenActivity(api: BaseBitBadgesApi, collectionId: CollectionId, tokenId: string | number, payload?: iGetTokenActivityPayload) {
     try {
       const validateRes: typia.IValidation<iGetTokenActivityPayload> = typia.validate<iGetTokenActivityPayload>(payload ?? {});
       if (!validateRes.success) {
@@ -1121,10 +978,7 @@ export class BitBadgesCollection<T extends NumberType>
       api.assertPositiveCollectionId(collectionId);
       api.assertPositiveInteger(tokenId);
 
-      const response = await api.axios.get<iGetTokenActivitySuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetTokenActivityRoute(collectionId, tokenId)}`,
-        { params: payload }
-      );
+      const response = await api.axios.get<iGetTokenActivitySuccessResponse<string>>(`${api.BACKEND_URL}${BitBadgesApiRoutes.GetTokenActivityRoute(collectionId, tokenId)}`, { params: payload });
       return new GetTokenActivitySuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
@@ -1135,19 +989,14 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Get the token activity for a specific token ID. You have to handle the pagination yourself.
    */
-  async getTokenActivity(api: BaseBitBadgesApi<T>, tokenId: T, body: iGetTokenActivityPayload) {
+  async getTokenActivity(api: BaseBitBadgesApi, tokenId: T, body: iGetTokenActivityPayload) {
     return await BitBadgesCollection.GetTokenActivity(api, this.collectionId, tokenId, body);
   }
 
   /**
    * Gets owners for a specific token ID. You have to handle the pagination yourself.
    */
-  static async GetOwners<T extends NumberType>(
-    api: BaseBitBadgesApi<T>,
-    collectionId: CollectionId,
-    tokenId: NumberType,
-    payload?: iGetOwnersPayload
-  ) {
+  static async GetOwners(api: BaseBitBadgesApi, collectionId: CollectionId, tokenId: string | number, payload?: iGetOwnersPayload) {
     try {
       const validateRes: typia.IValidation<iGetOwnersPayload> = typia.validate<iGetOwnersPayload>(payload ?? {});
       if (!validateRes.success) {
@@ -1157,10 +1006,7 @@ export class BitBadgesCollection<T extends NumberType>
       api.assertPositiveCollectionId(collectionId);
       api.assertPositiveInteger(tokenId);
 
-      const response = await api.axios.get<iGetOwnersSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetOwnersRoute(collectionId, tokenId)}`,
-        { params: payload }
-      );
+      const response = await api.axios.get<iGetOwnersSuccessResponse<string>>(`${api.BACKEND_URL}${BitBadgesApiRoutes.GetOwnersRoute(collectionId, tokenId)}`, { params: payload });
       return new GetOwnersSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
@@ -1171,28 +1017,21 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Gets the owners for a specific token. You have to handle the pagination yourself.
    */
-  async getOwners(api: BaseBitBadgesApi<T>, tokenId: T, body: iGetOwnersPayload) {
+  async getOwners(api: BaseBitBadgesApi, tokenId: T, body: iGetOwnersPayload) {
     return await BitBadgesCollection.GetOwners(api, this.collectionId, tokenId, body);
   }
 
   /**
    * Execute a filter query for the collection. You have to handle the pagination yourself.
    */
-  static async FilterTokensInCollection<T extends NumberType>(
-    api: BaseBitBadgesApi<T>,
-    collectionId: string,
-    body: iFilterTokensInCollectionPayload
-  ) {
+  static async FilterTokensInCollection(api: BaseBitBadgesApi, collectionId: string, body: iFilterTokensInCollectionPayload) {
     try {
       const validateRes: typia.IValidation<iFilterTokensInCollectionPayload> = typia.validate<iFilterTokensInCollectionPayload>(body ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await api.axios.post<iFilterTokensInCollectionSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.FilterTokensInCollectionRoute(collectionId)}`,
-        body
-      );
+      const response = await api.axios.post<iFilterTokensInCollectionSuccessResponse<string>>(`${api.BACKEND_URL}${BitBadgesApiRoutes.FilterTokensInCollectionRoute(collectionId)}`, body);
       return new FilterTokensInCollectionSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
@@ -1203,34 +1042,31 @@ export class BitBadgesCollection<T extends NumberType>
   /**
    * Execute a filter query for the collection. You have to handle the pagination yourself.
    */
-  async FilterTokensInCollection(api: BaseBitBadgesApi<T>, bodyOptions: Omit<iFilterTokensInCollectionPayload, 'collectionId'>) {
+  async FilterTokensInCollection(api: BaseBitBadgesApi, bodyOptions: Omit<iFilterTokensInCollectionPayload, 'collectionId'>) {
     return await BitBadgesCollection.FilterTokensInCollection(api, this.collectionId, bodyOptions);
   }
 }
 
-type CollectionViewData<T extends NumberType> = {
-  transferActivity: TransferActivityDoc<T>[];
-  owners: BalanceDocWithDetails<T>[];
-  amountTrackers: ApprovalTrackerDoc<T>[];
-  challengeTrackers: MerkleChallengeTrackerDoc<T>[];
-  listings: UtilityPageDoc<T>[];
-  tokenFloorPrices: TokenFloorPriceDoc<T>[];
+type CollectionViewData = {
+  transferActivity: TransferActivityDoc[];
+  owners: BalanceDocWithDetails[];
+  amountTrackers: ApprovalTrackerDoc[];
+  challengeTrackers: MerkleChallengeTrackerDoc[];
+  listings: UtilityPageDoc[];
+  tokenFloorPrices: TokenFloorPriceDoc[];
 };
 
 /**
   @category Indexer
 */
-export interface CollectionMap<T extends NumberType> {
-  [collectionId: string]: BitBadgesCollection<T> | undefined;
+export interface CollectionMap {
+  [collectionId: string]: BitBadgesCollection | undefined;
 }
 
 /**
  * @category Indexer
  */
-export function convertCollectionMap<T extends NumberType, U extends NumberType>(
-  item: CollectionMap<T>,
-  convertFunction: (item: NumberType) => U
-): CollectionMap<U> {
+export function convertCollectionMap<T extends NumberType, U extends NumberType>(item: CollectionMap, convertFunction: (item: string | number) => U): CollectionMap {
   return Object.fromEntries(
     Object.entries(item).map(([key, value]) => {
       return [key, value ? value.convert(convertFunction) : undefined];
@@ -1241,7 +1077,7 @@ export function convertCollectionMap<T extends NumberType, U extends NumberType>
 /**
  * Prunes the metadata to fetch based on the cached collection and the metadata fetch request
  */
-const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesCollection<T>, metadataFetchReq?: MetadataFetchOptions) => {
+const pruneMetadataToFetch = (cachedCollection: BitBadgesCollection, metadataFetchReq?: MetadataFetchOptions) => {
   if (!cachedCollection) throw new Error('Collection does not exist');
 
   const metadataToFetch: Required<MetadataFetchOptions> = {
@@ -1285,10 +1121,10 @@ const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesC
     //Check if we have all metadata corresponding to the tokenIds
     if (metadataFetchReq.tokenIds) {
       for (const tokenId of metadataFetchReq.tokenIds) {
-        const tokenIdCastedAsUintRange = new UintRange(tokenId as iUintRange<NumberType>);
+        const tokenIdCastedAsUintRange = new UintRange(tokenId as iUintRange);
         const tokenIdCastedAsNumber = tokenId as NumberType;
 
-        let tokenIdsLeft: UintRangeArray<bigint>;
+        let tokenIdsLeft: UintRangeArray;
         if (typeof tokenIdCastedAsNumber === 'object' && tokenIdCastedAsUintRange.start && tokenIdCastedAsUintRange.end) {
           tokenIdsLeft = UintRangeArray.From([tokenIdCastedAsUintRange.convert(BigIntify)]);
         } else {
@@ -1352,10 +1188,7 @@ const pruneMetadataToFetch = <T extends NumberType>(cachedCollection: BitBadgesC
   } as { doNotFetchCollectionMetadata: boolean; uris: string[] };
 };
 
-function updateCollectionWithResponse<T extends NumberType>(
-  oldCollection: BitBadgesCollection<T> | undefined,
-  newCollectionResponse: BitBadgesCollection<T>
-): BitBadgesCollection<T> {
+function updateCollectionWithResponse(oldCollection: BitBadgesCollection | undefined, newCollectionResponse: BitBadgesCollection): BitBadgesCollection {
   //TODO: No idea why the deep copy is necessary but it breaks the timeline batch updates for existing collections if not
   //      One place to look: somehow, I think that the indivudal elements in .tokenIds are the same object (cached[0].tokenIds === new[0].tokenIds)
   //      I think the cachedCollection deepCopyPrimitives is the important one, but I'm not sure
@@ -1507,22 +1340,19 @@ export interface iGetCollectionsPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iGetCollectionsSuccessResponse<T extends NumberType> {
-  collections: (iBitBadgesCollection<T> | undefined)[];
+export interface iGetCollectionsSuccessResponse {
+  collections: (iBitBadgesCollection | undefined)[];
 }
 
-export class GetCollectionsSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetCollectionsSuccessResponse<T>>
-  implements iGetCollectionsSuccessResponse<T>
-{
-  collections: (BitBadgesCollection<T> | undefined)[];
+export class GetCollectionsSuccessResponse extends BaseNumberTypeClass<GetCollectionsSuccessResponse> implements iGetCollectionsSuccessResponse {
+  collections: (BitBadgesCollection | undefined)[];
 
-  constructor(data: iGetCollectionsSuccessResponse<T>) {
+  constructor(data: iGetCollectionsSuccessResponse) {
     super();
     this.collections = data.collections.map((collection) => (collection ? new BitBadgesCollection(collection) : undefined));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetCollectionsSuccessResponse<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): GetCollectionsSuccessResponse {
     return new GetCollectionsSuccessResponse(
       deepCopyPrimitives({
         collections: this.collections.map((collection) => (collection ? collection.convert(convertFunction) : undefined))

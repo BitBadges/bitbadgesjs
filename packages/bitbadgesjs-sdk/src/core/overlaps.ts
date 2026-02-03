@@ -16,17 +16,17 @@ const { getReservedTrackerList } = AddressList;
 //TODO: This file was created with AI from the Go equivalent in github.com/bitbadges/bitbadgeschain. It should be cleaned up to be more idiomatic TypeScript.
 
 export interface UniversalPermission {
-  tokenIds: UintRangeArray<bigint>;
-  timelineTimes: UintRangeArray<bigint>;
-  transferTimes: UintRangeArray<bigint>;
-  ownershipTimes: UintRangeArray<bigint>;
+  tokenIds: UintRangeArray;
+  timelineTimes: UintRangeArray;
+  transferTimes: UintRangeArray;
+  ownershipTimes: UintRangeArray;
   toList: AddressList;
   fromList: AddressList;
   initiatedByList: AddressList;
 
   approvalIdList: AddressList;
-  permanentlyPermittedTimes: UintRangeArray<bigint>;
-  permanentlyForbiddenTimes: UintRangeArray<bigint>;
+  permanentlyPermittedTimes: UintRangeArray;
+  permanentlyForbiddenTimes: UintRangeArray;
 
   usesTokenIds: boolean;
   usesTimelineTimes: boolean;
@@ -41,18 +41,18 @@ export interface UniversalPermission {
 }
 
 export interface UniversalPermissionDetails {
-  tokenId: UintRange<bigint>;
-  timelineTime: UintRange<bigint>;
-  transferTime: UintRange<bigint>;
-  ownershipTime: UintRange<bigint>;
+  tokenId: UintRange;
+  timelineTime: UintRange;
+  transferTime: UintRange;
+  ownershipTime: UintRange;
   toList: AddressList;
   fromList: AddressList;
   initiatedByList: AddressList;
 
   approvalIdList: AddressList;
 
-  permanentlyPermittedTimes: UintRangeArray<bigint>;
-  permanentlyForbiddenTimes: UintRangeArray<bigint>;
+  permanentlyPermittedTimes: UintRangeArray;
+  permanentlyForbiddenTimes: UintRangeArray;
 
   arbitraryValue: any;
 }
@@ -63,10 +63,7 @@ export interface Overlap {
   secondDetails: UniversalPermissionDetails;
 }
 
-export function getOverlapsAndNonOverlaps(
-  firstDetails: UniversalPermissionDetails[],
-  secondDetails: UniversalPermissionDetails[]
-): [Overlap[], UniversalPermissionDetails[], UniversalPermissionDetails[]] {
+export function getOverlapsAndNonOverlaps(firstDetails: UniversalPermissionDetails[], secondDetails: UniversalPermissionDetails[]): [Overlap[], UniversalPermissionDetails[], UniversalPermissionDetails[]] {
   // Deep copy
   let inOldButNotNew = firstDetails;
   let inNewButNotOld = secondDetails;
@@ -94,10 +91,7 @@ export function getOverlapsAndNonOverlaps(
   return [allOverlaps, inOldButNotNew, inNewButNotOld];
 }
 
-export function universalRemoveOverlapFromValues(
-  handled: UniversalPermissionDetails,
-  valuesToCheck: UniversalPermissionDetails[]
-): [UniversalPermissionDetails[], UniversalPermissionDetails[]] {
+export function universalRemoveOverlapFromValues(handled: UniversalPermissionDetails, valuesToCheck: UniversalPermissionDetails[]): [UniversalPermissionDetails[], UniversalPermissionDetails[]] {
   const newValuesToCheck = [];
   const removed = [];
   for (const valueToCheck of valuesToCheck) {
@@ -109,10 +103,7 @@ export function universalRemoveOverlapFromValues(
   return [newValuesToCheck, removed];
 }
 
-export function universalRemoveOverlaps(
-  handled: UniversalPermissionDetails,
-  valueToCheck: UniversalPermissionDetails
-): [UniversalPermissionDetails[], UniversalPermissionDetails[]] {
+export function universalRemoveOverlaps(handled: UniversalPermissionDetails, valueToCheck: UniversalPermissionDetails): [UniversalPermissionDetails[], UniversalPermissionDetails[]] {
   const [timelineTimesAfterRemoval, removedTimelineTimes] = valueToCheck.timelineTime.getOverlapDetails(handled.timelineTime);
   const [tokensAfterRemoval, removedTokens] = valueToCheck.tokenId.getOverlapDetails(handled.tokenId);
   const [transferTimesAfterRemoval, removedTransferTimes] = valueToCheck.transferTime.getOverlapDetails(handled.transferTime);
@@ -131,16 +122,7 @@ export function universalRemoveOverlaps(
   const remaining: UniversalPermissionDetails[] = [];
 
   //If we didn't remove anything at all
-  if (
-    removedTimelineTimes.length === 0 ||
-    removedTokens.length === 0 ||
-    removedTransferTimes.length === 0 ||
-    removedOwnershipTimes.length === 0 ||
-    removedToListIsEmpty ||
-    removedFromListIsEmpty ||
-    removedInitiatedByListIsEmpty ||
-    removedApprovalIdListIsEmpty
-  ) {
+  if (removedTimelineTimes.length === 0 || removedTokens.length === 0 || removedTransferTimes.length === 0 || removedOwnershipTimes.length === 0 || removedToListIsEmpty || removedFromListIsEmpty || removedInitiatedByListIsEmpty || removedApprovalIdListIsEmpty) {
     remaining.push(valueToCheck);
     return [remaining, []];
   }
@@ -308,7 +290,7 @@ export function universalRemoveOverlaps(
   return [remaining, removed];
 }
 
-export function GetUintRangesWithOptions(_ranges: UintRangeArray<bigint>, uses: boolean): UintRangeArray<bigint> {
+export function GetUintRangesWithOptions(_ranges: UintRangeArray, uses: boolean): UintRangeArray {
   let ranges = _ranges.map((x) => x.convert(BigIntify));
 
   if (!uses) {
@@ -510,18 +492,18 @@ export function GetFirstMatchOnly(
 }
 
 export interface MergedUniversalPermissionDetails {
-  tokenIds: UintRangeArray<bigint>;
-  timelineTimes: UintRangeArray<bigint>;
-  transferTimes: UintRangeArray<bigint>;
-  ownershipTimes: UintRangeArray<bigint>;
+  tokenIds: UintRangeArray;
+  timelineTimes: UintRangeArray;
+  transferTimes: UintRangeArray;
+  ownershipTimes: UintRangeArray;
   toList: AddressList;
   fromList: AddressList;
   initiatedByList: AddressList;
 
   approvalIdList: AddressList;
 
-  permanentlyPermittedTimes: UintRangeArray<bigint>;
-  permanentlyForbiddenTimes: UintRangeArray<bigint>;
+  permanentlyPermittedTimes: UintRangeArray;
+  permanentlyForbiddenTimes: UintRangeArray;
 
   arbitraryValue: any;
 }
@@ -564,17 +546,10 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
         const timelineTimesAreSame = JSON.stringify(first.timelineTimes) === JSON.stringify(second.timelineTimes);
         const transferTimesAreSame = JSON.stringify(first.transferTimes) === JSON.stringify(second.transferTimes);
         const ownershipTimesAreSame = JSON.stringify(first.ownershipTimes) === JSON.stringify(second.ownershipTimes);
-        const toListsAreSame =
-          first.toList.whitelist === second.toList.whitelist && JSON.stringify(first.toList.addresses) === JSON.stringify(second.toList.addresses);
-        const fromListsAreSame =
-          first.fromList.whitelist === second.fromList.whitelist &&
-          JSON.stringify(first.fromList.addresses) === JSON.stringify(second.fromList.addresses);
-        const initiatedByListsAreSame =
-          first.initiatedByList.whitelist === second.initiatedByList.whitelist &&
-          JSON.stringify(first.initiatedByList.addresses) === JSON.stringify(second.initiatedByList.addresses);
-        const approvalIdListsAreSame =
-          first.approvalIdList.whitelist === second.approvalIdList.whitelist &&
-          JSON.stringify(first.approvalIdList.addresses) === JSON.stringify(second.approvalIdList.addresses);
+        const toListsAreSame = first.toList.whitelist === second.toList.whitelist && JSON.stringify(first.toList.addresses) === JSON.stringify(second.toList.addresses);
+        const fromListsAreSame = first.fromList.whitelist === second.fromList.whitelist && JSON.stringify(first.fromList.addresses) === JSON.stringify(second.fromList.addresses);
+        const initiatedByListsAreSame = first.initiatedByList.whitelist === second.initiatedByList.whitelist && JSON.stringify(first.initiatedByList.addresses) === JSON.stringify(second.initiatedByList.addresses);
+        const approvalIdListsAreSame = first.approvalIdList.whitelist === second.approvalIdList.whitelist && JSON.stringify(first.approvalIdList.addresses) === JSON.stringify(second.approvalIdList.addresses);
 
         const permittedTimesAreSame = JSON.stringify(first.permanentlyPermittedTimes) === JSON.stringify(second.permanentlyPermittedTimes);
         const forbiddenTimesAreSame = JSON.stringify(first.permanentlyForbiddenTimes) === JSON.stringify(second.permanentlyForbiddenTimes);
@@ -607,16 +582,7 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
         if (initiatedByListsAreSame) addressSameCount++;
         if (approvalIdListsAreSame) addressSameCount++;
 
-        if (
-          sameCount === 3 &&
-          approvalIdListsAreSame &&
-          toListsAreSame &&
-          fromListsAreSame &&
-          initiatedByListsAreSame &&
-          permittedTimesAreSame &&
-          forbiddenTimesAreSame &&
-          arbitraryValuesAreSame
-        ) {
+        if (sameCount === 3 && approvalIdListsAreSame && toListsAreSame && fromListsAreSame && initiatedByListsAreSame && permittedTimesAreSame && forbiddenTimesAreSame && arbitraryValuesAreSame) {
           merged.push({
             tokenIds: newTokenIds,
             timelineTimes: newTimelineTimes,
@@ -763,10 +729,7 @@ function GetPermissionString(permission: UniversalPermissionDetails): string {
 }
 
 // IMPORTANT PRECONDITION: Must be first match only
-export function ValidateUniversalPermissionUpdate(
-  oldPermissions: UniversalPermissionDetails[],
-  newPermissions: UniversalPermissionDetails[]
-): Error | null {
+export function ValidateUniversalPermissionUpdate(oldPermissions: UniversalPermissionDetails[], newPermissions: UniversalPermissionDetails[]): Error | null {
   const [allOverlaps, inOldButNotNew] = getOverlapsAndNonOverlaps(oldPermissions, newPermissions);
 
   if (inOldButNotNew.length > 0) {

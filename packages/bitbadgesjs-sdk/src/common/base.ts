@@ -37,13 +37,13 @@ export const parseArrayString = (str: undefined | string | string[] | ParsedQs |
  *
  * @category Utils
  */
-export interface CustomType<T extends CustomType<T>> {
+export interface CustomType<T extends CustomType> {
   /**
    * Compares this object's fields to another object's fields for equality. Equality is determined by comparing the JSON representations of the objects.
    *
    * If `normalizeNumberTypes` is true, then all number types will be compared as strings (i.e. "1n" === "1" === 1). Else, they will be compared as their native types (i.e. 1n !== 1 !== "1").
    */
-  equals<U extends CustomType<U>>(other: CustomType<U> | undefined | null, normalizeNumberTypes?: boolean): boolean;
+  equals<U extends CustomType>(other: CustomType | undefined | null, normalizeNumberTypes?: boolean): boolean;
   /**
    * Converts the object to a JSON object with all primitive types.
    */
@@ -55,7 +55,7 @@ export interface CustomType<T extends CustomType<T>> {
   /**
    * Deep copies the object and returns a new instance.
    */
-  clone(): T;
+  clone(): string | number;
   /**
    * Internal helper method to convert the number fields of the object to a different NumberType equivalent.
    */
@@ -63,7 +63,7 @@ export interface CustomType<T extends CustomType<T>> {
   /**
    * Converts the object to a different NumberType equivalent.
    */
-  convert<U extends NumberType>(convertFunction?: (val: NumberType) => U): CustomType<any>;
+  convert(convertFunction?: (val: string | number) => U): CustomType<any>;
   /**
    * Checks if the object has number fields.
    */
@@ -89,7 +89,7 @@ export interface ConvertOptions {
  *
  * @category Utils
  */
-export class CustomTypeClass<T extends CustomType<T>> implements CustomType<T> {
+export class CustomTypeClass<T extends CustomType> implements CustomType {
   toJson(): JsonObject {
     return convertClassPropertiesToJson(this);
   }
@@ -98,7 +98,7 @@ export class CustomTypeClass<T extends CustomType<T>> implements CustomType<T> {
     return JSON.stringify(this.toJson());
   }
 
-  equals<U extends CustomType<U>>(other: CustomType<U> | null | undefined, normalizeNumberTypes?: boolean | undefined): boolean {
+  equals<U extends CustomType>(other: CustomType | null | undefined, normalizeNumberTypes?: boolean | undefined): boolean {
     return compareCustomTypes(this, other, normalizeNumberTypes);
   }
 
@@ -121,7 +121,7 @@ export class CustomTypeClass<T extends CustomType<T>> implements CustomType<T> {
    * This function is unnecessary as this field has no numeric types.
    * Please use the `.clone()` method instead.
    */
-  convert<U extends NumberType>(_convertFunction?: (val: NumberType) => U, options?: ConvertOptions): CustomType<any> {
+  convert(_convertFunction?: (val: string | number) => U, options?: ConvertOptions): CustomType<any> {
     return this.clone();
   }
 }
@@ -135,7 +135,7 @@ export class CustomTypeClass<T extends CustomType<T>> implements CustomType<T> {
  *
  * @category Utils
  */
-export abstract class BaseNumberTypeClass<T extends CustomType<T>> implements CustomType<T> {
+export abstract class BaseNumberTypeClass<T extends CustomType> implements CustomType {
   toJson(): JsonObject {
     return convertClassPropertiesToJson(this);
   }
@@ -144,7 +144,7 @@ export abstract class BaseNumberTypeClass<T extends CustomType<T>> implements Cu
     return JSON.stringify(this.toJson());
   }
 
-  equals<U extends CustomType<U>>(other: CustomType<U> | null | undefined, normalizeNumberTypes?: boolean | undefined): boolean {
+  equals<U extends CustomType>(other: CustomType | null | undefined, normalizeNumberTypes?: boolean | undefined): boolean {
     return compareCustomTypes(this, other, normalizeNumberTypes);
   }
 
@@ -162,7 +162,7 @@ export abstract class BaseNumberTypeClass<T extends CustomType<T>> implements Cu
     return true;
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): CustomType<any> {
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): CustomType<any> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options);
   }
 }
@@ -174,13 +174,13 @@ export abstract class BaseNumberTypeClass<T extends CustomType<T>> implements Cu
  *
  * @category Utils
  */
-export function getConverterFunction<T extends NumberType>(val: T): (item: NumberType) => T {
+export function getConverterFunction(val: T): (item: string | number) => T {
   if (typeof val === 'bigint') {
-    return BigIntify as (item: NumberType) => T;
+    return BigIntify as (item: string | number) => T;
   } else if (typeof val === 'number') {
-    return Numberify as (item: NumberType) => T;
+    return Numberify as (item: string | number) => T;
   } else {
-    return Stringify as (item: NumberType) => T;
+    return Stringify as (item: string | number) => T;
   }
 }
 
@@ -239,11 +239,11 @@ function compareObjects(obj1: any, obj2: any): boolean {
  *
  * @category Utils
  */
-export function deepCopyPrimitives<T>(obj: T): T {
+export function deepCopyPrimitives(obj: T): T {
   return deepCopyWithBigInts(obj);
 }
 
-function deepCopyWithBigInts<T>(obj: T): T {
+function deepCopyWithBigInts(obj: T): T {
   if (typeof obj !== 'object' || obj === null) {
     // Base case: return primitive values as-is
     return obj;
@@ -284,11 +284,7 @@ function deepCopyWithBigInts<T>(obj: T): T {
  *
  * @category Utils
  */
-export function compareCustomTypes<T extends CustomType<T>, U extends CustomType<U>>(
-  obj1: CustomType<T> | undefined | null,
-  obj2: CustomType<U> | undefined | null,
-  normalizeNumberTypes?: boolean
-) {
+export function compareCustomTypes<T extends CustomType, U extends CustomType>(obj1: CustomType | undefined | null, obj2: CustomType | undefined | null, normalizeNumberTypes?: boolean) {
   if (obj1 === obj2) {
     return true;
   }
@@ -308,11 +304,7 @@ export function compareCustomTypes<T extends CustomType<T>, U extends CustomType
 /**
  * @category Utils
  */
-export function compareNumberTypeConvertibles<T extends CustomType<T>, U extends CustomType<U>>(
-  obj1: CustomType<T> | undefined | null,
-  obj2: CustomType<U> | undefined | null,
-  normalizeNumberTypes?: boolean
-) {
+export function compareNumberTypeConvertibles<T extends CustomType, U extends CustomType>(obj1: CustomType | undefined | null, obj2: CustomType | undefined | null, normalizeNumberTypes?: boolean) {
   return compareCustomTypes(obj1, obj2, normalizeNumberTypes);
 }
 
@@ -330,9 +322,7 @@ export function convertClassPropertiesToJson(obj: any): JsonObject {
       const value = obj[prop];
       if (typeof value !== 'undefined' && typeof value !== 'function') {
         if (Array.isArray(value)) {
-          json[prop] = value.map((item: any) =>
-            typeof item === 'object' && item !== null && typeof item.toJson === 'function' ? item.toJson() : item
-          );
+          json[prop] = value.map((item: any) => (typeof item === 'object' && item !== null && typeof item.toJson === 'function' ? item.toJson() : item));
         } else if (typeof value === 'object' && value !== null && typeof value.toJson === 'function') {
           json[prop] = value.toJson();
         } else {
@@ -353,7 +343,7 @@ export function deepCopy<T extends CustomType<any>>(obj: T): T {
 }
 
 //Attempt to get the current number type of the first present number field.
-function getCurrentType<T extends CustomType<T>>(obj: T): 'string' | 'number' | 'bigint' | 'unknown' {
+function getCurrentType<T extends CustomType>(obj: T): 'string' | 'number' | 'bigint' | 'unknown' {
   let numberFields: string[] = [];
   //If the object implements the numberFields() method, then we know it's a NumberTypeConvertible object itself.
   //We can apply convertFunction to the number fields.
@@ -392,12 +382,7 @@ function getCurrentType<T extends CustomType<T>>(obj: T): 'string' | 'number' | 
  *
  * @category Utils
  */
-export function convertClassPropertiesAndMaintainNumberTypes<U extends NumberType>(
-  obj: CustomType<any>,
-  convertFunction: (item: NumberType) => U,
-  options?: ConvertOptions,
-  depth = 0
-): CustomType<any> {
+export function convertClassPropertiesAndMaintainNumberTypes(obj: CustomType<any>, convertFunction: (item: string | number) => U, options?: ConvertOptions, depth = 0): CustomType<any> {
   let numberFields: string[] = [];
   const Constructor = obj.constructor as new (data?: any) => any;
 
@@ -438,9 +423,7 @@ export function convertClassPropertiesAndMaintainNumberTypes<U extends NumberTyp
         } else if (Array.isArray(value)) {
           //we assume no mixed types in arrays
 
-          json[prop] = value.map((item: any) =>
-            typeof item === 'object' && item !== null ? convertClassPropertiesAndMaintainNumberTypes(item, convertFunction, options, depth + 1) : item
-          );
+          json[prop] = value.map((item: any) => (typeof item === 'object' && item !== null ? convertClassPropertiesAndMaintainNumberTypes(item, convertFunction, options, depth + 1) : item));
         } else if (typeof value === 'object' && value !== null) {
           json[prop] = convertClassPropertiesAndMaintainNumberTypes(value, convertFunction, options, depth + 1);
         } else {

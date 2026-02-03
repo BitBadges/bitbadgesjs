@@ -1,8 +1,8 @@
 import type { Message, AnyMessage } from '@bufbuild/protobuf';
 import { Any } from '@bufbuild/protobuf';
 
-export interface MessageGenerated<T extends Message<T> = AnyMessage> {
-  message: Message<T>;
+export interface MessageGenerated<T extends Message = AnyMessage> {
+  message: Message;
   path: string;
 }
 

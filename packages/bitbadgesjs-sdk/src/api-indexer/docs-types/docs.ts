@@ -4,20 +4,7 @@ import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintain
 import type { NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
 import { AddressList } from '@/core/addressLists.js';
-import {
-  ApprovalInfoDetails,
-  ChallengeDetails,
-  ChallengeTrackerIdDetails,
-  ClaimCachePolicy,
-  CollectionApproval,
-  SatisfyMethod,
-  UserIncomingApproval,
-  UserIncomingApprovalWithDetails,
-  UserOutgoingApproval,
-  UserOutgoingApprovalWithDetails,
-  iApprovalInfoDetails,
-  iChallengeDetails
-} from '@/core/approvals.js';
+import { ApprovalInfoDetails, ChallengeDetails, ChallengeTrackerIdDetails, ClaimCachePolicy, CollectionApproval, SatisfyMethod, UserIncomingApproval, UserIncomingApprovalWithDetails, UserOutgoingApproval, UserOutgoingApprovalWithDetails, iApprovalInfoDetails, iChallengeDetails } from '@/core/approvals.js';
 import { BalanceArray } from '@/core/balances.js';
 import { BatchTokenDetailsArray } from '@/core/batch-utils.js';
 import { CosmosCoin } from '@/core/coin.js';
@@ -31,95 +18,29 @@ import { Map, ValueStore } from '@/transactions/messages/bitbadges/maps/index.js
 import type { Doc } from '../base.js';
 import type { iMetadata } from '../metadata/metadata.js';
 import { Metadata } from '../metadata/metadata.js';
-import {
-  ClaimReward,
-  DynamicDataHandlerData,
-  DynamicDataHandlerType,
-  iApiKeyDoc,
-  iApplicationDoc,
-  iApplicationPage,
-  iApprovalItemDoc,
-  iBaseStats,
-  iCollectionStatsDoc,
-  iCreatorCreditsDoc,
-  iDynamicDataDoc,
-  iEstimatedCost,
-  iFloorPriceHistory,
-  iInheritMetadataFrom,
-  iLinkedTo,
-  iListingViewsDoc,
-  iPointsDoc,
-  iTierWithOptionalWeight,
-  iTokenFloorPriceDoc,
-  iUtilityPageContent,
-  iUtilityPageDoc,
-  iUtilityPageLink,
-  type ClaimIntegrationPluginType,
-  type IntegrationPluginParams,
-  type JsonBodyInputSchema,
-  type JsonBodyInputWithValue,
-  type NativeAddress,
-  type OAuthScopeDetails,
-  type PluginPresetType,
-  type UNIXMilliTimestamp,
-  type iAccessTokenDoc,
-  type iAccountDoc,
-  type iAddressListDoc,
-  type iAirdropDoc,
-  type iApprovalTrackerDoc,
-  type iBalanceDoc,
-  type iBalanceDocWithDetails,
-  type iClaimBuilderDoc,
-  type iCollectionDoc,
-  type iComplianceDoc,
-  type iCustomPage,
-  type iDepositBalanceDoc,
-  type iDeveloperAppDoc,
-  type iDynamicStoreDoc,
-  type iDynamicStoreDocWithDetails,
-  type iDynamicStoreValueDoc,
-  type iEmailVerificationStatus,
-  type iFetchDoc,
-  type iIPFSTotalsDoc,
-  type iLatestBlockStatus,
-  type iMapDoc,
-  type iMapWithValues,
-  type iMerkleChallengeTrackerDoc,
-  type iNotificationPreferences,
-  type iPluginDoc,
-  type iPluginVersionConfig,
-  type iProfileDoc,
-  type iQueueDoc,
-  type iRefreshDoc,
-  type iSIWBBRequestDoc,
-  type iSocialConnections,
-  type iStatusDoc,
-  type iTransactionEntry,
-  type iUpdateHistory,
-  type iUsedLeafStatus
-} from './interfaces.js';
+import { ClaimReward, any, DynamicDataHandlerType, iApiKeyDoc, iApplicationDoc, iApplicationPage, iApprovalItemDoc, iBaseStats, iCollectionStatsDoc, iCreatorCreditsDoc, iDynamicDataDoc, iEstimatedCost, iFloorPriceHistory, iInheritMetadataFrom, iLinkedTo, iListingViewsDoc, iPointsDoc, iTierWithOptionalWeight, iTokenFloorPriceDoc, iUtilityPageContent, iUtilityPageDoc, iUtilityPageLink, type ClaimIntegrationPluginType, type IntegrationPluginParams, type JsonBodyInputSchema, type JsonBodyInputWithValue, type NativeAddress, type OAuthScopeDetails, type PluginPresetType, type UNIXMilliTimestamp, type iAccessTokenDoc, type iAccountDoc, type iAddressListDoc, type iAirdropDoc, type iApprovalTrackerDoc, type iBalanceDoc, type iBalanceDocWithDetails, type iClaimBuilderDoc, type iCollectionDoc, type iComplianceDoc, type iCustomPage, type iDepositBalanceDoc, type iDeveloperAppDoc, type iDynamicStoreDoc, type iDynamicStoreDocWithDetails, type iDynamicStoreValueDoc, type iEmailVerificationStatus, type iFetchDoc, type iIPFSTotalsDoc, type iLatestBlockStatus, type iMapDoc, type iMapWithValues, type iMerkleChallengeTrackerDoc, type iNotificationPreferences, type iPluginDoc, type iPluginVersionConfig, type iProfileDoc, type iQueueDoc, type iRefreshDoc, type iSIWBBRequestDoc, type iSocialConnections, type iStatusDoc, type iTransactionEntry, type iUpdateHistory, type iUsedLeafStatus } from './interfaces.js';
 
 /**
  * @inheritDoc iBaseStats
  * @category Collections
  */
-export class BaseStatsDoc<T extends NumberType> extends BaseNumberTypeClass<BaseStatsDoc<T>> implements iBaseStats<T> {
+export class BaseStatsDoc extends BaseNumberTypeClass<BaseStatsDoc> implements iBaseStats {
   _docId: string;
   _id?: string;
   /** The overall volume of the collection */
-  overallVolume: CosmosCoin<T>[];
+  overallVolume: CosmosCoin[];
   /** The daily volume of the collection */
-  dailyVolume: CosmosCoin<T>[];
+  dailyVolume: CosmosCoin[];
   /** The weekly volume of the collection */
-  weeklyVolume: CosmosCoin<T>[];
+  weeklyVolume: CosmosCoin[];
   /** The monthly volume of the collection */
-  monthlyVolume: CosmosCoin<T>[];
+  monthlyVolume: CosmosCoin[];
   /** The yearly volume of the collection */
-  yearlyVolume: CosmosCoin<T>[];
+  yearlyVolume: CosmosCoin[];
   /** Last set timestamp */
-  lastUpdatedAt: UNIXMilliTimestamp<T>;
+  lastUpdatedAt: UNIXMilliTimestamp;
 
-  constructor(data: iBaseStats<T>) {
+  constructor(data: iBaseStats) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -135,8 +56,8 @@ export class BaseStatsDoc<T extends NumberType> extends BaseNumberTypeClass<Base
     return ['lastUpdatedAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): BaseStatsDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BaseStatsDoc<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): BaseStatsDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BaseStatsDoc;
   }
 }
 
@@ -144,21 +65,19 @@ export class BaseStatsDoc<T extends NumberType> extends BaseNumberTypeClass<Base
  * @inheritDoc iCollectionStatsDoc
  * @category Collections
  */
-export class CollectionStatsDoc<T extends NumberType> extends BaseStatsDoc<T> implements iCollectionStatsDoc<T> {
+export class CollectionStatsDoc extends BaseStatsDoc implements iCollectionStatsDoc {
   collectionId: CollectionId;
-  floorPrices?: CosmosCoin<T>[];
-  uniqueOwners: BalanceArray<T>;
-  floorPriceHistory?: FloorPriceHistory<T>[];
-  payoutRewards?: CosmosCoin<T>[];
+  floorPrices?: CosmosCoin[];
+  uniqueOwners: BalanceArray;
+  floorPriceHistory?: FloorPriceHistory[];
+  payoutRewards?: CosmosCoin[];
 
-  constructor(data: iCollectionStatsDoc<T>) {
+  constructor(data: iCollectionStatsDoc) {
     super(data);
     this.collectionId = data.collectionId;
     this.floorPrices = data.floorPrices?.map((floorPrice) => new CosmosCoin(floorPrice)) ?? [];
     this.uniqueOwners = BalanceArray.From(data.uniqueOwners);
-    this.floorPriceHistory = data.floorPriceHistory
-      ? data.floorPriceHistory.map((floorPriceHistory) => new FloorPriceHistory(floorPriceHistory))
-      : undefined;
+    this.floorPriceHistory = data.floorPriceHistory ? data.floorPriceHistory.map((floorPriceHistory) => new FloorPriceHistory(floorPriceHistory)) : undefined;
     this.payoutRewards = data.payoutRewards?.map((payoutReward) => new CosmosCoin(payoutReward)) ?? [];
   }
 
@@ -166,8 +85,8 @@ export class CollectionStatsDoc<T extends NumberType> extends BaseStatsDoc<T> im
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): CollectionStatsDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionStatsDoc<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): CollectionStatsDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionStatsDoc;
   }
 }
 
@@ -175,11 +94,11 @@ export class CollectionStatsDoc<T extends NumberType> extends BaseStatsDoc<T> im
  * @inheritDoc iFloorPriceHistory
  * @category Collections
  */
-export class FloorPriceHistory<T extends NumberType> extends BaseNumberTypeClass<FloorPriceHistory<T>> implements iFloorPriceHistory<T> {
-  updatedAt: UNIXMilliTimestamp<T>;
-  floorPrice?: CosmosCoin<T>;
+export class FloorPriceHistory extends BaseNumberTypeClass<FloorPriceHistory> implements iFloorPriceHistory {
+  updatedAt: UNIXMilliTimestamp;
+  floorPrice?: CosmosCoin;
 
-  constructor(data: iFloorPriceHistory<T>) {
+  constructor(data: iFloorPriceHistory) {
     super();
     this.updatedAt = data.updatedAt;
     this.floorPrice = data.floorPrice ? new CosmosCoin(data.floorPrice) : undefined;
@@ -189,8 +108,8 @@ export class FloorPriceHistory<T extends NumberType> extends BaseNumberTypeClass
     return ['updatedAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): FloorPriceHistory<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FloorPriceHistory<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): FloorPriceHistory {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FloorPriceHistory;
   }
 }
 
@@ -198,32 +117,30 @@ export class FloorPriceHistory<T extends NumberType> extends BaseNumberTypeClass
  * @inheritDoc iApprovalItemDoc
  * @category Approvals
  */
-export class TokenFloorPriceDoc<T extends NumberType> extends BaseNumberTypeClass<TokenFloorPriceDoc<T>> implements iTokenFloorPriceDoc<T> {
+export class TokenFloorPriceDoc extends BaseNumberTypeClass<TokenFloorPriceDoc> implements iTokenFloorPriceDoc {
   collectionId: CollectionId;
-  tokenId: T;
+  tokenId: string | number;
   _docId: string;
   _id?: string | undefined;
-  floorPrices?: CosmosCoin<T>[];
-  floorPriceHistory?: iFloorPriceHistory<T>[] | undefined;
+  floorPrices?: CosmosCoin[];
+  floorPriceHistory?: iFloorPriceHistory[] | undefined;
 
-  constructor(data: iTokenFloorPriceDoc<T>) {
+  constructor(data: iTokenFloorPriceDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
     this.collectionId = data.collectionId;
     this.tokenId = data.tokenId;
     this.floorPrices = data.floorPrices?.map((floorPrice) => new CosmosCoin(floorPrice)) ?? [];
-    this.floorPriceHistory = data.floorPriceHistory
-      ? data.floorPriceHistory.map((floorPriceHistory) => new FloorPriceHistory(floorPriceHistory))
-      : undefined;
+    this.floorPriceHistory = data.floorPriceHistory ? data.floorPriceHistory.map((floorPriceHistory) => new FloorPriceHistory(floorPriceHistory)) : undefined;
   }
 
   getNumberFieldNames(): string[] {
     return ['tokenId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): TokenFloorPriceDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TokenFloorPriceDoc<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): TokenFloorPriceDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TokenFloorPriceDoc;
   }
 }
 
@@ -231,7 +148,7 @@ export class TokenFloorPriceDoc<T extends NumberType> extends BaseNumberTypeClas
  * @inheritDoc iApprovalItemDoc
  * @category Approvals
  */
-export class ApprovalItemDoc<T extends NumberType> extends BaseNumberTypeClass<ApprovalItemDoc<T>> implements iApprovalItemDoc<T> {
+export class ApprovalItemDoc extends BaseNumberTypeClass<ApprovalItemDoc> implements iApprovalItemDoc {
   _docId: string;
   _id?: string;
   collectionId: CollectionId;
@@ -239,18 +156,18 @@ export class ApprovalItemDoc<T extends NumberType> extends BaseNumberTypeClass<A
   approvalLevel: 'incoming' | 'outgoing';
   approverAddress: BitBadgesAddress;
   approvalType: string;
-  price?: T;
-  tokenId?: T;
+  price?: string | number;
+  tokenId?: string | number;
   used?: boolean;
   sufficientBalances?: boolean;
-  deletedAt?: UNIXMilliTimestamp<T>;
-  approval: CollectionApproval<T>;
+  deletedAt?: UNIXMilliTimestamp;
+  approval: CollectionApproval;
   isActive?: boolean | undefined;
-  nextCheckTime?: UNIXMilliTimestamp<T>;
-  numTransfersLeft?: T;
+  nextCheckTime?: UNIXMilliTimestamp;
+  numTransfersLeft?: string | number;
   denom?: string;
 
-  constructor(data: iApprovalItemDoc<T>) {
+  constructor(data: iApprovalItemDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -262,7 +179,7 @@ export class ApprovalItemDoc<T extends NumberType> extends BaseNumberTypeClass<A
     this.price = data.price;
     this.tokenId = data.tokenId;
     this.deletedAt = data.deletedAt;
-    this.approval = new CollectionApproval<T>(data.approval);
+    this.approval = new CollectionApproval(data.approval);
     this.used = data.used;
     this.isActive = data.isActive;
     this.sufficientBalances = data.sufficientBalances;
@@ -275,8 +192,8 @@ export class ApprovalItemDoc<T extends NumberType> extends BaseNumberTypeClass<A
     return ['price', 'tokenId', 'deletedAt', 'numTransfersLeft'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): ApprovalItemDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApprovalItemDoc<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): ApprovalItemDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApprovalItemDoc;
   }
 }
 
@@ -284,33 +201,30 @@ export class ApprovalItemDoc<T extends NumberType> extends BaseNumberTypeClass<A
  * @inheritDoc iCollectionDoc
  * @category Collections
  */
-export class CollectionDoc<T extends NumberType>
-  extends BaseNumberTypeClass<CollectionDoc<T>>
-  implements iCollectionDoc<T>, CustomType<CollectionDoc<T>>
-{
+export class CollectionDoc extends BaseNumberTypeClass<CollectionDoc> implements iCollectionDoc, CustomType<CollectionDoc> {
   _docId: string;
   _id?: string;
   collectionId: CollectionId;
   collectionMetadata: CollectionMetadata;
-  tokenMetadata: TokenMetadata<T>[];
+  tokenMetadata: TokenMetadata[];
   customData: string;
   manager: BitBadgesAddress;
-  collectionPermissions: CollectionPermissions<T>;
-  collectionApprovals: CollectionApproval<T>[];
+  collectionPermissions: CollectionPermissions;
+  collectionApprovals: CollectionApproval[];
   standards: string[];
   isArchived: boolean;
-  defaultBalances: UserBalanceStore<T>;
+  defaultBalances: UserBalanceStore;
   createdBy: BitBadgesAddress;
-  createdBlock: T;
-  createdTimestamp: UNIXMilliTimestamp<T>;
-  updateHistory: UpdateHistory<T>[];
-  validTokenIds: UintRangeArray<T>;
+  createdBlock: string | number;
+  createdTimestamp: UNIXMilliTimestamp;
+  updateHistory: UpdateHistory[];
+  validTokenIds: UintRangeArray;
   mintEscrowAddress: string;
-  cosmosCoinWrapperPaths: CosmosCoinWrapperPath<T>[];
-  aliasPaths: AliasPath<T>[];
-  invariants: CollectionInvariants<T>;
+  cosmosCoinWrapperPaths: CosmosCoinWrapperPath[];
+  aliasPaths: AliasPath[];
+  invariants: CollectionInvariants;
 
-  constructor(data: iCollectionDoc<T>) {
+  constructor(data: iCollectionDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -347,12 +261,12 @@ export class CollectionDoc<T extends NumberType>
     return ['createdBlock', 'createdTimestamp'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): CollectionDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionDoc<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): CollectionDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionDoc;
   }
 
-  clone(): CollectionDoc<T> {
-    return super.clone() as CollectionDoc<T>;
+  clone(): CollectionDoc {
+    return super.clone() as CollectionDoc;
   }
 }
 
@@ -360,17 +274,17 @@ export class CollectionDoc<T extends NumberType>
  * @inheritDoc iAccountDoc
  * @category Accounts
  */
-export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<AccountDoc<T>> implements iAccountDoc<T> {
+export class AccountDoc extends BaseNumberTypeClass<AccountDoc> implements iAccountDoc {
   _docId: string;
   _id?: string;
   publicKey: string;
-  accountNumber: T;
+  accountNumber: string | number;
   pubKeyType: string;
   bitbadgesAddress: BitBadgesAddress;
-  sequence?: T;
-  balances?: CosmosCoin<T>[];
+  sequence?: string | number;
+  balances?: CosmosCoin[];
 
-  constructor(data: iAccountDoc<T>) {
+  constructor(data: iAccountDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -386,21 +300,21 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
     return ['accountNumber', 'sequence'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AccountDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AccountDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): AccountDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AccountDoc;
   }
 }
 
 /**
  * @category Accounts
  */
-export class SocialConnectionInfo<T extends NumberType> extends BaseNumberTypeClass<SocialConnectionInfo<T>> {
+export class SocialConnectionInfo extends BaseNumberTypeClass<SocialConnectionInfo> {
   username: string;
   id: string;
-  lastUpdated: UNIXMilliTimestamp<T>;
+  lastUpdated: UNIXMilliTimestamp;
   discriminator?: string;
 
-  constructor(data: { username: string; id: string; lastUpdated: UNIXMilliTimestamp<T>; discriminator?: string }) {
+  constructor(data: { username: string; id: string; lastUpdated: UNIXMilliTimestamp; discriminator?: string }) {
     super();
     this.username = data.username;
     this.id = data.id;
@@ -412,8 +326,8 @@ export class SocialConnectionInfo<T extends NumberType> extends BaseNumberTypeCl
     return ['lastUpdated'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): SocialConnectionInfo<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SocialConnectionInfo<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): SocialConnectionInfo {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SocialConnectionInfo;
   }
 }
 
@@ -421,27 +335,27 @@ export class SocialConnectionInfo<T extends NumberType> extends BaseNumberTypeCl
  * @inheritDoc iSocialConnections
  * @category Accounts
  */
-export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass<SocialConnections<T>> implements iSocialConnections<T> {
-  discord?: SocialConnectionInfo<T> | undefined;
-  twitter?: SocialConnectionInfo<T> | undefined;
-  github?: SocialConnectionInfo<T> | undefined;
-  google?: SocialConnectionInfo<T> | undefined;
-  twitch?: SocialConnectionInfo<T> | undefined;
-  strava?: SocialConnectionInfo<T> | undefined;
-  reddit?: SocialConnectionInfo<T> | undefined;
-  meetup?: SocialConnectionInfo<T> | undefined;
-  bluesky?: SocialConnectionInfo<T> | undefined;
-  mailchimp?: SocialConnectionInfo<T> | undefined;
-  facebook?: SocialConnectionInfo<T> | undefined;
-  googleCalendar?: SocialConnectionInfo<T> | undefined;
-  youtube?: SocialConnectionInfo<T> | undefined;
-  linkedIn?: SocialConnectionInfo<T> | undefined;
-  shopify?: SocialConnectionInfo<T> | undefined;
-  telegram?: SocialConnectionInfo<T> | undefined;
-  farcaster?: SocialConnectionInfo<T> | undefined;
-  slack?: SocialConnectionInfo<T> | undefined;
+export class SocialConnections extends BaseNumberTypeClass<SocialConnections> implements iSocialConnections {
+  discord?: SocialConnectionInfo | undefined;
+  twitter?: SocialConnectionInfo | undefined;
+  github?: SocialConnectionInfo | undefined;
+  google?: SocialConnectionInfo | undefined;
+  twitch?: SocialConnectionInfo | undefined;
+  strava?: SocialConnectionInfo | undefined;
+  reddit?: SocialConnectionInfo | undefined;
+  meetup?: SocialConnectionInfo | undefined;
+  bluesky?: SocialConnectionInfo | undefined;
+  mailchimp?: SocialConnectionInfo | undefined;
+  facebook?: SocialConnectionInfo | undefined;
+  googleCalendar?: SocialConnectionInfo | undefined;
+  youtube?: SocialConnectionInfo | undefined;
+  linkedIn?: SocialConnectionInfo | undefined;
+  shopify?: SocialConnectionInfo | undefined;
+  telegram?: SocialConnectionInfo | undefined;
+  farcaster?: SocialConnectionInfo | undefined;
+  slack?: SocialConnectionInfo | undefined;
 
-  constructor(data: iSocialConnections<T>) {
+  constructor(data: iSocialConnections) {
     super();
     this.discord = data.discord ? new SocialConnectionInfo(data.discord) : undefined;
     this.twitter = data.twitter ? new SocialConnectionInfo(data.twitter) : undefined;
@@ -467,8 +381,8 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): SocialConnections<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SocialConnections<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): SocialConnections {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SocialConnections;
   }
 }
 
@@ -476,13 +390,10 @@ export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass
  * @inheritDoc iNotificationPreferences
  * @category Accounts
  */
-export class NotificationPreferences<T extends NumberType>
-  extends BaseNumberTypeClass<NotificationPreferences<T>>
-  implements iNotificationPreferences<T>
-{
+export class NotificationPreferences extends BaseNumberTypeClass<NotificationPreferences> implements iNotificationPreferences {
   email?: string;
   discord?: { id: string; username: string; discriminator: string | undefined; token: string } | undefined;
-  emailVerification?: EmailVerificationStatus<T>;
+  emailVerification?: EmailVerificationStatus;
   preferences?: {
     transferActivity?: boolean;
     claimActivity?: boolean;
@@ -490,7 +401,7 @@ export class NotificationPreferences<T extends NumberType>
     signInAlertsEnabled?: boolean;
   };
 
-  constructor(data: iNotificationPreferences<T>) {
+  constructor(data: iNotificationPreferences) {
     super();
     this.email = data.email;
     this.emailVerification = data.emailVerification ? new EmailVerificationStatus(data.emailVerification) : undefined;
@@ -498,8 +409,8 @@ export class NotificationPreferences<T extends NumberType>
     this.discord = data.discord;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): NotificationPreferences<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as NotificationPreferences<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): NotificationPreferences {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as NotificationPreferences;
   }
 }
 
@@ -507,17 +418,14 @@ export class NotificationPreferences<T extends NumberType>
  * @inheritDoc iEmailVerificationStatus
  * @category Accounts
  */
-export class EmailVerificationStatus<T extends NumberType>
-  extends BaseNumberTypeClass<EmailVerificationStatus<T>>
-  implements iEmailVerificationStatus<T>
-{
+export class EmailVerificationStatus extends BaseNumberTypeClass<EmailVerificationStatus> implements iEmailVerificationStatus {
   verified?: boolean;
-  verifiedAt?: UNIXMilliTimestamp<T> | undefined;
+  verifiedAt?: UNIXMilliTimestamp | undefined;
   token?: string;
-  expiry?: UNIXMilliTimestamp<T>;
+  expiry?: UNIXMilliTimestamp;
   antiPhishingCode?: string;
 
-  constructor(data: iEmailVerificationStatus<T>) {
+  constructor(data: iEmailVerificationStatus) {
     super();
     this.verified = data.verified;
     this.token = data.token;
@@ -530,8 +438,8 @@ export class EmailVerificationStatus<T extends NumberType>
     return ['expiry', 'verifiedAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): EmailVerificationStatus<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as EmailVerificationStatus<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): EmailVerificationStatus {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as EmailVerificationStatus;
   }
 }
 
@@ -539,20 +447,20 @@ export class EmailVerificationStatus<T extends NumberType>
  * @inheritDoc iCustomPage
  * @category Accounts
  */
-export class CustomPage<T extends NumberType> extends BaseNumberTypeClass<CustomPage<T>> implements iCustomPage<T> {
+export class CustomPage extends BaseNumberTypeClass<CustomPage> implements iCustomPage {
   title: string;
   description: string;
-  items: BatchTokenDetailsArray<T>;
+  items: BatchTokenDetailsArray;
 
-  constructor(data: iCustomPage<T>) {
+  constructor(data: iCustomPage) {
     super();
     this.title = data.title;
     this.description = data.description;
     this.items = BatchTokenDetailsArray.From(data.items);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CustomPage<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CustomPage<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): CustomPage {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CustomPage;
   }
 }
 
@@ -560,28 +468,28 @@ export class CustomPage<T extends NumberType> extends BaseNumberTypeClass<Custom
  * @inheritDoc iProfileDoc
  * @category Accounts
  */
-export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<ProfileDoc<T>> implements iProfileDoc<T> {
+export class ProfileDoc extends BaseNumberTypeClass<ProfileDoc> implements iProfileDoc {
   _docId: string;
   _id?: string;
   fetchedProfile?: 'full' | 'partial';
-  seenActivity?: UNIXMilliTimestamp<T>;
-  createdAt?: UNIXMilliTimestamp<T>;
+  seenActivity?: UNIXMilliTimestamp;
+  createdAt?: UNIXMilliTimestamp;
   discord?: string;
   twitter?: string;
   github?: string;
   telegram?: string;
   readme?: string;
   affiliateCode?: string;
-  hiddenTokens?: BatchTokenDetailsArray<T>;
+  hiddenTokens?: BatchTokenDetailsArray;
   profilePicUrl?: string;
   username?: string;
   latestSignedInChain?: SupportedChain;
-  notifications?: NotificationPreferences<T>;
-  socialConnections?: SocialConnections<T>;
-  publicSocialConnections?: SocialConnections<T>;
+  notifications?: NotificationPreferences;
+  socialConnections?: SocialConnections;
+  publicSocialConnections?: SocialConnections;
   bannerImage?: string;
 
-  constructor(data: iProfileDoc<T>) {
+  constructor(data: iProfileDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -608,8 +516,8 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     return ['seenActivity', 'createdAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ProfileDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ProfileDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ProfileDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ProfileDoc;
   }
 }
 
@@ -617,19 +525,19 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
  * @inheritDoc iQueueDoc
  * @category Indexer
  */
-export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc<T>> implements iQueueDoc<T> {
+export class QueueDoc extends BaseNumberTypeClass<QueueDoc> implements iQueueDoc {
   _docId: string;
   _id?: string;
   uri: string;
   collectionId: CollectionId;
-  loadBalanceId: T;
+  loadBalanceId: string | number;
   pending?: boolean;
-  refreshRequestTime: UNIXMilliTimestamp<T>;
-  numRetries: T;
-  lastFetchedAt?: UNIXMilliTimestamp<T>;
+  refreshRequestTime: UNIXMilliTimestamp;
+  numRetries: string | number;
+  lastFetchedAt?: UNIXMilliTimestamp;
   error?: string;
-  deletedAt?: UNIXMilliTimestamp<T>;
-  nextFetchTime?: UNIXMilliTimestamp<T>;
+  deletedAt?: UNIXMilliTimestamp;
+  nextFetchTime?: UNIXMilliTimestamp;
   emailMessage?: string;
   recipientAddress?: string;
   activityDocId?: string;
@@ -644,11 +552,11 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
         [key: string]: any;
       }
     | undefined;
-  faucetInfo?: { txHash: string; recipient: string; amount: NumberType; denom: string } | undefined;
+  faucetInfo?: { txHash: string; recipient: string; amount: string | number; denom: string } | undefined;
   actionConfig?: any;
   initiatedBy?: string | undefined;
 
-  constructor(data: iQueueDoc<T>) {
+  constructor(data: iQueueDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -676,8 +584,8 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
     return ['loadBalanceId', 'refreshRequestTime', 'numRetries', 'lastFetchedAt', 'deletedAt', 'nextFetchTime'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): QueueDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as QueueDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): QueueDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as QueueDoc;
   }
 }
 
@@ -685,12 +593,12 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
  * @inheritDoc iLatestBlockStatus
  * @category Indexer
  */
-export class LatestBlockStatus<T extends NumberType> extends BaseNumberTypeClass<LatestBlockStatus<T>> implements iLatestBlockStatus<T> {
-  height: T;
-  txIndex: T;
-  timestamp: UNIXMilliTimestamp<T>;
+export class LatestBlockStatus extends BaseNumberTypeClass<LatestBlockStatus> implements iLatestBlockStatus {
+  height: string | number;
+  txIndex: string | number;
+  timestamp: UNIXMilliTimestamp;
 
-  constructor(data: iLatestBlockStatus<T>) {
+  constructor(data: iLatestBlockStatus) {
     super();
     this.height = data.height;
     this.txIndex = data.txIndex;
@@ -701,8 +609,8 @@ export class LatestBlockStatus<T extends NumberType> extends BaseNumberTypeClass
     return ['height', 'txIndex', 'timestamp'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): LatestBlockStatus<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as LatestBlockStatus<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): LatestBlockStatus {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as LatestBlockStatus;
   }
 }
 
@@ -743,15 +651,15 @@ export class LatestBlockStatus<T extends NumberType> extends BaseNumberTypeClass
  * console.log(`Removed ${removed} old transactions`);
  * ```
  */
-export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusDoc<T>> implements iStatusDoc<T> {
+export class StatusDoc extends BaseNumberTypeClass<StatusDoc> implements iStatusDoc {
   _docId: string;
   _id?: string;
-  block: LatestBlockStatus<T>;
-  nextCollectionId: T;
+  block: LatestBlockStatus;
+  nextCollectionId: string | number;
   gasPrice: number;
-  lastXTxs?: TransactionEntry<T>[];
+  lastXTxs?: TransactionEntry[];
 
-  constructor(data: iStatusDoc<T>) {
+  constructor(data: iStatusDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -765,8 +673,8 @@ export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusD
     return ['nextCollectionId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): StatusDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as StatusDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): StatusDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as StatusDoc;
   }
 
   /**
@@ -781,7 +689,7 @@ export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusD
     const entry = new TransactionEntry({
       amount,
       limit,
-      timestamp: now as UNIXMilliTimestamp<T>
+      timestamp: now as UNIXMilliTimestamp
     });
 
     if (!this.lastXTxs) {
@@ -802,7 +710,7 @@ export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusD
    * @param currentTime - Current timestamp (optional, defaults to Date.now())
    * @returns Array of transactions within the time window
    */
-  getTransactionsInWindow(windowMs: number, currentTime?: number, defaultMinimumTxs?: number): TransactionEntry<T>[] {
+  getTransactionsInWindow(windowMs: number, currentTime?: number, defaultMinimumTxs?: number): TransactionEntry[] {
     if (!this.lastXTxs) {
       return [];
     }
@@ -869,7 +777,7 @@ export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusD
    * Get the most recent transaction
    * @returns The most recent transaction entry or null if none exist
    */
-  getLatestTransaction(): TransactionEntry<T> | null {
+  getLatestTransaction(): TransactionEntry | null {
     if (!this.lastXTxs || this.lastXTxs.length === 0) {
       return null;
     }
@@ -931,14 +839,14 @@ export class StatusDoc<T extends NumberType> extends BaseNumberTypeClass<StatusD
  * @inheritDoc iAddressListDoc
  * @category Address Lists
  */
-export class AddressListDoc<T extends NumberType> extends AddressList implements iAddressListDoc<T>, CustomType<AddressListDoc<T>> {
+export class AddressListDoc extends AddressList implements iAddressListDoc, CustomType<AddressListDoc> {
   _docId: string;
   _id?: string;
   createdBy: BitBadgesAddress;
   managedBy: BitBadgesAddress;
-  updateHistory: iUpdateHistory<T>[];
-  createdBlock: T;
-  lastUpdated: UNIXMilliTimestamp<T>;
+  updateHistory: iUpdateHistory[];
+  createdBlock: string | number;
+  lastUpdated: UNIXMilliTimestamp;
   nsfw?: { reason: string };
   reported?: { reason: string };
   listId: string;
@@ -947,7 +855,7 @@ export class AddressListDoc<T extends NumberType> extends AddressList implements
   uri: string;
   customData: string;
 
-  constructor(data: iAddressListDoc<T>) {
+  constructor(data: iAddressListDoc) {
     super(data);
     this._docId = data._docId;
     this._id = data._id;
@@ -969,12 +877,12 @@ export class AddressListDoc<T extends NumberType> extends AddressList implements
     return ['createdBlock', 'lastUpdated'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AddressListDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AddressListDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): AddressListDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AddressListDoc;
   }
 
-  clone(): AddressListDoc<T> {
-    return super.clone() as AddressListDoc<T>;
+  clone(): AddressListDoc {
+    return super.clone() as AddressListDoc;
   }
 }
 
@@ -982,22 +890,22 @@ export class AddressListDoc<T extends NumberType> extends AddressList implements
  * @inheritDoc iBalanceDoc
  * @category Balances
  */
-export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<BalanceDoc<T>> implements iBalanceDoc<T> {
+export class BalanceDoc extends BaseNumberTypeClass<BalanceDoc> implements iBalanceDoc {
   _docId: string;
   _id?: string;
   collectionId: CollectionId;
   bitbadgesAddress: BitBadgesAddress;
-  updateHistory: UpdateHistory<T>[];
-  balances: BalanceArray<T>;
-  incomingApprovals: UserIncomingApproval<T>[];
-  outgoingApprovals: UserOutgoingApproval<T>[];
-  userPermissions: UserPermissions<T>;
+  updateHistory: UpdateHistory[];
+  balances: BalanceArray;
+  incomingApprovals: UserIncomingApproval[];
+  outgoingApprovals: UserOutgoingApproval[];
+  userPermissions: UserPermissions;
   autoApproveSelfInitiatedIncomingTransfers: boolean;
   autoApproveSelfInitiatedOutgoingTransfers: boolean;
   autoApproveAllIncomingTransfers: boolean;
   tags?: string[];
 
-  constructor(data: iBalanceDoc<T> & Doc & iUserBalanceStore<T>) {
+  constructor(data: iBalanceDoc & Doc & iUserBalanceStore) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -1018,8 +926,8 @@ export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<Balanc
     return ['fetchedAt', 'fetchedAtBlock'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BalanceDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BalanceDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): BalanceDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BalanceDoc;
   }
 }
 
@@ -1027,22 +935,22 @@ export class BalanceDoc<T extends NumberType> extends BaseNumberTypeClass<Balanc
  * @inheritDoc iBalanceDocWithDetails
  * @category Balances
  */
-export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeClass<BalanceDocWithDetails<T>> implements iBalanceDocWithDetails<T> {
-  outgoingApprovals: UserOutgoingApprovalWithDetails<T>[];
-  incomingApprovals: UserIncomingApprovalWithDetails<T>[];
-  userPermissions: UserPermissionsWithDetails<T>;
+export class BalanceDocWithDetails extends BaseNumberTypeClass<BalanceDocWithDetails> implements iBalanceDocWithDetails {
+  outgoingApprovals: UserOutgoingApprovalWithDetails[];
+  incomingApprovals: UserIncomingApprovalWithDetails[];
+  userPermissions: UserPermissionsWithDetails;
   _docId: string;
   _id?: string;
   collectionId: CollectionId;
   bitbadgesAddress: BitBadgesAddress;
-  updateHistory: UpdateHistory<T>[];
-  balances: BalanceArray<T>;
+  updateHistory: UpdateHistory[];
+  balances: BalanceArray;
   autoApproveSelfInitiatedIncomingTransfers: boolean;
   autoApproveSelfInitiatedOutgoingTransfers: boolean;
   autoApproveAllIncomingTransfers: boolean;
   tags?: string[];
 
-  constructor(data: iBalanceDocWithDetails<T>) {
+  constructor(data: iBalanceDocWithDetails) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -1063,8 +971,8 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
     return ['fetchedAt', 'fetchedAtBlock'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BalanceDocWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BalanceDocWithDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): BalanceDocWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BalanceDocWithDetails;
   }
 }
 
@@ -1072,17 +980,17 @@ export class BalanceDocWithDetails<T extends NumberType> extends BaseNumberTypeC
  * @inheritDoc iPointsDoc
  * @category Indexer
  */
-export class PointsDoc<T extends NumberType> extends BaseNumberTypeClass<PointsDoc<T>> implements iPointsDoc<T> {
+export class PointsDoc extends BaseNumberTypeClass<PointsDoc> implements iPointsDoc {
   _docId: string;
   _id?: string;
   address: BitBadgesAddress;
-  points: T;
-  lastCalculatedAt: UNIXMilliTimestamp<T>;
+  points: string | number;
+  lastCalculatedAt: UNIXMilliTimestamp;
   applicationId: string;
   pageId: string;
   claimSuccessCounts?: { [claimId: string]: number };
 
-  constructor(data: iPointsDoc<T>) {
+  constructor(data: iPointsDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -1098,8 +1006,8 @@ export class PointsDoc<T extends NumberType> extends BaseNumberTypeClass<PointsD
     return ['points', 'lastCalculatedAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PointsDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PointsDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): PointsDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PointsDoc;
   }
 }
 
@@ -1107,16 +1015,13 @@ export class PointsDoc<T extends NumberType> extends BaseNumberTypeClass<PointsD
  * @inheritDoc iTierWithOptionalWeight
  * @category Indexer
  */
-export class TierWithOptionalWeight<T extends NumberType>
-  extends BaseNumberTypeClass<TierWithOptionalWeight<T>>
-  implements iTierWithOptionalWeight<T>
-{
+export class TierWithOptionalWeight extends BaseNumberTypeClass<TierWithOptionalWeight> implements iTierWithOptionalWeight {
   claimId: string;
-  weight?: T;
+  weight?: string | number;
   uncheckable?: boolean;
   pointsCalculationMethod?: string | undefined;
 
-  constructor(data: iTierWithOptionalWeight<T>) {
+  constructor(data: iTierWithOptionalWeight) {
     super();
     this.claimId = data.claimId;
     this.weight = data.weight;
@@ -1128,8 +1033,8 @@ export class TierWithOptionalWeight<T extends NumberType>
     return ['weight'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TierWithOptionalWeight<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TierWithOptionalWeight<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): TierWithOptionalWeight {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TierWithOptionalWeight;
   }
 }
 
@@ -1137,13 +1042,13 @@ export class TierWithOptionalWeight<T extends NumberType>
  * @inheritDoc iApplicationPage
  * @category Indexer
  */
-export class ApplicationPage<T extends NumberType> extends BaseNumberTypeClass<ApplicationPage<T>> implements iApplicationPage<T> {
-  metadata: Metadata<T>;
+export class ApplicationPage extends BaseNumberTypeClass<ApplicationPage> implements iApplicationPage {
+  metadata: Metadata;
   pageId: string;
   type?: string;
-  points?: TierWithOptionalWeight<T>[];
+  points?: TierWithOptionalWeight[];
 
-  constructor(data: iApplicationPage<T>) {
+  constructor(data: iApplicationPage) {
     super();
     this.metadata = new Metadata(data.metadata);
     this.pageId = data.pageId;
@@ -1155,12 +1060,12 @@ export class ApplicationPage<T extends NumberType> extends BaseNumberTypeClass<A
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApplicationPage<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApplicationPage<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ApplicationPage {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApplicationPage;
   }
 
-  clone(): ApplicationPage<T> {
-    return super.clone() as ApplicationPage<T>;
+  clone(): ApplicationPage {
+    return super.clone() as ApplicationPage;
   }
 }
 
@@ -1209,20 +1114,20 @@ export class ApiKeyDoc extends CustomTypeClass<ApiKeyDoc> implements iApiKeyDoc 
  * @inheritDoc iApplicationDoc
  * @category Indexer
  */
-export class ApplicationDoc<T extends NumberType> extends BaseNumberTypeClass<ApplicationDoc<T>> implements iApplicationDoc<T> {
+export class ApplicationDoc extends BaseNumberTypeClass<ApplicationDoc> implements iApplicationDoc {
   _docId: string;
   _id?: string;
   applicationId: string;
-  createdAt: UNIXMilliTimestamp<T>;
-  lastUpdated?: UNIXMilliTimestamp<T>;
+  createdAt: UNIXMilliTimestamp;
+  lastUpdated?: UNIXMilliTimestamp;
   createdBy: BitBadgesAddress;
   managedBy: BitBadgesAddress;
-  metadata: iMetadata<T>;
+  metadata: iMetadata;
   type: string;
 
-  pages: ApplicationPage<T>[];
+  pages: ApplicationPage[];
 
-  constructor(data: iApplicationDoc<T>) {
+  constructor(data: iApplicationDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -1240,8 +1145,8 @@ export class ApplicationDoc<T extends NumberType> extends BaseNumberTypeClass<Ap
     return ['createdAt', 'lastUpdated'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApplicationDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApplicationDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ApplicationDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApplicationDoc;
   }
 }
 
@@ -1274,15 +1179,15 @@ export class UtilityPageContent extends CustomTypeClass<UtilityPageContent> impl
  * @inheritDoc iUtilityPageLink
  * @category Indexer
  */
-export class UtilityPageLink<T extends NumberType> extends CustomTypeClass<UtilityPageLink<T>> implements iUtilityPageLink<T> {
+export class UtilityPageLink extends CustomTypeClass<UtilityPageLink> implements iUtilityPageLink {
   url: string;
   claimId?: string | undefined;
   applicationId?: string | undefined;
   collectionId?: CollectionId | undefined;
   mapId?: string | undefined;
-  metadata?: iMetadata<T> | undefined;
+  metadata?: iMetadata | undefined;
 
-  constructor(data: iUtilityPageLink<T>) {
+  constructor(data: iUtilityPageLink) {
     super();
     this.url = data.url;
     this.claimId = data.claimId;
@@ -1296,8 +1201,8 @@ export class UtilityPageLink<T extends NumberType> extends CustomTypeClass<Utili
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UtilityPageLink<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UtilityPageLink<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UtilityPageLink {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UtilityPageLink;
   }
 }
 
@@ -1305,15 +1210,15 @@ export class UtilityPageLink<T extends NumberType> extends CustomTypeClass<Utili
  * @inheritDoc iListingViewsDoc
  * @category Indexer
  */
-export class ListingViewsDoc<T extends NumberType> extends BaseNumberTypeClass<ListingViewsDoc<T>> implements iListingViewsDoc<T> {
+export class ListingViewsDoc extends BaseNumberTypeClass<ListingViewsDoc> implements iListingViewsDoc {
   _docId: string;
   _id?: string;
   listingId: string;
-  viewCount: T;
-  lastUpdated: UNIXMilliTimestamp<T>;
+  viewCount: string | number;
+  lastUpdated: UNIXMilliTimestamp;
   viewsByPeriod?: { hourly: number; daily: number; weekly: number; monthly: number } | undefined;
 
-  constructor(data: iListingViewsDoc<T>) {
+  constructor(data: iListingViewsDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -1327,8 +1232,8 @@ export class ListingViewsDoc<T extends NumberType> extends BaseNumberTypeClass<L
     return ['viewCount', 'lastUpdated'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ListingViewsDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ListingViewsDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ListingViewsDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ListingViewsDoc;
   }
 }
 
@@ -1336,11 +1241,11 @@ export class ListingViewsDoc<T extends NumberType> extends BaseNumberTypeClass<L
  * @inheritDoc iLinkedTo
  * @category Indexer
  */
-export class LinkedTo<T extends NumberType> extends CustomTypeClass<LinkedTo<T>> implements iLinkedTo<T> {
+export class LinkedTo extends CustomTypeClass<LinkedTo> implements iLinkedTo {
   collectionId?: CollectionId;
-  tokenIds?: UintRangeArray<T>;
+  tokenIds?: UintRangeArray;
 
-  constructor(data: iLinkedTo<T>) {
+  constructor(data: iLinkedTo) {
     super();
     this.collectionId = data.collectionId;
     this.tokenIds = data.tokenIds ? UintRangeArray.From(data.tokenIds) : undefined;
@@ -1350,8 +1255,8 @@ export class LinkedTo<T extends NumberType> extends CustomTypeClass<LinkedTo<T>>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): LinkedTo<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as LinkedTo<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): LinkedTo {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as LinkedTo;
   }
 }
 
@@ -1359,14 +1264,14 @@ export class LinkedTo<T extends NumberType> extends CustomTypeClass<LinkedTo<T>>
  * @inheritDoc iInheritMetadataFrom
  * @category Indexer
  */
-export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<InheritMetadataFrom<T>> implements iInheritMetadataFrom<T> {
+export class InheritMetadataFrom extends CustomTypeClass<InheritMetadataFrom> implements iInheritMetadataFrom {
   claimId?: string;
   applicationId?: string;
   collectionId?: CollectionId;
   mapId?: string;
   tokenId?: string;
 
-  constructor(data: iInheritMetadataFrom<T>) {
+  constructor(data: iInheritMetadataFrom) {
     super();
     this.claimId = data.claimId;
     this.applicationId = data.applicationId;
@@ -1379,8 +1284,8 @@ export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<I
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): InheritMetadataFrom<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as InheritMetadataFrom<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): InheritMetadataFrom {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as InheritMetadataFrom;
   }
 }
 
@@ -1388,11 +1293,11 @@ export class InheritMetadataFrom<T extends NumberType> extends CustomTypeClass<I
  * @inheritDoc iEstimatedCost
  * @category Indexer
  */
-export class EstimatedCost<T extends NumberType> extends CustomTypeClass<EstimatedCost<T>> implements iEstimatedCost<T> {
-  amount: T;
+export class EstimatedCost extends CustomTypeClass<EstimatedCost> implements iEstimatedCost {
+  amount: string | number;
   denom: string;
 
-  constructor(data: iEstimatedCost<T>) {
+  constructor(data: iEstimatedCost) {
     super();
     this.amount = data.amount;
     this.denom = data.denom;
@@ -1402,8 +1307,8 @@ export class EstimatedCost<T extends NumberType> extends CustomTypeClass<Estimat
     return ['amount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): EstimatedCost<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as EstimatedCost<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): EstimatedCost {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as EstimatedCost;
   }
 }
 
@@ -1411,7 +1316,7 @@ export class EstimatedCost<T extends NumberType> extends CustomTypeClass<Estimat
  * @inheritDoc iUtilityPageDoc
  * @category Indexer
  */
-export class UtilityPageDoc<T extends NumberType> extends BaseNumberTypeClass<UtilityPageDoc<T>> implements iUtilityPageDoc<T> {
+export class UtilityPageDoc extends BaseNumberTypeClass<UtilityPageDoc> implements iUtilityPageDoc {
   _docId: string;
   _id?: string;
   listingId: string;
@@ -1420,12 +1325,12 @@ export class UtilityPageDoc<T extends NumberType> extends BaseNumberTypeClass<Ut
   directLink?: string | undefined;
   createdBy: BitBadgesAddress;
   managedBy: BitBadgesAddress;
-  createdAt: UNIXMilliTimestamp<T>;
+  createdAt: UNIXMilliTimestamp;
   content: UtilityPageContent[];
-  links: UtilityPageLink<T>[];
-  metadata: iMetadata<T>;
+  links: UtilityPageLink[];
+  metadata: iMetadata;
   visibility: 'public' | 'private' | 'unlisted';
-  lastUpdated?: UNIXMilliTimestamp<T>;
+  lastUpdated?: UNIXMilliTimestamp;
   approvalStatus: {
     isApproved: boolean;
     isFeatured?: boolean;
@@ -1434,20 +1339,20 @@ export class UtilityPageDoc<T extends NumberType> extends BaseNumberTypeClass<Ut
     reason?: string;
     updatedBy?: BitBadgesAddress;
   };
-  displayTimes?: UintRange<T> | undefined;
+  displayTimes?: UintRange | undefined;
   viewCount?: T | undefined;
   viewsByPeriod?: { hourly: number; daily: number; weekly: number; monthly: number } | undefined;
-  linkedTo?: LinkedTo<T>;
-  inheritMetadataFrom?: InheritMetadataFrom<T>;
+  linkedTo?: LinkedTo;
+  inheritMetadataFrom?: InheritMetadataFrom;
   locale?: string;
-  estimatedCost?: EstimatedCost<T>;
+  estimatedCost?: EstimatedCost;
   estimatedTime?: string;
   homePageView?: {
     type: 'tokens' | 'lists' | 'claims' | 'applications';
     category: string;
   };
 
-  constructor(data: iUtilityPageDoc<T>) {
+  constructor(data: iUtilityPageDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -1479,8 +1384,8 @@ export class UtilityPageDoc<T extends NumberType> extends BaseNumberTypeClass<Ut
     return ['createdAt', 'viewCount', 'lastUpdated'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UtilityPageDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UtilityPageDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UtilityPageDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UtilityPageDoc;
   }
 }
 
@@ -1488,7 +1393,7 @@ export class UtilityPageDoc<T extends NumberType> extends BaseNumberTypeClass<Ut
  * @inheritDoc iClaimBuilderDoc
  * @category Indexer
  */
-export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<ClaimBuilderDoc<T>> implements iClaimBuilderDoc<T> {
+export class ClaimBuilderDoc extends BaseNumberTypeClass<ClaimBuilderDoc> implements iClaimBuilderDoc {
   _docId: string;
   _id?: string;
   cid: string;
@@ -1499,30 +1404,30 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
   deletedAt?: T | undefined;
   approach?: string;
   manualDistribution?: boolean;
-  plugins: IntegrationPluginParams<ClaimIntegrationPluginType>[];
+  plugins: IntegrationPluginParams[];
   pluginIds?: string[];
   state: { [pluginId: string]: any };
   action: {
     seedCode?: string;
     siwbbClaim?: boolean;
   };
-  trackerDetails?: ChallengeTrackerIdDetails<T> | undefined;
-  metadata?: Metadata<T> | undefined;
-  lastUpdated: T;
-  createdAt: T;
+  trackerDetails?: ChallengeTrackerIdDetails | undefined;
+  metadata?: Metadata | undefined;
+  lastUpdated: string | number;
+  createdAt: string | number;
   assignMethod?: string | undefined;
-  version: T;
+  version: string | number;
   testOnly?: boolean;
-  rewards?: ClaimReward<T>[] | undefined;
+  rewards?: ClaimReward[] | undefined;
   estimatedCost?: string | undefined;
 
   showInSearchResults?: boolean;
   categories?: string[];
   estimatedTime?: string | undefined;
   satisfyMethod?: SatisfyMethod;
-  cachePolicy?: ClaimCachePolicy<T>;
+  cachePolicy?: ClaimCachePolicy;
 
-  constructor(data: iClaimBuilderDoc<T>) {
+  constructor(data: iClaimBuilderDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -1561,8 +1466,8 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
     return ['deletedAt', 'lastUpdated', 'createdAt', 'version'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimBuilderDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimBuilderDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ClaimBuilderDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimBuilderDoc;
   }
 }
 
@@ -1570,11 +1475,11 @@ export class ClaimBuilderDoc<T extends NumberType> extends BaseNumberTypeClass<C
  * @inheritDoc iApprovalTrackerDoc
  * @category Approvals / Transferability
  */
-export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClass<ApprovalTrackerDoc<T>> implements iApprovalTrackerDoc<T> {
+export class ApprovalTrackerDoc extends BaseNumberTypeClass<ApprovalTrackerDoc> implements iApprovalTrackerDoc {
   _docId: string;
   _id?: string;
-  numTransfers: T;
-  amounts: BalanceArray<T>;
+  numTransfers: string | number;
+  amounts: BalanceArray;
   collectionId: CollectionId;
   approvalId: string;
   amountTrackerId: string;
@@ -1582,9 +1487,9 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
   approverAddress: BitBadgesAddress;
   trackerType: string;
   approvedAddress: BitBadgesAddress;
-  lastUpdatedAt: UNIXMilliTimestamp<T>;
+  lastUpdatedAt: UNIXMilliTimestamp;
 
-  constructor(data: iApprovalTrackerDoc<T> & Doc & iAmountTrackerIdDetails<T>) {
+  constructor(data: iApprovalTrackerDoc & Doc & iAmountTrackerIdDetails) {
     super();
     this.numTransfers = data.numTransfers;
     this.amounts = BalanceArray.From(data.amounts);
@@ -1604,8 +1509,8 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
     return ['numTransfers', 'lastUpdatedAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalTrackerDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApprovalTrackerDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ApprovalTrackerDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApprovalTrackerDoc;
   }
 }
 
@@ -1613,11 +1518,11 @@ export class ApprovalTrackerDoc<T extends NumberType> extends BaseNumberTypeClas
  * @inheritDoc iMerkleChallengeTrackerDoc
  * @category Approvals / Transferability
  */
-export class UsedLeafStatus<T extends NumberType> extends BaseNumberTypeClass<UsedLeafStatus<T>> implements iUsedLeafStatus<T> {
-  leafIndex: T;
+export class UsedLeafStatus extends BaseNumberTypeClass<UsedLeafStatus> implements iUsedLeafStatus {
+  leafIndex: string | number;
   usedBy: BitBadgesAddress;
 
-  constructor(data: iUsedLeafStatus<T>) {
+  constructor(data: iUsedLeafStatus) {
     super();
     this.leafIndex = data.leafIndex;
     this.usedBy = data.usedBy;
@@ -1627,8 +1532,8 @@ export class UsedLeafStatus<T extends NumberType> extends BaseNumberTypeClass<Us
     return ['leafIndex'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UsedLeafStatus<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UsedLeafStatus<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UsedLeafStatus {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UsedLeafStatus;
   }
 }
 
@@ -1636,20 +1541,17 @@ export class UsedLeafStatus<T extends NumberType> extends BaseNumberTypeClass<Us
  * @inheritDoc iMerkleChallengeTrackerDoc
  * @category Approvals / Transferability
  */
-export class MerkleChallengeTrackerDoc<T extends NumberType>
-  extends BaseNumberTypeClass<MerkleChallengeTrackerDoc<T>>
-  implements iMerkleChallengeTrackerDoc<T>
-{
+export class MerkleChallengeTrackerDoc extends BaseNumberTypeClass<MerkleChallengeTrackerDoc> implements iMerkleChallengeTrackerDoc {
   _docId: string;
   _id?: string;
   collectionId: CollectionId;
   challengeTrackerId: string;
   approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
   approverAddress: BitBadgesAddress;
-  usedLeafIndices: UsedLeafStatus<T>[];
+  usedLeafIndices: UsedLeafStatus[];
   approvalId: string;
 
-  constructor(data: iMerkleChallengeTrackerDoc<T>) {
+  constructor(data: iMerkleChallengeTrackerDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -1665,8 +1567,8 @@ export class MerkleChallengeTrackerDoc<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MerkleChallengeTrackerDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MerkleChallengeTrackerDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MerkleChallengeTrackerDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MerkleChallengeTrackerDoc;
   }
 }
 
@@ -1674,26 +1576,26 @@ export class MerkleChallengeTrackerDoc<T extends NumberType>
  * @inheritDoc iFetchDoc
  * @category Indexer
  */
-export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc<T>> implements iFetchDoc<T> {
+export class FetchDoc extends BaseNumberTypeClass<FetchDoc> implements iFetchDoc {
   _docId: string;
   _id?: string;
   content?:
-    | Metadata<T>
-    | ApprovalInfoDetails<T>
+    | Metadata
+    | ApprovalInfoDetails
     | {
-        [bitbadgesAddressOrListId: string]: BalanceArray<T>;
+        [bitbadgesAddressOrListId: string]: BalanceArray;
       }
-    | ChallengeDetails<T>;
-  fetchedAt: UNIXMilliTimestamp<T>;
-  fetchedAtBlock: T;
+    | ChallengeDetails;
+  fetchedAt: UNIXMilliTimestamp;
+  fetchedAtBlock: string | number;
   db: 'ApprovalInfo' | 'Metadata' | 'Balances' | 'ChallengeInfo';
   isPermanent: boolean;
 
-  constructor(data: iFetchDoc<T>) {
+  constructor(data: iFetchDoc) {
     super();
     this.content =
       data.db === 'Metadata'
-        ? new Metadata(data.content as iMetadata<T>)
+        ? new Metadata(data.content as iMetadata)
         : data.db === 'ApprovalInfo'
           ? new ApprovalInfoDetails(data.content as iApprovalInfoDetails)
           : data.db === 'Balances'
@@ -1706,10 +1608,10 @@ export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc
 
                   throw new Error('Content is undefined');
                 },
-                {} as { [bitbadgesAddressOrListId: string]: BalanceArray<T> }
+                {} as { [bitbadgesAddressOrListId: string]: BalanceArray }
               )
             : data.db === 'ChallengeInfo'
-              ? new ChallengeDetails(data.content as iChallengeDetails<T>)
+              ? new ChallengeDetails(data.content as iChallengeDetails)
               : undefined;
     this.fetchedAt = data.fetchedAt;
     this.fetchedAtBlock = data.fetchedAtBlock;
@@ -1723,8 +1625,8 @@ export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc
     return ['fetchedAt', 'fetchedAtBlock'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): FetchDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FetchDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): FetchDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FetchDoc;
   }
 }
 
@@ -1732,13 +1634,13 @@ export class FetchDoc<T extends NumberType> extends BaseNumberTypeClass<FetchDoc
  * @inheritDoc iRefreshDoc
  * @category Indexer
  */
-export class RefreshDoc<T extends NumberType> extends BaseNumberTypeClass<RefreshDoc<T>> implements iRefreshDoc<T> {
+export class RefreshDoc extends BaseNumberTypeClass<RefreshDoc> implements iRefreshDoc {
   _docId: string;
   _id?: string;
   collectionId: CollectionId;
-  refreshRequestTime: UNIXMilliTimestamp<T>;
+  refreshRequestTime: UNIXMilliTimestamp;
 
-  constructor(data: iRefreshDoc<T>) {
+  constructor(data: iRefreshDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -1750,8 +1652,8 @@ export class RefreshDoc<T extends NumberType> extends BaseNumberTypeClass<Refres
     return ['refreshRequestTime'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): RefreshDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as RefreshDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): RefreshDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as RefreshDoc;
   }
 }
 
@@ -1759,15 +1661,15 @@ export class RefreshDoc<T extends NumberType> extends BaseNumberTypeClass<Refres
  * @inheritDoc iAirdropDoc
  * @category Indexer
  */
-export class AirdropDoc<T extends NumberType> extends BaseNumberTypeClass<AirdropDoc<T>> implements iAirdropDoc<T> {
+export class AirdropDoc extends BaseNumberTypeClass<AirdropDoc> implements iAirdropDoc {
   _docId: string;
   _id?: string;
   airdropped: boolean;
-  timestamp: UNIXMilliTimestamp<T>;
+  timestamp: UNIXMilliTimestamp;
   hash?: string;
   ip?: string;
 
-  constructor(data: iAirdropDoc<T>) {
+  constructor(data: iAirdropDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -1781,8 +1683,8 @@ export class AirdropDoc<T extends NumberType> extends BaseNumberTypeClass<Airdro
     return ['timestamp'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AirdropDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AirdropDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): AirdropDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AirdropDoc;
   }
 }
 
@@ -1790,13 +1692,13 @@ export class AirdropDoc<T extends NumberType> extends BaseNumberTypeClass<Airdro
  * @inheritDoc iCreatorCreditsDoc
  * @category Indexer
  */
-export class CreatorCreditsDoc<T extends NumberType> extends BaseNumberTypeClass<CreatorCreditsDoc<T>> implements iCreatorCreditsDoc<T> {
+export class CreatorCreditsDoc extends BaseNumberTypeClass<CreatorCreditsDoc> implements iCreatorCreditsDoc {
   _docId: string;
   _id?: string;
-  credits: T;
-  creditsLimit?: T;
+  credits: string | number;
+  creditsLimit?: string | number;
 
-  constructor(data: iCreatorCreditsDoc<T>) {
+  constructor(data: iCreatorCreditsDoc) {
     super();
     this.credits = data.credits;
     this.creditsLimit = data.creditsLimit;
@@ -1808,8 +1710,8 @@ export class CreatorCreditsDoc<T extends NumberType> extends BaseNumberTypeClass
     return ['credits', 'creditsLimit'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreatorCreditsDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CreatorCreditsDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): CreatorCreditsDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CreatorCreditsDoc;
   }
 }
 
@@ -1817,12 +1719,12 @@ export class CreatorCreditsDoc<T extends NumberType> extends BaseNumberTypeClass
  * @inheritDoc iIPFSTotalsDoc
  * @category Indexer
  */
-export class IPFSTotalsDoc<T extends NumberType> extends BaseNumberTypeClass<IPFSTotalsDoc<T>> implements iIPFSTotalsDoc<T> {
+export class IPFSTotalsDoc extends BaseNumberTypeClass<IPFSTotalsDoc> implements iIPFSTotalsDoc {
   _docId: string;
   _id?: string;
-  bytesUploaded: T;
+  bytesUploaded: string | number;
 
-  constructor(data: iIPFSTotalsDoc<T>) {
+  constructor(data: iIPFSTotalsDoc) {
     super();
     this.bytesUploaded = data.bytesUploaded;
     this._docId = data._docId;
@@ -1833,8 +1735,8 @@ export class IPFSTotalsDoc<T extends NumberType> extends BaseNumberTypeClass<IPF
     return ['bytesUploaded'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IPFSTotalsDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as IPFSTotalsDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): IPFSTotalsDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as IPFSTotalsDoc;
   }
 }
 
@@ -1842,12 +1744,12 @@ export class IPFSTotalsDoc<T extends NumberType> extends BaseNumberTypeClass<IPF
  * @inheritDoc iComplianceDoc
  * @category Indexer
  */
-export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<ComplianceDoc<T>> implements iComplianceDoc<T> {
+export class ComplianceDoc extends BaseNumberTypeClass<ComplianceDoc> implements iComplianceDoc {
   _docId: string;
   _id?: string;
   tokens: {
-    nsfw: BatchTokenDetailsArray<T>;
-    reported: BatchTokenDetailsArray<T>;
+    nsfw: BatchTokenDetailsArray;
+    reported: BatchTokenDetailsArray;
   };
   accounts: {
     nsfw: { bitbadgesAddress: BitBadgesAddress; reason: string }[];
@@ -1866,7 +1768,7 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
     reported: { mapId: string; reason: string }[];
   };
 
-  constructor(data: iComplianceDoc<T>) {
+  constructor(data: iComplianceDoc) {
     super();
     this.tokens = {
       nsfw: BatchTokenDetailsArray.From(data.tokens.nsfw),
@@ -1880,8 +1782,8 @@ export class ComplianceDoc<T extends NumberType> extends BaseNumberTypeClass<Com
     this.maps = data.maps ?? { nsfw: [], reported: [] };
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ComplianceDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ComplianceDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ComplianceDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ComplianceDoc;
   }
 }
 
@@ -1917,7 +1819,7 @@ export class AccessTokenDoc extends CustomTypeClass<AccessTokenDoc> implements i
     this.scopes = data.scopes;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AccessTokenDoc {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): AccessTokenDoc {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AccessTokenDoc;
   }
 
@@ -1930,24 +1832,21 @@ export class AccessTokenDoc extends CustomTypeClass<AccessTokenDoc> implements i
  * @inheritDoc iDynamicDataDoc
  * @category Hook Bins
  */
-export class DynamicDataDoc<Q extends DynamicDataHandlerType, T extends NumberType>
-  extends BaseNumberTypeClass<DynamicDataDoc<Q, T>>
-  implements iDynamicDataDoc<Q, T>
-{
+export class DynamicDataDoc extends BaseNumberTypeClass<DynamicDataDoc> implements iDynamicDataDoc {
   _docId: string;
   _id?: string;
-  handlerId: Q;
+  handlerId: string;
   label: string;
   dynamicDataId: string;
   dataSecret: string;
-  data: DynamicDataHandlerData<Q>;
+  data: any;
   createdBy: BitBadgesAddress;
   managedBy: BitBadgesAddress;
   publicUseInClaims?: boolean;
-  createdAt?: UNIXMilliTimestamp<T>;
-  lastUpdated?: UNIXMilliTimestamp<T>;
+  createdAt?: UNIXMilliTimestamp;
+  lastUpdated?: UNIXMilliTimestamp;
 
-  constructor(data: iDynamicDataDoc<Q, T>) {
+  constructor(data: iDynamicDataDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -1967,12 +1866,12 @@ export class DynamicDataDoc<Q extends DynamicDataHandlerType, T extends NumberTy
     return ['createdAt', 'lastUpdated'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DynamicDataDoc<Q, U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): DynamicDataDoc<Q, U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicDataDoc<Q, U>;
   }
 
-  clone(): DynamicDataDoc<Q, T> {
-    return super.clone() as DynamicDataDoc<Q, T>;
+  clone(): DynamicDataDoc {
+    return super.clone() as DynamicDataDoc;
   }
 }
 
@@ -1980,7 +1879,7 @@ export class DynamicDataDoc<Q extends DynamicDataHandlerType, T extends NumberTy
  * @inheritDoc iDeveloperAppDoc
  * @category SIWBB
  */
-export class DeveloperAppDoc<T extends NumberType> extends BaseNumberTypeClass<DeveloperAppDoc<T>> implements iDeveloperAppDoc<T> {
+export class DeveloperAppDoc extends BaseNumberTypeClass<DeveloperAppDoc> implements iDeveloperAppDoc {
   _docId: string;
   _id?: string | undefined;
   name: string;
@@ -1991,10 +1890,10 @@ export class DeveloperAppDoc<T extends NumberType> extends BaseNumberTypeClass<D
   managedBy: BitBadgesAddress;
   description: string;
   image: string;
-  lastUpdated?: UNIXMilliTimestamp<T>;
-  createdAt?: UNIXMilliTimestamp<T>;
+  lastUpdated?: UNIXMilliTimestamp;
+  createdAt?: UNIXMilliTimestamp;
 
-  constructor(data: iDeveloperAppDoc<T>) {
+  constructor(data: iDeveloperAppDoc) {
     super();
     this.description = data.description;
     this.image = data.image;
@@ -2014,12 +1913,12 @@ export class DeveloperAppDoc<T extends NumberType> extends BaseNumberTypeClass<D
     return ['lastUpdated', 'createdAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DeveloperAppDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DeveloperAppDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): DeveloperAppDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DeveloperAppDoc;
   }
 
-  clone(): DeveloperAppDoc<T> {
-    return super.clone() as DeveloperAppDoc<T>;
+  clone(): DeveloperAppDoc {
+    return super.clone() as DeveloperAppDoc;
   }
 }
 
@@ -2027,12 +1926,12 @@ export class DeveloperAppDoc<T extends NumberType> extends BaseNumberTypeClass<D
  * @inheritDoc iDepositBalanceDoc
  * @category Indexer
  */
-export class DepositBalanceDoc<T extends NumberType> extends BaseNumberTypeClass<DepositBalanceDoc<T>> implements iDepositBalanceDoc<T> {
+export class DepositBalanceDoc extends BaseNumberTypeClass<DepositBalanceDoc> implements iDepositBalanceDoc {
   _docId: string;
   _id?: string;
   bitbadgesAddress: BitBadgesAddress;
 
-  constructor(data: iDepositBalanceDoc<T>) {
+  constructor(data: iDepositBalanceDoc) {
     super();
     this.bitbadgesAddress = data.bitbadgesAddress;
     this._docId = data._docId;
@@ -2043,12 +1942,12 @@ export class DepositBalanceDoc<T extends NumberType> extends BaseNumberTypeClass
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DepositBalanceDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DepositBalanceDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): DepositBalanceDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DepositBalanceDoc;
   }
 
-  clone(): DepositBalanceDoc<T> {
-    return super.clone() as DepositBalanceDoc<T>;
+  clone(): DepositBalanceDoc {
+    return super.clone() as DepositBalanceDoc;
   }
 }
 
@@ -2056,8 +1955,8 @@ export class DepositBalanceDoc<T extends NumberType> extends BaseNumberTypeClass
  * @inheritDoc iPluginVersionConfig
  * @category Plugins
  */
-export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeClass<PluginVersionConfig<T>> implements iPluginVersionConfig<T> {
-  version: T;
+export class PluginVersionConfig extends BaseNumberTypeClass<PluginVersionConfig> implements iPluginVersionConfig {
+  version: string | number;
   finalized: boolean;
   stateFunctionPreset: PluginPresetType;
   duplicatesAllowed: boolean;
@@ -2097,11 +1996,11 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
   };
   claimCreatorRedirect?: { toolUri?: string; tutorialUri?: string; testerUri?: string };
   userInputRedirect?: { baseUri?: string; tutorialUri?: string };
-  createdAt: UNIXMilliTimestamp<T>;
-  lastUpdated: UNIXMilliTimestamp<T>;
+  createdAt: UNIXMilliTimestamp;
+  lastUpdated: UNIXMilliTimestamp;
   requireSignIn?: boolean;
 
-  constructor(data: iPluginVersionConfig<T>) {
+  constructor(data: iPluginVersionConfig) {
     super();
     this.finalized = data.finalized;
     this.version = data.version;
@@ -2129,12 +2028,12 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
     return ['version', 'createdAt', 'lastUpdated'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PluginVersionConfig<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PluginVersionConfig<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): PluginVersionConfig {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PluginVersionConfig;
   }
 
-  clone(): PluginVersionConfig<T> {
-    return super.clone() as PluginVersionConfig<T>;
+  clone(): PluginVersionConfig {
+    return super.clone() as PluginVersionConfig;
   }
 }
 
@@ -2142,7 +2041,7 @@ export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeCla
  * @inheritDoc iPluginDoc
  * @category Plugins
  */
-export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginDoc<T>> implements iPluginDoc<T> {
+export class PluginDoc extends BaseNumberTypeClass<PluginDoc> implements iPluginDoc {
   _docId: string;
   _id?: string | undefined;
   pluginId: string;
@@ -2163,13 +2062,13 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     sourceCode?: string;
     supportLink?: string;
   };
-  lastUpdated: UNIXMilliTimestamp<T>;
-  createdAt: UNIXMilliTimestamp<T>;
-  deletedAt?: UNIXMilliTimestamp<T>;
-  versions: PluginVersionConfig<T>[];
+  lastUpdated: UNIXMilliTimestamp;
+  createdAt: UNIXMilliTimestamp;
+  deletedAt?: UNIXMilliTimestamp;
+  versions: PluginVersionConfig[];
   locale?: string;
 
-  constructor(data: iPluginDoc<T>) {
+  constructor(data: iPluginDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
@@ -2202,15 +2101,15 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     return ['lastUpdated', 'createdAt', 'deletedAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PluginDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PluginDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): PluginDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PluginDoc;
   }
 
-  clone(): PluginDoc<T> {
-    return super.clone() as PluginDoc<T>;
+  clone(): PluginDoc {
+    return super.clone() as PluginDoc;
   }
 
-  getLatestVersion(): PluginVersionConfig<T> {
+  getLatestVersion(): PluginVersionConfig {
     return this.versions[this.versions.length - 1];
   }
 }
@@ -2219,7 +2118,7 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
  * @inheritDoc iSIWBBRequestDoc
  * @category SIWBB
  */
-export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<SIWBBRequestDoc<T>> implements iSIWBBRequestDoc<T> {
+export class SIWBBRequestDoc extends BaseNumberTypeClass<SIWBBRequestDoc> implements iSIWBBRequestDoc {
   _docId: string;
   _id?: string;
   code: string;
@@ -2228,17 +2127,17 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
   description?: string;
   image?: string;
   bitbadgesAddress: BitBadgesAddress;
-  createdAt: UNIXMilliTimestamp<T>;
+  createdAt: UNIXMilliTimestamp;
   scopes: OAuthScopeDetails[];
-  expiresAt: UNIXMilliTimestamp<T>;
-  deletedAt?: UNIXMilliTimestamp<T>;
+  expiresAt: UNIXMilliTimestamp;
+  deletedAt?: UNIXMilliTimestamp;
   redirectUri?: string | undefined;
   address: string;
   chain: SupportedChain;
   codeChallenge?: string;
   codeChallengeMethod?: 'S256' | 'plain';
 
-  constructor(data: iSIWBBRequestDoc<T>) {
+  constructor(data: iSIWBBRequestDoc) {
     super();
     this.address = data.address;
     this.chain = data.chain;
@@ -2263,8 +2162,8 @@ export class SIWBBRequestDoc<T extends NumberType> extends BaseNumberTypeClass<S
     return ['createdAt', 'deletedAt'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): SIWBBRequestDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SIWBBRequestDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): SIWBBRequestDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SIWBBRequestDoc;
   }
 }
 
@@ -2282,12 +2181,12 @@ export interface ErrorDoc {
  * @inheritDoc iMapWithValues
  * @category Maps
  */
-export class MapWithValues<T extends NumberType> extends Map<T> implements iMapWithValues<T> {
+export class MapWithValues extends Map implements iMapWithValues {
   values: { [key: string]: ValueStore };
-  populatedMetadata?: Metadata<T>;
-  updateHistory: UpdateHistory<T>[];
+  populatedMetadata?: Metadata;
+  updateHistory: UpdateHistory[];
 
-  constructor(data: iMapWithValues<T>) {
+  constructor(data: iMapWithValues) {
     super(data);
     this.values = Object.fromEntries(Object.entries(data.values).map(([key, value]) => [key, new ValueStore(value)]));
     this.populatedMetadata = data.populatedMetadata ? new Metadata(data.populatedMetadata) : undefined;
@@ -2298,8 +2197,8 @@ export class MapWithValues<T extends NumberType> extends Map<T> implements iMapW
     return super.getNumberFieldNames();
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): MapWithValues<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapWithValues<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): MapWithValues {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapWithValues;
   }
 }
 
@@ -2307,11 +2206,11 @@ export class MapWithValues<T extends NumberType> extends Map<T> implements iMapW
  * @inheritDoc iMapDoc
  * @category Maps
  */
-export class MapDoc<T extends NumberType> extends MapWithValues<T> implements iMapDoc<T> {
+export class MapDoc extends MapWithValues implements iMapDoc {
   _docId: string;
   _id?: string;
 
-  constructor(data: iMapDoc<T>) {
+  constructor(data: iMapDoc) {
     super(data);
     this._docId = data._docId;
     this._id = data._id;
@@ -2321,8 +2220,8 @@ export class MapDoc<T extends NumberType> extends MapWithValues<T> implements iM
     return super.getNumberFieldNames();
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MapDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MapDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapDoc;
   }
 }
 
@@ -2330,12 +2229,12 @@ export class MapDoc<T extends NumberType> extends MapWithValues<T> implements iM
  * @inheritDoc iTransactionEntry
  * @category Transaction Tracking
  */
-export class TransactionEntry<T extends NumberType> extends BaseNumberTypeClass<TransactionEntry<T>> implements iTransactionEntry<T> {
-  amount: T;
-  limit: T;
-  timestamp: UNIXMilliTimestamp<T>;
+export class TransactionEntry extends BaseNumberTypeClass<TransactionEntry> implements iTransactionEntry {
+  amount: string | number;
+  limit: string | number;
+  timestamp: UNIXMilliTimestamp;
 
-  constructor(data: iTransactionEntry<T>) {
+  constructor(data: iTransactionEntry) {
     super();
     this.amount = data.amount;
     this.limit = data.limit;
@@ -2346,8 +2245,8 @@ export class TransactionEntry<T extends NumberType> extends BaseNumberTypeClass<
     return ['amount', 'limit', 'timestamp'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransactionEntry<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TransactionEntry<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): TransactionEntry {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TransactionEntry;
   }
 }
 
@@ -2355,17 +2254,17 @@ export class TransactionEntry<T extends NumberType> extends BaseNumberTypeClass<
  * @inheritDoc iDynamicStoreDoc
  * @category Collections
  */
-export class DynamicStoreDoc<T extends NumberType> extends BaseNumberTypeClass<DynamicStoreDoc<T>> implements iDynamicStoreDoc<T> {
+export class DynamicStoreDoc extends BaseNumberTypeClass<DynamicStoreDoc> implements iDynamicStoreDoc {
   _id?: string;
   _docId: string;
-  storeId: T;
+  storeId: string | number;
   createdBy: string;
   defaultValue: boolean;
   globalEnabled: boolean;
   uri?: string;
   customData?: string;
 
-  constructor(doc: iDynamicStoreDoc<T>) {
+  constructor(doc: iDynamicStoreDoc) {
     super();
     this._id = doc._id;
     this._docId = doc._docId;
@@ -2381,8 +2280,8 @@ export class DynamicStoreDoc<T extends NumberType> extends BaseNumberTypeClass<D
     return ['storeId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): DynamicStoreDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStoreDoc<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): DynamicStoreDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStoreDoc;
   }
 }
 
@@ -2390,21 +2289,18 @@ export class DynamicStoreDoc<T extends NumberType> extends BaseNumberTypeClass<D
  * @inheritDoc iDynamicStoreDocWithDetails
  * @category Collections
  */
-export class DynamicStoreDocWithDetails<T extends NumberType>
-  extends BaseNumberTypeClass<DynamicStoreDocWithDetails<T>>
-  implements iDynamicStoreDocWithDetails<T>
-{
+export class DynamicStoreDocWithDetails extends BaseNumberTypeClass<DynamicStoreDocWithDetails> implements iDynamicStoreDocWithDetails {
   _id?: string;
   _docId: string;
-  storeId: T;
+  storeId: string | number;
   createdBy: string;
   defaultValue: boolean;
   globalEnabled: boolean;
   uri?: string;
   customData?: string;
-  metadata?: Metadata<T>;
+  metadata?: Metadata;
 
-  constructor(doc: iDynamicStoreDocWithDetails<T>) {
+  constructor(doc: iDynamicStoreDocWithDetails) {
     super();
     this._id = doc._id;
     this._docId = doc._docId;
@@ -2421,8 +2317,8 @@ export class DynamicStoreDocWithDetails<T extends NumberType>
     return ['storeId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): DynamicStoreDocWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStoreDocWithDetails<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): DynamicStoreDocWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStoreDocWithDetails;
   }
 }
 
@@ -2430,14 +2326,14 @@ export class DynamicStoreDocWithDetails<T extends NumberType>
  * @inheritDoc iDynamicStoreValueDoc
  * @category Collections
  */
-export class DynamicStoreValueDoc<T extends NumberType> extends BaseNumberTypeClass<DynamicStoreValueDoc<T>> implements iDynamicStoreValueDoc<T> {
+export class DynamicStoreValueDoc extends BaseNumberTypeClass<DynamicStoreValueDoc> implements iDynamicStoreValueDoc {
   _id?: string;
   _docId: string;
-  storeId: T;
+  storeId: string | number;
   address: string;
   value: boolean;
 
-  constructor(doc: iDynamicStoreValueDoc<T>) {
+  constructor(doc: iDynamicStoreValueDoc) {
     super();
     this._id = doc._id;
     this._docId = doc._docId;
@@ -2450,7 +2346,7 @@ export class DynamicStoreValueDoc<T extends NumberType> extends BaseNumberTypeCl
     return ['storeId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): DynamicStoreValueDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStoreValueDoc<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): DynamicStoreValueDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStoreValueDoc;
   }
 }

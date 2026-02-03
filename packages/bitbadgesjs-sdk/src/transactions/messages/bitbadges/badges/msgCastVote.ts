@@ -13,16 +13,16 @@ import { normalizeMessagesIfNecessary } from '../../base.js';
  *
  * @category Transactions
  */
-export class MsgCastVote<T extends NumberType> extends CustomTypeClass<MsgCastVote<T>> implements iMsgCastVote<T> {
+export class MsgCastVote extends CustomTypeClass<MsgCastVote> implements iMsgCastVote {
   creator: BitBadgesAddress;
-  collectionId: T;
+  collectionId: string | number;
   approvalLevel: string;
   approverAddress: BitBadgesAddress;
   approvalId: string;
   proposalId: string;
-  yesWeight: T;
+  yesWeight: string | number;
 
-  constructor(msg: iMsgCastVote<T>) {
+  constructor(msg: iMsgCastVote) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
@@ -45,15 +45,15 @@ export class MsgCastVote<T extends NumberType> extends CustomTypeClass<MsgCastVo
     });
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCastVote<NumberType> {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgCastVote {
     return MsgCastVote.fromProto(protobadges.MsgCastVote.fromJson(jsonValue, options));
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCastVote<NumberType> {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgCastVote {
     return MsgCastVote.fromProto(protobadges.MsgCastVote.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: protobadges.MsgCastVote): MsgCastVote<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgCastVote): MsgCastVote {
     return new MsgCastVote({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
@@ -65,7 +65,7 @@ export class MsgCastVote<T extends NumberType> extends CustomTypeClass<MsgCastVo
     });
   }
 
-  toBech32Addresses(prefix: string): MsgCastVote<T> {
+  toBech32Addresses(prefix: string): MsgCastVote {
     return new MsgCastVote({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,

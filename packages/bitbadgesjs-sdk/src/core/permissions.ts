@@ -1,19 +1,6 @@
 import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
-import type {
-  iActionPermission,
-  iTokenIdsActionPermission,
-  iCollectionApprovalPermission,
-  iCollectionApprovalPermissionWithDetails,
-  iCollectionPermissions,
-  iCollectionPermissionsWithDetails,
-  iUserIncomingApprovalPermission,
-  iUserIncomingApprovalPermissionWithDetails,
-  iUserOutgoingApprovalPermission,
-  iUserOutgoingApprovalPermissionWithDetails,
-  iUserPermissions,
-  iUserPermissionsWithDetails
-} from '@/interfaces/types/permissions.js';
+import type { iActionPermission, iTokenIdsActionPermission, iCollectionApprovalPermission, iCollectionApprovalPermissionWithDetails, iCollectionPermissions, iCollectionPermissionsWithDetails, iUserIncomingApprovalPermission, iUserIncomingApprovalPermissionWithDetails, iUserOutgoingApprovalPermission, iUserOutgoingApprovalPermissionWithDetails, iUserPermissions, iUserPermissionsWithDetails } from '@/interfaces/types/permissions.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import * as protobadges from '../proto/badges/permissions_pb.js';
@@ -28,94 +15,58 @@ import { AllDefaultValues } from './validate-utils.js';
  *
  * @category Permissions
  */
-export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<UserPermissions<T>> implements iUserPermissions<T> {
-  canUpdateOutgoingApprovals: UserOutgoingApprovalPermission<T>[];
-  canUpdateIncomingApprovals: UserIncomingApprovalPermission<T>[];
-  canUpdateAutoApproveSelfInitiatedOutgoingTransfers: ActionPermission<T>[];
-  canUpdateAutoApproveSelfInitiatedIncomingTransfers: ActionPermission<T>[];
-  canUpdateAutoApproveAllIncomingTransfers: ActionPermission<T>[];
+export class UserPermissions extends BaseNumberTypeClass<UserPermissions> implements iUserPermissions {
+  canUpdateOutgoingApprovals: UserOutgoingApprovalPermission[];
+  canUpdateIncomingApprovals: UserIncomingApprovalPermission[];
+  canUpdateAutoApproveSelfInitiatedOutgoingTransfers: ActionPermission[];
+  canUpdateAutoApproveSelfInitiatedIncomingTransfers: ActionPermission[];
+  canUpdateAutoApproveAllIncomingTransfers: ActionPermission[];
 
-  constructor(msg: iUserPermissions<T>) {
+  constructor(msg: iUserPermissions) {
     super();
     this.canUpdateOutgoingApprovals = msg.canUpdateOutgoingApprovals.map((x) => new UserOutgoingApprovalPermission(x));
     this.canUpdateIncomingApprovals = msg.canUpdateIncomingApprovals.map((x) => new UserIncomingApprovalPermission(x));
-    this.canUpdateAutoApproveSelfInitiatedOutgoingTransfers = msg.canUpdateAutoApproveSelfInitiatedOutgoingTransfers.map(
-      (x) => new ActionPermission(x)
-    );
-    this.canUpdateAutoApproveSelfInitiatedIncomingTransfers = msg.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map(
-      (x) => new ActionPermission(x)
-    );
+    this.canUpdateAutoApproveSelfInitiatedOutgoingTransfers = msg.canUpdateAutoApproveSelfInitiatedOutgoingTransfers.map((x) => new ActionPermission(x));
+    this.canUpdateAutoApproveSelfInitiatedIncomingTransfers = msg.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map((x) => new ActionPermission(x));
     this.canUpdateAutoApproveAllIncomingTransfers = msg.canUpdateAutoApproveAllIncomingTransfers.map((x) => new ActionPermission(x));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserPermissions<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserPermissions<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UserPermissions {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserPermissions;
   }
 
   toProto(): protobadges.UserPermissions {
     return new protobadges.UserPermissions(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): UserPermissions<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): UserPermissions {
     return UserPermissions.fromProto(protobadges.UserPermissions.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): UserPermissions<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): UserPermissions {
     return UserPermissions.fromProto(protobadges.UserPermissions.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(protoMsg: protobadges.UserPermissions, convertFunction: (item: NumberType) => U): UserPermissions<U> {
+  static fromProto(protoMsg: protobadges.UserPermissions, convertFunction: (item: string | number) => U): UserPermissions {
     return new UserPermissions({
       canUpdateOutgoingApprovals: protoMsg.canUpdateOutgoingApprovals.map((x) => UserOutgoingApprovalPermission.fromProto(x, convertFunction)),
       canUpdateIncomingApprovals: protoMsg.canUpdateIncomingApprovals.map((x) => UserIncomingApprovalPermission.fromProto(x, convertFunction)),
-      canUpdateAutoApproveSelfInitiatedOutgoingTransfers: protoMsg.canUpdateAutoApproveSelfInitiatedOutgoingTransfers.map((x) =>
-        ActionPermission.fromProto(x, convertFunction)
-      ),
-      canUpdateAutoApproveSelfInitiatedIncomingTransfers: protoMsg.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map((x) =>
-        ActionPermission.fromProto(x, convertFunction)
-      ),
-      canUpdateAutoApproveAllIncomingTransfers: protoMsg.canUpdateAutoApproveAllIncomingTransfers.map((x) =>
-        ActionPermission.fromProto(x, convertFunction)
-      )
+      canUpdateAutoApproveSelfInitiatedOutgoingTransfers: protoMsg.canUpdateAutoApproveSelfInitiatedOutgoingTransfers.map((x) => ActionPermission.fromProto(x, convertFunction)),
+      canUpdateAutoApproveSelfInitiatedIncomingTransfers: protoMsg.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map((x) => ActionPermission.fromProto(x, convertFunction)),
+      canUpdateAutoApproveAllIncomingTransfers: protoMsg.canUpdateAutoApproveAllIncomingTransfers.map((x) => ActionPermission.fromProto(x, convertFunction))
     });
   }
 
   /**
    * Validates the update of the user permissions from old to new.
    */
-  static validateUpdate<U extends NumberType>(
-    oldPermissions: UserPermissionsWithDetails<U>,
-    newPermissions: UserPermissionsWithDetails<U>
-  ): Error | null {
-    const responses = [
-      UserOutgoingApprovalPermission.validateUpdate(oldPermissions.canUpdateOutgoingApprovals, newPermissions.canUpdateOutgoingApprovals),
-      UserIncomingApprovalPermission.validateUpdate(oldPermissions.canUpdateIncomingApprovals, newPermissions.canUpdateIncomingApprovals),
-      ActionPermission.validateUpdate(
-        oldPermissions.canUpdateAutoApproveSelfInitiatedOutgoingTransfers,
-        newPermissions.canUpdateAutoApproveSelfInitiatedOutgoingTransfers
-      ),
-      ActionPermission.validateUpdate(
-        oldPermissions.canUpdateAutoApproveSelfInitiatedIncomingTransfers,
-        newPermissions.canUpdateAutoApproveSelfInitiatedIncomingTransfers
-      ),
-      ActionPermission.validateUpdate(
-        oldPermissions.canUpdateAutoApproveAllIncomingTransfers,
-        newPermissions.canUpdateAutoApproveAllIncomingTransfers
-      )
-    ];
+  static validateUpdate(oldPermissions: UserPermissionsWithDetails, newPermissions: UserPermissionsWithDetails): Error | null {
+    const responses = [UserOutgoingApprovalPermission.validateUpdate(oldPermissions.canUpdateOutgoingApprovals, newPermissions.canUpdateOutgoingApprovals), UserIncomingApprovalPermission.validateUpdate(oldPermissions.canUpdateIncomingApprovals, newPermissions.canUpdateIncomingApprovals), ActionPermission.validateUpdate(oldPermissions.canUpdateAutoApproveSelfInitiatedOutgoingTransfers, newPermissions.canUpdateAutoApproveSelfInitiatedOutgoingTransfers), ActionPermission.validateUpdate(oldPermissions.canUpdateAutoApproveSelfInitiatedIncomingTransfers, newPermissions.canUpdateAutoApproveSelfInitiatedIncomingTransfers), ActionPermission.validateUpdate(oldPermissions.canUpdateAutoApproveAllIncomingTransfers, newPermissions.canUpdateAutoApproveAllIncomingTransfers)];
 
     return responses.find((x) => x !== null) ?? null;
   }
 
-  static InitEmpty(): UserPermissions<bigint> {
+  static InitEmpty(): UserPermissions {
     return new UserPermissions({
       canUpdateOutgoingApprovals: [],
       canUpdateIncomingApprovals: [],
@@ -125,7 +76,7 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
     });
   }
 
-  toBech32Addresses(prefix: string): UserPermissions<T> {
+  toBech32Addresses(prefix: string): UserPermissions {
     return new UserPermissions({
       ...this,
       canUpdateOutgoingApprovals: this.canUpdateOutgoingApprovals.map((x) => x.toBech32Addresses(prefix)),
@@ -139,20 +90,17 @@ export class UserPermissions<T extends NumberType> extends BaseNumberTypeClass<U
  *
  * @category Permissions
  */
-export class UserOutgoingApprovalPermission<T extends NumberType>
-  extends BaseNumberTypeClass<UserOutgoingApprovalPermission<T>>
-  implements iUserOutgoingApprovalPermission<T>
-{
+export class UserOutgoingApprovalPermission extends BaseNumberTypeClass<UserOutgoingApprovalPermission> implements iUserOutgoingApprovalPermission {
   toListId: string;
   initiatedByListId: string;
-  transferTimes: UintRangeArray<T>;
-  tokenIds: UintRangeArray<T>;
-  ownershipTimes: UintRangeArray<T>;
+  transferTimes: UintRangeArray;
+  tokenIds: UintRangeArray;
+  ownershipTimes: UintRangeArray;
   approvalId: string;
-  permanentlyPermittedTimes: UintRangeArray<T>;
-  permanentlyForbiddenTimes: UintRangeArray<T>;
+  permanentlyPermittedTimes: UintRangeArray;
+  permanentlyForbiddenTimes: UintRangeArray;
 
-  constructor(msg: iUserOutgoingApprovalPermission<T>) {
+  constructor(msg: iUserOutgoingApprovalPermission) {
     super();
     this.toListId = msg.toListId;
     this.initiatedByListId = msg.initiatedByListId;
@@ -164,34 +112,23 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserOutgoingApprovalPermission<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserOutgoingApprovalPermission<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UserOutgoingApprovalPermission {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserOutgoingApprovalPermission;
   }
 
   toProto(): protobadges.UserOutgoingApprovalPermission {
     return new protobadges.UserOutgoingApprovalPermission(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): UserOutgoingApprovalPermission<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): UserOutgoingApprovalPermission {
     return UserOutgoingApprovalPermission.fromProto(protobadges.UserOutgoingApprovalPermission.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): UserOutgoingApprovalPermission<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): UserOutgoingApprovalPermission {
     return UserOutgoingApprovalPermission.fromProto(protobadges.UserOutgoingApprovalPermission.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    protoMsg: protobadges.UserOutgoingApprovalPermission,
-    convertFunction: (item: NumberType) => U
-  ): UserOutgoingApprovalPermission<U> {
+  static fromProto(protoMsg: protobadges.UserOutgoingApprovalPermission, convertFunction: (item: string | number) => U): UserOutgoingApprovalPermission {
     return new UserOutgoingApprovalPermission({
       toListId: protoMsg.toListId,
       initiatedByListId: protoMsg.initiatedByListId,
@@ -204,7 +141,7 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
     });
   }
 
-  castToCollectionApprovalPermission(address: string): CollectionApprovalPermission<T> {
+  castToCollectionApprovalPermission(address: string): CollectionApprovalPermission {
     return new CollectionApprovalPermission({
       ...this,
       fromList: getReservedAddressList(address) as AddressList,
@@ -215,28 +152,21 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
   /**
    * Validates the update of the user outgoing approval permissions from old to new. No permanently frozen times can be edited.
    */
-  static validateUpdate<U extends NumberType>(
-    permissions: UserOutgoingApprovalPermissionWithDetails<U>[],
-    newPermission: UserOutgoingApprovalPermissionWithDetails<U>[]
-  ): Error | null {
+  static validateUpdate(permissions: UserOutgoingApprovalPermissionWithDetails[], newPermission: UserOutgoingApprovalPermissionWithDetails[]): Error | null {
     const dummyAddress = '0x';
-    const castedPermissions: UniversalPermission[] = permissions.map((x) =>
-      x.castToCollectionApprovalPermission(dummyAddress).castToUniversalPermission()
-    );
-    const castedNewPermissions: UniversalPermission[] = newPermission.map((x) =>
-      x.castToCollectionApprovalPermission(dummyAddress).castToUniversalPermission()
-    );
+    const castedPermissions: UniversalPermission[] = permissions.map((x) => x.castToCollectionApprovalPermission(dummyAddress).castToUniversalPermission());
+    const castedNewPermissions: UniversalPermission[] = newPermission.map((x) => x.castToCollectionApprovalPermission(dummyAddress).castToUniversalPermission());
     return validateUniversalPermissionUpdate(GetFirstMatchOnly(castedPermissions), GetFirstMatchOnly(castedNewPermissions));
   }
 
   /**
    * Checks if a certain approvals can be updated based on the permissions.
    */
-  static check<U extends NumberType>(
+  static check(
     details: {
-      tokenIds: UintRangeArray<U>;
-      ownershipTimes: UintRangeArray<U>;
-      transferTimes: UintRangeArray<U>;
+      tokenIds: UintRangeArray;
+      ownershipTimes: UintRangeArray;
+      transferTimes: UintRangeArray;
       toList: AddressList;
       fromList: AddressList;
       initiatedByList: AddressList;
@@ -244,7 +174,7 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
       amountTrackerIdList: AddressList;
       challengeTrackerIdList: AddressList;
     }[],
-    permissions: UserOutgoingApprovalPermissionWithDetails<U>[],
+    permissions: UserOutgoingApprovalPermissionWithDetails[],
     time?: U
   ): Error | null {
     const dummyAddress = '0x'; //For compatibility
@@ -255,7 +185,7 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
     );
   }
 
-  toBech32Addresses(prefix: string): UserOutgoingApprovalPermission<T> {
+  toBech32Addresses(prefix: string): UserOutgoingApprovalPermission {
     return new UserOutgoingApprovalPermission({
       ...this,
       toListId: convertListIdToBech32(this.toListId, prefix),
@@ -269,20 +199,17 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
  *
  * @category Permissions
  */
-export class UserIncomingApprovalPermission<T extends NumberType>
-  extends BaseNumberTypeClass<UserIncomingApprovalPermission<T>>
-  implements iUserIncomingApprovalPermission<T>
-{
+export class UserIncomingApprovalPermission extends BaseNumberTypeClass<UserIncomingApprovalPermission> implements iUserIncomingApprovalPermission {
   fromListId: string;
   initiatedByListId: string;
-  transferTimes: UintRangeArray<T>;
-  tokenIds: UintRangeArray<T>;
-  ownershipTimes: UintRangeArray<T>;
+  transferTimes: UintRangeArray;
+  tokenIds: UintRangeArray;
+  ownershipTimes: UintRangeArray;
   approvalId: string;
-  permanentlyPermittedTimes: UintRangeArray<T>;
-  permanentlyForbiddenTimes: UintRangeArray<T>;
+  permanentlyPermittedTimes: UintRangeArray;
+  permanentlyForbiddenTimes: UintRangeArray;
 
-  constructor(msg: iUserIncomingApprovalPermission<T>) {
+  constructor(msg: iUserIncomingApprovalPermission) {
     super();
     this.fromListId = msg.fromListId;
     this.initiatedByListId = msg.initiatedByListId;
@@ -295,34 +222,23 @@ export class UserIncomingApprovalPermission<T extends NumberType>
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserIncomingApprovalPermission<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserIncomingApprovalPermission<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UserIncomingApprovalPermission {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserIncomingApprovalPermission;
   }
 
   toProto(): protobadges.UserIncomingApprovalPermission {
     return new protobadges.UserIncomingApprovalPermission(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): UserIncomingApprovalPermission<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): UserIncomingApprovalPermission {
     return UserIncomingApprovalPermission.fromProto(protobadges.UserIncomingApprovalPermission.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): UserIncomingApprovalPermission<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): UserIncomingApprovalPermission {
     return UserIncomingApprovalPermission.fromProto(protobadges.UserIncomingApprovalPermission.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    protoMsg: protobadges.UserIncomingApprovalPermission,
-    convertFunction: (item: NumberType) => U
-  ): UserIncomingApprovalPermission<U> {
+  static fromProto(protoMsg: protobadges.UserIncomingApprovalPermission, convertFunction: (item: string | number) => U): UserIncomingApprovalPermission {
     return new UserIncomingApprovalPermission({
       fromListId: protoMsg.fromListId,
       initiatedByListId: protoMsg.initiatedByListId,
@@ -335,7 +251,7 @@ export class UserIncomingApprovalPermission<T extends NumberType>
     });
   }
 
-  castToCollectionApprovalPermission(address: string): CollectionApprovalPermission<T> {
+  castToCollectionApprovalPermission(address: string): CollectionApprovalPermission {
     return new CollectionApprovalPermission({
       ...this,
       toList: getReservedAddressList(address) as AddressList,
@@ -343,25 +259,18 @@ export class UserIncomingApprovalPermission<T extends NumberType>
     });
   }
 
-  static validateUpdate<U extends NumberType>(
-    permissions: UserIncomingApprovalPermissionWithDetails<U>[],
-    newPermission: UserIncomingApprovalPermissionWithDetails<U>[]
-  ): Error | null {
+  static validateUpdate(permissions: UserIncomingApprovalPermissionWithDetails[], newPermission: UserIncomingApprovalPermissionWithDetails[]): Error | null {
     const dummyAddress = '0x';
-    const castedPermissions: UniversalPermission[] = permissions.map((x) =>
-      x.castToCollectionApprovalPermission(dummyAddress).castToUniversalPermission()
-    );
-    const castedNewPermissions: UniversalPermission[] = newPermission.map((x) =>
-      x.castToCollectionApprovalPermission(dummyAddress).castToUniversalPermission()
-    );
+    const castedPermissions: UniversalPermission[] = permissions.map((x) => x.castToCollectionApprovalPermission(dummyAddress).castToUniversalPermission());
+    const castedNewPermissions: UniversalPermission[] = newPermission.map((x) => x.castToCollectionApprovalPermission(dummyAddress).castToUniversalPermission());
     return validateUniversalPermissionUpdate(GetFirstMatchOnly(castedPermissions), GetFirstMatchOnly(castedNewPermissions));
   }
 
-  static check<U extends NumberType>(
+  static check(
     details: {
-      tokenIds: UintRangeArray<U>;
-      ownershipTimes: UintRangeArray<U>;
-      transferTimes: UintRangeArray<U>;
+      tokenIds: UintRangeArray;
+      ownershipTimes: UintRangeArray;
+      transferTimes: UintRangeArray;
       toList: AddressList;
       fromList: AddressList;
       initiatedByList: AddressList;
@@ -369,7 +278,7 @@ export class UserIncomingApprovalPermission<T extends NumberType>
       amountTrackerIdList: AddressList;
       challengeTrackerIdList: AddressList;
     }[],
-    permissions: UserIncomingApprovalPermissionWithDetails<U>[],
+    permissions: UserIncomingApprovalPermissionWithDetails[],
     time?: U
   ): Error | null {
     const dummyAddress = '0x';
@@ -380,7 +289,7 @@ export class UserIncomingApprovalPermission<T extends NumberType>
     );
   }
 
-  toBech32Addresses(prefix: string): UserIncomingApprovalPermission<T> {
+  toBech32Addresses(prefix: string): UserIncomingApprovalPermission {
     return new UserIncomingApprovalPermission({
       ...this,
       fromListId: convertListIdToBech32(this.fromListId, prefix),
@@ -394,20 +303,20 @@ export class UserIncomingApprovalPermission<T extends NumberType>
  *
  * @category Permissions
  */
-export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeClass<CollectionPermissions<T>> implements iCollectionPermissions<T> {
-  canDeleteCollection: ActionPermission<T>[];
-  canArchiveCollection: ActionPermission<T>[];
-  canUpdateStandards: ActionPermission<T>[];
-  canUpdateCustomData: ActionPermission<T>[];
-  canUpdateManager: ActionPermission<T>[];
-  canUpdateCollectionMetadata: ActionPermission<T>[];
-  canUpdateValidTokenIds: TokenIdsActionPermission<T>[];
-  canUpdateTokenMetadata: TokenIdsActionPermission<T>[];
-  canUpdateCollectionApprovals: CollectionApprovalPermission<T>[];
-  canAddMoreAliasPaths: ActionPermission<T>[];
-  canAddMoreCosmosCoinWrapperPaths: ActionPermission<T>[];
+export class CollectionPermissions extends BaseNumberTypeClass<CollectionPermissions> implements iCollectionPermissions {
+  canDeleteCollection: ActionPermission[];
+  canArchiveCollection: ActionPermission[];
+  canUpdateStandards: ActionPermission[];
+  canUpdateCustomData: ActionPermission[];
+  canUpdateManager: ActionPermission[];
+  canUpdateCollectionMetadata: ActionPermission[];
+  canUpdateValidTokenIds: TokenIdsActionPermission[];
+  canUpdateTokenMetadata: TokenIdsActionPermission[];
+  canUpdateCollectionApprovals: CollectionApprovalPermission[];
+  canAddMoreAliasPaths: ActionPermission[];
+  canAddMoreCosmosCoinWrapperPaths: ActionPermission[];
 
-  constructor(msg: iCollectionPermissions<T>) {
+  constructor(msg: iCollectionPermissions) {
     super();
     this.canDeleteCollection = msg.canDeleteCollection.map((x) => new ActionPermission(x));
     this.canArchiveCollection = msg.canArchiveCollection.map((x) => new ActionPermission(x));
@@ -422,7 +331,7 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
     this.canAddMoreCosmosCoinWrapperPaths = msg.canAddMoreCosmosCoinWrapperPaths.map((x) => new ActionPermission(x));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionPermissions<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): CollectionPermissions {
     return new CollectionPermissions(
       deepCopyPrimitives({
         canDeleteCollection: this.canDeleteCollection.map((x) => x.convert(convertFunction)),
@@ -444,26 +353,15 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
     return new protobadges.CollectionPermissions(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): CollectionPermissions<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): CollectionPermissions {
     return CollectionPermissions.fromProto(protobadges.CollectionPermissions.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): CollectionPermissions<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): CollectionPermissions {
     return CollectionPermissions.fromProto(protobadges.CollectionPermissions.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    protoMsg: protobadges.CollectionPermissions,
-    convertFunction: (item: NumberType) => U
-  ): CollectionPermissions<U> {
+  static fromProto(protoMsg: protobadges.CollectionPermissions, convertFunction: (item: string | number) => U): CollectionPermissions {
     return new CollectionPermissions({
       canDeleteCollection: protoMsg.canDeleteCollection.map((x) => ActionPermission.fromProto(x, convertFunction)),
       canArchiveCollection: protoMsg.canArchiveCollection.map((x) => ActionPermission.fromProto(x, convertFunction)),
@@ -479,28 +377,13 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
     });
   }
 
-  static validateUpdate<U extends NumberType>(
-    oldPermissions: CollectionPermissionsWithDetails<U>,
-    newPermissions: CollectionPermissionsWithDetails<U>
-  ): Error | null {
-    const responses = [
-      ActionPermission.validateUpdate(oldPermissions.canDeleteCollection, newPermissions.canDeleteCollection),
-      ActionPermission.validateUpdate(oldPermissions.canUpdateManager, newPermissions.canUpdateManager),
-      ActionPermission.validateUpdate(oldPermissions.canUpdateCustomData, newPermissions.canUpdateCustomData),
-      ActionPermission.validateUpdate(oldPermissions.canUpdateStandards, newPermissions.canUpdateStandards),
-      ActionPermission.validateUpdate(oldPermissions.canArchiveCollection, newPermissions.canArchiveCollection),
-      ActionPermission.validateUpdate(oldPermissions.canUpdateCollectionMetadata, newPermissions.canUpdateCollectionMetadata),
-      TokenIdsActionPermission.validateUpdate(oldPermissions.canUpdateValidTokenIds, newPermissions.canUpdateValidTokenIds),
-      TokenIdsActionPermission.validateUpdate(oldPermissions.canUpdateTokenMetadata, newPermissions.canUpdateTokenMetadata),
-      CollectionApprovalPermission.validateUpdate(oldPermissions.canUpdateCollectionApprovals, newPermissions.canUpdateCollectionApprovals),
-      ActionPermission.validateUpdate(oldPermissions.canAddMoreAliasPaths, newPermissions.canAddMoreAliasPaths),
-      ActionPermission.validateUpdate(oldPermissions.canAddMoreCosmosCoinWrapperPaths, newPermissions.canAddMoreCosmosCoinWrapperPaths)
-    ];
+  static validateUpdate(oldPermissions: CollectionPermissionsWithDetails, newPermissions: CollectionPermissionsWithDetails): Error | null {
+    const responses = [ActionPermission.validateUpdate(oldPermissions.canDeleteCollection, newPermissions.canDeleteCollection), ActionPermission.validateUpdate(oldPermissions.canUpdateManager, newPermissions.canUpdateManager), ActionPermission.validateUpdate(oldPermissions.canUpdateCustomData, newPermissions.canUpdateCustomData), ActionPermission.validateUpdate(oldPermissions.canUpdateStandards, newPermissions.canUpdateStandards), ActionPermission.validateUpdate(oldPermissions.canArchiveCollection, newPermissions.canArchiveCollection), ActionPermission.validateUpdate(oldPermissions.canUpdateCollectionMetadata, newPermissions.canUpdateCollectionMetadata), TokenIdsActionPermission.validateUpdate(oldPermissions.canUpdateValidTokenIds, newPermissions.canUpdateValidTokenIds), TokenIdsActionPermission.validateUpdate(oldPermissions.canUpdateTokenMetadata, newPermissions.canUpdateTokenMetadata), CollectionApprovalPermission.validateUpdate(oldPermissions.canUpdateCollectionApprovals, newPermissions.canUpdateCollectionApprovals), ActionPermission.validateUpdate(oldPermissions.canAddMoreAliasPaths, newPermissions.canAddMoreAliasPaths), ActionPermission.validateUpdate(oldPermissions.canAddMoreCosmosCoinWrapperPaths, newPermissions.canAddMoreCosmosCoinWrapperPaths)];
 
     return responses.find((x) => x !== null) ?? null;
   }
 
-  static InitEmpty(): CollectionPermissions<bigint> {
+  static InitEmpty(): CollectionPermissions {
     return new CollectionPermissions({
       canDeleteCollection: [],
       canArchiveCollection: [],
@@ -516,7 +399,7 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
     });
   }
 
-  toBech32Addresses(prefix: string): CollectionPermissions<T> {
+  toBech32Addresses(prefix: string): CollectionPermissions {
     return new CollectionPermissions({
       ...this,
       canUpdateCollectionApprovals: this.canUpdateCollectionApprovals.map((x) => x.toBech32Addresses(prefix))
@@ -529,17 +412,17 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
  *
  * @category Permissions
  */
-export class ActionPermission<T extends NumberType> extends BaseNumberTypeClass<ActionPermission<T>> implements iActionPermission<T> {
-  permanentlyPermittedTimes: UintRangeArray<T>;
-  permanentlyForbiddenTimes: UintRangeArray<T>;
+export class ActionPermission extends BaseNumberTypeClass<ActionPermission> implements iActionPermission {
+  permanentlyPermittedTimes: UintRangeArray;
+  permanentlyForbiddenTimes: UintRangeArray;
 
-  constructor(msg: iActionPermission<T>) {
+  constructor(msg: iActionPermission) {
     super();
     this.permanentlyPermittedTimes = UintRangeArray.From(msg.permanentlyPermittedTimes);
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ActionPermission<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ActionPermission {
     return new ActionPermission(
       deepCopyPrimitives({
         permanentlyPermittedTimes: this.permanentlyPermittedTimes.map((x) => x.convert(convertFunction)),
@@ -552,23 +435,15 @@ export class ActionPermission<T extends NumberType> extends BaseNumberTypeClass<
     return new protobadges.ActionPermission(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): ActionPermission<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): ActionPermission {
     return ActionPermission.fromProto(protobadges.ActionPermission.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): ActionPermission<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): ActionPermission {
     return ActionPermission.fromProto(protobadges.ActionPermission.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(protoMsg: protobadges.ActionPermission, convertFunction: (item: NumberType) => U): ActionPermission<U> {
+  static fromProto(protoMsg: protobadges.ActionPermission, convertFunction: (item: string | number) => U): ActionPermission {
     return new ActionPermission({
       permanentlyPermittedTimes: protoMsg.permanentlyPermittedTimes.map((x) => UintRange.fromProto(x, convertFunction)),
       permanentlyForbiddenTimes: protoMsg.permanentlyForbiddenTimes.map((x) => UintRange.fromProto(x, convertFunction))
@@ -583,19 +458,19 @@ export class ActionPermission<T extends NumberType> extends BaseNumberTypeClass<
     };
   }
 
-  static validateUpdate<U extends NumberType>(permissions: ActionPermission<U>[], newPermission: ActionPermission<U>[]): Error | null {
+  static validateUpdate(permissions: ActionPermission[], newPermission: ActionPermission[]): Error | null {
     const castedPermissions: UniversalPermission[] = permissions.map((x) => x.castToUniversalPermission());
     const castedNewPermissions: UniversalPermission[] = newPermission.map((x) => x.castToUniversalPermission());
     return validateUniversalPermissionUpdate(GetFirstMatchOnly(castedPermissions), GetFirstMatchOnly(castedNewPermissions));
   }
 
-  static check<T extends NumberType>(permissions: ActionPermission<T>[], time?: T): Error | null {
+  static check(permissions: ActionPermission[], time?: T): Error | null {
     const castedPermissions = permissions.map((x) => x.castToUniversalPermission());
     return checkUniversalPermissionPermits(castedPermissions, time);
   }
 }
 
-function checkUniversalPermissionPermits<T extends NumberType>(permissions: UniversalPermission[], time?: T): Error | null {
+function checkUniversalPermissionPermits(permissions: UniversalPermission[], time?: T): Error | null {
   const permissionDetails = GetFirstMatchOnly(permissions);
   for (const permissionDetail of permissionDetails) {
     const err = checkNotForbidden(permissionDetail, time ? BigInt(time) : undefined);
@@ -605,7 +480,6 @@ function checkUniversalPermissionPermits<T extends NumberType>(permissions: Univ
   }
   return null;
 }
-
 
 const AllDefaultDetailsValues: UniversalPermissionDetails = {
   timelineTime: new UintRange({ start: -1n, end: -1n }),
@@ -640,22 +514,19 @@ const AllDefaultDetailsValues: UniversalPermissionDetails = {
  *
  * @category Permissions
  */
-export class TokenIdsActionPermission<T extends NumberType>
-  extends BaseNumberTypeClass<TokenIdsActionPermission<T>>
-  implements iTokenIdsActionPermission<T>
-{
-  tokenIds: UintRangeArray<T>;
-  permanentlyPermittedTimes: UintRangeArray<T>;
-  permanentlyForbiddenTimes: UintRangeArray<T>;
+export class TokenIdsActionPermission extends BaseNumberTypeClass<TokenIdsActionPermission> implements iTokenIdsActionPermission {
+  tokenIds: UintRangeArray;
+  permanentlyPermittedTimes: UintRangeArray;
+  permanentlyForbiddenTimes: UintRangeArray;
 
-  constructor(msg: iTokenIdsActionPermission<T>) {
+  constructor(msg: iTokenIdsActionPermission) {
     super();
     this.tokenIds = UintRangeArray.From(msg.tokenIds);
     this.permanentlyPermittedTimes = UintRangeArray.From(msg.permanentlyPermittedTimes);
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TokenIdsActionPermission<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): TokenIdsActionPermission {
     return new TokenIdsActionPermission(
       deepCopyPrimitives({
         tokenIds: this.tokenIds.map((x) => x.convert(convertFunction)),
@@ -669,26 +540,15 @@ export class TokenIdsActionPermission<T extends NumberType>
     return new protobadges.TokenIdsActionPermission(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): TokenIdsActionPermission<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): TokenIdsActionPermission {
     return TokenIdsActionPermission.fromProto(protobadges.TokenIdsActionPermission.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): TokenIdsActionPermission<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): TokenIdsActionPermission {
     return TokenIdsActionPermission.fromProto(protobadges.TokenIdsActionPermission.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    protoMsg: protobadges.TokenIdsActionPermission,
-    convertFunction: (item: NumberType) => U
-  ): TokenIdsActionPermission<U> {
+  static fromProto(protoMsg: protobadges.TokenIdsActionPermission, convertFunction: (item: string | number) => U): TokenIdsActionPermission {
     return new TokenIdsActionPermission({
       tokenIds: protoMsg.tokenIds.map((x) => UintRange.fromProto(x, convertFunction)),
       permanentlyPermittedTimes: protoMsg.permanentlyPermittedTimes.map((x) => UintRange.fromProto(x, convertFunction)),
@@ -705,20 +565,17 @@ export class TokenIdsActionPermission<T extends NumberType>
       usesTokenIds: true
     };
   }
-  static validateUpdate<U extends NumberType>(
-    permissions: TokenIdsActionPermission<U>[],
-    newPermission: TokenIdsActionPermission<U>[]
-  ): Error | null {
+  static validateUpdate(permissions: TokenIdsActionPermission[], newPermission: TokenIdsActionPermission[]): Error | null {
     const castedPermissions: UniversalPermission[] = permissions.map((x) => x.castToUniversalPermission());
     const castedNewPermissions: UniversalPermission[] = newPermission.map((x) => x.castToUniversalPermission());
     return validateUniversalPermissionUpdate(GetFirstMatchOnly(castedPermissions), GetFirstMatchOnly(castedNewPermissions));
   }
 
-  static check<U extends NumberType>(
+  static check(
     details: {
-      tokenIds: UintRangeArray<U>;
+      tokenIds: UintRangeArray;
     }[],
-    permissions: TokenIdsActionPermission<U>[],
+    permissions: TokenIdsActionPermission[],
     time?: U
   ): Error | null {
     const detailsToCheck: UniversalPermissionDetails[] = [];
@@ -737,7 +594,6 @@ export class TokenIdsActionPermission<T extends NumberType>
   }
 }
 
-
 /**
  * CollectionApprovalPermission represents a permission that allows updating the collection approved transfers.
  *
@@ -745,21 +601,18 @@ export class TokenIdsActionPermission<T extends NumberType>
  *
  * @category Permissions
  */
-export class CollectionApprovalPermission<T extends NumberType>
-  extends BaseNumberTypeClass<CollectionApprovalPermission<T>>
-  implements iCollectionApprovalPermission<T>
-{
+export class CollectionApprovalPermission extends BaseNumberTypeClass<CollectionApprovalPermission> implements iCollectionApprovalPermission {
   fromListId: string;
   toListId: string;
   initiatedByListId: string;
-  transferTimes: UintRangeArray<T>;
-  tokenIds: UintRangeArray<T>;
-  ownershipTimes: UintRangeArray<T>;
+  transferTimes: UintRangeArray;
+  tokenIds: UintRangeArray;
+  ownershipTimes: UintRangeArray;
   approvalId: string;
-  permanentlyPermittedTimes: UintRangeArray<T>;
-  permanentlyForbiddenTimes: UintRangeArray<T>;
+  permanentlyPermittedTimes: UintRangeArray;
+  permanentlyForbiddenTimes: UintRangeArray;
 
-  constructor(msg: iCollectionApprovalPermission<T>) {
+  constructor(msg: iCollectionApprovalPermission) {
     super();
     this.fromListId = msg.fromListId;
     this.toListId = msg.toListId;
@@ -772,7 +625,7 @@ export class CollectionApprovalPermission<T extends NumberType>
     this.permanentlyForbiddenTimes = UintRangeArray.From(msg.permanentlyForbiddenTimes);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionApprovalPermission<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): CollectionApprovalPermission {
     return new CollectionApprovalPermission(
       deepCopyPrimitives({
         fromListId: this.fromListId,
@@ -792,26 +645,15 @@ export class CollectionApprovalPermission<T extends NumberType>
     return new protobadges.CollectionApprovalPermission(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): CollectionApprovalPermission<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): CollectionApprovalPermission {
     return CollectionApprovalPermission.fromProto(protobadges.CollectionApprovalPermission.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): CollectionApprovalPermission<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): CollectionApprovalPermission {
     return CollectionApprovalPermission.fromProto(protobadges.CollectionApprovalPermission.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    protoMsg: protobadges.CollectionApprovalPermission,
-    convertFunction: (item: NumberType) => U
-  ): CollectionApprovalPermission<U> {
+  static fromProto(protoMsg: protobadges.CollectionApprovalPermission, convertFunction: (item: string | number) => U): CollectionApprovalPermission {
     return new CollectionApprovalPermission({
       fromListId: protoMsg.fromListId,
       toListId: protoMsg.toListId,
@@ -825,26 +667,23 @@ export class CollectionApprovalPermission<T extends NumberType>
     });
   }
 
-  static validateUpdate<U extends NumberType>(
-    permissions: CollectionApprovalPermissionWithDetails<U>[],
-    newPermission: CollectionApprovalPermissionWithDetails<U>[]
-  ): Error | null {
+  static validateUpdate(permissions: CollectionApprovalPermissionWithDetails[], newPermission: CollectionApprovalPermissionWithDetails[]): Error | null {
     const castedPermissions: UniversalPermission[] = permissions.map((x) => x.castToUniversalPermission());
     const castedNewPermissions: UniversalPermission[] = newPermission.map((x) => x.castToUniversalPermission());
     return validateUniversalPermissionUpdate(GetFirstMatchOnly(castedPermissions), GetFirstMatchOnly(castedNewPermissions));
   }
 
-  static check<U extends NumberType>(
+  static check(
     details: {
-      tokenIds: UintRangeArray<U>;
-      ownershipTimes: UintRangeArray<U>;
-      transferTimes: UintRangeArray<U>;
+      tokenIds: UintRangeArray;
+      ownershipTimes: UintRangeArray;
+      transferTimes: UintRangeArray;
       toList: AddressList;
       fromList: AddressList;
       initiatedByList: AddressList;
       approvalIdList: AddressList;
     }[],
-    permissions: CollectionApprovalPermissionWithDetails<U>[],
+    permissions: CollectionApprovalPermissionWithDetails[],
     time?: U
   ): Error | null {
     const detailsToCheck: UniversalPermissionDetails[] = [];
@@ -872,7 +711,7 @@ export class CollectionApprovalPermission<T extends NumberType>
     return checkNotForbiddenForAllOverlaps(permissionDetails, detailsToCheck, time ? BigInt(time) : undefined, true);
   }
 
-  toBech32Addresses(prefix: string): CollectionApprovalPermission<T> {
+  toBech32Addresses(prefix: string): CollectionApprovalPermission {
     return new CollectionApprovalPermission({
       ...this,
       fromListId: convertListIdToBech32(this.fromListId, prefix),
@@ -887,27 +726,24 @@ const { getReservedAddressList, getReservedTrackerList } = AddressList;
 /**
  * @category Permissions
  */
-export class CollectionApprovalPermissionWithDetails<T extends NumberType>
-  extends CollectionApprovalPermission<T>
-  implements iCollectionApprovalPermissionWithDetails<T>, CustomType<CollectionApprovalPermissionWithDetails<T>>
-{
+export class CollectionApprovalPermissionWithDetails extends CollectionApprovalPermission implements iCollectionApprovalPermissionWithDetails, CustomType<CollectionApprovalPermissionWithDetails> {
   toList: AddressList;
   fromList: AddressList;
   initiatedByList: AddressList;
 
-  constructor(data: iCollectionApprovalPermissionWithDetails<T>) {
+  constructor(data: iCollectionApprovalPermissionWithDetails) {
     super(data);
     this.toList = new AddressList(data.toList);
     this.fromList = new AddressList(data.fromList);
     this.initiatedByList = new AddressList(data.initiatedByList);
   }
 
-  clone(): CollectionApprovalPermissionWithDetails<T> {
-    return super.clone() as CollectionApprovalPermissionWithDetails<T>;
+  clone(): CollectionApprovalPermissionWithDetails {
+    return super.clone() as CollectionApprovalPermissionWithDetails;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionApprovalPermissionWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionApprovalPermissionWithDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): CollectionApprovalPermissionWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionApprovalPermissionWithDetails;
   }
 
   castToUniversalPermission(): UniversalPermission {
@@ -936,28 +772,25 @@ export class CollectionApprovalPermissionWithDetails<T extends NumberType>
 /**
  * @category Permissions
  */
-export class UserIncomingApprovalPermissionWithDetails<T extends NumberType>
-  extends UserIncomingApprovalPermission<T>
-  implements iUserIncomingApprovalPermissionWithDetails<T>, CustomType<UserIncomingApprovalPermissionWithDetails<T>>
-{
+export class UserIncomingApprovalPermissionWithDetails extends UserIncomingApprovalPermission implements iUserIncomingApprovalPermissionWithDetails, CustomType<UserIncomingApprovalPermissionWithDetails> {
   fromList: AddressList;
   initiatedByList: AddressList;
 
-  constructor(data: iUserIncomingApprovalPermissionWithDetails<T>) {
+  constructor(data: iUserIncomingApprovalPermissionWithDetails) {
     super(data);
     this.fromList = new AddressList(data.fromList);
     this.initiatedByList = new AddressList(data.initiatedByList);
   }
 
-  clone(): UserIncomingApprovalPermissionWithDetails<T> {
-    return super.clone() as UserIncomingApprovalPermissionWithDetails<T>;
+  clone(): UserIncomingApprovalPermissionWithDetails {
+    return super.clone() as UserIncomingApprovalPermissionWithDetails;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserIncomingApprovalPermissionWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserIncomingApprovalPermissionWithDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UserIncomingApprovalPermissionWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserIncomingApprovalPermissionWithDetails;
   }
 
-  castToCollectionApprovalPermission(address: string): CollectionApprovalPermissionWithDetails<T> {
+  castToCollectionApprovalPermission(address: string): CollectionApprovalPermissionWithDetails {
     return new CollectionApprovalPermissionWithDetails({
       ...this,
       toList: getReservedAddressList(address) as AddressList,
@@ -969,28 +802,25 @@ export class UserIncomingApprovalPermissionWithDetails<T extends NumberType>
 /**
  * @category Permissions
  */
-export class UserOutgoingApprovalPermissionWithDetails<T extends NumberType>
-  extends UserOutgoingApprovalPermission<T>
-  implements iUserOutgoingApprovalPermissionWithDetails<T>, CustomType<UserOutgoingApprovalPermissionWithDetails<T>>
-{
+export class UserOutgoingApprovalPermissionWithDetails extends UserOutgoingApprovalPermission implements iUserOutgoingApprovalPermissionWithDetails, CustomType<UserOutgoingApprovalPermissionWithDetails> {
   toList: AddressList;
   initiatedByList: AddressList;
 
-  constructor(data: iUserOutgoingApprovalPermissionWithDetails<T>) {
+  constructor(data: iUserOutgoingApprovalPermissionWithDetails) {
     super(data);
     this.toList = new AddressList(data.toList);
     this.initiatedByList = new AddressList(data.initiatedByList);
   }
 
-  clone(): UserOutgoingApprovalPermissionWithDetails<T> {
-    return super.clone() as UserOutgoingApprovalPermissionWithDetails<T>;
+  clone(): UserOutgoingApprovalPermissionWithDetails {
+    return super.clone() as UserOutgoingApprovalPermissionWithDetails;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserOutgoingApprovalPermissionWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserOutgoingApprovalPermissionWithDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UserOutgoingApprovalPermissionWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserOutgoingApprovalPermissionWithDetails;
   }
 
-  castToCollectionApprovalPermission(address: string): CollectionApprovalPermissionWithDetails<T> {
+  castToCollectionApprovalPermission(address: string): CollectionApprovalPermissionWithDetails {
     return new CollectionApprovalPermissionWithDetails({
       ...this,
       fromList: getReservedAddressList(address) as AddressList,
@@ -1002,31 +832,23 @@ export class UserOutgoingApprovalPermissionWithDetails<T extends NumberType>
 /**
  * @category Permissions
  */
-export class CollectionPermissionsWithDetails<T extends NumberType>
-  extends CollectionPermissions<T>
-  implements iCollectionPermissionsWithDetails<T>, CustomType<CollectionPermissionsWithDetails<T>>
-{
-  canUpdateCollectionApprovals: CollectionApprovalPermissionWithDetails<T>[];
+export class CollectionPermissionsWithDetails extends CollectionPermissions implements iCollectionPermissionsWithDetails, CustomType<CollectionPermissionsWithDetails> {
+  canUpdateCollectionApprovals: CollectionApprovalPermissionWithDetails[];
 
-  constructor(data: iCollectionPermissionsWithDetails<T>) {
+  constructor(data: iCollectionPermissionsWithDetails) {
     super(data);
-    this.canUpdateCollectionApprovals = data.canUpdateCollectionApprovals.map(
-      (canUpdateCollectionApproval) => new CollectionApprovalPermissionWithDetails(canUpdateCollectionApproval)
-    );
+    this.canUpdateCollectionApprovals = data.canUpdateCollectionApprovals.map((canUpdateCollectionApproval) => new CollectionApprovalPermissionWithDetails(canUpdateCollectionApproval));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionPermissionsWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionPermissionsWithDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): CollectionPermissionsWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionPermissionsWithDetails;
   }
 
-  clone<U extends NumberType>(): CollectionPermissionsWithDetails<U> {
-    return super.clone() as any as CollectionPermissionsWithDetails<U>;
+  clone(): CollectionPermissionsWithDetails {
+    return super.clone() as any as CollectionPermissionsWithDetails;
   }
 
-  static validateUpdate<U extends NumberType>(
-    oldPermissions: CollectionPermissionsWithDetails<U>,
-    newPermissions: CollectionPermissionsWithDetails<U>
-  ): Error | null {
+  static validateUpdate(oldPermissions: CollectionPermissionsWithDetails, newPermissions: CollectionPermissionsWithDetails): Error | null {
     return CollectionPermissions.validateUpdate(oldPermissions, newPermissions);
   }
 }
@@ -1034,34 +856,24 @@ export class CollectionPermissionsWithDetails<T extends NumberType>
 /**
  * @category Permissions
  */
-export class UserPermissionsWithDetails<T extends NumberType> extends UserPermissions<T> implements iUserPermissionsWithDetails<T> {
-  canUpdateIncomingApprovals: UserIncomingApprovalPermissionWithDetails<T>[];
-  canUpdateOutgoingApprovals: UserOutgoingApprovalPermissionWithDetails<T>[];
-  canUpdateAutoApproveSelfInitiatedOutgoingTransfers: ActionPermission<T>[];
-  canUpdateAutoApproveSelfInitiatedIncomingTransfers: ActionPermission<T>[];
-  canUpdateAutoApproveAllIncomingTransfers: ActionPermission<T>[];
+export class UserPermissionsWithDetails extends UserPermissions implements iUserPermissionsWithDetails {
+  canUpdateIncomingApprovals: UserIncomingApprovalPermissionWithDetails[];
+  canUpdateOutgoingApprovals: UserOutgoingApprovalPermissionWithDetails[];
+  canUpdateAutoApproveSelfInitiatedOutgoingTransfers: ActionPermission[];
+  canUpdateAutoApproveSelfInitiatedIncomingTransfers: ActionPermission[];
+  canUpdateAutoApproveAllIncomingTransfers: ActionPermission[];
 
-  constructor(data: iUserPermissionsWithDetails<T>) {
+  constructor(data: iUserPermissionsWithDetails) {
     super(data);
-    this.canUpdateIncomingApprovals = data.canUpdateIncomingApprovals.map(
-      (canUpdateUserIncomingApproval) => new UserIncomingApprovalPermissionWithDetails(canUpdateUserIncomingApproval)
-    );
-    this.canUpdateOutgoingApprovals = data.canUpdateOutgoingApprovals.map(
-      (canUpdateUserOutgoingApproval) => new UserOutgoingApprovalPermissionWithDetails(canUpdateUserOutgoingApproval)
-    );
-    this.canUpdateAutoApproveSelfInitiatedOutgoingTransfers = data.canUpdateAutoApproveSelfInitiatedOutgoingTransfers.map(
-      (actionPermission) => new ActionPermission(actionPermission)
-    );
-    this.canUpdateAutoApproveSelfInitiatedIncomingTransfers = data.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map(
-      (actionPermission) => new ActionPermission(actionPermission)
-    );
-    this.canUpdateAutoApproveAllIncomingTransfers = data.canUpdateAutoApproveAllIncomingTransfers.map(
-      (actionPermission) => new ActionPermission(actionPermission)
-    );
+    this.canUpdateIncomingApprovals = data.canUpdateIncomingApprovals.map((canUpdateUserIncomingApproval) => new UserIncomingApprovalPermissionWithDetails(canUpdateUserIncomingApproval));
+    this.canUpdateOutgoingApprovals = data.canUpdateOutgoingApprovals.map((canUpdateUserOutgoingApproval) => new UserOutgoingApprovalPermissionWithDetails(canUpdateUserOutgoingApproval));
+    this.canUpdateAutoApproveSelfInitiatedOutgoingTransfers = data.canUpdateAutoApproveSelfInitiatedOutgoingTransfers.map((actionPermission) => new ActionPermission(actionPermission));
+    this.canUpdateAutoApproveSelfInitiatedIncomingTransfers = data.canUpdateAutoApproveSelfInitiatedIncomingTransfers.map((actionPermission) => new ActionPermission(actionPermission));
+    this.canUpdateAutoApproveAllIncomingTransfers = data.canUpdateAutoApproveAllIncomingTransfers.map((actionPermission) => new ActionPermission(actionPermission));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserPermissionsWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserPermissionsWithDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UserPermissionsWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserPermissionsWithDetails;
   }
 }
 
@@ -1070,20 +882,13 @@ function checkNotForbidden(permission: UniversalPermissionDetails, time?: bigint
   const blockTime = time ?? BigInt(Date.now());
   const [, found] = permission.permanentlyForbiddenTimes.search(blockTime);
   if (found) {
-    return new Error(
-      `permission is forbidden from being executed at current time ${new Date(Number(blockTime)).toLocaleDateString() + ' ' + new Date(Number(blockTime)).toLocaleTimeString()}`
-    );
+    return new Error(`permission is forbidden from being executed at current time ${new Date(Number(blockTime)).toLocaleDateString() + ' ' + new Date(Number(blockTime)).toLocaleTimeString()}`);
   }
 
   return null;
 }
 
-function checkNotForbiddenForAllOverlaps(
-  permissionDetails: UniversalPermissionDetails[],
-  detailsToCheck: UniversalPermissionDetails[],
-  time: bigint | undefined = undefined,
-  usesLists?: boolean
-): Error | null {
+function checkNotForbiddenForAllOverlaps(permissionDetails: UniversalPermissionDetails[], detailsToCheck: UniversalPermissionDetails[], time: bigint | undefined = undefined, usesLists?: boolean): Error | null {
   let usesTokenIds = true;
   let usesTimelineTimes = true;
   let usesTransferTimes = true;

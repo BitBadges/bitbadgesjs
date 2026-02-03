@@ -10,7 +10,7 @@ import { Metadata } from './metadata.js';
 //TODO: Make an Array wrapper class for the util functions? Also add to BitBadgesCollection?
 
 /**
- * To keep track of metadata for tokens and load it dynamically, we store it in an array: TokenMetadataDetails<T>[].
+ * To keep track of metadata for tokens and load it dynamically, we store it in an array: TokenMetadataDetails[].
  *
  * The values are { metadata, uri, tokenIds, } where this object represents the metadata fetched by a uri
  * which correspond to the tokenIds.
@@ -29,11 +29,11 @@ import { Metadata } from './metadata.js';
 /**
  * @category Interfaces
  */
-export interface iTokenMetadataDetails<T extends NumberType> {
+export interface iTokenMetadataDetails {
   /** The token IDs that correspond to the metadata */
-  tokenIds: iUintRange<T>[];
+  tokenIds: iUintRange[];
   /** The metadata fetched by the URI */
-  metadata?: iMetadata<T>;
+  metadata?: iMetadata;
   /** The URI that the metadata was fetched from. This is the original on-chain URI, so may still have placeholders (i.e. {id} or {address}) */
   uri: string;
   /** The URI that the metadata was fetched from with placeholders replaced. */
@@ -47,9 +47,9 @@ export interface iTokenMetadataDetails<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iCollectionMetadataDetails<T extends NumberType> {
+export interface iCollectionMetadataDetails {
   /** The metadata fetched by the URI */
-  metadata?: iMetadata<T>;
+  metadata?: iMetadata;
   /** The URI that the metadata was fetched from. This is the original on-chain URI, so may still have placeholders (i.e. {id} or {address}) */
   uri: string;
   /** The URI that the metadata was fetched from with placeholders replaced. */
@@ -64,17 +64,14 @@ export interface iCollectionMetadataDetails<T extends NumberType> {
  * @inheritDoc iCollectionMetadataDetails
  * @category Collections
  */
-export class CollectionMetadataDetails<T extends NumberType>
-  extends BaseNumberTypeClass<CollectionMetadataDetails<T>>
-  implements iCollectionMetadataDetails<T>
-{
-  metadata?: Metadata<T>;
+export class CollectionMetadataDetails extends BaseNumberTypeClass<CollectionMetadataDetails> implements iCollectionMetadataDetails {
+  metadata?: Metadata;
   uri: string;
   fetchedUri?: string | undefined;
   customData: string;
   toUploadToIpfs?: boolean;
 
-  constructor(data: iCollectionMetadataDetails<T>) {
+  constructor(data: iCollectionMetadataDetails) {
     super();
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
     this.uri = data.uri;
@@ -87,8 +84,8 @@ export class CollectionMetadataDetails<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionMetadataDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionMetadataDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): CollectionMetadataDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionMetadataDetails;
   }
 
   toProto(): protobadges.CollectionMetadata {
@@ -100,15 +97,15 @@ export class CollectionMetadataDetails<T extends NumberType>
  * @inheritDoc iTokenMetadataDetails
  * @category Collections
  */
-export class TokenMetadataDetails<T extends NumberType> extends BaseNumberTypeClass<TokenMetadataDetails<T>> implements iTokenMetadataDetails<T> {
-  tokenIds: UintRangeArray<T>;
-  metadata?: Metadata<T>;
+export class TokenMetadataDetails extends BaseNumberTypeClass<TokenMetadataDetails> implements iTokenMetadataDetails {
+  tokenIds: UintRangeArray;
+  metadata?: Metadata;
   uri: string;
   fetchedUri?: string | undefined;
   customData: string;
   toUploadToIpfs?: boolean;
 
-  constructor(data: iTokenMetadataDetails<T>) {
+  constructor(data: iTokenMetadataDetails) {
     super();
     this.tokenIds = UintRangeArray.From(data.tokenIds);
     this.metadata = data.metadata ? new Metadata(data.metadata) : undefined;
@@ -122,22 +119,22 @@ export class TokenMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TokenMetadataDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TokenMetadataDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): TokenMetadataDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TokenMetadataDetails;
   }
 
   /**
-   * Removes the metadata from the TokenMetadataDetails<bigint>[] for specific token IDs.
+   * Removes the metadata from the TokenMetadataDetails[] for specific token IDs.
    *
    * Note that this function does not mutate the metadataArr, but instead returns a new one.
    */
-  static removeTokenMetadata = <T extends NumberType>(currTokenMetadata: TokenMetadataDetails<T>[], tokenIds: UintRange<T>[]) => {
-    const dummyMetadata = new Metadata<T>({
+  static removeTokenMetadata = (currTokenMetadata: TokenMetadataDetails[], tokenIds: UintRange[]) => {
+    const dummyMetadata = new Metadata({
       name: 'metadataToRemove',
       description: 'metadataToRemove',
       image: 'metadataToRemove'
     });
-    const uniqueTokenMetadataDetails = new TokenMetadataDetails<T>({
+    const uniqueTokenMetadataDetails = new TokenMetadataDetails({
       metadata: dummyMetadata,
       tokenIds,
       uri: '',
@@ -153,20 +150,14 @@ export class TokenMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
    *
    * Note that this function does not mutate the metadataArr, but instead returns a new one.
    */
-  static updateTokenMetadata = <T extends NumberType>(
-    currTokenMetadata: TokenMetadataDetails<T>[],
-    newTokenMetadataDetails: TokenMetadataDetails<T>
-  ) => {
+  static updateTokenMetadata = (currTokenMetadata: TokenMetadataDetails[], newTokenMetadataDetails: TokenMetadataDetails) => {
     return TokenMetadataDetails.batchUpdateTokenMetadata(currTokenMetadata, [newTokenMetadataDetails]);
   };
 
   /**
    * Batch update the metadataArr with the given metadata and tokenIds fetched from the given
    */
-  static batchUpdateTokenMetadata = <T extends NumberType>(
-    currTokenMetadata: TokenMetadataDetails<T>[],
-    newTokenMetadataDetailsArr: TokenMetadataDetails<T>[]
-  ) => {
+  static batchUpdateTokenMetadata = (currTokenMetadata: TokenMetadataDetails[], newTokenMetadataDetailsArr: TokenMetadataDetails[]) => {
     const allTokenIdsToBeUpdated = UintRangeArray.From(newTokenMetadataDetailsArr.map((x) => x.tokenIds).flat()).sortAndMerge();
     for (let i = 0; i < currTokenMetadata.length; i++) {
       const val = currTokenMetadata[i];
@@ -195,13 +186,7 @@ export class TokenMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
           const val = currTokenMetadata[idx];
           if (!val) continue; //For TS
 
-          if (
-            val.uri === newTokenMetadataDetails.uri &&
-            val.customData === newTokenMetadataDetails.customData &&
-            val.toUploadToIpfs === newTokenMetadataDetails.toUploadToIpfs &&
-            val.fetchedUri === newTokenMetadataDetails.fetchedUri &&
-            ((currentMetadata === undefined && undefined === val.metadata) || val.metadata?.equals(currentMetadata))
-          ) {
+          if (val.uri === newTokenMetadataDetails.uri && val.customData === newTokenMetadataDetails.customData && val.toUploadToIpfs === newTokenMetadataDetails.toUploadToIpfs && val.fetchedUri === newTokenMetadataDetails.fetchedUri && ((currentMetadata === undefined && undefined === val.metadata) || val.metadata?.equals(currentMetadata))) {
             currTokenMetadataExists = true;
             const newUintRange = new UintRange({ start: startTokenId, end: endTokenId });
             if (val.tokenIds.length > 0) {
@@ -246,11 +231,11 @@ export class TokenMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
   };
 
   /**
-   * Returns the { metadata, uri, tokenIds, customData } metadata object from the TokenMetadataDetails<bigint>[] for a specific tokenId.
+   * Returns the { metadata, uri, tokenIds, customData } metadata object from the TokenMetadataDetails[] for a specific tokenId.
    *
-   * If the tokenId does not exist in the TokenMetadataDetails<bigint>[], returns undefined.
+   * If the tokenId does not exist in the TokenMetadataDetails[], returns undefined.
    */
-  static getMetadataDetailsForTokenId<T extends NumberType>(tokenId: T, metadataArr: TokenMetadataDetails<T>[]): TokenMetadataDetails<T> | undefined {
+  static getMetadataDetailsForTokenId(tokenId: T, metadataArr: TokenMetadataDetails[]): TokenMetadataDetails | undefined {
     for (const val of Object.values(metadataArr)) {
       if (!val) continue; //For TS
 
@@ -263,11 +248,11 @@ export class TokenMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
   }
 
   /**
-   * Returns the metadata from the TokenMetadataDetails<bigint>[] for a specific tokenId.
+   * Returns the metadata from the TokenMetadataDetails[] for a specific tokenId.
    *
-   * If the tokenId does not exist in the TokenMetadataDetails<bigint>[], returns undefined.
+   * If the tokenId does not exist in the TokenMetadataDetails[], returns undefined.
    */
-  static getMetadataForTokenId<T extends NumberType>(tokenId: T, metadataArr: TokenMetadataDetails<T>[]) {
+  static getMetadataForTokenId(tokenId: T, metadataArr: TokenMetadataDetails[]) {
     return TokenMetadataDetails.getMetadataDetailsForTokenId(tokenId, metadataArr)?.metadata;
   }
 
@@ -281,20 +266,15 @@ export class TokenMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
    * @example
    * Use this function to set the "name" property of all tokens to "test" via setMetadataPropertyForAll(metadataArr, tokenIds, uri, "name", "test")
    */
-  static setMetadataPropertyForSpecificIds = <T extends NumberType>(
-    metadataArr: TokenMetadataDetails<T>[],
-    tokenIds: UintRange<T>[],
-    key: string,
-    value: any
-  ) => {
-    const toUploadToIpfsDetails: TokenMetadataDetails<T>[] = [];
+  static setMetadataPropertyForSpecificIds = (metadataArr: TokenMetadataDetails[], tokenIds: UintRange[], key: string, value: any) => {
+    const toUploadToIpfsDetails: TokenMetadataDetails[] = [];
     for (const tokenUintRange of tokenIds) {
       //We are updating a specific key value pair for each
       for (let id = tokenUintRange.start; id <= tokenUintRange.end; id = safeAddKeepLeft(id, 1)) {
-        let newMetadata = {} as Metadata<T>;
+        let newMetadata = {} as Metadata;
         let uri = '';
         let customData = '';
-        const uintRangeToUpdate = new UintRange<T>({ start: id, end: id });
+        const uintRangeToUpdate = new UintRange({ start: id, end: id });
 
         for (let i = 0; i < metadataArr.length; i++) {
           const val = metadataArr[i];
@@ -319,7 +299,7 @@ export class TokenMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
         }
         // console.log(metadataArr);
         toUploadToIpfsDetails.push(
-          new TokenMetadataDetails<T>({
+          new TokenMetadataDetails({
             metadata: newMetadata,
             tokenIds: [uintRangeToUpdate],
             uri,
@@ -329,7 +309,7 @@ export class TokenMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
         );
       }
     }
-    metadataArr = TokenMetadataDetails.batchUpdateTokenMetadata<T>(metadataArr, toUploadToIpfsDetails);
+    metadataArr = TokenMetadataDetails.batchUpdateTokenMetadata(metadataArr, toUploadToIpfsDetails);
 
     return metadataArr;
   };

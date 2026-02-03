@@ -6,25 +6,8 @@ import { BitBadgesCollection, iBitBadgesCollection } from '../BitBadgesCollectio
 import { ClaimDetails } from '@/core/approvals.js';
 import { CollectionId } from '@/interfaces/index.js';
 import { ClaimActivityDoc, PointsActivityDoc, TransferActivityDoc } from '../docs-types/activity.js';
-import {
-  ApprovalTrackerDoc,
-  BalanceDoc,
-  BalanceDocWithDetails,
-  MerkleChallengeTrackerDoc,
-  SIWBBRequestDoc,
-  UtilityPageDoc
-} from '../docs-types/docs.js';
-import {
-  iApprovalTrackerDoc,
-  iBalanceDoc,
-  iBalanceDocWithDetails,
-  iClaimActivityDoc,
-  iClaimDetails,
-  iMerkleChallengeTrackerDoc,
-  iPointsActivityDoc,
-  iTransferActivityDoc,
-  iUtilityPageDoc
-} from '../docs-types/interfaces.js';
+import { ApprovalTrackerDoc, BalanceDoc, BalanceDocWithDetails, MerkleChallengeTrackerDoc, SIWBBRequestDoc, UtilityPageDoc } from '../docs-types/docs.js';
+import { iApprovalTrackerDoc, iBalanceDoc, iBalanceDocWithDetails, iClaimActivityDoc, iClaimDetails, iMerkleChallengeTrackerDoc, iPointsActivityDoc, iTransferActivityDoc, iUtilityPageDoc } from '../docs-types/interfaces.js';
 import { iMetadata, Metadata } from '../metadata/metadata.js';
 
 /**
@@ -38,22 +21,19 @@ export interface iGetCollectionOwnersPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iGetCollectionOwnersSuccessResponse<T extends NumberType> {
-  owners: Array<iBalanceDoc<T>>;
+export interface iGetCollectionOwnersSuccessResponse {
+  owners: Array<iBalanceDoc>;
   pagination: PaginationInfo;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetCollectionOwnersSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetCollectionOwnersSuccessResponse<T>>
-  implements iGetCollectionOwnersSuccessResponse<T>
-{
-  owners: BalanceDoc<T>[];
+export class GetCollectionOwnersSuccessResponse extends BaseNumberTypeClass<GetCollectionOwnersSuccessResponse> implements iGetCollectionOwnersSuccessResponse {
+  owners: BalanceDoc[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetCollectionOwnersSuccessResponse<T>) {
+  constructor(data: iGetCollectionOwnersSuccessResponse) {
     super();
     this.owners = data.owners.map((owner) => new BalanceDoc(owner));
     this.pagination = data.pagination;
@@ -63,8 +43,8 @@ export class GetCollectionOwnersSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetCollectionOwnersSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionOwnersSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetCollectionOwnersSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionOwnersSuccessResponse;
   }
 }
 
@@ -81,22 +61,19 @@ export interface iGetCollectionTransferActivityPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iGetCollectionTransferActivitySuccessResponse<T extends NumberType> {
-  activity: Array<iTransferActivityDoc<T>>;
+export interface iGetCollectionTransferActivitySuccessResponse {
+  activity: Array<iTransferActivityDoc>;
   pagination: PaginationInfo;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetCollectionTransferActivitySuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetCollectionTransferActivitySuccessResponse<T>>
-  implements iGetCollectionTransferActivitySuccessResponse<T>
-{
-  activity: TransferActivityDoc<T>[];
+export class GetCollectionTransferActivitySuccessResponse extends BaseNumberTypeClass<GetCollectionTransferActivitySuccessResponse> implements iGetCollectionTransferActivitySuccessResponse {
+  activity: TransferActivityDoc[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetCollectionTransferActivitySuccessResponse<T>) {
+  constructor(data: iGetCollectionTransferActivitySuccessResponse) {
     super();
     this.activity = data.activity.map((activity) => new TransferActivityDoc(activity));
     this.pagination = data.pagination;
@@ -106,8 +83,8 @@ export class GetCollectionTransferActivitySuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetCollectionTransferActivitySuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionTransferActivitySuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetCollectionTransferActivitySuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionTransferActivitySuccessResponse;
   }
 }
 
@@ -122,22 +99,19 @@ export interface iGetCollectionChallengeTrackersPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iGetCollectionChallengeTrackersSuccessResponse<T extends NumberType> {
-  challengeTrackers: Array<iMerkleChallengeTrackerDoc<T>>;
+export interface iGetCollectionChallengeTrackersSuccessResponse {
+  challengeTrackers: Array<iMerkleChallengeTrackerDoc>;
   pagination: PaginationInfo;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetCollectionChallengeTrackersSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetCollectionChallengeTrackersSuccessResponse<T>>
-  implements iGetCollectionChallengeTrackersSuccessResponse<T>
-{
-  challengeTrackers: MerkleChallengeTrackerDoc<T>[];
+export class GetCollectionChallengeTrackersSuccessResponse extends BaseNumberTypeClass<GetCollectionChallengeTrackersSuccessResponse> implements iGetCollectionChallengeTrackersSuccessResponse {
+  challengeTrackers: MerkleChallengeTrackerDoc[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetCollectionChallengeTrackersSuccessResponse<T>) {
+  constructor(data: iGetCollectionChallengeTrackersSuccessResponse) {
     super();
     this.challengeTrackers = data.challengeTrackers.map((challengeTracker) => new MerkleChallengeTrackerDoc(challengeTracker));
     this.pagination = data.pagination;
@@ -147,8 +121,8 @@ export class GetCollectionChallengeTrackersSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetCollectionChallengeTrackersSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionChallengeTrackersSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetCollectionChallengeTrackersSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionChallengeTrackersSuccessResponse;
   }
 }
 
@@ -163,22 +137,19 @@ export interface iGetCollectionAmountTrackersPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iGetCollectionAmountTrackersSuccessResponse<T extends NumberType> {
-  amountTrackers: Array<iApprovalTrackerDoc<T>>;
+export interface iGetCollectionAmountTrackersSuccessResponse {
+  amountTrackers: Array<iApprovalTrackerDoc>;
   pagination: PaginationInfo;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetCollectionAmountTrackersSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetCollectionAmountTrackersSuccessResponse<T>>
-  implements iGetCollectionAmountTrackersSuccessResponse<T>
-{
-  amountTrackers: ApprovalTrackerDoc<T>[];
+export class GetCollectionAmountTrackersSuccessResponse extends BaseNumberTypeClass<GetCollectionAmountTrackersSuccessResponse> implements iGetCollectionAmountTrackersSuccessResponse {
+  amountTrackers: ApprovalTrackerDoc[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetCollectionAmountTrackersSuccessResponse<T>) {
+  constructor(data: iGetCollectionAmountTrackersSuccessResponse) {
     super();
     this.amountTrackers = data.amountTrackers.map((amountTracker) => new ApprovalTrackerDoc(amountTracker));
     this.pagination = data.pagination;
@@ -188,8 +159,8 @@ export class GetCollectionAmountTrackersSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetCollectionAmountTrackersSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionAmountTrackersSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetCollectionAmountTrackersSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionAmountTrackersSuccessResponse;
   }
 }
 
@@ -200,28 +171,25 @@ export interface iGetCollectionListingsPayload {
   bookmark?: string;
   oldestFirst?: boolean;
   /** Optional token ID to filter listings by */
-  tokenId?: NumberType;
+  tokenId?: string | number;
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetCollectionListingsSuccessResponse<T extends NumberType> {
-  listings: Array<iUtilityPageDoc<T>>;
+export interface iGetCollectionListingsSuccessResponse {
+  listings: Array<iUtilityPageDoc>;
   pagination: PaginationInfo;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetCollectionListingsSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetCollectionListingsSuccessResponse<T>>
-  implements iGetCollectionListingsSuccessResponse<T>
-{
-  listings: UtilityPageDoc<T>[];
+export class GetCollectionListingsSuccessResponse extends BaseNumberTypeClass<GetCollectionListingsSuccessResponse> implements iGetCollectionListingsSuccessResponse {
+  listings: UtilityPageDoc[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetCollectionListingsSuccessResponse<T>) {
+  constructor(data: iGetCollectionListingsSuccessResponse) {
     super();
     this.listings = data.listings.map((listing) => new UtilityPageDoc(listing));
     this.pagination = data.pagination;
@@ -231,8 +199,8 @@ export class GetCollectionListingsSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetCollectionListingsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionListingsSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetCollectionListingsSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionListingsSuccessResponse;
   }
 }
 
@@ -275,21 +243,18 @@ interface iBaseSuccessResponse {
 /**
  * @category API Requests / Responses
  */
-export interface iGetTransferActivityForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  activity: Array<iTransferActivityDoc<T>>;
+export interface iGetTransferActivityForUserSuccessResponse extends iBaseSuccessResponse {
+  activity: Array<iTransferActivityDoc>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetTransferActivityForUserSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetTransferActivityForUserSuccessResponse<T>>
-  implements iGetTransferActivityForUserSuccessResponse<T>
-{
-  activity: TransferActivityDoc<T>[];
+export class GetTransferActivityForUserSuccessResponse extends BaseNumberTypeClass<GetTransferActivityForUserSuccessResponse> implements iGetTransferActivityForUserSuccessResponse {
+  activity: TransferActivityDoc[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetTransferActivityForUserSuccessResponse<T>) {
+  constructor(data: iGetTransferActivityForUserSuccessResponse) {
     super();
     this.activity = data.activity.map((activity) => new TransferActivityDoc(activity));
     this.pagination = data.pagination;
@@ -299,28 +264,25 @@ export class GetTransferActivityForUserSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetTransferActivityForUserSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetTransferActivityForUserSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetTransferActivityForUserSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetTransferActivityForUserSuccessResponse;
   }
 }
 
 /**
  * @category API Requests / Responses */
-export interface iGetTokensViewForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  tokens: Array<iBalanceDocWithDetails<T>>;
+export interface iGetTokensViewForUserSuccessResponse extends iBaseSuccessResponse {
+  tokens: Array<iBalanceDocWithDetails>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetTokensViewForUserSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetTokensViewForUserSuccessResponse<T>>
-  implements iGetTokensViewForUserSuccessResponse<T>
-{
-  tokens: BalanceDocWithDetails<T>[];
+export class GetTokensViewForUserSuccessResponse extends BaseNumberTypeClass<GetTokensViewForUserSuccessResponse> implements iGetTokensViewForUserSuccessResponse {
+  tokens: BalanceDocWithDetails[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetTokensViewForUserSuccessResponse<T>) {
+  constructor(data: iGetTokensViewForUserSuccessResponse) {
     super();
     this.tokens = data.tokens.map((token) => new BalanceDocWithDetails(token));
     this.pagination = data.pagination;
@@ -330,8 +292,8 @@ export class GetTokensViewForUserSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetTokensViewForUserSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetTokensViewForUserSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetTokensViewForUserSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetTokensViewForUserSuccessResponse;
   }
 }
 
@@ -351,21 +313,18 @@ export interface iGetClaimActivityForUserPayload extends iBaseQueryParams {
 /**
  * @category API Requests / Responses
  */
-export interface iGetClaimActivityForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  activity: Array<iClaimActivityDoc<T>>;
+export interface iGetClaimActivityForUserSuccessResponse extends iBaseSuccessResponse {
+  activity: Array<iClaimActivityDoc>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetClaimActivityForUserSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetClaimActivityForUserSuccessResponse<T>>
-  implements iGetClaimActivityForUserSuccessResponse<T>
-{
-  activity: ClaimActivityDoc<T>[];
+export class GetClaimActivityForUserSuccessResponse extends BaseNumberTypeClass<GetClaimActivityForUserSuccessResponse> implements iGetClaimActivityForUserSuccessResponse {
+  activity: ClaimActivityDoc[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetClaimActivityForUserSuccessResponse<T>) {
+  constructor(data: iGetClaimActivityForUserSuccessResponse) {
     super();
     this.activity = data.activity.map((activity) => new ClaimActivityDoc(activity));
     this.pagination = data.pagination;
@@ -375,8 +334,8 @@ export class GetClaimActivityForUserSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetClaimActivityForUserSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetClaimActivityForUserSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetClaimActivityForUserSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetClaimActivityForUserSuccessResponse;
   }
 }
 
@@ -388,21 +347,18 @@ export interface iGetSiwbbRequestsForUserPayload extends iBaseQueryParams {}
 /**
  * @category API Requests / Responses
  */
-export interface iGetSiwbbRequestsForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  requests: Array<SIWBBRequestDoc<T>>;
+export interface iGetSiwbbRequestsForUserSuccessResponse extends iBaseSuccessResponse {
+  requests: Array<SIWBBRequestDoc>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetSiwbbRequestsForUserSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetSiwbbRequestsForUserSuccessResponse<T>>
-  implements iGetSiwbbRequestsForUserSuccessResponse<T>
-{
-  requests: SIWBBRequestDoc<T>[];
+export class GetSiwbbRequestsForUserSuccessResponse extends BaseNumberTypeClass<GetSiwbbRequestsForUserSuccessResponse> implements iGetSiwbbRequestsForUserSuccessResponse {
+  requests: SIWBBRequestDoc[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetSiwbbRequestsForUserSuccessResponse<T>) {
+  constructor(data: iGetSiwbbRequestsForUserSuccessResponse) {
     super();
     this.requests = data.requests.map((request) => new SIWBBRequestDoc(request));
     this.pagination = data.pagination;
@@ -412,8 +368,8 @@ export class GetSiwbbRequestsForUserSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetSiwbbRequestsForUserSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetSiwbbRequestsForUserSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetSiwbbRequestsForUserSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetSiwbbRequestsForUserSuccessResponse;
   }
 }
 
@@ -425,21 +381,18 @@ export interface iGetPointsActivityForUserPayload extends iBaseQueryParams {}
 /**
  * @category API Requests / Responses
  */
-export interface iGetPointsActivityForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  activity: Array<iPointsActivityDoc<T>>;
+export interface iGetPointsActivityForUserSuccessResponse extends iBaseSuccessResponse {
+  activity: Array<iPointsActivityDoc>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetPointsActivityForUserSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetPointsActivityForUserSuccessResponse<T>>
-  implements iGetPointsActivityForUserSuccessResponse<T>
-{
-  activity: PointsActivityDoc<T>[];
+export class GetPointsActivityForUserSuccessResponse extends BaseNumberTypeClass<GetPointsActivityForUserSuccessResponse> implements iGetPointsActivityForUserSuccessResponse {
+  activity: PointsActivityDoc[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetPointsActivityForUserSuccessResponse<T>) {
+  constructor(data: iGetPointsActivityForUserSuccessResponse) {
     super();
     this.activity = data.activity.map((activity) => new PointsActivityDoc(activity));
     this.pagination = data.pagination;
@@ -449,8 +402,8 @@ export class GetPointsActivityForUserSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetPointsActivityForUserSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetPointsActivityForUserSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetPointsActivityForUserSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetPointsActivityForUserSuccessResponse;
   }
 }
 
@@ -473,24 +426,21 @@ export class GetCollectionPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iGetCollectionSuccessResponse<T extends NumberType> {
+export interface iGetCollectionSuccessResponse {
   /** The collection details */
-  collection: iBitBadgesCollection<T>;
+  collection: iBitBadgesCollection;
   /** The current collection metadata */
-  metadata: iMetadata<T>;
+  metadata: iMetadata;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetCollectionSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetCollectionSuccessResponse<T>>
-  implements iGetCollectionSuccessResponse<T>
-{
-  collection: BitBadgesCollection<T>;
-  metadata: Metadata<T>;
+export class GetCollectionSuccessResponse extends BaseNumberTypeClass<GetCollectionSuccessResponse> implements iGetCollectionSuccessResponse {
+  collection: BitBadgesCollection;
+  metadata: Metadata;
 
-  constructor(data: iGetCollectionSuccessResponse<T>) {
+  constructor(data: iGetCollectionSuccessResponse) {
     super();
     this.collection = new BitBadgesCollection(data.collection);
     this.metadata = new Metadata(data.metadata);
@@ -500,8 +450,8 @@ export class GetCollectionSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetCollectionSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetCollectionSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionSuccessResponse;
   }
 }
 
@@ -513,20 +463,17 @@ export interface iGetTokenMetadataPayload {}
 /**
  * @category API Requests / Responses
  */
-export interface iGetTokenMetadataSuccessResponse<T extends NumberType> {
-  metadata: iMetadata<T>;
+export interface iGetTokenMetadataSuccessResponse {
+  metadata: iMetadata;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetTokenMetadataSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetTokenMetadataSuccessResponse<T>>
-  implements iGetTokenMetadataSuccessResponse<T>
-{
-  metadata: Metadata<T>;
+export class GetTokenMetadataSuccessResponse extends BaseNumberTypeClass<GetTokenMetadataSuccessResponse> implements iGetTokenMetadataSuccessResponse {
+  metadata: Metadata;
 
-  constructor(data: iGetTokenMetadataSuccessResponse<T>) {
+  constructor(data: iGetTokenMetadataSuccessResponse) {
     super();
     this.metadata = new Metadata(data.metadata);
   }
@@ -535,8 +482,8 @@ export class GetTokenMetadataSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetTokenMetadataSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetTokenMetadataSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetTokenMetadataSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetTokenMetadataSuccessResponse;
   }
 }
 
@@ -548,21 +495,18 @@ export interface GetCollectionClaimsPayload {}
 /**
  * @category API Requests / Responses
  */
-export interface iGetCollectionClaimsSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  claims: Array<iClaimDetails<T>>;
+export interface iGetCollectionClaimsSuccessResponse extends iBaseSuccessResponse {
+  claims: Array<iClaimDetails>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetCollectionClaimsSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetCollectionClaimsSuccessResponse<T>>
-  implements iGetCollectionClaimsSuccessResponse<T>
-{
-  claims: ClaimDetails<T>[];
+export class GetCollectionClaimsSuccessResponse extends BaseNumberTypeClass<GetCollectionClaimsSuccessResponse> implements iGetCollectionClaimsSuccessResponse {
+  claims: ClaimDetails[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetCollectionClaimsSuccessResponse<T>) {
+  constructor(data: iGetCollectionClaimsSuccessResponse) {
     super();
     this.claims = data.claims.map((claim) => new ClaimDetails(claim));
     this.pagination = data.pagination;
@@ -572,8 +516,8 @@ export class GetCollectionClaimsSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetCollectionClaimsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionClaimsSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetCollectionClaimsSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionClaimsSuccessResponse;
   }
 }
 
@@ -585,21 +529,18 @@ export interface GetAddressListClaimsPayload {}
 /**
  * @category API Requests / Responses
  */
-export interface iGetAddressListClaimsSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  claims: Array<iClaimDetails<T>>;
+export interface iGetAddressListClaimsSuccessResponse extends iBaseSuccessResponse {
+  claims: Array<iClaimDetails>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetAddressListClaimsSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetAddressListClaimsSuccessResponse<T>>
-  implements iGetAddressListClaimsSuccessResponse<T>
-{
-  claims: ClaimDetails<T>[];
+export class GetAddressListClaimsSuccessResponse extends BaseNumberTypeClass<GetAddressListClaimsSuccessResponse> implements iGetAddressListClaimsSuccessResponse {
+  claims: ClaimDetails[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetAddressListClaimsSuccessResponse<T>) {
+  constructor(data: iGetAddressListClaimsSuccessResponse) {
     super();
     this.claims = data.claims.map((claim) => new ClaimDetails(claim));
     this.pagination = data.pagination;
@@ -609,7 +550,7 @@ export class GetAddressListClaimsSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetAddressListClaimsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAddressListClaimsSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetAddressListClaimsSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAddressListClaimsSuccessResponse;
   }
 }

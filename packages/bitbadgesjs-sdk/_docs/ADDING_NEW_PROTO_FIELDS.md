@@ -389,10 +389,7 @@ export class CosmosCoinWrapperPathAddObject<T extends NumberType> {
     this.denomUnits = data.denomUnits.map((unit) => new DenomUnit(unit));
   }
 
-  static fromProto<T extends NumberType>(
-    data: badges.CosmosCoinWrapperPathAddObject,
-    convertFunction: (val: NumberType) => T
-  ): CosmosCoinWrapperPathAddObject<T> {
+  static fromProto<T extends NumberType>(data: badges.CosmosCoinWrapperPathAddObject, convertFunction: (val: NumberType) => T): CosmosCoinWrapperPathAddObject<T> {
     return new CosmosCoinWrapperPathAddObject({
       // ... existing fields
       symbol: data.symbol,

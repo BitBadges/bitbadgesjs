@@ -23,7 +23,7 @@ export class PermissionCriteria extends BaseNumberTypeClass<PermissionCriteria> 
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PermissionCriteria {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): PermissionCriteria {
     return deepCopyPrimitives(this) as PermissionCriteria;
   }
 
@@ -82,7 +82,7 @@ export class ManagerSplitterPermissions extends BaseNumberTypeClass<ManagerSplit
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ManagerSplitterPermissions {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ManagerSplitterPermissions {
     return deepCopyPrimitives(this) as ManagerSplitterPermissions;
   }
 
@@ -115,14 +115,10 @@ export class ManagerSplitterPermissions extends BaseNumberTypeClass<ManagerSplit
       canUpdateStandards: protoMsg.canUpdateStandards ? PermissionCriteria.fromProto(protoMsg.canUpdateStandards) : undefined,
       canUpdateCustomData: protoMsg.canUpdateCustomData ? PermissionCriteria.fromProto(protoMsg.canUpdateCustomData) : undefined,
       canUpdateManager: protoMsg.canUpdateManager ? PermissionCriteria.fromProto(protoMsg.canUpdateManager) : undefined,
-      canUpdateCollectionMetadata: protoMsg.canUpdateCollectionMetadata
-        ? PermissionCriteria.fromProto(protoMsg.canUpdateCollectionMetadata)
-        : undefined,
+      canUpdateCollectionMetadata: protoMsg.canUpdateCollectionMetadata ? PermissionCriteria.fromProto(protoMsg.canUpdateCollectionMetadata) : undefined,
       canUpdateValidTokenIds: protoMsg.canUpdateValidTokenIds ? PermissionCriteria.fromProto(protoMsg.canUpdateValidTokenIds) : undefined,
       canUpdateTokenMetadata: protoMsg.canUpdateTokenMetadata ? PermissionCriteria.fromProto(protoMsg.canUpdateTokenMetadata) : undefined,
-      canUpdateCollectionApprovals: protoMsg.canUpdateCollectionApprovals
-        ? PermissionCriteria.fromProto(protoMsg.canUpdateCollectionApprovals)
-        : undefined
+      canUpdateCollectionApprovals: protoMsg.canUpdateCollectionApprovals ? PermissionCriteria.fromProto(protoMsg.canUpdateCollectionApprovals) : undefined
     });
   }
 }

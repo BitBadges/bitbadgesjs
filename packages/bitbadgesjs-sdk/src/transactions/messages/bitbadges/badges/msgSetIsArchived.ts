@@ -15,13 +15,13 @@ import { Stringify } from '@/common/string-numbers.js';
  *
  * @category Transactions
  */
-export class MsgSetIsArchived<T extends NumberType> extends CustomTypeClass<MsgSetIsArchived<T>> implements iMsgSetIsArchived<T> {
+export class MsgSetIsArchived extends CustomTypeClass<MsgSetIsArchived> implements iMsgSetIsArchived {
   creator: BitBadgesAddress;
-  collectionId: T;
+  collectionId: string | number;
   isArchived: boolean;
-  canArchiveCollection: ActionPermission<T>[];
+  canArchiveCollection: ActionPermission[];
 
-  constructor(msg: iMsgSetIsArchived<T>) {
+  constructor(msg: iMsgSetIsArchived) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
@@ -38,15 +38,15 @@ export class MsgSetIsArchived<T extends NumberType> extends CustomTypeClass<MsgS
     });
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetIsArchived<NumberType> {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetIsArchived {
     return MsgSetIsArchived.fromProto(protobadges.MsgSetIsArchived.fromJson(jsonValue, options));
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetIsArchived<NumberType> {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetIsArchived {
     return MsgSetIsArchived.fromProto(protobadges.MsgSetIsArchived.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: protobadges.MsgSetIsArchived): MsgSetIsArchived<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetIsArchived): MsgSetIsArchived {
     return new MsgSetIsArchived({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
@@ -55,7 +55,7 @@ export class MsgSetIsArchived<T extends NumberType> extends CustomTypeClass<MsgS
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSetIsArchived<T> {
+  toBech32Addresses(prefix: string): MsgSetIsArchived {
     return new MsgSetIsArchived({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,

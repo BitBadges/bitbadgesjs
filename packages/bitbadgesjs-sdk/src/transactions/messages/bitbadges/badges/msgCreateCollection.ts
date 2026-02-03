@@ -24,24 +24,24 @@ import type { iCollectionMetadata } from '@/interfaces/types/core.js';
  *
  * @category Transactions
  */
-export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeClass<MsgCreateCollection<T>> implements iMsgCreateCollection<T> {
+export class MsgCreateCollection extends BaseNumberTypeClass<MsgCreateCollection> implements iMsgCreateCollection {
   creator: BitBadgesAddress;
-  defaultBalances?: UserBalanceStore<T>;
-  validTokenIds?: UintRangeArray<T>;
-  collectionPermissions?: CollectionPermissions<T>;
+  defaultBalances?: UserBalanceStore;
+  validTokenIds?: UintRangeArray;
+  collectionPermissions?: CollectionPermissions;
   manager?: BitBadgesAddress;
   collectionMetadata?: CollectionMetadata;
-  tokenMetadata?: TokenMetadata<T>[];
+  tokenMetadata?: TokenMetadata[];
   customData?: string;
-  collectionApprovals?: CollectionApproval<T>[];
+  collectionApprovals?: CollectionApproval[];
   standards?: string[];
   isArchived?: boolean;
-  mintEscrowCoinsToTransfer?: CosmosCoin<T>[];
-  cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject<T>[];
-  aliasPathsToAdd?: AliasPathAddObject<T>[];
-  invariants?: InvariantsAddObject<T>;
+  mintEscrowCoinsToTransfer?: CosmosCoin[];
+  cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject[];
+  aliasPathsToAdd?: AliasPathAddObject[];
+  invariants?: InvariantsAddObject;
 
-  constructor(msg: iMsgCreateCollection<T>) {
+  constructor(msg: iMsgCreateCollection) {
     super();
     this.creator = msg.creator;
     this.defaultBalances = msg.defaultBalances ? new UserBalanceStore(msg.defaultBalances) : undefined;
@@ -60,41 +60,28 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
     this.invariants = msg.invariants ? new InvariantsAddObject(msg.invariants) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgCreateCollection<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgCreateCollection<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgCreateCollection {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgCreateCollection;
   }
 
   toProto(): protobadges.MsgCreateCollection {
     return new protobadges.MsgCreateCollection(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgCreateCollection<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgCreateCollection {
     return MsgCreateCollection.fromProto(protobadges.MsgCreateCollection.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgCreateCollection<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgCreateCollection {
     return MsgCreateCollection.fromProto(protobadges.MsgCreateCollection.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    protoMsg: protobadges.MsgCreateCollection,
-    convertFunction: (item: NumberType) => U
-  ): MsgCreateCollection<U> {
+  static fromProto(protoMsg: protobadges.MsgCreateCollection, convertFunction: (item: string | number) => U): MsgCreateCollection {
     return new MsgCreateCollection({
       creator: protoMsg.creator,
       defaultBalances: protoMsg.defaultBalances ? UserBalanceStore.fromProto(protoMsg.defaultBalances, convertFunction) : undefined,
       validTokenIds: protoMsg.validTokenIds?.map((x) => UintRange.fromProto(x, convertFunction)),
-      collectionPermissions: protoMsg.collectionPermissions
-        ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction)
-        : undefined,
+      collectionPermissions: protoMsg.collectionPermissions ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction) : undefined,
       manager: protoMsg.manager || undefined,
       collectionMetadata: protoMsg.collectionMetadata ? CollectionMetadata.fromProto(protoMsg.collectionMetadata) : undefined,
       tokenMetadata: protoMsg.tokenMetadata.length > 0 ? protoMsg.tokenMetadata.map((tm) => TokenMetadata.fromProto(tm, convertFunction)) : undefined,
@@ -109,8 +96,8 @@ export class MsgCreateCollection<T extends NumberType> extends BaseNumberTypeCla
     });
   }
 
-  toBech32Addresses(prefix: string): MsgCreateCollection<T> {
-    return new MsgCreateCollection<T>({
+  toBech32Addresses(prefix: string): MsgCreateCollection {
+    return new MsgCreateCollection({
       ...this,
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       defaultBalances: this.defaultBalances?.toBech32Addresses(prefix),

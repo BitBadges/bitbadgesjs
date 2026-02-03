@@ -8,13 +8,13 @@ import type { AndGroup, AssetConditionGroup, OrGroup } from '@/blockin/index.js'
 /**
  * @category Interfaces
  */
-export interface iSiwbbChallenge<T extends NumberType> {
+export interface iSiwbbChallenge {
   /** The user's address */
   address: string;
   /** The chain of the address */
   chain: SupportedChain;
   /** The ownership requirements for the user */
-  ownershipRequirements?: AssetConditionGroup<T>;
+  ownershipRequirements?: AssetConditionGroup;
   /**
    * The converted BitBadges address of params.address. This can be used as the
    * unique identifier for the user (e.g. avoid duplicate sign ins from equivalent 0x and bb1 addresses).
@@ -39,35 +39,35 @@ export interface iSiwbbChallenge<T extends NumberType> {
 /**
  * @category SIWBB Authentication
  */
-export class SiwbbChallenge<T extends NumberType> extends BaseNumberTypeClass<SiwbbChallenge<T>> implements iSiwbbChallenge<T> {
+export class SiwbbChallenge extends BaseNumberTypeClass<SiwbbChallenge> implements iSiwbbChallenge {
   address: string;
   chain: SupportedChain;
-  ownershipRequirements?: SiwbbAssetConditionGroup<T>;
+  ownershipRequirements?: SiwbbAssetConditionGroup;
   bitbadgesAddress: BitBadgesAddress;
   verificationResponse?: {
     success: boolean;
     errorMessage?: string;
   };
 
-  constructor(data: iSiwbbChallenge<T>) {
+  constructor(data: iSiwbbChallenge) {
     super();
     this.address = data.address;
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.chain = data.chain;
     this.verificationResponse = data.verificationResponse;
     if (data.ownershipRequirements) {
-      if ((data.ownershipRequirements as AndGroup<T>)['$and']) {
-        this.ownershipRequirements = new SiwbbAndGroup(data.ownershipRequirements as AndGroup<T>);
-      } else if ((data.ownershipRequirements as OrGroup<T>)['$or']) {
-        this.ownershipRequirements = new SiwbbOrGroup(data.ownershipRequirements as OrGroup<T>);
+      if ((data.ownershipRequirements as AndGroup)['$and']) {
+        this.ownershipRequirements = new SiwbbAndGroup(data.ownershipRequirements as AndGroup);
+      } else if ((data.ownershipRequirements as OrGroup)['$or']) {
+        this.ownershipRequirements = new SiwbbOrGroup(data.ownershipRequirements as OrGroup);
       } else {
-        this.ownershipRequirements = new OwnershipRequirements(data.ownershipRequirements as OwnershipRequirements<T>);
+        this.ownershipRequirements = new OwnershipRequirements(data.ownershipRequirements as OwnershipRequirements);
       }
     }
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): SiwbbChallenge<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbChallenge<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): SiwbbChallenge {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbChallenge;
   }
 }
 

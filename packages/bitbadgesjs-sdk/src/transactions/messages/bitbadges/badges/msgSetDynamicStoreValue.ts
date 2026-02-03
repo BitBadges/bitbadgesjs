@@ -13,16 +13,13 @@ import { normalizeMessagesIfNecessary } from '../../base.js';
  *
  * @category Transactions
  */
-export class MsgSetDynamicStoreValue<T extends NumberType>
-  extends CustomTypeClass<MsgSetDynamicStoreValue<T>>
-  implements iMsgSetDynamicStoreValue<T>
-{
+export class MsgSetDynamicStoreValue extends CustomTypeClass<MsgSetDynamicStoreValue> implements iMsgSetDynamicStoreValue {
   creator: BitBadgesAddress;
-  storeId: T;
+  storeId: string | number;
   address: BitBadgesAddress;
   value: boolean;
 
-  constructor(msg: iMsgSetDynamicStoreValue<T>) {
+  constructor(msg: iMsgSetDynamicStoreValue) {
     super();
     this.creator = msg.creator;
     this.storeId = msg.storeId;
@@ -39,15 +36,15 @@ export class MsgSetDynamicStoreValue<T extends NumberType>
     });
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetDynamicStoreValue<NumberType> {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetDynamicStoreValue {
     return MsgSetDynamicStoreValue.fromProto(protobadges.MsgSetDynamicStoreValue.fromJson(jsonValue, options));
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetDynamicStoreValue<NumberType> {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetDynamicStoreValue {
     return MsgSetDynamicStoreValue.fromProto(protobadges.MsgSetDynamicStoreValue.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: protobadges.MsgSetDynamicStoreValue): MsgSetDynamicStoreValue<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetDynamicStoreValue): MsgSetDynamicStoreValue {
     return new MsgSetDynamicStoreValue({
       creator: protoMsg.creator,
       storeId: protoMsg.storeId,
@@ -56,7 +53,7 @@ export class MsgSetDynamicStoreValue<T extends NumberType>
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSetDynamicStoreValue<T> {
+  toBech32Addresses(prefix: string): MsgSetDynamicStoreValue {
     return new MsgSetDynamicStoreValue({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       storeId: this.storeId,

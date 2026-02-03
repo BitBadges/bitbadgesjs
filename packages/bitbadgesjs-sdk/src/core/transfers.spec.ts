@@ -1,11 +1,5 @@
 import { genTestAddress } from './addressLists.spec.js';
-import {
-  createBalanceMapForOffChainBalances,
-  getAllTokenIdsToBeTransferred,
-  getAllBalancesToBeTransferred,
-  getBalancesAfterTransfers,
-  iTransferWithIncrements
-} from './transfers.js';
+import { createBalanceMapForOffChainBalances, getAllTokenIdsToBeTransferred, getAllBalancesToBeTransferred, getBalancesAfterTransfers, iTransferWithIncrements } from './transfers.js';
 import { UintRangeArray } from './uintRanges.js';
 
 BigInt.prototype.toJSON = function () {
@@ -16,7 +10,7 @@ describe('Transfers', () => {
   it('should create a balance map for off-chain balances', async () => {
     const testAddress1 = genTestAddress();
     const testAddress2 = genTestAddress();
-    const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+    const transfersWithIncrements: iTransferWithIncrements[] = [
       {
         from: 'Mint', // replace with your address
         balances: [
@@ -44,7 +38,7 @@ describe('Transfers', () => {
   });
 
   it('should get all token ids to be transferred', () => {
-    const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+    const transfersWithIncrements: iTransferWithIncrements[] = [
       {
         from: 'Mint', // replace with your address
         balances: [
@@ -82,7 +76,7 @@ describe('Transfers', () => {
       }
     ];
 
-    const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+    const transfersWithIncrements: iTransferWithIncrements[] = [
       {
         from: 'Mint', // replace with your address
         balances: [
@@ -113,7 +107,7 @@ describe('Transfers', () => {
       }
     ];
 
-    const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+    const transfersWithIncrements: iTransferWithIncrements[] = [
       {
         from: 'Mint', // replace with your address
         balances: [

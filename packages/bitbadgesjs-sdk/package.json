@@ -35,6 +35,7 @@
     "dist"
   ],
   "sideEffects": false,
+  "type": "module",
   "scripts": {
     "alias": "tsc-alias -p tsconfig.build.json && tsc-alias -p tsconfig-esm.build.json",
     "build": "rm -rf dist && tsc --build tsconfig.build.json && tsc --build tsconfig-esm.build.json && bun run alias && bun run fixup && bun run dep-check",
@@ -62,7 +63,7 @@
     "@bufbuild/protoc-gen-es": "^1.4.2",
     "@types/jest": "^27.5.2",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^16.18.117",
+    "@types/node": "^25.2.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "babel-jest": "^29.7.0",

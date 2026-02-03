@@ -10,7 +10,7 @@ if (typeof BigInt !== 'undefined') {
 describe('BatchTokenDetails', () => {
   it('should create an instance', () => {
     expect(
-      BatchTokenDetailsArray.From<bigint>([
+      BatchTokenDetailsArray.From([
         {
           collectionId: '1',
           tokenIds: [{ start: 1n, end: 10000n }]
@@ -20,7 +20,7 @@ describe('BatchTokenDetails', () => {
   });
 
   it('should convert', () => {
-    const batchTokenDetails = BatchTokenDetailsArray.From<bigint>([
+    const batchTokenDetails = BatchTokenDetailsArray.From([
       {
         collectionId: '1',
         tokenIds: [{ start: 1n, end: 10000n }]
@@ -31,7 +31,7 @@ describe('BatchTokenDetails', () => {
   });
 
   it('should add', () => {
-    const batchTokenDetails = BatchTokenDetailsArray.From<bigint>([
+    const batchTokenDetails = BatchTokenDetailsArray.From([
       {
         collectionId: '1',
         tokenIds: [{ start: 1n, end: 10000n }]
@@ -52,7 +52,7 @@ describe('BatchTokenDetails', () => {
   });
 
   it('should remove', () => {
-    const batchTokenDetails = BatchTokenDetailsArray.From<bigint>([
+    const batchTokenDetails = BatchTokenDetailsArray.From([
       {
         collectionId: '1',
         tokenIds: [{ start: 1n, end: 10000n }]
@@ -84,7 +84,7 @@ describe('BatchTokenDetails', () => {
   });
 
   it('should isSubsetOf', () => {
-    const batchTokenDetails = BatchTokenDetailsArray.From<bigint>([
+    const batchTokenDetails = BatchTokenDetailsArray.From([
       {
         collectionId: '1',
         tokenIds: [{ start: 1n, end: 10000n }]
@@ -102,7 +102,7 @@ describe('BatchTokenDetails', () => {
   });
 
   it('should is not SubsetOf', () => {
-    const batchTokenDetails = BatchTokenDetailsArray.From<bigint>([
+    const batchTokenDetails = BatchTokenDetailsArray.From([
       {
         collectionId: '1',
         tokenIds: [{ start: 1n, end: 10000n }]
@@ -120,7 +120,7 @@ describe('BatchTokenDetails', () => {
   });
 
   it('should noneIn', () => {
-    const batchTokenDetails = BatchTokenDetailsArray.From<bigint>([
+    const batchTokenDetails = BatchTokenDetailsArray.From([
       {
         collectionId: '1',
         tokenIds: [{ start: 1n, end: 10000n }]
@@ -138,7 +138,7 @@ describe('BatchTokenDetails', () => {
   });
 
   it('should not noneIn', () => {
-    const batchTokenDetails = BatchTokenDetailsArray.From<bigint>([
+    const batchTokenDetails = BatchTokenDetailsArray.From([
       {
         collectionId: '1',
         tokenIds: [{ start: 1n, end: 10000n }]
@@ -156,7 +156,7 @@ describe('BatchTokenDetails', () => {
   });
 
   it('should getPage', () => {
-    const batchTokenDetails = BatchTokenDetailsArray.From<bigint>([
+    const batchTokenDetails = BatchTokenDetailsArray.From([
       {
         collectionId: '1',
         tokenIds: [{ start: 1n, end: 10000n }]
@@ -169,7 +169,7 @@ describe('BatchTokenDetails', () => {
   });
 
   it('should getPage - newest', () => {
-    const batchTokenDetails = BatchTokenDetailsArray.From<bigint>([
+    const batchTokenDetails = BatchTokenDetailsArray.From([
       {
         collectionId: '1',
         tokenIds: [{ start: 1n, end: 10000n }]

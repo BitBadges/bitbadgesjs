@@ -8,7 +8,7 @@ import { iUintRange } from '@/interfaces/types/core.js';
 /**
  * @category SIWBB
  */
-export class SiwbbChallengeParams<T extends NumberType> extends BaseNumberTypeClass<SiwbbChallengeParams<T>> implements ChallengeParams<T> {
+export class SiwbbChallengeParams extends BaseNumberTypeClass<SiwbbChallengeParams> implements ChallengeParams {
   domain: string;
   statement: string;
   address: NativeAddress;
@@ -20,9 +20,9 @@ export class SiwbbChallengeParams<T extends NumberType> extends BaseNumberTypeCl
   expirationDate?: string;
   notBefore?: string;
   resources?: string[];
-  assetOwnershipRequirements?: SiwbbAssetConditionGroup<T>;
+  assetOwnershipRequirements?: SiwbbAssetConditionGroup;
 
-  constructor(data: ChallengeParams<T>) {
+  constructor(data: ChallengeParams) {
     super();
     this.domain = data.domain;
     this.statement = data.statement;
@@ -36,12 +36,12 @@ export class SiwbbChallengeParams<T extends NumberType> extends BaseNumberTypeCl
     this.notBefore = data.notBefore;
     this.resources = data.resources;
     if (data.assetOwnershipRequirements) {
-      if ((data.assetOwnershipRequirements as AndGroup<T>)['$and']) {
-        this.assetOwnershipRequirements = new SiwbbAndGroup(data.assetOwnershipRequirements as AndGroup<T>);
-      } else if ((data.assetOwnershipRequirements as OrGroup<T>)['$or']) {
-        this.assetOwnershipRequirements = new SiwbbOrGroup(data.assetOwnershipRequirements as OrGroup<T>);
+      if ((data.assetOwnershipRequirements as AndGroup)['$and']) {
+        this.assetOwnershipRequirements = new SiwbbAndGroup(data.assetOwnershipRequirements as AndGroup);
+      } else if ((data.assetOwnershipRequirements as OrGroup)['$or']) {
+        this.assetOwnershipRequirements = new SiwbbOrGroup(data.assetOwnershipRequirements as OrGroup);
       } else {
-        this.assetOwnershipRequirements = new OwnershipRequirements(data.assetOwnershipRequirements as OwnershipRequirements<T>);
+        this.assetOwnershipRequirements = new OwnershipRequirements(data.assetOwnershipRequirements as OwnershipRequirements);
       }
     }
   }
@@ -50,20 +50,20 @@ export class SiwbbChallengeParams<T extends NumberType> extends BaseNumberTypeCl
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): SiwbbChallengeParams<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbChallengeParams<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): SiwbbChallengeParams {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbChallengeParams;
   }
 }
 
 /**
  * @category Interfaces
  */
-export interface iAssetDetails<T extends NumberType> {
+export interface iAssetDetails {
   chain: string;
   collectionId: T | string;
-  assetIds: (string | iUintRange<T>)[];
-  ownershipTimes: iUintRange<T>[];
-  mustOwnAmounts: iUintRange<T>;
+  assetIds: (string | iUintRange)[];
+  ownershipTimes: iUintRange[];
+  mustOwnAmounts: iUintRange;
   additionalCriteria?: string;
   ownershipPartyCheck?: string;
 }
@@ -71,26 +71,26 @@ export interface iAssetDetails<T extends NumberType> {
 /**
  * @category SIWBB
  */
-export class SiwbbAssetDetails<T extends NumberType> extends BaseNumberTypeClass<SiwbbAssetDetails<T>> implements iAssetDetails<T> {
+export class SiwbbAssetDetails extends BaseNumberTypeClass<SiwbbAssetDetails> implements iAssetDetails {
   chain: string;
   collectionId: T | string;
-  assetIds: (string | UintRange<T>)[];
-  ownershipTimes: UintRange<T>[];
-  mustOwnAmounts: UintRange<T>;
+  assetIds: (string | UintRange)[];
+  ownershipTimes: UintRange[];
+  mustOwnAmounts: UintRange;
   additionalCriteria?: string;
   ownershipPartyCheck?: string;
 
-  constructor(data: iAssetDetails<T>) {
+  constructor(data: iAssetDetails) {
     super();
     this.chain = data.chain;
     this.collectionId = data.collectionId;
     this.assetIds = data.assetIds.map((item) => {
-      if ((item as UintRange<T>).start || (item as UintRange<T>).end) {
-        return new UintRange(item as UintRange<T>);
+      if ((item as UintRange).start || (item as UintRange).end) {
+        return new UintRange(item as UintRange);
       } else {
         return item;
       }
-    }) as (string | UintRange<T>)[];
+    }) as (string | UintRange)[];
     this.ownershipTimes = data.ownershipTimes.map((item) => new UintRange(item));
     this.mustOwnAmounts = new UintRange(data.mustOwnAmounts);
     this.ownershipPartyCheck = data.ownershipPartyCheck;
@@ -112,26 +112,26 @@ export class SiwbbAssetDetails<T extends NumberType> extends BaseNumberTypeClass
     }
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): SiwbbAssetDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbAssetDetails<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): SiwbbAssetDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbAssetDetails;
   }
 }
 
 /**
  * @category SIWBB
  */
-export class SiwbbAndGroup<T extends NumberType> extends BaseNumberTypeClass<SiwbbAndGroup<T>> implements AndGroup<T> {
-  $and: SiwbbAssetConditionGroup<T>[];
+export class SiwbbAndGroup extends BaseNumberTypeClass<SiwbbAndGroup> implements AndGroup {
+  $and: SiwbbAssetConditionGroup[];
 
-  constructor(data: AndGroup<T>) {
+  constructor(data: AndGroup) {
     super();
-    this.$and = data.$and.map((item: AssetConditionGroup<T>) => {
-      if ((item as AndGroup<T>)['$and']) {
-        return new SiwbbAndGroup(item as AndGroup<T>);
-      } else if ((item as OrGroup<T>)['$or']) {
-        return new SiwbbOrGroup(item as OrGroup<T>);
+    this.$and = data.$and.map((item: AssetConditionGroup) => {
+      if ((item as AndGroup)['$and']) {
+        return new SiwbbAndGroup(item as AndGroup);
+      } else if ((item as OrGroup)['$or']) {
+        return new SiwbbOrGroup(item as OrGroup);
       } else {
-        return new OwnershipRequirements(item as OwnershipRequirements<T>);
+        return new OwnershipRequirements(item as OwnershipRequirements);
       }
     });
   }
@@ -140,26 +140,26 @@ export class SiwbbAndGroup<T extends NumberType> extends BaseNumberTypeClass<Siw
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): SiwbbAndGroup<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbAndGroup<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): SiwbbAndGroup {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbAndGroup;
   }
 }
 
 /**
  * @category SIWBB
  */
-export class SiwbbOrGroup<T extends NumberType> extends BaseNumberTypeClass<SiwbbOrGroup<T>> implements OrGroup<T> {
-  $or: SiwbbAssetConditionGroup<T>[];
+export class SiwbbOrGroup extends BaseNumberTypeClass<SiwbbOrGroup> implements OrGroup {
+  $or: SiwbbAssetConditionGroup[];
 
-  constructor(data: OrGroup<T>) {
+  constructor(data: OrGroup) {
     super();
-    this.$or = data.$or.map((item: AssetConditionGroup<T>) => {
-      if ((item as AndGroup<T>)['$and']) {
-        return new SiwbbAndGroup(item as AndGroup<T>);
-      } else if ((item as OrGroup<T>)['$or']) {
-        return new SiwbbOrGroup(item as OrGroup<T>);
+    this.$or = data.$or.map((item: AssetConditionGroup) => {
+      if ((item as AndGroup)['$and']) {
+        return new SiwbbAndGroup(item as AndGroup);
+      } else if ((item as OrGroup)['$or']) {
+        return new SiwbbOrGroup(item as OrGroup);
       } else {
-        return new OwnershipRequirements(item as OwnershipRequirements<T>);
+        return new OwnershipRequirements(item as OwnershipRequirements);
       }
     });
   }
@@ -168,23 +168,23 @@ export class SiwbbOrGroup<T extends NumberType> extends BaseNumberTypeClass<Siwb
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): SiwbbOrGroup<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbOrGroup<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): SiwbbOrGroup {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SiwbbOrGroup;
   }
 }
 
 /**
  * @category SIWBB
  */
-export class OwnershipRequirements<T extends NumberType> extends BaseNumberTypeClass<OwnershipRequirements<T>> implements OwnershipRequirements<T> {
-  assets: SiwbbAssetDetails<T>[];
+export class OwnershipRequirements extends BaseNumberTypeClass<OwnershipRequirements> implements OwnershipRequirements {
+  assets: SiwbbAssetDetails[];
   options?: {
-    numMatchesForVerification?: T;
+    numMatchesForVerification?: string | number;
   };
 
-  constructor(data: BlockinOwnershipRequirements<T>) {
+  constructor(data: BlockinOwnershipRequirements) {
     super();
-    this.assets = data.assets.map((item: BlockinOwnershipRequirements<T>['assets'][0]) => new SiwbbAssetDetails(item));
+    this.assets = data.assets.map((item: BlockinOwnershipRequirements['assets'][0]) => new SiwbbAssetDetails(item));
     this.options = data.options;
   }
 
@@ -192,12 +192,12 @@ export class OwnershipRequirements<T extends NumberType> extends BaseNumberTypeC
     return ['options']; //TODO: This assumes all options are NumberType
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): OwnershipRequirements<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as OwnershipRequirements<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): OwnershipRequirements {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as OwnershipRequirements;
   }
 }
 
 /**
  * @category SIWBB
  */
-export type SiwbbAssetConditionGroup<T extends NumberType> = SiwbbAndGroup<T> | SiwbbOrGroup<T> | OwnershipRequirements<T>;
+export type SiwbbAssetConditionGroup = SiwbbAndGroup | SiwbbOrGroup | OwnershipRequirements;

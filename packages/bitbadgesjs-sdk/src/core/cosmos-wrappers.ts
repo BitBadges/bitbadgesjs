@@ -1,17 +1,9 @@
 import { iUintRange } from '@/interfaces/index.js';
-import {
-  iApprovalAmounts,
-  iApprovalCriteria,
-  iIncomingApprovalCriteria,
-  iMaxNumTransfers,
-  iOutgoingApprovalCriteria,
-  iPredeterminedBalances,
-  iResetTimeIntervals
-} from '@/interfaces/types/approvals.js';
+import { iApprovalAmounts, iApprovalCriteria, iIncomingApprovalCriteria, iMaxNumTransfers, iOutgoingApprovalCriteria, iPredeterminedBalances, iResetTimeIntervals } from '@/interfaces/types/approvals.js';
 import { CollectionApprovalWithDetails } from './approvals.js';
 import { CosmosCoinWrapperPath } from './misc.js';
 
-function validateTokenIds(tokenIds: iUintRange<bigint>[], approvalTokenIds: iUintRange<bigint>[]) {
+function validateTokenIds(tokenIds: iUintRange[], approvalTokenIds: iUintRange[]) {
   if (tokenIds.length !== approvalTokenIds.length) {
     return false;
   }
@@ -25,11 +17,7 @@ function validateTokenIds(tokenIds: iUintRange<bigint>[], approvalTokenIds: iUin
   return true;
 }
 
-export const isWrapperApproval = (
-  approval: CollectionApprovalWithDetails<bigint>,
-  pathObj: CosmosCoinWrapperPath<bigint>,
-  options?: { skipPathValidation?: boolean; validTokenIds?: iUintRange<bigint>[] }
-) => {
+export const isWrapperApproval = (approval: CollectionApprovalWithDetails, pathObj: CosmosCoinWrapperPath, options?: { skipPathValidation?: boolean; validTokenIds?: iUintRange[] }) => {
   const { address, conversion } = pathObj;
   const balances = conversion.sideB;
 
@@ -91,11 +79,7 @@ export const isWrapperApproval = (
   return true;
 };
 
-export const isUnwrapperApproval = (
-  approval: CollectionApprovalWithDetails<bigint>,
-  pathObj: CosmosCoinWrapperPath<bigint>,
-  options?: { skipPathValidation?: boolean; validTokenIds?: iUintRange<bigint>[] }
-) => {
+export const isUnwrapperApproval = (approval: CollectionApprovalWithDetails, pathObj: CosmosCoinWrapperPath, options?: { skipPathValidation?: boolean; validTokenIds?: iUintRange[] }) => {
   const { address, conversion } = pathObj;
   const balances = conversion.sideB;
 
@@ -157,134 +141,68 @@ export const isUnwrapperApproval = (
   return true;
 };
 
-export function approvalCriteriaHasNoAdditionalRestrictions(
-  approvalCriteria?: iApprovalCriteria<bigint>,
-  allowMintOverrides?: boolean,
-  allowToOverrides?: boolean
-) {
-  return (
-    !approvalCriteria ||
-    (!approvalCriteria.requireFromEqualsInitiatedBy &&
-      !approvalCriteria.requireFromDoesNotEqualInitiatedBy &&
-      !approvalCriteria.requireToEqualsInitiatedBy &&
-      !approvalCriteria.requireToDoesNotEqualInitiatedBy &&
-      (allowMintOverrides || !approvalCriteria.overridesFromOutgoingApprovals) &&
-      (allowToOverrides || !approvalCriteria.overridesToIncomingApprovals) &&
-      (approvalCriteria.merkleChallenges ?? []).length === 0 &&
-      (approvalCriteria.coinTransfers ?? []).length === 0 &&
-      (approvalCriteria.userRoyalties?.percentage ?? 0n) === 0n &&
-      (approvalCriteria.userRoyalties?.payoutAddress ?? '') === '' &&
-      (approvalCriteria.mustOwnTokens ?? []).length === 0 &&
-      (approvalCriteria.dynamicStoreChallenges ?? []).length === 0 &&
-      (approvalCriteria.ethSignatureChallenges ?? []).length === 0)
-  );
+export function approvalCriteriaHasNoAdditionalRestrictions(approvalCriteria?: iApprovalCriteria, allowMintOverrides?: boolean, allowToOverrides?: boolean) {
+  return !approvalCriteria || (!approvalCriteria.requireFromEqualsInitiatedBy && !approvalCriteria.requireFromDoesNotEqualInitiatedBy && !approvalCriteria.requireToEqualsInitiatedBy && !approvalCriteria.requireToDoesNotEqualInitiatedBy && (allowMintOverrides || !approvalCriteria.overridesFromOutgoingApprovals) && (allowToOverrides || !approvalCriteria.overridesToIncomingApprovals) && (approvalCriteria.merkleChallenges ?? []).length === 0 && (approvalCriteria.coinTransfers ?? []).length === 0 && (approvalCriteria.userRoyalties?.percentage ?? 0n) === 0n && (approvalCriteria.userRoyalties?.payoutAddress ?? '') === '' && (approvalCriteria.mustOwnTokens ?? []).length === 0 && (approvalCriteria.dynamicStoreChallenges ?? []).length === 0 && (approvalCriteria.ethSignatureChallenges ?? []).length === 0);
 }
 
-export function approvalCriteriaUsesPredeterminedBalances(approvalCriteria?: iApprovalCriteria<bigint>) {
+export function approvalCriteriaUsesPredeterminedBalances(approvalCriteria?: iApprovalCriteria) {
   if (!approvalCriteria?.predeterminedBalances) {
     return false;
   }
 
-  return (
-    approvalCriteria.predeterminedBalances.incrementedBalances.startBalances.length > 0 ||
-    approvalCriteria.predeterminedBalances.manualBalances.length > 0
-  );
+  return approvalCriteria.predeterminedBalances.incrementedBalances.startBalances.length > 0 || approvalCriteria.predeterminedBalances.manualBalances.length > 0;
 }
 
-export function approvalCriteriaHasNoAmountRestrictions(approvalCriteria?: iApprovalCriteria<bigint>) {
+export function approvalCriteriaHasNoAmountRestrictions(approvalCriteria?: iApprovalCriteria) {
   if (!approvalCriteria) return true;
 
-  return (
-    !approvalHasApprovalAmounts(approvalCriteria.approvalAmounts) &&
-    !approvalHasMaxNumTransfers(approvalCriteria.maxNumTransfers) &&
-    !approvalCriteriaUsesPredeterminedBalances(approvalCriteria)
-  );
+  return !approvalHasApprovalAmounts(approvalCriteria.approvalAmounts) && !approvalHasMaxNumTransfers(approvalCriteria.maxNumTransfers) && !approvalCriteriaUsesPredeterminedBalances(approvalCriteria);
 }
 
-export const approvalHasApprovalAmounts = (approvalAmounts?: iApprovalAmounts<bigint>) => {
+export const approvalHasApprovalAmounts = (approvalAmounts?: iApprovalAmounts) => {
   if (!approvalAmounts) return false;
 
-  return (
-    approvalAmounts?.overallApprovalAmount > 0n ||
-    approvalAmounts?.perFromAddressApprovalAmount > 0n ||
-    approvalAmounts?.perToAddressApprovalAmount > 0n ||
-    approvalAmounts?.perInitiatedByAddressApprovalAmount > 0n
-  );
+  return approvalAmounts?.overallApprovalAmount > 0n || approvalAmounts?.perFromAddressApprovalAmount > 0n || approvalAmounts?.perToAddressApprovalAmount > 0n || approvalAmounts?.perInitiatedByAddressApprovalAmount > 0n;
 };
 
-export const approvalHasMaxNumTransfers = (maxNumTransfers?: iMaxNumTransfers<bigint>) => {
+export const approvalHasMaxNumTransfers = (maxNumTransfers?: iMaxNumTransfers) => {
   if (!maxNumTransfers) return false;
 
-  return (
-    maxNumTransfers?.overallMaxNumTransfers > 0n ||
-    maxNumTransfers?.perFromAddressMaxNumTransfers > 0n ||
-    maxNumTransfers?.perToAddressMaxNumTransfers > 0n ||
-    maxNumTransfers?.perInitiatedByAddressMaxNumTransfers > 0n
-  );
+  return maxNumTransfers?.overallMaxNumTransfers > 0n || maxNumTransfers?.perFromAddressMaxNumTransfers > 0n || maxNumTransfers?.perToAddressMaxNumTransfers > 0n || maxNumTransfers?.perInitiatedByAddressMaxNumTransfers > 0n;
 };
 
 /**
  * Checks if reset time intervals are basically nil (empty or zero values)
  */
-function isResetTimeIntervalBasicallyNil(resetTimeInterval?: iResetTimeIntervals<bigint>): boolean {
+function isResetTimeIntervalBasicallyNil(resetTimeInterval?: iResetTimeIntervals): boolean {
   return !resetTimeInterval || (resetTimeInterval.startTime === 0n && resetTimeInterval.intervalLength === 0n);
 }
 
 /**
  * Checks if max num transfers is basically nil (empty or zero values)
  */
-function maxNumTransfersIsBasicallyNil(maxNumTransfers?: iMaxNumTransfers<bigint>): boolean {
-  return (
-    !maxNumTransfers ||
-    (maxNumTransfers.overallMaxNumTransfers === 0n &&
-      maxNumTransfers.perToAddressMaxNumTransfers === 0n &&
-      maxNumTransfers.perFromAddressMaxNumTransfers === 0n &&
-      maxNumTransfers.perInitiatedByAddressMaxNumTransfers === 0n &&
-      isResetTimeIntervalBasicallyNil(maxNumTransfers.resetTimeIntervals))
-  );
+function maxNumTransfersIsBasicallyNil(maxNumTransfers?: iMaxNumTransfers): boolean {
+  return !maxNumTransfers || (maxNumTransfers.overallMaxNumTransfers === 0n && maxNumTransfers.perToAddressMaxNumTransfers === 0n && maxNumTransfers.perFromAddressMaxNumTransfers === 0n && maxNumTransfers.perInitiatedByAddressMaxNumTransfers === 0n && isResetTimeIntervalBasicallyNil(maxNumTransfers.resetTimeIntervals));
 }
 
 /**
  * Checks if approval amounts is basically nil (empty or zero values)
  */
-function approvalAmountsIsBasicallyNil(approvalAmounts?: iApprovalAmounts<bigint>): boolean {
-  return (
-    !approvalAmounts ||
-    (approvalAmounts.overallApprovalAmount === 0n &&
-      approvalAmounts.perToAddressApprovalAmount === 0n &&
-      approvalAmounts.perFromAddressApprovalAmount === 0n &&
-      approvalAmounts.perInitiatedByAddressApprovalAmount === 0n &&
-      isResetTimeIntervalBasicallyNil(approvalAmounts.resetTimeIntervals))
-  );
+function approvalAmountsIsBasicallyNil(approvalAmounts?: iApprovalAmounts): boolean {
+  return !approvalAmounts || (approvalAmounts.overallApprovalAmount === 0n && approvalAmounts.perToAddressApprovalAmount === 0n && approvalAmounts.perFromAddressApprovalAmount === 0n && approvalAmounts.perInitiatedByAddressApprovalAmount === 0n && isResetTimeIntervalBasicallyNil(approvalAmounts.resetTimeIntervals));
 }
 
 /**
  * Checks if predetermined balances is basically nil (empty or zero values)
  */
-function predeterminedBalancesIsBasicallyNil(predeterminedBalances?: iPredeterminedBalances<bigint>): boolean {
+function predeterminedBalancesIsBasicallyNil(predeterminedBalances?: iPredeterminedBalances): boolean {
   if (!predeterminedBalances) return true;
 
   // Check if order calculation method is basically nil
-  const orderCalculationMethodIsBasicallyNil =
-    !predeterminedBalances.orderCalculationMethod ||
-    (!predeterminedBalances.orderCalculationMethod.useMerkleChallengeLeafIndex &&
-      !predeterminedBalances.orderCalculationMethod.useOverallNumTransfers &&
-      !predeterminedBalances.orderCalculationMethod.usePerToAddressNumTransfers &&
-      !predeterminedBalances.orderCalculationMethod.usePerFromAddressNumTransfers &&
-      !predeterminedBalances.orderCalculationMethod.usePerInitiatedByAddressNumTransfers);
+  const orderCalculationMethodIsBasicallyNil = !predeterminedBalances.orderCalculationMethod || (!predeterminedBalances.orderCalculationMethod.useMerkleChallengeLeafIndex && !predeterminedBalances.orderCalculationMethod.useOverallNumTransfers && !predeterminedBalances.orderCalculationMethod.usePerToAddressNumTransfers && !predeterminedBalances.orderCalculationMethod.usePerFromAddressNumTransfers && !predeterminedBalances.orderCalculationMethod.usePerInitiatedByAddressNumTransfers);
 
   // Check if sequential transfer (incremented balances) is basically nil
-  const sequentialTransferIsBasicallyNil =
-    !predeterminedBalances.incrementedBalances ||
-    (predeterminedBalances.incrementedBalances.startBalances.length === 0 &&
-      !predeterminedBalances.incrementedBalances.allowOverrideWithAnyValidToken &&
-      !predeterminedBalances.incrementedBalances.allowOverrideTimestamp &&
-      predeterminedBalances.incrementedBalances.incrementTokenIdsBy === 0n &&
-      predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy === 0n &&
-      predeterminedBalances.incrementedBalances.durationFromTimestamp === 0n &&
-      (!predeterminedBalances.incrementedBalances.recurringOwnershipTimes ||
-        (predeterminedBalances.incrementedBalances.recurringOwnershipTimes.startTime === 0n &&
-          predeterminedBalances.incrementedBalances.recurringOwnershipTimes.intervalLength === 0n)));
+  const sequentialTransferIsBasicallyNil = !predeterminedBalances.incrementedBalances || (predeterminedBalances.incrementedBalances.startBalances.length === 0 && !predeterminedBalances.incrementedBalances.allowOverrideWithAnyValidToken && !predeterminedBalances.incrementedBalances.allowOverrideTimestamp && predeterminedBalances.incrementedBalances.incrementTokenIdsBy === 0n && predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy === 0n && predeterminedBalances.incrementedBalances.durationFromTimestamp === 0n && (!predeterminedBalances.incrementedBalances.recurringOwnershipTimes || (predeterminedBalances.incrementedBalances.recurringOwnershipTimes.startTime === 0n && predeterminedBalances.incrementedBalances.recurringOwnershipTimes.intervalLength === 0n)));
 
   // Check if manual balances is basically nil
   const manualBalancesIsBasicallyNil = !predeterminedBalances.manualBalances || predeterminedBalances.manualBalances.length === 0;
@@ -298,7 +216,7 @@ function predeterminedBalancesIsBasicallyNil(predeterminedBalances?: iPredetermi
  * @param approvalCriteria - The approval criteria to check
  * @returns true if the approval has no side effects, false otherwise
  */
-function collectionApprovalHasNoSideEffects(approvalCriteria?: iApprovalCriteria<bigint>): boolean {
+function collectionApprovalHasNoSideEffects(approvalCriteria?: iApprovalCriteria): boolean {
   if (!approvalCriteria) {
     return true;
   }
@@ -346,8 +264,6 @@ function collectionApprovalHasNoSideEffects(approvalCriteria?: iApprovalCriteria
   return true;
 }
 
-export function isAutoScannable(
-  approvalCriteria?: iApprovalCriteria<bigint> | iOutgoingApprovalCriteria<bigint> | iIncomingApprovalCriteria<bigint>
-): boolean {
+export function isAutoScannable(approvalCriteria?: iApprovalCriteria | iOutgoingApprovalCriteria | iIncomingApprovalCriteria): boolean {
   return collectionApprovalHasNoSideEffects(approvalCriteria);
 }

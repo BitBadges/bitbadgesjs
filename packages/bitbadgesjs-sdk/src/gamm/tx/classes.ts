@@ -9,38 +9,13 @@ import * as protogamm from '@/proto/gamm/v1beta1/tx_pb.js';
 import * as protopoolmanager from '@/proto/poolmanager/v1beta1/swap_route_pb.js';
 import { normalizeMessagesIfNecessary } from '@/transactions/messages/base.js';
 import { PoolAsset, PoolParams } from '../classes.js';
-import type {
-  iMsgCreateBalancerPool,
-  iMsgCreateBalancerPoolResponse,
-  iMsgExitPool,
-  iMsgExitPoolResponse,
-  iMsgExitSwapExternAmountOut,
-  iMsgExitSwapExternAmountOutResponse,
-  iMsgExitSwapShareAmountIn,
-  iMsgExitSwapShareAmountInResponse,
-  iMsgJoinPool,
-  iMsgJoinPoolResponse,
-  iMsgJoinSwapExternAmountIn,
-  iMsgJoinSwapExternAmountInResponse,
-  iMsgJoinSwapShareAmountOut,
-  iMsgJoinSwapShareAmountOutResponse,
-  iMsgSwapExactAmountIn,
-  iMsgSwapExactAmountInResponse,
-  iIBCTransferInfo,
-  iMsgSwapExactAmountInWithIBCTransfer,
-  iMsgSwapExactAmountInWithIBCTransferResponse,
-  iMsgSwapExactAmountOut,
-  iMsgSwapExactAmountOutResponse,
-  iSwapAmountInRoute,
-  iSwapAmountOutRoute,
-  iAffiliate
-} from './interfaces.js';
+import type { iMsgCreateBalancerPool, iMsgCreateBalancerPoolResponse, iMsgExitPool, iMsgExitPoolResponse, iMsgExitSwapExternAmountOut, iMsgExitSwapExternAmountOutResponse, iMsgExitSwapShareAmountIn, iMsgExitSwapShareAmountInResponse, iMsgJoinPool, iMsgJoinPoolResponse, iMsgJoinSwapExternAmountIn, iMsgJoinSwapExternAmountInResponse, iMsgJoinSwapShareAmountOut, iMsgJoinSwapShareAmountOutResponse, iMsgSwapExactAmountIn, iMsgSwapExactAmountInResponse, iIBCTransferInfo, iMsgSwapExactAmountInWithIBCTransfer, iMsgSwapExactAmountInWithIBCTransferResponse, iMsgSwapExactAmountOut, iMsgSwapExactAmountOutResponse, iSwapAmountInRoute, iSwapAmountOutRoute, iAffiliate } from './interfaces.js';
 
-export class SwapAmountInRoute<T extends NumberType> extends BaseNumberTypeClass<SwapAmountInRoute<T>> implements iSwapAmountInRoute<T> {
-  poolId: T;
+export class SwapAmountInRoute extends BaseNumberTypeClass<SwapAmountInRoute> implements iSwapAmountInRoute {
+  poolId: string | number;
   tokenOutDenom: string;
 
-  constructor(data: iSwapAmountInRoute<T>) {
+  constructor(data: iSwapAmountInRoute) {
     super();
     this.poolId = data.poolId;
     this.tokenOutDenom = data.tokenOutDenom;
@@ -50,8 +25,8 @@ export class SwapAmountInRoute<T extends NumberType> extends BaseNumberTypeClass
     return ['poolId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): SwapAmountInRoute<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SwapAmountInRoute<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): SwapAmountInRoute {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SwapAmountInRoute;
   }
 
   toProto(): protopoolmanager.SwapAmountInRoute {
@@ -61,31 +36,23 @@ export class SwapAmountInRoute<T extends NumberType> extends BaseNumberTypeClass
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): SwapAmountInRoute<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): SwapAmountInRoute {
     return SwapAmountInRoute.fromProto(protopoolmanager.SwapAmountInRoute.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): SwapAmountInRoute<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): SwapAmountInRoute {
     return SwapAmountInRoute.fromProto(protopoolmanager.SwapAmountInRoute.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protopoolmanager.SwapAmountInRoute, convertFunction: (item: NumberType) => U): SwapAmountInRoute<U> {
-    return new SwapAmountInRoute<U>({
+  static fromProto(item: protopoolmanager.SwapAmountInRoute, convertFunction: (item: string | number) => U): SwapAmountInRoute {
+    return new SwapAmountInRoute({
       poolId: convertFunction(BigInt(item.poolId)),
       tokenOutDenom: item.tokenOutDenom
     });
   }
 
-  toBech32Addresses(prefix: string): SwapAmountInRoute<T> {
-    return new SwapAmountInRoute<T>({
+  toBech32Addresses(prefix: string): SwapAmountInRoute {
+    return new SwapAmountInRoute({
       poolId: this.poolId,
       tokenOutDenom: this.tokenOutDenom
     });
@@ -117,7 +84,7 @@ export class Affiliate extends BaseNumberTypeClass<Affiliate> implements iAffili
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Affiliate {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): Affiliate {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Affiliate;
   }
 
@@ -160,11 +127,11 @@ export class Affiliate extends BaseNumberTypeClass<Affiliate> implements iAffili
   }
 }
 
-export class SwapAmountOutRoute<T extends NumberType> extends BaseNumberTypeClass<SwapAmountOutRoute<T>> implements iSwapAmountOutRoute<T> {
-  poolId: T;
+export class SwapAmountOutRoute extends BaseNumberTypeClass<SwapAmountOutRoute> implements iSwapAmountOutRoute {
+  poolId: string | number;
   tokenInDenom: string;
 
-  constructor(data: iSwapAmountOutRoute<T>) {
+  constructor(data: iSwapAmountOutRoute) {
     super();
     this.poolId = data.poolId;
     this.tokenInDenom = data.tokenInDenom;
@@ -174,8 +141,8 @@ export class SwapAmountOutRoute<T extends NumberType> extends BaseNumberTypeClas
     return ['poolId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): SwapAmountOutRoute<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SwapAmountOutRoute<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): SwapAmountOutRoute {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SwapAmountOutRoute;
   }
 
   toProto(): protopoolmanager.SwapAmountOutRoute {
@@ -185,31 +152,23 @@ export class SwapAmountOutRoute<T extends NumberType> extends BaseNumberTypeClas
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): SwapAmountOutRoute<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): SwapAmountOutRoute {
     return SwapAmountOutRoute.fromProto(protopoolmanager.SwapAmountOutRoute.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): SwapAmountOutRoute<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): SwapAmountOutRoute {
     return SwapAmountOutRoute.fromProto(protopoolmanager.SwapAmountOutRoute.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protopoolmanager.SwapAmountOutRoute, convertFunction: (item: NumberType) => U): SwapAmountOutRoute<U> {
-    return new SwapAmountOutRoute<U>({
+  static fromProto(item: protopoolmanager.SwapAmountOutRoute, convertFunction: (item: string | number) => U): SwapAmountOutRoute {
+    return new SwapAmountOutRoute({
       poolId: convertFunction(BigInt(item.poolId)),
       tokenInDenom: item.tokenInDenom
     });
   }
 
-  toBech32Addresses(prefix: string): SwapAmountOutRoute<T> {
-    return new SwapAmountOutRoute<T>({
+  toBech32Addresses(prefix: string): SwapAmountOutRoute {
+    return new SwapAmountOutRoute({
       poolId: this.poolId,
       tokenInDenom: this.tokenInDenom
     });
@@ -225,26 +184,26 @@ export class SwapAmountOutRoute<T extends NumberType> extends BaseNumberTypeClas
   }
 }
 
-export class MsgJoinPool<T extends NumberType> extends BaseNumberTypeClass<MsgJoinPool<T>> implements iMsgJoinPool<T> {
+export class MsgJoinPool extends BaseNumberTypeClass<MsgJoinPool> implements iMsgJoinPool {
   sender: string;
-  poolId: T;
-  shareOutAmount: T;
-  tokenInMaxs: CosmosCoin<T>[];
+  poolId: string | number;
+  shareOutAmount: string | number;
+  tokenInMaxs: CosmosCoin[];
 
-  constructor(data: iMsgJoinPool<T>) {
+  constructor(data: iMsgJoinPool) {
     super();
     this.sender = data.sender;
     this.poolId = data.poolId;
     this.shareOutAmount = data.shareOutAmount;
-    this.tokenInMaxs = data.tokenInMaxs.map((coin) => new CosmosCoin<T>(coin));
+    this.tokenInMaxs = data.tokenInMaxs.map((coin) => new CosmosCoin(coin));
   }
 
   getNumberFieldNames(): string[] {
     return ['poolId', 'shareOutAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgJoinPool<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgJoinPool<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgJoinPool {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgJoinPool;
   }
 
   toProto(): protogamm.MsgJoinPool {
@@ -256,29 +215,21 @@ export class MsgJoinPool<T extends NumberType> extends BaseNumberTypeClass<MsgJo
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgJoinPool<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgJoinPool {
     return MsgJoinPool.fromProto(protogamm.MsgJoinPool.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgJoinPool<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgJoinPool {
     return MsgJoinPool.fromProto(protogamm.MsgJoinPool.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protogamm.MsgJoinPool, convertFunction: (item: NumberType) => U): MsgJoinPool<U> {
-    return new MsgJoinPool<U>({
+  static fromProto(item: protogamm.MsgJoinPool, convertFunction: (item: string | number) => U): MsgJoinPool {
+    return new MsgJoinPool({
       sender: item.sender,
       poolId: convertFunction(BigInt(item.poolId)),
       shareOutAmount: convertFunction(BigInt(item.shareOutAmount)),
       tokenInMaxs: item.tokenInMaxs.map((coin) =>
-        new CosmosCoin<U>({
+        new CosmosCoin({
           amount: convertFunction(BigInt(coin.amount)),
           denom: coin.denom
         }).convert(convertFunction)
@@ -286,8 +237,8 @@ export class MsgJoinPool<T extends NumberType> extends BaseNumberTypeClass<MsgJo
     });
   }
 
-  toBech32Addresses(prefix: string): MsgJoinPool<T> {
-    return new MsgJoinPool<T>({
+  toBech32Addresses(prefix: string): MsgJoinPool {
+    return new MsgJoinPool({
       sender: getConvertFunctionFromPrefix(prefix)(this.sender),
       poolId: this.poolId,
       shareOutAmount: this.shareOutAmount,
@@ -305,22 +256,22 @@ export class MsgJoinPool<T extends NumberType> extends BaseNumberTypeClass<MsgJo
   }
 }
 
-export class MsgJoinPoolResponse<T extends NumberType> extends BaseNumberTypeClass<MsgJoinPoolResponse<T>> implements iMsgJoinPoolResponse<T> {
-  shareOutAmount: T;
-  tokenIn: CosmosCoin<T>[];
+export class MsgJoinPoolResponse extends BaseNumberTypeClass<MsgJoinPoolResponse> implements iMsgJoinPoolResponse {
+  shareOutAmount: string | number;
+  tokenIn: CosmosCoin[];
 
-  constructor(data: iMsgJoinPoolResponse<T>) {
+  constructor(data: iMsgJoinPoolResponse) {
     super();
     this.shareOutAmount = data.shareOutAmount;
-    this.tokenIn = data.tokenIn.map((coin) => new CosmosCoin<T>(coin));
+    this.tokenIn = data.tokenIn.map((coin) => new CosmosCoin(coin));
   }
 
   getNumberFieldNames(): string[] {
     return ['shareOutAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgJoinPoolResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgJoinPoolResponse<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgJoinPoolResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgJoinPoolResponse;
   }
 
   toProto(): protogamm.MsgJoinPoolResponse {
@@ -330,27 +281,19 @@ export class MsgJoinPoolResponse<T extends NumberType> extends BaseNumberTypeCla
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgJoinPoolResponse<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgJoinPoolResponse {
     return MsgJoinPoolResponse.fromProto(protogamm.MsgJoinPoolResponse.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgJoinPoolResponse<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgJoinPoolResponse {
     return MsgJoinPoolResponse.fromProto(protogamm.MsgJoinPoolResponse.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protogamm.MsgJoinPoolResponse, convertFunction: (item: NumberType) => U): MsgJoinPoolResponse<U> {
-    return new MsgJoinPoolResponse<U>({
+  static fromProto(item: protogamm.MsgJoinPoolResponse, convertFunction: (item: string | number) => U): MsgJoinPoolResponse {
+    return new MsgJoinPoolResponse({
       shareOutAmount: convertFunction(BigInt(item.shareOutAmount)),
       tokenIn: item.tokenIn.map((coin) =>
-        new CosmosCoin<U>({
+        new CosmosCoin({
           amount: convertFunction(BigInt(coin.amount)),
           denom: coin.denom
         }).convert(convertFunction)
@@ -358,8 +301,8 @@ export class MsgJoinPoolResponse<T extends NumberType> extends BaseNumberTypeCla
     });
   }
 
-  toBech32Addresses(prefix: string): MsgJoinPoolResponse<T> {
-    return new MsgJoinPoolResponse<T>({
+  toBech32Addresses(prefix: string): MsgJoinPoolResponse {
+    return new MsgJoinPoolResponse({
       shareOutAmount: this.shareOutAmount,
       tokenIn: this.tokenIn
     });
@@ -375,26 +318,26 @@ export class MsgJoinPoolResponse<T extends NumberType> extends BaseNumberTypeCla
   }
 }
 
-export class MsgExitPool<T extends NumberType> extends BaseNumberTypeClass<MsgExitPool<T>> implements iMsgExitPool<T> {
+export class MsgExitPool extends BaseNumberTypeClass<MsgExitPool> implements iMsgExitPool {
   sender: string;
-  poolId: T;
-  shareInAmount: T;
-  tokenOutMins: CosmosCoin<T>[];
+  poolId: string | number;
+  shareInAmount: string | number;
+  tokenOutMins: CosmosCoin[];
 
-  constructor(data: iMsgExitPool<T>) {
+  constructor(data: iMsgExitPool) {
     super();
     this.sender = data.sender;
     this.poolId = data.poolId;
     this.shareInAmount = data.shareInAmount;
-    this.tokenOutMins = data.tokenOutMins.map((coin) => new CosmosCoin<T>(coin));
+    this.tokenOutMins = data.tokenOutMins.map((coin) => new CosmosCoin(coin));
   }
 
   getNumberFieldNames(): string[] {
     return ['poolId', 'shareInAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgExitPool<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgExitPool<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgExitPool {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgExitPool;
   }
 
   toProto(): protogamm.MsgExitPool {
@@ -406,29 +349,21 @@ export class MsgExitPool<T extends NumberType> extends BaseNumberTypeClass<MsgEx
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgExitPool<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgExitPool {
     return MsgExitPool.fromProto(protogamm.MsgExitPool.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgExitPool<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgExitPool {
     return MsgExitPool.fromProto(protogamm.MsgExitPool.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protogamm.MsgExitPool, convertFunction: (item: NumberType) => U): MsgExitPool<U> {
-    return new MsgExitPool<U>({
+  static fromProto(item: protogamm.MsgExitPool, convertFunction: (item: string | number) => U): MsgExitPool {
+    return new MsgExitPool({
       sender: item.sender,
       poolId: convertFunction(BigInt(item.poolId)),
       shareInAmount: convertFunction(BigInt(item.shareInAmount)),
       tokenOutMins: item.tokenOutMins.map((coin) =>
-        new CosmosCoin<U>({
+        new CosmosCoin({
           amount: convertFunction(BigInt(coin.amount)),
           denom: coin.denom
         }).convert(convertFunction)
@@ -436,8 +371,8 @@ export class MsgExitPool<T extends NumberType> extends BaseNumberTypeClass<MsgEx
     });
   }
 
-  toBech32Addresses(prefix: string): MsgExitPool<T> {
-    return new MsgExitPool<T>({
+  toBech32Addresses(prefix: string): MsgExitPool {
+    return new MsgExitPool({
       sender: getConvertFunctionFromPrefix(prefix)(this.sender),
       poolId: this.poolId,
       shareInAmount: this.shareInAmount,
@@ -455,20 +390,20 @@ export class MsgExitPool<T extends NumberType> extends BaseNumberTypeClass<MsgEx
   }
 }
 
-export class MsgExitPoolResponse<T extends NumberType> extends BaseNumberTypeClass<MsgExitPoolResponse<T>> implements iMsgExitPoolResponse<T> {
-  tokenOut: CosmosCoin<T>[];
+export class MsgExitPoolResponse extends BaseNumberTypeClass<MsgExitPoolResponse> implements iMsgExitPoolResponse {
+  tokenOut: CosmosCoin[];
 
-  constructor(data: iMsgExitPoolResponse<T>) {
+  constructor(data: iMsgExitPoolResponse) {
     super();
-    this.tokenOut = data.tokenOut.map((coin) => new CosmosCoin<T>(coin));
+    this.tokenOut = data.tokenOut.map((coin) => new CosmosCoin(coin));
   }
 
   getNumberFieldNames(): string[] {
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgExitPoolResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgExitPoolResponse<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgExitPoolResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgExitPoolResponse;
   }
 
   toProto(): protogamm.MsgExitPoolResponse {
@@ -477,26 +412,18 @@ export class MsgExitPoolResponse<T extends NumberType> extends BaseNumberTypeCla
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgExitPoolResponse<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgExitPoolResponse {
     return MsgExitPoolResponse.fromProto(protogamm.MsgExitPoolResponse.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgExitPoolResponse<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgExitPoolResponse {
     return MsgExitPoolResponse.fromProto(protogamm.MsgExitPoolResponse.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protogamm.MsgExitPoolResponse, convertFunction: (item: NumberType) => U): MsgExitPoolResponse<U> {
-    return new MsgExitPoolResponse<U>({
+  static fromProto(item: protogamm.MsgExitPoolResponse, convertFunction: (item: string | number) => U): MsgExitPoolResponse {
+    return new MsgExitPoolResponse({
       tokenOut: item.tokenOut.map((coin) =>
-        new CosmosCoin<U>({
+        new CosmosCoin({
           amount: convertFunction(BigInt(coin.amount)),
           denom: coin.denom
         }).convert(convertFunction)
@@ -504,8 +431,8 @@ export class MsgExitPoolResponse<T extends NumberType> extends BaseNumberTypeCla
     });
   }
 
-  toBech32Addresses(prefix: string): MsgExitPoolResponse<T> {
-    return new MsgExitPoolResponse<T>({
+  toBech32Addresses(prefix: string): MsgExitPoolResponse {
+    return new MsgExitPoolResponse({
       tokenOut: this.tokenOut
     });
   }
@@ -520,18 +447,18 @@ export class MsgExitPoolResponse<T extends NumberType> extends BaseNumberTypeCla
   }
 }
 
-export class MsgSwapExactAmountIn<T extends NumberType> extends BaseNumberTypeClass<MsgSwapExactAmountIn<T>> implements iMsgSwapExactAmountIn<T> {
+export class MsgSwapExactAmountIn extends BaseNumberTypeClass<MsgSwapExactAmountIn> implements iMsgSwapExactAmountIn {
   sender: string;
-  routes: SwapAmountInRoute<T>[];
-  tokenIn: CosmosCoin<T>;
-  tokenOutMinAmount: T;
+  routes: SwapAmountInRoute[];
+  tokenIn: CosmosCoin;
+  tokenOutMinAmount: string | number;
   affiliates: Affiliate[];
 
-  constructor(data: iMsgSwapExactAmountIn<T>) {
+  constructor(data: iMsgSwapExactAmountIn) {
     super();
     this.sender = data.sender;
     this.routes = data.routes.map((route) => new SwapAmountInRoute(route));
-    this.tokenIn = new CosmosCoin<T>(data.tokenIn);
+    this.tokenIn = new CosmosCoin(data.tokenIn);
     this.tokenOutMinAmount = data.tokenOutMinAmount;
     this.affiliates = (data.affiliates || []).map((affiliate) => new Affiliate(affiliate));
   }
@@ -540,8 +467,8 @@ export class MsgSwapExactAmountIn<T extends NumberType> extends BaseNumberTypeCl
     return ['tokenOutMinAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgSwapExactAmountIn<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountIn<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgSwapExactAmountIn {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountIn;
   }
 
   toProto(): protogamm.MsgSwapExactAmountIn {
@@ -554,27 +481,19 @@ export class MsgSwapExactAmountIn<T extends NumberType> extends BaseNumberTypeCl
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgSwapExactAmountIn<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgSwapExactAmountIn {
     return MsgSwapExactAmountIn.fromProto(protogamm.MsgSwapExactAmountIn.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgSwapExactAmountIn<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgSwapExactAmountIn {
     return MsgSwapExactAmountIn.fromProto(protogamm.MsgSwapExactAmountIn.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protogamm.MsgSwapExactAmountIn, convertFunction: (item: NumberType) => U): MsgSwapExactAmountIn<U> {
-    return new MsgSwapExactAmountIn<U>({
+  static fromProto(item: protogamm.MsgSwapExactAmountIn, convertFunction: (item: string | number) => U): MsgSwapExactAmountIn {
+    return new MsgSwapExactAmountIn({
       sender: item.sender,
       routes: item.routes.map((route) => SwapAmountInRoute.fromProto(route, convertFunction)),
-      tokenIn: new CosmosCoin<U>({
+      tokenIn: new CosmosCoin({
         amount: convertFunction(BigInt(item.tokenIn!.amount)),
         denom: item.tokenIn!.denom
       }).convert(convertFunction),
@@ -583,8 +502,8 @@ export class MsgSwapExactAmountIn<T extends NumberType> extends BaseNumberTypeCl
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSwapExactAmountIn<T> {
-    return new MsgSwapExactAmountIn<T>({
+  toBech32Addresses(prefix: string): MsgSwapExactAmountIn {
+    return new MsgSwapExactAmountIn({
       sender: getConvertFunctionFromPrefix(prefix)(this.sender),
       routes: this.routes,
       tokenIn: this.tokenIn,
@@ -603,13 +522,10 @@ export class MsgSwapExactAmountIn<T extends NumberType> extends BaseNumberTypeCl
   }
 }
 
-export class MsgSwapExactAmountInResponse<T extends NumberType>
-  extends BaseNumberTypeClass<MsgSwapExactAmountInResponse<T>>
-  implements iMsgSwapExactAmountInResponse<T>
-{
-  tokenOutAmount: T;
+export class MsgSwapExactAmountInResponse extends BaseNumberTypeClass<MsgSwapExactAmountInResponse> implements iMsgSwapExactAmountInResponse {
+  tokenOutAmount: string | number;
 
-  constructor(data: iMsgSwapExactAmountInResponse<T>) {
+  constructor(data: iMsgSwapExactAmountInResponse) {
     super();
     this.tokenOutAmount = data.tokenOutAmount;
   }
@@ -618,8 +534,8 @@ export class MsgSwapExactAmountInResponse<T extends NumberType>
     return ['tokenOutAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgSwapExactAmountInResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountInResponse<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgSwapExactAmountInResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountInResponse;
   }
 
   toProto(): protogamm.MsgSwapExactAmountInResponse {
@@ -628,33 +544,22 @@ export class MsgSwapExactAmountInResponse<T extends NumberType>
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgSwapExactAmountInResponse<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgSwapExactAmountInResponse {
     return MsgSwapExactAmountInResponse.fromProto(protogamm.MsgSwapExactAmountInResponse.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgSwapExactAmountInResponse<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgSwapExactAmountInResponse {
     return MsgSwapExactAmountInResponse.fromProto(protogamm.MsgSwapExactAmountInResponse.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protogamm.MsgSwapExactAmountInResponse,
-    convertFunction: (item: NumberType) => U
-  ): MsgSwapExactAmountInResponse<U> {
-    return new MsgSwapExactAmountInResponse<U>({
+  static fromProto(item: protogamm.MsgSwapExactAmountInResponse, convertFunction: (item: string | number) => U): MsgSwapExactAmountInResponse {
+    return new MsgSwapExactAmountInResponse({
       tokenOutAmount: convertFunction(BigInt(item.tokenOutAmount))
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSwapExactAmountInResponse<T> {
-    return new MsgSwapExactAmountInResponse<T>({
+  toBech32Addresses(prefix: string): MsgSwapExactAmountInResponse {
+    return new MsgSwapExactAmountInResponse({
       tokenOutAmount: this.tokenOutAmount
     });
   }
@@ -669,13 +574,13 @@ export class MsgSwapExactAmountInResponse<T extends NumberType>
   }
 }
 
-export class IBCTransferInfo<T extends NumberType> extends BaseNumberTypeClass<IBCTransferInfo<T>> implements iIBCTransferInfo<T> {
+export class IBCTransferInfo extends BaseNumberTypeClass<IBCTransferInfo> implements iIBCTransferInfo {
   sourceChannel: string;
   receiver: string;
   memo: string;
-  timeoutTimestamp: T;
+  timeoutTimestamp: string | number;
 
-  constructor(data: iIBCTransferInfo<T>) {
+  constructor(data: iIBCTransferInfo) {
     super();
     this.sourceChannel = data.sourceChannel;
     this.receiver = data.receiver;
@@ -687,8 +592,8 @@ export class IBCTransferInfo<T extends NumberType> extends BaseNumberTypeClass<I
     return ['timeoutTimestamp'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IBCTransferInfo<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as IBCTransferInfo<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): IBCTransferInfo {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as IBCTransferInfo;
   }
 
   toProto(): protogamm.IBCTransferInfo {
@@ -700,24 +605,16 @@ export class IBCTransferInfo<T extends NumberType> extends BaseNumberTypeClass<I
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): IBCTransferInfo<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): IBCTransferInfo {
     return IBCTransferInfo.fromProto(protogamm.IBCTransferInfo.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): IBCTransferInfo<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): IBCTransferInfo {
     return IBCTransferInfo.fromProto(protogamm.IBCTransferInfo.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protogamm.IBCTransferInfo, convertFunction: (item: NumberType) => U): IBCTransferInfo<U> {
-    return new IBCTransferInfo<U>({
+  static fromProto(item: protogamm.IBCTransferInfo, convertFunction: (item: string | number) => U): IBCTransferInfo {
+    return new IBCTransferInfo({
       sourceChannel: item.sourceChannel,
       receiver: item.receiver,
       memo: item.memo,
@@ -725,8 +622,8 @@ export class IBCTransferInfo<T extends NumberType> extends BaseNumberTypeClass<I
     });
   }
 
-  toBech32Addresses(prefix: string): IBCTransferInfo<T> {
-    return new IBCTransferInfo<T>({
+  toBech32Addresses(prefix: string): IBCTransferInfo {
+    return new IBCTransferInfo({
       sourceChannel: this.sourceChannel,
       receiver: this.receiver,
       memo: this.memo,
@@ -744,24 +641,21 @@ export class IBCTransferInfo<T extends NumberType> extends BaseNumberTypeClass<I
   }
 }
 
-export class MsgSwapExactAmountInWithIBCTransfer<T extends NumberType>
-  extends BaseNumberTypeClass<MsgSwapExactAmountInWithIBCTransfer<T>>
-  implements iMsgSwapExactAmountInWithIBCTransfer<T>
-{
+export class MsgSwapExactAmountInWithIBCTransfer extends BaseNumberTypeClass<MsgSwapExactAmountInWithIBCTransfer> implements iMsgSwapExactAmountInWithIBCTransfer {
   sender: string;
-  routes: SwapAmountInRoute<T>[];
-  tokenIn: CosmosCoin<T>;
-  tokenOutMinAmount: T;
-  ibcTransferInfo: IBCTransferInfo<T>;
+  routes: SwapAmountInRoute[];
+  tokenIn: CosmosCoin;
+  tokenOutMinAmount: string | number;
+  ibcTransferInfo: IBCTransferInfo;
   affiliates: Affiliate[];
 
-  constructor(data: iMsgSwapExactAmountInWithIBCTransfer<T>) {
+  constructor(data: iMsgSwapExactAmountInWithIBCTransfer) {
     super();
     this.sender = data.sender;
     this.routes = data.routes.map((route) => new SwapAmountInRoute(route));
-    this.tokenIn = new CosmosCoin<T>(data.tokenIn);
+    this.tokenIn = new CosmosCoin(data.tokenIn);
     this.tokenOutMinAmount = data.tokenOutMinAmount;
-    this.ibcTransferInfo = new IBCTransferInfo<T>(data.ibcTransferInfo);
+    this.ibcTransferInfo = new IBCTransferInfo(data.ibcTransferInfo);
     this.affiliates = (data.affiliates || []).map((affiliate) => new Affiliate(affiliate));
   }
 
@@ -769,8 +663,8 @@ export class MsgSwapExactAmountInWithIBCTransfer<T extends NumberType>
     return ['tokenOutMinAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgSwapExactAmountInWithIBCTransfer<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountInWithIBCTransfer<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgSwapExactAmountInWithIBCTransfer {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountInWithIBCTransfer;
   }
 
   toProto(): protogamm.MsgSwapExactAmountInWithIBCTransfer {
@@ -784,33 +678,19 @@ export class MsgSwapExactAmountInWithIBCTransfer<T extends NumberType>
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgSwapExactAmountInWithIBCTransfer<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgSwapExactAmountInWithIBCTransfer {
     return MsgSwapExactAmountInWithIBCTransfer.fromProto(protogamm.MsgSwapExactAmountInWithIBCTransfer.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgSwapExactAmountInWithIBCTransfer<U> {
-    return MsgSwapExactAmountInWithIBCTransfer.fromProto(
-      protogamm.MsgSwapExactAmountInWithIBCTransfer.fromJsonString(jsonString, options),
-      convertFunction
-    );
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgSwapExactAmountInWithIBCTransfer {
+    return MsgSwapExactAmountInWithIBCTransfer.fromProto(protogamm.MsgSwapExactAmountInWithIBCTransfer.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protogamm.MsgSwapExactAmountInWithIBCTransfer,
-    convertFunction: (item: NumberType) => U
-  ): MsgSwapExactAmountInWithIBCTransfer<U> {
-    return new MsgSwapExactAmountInWithIBCTransfer<U>({
+  static fromProto(item: protogamm.MsgSwapExactAmountInWithIBCTransfer, convertFunction: (item: string | number) => U): MsgSwapExactAmountInWithIBCTransfer {
+    return new MsgSwapExactAmountInWithIBCTransfer({
       sender: item.sender,
       routes: item.routes.map((route) => SwapAmountInRoute.fromProto(route, convertFunction)),
-      tokenIn: new CosmosCoin<U>({
+      tokenIn: new CosmosCoin({
         amount: convertFunction(BigInt(item.tokenIn!.amount)),
         denom: item.tokenIn!.denom
       }).convert(convertFunction),
@@ -827,8 +707,8 @@ export class MsgSwapExactAmountInWithIBCTransfer<T extends NumberType>
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSwapExactAmountInWithIBCTransfer<T> {
-    return new MsgSwapExactAmountInWithIBCTransfer<T>({
+  toBech32Addresses(prefix: string): MsgSwapExactAmountInWithIBCTransfer {
+    return new MsgSwapExactAmountInWithIBCTransfer({
       sender: getConvertFunctionFromPrefix(prefix)(this.sender),
       routes: this.routes,
       tokenIn: this.tokenIn,
@@ -848,13 +728,10 @@ export class MsgSwapExactAmountInWithIBCTransfer<T extends NumberType>
   }
 }
 
-export class MsgSwapExactAmountInWithIBCTransferResponse<T extends NumberType>
-  extends BaseNumberTypeClass<MsgSwapExactAmountInWithIBCTransferResponse<T>>
-  implements iMsgSwapExactAmountInWithIBCTransferResponse<T>
-{
-  tokenOutAmount: T;
+export class MsgSwapExactAmountInWithIBCTransferResponse extends BaseNumberTypeClass<MsgSwapExactAmountInWithIBCTransferResponse> implements iMsgSwapExactAmountInWithIBCTransferResponse {
+  tokenOutAmount: string | number;
 
-  constructor(data: iMsgSwapExactAmountInWithIBCTransferResponse<T>) {
+  constructor(data: iMsgSwapExactAmountInWithIBCTransferResponse) {
     super();
     this.tokenOutAmount = data.tokenOutAmount;
   }
@@ -863,8 +740,8 @@ export class MsgSwapExactAmountInWithIBCTransferResponse<T extends NumberType>
     return ['tokenOutAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgSwapExactAmountInWithIBCTransferResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountInWithIBCTransferResponse<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgSwapExactAmountInWithIBCTransferResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountInWithIBCTransferResponse;
   }
 
   toProto(): protogamm.MsgSwapExactAmountInWithIBCTransferResponse {
@@ -873,39 +750,22 @@ export class MsgSwapExactAmountInWithIBCTransferResponse<T extends NumberType>
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgSwapExactAmountInWithIBCTransferResponse<U> {
-    return MsgSwapExactAmountInWithIBCTransferResponse.fromProto(
-      protogamm.MsgSwapExactAmountInWithIBCTransferResponse.fromJson(jsonValue, options),
-      convertFunction
-    );
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgSwapExactAmountInWithIBCTransferResponse {
+    return MsgSwapExactAmountInWithIBCTransferResponse.fromProto(protogamm.MsgSwapExactAmountInWithIBCTransferResponse.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgSwapExactAmountInWithIBCTransferResponse<U> {
-    return MsgSwapExactAmountInWithIBCTransferResponse.fromProto(
-      protogamm.MsgSwapExactAmountInWithIBCTransferResponse.fromJsonString(jsonString, options),
-      convertFunction
-    );
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgSwapExactAmountInWithIBCTransferResponse {
+    return MsgSwapExactAmountInWithIBCTransferResponse.fromProto(protogamm.MsgSwapExactAmountInWithIBCTransferResponse.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protogamm.MsgSwapExactAmountInWithIBCTransferResponse,
-    convertFunction: (item: NumberType) => U
-  ): MsgSwapExactAmountInWithIBCTransferResponse<U> {
-    return new MsgSwapExactAmountInWithIBCTransferResponse<U>({
+  static fromProto(item: protogamm.MsgSwapExactAmountInWithIBCTransferResponse, convertFunction: (item: string | number) => U): MsgSwapExactAmountInWithIBCTransferResponse {
+    return new MsgSwapExactAmountInWithIBCTransferResponse({
       tokenOutAmount: convertFunction(BigInt(item.tokenOutAmount))
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSwapExactAmountInWithIBCTransferResponse<T> {
-    return new MsgSwapExactAmountInWithIBCTransferResponse<T>({
+  toBech32Addresses(prefix: string): MsgSwapExactAmountInWithIBCTransferResponse {
+    return new MsgSwapExactAmountInWithIBCTransferResponse({
       tokenOutAmount: this.tokenOutAmount
     });
   }
@@ -920,26 +780,26 @@ export class MsgSwapExactAmountInWithIBCTransferResponse<T extends NumberType>
   }
 }
 
-export class MsgSwapExactAmountOut<T extends NumberType> extends BaseNumberTypeClass<MsgSwapExactAmountOut<T>> implements iMsgSwapExactAmountOut<T> {
+export class MsgSwapExactAmountOut extends BaseNumberTypeClass<MsgSwapExactAmountOut> implements iMsgSwapExactAmountOut {
   sender: string;
-  routes: SwapAmountOutRoute<T>[];
-  tokenInMaxAmount: T;
-  tokenOut: CosmosCoin<T>;
+  routes: SwapAmountOutRoute[];
+  tokenInMaxAmount: string | number;
+  tokenOut: CosmosCoin;
 
-  constructor(data: iMsgSwapExactAmountOut<T>) {
+  constructor(data: iMsgSwapExactAmountOut) {
     super();
     this.sender = data.sender;
     this.routes = data.routes.map((route) => new SwapAmountOutRoute(route));
     this.tokenInMaxAmount = data.tokenInMaxAmount;
-    this.tokenOut = new CosmosCoin<T>(data.tokenOut);
+    this.tokenOut = new CosmosCoin(data.tokenOut);
   }
 
   getNumberFieldNames(): string[] {
     return ['tokenInMaxAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgSwapExactAmountOut<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountOut<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgSwapExactAmountOut {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountOut;
   }
 
   toProto(): protogamm.MsgSwapExactAmountOut {
@@ -951,36 +811,28 @@ export class MsgSwapExactAmountOut<T extends NumberType> extends BaseNumberTypeC
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgSwapExactAmountOut<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgSwapExactAmountOut {
     return MsgSwapExactAmountOut.fromProto(protogamm.MsgSwapExactAmountOut.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgSwapExactAmountOut<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgSwapExactAmountOut {
     return MsgSwapExactAmountOut.fromProto(protogamm.MsgSwapExactAmountOut.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protogamm.MsgSwapExactAmountOut, convertFunction: (item: NumberType) => U): MsgSwapExactAmountOut<U> {
-    return new MsgSwapExactAmountOut<U>({
+  static fromProto(item: protogamm.MsgSwapExactAmountOut, convertFunction: (item: string | number) => U): MsgSwapExactAmountOut {
+    return new MsgSwapExactAmountOut({
       sender: item.sender,
       routes: item.routes.map((route) => SwapAmountOutRoute.fromProto(route, convertFunction)),
       tokenInMaxAmount: convertFunction(BigInt(item.tokenInMaxAmount)),
-      tokenOut: new CosmosCoin<U>({
+      tokenOut: new CosmosCoin({
         amount: convertFunction(BigInt(item.tokenOut!.amount)),
         denom: item.tokenOut!.denom
       }).convert(convertFunction)
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSwapExactAmountOut<T> {
-    return new MsgSwapExactAmountOut<T>({
+  toBech32Addresses(prefix: string): MsgSwapExactAmountOut {
+    return new MsgSwapExactAmountOut({
       sender: getConvertFunctionFromPrefix(prefix)(this.sender),
       routes: this.routes,
       tokenInMaxAmount: this.tokenInMaxAmount,
@@ -998,13 +850,10 @@ export class MsgSwapExactAmountOut<T extends NumberType> extends BaseNumberTypeC
   }
 }
 
-export class MsgSwapExactAmountOutResponse<T extends NumberType>
-  extends BaseNumberTypeClass<MsgSwapExactAmountOutResponse<T>>
-  implements iMsgSwapExactAmountOutResponse<T>
-{
-  tokenInAmount: T;
+export class MsgSwapExactAmountOutResponse extends BaseNumberTypeClass<MsgSwapExactAmountOutResponse> implements iMsgSwapExactAmountOutResponse {
+  tokenInAmount: string | number;
 
-  constructor(data: iMsgSwapExactAmountOutResponse<T>) {
+  constructor(data: iMsgSwapExactAmountOutResponse) {
     super();
     this.tokenInAmount = data.tokenInAmount;
   }
@@ -1013,8 +862,8 @@ export class MsgSwapExactAmountOutResponse<T extends NumberType>
     return ['tokenInAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgSwapExactAmountOutResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountOutResponse<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgSwapExactAmountOutResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgSwapExactAmountOutResponse;
   }
 
   toProto(): protogamm.MsgSwapExactAmountOutResponse {
@@ -1023,33 +872,22 @@ export class MsgSwapExactAmountOutResponse<T extends NumberType>
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgSwapExactAmountOutResponse<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgSwapExactAmountOutResponse {
     return MsgSwapExactAmountOutResponse.fromProto(protogamm.MsgSwapExactAmountOutResponse.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgSwapExactAmountOutResponse<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgSwapExactAmountOutResponse {
     return MsgSwapExactAmountOutResponse.fromProto(protogamm.MsgSwapExactAmountOutResponse.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protogamm.MsgSwapExactAmountOutResponse,
-    convertFunction: (item: NumberType) => U
-  ): MsgSwapExactAmountOutResponse<U> {
-    return new MsgSwapExactAmountOutResponse<U>({
+  static fromProto(item: protogamm.MsgSwapExactAmountOutResponse, convertFunction: (item: string | number) => U): MsgSwapExactAmountOutResponse {
+    return new MsgSwapExactAmountOutResponse({
       tokenInAmount: convertFunction(BigInt(item.tokenInAmount))
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSwapExactAmountOutResponse<T> {
-    return new MsgSwapExactAmountOutResponse<T>({
+  toBech32Addresses(prefix: string): MsgSwapExactAmountOutResponse {
+    return new MsgSwapExactAmountOutResponse({
       tokenInAmount: this.tokenInAmount
     });
   }
@@ -1064,20 +902,17 @@ export class MsgSwapExactAmountOutResponse<T extends NumberType>
   }
 }
 
-export class MsgJoinSwapExternAmountIn<T extends NumberType>
-  extends BaseNumberTypeClass<MsgJoinSwapExternAmountIn<T>>
-  implements iMsgJoinSwapExternAmountIn<T>
-{
+export class MsgJoinSwapExternAmountIn extends BaseNumberTypeClass<MsgJoinSwapExternAmountIn> implements iMsgJoinSwapExternAmountIn {
   sender: string;
-  poolId: T;
-  tokenIn: CosmosCoin<T>;
-  shareOutMinAmount: T;
+  poolId: string | number;
+  tokenIn: CosmosCoin;
+  shareOutMinAmount: string | number;
 
-  constructor(data: iMsgJoinSwapExternAmountIn<T>) {
+  constructor(data: iMsgJoinSwapExternAmountIn) {
     super();
     this.sender = data.sender;
     this.poolId = data.poolId as T;
-    this.tokenIn = new CosmosCoin<T>(data.tokenIn);
+    this.tokenIn = new CosmosCoin(data.tokenIn);
     this.shareOutMinAmount = data.shareOutMinAmount;
   }
 
@@ -1085,8 +920,8 @@ export class MsgJoinSwapExternAmountIn<T extends NumberType>
     return ['poolId', 'shareOutMinAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgJoinSwapExternAmountIn<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgJoinSwapExternAmountIn<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgJoinSwapExternAmountIn {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgJoinSwapExternAmountIn;
   }
 
   toProto(): protogamm.MsgJoinSwapExternAmountIn {
@@ -1098,30 +933,19 @@ export class MsgJoinSwapExternAmountIn<T extends NumberType>
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgJoinSwapExternAmountIn<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgJoinSwapExternAmountIn {
     return MsgJoinSwapExternAmountIn.fromProto(protogamm.MsgJoinSwapExternAmountIn.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgJoinSwapExternAmountIn<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgJoinSwapExternAmountIn {
     return MsgJoinSwapExternAmountIn.fromProto(protogamm.MsgJoinSwapExternAmountIn.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protogamm.MsgJoinSwapExternAmountIn,
-    convertFunction: (item: NumberType) => U
-  ): MsgJoinSwapExternAmountIn<U> {
-    return new MsgJoinSwapExternAmountIn<U>({
+  static fromProto(item: protogamm.MsgJoinSwapExternAmountIn, convertFunction: (item: string | number) => U): MsgJoinSwapExternAmountIn {
+    return new MsgJoinSwapExternAmountIn({
       sender: item.sender,
       poolId: convertFunction(BigInt(item.poolId)),
-      tokenIn: new CosmosCoin<U>({
+      tokenIn: new CosmosCoin({
         amount: convertFunction(BigInt(item.tokenIn!.amount)),
         denom: item.tokenIn!.denom
       }).convert(convertFunction),
@@ -1129,8 +953,8 @@ export class MsgJoinSwapExternAmountIn<T extends NumberType>
     });
   }
 
-  toBech32Addresses(prefix: string): MsgJoinSwapExternAmountIn<T> {
-    return new MsgJoinSwapExternAmountIn<T>({
+  toBech32Addresses(prefix: string): MsgJoinSwapExternAmountIn {
+    return new MsgJoinSwapExternAmountIn({
       sender: getConvertFunctionFromPrefix(prefix)(this.sender),
       poolId: this.poolId,
       tokenIn: this.tokenIn,
@@ -1148,13 +972,10 @@ export class MsgJoinSwapExternAmountIn<T extends NumberType>
   }
 }
 
-export class MsgJoinSwapExternAmountInResponse<T extends NumberType>
-  extends BaseNumberTypeClass<MsgJoinSwapExternAmountInResponse<T>>
-  implements iMsgJoinSwapExternAmountInResponse<T>
-{
-  shareOutAmount: T;
+export class MsgJoinSwapExternAmountInResponse extends BaseNumberTypeClass<MsgJoinSwapExternAmountInResponse> implements iMsgJoinSwapExternAmountInResponse {
+  shareOutAmount: string | number;
 
-  constructor(data: iMsgJoinSwapExternAmountInResponse<T>) {
+  constructor(data: iMsgJoinSwapExternAmountInResponse) {
     super();
     this.shareOutAmount = data.shareOutAmount;
   }
@@ -1163,8 +984,8 @@ export class MsgJoinSwapExternAmountInResponse<T extends NumberType>
     return ['shareOutAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgJoinSwapExternAmountInResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgJoinSwapExternAmountInResponse<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgJoinSwapExternAmountInResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgJoinSwapExternAmountInResponse;
   }
 
   toProto(): protogamm.MsgJoinSwapExternAmountInResponse {
@@ -1173,36 +994,22 @@ export class MsgJoinSwapExternAmountInResponse<T extends NumberType>
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgJoinSwapExternAmountInResponse<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgJoinSwapExternAmountInResponse {
     return MsgJoinSwapExternAmountInResponse.fromProto(protogamm.MsgJoinSwapExternAmountInResponse.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgJoinSwapExternAmountInResponse<U> {
-    return MsgJoinSwapExternAmountInResponse.fromProto(
-      protogamm.MsgJoinSwapExternAmountInResponse.fromJsonString(jsonString, options),
-      convertFunction
-    );
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgJoinSwapExternAmountInResponse {
+    return MsgJoinSwapExternAmountInResponse.fromProto(protogamm.MsgJoinSwapExternAmountInResponse.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protogamm.MsgJoinSwapExternAmountInResponse,
-    convertFunction: (item: NumberType) => U
-  ): MsgJoinSwapExternAmountInResponse<U> {
-    return new MsgJoinSwapExternAmountInResponse<U>({
+  static fromProto(item: protogamm.MsgJoinSwapExternAmountInResponse, convertFunction: (item: string | number) => U): MsgJoinSwapExternAmountInResponse {
+    return new MsgJoinSwapExternAmountInResponse({
       shareOutAmount: convertFunction(BigInt(item.shareOutAmount))
     });
   }
 
-  toBech32Addresses(prefix: string): MsgJoinSwapExternAmountInResponse<T> {
-    return new MsgJoinSwapExternAmountInResponse<T>({
+  toBech32Addresses(prefix: string): MsgJoinSwapExternAmountInResponse {
+    return new MsgJoinSwapExternAmountInResponse({
       shareOutAmount: this.shareOutAmount
     });
   }
@@ -1217,17 +1024,14 @@ export class MsgJoinSwapExternAmountInResponse<T extends NumberType>
   }
 }
 
-export class MsgJoinSwapShareAmountOut<T extends NumberType>
-  extends BaseNumberTypeClass<MsgJoinSwapShareAmountOut<T>>
-  implements iMsgJoinSwapShareAmountOut<T>
-{
+export class MsgJoinSwapShareAmountOut extends BaseNumberTypeClass<MsgJoinSwapShareAmountOut> implements iMsgJoinSwapShareAmountOut {
   sender: string;
-  poolId: T;
+  poolId: string | number;
   tokenInDenom: string;
-  shareOutAmount: T;
-  tokenInMaxAmount: T;
+  shareOutAmount: string | number;
+  tokenInMaxAmount: string | number;
 
-  constructor(data: iMsgJoinSwapShareAmountOut<T>) {
+  constructor(data: iMsgJoinSwapShareAmountOut) {
     super();
     this.sender = data.sender;
     this.poolId = data.poolId as T;
@@ -1240,8 +1044,8 @@ export class MsgJoinSwapShareAmountOut<T extends NumberType>
     return ['poolId', 'shareOutAmount', 'tokenInMaxAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgJoinSwapShareAmountOut<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgJoinSwapShareAmountOut<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgJoinSwapShareAmountOut {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgJoinSwapShareAmountOut;
   }
 
   toProto(): protogamm.MsgJoinSwapShareAmountOut {
@@ -1254,27 +1058,16 @@ export class MsgJoinSwapShareAmountOut<T extends NumberType>
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgJoinSwapShareAmountOut<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgJoinSwapShareAmountOut {
     return MsgJoinSwapShareAmountOut.fromProto(protogamm.MsgJoinSwapShareAmountOut.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgJoinSwapShareAmountOut<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgJoinSwapShareAmountOut {
     return MsgJoinSwapShareAmountOut.fromProto(protogamm.MsgJoinSwapShareAmountOut.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protogamm.MsgJoinSwapShareAmountOut,
-    convertFunction: (item: NumberType) => U
-  ): MsgJoinSwapShareAmountOut<U> {
-    return new MsgJoinSwapShareAmountOut<U>({
+  static fromProto(item: protogamm.MsgJoinSwapShareAmountOut, convertFunction: (item: string | number) => U): MsgJoinSwapShareAmountOut {
+    return new MsgJoinSwapShareAmountOut({
       sender: item.sender,
       poolId: convertFunction(BigInt(item.poolId)),
       tokenInDenom: item.tokenInDenom,
@@ -1283,8 +1076,8 @@ export class MsgJoinSwapShareAmountOut<T extends NumberType>
     });
   }
 
-  toBech32Addresses(prefix: string): MsgJoinSwapShareAmountOut<T> {
-    return new MsgJoinSwapShareAmountOut<T>({
+  toBech32Addresses(prefix: string): MsgJoinSwapShareAmountOut {
+    return new MsgJoinSwapShareAmountOut({
       sender: getConvertFunctionFromPrefix(prefix)(this.sender),
       poolId: this.poolId,
       tokenInDenom: this.tokenInDenom,
@@ -1303,13 +1096,10 @@ export class MsgJoinSwapShareAmountOut<T extends NumberType>
   }
 }
 
-export class MsgJoinSwapShareAmountOutResponse<T extends NumberType>
-  extends BaseNumberTypeClass<MsgJoinSwapShareAmountOutResponse<T>>
-  implements iMsgJoinSwapShareAmountOutResponse<T>
-{
-  tokenInAmount: T;
+export class MsgJoinSwapShareAmountOutResponse extends BaseNumberTypeClass<MsgJoinSwapShareAmountOutResponse> implements iMsgJoinSwapShareAmountOutResponse {
+  tokenInAmount: string | number;
 
-  constructor(data: iMsgJoinSwapShareAmountOutResponse<T>) {
+  constructor(data: iMsgJoinSwapShareAmountOutResponse) {
     super();
     this.tokenInAmount = data.tokenInAmount;
   }
@@ -1318,8 +1108,8 @@ export class MsgJoinSwapShareAmountOutResponse<T extends NumberType>
     return ['tokenInAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgJoinSwapShareAmountOutResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgJoinSwapShareAmountOutResponse<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgJoinSwapShareAmountOutResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgJoinSwapShareAmountOutResponse;
   }
 
   toProto(): protogamm.MsgJoinSwapShareAmountOutResponse {
@@ -1328,36 +1118,22 @@ export class MsgJoinSwapShareAmountOutResponse<T extends NumberType>
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgJoinSwapShareAmountOutResponse<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgJoinSwapShareAmountOutResponse {
     return MsgJoinSwapShareAmountOutResponse.fromProto(protogamm.MsgJoinSwapShareAmountOutResponse.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgJoinSwapShareAmountOutResponse<U> {
-    return MsgJoinSwapShareAmountOutResponse.fromProto(
-      protogamm.MsgJoinSwapShareAmountOutResponse.fromJsonString(jsonString, options),
-      convertFunction
-    );
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgJoinSwapShareAmountOutResponse {
+    return MsgJoinSwapShareAmountOutResponse.fromProto(protogamm.MsgJoinSwapShareAmountOutResponse.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protogamm.MsgJoinSwapShareAmountOutResponse,
-    convertFunction: (item: NumberType) => U
-  ): MsgJoinSwapShareAmountOutResponse<U> {
-    return new MsgJoinSwapShareAmountOutResponse<U>({
+  static fromProto(item: protogamm.MsgJoinSwapShareAmountOutResponse, convertFunction: (item: string | number) => U): MsgJoinSwapShareAmountOutResponse {
+    return new MsgJoinSwapShareAmountOutResponse({
       tokenInAmount: convertFunction(BigInt(item.tokenInAmount))
     });
   }
 
-  toBech32Addresses(prefix: string): MsgJoinSwapShareAmountOutResponse<T> {
-    return new MsgJoinSwapShareAmountOutResponse<T>({
+  toBech32Addresses(prefix: string): MsgJoinSwapShareAmountOutResponse {
+    return new MsgJoinSwapShareAmountOutResponse({
       tokenInAmount: this.tokenInAmount
     });
   }
@@ -1372,17 +1148,14 @@ export class MsgJoinSwapShareAmountOutResponse<T extends NumberType>
   }
 }
 
-export class MsgExitSwapShareAmountIn<T extends NumberType>
-  extends BaseNumberTypeClass<MsgExitSwapShareAmountIn<T>>
-  implements iMsgExitSwapShareAmountIn<T>
-{
+export class MsgExitSwapShareAmountIn extends BaseNumberTypeClass<MsgExitSwapShareAmountIn> implements iMsgExitSwapShareAmountIn {
   sender: string;
-  poolId: T;
+  poolId: string | number;
   tokenOutDenom: string;
-  shareInAmount: T;
-  tokenOutMinAmount: T;
+  shareInAmount: string | number;
+  tokenOutMinAmount: string | number;
 
-  constructor(data: iMsgExitSwapShareAmountIn<T>) {
+  constructor(data: iMsgExitSwapShareAmountIn) {
     super();
     this.sender = data.sender;
     this.poolId = data.poolId as T;
@@ -1395,8 +1168,8 @@ export class MsgExitSwapShareAmountIn<T extends NumberType>
     return ['poolId', 'shareInAmount', 'tokenOutMinAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgExitSwapShareAmountIn<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgExitSwapShareAmountIn<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgExitSwapShareAmountIn {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgExitSwapShareAmountIn;
   }
 
   toProto(): protogamm.MsgExitSwapShareAmountIn {
@@ -1409,27 +1182,16 @@ export class MsgExitSwapShareAmountIn<T extends NumberType>
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgExitSwapShareAmountIn<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgExitSwapShareAmountIn {
     return MsgExitSwapShareAmountIn.fromProto(protogamm.MsgExitSwapShareAmountIn.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgExitSwapShareAmountIn<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgExitSwapShareAmountIn {
     return MsgExitSwapShareAmountIn.fromProto(protogamm.MsgExitSwapShareAmountIn.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protogamm.MsgExitSwapShareAmountIn,
-    convertFunction: (item: NumberType) => U
-  ): MsgExitSwapShareAmountIn<U> {
-    return new MsgExitSwapShareAmountIn<U>({
+  static fromProto(item: protogamm.MsgExitSwapShareAmountIn, convertFunction: (item: string | number) => U): MsgExitSwapShareAmountIn {
+    return new MsgExitSwapShareAmountIn({
       sender: item.sender,
       poolId: convertFunction(BigInt(item.poolId)),
       tokenOutDenom: item.tokenOutDenom,
@@ -1438,8 +1200,8 @@ export class MsgExitSwapShareAmountIn<T extends NumberType>
     });
   }
 
-  toBech32Addresses(prefix: string): MsgExitSwapShareAmountIn<T> {
-    return new MsgExitSwapShareAmountIn<T>({
+  toBech32Addresses(prefix: string): MsgExitSwapShareAmountIn {
+    return new MsgExitSwapShareAmountIn({
       sender: getConvertFunctionFromPrefix(prefix)(this.sender),
       poolId: this.poolId,
       tokenOutDenom: this.tokenOutDenom,
@@ -1458,13 +1220,10 @@ export class MsgExitSwapShareAmountIn<T extends NumberType>
   }
 }
 
-export class MsgExitSwapShareAmountInResponse<T extends NumberType>
-  extends BaseNumberTypeClass<MsgExitSwapShareAmountInResponse<T>>
-  implements iMsgExitSwapShareAmountInResponse<T>
-{
-  tokenOutAmount: T;
+export class MsgExitSwapShareAmountInResponse extends BaseNumberTypeClass<MsgExitSwapShareAmountInResponse> implements iMsgExitSwapShareAmountInResponse {
+  tokenOutAmount: string | number;
 
-  constructor(data: iMsgExitSwapShareAmountInResponse<T>) {
+  constructor(data: iMsgExitSwapShareAmountInResponse) {
     super();
     this.tokenOutAmount = data.tokenOutAmount;
   }
@@ -1473,8 +1232,8 @@ export class MsgExitSwapShareAmountInResponse<T extends NumberType>
     return ['tokenOutAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgExitSwapShareAmountInResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgExitSwapShareAmountInResponse<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgExitSwapShareAmountInResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgExitSwapShareAmountInResponse;
   }
 
   toProto(): protogamm.MsgExitSwapShareAmountInResponse {
@@ -1483,36 +1242,22 @@ export class MsgExitSwapShareAmountInResponse<T extends NumberType>
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgExitSwapShareAmountInResponse<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgExitSwapShareAmountInResponse {
     return MsgExitSwapShareAmountInResponse.fromProto(protogamm.MsgExitSwapShareAmountInResponse.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgExitSwapShareAmountInResponse<U> {
-    return MsgExitSwapShareAmountInResponse.fromProto(
-      protogamm.MsgExitSwapShareAmountInResponse.fromJsonString(jsonString, options),
-      convertFunction
-    );
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgExitSwapShareAmountInResponse {
+    return MsgExitSwapShareAmountInResponse.fromProto(protogamm.MsgExitSwapShareAmountInResponse.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protogamm.MsgExitSwapShareAmountInResponse,
-    convertFunction: (item: NumberType) => U
-  ): MsgExitSwapShareAmountInResponse<U> {
-    return new MsgExitSwapShareAmountInResponse<U>({
+  static fromProto(item: protogamm.MsgExitSwapShareAmountInResponse, convertFunction: (item: string | number) => U): MsgExitSwapShareAmountInResponse {
+    return new MsgExitSwapShareAmountInResponse({
       tokenOutAmount: convertFunction(BigInt(item.tokenOutAmount))
     });
   }
 
-  toBech32Addresses(prefix: string): MsgExitSwapShareAmountInResponse<T> {
-    return new MsgExitSwapShareAmountInResponse<T>({
+  toBech32Addresses(prefix: string): MsgExitSwapShareAmountInResponse {
+    return new MsgExitSwapShareAmountInResponse({
       tokenOutAmount: this.tokenOutAmount
     });
   }
@@ -1527,20 +1272,17 @@ export class MsgExitSwapShareAmountInResponse<T extends NumberType>
   }
 }
 
-export class MsgExitSwapExternAmountOut<T extends NumberType>
-  extends BaseNumberTypeClass<MsgExitSwapExternAmountOut<T>>
-  implements iMsgExitSwapExternAmountOut<T>
-{
+export class MsgExitSwapExternAmountOut extends BaseNumberTypeClass<MsgExitSwapExternAmountOut> implements iMsgExitSwapExternAmountOut {
   sender: string;
-  poolId: T;
-  tokenOut: CosmosCoin<T>;
-  shareInMaxAmount: T;
+  poolId: string | number;
+  tokenOut: CosmosCoin;
+  shareInMaxAmount: string | number;
 
-  constructor(data: iMsgExitSwapExternAmountOut<T>) {
+  constructor(data: iMsgExitSwapExternAmountOut) {
     super();
     this.sender = data.sender;
     this.poolId = data.poolId as T;
-    this.tokenOut = new CosmosCoin<T>(data.tokenOut);
+    this.tokenOut = new CosmosCoin(data.tokenOut);
     this.shareInMaxAmount = data.shareInMaxAmount;
   }
 
@@ -1548,8 +1290,8 @@ export class MsgExitSwapExternAmountOut<T extends NumberType>
     return ['poolId', 'shareInMaxAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgExitSwapExternAmountOut<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgExitSwapExternAmountOut<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgExitSwapExternAmountOut {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgExitSwapExternAmountOut;
   }
 
   toProto(): protogamm.MsgExitSwapExternAmountOut {
@@ -1561,30 +1303,19 @@ export class MsgExitSwapExternAmountOut<T extends NumberType>
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgExitSwapExternAmountOut<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgExitSwapExternAmountOut {
     return MsgExitSwapExternAmountOut.fromProto(protogamm.MsgExitSwapExternAmountOut.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgExitSwapExternAmountOut<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgExitSwapExternAmountOut {
     return MsgExitSwapExternAmountOut.fromProto(protogamm.MsgExitSwapExternAmountOut.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protogamm.MsgExitSwapExternAmountOut,
-    convertFunction: (item: NumberType) => U
-  ): MsgExitSwapExternAmountOut<U> {
-    return new MsgExitSwapExternAmountOut<U>({
+  static fromProto(item: protogamm.MsgExitSwapExternAmountOut, convertFunction: (item: string | number) => U): MsgExitSwapExternAmountOut {
+    return new MsgExitSwapExternAmountOut({
       sender: item.sender,
       poolId: convertFunction(BigInt(item.poolId)),
-      tokenOut: new CosmosCoin<U>({
+      tokenOut: new CosmosCoin({
         amount: convertFunction(BigInt(item.tokenOut!.amount)),
         denom: item.tokenOut!.denom
       }).convert(convertFunction),
@@ -1592,8 +1323,8 @@ export class MsgExitSwapExternAmountOut<T extends NumberType>
     });
   }
 
-  toBech32Addresses(prefix: string): MsgExitSwapExternAmountOut<T> {
-    return new MsgExitSwapExternAmountOut<T>({
+  toBech32Addresses(prefix: string): MsgExitSwapExternAmountOut {
+    return new MsgExitSwapExternAmountOut({
       sender: getConvertFunctionFromPrefix(prefix)(this.sender),
       poolId: this.poolId,
       tokenOut: this.tokenOut,
@@ -1611,13 +1342,10 @@ export class MsgExitSwapExternAmountOut<T extends NumberType>
   }
 }
 
-export class MsgExitSwapExternAmountOutResponse<T extends NumberType>
-  extends BaseNumberTypeClass<MsgExitSwapExternAmountOutResponse<T>>
-  implements iMsgExitSwapExternAmountOutResponse<T>
-{
-  shareInAmount: T;
+export class MsgExitSwapExternAmountOutResponse extends BaseNumberTypeClass<MsgExitSwapExternAmountOutResponse> implements iMsgExitSwapExternAmountOutResponse {
+  shareInAmount: string | number;
 
-  constructor(data: iMsgExitSwapExternAmountOutResponse<T>) {
+  constructor(data: iMsgExitSwapExternAmountOutResponse) {
     super();
     this.shareInAmount = data.shareInAmount;
   }
@@ -1626,8 +1354,8 @@ export class MsgExitSwapExternAmountOutResponse<T extends NumberType>
     return ['shareInAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgExitSwapExternAmountOutResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgExitSwapExternAmountOutResponse<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgExitSwapExternAmountOutResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgExitSwapExternAmountOutResponse;
   }
 
   toProto(): protogamm.MsgExitSwapExternAmountOutResponse {
@@ -1636,36 +1364,22 @@ export class MsgExitSwapExternAmountOutResponse<T extends NumberType>
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgExitSwapExternAmountOutResponse<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgExitSwapExternAmountOutResponse {
     return MsgExitSwapExternAmountOutResponse.fromProto(protogamm.MsgExitSwapExternAmountOutResponse.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgExitSwapExternAmountOutResponse<U> {
-    return MsgExitSwapExternAmountOutResponse.fromProto(
-      protogamm.MsgExitSwapExternAmountOutResponse.fromJsonString(jsonString, options),
-      convertFunction
-    );
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgExitSwapExternAmountOutResponse {
+    return MsgExitSwapExternAmountOutResponse.fromProto(protogamm.MsgExitSwapExternAmountOutResponse.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protogamm.MsgExitSwapExternAmountOutResponse,
-    convertFunction: (item: NumberType) => U
-  ): MsgExitSwapExternAmountOutResponse<U> {
-    return new MsgExitSwapExternAmountOutResponse<U>({
+  static fromProto(item: protogamm.MsgExitSwapExternAmountOutResponse, convertFunction: (item: string | number) => U): MsgExitSwapExternAmountOutResponse {
+    return new MsgExitSwapExternAmountOutResponse({
       shareInAmount: convertFunction(BigInt(item.shareInAmount))
     });
   }
 
-  toBech32Addresses(prefix: string): MsgExitSwapExternAmountOutResponse<T> {
-    return new MsgExitSwapExternAmountOutResponse<T>({
+  toBech32Addresses(prefix: string): MsgExitSwapExternAmountOutResponse {
+    return new MsgExitSwapExternAmountOutResponse({
       shareInAmount: this.shareInAmount
     });
   }
@@ -1680,24 +1394,24 @@ export class MsgExitSwapExternAmountOutResponse<T extends NumberType>
   }
 }
 
-export class MsgCreateBalancerPool<T extends NumberType> extends BaseNumberTypeClass<MsgCreateBalancerPool<T>> implements iMsgCreateBalancerPool<T> {
+export class MsgCreateBalancerPool extends BaseNumberTypeClass<MsgCreateBalancerPool> implements iMsgCreateBalancerPool {
   sender: string;
-  poolParams: PoolParams<T>;
-  poolAssets: PoolAsset<T>[];
+  poolParams: PoolParams;
+  poolAssets: PoolAsset[];
 
-  constructor(data: iMsgCreateBalancerPool<T>) {
+  constructor(data: iMsgCreateBalancerPool) {
     super();
     this.sender = data.sender;
-    this.poolParams = new PoolParams<T>(data.poolParams);
-    this.poolAssets = data.poolAssets.map((asset) => new PoolAsset<T>(asset));
+    this.poolParams = new PoolParams(data.poolParams);
+    this.poolAssets = data.poolAssets.map((asset) => new PoolAsset(asset));
   }
 
   getNumberFieldNames(): string[] {
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgCreateBalancerPool<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgCreateBalancerPool<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgCreateBalancerPool {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgCreateBalancerPool;
   }
 
   toProto(): protobalancer.MsgCreateBalancerPool {
@@ -1708,27 +1422,16 @@ export class MsgCreateBalancerPool<T extends NumberType> extends BaseNumberTypeC
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgCreateBalancerPool<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgCreateBalancerPool {
     return MsgCreateBalancerPool.fromProto(protobalancer.MsgCreateBalancerPool.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgCreateBalancerPool<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgCreateBalancerPool {
     return MsgCreateBalancerPool.fromProto(protobalancer.MsgCreateBalancerPool.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protobalancer.MsgCreateBalancerPool,
-    convertFunction: (item: NumberType) => U
-  ): MsgCreateBalancerPool<U> {
-    return new MsgCreateBalancerPool<U>({
+  static fromProto(item: protobalancer.MsgCreateBalancerPool, convertFunction: (item: string | number) => U): MsgCreateBalancerPool {
+    return new MsgCreateBalancerPool({
       sender: item.sender,
       poolParams: item.poolParams
         ? PoolParams.fromProto(item.poolParams, convertFunction)
@@ -1740,8 +1443,8 @@ export class MsgCreateBalancerPool<T extends NumberType> extends BaseNumberTypeC
     });
   }
 
-  toBech32Addresses(prefix: string): MsgCreateBalancerPool<T> {
-    return new MsgCreateBalancerPool<T>({
+  toBech32Addresses(prefix: string): MsgCreateBalancerPool {
+    return new MsgCreateBalancerPool({
       sender: getConvertFunctionFromPrefix(prefix)(this.sender),
       poolParams: this.poolParams,
       poolAssets: this.poolAssets
@@ -1758,13 +1461,10 @@ export class MsgCreateBalancerPool<T extends NumberType> extends BaseNumberTypeC
   }
 }
 
-export class MsgCreateBalancerPoolResponse<T extends NumberType>
-  extends BaseNumberTypeClass<MsgCreateBalancerPoolResponse<T>>
-  implements iMsgCreateBalancerPoolResponse<T>
-{
-  poolId: T;
+export class MsgCreateBalancerPoolResponse extends BaseNumberTypeClass<MsgCreateBalancerPoolResponse> implements iMsgCreateBalancerPoolResponse {
+  poolId: string | number;
 
-  constructor(data: iMsgCreateBalancerPoolResponse<T>) {
+  constructor(data: iMsgCreateBalancerPoolResponse) {
     super();
     this.poolId = data.poolId as T;
   }
@@ -1773,8 +1473,8 @@ export class MsgCreateBalancerPoolResponse<T extends NumberType>
     return ['poolId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgCreateBalancerPoolResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgCreateBalancerPoolResponse<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgCreateBalancerPoolResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgCreateBalancerPoolResponse;
   }
 
   toProto(): protobalancer.MsgCreateBalancerPoolResponse {
@@ -1783,33 +1483,22 @@ export class MsgCreateBalancerPoolResponse<T extends NumberType>
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgCreateBalancerPoolResponse<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgCreateBalancerPoolResponse {
     return MsgCreateBalancerPoolResponse.fromProto(protobalancer.MsgCreateBalancerPoolResponse.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgCreateBalancerPoolResponse<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgCreateBalancerPoolResponse {
     return MsgCreateBalancerPoolResponse.fromProto(protobalancer.MsgCreateBalancerPoolResponse.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protobalancer.MsgCreateBalancerPoolResponse,
-    convertFunction: (item: NumberType) => U
-  ): MsgCreateBalancerPoolResponse<U> {
-    return new MsgCreateBalancerPoolResponse<U>({
+  static fromProto(item: protobalancer.MsgCreateBalancerPoolResponse, convertFunction: (item: string | number) => U): MsgCreateBalancerPoolResponse {
+    return new MsgCreateBalancerPoolResponse({
       poolId: convertFunction(BigInt(item.poolId))
     });
   }
 
-  toBech32Addresses(prefix: string): MsgCreateBalancerPoolResponse<T> {
-    return new MsgCreateBalancerPoolResponse<T>({
+  toBech32Addresses(prefix: string): MsgCreateBalancerPoolResponse {
+    return new MsgCreateBalancerPoolResponse({
       poolId: this.poolId
     });
   }

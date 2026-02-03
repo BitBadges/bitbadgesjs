@@ -49,11 +49,11 @@ export interface TxContext {
  * in an array. This enables our interfaces to indiscriminantly take either pure objects or
  * arrays to easily support wrapping muliple messages.
  */
-const wrapTypeToArray = <T>(obj: T | T[]) => {
+const wrapTypeToArray = (obj: T | T[]) => {
   return Array.isArray(obj) ? obj : [obj];
 };
 
-function createProtoMsg<T extends Message<T> = AnyMessage>(msg: T) {
+function createProtoMsg<T extends Message = AnyMessage>(msg: T) {
   return {
     message: msg,
     path: msg.getType().typeName
@@ -65,17 +65,7 @@ const createCosmosPayload = (context: LegacyTxContext, cosmosPayload: any | any[
 
   const messages = wrapTypeToArray(cosmosPayload);
 
-  return createTransactionWithMultipleMessages(
-    messages,
-    memo,
-    fee.amount,
-    fee.denom,
-    parseInt(fee.gas, 10),
-    sender.pubkey,
-    sender.sequence,
-    sender.accountNumber,
-    chain.cosmosChainId
-  );
+  return createTransactionWithMultipleMessages(messages, memo, fee.amount, fee.denom, parseInt(fee.gas, 10), sender.pubkey, sender.sequence, sender.accountNumber, chain.cosmosChainId);
 };
 
 /**
@@ -124,9 +114,7 @@ const wrapExternalTxContext = (context: TxContext): LegacyTxContext => {
   }
 
   if (txContext.sender.accountNumber <= 0) {
-    throw new Error(
-      'Account number must be greater than 0. This means the user is unregistered on the blockchain. Users can be registered by sending them any amount of BADGE.'
-    );
+    throw new Error('Account number must be greater than 0. This means the user is unregistered on the blockchain. Users can be registered by sending them any amount of BADGE.');
   }
 
   if (txContext.sender.sequence < 0) {

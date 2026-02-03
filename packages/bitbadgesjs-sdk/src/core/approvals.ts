@@ -1,45 +1,7 @@
-import {
-  BitBadgesAddress,
-  ClaimIntegrationPluginType,
-  ClaimReward,
-  CreateClaimRequest,
-  IntegrationPluginDetails,
-  UNIXMilliTimestamp,
-  iChallengeTrackerIdDetails,
-  iClaimCachePolicy,
-  iClaimDetails,
-  iSatisfyMethod
-} from '@/api-indexer/docs-types/interfaces.js';
+import { BitBadgesAddress, ClaimIntegrationPluginType, ClaimReward, CreateClaimRequest, IntegrationPluginDetails, UNIXMilliTimestamp, iChallengeTrackerIdDetails, iClaimCachePolicy, iClaimDetails, iSatisfyMethod } from '@/api-indexer/docs-types/interfaces.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
-import {
-  BaseNumberTypeClass,
-  ConvertOptions,
-  CustomTypeClass,
-  convertClassPropertiesAndMaintainNumberTypes,
-  deepCopyPrimitives
-} from '@/common/base.js';
-import type {
-  iAddressChecks,
-  iAltTimeChecks,
-  iApprovalAmounts,
-  iApprovalCriteria,
-  iAutoDeletionOptions,
-  iCollectionApproval,
-  iDynamicStoreChallenge,
-  iIncomingApprovalCriteria,
-  iIncrementedBalances,
-  iManualBalances,
-  iMaxNumTransfers,
-  iOutgoingApprovalCriteria,
-  iPredeterminedBalances,
-  iPredeterminedOrderCalculationMethod,
-  iRecurringOwnershipTimes,
-  iResetTimeIntervals,
-  iUserIncomingApproval,
-  iUserIncomingApprovalWithDetails,
-  iUserOutgoingApproval,
-  iUserRoyalties
-} from '@/interfaces/types/approvals.js';
+import { BaseNumberTypeClass, ConvertOptions, CustomTypeClass, convertClassPropertiesAndMaintainNumberTypes, deepCopyPrimitives } from '@/common/base.js';
+import type { iAddressChecks, iAltTimeChecks, iApprovalAmounts, iApprovalCriteria, iAutoDeletionOptions, iCollectionApproval, iDynamicStoreChallenge, iIncomingApprovalCriteria, iIncrementedBalances, iManualBalances, iMaxNumTransfers, iOutgoingApprovalCriteria, iPredeterminedBalances, iPredeterminedOrderCalculationMethod, iRecurringOwnershipTimes, iResetTimeIntervals, iUserIncomingApproval, iUserIncomingApprovalWithDetails, iUserOutgoingApproval, iUserRoyalties } from '@/interfaces/types/approvals.js';
 import type { CollectionId, iAddressList, iMerkleChallenge } from '@/interfaces/types/core.js';
 import * as protobadges from '@/proto/badges/index.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
@@ -62,12 +24,12 @@ const { getReservedAddressList, getReservedTrackerList } = AddressList;
  * @inheritDoc iClaimCachePolicy
  * @category Indexer
  */
-export class ClaimCachePolicy<T extends NumberType> extends BaseNumberTypeClass<ClaimCachePolicy<T>> implements iClaimCachePolicy<T> {
-  ttl?: T;
+export class ClaimCachePolicy extends BaseNumberTypeClass<ClaimCachePolicy> implements iClaimCachePolicy {
+  ttl?: string | number;
   alwaysPermanent?: boolean;
-  permanentAfter?: UNIXMilliTimestamp<T>;
+  permanentAfter?: UNIXMilliTimestamp;
 
-  constructor(data: iClaimCachePolicy<T>) {
+  constructor(data: iClaimCachePolicy) {
     super();
     this.ttl = data.ttl;
     this.alwaysPermanent = data.alwaysPermanent;
@@ -78,8 +40,8 @@ export class ClaimCachePolicy<T extends NumberType> extends BaseNumberTypeClass<
     return ['ttl', 'permanentAfter'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimCachePolicy<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimCachePolicy<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ClaimCachePolicy {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimCachePolicy;
   }
 }
 
@@ -87,17 +49,14 @@ export class ClaimCachePolicy<T extends NumberType> extends BaseNumberTypeClass<
  * @inheritDoc iChallengeTrackerIdDetails
  * @category Approvals / Transferability
  */
-export class ChallengeTrackerIdDetails<T extends NumberType>
-  extends BaseNumberTypeClass<ChallengeTrackerIdDetails<T>>
-  implements iChallengeTrackerIdDetails<T>
-{
+export class ChallengeTrackerIdDetails extends BaseNumberTypeClass<ChallengeTrackerIdDetails> implements iChallengeTrackerIdDetails {
   collectionId: CollectionId;
   approvalId: string;
   challengeTrackerId: string;
   approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
   approverAddress: BitBadgesAddress;
 
-  constructor(data: iChallengeTrackerIdDetails<T>) {
+  constructor(data: iChallengeTrackerIdDetails) {
     super();
     this.collectionId = data.collectionId;
     this.challengeTrackerId = data.challengeTrackerId;
@@ -110,8 +69,8 @@ export class ChallengeTrackerIdDetails<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ChallengeTrackerIdDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ChallengeTrackerIdDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ChallengeTrackerIdDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ChallengeTrackerIdDetails;
   }
 }
 
@@ -137,25 +96,25 @@ export class SatisfyMethod implements iSatisfyMethod {
  * @inheritDoc iClaimDetails
  * @category API Requests / Responses
  */
-export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<ClaimDetails<T>> implements iClaimDetails<T> {
+export class ClaimDetails extends BaseNumberTypeClass<ClaimDetails> implements iClaimDetails {
   claimId: string;
-  plugins: IntegrationPluginDetails<ClaimIntegrationPluginType>[];
+  plugins: IntegrationPluginDetails[];
   manualDistribution?: boolean;
   approach?: string;
   seedCode?: string | undefined;
-  metadata?: Metadata<T> | undefined;
+  metadata?: Metadata | undefined;
   assignMethod?: string | undefined;
   satisfyMethod?: SatisfyMethod;
   lastUpdated?: T | undefined;
-  version: T;
+  version: string | number;
   collectionId?: CollectionId;
   standaloneClaim?: boolean;
-  rewards?: ClaimReward<T>[];
+  rewards?: ClaimReward[];
   estimatedCost?: string;
   estimatedTime?: string;
   showInSearchResults?: boolean;
   categories?: string[];
-  trackerDetails?: ChallengeTrackerIdDetails<T>;
+  trackerDetails?: ChallengeTrackerIdDetails;
   createdBy?: BitBadgesAddress;
   managedBy?: BitBadgesAddress;
   _includesPrivateParams: boolean;
@@ -164,9 +123,9 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     pluginId?: string;
     completedTemplateStep?: boolean;
   };
-  cachePolicy?: ClaimCachePolicy<T>;
+  cachePolicy?: ClaimCachePolicy;
 
-  constructor(data: iClaimDetails<T>) {
+  constructor(data: iClaimDetails) {
     super();
     this._templateInfo = data._templateInfo;
     this._includesPrivateParams = data._includesPrivateParams;
@@ -193,8 +152,8 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.cachePolicy = data.cachePolicy ? new ClaimCachePolicy(data.cachePolicy) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): ClaimDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimDetails<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): ClaimDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimDetails;
   }
 
   getNumberFieldNames(): string[] {
@@ -207,19 +166,19 @@ export class ClaimDetails<T extends NumberType> extends BaseNumberTypeClass<Clai
  *
  * @category Approvals / Transferability
  */
-export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeClass<UserOutgoingApproval<T>> implements iUserOutgoingApproval<T> {
+export class UserOutgoingApproval extends BaseNumberTypeClass<UserOutgoingApproval> implements iUserOutgoingApproval {
   toListId: string;
   initiatedByListId: string;
-  transferTimes: UintRangeArray<T>;
-  tokenIds: UintRangeArray<T>;
-  ownershipTimes: UintRangeArray<T>;
+  transferTimes: UintRangeArray;
+  tokenIds: UintRangeArray;
+  ownershipTimes: UintRangeArray;
   approvalId: string;
   uri?: string;
   customData?: string;
-  approvalCriteria?: OutgoingApprovalCriteria<T>;
-  version: T;
+  approvalCriteria?: OutgoingApprovalCriteria;
+  version: string | number;
 
-  constructor(msg: iUserOutgoingApproval<T>) {
+  constructor(msg: iUserOutgoingApproval) {
     super();
     this.toListId = msg.toListId;
     this.initiatedByListId = msg.initiatedByListId;
@@ -237,32 +196,24 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
     return ['version'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserOutgoingApproval<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserOutgoingApproval<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UserOutgoingApproval {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserOutgoingApproval;
   }
 
   toProto(): protobadges.UserOutgoingApproval {
     return new protobadges.UserOutgoingApproval(this.convert(Stringify) as any);
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): UserOutgoingApproval<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): UserOutgoingApproval {
     return UserOutgoingApproval.fromProto(protobadges.UserOutgoingApproval.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): UserOutgoingApproval<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): UserOutgoingApproval {
     return UserOutgoingApproval.fromProto(protobadges.UserOutgoingApproval.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.UserOutgoingApproval, convertFunction: (item: NumberType) => U): UserOutgoingApproval<U> {
-    return new UserOutgoingApproval<U>({
+  static fromProto(item: protobadges.UserOutgoingApproval, convertFunction: (item: string | number) => U): UserOutgoingApproval {
+    return new UserOutgoingApproval({
       toListId: item.toListId,
       initiatedByListId: item.initiatedByListId,
       transferTimes: item.transferTimes.map((x) => UintRange.fromProto(x, convertFunction)),
@@ -276,7 +227,7 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
     });
   }
 
-  toBech32Addresses(prefix: string): UserOutgoingApproval<T> {
+  toBech32Addresses(prefix: string): UserOutgoingApproval {
     return new UserOutgoingApproval({
       ...this,
       toListId: convertListIdToBech32(this.toListId, prefix),
@@ -285,7 +236,7 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
     });
   }
 
-  castToCollectionTransfer(fromListId: string): CollectionApproval<T> {
+  castToCollectionTransfer(fromListId: string): CollectionApproval {
     return new CollectionApproval({
       ...this,
       fromListId,
@@ -299,29 +250,26 @@ export class UserOutgoingApproval<T extends NumberType> extends BaseNumberTypeCl
  *
  * @category Approvals / Transferability
  */
-export class OutgoingApprovalCriteria<T extends NumberType>
-  extends BaseNumberTypeClass<OutgoingApprovalCriteria<T>>
-  implements iOutgoingApprovalCriteria<T>
-{
-  merkleChallenges?: MerkleChallenge<T>[];
-  mustOwnTokens?: MustOwnTokens<T>[];
-  predeterminedBalances?: PredeterminedBalances<T>;
-  approvalAmounts?: ApprovalAmounts<T>;
-  maxNumTransfers?: MaxNumTransfers<T>;
-  autoDeletionOptions?: AutoDeletionOptions<T>;
+export class OutgoingApprovalCriteria extends BaseNumberTypeClass<OutgoingApprovalCriteria> implements iOutgoingApprovalCriteria {
+  merkleChallenges?: MerkleChallenge[];
+  mustOwnTokens?: MustOwnTokens[];
+  predeterminedBalances?: PredeterminedBalances;
+  approvalAmounts?: ApprovalAmounts;
+  maxNumTransfers?: MaxNumTransfers;
+  autoDeletionOptions?: AutoDeletionOptions;
 
   requireToEqualsInitiatedBy?: boolean;
   requireToDoesNotEqualInitiatedBy?: boolean;
-  coinTransfers?: CoinTransfer<T>[] | undefined;
-  dynamicStoreChallenges?: DynamicStoreChallenge<T>[];
+  coinTransfers?: CoinTransfer[] | undefined;
+  dynamicStoreChallenges?: DynamicStoreChallenge[];
   ethSignatureChallenges?: ETHSignatureChallenge[];
   recipientChecks?: AddressChecks;
   initiatorChecks?: AddressChecks;
-  altTimeChecks?: AltTimeChecks<T>;
+  altTimeChecks?: AltTimeChecks;
   mustPrioritize?: boolean;
-  votingChallenges?: VotingChallenge<T>[];
+  votingChallenges?: VotingChallenge[];
 
-  constructor(msg: iOutgoingApprovalCriteria<T>) {
+  constructor(msg: iOutgoingApprovalCriteria) {
     super();
     this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
     this.mustOwnTokens = msg.mustOwnTokens?.map((x) => new MustOwnTokens(x));
@@ -341,8 +289,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     this.votingChallenges = msg.votingChallenges?.map((x) => new VotingChallenge(x));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteria<U> {
-    return new OutgoingApprovalCriteria<U>({
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): OutgoingApprovalCriteria {
+    return new OutgoingApprovalCriteria({
       merkleChallenges: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
       mustOwnTokens: this.mustOwnTokens?.map((x) => x.convert(convertFunction)),
       predeterminedBalances: this.predeterminedBalances?.convert(convertFunction),
@@ -365,27 +313,16 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     return new protobadges.OutgoingApprovalCriteria(this.convert(Stringify) as any);
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): OutgoingApprovalCriteria<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): OutgoingApprovalCriteria {
     return OutgoingApprovalCriteria.fromProto(protobadges.OutgoingApprovalCriteria.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): OutgoingApprovalCriteria<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): OutgoingApprovalCriteria {
     return OutgoingApprovalCriteria.fromProto(protobadges.OutgoingApprovalCriteria.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protobadges.OutgoingApprovalCriteria,
-    convertFunction: (item: NumberType) => U
-  ): OutgoingApprovalCriteria<U> {
-    return new OutgoingApprovalCriteria<U>({
+  static fromProto(item: protobadges.OutgoingApprovalCriteria, convertFunction: (item: string | number) => U): OutgoingApprovalCriteria {
+    return new OutgoingApprovalCriteria({
       merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
       mustOwnTokens: item.mustOwnTokens.map((x) => MustOwnTokens.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
@@ -395,9 +332,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       requireToEqualsInitiatedBy: item.requireToEqualsInitiatedBy,
       requireToDoesNotEqualInitiatedBy: item.requireToDoesNotEqualInitiatedBy,
       coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined,
-      dynamicStoreChallenges: item.dynamicStoreChallenges
-        ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction))
-        : undefined,
+      dynamicStoreChallenges: item.dynamicStoreChallenges ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction)) : undefined,
       ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined,
       recipientChecks: item.recipientChecks ? AddressChecks.fromProto(item.recipientChecks) : undefined,
       initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined,
@@ -407,7 +342,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     });
   }
 
-  castToCollectionApprovalCriteria(): ApprovalCriteria<T> {
+  castToCollectionApprovalCriteria(): ApprovalCriteria {
     return new ApprovalCriteria({
       predeterminedBalances: this.predeterminedBalances,
       approvalAmounts: this.approvalAmounts,
@@ -433,7 +368,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     });
   }
 
-  toBech32Addresses(prefix: string): OutgoingApprovalCriteria<T> {
+  toBech32Addresses(prefix: string): OutgoingApprovalCriteria {
     return new OutgoingApprovalCriteria({
       ...this,
       coinTransfers: this.coinTransfers?.map((x) => x.toBech32Addresses(prefix))
@@ -450,19 +385,19 @@ export class OutgoingApprovalCriteria<T extends NumberType>
  *
  * @category Approvals / Transferability
  */
-export class PredeterminedBalances<T extends NumberType> extends BaseNumberTypeClass<PredeterminedBalances<T>> implements iPredeterminedBalances<T> {
-  manualBalances: ManualBalances<T>[];
-  incrementedBalances: IncrementedBalances<T>;
+export class PredeterminedBalances extends BaseNumberTypeClass<PredeterminedBalances> implements iPredeterminedBalances {
+  manualBalances: ManualBalances[];
+  incrementedBalances: IncrementedBalances;
   orderCalculationMethod: PredeterminedOrderCalculationMethod;
 
-  constructor(msg: iPredeterminedBalances<T>) {
+  constructor(msg: iPredeterminedBalances) {
     super();
     this.manualBalances = msg.manualBalances.map((x) => new ManualBalances(x));
     this.incrementedBalances = new IncrementedBalances(msg.incrementedBalances);
     this.orderCalculationMethod = new PredeterminedOrderCalculationMethod(msg.orderCalculationMethod);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PredeterminedBalances<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): PredeterminedBalances {
     return new PredeterminedBalances(
       deepCopyPrimitives({
         manualBalances: this.manualBalances.map((x) => x.convert(convertFunction)),
@@ -476,27 +411,16 @@ export class PredeterminedBalances<T extends NumberType> extends BaseNumberTypeC
     return new protobadges.PredeterminedBalances(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): PredeterminedBalances<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): PredeterminedBalances {
     return PredeterminedBalances.fromProto(protobadges.PredeterminedBalances.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): PredeterminedBalances<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): PredeterminedBalances {
     return PredeterminedBalances.fromProto(protobadges.PredeterminedBalances.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protobadges.PredeterminedBalances,
-    convertFunction: (item: NumberType) => U
-  ): PredeterminedBalances<U> {
-    return new PredeterminedBalances<U>({
+  static fromProto(item: protobadges.PredeterminedBalances, convertFunction: (item: string | number) => U): PredeterminedBalances {
+    return new PredeterminedBalances({
       manualBalances: item.manualBalances.map((x) => ManualBalances.fromProto(x, convertFunction)),
       incrementedBalances: item.incrementedBalances
         ? IncrementedBalances.fromProto(item.incrementedBalances, convertFunction)
@@ -506,9 +430,7 @@ export class PredeterminedBalances<T extends NumberType> extends BaseNumberTypeC
             incrementOwnershipTimesBy: convertFunction(0),
             durationFromTimestamp: convertFunction(0),
             allowOverrideTimestamp: false,
-            recurringOwnershipTimes: new RecurringOwnershipTimes({ startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }).convert(
-              convertFunction
-            ),
+            recurringOwnershipTimes: new RecurringOwnershipTimes({ startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }).convert(convertFunction),
             allowOverrideWithAnyValidToken: false
           }),
       orderCalculationMethod: item.orderCalculationMethod
@@ -530,16 +452,16 @@ export class PredeterminedBalances<T extends NumberType> extends BaseNumberTypeC
  *
  * @category Approvals / Transferability
  */
-export class ManualBalances<T extends NumberType> extends BaseNumberTypeClass<ManualBalances<T>> implements iManualBalances<T> {
+export class ManualBalances extends BaseNumberTypeClass<ManualBalances> implements iManualBalances {
   /** The list of balances for each transfer. Order number corresponds to the index of the balance in the array. */
-  balances: BalanceArray<T>;
+  balances: BalanceArray;
 
-  constructor(msg: iManualBalances<T>) {
+  constructor(msg: iManualBalances) {
     super();
     this.balances = BalanceArray.From(msg.balances);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ManualBalances<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ManualBalances {
     return new ManualBalances(
       deepCopyPrimitives({
         balances: this.balances.map((x) => x.convert(convertFunction))
@@ -551,24 +473,16 @@ export class ManualBalances<T extends NumberType> extends BaseNumberTypeClass<Ma
     return new protobadges.ManualBalances(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): ManualBalances<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): ManualBalances {
     return ManualBalances.fromProto(protobadges.ManualBalances.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): ManualBalances<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): ManualBalances {
     return ManualBalances.fromProto(protobadges.ManualBalances.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.ManualBalances, convertFunction: (item: NumberType) => U): ManualBalances<U> {
-    return new ManualBalances<U>({
+  static fromProto(item: protobadges.ManualBalances, convertFunction: (item: string | number) => U): ManualBalances {
+    return new ManualBalances({
       balances: item.balances.map((x) => Balance.fromProto(x, convertFunction))
     });
   }
@@ -579,15 +493,12 @@ export class ManualBalances<T extends NumberType> extends BaseNumberTypeClass<Ma
  *
  * @category Approvals / Transferability
  */
-export class RecurringOwnershipTimes<T extends NumberType>
-  extends BaseNumberTypeClass<RecurringOwnershipTimes<T>>
-  implements iRecurringOwnershipTimes<T>
-{
-  startTime: T;
-  intervalLength: T;
-  chargePeriodLength: T;
+export class RecurringOwnershipTimes extends BaseNumberTypeClass<RecurringOwnershipTimes> implements iRecurringOwnershipTimes {
+  startTime: string | number;
+  intervalLength: string | number;
+  chargePeriodLength: string | number;
 
-  constructor(msg: iRecurringOwnershipTimes<T>) {
+  constructor(msg: iRecurringOwnershipTimes) {
     super();
     this.startTime = msg.startTime;
     this.intervalLength = msg.intervalLength;
@@ -598,35 +509,24 @@ export class RecurringOwnershipTimes<T extends NumberType>
     return ['startTime', 'intervalLength', 'chargePeriodLength'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): RecurringOwnershipTimes<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as RecurringOwnershipTimes<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): RecurringOwnershipTimes {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as RecurringOwnershipTimes;
   }
 
   toProto(): protobadges.RecurringOwnershipTimes {
     return new protobadges.RecurringOwnershipTimes(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): RecurringOwnershipTimes<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): RecurringOwnershipTimes {
     return RecurringOwnershipTimes.fromProto(protobadges.RecurringOwnershipTimes.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): RecurringOwnershipTimes<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): RecurringOwnershipTimes {
     return RecurringOwnershipTimes.fromProto(protobadges.RecurringOwnershipTimes.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protobadges.RecurringOwnershipTimes,
-    convertFunction: (item: NumberType) => U
-  ): RecurringOwnershipTimes<U> {
-    return new RecurringOwnershipTimes<U>({
+  static fromProto(item: protobadges.RecurringOwnershipTimes, convertFunction: (item: string | number) => U): RecurringOwnershipTimes {
+    return new RecurringOwnershipTimes({
       startTime: convertFunction(item.startTime),
       intervalLength: convertFunction(item.intervalLength),
       chargePeriodLength: convertFunction(item.chargePeriodLength)
@@ -640,16 +540,16 @@ export class RecurringOwnershipTimes<T extends NumberType>
  *
  * @category Approvals / Transferability
  */
-export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeClass<IncrementedBalances<T>> implements iIncrementedBalances<T> {
-  startBalances: BalanceArray<T>;
-  incrementTokenIdsBy: T;
-  incrementOwnershipTimesBy: T;
-  durationFromTimestamp: T;
+export class IncrementedBalances extends BaseNumberTypeClass<IncrementedBalances> implements iIncrementedBalances {
+  startBalances: BalanceArray;
+  incrementTokenIdsBy: string | number;
+  incrementOwnershipTimesBy: string | number;
+  durationFromTimestamp: string | number;
   allowOverrideTimestamp: boolean;
-  recurringOwnershipTimes: RecurringOwnershipTimes<T>;
+  recurringOwnershipTimes: RecurringOwnershipTimes;
   allowOverrideWithAnyValidToken: boolean;
 
-  constructor(msg: iIncrementedBalances<T>) {
+  constructor(msg: iIncrementedBalances) {
     super();
     this.startBalances = BalanceArray.From(msg.startBalances);
     this.incrementTokenIdsBy = msg.incrementTokenIdsBy;
@@ -664,7 +564,7 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
     return ['incrementTokenIdsBy', 'incrementOwnershipTimesBy', 'durationFromTimestamp'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncrementedBalances<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): IncrementedBalances {
     return new IncrementedBalances(
       deepCopyPrimitives({
         startBalances: this.startBalances.map((x) => x.convert(convertFunction)),
@@ -682,33 +582,23 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
     return new protobadges.IncrementedBalances(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): IncrementedBalances<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): IncrementedBalances {
     return IncrementedBalances.fromProto(protobadges.IncrementedBalances.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): IncrementedBalances<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): IncrementedBalances {
     return IncrementedBalances.fromProto(protobadges.IncrementedBalances.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.IncrementedBalances, convertFunction: (item: NumberType) => U): IncrementedBalances<U> {
-    return new IncrementedBalances<U>({
+  static fromProto(item: protobadges.IncrementedBalances, convertFunction: (item: string | number) => U): IncrementedBalances {
+    return new IncrementedBalances({
       startBalances: item.startBalances.map((x) => Balance.fromProto(x, convertFunction)),
       incrementTokenIdsBy: convertFunction(item.incrementTokenIdsBy),
       incrementOwnershipTimesBy: convertFunction(item.incrementOwnershipTimesBy),
       durationFromTimestamp: convertFunction(item.durationFromTimestamp),
       allowOverrideTimestamp: item.allowOverrideTimestamp,
       allowOverrideWithAnyValidToken: item.allowOverrideWithAnyValidToken,
-      recurringOwnershipTimes: item.recurringOwnershipTimes
-        ? new RecurringOwnershipTimes(item.recurringOwnershipTimes).convert(convertFunction)
-        : new RecurringOwnershipTimes({ startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }).convert(convertFunction)
+      recurringOwnershipTimes: item.recurringOwnershipTimes ? new RecurringOwnershipTimes(item.recurringOwnershipTimes).convert(convertFunction) : new RecurringOwnershipTimes({ startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }).convert(convertFunction)
     });
   }
 }
@@ -720,10 +610,7 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
  *
  * @category Approvals / Transferability
  */
-export class PredeterminedOrderCalculationMethod
-  extends CustomTypeClass<PredeterminedOrderCalculationMethod>
-  implements iPredeterminedOrderCalculationMethod
-{
+export class PredeterminedOrderCalculationMethod extends CustomTypeClass<PredeterminedOrderCalculationMethod> implements iPredeterminedOrderCalculationMethod {
   useOverallNumTransfers: boolean;
   usePerToAddressNumTransfers: boolean;
   usePerFromAddressNumTransfers: boolean;
@@ -775,15 +662,15 @@ export class PredeterminedOrderCalculationMethod
  *
  * @category Approvals / Transferability
  */
-export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<ApprovalAmounts<T>> implements iApprovalAmounts<T> {
-  overallApprovalAmount: T;
-  perToAddressApprovalAmount: T;
-  perFromAddressApprovalAmount: T;
-  perInitiatedByAddressApprovalAmount: T;
+export class ApprovalAmounts extends BaseNumberTypeClass<ApprovalAmounts> implements iApprovalAmounts {
+  overallApprovalAmount: string | number;
+  perToAddressApprovalAmount: string | number;
+  perFromAddressApprovalAmount: string | number;
+  perInitiatedByAddressApprovalAmount: string | number;
   amountTrackerId: string;
-  resetTimeIntervals: ResetTimeIntervals<T>;
+  resetTimeIntervals: ResetTimeIntervals;
 
-  constructor(msg: iApprovalAmounts<T>) {
+  constructor(msg: iApprovalAmounts) {
     super();
     this.overallApprovalAmount = msg.overallApprovalAmount;
     this.perToAddressApprovalAmount = msg.perToAddressApprovalAmount;
@@ -797,7 +684,7 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
     return ['overallApprovalAmount', 'perToAddressApprovalAmount', 'perFromAddressApprovalAmount', 'perInitiatedByAddressApprovalAmount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalAmounts<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ApprovalAmounts {
     return new ApprovalAmounts(
       deepCopyPrimitives({
         overallApprovalAmount: convertFunction(this.overallApprovalAmount),
@@ -814,32 +701,22 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
     return new protobadges.ApprovalAmounts(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): ApprovalAmounts<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): ApprovalAmounts {
     return ApprovalAmounts.fromProto(protobadges.ApprovalAmounts.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): ApprovalAmounts<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): ApprovalAmounts {
     return ApprovalAmounts.fromProto(protobadges.ApprovalAmounts.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.ApprovalAmounts, convertFunction: (item: NumberType) => U): ApprovalAmounts<U> {
-    return new ApprovalAmounts<U>({
+  static fromProto(item: protobadges.ApprovalAmounts, convertFunction: (item: string | number) => U): ApprovalAmounts {
+    return new ApprovalAmounts({
       overallApprovalAmount: convertFunction(item.overallApprovalAmount),
       perToAddressApprovalAmount: convertFunction(item.perToAddressApprovalAmount),
       perFromAddressApprovalAmount: convertFunction(item.perFromAddressApprovalAmount),
       perInitiatedByAddressApprovalAmount: convertFunction(item.perInitiatedByAddressApprovalAmount),
       amountTrackerId: item.amountTrackerId,
-      resetTimeIntervals: item.resetTimeIntervals
-        ? new ResetTimeIntervals(item.resetTimeIntervals).convert(convertFunction)
-        : new ResetTimeIntervals({ startTime: 0n, intervalLength: 0n }).convert(convertFunction)
+      resetTimeIntervals: item.resetTimeIntervals ? new ResetTimeIntervals(item.resetTimeIntervals).convert(convertFunction) : new ResetTimeIntervals({ startTime: 0n, intervalLength: 0n }).convert(convertFunction)
     });
   }
 }
@@ -849,11 +726,11 @@ export class ApprovalAmounts<T extends NumberType> extends BaseNumberTypeClass<A
  *
  * @category Approvals / Transferability
  */
-export class ResetTimeIntervals<T extends NumberType> extends BaseNumberTypeClass<ResetTimeIntervals<T>> implements iResetTimeIntervals<T> {
-  startTime: T;
-  intervalLength: T;
+export class ResetTimeIntervals extends BaseNumberTypeClass<ResetTimeIntervals> implements iResetTimeIntervals {
+  startTime: string | number;
+  intervalLength: string | number;
 
-  constructor(msg: iResetTimeIntervals<T>) {
+  constructor(msg: iResetTimeIntervals) {
     super();
     this.startTime = msg.startTime;
     this.intervalLength = msg.intervalLength;
@@ -863,32 +740,24 @@ export class ResetTimeIntervals<T extends NumberType> extends BaseNumberTypeClas
     return ['startTime', 'intervalLength'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ResetTimeIntervals<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ResetTimeIntervals<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ResetTimeIntervals {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ResetTimeIntervals;
   }
 
   toProto(): protobadges.ResetTimeIntervals {
     return new protobadges.ResetTimeIntervals(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): ResetTimeIntervals<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): ResetTimeIntervals {
     return ResetTimeIntervals.fromProto(protobadges.ResetTimeIntervals.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): ResetTimeIntervals<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): ResetTimeIntervals {
     return ResetTimeIntervals.fromProto(protobadges.ResetTimeIntervals.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.ResetTimeIntervals, convertFunction: (item: NumberType) => U): ResetTimeIntervals<U> {
-    return new ResetTimeIntervals<U>({
+  static fromProto(item: protobadges.ResetTimeIntervals, convertFunction: (item: string | number) => U): ResetTimeIntervals {
+    return new ResetTimeIntervals({
       startTime: convertFunction(item.startTime),
       intervalLength: convertFunction(item.intervalLength)
     });
@@ -906,15 +775,15 @@ export class ResetTimeIntervals<T extends NumberType> extends BaseNumberTypeClas
  *
  * @category Approvals / Transferability
  */
-export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<MaxNumTransfers<T>> implements iMaxNumTransfers<T> {
-  overallMaxNumTransfers: T;
-  perToAddressMaxNumTransfers: T;
-  perFromAddressMaxNumTransfers: T;
-  perInitiatedByAddressMaxNumTransfers: T;
+export class MaxNumTransfers extends BaseNumberTypeClass<MaxNumTransfers> implements iMaxNumTransfers {
+  overallMaxNumTransfers: string | number;
+  perToAddressMaxNumTransfers: string | number;
+  perFromAddressMaxNumTransfers: string | number;
+  perInitiatedByAddressMaxNumTransfers: string | number;
   amountTrackerId: string;
-  resetTimeIntervals: ResetTimeIntervals<T>;
+  resetTimeIntervals: ResetTimeIntervals;
 
-  constructor(msg: iMaxNumTransfers<T>) {
+  constructor(msg: iMaxNumTransfers) {
     super();
     this.overallMaxNumTransfers = msg.overallMaxNumTransfers;
     this.perToAddressMaxNumTransfers = msg.perToAddressMaxNumTransfers;
@@ -928,40 +797,30 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
     return ['overallMaxNumTransfers', 'perToAddressMaxNumTransfers', 'perFromAddressMaxNumTransfers', 'perInitiatedByAddressMaxNumTransfers'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MaxNumTransfers<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MaxNumTransfers<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MaxNumTransfers {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MaxNumTransfers;
   }
 
   toProto(): protobadges.MaxNumTransfers {
     return new protobadges.MaxNumTransfers(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MaxNumTransfers<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MaxNumTransfers {
     return MaxNumTransfers.fromProto(protobadges.MaxNumTransfers.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MaxNumTransfers<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MaxNumTransfers {
     return MaxNumTransfers.fromProto(protobadges.MaxNumTransfers.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.MaxNumTransfers, convertFunction: (item: NumberType) => U): MaxNumTransfers<U> {
-    return new MaxNumTransfers<U>({
+  static fromProto(item: protobadges.MaxNumTransfers, convertFunction: (item: string | number) => U): MaxNumTransfers {
+    return new MaxNumTransfers({
       overallMaxNumTransfers: convertFunction(item.overallMaxNumTransfers),
       perToAddressMaxNumTransfers: convertFunction(item.perToAddressMaxNumTransfers),
       perFromAddressMaxNumTransfers: convertFunction(item.perFromAddressMaxNumTransfers),
       perInitiatedByAddressMaxNumTransfers: convertFunction(item.perInitiatedByAddressMaxNumTransfers),
       amountTrackerId: item.amountTrackerId,
-      resetTimeIntervals: item.resetTimeIntervals
-        ? new ResetTimeIntervals(item.resetTimeIntervals).convert(convertFunction)
-        : new ResetTimeIntervals({ startTime: 0n, intervalLength: 0n }).convert(convertFunction)
+      resetTimeIntervals: item.resetTimeIntervals ? new ResetTimeIntervals(item.resetTimeIntervals).convert(convertFunction) : new ResetTimeIntervals({ startTime: 0n, intervalLength: 0n }).convert(convertFunction)
     });
   }
 }
@@ -969,7 +828,7 @@ export class MaxNumTransfers<T extends NumberType> extends BaseNumberTypeClass<M
 /**
  * @category Approvals / Transferability
  */
-export class AutoDeletionOptions<T extends NumberType> extends BaseNumberTypeClass<AutoDeletionOptions<T>> implements iAutoDeletionOptions {
+export class AutoDeletionOptions extends BaseNumberTypeClass<AutoDeletionOptions> implements iAutoDeletionOptions {
   afterOneUse: boolean;
   afterOverallMaxNumTransfers: boolean;
   allowCounterpartyPurge: boolean;
@@ -987,32 +846,24 @@ export class AutoDeletionOptions<T extends NumberType> extends BaseNumberTypeCla
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AutoDeletionOptions<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AutoDeletionOptions<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): AutoDeletionOptions {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AutoDeletionOptions;
   }
 
   toProto(): protobadges.AutoDeletionOptions {
     return new protobadges.AutoDeletionOptions(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): AutoDeletionOptions<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): AutoDeletionOptions {
     return AutoDeletionOptions.fromProto(protobadges.AutoDeletionOptions.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): AutoDeletionOptions<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): AutoDeletionOptions {
     return AutoDeletionOptions.fromProto(protobadges.AutoDeletionOptions.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.AutoDeletionOptions, convertFunction: (item: NumberType) => U): AutoDeletionOptions<U> {
-    return new AutoDeletionOptions<U>({
+  static fromProto(item: protobadges.AutoDeletionOptions, convertFunction: (item: string | number) => U): AutoDeletionOptions {
+    return new AutoDeletionOptions({
       afterOneUse: item.afterOneUse,
       afterOverallMaxNumTransfers: item.afterOverallMaxNumTransfers,
       allowCounterpartyPurge: item.allowCounterpartyPurge,
@@ -1026,19 +877,19 @@ export class AutoDeletionOptions<T extends NumberType> extends BaseNumberTypeCla
  *
  * @category Approvals / Transferability
  */
-export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeClass<UserIncomingApproval<T>> implements iUserIncomingApproval<T> {
+export class UserIncomingApproval extends BaseNumberTypeClass<UserIncomingApproval> implements iUserIncomingApproval {
   fromListId: string;
   initiatedByListId: string;
-  transferTimes: UintRangeArray<T>;
-  tokenIds: UintRangeArray<T>;
-  ownershipTimes: UintRangeArray<T>;
+  transferTimes: UintRangeArray;
+  tokenIds: UintRangeArray;
+  ownershipTimes: UintRangeArray;
   approvalId: string;
   uri?: string;
   customData?: string;
-  approvalCriteria?: IncomingApprovalCriteria<T>;
-  version: T;
+  approvalCriteria?: IncomingApprovalCriteria;
+  version: string | number;
 
-  constructor(msg: iUserIncomingApproval<T>) {
+  constructor(msg: iUserIncomingApproval) {
     super();
     this.fromListId = msg.fromListId;
     this.initiatedByListId = msg.initiatedByListId;
@@ -1056,32 +907,24 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
     return ['version'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserIncomingApproval<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserIncomingApproval<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UserIncomingApproval {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserIncomingApproval;
   }
 
   toProto(): protobadges.UserIncomingApproval {
     return new protobadges.UserIncomingApproval(this.convert(Stringify) as any);
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): UserIncomingApproval<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): UserIncomingApproval {
     return UserIncomingApproval.fromProto(protobadges.UserIncomingApproval.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): UserIncomingApproval<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): UserIncomingApproval {
     return UserIncomingApproval.fromProto(protobadges.UserIncomingApproval.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.UserIncomingApproval, convertFunction: (item: NumberType) => U): UserIncomingApproval<U> {
-    return new UserIncomingApproval<U>({
+  static fromProto(item: protobadges.UserIncomingApproval, convertFunction: (item: string | number) => U): UserIncomingApproval {
+    return new UserIncomingApproval({
       fromListId: item.fromListId,
       initiatedByListId: item.initiatedByListId,
       transferTimes: item.transferTimes.map((x) => UintRange.fromProto(x, convertFunction)),
@@ -1095,7 +938,7 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
     });
   }
 
-  castToCollectionTransfer(toAddress: string): CollectionApproval<T> {
+  castToCollectionTransfer(toAddress: string): CollectionApproval {
     return new CollectionApproval({
       ...this,
       toListId: toAddress,
@@ -1103,7 +946,7 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
     });
   }
 
-  toBech32Addresses(prefix: string): UserIncomingApproval<T> {
+  toBech32Addresses(prefix: string): UserIncomingApproval {
     return new UserIncomingApproval({
       ...this,
       fromListId: convertListIdToBech32(this.fromListId, prefix),
@@ -1118,28 +961,25 @@ export class UserIncomingApproval<T extends NumberType> extends BaseNumberTypeCl
  *
  * @category Approvals / Transferability
  */
-export class IncomingApprovalCriteria<T extends NumberType>
-  extends BaseNumberTypeClass<IncomingApprovalCriteria<T>>
-  implements iIncomingApprovalCriteria<T>
-{
-  merkleChallenges?: MerkleChallenge<T>[];
-  mustOwnTokens?: MustOwnTokens<T>[];
-  predeterminedBalances?: PredeterminedBalances<T>;
-  approvalAmounts?: ApprovalAmounts<T>;
-  maxNumTransfers?: MaxNumTransfers<T>;
-  autoDeletionOptions?: AutoDeletionOptions<T>;
+export class IncomingApprovalCriteria extends BaseNumberTypeClass<IncomingApprovalCriteria> implements iIncomingApprovalCriteria {
+  merkleChallenges?: MerkleChallenge[];
+  mustOwnTokens?: MustOwnTokens[];
+  predeterminedBalances?: PredeterminedBalances;
+  approvalAmounts?: ApprovalAmounts;
+  maxNumTransfers?: MaxNumTransfers;
+  autoDeletionOptions?: AutoDeletionOptions;
   requireFromEqualsInitiatedBy?: boolean;
   requireFromDoesNotEqualInitiatedBy?: boolean;
-  coinTransfers?: CoinTransfer<T>[] | undefined;
-  dynamicStoreChallenges?: DynamicStoreChallenge<T>[];
+  coinTransfers?: CoinTransfer[] | undefined;
+  dynamicStoreChallenges?: DynamicStoreChallenge[];
   ethSignatureChallenges?: ETHSignatureChallenge[];
   senderChecks?: AddressChecks;
   initiatorChecks?: AddressChecks;
-  altTimeChecks?: AltTimeChecks<T>;
+  altTimeChecks?: AltTimeChecks;
   mustPrioritize?: boolean;
-  votingChallenges?: VotingChallenge<T>[];
+  votingChallenges?: VotingChallenge[];
 
-  constructor(msg: iIncomingApprovalCriteria<T>) {
+  constructor(msg: iIncomingApprovalCriteria) {
     super();
     this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
     this.mustOwnTokens = msg.mustOwnTokens?.map((x) => new MustOwnTokens(x));
@@ -1159,8 +999,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
     this.votingChallenges = msg.votingChallenges?.map((x) => new VotingChallenge(x));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteria<U> {
-    return new IncomingApprovalCriteria<U>({
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): IncomingApprovalCriteria {
+    return new IncomingApprovalCriteria({
       merkleChallenges: this.merkleChallenges?.map((x) => x.convert(convertFunction)),
       mustOwnTokens: this.mustOwnTokens?.map((x) => x.convert(convertFunction)),
       predeterminedBalances: this.predeterminedBalances?.convert(convertFunction),
@@ -1183,27 +1023,16 @@ export class IncomingApprovalCriteria<T extends NumberType>
     return new protobadges.IncomingApprovalCriteria(this.convert(Stringify) as any);
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): IncomingApprovalCriteria<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): IncomingApprovalCriteria {
     return IncomingApprovalCriteria.fromProto(protobadges.IncomingApprovalCriteria.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): IncomingApprovalCriteria<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): IncomingApprovalCriteria {
     return IncomingApprovalCriteria.fromProto(protobadges.IncomingApprovalCriteria.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protobadges.IncomingApprovalCriteria,
-    convertFunction: (item: NumberType) => U
-  ): IncomingApprovalCriteria<U> {
-    return new IncomingApprovalCriteria<U>({
+  static fromProto(item: protobadges.IncomingApprovalCriteria, convertFunction: (item: string | number) => U): IncomingApprovalCriteria {
+    return new IncomingApprovalCriteria({
       merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
       mustOwnTokens: item.mustOwnTokens.map((x) => MustOwnTokens.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
@@ -1213,9 +1042,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
       requireFromEqualsInitiatedBy: item.requireFromEqualsInitiatedBy,
       requireFromDoesNotEqualInitiatedBy: item.requireFromDoesNotEqualInitiatedBy,
       coinTransfers: item.coinTransfers ? item.coinTransfers.map((x) => CoinTransfer.fromProto(x, convertFunction)) : undefined,
-      dynamicStoreChallenges: item.dynamicStoreChallenges
-        ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction))
-        : undefined,
+      dynamicStoreChallenges: item.dynamicStoreChallenges ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction)) : undefined,
       ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined,
       senderChecks: item.senderChecks ? AddressChecks.fromProto(item.senderChecks) : undefined,
       initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined,
@@ -1225,7 +1052,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
     });
   }
 
-  castToCollectionApprovalCriteria(): ApprovalCriteria<T> {
+  castToCollectionApprovalCriteria(): ApprovalCriteria {
     return new ApprovalCriteria({
       approvalAmounts: this.approvalAmounts,
       maxNumTransfers: this.maxNumTransfers,
@@ -1251,7 +1078,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
     });
   }
 
-  toBech32Addresses(prefix: string): IncomingApprovalCriteria<T> {
+  toBech32Addresses(prefix: string): IncomingApprovalCriteria {
     return new IncomingApprovalCriteria({
       ...this,
       coinTransfers: this.coinTransfers?.map((x) => x.toBech32Addresses(prefix))
@@ -1264,20 +1091,20 @@ export class IncomingApprovalCriteria<T extends NumberType>
  *
  * @category Approvals / Transferability
  */
-export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClass<CollectionApproval<T>> implements iCollectionApproval<T> {
+export class CollectionApproval extends BaseNumberTypeClass<CollectionApproval> implements iCollectionApproval {
   toListId: string;
   fromListId: string;
   initiatedByListId: string;
-  transferTimes: UintRangeArray<T>;
-  tokenIds: UintRangeArray<T>;
-  ownershipTimes: UintRangeArray<T>;
+  transferTimes: UintRangeArray;
+  tokenIds: UintRangeArray;
+  ownershipTimes: UintRangeArray;
   approvalId: string;
   uri?: string;
   customData?: string;
-  approvalCriteria?: ApprovalCriteria<T>;
-  version: T;
+  approvalCriteria?: ApprovalCriteria;
+  version: string | number;
 
-  constructor(msg: iCollectionApproval<T>) {
+  constructor(msg: iCollectionApproval) {
     super();
     this.toListId = msg.toListId;
     this.fromListId = msg.fromListId;
@@ -1292,11 +1119,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
     this.version = msg.version;
   }
 
-  static validateUpdate<U extends NumberType>(
-    oldApprovals: CollectionApprovalWithDetails<U>[],
-    newApprovals: CollectionApprovalWithDetails<U>[],
-    canUpdateCollectionApprovals: CollectionApprovalPermissionWithDetails<U>[]
-  ): Error | null {
+  static validateUpdate(oldApprovals: CollectionApprovalWithDetails[], newApprovals: CollectionApprovalWithDetails[], canUpdateCollectionApprovals: CollectionApprovalPermissionWithDetails[]): Error | null {
     return validateCollectionApprovalsUpdate(
       oldApprovals.map((x) => x.convert(BigIntify)),
       newApprovals.map((x) => x.convert(BigIntify)),
@@ -1308,32 +1131,24 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
     return ['version'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionApproval<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionApproval<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): CollectionApproval {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionApproval;
   }
 
   toProto(): protobadges.CollectionApproval {
     return new protobadges.CollectionApproval(this.convert(Stringify) as any);
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): CollectionApproval<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): CollectionApproval {
     return CollectionApproval.fromProto(protobadges.CollectionApproval.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): CollectionApproval<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): CollectionApproval {
     return CollectionApproval.fromProto(protobadges.CollectionApproval.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.CollectionApproval, convertFunction: (item: NumberType) => U): CollectionApproval<U> {
-    return new CollectionApproval<U>({
+  static fromProto(item: protobadges.CollectionApproval, convertFunction: (item: string | number) => U): CollectionApproval {
+    return new CollectionApproval({
       toListId: item.toListId,
       fromListId: item.fromListId,
       initiatedByListId: item.initiatedByListId,
@@ -1348,7 +1163,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
     });
   }
 
-  castToOutgoingApproval(): UserOutgoingApproval<T> {
+  castToOutgoingApproval(): UserOutgoingApproval {
     return new UserOutgoingApproval({
       ...this,
       toListId: this.toListId,
@@ -1361,7 +1176,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
     });
   }
 
-  castToIncomingApproval(): UserIncomingApproval<T> {
+  castToIncomingApproval(): UserIncomingApproval {
     return new UserIncomingApproval({
       ...this,
       fromListId: this.fromListId,
@@ -1374,7 +1189,7 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
     });
   }
 
-  toBech32Addresses(prefix: string): CollectionApproval<T> {
+  toBech32Addresses(prefix: string): CollectionApproval {
     return new CollectionApproval({
       ...this,
       fromListId: convertListIdToBech32(this.fromListId, prefix),
@@ -1390,11 +1205,11 @@ export class CollectionApproval<T extends NumberType> extends BaseNumberTypeClas
  * @inheritDoc iDynamicStoreChallenge
  * @category Approvals / Transferability
  */
-export class DynamicStoreChallenge<T extends NumberType> extends BaseNumberTypeClass<DynamicStoreChallenge<T>> implements iDynamicStoreChallenge<T> {
-  storeId: T;
+export class DynamicStoreChallenge extends BaseNumberTypeClass<DynamicStoreChallenge> implements iDynamicStoreChallenge {
+  storeId: string | number;
   ownershipCheckParty?: string;
 
-  constructor(msg: iDynamicStoreChallenge<T>) {
+  constructor(msg: iDynamicStoreChallenge) {
     super();
     this.storeId = msg.storeId;
     this.ownershipCheckParty = msg.ownershipCheckParty;
@@ -1404,35 +1219,24 @@ export class DynamicStoreChallenge<T extends NumberType> extends BaseNumberTypeC
     return ['storeId'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DynamicStoreChallenge<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStoreChallenge<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): DynamicStoreChallenge {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStoreChallenge;
   }
 
   toProto(): protobadges.DynamicStoreChallenge {
     return new protobadges.DynamicStoreChallenge(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): DynamicStoreChallenge<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): DynamicStoreChallenge {
     return DynamicStoreChallenge.fromProto(protobadges.DynamicStoreChallenge.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): DynamicStoreChallenge<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): DynamicStoreChallenge {
     return DynamicStoreChallenge.fromProto(protobadges.DynamicStoreChallenge.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    item: protobadges.DynamicStoreChallenge,
-    convertFunction: (item: NumberType) => U
-  ): DynamicStoreChallenge<U> {
-    return new DynamicStoreChallenge<U>({
+  static fromProto(item: protobadges.DynamicStoreChallenge, convertFunction: (item: string | number) => U): DynamicStoreChallenge {
+    return new DynamicStoreChallenge({
       storeId: convertFunction(item.storeId),
       ownershipCheckParty: item.ownershipCheckParty
     });
@@ -1458,7 +1262,7 @@ export class AddressChecks extends CustomTypeClass<AddressChecks> implements iAd
     this.mustNotBeLiquidityPool = msg.mustNotBeLiquidityPool;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AddressChecks {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): AddressChecks {
     return new AddressChecks({
       mustBeWasmContract: this.mustBeWasmContract,
       mustNotBeWasmContract: this.mustNotBeWasmContract,
@@ -1501,18 +1305,18 @@ export class AddressChecks extends CustomTypeClass<AddressChecks> implements iAd
  *
  * @category Approvals / Transferability
  */
-export class AltTimeChecks<T extends NumberType> extends BaseNumberTypeClass<AltTimeChecks<T>> implements iAltTimeChecks<T> {
-  offlineHours?: UintRangeArray<T>;
-  offlineDays?: UintRangeArray<T>;
+export class AltTimeChecks extends BaseNumberTypeClass<AltTimeChecks> implements iAltTimeChecks {
+  offlineHours?: UintRangeArray;
+  offlineDays?: UintRangeArray;
 
-  constructor(msg: iAltTimeChecks<T>) {
+  constructor(msg: iAltTimeChecks) {
     super();
     this.offlineHours = msg.offlineHours ? UintRangeArray.From(msg.offlineHours) : undefined;
     this.offlineDays = msg.offlineDays ? UintRangeArray.From(msg.offlineDays) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AltTimeChecks<U> {
-    return new AltTimeChecks<U>({
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): AltTimeChecks {
+    return new AltTimeChecks({
       offlineHours: this.offlineHours?.map((x) => x.convert(convertFunction)),
       offlineDays: this.offlineDays?.map((x) => x.convert(convertFunction))
     });
@@ -1525,23 +1329,15 @@ export class AltTimeChecks<T extends NumberType> extends BaseNumberTypeClass<Alt
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): AltTimeChecks<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): AltTimeChecks {
     return AltTimeChecks.fromProto(protobadges.AltTimeChecks.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): AltTimeChecks<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): AltTimeChecks {
     return AltTimeChecks.fromProto(protobadges.AltTimeChecks.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.AltTimeChecks, convertFunction: (item: NumberType) => U): AltTimeChecks<U> {
+  static fromProto(item: protobadges.AltTimeChecks, convertFunction: (item: string | number) => U): AltTimeChecks {
     return new AltTimeChecks({
       offlineHours: item.offlineHours.map((x) => UintRange.fromProto(x, convertFunction)),
       offlineDays: item.offlineDays.map((x) => UintRange.fromProto(x, convertFunction))
@@ -1552,11 +1348,11 @@ export class AltTimeChecks<T extends NumberType> extends BaseNumberTypeClass<Alt
 /**
  * @category Approvals / Transferability
  */
-export class UserRoyalties<T extends NumberType> extends BaseNumberTypeClass<UserRoyalties<T>> implements iUserRoyalties<T> {
-  percentage: T;
+export class UserRoyalties extends BaseNumberTypeClass<UserRoyalties> implements iUserRoyalties {
+  percentage: string | number;
   payoutAddress: string;
 
-  constructor(msg: iUserRoyalties<T>) {
+  constructor(msg: iUserRoyalties) {
     super();
     this.percentage = msg.percentage;
     this.payoutAddress = msg.payoutAddress;
@@ -1566,31 +1362,23 @@ export class UserRoyalties<T extends NumberType> extends BaseNumberTypeClass<Use
     return ['percentage'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserRoyalties<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserRoyalties<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UserRoyalties {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserRoyalties;
   }
 
   toProto(): protobadges.UserRoyalties {
     return new protobadges.UserRoyalties(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): UserRoyalties<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): UserRoyalties {
     return UserRoyalties.fromProto(protobadges.UserRoyalties.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): UserRoyalties<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): UserRoyalties {
     return UserRoyalties.fromProto(protobadges.UserRoyalties.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.UserRoyalties, convertFunction: (item: NumberType) => U): UserRoyalties<U> {
+  static fromProto(item: protobadges.UserRoyalties, convertFunction: (item: string | number) => U): UserRoyalties {
     return new UserRoyalties({ percentage: convertFunction(item.percentage), payoutAddress: item.payoutAddress });
   }
 }
@@ -1601,33 +1389,33 @@ export class UserRoyalties<T extends NumberType> extends BaseNumberTypeClass<Use
  *
  * @category Approvals / Transferability
  */
-export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<ApprovalCriteria<T>> implements iApprovalCriteria<T> {
-  merkleChallenges?: MerkleChallenge<T>[];
-  mustOwnTokens?: MustOwnTokens<T>[];
-  predeterminedBalances?: PredeterminedBalances<T>;
-  approvalAmounts?: ApprovalAmounts<T>;
-  maxNumTransfers?: MaxNumTransfers<T>;
-  autoDeletionOptions?: AutoDeletionOptions<T>;
+export class ApprovalCriteria extends BaseNumberTypeClass<ApprovalCriteria> implements iApprovalCriteria {
+  merkleChallenges?: MerkleChallenge[];
+  mustOwnTokens?: MustOwnTokens[];
+  predeterminedBalances?: PredeterminedBalances;
+  approvalAmounts?: ApprovalAmounts;
+  maxNumTransfers?: MaxNumTransfers;
+  autoDeletionOptions?: AutoDeletionOptions;
   requireToEqualsInitiatedBy?: boolean;
   requireFromEqualsInitiatedBy?: boolean;
   requireToDoesNotEqualInitiatedBy?: boolean;
   requireFromDoesNotEqualInitiatedBy?: boolean;
   overridesFromOutgoingApprovals?: boolean;
   overridesToIncomingApprovals?: boolean;
-  coinTransfers?: CoinTransfer<T>[] | undefined;
-  userRoyalties?: UserRoyalties<T>;
-  dynamicStoreChallenges?: DynamicStoreChallenge<T>[];
+  coinTransfers?: CoinTransfer[] | undefined;
+  userRoyalties?: UserRoyalties;
+  dynamicStoreChallenges?: DynamicStoreChallenge[];
   ethSignatureChallenges?: ETHSignatureChallenge[];
   senderChecks?: AddressChecks;
   recipientChecks?: AddressChecks;
   initiatorChecks?: AddressChecks;
-  altTimeChecks?: AltTimeChecks<T>;
+  altTimeChecks?: AltTimeChecks;
   mustPrioritize?: boolean;
-  votingChallenges?: VotingChallenge<T>[];
+  votingChallenges?: VotingChallenge[];
   allowBackedMinting?: boolean;
   allowSpecialWrapping?: boolean;
 
-  constructor(msg: iApprovalCriteria<T>) {
+  constructor(msg: iApprovalCriteria) {
     super();
     this.merkleChallenges = msg.merkleChallenges?.map((x) => new MerkleChallenge(x));
     this.mustOwnTokens = msg.mustOwnTokens?.map((x) => new MustOwnTokens(x));
@@ -1648,39 +1436,31 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.senderChecks = msg.senderChecks ? new AddressChecks(msg.senderChecks) : undefined;
     this.recipientChecks = msg.recipientChecks ? new AddressChecks(msg.recipientChecks) : undefined;
     this.initiatorChecks = msg.initiatorChecks ? new AddressChecks(msg.initiatorChecks) : undefined;
-    this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks<T>(msg.altTimeChecks) : undefined;
+    this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks(msg.altTimeChecks) : undefined;
     this.mustPrioritize = msg.mustPrioritize;
     this.votingChallenges = msg.votingChallenges?.map((x) => new VotingChallenge(x));
     this.allowBackedMinting = msg.allowBackedMinting;
     this.allowSpecialWrapping = msg.allowSpecialWrapping;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteria<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApprovalCriteria<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ApprovalCriteria {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApprovalCriteria;
   }
 
   toProto(): protobadges.ApprovalCriteria {
     return new protobadges.ApprovalCriteria(this.convert(Stringify) as any);
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): ApprovalCriteria<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): ApprovalCriteria {
     return ApprovalCriteria.fromProto(protobadges.ApprovalCriteria.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): ApprovalCriteria<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): ApprovalCriteria {
     return ApprovalCriteria.fromProto(protobadges.ApprovalCriteria.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.ApprovalCriteria, convertFunction: (item: NumberType) => U): ApprovalCriteria<U> {
-    return new ApprovalCriteria<U>({
+  static fromProto(item: protobadges.ApprovalCriteria, convertFunction: (item: string | number) => U): ApprovalCriteria {
+    return new ApprovalCriteria({
       merkleChallenges: item.merkleChallenges.map((x) => MerkleChallenge.fromProto(x, convertFunction)),
       mustOwnTokens: item.mustOwnTokens.map((x) => MustOwnTokens.fromProto(x, convertFunction)),
       predeterminedBalances: item.predeterminedBalances ? PredeterminedBalances.fromProto(item.predeterminedBalances, convertFunction) : undefined,
@@ -1695,9 +1475,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       overridesFromOutgoingApprovals: item.overridesFromOutgoingApprovals,
       overridesToIncomingApprovals: item.overridesToIncomingApprovals,
       userRoyalties: item.userRoyalties ? UserRoyalties.fromProto(item.userRoyalties, convertFunction) : undefined,
-      dynamicStoreChallenges: item.dynamicStoreChallenges
-        ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction))
-        : undefined,
+      dynamicStoreChallenges: item.dynamicStoreChallenges ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction)) : undefined,
       ethSignatureChallenges: item.ethSignatureChallenges ? item.ethSignatureChallenges.map((x) => ETHSignatureChallenge.fromProto(x)) : undefined,
       senderChecks: item.senderChecks ? AddressChecks.fromProto(item.senderChecks) : undefined,
       recipientChecks: item.recipientChecks ? AddressChecks.fromProto(item.recipientChecks) : undefined,
@@ -1710,7 +1488,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     });
   }
 
-  toBech32Addresses(prefix: string): ApprovalCriteria<T> {
+  toBech32Addresses(prefix: string): ApprovalCriteria {
     return new ApprovalCriteria({
       ...this,
       coinTransfers: this.coinTransfers?.map((x) => x.toBech32Addresses(prefix))
@@ -1721,25 +1499,25 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
 /**
  * @category Approvals / Transferability
  */
-export interface iUserOutgoingApprovalWithDetails<T extends NumberType> extends iUserOutgoingApproval<T> {
+export interface iUserOutgoingApprovalWithDetails extends iUserOutgoingApproval {
   /** The populated address list for the toListId */
   toList: iAddressList;
   /** The populated address list for the initiatedByListId */
   initiatedByList: iAddressList;
-  approvalCriteria?: iOutgoingApprovalCriteriaWithDetails<T>;
+  approvalCriteria?: iOutgoingApprovalCriteriaWithDetails;
   details?: iApprovalInfoDetails;
 }
 
 /**
  * @category Approvals / Transferability
  */
-export class UserOutgoingApprovalWithDetails<T extends NumberType> extends UserOutgoingApproval<T> implements iUserOutgoingApprovalWithDetails<T> {
+export class UserOutgoingApprovalWithDetails extends UserOutgoingApproval implements iUserOutgoingApprovalWithDetails {
   toList: AddressList;
   initiatedByList: AddressList;
-  approvalCriteria?: OutgoingApprovalCriteriaWithDetails<T> | undefined;
+  approvalCriteria?: OutgoingApprovalCriteriaWithDetails | undefined;
   details?: iApprovalInfoDetails | undefined;
 
-  constructor(data: iUserOutgoingApprovalWithDetails<T>) {
+  constructor(data: iUserOutgoingApprovalWithDetails) {
     super(data);
     this.toList = new AddressList(data.toList);
     this.initiatedByList = new AddressList(data.initiatedByList);
@@ -1747,15 +1525,15 @@ export class UserOutgoingApprovalWithDetails<T extends NumberType> extends UserO
     this.details = data.details ? new ApprovalInfoDetails(data.details) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserOutgoingApprovalWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserOutgoingApprovalWithDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UserOutgoingApprovalWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserOutgoingApprovalWithDetails;
   }
 
-  clone(): UserOutgoingApprovalWithDetails<T> {
-    return super.clone() as UserOutgoingApprovalWithDetails<T>;
+  clone(): UserOutgoingApprovalWithDetails {
+    return super.clone() as UserOutgoingApprovalWithDetails;
   }
 
-  castToCollectionTransfer(fromAddress: string): CollectionApprovalWithDetails<T> {
+  castToCollectionTransfer(fromAddress: string): CollectionApprovalWithDetails {
     return new CollectionApprovalWithDetails({
       ...this,
       fromListId: fromAddress,
@@ -1772,13 +1550,13 @@ export class UserOutgoingApprovalWithDetails<T extends NumberType> extends UserO
 /**
  * @category Approvals / Transferability
  */
-export class UserIncomingApprovalWithDetails<T extends NumberType> extends UserIncomingApproval<T> implements iUserIncomingApprovalWithDetails<T> {
-  details?: ApprovalInfoDetails<T>;
+export class UserIncomingApprovalWithDetails extends UserIncomingApproval implements iUserIncomingApprovalWithDetails {
+  details?: ApprovalInfoDetails;
   fromList: AddressList;
   initiatedByList: AddressList;
-  approvalCriteria?: IncomingApprovalCriteriaWithDetails<T> | undefined;
+  approvalCriteria?: IncomingApprovalCriteriaWithDetails | undefined;
 
-  constructor(data: iUserIncomingApprovalWithDetails<T>) {
+  constructor(data: iUserIncomingApprovalWithDetails) {
     super(data);
     this.details = data.details ? new ApprovalInfoDetails(data.details) : undefined;
     this.fromList = new AddressList(data.fromList);
@@ -1786,15 +1564,15 @@ export class UserIncomingApprovalWithDetails<T extends NumberType> extends UserI
     this.approvalCriteria = data.approvalCriteria ? new IncomingApprovalCriteriaWithDetails(data.approvalCriteria) : undefined;
   }
 
-  clone(): UserIncomingApprovalWithDetails<T> {
-    return super.clone() as UserIncomingApprovalWithDetails<T>;
+  clone(): UserIncomingApprovalWithDetails {
+    return super.clone() as UserIncomingApprovalWithDetails;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserIncomingApprovalWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserIncomingApprovalWithDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UserIncomingApprovalWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserIncomingApprovalWithDetails;
   }
 
-  castToCollectionTransfer(toAddress: string): CollectionApprovalWithDetails<T> {
+  castToCollectionTransfer(toAddress: string): CollectionApprovalWithDetails {
     return new CollectionApprovalWithDetails({
       ...this,
       toList: getReservedAddressList(toAddress) as AddressList,
@@ -1823,7 +1601,7 @@ export class UserIncomingApprovalWithDetails<T extends NumberType> extends UserI
  *
  * @category Interfaces
  */
-export interface iChallengeDetails<T extends NumberType> {
+export interface iChallengeDetails {
   /** The leaves of the Merkle tree. Leaves should be considered public. Use preimages for the private codes + isHashed. For whitelist trees, these can be the plaintext BitBadges addresses. */
   leaves: string[];
   /** True if the leaves are hashed. Hash(preimage[i]) = leaves[i] */
@@ -1838,24 +1616,24 @@ export interface iChallengeDetails<T extends NumberType> {
   /** The Merkle tree options for how to build it */
   treeOptions?: MerkleTreeJsOptions;
   /** The number of leaves in the Merkle tree. This takes priority over leaves.length if defined (used for buffer time between leaf generation and leaf length select) */
-  numLeaves?: T;
+  numLeaves?: string | number;
   /** The current code being used for the challenge. Used behind the scenes */
-  currCode?: T;
+  currCode?: string | number;
 }
 
 /**
  * @category Approvals / Transferability
  */
-export class ChallengeDetails<T extends NumberType> extends BaseNumberTypeClass<ChallengeDetails<T>> implements iChallengeDetails<T> {
+export class ChallengeDetails extends BaseNumberTypeClass<ChallengeDetails> implements iChallengeDetails {
   treeOptions?: MerkleTreeJsOptions;
-  numLeaves?: T;
+  numLeaves?: string | number;
   leaves: string[];
   isHashed: boolean;
   preimages?: string[] | undefined;
   seedCode?: string | undefined;
   tree?: MerkleTree | undefined;
 
-  constructor(data: iChallengeDetails<T>) {
+  constructor(data: iChallengeDetails) {
     super();
     this.treeOptions = data.treeOptions;
     this.numLeaves = data.numLeaves;
@@ -1869,29 +1647,29 @@ export class ChallengeDetails<T extends NumberType> extends BaseNumberTypeClass<
     return ['numLeaves'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ChallengeDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ChallengeDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ChallengeDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ChallengeDetails;
   }
 }
 
 /**
  * @category Interfaces
  */
-export interface iChallengeInfoDetails<T extends NumberType> {
+export interface iChallengeInfoDetails {
   /** The challenge details of the claim / approval */
-  challengeDetails: iChallengeDetails<T>;
+  challengeDetails: iChallengeDetails;
 
-  claim?: iClaimDetails<T>;
+  claim?: iClaimDetails;
 }
 
 /**
  * @category Interfaces
  */
-export interface iChallengeInfoDetailsUpdate<T extends NumberType> {
+export interface iChallengeInfoDetailsUpdate {
   /** The challenge details of the claim / approval */
-  challengeDetails: iChallengeDetails<T>;
+  challengeDetails: iChallengeDetails;
 
-  claim?: CreateClaimRequest<T>;
+  claim?: CreateClaimRequest;
 }
 
 /**
@@ -1906,17 +1684,17 @@ export interface iApprovalInfoDetails {
 /**
  * @category Approvals / Transferability
  */
-export class ChallengeInfoDetails<T extends NumberType> extends BaseNumberTypeClass<ChallengeInfoDetails<T>> implements iChallengeInfoDetails<T> {
-  challengeDetails: ChallengeDetails<T>;
-  claim?: ClaimDetails<T>;
+export class ChallengeInfoDetails extends BaseNumberTypeClass<ChallengeInfoDetails> implements iChallengeInfoDetails {
+  challengeDetails: ChallengeDetails;
+  claim?: ClaimDetails;
 
-  constructor(data: iChallengeInfoDetails<T>) {
+  constructor(data: iChallengeInfoDetails) {
     super();
     this.challengeDetails = new ChallengeDetails(data.challengeDetails);
     this.claim = data.claim ? new ClaimDetails(data.claim) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ChallengeInfoDetails<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ChallengeInfoDetails {
     return new ChallengeInfoDetails(
       deepCopyPrimitives({
         ...this,
@@ -1930,7 +1708,7 @@ export class ChallengeInfoDetails<T extends NumberType> extends BaseNumberTypeCl
 /**
  * @category Approvals / Transferability
  */
-export class ApprovalInfoDetails<T extends NumberType> extends BaseNumberTypeClass<ApprovalInfoDetails<T>> implements iApprovalInfoDetails {
+export class ApprovalInfoDetails extends BaseNumberTypeClass<ApprovalInfoDetails> implements iApprovalInfoDetails {
   name: string;
   description: string;
   image: string;
@@ -1942,7 +1720,7 @@ export class ApprovalInfoDetails<T extends NumberType> extends BaseNumberTypeCla
     this.image = data.image;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalInfoDetails<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ApprovalInfoDetails {
     return new ApprovalInfoDetails(deepCopyPrimitives({ ...this }));
   }
 }
@@ -1950,17 +1728,17 @@ export class ApprovalInfoDetails<T extends NumberType> extends BaseNumberTypeCla
 /**
  * @category Interfaces
  */
-export interface iMerkleChallengeWithDetails<T extends NumberType> extends iMerkleChallenge<T> {
-  challengeInfoDetails: iChallengeInfoDetails<T>;
+export interface iMerkleChallengeWithDetails extends iMerkleChallenge {
+  challengeInfoDetails: iChallengeInfoDetails;
 }
 
 /**
  * @category Approvals / Transferability
  */
-export class MerkleChallengeWithDetails<T extends NumberType> extends MerkleChallenge<T> implements iMerkleChallengeWithDetails<T> {
-  challengeInfoDetails: ChallengeInfoDetails<T>;
+export class MerkleChallengeWithDetails extends MerkleChallenge implements iMerkleChallengeWithDetails {
+  challengeInfoDetails: ChallengeInfoDetails;
 
-  constructor(data: iMerkleChallengeWithDetails<T>) {
+  constructor(data: iMerkleChallengeWithDetails) {
     super(data);
     this.challengeInfoDetails = new ChallengeInfoDetails(data.challengeInfoDetails);
   }
@@ -1969,72 +1747,69 @@ export class MerkleChallengeWithDetails<T extends NumberType> extends MerkleChal
     return super.getNumberFieldNames().concat(this.challengeInfoDetails.challengeDetails.getNumberFieldNames());
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MerkleChallengeWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MerkleChallengeWithDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MerkleChallengeWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MerkleChallengeWithDetails;
   }
 
-  clone(): MerkleChallengeWithDetails<T> {
-    return super.clone() as MerkleChallengeWithDetails<T>;
-  }
-}
-
-/**
- * @category Interfaces
- */
-export interface iApprovalCriteriaWithDetails<T extends NumberType> extends iApprovalCriteria<T> {
-  merkleChallenges?: iMerkleChallengeWithDetails<T>[];
-}
-
-/**
- * @category Approvals / Transferability
- */
-export class ApprovalCriteriaWithDetails<T extends NumberType> extends ApprovalCriteria<T> implements iApprovalCriteriaWithDetails<T> {
-  merkleChallenges?: MerkleChallengeWithDetails<T>[];
-
-  constructor(data: iApprovalCriteriaWithDetails<T>) {
-    super(data);
-    this.merkleChallenges = data.merkleChallenges?.map((x) => new MerkleChallengeWithDetails(x));
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteriaWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApprovalCriteriaWithDetails<U>;
-  }
-
-  clone(): ApprovalCriteriaWithDetails<T> {
-    return super.clone() as ApprovalCriteriaWithDetails<T>;
+  clone(): MerkleChallengeWithDetails {
+    return super.clone() as MerkleChallengeWithDetails;
   }
 }
 
 /**
  * @category Interfaces
  */
-export interface iIncomingApprovalCriteriaWithDetails<T extends NumberType> extends iIncomingApprovalCriteria<T> {
-  merkleChallenges?: iMerkleChallengeWithDetails<T>[];
+export interface iApprovalCriteriaWithDetails extends iApprovalCriteria {
+  merkleChallenges?: iMerkleChallengeWithDetails[];
 }
 
 /**
  * @category Approvals / Transferability
  */
-export class IncomingApprovalCriteriaWithDetails<T extends NumberType>
-  extends IncomingApprovalCriteria<T>
-  implements iIncomingApprovalCriteriaWithDetails<T>
-{
-  merkleChallenges?: MerkleChallengeWithDetails<T>[];
+export class ApprovalCriteriaWithDetails extends ApprovalCriteria implements iApprovalCriteriaWithDetails {
+  merkleChallenges?: MerkleChallengeWithDetails[];
 
-  constructor(data: iIncomingApprovalCriteriaWithDetails<T>) {
+  constructor(data: iApprovalCriteriaWithDetails) {
     super(data);
     this.merkleChallenges = data.merkleChallenges?.map((x) => new MerkleChallengeWithDetails(x));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteriaWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as IncomingApprovalCriteriaWithDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ApprovalCriteriaWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApprovalCriteriaWithDetails;
   }
 
-  clone(): IncomingApprovalCriteriaWithDetails<T> {
-    return super.clone() as IncomingApprovalCriteriaWithDetails<T>;
+  clone(): ApprovalCriteriaWithDetails {
+    return super.clone() as ApprovalCriteriaWithDetails;
+  }
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iIncomingApprovalCriteriaWithDetails extends iIncomingApprovalCriteria {
+  merkleChallenges?: iMerkleChallengeWithDetails[];
+}
+
+/**
+ * @category Approvals / Transferability
+ */
+export class IncomingApprovalCriteriaWithDetails extends IncomingApprovalCriteria implements iIncomingApprovalCriteriaWithDetails {
+  merkleChallenges?: MerkleChallengeWithDetails[];
+
+  constructor(data: iIncomingApprovalCriteriaWithDetails) {
+    super(data);
+    this.merkleChallenges = data.merkleChallenges?.map((x) => new MerkleChallengeWithDetails(x));
   }
 
-  castToCollectionApprovalCriteria(): ApprovalCriteriaWithDetails<T> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): IncomingApprovalCriteriaWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as IncomingApprovalCriteriaWithDetails;
+  }
+
+  clone(): IncomingApprovalCriteriaWithDetails {
+    return super.clone() as IncomingApprovalCriteriaWithDetails;
+  }
+
+  castToCollectionApprovalCriteria(): ApprovalCriteriaWithDetails {
     return new ApprovalCriteriaWithDetails({
       approvalAmounts: this.approvalAmounts,
       maxNumTransfers: this.maxNumTransfers,
@@ -2062,33 +1837,30 @@ export class IncomingApprovalCriteriaWithDetails<T extends NumberType>
 /**
  * @category Interfaces
  */
-export interface iOutgoingApprovalCriteriaWithDetails<T extends NumberType> extends iOutgoingApprovalCriteria<T> {
-  merkleChallenges?: iMerkleChallengeWithDetails<T>[];
+export interface iOutgoingApprovalCriteriaWithDetails extends iOutgoingApprovalCriteria {
+  merkleChallenges?: iMerkleChallengeWithDetails[];
 }
 
 /**
  * @category Approvals / Transferability
  */
-export class OutgoingApprovalCriteriaWithDetails<T extends NumberType>
-  extends OutgoingApprovalCriteria<T>
-  implements iOutgoingApprovalCriteriaWithDetails<T>
-{
-  merkleChallenges?: MerkleChallengeWithDetails<T>[];
+export class OutgoingApprovalCriteriaWithDetails extends OutgoingApprovalCriteria implements iOutgoingApprovalCriteriaWithDetails {
+  merkleChallenges?: MerkleChallengeWithDetails[];
 
-  constructor(data: iOutgoingApprovalCriteriaWithDetails<T>) {
+  constructor(data: iOutgoingApprovalCriteriaWithDetails) {
     super(data);
     this.merkleChallenges = data.merkleChallenges?.map((x) => new MerkleChallengeWithDetails(x));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteriaWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as OutgoingApprovalCriteriaWithDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): OutgoingApprovalCriteriaWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as OutgoingApprovalCriteriaWithDetails;
   }
 
-  clone(): OutgoingApprovalCriteriaWithDetails<T> {
-    return super.clone() as OutgoingApprovalCriteriaWithDetails<T>;
+  clone(): OutgoingApprovalCriteriaWithDetails {
+    return super.clone() as OutgoingApprovalCriteriaWithDetails;
   }
 
-  castToCollectionApprovalCriteria(): ApprovalCriteriaWithDetails<T> {
+  castToCollectionApprovalCriteria(): ApprovalCriteriaWithDetails {
     return new ApprovalCriteriaWithDetails({
       predeterminedBalances: this.predeterminedBalances,
       approvalAmounts: this.approvalAmounts,
@@ -2116,7 +1888,7 @@ export class OutgoingApprovalCriteriaWithDetails<T extends NumberType>
 /**
  * @category Interfaces
  */
-export interface iCollectionApprovalWithDetails<T extends NumberType> extends iCollectionApproval<T> {
+export interface iCollectionApprovalWithDetails extends iCollectionApproval {
   /** The approval metadata details */
   details?: iApprovalInfoDetails;
   /** The populated address list for the toListId */
@@ -2125,20 +1897,20 @@ export interface iCollectionApprovalWithDetails<T extends NumberType> extends iC
   fromList: iAddressList;
   /** The populated address list for the initiatedByListId */
   initiatedByList: iAddressList;
-  approvalCriteria?: iApprovalCriteriaWithDetails<T>;
+  approvalCriteria?: iApprovalCriteriaWithDetails;
 }
 
 /**
  * @category Approvals / Transferability
  */
-export class CollectionApprovalWithDetails<T extends NumberType> extends CollectionApproval<T> implements iCollectionApprovalWithDetails<T> {
-  details?: ApprovalInfoDetails<T>;
+export class CollectionApprovalWithDetails extends CollectionApproval implements iCollectionApprovalWithDetails {
+  details?: ApprovalInfoDetails;
   toList: AddressList;
   fromList: AddressList;
   initiatedByList: AddressList;
-  approvalCriteria?: ApprovalCriteriaWithDetails<T>;
+  approvalCriteria?: ApprovalCriteriaWithDetails;
 
-  constructor(data: iCollectionApprovalWithDetails<T>) {
+  constructor(data: iCollectionApprovalWithDetails) {
     super(data);
     this.details = data.details ? new ApprovalInfoDetails(data.details) : undefined;
     this.toList = new AddressList(data.toList);
@@ -2147,12 +1919,12 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
     this.approvalCriteria = data.approvalCriteria ? new ApprovalCriteriaWithDetails(data.approvalCriteria) : undefined;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionApprovalWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionApprovalWithDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): CollectionApprovalWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionApprovalWithDetails;
   }
 
-  clone(): CollectionApprovalWithDetails<T> {
-    return super.clone() as CollectionApprovalWithDetails<T>;
+  clone(): CollectionApprovalWithDetails {
+    return super.clone() as CollectionApprovalWithDetails;
   }
 
   castToUniversalPermission(): UniversalPermission {
@@ -2192,7 +1964,7 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
     };
   }
 
-  castToOutgoingApproval(): UserOutgoingApprovalWithDetails<T> {
+  castToOutgoingApproval(): UserOutgoingApprovalWithDetails {
     return new UserOutgoingApprovalWithDetails({
       ...this,
       toListId: this.toListId,
@@ -2206,7 +1978,7 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
     });
   }
 
-  castToIncomingApproval(): UserIncomingApprovalWithDetails<T> {
+  castToIncomingApproval(): UserIncomingApprovalWithDetails {
     return new UserIncomingApprovalWithDetails({
       ...this,
       fromList: this.fromList,
@@ -2219,11 +1991,7 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
     });
   }
 
-  static validateUpdate<U extends NumberType>(
-    oldApprovals: CollectionApprovalWithDetails<U>[],
-    newApprovals: CollectionApprovalWithDetails<U>[],
-    canUpdateCollectionApprovals: CollectionApprovalPermissionWithDetails<U>[]
-  ): Error | null {
+  static validateUpdate(oldApprovals: CollectionApprovalWithDetails[], newApprovals: CollectionApprovalWithDetails[], canUpdateCollectionApprovals: CollectionApprovalPermissionWithDetails[]): Error | null {
     return validateCollectionApprovalsUpdate(
       oldApprovals.map((x) => x.convert(BigIntify)),
       newApprovals.map((x) => x.convert(BigIntify)),
@@ -2234,7 +2002,7 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
 
 interface ApprovalCriteriaWithIsApproved {
   isApproved: boolean;
-  approvalCriteria: (ApprovalCriteria<bigint> | null)[];
+  approvalCriteria: (ApprovalCriteria | null)[];
 }
 
 /**
@@ -2257,7 +2025,7 @@ export function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPerm
       for (const timelineTime of timelineTimes) {
         for (const transferTime of transferTimes) {
           for (const ownershipTime of ownershipTimes) {
-            const approvalCriteria: ApprovalCriteria<bigint>[] = [permission.arbitraryValue.approvalCriteria ?? null];
+            const approvalCriteria: ApprovalCriteria[] = [permission.arbitraryValue.approvalCriteria ?? null];
 
             const isApproved: boolean = permission.arbitraryValue.isApproved;
             const arbValue: ApprovalCriteriaWithIsApproved = {
@@ -2288,9 +2056,7 @@ export function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPerm
             handled.push(...inBrokenDownButNotHandled);
 
             for (const overlap of overlaps) {
-              const mergedApprovalCriteria: (ApprovalCriteria<bigint> | null)[] = overlap.secondDetails.arbitraryValue.approvalCriteria.concat(
-                overlap.firstDetails.arbitraryValue.approvalCriteria
-              );
+              const mergedApprovalCriteria: (ApprovalCriteria | null)[] = overlap.secondDetails.arbitraryValue.approvalCriteria.concat(overlap.firstDetails.arbitraryValue.approvalCriteria);
 
               const isApprovedFirst: boolean = overlap.firstDetails.arbitraryValue.isApproved;
               const isApprovedSecond: boolean = overlap.secondDetails.arbitraryValue.isApproved;
@@ -2343,11 +2109,7 @@ export function getFirstMatchOnlyWithApprovalCriteria(permissions: UniversalPerm
  *
  * @category Approvals / Transferability
  */
-export function validateCollectionApprovalsUpdate<T extends NumberType>(
-  oldApprovals: CollectionApprovalWithDetails<T>[],
-  newApprovals: CollectionApprovalWithDetails<T>[],
-  canUpdateCollectionApprovals: CollectionApprovalPermissionWithDetails<T>[]
-): Error | null {
+export function validateCollectionApprovalsUpdate(oldApprovals: CollectionApprovalWithDetails[], newApprovals: CollectionApprovalWithDetails[], canUpdateCollectionApprovals: CollectionApprovalPermissionWithDetails[]): Error | null {
   const dummyRanges = [UintRangeArray.From([{ start: 1n, end: 1n }])]; //dummy for compatibility with getPotentialUpdatesForTimelineValues
   const oldTimelineFirstMatches = getPotentialUpdatesForTimelineValues(
     dummyRanges.map((x) => x.clone()),
@@ -2381,10 +2143,7 @@ export function validateCollectionApprovalsUpdate<T extends NumberType>(
       const oldDetails = overlapObject.firstDetails;
       const newDetails = overlapObject.secondDetails;
       let different = false;
-      if (
-        (oldDetails.arbitraryValue === null && newDetails.arbitraryValue !== null) ||
-        (oldDetails.arbitraryValue !== null && newDetails.arbitraryValue === null)
-      ) {
+      if ((oldDetails.arbitraryValue === null && newDetails.arbitraryValue !== null) || (oldDetails.arbitraryValue !== null && newDetails.arbitraryValue === null)) {
         different = true;
       } else {
         const oldArbVal: ApprovalCriteriaWithIsApproved = oldDetails.arbitraryValue as ApprovalCriteriaWithIsApproved;
@@ -2449,8 +2208,8 @@ export function validateCollectionApprovalsUpdate<T extends NumberType>(
  * @category Approvals / Transferability
  * @hidden
  */
-export function expandCollectionApprovals(approvals: CollectionApprovalWithDetails<bigint>[]): CollectionApprovalWithDetails<bigint>[] {
-  const newCurrApprovals: CollectionApprovalWithDetails<bigint>[] = [];
+export function expandCollectionApprovals(approvals: CollectionApprovalWithDetails[]): CollectionApprovalWithDetails[] {
+  const newCurrApprovals: CollectionApprovalWithDetails[] = [];
   for (const approval of approvals) {
     const tokenIds = GetUintRangesWithOptions(approval.tokenIds, true);
     const ownershipTimes = GetUintRangesWithOptions(approval.ownershipTimes, true);

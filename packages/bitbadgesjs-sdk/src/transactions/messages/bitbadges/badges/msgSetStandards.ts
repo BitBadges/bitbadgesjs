@@ -15,13 +15,13 @@ import { Stringify } from '@/common/string-numbers.js';
  *
  * @category Transactions
  */
-export class MsgSetStandards<T extends NumberType> extends CustomTypeClass<MsgSetStandards<T>> implements iMsgSetStandards<T> {
+export class MsgSetStandards extends CustomTypeClass<MsgSetStandards> implements iMsgSetStandards {
   creator: BitBadgesAddress;
-  collectionId: T;
+  collectionId: string | number;
   standards: string[];
-  canUpdateStandards: ActionPermission<T>[];
+  canUpdateStandards: ActionPermission[];
 
-  constructor(msg: iMsgSetStandards<T>) {
+  constructor(msg: iMsgSetStandards) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
@@ -38,15 +38,15 @@ export class MsgSetStandards<T extends NumberType> extends CustomTypeClass<MsgSe
     });
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetStandards<NumberType> {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetStandards {
     return MsgSetStandards.fromProto(protobadges.MsgSetStandards.fromJson(jsonValue, options));
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetStandards<NumberType> {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetStandards {
     return MsgSetStandards.fromProto(protobadges.MsgSetStandards.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: protobadges.MsgSetStandards): MsgSetStandards<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetStandards): MsgSetStandards {
     return new MsgSetStandards({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
@@ -55,7 +55,7 @@ export class MsgSetStandards<T extends NumberType> extends CustomTypeClass<MsgSe
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSetStandards<T> {
+  toBech32Addresses(prefix: string): MsgSetStandards {
     return new MsgSetStandards({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,

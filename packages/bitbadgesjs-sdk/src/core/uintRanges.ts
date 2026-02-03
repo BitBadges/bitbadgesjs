@@ -14,11 +14,11 @@ import { BaseTypedArray } from '@/common/typed-arrays.js';
  *
  * @category Uint Ranges
  */
-export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRange<T>> implements iUintRange<T> {
-  start: T;
-  end: T;
+export class UintRange extends BaseNumberTypeClass<UintRange> implements iUintRange {
+  start: string | number;
+  end: string | number;
 
-  constructor(uintRange: iUintRange<T>) {
+  constructor(uintRange: iUintRange) {
     super();
     this.start = uintRange.start;
     this.end = uintRange.end;
@@ -28,8 +28,8 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
     return ['start', 'end'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UintRange<U> {
-    return new UintRange<U>(
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UintRange {
+    return new UintRange(
       deepCopyPrimitives({
         start: convertFunction(this.start),
         end: convertFunction(this.end)
@@ -41,24 +41,16 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
     return new protobadges.UintRange(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): UintRange<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): UintRange {
     return UintRange.fromProto(protobadges.UintRange.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): UintRange<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): UintRange {
     return UintRange.fromProto(protobadges.UintRange.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.UintRange, convertFunction: (item: NumberType) => U): UintRange<U> {
-    return new UintRange<U>({
+  static fromProto(item: protobadges.UintRange, convertFunction: (item: string | number) => U): UintRange {
+    return new UintRange({
       start: convertFunction(BigInt(item.start)),
       end: convertFunction(BigInt(item.end))
     });
@@ -84,7 +76,7 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
   /**
    * Returns a new UintRange from 1 to 18446744073709551615 (max uint64).
    */
-  static FullRange(): UintRange<bigint> {
+  static FullRange(): UintRange {
     return new UintRange({
       start: 1n,
       end: GO_MAX_UINT_64
@@ -94,11 +86,11 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
   /**
    * Returns a new UintRangeArray from 1 to 18446744073709551615 (max uint64).
    */
-  static FullRanges(): UintRangeArray<bigint> {
+  static FullRanges(): UintRangeArray {
     return UintRangeArray.From([UintRange.FullRange()]);
   }
 
-  static From<T extends NumberType>(val: T): UintRange<T> {
+  static From(val: T): UintRange {
     return new UintRange({
       start: val,
       end: val
@@ -108,7 +100,7 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
   /**
    * Returns true if the range overlaps with the other range.
    */
-  overlaps(other: iUintRange<T>[] | iUintRange<T> | UintRangeArray<T>): boolean {
+  overlaps(other: iUintRange[] | iUintRange | UintRangeArray): boolean {
     const otherArr = UintRangeArray.From(Array.isArray(other) ? other : [other]);
     try {
       otherArr.sortAndMerge().assertNoOverlaps([this]);
@@ -121,7 +113,7 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
   /**
    * Returns a new UintRangeArray that is the result of inverting the current range (i.e. getting all values within the bounds that are not in the current range).
    */
-  invert(minId: NumberType = 1n, maxId: NumberType = GO_MAX_UINT_64): UintRangeArray<T> {
+  invert(minId: string | number = 1n, maxId: string | number = GO_MAX_UINT_64): UintRangeArray {
     const converterFunction = getConverterFunction(this.start);
     const bounds = new UintRange({ start: minId, end: maxId }).convert(converterFunction);
 
@@ -131,11 +123,11 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
   /**
    * Searches for a specific ID within the range.
    */
-  search(id: NumberType): boolean {
+  search(id: string | number): boolean {
     return BigInt(this.start) <= BigInt(id) && BigInt(this.end) >= BigInt(id);
   }
 
-  protected static createUintRange<T extends NumberType>(start: T, end: T) {
+  protected static createUintRange(start: T, end: T) {
     return new UintRange({
       start: deepCopyPrimitives(start),
       end: deepCopyPrimitives(end)
@@ -145,7 +137,7 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
   /**
    * Returns the [inCurrentButNotInToCheck, overlaps].
    */
-  getOverlapDetails(toCheck: iUintRange<T> | iUintRange<T>[] | UintRangeArray<T>): [UintRangeArray<T>, UintRangeArray<T>] {
+  getOverlapDetails(toCheck: iUintRange | iUintRange[] | UintRangeArray): [UintRangeArray, UintRangeArray] {
     if (Array.isArray(toCheck)) {
       const [remaining, removed] = UintRangeArray.From([this]).getOverlapDetails(toCheck);
 
@@ -159,8 +151,8 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
       return [UintRangeArray.From([rangeObject]), UintRangeArray.From([])];
     }
 
-    const newRanges = UintRangeArray.From<T>([]);
-    let removedRanges = UintRangeArray.From<T>([]);
+    const newRanges = UintRangeArray.From([]);
+    let removedRanges = UintRangeArray.From([]);
     if (idxsToRemove.start <= rangeObject.start && idxsToRemove.end >= rangeObject.end) {
       // idxsToRemove fully contains rangeObject, so nothing is left
       return [newRanges, UintRangeArray.From([rangeObject])];
@@ -218,11 +210,11 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
   /**
    * Returns the overlap between the current range and the provided range.
    */
-  getOverlaps(toRemove: iUintRange<T> | iUintRange<T>[] | UintRangeArray<T>): UintRangeArray<T> {
+  getOverlaps(toRemove: iUintRange | iUintRange[] | UintRangeArray): UintRangeArray {
     return this.getOverlapDetails(toRemove)[1];
   }
 
-  toArray(): UintRangeArray<T> {
+  toArray(): UintRangeArray {
     return UintRangeArray.From([this.clone()]);
   }
 }
@@ -230,15 +222,15 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
 /**
  * @category Uint Ranges
  */
-export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRangeArray<T>, UintRange<T>> {
+export class UintRangeArray extends BaseTypedArray<UintRangeArray, UintRange> {
   /**
    * Returns a new UintRangeArray from 1 to 18446744073709551615 (max uint64).
    */
-  static FullRanges(): UintRangeArray<bigint> {
+  static FullRanges(): UintRangeArray {
     return new UintRangeArray(UintRange.FullRange());
   }
 
-  static From<T extends NumberType>(arr: iUintRange<T>[] | iUintRange<T> | UintRangeArray<T>): UintRangeArray<T> {
+  static From(arr: iUintRange[] | iUintRange | UintRangeArray): UintRangeArray {
     const wrappedArr = Array.isArray(arr) ? arr : [arr];
     return new UintRangeArray(...wrappedArr.map((i) => new UintRange(i)));
   }
@@ -246,25 +238,25 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
   /**
    * @hidden
    */
-  push(...items: iUintRange<T>[]): number {
+  push(...items: iUintRange[]): number {
     return super.push(...items.map((i) => new UintRange(i)));
   }
   /**
    * @hidden
    */
-  fill(value: iUintRange<T>, start?: number | undefined, end?: number | undefined): this {
+  fill(value: iUintRange, start?: number | undefined, end?: number | undefined): this {
     return super.fill(new UintRange(value), start, end);
   }
   /**
    * @hidden
    */
-  with(index: number, value: iUintRange<T>): UintRangeArray<T> {
+  with(index: number, value: iUintRange): UintRangeArray {
     return super.with(index, new UintRange(value));
   }
   /**
    * @hidden
    */
-  unshift(...items: iUintRange<T>[]): number {
+  unshift(...items: iUintRange[]): number {
     return super.unshift(...items.map((i) => new UintRange(i)));
   }
 
@@ -281,12 +273,12 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
     return sum;
   }
 
-  clone(): UintRangeArray<T> {
+  clone(): UintRangeArray {
     return UintRangeArray.From(this.map((x) => x.clone()));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UintRangeArray<U> {
-    return UintRangeArray.From<U>(this.map((x) => x.convert(convertFunction)));
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UintRangeArray {
+    return UintRangeArray.From(this.map((x) => x.convert(convertFunction)));
   }
 
   /**
@@ -341,7 +333,7 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
     }
 
     //Merge overlapping ranges
-    const mergedRanges = UintRangeArray.From<T>([]);
+    const mergedRanges = UintRangeArray.From([]);
     let currRange = this[0];
     for (let i = 1; i < this.length; i++) {
       const range = this[i];
@@ -364,13 +356,13 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
   /**
    * Invert a list of UintRanges (i.e. get all values in some bounds not in current list) in-place.
    */
-  invert(bounds: iUintRange<T>) {
+  invert(bounds: iUintRange) {
     let ranges = UintRangeArray.From([bounds]);
     const uintRanges = UintRangeArray.From(this);
 
     for (let i = 0; i < uintRanges.length; i++) {
       const uintRange = uintRanges[i];
-      let newRanges = UintRangeArray.From<T>([]);
+      let newRanges = UintRangeArray.From([]);
       for (let j = 0; j < ranges.length; j++) {
         const rangeObject = ranges[j];
         const [rangesAfterRemoval] = rangeObject.getOverlapDetails(uintRange);
@@ -387,7 +379,7 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
   /**
    * Wrapper for invert that returns a new list instead of modifying the current list.
    */
-  toInverted(bounds: iUintRange<T>): UintRangeArray<T> {
+  toInverted(bounds: iUintRange): UintRangeArray {
     return this.clone().invert(bounds);
   }
 
@@ -395,7 +387,7 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
    * Gets the overlap details between two lists of UintRanges.
    * Returns a tuple of [remainingInThis, overlaps, remainingInOther].
    */
-  getOverlapDetails(idsToRemove: iUintRange<T>[] | iUintRange<T> | UintRangeArray<T>): [UintRangeArray<T>, UintRangeArray<T>, UintRangeArray<T>] {
+  getOverlapDetails(idsToRemove: iUintRange[] | iUintRange | UintRangeArray): [UintRangeArray, UintRangeArray, UintRangeArray] {
     const [remaining, removed] = this.getRemainingAndRemoved(idsToRemove);
     const [remainingInOther] = UintRangeArray.From(idsToRemove).getRemainingAndRemoved(this);
     return [remaining, removed, remainingInOther];
@@ -404,22 +396,22 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
   /**
    * Gets the overlap between the current range and another
    */
-  getOverlaps(idsToRemove: iUintRange<T> | iUintRange<T>[] | UintRangeArray<T>): UintRangeArray<T> {
+  getOverlaps(idsToRemove: iUintRange | iUintRange[] | UintRangeArray): UintRangeArray {
     return this.getOverlapDetails(idsToRemove)[1];
   }
 
-  private getRemainingAndRemoved(idsToRemove: iUintRange<T> | iUintRange<T>[] | UintRangeArray<T>): [UintRangeArray<T>, UintRangeArray<T>] {
-    const wrappedArr: UintRange<T>[] = Array.isArray(idsToRemove) ? idsToRemove.map((i) => new UintRange(i)) : [new UintRange(idsToRemove)];
+  private getRemainingAndRemoved(idsToRemove: iUintRange | iUintRange[] | UintRangeArray): [UintRangeArray, UintRangeArray] {
+    const wrappedArr: UintRange[] = Array.isArray(idsToRemove) ? idsToRemove.map((i) => new UintRange(i)) : [new UintRange(idsToRemove)];
     let rangeToRemoveFrom = this.clone().sortAndMerge();
 
     if (wrappedArr.length === 0) {
       return [rangeToRemoveFrom, UintRangeArray.From([])];
     }
 
-    let removedRanges = UintRangeArray.From<T>([]);
+    let removedRanges = UintRangeArray.From([]);
     for (let i = 0; i < wrappedArr.length; i++) {
       const handledValue = wrappedArr[i];
-      let newRanges = UintRangeArray.From<T>([]);
+      let newRanges = UintRangeArray.From([]);
       for (let j = 0; j < rangeToRemoveFrom.length; j++) {
         const oldPermittedTime = rangeToRemoveFrom[j];
         const [rangesAfterRemoval, removed] = oldPermittedTime.getOverlapDetails(handledValue);
@@ -435,7 +427,7 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
   /**
    * Remove a range from the current range in-place
    */
-  remove(idsToRemove: iUintRange<T>[] | iUintRange<T> | UintRangeArray<T>): this {
+  remove(idsToRemove: iUintRange[] | iUintRange | UintRangeArray): this {
     const [remaining] = this.getOverlapDetails(idsToRemove);
     this.length = 0;
     this.push(...remaining);
@@ -447,7 +439,7 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
    *
    * If you just want one or the other, use searchIndex() or searchIfExists().
    */
-  search(id: NumberType): [bigint, boolean] {
+  search(id: string | number): [bigint, boolean] {
     const ranges = this.clone().sortAndMerge();
     if (ranges.length === 0) {
       return [BigInt(-1), false];
@@ -479,14 +471,14 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
   /**
    * Search ID ranges for a specific ID. Return true, if found.
    */
-  searchIfExists(val: NumberType): boolean {
+  searchIfExists(val: string | number): boolean {
     return this.search(val)[1];
   }
 
   /**
    * Search for the first index of an element that includes the provided value.
    */
-  searchIndex(val: NumberType): bigint {
+  searchIndex(val: string | number): bigint {
     return this.search(val)[0];
   }
 
@@ -494,7 +486,7 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
    * Asserts two UintRanges[] do not overlap at all with each other.
    * For example, if we have a list of permitted and forbidden times, we want to make sure that the forbidden times do not overlap with the permitted times.
    */
-  assertNoOverlaps(overlappingRange: iUintRange<T>[]) {
+  assertNoOverlaps(overlappingRange: iUintRange[]) {
     const rangeToCheck = this.clone().sortAndMerge();
 
     // Check that for old times, there is 100% overlap with new times and 0% overlap with the opposite

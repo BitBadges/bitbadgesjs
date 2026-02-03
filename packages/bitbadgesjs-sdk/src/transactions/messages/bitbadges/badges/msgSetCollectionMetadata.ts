@@ -17,16 +17,13 @@ import type { iCollectionMetadata } from '@/interfaces/types/core.js';
  *
  * @category Transactions
  */
-export class MsgSetCollectionMetadata<T extends NumberType>
-  extends CustomTypeClass<MsgSetCollectionMetadata<T>>
-  implements iMsgSetCollectionMetadata<T>
-{
+export class MsgSetCollectionMetadata extends CustomTypeClass<MsgSetCollectionMetadata> implements iMsgSetCollectionMetadata {
   creator: BitBadgesAddress;
-  collectionId: T;
+  collectionId: string | number;
   collectionMetadata: iCollectionMetadata;
-  canUpdateCollectionMetadata: ActionPermission<T>[];
+  canUpdateCollectionMetadata: ActionPermission[];
 
-  constructor(msg: iMsgSetCollectionMetadata<T>) {
+  constructor(msg: iMsgSetCollectionMetadata) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
@@ -44,18 +41,16 @@ export class MsgSetCollectionMetadata<T extends NumberType>
     });
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCollectionMetadata<NumberType> {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCollectionMetadata {
     return MsgSetCollectionMetadata.fromProto(protobadges.MsgSetCollectionMetadata.fromJson(jsonValue, options));
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCollectionMetadata<NumberType> {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCollectionMetadata {
     return MsgSetCollectionMetadata.fromProto(protobadges.MsgSetCollectionMetadata.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: protobadges.MsgSetCollectionMetadata): MsgSetCollectionMetadata<NumberType> {
-    const collectionMetadata = protoMsg.collectionMetadata
-      ? CollectionMetadata.fromProto(protoMsg.collectionMetadata)
-      : new CollectionMetadata({ uri: '', customData: '' });
+  static fromProto(protoMsg: protobadges.MsgSetCollectionMetadata): MsgSetCollectionMetadata {
+    const collectionMetadata = protoMsg.collectionMetadata ? CollectionMetadata.fromProto(protoMsg.collectionMetadata) : new CollectionMetadata({ uri: '', customData: '' });
     return new MsgSetCollectionMetadata({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
@@ -64,7 +59,7 @@ export class MsgSetCollectionMetadata<T extends NumberType>
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSetCollectionMetadata<T> {
+  toBech32Addresses(prefix: string): MsgSetCollectionMetadata {
     return new MsgSetCollectionMetadata({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,

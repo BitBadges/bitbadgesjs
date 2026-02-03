@@ -18,7 +18,7 @@ export interface iValueStore {
 /**
  * @category Interfaces
  */
-export interface iMapUpdateCriteria<T extends NumberType> {
+export interface iMapUpdateCriteria {
   managerOnly: boolean;
   collectionId: string;
   creatorOnly: boolean;
@@ -40,28 +40,28 @@ export interface iValueOptions {
 /**
  * @category Interfaces
  */
-export interface iMapPermissions<T extends NumberType> {
-  canUpdateMetadata: iActionPermission<T>[];
-  canUpdateManager: iActionPermission<T>[];
-  canDeleteMap: iActionPermission<T>[];
+export interface iMapPermissions {
+  canUpdateMetadata: iActionPermission[];
+  canUpdateManager: iActionPermission[];
+  canDeleteMap: iActionPermission[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iMap<T extends NumberType> {
+export interface iMap {
   creator: BitBadgesAddress;
   mapId: string;
 
-  inheritManagerFrom: T;
+  inheritManagerFrom: string | number;
   manager: string;
 
-  updateCriteria: iMapUpdateCriteria<T>;
+  updateCriteria: iMapUpdateCriteria;
 
   valueOptions: iValueOptions;
   defaultValue: string;
 
-  permissions: iMapPermissions<T>;
+  permissions: iMapPermissions;
 
   metadata: iCollectionMetadata;
 }
@@ -69,26 +69,26 @@ export interface iMap<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iMsgCreateMap<T extends NumberType> {
+export interface iMsgCreateMap {
   creator: BitBadgesAddress;
   mapId: string;
 
-  inheritManagerFrom: T;
+  inheritManagerFrom: string | number;
   manager: string;
 
-  updateCriteria: iMapUpdateCriteria<T>;
+  updateCriteria: iMapUpdateCriteria;
   valueOptions: iValueOptions;
   defaultValue: string;
 
   metadata: iCollectionMetadata;
 
-  permissions: iMapPermissions<T>;
+  permissions: iMapPermissions;
 }
 
 /**
  * @category Interfaces
  */
-export interface iMsgUpdateMap<T extends NumberType> {
+export interface iMsgUpdateMap {
   creator: BitBadgesAddress;
   mapId: string;
 
@@ -99,7 +99,7 @@ export interface iMsgUpdateMap<T extends NumberType> {
   metadata: iCollectionMetadata;
 
   updatePermissions: boolean;
-  permissions: iMapPermissions<T>;
+  permissions: iMapPermissions;
 }
 
 /**
@@ -147,13 +147,13 @@ export class ValueStore extends CustomTypeClass<ValueStore> implements iValueSto
 /**
  * @category Maps
  */
-export class MapUpdateCriteria<T extends NumberType> extends BaseNumberTypeClass<MapUpdateCriteria<T>> implements iMapUpdateCriteria<T> {
+export class MapUpdateCriteria extends BaseNumberTypeClass<MapUpdateCriteria> implements iMapUpdateCriteria {
   managerOnly: boolean;
   collectionId: string;
   creatorOnly: boolean;
   firstComeFirstServe: boolean;
 
-  constructor(msg: iMapUpdateCriteria<T>) {
+  constructor(msg: iMapUpdateCriteria) {
     super();
     this.managerOnly = msg.managerOnly;
     this.collectionId = msg.collectionId;
@@ -165,8 +165,8 @@ export class MapUpdateCriteria<T extends NumberType> extends BaseNumberTypeClass
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MapUpdateCriteria<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapUpdateCriteria<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MapUpdateCriteria {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapUpdateCriteria;
   }
 }
 
@@ -195,12 +195,12 @@ export class ValueOptions extends CustomTypeClass<ValueOptions> implements iValu
 /**
  * @category Maps
  */
-export class MapPermissions<T extends NumberType> extends BaseNumberTypeClass<MapPermissions<T>> implements iMapPermissions<T> {
-  canUpdateMetadata: ActionPermission<T>[];
-  canUpdateManager: ActionPermission<T>[];
-  canDeleteMap: ActionPermission<T>[];
+export class MapPermissions extends BaseNumberTypeClass<MapPermissions> implements iMapPermissions {
+  canUpdateMetadata: ActionPermission[];
+  canUpdateManager: ActionPermission[];
+  canDeleteMap: ActionPermission[];
 
-  constructor(msg: iMapPermissions<T>) {
+  constructor(msg: iMapPermissions) {
     super();
     this.canUpdateMetadata = msg.canUpdateMetadata.map((item) => new ActionPermission(item));
     this.canUpdateManager = msg.canUpdateManager.map((item) => new ActionPermission(item));
@@ -211,30 +211,30 @@ export class MapPermissions<T extends NumberType> extends BaseNumberTypeClass<Ma
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): MapPermissions<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapPermissions<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): MapPermissions {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapPermissions;
   }
 }
 
 /**
  * @category Maps
  */
-export class Map<T extends NumberType> extends BaseNumberTypeClass<Map<T>> implements iMap<T> {
+export class Map extends BaseNumberTypeClass<Map> implements iMap {
   creator: BitBadgesAddress;
   mapId: string;
 
-  inheritManagerFrom: T;
+  inheritManagerFrom: string | number;
   manager: string;
 
-  updateCriteria: MapUpdateCriteria<T>;
+  updateCriteria: MapUpdateCriteria;
 
   valueOptions: ValueOptions;
   defaultValue: string;
-  permissions: MapPermissions<T>;
+  permissions: MapPermissions;
 
   metadata: iCollectionMetadata;
 
-  constructor(msg: iMap<T>) {
+  constructor(msg: iMap) {
     super();
     this.creator = msg.creator;
     this.mapId = msg.mapId;
@@ -251,30 +251,30 @@ export class Map<T extends NumberType> extends BaseNumberTypeClass<Map<T>> imple
     return ['inheritManagerFrom'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): Map<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Map<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): Map {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Map;
   }
 }
 
 /**
  * @category Transactions
  */
-export class MsgCreateMap<T extends NumberType> extends BaseNumberTypeClass<MsgCreateMap<T>> implements iMsgCreateMap<T> {
+export class MsgCreateMap extends BaseNumberTypeClass<MsgCreateMap> implements iMsgCreateMap {
   creator: BitBadgesAddress;
   mapId: string;
 
-  inheritManagerFrom: T;
+  inheritManagerFrom: string | number;
   manager: string;
 
-  updateCriteria: MapUpdateCriteria<T>;
+  updateCriteria: MapUpdateCriteria;
   valueOptions: ValueOptions;
   defaultValue: string;
 
   metadata: iCollectionMetadata;
 
-  permissions: MapPermissions<T>;
+  permissions: MapPermissions;
 
-  constructor(msg: iMsgCreateMap<T>) {
+  constructor(msg: iMsgCreateMap) {
     super();
     this.creator = msg.creator;
     this.mapId = msg.mapId;
@@ -291,8 +291,8 @@ export class MsgCreateMap<T extends NumberType> extends BaseNumberTypeClass<MsgC
     return ['inheritManagerFrom'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): MsgCreateMap<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgCreateMap<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): MsgCreateMap {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgCreateMap;
   }
 
   toProto(): maps.MsgCreateMap {
@@ -303,7 +303,7 @@ export class MsgCreateMap<T extends NumberType> extends BaseNumberTypeClass<MsgC
 /**
  * @category Transactions
  */
-export class MsgUpdateMap<T extends NumberType> extends BaseNumberTypeClass<MsgUpdateMap<T>> implements iMsgUpdateMap<T> {
+export class MsgUpdateMap extends BaseNumberTypeClass<MsgUpdateMap> implements iMsgUpdateMap {
   creator: BitBadgesAddress;
   mapId: string;
 
@@ -314,9 +314,9 @@ export class MsgUpdateMap<T extends NumberType> extends BaseNumberTypeClass<MsgU
   metadata: iCollectionMetadata;
 
   updatePermissions: boolean;
-  permissions: MapPermissions<T>;
+  permissions: MapPermissions;
 
-  constructor(msg: iMsgUpdateMap<T>) {
+  constructor(msg: iMsgUpdateMap) {
     super();
     this.creator = msg.creator;
     this.mapId = msg.mapId;
@@ -332,8 +332,8 @@ export class MsgUpdateMap<T extends NumberType> extends BaseNumberTypeClass<MsgU
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): MsgUpdateMap<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUpdateMap<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): MsgUpdateMap {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUpdateMap;
   }
 
   toProto(): maps.MsgUpdateMap {

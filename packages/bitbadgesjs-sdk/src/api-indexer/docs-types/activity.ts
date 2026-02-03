@@ -3,28 +3,20 @@ import type { NumberType } from '@/common/string-numbers.js';
 import { BalanceArray } from '@/core/balances.js';
 import { ApprovalIdentifierDetails, PrecalculateBalancesFromApprovalDetails, PrecalculationOptions } from '@/core/misc.js';
 import { CollectionId } from '@/interfaces/types/core.js';
-import type {
-  BitBadgesAddress,
-  iActivityDoc,
-  iClaimActivityDoc,
-  iCoinTransferItem,
-  iPointsActivityDoc,
-  iTransferActivityDoc,
-  UNIXMilliTimestamp
-} from './interfaces.js';
+import type { BitBadgesAddress, iActivityDoc, iClaimActivityDoc, iCoinTransferItem, iPointsActivityDoc, iTransferActivityDoc, UNIXMilliTimestamp } from './interfaces.js';
 
 /**
  * @inheritDoc iActivityDoc
  * @category Indexer
  */
-export class ActivityDoc<T extends NumberType> extends BaseNumberTypeClass<ActivityDoc<T>> implements iActivityDoc<T> {
-  timestamp: UNIXMilliTimestamp<T>;
-  block: T;
+export class ActivityDoc extends BaseNumberTypeClass<ActivityDoc> implements iActivityDoc {
+  timestamp: UNIXMilliTimestamp;
+  block: string | number;
   _notificationsHandled?: boolean;
   _docId: string;
   _id?: string;
 
-  constructor(data: iActivityDoc<T>) {
+  constructor(data: iActivityDoc) {
     super();
     this.timestamp = data.timestamp;
     this.block = data.block;
@@ -37,22 +29,22 @@ export class ActivityDoc<T extends NumberType> extends BaseNumberTypeClass<Activ
     return ['timestamp', 'block'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ActivityDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ActivityDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ActivityDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ActivityDoc;
   }
 }
 
 /**
  * @category Indexer
  */
-export class CoinTransferItem<T extends NumberType> extends BaseNumberTypeClass<CoinTransferItem<T>> implements iCoinTransferItem<T> {
-  amount: T;
+export class CoinTransferItem extends BaseNumberTypeClass<CoinTransferItem> implements iCoinTransferItem {
+  amount: string | number;
   denom: string;
   from: BitBadgesAddress;
   to: BitBadgesAddress;
   isProtocolFee: boolean;
 
-  constructor(data: iCoinTransferItem<T>) {
+  constructor(data: iCoinTransferItem) {
     super();
     this.amount = data.amount;
     this.denom = data.denom;
@@ -65,8 +57,8 @@ export class CoinTransferItem<T extends NumberType> extends BaseNumberTypeClass<
     return ['amount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CoinTransferItem<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CoinTransferItem<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): CoinTransferItem {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CoinTransferItem;
   }
 }
 
@@ -74,37 +66,35 @@ export class CoinTransferItem<T extends NumberType> extends BaseNumberTypeClass<
  * @inheritDoc iTransferActivityDoc
  * @category Indexer
  */
-export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> implements iTransferActivityDoc<T> {
+export class TransferActivityDoc extends ActivityDoc implements iTransferActivityDoc {
   to: BitBadgesAddress[];
   from: BitBadgesAddress;
-  balances: BalanceArray<T>;
+  balances: BalanceArray;
   collectionId: CollectionId;
   initiatedBy: BitBadgesAddress;
   txHash?: string;
 
   memo?: string;
-  precalculateBalancesFromApproval?: PrecalculateBalancesFromApprovalDetails<T>;
-  prioritizedApprovals?: ApprovalIdentifierDetails<T>[];
+  precalculateBalancesFromApproval?: PrecalculateBalancesFromApprovalDetails;
+  prioritizedApprovals?: ApprovalIdentifierDetails[];
 
   private?: boolean | undefined;
-  precalculationOptions?: PrecalculationOptions<T>;
-  coinTransfers?: CoinTransferItem<T>[];
-  approvalsUsed?: ApprovalIdentifierDetails<T>[];
-  tokenId?: T;
-  price?: T;
-  volume?: T;
+  precalculationOptions?: PrecalculationOptions;
+  coinTransfers?: CoinTransferItem[];
+  approvalsUsed?: ApprovalIdentifierDetails[];
+  tokenId?: string | number;
+  price?: string | number;
+  volume?: string | number;
   denom?: string;
 
-  constructor(data: iTransferActivityDoc<T>) {
+  constructor(data: iTransferActivityDoc) {
     super(data);
     this.to = data.to;
     this.from = data.from;
     this.balances = BalanceArray.From(data.balances);
     this.collectionId = data.collectionId;
     this.memo = data.memo;
-    this.precalculateBalancesFromApproval = data.precalculateBalancesFromApproval
-      ? new PrecalculateBalancesFromApprovalDetails(data.precalculateBalancesFromApproval)
-      : undefined;
+    this.precalculateBalancesFromApproval = data.precalculateBalancesFromApproval ? new PrecalculateBalancesFromApprovalDetails(data.precalculateBalancesFromApproval) : undefined;
     this.prioritizedApprovals = data.prioritizedApprovals ? data.prioritizedApprovals.map((x) => new ApprovalIdentifierDetails(x)) : undefined;
     this.initiatedBy = data.initiatedBy;
     this.txHash = data.txHash;
@@ -122,8 +112,8 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
     return [...super.getNumberFieldNames(), 'tokenId', 'price', 'volume'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): TransferActivityDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TransferActivityDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): TransferActivityDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as TransferActivityDoc;
   }
 }
 
@@ -131,7 +121,7 @@ export class TransferActivityDoc<T extends NumberType> extends ActivityDoc<T> im
  * @inheritDoc iClaimActivityDoc
  * @category Indexer
  */
-export class ClaimActivityDoc<T extends NumberType> extends ActivityDoc<T> implements iClaimActivityDoc<T> {
+export class ClaimActivityDoc extends ActivityDoc implements iClaimActivityDoc {
   success: boolean;
   claimId: string;
   bitbadgesAddress: BitBadgesAddress;
@@ -139,7 +129,7 @@ export class ClaimActivityDoc<T extends NumberType> extends ActivityDoc<T> imple
   private?: boolean;
   claimType?: 'standalone' | 'collection' | 'list';
 
-  constructor(data: iClaimActivityDoc<T>) {
+  constructor(data: iClaimActivityDoc) {
     super(data);
     this.success = data.success;
     this.claimId = data.claimId;
@@ -149,8 +139,8 @@ export class ClaimActivityDoc<T extends NumberType> extends ActivityDoc<T> imple
     this.claimType = data.claimType;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ClaimActivityDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimActivityDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): ClaimActivityDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ClaimActivityDoc;
   }
 }
 
@@ -158,14 +148,14 @@ export class ClaimActivityDoc<T extends NumberType> extends ActivityDoc<T> imple
  * @inheritDoc iPointsActivityDoc
  * @category Indexer
  */
-export class PointsActivityDoc<T extends NumberType> extends ActivityDoc<T> implements iPointsActivityDoc<T> {
+export class PointsActivityDoc extends ActivityDoc implements iPointsActivityDoc {
   bitbadgesAddress: BitBadgesAddress;
-  oldPoints: T;
-  newPoints: T;
+  oldPoints: string | number;
+  newPoints: string | number;
   applicationId: string;
   pageId: string;
 
-  constructor(data: iPointsActivityDoc<T>) {
+  constructor(data: iPointsActivityDoc) {
     super(data);
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.oldPoints = data.oldPoints;
@@ -174,7 +164,7 @@ export class PointsActivityDoc<T extends NumberType> extends ActivityDoc<T> impl
     this.pageId = data.pageId;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PointsActivityDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PointsActivityDoc<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): PointsActivityDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PointsActivityDoc;
   }
 }

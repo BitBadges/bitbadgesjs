@@ -1,12 +1,5 @@
 import { CollectionApprovalWithDetails } from './approvals.js';
-import {
-  validateIsArchivedUpdate,
-  validateManagerUpdate,
-  validateCollectionMetadataUpdate,
-  validateTokenMetadataUpdate,
-  validateCustomDataUpdate,
-  validateStandardsUpdate
-} from './misc.js';
+import { validateIsArchivedUpdate, validateManagerUpdate, validateCollectionMetadataUpdate, validateTokenMetadataUpdate, validateCustomDataUpdate, validateStandardsUpdate } from './misc.js';
 import type { UsedFlags } from './overlaps.js';
 import { ActionPermissionUsedFlags, ApprovalPermissionUsedFlags, TokenIdsActionPermissionUsedFlags } from './overlaps.js';
 import { ActionPermission, CollectionApprovalPermission, TokenIdsActionPermission } from './permissions.js';
@@ -14,21 +7,7 @@ import { ActionPermission, CollectionApprovalPermission, TokenIdsActionPermissio
 /**
  * @category Permissions
  */
-export type PermissionNameString =
-  | 'canDeleteCollection'
-  | 'canArchiveCollection'
-  | 'canUpdateTokenMetadata'
-  | 'canUpdateCollectionMetadata'
-  | 'canUpdateValidTokenIds'
-  | 'canUpdateCollectionApprovals'
-  | 'canUpdateAutoApproveSelfInitiatedIncomingTransfers'
-  | 'canUpdateAutoApproveSelfInitiatedOutgoingTransfers'
-  | 'canUpdateAutoApproveAllIncomingTransfers'
-  | 'canUpdateStandards'
-  | 'canUpdateCustomData'
-  | 'canUpdateManager'
-  | 'canAddMoreAliasPaths'
-  | 'canAddMoreCosmosCoinWrapperPaths';
+export type PermissionNameString = 'canDeleteCollection' | 'canArchiveCollection' | 'canUpdateTokenMetadata' | 'canUpdateCollectionMetadata' | 'canUpdateValidTokenIds' | 'canUpdateCollectionApprovals' | 'canUpdateAutoApproveSelfInitiatedIncomingTransfers' | 'canUpdateAutoApproveSelfInitiatedOutgoingTransfers' | 'canUpdateAutoApproveAllIncomingTransfers' | 'canUpdateStandards' | 'canUpdateCustomData' | 'canUpdateManager' | 'canAddMoreAliasPaths' | 'canAddMoreCosmosCoinWrapperPaths';
 
 /**
  * Gets the permission variables from a permission name. Variables include the flags, question, and validation function.

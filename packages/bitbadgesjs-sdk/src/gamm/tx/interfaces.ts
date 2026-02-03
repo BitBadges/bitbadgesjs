@@ -2,13 +2,13 @@ import type { NumberType } from '@/common/string-numbers.js';
 import type { iCosmosCoin } from '@/core/coin.js';
 import type { iPoolAsset, iPoolParams } from '../interfaces.js';
 
-export interface iSwapAmountInRoute<T extends NumberType> {
-  poolId: T;
+export interface iSwapAmountInRoute {
+  poolId: string | number;
   tokenOutDenom: string;
 }
 
-export interface iSwapAmountOutRoute<T extends NumberType> {
-  poolId: T;
+export interface iSwapAmountOutRoute {
+  poolId: string | number;
   tokenInDenom: string;
 }
 
@@ -19,125 +19,125 @@ export interface iAffiliate {
   address: string;
 }
 
-export interface iMsgJoinPool<T extends NumberType> {
+export interface iMsgJoinPool {
   sender: string;
-  poolId: T;
-  shareOutAmount: T;
-  tokenInMaxs: iCosmosCoin<T>[];
+  poolId: string | number;
+  shareOutAmount: string | number;
+  tokenInMaxs: iCosmosCoin[];
 }
 
-export interface iMsgJoinPoolResponse<T extends NumberType> {
-  shareOutAmount: T;
-  tokenIn: iCosmosCoin<T>[];
+export interface iMsgJoinPoolResponse {
+  shareOutAmount: string | number;
+  tokenIn: iCosmosCoin[];
 }
 
-export interface iMsgExitPool<T extends NumberType> {
+export interface iMsgExitPool {
   sender: string;
-  poolId: T;
-  shareInAmount: T;
-  tokenOutMins: iCosmosCoin<T>[];
+  poolId: string | number;
+  shareInAmount: string | number;
+  tokenOutMins: iCosmosCoin[];
 }
 
-export interface iMsgExitPoolResponse<T extends NumberType> {
-  tokenOut: iCosmosCoin<T>[];
+export interface iMsgExitPoolResponse {
+  tokenOut: iCosmosCoin[];
 }
 
-export interface iMsgSwapExactAmountIn<T extends NumberType> {
+export interface iMsgSwapExactAmountIn {
   sender: string;
-  routes: iSwapAmountInRoute<T>[];
-  tokenIn: iCosmosCoin<T>;
-  tokenOutMinAmount: T;
+  routes: iSwapAmountInRoute[];
+  tokenIn: iCosmosCoin;
+  tokenOutMinAmount: string | number;
   affiliates: iAffiliate[];
 }
 
-export interface iMsgSwapExactAmountInResponse<T extends NumberType> {
-  tokenOutAmount: T;
+export interface iMsgSwapExactAmountInResponse {
+  tokenOutAmount: string | number;
 }
 
-export interface iIBCTransferInfo<T extends NumberType> {
+export interface iIBCTransferInfo {
   sourceChannel: string;
   receiver: string;
   memo: string;
-  timeoutTimestamp: T;
+  timeoutTimestamp: string | number;
 }
 
-export interface iMsgSwapExactAmountInWithIBCTransfer<T extends NumberType> {
+export interface iMsgSwapExactAmountInWithIBCTransfer {
   sender: string;
-  routes: iSwapAmountInRoute<T>[];
-  tokenIn: iCosmosCoin<T>;
-  tokenOutMinAmount: T;
-  ibcTransferInfo: iIBCTransferInfo<T>;
+  routes: iSwapAmountInRoute[];
+  tokenIn: iCosmosCoin;
+  tokenOutMinAmount: string | number;
+  ibcTransferInfo: iIBCTransferInfo;
   /** affiliates are fee recipients that receive fees calculated from token_out_min_amount */
   affiliates: iAffiliate[];
 }
 
-export interface iMsgSwapExactAmountInWithIBCTransferResponse<T extends NumberType> {
-  tokenOutAmount: T;
+export interface iMsgSwapExactAmountInWithIBCTransferResponse {
+  tokenOutAmount: string | number;
 }
 
-export interface iMsgSwapExactAmountOut<T extends NumberType> {
+export interface iMsgSwapExactAmountOut {
   sender: string;
-  routes: iSwapAmountOutRoute<T>[];
-  tokenInMaxAmount: T;
-  tokenOut: iCosmosCoin<T>;
+  routes: iSwapAmountOutRoute[];
+  tokenInMaxAmount: string | number;
+  tokenOut: iCosmosCoin;
 }
 
-export interface iMsgSwapExactAmountOutResponse<T extends NumberType> {
-  tokenInAmount: T;
+export interface iMsgSwapExactAmountOutResponse {
+  tokenInAmount: string | number;
 }
 
-export interface iMsgJoinSwapExternAmountIn<T extends NumberType> {
+export interface iMsgJoinSwapExternAmountIn {
   sender: string;
-  poolId: T;
-  tokenIn: iCosmosCoin<T>;
-  shareOutMinAmount: T;
+  poolId: string | number;
+  tokenIn: iCosmosCoin;
+  shareOutMinAmount: string | number;
 }
 
-export interface iMsgJoinSwapExternAmountInResponse<T extends NumberType> {
-  shareOutAmount: T;
+export interface iMsgJoinSwapExternAmountInResponse {
+  shareOutAmount: string | number;
 }
 
-export interface iMsgJoinSwapShareAmountOut<T extends NumberType> {
+export interface iMsgJoinSwapShareAmountOut {
   sender: string;
-  poolId: T;
+  poolId: string | number;
   tokenInDenom: string;
-  shareOutAmount: T;
-  tokenInMaxAmount: T;
+  shareOutAmount: string | number;
+  tokenInMaxAmount: string | number;
 }
 
-export interface iMsgJoinSwapShareAmountOutResponse<T extends NumberType> {
-  tokenInAmount: T;
+export interface iMsgJoinSwapShareAmountOutResponse {
+  tokenInAmount: string | number;
 }
 
-export interface iMsgExitSwapShareAmountIn<T extends NumberType> {
+export interface iMsgExitSwapShareAmountIn {
   sender: string;
-  poolId: T;
+  poolId: string | number;
   tokenOutDenom: string;
-  shareInAmount: T;
-  tokenOutMinAmount: T;
+  shareInAmount: string | number;
+  tokenOutMinAmount: string | number;
 }
 
-export interface iMsgExitSwapShareAmountInResponse<T extends NumberType> {
-  tokenOutAmount: T;
+export interface iMsgExitSwapShareAmountInResponse {
+  tokenOutAmount: string | number;
 }
 
-export interface iMsgExitSwapExternAmountOut<T extends NumberType> {
+export interface iMsgExitSwapExternAmountOut {
   sender: string;
-  poolId: T;
-  tokenOut: iCosmosCoin<T>;
-  shareInMaxAmount: T;
+  poolId: string | number;
+  tokenOut: iCosmosCoin;
+  shareInMaxAmount: string | number;
 }
 
-export interface iMsgExitSwapExternAmountOutResponse<T extends NumberType> {
-  shareInAmount: T;
+export interface iMsgExitSwapExternAmountOutResponse {
+  shareInAmount: string | number;
 }
 
-export interface iMsgCreateBalancerPool<T extends NumberType> {
+export interface iMsgCreateBalancerPool {
   sender: string;
-  poolParams: iPoolParams<T>;
-  poolAssets: iPoolAsset<T>[];
+  poolParams: iPoolParams;
+  poolAssets: iPoolAsset[];
 }
 
-export interface iMsgCreateBalancerPoolResponse<T extends NumberType> {
-  poolId: T;
+export interface iMsgCreateBalancerPoolResponse {
+  poolId: string | number;
 }

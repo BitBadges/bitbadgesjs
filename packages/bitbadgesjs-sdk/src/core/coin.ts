@@ -4,9 +4,9 @@ import type { NumberType } from '../common/string-numbers.js';
 /**
  * @category Interfaces
  */
-export interface iCosmosCoin<T extends NumberType> {
+export interface iCosmosCoin {
   /** The amount of the coin. */
-  amount: T;
+  amount: string | number;
   /** The denomination of the coin (e.g. "ubadge"). */
   denom: string;
 }
@@ -16,11 +16,11 @@ export interface iCosmosCoin<T extends NumberType> {
  *
  * @category Balances
  */
-export class CosmosCoin<T extends NumberType> extends BaseNumberTypeClass<CosmosCoin<T>> implements iCosmosCoin<T> {
-  amount: T;
+export class CosmosCoin extends BaseNumberTypeClass<CosmosCoin> implements iCosmosCoin {
+  amount: string | number;
   denom: string;
 
-  constructor(data: iCosmosCoin<T>) {
+  constructor(data: iCosmosCoin) {
     super();
     this.amount = data.amount;
     this.denom = data.denom;
@@ -30,11 +30,11 @@ export class CosmosCoin<T extends NumberType> extends BaseNumberTypeClass<Cosmos
     return ['amount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CosmosCoin<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CosmosCoin<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): CosmosCoin {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CosmosCoin;
   }
 
-  static fromProto<T extends NumberType>(data: { amount: string; denom: string }, convertFunction: (val: NumberType) => T): CosmosCoin<T> {
+  static fromProto(data: { amount: string; denom: string }, convertFunction: (val: string | number) => T): CosmosCoin {
     return new CosmosCoin({
       amount: convertFunction(data.amount as any),
       denom: data.denom

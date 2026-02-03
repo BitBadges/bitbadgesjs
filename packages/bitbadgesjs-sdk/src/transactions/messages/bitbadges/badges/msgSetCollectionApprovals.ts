@@ -16,16 +16,13 @@ import { Stringify } from '@/common/string-numbers.js';
  *
  * @category Transactions
  */
-export class MsgSetCollectionApprovals<T extends NumberType>
-  extends CustomTypeClass<MsgSetCollectionApprovals<T>>
-  implements iMsgSetCollectionApprovals<T>
-{
+export class MsgSetCollectionApprovals extends CustomTypeClass<MsgSetCollectionApprovals> implements iMsgSetCollectionApprovals {
   creator: BitBadgesAddress;
-  collectionId: T;
-  collectionApprovals: CollectionApproval<T>[];
-  canUpdateCollectionApprovals: CollectionApprovalPermission<T>[];
+  collectionId: string | number;
+  collectionApprovals: CollectionApproval[];
+  canUpdateCollectionApprovals: CollectionApprovalPermission[];
 
-  constructor(msg: iMsgSetCollectionApprovals<T>) {
+  constructor(msg: iMsgSetCollectionApprovals) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
@@ -42,26 +39,24 @@ export class MsgSetCollectionApprovals<T extends NumberType>
     });
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCollectionApprovals<NumberType> {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCollectionApprovals {
     return MsgSetCollectionApprovals.fromProto(protobadges.MsgSetCollectionApprovals.fromJson(jsonValue, options));
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCollectionApprovals<NumberType> {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCollectionApprovals {
     return MsgSetCollectionApprovals.fromProto(protobadges.MsgSetCollectionApprovals.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: protobadges.MsgSetCollectionApprovals): MsgSetCollectionApprovals<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetCollectionApprovals): MsgSetCollectionApprovals {
     return new MsgSetCollectionApprovals({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
       collectionApprovals: protoMsg.collectionApprovals.map((approval) => CollectionApproval.fromProto(approval, Stringify)),
-      canUpdateCollectionApprovals: protoMsg.canUpdateCollectionApprovals.map((permission) =>
-        CollectionApprovalPermission.fromProto(permission, Stringify)
-      )
+      canUpdateCollectionApprovals: protoMsg.canUpdateCollectionApprovals.map((permission) => CollectionApprovalPermission.fromProto(permission, Stringify))
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSetCollectionApprovals<T> {
+  toBech32Addresses(prefix: string): MsgSetCollectionApprovals {
     return new MsgSetCollectionApprovals({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,

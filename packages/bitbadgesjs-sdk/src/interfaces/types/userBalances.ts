@@ -10,15 +10,15 @@ import type { iBalance } from './core.js';
  *
  * @category Interfaces
  */
-export interface iUserBalanceStore<T extends NumberType> {
+export interface iUserBalanceStore {
   /** The user's balances. */
-  balances: iBalance<T>[];
+  balances: iBalance[];
   /** The user's incoming approvals. */
-  incomingApprovals: iUserIncomingApproval<T>[];
+  incomingApprovals: iUserIncomingApproval[];
   /** The user's outgoing approvals. */
-  outgoingApprovals: iUserOutgoingApproval<T>[];
+  outgoingApprovals: iUserOutgoingApproval[];
   /** The user's permissions. */
-  userPermissions: iUserPermissions<T>;
+  userPermissions: iUserPermissions;
   /** Whether the user's self-initiated outgoing transfers are auto-approved. If not, they must be explicitly approved using the outgoing approvals. */
   autoApproveSelfInitiatedOutgoingTransfers: boolean;
   /** Whether the user's self-initiated incoming transfers are auto-approved. If not, they must be explicitly approved using the incoming approvals. */
@@ -31,11 +31,11 @@ export interface iUserBalanceStore<T extends NumberType> {
  * @inheritDoc iUserBalanceStore
  * @category Interfaces
  */
-export interface iUserBalanceStoreWithDetails<T extends NumberType> extends iUserBalanceStore<T> {
-  outgoingApprovals: iUserOutgoingApprovalWithDetails<T>[];
-  incomingApprovals: iUserIncomingApprovalWithDetails<T>[];
-  userPermissions: iUserPermissionsWithDetails<T>;
-  balances: iBalance<T>[];
+export interface iUserBalanceStoreWithDetails extends iUserBalanceStore {
+  outgoingApprovals: iUserOutgoingApprovalWithDetails[];
+  incomingApprovals: iUserIncomingApprovalWithDetails[];
+  userPermissions: iUserPermissionsWithDetails;
+  balances: iBalance[];
   autoApproveSelfInitiatedOutgoingTransfers: boolean;
   autoApproveSelfInitiatedIncomingTransfers: boolean;
   autoApproveAllIncomingTransfers: boolean;

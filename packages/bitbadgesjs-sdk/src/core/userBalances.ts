@@ -13,16 +13,16 @@ import { BalanceArray, Balance } from './balances.js';
 /**
  * @category Balances
  */
-export class UserBalanceStore<T extends NumberType> extends BaseNumberTypeClass<UserBalanceStore<T>> implements iUserBalanceStore<T> {
-  balances: BalanceArray<T>;
-  incomingApprovals: UserIncomingApproval<T>[];
-  outgoingApprovals: UserOutgoingApproval<T>[];
-  userPermissions: UserPermissions<T>;
+export class UserBalanceStore extends BaseNumberTypeClass<UserBalanceStore> implements iUserBalanceStore {
+  balances: BalanceArray;
+  incomingApprovals: UserIncomingApproval[];
+  outgoingApprovals: UserOutgoingApproval[];
+  userPermissions: UserPermissions;
   autoApproveSelfInitiatedOutgoingTransfers: boolean;
   autoApproveSelfInitiatedIncomingTransfers: boolean;
   autoApproveAllIncomingTransfers: boolean;
 
-  constructor(data: iUserBalanceStore<T>) {
+  constructor(data: iUserBalanceStore) {
     super();
     this.balances = BalanceArray.From(data.balances);
     this.incomingApprovals = data.incomingApprovals.map((x) => new UserIncomingApproval(x));
@@ -33,15 +33,15 @@ export class UserBalanceStore<T extends NumberType> extends BaseNumberTypeClass<
     this.autoApproveAllIncomingTransfers = data.autoApproveAllIncomingTransfers;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserBalanceStore<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserBalanceStore<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UserBalanceStore {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserBalanceStore;
   }
 
   toProto() {
     return new ProtoUserBalanceStore(this.convert(Stringify));
   }
 
-  static fromProto<T extends NumberType>(item: ProtoUserBalanceStore, convertFunction: (item: NumberType) => T): UserBalanceStore<T> {
+  static fromProto(item: ProtoUserBalanceStore, convertFunction: (item: string | number) => T): UserBalanceStore {
     return new UserBalanceStore({
       balances: item.balances.map((x) => Balance.fromProto(x, convertFunction)),
       incomingApprovals: item.incomingApprovals.map((x: ProtoUserIncomingApproval) => UserIncomingApproval.fromProto(x, convertFunction)),
@@ -61,7 +61,7 @@ export class UserBalanceStore<T extends NumberType> extends BaseNumberTypeClass<
     });
   }
 
-  toBech32Addresses(prefix: string): UserBalanceStore<T> {
+  toBech32Addresses(prefix: string): UserBalanceStore {
     return new UserBalanceStore({
       ...this,
       incomingApprovals: this.incomingApprovals.map((x) => x.toBech32Addresses(prefix)),
@@ -74,26 +74,23 @@ export class UserBalanceStore<T extends NumberType> extends BaseNumberTypeClass<
 /**
  * @category Balances
  */
-export class UserBalanceStoreWithDetails<T extends NumberType>
-  extends UserBalanceStore<T>
-  implements iUserBalanceStoreWithDetails<T>, CustomType<UserBalanceStoreWithDetails<T>>
-{
-  outgoingApprovals: UserOutgoingApprovalWithDetails<T>[];
-  incomingApprovals: UserIncomingApprovalWithDetails<T>[];
-  userPermissions: UserPermissionsWithDetails<T>;
+export class UserBalanceStoreWithDetails extends UserBalanceStore implements iUserBalanceStoreWithDetails, CustomType<UserBalanceStoreWithDetails> {
+  outgoingApprovals: UserOutgoingApprovalWithDetails[];
+  incomingApprovals: UserIncomingApprovalWithDetails[];
+  userPermissions: UserPermissionsWithDetails;
 
-  constructor(data: iUserBalanceStoreWithDetails<T>) {
+  constructor(data: iUserBalanceStoreWithDetails) {
     super(data);
     this.outgoingApprovals = data.outgoingApprovals.map((x) => new UserOutgoingApprovalWithDetails(x));
     this.incomingApprovals = data.incomingApprovals.map((x) => new UserIncomingApprovalWithDetails(x));
     this.userPermissions = new UserPermissionsWithDetails(data.userPermissions);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserBalanceStoreWithDetails<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserBalanceStoreWithDetails<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): UserBalanceStoreWithDetails {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserBalanceStoreWithDetails;
   }
 
-  clone(): UserBalanceStoreWithDetails<T> {
-    return super.clone() as UserBalanceStoreWithDetails<T>;
+  clone(): UserBalanceStoreWithDetails {
+    return super.clone() as UserBalanceStoreWithDetails;
   }
 }

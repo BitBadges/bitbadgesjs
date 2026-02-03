@@ -8,22 +8,22 @@ import type { iCosmosCoin } from '@/core/coin.js';
 /**
  * @category Interfaces
  */
-export interface iUintRange<T extends NumberType> {
+export interface iUintRange {
   /**
    * The start of the range.
    */
-  start: T;
+  start: string | number;
 
   /**
    * The end of the range, inclusive.
    */
-  end: T;
+  end: string | number;
 }
 
 /**
  * @category Interfaces
  */
-export interface iTokenMetadata<T extends NumberType> {
+export interface iTokenMetadata {
   /**
    * The URI where to fetch the token metadata from.
    */
@@ -32,7 +32,7 @@ export interface iTokenMetadata<T extends NumberType> {
   /**
    * The token IDs corresponding to the URI.
    */
-  tokenIds: iUintRange<T>[];
+  tokenIds: iUintRange[];
 
   /**
    * Arbitrary custom data that can be stored on-chain
@@ -73,17 +73,17 @@ export interface iPathMetadata {
 /**
  * @category Interfaces
  */
-export interface iPathMetadataWithDetails<T extends NumberType> extends iPathMetadata {
+export interface iPathMetadataWithDetails extends iPathMetadata {
   /**
    * The fetched metadata from the URI.
    */
-  metadata?: iMetadata<T>;
+  metadata?: iMetadata;
 }
 
 /**
  * @category Interfaces
  */
-export interface iMustOwnTokens<T extends NumberType> {
+export interface iMustOwnTokens {
   /**
    * The collection IDs to own.
    */
@@ -92,17 +92,17 @@ export interface iMustOwnTokens<T extends NumberType> {
   /**
    * The min/max acceptable amount of tokens that must be owned (can be any values, including 0-0).
    */
-  amountRange: iUintRange<T>;
+  amountRange: iUintRange;
 
   /**
    * The range of the times that the tokens must be owned.
    */
-  ownershipTimes: iUintRange<T>[];
+  ownershipTimes: iUintRange[];
 
   /**
    * The range of the token IDs that must be owned.
    */
-  tokenIds: iUintRange<T>[];
+  tokenIds: iUintRange[];
 
   /**
    * Whether or not to override the ownershipTimes with the current time.
@@ -123,21 +123,21 @@ export interface iMustOwnTokens<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iBalance<T extends NumberType> {
+export interface iBalance {
   /**
    * The amount or balance of the owned token.
    */
-  amount: T;
+  amount: string | number;
 
   /**
    * The token IDs corresponding to the balance.
    */
-  tokenIds: iUintRange<T>[];
+  tokenIds: iUintRange[];
 
   /**
    * The times that the token is owned from.
    */
-  ownershipTimes: iUintRange<T>[];
+  ownershipTimes: iUintRange[];
 }
 
 /**
@@ -178,9 +178,9 @@ export interface iAddressList {
 /**
  * @category Interfaces
  */
-export interface iConversionSideAWithDenom<T extends NumberType> {
+export interface iConversionSideAWithDenom {
   /** The amount of the cosmos coin (0 decimals). */
-  amount: T;
+  amount: string | number;
   /** The denomination of the cosmos coin. */
   denom: string;
 }
@@ -188,37 +188,37 @@ export interface iConversionSideAWithDenom<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iConversionSideA<T extends NumberType> {
+export interface iConversionSideA {
   /** The amount of the cosmos coin (0 decimals). */
-  amount: T;
+  amount: string | number;
 }
 
 /**
  * @category Interfaces
  */
-export interface iConversion<T extends NumberType> {
+export interface iConversion {
   /** Side A: The cosmos coin side of the conversion (amount + denom). */
-  sideA: iConversionSideAWithDenom<T>;
+  sideA: iConversionSideAWithDenom;
   /** Side B: The badge balances side of the conversion. */
-  sideB: iBalance<T>[];
+  sideB: iBalance[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iConversionWithoutDenom<T extends NumberType> {
+export interface iConversionWithoutDenom {
   /** Side A: The cosmos coin amount side of the conversion (amount only, denom stored separately). */
-  sideA: iConversionSideA<T>;
+  sideA: iConversionSideA;
   /** Side B: The badge balances side of the conversion. */
-  sideB: iBalance<T>[];
+  sideB: iBalance[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iDenomUnit<T extends NumberType> {
+export interface iDenomUnit {
   /** The number of decimal places for this denomination unit. */
-  decimals: T;
+  decimals: string | number;
   /** The symbol for this denomination unit. */
   symbol: string;
   /** Whether this denomination unit is the default display unit. */
@@ -230,26 +230,26 @@ export interface iDenomUnit<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iDenomUnitWithDetails<T extends NumberType> extends iDenomUnit<T> {
+export interface iDenomUnitWithDetails extends iDenomUnit {
   /** Metadata object containing uri, customData, and fetched metadata. */
-  metadata: iPathMetadataWithDetails<T>;
+  metadata: iPathMetadataWithDetails;
 }
 
 /**
  * @category Interfaces
  */
-export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
+export interface iCosmosCoinWrapperPathAddObject {
   /** The denom of the IBC wrapper path. */
   denom: string;
 
   /** The conversion between cosmos coin and badge balances. */
-  conversion: iConversionWithoutDenom<T>;
+  conversion: iConversionWithoutDenom;
 
   /** The symbol for this IBC wrapper path. */
   symbol: string;
 
   /** The denomination units for this IBC wrapper path. */
-  denomUnits: iDenomUnit<T>[];
+  denomUnits: iDenomUnit[];
 
   /** Whether to allow override with any valid token. */
   allowOverrideWithAnyValidToken: boolean;
@@ -261,20 +261,20 @@ export interface iCosmosCoinWrapperPathAddObject<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iCosmosCoinBackedPathAddObject<T extends NumberType> {
+export interface iCosmosCoinBackedPathAddObject {
   /** The conversion between IBC cosmos coin and badge balances. */
-  conversion: iConversion<T>;
+  conversion: iConversion;
 }
 
 /**
  * @category Interfaces
  */
-export interface iCosmosCoinBackedPath<T extends NumberType> {
+export interface iCosmosCoinBackedPath {
   /** The address for this IBC backed path. */
   address: string;
 
   /** The conversion between IBC cosmos coin and badge balances. */
-  conversion: iConversion<T>;
+  conversion: iConversion;
 }
 
 /**
@@ -283,7 +283,7 @@ export interface iCosmosCoinBackedPath<T extends NumberType> {
  *
  * @category Interfaces
  */
-export interface iInvariantsAddObject<T extends NumberType> {
+export interface iInvariantsAddObject {
   /**
    * If true, all ownership times must be full ranges [{ start: 1, end: GoMaxUInt64 }].
    * This prevents time-based restrictions on token ownership.
@@ -294,13 +294,13 @@ export interface iInvariantsAddObject<T extends NumberType> {
    * Maximum supply per token ID. If set, no balance can exceed this amount.
    * This prevents any single token ID from having more than the specified supply.
    */
-  maxSupplyPerId: T;
+  maxSupplyPerId: string | number;
 
   /**
    * The IBC backed (sdk.coin) path for the collection. Only one path is allowed.
    * Address will be generated by the keeper.
    */
-  cosmosCoinBackedPath?: iCosmosCoinBackedPathAddObject<T>;
+  cosmosCoinBackedPath?: iCosmosCoinBackedPathAddObject;
 
   /**
    * If true, disallows any collection approvals that have overridesFromOutgoingApprovals or overridesToIncomingApprovals set to true.
@@ -318,18 +318,18 @@ export interface iInvariantsAddObject<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iAliasPathAddObject<T extends NumberType> {
+export interface iAliasPathAddObject {
   /** The denomination (denom) to be used for the alias. */
   denom: string;
 
   /** The conversion between cosmos coin and badge balances. */
-  conversion: iConversionWithoutDenom<T>;
+  conversion: iConversionWithoutDenom;
 
   /** The symbol for the alias (e.g., "BADGE", "NFT"). */
   symbol: string;
 
   /** Denomination units for the alias. Defines how the coin can be displayed with different decimal places and symbols. */
-  denomUnits: iDenomUnit<T>[];
+  denomUnits: iDenomUnit[];
 
   /** The metadata for this alias path. */
   metadata: iPathMetadata;
@@ -338,7 +338,7 @@ export interface iAliasPathAddObject<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iTransfer<T extends NumberType> {
+export interface iTransfer {
   /**
    * The address to transfer from.
    */
@@ -352,12 +352,12 @@ export interface iTransfer<T extends NumberType> {
   /**
    * The balances to transfer.
    */
-  balances: iBalance<T>[];
+  balances: iBalance[];
 
   /**
    * If specified, we will precalculate from this approval and override the balances. This can only be used when the specified approval has predeterminedBalances set.
    */
-  precalculateBalancesFromApproval?: iPrecalculateBalancesFromApprovalDetails<T>;
+  precalculateBalancesFromApproval?: iPrecalculateBalancesFromApprovalDetails;
 
   /**
    * The merkle proofs that satisfy the mkerkle challenges in the approvals. If the transfer deducts from multiple approvals, we check all the merkle proofs and assert at least one is valid for every challenge.
@@ -377,7 +377,7 @@ export interface iTransfer<T extends NumberType> {
   /**
    * The prioritized approvals to use for the transfer. If specified, we will check these first.
    */
-  prioritizedApprovals?: iApprovalIdentifierDetails<T>[];
+  prioritizedApprovals?: iApprovalIdentifierDetails[];
 
   /**
    * Whether or not to only check the prioritized approvals. If false, we will check all approvals with any prioritized first.
@@ -404,7 +404,7 @@ export interface iTransfer<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iApprovalIdentifierDetails<T extends NumberType> {
+export interface iApprovalIdentifierDetails {
   /**
    * The approval ID of the approval.
    */
@@ -423,23 +423,23 @@ export interface iApprovalIdentifierDetails<T extends NumberType> {
   /**
    * The version of the approval.
    */
-  version: T;
+  version: string | number;
 }
 
 /**
  * @category Interfaces
  */
-export interface iPrecalculationOptions<T extends NumberType> {
+export interface iPrecalculationOptions {
   /** The timestamp to use for the transfer. */
-  overrideTimestamp?: T;
+  overrideTimestamp?: string | number;
   /** The token IDs to use for the transfer. */
-  tokenIdsOverride?: iUintRange<T>[];
+  tokenIdsOverride?: iUintRange[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iPrecalculateBalancesFromApprovalDetails<T extends NumberType> {
+export interface iPrecalculateBalancesFromApprovalDetails {
   /**
    * The approval ID of the approval.
    */
@@ -458,18 +458,18 @@ export interface iPrecalculateBalancesFromApprovalDetails<T extends NumberType> 
   /**
    * The version of the approval.
    */
-  version: T;
+  version: string | number;
 
   /**
    * The options for precalculating the balances.
    */
-  precalculationOptions?: iPrecalculationOptions<T>;
+  precalculationOptions?: iPrecalculationOptions;
 }
 
 /**
  * @category Interfaces
  */
-export interface iCoinTransfer<T extends NumberType> {
+export interface iCoinTransfer {
   /**
    * The recipient of the coin transfer. This should be a Bech32 BitBadges address.
    */
@@ -477,7 +477,7 @@ export interface iCoinTransfer<T extends NumberType> {
   /**
    * The coins
    */
-  coins: iCosmosCoin<T>[];
+  coins: iCosmosCoin[];
   /**
    * Whether or not to override the from address with the approver address.
    */
@@ -494,7 +494,7 @@ export type CollectionId = string;
 /**
  * @category Interfaces
  */
-export interface iAmountTrackerIdDetails<T extends NumberType> {
+export interface iAmountTrackerIdDetails {
   /**
    * The collection ID for the approval.
    */
@@ -534,7 +534,7 @@ export interface iAmountTrackerIdDetails<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iMustOwnToken<T extends NumberType> {
+export interface iMustOwnToken {
   /**
    * The ID of the collection.
    */
@@ -543,17 +543,17 @@ export interface iMustOwnToken<T extends NumberType> {
   /**
    * The range of amounts the user must own (min to max).
    */
-  amountRange: iUintRange<T>;
+  amountRange: iUintRange;
 
   /**
    * The time ranges during which the user must own the tokens.
    */
-  ownershipTimes: iUintRange<T>[];
+  ownershipTimes: iUintRange[];
 
   /**
    * The token IDs the user must own.
    */
-  tokenIds: iUintRange<T>[];
+  tokenIds: iUintRange[];
 
   /**
    * If true, override ownershipTimes with the current time.
@@ -574,7 +574,7 @@ export interface iMustOwnToken<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iMerkleChallenge<T extends NumberType> {
+export interface iMerkleChallenge {
   /**
    * The root of the merkle tree.
    */
@@ -583,7 +583,7 @@ export interface iMerkleChallenge<T extends NumberType> {
   /**
    * The expected proof length of the merkle proof.
    */
-  expectedProofLength: T;
+  expectedProofLength: string | number;
 
   /**
    * Whether or not to override any leaf value and use the creator address as the leaf. Used for whitelist trees.
@@ -593,7 +593,7 @@ export interface iMerkleChallenge<T extends NumberType> {
   /**
    * Whether or not to enforce max uses per leaf. Used to prevent replay attacks.
    */
-  maxUsesPerLeaf: T;
+  maxUsesPerLeaf: string | number;
 
   /**
    * The URI where to fetch the merkle challenge metadata from.
@@ -694,7 +694,7 @@ export interface iETHSignatureProof {
 /**
  * @category Interfaces
  */
-export interface iVoter<T extends NumberType> {
+export interface iVoter {
   /**
    * The address of the voter.
    */
@@ -703,13 +703,13 @@ export interface iVoter<T extends NumberType> {
   /**
    * The weight of this voter's vote.
    */
-  weight: T;
+  weight: string | number;
 }
 
 /**
  * @category Interfaces
  */
-export interface iVotingChallenge<T extends NumberType> {
+export interface iVotingChallenge {
   /**
    * The ID of this voting challenge for tracking votes (scoped like challengeTrackerId).
    * Format: collectionId-approverAddress-approvalLevel-approvalId-challengeId
@@ -720,12 +720,12 @@ export interface iVotingChallenge<T extends NumberType> {
    * The quorum threshold as a percentage (0-100) of total possible weight that must vote "yes".
    * Example: 50 means 50% of total voter weight must vote yes for approval.
    */
-  quorumThreshold: T;
+  quorumThreshold: string | number;
 
   /**
    * List of voters with their weights. Each voter can cast a weighted vote.
    */
-  voters: iVoter<T>[];
+  voters: iVoter[];
 
   /**
    * The URI associated with this voting challenge.
@@ -743,7 +743,7 @@ export interface iVotingChallenge<T extends NumberType> {
  *
  * @category Interfaces
  */
-export interface iVoteProof<T extends NumberType> {
+export interface iVoteProof {
   /**
    * The proposal ID this vote is for.
    */
@@ -759,7 +759,7 @@ export interface iVoteProof<T extends NumberType> {
    * The remaining percentage (100 - yesWeight) is allocated to "no" vote.
    * Example: yesWeight=70 means 70% yes, 30% no.
    */
-  yesWeight: T;
+  yesWeight: string | number;
 }
 
 /**
@@ -770,11 +770,11 @@ export interface iVoteProof<T extends NumberType> {
  *
  * @category Interfaces
  */
-export interface iDynamicStore<T extends NumberType> {
+export interface iDynamicStore {
   /**
    * The unique identifier for this dynamic store. This is assigned by the blockchain.
    */
-  storeId: T;
+  storeId: string | number;
 
   /**
    * The address of the creator of this dynamic store.
@@ -809,11 +809,11 @@ export interface iDynamicStore<T extends NumberType> {
  *
  * @category Interfaces
  */
-export interface iDynamicStoreValue<T extends NumberType> {
+export interface iDynamicStoreValue {
   /**
    * The unique identifier for this dynamic store.
    */
-  storeId: T;
+  storeId: string | number;
 
   /**
    * The address for which this value is stored.
@@ -836,7 +836,7 @@ export interface iDynamicStoreValue<T extends NumberType> {
  *
  * @category Interfaces
  */
-export interface iCollectionInvariants<T extends NumberType> {
+export interface iCollectionInvariants {
   /**
    * If true, all ownership times must be full ranges [{ start: 1, end: GoMaxUInt64 }].
    * This prevents time-based restrictions on token ownership.
@@ -847,12 +847,12 @@ export interface iCollectionInvariants<T extends NumberType> {
    * Maximum supply per token ID. If set, no balance can exceed this amount.
    * This prevents any single token ID from having more than the specified supply.
    */
-  maxSupplyPerId: T;
+  maxSupplyPerId: string | number;
 
   /**
    * The IBC backed (sdk.coin) path for the collection. Only one path is allowed.
    */
-  cosmosCoinBackedPath?: iCosmosCoinBackedPath<T>;
+  cosmosCoinBackedPath?: iCosmosCoinBackedPath;
 
   /**
    * If true, disallows any collection approvals that have overridesFromOutgoingApprovals or overridesToIncomingApprovals set to true.

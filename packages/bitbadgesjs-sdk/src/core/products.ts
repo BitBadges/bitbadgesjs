@@ -2,7 +2,7 @@ import { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 import type { iCollectionApproval, iUserOutgoingApproval } from '@/interfaces/types/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
 
-export const doesCollectionFollowProductProtocol = (collection?: Readonly<iCollectionDoc<bigint>>) => {
+export const doesCollectionFollowProductProtocol = (collection?: Readonly<iCollectionDoc>) => {
   if (!collection) {
     return false;
   }
@@ -27,7 +27,7 @@ export const doesCollectionFollowProductProtocol = (collection?: Readonly<iColle
   return true;
 };
 
-export const isProductApproval = (approval: iCollectionApproval<bigint>) => {
+export const isProductApproval = (approval: iCollectionApproval) => {
   const approvalCriteria = approval.approvalCriteria;
   if (!approvalCriteria?.coinTransfers) {
     return false;

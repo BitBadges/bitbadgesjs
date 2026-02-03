@@ -14,12 +14,12 @@ import type { NumberType } from '@/common/string-numbers.js';
  *
  * @category Transactions
  */
-export class MsgSetOutgoingApproval<T extends NumberType> extends CustomTypeClass<MsgSetOutgoingApproval<T>> implements iMsgSetOutgoingApproval<T> {
+export class MsgSetOutgoingApproval extends CustomTypeClass<MsgSetOutgoingApproval> implements iMsgSetOutgoingApproval {
   creator: BitBadgesAddress;
   collectionId: string;
-  approval: UserOutgoingApproval<T>;
+  approval: UserOutgoingApproval;
 
-  constructor(msg: iMsgSetOutgoingApproval<T>) {
+  constructor(msg: iMsgSetOutgoingApproval) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
@@ -34,26 +34,15 @@ export class MsgSetOutgoingApproval<T extends NumberType> extends CustomTypeClas
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgSetOutgoingApproval<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgSetOutgoingApproval {
     return MsgSetOutgoingApproval.fromProto(protobadges.MsgSetOutgoingApproval.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgSetOutgoingApproval<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgSetOutgoingApproval {
     return MsgSetOutgoingApproval.fromProto(protobadges.MsgSetOutgoingApproval.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    protoMsg: protobadges.MsgSetOutgoingApproval,
-    convertFunction: (item: NumberType) => U
-  ): MsgSetOutgoingApproval<U> {
+  static fromProto(protoMsg: protobadges.MsgSetOutgoingApproval, convertFunction: (item: string | number) => U): MsgSetOutgoingApproval {
     return new MsgSetOutgoingApproval({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
@@ -61,7 +50,7 @@ export class MsgSetOutgoingApproval<T extends NumberType> extends CustomTypeClas
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSetOutgoingApproval<T> {
+  toBech32Addresses(prefix: string): MsgSetOutgoingApproval {
     return new MsgSetOutgoingApproval({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,

@@ -3,7 +3,7 @@ import { GO_MAX_UINT_64 } from '@/common/math.js';
 import type { iCollectionApproval, iPredeterminedBalances, iResetTimeIntervals, iUserIncomingApproval } from '@/interfaces/types/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
 
-export const getCurrentInterval = (resetTimeIntervals: iResetTimeIntervals<bigint> | undefined) => {
+export const getCurrentInterval = (resetTimeIntervals: iResetTimeIntervals | undefined) => {
   // If no resets, we just treat it as one big interval
   if (!resetTimeIntervals || resetTimeIntervals.startTime === 0n || resetTimeIntervals.intervalLength === 0n) {
     return { start: 1n, end: GO_MAX_UINT_64 };
@@ -29,12 +29,12 @@ export const getCurrentInterval = (resetTimeIntervals: iResetTimeIntervals<bigin
   };
 };
 
-export const trackerNeedsReset = (resetTimeIntervals: iResetTimeIntervals<bigint>, lastUpdatedAt: bigint) => {
+export const trackerNeedsReset = (resetTimeIntervals: iResetTimeIntervals, lastUpdatedAt: bigint) => {
   const currentInterval = getCurrentInterval(resetTimeIntervals);
   return lastUpdatedAt < currentInterval.start;
 };
 
-export const getNextChargeTime = (predeterminedBalances: iPredeterminedBalances<bigint> | undefined) => {
+export const getNextChargeTime = (predeterminedBalances: iPredeterminedBalances | undefined) => {
   const currentInterval = getCurrentInterval({
     startTime: predeterminedBalances?.incrementedBalances.recurringOwnershipTimes.startTime ?? 0n,
     intervalLength: predeterminedBalances?.incrementedBalances.recurringOwnershipTimes.intervalLength ?? 0n
@@ -48,7 +48,7 @@ export const getNextChargeTime = (predeterminedBalances: iPredeterminedBalances<
   return nextInterval.start - (predeterminedBalances?.incrementedBalances.recurringOwnershipTimes.chargePeriodLength ?? 0n);
 };
 
-export const doesCollectionFollowSubscriptionProtocol = (collection?: Readonly<iCollectionDoc<bigint>>) => {
+export const doesCollectionFollowSubscriptionProtocol = (collection?: Readonly<iCollectionDoc>) => {
   if (!collection) {
     return false;
   }
@@ -86,10 +86,7 @@ export const doesCollectionFollowSubscriptionProtocol = (collection?: Readonly<i
   }
 
   for (let i = 0; i < collection.validTokenIds.length; i++) {
-    if (
-      collection.validTokenIds[i].start !== allSubscriptionTokenIdsSorted[i].start ||
-      collection.validTokenIds[i].end !== allSubscriptionTokenIdsSorted[i].end
-    ) {
+    if (collection.validTokenIds[i].start !== allSubscriptionTokenIdsSorted[i].start || collection.validTokenIds[i].end !== allSubscriptionTokenIdsSorted[i].end) {
       return false;
     }
   }
@@ -97,7 +94,7 @@ export const doesCollectionFollowSubscriptionProtocol = (collection?: Readonly<i
   return true;
 };
 
-export const isSubscriptionFaucetApproval = (approval: iCollectionApproval<bigint>) => {
+export const isSubscriptionFaucetApproval = (approval: iCollectionApproval) => {
   if (approval.fromListId !== 'Mint') {
     return false;
   }
@@ -194,7 +191,7 @@ export const isSubscriptionFaucetApproval = (approval: iCollectionApproval<bigin
   return true;
 };
 
-export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>, subscriptionApproval: iCollectionApproval<bigint>) => {
+export const isUserRecurringApproval = (approval: iUserIncomingApproval, subscriptionApproval: iCollectionApproval) => {
   if (approval.fromListId !== 'Mint') {
     return false;
   }
@@ -258,10 +255,7 @@ export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>,
     return false;
   }
 
-  if (
-    incrementedBalances.startBalances[0].tokenIds.length !== 1 ||
-    UintRangeArray.From(incrementedBalances.startBalances[0].tokenIds).sortAndMerge().convert(BigInt).size() !== 1n
-  ) {
+  if (incrementedBalances.startBalances[0].tokenIds.length !== 1 || UintRangeArray.From(incrementedBalances.startBalances[0].tokenIds).sortAndMerge().convert(BigInt).size() !== 1n) {
     return false;
   }
 

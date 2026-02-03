@@ -24,20 +24,20 @@ import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
  *
  * @category Transactions
  */
-export class MsgTransferTokens<T extends NumberType> extends BaseNumberTypeClass<MsgTransferTokens<T>> implements iMsgTransferTokens<T> {
+export class MsgTransferTokens extends BaseNumberTypeClass<MsgTransferTokens> implements iMsgTransferTokens {
   creator: BitBadgesAddress;
   collectionId: CollectionId;
-  transfers: Transfer<T>[];
+  transfers: Transfer[];
 
-  constructor(msg: iMsgTransferTokens<T>) {
+  constructor(msg: iMsgTransferTokens) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
     this.transfers = msg.transfers.map((x) => new Transfer(x));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgTransferTokens<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgTransferTokens<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgTransferTokens {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgTransferTokens;
   }
 
   getNumberFieldNames(): string[] {
@@ -48,23 +48,15 @@ export class MsgTransferTokens<T extends NumberType> extends BaseNumberTypeClass
     return new protobadges.MsgTransferTokens(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgTransferTokens<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgTransferTokens {
     return MsgTransferTokens.fromProto(protobadges.MsgTransferTokens.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgTransferTokens<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgTransferTokens {
     return MsgTransferTokens.fromProto(protobadges.MsgTransferTokens.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(protoMsg: protobadges.MsgTransferTokens, convertFunction: (item: NumberType) => U): MsgTransferTokens<U> {
+  static fromProto(protoMsg: protobadges.MsgTransferTokens, convertFunction: (item: string | number) => U): MsgTransferTokens {
     return new MsgTransferTokens({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
@@ -72,7 +64,7 @@ export class MsgTransferTokens<T extends NumberType> extends BaseNumberTypeClass
     });
   }
 
-  toBech32Addresses(prefix: string): MsgTransferTokens<T> {
+  toBech32Addresses(prefix: string): MsgTransferTokens {
     return new MsgTransferTokens({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,

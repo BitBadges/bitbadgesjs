@@ -15,13 +15,13 @@ export const GO_MAX_UINT_64 = 18446744073709551615n;
  *
  * @category Math
  */
-export function safeAdd<T extends NumberType>(a: T, b: T): T {
+export function safeAdd(a: T, b: T): T {
   if (typeof a !== typeof b) {
     throw new Error('mismatched types for uint64 addition');
   }
 
   //Takes a little hardcoding to make the types work
-  let result: T;
+  let result: string | number;
   if (typeof a === 'bigint' && typeof b === 'bigint') {
     result = (a + b) as T;
   } else if (typeof a === 'string' && typeof b === 'string') {
@@ -40,13 +40,13 @@ export function safeAdd<T extends NumberType>(a: T, b: T): T {
  *
  * @category Math
  */
-export function safeSubtract<T extends NumberType>(left: T, right: T, allowNegative = false): T {
+export function safeSubtract(left: T, right: T, allowNegative = false): T {
   if (typeof left !== typeof right) {
     throw new Error('mismatched types for uint64 subtraction');
   }
 
   //Takes a little hardcoding to make the types work
-  let result: T;
+  let result: string | number;
   if (typeof left === 'bigint' && typeof right === 'bigint') {
     result = (left - right) as T;
   } else if (typeof left === 'string' && typeof right === 'string') {
@@ -68,7 +68,7 @@ export function safeSubtract<T extends NumberType>(left: T, right: T, allowNegat
  *
  * @category Math
  */
-export function castNumberType<T extends NumberType>(expectedType: T, valToCast: NumberType): T {
+export function castNumberType(expectedType: T, valToCast: string | number): T {
   if (typeof expectedType === 'bigint') {
     return BigInt(valToCast) as T;
   } else if (typeof expectedType === 'string') {
@@ -85,7 +85,7 @@ export function castNumberType<T extends NumberType>(expectedType: T, valToCast:
  *
  * @category Math
  */
-export function safeSubtractKeepLeft<T extends NumberType>(left: T, right: NumberType): T {
+export function safeSubtractKeepLeft(left: T, right: string | number): T {
   return safeSubtract(left, castNumberType(left, right)) as T;
 }
 
@@ -94,7 +94,7 @@ export function safeSubtractKeepLeft<T extends NumberType>(left: T, right: Numbe
  *
  * @category Math
  */
-export function safeSubtractKeepRight<T extends NumberType>(left: NumberType, right: T): T {
+export function safeSubtractKeepRight(left: string | number, right: T): T {
   return safeSubtract(castNumberType(right, left), right) as T;
 }
 
@@ -103,7 +103,7 @@ export function safeSubtractKeepRight<T extends NumberType>(left: NumberType, ri
  *
  * @category Math
  */
-export function safeAddKeepLeft<T extends NumberType>(left: T, right: NumberType): T {
+export function safeAddKeepLeft(left: T, right: string | number): T {
   return safeAdd(left, castNumberType(left, right)) as T;
 }
 
@@ -113,7 +113,7 @@ export function safeAddKeepLeft<T extends NumberType>(left: T, right: NumberType
  * @category Math
 
  */
-export function safeAddKeepRight<T extends NumberType>(left: NumberType, right: T): T {
+export function safeAddKeepRight(left: string | number, right: T): T {
   return safeAdd(castNumberType(right, left), right) as T;
 }
 
@@ -122,13 +122,13 @@ export function safeAddKeepRight<T extends NumberType>(left: NumberType, right: 
  *
  * @category Math
  */
-export function safeMultiply<T extends NumberType>(left: T, right: T): T {
+export function safeMultiply(left: T, right: T): T {
   if (typeof left !== typeof right) {
     throw new Error('mismatched types for uint64 multiplication');
   }
 
   //Takes a little hardcoding to make the types work
-  let result: T;
+  let result: string | number;
   if (typeof left === 'bigint' && typeof right === 'bigint') {
     result = (left * right) as T;
   } else if (typeof left === 'string' && typeof right === 'string') {
@@ -145,7 +145,7 @@ export function safeMultiply<T extends NumberType>(left: T, right: T): T {
  *
  * @category Math
  */
-export function safeMultiplyKeepLeft<T extends NumberType>(left: T, right: NumberType): T {
+export function safeMultiplyKeepLeft(left: T, right: string | number): T {
   return safeMultiply(left, castNumberType(left, right)) as T;
 }
 
@@ -154,7 +154,7 @@ export function safeMultiplyKeepLeft<T extends NumberType>(left: T, right: Numbe
  *
  * @category Math
  */
-export function safeMultiplyKeepRight<T extends NumberType>(left: NumberType, right: T): T {
+export function safeMultiplyKeepRight(left: string | number, right: T): T {
   return safeMultiply(castNumberType(right, left), right) as T;
 }
 
@@ -163,7 +163,7 @@ export function safeMultiplyKeepRight<T extends NumberType>(left: NumberType, ri
  *
  * @category Math
  */
-export function bigIntMin<T extends NumberType>(a: T, b: T): T {
+export function bigIntMin(a: T, b: T): T {
   return a > b ? b : a;
 }
 
@@ -172,6 +172,6 @@ export function bigIntMin<T extends NumberType>(a: T, b: T): T {
  *
  * @category Math
  */
-export function bigIntMax<T extends NumberType>(a: T, b: T): T {
+export function bigIntMax(a: T, b: T): T {
   return a > b ? a : b;
 }

@@ -18,14 +18,10 @@ export class BitBadgesApiRoutes {
   static SearchRoute = (searchValue: string) => `/api/v0/search/${searchValue}`;
   static GetCollectionsRoute = () => '/api/v0/collections';
 
-  static GetOwnersRoute = (collectionId: CollectionId, tokenId: NumberType) =>
-    `/api/v0/collection/${collectionId.toString()}/${tokenId.toString()}/owners`;
-  static GetBalanceByAddressRoute = (collectionId: CollectionId, bitbadgesAddress: string) =>
-    `/api/v0/collection/${collectionId.toString()}/balance/${bitbadgesAddress}`;
-  static GetBalanceByAddressSpecificTokenRoute = (collectionId: CollectionId, bitbadgesAddress: string, tokenId: NumberType) =>
-    `/api/v0/collection/${collectionId.toString()}/${tokenId.toString()}/balance/${bitbadgesAddress}`;
-  static GetTokenActivityRoute = (collectionId: CollectionId, tokenId: NumberType) =>
-    `/api/v0/collection/${collectionId.toString()}/${tokenId.toString()}/activity`;
+  static GetOwnersRoute = (collectionId: CollectionId, tokenId: string | number) => `/api/v0/collection/${collectionId.toString()}/${tokenId.toString()}/owners`;
+  static GetBalanceByAddressRoute = (collectionId: CollectionId, bitbadgesAddress: string) => `/api/v0/collection/${collectionId.toString()}/balance/${bitbadgesAddress}`;
+  static GetBalanceByAddressSpecificTokenRoute = (collectionId: CollectionId, bitbadgesAddress: string, tokenId: string | number) => `/api/v0/collection/${collectionId.toString()}/${tokenId.toString()}/balance/${bitbadgesAddress}`;
+  static GetTokenActivityRoute = (collectionId: CollectionId, tokenId: string | number) => `/api/v0/collection/${collectionId.toString()}/${tokenId.toString()}/activity`;
   static RefreshMetadataRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/refresh`;
   static GetRefreshStatusRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/refreshStatus`;
   static FilterTokensInCollectionRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/filter`;
@@ -56,8 +52,7 @@ export class BitBadgesApiRoutes {
   static AddToIpfsRoute = () => '/api/v0/addToIpfs';
   static AddApprovalDetailsToOffChainStorageRoute = () => '/api/v0/addApprovalDetailsToOffChainStorage';
 
-  static GetAttemptDataFromRequestBinRoute = (claimId: string, claimAttemptId: string) =>
-    `/api/v0/requestBin/attemptData/${claimId.toString()}/${claimAttemptId.toString()}`;
+  static GetAttemptDataFromRequestBinRoute = (claimId: string, claimAttemptId: string) => `/api/v0/requestBin/attemptData/${claimId.toString()}/${claimAttemptId.toString()}`;
 
   static GetSignInChallengeRoute = () => '/api/v0/auth/getChallenge';
   static VerifySignInRoute = () => '/api/v0/auth/verify';
@@ -139,8 +134,7 @@ export class BitBadgesApiRoutes {
 
   static GetCollectionOwnersRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/owners`;
   static GetCollectionRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}`;
-  static GetTokenMetadataRoute = (collectionId: CollectionId, tokenId: NumberType) =>
-    `/api/v0/collection/${collectionId.toString()}/${tokenId.toString()}/metadata`;
+  static GetTokenMetadataRoute = (collectionId: CollectionId, tokenId: string | number) => `/api/v0/collection/${collectionId.toString()}/${tokenId.toString()}/metadata`;
   static GetCollectionClaimsRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/claims`;
 
   static GetCollectionTransferActivityRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/activity`;
@@ -154,7 +148,6 @@ export class BitBadgesApiRoutes {
   static GetSwapActivitiesRoute = () => '/api/v0/swapActivities';
   static GetOnChainDynamicStoreRoute = (storeId: string) => `/api/v0/onChainDynamicStore/${storeId.toString()}`;
   static GetOnChainDynamicStoresByCreatorRoute = (address: NativeAddress) => `/api/v0/onChainDynamicStores/by-creator/${address}`;
-  static GetOnChainDynamicStoreValueRoute = (storeId: string, address: NativeAddress) =>
-    `/api/v0/onChainDynamicStore/${storeId.toString()}/value/${address}`;
+  static GetOnChainDynamicStoreValueRoute = (storeId: string, address: NativeAddress) => `/api/v0/onChainDynamicStore/${storeId.toString()}/value/${address}`;
   static GetOnChainDynamicStoreValuesPaginatedRoute = (storeId: string) => `/api/v0/onChainDynamicStore/${storeId.toString()}/values`;
 }

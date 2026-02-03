@@ -121,16 +121,7 @@ export function createStdSignDocFromProto(protoMessages: any[], fee: StdFee, cha
 // Returns the hashed digest of the corresponding StdSignDoc.
 // If the StdSignDoc cannot be generated (e.g. types are not
 // supported), returns an empty string.
-export function createStdSignDigestFromProto(
-  messages: any,
-  memo: string,
-  fee: string,
-  denom: string,
-  gasLimit: number,
-  sequence: number,
-  accountNumber: number,
-  chainId: string
-) {
+export function createStdSignDigestFromProto(messages: any, memo: string, fee: string, denom: string, gasLimit: number, sequence: number, accountNumber: number, chainId: string) {
   try {
     const stdFee = createStdFee(fee, denom, gasLimit);
     const stdSignDoc = createStdSignDocFromProto(messages, stdFee, chainId, memo, sequence, accountNumber);
@@ -141,17 +132,7 @@ export function createStdSignDigestFromProto(
   }
 }
 
-export function createTransactionWithMultipleMessages(
-  messages: any,
-  memo: string,
-  fee: string,
-  denom: string,
-  gasLimit: number,
-  pubKey: string,
-  sequence: number,
-  accountNumber: number,
-  chainId: string
-) {
+export function createTransactionWithMultipleMessages(messages: any, memo: string, fee: string, denom: string, gasLimit: number, pubKey: string, sequence: number, accountNumber: number, chainId: string) {
   const body = createBodyWithMultipleMessages(messages, memo);
   const feeMessage = createFee(fee, denom, gasLimit);
   const pubKeyDecoded = Buffer.from(pubKey, 'base64');
@@ -180,16 +161,6 @@ export function createTransactionWithMultipleMessages(
   };
 }
 
-export function createTransaction(
-  message: any,
-  memo: string,
-  fee: string,
-  denom: string,
-  gasLimit: number,
-  pubKey: string,
-  sequence: number,
-  accountNumber: number,
-  chainId: string
-) {
+export function createTransaction(message: any, memo: string, fee: string, denom: string, gasLimit: number, pubKey: string, sequence: number, accountNumber: number, chainId: string) {
   return createTransactionWithMultipleMessages([message], memo, fee, denom, gasLimit, pubKey, sequence, accountNumber, chainId);
 }

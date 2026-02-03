@@ -16,13 +16,13 @@ import { Stringify } from '@/common/string-numbers.js';
  *
  * @category Transactions
  */
-export class MsgSetValidTokenIds<T extends NumberType> extends CustomTypeClass<MsgSetValidTokenIds<T>> implements iMsgSetValidTokenIds<T> {
+export class MsgSetValidTokenIds extends CustomTypeClass<MsgSetValidTokenIds> implements iMsgSetValidTokenIds {
   creator: BitBadgesAddress;
-  collectionId: T;
-  validTokenIds: UintRange<T>[];
-  canUpdateValidTokenIds: TokenIdsActionPermission<T>[];
+  collectionId: string | number;
+  validTokenIds: UintRange[];
+  canUpdateValidTokenIds: TokenIdsActionPermission[];
 
-  constructor(msg: iMsgSetValidTokenIds<T>) {
+  constructor(msg: iMsgSetValidTokenIds) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
@@ -39,15 +39,15 @@ export class MsgSetValidTokenIds<T extends NumberType> extends CustomTypeClass<M
     });
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetValidTokenIds<NumberType> {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetValidTokenIds {
     return MsgSetValidTokenIds.fromProto(protobadges.MsgSetValidTokenIds.fromJson(jsonValue, options));
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetValidTokenIds<NumberType> {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetValidTokenIds {
     return MsgSetValidTokenIds.fromProto(protobadges.MsgSetValidTokenIds.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: protobadges.MsgSetValidTokenIds): MsgSetValidTokenIds<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetValidTokenIds): MsgSetValidTokenIds {
     return new MsgSetValidTokenIds({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
@@ -56,7 +56,7 @@ export class MsgSetValidTokenIds<T extends NumberType> extends CustomTypeClass<M
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSetValidTokenIds<T> {
+  toBech32Addresses(prefix: string): MsgSetValidTokenIds {
     return new MsgSetValidTokenIds({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,

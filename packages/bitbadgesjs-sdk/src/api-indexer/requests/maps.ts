@@ -34,20 +34,17 @@ export class GetMapsPayload extends CustomTypeClass<GetMapsPayload> implements i
 /**
  * @category API Requests / Responses
  */
-export interface iGetMapsSuccessResponse<T extends NumberType> {
-  maps: (iMapWithValues<T> | undefined)[];
+export interface iGetMapsSuccessResponse {
+  maps: (iMapWithValues | undefined)[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetMapsSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetMapsSuccessResponse<T>>
-  implements iGetMapsSuccessResponse<T>, CustomType<GetMapsSuccessResponse<T>>
-{
-  maps: (MapWithValues<T> | undefined)[];
+export class GetMapsSuccessResponse extends BaseNumberTypeClass<GetMapsSuccessResponse> implements iGetMapsSuccessResponse, CustomType<GetMapsSuccessResponse> {
+  maps: (MapWithValues | undefined)[];
 
-  constructor(data: iGetMapsSuccessResponse<T>) {
+  constructor(data: iGetMapsSuccessResponse) {
     super();
     this.maps = data.maps.map((map) => (map ? new MapWithValues(map) : undefined));
   }
@@ -56,8 +53,8 @@ export class GetMapsSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetMapsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetMapsSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetMapsSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetMapsSuccessResponse;
   }
 }
 
@@ -102,10 +99,7 @@ export interface iGetMapValuesSuccessResponse {
 /**
  * @category API Requests / Responses
  */
-export class GetMapValuesSuccessResponse
-  extends BaseNumberTypeClass<GetMapValuesSuccessResponse>
-  implements iGetMapValuesSuccessResponse, CustomType<GetMapValuesSuccessResponse>
-{
+export class GetMapValuesSuccessResponse extends BaseNumberTypeClass<GetMapValuesSuccessResponse> implements iGetMapValuesSuccessResponse, CustomType<GetMapValuesSuccessResponse> {
   values: ({ mapId: string; values: { [key: string]: ValueStore } } | undefined)[];
 
   constructor(data: iGetMapValuesSuccessResponse) {
@@ -123,7 +117,7 @@ export class GetMapValuesSuccessResponse
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetMapValuesSuccessResponse {
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetMapValuesSuccessResponse {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetMapValuesSuccessResponse;
   }
 }
@@ -145,20 +139,17 @@ export class GetMapPayload extends CustomTypeClass<GetMapPayload> implements iGe
 /**
  * @category API Requests / Responses
  */
-export interface iGetMapSuccessResponse<T extends NumberType> {
-  map: iMapWithValues<T> | undefined;
+export interface iGetMapSuccessResponse {
+  map: iMapWithValues | undefined;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetMapSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetMapSuccessResponse<T>>
-  implements iGetMapSuccessResponse<T>, CustomType<GetMapSuccessResponse<T>>
-{
-  map: MapWithValues<T> | undefined;
+export class GetMapSuccessResponse extends BaseNumberTypeClass<GetMapSuccessResponse> implements iGetMapSuccessResponse, CustomType<GetMapSuccessResponse> {
+  map: MapWithValues | undefined;
 
-  constructor(data: iGetMapSuccessResponse<T>) {
+  constructor(data: iGetMapSuccessResponse) {
     super();
     this.map = data.map ? new MapWithValues(data.map) : undefined;
   }
@@ -167,8 +158,8 @@ export class GetMapSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetMapSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetMapSuccessResponse<U>;
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetMapSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetMapSuccessResponse;
   }
 }
 
@@ -193,10 +184,7 @@ export interface iGetMapValueSuccessResponse extends iValueStore {}
 /**
  * @category API Requests / Responses
  */
-export class GetMapValueSuccessResponse
-  extends BaseNumberTypeClass<GetMapValueSuccessResponse>
-  implements iGetMapValueSuccessResponse, CustomType<GetMapValueSuccessResponse>
-{
+export class GetMapValueSuccessResponse extends BaseNumberTypeClass<GetMapValueSuccessResponse> implements iGetMapValueSuccessResponse, CustomType<GetMapValueSuccessResponse> {
   lastSetBy: string;
   key: string;
   value: string;
@@ -212,7 +200,7 @@ export class GetMapValueSuccessResponse
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetMapValueSuccessResponse {
+  convert(convertFunction: (val: string | number) => U, options?: ConvertOptions): GetMapValueSuccessResponse {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetMapValueSuccessResponse;
   }
 }

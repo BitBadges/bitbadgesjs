@@ -12,9 +12,7 @@ const { generateReservedListId, getReservedAddressList } = AddressList;
  *
  * @category Approvals / Transferability
  */
-export function appendAllIncomingTransfersApproval(
-  currApprovals: UserIncomingApprovalWithDetails<bigint>[]
-): UserIncomingApprovalWithDetails<bigint>[] {
+export function appendAllIncomingTransfersApproval(currApprovals: UserIncomingApprovalWithDetails[]): UserIncomingApprovalWithDetails[] {
   const defaultToAdd = new UserIncomingApprovalWithDetails({
     fromListId: 'All', //everyone
     fromList: AddressList.AllAddresses(),
@@ -39,10 +37,7 @@ export function appendAllIncomingTransfersApproval(
  *
  * @category Approvals / Transferability
  */
-export function appendSelfInitiatedIncomingApproval(
-  currApprovals: UserIncomingApprovalWithDetails<bigint>[],
-  userAddress: string
-): UserIncomingApprovalWithDetails<bigint>[] {
+export function appendSelfInitiatedIncomingApproval(currApprovals: UserIncomingApprovalWithDetails[], userAddress: string): UserIncomingApprovalWithDetails[] {
   if (userAddress === 'Mint' || userAddress === 'Total') {
     return currApprovals;
   }
@@ -71,10 +66,7 @@ export function appendSelfInitiatedIncomingApproval(
  *
  * @category Approvals / Transferability
  */
-export function appendSelfInitiatedOutgoingApproval(
-  currApprovals: UserOutgoingApprovalWithDetails<bigint>[],
-  userAddress: string
-): UserOutgoingApprovalWithDetails<bigint>[] {
+export function appendSelfInitiatedOutgoingApproval(currApprovals: UserOutgoingApprovalWithDetails[], userAddress: string): UserOutgoingApprovalWithDetails[] {
   if (userAddress === 'Mint' || userAddress === 'Total') {
     return currApprovals;
   }
@@ -108,16 +100,12 @@ export function appendSelfInitiatedOutgoingApproval(
  *
  * @category Approvals / Transferability
  */
-export function getUnhandledCollectionApprovals(
-  collectionApprovals: CollectionApprovalWithDetails<bigint>[],
-  ignoreTrackerIds = true,
-  doNotMerge = false
-) {
-  const currTransferability: CollectionApprovalWithDetails<bigint>[] = collectionApprovals.map((x) => x.clone());
+export function getUnhandledCollectionApprovals(collectionApprovals: CollectionApprovalWithDetails[], ignoreTrackerIds = true, doNotMerge = false) {
+  const currTransferability: CollectionApprovalWithDetails[] = collectionApprovals.map((x) => x.clone());
 
   //Startegy here is to create a unique approval, get first matches, and then whatever makes it through the first matches (w/ approvalId "__disapproved__") is unhandled
   currTransferability.push(
-    new CollectionApprovalWithDetails<bigint>({
+    new CollectionApprovalWithDetails({
       fromList: AddressList.getReservedAddressList('All'),
       toList: AddressList.getReservedAddressList('All'),
       initiatedByList: AddressList.getReservedAddressList('All'),
@@ -132,7 +120,7 @@ export function getUnhandledCollectionApprovals(
     })
   );
 
-  const expandedTransferability: CollectionApprovalWithDetails<bigint>[] = currTransferability;
+  const expandedTransferability: CollectionApprovalWithDetails[] = currTransferability;
   const firstMatches = GetFirstMatchOnly(
     expandedTransferability
       .map((x) => x.castToUniversalPermission())
@@ -152,7 +140,7 @@ export function getUnhandledCollectionApprovals(
 
   const merged = MergeUniversalPermissionDetails(firstMatches, doNotMerge);
 
-  const newApprovals: CollectionApprovalWithDetails<bigint>[] = [];
+  const newApprovals: CollectionApprovalWithDetails[] = [];
   for (const match of merged) {
     newApprovals.push(
       new CollectionApprovalWithDetails({
@@ -181,12 +169,7 @@ export function getUnhandledCollectionApprovals(
  *
  * @category Approvals / Transferability
  */
-export function getUnhandledUserOutgoingApprovals(
-  approvals: UserOutgoingApprovalWithDetails<bigint>[],
-  userAddress: string,
-  ignoreTrackerIds: boolean,
-  doNotMerge?: boolean
-) {
+export function getUnhandledUserOutgoingApprovals(approvals: UserOutgoingApprovalWithDetails[], userAddress: string, ignoreTrackerIds: boolean, doNotMerge?: boolean) {
   const castedApprovals = approvals.map((x) => x.castToCollectionTransfer(userAddress));
   const unhandled = getUnhandledCollectionApprovals(castedApprovals, ignoreTrackerIds, doNotMerge);
   const newUnhandled = [];
@@ -206,12 +189,7 @@ export function getUnhandledUserOutgoingApprovals(
  *
  * @category Approvals / Transferability
  */
-export function getUnhandledUserIncomingApprovals(
-  approvals: UserIncomingApprovalWithDetails<bigint>[],
-  userAddress: string,
-  ignoreTrackerIds: boolean,
-  doNotMerge?: boolean
-) {
+export function getUnhandledUserIncomingApprovals(approvals: UserIncomingApprovalWithDetails[], userAddress: string, ignoreTrackerIds: boolean, doNotMerge?: boolean) {
   const castedApprovals = approvals.map((x) => x.castToCollectionTransfer(userAddress));
   const unhandled = getUnhandledCollectionApprovals(castedApprovals, ignoreTrackerIds, doNotMerge);
   const newUnhandled = [];
@@ -232,7 +210,7 @@ export function getUnhandledUserIncomingApprovals(
  *
  * @category Approvals / Transferability
  */
-export const getNonMintApprovals = <T extends NumberType>(collectionApprovals: CollectionApprovalWithDetails<T>[]) => {
+export const getNonMintApprovals = (collectionApprovals: CollectionApprovalWithDetails[]) => {
   const existingNonMint = collectionApprovals
     .map((x) => {
       if (x.fromList.checkAddress('Mint')) {
@@ -258,7 +236,8 @@ export const getNonMintApprovals = <T extends NumberType>(collectionApprovals: C
         return x;
       }
     })
-    .filter((x) => x !== undefined).map((x) => new CollectionApprovalWithDetails(x));
+    .filter((x) => x !== undefined)
+    .map((x) => new CollectionApprovalWithDetails(x));
 
   return existingNonMint;
 };
@@ -269,7 +248,7 @@ export const getNonMintApprovals = <T extends NumberType>(collectionApprovals: C
  *
  * @category Approvals / Transferability
  */
-export const getMintApprovals = <T extends NumberType>(collectionApprovals: CollectionApprovalWithDetails<T>[]) => {
+export const getMintApprovals = (collectionApprovals: CollectionApprovalWithDetails[]) => {
   const newApprovals = collectionApprovals
     .map((x) => {
       if (x.fromList.checkAddress('Mint')) {
@@ -282,7 +261,8 @@ export const getMintApprovals = <T extends NumberType>(collectionApprovals: Coll
         return undefined;
       }
     })
-    .filter((x) => x !== undefined).map((x) => new CollectionApprovalWithDetails(x));
+    .filter((x) => x !== undefined)
+    .map((x) => new CollectionApprovalWithDetails(x));
 
   return newApprovals;
 };

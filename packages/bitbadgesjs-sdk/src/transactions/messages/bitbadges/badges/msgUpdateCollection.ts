@@ -27,33 +27,33 @@ import type { iMsgUpdateCollection } from './interfaces.js';
  *
  * @category Transactions
  */
-export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeClass<MsgUpdateCollection<T>> implements iMsgUpdateCollection<T> {
+export class MsgUpdateCollection extends BaseNumberTypeClass<MsgUpdateCollection> implements iMsgUpdateCollection {
   creator: BitBadgesAddress;
   collectionId: CollectionId;
   updateValidTokenIds?: boolean;
-  validTokenIds?: UintRangeArray<T>;
+  validTokenIds?: UintRangeArray;
   updateCollectionPermissions?: boolean;
-  collectionPermissions?: CollectionPermissions<T>;
+  collectionPermissions?: CollectionPermissions;
   updateManager?: boolean;
   manager?: BitBadgesAddress;
   updateCollectionMetadata?: boolean;
   collectionMetadata?: CollectionMetadata;
   updateTokenMetadata?: boolean;
-  tokenMetadata?: TokenMetadata<T>[];
+  tokenMetadata?: TokenMetadata[];
   updateCustomData?: boolean;
   customData?: string;
   updateCollectionApprovals?: boolean;
-  collectionApprovals?: CollectionApproval<T>[];
+  collectionApprovals?: CollectionApproval[];
   updateStandards?: boolean;
   standards?: string[];
   updateIsArchived?: boolean;
   isArchived?: boolean;
-  mintEscrowCoinsToTransfer?: CosmosCoin<T>[];
-  cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject<T>[];
-  aliasPathsToAdd?: AliasPathAddObject<T>[];
-  invariants?: InvariantsAddObject<T>;
+  mintEscrowCoinsToTransfer?: CosmosCoin[];
+  cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject[];
+  aliasPathsToAdd?: AliasPathAddObject[];
+  invariants?: InvariantsAddObject;
 
-  constructor(msg: iMsgUpdateCollection<T>) {
+  constructor(msg: iMsgUpdateCollection) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
@@ -76,9 +76,7 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     this.updateIsArchived = msg.updateIsArchived;
     this.isArchived = msg.isArchived;
     this.mintEscrowCoinsToTransfer = msg.mintEscrowCoinsToTransfer ? msg.mintEscrowCoinsToTransfer.map((x) => new CosmosCoin(x)) : undefined;
-    this.cosmosCoinWrapperPathsToAdd = msg.cosmosCoinWrapperPathsToAdd
-      ? msg.cosmosCoinWrapperPathsToAdd.map((x) => new CosmosCoinWrapperPathAddObject(x))
-      : undefined;
+    this.cosmosCoinWrapperPathsToAdd = msg.cosmosCoinWrapperPathsToAdd ? msg.cosmosCoinWrapperPathsToAdd.map((x) => new CosmosCoinWrapperPathAddObject(x)) : undefined;
     this.aliasPathsToAdd = msg.aliasPathsToAdd ? msg.aliasPathsToAdd.map((x) => new AliasPathAddObject(x)) : undefined;
   }
 
@@ -86,43 +84,30 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgUpdateCollection<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUpdateCollection<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgUpdateCollection {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUpdateCollection;
   }
 
   toProto(): protobadges.MsgUpdateCollection {
     return new protobadges.MsgUpdateCollection(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgUpdateCollection<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgUpdateCollection {
     return MsgUpdateCollection.fromProto(protobadges.MsgUpdateCollection.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgUpdateCollection<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgUpdateCollection {
     return MsgUpdateCollection.fromProto(protobadges.MsgUpdateCollection.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    protoMsg: protobadges.MsgUpdateCollection,
-    convertFunction: (item: NumberType) => U
-  ): MsgUpdateCollection<U> {
+  static fromProto(protoMsg: protobadges.MsgUpdateCollection, convertFunction: (item: string | number) => U): MsgUpdateCollection {
     return new MsgUpdateCollection({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
       updateValidTokenIds: protoMsg.updateValidTokenIds,
       validTokenIds: protoMsg.validTokenIds?.map((x) => UintRange.fromProto(x, convertFunction)),
       updateCollectionPermissions: protoMsg.updateCollectionPermissions,
-      collectionPermissions: protoMsg.collectionPermissions
-        ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction)
-        : undefined,
+      collectionPermissions: protoMsg.collectionPermissions ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction) : undefined,
       updateManager: protoMsg.updateManager,
       manager: protoMsg.manager || undefined,
       updateCollectionMetadata: protoMsg.updateCollectionMetadata,
@@ -144,8 +129,8 @@ export class MsgUpdateCollection<T extends NumberType> extends BaseNumberTypeCla
     });
   }
 
-  toBech32Addresses(prefix: string): MsgUpdateCollection<T> {
-    return new MsgUpdateCollection<T>({
+  toBech32Addresses(prefix: string): MsgUpdateCollection {
+    return new MsgUpdateCollection({
       ...this,
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,

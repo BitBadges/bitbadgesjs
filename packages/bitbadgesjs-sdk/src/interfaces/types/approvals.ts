@@ -1,22 +1,13 @@
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iApprovalInfoDetails, iIncomingApprovalCriteriaWithDetails } from '@/core/approvals.js';
-import type {
-  iAddressList,
-  iBalance,
-  iCoinTransfer,
-  iETHSignatureChallenge,
-  iMerkleChallenge,
-  iMustOwnToken,
-  iUintRange,
-  iVotingChallenge
-} from './core.js';
+import type { iAddressList, iBalance, iCoinTransfer, iETHSignatureChallenge, iMerkleChallenge, iMustOwnToken, iUintRange, iVotingChallenge } from './core.js';
 
 /**
  * @category Interfaces
  */
-export interface iDynamicStoreChallenge<T extends NumberType> {
+export interface iDynamicStoreChallenge {
   /** The ID of the dynamic store to check. */
-  storeId: T;
+  storeId: string | number;
   /** The party to check ownership for. Options are "initiator", "sender", "recipient", or any valid bb1 address. If a valid bb1 address is provided, ownership will be checked for that specific address. This enables use cases like halt tokens where ownership is checked for an arbitrary address (e.g., halt token owner). Defaults to "initiator" if empty or if the value is not a recognized option or valid bb1 address. */
   ownershipCheckParty?: string;
 }
@@ -38,27 +29,27 @@ export interface iAddressChecks {
 /**
  * @category Interfaces
  */
-export interface iAltTimeChecks<T extends NumberType> {
+export interface iAltTimeChecks {
   /** Hours (0-23) when transfers should be denied. Uses UTC timezone. */
-  offlineHours?: iUintRange<T>[];
+  offlineHours?: iUintRange[];
   /** Days (0-6, where 0=Sunday, 1=Monday, ..., 6=Saturday) when transfers should be denied. Uses UTC timezone. */
-  offlineDays?: iUintRange<T>[];
+  offlineDays?: iUintRange[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iUserOutgoingApproval<T extends NumberType> {
+export interface iUserOutgoingApproval {
   /** The list ID for the user(s) who is sending the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   toListId: string;
   /** The list ID for the user(s) who initiate the transfer. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   initiatedByListId: string;
   /** The times allowed for the transfer transaction. */
-  transferTimes: iUintRange<T>[];
+  transferTimes: iUintRange[];
   /** The token IDs to be transferred. */
-  tokenIds: iUintRange<T>[];
+  tokenIds: iUintRange[];
   /** The ownership times of the tokens being transferred. */
-  ownershipTimes: iUintRange<T>[];
+  ownershipTimes: iUintRange[];
   /** The ID of the approval. Must not be a duplicate of another approval ID in the same timeline. */
   approvalId: string;
   /** The URI of the approval. */
@@ -66,27 +57,27 @@ export interface iUserOutgoingApproval<T extends NumberType> {
   /** Arbitrary custom data of the approval */
   customData?: string;
   /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own tokens, etc. */
-  approvalCriteria?: iOutgoingApprovalCriteria<T>;
+  approvalCriteria?: iOutgoingApprovalCriteria;
   /** The version of the approval. */
-  version: T;
+  version: string | number;
 }
 
 /**
  * @category Interfaces
  */
-export interface iOutgoingApprovalCriteria<T extends NumberType> {
+export interface iOutgoingApprovalCriteria {
   /** The BADGE or sdk.coin transfers to be executed upon every approval. */
-  coinTransfers?: iCoinTransfer<T>[];
+  coinTransfers?: iCoinTransfer[];
   /** The list of must own tokens that need valid proofs to be approved. */
-  mustOwnTokens?: iMustOwnToken<T>[];
+  mustOwnTokens?: iMustOwnToken[];
   /** The list of merkle challenges that need valid proofs to be approved. */
-  merkleChallenges?: iMerkleChallenge<T>[];
+  merkleChallenges?: iMerkleChallenge[];
   /** The predetermined balances for each transfer. These allow approvals to use predetermined balance amounts rather than an incrementing tally system. */
-  predeterminedBalances?: iPredeterminedBalances<T>;
+  predeterminedBalances?: iPredeterminedBalances;
   /** The maximum approved amounts for this approval. */
-  approvalAmounts?: iApprovalAmounts<T>;
+  approvalAmounts?: iApprovalAmounts;
   /** The max num transfers for this approval. */
-  maxNumTransfers?: iMaxNumTransfers<T>;
+  maxNumTransfers?: iMaxNumTransfers;
   /** Whether the to address must equal the initiatedBy address. */
   requireToEqualsInitiatedBy?: boolean;
   /** Whether the to address must not equal the initiatedBy  address. */
@@ -94,7 +85,7 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   /** Whether the approval should be deleted after one use. */
   autoDeletionOptions?: iAutoDeletionOptions;
   /** The list of dynamic store challenges that the initiator must pass for approval. */
-  dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
+  dynamicStoreChallenges?: iDynamicStoreChallenge[];
   /** The list of ETH signature challenges that the initiator must pass for approval. */
   ethSignatureChallenges?: iETHSignatureChallenge[];
   /** Address checks for recipient */
@@ -102,21 +93,21 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   /** Address checks for initiator */
   initiatorChecks?: iAddressChecks;
   /** Alternative time-based checks for approval denial (offline hours/days). */
-  altTimeChecks?: iAltTimeChecks<T>;
+  altTimeChecks?: iAltTimeChecks;
   /** If true, this approval must be explicitly prioritized in PrioritizedApprovals to be used. */
   mustPrioritize?: boolean;
   /** The list of voting challenges that must be satisfied for approval. */
-  votingChallenges?: iVotingChallenge<T>[];
+  votingChallenges?: iVotingChallenge[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iPredeterminedBalances<T extends NumberType> {
+export interface iPredeterminedBalances {
   /** Manually define the balances for each transfer. Cannot be used with incrementedBalances. Order number corresponds to the index of the balance in the array. */
-  manualBalances: iManualBalances<T>[];
+  manualBalances: iManualBalances[];
   /** Define a starting balance and increment the token IDs and owned times by a certain amount after each transfer. Cannot be used with manualBalances. Order number corresponds to number of times we increment. */
-  incrementedBalances: iIncrementedBalances<T>;
+  incrementedBalances: iIncrementedBalances;
   /** The order calculation method. */
   orderCalculationMethod: iPredeterminedOrderCalculationMethod;
 }
@@ -124,39 +115,39 @@ export interface iPredeterminedBalances<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iManualBalances<T extends NumberType> {
+export interface iManualBalances {
   /** The list of balances for each transfer. Order number corresponds to the index of the balance in the array. */
-  balances: iBalance<T>[];
+  balances: iBalance[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iRecurringOwnershipTimes<T extends NumberType> {
+export interface iRecurringOwnershipTimes {
   /** The start time of the recurring ownership times. */
-  startTime: T;
+  startTime: string | number;
   /** The interval length of the recurring ownership times. */
-  intervalLength: T;
+  intervalLength: string | number;
   /** Grace period length of when this is valid. */
-  chargePeriodLength: T;
+  chargePeriodLength: string | number;
 }
 
 /**
  * @category Interfaces
  */
-export interface iIncrementedBalances<T extends NumberType> {
+export interface iIncrementedBalances {
   /** The starting balances for each transfer. Order number corresponds to the number of times we increment. */
-  startBalances: iBalance<T>[];
+  startBalances: iBalance[];
   /** The amount to increment the token IDs by after each transfer. */
-  incrementTokenIdsBy: T;
+  incrementTokenIdsBy: string | number;
   /** The amount to increment the owned times by after each transfer. Incompatible with durationFromTimestamp. */
-  incrementOwnershipTimesBy: T;
+  incrementOwnershipTimesBy: string | number;
   /** The number of unix milliseconds to approve starting from now. Incompatible with incrementOwnershipTimesBy. */
-  durationFromTimestamp: T;
+  durationFromTimestamp: string | number;
   /** Whether to allow the override timestamp to be used. */
   allowOverrideTimestamp: boolean;
   /** The recurring ownership times for the approval. */
-  recurringOwnershipTimes: iRecurringOwnershipTimes<T>;
+  recurringOwnershipTimes: iRecurringOwnershipTimes;
   /** Whether to allow the override with any valid ID. */
   allowOverrideWithAnyValidToken: boolean;
 }
@@ -182,29 +173,29 @@ export interface iPredeterminedOrderCalculationMethod {
 /**
  * @category Interfaces
  */
-export interface iResetTimeIntervals<T extends NumberType> {
+export interface iResetTimeIntervals {
   /** The start time of the first interval. */
-  startTime: T;
+  startTime: string | number;
   /** The length of the interval. */
-  intervalLength: T;
+  intervalLength: string | number;
 }
 
 /**
  * @category Interfaces
  */
-export interface iApprovalAmounts<T extends NumberType> {
+export interface iApprovalAmounts {
   /** The overall maximum amount approved for the tokenIDs and ownershipTimes. Running tally that includes all transfers that match this approval. */
-  overallApprovalAmount: T;
+  overallApprovalAmount: string | number;
   /** The maximum amount approved for the tokenIDs and ownershipTimes for each to address. Running tally that includes all transfers from each unique to address that match this approval. */
-  perToAddressApprovalAmount: T;
+  perToAddressApprovalAmount: string | number;
   /** The maximum amount approved for the tokenIDs and ownershipTimes for each from address. Running tally that includes all transfers from each unique from address that match this approval. */
-  perFromAddressApprovalAmount: T;
+  perFromAddressApprovalAmount: string | number;
   /** The maximum amount approved for the tokenIDs and ownershipTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval. */
-  perInitiatedByAddressApprovalAmount: T;
+  perInitiatedByAddressApprovalAmount: string | number;
   /** The ID of the approval tracker. This is the key used to track tallies. */
   amountTrackerId: string;
   /** The time intervals to reset the tracker at. */
-  resetTimeIntervals: iResetTimeIntervals<T>;
+  resetTimeIntervals: iResetTimeIntervals;
 }
 
 /**
@@ -224,35 +215,35 @@ export interface iAutoDeletionOptions {
 /**
  * @category Interfaces
  */
-export interface iMaxNumTransfers<T extends NumberType> {
+export interface iMaxNumTransfers {
   /** The overall maximum number of transfers for the tokenIDs and ownershipTimes. Running tally that includes all transfers that match this approval. */
-  overallMaxNumTransfers: T;
+  overallMaxNumTransfers: string | number;
   /** The maximum number of transfers for the tokenIDs and ownershipTimes for each to address. Running tally that includes all transfers from each unique to address that match this approval. */
-  perToAddressMaxNumTransfers: T;
+  perToAddressMaxNumTransfers: string | number;
   /** The maximum number of transfers for the tokenIDs and ownershipTimes for each from address. Running tally that includes all transfers from each unique from address that match this approval. */
-  perFromAddressMaxNumTransfers: T;
+  perFromAddressMaxNumTransfers: string | number;
   /** The maximum number of transfers for the tokenIDs and ownershipTimes for each initiated by address. Running tally that includes all transfers from each unique initiated by address that match this approval. */
-  perInitiatedByAddressMaxNumTransfers: T;
+  perInitiatedByAddressMaxNumTransfers: string | number;
   /** The ID of the approval tracker. This is the key used to track tallies. */
   amountTrackerId: string;
   /** The time intervals to reset the tracker at. */
-  resetTimeIntervals: iResetTimeIntervals<T>;
+  resetTimeIntervals: iResetTimeIntervals;
 }
 
 /**
  * @category Interfaces
  */
-export interface iUserIncomingApproval<T extends NumberType> {
+export interface iUserIncomingApproval {
   /** The list ID for the user(s) who is sending the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   fromListId: string;
   /** The list ID for the user(s) who initiate the transfer. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   initiatedByListId: string;
   /** The times allowed for the transfer transaction. */
-  transferTimes: iUintRange<T>[];
+  transferTimes: iUintRange[];
   /** The token IDs to be transferred. */
-  tokenIds: iUintRange<T>[];
+  tokenIds: iUintRange[];
   /** The ownership times of the tokens being transferred. */
-  ownershipTimes: iUintRange<T>[];
+  ownershipTimes: iUintRange[];
   /** The ID of the approval. Must not be a duplicate of another approval ID in the same timeline. */
   approvalId: string;
   /** The URI of the approval. */
@@ -260,27 +251,27 @@ export interface iUserIncomingApproval<T extends NumberType> {
   /** Arbitrary custom data of the approval */
   customData?: string;
   /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own tokens, etc. */
-  approvalCriteria?: iIncomingApprovalCriteria<T>;
+  approvalCriteria?: iIncomingApprovalCriteria;
   /** The version of the approval. */
-  version: T;
+  version: string | number;
 }
 
 /**
  * @category Interfaces
  */
-export interface iIncomingApprovalCriteria<T extends NumberType> {
+export interface iIncomingApprovalCriteria {
   /** The BADGE or sdk.coin transfers to be executed upon every approval. */
-  coinTransfers?: iCoinTransfer<T>[];
+  coinTransfers?: iCoinTransfer[];
   /** The list of merkle challenges that need valid proofs to be approved. */
-  merkleChallenges?: iMerkleChallenge<T>[];
+  merkleChallenges?: iMerkleChallenge[];
   /** The list of must own tokens that need valid proofs to be approved. */
-  mustOwnTokens?: iMustOwnToken<T>[];
+  mustOwnTokens?: iMustOwnToken[];
   /** The predetermined balances for each transfer using this approval. */
-  predeterminedBalances?: iPredeterminedBalances<T>;
+  predeterminedBalances?: iPredeterminedBalances;
   /** The maximum approved amounts for this approval. */
-  approvalAmounts?: iApprovalAmounts<T>;
+  approvalAmounts?: iApprovalAmounts;
   /** The max num transfers for this approval. */
-  maxNumTransfers?: iMaxNumTransfers<T>;
+  maxNumTransfers?: iMaxNumTransfers;
   /** Whether the approval should be deleted after one use. */
   autoDeletionOptions?: iAutoDeletionOptions;
   /** Whether the from address must equal the initiatedBy address. */
@@ -288,7 +279,7 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   /** Whether the from address must not equal the initiatedBy address. */
   requireFromDoesNotEqualInitiatedBy?: boolean;
   /** The list of dynamic store challenges that the initiator must pass for approval. */
-  dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
+  dynamicStoreChallenges?: iDynamicStoreChallenge[];
   /** The list of ETH signature challenges that the initiator must pass for approval. */
   ethSignatureChallenges?: iETHSignatureChallenge[];
   /** Address checks for sender */
@@ -296,17 +287,17 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   /** Address checks for initiator */
   initiatorChecks?: iAddressChecks;
   /** Alternative time-based checks for approval denial (offline hours/days). */
-  altTimeChecks?: iAltTimeChecks<T>;
+  altTimeChecks?: iAltTimeChecks;
   /** If true, this approval must be explicitly prioritized in PrioritizedApprovals to be used. */
   mustPrioritize?: boolean;
   /** The list of voting challenges that must be satisfied for approval. */
-  votingChallenges?: iVotingChallenge<T>[];
+  votingChallenges?: iVotingChallenge[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iCollectionApproval<T extends NumberType> {
+export interface iCollectionApproval {
   /** The list ID for the user(s) who is receiving the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   toListId: string;
   /** The list ID for the user(s) who is sending the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system. */
@@ -314,11 +305,11 @@ export interface iCollectionApproval<T extends NumberType> {
   /** The list ID for the user(s) who initiate the transfer. The ID is either registered on-chain for reusability or follows the reserved ID system. */
   initiatedByListId: string;
   /** The times allowed for the transfer transaction. */
-  transferTimes: iUintRange<T>[];
+  transferTimes: iUintRange[];
   /** The token IDs to be transferred. */
-  tokenIds: iUintRange<T>[];
+  tokenIds: iUintRange[];
   /** The ownership times of the tokens being transferred. */
-  ownershipTimes: iUintRange<T>[];
+  ownershipTimes: iUintRange[];
   /** The ID of the approval. Must not be a duplicate of another approval ID in the same timeline. */
   approvalId: string;
   /** The URI of the approval. */
@@ -326,27 +317,27 @@ export interface iCollectionApproval<T extends NumberType> {
   /** Arbitrary custom data of the approval */
   customData?: string;
   /** The criteria to be met. These represent the restrictions that must be obeyed such as the total amount approved, max num transfers, merkle challenges, must own tokens, etc. */
-  approvalCriteria?: iApprovalCriteria<T>;
+  approvalCriteria?: iApprovalCriteria;
   /** The version of the approval.0 */
-  version: T;
+  version: string | number;
 }
 
 /**
  * @category Interfaces
  */
-export interface iApprovalCriteria<T extends NumberType> {
+export interface iApprovalCriteria {
   /** The BADGE or sdk.coin transfers to be executed upon every approval. */
-  coinTransfers?: iCoinTransfer<T>[];
+  coinTransfers?: iCoinTransfer[];
   /** The list of merkle challenges that need valid proofs to be approved. */
-  merkleChallenges?: iMerkleChallenge<T>[];
+  merkleChallenges?: iMerkleChallenge[];
   /** The list of must own tokens that need valid proofs to be approved. */
-  mustOwnTokens?: iMustOwnToken<T>[];
+  mustOwnTokens?: iMustOwnToken[];
   /** The predetermined balances for each transfer. These allow approvals to use predetermined balance amounts rather than an incrementing tally system. */
-  predeterminedBalances?: iPredeterminedBalances<T>;
+  predeterminedBalances?: iPredeterminedBalances;
   /** The maximum approved amounts for this approval. */
-  approvalAmounts?: iApprovalAmounts<T>;
+  approvalAmounts?: iApprovalAmounts;
   /** The max num transfers for this approval. */
-  maxNumTransfers?: iMaxNumTransfers<T>;
+  maxNumTransfers?: iMaxNumTransfers;
   /** Whether the approval should be deleted after one use. */
   autoDeletionOptions?: iAutoDeletionOptions;
   /** Whether the to address must equal the initiatedBy address. */
@@ -362,9 +353,9 @@ export interface iApprovalCriteria<T extends NumberType> {
   /** Whether this approval overrides the to address's approved incoming transfers. */
   overridesToIncomingApprovals?: boolean;
   /** The royalties to apply to the transfer. */
-  userRoyalties?: iUserRoyalties<T>;
+  userRoyalties?: iUserRoyalties;
   /** The list of dynamic store challenges that the initiator must pass for approval. */
-  dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
+  dynamicStoreChallenges?: iDynamicStoreChallenge[];
   /** The list of ETH signature challenges that the initiator must pass for approval. */
   ethSignatureChallenges?: iETHSignatureChallenge[];
   /** Address checks for sender */
@@ -374,11 +365,11 @@ export interface iApprovalCriteria<T extends NumberType> {
   /** Address checks for initiator */
   initiatorChecks?: iAddressChecks;
   /** Alternative time-based checks for approval denial (offline hours/days). */
-  altTimeChecks?: iAltTimeChecks<T>;
+  altTimeChecks?: iAltTimeChecks;
   /** If true, this approval must be explicitly prioritized in PrioritizedApprovals to be used. */
   mustPrioritize?: boolean;
   /** The list of voting challenges that must be satisfied for approval. */
-  votingChallenges?: iVotingChallenge<T>[];
+  votingChallenges?: iVotingChallenge[];
   /** If true, this collection approval allows backed minting operations (CosmosCoinBackedPath). When false, this approval cannot be used for transfers involving backed minting addresses. This prevents accidental allowances when toListIds is "All". */
   allowBackedMinting?: boolean;
   /** If true, this collection approval allows special wrapping operations (CosmosCoinWrapperPath). When false, this approval cannot be used for transfers involving wrapping addresses. This prevents accidental allowances when toListIds is "All". */
@@ -388,9 +379,9 @@ export interface iApprovalCriteria<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iUserRoyalties<T extends NumberType> {
+export interface iUserRoyalties {
   /** The percentage of the transfer amount to apply as royalties. 1 to 10000 represents basis points. */
-  percentage: T;
+  percentage: string | number;
   /** The payout address for the royalties. */
   payoutAddress: string;
 }
@@ -398,11 +389,11 @@ export interface iUserRoyalties<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iUserIncomingApprovalWithDetails<T extends NumberType> extends iUserIncomingApproval<T> {
+export interface iUserIncomingApprovalWithDetails extends iUserIncomingApproval {
   /** The populated address list for fromListId */
   fromList: iAddressList;
   /** The populated address list for initiatedByListId */
   initiatedByList: iAddressList;
-  approvalCriteria?: iIncomingApprovalCriteriaWithDetails<T>;
+  approvalCriteria?: iIncomingApprovalCriteriaWithDetails;
   details?: iApprovalInfoDetails;
 }

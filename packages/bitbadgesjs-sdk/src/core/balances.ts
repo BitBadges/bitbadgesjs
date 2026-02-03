@@ -19,12 +19,12 @@ import { BaseTypedArray } from '@/common/typed-arrays.js';
  *
  * @see [BitBadges Documentation - Balances](https://docs.bitbadges.io/for-developers/core-concepts/balances)
  */
-export class Balance<T extends NumberType> extends BaseNumberTypeClass<Balance<T>> implements iBalance<T> {
-  amount: T;
-  tokenIds: UintRangeArray<T>;
-  ownershipTimes: UintRangeArray<T>;
+export class Balance extends BaseNumberTypeClass<Balance> implements iBalance {
+  amount: string | number;
+  tokenIds: UintRangeArray;
+  ownershipTimes: UintRangeArray;
 
-  constructor(balance: iBalance<T>) {
+  constructor(balance: iBalance) {
     super();
     this.amount = balance.amount;
     this.tokenIds = UintRangeArray.From(balance.tokenIds);
@@ -35,8 +35,8 @@ export class Balance<T extends NumberType> extends BaseNumberTypeClass<Balance<T
     return ['amount'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Balance<U> {
-    return new Balance<U>(
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): Balance {
+    return new Balance(
       deepCopyPrimitives({
         amount: convertFunction(this.amount),
         tokenIds: this.tokenIds.map((b) => b.convert(convertFunction)),
@@ -49,31 +49,23 @@ export class Balance<T extends NumberType> extends BaseNumberTypeClass<Balance<T
     return new protobadges.Balance(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): Balance<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): Balance {
     return Balance.fromProto(protobadges.Balance.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): Balance<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): Balance {
     return Balance.fromProto(protobadges.Balance.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.Balance, convertFunction: (item: NumberType) => U): Balance<U> {
-    return new Balance<U>({
+  static fromProto(item: protobadges.Balance, convertFunction: (item: string | number) => U): Balance {
+    return new Balance({
       amount: convertFunction(BigInt(item.amount)),
       tokenIds: item.tokenIds.map((b) => UintRange.fromProto(b, convertFunction)),
       ownershipTimes: item.ownershipTimes.map((b) => UintRange.fromProto(b, convertFunction))
     });
   }
 
-  toArray(): BalanceArray<T> {
+  toArray(): BalanceArray {
     return BalanceArray.From([this.clone()]);
   }
 }
@@ -86,14 +78,7 @@ export class Balance<T extends NumberType> extends BaseNumberTypeClass<Balance<T
  *
  * @category Balances
  */
-export const applyIncrementsToBalances = <T extends NumberType>(
-  startBalances: iBalance<T>[],
-  incrementTokenIdsBy: T,
-  incrementOwnershipTimesBy: T,
-  numIncrements: T,
-  durationFromTimestamp: T,
-  blockTime: T
-) => {
+export const applyIncrementsToBalances = (startBalances: iBalance[], incrementTokenIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T, durationFromTimestamp: T, blockTime: T) => {
   let balancesToReturn = BalanceArray.From(startBalances).clone();
 
   balancesToReturn = BalanceArray.From(
@@ -141,7 +126,7 @@ export const applyIncrementsToBalances = <T extends NumberType>(
  * @param balances - The set of balances to search.
  * @category Balances
  */
-export const getBalanceForIdAndTime = <T extends NumberType>(id: T, time: T, balances: iBalance<T>[]) => {
+export const getBalanceForIdAndTime = (id: T, time: T, balances: iBalance[]) => {
   const convertFunction = getConverterFunction(id);
   let amount = 0n;
   for (const balance of BalanceArray.From(balances)) {
@@ -162,8 +147,8 @@ export const getBalanceForIdAndTime = <T extends NumberType>(id: T, time: T, bal
  *
  * @category Balances
  */
-export function getBalancesForId<T extends NumberType>(tokenId: T, balances: iBalance<T>[]): BalanceArray<T> {
-  const matchingBalances: BalanceArray<T> = BalanceArray.From([]);
+export function getBalancesForId(tokenId: T, balances: iBalance[]): BalanceArray {
+  const matchingBalances: BalanceArray = BalanceArray.From([]);
 
   for (const balance of BalanceArray.From(balances)) {
     if (balance.tokenIds.searchIfExists(tokenId)) {
@@ -187,8 +172,8 @@ export function getBalancesForId<T extends NumberType>(tokenId: T, balances: iBa
  *
  * @category Balances
  */
-export function getBalancesForTime<T extends NumberType>(time: T, balances: iBalance<T>[]): BalanceArray<T> {
-  const matchingBalances: BalanceArray<T> = BalanceArray.From([]);
+export function getBalancesForTime(time: T, balances: iBalance[]): BalanceArray {
+  const matchingBalances: BalanceArray = BalanceArray.From([]);
 
   for (const balance of BalanceArray.From(balances)) {
     const found = balance.ownershipTimes.searchIfExists(time);
@@ -208,8 +193,8 @@ export function getBalancesForTime<T extends NumberType>(time: T, balances: iBal
  *
  * @category Balances
  */
-export function filterZeroBalances<T extends NumberType>(balances: iBalance<T>[]) {
-  const newBalances: BalanceArray<T> = BalanceArray.From([]);
+export function filterZeroBalances(balances: iBalance[]) {
+  const newBalances: BalanceArray = BalanceArray.From([]);
   const balanceArr = BalanceArray.From(balances);
   for (let i = 0; i < balanceArr.length; i++) {
     const balance = balanceArr[i];
@@ -229,7 +214,7 @@ export function filterZeroBalances<T extends NumberType>(balances: iBalance<T>[]
  *
  * @category Balances
  */
-export function doBalancesExceedThreshold<T extends NumberType>(balances: iBalance<T>[], thresholdBalances: iBalance<T>[]) {
+export function doBalancesExceedThreshold(balances: iBalance[], thresholdBalances: iBalance[]) {
   //Check if we exceed the threshold; will underflow if we do exceed it
   const thresholdCopy = BalanceArray.From(thresholdBalances).clone();
 
@@ -252,11 +237,7 @@ export function doBalancesExceedThreshold<T extends NumberType>(balances: iBalan
  *
  * @category Balances
  */
-export function addBalancesAndCheckIfExceedsThreshold<T extends NumberType>(
-  currTally: iBalance<T>[],
-  toAdd: iBalance<T>[],
-  threshold: iBalance<T>[]
-) {
+export function addBalancesAndCheckIfExceedsThreshold(currTally: iBalance[], toAdd: iBalance[], threshold: iBalance[]) {
   //If we transferAsMuchAsPossible, we need to increment the currTally by all that we can
   //We then need to return the updated toAdd
   currTally = addBalances(toAdd, currTally);
@@ -278,7 +259,7 @@ export function addBalancesAndCheckIfExceedsThreshold<T extends NumberType>(
  *
  * @category Balances
  */
-export function areBalancesEqual<T extends NumberType>(expected: iBalance<T>[], actual: iBalance<T>[], checkZeroBalances: boolean) {
+export function areBalancesEqual(expected: iBalance[], actual: iBalance[], checkZeroBalances: boolean) {
   expected = BalanceArray.From(expected).clone();
   actual = BalanceArray.From(actual).clone();
 
@@ -313,7 +294,7 @@ export function areBalancesEqual<T extends NumberType>(expected: iBalance<T>[], 
  *
  * @category Balances
  */
-export function updateBalances<T extends NumberType>(newBalance: iBalance<T>, balances: iBalance<T>[]): BalanceArray<T> {
+export function updateBalances(newBalance: iBalance, balances: iBalance[]): BalanceArray {
   let balanceArr = BalanceArray.From(balances).clone();
 
   // We do a delete then set. Can maybe optimize in future.
@@ -323,7 +304,7 @@ export function updateBalances<T extends NumberType>(newBalance: iBalance<T>, ba
   return balanceArr;
 }
 
-function getConverterFunctionForBalances<T extends NumberType>(balance: iBalance<T> | iBalance<T>[]): (item: NumberType) => T {
+function getConverterFunctionForBalances(balance: iBalance | iBalance[]): (item: string | number) => T {
   if (Array.isArray(balance) && balance.length === 0) {
     throw new Error('invalid balance');
   }
@@ -340,7 +321,7 @@ function getConverterFunctionForBalances<T extends NumberType>(balance: iBalance
  *
  * @category Balances
  */
-export function addBalance<T extends NumberType>(existingBalances: iBalance<T>[], balanceToAdd: iBalance<T>): BalanceArray<T> {
+export function addBalance(existingBalances: iBalance[], balanceToAdd: iBalance): BalanceArray {
   const currBalances = getBalancesForIds(balanceToAdd.tokenIds, balanceToAdd.ownershipTimes, existingBalances);
   let existing = BalanceArray.From(existingBalances).clone();
   existing = deleteBalances(balanceToAdd.tokenIds, balanceToAdd.ownershipTimes, existing);
@@ -361,7 +342,7 @@ export function addBalance<T extends NumberType>(existingBalances: iBalance<T>[]
  *
  * @category Balances
  */
-export function addBalances<T extends NumberType>(balancesToAdd: iBalance<T>[], balances: iBalance<T>[]): BalanceArray<T> {
+export function addBalances(balancesToAdd: iBalance[], balances: iBalance[]): BalanceArray {
   let balancesArr = BalanceArray.From(balances).clone();
 
   for (const balance of balancesToAdd) {
@@ -381,11 +362,7 @@ export function addBalances<T extends NumberType>(balancesToAdd: iBalance<T>[], 
  *
  * @category Balances
  */
-export function subtractBalance<T extends NumberType>(
-  balances: iBalance<T>[],
-  balanceToRemove: iBalance<T>,
-  allowUnderflow?: boolean
-): BalanceArray<T> {
+export function subtractBalance(balances: iBalance[], balanceToRemove: iBalance, allowUnderflow?: boolean): BalanceArray {
   const currBalances = getBalancesForIds(balanceToRemove.tokenIds, balanceToRemove.ownershipTimes, balances);
   let balancesArr = BalanceArray.From(balances).clone();
 
@@ -409,11 +386,7 @@ export function subtractBalance<T extends NumberType>(
  *
  * @category Balances
  */
-export function subtractBalances<T extends NumberType>(
-  balancesToSubtract: iBalance<T>[],
-  balances: iBalance<T>[],
-  allowUnderflow?: boolean
-): BalanceArray<T> {
+export function subtractBalances(balancesToSubtract: iBalance[], balances: iBalance[], allowUnderflow?: boolean): BalanceArray {
   let newBalances = BalanceArray.From(balances).clone();
   // console.log(JSON.stringify(balancesToSubtract));
 
@@ -434,7 +407,7 @@ export function subtractBalances<T extends NumberType>(
  *
  * @category Balances
  */
-function setBalance<T extends NumberType>(newBalance: iBalance<T>, balances: iBalance<T>[]): BalanceArray<T> {
+function setBalance(newBalance: iBalance, balances: iBalance[]): BalanceArray {
   let newBalances = BalanceArray.From(balances).clone();
 
   if (newBalance.amount === 0n) {
@@ -448,7 +421,7 @@ function setBalance<T extends NumberType>(newBalance: iBalance<T>, balances: iBa
   return newBalances;
 }
 
-function setBalances<T extends NumberType>(newBalances: iBalance<T>[], balances: iBalance<T>[]): BalanceArray<T> {
+function setBalances(newBalances: iBalance[], balances: iBalance[]): BalanceArray {
   let newBalancesArr = BalanceArray.From(balances).clone();
 
   newBalancesArr.push(...newBalances.filter((x) => x.amount !== 0n));
@@ -461,7 +434,7 @@ function setBalances<T extends NumberType>(newBalances: iBalance<T>[], balances:
 /**
  * Gets the balances for specified ID ranges.
  *
- * Returns a BalanceArray.From<T> where only the specified ID ranges and their balances are included.
+ * Returns a BalanceArray.From where only the specified ID ranges and their balances are included.
  * Sets balance amount == 0 objects for IDs that are not found.
  *
  * @remarks
@@ -471,13 +444,13 @@ function setBalances<T extends NumberType>(newBalances: iBalance<T>[], balances:
  *
  * @category Balances
  */
-export function getBalancesForIds<T extends NumberType>(idRanges: iUintRange<T>[], times: iUintRange<T>[], balances: iBalance<T>[]): BalanceArray<T> {
+export function getBalancesForIds(idRanges: iUintRange[], times: iUintRange[], balances: iBalance[]): BalanceArray {
   if (idRanges.length === 0) {
     throw new Error('invalid idRanges');
   }
   const convertFunction = getConverterFunction(idRanges[0].start);
 
-  const fetchedBalances: BalanceArray<bigint> = BalanceArray.From([]);
+  const fetchedBalances: BalanceArray = BalanceArray.From([]);
 
   const currPermissionDetails: UniversalPermissionDetails[] = [];
   //assumes balances are sorted and non-overlapping
@@ -564,17 +537,13 @@ export function getBalancesForIds<T extends NumberType>(idRanges: iUintRange<T>[
  *
  * @category Balances
  */
-function deleteBalances<T extends NumberType>(
-  rangesToDelete: iUintRange<T>[],
-  timesToDelete: iUintRange<T>[],
-  balances: iBalance<T>[]
-): BalanceArray<T> {
+function deleteBalances(rangesToDelete: iUintRange[], timesToDelete: iUintRange[], balances: iBalance[]): BalanceArray {
   if (balances.length === 0) {
     return BalanceArray.From([]);
   }
 
   const convertFunction = getConverterFunctionForBalances(balances);
-  const newBalances: BalanceArray<bigint> = BalanceArray.From([]);
+  const newBalances: BalanceArray = BalanceArray.From([]);
 
   const toDeletePermissionDetails: UniversalPermissionDetails[] = [];
   for (const rangeToDelete of rangesToDelete) {
@@ -620,7 +589,7 @@ function deleteBalances<T extends NumberType>(
     const [, inOldButNotNew] = getOverlapsAndNonOverlaps(currPermissionDetails, toDeletePermissionDetails);
     for (const remainingBalance of inOldButNotNew) {
       newBalances.push(
-        new Balance<bigint>({
+        new Balance({
           amount: BigInt(balanceObj.amount),
           tokenIds: [remainingBalance.tokenId],
           ownershipTimes: [remainingBalance.ownershipTime]
@@ -640,7 +609,7 @@ function deleteBalances<T extends NumberType>(
  *
  * @category Balances
  */
-export function sortBalancesByAmount<T extends NumberType>(balances: iBalance<T>[]) {
+export function sortBalancesByAmount(balances: iBalance[]) {
   return BalanceArray.From(
     balances.sort((a, b) => {
       return a.amount > b.amount ? 1 : -1;
@@ -653,7 +622,7 @@ export function sortBalancesByAmount<T extends NumberType>(balances: iBalance<T>
  *
  * @category Balances
  */
-export function cleanBalances<T extends NumberType>(balancesArr: iBalance<T>[]) {
+export function cleanBalances(balancesArr: iBalance[]) {
   let balances = BalanceArray.From(balancesArr);
   for (const balance of balances) {
     balance.tokenIds.sortAndMerge();
@@ -662,7 +631,7 @@ export function cleanBalances<T extends NumberType>(balancesArr: iBalance<T>[]) 
   balances = sortBalancesByAmount(balances);
 
   //we also see if we can merge cross-balances
-  const newBalances: BalanceArray<T> = BalanceArray.From([]);
+  const newBalances: BalanceArray = BalanceArray.From([]);
   for (let i = 0; i < balances.length; i++) {
     const currBalance = balances[i];
 
@@ -701,7 +670,7 @@ export function cleanBalances<T extends NumberType>(balancesArr: iBalance<T>[]) 
 /**
  * @category Uint Ranges
  */
-export function uintRangeArrsEqual<T extends NumberType>(arr1: UintRangeArray<T>, arr2: UintRangeArray<T>) {
+export function uintRangeArrsEqual(arr1: UintRangeArray, arr2: UintRangeArray) {
   if (arr1.length !== arr2.length) {
     return false;
   }
@@ -722,7 +691,7 @@ export function uintRangeArrsEqual<T extends NumberType>(arr1: UintRangeArray<T>
  *
  * @category Balances
  */
-export function sortAndMergeBalances<T extends NumberType>(balances: iBalance<T>[]) {
+export function sortAndMergeBalances(balances: iBalance[]) {
   balances = handleDuplicateTokenIdsInBalances(balances);
   balances = cleanBalances(balances);
   balances = sortBalancesByAmount(balances);
@@ -737,24 +706,24 @@ export function sortAndMergeBalances<T extends NumberType>(balances: iBalance<T>
  *
  * @category Balances
  */
-export function handleDuplicateTokenIdsInBalances<T extends NumberType>(balances: iBalance<T>[]) {
-  let newBalances: BalanceArray<T> = BalanceArray.From([]);
+export function handleDuplicateTokenIdsInBalances(balances: iBalance[]) {
+  let newBalances: BalanceArray = BalanceArray.From([]);
   newBalances.addBalances(balances);
   return newBalances;
 }
 
-interface BalanceFunctions<T extends NumberType> {
+interface BalanceFunctions {
   getBalanceForIdAndTime: (tokenId: T, ownedTime: T) => T;
-  getBalancesForId: (tokenId: T) => BalanceArray<T>;
-  getBalancesForTime: (ownedTime: T) => BalanceArray<T>;
+  getBalancesForId: (tokenId: T) => BalanceArray;
+  getBalancesForTime: (ownedTime: T) => BalanceArray;
   filterZeroBalances: () => void;
-  subsetOf: (threshold: iBalance<T>[]) => boolean;
-  equalBalances: (other: iBalance<T>[], checkZeroBalances?: boolean) => boolean;
-  updateBalances: (newBalance: iBalance<T>) => void;
-  addBalances: (balancesToAdd: iBalance<T>[]) => void;
-  addBalance: (balanceToAdd: iBalance<T>) => void;
-  subtractBalances: (balancesToSubtract: iBalance<T>[], allowUnderflow: boolean) => void;
-  subtractBalance: (balanceToSubtract: iBalance<T>, allowUnderflow: boolean) => void;
+  subsetOf: (threshold: iBalance[]) => boolean;
+  equalBalances: (other: iBalance[], checkZeroBalances?: boolean) => boolean;
+  updateBalances: (newBalance: iBalance) => void;
+  addBalances: (balancesToAdd: iBalance[]) => void;
+  addBalance: (balanceToAdd: iBalance) => void;
+  subtractBalances: (balancesToSubtract: iBalance[], allowUnderflow: boolean) => void;
+  subtractBalance: (balanceToSubtract: iBalance, allowUnderflow: boolean) => void;
   sortBalancesByAmount: () => void;
   applyIncrements: (incrementTokenIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T, durationFromTimestamp: T, blockTime: T) => void;
 }
@@ -762,8 +731,8 @@ interface BalanceFunctions<T extends NumberType> {
 /**
  * @category Balances
  */
-export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceArray<T>, Balance<T>> implements BalanceFunctions<T> {
-  static From<T extends NumberType>(arr: iBalance<T>[] | iBalance<T> | BalanceArray<T>): BalanceArray<T> {
+export class BalanceArray extends BaseTypedArray<BalanceArray, Balance> implements BalanceFunctions {
+  static From(arr: iBalance[] | iBalance | BalanceArray): BalanceArray {
     const wrappedArr = Array.isArray(arr) ? arr : [arr];
     return new BalanceArray(...wrappedArr.map((x) => new Balance(x)));
   }
@@ -771,36 +740,36 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
   /**
    * @hidden
    */
-  push(...items: iBalance<T>[] | BalanceArray<T>): number {
+  push(...items: iBalance[] | BalanceArray): number {
     return super.push(...items.map((i) => new Balance(i)));
   }
 
   /**
    * @hidden
    */
-  fill(value: iBalance<T>, start?: number | undefined, end?: number | undefined): this {
+  fill(value: iBalance, start?: number | undefined, end?: number | undefined): this {
     return super.fill(new Balance(value), start, end);
   }
 
   /**
    * @hidden
    */
-  with(index: number, value: iBalance<T>): BalanceArray<T> {
+  with(index: number, value: iBalance): BalanceArray {
     return super.with(index, new Balance(value));
   }
 
   /**
    * @hidden
    */
-  unshift(...items: iBalance<T>[] | BalanceArray<T>): number {
+  unshift(...items: iBalance[] | BalanceArray): number {
     return super.unshift(...items.map((i) => new Balance(i)));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BalanceArray<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): BalanceArray {
     return BalanceArray.From(this.map((x) => x.convert(convertFunction)));
   }
 
-  clone(): BalanceArray<T> {
+  clone(): BalanceArray {
     return BalanceArray.From(this.map((x) => x.clone()));
   }
 
@@ -838,7 +807,7 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
   /**
    * Checks if the current balances are a subset of the threshold balances (i.e. doesn't exceed the threshold).
    */
-  subsetOf(threshold: iBalance<T>[] | BalanceArray<T>) {
+  subsetOf(threshold: iBalance[] | BalanceArray) {
     const res = doBalancesExceedThreshold(
       this.map((x) => x.convert(BigIntify)),
       BalanceArray.From(threshold).map((x) => x.convert(BigIntify))
@@ -849,7 +818,7 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
   /**
    * {@inheritDoc areBalancesEqual}
    */
-  equalBalances(other: iBalance<T>[] | BalanceArray<T>, checkZeroBalances = false) {
+  equalBalances(other: iBalance[] | BalanceArray, checkZeroBalances = false) {
     return areBalancesEqual(
       this.map((x) => x.convert(BigIntify)),
       BalanceArray.From(other).map((x) => x.convert(BigIntify)),
@@ -860,7 +829,7 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
   /**
    * {@inheritDoc updateBalances}
    */
-  updateBalances(newBalance: iBalance<T>): this {
+  updateBalances(newBalance: iBalance): this {
     const newBalances = updateBalances(newBalance, this);
     this.length = 0;
     this.push(...newBalances);
@@ -870,7 +839,7 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
   /**
    * {@inheritDoc addBalances}
    */
-  addBalances(balancesToAdd: iBalance<T>[] | BalanceArray<T>): this {
+  addBalances(balancesToAdd: iBalance[] | BalanceArray): this {
     const newBalances = addBalances(balancesToAdd, this);
     this.length = 0;
     this.push(...newBalances);
@@ -880,7 +849,7 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
   /**
    * {@inheritDoc addBalance}
    */
-  addBalance(balanceToAdd: iBalance<T>): this {
+  addBalance(balanceToAdd: iBalance): this {
     const newBalances = addBalance(this, balanceToAdd);
     this.length = 0;
     this.push(...newBalances);
@@ -890,7 +859,7 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
   /**
    * {@inheritDoc subtractBalances}
    */
-  subtractBalances(balancesToSubtract: iBalance<T>[] | BalanceArray<T>, allowNegatives = false) {
+  subtractBalances(balancesToSubtract: iBalance[] | BalanceArray, allowNegatives = false) {
     const newBalances = subtractBalances(balancesToSubtract, this, allowNegatives);
     this.length = 0;
     this.push(...newBalances);
@@ -900,7 +869,7 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
   /**
    * {@inheritDoc subtractBalance}
    */
-  subtractBalance(balanceToSubtract: iBalance<T>, allowUnderflow: boolean) {
+  subtractBalance(balanceToSubtract: iBalance, allowUnderflow: boolean) {
     return this.subtractBalances([balanceToSubtract], allowUnderflow);
   }
 
@@ -918,14 +887,7 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
    * {@inheritDoc applyIncrementsToBalances}
    */
   applyIncrements(incrementTokenIdsBy: T, incrementOwnershipTimesBy: T, numIncrements: T, durationFromTimestamp: T, blockTime: T) {
-    const newBalances = applyIncrementsToBalances(
-      this,
-      incrementTokenIdsBy,
-      incrementOwnershipTimesBy,
-      numIncrements,
-      durationFromTimestamp,
-      blockTime
-    );
+    const newBalances = applyIncrementsToBalances(this, incrementTokenIdsBy, incrementOwnershipTimesBy, numIncrements, durationFromTimestamp, blockTime);
     this.length = 0;
     this.push(...newBalances);
     return this;
@@ -935,7 +897,7 @@ export class BalanceArray<T extends NumberType> extends BaseTypedArray<BalanceAr
    * Gets all token IDs from the balances (sorted and merged).
    */
   getAllTokenIds() {
-    const tokenIds = new UintRangeArray<T>();
+    const tokenIds = new UintRangeArray();
     for (const balance of this) {
       tokenIds.push(...balance.tokenIds);
     }

@@ -11,22 +11,22 @@ export type JSPrimitiveNumberType = string | number;
 /**
  * @category Number Types
  */
-export const BigIntify = (item: NumberType) => numberify(item, StringNumberStorageOptions.BigInt) as bigint;
+export const BigIntify = (item: string | number) => numberify(item, StringNumberStorageOptions.BigInt) as bigint;
 
 /**
  * @category Number Types
  */
-export const Stringify = (item: NumberType) => numberify(item, StringNumberStorageOptions.String) as string;
+export const Stringify = (item: string | number) => numberify(item, StringNumberStorageOptions.String) as string;
 
 /**
  * @category Number Types
  */
-export const Numberify = (item: NumberType) => numberify(item, StringNumberStorageOptions.Number) as number;
+export const Numberify = (item: string | number) => numberify(item, StringNumberStorageOptions.Number) as number;
 
 /**
  * @category Number Types
  */
-export const NumberifyIfPossible = (item: NumberType) => numberify(item, StringNumberStorageOptions.NumberIfPossible) as number | string;
+export const NumberifyIfPossible = (item: string | number) => numberify(item, StringNumberStorageOptions.NumberIfPossible) as number | string;
 
 enum StringNumberStorageOptions {
   String = 'String',
@@ -35,7 +35,7 @@ enum StringNumberStorageOptions {
   NumberIfPossible = 'NumberIfPossible'
 }
 
-function numberify(_item: NumberType, options?: StringNumberStorageOptions): NumberType {
+function numberify(_item: string | number, options?: StringNumberStorageOptions): string | number {
   const item = BigInt(_item);
   if (options === StringNumberStorageOptions.String) {
     return item.toString();

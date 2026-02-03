@@ -6,11 +6,11 @@ import { BigIntify, NumberType, Stringify } from '@/common/string-numbers.js';
 import { CosmosCoin, iCosmosCoin } from '@/core/coin.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions } from '@/common/base.js';
 
-export class PoolParams<T extends NumberType> extends BaseNumberTypeClass<PoolParams<T>> implements iPoolParams<T> {
+export class PoolParams extends BaseNumberTypeClass<PoolParams> implements iPoolParams {
   swapFee: string;
   exitFee: string;
 
-  constructor(data: iPoolParams<T>) {
+  constructor(data: iPoolParams) {
     super();
     this.swapFee = data.swapFee;
     this.exitFee = data.exitFee;
@@ -20,8 +20,8 @@ export class PoolParams<T extends NumberType> extends BaseNumberTypeClass<PoolPa
     return []; // These should stay numbers, not converted to strings
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PoolParams<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PoolParams<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): PoolParams {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PoolParams;
   }
 
   toProto(): protogamm.PoolParams {
@@ -32,37 +32,29 @@ export class PoolParams<T extends NumberType> extends BaseNumberTypeClass<PoolPa
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): PoolParams<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): PoolParams {
     return PoolParams.fromProto(protogamm.PoolParams.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): PoolParams<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): PoolParams {
     return PoolParams.fromProto(protogamm.PoolParams.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protogamm.PoolParams, convertFunction: (item: NumberType) => U): PoolParams<U> {
-    return new PoolParams<U>({
+  static fromProto(item: protogamm.PoolParams, convertFunction: (item: string | number) => U): PoolParams {
+    return new PoolParams({
       swapFee: item.swapFee,
       exitFee: item.exitFee
     });
   }
 }
 
-export class PoolAsset<T extends NumberType> extends BaseNumberTypeClass<PoolAsset<T>> implements iPoolAsset<T> {
-  token: CosmosCoin<T>;
-  weight: T;
+export class PoolAsset extends BaseNumberTypeClass<PoolAsset> implements iPoolAsset {
+  token: CosmosCoin;
+  weight: string | number;
 
-  constructor(data: iPoolAsset<T>) {
+  constructor(data: iPoolAsset) {
     super();
-    this.token = new CosmosCoin<T>(data.token);
+    this.token = new CosmosCoin(data.token);
     this.weight = data.weight;
   }
 
@@ -70,34 +62,26 @@ export class PoolAsset<T extends NumberType> extends BaseNumberTypeClass<PoolAss
     return ['weight'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PoolAsset<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PoolAsset<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): PoolAsset {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PoolAsset;
   }
 
   toProto(): protogamm.PoolAsset {
     return new protogamm.PoolAsset(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): PoolAsset<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): PoolAsset {
     return PoolAsset.fromProto(protogamm.PoolAsset.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): PoolAsset<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): PoolAsset {
     return PoolAsset.fromProto(protogamm.PoolAsset.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protogamm.PoolAsset, convertFunction: (item: NumberType) => U): PoolAsset<U> {
-    return new PoolAsset<U>({
+  static fromProto(item: protogamm.PoolAsset, convertFunction: (item: string | number) => U): PoolAsset {
+    return new PoolAsset({
       token: item.token
-        ? new CosmosCoin<U>({
+        ? new CosmosCoin({
             amount: convertFunction(BigInt(item.token.amount)),
             denom: item.token.denom
           }).convert(convertFunction)
@@ -110,15 +94,15 @@ export class PoolAsset<T extends NumberType> extends BaseNumberTypeClass<PoolAss
   }
 }
 
-export class Pool<T extends NumberType> extends BaseNumberTypeClass<Pool<T>> implements iPool<T> {
+export class Pool extends BaseNumberTypeClass<Pool> implements iPool {
   address: string;
-  id: T;
-  poolParams: iPoolParams<T>;
-  totalShares: iCosmosCoin<T>;
-  poolAssets: iPoolAsset<T>[];
-  totalWeight: T;
+  id: string | number;
+  poolParams: iPoolParams;
+  totalShares: iCosmosCoin;
+  poolAssets: iPoolAsset[];
+  totalWeight: string | number;
 
-  constructor(data: iPool<T>) {
+  constructor(data: iPool) {
     super();
     this.address = data.address;
     this.id = data.id;
@@ -132,8 +116,8 @@ export class Pool<T extends NumberType> extends BaseNumberTypeClass<Pool<T>> imp
     return ['id', 'totalWeight'];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): Pool<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Pool<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): Pool {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Pool;
   }
 
   toProto(): protogamm.Pool {
@@ -144,20 +128,16 @@ export class Pool<T extends NumberType> extends BaseNumberTypeClass<Pool<T>> imp
     });
   }
 
-  static fromJson<U extends NumberType>(jsonValue: JsonValue, convertFunction: (item: NumberType) => U, options?: Partial<JsonReadOptions>): Pool<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): Pool {
     return Pool.fromProto(protogamm.Pool.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): Pool<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): Pool {
     return Pool.fromProto(protogamm.Pool.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protogamm.Pool, convertFunction: (item: NumberType) => U): Pool<U> {
-    return new Pool<U>({
+  static fromProto(item: protogamm.Pool, convertFunction: (item: string | number) => U): Pool {
+    return new Pool({
       address: item.address,
       id: convertFunction(BigInt(item.id)),
       poolParams: item.poolParams
@@ -167,11 +147,11 @@ export class Pool<T extends NumberType> extends BaseNumberTypeClass<Pool<T>> imp
             exitFee: '0'
           },
       totalShares: item.totalShares
-        ? new CosmosCoin<U>({
+        ? new CosmosCoin({
             amount: convertFunction(BigInt(item.totalShares.amount)),
             denom: item.totalShares.denom
           }).convert(convertFunction)
-        : new CosmosCoin<U>({
+        : new CosmosCoin({
             amount: convertFunction(0n),
             denom: ''
           }).convert(convertFunction),

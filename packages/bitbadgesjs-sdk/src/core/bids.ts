@@ -1,15 +1,11 @@
 import { iCollectionApproval } from '@/interfaces/types/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
 
-export const isOrderbookBidOrListingApproval = (approval: iCollectionApproval<bigint>, approvalLevel: 'incoming' | 'outgoing') => {
+export const isOrderbookBidOrListingApproval = (approval: iCollectionApproval, approvalLevel: 'incoming' | 'outgoing') => {
   return isBidOrListingApproval(approval, approvalLevel, { isFungibleCheck: true, fungibleOrNonFungibleAllowed: true });
 };
 
-export const isBidOrListingApproval = (
-  approval: iCollectionApproval<bigint>,
-  approvalLevel: 'incoming' | 'outgoing',
-  options?: { isFungibleCheck?: boolean; fungibleOrNonFungibleAllowed?: boolean; isCollectionBid?: boolean }
-) => {
+export const isBidOrListingApproval = (approval: iCollectionApproval, approvalLevel: 'incoming' | 'outgoing', options?: { isFungibleCheck?: boolean; fungibleOrNonFungibleAllowed?: boolean; isCollectionBid?: boolean }) => {
   const approvalCriteria = approval.approvalCriteria;
   if (approvalCriteria?.coinTransfers?.length !== 1) {
     return false;
@@ -139,6 +135,6 @@ export const isBidOrListingApproval = (
   return true;
 };
 
-export const isCollectionBid = (approval: iCollectionApproval<bigint>) => {
+export const isCollectionBid = (approval: iCollectionApproval) => {
   return isBidOrListingApproval(approval, 'incoming', { isCollectionBid: true });
 };

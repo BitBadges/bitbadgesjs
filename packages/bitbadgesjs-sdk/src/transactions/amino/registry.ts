@@ -1,103 +1,24 @@
 import { MsgAddCustomData } from '@/proto/anchor/tx_pb.js';
-import {
-  MsgCastVote,
-  MsgCreateAddressLists,
-  MsgCreateCollection,
-  MsgCreateDynamicStore,
-  MsgDeleteCollection,
-  MsgDeleteDynamicStore,
-  MsgDeleteIncomingApproval,
-  MsgDeleteOutgoingApproval,
-  MsgPurgeApprovals,
-  MsgSetTokenMetadata,
-  MsgSetCollectionApprovals,
-  MsgSetCollectionMetadata,
-  MsgSetCustomData,
-  MsgSetDynamicStoreValue,
-  MsgSetIncomingApproval,
-  MsgSetIsArchived,
-  MsgSetManager,
-  MsgSetOutgoingApproval,
-  MsgSetStandards,
-  MsgSetValidTokenIds,
-  MsgTransferTokens,
-  MsgUniversalUpdateCollection,
-  MsgUpdateCollection,
-  MsgUpdateDynamicStore,
-  MsgUpdateUserApprovals
-} from '@/proto/badges/tx_pb.js';
+import { MsgCastVote, MsgCreateAddressLists, MsgCreateCollection, MsgCreateDynamicStore, MsgDeleteCollection, MsgDeleteDynamicStore, MsgDeleteIncomingApproval, MsgDeleteOutgoingApproval, MsgPurgeApprovals, MsgSetTokenMetadata, MsgSetCollectionApprovals, MsgSetCollectionMetadata, MsgSetCustomData, MsgSetDynamicStoreValue, MsgSetIncomingApproval, MsgSetIsArchived, MsgSetManager, MsgSetOutgoingApproval, MsgSetStandards, MsgSetValidTokenIds, MsgTransferTokens, MsgUniversalUpdateCollection, MsgUpdateCollection, MsgUpdateDynamicStore, MsgUpdateUserApprovals } from '@/proto/badges/tx_pb.js';
 import { MsgExecuteContract, MsgInstantiateContract, MsgStoreCode } from '@/proto/cosmwasm/wasm/v1/tx_pb.js';
 import { MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap } from '@/proto/maps/tx_pb.js';
-import {
-  MsgCreateManagerSplitter,
-  MsgDeleteManagerSplitter,
-  MsgExecuteUniversalUpdateCollection,
-  MsgUpdateManagerSplitter
-} from '@/proto/managersplitter/tx_pb.js';
+import { MsgCreateManagerSplitter, MsgDeleteManagerSplitter, MsgExecuteUniversalUpdateCollection, MsgUpdateManagerSplitter } from '@/proto/managersplitter/tx_pb.js';
 import { MsgExecuteContractCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/tx_pb.js';
 import { AminoMsg } from '../messages/signDoc.js';
 import { createAminoConverter } from './objectConverter.js';
 
 import { MsgMultiSend, MsgSend, SendAuthorization } from '@/proto/cosmos/bank/v1beta1/index.js';
-import {
-  MsgFundCommunityPool,
-  MsgSetWithdrawAddress,
-  MsgWithdrawDelegatorReward,
-  MsgWithdrawValidatorCommission
-} from '@/proto/cosmos/distribution/v1beta1/index.js';
+import { MsgFundCommunityPool, MsgSetWithdrawAddress, MsgWithdrawDelegatorReward, MsgWithdrawValidatorCommission } from '@/proto/cosmos/distribution/v1beta1/index.js';
 import { MsgDeposit, MsgSubmitProposal, MsgVote, MsgVoteWeighted } from '@/proto/cosmos/gov/v1/index.js';
-import {
-  MsgBeginRedelegate,
-  MsgCreateValidator,
-  MsgDelegate,
-  MsgEditValidator,
-  MsgUndelegate,
-  StakeAuthorization
-} from '@/proto/cosmos/staking/v1beta1/index.js';
+import { MsgBeginRedelegate, MsgCreateValidator, MsgDelegate, MsgEditValidator, MsgUndelegate, StakeAuthorization } from '@/proto/cosmos/staking/v1beta1/index.js';
 
 import { GenericAuthorization } from '@/proto/cosmos/authz/v1beta1/authz_pb.js';
 import { MsgExec, MsgGrant, MsgRevoke } from '@/proto/cosmos/authz/v1beta1/tx_pb.js';
 import { MsgCreateVestingAccount } from '@/proto/cosmos/vesting/v1beta1/index.js';
-import {
-  MsgCreateGroup,
-  MsgUpdateGroupMembers,
-  MsgUpdateGroupAdmin,
-  MsgUpdateGroupMetadata,
-  MsgCreateGroupPolicy,
-  MsgUpdateGroupPolicyAdmin,
-  MsgCreateGroupWithPolicy,
-  MsgUpdateGroupPolicyDecisionPolicy,
-  MsgUpdateGroupPolicyMetadata,
-  MsgSubmitProposal as MsgGroupSubmitProposal,
-  MsgWithdrawProposal,
-  MsgVote as MsgGroupVote,
-  MsgExec as MsgGroupExec,
-  MsgLeaveGroup,
-  ThresholdDecisionPolicy,
-  PercentageDecisionPolicy
-} from '@/proto/cosmos/group/v1/index.js';
+import { MsgCreateGroup, MsgUpdateGroupMembers, MsgUpdateGroupAdmin, MsgUpdateGroupMetadata, MsgCreateGroupPolicy, MsgUpdateGroupPolicyAdmin, MsgCreateGroupWithPolicy, MsgUpdateGroupPolicyDecisionPolicy, MsgUpdateGroupPolicyMetadata, MsgSubmitProposal as MsgGroupSubmitProposal, MsgWithdrawProposal, MsgVote as MsgGroupVote, MsgExec as MsgGroupExec, MsgLeaveGroup, ThresholdDecisionPolicy, PercentageDecisionPolicy } from '@/proto/cosmos/group/v1/index.js';
 
 import { MsgTransfer } from '@/proto/ibc/index.js';
-import {
-  MsgJoinPool,
-  MsgJoinPoolResponse,
-  MsgExitPool,
-  MsgExitPoolResponse,
-  MsgSwapExactAmountIn,
-  MsgSwapExactAmountInResponse,
-  MsgSwapExactAmountInWithIBCTransfer,
-  MsgSwapExactAmountInWithIBCTransferResponse,
-  MsgSwapExactAmountOut,
-  MsgSwapExactAmountOutResponse,
-  MsgJoinSwapExternAmountIn,
-  MsgJoinSwapExternAmountInResponse,
-  MsgJoinSwapShareAmountOut,
-  MsgJoinSwapShareAmountOutResponse,
-  MsgExitSwapShareAmountIn,
-  MsgExitSwapShareAmountInResponse,
-  MsgExitSwapExternAmountOut,
-  MsgExitSwapExternAmountOutResponse
-} from '@/proto/gamm/v1beta1/tx_pb.js';
+import { MsgJoinPool, MsgJoinPoolResponse, MsgExitPool, MsgExitPoolResponse, MsgSwapExactAmountIn, MsgSwapExactAmountInResponse, MsgSwapExactAmountInWithIBCTransfer, MsgSwapExactAmountInWithIBCTransferResponse, MsgSwapExactAmountOut, MsgSwapExactAmountOutResponse, MsgJoinSwapExternAmountIn, MsgJoinSwapExternAmountInResponse, MsgJoinSwapShareAmountOut, MsgJoinSwapShareAmountOutResponse, MsgExitSwapShareAmountIn, MsgExitSwapShareAmountInResponse, MsgExitSwapExternAmountOut, MsgExitSwapExternAmountOutResponse } from '@/proto/gamm/v1beta1/tx_pb.js';
 import { MsgCreateBalancerPool, MsgCreateBalancerPoolResponse } from '@/proto/gamm/poolmodels/balancer/tx_pb.js';
 
 export interface EncodeObject {
@@ -177,11 +98,7 @@ export class AminoTypesClass {
   public toAmino({ typeUrl, value }: EncodeObject): AminoMsg {
     const converter = this.register[typeUrl];
     if (!converter) {
-      throw new Error(
-        `Type URL '${typeUrl}' does not exist in the Amino message type register. ` +
-          'If you need support for this message type, you can pass in additional entries to the AminoTypes constructor. ' +
-          'If you think this message type should be included by default, please open an issue at https://github.com/cosmos/cosmjs/issues.'
-      );
+      throw new Error(`Type URL '${typeUrl}' does not exist in the Amino message type register. ` + 'If you need support for this message type, you can pass in additional entries to the AminoTypes constructor. ' + 'If you think this message type should be included by default, please open an issue at https://github.com/cosmos/cosmjs/issues.');
     }
 
     const initialJson = converter.toAmino(value);
@@ -225,11 +142,7 @@ export class AminoTypesClass {
 
     switch (matches.length) {
       case 0: {
-        throw new Error(
-          `Amino type identifier '${type}' does not exist in the Amino message type register. ` +
-            'If you need support for this message type, you can pass in additional entries to the AminoTypes constructor. ' +
-            'If you think this message type should be included by default, please open an issue at https://github.com/cosmos/cosmjs/issues.'
-        );
+        throw new Error(`Amino type identifier '${type}' does not exist in the Amino message type register. ` + 'If you need support for this message type, you can pass in additional entries to the AminoTypes constructor. ' + 'If you think this message type should be included by default, please open an issue at https://github.com/cosmos/cosmjs/issues.');
       }
       case 1: {
         const [typeUrl, converter] = matches[0];

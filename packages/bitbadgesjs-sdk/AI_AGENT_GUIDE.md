@@ -825,15 +825,7 @@ async function checkUserBalance(address: string, collectionId: string) {
 ### Pattern 3: Create and Broadcast Transfer
 
 ```typescript
-import {
-  MsgTransferTokens,
-  Transfer,
-  Balance,
-  createTxBroadcastBody,
-  BitBadgesAPI,
-  BigIntify,
-  PrecalculateBalancesFromApprovalDetails
-} from 'bitbadgesjs-sdk';
+import { MsgTransferTokens, Transfer, Balance, createTxBroadcastBody, BitBadgesAPI, BigIntify, PrecalculateBalancesFromApprovalDetails } from 'bitbadgesjs-sdk';
 
 async function transferBadges(from: string, to: string, collectionId: string, tokenIds: { start: bigint; end: bigint }[], amount: string) {
   const api = new BitBadgesAPI({
@@ -1132,18 +1124,15 @@ import type { NumberType, CollectionId, BitBadgesAddress } from 'bitbadgesjs-sdk
 ### Common Issues
 
 1. **Precision Loss with Large Numbers**
-
    - Always use `BigIntify` instead of `Numberify`
    - Use `bigint` or `string` for collection IDs and token IDs
 
 2. **Authentication Errors**
-
    - Ensure API key is set correctly
    - Check if endpoint requires authentication
    - Verify access token is set for authenticated endpoints
 
 3. **Transaction Broadcasting Failures**
-
    - Always simulate first to catch errors
    - Verify account has sufficient balance for fees
    - Check sequence number is correct

@@ -35,37 +35,34 @@ import { AliasPathAddObject, CosmosCoinWrapperPathAddObject, InvariantsAddObject
  *
  * @category Transactions
  */
-export class MsgUniversalUpdateCollection<T extends NumberType>
-  extends BaseNumberTypeClass<MsgUniversalUpdateCollection<T>>
-  implements iMsgUniversalUpdateCollection<T>
-{
+export class MsgUniversalUpdateCollection extends BaseNumberTypeClass<MsgUniversalUpdateCollection> implements iMsgUniversalUpdateCollection {
   creator: BitBadgesAddress;
   collectionId: CollectionId;
-  defaultBalances?: UserBalanceStore<T>;
+  defaultBalances?: UserBalanceStore;
   updateValidTokenIds?: boolean;
-  validTokenIds?: UintRangeArray<T>;
+  validTokenIds?: UintRangeArray;
   updateCollectionPermissions?: boolean;
-  collectionPermissions?: CollectionPermissions<T>;
+  collectionPermissions?: CollectionPermissions;
   updateManager?: boolean;
   manager?: BitBadgesAddress;
   updateCollectionMetadata?: boolean;
   collectionMetadata?: CollectionMetadata;
   updateTokenMetadata?: boolean;
-  tokenMetadata?: TokenMetadata<T>[];
+  tokenMetadata?: TokenMetadata[];
   updateCustomData?: boolean;
   customData?: string;
   updateCollectionApprovals?: boolean;
-  collectionApprovals?: CollectionApproval<T>[];
+  collectionApprovals?: CollectionApproval[];
   updateStandards?: boolean;
   standards?: string[];
   updateIsArchived?: boolean;
   isArchived?: boolean;
-  mintEscrowCoinsToTransfer?: CosmosCoin<T>[];
-  cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject<T>[];
-  aliasPathsToAdd?: AliasPathAddObject<T>[];
-  invariants?: InvariantsAddObject<T>;
+  mintEscrowCoinsToTransfer?: CosmosCoin[];
+  cosmosCoinWrapperPathsToAdd?: CosmosCoinWrapperPathAddObject[];
+  aliasPathsToAdd?: AliasPathAddObject[];
+  invariants?: InvariantsAddObject;
 
-  constructor(msg: iMsgUniversalUpdateCollection<T>) {
+  constructor(msg: iMsgUniversalUpdateCollection) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
@@ -89,9 +86,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     this.updateIsArchived = msg.updateIsArchived;
     this.isArchived = msg.isArchived;
     this.mintEscrowCoinsToTransfer = msg.mintEscrowCoinsToTransfer ? msg.mintEscrowCoinsToTransfer.map((x) => new CosmosCoin(x)) : undefined;
-    this.cosmosCoinWrapperPathsToAdd = msg.cosmosCoinWrapperPathsToAdd
-      ? msg.cosmosCoinWrapperPathsToAdd.map((x) => new CosmosCoinWrapperPathAddObject(x))
-      : undefined;
+    this.cosmosCoinWrapperPathsToAdd = msg.cosmosCoinWrapperPathsToAdd ? msg.cosmosCoinWrapperPathsToAdd.map((x) => new CosmosCoinWrapperPathAddObject(x)) : undefined;
     this.aliasPathsToAdd = msg.aliasPathsToAdd ? msg.aliasPathsToAdd.map((x) => new AliasPathAddObject(x)) : undefined;
     this.invariants = msg.invariants ? new InvariantsAddObject(msg.invariants) : undefined;
   }
@@ -100,33 +95,22 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgUniversalUpdateCollection<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUniversalUpdateCollection<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgUniversalUpdateCollection {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUniversalUpdateCollection;
   }
 
   toProto(): protobadges.MsgUniversalUpdateCollection {
     return new protobadges.MsgUniversalUpdateCollection(this.convert(Stringify));
   }
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgUniversalUpdateCollection<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgUniversalUpdateCollection {
     return MsgUniversalUpdateCollection.fromProto(protobadges.MsgUniversalUpdateCollection.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgUniversalUpdateCollection<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgUniversalUpdateCollection {
     return MsgUniversalUpdateCollection.fromProto(protobadges.MsgUniversalUpdateCollection.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    protoMsg: protobadges.MsgUniversalUpdateCollection,
-    convertFunction: (item: NumberType) => U
-  ): MsgUniversalUpdateCollection<U> {
+  static fromProto(protoMsg: protobadges.MsgUniversalUpdateCollection, convertFunction: (item: string | number) => U): MsgUniversalUpdateCollection {
     return new MsgUniversalUpdateCollection({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
@@ -134,9 +118,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
       validTokenIds: protoMsg.validTokenIds ? protoMsg.validTokenIds.map((x) => UintRange.fromProto(x, convertFunction)) : undefined,
       updateValidTokenIds: protoMsg.updateValidTokenIds,
       updateCollectionPermissions: protoMsg.updateCollectionPermissions,
-      collectionPermissions: protoMsg.collectionPermissions
-        ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction)
-        : undefined,
+      collectionPermissions: protoMsg.collectionPermissions ? CollectionPermissions.fromProto(protoMsg.collectionPermissions, convertFunction) : undefined,
       updateManager: protoMsg.updateManager,
       manager: protoMsg.manager || undefined,
       updateCollectionMetadata: protoMsg.updateCollectionMetadata,
@@ -146,9 +128,7 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
       updateCustomData: protoMsg.updateCustomData,
       customData: protoMsg.customData || undefined,
       updateCollectionApprovals: protoMsg.updateCollectionApprovals,
-      collectionApprovals: protoMsg.collectionApprovals
-        ? protoMsg.collectionApprovals.map((x) => CollectionApproval.fromProto(x, convertFunction))
-        : undefined,
+      collectionApprovals: protoMsg.collectionApprovals ? protoMsg.collectionApprovals.map((x) => CollectionApproval.fromProto(x, convertFunction)) : undefined,
       updateStandards: protoMsg.updateStandards,
       standards: protoMsg.standards.length > 0 ? protoMsg.standards : undefined,
       updateIsArchived: protoMsg.updateIsArchived,
@@ -160,8 +140,8 @@ export class MsgUniversalUpdateCollection<T extends NumberType>
     });
   }
 
-  toBech32Addresses(prefix: string): MsgUniversalUpdateCollection<T> {
-    return new MsgUniversalUpdateCollection<T>({
+  toBech32Addresses(prefix: string): MsgUniversalUpdateCollection {
+    return new MsgUniversalUpdateCollection({
       ...this,
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       defaultBalances: this.defaultBalances?.toBech32Addresses(prefix),

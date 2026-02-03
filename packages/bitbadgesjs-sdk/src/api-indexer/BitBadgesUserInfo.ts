@@ -10,34 +10,14 @@ import { SupportedChain } from '../common/types.js';
 import { BitBadgesCollection } from './BitBadgesCollection.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
 import { ClaimActivityDoc, PointsActivityDoc, TransferActivityDoc } from './docs-types/activity.js';
-import {
-  ApprovalTrackerDoc,
-  BalanceDocWithDetails,
-  CreatorCreditsDoc,
-  MerkleChallengeTrackerDoc,
-  ProfileDoc,
-  SIWBBRequestDoc
-} from './docs-types/docs.js';
-import type {
-  BitBadgesAddress,
-  NativeAddress,
-  iAccountDoc,
-  iApprovalTrackerDoc,
-  iBalanceDocWithDetails,
-  iClaimActivityDoc,
-  iCreatorCreditsDoc,
-  iMerkleChallengeTrackerDoc,
-  iPointsActivityDoc,
-  iProfileDoc,
-  iSIWBBRequestDoc,
-  iTransferActivityDoc
-} from './docs-types/interfaces.js';
+import { ApprovalTrackerDoc, BalanceDocWithDetails, CreatorCreditsDoc, MerkleChallengeTrackerDoc, ProfileDoc, SIWBBRequestDoc } from './docs-types/docs.js';
+import type { BitBadgesAddress, NativeAddress, iAccountDoc, iApprovalTrackerDoc, iBalanceDocWithDetails, iClaimActivityDoc, iCreatorCreditsDoc, iMerkleChallengeTrackerDoc, iPointsActivityDoc, iProfileDoc, iSIWBBRequestDoc, iTransferActivityDoc } from './docs-types/interfaces.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
 
 /**
  * @category Interfaces
  */
-export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>, iAccountDoc<T> {
+export interface iBitBadgesUserInfo extends iProfileDoc, iAccountDoc {
   /** The resolved name of the account (e.g. ENS name). */
   resolvedName?: string;
   /** The avatar of the account. */
@@ -47,19 +27,19 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   /** Indicates whether the account has claimed their airdrop. */
   airdropped?: boolean;
   /** A list of tokens that the account has collected. Paginated and fetched as needed. To be used in conjunction with views. */
-  collected: iBalanceDocWithDetails<T>[];
+  collected: iBalanceDocWithDetails[];
   /** A list of transfer activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  activity: iTransferActivityDoc<T>[];
+  activity: iTransferActivityDoc[];
   /** A list of claim activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  claimActivity?: iClaimActivityDoc<T>[];
+  claimActivity?: iClaimActivityDoc[];
   /** A list of points activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  pointsActivity?: iPointsActivityDoc<T>[];
+  pointsActivity?: iPointsActivityDoc[];
   /** A list of merkle challenge activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  challengeTrackers: iMerkleChallengeTrackerDoc<T>[];
+  challengeTrackers: iMerkleChallengeTrackerDoc[];
   /** A list of approvals tracker activity items for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  approvalTrackers: iApprovalTrackerDoc<T>[];
+  approvalTrackers: iApprovalTrackerDoc[];
   /** A list of SIWBB requests for the account. Paginated and fetched as needed. To be used in conjunction with views. */
-  siwbbRequests: iSIWBBRequestDoc<T>[];
+  siwbbRequests: iSIWBBRequestDoc[];
 
   /** The native address of the account */
   address: NativeAddress;
@@ -90,7 +70,7 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
   };
 
   /** The credits for the account. */
-  creatorCredits?: iCreatorCreditsDoc<T>;
+  creatorCredits?: iCreatorCreditsDoc;
 
   /** The tags for the account. Extra descriptors for what this address is used for (e.g. "Pool", "Governance",  etc). */
   tags?: string[];
@@ -104,11 +84,11 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
  *
  * @category Accounts
  */
-export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> implements iBitBadgesUserInfo<T>, CustomType<BitBadgesUserInfo<T>> {
+export class BitBadgesUserInfo extends ProfileDoc implements iBitBadgesUserInfo, CustomType<BitBadgesUserInfo> {
   bitbadgesAddress: BitBadgesAddress;
-  accountNumber: T;
-  sequence?: T;
-  balances?: CosmosCoin<T>[];
+  accountNumber: string | number;
+  sequence?: string | number;
+  balances?: CosmosCoin[];
   pubKeyType: string;
   publicKey: string;
 
@@ -116,13 +96,13 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   avatar?: string;
   chain: SupportedChain;
   airdropped?: boolean;
-  collected: BalanceDocWithDetails<T>[];
-  activity: TransferActivityDoc<T>[];
-  claimActivity?: ClaimActivityDoc<T>[];
-  pointsActivity?: PointsActivityDoc<T>[];
-  challengeTrackers: MerkleChallengeTrackerDoc<T>[];
-  approvalTrackers: ApprovalTrackerDoc<T>[];
-  siwbbRequests: SIWBBRequestDoc<T>[];
+  collected: BalanceDocWithDetails[];
+  activity: TransferActivityDoc[];
+  claimActivity?: ClaimActivityDoc[];
+  pointsActivity?: PointsActivityDoc[];
+  challengeTrackers: MerkleChallengeTrackerDoc[];
+  approvalTrackers: ApprovalTrackerDoc[];
+  siwbbRequests: SIWBBRequestDoc[];
 
   address: NativeAddress;
   nsfw?: { reason: string };
@@ -139,10 +119,10 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   alias?: {
     collectionId?: CollectionId;
   };
-  creatorCredits?: CreatorCreditsDoc<T>;
+  creatorCredits?: CreatorCreditsDoc;
   tags?: string[];
 
-  constructor(data: iBitBadgesUserInfo<T>) {
+  constructor(data: iBitBadgesUserInfo) {
     super(data);
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.accountNumber = data.accountNumber;
@@ -170,12 +150,12 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     this.tags = data.tags;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BitBadgesUserInfo<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BitBadgesUserInfo<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): BitBadgesUserInfo {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as BitBadgesUserInfo;
   }
 
-  clone(): BitBadgesUserInfo<T> {
-    return super.clone() as BitBadgesUserInfo<T>;
+  clone(): BitBadgesUserInfo {
+    return super.clone() as BitBadgesUserInfo;
   }
 
   getNumberFieldNames(): string[] {
@@ -185,7 +165,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   /**
    * Fetches the user's information from the API and initializes a new BitBadgesUserInfo object.
    */
-  static async FetchAndInitialize<T extends NumberType>(api: BaseBitBadgesApi<T>, options: AccountFetchDetails) {
+  static async FetchAndInitialize(api: BaseBitBadgesApi, options: AccountFetchDetails) {
     const collection = await BitBadgesUserInfo.GetAccounts(api, { accountsToFetch: [options] });
     return new BitBadgesUserInfo(collection.accounts[0]);
   }
@@ -193,7 +173,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   /**
    * Fetches users' information from the API and initializes a new BitBadgesUserInfo object for each.
    */
-  static async FetchAndInitializeBatch<T extends NumberType>(api: BaseBitBadgesApi<T>, options: AccountFetchDetails[]) {
+  static async FetchAndInitializeBatch(api: BaseBitBadgesApi, options: AccountFetchDetails[]) {
     const collection = await BitBadgesUserInfo.GetAccounts(api, { accountsToFetch: options });
     return collection.accounts.map((account) => new BitBadgesUserInfo(account));
   }
@@ -201,17 +181,14 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   /**
    * Gets accounts by address or username from the API.
    */
-  static async GetAccounts<T extends NumberType>(api: BaseBitBadgesApi<T>, params: iGetAccountsPayload) {
+  static async GetAccounts(api: BaseBitBadgesApi, params: iGetAccountsPayload) {
     try {
       const validateRes: typia.IValidation<iGetAccountsPayload> = typia.validate<iGetAccountsPayload>(params ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await api.axios.post<iGetAccountsSuccessResponse<string>>(
-        `${api.BACKEND_URL}${BitBadgesApiRoutes.GetAccountsRoute()}`,
-        params
-      );
+      const response = await api.axios.post<iGetAccountsSuccessResponse<string>>(`${api.BACKEND_URL}${BitBadgesApiRoutes.GetAccountsRoute()}`, params);
       return new GetAccountsSuccessResponse(response.data).convert(api.ConvertFunction);
     } catch (error) {
       await api.handleApiError(error);
@@ -222,7 +199,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   /**
    * Gets an account by address or username from the API.
    */
-  static async GetAccount<T extends NumberType>(api: BaseBitBadgesApi<T>, params: iGetAccountPayload) {
+  static async GetAccount(api: BaseBitBadgesApi, params: iGetAccountPayload) {
     try {
       const validateRes: typia.IValidation<iGetAccountPayload> = typia.validate<iGetAccountPayload>(params ?? {});
       if (!validateRes.success) {
@@ -272,7 +249,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    */
   mustGetBalanceInfo(collectionId: CollectionId) {
     const balance = this.getBalanceInfoHelper(collectionId, true);
-    return balance as BalanceDocWithDetails<T>;
+    return balance as BalanceDocWithDetails;
   }
 
   /**
@@ -306,7 +283,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    * Fetch balances for a collection and updates the user's collected array. Must pass in a valid API instance.
    * If forceful is true, it will fetch regardless of if it is already fetched. Else, it will only fetch if it is not already cached.
    */
-  async fetchBalances(api: BaseBitBadgesApi<T>, collectionId: CollectionId, forceful?: boolean) {
+  async fetchBalances(api: BaseBitBadgesApi, collectionId: CollectionId, forceful?: boolean) {
     const currOwnerInfo = this.collected.find((x) => x.collectionId === collectionId);
     if (currOwnerInfo && !forceful) return currOwnerInfo;
 
@@ -359,7 +336,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    * Fetch the user's information via an API request and updates the current BitBadgesUserInfo object.
    * This will handle all paginations, etc. behind the scenes.
    */
-  async fetchAndUpdate(api: BaseBitBadgesApi<T>, options: Omit<AccountFetchDetails, 'address' | 'username'>, forceful?: boolean) {
+  async fetchAndUpdate(api: BaseBitBadgesApi, options: Omit<AccountFetchDetails, 'address' | 'username'>, forceful?: boolean) {
     if (!forceful) {
       if (this.isRedundantRequest(options)) return;
       options = this.pruneBody(options);
@@ -374,7 +351,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   /**
    * Logic for updating the current BitBadgesUserInfo object with a new API response. If forceful is true, it will overwrite everything.
    */
-  updateWithNewResponse(newResponse: BitBadgesUserInfo<T>, forceful?: boolean) {
+  updateWithNewResponse(newResponse: BitBadgesUserInfo, forceful?: boolean) {
     if (forceful) {
       const newCollectionInfo = new BitBadgesUserInfo(newResponse);
       Object.assign(this, newCollectionInfo);
@@ -401,14 +378,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   /**
    * Fetches the next page of a view for a user. If view has no more items, it will do nothing.
    */
-  async fetchNextForView(
-    api: BaseBitBadgesApi<T>,
-    viewType: AccountViewKey,
-    viewId: string,
-    specificCollections?: BatchTokenDetails<NumberType>[],
-    oldestFirst?: boolean,
-    standard?: string
-  ) {
+  async fetchNextForView(api: BaseBitBadgesApi, viewType: AccountViewKey, viewId: string, specificCollections?: BatchTokenDetails[], oldestFirst?: boolean, standard?: string) {
     if (!this.viewHasMore(viewId)) return;
 
     await this.fetchAndUpdate(api, {
@@ -428,7 +398,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   /**
    * Fetches until the view has no more items. 1 second delay between each fetch for rate limiting.
    */
-  async fetchAllForView(api: BaseBitBadgesApi<T>, viewType: AccountViewKey, viewId: string) {
+  async fetchAllForView(api: BaseBitBadgesApi, viewType: AccountViewKey, viewId: string) {
     while (this.viewHasMore(viewId)) {
       await this.fetchNextForView(api, viewType, viewId);
       await new Promise((r) => setTimeout(r, 1000));
@@ -438,26 +408,26 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   /**
    * Type agnostic get view function. Uses the viewType to determine the type of view to fetch and docs to return.
    */
-  getView<KeyType extends AccountViewKey>(viewType: KeyType, viewId: string): AccountViewData<T>[KeyType] {
+  getView<KeyType extends AccountViewKey>(viewType: KeyType, viewId: string): AccountViewData[KeyType] {
     switch (viewType) {
       case 'siwbbRequests':
-        return this.getSIWBBRequestsView(viewId) as AccountViewData<T>[KeyType];
+        return this.getSIWBBRequestsView(viewId) as AccountViewData[KeyType];
       case 'transferActivity':
-        return this.getAccountActivityView(viewId) as AccountViewData<T>[KeyType];
+        return this.getAccountActivityView(viewId) as AccountViewData[KeyType];
       case 'tokensCollected':
-        return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
+        return this.getAccountBalancesView(viewId) as AccountViewData[KeyType];
 
       case 'createdTokens':
-        return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
+        return this.getAccountBalancesView(viewId) as AccountViewData[KeyType];
       case 'managingTokens':
-        return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
+        return this.getAccountBalancesView(viewId) as AccountViewData[KeyType];
 
       case 'publicClaimActivity':
-        return this.getClaimActivityView(viewId) as AccountViewData<T>[KeyType];
+        return this.getClaimActivityView(viewId) as AccountViewData[KeyType];
       case 'allClaimActivity':
-        return this.getClaimActivityView(viewId) as AccountViewData<T>[KeyType];
+        return this.getClaimActivityView(viewId) as AccountViewData[KeyType];
       case 'pointsActivity':
-        return this.getPointsActivityView(viewId) as AccountViewData<T>[KeyType];
+        return this.getPointsActivityView(viewId) as AccountViewData[KeyType];
       default:
         throw new Error('Invalid view type');
     }
@@ -466,31 +436,31 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   getClaimActivityView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.claimActivity?.find((y) => y._docId === x);
-    }) ?? []) as ClaimActivityDoc<T>[];
+    }) ?? []) as ClaimActivityDoc[];
   }
 
   getPointsActivityView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.pointsActivity?.find((y) => y._docId === x);
-    }) ?? []) as PointsActivityDoc<T>[];
+    }) ?? []) as PointsActivityDoc[];
   }
 
   getSIWBBRequestsView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.siwbbRequests.find((y) => y._docId === x);
-    }) ?? []) as SIWBBRequestDoc<T>[];
+    }) ?? []) as SIWBBRequestDoc[];
   }
 
   getAccountActivityView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.activity.find((y) => y._docId === x);
-    }) ?? []) as TransferActivityDoc<T>[];
+    }) ?? []) as TransferActivityDoc[];
   }
 
   getAccountBalancesView(viewId: string) {
     return (this.views[viewId]?.ids.map((x) => {
       return this.collected.find((y) => y._docId === x);
-    }) ?? []) as BalanceDocWithDetails<T>[];
+    }) ?? []) as BalanceDocWithDetails[];
   }
 
   /**
@@ -504,10 +474,10 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    * Returns a BitBadgesUserInfo object with all fields set for the Mint address.
    *
    * @remarks
-   * By default, it uses <bigint> type for all number fields, but you can convert with the `.convert` method.
+   * By default, it uses  type for all number fields, but you can convert with the `.convert` method.
    */
   static MintAccount() {
-    return new BitBadgesUserInfo<bigint>({
+    return new BitBadgesUserInfo({
       bitbadgesAddress: 'Mint',
       address: 'Mint',
       chain: SupportedChain.COSMOS,
@@ -533,10 +503,10 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    * Returns a BitBadgesUserInfo object with all fields set to blank.
    *
    * @remarks
-   * By default, it uses <bigint> type for all number fields, but you can convert with the `.convert` method.
+   * By default, it uses  type for all number fields, but you can convert with the `.convert` method.
    */
   static BlankUserInfo() {
-    return new BitBadgesUserInfo<bigint>({
+    return new BitBadgesUserInfo({
       _docId: '',
       bitbadgesAddress: '',
       address: '',
@@ -559,32 +529,29 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   }
 }
 
-type AccountViewData<T extends NumberType> = {
-  siwbbRequests: SIWBBRequestDoc<T>[];
-  transferActivity: TransferActivityDoc<T>[];
-  tokensCollected: BalanceDocWithDetails<T>[];
-  createdTokens: BalanceDocWithDetails<T>[];
-  managingTokens: BalanceDocWithDetails<T>[];
-  publicClaimActivity: ClaimActivityDoc<T>[];
-  allClaimActivity: ClaimActivityDoc<T>[];
-  pointsActivity: PointsActivityDoc<T>[];
+type AccountViewData = {
+  siwbbRequests: SIWBBRequestDoc[];
+  transferActivity: TransferActivityDoc[];
+  tokensCollected: BalanceDocWithDetails[];
+  createdTokens: BalanceDocWithDetails[];
+  managingTokens: BalanceDocWithDetails[];
+  publicClaimActivity: ClaimActivityDoc[];
+  allClaimActivity: ClaimActivityDoc[];
+  pointsActivity: PointsActivityDoc[];
 };
 
 /**
  * AccountMap is used to store the user information by address.
  * @category Indexer
  */
-export interface AccountMap<T extends NumberType> {
-  [bitbadgesAddress: string]: BitBadgesUserInfo<T> | undefined;
+export interface AccountMap {
+  [bitbadgesAddress: string]: BitBadgesUserInfo | undefined;
 }
 
 /**
  * @category Indexer
  */
-export function convertAccountMap<T extends NumberType, U extends NumberType>(
-  item: AccountMap<T>,
-  convertFunction: (item: NumberType) => U
-): AccountMap<U> {
+export function convertAccountMap<T extends NumberType, U extends NumberType>(item: AccountMap, convertFunction: (item: string | number) => U): AccountMap {
   return Object.fromEntries(
     Object.entries(item).map(([key, value]) => {
       return [key, value ? value.convert(convertFunction) : undefined];
@@ -592,10 +559,7 @@ export function convertAccountMap<T extends NumberType, U extends NumberType>(
   );
 }
 
-function updateAccountWithResponse<T extends NumberType>(
-  oldAccount: BitBadgesUserInfo<T> | undefined,
-  newAccountResponse: BitBadgesUserInfo<T>
-): BitBadgesUserInfo<T> {
+function updateAccountWithResponse(oldAccount: BitBadgesUserInfo | undefined, newAccountResponse: BitBadgesUserInfo): BitBadgesUserInfo {
   const cachedAccount = oldAccount ? oldAccount.convert(getConverterFunction(oldAccount.accountNumber)) : undefined;
   if (!cachedAccount) return newAccountResponse;
 
@@ -631,18 +595,8 @@ function updateAccountWithResponse<T extends NumberType>(
     views: views,
     publicKey,
     airdropped: account.airdropped ? account.airdropped : cachedAccount?.airdropped ? cachedAccount.airdropped : false,
-    sequence:
-      account && account.sequence !== undefined && account.sequence >= converterFunction(0n)
-        ? account.sequence
-        : cachedAccount && cachedAccount.sequence !== undefined && cachedAccount.sequence >= converterFunction(0n)
-          ? cachedAccount.sequence
-          : converterFunction(-1n),
-    accountNumber:
-      account && account.accountNumber !== undefined && account.accountNumber >= converterFunction(0n)
-        ? account.accountNumber
-        : cachedAccount && cachedAccount.accountNumber !== undefined && cachedAccount.accountNumber >= converterFunction(0n)
-          ? cachedAccount.accountNumber
-          : converterFunction(-1n),
+    sequence: account && account.sequence !== undefined && account.sequence >= converterFunction(0n) ? account.sequence : cachedAccount && cachedAccount.sequence !== undefined && cachedAccount.sequence >= converterFunction(0n) ? cachedAccount.sequence : converterFunction(-1n),
+    accountNumber: account && account.accountNumber !== undefined && account.accountNumber >= converterFunction(0n) ? account.accountNumber : cachedAccount && cachedAccount.accountNumber !== undefined && cachedAccount.accountNumber >= converterFunction(0n) ? cachedAccount.accountNumber : converterFunction(-1n),
     resolvedName: account.resolvedName ? account.resolvedName : cachedAccount?.resolvedName ? cachedAccount.resolvedName : ''
   });
 
@@ -666,15 +620,7 @@ function updateAccountWithResponse<T extends NumberType>(
  *
  * @category API Requests / Responses
  */
-export type AccountViewKey =
-  | 'siwbbRequests'
-  | 'transferActivity'
-  | 'tokensCollected'
-  | 'createdTokens'
-  | 'managingTokens'
-  | 'publicClaimActivity'
-  | 'allClaimActivity'
-  | 'pointsActivity';
+export type AccountViewKey = 'siwbbRequests' | 'transferActivity' | 'tokensCollected' | 'createdTokens' | 'managingTokens' | 'publicClaimActivity' | 'allClaimActivity' | 'pointsActivity';
 
 /**
  * This defines the options for fetching additional account details.
@@ -715,7 +661,7 @@ export type AccountFetchDetails = {
     /** The base view type to fetch. */
     viewType: AccountViewKey;
     /** If defined, we will filter the view to only include the specified collections. */
-    specificCollections?: iBatchTokenDetails<NumberType>[];
+    specificCollections?: iBatchTokenDetails[];
     /** Oldest first. By default, we fetch newest */
     oldestFirst?: boolean;
     /** A bookmark to pass in for pagination. "" for first request. */
@@ -756,34 +702,31 @@ export class GetAccountPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iGetAccountSuccessResponse<T extends NumberType> {
-  account: iBitBadgesUserInfo<T>;
+export interface iGetAccountSuccessResponse {
+  account: iBitBadgesUserInfo;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetAccountSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetAccountSuccessResponse<T>>
-  implements iGetAccountSuccessResponse<T>
-{
-  account: BitBadgesUserInfo<T>;
+export class GetAccountSuccessResponse extends BaseNumberTypeClass<GetAccountSuccessResponse> implements iGetAccountSuccessResponse {
+  account: BitBadgesUserInfo;
 
-  constructor(data: iGetAccountSuccessResponse<T>) {
+  constructor(data: iGetAccountSuccessResponse) {
     super();
     this.account = new BitBadgesUserInfo(data.account);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetAccountSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAccountSuccessResponse<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): GetAccountSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAccountSuccessResponse;
   }
 }
 
 /**
  * @category API Requests / Responses
  */
-export interface iGetAccountSuccessResponse<T extends NumberType> {
-  account: iBitBadgesUserInfo<T>;
+export interface iGetAccountSuccessResponse {
+  account: iBitBadgesUserInfo;
 }
 
 /**
@@ -796,25 +739,22 @@ export interface iGetAccountsPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iGetAccountsSuccessResponse<T extends NumberType> {
-  accounts: iBitBadgesUserInfo<T>[];
+export interface iGetAccountsSuccessResponse {
+  accounts: iBitBadgesUserInfo[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetAccountsSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetAccountsSuccessResponse<T>>
-  implements iGetAccountsSuccessResponse<T>
-{
-  accounts: BitBadgesUserInfo<T>[];
+export class GetAccountsSuccessResponse extends BaseNumberTypeClass<GetAccountsSuccessResponse> implements iGetAccountsSuccessResponse {
+  accounts: BitBadgesUserInfo[];
 
-  constructor(data: iGetAccountsSuccessResponse<T>) {
+  constructor(data: iGetAccountsSuccessResponse) {
     super();
     this.accounts = data.accounts.map((account) => new BitBadgesUserInfo(account));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetAccountsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAccountsSuccessResponse<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): GetAccountsSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAccountsSuccessResponse;
   }
 }

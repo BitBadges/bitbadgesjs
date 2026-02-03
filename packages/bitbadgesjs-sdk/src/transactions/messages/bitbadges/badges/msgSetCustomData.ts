@@ -15,13 +15,13 @@ import { Stringify } from '@/common/string-numbers.js';
  *
  * @category Transactions
  */
-export class MsgSetCustomData<T extends NumberType> extends CustomTypeClass<MsgSetCustomData<T>> implements iMsgSetCustomData<T> {
+export class MsgSetCustomData extends CustomTypeClass<MsgSetCustomData> implements iMsgSetCustomData {
   creator: BitBadgesAddress;
-  collectionId: T;
+  collectionId: string | number;
   customData: string;
-  canUpdateCustomData: ActionPermission<T>[];
+  canUpdateCustomData: ActionPermission[];
 
-  constructor(msg: iMsgSetCustomData<T>) {
+  constructor(msg: iMsgSetCustomData) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
@@ -38,15 +38,15 @@ export class MsgSetCustomData<T extends NumberType> extends CustomTypeClass<MsgS
     });
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCustomData<NumberType> {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetCustomData {
     return MsgSetCustomData.fromProto(protobadges.MsgSetCustomData.fromJson(jsonValue, options));
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCustomData<NumberType> {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetCustomData {
     return MsgSetCustomData.fromProto(protobadges.MsgSetCustomData.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: protobadges.MsgSetCustomData): MsgSetCustomData<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetCustomData): MsgSetCustomData {
     return new MsgSetCustomData({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
@@ -55,7 +55,7 @@ export class MsgSetCustomData<T extends NumberType> extends CustomTypeClass<MsgS
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSetCustomData<T> {
+  toBech32Addresses(prefix: string): MsgSetCustomData {
     return new MsgSetCustomData({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,

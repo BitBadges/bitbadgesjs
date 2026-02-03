@@ -59,15 +59,7 @@ export function sortedJsonStringify(obj: any): string {
   return JSON.stringify(sortedObject(obj));
 }
 
-export function makeSignDoc(
-  msgs: readonly AminoMsg[],
-  fee: StdFee,
-  chainId: string,
-  memo: string | undefined,
-  accountNumber: number | string,
-  sequence: number | string,
-  timeout_height?: bigint
-): StdSignDoc {
+export function makeSignDoc(msgs: readonly AminoMsg[], fee: StdFee, chainId: string, memo: string | undefined, accountNumber: number | string, sequence: number | string, timeout_height?: bigint): StdSignDoc {
   return {
     chain_id: chainId,
     // account_number: Uint53.fromString(accountNumber.toString()).toString(),

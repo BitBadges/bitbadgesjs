@@ -63,12 +63,7 @@ fs.readFile(filePath, 'utf8', (err, data) => {
     const newLines: string[] = [];
     for (let i = 0; i < lines.length; i++) {
       if (i + 3 < lines.length) {
-        if (
-          lines[i].trim() === 'anyOf:' &&
-          lines[i + 1].trim() === '- type: string' &&
-          lines[i + 2].trim() === '- type: number' &&
-          lines[i + 3].trim() !== '- type: boolean'
-        ) {
+        if (lines[i].trim() === 'anyOf:' && lines[i + 1].trim() === '- type: string' && lines[i + 2].trim() === '- type: number' && lines[i + 3].trim() !== '- type: boolean') {
           newLines.push(lines[i].replace('anyOf:', `$ref: '#/components/schemas/NumberType'`));
           i += 2;
           continue;

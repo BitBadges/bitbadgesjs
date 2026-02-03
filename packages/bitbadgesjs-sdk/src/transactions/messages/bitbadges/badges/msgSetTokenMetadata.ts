@@ -16,13 +16,13 @@ import { Stringify } from '@/common/string-numbers.js';
  *
  * @category Transactions
  */
-export class MsgSetTokenMetadata<T extends NumberType> extends CustomTypeClass<MsgSetTokenMetadata<T>> implements iMsgSetTokenMetadata<T> {
+export class MsgSetTokenMetadata extends CustomTypeClass<MsgSetTokenMetadata> implements iMsgSetTokenMetadata {
   creator: BitBadgesAddress;
-  collectionId: T;
-  tokenMetadata: TokenMetadata<T>[];
-  canUpdateTokenMetadata: TokenIdsActionPermission<T>[];
+  collectionId: string | number;
+  tokenMetadata: TokenMetadata[];
+  canUpdateTokenMetadata: TokenIdsActionPermission[];
 
-  constructor(msg: iMsgSetTokenMetadata<T>) {
+  constructor(msg: iMsgSetTokenMetadata) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
@@ -39,15 +39,15 @@ export class MsgSetTokenMetadata<T extends NumberType> extends CustomTypeClass<M
     });
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetTokenMetadata<NumberType> {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetTokenMetadata {
     return MsgSetTokenMetadata.fromProto(protobadges.MsgSetTokenMetadata.fromJson(jsonValue, options));
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetTokenMetadata<NumberType> {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetTokenMetadata {
     return MsgSetTokenMetadata.fromProto(protobadges.MsgSetTokenMetadata.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: protobadges.MsgSetTokenMetadata): MsgSetTokenMetadata<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetTokenMetadata): MsgSetTokenMetadata {
     const tokenMetadata = protoMsg.tokenMetadata.map((tm) => TokenMetadata.fromProto(tm, Stringify));
     return new MsgSetTokenMetadata({
       creator: protoMsg.creator,
@@ -57,7 +57,7 @@ export class MsgSetTokenMetadata<T extends NumberType> extends CustomTypeClass<M
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSetTokenMetadata<T> {
+  toBech32Addresses(prefix: string): MsgSetTokenMetadata {
     return new MsgSetTokenMetadata({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,

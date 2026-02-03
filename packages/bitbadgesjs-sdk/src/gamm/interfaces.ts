@@ -1,21 +1,21 @@
 import { NumberType } from '@/common/string-numbers.js';
 import { iCosmosCoin } from '@/core/coin.js';
 
-export interface iPoolParams<T extends NumberType> {
+export interface iPoolParams {
   swapFee: string;
   exitFee: string;
 }
 
-export interface iPoolAsset<T extends NumberType> {
-  token: iCosmosCoin<T>;
-  weight: T;
+export interface iPoolAsset {
+  token: iCosmosCoin;
+  weight: string | number;
 }
 
-export interface iPool<T extends NumberType> {
+export interface iPool {
   address: string;
-  id: T;
-  poolParams: iPoolParams<T>;
-  totalShares: iCosmosCoin<T>;
-  poolAssets: iPoolAsset<T>[];
-  totalWeight: T;
+  id: string | number;
+  poolParams: iPoolParams;
+  totalShares: iCosmosCoin;
+  poolAssets: iPoolAsset[];
+  totalWeight: string | number;
 }

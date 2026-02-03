@@ -1,11 +1,4 @@
-import {
-  BaseNumberTypeClass,
-  convertClassPropertiesAndMaintainNumberTypes,
-  ConvertOptions,
-  CustomTypeClass,
-  deepCopyPrimitives,
-  ParsedQs
-} from '@/common/base.js';
+import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, ConvertOptions, CustomTypeClass, deepCopyPrimitives, ParsedQs } from '@/common/base.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
 import type { CollectionId, iAmountTrackerIdDetails, iUintRange } from '@/interfaces/types/core.js';
@@ -29,18 +22,15 @@ export interface iFilterSuggestionsSuccessResponse {
     value: string | number | boolean;
     count: number;
     type: string;
-    floorPrice?: { amount: NumberType; denom: string };
+    floorPrice?: { amount: string | number; denom: string };
   }[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export class FilterSuggestionsSuccessResponse
-  extends BaseNumberTypeClass<FilterSuggestionsSuccessResponse>
-  implements iFilterSuggestionsSuccessResponse
-{
-  attributes: { name: string; value: string | number | boolean; count: number; type: string; floorPrice?: { amount: NumberType; denom: string } }[];
+export class FilterSuggestionsSuccessResponse extends BaseNumberTypeClass<FilterSuggestionsSuccessResponse> implements iFilterSuggestionsSuccessResponse {
+  attributes: { name: string; value: string | number | boolean; count: number; type: string; floorPrice?: { amount: string | number; denom: string } }[];
 
   constructor(data: iFilterSuggestionsSuccessResponse) {
     super();
@@ -53,7 +43,7 @@ export class FilterSuggestionsSuccessResponse
  */
 export interface iFilterTokensInCollectionPayload {
   /** Limit to specific token IDs. Leave undefined to not filter by token ID. */
-  tokenIds?: iUintRange<NumberType>[];
+  tokenIds?: iUintRange[];
   /** Limit to specific lists. Leave undefined to not filter by list. */
   categories?: string[];
   /** Limit to specific lists. Leave undefined to not filter by list. */
@@ -71,7 +61,7 @@ export interface iFilterTokensInCollectionPayload {
   }[];
 
   /** The listing prices */
-  priceRange?: iUintRange<NumberType>;
+  priceRange?: iUintRange;
   /** Denom for the price range. Defaults to ubadge. */
   denom?: string;
 }
@@ -79,29 +69,26 @@ export interface iFilterTokensInCollectionPayload {
 /**
  * @category API Requests / Responses
  */
-export interface iFilterTokensInCollectionSuccessResponse<T extends NumberType> {
-  tokenIds: iUintRange<T>[];
+export interface iFilterTokensInCollectionSuccessResponse {
+  tokenIds: iUintRange[];
   pagination: PaginationInfo;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class FilterTokensInCollectionSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<FilterTokensInCollectionSuccessResponse<T>>
-  implements iFilterTokensInCollectionSuccessResponse<T>
-{
-  tokenIds: UintRangeArray<T>;
+export class FilterTokensInCollectionSuccessResponse extends BaseNumberTypeClass<FilterTokensInCollectionSuccessResponse> implements iFilterTokensInCollectionSuccessResponse {
+  tokenIds: UintRangeArray;
   pagination: PaginationInfo;
 
-  constructor(data: iFilterTokensInCollectionSuccessResponse<T>) {
+  constructor(data: iFilterTokensInCollectionSuccessResponse) {
     super();
     this.tokenIds = UintRangeArray.From(data.tokenIds);
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): FilterTokensInCollectionSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FilterTokensInCollectionSuccessResponse<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): FilterTokensInCollectionSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FilterTokensInCollectionSuccessResponse;
   }
 }
 
@@ -143,11 +130,11 @@ export class GetOwnersPayload extends CustomTypeClass<GetOwnersPayload> implemen
 /**
  * @category API Requests / Responses
  */
-export interface iGetOwnersSuccessResponse<T extends NumberType> {
+export interface iGetOwnersSuccessResponse {
   /**
    * Represents a list of owners balance details.
    */
-  owners: iBalanceDocWithDetails<T>[];
+  owners: iBalanceDocWithDetails[];
   /**
    * Represents pagination information.
    */
@@ -157,20 +144,17 @@ export interface iGetOwnersSuccessResponse<T extends NumberType> {
 /**
  * @category API Requests / Responses
  */
-export class GetOwnersSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetOwnersSuccessResponse<T>>
-  implements iGetOwnersSuccessResponse<T>
-{
-  owners: BalanceDocWithDetails<T>[];
+export class GetOwnersSuccessResponse extends BaseNumberTypeClass<GetOwnersSuccessResponse> implements iGetOwnersSuccessResponse {
+  owners: BalanceDocWithDetails[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetOwnersSuccessResponse<T>) {
+  constructor(data: iGetOwnersSuccessResponse) {
     super();
     this.owners = data.owners.map((balance) => new BalanceDocWithDetails(balance));
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetOwnersSuccessResponse<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): GetOwnersSuccessResponse {
     return new GetOwnersSuccessResponse(
       deepCopyPrimitives({
         owners: this.owners.map((balance) => balance.convert(convertFunction)),
@@ -188,19 +172,17 @@ export interface iGetBalanceByAddressSpecificTokenPayload {}
 /**
  * @category API Requests / Responses
  */
-export interface iGetBalanceByAddressSpecificTokenSuccessResponse<T extends NumberType> {
-  balance: T;
+export interface iGetBalanceByAddressSpecificTokenSuccessResponse {
+  balance: string | number;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetBalanceByAddressSpecificTokenSuccessResponse<T extends NumberType> extends BaseNumberTypeClass<
-  GetBalanceByAddressSpecificTokenSuccessResponse<T>
-> {
-  balance: T;
+export class GetBalanceByAddressSpecificTokenSuccessResponse extends BaseNumberTypeClass<GetBalanceByAddressSpecificTokenSuccessResponse> {
+  balance: string | number;
 
-  constructor(data: iGetBalanceByAddressSpecificTokenSuccessResponse<T>) {
+  constructor(data: iGetBalanceByAddressSpecificTokenSuccessResponse) {
     super();
     this.balance = data.balance;
   }
@@ -209,11 +191,8 @@ export class GetBalanceByAddressSpecificTokenSuccessResponse<T extends NumberTyp
     return ['balance'];
   }
 
-  convert<U extends NumberType>(
-    convertFunction: (item: NumberType) => U,
-    options?: ConvertOptions
-  ): GetBalanceByAddressSpecificTokenSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetBalanceByAddressSpecificTokenSuccessResponse<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): GetBalanceByAddressSpecificTokenSuccessResponse {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetBalanceByAddressSpecificTokenSuccessResponse;
   }
 }
 
@@ -258,9 +237,9 @@ export class GetBalanceByAddressPayload extends CustomTypeClass<GetBalanceByAddr
 /**
  * @category API Requests / Responses
  */
-export interface iGetBalanceByAddressSuccessResponse<T extends NumberType> extends iBalanceDocWithDetails<T> {}
+export interface iGetBalanceByAddressSuccessResponse extends iBalanceDocWithDetails {}
 
-export class GetBalanceByAddressSuccessResponse<T extends NumberType> extends BalanceDocWithDetails<T> {}
+export class GetBalanceByAddressSuccessResponse extends BalanceDocWithDetails {}
 
 /**
  * @category API Requests / Responses
@@ -300,31 +279,28 @@ export class GetTokenActivityPayload extends CustomTypeClass<GetTokenActivityPay
 /**
  * @category API Requests / Responses
  */
-export interface iGetTokenActivitySuccessResponse<T extends NumberType> {
+export interface iGetTokenActivitySuccessResponse {
   /**
    * Array of transfer activity information.
    */
-  activity: iTransferActivityDoc<T>[];
+  activity: iTransferActivityDoc[];
   /**
    * Pagination information.
    */
   pagination: PaginationInfo;
 }
 
-export class GetTokenActivitySuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetTokenActivitySuccessResponse<T>>
-  implements iGetTokenActivitySuccessResponse<T>
-{
-  activity: TransferActivityDoc<T>[];
+export class GetTokenActivitySuccessResponse extends BaseNumberTypeClass<GetTokenActivitySuccessResponse> implements iGetTokenActivitySuccessResponse {
+  activity: TransferActivityDoc[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetTokenActivitySuccessResponse<T>) {
+  constructor(data: iGetTokenActivitySuccessResponse) {
     super();
     this.activity = data.activity.map((activity) => new TransferActivityDoc(activity));
     this.pagination = data.pagination;
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetTokenActivitySuccessResponse<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): GetTokenActivitySuccessResponse {
     return new GetTokenActivitySuccessResponse(
       deepCopyPrimitives({
         activity: this.activity.map((activity) => activity.convert(convertFunction)),
@@ -339,9 +315,9 @@ export class GetTokenActivitySuccessResponse<T extends NumberType>
  *
  * @typedef {Object} MetadataFetchOptions
  * @property {boolean} [doNotFetchCollectionMetadata] - If true, collection metadata will not be fetched.
- * @property {NumberType[] | UintRange<NumberType>[]} [metadataIds] - If present, the metadata corresponding to the specified metadata IDs will be fetched. See documentation for how to determine metadata IDs.
+ * @property {NumberType[] | UintRange[]} [metadataIds] - If present, the metadata corresponding to the specified metadata IDs will be fetched. See documentation for how to determine metadata IDs.
  * @property {string[]} [uris] - If present, the metadata corresponding to the specified URIs will be fetched.
- * @property {NumberType[] | UintRange<NumberType>[]} [tokenIds] - If present, the metadata corresponding to the specified token IDs will be fetched.
+ * @property {NumberType[] | UintRange[]} [tokenIds] - If present, the metadata corresponding to the specified token IDs will be fetched.
  *
  * @category API Requests / Responses
  */
@@ -357,7 +333,7 @@ export interface MetadataFetchOptions {
   /**
    * If present, the metadata corresponding to the specified token IDs will be fetched.
    */
-  tokenIds?: NumberType[] | iUintRange<NumberType>[];
+  tokenIds?: string | number[] | iUintRange[];
 }
 
 /**
@@ -378,7 +354,7 @@ export type CollectionViewKey = 'transferActivity' | 'owners' | 'amountTrackers'
  * @property {{ viewType: string, bookmark: string }[]} [viewsToFetch] - If present, the specified views will be fetched.
  * @property {boolean} [fetchTotalBalances] - If true, the total and mint balances will be fetched.
  * @property {string[]} [challengeTrackersToFetch] - If present, the merkle challenge trackers corresponding to the specified merkle challenge IDs will be fetched.
- * @property {AmountTrackerIdDetails<NumberType>[]} [approvalTrackersToFetch] - If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
+ * @property {AmountTrackerIdDetails[]} [approvalTrackersToFetch] - If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
  * @category API Requests / Responses
  */
 export interface GetAdditionalCollectionDetailsPayload {
@@ -397,7 +373,7 @@ export interface GetAdditionalCollectionDetailsPayload {
     /** If specified, we will only fetch this users' activity. */
     address?: string;
     /** IF specified, we will filter to this abdge ID (only applicable to utiity listings view currently) */
-    tokenId?: NumberType;
+    tokenId?: string | number;
   }[];
 
   /**
@@ -409,7 +385,7 @@ export interface GetAdditionalCollectionDetailsPayload {
   /**
    * If present, the merkle challenge trackers corresponding to the specified merkle challenge IDs will be fetched.
    */
-  challengeTrackersToFetch?: iChallengeTrackerIdDetails<NumberType>[];
+  challengeTrackersToFetch?: iChallengeTrackerIdDetails[];
   /**
    * Disable appending default approvals.
    */
@@ -417,7 +393,7 @@ export interface GetAdditionalCollectionDetailsPayload {
   /**
    * If present, the approvals trackers corresponding to the specified approvals tracker IDs will be fetched.
    */
-  approvalTrackersToFetch?: iAmountTrackerIdDetails<NumberType>[];
+  approvalTrackersToFetch?: iAmountTrackerIdDetails[];
   /**
    * Fetches private parameters for any claims in addition to public parameters.
    */
@@ -438,7 +414,7 @@ export interface GetMetadataForCollectionPayload {
   /**
    * If present, we will fetch the floor price for the specified token IDs.
    */
-  tokenFloorPricesToFetch?: NumberType[] | iUintRange<NumberType>[];
+  tokenFloorPricesToFetch?: string | number[] | iUintRange[];
 }
 
 /**
@@ -478,7 +454,7 @@ export class RefreshStatusPayload extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface iRefreshStatusSuccessResponse<T extends NumberType> {
+export interface iRefreshStatusSuccessResponse {
   /**
    * Boolean indicating if the collection is currently in the queue.
    */
@@ -486,32 +462,29 @@ export interface iRefreshStatusSuccessResponse<T extends NumberType> {
   /**
    * Array of error documents corresponding to the collection.
    */
-  errorDocs: iQueueDoc<T>[];
+  errorDocs: iQueueDoc[];
   /**
    * The status information corresponding to the collection.
    */
-  refreshDoc: iRefreshDoc<T>;
+  refreshDoc: iRefreshDoc;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class RefreshStatusSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<RefreshStatusSuccessResponse<T>>
-  implements iRefreshStatusSuccessResponse<T>
-{
+export class RefreshStatusSuccessResponse extends BaseNumberTypeClass<RefreshStatusSuccessResponse> implements iRefreshStatusSuccessResponse {
   inQueue: boolean;
-  errorDocs: QueueDoc<T>[];
-  refreshDoc: RefreshDoc<T>;
+  errorDocs: QueueDoc[];
+  refreshDoc: RefreshDoc;
 
-  constructor(data: iRefreshStatusSuccessResponse<T>) {
+  constructor(data: iRefreshStatusSuccessResponse) {
     super();
     this.inQueue = data.inQueue;
     this.errorDocs = data.errorDocs.map((errorDoc) => new QueueDoc(errorDoc));
     this.refreshDoc = new RefreshDoc(data.refreshDoc);
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): RefreshStatusSuccessResponse<U> {
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): RefreshStatusSuccessResponse {
     return new RefreshStatusSuccessResponse(
       deepCopyPrimitives({
         inQueue: this.inQueue,

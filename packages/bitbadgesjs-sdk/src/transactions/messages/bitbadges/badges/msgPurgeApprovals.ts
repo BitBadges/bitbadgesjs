@@ -14,15 +14,15 @@ import type { NumberType } from '@/common/string-numbers.js';
  *
  * @category Transactions
  */
-export class MsgPurgeApprovals<T extends NumberType> extends CustomTypeClass<MsgPurgeApprovals<T>> implements iMsgPurgeApprovals<T> {
+export class MsgPurgeApprovals extends CustomTypeClass<MsgPurgeApprovals> implements iMsgPurgeApprovals {
   creator: BitBadgesAddress;
   collectionId: string;
   purgeExpired: boolean;
   approverAddress: BitBadgesAddress;
   purgeCounterpartyApprovals: boolean;
-  approvalsToPurge: ApprovalIdentifierDetails<T>[];
+  approvalsToPurge: ApprovalIdentifierDetails[];
 
-  constructor(msg: iMsgPurgeApprovals<T>) {
+  constructor(msg: iMsgPurgeApprovals) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
@@ -43,23 +43,15 @@ export class MsgPurgeApprovals<T extends NumberType> extends CustomTypeClass<Msg
     });
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgPurgeApprovals<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgPurgeApprovals {
     return MsgPurgeApprovals.fromProto(protobadges.MsgPurgeApprovals.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgPurgeApprovals<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgPurgeApprovals {
     return MsgPurgeApprovals.fromProto(protobadges.MsgPurgeApprovals.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(protoMsg: protobadges.MsgPurgeApprovals, convertFunction: (item: NumberType) => U): MsgPurgeApprovals<U> {
+  static fromProto(protoMsg: protobadges.MsgPurgeApprovals, convertFunction: (item: string | number) => U): MsgPurgeApprovals {
     return new MsgPurgeApprovals({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
@@ -70,7 +62,7 @@ export class MsgPurgeApprovals<T extends NumberType> extends CustomTypeClass<Msg
     });
   }
 
-  toBech32Addresses(prefix: string): MsgPurgeApprovals<T> {
+  toBech32Addresses(prefix: string): MsgPurgeApprovals {
     return new MsgPurgeApprovals({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,

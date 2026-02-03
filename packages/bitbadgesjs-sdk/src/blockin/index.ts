@@ -3,37 +3,37 @@
 
 export type NumberType = string | bigint | number;
 
-export interface UintRange<T extends NumberType> {
-  start: T;
-  end: T;
+export interface UintRange {
+  start: string | number;
+  end: string | number;
 }
 
-export interface AndGroup<T extends NumberType> {
-  $and: AssetConditionGroup<T>[];
+export interface AndGroup {
+  $and: AssetConditionGroup[];
 }
 
-export interface OrGroup<T extends NumberType> {
-  $or: AssetConditionGroup<T>[];
+export interface OrGroup {
+  $or: AssetConditionGroup[];
 }
 
-export interface AssetDetails<T extends NumberType> {
+export interface AssetDetails {
   chain: string;
   collectionId: T | string;
-  assetIds: (string | UintRange<T>)[];
-  ownershipTimes: UintRange<T>[];
-  mustOwnAmounts: UintRange<T>;
+  assetIds: (string | UintRange)[];
+  ownershipTimes: UintRange[];
+  mustOwnAmounts: UintRange;
   additionalCriteria?: string;
   ownershipPartyCheck?: string;
 }
 
-export interface OwnershipRequirements<T extends NumberType> {
-  assets: AssetDetails<T>[];
+export interface OwnershipRequirements {
+  assets: AssetDetails[];
   options?: {
-    numMatchesForVerification?: T; // 0 or undefined = must satisfy all
+    numMatchesForVerification?: string | number; // 0 or undefined = must satisfy all
   };
 }
 
-export type AssetConditionGroup<T extends NumberType> = AndGroup<T> | OrGroup<T> | OwnershipRequirements<T>;
+export type AssetConditionGroup = AndGroup | OrGroup | OwnershipRequirements;
 
 /**
  * Interface for EIP-4361 Challenge - Sign in With Ethereum
@@ -42,7 +42,7 @@ export type AssetConditionGroup<T extends NumberType> = AndGroup<T> | OrGroup<T>
  *
  * We extend it to support assets.
  */
-export interface ChallengeParams<T extends NumberType> {
+export interface ChallengeParams {
   domain: string;
   statement: string;
   address: string;
@@ -54,7 +54,7 @@ export interface ChallengeParams<T extends NumberType> {
   expirationDate?: string;
   notBefore?: string;
   resources?: string[];
-  assetOwnershipRequirements?: AssetConditionGroup<T>;
+  assetOwnershipRequirements?: AssetConditionGroup;
 }
 
 /**
@@ -65,7 +65,7 @@ export type VerifyChallengeOptions = {
    * Optionally define the expected details to check. If the challenge was edited and the details
    * do not match, the challenge will fail verification.
    */
-  expectedChallengeParams?: Partial<ChallengeParams<NumberType>>;
+  expectedChallengeParams?: Partial<ChallengeParams>;
 
   /**
    * Optional function to call before verification. This is useful to verify the challenge is
@@ -76,7 +76,7 @@ export type VerifyChallengeOptions = {
    * This function is useful if you need to implement custom logic other than strict equality).
    * For example, assert that only one of assets A, B, or C are defined and not all three.
    */
-  beforeVerification?: (params: ChallengeParams<NumberType>) => Promise<void>;
+  beforeVerification?: (params: ChallengeParams) => Promise<void>;
 
   /**
    * For verification of assets, instead of dynamically fetching the assets, you can specify a snapshot of the assets.
@@ -110,4 +110,3 @@ export type VerifyChallengeOptions = {
    */
   skipSignatureVerification?: boolean;
 };
-

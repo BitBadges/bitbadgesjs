@@ -15,13 +15,13 @@ import { Stringify } from '@/common/string-numbers.js';
  *
  * @category Transactions
  */
-export class MsgSetManager<T extends NumberType> extends CustomTypeClass<MsgSetManager<T>> implements iMsgSetManager<T> {
+export class MsgSetManager extends CustomTypeClass<MsgSetManager> implements iMsgSetManager {
   creator: BitBadgesAddress;
-  collectionId: T;
+  collectionId: string | number;
   manager: BitBadgesAddress;
-  canUpdateManager: ActionPermission<T>[];
+  canUpdateManager: ActionPermission[];
 
-  constructor(msg: iMsgSetManager<T>) {
+  constructor(msg: iMsgSetManager) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
@@ -38,15 +38,15 @@ export class MsgSetManager<T extends NumberType> extends CustomTypeClass<MsgSetM
     });
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetManager<NumberType> {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSetManager {
     return MsgSetManager.fromProto(protobadges.MsgSetManager.fromJson(jsonValue, options));
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetManager<NumberType> {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSetManager {
     return MsgSetManager.fromProto(protobadges.MsgSetManager.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: protobadges.MsgSetManager): MsgSetManager<NumberType> {
+  static fromProto(protoMsg: protobadges.MsgSetManager): MsgSetManager {
     return new MsgSetManager({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
@@ -55,7 +55,7 @@ export class MsgSetManager<T extends NumberType> extends CustomTypeClass<MsgSetM
     });
   }
 
-  toBech32Addresses(prefix: string): MsgSetManager<T> {
+  toBech32Addresses(prefix: string): MsgSetManager {
     return new MsgSetManager({
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,

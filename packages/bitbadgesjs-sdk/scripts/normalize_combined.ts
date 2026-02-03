@@ -5,13 +5,7 @@ function removeImports(data: string): string {
   const lines = data.split('\n');
   const newLines: string[] = [];
   for (let i = 0; i < lines.length; i++) {
-    if (
-      (lines[i].trim().startsWith('import') ||
-        lines[i].trim().startsWith('export *') ||
-        lines[i].trim().startsWith('export default') ||
-        lines[i].trim().startsWith('export {')) &&
-      !lines[i].trim().startsWith('export default class')
-    ) {
+    if ((lines[i].trim().startsWith('import') || lines[i].trim().startsWith('export *') || lines[i].trim().startsWith('export default') || lines[i].trim().startsWith('export {')) && !lines[i].trim().startsWith('export default class')) {
       while (lines[i] && lines[i].trim() !== '') {
         i++;
       }
@@ -25,27 +19,7 @@ function removeImports(data: string): string {
 
   return modifiedContent;
 }
-const withDetailsInterfaces = [
-  'iUserPermissions',
-  'iBalanceDoc',
-  'iUserOutgoingApproval',
-  'iUserIncomingApproval',
-  'iCollectionApproval',
-  'iCollectionPermissions',
-  'iUserBalanceStore',
-  'iOutgoingApprovalCriteria',
-  'iIncomingApprovalCriteria',
-  'iApprovalCriteria',
-  'iMerkleChallenge',
-  'iUserOutgoingApprovalPermission',
-  'iUserIncomingApprovalPermission',
-  'iCollectionApprovalPermission',
-  'iCosmosCoinWrapperPath',
-  'iAliasPath',
-  'iDenomUnit',
-  'iPathMetadata',
-  'iDynamicStoreDoc'
-];
+const withDetailsInterfaces = ['iUserPermissions', 'iBalanceDoc', 'iUserOutgoingApproval', 'iUserIncomingApproval', 'iCollectionApproval', 'iCollectionPermissions', 'iUserBalanceStore', 'iOutgoingApprovalCriteria', 'iIncomingApprovalCriteria', 'iApprovalCriteria', 'iMerkleChallenge', 'iUserOutgoingApprovalPermission', 'iUserIncomingApprovalPermission', 'iCollectionApprovalPermission', 'iCosmosCoinWrapperPath', 'iAliasPath', 'iDenomUnit', 'iPathMetadata', 'iDynamicStoreDoc'];
 
 function removeClasses(data: string): string {
   // Split the content into lines
@@ -65,35 +39,12 @@ function removeClasses(data: string): string {
       // 'ClaimIntegrationPrivateParamsType',
       ...withDetailsInterfaces.map((interfaceName) => `${interfaceName}WithDetails`)
     ];
-    const startsWithProblemInterface = problemInterfaces.some(
-      (problemInterface) =>
-        lines[i].trim().startsWith(`export interface ${problemInterface}`) ||
-        lines[i].trim().startsWith(`interface ${problemInterface}`) ||
-        lines[i].trim().startsWith(`export type ${problemInterface}`) ||
-        lines[i].trim().startsWith(`type ${problemInterface}`)
-    );
+    const startsWithProblemInterface = problemInterfaces.some((problemInterface) => lines[i].trim().startsWith(`export interface ${problemInterface}`) || lines[i].trim().startsWith(`interface ${problemInterface}`) || lines[i].trim().startsWith(`export type ${problemInterface}`) || lines[i].trim().startsWith(`type ${problemInterface}`));
 
     const safeEnums = ['BroadcastMode'];
-    const startsWithUnsafeEnum =
-      (lines[i].trim().startsWith('enum ') && !safeEnums.some((safeEnum) => lines[i].includes(safeEnum))) ||
-      (lines[i].trim().startsWith('export enum ') && !safeEnums.some((safeEnum) => lines[i].includes(safeEnum)));
+    const startsWithUnsafeEnum = (lines[i].trim().startsWith('enum ') && !safeEnums.some((safeEnum) => lines[i].includes(safeEnum))) || (lines[i].trim().startsWith('export enum ') && !safeEnums.some((safeEnum) => lines[i].includes(safeEnum)));
 
-    if (
-      lines[i].trim().startsWith('export class ') ||
-      lines[i].trim().startsWith('class ') ||
-      lines[i].trim().startsWith('export function ') ||
-      lines[i].trim().startsWith('abstract class ') ||
-      lines[i].trim().startsWith('export abstract class ') ||
-      lines[i].trim().startsWith('export default class ') ||
-      lines[i].trim().startsWith('function ') ||
-      lines[i].trim().startsWith('proto3.util') ||
-      lines[i].trim().startsWith('proto2.util') ||
-      lines[i].trim().startsWith('declare ') ||
-      startsWithProblemInterface ||
-      startsWithUnsafeEnum ||
-      lines[i].trim().startsWith('export const ') ||
-      lines[i].trim().startsWith('const ')
-    ) {
+    if (lines[i].trim().startsWith('export class ') || lines[i].trim().startsWith('class ') || lines[i].trim().startsWith('export function ') || lines[i].trim().startsWith('abstract class ') || lines[i].trim().startsWith('export abstract class ') || lines[i].trim().startsWith('export default class ') || lines[i].trim().startsWith('function ') || lines[i].trim().startsWith('proto3.util') || lines[i].trim().startsWith('proto2.util') || lines[i].trim().startsWith('declare ') || startsWithProblemInterface || startsWithUnsafeEnum || lines[i].trim().startsWith('export const ') || lines[i].trim().startsWith('const ')) {
       if (lines[i].trim().endsWith('{}') || lines[i].trim().endsWith(';')) {
         //skip (one-liner)
       } else {
@@ -170,10 +121,7 @@ function removeImportLinesFromFile(filePath: string): void {
     modifiedContent = modifiedContent.replace(new RegExp('solAddress?: string;', 'g'), 'solAddress: string;');
     modifiedContent = modifiedContent.replace(new RegExp('toListId: string;', 'g'), 'toListId: string;\ntoList: iAddressList;');
     modifiedContent = modifiedContent.replace(new RegExp('fromListId: string;', 'g'), 'fromListId: string;\nfromList: iAddressList;');
-    modifiedContent = modifiedContent.replace(
-      new RegExp('initiatedByListId: string;', 'g'),
-      'initiatedByListId: string;\ninitiatedByList: iAddressList;'
-    );
+    modifiedContent = modifiedContent.replace(new RegExp('initiatedByListId: string;', 'g'), 'initiatedByListId: string;\ninitiatedByList: iAddressList;');
 
     for (const interfaceName of withDetailsInterfaces) {
       modifiedContent = modifiedContent.replace(new RegExp(`${interfaceName} `, 'g'), `${interfaceName}WithDetails `);
@@ -284,9 +232,7 @@ function removeImportLinesFromFile(filePath: string): void {
     // These fields cause typeconv to fail with "Cyclic dependency detected" because the same field
     // is defined in both the base interface and the extending interface
     const lines = modifiedContent.split('\n');
-    const bitBadgesCollectionStartIdx = lines.findIndex(
-      (line) => line.includes('export interface iBitBadgesCollection') || line.includes('interface iBitBadgesCollection')
-    );
+    const bitBadgesCollectionStartIdx = lines.findIndex((line) => line.includes('export interface iBitBadgesCollection') || line.includes('interface iBitBadgesCollection'));
 
     if (bitBadgesCollectionStartIdx !== -1) {
       // Find the end of the interface by finding the closing brace
@@ -309,12 +255,7 @@ function removeImportLinesFromFile(filePath: string): void {
       }
 
       // Fields that are duplicates from iCollectionDoc (already defined in parent)
-      const duplicateFields = [
-        'defaultBalances: iUserBalanceStore',
-        'collectionPermissions: iCollectionPermissions',
-        'collectionMetadata: iCollectionMetadata',
-        'tokenMetadata: iTokenMetadata'
-      ];
+      const duplicateFields = ['defaultBalances: iUserBalanceStore', 'collectionPermissions: iCollectionPermissions', 'collectionMetadata: iCollectionMetadata', 'tokenMetadata: iTokenMetadata'];
 
       // Find and mark lines to remove within the iBitBadgesCollection interface
       const linesToRemove: number[] = [];
@@ -354,12 +295,8 @@ function removeImportLinesFromFile(filePath: string): void {
       // Fallback to old method if interface not found (shouldn't happen, but safe)
       const defaultBalancesLine = lines.findIndex((line) => line.includes('defaultBalances: iUserBalanceStore'));
       const permLine = lines.findIndex((line) => line.includes('collectionPermissions: iCollectionPermissions'));
-      const collectionMetadataLine = lines.findIndex(
-        (line) => line.includes('collectionMetadata: iCollectionMetadata') && !line.includes('iCollectionMetadataWithDetails')
-      );
-      const tokenMetadataLine = lines.findIndex(
-        (line) => line.includes('tokenMetadata: iTokenMetadata') && !line.includes('iTokenMetadataWithDetails')
-      );
+      const collectionMetadataLine = lines.findIndex((line) => line.includes('collectionMetadata: iCollectionMetadata') && !line.includes('iCollectionMetadataWithDetails'));
+      const tokenMetadataLine = lines.findIndex((line) => line.includes('tokenMetadata: iTokenMetadata') && !line.includes('iTokenMetadataWithDetails'));
 
       const linesToRemove = [defaultBalancesLine, permLine, collectionMetadataLine, tokenMetadataLine].filter((idx) => idx !== -1);
       modifiedContent = lines
@@ -392,12 +329,8 @@ function removeImportLinesFromFile(filePath: string): void {
       )
       .join('\n');
 
-    const accountDocLines = getInBetweenBraces('export interface iAccountDoc', modifiedContent.split('\n')).filter(
-      (x) => !(x.includes('solAddress') || x.includes('Solana address'))
-    );
-    const profileDocLines = getInBetweenBraces('export interface iProfileDoc', modifiedContent.split('\n')).filter(
-      (x) => !(x.includes('solAddress') || x.includes('Solana address'))
-    );
+    const accountDocLines = getInBetweenBraces('export interface iAccountDoc', modifiedContent.split('\n')).filter((x) => !(x.includes('solAddress') || x.includes('Solana address')));
+    const profileDocLines = getInBetweenBraces('export interface iProfileDoc', modifiedContent.split('\n')).filter((x) => !(x.includes('solAddress') || x.includes('Solana address')));
 
     const bitbadgesuserInfoIdx = modifiedContent.split('\n').findIndex((line) => line.includes('export interface iBitBadgesUserInfo'));
     modifiedContent = modifiedContent

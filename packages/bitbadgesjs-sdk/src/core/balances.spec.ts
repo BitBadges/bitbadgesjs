@@ -1,12 +1,4 @@
-import {
-  BalanceArray,
-  areBalancesEqual,
-  addBalances,
-  getBalancesForIds,
-  doBalancesExceedThreshold,
-  addBalancesAndCheckIfExceedsThreshold,
-  handleDuplicateTokenIdsInBalances
-} from './balances.js';
+import { BalanceArray, areBalancesEqual, addBalances, getBalancesForIds, doBalancesExceedThreshold, addBalancesAndCheckIfExceedsThreshold, handleDuplicateTokenIdsInBalances } from './balances.js';
 import { UserPermissions } from './permissions.js';
 import { UintRangeArray } from './uintRanges.js';
 import { UserBalanceStore } from './userBalances.js';
@@ -145,7 +137,7 @@ describe('BalancesWithTimesFuzz', () => {
   }
 
   it('should applyIncrementsToBalances', () => {
-    const startBalances = BalanceArray.From<bigint>([
+    const startBalances = BalanceArray.From([
       {
         amount: 1n,
         tokenIds: [{ start: 1n, end: 1n }],
@@ -159,7 +151,7 @@ describe('BalancesWithTimesFuzz', () => {
     expect(
       areBalancesEqual(
         startBalances,
-        BalanceArray.From<bigint>([
+        BalanceArray.From([
           {
             amount: 1n,
             tokenIds: [{ start: 1001n, end: 1001n }],
@@ -172,7 +164,7 @@ describe('BalancesWithTimesFuzz', () => {
   });
 
   it('should filterZeroBalances', () => {
-    const balances = BalanceArray.From<bigint>([
+    const balances = BalanceArray.From([
       {
         amount: 0n,
         tokenIds: [{ start: 1n, end: 1n }],
@@ -191,7 +183,7 @@ describe('BalancesWithTimesFuzz', () => {
   });
 
   it('should correctly check threhsold', () => {
-    const balances = BalanceArray.From<bigint>([
+    const balances = BalanceArray.From([
       {
         amount: 5n,
         tokenIds: [{ start: 1n, end: 1n }],
@@ -199,7 +191,7 @@ describe('BalancesWithTimesFuzz', () => {
       }
     ]);
 
-    const threshold = BalanceArray.From<bigint>([
+    const threshold = BalanceArray.From([
       {
         amount: 1n,
         tokenIds: [{ start: 1n, end: 1n }],
@@ -214,7 +206,7 @@ describe('BalancesWithTimesFuzz', () => {
   });
 
   it('should handle duplicate token ids', () => {
-    const balances = BalanceArray.From<bigint>([
+    const balances = BalanceArray.From([
       {
         amount: 1n,
         tokenIds: [{ start: 1n, end: 1n }],

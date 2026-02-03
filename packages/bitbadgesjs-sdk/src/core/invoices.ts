@@ -3,7 +3,7 @@ import type { iCollectionApproval } from '@/interfaces/types/approvals.js';
 import { UintRangeArray } from './uintRanges.js';
 import { doesCollectionFollowProtocol } from './quests.js';
 
-export const doesCollectionFollowInvoiceProtocol = (collection: Readonly<iCollectionDoc<bigint>>) => {
+export const doesCollectionFollowInvoiceProtocol = (collection: Readonly<iCollectionDoc>) => {
   if (!doesCollectionFollowProtocol(collection, 'Invoices')) {
     return false;
   }
@@ -21,7 +21,7 @@ export const doesCollectionFollowInvoiceProtocol = (collection: Readonly<iCollec
   return true;
 };
 
-export const isInvoiceApproval = (approval: iCollectionApproval<bigint>) => {
+export const isInvoiceApproval = (approval: iCollectionApproval) => {
   const approvalCriteria = approval.approvalCriteria;
   if (!approvalCriteria) {
     return false;

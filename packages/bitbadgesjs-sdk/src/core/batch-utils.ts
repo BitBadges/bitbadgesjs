@@ -10,21 +10,21 @@ import { UintRange, UintRangeArray } from './uintRanges.js';
 /**
  * @category Interfaces
  */
-export interface iBatchTokenDetails<T extends NumberType> {
+export interface iBatchTokenDetails {
   /** The collection ID of this element's token details. */
   collectionId: CollectionId;
   /** The corresponding token IDs for this collection ID. */
-  tokenIds: iUintRange<T>[];
+  tokenIds: iUintRange[];
 }
 
 /**
  * @category Batch Utils
  */
-export class BatchTokenDetails<T extends NumberType> extends BaseNumberTypeClass<BatchTokenDetails<T>> implements iBatchTokenDetails<T> {
+export class BatchTokenDetails extends BaseNumberTypeClass<BatchTokenDetails> implements iBatchTokenDetails {
   collectionId: CollectionId;
-  tokenIds: UintRangeArray<T>;
+  tokenIds: UintRangeArray;
 
-  constructor(data: iBatchTokenDetails<T>) {
+  constructor(data: iBatchTokenDetails) {
     super();
     this.collectionId = data.collectionId;
     this.tokenIds = UintRangeArray.From(data.tokenIds);
@@ -34,8 +34,8 @@ export class BatchTokenDetails<T extends NumberType> extends BaseNumberTypeClass
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BatchTokenDetails<U> {
-    return new BatchTokenDetails<U>({
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): BatchTokenDetails {
+    return new BatchTokenDetails({
       ...this,
       collectionId: this.collectionId,
       tokenIds: this.tokenIds.map((x) => x.convert(convertFunction))
@@ -45,8 +45,8 @@ export class BatchTokenDetails<T extends NumberType> extends BaseNumberTypeClass
   /**
    * Checks if the token details overlap with another set of token details.
    */
-  doesNotOverlap(other: iBatchTokenDetails<T>[] | iBatchTokenDetails<T>) {
-    const otherArr: BatchTokenDetailsArray<T> = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
+  doesNotOverlap(other: iBatchTokenDetails[] | iBatchTokenDetails) {
+    const otherArr: BatchTokenDetailsArray = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
 
     const matchingElem = otherArr.find((x) => x.collectionId === this.collectionId);
     if (!matchingElem) return true;
@@ -57,8 +57,8 @@ export class BatchTokenDetails<T extends NumberType> extends BaseNumberTypeClass
   /**
    * Checks if the token details are a subset of another set of token details (i.e. all tokenIds are in the other set).
    */
-  isSubsetOf(other: iBatchTokenDetails<T>[] | iBatchTokenDetails<T>): boolean {
-    const otherArr: BatchTokenDetailsArray<T> = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
+  isSubsetOf(other: iBatchTokenDetails[] | iBatchTokenDetails): boolean {
+    const otherArr: BatchTokenDetailsArray = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
 
     const matchingElem = otherArr.find((x) => x.collectionId === this.collectionId);
     if (!matchingElem) return false;
@@ -70,8 +70,8 @@ export class BatchTokenDetails<T extends NumberType> extends BaseNumberTypeClass
   /**
    * Checks if the token details are not in another set of token details (i.e. none of the token IDs are in the other set).
    */
-  noneIn(other: iBatchTokenDetails<T>[] | iBatchTokenDetails<T>): boolean {
-    const otherArr: BatchTokenDetailsArray<T> = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
+  noneIn(other: iBatchTokenDetails[] | iBatchTokenDetails): boolean {
+    const otherArr: BatchTokenDetailsArray = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
 
     const matchingElem = otherArr.find((x) => x.collectionId === this.collectionId);
     if (!matchingElem) return true;
@@ -79,7 +79,7 @@ export class BatchTokenDetails<T extends NumberType> extends BaseNumberTypeClass
     return this.tokenIds.getOverlaps(matchingElem.tokenIds).length === 0;
   }
 
-  toArray(): BatchTokenDetailsArray<T> {
+  toArray(): BatchTokenDetailsArray {
     return new BatchTokenDetailsArray(this.clone());
   }
 }
@@ -87,8 +87,8 @@ export class BatchTokenDetails<T extends NumberType> extends BaseNumberTypeClass
 /**
  * @category Batch Utils
  */
-export class BatchTokenDetailsArray<T extends NumberType> extends BaseTypedArray<BatchTokenDetailsArray<T>, BatchTokenDetails<T>> {
-  static From<T extends NumberType>(arr: iBatchTokenDetails<T>[] | iBatchTokenDetails<T> | BatchTokenDetailsArray<T>): BatchTokenDetailsArray<T> {
+export class BatchTokenDetailsArray extends BaseTypedArray<BatchTokenDetailsArray, BatchTokenDetails> {
+  static From(arr: iBatchTokenDetails[] | iBatchTokenDetails | BatchTokenDetailsArray): BatchTokenDetailsArray {
     const wrappedArr = Array.isArray(arr) ? arr : [arr];
     return new BatchTokenDetailsArray(...wrappedArr.map((i) => new BatchTokenDetails(i)));
   }
@@ -96,40 +96,40 @@ export class BatchTokenDetailsArray<T extends NumberType> extends BaseTypedArray
   /**
    * @hidden
    */
-  push(...items: iBatchTokenDetails<T>[] | BatchTokenDetailsArray<T>): number {
+  push(...items: iBatchTokenDetails[] | BatchTokenDetailsArray): number {
     return super.push(...items.map((i) => new BatchTokenDetails(i)));
   }
 
   /**
    * @hidden
    */
-  fill(value: iBatchTokenDetails<T>, start?: number | undefined, end?: number | undefined): this {
+  fill(value: iBatchTokenDetails, start?: number | undefined, end?: number | undefined): this {
     return super.fill(new BatchTokenDetails(value), start, end);
   }
 
   /**
    * @hidden
    */
-  with(index: number, value: iBatchTokenDetails<T>): BatchTokenDetailsArray<T> {
+  with(index: number, value: iBatchTokenDetails): BatchTokenDetailsArray {
     return super.with(index, new BatchTokenDetails(value));
   }
 
   /**
    * @hidden
    */
-  unshift(...items: iBatchTokenDetails<T>[] | BatchTokenDetailsArray<T>): number {
+  unshift(...items: iBatchTokenDetails[] | BatchTokenDetailsArray): number {
     return super.unshift(...items.map((i) => new BatchTokenDetails(i)));
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): BatchTokenDetailsArray<U> {
-    return new BatchTokenDetailsArray<U>(...this.map((x) => x.convert(convertFunction)));
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): BatchTokenDetailsArray {
+    return new BatchTokenDetailsArray(...this.map((x) => x.convert(convertFunction)));
   }
 
   /**
    * Adds token details to the batch details array. If the collectionId already exists, it will merge the tokenIds.
    */
-  add(other: iBatchTokenDetails<T>[] | iBatchTokenDetails<T> | BatchTokenDetailsArray<T>) {
-    const otherArr: BatchTokenDetails<T>[] = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
+  add(other: iBatchTokenDetails[] | iBatchTokenDetails | BatchTokenDetailsArray) {
+    const otherArr: BatchTokenDetails[] = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
 
     let arr = BatchTokenDetailsArray.From(this);
     for (const tokenIdObj of otherArr) {
@@ -155,8 +155,8 @@ export class BatchTokenDetailsArray<T extends NumberType> extends BaseTypedArray
   /**
    * Removes token details from the batch details array. If the collectionId already exists, it will remove the tokenIds.
    */
-  remove(other: iBatchTokenDetails<T>[] | iBatchTokenDetails<T> | BatchTokenDetailsArray<T>) {
-    const otherArr: BatchTokenDetails<T>[] = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
+  remove(other: iBatchTokenDetails[] | iBatchTokenDetails | BatchTokenDetailsArray) {
+    const otherArr: BatchTokenDetails[] = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
 
     let arr = BatchTokenDetailsArray.From(this);
     for (const tokenIdObj of otherArr) {
@@ -176,8 +176,8 @@ export class BatchTokenDetailsArray<T extends NumberType> extends BaseTypedArray
   /**
    * Checks if the token details completely overlap with another set of token details (i.e. all tokenIds are in the other set).
    */
-  isSubsetOf(other: iBatchTokenDetails<T>[] | iBatchTokenDetails<T> | BatchTokenDetailsArray<T>) {
-    const otherArr: BatchTokenDetails<T>[] = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
+  isSubsetOf(other: iBatchTokenDetails[] | iBatchTokenDetails | BatchTokenDetailsArray) {
+    const otherArr: BatchTokenDetails[] = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
 
     return this.every((x) => x.isSubsetOf(otherArr));
   }
@@ -185,8 +185,8 @@ export class BatchTokenDetailsArray<T extends NumberType> extends BaseTypedArray
   /**
    * Checks if the token details do not overlap with another set of token details (i.e. none of the token IDs are in the other set).
    */
-  noneIn(other: iBatchTokenDetails<T>[] | iBatchTokenDetails<T> | BatchTokenDetailsArray<T>) {
-    const otherArr: BatchTokenDetails<T>[] = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
+  noneIn(other: iBatchTokenDetails[] | iBatchTokenDetails | BatchTokenDetailsArray) {
+    const otherArr: BatchTokenDetails[] = BatchTokenDetailsArray.From(Array.isArray(other) ? other : [other]);
 
     return this.every((x) => x.noneIn(otherArr));
   }
@@ -196,9 +196,9 @@ export class BatchTokenDetailsArray<T extends NumberType> extends BaseTypedArray
    *
    * Assums that tokenIds are sorted, merged, and non-overlapping.
    */
-  getPage(_pageNumber: number, _pageSize: number, sortBy?: 'newest' | 'oldest' | undefined): BatchTokenDetailsArray<T> {
-    if (this.length === 0) return BatchTokenDetailsArray.From<T>([]);
-    if (this[0].tokenIds.length === 0) return BatchTokenDetailsArray.From<T>([]);
+  getPage(_pageNumber: number, _pageSize: number, sortBy?: 'newest' | 'oldest' | undefined): BatchTokenDetailsArray {
+    if (this.length === 0) return BatchTokenDetailsArray.From([]);
+    if (this[0].tokenIds.length === 0) return BatchTokenDetailsArray.From([]);
 
     const converterFunction = getConverterFunction(this[0].tokenIds[0].start);
 
@@ -220,7 +220,7 @@ export class BatchTokenDetailsArray<T extends NumberType> extends BaseTypedArray
     }
 
     const startIdxNum = BigInt((pageNumber - 1n) * pageSize);
-    const tokenIdsToDisplay = BatchTokenDetailsArray.From<bigint>([]);
+    const tokenIdsToDisplay = BatchTokenDetailsArray.From([]);
 
     let currIdx = 0n;
     let numEntriesLeftToHandle = pageSize;
@@ -238,7 +238,7 @@ export class BatchTokenDetailsArray<T extends NumberType> extends BaseTypedArray
           }
 
           //Iterate through the range and add tokenIds to the array, until we have added enough
-          const tokenIdsToDisplayIds = UintRangeArray.From<bigint>([]);
+          const tokenIdsToDisplayIds = UintRangeArray.From([]);
           if (numEntriesLeftToHandle > 0) {
             const endTokenId = bigIntMin(currTokenId + numEntriesLeftToHandle - 1n, range.end);
             if (currTokenId <= endTokenId) {

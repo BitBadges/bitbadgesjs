@@ -29,16 +29,13 @@ import { normalizeMessagesIfNecessary } from '../../base.js';
  *
  * @category Transactions
  */
-export class MsgUpdateUserApprovals<T extends NumberType>
-  extends BaseNumberTypeClass<MsgUpdateUserApprovals<T>>
-  implements iMsgUpdateUserApprovals<T>
-{
+export class MsgUpdateUserApprovals extends BaseNumberTypeClass<MsgUpdateUserApprovals> implements iMsgUpdateUserApprovals {
   creator: BitBadgesAddress;
   collectionId: CollectionId;
   updateOutgoingApprovals?: boolean;
-  outgoingApprovals?: UserOutgoingApproval<T>[];
+  outgoingApprovals?: UserOutgoingApproval[];
   updateIncomingApprovals?: boolean;
-  incomingApprovals?: UserIncomingApproval<T>[];
+  incomingApprovals?: UserIncomingApproval[];
   updateAutoApproveSelfInitiatedOutgoingTransfers?: boolean;
   autoApproveSelfInitiatedOutgoingTransfers?: boolean;
   updateAutoApproveSelfInitiatedIncomingTransfers?: boolean;
@@ -46,9 +43,9 @@ export class MsgUpdateUserApprovals<T extends NumberType>
   updateAutoApproveAllIncomingTransfers?: boolean;
   autoApproveAllIncomingTransfers?: boolean;
   updateUserPermissions?: boolean;
-  userPermissions?: UserPermissions<T>;
+  userPermissions?: UserPermissions;
 
-  constructor(msg: iMsgUpdateUserApprovals<T>) {
+  constructor(msg: iMsgUpdateUserApprovals) {
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
@@ -70,34 +67,23 @@ export class MsgUpdateUserApprovals<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MsgUpdateUserApprovals<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUpdateUserApprovals<U>;
+  convert(convertFunction: (item: string | number) => U, options?: ConvertOptions): MsgUpdateUserApprovals {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MsgUpdateUserApprovals;
   }
 
   toProto(): protobadges.MsgUpdateUserApprovals {
     return new protobadges.MsgUpdateUserApprovals(this.convert(Stringify));
   }
 
-  static fromJson<U extends NumberType>(
-    jsonValue: JsonValue,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgUpdateUserApprovals<U> {
+  static fromJson(jsonValue: JsonValue, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgUpdateUserApprovals {
     return MsgUpdateUserApprovals.fromProto(protobadges.MsgUpdateUserApprovals.fromJson(jsonValue, options), convertFunction);
   }
 
-  static fromJsonString<U extends NumberType>(
-    jsonString: string,
-    convertFunction: (item: NumberType) => U,
-    options?: Partial<JsonReadOptions>
-  ): MsgUpdateUserApprovals<U> {
+  static fromJsonString(jsonString: string, convertFunction: (item: string | number) => U, options?: Partial<JsonReadOptions>): MsgUpdateUserApprovals {
     return MsgUpdateUserApprovals.fromProto(protobadges.MsgUpdateUserApprovals.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(
-    protoMsg: protobadges.MsgUpdateUserApprovals,
-    convertFunction: (item: NumberType) => U
-  ): MsgUpdateUserApprovals<U> {
+  static fromProto(protoMsg: protobadges.MsgUpdateUserApprovals, convertFunction: (item: string | number) => U): MsgUpdateUserApprovals {
     return new MsgUpdateUserApprovals({
       creator: protoMsg.creator,
       collectionId: protoMsg.collectionId,
@@ -124,8 +110,8 @@ export class MsgUpdateUserApprovals<T extends NumberType>
     });
   }
 
-  toBech32Addresses(prefix: string): MsgUpdateUserApprovals<T> {
-    return new MsgUpdateUserApprovals<T>({
+  toBech32Addresses(prefix: string): MsgUpdateUserApprovals {
+    return new MsgUpdateUserApprovals({
       ...this,
       creator: getConvertFunctionFromPrefix(prefix)(this.creator),
       collectionId: this.collectionId,

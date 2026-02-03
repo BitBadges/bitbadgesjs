@@ -38,11 +38,11 @@ export interface iMsgDeleteManagerSplitter {
 /**
  * @category Interfaces
  */
-export interface iMsgExecuteUniversalUpdateCollection<T extends NumberType> {
+export interface iMsgExecuteUniversalUpdateCollection {
   /** Address executing the message (must be approved or admin). */
   executor: BitBadgesAddress;
   /** Address of the manager splitter to execute through. */
   managerSplitterAddress: BitBadgesAddress;
   /** The UniversalUpdateCollection message to execute. */
-  universalUpdateCollectionMsg: iMsgUniversalUpdateCollection<T>;
+  universalUpdateCollectionMsg: iMsgUniversalUpdateCollection;
 }

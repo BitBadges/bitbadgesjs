@@ -41,7 +41,7 @@ function Derive(address: string, key: Buffer) {
   return Hash(Buffer.from(address, 'hex'), key);
 }
 
-function uint64ToBufferBE(number: NumberType): Buffer {
+function uint64ToBufferBE(number: string | number): Buffer {
   number = Number(number);
   const buffer = Buffer.alloc(8);
   buffer.writeUInt32BE(Math.floor(number / 0x100000000), 0);
@@ -68,7 +68,7 @@ export function generateAlias(moduleName: string, derivationKeys: Buffer[]) {
  *
  * @category Aliases
  */
-export function getAliasDerivationKeysForBadge(collectionId: CollectionId, tokenId: NumberType) {
+export function getAliasDerivationKeysForBadge(collectionId: CollectionId, tokenId: string | number) {
   const collectionIdNum = Number(collectionId.split('-')[0]);
 
   const derivationKey = [Buffer.from([AccountGenerationPrefix]), uint64ToBufferBE(collectionIdNum), uint64ToBufferBE(tokenId)];
@@ -93,7 +93,7 @@ export function getAliasDerivationKeysForCollection(collectionId: CollectionId) 
  *
  * @category Aliases
  */
-export function getAliasDerivationKeysForList(id: NumberType) {
+export function getAliasDerivationKeysForList(id: string | number) {
   const derivationKey = [Buffer.from([AddressGenerationPrefix]), uint64ToBufferBE(id)];
   return derivationKey;
 }

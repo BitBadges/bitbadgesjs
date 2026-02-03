@@ -4,40 +4,37 @@ import { iCosmosCoin, CosmosCoin } from '@/core/coin.js';
 import { Doc, PaginationInfo } from '@/api-indexer/base.js';
 import { iMetadata, Metadata } from '@/api-indexer/metadata/metadata.js';
 
-export interface iLiquidityPoolInfoVolume<T extends NumberType> {
-  daily: iCosmosCoin<T>[];
-  weekly: iCosmosCoin<T>[];
-  monthly: iCosmosCoin<T>[];
-  allTime: iCosmosCoin<T>[];
+export interface iLiquidityPoolInfoVolume {
+  daily: iCosmosCoin[];
+  weekly: iCosmosCoin[];
+  monthly: iCosmosCoin[];
+  allTime: iCosmosCoin[];
 }
 
-export class LiquidityPoolInfoVolume<T extends NumberType>
-  extends BaseNumberTypeClass<LiquidityPoolInfoVolume<T>>
-  implements iLiquidityPoolInfoVolume<T>
-{
-  daily: CosmosCoin<T>[];
-  weekly: CosmosCoin<T>[];
-  monthly: CosmosCoin<T>[];
-  allTime: CosmosCoin<T>[];
+export class LiquidityPoolInfoVolume extends BaseNumberTypeClass<LiquidityPoolInfoVolume> implements iLiquidityPoolInfoVolume {
+  daily: CosmosCoin[];
+  weekly: CosmosCoin[];
+  monthly: CosmosCoin[];
+  allTime: CosmosCoin[];
 
-  constructor(doc: iLiquidityPoolInfoVolume<T>) {
+  constructor(doc: iLiquidityPoolInfoVolume) {
     super();
-    this.daily = doc.daily.map((coin) => new CosmosCoin<T>(coin));
-    this.weekly = doc.weekly.map((coin) => new CosmosCoin<T>(coin));
-    this.monthly = doc.monthly.map((coin) => new CosmosCoin<T>(coin));
-    this.allTime = doc.allTime.map((coin) => new CosmosCoin<T>(coin));
+    this.daily = doc.daily.map((coin) => new CosmosCoin(coin));
+    this.weekly = doc.weekly.map((coin) => new CosmosCoin(coin));
+    this.monthly = doc.monthly.map((coin) => new CosmosCoin(coin));
+    this.allTime = doc.allTime.map((coin) => new CosmosCoin(coin));
   }
 
   getNumberFieldNames(): string[] {
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: { keepOriginalObject: boolean }): LiquidityPoolInfoVolume<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as LiquidityPoolInfoVolume<U>;
+  convert(convertFunction: (val: string | number) => U, options?: { keepOriginalObject: boolean }): LiquidityPoolInfoVolume {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as LiquidityPoolInfoVolume;
   }
 }
 
-export interface iLiquidityPoolInfoDoc<T extends NumberType> extends Doc {
+export interface iLiquidityPoolInfoDoc extends Doc {
   poolId: string;
   collectionId: string;
   address: string;
@@ -48,14 +45,14 @@ export interface iLiquidityPoolInfoDoc<T extends NumberType> extends Doc {
     swapFee: string;
     exitFee: string;
   };
-  volume: iLiquidityPoolInfoVolume<T>;
+  volume: iLiquidityPoolInfoVolume;
   lastVolumeUpdate: number;
-  liquidity: iCosmosCoin<T>[];
+  liquidity: iCosmosCoin[];
   lastLiquidityUpdate: number;
-  totalShares: T;
+  totalShares: string | number;
 }
 
-export class LiquidityPoolInfoDoc<T extends NumberType> extends BaseNumberTypeClass<LiquidityPoolInfoDoc<T>> implements iLiquidityPoolInfoDoc<T> {
+export class LiquidityPoolInfoDoc extends BaseNumberTypeClass<LiquidityPoolInfoDoc> implements iLiquidityPoolInfoDoc {
   _id?: string;
   _docId: string;
   poolId: string;
@@ -68,13 +65,13 @@ export class LiquidityPoolInfoDoc<T extends NumberType> extends BaseNumberTypeCl
     swapFee: string;
     exitFee: string;
   };
-  volume: LiquidityPoolInfoVolume<T>;
+  volume: LiquidityPoolInfoVolume;
   lastVolumeUpdate: number;
-  liquidity: CosmosCoin<T>[];
+  liquidity: CosmosCoin[];
   lastLiquidityUpdate: number;
-  totalShares: T;
+  totalShares: string | number;
 
-  constructor(doc: iLiquidityPoolInfoDoc<T>) {
+  constructor(doc: iLiquidityPoolInfoDoc) {
     super();
     this._id = doc._id;
     this._docId = doc._docId;
@@ -87,7 +84,7 @@ export class LiquidityPoolInfoDoc<T extends NumberType> extends BaseNumberTypeCl
     this.poolParams = doc.poolParams;
     this.volume = new LiquidityPoolInfoVolume(doc.volume);
     this.lastVolumeUpdate = doc.lastVolumeUpdate || Date.now();
-    this.liquidity = doc.liquidity.map((coin) => new CosmosCoin<T>(coin));
+    this.liquidity = doc.liquidity.map((coin) => new CosmosCoin(coin));
     this.lastLiquidityUpdate = doc.lastLiquidityUpdate || Date.now();
     this.totalShares = doc.totalShares;
   }
@@ -96,42 +93,42 @@ export class LiquidityPoolInfoDoc<T extends NumberType> extends BaseNumberTypeCl
     return ['totalShares'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: { keepOriginalObject: boolean }): LiquidityPoolInfoDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as LiquidityPoolInfoDoc<U>;
+  convert(convertFunction: (val: string | number) => U, options?: { keepOriginalObject: boolean }): LiquidityPoolInfoDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as LiquidityPoolInfoDoc;
   }
 }
 
-export interface iAssetPriceHistoryDoc<T extends NumberType> extends Doc {
+export interface iAssetPriceHistoryDoc extends Doc {
   asset: string;
   price: number;
-  timestamp: T;
-  totalLiquidity: iCosmosCoin<T>[];
+  timestamp: string | number;
+  totalLiquidity: iCosmosCoin[];
   timeframe?: string;
   high?: number;
   low?: number;
   open?: number;
 }
 
-export class AssetPriceHistoryDoc<T extends NumberType> extends BaseNumberTypeClass<AssetPriceHistoryDoc<T>> implements iAssetPriceHistoryDoc<T> {
+export class AssetPriceHistoryDoc extends BaseNumberTypeClass<AssetPriceHistoryDoc> implements iAssetPriceHistoryDoc {
   _id?: string;
   _docId: string;
   asset: string;
   price: number;
-  timestamp: T;
-  totalLiquidity: CosmosCoin<T>[];
+  timestamp: string | number;
+  totalLiquidity: CosmosCoin[];
   timeframe: string;
   high?: number;
   low?: number;
   open?: number;
 
-  constructor(doc: iAssetPriceHistoryDoc<T>) {
+  constructor(doc: iAssetPriceHistoryDoc) {
     super();
     this._id = doc._id;
     this._docId = doc._docId;
     this.asset = doc.asset;
     this.price = doc.price;
     this.timestamp = doc.timestamp;
-    this.totalLiquidity = doc.totalLiquidity.map((coin) => new CosmosCoin<T>(coin));
+    this.totalLiquidity = doc.totalLiquidity.map((coin) => new CosmosCoin(coin));
     this.timeframe = doc.timeframe || '';
     this.high = doc.high;
     this.low = doc.low;
@@ -142,8 +139,8 @@ export class AssetPriceHistoryDoc<T extends NumberType> extends BaseNumberTypeCl
     return ['timestamp'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: { keepOriginalObject: boolean }): AssetPriceHistoryDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AssetPriceHistoryDoc<U>;
+  convert(convertFunction: (val: string | number) => U, options?: { keepOriginalObject: boolean }): AssetPriceHistoryDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AssetPriceHistoryDoc;
   }
 }
 
@@ -153,8 +150,8 @@ export interface iGetAllPoolsPayload {
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface iGetAllPoolsSuccessResponse<T extends NumberType> {
-  pools: LiquidityPoolInfoDoc<T>[];
+export interface iGetAllPoolsSuccessResponse {
+  pools: LiquidityPoolInfoDoc[];
   pagination: PaginationInfo;
 }
 
@@ -162,8 +159,8 @@ export interface iGetPoolInfosByDenomPayload {
   denom: string;
 }
 
-export interface iGetPoolInfosByDenomSuccessResponse<T extends NumberType> {
-  pools: LiquidityPoolInfoDoc<T>[];
+export interface iGetPoolInfosByDenomSuccessResponse {
+  pools: LiquidityPoolInfoDoc[];
   denom: string;
   count: number;
 }
@@ -173,8 +170,8 @@ export interface iGetPoolInfosByAssetsPayload {
   asset2?: string;
 }
 
-export interface iGetPoolInfosByAssetsSuccessResponse<T extends NumberType> {
-  pools: LiquidityPoolInfoDoc<T>[];
+export interface iGetPoolInfosByAssetsSuccessResponse {
+  pools: LiquidityPoolInfoDoc[];
   asset1: string;
   asset2?: string;
   count: number;
@@ -280,7 +277,7 @@ export interface iEstimateSwapSuccessResponse {
     /** Estimated time in seconds for the swap to complete (if available). */
     estimatedTime?: number;
     /** Fallback asset if swap is not possible. */
-    fallbackAsset?: { denom: string; chainId: string; };
+    fallbackAsset?: { denom: string; chainId: string };
     /** Whether the swap was automatically redirected to WETH. BitBadges only supports single-tx operations. Bridges return WETH. Then, another unwrap tx is required (which we do not handle). */
     autoRedirectedToWETH?: boolean;
     /** Whether the swap was vs standard estimate (internal use) */
@@ -298,19 +295,19 @@ export interface iGetAssetPairsPayload {
   sortDirection?: 'asc' | 'desc';
 }
 
-export interface iGetAssetPairsSuccessResponse<T extends NumberType> {
+export interface iGetAssetPairsSuccessResponse {
   assetPairs: Array<{
     _id?: string;
     _docId: string;
     asset: string;
-    price: T;
-    lastUpdated: T;
+    price: string | number;
+    lastUpdated: string | number;
     totalLiquidity: any[];
-    volume24h: T;
-    volume7d: T;
-    percentageChange24h: T;
-    percentageChange7d: T;
-    info?: WrappedCosmosAssetMetadataDoc<T>;
+    volume24h: string | number;
+    volume7d: string | number;
+    percentageChange24h: string | number;
+    percentageChange7d: string | number;
+    info?: WrappedCosmosAssetMetadataDoc;
   }>;
   pagination: PaginationInfo;
 }
@@ -319,19 +316,19 @@ export interface iGetTopGainersPayload {
   bookmark?: string;
 }
 
-export interface iGetTopGainersSuccessResponse<T extends NumberType> {
+export interface iGetTopGainersSuccessResponse {
   assetPairs: Array<{
     _id?: string;
     _docId: string;
     asset: string;
-    price: T;
-    lastUpdated: T;
+    price: string | number;
+    lastUpdated: string | number;
     totalLiquidity: any[];
-    volume24h: T;
-    volume7d: T;
-    percentageChange24h: T;
-    percentageChange7d: T;
-    info?: WrappedCosmosAssetMetadataDoc<T>;
+    volume24h: string | number;
+    volume7d: string | number;
+    percentageChange24h: string | number;
+    percentageChange7d: string | number;
+    info?: WrappedCosmosAssetMetadataDoc;
   }>;
   pagination: PaginationInfo;
 }
@@ -340,19 +337,19 @@ export interface iGetTopLosersPayload {
   bookmark?: string;
 }
 
-export interface iGetTopLosersSuccessResponse<T extends NumberType> {
+export interface iGetTopLosersSuccessResponse {
   assetPairs: Array<{
     _id?: string;
     _docId: string;
     asset: string;
-    price: T;
-    lastUpdated: T;
+    price: string | number;
+    lastUpdated: string | number;
     totalLiquidity: any[];
-    volume24h: T;
-    volume7d: T;
-    percentageChange24h: T;
-    percentageChange7d: T;
-    info?: WrappedCosmosAssetMetadataDoc<T>;
+    volume24h: string | number;
+    volume7d: string | number;
+    percentageChange24h: string | number;
+    percentageChange7d: string | number;
+    info?: WrappedCosmosAssetMetadataDoc;
   }>;
   pagination: PaginationInfo;
 }
@@ -361,19 +358,19 @@ export interface iGetHighestVolumePayload {
   bookmark?: string;
 }
 
-export interface iGetHighestVolumeSuccessResponse<T extends NumberType> {
+export interface iGetHighestVolumeSuccessResponse {
   assetPairs: Array<{
     _id?: string;
     _docId: string;
     asset: string;
-    price: T;
-    lastUpdated: T;
+    price: string | number;
+    lastUpdated: string | number;
     totalLiquidity: any[];
-    volume24h: T;
-    volume7d: T;
-    percentageChange24h: T;
-    percentageChange7d: T;
-    info?: WrappedCosmosAssetMetadataDoc<T>;
+    volume24h: string | number;
+    volume7d: string | number;
+    percentageChange24h: string | number;
+    percentageChange7d: string | number;
+    info?: WrappedCosmosAssetMetadataDoc;
   }>;
   pagination: PaginationInfo;
 }
@@ -383,19 +380,19 @@ export interface iGetByPricePayload {
   sortDirection?: 'asc' | 'desc';
 }
 
-export interface iGetByPriceSuccessResponse<T extends NumberType> {
+export interface iGetByPriceSuccessResponse {
   assetPairs: Array<{
     _id?: string;
     _docId: string;
     asset: string;
-    price: T;
-    lastUpdated: T;
+    price: string | number;
+    lastUpdated: string | number;
     totalLiquidity: any[];
-    volume24h: T;
-    volume7d: T;
-    percentageChange24h: T;
-    percentageChange7d: T;
-    info?: WrappedCosmosAssetMetadataDoc<T>;
+    volume24h: string | number;
+    volume7d: string | number;
+    percentageChange24h: string | number;
+    percentageChange7d: string | number;
+    info?: WrappedCosmosAssetMetadataDoc;
   }>;
   pagination: PaginationInfo;
 }
@@ -404,19 +401,19 @@ export interface iGetWeeklyTopGainersPayload {
   bookmark?: string;
 }
 
-export interface iGetWeeklyTopGainersSuccessResponse<T extends NumberType> {
+export interface iGetWeeklyTopGainersSuccessResponse {
   assetPairs: Array<{
     _id?: string;
     _docId: string;
     asset: string;
-    price: T;
-    lastUpdated: T;
+    price: string | number;
+    lastUpdated: string | number;
     totalLiquidity: any[];
-    volume24h: T;
-    volume7d: T;
-    percentageChange24h: T;
-    percentageChange7d: T;
-    info?: WrappedCosmosAssetMetadataDoc<T>;
+    volume24h: string | number;
+    volume7d: string | number;
+    percentageChange24h: string | number;
+    percentageChange7d: string | number;
+    info?: WrappedCosmosAssetMetadataDoc;
   }>;
   pagination: PaginationInfo;
 }
@@ -425,19 +422,19 @@ export interface iGetWeeklyTopLosersPayload {
   bookmark?: string;
 }
 
-export interface iGetWeeklyTopLosersSuccessResponse<T extends NumberType> {
+export interface iGetWeeklyTopLosersSuccessResponse {
   assetPairs: Array<{
     _id?: string;
     _docId: string;
     asset: string;
-    price: T;
-    lastUpdated: T;
+    price: string | number;
+    lastUpdated: string | number;
     totalLiquidity: any[];
-    volume24h: T;
-    volume7d: T;
-    percentageChange24h: T;
-    percentageChange7d: T;
-    info?: WrappedCosmosAssetMetadataDoc<T>;
+    volume24h: string | number;
+    volume7d: string | number;
+    percentageChange24h: string | number;
+    percentageChange7d: string | number;
+    info?: WrappedCosmosAssetMetadataDoc;
   }>;
   pagination: PaginationInfo;
 }
@@ -446,19 +443,19 @@ export interface iSearchAssetPairsByTextPayload {
   query: string;
 }
 
-export interface iSearchAssetPairsByTextSuccessResponse<T extends NumberType> {
+export interface iSearchAssetPairsByTextSuccessResponse {
   assetPairs: Array<{
     _id?: string;
     _docId: string;
     asset: string;
-    price: T;
-    lastUpdated: T;
+    price: string | number;
+    lastUpdated: string | number;
     totalLiquidity: any[];
-    volume24h: T;
-    volume7d: T;
-    percentageChange24h: T;
-    percentageChange7d: T;
-    info?: WrappedCosmosAssetMetadataDoc<T>;
+    volume24h: string | number;
+    volume7d: string | number;
+    percentageChange24h: string | number;
+    percentageChange7d: string | number;
+    info?: WrappedCosmosAssetMetadataDoc;
   }>;
   pagination: PaginationInfo;
 }
@@ -467,43 +464,40 @@ export interface iGetByDenomsPayload {
   denoms: string[];
 }
 
-export interface iGetByDenomsSuccessResponse<T extends NumberType> {
+export interface iGetByDenomsSuccessResponse {
   assetPairs: Array<{
     _id?: string;
     _docId: string;
     asset: string;
-    price: T;
-    lastUpdated: T;
+    price: string | number;
+    lastUpdated: string | number;
     totalLiquidity: any[];
-    volume24h: T;
-    volume7d: T;
-    percentageChange24h: T;
-    percentageChange7d: T;
-    info?: WrappedCosmosAssetMetadataDoc<T>;
+    volume24h: string | number;
+    volume7d: string | number;
+    percentageChange24h: string | number;
+    percentageChange7d: string | number;
+    info?: WrappedCosmosAssetMetadataDoc;
   }>;
   pagination: PaginationInfo;
 }
-export interface iWrappedCosmosAssetMetadataDoc<T extends NumberType> extends Doc {
+export interface iWrappedCosmosAssetMetadataDoc extends Doc {
   collectionId: string;
   baseDenom: string;
   symbol: string;
-  decimals: T;
-  metadata: iMetadata<T>;
+  decimals: string | number;
+  metadata: iMetadata;
 }
 
-export class WrappedCosmosAssetMetadataDoc<T extends NumberType>
-  extends BaseNumberTypeClass<WrappedCosmosAssetMetadataDoc<T>>
-  implements iWrappedCosmosAssetMetadataDoc<T>
-{
+export class WrappedCosmosAssetMetadataDoc extends BaseNumberTypeClass<WrappedCosmosAssetMetadataDoc> implements iWrappedCosmosAssetMetadataDoc {
   _id?: string;
   _docId: string;
   collectionId: string;
   baseDenom: string;
   symbol: string;
-  decimals: T;
-  metadata: Metadata<T>;
+  decimals: string | number;
+  metadata: Metadata;
 
-  constructor(doc: iWrappedCosmosAssetMetadataDoc<T>) {
+  constructor(doc: iWrappedCosmosAssetMetadataDoc) {
     super();
     this._id = doc._id;
     this._docId = doc._docId;
@@ -511,17 +505,14 @@ export class WrappedCosmosAssetMetadataDoc<T extends NumberType>
     this.baseDenom = doc.baseDenom;
     this.symbol = doc.symbol;
     this.decimals = doc.decimals;
-    this.metadata = new Metadata<T>(doc.metadata);
+    this.metadata = new Metadata(doc.metadata);
   }
 
   getNumberFieldNames(): string[] {
     return ['decimals'];
   }
 
-  convert<U extends NumberType>(
-    convertFunction: (val: NumberType) => U,
-    options?: { keepOriginalObject: boolean }
-  ): WrappedCosmosAssetMetadataDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as WrappedCosmosAssetMetadataDoc<U>;
+  convert(convertFunction: (val: string | number) => U, options?: { keepOriginalObject: boolean }): WrappedCosmosAssetMetadataDoc {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as WrappedCosmosAssetMetadataDoc;
   }
 }

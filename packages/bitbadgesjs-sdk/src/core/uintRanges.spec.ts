@@ -4,7 +4,7 @@ import { UintRange, UintRangeArray } from './uintRanges.js';
 describe('UintRange and UintRangeArray', () => {
   // Singular range functions
   test('UintRange', () => {
-    const range = new UintRange<bigint>({ start: 1n, end: 10n });
+    const range = new UintRange({ start: 1n, end: 10n });
     expect(range.size() === 10n).toBe(true);
 
     const fullRange = UintRange.FullRange();
@@ -37,7 +37,7 @@ describe('UintRange and UintRangeArray', () => {
   });
 
   test('UintRangeArray', () => {
-    const rangeArr = UintRangeArray.From<bigint>([
+    const rangeArr = UintRangeArray.From([
       { start: 1n, end: 10n },
       { start: 11n, end: 20n }
     ]);
@@ -50,7 +50,7 @@ describe('UintRange and UintRangeArray', () => {
     expect(rangeArrInverted[0].start === 21n).toBe(true);
     expect(rangeArrInverted[0].end === GO_MAX_UINT_64).toBe(true);
 
-    const unsortedArr = UintRangeArray.From<bigint>([
+    const unsortedArr = UintRangeArray.From([
       { start: 11n, end: 20n },
       { start: 1n, end: 15n }
     ]);

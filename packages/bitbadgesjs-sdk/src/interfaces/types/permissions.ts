@@ -4,24 +4,24 @@ import type { iAddressList, iUintRange } from './core.js';
 /**
  * @category Interfaces
  */
-export interface iUserPermissions<T extends NumberType> {
+export interface iUserPermissions {
   /** The list of permissions for updating approved outgoing transfers. */
-  canUpdateOutgoingApprovals: iUserOutgoingApprovalPermission<T>[];
+  canUpdateOutgoingApprovals: iUserOutgoingApprovalPermission[];
   /** The list of permissions for updating approved incoming transfers. */
-  canUpdateIncomingApprovals: iUserIncomingApprovalPermission<T>[];
+  canUpdateIncomingApprovals: iUserIncomingApprovalPermission[];
   /** The permissions for updating auto-approving self-initiated outgoing transfers. If auto-approve is enabled, then the user will be approved by default for all outgoing transfers that are self-initiated. */
-  canUpdateAutoApproveSelfInitiatedOutgoingTransfers: iActionPermission<T>[];
+  canUpdateAutoApproveSelfInitiatedOutgoingTransfers: iActionPermission[];
   /** The permissions for updating auto-approving self-initiated incoming transfers. If auto-approve is enabled, then the user will be approved by default for all incoming transfers that are self-initiated. */
-  canUpdateAutoApproveSelfInitiatedIncomingTransfers: iActionPermission<T>[];
+  canUpdateAutoApproveSelfInitiatedIncomingTransfers: iActionPermission[];
   /** The permissions for updating auto-approving all incoming transfers. If auto-approve is enabled, then the user will be approved by default for all incoming transfers. */
-  canUpdateAutoApproveAllIncomingTransfers: iActionPermission<T>[];
+  canUpdateAutoApproveAllIncomingTransfers: iActionPermission[];
 }
 
 /**
  * @category Interfaces
  *  @interface
  */
-export type iUserOutgoingApprovalPermissionWithDetails<T extends NumberType> = Omit<iCollectionApprovalPermission<T>, 'fromListId'> & {
+export type iUserOutgoingApprovalPermissionWithDetails = Omit<iCollectionApprovalPermission, 'fromListId'> & {
   toList: iAddressList;
   initiatedByList: iAddressList;
 };
@@ -30,7 +30,7 @@ export type iUserOutgoingApprovalPermissionWithDetails<T extends NumberType> = O
  * @category Interfaces
  * @interface
  */
-export type iUserIncomingApprovalPermissionWithDetails<T extends NumberType> = Omit<iCollectionApprovalPermission<T>, 'toListId'> & {
+export type iUserIncomingApprovalPermissionWithDetails = Omit<iCollectionApprovalPermission, 'toListId'> & {
   fromList: iAddressList;
   initiatedByList: iAddressList;
 };
@@ -38,101 +38,101 @@ export type iUserIncomingApprovalPermissionWithDetails<T extends NumberType> = O
 /**
  * @category Interfaces
  */
-export interface iUserOutgoingApprovalPermission<T extends NumberType> {
+export interface iUserOutgoingApprovalPermission {
   /** The list ID of the to addresses of the approved outgoing transfers. */
   toListId: string;
   /** The list ID of the initiatedBy addresses of the approved outgoing transfers. */
   initiatedByListId: string;
   /** The transfer times of the approved outgoing transfers. */
-  transferTimes: iUintRange<T>[];
+  transferTimes: iUintRange[];
   /** The token IDs of the approved outgoing transfers. */
-  tokenIds: iUintRange<T>[];
+  tokenIds: iUintRange[];
   /** The owned times of the approved outgoing transfers. */
-  ownershipTimes: iUintRange<T>[];
+  ownershipTimes: iUintRange[];
   /** The approval ID of the approved outgoing transfers. Can use "All" to represent all IDs, "!approvalId" to represent all IDs except approvalId, or "approvalId" to represent only approvalId. */
   approvalId: string;
   /** The permitted times of the approved outgoing transfers. */
-  permanentlyPermittedTimes: iUintRange<T>[];
+  permanentlyPermittedTimes: iUintRange[];
   /** The forbidden times of the approved outgoing transfers. */
-  permanentlyForbiddenTimes: iUintRange<T>[];
+  permanentlyForbiddenTimes: iUintRange[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iUserIncomingApprovalPermission<T extends NumberType> {
+export interface iUserIncomingApprovalPermission {
   /** The list ID of the from addresses of the approved incoming transfers. */
   fromListId: string;
   /** The list ID of the initiatedBy addresses of the approved incoming transfers. */
   initiatedByListId: string;
   /** The transfer times of the approved incoming transfers. */
-  transferTimes: iUintRange<T>[];
+  transferTimes: iUintRange[];
   /** The token IDs of the approved incoming transfers. */
-  tokenIds: iUintRange<T>[];
+  tokenIds: iUintRange[];
   /** The owned times of the approved incoming transfers. */
-  ownershipTimes: iUintRange<T>[];
+  ownershipTimes: iUintRange[];
   /** The approval ID of the approved incoming transfers. Can use "All" to represent all IDs, "!approvalId" to represent all IDs except approvalId, or "approvalId" to represent only approvalId. */
   approvalId: string;
   /** The permitted times of the approved incoming transfers. */
-  permanentlyPermittedTimes: iUintRange<T>[];
+  permanentlyPermittedTimes: iUintRange[];
   /** The forbidden times of the approved incoming transfers. */
-  permanentlyForbiddenTimes: iUintRange<T>[];
+  permanentlyForbiddenTimes: iUintRange[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iCollectionPermissions<T extends NumberType> {
+export interface iCollectionPermissions {
   /** The permissions for deleting the collection. */
-  canDeleteCollection: iActionPermission<T>[];
+  canDeleteCollection: iActionPermission[];
   /** The permissions for archiving the collection. */
-  canArchiveCollection: iActionPermission<T>[];
+  canArchiveCollection: iActionPermission[];
   /** The permissions for updating the standards. */
-  canUpdateStandards: iActionPermission<T>[];
+  canUpdateStandards: iActionPermission[];
   /** The permissions for updating the custom data. */
-  canUpdateCustomData: iActionPermission<T>[];
+  canUpdateCustomData: iActionPermission[];
   /** The permissions for updating the manager. */
-  canUpdateManager: iActionPermission<T>[];
+  canUpdateManager: iActionPermission[];
   /** The permissions for updating the collection metadata. */
-  canUpdateCollectionMetadata: iActionPermission<T>[];
+  canUpdateCollectionMetadata: iActionPermission[];
   /** The permissions for creating more tokens. */
-  canUpdateValidTokenIds: iTokenIdsActionPermission<T>[];
+  canUpdateValidTokenIds: iTokenIdsActionPermission[];
   /** The permissions for updating the token metadata. */
-  canUpdateTokenMetadata: iTokenIdsActionPermission<T>[];
+  canUpdateTokenMetadata: iTokenIdsActionPermission[];
   /** The permissions for updating the collection approved transfers. */
-  canUpdateCollectionApprovals: iCollectionApprovalPermission<T>[];
+  canUpdateCollectionApprovals: iCollectionApprovalPermission[];
   /** The permissions for adding more alias paths to the collection. */
-  canAddMoreAliasPaths: iActionPermission<T>[];
+  canAddMoreAliasPaths: iActionPermission[];
   /** The permissions for adding more cosmos coin wrapper paths to the collection. */
-  canAddMoreCosmosCoinWrapperPaths: iActionPermission<T>[];
+  canAddMoreCosmosCoinWrapperPaths: iActionPermission[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iActionPermission<T extends NumberType> {
+export interface iActionPermission {
   /** The permitted times of the permission. */
-  permanentlyPermittedTimes: iUintRange<T>[];
+  permanentlyPermittedTimes: iUintRange[];
   /** The forbidden times of the permission. */
-  permanentlyForbiddenTimes: iUintRange<T>[];
+  permanentlyForbiddenTimes: iUintRange[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iTokenIdsActionPermission<T extends NumberType> {
+export interface iTokenIdsActionPermission {
   /** The token IDs that the permission applies to. */
-  tokenIds: iUintRange<T>[];
+  tokenIds: iUintRange[];
   /** The permitted times of the permission. */
-  permanentlyPermittedTimes: iUintRange<T>[];
+  permanentlyPermittedTimes: iUintRange[];
   /** The forbidden times of the permission. */
-  permanentlyForbiddenTimes: iUintRange<T>[];
+  permanentlyForbiddenTimes: iUintRange[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iCollectionApprovalPermission<T extends NumberType> {
+export interface iCollectionApprovalPermission {
   /** The list ID of the from addresses of the approved transfers. */
   fromListId: string;
   /** The list ID of the to addresses of the approved transfers. */
@@ -140,23 +140,23 @@ export interface iCollectionApprovalPermission<T extends NumberType> {
   /** The list ID of the initiatedBy addresses of the approved transfers. */
   initiatedByListId: string;
   /** The transfer times of the approved transfers. */
-  transferTimes: iUintRange<T>[];
+  transferTimes: iUintRange[];
   /** The token IDs of the approved transfers. */
-  tokenIds: iUintRange<T>[];
+  tokenIds: iUintRange[];
   /** The owned times of the approved transfers. */
-  ownershipTimes: iUintRange<T>[];
+  ownershipTimes: iUintRange[];
   /** The approval ID of the approved transfers. Can use "All" to represent all IDs, "!approvalId" to represent all IDs except approvalId, or "approvalId" to represent only approvalId. */
   approvalId: string;
   /** The permitted times of this permission. */
-  permanentlyPermittedTimes: iUintRange<T>[];
+  permanentlyPermittedTimes: iUintRange[];
   /** The forbidden times of this permission. */
-  permanentlyForbiddenTimes: iUintRange<T>[];
+  permanentlyForbiddenTimes: iUintRange[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iCollectionApprovalPermissionWithDetails<T extends NumberType> extends iCollectionApprovalPermission<T> {
+export interface iCollectionApprovalPermissionWithDetails extends iCollectionApprovalPermission {
   toList: iAddressList;
   fromList: iAddressList;
   initiatedByList: iAddressList;
@@ -165,14 +165,14 @@ export interface iCollectionApprovalPermissionWithDetails<T extends NumberType> 
 /**
  * @category Interfaces
  */
-export interface iCollectionPermissionsWithDetails<T extends NumberType> extends iCollectionPermissions<T> {
-  canUpdateCollectionApprovals: iCollectionApprovalPermissionWithDetails<T>[];
+export interface iCollectionPermissionsWithDetails extends iCollectionPermissions {
+  canUpdateCollectionApprovals: iCollectionApprovalPermissionWithDetails[];
 }
 
 /**
  * @category Interfaces
  */
-export interface iUserPermissionsWithDetails<T extends NumberType> extends iUserPermissions<T> {
-  canUpdateIncomingApprovals: iUserIncomingApprovalPermissionWithDetails<T>[];
-  canUpdateOutgoingApprovals: iUserOutgoingApprovalPermissionWithDetails<T>[];
+export interface iUserPermissionsWithDetails extends iUserPermissions {
+  canUpdateIncomingApprovals: iUserIncomingApprovalPermissionWithDetails[];
+  canUpdateOutgoingApprovals: iUserOutgoingApprovalPermissionWithDetails[];
 }
