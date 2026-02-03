@@ -6,6 +6,10 @@ on:
       - "packages/bitbadgesjs-sdk/**"
   workflow_dispatch:
 
+# Sets permissions for GITHUB_TOKEN to allow pushing changes
+permissions:
+  contents: write
+
 jobs:
   generate-docs:
     runs-on: ubuntu-latest
@@ -53,3 +57,23 @@ jobs:
           STOPLIGHT_TOKEN: ${{ secrets.STOPLIGHT_TOKEN }}
         run: |
           bunx @stoplight/cli@6 push --ci-token "$STOPLIGHT_TOKEN" --branch main --directory ./openapitypes
+
+      - name: Host OpenAPI spec for LLMs
+        run: |
+          # Configure git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Navigate back to repo root to add files
+          cd ../..
+
+          # Add the openapi-hosted directory
+          git add packages/bitbadgesjs-sdk/openapi-hosted/
+
+          # Commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update hosted OpenAPI spec for LLMs [skip ci]"
+            git push
+          fi

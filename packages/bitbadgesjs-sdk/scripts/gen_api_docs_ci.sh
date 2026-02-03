@@ -14,5 +14,8 @@ npm run format-ci || echo "Format failed, continuing anyway..."
 bun ./scripts/normalize_yml.ts ./openapitypes/combined.yaml
 bun ./scripts/spread_explodes.ts ./openapitypes/combined.yaml
 
+# Convert final OpenAPI spec to JSON for LLM hosting
+bun ./scripts/convert_openapi_to_json.ts
+
 rm ./openapitypes/combined.yaml
 rm ./src/combined.ts
