@@ -46,8 +46,8 @@ import type {
   iVoteProof,
   iVotingChallenge
 } from '../interfaces/types/core.js';
-import * as protobadges from '../proto/badges/index.js';
-import * as protobadgesDynamicStores from '../proto/badges/dynamic_stores_pb.js';
+import * as prototokenization from '../proto/tokenization/index.js';
+import * as prototokenizationDynamicStores from '../proto/tokenization/dynamic_stores_pb.js';
 import { CosmosCoin, iCosmosCoin } from './coin.js';
 import type { UniversalPermission } from './overlaps.js';
 import { GetFirstMatchOnly, getOverlapsAndNonOverlaps } from './overlaps.js';
@@ -86,8 +86,8 @@ export class TokenMetadata<T extends NumberType> extends BaseNumberTypeClass<Tok
     );
   }
 
-  toProto(): protobadges.TokenMetadata {
-    return new protobadges.TokenMetadata({
+  toProto(): prototokenization.TokenMetadata {
+    return new prototokenization.TokenMetadata({
       uri: this.uri,
       tokenIds: this.tokenIds.map((b) => b.toProto()),
       customData: this.customData
@@ -99,7 +99,7 @@ export class TokenMetadata<T extends NumberType> extends BaseNumberTypeClass<Tok
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): TokenMetadata<U> {
-    return TokenMetadata.fromProto(protobadges.TokenMetadata.fromJson(jsonValue, options), convertFunction);
+    return TokenMetadata.fromProto(prototokenization.TokenMetadata.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -107,10 +107,10 @@ export class TokenMetadata<T extends NumberType> extends BaseNumberTypeClass<Tok
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): TokenMetadata<U> {
-    return TokenMetadata.fromProto(protobadges.TokenMetadata.fromJsonString(jsonString, options), convertFunction);
+    return TokenMetadata.fromProto(prototokenization.TokenMetadata.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.TokenMetadata, convertFunction: (item: NumberType) => U): TokenMetadata<U> {
+  static fromProto<U extends NumberType>(item: prototokenization.TokenMetadata, convertFunction: (item: NumberType) => U): TokenMetadata<U> {
     return new TokenMetadata<U>({
       uri: item.uri,
       tokenIds: item.tokenIds.map((b) => UintRange.fromProto(b, convertFunction)),
@@ -150,22 +150,22 @@ export class CollectionMetadata extends CustomTypeClass<CollectionMetadata> impl
     this.customData = collectionMetadata.customData;
   }
 
-  toProto(): protobadges.CollectionMetadata {
-    return new protobadges.CollectionMetadata({
+  toProto(): prototokenization.CollectionMetadata {
+    return new prototokenization.CollectionMetadata({
       uri: this.uri,
       customData: this.customData
     });
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CollectionMetadata {
-    return CollectionMetadata.fromProto(protobadges.CollectionMetadata.fromJson(jsonValue, options));
+    return CollectionMetadata.fromProto(prototokenization.CollectionMetadata.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CollectionMetadata {
-    return CollectionMetadata.fromProto(protobadges.CollectionMetadata.fromJsonString(jsonString, options));
+    return CollectionMetadata.fromProto(prototokenization.CollectionMetadata.fromJsonString(jsonString, options));
   }
 
-  static fromProto(item: protobadges.CollectionMetadata): CollectionMetadata {
+  static fromProto(item: prototokenization.CollectionMetadata): CollectionMetadata {
     return new CollectionMetadata({
       uri: item.uri,
       customData: item.customData
@@ -203,11 +203,11 @@ export class CoinTransfer<T extends NumberType> extends BaseNumberTypeClass<Coin
     });
   }
 
-  toProto(): protobadges.CoinTransfer {
-    return new protobadges.CoinTransfer(this.convert(Stringify));
+  toProto(): prototokenization.CoinTransfer {
+    return new prototokenization.CoinTransfer(this.convert(Stringify));
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.CoinTransfer, convertFunction: (item: NumberType) => U): CoinTransfer<U> {
+  static fromProto<U extends NumberType>(item: prototokenization.CoinTransfer, convertFunction: (item: NumberType) => U): CoinTransfer<U> {
     return new CoinTransfer<U>({
       to: item.to,
       coins: item.coins.map((b) => CosmosCoin.fromProto(b, convertFunction)),
@@ -258,8 +258,8 @@ export class ApprovalIdentifierDetails<T extends NumberType>
     });
   }
 
-  toProto(): protobadges.ApprovalIdentifierDetails {
-    return new protobadges.ApprovalIdentifierDetails(this.clone().toJson());
+  toProto(): prototokenization.ApprovalIdentifierDetails {
+    return new prototokenization.ApprovalIdentifierDetails(this.clone().toJson());
   }
 
   clone(): ApprovalIdentifierDetails<T> {
@@ -271,7 +271,7 @@ export class ApprovalIdentifierDetails<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): ApprovalIdentifierDetails<U> {
-    return ApprovalIdentifierDetails.fromProto(protobadges.ApprovalIdentifierDetails.fromJson(jsonValue, options), convertFunction);
+    return ApprovalIdentifierDetails.fromProto(prototokenization.ApprovalIdentifierDetails.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -279,11 +279,11 @@ export class ApprovalIdentifierDetails<T extends NumberType>
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): ApprovalIdentifierDetails<U> {
-    return ApprovalIdentifierDetails.fromProto(protobadges.ApprovalIdentifierDetails.fromJsonString(jsonString, options), convertFunction);
+    return ApprovalIdentifierDetails.fromProto(prototokenization.ApprovalIdentifierDetails.fromJsonString(jsonString, options), convertFunction);
   }
 
   static fromProto<U extends NumberType>(
-    item: protobadges.ApprovalIdentifierDetails,
+    item: prototokenization.ApprovalIdentifierDetails,
     convertFunction: (item: NumberType) => U
   ): ApprovalIdentifierDetails<U> {
     return new ApprovalIdentifierDetails<U>({
@@ -334,8 +334,8 @@ export class PrecalculateBalancesFromApprovalDetails<T extends NumberType>
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PrecalculateBalancesFromApprovalDetails<U>;
   }
 
-  toProto(): protobadges.PrecalculateBalancesFromApprovalDetails {
-    return new protobadges.PrecalculateBalancesFromApprovalDetails(this.convert(Stringify).toJson());
+  toProto(): prototokenization.PrecalculateBalancesFromApprovalDetails {
+    return new prototokenization.PrecalculateBalancesFromApprovalDetails(this.convert(Stringify).toJson());
   }
 
   static fromJson<U extends NumberType>(
@@ -344,7 +344,7 @@ export class PrecalculateBalancesFromApprovalDetails<T extends NumberType>
     options?: Partial<JsonReadOptions>
   ): PrecalculateBalancesFromApprovalDetails<U> {
     return PrecalculateBalancesFromApprovalDetails.fromProto(
-      protobadges.PrecalculateBalancesFromApprovalDetails.fromJson(jsonValue, options),
+      prototokenization.PrecalculateBalancesFromApprovalDetails.fromJson(jsonValue, options),
       convertFunction
     );
   }
@@ -355,13 +355,13 @@ export class PrecalculateBalancesFromApprovalDetails<T extends NumberType>
     options?: Partial<JsonReadOptions>
   ): PrecalculateBalancesFromApprovalDetails<U> {
     return PrecalculateBalancesFromApprovalDetails.fromProto(
-      protobadges.PrecalculateBalancesFromApprovalDetails.fromJsonString(jsonString, options),
+      prototokenization.PrecalculateBalancesFromApprovalDetails.fromJsonString(jsonString, options),
       convertFunction
     );
   }
 
   static fromProto<U extends NumberType>(
-    item: protobadges.PrecalculateBalancesFromApprovalDetails,
+    item: prototokenization.PrecalculateBalancesFromApprovalDetails,
     convertFunction: (item: NumberType) => U
   ): PrecalculateBalancesFromApprovalDetails<U> {
     return new PrecalculateBalancesFromApprovalDetails<U>({
@@ -406,7 +406,7 @@ export class PrecalculationOptions<T extends NumberType> extends BaseNumberTypeC
   }
 
   static fromProto<U extends NumberType>(
-    proto: protobadges.PrecalculationOptions,
+    proto: prototokenization.PrecalculationOptions,
     convertFunction: (item: NumberType) => U
   ): PrecalculationOptions<U> {
     return new PrecalculationOptions({
@@ -496,8 +496,8 @@ export class MustOwnTokens<T extends NumberType> extends BaseNumberTypeClass<Mus
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MustOwnTokens<U>;
   }
 
-  toProto(): protobadges.MustOwnTokens {
-    return new protobadges.MustOwnTokens(this.convert(Stringify));
+  toProto(): prototokenization.MustOwnTokens {
+    return new prototokenization.MustOwnTokens(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -505,7 +505,7 @@ export class MustOwnTokens<T extends NumberType> extends BaseNumberTypeClass<Mus
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MustOwnTokens<U> {
-    return MustOwnTokens.fromProto(protobadges.MustOwnTokens.fromJson(jsonValue, options), convertFunction);
+    return MustOwnTokens.fromProto(prototokenization.MustOwnTokens.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -513,10 +513,10 @@ export class MustOwnTokens<T extends NumberType> extends BaseNumberTypeClass<Mus
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MustOwnTokens<U> {
-    return MustOwnTokens.fromProto(protobadges.MustOwnTokens.fromJsonString(jsonString, options), convertFunction);
+    return MustOwnTokens.fromProto(prototokenization.MustOwnTokens.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.MustOwnTokens, convertFunction: (item: NumberType) => U): MustOwnTokens<U> {
+  static fromProto<U extends NumberType>(item: prototokenization.MustOwnTokens, convertFunction: (item: NumberType) => U): MustOwnTokens<U> {
     return new MustOwnTokens<U>({
       amountRange: item.amountRange
         ? new UintRange(item.amountRange).convert(convertFunction)
@@ -590,8 +590,8 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
     );
   }
 
-  toProto(): protobadges.MerkleChallenge {
-    return new protobadges.MerkleChallenge(this.convert(Stringify));
+  toProto(): prototokenization.MerkleChallenge {
+    return new prototokenization.MerkleChallenge(this.convert(Stringify));
   }
 
   static fromJson<U extends NumberType>(
@@ -599,7 +599,7 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MerkleChallenge<U> {
-    return MerkleChallenge.fromProto(protobadges.MerkleChallenge.fromJson(jsonValue, options), convertFunction);
+    return MerkleChallenge.fromProto(prototokenization.MerkleChallenge.fromJson(jsonValue, options), convertFunction);
   }
 
   static fromJsonString<U extends NumberType>(
@@ -607,10 +607,10 @@ export class MerkleChallenge<T extends NumberType> extends BaseNumberTypeClass<M
     convertFunction: (item: NumberType) => U,
     options?: Partial<JsonReadOptions>
   ): MerkleChallenge<U> {
-    return MerkleChallenge.fromProto(protobadges.MerkleChallenge.fromJsonString(jsonString, options), convertFunction);
+    return MerkleChallenge.fromProto(prototokenization.MerkleChallenge.fromJsonString(jsonString, options), convertFunction);
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.MerkleChallenge, convertFunction: (item: NumberType) => U): MerkleChallenge<U> {
+  static fromProto<U extends NumberType>(item: prototokenization.MerkleChallenge, convertFunction: (item: NumberType) => U): MerkleChallenge<U> {
     return new MerkleChallenge<U>({
       root: item.root,
       expectedProofLength: convertFunction(BigInt(item.expectedProofLength)),
@@ -646,8 +646,8 @@ export class MerklePathItem extends CustomTypeClass<MerklePathItem> {
     });
   }
 
-  toProto(): protobadges.MerklePathItem {
-    return new protobadges.MerklePathItem(this.clone().toJson());
+  toProto(): prototokenization.MerklePathItem {
+    return new prototokenization.MerklePathItem(this.clone().toJson());
   }
 
   clone(): MerklePathItem {
@@ -655,14 +655,14 @@ export class MerklePathItem extends CustomTypeClass<MerklePathItem> {
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MerklePathItem {
-    return MerklePathItem.fromProto(protobadges.MerklePathItem.fromJson(jsonValue, options));
+    return MerklePathItem.fromProto(prototokenization.MerklePathItem.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MerklePathItem {
-    return MerklePathItem.fromProto(protobadges.MerklePathItem.fromJsonString(jsonString, options));
+    return MerklePathItem.fromProto(prototokenization.MerklePathItem.fromJsonString(jsonString, options));
   }
 
-  static fromProto(item: protobadges.MerklePathItem): MerklePathItem {
+  static fromProto(item: prototokenization.MerklePathItem): MerklePathItem {
     return new MerklePathItem({ ...item });
   }
 }
@@ -693,8 +693,8 @@ export class MerkleProof extends CustomTypeClass<MerkleProof> implements MerkleP
     });
   }
 
-  toProto(): protobadges.MerkleProof {
-    return new protobadges.MerkleProof(this.clone().toJson());
+  toProto(): prototokenization.MerkleProof {
+    return new prototokenization.MerkleProof(this.clone().toJson());
   }
 
   clone(): MerkleProof {
@@ -702,14 +702,14 @@ export class MerkleProof extends CustomTypeClass<MerkleProof> implements MerkleP
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MerkleProof {
-    return MerkleProof.fromProto(protobadges.MerkleProof.fromJson(jsonValue, options));
+    return MerkleProof.fromProto(prototokenization.MerkleProof.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MerkleProof {
-    return MerkleProof.fromProto(protobadges.MerkleProof.fromJsonString(jsonString, options));
+    return MerkleProof.fromProto(prototokenization.MerkleProof.fromJsonString(jsonString, options));
   }
 
-  static fromProto(item: protobadges.MerkleProof): MerkleProof {
+  static fromProto(item: prototokenization.MerkleProof): MerkleProof {
     return new MerkleProof({
       aunts: item.aunts.map((b) => MerklePathItem.fromProto(b)),
       leaf: item.leaf,
@@ -923,7 +923,7 @@ export class CosmosCoinWrapperPath<T extends NumberType> extends CustomTypeClass
   }
 
   static fromProto<U extends NumberType>(
-    protoMsg: protobadges.CosmosCoinWrapperPath,
+    protoMsg: prototokenization.CosmosCoinWrapperPath,
     convertFunction: (item: NumberType) => U
   ): CosmosCoinWrapperPath<U> {
     const denomUnits = protoMsg.denomUnits.map((unit) => DenomUnit.fromProto(unit, convertFunction));
@@ -969,7 +969,7 @@ export class AliasPath<T extends NumberType> extends CustomTypeClass<AliasPath<T
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AliasPath<U>;
   }
 
-  static fromProto<U extends NumberType>(protoMsg: protobadges.AliasPath, convertFunction: (item: NumberType) => U): AliasPath<U> {
+  static fromProto<U extends NumberType>(protoMsg: prototokenization.AliasPath, convertFunction: (item: NumberType) => U): AliasPath<U> {
     const denomUnits = protoMsg.denomUnits.map((unit) => DenomUnit.fromProto(unit, convertFunction));
     return new AliasPath<NumberType>({
       denom: protoMsg.denom,
@@ -1033,7 +1033,7 @@ export class CosmosCoinBackedPath<T extends NumberType> extends CustomTypeClass<
   }
 
   static fromProto<U extends NumberType>(
-    protoMsg: protobadges.CosmosCoinBackedPath,
+    protoMsg: prototokenization.CosmosCoinBackedPath,
     convertFunction: (item: NumberType) => U
   ): CosmosCoinBackedPath<U> {
     return new CosmosCoinBackedPath<NumberType>({
@@ -1189,7 +1189,7 @@ export class CosmosCoinWrapperPathWithDetails<T extends NumberType> extends Cosm
   }
 
   static fromProto<U extends NumberType>(
-    protoMsg: protobadges.CosmosCoinWrapperPath,
+    protoMsg: prototokenization.CosmosCoinWrapperPath,
     convertFunction: (item: NumberType) => U
   ): CosmosCoinWrapperPathWithDetails<U> {
     const denomUnits = protoMsg.denomUnits.map((unit) => DenomUnitWithDetails.fromProto(unit, convertFunction));
@@ -1262,8 +1262,8 @@ export class ETHSignatureChallenge extends CustomTypeClass<ETHSignatureChallenge
     });
   }
 
-  toProto(): protobadges.ETHSignatureChallenge {
-    return new protobadges.ETHSignatureChallenge(this.clone().toJson());
+  toProto(): prototokenization.ETHSignatureChallenge {
+    return new prototokenization.ETHSignatureChallenge(this.clone().toJson());
   }
 
   clone(): ETHSignatureChallenge {
@@ -1276,14 +1276,14 @@ export class ETHSignatureChallenge extends CustomTypeClass<ETHSignatureChallenge
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ETHSignatureChallenge {
-    return ETHSignatureChallenge.fromProto(protobadges.ETHSignatureChallenge.fromJson(jsonValue, options));
+    return ETHSignatureChallenge.fromProto(prototokenization.ETHSignatureChallenge.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ETHSignatureChallenge {
-    return ETHSignatureChallenge.fromProto(protobadges.ETHSignatureChallenge.fromJsonString(jsonString, options));
+    return ETHSignatureChallenge.fromProto(prototokenization.ETHSignatureChallenge.fromJsonString(jsonString, options));
   }
 
-  static fromProto(item: protobadges.ETHSignatureChallenge): ETHSignatureChallenge {
+  static fromProto(item: prototokenization.ETHSignatureChallenge): ETHSignatureChallenge {
     return new ETHSignatureChallenge({
       signer: item.signer,
       challengeTrackerId: item.challengeTrackerId,
@@ -1316,8 +1316,8 @@ export class ETHSignatureProof extends CustomTypeClass<ETHSignatureProof> implem
     });
   }
 
-  toProto(): protobadges.ETHSignatureProof {
-    return new protobadges.ETHSignatureProof(this.clone().toJson());
+  toProto(): prototokenization.ETHSignatureProof {
+    return new prototokenization.ETHSignatureProof(this.clone().toJson());
   }
 
   clone(): ETHSignatureProof {
@@ -1330,14 +1330,14 @@ export class ETHSignatureProof extends CustomTypeClass<ETHSignatureProof> implem
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ETHSignatureProof {
-    return ETHSignatureProof.fromProto(protobadges.ETHSignatureProof.fromJson(jsonValue, options));
+    return ETHSignatureProof.fromProto(prototokenization.ETHSignatureProof.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ETHSignatureProof {
-    return ETHSignatureProof.fromProto(protobadges.ETHSignatureProof.fromJsonString(jsonString, options));
+    return ETHSignatureProof.fromProto(prototokenization.ETHSignatureProof.fromJsonString(jsonString, options));
   }
 
-  static fromProto(item: protobadges.ETHSignatureProof): ETHSignatureProof {
+  static fromProto(item: prototokenization.ETHSignatureProof): ETHSignatureProof {
     return new ETHSignatureProof({
       nonce: item.nonce,
       signature: item.signature
@@ -1368,7 +1368,7 @@ export class Voter<T extends NumberType> extends BaseNumberTypeClass<Voter<T>> i
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Voter<U>;
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.Voter, convertFunction: (item: NumberType) => U): Voter<U> {
+  static fromProto<U extends NumberType>(item: prototokenization.Voter, convertFunction: (item: NumberType) => U): Voter<U> {
     return new Voter<U>({
       address: item.address,
       weight: convertFunction(item.weight)
@@ -1412,7 +1412,7 @@ export class VotingChallenge<T extends NumberType> extends BaseNumberTypeClass<V
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as VotingChallenge<U>;
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.VotingChallenge, convertFunction: (item: NumberType) => U): VotingChallenge<U> {
+  static fromProto<U extends NumberType>(item: prototokenization.VotingChallenge, convertFunction: (item: NumberType) => U): VotingChallenge<U> {
     return new VotingChallenge<U>({
       proposalId: item.proposalId,
       quorumThreshold: convertFunction(item.quorumThreshold),
@@ -1448,7 +1448,7 @@ export class VoteProof<T extends NumberType> extends BaseNumberTypeClass<VotePro
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as VoteProof<U>;
   }
 
-  static fromProto<U extends NumberType>(item: protobadges.VoteProof, convertFunction: (item: NumberType) => U): VoteProof<U> {
+  static fromProto<U extends NumberType>(item: prototokenization.VoteProof, convertFunction: (item: NumberType) => U): VoteProof<U> {
     return new VoteProof<U>({
       proposalId: item.proposalId,
       voter: item.voter,
@@ -1491,7 +1491,7 @@ export class DynamicStore<T extends NumberType> extends BaseNumberTypeClass<Dyna
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DynamicStore<U>;
   }
 
-  static fromProto<U extends NumberType>(item: protobadgesDynamicStores.DynamicStore, convertFunction: (item: NumberType) => U): DynamicStore<U> {
+  static fromProto<U extends NumberType>(item: prototokenizationDynamicStores.DynamicStore, convertFunction: (item: NumberType) => U): DynamicStore<U> {
     return new DynamicStore<U>({
       storeId: convertFunction(item.storeId),
       createdBy: item.createdBy,
@@ -1502,8 +1502,8 @@ export class DynamicStore<T extends NumberType> extends BaseNumberTypeClass<Dyna
     });
   }
 
-  toProto(): protobadgesDynamicStores.DynamicStore {
-    return new protobadgesDynamicStores.DynamicStore(this.convert(Stringify));
+  toProto(): prototokenizationDynamicStores.DynamicStore {
+    return new prototokenizationDynamicStores.DynamicStore(this.convert(Stringify));
   }
 }
 
@@ -1534,7 +1534,7 @@ export class DynamicStoreValue<T extends NumberType> extends BaseNumberTypeClass
   }
 
   static fromProto<U extends NumberType>(
-    item: protobadgesDynamicStores.DynamicStoreValue,
+    item: prototokenizationDynamicStores.DynamicStoreValue,
     convertFunction: (item: NumberType) => U
   ): DynamicStoreValue<U> {
     return new DynamicStoreValue<U>({
@@ -1544,8 +1544,8 @@ export class DynamicStoreValue<T extends NumberType> extends BaseNumberTypeClass
     });
   }
 
-  toProto(): protobadgesDynamicStores.DynamicStoreValue {
-    return new protobadgesDynamicStores.DynamicStoreValue(this.convert(Stringify));
+  toProto(): prototokenizationDynamicStores.DynamicStoreValue {
+    return new prototokenizationDynamicStores.DynamicStoreValue(this.convert(Stringify));
   }
 }
 
@@ -1581,7 +1581,7 @@ export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeCl
 
   /**
    * If true, disallows pool creation with this collection's assets.
-   * When true, any attempt to create a pool with badges assets from this collection will fail.
+   * When true, any attempt to create a pool with assets from this collection will fail.
    */
   disablePoolCreation: boolean;
 
@@ -1602,12 +1602,12 @@ export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeCl
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionInvariants<U>;
   }
 
-  toProto(): protobadges.CollectionInvariants {
-    return new protobadges.CollectionInvariants({
+  toProto(): prototokenization.CollectionInvariants {
+    return new prototokenization.CollectionInvariants({
       noCustomOwnershipTimes: this.noCustomOwnershipTimes,
       maxSupplyPerId: this.maxSupplyPerId.toString(),
       cosmosCoinBackedPath: this.cosmosCoinBackedPath
-        ? new protobadges.CosmosCoinBackedPath({
+        ? new prototokenization.CosmosCoinBackedPath({
             address: this.cosmosCoinBackedPath.address,
             conversion: this.cosmosCoinBackedPath.conversion ? this.cosmosCoinBackedPath.conversion.toProto() : undefined
           })
@@ -1618,14 +1618,14 @@ export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeCl
   }
 
   static fromJson<T extends NumberType>(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CollectionInvariants<T> {
-    return CollectionInvariants.fromProto(protobadges.CollectionInvariants.fromJson(jsonValue, options), (val: NumberType) => val as T);
+    return CollectionInvariants.fromProto(prototokenization.CollectionInvariants.fromJson(jsonValue, options), (val: NumberType) => val as T);
   }
 
   static fromJsonString<T extends NumberType>(jsonString: string, options?: Partial<JsonReadOptions>): CollectionInvariants<T> {
-    return CollectionInvariants.fromProto(protobadges.CollectionInvariants.fromJsonString(jsonString, options), (val: NumberType) => val as T);
+    return CollectionInvariants.fromProto(prototokenization.CollectionInvariants.fromJsonString(jsonString, options), (val: NumberType) => val as T);
   }
 
-  static fromProto<T extends NumberType>(item: protobadges.CollectionInvariants, convertFunction: (val: NumberType) => T): CollectionInvariants<T> {
+  static fromProto<T extends NumberType>(item: prototokenization.CollectionInvariants, convertFunction: (val: NumberType) => T): CollectionInvariants<T> {
     return new CollectionInvariants({
       noCustomOwnershipTimes: item.noCustomOwnershipTimes,
       maxSupplyPerId: convertFunction(item.maxSupplyPerId),

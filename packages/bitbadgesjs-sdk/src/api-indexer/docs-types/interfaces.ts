@@ -643,7 +643,7 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   /** Affiliate code */
   affiliateCode?: string;
 
-  /** The hidden badges of the account */
+  /** The hidden tokens of the account */
   hiddenTokens?: iBatchTokenDetails<T>[];
 
   /** The profile picture URL of the account */

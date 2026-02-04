@@ -1,7 +1,7 @@
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import type { iManagerSplitterPermissions } from '@/interfaces/types/managersplitter.js';
-import type { iMsgUniversalUpdateCollection } from '../badges/interfaces.js';
+import type { iMsgUniversalUpdateCollection } from '../tokenization/interfaces.js';
 
 /**
  * @category Interfaces

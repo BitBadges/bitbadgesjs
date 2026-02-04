@@ -7,7 +7,7 @@ import type { iMsgExecuteUniversalUpdateCollection } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { normalizeMessagesIfNecessary } from '../../base.js';
-import { MsgUniversalUpdateCollection } from '../badges/msgUniversalUpdateCollection.js';
+import { MsgUniversalUpdateCollection } from '../tokenization/msgUniversalUpdateCollection.js';
 
 /**
  * MsgExecuteUniversalUpdateCollection executes a UniversalUpdateCollection message

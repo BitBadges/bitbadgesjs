@@ -61,7 +61,7 @@ Look for:
 
 For each new message type, you need to create the corresponding TypeScript interfaces:
 
-#### 3.1 Update Message Interfaces (`src/transactions/messages/bitbadges/badges/interfaces.ts`)
+#### 3.1 Update Message Interfaces (`src/transactions/messages/bitbadges/tokenization/interfaces.ts`)
 
 Add new interfaces for new message types:
 
@@ -91,12 +91,12 @@ For each new message type, create the corresponding TypeScript class:
 
 #### 4.1 Create Message Class File
 
-Create a new file in `src/transactions/messages/bitbadges/badges/` directory:
+Create a new file in `src/transactions/messages/bitbadges/tokenization/` directory:
 
 ```typescript
-// src/transactions/messages/bitbadges/badges/msgNewMessageType.ts
+// src/transactions/messages/bitbadges/tokenization/msgNewMessageType.ts
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import * as protobadges from '@/proto/badges/tx_pb.js';
+import * as prototokenization from '@/proto/tokenization/tx_pb.js';
 
 import { CustomTypeClass } from '@/common/base.js';
 import type { iMsgNewMessageType } from './interfaces.js';
@@ -119,22 +119,22 @@ export class MsgNewMessageType<T extends NumberType> extends CustomTypeClass<Msg
     this.fieldName = msg.fieldName;
   }
 
-  toProto(): protobadges.MsgNewMessageType {
-    return new protobadges.MsgNewMessageType({
+  toProto(): prototokenization.MsgNewMessageType {
+    return new prototokenization.MsgNewMessageType({
       creator: this.creator,
       fieldName: this.fieldName.toString() // Convert NumberType to string for proto
     });
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgNewMessageType<NumberType> {
-    return MsgNewMessageType.fromProto(protobadges.MsgNewMessageType.fromJson(jsonValue, options));
+    return MsgNewMessageType.fromProto(prototokenization.MsgNewMessageType.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgNewMessageType<NumberType> {
-    return MsgNewMessageType.fromProto(protobadges.MsgNewMessageType.fromJsonString(jsonString, options));
+    return MsgNewMessageType.fromProto(prototokenization.MsgNewMessageType.fromJsonString(jsonString, options));
   }
 
-  static fromProto(protoMsg: protobadges.MsgNewMessageType): MsgNewMessageType<NumberType> {
+  static fromProto(protoMsg: prototokenization.MsgNewMessageType): MsgNewMessageType<NumberType> {
     return new MsgNewMessageType({
       creator: protoMsg.creator,
       fieldName: protoMsg.fieldName // Convert string to NumberType
@@ -169,7 +169,7 @@ export class MsgNewMessageType<T extends NumberType> extends CustomTypeClass<Msg
 
 #### 4.2 Update Index File
 
-Add the export to `src/transactions/messages/bitbadges/badges/index.ts`:
+Add the export to `src/transactions/messages/bitbadges/tokenization/index.ts`:
 
 ```typescript
 export * from './msgNewMessageType.js';
@@ -187,7 +187,7 @@ Add the new message types to the `ProtoTypeRegistry`:
 import {
   MsgNewMessageType
   // ... other imports
-} from '@/proto/badges/tx_pb.js';
+} from '@/proto/tokenization/tx_pb.js';
 
 export const ProtoTypeRegistry = createRegistry(
   // ... existing messages
@@ -202,18 +202,18 @@ Add the new message types to the amino converters for proper transaction signing
 
 #### 6.1 Update Registry (`src/transactions/amino/registry.ts`)
 
-Add the new message types to the badges amino converters:
+Add the new message types to the tokenization amino converters:
 
 ```typescript
 import {
   MsgNewMessageType
   // ... other imports
-} from '@/proto/badges/tx_pb.js';
+} from '@/proto/tokenization/tx_pb.js';
 
-export function createBadgesAminoConverters(): AminoConverters {
+export function createTokenizationAminoConverters(): AminoConverters {
   return {
     // ... existing converters
-    ...createAminoConverter(MsgNewMessageType, 'badges/NewMessageType')
+    ...createAminoConverter(MsgNewMessageType, 'tokenization/NewMessageType')
     // ... other converters
   };
 }
@@ -221,7 +221,7 @@ export function createBadgesAminoConverters(): AminoConverters {
 
 **Important Notes:**
 
-- The amino type should match the proto option: `option (amino.name) = "badges/NewMessageType";`
+- The amino type should match the proto option: `option (amino.name) = "tokenization/NewMessageType";`
 - Use the same message class in both the import and the converter
 
 ### Step 7: Update Sample Message Generation
@@ -236,7 +236,7 @@ Add the new message types to the `getSampleMsg` function:
 export function getSampleMsg(msgType: string, currMsg: any) {
   switch (msgType) {
     // ... existing cases
-    case 'badges/NewMessageType':
+    case 'tokenization/NewMessageType':
       return {
         type: msgType,
         value: new MsgNewMessageType({
@@ -269,7 +269,7 @@ Add the new message types to the `normalizeMessagesIfNecessary` function:
 import {
   MsgNewMessageType
   // ... other imports
-} from '@/proto/badges/tx_pb.js';
+} from '@/proto/tokenization/tx_pb.js';
 
 import {
   populateUndefinedForMsgNewMessageType
@@ -355,14 +355,14 @@ Here's a real example from adding support for the Dynamic Store message types:
 ```protobuf
 message MsgCreateDynamicStore {
   option (cosmos.msg.v1.signer) = "creator";
-  option (amino.name) = "badges/CreateDynamicStore";
+  option (amino.name) = "tokenization/CreateDynamicStore";
 
   string creator = 1;
 }
 
 message MsgUpdateDynamicStore {
   option (cosmos.msg.v1.signer) = "creator";
-  option (amino.name) = "badges/UpdateDynamicStore";
+  option (amino.name) = "tokenization/UpdateDynamicStore";
 
   string creator = 1;
   string storeId = 2;
@@ -370,7 +370,7 @@ message MsgUpdateDynamicStore {
 
 message MsgDeleteDynamicStore {
   option (cosmos.msg.v1.signer) = "creator";
-  option (amino.name) = "badges/DeleteDynamicStore";
+  option (amino.name) = "tokenization/DeleteDynamicStore";
 
   string creator = 1;
   string storeId = 2;
@@ -378,7 +378,7 @@ message MsgDeleteDynamicStore {
 
 message MsgSetDynamicStoreValue {
   option (cosmos.msg.v1.signer) = "creator";
-  option (amino.name) = "badges/SetDynamicStoreValue";
+  option (amino.name) = "tokenization/SetDynamicStoreValue";
 
   string creator = 1;
   string storeId = 2;
@@ -390,7 +390,7 @@ message MsgSetDynamicStoreValue {
 ### 2. Interface Updates
 
 ```typescript
-// src/transactions/messages/bitbadges/badges/interfaces.ts
+// src/transactions/messages/bitbadges/tokenization/interfaces.ts
 export interface iMsgCreateDynamicStore {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
@@ -425,7 +425,7 @@ export interface iMsgSetDynamicStoreValue<T extends NumberType> {
 ### 3. Class Updates
 
 ```typescript
-// src/transactions/messages/bitbadges/badges/msgCreateDynamicStore.ts
+// src/transactions/messages/bitbadges/tokenization/msgCreateDynamicStore.ts
 export class MsgCreateDynamicStore extends CustomTypeClass<MsgCreateDynamicStore> implements iMsgCreateDynamicStore {
   creator: BitBadgesAddress;
 
@@ -434,11 +434,11 @@ export class MsgCreateDynamicStore extends CustomTypeClass<MsgCreateDynamicStore
     this.creator = msg.creator;
   }
 
-  toProto(): protobadges.MsgCreateDynamicStore {
-    return new protobadges.MsgCreateDynamicStore({ creator: this.creator });
+  toProto(): prototokenization.MsgCreateDynamicStore {
+    return new prototokenization.MsgCreateDynamicStore({ creator: this.creator });
   }
 
-  static fromProto(protoMsg: protobadges.MsgCreateDynamicStore): MsgCreateDynamicStore {
+  static fromProto(protoMsg: prototokenization.MsgCreateDynamicStore): MsgCreateDynamicStore {
     return new MsgCreateDynamicStore({ creator: protoMsg.creator });
   }
 
@@ -459,13 +459,13 @@ export const ProtoTypeRegistry = createRegistry(
 );
 
 // src/transactions/amino/registry.ts
-export function createBadgesAminoConverters(): AminoConverters {
+export function createTokenizationAminoConverters(): AminoConverters {
   return {
     // ... existing converters
-    ...createAminoConverter(MsgCreateDynamicStore, 'badges/CreateDynamicStore'),
-    ...createAminoConverter(MsgUpdateDynamicStore, 'badges/UpdateDynamicStore'),
-    ...createAminoConverter(MsgDeleteDynamicStore, 'badges/DeleteDynamicStore'),
-    ...createAminoConverter(MsgSetDynamicStoreValue, 'badges/SetDynamicStoreValue')
+    ...createAminoConverter(MsgCreateDynamicStore, 'tokenization/CreateDynamicStore'),
+    ...createAminoConverter(MsgUpdateDynamicStore, 'tokenization/UpdateDynamicStore'),
+    ...createAminoConverter(MsgDeleteDynamicStore, 'tokenization/DeleteDynamicStore'),
+    ...createAminoConverter(MsgSetDynamicStoreValue, 'tokenization/SetDynamicStoreValue')
   };
 }
 ```
@@ -477,14 +477,14 @@ export function createBadgesAminoConverters(): AminoConverters {
 export function getSampleMsg(msgType: string, currMsg: any) {
   switch (msgType) {
     // ... existing cases
-    case 'badges/CreateDynamicStore':
+    case 'tokenization/CreateDynamicStore':
       return {
         type: msgType,
         value: new MsgCreateDynamicStore({
           creator: ''
         }).toJson({ emitDefaultValues: true })
       };
-    case 'badges/UpdateDynamicStore':
+    case 'tokenization/UpdateDynamicStore':
       return {
         type: msgType,
         value: new MsgUpdateDynamicStore({
@@ -571,14 +571,14 @@ export class MsgSimple<T extends NumberType> extends CustomTypeClass<MsgSimple<T
     this.fieldName = msg.fieldName;
   }
 
-  toProto(): protobadges.MsgSimple {
-    return new protobadges.MsgSimple({
+  toProto(): prototokenization.MsgSimple {
+    return new prototokenization.MsgSimple({
       creator: this.creator,
       fieldName: this.fieldName.toString()
     });
   }
 
-  static fromProto(protoMsg: protobadges.MsgSimple): MsgSimple<NumberType> {
+  static fromProto(protoMsg: prototokenization.MsgSimple): MsgSimple<NumberType> {
     return new MsgSimple({
       creator: protoMsg.creator,
       fieldName: protoMsg.fieldName
@@ -609,14 +609,14 @@ export class MsgComplex<T extends NumberType> extends CustomTypeClass<MsgComplex
     this.complexObject = new ComplexObject(msg.complexObject);
   }
 
-  toProto(): protobadges.MsgComplex {
-    return new protobadges.MsgComplex({
+  toProto(): prototokenization.MsgComplex {
+    return new prototokenization.MsgComplex({
       creator: this.creator,
       complexObject: this.complexObject.toProto()
     });
   }
 
-  static fromProto(protoMsg: protobadges.MsgComplex): MsgComplex<NumberType> {
+  static fromProto(protoMsg: prototokenization.MsgComplex): MsgComplex<NumberType> {
     return new MsgComplex({
       creator: protoMsg.creator,
       complexObject: ComplexObject.fromProto(protoMsg.complexObject)
@@ -671,13 +671,13 @@ export class MsgComplex<T extends NumberType> extends CustomTypeClass<MsgComplex
 **Solution**: Always convert `NumberType` to string in `toProto()` and vice versa in `fromProto()`:
 
 ```typescript
-toProto(): protobadges.MsgExample {
-  return new protobadges.MsgExample({
+toProto(): prototokenization.MsgExample {
+  return new prototokenization.MsgExample({
     amount: this.amount.toString() // Convert NumberType to string
   });
 }
 
-static fromProto(protoMsg: protobadges.MsgExample): MsgExample<NumberType> {
+static fromProto(protoMsg: prototokenization.MsgExample): MsgExample<NumberType> {
   return new MsgExample({
     amount: protoMsg.amount // Convert string to NumberType
   });
@@ -691,11 +691,11 @@ static fromProto(protoMsg: protobadges.MsgExample): MsgExample<NumberType> {
 **Solution**: Ensure the amino type matches exactly:
 
 ```protobuf
-option (amino.name) = "badges/CreateDynamicStore";
+option (amino.name) = "tokenization/CreateDynamicStore";
 ```
 
 ```typescript
-...createAminoConverter(MsgCreateDynamicStore, 'badges/CreateDynamicStore')
+...createAminoConverter(MsgCreateDynamicStore, 'tokenization/CreateDynamicStore')
 ```
 
 ### 3. Missing Required Methods
@@ -729,7 +729,7 @@ toCosmWasmPayloadString(): string {
 **Solution**: Always use string values for number types in sample messages:
 
 ```typescript
-case 'badges/Example':
+case 'tokenization/Example':
   return {
     type: msgType,
     value: new MsgExample({
@@ -795,7 +795,7 @@ import {
   MsgUpdateCollection,
   MsgUpdateDynamicStore,
   MsgUpdateUserApprovals
-} from '@/proto/badges/tx_pb.js';
+} from '@/proto/tokenization/tx_pb.js';
 ```
 
 ### 8. Message Normalization Order
@@ -860,7 +860,7 @@ The Dynamic Store message types have been fully implemented in the SDK as a comp
 
 ### Files Created/Modified:
 
-1. **Interfaces** (`src/transactions/messages/bitbadges/badges/interfaces.ts`):
+1. **Interfaces** (`src/transactions/messages/bitbadges/tokenization/interfaces.ts`):
 
    - `iMsgCreateDynamicStore`
    - `iMsgUpdateDynamicStore<T extends NumberType>`
@@ -869,15 +869,15 @@ The Dynamic Store message types have been fully implemented in the SDK as a comp
 
 2. **Message Classes**:
 
-   - `src/transactions/messages/bitbadges/badges/msgCreateDynamicStore.ts`
-   - `src/transactions/messages/bitbadges/badges/msgUpdateDynamicStore.ts`
-   - `src/transactions/messages/bitbadges/badges/msgDeleteDynamicStore.ts`
-   - `src/transactions/messages/bitbadges/badges/msgSetDynamicStoreValue.ts`
+   - `src/transactions/messages/bitbadges/tokenization/msgCreateDynamicStore.ts`
+   - `src/transactions/messages/bitbadges/tokenization/msgUpdateDynamicStore.ts`
+   - `src/transactions/messages/bitbadges/tokenization/msgDeleteDynamicStore.ts`
+   - `src/transactions/messages/bitbadges/tokenization/msgSetDynamicStoreValue.ts`
 
 3. **Registry Updates**:
 
    - `src/transactions/amino/objectConverter.ts` - Added to `ProtoTypeRegistry`
-   - `src/transactions/amino/registry.ts` - Added to `createBadgesAminoConverters()`
+   - `src/transactions/amino/registry.ts` - Added to `createTokenizationAminoConverters()`
 
 4. **Sample Messages** (`src/transactions/eip712/payload/samples/getSampleMsg.ts`):
 
@@ -889,7 +889,7 @@ The Dynamic Store message types have been fully implemented in the SDK as a comp
    - Added normalization conditions for all four message types
    - Added imports for population functions
 
-6. **Index Exports** (`src/transactions/messages/bitbadges/badges/index.ts`):
+6. **Index Exports** (`src/transactions/messages/bitbadges/tokenization/index.ts`):
    - Added exports for all four message classes
 
 ### Verification:

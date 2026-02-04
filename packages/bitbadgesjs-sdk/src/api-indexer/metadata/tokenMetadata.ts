@@ -2,7 +2,7 @@ import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, Conv
 import { bigIntMin, safeAddKeepLeft } from '@/common/math.js';
 import { Stringify, type NumberType } from '@/common/string-numbers.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
-import * as protobadges from '@/proto/badges/metadata_pb.js';
+import * as prototokenization from '@/proto/tokenization/metadata_pb.js';
 import type { iUintRange } from '@/interfaces/types/core.js';
 import type { iMetadata } from './metadata.js';
 import { Metadata } from './metadata.js';
@@ -91,8 +91,8 @@ export class CollectionMetadataDetails<T extends NumberType>
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionMetadataDetails<U>;
   }
 
-  toProto(): protobadges.CollectionMetadata {
-    return new protobadges.CollectionMetadata(this.convert(Stringify));
+  toProto(): prototokenization.CollectionMetadata {
+    return new prototokenization.CollectionMetadata(this.convert(Stringify));
   }
 }
 
@@ -334,7 +334,7 @@ export class TokenMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
     return metadataArr;
   };
 
-  toProto(): protobadges.TokenMetadata {
-    return new protobadges.TokenMetadata(this.convert(Stringify));
+  toProto(): prototokenization.TokenMetadata {
+    return new prototokenization.TokenMetadata(this.convert(Stringify));
   }
 }

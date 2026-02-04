@@ -13,7 +13,7 @@ import {
   iPathMetadata,
   iPathMetadataWithDetails
 } from '@/interfaces/types/core.js';
-import { badges as protobadges } from '@/proto/index.js';
+import { tokenization as prototokenization } from '@/proto/index.js';
 import type { NumberType } from '../common/string-numbers.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { Balance } from './balances.js';
@@ -44,7 +44,7 @@ export class ConversionSideAWithDenom<T extends NumberType>
   }
 
   static fromProto<T extends NumberType>(
-    data: protobadges.ConversionSideAWithDenom,
+    data: prototokenization.ConversionSideAWithDenom,
     convertFunction: (val: NumberType) => T
   ): ConversionSideAWithDenom<T> {
     return new ConversionSideAWithDenom({
@@ -73,7 +73,7 @@ export class ConversionSideA<T extends NumberType> extends BaseNumberTypeClass<C
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ConversionSideA<U>;
   }
 
-  static fromProto<T extends NumberType>(data: protobadges.ConversionSideA, convertFunction: (val: NumberType) => T): ConversionSideA<T> {
+  static fromProto<T extends NumberType>(data: prototokenization.ConversionSideA, convertFunction: (val: NumberType) => T): ConversionSideA<T> {
     return new ConversionSideA({
       amount: convertFunction(data.amount)
     });
@@ -101,17 +101,17 @@ export class Conversion<T extends NumberType> extends BaseNumberTypeClass<Conver
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as Conversion<U>;
   }
 
-  static fromProto<T extends NumberType>(data: protobadges.Conversion, convertFunction: (val: NumberType) => T): Conversion<T> {
+  static fromProto<T extends NumberType>(data: prototokenization.Conversion, convertFunction: (val: NumberType) => T): Conversion<T> {
     return new Conversion({
       sideA: data.sideA ? ConversionSideAWithDenom.fromProto(data.sideA, convertFunction) : { amount: convertFunction('0'), denom: '' },
       sideB: data.sideB.map((balance) => Balance.fromProto(balance, convertFunction))
     });
   }
 
-  toProto(): protobadges.Conversion {
-    return new protobadges.Conversion({
+  toProto(): prototokenization.Conversion {
+    return new prototokenization.Conversion({
       sideA: this.sideA
-        ? new protobadges.ConversionSideAWithDenom({
+        ? new prototokenization.ConversionSideAWithDenom({
             amount: this.sideA.amount.toString(),
             denom: this.sideA.denom
           })
@@ -146,7 +146,7 @@ export class ConversionWithoutDenom<T extends NumberType>
   }
 
   static fromProto<T extends NumberType>(
-    data: protobadges.ConversionWithoutDenom,
+    data: prototokenization.ConversionWithoutDenom,
     convertFunction: (val: NumberType) => T
   ): ConversionWithoutDenom<T> {
     return new ConversionWithoutDenom({
@@ -155,10 +155,10 @@ export class ConversionWithoutDenom<T extends NumberType>
     });
   }
 
-  toProto(): protobadges.ConversionWithoutDenom {
-    return new protobadges.ConversionWithoutDenom({
+  toProto(): prototokenization.ConversionWithoutDenom {
+    return new prototokenization.ConversionWithoutDenom({
       sideA: this.sideA
-        ? new protobadges.ConversionSideA({
+        ? new prototokenization.ConversionSideA({
             amount: this.sideA.amount.toString()
           })
         : undefined,
@@ -192,7 +192,7 @@ export class DenomUnit<T extends NumberType> extends BaseNumberTypeClass<DenomUn
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DenomUnit<U>;
   }
 
-  static fromProto<T extends NumberType>(data: protobadges.DenomUnit, convertFunction: (val: NumberType) => T): DenomUnit<T> {
+  static fromProto<T extends NumberType>(data: prototokenization.DenomUnit, convertFunction: (val: NumberType) => T): DenomUnit<T> {
     return new DenomUnit({
       decimals: convertFunction(data.decimals),
       symbol: data.symbol,
@@ -217,22 +217,22 @@ export class PathMetadata extends CustomTypeClass<PathMetadata> implements iPath
     this.customData = pathMetadata.customData;
   }
 
-  toProto(): protobadges.PathMetadata {
-    return new protobadges.PathMetadata({
+  toProto(): prototokenization.PathMetadata {
+    return new prototokenization.PathMetadata({
       uri: this.uri,
       customData: this.customData
     });
   }
 
   static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PathMetadata {
-    return PathMetadata.fromProto(protobadges.PathMetadata.fromJson(jsonValue, options));
+    return PathMetadata.fromProto(prototokenization.PathMetadata.fromJson(jsonValue, options));
   }
 
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PathMetadata {
-    return PathMetadata.fromProto(protobadges.PathMetadata.fromJsonString(jsonString, options));
+    return PathMetadata.fromProto(prototokenization.PathMetadata.fromJsonString(jsonString, options));
   }
 
-  static fromProto(item: protobadges.PathMetadata): PathMetadata {
+  static fromProto(item: prototokenization.PathMetadata): PathMetadata {
     return new PathMetadata({
       uri: item.uri,
       customData: item.customData
@@ -278,7 +278,7 @@ export class DenomUnitWithDetails<T extends NumberType> extends DenomUnit<T> imp
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as DenomUnitWithDetails<U>;
   }
 
-  static fromProto<T extends NumberType>(data: protobadges.DenomUnit, convertFunction: (val: NumberType) => T): DenomUnitWithDetails<T> {
+  static fromProto<T extends NumberType>(data: prototokenization.DenomUnit, convertFunction: (val: NumberType) => T): DenomUnitWithDetails<T> {
     return new DenomUnitWithDetails({
       decimals: convertFunction(data.decimals),
       symbol: data.symbol,
@@ -329,7 +329,7 @@ export class CosmosCoinWrapperPathAddObject<T extends NumberType>
   }
 
   static fromProto<T extends NumberType>(
-    data: protobadges.CosmosCoinWrapperPathAddObject,
+    data: prototokenization.CosmosCoinWrapperPathAddObject,
     convertFunction: (val: NumberType) => T
   ): CosmosCoinWrapperPathAddObject<T> {
     return new CosmosCoinWrapperPathAddObject({
@@ -344,13 +344,13 @@ export class CosmosCoinWrapperPathAddObject<T extends NumberType>
     });
   }
 
-  toProto(): protobadges.CosmosCoinWrapperPathAddObject {
-    return new protobadges.CosmosCoinWrapperPathAddObject({
+  toProto(): prototokenization.CosmosCoinWrapperPathAddObject {
+    return new prototokenization.CosmosCoinWrapperPathAddObject({
       denom: this.denom,
       conversion: this.conversion.toProto(),
       symbol: this.symbol,
       denomUnits: this.denomUnits.map((unit) => {
-        const protoUnit = new protobadges.DenomUnit({
+        const protoUnit = new prototokenization.DenomUnit({
           decimals: unit.decimals.toString(),
           symbol: unit.symbol,
           isDefaultDisplay: unit.isDefaultDisplay
@@ -393,7 +393,7 @@ export class AliasPathAddObject<T extends NumberType> extends BaseNumberTypeClas
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as AliasPathAddObject<U>;
   }
 
-  static fromProto<T extends NumberType>(data: protobadges.AliasPathAddObject, convertFunction: (val: NumberType) => T): AliasPathAddObject<T> {
+  static fromProto<T extends NumberType>(data: prototokenization.AliasPathAddObject, convertFunction: (val: NumberType) => T): AliasPathAddObject<T> {
     return new AliasPathAddObject({
       denom: data.denom,
       conversion: data.conversion
@@ -405,13 +405,13 @@ export class AliasPathAddObject<T extends NumberType> extends BaseNumberTypeClas
     });
   }
 
-  toProto(): protobadges.AliasPathAddObject {
-    return new protobadges.AliasPathAddObject({
+  toProto(): prototokenization.AliasPathAddObject {
+    return new prototokenization.AliasPathAddObject({
       denom: this.denom,
       conversion: this.conversion.toProto(),
       symbol: this.symbol,
       denomUnits: this.denomUnits.map((unit) => {
-        const protoUnit = new protobadges.DenomUnit({
+        const protoUnit = new prototokenization.DenomUnit({
           decimals: unit.decimals.toString(),
           symbol: unit.symbol,
           isDefaultDisplay: unit.isDefaultDisplay
@@ -449,7 +449,7 @@ export class CosmosCoinBackedPathAddObject<T extends NumberType>
   }
 
   static fromProto<T extends NumberType>(
-    data: protobadges.CosmosCoinBackedPathAddObject,
+    data: prototokenization.CosmosCoinBackedPathAddObject,
     convertFunction: (val: NumberType) => T
   ): CosmosCoinBackedPathAddObject<T> {
     return new CosmosCoinBackedPathAddObject({
@@ -459,12 +459,12 @@ export class CosmosCoinBackedPathAddObject<T extends NumberType>
     });
   }
 
-  toProto(): protobadges.CosmosCoinBackedPathAddObject {
-    return new protobadges.CosmosCoinBackedPathAddObject({
+  toProto(): prototokenization.CosmosCoinBackedPathAddObject {
+    return new prototokenization.CosmosCoinBackedPathAddObject({
       conversion: this.conversion
-        ? new protobadges.Conversion({
+        ? new prototokenization.Conversion({
             sideA: this.conversion.sideA
-              ? new protobadges.ConversionSideAWithDenom({
+              ? new prototokenization.ConversionSideAWithDenom({
                   amount: this.conversion.sideA.amount.toString(),
                   denom: this.conversion.sideA.denom
                 })
@@ -506,7 +506,7 @@ export class InvariantsAddObject<T extends NumberType> extends BaseNumberTypeCla
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as InvariantsAddObject<U>;
   }
 
-  static fromProto<T extends NumberType>(data: protobadges.InvariantsAddObject, convertFunction: (val: NumberType) => T): InvariantsAddObject<T> {
+  static fromProto<T extends NumberType>(data: prototokenization.InvariantsAddObject, convertFunction: (val: NumberType) => T): InvariantsAddObject<T> {
     return new InvariantsAddObject({
       noCustomOwnershipTimes: data.noCustomOwnershipTimes,
       maxSupplyPerId: convertFunction(data.maxSupplyPerId),
@@ -518,8 +518,8 @@ export class InvariantsAddObject<T extends NumberType> extends BaseNumberTypeCla
     });
   }
 
-  toProto(): protobadges.InvariantsAddObject {
-    return new protobadges.InvariantsAddObject({
+  toProto(): prototokenization.InvariantsAddObject {
+    return new prototokenization.InvariantsAddObject({
       noCustomOwnershipTimes: this.noCustomOwnershipTimes,
       maxSupplyPerId: this.maxSupplyPerId.toString(),
       cosmosCoinBackedPath: this.cosmosCoinBackedPath ? this.cosmosCoinBackedPath.toProto() : undefined,

@@ -8,17 +8,17 @@ import "cosmos/base/query/v1beta1/pagination.proto";
 import "anchor/params.proto";
 import "anchor/tx.proto";
 
-option go_package = "github.com/bitbadges/bitbadgeschain/x/anchor/types";
+option go_package = "github.com/bit/bitchain/x/anchor/types";
 
 // Query defines the gRPC querier service.
 service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/bitbadgeschain/anchor/params";
+    option (google.api.http).get = "/bitchain/anchor/params";
   }
 
   rpc GetValueAtLocation(QueryGetValueAtLocationRequest) returns (QueryGetValueAtLocationResponse) {
-    option (google.api.http).get = "/bitbadgeschain/anchor/locations/{locationId}";
+    option (google.api.http).get = "/bitchain/anchor/locations/{locationId}";
   }
 }
 

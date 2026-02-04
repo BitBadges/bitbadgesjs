@@ -50,7 +50,7 @@ function uint64ToBufferBE(number: NumberType): Buffer {
 }
 
 /**
- * Generates a non-claimable alias address. For badge module derivations, use module name = "badges". Get the detivation keys from `getAliasDerivationKeysForBadge` or `getAliasDerivationKeysForCollection`.
+ * Generates a non-claimable alias address. For module derivations, use module name = "tokenization". Get the detivation keys from `getAliasDerivationKeysForBadge` or `getAliasDerivationKeysForCollection`.
  * For lists, get the derivation keys from `getAliasDerivationKeysForList`.
  *
  * @category Aliases
@@ -115,7 +115,7 @@ export function getAliasDerivationKeysForDenom(denom: string) {
  */
 export function generateAliasAddressForDenom(denom: string) {
   const derivationKey = getAliasDerivationKeysForDenom(denom);
-  return generateAlias('badges', derivationKey);
+  return generateAlias('tokenization', derivationKey);
 }
 
 /**
@@ -135,7 +135,7 @@ export function getAliasDerivationKeysForIBCBackedDenom(ibcDenom: string) {
  */
 export function generateAliasAddressForIBCBackedDenom(ibcDenom: string) {
   const derivationKey = getAliasDerivationKeysForIBCBackedDenom(ibcDenom);
-  return generateAlias('badges', derivationKey);
+  return generateAlias('tokenization', derivationKey);
 }
 
 const SenderPrefix = 'ibc-hook-intermediary';

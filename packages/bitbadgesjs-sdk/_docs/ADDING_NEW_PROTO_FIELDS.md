@@ -54,7 +54,7 @@ Look for:
 
 For each new field or message, you need to update the corresponding TypeScript interfaces:
 
-#### 3.1 Update Core Interfaces (`src/interfaces/badges/core.ts`)
+#### 3.1 Update Core Interfaces (`src/interfaces/types/core.ts`)
 
 Add new interfaces for new messages or update existing interfaces for new fields:
 
@@ -118,7 +118,7 @@ export class NewMessage<T extends NumberType> extends BaseNumberTypeClass<NewMes
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as NewMessage<U>;
   }
 
-  static fromProto<T extends NumberType>(data: badges.NewMessage, convertFunction: (val: NumberType) => T): NewMessage<T> {
+  static fromProto<T extends NumberType>(data: tokenization.NewMessage, convertFunction: (val: NumberType) => T): NewMessage<T> {
     return new NewMessage({
       fieldName: convertFunction(data.fieldName)
     });
@@ -143,7 +143,7 @@ export class UpdatedMessage<T extends NumberType> extends BaseNumberTypeClass<Up
 
   // ... existing methods
 
-  static fromProto<T extends NumberType>(data: badges.UpdatedMessage, convertFunction: (val: NumberType) => T): UpdatedMessage<T> {
+  static fromProto<T extends NumberType>(data: tokenization.UpdatedMessage, convertFunction: (val: NumberType) => T): UpdatedMessage<T> {
     return new UpdatedMessage({
       // ... existing fields
       newField: data.newField
@@ -157,7 +157,7 @@ export class UpdatedMessage<T extends NumberType> extends BaseNumberTypeClass<Up
 Make sure to update any import statements that reference the new interfaces or classes:
 
 ```typescript
-import { iNewMessage, iUpdatedMessage } from '@/interfaces/badges/core.js';
+import { iNewMessage, iUpdatedMessage } from '@/interfaces/types/core.js';
 import { NewMessage, UpdatedMessage } from '@/core/misc.js';
 ```
 
@@ -166,9 +166,9 @@ import { NewMessage, UpdatedMessage } from '@/core/misc.js';
 If the new fields are used in transaction messages, update the corresponding message builders:
 
 ```typescript
-// In src/transactions/messages/bitbadges/badges/
-export function buildNewMessage(data: iNewMessage<NumberType>): badges.NewMessage {
-  return new protobadges.NewMessage({
+// In src/transactions/messages/bitbadges/tokenization/
+export function buildNewMessage(data: iNewMessage<NumberType>): tokenization.NewMessage {
+  return new prototokenization.NewMessage({
     fieldName: data.fieldName.toString()
   });
 }
@@ -257,7 +257,7 @@ export class Example<T extends NumberType> {
     return ['amount']; // Include in number fields
   }
 
-  static fromProto<T extends NumberType>(data: badges.Example, convertFunction: (val: NumberType) => T): Example<T> {
+  static fromProto<T extends NumberType>(data: tokenization.Example, convertFunction: (val: NumberType) => T): Example<T> {
     return new Example({
       amount: convertFunction(data.amount)
     });
@@ -283,7 +283,7 @@ export class Example<T extends NumberType> {
     this.items = data.items.map((item) => new Item(item));
   }
 
-  static fromProto<T extends NumberType>(data: badges.Example, convertFunction: (val: NumberType) => T): Example<T> {
+  static fromProto<T extends NumberType>(data: tokenization.Example, convertFunction: (val: NumberType) => T): Example<T> {
     return new Example({
       items: data.items.map((item) => Item.fromProto(item, convertFunction))
     });
@@ -309,7 +309,7 @@ export class Example<T extends NumberType> {
     this.optionalField = data.optionalField;
   }
 
-  static fromProto<T extends NumberType>(data: badges.Example, convertFunction: (val: NumberType) => T): Example<T> {
+  static fromProto<T extends NumberType>(data: tokenization.Example, convertFunction: (val: NumberType) => T): Example<T> {
     return new Example({
       optionalField: data.optionalField
     });
@@ -339,7 +339,7 @@ message CosmosCoinWrapperPath {
 ### 2. Interface Updates
 
 ```typescript
-// src/interfaces/badges/core.ts
+// src/interfaces/types/core.ts
 export interface iDenomUnit {
   decimals: number;
   symbol: string;
@@ -370,7 +370,7 @@ export class DenomUnit extends BaseNumberTypeClass<DenomUnit> implements iDenomU
     return ['decimals']; // Include number fields
   }
 
-  static fromProto(data: badges.DenomUnit): DenomUnit {
+  static fromProto(data: tokenization.DenomUnit): DenomUnit {
     return new DenomUnit({
       decimals: data.decimals,
       symbol: data.symbol
@@ -390,7 +390,7 @@ export class CosmosCoinWrapperPathAddObject<T extends NumberType> {
   }
 
   static fromProto<T extends NumberType>(
-    data: badges.CosmosCoinWrapperPathAddObject,
+    data: tokenization.CosmosCoinWrapperPathAddObject,
     convertFunction: (val: NumberType) => T
   ): CosmosCoinWrapperPathAddObject<T> {
     return new CosmosCoinWrapperPathAddObject({

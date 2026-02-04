@@ -1017,7 +1017,7 @@ export class BitBadgesCollection<T extends NumberType>
    * Wrapper for {@link generateAlias}.
    */
   generateAliasForTokenId(tokenId: T) {
-    const moduleName = 'badges';
+    const moduleName = 'tokenization';
     const derivationKeys = getAliasDerivationKeysForBadge(this.collectionId, tokenId);
     return generateAlias(moduleName, derivationKeys);
   }

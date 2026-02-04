@@ -1,9 +1,9 @@
 import type { iUserBalanceStore, iUserBalanceStoreWithDetails } from '@/interfaces/types/userBalances.js';
 import type { ConvertOptions, CustomType } from '@/common/base.js';
 import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
-import * as protobadges from '@/proto/badges/transfers_pb.js';
-import { UserBalanceStore as ProtoUserBalanceStore } from '@/proto/badges/user_balance_store_pb.js';
-import { UserIncomingApproval as ProtoUserIncomingApproval, UserOutgoingApproval as ProtoUserOutgoingApproval } from '@/proto/badges/approvals_pb.js';
+import * as prototokenization from '@/proto/tokenization/transfers_pb.js';
+import { UserBalanceStore as ProtoUserBalanceStore } from '@/proto/tokenization/user_balance_store_pb.js';
+import { UserIncomingApproval as ProtoUserIncomingApproval, UserOutgoingApproval as ProtoUserOutgoingApproval } from '@/proto/tokenization/approvals_pb.js';
 import { UserIncomingApproval, UserIncomingApprovalWithDetails, UserOutgoingApproval, UserOutgoingApprovalWithDetails } from './approvals.js';
 import { UserPermissions, UserPermissionsWithDetails } from './permissions.js';
 import type { NumberType } from '../common/string-numbers.js';

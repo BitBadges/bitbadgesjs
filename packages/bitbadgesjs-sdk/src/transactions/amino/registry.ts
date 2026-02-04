@@ -25,7 +25,7 @@ import {
   MsgUpdateCollection,
   MsgUpdateDynamicStore,
   MsgUpdateUserApprovals
-} from '@/proto/badges/tx_pb.js';
+} from '@/proto/tokenization/tx_pb.js';
 import { MsgExecuteContract, MsgInstantiateContract, MsgStoreCode } from '@/proto/cosmwasm/wasm/v1/tx_pb.js';
 import { MsgCreateMap, MsgDeleteMap, MsgSetValue, MsgUpdateMap } from '@/proto/maps/tx_pb.js';
 import {
@@ -251,33 +251,33 @@ export class AminoTypesClass {
   }
 }
 
-export function createBadgesAminoConverters(): AminoConverters {
+export function createTokenizationAminoConverters(): AminoConverters {
   return {
-    ...createAminoConverter(MsgDeleteCollection, 'badges/DeleteCollection'),
-    ...createAminoConverter(MsgTransferTokens, 'badges/TransferTokens'),
-    ...createAminoConverter(MsgUpdateCollection, 'badges/UpdateCollection'),
-    ...createAminoConverter(MsgUpdateUserApprovals, 'badges/UpdateUserApprovals'),
-    ...createAminoConverter(MsgCreateAddressLists, 'badges/CreateAddressLists'),
-    ...createAminoConverter(MsgCreateCollection, 'badges/CreateCollection'),
-    ...createAminoConverter(MsgCreateDynamicStore, 'badges/CreateDynamicStore'),
-    ...createAminoConverter(MsgCastVote, 'badges/CastVote'),
-    ...createAminoConverter(MsgDeleteDynamicStore, 'badges/DeleteDynamicStore'),
-    ...createAminoConverter(MsgDeleteIncomingApproval, 'badges/DeleteIncomingApproval'),
-    ...createAminoConverter(MsgDeleteOutgoingApproval, 'badges/DeleteOutgoingApproval'),
-    ...createAminoConverter(MsgPurgeApprovals, 'badges/PurgeApprovals'),
-    ...createAminoConverter(MsgSetTokenMetadata, 'badges/SetTokenMetadata'),
-    ...createAminoConverter(MsgSetCollectionApprovals, 'badges/SetCollectionApprovals'),
-    ...createAminoConverter(MsgSetCollectionMetadata, 'badges/SetCollectionMetadata'),
-    ...createAminoConverter(MsgSetCustomData, 'badges/SetCustomData'),
-    ...createAminoConverter(MsgSetDynamicStoreValue, 'badges/SetDynamicStoreValue'),
-    ...createAminoConverter(MsgSetIncomingApproval, 'badges/SetIncomingApproval'),
-    ...createAminoConverter(MsgSetIsArchived, 'badges/SetIsArchived'),
-    ...createAminoConverter(MsgSetManager, 'badges/SetManager'),
-    ...createAminoConverter(MsgSetOutgoingApproval, 'badges/SetOutgoingApproval'),
-    ...createAminoConverter(MsgSetStandards, 'badges/SetStandards'),
-    ...createAminoConverter(MsgSetValidTokenIds, 'badges/SetValidTokenIds'),
-    ...createAminoConverter(MsgUniversalUpdateCollection, 'badges/UniversalUpdateCollection'),
-    ...createAminoConverter(MsgUpdateDynamicStore, 'badges/UpdateDynamicStore')
+    ...createAminoConverter(MsgDeleteCollection, 'tokenization/DeleteCollection'),
+    ...createAminoConverter(MsgTransferTokens, 'tokenization/TransferTokens'),
+    ...createAminoConverter(MsgUpdateCollection, 'tokenization/UpdateCollection'),
+    ...createAminoConverter(MsgUpdateUserApprovals, 'tokenization/UpdateUserApprovals'),
+    ...createAminoConverter(MsgCreateAddressLists, 'tokenization/CreateAddressLists'),
+    ...createAminoConverter(MsgCreateCollection, 'tokenization/CreateCollection'),
+    ...createAminoConverter(MsgCreateDynamicStore, 'tokenization/CreateDynamicStore'),
+    ...createAminoConverter(MsgCastVote, 'tokenization/CastVote'),
+    ...createAminoConverter(MsgDeleteDynamicStore, 'tokenization/DeleteDynamicStore'),
+    ...createAminoConverter(MsgDeleteIncomingApproval, 'tokenization/DeleteIncomingApproval'),
+    ...createAminoConverter(MsgDeleteOutgoingApproval, 'tokenization/DeleteOutgoingApproval'),
+    ...createAminoConverter(MsgPurgeApprovals, 'tokenization/PurgeApprovals'),
+    ...createAminoConverter(MsgSetTokenMetadata, 'tokenization/SetTokenMetadata'),
+    ...createAminoConverter(MsgSetCollectionApprovals, 'tokenization/SetCollectionApprovals'),
+    ...createAminoConverter(MsgSetCollectionMetadata, 'tokenization/SetCollectionMetadata'),
+    ...createAminoConverter(MsgSetCustomData, 'tokenization/SetCustomData'),
+    ...createAminoConverter(MsgSetDynamicStoreValue, 'tokenization/SetDynamicStoreValue'),
+    ...createAminoConverter(MsgSetIncomingApproval, 'tokenization/SetIncomingApproval'),
+    ...createAminoConverter(MsgSetIsArchived, 'tokenization/SetIsArchived'),
+    ...createAminoConverter(MsgSetManager, 'tokenization/SetManager'),
+    ...createAminoConverter(MsgSetOutgoingApproval, 'tokenization/SetOutgoingApproval'),
+    ...createAminoConverter(MsgSetStandards, 'tokenization/SetStandards'),
+    ...createAminoConverter(MsgSetValidTokenIds, 'tokenization/SetValidTokenIds'),
+    ...createAminoConverter(MsgUniversalUpdateCollection, 'tokenization/UniversalUpdateCollection'),
+    ...createAminoConverter(MsgUpdateDynamicStore, 'tokenization/UpdateDynamicStore')
   };
 }
 
@@ -349,7 +349,7 @@ export function createGAMMAminoConverters(): AminoConverters {
 export function createDefaultAminoConverters() {
   return {
     ...createDefaultCosmosAminoConverters(),
-    ...createBadgesAminoConverters(),
+    ...createTokenizationAminoConverters(),
     ...createWasmXAminoConverters(),
     ...createAnchorAminoConverters(),
     ...createMapsAminoConverters(),

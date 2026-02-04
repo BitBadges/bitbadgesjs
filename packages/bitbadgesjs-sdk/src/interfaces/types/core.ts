@@ -310,7 +310,7 @@ export interface iInvariantsAddObject<T extends NumberType> {
 
   /**
    * If true, disallows pool creation with this collection's assets.
-   * When true, any attempt to create a pool with badges assets from this collection will fail.
+   * When true, any attempt to create a pool with assets from this collection will fail.
    */
   disablePoolCreation: boolean;
 }
@@ -862,7 +862,7 @@ export interface iCollectionInvariants<T extends NumberType> {
 
   /**
    * If true, disallows pool creation with this collection's assets.
-   * When true, any attempt to create a pool with badges assets from this collection will fail.
+   * When true, any attempt to create a pool with assets from this collection will fail.
    */
   disablePoolCreation: boolean;
 }

@@ -25,7 +25,7 @@ The BitBadges SDK (`bitbadgesjs-sdk`) is a TypeScript library that provides tool
 - **Type-safe API client** for interacting with the BitBadges indexer/API
 - **Transaction building** for creating and broadcasting blockchain transactions
 - **Address utilities** for working with BitBadges addresses (Cosmos-based, bb-prefixed)
-- **Core utilities** for badges, balances, approvals, permissions, and more
+- **Core utilities** for , balances, approvals, permissions, and more
 - **Protocol buffer support** for blockchain message types
 - **Number type flexibility** supporting `bigint`, `number`, and `string`
 
@@ -215,7 +215,7 @@ const cloned = balance.clone();
 - When you need utility methods (conversion, cloning, etc.)
 - Most common use case in the SDK
 
-#### 3. Protocol Buffer Types (`proto.badges.*`)
+#### 3. Protocol Buffer Types (`proto..*`)
 
 **Purpose**: Auto-generated classes from `.proto` files used for blockchain serialization.
 
@@ -230,13 +230,13 @@ const cloned = balance.clone();
 **Example**:
 
 ```typescript
-import * as protobadges from 'bitbadgesjs-sdk/proto/badges';
+import * as prototokenization from 'bitbadgesjs-sdk/proto/';
 
 // Protocol buffer types use strings for numbers
-const protoBalance = new protobadges.Balance({
+const protoBalance = new prototokenization.Balance({
   amount: '100', // String, not number!
-  tokenIds: [new protobadges.UintRange({ start: '1', end: '10' })],
-  ownershipTimes: [new protobadges.UintRange({ start: '1', end: '1000' })]
+  tokenIds: [new prototokenization.UintRange({ start: '1', end: '10' })],
+  ownershipTimes: [new prototokenization.UintRange({ start: '1', end: '1000' })]
 });
 
 // Serialize to binary for blockchain
@@ -259,7 +259,7 @@ The SDK provides conversion methods between these type systems:
 
 ```typescript
 import { Balance } from 'bitbadgesjs-sdk';
-import * as protobadges from 'bitbadgesjs-sdk/proto/badges';
+import * as prototokenization from 'bitbadgesjs-sdk/proto/';
 import { Stringify } from 'bitbadgesjs-sdk';
 
 // 1. Interface → Class
@@ -326,7 +326,7 @@ const bigintBalance = stringBalance.convert(BigIntify); // string → bigint
    const proto = balance.toProto();
 
    // ❌ Wrong - don't manually create proto objects
-   const proto = new protobadges.Balance({ amount: "100", ... });
+   const proto = new prototokenization.Balance({ amount: "100", ... });
    ```
 
 ### API Client Initialization
@@ -555,7 +555,7 @@ const transferMsg = new MsgTransferTokens({
           ownershipTimes: [{ start: 1n, end: 1000n }]
         })
       ],
-      memo: 'Transfer 10 badges',
+      memo: 'Transfer 10 ',
       // Optional: Precalculate balances from an approval
       precalculateBalancesFromApproval: new PrecalculateBalancesFromApprovalDetails({
         approvalId: 'approval-id',
@@ -758,10 +758,10 @@ TypeScript interfaces for all BitBadges data structures:
 Protocol buffer definitions and generated TypeScript classes:
 
 ```typescript
-import * as badges from 'bitbadgesjs-sdk/proto/badges';
+import * as  from 'bitbadgesjs-sdk/proto/';
 
 // Use protocol buffer message types
-const protoMsg = new badges.MsgTransferTokens({
+const protoMsg = new .MsgTransferTokens({
   creator: 'bb1abc...'
   // ...
 });
@@ -800,7 +800,7 @@ async function displayCollection(collectionId: string) {
   }
 
   console.log('Collection Name:', collection.metadata?.name);
-  console.log('Total Badges:', collection.badges.length);
+  console.log('Total Badges:', collection..length);
   console.log('Collection ID:', collection.collectionId);
 }
 ```
@@ -856,7 +856,7 @@ async function transferBadges(from: string, to: string, collectionId: string, to
             ownershipTimes: [{ start: 1n, end: 1000n }] // Adjust as needed
           })
         ],
-        memo: `Transfer ${amount} badges`
+        memo: `Transfer ${amount} `
         // Optional: Only include if you need to precalculate from an approval
         // precalculateBalancesFromApproval: new PrecalculateBalancesFromApprovalDetails({...})
       })

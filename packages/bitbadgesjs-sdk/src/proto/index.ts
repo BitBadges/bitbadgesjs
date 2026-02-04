@@ -1,4 +1,4 @@
-export * as badges from './badges/index.js';
+export * as tokenization from './tokenization/index.js';
 export * as cosmos from './cosmos/index.js';
 export * as cosmos_proto from './cosmos_proto/index.js';
 export * as cosmwasm from './cosmwasm/index.js';

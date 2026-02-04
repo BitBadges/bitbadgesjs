@@ -6,18 +6,18 @@ MYFOLDER=$(pwd)
 
 # Fetch from bitbadgeschain
 cd ../../../bitbadgeschain
-cp -r ./proto/badges/* $MYFOLDER/proto/badges/
 cp -r ./proto/wasmx/* $MYFOLDER/proto/wasmx/
 cp -r ./proto/anchor/* $MYFOLDER/proto/anchor/
 cp -r ./proto/maps/* $MYFOLDER/proto/maps/
 cp -r ./proto/gamm/* $MYFOLDER/proto/gamm/
 cp -r ./proto/poolmanager/* $MYFOLDER/proto/poolmanager/
 cp -r ./proto/managersplitter/* $MYFOLDER/proto/managersplitter/
+cp -r ./proto/tokenization/* $MYFOLDER/proto/tokenization/
 
 cd ../bitbadgesjs/packages/bitbadgesjs-sdk
 
 # We have a v6 or v* folder for migration, lets delete that
-rm -rf ./proto/badges/v*
+rm -rf ./proto/tokenization/v*
 
 
 # # BitBadges
