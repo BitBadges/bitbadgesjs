@@ -1291,7 +1291,6 @@ export interface iApiKeyDoc extends Doc {
   numRequests: number;
   lastRequest: number;
   createdAt: number;
-  expiry: number;
   intendedUse: string;
 
   // Stripe-related fields

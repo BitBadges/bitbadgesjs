@@ -1178,7 +1178,6 @@ export class ApiKeyDoc extends CustomTypeClass<ApiKeyDoc> implements iApiKeyDoc 
   numRequests: number;
   lastRequest: number;
   createdAt: number;
-  expiry: number;
   intendedUse: string;
   stripeSubscriptionId?: string;
   subscriptionStatus?: string;
@@ -1196,7 +1195,6 @@ export class ApiKeyDoc extends CustomTypeClass<ApiKeyDoc> implements iApiKeyDoc 
     this.numRequests = data.numRequests;
     this.lastRequest = data.lastRequest;
     this.createdAt = data.createdAt;
-    this.expiry = data.expiry;
     this.intendedUse = data.intendedUse;
     this.stripeSubscriptionId = data.stripeSubscriptionId;
     this.subscriptionStatus = data.subscriptionStatus;
