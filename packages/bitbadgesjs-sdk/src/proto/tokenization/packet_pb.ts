@@ -7,11 +7,11 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3 } from "@bufbuild/protobuf";
 
 /**
- * @generated from message tokenization.BadgesPacketData
+ * @generated from message tokenization.TokenizationPacketData
  */
-export class BadgesPacketData extends Message<BadgesPacketData> {
+export class TokenizationPacketData extends Message<TokenizationPacketData> {
   /**
-   * @generated from oneof tokenization.BadgesPacketData.packet
+   * @generated from oneof tokenization.TokenizationPacketData.packet
    */
   packet: {
     /**
@@ -21,31 +21,31 @@ export class BadgesPacketData extends Message<BadgesPacketData> {
     case: "noData";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
-  constructor(data?: PartialMessage<BadgesPacketData>) {
+  constructor(data?: PartialMessage<TokenizationPacketData>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "tokenization.BadgesPacketData";
+  static readonly typeName = "tokenization.TokenizationPacketData";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "noData", kind: "message", T: NoData, oneof: "packet" },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadgesPacketData {
-    return new BadgesPacketData().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TokenizationPacketData {
+    return new TokenizationPacketData().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BadgesPacketData {
-    return new BadgesPacketData().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): TokenizationPacketData {
+    return new TokenizationPacketData().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BadgesPacketData {
-    return new BadgesPacketData().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): TokenizationPacketData {
+    return new TokenizationPacketData().fromJsonString(jsonString, options);
   }
 
-  static equals(a: BadgesPacketData | PlainMessage<BadgesPacketData> | undefined, b: BadgesPacketData | PlainMessage<BadgesPacketData> | undefined): boolean {
-    return proto3.util.equals(BadgesPacketData, a, b);
+  static equals(a: TokenizationPacketData | PlainMessage<TokenizationPacketData> | undefined, b: TokenizationPacketData | PlainMessage<TokenizationPacketData> | undefined): boolean {
+    return proto3.util.equals(TokenizationPacketData, a, b);
   }
 }
 

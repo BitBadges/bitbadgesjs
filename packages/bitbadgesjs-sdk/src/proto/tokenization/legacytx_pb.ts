@@ -303,7 +303,7 @@ export class MsgNewCollection extends Message<MsgNewCollection> {
  */
 export class MsgNewCollectionResponse extends Message<MsgNewCollectionResponse> {
   /**
-   * ID of created badge collecon
+   * ID of created token collection
    *
    * @generated from field: string collectionId = 1;
    */
@@ -338,7 +338,7 @@ export class MsgNewCollectionResponse extends Message<MsgNewCollectionResponse> 
 }
 
 /**
- * This handles both minting more of existing badges and creating new tokens.
+ * This handles both minting more of existing tokens and creating new tokens.
  *
  * @generated from message tokenization.MsgMintAndDistributeTokens
  */
@@ -536,7 +536,7 @@ export class MsgUniversalUpdateCollectionApprovalsResponse extends Message<MsgUn
 }
 
 /**
- * Update badge Uris with new URI object, if permitted.
+ * Update token Uris with new URI object, if permitted.
  *
  * @generated from message tokenization.MsgUpdateMetadata
  */
@@ -642,7 +642,7 @@ export class MsgUpdateMetadataResponse extends Message<MsgUpdateMetadataResponse
 }
 
 /**
- * Update badge permissions with new permissions, if permitted.
+ * Update token permissions with new permissions, if permitted.
  *
  * @generated from message tokenization.MsgUniversalUpdateCollectionPermissions
  */

@@ -1,5 +1,5 @@
 syntax = "proto3";
-package tokenization;
+package tokenization;  
 
 import "gogoproto/gogo.proto";
 import "tokenization/params.proto";
@@ -7,7 +7,7 @@ import "tokenization/params.proto";
 
 option go_package = "github.com/bitbadges/bitbadgeschain/x/tokenization/types";
 
-/*
+/* 
   The UintRange is a range of IDs from some start to some end (inclusive).
   uintRanges are one of the core types used.
 
@@ -24,12 +24,12 @@ message UintRange {
 }
 
 
-/*
+/* 
   Balance represents the balance of a token for a specific user.
   The user amounts xAmount of a token specified for the time ranges specified.
 
   Example: User A owns x10 of token IDs 1-10 from 1/1/2020 to 1/1/2021.
-
+  
   If times or tokenIDs have len > 1, then the user owns all token IDs specified for all time ranges specified.
 */
 message Balance {

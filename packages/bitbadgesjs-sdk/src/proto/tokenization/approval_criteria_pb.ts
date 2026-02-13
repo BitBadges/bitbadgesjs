@@ -51,7 +51,7 @@ export class ApprovalCriteria extends Message<ApprovalCriteria> {
 
   /**
    * The sdk.Coins that need to be transferred for approval. Defines required coin transfers (e.g., fees,
-   * royalties) that must be executed alongside the badge transfer for the approval to be valid.
+   * royalties) that must be executed alongside the token transfer for the approval to be valid.
    *
    * @generated from field: repeated tokenization.CoinTransfer coinTransfers = 5;
    */
@@ -306,7 +306,7 @@ export class OutgoingApprovalCriteria extends Message<OutgoingApprovalCriteria> 
 
   /**
    * The sdk.Coins that need to be transferred for approval. Defines required coin transfers (e.g., fees,
-   * royalties) that must be executed alongside the badge transfer for the approval to be valid.
+   * royalties) that must be executed alongside the token transfer for the approval to be valid.
    *
    * @generated from field: repeated tokenization.CoinTransfer coinTransfers = 5;
    */
@@ -486,7 +486,7 @@ export class IncomingApprovalCriteria extends Message<IncomingApprovalCriteria> 
 
   /**
    * The sdk.Coins that need to be transferred for approval. Defines required coin transfers (e.g., fees,
-   * royalties) that must be executed alongside the badge transfer for the approval to be valid.
+   * royalties) that must be executed alongside the token transfer for the approval to be valid.
    *
    * @generated from field: repeated tokenization.CoinTransfer coinTransfers = 5;
    */

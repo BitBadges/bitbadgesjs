@@ -137,3 +137,4 @@ message ManagersplitterCustomMsgType {
   MsgDeleteManagerSplitter deleteManagerSplitterMsg = 3;
   MsgExecuteUniversalUpdateCollection executeUniversalUpdateCollectionMsg = 4;
 }
+

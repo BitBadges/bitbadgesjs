@@ -189,7 +189,7 @@ export class TokenCollection extends Message<TokenCollection> {
 }
 
 /**
- * Conversion defines a bidirectional conversion between a cosmos coin (with denom) and badge balances.
+ * Conversion defines a bidirectional conversion between a cosmos coin (with denom) and token balances.
  *
  * @generated from message tokenization.Conversion
  */
@@ -202,7 +202,7 @@ export class Conversion extends Message<Conversion> {
   sideA?: ConversionSideAWithDenom;
 
   /**
-   * Side B: The badge balances side of the conversion.
+   * Side B: The token balances side of the conversion.
    *
    * @generated from field: repeated tokenization.Balance sideB = 2;
    */
@@ -287,7 +287,7 @@ export class ConversionSideAWithDenom extends Message<ConversionSideAWithDenom> 
 }
 
 /**
- * ConversionWithoutDenom defines a bidirectional conversion between a cosmos coin amount (without denom) and badge balances.
+ * ConversionWithoutDenom defines a bidirectional conversion between a cosmos coin amount (without denom) and token balances.
  * The denom is stored at the base level (e.g., in AliasPath or CosmosCoinWrapperPath).
  *
  * @generated from message tokenization.ConversionWithoutDenom
@@ -301,7 +301,7 @@ export class ConversionWithoutDenom extends Message<ConversionWithoutDenom> {
   sideA?: ConversionSideA;
 
   /**
-   * Side B: The badge balances side of the conversion.
+   * Side B: The token balances side of the conversion.
    *
    * @generated from field: repeated tokenization.Balance sideB = 2;
    */
@@ -396,7 +396,7 @@ export class CosmosCoinWrapperPath extends Message<CosmosCoinWrapperPath> {
   denom = "";
 
   /**
-   * The conversion between cosmos coin and badge balances.
+   * The conversion between cosmos coin and token balances.
    *
    * @generated from field: tokenization.ConversionWithoutDenom conversion = 3;
    */
@@ -477,7 +477,7 @@ export class AliasPath extends Message<AliasPath> {
   denom = "";
 
   /**
-   * The conversion between cosmos coin and badge balances.
+   * The conversion between cosmos coin and token balances.
    *
    * @generated from field: tokenization.ConversionWithoutDenom conversion = 2;
    */
@@ -548,7 +548,7 @@ export class CosmosCoinBackedPath extends Message<CosmosCoinBackedPath> {
   address = "";
 
   /**
-   * The conversion between IBC cosmos coin and badge balances.
+   * The conversion between IBC cosmos coin and token balances.
    *
    * @generated from field: tokenization.Conversion conversion = 2;
    */

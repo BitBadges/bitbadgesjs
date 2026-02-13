@@ -131,8 +131,8 @@ export class BitBadgesApiRoutes {
   static CheckClaimSuccessRoute = (claimId: string, address: NativeAddress) => `/api/v0/claims/success/${claimId}/${address}`;
 
   static GetSiwbbRequestsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/requests/siwbb`;
-  static GetTransferActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/badges`;
-  static GetTokensByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/badges`;
+  static GetTransferActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/tokens`;
+  static GetTokensByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/tokens`;
 
   static GetClaimActivityByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/claims`;
   static GetPointsActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/points`;

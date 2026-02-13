@@ -1672,7 +1672,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Gets transfer activity for a specific user.
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/account/:address/activity/badges`
+   * - **API Route**: `GET /api/v0/account/:address/activity/tokens`
    * - **SDK Function Call**: `await BitBadgesApi.getTransferActivityForUser(address, { });`
    *
    * @example
@@ -1709,7 +1709,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * tokens to retrieve.
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/account/:address/badges`
+   * - **API Route**: `GET /api/v0/account/:address/tokens`
    * - **SDK Function Call**: `await BitBadgesApi.getTokensViewForUser(address, { viewType });`
    *
    * @example
