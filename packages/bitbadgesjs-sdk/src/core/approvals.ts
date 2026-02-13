@@ -1440,28 +1440,28 @@ export class DynamicStoreChallenge<T extends NumberType> extends BaseNumberTypeC
 }
 
 /**
- * AddressChecks defines checks for address types (WASM contract, liquidity pool, etc.)
+ * AddressChecks defines checks for address types (EVM contract, liquidity pool, etc.)
  *
  * @category Approvals / Transferability
  */
 export class AddressChecks extends CustomTypeClass<AddressChecks> implements iAddressChecks {
-  mustBeWasmContract?: boolean;
-  mustNotBeWasmContract?: boolean;
+  mustBeEvmContract?: boolean;
+  mustNotBeEvmContract?: boolean;
   mustBeLiquidityPool?: boolean;
   mustNotBeLiquidityPool?: boolean;
 
   constructor(msg: iAddressChecks) {
     super();
-    this.mustBeWasmContract = msg.mustBeWasmContract;
-    this.mustNotBeWasmContract = msg.mustNotBeWasmContract;
+    this.mustBeEvmContract = msg.mustBeEvmContract;
+    this.mustNotBeEvmContract = msg.mustNotBeEvmContract;
     this.mustBeLiquidityPool = msg.mustBeLiquidityPool;
     this.mustNotBeLiquidityPool = msg.mustNotBeLiquidityPool;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AddressChecks {
     return new AddressChecks({
-      mustBeWasmContract: this.mustBeWasmContract,
-      mustNotBeWasmContract: this.mustNotBeWasmContract,
+      mustBeEvmContract: this.mustBeEvmContract,
+      mustNotBeEvmContract: this.mustNotBeEvmContract,
       mustBeLiquidityPool: this.mustBeLiquidityPool,
       mustNotBeLiquidityPool: this.mustNotBeLiquidityPool
     });
@@ -1469,8 +1469,8 @@ export class AddressChecks extends CustomTypeClass<AddressChecks> implements iAd
 
   toProto(): prototokenization.AddressChecks {
     return new prototokenization.AddressChecks({
-      mustBeWasmContract: this.mustBeWasmContract ?? false,
-      mustNotBeWasmContract: this.mustNotBeWasmContract ?? false,
+      mustBeEvmContract: this.mustBeEvmContract ?? false,
+      mustNotBeEvmContract: this.mustNotBeEvmContract ?? false,
       mustBeLiquidityPool: this.mustBeLiquidityPool ?? false,
       mustNotBeLiquidityPool: this.mustNotBeLiquidityPool ?? false
     });
@@ -1486,8 +1486,8 @@ export class AddressChecks extends CustomTypeClass<AddressChecks> implements iAd
 
   static fromProto(item: prototokenization.AddressChecks): AddressChecks {
     return new AddressChecks({
-      mustBeWasmContract: item.mustBeWasmContract,
-      mustNotBeWasmContract: item.mustNotBeWasmContract,
+      mustBeEvmContract: item.mustBeEvmContract,
+      mustNotBeEvmContract: item.mustNotBeEvmContract,
       mustBeLiquidityPool: item.mustBeLiquidityPool,
       mustNotBeLiquidityPool: item.mustNotBeLiquidityPool
     });

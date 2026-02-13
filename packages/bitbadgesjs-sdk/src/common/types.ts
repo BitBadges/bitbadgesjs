@@ -7,10 +7,11 @@
  */
 export enum SupportedChain {
   COSMOS = 'Cosmos',
+  ETH = 'ETH',
   UNKNOWN = 'Unknown' //If unknown address, we don't officially know the chain yet.
 }
 
 /**
  * @category Address Utils
  */
-export type SupportedChainType = 'Cosmos' | 'Unknown';
+export type SupportedChainType = 'Cosmos' | 'ETH' | 'Unknown';

@@ -6,7 +6,7 @@ import type { iMsgUpdateDynamicStore } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
-import { normalizeMessagesIfNecessary } from '../../base.js';
+import { normalizeMessagesIfNecessary } from '../../utils.js';
 
 /**
  * MsgUpdateDynamicStore is used to update an existing dynamic store.

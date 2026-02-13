@@ -12,3 +12,25 @@ export function createAnyMessage(msg: MessageGenerated) {
     value: msg.message.toBinary()
   });
 }
+
+export function createProtoMsg<T extends Message<T> = AnyMessage>(msg: T): MessageGenerated<T> {
+  const msgType = msg.getType();
+  return {
+    message: msg,
+    path: msgType.typeName
+  };
+}
+
+/**
+ * Normalizes messages by ensuring they have the proper structure.
+ * Because the current and other code doesn't support Msgs with optional / empty fields,
+ * we need to populate undefined fields with empty default values.
+ */
+export const normalizeMessagesIfNecessary = (messages: MessageGenerated[]): MessageGenerated[] => {
+  const newMessages = messages.map((msg) => {
+    const msgVal = msg.message;
+    return createProtoMsg(msgVal);
+  });
+
+  return newMessages;
+};

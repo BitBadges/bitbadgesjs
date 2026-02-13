@@ -367,6 +367,7 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
   accountNumber: T;
   pubKeyType: string;
   bitbadgesAddress: BitBadgesAddress;
+  ethAddress: string;
   sequence?: T;
   balances?: CosmosCoin<T>[];
 
@@ -378,6 +379,7 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
     this.accountNumber = data.accountNumber;
     this.pubKeyType = data.pubKeyType;
     this.bitbadgesAddress = data.bitbadgesAddress;
+    this.ethAddress = data.ethAddress;
     this.sequence = data.sequence;
     this.balances = data.balances?.map((balance) => new CosmosCoin(balance)) ?? [];
   }

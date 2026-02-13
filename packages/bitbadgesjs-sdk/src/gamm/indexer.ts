@@ -239,6 +239,8 @@ export interface iEstimateSwapPayload {
   slippageTolerancePercent: string | number;
   /** Forcefully recheck compliance and avoid cache (5 minutes) */
   forcefulRecheckCompliance?: boolean;
+  /** Whether to only use local pools for the swap estimation */
+  isLocalOnly?: boolean;
 }
 
 /**

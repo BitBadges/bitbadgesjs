@@ -8,7 +8,7 @@ import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { Transfer } from '@/core/transfers.js';
 import { CollectionId } from '@/interfaces/index.js';
-import { normalizeMessagesIfNecessary } from '../../base.js';
+import { normalizeMessagesIfNecessary } from '../../utils.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 
 /**

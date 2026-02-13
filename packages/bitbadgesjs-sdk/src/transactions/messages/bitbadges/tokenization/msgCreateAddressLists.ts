@@ -6,7 +6,7 @@ import { AddressList } from '@/core/addressLists.js';
 import type { iMsgCreateAddressLists } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
-import { normalizeMessagesIfNecessary } from '../../base.js';
+import { normalizeMessagesIfNecessary } from '../../utils.js';
 import { AddressListInput } from '@/proto/tokenization/address_lists_pb.js';
 
 /**

@@ -5,7 +5,7 @@ import { CustomTypeClass } from '@/common/base.js';
 import type { iMsgCreateDynamicStore } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
-import { normalizeMessagesIfNecessary } from '../../base.js';
+import { normalizeMessagesIfNecessary } from '../../utils.js';
 
 /**
  * MsgCreateDynamicStore is used to create a new dynamic store.

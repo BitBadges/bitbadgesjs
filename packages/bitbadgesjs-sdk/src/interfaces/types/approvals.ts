@@ -25,10 +25,10 @@ export interface iDynamicStoreChallenge<T extends NumberType> {
  * @category Interfaces
  */
 export interface iAddressChecks {
-  /** Require the address to be a WASM contract. */
-  mustBeWasmContract?: boolean;
-  /** Require the address to not be a WASM contract. */
-  mustNotBeWasmContract?: boolean;
+  /** Require the address to be an EVM contract (has code). */
+  mustBeEvmContract?: boolean;
+  /** Require the address to not be an EVM contract (no code). */
+  mustNotBeEvmContract?: boolean;
   /** Require the address to be a liquidity pool. */
   mustBeLiquidityPool?: boolean;
   /** Require the address to not be a liquidity pool. */

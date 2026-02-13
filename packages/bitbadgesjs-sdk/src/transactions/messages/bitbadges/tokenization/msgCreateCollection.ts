@@ -11,7 +11,7 @@ import { UserBalanceStore } from '@/core/userBalances.js';
 import * as prototokenization from '@/proto/tokenization/tx_pb.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iMsgCreateCollection } from './interfaces.js';
-import { normalizeMessagesIfNecessary } from '../../base.js';
+import { normalizeMessagesIfNecessary } from '../../utils.js';
 import { CosmosCoin } from '@/core/coin.js';
 import { AliasPathAddObject, CosmosCoinWrapperPathAddObject, InvariantsAddObject } from '@/core/ibc-wrappers.js';
 import type { iCollectionMetadata } from '@/interfaces/types/core.js';

@@ -10,6 +10,7 @@ export * as crisis from './crisis/index.js';
 export * as crypto from './crypto/index.js';
 export * as distribution from './distribution/index.js';
 export * as evidence from './evidence/index.js';
+export * as evm from './evm/index.js';
 export * as feegrant from './feegrant/index.js';
 export * as genutil from './genutil/index.js';
 export * as gov from './gov/index.js';

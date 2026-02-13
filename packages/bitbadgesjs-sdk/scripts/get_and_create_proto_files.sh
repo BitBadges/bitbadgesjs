@@ -65,6 +65,15 @@ cp -r ./proto/* $MYFOLDER/proto
 cd /tmp
 rm -rf ics23
 
+#cosmos/evm v5
+cd /tmp
+git clone --branch v0.5.0 https://github.com/cosmos/evm.git
+cd evm/
+cp -r ./proto/* $MYFOLDER/proto
+# cp -r ./third_party/proto/* $MYFOLDER/proto
+cd /tmp
+rm -rf evm
+
 cd $MYFOLDER
 rm -f ./proto/*.yaml
 rm -f ./proto/*.md

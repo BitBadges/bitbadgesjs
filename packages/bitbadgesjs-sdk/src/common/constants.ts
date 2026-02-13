@@ -19,6 +19,24 @@ export const MAINNET_CHAIN_DETAILS = {
 };
 
 /**
+ * EVMChainIDMainnet is the EVM chain ID for BitBadges mainnet
+ * Chain ID: 90124 (claimed in ethereum-lists/chains registry)
+ * This should match the chain_id in genesis under app_state.evm.params.chain_config.chain_id
+ *
+ * @category Chain Details
+ */
+export const EVMChainIDMainnet = '90124';
+
+/**
+ * EVMChainIDTestnet is the EVM chain ID for BitBadges testnet
+ * Chain ID: 90125 (claimed in ethereum-lists/chains registry)
+ * This should match the chain_id in genesis under app_state.evm.params.chain_config.chain_id
+ *
+ * @category Chain Details
+ */
+export const EVMChainIDTestnet = '90125';
+
+/**
  * BitBadges Betanet chain details to suggest to Keplr.
  *
  * @category Chain Details
@@ -31,7 +49,7 @@ export const BitBadgesKeplrSuggestMainnetChainInfo = {
   rpc: 'https://rpc.bitbadges.io',
   rest: 'https://lcd.bitbadges.io',
   bip44: {
-    coinType: 118
+    coinType: 60
   },
   bech32Config: {
     bech32PrefixAccAddr: 'bb',

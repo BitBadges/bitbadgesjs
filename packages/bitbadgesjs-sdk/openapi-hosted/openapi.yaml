@@ -6349,6 +6349,9 @@ components:
         forcefulRecheckCompliance:
           description: Forcefully recheck compliance and avoid cache (5 minutes)
           type: boolean
+        isLocalOnly:
+          description: Whether to only use local pools for the swap estimation
+          type: boolean
       required:
         - tokenIn
         - tokenOutDenom
@@ -17971,11 +17974,11 @@ components:
       type: object
     iAddressChecks:
       properties:
-        mustBeWasmContract:
-          description: Require the address to be a WASM contract.
+        mustBeEvmContract:
+          description: Require the address to be an EVM contract (has code).
           type: boolean
-        mustNotBeWasmContract:
-          description: Require the address to not be a WASM contract.
+        mustNotBeEvmContract:
+          description: Require the address to not be an EVM contract (no code).
           type: boolean
         mustBeLiquidityPool:
           description: Require the address to be a liquidity pool.

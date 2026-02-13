@@ -14,7 +14,7 @@ import { CollectionPermissions } from '@/core/permissions.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { CollectionId } from '@/interfaces/index.js';
 import { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
-import { normalizeMessagesIfNecessary } from '../../base.js';
+import { normalizeMessagesIfNecessary } from '../../utils.js';
 import type { iMsgUpdateCollection } from './interfaces.js';
 /**
  * MsgUpdateCollection is a transaction that can be used to update any collection. It is only executable by the manager.

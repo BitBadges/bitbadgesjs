@@ -6,7 +6,7 @@ import type { NumberType } from '@/common/string-numbers.js';
 import type { iMsgSetCollectionMetadata } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
-import { normalizeMessagesIfNecessary } from '../../base.js';
+import { normalizeMessagesIfNecessary } from '../../utils.js';
 import { CollectionMetadata } from '@/core/misc.js';
 import { ActionPermission } from '@/core/permissions.js';
 import { Stringify } from '@/common/string-numbers.js';

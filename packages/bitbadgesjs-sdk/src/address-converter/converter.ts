@@ -1,5 +1,7 @@
 import { SupportedChain } from '@/common/types.js';
 import { bech32 } from 'bech32';
+import { isValidChecksumAddress, stripHexPrefix, toChecksumAddress } from 'crypto-addr-codec';
+import { isAddress } from 'web3-validator';
 
 function makeBech32Decoder(currentPrefix: string) {
   return (data: string) => {
@@ -27,29 +29,69 @@ const bech32Chain = (name: string, prefix: string) => ({
 
 const BITBADGES = bech32Chain('BITBADGES', 'bb');
 
+function makeChecksummedHexDecoder(chainId?: number) {
+  return (data: string) => {
+    const stripped = stripHexPrefix(data);
+    if (!isValidChecksumAddress(data, chainId || null) && stripped !== stripped.toLowerCase() && stripped !== stripped.toUpperCase()) {
+      throw Error('Invalid address checksum');
+    }
+    return Buffer.from(stripHexPrefix(data), 'hex');
+  };
+}
+
+function makeChecksummedHexEncoder(chainId?: number) {
+  return (data: Buffer) => toChecksumAddress(data.toString('hex'), chainId || null);
+}
+
+const hexChecksumChain = (name: string, chainId?: number) => ({
+  decoder: makeChecksummedHexDecoder(chainId),
+  encoder: makeChecksummedHexEncoder(chainId),
+  name
+});
+
+const ETH = hexChecksumChain('ETH');
+
+const ethToBitBadges = (ethAddress: string) => {
+  const data = ETH.decoder(ethAddress);
+  return BITBADGES.encoder(data);
+};
+
+const bitbadgesToEth = (bitbadgesAddress: string) => {
+  const data = BITBADGES.decoder(bitbadgesAddress);
+  return ETH.encoder(data);
+};
+
 /**
- * Converts an address to a bech32 formatted address prefixed with `bb`.
- * Only accepts addresses that already start with `bb` or `bbvaloper`.
- * If the address is not a valid BitBadges address, we return an empty string ('').
+ * Converts an address from any supported chain to a bech32 formatted address prefixed with `bb`.
+ * If we are unable to convert the address, we return an empty string ('').
  *
  * @category Address Utils
  */
 export function convertToBitBadgesAddress(address: string) {
+  let bech32Address = '';
+
   if (address.startsWith('bbvaloper')) {
     return address;
   }
 
-  if (address.startsWith('bb')) {
-    try {
-      // Validate that it's a valid bech32 address
-      BITBADGES.decoder(address);
-      return address;
-    } catch {
-      return '';
+  try {
+    bitbadgesToEth(address); //throws on failure
+    bech32Address = address;
+  } catch {
+    if (isAddress(address, true)) {
+      bech32Address = ethToBitBadges(address);
+    } else if (address.startsWith('bb')) {
+      try {
+        // Validate that it's a valid bech32 address
+        BITBADGES.decoder(address);
+        bech32Address = address;
+      } catch {
+        bech32Address = '';
+      }
     }
   }
 
-  return '';
+  return bech32Address;
 }
 
 /**
@@ -82,13 +124,41 @@ export function mustConvertToBitBadgesAddress(address: string) {
 }
 
 /**
- * Returns the chain that the address belongs to.
- * Only Cosmos (bb-prefixed) addresses are supported.
+ * Converts an address from a supported chain to a Ethereum address. Throws when cannot convert.
+ *
+ * @category Address Utils
+ */
+export function mustConvertToEthAddress(address: string) {
+  const bech32Address = convertToEthAddress(address);
+  if (!bech32Address) throw new Error('Could not convert. Please make sure inputted address is well-formed');
+
+  return bech32Address;
+}
+
+/**
+ * Converts an address from a supported chain to an Ethereum address
+ * If we are unable to convert the address, we return an empty string
+ *
+ * @category Address Utils
+ */
+export function convertToEthAddress(address: string) {
+  try {
+    return bitbadgesToEth(convertToBitBadgesAddress(address));
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Goes through the list of supported chains and returns the chain that the address belongs to.
  *
  * @category Address Utils
  */
 export function getChainForAddress(address: string) {
-  if (address.startsWith('bb')) {
+  const addr: string = address;
+  if (addr.startsWith('0x')) {
+    return SupportedChain.ETH;
+  } else if (addr.startsWith('bb')) {
     return SupportedChain.COSMOS;
   }
 
@@ -111,7 +181,6 @@ export function getAbbreviatedAddress(address: string) {
 
 /**
  * Checks if an address is validly formatted. If a chain is not provided, we will try to determine the chain from the address.
- * Only Cosmos (bb-prefixed) addresses are supported.
  *
  * @category Address Utils
  *
@@ -122,27 +191,34 @@ export function getAbbreviatedAddress(address: string) {
  * ```
  */
 export function isAddressValid(address: string, chain?: SupportedChain) {
-  if (address === 'Mint') {
-    return true;
-  }
-
-  //TODO:
-  if (address.startsWith('bbvaloper')) {
-    return true;
-  }
+  let isValidAddress = true;
 
   if (chain == undefined || chain == SupportedChain.UNKNOWN) {
     chain = getChainForAddress(address);
   }
 
-  if (chain === SupportedChain.COSMOS) {
-    try {
-      BITBADGES.decoder(address);
-      return true;
-    } catch {
-      return false;
-    }
+  switch (chain) {
+    case SupportedChain.ETH:
+    case SupportedChain.UNKNOWN:
+      isValidAddress = isAddress(address);
+      break;
+    case SupportedChain.COSMOS:
+      try {
+        bitbadgesToEth(address); //throws on failure
+        isValidAddress = true;
+      } catch {
+        isValidAddress = false;
+      }
+      break;
+    default:
+      break;
   }
 
-  return false;
+  if (address === 'Mint') {
+    isValidAddress = true;
+  } else if (address.startsWith('bbvaloper')) {
+    isValidAddress = true;
+  }
+
+  return isValidAddress;
 }

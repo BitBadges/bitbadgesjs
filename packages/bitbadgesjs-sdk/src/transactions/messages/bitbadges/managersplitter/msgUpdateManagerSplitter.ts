@@ -5,7 +5,7 @@ import { CustomTypeClass } from '@/common/base.js';
 import type { iMsgUpdateManagerSplitter } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
-import { normalizeMessagesIfNecessary } from '../../base.js';
+import { normalizeMessagesIfNecessary } from '../../utils.js';
 import { ManagerSplitterPermissions } from '@/core/managersplitter.js';
 
 /**

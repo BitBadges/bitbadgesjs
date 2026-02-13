@@ -7,7 +7,7 @@ import { CosmosCoin } from '@/core/coin.js';
 import * as protobalancer from '@/proto/gamm/poolmodels/balancer/tx_pb.js';
 import * as protogamm from '@/proto/gamm/v1beta1/tx_pb.js';
 import * as protopoolmanager from '@/proto/poolmanager/v1beta1/swap_route_pb.js';
-import { normalizeMessagesIfNecessary } from '@/transactions/messages/base.js';
+import { normalizeMessagesIfNecessary } from '@/transactions/messages/utils.js';
 import { PoolAsset, PoolParams } from '../classes.js';
 import type {
   iMsgCreateBalancerPool,

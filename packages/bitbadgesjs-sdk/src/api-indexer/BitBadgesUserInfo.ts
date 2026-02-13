@@ -106,6 +106,7 @@ export interface iBitBadgesUserInfo<T extends NumberType> extends iProfileDoc<T>
  */
 export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> implements iBitBadgesUserInfo<T>, CustomType<BitBadgesUserInfo<T>> {
   bitbadgesAddress: BitBadgesAddress;
+  ethAddress: string;
   accountNumber: T;
   sequence?: T;
   balances?: CosmosCoin<T>[];
@@ -145,6 +146,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   constructor(data: iBitBadgesUserInfo<T>) {
     super(data);
     this.bitbadgesAddress = data.bitbadgesAddress;
+    this.ethAddress = data.ethAddress;
     this.accountNumber = data.accountNumber;
     this.sequence = data.sequence;
     this.balances = data.balances?.map((balance) => new CosmosCoin(balance)) ?? [];
@@ -509,6 +511,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
   static MintAccount() {
     return new BitBadgesUserInfo<bigint>({
       bitbadgesAddress: 'Mint',
+      ethAddress: 'Mint',
       address: 'Mint',
       chain: SupportedChain.COSMOS,
       pubKeyType: 'secp256k1',
@@ -539,6 +542,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     return new BitBadgesUserInfo<bigint>({
       _docId: '',
       bitbadgesAddress: '',
+      ethAddress: '',
       address: '',
       chain: SupportedChain.UNKNOWN,
       pubKeyType: '',

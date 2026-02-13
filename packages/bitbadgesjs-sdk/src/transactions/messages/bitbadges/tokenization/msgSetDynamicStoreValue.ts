@@ -6,7 +6,7 @@ import type { iMsgSetDynamicStoreValue } from './interfaces.js';
 import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 import type { NumberType } from '@/common/string-numbers.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
-import { normalizeMessagesIfNecessary } from '../../base.js';
+import { normalizeMessagesIfNecessary } from '../../utils.js';
 
 /**
  * MsgSetDynamicStoreValue is used to set a boolean value for a specific address in a dynamic store.

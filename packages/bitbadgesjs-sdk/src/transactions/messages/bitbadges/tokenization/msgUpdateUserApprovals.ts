@@ -10,7 +10,7 @@ import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type { iMsgUpdateUserApprovals } from './interfaces.js';
 import { getConvertFunctionFromPrefix } from '@/address-converter/converter.js';
 import { CollectionId } from '@/interfaces/index.js';
-import { normalizeMessagesIfNecessary } from '../../base.js';
+import { normalizeMessagesIfNecessary } from '../../utils.js';
 
 /**
  * MsgUpdateUserApprovals represents the message for updating user approvals.

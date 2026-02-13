@@ -15,7 +15,7 @@ import { CosmosCoin } from '@/core/coin.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
 import { CollectionId } from '@/interfaces/index.js';
-import { normalizeMessagesIfNecessary } from '../../base.js';
+import { normalizeMessagesIfNecessary } from '../../utils.js';
 import type { iMsgUniversalUpdateCollection } from './interfaces.js';
 import { AliasPathAddObject, CosmosCoinWrapperPathAddObject, InvariantsAddObject } from '@/core/ibc-wrappers.js';
 /**

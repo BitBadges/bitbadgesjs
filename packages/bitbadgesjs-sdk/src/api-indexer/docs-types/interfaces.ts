@@ -599,6 +599,8 @@ export interface iAccountDoc<T extends NumberType> extends Doc {
   pubKeyType: string;
   /** The BitBadges address of the account */
   bitbadgesAddress: BitBadgesAddress;
+  /** The Eth address of the account */
+  ethAddress: string;
   /** The sequence of the account. This is the nonce for the blockchain for this account */
   sequence?: T;
   /** The BADGE balance of the account and other sdk.coin balances */
