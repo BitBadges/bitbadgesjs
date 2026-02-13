@@ -20,21 +20,21 @@ export const MAINNET_CHAIN_DETAILS = {
 
 /**
  * EVMChainIDMainnet is the EVM chain ID for BitBadges mainnet
- * Chain ID: 90124 (claimed in ethereum-lists/chains registry)
+ * Chain ID: 50024 (claimed in ethereum-lists/chains registry)
  * This should match the chain_id in genesis under app_state.evm.params.chain_config.chain_id
  *
  * @category Chain Details
  */
-export const EVMChainIDMainnet = '90124';
+export const EVMChainIDMainnet = '50024';
 
 /**
  * EVMChainIDTestnet is the EVM chain ID for BitBadges testnet
- * Chain ID: 90125 (claimed in ethereum-lists/chains registry)
+ * Chain ID: 50025 (claimed in ethereum-lists/chains registry)
  * This should match the chain_id in genesis under app_state.evm.params.chain_config.chain_id
  *
  * @category Chain Details
  */
-export const EVMChainIDTestnet = '90125';
+export const EVMChainIDTestnet = '50025';
 
 /**
  * BitBadges Betanet chain details to suggest to Keplr.
