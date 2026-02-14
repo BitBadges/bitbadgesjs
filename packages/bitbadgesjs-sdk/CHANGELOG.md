@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.29.0]
+
+### Version Compatibility
+
+- **BitBadges Chain v24**: 0.29.0 corresponds to BitBadges chain v24 upgrades
+
+### What's New
+
+- Updated EVM chain IDs for v24 chain upgrade:
+  - Mainnet chain ID changed from `90124` to `50024`
+  - Testnet chain ID changed from `90125` to `50025`
+- See [BitBadges Chain v24 release information](https://github.com/BitBadges/bitbadgeschain/releases/tag/v24) for more details.
+
+### Installation
+
+```bash
+npm install bitbadgesjs-sdk@^0.29.0
+```
+
 ## [0.28.0]
 
 ### Version Compatibility
