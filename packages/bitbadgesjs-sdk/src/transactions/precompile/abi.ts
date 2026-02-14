@@ -1,11 +1,13 @@
 /**
  * Precompile Address and ABI Configuration
- * 
+ *
  * Address and ABI for the tokenization precompile on BitBadges chain.
  * All precompile methods accept a single JSON string parameter.
  */
 
-import precompileAbi from './abi.json';
+import { precompileAbiData } from './abi-data.js';
+
+const precompileAbi = precompileAbiData;
 
 /**
  * Tokenization precompile contract address
@@ -40,7 +42,7 @@ export const GAMM_PRECOMPILE_ADDRESS = '0x00000000000000000000000000000000000010
 
 /**
  * Precompile ABI (Application Binary Interface)
- * 
+ *
  * This ABI defines all available functions on the tokenization precompile.
  * All transaction methods accept a single `string msgJson` parameter.
  * Query methods are included but not used (we use Cosmos queries instead).
