@@ -1,7 +1,7 @@
 {
   "name": "bitbadgesjs-sdk",
   "description": "SDK for BitBadges development - Compatible with BitBadges v12 (SDK 0.18.x), v13 (SDK 0.19.x), v14 (SDK 0.20.x), v20 (SDK 0.25.x), v21 (SDK 0.26.x), v22 (SDK 0.27.x), v23 (SDK 0.28.x), and v24 (SDK 0.29.x)",
-  "version": "0.29.0",
+  "version": "0.29.1",
   "license": "MIT",
   "keywords": [
     "bitbadges",

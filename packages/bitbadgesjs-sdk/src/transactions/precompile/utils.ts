@@ -121,7 +121,7 @@ export class PrecompileEncodingError extends Error {
  * ```
  */
 export function convertMessageToPrecompileCall(
-  message: SupportedSdkMessage,
+  message: SupportedSdkMessage | any, // Accept both SDK and proto messages
   evmAddress?: string
 ): PrecompileCallResult {
   // Validate inputs
@@ -225,7 +225,7 @@ interface MessageInput {
  * @throws {Error} If any message is not a tokenization message
  */
 export function convertMessagesToExecuteMultiple(
-  messages: SupportedSdkMessage[],
+  messages: (SupportedSdkMessage | any)[], // Accept both SDK and proto messages
   evmAddress?: string
 ): PrecompileCallResult {
   // Validate inputs
@@ -292,7 +292,7 @@ export function convertMessagesToExecuteMultiple(
  */
 function convertMessageToJsonObject(
   messageType: MessageType,
-  message: SupportedSdkMessage,
+  message: SupportedSdkMessage | any, // Accept both SDK and proto messages
   evmAddress?: string
 ): PrecompileFunctionParams {
   switch (messageType) {

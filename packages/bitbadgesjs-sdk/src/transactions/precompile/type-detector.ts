@@ -114,13 +114,71 @@ export type SupportedSdkMessage =
   | { constructor: { name: 'MsgSend' }; toJson(): unknown }; // MsgSend from proto.cosmos.bank.v1beta1 (not exported from bitbadgesjs-sdk types)
 
 /**
- * Detect the type of a BitBadges SDK message
+ * Detect message type from proto message's typeName
+ * This allows us to work with proto messages directly without converting to SDK messages
+ */
+function detectMessageTypeFromProto(typeName: string): MessageType | null {
+  // Map proto type names to MessageType enum
+  // Format: "package.MessageName" -> MessageType.MessageName
+
+  // Gamm messages
+  if (typeName === 'gamm.v1beta1.MsgSwapExactAmountIn') return MessageType.MsgSwapExactAmountIn;
+  if (typeName === 'gamm.v1beta1.MsgSwapExactAmountInWithIBCTransfer') return MessageType.MsgSwapExactAmountInWithIBCTransfer;
+  if (typeName === 'gamm.v1beta1.MsgJoinPool') return MessageType.MsgJoinPool;
+  if (typeName === 'gamm.v1beta1.MsgExitPool') return MessageType.MsgExitPool;
+  if (typeName === 'gamm.poolmodels.balancer.v1beta1.MsgCreateBalancerPool') return MessageType.MsgCreateBalancerPool;
+
+  // Tokenization messages
+  if (typeName === 'tokenization.MsgTransferTokens') return MessageType.MsgTransferTokens;
+  if (typeName === 'tokenization.MsgSetIncomingApproval') return MessageType.MsgSetIncomingApproval;
+  if (typeName === 'tokenization.MsgSetOutgoingApproval') return MessageType.MsgSetOutgoingApproval;
+  if (typeName === 'tokenization.MsgDeleteCollection') return MessageType.MsgDeleteCollection;
+  if (typeName === 'tokenization.MsgDeleteIncomingApproval') return MessageType.MsgDeleteIncomingApproval;
+  if (typeName === 'tokenization.MsgDeleteOutgoingApproval') return MessageType.MsgDeleteOutgoingApproval;
+  if (typeName === 'tokenization.MsgCreateDynamicStore') return MessageType.MsgCreateDynamicStore;
+  if (typeName === 'tokenization.MsgUpdateDynamicStore') return MessageType.MsgUpdateDynamicStore;
+  if (typeName === 'tokenization.MsgDeleteDynamicStore') return MessageType.MsgDeleteDynamicStore;
+  if (typeName === 'tokenization.MsgSetDynamicStoreValue') return MessageType.MsgSetDynamicStoreValue;
+  if (typeName === 'tokenization.MsgSetCustomData') return MessageType.MsgSetCustomData;
+  if (typeName === 'tokenization.MsgSetIsArchived') return MessageType.MsgSetIsArchived;
+  if (typeName === 'tokenization.MsgSetManager') return MessageType.MsgSetManager;
+  if (typeName === 'tokenization.MsgSetCollectionMetadata') return MessageType.MsgSetCollectionMetadata;
+  if (typeName === 'tokenization.MsgSetStandards') return MessageType.MsgSetStandards;
+  if (typeName === 'tokenization.MsgCastVote') return MessageType.MsgCastVote;
+  if (typeName === 'tokenization.MsgCreateCollection') return MessageType.MsgCreateCollection;
+  if (typeName === 'tokenization.MsgUpdateCollection') return MessageType.MsgUpdateCollection;
+  if (typeName === 'tokenization.MsgUpdateUserApprovals') return MessageType.MsgUpdateUserApprovals;
+  if (typeName === 'tokenization.MsgCreateAddressLists') return MessageType.MsgCreateAddressLists;
+  if (typeName === 'tokenization.MsgPurgeApprovals') return MessageType.MsgPurgeApprovals;
+  if (typeName === 'tokenization.MsgSetValidTokenIds') return MessageType.MsgSetValidTokenIds;
+  if (typeName === 'tokenization.MsgSetTokenMetadata') return MessageType.MsgSetTokenMetadata;
+  if (typeName === 'tokenization.MsgSetCollectionApprovals') return MessageType.MsgSetCollectionApprovals;
+  if (typeName === 'tokenization.MsgUniversalUpdateCollection') return MessageType.MsgUniversalUpdateCollection;
+
+  // Cosmos messages
+  if (typeName === 'cosmos.bank.v1beta1.MsgSend') return MessageType.MsgSend;
+
+  return null;
+}
+
+/**
+ * Detect the type of a BitBadges SDK message or proto message
  *
- * @param message - The SDK message to detect
+ * @param message - The SDK message or proto message to detect
  * @returns The detected message type
  * @throws Error if the message type is not supported
  */
-export function detectMessageType(message: SupportedSdkMessage): MessageType {
+export function detectMessageType(message: SupportedSdkMessage | any): MessageType {
+  // First, try to detect from proto message typeName (if it's a proto message)
+  if (message && typeof message === 'object' && typeof message.getType === 'function') {
+    const typeName = message.getType().typeName;
+    const protoType = detectMessageTypeFromProto(typeName);
+    if (protoType) {
+      return protoType;
+    }
+  }
+
+  // Fall back to SDK message detection (original logic)
   // Check each message type - order doesn't matter since we only check constructor names
   // Check MsgSend first (from proto.cosmos.bank.v1beta1)
   if (isMsgSend(message)) return MessageType.MsgSend;

@@ -188,17 +188,19 @@ const wrapExternalTxContext = (context: TxContext): LegacyTxContext | null => {
  * signDirect and legacyAmino are the payloads for signing with the respective signing methods from the Cosmos SDK.
  * evmTx is included if evmAddress is provided in context and messages are supported for precompile conversion.
  *
+ * Messages can be either:
+ * - SDK messages (with toProto() method) - will be used for both Cosmos and EVM conversion
+ * - Proto messages (with getType() method) - will be used for Cosmos, EVM conversion will be attempted if possible
+ *
  * @param context - Transaction context. Must include either sender (for Cosmos) or evmAddress (for EVM), or both
  * @param messages - Messages to include in the transaction. Can be proto messages (with getType()) or SDK messages (with toProto())
- * @param sdkMessagesForEvm - Optional: Original SDK messages for EVM conversion. If not provided, will try to use messages parameter.
  * @throws {Error} If neither sender nor evmAddress is provided
  *
  * @category Transactions
  */
 export const createTransactionPayload = (
   context: TxContext,
-  messages: Message | Message[],
-  sdkMessagesForEvm?: any | any[]
+  messages: Message | Message[]
 ): TransactionPayload => {
   // Validate that at least one of sender or evmAddress is provided
   if (!context.sender && !context.evmAddress) {
@@ -207,14 +209,13 @@ export const createTransactionPayload = (
 
   const txContext: LegacyTxContext | null = wrapExternalTxContext(context);
 
-  return createTransactionPayloadFromTxContext(txContext, messages, context.evmAddress, sdkMessagesForEvm);
+  return createTransactionPayloadFromTxContext(txContext, messages, context.evmAddress);
 };
 
 const createTransactionPayloadFromTxContext = (
   txContext: LegacyTxContext | null,
   messages: Message | Message[],
-  evmAddress?: string,
-  sdkMessagesForEvm?: any | any[]
+  evmAddress?: string
 ): TransactionPayload => {
   messages = wrapTypeToArray(messages);
 
@@ -222,9 +223,21 @@ const createTransactionPayloadFromTxContext = (
   let cosmosPayload: { signDirect?: TransactionPayload['signDirect']; legacyAmino?: TransactionPayload['legacyAmino'] } = {};
 
   if (txContext) {
-    //Don't do anything with these msgs like setShowJson bc they are simulated messages, not final ones
+    // Convert messages to proto format for Cosmos payloads
+    // If messages are SDK messages (with toProto()), convert them first
+    let protoMessages: Message[] = [];
+    for (const msg of messages) {
+      // Check if it's an SDK message with toProto() method
+      if (msg && typeof (msg as any).toProto === 'function') {
+        protoMessages.push((msg as any).toProto());
+      } else {
+        // Already a proto message
+        protoMessages.push(msg);
+      }
+    }
+
     let generatedMsgs: MessageGenerated[] = [];
-    for (const cosmosMsg of messages) {
+    for (const cosmosMsg of protoMessages) {
       generatedMsgs.push(createProtoMsg(cosmosMsg));
     }
     generatedMsgs = normalizeMessagesIfNecessary(generatedMsgs);
@@ -240,19 +253,16 @@ const createTransactionPayloadFromTxContext = (
   let evmTx: TransactionPayload['evmTx'] | undefined;
   if (evmAddress) {
     try {
-      // Use SDK messages for EVM conversion if provided, otherwise try to use the messages parameter
-      const messagesArray = sdkMessagesForEvm
-        ? wrapTypeToArray(sdkMessagesForEvm)
-        : wrapTypeToArray(messages);
+      // Use the messages directly for EVM conversion
+      // Both SDK and proto messages are now supported
+      const messagesArray = wrapTypeToArray(messages);
 
       // Check if all messages are supported for precompile conversion
-      // Actually try to detect the message type to ensure it's a supported SDK message
       let allSupported = true;
       for (const msg of messagesArray) {
         try {
-          // Try to detect message type using the actual detection function
-          // This ensures the message is a proper SDK message instance, not just a proto message
-          detectMessageType(msg as SupportedSdkMessage);
+          // detectMessageType now works with both SDK and proto messages
+          detectMessageType(msg);
         } catch {
           // If detection fails, message is not supported for EVM conversion
           allSupported = false;
@@ -262,8 +272,8 @@ const createTransactionPayloadFromTxContext = (
 
       if (allSupported && messagesArray.length > 0) {
         // Handle multiple messages - use executeMultiple if all are tokenization messages
-        if (messagesArray.length > 1 && areAllTokenizationMessages(messagesArray as SupportedSdkMessage[])) {
-          const result = convertMessagesToExecuteMultiple(messagesArray as SupportedSdkMessage[], evmAddress);
+        if (messagesArray.length > 1 && areAllTokenizationMessages(messagesArray)) {
+          const result = convertMessagesToExecuteMultiple(messagesArray, evmAddress);
           evmTx = {
             to: result.precompileAddress,
             data: result.data,
@@ -272,7 +282,7 @@ const createTransactionPayloadFromTxContext = (
           };
         } else if (messagesArray.length === 1) {
           // Single message - use standard conversion
-          const result = convertMessageToPrecompileCall(messagesArray[0] as SupportedSdkMessage, evmAddress);
+          const result = convertMessageToPrecompileCall(messagesArray[0], evmAddress);
           evmTx = {
             to: result.precompileAddress,
             data: result.data,
