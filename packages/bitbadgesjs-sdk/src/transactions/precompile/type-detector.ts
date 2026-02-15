@@ -126,7 +126,7 @@ function detectMessageTypeFromProto(typeName: string): MessageType | null {
   if (typeName === 'gamm.v1beta1.MsgSwapExactAmountInWithIBCTransfer') return MessageType.MsgSwapExactAmountInWithIBCTransfer;
   if (typeName === 'gamm.v1beta1.MsgJoinPool') return MessageType.MsgJoinPool;
   if (typeName === 'gamm.v1beta1.MsgExitPool') return MessageType.MsgExitPool;
-  if (typeName === 'gamm.poolmodels.balancer.v1beta1.MsgCreateBalancerPool') return MessageType.MsgCreateBalancerPool;
+  if (typeName === 'gamm.poolmodels.balancer.MsgCreateBalancerPool') return MessageType.MsgCreateBalancerPool;
 
   // Tokenization messages
   if (typeName === 'tokenization.MsgTransferTokens') return MessageType.MsgTransferTokens;
