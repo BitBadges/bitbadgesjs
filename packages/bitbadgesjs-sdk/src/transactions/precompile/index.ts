@@ -23,19 +23,35 @@ export {
   convertMessageToPrecompileCall,
   convertMessagesToExecuteMultiple,
   areAllTokenizationMessages,
+  isGammMessage,
+  isStakingMessage,
+  isDistributionMessage,
   TOKENIZATION_PRECOMPILE_ADDRESS,
   BANK_PRECOMPILE_ADDRESS,
   SENDMANAGER_PRECOMPILE_ADDRESS,
   GAMM_PRECOMPILE_ADDRESS,
+  STAKING_PRECOMPILE_ADDRESS,
+  DISTRIBUTION_PRECOMPILE_ADDRESS,
   PrecompileEncodingError
 } from './utils.js';
 
 export type { PrecompileCallResult } from './utils.js';
 export { PRECOMPILE_ABI, type PrecompileAbi } from './abi.js';
+export { stakingPrecompileAbiData, distributionPrecompileAbiData } from './abi-data.js';
 
-export type { PrecompileFunctionParams } from './data-converter.js';
+export type { PrecompileFunctionParams, StakingPrecompileParams, DistributionPrecompileParams } from './data-converter.js';
 export { PrecompileFunction, mapMessageToFunction } from './function-mapper.js';
-export { MessageType, detectMessageType, type SupportedSdkMessage } from './type-detector.js';
+export {
+  MessageType,
+  detectMessageType,
+  type SupportedSdkMessage,
+  isMsgDelegate,
+  isMsgUndelegate,
+  isMsgBeginRedelegate,
+  isMsgCancelUnbondingDelegation,
+  isMsgWithdrawDelegatorReward,
+  isMsgClaimRewards
+} from './type-detector.js';
 export {
   evmToCosmosAddress,
   cosmosToEvmAddress,

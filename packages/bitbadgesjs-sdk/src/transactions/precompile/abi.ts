@@ -41,6 +41,26 @@ export const SENDMANAGER_PRECOMPILE_ADDRESS = '0x0000000000000000000000000000000
 export const GAMM_PRECOMPILE_ADDRESS = '0x0000000000000000000000000000000000001002';
 
 /**
+ * Staking precompile contract address (Cosmos EVM default)
+ * Enables staking operations (delegate, undelegate, redelegate) from EVM
+ * Address: 0x0000000000000000000000000000000000000800
+ * Note: Uses typed ABI parameters (not JSON string encoding)
+ *       delegatorAddress must equal msg.sender (enforced by precompile)
+ *       validatorAddress can be either Ethereum hex or Cosmos bech32 format
+ *       Amounts are in abadge (18 decimals via precisebank)
+ */
+export const STAKING_PRECOMPILE_ADDRESS = '0x0000000000000000000000000000000000000800';
+
+/**
+ * Distribution precompile contract address (Cosmos EVM default)
+ * Enables reward claiming and withdrawal operations from EVM
+ * Address: 0x0000000000000000000000000000000000000801
+ * Note: Uses typed ABI parameters (not JSON string encoding)
+ *       delegatorAddress must equal msg.sender (enforced by precompile)
+ */
+export const DISTRIBUTION_PRECOMPILE_ADDRESS = '0x0000000000000000000000000000000000000801';
+
+/**
  * Precompile ABI (Application Binary Interface)
  *
  * This ABI defines all available functions on the tokenization precompile.

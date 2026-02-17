@@ -73,7 +73,15 @@ export enum MessageType {
   MsgJoinPool = 'MsgJoinPool',
   MsgExitPool = 'MsgExitPool',
   MsgSwapExactAmountIn = 'MsgSwapExactAmountIn',
-  MsgSwapExactAmountInWithIBCTransfer = 'MsgSwapExactAmountInWithIBCTransfer'
+  MsgSwapExactAmountInWithIBCTransfer = 'MsgSwapExactAmountInWithIBCTransfer',
+  // Staking messages (use typed ABI parameters, not JSON string encoding)
+  MsgDelegate = 'MsgDelegate',
+  MsgUndelegate = 'MsgUndelegate',
+  MsgBeginRedelegate = 'MsgBeginRedelegate',
+  MsgCancelUnbondingDelegation = 'MsgCancelUnbondingDelegation',
+  // Distribution messages (use typed ABI parameters, not JSON string encoding)
+  MsgWithdrawDelegatorReward = 'MsgWithdrawDelegatorReward',
+  MsgClaimRewards = 'MsgClaimRewards'
 }
 
 /**
@@ -158,6 +166,15 @@ function detectMessageTypeFromProto(typeName: string): MessageType | null {
   // Cosmos messages
   if (typeName === 'cosmos.bank.v1beta1.MsgSend') return MessageType.MsgSend;
 
+  // Staking messages
+  if (typeName === 'cosmos.staking.v1beta1.MsgDelegate') return MessageType.MsgDelegate;
+  if (typeName === 'cosmos.staking.v1beta1.MsgUndelegate') return MessageType.MsgUndelegate;
+  if (typeName === 'cosmos.staking.v1beta1.MsgBeginRedelegate') return MessageType.MsgBeginRedelegate;
+  if (typeName === 'cosmos.staking.v1beta1.MsgCancelUnbondingDelegation') return MessageType.MsgCancelUnbondingDelegation;
+
+  // Distribution messages
+  if (typeName === 'cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward') return MessageType.MsgWithdrawDelegatorReward;
+
   return null;
 }
 
@@ -212,6 +229,14 @@ export function detectMessageType(message: SupportedSdkMessage | any): MessageTy
   if (isMsgExitPool(message)) return MessageType.MsgExitPool;
   if (isMsgSwapExactAmountIn(message)) return MessageType.MsgSwapExactAmountIn;
   if (isMsgSwapExactAmountInWithIBCTransfer(message)) return MessageType.MsgSwapExactAmountInWithIBCTransfer;
+  // Staking messages
+  if (isMsgDelegate(message)) return MessageType.MsgDelegate;
+  if (isMsgUndelegate(message)) return MessageType.MsgUndelegate;
+  if (isMsgBeginRedelegate(message)) return MessageType.MsgBeginRedelegate;
+  if (isMsgCancelUnbondingDelegation(message)) return MessageType.MsgCancelUnbondingDelegation;
+  // Distribution messages
+  if (isMsgWithdrawDelegatorReward(message)) return MessageType.MsgWithdrawDelegatorReward;
+  if (isMsgClaimRewards(message)) return MessageType.MsgClaimRewards;
 
   const messageName = (message && typeof message === 'object' && 'constructor' in message)
     ? (message as { constructor?: { name?: string } }).constructor?.name || 'unknown'
@@ -282,4 +307,52 @@ export function isMsgSend(message: unknown): message is { constructor: { name: '
   if (!message || typeof message !== 'object') return false;
   const msg = message as { constructor?: { name?: string }; toJson?: unknown };
   return msg.constructor?.name === 'MsgSend' && typeof msg.toJson === 'function';
+}
+
+// Staking message type guards
+export function isMsgDelegate(message: unknown): boolean {
+  if (!message || typeof message !== 'object') return false;
+  const msg = message as { constructor?: { name?: string }; toJson?: unknown; delegatorAddress?: unknown; validatorAddress?: unknown };
+  return (
+    (msg.constructor?.name === 'MsgDelegate' && typeof msg.toJson === 'function') ||
+    ('delegatorAddress' in msg && 'validatorAddress' in msg && 'amount' in msg && !('validatorSrcAddress' in msg))
+  );
+}
+
+export function isMsgUndelegate(message: unknown): boolean {
+  if (!message || typeof message !== 'object') return false;
+  const msg = message as { constructor?: { name?: string }; toJson?: unknown };
+  return msg.constructor?.name === 'MsgUndelegate' && typeof msg.toJson === 'function';
+}
+
+export function isMsgBeginRedelegate(message: unknown): boolean {
+  if (!message || typeof message !== 'object') return false;
+  const msg = message as { constructor?: { name?: string }; toJson?: unknown; validatorSrcAddress?: unknown };
+  return (
+    (msg.constructor?.name === 'MsgBeginRedelegate' && typeof msg.toJson === 'function') ||
+    ('validatorSrcAddress' in msg && 'validatorDstAddress' in msg)
+  );
+}
+
+export function isMsgCancelUnbondingDelegation(message: unknown): boolean {
+  if (!message || typeof message !== 'object') return false;
+  const msg = message as { constructor?: { name?: string }; toJson?: unknown; creationHeight?: unknown };
+  return (
+    (msg.constructor?.name === 'MsgCancelUnbondingDelegation' && typeof msg.toJson === 'function') ||
+    ('creationHeight' in msg && 'delegatorAddress' in msg && 'validatorAddress' in msg)
+  );
+}
+
+// Distribution message type guards
+export function isMsgWithdrawDelegatorReward(message: unknown): boolean {
+  if (!message || typeof message !== 'object') return false;
+  const msg = message as { constructor?: { name?: string }; toJson?: unknown };
+  return msg.constructor?.name === 'MsgWithdrawDelegatorReward' && typeof msg.toJson === 'function';
+}
+
+export function isMsgClaimRewards(message: unknown): boolean {
+  if (!message || typeof message !== 'object') return false;
+  const msg = message as { maxRetrieve?: unknown };
+  // MsgClaimRewards is a custom type for the claimRewards precompile function
+  return 'maxRetrieve' in msg && 'delegatorAddress' in msg;
 }

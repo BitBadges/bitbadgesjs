@@ -40,7 +40,15 @@ export enum PrecompileFunction {
   JoinPool = 'joinPool',
   ExitPool = 'exitPool',
   SwapExactAmountIn = 'swapExactAmountIn',
-  SwapExactAmountInWithIBCTransfer = 'swapExactAmountInWithIBCTransfer'
+  SwapExactAmountInWithIBCTransfer = 'swapExactAmountInWithIBCTransfer',
+  // Staking precompile functions (use typed ABI parameters)
+  Delegate = 'delegate',
+  Undelegate = 'undelegate',
+  Redelegate = 'redelegate',
+  CancelUnbondingDelegation = 'cancelUnbondingDelegation',
+  // Distribution precompile functions (use typed ABI parameters)
+  WithdrawDelegatorRewards = 'withdrawDelegatorRewards',
+  ClaimRewards = 'claimRewards'
 }
 
 /**
@@ -77,7 +85,15 @@ const MESSAGE_TO_FUNCTION_MAP: Record<MessageType, PrecompileFunction> = {
   [MessageType.MsgJoinPool]: PrecompileFunction.JoinPool,
   [MessageType.MsgExitPool]: PrecompileFunction.ExitPool,
   [MessageType.MsgSwapExactAmountIn]: PrecompileFunction.SwapExactAmountIn,
-  [MessageType.MsgSwapExactAmountInWithIBCTransfer]: PrecompileFunction.SwapExactAmountInWithIBCTransfer
+  [MessageType.MsgSwapExactAmountInWithIBCTransfer]: PrecompileFunction.SwapExactAmountInWithIBCTransfer,
+  // Staking messages
+  [MessageType.MsgDelegate]: PrecompileFunction.Delegate,
+  [MessageType.MsgUndelegate]: PrecompileFunction.Undelegate,
+  [MessageType.MsgBeginRedelegate]: PrecompileFunction.Redelegate,
+  [MessageType.MsgCancelUnbondingDelegation]: PrecompileFunction.CancelUnbondingDelegation,
+  // Distribution messages
+  [MessageType.MsgWithdrawDelegatorReward]: PrecompileFunction.WithdrawDelegatorRewards,
+  [MessageType.MsgClaimRewards]: PrecompileFunction.ClaimRewards
 };
 
 /**

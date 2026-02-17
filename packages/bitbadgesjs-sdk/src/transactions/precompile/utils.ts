@@ -6,7 +6,14 @@
  */
 
 import { ethers } from 'ethers';
-import { TOKENIZATION_PRECOMPILE_ADDRESS, BANK_PRECOMPILE_ADDRESS, SENDMANAGER_PRECOMPILE_ADDRESS, GAMM_PRECOMPILE_ADDRESS } from './abi.js';
+import {
+  TOKENIZATION_PRECOMPILE_ADDRESS,
+  BANK_PRECOMPILE_ADDRESS,
+  SENDMANAGER_PRECOMPILE_ADDRESS,
+  GAMM_PRECOMPILE_ADDRESS,
+  STAKING_PRECOMPILE_ADDRESS,
+  DISTRIBUTION_PRECOMPILE_ADDRESS
+} from './abi.js';
 import { validateEvmAddress, validateMessage } from './helpers.js';
 import {
   convertCastVote,
@@ -40,14 +47,29 @@ import {
   convertMsgExitPool,
   convertMsgSwapExactAmountIn,
   convertMsgSwapExactAmountInWithIBCTransfer,
-  PrecompileFunctionParams
+  convertMsgDelegate,
+  convertMsgUndelegate,
+  convertMsgBeginRedelegate,
+  convertMsgCancelUnbondingDelegation,
+  convertMsgWithdrawDelegatorReward,
+  convertMsgClaimRewards,
+  PrecompileFunctionParams,
+  StakingPrecompileParams,
+  DistributionPrecompileParams
 } from './data-converter.js';
 import { mapMessageToFunction } from './function-mapper.js';
 import type { SupportedSdkMessage } from './type-detector.js';
 import { detectMessageType, MessageType } from './type-detector.js';
 
 // Re-export for convenience
-export { TOKENIZATION_PRECOMPILE_ADDRESS, BANK_PRECOMPILE_ADDRESS, SENDMANAGER_PRECOMPILE_ADDRESS, GAMM_PRECOMPILE_ADDRESS };
+export {
+  TOKENIZATION_PRECOMPILE_ADDRESS,
+  BANK_PRECOMPILE_ADDRESS,
+  SENDMANAGER_PRECOMPILE_ADDRESS,
+  GAMM_PRECOMPILE_ADDRESS,
+  STAKING_PRECOMPILE_ADDRESS,
+  DISTRIBUTION_PRECOMPILE_ADDRESS
+};
 
 /**
  * Set of Gamm message types that use the Gamm precompile (0x1002)
@@ -61,6 +83,26 @@ const GAMM_MESSAGE_TYPES = new Set<MessageType>([
 ]);
 
 /**
+ * Set of Staking message types that use the Staking precompile (0x800)
+ * These use typed ABI parameters, not JSON string encoding
+ */
+const STAKING_MESSAGE_TYPES = new Set<MessageType>([
+  MessageType.MsgDelegate,
+  MessageType.MsgUndelegate,
+  MessageType.MsgBeginRedelegate,
+  MessageType.MsgCancelUnbondingDelegation
+]);
+
+/**
+ * Set of Distribution message types that use the Distribution precompile (0x801)
+ * These use typed ABI parameters, not JSON string encoding
+ */
+const DISTRIBUTION_MESSAGE_TYPES = new Set<MessageType>([
+  MessageType.MsgWithdrawDelegatorReward,
+  MessageType.MsgClaimRewards
+]);
+
+/**
  * Check if a message type is a Gamm message (uses Gamm precompile)
  *
  * @param messageType - The message type to check
@@ -68,6 +110,26 @@ const GAMM_MESSAGE_TYPES = new Set<MessageType>([
  */
 export function isGammMessage(messageType: MessageType): boolean {
   return GAMM_MESSAGE_TYPES.has(messageType);
+}
+
+/**
+ * Check if a message type is a Staking message (uses Staking precompile)
+ *
+ * @param messageType - The message type to check
+ * @returns true if the message type is a Staking message
+ */
+export function isStakingMessage(messageType: MessageType): boolean {
+  return STAKING_MESSAGE_TYPES.has(messageType);
+}
+
+/**
+ * Check if a message type is a Distribution message (uses Distribution precompile)
+ *
+ * @param messageType - The message type to check
+ * @returns true if the message type is a Distribution message
+ */
+export function isDistributionMessage(messageType: MessageType): boolean {
+  return DISTRIBUTION_MESSAGE_TYPES.has(messageType);
 }
 
 /**
@@ -148,6 +210,18 @@ export function convertMessageToPrecompileCall(
     // This precompile uses JSON string encoding (same pattern as tokenization precompile)
     precompileAddress = GAMM_PRECOMPILE_ADDRESS;
     functionName = mapMessageToFunction(messageType);
+  } else if (isStakingMessage(messageType)) {
+    // Use Staking precompile for staking messages
+    // This precompile uses typed ABI parameters (NOT JSON string encoding)
+    precompileAddress = STAKING_PRECOMPILE_ADDRESS;
+    functionName = mapMessageToFunction(messageType);
+    return encodeStakingPrecompileCall(messageType, message, evmAddress, precompileAddress, functionName);
+  } else if (isDistributionMessage(messageType)) {
+    // Use Distribution precompile for distribution messages
+    // This precompile uses typed ABI parameters (NOT JSON string encoding)
+    precompileAddress = DISTRIBUTION_PRECOMPILE_ADDRESS;
+    functionName = mapMessageToFunction(messageType);
+    return encodeDistributionPrecompileCall(messageType, message, evmAddress, precompileAddress, functionName);
   } else {
     // Tokenization precompile uses JSON string encoding
     precompileAddress = TOKENIZATION_PRECOMPILE_ADDRESS;
@@ -179,6 +253,108 @@ export function convertMessageToPrecompileCall(
 }
 
 /**
+ * Encode a staking precompile call with typed ABI parameters
+ */
+function encodeStakingPrecompileCall(
+  messageType: MessageType,
+  message: any,
+  evmAddress: string | undefined,
+  precompileAddress: string,
+  functionName: string
+): PrecompileCallResult {
+  let params: StakingPrecompileParams;
+  let functionSignature: string;
+  let args: any[];
+
+  switch (messageType) {
+    case MessageType.MsgDelegate:
+      params = convertMsgDelegate(message, evmAddress);
+      functionSignature = 'function delegate(address delegatorAddress, string validatorAddress, uint256 amount)';
+      args = [params.delegatorAddress, params.validatorAddress, params.amount];
+      break;
+    case MessageType.MsgUndelegate:
+      params = convertMsgUndelegate(message, evmAddress);
+      functionSignature = 'function undelegate(address delegatorAddress, string validatorAddress, uint256 amount)';
+      args = [params.delegatorAddress, params.validatorAddress, params.amount];
+      break;
+    case MessageType.MsgBeginRedelegate:
+      params = convertMsgBeginRedelegate(message, evmAddress);
+      functionSignature =
+        'function redelegate(address delegatorAddress, string validatorSrcAddress, string validatorDstAddress, uint256 amount)';
+      args = [params.delegatorAddress, params.validatorSrcAddress!, params.validatorDstAddress!, params.amount];
+      break;
+    case MessageType.MsgCancelUnbondingDelegation:
+      params = convertMsgCancelUnbondingDelegation(message, evmAddress);
+      functionSignature =
+        'function cancelUnbondingDelegation(address delegatorAddress, string validatorAddress, uint256 amount, int64 creationHeight)';
+      args = [params.delegatorAddress, params.validatorAddress, params.amount, params.creationHeight!];
+      break;
+    default:
+      throw new Error(`Unsupported staking message type: ${messageType}`);
+  }
+
+  try {
+    const iface = new ethers.Interface([functionSignature]);
+    const data = iface.encodeFunctionData(functionName, args);
+
+    return {
+      functionName,
+      data,
+      jsonMsg: JSON.stringify(params), // For debugging
+      precompileAddress
+    };
+  } catch (error: any) {
+    const errorMessage = error instanceof Error ? error : new Error(String(error));
+    throw new PrecompileEncodingError(functionName, errorMessage, JSON.stringify(params).substring(0, 200));
+  }
+}
+
+/**
+ * Encode a distribution precompile call with typed ABI parameters
+ */
+function encodeDistributionPrecompileCall(
+  messageType: MessageType,
+  message: any,
+  evmAddress: string | undefined,
+  precompileAddress: string,
+  functionName: string
+): PrecompileCallResult {
+  let params: DistributionPrecompileParams;
+  let functionSignature: string;
+  let args: any[];
+
+  switch (messageType) {
+    case MessageType.MsgWithdrawDelegatorReward:
+      params = convertMsgWithdrawDelegatorReward(message, evmAddress);
+      functionSignature = 'function withdrawDelegatorRewards(address delegatorAddress, string validatorAddress)';
+      args = [params.delegatorAddress, params.validatorAddress!];
+      break;
+    case MessageType.MsgClaimRewards:
+      params = convertMsgClaimRewards(message, evmAddress);
+      functionSignature = 'function claimRewards(address delegatorAddress, uint32 maxRetrieve)';
+      args = [params.delegatorAddress, params.maxRetrieve!];
+      break;
+    default:
+      throw new Error(`Unsupported distribution message type: ${messageType}`);
+  }
+
+  try {
+    const iface = new ethers.Interface([functionSignature]);
+    const data = iface.encodeFunctionData(functionName, args);
+
+    return {
+      functionName,
+      data,
+      jsonMsg: JSON.stringify(params), // For debugging
+      precompileAddress
+    };
+  } catch (error: any) {
+    const errorMessage = error instanceof Error ? error : new Error(String(error));
+    throw new PrecompileEncodingError(functionName, errorMessage, JSON.stringify(params).substring(0, 200));
+  }
+}
+
+/**
  * Check if all messages in an array are tokenization messages
  * Tokenization messages use TOKENIZATION_PRECOMPILE_ADDRESS (not SendManager or Gamm)
  *
@@ -194,8 +370,13 @@ export function areAllTokenizationMessages(messages: unknown[]): boolean {
     try {
       const messageType = detectMessageType(message as SupportedSdkMessage);
 
-      // Check if message uses tokenization precompile (not SendManager or Gamm)
-      if (messageType === MessageType.MsgSend || isGammMessage(messageType)) {
+      // Check if message uses tokenization precompile (not SendManager, Gamm, Staking, or Distribution)
+      if (
+        messageType === MessageType.MsgSend ||
+        isGammMessage(messageType) ||
+        isStakingMessage(messageType) ||
+        isDistributionMessage(messageType)
+      ) {
         return false;
       }
     } catch {

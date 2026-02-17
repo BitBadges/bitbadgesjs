@@ -664,7 +664,180 @@ export function convertMsgSwapExactAmountInWithIBCTransfer(
       memo: ibcInfo.memo || ''
     };
   }
-  
+
   return result;
+}
+
+// ============================================================================
+// Staking Precompile Converter Functions
+// ============================================================================
+
+/**
+ * Parameters for staking precompile typed ABI calls
+ * These are NOT JSON-encoded - they are passed as typed parameters
+ */
+export interface StakingPrecompileParams {
+  delegatorAddress: string;
+  validatorAddress: string;
+  amount: bigint;
+  // For redelegate
+  validatorSrcAddress?: string;
+  validatorDstAddress?: string;
+  // For cancelUnbondingDelegation
+  creationHeight?: bigint;
+}
+
+/**
+ * Parameters for distribution precompile typed ABI calls
+ */
+export interface DistributionPrecompileParams {
+  delegatorAddress: string;
+  validatorAddress?: string;
+  maxRetrieve?: number;
+}
+
+/**
+ * Convert MsgDelegate to staking precompile parameters
+ * Note: The staking precompile uses typed ABI parameters (not JSON string)
+ * Amount should be in abadge (18 decimals via precisebank)
+ */
+export function convertMsgDelegate(msg: any, evmAddress?: string): StakingPrecompileParams {
+  let msgObj: any;
+
+  if (typeof msg.toJson === 'function') {
+    msgObj = msg.toJson();
+  } else if (typeof msg.toProto === 'function') {
+    msgObj = msg.toProto().toJson();
+  } else {
+    msgObj = msg;
+  }
+
+  // Get amount - convert from ubadge (9 decimals) to abadge (18 decimals) if needed
+  const amountStr = msgObj.amount?.amount || msgObj.amount || '0';
+  const amount = BigInt(amountStr);
+
+  return {
+    delegatorAddress: evmAddress || msgObj.delegatorAddress || msgObj.delegator_address || '',
+    validatorAddress: msgObj.validatorAddress || msgObj.validator_address || '',
+    amount
+  };
+}
+
+/**
+ * Convert MsgUndelegate to staking precompile parameters
+ */
+export function convertMsgUndelegate(msg: any, evmAddress?: string): StakingPrecompileParams {
+  let msgObj: any;
+
+  if (typeof msg.toJson === 'function') {
+    msgObj = msg.toJson();
+  } else if (typeof msg.toProto === 'function') {
+    msgObj = msg.toProto().toJson();
+  } else {
+    msgObj = msg;
+  }
+
+  const amountStr = msgObj.amount?.amount || msgObj.amount || '0';
+  const amount = BigInt(amountStr);
+
+  return {
+    delegatorAddress: evmAddress || msgObj.delegatorAddress || msgObj.delegator_address || '',
+    validatorAddress: msgObj.validatorAddress || msgObj.validator_address || '',
+    amount
+  };
+}
+
+/**
+ * Convert MsgBeginRedelegate to staking precompile parameters
+ */
+export function convertMsgBeginRedelegate(msg: any, evmAddress?: string): StakingPrecompileParams {
+  let msgObj: any;
+
+  if (typeof msg.toJson === 'function') {
+    msgObj = msg.toJson();
+  } else if (typeof msg.toProto === 'function') {
+    msgObj = msg.toProto().toJson();
+  } else {
+    msgObj = msg;
+  }
+
+  const amountStr = msgObj.amount?.amount || msgObj.amount || '0';
+  const amount = BigInt(amountStr);
+
+  return {
+    delegatorAddress: evmAddress || msgObj.delegatorAddress || msgObj.delegator_address || '',
+    validatorAddress: '', // Not used for redelegate
+    validatorSrcAddress: msgObj.validatorSrcAddress || msgObj.validator_src_address || '',
+    validatorDstAddress: msgObj.validatorDstAddress || msgObj.validator_dst_address || '',
+    amount
+  };
+}
+
+/**
+ * Convert MsgCancelUnbondingDelegation to staking precompile parameters
+ */
+export function convertMsgCancelUnbondingDelegation(msg: any, evmAddress?: string): StakingPrecompileParams {
+  let msgObj: any;
+
+  if (typeof msg.toJson === 'function') {
+    msgObj = msg.toJson();
+  } else if (typeof msg.toProto === 'function') {
+    msgObj = msg.toProto().toJson();
+  } else {
+    msgObj = msg;
+  }
+
+  const amountStr = msgObj.amount?.amount || msgObj.amount || '0';
+  const amount = BigInt(amountStr);
+  const creationHeight = BigInt(msgObj.creationHeight || msgObj.creation_height || '0');
+
+  return {
+    delegatorAddress: evmAddress || msgObj.delegatorAddress || msgObj.delegator_address || '',
+    validatorAddress: msgObj.validatorAddress || msgObj.validator_address || '',
+    amount,
+    creationHeight
+  };
+}
+
+/**
+ * Convert MsgWithdrawDelegatorReward to distribution precompile parameters
+ */
+export function convertMsgWithdrawDelegatorReward(msg: any, evmAddress?: string): DistributionPrecompileParams {
+  let msgObj: any;
+
+  if (typeof msg.toJson === 'function') {
+    msgObj = msg.toJson();
+  } else if (typeof msg.toProto === 'function') {
+    msgObj = msg.toProto().toJson();
+  } else {
+    msgObj = msg;
+  }
+
+  return {
+    delegatorAddress: evmAddress || msgObj.delegatorAddress || msgObj.delegator_address || '',
+    validatorAddress: msgObj.validatorAddress || msgObj.validator_address || ''
+  };
+}
+
+/**
+ * Convert MsgClaimRewards to distribution precompile parameters
+ * Note: This is a custom message type for the claimRewards convenience function
+ * which claims rewards from multiple validators at once
+ */
+export function convertMsgClaimRewards(msg: any, evmAddress?: string): DistributionPrecompileParams {
+  let msgObj: any;
+
+  if (typeof msg.toJson === 'function') {
+    msgObj = msg.toJson();
+  } else if (typeof msg.toProto === 'function') {
+    msgObj = msg.toProto().toJson();
+  } else {
+    msgObj = msg;
+  }
+
+  return {
+    delegatorAddress: evmAddress || msgObj.delegatorAddress || msgObj.delegator_address || '',
+    maxRetrieve: msgObj.maxRetrieve || msgObj.max_retrieve || 10 // Default to 10 validators
+  };
 }
 

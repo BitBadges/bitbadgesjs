@@ -821,3 +821,222 @@ export const precompileAbiData = {
   ]
 } as const;
 
+/**
+ * Staking precompile ABI data (Cosmos EVM default at 0x800)
+ * These functions use typed ABI parameters (not JSON string encoding)
+ *
+ * Note: delegatorAddress must equal msg.sender (enforced by precompile)
+ * Note: validatorAddress can be either Ethereum hex or Cosmos bech32 format
+ * Note: Amounts are in abadge (18 decimals via precisebank)
+ */
+export const stakingPrecompileAbiData = {
+  _format: 'hh-sol-artifact-1',
+  contractName: 'IStakingPrecompile',
+  sourceName: 'cosmos/evm/precompiles/staking/StakingI.sol',
+  abi: [
+    {
+      inputs: [
+        { internalType: 'address', name: 'delegatorAddress', type: 'address' },
+        { internalType: 'string', name: 'validatorAddress', type: 'string' },
+        { internalType: 'uint256', name: 'amount', type: 'uint256' }
+      ],
+      name: 'delegate',
+      outputs: [{ internalType: 'bool', name: 'success', type: 'bool' }],
+      stateMutability: 'nonpayable',
+      type: 'function'
+    },
+    {
+      inputs: [
+        { internalType: 'address', name: 'delegatorAddress', type: 'address' },
+        { internalType: 'string', name: 'validatorAddress', type: 'string' },
+        { internalType: 'uint256', name: 'amount', type: 'uint256' }
+      ],
+      name: 'undelegate',
+      outputs: [{ internalType: 'int64', name: 'completionTime', type: 'int64' }],
+      stateMutability: 'nonpayable',
+      type: 'function'
+    },
+    {
+      inputs: [
+        { internalType: 'address', name: 'delegatorAddress', type: 'address' },
+        { internalType: 'string', name: 'validatorSrcAddress', type: 'string' },
+        { internalType: 'string', name: 'validatorDstAddress', type: 'string' },
+        { internalType: 'uint256', name: 'amount', type: 'uint256' }
+      ],
+      name: 'redelegate',
+      outputs: [{ internalType: 'int64', name: 'completionTime', type: 'int64' }],
+      stateMutability: 'nonpayable',
+      type: 'function'
+    },
+    {
+      inputs: [
+        { internalType: 'address', name: 'delegatorAddress', type: 'address' },
+        { internalType: 'string', name: 'validatorAddress', type: 'string' },
+        { internalType: 'uint256', name: 'amount', type: 'uint256' },
+        { internalType: 'int64', name: 'creationHeight', type: 'int64' }
+      ],
+      name: 'cancelUnbondingDelegation',
+      outputs: [{ internalType: 'bool', name: 'success', type: 'bool' }],
+      stateMutability: 'nonpayable',
+      type: 'function'
+    },
+    // Query functions (view)
+    {
+      inputs: [
+        { internalType: 'address', name: 'delegatorAddress', type: 'address' },
+        { internalType: 'string', name: 'validatorAddress', type: 'string' }
+      ],
+      name: 'delegation',
+      outputs: [
+        { internalType: 'uint256', name: 'shares', type: 'uint256' },
+        {
+          internalType: 'tuple',
+          name: 'balance',
+          type: 'tuple',
+          components: [
+            { internalType: 'string', name: 'denom', type: 'string' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' }
+          ]
+        }
+      ],
+      stateMutability: 'view',
+      type: 'function'
+    },
+    {
+      inputs: [{ internalType: 'string', name: 'validatorAddress', type: 'string' }],
+      name: 'validator',
+      outputs: [
+        {
+          internalType: 'tuple',
+          name: 'validator',
+          type: 'tuple',
+          components: [
+            { internalType: 'string', name: 'operatorAddress', type: 'string' },
+            { internalType: 'string', name: 'consensusPubkey', type: 'string' },
+            { internalType: 'bool', name: 'jailed', type: 'bool' },
+            { internalType: 'uint8', name: 'status', type: 'uint8' },
+            { internalType: 'uint256', name: 'tokens', type: 'uint256' },
+            { internalType: 'uint256', name: 'delegatorShares', type: 'uint256' },
+            { internalType: 'string', name: 'description', type: 'string' },
+            { internalType: 'int64', name: 'unbondingHeight', type: 'int64' },
+            { internalType: 'int64', name: 'unbondingTime', type: 'int64' },
+            { internalType: 'uint256', name: 'commission', type: 'uint256' },
+            { internalType: 'uint256', name: 'minSelfDelegation', type: 'uint256' }
+          ]
+        }
+      ],
+      stateMutability: 'view',
+      type: 'function'
+    }
+  ]
+} as const;
+
+/**
+ * Distribution precompile ABI data (Cosmos EVM default at 0x801)
+ * These functions use typed ABI parameters (not JSON string encoding)
+ *
+ * Note: delegatorAddress must equal msg.sender (enforced by precompile)
+ */
+export const distributionPrecompileAbiData = {
+  _format: 'hh-sol-artifact-1',
+  contractName: 'IDistributionPrecompile',
+  sourceName: 'cosmos/evm/precompiles/distribution/DistributionI.sol',
+  abi: [
+    {
+      inputs: [
+        { internalType: 'address', name: 'delegatorAddress', type: 'address' },
+        { internalType: 'uint32', name: 'maxRetrieve', type: 'uint32' }
+      ],
+      name: 'claimRewards',
+      outputs: [{ internalType: 'bool', name: 'success', type: 'bool' }],
+      stateMutability: 'nonpayable',
+      type: 'function'
+    },
+    {
+      inputs: [
+        { internalType: 'address', name: 'delegatorAddress', type: 'address' },
+        { internalType: 'string', name: 'validatorAddress', type: 'string' }
+      ],
+      name: 'withdrawDelegatorRewards',
+      outputs: [
+        {
+          internalType: 'tuple[]',
+          name: 'amount',
+          type: 'tuple[]',
+          components: [
+            { internalType: 'string', name: 'denom', type: 'string' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' }
+          ]
+        }
+      ],
+      stateMutability: 'nonpayable',
+      type: 'function'
+    },
+    {
+      inputs: [
+        { internalType: 'address', name: 'delegatorAddress', type: 'address' },
+        { internalType: 'string', name: 'withdrawerAddress', type: 'string' }
+      ],
+      name: 'setWithdrawAddress',
+      outputs: [{ internalType: 'bool', name: 'success', type: 'bool' }],
+      stateMutability: 'nonpayable',
+      type: 'function'
+    },
+    // Query functions (view)
+    {
+      inputs: [
+        { internalType: 'address', name: 'delegatorAddress', type: 'address' },
+        { internalType: 'string', name: 'validatorAddress', type: 'string' }
+      ],
+      name: 'delegationRewards',
+      outputs: [
+        {
+          internalType: 'tuple[]',
+          name: 'rewards',
+          type: 'tuple[]',
+          components: [
+            { internalType: 'string', name: 'denom', type: 'string' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' }
+          ]
+        }
+      ],
+      stateMutability: 'view',
+      type: 'function'
+    },
+    {
+      inputs: [{ internalType: 'address', name: 'delegatorAddress', type: 'address' }],
+      name: 'delegationTotalRewards',
+      outputs: [
+        {
+          internalType: 'tuple[]',
+          name: 'rewards',
+          type: 'tuple[]',
+          components: [
+            { internalType: 'string', name: 'validatorAddress', type: 'string' },
+            {
+              internalType: 'tuple[]',
+              name: 'reward',
+              type: 'tuple[]',
+              components: [
+                { internalType: 'string', name: 'denom', type: 'string' },
+                { internalType: 'uint256', name: 'amount', type: 'uint256' }
+              ]
+            }
+          ]
+        },
+        {
+          internalType: 'tuple[]',
+          name: 'total',
+          type: 'tuple[]',
+          components: [
+            { internalType: 'string', name: 'denom', type: 'string' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' }
+          ]
+        }
+      ],
+      stateMutability: 'view',
+      type: 'function'
+    }
+  ]
+} as const;
+
