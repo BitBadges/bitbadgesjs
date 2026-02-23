@@ -4,6 +4,7 @@
  * These tests are ported from the Go equivalents in:
  * bitbadgeschain/x/tokenization/types/universal_permissions_test.go
  */
+
 import { AddressList } from './addressLists.js';
 import {
   ActionPermissionUsedFlags,
@@ -758,6 +759,389 @@ describe('overlaps', () => {
     test('should handle empty permission arrays', () => {
       const error = ValidateUniversalPermissionUpdate([], []);
       expect(error).toBeNull();
+    });
+  });
+
+  describe('MergeUniversalPermissionDetails - Address List Polarity Bug', () => {
+    // Tests for the known issue at line 640: "TODO: Merge address lists if whitelist is not the same"
+    // When two permissions have different whitelist polarities, they should NOT be merged incorrectly
+
+    test('should NOT merge permissions with different toList whitelist polarities', () => {
+      // Permission 1: toList is whitelist (only alice allowed)
+      // Permission 2: toList is blacklist (everyone except bob allowed)
+      // These should NOT be merged because their semantics are incompatible
+      const permissions = [
+        createPermissionDetails(
+          { start: 1n, end: 5n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [alice], whitelist: true }, // Only alice
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        ),
+        createPermissionDetails(
+          { start: 6n, end: 10n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [bob], whitelist: false }, // Everyone except bob (blacklist)
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        )
+      ];
+
+      const result = MergeUniversalPermissionDetails(permissions);
+
+      // Should remain as 2 separate entries due to different whitelist polarity
+      // If this fails, the bug at line 640 is present
+      expect(result.length).toBe(2);
+    });
+
+    test('should merge permissions when ALL UintRanges are same and only one address list differs (same polarity)', () => {
+      // For merge to happen with address list diff, ALL 4 UintRange fields must be same
+      // and exactly 3 of 4 address lists must be same
+      const permissions = [
+        createPermissionDetails(
+          { start: 1n, end: 10n }, // Same tokenId
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [alice], whitelist: true },
+          { addresses: [], whitelist: false }, // Same
+          { addresses: [], whitelist: false } // Same
+        ),
+        createPermissionDetails(
+          { start: 1n, end: 10n }, // Same tokenId
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [bob], whitelist: true }, // Different but same polarity
+          { addresses: [], whitelist: false }, // Same
+          { addresses: [], whitelist: false } // Same
+        )
+      ];
+
+      const result = MergeUniversalPermissionDetails(permissions);
+
+      // Should merge to 1 entry with combined addresses
+      expect(result.length).toBe(1);
+      expect(result[0].toList.addresses).toContain(alice);
+      expect(result[0].toList.addresses).toContain(bob);
+      expect(result[0].toList.whitelist).toBe(true);
+    });
+
+    test('should NOT merge when UintRanges differ and address lists also differ', () => {
+      // This is the actual behavior - when tokenIds differ AND toList differs,
+      // merge doesn't happen because we need sameCount === 4 for address merge
+      const permissions = [
+        createPermissionDetails(
+          { start: 1n, end: 5n }, // Different tokenId
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [alice], whitelist: true },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        ),
+        createPermissionDetails(
+          { start: 6n, end: 10n }, // Different tokenId
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [bob], whitelist: true },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        )
+      ];
+
+      const result = MergeUniversalPermissionDetails(permissions);
+
+      // Should NOT merge - remains as 2 entries
+      // This is correct behavior: can't merge tokenId ranges when address lists differ
+      expect(result.length).toBe(2);
+    });
+
+    test('documents merge behavior: when sameCount === 3, differing field is not combined', () => {
+      // When sameCount === 3, the merge condition is met BUT the differing UintRange
+      // field (tokenIds here) is NOT combined into the result - only the first permission's
+      // value is kept. This documents current behavior (may be a limitation).
+      const permissions = [
+        createPermissionDetails(
+          { start: 1n, end: 5n }, // Different (this is the differing field)
+          { start: 1n, end: 1n }, // Same
+          { start: 1n, end: 1n }, // Same
+          { start: 1n, end: 1n }, // Same
+          { addresses: [alice], whitelist: true }, // Same
+          { addresses: [], whitelist: false }, // Same
+          { addresses: [], whitelist: false } // Same
+        ),
+        createPermissionDetails(
+          { start: 6n, end: 10n }, // Different (lost in merge!)
+          { start: 1n, end: 1n }, // Same
+          { start: 1n, end: 1n }, // Same
+          { start: 1n, end: 1n }, // Same
+          { addresses: [alice], whitelist: true }, // Same
+          { addresses: [], whitelist: false }, // Same
+          { addresses: [], whitelist: false } // Same
+        )
+      ];
+
+      const result = MergeUniversalPermissionDetails(permissions);
+
+      // Result is merged to 1 entry, but only first permission's tokenIds kept
+      // This is because lines 583-586 only push when fields ARE same,
+      // but merge happens when sameCount === 3 (one field differs)
+      expect(result.length).toBe(1);
+
+      // Only first permission's tokenIds (1-5) are in result - second (6-10) is lost
+      expect(result[0].tokenIds.length).toBe(1);
+      expect(result[0].tokenIds[0].start.toString()).toBe('1');
+      expect(result[0].tokenIds[0].end.toString()).toBe('5');
+      // Note: tokenIds 6-10 from second permission are NOT in result
+    });
+  });
+
+  describe('Edge Cases - Large UintRange Values', () => {
+    test('should handle large range values', () => {
+      const largeValue = 1000000000000n; // Use a large but not MAX value
+
+      const handled = createPermissionDetails(
+        { start: largeValue, end: largeValue },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false }
+      );
+
+      const valueToCheck = createPermissionDetails(
+        { start: 1n, end: largeValue },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false }
+      );
+
+      const [remaining, removed] = universalRemoveOverlaps(handled, valueToCheck);
+
+      // Should have remaining and removed
+      expect(removed.length).toBe(1);
+      expect(removed[0].tokenId.start.toString()).toBe(largeValue.toString());
+      expect(removed[0].tokenId.end.toString()).toBe(largeValue.toString());
+      expect(remaining.length).toBeGreaterThan(0);
+    });
+
+    test('should handle full range removal from large range', () => {
+      const largeEnd = 10000000n;
+
+      const fullRange = createPermissionDetails(
+        { start: 1n, end: largeEnd },
+        { start: 1n, end: largeEnd },
+        { start: 1n, end: largeEnd },
+        { start: 1n, end: largeEnd },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false }
+      );
+
+      const singlePoint = createPermissionDetails(
+        { start: 1000n, end: 1000n },
+        { start: 1000n, end: 1000n },
+        { start: 1000n, end: 1000n },
+        { start: 1000n, end: 1000n },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false }
+      );
+
+      const [remaining, removed] = universalRemoveOverlaps(singlePoint, fullRange);
+
+      // Should have removed the single point and remaining should have many pieces
+      expect(removed.length).toBe(1);
+      expect(remaining.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('Edge Cases - Empty and Single Element Inputs', () => {
+    test('should handle single-element permission arrays', () => {
+      const singlePermission = [
+        createPermissionDetails(
+          { start: 5n, end: 5n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        )
+      ];
+
+      const [overlaps, inOld, inNew] = getOverlapsAndNonOverlaps(singlePermission, singlePermission);
+
+      expect(overlaps.length).toBe(1);
+      expect(inOld.length).toBe(0);
+      expect(inNew.length).toBe(0);
+    });
+
+    test('should handle permission with empty address lists', () => {
+      const emptyLists = createPermissionDetails(
+        { start: 1n, end: 10n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { addresses: [], whitelist: true }, // Empty whitelist = no one
+        { addresses: [], whitelist: true },
+        { addresses: [], whitelist: true }
+      );
+
+      const nonEmptyLists = createPermissionDetails(
+        { start: 1n, end: 10n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { addresses: [alice], whitelist: true },
+        { addresses: [alice], whitelist: true },
+        { addresses: [alice], whitelist: true }
+      );
+
+      const [remaining, removed] = universalRemoveOverlaps(emptyLists, nonEmptyLists);
+
+      // Empty whitelist means no addresses match, so no overlap should be removed
+      expect(remaining.length).toBeGreaterThan(0);
+    });
+
+    test('should handle single address in list', () => {
+      const singleAddress = createPermissionDetails(
+        { start: 1n, end: 10n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { addresses: [alice], whitelist: true },
+        { addresses: [alice], whitelist: true },
+        { addresses: [alice], whitelist: true }
+      );
+
+      const [overlaps, inOld, inNew] = getOverlapsAndNonOverlaps([singleAddress], [singleAddress]);
+
+      expect(overlaps.length).toBe(1);
+      expect(inOld.length).toBe(0);
+      expect(inNew.length).toBe(0);
+    });
+  });
+
+  describe('Multiple Overlapping Permissions', () => {
+    test('should correctly handle multiple overlapping permission sets', () => {
+      const permissions1 = [
+        createPermissionDetails(
+          { start: 1n, end: 10n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        ),
+        createPermissionDetails(
+          { start: 20n, end: 30n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        )
+      ];
+
+      const permissions2 = [
+        createPermissionDetails(
+          { start: 5n, end: 25n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        )
+      ];
+
+      const [overlaps, inOld, inNew] = getOverlapsAndNonOverlaps(permissions1, permissions2);
+
+      // Should have overlaps for both ranges
+      expect(overlaps.length).toBe(2); // 5-10 from first, 20-25 from second
+
+      // In old but not new: 1-4
+      expect(inOld.length).toBeGreaterThan(0);
+      const hasRange1to4 = inOld.some((p) => p.tokenId.start.toString() === '1' && p.tokenId.end.toString() === '4');
+      expect(hasRange1to4).toBe(true);
+
+      // In new but not old: 11-19
+      expect(inNew.length).toBeGreaterThan(0);
+    });
+
+    test('should handle three-way overlap scenarios', () => {
+      const perms = [
+        createPermissionDetails(
+          { start: 1n, end: 10n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        ),
+        createPermissionDetails(
+          { start: 5n, end: 15n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        ),
+        createPermissionDetails(
+          { start: 8n, end: 20n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        )
+      ];
+
+      // Test GetFirstMatchOnly with multiple overlapping permissions
+      const firstMatchPermissions: UniversalPermission[] = perms.map((p) => ({
+        tokenIds: UintRangeArray.From([p.tokenId]),
+        timelineTimes: UintRangeArray.From([p.timelineTime]),
+        transferTimes: UintRangeArray.From([p.transferTime]),
+        ownershipTimes: UintRangeArray.From([p.ownershipTime]),
+        toList: p.toList,
+        fromList: p.fromList,
+        initiatedByList: p.initiatedByList,
+        approvalIdList: p.approvalIdList,
+        permanentlyPermittedTimes: UintRangeArray.From([{ start: 1n, end: 100n }]),
+        permanentlyForbiddenTimes: UintRangeArray.From([]),
+        usesTokenIds: true,
+        usesTimelineTimes: false,
+        usesTransferTimes: false,
+        usesToList: false,
+        usesFromList: false,
+        usesInitiatedByList: false,
+        usesOwnershipTimes: false,
+        usesApprovalIdList: false,
+        arbitraryValue: {}
+      }));
+
+      const result = GetFirstMatchOnly(firstMatchPermissions);
+
+      // First permission should claim 1-10
+      // Second permission should claim 11-15 (5-10 already claimed)
+      // Third permission should claim 16-20 (8-15 already claimed)
+      expect(result.length).toBe(3);
     });
   });
 

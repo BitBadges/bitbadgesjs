@@ -105,6 +105,72 @@ export class AddressList extends CustomTypeClass<AddressList> implements iAddres
   }
 
   /**
+   * Computes the union of two address lists in-place.
+   * The result contains all addresses that are in either list.
+   *
+   * Cases:
+   * - Whitelist ∪ Whitelist = Whitelist with combined addresses
+   * - Whitelist ∪ Blacklist = Blacklist with addresses in blacklist that are NOT in whitelist
+   * - Blacklist ∪ Whitelist = Blacklist with addresses in blacklist that are NOT in whitelist
+   * - Blacklist ∪ Blacklist = Blacklist with intersection of excluded addresses
+   */
+  union(other: iAddressList): this {
+    const result = AddressList.computeUnion(this, other);
+    this.addresses = result.addresses;
+    this.whitelist = result.whitelist;
+    return this;
+  }
+
+  /**
+   * Wrapper for {@link union} that returns a new list instead of modifying the current one.
+   */
+  toUnion(other: iAddressList): AddressList {
+    return this.clone().union(other);
+  }
+
+  /**
+   * Computes the union of two address lists.
+   * The result contains all addresses that are in either list.
+   */
+  static computeUnion(first: iAddressList, second: iAddressList): AddressList {
+    const firstAddrs = new Set(first.addresses);
+    const secondAddrs = new Set(second.addresses);
+
+    let resultAddresses: string[];
+    let resultWhitelist: boolean;
+
+    if (first.whitelist && second.whitelist) {
+      // Case 1: Whitelist ∪ Whitelist = Whitelist with combined addresses
+      resultWhitelist = true;
+      resultAddresses = [...new Set([...first.addresses, ...second.addresses])];
+    } else if (first.whitelist && !second.whitelist) {
+      // Case 2: Whitelist ∪ Blacklist = Blacklist with (second - first)
+      // Union allows all of first, plus all not in second = all except (second minus first)
+      resultWhitelist = false;
+      resultAddresses = second.addresses.filter((addr) => !firstAddrs.has(addr));
+    } else if (!first.whitelist && second.whitelist) {
+      // Case 3: Blacklist ∪ Whitelist = Blacklist with (first - second)
+      // Union allows all of second, plus all not in first = all except (first minus second)
+      resultWhitelist = false;
+      resultAddresses = first.addresses.filter((addr) => !secondAddrs.has(addr));
+    } else {
+      // Case 4: Blacklist ∪ Blacklist = Blacklist with intersection
+      // All except first OR all except second = all except (first AND second)
+      resultWhitelist = false;
+      resultAddresses = first.addresses.filter((addr) => secondAddrs.has(addr));
+    }
+
+    return new AddressList({
+      listId: '',
+      addresses: resultAddresses,
+      whitelist: resultWhitelist,
+      uri: '',
+      customData: '',
+      createdBy: ''
+    });
+  }
+
+  /**
    * Gets the addresses that are in both lists.
    *
    * Note the returned value can be a whitelist or a blacklist, depending on the input lists.

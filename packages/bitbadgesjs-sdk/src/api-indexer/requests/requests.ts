@@ -881,11 +881,6 @@ export interface iUpdateAccountInfoPayload {
   bluesky?: string;
 
   /**
-   * The affiliate code of the referrer  that sent them?
-   */
-  affiliateCode?: string;
-
-  /**
    * The last seen activity timestamp.
    */
   seenActivity?: UNIXMilliTimestamp<NumberType>;
@@ -2807,8 +2802,6 @@ export interface iCreatePaymentIntentPayload {
   amount: number;
   /** Purpose of the payment */
   purpose: 'credits' | 'deposit';
-  /** The affiliate code to use for the payment */
-  affiliateCode?: string;
 }
 
 /**

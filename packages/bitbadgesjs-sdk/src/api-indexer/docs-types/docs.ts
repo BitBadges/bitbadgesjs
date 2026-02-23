@@ -573,7 +573,6 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   github?: string;
   telegram?: string;
   readme?: string;
-  affiliateCode?: string;
   hiddenTokens?: BatchTokenDetailsArray<T>;
   profilePicUrl?: string;
   username?: string;
@@ -595,7 +594,6 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.github = data.github;
     this.telegram = data.telegram;
     this.readme = data.readme;
-    this.affiliateCode = data.affiliateCode;
     this.hiddenTokens = data.hiddenTokens ? BatchTokenDetailsArray.From(data.hiddenTokens) : undefined;
     this.profilePicUrl = data.profilePicUrl;
     this.username = data.username;

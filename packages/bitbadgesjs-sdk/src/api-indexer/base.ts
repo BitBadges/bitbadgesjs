@@ -56,23 +56,21 @@ export interface iBitBadgesApi<T extends NumberType> {
  * @category API
  */
 export class BaseBitBadgesApi<T extends NumberType> {
-  axios = axios.create({
-    withCredentials: true,
-    headers: {
-      'Content-type': 'application/json',
-      'x-api-key': process.env.BITBADGES_API_KEY
-    }
-  });
-  BACKEND_URL = process.env.BITBADGES_API_URL || 'https://api.bitbadges.io';
+  axios: ReturnType<typeof axios.create>;
+  BACKEND_URL: string;
   ConvertFunction: (num: NumberType) => T;
-  apiKey = process.env.BITBADGES_API_KEY;
+  apiKey: string | undefined;
   accessToken = '';
   appendedHeaders: Record<string, string> = {};
 
   constructor(apiDetails: iBitBadgesApi<T>) {
-    this.BACKEND_URL = apiDetails.apiUrl || this.BACKEND_URL;
+    // Use optional chaining to avoid ReferenceError in browsers without process shim
+    const envApiKey = typeof process !== 'undefined' ? process.env?.BITBADGES_API_KEY : undefined;
+    const envApiUrl = typeof process !== 'undefined' ? process.env?.BITBADGES_API_URL : undefined;
+
+    this.BACKEND_URL = apiDetails.apiUrl || envApiUrl || 'https://api.bitbadges.io';
     this.ConvertFunction = apiDetails.convertFunction;
-    this.apiKey = apiDetails.apiKey || this.apiKey;
+    this.apiKey = apiDetails.apiKey || envApiKey;
     this.appendedHeaders = apiDetails.appendedHeaders || {};
     this.axios = axios.create({
       withCredentials: true,
@@ -82,7 +80,6 @@ export class BaseBitBadgesApi<T extends NumberType> {
         ...apiDetails.appendedHeaders
       }
     });
-    this.accessToken = '';
   }
 
   setAccessToken(token: string) {

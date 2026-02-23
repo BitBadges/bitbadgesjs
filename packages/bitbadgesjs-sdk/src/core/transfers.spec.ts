@@ -135,4 +135,328 @@ describe('Transfers', () => {
     console.log(JSON.stringify(balancesAfterTransfers));
     expect(balancesAfterTransfers[0].amount == -99n).toBe(true);
   });
+
+  describe('Multi-recipient transfers', () => {
+    it('should correctly distribute tokens to multiple recipients', async () => {
+      const recipients = [genTestAddress(), genTestAddress(), genTestAddress()];
+
+      const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+        {
+          from: 'Mint',
+          balances: [
+            {
+              amount: 10n,
+              tokenIds: [{ start: 1n, end: 10n }],
+              ownershipTimes: UintRangeArray.FullRanges()
+            }
+          ],
+          toAddresses: recipients,
+          incrementTokenIdsBy: 0n,
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: 0n
+        }
+      ];
+
+      const balanceMap = await createBalanceMapForOffChainBalances(transfersWithIncrements);
+
+      // Each recipient should receive the same tokens
+      for (const recipient of recipients) {
+        expect(balanceMap[recipient]).toBeDefined();
+        expect(balanceMap[recipient][0].amount).toBe(10n);
+        expect(balanceMap[recipient][0].tokenIds[0].start).toBe(1n);
+        expect(balanceMap[recipient][0].tokenIds[0].end).toBe(10n);
+      }
+    });
+
+    it('should handle different amounts per recipient with increments', async () => {
+      const recipients = [genTestAddress(), genTestAddress()];
+
+      const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+        {
+          from: 'Mint',
+          balances: [
+            {
+              amount: 5n,
+              tokenIds: [{ start: 1n, end: 5n }],
+              ownershipTimes: UintRangeArray.FullRanges()
+            }
+          ],
+          toAddresses: recipients,
+          incrementTokenIdsBy: 5n, // Each recipient gets different token IDs
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: 0n
+        }
+      ];
+
+      const balanceMap = await createBalanceMapForOffChainBalances(transfersWithIncrements);
+
+      // First recipient: tokens 1-5
+      expect(balanceMap[recipients[0]][0].tokenIds[0].start).toBe(1n);
+      expect(balanceMap[recipients[0]][0].tokenIds[0].end).toBe(5n);
+
+      // Second recipient: tokens 6-10
+      expect(balanceMap[recipients[1]][0].tokenIds[0].start).toBe(6n);
+      expect(balanceMap[recipients[1]][0].tokenIds[0].end).toBe(10n);
+    });
+  });
+
+  describe('Time-based balance restrictions', () => {
+    it('should correctly handle time-restricted balances', () => {
+      const startTime = 1000000n;
+      const endTime = 2000000n;
+
+      const startingBalances = [
+        {
+          amount: 100n,
+          tokenIds: [{ start: 1n, end: 10n }],
+          ownershipTimes: [{ start: startTime, end: endTime }]
+        }
+      ];
+
+      // Transfer within the valid time range
+      const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+        {
+          from: 'Mint',
+          balances: [
+            {
+              amount: 50n,
+              tokenIds: [{ start: 1n, end: 10n }],
+              ownershipTimes: [{ start: startTime, end: endTime }]
+            }
+          ],
+          toAddresses: [genTestAddress()],
+          incrementTokenIdsBy: 0n,
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: 0n
+        }
+      ];
+
+      const balancesAfterTransfers = getBalancesAfterTransfers(startingBalances, transfersWithIncrements, 0n);
+
+      // Should have 50 remaining
+      expect(balancesAfterTransfers[0].amount).toBe(50n);
+      expect(balancesAfterTransfers[0].ownershipTimes[0].start).toBe(startTime);
+      expect(balancesAfterTransfers[0].ownershipTimes[0].end).toBe(endTime);
+    });
+
+    it('should handle incremental ownership times', async () => {
+      const recipients = [genTestAddress(), genTestAddress()];
+      const baseTime = 1000000n;
+      const increment = 100000n;
+
+      const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+        {
+          from: 'Mint',
+          balances: [
+            {
+              amount: 10n,
+              tokenIds: [{ start: 1n, end: 10n }],
+              ownershipTimes: [{ start: baseTime, end: baseTime + 50000n }]
+            }
+          ],
+          toAddresses: recipients,
+          incrementTokenIdsBy: 0n,
+          incrementOwnershipTimesBy: increment,
+          durationFromTimestamp: 0n
+        }
+      ];
+
+      const balanceMap = await createBalanceMapForOffChainBalances(transfersWithIncrements);
+
+      // First recipient: ownership time starts at baseTime
+      expect(balanceMap[recipients[0]][0].ownershipTimes[0].start).toBe(baseTime);
+
+      // Second recipient: ownership time starts at baseTime + increment
+      expect(balanceMap[recipients[1]][0].ownershipTimes[0].start).toBe(baseTime + increment);
+    });
+  });
+
+  describe('Transfer validation edge cases', () => {
+    it('should handle zero amount transfers gracefully', () => {
+      const startingBalances = [
+        {
+          amount: 100n,
+          tokenIds: [{ start: 1n, end: 10n }],
+          ownershipTimes: UintRangeArray.FullRanges()
+        }
+      ];
+
+      const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+        {
+          from: 'Mint',
+          balances: [
+            {
+              amount: 0n, // Zero amount
+              tokenIds: [{ start: 1n, end: 10n }],
+              ownershipTimes: UintRangeArray.FullRanges()
+            }
+          ],
+          toAddresses: [genTestAddress()],
+          incrementTokenIdsBy: 0n,
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: 0n
+        }
+      ];
+
+      const balancesAfterTransfers = getBalancesAfterTransfers(startingBalances, transfersWithIncrements, 0n);
+
+      // Balance should remain unchanged
+      const nonZeroBalances = balancesAfterTransfers.filter((b) => b.amount > 0n);
+      expect(nonZeroBalances.length).toBeGreaterThan(0);
+      expect(nonZeroBalances[0].amount).toBe(100n);
+    });
+
+    it('should handle empty recipient list', () => {
+      const allTokenIds = getAllTokenIdsToBeTransferred([
+        {
+          from: 'Mint',
+          balances: [
+            {
+              amount: 100n,
+              tokenIds: [{ start: 1n, end: 10n }],
+              ownershipTimes: UintRangeArray.FullRanges()
+            }
+          ],
+          toAddresses: [], // Empty
+          toAddressesLength: 0n,
+          incrementTokenIdsBy: 0n,
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: 0n
+        }
+      ]);
+
+      // With 0 recipients, still returns base token IDs (the function calculates
+      // what tokens would be transferred regardless of recipient count)
+      // This is correct behavior - the token IDs are defined in the transfer spec
+      expect(allTokenIds.length).toBe(1);
+      expect(allTokenIds[0].start).toBe(1n);
+      expect(allTokenIds[0].end).toBe(10n);
+    });
+
+    it('should handle single token transfer', () => {
+      const startingBalances = [
+        {
+          amount: 1n,
+          tokenIds: [{ start: 5n, end: 5n }], // Single token
+          ownershipTimes: UintRangeArray.FullRanges()
+        }
+      ];
+
+      const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+        {
+          from: 'Mint',
+          balances: [
+            {
+              amount: 1n,
+              tokenIds: [{ start: 5n, end: 5n }],
+              ownershipTimes: UintRangeArray.FullRanges()
+            }
+          ],
+          toAddresses: [genTestAddress()],
+          incrementTokenIdsBy: 0n,
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: 0n
+        }
+      ];
+
+      const balancesAfterTransfers = getBalancesAfterTransfers(startingBalances, transfersWithIncrements, 0n);
+      const filtered = balancesAfterTransfers.filterZeroBalances();
+
+      expect(filtered.length).toBe(0); // All transferred
+    });
+  });
+
+  describe('Large claim simulation', () => {
+    // Note: This tests the performance concern at transfers.ts:512
+    // The O(n*m*k) loop can be slow for large claims
+
+    it('should handle moderate-sized claims without timeout', () => {
+      const numRecipients = 100;
+      const recipients: string[] = [];
+      for (let i = 0; i < numRecipients; i++) {
+        recipients.push(genTestAddress());
+      }
+
+      const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+        {
+          from: 'Mint',
+          balances: [
+            {
+              amount: 1n,
+              tokenIds: [{ start: 1n, end: 1n }],
+              ownershipTimes: UintRangeArray.FullRanges()
+            }
+          ],
+          toAddresses: recipients,
+          incrementTokenIdsBy: 1n,
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: 0n
+        }
+      ];
+
+      const startTime = Date.now();
+      const allTokenIds = getAllTokenIdsToBeTransferred(transfersWithIncrements);
+      const endTime = Date.now();
+
+      // Should complete in reasonable time (< 1 second)
+      expect(endTime - startTime).toBeLessThan(1000);
+      expect(allTokenIds[0].start).toBe(1n);
+      expect(allTokenIds[0].end).toBe(BigInt(numRecipients));
+    });
+
+    it('should correctly calculate all balances for incremental transfers', () => {
+      const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+        {
+          from: 'Mint',
+          balances: [
+            {
+              amount: 1n,
+              tokenIds: [{ start: 1n, end: 1n }],
+              ownershipTimes: UintRangeArray.FullRanges()
+            }
+          ],
+          toAddresses: [],
+          toAddressesLength: 50n,
+          incrementTokenIdsBy: 1n,
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: 0n
+        }
+      ];
+
+      const allBalances = getAllBalancesToBeTransferred(transfersWithIncrements, 0n);
+
+      // Should aggregate all token IDs correctly
+      expect(allBalances[0].tokenIds[0].start).toBe(1n);
+      expect(allBalances[0].tokenIds[0].end).toBe(50n);
+    });
+  });
+
+  describe('Duration-based transfers', () => {
+    it('should calculate balances with durationFromTimestamp', () => {
+      const currentTime = 1000000n;
+      const duration = 86400000n; // 1 day in milliseconds
+
+      const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+        {
+          from: 'Mint',
+          balances: [
+            {
+              amount: 10n,
+              tokenIds: [{ start: 1n, end: 10n }],
+              ownershipTimes: [{ start: 0n, end: 100000n }]
+            }
+          ],
+          toAddresses: [genTestAddress()],
+          incrementTokenIdsBy: 0n,
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: duration
+        }
+      ];
+
+      const allBalances = getAllBalancesToBeTransferred(transfersWithIncrements, currentTime);
+
+      // Ownership times should be adjusted based on currentTime + duration
+      expect(allBalances.length).toBeGreaterThan(0);
+    });
+  });
 });

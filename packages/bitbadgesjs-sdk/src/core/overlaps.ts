@@ -637,40 +637,20 @@ export function MergeUniversalPermissionDetails(permissions: UniversalPermission
           i = Number.MAX_SAFE_INTEGER;
           j = Number.MAX_SAFE_INTEGER;
         } else if (sameCount === 4 && addressSameCount == 3 && permittedTimesAreSame && forbiddenTimesAreSame && arbitraryValuesAreSame) {
-          //TODO: Merge address lists if whitelist is not the same
+          // Merge address lists using union (handles both same and different whitelist flags)
           merged.push({
             tokenIds: newTokenIds,
             timelineTimes: newTimelineTimes,
             transferTimes: newTransferTimes,
             ownershipTimes: newOwnershipTimes,
-            toList:
-              !toListsAreSame && first.toList.whitelist === second.toList.whitelist
-                ? new AddressList({
-                    ...first.toList,
-                    addresses: [...new Set([...first.toList.addresses, ...second.toList.addresses])]
-                  })
-                : first.toList,
-            fromList:
-              !fromListsAreSame && first.fromList.whitelist === second.fromList.whitelist
-                ? new AddressList({
-                    ...first.fromList,
-                    addresses: [...new Set([...first.fromList.addresses, ...second.fromList.addresses])]
-                  })
-                : first.fromList,
-            initiatedByList:
-              !initiatedByListsAreSame && first.initiatedByList.whitelist === second.initiatedByList.whitelist
-                ? new AddressList({
-                    ...first.initiatedByList,
-                    addresses: [...new Set([...first.initiatedByList.addresses, ...second.initiatedByList.addresses])]
-                  })
-                : first.initiatedByList,
-            approvalIdList:
-              !approvalIdListsAreSame && first.approvalIdList.whitelist === second.approvalIdList.whitelist
-                ? new AddressList({
-                    ...first.approvalIdList,
-                    addresses: [...new Set([...first.approvalIdList.addresses, ...second.approvalIdList.addresses])]
-                  })
-                : first.approvalIdList,
+            toList: !toListsAreSame ? AddressList.computeUnion(first.toList, second.toList) : first.toList,
+            fromList: !fromListsAreSame ? AddressList.computeUnion(first.fromList, second.fromList) : first.fromList,
+            initiatedByList: !initiatedByListsAreSame
+              ? AddressList.computeUnion(first.initiatedByList, second.initiatedByList)
+              : first.initiatedByList,
+            approvalIdList: !approvalIdListsAreSame
+              ? AddressList.computeUnion(first.approvalIdList, second.approvalIdList)
+              : first.approvalIdList,
             permanentlyPermittedTimes: first.permanentlyPermittedTimes,
             permanentlyForbiddenTimes: first.permanentlyForbiddenTimes,
             arbitraryValue: first.arbitraryValue

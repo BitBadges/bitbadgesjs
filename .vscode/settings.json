@@ -7,7 +7,9 @@
   "workbench.colorCustomizations": {
     "activityBar.background": "#09304B",
     "titleBar.activeBackground": "#0D4369",
-    "titleBar.activeForeground": "#F9FCFE"
+    "titleBar.activeForeground": "#F9FCFE",
+    "titleBar.inactiveBackground": "#1F330F",
+    "titleBar.inactiveForeground": "#F8FCF5"
   },
   "sonarlint.connectedMode.project": {
     "connectionId": "http-localhost-9000",

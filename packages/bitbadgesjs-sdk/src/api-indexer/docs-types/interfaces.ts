@@ -642,9 +642,6 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   /** The readme of the account */
   readme?: string;
 
-  /** Affiliate code */
-  affiliateCode?: string;
-
   /** The hidden tokens of the account */
   hiddenTokens?: iBatchTokenDetails<T>[];
 

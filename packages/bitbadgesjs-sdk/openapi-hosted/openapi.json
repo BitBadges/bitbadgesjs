@@ -10777,10 +10777,6 @@
             "description": "The readme of the account",
             "type": "string"
           },
-          "affiliateCode": {
-            "description": "Affiliate code",
-            "type": "string"
-          },
           "hiddenTokens": {
             "items": {
               "$ref": "#/components/schemas/iBatchTokenDetails"
@@ -16376,10 +16372,6 @@
             "description": "The Bluesky username.",
             "type": "string"
           },
-          "affiliateCode": {
-            "description": "The affiliate code of the referrer  that sent them?",
-            "type": "string"
-          },
           "seenActivity": {
             "description": "The last seen activity timestamp.",
             "$ref": "#/components/schemas/UNIXMilliTimestamp"
@@ -19028,10 +19020,6 @@
             ],
             "description": "Purpose of the payment",
             "type": "string"
-          },
-          "affiliateCode": {
-            "description": "The affiliate code to use for the payment",
-            "type": "string"
           }
         },
         "required": [
@@ -21583,10 +21571,6 @@
           },
           "readme": {
             "description": "The readme of the account",
-            "type": "string"
-          },
-          "affiliateCode": {
-            "description": "Affiliate code",
             "type": "string"
           },
           "hiddenTokens": {
