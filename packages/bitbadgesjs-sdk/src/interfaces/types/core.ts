@@ -313,6 +313,12 @@ export interface iInvariantsAddObject<T extends NumberType> {
    * When true, any attempt to create a pool with assets from this collection will fail.
    */
   disablePoolCreation: boolean;
+
+  /**
+   * EVM query invariants that must pass after all transfers complete.
+   * Read-only contract queries that verify external EVM state.
+   */
+  evmQueryChallenges?: iEVMQueryChallenge<T>[];
 }
 
 /**
@@ -763,6 +769,84 @@ export interface iVoteProof<T extends NumberType> {
 }
 
 /**
+ * EVMQueryChallenge defines a rule for approval via read-only EVM contract query.
+ *
+ * The challenge executes a staticcall to the specified contract with the given calldata.
+ * The result is compared against the expected result (if provided) or checked for non-zero return.
+ *
+ * IMPORTANT: This is read-only and cannot modify state. The query is executed with a gas limit
+ * to prevent DoS attacks. All results are deterministic since EVM state is consistent within a block.
+ *
+ * @category Interfaces
+ */
+export interface iEVMQueryChallenge<T extends NumberType> {
+  /**
+   * The EVM contract address to query (0x format or bb1 format)
+   */
+  contractAddress: string;
+
+  /**
+   * ABI-encoded function selector + arguments (hex string).
+   * Example: "70a08231000000000000000000000000{address}" for balanceOf(address)
+   * Placeholders: $initiator, $sender, $recipient, $collectionId, $recipients
+   */
+  calldata: string;
+
+  /**
+   * Expected return value (hex string). If empty, any non-error result passes.
+   * For boolean checks, use "0000...0001" for true.
+   */
+  expectedResult?: string;
+
+  /**
+   * Comparison operator: "eq" (equals), "ne" (not equals), "gt" (greater than), "gte", "lt", "lte"
+   * Only "eq" and "ne" work for non-numeric types. Default is "eq".
+   */
+  comparisonOperator?: string;
+
+  /**
+   * Gas limit for the query (default 100000, max 500000)
+   */
+  gasLimit: T;
+
+  /**
+   * The URI associated with this challenge (metadata)
+   */
+  uri?: string;
+
+  /**
+   * Arbitrary custom data
+   */
+  customData?: string;
+}
+
+/**
+ * Optional metadata for an EVM query challenge, resolved from the challenge URI (e.g. by the indexer).
+ * Used by EVMQueryChallengeWithDetails for BitBadgesCollection responses.
+ *
+ * @category Interfaces
+ */
+export interface iEVMQueryChallengeMetadata {
+  /** Human-readable name for the challenge */
+  name?: string;
+  /** Description of what the challenge checks */
+  description?: string;
+  /** Image URI for display */
+  image?: string;
+}
+
+/**
+ * EVM query challenge with optional resolved metadata (WithDetails pattern).
+ * Used in approval criteria and collection invariants when returned from the API.
+ *
+ * @category Interfaces
+ */
+export interface iEVMQueryChallengeWithDetails<T extends NumberType> extends iEVMQueryChallenge<T> {
+  /** Resolved metadata from the challenge URI, when populated by the indexer/API */
+  metadata?: iEVMQueryChallengeMetadata;
+}
+
+/**
  * DynamicStore is a flexible storage object that can store arbitrary data.
  * It is identified by a unique ID assigned by the blockchain, which is a uint64 that increments.
  * Dynamic stores are created by users and can only be updated or deleted by their creator.
@@ -865,4 +949,39 @@ export interface iCollectionInvariants<T extends NumberType> {
    * When true, any attempt to create a pool with assets from this collection will fail.
    */
   disablePoolCreation: boolean;
+
+  /**
+   * EVM query invariants that must pass after all transfers complete.
+   * These are checked once per message after all balance updates, with access to ALL recipient addresses.
+   * Placeholders: $sender, $recipients (comma-separated), $initiator, $collectionId, $recipient
+   */
+  evmQueryChallenges?: iEVMQueryChallenge<T>[];
+}
+
+/**
+ * Collection invariants with EVM query challenges as WithDetails (metadata populated).
+ * Used on BitBadgesCollection responses.
+ *
+ * @category Interfaces
+ */
+export interface iCollectionInvariantsWithDetails<T extends NumberType> extends iCollectionInvariants<T> {
+  evmQueryChallenges?: iEVMQueryChallengeWithDetails<T>[];
+}
+
+/**
+ * CollectionStats tracks aggregated statistics for a collection.
+ * These are computed on-chain and can be queried via GRPC or precompile.
+ *
+ * @category Interfaces
+ */
+export interface iCollectionStats<T extends NumberType> {
+  /**
+   * Number of unique holders (addresses with non-zero balance)
+   */
+  holderCount: T;
+
+  /**
+   * Circulating supply as Balance[] for proper range handling
+   */
+  balances: iBalance<T>[];
 }

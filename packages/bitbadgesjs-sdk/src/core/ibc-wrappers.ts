@@ -11,7 +11,8 @@ import {
   iDenomUnitWithDetails,
   iInvariantsAddObject,
   iPathMetadata,
-  iPathMetadataWithDetails
+  iPathMetadataWithDetails,
+  iEVMQueryChallenge
 } from '@/interfaces/types/core.js';
 import { tokenization as prototokenization } from '@/proto/index.js';
 import type { NumberType } from '../common/string-numbers.js';
@@ -488,6 +489,7 @@ export class InvariantsAddObject<T extends NumberType> extends BaseNumberTypeCla
   cosmosCoinBackedPath?: CosmosCoinBackedPathAddObject<T>;
   noForcefulPostMintTransfers: boolean;
   disablePoolCreation: boolean;
+  evmQueryChallenges?: iEVMQueryChallenge<T>[];
 
   constructor(data: iInvariantsAddObject<T>) {
     super();
@@ -496,6 +498,7 @@ export class InvariantsAddObject<T extends NumberType> extends BaseNumberTypeCla
     this.cosmosCoinBackedPath = data.cosmosCoinBackedPath ? new CosmosCoinBackedPathAddObject(data.cosmosCoinBackedPath) : undefined;
     this.noForcefulPostMintTransfers = data.noForcefulPostMintTransfers;
     this.disablePoolCreation = data.disablePoolCreation;
+    this.evmQueryChallenges = data.evmQueryChallenges;
   }
 
   getNumberFieldNames(): string[] {
@@ -514,7 +517,16 @@ export class InvariantsAddObject<T extends NumberType> extends BaseNumberTypeCla
         ? CosmosCoinBackedPathAddObject.fromProto(data.cosmosCoinBackedPath, convertFunction)
         : undefined,
       noForcefulPostMintTransfers: data.noForcefulPostMintTransfers,
-      disablePoolCreation: data.disablePoolCreation
+      disablePoolCreation: data.disablePoolCreation,
+      evmQueryChallenges: data.evmQueryChallenges?.map((c) => ({
+        contractAddress: c.contractAddress,
+        calldata: c.calldata,
+        expectedResult: c.expectedResult || undefined,
+        comparisonOperator: c.comparisonOperator || undefined,
+        gasLimit: convertFunction(c.gasLimit),
+        uri: c.uri || undefined,
+        customData: c.customData || undefined
+      }))
     });
   }
 
@@ -524,7 +536,18 @@ export class InvariantsAddObject<T extends NumberType> extends BaseNumberTypeCla
       maxSupplyPerId: this.maxSupplyPerId.toString(),
       cosmosCoinBackedPath: this.cosmosCoinBackedPath ? this.cosmosCoinBackedPath.toProto() : undefined,
       noForcefulPostMintTransfers: this.noForcefulPostMintTransfers,
-      disablePoolCreation: this.disablePoolCreation
+      disablePoolCreation: this.disablePoolCreation,
+      evmQueryChallenges: this.evmQueryChallenges?.map((c) =>
+        new prototokenization.EVMQueryChallenge({
+          contractAddress: c.contractAddress,
+          calldata: c.calldata,
+          expectedResult: c.expectedResult ?? '',
+          comparisonOperator: c.comparisonOperator ?? '',
+          gasLimit: String((c as iEVMQueryChallenge<NumberType>).gasLimit ?? ''),
+          uri: c.uri ?? '',
+          customData: c.customData ?? ''
+        })
+      )
     });
   }
 }

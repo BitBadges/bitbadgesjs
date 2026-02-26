@@ -699,6 +699,103 @@ export function cleanBalances<T extends NumberType>(balancesArr: iBalance<T>[]) 
 }
 
 /**
+ * Calculates the maximum wrappable/fungible amount for an alias or Cosmos coin wrapper path.
+ *
+ * This function determines how many wrapped tokens can be created based on the user's balances
+ * and the conversion path requirements.
+ *
+ * Logic:
+ * 1. Gets the path's conversion.sideB (balances required per conversion)
+ * 2. For each sideB balance, finds matching user balances via getBalancesForIds
+ * 3. Calculates minimum conversions possible across all sideB requirements
+ * 4. Multiplies by conversion.sideA.amount (wrapped tokens created per conversion)
+ *
+ * @param path - The alias path or cosmos coin wrapper path with conversion details
+ * @param userBalances - The user's current balances to check against
+ * @returns The maximum amount of wrapped tokens that can be created
+ *
+ * @category Balances
+ */
+export const getMaxWrappableAmount = <T extends NumberType>(
+  path: {
+    conversion: {
+      sideA: { amount: T };
+      sideB: Array<{ amount: T; tokenIds: iUintRange<T>[]; ownershipTimes: iUintRange<T>[] }>;
+    };
+  },
+  userBalances: iBalance<T>[]
+): bigint => {
+  // Get balances from conversion.sideB
+  const pathBalances = path.conversion.sideB;
+
+  // If path has no balances, return 0
+  if (!pathBalances || pathBalances.length === 0) {
+    return 0n;
+  }
+
+  // Get path.conversion.sideA.amount (the amount of wrapped tokens created per conversion)
+  // In Go: path.Conversion.SideA.Amount represents the amount of the wrapped denom created
+  const pathAmount = BigInt(path.conversion.sideA.amount);
+
+  // If path amount is zero, return 0
+  if (pathAmount === 0n) {
+    return 0n;
+  }
+
+  // Track the minimum number of conversions possible across all path balances
+  // We need all path balances to perform a conversion, so we're limited by the scarcest one
+  let minConversions: bigint | null = null;
+
+  // For each balance required by the path, find how many conversions are possible
+  for (const pathBalance of pathBalances) {
+    // If pathBalance.amount is zero, we can't perform any conversions
+    if (BigInt(pathBalance.amount) === 0n) {
+      return 0n;
+    }
+
+    // Get user balances that match this path balance's token IDs and ownership times
+    const userBalancesForPath = getBalancesForIds(
+      pathBalance.tokenIds,
+      pathBalance.ownershipTimes,
+      userBalances
+    ).filterZeroBalances();
+
+    // If no matching balances, return 0
+    if (userBalancesForPath.length === 0) {
+      return 0n;
+    }
+
+    // If multiple balances are returned, they represent different ID/time combinations.
+    // We need to take the minimum amount, as each balance represents a different combination
+    // and we can only use the amount available for the specific ID/time combination we need.
+    let minUserAmount = BigInt(userBalancesForPath[0].amount);
+    for (let i = 1; i < userBalancesForPath.length; i++) {
+      const amt = BigInt(userBalancesForPath[i].amount);
+      if (amt < minUserAmount) {
+        minUserAmount = amt;
+      }
+    }
+
+    // Calculate how many times this path balance can fit: userBalance.Amount / pathBalance.Amount
+    const conversionsForThisBalance = minUserAmount / BigInt(pathBalance.amount);
+
+    // Update minimum conversions (first iteration or if this is smaller)
+    if (minConversions === null || conversionsForThisBalance < minConversions) {
+      minConversions = conversionsForThisBalance;
+    }
+  }
+
+  // If we couldn't perform any conversions, return 0
+  if (minConversions === null) {
+    return 0n;
+  }
+
+  // Multiply by path.Amount to get the total wrappable amount
+  // This represents how many wrapped units (denom with amount path.Amount) can be created
+  return minConversions * pathAmount;
+};
+
+/**
  * @category Uint Ranges
  */
 export function uintRangeArrsEqual<T extends NumberType>(arr1: UintRangeArray<T>, arr2: UintRangeArray<T>) {

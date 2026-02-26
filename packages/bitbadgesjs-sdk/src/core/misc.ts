@@ -27,27 +27,32 @@ import type {
   iApprovalIdentifierDetails,
   iCoinTransfer,
   iCollectionInvariants,
+  iCollectionInvariantsWithDetails,
   iCollectionMetadata,
+  iCollectionStats,
   iCosmosCoinBackedPath,
   iDynamicStore,
   iDynamicStoreValue,
   iETHSignatureChallenge,
   iETHSignatureProof,
+  iEVMQueryChallenge,
+  iEVMQueryChallengeMetadata,
+  iEVMQueryChallengeWithDetails,
   iMerkleChallenge,
   iMerklePathItem,
   iMerkleProof,
   iMustOwnToken,
   iMustOwnTokens,
-  iPathMetadata,
   iPrecalculateBalancesFromApprovalDetails,
   iPrecalculationOptions,
   iTokenMetadata,
-  iVoter,
   iVoteProof,
+  iVoter,
   iVotingChallenge
 } from '../interfaces/types/core.js';
-import * as prototokenization from '../proto/tokenization/index.js';
 import * as prototokenizationDynamicStores from '../proto/tokenization/dynamic_stores_pb.js';
+import * as prototokenization from '../proto/tokenization/index.js';
+import { Balance } from './balances.js';
 import { CosmosCoin, iCosmosCoin } from './coin.js';
 import type { UniversalPermission } from './overlaps.js';
 import { GetFirstMatchOnly, getOverlapsAndNonOverlaps } from './overlaps.js';
@@ -1458,6 +1463,93 @@ export class VoteProof<T extends NumberType> extends BaseNumberTypeClass<VotePro
 }
 
 /**
+ * EVMQueryChallenge defines a rule for approval via read-only EVM contract query.
+ *
+ * The challenge executes a staticcall to the specified contract with the given calldata.
+ * The result is compared against the expected result (if provided) or checked for non-zero return.
+ *
+ * @category Approvals / Transferability
+ */
+export class EVMQueryChallenge<T extends NumberType> extends BaseNumberTypeClass<EVMQueryChallenge<T>> implements iEVMQueryChallenge<T> {
+  contractAddress: string;
+  calldata: string;
+  expectedResult?: string;
+  comparisonOperator?: string;
+  gasLimit: T;
+  uri?: string;
+  customData?: string;
+
+  constructor(evmQueryChallenge: iEVMQueryChallenge<T>) {
+    super();
+    this.contractAddress = evmQueryChallenge.contractAddress;
+    this.calldata = evmQueryChallenge.calldata;
+    this.expectedResult = evmQueryChallenge.expectedResult;
+    this.comparisonOperator = evmQueryChallenge.comparisonOperator;
+    this.gasLimit = evmQueryChallenge.gasLimit;
+    this.uri = evmQueryChallenge.uri;
+    this.customData = evmQueryChallenge.customData;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['gasLimit'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): EVMQueryChallenge<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as EVMQueryChallenge<U>;
+  }
+
+  static fromProto<U extends NumberType>(item: prototokenization.EVMQueryChallenge, convertFunction: (item: NumberType) => U): EVMQueryChallenge<U> {
+    return new EVMQueryChallenge<U>({
+      contractAddress: item.contractAddress,
+      calldata: item.calldata,
+      expectedResult: item.expectedResult || undefined,
+      comparisonOperator: item.comparisonOperator || undefined,
+      gasLimit: convertFunction(item.gasLimit),
+      uri: item.uri || undefined,
+      customData: item.customData || undefined
+    });
+  }
+
+  toProto(): prototokenization.EVMQueryChallenge {
+    return new prototokenization.EVMQueryChallenge({
+      contractAddress: this.contractAddress,
+      calldata: this.calldata,
+      expectedResult: this.expectedResult || '',
+      comparisonOperator: this.comparisonOperator || '',
+      gasLimit: String(this.gasLimit ?? ''),
+      uri: this.uri || '',
+      customData: this.customData || ''
+    });
+  }
+}
+
+/**
+ * EVM query challenge with optional resolved metadata (WithDetails pattern).
+ * Used in approval criteria and collection invariants when returned from the API.
+ *
+ * @category Approvals / Transferability
+ */
+export class EVMQueryChallengeWithDetails<T extends NumberType>
+  extends EVMQueryChallenge<T>
+  implements iEVMQueryChallengeWithDetails<T>
+{
+  metadata?: iEVMQueryChallengeMetadata;
+
+  constructor(evmQueryChallenge: iEVMQueryChallengeWithDetails<T>) {
+    super(evmQueryChallenge);
+    this.metadata = evmQueryChallenge.metadata;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): EVMQueryChallengeWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as EVMQueryChallengeWithDetails<U>;
+  }
+
+  clone(): EVMQueryChallengeWithDetails<T> {
+    return super.clone() as EVMQueryChallengeWithDetails<T>;
+  }
+}
+
+/**
  * DynamicStore is a flexible storage object that can store arbitrary data.
  * It is identified by a unique ID assigned by the blockchain, which is a uint64 that increments.
  * Dynamic stores are created by users and can only be updated or deleted by their creator.
@@ -1585,6 +1677,12 @@ export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeCl
    */
   disablePoolCreation: boolean;
 
+  /**
+   * EVM query invariants that must pass after all transfers complete.
+   * These are checked once per message after all balance updates, with access to ALL recipient addresses.
+   */
+  evmQueryChallenges?: EVMQueryChallenge<T>[];
+
   constructor(data: iCollectionInvariants<T>) {
     super();
     this.noCustomOwnershipTimes = data.noCustomOwnershipTimes;
@@ -1592,6 +1690,7 @@ export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeCl
     this.cosmosCoinBackedPath = data.cosmosCoinBackedPath ? new CosmosCoinBackedPath(data.cosmosCoinBackedPath) : undefined;
     this.noForcefulPostMintTransfers = data.noForcefulPostMintTransfers;
     this.disablePoolCreation = data.disablePoolCreation;
+    this.evmQueryChallenges = data.evmQueryChallenges?.map((c) => new EVMQueryChallenge(c));
   }
 
   getNumberFieldNames(): string[] {
@@ -1613,7 +1712,8 @@ export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeCl
           })
         : undefined,
       noForcefulPostMintTransfers: this.noForcefulPostMintTransfers,
-      disablePoolCreation: this.disablePoolCreation
+      disablePoolCreation: this.disablePoolCreation,
+      evmQueryChallenges: this.evmQueryChallenges?.map((c) => c.toProto())
     });
   }
 
@@ -1631,7 +1731,87 @@ export class CollectionInvariants<T extends NumberType> extends BaseNumberTypeCl
       maxSupplyPerId: convertFunction(item.maxSupplyPerId),
       cosmosCoinBackedPath: item.cosmosCoinBackedPath ? CosmosCoinBackedPath.fromProto(item.cosmosCoinBackedPath, convertFunction) : undefined,
       noForcefulPostMintTransfers: item.noForcefulPostMintTransfers,
-      disablePoolCreation: item.disablePoolCreation
+      disablePoolCreation: item.disablePoolCreation,
+      evmQueryChallenges: item.evmQueryChallenges?.map((c) => EVMQueryChallenge.fromProto(c, convertFunction))
+    });
+  }
+}
+
+/**
+ * Collection invariants with EVM query challenges as WithDetails (metadata populated).
+ * Used on BitBadgesCollection API responses.
+ *
+ * @category Collections
+ */
+export class CollectionInvariantsWithDetails<T extends NumberType>
+  extends CollectionInvariants<T>
+  implements iCollectionInvariantsWithDetails<T>
+{
+  override evmQueryChallenges?: EVMQueryChallengeWithDetails<T>[];
+
+  constructor(data: iCollectionInvariantsWithDetails<T>) {
+    super(data);
+    this.evmQueryChallenges = data.evmQueryChallenges?.map((c) =>
+      c instanceof EVMQueryChallengeWithDetails ? c : new EVMQueryChallengeWithDetails(c as iEVMQueryChallengeWithDetails<T>)
+    );
+  }
+
+  override convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionInvariantsWithDetails<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionInvariantsWithDetails<U>;
+  }
+
+  override toProto(): prototokenization.CollectionInvariants {
+    return new prototokenization.CollectionInvariants({
+      noCustomOwnershipTimes: this.noCustomOwnershipTimes,
+      maxSupplyPerId: this.maxSupplyPerId.toString(),
+      cosmosCoinBackedPath: this.cosmosCoinBackedPath
+        ? new prototokenization.CosmosCoinBackedPath({
+            address: this.cosmosCoinBackedPath.address,
+            conversion: this.cosmosCoinBackedPath.conversion ? this.cosmosCoinBackedPath.conversion.toProto() : undefined
+          })
+        : undefined,
+      noForcefulPostMintTransfers: this.noForcefulPostMintTransfers,
+      disablePoolCreation: this.disablePoolCreation,
+      evmQueryChallenges: this.evmQueryChallenges?.map((c) => c.toProto())
+    });
+  }
+}
+
+/**
+ * CollectionStats tracks aggregated statistics for a collection.
+ * These are computed on-chain and can be queried via GRPC or precompile.
+ *
+ * @category Collections
+ */
+export class CollectionStats<T extends NumberType> extends BaseNumberTypeClass<CollectionStats<T>> implements iCollectionStats<T> {
+  /**
+   * Number of unique holders (addresses with non-zero balance)
+   */
+  holderCount: T;
+
+  /**
+   * Circulating supply as Balance[] for proper range handling
+   */
+  balances: Balance<T>[];
+
+  constructor(data: iCollectionStats<T>) {
+    super();
+    this.holderCount = data.holderCount;
+    this.balances = data.balances.map((b) => new Balance(b));
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['holderCount'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionStats<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionStats<U>;
+  }
+
+  static fromProto<T extends NumberType>(item: prototokenization.CollectionStats, convertFunction: (val: NumberType) => T): CollectionStats<T> {
+    return new CollectionStats({
+      holderCount: convertFunction(item.holderCount),
+      balances: item.balances.map((b) => Balance.fromProto(b, convertFunction))
     });
   }
 }

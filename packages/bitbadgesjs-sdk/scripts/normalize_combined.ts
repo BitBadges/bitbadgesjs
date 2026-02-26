@@ -37,6 +37,8 @@ const withDetailsInterfaces = [
   'iIncomingApprovalCriteria',
   'iApprovalCriteria',
   'iMerkleChallenge',
+  'iEVMQueryChallenge',
+  'iCollectionInvariants',
   'iUserOutgoingApprovalPermission',
   'iUserIncomingApprovalPermission',
   'iCollectionApprovalPermission',

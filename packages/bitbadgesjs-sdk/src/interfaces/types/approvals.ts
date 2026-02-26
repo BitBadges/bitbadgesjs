@@ -5,6 +5,7 @@ import type {
   iBalance,
   iCoinTransfer,
   iETHSignatureChallenge,
+  iEVMQueryChallenge,
   iMerkleChallenge,
   iMustOwnToken,
   iUintRange,
@@ -107,6 +108,8 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   mustPrioritize?: boolean;
   /** The list of voting challenges that must be satisfied for approval. */
   votingChallenges?: iVotingChallenge<T>[];
+  /** EVM query challenges that must pass for approval. Read-only contract queries that verify external EVM state. */
+  evmQueryChallenges?: iEVMQueryChallenge<T>[];
 }
 
 /**
@@ -301,6 +304,8 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   mustPrioritize?: boolean;
   /** The list of voting challenges that must be satisfied for approval. */
   votingChallenges?: iVotingChallenge<T>[];
+  /** EVM query challenges that must pass for approval. Read-only contract queries that verify external EVM state. */
+  evmQueryChallenges?: iEVMQueryChallenge<T>[];
 }
 
 /**
@@ -379,6 +384,8 @@ export interface iApprovalCriteria<T extends NumberType> {
   mustPrioritize?: boolean;
   /** The list of voting challenges that must be satisfied for approval. */
   votingChallenges?: iVotingChallenge<T>[];
+  /** EVM query challenges that must pass for approval. Read-only contract queries that verify external EVM state. */
+  evmQueryChallenges?: iEVMQueryChallenge<T>[];
   /** If true, this collection approval allows backed minting operations (CosmosCoinBackedPath). When false, this approval cannot be used for transfers involving backed minting addresses. This prevents accidental allowances when toListIds is "All". */
   allowBackedMinting?: boolean;
   /** If true, this collection approval allows special wrapping operations (CosmosCoinWrapperPath). When false, this approval cannot be used for transfers involving wrapping addresses. This prevents accidental allowances when toListIds is "All". */

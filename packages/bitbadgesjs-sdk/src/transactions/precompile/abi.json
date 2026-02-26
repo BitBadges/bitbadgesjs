@@ -87,6 +87,25 @@
           "type": "string"
         }
       ],
+      "name": "getCollectionStats",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "stats",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "msgJson",
+          "type": "string"
+        }
+      ],
       "name": "getBalance",
       "outputs": [
         {
@@ -785,9 +804,6 @@
     {
       "inputs": [
         {
-          "internalType": "(string,string)[]",
-          "name": "messages",
-          "type": "tuple[]",
           "components": [
             {
               "internalType": "string",
@@ -799,7 +815,10 @@
               "name": "msgJson",
               "type": "string"
             }
-          ]
+          ],
+          "internalType": "tuple[]",
+          "name": "messages",
+          "type": "tuple[]"
         }
       ],
       "name": "executeMultiple",
@@ -808,6 +827,11 @@
           "internalType": "bool",
           "name": "success",
           "type": "bool"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "results",
+          "type": "bytes[]"
         }
       ],
       "stateMutability": "nonpayable",
@@ -815,4 +839,3 @@
     }
   ]
 }
-

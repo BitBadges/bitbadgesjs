@@ -8,6 +8,7 @@ import { getMintApprovals, getNonMintApprovals, getUnhandledCollectionApprovals 
 import { CollectionApprovalWithDetails, iCollectionApprovalWithDetails } from '@/core/approvals.js';
 import {
   AliasPathWithDetails,
+  CollectionInvariantsWithDetails,
   CosmosCoinWrapperPathWithDetails,
   TokenMetadata,
   validateCollectionMetadataUpdate,
@@ -27,7 +28,7 @@ import {
 } from '@/core/permissions.js';
 import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStoreWithDetails } from '@/core/userBalances.js';
-import type { CollectionId, iAddressList, iCollectionMetadata, iTokenMetadata, iUintRange } from '@/interfaces/types/core.js';
+import type { CollectionId, iAddressList, iCollectionInvariantsWithDetails, iCollectionMetadata, iTokenMetadata, iUintRange } from '@/interfaces/types/core.js';
 import type { iCollectionPermissionsWithDetails } from '@/interfaces/types/permissions.js';
 import type { iUserBalanceStoreWithDetails } from '@/interfaces/types/userBalances.js';
 import type { BaseBitBadgesApi, PaginationInfo } from './base.js';
@@ -151,6 +152,9 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
 
   /** The alias (non-wrapping) paths for the collection, with off-chain metadata populated. */
   aliasPaths: iAliasPathWithDetails<T>[];
+
+  /** Collection-level invariants with EVM query challenge metadata populated (WithDetails). */
+  invariants: iCollectionInvariantsWithDetails<T>;
 }
 
 /**
@@ -207,8 +211,11 @@ export class BitBadgesCollection<T extends NumberType>
 
   aliasPaths: AliasPathWithDetails<T>[];
 
+  invariants: CollectionInvariantsWithDetails<T>;
+
   constructor(data: iBitBadgesCollection<T>) {
     super(data);
+    this.invariants = new CollectionInvariantsWithDetails(data.invariants);
     this.collectionApprovals = data.collectionApprovals.map((collectionApproval) => new CollectionApprovalWithDetails(collectionApproval));
     this.collectionPermissions = new CollectionPermissionsWithDetails(data.collectionPermissions);
     this.defaultBalances = new UserBalanceStoreWithDetails(data.defaultBalances);

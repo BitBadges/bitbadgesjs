@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.30.0]
+
+### Version Compatibility
+
+- **BitBadges Chain v25**: 0.30.0 corresponds to BitBadges chain v25 upgrades
+
+### What's New
+
+- **EVM query challenges**: URI and custom data are now correctly handled for all EVM query challenge flows:
+  - Collection invariants (`CollectionInvariants`, `CollectionInvariantsWithDetails`) and their proto serialization
+  - `InvariantsAddObject` for create/update collection messages (previously `evmQueryChallenges` were not supported; now full round-trip with `uri` and `customData`)
+  - Approval criteria (`ApprovalCriteria`, `OutgoingApprovalCriteria`, `IncomingApprovalCriteria`) when serializing to proto
+- Added `toProto()` on `EVMQueryChallenge` and explicit mapping in approval criteria so `uri`/`customData` are always included when building protobuf messages
+- See [BitBadges Chain v25 release information](https://github.com/BitBadges/bitbadgeschain/releases/tag/v25) for more details.
+
+### Installation
+
+```bash
+npm install bitbadgesjs-sdk@^0.30.0
+```
+
 ## [0.29.0]
 
 ### Version Compatibility

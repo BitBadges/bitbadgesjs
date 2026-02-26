@@ -40,7 +40,7 @@ import type {
   iUserOutgoingApproval,
   iUserRoyalties
 } from '@/interfaces/types/approvals.js';
-import type { CollectionId, iAddressList, iMerkleChallenge } from '@/interfaces/types/core.js';
+import type { CollectionId, iAddressList, iEVMQueryChallenge, iEVMQueryChallengeWithDetails, iMerkleChallenge } from '@/interfaces/types/core.js';
 import * as prototokenization from '@/proto/tokenization/index.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import type MerkleTree from 'merkletreejs';
@@ -48,7 +48,7 @@ import type { Options as MerkleTreeJsOptions } from 'merkletreejs/dist/MerkleTre
 import { BigIntify, Stringify, type NumberType } from '../common/string-numbers.js';
 import { AddressList, convertListIdToBech32 } from './addressLists.js';
 import { Balance, BalanceArray } from './balances.js';
-import { CoinTransfer, ETHSignatureChallenge, MerkleChallenge, MustOwnTokens, VotingChallenge } from './misc.js';
+import { CoinTransfer, ETHSignatureChallenge, EVMQueryChallenge, EVMQueryChallengeWithDetails, MerkleChallenge, MustOwnTokens, VotingChallenge } from './misc.js';
 import type { UniversalPermission, UniversalPermissionDetails } from './overlaps.js';
 import { GetListIdWithOptions, GetListWithOptions, GetUintRangesWithOptions, getOverlapsAndNonOverlaps } from './overlaps.js';
 import type { CollectionApprovalPermissionWithDetails } from './permissions.js';
@@ -320,6 +320,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   altTimeChecks?: AltTimeChecks<T>;
   mustPrioritize?: boolean;
   votingChallenges?: VotingChallenge<T>[];
+  evmQueryChallenges?: EVMQueryChallenge<T>[];
 
   constructor(msg: iOutgoingApprovalCriteria<T>) {
     super();
@@ -339,6 +340,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks(msg.altTimeChecks) : undefined;
     this.mustPrioritize = msg.mustPrioritize;
     this.votingChallenges = msg.votingChallenges?.map((x) => new VotingChallenge(x));
+    this.evmQueryChallenges = msg.evmQueryChallenges?.map((x) => new EVMQueryChallenge(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteria<U> {
@@ -357,12 +359,18 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       recipientChecks: this.recipientChecks?.convert(convertFunction),
       initiatorChecks: this.initiatorChecks?.convert(convertFunction),
       altTimeChecks: this.altTimeChecks?.convert(convertFunction),
-      mustPrioritize: this.mustPrioritize
+      mustPrioritize: this.mustPrioritize,
+      votingChallenges: this.votingChallenges?.map((x) => x.convert(convertFunction)),
+      evmQueryChallenges: this.evmQueryChallenges?.map((x) => x.convert(convertFunction))
     });
   }
 
   toProto(): prototokenization.OutgoingApprovalCriteria {
-    return new prototokenization.OutgoingApprovalCriteria(this.convert(Stringify) as any);
+    const converted = this.convert(Stringify) as any;
+    return new prototokenization.OutgoingApprovalCriteria({
+      ...converted,
+      evmQueryChallenges: this.evmQueryChallenges?.map((x) => x.toProto())
+    });
   }
 
   static fromJson<U extends NumberType>(
@@ -403,7 +411,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined,
       altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined,
       mustPrioritize: item.mustPrioritize,
-      votingChallenges: item.votingChallenges ? item.votingChallenges.map((x) => VotingChallenge.fromProto(x, convertFunction)) : undefined
+      votingChallenges: item.votingChallenges ? item.votingChallenges.map((x) => VotingChallenge.fromProto(x, convertFunction)) : undefined,
+      evmQueryChallenges: item.evmQueryChallenges ? item.evmQueryChallenges.map((x) => EVMQueryChallenge.fromProto(x, convertFunction)) : undefined
     });
   }
 
@@ -425,6 +434,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       altTimeChecks: this.altTimeChecks,
       mustPrioritize: this.mustPrioritize,
       votingChallenges: this.votingChallenges,
+      evmQueryChallenges: this.evmQueryChallenges,
 
       requireFromEqualsInitiatedBy: false,
       requireFromDoesNotEqualInitiatedBy: false,
@@ -1138,6 +1148,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   altTimeChecks?: AltTimeChecks<T>;
   mustPrioritize?: boolean;
   votingChallenges?: VotingChallenge<T>[];
+  evmQueryChallenges?: EVMQueryChallenge<T>[];
 
   constructor(msg: iIncomingApprovalCriteria<T>) {
     super();
@@ -1157,6 +1168,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
     this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks(msg.altTimeChecks) : undefined;
     this.mustPrioritize = msg.mustPrioritize;
     this.votingChallenges = msg.votingChallenges?.map((x) => new VotingChallenge(x));
+    this.evmQueryChallenges = msg.evmQueryChallenges?.map((x) => new EVMQueryChallenge(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteria<U> {
@@ -1175,12 +1187,18 @@ export class IncomingApprovalCriteria<T extends NumberType>
       senderChecks: this.senderChecks?.convert(convertFunction),
       initiatorChecks: this.initiatorChecks?.convert(convertFunction),
       altTimeChecks: this.altTimeChecks?.convert(convertFunction),
-      mustPrioritize: this.mustPrioritize
+      mustPrioritize: this.mustPrioritize,
+      votingChallenges: this.votingChallenges?.map((x) => x.convert(convertFunction)),
+      evmQueryChallenges: this.evmQueryChallenges?.map((x) => x.convert(convertFunction))
     });
   }
 
   toProto(): prototokenization.IncomingApprovalCriteria {
-    return new prototokenization.IncomingApprovalCriteria(this.convert(Stringify) as any);
+    const converted = this.convert(Stringify) as any;
+    return new prototokenization.IncomingApprovalCriteria({
+      ...converted,
+      evmQueryChallenges: this.evmQueryChallenges?.map((x) => x.toProto())
+    });
   }
 
   static fromJson<U extends NumberType>(
@@ -1221,7 +1239,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
       initiatorChecks: item.initiatorChecks ? AddressChecks.fromProto(item.initiatorChecks) : undefined,
       altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined,
       mustPrioritize: item.mustPrioritize,
-      votingChallenges: item.votingChallenges ? item.votingChallenges.map((x) => VotingChallenge.fromProto(x, convertFunction)) : undefined
+      votingChallenges: item.votingChallenges ? item.votingChallenges.map((x) => VotingChallenge.fromProto(x, convertFunction)) : undefined,
+      evmQueryChallenges: item.evmQueryChallenges ? item.evmQueryChallenges.map((x) => EVMQueryChallenge.fromProto(x, convertFunction)) : undefined
     });
   }
 
@@ -1243,6 +1262,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
       altTimeChecks: this.altTimeChecks,
       mustPrioritize: this.mustPrioritize,
       votingChallenges: this.votingChallenges,
+      evmQueryChallenges: this.evmQueryChallenges,
 
       requireToEqualsInitiatedBy: false,
       requireToDoesNotEqualInitiatedBy: false,
@@ -1624,6 +1644,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   altTimeChecks?: AltTimeChecks<T>;
   mustPrioritize?: boolean;
   votingChallenges?: VotingChallenge<T>[];
+  evmQueryChallenges?: EVMQueryChallenge<T>[];
   allowBackedMinting?: boolean;
   allowSpecialWrapping?: boolean;
 
@@ -1651,6 +1672,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.altTimeChecks = msg.altTimeChecks ? new AltTimeChecks<T>(msg.altTimeChecks) : undefined;
     this.mustPrioritize = msg.mustPrioritize;
     this.votingChallenges = msg.votingChallenges?.map((x) => new VotingChallenge(x));
+    this.evmQueryChallenges = msg.evmQueryChallenges?.map((x) => new EVMQueryChallenge(x));
     this.allowBackedMinting = msg.allowBackedMinting;
     this.allowSpecialWrapping = msg.allowSpecialWrapping;
   }
@@ -1660,7 +1682,11 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   }
 
   toProto(): prototokenization.ApprovalCriteria {
-    return new prototokenization.ApprovalCriteria(this.convert(Stringify) as any);
+    const converted = this.convert(Stringify) as any;
+    return new prototokenization.ApprovalCriteria({
+      ...converted,
+      evmQueryChallenges: this.evmQueryChallenges?.map((x) => x.toProto())
+    });
   }
 
   static fromJson<U extends NumberType>(
@@ -1705,6 +1731,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined,
       mustPrioritize: item.mustPrioritize,
       votingChallenges: item.votingChallenges ? item.votingChallenges.map((x) => VotingChallenge.fromProto(x, convertFunction)) : undefined,
+      evmQueryChallenges: item.evmQueryChallenges ? item.evmQueryChallenges.map((x) => EVMQueryChallenge.fromProto(x, convertFunction)) : undefined,
       allowBackedMinting: item.allowBackedMinting,
       allowSpecialWrapping: item.allowSpecialWrapping
     });
@@ -1983,6 +2010,7 @@ export class MerkleChallengeWithDetails<T extends NumberType> extends MerkleChal
  */
 export interface iApprovalCriteriaWithDetails<T extends NumberType> extends iApprovalCriteria<T> {
   merkleChallenges?: iMerkleChallengeWithDetails<T>[];
+  evmQueryChallenges?: iEVMQueryChallengeWithDetails<T>[];
 }
 
 /**
@@ -1990,10 +2018,14 @@ export interface iApprovalCriteriaWithDetails<T extends NumberType> extends iApp
  */
 export class ApprovalCriteriaWithDetails<T extends NumberType> extends ApprovalCriteria<T> implements iApprovalCriteriaWithDetails<T> {
   merkleChallenges?: MerkleChallengeWithDetails<T>[];
+  evmQueryChallenges?: EVMQueryChallengeWithDetails<T>[];
 
   constructor(data: iApprovalCriteriaWithDetails<T>) {
     super(data);
     this.merkleChallenges = data.merkleChallenges?.map((x) => new MerkleChallengeWithDetails(x));
+    this.evmQueryChallenges = data.evmQueryChallenges?.map((c) =>
+      c instanceof EVMQueryChallengeWithDetails ? c : new EVMQueryChallengeWithDetails(c)
+    );
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteriaWithDetails<U> {
@@ -2010,6 +2042,7 @@ export class ApprovalCriteriaWithDetails<T extends NumberType> extends ApprovalC
  */
 export interface iIncomingApprovalCriteriaWithDetails<T extends NumberType> extends iIncomingApprovalCriteria<T> {
   merkleChallenges?: iMerkleChallengeWithDetails<T>[];
+  evmQueryChallenges?: iEVMQueryChallengeWithDetails<T>[];
 }
 
 /**
@@ -2020,10 +2053,14 @@ export class IncomingApprovalCriteriaWithDetails<T extends NumberType>
   implements iIncomingApprovalCriteriaWithDetails<T>
 {
   merkleChallenges?: MerkleChallengeWithDetails<T>[];
+  evmQueryChallenges?: EVMQueryChallengeWithDetails<T>[];
 
   constructor(data: iIncomingApprovalCriteriaWithDetails<T>) {
     super(data);
     this.merkleChallenges = data.merkleChallenges?.map((x) => new MerkleChallengeWithDetails(x));
+    this.evmQueryChallenges = data.evmQueryChallenges?.map((c) =>
+      c instanceof EVMQueryChallengeWithDetails ? c : new EVMQueryChallengeWithDetails(c)
+    );
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteriaWithDetails<U> {
@@ -2050,6 +2087,8 @@ export class IncomingApprovalCriteriaWithDetails<T extends NumberType>
       senderChecks: this.senderChecks,
       initiatorChecks: this.initiatorChecks,
       altTimeChecks: this.altTimeChecks,
+      votingChallenges: this.votingChallenges,
+      evmQueryChallenges: this.evmQueryChallenges,
 
       requireToEqualsInitiatedBy: false,
       requireToDoesNotEqualInitiatedBy: false,
@@ -2064,6 +2103,7 @@ export class IncomingApprovalCriteriaWithDetails<T extends NumberType>
  */
 export interface iOutgoingApprovalCriteriaWithDetails<T extends NumberType> extends iOutgoingApprovalCriteria<T> {
   merkleChallenges?: iMerkleChallengeWithDetails<T>[];
+  evmQueryChallenges?: iEVMQueryChallengeWithDetails<T>[];
 }
 
 /**
@@ -2074,10 +2114,14 @@ export class OutgoingApprovalCriteriaWithDetails<T extends NumberType>
   implements iOutgoingApprovalCriteriaWithDetails<T>
 {
   merkleChallenges?: MerkleChallengeWithDetails<T>[];
+  evmQueryChallenges?: EVMQueryChallengeWithDetails<T>[];
 
   constructor(data: iOutgoingApprovalCriteriaWithDetails<T>) {
     super(data);
     this.merkleChallenges = data.merkleChallenges?.map((x) => new MerkleChallengeWithDetails(x));
+    this.evmQueryChallenges = data.evmQueryChallenges?.map((c) =>
+      c instanceof EVMQueryChallengeWithDetails ? c : new EVMQueryChallengeWithDetails(c)
+    );
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteriaWithDetails<U> {
@@ -2104,6 +2148,8 @@ export class OutgoingApprovalCriteriaWithDetails<T extends NumberType>
       recipientChecks: this.recipientChecks,
       initiatorChecks: this.initiatorChecks,
       altTimeChecks: this.altTimeChecks,
+      votingChallenges: this.votingChallenges,
+      evmQueryChallenges: this.evmQueryChallenges,
 
       requireFromEqualsInitiatedBy: false,
       requireFromDoesNotEqualInitiatedBy: false,
@@ -2185,7 +2231,20 @@ export class CollectionApprovalWithDetails<T extends NumberType> extends Collect
                 ...x,
                 challengeInfoDetails: undefined
               };
-            })
+            }),
+          evmQueryChallenges: this.approvalCriteria?.evmQueryChallenges?.map((c) =>
+            c instanceof EVMQueryChallengeWithDetails
+              ? {
+                  contractAddress: c.contractAddress,
+                  calldata: c.calldata,
+                  expectedResult: c.expectedResult,
+                  comparisonOperator: c.comparisonOperator,
+                  gasLimit: c.gasLimit,
+                  uri: c.uri,
+                  customData: c.customData
+                }
+              : c
+          )
         },
         approvalCriteriaWithDetails: this.approvalCriteria?.convert(BigIntify)
       }
