@@ -1,0 +1,80 @@
+import type { EvmTransaction, SigningResult } from '../types.js';
+import type { TransactionPayload } from '@/transactions/messages/base.js';
+
+/**
+ * Base interface for wallet adapters.
+ * Wallet adapters provide a unified interface for different wallet types (Cosmos, EVM).
+ *
+ * Implementations must support either Cosmos signing (signDirect) or EVM transactions (sendEvmTransaction).
+ *
+ * @category Signing
+ */
+export interface WalletAdapter {
+  /** The chain type this adapter supports */
+  readonly chainType: 'cosmos' | 'evm';
+
+  /** The address managed by this adapter (BitBadges bb-prefixed for Cosmos, 0x for EVM) */
+  readonly address: string;
+
+  /**
+   * Get the public key in base64 format.
+   * Required for Cosmos transactions (used to build the auth info).
+   * Returns empty string for EVM-only adapters.
+   */
+  getPublicKey(): Promise<string>;
+
+  /**
+   * Sign a transaction using Cosmos SignDirect format.
+   * Only implemented by Cosmos wallet adapters.
+   *
+   * @param payload - The transaction payload containing signBytes
+   * @param accountNumber - The account number on the blockchain
+   * @returns The signature and public key
+   */
+  signDirect?(payload: TransactionPayload, accountNumber: number): Promise<SigningResult>;
+
+  /**
+   * Send an EVM transaction.
+   * Only implemented by EVM wallet adapters.
+   *
+   * @param tx - The EVM transaction to send
+   * @returns The transaction hash
+   */
+  sendEvmTransaction?(tx: EvmTransaction): Promise<string>;
+
+  /** Check if the adapter supports SignDirect signing */
+  supportsSignDirect(): boolean;
+
+  /** Check if the adapter supports Amino signing (legacy) */
+  supportsSignAmino(): boolean;
+
+  /** Check if the adapter supports EVM transactions */
+  supportsEvmTransaction(): boolean;
+}
+
+/**
+ * Abstract base class for wallet adapters with common functionality.
+ *
+ * @category Signing
+ */
+export abstract class BaseWalletAdapter implements WalletAdapter {
+  abstract readonly chainType: 'cosmos' | 'evm';
+  abstract readonly address: string;
+
+  abstract getPublicKey(): Promise<string>;
+
+  signDirect?(payload: TransactionPayload, accountNumber: number): Promise<SigningResult>;
+  sendEvmTransaction?(tx: EvmTransaction): Promise<string>;
+
+  supportsSignDirect(): boolean {
+    return typeof this.signDirect === 'function';
+  }
+
+  supportsSignAmino(): boolean {
+    return false;
+  }
+
+  supportsEvmTransaction(): boolean {
+    return typeof this.sendEvmTransaction === 'function';
+  }
+}
