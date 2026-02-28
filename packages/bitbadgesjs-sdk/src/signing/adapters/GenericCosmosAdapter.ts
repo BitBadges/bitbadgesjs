@@ -24,7 +24,7 @@ interface KeplrLike {
       bodyBytes: Uint8Array;
       authInfoBytes: Uint8Array;
       chainId: string;
-      accountNumber: Long | bigint | string;
+      accountNumber: bigint | string;
     },
     signOptions?: {
       preferNoSetFee?: boolean;
@@ -48,25 +48,7 @@ interface KeplrLike {
   }>;
 }
 
-/**
- * Long type for account numbers (Keplr uses this).
- */
-interface Long {
-  low: number;
-  high: number;
-  unsigned: boolean;
-}
-
-/**
- * Create a Long from a number (simple implementation for Keplr compatibility).
- */
-function toLong(value: number): Long {
-  return {
-    low: value | 0,
-    high: 0,
-    unsigned: false
-  };
-}
+// Use the 'long' library for proper Keplr compatibility
 
 /**
  * Internal signing strategy interface.
@@ -76,23 +58,31 @@ interface SigningStrategy {
 }
 
 /**
+ * Sign document structure for Keplr-like wallets.
+ */
+interface KeplrSignDoc {
+  bodyBytes: Uint8Array;
+  authInfoBytes: Uint8Array;
+  chainId: string;
+  accountNumber: bigint;
+}
+
+/**
  * Browser wallet signing strategy (Keplr, Leap, etc.)
  */
 class BrowserWalletStrategy implements SigningStrategy {
   constructor(
     private wallet: KeplrLike,
-    private signDoc: (signBytes: Uint8Array, accountNumber: number) => {
-      bodyBytes: Uint8Array;
-      authInfoBytes: Uint8Array;
-      chainId: string;
-      accountNumber: Long;
-    }
+    private chainId: string
   ) {}
 
-  async sign(signBytes: Uint8Array, chainId: string, address: string, accountNumber: number): Promise<SigningResult> {
-    const signDoc = this.signDoc(signBytes, accountNumber);
+  async sign(_signBytes: Uint8Array, _chainId: string, address: string, _accountNumber: number): Promise<SigningResult> {
+    // This method is not used for browser wallets - signWithDoc is used instead
+    throw new Error('BrowserWalletStrategy.sign should not be called directly. Use signWithDoc instead.');
+  }
 
-    const result = await this.wallet.signDirect(chainId, address, signDoc, {
+  async signWithDoc(signDoc: KeplrSignDoc, address: string): Promise<SigningResult> {
+    const result = await this.wallet.signDirect(this.chainId, address, signDoc, {
       preferNoSetFee: true,
       preferNoSetMemo: true
     });
@@ -176,24 +166,14 @@ export class GenericCosmosAdapter extends BaseWalletAdapter implements WalletAda
   private readonly prefix: string;
   private readonly publicKeyBase64: string;
   private readonly signingStrategy: SigningStrategy;
-  private readonly payloadBuilder?: (payload: TransactionPayload, accountNumber: number) => {
-    bodyBytes: Uint8Array;
-    authInfoBytes: Uint8Array;
-    chainId: string;
-    accountNumber: Long;
-  };
+  private readonly isBrowserWallet: boolean;
 
   private constructor(
     address: string,
     publicKey: string,
     config: GenericCosmosAdapterConfig,
     signingStrategy: SigningStrategy,
-    payloadBuilder?: (payload: TransactionPayload, accountNumber: number) => {
-      bodyBytes: Uint8Array;
-      authInfoBytes: Uint8Array;
-      chainId: string;
-      accountNumber: Long;
-    }
+    isBrowserWallet = false
   ) {
     super();
     this.address = address;
@@ -201,7 +181,7 @@ export class GenericCosmosAdapter extends BaseWalletAdapter implements WalletAda
     this.chainId = config.chainId;
     this.prefix = config.prefix || 'bb';
     this.signingStrategy = signingStrategy;
-    this.payloadBuilder = payloadBuilder;
+    this.isBrowserWallet = isBrowserWallet;
   }
 
   // ==================== Browser Wallet Factory Methods ====================
@@ -265,18 +245,9 @@ export class GenericCosmosAdapter extends BaseWalletAdapter implements WalletAda
 
     const publicKeyBase64 = Buffer.from(keyInfo.pubKey).toString('base64');
 
-    const payloadBuilder = (_payload: TransactionPayload, accountNumber: number) => ({
-      bodyBytes: _payload.signDirect.body.toBinary(),
-      authInfoBytes: _payload.signDirect.authInfo.toBinary(),
-      chainId,
-      accountNumber: toLong(accountNumber)
-    });
+    const strategy = new BrowserWalletStrategy(wallet, chainId);
 
-    const strategy = new BrowserWalletStrategy(wallet, (signBytes, accNum) =>
-      payloadBuilder({ signDirect: { body: { toBinary: () => signBytes } } } as any, accNum)
-    );
-
-    return new GenericCosmosAdapter(address, publicKeyBase64, { chainId, prefix }, strategy, payloadBuilder);
+    return new GenericCosmosAdapter(address, publicKeyBase64, { chainId, prefix }, strategy, true);
   }
 
   /**
@@ -370,12 +341,17 @@ export class GenericCosmosAdapter extends BaseWalletAdapter implements WalletAda
   }
 
   async signDirect(payload: TransactionPayload, accountNumber: number): Promise<SigningResult> {
-    // For browser wallets, we need to use the full signDirect flow
-    if (this.payloadBuilder) {
-      const signDoc = this.payloadBuilder(payload, accountNumber);
-      // The browser wallet strategy handles the actual signing
+    // For browser wallets, we need to use the full signDirect flow with Keplr
+    if (this.isBrowserWallet) {
+      const signDoc: KeplrSignDoc = {
+        bodyBytes: payload.signDirect.body.toBinary(),
+        authInfoBytes: payload.signDirect.authInfo.toBinary(),
+        chainId: this.chainId,
+        accountNumber: BigInt(accountNumber)
+      };
+
       const strategy = this.signingStrategy as BrowserWalletStrategy;
-      return strategy.sign(signDoc.bodyBytes, this.chainId, this.address, accountNumber);
+      return strategy.signWithDoc(signDoc, this.address);
     }
 
     // For direct key signing, we sign the signBytes hash

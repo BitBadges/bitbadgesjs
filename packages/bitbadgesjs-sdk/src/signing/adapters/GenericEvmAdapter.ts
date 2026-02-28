@@ -16,6 +16,9 @@ interface EthersSigner {
     hash: string;
     wait(): Promise<any>;
   }>;
+  provider?: {
+    getNetwork(): Promise<{ chainId: bigint }>;
+  };
 }
 
 /**
@@ -23,6 +26,17 @@ interface EthersSigner {
  */
 interface EIP1193Provider {
   request(args: { method: string; params?: any[] }): Promise<any>;
+}
+
+/**
+ * Options for creating an EVM adapter with chain validation.
+ */
+export interface EvmAdapterOptions {
+  /**
+   * Expected EVM chain ID. If provided, the adapter will validate that
+   * the wallet is connected to this chain.
+   */
+  expectedChainId?: number;
 }
 
 /**
@@ -62,12 +76,54 @@ export class GenericEvmAdapter extends BaseWalletAdapter implements WalletAdapte
   }
 
   /**
+   * Get the current chain ID from the provider.
+   *
+   * @param provider - The EIP-1193 provider
+   * @returns The current chain ID as a number
+   */
+  private static async getChainId(provider: EIP1193Provider): Promise<number> {
+    const chainIdHex = await provider.request({ method: 'eth_chainId' });
+    return parseInt(chainIdHex, 16);
+  }
+
+  /**
+   * Validate that the wallet is connected to the expected chain.
+   *
+   * @param provider - The EIP-1193 provider
+   * @param expectedChainId - The expected EVM chain ID
+   * @throws Error if wallet is on wrong network
+   */
+  private static async validateChainId(provider: EIP1193Provider, expectedChainId: number): Promise<void> {
+    const currentChainId = await GenericEvmAdapter.getChainId(provider);
+    if (currentChainId !== expectedChainId) {
+      throw new Error(
+        `Wallet is connected to chain ${currentChainId}, but expected chain ${expectedChainId}. ` +
+          `Please switch your wallet to the correct network.`
+      );
+    }
+  }
+
+  /**
    * Create an adapter from an ethers.js Signer (v6).
    *
    * @param signer - An ethers.js Signer instance
+   * @param options - Optional configuration including expected chain ID
    * @returns A new GenericEvmAdapter connected to the signer
+   * @throws Error if expectedChainId is provided and wallet is on wrong network
    */
-  static async fromSigner(signer: EthersSigner): Promise<GenericEvmAdapter> {
+  static async fromSigner(signer: EthersSigner, options?: EvmAdapterOptions): Promise<GenericEvmAdapter> {
+    // Validate chain ID if expected chain is specified
+    if (options?.expectedChainId !== undefined && signer.provider) {
+      const network = await signer.provider.getNetwork();
+      const currentChainId = Number(network.chainId);
+      if (currentChainId !== options.expectedChainId) {
+        throw new Error(
+          `Wallet is connected to chain ${currentChainId}, but expected chain ${options.expectedChainId}. ` +
+            `Please switch your wallet to the correct network.`
+        );
+      }
+    }
+
     const address = await signer.getAddress();
     return new GenericEvmAdapter(address, signer);
   }
@@ -76,9 +132,16 @@ export class GenericEvmAdapter extends BaseWalletAdapter implements WalletAdapte
    * Create an adapter from an EIP-1193 provider (like window.ethereum).
    *
    * @param provider - An EIP-1193 compliant provider
+   * @param options - Optional configuration including expected chain ID
    * @returns A new GenericEvmAdapter connected to the provider
+   * @throws Error if expectedChainId is provided and wallet is on wrong network
    */
-  static async fromProvider(provider: EIP1193Provider): Promise<GenericEvmAdapter> {
+  static async fromProvider(provider: EIP1193Provider, options?: EvmAdapterOptions): Promise<GenericEvmAdapter> {
+    // Validate chain ID if expected chain is specified
+    if (options?.expectedChainId !== undefined) {
+      await GenericEvmAdapter.validateChainId(provider, options.expectedChainId);
+    }
+
     // Request accounts
     const accounts = await provider.request({ method: 'eth_requestAccounts' });
     if (!accounts || accounts.length === 0) {
@@ -90,13 +153,15 @@ export class GenericEvmAdapter extends BaseWalletAdapter implements WalletAdapte
   /**
    * Create an adapter from window.ethereum (MetaMask, etc.).
    *
+   * @param options - Optional configuration including expected chain ID
    * @returns A new GenericEvmAdapter connected to the browser wallet
+   * @throws Error if expectedChainId is provided and wallet is on wrong network
    */
-  static async fromBrowserWallet(): Promise<GenericEvmAdapter> {
+  static async fromBrowserWallet(options?: EvmAdapterOptions): Promise<GenericEvmAdapter> {
     if (typeof window === 'undefined' || !(window as any).ethereum) {
       throw new Error('No Ethereum provider found. Please install MetaMask or another wallet.');
     }
-    return GenericEvmAdapter.fromProvider((window as any).ethereum);
+    return GenericEvmAdapter.fromProvider((window as any).ethereum, options);
   }
 
   /**

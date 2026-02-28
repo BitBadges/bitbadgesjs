@@ -63,6 +63,58 @@ export interface SigningFee {
 }
 
 /**
+ * Network mode for the signing client.
+ * - 'mainnet': BitBadges mainnet (default)
+ * - 'testnet': BitBadges testnet
+ * - 'local': Local development environment
+ *
+ * @category Signing
+ */
+export type NetworkMode = 'mainnet' | 'testnet' | 'local';
+
+/**
+ * Network configuration with all endpoints and chain IDs.
+ *
+ * @category Signing
+ */
+export interface NetworkConfig {
+  /** BitBadges API URL (indexer) */
+  apiUrl: string;
+  /** Node REST API URL (LCD) */
+  nodeUrl: string;
+  /** Cosmos chain ID (e.g., 'bitbadges-1') */
+  cosmosChainId: string;
+  /** EVM chain ID for MetaMask (e.g., 90123 for local) */
+  evmChainId: number;
+}
+
+/**
+ * Preset network configurations.
+ *
+ * @category Signing
+ */
+export const NETWORK_CONFIGS: Record<NetworkMode, NetworkConfig> = {
+  mainnet: {
+    apiUrl: 'https://api.bitbadges.io',
+    nodeUrl: 'https://lcd.bitbadges.io',
+    cosmosChainId: 'bitbadges-1',
+    evmChainId: 50024
+  },
+  testnet: {
+    apiUrl: 'https://api.bitbadges.io/testnet',
+    nodeUrl: 'https://lcd-testnet.bitbadges.io',
+    cosmosChainId: 'bitbadges-2',
+    evmChainId: 50025
+  },
+  local: {
+    apiUrl: 'http://localhost:3001',
+    nodeUrl: 'http://localhost:1317',
+    cosmosChainId: 'bitbadges-1',
+    evmChainId: 90123
+  }
+};
+
+/**
  * Options for the signing client.
  *
  * @category Signing
@@ -70,16 +122,26 @@ export interface SigningFee {
 export interface SigningClientOptions {
   /** The wallet adapter to use for signing */
   adapter: WalletAdapterInterface;
-  /** BitBadges API URL. Default: https://api.bitbadges.io */
+
+  /**
+   * Network mode preset. Use this for standard configurations.
+   * - 'mainnet': BitBadges mainnet (default)
+   * - 'testnet': BitBadges testnet
+   * - 'local': Local development (localhost)
+   *
+   * Individual URL/chainId options below will override the preset values.
+   */
+  network?: NetworkMode;
+
+  /** Override the API URL (indexer). Overrides network preset. */
   apiUrl?: string;
-  /** Node REST API URL. Default: https://node.bitbadges.io:1317 */
+  /** Override the node URL (LCD). Overrides network preset. */
   nodeUrl?: string;
-  /** Node RPC URL. Default: https://node.bitbadges.io:26657 */
-  rpcUrl?: string;
-  /** Use testnet instead of mainnet. Default: false */
-  testnet?: boolean;
-  /** Override the chain ID */
-  chainIdOverride?: string;
+  /** Override the Cosmos chain ID. Overrides network preset. */
+  cosmosChainId?: string;
+  /** Override the EVM chain ID. Overrides network preset. */
+  evmChainId?: number;
+
   /** Enable automatic sequence retry on mismatch. Default: true */
   sequenceRetryEnabled?: boolean;
   /** Maximum sequence retry attempts. Default: 3 */

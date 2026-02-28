@@ -43,6 +43,8 @@ export type {
   AccountInfo,
   BroadcastResult,
   EvmTransaction,
+  NetworkConfig,
+  NetworkMode,
   SignAndBroadcastOptions,
   SigningClientOptions,
   SigningFee,
@@ -52,11 +54,15 @@ export type {
   WalletAdapterInterface
 } from './types.js';
 
+// Network configuration presets
+export { NETWORK_CONFIGS } from './types.js';
+
 // Adapters
 export {
   WalletAdapter,
   BaseWalletAdapter,
   GenericCosmosAdapter,
   GenericEvmAdapter,
-  type GenericCosmosAdapterConfig
+  type GenericCosmosAdapterConfig,
+  type EvmAdapterOptions
 } from './adapters/index.js';

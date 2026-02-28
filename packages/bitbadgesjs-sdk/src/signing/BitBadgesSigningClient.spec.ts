@@ -86,7 +86,7 @@ describe('BitBadgesSigningClient', () => {
         adapter,
         apiUrl: 'https://custom-api.example.com',
         nodeUrl: 'https://custom-node.example.com:1317',
-        testnet: true,
+        network: 'testnet',
         sequenceRetryEnabled: false,
         maxSequenceRetries: 5,
         gasMultiplier: 1.5,
@@ -211,23 +211,28 @@ describe('SigningClientOptions', () => {
     expect(client).toBeDefined();
   });
 
-  it('should respect testnet flag', () => {
+  it('should respect network mode', () => {
     const adapter = new MockCosmosAdapter();
-    const clientMainnet = new BitBadgesSigningClient({ adapter, testnet: false });
-    const clientTestnet = new BitBadgesSigningClient({ adapter, testnet: true });
+    const clientMainnet = new BitBadgesSigningClient({ adapter, network: 'mainnet' });
+    const clientTestnet = new BitBadgesSigningClient({ adapter, network: 'testnet' });
+    const clientLocal = new BitBadgesSigningClient({ adapter, network: 'local' });
 
-    // Both should be created successfully
+    // All should be created successfully
     expect(clientMainnet).toBeDefined();
     expect(clientTestnet).toBeDefined();
+    expect(clientLocal).toBeDefined();
   });
 
-  it('should respect chainIdOverride', () => {
+  it('should respect custom chain IDs', () => {
     const adapter = new MockCosmosAdapter();
     const client = new BitBadgesSigningClient({
       adapter,
-      chainIdOverride: 'custom-chain-123'
+      cosmosChainId: 'custom-chain-123',
+      evmChainId: 12345
     });
 
     expect(client).toBeDefined();
+    expect(client.config.cosmosChainId).toBe('custom-chain-123');
+    expect(client.evmChainId).toBe(12345);
   });
 });

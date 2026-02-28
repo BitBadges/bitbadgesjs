@@ -6,4 +6,4 @@
 
 export { WalletAdapter, BaseWalletAdapter } from './WalletAdapter.js';
 export { GenericCosmosAdapter, type GenericCosmosAdapterConfig } from './GenericCosmosAdapter.js';
-export { GenericEvmAdapter } from './GenericEvmAdapter.js';
+export { GenericEvmAdapter, type EvmAdapterOptions } from './GenericEvmAdapter.js';

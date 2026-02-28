@@ -1,29 +1,22 @@
-import axios, { type AxiosInstance } from 'axios';
 import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
-import { MAINNET_CHAIN_DETAILS, TESTNET_CHAIN_DETAILS } from '@/common/constants.js';
 import { generateEndpointAccount, type AccountResponse } from '@/node-rest-api/account.js';
 import { createTransactionPayload, createTxBroadcastBody, type TxContext } from '@/transactions/messages/base.js';
 import type { Fee } from '@/transactions/messages/common.js';
 import type { Message } from '@bufbuild/protobuf';
+import axios, { type AxiosInstance } from 'axios';
 import type { WalletAdapter } from './adapters/WalletAdapter.js';
-import type {
-  AccountInfo,
-  BroadcastResult,
-  SignAndBroadcastOptions,
-  SigningClientOptions,
-  SigningFee,
-  SimulateResult,
-  TransactionMessage
+import {
+  NETWORK_CONFIGS,
+  type AccountInfo,
+  type BroadcastResult,
+  type NetworkConfig,
+  type NetworkMode,
+  type SignAndBroadcastOptions,
+  type SigningClientOptions,
+  type SimulateResult,
+  type TransactionMessage
 } from './types.js';
 
-/** Default API URL for BitBadges mainnet (indexer API) */
-const DEFAULT_API_URL = 'https://api.bitbadges.io';
-/** Default API URL for BitBadges testnet (indexer API) */
-const TESTNET_API_URL = 'https://api.bitbadges.io/testnet';
-/** Default node REST API (LCD) URL for BitBadges mainnet */
-const DEFAULT_NODE_URL = 'https://lcd.bitbadges.io';
-/** Default node REST API (LCD) URL for BitBadges testnet */
-const TESTNET_NODE_URL = 'https://lcd-testnet.bitbadges.io';
 /** Default gas limit for Cosmos transactions */
 const DEFAULT_GAS_LIMIT = 400000;
 /** Default gas limit for EVM precompile transactions */
@@ -67,10 +60,7 @@ const DEFAULT_GAS_PRICE = 0.025;
  */
 export class BitBadgesSigningClient {
   private readonly adapter: WalletAdapter;
-  private readonly apiUrl: string;
-  private readonly nodeUrl: string;
-  private readonly testnet: boolean;
-  private readonly chainIdOverride?: string;
+  private readonly networkConfig: NetworkConfig;
   private readonly sequenceRetryEnabled: boolean;
   private readonly maxSequenceRetries: number;
   private readonly gasMultiplier: number;
@@ -86,16 +76,22 @@ export class BitBadgesSigningClient {
    * Create a new BitBadgesSigningClient.
    *
    * @param options - Configuration options for the client
+   * @throws Error if EVM adapter is used and MetaMask is on wrong network
    */
   constructor(options: SigningClientOptions) {
     this.adapter = options.adapter;
-    this.testnet = options.testnet || false;
 
-    // Use testnet URLs if testnet flag is set and no custom URLs provided
-    this.apiUrl = options.apiUrl || (this.testnet ? TESTNET_API_URL : DEFAULT_API_URL);
-    this.nodeUrl = options.nodeUrl || (this.testnet ? TESTNET_NODE_URL : DEFAULT_NODE_URL);
+    // Resolve network configuration from preset or custom values
+    const network: NetworkMode = options.network || 'mainnet';
+    const baseConfig = NETWORK_CONFIGS[network];
 
-    this.chainIdOverride = options.chainIdOverride;
+    this.networkConfig = {
+      apiUrl: options.apiUrl || baseConfig.apiUrl,
+      nodeUrl: options.nodeUrl || baseConfig.nodeUrl,
+      cosmosChainId: options.cosmosChainId || baseConfig.cosmosChainId,
+      evmChainId: options.evmChainId ?? baseConfig.evmChainId
+    };
+
     this.sequenceRetryEnabled = options.sequenceRetryEnabled !== false; // Default: true
     this.maxSequenceRetries = options.maxSequenceRetries || DEFAULT_MAX_SEQUENCE_RETRIES;
     this.gasMultiplier = options.gasMultiplier || DEFAULT_GAS_MULTIPLIER;
@@ -110,6 +106,13 @@ export class BitBadgesSigningClient {
         ...(this.apiKey && { 'x-api-key': this.apiKey })
       }
     });
+  }
+
+  /**
+   * Get the network configuration.
+   */
+  get config(): NetworkConfig {
+    return this.networkConfig;
   }
 
   /**
@@ -132,13 +135,31 @@ export class BitBadgesSigningClient {
   }
 
   /**
-   * Get the chain ID being used.
+   * Get the Cosmos chain ID being used.
    */
   private get chainId(): string {
-    if (this.chainIdOverride) {
-      return this.chainIdOverride;
-    }
-    return this.testnet ? TESTNET_CHAIN_DETAILS.cosmosChainId : MAINNET_CHAIN_DETAILS.cosmosChainId;
+    return this.networkConfig.cosmosChainId;
+  }
+
+  /**
+   * Get the EVM chain ID being used.
+   */
+  get evmChainId(): number {
+    return this.networkConfig.evmChainId;
+  }
+
+  /**
+   * Get the node URL (LCD endpoint).
+   */
+  private get nodeUrl(): string {
+    return this.networkConfig.nodeUrl;
+  }
+
+  /**
+   * Get the API URL (BitBadges indexer).
+   */
+  private get apiUrl(): string {
+    return this.networkConfig.apiUrl;
   }
 
   /**
@@ -159,7 +180,29 @@ export class BitBadgesSigningClient {
     const endpoint = generateEndpointAccount(bbAddress);
     const response = await this.axiosInstance.get<AccountResponse>(`${this.nodeUrl}${endpoint}`);
 
-    const baseAccount = response.data.account.base_account;
+    // Handle various account response structures
+    // The response can be nested differently depending on account type
+    const account = response.data?.account;
+    const baseAccount = account?.base_account || account;
+
+    // Handle case where account doesn't exist yet (new account)
+    if (!baseAccount) {
+      // For new accounts, we need the public key from the adapter
+      let publicKey = '';
+      try {
+        publicKey = await this.adapter.getPublicKey();
+      } catch {
+        // Public key not available yet - that's ok for new accounts
+      }
+
+      this.cachedAccountInfo = {
+        address: bbAddress,
+        accountNumber: 0,
+        sequence: 0,
+        publicKey
+      };
+      return this.cachedAccountInfo;
+    }
 
     // Get public key from adapter or chain response
     let publicKey = baseAccount.pub_key?.key || '';
@@ -173,8 +216,8 @@ export class BitBadgesSigningClient {
 
     this.cachedAccountInfo = {
       address: bbAddress,
-      accountNumber: parseInt(baseAccount.account_number, 10),
-      sequence: parseInt(baseAccount.sequence, 10),
+      accountNumber: parseInt(baseAccount.account_number || '0', 10),
+      sequence: parseInt(baseAccount.sequence || '0', 10),
       publicKey
     };
 
@@ -221,8 +264,7 @@ export class BitBadgesSigningClient {
     const dummySignature = '0'.repeat(128);
 
     const txContext: TxContext = {
-      testnet: this.testnet,
-      chainIdOverride: this.chainIdOverride,
+      chainIdOverride: this.chainId,
       sender: {
         address: this.address as any,
         sequence: accountInfo.sequence,
@@ -316,8 +358,7 @@ export class BitBadgesSigningClient {
 
     // Create transaction context
     const txContext: TxContext = {
-      testnet: this.testnet,
-      chainIdOverride: this.chainIdOverride,
+      chainIdOverride: this.chainId,
       sender: {
         address: this.address as any,
         sequence: accountInfo.sequence,
@@ -338,7 +379,9 @@ export class BitBadgesSigningClient {
 
     const signResult = await this.adapter.signDirect(payload, accountInfo.accountNumber);
 
-    // Create broadcast body
+    // Create broadcast body using the same approach as the frontend:
+    // Use createTxBroadcastBody with the original context and messages
+    // This ensures the bytes are recreated identically to what was signed
     const broadcastBody = createTxBroadcastBody(txContext, protoMessages, signResult.signature);
 
     // Broadcast
@@ -412,8 +455,7 @@ export class BitBadgesSigningClient {
 
     // Create payload - only evmAddress, no sender (for EVM-only path)
     const txContext: TxContext = {
-      testnet: this.testnet,
-      chainIdOverride: this.chainIdOverride,
+      chainIdOverride: this.chainId,
       evmAddress,
       fee: this.calculateFee(this.evmPrecompileGasLimit),
       memo: options?.memo || ''
