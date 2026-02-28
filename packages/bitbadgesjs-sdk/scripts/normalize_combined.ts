@@ -311,11 +311,16 @@ function removeImportLinesFromFile(filePath: string): void {
       }
 
       // Fields that are duplicates from iCollectionDoc (already defined in parent)
+      // These cause typeconv "Cyclic dependency detected" errors when both parent and child define the same field
       const duplicateFields = [
         'defaultBalances: iUserBalanceStore',
         'collectionPermissions: iCollectionPermissions',
         'collectionMetadata: iCollectionMetadata',
-        'tokenMetadata: iTokenMetadata'
+        'tokenMetadata: iTokenMetadata',
+        'invariants: iCollectionInvariants',
+        'collectionApprovals: iCollectionApproval',
+        'cosmosCoinWrapperPaths: iCosmosCoinWrapperPath',
+        'aliasPaths: iAliasPath'
       ];
 
       // Find and mark lines to remove within the iBitBadgesCollection interface
