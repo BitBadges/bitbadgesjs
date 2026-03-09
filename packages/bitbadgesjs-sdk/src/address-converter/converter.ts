@@ -62,6 +62,28 @@ const bitbadgesToEth = (bitbadgesAddress: string) => {
 };
 
 /**
+ * Derives a bech32 address from a compressed secp256k1 public key using standard Cosmos
+ * address derivation: ripemd160(sha256(compressedPubKey)).
+ *
+ * This is the correct derivation for chains using cosmos.crypto.secp256k1.PubKey.
+ * For EVM-derived addresses, use convertToBitBadgesAddress with an EVM hex address instead.
+ *
+ * @param compressedPubKeyHex - The compressed public key as a hex string (33 bytes / 66 hex chars)
+ * @param prefix - The bech32 prefix (default: 'bb')
+ * @returns The bech32-encoded address
+ *
+ * @category Address Utils
+ */
+export function cosmosAddressFromPublicKey(compressedPubKeyHex: string, prefix = 'bb'): string {
+  const crypto = require('crypto');
+  const pubKeyBytes = Buffer.from(compressedPubKeyHex, 'hex');
+  const sha256Hash = crypto.createHash('sha256').update(pubKeyBytes).digest();
+  const ripemd160Hash = crypto.createHash('ripemd160').update(sha256Hash).digest();
+  const words = bech32.toWords(ripemd160Hash);
+  return bech32.encode(prefix, words);
+}
+
+/**
  * Converts an address from any supported chain to a bech32 formatted address prefixed with `bb`.
  * If we are unable to convert the address, we return an empty string ('').
  *

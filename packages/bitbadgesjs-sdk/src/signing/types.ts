@@ -86,6 +86,8 @@ export interface NetworkConfig {
   cosmosChainId: string;
   /** EVM chain ID for MetaMask (e.g., 90123 for local) */
   evmChainId: number;
+  /** EVM JSON-RPC URL for server-side EVM signing */
+  evmRpcUrl: string;
 }
 
 /**
@@ -98,19 +100,22 @@ export const NETWORK_CONFIGS: Record<NetworkMode, NetworkConfig> = {
     apiUrl: 'https://api.bitbadges.io',
     nodeUrl: 'https://lcd.bitbadges.io',
     cosmosChainId: 'bitbadges-1',
-    evmChainId: 50024
+    evmChainId: 50024,
+    evmRpcUrl: 'https://evm-rpc.bitbadges.io'
   },
   testnet: {
     apiUrl: 'https://api.bitbadges.io/testnet',
     nodeUrl: 'https://lcd-testnet.bitbadges.io',
     cosmosChainId: 'bitbadges-2',
-    evmChainId: 50025
+    evmChainId: 50025,
+    evmRpcUrl: 'https://evm-rpc-testnet.bitbadges.io'
   },
   local: {
     apiUrl: 'http://localhost:3001',
     nodeUrl: 'http://localhost:1317',
     cosmosChainId: 'bitbadges-1',
-    evmChainId: 90123
+    evmChainId: 90123,
+    evmRpcUrl: 'http://localhost:8545'
   }
 };
 
@@ -141,6 +146,8 @@ export interface SigningClientOptions {
   cosmosChainId?: string;
   /** Override the EVM chain ID. Overrides network preset. */
   evmChainId?: number;
+  /** Override the EVM JSON-RPC URL. Overrides network preset. */
+  evmRpcUrl?: string;
 
   /** Enable automatic sequence retry on mismatch. Default: true */
   sequenceRetryEnabled?: boolean;
@@ -224,6 +231,9 @@ export interface WalletAdapterInterface {
 
   /** Send an EVM transaction (for EVM wallets) */
   sendEvmTransaction?(tx: EvmTransaction): Promise<string>;
+
+  /** Estimate gas for an EVM transaction (for EVM wallets) */
+  estimateEvmGas?(tx: EvmTransaction): Promise<bigint>;
 
   /** Check if the adapter supports SignDirect signing */
   supportsSignDirect(): boolean;

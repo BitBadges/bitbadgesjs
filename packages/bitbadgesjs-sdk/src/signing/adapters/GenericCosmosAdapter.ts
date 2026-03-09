@@ -1,4 +1,4 @@
-import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
+import { convertToBitBadgesAddress, cosmosAddressFromPublicKey } from '@/address-converter/converter.js';
 import { BaseWalletAdapter, type WalletAdapter } from './WalletAdapter.js';
 import type { SigningResult } from '../types.js';
 import type { TransactionPayload } from '@/transactions/messages/base.js';
@@ -266,13 +266,21 @@ export class GenericCosmosAdapter extends BaseWalletAdapter implements WalletAda
    *
    * @param mnemonic - The BIP-39 mnemonic phrase (12 or 24 words)
    * @param chainId - The chain ID to use
-   * @param prefix - Optional address prefix (default: 'bb')
+   * @param options - Optional: prefix string (default 'bb') or options object with prefix
    * @returns A new GenericCosmosAdapter for server-side signing
+   *
+   * @example
+   * ```typescript
+   * const adapter = await GenericCosmosAdapter.fromMnemonic('word1 word2 ...', 'bitbadges-2');
+   * const client = new BitBadgesSigningClient({ adapter, network: 'testnet' });
+   * ```
    */
-  static async fromMnemonic(mnemonic: string, chainId: string, prefix = 'bb'): Promise<GenericCosmosAdapter> {
+  static async fromMnemonic(mnemonic: string, chainId: string, options?: string | { prefix?: string }): Promise<GenericCosmosAdapter> {
+    const prefix = typeof options === 'string' ? options : (options?.prefix || 'bb');
+
     const { HDNodeWallet } = await import('ethers');
-    const wallet = HDNodeWallet.fromPhrase(mnemonic);
-    return GenericCosmosAdapter.createFromEthersWallet(wallet, chainId, prefix);
+    const wallet = HDNodeWallet.fromPhrase(mnemonic, undefined, "m/44'/60'/0'/0/0");
+    return GenericCosmosAdapter.createFromSigningKey(wallet.signingKey, chainId, prefix);
   }
 
   /**
@@ -282,32 +290,31 @@ export class GenericCosmosAdapter extends BaseWalletAdapter implements WalletAda
    *
    * @param privateKey - The private key (hex string, with or without 0x prefix)
    * @param chainId - The chain ID to use
-   * @param prefix - Optional address prefix (default: 'bb')
+   * @param options - Optional: prefix string (default 'bb') or options object with prefix
    * @returns A new GenericCosmosAdapter for server-side signing
    */
-  static async fromPrivateKey(privateKey: string, chainId: string, prefix = 'bb'): Promise<GenericCosmosAdapter> {
+  static async fromPrivateKey(privateKey: string, chainId: string, options?: string | { prefix?: string }): Promise<GenericCosmosAdapter> {
+    const prefix = typeof options === 'string' ? options : (options?.prefix || 'bb');
+
     const { Wallet } = await import('ethers');
     const wallet = new Wallet(privateKey);
-    return GenericCosmosAdapter.createFromEthersWallet(wallet, chainId, prefix);
+    return GenericCosmosAdapter.createFromSigningKey(wallet.signingKey, chainId, prefix);
   }
 
   /**
-   * Internal method to create adapter from ethers wallet.
+   * Internal: create adapter from a secp256k1 signing key.
+   * Uses Cosmos address derivation: ripemd160(sha256(compressed_pubkey)).
    */
-  private static async createFromEthersWallet(
-    wallet: { address: string; signingKey: { publicKey: string; sign(digest: string | Uint8Array): { r: string; s: string } } },
+  private static createFromSigningKey(
+    signingKey: { publicKey: string; sign(digest: string | Uint8Array): { r: string; s: string } },
     chainId: string,
     prefix: string
-  ): Promise<GenericCosmosAdapter> {
-    const address = convertToBitBadgesAddress(wallet.address);
-    if (!address) {
-      throw new Error('Failed to convert address to BitBadges format');
-    }
-
-    const compressedPubKey = GenericCosmosAdapter.compressPublicKey(wallet.signingKey.publicKey);
+  ): GenericCosmosAdapter {
+    const compressedPubKey = GenericCosmosAdapter.compressPublicKey(signingKey.publicKey);
     const publicKeyBase64 = Buffer.from(compressedPubKey, 'hex').toString('base64');
+    const address = cosmosAddressFromPublicKey(compressedPubKey, prefix);
 
-    const strategy = new DirectKeyStrategy((digest: Uint8Array) => wallet.signingKey.sign(digest), publicKeyBase64);
+    const strategy = new DirectKeyStrategy((digest: Uint8Array) => signingKey.sign(digest), publicKeyBase64);
 
     return new GenericCosmosAdapter(address, publicKeyBase64, { chainId, prefix }, strategy);
   }
@@ -354,10 +361,20 @@ export class GenericCosmosAdapter extends BaseWalletAdapter implements WalletAda
       return strategy.signWithDoc(signDoc, this.address);
     }
 
-    // For direct key signing, we sign the signBytes hash
-    const signBytesBase64 = payload.signDirect.signBytes;
-    const signBytesBuffer = Buffer.from(signBytesBase64, 'base64');
-    return this.signingStrategy.sign(signBytesBuffer, this.chainId, this.address, accountNumber);
+    // For direct key signing, construct the SignDoc and SHA256 hash it.
+    // The payload.signDirect.signBytes is keccak256-hashed (for ethermint compatibility),
+    // but cosmos.crypto.secp256k1.PubKey requires SHA256 verification.
+    const { createHash } = await import('crypto');
+    const { SignDoc } = await import('@/proto/cosmos/tx/v1beta1/tx_pb.js');
+    const signDoc = new SignDoc({
+      bodyBytes: payload.signDirect.body.toBinary() as Uint8Array<ArrayBuffer>,
+      authInfoBytes: payload.signDirect.authInfo.toBinary() as Uint8Array<ArrayBuffer>,
+      chainId: this.chainId,
+      accountNumber: BigInt(accountNumber)
+    });
+    const signDocBytes = signDoc.toBinary();
+    const sha256Hash = createHash('sha256').update(signDocBytes).digest();
+    return this.signingStrategy.sign(new Uint8Array(sha256Hash), this.chainId, this.address, accountNumber);
   }
 
   supportsSignDirect(): boolean {

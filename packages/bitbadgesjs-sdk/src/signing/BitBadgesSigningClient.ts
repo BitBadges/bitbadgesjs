@@ -89,7 +89,8 @@ export class BitBadgesSigningClient {
       apiUrl: options.apiUrl || baseConfig.apiUrl,
       nodeUrl: options.nodeUrl || baseConfig.nodeUrl,
       cosmosChainId: options.cosmosChainId || baseConfig.cosmosChainId,
-      evmChainId: options.evmChainId ?? baseConfig.evmChainId
+      evmChainId: options.evmChainId ?? baseConfig.evmChainId,
+      evmRpcUrl: options.evmRpcUrl || baseConfig.evmRpcUrl
     };
 
     this.sequenceRetryEnabled = options.sequenceRetryEnabled !== false; // Default: true
@@ -251,6 +252,19 @@ export class BitBadgesSigningClient {
    * @returns Simulation result with gas estimates
    */
   async simulate(messages: TransactionMessage[], options?: { memo?: string }): Promise<SimulateResult> {
+    // EVM path: use eth_estimateGas via the adapter's provider
+    if (this.adapter.chainType === 'evm') {
+      return this.simulateEvm(messages, options);
+    }
+
+    // Cosmos path: use the standard simulate endpoint
+    return this.simulateCosmos(messages, options);
+  }
+
+  /**
+   * Simulate via Cosmos SDK endpoint.
+   */
+  private async simulateCosmos(messages: TransactionMessage[], options?: { memo?: string }): Promise<SimulateResult> {
     const accountInfo = await this.getAccountInfo();
 
     if (!accountInfo.publicKey) {
@@ -281,6 +295,45 @@ export class BitBadgesSigningClient {
     const response = await this.axiosInstance.post(`${this.apiUrl}/api/v0/simulate`, JSON.parse(broadcastBody));
 
     const gasUsed = parseInt(response.data.gas_info?.gas_used || '0', 10);
+    const gasLimit = Math.ceil(gasUsed * this.gasMultiplier);
+
+    return {
+      gasUsed,
+      gasLimit,
+      fee: this.calculateFee(gasLimit)
+    };
+  }
+
+  /**
+   * Simulate via EVM eth_estimateGas.
+   */
+  private async simulateEvm(messages: TransactionMessage[], options?: { memo?: string }): Promise<SimulateResult> {
+    if (!this.adapter.estimateEvmGas) {
+      throw new Error('EVM adapter does not support gas estimation. Ensure a provider is connected.');
+    }
+
+    const protoMessages = this.normalizeMessages(messages);
+
+    // Build the precompile call data
+    const txContext: TxContext = {
+      chainIdOverride: this.chainId,
+      evmAddress: this.adapter.address,
+      fee: this.calculateFee(this.evmPrecompileGasLimit),
+      memo: options?.memo || ''
+    };
+
+    const payload = createTransactionPayload(txContext, protoMessages);
+
+    if (!payload.evmTx) {
+      throw new Error('Messages are not supported for EVM precompile simulation');
+    }
+
+    const gasUsed = Number(await this.adapter.estimateEvmGas({
+      to: payload.evmTx.to,
+      data: payload.evmTx.data,
+      value: payload.evmTx.value
+    }));
+
     const gasLimit = Math.ceil(gasUsed * this.gasMultiplier);
 
     return {

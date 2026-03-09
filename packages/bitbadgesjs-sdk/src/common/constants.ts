@@ -49,7 +49,7 @@ export const BitBadgesKeplrSuggestMainnetChainInfo = {
   rpc: 'https://rpc.bitbadges.io',
   rest: 'https://lcd.bitbadges.io',
   bip44: {
-    coinType: 60
+    coinType: 118
   },
   bech32Config: {
     bech32PrefixAccAddr: 'bb',

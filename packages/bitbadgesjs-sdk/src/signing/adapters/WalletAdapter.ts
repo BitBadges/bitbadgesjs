@@ -42,6 +42,12 @@ export interface WalletAdapter {
    */
   sendEvmTransaction?(tx: EvmTransaction): Promise<string>;
 
+  /**
+   * Estimate gas for an EVM transaction.
+   * Only implemented by EVM wallet adapters with a provider connection.
+   */
+  estimateEvmGas?(tx: EvmTransaction): Promise<bigint>;
+
   /** Check if the adapter supports SignDirect signing */
   supportsSignDirect(): boolean;
 
@@ -65,6 +71,7 @@ export abstract class BaseWalletAdapter implements WalletAdapter {
 
   signDirect?(payload: TransactionPayload, accountNumber: number): Promise<SigningResult>;
   sendEvmTransaction?(tx: EvmTransaction): Promise<string>;
+  estimateEvmGas?(tx: EvmTransaction): Promise<bigint>;
 
   supportsSignDirect(): boolean {
     return typeof this.signDirect === 'function';

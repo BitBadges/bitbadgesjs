@@ -16,8 +16,25 @@ interface EthersSigner {
     hash: string;
     wait(): Promise<any>;
   }>;
+  estimateGas?(tx: {
+    to: string;
+    data: string;
+    value?: string | bigint;
+  }): Promise<bigint>;
   provider?: {
     getNetwork(): Promise<{ chainId: bigint }>;
+    estimateGas?(tx: {
+      to: string;
+      data: string;
+      value?: string | bigint;
+      from?: string;
+    }): Promise<bigint>;
+    call?(tx: {
+      to: string;
+      data: string;
+      value?: string | bigint;
+      from?: string;
+    }): Promise<string>;
   };
 }
 
@@ -150,6 +167,80 @@ export class GenericEvmAdapter extends BaseWalletAdapter implements WalletAdapte
     return new GenericEvmAdapter(accounts[0], undefined, provider);
   }
 
+  // ==================== Server-Side Factory Methods ====================
+
+  /**
+   * Create an adapter from a mnemonic phrase for server-side EVM signing.
+   *
+   * Uses ETH HD path (m/44'/60'/0'/0/0) and connects to an EVM JSON-RPC provider.
+   *
+   * **Security Note**: Only use in secure server-side environments.
+   *
+   * @param mnemonic - The BIP-39 mnemonic phrase (12 or 24 words)
+   * @param evmRpcUrl - The EVM JSON-RPC endpoint URL
+   * @param options - Optional configuration including expected chain ID
+   * @returns A new GenericEvmAdapter for server-side signing
+   *
+   * @example
+   * ```typescript
+   * const adapter = await GenericEvmAdapter.fromMnemonic(
+   *   'word1 word2 ...',
+   *   'https://evm-rpc-testnet.bitbadges.io'
+   * );
+   * const client = new BitBadgesSigningClient({ adapter, network: 'testnet' });
+   * ```
+   */
+  static async fromMnemonic(mnemonic: string, evmRpcUrl: string, options?: EvmAdapterOptions): Promise<GenericEvmAdapter> {
+    const { HDNodeWallet, JsonRpcProvider } = await import('ethers');
+    const provider = new JsonRpcProvider(evmRpcUrl);
+    const hdWallet = HDNodeWallet.fromPhrase(mnemonic, undefined, "m/44'/60'/0'/0/0");
+    const wallet = hdWallet.connect(provider);
+
+    if (options?.expectedChainId !== undefined) {
+      const network = await provider.getNetwork();
+      const currentChainId = Number(network.chainId);
+      if (currentChainId !== options.expectedChainId) {
+        throw new Error(
+          `EVM RPC is on chain ${currentChainId}, but expected chain ${options.expectedChainId}.`
+        );
+      }
+    }
+
+    return new GenericEvmAdapter(wallet.address, wallet as unknown as EthersSigner);
+  }
+
+  /**
+   * Create an adapter from a private key for server-side EVM signing.
+   *
+   * Connects to an EVM JSON-RPC provider for transaction broadcasting.
+   *
+   * **Security Note**: Only use in secure server-side environments.
+   *
+   * @param privateKey - The private key (hex string, with or without 0x prefix)
+   * @param evmRpcUrl - The EVM JSON-RPC endpoint URL
+   * @param options - Optional configuration including expected chain ID
+   * @returns A new GenericEvmAdapter for server-side signing
+   */
+  static async fromPrivateKey(privateKey: string, evmRpcUrl: string, options?: EvmAdapterOptions): Promise<GenericEvmAdapter> {
+    const { Wallet, JsonRpcProvider } = await import('ethers');
+    const provider = new JsonRpcProvider(evmRpcUrl);
+    const wallet = new Wallet(privateKey, provider);
+
+    if (options?.expectedChainId !== undefined) {
+      const network = await provider.getNetwork();
+      const currentChainId = Number(network.chainId);
+      if (currentChainId !== options.expectedChainId) {
+        throw new Error(
+          `EVM RPC is on chain ${currentChainId}, but expected chain ${options.expectedChainId}.`
+        );
+      }
+    }
+
+    return new GenericEvmAdapter(wallet.address, wallet as unknown as EthersSigner);
+  }
+
+  // ==================== Browser Wallet Factory Methods ====================
+
   /**
    * Create an adapter from window.ethereum (MetaMask, etc.).
    *
@@ -210,6 +301,48 @@ export class GenericEvmAdapter extends BaseWalletAdapter implements WalletAdapte
     }
 
     throw new Error('No signer or provider available');
+  }
+
+  /**
+   * Estimate gas for an EVM transaction via the connected provider.
+   *
+   * @param tx - The EVM transaction to estimate
+   * @returns Estimated gas as bigint
+   */
+  async estimateEvmGas(tx: EvmTransaction): Promise<bigint> {
+    if (this.signer?.provider?.estimateGas) {
+      return this.signer.provider.estimateGas({
+        from: this.address,
+        to: tx.to,
+        data: tx.data,
+        value: tx.value || '0'
+      });
+    }
+
+    if (this.signer?.estimateGas) {
+      return this.signer.estimateGas({
+        to: tx.to,
+        data: tx.data,
+        value: tx.value || '0'
+      });
+    }
+
+    if (this.provider) {
+      const result = await this.provider.request({
+        method: 'eth_estimateGas',
+        params: [
+          {
+            from: this.address,
+            to: tx.to,
+            data: tx.data,
+            value: tx.value ? `0x${BigInt(tx.value).toString(16)}` : '0x0'
+          }
+        ]
+      });
+      return BigInt(result);
+    }
+
+    throw new Error('No provider available for gas estimation');
   }
 
   supportsSignDirect(): boolean {
