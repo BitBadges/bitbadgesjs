@@ -3670,6 +3670,56 @@ paths:
         - apiKey: []
           userMaybeSignedIn: []
       x-internal: false
+  /plugins/creator:
+    get:
+      operationId: getCreatorPlugins
+      summary: Get Creator Plugins
+      tags:
+        - Plugins
+      description: |-
+        Fetches all plugins created/managed by a specific address.
+        If authenticated as the creator, sensitive data (pluginSecret) is included.
+
+        ```tsx
+        await BitBadgesApi.getCreatorPlugins({ creatorAddress: '...', returnSensitiveData: true });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCreatorPluginsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPluginSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getcreatorplugins)**
+
+        Scopes:
+        - Full Access - Required for sensitive data (pluginSecret)
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetPluginSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetCreatorPluginsPayload'
+      security:
+        - apiKey: []
+          userMaybeSignedIn: []
+      x-internal: false
   /utilityPages/fetch:
     post:
       operationId: getUtilityPages
@@ -4601,63 +4651,6 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/v0/requestBin/attemptData/{claimId}/{claimAttemptId}:
-    get:
-      operationId: getAttemptDataFromRequestBin
-      summary: Get Attempt Data (Request Bin)
-      tags:
-        - Claims
-      description: |-
-        Gets the attempt data for a specific claim attempt from the requestBin plugin.
-
-        Pre-Req: Your claim must be setup with a "requestBin" plugin. On the site, it will be titled
-        "Collect User Inputs". If there is none, this will fail.
-
-        ```tsx
-        await BitBadgesApi.getAttemptDataFromRequestBin("claim123", "attempt123", { ... });
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAttemptDataFromRequestBinPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAttemptDataFromRequestBinSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getattemptdatafromrequestbin)**
-
-        Scopes:
-          - `readPrivateClaimData` - Required and must be the manager
-      parameters:
-        - name: claimId
-          in: path
-          description: Claim ID
-          required: true
-          schema:
-            type: string
-        - name: claimAttemptId
-          in: path
-          description: Claim attempt ID
-          required: true
-          schema:
-            type: string
-        - in: query
-          explode: true
-          name: payload
-          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
-          required: false
-          schema:
-            $ref: '#/components/schemas/iGetAttemptDataFromRequestBinPayload'
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iGetAttemptDataFromRequestBinSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      security:
-        - apiKey: []
-      x-internal: false
 
   /api/{version}/pools:
     get:

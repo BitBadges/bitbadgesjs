@@ -89,10 +89,10 @@ import {
   type iPluginDoc,
   type iPluginVersionConfig,
   type iProfileDoc,
+  type iPromptSkillDoc,
   type iQueueDoc,
   type iRefreshDoc,
   type iSIWBBRequestDoc,
-  type iSocialConnections,
   type iStatusDoc,
   type iTransactionEntry,
   type iUpdateHistory,
@@ -394,87 +394,6 @@ export class AccountDoc<T extends NumberType> extends BaseNumberTypeClass<Accoun
 }
 
 /**
- * @category Accounts
- */
-export class SocialConnectionInfo<T extends NumberType> extends BaseNumberTypeClass<SocialConnectionInfo<T>> {
-  username: string;
-  id: string;
-  lastUpdated: UNIXMilliTimestamp<T>;
-  discriminator?: string;
-
-  constructor(data: { username: string; id: string; lastUpdated: UNIXMilliTimestamp<T>; discriminator?: string }) {
-    super();
-    this.username = data.username;
-    this.id = data.id;
-    this.lastUpdated = data.lastUpdated;
-    this.discriminator = data.discriminator;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['lastUpdated'];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): SocialConnectionInfo<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SocialConnectionInfo<U>;
-  }
-}
-
-/**
- * @inheritDoc iSocialConnections
- * @category Accounts
- */
-export class SocialConnections<T extends NumberType> extends BaseNumberTypeClass<SocialConnections<T>> implements iSocialConnections<T> {
-  discord?: SocialConnectionInfo<T> | undefined;
-  twitter?: SocialConnectionInfo<T> | undefined;
-  github?: SocialConnectionInfo<T> | undefined;
-  google?: SocialConnectionInfo<T> | undefined;
-  twitch?: SocialConnectionInfo<T> | undefined;
-  strava?: SocialConnectionInfo<T> | undefined;
-  reddit?: SocialConnectionInfo<T> | undefined;
-  meetup?: SocialConnectionInfo<T> | undefined;
-  bluesky?: SocialConnectionInfo<T> | undefined;
-  mailchimp?: SocialConnectionInfo<T> | undefined;
-  facebook?: SocialConnectionInfo<T> | undefined;
-  googleCalendar?: SocialConnectionInfo<T> | undefined;
-  youtube?: SocialConnectionInfo<T> | undefined;
-  linkedIn?: SocialConnectionInfo<T> | undefined;
-  shopify?: SocialConnectionInfo<T> | undefined;
-  telegram?: SocialConnectionInfo<T> | undefined;
-  farcaster?: SocialConnectionInfo<T> | undefined;
-  slack?: SocialConnectionInfo<T> | undefined;
-
-  constructor(data: iSocialConnections<T>) {
-    super();
-    this.discord = data.discord ? new SocialConnectionInfo(data.discord) : undefined;
-    this.twitter = data.twitter ? new SocialConnectionInfo(data.twitter) : undefined;
-    this.github = data.github ? new SocialConnectionInfo(data.github) : undefined;
-    this.twitch = data.twitch ? new SocialConnectionInfo(data.twitch) : undefined;
-    this.google = data.google ? new SocialConnectionInfo(data.google) : undefined;
-    this.strava = data.strava ? new SocialConnectionInfo(data.strava) : undefined;
-    this.reddit = data.reddit ? new SocialConnectionInfo(data.reddit) : undefined;
-    this.bluesky = data.bluesky ? new SocialConnectionInfo(data.bluesky) : undefined;
-    this.mailchimp = data.mailchimp ? new SocialConnectionInfo(data.mailchimp) : undefined;
-    this.facebook = data.facebook ? new SocialConnectionInfo(data.facebook) : undefined;
-    this.telegram = data.telegram ? new SocialConnectionInfo(data.telegram) : undefined;
-    this.youtube = data.youtube ? new SocialConnectionInfo(data.youtube) : undefined;
-    this.meetup = data.meetup ? new SocialConnectionInfo(data.meetup) : undefined;
-    this.farcaster = data.farcaster ? new SocialConnectionInfo(data.farcaster) : undefined;
-    this.slack = data.slack ? new SocialConnectionInfo(data.slack) : undefined;
-    this.googleCalendar = data.googleCalendar ? new SocialConnectionInfo(data.googleCalendar) : undefined;
-    this.linkedIn = data.linkedIn ? new SocialConnectionInfo(data.linkedIn) : undefined;
-    this.shopify = data.shopify ? new SocialConnectionInfo(data.shopify) : undefined;
-  }
-
-  getNumberFieldNames(): string[] {
-    return [];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): SocialConnections<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as SocialConnections<U>;
-  }
-}
-
-/**
  * @inheritDoc iNotificationPreferences
  * @category Accounts
  */
@@ -578,8 +497,6 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
   username?: string;
   latestSignedInChain?: SupportedChain;
   notifications?: NotificationPreferences<T>;
-  socialConnections?: SocialConnections<T>;
-  publicSocialConnections?: SocialConnections<T>;
   bannerImage?: string;
 
   constructor(data: iProfileDoc<T>) {
@@ -599,8 +516,6 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
     this.username = data.username;
     this.latestSignedInChain = data.latestSignedInChain;
     this.notifications = data.notifications ? new NotificationPreferences(data.notifications) : undefined;
-    this.socialConnections = data.socialConnections ? new SocialConnections(data.socialConnections) : undefined;
-    this.publicSocialConnections = data.publicSocialConnections ? new SocialConnections(data.publicSocialConnections) : undefined;
     this.bannerImage = data.bannerImage;
   }
 
@@ -1793,17 +1708,19 @@ export class CreatorCreditsDoc<T extends NumberType> extends BaseNumberTypeClass
   _id?: string;
   credits: T;
   creditsLimit?: T;
+  aiTokensUsed?: T;
 
   constructor(data: iCreatorCreditsDoc<T>) {
     super();
     this.credits = data.credits;
     this.creditsLimit = data.creditsLimit;
+    this.aiTokensUsed = data.aiTokensUsed;
     this._docId = data._docId;
     this._id = data._id;
   }
 
   getNumberFieldNames(): string[] {
-    return ['credits', 'creditsLimit'];
+    return ['credits', 'creditsLimit', 'aiTokensUsed'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreatorCreditsDoc<U> {
@@ -2022,6 +1939,49 @@ export class DeveloperAppDoc<T extends NumberType> extends BaseNumberTypeClass<D
 }
 
 /**
+ * @inheritDoc iPromptSkillDoc
+ * @category Plugins
+ */
+export class PromptSkillDoc extends CustomTypeClass<PromptSkillDoc> implements iPromptSkillDoc {
+  _docId: string;
+  _id?: string;
+  promptSkillId: string;
+  promptText: string;
+  createdBy: string;
+  name: string;
+  image: string;
+  description: string;
+  category: string;
+  tags: string[];
+  numUses: number;
+  toPublish: boolean;
+  approvalStatus: 'approved' | 'pending' | 'rejected';
+  version: number;
+  createdAt: number;
+  updatedAt: number;
+
+  constructor(data: iPromptSkillDoc) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.promptSkillId = data.promptSkillId;
+    this.promptText = data.promptText;
+    this.createdBy = data.createdBy;
+    this.name = data.name;
+    this.image = data.image;
+    this.description = data.description;
+    this.category = data.category;
+    this.tags = data.tags;
+    this.numUses = data.numUses;
+    this.toPublish = data.toPublish;
+    this.approvalStatus = data.approvalStatus;
+    this.version = data.version;
+    this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
+  }
+}
+
+/**
  * @inheritDoc iDepositBalanceDoc
  * @category Indexer
  */
@@ -2051,92 +2011,6 @@ export class DepositBalanceDoc<T extends NumberType> extends BaseNumberTypeClass
 }
 
 /**
- * @inheritDoc iPluginVersionConfig
- * @category Plugins
- */
-export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeClass<PluginVersionConfig<T>> implements iPluginVersionConfig<T> {
-  version: T;
-  finalized: boolean;
-  stateFunctionPreset: PluginPresetType;
-  duplicatesAllowed: boolean;
-  requiresSessions: boolean;
-  requiresUserInputs: boolean;
-  reuseForNonIndexed: boolean;
-  skipProcessingWebhook?: boolean;
-  receiveStatusWebhook: boolean;
-  ignoreSimulations?: boolean;
-  userInputsSchema: Array<JsonBodyInputSchema>;
-  publicParamsSchema: Array<JsonBodyInputSchema>;
-  privateParamsSchema: Array<JsonBodyInputSchema>;
-  customDetailsDisplay?: string;
-  verificationCall?: {
-    uri: string;
-    method: 'POST' | 'GET' | 'PUT' | 'DELETE';
-    hardcodedInputs: Array<JsonBodyInputWithValue>;
-    passAddress?: boolean;
-    passDiscord?: boolean;
-    passEmail?: boolean;
-    passTwitter?: boolean;
-    passGoogle?: boolean;
-    passYoutube?: boolean;
-    passGithub?: boolean;
-    passTwitch?: boolean;
-    passStrava?: boolean;
-    passReddit?: boolean;
-    passMeetup?: boolean;
-    passBluesky?: boolean;
-    passShopify?: boolean;
-    passFacebook?: boolean;
-    passTelegram?: boolean;
-    passFarcaster?: boolean;
-    passSlack?: boolean;
-    passMailchimp?: boolean;
-    postProcessingJs: string;
-  };
-  claimCreatorRedirect?: { toolUri?: string; tutorialUri?: string; testerUri?: string };
-  userInputRedirect?: { baseUri?: string; tutorialUri?: string };
-  createdAt: UNIXMilliTimestamp<T>;
-  lastUpdated: UNIXMilliTimestamp<T>;
-  requireSignIn?: boolean;
-
-  constructor(data: iPluginVersionConfig<T>) {
-    super();
-    this.finalized = data.finalized;
-    this.version = data.version;
-    this.stateFunctionPreset = data.stateFunctionPreset;
-    this.duplicatesAllowed = data.duplicatesAllowed;
-    this.requiresSessions = data.requiresSessions;
-    this.requiresUserInputs = data.requiresUserInputs;
-    this.reuseForNonIndexed = data.reuseForNonIndexed;
-    this.ignoreSimulations = data.ignoreSimulations;
-    this.receiveStatusWebhook = data.receiveStatusWebhook;
-    this.skipProcessingWebhook = data.skipProcessingWebhook;
-    this.userInputsSchema = data.userInputsSchema;
-    this.customDetailsDisplay = data.customDetailsDisplay;
-    this.publicParamsSchema = data.publicParamsSchema;
-    this.privateParamsSchema = data.privateParamsSchema;
-    this.verificationCall = data.verificationCall;
-    this.claimCreatorRedirect = data.claimCreatorRedirect;
-    this.userInputRedirect = data.userInputRedirect;
-    this.createdAt = data.createdAt;
-    this.lastUpdated = data.lastUpdated;
-    this.requireSignIn = data.requireSignIn;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['version', 'createdAt', 'lastUpdated'];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PluginVersionConfig<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PluginVersionConfig<U>;
-  }
-
-  clone(): PluginVersionConfig<T> {
-    return super.clone() as PluginVersionConfig<T>;
-  }
-}
-
-/**
  * @inheritDoc iPluginDoc
  * @category Plugins
  */
@@ -2147,8 +2021,6 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
   pluginSecret?: string;
   toPublish: boolean;
   reviewCompleted: boolean;
-  inviteCode?: string | undefined;
-  approvedUsers: NativeAddress[];
   createdBy: BitBadgesAddress;
   managedBy: BitBadgesAddress;
   metadata: {
@@ -2175,8 +2047,6 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
     this.pluginSecret = data.pluginSecret;
     this.toPublish = data.toPublish;
     this.reviewCompleted = data.reviewCompleted;
-    this.inviteCode = data.inviteCode;
-    this.approvedUsers = data.approvedUsers;
     this.createdBy = data.createdBy;
     this.managedBy = data.managedBy;
     this.metadata = {
@@ -2210,6 +2080,69 @@ export class PluginDoc<T extends NumberType> extends BaseNumberTypeClass<PluginD
 
   getLatestVersion(): PluginVersionConfig<T> {
     return this.versions[this.versions.length - 1];
+  }
+}
+
+/**
+ * @inheritDoc iPluginVersionConfig
+ * @category Plugins
+ */
+export class PluginVersionConfig<T extends NumberType> extends BaseNumberTypeClass<PluginVersionConfig<T>> implements iPluginVersionConfig<T> {
+  version: T;
+  finalized: boolean;
+  stateFunctionPreset: PluginPresetType;
+  duplicatesAllowed: boolean;
+  requiresSessions: boolean;
+  requiresUserInputs: boolean;
+  reuseForNonIndexed: boolean;
+  skipProcessingWebhook?: boolean;
+  receiveStatusWebhook: boolean;
+  ignoreSimulations?: boolean;
+  userInputsSchema: Array<JsonBodyInputSchema>;
+  publicParamsSchema: Array<JsonBodyInputSchema>;
+  privateParamsSchema: Array<JsonBodyInputSchema>;
+  customDetailsDisplay?: string;
+  verificationCall?: {
+    uri: string;
+    hardcodedInputs: Array<JsonBodyInputWithValue>;
+    passAddress?: boolean;
+  };
+  createdAt: UNIXMilliTimestamp<T>;
+  lastUpdated: UNIXMilliTimestamp<T>;
+  requireSignIn?: boolean;
+
+  constructor(data: iPluginVersionConfig<T>) {
+    super();
+    this.finalized = data.finalized;
+    this.version = data.version;
+    this.stateFunctionPreset = data.stateFunctionPreset;
+    this.duplicatesAllowed = data.duplicatesAllowed;
+    this.requiresSessions = data.requiresSessions;
+    this.requiresUserInputs = data.requiresUserInputs;
+    this.reuseForNonIndexed = data.reuseForNonIndexed;
+    this.ignoreSimulations = data.ignoreSimulations;
+    this.receiveStatusWebhook = data.receiveStatusWebhook;
+    this.skipProcessingWebhook = data.skipProcessingWebhook;
+    this.userInputsSchema = data.userInputsSchema;
+    this.customDetailsDisplay = data.customDetailsDisplay;
+    this.publicParamsSchema = data.publicParamsSchema;
+    this.privateParamsSchema = data.privateParamsSchema;
+    this.verificationCall = data.verificationCall;
+    this.createdAt = data.createdAt;
+    this.lastUpdated = data.lastUpdated;
+    this.requireSignIn = data.requireSignIn;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['version', 'createdAt', 'lastUpdated'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PluginVersionConfig<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PluginVersionConfig<U>;
+  }
+
+  clone(): PluginVersionConfig<T> {
+    return super.clone() as PluginVersionConfig<T>;
   }
 }
 

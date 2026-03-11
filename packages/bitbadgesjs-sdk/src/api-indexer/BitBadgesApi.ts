@@ -72,7 +72,6 @@ import {
   GetApiKeysSuccessResponse,
   GetApplicationSuccessResponse,
   GetApplicationsSuccessResponse,
-  GetAttemptDataFromRequestBinSuccessResponse,
   GetBrowseSuccessResponse,
   GetClaimAttemptStatusSuccessResponse,
   GetClaimAttemptsSuccessResponse,
@@ -87,12 +86,11 @@ import {
   GetDynamicDataStoreValueSuccessResponse,
   GetDynamicDataStoreValuesPaginatedSuccessResponse,
   GetDynamicDataStoresSuccessResponse,
-  GetSwapActivitiesSuccessResponse,
+  GetGatedContentForClaimSuccessResponse,
   GetOnChainDynamicStoreSuccessResponse,
-  GetOnChainDynamicStoresByCreatorSuccessResponse,
   GetOnChainDynamicStoreValueSuccessResponse,
   GetOnChainDynamicStoreValuesPaginatedSuccessResponse,
-  GetGatedContentForClaimSuccessResponse,
+  GetOnChainDynamicStoresByCreatorSuccessResponse,
   GetPluginErrorsSuccessResponse,
   GetPluginSuccessResponse,
   GetPluginsSuccessResponse,
@@ -102,6 +100,7 @@ import {
   GetSearchSuccessResponse,
   GetSignInChallengeSuccessResponse,
   GetStatusSuccessResponse,
+  GetSwapActivitiesSuccessResponse,
   GetTokensFromFaucetSuccessResponse,
   GetUtilityPageSuccessResponse,
   GetUtilityPagesSuccessResponse,
@@ -171,7 +170,6 @@ import {
   iGetApiKeysPayload,
   iGetApplicationPayload,
   iGetApplicationsPayload,
-  iGetAttemptDataFromRequestBinPayload,
   iGetBrowsePayload,
   iGetBrowseSuccessResponse,
   iGetClaimAttemptStatusSuccessResponse,
@@ -181,6 +179,7 @@ import {
   iGetClaimsSuccessResponse,
   iGetCollectionAmountTrackerByIdSuccessResponse,
   iGetCollectionChallengeTrackerByIdSuccessResponse,
+  iGetCreatorPluginsPayload,
   iGetDeveloperAppPayload,
   iGetDeveloperAppsPayload,
   iGetDynamicDataActivityPayload,
@@ -189,17 +188,12 @@ import {
   iGetDynamicDataStoreValuesPaginatedPayload,
   iGetDynamicDataStoresPayload,
   iGetDynamicDataStoresSuccessResponse,
-  iGetSwapActivitiesPayload,
-  iGetSwapActivitiesSuccessResponse,
-  iGetOnChainDynamicStorePayload,
+  iGetGatedContentForClaimPayload,
   iGetOnChainDynamicStoreSuccessResponse,
-  iGetOnChainDynamicStoresByCreatorPayload,
-  iGetOnChainDynamicStoresByCreatorSuccessResponse,
-  iGetOnChainDynamicStoreValuePayload,
   iGetOnChainDynamicStoreValueSuccessResponse,
   iGetOnChainDynamicStoreValuesPaginatedPayload,
   iGetOnChainDynamicStoreValuesPaginatedSuccessResponse,
-  iGetGatedContentForClaimPayload,
+  iGetOnChainDynamicStoresByCreatorSuccessResponse,
   iGetPluginErrorsPayload,
   iGetPluginPayload,
   iGetPluginsPayload,
@@ -215,6 +209,8 @@ import {
   iGetSignInChallengeSuccessResponse,
   iGetStatusPayload,
   iGetStatusSuccessResponse,
+  iGetSwapActivitiesPayload,
+  iGetSwapActivitiesSuccessResponse,
   iGetTokensFromFaucetPayload,
   iGetTokensFromFaucetSuccessResponse,
   iGetUtilityPagePayload,
@@ -252,8 +248,6 @@ import {
 } from './requests/requests.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
 import {
-  GetTokenMetadataSuccessResponse,
-  GetTokensViewForUserSuccessResponse,
   GetClaimActivityForUserSuccessResponse,
   GetCollectionAmountTrackersSuccessResponse,
   GetCollectionChallengeTrackersSuccessResponse,
@@ -264,10 +258,9 @@ import {
   GetCollectionTransferActivitySuccessResponse,
   GetPointsActivityForUserSuccessResponse,
   GetSiwbbRequestsForUserSuccessResponse,
+  GetTokenMetadataSuccessResponse,
+  GetTokensViewForUserSuccessResponse,
   GetTransferActivityForUserSuccessResponse,
-  iGetTokenMetadataSuccessResponse,
-  iGetTokensViewForUserPayload,
-  iGetTokensViewForUserSuccessResponse,
   iGetClaimActivityForUserPayload,
   iGetClaimActivityForUserSuccessResponse,
   iGetCollectionAmountTrackersPayload,
@@ -287,6 +280,9 @@ import {
   iGetPointsActivityForUserSuccessResponse,
   iGetSiwbbRequestsForUserPayload,
   iGetSiwbbRequestsForUserSuccessResponse,
+  iGetTokenMetadataSuccessResponse,
+  iGetTokensViewForUserPayload,
+  iGetTokensViewForUserSuccessResponse,
   iGetTransferActivityForUserPayload,
   iGetTransferActivityForUserSuccessResponse
 } from './requests/wrappers.js';
@@ -2305,7 +2301,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Get all developer apps for a user.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/plugins`
+   * - **API Route**: `POST /api/v0/plugins/fetch`
    * - **SDK Function Call**: `await BitBadgesApi.getPlugins(payload);`
    */
   public async getPlugins(payload: iGetPluginsPayload): Promise<GetPluginsSuccessResponse<T>> {
@@ -2600,30 +2596,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets the attempt data for a specific claim attempt from the request bin plugin.
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/requestBin/attemptData/{claimId}/{claimAttemptId}`
-   * - **SDK Function Call**: `await BitBadgesApi.getAttemptDataFromRequestBin(claimId, claimAttemptId, payload);`
-   */
-  public async getAttemptDataFromRequestBin(
-    claimId: string,
-    claimAttemptId: string,
-    payload?: iGetAttemptDataFromRequestBinPayload
-  ): Promise<GetAttemptDataFromRequestBinSuccessResponse> {
-    try {
-      const response = await this.axios.get<GetAttemptDataFromRequestBinSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAttemptDataFromRequestBinRoute(claimId, claimAttemptId)}`,
-        { params: payload }
-      );
-      return new GetAttemptDataFromRequestBinSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
    * Get Swap Activities
    *
    * @remarks
@@ -2908,6 +2880,31 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
   }
 
   /**
+   * Fetches all plugins created/managed by a specific address.
+   * If authenticated as the creator, sensitive data (pluginSecret) is included.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/plugins/creator`
+   * - **SDK Function Call**: `await BitBadgesApi.getCreatorPlugins(payload);`
+   */
+  public async getCreatorPlugins(payload: iGetCreatorPluginsPayload): Promise<GetPluginsSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetCreatorPluginsPayload> = typia.validate<iGetCreatorPluginsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<GetPluginsSuccessResponse<T>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetCreatorPluginsRoute()}`, {
+        params: payload
+      });
+      return new GetPluginsSuccessResponse<T>(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
    * Fetches arbitrary metadata directly from IPFS. This is useful for fetching metadata that is not stored on-chain.
    *
    * @remarks
@@ -3121,7 +3118,9 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.get<GetPluginErrorsSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetPluginErrorsRoute()}`);
+      const response = await this.axios.get<GetPluginErrorsSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetPluginErrorsRoute()}`, {
+        params: payload
+      });
       return new GetPluginErrorsSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);

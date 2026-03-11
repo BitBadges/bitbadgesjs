@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.31.0] - BREAKING CHANGES
+
+### Breaking Changes
+
+- **Removed `iSocialConnections`**: The `iSocialConnections` interface and `socialConnections`/`publicSocialConnections` fields on `iProfileDoc` have been removed. Social connection tracking is no longer part of the SDK.
+- **Removed `OauthAppName` type**: Individual OAuth app name union type removed; plugins now handle auth generically.
+- **Simplified `ClaimIntegrationPluginType`**: Removed hardcoded plugin types (`discord`, `github`, `google`, `twitch`, `twitter`, `strava`, `email`, `ip`, `webhooks`, `successWebhooks`, `payments`, etc.). The type now uses a minimal set plus `string` for custom plugins.
+- **Removed `OAuthAppParams` interface**: OAuth configuration is no longer part of claim plugin params.
+- **Removed `captcha` from `ClaimIntegrationPluginCustomBodyType`**: Captcha is no longer a built-in claim body type.
+- **Removed `GetAttemptDataFromRequestBin` route and types**: `GetAttemptDataFromRequestBinRoute` removed from `BitBadgesApiRoutes`.
+- **Removed `signOutEmail` from `iSignOutPayload`**: Email sign-out is no longer a separate option.
+- **PromptSkillDoc breaking field renames**: `title` → `name`, added `image`, removed `rating`/`numRatings`, added `toPublish`.
+- **Plugin management renames**: `iCreatePromptSkillPayload` and `iUpdatePromptSkillPayload` updated with `name`/`image`/`toPublish` fields replacing `title`.
+
+### New Features
+
+- **`GetCreatorPluginsRoute`**: New route `/api/v0/plugins/creator` and `getCreatorPlugins()` API method to fetch all plugins by creator address.
+- **`aiTokensUsed` on `iCreatorCreditsDoc`**: Track AI Builder token usage per billing period.
+- **`GetPluginErrors` fix**: Now correctly passes query params to the API.
+
+### Installation
+
+```bash
+npm install bitbadgesjs-sdk@^0.31.0
+```
+
 ## [0.30.0]
 
 ### Version Compatibility

@@ -57,13 +57,14 @@ import {
   type iDeveloperAppDoc,
   type iMapWithValues,
   type iPluginDoc,
-  type iSocialConnections,
+  type iPromptSkillDoc,
   type iStatusDoc,
   type iTransferActivityDoc
 } from '@/api-indexer/docs-types/interfaces.js';
 import type { iMetadata, iMetadataWithoutInternals } from '@/api-indexer/metadata/metadata.js';
 import { Metadata } from '@/api-indexer/metadata/metadata.js';
 import type { iCollectionMetadataDetails, iTokenMetadataDetails } from '@/api-indexer/metadata/tokenMetadata.js';
+import type { AssetConditionGroup, ChallengeParams, VerifyChallengeOptions } from '@/blockin/index.js';
 import { BaseNumberTypeClass, ConvertOptions, CustomTypeClass, ParsedQs, convertClassPropertiesAndMaintainNumberTypes } from '@/common/base.js';
 import { type NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
@@ -73,7 +74,6 @@ import { VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
 import type { CollectionId, iUintRange } from '@/interfaces/index.js';
 import { BroadcastPostBody } from '@/node-rest-api/index.js';
-import type { AssetConditionGroup, ChallengeParams, VerifyChallengeOptions } from '@/blockin/index.js';
 import { SiwbbChallengeParams } from './blockin.js';
 
 /**
@@ -630,12 +630,6 @@ export interface iGetClaimAttemptsPayload {
   includeErrors?: boolean;
   /** The specific address to fetch claims for. If blank, we fetch most recent claims. */
   address?: NativeAddress;
-  /**
-   * Include the cached payload data for requestBin plugin. Must be claim creator to view.
-   *
-   * You can also use the individual GET route to fetch this data.
-   */
-  includeRequestBinAttemptData?: boolean;
 }
 
 /**
@@ -645,22 +639,19 @@ export class GetClaimAttemptsPayload extends CustomTypeClass<GetClaimAttemptsPay
   bookmark?: string;
   includeErrors?: boolean;
   address?: NativeAddress;
-  includeRequestBinAttemptData?: boolean;
 
   constructor(payload: iGetClaimAttemptsPayload) {
     super();
     this.bookmark = payload.bookmark;
     this.includeErrors = payload.includeErrors;
     this.address = payload.address;
-    this.includeRequestBinAttemptData = payload.includeRequestBinAttemptData;
   }
 
   static FromQuery(query: ParsedQs): GetClaimAttemptsPayload {
     return new GetClaimAttemptsPayload({
       bookmark: query.bookmark?.toString(),
       includeErrors: query.includeErrors === 'true',
-      address: query.address?.toString(),
-      includeRequestBinAttemptData: query.includeRequestBinAttemptData === 'true'
+      address: query.address?.toString()
     });
   }
 }
@@ -678,13 +669,6 @@ export interface iGetClaimAttemptsSuccessResponse<T extends NumberType> {
     /** Zero-based index claim number */
     claimNumber: number;
     error?: string;
-    /**
-     * This is in the format of { [instanceId: string]: Record<string, any> }
-     * where the object is what was configured via the plugin.
-     */
-    attemptData?: {
-      [instanceId: string]: Record<string, any>;
-    };
   }[];
   bookmark?: string;
   total?: number;
@@ -701,14 +685,6 @@ export interface iClaimAttempt<T extends NumberType> {
   claimAttemptId: string;
   claimNumber: number;
   error?: string;
-  /** This is in the format of { [instanceId: string]: Record<string, any> }
-   * where the object is what was configured via the plugin.
-   *
-   * The instanceId is for the requestBin plugin's instance ID.
-   */
-  attemptData?: {
-    [instanceId: string]: Record<string, any>;
-  };
 }
 
 /**
@@ -722,9 +698,6 @@ export class ClaimAttempt<T extends NumberType> extends BaseNumberTypeClass<Clai
   claimAttemptId: string;
   claimNumber: number;
   error?: string;
-  attemptData?: {
-    [instanceId: string]: Record<string, any>;
-  };
 
   constructor(data: iClaimAttempt<T>) {
     super();
@@ -735,7 +708,6 @@ export class ClaimAttempt<T extends NumberType> extends BaseNumberTypeClass<Clai
     this.claimAttemptId = data.claimAttemptId;
     this.claimNumber = data.claimNumber;
     this.error = data.error;
-    this.attemptData = data.attemptData;
   }
 
   getNumberFieldNames(): string[] {
@@ -925,15 +897,6 @@ export interface iUpdateAccountInfoPayload {
     preferences?: { transferActivity?: boolean; ignoreIfInitiator?: boolean; signInAlertsEnabled?: boolean };
   };
 
-  /**
-   * The social connections for the user. Only returned if user is authenticated with full access.
-   */
-  socialConnections?: iSocialConnections<NumberType>;
-
-  /**
-   * The public social connections for the user. Will be returned for all queries and may be publicly displayed on profile
-   */
-  publicSocialConnectionsToSet?: { appName: string; toDelete?: boolean }[];
 }
 
 /**
@@ -953,43 +916,6 @@ export class UpdateAccountInfoSuccessResponse extends CustomTypeClass<UpdateAcco
   constructor(data: iUpdateAccountInfoSuccessResponse) {
     super();
     this.verificationEmailSent = data.verificationEmailSent;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetAttemptDataFromRequestBinPayload {
-  /**
-   * The instance ID of the request bin plugin.
-   *
-   * Only needed if there are duplicates. Else, we default to first instance found.
-   */
-  instanceId?: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetAttemptDataFromRequestBinSuccessResponse {
-  /**
-   * The attempt payload we cached. This will be in the format configured for the request bin plugin.
-   */
-  payload: Record<string, any>;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetAttemptDataFromRequestBinSuccessResponse
-  extends CustomTypeClass<GetAttemptDataFromRequestBinSuccessResponse>
-  implements iGetAttemptDataFromRequestBinSuccessResponse
-{
-  payload: Record<string, any>;
-
-  constructor(data: iGetAttemptDataFromRequestBinSuccessResponse) {
-    super();
-    this.payload = data.payload;
   }
 }
 
@@ -1526,44 +1452,6 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
 export interface iSignOutPayload {
   /** Sign out of Blockin, and thus the entire API. */
   signOutBlockin: boolean;
-  /** Sign out of Discord. */
-  signOutDiscord?: boolean;
-  /** Sign out of Twitter. */
-  signOutTwitter?: boolean;
-  /** Sign out of Google. */
-  signOutGoogle?: boolean;
-  /** Sign out of GitHub. */
-  signOutGithub?: boolean;
-  /** Sign out of Twitch. */
-  signOutTwitch?: boolean;
-  /** Sign out of Strava. */
-  signOutStrava?: boolean;
-  /** Sign out of Youtube */
-  signOutYoutube?: boolean;
-  /** Sign out of Reddit */
-  signOutReddit?: boolean;
-  /** Sign out of Meetup */
-  signOutMeetup?: boolean;
-  /** Sign out of Bluesky */
-  signOutBluesky?: boolean;
-  /** Sign out of Mailchimp */
-  signOutMailchimp?: boolean;
-  /** Sign out of Google Calendar */
-  signOutGoogleCalendar?: boolean;
-  /** Sign out of Telegram */
-  signOutTelegram?: boolean;
-  /** Sign out of Farcaster */
-  signOutFarcaster?: boolean;
-  /** Sign out of Slack */
-  signOutSlack?: boolean;
-  /** Sign out of email */
-  signOutEmail?: boolean;
-  /** Sign out of Facebook */
-  signOutFacebook?: boolean;
-  /** Sign out of LinkedIn */
-  signOutLinkedIn?: boolean;
-  /** Sign out of Shopify */
-  signOutShopify?: boolean;
 }
 
 /**
@@ -2542,53 +2430,18 @@ export interface PluginVersionConfigPayload {
   /** This is a flag for being compatible with auto-triggered claims, meaning no user interaction is needed. */
   requiresUserInputs: boolean;
 
-  /** The redirect URI for user inputs. */
-  userInputRedirect?: {
-    /** The base URI for user inputs. Note: This is experimental and not fully supported yet. */
-    baseUri?: string;
-    /** The tutorial URI for user inputs. */
-    tutorialUri?: string;
-  };
+  /** This means that the plugin can be used w/o any session cookies or authentication. */
+  requiresSessions: boolean;
 
   userInputsSchema?: Array<JsonBodyInputSchema>;
-
-  /** The redirect URI for claim creators. */
-  claimCreatorRedirect?: {
-    /** The tool URI for claim creators. Note: This is experimental and not fully supported yet. */
-    toolUri?: string;
-    /** The tutorial URI for claim creators. */
-    tutorialUri?: string;
-    /** The tester URI for claim creators. Note: This is experimental and not fully supported yet. */
-    testerUri?: string;
-  };
-
   publicParamsSchema?: Array<JsonBodyInputSchema>;
   privateParamsSchema?: Array<JsonBodyInputSchema>;
 
   /** The verification URL */
   verificationCall?: {
     uri: string;
-    method: 'POST' | 'GET' | 'PUT' | 'DELETE';
     hardcodedInputs: Array<JsonBodyInputWithValue>;
-
     passAddress?: boolean;
-    passDiscord?: boolean;
-    passEmail?: boolean;
-    passTwitter?: boolean;
-    passGoogle?: boolean;
-    passYoutube?: boolean;
-    passGithub?: boolean;
-    passStrava?: boolean;
-    passTwitch?: boolean;
-    passReddit?: boolean;
-    passMeetup?: boolean;
-    passFacebook?: boolean;
-    passTelegram?: boolean;
-    passFarcaster?: boolean;
-    passSlack?: boolean;
-    passShopify?: boolean;
-    passBluesky?: boolean;
-    postProcessingJs: string;
   };
 
   /** Require BitBadges sign-in to use the plugin? */
@@ -2604,9 +2457,6 @@ export interface PluginVersionConfigPayload {
 export interface iCreatePluginPayload {
   /** The unique plugin ID */
   pluginId: string;
-
-  /** Invite code for the plugin */
-  inviteCode?: string;
 
   metadata: {
     /** The name of the plugin */
@@ -2629,9 +2479,6 @@ export interface iCreatePluginPayload {
 
   /** To publish in the directory. This will trigger the start of the review process. */
   toPublish: boolean;
-
-  /** The addresses that are allowed to use this plugin. */
-  approvedUsers?: NativeAddress[];
 
   /** The initial version configuration */
   initialVersion: PluginVersionConfigPayload;
@@ -2657,12 +2504,6 @@ export interface iUpdatePluginPayload {
   /** The unique plugin ID */
   pluginId: string;
 
-  /** Invite code for the plugin */
-  inviteCode?: string;
-
-  /** Remove self from approved users? */
-  removeSelfFromApprovedUsers?: boolean;
-
   metadata?: {
     /** The name of the plugin */
     name: string;
@@ -2685,15 +2526,12 @@ export interface iUpdatePluginPayload {
   /** To publish in the directory. This will trigger the start of the review process. */
   toPublish?: boolean;
 
-  /** The addresses that are allowed to use this plugin. */
-  approvedUsers?: NativeAddress[];
-
   /** Rotate the plugin secret? */
   rotatePluginSecret?: boolean;
 
   /** Update an existing version */
   versionUpdates?: {
-    /** The version to update or create */
+    /** The version to update */
     version: NumberType;
     /** The configuration for this version */
     config: Partial<PluginVersionConfigPayload>;
@@ -2738,17 +2576,11 @@ export class DeletePluginSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface iSearchPluginsPayload {
-  /**
-   * If true, we will fetch all plugins for the authenticated user (with plugin secrets).
-   *
-   * This will include plugins created by the signed in user and also those where they are explicitly approved / invited.
-   */
-  pluginsForSignedInUser?: boolean;
   /** Bookmark for pagination of the plugins (obtained from a previous call to this endpoint). */
   bookmark?: string;
-  /** Search value */
+  /** Search value to filter by plugin name. */
   searchValue?: string;
-  /** Locale to restrict results to. By default, we assume 'en'. This is not applicable if you specify createdPluginsOnly, speciifc pluginIds, or an invite code. */
+  /** Locale to restrict results to. By default, we assume 'en'. */
   locale?: string;
 }
 
@@ -2756,14 +2588,12 @@ export interface iSearchPluginsPayload {
  * @category API Requests / Responses
  */
 export class SearchPluginsPayload extends CustomTypeClass<SearchPluginsPayload> implements iSearchPluginsPayload {
-  pluginsForSignedInUser?: boolean;
   bookmark?: string;
   searchValue?: string;
   locale?: string;
 
   constructor(payload: iSearchPluginsPayload) {
     super();
-    this.pluginsForSignedInUser = payload.pluginsForSignedInUser;
     this.bookmark = payload.bookmark;
     this.searchValue = payload.searchValue;
     this.locale = payload.locale;
@@ -2771,7 +2601,6 @@ export class SearchPluginsPayload extends CustomTypeClass<SearchPluginsPayload> 
 
   static FromQuery(query: ParsedQs): SearchPluginsPayload {
     return new SearchPluginsPayload({
-      pluginsForSignedInUser: query.pluginsForSignedInUser === 'true',
       bookmark: query.bookmark?.toString(),
       searchValue: query.searchValue?.toString(),
       locale: query.locale?.toString()
@@ -2780,13 +2609,68 @@ export class SearchPluginsPayload extends CustomTypeClass<SearchPluginsPayload> 
 }
 
 /**
+ * Payload for fetching all plugins created/managed by a specific address.
+ *
+ * Set `returnSensitiveData` to include sensitive fields (pluginSecret). This requires authentication as the creator address.
+ * Without the flag, sensitive data is always stripped regardless of authentication.
+ *
+ * @category API Requests / Responses
+ */
+export interface iGetCreatorPluginsPayload {
+  /** The address of the plugin creator to query. */
+  creatorAddress: string;
+  /** Bookmark for pagination. */
+  bookmark?: string;
+  /** If true, include sensitive data (pluginSecret) in the response. Requires authentication as the creator. */
+  returnSensitiveData?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetCreatorPluginsPayload extends CustomTypeClass<GetCreatorPluginsPayload> implements iGetCreatorPluginsPayload {
+  creatorAddress: string;
+  bookmark?: string;
+  returnSensitiveData?: boolean;
+
+  constructor(payload: iGetCreatorPluginsPayload) {
+    super();
+    this.creatorAddress = payload.creatorAddress;
+    this.bookmark = payload.bookmark;
+    this.returnSensitiveData = payload.returnSensitiveData;
+  }
+
+  static FromQuery(query: ParsedQs): GetCreatorPluginsPayload {
+    return new GetCreatorPluginsPayload({
+      creatorAddress: query.creatorAddress?.toString() ?? '',
+      bookmark: query.bookmark?.toString(),
+      returnSensitiveData: query.returnSensitiveData === 'true'
+    });
+  }
+}
+
+/**
  * @category API Requests / Responses
  */
 export interface iGetPluginsPayload {
-  /** If true, we will fetch only the specific plugin with the plugin ID (no secrets). */
+  /** The plugin IDs to fetch. */
   pluginIds: string[];
-  /** Invite code to fetch the plugin with.  */
-  inviteCode?: string;
+  /** If true, include sensitive data (pluginSecret) for plugins you own. Requires authentication. */
+  returnSensitiveData?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetPluginsPayload extends CustomTypeClass<GetPluginsPayload> implements iGetPluginsPayload {
+  pluginIds: string[];
+  returnSensitiveData?: boolean;
+
+  constructor(payload: iGetPluginsPayload) {
+    super();
+    this.pluginIds = payload.pluginIds;
+    this.returnSensitiveData = payload.returnSensitiveData;
+  }
 }
 
 /**
@@ -4768,5 +4652,109 @@ export class GetOnChainDynamicStoreValuesPaginatedSuccessResponse<T extends Numb
     options?: ConvertOptions
   ): GetOnChainDynamicStoreValuesPaginatedSuccessResponse<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetOnChainDynamicStoreValuesPaginatedSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreatePromptSkillPayload {
+  promptText: string;
+  name: string;
+  image: string;
+  description: string;
+  category: string;
+  tags: string[];
+  toPublish?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iCreatePromptSkillSuccessResponse {
+  promptSkillId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class CreatePromptSkillSuccessResponse extends CustomTypeClass<CreatePromptSkillSuccessResponse> implements iCreatePromptSkillSuccessResponse {
+  promptSkillId: string;
+  constructor(data: iCreatePromptSkillSuccessResponse) {
+    super();
+    this.promptSkillId = data.promptSkillId;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdatePromptSkillPayload {
+  promptSkillId: string;
+  promptText?: string;
+  name?: string;
+  image?: string;
+  description?: string;
+  category?: string;
+  tags?: string[];
+  toPublish?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdatePromptSkillSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UpdatePromptSkillSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeletePromptSkillPayload {
+  promptSkillId: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iDeletePromptSkillSuccessResponse {}
+
+/**
+ * @category API Requests / Responses
+ */
+export class DeletePromptSkillSuccessResponse extends EmptyResponseClass {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iSearchPromptSkillsPayload {
+  searchValue?: string;
+  category?: string;
+  bookmark?: string;
+  creatorAddress?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iSearchPromptSkillsSuccessResponse {
+  promptSkills: iPromptSkillDoc[];
+  bookmark?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class SearchPromptSkillsSuccessResponse extends CustomTypeClass<SearchPromptSkillsSuccessResponse> implements iSearchPromptSkillsSuccessResponse {
+  promptSkills: iPromptSkillDoc[];
+  bookmark?: string;
+
+  constructor(data: iSearchPromptSkillsSuccessResponse) {
+    super();
+    this.promptSkills = data.promptSkills;
+    this.bookmark = data.bookmark;
   }
 }

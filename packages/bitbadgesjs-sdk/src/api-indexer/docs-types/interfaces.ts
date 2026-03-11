@@ -83,107 +83,6 @@ export type SiwbbMessage = string;
 export type NativeAddress = string;
 
 /**
- * Social connections are tracked for each user to provide an enhanced experience.
- * These are kept private from other users or sites using the API.
- * Currently, there is no use for these, but they may be used in the future.
- *
- * @category Interfaces
- */
-export interface iSocialConnections<T extends NumberType> {
-  discord?: {
-    username: string;
-    id: string;
-    discriminator?: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  twitter?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  google?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  github?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  twitch?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  strava?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  reddit?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  meetup?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  bluesky?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  mailchimp?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  facebook?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  googleCalendar?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  youtube?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  linkedIn?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  shopify?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  telegram?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  farcaster?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-  slack?: {
-    username: string;
-    id: string;
-    lastUpdated: UNIXMilliTimestamp<T>;
-  };
-}
-
-/**
  * Details about the user's push notification preferences.
  *
  * @category Interfaces
@@ -659,11 +558,6 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
   /** The notifications of the account */
   notifications?: iNotificationPreferences<T>;
 
-  /** Social connections stored for the account */
-  socialConnections?: iSocialConnections<T>;
-
-  /** Public social connections stored for the account */
-  publicSocialConnections?: iSocialConnections<T>;
 }
 
 /**
@@ -839,34 +733,12 @@ export interface iBalanceDocWithDetails<T extends NumberType> extends iBalanceDo
  * @category Claims
  */
 export type ClaimIntegrationPluginType =
+  | 'codes'
   | 'password'
   | 'numUses'
-  | 'discord'
-  | 'codes'
-  | 'github'
-  | 'google'
-  | 'twitch'
-  | 'twitter'
-  | 'strava'
-  | 'googleCalendar'
-  | 'youtube'
-  | 'reddit'
-  | 'bluesky'
-  | 'mailchimp'
-  | 'facebook'
-  | 'linkedIn'
-  | 'telegram'
-  | 'shopify'
-  | 'farcaster'
-  | 'slack'
   | 'transferTimes'
   | 'initiatedBy'
   | 'whitelist'
-  | 'email'
-  | 'ip'
-  | 'webhooks'
-  | 'successWebhooks'
-  | 'payments'
   | string;
 
 /**
@@ -906,26 +778,6 @@ export type JsonBodyInputSchema = {
   arrayField?: boolean;
 };
 
-type OauthAppName =
-  | 'twitter'
-  | 'github'
-  | 'google'
-  | 'email'
-  | 'discord'
-  | 'twitch'
-  | 'strava'
-  | 'youtube'
-  | 'reddit'
-  | 'facebook'
-  | 'mailchimp'
-  | 'bluesky'
-  | 'googleCalendar'
-  | 'telegram'
-  | 'farcaster'
-  | 'slack'
-  | 'linkedIn'
-  | 'shopify';
-
 /**
  * @category Claims
  */
@@ -941,17 +793,7 @@ export type ClaimIntegrationPluginCustomBodyType<T extends ClaimIntegrationPlugi
       ? {
           token?: string;
         }
-      : T extends 'captcha'
-        ? {
-            captchaToken: string;
-          }
-        : Record<string, any>;
-
-interface OAuthAppParams {
-  hasPrivateList: boolean;
-  maxUsesPerUser?: number;
-  blacklist?: boolean;
-}
+      : Record<string, any>;
 
 /**
  * Public params are params that are visible to the public. For example, the number of uses for a claim code.
@@ -969,56 +811,18 @@ export type ClaimIntegrationPublicParamsType<T extends ClaimIntegrationPluginTyp
         numCodes: number;
         hideCurrentState?: boolean;
       }
-    : T extends 'ip'
+    : T extends 'transferTimes'
       ? {
-          maxUsesPerIp: number;
+          transferTimes: iUintRange<JSPrimitiveNumberType>[];
         }
-      : T extends 'email'
-        ? OAuthAppParams
-        : T extends OauthAppName
-          ? OAuthAppParams
-          : T extends 'transferTimes'
-            ? {
-                transferTimes: iUintRange<JSPrimitiveNumberType>[];
-              }
-            : T extends 'whitelist'
-              ? {
-                  listId?: string;
-                  list?: iAddressList;
-                  maxUsesPerAddress?: number;
-                  hasPrivateList?: boolean;
-                }
-              : T extends 'geolocation'
-                ? {
-                    pindrop?: { latitude: number; longitude: number; radius: number };
-                    allowedCountryCodes?: string[];
-                    disallowedCountryCodes?: string[];
-                  }
-                : T extends 'webhooks' | 'successWebhooks' | 'zapierAiAction'
-                  ? {
-                      tutorialUri?: string;
-                      ignoreSimulations?: boolean;
-                      passAddress?: boolean;
-                      passDiscord?: boolean;
-                      passEmail?: boolean;
-                      passTwitter?: boolean;
-                      passGoogle?: boolean;
-                      passYoutube?: boolean;
-                      passGithub?: boolean;
-                      passTwitch?: boolean;
-                      passStrava?: boolean;
-                      passReddit?: boolean;
-                      passMeetup?: boolean;
-                      passBluesky?: boolean;
-                      passTelegram?: boolean;
-                      passFarcaster?: boolean;
-                      passSlack?: boolean;
-                      passFacebook?: boolean;
-                      passShopify?: boolean;
-                      passMailchimp?: boolean;
-                      userInputsSchema?: Array<JsonBodyInputSchema>;
-                    }
-                  : Record<string, any>;
+      : T extends 'whitelist'
+        ? {
+            listId?: string;
+            list?: iAddressList;
+            maxUsesPerAddress?: number;
+            hasPrivateList?: boolean;
+          }
+        : Record<string, any>;
 
 /**
  * Private params are params that are not visible to the public. For example, the password for a claim code.
@@ -1043,27 +847,7 @@ export type ClaimIntegrationPrivateParamsType<T extends ClaimIntegrationPluginTy
           listId?: string;
           list?: iAddressList;
         }
-      : T extends OauthAppName
-        ? {
-            useDynamicStore?: boolean;
-            dynamicDataId?: string;
-            dataSecret?: string;
-
-            usernames?: string[];
-            ids?: string[];
-          }
-        : T extends 'webhooks' | 'successWebhooks'
-          ? {
-              webhookUrl: string;
-              webhookSecret: string;
-            }
-          : T extends 'zapierAiAction'
-            ? {
-                action: string;
-                instructions: string;
-                apiKey: string;
-              }
-            : Record<string, any>;
+      : Record<string, any>;
 
 /**
  * Public state is the current state of the claim integration that is visible to the public. For example, the number of times a claim code has been used.
@@ -1093,16 +877,11 @@ export type ClaimIntegrationPublicStateType<T extends ClaimIntegrationPluginType
  *
  * @category Claims
  */
-export type ClaimIntegrationPrivateStateType<T extends ClaimIntegrationPluginType> = T extends OauthAppName
+export type ClaimIntegrationPrivateStateType<T extends ClaimIntegrationPluginType> = T extends 'whitelist'
   ? {
-      ids: { [id: string]: number };
-      usernames: { [username: string]: string };
+      addresses: { [address: string]: number };
     }
-  : T extends 'whitelist'
-    ? {
-        addresses: { [address: string]: number };
-      }
-    : Record<string, any>;
+  : Record<string, any>;
 
 /**
  * @category Claims
@@ -1829,6 +1608,8 @@ export interface iCreatorCreditsDoc<T extends NumberType> extends Doc {
   credits: T;
   /** The limit of credits */
   creditsLimit?: T;
+  /** AI Builder tokens used this billing period */
+  aiTokensUsed?: T;
 }
 
 /**
@@ -1886,29 +1667,21 @@ export interface iDeveloperAppDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export type DynamicDataHandlerType = OauthAppName | 'addresses';
+export type DynamicDataHandlerType = 'addresses';
 
 /**
  * @category Interfaces
  */
-export type DynamicDataHandlerData<Q extends DynamicDataHandlerType> = Q extends 'email'
-  ? { emails: string[] }
-  : Q extends OauthAppName
-    ? { ids: string[]; usernames: string[] }
-    : Q extends 'addresses'
-      ? { addresses: string[] }
-      : never;
+export type DynamicDataHandlerData<Q extends DynamicDataHandlerType> = Q extends 'addresses'
+  ? { addresses: string[] }
+  : never;
 
 /**
  * @category Interfaces
  */
-export type DynamicDataHandlerActionPayload<Q extends DynamicDataHandlerType> = Q extends 'email'
-  ? { email: string }
-  : Q extends OauthAppName
-    ? { id: string; username: string }
-    : Q extends 'addresses'
-      ? { address: string }
-      : never;
+export type DynamicDataHandlerActionPayload<Q extends DynamicDataHandlerType> = Q extends 'addresses'
+  ? { address: string }
+  : never;
 
 /**
  * @category Interfaces
@@ -1967,7 +1740,6 @@ export interface iAccessTokenDoc extends Doc {
  */
 export enum PluginPresetType {
   Stateless = 'Stateless',
-  Usernames = 'Usernames',
   ClaimToken = 'ClaimToken',
   CustomResponseHandler = 'CustomResponseHandler',
   ClaimNumbers = 'ClaimNumbers'
@@ -1988,9 +1760,6 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
 
   /** The secret of the plugin. Used to verify BitBadges as origin of request. */
   pluginSecret?: string;
-
-  /** Invite code for the plugin */
-  inviteCode?: string;
 
   /** To publish to directory? */
   toPublish: boolean;
@@ -2024,8 +1793,6 @@ export interface iPluginDoc<T extends NumberType> extends Doc {
 
   createdAt: UNIXMilliTimestamp<T>;
   deletedAt?: UNIXMilliTimestamp<T>;
-
-  approvedUsers: NativeAddress[];
 
   /** Array of version-controlled plugin configurations */
   versions: iPluginVersionConfig<T>[];
@@ -2075,67 +1842,56 @@ export interface iPluginVersionConfig<T extends NumberType> {
   publicParamsSchema: Array<JsonBodyInputSchema>;
   privateParamsSchema: Array<JsonBodyInputSchema>;
 
-  /** The redirect URI for user inputs. */
-  userInputRedirect?: {
-    /** The base URI for user inputs. Note: This is experimental and not fully supported yet. */
-    baseUri?: string;
-    /** The tutorial URI for user inputs. */
-    tutorialUri?: string;
-  };
-
-  /** The redirect URI for claim creators. */
-  claimCreatorRedirect?: {
-    /** The tool URI for claim creators. Note: This is experimental and not fully supported yet. */
-    toolUri?: string;
-    /** The tutorial URI for claim creators. */
-    tutorialUri?: string;
-    /** The tester URI for claim creators. Note: This is experimental and not fully supported yet. */
-    testerUri?: string;
-  };
-
   /** The verification URL config. This lets us know what should be passed to the plugin payload. */
   verificationCall?: {
     uri: string;
-    method: 'POST' | 'GET' | 'PUT' | 'DELETE';
     hardcodedInputs: Array<JsonBodyInputWithValue>;
-
     passAddress?: boolean;
-    passDiscord?: boolean;
-    passEmail?: boolean;
-    passTwitter?: boolean;
-    passGoogle?: boolean;
-    passYoutube?: boolean;
-    passGithub?: boolean;
-    passTwitch?: boolean;
-    passStrava?: boolean;
-    passReddit?: boolean;
-    passBluesky?: boolean;
-    passShopify?: boolean;
-    passFacebook?: boolean;
-    passTelegram?: boolean;
-    passFarcaster?: boolean;
-    passSlack?: boolean;
-    passMeetup?: boolean;
-    passMailchimp?: boolean;
-    postProcessingJs: string;
   };
 
   /**
    * Custom details display for the plugin. Use {{publicParamKey}} to dynamically display the values of public parameters.
-   *
-   * Example: "This plugin checks for a minimum of {{publicBalanceParam}} balance."
    */
   customDetailsDisplay?: string;
 
   /**
    * Require BitBadges sign-in to use the plugin?
-   * This will ensure that any addresss received is actually verified by BitBadges.
-   * Otherwise, the address will be the claimee's address but it could be manually entered (if configuration allows).
-   *
-   * We recommend keeping this false to allow for non-indexed support and also be more flexible
-   * for the claim creator's implementation.
    */
   requireSignIn?: boolean;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iPromptSkillDoc extends Doc {
+  /** The unique prompt skill ID */
+  promptSkillId: string;
+  /** The prompt text */
+  promptText: string;
+  /** The BitBadges address of the creator */
+  createdBy: string;
+  /** Name of the prompt skill */
+  name: string;
+  /** Image URL for the prompt skill */
+  image: string;
+  /** Description of what the prompt does */
+  description: string;
+  /** Category for organization */
+  category: string;
+  /** Tags for searchability */
+  tags: string[];
+  /** Number of times used */
+  numUses: number;
+  /** Whether the skill is published to the public directory */
+  toPublish: boolean;
+  /** Approval status */
+  approvalStatus: 'approved' | 'pending' | 'rejected';
+  /** Version number */
+  version: number;
+  /** Creation timestamp (ms) */
+  createdAt: number;
+  /** Last update timestamp (ms) */
+  updatedAt: number;
 }
 
 /**

@@ -56,9 +56,6 @@ export class BitBadgesApiRoutes {
   static AddToIpfsRoute = () => '/api/v0/addToIpfs';
   static AddApprovalDetailsToOffChainStorageRoute = () => '/api/v0/addApprovalDetailsToOffChainStorage';
 
-  static GetAttemptDataFromRequestBinRoute = (claimId: string, claimAttemptId: string) =>
-    `/api/v0/requestBin/attemptData/${claimId.toString()}/${claimAttemptId.toString()}`;
-
   static GetSignInChallengeRoute = () => '/api/v0/auth/getChallenge';
   static VerifySignInRoute = () => '/api/v0/auth/verify';
   static SignOutRoute = () => '/api/v0/auth/logout';
@@ -85,6 +82,7 @@ export class BitBadgesApiRoutes {
   static GetPluginRoute = (pluginId: string) => `/api/v0/plugins/${pluginId.toString()}`;
   static GetPluginsRoute = () => '/api/v0/plugins/fetch';
   static SearchPluginsRoute = () => '/api/v0/plugins/search';
+  static GetCreatorPluginsRoute = () => '/api/v0/plugins/creator';
   static CRUDPluginRoute = () => '/api/v0/plugins';
 
   static GetMapsRoute = () => '/api/v0/maps';
