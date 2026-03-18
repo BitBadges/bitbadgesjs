@@ -4,6 +4,7 @@ import {
   getAllTokenIdsToBeTransferred,
   getAllBalancesToBeTransferred,
   getBalancesAfterTransfers,
+  getTransfersFromTransfersWithIncrements,
   iTransferWithIncrements
 } from './transfers.js';
 import { UintRangeArray } from './uintRanges.js';
@@ -585,6 +586,40 @@ describe('Transfers', () => {
           expect(ownershipTime.end).not.toBe(wrongEnd);
           expect(ownershipTime.end).toBe(wrongEnd - 1n);
         }
+      }
+    });
+
+    it('should give all recipients the same duration-based ownership times', () => {
+      const blockTime = 1000000n;
+      const duration = 86400000n;
+      const recipients = [genTestAddress(), genTestAddress(), genTestAddress()];
+      const transfers = getTransfersFromTransfersWithIncrements(
+        [
+          {
+            from: 'Mint',
+            toAddresses: recipients,
+            balances: [
+              {
+                amount: 1n,
+                tokenIds: [{ start: 1n, end: 1n }],
+                ownershipTimes: [{ start: 0n, end: 100000n }]
+              }
+            ],
+            durationFromTimestamp: duration
+          }
+        ],
+        blockTime
+      );
+
+      expect(transfers.length).toBe(3);
+
+      // All recipients should get the duration-based ownership times
+      const expectedStart = blockTime;
+      const expectedEnd = blockTime + duration - 1n;
+
+      for (let i = 0; i < transfers.length; i++) {
+        expect(transfers[i].balances[0].ownershipTimes[0].start).toBe(expectedStart);
+        expect(transfers[i].balances[0].ownershipTimes[0].end).toBe(expectedEnd);
       }
     });
   });
