@@ -458,5 +458,134 @@ describe('Transfers', () => {
       // Ownership times should be adjusted based on currentTime + duration
       expect(allBalances.length).toBeGreaterThan(0);
     });
+
+    it('should compute end time as blockTime + duration - 1 (matching on-chain behavior) via slow path', () => {
+      const blockTime = 1000000n;
+      const duration = 50000n;
+      const expectedEnd = blockTime + duration - 1n; // on-chain: now + duration - 1
+
+      // To force the slow path in getBalancesAfterTransfers, we need:
+      // - incrementTokenIdsBy set, but token range size != incrementTokenIdsBy (breaks fast path)
+      // - durationFromTimestamp set
+      // Token range {1,2} has size 2, incrementTokenIdsBy is 3 => 2 != 3 => slow path
+      //
+      // The slow path: iteration 0 uses original ownershipTimes, then sets
+      // ownershipTimes = [blockTime, blockTime+duration-1] for subsequent iterations.
+      // We use 3 recipients to ensure iteration 2 uses the durationFromTimestamp-computed times.
+
+      // Starting balances must cover both the original ownership times (used by first iteration)
+      // and the duration-computed times (used by subsequent iterations)
+      const startingBalances = [
+        {
+          amount: 1n,
+          tokenIds: [{ start: 1n, end: 10n }],
+          ownershipTimes: UintRangeArray.FullRanges()
+        }
+      ];
+
+      const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+        {
+          from: 'Mint',
+          balances: [
+            {
+              amount: 1n,
+              tokenIds: [{ start: 1n, end: 2n }], // size=2
+              ownershipTimes: [{ start: blockTime, end: expectedEnd }] // first iteration uses this
+            }
+          ],
+          toAddresses: [genTestAddress(), genTestAddress(), genTestAddress()],
+          incrementTokenIdsBy: 3n, // size(2) != 3 => slow path
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: duration
+        }
+      ];
+
+      // This should NOT throw. If the -1 fix were missing, the ownership times
+      // for iterations 1+ would be [blockTime, blockTime+duration] instead of
+      // [blockTime, blockTime+duration-1], which would be 1 unit wider than expected.
+      const balancesAfterTransfers = getBalancesAfterTransfers(startingBalances, transfersWithIncrements, blockTime);
+      const remaining = balancesAfterTransfers.filterZeroBalances();
+      expect(remaining.length).toBeGreaterThan(0);
+    });
+
+    it('should compute end time as blockTime + duration - 1 via fast path', () => {
+      const blockTime = 1000000n;
+      const duration = 50000n;
+      const expectedEnd = blockTime + duration - 1n;
+
+      const startingBalances = [
+        {
+          amount: 1n,
+          tokenIds: [{ start: 1n, end: 100n }],
+          ownershipTimes: [{ start: blockTime, end: expectedEnd }]
+        }
+      ];
+
+      // Fast path: incrementTokenIdsBy matches token range size (1), so it can batch
+      const transfersWithIncrements: iTransferWithIncrements<bigint>[] = [
+        {
+          from: 'Mint',
+          balances: [
+            {
+              amount: 1n,
+              tokenIds: [{ start: 1n, end: 1n }],
+              ownershipTimes: [{ start: 0n, end: 100000n }]
+            }
+          ],
+          toAddresses: [],
+          toAddressesLength: 100n,
+          incrementTokenIdsBy: 1n,
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: duration
+        }
+      ];
+
+      const allBalances = getAllBalancesToBeTransferred(transfersWithIncrements, blockTime);
+      expect(allBalances.length).toBeGreaterThan(0);
+      for (const balance of allBalances) {
+        for (const ownershipTime of balance.ownershipTimes) {
+          expect(ownershipTime.start).toBe(blockTime);
+          expect(ownershipTime.end).toBe(expectedEnd);
+        }
+      }
+
+      // The full transfer should exactly deplete the starting balance
+      const balancesAfterTransfers = getBalancesAfterTransfers(startingBalances, transfersWithIncrements, blockTime);
+      expect(balancesAfterTransfers.filterZeroBalances().length).toBe(0);
+    });
+
+    it('should NOT match if end time were blockTime + duration (without -1)', () => {
+      const blockTime = 1000000n;
+      const duration = 50000n;
+      const wrongEnd = blockTime + duration; // Without -1, this would be wrong
+
+      const allBalances = getAllBalancesToBeTransferred(
+        [
+          {
+            from: 'Mint',
+            balances: [
+              {
+                amount: 1n,
+                tokenIds: [{ start: 1n, end: 1n }],
+                ownershipTimes: [{ start: 0n, end: 100000n }]
+              }
+            ],
+            toAddresses: [genTestAddress()],
+            incrementTokenIdsBy: 0n,
+            incrementOwnershipTimesBy: 0n,
+            durationFromTimestamp: duration
+          }
+        ],
+        blockTime
+      );
+
+      // The end should be blockTime + duration - 1, NOT blockTime + duration
+      for (const balance of allBalances) {
+        for (const ownershipTime of balance.ownershipTimes) {
+          expect(ownershipTime.end).not.toBe(wrongEnd);
+          expect(ownershipTime.end).toBe(wrongEnd - 1n);
+        }
+      }
+    });
   });
 });

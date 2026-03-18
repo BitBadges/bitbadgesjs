@@ -539,7 +539,9 @@ export const getBalancesAfterTransfers = <T extends NumberType>(
                 ownershipTime.end = safeAddKeepLeft(ownershipTime.end, transfer.incrementOwnershipTimesBy || 0n);
               }
             } else if (transfer.durationFromTimestamp) {
-              ownershipTimes = UintRangeArray.From([{ start: blockTime, end: safeAddKeepLeft(blockTime, transfer.durationFromTimestamp || 0n) }]);
+              let endTime = safeAddKeepLeft(blockTime, transfer.durationFromTimestamp || 0n);
+              endTime = safeSubtractKeepLeft(endTime, 1n);
+              ownershipTimes = UintRangeArray.From([{ start: blockTime, end: endTime }]);
             }
           }
         }
