@@ -352,6 +352,18 @@ export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(
     //Else, we can create one transfer with N addresses
     if (incrementTokenIdsBy || incrementOwnershipTimesBy || durationFromTimestamp) {
       const currBalances = transfer.balances.clone();
+
+      // Apply durationFromTimestamp before the loop so the first recipient
+      // gets the correct ownership times (not the raw transfer definition times)
+      if (durationFromTimestamp) {
+        for (const balance of currBalances) {
+          let endTime = safeAddKeepLeft(blockTime, durationFromTimestamp || 0n);
+          endTime = safeSubtractKeepLeft(endTime, 1n);
+
+          balance.ownershipTimes = UintRangeArray.From([{ start: blockTime, end: endTime }]);
+        }
+      }
+
       for (let i = 0; i < length; i++) {
         transfers.push(
           new Transfer({
@@ -367,12 +379,7 @@ export const getTransfersFromTransfersWithIncrements = <T extends NumberType>(
             tokenId.end = safeAddKeepLeft(tokenId.end, incrementTokenIdsBy || 0n);
           }
 
-          if (durationFromTimestamp) {
-            let endTime = safeAddKeepLeft(blockTime, durationFromTimestamp || 0n);
-            endTime = safeSubtractKeepLeft(endTime, 1n);
-
-            balance.ownershipTimes = UintRangeArray.From([{ start: blockTime, end: endTime }]);
-          } else {
+          if (!durationFromTimestamp) {
             for (const ownershipTime of balance.ownershipTimes) {
               ownershipTime.start = safeAddKeepLeft(ownershipTime.start, incrementOwnershipTimesBy || 0n);
               ownershipTime.end = safeAddKeepLeft(ownershipTime.end, incrementOwnershipTimesBy || 0n);
