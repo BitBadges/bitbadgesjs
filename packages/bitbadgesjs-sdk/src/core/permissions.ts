@@ -219,7 +219,7 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
     permissions: UserOutgoingApprovalPermissionWithDetails<U>[],
     newPermission: UserOutgoingApprovalPermissionWithDetails<U>[]
   ): Error | null {
-    const dummyAddress = '0x';
+    const dummyAddress = 'All';
     const castedPermissions: UniversalPermission[] = permissions.map((x) =>
       x.castToCollectionApprovalPermission(dummyAddress).castToUniversalPermission()
     );
@@ -247,7 +247,7 @@ export class UserOutgoingApprovalPermission<T extends NumberType>
     permissions: UserOutgoingApprovalPermissionWithDetails<U>[],
     time?: U
   ): Error | null {
-    const dummyAddress = '0x'; //For compatibility
+    const dummyAddress = 'All';
     return CollectionApprovalPermission.check(
       details,
       permissions.map((x) => x.castToCollectionApprovalPermission(dummyAddress)),
@@ -347,7 +347,7 @@ export class UserIncomingApprovalPermission<T extends NumberType>
     permissions: UserIncomingApprovalPermissionWithDetails<U>[],
     newPermission: UserIncomingApprovalPermissionWithDetails<U>[]
   ): Error | null {
-    const dummyAddress = '0x';
+    const dummyAddress = 'All';
     const castedPermissions: UniversalPermission[] = permissions.map((x) =>
       x.castToCollectionApprovalPermission(dummyAddress).castToUniversalPermission()
     );
@@ -372,7 +372,7 @@ export class UserIncomingApprovalPermission<T extends NumberType>
     permissions: UserIncomingApprovalPermissionWithDetails<U>[],
     time?: U
   ): Error | null {
-    const dummyAddress = '0x';
+    const dummyAddress = 'All';
     return CollectionApprovalPermission.check(
       details,
       permissions.map((x) => x.castToCollectionApprovalPermission(dummyAddress)),
