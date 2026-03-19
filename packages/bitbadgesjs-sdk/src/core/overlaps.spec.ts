@@ -10,10 +10,13 @@ import {
   ActionPermissionUsedFlags,
   ApprovalPermissionUsedFlags,
   GetFirstMatchOnly,
+  GetListIdWithOptions,
   GetListWithOptions,
   GetUintRangesWithOptions,
   MergeUniversalPermissionDetails,
   TimedUpdatePermissionUsedFlags,
+  TimedUpdateWithTokenIdsPermissionUsedFlags,
+  TokenIdsActionPermissionUsedFlags,
   UniversalPermission,
   UniversalPermissionDetails,
   ValidateUniversalPermissionUpdate,
@@ -1171,6 +1174,269 @@ describe('overlaps', () => {
       expect(ApprovalPermissionUsedFlags.usesInitiatedByList).toBe(true);
       expect(ApprovalPermissionUsedFlags.usesOwnershipTimes).toBe(true);
       expect(ApprovalPermissionUsedFlags.usesApprovalIdList).toBe(true);
+    });
+
+    test('TimedUpdateWithTokenIdsPermissionUsedFlags should have tokenIds and timelineTimes true', () => {
+      expect(TimedUpdateWithTokenIdsPermissionUsedFlags.usesTokenIds).toBe(true);
+      expect(TimedUpdateWithTokenIdsPermissionUsedFlags.usesTimelineTimes).toBe(true);
+      expect(TimedUpdateWithTokenIdsPermissionUsedFlags.usesTransferTimes).toBe(false);
+      expect(TimedUpdateWithTokenIdsPermissionUsedFlags.usesToList).toBe(false);
+    });
+
+    test('TokenIdsActionPermissionUsedFlags should only have usesTokenIds true', () => {
+      expect(TokenIdsActionPermissionUsedFlags.usesTokenIds).toBe(true);
+      expect(TokenIdsActionPermissionUsedFlags.usesTimelineTimes).toBe(false);
+      expect(TokenIdsActionPermissionUsedFlags.usesTransferTimes).toBe(false);
+      expect(TokenIdsActionPermissionUsedFlags.usesToList).toBe(false);
+      expect(TokenIdsActionPermissionUsedFlags.usesFromList).toBe(false);
+      expect(TokenIdsActionPermissionUsedFlags.usesInitiatedByList).toBe(false);
+      expect(TokenIdsActionPermissionUsedFlags.usesOwnershipTimes).toBe(false);
+      expect(TokenIdsActionPermissionUsedFlags.usesApprovalIdList).toBe(false);
+    });
+  });
+
+  describe('GetListIdWithOptions', () => {
+    test('should return original listId when uses is true', () => {
+      const result = GetListIdWithOptions('custom-list', true);
+      expect(result).toBe('custom-list');
+    });
+
+    test('should return "All" when uses is false', () => {
+      const result = GetListIdWithOptions('custom-list', false);
+      expect(result).toBe('All');
+    });
+
+    test('should return "All" when uses is undefined', () => {
+      const result = GetListIdWithOptions('custom-list', undefined);
+      expect(result).toBe('All');
+    });
+
+    test('should return "All" when uses is explicitly false and listId is empty', () => {
+      const result = GetListIdWithOptions('', false);
+      expect(result).toBe('All');
+    });
+  });
+
+  describe('Boundary conditions for universalRemoveOverlaps', () => {
+    test('should handle adjacent non-overlapping ranges', () => {
+      // Range 1-5 handled, checking range 6-10 - should have no overlap
+      const handled = createPermissionDetails(
+        { start: 1n, end: 5n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false }
+      );
+
+      const valueToCheck = createPermissionDetails(
+        { start: 6n, end: 10n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false }
+      );
+
+      const [remaining, removed] = universalRemoveOverlaps(handled, valueToCheck);
+      expect(remaining.length).toBe(1);
+      expect(removed.length).toBe(0);
+      expect(remaining[0].tokenId.start).toBe(6n);
+      expect(remaining[0].tokenId.end).toBe(10n);
+    });
+
+    test('should handle single-point overlap at boundary', () => {
+      // Range 1-5 handled, checking range 5-10 - overlap at 5
+      const handled = createPermissionDetails(
+        { start: 1n, end: 5n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false }
+      );
+
+      const valueToCheck = createPermissionDetails(
+        { start: 5n, end: 10n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false }
+      );
+
+      const [remaining, removed] = universalRemoveOverlaps(handled, valueToCheck);
+      expect(removed.length).toBe(1);
+      expect(removed[0].tokenId.start).toBe(5n);
+      expect(removed[0].tokenId.end).toBe(5n);
+      // Remaining should be 6-10
+      expect(remaining.length).toBeGreaterThan(0);
+      const hasRemaining = remaining.some((r) => r.tokenId.start === 6n && r.tokenId.end === 10n);
+      expect(hasRemaining).toBe(true);
+    });
+
+    test('should handle start == end (single point range)', () => {
+      const handled = createPermissionDetails(
+        { start: 5n, end: 5n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false }
+      );
+
+      const valueToCheck = createPermissionDetails(
+        { start: 5n, end: 5n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { start: 1n, end: 1n },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false }
+      );
+
+      const [remaining, removed] = universalRemoveOverlaps(handled, valueToCheck);
+      expect(remaining.length).toBe(0);
+      expect(removed.length).toBe(1);
+      expect(removed[0].tokenId.start).toBe(5n);
+      expect(removed[0].tokenId.end).toBe(5n);
+    });
+  });
+
+  describe('ValidateUniversalPermissionUpdate - additional edge cases', () => {
+    test('should allow adding forbidden times that were not previously defined', () => {
+      const oldPermissions = [
+        createPermissionDetails(
+          { start: 1n, end: 10n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        )
+      ];
+      oldPermissions[0].permanentlyForbiddenTimes = UintRangeArray.From([]);
+      oldPermissions[0].permanentlyPermittedTimes = UintRangeArray.From([]);
+
+      const newPermissions = [
+        createPermissionDetails(
+          { start: 1n, end: 10n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        )
+      ];
+      newPermissions[0].permanentlyForbiddenTimes = UintRangeArray.From([{ start: 1n, end: 100n }]);
+      newPermissions[0].permanentlyPermittedTimes = UintRangeArray.From([]);
+
+      const error = ValidateUniversalPermissionUpdate(oldPermissions, newPermissions);
+      expect(error).toBeNull();
+    });
+
+    test('should return error when revoking previously forbidden times', () => {
+      const oldPermissions = [
+        createPermissionDetails(
+          { start: 1n, end: 10n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        )
+      ];
+      oldPermissions[0].permanentlyForbiddenTimes = UintRangeArray.From([{ start: 1n, end: 100n }]);
+      oldPermissions[0].permanentlyPermittedTimes = UintRangeArray.From([]);
+
+      const newPermissions = [
+        createPermissionDetails(
+          { start: 1n, end: 10n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        )
+      ];
+      newPermissions[0].permanentlyForbiddenTimes = UintRangeArray.From([{ start: 1n, end: 49n }]);
+      newPermissions[0].permanentlyPermittedTimes = UintRangeArray.From([]);
+
+      const error = ValidateUniversalPermissionUpdate(oldPermissions, newPermissions);
+      expect(error).not.toBeNull();
+      expect(error!.message).toContain('previously explicitly disApproved');
+    });
+  });
+
+  describe('GetFirstMatchOnly - additional edge cases', () => {
+    test('should handle permission with all uses flags true', () => {
+      const permission: UniversalPermission = {
+        tokenIds: UintRangeArray.From([{ start: 1n, end: 10n }]),
+        timelineTimes: UintRangeArray.From([{ start: 1n, end: 5n }]),
+        transferTimes: UintRangeArray.From([{ start: 1n, end: 5n }]),
+        ownershipTimes: UintRangeArray.From([{ start: 1n, end: 5n }]),
+        toList: AddressList.AllAddresses(),
+        fromList: AddressList.AllAddresses(),
+        initiatedByList: AddressList.AllAddresses(),
+        approvalIdList: new AddressList({ listId: '', addresses: [], whitelist: false, uri: '', customData: '' }),
+        permanentlyPermittedTimes: UintRangeArray.From([{ start: 1n, end: 100n }]),
+        permanentlyForbiddenTimes: UintRangeArray.From([]),
+        usesTokenIds: true,
+        usesTimelineTimes: true,
+        usesTransferTimes: true,
+        usesToList: true,
+        usesFromList: true,
+        usesInitiatedByList: true,
+        usesOwnershipTimes: true,
+        usesApprovalIdList: false,
+        arbitraryValue: {}
+      };
+
+      const result = GetFirstMatchOnly([permission]);
+      expect(result.length).toBeGreaterThanOrEqual(1);
+      // All results should have the correct permitted times
+      for (const r of result) {
+        expect(r.permanentlyPermittedTimes[0].start).toBe(1n);
+        expect(r.permanentlyPermittedTimes[0].end).toBe(100n);
+      }
+    });
+
+    test('should handle single permission covering entire space', () => {
+      const permission: UniversalPermission = {
+        tokenIds: UintRangeArray.From([{ start: 1n, end: 18446744073709551615n }]),
+        timelineTimes: UintRangeArray.From([{ start: 1n, end: 1n }]),
+        transferTimes: UintRangeArray.From([{ start: 1n, end: 1n }]),
+        ownershipTimes: UintRangeArray.From([{ start: 1n, end: 1n }]),
+        toList: AddressList.AllAddresses(),
+        fromList: AddressList.AllAddresses(),
+        initiatedByList: AddressList.AllAddresses(),
+        approvalIdList: new AddressList({ listId: '', addresses: [], whitelist: false, uri: '', customData: '' }),
+        permanentlyPermittedTimes: UintRangeArray.From([{ start: 1n, end: 18446744073709551615n }]),
+        permanentlyForbiddenTimes: UintRangeArray.From([]),
+        usesTokenIds: true,
+        usesTimelineTimes: false,
+        usesTransferTimes: false,
+        usesToList: false,
+        usesFromList: false,
+        usesInitiatedByList: false,
+        usesOwnershipTimes: false,
+        usesApprovalIdList: false,
+        arbitraryValue: {}
+      };
+
+      const result = GetFirstMatchOnly([permission]);
+      expect(result.length).toBe(1);
+      expect(result[0].tokenId.start).toBe(1n);
+      expect(result[0].tokenId.end).toBe(18446744073709551615n);
     });
   });
 });
