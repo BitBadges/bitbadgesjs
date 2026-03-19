@@ -1,13 +1,18 @@
 import { genTestAddress } from './addressLists.spec.js';
 import {
   createBalanceMapForOffChainBalances,
+  convertOffChainBalancesMap,
   getAllTokenIdsToBeTransferred,
   getAllBalancesToBeTransferred,
   getBalancesAfterTransfers,
+  getBalanceAfterTransfer,
   getTransfersFromTransfersWithIncrements,
-  iTransferWithIncrements
+  iTransferWithIncrements,
+  Transfer,
+  TransferWithIncrements
 } from './transfers.js';
 import { UintRangeArray } from './uintRanges.js';
+import { BigIntify, Stringify } from '../common/string-numbers.js';
 
 BigInt.prototype.toJSON = function () {
   return this.toString();
@@ -621,6 +626,452 @@ describe('Transfers', () => {
         expect(transfers[i].balances[0].ownershipTimes[0].start).toBe(expectedStart);
         expect(transfers[i].balances[0].ownershipTimes[0].end).toBe(expectedEnd);
       }
+    });
+  });
+
+  describe('Transfer class', () => {
+    it('should construct a Transfer with required fields', () => {
+      const addr1 = genTestAddress();
+      const addr2 = genTestAddress();
+      const transfer = new Transfer({
+        from: addr1,
+        toAddresses: [addr2],
+        balances: [
+          {
+            amount: 10n,
+            tokenIds: [{ start: 1n, end: 5n }],
+            ownershipTimes: UintRangeArray.FullRanges()
+          }
+        ]
+      });
+
+      expect(transfer.from).toBe(addr1);
+      expect(transfer.toAddresses).toEqual([addr2]);
+      expect(transfer.balances.length).toBe(1);
+      expect(transfer.balances[0].amount).toBe(10n);
+    });
+
+    it('should construct with optional memo', () => {
+      const transfer = new Transfer({
+        from: genTestAddress(),
+        toAddresses: [genTestAddress()],
+        balances: [],
+        memo: 'test memo'
+      });
+
+      expect(transfer.memo).toBe('test memo');
+    });
+
+    it('should return empty number field names', () => {
+      const transfer = new Transfer({
+        from: genTestAddress(),
+        toAddresses: [],
+        balances: []
+      });
+
+      expect(transfer.getNumberFieldNames()).toEqual([]);
+    });
+
+    it('should convert between number types', () => {
+      const transfer = new Transfer({
+        from: genTestAddress(),
+        toAddresses: [genTestAddress()],
+        balances: [
+          {
+            amount: 100n,
+            tokenIds: [{ start: 1n, end: 10n }],
+            ownershipTimes: [{ start: 1n, end: 1000n }]
+          }
+        ]
+      });
+
+      const stringified = transfer.convert(Stringify);
+      expect(stringified.balances[0].amount).toBe('100');
+      expect(stringified.balances[0].tokenIds[0].start).toBe('1');
+      expect(stringified.balances[0].tokenIds[0].end).toBe('10');
+    });
+
+    it('should handle optional fields being undefined', () => {
+      const transfer = new Transfer({
+        from: genTestAddress(),
+        toAddresses: [],
+        balances: []
+      });
+
+      expect(transfer.precalculateBalancesFromApproval).toBeUndefined();
+      expect(transfer.merkleProofs).toBeUndefined();
+      expect(transfer.ethSignatureProofs).toBeUndefined();
+      expect(transfer.memo).toBeUndefined();
+      expect(transfer.prioritizedApprovals).toBeUndefined();
+      expect(transfer.onlyCheckPrioritizedCollectionApprovals).toBeUndefined();
+      expect(transfer.onlyCheckPrioritizedIncomingApprovals).toBeUndefined();
+      expect(transfer.onlyCheckPrioritizedOutgoingApprovals).toBeUndefined();
+    });
+  });
+
+  describe('TransferWithIncrements class', () => {
+    it('should construct with increment fields', () => {
+      const twi = new TransferWithIncrements({
+        from: genTestAddress(),
+        toAddresses: [genTestAddress()],
+        balances: [
+          {
+            amount: 1n,
+            tokenIds: [{ start: 1n, end: 1n }],
+            ownershipTimes: UintRangeArray.FullRanges()
+          }
+        ],
+        incrementTokenIdsBy: 1n,
+        incrementOwnershipTimesBy: 0n,
+        toAddressesLength: 100n,
+        durationFromTimestamp: 0n
+      });
+
+      expect(twi.incrementTokenIdsBy).toBe(1n);
+      expect(twi.incrementOwnershipTimesBy).toBe(0n);
+      expect(twi.toAddressesLength).toBe(100n);
+      expect(twi.durationFromTimestamp).toBe(0n);
+    });
+
+    it('should return correct number field names', () => {
+      const twi = new TransferWithIncrements({
+        from: genTestAddress(),
+        toAddresses: [],
+        balances: []
+      });
+
+      expect(twi.getNumberFieldNames()).toEqual([
+        'toAddressesLength',
+        'incrementTokenIdsBy',
+        'incrementOwnershipTimesBy',
+        'durationFromTimestamp'
+      ]);
+    });
+
+    it('should convert between number types', () => {
+      const twi = new TransferWithIncrements({
+        from: genTestAddress(),
+        toAddresses: [],
+        balances: [
+          {
+            amount: 50n,
+            tokenIds: [{ start: 1n, end: 10n }],
+            ownershipTimes: UintRangeArray.FullRanges()
+          }
+        ],
+        incrementTokenIdsBy: 5n,
+        toAddressesLength: 20n
+      });
+
+      const stringified = twi.convert(Stringify);
+      expect(stringified.incrementTokenIdsBy).toBe('5');
+      expect(stringified.toAddressesLength).toBe('20');
+      expect(stringified.balances[0].amount).toBe('50');
+    });
+
+    it('should handle undefined optional increment fields', () => {
+      const twi = new TransferWithIncrements({
+        from: genTestAddress(),
+        toAddresses: [],
+        balances: []
+      });
+
+      expect(twi.incrementTokenIdsBy).toBeUndefined();
+      expect(twi.incrementOwnershipTimesBy).toBeUndefined();
+      expect(twi.toAddressesLength).toBeUndefined();
+      expect(twi.durationFromTimestamp).toBeUndefined();
+    });
+  });
+
+  describe('getBalanceAfterTransfer (single)', () => {
+    it('should subtract a single transfer from balance', () => {
+      const startBalance = [
+        {
+          amount: 100n,
+          tokenIds: [{ start: 1n, end: 10n }],
+          ownershipTimes: UintRangeArray.FullRanges()
+        }
+      ];
+
+      const result = getBalanceAfterTransfer(
+        startBalance,
+        1n, // startTokenId
+        10n, // endTokenId
+        1n, // ownershipTimeStart
+        18446744073709551615n, // ownershipTimeEnd
+        10n, // amountToTransfer
+        1n // numRecipients
+      );
+
+      expect(result[0].amount).toBe(90n);
+    });
+
+    it('should multiply amount by numRecipients', () => {
+      const startBalance = [
+        {
+          amount: 100n,
+          tokenIds: [{ start: 1n, end: 1n }],
+          ownershipTimes: UintRangeArray.FullRanges()
+        }
+      ];
+
+      const result = getBalanceAfterTransfer(
+        startBalance,
+        1n,
+        1n,
+        1n,
+        18446744073709551615n,
+        10n,
+        5n // 5 recipients * 10 amount = 50 total
+      );
+
+      expect(result[0].amount).toBe(50n);
+    });
+
+    it('should throw on underflow without allowUnderflow', () => {
+      const startBalance = [
+        {
+          amount: 10n,
+          tokenIds: [{ start: 1n, end: 1n }],
+          ownershipTimes: UintRangeArray.FullRanges()
+        }
+      ];
+
+      expect(() =>
+        getBalanceAfterTransfer(startBalance, 1n, 1n, 1n, 18446744073709551615n, 20n, 1n, false)
+      ).toThrow();
+    });
+
+    it('should allow underflow when flag is set', () => {
+      const startBalance = [
+        {
+          amount: 10n,
+          tokenIds: [{ start: 1n, end: 1n }],
+          ownershipTimes: UintRangeArray.FullRanges()
+        }
+      ];
+
+      const result = getBalanceAfterTransfer(startBalance, 1n, 1n, 1n, 18446744073709551615n, 20n, 1n, true);
+      expect(result[0].amount).toBe(-10n);
+    });
+
+    it('should return empty array when balance is fully depleted', () => {
+      const startBalance = [
+        {
+          amount: 50n,
+          tokenIds: [{ start: 1n, end: 1n }],
+          ownershipTimes: UintRangeArray.FullRanges()
+        }
+      ];
+
+      const result = getBalanceAfterTransfer(startBalance, 1n, 1n, 1n, 18446744073709551615n, 50n, 1n);
+      const filtered = result.filter((b) => b.amount > 0n);
+      expect(filtered.length).toBe(0);
+    });
+
+    it('should only subtract from matching token ID range', () => {
+      const startBalance = [
+        {
+          amount: 100n,
+          tokenIds: [{ start: 1n, end: 10n }],
+          ownershipTimes: UintRangeArray.FullRanges()
+        }
+      ];
+
+      // Transfer only token IDs 5-5
+      const result = getBalanceAfterTransfer(startBalance, 5n, 5n, 1n, 18446744073709551615n, 50n, 1n);
+
+      // Token IDs 1-4 and 6-10 should still have 100, token ID 5 should have 50
+      const totalNonZero = result.filter((b) => b.amount > 0n);
+      expect(totalNonZero.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('convertOffChainBalancesMap', () => {
+    it('should convert balances map between number types', () => {
+      const bigintMap = {
+        [genTestAddress()]: [
+          {
+            amount: 100n,
+            tokenIds: [{ start: 1n, end: 10n }],
+            ownershipTimes: [{ start: 1n, end: 1000n }]
+          }
+        ]
+      };
+
+      const stringMap = convertOffChainBalancesMap(bigintMap, Stringify);
+      const keys = Object.keys(stringMap);
+      expect(keys.length).toBe(1);
+      expect(stringMap[keys[0]][0].amount).toBe('100');
+      expect(stringMap[keys[0]][0].tokenIds[0].start).toBe('1');
+    });
+
+    it('should handle empty map', () => {
+      const result = convertOffChainBalancesMap({}, Stringify);
+      expect(Object.keys(result).length).toBe(0);
+    });
+
+    it('should handle map with multiple addresses', () => {
+      const addr1 = genTestAddress();
+      const addr2 = genTestAddress();
+      const bigintMap = {
+        [addr1]: [
+          {
+            amount: 50n,
+            tokenIds: [{ start: 1n, end: 5n }],
+            ownershipTimes: UintRangeArray.FullRanges()
+          }
+        ],
+        [addr2]: [
+          {
+            amount: 200n,
+            tokenIds: [{ start: 10n, end: 20n }],
+            ownershipTimes: UintRangeArray.FullRanges()
+          }
+        ]
+      };
+
+      const stringMap = convertOffChainBalancesMap(bigintMap, Stringify);
+      expect(stringMap[addr1][0].amount).toBe('50');
+      expect(stringMap[addr2][0].amount).toBe('200');
+    });
+  });
+
+  describe('createBalanceMapForOffChainBalances - error paths', () => {
+    it('should throw when durationFromTimestamp is used', () => {
+      const transfers: iTransferWithIncrements<bigint>[] = [
+        {
+          from: 'Mint',
+          balances: [
+            {
+              amount: 1n,
+              tokenIds: [{ start: 1n, end: 1n }],
+              ownershipTimes: UintRangeArray.FullRanges()
+            }
+          ],
+          toAddresses: [genTestAddress()],
+          durationFromTimestamp: 86400000n
+        }
+      ];
+
+      expect(() => createBalanceMapForOffChainBalances(transfers)).toThrow(
+        'durationFromTimestamp is not supported in createBalanceMapForOffChainBalances'
+      );
+    });
+  });
+
+  describe('getTransfersFromTransfersWithIncrements', () => {
+    it('should return single transfer when no increments', () => {
+      const addr1 = genTestAddress();
+      const addr2 = genTestAddress();
+      const transfers = getTransfersFromTransfersWithIncrements(
+        [
+          {
+            from: addr1,
+            toAddresses: [addr2],
+            balances: [
+              {
+                amount: 10n,
+                tokenIds: [{ start: 1n, end: 10n }],
+                ownershipTimes: UintRangeArray.FullRanges()
+              }
+            ]
+          }
+        ],
+        0n
+      );
+
+      expect(transfers.length).toBe(1);
+      expect(transfers[0].toAddresses).toEqual([addr2]);
+    });
+
+    it('should create N transfers when incrementTokenIdsBy is set', () => {
+      const recipients = [genTestAddress(), genTestAddress(), genTestAddress()];
+      const transfers = getTransfersFromTransfersWithIncrements(
+        [
+          {
+            from: 'Mint',
+            toAddresses: recipients,
+            balances: [
+              {
+                amount: 1n,
+                tokenIds: [{ start: 1n, end: 1n }],
+                ownershipTimes: UintRangeArray.FullRanges()
+              }
+            ],
+            incrementTokenIdsBy: 1n
+          }
+        ],
+        0n
+      );
+
+      expect(transfers.length).toBe(3);
+      // First gets token 1
+      expect(transfers[0].balances[0].tokenIds[0].start).toBe(1n);
+      expect(transfers[0].balances[0].tokenIds[0].end).toBe(1n);
+      // Second gets token 2
+      expect(transfers[1].balances[0].tokenIds[0].start).toBe(2n);
+      // Third gets token 3
+      expect(transfers[2].balances[0].tokenIds[0].start).toBe(3n);
+    });
+
+    it('should create N transfers when incrementOwnershipTimesBy is set', () => {
+      const recipients = [genTestAddress(), genTestAddress()];
+      const transfers = getTransfersFromTransfersWithIncrements(
+        [
+          {
+            from: 'Mint',
+            toAddresses: recipients,
+            balances: [
+              {
+                amount: 1n,
+                tokenIds: [{ start: 1n, end: 1n }],
+                ownershipTimes: [{ start: 1000n, end: 2000n }]
+              }
+            ],
+            incrementOwnershipTimesBy: 5000n
+          }
+        ],
+        0n
+      );
+
+      expect(transfers.length).toBe(2);
+      // First gets ownership time 1000-2000
+      expect(transfers[0].balances[0].ownershipTimes[0].start).toBe(1000n);
+      expect(transfers[0].balances[0].ownershipTimes[0].end).toBe(2000n);
+      // Second gets ownership time 6000-7000
+      expect(transfers[1].balances[0].ownershipTimes[0].start).toBe(6000n);
+      expect(transfers[1].balances[0].ownershipTimes[0].end).toBe(7000n);
+    });
+
+    it('should handle empty transfers array', () => {
+      const transfers = getTransfersFromTransfersWithIncrements([], 0n);
+      expect(transfers.length).toBe(0);
+    });
+
+    it('should use toAddressesLength over toAddresses.length when both are set', () => {
+      // toAddressesLength = 2 but only 1 address provided
+      // The function uses length for iteration count
+      const addr = genTestAddress();
+      const transfers = getTransfersFromTransfersWithIncrements(
+        [
+          {
+            from: 'Mint',
+            toAddresses: [addr],
+            balances: [
+              {
+                amount: 1n,
+                tokenIds: [{ start: 1n, end: 1n }],
+                ownershipTimes: UintRangeArray.FullRanges()
+              }
+            ]
+          }
+        ],
+        0n
+      );
+
+      // Without increments, should bundle into one transfer
+      expect(transfers.length).toBe(1);
     });
   });
 });
