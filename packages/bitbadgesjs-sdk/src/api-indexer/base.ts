@@ -119,6 +119,30 @@ export class BaseBitBadgesApi<T extends NumberType> {
     const num = Number(collectionId.split('-')[0]);
     this.assertPositiveInteger(num);
   }
+
+  protected async request<R>(
+    method: 'get' | 'post' | 'put' | 'delete',
+    route: string,
+    ResponseClass: new (data: any) => any,
+    payload?: any
+  ): Promise<R> {
+    try {
+      const url = `${this.BACKEND_URL}${route}`;
+      let response;
+      if (method === 'get') {
+        response = await this.axios.get(url, { params: payload });
+      } else if (method === 'delete') {
+        response = await this.axios.delete(url, { data: payload });
+      } else {
+        response = await this.axios[method](url, payload);
+      }
+      const result = new ResponseClass(response.data);
+      return result.convert ? result.convert(this.ConvertFunction) : result;
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
 }
 
 /**
