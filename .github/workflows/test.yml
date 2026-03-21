@@ -3,10 +3,10 @@ name: Run Tests
 on:
   push:
     branches:
-      - main # Adjust the branch name as needed
+      - main
   pull_request:
     branches:
-      - main # Adjust the branch name as needed
+      - main
 
 jobs:
   build:
@@ -14,7 +14,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
       - name: Install dependencies
         working-directory: packages/bitbadgesjs-sdk
