@@ -13,6 +13,7 @@ import {
 } from './transfers.js';
 import { UintRangeArray } from './uintRanges.js';
 import { BigIntify, Stringify } from '../common/string-numbers.js';
+import { ApprovalIdentifierDetails, MerkleProof, ETHSignatureProof } from './misc.js';
 
 BigInt.prototype.toJSON = function () {
   return this.toString();
@@ -1072,6 +1073,196 @@ describe('Transfers', () => {
 
       // Without increments, should bundle into one transfer
       expect(transfers.length).toBe(1);
+    });
+  });
+
+  describe('Transfer class - proto/JSON serialization', () => {
+    it('should convert to proto and back via fromProto', () => {
+      const addr1 = genTestAddress();
+      const addr2 = genTestAddress();
+      const original = new Transfer({
+        from: addr1,
+        toAddresses: [addr2],
+        balances: [
+          {
+            amount: 42n,
+            tokenIds: [{ start: 1n, end: 10n }],
+            ownershipTimes: [{ start: 1n, end: 1000n }]
+          }
+        ]
+      });
+
+      const proto = original.toProto();
+      expect(proto).toBeTruthy();
+
+      const restored = Transfer.fromProto(proto, BigIntify);
+      expect(restored.from).toBe(addr1);
+      expect(restored.toAddresses).toEqual([addr2]);
+      expect(restored.balances[0].amount).toBe(42n);
+      expect(restored.balances[0].tokenIds[0].start).toBe(1n);
+      expect(restored.balances[0].tokenIds[0].end).toBe(10n);
+    });
+
+    it('should round-trip through fromJson', () => {
+      const addr1 = genTestAddress();
+      const addr2 = genTestAddress();
+      const original = new Transfer({
+        from: addr1,
+        toAddresses: [addr2],
+        balances: [
+          {
+            amount: 10n,
+            tokenIds: [{ start: 5n, end: 5n }],
+            ownershipTimes: [{ start: 1n, end: 100n }]
+          }
+        ],
+        memo: 'hello'
+      });
+
+      const proto = original.toProto();
+      const jsonVal = proto.toJson();
+      const restored = Transfer.fromJson(jsonVal, BigIntify);
+
+      expect(restored.from).toBe(addr1);
+      expect(restored.balances[0].amount).toBe(10n);
+      expect(restored.memo).toBe('hello');
+    });
+
+    it('should round-trip through fromJsonString', () => {
+      const addr1 = genTestAddress();
+      const original = new Transfer({
+        from: addr1,
+        toAddresses: [],
+        balances: [
+          {
+            amount: 7n,
+            tokenIds: [{ start: 3n, end: 3n }],
+            ownershipTimes: UintRangeArray.FullRanges()
+          }
+        ]
+      });
+
+      const jsonStr = original.toProto().toJsonString();
+      const restored = Transfer.fromJsonString(jsonStr, BigIntify);
+
+      expect(restored.from).toBe(addr1);
+      expect(restored.balances[0].amount).toBe(7n);
+    });
+
+    it('should construct Transfer with prioritizedApprovals', () => {
+      const addr1 = genTestAddress();
+      const transfer = new Transfer({
+        from: addr1,
+        toAddresses: [],
+        balances: [],
+        prioritizedApprovals: [
+          new ApprovalIdentifierDetails({
+            approvalId: 'approval-1',
+            approvalLevel: 'collection',
+            approverAddress: '',
+            version: 0n
+          })
+        ],
+        onlyCheckPrioritizedCollectionApprovals: true,
+        onlyCheckPrioritizedIncomingApprovals: false,
+        onlyCheckPrioritizedOutgoingApprovals: true
+      });
+
+      expect(transfer.prioritizedApprovals).toBeDefined();
+      expect(transfer.prioritizedApprovals!.length).toBe(1);
+      expect(transfer.prioritizedApprovals![0].approvalId).toBe('approval-1');
+      expect(transfer.onlyCheckPrioritizedCollectionApprovals).toBe(true);
+      expect(transfer.onlyCheckPrioritizedOutgoingApprovals).toBe(true);
+    });
+
+    it('should convert Transfer with prioritizedApprovals to proto and back', () => {
+      const addr1 = genTestAddress();
+      const transfer = new Transfer({
+        from: addr1,
+        toAddresses: [],
+        balances: [],
+        prioritizedApprovals: [
+          new ApprovalIdentifierDetails({
+            approvalId: 'approval-x',
+            approvalLevel: 'outgoing',
+            approverAddress: addr1,
+            version: 0n
+          })
+        ]
+      });
+
+      const proto = transfer.toProto();
+      const restored = Transfer.fromProto(proto, BigIntify);
+
+      expect(restored.prioritizedApprovals).toBeDefined();
+      expect(restored.prioritizedApprovals![0].approvalId).toBe('approval-x');
+    });
+
+    it('should toBech32Addresses convert address formats', () => {
+      const addr = genTestAddress(); // generates a valid 'bb' prefixed address
+      const transfer = new Transfer({
+        from: addr,
+        toAddresses: [addr],
+        balances: []
+      });
+
+      // 'bb' is the supported BitBadges bech32 prefix
+      const converted = transfer.toBech32Addresses('bb');
+      expect(converted.from).toBeTruthy();
+      expect(converted.toAddresses.length).toBe(1);
+    });
+
+    it('should toBech32Addresses with prioritizedApprovals (covers line 107)', () => {
+      const addr = genTestAddress();
+      const transfer = new Transfer({
+        from: addr,
+        toAddresses: [],
+        balances: [],
+        prioritizedApprovals: [
+          new ApprovalIdentifierDetails({
+            approvalId: 'test',
+            approvalLevel: 'collection',
+            approverAddress: '',
+            version: 0n
+          })
+        ]
+      });
+
+      // toBech32Addresses should also map prioritizedApprovals
+      const converted = transfer.toBech32Addresses('bb');
+      expect(converted.prioritizedApprovals).toBeDefined();
+      expect(converted.prioritizedApprovals!.length).toBe(1);
+    });
+
+    it('should round-trip Transfer with merkleProofs through proto (covers lines 88-89)', () => {
+      const addr = genTestAddress();
+      const transfer = new Transfer({
+        from: addr,
+        toAddresses: [],
+        balances: [],
+        merkleProofs: [
+          new MerkleProof({
+            aunts: [],
+            leaf: 'leaf-value',
+            leafSignature: 'sig'
+          })
+        ],
+        ethSignatureProofs: [
+          new ETHSignatureProof({
+            nonce: 'nonce-123',
+            signature: '0x1234'
+          })
+        ]
+      });
+
+      const proto = transfer.toProto();
+      const restored = Transfer.fromProto(proto, BigIntify);
+
+      expect(restored.merkleProofs).toBeDefined();
+      expect(restored.merkleProofs!.length).toBe(1);
+      expect(restored.merkleProofs![0].leaf).toBe('leaf-value');
+      expect(restored.ethSignatureProofs).toBeDefined();
+      expect(restored.ethSignatureProofs![0].nonce).toBe('nonce-123');
     });
   });
 });

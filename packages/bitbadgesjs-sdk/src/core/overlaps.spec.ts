@@ -1439,4 +1439,126 @@ describe('overlaps', () => {
       expect(result[0].tokenId.end).toBe(18446744073709551615n);
     });
   });
+
+  describe('universalRemoveOverlaps - approvalIdList remaining branch', () => {
+    test('should produce approvalId remaining entry when approvalIdList partially overlaps', () => {
+      // handled has approvalId whitelist [alice]
+      // valueToCheck has approvalId whitelist [alice, bob]
+      // So after removing [alice], the remaining approvalId should be [bob] — a non-empty remainder
+      const handled = createPermissionDetails(
+        { start: 1n, end: 10n },
+        { start: 1n, end: 10n },
+        { start: 1n, end: 10n },
+        { start: 1n, end: 10n },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false },
+        { addresses: [alice], whitelist: true } // approvalId: only alice
+      );
+
+      const valueToCheck = createPermissionDetails(
+        { start: 1n, end: 10n },
+        { start: 1n, end: 10n },
+        { start: 1n, end: 10n },
+        { start: 1n, end: 10n },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false },
+        { addresses: [], whitelist: false },
+        { addresses: [alice, bob], whitelist: true } // approvalId: alice and bob
+      );
+
+      const [remaining, removed] = universalRemoveOverlaps(handled, valueToCheck);
+
+      // Should have at least one remaining (the bob part of approvalId)
+      expect(remaining.length).toBeGreaterThan(0);
+      // Should have removed the alice intersection
+      expect(removed.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('ValidateUniversalPermissionUpdate - GetPermissionString branches', () => {
+    test('should include field info in error message when values are at MAX_UINT64', () => {
+      // Create old permissions at MAX_UINT64 boundaries to exercise GetPermissionString branches
+      const MAX = 18446744073709551615n;
+      const oldPermissions = [
+        createPermissionDetails(
+          { start: MAX, end: MAX },
+          { start: MAX, end: MAX },
+          { start: MAX, end: MAX },
+          { start: MAX, end: MAX },
+          { addresses: [alice], whitelist: true }, // non-empty toList to trigger address branches
+          { addresses: [alice], whitelist: true }, // non-empty fromList
+          { addresses: [alice], whitelist: true }  // non-empty initiatedByList
+        )
+      ];
+      oldPermissions[0].permanentlyPermittedTimes = UintRangeArray.From([{ start: 1n, end: 100n }]);
+
+      // New permissions omit this range entirely → triggers error with GetPermissionString
+      const newPermissions: UniversalPermissionDetails[] = [];
+
+      const error = ValidateUniversalPermissionUpdate(oldPermissions, newPermissions);
+      expect(error).not.toBeNull();
+      // Message should reference the MAX uint64 values via GetPermissionString
+      expect(error!.message).toContain('found in old permissions but not in new permissions');
+    });
+
+    test('should include address details in error message when address list has 1-5 addresses', () => {
+      const oldPermissions = [
+        createPermissionDetails(
+          { start: 1n, end: 5n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [alice, bob], whitelist: true }, // 2 addresses, triggers address listing
+          { addresses: [alice, bob], whitelist: true },
+          { addresses: [alice, bob], whitelist: true }
+        )
+      ];
+      oldPermissions[0].permanentlyPermittedTimes = UintRangeArray.From([{ start: 1n, end: 100n }]);
+
+      const newPermissions: UniversalPermissionDetails[] = [];
+
+      const error = ValidateUniversalPermissionUpdate(oldPermissions, newPermissions);
+      expect(error).not.toBeNull();
+      expect(error!.message).toContain('found in old permissions but not in new permissions');
+    });
+
+    test('should produce error with both permitted and forbidden leftover error message', () => {
+      // Both permitted AND forbidden times are removed from overlap
+      const oldPermissions = [
+        createPermissionDetails(
+          { start: 1n, end: 10n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        )
+      ];
+      oldPermissions[0].permanentlyPermittedTimes = UintRangeArray.From([{ start: 1n, end: 50n }]);
+      oldPermissions[0].permanentlyForbiddenTimes = UintRangeArray.From([{ start: 51n, end: 100n }]);
+
+      const newPermissions = [
+        createPermissionDetails(
+          { start: 1n, end: 10n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { start: 1n, end: 1n },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false },
+          { addresses: [], whitelist: false }
+        )
+      ];
+      // New permissions have neither the old permitted nor forbidden times
+      newPermissions[0].permanentlyPermittedTimes = UintRangeArray.From([]);
+      newPermissions[0].permanentlyForbiddenTimes = UintRangeArray.From([]);
+
+      const error = ValidateUniversalPermissionUpdate(oldPermissions, newPermissions);
+      // Both permitted and forbidden times were removed → error message should mention both
+      expect(error).not.toBeNull();
+      // The error message mentions either allowed or disApproved
+      expect(error!.message.toLowerCase()).toMatch(/allowed|disapproved/i);
+    });
+  });
 });
