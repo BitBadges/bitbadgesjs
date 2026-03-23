@@ -315,11 +315,18 @@ export class BitBadgesCollection<T extends NumberType>
   getDefaultDisplayCurrency() {
     return (
       this.standards
-        ?.find((x) => x.startsWith('DefaultDisplayCurrency'))
+        ?.find((x) => x.startsWith('NFTPricingDenom:') || x.startsWith('DefaultDisplayCurrency:'))
         ?.split(':')
         .slice(1)
         .join(':') ?? 'ubadge'
     );
+  }
+
+  /**
+   * Checks if collection has the NFT marketplace standard (accepts both new 'NFTMarketplace' and legacy 'Tradable' names).
+   */
+  hasNFTMarketplaceStandard() {
+    return this.standards?.some((s) => s === 'NFTMarketplace' || s === 'Tradable') ?? false;
   }
 
   private getBalanceInfoHelper(address: NativeAddress, throwIfNotFound = true) {
