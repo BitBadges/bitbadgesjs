@@ -155,6 +155,19 @@ export const getBalanceForIdAndTime = <T extends NumberType>(id: T, time: T, bal
 };
 
 /**
+ * Returns the balance amount for a specific token ID at the current time (Date.now()).
+ * Convenience wrapper around {@link getBalanceForIdAndTime}.
+ *
+ * @param id - The token ID to search for.
+ * @param balances - The set of balances to search.
+ * @category Balances
+ */
+export const getBalanceForIdNow = <T extends NumberType>(id: T, balances: iBalance<T>[]) => {
+  const convertFunction = getConverterFunction(id);
+  return getBalanceForIdAndTime(id, convertFunction(BigInt(Date.now())) as T, balances);
+};
+
+/**
  * Returns all matching balances for a specific token ID. Returns a new BalanceArray.
  *
  * @remarks
