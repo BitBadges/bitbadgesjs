@@ -447,7 +447,8 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
     collectionId: CollectionId,
     tokenId: NumberType,
     address: NativeAddress,
-    payload?: iGetBalanceByAddressPayload
+    payload?: iGetBalanceByAddressPayload,
+    options?: { time?: NumberType }
   ): Promise<GetBalanceByAddressSpecificTokenSuccessResponse<T>> {
     try {
       const validateRes: typia.IValidation<iGetBalanceByAddressPayload> = typia.validate<iGetBalanceByAddressPayload>(payload ?? {});
@@ -455,9 +456,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.get<iGetBalanceByAddressSpecificTokenSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBalanceByAddressSpecificTokenRoute(collectionId, address, tokenId)}`
-      );
+      const baseUrl = `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBalanceByAddressSpecificTokenRoute(collectionId, address, tokenId)}`;
+      const url = options?.time !== undefined ? `${baseUrl}?time=${options.time.toString()}` : baseUrl;
+      const response = await this.axios.get<iGetBalanceByAddressSpecificTokenSuccessResponse<string>>(url);
       return new GetBalanceByAddressSpecificTokenSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
