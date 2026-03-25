@@ -11,6 +11,7 @@ import type { DynamicDataHandlerType, NativeAddress, iChallengeTrackerIdDetails 
 import {
   FilterSuggestionsSuccessResponse,
   FilterTokensInCollectionSuccessResponse,
+  GetBalanceByAddressSpecificTokenSuccessResponse,
   GetBalanceByAddressSuccessResponse,
   GetOwnersSuccessResponse,
   GetTokenActivitySuccessResponse,
@@ -20,6 +21,7 @@ import {
   iFilterSuggestionsSuccessResponse,
   iFilterTokensInCollectionPayload,
   iGetBalanceByAddressPayload,
+  iGetBalanceByAddressSpecificTokenSuccessResponse,
   iGetBalanceByAddressSuccessResponse,
   iGetOwnersPayload,
   iGetTokenActivityPayload,
@@ -446,17 +448,17 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
     tokenId: NumberType,
     address: NativeAddress,
     payload?: iGetBalanceByAddressPayload
-  ): Promise<GetBalanceByAddressSuccessResponse<T>> {
+  ): Promise<GetBalanceByAddressSpecificTokenSuccessResponse<T>> {
     try {
       const validateRes: typia.IValidation<iGetBalanceByAddressPayload> = typia.validate<iGetBalanceByAddressPayload>(payload ?? {});
       if (!validateRes.success) {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.get<iGetBalanceByAddressSuccessResponse<string>>(
+      const response = await this.axios.get<iGetBalanceByAddressSpecificTokenSuccessResponse<string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetBalanceByAddressSpecificTokenRoute(collectionId, address, tokenId)}`
       );
-      return new GetBalanceByAddressSuccessResponse(response.data).convert(this.ConvertFunction);
+      return new GetBalanceByAddressSpecificTokenSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
