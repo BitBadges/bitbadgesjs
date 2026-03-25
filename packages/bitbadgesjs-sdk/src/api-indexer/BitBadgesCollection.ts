@@ -4,6 +4,7 @@ import type { NumberType } from '@/common/string-numbers.js';
 import { BigIntify } from '@/common/string-numbers.js';
 import { AddressList } from '@/core/addressLists.js';
 import { generateAlias, getAliasDerivationKeysForBadge } from '@/core/aliases.js';
+import { getBalanceForIdNow } from '@/core/balances.js';
 import { getMintApprovals, getNonMintApprovals, getUnhandledCollectionApprovals } from '@/core/approval-utils.js';
 import { CollectionApprovalWithDetails, iCollectionApprovalWithDetails } from '@/core/approvals.js';
 import {
@@ -394,6 +395,19 @@ export class BitBadgesCollection<T extends NumberType>
    */
   mustGetBalances(address: string) {
     return this.mustGetBalanceInfo(address).balances;
+  }
+
+  /**
+   * Returns the balance amount for a specific token ID at the current time for a given address.
+   * Uses the cached balance data. Returns 0 if no balance info is found.
+   *
+   * @param address - The address to look up.
+   * @param tokenId - The token ID to look up.
+   */
+  getBalanceAmountForToken(address: string, tokenId: T): T {
+    const balances = this.getBalances(address);
+    if (!balances) return getConverterFunction(tokenId)(0n) as T;
+    return getBalanceForIdNow(tokenId, balances);
   }
 
   /**
