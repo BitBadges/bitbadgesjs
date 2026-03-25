@@ -3,7 +3,7 @@
  */
 import { BitBadgesCollection } from '../api-indexer/BitBadgesCollection.js';
 import type { iBitBadgesCollection } from '../api-indexer/BitBadgesCollection.js';
-import { interpretCollection } from './interpret.js';
+import { interpretCollection, timestampToDate, durationToHuman, denomToHuman, amountToHuman } from './interpret.js';
 
 const GO_MAX = 18446744073709551615n;
 
@@ -121,13 +121,10 @@ function baseCollection(overrides: Partial<iBitBadgesCollection<bigint>> = {}): 
 }
 
 function addressList(id: string) {
-  // For reserved IDs like 'All', use blacklist (empty blacklist = everyone).
-  // For specific addresses like 'Mint', use whitelist with that address.
   if (id === 'All') {
     return { listId: 'All', addresses: [], whitelist: false, uri: '', customData: '', createdBy: '' };
   }
   if (id.startsWith('!')) {
-    // e.g. '!Mint' = everyone except Mint
     return { listId: id, addresses: [id.slice(1)], whitelist: false, uri: '', customData: '', createdBy: '' };
   }
   return { listId: id, addresses: [id], whitelist: true, uri: '', customData: '', createdBy: '' };
@@ -200,12 +197,12 @@ describe('interpretCollection', () => {
     expect(typeof result).toBe('string');
     expect(result.length).toBeGreaterThan(100);
     expect(result).toContain('NFT Collection');
-    expect(result).toContain('OVERVIEW');
-    expect(result).toContain('HOW TOKENS ARE CREATED');
-    expect(result).toContain('TRANSFERABILITY');
-    expect(result).toContain('PERMISSIONS');
-    expect(result).toContain('INVARIANTS');
-    expect(result).toContain('LOCKED');
+    expect(result).toContain('## Collection Overview');
+    expect(result).toContain('## How Tokens Are Created');
+    expect(result).toContain('## Transfer & Approval Rules');
+    expect(result).toContain('## Permissions');
+    expect(result).toContain('## Invariants');
+    expect(result).toContain('Permanently Locked');
     expect(result).toContain('Test Collection');
   });
 
@@ -238,11 +235,11 @@ describe('interpretCollection', () => {
 
     const result = interpretCollection(col);
     expect(result).toContain('Fungible Token');
-    expect(result).toContain('1000000');
-    expect(result).toContain('ubadge');
+    expect(result).toContain('1,000,000');
+    expect(result).toContain('BADGE');
     expect(result).toContain('public-mint');
     expect(result).toContain('free-transfer');
-    expect(result).toContain('forcefully seized after minting');
+    expect(result).toContain('forcefully seized or moved');
   });
 
   it('should handle a smart token (IBC-backed)', () => {
@@ -265,7 +262,7 @@ describe('interpretCollection', () => {
 
     const result = interpretCollection(col);
     expect(result).toContain('Smart Token (IBC-backed)');
-    expect(result).toContain('ibc/USDC');
+    expect(result).toContain('USDC');
     expect(result).toContain('bb1backingaddr');
     expect(result).toContain('IBC');
   });
@@ -336,7 +333,7 @@ describe('interpretCollection', () => {
 
     // But the claim should still be described
     expect(result).toContain('claim-1');
-    expect(result).toContain('CLAIMS');
+    expect(result).toContain('## Claims');
   });
 
   it('should detect soulbound (non-transferable) collections', () => {
@@ -346,26 +343,26 @@ describe('interpretCollection', () => {
     });
 
     const result = interpretCollection(col);
-    expect(result).toContain('Non-transferable');
+    expect(result).toContain('non-transferable');
     expect(result).toContain('soulbound');
   });
 
-  it('should show all required sections', () => {
+  it('should show all required markdown sections', () => {
     const col = baseCollection({
       standards: ['NFTs'],
       collectionApprovals: [mintApproval('mint'), transferApproval('transfer')] as any
     });
 
     const result = interpretCollection(col);
-    expect(result).toContain('OVERVIEW');
-    expect(result).toContain('METADATA');
-    expect(result).toContain('HOW TOKENS ARE CREATED');
-    expect(result).toContain('TRANSFERABILITY');
-    expect(result).toContain('DEFAULT BALANCES');
-    expect(result).toContain('PERMISSIONS');
-    expect(result).toContain('INVARIANTS');
-    expect(result).toContain('CLAIMS');
-    expect(result).toContain('IBC / CROSS-CHAIN');
+    expect(result).toContain('## Collection Overview');
+    expect(result).toContain('## Token Backing & Cross-Chain');
+    expect(result).toContain('## How Tokens Are Created');
+    expect(result).toContain('## Transfer & Approval Rules');
+    expect(result).toContain('## Default Balances & Auto-Approve Settings');
+    expect(result).toContain('## Permissions');
+    expect(result).toContain('## Invariants');
+    expect(result).toContain('## Claims');
+    expect(result).toContain('## Key Reference Information');
   });
 
   it('should accept a BitBadgesCollection class instance', () => {
@@ -384,8 +381,114 @@ describe('interpretCollection', () => {
   it('should describe default balance auto-approve settings', () => {
     const col = baseCollection();
     const result = interpretCollection(col);
-    expect(result).toContain('Auto-approve self-initiated outgoing transfers: Yes');
-    expect(result).toContain('Auto-approve self-initiated incoming transfers: Yes');
-    expect(result).toContain('Auto-approve all incoming transfers: No');
+    expect(result).toContain('Auto-approve self-initiated outgoing transfers**: Yes');
+    expect(result).toContain('Auto-approve self-initiated incoming transfers**: Yes');
+    expect(result).toContain('Auto-approve all incoming transfers**: No');
+  });
+
+  it('should use markdown headings (##) not ALL CAPS section headers', () => {
+    const col = baseCollection({
+      standards: ['NFTs'],
+      collectionApprovals: [mintApproval('mint'), transferApproval('transfer')] as any
+    });
+
+    const result = interpretCollection(col);
+    // Markdown headings should be present
+    const headings = result.match(/^## .+$/gm) || [];
+    expect(headings.length).toBeGreaterThanOrEqual(7);
+
+    // Old ALL CAPS headers should NOT be present
+    expect(result).not.toMatch(/^OVERVIEW$/m);
+    expect(result).not.toMatch(/^METADATA$/m);
+    expect(result).not.toMatch(/^HOW TOKENS ARE CREATED \/ OBTAINED$/m);
+    expect(result).not.toMatch(/^TRANSFERABILITY$/m);
+    expect(result).not.toMatch(/^PERMISSIONS$/m);
+    expect(result).not.toMatch(/^INVARIANTS \(ON-CHAIN GUARANTEES\)$/m);
+    expect(result).not.toMatch(/^CLAIMS$/m);
+    expect(result).not.toMatch(/^IBC \/ CROSS-CHAIN$/m);
+  });
+
+  it('should produce prose paragraphs, not just bullet lists', () => {
+    const col = baseCollection({
+      standards: ['NFTs'],
+      collectionPermissions: lockedPerms() as any,
+      collectionApprovals: [
+        mintApproval('mint-all', {
+          approvalCriteria: {
+            approvalAmounts: {
+              overallApprovalAmount: 100n,
+              perToAddressApprovalAmount: 0n,
+              perFromAddressApprovalAmount: 0n,
+              perInitiatedByAddressApprovalAmount: 5n,
+              amountTrackerId: 'mint-all',
+              resetTimeIntervals: { startTime: 0n, intervalLength: 0n }
+            }
+          }
+        }),
+        transferApproval('free-transfer')
+      ] as any
+    });
+
+    const result = interpretCollection(col);
+    // Should contain full sentences, not just "Key: value" pairs
+    expect(result).toContain('This approval governs');
+    expect(result).toContain('permanently locked');
+    // Should have proper bold markdown
+    expect(result).toMatch(/\*\*[^*]+\*\*/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Helper function tests
+// ---------------------------------------------------------------------------
+
+describe('timestampToDate', () => {
+  it('should return boundary text for 0 and max', () => {
+    expect(timestampToDate(0n)).toBe('the beginning of time');
+    expect(timestampToDate(GO_MAX)).toBe('the end of time');
+  });
+
+  it('should format a known date correctly', () => {
+    // Jan 1, 2025 00:00:00 UTC = 1735689600000 ms
+    const result = timestampToDate(1735689600000n);
+    expect(result).toContain('January');
+    expect(result).toContain('2025');
+  });
+});
+
+describe('durationToHuman', () => {
+  it('should convert common durations', () => {
+    expect(durationToHuman(86400000n)).toBe('24 hours');
+    expect(durationToHuman(604800000n)).toBe('7 days (weekly)');
+    expect(durationToHuman(3600000n)).toBe('1 hour');
+  });
+
+  it('should handle boundary values', () => {
+    expect(durationToHuman(0n)).toBe('instant');
+    expect(durationToHuman(GO_MAX)).toBe('forever');
+  });
+});
+
+describe('denomToHuman', () => {
+  it('should map ubadge to BADGE', () => {
+    expect(denomToHuman('ubadge')).toBe('BADGE');
+  });
+
+  it('should pass through unknown denoms', () => {
+    expect(denomToHuman('some-random-denom')).toBe('some-random-denom');
+  });
+});
+
+describe('amountToHuman', () => {
+  it('should convert ubadge amounts with 9 decimals', () => {
+    const result = amountToHuman(1000000000n, 'ubadge');
+    expect(result).toContain('1');
+    expect(result).toContain('BADGE');
+  });
+
+  it('should handle fractional amounts', () => {
+    const result = amountToHuman(1500000000n, 'ubadge');
+    expect(result).toContain('1.5');
+    expect(result).toContain('BADGE');
   });
 });
