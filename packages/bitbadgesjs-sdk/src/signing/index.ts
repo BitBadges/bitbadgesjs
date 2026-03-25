@@ -49,6 +49,7 @@ export type {
   SigningClientOptions,
   SigningFee,
   SigningResult,
+  SimulateAndReviewResult,
   SimulateResult,
   TransactionMessage,
   WalletAdapterInterface

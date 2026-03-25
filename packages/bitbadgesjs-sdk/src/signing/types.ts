@@ -1,4 +1,5 @@
 import type { Message } from '@bufbuild/protobuf';
+import type { SimulationEvent, ParsedSimulationEvents, NetBalanceChanges } from '@/core/simulation.js';
 
 // Note: TransactionPayload and Fee are imported from transactions module when needed.
 // They are NOT re-exported here to avoid conflicts with the main SDK exports.
@@ -191,6 +192,28 @@ export interface SimulateResult {
   gasLimit: number;
   /** Calculated fee based on gas limit */
   fee: SigningFee;
+  /** Raw events from Cosmos simulation (present for Cosmos path, populated via separate Cosmos sim for EVM path) */
+  events?: SimulationEvent[];
+}
+
+/**
+ * Result from simulating a transaction with full event parsing and net change calculation.
+ *
+ * @category Signing
+ */
+export interface SimulateAndReviewResult {
+  /** Estimated gas used */
+  gasUsed: number;
+  /** Recommended gas limit (gasUsed * multiplier) */
+  gasLimit: number;
+  /** Calculated fee based on gas limit */
+  fee: SigningFee;
+  /** Raw events from Cosmos simulation */
+  events: SimulationEvent[];
+  /** Parsed simulation events (coin transfers, badge transfers, IBC transfers) */
+  parsed: ParsedSimulationEvents;
+  /** Net balance changes per address */
+  netChanges: NetBalanceChanges;
 }
 
 /**
