@@ -304,13 +304,14 @@ export function calculateNetChanges(
   fee?: { amount: string; denom: string },
   signerAddress?: string
 ): NetBalanceChanges {
-  const coinChanges: Record<string, Record<string, bigint>> = {};
-  const badgeChanges: Record<string, Record<string, BalanceArray<bigint>>> = {};
+  const coinChanges: Map<string, Map<string, bigint>> = new Map();
+  const badgeChanges: Map<string, Map<string, BalanceArray<bigint>>> = new Map();
 
-  // Helper to ensure nested records exist
+  // Helper to ensure nested map entries exist (avoids prototype pollution with dynamic keys)
   const ensureCoinEntry = (addr: string, denom: string) => {
-    if (!coinChanges[addr]) coinChanges[addr] = {};
-    if (coinChanges[addr][denom] === undefined) coinChanges[addr][denom] = 0n;
+    if (!coinChanges.has(addr)) coinChanges.set(addr, new Map());
+    const addrMap = coinChanges.get(addr)!;
+    if (!addrMap.has(denom)) addrMap.set(denom, 0n);
   };
 
   // Add fee deduction if provided
@@ -319,10 +320,10 @@ export function calculateNetChanges(
     const feeDenom = fee.denom || 'ubadge';
 
     ensureCoinEntry(signerAddress, feeDenom);
-    coinChanges[signerAddress][feeDenom] -= feeAmount;
+    coinChanges.get(signerAddress)!.set(feeDenom, coinChanges.get(signerAddress)!.get(feeDenom)! - feeAmount);
 
     ensureCoinEntry('Network Fee', feeDenom);
-    coinChanges['Network Fee'][feeDenom] += feeAmount;
+    coinChanges.get('Network Fee')!.set(feeDenom, coinChanges.get('Network Fee')!.get(feeDenom)! + feeAmount);
   }
 
   // Aggregate coin transfers
@@ -335,11 +336,11 @@ export function calculateNetChanges(
 
     // Deduct from sender
     ensureCoinEntry(from, denom);
-    coinChanges[from][denom] -= amount;
+    coinChanges.get(from)!.set(denom, coinChanges.get(from)!.get(denom)! - amount);
 
     // Add to recipient
     ensureCoinEntry(to, denom);
-    coinChanges[to][denom] += amount;
+    coinChanges.get(to)!.set(denom, coinChanges.get(to)!.get(denom)! + amount);
   }
 
   // Aggregate IBC transfers as coin deductions
@@ -347,10 +348,10 @@ export function calculateNetChanges(
     const denom = event.denom;
 
     ensureCoinEntry(event.from, denom);
-    coinChanges[event.from][denom] -= event.amount;
+    coinChanges.get(event.from)!.set(denom, coinChanges.get(event.from)!.get(denom)! - event.amount);
 
     ensureCoinEntry('IBC Transfer', denom);
-    coinChanges['IBC Transfer'][denom] += event.amount;
+    coinChanges.get('IBC Transfer')!.set(denom, coinChanges.get('IBC Transfer')!.get(denom)! + event.amount);
   }
 
   // Aggregate badge transfers
@@ -361,15 +362,34 @@ export function calculateNetChanges(
     const balances = BalanceArray.From(event.balances);
 
     // Deduct from sender
-    if (!badgeChanges[from]) badgeChanges[from] = {};
-    if (!badgeChanges[from][collectionId]) badgeChanges[from][collectionId] = new BalanceArray<bigint>();
-    badgeChanges[from][collectionId] = badgeChanges[from][collectionId].subtractBalances(balances, true);
+    if (!badgeChanges.has(from)) badgeChanges.set(from, new Map());
+    const fromMap = badgeChanges.get(from)!;
+    if (!fromMap.has(collectionId)) fromMap.set(collectionId, new BalanceArray<bigint>());
+    fromMap.set(collectionId, fromMap.get(collectionId)!.subtractBalances(balances, true));
 
     // Add to recipient
-    if (!badgeChanges[to]) badgeChanges[to] = {};
-    if (!badgeChanges[to][collectionId]) badgeChanges[to][collectionId] = new BalanceArray<bigint>();
-    badgeChanges[to][collectionId] = badgeChanges[to][collectionId].addBalances(balances);
+    if (!badgeChanges.has(to)) badgeChanges.set(to, new Map());
+    const toMap = badgeChanges.get(to)!;
+    if (!toMap.has(collectionId)) toMap.set(collectionId, new BalanceArray<bigint>());
+    toMap.set(collectionId, toMap.get(collectionId)!.addBalances(balances));
   }
 
-  return { coinChanges, badgeChanges };
+  // Convert Maps to plain Records for the return type
+  const coinResult: Record<string, Record<string, bigint>> = {};
+  for (const [addr, denomMap] of coinChanges) {
+    coinResult[addr] = Object.create(null);
+    for (const [denom, amount] of denomMap) {
+      coinResult[addr][denom] = amount;
+    }
+  }
+
+  const badgeResult: Record<string, Record<string, BalanceArray<bigint>>> = {};
+  for (const [addr, collMap] of badgeChanges) {
+    badgeResult[addr] = Object.create(null);
+    for (const [collId, bal] of collMap) {
+      badgeResult[addr][collId] = bal;
+    }
+  }
+
+  return { coinChanges: coinResult, badgeChanges: badgeResult };
 }
