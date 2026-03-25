@@ -13,9 +13,16 @@ import {
   type NetworkMode,
   type SignAndBroadcastOptions,
   type SigningClientOptions,
+  type SimulateAndReviewResult,
   type SimulateResult,
   type TransactionMessage
 } from './types.js';
+import {
+  parseSimulationEvents,
+  calculateNetChanges,
+  type SimulationEvent,
+  type TxMessageInfo
+} from '@/core/simulation.js';
 
 /** Default gas limit for Cosmos transactions */
 const DEFAULT_GAS_LIMIT = 400000;
@@ -296,11 +303,13 @@ export class BitBadgesSigningClient {
 
     const gasUsed = parseInt(response.data.gas_info?.gas_used || '0', 10);
     const gasLimit = Math.ceil(gasUsed * this.gasMultiplier);
+    const events: SimulationEvent[] = response.data.result?.events || [];
 
     return {
       gasUsed,
       gasLimit,
-      fee: this.calculateFee(gasLimit)
+      fee: this.calculateFee(gasLimit),
+      events
     };
   }
 
@@ -340,6 +349,114 @@ export class BitBadgesSigningClient {
       gasUsed,
       gasLimit,
       fee: this.calculateFee(gasLimit)
+    };
+  }
+
+  /**
+   * Run a Cosmos-style simulation to obtain events.
+   * Used internally by simulateAndReview when the primary path is EVM
+   * (since EVM estimateGas does not return events).
+   */
+  private async simulateCosmosForEvents(messages: TransactionMessage[], options?: { memo?: string }): Promise<SimulationEvent[]> {
+    try {
+      const accountInfo = await this.getAccountInfo();
+      const protoMessages = this.normalizeMessages(messages);
+
+      // Use a placeholder public key if none is available (simulation doesn't need the real key)
+      let publicKey = accountInfo.publicKey;
+      if (!publicKey) {
+        try {
+          publicKey = await this.adapter.getPublicKey();
+        } catch {
+          // Use placeholder for simulation — signature is not verified
+          publicKey = btoa('placeholder-public-key-for-simulation');
+        }
+      }
+
+      const dummySignature = '0'.repeat(128);
+
+      const txContext: TxContext = {
+        chainIdOverride: this.chainId,
+        sender: {
+          address: this.address as any,
+          sequence: accountInfo.sequence,
+          accountNumber: accountInfo.accountNumber,
+          publicKey
+        },
+        fee: this.calculateFee(this.defaultGasLimit),
+        memo: options?.memo || ''
+      };
+
+      const broadcastBody = createTxBroadcastBody(txContext, protoMessages, dummySignature);
+      const response = await this.axiosInstance.post(`${this.apiUrl}/api/v0/simulate`, JSON.parse(broadcastBody));
+      return response.data.result?.events || [];
+    } catch {
+      // If Cosmos simulation fails for EVM path, return empty events
+      return [];
+    }
+  }
+
+  /**
+   * Simulate a transaction and return parsed event data with net balance changes.
+   *
+   * This combines gas estimation with full event parsing, giving a complete
+   * preview of what the transaction will do (coin transfers, badge transfers,
+   * IBC transfers, fees) before signing.
+   *
+   * For Cosmos wallets, events come from the standard simulate endpoint.
+   * For EVM wallets, a separate Cosmos-style simulation is run to obtain events
+   * (since EVM estimateGas does not return Cosmos events).
+   *
+   * @param messages - Messages to include in the transaction
+   * @param options - Optional memo and txsInfo for IBC transfer detection
+   * @returns Full simulation result with parsed events and net changes
+   *
+   * @example
+   * ```typescript
+   * const review = await client.simulateAndReview([msg], {
+   *   txsInfo: [{ type: 'MsgTransferBadges', msg: { ... } }]
+   * });
+   *
+   * console.log('Gas:', review.gasUsed);
+   * console.log('Coin changes:', review.netChanges.coinChanges);
+   * console.log('Badge changes:', review.netChanges.badgeChanges);
+   * ```
+   */
+  async simulateAndReview(
+    messages: TransactionMessage[],
+    options?: { memo?: string; txsInfo?: TxMessageInfo[] }
+  ): Promise<SimulateAndReviewResult> {
+    const txsInfo = options?.txsInfo || [];
+
+    // Get gas estimation via the standard path
+    const simResult = await this.simulate(messages, { memo: options?.memo });
+
+    // Get events — for Cosmos path they come from simulate(), for EVM we need a separate Cosmos sim
+    let events: SimulationEvent[];
+    if (simResult.events && simResult.events.length > 0) {
+      events = simResult.events;
+    } else {
+      // EVM path or Cosmos path that returned no events — run Cosmos simulation for events
+      events = await this.simulateCosmosForEvents(messages, { memo: options?.memo });
+    }
+
+    // Parse events into structured transfer data
+    const parsed = parseSimulationEvents(events, txsInfo);
+
+    // Calculate net changes per address
+    const netChanges = calculateNetChanges(
+      parsed,
+      { amount: simResult.fee.amount, denom: simResult.fee.denom },
+      this.address
+    );
+
+    return {
+      gasUsed: simResult.gasUsed,
+      gasLimit: simResult.gasLimit,
+      fee: simResult.fee,
+      events,
+      parsed,
+      netChanges
     };
   }
 
