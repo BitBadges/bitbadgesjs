@@ -26,3 +26,4 @@ export * from './ibc-wrappers.js';
 export * from './cosmos-wrappers.js';
 export * from './simulation.js';
 export * from './interpret.js';
+export * from './interpret-transaction.js';
