@@ -79,13 +79,13 @@ describe('interpretTransaction', () => {
     // Verify all section headers appear
     expect(result).toContain('## Transaction Summary');
     expect(result).toContain('## Collection Overview');
-    expect(result).toContain('## Token Backing & Paths');
+    expect(result).toContain('## Token Backing & Cross-Chain');
     expect(result).toContain('## Invariants');
     expect(result).toContain('## Standards');
     expect(result).toContain('## Key Reference Information');
     expect(result).toContain('## Transfer & Approval Rules');
     expect(result).toContain('## Permissions -- What Can Change Later');
-    expect(result).toContain('## Default User Balances');
+    expect(result).toContain('## Default Balances & Auto-Approve Settings');
 
     // Content checks
     expect(result).toContain('Test NFTs');
@@ -233,11 +233,11 @@ describe('interpretTransaction', () => {
 
     // Should NOT include sections 2, 3, 4, 5, 8, 9
     expect(result).not.toContain('## Collection Overview');
-    expect(result).not.toContain('## Token Backing & Paths');
+    expect(result).not.toContain('## Token Backing & Cross-Chain');
     expect(result).not.toContain('## Invariants');
     expect(result).not.toContain('## Standards');
     expect(result).not.toContain('## Permissions -- What Can Change Later');
-    expect(result).not.toContain('## Default User Balances');
+    expect(result).not.toContain('## Default Balances & Auto-Approve Settings');
   });
 
   // -------------------------------------------------------------------------
@@ -388,12 +388,12 @@ describe('interpretTransaction', () => {
     expect(result).toContain('## Transaction Summary');
     expect(result).toContain('## Key Reference Information');
     expect(result).toContain('## Permissions -- What Can Change Later');
-    expect(result).toContain('## Default User Balances');
+    expect(result).toContain('## Default Balances & Auto-Approve Settings');
     expect(result).toContain('## Invariants');
 
     // Should NOT include sections 2, 3, 5, 7
     expect(result).not.toContain('## Collection Overview');
-    expect(result).not.toContain('## Token Backing & Paths');
+    expect(result).not.toContain('## Token Backing & Cross-Chain');
     expect(result).not.toContain('## Standards');
     expect(result).not.toContain('## Transfer & Approval Rules');
   });
