@@ -8,7 +8,6 @@
  */
 import type { NumberType } from '../common/string-numbers.js';
 import { GO_MAX_UINT_64 } from '../common/math.js';
-import { CoinsRegistry } from '../common/constants.js';
 import type { iBitBadgesCollection } from '../api-indexer/BitBadgesCollection.js';
 import { BitBadgesCollection } from '../api-indexer/BitBadgesCollection.js';
 import { getMintApprovals, getNonMintApprovals } from './approval-utils.js';
@@ -26,6 +25,7 @@ import {
   buildDefaultBalancesSection,
   buildBackingAndPathsSection,
   buildInvariantsSection,
+  buildKeyReferenceSection,
   PERM_KEYS,
   timestampToDate,
   durationToHuman,
@@ -343,63 +343,6 @@ function buildClaims<T extends NumberType>(col: BitBadgesCollection<T>, linkedCl
   return md;
 }
 
-function buildKeyReference<T extends NumberType>(col: BitBadgesCollection<T>): string {
-  let md = '## Key Reference Information\n\n';
-
-  md += `- **Manager**: \`${col.manager || 'not set'}\`\n`;
-  md += `- **Collection ID**: ${col.collectionId || '(new, not yet deployed)'}\n`;
-  md += `- **Created by**: \`${col.createdBy || 'unknown'}\`\n`;
-
-  // Backing address
-  if (col.invariants?.cosmosCoinBackedPath?.address) {
-    md += `- **Backing address**: \`${col.invariants.cosmosCoinBackedPath.address}\`\n`;
-  }
-
-  // Key approval IDs
-  if (col.collectionApprovals && col.collectionApprovals.length > 0) {
-    md += '\n**Approval IDs**:\n\n';
-    for (const approval of col.collectionApprovals) {
-      const isMint = approval.fromList.checkAddress('Mint');
-      const isBacked = approval.approvalCriteria?.allowBackedMinting;
-      let type = 'transfer';
-      if (isMint && isBacked) type = 'IBC deposit/mint';
-      else if (isMint) type = 'mint';
-      else if (isBacked) type = 'IBC withdrawal';
-      md += `- \`${approval.approvalId}\` -- ${type} approval for ${listIdHuman(approval.toListId)}\n`;
-    }
-  }
-
-  // Denomination details
-  const denomsSeen = new Set<string>();
-  for (const approval of col.collectionApprovals) {
-    const coinTransfers = approval.approvalCriteria?.coinTransfers;
-    if (coinTransfers) {
-      for (const ct of coinTransfers) {
-        for (const coin of ct.coins || []) {
-          if (coin.denom) denomsSeen.add(coin.denom);
-        }
-      }
-    }
-  }
-  if (col.invariants?.cosmosCoinBackedPath?.conversion?.sideA?.denom) {
-    denomsSeen.add(col.invariants.cosmosCoinBackedPath.conversion.sideA.denom);
-  }
-
-  if (denomsSeen.size > 0) {
-    md += '\n**Denominations used**:\n\n';
-    for (const denom of denomsSeen) {
-      const entry = CoinsRegistry[denom];
-      if (entry) {
-        md += `- \`${denom}\` = **${entry.symbol}** (${entry.decimals} decimals)\n`;
-      } else {
-        md += `- \`${denom}\` = ${denomToHuman(denom)}\n`;
-      }
-    }
-  }
-
-  md += '\n';
-  return md;
-}
 
 // ---------------------------------------------------------------------------
 // Main export
@@ -450,7 +393,18 @@ export function interpretCollection<T extends NumberType>(
   report += buildInvariantsSection(col.invariants as any);
   report += buildDefaultBalancesSection(col.defaultBalances as any);
   report += buildClaims(col, linkedClaimIds);
-  report += buildKeyReference(col);
+  report += buildKeyReferenceSection({
+    manager: col.manager || null,
+    creator: col.createdBy || 'unknown',
+    collectionId: col.collectionId || null,
+    invariants: col.invariants,
+    collectionApprovals: col.collectionApprovals?.map((a: any) => ({
+      approvalId: a.approvalId,
+      fromListId: a.fromListId,
+      toListId: a.toListId,
+      approvalCriteria: a.approvalCriteria
+    })) || []
+  });
   report += buildSummary(col);
 
   return report;

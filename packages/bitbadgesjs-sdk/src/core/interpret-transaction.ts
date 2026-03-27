@@ -136,10 +136,45 @@ function buildCollectionOverview(txBody: Record<string, any>): string {
     md += `Each token ID has a maximum supply of ${maxSupply.toLocaleString('en-US')} tokens, enforced at the protocol level.`;
   }
 
-  // Standards inline
+  // Type-specific explanation
+  md += '\n\n';
+  if (type === 'NFT Collection') {
+    md += 'As an NFT collection, each token ID represents a distinct, individually identifiable asset. ';
+    if (maxSupply === 1n) {
+      md += 'With a maximum supply of 1 per ID, each token is truly unique and non-fungible.';
+    } else if (maxSupply === 0n) {
+      md += 'There is no supply cap, so multiple copies of each token ID can exist.';
+    } else {
+      md += `Up to ${maxSupply.toLocaleString('en-US')} copies of each token ID can exist.`;
+    }
+  } else if (type.includes('Smart Token')) {
+    const backing = inv.cosmosCoinBackedPath;
+    const denom = backing?.conversion?.sideA?.denom ? denomToHuman(backing.conversion.sideA.denom) : 'an IBC asset';
+    md += `This is a smart token backed 1:1 by ${denom}. Users can deposit the backing asset to receive collection tokens, and redeem collection tokens to withdraw the backing asset.`;
+  } else if (type === 'Fungible Token') {
+    md += 'As a fungible token, all tokens of the same ID are interchangeable, similar to an ERC-20 token. ';
+    if (maxSupply === 0n) {
+      md += 'There is no supply cap.';
+    } else {
+      md += `The maximum total supply is ${maxSupply.toLocaleString('en-US')} tokens.`;
+    }
+  } else if (type === 'Subscription Token') {
+    md += 'This is a subscription token. Holding it grants access to a service or resource for a defined time period. It may require periodic renewal or payment.';
+  } else if (type === 'AI Agent Stablecoin') {
+    md += 'This is an AI agent-managed stablecoin vault. An AI agent manages the vault and controls minting and burning operations.';
+  } else if (type === 'Address List') {
+    md += 'This is an address list — a membership roster that tracks who is a member. Tokens are non-tradeable and represent membership status.';
+  } else if (type === 'Credit Token') {
+    md += 'This is a credit token — a non-transferable balance representing points, credits, or reputation. These are bound to the holder and cannot be traded.';
+  } else if (type === 'Liquidity Pool') {
+    md += 'This is a liquidity pool token paired with an ICS20 coin for on-chain swaps and automated market-making.';
+  } else {
+    md += 'This is a token collection on BitBadges.';
+  }
+
   const standards: string[] = txBody.standards || [];
   if (standards.length > 0) {
-    md += `\n\nThe collection declares the following standards: **${standards.join(', ')}**.`;
+    md += `\n\nDeclared standards: ${standards.join(', ')}. See the Standards section below for details.`;
   }
 
   // Token metadata
@@ -205,23 +240,76 @@ function buildStandardsSection(txBody: Record<string, any>): string {
   return md;
 }
 
-function buildTransferAndApprovalRules(txBody: Record<string, any>): string {
+function buildMintingSection(txBody: Record<string, any>): string {
   const approvals: any[] = txBody.collectionApprovals || [];
+  const mintApprovals = approvals.filter((a: any) => a.fromListId === 'Mint');
+
+  if (mintApprovals.length === 0) {
+    return '## How Tokens Are Created\n\nThere are no active minting approvals configured for this collection. New tokens cannot be created through the standard approval system. The only way to obtain tokens is through transfers from existing holders (if the collection supports transfers).\n\n';
+  }
+
+  let md = '## How Tokens Are Created\n\n';
+
+  for (const approval of mintApprovals) {
+    md += buildApprovalParagraph(approval, true);
+  }
+
+  // Practical guidance
+  const hasClaims = mintApprovals.some((a: any) => a.approvalCriteria?.merkleChallenges?.length > 0);
+  const hasCost = mintApprovals.some((a: any) => a.approvalCriteria?.coinTransfers?.length > 0);
+  const hasSelfClaim = mintApprovals.some((a: any) => a.approvalCriteria?.requireToEqualsInitiatedBy);
+  md += '### How to Mint\n\n';
+  if (hasClaims) {
+    md += 'To mint tokens from this collection, you would typically go through a claim flow: visit the collection page, complete the required verification steps (listed above for each approval), and submit the claim. ';
+  } else if (hasSelfClaim) {
+    md += 'To mint tokens, you submit a mint transaction where you are both the initiator and the recipient. ';
+  } else {
+    md += 'To mint tokens, submit a transfer transaction from the Mint address to the desired recipient. ';
+  }
+  if (hasCost) {
+    md += 'A payment is required (see the cost listed for each approval above). ';
+  }
+  md += 'Make sure you meet any ownership requirements and that the mint has not exceeded its limits.\n\n';
+
+  return md;
+}
+
+function buildTransferRulesSection(txBody: Record<string, any>): string {
+  const approvals: any[] = txBody.collectionApprovals || [];
+  const nonMintApprovals = approvals.filter((a: any) => a.fromListId !== 'Mint');
+  const transferApprovals = nonMintApprovals.filter((a: any) => !a.approvalCriteria?.allowBackedMinting);
+  const unbackingApprovals = nonMintApprovals.filter((a: any) => a.approvalCriteria?.allowBackedMinting);
 
   let md = '## Transfer & Approval Rules\n\n';
-  md += 'When a transfer is submitted, the chain checks each collection-level approval (a rule that governs who can send tokens to whom and under what conditions) in order. The first approval whose criteria match the transfer is used. If no approval matches, the transfer is rejected. This is a default-deny system -- only explicitly approved operations can proceed.\n\n';
+  md += 'When a transfer is submitted, the chain checks each collection-level approval in order. The first approval whose criteria match the transfer is used. If no approval matches, the transfer is rejected. This is a default-deny system — only explicitly approved operations can proceed.\n\n';
 
-  if (approvals.length === 0) {
-    md += 'No collection-level approvals are configured. No transfers or minting can occur.\n\n';
+  if (transferApprovals.length === 0 && unbackingApprovals.length === 0) {
+    md += 'This collection is **non-transferable (soulbound)**. Once tokens are minted to a holder, they cannot be sent to another address. ';
+    md += 'This is a permanent characteristic of the tokens as long as the transfer rules remain unchanged. ';
+    md += 'Soulbound tokens are commonly used for credentials, membership badges, and reputation scores that should not be tradeable.\n\n';
     return md;
   }
 
-  for (const approval of approvals) {
-    const isMint = approval.fromListId === 'Mint';
-    md += buildApprovalParagraph(approval, isMint);
+  for (const approval of transferApprovals) {
+    md += buildApprovalParagraph(approval, false);
+  }
+
+  // IBC withdrawal approvals
+  for (const approval of unbackingApprovals) {
+    const inv = txBody.invariants || {};
+    const rawDenom = inv.cosmosCoinBackedPath?.conversion?.sideA?.denom || 'the IBC asset';
+    const symbol = denomToHuman(rawDenom);
+    md += `### IBC Withdrawal: "${approval.approvalId}"\n\n`;
+    md += `This approval enables IBC-backed withdrawal (burning). Holders send collection tokens to the backing address and receive **${symbol}** back at a 1:1 conversion rate. `;
+    md += `Withdrawals are available to ${listIdHuman(approval.fromListId)}.\n\n`;
   }
 
   md += 'Any transfer that does not match one of the approvals listed above will be rejected.\n\n';
+
+  // noForcefulPostMintTransfers callout
+  if (txBody.invariants?.noForcefulPostMintTransfers) {
+    md += '> **Safety Guarantee**: The on-chain invariant `noForcefulPostMintTransfers` is active. No one can forcefully move tokens from holders after minting. This is enforced at the protocol level and cannot be overridden.\n\n';
+  }
 
   return md;
 }
@@ -341,9 +429,14 @@ export function interpretTransaction(
   // Section 6: Key Reference Information
   report += buildKeyReferenceSection(txBody);
 
-  // Section 7: Transfer & Approval Rules
+  // Section 7a: How Tokens Are Created (minting)
   if (activeSections.has(7)) {
-    report += buildTransferAndApprovalRules(txBody);
+    report += buildMintingSection(txBody);
+  }
+
+  // Section 7b: Transfer & Approval Rules (transfers)
+  if (activeSections.has(7)) {
+    report += buildTransferRulesSection(txBody);
   }
 
   // Section 8: Permissions

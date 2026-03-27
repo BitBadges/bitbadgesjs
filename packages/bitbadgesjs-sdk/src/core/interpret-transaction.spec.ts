@@ -83,6 +83,7 @@ describe('interpretTransaction', () => {
     expect(result).toContain('## Invariants');
     expect(result).toContain('## Standards');
     expect(result).toContain('## Key Reference Information');
+    expect(result).toContain('## How Tokens Are Created');
     expect(result).toContain('## Transfer & Approval Rules');
     expect(result).toContain('## Permissions -- What Can Change Later');
     expect(result).toContain('## Default Balances & Auto-Approve Settings');
@@ -92,6 +93,7 @@ describe('interpretTransaction', () => {
     expect(result).toContain('NFT Collection');
     expect(result).toContain('10 unique token IDs');
     expect(result).toContain('maximum supply of 1 tokens');
+    expect(result).toContain('each token is truly unique and non-fungible');
     expect(result).toContain('Permanently Locked');
     expect(result).toContain('fully immutable');
     expect(result).toContain('mint-all');
@@ -228,6 +230,7 @@ describe('interpretTransaction', () => {
     expect(result).toContain('Update collection');
     expect(result).toContain('transfer and minting rules');
     expect(result).toContain('## Key Reference Information');
+    expect(result).toContain('## How Tokens Are Created');
     expect(result).toContain('## Transfer & Approval Rules');
     expect(result).toContain('new-transfer-rule');
 
@@ -256,7 +259,8 @@ describe('interpretTransaction', () => {
     expect(result).toContain('## Transaction Summary');
     expect(result).toContain('Empty Collection');
     expect(result).toContain('No token IDs have been defined yet');
-    expect(result).toContain('No collection-level approvals are configured');
+    expect(result).toContain('no active minting approvals configured');
+    expect(result).toContain('non-transferable (soulbound)');
     expect(result).toContain('No invariants are set');
     expect(result).toContain('No standards are declared');
   });
@@ -360,6 +364,349 @@ describe('interpretTransaction', () => {
   });
 
   // -------------------------------------------------------------------------
+  // Test: senderChecks, recipientChecks, initiatorChecks
+  // -------------------------------------------------------------------------
+  it('should describe sender, recipient, and initiator checks', () => {
+    const txBody = {
+      creator: 'bb1checks',
+      manager: 'bb1checks',
+      collectionMetadata: { metadata: { name: 'Checks Collection' } },
+      validTokenIds: [{ start: '1', end: '1' }],
+      standards: [],
+      collectionApprovals: [{
+        approvalId: 'guarded-transfer',
+        fromListId: '!Mint',
+        toListId: 'All',
+        initiatedByListId: 'All',
+        tokenIds: fullRange(),
+        transferTimes: fullRange(),
+        ownershipTimes: fullRange(),
+        approvalCriteria: {
+          senderChecks: { mustNotBeEvmContract: true },
+          recipientChecks: { mustNotBeLiquidityPool: true },
+          initiatorChecks: { mustBeEvmContract: true }
+        }
+      }],
+      collectionPermissions: {}
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('Sender Checks');
+    expect(result).toContain('must NOT be an EVM contract');
+    expect(result).toContain('Recipient Checks');
+    expect(result).toContain('must NOT be a liquidity pool');
+    expect(result).toContain('Initiator Checks');
+    expect(result).toContain('must be an EVM contract');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: altTimeChecks
+  // -------------------------------------------------------------------------
+  it('should describe alt time checks', () => {
+    const txBody = {
+      creator: 'bb1time',
+      manager: 'bb1time',
+      collectionMetadata: { metadata: { name: 'Time Collection' } },
+      validTokenIds: [{ start: '1', end: '1' }],
+      standards: [],
+      collectionApprovals: [{
+        approvalId: 'business-hours',
+        fromListId: '!Mint',
+        toListId: 'All',
+        initiatedByListId: 'All',
+        tokenIds: fullRange(),
+        transferTimes: fullRange(),
+        ownershipTimes: fullRange(),
+        approvalCriteria: {
+          altTimeChecks: {
+            offlineHours: [{ start: '0', end: '8' }, { start: '17', end: '24' }],
+            offlineDays: [{ start: '0', end: '0' }, { start: '6', end: '6' }]
+          }
+        }
+      }],
+      collectionPermissions: {}
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('Time Restrictions');
+    expect(result).toContain('denied during hours');
+    expect(result).toContain('Sunday');
+    expect(result).toContain('Saturday');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: userRoyalties
+  // -------------------------------------------------------------------------
+  it('should describe royalties', () => {
+    const txBody = {
+      creator: 'bb1royalty',
+      manager: 'bb1royalty',
+      collectionMetadata: { metadata: { name: 'Royalty Collection' } },
+      validTokenIds: [{ start: '1', end: '1' }],
+      standards: [],
+      collectionApprovals: [{
+        approvalId: 'royalty-transfer',
+        fromListId: '!Mint',
+        toListId: 'All',
+        initiatedByListId: 'All',
+        tokenIds: fullRange(),
+        transferTimes: fullRange(),
+        ownershipTimes: fullRange(),
+        approvalCriteria: {
+          userRoyalties: {
+            percentage: '250',
+            payoutAddress: 'bb1royaltypayout'
+          }
+        }
+      }],
+      collectionPermissions: {}
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('Royalties');
+    expect(result).toContain('2.50%');
+    expect(result).toContain('bb1royaltypayout');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: advanced challenge types
+  // -------------------------------------------------------------------------
+  it('should describe advanced challenge types', () => {
+    const txBody = {
+      creator: 'bb1adv',
+      manager: 'bb1adv',
+      collectionMetadata: { metadata: { name: 'Advanced Collection' } },
+      validTokenIds: [{ start: '1', end: '1' }],
+      standards: [],
+      collectionApprovals: [{
+        approvalId: 'multi-challenge',
+        fromListId: '!Mint',
+        toListId: 'All',
+        initiatedByListId: 'All',
+        tokenIds: fullRange(),
+        transferTimes: fullRange(),
+        ownershipTimes: fullRange(),
+        approvalCriteria: {
+          ethSignatureChallenges: [{ someData: true }],
+          votingChallenges: [{ someData: true }],
+          dynamicStoreChallenges: [{ someData: true }],
+          evmQueryChallenges: [{ someData: true }]
+        }
+      }],
+      collectionPermissions: {}
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('Signature Verification');
+    expect(result).toContain('Voting Requirements');
+    expect(result).toContain('Dynamic Store Checks');
+    expect(result).toContain('On-Chain Verification');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: predeterminedBalances with duration (subscriptions)
+  // -------------------------------------------------------------------------
+  it('should describe predetermined balances with duration', () => {
+    const txBody = {
+      creator: 'bb1sub',
+      manager: 'bb1sub',
+      collectionMetadata: { metadata: { name: 'Subscription Collection' } },
+      validTokenIds: fullRange(),
+      standards: ['Subscription'],
+      collectionApprovals: [{
+        approvalId: 'subscribe',
+        fromListId: 'Mint',
+        toListId: 'All',
+        initiatedByListId: 'All',
+        tokenIds: fullRange(),
+        transferTimes: fullRange(),
+        ownershipTimes: fullRange(),
+        approvalCriteria: {
+          predeterminedBalances: {
+            orderCalculationMethod: { useOverallNumTransfers: true },
+            incrementedBalances: {
+              incrementTokenIdsBy: '0',
+              incrementOwnershipTimesBy: '0',
+              durationFromTimestamp: '2592000000',
+              allowOverrideTimestamp: false
+            }
+          },
+          requireToEqualsInitiatedBy: true
+        }
+      }],
+      collectionPermissions: {}
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('Distribution Method');
+    expect(result).toContain('30 days');
+    expect(result).toContain('self-claim only');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: default incoming/outgoing approvals
+  // -------------------------------------------------------------------------
+  it('should describe default user-level approvals', () => {
+    const txBody = {
+      creator: 'bb1def',
+      manager: 'bb1def',
+      collectionMetadata: { metadata: { name: 'Defaults Collection' } },
+      validTokenIds: [{ start: '1', end: '1' }],
+      standards: [],
+      collectionApprovals: [],
+      collectionPermissions: {},
+      defaultBalances: {
+        balances: [{ amount: '5', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: fullRange() }],
+        autoApproveSelfInitiatedOutgoingTransfers: true,
+        autoApproveSelfInitiatedIncomingTransfers: true,
+        autoApproveAllIncomingTransfers: false,
+        incomingApprovals: [{
+          approvalId: 'default-incoming',
+          fromListId: 'All',
+          toListId: 'All',
+          initiatedByListId: 'All',
+          tokenIds: fullRange(),
+          transferTimes: fullRange(),
+          ownershipTimes: fullRange(),
+          approvalCriteria: {}
+        }],
+        outgoingApprovals: [{
+          approvalId: 'default-outgoing',
+          fromListId: 'All',
+          toListId: 'All',
+          initiatedByListId: 'All',
+          tokenIds: fullRange(),
+          transferTimes: fullRange(),
+          ownershipTimes: fullRange(),
+          approvalCriteria: {}
+        }]
+      }
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('Default Balances');
+    expect(result).toContain('5 tokens');
+    expect(result).toContain('Default Incoming Approvals');
+    expect(result).toContain('default-incoming');
+    expect(result).toContain('Default Outgoing Approvals');
+    expect(result).toContain('default-outgoing');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: MsgTransferTokens in multi-message transaction
+  // -------------------------------------------------------------------------
+  it('should describe additional MsgTransferTokens', () => {
+    const txBody = {
+      creator: 'bb1transfer',
+      manager: 'bb1transfer',
+      collectionMetadata: { metadata: { name: 'Transfer Test' } },
+      validTokenIds: [{ start: '1', end: '10' }],
+      standards: [],
+      collectionApprovals: [],
+      collectionPermissions: {}
+    };
+    const messages = [
+      { typeUrl: '/bitbadges.MsgUniversalUpdateCollection', value: txBody },
+      {
+        typeUrl: '/bitbadges.MsgTransferTokens',
+        value: {
+          from: 'bb1sender',
+          transfers: [{
+            to: 'bb1recipient',
+            balances: [{ amount: '5', tokenIds: [{ start: '1', end: '3' }] }]
+          }]
+        }
+      }
+    ];
+    const result = interpretTransaction(txBody, false, [], messages);
+    expect(result).toContain('## Token Transfers');
+    expect(result).toContain('bb1sender');
+    expect(result).toContain('bb1recipient');
+    expect(result).toContain('5 token(s)');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: coinTransfers.overrideToWithInitiator
+  // -------------------------------------------------------------------------
+  it('should describe overrideToWithInitiator on coinTransfers', () => {
+    const txBody = {
+      creator: 'bb1pay',
+      manager: 'bb1pay',
+      collectionMetadata: { metadata: { name: 'Payment Collection' } },
+      validTokenIds: [{ start: '1', end: '1' }],
+      standards: [],
+      collectionApprovals: [{
+        approvalId: 'paid-mint',
+        fromListId: 'Mint',
+        toListId: 'All',
+        initiatedByListId: 'All',
+        tokenIds: fullRange(),
+        transferTimes: fullRange(),
+        ownershipTimes: fullRange(),
+        approvalCriteria: {
+          coinTransfers: [{
+            coins: [{ denom: 'ubadge', amount: '1000000' }],
+            overrideToWithInitiator: true
+          }]
+        }
+      }],
+      collectionPermissions: {}
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('Payment is sent to the transfer initiator');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: autoDeletionOptions
+  // -------------------------------------------------------------------------
+  it('should describe auto-deletion', () => {
+    const txBody = {
+      creator: 'bb1auto',
+      manager: 'bb1auto',
+      collectionMetadata: { metadata: { name: 'Auto-Delete Collection' } },
+      validTokenIds: [{ start: '1', end: '1' }],
+      standards: [],
+      collectionApprovals: [{
+        approvalId: 'one-time',
+        fromListId: 'Mint',
+        toListId: 'All',
+        initiatedByListId: 'All',
+        tokenIds: fullRange(),
+        transferTimes: fullRange(),
+        ownershipTimes: fullRange(),
+        approvalCriteria: {
+          autoDeletionOptions: { afterOneUse: true }
+        }
+      }],
+      collectionPermissions: {}
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('Auto-Deletion');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: soulbound (no transfer approvals but has mint approvals)
+  // -------------------------------------------------------------------------
+  it('should detect soulbound when only mint approvals exist', () => {
+    const txBody = {
+      creator: 'bb1soul',
+      manager: 'bb1soul',
+      collectionMetadata: { metadata: { name: 'Soulbound Credential' } },
+      validTokenIds: [{ start: '1', end: '100' }],
+      standards: ['Non-Transferable'],
+      collectionApprovals: [{
+        approvalId: 'mint-only',
+        fromListId: 'Mint',
+        toListId: 'All',
+        initiatedByListId: 'bb1soul',
+        tokenIds: fullRange(),
+        transferTimes: fullRange(),
+        ownershipTimes: fullRange(),
+        approvalCriteria: {}
+      }],
+      collectionPermissions: {}
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('non-transferable (soulbound)');
+    expect(result).toContain('How Tokens Are Created');
+    expect(result).toContain('mint-only');
+  });
+
+  // -------------------------------------------------------------------------
   // Additional: update with multiple flags
   // -------------------------------------------------------------------------
   it('should include multiple sections when multiple update flags are set', () => {
@@ -395,6 +742,7 @@ describe('interpretTransaction', () => {
     expect(result).not.toContain('## Collection Overview');
     expect(result).not.toContain('## Token Backing & Cross-Chain');
     expect(result).not.toContain('## Standards');
+    expect(result).not.toContain('## How Tokens Are Created');
     expect(result).not.toContain('## Transfer & Approval Rules');
   });
 });

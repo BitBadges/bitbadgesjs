@@ -302,6 +302,10 @@ export function detectType(standards: string[], hasBackingPath: boolean): string
   if (s.some((x) => x.toLowerCase().includes('subscription'))) return 'Subscription Token';
   if (s.some((x) => x.toLowerCase().includes('ai agent stablecoin'))) return 'AI Agent Stablecoin';
   if (s.some((x) => x.toLowerCase().includes('smart token')) || hasBackingPath) return 'Smart Token (IBC-backed)';
+  if (s.includes('Address List')) return 'Address List';
+  if (s.some((x) => x.toLowerCase().includes('credit'))) return 'Credit Token';
+  if (s.some((x) => x.toLowerCase().includes('membership'))) return 'Membership Token';
+  if (s.some((x) => x.toLowerCase().includes('liquidity pool'))) return 'Liquidity Pool';
   if (s.includes('NFTs')) return 'NFT Collection';
   if (s.includes('Fungible Tokens')) return 'Fungible Token';
   return 'Token Collection';
