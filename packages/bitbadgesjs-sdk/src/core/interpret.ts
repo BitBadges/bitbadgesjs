@@ -29,6 +29,7 @@ import {
   buildInvariantsSection,
   buildKeyReferenceSection,
   PERM_KEYS,
+  aOrAn,
   timestampToDate,
   durationToHuman,
   denomToHuman,
@@ -63,7 +64,7 @@ function buildOverview<T extends NumberType>(col: BitBadgesCollection<T>): strin
   // Opening paragraph: name, description, type
   const name = metadata?.name || 'Unnamed Collection';
   const desc = metadata?.description || '';
-  md += `**"${name}"** (creator-provided name) is a ${type} on BitBadges`;
+  md += `**"${name}"** (creator-provided name) is ${aOrAn(type)} ${type} on BitBadges`;
   if (col.collectionId) {
     md += ` (Collection ID: ${col.collectionId})`;
   } else {
@@ -387,7 +388,7 @@ function buildSummary<T extends NumberType>(col: BitBadgesCollection<T>): string
   const metadata = col.getCollectionMetadata();
   const name = metadata?.name || 'This collection';
 
-  md += `**${name}** is a ${type} on BitBadges. `;
+  md += `**${name}** is ${aOrAn(type)} ${type} on BitBadges. `;
 
   // Transferability summary
   const nonMintApprovals = getNonMintApprovals(col.collectionApprovals);

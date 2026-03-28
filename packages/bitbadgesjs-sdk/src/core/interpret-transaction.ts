@@ -25,7 +25,8 @@ import {
   buildBackingAndPathsSection,
   buildInvariantsSection as buildInvariantsSectionShared,
   buildKeyReferenceSection,
-  denomToHuman
+  denomToHuman,
+  aOrAn
 } from './interpret-shared.js';
 
 // ---------------------------------------------------------------------------
@@ -119,7 +120,7 @@ function buildCollectionOverview(txBody: Record<string, any>): string {
 
   const name = meta.name || 'Unnamed Collection';
   const desc = meta.description || '';
-  md += `**"${name}"** (creator-provided name) is a ${type} on BitBadges. `;
+  md += `**"${name}"** (creator-provided name) is ${aOrAn(type)} ${type} on BitBadges. `;
   if (desc) md += `\n\n> *Creator-provided description:* ${desc}\n\n`;
 
   // Token ID range

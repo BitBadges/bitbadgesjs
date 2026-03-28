@@ -391,6 +391,18 @@ export function pluginDisplayName(pluginId: string): string {
   return PLUGIN_DISPLAY_NAMES[pluginId] || pluginId;
 }
 
+/** Pluralize "token" / "tokens" based on count */
+function tok(n: bigint): string {
+  return n === 1n ? '1 token' : `${n.toLocaleString('en-US')} tokens`;
+}
+
+/** Return "a" or "an" depending on whether the next word starts with a vowel sound */
+export function aOrAn(nextWord: string): string {
+  const first = nextWord.trim().charAt(0).toUpperCase();
+  // NFT, Address, AI all start with vowel sounds
+  return 'AEIOU'.includes(first) || nextWord.startsWith('NFT') ? 'an' : 'a';
+}
+
 // ---------------------------------------------------------------------------
 // Core builders
 // ---------------------------------------------------------------------------
@@ -492,13 +504,13 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
 
   if (amounts) {
     const oa = big(amounts.overallApprovalAmount);
-    if (oa > 0n && oa < MAX_UINT64) limitParts.push(`a total cap of ${oa.toLocaleString('en-US')} tokens across all users`);
+    if (oa > 0n && oa < MAX_UINT64) limitParts.push(`a total cap of ${tok(oa)} across all users`);
     const pa = big(amounts.perInitiatedByAddressApprovalAmount);
-    if (pa > 0n && pa < MAX_UINT64) limitParts.push(`a per-user limit of ${pa.toLocaleString('en-US')} tokens`);
+    if (pa > 0n && pa < MAX_UINT64) limitParts.push(`a per-user limit of ${tok(pa)}`);
     const fa = big(amounts.perFromAddressApprovalAmount);
-    if (fa > 0n && fa < MAX_UINT64) limitParts.push(`a per-sender limit of ${fa.toLocaleString('en-US')} tokens`);
+    if (fa > 0n && fa < MAX_UINT64) limitParts.push(`a per-sender limit of ${tok(fa)}`);
     const ta = big(amounts.perToAddressApprovalAmount);
-    if (ta > 0n && ta < MAX_UINT64) limitParts.push(`a per-recipient limit of ${ta.toLocaleString('en-US')} tokens`);
+    if (ta > 0n && ta < MAX_UINT64) limitParts.push(`a per-recipient limit of ${tok(ta)}`);
   }
 
   if (maxNum) {
@@ -1104,11 +1116,9 @@ export function buildInvariantsSection(invariants: any): string {
     md += '**Time-Limited Ownership Allowed**: Tokens can have time-windowed ownership periods, where a holder owns a token only during specified time ranges. This enables use cases like time-based access passes, rental tokens, and subscriptions where ownership automatically starts and stops at defined times.\n\n';
   }
 
-  // Pool creation
+  // Pool creation — only mention if explicitly disabled (the default is allowed, no need to state it)
   if (invariants.disablePoolCreation) {
     md += '**Trading Pools Disabled**: No automated trading pools can be created for this collection\'s tokens. This means the tokens cannot be listed on automated exchanges (where a computer algorithm sets the price). Tokens can only change hands through the standard transfer approval system described in this report.\n\n';
-  } else {
-    md += '**Trading Pools Allowed**: Automated trading pools can be created for this collection\'s tokens, allowing them to be bought and sold through an automated exchange where the price adjusts based on supply and demand.\n\n';
   }
 
   // IBC backing invariant

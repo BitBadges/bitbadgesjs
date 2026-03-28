@@ -98,7 +98,7 @@ describe('interpretTransaction', () => {
     expect(result).toContain('fully immutable');
     expect(result).toContain('mint-all');
     expect(result).toContain('a total cap of 10 tokens');
-    expect(result).toContain('a per-user limit of 1 tokens');
+    expect(result).toContain('a per-user limit of 1 token');
   });
 
   // -------------------------------------------------------------------------
