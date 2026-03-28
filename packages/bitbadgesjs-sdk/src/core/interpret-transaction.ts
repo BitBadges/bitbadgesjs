@@ -23,8 +23,7 @@ import {
   buildBackingAndPathsSection,
   buildInvariantsSection as buildInvariantsSectionShared,
   buildKeyReferenceSection,
-  denomToHuman,
-  amountToHuman
+  denomToHuman
 } from './interpret-shared.js';
 
 // ---------------------------------------------------------------------------
@@ -41,8 +40,10 @@ const FLAG_TO_SECTIONS: Record<string, number[]> = {
   updateStandards: [5],
   updateCustomData: [6],
   updateDefaultBalances: [9],
-  updateInvariants: [4],
-  updateIsArchived: [2]
+  updateInvariants: [3, 4],
+  updateIsArchived: [2],
+  updateAliasPaths: [3],
+  updateCosmosCoinWrapperPaths: [3]
 };
 
 // ---------------------------------------------------------------------------
@@ -241,7 +242,7 @@ function buildStandardsSection(txBody: Record<string, any>): string {
 }
 
 function buildMintingSection(txBody: Record<string, any>): string {
-  const approvals: any[] = txBody.collectionApprovals || [];
+  const approvals: any[] = Array.isArray(txBody.collectionApprovals) ? txBody.collectionApprovals : [];
   const mintApprovals = approvals.filter((a: any) => a.fromListId === 'Mint');
 
   if (mintApprovals.length === 0) {
@@ -275,18 +276,19 @@ function buildMintingSection(txBody: Record<string, any>): string {
 }
 
 function buildTransferRulesSection(txBody: Record<string, any>): string {
-  const approvals: any[] = txBody.collectionApprovals || [];
+  const approvals: any[] = Array.isArray(txBody.collectionApprovals) ? txBody.collectionApprovals : [];
   const nonMintApprovals = approvals.filter((a: any) => a.fromListId !== 'Mint');
   const transferApprovals = nonMintApprovals.filter((a: any) => !a.approvalCriteria?.allowBackedMinting);
   const unbackingApprovals = nonMintApprovals.filter((a: any) => a.approvalCriteria?.allowBackedMinting);
 
   let md = '## Transfer & Approval Rules\n\n';
-  md += 'When a transfer is submitted, the chain checks each collection-level approval in order. The first approval whose criteria match the transfer is used. If no approval matches, the transfer is rejected. This is a default-deny system — only explicitly approved operations can proceed.\n\n';
+  md += 'This section describes the rules that control how tokens can be moved between addresses after they have been created. When someone tries to transfer tokens, the chain checks each collection-level approval rule in order. The first rule whose conditions match the transfer (correct sender, recipient, token IDs, timing, etc.) is used. If no rule matches, the transfer is blocked. This is a "default-deny" system — nothing is allowed unless there is a specific rule that permits it.\n\n';
+  md += 'Remember: even after a collection-level rule approves a transfer, the sender\'s personal outgoing approval and the recipient\'s personal incoming approval must also agree. All three layers must pass.\n\n';
 
   if (transferApprovals.length === 0 && unbackingApprovals.length === 0) {
-    md += 'This collection is **non-transferable (soulbound)**. Once tokens are minted to a holder, they cannot be sent to another address. ';
-    md += 'This is a permanent characteristic of the tokens as long as the transfer rules remain unchanged. ';
-    md += 'Soulbound tokens are commonly used for credentials, membership badges, and reputation scores that should not be tradeable.\n\n';
+    md += 'This collection is **non-transferable (soulbound)**. There are no transfer approval rules configured, which means once tokens are created and delivered to a holder, they can never be sent to another address. The tokens are permanently bound to whoever receives them. ';
+    md += 'This will remain the case as long as the transfer rules are not changed (check the Permissions section to see whether the manager has the ability to add transfer rules in the future). ';
+    md += 'Non-transferable tokens are commonly used for credentials, certificates, membership badges, and reputation scores where it is important that the token cannot be sold or given away.\n\n';
     return md;
   }
 
@@ -294,14 +296,14 @@ function buildTransferRulesSection(txBody: Record<string, any>): string {
     md += buildApprovalParagraph(approval, false);
   }
 
-  // IBC withdrawal approvals
+  // Asset-backed withdrawal approvals
   for (const approval of unbackingApprovals) {
     const inv = txBody.invariants || {};
-    const rawDenom = inv.cosmosCoinBackedPath?.conversion?.sideA?.denom || 'the IBC asset';
+    const rawDenom = inv.cosmosCoinBackedPath?.conversion?.sideA?.denom || 'the backing asset';
     const symbol = denomToHuman(rawDenom);
-    md += `### IBC Withdrawal: "${approval.approvalId}"\n\n`;
-    md += `This approval enables IBC-backed withdrawal (burning). Holders send collection tokens to the backing address and receive **${symbol}** back at a 1:1 conversion rate. `;
-    md += `Withdrawals are available to ${listIdHuman(approval.fromListId)}.\n\n`;
+    md += `### Withdrawal: "${approval.approvalId}"\n\n`;
+    md += `This approval allows token holders to redeem their collection tokens for the underlying backing asset (**${symbol}**). The holder sends their collection tokens to the backing address, and the tokens are destroyed (burned) in exchange for receiving the equivalent amount of **${symbol}** back. `;
+    md += `Who can withdraw: ${listIdHuman(approval.fromListId)}.\n\n`;
   }
 
   md += 'Any transfer that does not match one of the approvals listed above will be rejected.\n\n';
@@ -453,7 +455,9 @@ export function interpretTransaction(
   }
 
   // Section 10: Token Transfers (multi-message)
-  if (messages && messages.length > 1) {
+  // Always show token transfers if present, even in update mode — bundled transfers
+  // are always relevant regardless of which fields are being updated
+  if (activeSections.has(10) && messages && messages.length > 1) {
     report += buildTokenTransfersSection(messages);
   }
 

@@ -431,7 +431,7 @@ describe('interpretCollection', () => {
 
     const result = interpretCollection(col);
     // Should contain full sentences, not just "Key: value" pairs
-    expect(result).toContain('This approval governs');
+    expect(result).toContain('This approval controls');
     expect(result).toContain('permanently locked');
     // Should have proper bold markdown
     expect(result).toMatch(/\*\*[^*]+\*\*/);

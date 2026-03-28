@@ -216,7 +216,8 @@ function buildHowTokensAreCreated<T extends NumberType>(col: BitBadgesCollection
 
 function buildTransferRules<T extends NumberType>(col: BitBadgesCollection<T>): string {
   let md = '## Transfer & Approval Rules\n\n';
-  md += 'When a transfer is submitted, the chain checks each collection-level approval in order. The first approval whose criteria match the transfer (correct sender, recipient, token IDs, timing, etc.) is used. If an approval with `mustPrioritize` is set, it must be explicitly referenced. If no approval matches, the transfer is rejected.\n\n';
+  md += 'This section describes the rules that control how tokens can be moved between addresses after they have been created. When someone tries to transfer tokens, the chain checks each collection-level approval rule in order. The first rule whose conditions match the transfer (correct sender, recipient, token IDs, timing, etc.) is used. If a rule has the "must be explicitly selected" flag, it will only be used if the user specifically requests it by its approval ID. If no rule matches, the transfer is blocked. This is a "default-deny" system — nothing is allowed unless there is a specific rule that permits it.\n\n';
+  md += 'Remember: even after a collection-level rule approves a transfer, the sender\'s personal outgoing approval and the recipient\'s personal incoming approval must also agree. All three layers must pass.\n\n';
 
   const nonMintApprovals = getNonMintApprovals(col.collectionApprovals);
   const transferApprovals = nonMintApprovals.filter((a) => !a.approvalCriteria?.allowBackedMinting);
@@ -225,9 +226,9 @@ function buildTransferRules<T extends NumberType>(col: BitBadgesCollection<T>): 
   );
 
   if (transferApprovals.length === 0 && unbackingApprovals.length === 0) {
-    md += 'This collection is **non-transferable (soulbound)**. Once tokens are minted to a holder, they cannot be sent to another address. ';
-    md += 'This is a permanent characteristic of the tokens as long as the transfer rules remain unchanged. ';
-    md += 'Soulbound tokens are commonly used for credentials, membership badges, and reputation scores that should not be tradeable.\n\n';
+    md += 'This collection is **non-transferable (soulbound)**. There are no transfer approval rules configured, which means once tokens are created and delivered to a holder, they can never be sent to another address. The tokens are permanently bound to whoever receives them. ';
+    md += 'This will remain the case as long as the transfer rules are not changed (check the Permissions section to see whether the manager has the ability to add transfer rules in the future). ';
+    md += 'Non-transferable tokens are commonly used for credentials, certificates, membership badges, and reputation scores where it is important that the token cannot be sold or given away.\n\n';
     return md;
   }
 
@@ -240,9 +241,9 @@ function buildTransferRules<T extends NumberType>(col: BitBadgesCollection<T>): 
     const rawDenom = backing?.conversion?.sideA?.denom || 'the IBC asset';
     const symbol = denomToHuman(rawDenom);
 
-    md += `### IBC Withdrawal: "${approval.approvalId}"\n\n`;
-    md += `This approval enables IBC-backed withdrawal (burning). Holders send collection tokens to the backing address and receive **${symbol}** back at a 1:1 conversion rate. `;
-    md += `Withdrawals are available to ${listIdHuman(approval.fromListId)}. `;
+    md += `### Withdrawal: "${approval.approvalId}"\n\n`;
+    md += `This approval allows token holders to redeem their collection tokens for the underlying backing asset (**${symbol}**). The holder sends their collection tokens to the backing address, and the tokens are destroyed in exchange for receiving the equivalent amount of **${symbol}** back. `;
+    md += `Who can withdraw: ${listIdHuman(approval.fromListId)}. `;
 
     const amounts = approval.approvalCriteria?.approvalAmounts;
     if (amounts) {
@@ -374,12 +375,12 @@ export function interpretCollection<T extends NumberType>(
 
   // Preamble
   report += '## How BitBadges Collections Work\n\n';
-  report += 'BitBadges uses a **three-tier approval system** to control all token operations. For any transfer to succeed, it must pass through three levels of approval:\n\n';
-  report += '1. **Collection-level approvals** — rules set by the collection creator that apply to everyone (described in this report)\n';
-  report += '2. **Sender\'s outgoing approvals** — personal rules each holder sets for tokens leaving their account (by default, holders auto-approve their own sends)\n';
-  report += '3. **Recipient\'s incoming approvals** — personal rules each address sets for tokens arriving (by default, all incoming transfers are auto-approved)\n\n';
-  report += 'All three tiers must approve for a transfer to proceed. If any tier rejects, the transfer fails. This is a **default-deny** system — if no approval matches a transfer, it is rejected.\n\n';
-  report += '**Permissions** control what the collection manager can change in the future. **Invariants** are permanent on-chain rules that can never be changed by anyone. Together, they determine how much you can trust that the rules described below will remain as they are.\n\n';
+  report += 'BitBadges uses a **three-tier approval system** to control all token operations. For any transfer (moving tokens from one address to another) to succeed, it must pass through three independent layers of approval:\n\n';
+  report += '1. **Collection-level approvals** — rules set by the collection creator that apply to everyone. These are the "global" rules for the collection and are the primary focus of this report.\n';
+  report += '2. **Sender\'s outgoing approvals** — personal rules that each token holder sets for tokens leaving their own account. By default, holders automatically approve transfers that they themselves initiate, but they can customize these rules.\n';
+  report += '3. **Recipient\'s incoming approvals** — personal rules that each address sets for tokens arriving in their account. By default, all incoming transfers are automatically accepted, but recipients can restrict which tokens they are willing to receive.\n\n';
+  report += 'All three layers must independently approve a transfer for it to go through. If any single layer rejects, the entire transfer fails. This is a **"default-deny"** system — if no matching approval rule exists at any layer, the transfer is blocked.\n\n';
+  report += '**Permissions** control what the collection manager (the administrator of the collection) can change in the future. If a permission is "locked", that aspect of the collection can never be changed by anyone. **Invariants** are permanent guarantees enforced by the blockchain itself that can never be altered or overridden. Together, permissions and invariants determine how much you can trust that the rules described in this report will remain unchanged over time.\n\n';
 
   report += buildOverview(col);
   report += buildBackingAndPathsSection(

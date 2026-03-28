@@ -318,7 +318,7 @@ describe('interpretTransaction', () => {
     const result = interpretTransaction(txBody);
 
     expect(result).toContain('Verification Challenges');
-    expect(result).toContain('1 Merkle proof challenge');
+    expect(result).toContain('1 verification challenge');
     expect(result).toContain('whitelist-claim-1');
     expect(result).toContain('Early Access Claim');
     expect(result).toContain('Whitelist (user must be on an approved address list)');
@@ -391,11 +391,11 @@ describe('interpretTransaction', () => {
     };
     const result = interpretTransaction(txBody);
     expect(result).toContain('Sender Checks');
-    expect(result).toContain('must NOT be an EVM contract');
+    expect(result).toContain('must NOT be a smart contract');
     expect(result).toContain('Recipient Checks');
     expect(result).toContain('must NOT be a liquidity pool');
     expect(result).toContain('Initiator Checks');
-    expect(result).toContain('must be an EVM contract');
+    expect(result).toContain('must be a smart contract');
   });
 
   // -------------------------------------------------------------------------
@@ -731,18 +731,256 @@ describe('interpretTransaction', () => {
 
     const result = interpretTransaction(txBody, true, ['updateCollectionPermissions', 'updateDefaultBalances', 'updateInvariants']);
 
-    // Should include sections 1, 4, 6, 8, 9
+    // Should include sections 1, 3 (because updateInvariants includes backing), 4, 6, 8, 9
     expect(result).toContain('## Transaction Summary');
     expect(result).toContain('## Key Reference Information');
     expect(result).toContain('## Permissions -- What Can Change Later');
     expect(result).toContain('## Default Balances & Auto-Approve Settings');
     expect(result).toContain('## Invariants');
+    expect(result).toContain('## Token Backing & Cross-Chain');
 
-    // Should NOT include sections 2, 3, 5, 7
+    // Should NOT include sections 2, 5, 7
     expect(result).not.toContain('## Collection Overview');
-    expect(result).not.toContain('## Token Backing & Cross-Chain');
     expect(result).not.toContain('## Standards');
     expect(result).not.toContain('## How Tokens Are Created');
     expect(result).not.toContain('## Transfer & Approval Rules');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: mustPrioritize flag on approval
+  // -------------------------------------------------------------------------
+  it('should describe mustPrioritize on an approval', () => {
+    const txBody = {
+      creator: 'bb1prio',
+      manager: 'bb1prio',
+      collectionMetadata: { metadata: { name: 'Priority Collection' } },
+      validTokenIds: [{ start: '1', end: '1' }],
+      standards: [],
+      collectionApprovals: [{
+        approvalId: 'special-transfer',
+        fromListId: '!Mint',
+        toListId: 'All',
+        initiatedByListId: 'All',
+        tokenIds: fullRange(),
+        transferTimes: fullRange(),
+        ownershipTimes: fullRange(),
+        approvalCriteria: {
+          mustPrioritize: true
+        }
+      }],
+      collectionPermissions: {}
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('Must Be Explicitly Selected');
+    expect(result).toContain('explicitly selects it');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: allowSpecialWrapping flag
+  // -------------------------------------------------------------------------
+  it('should describe allowSpecialWrapping on an approval', () => {
+    const txBody = {
+      creator: 'bb1wrap',
+      manager: 'bb1wrap',
+      collectionMetadata: { metadata: { name: 'Wrapping Collection' } },
+      validTokenIds: fullRange(),
+      standards: [],
+      collectionApprovals: [{
+        approvalId: 'wrap-unwrap',
+        fromListId: 'Mint',
+        toListId: 'All',
+        initiatedByListId: 'All',
+        tokenIds: fullRange(),
+        transferTimes: fullRange(),
+        ownershipTimes: fullRange(),
+        approvalCriteria: {
+          allowSpecialWrapping: true
+        }
+      }],
+      collectionPermissions: {}
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('Coin Wrapping');
+    expect(result).toContain('converted between');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: mustOwnTokens (token gating)
+  // -------------------------------------------------------------------------
+  it('should describe mustOwnTokens requirements', () => {
+    const txBody = {
+      creator: 'bb1gate',
+      manager: 'bb1gate',
+      collectionMetadata: { metadata: { name: 'Gated Collection' } },
+      validTokenIds: [{ start: '1', end: '10' }],
+      standards: [],
+      collectionApprovals: [{
+        approvalId: 'gated-mint',
+        fromListId: 'Mint',
+        toListId: 'All',
+        initiatedByListId: 'All',
+        tokenIds: fullRange(),
+        transferTimes: fullRange(),
+        ownershipTimes: fullRange(),
+        approvalCriteria: {
+          mustOwnTokens: [{
+            collectionId: '42',
+            amountRange: { start: '1', end: '0' },
+            tokenIds: [{ start: '1', end: '5' }],
+            ownershipTimes: fullRange(),
+            overrideWithCurrentTime: true,
+            mustSatisfyForAllAssets: false
+          }]
+        }
+      }],
+      collectionPermissions: {}
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('Ownership Requirements');
+    expect(result).toContain('collection 42');
+    expect(result).toContain('#1-#5');
+    expect(result).toContain('membership or access check');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: reset intervals on limits
+  // -------------------------------------------------------------------------
+  it('should describe reset intervals on approval limits', () => {
+    const txBody = {
+      creator: 'bb1reset',
+      manager: 'bb1reset',
+      collectionMetadata: { metadata: { name: 'Reset Collection' } },
+      validTokenIds: [{ start: '1', end: '100' }],
+      standards: [],
+      collectionApprovals: [{
+        approvalId: 'recurring-mint',
+        fromListId: 'Mint',
+        toListId: 'All',
+        initiatedByListId: 'All',
+        tokenIds: fullRange(),
+        transferTimes: fullRange(),
+        ownershipTimes: fullRange(),
+        approvalCriteria: {
+          approvalAmounts: {
+            overallApprovalAmount: '0',
+            perInitiatedByAddressApprovalAmount: '5',
+            perFromAddressApprovalAmount: '0',
+            perToAddressApprovalAmount: '0',
+            resetTimeIntervals: {
+              intervalLength: '604800000'
+            }
+          },
+          maxNumTransfers: {
+            overallMaxNumTransfers: '0',
+            perInitiatedByAddressMaxNumTransfers: '0',
+            perFromAddressMaxNumTransfers: '0',
+            perToAddressMaxNumTransfers: '0'
+          }
+        }
+      }],
+      collectionPermissions: {}
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('reset every 7 days');
+    expect(result).toContain('per-user limit of 5');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: per-token metadata
+  // -------------------------------------------------------------------------
+  it('should describe per-token metadata', () => {
+    const txBody = {
+      creator: 'bb1meta',
+      manager: 'bb1meta',
+      collectionMetadata: { metadata: { name: 'Multi-Token Collection' } },
+      validTokenIds: [{ start: '1', end: '3' }],
+      standards: ['NFTs'],
+      tokenMetadata: [
+        {
+          tokenIds: [{ start: '1', end: '1' }],
+          metadata: { metadata: { name: 'Gold Badge', description: 'The top tier badge' } }
+        },
+        {
+          tokenIds: [{ start: '2', end: '3' }],
+          metadata: { metadata: { name: 'Silver Badge' } }
+        }
+      ],
+      collectionApprovals: [],
+      collectionPermissions: {}
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('Per-Token Metadata');
+    expect(result).toContain('Gold Badge');
+    expect(result).toContain('The top tier badge');
+    expect(result).toContain('Silver Badge');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: custom data and archived status
+  // -------------------------------------------------------------------------
+  it('should describe custom data and archived status', () => {
+    const txBody = {
+      creator: 'bb1custom',
+      manager: 'bb1custom',
+      collectionMetadata: { metadata: { name: 'Custom Collection' } },
+      validTokenIds: [{ start: '1', end: '1' }],
+      standards: [],
+      customData: 'some-custom-json-data',
+      isArchived: true,
+      collectionApprovals: [],
+      collectionPermissions: {}
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('Custom Data');
+    expect(result).toContain('some-custom-json-data');
+    expect(result).toContain('ARCHIVED');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: user permissions in default balances
+  // -------------------------------------------------------------------------
+  it('should describe user permissions in default balances', () => {
+    const txBody = {
+      creator: 'bb1userperm',
+      manager: 'bb1userperm',
+      collectionMetadata: { metadata: { name: 'User Perms Collection' } },
+      validTokenIds: [{ start: '1', end: '1' }],
+      standards: [],
+      collectionApprovals: [],
+      collectionPermissions: {},
+      defaultBalances: {
+        balances: [],
+        autoApproveSelfInitiatedOutgoingTransfers: true,
+        autoApproveSelfInitiatedIncomingTransfers: true,
+        autoApproveAllIncomingTransfers: false,
+        userPermissions: {
+          canUpdateIncomingApprovals: [{ permanentlyForbiddenTimes: fullRange(), permanentlyPermittedTimes: [] }],
+          canUpdateOutgoingApprovals: [{ permanentlyForbiddenTimes: fullRange(), permanentlyPermittedTimes: [] }]
+        }
+      }
+    };
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('User Permissions');
+    expect(result).toContain('Update incoming approvals: locked');
+    expect(result).toContain('Update outgoing approvals: locked');
+  });
+
+  // -------------------------------------------------------------------------
+  // Test: malformed input does not crash
+  // -------------------------------------------------------------------------
+  it('should handle malformed input without crashing', () => {
+    const txBody = {
+      creator: 'bb1bad',
+      collectionMetadata: { metadata: { name: 'Bad Collection' } },
+      invariants: {
+        maxSupplyPerId: { notANumber: true }
+      },
+      collectionApprovals: 'not-an-array',
+      validTokenIds: 'also-not-an-array'
+    };
+    // Should not throw
+    expect(() => interpretTransaction(txBody)).not.toThrow();
+    const result = interpretTransaction(txBody);
+    expect(result).toContain('Transaction Summary');
   });
 });

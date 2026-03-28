@@ -222,7 +222,11 @@ export const PERM_KEYS = Object.keys(PERM_DESCRIPTIONS);
 /** Safe BigInt conversion from any value */
 export function big(val: any): bigint {
   if (val == null || val === '') return 0n;
-  return BigInt(val.valueOf ? val.valueOf() : val);
+  try {
+    return BigInt(val.valueOf ? val.valueOf() : val);
+  } catch {
+    return 0n;
+  }
 }
 
 /** Check if any range covers 1 -> MAX_UINT64 */
@@ -245,19 +249,19 @@ export function permState(entries: any[] | undefined): 'locked' | 'open' | 'unde
 export function listIdHuman(listId: string): string {
   if (!listId) return 'unspecified';
   if (listId === 'All') return 'anyone';
-  if (listId === 'Mint') return 'the Mint address (new token creation)';
-  if (listId === '!Mint') return 'any existing holder (not the Mint)';
-  if (listId === 'Total') return 'Total (aggregate tracker)';
-  if (listId.startsWith('!Mint:')) return `any holder except ${listId.slice(6)}`;
-  if (listId.startsWith('!')) return `anyone except ${listId.slice(1)}`;
-  if (listId.includes(':')) return listId.split(':').join(' and ');
-  if (listId.startsWith('bb1')) return `address ${listId.slice(0, 12)}...`;
+  if (listId === 'Mint') return 'the Mint address (this is a special reserved address that represents the creation of new tokens)';
+  if (listId === '!Mint') return 'any existing token holder (excludes the Mint address, so this only applies to tokens that already exist in someone\'s balance)';
+  if (listId === 'Total') return 'the aggregate tracker (an internal address used to track totals across all users)';
+  if (listId.startsWith('!Mint:')) return `any existing holder except the specific address ${listId.slice(6)}`;
+  if (listId.startsWith('!')) return `anyone except the specific address ${listId.slice(1)}`;
+  if (listId.includes(':')) return `the following addresses: ${listId.split(':').join(' and ')}`;
+  if (listId.startsWith('bb1') || listId.startsWith('0x')) return `the specific address ${listId}`;
   return listId;
 }
 
 /** Format token ID ranges */
 export function rangeStr(ranges: any[] | undefined): string {
-  if (!ranges || ranges.length === 0) return 'none';
+  if (!ranges || !Array.isArray(ranges) || ranges.length === 0) return 'none';
   return (ranges as any[])
     .map((r: any) => {
       const s = big(r?.start);
@@ -271,7 +275,7 @@ export function rangeStr(ranges: any[] | undefined): string {
 
 /** Format time ranges using timestampToDate */
 export function timeRangeStr(ranges: any[] | undefined): string {
-  if (!ranges || ranges.length === 0) return 'none';
+  if (!ranges || !Array.isArray(ranges) || ranges.length === 0) return 'none';
   return (ranges as any[])
     .map((r: any) => {
       const s = big(r?.start);
@@ -284,7 +288,7 @@ export function timeRangeStr(ranges: any[] | undefined): string {
 
 /** Count total token IDs in a range array */
 export function countTokenIds(ranges: any[] | undefined): string {
-  if (!ranges || ranges.length === 0) return '0';
+  if (!ranges || !Array.isArray(ranges) || ranges.length === 0) return '0';
   let total = 0n;
   for (const r of ranges as any[]) {
     const s = big(r?.start);
@@ -350,18 +354,18 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
 
   // Direction paragraph
   if (isForMint) {
-    md += `This approval governs the creation of new tokens. `;
-    md += `It allows ${listIdHuman(approval.initiatedByListId)} to initiate minting, `;
-    md += `with tokens being delivered to ${listIdHuman(approval.toListId)}. `;
+    md += `This approval controls how new tokens are created (minted) and who receives them. `;
+    md += `Who can trigger the mint: ${listIdHuman(approval.initiatedByListId)}. `;
+    md += `Who receives the newly created tokens: ${listIdHuman(approval.toListId)}. `;
   } else {
-    md += `This approval governs token transfers. `;
-    md += `It permits tokens to be sent from ${listIdHuman(approval.fromListId)} `;
-    md += `to ${listIdHuman(approval.toListId)}, `;
-    md += `initiated by ${listIdHuman(approval.initiatedByListId)}. `;
+    md += `This approval controls when and how tokens can be transferred between addresses. `;
+    md += `Who tokens can be sent from: ${listIdHuman(approval.fromListId)}. `;
+    md += `Who tokens can be sent to: ${listIdHuman(approval.toListId)}. `;
+    md += `Who can trigger the transfer: ${listIdHuman(approval.initiatedByListId)}. `;
 
-    // Two-level approval clarification
+    // Three-tier approval clarification
     if (approval.initiatedByListId === 'All' && !criteria?.overridesFromOutgoingApprovals) {
-      md += 'Note that while the collection-level rule does not restrict who initiates, the sender\'s personal outgoing approval must still pass. By default, only the sender themselves can initiate their own outgoing transfer. ';
+      md += 'Important: even though this collection-level rule allows anyone to trigger the transfer, there are two additional layers of approval. The sender must have their personal outgoing approval set to allow this transfer, and the recipient must have their personal incoming approval set to accept it. By default, only the sender themselves can trigger their own outgoing transfer, and all incoming transfers are accepted. So in practice, even though this says "anyone", only the token holder can typically send their own tokens unless the other tiers are also configured to allow it. ';
     }
   }
 
@@ -447,7 +451,7 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
     if (resetInterval) {
       const intervalLen = big(resetInterval.intervalLength);
       if (intervalLen > 0n) {
-        md += ` These limits reset every ${durationToHuman(intervalLen)}.`;
+        md += ` These limits reset every ${durationToHuman(intervalLen)}. This means after each ${durationToHuman(intervalLen)} period, the counters go back to zero and users can claim or transfer again up to the limits. For example, a per-user limit of 1 token with a ${durationToHuman(intervalLen)} reset means each user can claim 1 token per ${durationToHuman(intervalLen)} period.`;
       }
     }
 
@@ -483,27 +487,27 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
       }
       return desc;
     });
-    md += `To use this approval, the user must already hold ${reqs.join(' and ')}. This acts as a token gate, restricting access to existing holders of specific collections.\n\n`;
+    md += `To use this approval, the user must already hold ${reqs.join(' and ')}. This means only people who already own tokens from another collection can use this approval — it acts as a membership or access check, similar to requiring a VIP pass before you can enter.\n\n`;
   }
 
   // Predetermined balances
   if (criteria.predeterminedBalances) {
     const pb = criteria.predeterminedBalances;
-    md += '**Distribution Method**: Tokens are distributed using sequential allocation. ';
+    md += '**Distribution Method**: Instead of the user choosing exactly which tokens and amounts they receive, the system automatically determines what each person gets based on a pre-set sequence. Think of it like a queue — each person who claims gets the next item in line. ';
 
     // Order calculation method
     const ocm = pb.orderCalculationMethod;
     if (ocm) {
       if (ocm.useOverallNumTransfers) {
-        md += 'The order number is determined by the overall number of transfers across all users (the Nth person to claim gets the Nth allocation). ';
+        md += 'The queue position is based on the total number of claims made so far across all users. For example, the 1st person to claim gets allocation #1, the 2nd person gets allocation #2, and so on. ';
       } else if (ocm.usePerToAddressNumTransfers) {
-        md += 'The order number is determined per recipient address (each recipient\'s own claim count determines their allocation). ';
+        md += 'Each recipient has their own independent queue. The first time a specific address claims, they get their allocation #1; their second claim gets allocation #2, and so on. Different users\' claims do not affect each other\'s queue positions. ';
       } else if (ocm.usePerFromAddressNumTransfers) {
-        md += 'The order number is determined per sender address. ';
+        md += 'The queue position is tracked separately for each sender address. ';
       } else if (ocm.usePerInitiatedByAddressNumTransfers) {
-        md += 'The order number is determined per initiator address. ';
+        md += 'The queue position is tracked separately for each address that triggers the transfer. ';
       } else if (ocm.useMerkleChallengeLeafIndex) {
-        md += 'The order number is determined by the Merkle proof leaf index, reserving specific allocations for specific whitelist entries or codes. ';
+        md += 'Each entry in the whitelist or code list is mapped to a specific allocation. For example, whitelist entry #5 always receives allocation #5, regardless of claim order. This allows the creator to reserve specific tokens or amounts for specific people or codes. ';
       }
     }
 
@@ -514,22 +518,22 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
       const incOwnership = big(inc.incrementOwnershipTimesBy);
       const duration = big(inc.durationFromTimestamp);
       if (incTokenIds > 0n) {
-        md += `Each successive claim receives the next token ID in sequence, incrementing by ${incTokenIds.toLocaleString('en-US')}. `;
+        md += `Each successive claim receives a different token ID, advancing by ${incTokenIds.toLocaleString('en-US')} each time. For example, the first person gets token #1, the second gets token #${(1n + incTokenIds).toString()}, and so on. `;
       }
       if (incOwnership > 0n) {
-        md += `Ownership times increment by ${durationToHuman(incOwnership)} per claim. `;
+        md += `Each successive claim receives a different ownership time window, shifted forward by ${durationToHuman(incOwnership)} from the previous claim. This creates staggered time-based access. `;
       }
       if (duration > 0n) {
-        md += `Each claim grants ownership for a duration of ${durationToHuman(duration)} starting from the claim timestamp. `;
+        md += `Each claim grants ownership for exactly ${durationToHuman(duration)}, starting from the moment the claim is made. After this period expires, the tokens are no longer owned by the claimant. This is commonly used for subscriptions, time-limited access passes, or rental-style tokens. `;
       }
       if (inc.allowOverrideTimestamp) {
-        md += 'The claimant can override the start timestamp. ';
+        md += 'The person claiming can choose a custom start time instead of using the moment they claim. ';
       }
     }
 
     // Manual balances
     if (pb.manualBalances && pb.manualBalances.length > 0) {
-      md += `There are ${pb.manualBalances.length} manually defined balance allocation(s). `;
+      md += `There are ${pb.manualBalances.length} manually defined allocation(s) where the creator has specified exactly which tokens and amounts each queue position receives. `;
     }
 
     md += '\n\n';
@@ -567,17 +571,17 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
 
   // Backed minting
   if (criteria.allowBackedMinting) {
-    md += '**IBC Backing**: This approval is used for IBC-backed minting or withdrawal operations. Tokens are created or destroyed in exchange for the underlying IBC asset.\n\n';
+    md += '**Asset-Backed Operations**: This approval is specifically designed for deposit and withdrawal operations with an underlying backing asset. When used for minting, users deposit the backing asset and receive collection tokens in return. When used for withdrawal, users return collection tokens and receive the backing asset back. This ensures every token in circulation is fully backed.\n\n';
   }
 
   // Special wrapping
   if (criteria.allowSpecialWrapping) {
-    md += '**Special Wrapping**: This approval is used for Cosmos coin wrapping/unwrapping operations. Tokens can be wrapped into or unwrapped from a native Cosmos SDK coin denomination.\n\n';
+    md += '**Coin Wrapping**: This approval allows tokens to be converted between the BitBadges collection format and a standard blockchain coin format. This is useful for making collection tokens compatible with other blockchain features like staking, governance voting, or transferring tokens to other blockchains. The wrapping process is reversible — tokens can be unwrapped back into the collection format at any time.\n\n';
   }
 
   // Must prioritize
   if (criteria.mustPrioritize) {
-    md += '**Priority**: This approval must be explicitly prioritized to be used. It will not be automatically selected during transfer matching.\n\n';
+    md += '**Must Be Explicitly Selected**: Unlike most approvals which are automatically matched when a transfer is submitted, this approval will only be used if the user explicitly selects it by its approval ID in the transfer request. It will be skipped during the normal automatic matching process. This is useful for special-purpose approvals that should only be used intentionally.\n\n';
   }
 
   // Merkle challenges (with inline claim details if available)
@@ -586,9 +590,9 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
       .map((mc: any) => mc.challengeInfoDetails?.claim)
       .filter((c: any) => !!c);
 
-    md += `**Verification Challenges**: ${criteria.merkleChallenges.length} Merkle proof challenge${criteria.merkleChallenges.length > 1 ? 's' : ''} must be satisfied. `;
+    md += `**Verification Challenges**: ${criteria.merkleChallenges.length} verification challenge${criteria.merkleChallenges.length > 1 ? 's' : ''} must be satisfied before this approval can be used. `;
     if (linkedClaims.length === 0) {
-      md += 'This typically means the user must provide a valid proof of inclusion in a whitelist or enter a valid claim code.\n\n';
+      md += 'This typically means the user must prove they are on an approved whitelist or provide a valid claim code. The verification uses a cryptographic proof system that allows the chain to verify eligibility without storing the entire whitelist on-chain.\n\n';
     } else {
       md += '\n\n';
       for (const claim of linkedClaims) {
@@ -635,31 +639,31 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
 
   // EVM query challenges
   if (criteria.evmQueryChallenges && criteria.evmQueryChallenges.length > 0) {
-    md += `**On-Chain Verification**: ${criteria.evmQueryChallenges.length} EVM smart contract query check${criteria.evmQueryChallenges.length > 1 ? 's' : ''} must pass. The on-chain contract is queried to verify eligibility before the transfer can proceed.\n\n`;
+    md += `**On-Chain Verification**: ${criteria.evmQueryChallenges.length} smart contract check${criteria.evmQueryChallenges.length > 1 ? 's' : ''} must pass before this approval can be used. The BitBadges chain calls out to an external smart contract deployed on the built-in EVM (Ethereum-compatible) layer and asks it a question (for example, "does this address hold a specific NFT?" or "has this address completed a certain action?"). If the smart contract returns a failing answer, the transfer is blocked. This enables complex, programmable eligibility rules that go beyond what the standard approval system supports.\n\n`;
   }
 
   // Dynamic store challenges
   if (criteria.dynamicStoreChallenges && criteria.dynamicStoreChallenges.length > 0) {
-    md += `**Dynamic Store Checks**: ${criteria.dynamicStoreChallenges.length} dynamic store verification${criteria.dynamicStoreChallenges.length > 1 ? 's' : ''} must pass. Dynamic stores are on-chain key-value databases that can be updated externally (for example, by an oracle or off-chain service). This approval checks values in the dynamic store to determine eligibility, enabling conditions that can change over time without modifying the approval itself.\n\n`;
+    md += `**Dynamic Store Checks**: ${criteria.dynamicStoreChallenges.length} dynamic data verification${criteria.dynamicStoreChallenges.length > 1 ? 's' : ''} must pass. A dynamic store is an on-chain database that can be updated by external services (for example, a price feed, an identity verification service, or any off-chain system). Before this approval can be used, the chain reads specific values from the dynamic store and checks whether they meet the required conditions. This allows the approval rules to respond to real-world data that changes over time, without needing to update the approval itself.\n\n`;
   }
 
   // Eth signature challenges
   if (criteria.ethSignatureChallenges && criteria.ethSignatureChallenges.length > 0) {
-    md += `**Signature Verification**: ${criteria.ethSignatureChallenges.length} Ethereum signature challenge${criteria.ethSignatureChallenges.length > 1 ? 's' : ''} must be satisfied. The user must cryptographically sign a specific message with their Ethereum wallet to prove ownership of an address or authorization.\n\n`;
+    md += `**Signature Verification**: ${criteria.ethSignatureChallenges.length} digital signature check${criteria.ethSignatureChallenges.length > 1 ? 's' : ''} must be satisfied. The user must digitally sign a specific message using their wallet to prove they control a particular address or have received authorization from a specific party. This is similar to signing a document to prove your identity.\n\n`;
   }
 
   // Voting challenges
   if (criteria.votingChallenges && criteria.votingChallenges.length > 0) {
-    md += `**Voting Requirements**: ${criteria.votingChallenges.length} voting challenge${criteria.votingChallenges.length > 1 ? 's' : ''} must be satisfied. A governance vote must reach the required threshold before this approval can be used, enabling community-controlled transfers or minting.\n\n`;
+    md += `**Voting Requirements**: ${criteria.votingChallenges.length} community vote${criteria.votingChallenges.length > 1 ? 's' : ''} must pass before this approval can be used. A group of designated voters must collectively approve the action by reaching a required threshold (for example, a majority). This enables community-governed operations where no single person can authorize a transfer or mint — instead, the community must agree through a formal voting process.\n\n`;
   }
 
   // Sender checks
   if (criteria.senderChecks) {
     const sc = criteria.senderChecks;
     const parts: string[] = [];
-    if (sc.mustBeEvmContract) parts.push('the sender must be an EVM contract');
-    if (sc.mustNotBeEvmContract) parts.push('the sender must NOT be an EVM contract (must be an externally-owned account)');
-    if (sc.mustBeLiquidityPool) parts.push('the sender must be a liquidity pool');
+    if (sc.mustBeEvmContract) parts.push('the sender must be a smart contract (not a person\'s wallet)');
+    if (sc.mustNotBeEvmContract) parts.push('the sender must NOT be a smart contract (must be a person\'s wallet address, not an automated program)');
+    if (sc.mustBeLiquidityPool) parts.push('the sender must be a liquidity pool (a special address that holds paired assets for trading)');
     if (sc.mustNotBeLiquidityPool) parts.push('the sender must NOT be a liquidity pool');
     if (parts.length > 0) {
       md += `**Sender Checks**: ${parts.join('; ')}.\n\n`;
@@ -672,8 +676,8 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
   if (criteria.recipientChecks) {
     const rc = criteria.recipientChecks;
     const parts: string[] = [];
-    if (rc.mustBeEvmContract) parts.push('the recipient must be an EVM contract');
-    if (rc.mustNotBeEvmContract) parts.push('the recipient must NOT be an EVM contract (must be an externally-owned account)');
+    if (rc.mustBeEvmContract) parts.push('the recipient must be a smart contract (not a person\'s wallet)');
+    if (rc.mustNotBeEvmContract) parts.push('the recipient must NOT be a smart contract (must be a person\'s wallet address, not an automated program)');
     if (rc.mustBeLiquidityPool) parts.push('the recipient must be a liquidity pool');
     if (rc.mustNotBeLiquidityPool) parts.push('the recipient must NOT be a liquidity pool');
     if (parts.length > 0) {
@@ -687,8 +691,8 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
   if (criteria.initiatorChecks) {
     const ic = criteria.initiatorChecks;
     const parts: string[] = [];
-    if (ic.mustBeEvmContract) parts.push('the initiator must be an EVM contract');
-    if (ic.mustNotBeEvmContract) parts.push('the initiator must NOT be an EVM contract (must be an externally-owned account)');
+    if (ic.mustBeEvmContract) parts.push('the initiator (the address that triggers the transfer) must be a smart contract');
+    if (ic.mustNotBeEvmContract) parts.push('the initiator (the address that triggers the transfer) must NOT be a smart contract (must be a person\'s wallet)');
     if (ic.mustBeLiquidityPool) parts.push('the initiator must be a liquidity pool');
     if (ic.mustNotBeLiquidityPool) parts.push('the initiator must NOT be a liquidity pool');
     if (parts.length > 0) {
@@ -738,7 +742,14 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
   }
 
   // Auto-deletion
-  if (criteria.autoDeletionOptions) md += '**Auto-Deletion**: This approval may be automatically removed after its conditions are fully consumed.\n\n';
+  if (criteria.autoDeletionOptions) {
+    const opts = criteria.autoDeletionOptions;
+    if (opts.afterOneUse) {
+      md += '**Auto-Deletion**: This approval will be automatically removed after it is used once. It is a single-use approval — after the first successful transfer or mint using this rule, the approval is permanently deleted from the collection and cannot be used again.\n\n';
+    } else {
+      md += '**Auto-Deletion**: This approval will be automatically removed once its limits have been fully reached. After all available tokens or transfer slots have been used up, the approval is permanently deleted from the collection to keep the rules clean.\n\n';
+    }
+  }
 
   // Forceful transfer warning
   if (!isForMint && approval.fromListId === 'All' && approval.initiatedByListId === 'All' && !criteria.requireToEqualsInitiatedBy && !criteria.requireFromEqualsInitiatedBy) {
