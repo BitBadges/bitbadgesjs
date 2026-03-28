@@ -26,3 +26,27 @@ export * from './ibc-wrappers.js';
 export * from './cosmos-wrappers.js';
 export * from './simulation.js';
 export * from './interpret.js';
+export * from './interpret-transaction.js';
+// Selectively re-export shared builders (helpers like timestampToDate are already re-exported by interpret.js)
+export {
+  big,
+  isFullRange,
+  permState,
+  listIdHuman,
+  rangeStr,
+  timeRangeStr,
+  countTokenIds,
+  detectType,
+  buildTypeExplanation,
+  buildStandardExplanations,
+  pluginDisplayName,
+  buildApprovalParagraph,
+  buildPermissionsSection,
+  buildDefaultBalancesSection,
+  buildBackingAndPathsSection,
+  buildInvariantsSection,
+  buildKeyReferenceSection,
+  PLUGIN_DISPLAY_NAMES,
+  PERM_DESCRIPTIONS,
+  PERM_KEYS
+} from './interpret-shared.js';
