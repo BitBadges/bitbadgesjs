@@ -37,6 +37,8 @@ export {
   timeRangeStr,
   countTokenIds,
   detectType,
+  buildTypeExplanation,
+  buildStandardExplanations,
   pluginDisplayName,
   buildApprovalParagraph,
   buildPermissionsSection,

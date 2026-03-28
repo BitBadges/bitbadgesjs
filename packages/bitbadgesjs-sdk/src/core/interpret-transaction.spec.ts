@@ -93,7 +93,7 @@ describe('interpretTransaction', () => {
     expect(result).toContain('NFT Collection');
     expect(result).toContain('10 unique token IDs');
     expect(result).toContain('maximum supply of 1 tokens');
-    expect(result).toContain('each token is truly unique and non-fungible');
+    expect(result).toContain('truly one-of-a-kind');
     expect(result).toContain('Permanently Locked');
     expect(result).toContain('fully immutable');
     expect(result).toContain('mint-all');

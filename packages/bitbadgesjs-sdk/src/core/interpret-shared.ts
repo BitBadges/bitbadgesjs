@@ -201,15 +201,15 @@ export const PERM_DESCRIPTIONS: Record<string, { label: string; lockedDesc: stri
   },
   canAddMoreAliasPaths: {
     label: 'Alias Paths',
-    lockedDesc: 'No new alias paths (trading pairs) can be added. The current set is permanent.',
-    openDesc: 'The manager can add new alias paths (trading pairs) for liquidity pools.',
+    lockedDesc: 'No new alias paths can be added. The current set of trading pair configurations is permanent.',
+    openDesc: 'The manager can add new alias paths that allow the token to appear under alternative names and symbols in wallets and DEX interfaces.',
     undecidedDesc: 'The manager can currently add alias paths. This permission could be locked in the future.'
   },
   canAddMoreCosmosCoinWrapperPaths: {
-    label: 'IBC Wrapper Paths',
-    lockedDesc: 'No new IBC asset backing configurations can be added. The current set is permanent.',
-    openDesc: 'The manager can add new IBC asset backing configurations.',
-    undecidedDesc: 'The manager can currently add IBC wrapper paths. This permission could be locked in the future.'
+    label: 'Cosmos Coin Wrapper Paths',
+    lockedDesc: 'No new Cosmos coin wrapper configurations can be added. The current set is permanent.',
+    openDesc: 'The manager can add new Cosmos coin wrapper configurations that allow collection tokens to be wrapped as native Cosmos SDK coins (for IBC transfers, staking, or governance).',
+    undecidedDesc: 'The manager can currently add Cosmos coin wrapper paths. This permission could be locked in the future.'
   }
 };
 
@@ -313,6 +313,77 @@ export function detectType(standards: string[], hasBackingPath: boolean): string
   if (s.includes('NFTs')) return 'NFT Collection';
   if (s.includes('Fungible Tokens')) return 'Fungible Token';
   return 'Token Collection';
+}
+
+/**
+ * Build a plain-English explanation of what this type of collection means.
+ * Used by both interpretCollection and interpretTransaction for consistency.
+ */
+export function buildTypeExplanation(type: string, maxSupply: bigint, backingDenom?: string): string {
+  if (type === 'NFT Collection') {
+    let text = 'As an NFT collection, each token ID represents a distinct, individually identifiable asset (similar to how each painting in a gallery is unique). ';
+    if (maxSupply === 1n) {
+      text += 'With a maximum supply of 1 per ID, each token is truly one-of-a-kind — there can only ever be one copy.';
+    } else if (maxSupply === 0n) {
+      text += 'There is no supply cap, so multiple copies of each token ID can exist.';
+    } else {
+      text += `Up to ${maxSupply.toLocaleString('en-US')} copies of each token ID can exist.`;
+    }
+    return text;
+  } else if (type.includes('Smart Token')) {
+    const denom = backingDenom || 'an IBC asset';
+    return `This is a smart token backed 1:1 by ${denom}. Users deposit the IBC backing asset into a vault and receive collection tokens in return. They can redeem their collection tokens at any time to withdraw the backing asset from the vault.`;
+  } else if (type === 'Fungible Token') {
+    let text = 'As a fungible token, all tokens of the same ID are identical and interchangeable (similar to how one dollar bill is the same as any other dollar bill). ';
+    if (maxSupply === 0n) {
+      text += 'There is no supply cap.';
+    } else {
+      text += `The maximum total supply is ${maxSupply.toLocaleString('en-US')} tokens.`;
+    }
+    return text;
+  } else if (type === 'Subscription Token') {
+    return 'This is a subscription token. Holding it grants the owner access to a service or resource for a defined time period, similar to a monthly subscription pass. It may require periodic renewal or payment to maintain access.';
+  } else if (type === 'AI Agent Stablecoin') {
+    return 'This is an AI agent-managed stablecoin vault. An AI agent (an automated program) manages the vault and controls when new tokens are created or destroyed, typically to maintain a stable value.';
+  } else if (type === 'Address List') {
+    return 'This is an address list — essentially a membership roster stored on the blockchain. Tokens represent membership status and cannot be traded or transferred. If you hold a token, you are on the list; if not, you are not a member.';
+  } else if (type === 'Credit Token') {
+    return 'This is a credit token — a non-transferable balance representing points, credits, or reputation. These are permanently bound to the holder and cannot be traded, sold, or given away. Think of it like loyalty points or a reputation score.';
+  } else if (type === 'Membership Token') {
+    return 'This is a membership token that represents participation in a group or organization. Holding the token proves membership status.';
+  } else if (type === 'Liquidity Pool') {
+    return 'This is a liquidity pool token paired with an ICS20 coin for on-chain swaps and automated market-making. Pool token holders earn a portion of trading fees proportional to their share of the pool.';
+  }
+  return 'This is a token collection on BitBadges.';
+}
+
+/**
+ * Build plain-English explanations for declared standards.
+ * Used by both interpretCollection and interpretTransaction for consistency.
+ */
+export function buildStandardExplanations(standards: string[]): string[] {
+  const explanations: string[] = [];
+  for (const std of standards) {
+    const lower = std.toLowerCase();
+    if (std === 'NFTs') {
+      explanations.push(`"${std}" — each token ID is a distinct asset with its own name, image, and description, similar to how collectibles or artwork each have unique properties`);
+    } else if (std === 'Fungible Tokens') {
+      explanations.push(`"${std}" — all tokens of the same ID are identical and interchangeable, similar to how units of a currency are all the same`);
+    } else if (lower.includes('non-transferable') || lower.includes('soulbound')) {
+      explanations.push(`"${std}" — tokens cannot be transferred once received; they are permanently bound to the holder and cannot be sold or given away`);
+    } else if (lower.includes('subscription')) {
+      explanations.push(`"${std}" — tokens represent time-limited access that may require periodic renewal, like a subscription pass`);
+    } else if (lower.includes('tradable') || lower.includes('marketplace') || std === 'NFTMarketplace') {
+      explanations.push(`"${std}" — the collection is designed for secondary market trading, meaning tokens can be bought and sold between users`);
+    } else if (lower.includes('smart token')) {
+      explanations.push(`"${std}" — the token is IBC-backed by an external asset and supports deposit/withdrawal`);
+    } else if (lower.includes('ai agent')) {
+      explanations.push(`"${std}" — the token is managed by an automated AI agent that controls minting, burning, or other operations`);
+    } else {
+      explanations.push(`"${std}"`);
+    }
+  }
+  return explanations;
 }
 
 /** Lookup plugin display name */
@@ -571,7 +642,7 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
 
   // Backed minting
   if (criteria.allowBackedMinting) {
-    md += '**Asset-Backed Operations**: This approval is specifically designed for deposit and withdrawal operations with an underlying backing asset. When used for minting, users deposit the backing asset and receive collection tokens in return. When used for withdrawal, users return collection tokens and receive the backing asset back. This ensures every token in circulation is fully backed.\n\n';
+    md += '**IBC Backing**: This approval is specifically designed for IBC-backed deposit and withdrawal operations. When used for minting, users deposit the IBC backing asset and receive collection tokens in return. When used for withdrawal, users return collection tokens and receive the IBC backing asset back. This ensures every token in circulation is fully backed by the underlying IBC asset.\n\n';
   }
 
   // Special wrapping
@@ -769,7 +840,7 @@ export function buildPermissionsSection(perms: any, manager: string | null | und
   let md = '## Permissions -- What Can Change Later\n\n';
 
   const managerAddr = manager || 'not set';
-  md += `The **manager** is a single address that has administrative control over the collection. The manager is the ONLY address that can execute changes allowed by unfrozen permissions. If a permission is locked (forbidden), even the manager cannot make that change. If no manager is set, no one can make administrative changes.\n\n`;
+  md += `The **manager** is a single address that serves as the administrator of the collection. The manager is the ONLY address that can make changes to the collection — but only for aspects where the permission has not been permanently locked. If a permission is "Permanently Locked", that aspect of the collection can never be changed by anyone, not even the manager. If no manager is set, no one can make any administrative changes at all.\n\n`;
   if (!manager) {
     md += '> **No Manager Set**: This collection has no manager address. No administrative changes can be made to the collection, regardless of permission settings. All unlocked permissions below are effectively inert until a manager is set (if the "Manager Transfer" permission allows it).\n\n';
   }
@@ -948,7 +1019,7 @@ export function buildBackingAndPathsSection(invariants: any, aliasPaths: any[], 
   let md = '## Token Backing & Cross-Chain\n\n';
 
   if (!hasAlias && !hasWrapper && !hasBacking) {
-    md += 'This is a native BitBadges collection with no cross-chain backing. Tokens are created and managed entirely within the BitBadges chain and are not pegged to any external asset or IBC denomination.\n\n';
+    md += 'This is a native BitBadges collection with no IBC backing. Tokens are created and managed entirely within the BitBadges chain and are not pegged to any external asset or IBC denomination.\n\n';
     return md;
   }
 
@@ -968,16 +1039,16 @@ export function buildBackingAndPathsSection(invariants: any, aliasPaths: any[], 
     } else {
       rateDesc = '1:1';
     }
-    md += `This collection is **IBC-backed**, meaning each token is redeemable for the underlying asset at a **${rateDesc}** conversion rate. `;
+    md += `This collection is **IBC-backed**, meaning every token in circulation is redeemable for the underlying IBC asset at a **${rateDesc}** conversion rate. `;
     md += `The backing asset is **${symbol}** (denomination: \`${rawDenom}\`). `;
     md += `All backing funds are held at the backing address (\`${address}\`). `;
     md += 'Users can deposit the backing asset to mint new collection tokens, and burn collection tokens to withdraw the backing asset. ';
-    md += 'This mechanism ensures that the total supply of collection tokens never exceeds the reserves held at the backing address.\n\n';
+    md += 'This mechanism ensures that the total supply of collection tokens never exceeds the reserves held at the backing address — every token is fully backed.\n\n';
   }
 
   if (hasAlias) {
     md += '### Alias Paths\n\n';
-    md += 'Alias paths provide alternative denominations for display and trading purposes. They allow the token to appear under a different symbol in wallets and DEX interfaces:\n\n';
+    md += 'Alias paths allow the token to appear under alternative names and symbols in wallets and DEX interfaces. This is purely for display and trading convenience — the underlying token is the same regardless of which alias is used:\n\n';
     for (const alias of aliasPaths) {
       const aliasName = alias.metadata?.metadata?.name || alias.symbol || alias.denom || 'unnamed';
       md += `- **${aliasName}**: denomination \`${alias.denom || 'N/A'}\`, symbol \`${alias.symbol || 'N/A'}\`\n`;
@@ -987,7 +1058,7 @@ export function buildBackingAndPathsSection(invariants: any, aliasPaths: any[], 
 
   if (hasWrapper) {
     md += '### Cosmos Coin Wrapper Paths\n\n';
-    md += 'Wrapper paths allow this collection token to be wrapped as a native Cosmos SDK coin, enabling integration with standard Cosmos modules (staking, governance, IBC transfers):\n\n';
+    md += 'Wrapper paths allow this collection token to be wrapped as a native Cosmos SDK coin. This makes the token compatible with standard Cosmos modules such as IBC transfers (sending to other chains), staking, and governance. The wrapping is reversible — wrapped coins can be unwrapped back into collection tokens at any time:\n\n';
     for (const wrapper of wrapperPaths) {
       const wrapperName = wrapper.metadata?.metadata?.name || wrapper.symbol || wrapper.denom || 'unnamed';
       md += `- **${wrapperName}**: denomination \`${wrapper.denom || 'N/A'}\`, symbol \`${wrapper.symbol || 'N/A'}\`\n`;
@@ -1021,23 +1092,23 @@ export function buildInvariantsSection(invariants: any): string {
 
   // No forceful transfers
   if (invariants.noForcefulPostMintTransfers) {
-    md += '**No Forceful Post-Mint Transfers**: Once tokens are minted to a holder, they cannot be forcefully seized or moved by anyone other than the holder. This is a critical safety guarantee that protects holders from rug pulls and unauthorized token seizure. Even if transfer approval rules are changed in the future, this invariant ensures that no approval can override a holder\'s custody of their tokens.\n\n';
+    md += '**No Forceful Transfers After Minting**: Once tokens are delivered to a holder, they cannot be forcefully seized, moved, or taken by anyone other than the holder themselves. This is a critical safety guarantee — it means that even if the collection manager changes the transfer rules in the future, no new rule can ever override a holder\'s control over their own tokens. Your tokens are yours, period.\n\n';
   } else {
-    md += '**No Forceful Post-Mint Transfers**: Not enforced. Depending on the collection\'s approval rules, it may be possible for a third party to move tokens from a holder\'s account without their consent. Review the transfer rules carefully.\n\n';
+    md += '**No Forceful Transfers After Minting**: This guarantee is NOT active. Depending on the collection\'s transfer rules, it may be possible for a third party (such as the collection manager or another designated address) to move tokens out of a holder\'s account without their consent. Review the Transfer & Approval Rules section carefully to understand whether any forceful transfer rules exist.\n\n';
   }
 
   // No custom ownership times
   if (invariants.noCustomOwnershipTimes) {
-    md += '**No Custom Ownership Times**: All ownership is treated as full-range (always active). This simplifies the token model by preventing time-windowed ownership, making balances straightforward to understand and display.\n\n';
+    md += '**No Time-Limited Ownership**: Token ownership is permanent and does not expire. There are no time windows or expiration dates on ownership — once you own a token, you own it indefinitely (unless you choose to transfer it). This simplifies the token model and makes balances easy to understand.\n\n';
   } else {
-    md += '**Custom Ownership Times**: Allowed. Tokens can have time-windowed ownership periods, where a holder owns a token only during specified time ranges. This enables time-based access passes and subscriptions.\n\n';
+    md += '**Time-Limited Ownership Allowed**: Tokens can have time-windowed ownership periods, where a holder owns a token only during specified time ranges. This enables use cases like time-based access passes, rental tokens, and subscriptions where ownership automatically starts and stops at defined times.\n\n';
   }
 
   // Pool creation
   if (invariants.disablePoolCreation) {
-    md += '**Pool Creation**: Disabled. No liquidity pools can be created for this collection\'s tokens. This prevents automated market-making and ensures tokens can only be transferred through the standard approval system.\n\n';
+    md += '**Trading Pools Disabled**: No automated trading pools can be created for this collection\'s tokens. This means the tokens cannot be listed on automated exchanges (where a computer algorithm sets the price). Tokens can only change hands through the standard transfer approval system described in this report.\n\n';
   } else {
-    md += '**Pool Creation**: Allowed. Liquidity pools can be created for this collection\'s tokens, enabling automated market-making and decentralized trading.\n\n';
+    md += '**Trading Pools Allowed**: Automated trading pools can be created for this collection\'s tokens, allowing them to be bought and sold through an automated exchange where the price adjusts based on supply and demand.\n\n';
   }
 
   // IBC backing invariant
@@ -1045,12 +1116,12 @@ export function buildInvariantsSection(invariants: any): string {
     const rawDenom = invariants.cosmosCoinBackedPath.conversion?.sideA?.denom || 'unknown';
     const symbol = denomToHuman(rawDenom);
     const address = invariants.cosmosCoinBackedPath.address || 'unknown';
-    md += `**IBC Backing**: This collection is permanently backed 1:1 by **${symbol}** (\`${rawDenom}\`). The backing address is \`${address}\`. This invariant guarantees that the backing relationship cannot be altered or removed.\n\n`;
+    md += `**IBC Backing**: This collection is permanently backed 1:1 by **${symbol}** (\`${rawDenom}\`). The backing address is \`${address}\`. This is a permanent, unbreakable guarantee — the backing relationship can never be altered or removed by anyone, ensuring that every token will always be redeemable for the underlying IBC asset.\n\n`;
   }
 
-  // EVM query invariants
+  // Smart contract verification invariants
   if (invariants.evmQueryChallenges && invariants.evmQueryChallenges.length > 0) {
-    md += `**EVM Query Invariants**: ${invariants.evmQueryChallenges.length} on-chain contract verification${invariants.evmQueryChallenges.length > 1 ? 's are' : ' is'} checked after every transfer. These invariants call external smart contracts to enforce custom rules at the protocol level.\n\n`;
+    md += `**Permanent Smart Contract Checks**: ${invariants.evmQueryChallenges.length} smart contract verification${invariants.evmQueryChallenges.length > 1 ? 's are' : ' is'} permanently enforced after every transfer. These checks call external smart contracts to verify custom rules (for example, confirming the recipient meets certain criteria). Because these are invariants, they can never be removed or bypassed.\n\n`;
   }
 
   return md;
@@ -1073,17 +1144,17 @@ export function buildKeyReferenceSection(txBody: any): string {
   }
 
   // Key approval IDs
-  const approvals: any[] = txBody.collectionApprovals || [];
+  const approvals: any[] = Array.isArray(txBody.collectionApprovals) ? txBody.collectionApprovals : [];
   if (approvals.length > 0) {
-    md += '\n**Approval IDs**:\n\n';
+    md += '\n**Approval IDs** (each approval is a named rule that governs a specific type of token operation):\n\n';
     for (const approval of approvals) {
       const isMint = approval.fromListId === 'Mint';
       const isBacked = approval.approvalCriteria?.allowBackedMinting;
       let type = 'transfer';
       if (isMint && isBacked) type = 'IBC deposit/mint';
-      else if (isMint) type = 'mint';
+      else if (isMint) type = 'mint (token creation)';
       else if (isBacked) type = 'IBC withdrawal';
-      md += `- \`${approval.approvalId}\` -- ${type} approval for ${listIdHuman(approval.toListId)}\n`;
+      md += `- \`${approval.approvalId}\` — ${type} approval for ${listIdHuman(approval.toListId)}\n`;
     }
   }
 

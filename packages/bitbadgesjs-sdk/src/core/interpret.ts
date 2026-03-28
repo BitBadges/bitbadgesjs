@@ -19,6 +19,8 @@ import {
   timeRangeStr,
   countTokenIds,
   detectType as detectTypeShared,
+  buildTypeExplanation,
+  buildStandardExplanations,
   pluginDisplayName,
   buildApprovalParagraph,
   buildPermissionsSection,
@@ -87,53 +89,20 @@ function buildOverview<T extends NumberType>(col: BitBadgesCollection<T>): strin
     md += `Each token ID has a maximum supply of ${maxSupply.toLocaleString('en-US')} tokens, enforced at the protocol level.`;
   }
 
-  // Type-specific explanation
+  // Type-specific explanation (using shared builder for consistency)
   md += '\n\n';
-  if (type === 'NFT Collection') {
-    md += `As an NFT collection, each token ID represents a distinct, individually identifiable asset. `;
-    if (maxSupply === 1n) {
-      md += 'With a maximum supply of 1 per ID, each token is truly unique and non-fungible.';
-    } else if (maxSupply === 0n) {
-      md += 'There is no supply cap, so multiple copies of each token ID can exist.';
-    } else {
-      md += `Up to ${maxSupply.toLocaleString('en-US')} copies of each token ID can exist.`;
-    }
-  } else if (type.includes('Smart Token')) {
-    const backing = col.invariants?.cosmosCoinBackedPath;
-    const denom = backing?.conversion?.sideA?.denom ? denomToHuman(backing.conversion.sideA.denom) : 'an IBC asset';
-    md += `This is a smart token backed 1:1 by ${denom}. Users can deposit the backing asset to receive collection tokens, and redeem collection tokens to withdraw the backing asset.`;
-  } else if (type === 'Fungible Token') {
-    md += `As a fungible token, all tokens of the same ID are interchangeable, similar to an ERC-20 token. `;
-    if (maxSupply === 0n) {
-      md += 'There is no supply cap.';
-    } else {
-      md += `The maximum total supply is ${maxSupply.toLocaleString('en-US')} tokens.`;
-    }
-  } else if (type === 'Subscription Token') {
-    md += 'This is a subscription token. Holding it grants access to a service or resource for a defined time period. It may require periodic renewal or payment.';
-  } else if (type === 'AI Agent Stablecoin') {
-    md += 'This is an AI agent-managed stablecoin vault. An AI agent manages the vault and controls minting and burning operations.';
-  } else {
-    md += 'This is a token collection on BitBadges.';
-  }
+  const backingDenom = col.invariants?.cosmosCoinBackedPath?.conversion?.sideA?.denom
+    ? denomToHuman(col.invariants.cosmosCoinBackedPath.conversion.sideA.denom)
+    : undefined;
+  md += buildTypeExplanation(type, maxSupply, backingDenom);
 
-  // Standards
+  // Standards (using shared builder for consistency)
   if (col.standards && col.standards.length > 0) {
     md += `\n\nThe collection declares the following standards: **${col.standards.join(', ')}**. `;
     md += 'Standards tell wallets, marketplaces, and other tools how to interpret and display these tokens. ';
-    const standardExplanations: string[] = [];
-    for (const std of col.standards) {
-      const lower = std.toLowerCase();
-      if (std === 'NFTs') standardExplanations.push('"NFTs" -- each token ID is a distinct asset with its own metadata, similar to ERC-721 on Ethereum');
-      else if (std === 'Fungible Tokens') standardExplanations.push('"Fungible Tokens" -- all tokens of the same ID are interchangeable, similar to ERC-20 on Ethereum');
-      else if (lower.includes('non-transferable') || lower.includes('soulbound')) standardExplanations.push(`"${std}" -- tokens cannot be transferred once received; they are permanently bound to the holder`);
-      else if (lower.includes('subscription')) standardExplanations.push(`"${std}" -- tokens represent time-limited access that may require periodic renewal`);
-      else if (lower.includes('tradable') || lower.includes('marketplace') || std === 'NFTMarketplace') standardExplanations.push(`"${std}" -- the collection is designed for secondary market trading`);
-      else if (lower.includes('smart token')) standardExplanations.push(`"${std}" -- the token is backed by an external asset and supports deposit/withdrawal`);
-      else if (lower.includes('ai agent')) standardExplanations.push(`"${std}" -- the token is managed by an AI agent that controls minting, burning, or other operations`);
-    }
-    if (standardExplanations.length > 0) {
-      md += 'Specifically: ' + standardExplanations.join('; ') + '.';
+    const explanations = buildStandardExplanations(col.standards);
+    if (explanations.length > 0) {
+      md += 'Specifically: ' + explanations.join('; ') + '.';
     }
   }
 
@@ -187,7 +156,7 @@ function buildHowTokensAreCreated<T extends NumberType>(col: BitBadgesCollection
     const symbol = denomToHuman(rawDenom);
 
     md += `### IBC Deposit: "${approval.approvalId}"\n\n`;
-    md += `This approval enables IBC-backed minting. Users send **${symbol}** to the backing address and receive collection tokens in return at a 1:1 conversion rate. `;
+    md += `This approval enables IBC-backed minting. Users deposit **${symbol}** into the backing address and receive collection tokens in return at a 1:1 conversion rate. `;
     md += `Deposits are available to ${listIdHuman(approval.toListId)}. `;
     md += 'The backing mechanism ensures that every collection token in circulation is fully reserved by the underlying asset.\n\n';
   }
@@ -258,7 +227,7 @@ function buildTransferRules<T extends NumberType>(col: BitBadgesCollection<T>): 
   md += 'Any transfer that does not match one of the approvals listed above will be rejected. This is a default-deny system — only explicitly approved operations can proceed.\n\n';
 
   if (col.invariants?.noForcefulPostMintTransfers) {
-    md += '> **Safety Guarantee**: The on-chain invariant `noForcefulPostMintTransfers` is active. No one can forcefully move tokens from holders after minting. This is enforced at the protocol level and cannot be overridden.\n\n';
+    md += '> **Safety Guarantee**: This collection has an unbreakable on-chain rule that prevents anyone from forcefully moving tokens out of a holder\'s account after minting. This is enforced by the blockchain itself and cannot be overridden by anyone, including the collection manager.\n\n';
   }
 
   return md;

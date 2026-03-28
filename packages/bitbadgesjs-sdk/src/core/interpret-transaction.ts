@@ -17,6 +17,8 @@ import {
   timeRangeStr,
   countTokenIds,
   detectType,
+  buildTypeExplanation,
+  buildStandardExplanations,
   buildApprovalParagraph,
   buildPermissionsSection as buildPermissionsSectionShared,
   buildDefaultBalancesSection as buildDefaultBalancesSectionShared,
@@ -137,41 +139,10 @@ function buildCollectionOverview(txBody: Record<string, any>): string {
     md += `Each token ID has a maximum supply of ${maxSupply.toLocaleString('en-US')} tokens, enforced at the protocol level.`;
   }
 
-  // Type-specific explanation
+  // Type-specific explanation (using shared builder for consistency)
   md += '\n\n';
-  if (type === 'NFT Collection') {
-    md += 'As an NFT collection, each token ID represents a distinct, individually identifiable asset. ';
-    if (maxSupply === 1n) {
-      md += 'With a maximum supply of 1 per ID, each token is truly unique and non-fungible.';
-    } else if (maxSupply === 0n) {
-      md += 'There is no supply cap, so multiple copies of each token ID can exist.';
-    } else {
-      md += `Up to ${maxSupply.toLocaleString('en-US')} copies of each token ID can exist.`;
-    }
-  } else if (type.includes('Smart Token')) {
-    const backing = inv.cosmosCoinBackedPath;
-    const denom = backing?.conversion?.sideA?.denom ? denomToHuman(backing.conversion.sideA.denom) : 'an IBC asset';
-    md += `This is a smart token backed 1:1 by ${denom}. Users can deposit the backing asset to receive collection tokens, and redeem collection tokens to withdraw the backing asset.`;
-  } else if (type === 'Fungible Token') {
-    md += 'As a fungible token, all tokens of the same ID are interchangeable, similar to an ERC-20 token. ';
-    if (maxSupply === 0n) {
-      md += 'There is no supply cap.';
-    } else {
-      md += `The maximum total supply is ${maxSupply.toLocaleString('en-US')} tokens.`;
-    }
-  } else if (type === 'Subscription Token') {
-    md += 'This is a subscription token. Holding it grants access to a service or resource for a defined time period. It may require periodic renewal or payment.';
-  } else if (type === 'AI Agent Stablecoin') {
-    md += 'This is an AI agent-managed stablecoin vault. An AI agent manages the vault and controls minting and burning operations.';
-  } else if (type === 'Address List') {
-    md += 'This is an address list — a membership roster that tracks who is a member. Tokens are non-tradeable and represent membership status.';
-  } else if (type === 'Credit Token') {
-    md += 'This is a credit token — a non-transferable balance representing points, credits, or reputation. These are bound to the holder and cannot be traded.';
-  } else if (type === 'Liquidity Pool') {
-    md += 'This is a liquidity pool token paired with an ICS20 coin for on-chain swaps and automated market-making.';
-  } else {
-    md += 'This is a token collection on BitBadges.';
-  }
+  const backingDenom = inv.cosmosCoinBackedPath?.conversion?.sideA?.denom ? denomToHuman(inv.cosmosCoinBackedPath.conversion.sideA.denom) : undefined;
+  md += buildTypeExplanation(type, maxSupply, backingDenom);
 
   const standards: string[] = txBody.standards || [];
   if (standards.length > 0) {
@@ -218,23 +189,9 @@ function buildStandardsSection(txBody: Record<string, any>): string {
 
   md += 'Standards tell wallets, marketplaces, and other tools how to interpret and display these tokens. The collection declares the following standards:\n\n';
 
-  for (const std of standards) {
-    const lower = std.toLowerCase();
-    if (std === 'NFTs') {
-      md += `- **NFTs**: Each token ID is a distinct asset with its own metadata, similar to ERC-721 on Ethereum.\n`;
-    } else if (std === 'Fungible Tokens') {
-      md += `- **Fungible Tokens**: All tokens of the same ID are interchangeable, similar to ERC-20 on Ethereum.\n`;
-    } else if (lower.includes('non-transferable') || lower.includes('soulbound')) {
-      md += `- **${std}**: Tokens cannot be transferred once received; they are permanently bound to the holder.\n`;
-    } else if (lower.includes('subscription')) {
-      md += `- **${std}**: Tokens represent time-limited access that may require periodic renewal.\n`;
-    } else if (lower.includes('smart token')) {
-      md += `- **${std}**: The token is backed by an external asset and supports deposit/withdrawal.\n`;
-    } else if (lower.includes('ai agent')) {
-      md += `- **${std}**: The token is managed by an AI agent that controls minting, burning, or other operations.\n`;
-    } else {
-      md += `- **${std}**\n`;
-    }
+  const explanations = buildStandardExplanations(standards);
+  for (const explanation of explanations) {
+    md += `- ${explanation}\n`;
   }
 
   md += '\n';
@@ -310,7 +267,7 @@ function buildTransferRulesSection(txBody: Record<string, any>): string {
 
   // noForcefulPostMintTransfers callout
   if (txBody.invariants?.noForcefulPostMintTransfers) {
-    md += '> **Safety Guarantee**: The on-chain invariant `noForcefulPostMintTransfers` is active. No one can forcefully move tokens from holders after minting. This is enforced at the protocol level and cannot be overridden.\n\n';
+    md += '> **Safety Guarantee**: This collection has an unbreakable on-chain rule that prevents anyone from forcefully moving tokens out of a holder\'s account after minting. This is enforced by the blockchain itself and cannot be overridden by anyone, including the collection manager.\n\n';
   }
 
   return md;

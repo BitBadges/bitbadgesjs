@@ -239,7 +239,7 @@ describe('interpretCollection', () => {
     expect(result).toContain('BADGE');
     expect(result).toContain('public-mint');
     expect(result).toContain('free-transfer');
-    expect(result).toContain('forcefully seized or moved');
+    expect(result).toContain('forcefully moving tokens');
   });
 
   it('should handle a smart token (IBC-backed)', () => {
