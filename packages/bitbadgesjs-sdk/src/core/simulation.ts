@@ -217,7 +217,66 @@ export function parseSimulationEvents(
     }
   }
 
-  // Process burn / coinbase (mint) events
+  // Process IBC transfers from message info (MsgTransfer) and simulation events (ibc_transfer).
+  // We detect these first so we can suppress the corresponding IBC voucher burns below.
+  const ibcTransferEvents: IbcTransferEvent[] = [];
+  for (const tx of txsInfo) {
+    if (tx.type === 'MsgTransfer') {
+      const msg = tx.msg as Record<string, any>;
+      if (msg.token && msg.sender && msg.receiver) {
+        ibcTransferEvents.push({
+          from: msg.sender as string,
+          to: 'IBC Transfer',
+          amount: BigIntify(msg.token.amount),
+          denom: msg.token.denom as string,
+          sourcePort: (msg.sourcePort || msg.source_port || '') as string,
+          sourceChannel: (msg.sourceChannel || msg.source_channel || '') as string,
+          receiver: msg.receiver as string
+        });
+      }
+    }
+  }
+
+  // Also detect IBC transfers from simulation events (covers composite msgs like SwapExactAmountInWithIBCTransfer)
+  if (ibcTransferEvents.length === 0) {
+    const sendPacketEvents = events.filter((e) => e.type === 'send_packet');
+    for (const event of events) {
+      if (event.type !== 'ibc_transfer') continue;
+
+      const sender = event.attributes.find((attr) => attr.key === 'sender')?.value;
+      const receiver = event.attributes.find((attr) => attr.key === 'receiver')?.value;
+      const denom = event.attributes.find((attr) => attr.key === 'denom')?.value;
+      const amountStr = event.attributes.find((attr) => attr.key === 'amount')?.value;
+
+      if (sender && receiver && denom && amountStr) {
+        const msgIndex = event.attributes.find((attr) => attr.key === 'msg_index')?.value;
+        const matchingPacket = sendPacketEvents.find(
+          (p) => p.attributes.find((a) => a.key === 'msg_index')?.value === msgIndex
+        );
+
+        ibcTransferEvents.push({
+          from: sender,
+          to: 'IBC Transfer',
+          amount: BigIntify(amountStr),
+          denom,
+          sourcePort: matchingPacket?.attributes.find((a) => a.key === 'packet_src_port')?.value ?? '',
+          sourceChannel: matchingPacket?.attributes.find((a) => a.key === 'packet_src_channel')?.value ?? '',
+          receiver
+        });
+      }
+    }
+  }
+
+  // Build a set of IBC burn keys to suppress (IBC voucher burns use ibc/ hash denoms
+  // while ibc_transfer events use path form, so we match on amount only + ibc/ prefix)
+  const ibcBurnAmounts = new Set<string>();
+  for (const ibc of ibcTransferEvents) {
+    if (ibc.amount > 0n) {
+      ibcBurnAmounts.add(ibc.amount.toString());
+    }
+  }
+
+  // Process burn / coinbase (mint) events, suppressing IBC voucher burns
   for (const event of events) {
     if (event.type === 'burn' || event.type === 'coinbase') {
       const burner = event.attributes.find((attr) => attr.key === 'burner')?.value;
@@ -229,6 +288,12 @@ export function parseSimulationEvents(
 
       if (actor && rawAmount) {
         const { amount, denom } = splitAmountDenom(rawAmount);
+
+        // Skip burns that are IBC voucher burns (already captured as IBC transfers)
+        if (event.type === 'burn' && denom.startsWith('ibc/') && ibcBurnAmounts.has(amount.toString())) {
+          ibcBurnAmounts.delete(amount.toString());
+          continue;
+        }
 
         coinTransferEvents.push({
           from: event.type === 'burn' ? actor : destination,
@@ -257,25 +322,6 @@ export function parseSimulationEvents(
         balances: BalanceArray.From(balancesObj).convert(BigIntify),
         collectionId: collectionId ?? ''
       });
-    }
-  }
-
-  // Process IBC transfers from message info (not from events)
-  const ibcTransferEvents: IbcTransferEvent[] = [];
-  for (const tx of txsInfo) {
-    if (tx.type === 'MsgTransfer') {
-      const msg = tx.msg as Record<string, any>;
-      if (msg.token && msg.sender && msg.receiver) {
-        ibcTransferEvents.push({
-          from: msg.sender as string,
-          to: 'IBC Transfer',
-          amount: BigIntify(msg.token.amount),
-          denom: msg.token.denom as string,
-          sourcePort: (msg.sourcePort || msg.source_port || '') as string,
-          sourceChannel: (msg.sourceChannel || msg.source_channel || '') as string,
-          receiver: msg.receiver as string
-        });
-      }
     }
   }
 
