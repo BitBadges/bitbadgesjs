@@ -20,6 +20,10 @@ export interface iDynamicStoreChallenge<T extends NumberType> {
   storeId: T;
   /** The party to check ownership for. Options are "initiator", "sender", "recipient", or any valid bb1 address. If a valid bb1 address is provided, ownership will be checked for that specific address. This enables use cases like halt tokens where ownership is checked for an arbitrary address (e.g., halt token owner). Defaults to "initiator" if empty or if the value is not a recognized option or valid bb1 address. */
   ownershipCheckParty?: string;
+  /** The comparison operator. Options: "eq", "ne", "gt", "gte", "lt", "lte". When empty, defaults to legacy behavior: value != 0 (backward compatible). */
+  comparisonOperator?: string;
+  /** The value to compare against (Uint). Only used when comparisonOperator is set. */
+  comparisonValue?: T;
 }
 
 /**

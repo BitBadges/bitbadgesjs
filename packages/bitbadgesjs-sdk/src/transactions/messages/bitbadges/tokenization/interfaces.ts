@@ -173,11 +173,11 @@ export interface iMsgUpdateUserApprovals<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iMsgCreateDynamicStore {
+export interface iMsgCreateDynamicStore<T extends NumberType> {
   /** The creator of the transaction. */
   creator: BitBadgesAddress;
-  /** The default value for uninitialized addresses (true/false). */
-  defaultValue: boolean;
+  /** The default numeric value for uninitialized addresses (Uint). 0 = old false, 1 = old true. */
+  defaultValue: T;
   /** URI for additional metadata or resources associated with this dynamic store. */
   uri?: string;
   /** Custom data field for storing arbitrary data associated with this dynamic store. */
@@ -192,8 +192,8 @@ export interface iMsgUpdateDynamicStore<T extends NumberType> {
   creator: BitBadgesAddress;
   /** The ID of the dynamic store to update. */
   storeId: T;
-  /** The new default value for uninitialized addresses (true/false). */
-  defaultValue?: boolean;
+  /** The new default numeric value for uninitialized addresses (Uint). */
+  defaultValue?: T;
   /** The global kill switch state (true = enabled, false = disabled/halted). Callers should query the current value first if they want to keep it unchanged. */
   globalEnabled?: boolean;
   /** URI for additional metadata or resources associated with this dynamic store. */
@@ -222,8 +222,8 @@ export interface iMsgSetDynamicStoreValue<T extends NumberType> {
   storeId: T;
   /** The address for which to set the value. */
   address: BitBadgesAddress;
-  /** The boolean value to set (true/false). */
-  value: boolean;
+  /** The numeric value to set (Uint). 0 = old false, any non-zero = old true. */
+  value: T;
 }
 
 /**

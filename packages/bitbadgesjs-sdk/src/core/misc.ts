@@ -1560,7 +1560,7 @@ export class EVMQueryChallengeWithDetails<T extends NumberType>
 export class DynamicStore<T extends NumberType> extends BaseNumberTypeClass<DynamicStore<T>> implements iDynamicStore<T> {
   storeId: T;
   createdBy: string;
-  defaultValue: boolean;
+  defaultValue: T;
   globalEnabled: boolean;
   uri: string;
   customData: string;
@@ -1576,7 +1576,7 @@ export class DynamicStore<T extends NumberType> extends BaseNumberTypeClass<Dyna
   }
 
   getNumberFieldNames(): string[] {
-    return ['storeId'];
+    return ['storeId', 'defaultValue'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DynamicStore<U> {
@@ -1587,7 +1587,7 @@ export class DynamicStore<T extends NumberType> extends BaseNumberTypeClass<Dyna
     return new DynamicStore<U>({
       storeId: convertFunction(item.storeId),
       createdBy: item.createdBy,
-      defaultValue: item.defaultValue,
+      defaultValue: convertFunction(item.defaultValue),
       globalEnabled: item.globalEnabled,
       uri: item.uri,
       customData: item.customData
@@ -1600,15 +1600,16 @@ export class DynamicStore<T extends NumberType> extends BaseNumberTypeClass<Dyna
 }
 
 /**
- * DynamicStoreValue stores a boolean value for a specific address in a dynamic store.
- * This allows the creator to set true/false values per address that can be checked during approval.
+ * DynamicStoreValue stores a numeric value (Uint) for a specific address in a dynamic store.
+ * This allows the creator to set numeric values per address that can be checked during approval.
+ * For backward compatibility: 0 = old false, any non-zero = old true.
  *
  * @category Collections
  */
 export class DynamicStoreValue<T extends NumberType> extends BaseNumberTypeClass<DynamicStoreValue<T>> implements iDynamicStoreValue<T> {
   storeId: T;
   address: string;
-  value: boolean;
+  value: T;
 
   constructor(dynamicStoreValue: iDynamicStoreValue<T>) {
     super();
@@ -1618,7 +1619,7 @@ export class DynamicStoreValue<T extends NumberType> extends BaseNumberTypeClass
   }
 
   getNumberFieldNames(): string[] {
-    return ['storeId'];
+    return ['storeId', 'value'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): DynamicStoreValue<U> {
@@ -1632,7 +1633,7 @@ export class DynamicStoreValue<T extends NumberType> extends BaseNumberTypeClass
     return new DynamicStoreValue<U>({
       storeId: convertFunction(item.storeId),
       address: item.address,
-      value: item.value
+      value: convertFunction(item.value)
     });
   }
 

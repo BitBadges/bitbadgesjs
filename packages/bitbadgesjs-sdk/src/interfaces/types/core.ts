@@ -866,9 +866,10 @@ export interface iDynamicStore<T extends NumberType> {
   createdBy: string;
 
   /**
-   * The default value for uninitialized addresses (true/false).
+   * The default numeric value for uninitialized addresses (Uint).
+   * For backward compatibility: 0 = old false, 1 = old true.
    */
-  defaultValue: boolean;
+  defaultValue: T;
 
   /**
    * Global kill switch state (defaults to true on creation, can be toggled via UpdateDynamicStore).
@@ -888,8 +889,9 @@ export interface iDynamicStore<T extends NumberType> {
 }
 
 /**
- * DynamicStoreValue stores a boolean value for a specific address in a dynamic store.
- * This allows the creator to set true/false values per address that can be checked during approval.
+ * DynamicStoreValue stores a numeric value (Uint) for a specific address in a dynamic store.
+ * This allows the creator to set numeric values per address that can be checked during approval.
+ * For backward compatibility: 0 = old false, any non-zero = old true.
  *
  * @category Interfaces
  */
@@ -905,9 +907,9 @@ export interface iDynamicStoreValue<T extends NumberType> {
   address: string;
 
   /**
-   * The boolean value (true/false).
+   * The numeric value (Uint). 0 = old false, any non-zero = old true.
    */
-  value: boolean;
+  value: T;
 }
 
 /**
