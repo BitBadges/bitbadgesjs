@@ -110,6 +110,8 @@ export interface iOutgoingApprovalCriteria<T extends NumberType> {
   votingChallenges?: iVotingChallenge<T>[];
   /** EVM query challenges that must pass for approval. Read-only contract queries that verify external EVM state. */
   evmQueryChallenges?: iEVMQueryChallenge<T>[];
+  /** Human-readable message shown when this approval's criteria are not met. Included in the error output when a transfer is rejected by this approval. */
+  rejectionMessage?: string;
 }
 
 /**
@@ -306,6 +308,8 @@ export interface iIncomingApprovalCriteria<T extends NumberType> {
   votingChallenges?: iVotingChallenge<T>[];
   /** EVM query challenges that must pass for approval. Read-only contract queries that verify external EVM state. */
   evmQueryChallenges?: iEVMQueryChallenge<T>[];
+  /** Human-readable message shown when this approval's criteria are not met. Included in the error output when a transfer is rejected by this approval. */
+  rejectionMessage?: string;
 }
 
 /**
@@ -390,6 +394,8 @@ export interface iApprovalCriteria<T extends NumberType> {
   allowBackedMinting?: boolean;
   /** If true, this collection approval allows special wrapping operations (CosmosCoinWrapperPath). When false, this approval cannot be used for transfers involving wrapping addresses. This prevents accidental allowances when toListIds is "All". */
   allowSpecialWrapping?: boolean;
+  /** Human-readable message shown when this approval's criteria are not met. Included in the error output when a transfer is rejected by this approval. */
+  rejectionMessage?: string;
 }
 
 /**

@@ -321,6 +321,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
   mustPrioritize?: boolean;
   votingChallenges?: VotingChallenge<T>[];
   evmQueryChallenges?: EVMQueryChallenge<T>[];
+  rejectionMessage?: string;
 
   constructor(msg: iOutgoingApprovalCriteria<T>) {
     super();
@@ -341,6 +342,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
     this.mustPrioritize = msg.mustPrioritize;
     this.votingChallenges = msg.votingChallenges?.map((x) => new VotingChallenge(x));
     this.evmQueryChallenges = msg.evmQueryChallenges?.map((x) => new EVMQueryChallenge(x));
+    this.rejectionMessage = msg.rejectionMessage;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): OutgoingApprovalCriteria<U> {
@@ -361,7 +363,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       altTimeChecks: this.altTimeChecks?.convert(convertFunction),
       mustPrioritize: this.mustPrioritize,
       votingChallenges: this.votingChallenges?.map((x) => x.convert(convertFunction)),
-      evmQueryChallenges: this.evmQueryChallenges?.map((x) => x.convert(convertFunction))
+      evmQueryChallenges: this.evmQueryChallenges?.map((x) => x.convert(convertFunction)),
+      rejectionMessage: this.rejectionMessage
     });
   }
 
@@ -412,7 +415,8 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined,
       mustPrioritize: item.mustPrioritize,
       votingChallenges: item.votingChallenges ? item.votingChallenges.map((x) => VotingChallenge.fromProto(x, convertFunction)) : undefined,
-      evmQueryChallenges: item.evmQueryChallenges ? item.evmQueryChallenges.map((x) => EVMQueryChallenge.fromProto(x, convertFunction)) : undefined
+      evmQueryChallenges: item.evmQueryChallenges ? item.evmQueryChallenges.map((x) => EVMQueryChallenge.fromProto(x, convertFunction)) : undefined,
+      rejectionMessage: item.rejectionMessage || undefined
     });
   }
 
@@ -435,6 +439,7 @@ export class OutgoingApprovalCriteria<T extends NumberType>
       mustPrioritize: this.mustPrioritize,
       votingChallenges: this.votingChallenges,
       evmQueryChallenges: this.evmQueryChallenges,
+      rejectionMessage: this.rejectionMessage,
 
       requireFromEqualsInitiatedBy: false,
       requireFromDoesNotEqualInitiatedBy: false,
@@ -1149,6 +1154,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
   mustPrioritize?: boolean;
   votingChallenges?: VotingChallenge<T>[];
   evmQueryChallenges?: EVMQueryChallenge<T>[];
+  rejectionMessage?: string;
 
   constructor(msg: iIncomingApprovalCriteria<T>) {
     super();
@@ -1169,6 +1175,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
     this.mustPrioritize = msg.mustPrioritize;
     this.votingChallenges = msg.votingChallenges?.map((x) => new VotingChallenge(x));
     this.evmQueryChallenges = msg.evmQueryChallenges?.map((x) => new EVMQueryChallenge(x));
+    this.rejectionMessage = msg.rejectionMessage;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncomingApprovalCriteria<U> {
@@ -1189,7 +1196,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
       altTimeChecks: this.altTimeChecks?.convert(convertFunction),
       mustPrioritize: this.mustPrioritize,
       votingChallenges: this.votingChallenges?.map((x) => x.convert(convertFunction)),
-      evmQueryChallenges: this.evmQueryChallenges?.map((x) => x.convert(convertFunction))
+      evmQueryChallenges: this.evmQueryChallenges?.map((x) => x.convert(convertFunction)),
+      rejectionMessage: this.rejectionMessage
     });
   }
 
@@ -1240,7 +1248,8 @@ export class IncomingApprovalCriteria<T extends NumberType>
       altTimeChecks: item.altTimeChecks ? AltTimeChecks.fromProto(item.altTimeChecks, convertFunction) : undefined,
       mustPrioritize: item.mustPrioritize,
       votingChallenges: item.votingChallenges ? item.votingChallenges.map((x) => VotingChallenge.fromProto(x, convertFunction)) : undefined,
-      evmQueryChallenges: item.evmQueryChallenges ? item.evmQueryChallenges.map((x) => EVMQueryChallenge.fromProto(x, convertFunction)) : undefined
+      evmQueryChallenges: item.evmQueryChallenges ? item.evmQueryChallenges.map((x) => EVMQueryChallenge.fromProto(x, convertFunction)) : undefined,
+      rejectionMessage: item.rejectionMessage || undefined
     });
   }
 
@@ -1263,6 +1272,7 @@ export class IncomingApprovalCriteria<T extends NumberType>
       mustPrioritize: this.mustPrioritize,
       votingChallenges: this.votingChallenges,
       evmQueryChallenges: this.evmQueryChallenges,
+      rejectionMessage: this.rejectionMessage,
 
       requireToEqualsInitiatedBy: false,
       requireToDoesNotEqualInitiatedBy: false,
@@ -1647,6 +1657,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   evmQueryChallenges?: EVMQueryChallenge<T>[];
   allowBackedMinting?: boolean;
   allowSpecialWrapping?: boolean;
+  rejectionMessage?: string;
 
   constructor(msg: iApprovalCriteria<T>) {
     super();
@@ -1675,6 +1686,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.evmQueryChallenges = msg.evmQueryChallenges?.map((x) => new EVMQueryChallenge(x));
     this.allowBackedMinting = msg.allowBackedMinting;
     this.allowSpecialWrapping = msg.allowSpecialWrapping;
+    this.rejectionMessage = msg.rejectionMessage;
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApprovalCriteria<U> {
@@ -1733,7 +1745,8 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       votingChallenges: item.votingChallenges ? item.votingChallenges.map((x) => VotingChallenge.fromProto(x, convertFunction)) : undefined,
       evmQueryChallenges: item.evmQueryChallenges ? item.evmQueryChallenges.map((x) => EVMQueryChallenge.fromProto(x, convertFunction)) : undefined,
       allowBackedMinting: item.allowBackedMinting,
-      allowSpecialWrapping: item.allowSpecialWrapping
+      allowSpecialWrapping: item.allowSpecialWrapping,
+      rejectionMessage: item.rejectionMessage || undefined
     });
   }
 
