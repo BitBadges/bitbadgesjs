@@ -372,8 +372,16 @@ export function calculateNetChanges(
     coinChanges.get('Network Fee')!.set(feeDenom, coinChanges.get('Network Fee')!.get(feeDenom)! + feeAmount);
   }
 
-  // Aggregate coin transfers
+  // Known fee collector addresses — transfers to these are already represented by "Network Fee" above
+  const FEE_COLLECTOR_ADDRESSES = new Set([
+    'bb17xpfvakm2amg962yls6f84z3kell8c5lnytnhv',
+    'cosmos17xpfvakm2amg962yls6f84z3kell8c5lserqta'
+  ]);
+
+  // Aggregate coin transfers (skip fee collector since it's already in "Network Fee")
   for (const event of parsed.coinTransferEvents) {
+    if (FEE_COLLECTOR_ADDRESSES.has(event.to)) continue;
+
     const amount = event.amount;
     const denom = event.denom;
 
