@@ -332,6 +332,15 @@ export interface iApprovalItemDoc<T extends NumberType> extends Doc {
   numTransfersLeft?: T;
   /** Denom */
   denom?: string;
+
+  /** Intent: the denom the creator pays out */
+  intentPayDenom?: string;
+  /** Intent: the denom the creator receives */
+  intentReceiveDenom?: string;
+  /** Intent: the amount the creator pays out */
+  intentPayAmount?: T;
+  /** Intent: the amount the creator receives */
+  intentReceiveAmount?: T;
 }
 
 /**
