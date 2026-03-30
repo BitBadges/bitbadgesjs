@@ -249,6 +249,10 @@ export class ApprovalItemDoc<T extends NumberType> extends BaseNumberTypeClass<A
   nextCheckTime?: UNIXMilliTimestamp<T>;
   numTransfersLeft?: T;
   denom?: string;
+  intentPayDenom?: string;
+  intentReceiveDenom?: string;
+  intentPayAmount?: T;
+  intentReceiveAmount?: T;
 
   constructor(data: iApprovalItemDoc<T>) {
     super();
@@ -269,10 +273,14 @@ export class ApprovalItemDoc<T extends NumberType> extends BaseNumberTypeClass<A
     this.nextCheckTime = data.nextCheckTime;
     this.numTransfersLeft = data.numTransfersLeft;
     this.denom = data.denom;
+    this.intentPayDenom = data.intentPayDenom;
+    this.intentReceiveDenom = data.intentReceiveDenom;
+    this.intentPayAmount = data.intentPayAmount;
+    this.intentReceiveAmount = data.intentReceiveAmount;
   }
 
   getNumberFieldNames(): string[] {
-    return ['price', 'tokenId', 'deletedAt', 'numTransfersLeft'];
+    return ['price', 'tokenId', 'deletedAt', 'numTransfersLeft', 'intentPayAmount', 'intentReceiveAmount'];
   }
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): ApprovalItemDoc<U> {
