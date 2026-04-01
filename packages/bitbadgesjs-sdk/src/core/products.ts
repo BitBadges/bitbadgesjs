@@ -70,6 +70,10 @@ export const isProductApproval = (approval: iCollectionApproval<bigint>) => {
     return false;
   }
 
+  if (incrementedBalances.allowAmountScaling) {
+    return false;
+  }
+
   if (incrementedBalances.startBalances.length !== 1) {
     return false;
   }
