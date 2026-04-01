@@ -29,26 +29,6 @@ function isFrozen(permArr: any[] | undefined): boolean {
   );
 }
 
-/** Check if a token-scoped permission array is frozen. */
-function isFrozenTokenScoped(permArr: any[] | undefined): boolean {
-  if (!Array.isArray(permArr) || permArr.length === 0) return false;
-  return permArr.some(
-    (p: any) =>
-      Array.isArray(p.permanentlyForbiddenTimes) &&
-      p.permanentlyForbiddenTimes.some((t: any) => n(t.start) === '1' && n(t.end) === MAX_UINT64)
-  );
-}
-
-/** Check if approval-scoped permission array is frozen. */
-function isFrozenApprovalScoped(permArr: any[] | undefined): boolean {
-  if (!Array.isArray(permArr) || permArr.length === 0) return false;
-  return permArr.some(
-    (p: any) =>
-      Array.isArray(p.permanentlyForbiddenTimes) &&
-      p.permanentlyForbiddenTimes.some((t: any) => n(t.start) === '1' && n(t.end) === MAX_UINT64)
-  );
-}
-
 /**
  * Determine if an approval is a "push" (half-payout) variant by comparing
  * coin transfer amount to the start balance amount. Push pays half.
@@ -421,12 +401,12 @@ export function validatePredictionMarketCollection(collection: any): PredictionM
       ['canUpdateTokenMetadata', 'Update token metadata']
     ];
     for (const [key, label] of tokenPerms) {
-      if (!isFrozenTokenScoped(perms[key])) {
+      if (!isFrozen(perms[key])) {
         warnings.push(`Permission "${label}" should be frozen (permanently forbidden)`);
       }
     }
 
-    if (!isFrozenApprovalScoped(perms.canUpdateCollectionApprovals)) {
+    if (!isFrozen(perms.canUpdateCollectionApprovals)) {
       warnings.push('Permission "Update collection approvals" should be frozen (permanently forbidden)');
     }
   }
