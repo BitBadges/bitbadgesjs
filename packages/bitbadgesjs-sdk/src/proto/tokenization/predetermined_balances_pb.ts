@@ -156,6 +156,15 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
    */
   allowOverrideWithAnyValidToken = false;
 
+  /**
+   * When true, the actual transfer can be any evenly divisible integer multiple (>=1x) of startBalances.
+   * approvalCriteria.coinTransfers are scaled by the same multiplier.
+   * All other IncrementedBalances fields must be zero/false/nil when this is true.
+   *
+   * @generated from field: bool allowAmountScaling = 8;
+   */
+  allowAmountScaling = false;
+
   constructor(data?: PartialMessage<IncrementedBalances>) {
     super();
     proto3.util.initPartial(data, this);
@@ -171,6 +180,7 @@ export class IncrementedBalances extends Message<IncrementedBalances> {
     { no: 5, name: "allowOverrideTimestamp", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 6, name: "recurringOwnershipTimes", kind: "message", T: RecurringOwnershipTimes },
     { no: 7, name: "allowOverrideWithAnyValidToken", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 8, name: "allowAmountScaling", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IncrementedBalances {

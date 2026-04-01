@@ -45,6 +45,7 @@ function makeValidBidApproval(overrides?: Partial<iCollectionApproval<bigint>>):
           durationFromTimestamp: 0n,
           allowOverrideTimestamp: false,
           allowOverrideWithAnyValidToken: false,
+          allowAmountScaling: false,
           recurringOwnershipTimes: { startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }
         },
         manualBalances: [],

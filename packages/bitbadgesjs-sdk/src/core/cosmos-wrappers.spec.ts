@@ -599,6 +599,7 @@ describe('isAutoScannable', () => {
           incrementedBalances: {
             startBalances: [{ amount: 1n }],
             allowOverrideWithAnyValidToken: false,
+            allowAmountScaling: false,
             allowOverrideTimestamp: false,
             incrementTokenIdsBy: 0n,
             incrementOwnershipTimesBy: 0n,
