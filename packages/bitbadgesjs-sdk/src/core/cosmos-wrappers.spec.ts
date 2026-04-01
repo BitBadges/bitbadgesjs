@@ -600,6 +600,7 @@ describe('isAutoScannable', () => {
             startBalances: [{ amount: 1n }],
             allowOverrideWithAnyValidToken: false,
             allowAmountScaling: false,
+          maxScalingMultiplier: 0n,
             allowOverrideTimestamp: false,
             incrementTokenIdsBy: 0n,
             incrementOwnershipTimesBy: 0n,

@@ -536,7 +536,8 @@ describe('IncrementedBalances', () => {
       allowOverrideTimestamp: false,
       recurringOwnershipTimes: { startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n },
       allowOverrideWithAnyValidToken: false,
-          allowAmountScaling: false
+          allowAmountScaling: false,
+          maxScalingMultiplier: 0n,
     });
     const proto = original.toProto();
     const restored = IncrementedBalances.fromProto(proto, BigIntify);
@@ -566,7 +567,8 @@ describe('PredeterminedBalances', () => {
         allowOverrideTimestamp: false,
         recurringOwnershipTimes: { startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n },
         allowOverrideWithAnyValidToken: false,
-          allowAmountScaling: false
+          allowAmountScaling: false,
+          maxScalingMultiplier: 0n,
       },
       orderCalculationMethod: {
         useOverallNumTransfers: true,
@@ -942,7 +944,8 @@ describe('ApprovalCriteria full round-trip', () => {
           allowOverrideTimestamp: false,
           recurringOwnershipTimes: { startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n },
           allowOverrideWithAnyValidToken: false,
-          allowAmountScaling: false
+          allowAmountScaling: false,
+          maxScalingMultiplier: 0n,
         },
         orderCalculationMethod: {
           useOverallNumTransfers: true,

@@ -163,6 +163,11 @@ export const isSubscriptionFaucetApproval = (approval: iCollectionApproval<bigin
     return false;
   }
 
+  // Amount scaling is incompatible with subscription standard (fixed per-period amounts)
+  if (incrementedBalances.allowAmountScaling) {
+    return false;
+  }
+
   if (incrementedBalances.recurringOwnershipTimes.startTime !== 0n) {
     return false;
   }

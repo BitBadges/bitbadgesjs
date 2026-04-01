@@ -112,6 +112,11 @@ export const isInvoiceApproval = (approval: iCollectionApproval<bigint>) => {
     return false;
   }
 
+  // Amount scaling is incompatible with invoice standard (fixed payment amounts)
+  if (incrementedBalances.allowAmountScaling) {
+    return false;
+  }
+
   if (incrementedBalances.recurringOwnershipTimes.startTime !== 0n) {
     return false;
   }
