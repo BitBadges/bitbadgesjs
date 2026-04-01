@@ -25,6 +25,7 @@ export * from './ibc-wrappers.js';
 
 export * from './cosmos-wrappers.js';
 export * from './simulation.js';
+export * from './prediction-markets.js';
 export * from './interpret.js';
 export * from './interpret-transaction.js';
 // Selectively re-export shared builders (helpers like timestampToDate are already re-exported by interpret.js)
