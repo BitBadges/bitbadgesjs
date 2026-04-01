@@ -40,8 +40,8 @@ export function getDepositDenom(collection: any): string | undefined {
 }
 
 /**
- * Determine if an approval is a "push" (half-payout) variant by comparing
- * coin transfer amount to the start balance amount. Push pays half.
+ * Determine if an approval is a "push" variant by comparing coin transfer
+ * amount to the start balance amount. Push burns 2x tokens for 1x payout.
  */
 function isApprovalPush(approval: any): boolean {
   const coinAmount = BigInt(n(approval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount));
