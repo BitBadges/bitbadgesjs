@@ -691,7 +691,7 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
         recurringOwnershipTimes: this.recurringOwnershipTimes.convert(convertFunction),
         allowOverrideWithAnyValidToken: this.allowOverrideWithAnyValidToken,
         allowAmountScaling: this.allowAmountScaling,
-        maxScalingMultiplier: convertFunction(this.maxScalingMultiplier)
+        maxScalingMultiplier: convertFunction(this.maxScalingMultiplier || ('0' as T))
       })
     );
   }
@@ -725,7 +725,7 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
       allowOverrideTimestamp: item.allowOverrideTimestamp,
       allowOverrideWithAnyValidToken: item.allowOverrideWithAnyValidToken,
       allowAmountScaling: item.allowAmountScaling,
-      maxScalingMultiplier: convertFunction(item.maxScalingMultiplier),
+      maxScalingMultiplier: convertFunction(item.maxScalingMultiplier || '0'),
       recurringOwnershipTimes: item.recurringOwnershipTimes
         ? new RecurringOwnershipTimes(item.recurringOwnershipTimes).convert(convertFunction)
         : new RecurringOwnershipTimes({ startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }).convert(convertFunction)
