@@ -30,6 +30,16 @@ function isFrozen(permArr: any[] | undefined): boolean {
 }
 
 /**
+ * Extract the deposit denom from a prediction market collection's mint approval.
+ * Returns the denom string (e.g., 'ubadge', 'ibc/F082B65...') or undefined if not found.
+ */
+export function getDepositDenom(collection: any): string | undefined {
+  const approvals: any[] = collection?.collectionApprovals ?? [];
+  const mintApproval = approvals.find((a: any) => a.fromListId === 'Mint');
+  return mintApproval?.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.denom?.toString();
+}
+
+/**
  * Determine if an approval is a "push" (half-payout) variant by comparing
  * coin transfer amount to the start balance amount. Push pays half.
  */
