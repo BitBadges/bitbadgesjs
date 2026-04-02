@@ -144,6 +144,14 @@ export class PrecalculationOptions extends Message<PrecalculationOptions> {
    */
   tokenIdsOverride: UintRange[] = [];
 
+  /**
+   * When > 0 and allowAmountScaling is true on the approval, all precalculated balance amounts
+   * are multiplied by this value. Must be <= maxScalingMultiplier. 0 means no scaling (returns 1x base).
+   *
+   * @generated from field: string scalingMultiplier = 3;
+   */
+  scalingMultiplier = "";
+
   constructor(data?: PartialMessage<PrecalculationOptions>) {
     super();
     proto3.util.initPartial(data, this);
@@ -154,6 +162,7 @@ export class PrecalculationOptions extends Message<PrecalculationOptions> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "overrideTimestamp", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "tokenIdsOverride", kind: "message", T: UintRange, repeated: true },
+    { no: 3, name: "scalingMultiplier", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PrecalculationOptions {
