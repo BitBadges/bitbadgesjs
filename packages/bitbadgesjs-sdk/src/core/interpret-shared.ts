@@ -479,7 +479,12 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
           const denom = c.denom || 'unknown';
           return amountToHuman(amt, denom);
         });
-        md += `**Cost**: ${costParts.join(' + ')} per transfer. `;
+        const isScaling = criteria.predeterminedBalances?.incrementedBalances?.allowAmountScaling;
+        if (isScaling) {
+          md += `**Cost**: ${costParts.join(' + ')} per 1x base amount (scales proportionally with quantity — transferring Nx the base amount costs Nx the listed price). `;
+        } else {
+          md += `**Cost**: ${costParts.join(' + ')} per transfer. `;
+        }
         if (ct.overrideFromWithApproverAddress) {
           md += 'The payment is deducted from the approver address (the address that set up this approval). ';
         } else {
@@ -611,6 +616,14 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
       }
       if (inc.allowOverrideTimestamp) {
         md += 'The person claiming can choose a custom start time instead of using the moment they claim. ';
+      }
+      if (inc.allowAmountScaling) {
+        const maxMult = big(inc.maxScalingMultiplier);
+        md += `**Amount scaling is enabled**: instead of a fixed quantity, the user can transfer any whole-number multiple of the base amount (1x, 2x, 3x, etc.`;
+        if (maxMult > 0n) {
+          md += `, up to ${maxMult.toLocaleString('en-US')}x`;
+        }
+        md += `). Any associated coin transfer costs scale by the same multiplier. For example, if the base is 1 token for 1000 ubadge, transferring 5 tokens costs 5000 ubadge. `;
       }
     }
 
