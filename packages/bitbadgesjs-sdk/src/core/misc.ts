@@ -395,15 +395,17 @@ export class PrecalculateBalancesFromApprovalDetails<T extends NumberType>
 export class PrecalculationOptions<T extends NumberType> extends BaseNumberTypeClass<PrecalculationOptions<T>> implements iPrecalculationOptions<T> {
   overrideTimestamp?: T;
   tokenIdsOverride?: UintRangeArray<T>;
+  scalingMultiplier?: T;
 
   constructor(data: iPrecalculationOptions<T>) {
     super();
     this.overrideTimestamp = data.overrideTimestamp;
     this.tokenIdsOverride = data.tokenIdsOverride ? UintRangeArray.From(data.tokenIdsOverride) : undefined;
+    this.scalingMultiplier = data.scalingMultiplier;
   }
 
   getNumberFieldNames(): string[] {
-    return ['overrideTimestamp'];
+    return ['overrideTimestamp', 'scalingMultiplier'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): PrecalculationOptions<U> {
@@ -416,7 +418,8 @@ export class PrecalculationOptions<T extends NumberType> extends BaseNumberTypeC
   ): PrecalculationOptions<U> {
     return new PrecalculationOptions({
       overrideTimestamp: convertFunction(proto.overrideTimestamp),
-      tokenIdsOverride: proto.tokenIdsOverride ? UintRangeArray.From(proto.tokenIdsOverride).convert(convertFunction) : undefined
+      tokenIdsOverride: proto.tokenIdsOverride ? UintRangeArray.From(proto.tokenIdsOverride).convert(convertFunction) : undefined,
+      scalingMultiplier: convertFunction(proto.scalingMultiplier ?? '0')
     });
   }
 }
