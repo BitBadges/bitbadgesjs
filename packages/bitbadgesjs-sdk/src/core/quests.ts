@@ -125,6 +125,11 @@ export const isQuestApproval = (approval: iCollectionApproval<bigint>) => {
     return false;
   }
 
+  // Amount scaling is incompatible with quest standard (fixed 1 token per completion)
+  if (incrementedBalances.allowAmountScaling) {
+    return false;
+  }
+
   if (incrementedBalances.recurringOwnershipTimes.startTime !== 0n) {
     return false;
   }

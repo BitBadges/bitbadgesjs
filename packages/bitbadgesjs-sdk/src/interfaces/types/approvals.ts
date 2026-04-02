@@ -162,6 +162,10 @@ export interface iIncrementedBalances<T extends NumberType> {
   recurringOwnershipTimes: iRecurringOwnershipTimes<T>;
   /** Whether to allow the override with any valid ID. */
   allowOverrideWithAnyValidToken: boolean;
+  /** When true, transfers can be any evenly divisible integer multiple of startBalances. coinTransfers scale by the same multiplier. All other fields must be zero/false/nil. */
+  allowAmountScaling: boolean;
+  /** Maximum allowed scaling multiplier. Must be > 0 when allowAmountScaling is true. 0 means N/A (scaling disabled). */
+  maxScalingMultiplier: T;
 }
 
 /**

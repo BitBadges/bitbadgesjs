@@ -40,8 +40,8 @@ export function getDepositDenom(collection: any): string | undefined {
 }
 
 /**
- * Determine if an approval is a "push" (half-payout) variant by comparing
- * coin transfer amount to the start balance amount. Push pays half.
+ * Determine if an approval is a "push" variant by comparing coin transfer
+ * amount to the start balance amount. Push burns 2x tokens for 1x payout.
  */
 function isApprovalPush(approval: any): boolean {
   const coinAmount = BigInt(n(approval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount));
@@ -239,10 +239,11 @@ function validateSettlementApproval(
     }
 
     if (isPush && depositAmount) {
-      const expectedPayout = (BigInt(depositAmount) / 2n).toString();
+      // Push uses 2:1 ratio: burn 2x base tokens, receive 1x base payout (avoids fractional micro-units)
+      const expectedPayout = BigInt(depositAmount).toString();
       const actualPayout = n(ct.coins?.[0]?.amount);
       if (actualPayout !== expectedPayout) {
-        warnings.push(`${prefix}: expected payout amount ${expectedPayout} (half of deposit), got ${actualPayout}`);
+        warnings.push(`${prefix}: expected payout amount ${expectedPayout} (deposit base), got ${actualPayout}`);
       }
     }
   }
@@ -574,8 +575,9 @@ export function validatePredictionMarketCollection(collection: any): PredictionM
     checkPayoutAmount(redeemApproval, 'Pre-settlement redeem', deposit);
     checkPayoutAmount(yesWinsApproval, 'YES wins', deposit);
     checkPayoutAmount(noWinsApproval, 'NO wins', deposit);
-    checkPayoutAmount(pushYesApproval, 'Push YES', deposit / 2n);
-    checkPayoutAmount(pushNoApproval, 'Push NO', deposit / 2n);
+    // Push pays full deposit base but burns 2x tokens (2:1 ratio for 50% value return)
+    checkPayoutAmount(pushYesApproval, 'Push YES', deposit);
+    checkPayoutAmount(pushNoApproval, 'Push NO', deposit);
   }
 
   for (const [a, label] of [
