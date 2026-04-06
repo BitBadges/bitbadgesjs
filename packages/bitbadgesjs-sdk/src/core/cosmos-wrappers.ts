@@ -279,6 +279,7 @@ function predeterminedBalancesIsBasicallyNil(predeterminedBalances?: iPredetermi
     (predeterminedBalances.incrementedBalances.startBalances.length === 0 &&
       !predeterminedBalances.incrementedBalances.allowOverrideWithAnyValidToken &&
       !predeterminedBalances.incrementedBalances.allowOverrideTimestamp &&
+      !predeterminedBalances.incrementedBalances.allowAmountScaling &&
       predeterminedBalances.incrementedBalances.incrementTokenIdsBy === 0n &&
       predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy === 0n &&
       predeterminedBalances.incrementedBalances.durationFromTimestamp === 0n &&

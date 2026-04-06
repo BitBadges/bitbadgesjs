@@ -440,6 +440,8 @@ export interface iPrecalculationOptions<T extends NumberType> {
   overrideTimestamp?: T;
   /** The token IDs to use for the transfer. */
   tokenIdsOverride?: iUintRange<T>[];
+  /** When > 0 and allowAmountScaling is true on the approval, all precalculated balance amounts are multiplied by this value. Must be <= maxScalingMultiplier. 0 or absent means no scaling (returns 1x base). */
+  scalingMultiplier?: T;
 }
 
 /**

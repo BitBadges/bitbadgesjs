@@ -520,7 +520,9 @@ export class PredeterminedBalances<T extends NumberType> extends BaseNumberTypeC
             recurringOwnershipTimes: new RecurringOwnershipTimes({ startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }).convert(
               convertFunction
             ),
-            allowOverrideWithAnyValidToken: false
+            allowOverrideWithAnyValidToken: false,
+            allowAmountScaling: false,
+            maxScalingMultiplier: convertFunction(0)
           }),
       orderCalculationMethod: item.orderCalculationMethod
         ? PredeterminedOrderCalculationMethod.fromProto(item.orderCalculationMethod)
@@ -659,6 +661,8 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
   allowOverrideTimestamp: boolean;
   recurringOwnershipTimes: RecurringOwnershipTimes<T>;
   allowOverrideWithAnyValidToken: boolean;
+  allowAmountScaling: boolean;
+  maxScalingMultiplier: T;
 
   constructor(msg: iIncrementedBalances<T>) {
     super();
@@ -669,10 +673,12 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
     this.allowOverrideTimestamp = msg.allowOverrideTimestamp;
     this.recurringOwnershipTimes = new RecurringOwnershipTimes(msg.recurringOwnershipTimes);
     this.allowOverrideWithAnyValidToken = msg.allowOverrideWithAnyValidToken;
+    this.allowAmountScaling = msg.allowAmountScaling;
+    this.maxScalingMultiplier = msg.maxScalingMultiplier;
   }
 
   getNumberFieldNames(): string[] {
-    return ['incrementTokenIdsBy', 'incrementOwnershipTimesBy', 'durationFromTimestamp'];
+    return ['incrementTokenIdsBy', 'incrementOwnershipTimesBy', 'durationFromTimestamp', 'maxScalingMultiplier'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): IncrementedBalances<U> {
@@ -684,7 +690,9 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
         durationFromTimestamp: convertFunction(this.durationFromTimestamp),
         allowOverrideTimestamp: this.allowOverrideTimestamp,
         recurringOwnershipTimes: this.recurringOwnershipTimes.convert(convertFunction),
-        allowOverrideWithAnyValidToken: this.allowOverrideWithAnyValidToken
+        allowOverrideWithAnyValidToken: this.allowOverrideWithAnyValidToken,
+        allowAmountScaling: this.allowAmountScaling,
+        maxScalingMultiplier: convertFunction(this.maxScalingMultiplier ?? ('0' as T))
       })
     );
   }
@@ -717,6 +725,8 @@ export class IncrementedBalances<T extends NumberType> extends BaseNumberTypeCla
       durationFromTimestamp: convertFunction(item.durationFromTimestamp),
       allowOverrideTimestamp: item.allowOverrideTimestamp,
       allowOverrideWithAnyValidToken: item.allowOverrideWithAnyValidToken,
+      allowAmountScaling: item.allowAmountScaling,
+      maxScalingMultiplier: convertFunction(item.maxScalingMultiplier ?? '0'),
       recurringOwnershipTimes: item.recurringOwnershipTimes
         ? new RecurringOwnershipTimes(item.recurringOwnershipTimes).convert(convertFunction)
         : new RecurringOwnershipTimes({ startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }).convert(convertFunction)
