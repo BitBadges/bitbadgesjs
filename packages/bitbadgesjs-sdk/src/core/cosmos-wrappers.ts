@@ -172,8 +172,8 @@ export function approvalCriteriaHasNoAdditionalRestrictions(
       (allowToOverrides || !approvalCriteria.overridesToIncomingApprovals) &&
       (approvalCriteria.merkleChallenges ?? []).length === 0 &&
       (approvalCriteria.coinTransfers ?? []).length === 0 &&
-      (approvalCriteria.userRoyalties?.percentage ?? 0n) === 0n &&
-      (approvalCriteria.userRoyalties?.payoutAddress ?? '') === '' &&
+      (approvalCriteria.userApprovalSettings?.userRoyalties?.percentage ?? 0n) === 0n &&
+      (approvalCriteria.userApprovalSettings?.userRoyalties?.payoutAddress ?? '') === '' &&
       (approvalCriteria.mustOwnTokens ?? []).length === 0 &&
       (approvalCriteria.dynamicStoreChallenges ?? []).length === 0 &&
       (approvalCriteria.ethSignatureChallenges ?? []).length === 0)

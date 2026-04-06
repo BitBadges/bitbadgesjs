@@ -742,6 +742,26 @@ export interface iVotingChallenge<T extends NumberType> {
    * Arbitrary custom data associated with this voting challenge.
    */
   customData?: string;
+
+  /**
+   * If true, all votes for this challenge are cleared after a successful transfer execution.
+   */
+  resetAfterExecution?: boolean;
+
+  /**
+   * Mandatory delay in milliseconds after quorum is reached before the transfer can execute.
+   */
+  delayAfterQuorum?: T;
+}
+
+/**
+ * VotingChallengeTracker tracks the quorum state for a voting challenge.
+ *
+ * @category Interfaces
+ */
+export interface iVotingChallengeTracker<T extends NumberType> {
+  /** Timestamp (unix ms) when quorum was first reached. Cleared when quorum drops or after reset. */
+  quorumReachedTimestamp: T;
 }
 
 /**
@@ -766,6 +786,9 @@ export interface iVoteProof<T extends NumberType> {
    * Example: yesWeight=70 means 70% yes, 30% no.
    */
   yesWeight: T;
+
+  /** Timestamp (unix ms) when this vote was cast. Set automatically by the chain. */
+  votedAt?: T;
 }
 
 /**

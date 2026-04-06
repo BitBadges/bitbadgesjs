@@ -1399,6 +1399,8 @@ export class VotingChallenge<T extends NumberType> extends BaseNumberTypeClass<V
   voters: Voter<T>[];
   uri?: string;
   customData?: string;
+  resetAfterExecution?: boolean;
+  delayAfterQuorum?: T;
 
   constructor(votingChallenge: iVotingChallenge<T>) {
     super();
@@ -1407,10 +1409,12 @@ export class VotingChallenge<T extends NumberType> extends BaseNumberTypeClass<V
     this.voters = votingChallenge.voters.map((voter) => new Voter(voter));
     this.uri = votingChallenge.uri;
     this.customData = votingChallenge.customData;
+    this.resetAfterExecution = votingChallenge.resetAfterExecution;
+    this.delayAfterQuorum = votingChallenge.delayAfterQuorum;
   }
 
   getNumberFieldNames(): string[] {
-    return ['quorumThreshold'];
+    return ['quorumThreshold', 'delayAfterQuorum'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): VotingChallenge<U> {
@@ -1423,7 +1427,9 @@ export class VotingChallenge<T extends NumberType> extends BaseNumberTypeClass<V
       quorumThreshold: convertFunction(item.quorumThreshold),
       voters: item.voters.map((voter) => Voter.fromProto(voter, convertFunction)),
       uri: item.uri || undefined,
-      customData: item.customData || undefined
+      customData: item.customData || undefined,
+      resetAfterExecution: item.resetAfterExecution,
+      delayAfterQuorum: item.delayAfterQuorum ? convertFunction(BigInt(item.delayAfterQuorum)) : undefined
     });
   }
 }
@@ -1437,16 +1443,18 @@ export class VoteProof<T extends NumberType> extends BaseNumberTypeClass<VotePro
   proposalId: string;
   voter: string;
   yesWeight: T;
+  votedAt?: T;
 
   constructor(voteProof: iVoteProof<T>) {
     super();
     this.proposalId = voteProof.proposalId;
     this.voter = voteProof.voter;
     this.yesWeight = voteProof.yesWeight;
+    this.votedAt = voteProof.votedAt;
   }
 
   getNumberFieldNames(): string[] {
-    return ['yesWeight'];
+    return ['yesWeight', 'votedAt'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): VoteProof<U> {
@@ -1457,7 +1465,8 @@ export class VoteProof<T extends NumberType> extends BaseNumberTypeClass<VotePro
     return new VoteProof<U>({
       proposalId: item.proposalId,
       voter: item.voter,
-      yesWeight: convertFunction(item.yesWeight)
+      yesWeight: convertFunction(item.yesWeight),
+      votedAt: item.votedAt ? convertFunction(BigInt(item.votedAt)) : undefined
     });
   }
 }
