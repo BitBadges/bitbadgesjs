@@ -11,6 +11,8 @@ import { generateAliasAddressForIBCBackedDenom } from '../aliases.js';
 export const MAX_UINT64 = '18446744073709551615';
 export const FOREVER = [{ start: '1', end: MAX_UINT64 }];
 export const BURN_ADDRESS = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
+export const BITBADGES_DEFAULT_IMAGE = 'ipfs://QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E';
+export const DEFAULT_METADATA_URI = 'ipfs://QmSviTf2qQLpFU84oF8CrxNrdgXPdWwHEyrkX3k6j7iiqR';
 
 // ── Coin resolution ──────────────────────────────────────────────────────────
 
@@ -109,12 +111,12 @@ export function uniqueId(prefix?: string): string {
 export function metadataPlaceholders(name: string, description?: string, image?: string) {
   return {
     collectionMetadata: {
-      uri: 'ipfs://METADATA_COLLECTION',
-      customData: JSON.stringify({ name, description: description || '', image: image || '' })
+      uri: DEFAULT_METADATA_URI,
+      customData: JSON.stringify({ name, description: description || '', image: image || BITBADGES_DEFAULT_IMAGE })
     },
     tokenMetadata: [
       {
-        uri: 'ipfs://METADATA_TOKEN_{id}',
+        uri: DEFAULT_METADATA_URI,
         customData: '',
         tokenIds: FOREVER
       }
@@ -124,7 +126,7 @@ export function metadataPlaceholders(name: string, description?: string, image?:
 
 export function singleTokenMetadata(tokenId: string, name: string, description?: string, image?: string) {
   return {
-    uri: '',
+    uri: DEFAULT_METADATA_URI,
     customData: JSON.stringify({ name, description: description || '', image: image || '' }),
     tokenIds: [{ start: tokenId, end: tokenId }]
   };
@@ -161,13 +163,16 @@ export function buildMsg(params: {
       updateManager: true,
       manager: params.manager || '',
       updateCollectionMetadata: true,
-      collectionMetadata: params.collectionMetadata || { uri: 'ipfs://METADATA_COLLECTION', customData: '' },
+      collectionMetadata: params.collectionMetadata || { uri: DEFAULT_METADATA_URI, customData: '' },
       updateTokenMetadata: true,
-      tokenMetadata: params.tokenMetadata || [{ uri: 'ipfs://METADATA_TOKEN_{id}', customData: '', tokenIds: FOREVER }],
+      tokenMetadata: params.tokenMetadata || [{ uri: DEFAULT_METADATA_URI, customData: '', tokenIds: FOREVER }],
       updateCustomData: true,
       customData: params.customData || '',
       updateCollectionApprovals: true,
-      collectionApprovals: params.collectionApprovals,
+      collectionApprovals: params.collectionApprovals.map((a: any) => ({
+        ...a,
+        uri: a.uri || DEFAULT_METADATA_URI
+      })),
       updateStandards: true,
       standards: params.standards || [],
       updateIsArchived: false,
@@ -343,6 +348,7 @@ export function scalingBalances(amount: string, maxMultiplier?: string) {
 // ── Alias path builder ───────────────────────────────────────────────────────
 
 export function buildAliasPath(denom: string, symbol: string, decimals: number, image?: string) {
+  const img = image || BITBADGES_DEFAULT_IMAGE;
   return {
     denom,
     conversion: {
@@ -355,10 +361,10 @@ export function buildAliasPath(denom: string, symbol: string, decimals: number, 
         decimals: String(decimals),
         symbol,
         isDefaultDisplay: true,
-        metadata: { uri: '', customData: '' }
+        metadata: { uri: '', customData: '', image: img }
       }
     ],
-    metadata: { uri: image || '', customData: '' }
+    metadata: { uri: '', customData: '', image: img }
   };
 }
 

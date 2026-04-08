@@ -77,7 +77,7 @@ export function buildAuction(params: AuctionParams): any {
     collectionApprovals,
     standards: ['Auction'],
     collectionPermissions: frozenPermissions(),
-    defaultBalances: defaultBalances({ autoApproveAllIncomingTransfers: false }),
+    defaultBalances: defaultBalances(),
     invariants: {
       noCustomOwnershipTimes: true,
       maxSupplyPerId: '0',

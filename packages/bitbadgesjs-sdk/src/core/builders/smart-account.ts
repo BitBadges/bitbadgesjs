@@ -24,7 +24,7 @@ export interface SmartAccountParams {
 export function buildSmartAccount(params: SmartAccountParams): any {
   const coin = resolveCoin(params.backingCoin);
   const backingAddr = generateAliasAddressForIBCBackedDenom(coin.denom);
-  const symbol = params.symbol || coin.symbol;
+  const symbol = params.symbol || ('v' + coin.symbol);
 
   const collectionApprovals: any[] = [
     // Backing
