@@ -27,6 +27,7 @@ export interface SubscriptionParams {
   /** Multiple payouts per interval — use this OR price/denom/recipient */
   payouts?: SubscriptionPayout[];
   tiers?: number; // number of tiers, default 1
+  transferable?: boolean; // allow post-mint P2P transfers of subscription tokens
   name?: string;
 }
 
@@ -94,6 +95,20 @@ export function buildSubscription(params: SubscriptionParams): any {
         overridesFromOutgoingApprovals: true,
         overridesToIncomingApprovals: true
       }
+    });
+  }
+
+  if (params.transferable) {
+    collectionApprovals.push({
+      fromListId: '!Mint',
+      toListId: 'All',
+      initiatedByListId: 'All',
+      approvalId: 'free-transfer',
+      transferTimes: FOREVER,
+      tokenIds: FOREVER,
+      ownershipTimes: FOREVER,
+      version: '0',
+      approvalCriteria: {}
     });
   }
 

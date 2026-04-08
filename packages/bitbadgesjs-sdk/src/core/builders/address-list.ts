@@ -15,6 +15,7 @@ export interface AddressListParams {
   name: string;
   image?: string;
   description?: string;
+  manager?: string; // bb1... address that can add/remove members (defaults to creator)
 }
 
 export function buildAddressList(params: AddressListParams): any {
@@ -23,7 +24,7 @@ export function buildAddressList(params: AddressListParams): any {
     {
       fromListId: 'Mint',
       toListId: 'All',
-      initiatedByListId: '',
+      initiatedByListId: params.manager || '',
       approvalId: 'manager-add',
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
@@ -39,7 +40,7 @@ export function buildAddressList(params: AddressListParams): any {
     {
       fromListId: '!Mint',
       toListId: BURN_ADDRESS,
-      initiatedByListId: '',
+      initiatedByListId: params.manager || '',
       approvalId: 'manager-remove',
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
@@ -55,6 +56,7 @@ export function buildAddressList(params: AddressListParams): any {
   return buildMsg({
     collectionApprovals,
     standards: ['Address List'],
+    manager: params.manager || '',
     collectionPermissions: emptyPermissions(),
     invariants: {
       noCustomOwnershipTimes: true,

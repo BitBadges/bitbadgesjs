@@ -85,12 +85,13 @@ sharedOpts(
     .option('--recipient <address>', 'Payout address (bb1...)')
     .option('--payouts <json>', 'Multiple payouts JSON: [{"recipient","amount","denom"}]')
     .option('--tiers <n>', 'Number of tiers', '1')
+    .option('--transferable', 'Allow post-mint P2P transfers')
     .option('--name <name>', 'Collection name', 'Subscription')
 ).action(async (opts) => {
   await applyGlobalOpts(opts);
   const { buildSubscription } = await import('../../core/builders/subscription.js');
   if (opts.json) { emit(buildSubscription(readJsonInput(opts.json)), opts); return; }
-  const params: any = { interval: opts.interval, tiers: Number(opts.tiers), name: opts.name };
+  const params: any = { interval: opts.interval, tiers: Number(opts.tiers), transferable: !!opts.transferable, name: opts.name };
   if (opts.payouts) {
     params.payouts = JSON.parse(opts.payouts);
   } else {
@@ -220,11 +221,12 @@ sharedOpts(
     .option('--image <url>', 'Token image URL')
     .option('--description <text>', 'Description')
     .option('--burnable', 'Allow burning')
+    .option('--transferable', 'Allow post-mint P2P transfers')
 ).action(async (opts) => {
   await applyGlobalOpts(opts);
   const { buildCustom2FA } = await import('../../core/builders/custom-2fa.js');
   if (opts.json) { emit(buildCustom2FA(readJsonInput(opts.json)), opts); return; }
-  emit(buildCustom2FA({ name: opts.name, image: opts.image, description: opts.description, burnable: !!opts.burnable }), opts);
+  emit(buildCustom2FA({ name: opts.name, image: opts.image, description: opts.description, burnable: !!opts.burnable, transferable: !!opts.transferable }), opts);
 });
 
 sharedOpts(
@@ -249,11 +251,12 @@ sharedOpts(
     .requiredOption('--name <name>', 'List name')
     .option('--image <url>', 'List image URL')
     .option('--description <text>', 'Description')
+    .option('--manager <address>', 'Manager address that controls add/remove (bb1...)')
 ).action(async (opts) => {
   await applyGlobalOpts(opts);
   const { buildAddressList } = await import('../../core/builders/address-list.js');
   if (opts.json) { emit(buildAddressList(readJsonInput(opts.json)), opts); return; }
-  emit(buildAddressList({ name: opts.name, image: opts.image, description: opts.description }), opts);
+  emit(buildAddressList({ name: opts.name, image: opts.image, description: opts.description, manager: opts.manager }), opts);
 });
 
 // ============================================================

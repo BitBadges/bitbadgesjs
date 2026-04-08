@@ -15,6 +15,7 @@ export interface Custom2FAParams {
   image?: string;
   description?: string;
   burnable?: boolean;
+  transferable?: boolean; // allow post-mint P2P transfers of 2FA tokens
 }
 
 export function buildCustom2FA(params: Custom2FAParams): any {
@@ -73,6 +74,21 @@ export function buildCustom2FA(params: Custom2FAParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'burn',
+      transferTimes: FOREVER,
+      tokenIds: [{ start: '1', end: '1' }],
+      ownershipTimes: FOREVER,
+      version: '0',
+      approvalCriteria: {}
+    });
+  }
+
+  // Optional free-transfer approval
+  if (params.transferable) {
+    collectionApprovals.push({
+      fromListId: '!Mint',
+      toListId: 'All',
+      initiatedByListId: 'All',
+      approvalId: 'free-transfer',
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
