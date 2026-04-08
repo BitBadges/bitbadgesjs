@@ -166,50 +166,31 @@ sdkCommand
 
 // ── sdk alias ──────────────────────────────────────────────────────────────────
 
-const aliasCmd = sdkCommand.command('alias').description('Generate alias addresses for denoms and collections');
+const aliasCmd = sdkCommand.command('alias').description('Generate protocol-derived alias addresses');
 
 aliasCmd
-  .command('for-denom <denom>')
-  .description('Generate alias address for a denom (IBC or native)')
-  .action(async (denom: string) => {
-    const { generateAliasAddressForIBCBackedDenom, generateAliasAddressForDenom } = await import('../../core/aliases.js');
-
-    if (denom.startsWith('ibc/')) {
-      console.log(generateAliasAddressForIBCBackedDenom(denom));
-    } else {
-      console.log(generateAliasAddressForDenom(denom));
-    }
+  .command('for-ibc-backing <ibcDenom>')
+  .description('Generate backing address for an IBC-backed smart token (uses BackedPathGenerationPrefix)')
+  .action(async (ibcDenom: string) => {
+    const { generateAliasAddressForIBCBackedDenom } = await import('../../core/aliases.js');
+    console.log(generateAliasAddressForIBCBackedDenom(ibcDenom));
   });
 
 aliasCmd
-  .command('for-collection <collectionId>')
-  .description('Generate alias address for a collection mint escrow')
+  .command('for-wrapper <denom>')
+  .description('Generate wrapper path address for a cosmos coin wrapper (uses DenomGenerationPrefix)')
+  .action(async (denom: string) => {
+    const { generateAliasAddressForDenom } = await import('../../core/aliases.js');
+    console.log(generateAliasAddressForDenom(denom));
+  });
+
+aliasCmd
+  .command('for-mint-escrow <collectionId>')
+  .description('Generate mint escrow address for a collection (where to send quest reward funds, etc.)')
   .action(async (collectionId: string) => {
     const { getAliasDerivationKeysForCollection, generateAlias } = await import('../../core/aliases.js');
 
     const derivationKeys = getAliasDerivationKeysForCollection(collectionId);
-    const address = generateAlias('badges', derivationKeys);
-    console.log(address);
-  });
-
-aliasCmd
-  .command('for-token <collectionId> <tokenId>')
-  .description('Generate alias address for a specific token in a collection')
-  .action(async (collectionId: string, tokenId: string) => {
-    const { getAliasDerivationKeysForBadge, generateAlias } = await import('../../core/aliases.js');
-
-    const derivationKeys = getAliasDerivationKeysForBadge(collectionId, tokenId);
-    const address = generateAlias('badges', derivationKeys);
-    console.log(address);
-  });
-
-aliasCmd
-  .command('for-list <listId>')
-  .description('Generate alias address for an address list')
-  .action(async (listId: string) => {
-    const { getAliasDerivationKeysForList, generateAlias } = await import('../../core/aliases.js');
-
-    const derivationKeys = getAliasDerivationKeysForList(listId);
     const address = generateAlias('badges', derivationKeys);
     console.log(address);
   });
