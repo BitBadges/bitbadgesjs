@@ -1,17 +1,22 @@
 import * as fs from 'fs';
 
 /**
- * Read JSON input from a file path, `@file.json` syntax, or stdin (`-`).
+ * Read JSON input from multiple sources:
+ * - File path: `tx.json` or `@tx.json`
+ * - Inline JSON string: `'{"messages":[...]}'`
+ * - Stdin: `-`
  */
-export function readJsonInput(fileArg: string): any {
+export function readJsonInput(input: string): any {
   let raw: string;
 
-  if (fileArg === '-') {
-    // Read from stdin
+  if (input === '-') {
     raw = fs.readFileSync(0, 'utf-8');
+  } else if (input.startsWith('{') || input.startsWith('[') || input.startsWith('"')) {
+    // Inline JSON
+    raw = input;
   } else {
-    // Strip leading @ if present
-    const filePath = fileArg.startsWith('@') ? fileArg.slice(1) : fileArg;
+    // File path (strip leading @ if present)
+    const filePath = input.startsWith('@') ? input.slice(1) : input;
     if (!fs.existsSync(filePath)) {
       throw new Error(`File not found: ${filePath}`);
     }
@@ -21,20 +26,26 @@ export function readJsonInput(fileArg: string): any {
   try {
     return JSON.parse(raw);
   } catch {
-    throw new Error('Failed to parse JSON input');
+    throw new Error('Failed to parse JSON input. Accepts: file path, @file.json, inline JSON string, or - for stdin.');
   }
 }
 
 /**
- * Output data as JSON or human-readable text.
+ * Output data as JSON (pretty-printed by default) or human-readable text.
+ *
+ * --condensed: no whitespace (for piping/scripts)
+ * --human: human-readable tree format
+ * default: pretty-printed JSON (2-space indent)
  */
-export function output(data: any, options: { human?: boolean }): void {
+export function output(data: any, options: { human?: boolean; condensed?: boolean }): void {
   if (options.human) {
     if (typeof data === 'string') {
       console.log(data);
     } else {
       console.log(formatHuman(data));
     }
+  } else if (options.condensed) {
+    console.log(JSON.stringify(data));
   } else {
     console.log(JSON.stringify(data, null, 2));
   }
@@ -67,9 +78,12 @@ function formatHuman(obj: any, indent = 0): string {
 /**
  * Resolve the API URL from CLI flags and environment variables.
  *
- * Priority: --local > --testnet > BITBADGES_API_URL env > default production URL.
+ * Priority: --url > --local > --testnet > BITBADGES_API_URL env > default production URL.
  */
-export function getApiUrl(options: { testnet?: boolean; local?: boolean }): string {
+export function getApiUrl(options: { testnet?: boolean; local?: boolean; url?: string }): string {
+  if (options.url) {
+    return options.url;
+  }
   if (options.local) {
     return 'http://localhost:3001';
   }

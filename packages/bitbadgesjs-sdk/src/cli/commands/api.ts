@@ -998,8 +998,9 @@ export function createApiCommand(): Command {
       .option('--api-key <key>', 'BitBadges API key (overrides BITBADGES_API_KEY env)')
       .option('--testnet', 'Use testnet API', false)
       .option('--local', 'Use local API (localhost:3001)', false)
+      .option('--url <url>', 'Custom API base URL (overrides all other URL options)')
       .option('--query <params>', 'Query string params as JSON object (e.g. \'{"bookmark":"x"}\')')
-      .option('--pretty', 'Pretty-print JSON output', false);
+      .option('--condensed', 'Output condensed JSON (no whitespace)', false);
 
     cmd.action(async (...args: any[]) => {
       // Commander passes positional args first, then the options object, then the command
@@ -1010,6 +1011,7 @@ export function createApiCommand(): Command {
         const baseUrl = resolveBaseUrl({
           testnet: opts.testnet,
           local: opts.local,
+          baseUrl: opts.url,
         });
 
         // Build path params map
@@ -1047,9 +1049,9 @@ export function createApiCommand(): Command {
           baseUrl,
         });
 
-        const output = opts.pretty
-          ? JSON.stringify(result, null, 2)
-          : JSON.stringify(result);
+        const output = opts.condensed
+          ? JSON.stringify(result)
+          : JSON.stringify(result, null, 2);
 
         process.stdout.write(output + '\n');
       } catch (err: any) {
