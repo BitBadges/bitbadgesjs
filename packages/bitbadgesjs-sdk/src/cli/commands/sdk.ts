@@ -279,7 +279,7 @@ sdkCommand
   .description('Fetch BitBadges documentation for LLMs')
   .option('--url <url>', 'Override the documentation URL')
   .action(async (opts: { url?: string }) => {
-    const url = opts.url || 'https://docs.bitbadges.io/for-llms.txt';
+    const url = opts.url || 'https://raw.githubusercontent.com/BitBadges/bitbadges-docs/master/for-llms.txt';
 
     try {
       const axios = (await import('axios')).default;
