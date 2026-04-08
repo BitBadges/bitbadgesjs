@@ -24,6 +24,28 @@ import {
 // Route registry
 // ---------------------------------------------------------------------------
 
+interface SdkLinks {
+  /** SDK request/payload type name */
+  request?: string;
+  /** SDK response type name */
+  response?: string;
+  /** SDK API function name */
+  function?: string;
+}
+
+interface ParamInfo {
+  name: string;
+  description: string;
+  required: boolean;
+}
+
+interface FieldInfo {
+  name: string;
+  type: string;
+  description: string;
+  required: boolean;
+}
+
 interface ApiRoute {
   /** CLI command name (kebab-case) */
   name: string;
@@ -37,6 +59,14 @@ interface ApiRoute {
   pathParams: string[];
   /** Whether the route accepts a JSON request body */
   hasBody: boolean;
+  /** Query parameters (for GET routes with exploded payload) */
+  queryParams?: ParamInfo[];
+  /** Key body fields (for POST/PUT/DELETE routes) */
+  bodyFields?: FieldInfo[];
+  /** SDK usage example */
+  example?: string;
+  /** Links to SDK type docs */
+  sdkLinks?: SdkLinks;
 }
 
 const ROUTES: ApiRoute[] = [
@@ -50,6 +80,16 @@ const ROUTES: ApiRoute[] = [
     description: 'Get account by address or username',
     pathParams: [],
     hasBody: false,
+    queryParams: [
+      { name: 'address', description: 'The address of the account', required: false },
+      { name: 'username', description: 'The username of the account', required: false },
+    ],
+    example: `const res = await BitBadgesApi.getAccount({ address: '...' });`,
+    sdkLinks: {
+      request: 'iGetAccountPayload',
+      response: 'iGetAccountSuccessResponse',
+      function: 'BitBadgesAPI.getAccount',
+    },
   },
   {
     name: 'get-accounts',
@@ -58,6 +98,15 @@ const ROUTES: ApiRoute[] = [
     description: 'Get accounts (batch, view-based)',
     pathParams: [],
     hasBody: true,
+    bodyFields: [
+      { name: 'accountsToFetch', type: 'Array<{ address, viewsToFetch? }>', description: 'Array of accounts to fetch with optional views', required: true },
+    ],
+    example: `const res = await BitBadgesApi.getAccounts({ accountsToFetch: [{ address: 'bb1...' }] });`,
+    sdkLinks: {
+      request: 'iGetAccountsPayload',
+      response: 'iGetAccountsSuccessResponse',
+      function: 'BitBadgesAPI.getAccounts',
+    },
   },
   {
     name: 'get-siwbb-requests-for-user',
@@ -66,6 +115,14 @@ const ROUTES: ApiRoute[] = [
     description: 'Get SIWBB requests for a user',
     pathParams: ['address'],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetSiwbbRequestsForUserPayload',
+      response: 'iGetSiwbbRequestsForUserSuccessResponse',
+      function: 'BitBadgesAPI.getSiwbbRequestsForUser',
+    },
   },
   {
     name: 'get-transfer-activity-for-user',
@@ -74,14 +131,31 @@ const ROUTES: ApiRoute[] = [
     description: 'Get transfer activity for a user',
     pathParams: ['address'],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetTransferActivityForUserPayload',
+      response: 'iGetTransferActivityForUserSuccessResponse',
+      function: 'BitBadgesAPI.getTransferActivityForUser',
+    },
   },
   {
     name: 'get-tokens-for-user',
     method: 'GET',
     path: '/account/{address}/tokens',
-    description: 'Get tokens for a user',
+    description: 'Get tokens for a user. Specify viewType to choose collected, created, managing, etc.',
     pathParams: ['address'],
     hasBody: false,
+    queryParams: [
+      { name: 'viewType', description: 'Type of tokens view (collected, created, managing, etc.)', required: false },
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetTokensViewForUserPayload',
+      response: 'iGetTokensViewForUserSuccessResponse',
+      function: 'BitBadgesAPI.getTokensViewForUser',
+    },
   },
   {
     name: 'get-claim-activity-for-user',
@@ -90,6 +164,14 @@ const ROUTES: ApiRoute[] = [
     description: 'Get claim activity for a user',
     pathParams: ['address'],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetClaimActivityForUserPayload',
+      response: 'iGetClaimActivityForUserSuccessResponse',
+      function: 'BitBadgesAPI.getClaimActivityForUser',
+    },
   },
   {
     name: 'get-points-activity-for-user',
@@ -98,6 +180,14 @@ const ROUTES: ApiRoute[] = [
     description: 'Get points activity for a user',
     pathParams: ['address'],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetPointsActivityForUserPayload',
+      response: 'iGetPointsActivityForUserSuccessResponse',
+      function: 'BitBadgesAPI.getPointsActivityForUser',
+    },
   },
 
   // =========================================================================
@@ -110,6 +200,11 @@ const ROUTES: ApiRoute[] = [
     description: 'Get a specific collection',
     pathParams: ['collectionId'],
     hasBody: false,
+    example: `await BitBadgesApi.getCollection("123");`,
+    sdkLinks: {
+      response: 'iGetCollectionSuccessResponse',
+      function: 'BitBadgesAPI.getCollection',
+    },
   },
   {
     name: 'get-token-metadata',
@@ -118,6 +213,11 @@ const ROUTES: ApiRoute[] = [
     description: 'Get metadata for a specific token',
     pathParams: ['collectionId', 'tokenId'],
     hasBody: false,
+    example: `await BitBadgesApi.getTokenMetadata("123", "1");`,
+    sdkLinks: {
+      response: 'iGetTokenMetadataSuccessResponse',
+      function: 'BitBadgesAPI.getTokenMetadata',
+    },
   },
   {
     name: 'get-collections',
@@ -126,22 +226,45 @@ const ROUTES: ApiRoute[] = [
     description: 'Get collections (batch, view-based)',
     pathParams: [],
     hasBody: true,
+    bodyFields: [
+      { name: 'collectionsToFetch', type: 'Array<{ collectionId, metadataToFetch?, viewsToFetch?, fetchTotalAndMintBalances? }>', description: 'Array of collections to fetch with optional metadata/views', required: true },
+    ],
+    example: `const res = await BitBadgesApi.getCollections({ collectionsToFetch: [{ collectionId: 1n }] });`,
+    sdkLinks: {
+      request: 'iGetCollectionsPayload',
+      response: 'iGetCollectionsSuccessResponse',
+      function: 'BitBadgesAPI.getCollections',
+    },
   },
   {
     name: 'get-balance-specific-token',
     method: 'GET',
     path: '/collection/{collectionId}/balance/{address}/{tokenId}',
-    description: 'Get balance of a specific token for an address',
+    description: 'Get balance of a specific token for an address. Address can be "Total" for circulating supply.',
     pathParams: ['collectionId', 'address', 'tokenId'],
     hasBody: false,
+    example: `const res = await BitBadgesApi.getBalanceByAddressSpecificToken(collectionId, address, tokenId);`,
+    sdkLinks: {
+      request: 'iGetBalanceByAddressSpecificTokenPayload',
+      response: 'iGetBalanceByAddressSpecificTokenSuccessResponse',
+      function: 'BitBadgesAPI.getBalanceByAddressSpecificToken',
+    },
   },
   {
     name: 'get-balance-by-address',
     method: 'GET',
     path: '/collection/{collectionId}/balance/{address}',
-    description: 'Get balances for an address in a collection',
+    description: 'Get balances for an address in a collection. Address can be "Total" for circulating supply.',
     pathParams: ['collectionId', 'address'],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetBalanceByAddressPayload',
+      response: 'iGetBalanceByAddressSuccessResponse',
+      function: 'BitBadgesAPI.getBalanceByAddress',
+    },
   },
   {
     name: 'get-token-owners',
@@ -150,6 +273,14 @@ const ROUTES: ApiRoute[] = [
     description: 'Get owners of a specific token (paginated)',
     pathParams: ['collectionId', 'tokenId'],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetOwnersPayload',
+      response: 'iGetOwnersSuccessResponse',
+      function: 'BitBadgesAPI.getOwners',
+    },
   },
   {
     name: 'get-token-activity',
@@ -158,14 +289,27 @@ const ROUTES: ApiRoute[] = [
     description: 'Get activity for a specific token (paginated)',
     pathParams: ['collectionId', 'tokenId'],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetTokenActivityPayload',
+      response: 'iGetTokenActivitySuccessResponse',
+      function: 'BitBadgesAPI.getTokenActivity',
+    },
   },
   {
     name: 'refresh-metadata',
     method: 'POST',
     path: '/collection/{collectionId}/refresh',
-    description: 'Trigger metadata refresh for a collection',
+    description: 'Trigger metadata refresh for a collection. Will reject if recently refreshed.',
     pathParams: ['collectionId'],
     hasBody: true,
+    sdkLinks: {
+      request: 'iRefreshMetadataPayload',
+      response: 'iRefreshMetadataSuccessResponse',
+      function: 'BitBadgesAPI.refreshMetadata',
+    },
   },
   {
     name: 'get-refresh-status',
@@ -174,6 +318,11 @@ const ROUTES: ApiRoute[] = [
     description: 'Get refresh status for a collection',
     pathParams: ['collectionId'],
     hasBody: false,
+    sdkLinks: {
+      request: 'iGetRefreshStatusPayload',
+      response: 'iRefreshStatusSuccessResponse',
+      function: 'BitBadgesAPI.getRefreshStatus',
+    },
   },
   {
     name: 'get-collection-owners',
@@ -182,6 +331,14 @@ const ROUTES: ApiRoute[] = [
     description: 'Get owners for a collection',
     pathParams: ['collectionId'],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetCollectionOwnersPayload',
+      response: 'iGetCollectionOwnersSuccessResponse',
+      function: 'BitBadgesAPI.getCollectionOwners',
+    },
   },
   {
     name: 'get-collection-transfer-activity',
@@ -190,6 +347,14 @@ const ROUTES: ApiRoute[] = [
     description: 'Get transfer activity for a collection',
     pathParams: ['collectionId'],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetCollectionTransferActivityPayload',
+      response: 'iGetCollectionTransferActivitySuccessResponse',
+      function: 'BitBadgesAPI.getCollectionTransferActivity',
+    },
   },
   {
     name: 'get-collection-challenge-trackers',
@@ -198,6 +363,14 @@ const ROUTES: ApiRoute[] = [
     description: 'Get challenge trackers for a collection',
     pathParams: ['collectionId'],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetCollectionChallengeTrackersPayload',
+      response: 'iGetCollectionChallengeTrackersSuccessResponse',
+      function: 'BitBadgesAPI.getCollectionChallengeTrackers',
+    },
   },
   {
     name: 'get-collection-amount-trackers',
@@ -206,6 +379,14 @@ const ROUTES: ApiRoute[] = [
     description: 'Get amount trackers for a collection',
     pathParams: ['collectionId'],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetCollectionAmountTrackersPayload',
+      response: 'iGetCollectionAmountTrackersSuccessResponse',
+      function: 'BitBadgesAPI.getCollectionAmountTrackers',
+    },
   },
   {
     name: 'get-collection-amount-tracker-by-id',
@@ -214,6 +395,19 @@ const ROUTES: ApiRoute[] = [
     description: 'Get a collection amount tracker by ID',
     pathParams: [],
     hasBody: false,
+    queryParams: [
+      { name: 'collectionId', description: 'The collection ID', required: true },
+      { name: 'approvalId', description: 'The approval ID', required: true },
+      { name: 'approvalLevel', description: 'The approval level', required: true },
+      { name: 'approverAddress', description: 'The approver address', required: true },
+      { name: 'amountTrackerId', description: 'The amount tracker ID', required: true },
+      { name: 'trackerType', description: 'The tracker type', required: true },
+    ],
+    sdkLinks: {
+      request: 'iAmountTrackerIdDetails',
+      response: 'iGetCollectionAmountTrackerByIdSuccessResponse',
+      function: 'BitBadgesAPI.getCollectionAmountTrackerById',
+    },
   },
   {
     name: 'get-collection-challenge-tracker-by-id',
@@ -222,6 +416,18 @@ const ROUTES: ApiRoute[] = [
     description: 'Get a collection challenge tracker by ID',
     pathParams: [],
     hasBody: false,
+    queryParams: [
+      { name: 'collectionId', description: 'The collection ID', required: true },
+      { name: 'approvalId', description: 'The approval ID', required: true },
+      { name: 'approvalLevel', description: 'The approval level', required: true },
+      { name: 'approverAddress', description: 'The approver address', required: true },
+      { name: 'challengeTrackerId', description: 'The challenge tracker ID', required: true },
+    ],
+    sdkLinks: {
+      request: 'iChallengeTrackerIdDetails',
+      response: 'iGetCollectionChallengeTrackerByIdSuccessResponse',
+      function: 'BitBadgesAPI.getCollectionChallengeTrackerById',
+    },
   },
   {
     name: 'get-collection-listings',
@@ -230,6 +436,14 @@ const ROUTES: ApiRoute[] = [
     description: 'Get listings for a collection',
     pathParams: ['collectionId'],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetCollectionListingsPayload',
+      response: 'iGetCollectionListingsSuccessResponse',
+      function: 'BitBadgesAPI.getCollectionListings',
+    },
   },
   {
     name: 'get-collection-claims',
@@ -238,6 +452,10 @@ const ROUTES: ApiRoute[] = [
     description: 'Get claims for a collection',
     pathParams: ['collectionId'],
     hasBody: false,
+    sdkLinks: {
+      response: 'iGetCollectionClaimsSuccessResponse',
+      function: 'BitBadgesAPI.getCollectionClaims',
+    },
   },
 
   // =========================================================================
@@ -250,110 +468,208 @@ const ROUTES: ApiRoute[] = [
     description: 'Get a claim by ID',
     pathParams: ['claimId'],
     hasBody: false,
+    queryParams: [
+      { name: 'fetchPrivateParams', description: 'Whether to fetch private claim parameters (must be manager)', required: false },
+    ],
+    example: `await BitBadgesApi.getClaim("claim123");`,
+    sdkLinks: {
+      request: 'iGetClaimPayload',
+      response: 'iGetClaimSuccessResponse',
+      function: 'BitBadgesAPI.getClaim',
+    },
   },
   {
     name: 'check-claim-success',
     method: 'GET',
     path: '/claims/success/{claimId}/{address}',
-    description: 'Check if a claim was successfully completed by a user',
+    description: 'Check if a claim was successfully completed by a user. Returns success count.',
     pathParams: ['claimId', 'address'],
     hasBody: false,
+    example: `const res = await BitBadgesApi.checkClaimSuccess(claimId, address);`,
+    sdkLinks: {
+      request: 'iCheckClaimSuccessPayload',
+      response: 'iCheckClaimSuccessSuccessResponse',
+      function: 'BitBadgesAPI.checkClaimSuccess',
+    },
   },
   {
     name: 'complete-claim',
     method: 'POST',
     path: '/claims/complete/{claimId}/{address}',
-    description: 'Complete a claim for an address',
+    description: 'Complete a claim for an address. Returns a claimAttemptId to check status.',
     pathParams: ['claimId', 'address'],
     hasBody: true,
+    bodyFields: [
+      { name: '_expectedVersion', type: 'number', description: 'Must match the claim version. Use -1 to skip check.', required: true },
+      { name: '[pluginInstanceId]', type: 'object', description: 'Body for each plugin instance (keyed by plugin instance ID)', required: false },
+    ],
+    example: `const res = await BitBadgesApi.completeClaim(claimId, address, { _expectedVersion: 1 });`,
+    sdkLinks: {
+      request: 'iCompleteClaimPayload',
+      response: 'iCompleteClaimSuccessResponse',
+      function: 'BitBadgesAPI.completeClaim',
+    },
   },
   {
     name: 'simulate-claim',
     method: 'POST',
     path: '/claims/simulate/{claimId}/{address}',
-    description: 'Simulate a claim for an address',
+    description: 'Simulate a claim for an address. Instant check (no queue). Success means simulation passed.',
     pathParams: ['claimId', 'address'],
     hasBody: true,
+    bodyFields: [
+      { name: '_expectedVersion', type: 'number', description: 'Must match the claim version. Use -1 to skip check.', required: true },
+      { name: '_specificInstanceIds', type: 'string[]', description: 'Optional: simulate only specific plugin instances', required: false },
+      { name: '[pluginInstanceId]', type: 'object', description: 'Body for each plugin instance', required: false },
+    ],
+    example: `const res = await BitBadgesApi.simulateClaim(claimId, address, { _expectedVersion: 1 });`,
+    sdkLinks: {
+      request: 'iSimulateClaimPayload',
+      response: 'iSimulateClaimSuccessResponse',
+      function: 'BitBadgesAPI.simulateClaim',
+    },
   },
   {
     name: 'get-reserved-codes',
     method: 'POST',
     path: '/claims/reserved/{claimId}/{address}',
-    description: 'Get reserved claim codes',
+    description: 'Get reserved claim codes (for on-chain claims bridging off-chain to on-chain)',
     pathParams: ['claimId', 'address'],
     hasBody: true,
+    sdkLinks: {
+      request: 'iGetReservedClaimCodesPayload',
+      response: 'iGetReservedClaimCodesSuccessResponse',
+      function: 'BitBadgesAPI.getReservedCodes',
+    },
   },
   {
     name: 'get-claim-attempt-status',
     method: 'GET',
     path: '/claims/status/{claimAttemptId}',
-    description: 'Get status of a claim attempt',
+    description: 'Get status of a claim attempt by the ID received when submitting',
     pathParams: ['claimAttemptId'],
     hasBody: false,
+    example: `const res = await BitBadgesApi.getClaimAttemptStatus(claimAttemptId);`,
+    sdkLinks: {
+      request: 'iGetClaimAttemptStatusPayload',
+      response: 'iGetClaimAttemptStatusSuccessResponse',
+      function: 'BitBadgesAPI.getClaimAttemptStatus',
+    },
   },
   {
     name: 'search-claims',
     method: 'GET',
     path: '/claims/search',
-    description: 'Search through your managed claims',
+    description: 'Search through your managed claims (requires sign-in)',
     pathParams: [],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iSearchClaimsPayload',
+      response: 'iSearchClaimsSuccessResponse',
+      function: 'BitBadgesAPI.searchClaims',
+    },
   },
   {
     name: 'get-claims',
     method: 'POST',
     path: '/claims/fetch',
-    description: 'Get claims (batch)',
+    description: 'Get claims (batch). To fetch private state, must be manager and signed in.',
     pathParams: [],
     hasBody: true,
+    bodyFields: [
+      { name: 'claimsToFetch', type: 'Array<{ claimId, fetchPrivateParams?, privateStatesToFetch? }>', description: 'Claims to fetch with optional private data requests', required: true },
+    ],
+    example: `const res = await BitBadgesApi.getClaims({ claimsToFetch: [{ claimId: '123' }] });`,
+    sdkLinks: {
+      request: 'iGetClaimsPayloadV1',
+      response: 'iGetClaimsSuccessResponse',
+      function: 'BitBadgesAPI.getClaims',
+    },
   },
   {
     name: 'create-claim',
     method: 'POST',
     path: '/claims',
-    description: 'Create a new claim',
+    description: 'Create a new claim. Scope: manageClaims',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iCreateClaimPayload',
+      response: 'iCreateClaimSuccessResponse',
+      function: 'BitBadgesAPI.createClaims',
+    },
   },
   {
     name: 'update-claim',
     method: 'PUT',
     path: '/claims',
-    description: 'Update an existing claim',
+    description: 'Update an existing claim. Scope: manageClaims',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iUpdateClaimPayload',
+      response: 'iUpdateClaimSuccessResponse',
+      function: 'BitBadgesAPI.updateClaims',
+    },
   },
   {
     name: 'delete-claim',
     method: 'DELETE',
     path: '/claims',
-    description: 'Delete a claim',
+    description: 'Delete a claim. Scope: manageClaims',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iDeleteClaimPayload',
+      response: 'iDeleteClaimSuccessResponse',
+      function: 'BitBadgesAPI.deleteClaims',
+    },
   },
   {
     name: 'generate-code',
     method: 'GET',
     path: '/codes',
-    description: 'Generate a unique code (Codes plugin)',
+    description: 'Generate a unique code from a seed and index (Codes plugin)',
     pathParams: [],
     hasBody: false,
+    queryParams: [
+      { name: 'seedCode', description: 'The seed used to generate the code', required: true },
+      { name: 'idx', description: 'The zero-based index of the code to generate', required: true },
+    ],
   },
   {
     name: 'get-claim-attempts',
     method: 'GET',
     path: '/claims/{claimId}/attempts',
-    description: 'Get claim attempts (paginated)',
+    description: 'Get claim attempts (paginated). Managers can include errors.',
     pathParams: ['claimId'],
     hasBody: false,
+    queryParams: [
+      { name: 'address', description: 'Filter by claimant address', required: false },
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+      { name: 'includeErrors', description: 'Include failed attempts with errors (manager only)', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetClaimAttemptsPayload',
+      response: 'iGetClaimAttemptsSuccessResponse',
+      function: 'BitBadgesAPI.getClaimAttempts',
+    },
   },
   {
     name: 'get-gated-content-for-claim',
     method: 'GET',
     path: '/claims/gatedContent/{claimId}',
-    description: 'Get gated content for a claim',
+    description: 'Get gated content for a claim (must have completed claim). Scope: completeClaims',
     pathParams: ['claimId'],
     hasBody: false,
+    sdkLinks: {
+      request: 'iGetGatedContentForClaimPayload',
+      response: 'iGetGatedContentForClaimSuccessResponse',
+      function: 'BitBadgesAPI.getGatedContentForClaim',
+    },
   },
 
   // =========================================================================
@@ -366,6 +682,12 @@ const ROUTES: ApiRoute[] = [
     description: 'Broadcast a transaction to the blockchain',
     pathParams: [],
     hasBody: true,
+    example: `const res = await BitBadgesApi.broadcastTx(...);`,
+    sdkLinks: {
+      request: 'iBroadcastTxPayload',
+      response: 'iBroadcastTxSuccessResponse',
+      function: 'BitBadgesAPI.broadcastTx',
+    },
   },
   {
     name: 'simulate-tx',
@@ -374,6 +696,12 @@ const ROUTES: ApiRoute[] = [
     description: 'Simulate a transaction on the blockchain',
     pathParams: [],
     hasBody: true,
+    example: `const res = await BitBadgesApi.simulateTx(...);`,
+    sdkLinks: {
+      request: 'iSimulateTxPayload',
+      response: 'iSimulateTxSuccessResponse',
+      function: 'BitBadgesAPI.simulateTx',
+    },
   },
 
   // =========================================================================
@@ -383,57 +711,96 @@ const ROUTES: ApiRoute[] = [
     name: 'exchange-siwbb-code',
     method: 'POST',
     path: '/siwbb/token',
-    description: 'Exchange SIWBB authorization code for access token',
+    description: 'Exchange SIWBB authorization code or refresh token for access token',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iExchangeSIWBBAuthorizationCodePayload',
+      response: 'iExchangeSIWBBAuthorizationCodeSuccessResponse',
+      function: 'BitBadgesAPI.exchangeSIWBBAuthorizationCode',
+    },
   },
   {
     name: 'revoke-oauth',
     method: 'POST',
     path: '/siwbb/token/revoke',
-    description: 'Revoke an OAuth authorization',
+    description: 'Revoke an OAuth authorization (access or refresh token)',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iOauthRevokePayload',
+      response: 'iOauthRevokeSuccessResponse',
+      function: 'BitBadgesAPI.revokeOauthAuthorization',
+    },
   },
   {
     name: 'rotate-siwbb-request',
     method: 'POST',
     path: '/siwbbRequest/rotate',
-    description: 'Rotate a SIWBB request (e.g. QR code)',
+    description: 'Rotate a SIWBB request (e.g. QR code). Scope: approveSignInWithBitBadgesRequests',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iRotateSIWBBRequestPayload',
+      response: 'iRotateSIWBBRequestSuccessResponse',
+      function: 'BitBadgesAPI.rotateSIWBBRequest',
+    },
   },
   {
     name: 'delete-siwbb-request',
     method: 'DELETE',
     path: '/siwbbRequest',
-    description: 'Delete a SIWBB request',
+    description: 'Delete a SIWBB request. Scope: deleteAuthenticationCodes',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iDeleteSIWBBRequestPayload',
+      response: 'iDeleteSIWBBRequestSuccessResponse',
+      function: 'BitBadgesAPI.deleteSIWBBRequest',
+    },
   },
   {
     name: 'create-siwbb-request',
     method: 'POST',
     path: '/siwbbRequest',
-    description: 'Create a SIWBB request',
+    description: 'Create a SIWBB request. Typically use frontend flow instead. Scope: approveSignInWithBitBadgesRequests',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iCreateSIWBBRequestPayload',
+      response: 'iCreateSIWBBRequestSuccessResponse',
+      function: 'BitBadgesAPI.createSIWBBRequest',
+    },
   },
   {
     name: 'get-siwbb-requests-for-app',
     method: 'GET',
     path: '/developerApps/siwbbRequests',
-    description: 'Get SIWBB requests for a developer app',
+    description: 'Get SIWBB requests for a developer app. Scope: manageDeveloperApps',
     pathParams: [],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetSIWBBRequestsForDeveloperAppPayload',
+      response: 'iGetSIWBBRequestsForDeveloperAppSuccessResponse',
+      function: 'BitBadgesAPI.getSIWBBRequestsForDeveloperApp',
+    },
   },
   {
     name: 'check-sign-in-status',
     method: 'POST',
     path: '/auth/status',
-    description: 'Check if a user is currently signed in',
+    description: 'Check if a user is currently signed in and get auth status',
     pathParams: [],
     hasBody: true,
+    example: `const res = await BitBadgesApi.checkIfSignedIn(...);`,
+    sdkLinks: {
+      request: 'iCheckSignInStatusPayload',
+      response: 'iCheckSignInStatusSuccessResponse',
+      function: 'BitBadgesAPI.checkIfSignedIn',
+    },
   },
 
   // =========================================================================
@@ -443,33 +810,53 @@ const ROUTES: ApiRoute[] = [
     name: 'get-developer-app',
     method: 'GET',
     path: '/developerApp/{clientId}',
-    description: 'Get an OAuth app by client ID',
+    description: 'Get an OAuth app by client ID. Scope: manageDeveloperApps (for client secret)',
     pathParams: ['clientId'],
     hasBody: false,
+    sdkLinks: {
+      request: 'iGetDeveloperAppPayload',
+      response: 'iGetDeveloperAppSuccessResponse',
+      function: 'BitBadgesAPI.getDeveloperApp',
+    },
   },
   {
     name: 'create-developer-app',
     method: 'POST',
     path: '/developerApps',
-    description: 'Create a new OAuth app',
+    description: 'Create a new OAuth app. Scope: manageDeveloperApps',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iCreateDeveloperAppPayload',
+      response: 'iCreateDeveloperAppSuccessResponse',
+      function: 'BitBadgesAPI.createDeveloperApp',
+    },
   },
   {
     name: 'update-developer-app',
     method: 'PUT',
     path: '/developerApps',
-    description: 'Update an OAuth app',
+    description: 'Update an OAuth app. Scope: manageDeveloperApps',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iUpdateDeveloperAppPayload',
+      response: 'iUpdateDeveloperAppSuccessResponse',
+      function: 'BitBadgesAPI.updateDeveloperApp',
+    },
   },
   {
     name: 'delete-developer-app',
     method: 'DELETE',
     path: '/developerApps',
-    description: 'Delete an OAuth app',
+    description: 'Delete an OAuth app. Scope: manageDeveloperApps',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iDeleteDeveloperAppPayload',
+      response: 'iDeleteDeveloperAppSuccessResponse',
+      function: 'BitBadgesAPI.deleteDeveloperApp',
+    },
   },
 
   // =========================================================================
@@ -482,6 +869,11 @@ const ROUTES: ApiRoute[] = [
     description: 'Get a plugin by ID',
     pathParams: ['pluginId'],
     hasBody: false,
+    sdkLinks: {
+      request: 'iGetPluginPayload',
+      response: 'iGetPluginSuccessResponse',
+      function: 'BitBadgesAPI.getPlugin',
+    },
   },
   {
     name: 'get-plugins',
@@ -490,6 +882,11 @@ const ROUTES: ApiRoute[] = [
     description: 'Get plugins (batch)',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iGetPluginsPayload',
+      response: 'iGetPluginSuccessResponse',
+      function: 'BitBadgesAPI.getPlugins',
+    },
   },
   {
     name: 'search-plugins',
@@ -498,14 +895,28 @@ const ROUTES: ApiRoute[] = [
     description: 'Search plugins',
     pathParams: [],
     hasBody: false,
+    sdkLinks: {
+      request: 'iSearchPluginsPayload',
+      response: 'iSearchPluginsSuccessResponse',
+      function: 'BitBadgesAPI.searchPlugins',
+    },
   },
   {
     name: 'get-creator-plugins',
     method: 'GET',
     path: '/plugins/creator',
-    description: 'Get plugins by creator address',
+    description: 'Get plugins by creator address. Full Access scope required for private plugins.',
     pathParams: [],
     hasBody: false,
+    queryParams: [
+      { name: 'creatorAddress', description: 'The creator address', required: false },
+      { name: 'returnSensitiveData', description: 'Return sensitive data like plugin secret', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetCreatorPluginsPayload',
+      response: 'iGetPluginSuccessResponse',
+      function: 'BitBadgesAPI.getCreatorPlugins',
+    },
   },
 
   // =========================================================================
@@ -515,17 +926,34 @@ const ROUTES: ApiRoute[] = [
     name: 'get-dynamic-store',
     method: 'GET',
     path: '/dynamicStore/{dynamicStoreId}',
-    description: 'Get a dynamic data store by ID',
+    description: 'Get a dynamic data store by ID. Scope: manageDynamicStores (or use dataSecret)',
     pathParams: ['dynamicStoreId'],
     hasBody: false,
+    queryParams: [
+      { name: 'dataSecret', description: 'Data secret for authentication (alternative to sign-in)', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetDynamicDataStorePayload',
+      response: 'iGetDynamicDataStoreSuccessResponse',
+      function: 'BitBadgesAPI.getDynamicDataStore',
+    },
   },
   {
     name: 'get-dynamic-store-value',
     method: 'GET',
     path: '/dynamicStore/{dynamicStoreId}/value',
-    description: 'Get a value from a dynamic data store',
+    description: 'Get a value from a dynamic data store by key',
     pathParams: ['dynamicStoreId'],
     hasBody: false,
+    queryParams: [
+      { name: 'key', description: 'The key to fetch', required: true },
+      { name: 'dataSecret', description: 'Data secret for authentication', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetDynamicDataStoreValuePayload',
+      response: 'iGetDynamicDataStoreValueSuccessResponse',
+      function: 'BitBadgesAPI.getDynamicDataStoreValue',
+    },
   },
   {
     name: 'get-dynamic-store-values',
@@ -534,70 +962,121 @@ const ROUTES: ApiRoute[] = [
     description: 'Get paginated values from a dynamic data store',
     pathParams: ['dynamicStoreId'],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetDynamicDataStoreValuesPaginatedPayload',
+      response: 'iGetDynamicDataStoreValuesPaginatedSuccessResponse',
+      function: 'BitBadgesAPI.getDynamicDataStoreValuesPaginated',
+    },
   },
   {
     name: 'create-dynamic-store',
     method: 'POST',
     path: '/dynamicStores',
-    description: 'Create a new dynamic data store',
+    description: 'Create a new dynamic data store. Scope: manageDynamicStores',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iCreateDynamicDataStorePayload',
+      response: 'iCreateDynamicDataStoreSuccessResponse',
+      function: 'BitBadgesAPI.createDynamicDataStore',
+    },
   },
   {
     name: 'update-dynamic-store',
     method: 'PUT',
     path: '/dynamicStores',
-    description: 'Update a dynamic data store',
+    description: 'Update a dynamic data store. Scope: manageDynamicStores',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iUpdateDynamicDataStorePayload',
+      response: 'iUpdateDynamicDataStoreSuccessResponse',
+      function: 'BitBadgesAPI.updateDynamicDataStore',
+    },
   },
   {
     name: 'delete-dynamic-store',
     method: 'DELETE',
     path: '/dynamicStores',
-    description: 'Delete a dynamic data store',
+    description: 'Delete a dynamic data store. Scope: manageDynamicStores',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iDeleteDynamicDataStorePayload',
+      response: 'iDeleteDynamicDataStoreSuccessResponse',
+      function: 'BitBadgesAPI.deleteDynamicDataStore',
+    },
   },
   {
     name: 'get-dynamic-stores',
     method: 'POST',
     path: '/dynamicStores/fetch',
-    description: 'Fetch dynamic data stores (batch)',
+    description: 'Fetch dynamic data stores (batch). Scope: manageDynamicStores (or dataSecret)',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iGetDynamicDataStoresPayload',
+      response: 'iGetDynamicDataStoresSuccessResponse',
+      function: 'BitBadgesAPI.getDynamicDataStores',
+    },
   },
   {
     name: 'search-dynamic-stores',
     method: 'GET',
     path: '/dynamicStores/search',
-    description: 'Search dynamic data stores for user',
+    description: 'Search dynamic data stores for signed-in user. Scope: manageDynamicStores',
     pathParams: [],
     hasBody: false,
+    sdkLinks: {
+      request: 'iSearchDynamicDataStoresPayload',
+      response: 'iSearchDynamicDataStoresSuccessResponse',
+      function: 'BitBadgesAPI.searchDynamicDataStores',
+    },
   },
   {
     name: 'get-dynamic-data-activity',
     method: 'GET',
     path: '/dynamicStores/activity',
-    description: 'Get dynamic data store activity history',
+    description: 'Get dynamic data store activity history. Scope: manageDynamicStores (or dataSecret)',
     pathParams: [],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetDynamicDataActivityPayload',
+      response: 'iGetDynamicDataActivitySuccessResponse',
+      function: 'BitBadgesAPI.getDynamicDataActivity',
+    },
   },
   {
     name: 'perform-store-action-single',
     method: 'POST',
     path: '/storeActions/single',
-    description: 'Perform a single store action (body auth)',
+    description: 'Perform a single store action (body auth). Scope: manageDynamicStores (or dataSecret)',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iPerformStoreActionSingleWithBodyAuthPayload',
+      response: 'iPerformStoreActionSuccessResponse',
+      function: 'BitBadgesAPI.performStoreAction',
+    },
   },
   {
     name: 'perform-store-action-batch',
     method: 'POST',
     path: '/storeActions/batch',
-    description: 'Perform batch store actions (body auth)',
+    description: 'Perform batch store actions (body auth). Scope: manageDynamicStores (or dataSecret)',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iPerformStoreActionBatchWithBodyAuthPayload',
+      response: 'iBatchStoreActionSuccessResponse',
+      function: 'BitBadgesAPI.performBatchStoreAction',
+    },
   },
 
   // =========================================================================
@@ -610,14 +1089,24 @@ const ROUTES: ApiRoute[] = [
     description: 'Get an application by ID',
     pathParams: ['applicationId'],
     hasBody: false,
+    sdkLinks: {
+      request: 'iGetApplicationPayload',
+      response: 'iGetApplicationSuccessResponse',
+      function: 'BitBadgesAPI.getApplication',
+    },
   },
   {
     name: 'search-applications',
     method: 'GET',
     path: '/applications/search',
-    description: 'Search applications',
+    description: 'Search applications (signed-in user only). Scope: manageApplications',
     pathParams: [],
     hasBody: false,
+    sdkLinks: {
+      request: 'iSearchApplicationsPayload',
+      response: 'iSearchApplicationsSuccessResponse',
+      function: 'BitBadgesAPI.searchApplications',
+    },
   },
   {
     name: 'get-applications',
@@ -626,38 +1115,63 @@ const ROUTES: ApiRoute[] = [
     description: 'Fetch applications (batch)',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iGetApplicationsPayload',
+      response: 'iGetApplicationsSuccessResponse',
+      function: 'BitBadgesAPI.getApplications',
+    },
   },
   {
     name: 'create-application',
     method: 'POST',
     path: '/applications',
-    description: 'Create an application',
+    description: 'Create an application. Scope: manageApplications',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iCreateApplicationPayload',
+      response: 'iCreateApplicationSuccessResponse',
+      function: 'BitBadgesAPI.createApplication',
+    },
   },
   {
     name: 'update-application',
     method: 'PUT',
     path: '/applications',
-    description: 'Update an application',
+    description: 'Update an application. Scope: manageApplications',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iUpdateApplicationPayload',
+      response: 'iUpdateApplicationSuccessResponse',
+      function: 'BitBadgesAPI.updateApplication',
+    },
   },
   {
     name: 'delete-application',
     method: 'DELETE',
     path: '/applications',
-    description: 'Delete an application',
+    description: 'Delete an application. Scope: manageApplications',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iDeleteApplicationPayload',
+      response: 'iDeleteApplicationSuccessResponse',
+      function: 'BitBadgesAPI.deleteApplication',
+    },
   },
   {
     name: 'calculate-points',
     method: 'POST',
     path: '/applications/points',
-    description: 'Calculate points for an application',
+    description: 'Calculate points for an application. Uses heavy caching.',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iCalculatePointsPayload',
+      response: 'iCalculatePointsSuccessResponse',
+      function: 'BitBadgesAPI.calculatePoints',
+    },
   },
   {
     name: 'get-points-activity',
@@ -666,6 +1180,14 @@ const ROUTES: ApiRoute[] = [
     description: 'Get points activity for an application',
     pathParams: [],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetPointsActivityPayload',
+      response: 'iGetPointsActivitySuccessResponse',
+      function: 'BitBadgesAPI.getPointsActivity',
+    },
   },
 
   // =========================================================================
@@ -675,49 +1197,79 @@ const ROUTES: ApiRoute[] = [
     name: 'get-utility-page',
     method: 'GET',
     path: '/utilityPage/{utilityPageId}',
-    description: 'Get a utility page by ID',
+    description: 'Get a utility page by ID. Scope: manageUtilityPages (for private pages)',
     pathParams: ['utilityPageId'],
     hasBody: false,
+    sdkLinks: {
+      request: 'iGetUtilityPagePayload',
+      response: 'iGetUtilityPageSuccessResponse',
+      function: 'BitBadgesAPI.getUtilityPage',
+    },
   },
   {
     name: 'get-utility-pages',
     method: 'POST',
     path: '/utilityPages/fetch',
-    description: 'Fetch utility pages (batch)',
+    description: 'Fetch utility pages (batch). Scope: manageUtilityPages (for private pages)',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iGetUtilityPagesPayload',
+      response: 'iGetUtilityPagesSuccessResponse',
+      function: 'BitBadgesAPI.getUtilityPages',
+    },
   },
   {
     name: 'search-utility-pages',
     method: 'GET',
     path: '/utilityPages/search',
-    description: 'Search utility pages',
+    description: 'Search utility pages (signed-in user only). Scope: manageUtilityPages',
     pathParams: [],
     hasBody: false,
+    sdkLinks: {
+      request: 'iSearchUtilityPagesPayload',
+      response: 'iSearchUtilityPagesSuccessResponse',
+      function: 'BitBadgesAPI.searchUtilityPages',
+    },
   },
   {
     name: 'create-utility-page',
     method: 'POST',
     path: '/utilityPages',
-    description: 'Create a utility page',
+    description: 'Create a utility page. Scope: manageUtilityPages',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iCreateUtilityPagePayload',
+      response: 'iCreateUtilityPageSuccessResponse',
+      function: 'BitBadgesAPI.createUtilityPage',
+    },
   },
   {
     name: 'update-utility-page',
     method: 'PUT',
     path: '/utilityPages',
-    description: 'Update a utility page',
+    description: 'Update a utility page. Scope: manageUtilityPages',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iUpdateUtilityPagePayload',
+      response: 'iUpdateUtilityPageSuccessResponse',
+      function: 'BitBadgesAPI.updateUtilityPage',
+    },
   },
   {
     name: 'delete-utility-page',
     method: 'DELETE',
     path: '/utilityPages',
-    description: 'Delete a utility page',
+    description: 'Delete a utility page. Scope: manageUtilityPages',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iDeleteUtilityPagePayload',
+      response: 'iDeleteUtilityPageSuccessResponse',
+      function: 'BitBadgesAPI.deleteUtilityPage',
+    },
   },
 
   // =========================================================================
@@ -727,9 +1279,14 @@ const ROUTES: ApiRoute[] = [
     name: 'get-map',
     method: 'GET',
     path: '/maps/{mapId}',
-    description: 'Get a map by ID',
+    description: 'Get a map by ID. Maps are on-chain key-value stores.',
     pathParams: ['mapId'],
     hasBody: false,
+    sdkLinks: {
+      request: 'iGetMapPayload',
+      response: 'iGetMapSuccessResponse',
+      function: 'BitBadgesAPI.getMap',
+    },
   },
   {
     name: 'get-maps',
@@ -738,6 +1295,11 @@ const ROUTES: ApiRoute[] = [
     description: 'Get maps (batch)',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iGetMapsPayload',
+      response: 'iGetMapsSuccessResponse',
+      function: 'BitBadgesAPI.getMaps',
+    },
   },
   {
     name: 'get-map-values',
@@ -746,14 +1308,24 @@ const ROUTES: ApiRoute[] = [
     description: 'Get map values (batch)',
     pathParams: [],
     hasBody: true,
+    sdkLinks: {
+      request: 'iGetMapValuesPayload',
+      response: 'iGetMapValuesSuccessResponse',
+      function: 'BitBadgesAPI.getMapValues',
+    },
   },
   {
     name: 'get-map-value',
     method: 'GET',
     path: '/mapValue/{mapId}/{key}',
-    description: 'Get a single map value',
+    description: 'Get a single map value by map ID and key',
     pathParams: ['mapId', 'key'],
     hasBody: false,
+    sdkLinks: {
+      request: 'iGetMapValuePayload',
+      response: 'iGetMapValueSuccessResponse',
+      function: 'BitBadgesAPI.getMapValue',
+    },
   },
 
   // =========================================================================
@@ -763,9 +1335,15 @@ const ROUTES: ApiRoute[] = [
     name: 'get-status',
     method: 'GET',
     path: '/status',
-    description: 'Get blockchain/indexer status',
+    description: 'Get blockchain/indexer status (gas, block height, etc.)',
     pathParams: [],
     hasBody: false,
+    example: `const res = await BitBadgesApi.getStatus();`,
+    sdkLinks: {
+      request: 'iGetStatusPayload',
+      response: 'iGetStatusSuccessResponse',
+      function: 'BitBadgesAPI.getStatus',
+    },
   },
 
   // =========================================================================
@@ -775,7 +1353,7 @@ const ROUTES: ApiRoute[] = [
     name: 'get-on-chain-dynamic-store',
     method: 'GET',
     path: '/onChainDynamicStore/{storeId}',
-    description: 'Get an on-chain dynamic store by ID',
+    description: 'Get an on-chain dynamic store by ID (stored on blockchain)',
     pathParams: ['storeId'],
     hasBody: false,
   },
@@ -802,6 +1380,9 @@ const ROUTES: ApiRoute[] = [
     description: 'Get paginated values from an on-chain dynamic store',
     pathParams: ['storeId'],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
   },
 
   // =========================================================================
@@ -814,6 +1395,10 @@ const ROUTES: ApiRoute[] = [
     description: 'Get all liquidity pools',
     pathParams: ['version'],
     hasBody: false,
+    sdkLinks: {
+      request: 'iGetAllPoolsPayload',
+      response: 'iGetAllPoolsSuccessResponse',
+    },
   },
   {
     name: 'get-pool-infos-by-denom',
@@ -926,6 +1511,9 @@ const ROUTES: ApiRoute[] = [
     description: 'Get swap activities (paginated)',
     pathParams: [],
     hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Pagination bookmark', required: false },
+    ],
   },
 ];
 
@@ -974,6 +1562,63 @@ function interpolatePath(
 }
 
 // ---------------------------------------------------------------------------
+// Help text builder
+// ---------------------------------------------------------------------------
+
+const SDK_DOCS_BASE = 'https://bitbadges.github.io/bitbadgesjs';
+
+function buildAfterHelpText(route: ApiRoute): string {
+  const lines: string[] = [];
+
+  // SDK type information
+  if (route.sdkLinks) {
+    lines.push('');
+    lines.push('SDK Types:');
+    if (route.sdkLinks.request) {
+      lines.push(`  Request:  ${route.sdkLinks.request}`);
+      lines.push(`            ${SDK_DOCS_BASE}/interfaces/${route.sdkLinks.request}`);
+    }
+    if (route.sdkLinks.response) {
+      lines.push(`  Response: ${route.sdkLinks.response}`);
+      lines.push(`            ${SDK_DOCS_BASE}/interfaces/${route.sdkLinks.response}`);
+    }
+    if (route.sdkLinks.function) {
+      lines.push(`  Function: ${route.sdkLinks.function}`);
+    }
+  }
+
+  // Query parameters
+  if (route.queryParams && route.queryParams.length > 0) {
+    lines.push('');
+    lines.push('Query Parameters (pass via --query \'{"key":"value"}\'):');
+    for (const qp of route.queryParams) {
+      const req = qp.required ? ' (required)' : '';
+      lines.push(`  ${qp.name}${req} - ${qp.description}`);
+    }
+  }
+
+  // Body fields
+  if (route.bodyFields && route.bodyFields.length > 0) {
+    lines.push('');
+    lines.push('Body Fields (pass via --body):');
+    for (const bf of route.bodyFields) {
+      const req = bf.required ? ' (required)' : '';
+      lines.push(`  ${bf.name}: ${bf.type}${req}`);
+      lines.push(`    ${bf.description}`);
+    }
+  }
+
+  // Example
+  if (route.example) {
+    lines.push('');
+    lines.push('SDK Example:');
+    lines.push(`  ${route.example}`);
+  }
+
+  return lines.length > 0 ? lines.join('\n') : '';
+}
+
+// ---------------------------------------------------------------------------
 // Command builder
 // ---------------------------------------------------------------------------
 
@@ -1003,6 +1648,12 @@ export function createApiCommand(): Command {
       .option('--condensed', 'Output condensed JSON (no whitespace)', false)
       .option('--dry-run', 'Show request details without sending', false)
       .option('--output-file <path>', 'Write output to file instead of stdout');
+
+    // Append rich documentation from the OpenAPI spec
+    const afterHelp = buildAfterHelpText(route);
+    if (afterHelp) {
+      cmd.addHelpText('after', afterHelp);
+    }
 
     cmd.action(async (...args: any[]) => {
       // Commander passes positional args first, then the options object, then the command
@@ -1041,6 +1692,17 @@ export function createApiCommand(): Command {
         let body: any = undefined;
         if (opts.body) {
           body = resolveBody(opts.body);
+        }
+
+        // Warn when a POST/PUT/DELETE route is called without --body
+        if (route.hasBody && body === undefined && !opts.dryRun) {
+          const typeHint = route.sdkLinks?.request
+            ? ` (see ${route.sdkLinks.request} for fields)`
+            : '';
+          process.stderr.write(
+            `Warning: ${route.method} ${route.path} expects a request body but none was provided.${typeHint}\n` +
+            `  Use --body '{}' to send an empty body, or --body @file.json to load from file.\n`
+          );
         }
 
         // Dry-run: show request details and exit
