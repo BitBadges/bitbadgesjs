@@ -1,6 +1,5 @@
 import type { NumberType } from '../common/string-numbers.js';
 import { AddressList } from './addressLists.js';
-import type { iApprovalCriteriaWithDetails, iApprovalInfoDetails, iCollectionApprovalWithDetails } from './approvals.js';
 import { CollectionApprovalWithDetails, UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from './approvals.js';
 import { GetFirstMatchOnly, MergeUniversalPermissionDetails } from './overlaps.js';
 import { UintRange } from './uintRanges.js';
@@ -286,14 +285,4 @@ export const getMintApprovals = <T extends NumberType>(collectionApprovals: Coll
     .filter((x) => x !== undefined).map((x) => new CollectionApprovalWithDetails(x));
 
   return newApprovals;
-};
-
-/**
- * A collection approval that is guaranteed to have approvalCriteria and details populated.
- *
- * @category Approvals / Transferability
- */
-export type RequiredApprovalProps = iCollectionApprovalWithDetails<bigint> & {
-  approvalCriteria: Required<iApprovalCriteriaWithDetails<bigint>>;
-  details: iApprovalInfoDetails;
 };
