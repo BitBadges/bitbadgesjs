@@ -130,6 +130,40 @@ addressCmd
     console.log(JSON.stringify({ valid, chain: chainLabel, address }, null, 2));
   });
 
+// ── sdk lookup-token ──────────────────────────────────────────────────────────
+
+const TOKEN_REGISTRY: Record<string, { symbol: string; ibcDenom: string; decimals: number }> = {
+  BADGE: { symbol: 'BADGE', ibcDenom: 'ubadge', decimals: 9 },
+  CHAOS: { symbol: 'CHAOS', ibcDenom: 'badges:49:chaosnet', decimals: 9 },
+  USDC: { symbol: 'USDC', ibcDenom: 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349', decimals: 6 },
+  ATOM: { symbol: 'ATOM', ibcDenom: 'ibc/A4DB47A9D3CF9A068D454513891B526702455D3EF08FB9EB558C561F9DC2B701', decimals: 6 },
+  OSMO: { symbol: 'OSMO', ibcDenom: 'ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518', decimals: 6 }
+};
+
+sdkCommand
+  .command('lookup-token <symbol>')
+  .description('Look up token info by symbol — returns IBC denom, decimals, and backing address')
+  .action(async (symbol: string) => {
+    const entry = TOKEN_REGISTRY[symbol.toUpperCase()];
+    if (!entry) {
+      console.error(`Unknown token "${symbol}". Known tokens: ${Object.keys(TOKEN_REGISTRY).join(', ')}`);
+      process.exit(1);
+    }
+
+    let backingAddress = '';
+    if (entry.ibcDenom.startsWith('ibc/')) {
+      const { generateAliasAddressForIBCBackedDenom } = await import('../../core/aliases.js');
+      backingAddress = generateAliasAddressForIBCBackedDenom(entry.ibcDenom);
+    }
+
+    console.log(JSON.stringify({
+      symbol: entry.symbol,
+      ibcDenom: entry.ibcDenom,
+      decimals: entry.decimals,
+      ...(backingAddress ? { backingAddress } : {})
+    }, null, 2));
+  });
+
 // ── sdk alias ──────────────────────────────────────────────────────────────────
 
 const aliasCmd = sdkCommand.command('alias').description('Generate alias addresses for denoms and collections');
