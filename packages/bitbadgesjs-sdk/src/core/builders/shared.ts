@@ -141,6 +141,7 @@ export function buildMsg(params: {
   validTokenIds?: any[];
   standards?: string[];
   collectionPermissions?: any;
+  creator?: string;
   manager?: string;
   collectionMetadata?: any;
   tokenMetadata?: any[];
@@ -154,7 +155,7 @@ export function buildMsg(params: {
   return {
     typeUrl: '/tokenization.MsgUniversalUpdateCollection',
     value: {
-      creator: '',
+      creator: params.creator || '',
       collectionId: '0',
       updateValidTokenIds: true,
       validTokenIds: params.validTokenIds || [{ start: '1', end: '1' }],

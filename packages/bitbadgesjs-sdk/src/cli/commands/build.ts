@@ -13,7 +13,13 @@ async function applyGlobalOpts(opts: any) {
   }
 }
 
-async function emit(data: any, opts: { condensed?: boolean; outputFile?: string; dryRun?: boolean; explain?: boolean; testnet?: boolean }) {
+async function emit(data: any, opts: { condensed?: boolean; outputFile?: string; dryRun?: boolean; explain?: boolean; testnet?: boolean; creator?: string; manager?: string }) {
+  // Apply --creator / --manager overrides to collection msgs
+  if (data.typeUrl?.includes('MsgUniversalUpdateCollection') && data.value) {
+    if (opts.creator) data.value.creator = opts.creator;
+    if (opts.manager) data.value.manager = opts.manager;
+  }
+
   // --dry-run: run verifyStandardsCompliance and print violations
   if (opts.dryRun && data.typeUrl?.includes('MsgUniversalUpdateCollection')) {
     const { verifyStandardsCompliance } = await import('../../core/verify-standards.js');
@@ -46,7 +52,9 @@ const sharedOpts = (cmd: Command) =>
     .option('--json <input>', 'Pass all params as JSON (file, inline, or - for stdin). Overrides individual flags.')
     .option('--dry-run', 'Validate output against standard checks (violations to stderr)')
     .option('--explain', 'Print human-readable explanation of the output (to stderr)')
-    .option('--testnet', 'Use testnet coin registry (only BADGE available)');
+    .option('--testnet', 'Use testnet coin registry (only BADGE available)')
+    .option('--creator <address>', 'Creator/sender address (bb1... or 0x...)')
+    .option('--manager <address>', 'Collection manager address (bb1...)');
 
 // ============================================================
 // Collection builders
@@ -251,7 +259,6 @@ sharedOpts(
     .requiredOption('--name <name>', 'List name')
     .option('--image <url>', 'List image URL')
     .option('--description <text>', 'Description')
-    .option('--manager <address>', 'Manager address that controls add/remove (bb1...)')
 ).action(async (opts) => {
   await applyGlobalOpts(opts);
   const { buildAddressList } = await import('../../core/builders/address-list.js');
