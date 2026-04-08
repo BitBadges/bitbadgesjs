@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { getConfigBaseUrl } from './config.js';
 
 /**
  * Read JSON input from multiple sources:
@@ -35,19 +36,25 @@ export function readJsonInput(input: string): any {
  *
  * --condensed: no whitespace (for piping/scripts)
  * --human: human-readable tree format
+ * --output-file: write to file instead of stdout
  * default: pretty-printed JSON (2-space indent)
  */
-export function output(data: any, options: { human?: boolean; condensed?: boolean }): void {
+export function output(data: any, options: { human?: boolean; condensed?: boolean; outputFile?: string }): void {
+  let text: string;
+
   if (options.human) {
-    if (typeof data === 'string') {
-      console.log(data);
-    } else {
-      console.log(formatHuman(data));
-    }
+    text = typeof data === 'string' ? data : formatHuman(data);
   } else if (options.condensed) {
-    console.log(JSON.stringify(data));
+    text = JSON.stringify(data);
   } else {
-    console.log(JSON.stringify(data, null, 2));
+    text = JSON.stringify(data, null, 2);
+  }
+
+  if (options.outputFile) {
+    fs.writeFileSync(options.outputFile, text + '\n', 'utf-8');
+    process.stderr.write(`Written to ${options.outputFile}\n`);
+  } else {
+    console.log(text);
   }
 }
 
@@ -90,5 +97,13 @@ export function getApiUrl(options: { testnet?: boolean; local?: boolean; url?: s
   if (options.testnet) {
     return 'https://api.testnet.bitbadges.io';
   }
-  return process.env.BITBADGES_API_URL || 'https://api.bitbadges.io';
+  if (process.env.BITBADGES_API_URL) {
+    return process.env.BITBADGES_API_URL;
+  }
+  const configUrl = getConfigBaseUrl();
+  if (configUrl) {
+    // Config base URL includes /api/v0 suffix; strip it for getApiUrl callers
+    return configUrl.replace(/\/api\/v0$/, '');
+  }
+  return 'https://api.bitbadges.io';
 }

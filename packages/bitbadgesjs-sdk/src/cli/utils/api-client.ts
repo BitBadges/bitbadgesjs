@@ -3,6 +3,8 @@
  * Uses native fetch. Adds x-api-key header. Returns parsed JSON.
  */
 
+import { getConfigApiKey, getConfigBaseUrl } from './config.js';
+
 export interface ApiRequestOptions {
   method: string;
   path: string;
@@ -12,12 +14,15 @@ export interface ApiRequestOptions {
 }
 
 /**
- * Resolves the base URL for the API from flags/env/defaults.
+ * Resolves the base URL for the API from flags/env/config/defaults.
  *
  * Priority:
- *  1. Explicit baseUrl argument (from --testnet / --local flags)
- *  2. BITBADGES_API_URL environment variable
- *  3. Default production URL
+ *  1. Explicit --url flag
+ *  2. --local flag
+ *  3. --testnet flag
+ *  4. BITBADGES_API_URL environment variable
+ *  5. Config file (network / url)
+ *  6. Default production URL
  */
 export function resolveBaseUrl(options?: {
   testnet?: boolean;
@@ -28,17 +33,21 @@ export function resolveBaseUrl(options?: {
   if (options?.local) return 'http://localhost:3001/api/v0';
   if (options?.testnet) return 'https://api.testnet.bitbadges.io/api/v0';
   if (process.env.BITBADGES_API_URL) return process.env.BITBADGES_API_URL;
+  const configUrl = getConfigBaseUrl();
+  if (configUrl) return configUrl;
   return 'https://api.bitbadges.io/api/v0';
 }
 
 /**
- * Resolves the API key from flag or environment variable.
+ * Resolves the API key from flag, environment variable, or config file.
+ *
+ * Priority: explicit flag > env var > config file
  */
 export function resolveApiKey(explicit?: string): string {
-  const key = explicit || process.env.BITBADGES_API_KEY;
+  const key = explicit || process.env.BITBADGES_API_KEY || getConfigApiKey();
   if (!key) {
     throw new Error(
-      'No API key provided. Set BITBADGES_API_KEY env var or pass --api-key <key>.'
+      'No API key provided. Set BITBADGES_API_KEY env var, pass --api-key <key>, or run `bitbadges-cli config set apiKey <key>`.'
     );
   }
   return key;

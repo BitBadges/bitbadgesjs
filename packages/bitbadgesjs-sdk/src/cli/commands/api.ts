@@ -1000,7 +1000,9 @@ export function createApiCommand(): Command {
       .option('--local', 'Use local API (localhost:3001)', false)
       .option('--url <url>', 'Custom API base URL (overrides all other URL options)')
       .option('--query <params>', 'Query string params as JSON object (e.g. \'{"bookmark":"x"}\')')
-      .option('--condensed', 'Output condensed JSON (no whitespace)', false);
+      .option('--condensed', 'Output condensed JSON (no whitespace)', false)
+      .option('--dry-run', 'Show request details without sending', false)
+      .option('--output-file <path>', 'Write output to file instead of stdout');
 
     cmd.action(async (...args: any[]) => {
       // Commander passes positional args first, then the options object, then the command
@@ -1041,6 +1043,21 @@ export function createApiCommand(): Command {
           body = resolveBody(opts.body);
         }
 
+        // Dry-run: show request details and exit
+        if (opts.dryRun) {
+          const dryOutput = {
+            method: route.method,
+            url: `${baseUrl}${resolvedPath}`,
+            headers: {
+              'x-api-key': apiKey ? apiKey.slice(0, 4) + '****' : '(none)',
+              ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+            },
+            body: body ?? null,
+          };
+          process.stdout.write(JSON.stringify(dryOutput, null, 2) + '\n');
+          return;
+        }
+
         const result = await apiRequest({
           method: route.method,
           path: resolvedPath,
@@ -1049,11 +1066,16 @@ export function createApiCommand(): Command {
           baseUrl,
         });
 
-        const output = opts.condensed
+        const formatted = opts.condensed
           ? JSON.stringify(result)
           : JSON.stringify(result, null, 2);
 
-        process.stdout.write(output + '\n');
+        if (opts.outputFile) {
+          fs.writeFileSync(opts.outputFile, formatted + '\n', 'utf-8');
+          process.stderr.write(`Written to ${opts.outputFile}\n`);
+        } else {
+          process.stdout.write(formatted + '\n');
+        }
       } catch (err: any) {
         // If the error has a response body, print it
         if (err.response) {

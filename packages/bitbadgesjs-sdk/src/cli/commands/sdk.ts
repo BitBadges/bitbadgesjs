@@ -1,5 +1,7 @@
 import { Command } from 'commander';
 import { readJsonInput, output, getApiUrl } from '../utils/io.js';
+import { loadConfig, getConfigPath } from '../utils/config.js';
+import { resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
 
 export const sdkCommand = new Command('sdk').description('SDK analysis and utility commands');
 
@@ -11,7 +13,8 @@ sdkCommand
   .option('--human', 'Output human-readable text instead of JSON')
   .option('--testnet', 'Use testnet API URL')
   .option('--local', 'Use local API URL (http://localhost:3001)')
-  .action(async (file: string, opts: { human?: boolean; testnet?: boolean; local?: boolean }) => {
+  .option('--output-file <path>', 'Write output to file instead of stdout')
+  .action(async (file: string, opts: { human?: boolean; testnet?: boolean; local?: boolean; outputFile?: string }) => {
     const data = readJsonInput(file);
     const isTransaction = !!data.messages || !!data.msgs;
 
@@ -76,11 +79,18 @@ sdkCommand
 sdkCommand
   .command('interpret-tx <file>')
   .description('Interpret a transaction JSON and print a human-readable summary')
-  .action(async (file: string) => {
+  .option('--output-file <path>', 'Write output to file instead of stdout')
+  .action(async (file: string, opts: { outputFile?: string }) => {
     const data = readJsonInput(file);
     const { interpretTransaction } = await import('../../core/interpret-transaction.js');
     const result = interpretTransaction(data);
-    console.log(result);
+    if (opts.outputFile) {
+      const fs = await import('fs');
+      fs.writeFileSync(opts.outputFile, result + '\n', 'utf-8');
+      process.stderr.write(`Written to ${opts.outputFile}\n`);
+    } else {
+      console.log(result);
+    }
   });
 
 // ── sdk interpret-collection <file> ────────────────────────────────────────────
@@ -88,11 +98,18 @@ sdkCommand
 sdkCommand
   .command('interpret-collection <file>')
   .description('Interpret a collection JSON and print a human-readable summary')
-  .action(async (file: string) => {
+  .option('--output-file <path>', 'Write output to file instead of stdout')
+  .action(async (file: string, opts: { outputFile?: string }) => {
     const data = readJsonInput(file);
     const { interpretCollection } = await import('../../core/interpret.js');
     const result = interpretCollection(data);
-    console.log(result);
+    if (opts.outputFile) {
+      const fs = await import('fs');
+      fs.writeFileSync(opts.outputFile, result + '\n', 'utf-8');
+      process.stderr.write(`Written to ${opts.outputFile}\n`);
+    } else {
+      console.log(result);
+    }
   });
 
 // ── sdk address ────────────────────────────────────────────────────────────────
@@ -143,7 +160,8 @@ const TOKEN_REGISTRY: Record<string, { symbol: string; ibcDenom: string; decimal
 sdkCommand
   .command('lookup-token <symbol>')
   .description('Look up token info by symbol — returns IBC denom, decimals, and backing address')
-  .action(async (symbol: string) => {
+  .option('--output-file <path>', 'Write output to file instead of stdout')
+  .action(async (symbol: string, opts: { outputFile?: string }) => {
     const entry = TOKEN_REGISTRY[symbol.toUpperCase()];
     if (!entry) {
       console.error(`Unknown token "${symbol}". Known tokens: ${Object.keys(TOKEN_REGISTRY).join(', ')}`);
@@ -156,12 +174,20 @@ sdkCommand
       backingAddress = generateAliasAddressForIBCBackedDenom(entry.ibcDenom);
     }
 
-    console.log(JSON.stringify({
+    const result = JSON.stringify({
       symbol: entry.symbol,
       ibcDenom: entry.ibcDenom,
       decimals: entry.decimals,
       ...(backingAddress ? { backingAddress } : {})
-    }, null, 2));
+    }, null, 2);
+
+    if (opts.outputFile) {
+      const fs = await import('fs');
+      fs.writeFileSync(opts.outputFile, result + '\n', 'utf-8');
+      process.stderr.write(`Written to ${opts.outputFile}\n`);
+    } else {
+      console.log(result);
+    }
   });
 
 // ── sdk alias ──────────────────────────────────────────────────────────────────
@@ -291,5 +317,85 @@ sdkCommand
     } catch (err: any) {
       console.error(`Failed to fetch docs from ${url}: ${err.message}`);
       process.exit(1);
+    }
+  });
+
+// ── sdk status ────────────────────────────────────────────────────────────────
+
+sdkCommand
+  .command('status')
+  .description('Show CLI status: API key, network, base URL, config path, and API health')
+  .option('--testnet', 'Use testnet API URL')
+  .option('--local', 'Use local API URL')
+  .action(async (opts: { testnet?: boolean; local?: boolean }) => {
+    const config = loadConfig();
+    const configPath = getConfigPath();
+
+    // API key status
+    let apiKeyStatus = '(not set)';
+    try {
+      const key = resolveApiKey();
+      apiKeyStatus = key.length <= 8 ? '****' : key.slice(0, 4) + '****' + key.slice(-4);
+    } catch {
+      // No key configured
+    }
+
+    // Network / base URL
+    const baseUrl = resolveBaseUrl({
+      testnet: opts.testnet,
+      local: opts.local,
+    });
+
+    const network = opts.testnet
+      ? 'testnet'
+      : opts.local
+        ? 'local'
+        : config.network || 'mainnet';
+
+    console.log('BitBadges CLI Status');
+    console.log('====================');
+    console.log(`  API Key:      ${apiKeyStatus}`);
+    console.log(`  Network:      ${network}`);
+    console.log(`  Base URL:     ${baseUrl}`);
+    console.log(`  Config file:  ${configPath}`);
+    console.log(`  Node.js:      ${process.version}`);
+
+    // Try to get SDK version from package.json
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+      // Walk up from this file to find package.json
+      let dir = __dirname;
+      let sdkVersion = 'unknown';
+      for (let i = 0; i < 6; i++) {
+        const candidate = path.join(dir, 'package.json');
+        if (fs.existsSync(candidate)) {
+          const pkg = JSON.parse(fs.readFileSync(candidate, 'utf-8'));
+          if (pkg.name && pkg.version) {
+            sdkVersion = pkg.version;
+            break;
+          }
+        }
+        dir = path.dirname(dir);
+      }
+      console.log(`  SDK version:  ${sdkVersion}`);
+    } catch {
+      console.log(`  SDK version:  unknown`);
+    }
+
+    // Health check
+    console.log('');
+    process.stdout.write('  API health:   ');
+    try {
+      const response = await fetch(`${baseUrl}/status`, {
+        signal: AbortSignal.timeout(5000),
+      });
+      if (response.ok) {
+        console.log('reachable');
+      } else {
+        console.log(`HTTP ${response.status}`);
+      }
+    } catch (err: any) {
+      console.log(`unreachable (${err.message})`);
     }
   });
