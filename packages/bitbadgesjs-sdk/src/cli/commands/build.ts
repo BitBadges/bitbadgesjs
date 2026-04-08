@@ -5,7 +5,29 @@ export const buildCommand = new Command('build').description('Template builders 
 
 // ── Output helper ────────────────────────────────────────────────────────────
 
-function emit(data: any, opts: { condensed?: boolean; outputFile?: string }) {
+async function emit(data: any, opts: { condensed?: boolean; outputFile?: string; dryRun?: boolean; explain?: boolean }) {
+  // --dry-run: run verifyStandardsCompliance and print violations
+  if (opts.dryRun && data.typeUrl?.includes('MsgUniversalUpdateCollection')) {
+    const { verifyStandardsCompliance } = await import('../../core/verify-standards.js');
+    const result = verifyStandardsCompliance({ messages: [data] });
+    if (result.valid) {
+      process.stderr.write(`✓ Passes all standard checks (${result.standardsChecked.length} checks run)\n`);
+    } else {
+      process.stderr.write(`✗ ${result.violations.length} violation(s) found:\n`);
+      for (const v of result.violations) {
+        process.stderr.write(`  [${v.standard}] ${v.field}: ${v.message}\n`);
+        if (v.fix) process.stderr.write(`    Fix: ${v.fix}\n`);
+      }
+    }
+  }
+
+  // --explain: run interpretTransaction and print human-readable summary
+  if (opts.explain && data.typeUrl?.includes('MsgUniversalUpdateCollection')) {
+    const { interpretTransaction } = await import('../../core/interpret-transaction.js');
+    const explanation = interpretTransaction(data.value);
+    process.stderr.write('\n── Explanation ──\n' + explanation + '\n');
+  }
+
   output(data, { condensed: opts.condensed, outputFile: opts.outputFile });
 }
 
@@ -13,7 +35,9 @@ const sharedOpts = (cmd: Command) =>
   cmd
     .option('--condensed', 'Output compact JSON (no whitespace)')
     .option('--output-file <path>', 'Write output to file')
-    .option('--json <input>', 'Pass all params as JSON (file, inline, or - for stdin). Overrides individual flags.');
+    .option('--json <input>', 'Pass all params as JSON (file, inline, or - for stdin). Overrides individual flags.')
+    .option('--dry-run', 'Validate output against standard checks (violations to stderr)')
+    .option('--explain', 'Print human-readable explanation of the output (to stderr)');
 
 /**
  * Merge CLI flags with --json input. JSON takes precedence for overlapping keys.
