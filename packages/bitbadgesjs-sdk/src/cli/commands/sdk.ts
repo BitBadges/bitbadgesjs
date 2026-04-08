@@ -178,6 +178,66 @@ sdkCommand
     console.log(listId);
   });
 
+// ── sdk skills ─────────────────────────────────────────────────────────────────
+
+const KNOWN_SKILLS = [
+  'smart-token',
+  'minting',
+  'liquidity-pools',
+  'fungible-token',
+  'nft-collection',
+  'subscription',
+  'immutability',
+  'custom-2fa',
+  'address-list',
+  'bb-402',
+  'burnable',
+  'multi-sig-voting',
+  'payment-protocol',
+  'tradable',
+  'credit-token',
+  'auto-mint',
+  'quest',
+  'prediction-market',
+  'bounty'
+];
+
+const skillsCmd = sdkCommand.command('skills').description('Fetch MCP builder skill instructions');
+
+skillsCmd
+  .command('list')
+  .description('List all available skill IDs')
+  .action(() => {
+    for (const id of KNOWN_SKILLS) {
+      console.log(id);
+    }
+  });
+
+skillsCmd
+  .command('get <skillId>')
+  .description('Fetch skill instructions by ID (from docs site)')
+  .option('--url <url>', 'Override base URL for skill docs')
+  .action(async (skillId: string, opts: { url?: string }) => {
+    const baseUrl = opts.url || 'https://docs.bitbadges.io/token-standard/skills';
+    const url = `${baseUrl}/${skillId}`;
+
+    try {
+      const axios = (await import('axios')).default;
+      const response = await axios.get(url, { responseType: 'text' });
+      console.log(response.data);
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        console.error(`Skill "${skillId}" not found. Available skills:`);
+        for (const id of KNOWN_SKILLS) {
+          console.error(`  ${id}`);
+        }
+      } else {
+        console.error(`Failed to fetch skill "${skillId}" from ${url}: ${err.message}`);
+      }
+      process.exit(1);
+    }
+  });
+
 // ── sdk docs ───────────────────────────────────────────────────────────────────
 
 sdkCommand
