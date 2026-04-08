@@ -8,6 +8,95 @@ const AccountGenerationPrefix = 0x08;
 const DenomGenerationPrefix = 0x0c;
 const BackedPathGenerationPrefix = 0x12;
 
+/**
+ * Address alias for the mint escrow address. This is a reserved address used
+ * for minting operations. On the chain side, it resolves to a real bb1... address.
+ *
+ * @category Address Aliases
+ */
+export const MintEscrowAlias = 'MintEscrow';
+
+/**
+ * Prefix for cosmos wrapper alias addresses. Cosmos wrapper aliases are formatted
+ * as "CosmosWrapper/{index}" (e.g. "CosmosWrapper/0", "CosmosWrapper/1").
+ * On the chain side, these resolve to real bb1... addresses.
+ *
+ * @category Address Aliases
+ */
+export const CosmosWrapperPrefix = 'CosmosWrapper/';
+
+/**
+ * Address alias for the IBC backing address. This is a reserved address used
+ * for IBC-backed token operations. On the chain side, it resolves to a real bb1... address.
+ *
+ * @category Address Aliases
+ */
+export const IBCBackingAlias = 'IBCBacking';
+
+/**
+ * All known address alias constants (excluding CosmosWrapper/N which uses a prefix pattern).
+ */
+const KNOWN_ALIASES = [MintEscrowAlias, IBCBackingAlias];
+
+/**
+ * Checks whether the given string is a valid address alias.
+ *
+ * Valid aliases are:
+ * - "MintEscrow"
+ * - "CosmosWrapper/0", "CosmosWrapper/1", etc. (CosmosWrapper/ followed by a non-negative integer)
+ * - "IBCBacking"
+ *
+ * @category Address Aliases
+ */
+export function isAddressAlias(address: string): boolean {
+  if (KNOWN_ALIASES.includes(address)) {
+    return true;
+  }
+
+  if (address.startsWith(CosmosWrapperPrefix)) {
+    const suffix = address.slice(CosmosWrapperPrefix.length);
+    // Must be a non-negative integer
+    if (suffix.length > 0 && /^\d+$/.test(suffix)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Validates that the given string is a valid address alias. Throws an error if it is not.
+ *
+ * @category Address Aliases
+ */
+export function validateAddressAlias(address: string): void {
+  if (!isAddressAlias(address)) {
+    throw new Error(`Invalid address alias: "${address}". Valid aliases are: MintEscrow, CosmosWrapper/{index}, IBCBacking`);
+  }
+}
+
+/**
+ * Checks whether the given list ID is a reserved alias list ID.
+ * Reserved alias list IDs are list IDs that match a known address alias (e.g. "MintEscrow", "CosmosWrapper/0", "IBCBacking")
+ * or their inverted forms (e.g. "!MintEscrow").
+ *
+ * @category Address Aliases
+ */
+export function IsReservedAliasListId(listId: string): boolean {
+  let id = listId;
+
+  // Strip inversion prefix
+  if (id.startsWith('!') && !id.startsWith('!(')) {
+    id = id.slice(1);
+  } else if (id.startsWith('!(') && id.endsWith(')')) {
+    id = id.slice(2, -1);
+  }
+
+  // Check if all colon-separated parts are aliases
+  const parts = id.split(':');
+  return parts.every((part) => isAddressAlias(part));
+}
+
 function Module(moduleName: string, ...derivationKeys: Buffer[]) {
   let mKey = Buffer.from(moduleName);
 

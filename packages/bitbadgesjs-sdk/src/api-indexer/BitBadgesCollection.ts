@@ -3,7 +3,7 @@ import { BaseNumberTypeClass, convertClassPropertiesAndMaintainNumberTypes, deep
 import type { NumberType } from '@/common/string-numbers.js';
 import { BigIntify } from '@/common/string-numbers.js';
 import { AddressList } from '@/core/addressLists.js';
-import { generateAlias, getAliasDerivationKeysForBadge } from '@/core/aliases.js';
+import { generateAlias, getAliasDerivationKeysForBadge, isAddressAlias } from '@/core/aliases.js';
 import { getBalanceForIdNow } from '@/core/balances.js';
 import { getMintApprovals, getNonMintApprovals, getUnhandledCollectionApprovals } from '@/core/approval-utils.js';
 import { CollectionApprovalWithDetails, iCollectionApprovalWithDetails } from '@/core/approvals.js';
@@ -331,7 +331,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   private getBalanceInfoHelper(address: NativeAddress, throwIfNotFound = true) {
-    const convertedAddress = address === 'Mint' || address === 'Total' ? address : convertToBitBadgesAddress(address);
+    const convertedAddress = address === 'Mint' || address === 'Total' || isAddressAlias(address) ? address : convertToBitBadgesAddress(address);
     const owner = this.owners.find((x) => x.bitbadgesAddress === convertedAddress);
     if (!owner && throwIfNotFound)
       throw new Error(`Owner not found for address ${address}. Balance not fetched yet. Missing doc for '${address}' in owners.`);

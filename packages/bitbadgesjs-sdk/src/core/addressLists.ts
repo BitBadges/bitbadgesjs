@@ -3,6 +3,7 @@ import type { iAddressList } from '@/interfaces/types/core.js';
 import type { JsonReadOptions, JsonValue } from '@bufbuild/protobuf';
 import { AddressList as ProtoAddressList } from '@/proto/tokenization/address_lists_pb.js';
 import { convertToBitBadgesAddress, getConvertFunctionFromPrefix, isAddressValid } from '../address-converter/converter.js';
+import { isAddressAlias } from './aliases.js';
 
 /**
  * AddressLists represent a list of addresses, identified by a unique ID.
@@ -363,10 +364,10 @@ export class AddressList extends CustomTypeClass<AddressList> implements iAddres
       //split by :
       const addressesToCheck = addressListId.split(':');
       let allAreValid = true;
-      //For tracker IDs, we allow aliasses(aka non valid addresses)
+      //For tracker IDs, we allow aliases (aka non valid addresses)
       if (!allowAliases) {
         for (const address of addressesToCheck) {
-          if (address != 'Mint' && !convertToBitBadgesAddress(address)) {
+          if (address != 'Mint' && !isAddressAlias(address) && !convertToBitBadgesAddress(address)) {
             allAreValid = false;
           }
         }

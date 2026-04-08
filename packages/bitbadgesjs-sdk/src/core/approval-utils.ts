@@ -1,5 +1,6 @@
 import type { NumberType } from '../common/string-numbers.js';
 import { AddressList } from './addressLists.js';
+import { isAddressAlias } from './aliases.js';
 import { CollectionApprovalWithDetails, UserIncomingApprovalWithDetails, UserOutgoingApprovalWithDetails } from './approvals.js';
 import { GetFirstMatchOnly, MergeUniversalPermissionDetails } from './overlaps.js';
 import { UintRange } from './uintRanges.js';
@@ -43,7 +44,7 @@ export function appendSelfInitiatedIncomingApproval(
   currApprovals: UserIncomingApprovalWithDetails<bigint>[],
   userAddress: string
 ): UserIncomingApprovalWithDetails<bigint>[] {
-  if (userAddress === 'Mint' || userAddress === 'Total') {
+  if (userAddress === 'Mint' || userAddress === 'Total' || isAddressAlias(userAddress)) {
     return currApprovals;
   }
 
@@ -75,7 +76,7 @@ export function appendSelfInitiatedOutgoingApproval(
   currApprovals: UserOutgoingApprovalWithDetails<bigint>[],
   userAddress: string
 ): UserOutgoingApprovalWithDetails<bigint>[] {
-  if (userAddress === 'Mint' || userAddress === 'Total') {
+  if (userAddress === 'Mint' || userAddress === 'Total' || isAddressAlias(userAddress)) {
     return currApprovals;
   }
 

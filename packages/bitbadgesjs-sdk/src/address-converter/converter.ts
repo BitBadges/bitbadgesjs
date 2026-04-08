@@ -3,6 +3,19 @@ import { bech32 } from 'bech32';
 import { isValidChecksumAddress, stripHexPrefix, toChecksumAddress } from 'crypto-addr-codec';
 import { isAddress } from 'web3-validator';
 
+/**
+ * Internal check for address aliases (duplicated from core/aliases.ts to avoid circular imports).
+ * Recognised aliases: MintEscrow, CosmosWrapper/{uint}, IBCBacking.
+ */
+function isAddressAliasInternal(address: string): boolean {
+  if (address === 'MintEscrow' || address === 'IBCBacking') return true;
+  if (address.startsWith('CosmosWrapper/')) {
+    const suffix = address.slice('CosmosWrapper/'.length);
+    return suffix.length > 0 && /^\d+$/.test(suffix);
+  }
+  return false;
+}
+
 function makeBech32Decoder(currentPrefix: string) {
   return (data: string) => {
     const { prefix, words } = bech32.decode(data);
@@ -96,6 +109,11 @@ export function convertToBitBadgesAddress(address: string) {
     return address;
   }
 
+  // Address aliases pass through as-is (chain resolves them)
+  if (isAddressAliasInternal(address)) {
+    return address;
+  }
+
   try {
     bitbadgesToEth(address); //throws on failure
     bech32Address = address;
@@ -121,7 +139,7 @@ export function convertToBitBadgesAddress(address: string) {
  */
 export function getConvertFunctionFromPrefix(prefix: string, withAliasSupport = true) {
   return (address: string) => {
-    if (withAliasSupport && ['Mint', 'All', 'Total'].includes(address)) {
+    if (withAliasSupport && (['Mint', 'All', 'Total'].includes(address) || isAddressAliasInternal(address))) {
       return address;
     }
 
@@ -195,6 +213,7 @@ export function getChainForAddress(address: string) {
 export function getAbbreviatedAddress(address: string) {
   const isMintAddress = address === 'Mint';
   if (isMintAddress) return 'Mint';
+  if (isAddressAliasInternal(address)) return address;
   if (address.length == 0) return '...';
   if (address.length < 13) return address;
 
@@ -239,6 +258,8 @@ export function isAddressValid(address: string, chain?: SupportedChain) {
   if (address === 'Mint') {
     isValidAddress = true;
   } else if (address.startsWith('bbvaloper')) {
+    isValidAddress = true;
+  } else if (isAddressAliasInternal(address)) {
     isValidAddress = true;
   }
 

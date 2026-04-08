@@ -252,6 +252,9 @@ export function listIdHuman(listId: string): string {
   if (listId === 'Mint') return 'the Mint address (this is a special reserved address that represents the creation of new tokens)';
   if (listId === '!Mint') return 'any existing token holder (excludes the Mint address, so this only applies to tokens that already exist in someone\'s balance)';
   if (listId === 'Total') return 'the aggregate tracker (an internal address used to track totals across all users)';
+  if (listId === 'MintEscrow') return 'the mint escrow address (a reserved alias for the collection mint escrow)';
+  if (listId === 'IBCBacking') return 'the IBC backing address (a reserved alias for the IBC-backed token escrow)';
+  if (listId.startsWith('CosmosWrapper/')) return `a cosmos wrapper address (reserved alias for cosmos coin wrapper path ${listId})`;
   if (listId.startsWith('!Mint:')) return `any existing holder except the specific address ${listId.slice(6)}`;
   if (listId.startsWith('!')) return `anyone except the specific address ${listId.slice(1)}`;
   if (listId.includes(':')) return `the following addresses: ${listId.split(':').join(' and ')}`;
