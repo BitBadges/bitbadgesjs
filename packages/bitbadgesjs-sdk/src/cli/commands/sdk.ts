@@ -175,22 +175,58 @@ addressCmd
 
 // ── sdk lookup-token ──────────────────────────────────────────────────────────
 
-const TOKEN_REGISTRY: Record<string, { symbol: string; ibcDenom: string; decimals: number }> = {
-  BADGE: { symbol: 'BADGE', ibcDenom: 'ubadge', decimals: 9 },
-  CHAOS: { symbol: 'CHAOS', ibcDenom: 'badges:49:chaosnet', decimals: 9 },
-  USDC: { symbol: 'USDC', ibcDenom: 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349', decimals: 6 },
-  ATOM: { symbol: 'ATOM', ibcDenom: 'ibc/A4DB47A9D3CF9A068D454513891B526702455D3EF08FB9EB558C561F9DC2B701', decimals: 6 },
-  OSMO: { symbol: 'OSMO', ibcDenom: 'ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518', decimals: 6 }
-};
-
 sdkCommand
-  .command('lookup-token <symbol>')
-  .description('Look up token info by symbol — returns IBC denom, decimals, and backing address')
+  .command('lookup-token [symbol]')
+  .description('Look up token info by symbol — returns IBC denom, decimals, backing address, and supported networks. Omit symbol to list all tokens.')
   .option('--output-file <path>', 'Write output to file instead of stdout')
-  .action(async (symbol: string, opts: { outputFile?: string }) => {
-    const entry = TOKEN_REGISTRY[symbol.toUpperCase()];
+  .action(async (symbol: string | undefined, opts: { outputFile?: string }) => {
+    const { MAINNET_COINS_REGISTRY, TESTNET_COINS_REGISTRY } = await import('../../common/constants.js');
+
+    // Build combined registry with network info
+    const allSymbols = new Map<string, { symbol: string; ibcDenom: string; decimals: number; networks: string[] }>();
+
+    for (const [denom, coin] of Object.entries(MAINNET_COINS_REGISTRY)) {
+      const key = coin.symbol.toUpperCase();
+      const existing = allSymbols.get(key);
+      if (existing) {
+        if (!existing.networks.includes('mainnet')) existing.networks.push('mainnet');
+      } else {
+        allSymbols.set(key, { symbol: coin.symbol, ibcDenom: denom, decimals: Number(coin.decimals), networks: ['mainnet'] });
+      }
+    }
+
+    for (const [denom, coin] of Object.entries(TESTNET_COINS_REGISTRY)) {
+      const key = coin.symbol.toUpperCase();
+      const existing = allSymbols.get(key);
+      if (existing) {
+        if (!existing.networks.includes('testnet')) existing.networks.push('testnet');
+      } else {
+        allSymbols.set(key, { symbol: coin.symbol, ibcDenom: denom, decimals: Number(coin.decimals), networks: ['testnet'] });
+      }
+    }
+
+    // If no symbol, list all tokens
+    if (!symbol) {
+      const tokens = Array.from(allSymbols.values()).map((t) => ({
+        symbol: t.symbol,
+        ibcDenom: t.ibcDenom,
+        decimals: t.decimals,
+        networks: t.networks
+      }));
+      const result = JSON.stringify(tokens, null, 2);
+      if (opts.outputFile) {
+        const fs = await import('fs');
+        fs.writeFileSync(opts.outputFile, result + '\n', 'utf-8');
+        process.stderr.write(`Written to ${opts.outputFile}\n`);
+      } else {
+        console.log(result);
+      }
+      return;
+    }
+
+    const entry = allSymbols.get(symbol.toUpperCase());
     if (!entry) {
-      console.error(`Unknown token "${symbol}". Known tokens: ${Object.keys(TOKEN_REGISTRY).join(', ')}`);
+      console.error(`Unknown token "${symbol}". Known tokens: ${Array.from(allSymbols.keys()).join(', ')}`);
       process.exit(1);
     }
 
@@ -204,6 +240,7 @@ sdkCommand
       symbol: entry.symbol,
       ibcDenom: entry.ibcDenom,
       decimals: entry.decimals,
+      networks: entry.networks,
       ...(backingAddress ? { backingAddress } : {})
     }, null, 2);
 
