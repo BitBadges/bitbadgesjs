@@ -57,4 +57,3 @@ export * from './blankCriteria.js';
 export * from './system-addresses.js';
 export * from './audit.js';
 export * from './verify-standards.js';
-export * from './registries/index.js';
