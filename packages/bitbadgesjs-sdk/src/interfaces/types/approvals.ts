@@ -40,10 +40,20 @@ export interface iAddressChecks {
  * @category Interfaces
  */
 export interface iAltTimeChecks<T extends NumberType> {
-  /** Hours (0-23) when transfers should be denied. Uses UTC timezone. */
+  /** Hours (0-23) when transfers should be denied. */
   offlineHours?: iUintRange<T>[];
-  /** Days (0-6, where 0=Sunday, 1=Monday, ..., 6=Saturday) when transfers should be denied. Uses UTC timezone. */
+  /** Days (0-6, where 0=Sunday, 1=Monday, ..., 6=Saturday) when transfers should be denied. */
   offlineDays?: iUintRange<T>[];
+  /** Months (1-12, where 1=January, 12=December) when transfers should be denied. */
+  offlineMonths?: iUintRange<T>[];
+  /** Days of month (1-31) when transfers should be denied. */
+  offlineDaysOfMonth?: iUintRange<T>[];
+  /** Weeks of year (1-52) when transfers should be denied. Uses ISO 8601 week numbering. */
+  offlineWeeksOfYear?: iUintRange<T>[];
+  /** Timezone offset magnitude in minutes from UTC. Default 0 = UTC. */
+  timezoneOffsetMinutes?: T;
+  /** If true, the timezone offset is subtracted (west of UTC). */
+  timezoneOffsetNegative?: boolean;
 }
 
 /**
@@ -370,8 +380,8 @@ export interface iApprovalCriteria<T extends NumberType> {
   overridesFromOutgoingApprovals?: boolean;
   /** Whether this approval overrides the to address's approved incoming transfers. */
   overridesToIncomingApprovals?: boolean;
-  /** The royalties to apply to the transfer. */
-  userRoyalties?: iUserRoyalties<T>;
+  /** Issuer-imposed constraints on user-level approvals. Includes royalties, allowed denoms, and coin transfer restrictions. */
+  userApprovalSettings?: iUserApprovalSettings<T>;
   /** The list of dynamic store challenges that the initiator must pass for approval. */
   dynamicStoreChallenges?: iDynamicStoreChallenge<T>[];
   /** The list of ETH signature challenges that the initiator must pass for approval. */
@@ -404,6 +414,18 @@ export interface iUserRoyalties<T extends NumberType> {
   percentage: T;
   /** The payout address for the royalties. */
   payoutAddress: string;
+}
+
+/**
+ * @category Interfaces
+ */
+export interface iUserApprovalSettings<T extends NumberType> {
+  /** Restricts which denoms user-level coinTransfers can reference. If empty, all params-allowed denoms are permitted. */
+  allowedDenoms?: string[];
+  /** If true, user-level approvals cannot trigger coinTransfers at all for transfers matched by this collection approval. */
+  disableUserCoinTransfers?: boolean;
+  /** User-level royalties to enforce for transfers matched by this collection approval. */
+  userRoyalties?: iUserRoyalties<T>;
 }
 
 /**

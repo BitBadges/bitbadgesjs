@@ -1307,3 +1307,97 @@ export class QueryGetCollectionStatsResponse extends Message<QueryGetCollectionS
   }
 }
 
+/**
+ * @generated from message tokenization.QueryGetBalanceForTokenRequest
+ */
+export class QueryGetBalanceForTokenRequest extends Message<QueryGetBalanceForTokenRequest> {
+  /**
+   * @generated from field: string collectionId = 1;
+   */
+  collectionId = "";
+
+  /**
+   * @generated from field: string address = 2;
+   */
+  address = "";
+
+  /**
+   * @generated from field: string tokenId = 3;
+   */
+  tokenId = "";
+
+  /**
+   * Optional - milliseconds since epoch, defaults to current block time
+   *
+   * @generated from field: string time = 4;
+   */
+  time = "";
+
+  constructor(data?: PartialMessage<QueryGetBalanceForTokenRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "tokenization.QueryGetBalanceForTokenRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "collectionId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "tokenId", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "time", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetBalanceForTokenRequest {
+    return new QueryGetBalanceForTokenRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetBalanceForTokenRequest {
+    return new QueryGetBalanceForTokenRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetBalanceForTokenRequest {
+    return new QueryGetBalanceForTokenRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetBalanceForTokenRequest | PlainMessage<QueryGetBalanceForTokenRequest> | undefined, b: QueryGetBalanceForTokenRequest | PlainMessage<QueryGetBalanceForTokenRequest> | undefined): boolean {
+    return proto3.util.equals(QueryGetBalanceForTokenRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message tokenization.QueryGetBalanceForTokenResponse
+ */
+export class QueryGetBalanceForTokenResponse extends Message<QueryGetBalanceForTokenResponse> {
+  /**
+   * @generated from field: string balance = 1;
+   */
+  balance = "";
+
+  constructor(data?: PartialMessage<QueryGetBalanceForTokenResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "tokenization.QueryGetBalanceForTokenResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "balance", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryGetBalanceForTokenResponse {
+    return new QueryGetBalanceForTokenResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryGetBalanceForTokenResponse {
+    return new QueryGetBalanceForTokenResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryGetBalanceForTokenResponse {
+    return new QueryGetBalanceForTokenResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryGetBalanceForTokenResponse | PlainMessage<QueryGetBalanceForTokenResponse> | undefined, b: QueryGetBalanceForTokenResponse | PlainMessage<QueryGetBalanceForTokenResponse> | undefined): boolean {
+    return proto3.util.equals(QueryGetBalanceForTokenResponse, a, b);
+  }
+}
+
