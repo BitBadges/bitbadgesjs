@@ -449,3 +449,43 @@ describe('pm-buy-intent builder', () => {
   });
   test('meta', () => { expect(msg._meta.collectionId).toBe('42'); expect(msg._meta.escrowCoins.length).toBe(1); });
 });
+
+// ── Zero-violations suite: every builder must pass ALL standard checks ───────
+
+describe('all collection builders pass verifyStandardsCompliance with zero violations', () => {
+  const builders: [string, any][] = [
+    ['vault', buildVault({ backingCoin: 'USDC' })],
+    ['vault (with limits)', buildVault({ backingCoin: 'USDC', dailyWithdrawLimit: 100, require2fa: '74', emergencyRecovery: 'bb1recovery' })],
+    ['smart-account', buildSmartAccount({ backingCoin: 'USDC' })],
+    ['smart-account (tradable)', buildSmartAccount({ backingCoin: 'USDC', tradable: true })],
+    ['smart-account (ai-agent)', buildSmartAccount({ backingCoin: 'BADGE', aiAgentVault: true })],
+    ['subscription (single)', buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test' })],
+    ['subscription (multi-tier)', buildSubscription({ interval: 'daily', price: 5, denom: 'BADGE', recipient: 'bb1r', tiers: 3 })],
+    ['subscription (multi-payout)', buildSubscription({ interval: 'monthly', payouts: [{ recipient: 'bb1a', amount: 5, denom: 'USDC' }, { recipient: 'bb1b', amount: 3, denom: 'BADGE' }] })],
+    ['bounty', buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1v', recipient: 'bb1r' })],
+    ['bounty (BADGE)', buildBounty({ amount: 50, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', expiration: '7d' })],
+    ['crowdfund', buildCrowdfund({ goal: 1000, denom: 'USDC' })],
+    ['crowdfund (with crowdfunder)', buildCrowdfund({ goal: 500, denom: 'BADGE', crowdfunder: 'bb1fund', deadline: '14d' })],
+    ['auction', buildAuction({})],
+    ['auction (custom times)', buildAuction({ bidDeadline: '3d', acceptWindow: '1d' })],
+    ['product-catalog', buildProductCatalog({ products: [{ name: 'Item', price: 10, denom: 'USDC' }], storeAddress: 'bb1s' })],
+    ['product-catalog (multi)', buildProductCatalog({ products: [{ name: 'A', price: 5, denom: 'BADGE' }, { name: 'B', price: 10, denom: 'USDC', maxSupply: 50, burn: true }], storeAddress: 'bb1s' })],
+    ['prediction-market', buildPredictionMarket({ verifier: 'bb1v' })],
+    ['credit-token', buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1r' })],
+    ['credit-token (custom)', buildCreditToken({ paymentDenom: 'BADGE', recipient: 'bb1r', symbol: 'CRED', tokensPerUnit: 50 })],
+    ['custom-2fa', buildCustom2FA({ name: 'My 2FA' })],
+    ['custom-2fa (burnable)', buildCustom2FA({ name: 'Burnable 2FA', burnable: true })],
+    ['quests', buildQuests({ reward: 10, denom: 'BADGE', maxClaims: 100 })],
+    ['address-list', buildAddressList({ name: 'My List' })],
+  ];
+
+  for (const [name, msg] of builders) {
+    test(`${name}: zero violations`, () => {
+      const result = verifyBuilder(msg);
+      if (result.violations.length > 0) {
+        const details = result.violations.map((v: any) => `[${v.standard}] ${v.field}: ${v.message}`).join('\n');
+        throw new Error(`${name} has ${result.violations.length} violation(s):\n${details}`);
+      }
+    });
+  }
+});

@@ -192,13 +192,14 @@ function verifySubscription(value: any): StandardViolation[] {
   const violations: StandardViolation[] = [];
   const std = 'Subscription';
 
-  // validTokenIds must be exactly 1 token
-  if (!isSingleToken(value.validTokenIds)) {
+  // validTokenIds must start at 1 (one range, supports multi-tier)
+  const vt = value.validTokenIds;
+  if (!Array.isArray(vt) || vt.length !== 1 || String(vt[0]?.start) !== '1') {
     violations.push({
       standard: std,
       field: 'validTokenIds',
-      message: 'Subscription collections MUST have validTokenIds = [{ start: "1", end: "1" }] (exactly 1 token ID).',
-      fix: 'Set validTokenIds to [{ "start": "1", "end": "1" }].'
+      message: 'Subscription collections MUST have validTokenIds starting at 1 (e.g. [{ start: "1", end: "1" }] for single tier, or [{ start: "1", end: "3" }] for 3 tiers).',
+      fix: 'Set validTokenIds to [{ "start": "1", "end": "<numTiers>" }].'
     });
   }
 

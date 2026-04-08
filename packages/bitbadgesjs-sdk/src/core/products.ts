@@ -143,6 +143,10 @@ export const validateProductCatalogCollection = (collection: Readonly<iCollectio
   return { valid: errors.length === 0, errors, warnings, details };
 };
 
+/**
+ * @deprecated Use doesCollectionFollowProductCatalogProtocol or validateProductCatalogCollection instead.
+ * This legacy check only supports single-product collections (tokenIds 1-1).
+ */
 export const doesCollectionFollowProductProtocol = (collection?: Readonly<iCollectionDoc<bigint>>) => {
   if (!collection) {
     return false;
@@ -166,6 +170,14 @@ export const doesCollectionFollowProductProtocol = (collection?: Readonly<iColle
   }
 
   return true;
+};
+
+/**
+ * Comprehensive product catalog protocol check. Supports multi-product collections.
+ */
+export const doesCollectionFollowProductCatalogProtocol = (collection?: Readonly<iCollectionDoc<bigint>>): boolean => {
+  if (!collection) return false;
+  return validateProductCatalogCollection(collection).valid;
 };
 
 export const isProductApproval = (approval: iCollectionApproval<bigint>) => {
