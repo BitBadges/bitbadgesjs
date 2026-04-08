@@ -5,17 +5,29 @@ import { resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
 
 export const sdkCommand = new Command('sdk').description('SDK analysis and utility commands');
 
-// ── sdk review <file> ──────────────────────────────────────────────────────────
+// ── sdk review <input> ─────────────────────────────────────────────────────────
 
 sdkCommand
-  .command('review <file>')
-  .description('Review a transaction or collection JSON for issues')
+  .command('review <input>')
+  .description('Review a transaction or collection JSON for issues. Input: JSON file, inline JSON, collection ID, or - for stdin')
   .option('--human', 'Output human-readable text instead of JSON')
   .option('--testnet', 'Use testnet API URL')
   .option('--local', 'Use local API URL (http://localhost:3001)')
+  .option('--url <url>', 'Custom API base URL')
   .option('--output-file <path>', 'Write output to file instead of stdout')
-  .action(async (file: string, opts: { human?: boolean; testnet?: boolean; local?: boolean; outputFile?: string }) => {
-    const data = readJsonInput(file);
+  .action(async (input: string, opts: { human?: boolean; testnet?: boolean; local?: boolean; url?: string; outputFile?: string }) => {
+    let data;
+    if (/^\d+$/.test(input)) {
+      // Numeric ID — fetch collection from API
+      const baseUrl = getApiUrl(opts);
+      const response = await fetch(`${baseUrl}/api/v0/collection/${input}`, {
+        headers: { 'x-api-key': process.env.BITBADGES_API_KEY || '' }
+      });
+      if (!response.ok) throw new Error(`Failed to fetch collection ${input}: HTTP ${response.status}`);
+      data = await response.json();
+    } else {
+      data = readJsonInput(input);
+    }
     const isTransaction = !!data.messages || !!data.msgs;
 
     if (isTransaction) {
@@ -74,14 +86,14 @@ sdkCommand
     }
   });
 
-// ── sdk interpret-tx <file> ────────────────────────────────────────────────────
+// ── sdk interpret-tx <input> ───────────────────────────────────────────────────
 
 sdkCommand
-  .command('interpret-tx <file>')
-  .description('Interpret a transaction JSON and print a human-readable summary')
+  .command('interpret-tx <input>')
+  .description('Interpret a transaction JSON and print a human-readable summary. Input: JSON file, inline JSON, or - for stdin')
   .option('--output-file <path>', 'Write output to file instead of stdout')
-  .action(async (file: string, opts: { outputFile?: string }) => {
-    const data = readJsonInput(file);
+  .action(async (input: string, opts: { outputFile?: string }) => {
+    const data = readJsonInput(input);
     const { interpretTransaction } = await import('../../core/interpret-transaction.js');
     const result = interpretTransaction(data);
     if (opts.outputFile) {
@@ -93,14 +105,28 @@ sdkCommand
     }
   });
 
-// ── sdk interpret-collection <file> ────────────────────────────────────────────
+// ── sdk interpret-collection <input> ───────────────────────────────────────────
 
 sdkCommand
-  .command('interpret-collection <file>')
-  .description('Interpret a collection JSON and print a human-readable summary')
+  .command('interpret-collection <input>')
+  .description('Interpret a collection JSON and print a human-readable summary. Input: JSON file, inline JSON, collection ID, or - for stdin')
+  .option('--testnet', 'Use testnet API URL')
+  .option('--local', 'Use local API URL (http://localhost:3001)')
+  .option('--url <url>', 'Custom API base URL')
   .option('--output-file <path>', 'Write output to file instead of stdout')
-  .action(async (file: string, opts: { outputFile?: string }) => {
-    const data = readJsonInput(file);
+  .action(async (input: string, opts: { testnet?: boolean; local?: boolean; url?: string; outputFile?: string }) => {
+    let data;
+    if (/^\d+$/.test(input)) {
+      // Numeric ID — fetch collection from API
+      const baseUrl = getApiUrl(opts);
+      const response = await fetch(`${baseUrl}/api/v0/collection/${input}`, {
+        headers: { 'x-api-key': process.env.BITBADGES_API_KEY || '' }
+      });
+      if (!response.ok) throw new Error(`Failed to fetch collection ${input}: HTTP ${response.status}`);
+      data = await response.json();
+    } else {
+      data = readJsonInput(input);
+    }
     const { interpretCollection } = await import('../../core/interpret.js');
     const result = interpretCollection(data);
     if (opts.outputFile) {
@@ -265,22 +291,20 @@ const KNOWN_SKILLS = [
   'bounty'
 ];
 
-const skillsCmd = sdkCommand.command('skills').description('Fetch MCP builder skill instructions');
-
-skillsCmd
-  .command('list')
-  .description('List all available skill IDs')
-  .action(() => {
-    for (const id of KNOWN_SKILLS) {
-      console.log(id);
-    }
-  });
-
-skillsCmd
-  .command('get <skillId>')
-  .description('Fetch skill instructions by ID (from docs site)')
+sdkCommand
+  .command('skills [skillId]')
+  .description('List available skills or fetch a specific skill by ID')
   .option('--url <url>', 'Override base URL for skill docs')
-  .action(async (skillId: string, opts: { url?: string }) => {
+  .addHelpText('after', `\nAvailable skill IDs:\n${KNOWN_SKILLS.map((s) => `  ${s}`).join('\n')}`)
+  .action(async (skillId: string | undefined, opts: { url?: string }) => {
+    if (!skillId) {
+      // List all skills
+      for (const id of KNOWN_SKILLS) {
+        console.log(id);
+      }
+      return;
+    }
+
     const baseUrl = opts.url || 'https://docs.bitbadges.io/token-standard/skills';
     const url = `${baseUrl}/${skillId}`;
 

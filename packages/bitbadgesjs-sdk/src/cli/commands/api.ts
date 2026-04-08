@@ -59,6 +59,8 @@ interface ApiRoute {
   pathParams: string[];
   /** Whether the route accepts a JSON request body */
   hasBody: boolean;
+  /** Tag for grouping in CLI help */
+  tag: string;
   /** Query parameters (for GET routes with exploded payload) */
   queryParams?: ParamInfo[];
   /** Key body fields (for POST/PUT/DELETE routes) */
@@ -75,6 +77,7 @@ const ROUTES: ApiRoute[] = [
   // =========================================================================
   {
     name: 'get-account',
+    tag: 'accounts',
     method: 'GET',
     path: '/user',
     description: 'Get account by address or username',
@@ -93,6 +96,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-accounts',
+    tag: 'accounts',
     method: 'POST',
     path: '/users',
     description: 'Get accounts (batch, view-based)',
@@ -110,6 +114,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-siwbb-requests-for-user',
+    tag: 'accounts',
     method: 'GET',
     path: '/account/{address}/requests/siwbb',
     description: 'Get SIWBB requests for a user',
@@ -126,6 +131,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-transfer-activity-for-user',
+    tag: 'accounts',
     method: 'GET',
     path: '/account/{address}/activity/tokens',
     description: 'Get transfer activity for a user',
@@ -142,6 +148,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-tokens-for-user',
+    tag: 'accounts',
     method: 'GET',
     path: '/account/{address}/tokens',
     description: 'Get tokens for a user. Specify viewType to choose collected, created, managing, etc.',
@@ -159,6 +166,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-claim-activity-for-user',
+    tag: 'accounts',
     method: 'GET',
     path: '/account/{address}/activity/claims',
     description: 'Get claim activity for a user',
@@ -175,6 +183,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-points-activity-for-user',
+    tag: 'accounts',
     method: 'GET',
     path: '/account/{address}/activity/points',
     description: 'Get points activity for a user',
@@ -195,6 +204,7 @@ const ROUTES: ApiRoute[] = [
   // =========================================================================
   {
     name: 'get-collection',
+    tag: 'tokens',
     method: 'GET',
     path: '/collection/{collectionId}',
     description: 'Get a specific collection',
@@ -208,6 +218,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-token-metadata',
+    tag: 'tokens',
     method: 'GET',
     path: '/collection/{collectionId}/{tokenId}/metadata',
     description: 'Get metadata for a specific token',
@@ -221,6 +232,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-collections',
+    tag: 'tokens',
     method: 'POST',
     path: '/collections',
     description: 'Get collections (batch, view-based)',
@@ -238,6 +250,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-balance-specific-token',
+    tag: 'tokens',
     method: 'GET',
     path: '/collection/{collectionId}/balance/{address}/{tokenId}',
     description: 'Get balance of a specific token for an address. Address can be "Total" for circulating supply.',
@@ -252,6 +265,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-balance-by-address',
+    tag: 'tokens',
     method: 'GET',
     path: '/collection/{collectionId}/balance/{address}',
     description: 'Get balances for an address in a collection. Address can be "Total" for circulating supply.',
@@ -268,6 +282,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-token-owners',
+    tag: 'tokens',
     method: 'GET',
     path: '/collection/{collectionId}/{tokenId}/owners',
     description: 'Get owners of a specific token (paginated)',
@@ -284,6 +299,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-token-activity',
+    tag: 'tokens',
     method: 'GET',
     path: '/collection/{collectionId}/{tokenId}/activity',
     description: 'Get activity for a specific token (paginated)',
@@ -300,6 +316,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'refresh-metadata',
+    tag: 'tokens',
     method: 'POST',
     path: '/collection/{collectionId}/refresh',
     description: 'Trigger metadata refresh for a collection. Will reject if recently refreshed.',
@@ -313,6 +330,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-refresh-status',
+    tag: 'tokens',
     method: 'GET',
     path: '/collection/{collectionId}/refreshStatus',
     description: 'Get refresh status for a collection',
@@ -326,6 +344,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-collection-owners',
+    tag: 'tokens',
     method: 'GET',
     path: '/collection/{collectionId}/owners',
     description: 'Get owners for a collection',
@@ -342,6 +361,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-collection-transfer-activity',
+    tag: 'tokens',
     method: 'GET',
     path: '/collection/{collectionId}/activity',
     description: 'Get transfer activity for a collection',
@@ -358,6 +378,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-collection-challenge-trackers',
+    tag: 'tokens',
     method: 'GET',
     path: '/collection/{collectionId}/challengeTrackers',
     description: 'Get challenge trackers for a collection',
@@ -374,6 +395,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-collection-amount-trackers',
+    tag: 'tokens',
     method: 'GET',
     path: '/collection/{collectionId}/amountTrackers',
     description: 'Get amount trackers for a collection',
@@ -390,6 +412,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-collection-amount-tracker-by-id',
+    tag: 'tokens',
     method: 'GET',
     path: '/api/v0/collection/amountTracker',
     description: 'Get a collection amount tracker by ID',
@@ -411,6 +434,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-collection-challenge-tracker-by-id',
+    tag: 'tokens',
     method: 'GET',
     path: '/api/v0/collection/challengeTracker',
     description: 'Get a collection challenge tracker by ID',
@@ -431,6 +455,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-collection-listings',
+    tag: 'tokens',
     method: 'GET',
     path: '/collection/{collectionId}/listings',
     description: 'Get listings for a collection',
@@ -447,6 +472,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-collection-claims',
+    tag: 'tokens',
     method: 'GET',
     path: '/collection/{collectionId}/claims',
     description: 'Get claims for a collection',
@@ -463,6 +489,7 @@ const ROUTES: ApiRoute[] = [
   // =========================================================================
   {
     name: 'get-claim',
+    tag: 'claims',
     method: 'GET',
     path: '/claim/{claimId}',
     description: 'Get a claim by ID',
@@ -480,6 +507,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'check-claim-success',
+    tag: 'claims',
     method: 'GET',
     path: '/claims/success/{claimId}/{address}',
     description: 'Check if a claim was successfully completed by a user. Returns success count.',
@@ -494,6 +522,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'complete-claim',
+    tag: 'claims',
     method: 'POST',
     path: '/claims/complete/{claimId}/{address}',
     description: 'Complete a claim for an address. Returns a claimAttemptId to check status.',
@@ -512,6 +541,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'simulate-claim',
+    tag: 'claims',
     method: 'POST',
     path: '/claims/simulate/{claimId}/{address}',
     description: 'Simulate a claim for an address. Instant check (no queue). Success means simulation passed.',
@@ -531,6 +561,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-reserved-codes',
+    tag: 'claims',
     method: 'POST',
     path: '/claims/reserved/{claimId}/{address}',
     description: 'Get reserved claim codes (for on-chain claims bridging off-chain to on-chain)',
@@ -544,6 +575,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-claim-attempt-status',
+    tag: 'claims',
     method: 'GET',
     path: '/claims/status/{claimAttemptId}',
     description: 'Get status of a claim attempt by the ID received when submitting',
@@ -558,6 +590,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'search-claims',
+    tag: 'claims',
     method: 'GET',
     path: '/claims/search',
     description: 'Search through your managed claims (requires sign-in)',
@@ -574,6 +607,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-claims',
+    tag: 'claims',
     method: 'POST',
     path: '/claims/fetch',
     description: 'Get claims (batch). To fetch private state, must be manager and signed in.',
@@ -591,6 +625,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'create-claim',
+    tag: 'claims',
     method: 'POST',
     path: '/claims',
     description: 'Create a new claim. Scope: manageClaims',
@@ -604,6 +639,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'update-claim',
+    tag: 'claims',
     method: 'PUT',
     path: '/claims',
     description: 'Update an existing claim. Scope: manageClaims',
@@ -617,6 +653,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'delete-claim',
+    tag: 'claims',
     method: 'DELETE',
     path: '/claims',
     description: 'Delete a claim. Scope: manageClaims',
@@ -630,6 +667,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'generate-code',
+    tag: 'claims',
     method: 'GET',
     path: '/codes',
     description: 'Generate a unique code from a seed and index (Codes plugin)',
@@ -642,6 +680,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-claim-attempts',
+    tag: 'claims',
     method: 'GET',
     path: '/claims/{claimId}/attempts',
     description: 'Get claim attempts (paginated). Managers can include errors.',
@@ -660,6 +699,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-gated-content-for-claim',
+    tag: 'claims',
     method: 'GET',
     path: '/claims/gatedContent/{claimId}',
     description: 'Get gated content for a claim (must have completed claim). Scope: completeClaims',
@@ -677,6 +717,7 @@ const ROUTES: ApiRoute[] = [
   // =========================================================================
   {
     name: 'broadcast-tx',
+    tag: 'tx',
     method: 'POST',
     path: '/broadcast',
     description: 'Broadcast a transaction to the blockchain',
@@ -691,6 +732,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'simulate-tx',
+    tag: 'tx',
     method: 'POST',
     path: '/simulate',
     description: 'Simulate a transaction on the blockchain',
@@ -709,6 +751,7 @@ const ROUTES: ApiRoute[] = [
   // =========================================================================
   {
     name: 'exchange-siwbb-code',
+    tag: 'auth',
     method: 'POST',
     path: '/siwbb/token',
     description: 'Exchange SIWBB authorization code or refresh token for access token',
@@ -722,6 +765,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'revoke-oauth',
+    tag: 'auth',
     method: 'POST',
     path: '/siwbb/token/revoke',
     description: 'Revoke an OAuth authorization (access or refresh token)',
@@ -735,6 +779,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'rotate-siwbb-request',
+    tag: 'auth',
     method: 'POST',
     path: '/siwbbRequest/rotate',
     description: 'Rotate a SIWBB request (e.g. QR code). Scope: approveSignInWithBitBadgesRequests',
@@ -748,6 +793,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'delete-siwbb-request',
+    tag: 'auth',
     method: 'DELETE',
     path: '/siwbbRequest',
     description: 'Delete a SIWBB request. Scope: deleteAuthenticationCodes',
@@ -761,6 +807,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'create-siwbb-request',
+    tag: 'auth',
     method: 'POST',
     path: '/siwbbRequest',
     description: 'Create a SIWBB request. Typically use frontend flow instead. Scope: approveSignInWithBitBadgesRequests',
@@ -774,6 +821,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-siwbb-requests-for-app',
+    tag: 'auth',
     method: 'GET',
     path: '/developerApps/siwbbRequests',
     description: 'Get SIWBB requests for a developer app. Scope: manageDeveloperApps',
@@ -790,6 +838,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'check-sign-in-status',
+    tag: 'auth',
     method: 'POST',
     path: '/auth/status',
     description: 'Check if a user is currently signed in and get auth status',
@@ -808,6 +857,7 @@ const ROUTES: ApiRoute[] = [
   // =========================================================================
   {
     name: 'get-developer-app',
+    tag: 'apps',
     method: 'GET',
     path: '/developerApp/{clientId}',
     description: 'Get an OAuth app by client ID. Scope: manageDeveloperApps (for client secret)',
@@ -821,6 +871,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'create-developer-app',
+    tag: 'apps',
     method: 'POST',
     path: '/developerApps',
     description: 'Create a new OAuth app. Scope: manageDeveloperApps',
@@ -834,6 +885,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'update-developer-app',
+    tag: 'apps',
     method: 'PUT',
     path: '/developerApps',
     description: 'Update an OAuth app. Scope: manageDeveloperApps',
@@ -847,6 +899,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'delete-developer-app',
+    tag: 'apps',
     method: 'DELETE',
     path: '/developerApps',
     description: 'Delete an OAuth app. Scope: manageDeveloperApps',
@@ -864,6 +917,7 @@ const ROUTES: ApiRoute[] = [
   // =========================================================================
   {
     name: 'get-plugin',
+    tag: 'plugins',
     method: 'GET',
     path: '/plugin/{pluginId}',
     description: 'Get a plugin by ID',
@@ -877,6 +931,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-plugins',
+    tag: 'plugins',
     method: 'POST',
     path: '/plugins/fetch',
     description: 'Get plugins (batch)',
@@ -890,6 +945,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'search-plugins',
+    tag: 'plugins',
     method: 'GET',
     path: '/plugins/search',
     description: 'Search plugins',
@@ -903,6 +959,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-creator-plugins',
+    tag: 'plugins',
     method: 'GET',
     path: '/plugins/creator',
     description: 'Get plugins by creator address. Full Access scope required for private plugins.',
@@ -924,6 +981,7 @@ const ROUTES: ApiRoute[] = [
   // =========================================================================
   {
     name: 'get-dynamic-store',
+    tag: 'stores',
     method: 'GET',
     path: '/dynamicStore/{dynamicStoreId}',
     description: 'Get a dynamic data store by ID. Scope: manageDynamicStores (or use dataSecret)',
@@ -940,6 +998,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-dynamic-store-value',
+    tag: 'stores',
     method: 'GET',
     path: '/dynamicStore/{dynamicStoreId}/value',
     description: 'Get a value from a dynamic data store by key',
@@ -957,6 +1016,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-dynamic-store-values',
+    tag: 'stores',
     method: 'GET',
     path: '/dynamicStore/{dynamicStoreId}/values',
     description: 'Get paginated values from a dynamic data store',
@@ -973,6 +1033,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'create-dynamic-store',
+    tag: 'stores',
     method: 'POST',
     path: '/dynamicStores',
     description: 'Create a new dynamic data store. Scope: manageDynamicStores',
@@ -986,6 +1047,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'update-dynamic-store',
+    tag: 'stores',
     method: 'PUT',
     path: '/dynamicStores',
     description: 'Update a dynamic data store. Scope: manageDynamicStores',
@@ -999,6 +1061,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'delete-dynamic-store',
+    tag: 'stores',
     method: 'DELETE',
     path: '/dynamicStores',
     description: 'Delete a dynamic data store. Scope: manageDynamicStores',
@@ -1012,6 +1075,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-dynamic-stores',
+    tag: 'stores',
     method: 'POST',
     path: '/dynamicStores/fetch',
     description: 'Fetch dynamic data stores (batch). Scope: manageDynamicStores (or dataSecret)',
@@ -1025,6 +1089,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'search-dynamic-stores',
+    tag: 'stores',
     method: 'GET',
     path: '/dynamicStores/search',
     description: 'Search dynamic data stores for signed-in user. Scope: manageDynamicStores',
@@ -1038,6 +1103,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-dynamic-data-activity',
+    tag: 'stores',
     method: 'GET',
     path: '/dynamicStores/activity',
     description: 'Get dynamic data store activity history. Scope: manageDynamicStores (or dataSecret)',
@@ -1054,6 +1120,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'perform-store-action-single',
+    tag: 'stores',
     method: 'POST',
     path: '/storeActions/single',
     description: 'Perform a single store action (body auth). Scope: manageDynamicStores (or dataSecret)',
@@ -1067,6 +1134,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'perform-store-action-batch',
+    tag: 'stores',
     method: 'POST',
     path: '/storeActions/batch',
     description: 'Perform batch store actions (body auth). Scope: manageDynamicStores (or dataSecret)',
@@ -1084,6 +1152,7 @@ const ROUTES: ApiRoute[] = [
   // =========================================================================
   {
     name: 'get-application',
+    tag: 'apps',
     method: 'GET',
     path: '/application/{applicationId}',
     description: 'Get an application by ID',
@@ -1097,6 +1166,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'search-applications',
+    tag: 'apps',
     method: 'GET',
     path: '/applications/search',
     description: 'Search applications (signed-in user only). Scope: manageApplications',
@@ -1110,6 +1180,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-applications',
+    tag: 'apps',
     method: 'POST',
     path: '/applications/fetch',
     description: 'Fetch applications (batch)',
@@ -1123,6 +1194,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'create-application',
+    tag: 'apps',
     method: 'POST',
     path: '/applications',
     description: 'Create an application. Scope: manageApplications',
@@ -1136,6 +1208,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'update-application',
+    tag: 'apps',
     method: 'PUT',
     path: '/applications',
     description: 'Update an application. Scope: manageApplications',
@@ -1149,6 +1222,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'delete-application',
+    tag: 'apps',
     method: 'DELETE',
     path: '/applications',
     description: 'Delete an application. Scope: manageApplications',
@@ -1162,6 +1236,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'calculate-points',
+    tag: 'apps',
     method: 'POST',
     path: '/applications/points',
     description: 'Calculate points for an application. Uses heavy caching.',
@@ -1175,6 +1250,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-points-activity',
+    tag: 'apps',
     method: 'GET',
     path: '/applications/points/activity',
     description: 'Get points activity for an application',
@@ -1195,6 +1271,7 @@ const ROUTES: ApiRoute[] = [
   // =========================================================================
   {
     name: 'get-utility-page',
+    tag: 'pages',
     method: 'GET',
     path: '/utilityPage/{utilityPageId}',
     description: 'Get a utility page by ID. Scope: manageUtilityPages (for private pages)',
@@ -1208,6 +1285,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-utility-pages',
+    tag: 'pages',
     method: 'POST',
     path: '/utilityPages/fetch',
     description: 'Fetch utility pages (batch). Scope: manageUtilityPages (for private pages)',
@@ -1221,6 +1299,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'search-utility-pages',
+    tag: 'pages',
     method: 'GET',
     path: '/utilityPages/search',
     description: 'Search utility pages (signed-in user only). Scope: manageUtilityPages',
@@ -1234,6 +1313,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'create-utility-page',
+    tag: 'pages',
     method: 'POST',
     path: '/utilityPages',
     description: 'Create a utility page. Scope: manageUtilityPages',
@@ -1247,6 +1327,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'update-utility-page',
+    tag: 'pages',
     method: 'PUT',
     path: '/utilityPages',
     description: 'Update a utility page. Scope: manageUtilityPages',
@@ -1260,6 +1341,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'delete-utility-page',
+    tag: 'pages',
     method: 'DELETE',
     path: '/utilityPages',
     description: 'Delete a utility page. Scope: manageUtilityPages',
@@ -1277,6 +1359,7 @@ const ROUTES: ApiRoute[] = [
   // =========================================================================
   {
     name: 'get-map',
+    tag: 'maps',
     method: 'GET',
     path: '/maps/{mapId}',
     description: 'Get a map by ID. Maps are on-chain key-value stores.',
@@ -1290,6 +1373,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-maps',
+    tag: 'maps',
     method: 'POST',
     path: '/maps',
     description: 'Get maps (batch)',
@@ -1303,6 +1387,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-map-values',
+    tag: 'maps',
     method: 'POST',
     path: '/mapValues',
     description: 'Get map values (batch)',
@@ -1316,6 +1401,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-map-value',
+    tag: 'maps',
     method: 'GET',
     path: '/mapValue/{mapId}/{key}',
     description: 'Get a single map value by map ID and key',
@@ -1333,6 +1419,7 @@ const ROUTES: ApiRoute[] = [
   // =========================================================================
   {
     name: 'get-status',
+    tag: 'misc',
     method: 'GET',
     path: '/status',
     description: 'Get blockchain/indexer status (gas, block height, etc.)',
@@ -1351,6 +1438,7 @@ const ROUTES: ApiRoute[] = [
   // =========================================================================
   {
     name: 'get-on-chain-dynamic-store',
+    tag: 'onchain-stores',
     method: 'GET',
     path: '/onChainDynamicStore/{storeId}',
     description: 'Get an on-chain dynamic store by ID (stored on blockchain)',
@@ -1359,6 +1447,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-on-chain-dynamic-stores-by-creator',
+    tag: 'onchain-stores',
     method: 'GET',
     path: '/onChainDynamicStores/by-creator/{address}',
     description: 'Get on-chain dynamic stores by creator address',
@@ -1367,6 +1456,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-on-chain-dynamic-store-value',
+    tag: 'onchain-stores',
     method: 'GET',
     path: '/onChainDynamicStore/{storeId}/value/{address}',
     description: 'Get value for an address in an on-chain dynamic store',
@@ -1375,6 +1465,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-on-chain-dynamic-store-values',
+    tag: 'onchain-stores',
     method: 'GET',
     path: '/onChainDynamicStore/{storeId}/values',
     description: 'Get paginated values from an on-chain dynamic store',
@@ -1390,6 +1481,7 @@ const ROUTES: ApiRoute[] = [
   // =========================================================================
   {
     name: 'get-all-pools',
+    tag: 'assets',
     method: 'GET',
     path: '/api/{version}/pools',
     description: 'Get all liquidity pools',
@@ -1402,6 +1494,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-pool-infos-by-denom',
+    tag: 'assets',
     method: 'GET',
     path: '/api/{version}/pools/byDenom',
     description: 'Get pool infos filtered by denomination',
@@ -1410,6 +1503,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-pool-infos-by-assets',
+    tag: 'assets',
     method: 'GET',
     path: '/api/{version}/pools/byAssets',
     description: 'Get pool infos filtered by assets',
@@ -1418,6 +1512,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-pool-info-by-id',
+    tag: 'assets',
     method: 'GET',
     path: '/api/{version}/pools/{poolId}',
     description: 'Get pool info by pool ID',
@@ -1426,6 +1521,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'estimate-swap',
+    tag: 'assets',
     method: 'POST',
     path: '/api/{version}/swaps/estimate',
     description: 'Estimate the output amount for a swap',
@@ -1434,6 +1530,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-asset-pairs',
+    tag: 'assets',
     method: 'GET',
     path: '/api/{version}/assetPairs',
     description: 'Get all asset pairs',
@@ -1442,6 +1539,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-top-gainers',
+    tag: 'assets',
     method: 'GET',
     path: '/api/{version}/assetPairs/topGainers',
     description: 'Get asset pairs with highest price gains',
@@ -1450,6 +1548,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-top-losers',
+    tag: 'assets',
     method: 'GET',
     path: '/api/{version}/assetPairs/topLosers',
     description: 'Get asset pairs with highest price losses',
@@ -1458,6 +1557,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-highest-volume',
+    tag: 'assets',
     method: 'GET',
     path: '/api/{version}/assetPairs/highestVolume',
     description: 'Get asset pairs with highest trading volume',
@@ -1466,6 +1566,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-by-price',
+    tag: 'assets',
     method: 'GET',
     path: '/api/{version}/assetPairs/priceSorted',
     description: 'Get asset pairs sorted by price',
@@ -1474,6 +1575,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-weekly-top-gainers',
+    tag: 'assets',
     method: 'GET',
     path: '/api/{version}/assetPairs/weeklyTopGainers',
     description: 'Get asset pairs with highest weekly gains',
@@ -1482,6 +1584,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-weekly-top-losers',
+    tag: 'assets',
     method: 'GET',
     path: '/api/{version}/assetPairs/weeklyTopLosers',
     description: 'Get asset pairs with highest weekly losses',
@@ -1490,6 +1593,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'search-asset-pairs',
+    tag: 'assets',
     method: 'GET',
     path: '/api/{version}/assetPairs/search',
     description: 'Search asset pairs by text',
@@ -1498,6 +1602,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-by-denoms',
+    tag: 'assets',
     method: 'POST',
     path: '/api/{version}/assetPairs/byDenoms',
     description: 'Get asset pairs filtered by denominations',
@@ -1506,6 +1611,7 @@ const ROUTES: ApiRoute[] = [
   },
   {
     name: 'get-swap-activities',
+    tag: 'assets',
     method: 'GET',
     path: '/swapActivities',
     description: 'Get swap activities (paginated)',
@@ -1619,137 +1725,178 @@ function buildAfterHelpText(route: ApiRoute): string {
 }
 
 // ---------------------------------------------------------------------------
+// Tag definitions
+// ---------------------------------------------------------------------------
+
+const TAG_DESCRIPTIONS: Record<string, string> = {
+  accounts: 'Account and user routes',
+  tokens: 'Collection and token routes',
+  claims: 'Claim management routes',
+  auth: 'Sign In with BitBadges / OAuth routes',
+  tx: 'Transaction broadcast and simulation',
+  apps: 'Developer apps and applications',
+  plugins: 'Plugin management routes',
+  stores: 'Dynamic data store routes',
+  'onchain-stores': 'On-chain dynamic store routes',
+  pages: 'Utility page routes',
+  maps: 'On-chain map and protocol routes',
+  assets: 'DEX, pools, and asset pair routes',
+  misc: 'Miscellaneous routes',
+};
+
+// ---------------------------------------------------------------------------
 // Command builder
 // ---------------------------------------------------------------------------
 
-export function createApiCommand(): Command {
-  const api = new Command('api').description(
-    `BitBadges Indexer API client (${ROUTES.length} routes). Call any API endpoint from the CLI.`
+function buildRouteCommand(route: ApiRoute): Command {
+  let cmd = new Command(route.name).description(
+    `[${route.method}] ${route.path} -- ${route.description}`
   );
 
-  for (const route of ROUTES) {
-    let cmd = new Command(route.name).description(
-      `[${route.method}] ${route.path} -- ${route.description}`
-    );
+  // Positional arguments for path params
+  for (const param of route.pathParams) {
+    cmd = cmd.argument(`<${param}>`, `Path parameter: ${param}`);
+  }
 
-    // Positional arguments for path params
-    for (const param of route.pathParams) {
-      cmd = cmd.argument(`<${param}>`, `Path parameter: ${param}`);
-    }
+  // Common options
+  cmd
+    .option('--body <json>', 'Request body: inline JSON, @file.json, or - for stdin')
+    .option('--api-key <key>', 'BitBadges API key (overrides BITBADGES_API_KEY env)')
+    .option('--testnet', 'Use testnet API', false)
+    .option('--local', 'Use local API (localhost:3001)', false)
+    .option('--url <url>', 'Custom API base URL (overrides all other URL options)')
+    .option('--query <params>', 'Query string params as JSON object (e.g. \'{"bookmark":"x"}\')')
+    .option('--condensed', 'Output condensed JSON (no whitespace)', false)
+    .option('--dry-run', 'Show request details without sending', false)
+    .option('--output-file <path>', 'Write output to file instead of stdout');
 
-    // Common options
-    cmd
-      .option('--body <json>', 'Request body: inline JSON, @file.json, or - for stdin')
-      .option('--api-key <key>', 'BitBadges API key (overrides BITBADGES_API_KEY env)')
-      .option('--testnet', 'Use testnet API', false)
-      .option('--local', 'Use local API (localhost:3001)', false)
-      .option('--url <url>', 'Custom API base URL (overrides all other URL options)')
-      .option('--query <params>', 'Query string params as JSON object (e.g. \'{"bookmark":"x"}\')')
-      .option('--condensed', 'Output condensed JSON (no whitespace)', false)
-      .option('--dry-run', 'Show request details without sending', false)
-      .option('--output-file <path>', 'Write output to file instead of stdout');
+  // Append rich documentation from the OpenAPI spec
+  const afterHelp = buildAfterHelpText(route);
+  if (afterHelp) {
+    cmd.addHelpText('after', afterHelp);
+  }
 
-    // Append rich documentation from the OpenAPI spec
-    const afterHelp = buildAfterHelpText(route);
-    if (afterHelp) {
-      cmd.addHelpText('after', afterHelp);
-    }
+  cmd.action(async (...args: any[]) => {
+    // Commander passes positional args first, then the options object, then the command
+    const opts = args[route.pathParams.length];
 
-    cmd.action(async (...args: any[]) => {
-      // Commander passes positional args first, then the options object, then the command
-      const opts = args[route.pathParams.length];
+    try {
+      const apiKey = resolveApiKey(opts.apiKey);
+      const baseUrl = resolveBaseUrl({
+        testnet: opts.testnet,
+        local: opts.local,
+        baseUrl: opts.url,
+      });
 
-      try {
-        const apiKey = resolveApiKey(opts.apiKey);
-        const baseUrl = resolveBaseUrl({
-          testnet: opts.testnet,
-          local: opts.local,
-          baseUrl: opts.url,
-        });
-
-        // Build path params map
-        const pathParamValues: Record<string, string> = {};
-        for (let i = 0; i < route.pathParams.length; i++) {
-          pathParamValues[route.pathParams[i]] = args[i];
-        }
-
-        let resolvedPath = interpolatePath(route.path, pathParamValues);
-
-        // Append query params if provided
-        if (opts.query) {
-          const queryObj = JSON.parse(opts.query);
-          const searchParams = new URLSearchParams();
-          for (const [k, v] of Object.entries(queryObj)) {
-            searchParams.set(k, String(v));
-          }
-          const qs = searchParams.toString();
-          if (qs) {
-            resolvedPath += `?${qs}`;
-          }
-        }
-
-        // Resolve body
-        let body: any = undefined;
-        if (opts.body) {
-          body = resolveBody(opts.body);
-        }
-
-        // Warn when a POST/PUT/DELETE route is called without --body
-        if (route.hasBody && body === undefined && !opts.dryRun) {
-          const typeHint = route.sdkLinks?.request
-            ? ` (see ${route.sdkLinks.request} for fields)`
-            : '';
-          process.stderr.write(
-            `Warning: ${route.method} ${route.path} expects a request body but none was provided.${typeHint}\n` +
-            `  Use --body '{}' to send an empty body, or --body @file.json to load from file.\n`
-          );
-        }
-
-        // Dry-run: show request details and exit
-        if (opts.dryRun) {
-          const dryOutput = {
-            method: route.method,
-            url: `${baseUrl}${resolvedPath}`,
-            headers: {
-              'x-api-key': apiKey ? apiKey.slice(0, 4) + '****' : '(none)',
-              ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
-            },
-            body: body ?? null,
-          };
-          process.stdout.write(JSON.stringify(dryOutput, null, 2) + '\n');
-          return;
-        }
-
-        const result = await apiRequest({
-          method: route.method,
-          path: resolvedPath,
-          body,
-          apiKey,
-          baseUrl,
-        });
-
-        const formatted = opts.condensed
-          ? JSON.stringify(result)
-          : JSON.stringify(result, null, 2);
-
-        if (opts.outputFile) {
-          fs.writeFileSync(opts.outputFile, formatted + '\n', 'utf-8');
-          process.stderr.write(`Written to ${opts.outputFile}\n`);
-        } else {
-          process.stdout.write(formatted + '\n');
-        }
-      } catch (err: any) {
-        // If the error has a response body, print it
-        if (err.response) {
-          process.stderr.write(JSON.stringify(err.response, null, 2) + '\n');
-        } else {
-          process.stderr.write(`Error: ${err.message}\n`);
-        }
-        process.exitCode = 1;
+      // Build path params map
+      const pathParamValues: Record<string, string> = {};
+      for (let i = 0; i < route.pathParams.length; i++) {
+        pathParamValues[route.pathParams[i]] = args[i];
       }
-    });
 
-    api.addCommand(cmd);
+      let resolvedPath = interpolatePath(route.path, pathParamValues);
+
+      // Append query params if provided
+      if (opts.query) {
+        const queryObj = JSON.parse(opts.query);
+        const searchParams = new URLSearchParams();
+        for (const [k, v] of Object.entries(queryObj)) {
+          searchParams.set(k, String(v));
+        }
+        const qs = searchParams.toString();
+        if (qs) {
+          resolvedPath += `?${qs}`;
+        }
+      }
+
+      // Resolve body
+      let body: any = undefined;
+      if (opts.body) {
+        body = resolveBody(opts.body);
+      }
+
+      // Warn when a POST/PUT/DELETE route is called without --body
+      if (route.hasBody && body === undefined && !opts.dryRun) {
+        const typeHint = route.sdkLinks?.request
+          ? ` (see ${route.sdkLinks.request} for fields)`
+          : '';
+        process.stderr.write(
+          `Warning: ${route.method} ${route.path} expects a request body but none was provided.${typeHint}\n` +
+          `  Use --body '{}' to send an empty body, or --body @file.json to load from file.\n`
+        );
+      }
+
+      // Dry-run: show request details and exit
+      if (opts.dryRun) {
+        const dryOutput = {
+          method: route.method,
+          url: `${baseUrl}${resolvedPath}`,
+          headers: {
+            'x-api-key': apiKey ? apiKey.slice(0, 4) + '****' : '(none)',
+            ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+          },
+          body: body ?? null,
+        };
+        process.stdout.write(JSON.stringify(dryOutput, null, 2) + '\n');
+        return;
+      }
+
+      const result = await apiRequest({
+        method: route.method,
+        path: resolvedPath,
+        body,
+        apiKey,
+        baseUrl,
+      });
+
+      const formatted = opts.condensed
+        ? JSON.stringify(result)
+        : JSON.stringify(result, null, 2);
+
+      if (opts.outputFile) {
+        fs.writeFileSync(opts.outputFile, formatted + '\n', 'utf-8');
+        process.stderr.write(`Written to ${opts.outputFile}\n`);
+      } else {
+        process.stdout.write(formatted + '\n');
+      }
+    } catch (err: any) {
+      // If the error has a response body, print it
+      if (err.response) {
+        process.stderr.write(JSON.stringify(err.response, null, 2) + '\n');
+      } else {
+        process.stderr.write(`Error: ${err.message}\n`);
+      }
+      process.exitCode = 1;
+    }
+  });
+
+  return cmd;
+}
+
+export function createApiCommand(): Command {
+  const api = new Command('api').description(
+    `BitBadges Indexer API client (${ROUTES.length} routes). Call any API endpoint from the CLI.\n\nRoutes are grouped by category. Use "api all <command>" for a flat list.`
+  );
+
+  // Create tag-based group commands
+  const groups: Record<string, Command> = {};
+  for (const [tag, desc] of Object.entries(TAG_DESCRIPTIONS)) {
+    const tagRoutes = ROUTES.filter((r) => r.tag === tag);
+    if (tagRoutes.length === 0) continue;
+    groups[tag] = new Command(tag).description(`${desc} (${tagRoutes.length} routes)`);
+    api.addCommand(groups[tag]);
+  }
+
+  // Create "all" group with every route (flat, backward compat)
+  const allCmd = new Command('all').description(`All API routes ungrouped (${ROUTES.length} routes)`);
+  api.addCommand(allCmd);
+
+  // Register each route in its tag group AND in "all"
+  for (const route of ROUTES) {
+    if (groups[route.tag]) {
+      groups[route.tag].addCommand(buildRouteCommand(route));
+    }
+    allCmd.addCommand(buildRouteCommand(route));
   }
 
   return api;
