@@ -432,50 +432,16 @@ Cache location: ~/.bitbadges/docs-cache.json`)
     console.log(out.trim() || `No content found for "${section}".`);
   });
 
-// ── sdk skills ─────────────────────────────────────────────────────────────────
+// ── sdk skills (alias for sdk docs mcp-builder-skills) ──────────────────────
 
 sdkCommand
   .command('skills [skillId]')
-  .description('List available MCP Builder skills or show a specific skill')
-  .addHelpText('after', '\nRun "sdk skills" to list all. "sdk skills <id>" for details.\nSkills are fetched from docs (cached locally).')
+  .description('Shorthand for "sdk docs mcp-builder-skills" — list or show MCP Builder skills')
+  .addHelpText('after', '\nEquivalent to: sdk docs mcp-builder-skills / sdk docs mcp-builder-skills/<id>')
   .action(async (skillId: string | undefined) => {
-    const { loadDocs } = await import('../utils/docs-cache.js');
-    const docs = await loadDocs();
-
-    const skillsSection = findSection(docs.tree, 'mcp-builder-skills');
-    if (!skillsSection || !skillsSection.children) {
-      console.error('Skills section not found in docs. Try "sdk docs" to see available sections.');
-      process.exit(1);
-    }
-
-    if (!skillId) {
-      console.log('Available MCP Builder Skills:\n');
-      for (const skill of skillsSection.children) {
-        console.log(`  ${skill.slug.padEnd(24)} ${skill.title}`);
-      }
-      console.log('\nUse "sdk skills <id>" for full content.');
-      return;
-    }
-
-    const skill = skillsSection.children.find((s) => s.slug === skillId);
-    if (!skill) {
-      console.error(`Skill "${skillId}" not found. Available skills:`);
-      for (const s of skillsSection.children) console.error(`  ${s.slug}`);
-      process.exit(1);
-    }
-
-    if (!skill.path) {
-      console.error(`Skill "${skillId}" has no content path.`);
-      process.exit(1);
-    }
-
-    const content = docs.byPath[skill.path];
-    if (!content) {
-      console.error(`No content found for skill "${skillId}".`);
-      process.exit(1);
-    }
-
-    console.log(content.trim());
+    // Delegate to the docs command logic
+    const section = skillId ? `mcp-builder-skills/${skillId}` : 'mcp-builder-skills';
+    sdkCommand.commands.find((c) => c.name() === 'docs')!.parseAsync(['node', 'docs', section]);
   });
 
 // ── sdk status ────────────────────────────────────────────────────────────────
