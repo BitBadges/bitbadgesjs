@@ -51,3 +51,10 @@ export {
   PERM_DESCRIPTIONS,
   PERM_KEYS
 } from './interpret-shared.js';
+
+export * from './validate.js';
+export * from './blankCriteria.js';
+export * from './system-addresses.js';
+export * from './audit.js';
+export * from './verify-standards.js';
+export * from './registries/index.js';
