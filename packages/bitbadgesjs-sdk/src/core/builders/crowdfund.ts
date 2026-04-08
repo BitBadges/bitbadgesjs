@@ -21,6 +21,7 @@ import {
 export interface CrowdfundParams {
   goal: number; // display units
   denom: string;
+  crowdfunder?: string; // bb1... address — who receives funds on success (creator fills in if empty)
   deadline?: string; // duration shorthand, default "30d"
   name?: string;
 }
@@ -60,7 +61,7 @@ export function buildCrowdfund(params: CrowdfundParams): any {
     // Deposit-Progress — tracks total deposits via token 2 to creator
     {
       fromListId: 'Mint',
-      toListId: '',
+      toListId: params.crowdfunder || '',
       initiatedByListId: 'All',
       approvalId: 'deposit-progress',
       transferTimes: FOREVER,
@@ -77,8 +78,8 @@ export function buildCrowdfund(params: CrowdfundParams): any {
     // Success — creator withdraws funds after deadline if goal met
     {
       fromListId: 'Mint',
-      toListId: '',
-      initiatedByListId: '',
+      toListId: params.crowdfunder || '',
+      initiatedByListId: params.crowdfunder || '',
       approvalId: 'success',
       transferTimes: [{ start: deadlineTs, end: MAX_UINT64 }],
       tokenIds: FOREVER,

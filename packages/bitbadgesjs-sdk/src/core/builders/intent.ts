@@ -18,6 +18,7 @@ import {
 
 export interface IntentParams {
   address: string; // creator bb1... address
+  collectionId: string; // Intent Exchange collection ID
   payDenom: string; // what creator sends (USDC, BADGE)
   payAmount: number; // display units
   receiveDenom: string; // what creator receives
@@ -78,6 +79,7 @@ export function buildIntent(params: IntentParams): any {
     },
     _meta: {
       description: `OTC Swap: ${params.payAmount} ${payCoin.symbol} → ${params.receiveAmount} ${receiveCoin.symbol}`,
+      collectionId: params.collectionId,
       escrowCoins: [{ amount: payBase, denom: payCoin.denom }]
     }
   };

@@ -17,6 +17,7 @@ import {
 } from './shared.js';
 
 export interface RecurringPaymentParams {
+  collectionId: string; // subscription collection ID
   amount: number; // payment amount per interval (display units)
   denom: string; // payment coin (USDC, BADGE)
   interval: string; // "daily", "monthly", "annually", or shorthand
@@ -88,7 +89,8 @@ export function buildRecurringPayment(params: RecurringPaymentParams): any {
       ]
     },
     _meta: {
-      description: `Recurring: ${params.amount} ${coin.symbol} every ${params.interval} to ${params.recipient}`
+      description: `Recurring: ${params.amount} ${coin.symbol} every ${params.interval} to ${params.recipient}`,
+      collectionId: params.collectionId
     }
   };
 }

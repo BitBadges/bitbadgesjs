@@ -18,6 +18,7 @@ export interface SmartAccountParams {
   symbol?: string;
   image?: string;
   tradable?: boolean;
+  aiAgentVault?: boolean; // adds 'AI Agent Vault' standard tag
 }
 
 export function buildSmartAccount(params: SmartAccountParams): any {
@@ -73,7 +74,11 @@ export function buildSmartAccount(params: SmartAccountParams): any {
     });
   }
 
-  const standards = ['Smart Token', ...(params.tradable ? ['Liquidity Pools'] : [])];
+  const standards = [
+    'Smart Token',
+    ...(params.tradable ? ['Liquidity Pools'] : []),
+    ...(params.aiAgentVault ? ['AI Agent Vault'] : [])
+  ];
 
   const invariants = {
     ...ibcBackedInvariants(coin.denom),

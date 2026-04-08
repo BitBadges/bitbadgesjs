@@ -22,6 +22,8 @@ import { buildIntent } from './intent.js';
 import { buildRecurringPayment } from './recurring-payment.js';
 import { buildListing } from './listing.js';
 import { buildBid } from './bid.js';
+import { buildPmSellIntent } from './pm-sell-intent.js';
+import { buildPmBuyIntent } from './pm-buy-intent.js';
 import { resolveCoin, parseDuration, toBaseUnits } from './shared.js';
 
 // ── Helper ───────────────────────────────────────────────────────────────────
@@ -451,6 +453,7 @@ describe('address-list builder', () => {
 describe('intent builder', () => {
   const result = buildIntent({
     address: 'bb1creator',
+    collectionId: '99',
     payDenom: 'USDC',
     payAmount: 100,
     receiveDenom: 'BADGE',
@@ -478,10 +481,15 @@ describe('intent builder', () => {
   test('auto-deletes after one use', () => {
     expect(result.approvalCriteria.autoDeletionOptions.afterOneUse).toBe(true);
   });
+
+  test('includes collectionId in meta', () => {
+    expect(result._meta.collectionId).toBe('99');
+  });
 });
 
 describe('recurring-payment builder', () => {
   const result = buildRecurringPayment({
+    collectionId: '42',
     amount: 10,
     denom: 'USDC',
     interval: 'monthly',
@@ -500,6 +508,10 @@ describe('recurring-payment builder', () => {
 
   test('has coin transfer to recipient', () => {
     expect(result.approvalCriteria.coinTransfers[0].to).toBe('bb1recipient');
+  });
+
+  test('includes collectionId in meta', () => {
+    expect(result._meta.collectionId).toBe('42');
   });
 });
 
@@ -553,5 +565,78 @@ describe('bid builder', () => {
 
   test('auto-deletes after one use', () => {
     expect(result.approvalCriteria.autoDeletionOptions.afterOneUse).toBe(true);
+  });
+});
+
+// ── Prediction Market Intent tests ───────────────────────────────────────────
+
+describe('pm-sell-intent builder', () => {
+  const result = buildPmSellIntent({
+    address: 'bb1seller',
+    collectionId: '42',
+    token: 'yes',
+    amount: 100,
+    price: 50,
+    denom: 'USDC'
+  });
+
+  test('produces outgoing approval', () => {
+    expect(result.type).toBe('outgoing');
+  });
+
+  test('targets YES token (ID 1)', () => {
+    expect(result.tokenIds).toEqual([{ start: '1', end: '1' }]);
+  });
+
+  test('NO token maps to ID 2', () => {
+    const noResult = buildPmSellIntent({ address: 'bb1seller', collectionId: '42', token: 'no', amount: 100, price: 50, denom: 'USDC' });
+    expect(noResult.tokenIds).toEqual([{ start: '2', end: '2' }]);
+  });
+
+  test('has coin transfer paying seller', () => {
+    expect(result.approvalCriteria.coinTransfers[0].to).toBe('bb1seller');
+    expect(result.approvalCriteria.coinTransfers[0].overrideFromWithApproverAddress).toBe(false);
+  });
+
+  test('includes collectionId and token in meta', () => {
+    expect(result._meta.collectionId).toBe('42');
+    expect(result._meta.token).toBe('yes');
+  });
+
+  test('auto-deletes after one use', () => {
+    expect(result.approvalCriteria.autoDeletionOptions.afterOneUse).toBe(true);
+  });
+});
+
+describe('pm-buy-intent builder', () => {
+  const result = buildPmBuyIntent({
+    address: 'bb1buyer',
+    collectionId: '42',
+    token: 'no',
+    amount: 200,
+    price: 30,
+    denom: 'USDC'
+  });
+
+  test('produces incoming approval', () => {
+    expect(result.type).toBe('incoming');
+  });
+
+  test('targets NO token (ID 2)', () => {
+    expect(result.tokenIds).toEqual([{ start: '2', end: '2' }]);
+  });
+
+  test('has escrow-funded coin transfer', () => {
+    expect(result.approvalCriteria.coinTransfers[0].overrideFromWithApproverAddress).toBe(true);
+    expect(result.approvalCriteria.coinTransfers[0].overrideToWithInitiator).toBe(true);
+  });
+
+  test('includes collectionId and token in meta', () => {
+    expect(result._meta.collectionId).toBe('42');
+    expect(result._meta.token).toBe('no');
+  });
+
+  test('includes escrow coins in meta', () => {
+    expect(result._meta.escrowCoins.length).toBe(1);
   });
 });

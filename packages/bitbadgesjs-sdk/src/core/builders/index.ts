@@ -10,7 +10,7 @@
 // ── Collection builders ──────────────────────────────────────────────────────
 
 export { buildVault, type VaultParams } from './vault.js';
-export { buildSubscription, type SubscriptionParams } from './subscription.js';
+export { buildSubscription, type SubscriptionParams, type SubscriptionPayout } from './subscription.js';
 export { buildBounty, type BountyParams } from './bounty.js';
 export { buildCrowdfund, type CrowdfundParams } from './crowdfund.js';
 export { buildAuction, type AuctionParams } from './auction.js';
@@ -28,6 +28,8 @@ export { buildIntent, type IntentParams } from './intent.js';
 export { buildRecurringPayment, type RecurringPaymentParams } from './recurring-payment.js';
 export { buildListing, type ListingParams } from './listing.js';
 export { buildBid, type BidParams } from './bid.js';
+export { buildPmSellIntent, type PmSellIntentParams } from './pm-sell-intent.js';
+export { buildPmBuyIntent, type PmBuyIntentParams } from './pm-buy-intent.js';
 
 // ── Shared utilities ─────────────────────────────────────────────────────────
 
