@@ -192,6 +192,28 @@ aliasCmd
     console.log(address);
   });
 
+aliasCmd
+  .command('for-token <collectionId> <tokenId>')
+  .description('Generate alias address for a specific token in a collection')
+  .action(async (collectionId: string, tokenId: string) => {
+    const { getAliasDerivationKeysForBadge, generateAlias } = await import('../../core/aliases.js');
+
+    const derivationKeys = getAliasDerivationKeysForBadge(collectionId, tokenId);
+    const address = generateAlias('badges', derivationKeys);
+    console.log(address);
+  });
+
+aliasCmd
+  .command('for-list <listId>')
+  .description('Generate alias address for an address list')
+  .action(async (listId: string) => {
+    const { getAliasDerivationKeysForList, generateAlias } = await import('../../core/aliases.js');
+
+    const derivationKeys = getAliasDerivationKeysForList(listId);
+    const address = generateAlias('badges', derivationKeys);
+    console.log(address);
+  });
+
 // ── sdk gen-list-id <addresses...> ─────────────────────────────────────────────
 
 sdkCommand
