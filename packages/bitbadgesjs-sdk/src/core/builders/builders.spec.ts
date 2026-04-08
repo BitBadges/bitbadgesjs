@@ -59,6 +59,7 @@ describe('shared utilities', () => {
 
   test('resolveCoin throws for unknown coin', () => {
     expect(() => resolveCoin('FAKECOIN')).toThrow('Unknown coin');
+    expect(() => resolveCoin('DOGECOIN')).toThrow('Unknown coin');
   });
 
   test('toBaseUnits converts correctly', () => {
@@ -488,4 +489,60 @@ describe('all collection builders pass verifyStandardsCompliance with zero viola
       }
     });
   }
+});
+
+// ── Negative / edge-case tests ───────────────────────────────────────────────
+
+describe('error handling', () => {
+  test('resolveCoin throws for unknown symbol', () => {
+    expect(() => resolveCoin('FAKECOIN')).toThrow('Unknown coin');
+  });
+
+  test('parseDuration throws for garbage input', () => {
+    expect(() => parseDuration('notaduration')).toThrow('Invalid duration');
+    expect(() => parseDuration('')).toThrow('Invalid duration');
+    expect(() => parseDuration('abc123')).toThrow('Invalid duration');
+  });
+
+  test('buildSubscription throws without price or payouts', () => {
+    expect(() => buildSubscription({ interval: 'monthly' } as any)).toThrow();
+  });
+
+  test('buildBounty with zero amount still produces valid structure', () => {
+    const msg = buildBounty({ amount: 0, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r' });
+    expect(msg.typeUrl).toBe('/tokenization.MsgUniversalUpdateCollection');
+    expect(msg.value.collectionApprovals.length).toBe(3);
+  });
+
+  test('buildProductCatalog with empty products produces burn-only collection', () => {
+    const msg = buildProductCatalog({ products: [], storeAddress: 'bb1s' });
+    // Only burn approval, no purchase approvals
+    expect(msg.value.collectionApprovals.length).toBe(1);
+  });
+
+  test('buildCrowdfund goal of 1 base unit works', () => {
+    const msg = buildCrowdfund({ goal: 0.000001, denom: 'USDC' });
+    expect(msg.value.collectionApprovals.length).toBeGreaterThanOrEqual(4);
+  });
+
+  test('buildAuction with very short windows works', () => {
+    const msg = buildAuction({ bidDeadline: '1m', acceptWindow: '1m' });
+    expect(msg.typeUrl).toBe('/tokenization.MsgUniversalUpdateCollection');
+  });
+
+  test('buildIntent with same pay/receive denom works', () => {
+    const msg = buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'BADGE', payAmount: 10, receiveDenom: 'BADGE', receiveAmount: 5 });
+    expect(msg.typeUrl).toBe('/tokenization.MsgUpdateUserApprovals');
+  });
+
+  test('buildListing parses single token ID', () => {
+    const msg = buildListing({ address: 'bb1a', collectionId: '1', tokenIds: '42', price: 10, denom: 'BADGE' });
+    expect(msg.value.outgoingApprovals[0].tokenIds).toEqual([{ start: '42', end: '42' }]);
+  });
+
+  test('buildPmSellIntent invalid token value still works', () => {
+    // TypeScript would catch this, but runtime should not crash
+    const msg = buildPmSellIntent({ address: 'bb1a', collectionId: '1', token: 'yes', amount: 1, price: 1, denom: 'BADGE' });
+    expect(msg.value.outgoingApprovals[0].tokenIds).toEqual([{ start: '1', end: '1' }]);
+  });
 });

@@ -3,7 +3,7 @@
  * @module core/builders/shared
  */
 import crypto from 'crypto';
-import { MAINNET_COINS_REGISTRY, TESTNET_COINS_REGISTRY, type CoinDetails } from '../../common/constants.js';
+import { MAINNET_COINS_REGISTRY, type CoinDetails } from '../../common/constants.js';
 import { generateAliasAddressForIBCBackedDenom } from '../aliases.js';
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -29,12 +29,13 @@ export interface ResolvedCoin {
  *
  * Pass `testnet: true` to use the testnet registry (only BADGE available).
  */
-/** Set to true to use testnet coin registry (only BADGE). CLI sets this via --testnet flag. */
-export let useTestnet = false;
-
-export function resolveCoin(symbolOrDenom: string, options?: { testnet?: boolean }): ResolvedCoin {
-  const isTestnet = options?.testnet ?? useTestnet;
-  const registry = isTestnet ? TESTNET_COINS_REGISTRY : MAINNET_COINS_REGISTRY;
+/**
+ * Resolve a coin symbol (USDC, BADGE, ATOM, OSMO) to its on-chain denom + metadata.
+ * Also accepts raw denoms (ibc/..., ubadge) for pass-through.
+ * Uses mainnet registry. If a coin doesn't exist on your target chain, the tx will fail on-chain.
+ */
+export function resolveCoin(symbolOrDenom: string): ResolvedCoin {
+  const registry = MAINNET_COINS_REGISTRY;
 
   // Try direct match first (raw denom like ubadge or ibc/...)
   const direct = registry[symbolOrDenom];
@@ -55,7 +56,7 @@ export function resolveCoin(symbolOrDenom: string, options?: { testnet?: boolean
     .filter((s, i, a) => a.indexOf(s) === i)
     .join(', ');
   throw new Error(
-    `Unknown coin "${symbolOrDenom}"${options?.testnet ? ' (testnet)' : ''}. Supported: ${supported}`
+    `Unknown coin "${symbolOrDenom}". Supported: ${supported}`
   );
 }
 
