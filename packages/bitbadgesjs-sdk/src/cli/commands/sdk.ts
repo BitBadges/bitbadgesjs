@@ -379,14 +379,27 @@ sdkCommand
   .option('--refresh', 'Force refresh the docs cache')
   .addHelpText('after', `
 Usage:
-  sdk docs                    Show available sections (tree view)
-  sdk docs all                Dump everything (full for-llms.txt)
-  sdk docs <section>          Show specific section content
-  sdk docs learn/approvals    Navigate deeper with slash paths
-  sdk docs --refresh          Force refresh the cache
+  sdk docs                              Show all sections as a navigable tree
+  sdk docs all                          Dump full for-llms.txt (entire documentation)
+  sdk docs <section>                    Show a top-level section and all its children
+  sdk docs <section>/<subsection>       Drill into a specific subsection
+  sdk docs <section>/<sub>/<sub>        Navigate as deep as needed with slashes
+  sdk docs --refresh                    Force refresh the cached docs
+
+Section Navigation (use slugs from the tree view, separated by /):
+  sdk docs learn                        All learning material
+  sdk docs learn/approval-criteria      Just the approval criteria section
+  sdk docs learn/approval-criteria/merkle-challenges   A specific sub-topic
+  sdk docs messages                     All message type docs
+  sdk docs messages/msg-transfer-tokens A specific message
+  sdk docs examples                     Code examples and snippets
+  sdk docs mcp-builder-skills           All builder skills (same as "sdk skills")
+  sdk docs mcp-builder-skills/smart-token  A specific skill
+
+Partial matching: "sdk docs approvals" finds the first section containing "approvals".
 
 Docs are fetched from GitHub on first use and cached locally for 24 hours.
-Cache location: ~/.bitbadges/docs-cache.json`)
+Cache: ~/.bitbadges/docs-cache.json | Refresh: sdk docs --refresh`)
   .action(async (section: string | undefined, opts: { refresh?: boolean }) => {
     const { loadDocs, clearDocsCache } = await import('../utils/docs-cache.js');
 
@@ -400,7 +413,9 @@ Cache location: ~/.bitbadges/docs-cache.json`)
     if (!section) {
       console.log('BitBadges Documentation\n');
       console.log(printTree(docs.tree));
-      console.log('\nUse "sdk docs <section>" to view content. "sdk docs all" for everything.');
+      console.log('\nNavigate with slashes: sdk docs learn/approval-criteria/merkle-challenges');
+      console.log('Dump everything: sdk docs all');
+      console.log('Partial match: sdk docs approvals (finds first match)');
       return;
     }
 
