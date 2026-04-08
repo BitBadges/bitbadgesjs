@@ -1,0 +1,110 @@
+/**
+ * Custom 2FA builder — creates a MsgUniversalUpdateCollection for 2FA tokens with 5-minute expiry.
+ * @module core/builders/custom-2fa
+ */
+import {
+  FOREVER,
+  BURN_ADDRESS,
+  buildMsg,
+  emptyPermissions,
+  alwaysLockedPermission
+} from './shared.js';
+
+export interface Custom2FAParams {
+  name: string;
+  image?: string;
+  description?: string;
+  burnable?: boolean;
+}
+
+export function buildCustom2FA(params: Custom2FAParams): any {
+  const collectionApprovals: any[] = [
+    // 2FA Mint — 5-minute expiration via durationFromTimestamp
+    {
+      fromListId: 'Mint',
+      toListId: 'All',
+      initiatedByListId: 'All',
+      approvalId: 'custom-2fa-mint',
+      transferTimes: FOREVER,
+      tokenIds: [{ start: '1', end: '1' }],
+      ownershipTimes: FOREVER,
+      version: '0',
+      approvalCriteria: {
+        predeterminedBalances: {
+          manualBalances: [],
+          incrementedBalances: {
+            startBalances: [
+              { amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: FOREVER }
+            ],
+            incrementTokenIdsBy: '0',
+            incrementOwnershipTimesBy: '0',
+            durationFromTimestamp: '300000',
+            allowOverrideTimestamp: false,
+            recurringOwnershipTimes: { startTime: '0', intervalLength: '0', chargePeriodLength: '0' },
+            allowOverrideWithAnyValidToken: false,
+            allowAmountScaling: false,
+            maxScalingMultiplier: '0'
+          },
+          orderCalculationMethod: {
+            useOverallNumTransfers: false,
+            usePerToAddressNumTransfers: false,
+            usePerFromAddressNumTransfers: false,
+            usePerInitiatedByAddressNumTransfers: true,
+            useMerkleChallengeLeafIndex: false,
+            challengeTrackerId: ''
+          }
+        },
+        overridesFromOutgoingApprovals: true,
+        overridesToIncomingApprovals: true,
+        autoDeletionOptions: {
+          afterOneUse: false,
+          afterOverallMaxNumTransfers: false,
+          allowCounterpartyPurge: false,
+          allowPurgeIfExpired: true
+        }
+      }
+    }
+  ];
+
+  // Optional burn approval
+  if (params.burnable) {
+    collectionApprovals.push({
+      fromListId: '!Mint',
+      toListId: BURN_ADDRESS,
+      initiatedByListId: 'All',
+      approvalId: 'burn',
+      transferTimes: FOREVER,
+      tokenIds: [{ start: '1', end: '1' }],
+      ownershipTimes: FOREVER,
+      version: '0',
+      approvalCriteria: {}
+    });
+  }
+
+  // Permissions: lock certain fields, leave approvals + manager + token metadata + collection metadata open
+  const perms = {
+    canDeleteCollection: [alwaysLockedPermission()],
+    canArchiveCollection: [alwaysLockedPermission()],
+    canUpdateStandards: [alwaysLockedPermission()],
+    canUpdateCustomData: [alwaysLockedPermission()],
+    canUpdateManager: [],
+    canUpdateCollectionMetadata: [],
+    canUpdateValidTokenIds: [alwaysLockedPermission()],
+    canUpdateTokenMetadata: [],
+    canUpdateCollectionApprovals: [],
+    canAddMoreAliasPaths: [alwaysLockedPermission()],
+    canAddMoreCosmosCoinWrapperPaths: [alwaysLockedPermission()]
+  };
+
+  return buildMsg({
+    collectionApprovals,
+    standards: ['Custom-2FA'],
+    collectionPermissions: perms,
+    invariants: {
+      noCustomOwnershipTimes: false,
+      maxSupplyPerId: '0',
+      noForcefulPostMintTransfers: false,
+      disablePoolCreation: true
+    }
+  });
+}

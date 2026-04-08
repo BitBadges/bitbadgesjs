@@ -716,6 +716,217 @@ function verifyCommonMintRules(value: any): StandardViolation[] {
 }
 
 // ============================================================
+// Bounty Validator
+// ============================================================
+
+function verifyBounty(value: any): StandardViolation[] {
+  const violations: StandardViolation[] = [];
+  const std = 'Bounty';
+  const approvals = getApprovals(value);
+
+  if (!isSingleToken(value.validTokenIds)) {
+    violations.push({ standard: std, field: 'validTokenIds', message: 'Bounty collections MUST have validTokenIds = [{ start: "1", end: "1" }].' });
+  }
+
+  // Must have 3 approvals: accept, deny, expire
+  if (approvals.length < 3) {
+    violations.push({ standard: std, field: 'collectionApprovals', message: `Bounty requires at least 3 approvals (accept, deny, expire). Found ${approvals.length}.` });
+  }
+
+  const mintApprovals = approvals.filter((a: any) => a.fromListId === 'Mint');
+  for (const a of mintApprovals) {
+    const ac = a.approvalCriteria || {};
+    if (ac.overridesFromOutgoingApprovals !== true && ac.overridesFromOutgoingApprovals !== 'true') {
+      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].overridesFromOutgoingApprovals`, message: `Bounty approval "${a.approvalId}" MUST have overridesFromOutgoingApprovals: true.` });
+    }
+    if (ac.overridesToIncomingApprovals !== true && ac.overridesToIncomingApprovals !== 'true') {
+      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].overridesToIncomingApprovals`, message: `Bounty approval "${a.approvalId}" MUST have overridesToIncomingApprovals: true.` });
+    }
+    // Each should have maxNumTransfers.overallMaxNumTransfers = 1
+    const mnt = ac.maxNumTransfers;
+    if (mnt && String(mnt.overallMaxNumTransfers) !== '1') {
+      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].maxNumTransfers`, message: `Bounty approval "${a.approvalId}" overallMaxNumTransfers must be "1".` });
+    }
+  }
+
+  // Verify voting challenges exist on at least 2 approvals
+  const withVoting = mintApprovals.filter((a: any) => a.approvalCriteria?.votingChallenges?.length > 0);
+  if (withVoting.length < 2) {
+    violations.push({ standard: std, field: 'collectionApprovals.votingChallenges', message: 'Bounty requires at least 2 approvals with votingChallenges (accept + deny).' });
+  }
+
+  return violations;
+}
+
+// ============================================================
+// Crowdfund Validator
+// ============================================================
+
+function verifyCrowdfund(value: any): StandardViolation[] {
+  const violations: StandardViolation[] = [];
+  const std = 'Crowdfund';
+  const approvals = getApprovals(value);
+
+  // Must have 2 token IDs (refund + progress)
+  const tokenIds = value.validTokenIds;
+  if (!Array.isArray(tokenIds) || tokenIds.length !== 1 || String(tokenIds[0]?.start) !== '1' || String(tokenIds[0]?.end) !== '2') {
+    violations.push({ standard: std, field: 'validTokenIds', message: 'Crowdfund collections MUST have validTokenIds = [{ start: "1", end: "2" }] (refund + progress tokens).' });
+  }
+
+  // Must have at least 4 approvals
+  if (approvals.length < 4) {
+    violations.push({ standard: std, field: 'collectionApprovals', message: `Crowdfund requires at least 4 approvals (deposit-refund, deposit-progress, success, refund). Found ${approvals.length}.` });
+  }
+
+  // Check mint approvals have overrides
+  for (const a of getMintApprovals(value)) {
+    const ac = a.approvalCriteria || {};
+    if (ac.overridesFromOutgoingApprovals !== true && ac.overridesFromOutgoingApprovals !== 'true') {
+      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].overridesFromOutgoingApprovals`, message: `Mint approval "${a.approvalId}" MUST have overridesFromOutgoingApprovals: true.` });
+    }
+  }
+
+  return violations;
+}
+
+// ============================================================
+// Auction Validator
+// ============================================================
+
+function verifyAuction(value: any): StandardViolation[] {
+  const violations: StandardViolation[] = [];
+  const std = 'Auction';
+
+  if (!isSingleToken(value.validTokenIds)) {
+    violations.push({ standard: std, field: 'validTokenIds', message: 'Auction collections MUST have validTokenIds = [{ start: "1", end: "1" }].' });
+  }
+
+  const approvals = getApprovals(value);
+  const mintApprovals = getMintApprovals(value);
+
+  if (mintApprovals.length === 0) {
+    violations.push({ standard: std, field: 'collectionApprovals', message: 'Auction requires at least one mint approval (mint-to-winner).' });
+    return violations;
+  }
+
+  for (const a of mintApprovals) {
+    const ac = a.approvalCriteria || {};
+    if (ac.overridesFromOutgoingApprovals !== true && ac.overridesFromOutgoingApprovals !== 'true') {
+      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].overridesFromOutgoingApprovals`, message: `Mint approval "${a.approvalId}" MUST have overridesFromOutgoingApprovals: true.` });
+    }
+    // Must have maxNumTransfers = 1
+    const mnt = ac.maxNumTransfers;
+    if (mnt && String(mnt.overallMaxNumTransfers) !== '1') {
+      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].maxNumTransfers`, message: `Auction mint-to-winner overallMaxNumTransfers must be "1".` });
+    }
+    // Transfer times should be bounded (not FOREVER)
+    if (isForever(a.transferTimes || [])) {
+      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].transferTimes`, message: 'Auction mint-to-winner transferTimes should be time-bounded (bid deadline → accept window), not FOREVER.' });
+    }
+  }
+
+  return violations;
+}
+
+// ============================================================
+// Products Validator
+// ============================================================
+
+function verifyProducts(value: any): StandardViolation[] {
+  const violations: StandardViolation[] = [];
+  const std = 'Products';
+  const approvals = getApprovals(value);
+  const invariants = getInvariants(value);
+
+  if (invariants.noCustomOwnershipTimes !== true && invariants.noCustomOwnershipTimes !== 'true') {
+    violations.push({ standard: std, field: 'invariants.noCustomOwnershipTimes', message: 'Product catalog should have noCustomOwnershipTimes: true.' });
+  }
+
+  const purchaseApprovals = getMintApprovals(value);
+  for (const a of purchaseApprovals) {
+    const ac = a.approvalCriteria || {};
+    if (ac.overridesFromOutgoingApprovals !== true && ac.overridesFromOutgoingApprovals !== 'true') {
+      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].overridesFromOutgoingApprovals`, message: `Purchase approval "${a.approvalId}" MUST have overridesFromOutgoingApprovals: true.` });
+    }
+    // Each purchase approval should have coin transfers
+    if (!ac.coinTransfers || ac.coinTransfers.length === 0) {
+      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].coinTransfers`, message: `Purchase approval "${a.approvalId}" should have coinTransfers to the store address.` });
+    }
+  }
+
+  return violations;
+}
+
+// ============================================================
+// Prediction Market Validator
+// ============================================================
+
+function verifyPredictionMarket(value: any): StandardViolation[] {
+  const violations: StandardViolation[] = [];
+  const std = 'Prediction Market';
+  const approvals = getApprovals(value);
+
+  // Must have 2 token IDs (YES/NO)
+  const tokenIds = value.validTokenIds;
+  if (!Array.isArray(tokenIds) || tokenIds.length !== 1 || String(tokenIds[0]?.start) !== '1' || String(tokenIds[0]?.end) !== '2') {
+    violations.push({ standard: std, field: 'validTokenIds', message: 'Prediction market MUST have validTokenIds = [{ start: "1", end: "2" }] (YES + NO tokens).' });
+  }
+
+  // Should have a paired mint approval with scaling
+  const pairedMint = approvals.find((a: any) => {
+    const ib = a.approvalCriteria?.predeterminedBalances?.incrementedBalances;
+    return a.fromListId === 'Mint' && (ib?.allowAmountScaling === true || ib?.allowAmountScaling === 'true');
+  });
+  if (!pairedMint) {
+    violations.push({ standard: std, field: 'collectionApprovals', message: 'Prediction market MUST have a paired mint approval with allowAmountScaling: true for depositing.' });
+  }
+
+  // Should have settlement approvals with voting challenges
+  const settlements = approvals.filter((a: any) => a.approvalCriteria?.votingChallenges?.length > 0);
+  if (settlements.length === 0) {
+    violations.push({ standard: std, field: 'collectionApprovals.votingChallenges', message: 'Prediction market MUST have settlement approvals with votingChallenges for the verifier to resolve outcomes.' });
+  }
+
+  // Should have 2 alias paths (YES/NO)
+  const aliasPaths = value.aliasPathsToAdd || [];
+  if (aliasPaths.length < 2) {
+    violations.push({ standard: std, field: 'aliasPathsToAdd', message: 'Prediction market should have 2 alias paths (YES + NO tokens).' });
+  }
+
+  return violations;
+}
+
+// ============================================================
+// Vault Validator
+// ============================================================
+
+function verifyVault(value: any): StandardViolation[] {
+  const violations: StandardViolation[] = [];
+  const std = 'Vault';
+  const approvals = getApprovals(value);
+  const invariants = getInvariants(value);
+
+  // Must have cosmosCoinBackedPath
+  if (!invariants.cosmosCoinBackedPath) {
+    violations.push({ standard: std, field: 'invariants.cosmosCoinBackedPath', message: 'Vault collections MUST have a cosmosCoinBackedPath defining the IBC backing.' });
+  }
+
+  // Must have backing approvals
+  const backingApprovals = approvals.filter((a: any) => a.approvalCriteria?.allowBackedMinting === true || a.approvalCriteria?.allowBackedMinting === 'true');
+  if (backingApprovals.length === 0) {
+    violations.push({ standard: std, field: 'collectionApprovals', message: 'Vault MUST have at least one approval with allowBackedMinting: true.' });
+  }
+
+  for (const ba of backingApprovals) {
+    if (ba.approvalCriteria?.mustPrioritize !== true && ba.approvalCriteria?.mustPrioritize !== 'true') {
+      violations.push({ standard: std, field: `collectionApprovals[${ba.approvalId}].mustPrioritize`, message: `Vault backing approval "${ba.approvalId}" MUST have mustPrioritize: true.` });
+    }
+  }
+
+  return violations;
+}
+
+// ============================================================
 // Standard → Validator Map
 // ============================================================
 
@@ -730,7 +941,13 @@ const STANDARD_VALIDATORS: Record<string, (value: any) => StandardViolation[]> =
   'Credit Token': verifyCreditToken,
   Quests: verifyQuest,
   NFTMarketplace: verifyTradableNFT,
-  'Non-Transferable': verifyNonTransferable
+  'Non-Transferable': verifyNonTransferable,
+  Bounty: verifyBounty,
+  Crowdfund: verifyCrowdfund,
+  Auction: verifyAuction,
+  Products: verifyProducts,
+  'Prediction Market': verifyPredictionMarket,
+  Vault: verifyVault
 };
 
 // Also match common alternative names
@@ -752,7 +969,14 @@ const STANDARD_ALIASES: Record<string, string> = {
   Quest: 'Quests',
   NFTMarketplace: 'NFTMarketplace',
   Tradable: 'NFTMarketplace',
-  'Non-Transferable': 'Non-Transferable'
+  'Non-Transferable': 'Non-Transferable',
+  Bounty: 'Bounty',
+  Crowdfund: 'Crowdfund',
+  Auction: 'Auction',
+  Products: 'Products',
+  'Product Catalog': 'Products',
+  'Prediction Market': 'Prediction Market',
+  Vault: 'Vault'
 };
 
 // ============================================================
