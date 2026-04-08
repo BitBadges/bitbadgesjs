@@ -69,6 +69,10 @@ interface ApiRoute {
   example?: string;
   /** Links to SDK type docs */
   sdkLinks?: SdkLinks;
+  /** Compact TypeScript-like schema for the request type */
+  requestSchema?: string;
+  /** Compact TypeScript-like schema for the response type */
+  responseSchema?: string;
 }
 
 const ROUTES: ApiRoute[] = [
@@ -93,6 +97,13 @@ const ROUTES: ApiRoute[] = [
       response: 'iGetAccountSuccessResponse',
       function: 'BitBadgesAPI.getAccount',
     },
+    requestSchema: `{
+  address?: string;
+  username?: string;
+}`,
+    responseSchema: `{
+  account: iBitBadgesUserInfo;  // Full account details
+}`,
   },
   {
     name: 'get-accounts',
@@ -111,6 +122,15 @@ const ROUTES: ApiRoute[] = [
       response: 'iGetAccountsSuccessResponse',
       function: 'BitBadgesAPI.getAccounts',
     },
+    requestSchema: `{
+  accountsToFetch: Array<{
+    address: string;
+    viewsToFetch?: Record<string, { viewType: string; bookmark?: string }>;
+  }>;
+}`,
+    responseSchema: `{
+  accounts: iBitBadgesUserInfo[];  // Array of account details
+}`,
   },
   {
     name: 'get-siwbb-requests-for-user',
@@ -215,6 +235,10 @@ const ROUTES: ApiRoute[] = [
       response: 'iGetCollectionSuccessResponse',
       function: 'BitBadgesAPI.getCollection',
     },
+    responseSchema: `{
+  collection: iBitBadgesCollection;  // Full collection details
+  metadata: iMetadata;               // Current collection metadata
+}`,
   },
   {
     name: 'get-token-metadata',
@@ -247,6 +271,17 @@ const ROUTES: ApiRoute[] = [
       response: 'iGetCollectionsSuccessResponse',
       function: 'BitBadgesAPI.getCollections',
     },
+    requestSchema: `{
+  collectionsToFetch: Array<{
+    collectionId: NumberType;
+    metadataToFetch?: { badgeIds?: iUintRange[]; ... };
+    viewsToFetch?: Record<string, { viewType: string; bookmark?: string }>;
+    fetchTotalAndMintBalances?: boolean;
+  }>;
+}`,
+    responseSchema: `{
+  collections: iBitBadgesCollection[];  // Array of collection details
+}`,
   },
   {
     name: 'get-balance-specific-token',
@@ -262,6 +297,9 @@ const ROUTES: ApiRoute[] = [
       response: 'iGetBalanceByAddressSpecificTokenSuccessResponse',
       function: 'BitBadgesAPI.getBalanceByAddressSpecificToken',
     },
+    responseSchema: `{
+  balance: NumberType;  // The balance amount for this specific token
+}`,
   },
   {
     name: 'get-balance-by-address',
@@ -279,6 +317,22 @@ const ROUTES: ApiRoute[] = [
       response: 'iGetBalanceByAddressSuccessResponse',
       function: 'BitBadgesAPI.getBalanceByAddress',
     },
+    requestSchema: `{
+  fetchPrivateParams?: boolean;
+  forceful?: boolean;
+}`,
+    responseSchema: `{
+  balances: iBalance[];
+  incomingApprovals: iUserIncomingApproval[];
+  outgoingApprovals: iUserOutgoingApproval[];
+  userPermissions: iUserPermissions;
+  autoApproveSelfInitiatedOutgoingTransfers: boolean;
+  autoApproveSelfInitiatedIncomingTransfers: boolean;
+  autoApproveAllIncomingTransfers: boolean;
+  collectionId: NumberType;
+  bitbadgesAddress: string;
+  ...
+}`,
   },
   {
     name: 'get-token-owners',
@@ -504,6 +558,14 @@ const ROUTES: ApiRoute[] = [
       response: 'iGetClaimSuccessResponse',
       function: 'BitBadgesAPI.getClaim',
     },
+    requestSchema: `{
+  fetchPrivateParams?: boolean;
+  fetchAllClaimedUsers?: boolean;
+  privateStatesToFetch?: string[];
+}`,
+    responseSchema: `{
+  claim: iClaimDetails;  // Full claim details including plugins
+}`,
   },
   {
     name: 'check-claim-success',
@@ -519,6 +581,10 @@ const ROUTES: ApiRoute[] = [
       response: 'iCheckClaimSuccessSuccessResponse',
       function: 'BitBadgesAPI.checkClaimSuccess',
     },
+    responseSchema: `{
+  success: boolean;
+  numUsed: number;   // Number of times claim was completed
+}`,
   },
   {
     name: 'complete-claim',
@@ -538,6 +604,14 @@ const ROUTES: ApiRoute[] = [
       response: 'iCompleteClaimSuccessResponse',
       function: 'BitBadgesAPI.completeClaim',
     },
+    requestSchema: `{
+  _expectedVersion: number;  // Must match claim version, or -1 to skip
+  _specificInstanceIds?: string[];
+  [pluginInstanceId: string]: any;  // Per-plugin bodies keyed by instance ID
+}`,
+    responseSchema: `{
+  claimAttemptId: string;  // Track with get-claim-attempt-status
+}`,
   },
   {
     name: 'simulate-claim',
@@ -558,6 +632,11 @@ const ROUTES: ApiRoute[] = [
       response: 'iSimulateClaimSuccessResponse',
       function: 'BitBadgesAPI.simulateClaim',
     },
+    requestSchema: `{
+  _expectedVersion: number;  // Must match claim version, or -1 to skip
+  _specificInstanceIds?: string[];  // Simulate only specific plugin instances
+  [pluginInstanceId: string]: any;  // Per-plugin bodies
+}`,
   },
   {
     name: 'get-reserved-codes',
@@ -587,6 +666,12 @@ const ROUTES: ApiRoute[] = [
       response: 'iGetClaimAttemptStatusSuccessResponse',
       function: 'BitBadgesAPI.getClaimAttemptStatus',
     },
+    responseSchema: `{
+  success: boolean;
+  error: string;
+  code?: string;            // On-chain tx code (if applicable)
+  bitbadgesAddress: string;
+}`,
   },
   {
     name: 'search-claims',
@@ -622,6 +707,18 @@ const ROUTES: ApiRoute[] = [
       response: 'iGetClaimsSuccessResponse',
       function: 'BitBadgesAPI.getClaims',
     },
+    requestSchema: `{
+  claimsToFetch: Array<{
+    claimId: string;
+    privateStatesToFetch?: string[];
+    fetchAllClaimedUsers?: boolean;
+    fetchPrivateParams?: boolean;
+  }>;
+}`,
+    responseSchema: `{
+  claims: iClaimDetails[];
+  bookmark?: string;
+}`,
   },
   {
     name: 'create-claim',
@@ -729,6 +826,22 @@ const ROUTES: ApiRoute[] = [
       response: 'iBroadcastTxSuccessResponse',
       function: 'BitBadgesAPI.broadcastTx',
     },
+    requestSchema: `{
+  tx_bytes: any;   // Signed transaction bytes
+  mode: string;    // Broadcast mode (e.g. "BROADCAST_MODE_SYNC")
+}`,
+    responseSchema: `{
+  tx_response: {
+    code: number;
+    txhash: string;
+    height: string;
+    gas_wanted: string;
+    gas_used: string;
+    raw_log: string;
+    events: Array<{ type: string; attributes: ... }>;
+    ...
+  };
+}`,
   },
   {
     name: 'simulate-tx',
@@ -744,6 +857,21 @@ const ROUTES: ApiRoute[] = [
       response: 'iSimulateTxSuccessResponse',
       function: 'BitBadgesAPI.simulateTx',
     },
+    requestSchema: `{
+  tx_bytes: any;   // Signed transaction bytes
+  mode: string;    // Broadcast mode
+}`,
+    responseSchema: `{
+  gas_info: {
+    gas_used: string;
+    gas_wanted: string;
+  };
+  result: {
+    data: string;
+    log: string;
+    events: Array<{ type: string; attributes: ... }>;
+  };
+}`,
   },
 
   // =========================================================================
@@ -1431,6 +1559,15 @@ const ROUTES: ApiRoute[] = [
       response: 'iGetStatusSuccessResponse',
       function: 'BitBadgesAPI.getStatus',
     },
+    requestSchema: `{
+  withOutOfSyncCheck?: boolean;
+  chain?: string;
+}`,
+    responseSchema: `{
+  status: iStatusDoc;    // Indexer/blockchain status details
+  outOfSync?: boolean;   // True if indexer is behind the chain
+  prices?: object;       // Asset prices
+}`,
   },
 
   // =========================================================================
@@ -1693,6 +1830,22 @@ function buildAfterHelpText(route: ApiRoute): string {
     }
   }
 
+  // Inline TypeScript interface schemas
+  if (route.requestSchema && route.sdkLinks?.request) {
+    lines.push('');
+    lines.push(`Request Type (${route.sdkLinks.request}):`);
+    for (const schemaLine of route.requestSchema.split('\n')) {
+      lines.push(`  ${schemaLine}`);
+    }
+  }
+  if (route.responseSchema && route.sdkLinks?.response) {
+    lines.push('');
+    lines.push(`Response Type (${route.sdkLinks.response}):`);
+    for (const schemaLine of route.responseSchema.split('\n')) {
+      lines.push(`  ${schemaLine}`);
+    }
+  }
+
   // Query parameters
   if (route.queryParams && route.queryParams.length > 0) {
     lines.push('');
@@ -1781,7 +1934,12 @@ function buildRouteCommand(route: ApiRoute): Command {
     const opts = args[route.pathParams.length];
 
     try {
-      const apiKey = resolveApiKey(opts.apiKey);
+      const network: 'mainnet' | 'testnet' | 'local' | undefined = opts.testnet
+        ? 'testnet'
+        : opts.local
+          ? 'local'
+          : undefined;
+      const apiKey = resolveApiKey(opts.apiKey, network);
       const baseUrl = resolveBaseUrl({
         testnet: opts.testnet,
         local: opts.local,

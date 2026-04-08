@@ -41,16 +41,34 @@ export function resolveBaseUrl(options?: {
 /**
  * Resolves the API key from flag, environment variable, or config file.
  *
- * Priority: explicit flag > env var > config file
+ * Priority:
+ *  1. Explicit --api-key flag
+ *  2. Network-specific env var (BITBADGES_API_KEY_TESTNET / BITBADGES_API_KEY_LOCAL)
+ *  3. Generic BITBADGES_API_KEY env var
+ *  4. Network-specific config key (apiKeyTestnet / apiKeyLocal)
+ *  5. Default config apiKey
  */
-export function resolveApiKey(explicit?: string): string {
-  const key = explicit || process.env.BITBADGES_API_KEY || getConfigApiKey();
-  if (!key) {
-    throw new Error(
-      'No API key provided. Set BITBADGES_API_KEY env var, pass --api-key <key>, or run `bitbadges-cli config set apiKey <key>`.'
-    );
+export function resolveApiKey(explicit?: string, network?: 'mainnet' | 'testnet' | 'local'): string {
+  if (explicit) return explicit;
+
+  // Network-specific env var
+  if (network === 'testnet' && process.env.BITBADGES_API_KEY_TESTNET) {
+    return process.env.BITBADGES_API_KEY_TESTNET;
   }
-  return key;
+  if (network === 'local' && process.env.BITBADGES_API_KEY_LOCAL) {
+    return process.env.BITBADGES_API_KEY_LOCAL;
+  }
+
+  // Generic env var
+  if (process.env.BITBADGES_API_KEY) return process.env.BITBADGES_API_KEY;
+
+  // Config file (network-aware)
+  const configKey = getConfigApiKey(network);
+  if (configKey) return configKey;
+
+  throw new Error(
+    'No API key provided. Set BITBADGES_API_KEY env var, pass --api-key <key>, or run `bitbadges-cli config set apiKey <key>`.'
+  );
 }
 
 /**

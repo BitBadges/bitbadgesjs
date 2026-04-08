@@ -28,7 +28,7 @@ configCommand
     }
 
     for (const [key, value] of Object.entries(config)) {
-      const display = key === 'apiKey' && typeof value === 'string'
+      const display = key.startsWith('apiKey') && typeof value === 'string'
         ? maskKey(value)
         : value;
       console.log(`  ${key} = ${display}`);
@@ -58,7 +58,7 @@ configCommand
     const config = loadConfig();
     (config as any)[key] = value;
     saveConfig(config);
-    console.log(`Set ${key} = ${key === 'apiKey' ? maskKey(value) : value}`);
+    console.log(`Set ${key} = ${key.startsWith('apiKey') ? maskKey(value) : value}`);
   });
 
 // ── config unset <key> ───────────────────────────────────────────────────────

@@ -355,15 +355,6 @@ sdkCommand
     const config = loadConfig();
     const configPath = getConfigPath();
 
-    // API key status
-    let apiKeyStatus = '(not set)';
-    try {
-      const key = resolveApiKey();
-      apiKeyStatus = key.length <= 8 ? '****' : key.slice(0, 4) + '****' + key.slice(-4);
-    } catch {
-      // No key configured
-    }
-
     // Network / base URL
     const baseUrl = resolveBaseUrl({
       testnet: opts.testnet,
@@ -376,13 +367,34 @@ sdkCommand
         ? 'local'
         : config.network || 'mainnet';
 
+    // API key status (resolved for current network)
+    const maskApiKey = (k: string | undefined): string => {
+      if (!k) return '(not set)';
+      return k.length <= 8 ? '****' : k.slice(0, 4) + '****' + k.slice(-4);
+    };
+
+    let apiKeyStatus = '(not set)';
+    try {
+      const key = resolveApiKey(undefined, network as 'mainnet' | 'testnet' | 'local');
+      apiKeyStatus = maskApiKey(key);
+    } catch {
+      // No key configured
+    }
+
     console.log('BitBadges CLI Status');
     console.log('====================');
-    console.log(`  API Key:      ${apiKeyStatus}`);
+    console.log(`  API Key:      ${apiKeyStatus}  (active for ${network})`);
     console.log(`  Network:      ${network}`);
     console.log(`  Base URL:     ${baseUrl}`);
     console.log(`  Config file:  ${configPath}`);
     console.log(`  Node.js:      ${process.version}`);
+
+    // Show all configured API keys
+    console.log('');
+    console.log('API Keys:');
+    console.log(`  apiKey:         ${maskApiKey(config.apiKey)}`);
+    console.log(`  apiKeyTestnet:  ${maskApiKey(config.apiKeyTestnet)}`);
+    console.log(`  apiKeyLocal:    ${maskApiKey(config.apiKeyLocal)}`);
 
     // Try to get SDK version from package.json
     try {

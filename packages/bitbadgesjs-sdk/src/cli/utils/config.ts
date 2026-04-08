@@ -4,6 +4,8 @@ import * as os from 'os';
 
 export interface Config {
   apiKey?: string;
+  apiKeyTestnet?: string;
+  apiKeyLocal?: string;
   network?: 'mainnet' | 'testnet' | 'local';
   url?: string;
 }
@@ -11,7 +13,7 @@ export interface Config {
 const CONFIG_DIR = path.join(os.homedir(), '.bitbadges');
 const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json');
 
-export const SUPPORTED_CONFIG_KEYS = ['apiKey', 'network', 'url'] as const;
+export const SUPPORTED_CONFIG_KEYS = ['apiKey', 'apiKeyTestnet', 'apiKeyLocal', 'network', 'url'] as const;
 export type ConfigKey = (typeof SUPPORTED_CONFIG_KEYS)[number];
 
 /**
@@ -46,9 +48,13 @@ export function getConfigPath(): string {
 
 /**
  * Returns config apiKey (used as fallback after env var).
+ * If a network is specified, returns the network-specific key first, then the default.
  */
-export function getConfigApiKey(): string | undefined {
-  return loadConfig().apiKey;
+export function getConfigApiKey(network?: 'mainnet' | 'testnet' | 'local'): string | undefined {
+  const config = loadConfig();
+  if (network === 'testnet' && config.apiKeyTestnet) return config.apiKeyTestnet;
+  if (network === 'local' && config.apiKeyLocal) return config.apiKeyLocal;
+  return config.apiKey;
 }
 
 /**
