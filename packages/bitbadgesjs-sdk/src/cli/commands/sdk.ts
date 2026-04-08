@@ -356,15 +356,16 @@ function collectPaths(section: DocSection): string[] {
   return paths;
 }
 
-function printTree(sections: DocSection[], indent = 0): string {
+function printTree(sections: DocSection[], indent = 0, maxDepth = 4): string {
   const lines: string[] = [];
   for (const s of sections) {
     const prefix = '  '.repeat(indent);
-    lines.push(`${prefix}${s.slug.padEnd(28 - indent * 2)} ${s.title}`);
-    if (s.children && indent < 1) {
-      for (const child of s.children) {
-        lines.push(`${'  '.repeat(indent + 1)}${child.slug.padEnd(26 - indent * 2)} ${child.title}`);
-      }
+    const hasChildren = s.children && s.children.length > 0;
+    const marker = hasChildren ? '▸ ' : '  ';
+    const pad = Math.max(2, 30 - indent * 2);
+    lines.push(`${prefix}${marker}${s.slug.padEnd(pad)} ${s.title}`);
+    if (hasChildren && indent < maxDepth) {
+      lines.push(printTree(s.children!, indent + 1, maxDepth));
     }
   }
   return lines.join('\n');
