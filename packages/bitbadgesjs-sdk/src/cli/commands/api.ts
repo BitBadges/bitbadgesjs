@@ -1973,8 +1973,33 @@ function buildRouteCommand(route: ApiRoute): Command {
         body = resolveBody(opts.body);
       }
 
+      // For GET routes, convert --body to exploded query params (OpenAPI explode: true)
+      // GET routes use ?key1=value1&key2=value2 instead of a JSON body
+      if (route.method === 'GET' && body !== undefined && typeof body === 'object') {
+        const searchParams = new URLSearchParams();
+        // First add any existing --query params
+        if (opts.query) {
+          const queryObj = JSON.parse(opts.query);
+          for (const [k, v] of Object.entries(queryObj)) {
+            searchParams.set(k, String(v));
+          }
+        }
+        // Then explode the body fields as query params
+        for (const [k, v] of Object.entries(body)) {
+          if (v !== undefined && v !== null) {
+            // For objects/arrays, JSON-encode them
+            searchParams.set(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+          }
+        }
+        const qs = searchParams.toString();
+        if (qs) {
+          resolvedPath += (resolvedPath.includes('?') ? '&' : '?') + qs;
+        }
+        body = undefined; // Don't send body on GET
+      }
+
       // Warn when a POST/PUT/DELETE route is called without --body
-      if (route.hasBody && body === undefined && !opts.dryRun) {
+      if (route.hasBody && body === undefined && route.method !== 'GET' && !opts.dryRun) {
         const typeHint = route.sdkLinks?.request
           ? ` (see ${route.sdkLinks.request} for fields)`
           : '';
