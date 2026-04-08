@@ -11,7 +11,8 @@ import {
   resolveCoin,
   toBaseUnits,
   durationToTimestamp,
-  uniqueId
+  uniqueId,
+  buildUserApprovalMsg
 } from './shared.js';
 
 export interface PmBuyIntentParams {
@@ -31,8 +32,7 @@ export function buildPmBuyIntent(params: PmBuyIntentParams): any {
   const id = uniqueId('pm-buy');
   const tokenId = params.token === 'yes' ? '1' : '2';
 
-  return {
-    type: 'incoming',
+  const approval = {
     approvalId: id,
     fromListId: 'All',
     initiatedByListId: 'All',
@@ -86,7 +86,11 @@ export function buildPmBuyIntent(params: PmBuyIntentParams): any {
         allowCounterpartyPurge: false,
         allowPurgeIfExpired: true
       }
-    },
+    }
+  };
+
+  return {
+    ...buildUserApprovalMsg({ collectionId: params.collectionId, incomingApprovals: [approval] }),
     _meta: {
       description: `PM Buy: ${params.amount} ${params.token.toUpperCase()} for ${params.price} ${coin.symbol}`,
       collectionId: params.collectionId,

@@ -13,7 +13,8 @@ import {
   toBaseUnits,
   durationToTimestamp,
   uniqueId,
-  mintToBurnBalances
+  mintToBurnBalances,
+  buildUserApprovalMsg
 } from './shared.js';
 
 export interface IntentParams {
@@ -34,8 +35,7 @@ export function buildIntent(params: IntentParams): any {
   const expirationTs = durationToTimestamp(params.expiration || '7d');
   const id = uniqueId('intent');
 
-  return {
-    type: 'outgoing',
+  const approval = {
     approvalId: id,
     toListId: 'All',
     initiatedByListId: 'All',
@@ -76,7 +76,11 @@ export function buildIntent(params: IntentParams): any {
         allowPurgeIfExpired: true
       },
       requireToEqualsInitiatedBy: true
-    },
+    }
+  };
+
+  return {
+    ...buildUserApprovalMsg({ collectionId: params.collectionId, outgoingApprovals: [approval] }),
     _meta: {
       description: `OTC Swap: ${params.payAmount} ${payCoin.symbol} → ${params.receiveAmount} ${receiveCoin.symbol}`,
       collectionId: params.collectionId,

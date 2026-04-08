@@ -11,7 +11,8 @@ import {
   resolveCoin,
   toBaseUnits,
   durationToTimestamp,
-  uniqueId
+  uniqueId,
+  buildUserApprovalMsg
 } from './shared.js';
 
 export interface ListingParams {
@@ -40,8 +41,7 @@ export function buildListing(params: ListingParams): any {
   const id = uniqueId('listing');
   const tokenIds = parseTokenIdRange(params.tokenIds);
 
-  return {
-    type: 'outgoing',
+  const approval = {
     approvalId: id,
     toListId: 'All',
     initiatedByListId: 'All',
@@ -94,7 +94,11 @@ export function buildListing(params: ListingParams): any {
         allowCounterpartyPurge: false,
         allowPurgeIfExpired: true
       }
-    },
+    }
+  };
+
+  return {
+    ...buildUserApprovalMsg({ collectionId: params.collectionId, outgoingApprovals: [approval] }),
     _meta: {
       description: `Listing: ${params.tokenIds} from collection ${params.collectionId} for ${params.price} ${coin.symbol}`,
       collectionId: params.collectionId

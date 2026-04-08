@@ -123,6 +123,7 @@ export function singleTokenMetadata(tokenId: string, name: string, description?:
 
 /**
  * Build a complete MsgUniversalUpdateCollection with collectionId "0" (new collection).
+ * Output is wrapped in { typeUrl, value } for direct use with signing clients.
  */
 export function buildMsg(params: {
   collectionApprovals: any[];
@@ -140,31 +141,56 @@ export function buildMsg(params: {
   mintEscrowCoinsToTransfer?: any[];
 }) {
   return {
-    creator: '',
-    collectionId: '0',
-    updateValidTokenIds: true,
-    validTokenIds: params.validTokenIds || [{ start: '1', end: '1' }],
-    updateCollectionPermissions: true,
-    collectionPermissions: params.collectionPermissions || emptyPermissions(),
-    updateManager: true,
-    manager: params.manager || '',
-    updateCollectionMetadata: true,
-    collectionMetadata: params.collectionMetadata || { uri: 'ipfs://METADATA_COLLECTION', customData: '' },
-    updateTokenMetadata: true,
-    tokenMetadata: params.tokenMetadata || [{ uri: 'ipfs://METADATA_TOKEN_{id}', customData: '', tokenIds: FOREVER }],
-    updateCustomData: true,
-    customData: params.customData || '',
-    updateCollectionApprovals: true,
-    collectionApprovals: params.collectionApprovals,
-    updateStandards: true,
-    standards: params.standards || [],
-    updateIsArchived: false,
-    isArchived: false,
-    defaultBalances: params.defaultBalances || defaultBalances(),
-    mintEscrowCoinsToTransfer: params.mintEscrowCoinsToTransfer || [],
-    invariants: params.invariants || undefined,
-    aliasPathsToAdd: params.aliasPathsToAdd || [],
-    cosmosCoinWrapperPathsToAdd: params.cosmosCoinWrapperPathsToAdd || []
+    typeUrl: '/tokenization.MsgUniversalUpdateCollection',
+    value: {
+      creator: '',
+      collectionId: '0',
+      updateValidTokenIds: true,
+      validTokenIds: params.validTokenIds || [{ start: '1', end: '1' }],
+      updateCollectionPermissions: true,
+      collectionPermissions: params.collectionPermissions || emptyPermissions(),
+      updateManager: true,
+      manager: params.manager || '',
+      updateCollectionMetadata: true,
+      collectionMetadata: params.collectionMetadata || { uri: 'ipfs://METADATA_COLLECTION', customData: '' },
+      updateTokenMetadata: true,
+      tokenMetadata: params.tokenMetadata || [{ uri: 'ipfs://METADATA_TOKEN_{id}', customData: '', tokenIds: FOREVER }],
+      updateCustomData: true,
+      customData: params.customData || '',
+      updateCollectionApprovals: true,
+      collectionApprovals: params.collectionApprovals,
+      updateStandards: true,
+      standards: params.standards || [],
+      updateIsArchived: false,
+      isArchived: false,
+      defaultBalances: params.defaultBalances || defaultBalances(),
+      mintEscrowCoinsToTransfer: params.mintEscrowCoinsToTransfer || [],
+      invariants: params.invariants || undefined,
+      aliasPathsToAdd: params.aliasPathsToAdd || [],
+      cosmosCoinWrapperPathsToAdd: params.cosmosCoinWrapperPathsToAdd || []
+    }
+  };
+}
+
+/**
+ * Wrap a user-level approval in MsgUpdateUserApprovals { typeUrl, value }.
+ * Caller provides the collectionId and either outgoing or incoming approval.
+ */
+export function buildUserApprovalMsg(params: {
+  collectionId: string;
+  outgoingApprovals?: any[];
+  incomingApprovals?: any[];
+}) {
+  return {
+    typeUrl: '/tokenization.MsgUpdateUserApprovals',
+    value: {
+      creator: '',
+      collectionId: params.collectionId,
+      updateOutgoingApprovals: (params.outgoingApprovals?.length ?? 0) > 0,
+      outgoingApprovals: params.outgoingApprovals || [],
+      updateIncomingApprovals: (params.incomingApprovals?.length ?? 0) > 0,
+      incomingApprovals: params.incomingApprovals || []
+    }
   };
 }
 

@@ -11,7 +11,8 @@ import {
   resolveCoin,
   toBaseUnits,
   durationToTimestamp,
-  uniqueId
+  uniqueId,
+  buildUserApprovalMsg
 } from './shared.js';
 
 export interface PmSellIntentParams {
@@ -31,8 +32,7 @@ export function buildPmSellIntent(params: PmSellIntentParams): any {
   const id = uniqueId('pm-sell');
   const tokenId = params.token === 'yes' ? '1' : '2';
 
-  return {
-    type: 'outgoing',
+  const approval = {
     approvalId: id,
     toListId: 'All',
     initiatedByListId: 'All',
@@ -86,7 +86,11 @@ export function buildPmSellIntent(params: PmSellIntentParams): any {
         allowCounterpartyPurge: false,
         allowPurgeIfExpired: true
       }
-    },
+    }
+  };
+
+  return {
+    ...buildUserApprovalMsg({ collectionId: params.collectionId, outgoingApprovals: [approval] }),
     _meta: {
       description: `PM Sell: ${params.amount} ${params.token.toUpperCase()} for ${params.price} ${coin.symbol}`,
       collectionId: params.collectionId,

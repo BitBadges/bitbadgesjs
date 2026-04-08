@@ -11,7 +11,8 @@ import {
   resolveCoin,
   toBaseUnits,
   durationToTimestamp,
-  uniqueId
+  uniqueId,
+  buildUserApprovalMsg
 } from './shared.js';
 
 export interface BidParams {
@@ -38,8 +39,7 @@ export function buildBid(params: BidParams): any {
   const id = uniqueId('bid');
   const tokenIds = parseTokenIdRange(params.tokenIds);
 
-  return {
-    type: 'incoming',
+  const approval = {
     approvalId: id,
     fromListId: 'All',
     initiatedByListId: 'All',
@@ -92,7 +92,11 @@ export function buildBid(params: BidParams): any {
         allowCounterpartyPurge: false,
         allowPurgeIfExpired: true
       }
-    },
+    }
+  };
+
+  return {
+    ...buildUserApprovalMsg({ collectionId: params.collectionId, incomingApprovals: [approval] }),
     _meta: {
       description: `Bid: ${params.price} ${coin.symbol} for token ${params.tokenIds} in collection ${params.collectionId}`,
       collectionId: params.collectionId,

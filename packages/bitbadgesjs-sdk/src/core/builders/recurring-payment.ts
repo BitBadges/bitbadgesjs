@@ -13,7 +13,8 @@ import {
   toBaseUnits,
   parseDuration,
   durationToTimestamp,
-  uniqueId
+  uniqueId,
+  buildUserApprovalMsg
 } from './shared.js';
 
 export interface RecurringPaymentParams {
@@ -32,8 +33,7 @@ export function buildRecurringPayment(params: RecurringPaymentParams): any {
   const expirationTs = durationToTimestamp(params.expiration || '365d');
   const id = uniqueId('recurring');
 
-  return {
-    type: 'incoming',
+  const approval = {
     approvalId: id,
     fromListId: 'Mint',
     initiatedByListId: 'All',
@@ -87,7 +87,11 @@ export function buildRecurringPayment(params: RecurringPaymentParams): any {
           overrideToWithInitiator: true
         }
       ]
-    },
+    }
+  };
+
+  return {
+    ...buildUserApprovalMsg({ collectionId: params.collectionId, incomingApprovals: [approval] }),
     _meta: {
       description: `Recurring: ${params.amount} ${coin.symbol} every ${params.interval} to ${params.recipient}`,
       collectionId: params.collectionId
