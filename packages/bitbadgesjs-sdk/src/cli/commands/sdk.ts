@@ -267,81 +267,231 @@ sdkCommand
     console.log(listId);
   });
 
-// ── sdk skills ─────────────────────────────────────────────────────────────────
+// ── docs helpers ──────────────────────────────────────────────────────────────
 
-const KNOWN_SKILLS = [
-  'smart-token',
-  'minting',
-  'liquidity-pools',
-  'fungible-token',
-  'nft-collection',
-  'subscription',
-  'immutability',
-  'custom-2fa',
-  'address-list',
-  'bb-402',
-  'burnable',
-  'multi-sig-voting',
-  'payment-protocol',
-  'tradable',
-  'credit-token',
-  'auto-mint',
-  'quest',
-  'prediction-market',
-  'bounty'
-];
+interface DocSection {
+  title: string;
+  slug: string;
+  path?: string;
+  children?: DocSection[];
+}
+
+/** Lazily load the bundled docs (large file, only import when needed). */
+async function loadDocsBundle() {
+  return await import('../data/docs-bundle.js');
+}
+
+/** Recursively search the docs tree for a node matching a slug path like "learn/approvals".
+ *  Supports exact match and substring fallback (e.g. "approvals" matches "transferability-approvals"). */
+function findSection(tree: DocSection[], slugPath: string): DocSection | null {
+  const parts = slugPath.toLowerCase().split('/');
+
+  // Exact slug match
+  function searchExact(nodes: DocSection[], depth: number): DocSection | null {
+    for (const node of nodes) {
+      if (node.slug === parts[depth]) {
+        if (depth === parts.length - 1) return node;
+        if (node.children) {
+          const deeper = searchExact(node.children, depth + 1);
+          if (deeper) return deeper;
+        }
+      }
+      // Also search inside group children at the same depth
+      if (node.children) {
+        const found = searchExact(node.children, depth);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
+  const exact = searchExact(tree, 0);
+  if (exact) return exact;
+
+  // Substring fallback: find first node whose slug contains the query
+  if (parts.length === 1) {
+    const query = parts[0];
+    function searchPartial(nodes: DocSection[]): DocSection | null {
+      for (const node of nodes) {
+        if (node.slug.includes(query) || query.includes(node.slug)) return node;
+        if (node.children) {
+          const found = searchPartial(node.children);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+    return searchPartial(tree);
+  }
+
+  return null;
+}
+
+/** Collect all file paths under a section (including itself). */
+function collectPaths(section: DocSection): string[] {
+  const paths: string[] = [];
+  if (section.path) paths.push(section.path);
+  if (section.children) {
+    for (const child of section.children) {
+      paths.push(...collectPaths(child));
+    }
+  }
+  return paths;
+}
+
+/** Print a tree of sections with indentation. */
+function printTree(sections: DocSection[], indent = 0): string {
+  const lines: string[] = [];
+  for (const s of sections) {
+    const prefix = '  '.repeat(indent);
+    const label = s.children && s.children.length > 0
+      ? `${prefix}${s.slug}/          ${s.title}`
+      : `${prefix}${s.slug}            ${s.title}`;
+    lines.push(label);
+    if (s.children && indent < 1) {
+      // Only show one level deep in the overview
+      for (const child of s.children) {
+        lines.push(`${'  '.repeat(indent + 1)}${child.slug}          ${child.title}`);
+      }
+    }
+  }
+  return lines.join('\n');
+}
+
+// ── sdk docs ───────────────────────────────────────────────────────────────────
+
+const SECTION_HELP = `
+Available documentation sections:
+  overview          BitBadges Overview, Use Cases, BADGE
+  learn             Manager, Permissions, Balances, Approvals, ...
+  messages          All Msg types (MsgCreateCollection, MsgTransferTokens, ...)
+  concepts          Approval Change Events, Review Items
+  queries           GetBalance, GetCollection, GetApprovalTracker, ...
+  examples          Code examples, approval patterns, permission patterns
+  skills            MCP Builder Skills (smart-token, subscription, quest, ...)
+  bb-402            BB-402 Token-Gated Access specification
+  api               BitBadges API reference
+  sdk               SDK overview, common snippets
+  blockchain        Node setup, testnet, EVM RPC
+  ai-agents         Agent tutorials, MCP tools, bot examples
+  claims            Claims system, plugins, dynamic stores
+  evm               EVM compatibility, precompiles
+  gamm              Liquidity pools, swaps
+
+Usage:
+  sdk docs                    Show available sections (tree view)
+  sdk docs all                Dump everything (full for-llms.txt)
+  sdk docs <section>          Show specific section content
+  sdk docs learn/approvals    Navigate deeper with slash paths
+`.trim();
 
 sdkCommand
-  .command('skills [skillId]')
-  .description('List available skills or fetch a specific skill by ID')
-  .option('--url <url>', 'Override base URL for skill docs')
-  .addHelpText('after', `\nAvailable skill IDs:\n${KNOWN_SKILLS.map((s) => `  ${s}`).join('\n')}`)
-  .action(async (skillId: string | undefined, opts: { url?: string }) => {
-    if (!skillId) {
-      // List all skills
-      for (const id of KNOWN_SKILLS) {
-        console.log(id);
+  .command('docs [section]')
+  .description('Browse bundled BitBadges documentation')
+  .addHelpText('after', '\n' + SECTION_HELP)
+  .action(async (section: string | undefined) => {
+    const bundle = await loadDocsBundle();
+
+    // No argument: show tree overview
+    if (!section) {
+      console.log('BitBadges Documentation\n');
+      console.log(printTree(bundle.DOCS_TREE));
+      console.log('\nUse "sdk docs <section>" to view content. "sdk docs all" for everything.');
+      return;
+    }
+
+    // "all" — dump full text
+    if (section === 'all') {
+      console.log(bundle.DOCS_FULL_TEXT);
+      return;
+    }
+
+    // Find the section in the tree
+    const found = findSection(bundle.DOCS_TREE, section);
+    if (!found) {
+      console.error(`Section "${section}" not found.\n`);
+      console.error(SECTION_HELP);
+      process.exit(1);
+    }
+
+    // Gather all content for this section and its children
+    const paths = collectPaths(found);
+    if (paths.length === 0) {
+      console.log(`Section "${found.title}" has no associated content files.`);
+      if (found.children) {
+        console.log('\nSub-sections:');
+        for (const child of found.children) {
+          console.log(`  ${child.slug}    ${child.title}`);
+        }
       }
       return;
     }
 
-    const baseUrl = opts.url || 'https://docs.bitbadges.io/token-standard/skills';
-    const url = `${baseUrl}/${skillId}`;
+    let output = '';
+    for (const p of paths) {
+      const content = bundle.DOCS_BY_PATH[p];
+      if (content) {
+        output += `\n## File: ${p}\n${content}\n`;
+      }
+    }
 
-    try {
-      const axios = (await import('axios')).default;
-      const response = await axios.get(url, { responseType: 'text' });
-      console.log(response.data);
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        console.error(`Skill "${skillId}" not found. Available skills:`);
-        for (const id of KNOWN_SKILLS) {
-          console.error(`  ${id}`);
-        }
-      } else {
-        console.error(`Failed to fetch skill "${skillId}" from ${url}: ${err.message}`);
+    if (!output) {
+      console.error(`No content found for paths under "${section}". The docs bundle may need regeneration.`);
+      process.exit(1);
+    }
+
+    console.log(output.trim());
+  });
+
+// ── sdk skills ─────────────────────────────────────────────────────────────────
+
+sdkCommand
+  .command('skills [skillId]')
+  .description('List available MCP Builder skills or show a specific skill')
+  .addHelpText('after', '\nRun "sdk skills" to list all. "sdk skills <id>" for details.')
+  .action(async (skillId: string | undefined) => {
+    const bundle = await loadDocsBundle();
+
+    // Find the skills section in the tree
+    const skillsSection = findSection(bundle.DOCS_TREE, 'mcp-builder-skills');
+
+    if (!skillsSection || !skillsSection.children) {
+      console.error('Skills section not found in docs bundle. Try "sdk docs" to see available sections.');
+      process.exit(1);
+    }
+
+    if (!skillId) {
+      // List all skills
+      console.log('Available MCP Builder Skills:\n');
+      for (const skill of skillsSection.children) {
+        console.log(`  ${skill.slug.padEnd(24)} ${skill.title}`);
+      }
+      console.log('\nUse "sdk skills <id>" for full content.');
+      return;
+    }
+
+    // Find the specific skill
+    const skill = skillsSection.children.find((s) => s.slug === skillId);
+    if (!skill) {
+      console.error(`Skill "${skillId}" not found. Available skills:`);
+      for (const s of skillsSection.children) {
+        console.error(`  ${s.slug}`);
       }
       process.exit(1);
     }
-  });
 
-// ── sdk docs ───────────────────────────────────────────────────────────────────
-
-sdkCommand
-  .command('docs')
-  .description('Fetch BitBadges documentation for LLMs')
-  .option('--url <url>', 'Override the documentation URL')
-  .action(async (opts: { url?: string }) => {
-    const url = opts.url || 'https://raw.githubusercontent.com/BitBadges/bitbadges-docs/master/for-llms.txt';
-
-    try {
-      const axios = (await import('axios')).default;
-      const response = await axios.get(url, { responseType: 'text' });
-      console.log(response.data);
-    } catch (err: any) {
-      console.error(`Failed to fetch docs from ${url}: ${err.message}`);
+    if (!skill.path) {
+      console.error(`Skill "${skillId}" has no content path.`);
       process.exit(1);
     }
+
+    const content = bundle.DOCS_BY_PATH[skill.path];
+    if (!content) {
+      console.error(`No content found for skill "${skillId}" at path ${skill.path}.`);
+      process.exit(1);
+    }
+
+    console.log(content.trim());
   });
 
 // ── sdk status ────────────────────────────────────────────────────────────────
