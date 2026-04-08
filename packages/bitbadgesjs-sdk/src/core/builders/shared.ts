@@ -3,7 +3,7 @@
  * @module core/builders/shared
  */
 import crypto from 'crypto';
-import { MAINNET_COINS_REGISTRY, type CoinDetails } from '../../common/constants.js';
+import { MAINNET_COINS_REGISTRY, TESTNET_COINS_REGISTRY, type CoinDetails } from '../../common/constants.js';
 import { generateAliasAddressForIBCBackedDenom } from '../aliases.js';
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -24,27 +24,36 @@ export interface ResolvedCoin {
 /**
  * Resolve a coin symbol (USDC, BADGE, ATOM, OSMO) to its on-chain denom + metadata.
  * Also accepts raw denoms (ibc/..., ubadge) for pass-through.
+ *
+ * Pass `testnet: true` to use the testnet registry (only BADGE available).
  */
-export function resolveCoin(symbolOrDenom: string): ResolvedCoin {
+/** Set to true to use testnet coin registry (only BADGE). CLI sets this via --testnet flag. */
+export let useTestnet = false;
+
+export function resolveCoin(symbolOrDenom: string, options?: { testnet?: boolean }): ResolvedCoin {
+  const isTestnet = options?.testnet ?? useTestnet;
+  const registry = isTestnet ? TESTNET_COINS_REGISTRY : MAINNET_COINS_REGISTRY;
+
   // Try direct match first (raw denom like ubadge or ibc/...)
-  const direct = MAINNET_COINS_REGISTRY[symbolOrDenom];
+  const direct = registry[symbolOrDenom];
   if (direct) {
     return { denom: direct.baseDenom, symbol: direct.symbol, decimals: Number(direct.decimals), image: direct.image };
   }
 
   // Try symbol lookup (case-insensitive)
   const upper = symbolOrDenom.toUpperCase();
-  for (const [denom, details] of Object.entries(MAINNET_COINS_REGISTRY)) {
+  for (const [denom, details] of Object.entries(registry)) {
     if (details.symbol.toUpperCase() === upper) {
       return { denom: details.baseDenom, symbol: details.symbol, decimals: Number(details.decimals), image: details.image };
     }
   }
 
+  const supported = Object.values(registry)
+    .map((c) => c.symbol)
+    .filter((s, i, a) => a.indexOf(s) === i)
+    .join(', ');
   throw new Error(
-    `Unknown coin "${symbolOrDenom}". Supported: ${Object.values(MAINNET_COINS_REGISTRY)
-      .map((c) => c.symbol)
-      .filter((s, i, a) => a.indexOf(s) === i)
-      .join(', ')}`
+    `Unknown coin "${symbolOrDenom}"${options?.testnet ? ' (testnet)' : ''}. Supported: ${supported}`
   );
 }
 

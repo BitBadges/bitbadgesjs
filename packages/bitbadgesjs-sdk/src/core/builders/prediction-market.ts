@@ -7,6 +7,7 @@ import {
   BURN_ADDRESS,
   FOREVER,
   resolveCoin,
+  useTestnet,
   buildMsg,
   buildAliasPath,
   frozenPermissions,
@@ -22,7 +23,7 @@ export interface PredictionMarketParams {
 }
 
 export function buildPredictionMarket(params: PredictionMarketParams): any {
-  const coin = resolveCoin('USDC');
+  const coin = resolveCoin(useTestnet ? 'BADGE' : 'USDC');
   const bothTokenIds = [{ start: '1', end: '2' }];
   const yesTokenIds = [{ start: '1', end: '1' }];
   const noTokenIds = [{ start: '2', end: '2' }];

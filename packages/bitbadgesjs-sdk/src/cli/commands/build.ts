@@ -5,7 +5,15 @@ export const buildCommand = new Command('build').description('Template builders 
 
 // ── Output helper ────────────────────────────────────────────────────────────
 
-async function emit(data: any, opts: { condensed?: boolean; outputFile?: string; dryRun?: boolean; explain?: boolean }) {
+/** Call at the start of every action to set testnet mode before builders run */
+async function applyGlobalOpts(opts: any) {
+  if (opts.testnet) {
+    const shared = await import('../../core/builders/shared.js');
+    (shared as any).useTestnet = true;
+  }
+}
+
+async function emit(data: any, opts: { condensed?: boolean; outputFile?: string; dryRun?: boolean; explain?: boolean; testnet?: boolean }) {
   // --dry-run: run verifyStandardsCompliance and print violations
   if (opts.dryRun && data.typeUrl?.includes('MsgUniversalUpdateCollection')) {
     const { verifyStandardsCompliance } = await import('../../core/verify-standards.js');
@@ -37,30 +45,8 @@ const sharedOpts = (cmd: Command) =>
     .option('--output-file <path>', 'Write output to file')
     .option('--json <input>', 'Pass all params as JSON (file, inline, or - for stdin). Overrides individual flags.')
     .option('--dry-run', 'Validate output against standard checks (violations to stderr)')
-    .option('--explain', 'Print human-readable explanation of the output (to stderr)');
-
-/**
- * Merge CLI flags with --json input. JSON takes precedence for overlapping keys.
- */
-function mergeParams(opts: any, flagMap: Record<string, string | ((v: string) => any)>): any {
-  let jsonParams: any = {};
-  if (opts.json) {
-    jsonParams = readJsonInput(opts.json);
-  }
-
-  const flagParams: any = {};
-  for (const [flag, key] of Object.entries(flagMap)) {
-    if (opts[flag] !== undefined) {
-      if (typeof key === 'function') {
-        flagParams[flag] = key(opts[flag]);
-      } else {
-        flagParams[key] = opts[flag];
-      }
-    }
-  }
-
-  return { ...flagParams, ...jsonParams };
-}
+    .option('--explain', 'Print human-readable explanation of the output (to stderr)')
+    .option('--testnet', 'Use testnet coin registry (only BADGE available)');
 
 // ============================================================
 // Collection builders
@@ -79,6 +65,7 @@ sharedOpts(
     .option('--require-2fa <collectionId>', '2FA collection ID for withdrawal gating')
     .option('--emergency-recovery <address>', 'Recovery address for emergency migration')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildVault } = await import('../../core/builders/vault.js');
   if (opts.json) { emit(buildVault(readJsonInput(opts.json)), opts); return; }
   emit(buildVault({
@@ -100,6 +87,7 @@ sharedOpts(
     .option('--tiers <n>', 'Number of tiers', '1')
     .option('--name <name>', 'Collection name', 'Subscription')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildSubscription } = await import('../../core/builders/subscription.js');
   if (opts.json) { emit(buildSubscription(readJsonInput(opts.json)), opts); return; }
   const params: any = { interval: opts.interval, tiers: Number(opts.tiers), name: opts.name };
@@ -124,6 +112,7 @@ sharedOpts(
     .option('--expiration <duration>', 'Expiration duration', '30d')
     .option('--name <name>', 'Collection name', 'Bounty')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildBounty } = await import('../../core/builders/bounty.js');
   if (opts.json) { emit(buildBounty(readJsonInput(opts.json)), opts); return; }
   emit(buildBounty({ amount: Number(opts.amount), denom: opts.denom, verifier: opts.verifier, recipient: opts.recipient, expiration: opts.expiration, name: opts.name }), opts);
@@ -139,6 +128,7 @@ sharedOpts(
     .option('--deadline <duration>', 'Deadline duration', '30d')
     .option('--name <name>', 'Collection name', 'Crowdfund')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildCrowdfund } = await import('../../core/builders/crowdfund.js');
   if (opts.json) { emit(buildCrowdfund(readJsonInput(opts.json)), opts); return; }
   emit(buildCrowdfund({ goal: Number(opts.goal), denom: opts.denom, crowdfunder: opts.crowdfunder, deadline: opts.deadline, name: opts.name }), opts);
@@ -154,6 +144,7 @@ sharedOpts(
     .option('--description <text>', 'Item description')
     .option('--image <url>', 'Item image URL')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildAuction } = await import('../../core/builders/auction.js');
   if (opts.json) { emit(buildAuction(readJsonInput(opts.json)), opts); return; }
   emit(buildAuction({ bidDeadline: opts.bidDeadline, acceptWindow: opts.acceptWindow, name: opts.name, description: opts.description, image: opts.image }), opts);
@@ -167,6 +158,7 @@ sharedOpts(
     .requiredOption('--store-address <address>', 'Payment recipient (bb1...)')
     .option('--name <name>', 'Collection name', 'Product Catalog')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildProductCatalog } = await import('../../core/builders/product-catalog.js');
   if (opts.json) { emit(buildProductCatalog(readJsonInput(opts.json)), opts); return; }
   const products = JSON.parse(opts.products);
@@ -182,6 +174,7 @@ sharedOpts(
     .option('--description <text>', 'Market details')
     .option('--image <url>', 'Market image URL')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildPredictionMarket } = await import('../../core/builders/prediction-market.js');
   if (opts.json) { emit(buildPredictionMarket(readJsonInput(opts.json)), opts); return; }
   emit(buildPredictionMarket({ verifier: opts.verifier, name: opts.name, description: opts.description, image: opts.image }), opts);
@@ -197,6 +190,7 @@ sharedOpts(
     .option('--tradable', 'Enable liquidity pool trading')
     .option('--ai-agent-vault', 'Add AI Agent Vault standard tag')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildSmartAccount } = await import('../../core/builders/smart-account.js');
   if (opts.json) { emit(buildSmartAccount(readJsonInput(opts.json)), opts); return; }
   emit(buildSmartAccount({ backingCoin: opts.backingCoin, symbol: opts.symbol, image: opts.image, tradable: !!opts.tradable, aiAgentVault: !!opts.aiAgentVault }), opts);
@@ -212,6 +206,7 @@ sharedOpts(
     .option('--tokens-per-unit <n>', 'Tokens per 1 display unit of payment', '100')
     .option('--name <name>', 'Collection name', 'Credit Token')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildCreditToken } = await import('../../core/builders/credit-token.js');
   if (opts.json) { emit(buildCreditToken(readJsonInput(opts.json)), opts); return; }
   emit(buildCreditToken({ paymentDenom: opts.paymentDenom, recipient: opts.recipient, symbol: opts.symbol, tokensPerUnit: Number(opts.tokensPerUnit), name: opts.name }), opts);
@@ -226,6 +221,7 @@ sharedOpts(
     .option('--description <text>', 'Description')
     .option('--burnable', 'Allow burning')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildCustom2FA } = await import('../../core/builders/custom-2fa.js');
   if (opts.json) { emit(buildCustom2FA(readJsonInput(opts.json)), opts); return; }
   emit(buildCustom2FA({ name: opts.name, image: opts.image, description: opts.description, burnable: !!opts.burnable }), opts);
@@ -240,6 +236,7 @@ sharedOpts(
     .requiredOption('--max-claims <n>', 'Maximum number of claims')
     .option('--name <name>', 'Collection name', 'Quest')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildQuests } = await import('../../core/builders/quests.js');
   if (opts.json) { emit(buildQuests(readJsonInput(opts.json)), opts); return; }
   emit(buildQuests({ reward: Number(opts.reward), denom: opts.denom, maxClaims: Number(opts.maxClaims), name: opts.name }), opts);
@@ -253,6 +250,7 @@ sharedOpts(
     .option('--image <url>', 'List image URL')
     .option('--description <text>', 'Description')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildAddressList } = await import('../../core/builders/address-list.js');
   if (opts.json) { emit(buildAddressList(readJsonInput(opts.json)), opts); return; }
   emit(buildAddressList({ name: opts.name, image: opts.image, description: opts.description }), opts);
@@ -274,6 +272,7 @@ sharedOpts(
     .requiredOption('--receive-amount <n>', 'Amount you receive (display units)')
     .option('--expiration <duration>', 'How long intent stays open', '7d')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildIntent } = await import('../../core/builders/intent.js');
   if (opts.json) { emit(buildIntent(readJsonInput(opts.json)), opts); return; }
   emit(buildIntent({ address: opts.address, collectionId: opts.collectionId, payDenom: opts.payDenom, payAmount: Number(opts.payAmount), receiveDenom: opts.receiveDenom, receiveAmount: Number(opts.receiveAmount), expiration: opts.expiration }), opts);
@@ -290,6 +289,7 @@ sharedOpts(
     .requiredOption('--recipient <address>', 'Who receives payments (bb1...)')
     .option('--expiration <duration>', 'How long subscription lasts', '365d')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildRecurringPayment } = await import('../../core/builders/recurring-payment.js');
   if (opts.json) { emit(buildRecurringPayment(readJsonInput(opts.json)), opts); return; }
   emit(buildRecurringPayment({ collectionId: opts.collectionId, amount: Number(opts.amount), denom: opts.denom, interval: opts.interval, recipient: opts.recipient, expiration: opts.expiration }), opts);
@@ -307,6 +307,7 @@ sharedOpts(
     .option('--max-sales <n>', 'Maximum number of sales', '1')
     .option('--expiration <duration>', 'Listing duration', '30d')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildListing } = await import('../../core/builders/listing.js');
   if (opts.json) { emit(buildListing(readJsonInput(opts.json)), opts); return; }
   emit(buildListing({ address: opts.address, collectionId: opts.collectionId, tokenIds: opts.tokenIds, price: Number(opts.price), denom: opts.denom, maxSales: Number(opts.maxSales), expiration: opts.expiration }), opts);
@@ -323,6 +324,7 @@ sharedOpts(
     .requiredOption('--denom <symbol>', 'Price coin (USDC, BADGE)')
     .option('--expiration <duration>', 'Bid duration', '7d')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildBid } = await import('../../core/builders/bid.js');
   if (opts.json) { emit(buildBid(readJsonInput(opts.json)), opts); return; }
   emit(buildBid({ address: opts.address, collectionId: opts.collectionId, tokenIds: opts.tokenIds, price: Number(opts.price), denom: opts.denom, expiration: opts.expiration }), opts);
@@ -340,6 +342,7 @@ sharedOpts(
     .requiredOption('--denom <symbol>', 'Payment coin (USDC, BADGE)')
     .option('--expiration <duration>', 'How long intent stays open', '7d')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildPmSellIntent } = await import('../../core/builders/pm-sell-intent.js');
   if (opts.json) { emit(buildPmSellIntent(readJsonInput(opts.json)), opts); return; }
   emit(buildPmSellIntent({ address: opts.address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom: opts.denom, expiration: opts.expiration }), opts);
@@ -357,6 +360,7 @@ sharedOpts(
     .requiredOption('--denom <symbol>', 'Payment coin (USDC, BADGE)')
     .option('--expiration <duration>', 'How long intent stays open', '7d')
 ).action(async (opts) => {
+  await applyGlobalOpts(opts);
   const { buildPmBuyIntent } = await import('../../core/builders/pm-buy-intent.js');
   if (opts.json) { emit(buildPmBuyIntent(readJsonInput(opts.json)), opts); return; }
   emit(buildPmBuyIntent({ address: opts.address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom: opts.denom, expiration: opts.expiration }), opts);
