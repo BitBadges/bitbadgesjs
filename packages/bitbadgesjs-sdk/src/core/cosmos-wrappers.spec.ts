@@ -310,7 +310,7 @@ describe('approvalCriteriaHasNoAdditionalRestrictions', () => {
         mustOwnTokens: [],
         dynamicStoreChallenges: [],
         ethSignatureChallenges: [],
-        userApprovalSettings: { userRoyalties: { percentage: 5n, payoutAddress: 'bb1abc' } }
+        userRoyalties: { percentage: 5n, payoutAddress: 'bb1abc' }
       } as any)
     ).toBe(false);
   });

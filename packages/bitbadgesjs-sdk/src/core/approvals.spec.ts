@@ -902,7 +902,7 @@ describe('CollectionApproval', () => {
         requireFromDoesNotEqualInitiatedBy: false,
         overridesFromOutgoingApprovals: true,
         overridesToIncomingApprovals: true,
-        userApprovalSettings: { userRoyalties: { percentage: 100n, payoutAddress: 'bb1pay' } }
+        userRoyalties: { percentage: 100n, payoutAddress: 'bb1pay' }
       }
     });
 
@@ -913,7 +913,7 @@ describe('CollectionApproval', () => {
     expect(restored.approvalId).toBe('col-1');
     expect(restored.fromListId).toBe('Mint');
     expect(restored.approvalCriteria?.overridesFromOutgoingApprovals).toBe(true);
-    expect(restored.approvalCriteria?.userApprovalSettings?.userRoyalties?.percentage).toBe(100n);
+    expect(restored.approvalCriteria?.userRoyalties?.percentage).toBe(100n);
   });
 
   it('should castToOutgoingApproval', () => {

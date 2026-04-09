@@ -92,13 +92,9 @@ export const blankCriteria = (id: string): Required<iApprovalCriteriaWithDetails
       offlineHours: [],
       offlineDays: []
     },
-    userApprovalSettings: {
-      allowedDenoms: [],
-      disableUserCoinTransfers: false,
-      userRoyalties: {
-        percentage: 0n,
-        payoutAddress: ''
-      }
+    userRoyalties: {
+      percentage: 0n,
+      payoutAddress: ''
     },
     mustPrioritize: false,
     allowBackedMinting: false,
