@@ -451,9 +451,11 @@ describe('interpretTransaction', () => {
         transferTimes: fullRange(),
         ownershipTimes: fullRange(),
         approvalCriteria: {
-          userRoyalties: {
-            percentage: '250',
-            payoutAddress: 'bb1royaltypayout'
+          userApprovalSettings: {
+            userRoyalties: {
+              percentage: '250',
+              payoutAddress: 'bb1royaltypayout'
+            }
           }
         }
       }],

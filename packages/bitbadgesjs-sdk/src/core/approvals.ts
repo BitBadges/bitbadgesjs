@@ -38,7 +38,8 @@ import type {
   iUserIncomingApproval,
   iUserIncomingApprovalWithDetails,
   iUserOutgoingApproval,
-  iUserRoyalties
+  iUserRoyalties,
+  iUserApprovalSettings
 } from '@/interfaces/types/approvals.js';
 import type { CollectionId, iAddressList, iEVMQueryChallenge, iEVMQueryChallengeWithDetails, iMerkleChallenge } from '@/interfaces/types/core.js';
 import * as prototokenization from '@/proto/tokenization/index.js';
@@ -1534,28 +1535,48 @@ export class AddressChecks extends CustomTypeClass<AddressChecks> implements iAd
 export class AltTimeChecks<T extends NumberType> extends BaseNumberTypeClass<AltTimeChecks<T>> implements iAltTimeChecks<T> {
   offlineHours?: UintRangeArray<T>;
   offlineDays?: UintRangeArray<T>;
+  offlineMonths?: UintRangeArray<T>;
+  offlineDaysOfMonth?: UintRangeArray<T>;
+  offlineWeeksOfYear?: UintRangeArray<T>;
+  timezoneOffsetMinutes?: T;
+  timezoneOffsetNegative?: boolean;
 
   constructor(msg: iAltTimeChecks<T>) {
     super();
     this.offlineHours = msg.offlineHours ? UintRangeArray.From(msg.offlineHours) : undefined;
     this.offlineDays = msg.offlineDays ? UintRangeArray.From(msg.offlineDays) : undefined;
+    this.offlineMonths = msg.offlineMonths ? UintRangeArray.From(msg.offlineMonths) : undefined;
+    this.offlineDaysOfMonth = msg.offlineDaysOfMonth ? UintRangeArray.From(msg.offlineDaysOfMonth) : undefined;
+    this.offlineWeeksOfYear = msg.offlineWeeksOfYear ? UintRangeArray.From(msg.offlineWeeksOfYear) : undefined;
+    this.timezoneOffsetMinutes = msg.timezoneOffsetMinutes;
+    this.timezoneOffsetNegative = msg.timezoneOffsetNegative;
   }
 
   getNumberFieldNames(): string[] {
-    return [];
+    return ['timezoneOffsetMinutes'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): AltTimeChecks<U> {
     return new AltTimeChecks<U>({
       offlineHours: this.offlineHours?.map((x) => x.convert(convertFunction)),
-      offlineDays: this.offlineDays?.map((x) => x.convert(convertFunction))
+      offlineDays: this.offlineDays?.map((x) => x.convert(convertFunction)),
+      offlineMonths: this.offlineMonths?.map((x) => x.convert(convertFunction)),
+      offlineDaysOfMonth: this.offlineDaysOfMonth?.map((x) => x.convert(convertFunction)),
+      offlineWeeksOfYear: this.offlineWeeksOfYear?.map((x) => x.convert(convertFunction)),
+      timezoneOffsetMinutes: this.timezoneOffsetMinutes != undefined ? convertFunction(this.timezoneOffsetMinutes) : undefined,
+      timezoneOffsetNegative: this.timezoneOffsetNegative
     });
   }
 
   toProto(): prototokenization.AltTimeChecks {
     return new prototokenization.AltTimeChecks({
       offlineHours: this.offlineHours?.map((x) => x.convert(Stringify).toProto()) ?? [],
-      offlineDays: this.offlineDays?.map((x) => x.convert(Stringify).toProto()) ?? []
+      offlineDays: this.offlineDays?.map((x) => x.convert(Stringify).toProto()) ?? [],
+      offlineMonths: this.offlineMonths?.map((x) => x.convert(Stringify).toProto()) ?? [],
+      offlineDaysOfMonth: this.offlineDaysOfMonth?.map((x) => x.convert(Stringify).toProto()) ?? [],
+      offlineWeeksOfYear: this.offlineWeeksOfYear?.map((x) => x.convert(Stringify).toProto()) ?? [],
+      timezoneOffsetMinutes: this.timezoneOffsetMinutes != undefined ? Stringify(this.timezoneOffsetMinutes) : '0',
+      timezoneOffsetNegative: this.timezoneOffsetNegative ?? false
     });
   }
 
@@ -1578,7 +1599,12 @@ export class AltTimeChecks<T extends NumberType> extends BaseNumberTypeClass<Alt
   static fromProto<U extends NumberType>(item: prototokenization.AltTimeChecks, convertFunction: (item: NumberType) => U): AltTimeChecks<U> {
     return new AltTimeChecks({
       offlineHours: item.offlineHours.map((x) => UintRange.fromProto(x, convertFunction)),
-      offlineDays: item.offlineDays.map((x) => UintRange.fromProto(x, convertFunction))
+      offlineDays: item.offlineDays.map((x) => UintRange.fromProto(x, convertFunction)),
+      offlineMonths: item.offlineMonths.map((x) => UintRange.fromProto(x, convertFunction)),
+      offlineDaysOfMonth: item.offlineDaysOfMonth.map((x) => UintRange.fromProto(x, convertFunction)),
+      offlineWeeksOfYear: item.offlineWeeksOfYear.map((x) => UintRange.fromProto(x, convertFunction)),
+      timezoneOffsetMinutes: item.timezoneOffsetMinutes ? convertFunction(BigInt(item.timezoneOffsetMinutes)) : undefined,
+      timezoneOffsetNegative: item.timezoneOffsetNegative
     });
   }
 }
@@ -1630,6 +1656,61 @@ export class UserRoyalties<T extends NumberType> extends BaseNumberTypeClass<Use
 }
 
 /**
+ * UserApprovalSettings defines issuer-imposed constraints on user-level approvals.
+ * Set on collection-level ApprovalCriteria and propagated to user-level approvals.
+ *
+ * @category Approvals / Transferability
+ */
+export class UserApprovalSettings<T extends NumberType> extends BaseNumberTypeClass<UserApprovalSettings<T>> implements iUserApprovalSettings<T> {
+  allowedDenoms?: string[];
+  disableUserCoinTransfers?: boolean;
+  userRoyalties?: UserRoyalties<T>;
+
+  constructor(msg: iUserApprovalSettings<T>) {
+    super();
+    this.allowedDenoms = msg.allowedDenoms;
+    this.disableUserCoinTransfers = msg.disableUserCoinTransfers;
+    this.userRoyalties = msg.userRoyalties ? new UserRoyalties(msg.userRoyalties) : undefined;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UserApprovalSettings<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UserApprovalSettings<U>;
+  }
+
+  toProto(): prototokenization.UserApprovalSettings {
+    return new prototokenization.UserApprovalSettings({
+      allowedDenoms: this.allowedDenoms ?? [],
+      disableUserCoinTransfers: this.disableUserCoinTransfers ?? false,
+      userRoyalties: this.userRoyalties ? this.userRoyalties.toProto() : undefined
+    });
+  }
+
+  static fromJson<U extends NumberType>(
+    jsonValue: JsonValue,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): UserApprovalSettings<U> {
+    return UserApprovalSettings.fromProto(prototokenization.UserApprovalSettings.fromJson(jsonValue, options), convertFunction);
+  }
+
+  static fromJsonString<U extends NumberType>(
+    jsonString: string,
+    convertFunction: (item: NumberType) => U,
+    options?: Partial<JsonReadOptions>
+  ): UserApprovalSettings<U> {
+    return UserApprovalSettings.fromProto(prototokenization.UserApprovalSettings.fromJsonString(jsonString, options), convertFunction);
+  }
+
+  static fromProto<U extends NumberType>(item: prototokenization.UserApprovalSettings, convertFunction: (item: NumberType) => U): UserApprovalSettings<U> {
+    return new UserApprovalSettings({
+      allowedDenoms: item.allowedDenoms,
+      disableUserCoinTransfers: item.disableUserCoinTransfers,
+      userRoyalties: item.userRoyalties ? UserRoyalties.fromProto(item.userRoyalties, convertFunction) : undefined
+    });
+  }
+}
+
+/**
  *
  * ApprovalCriteria represents the criteria for an approval. The approvee must satisfy all of the criteria to be approved.
  *
@@ -1649,7 +1730,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
   overridesFromOutgoingApprovals?: boolean;
   overridesToIncomingApprovals?: boolean;
   coinTransfers?: CoinTransfer<T>[] | undefined;
-  userRoyalties?: UserRoyalties<T>;
+  userApprovalSettings?: UserApprovalSettings<T>;
   dynamicStoreChallenges?: DynamicStoreChallenge<T>[];
   ethSignatureChallenges?: ETHSignatureChallenge[];
   senderChecks?: AddressChecks;
@@ -1677,7 +1758,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
     this.overridesFromOutgoingApprovals = msg.overridesFromOutgoingApprovals;
     this.overridesToIncomingApprovals = msg.overridesToIncomingApprovals;
     this.coinTransfers = msg.coinTransfers ? msg.coinTransfers.map((x) => new CoinTransfer(x)) : undefined;
-    this.userRoyalties = msg.userRoyalties ? new UserRoyalties(msg.userRoyalties) : undefined;
+    this.userApprovalSettings = msg.userApprovalSettings ? new UserApprovalSettings(msg.userApprovalSettings) : undefined;
     this.dynamicStoreChallenges = msg.dynamicStoreChallenges?.map((x) => new DynamicStoreChallenge(x));
     this.ethSignatureChallenges = msg.ethSignatureChallenges?.map((x) => new ETHSignatureChallenge(x));
     this.senderChecks = msg.senderChecks ? new AddressChecks(msg.senderChecks) : undefined;
@@ -1734,7 +1815,7 @@ export class ApprovalCriteria<T extends NumberType> extends BaseNumberTypeClass<
       requireFromDoesNotEqualInitiatedBy: item.requireFromDoesNotEqualInitiatedBy,
       overridesFromOutgoingApprovals: item.overridesFromOutgoingApprovals,
       overridesToIncomingApprovals: item.overridesToIncomingApprovals,
-      userRoyalties: item.userRoyalties ? UserRoyalties.fromProto(item.userRoyalties, convertFunction) : undefined,
+      userApprovalSettings: item.userApprovalSettings ? UserApprovalSettings.fromProto(item.userApprovalSettings, convertFunction) : undefined,
       dynamicStoreChallenges: item.dynamicStoreChallenges
         ? item.dynamicStoreChallenges.map((x) => DynamicStoreChallenge.fromProto(x, convertFunction))
         : undefined,
