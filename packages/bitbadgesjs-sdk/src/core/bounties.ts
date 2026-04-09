@@ -64,11 +64,18 @@ export const validateBountyCollection = (collection: Readonly<iCollectionDoc<big
   if (withVoting.length !== 2) errors.push(`Expected 2 approvals with votingChallenges (accept+deny), found ${withVoting.length}`);
   if (withoutVoting.length !== 1) errors.push(`Expected 1 approval without votingChallenges (expire), found ${withoutVoting.length}`);
 
-  // 9. Accept+deny have same verifier
+  // 9. Accept+deny have same verifier and pay to different addresses
   if (withVoting.length === 2) {
     const v0 = withVoting[0].approvalCriteria?.votingChallenges?.[0]?.voters?.[0]?.address;
     const v1 = withVoting[1].approvalCriteria?.votingChallenges?.[0]?.voters?.[0]?.address;
     if (v0 !== v1) errors.push('Accept and deny must have the same verifier address');
+
+    // Accept and deny must pay to different addresses (recipient vs submitter)
+    const payout0 = withVoting[0].approvalCriteria?.coinTransfers?.[0]?.to;
+    const payout1 = withVoting[1].approvalCriteria?.coinTransfers?.[0]?.to;
+    if (payout0 && payout1 && payout0 === payout1) {
+      errors.push('Accept and deny must pay out to different addresses (recipient vs submitter)');
+    }
 
     // Same transferTimes end
     const end0 = withVoting[0].transferTimes?.[0]?.end;

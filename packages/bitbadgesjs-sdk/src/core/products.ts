@@ -107,8 +107,8 @@ export const validateProductCatalogCollection = (collection: Readonly<iCollectio
     }
 
     const maxNumTransfers = criteria?.maxNumTransfers;
-    if (!maxNumTransfers || maxNumTransfers.overallMaxNumTransfers === 0n) {
-      errors.push(`${prefix}: must use overallMaxNumTransfers (useOverallNumTransfers=true)`);
+    if (!maxNumTransfers) {
+      errors.push(`${prefix}: must have maxNumTransfers set`);
     }
 
     // NO challenges (merkle, voting, dynamic store)
@@ -129,12 +129,6 @@ export const validateProductCatalogCollection = (collection: Readonly<iCollectio
     const prefix = `Burn approval #${i + 1}`;
     const criteria = a.approvalCriteria;
 
-    if (!criteria?.overridesFromOutgoingApprovals) {
-      errors.push(`${prefix}: overridesFromOutgoingApprovals must be true`);
-    }
-    if (!criteria?.overridesToIncomingApprovals) {
-      errors.push(`${prefix}: overridesToIncomingApprovals must be true`);
-    }
     if (criteria?.coinTransfers?.length) {
       errors.push(`${prefix}: burn approval must NOT have coinTransfers`);
     }
