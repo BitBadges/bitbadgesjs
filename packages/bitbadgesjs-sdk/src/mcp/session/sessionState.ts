@@ -284,39 +284,11 @@ export function setTokenMetadata(
 // Add/Remove operations — array items with order preservation
 // ============================================================
 
-/**
- * Ensure amountTrackerId is set on any approvalAmounts / maxNumTransfers that have
- * non-zero limits. Without this the on-chain tracker defaults to an empty string and
- * collides with every other empty-tracker approval — silent cross-contamination.
- * Default to approvalId since each approval must already have a unique approvalId.
- */
-function ensureAmountTrackerIds(approval: Record<string, any>): void {
-  const ac = approval.approvalCriteria;
-  if (!ac) return;
-  const approvalId = approval.approvalId || '';
-  const AA_LIMITS = ['overallApprovalAmount', 'perToAddressApprovalAmount', 'perFromAddressApprovalAmount', 'perInitiatedByAddressApprovalAmount'];
-  const MNT_LIMITS = ['overallMaxNumTransfers', 'perToAddressMaxNumTransfers', 'perFromAddressMaxNumTransfers', 'perInitiatedByAddressMaxNumTransfers'];
-  const aa = ac.approvalAmounts;
-  if (aa && typeof aa === 'object' && !aa.amountTrackerId) {
-    if (AA_LIMITS.some((k) => aa[k] && String(aa[k]) !== '0')) {
-      aa.amountTrackerId = approvalId;
-    }
-  }
-  const mnt = ac.maxNumTransfers;
-  if (mnt && typeof mnt === 'object' && !mnt.amountTrackerId) {
-    if (MNT_LIMITS.some((k) => mnt[k] && String(mnt[k]) !== '0')) {
-      mnt.amountTrackerId = approvalId;
-    }
-  }
-}
-
 export function addApproval(sessionId: string | undefined, approval: Record<string, any>): void {
   const s = getOrCreateSession(sessionId);
   const value = s.messages[0].value;
   const approvals: any[] = value.collectionApprovals || [];
   const approvalId = approval.approvalId;
-
-  ensureAmountTrackerIds(approval);
 
   const existingIdx = approvals.findIndex((a: any) => a.approvalId === approvalId);
   if (existingIdx >= 0) {
