@@ -36,8 +36,8 @@ export const SKILL_INSTRUCTIONS: SkillInstruction[] = [
 - Unbacking fromListId uses "!Mint:backingAddress" syntax (excludes both Mint and backing address — meaning only regular holders can unback)
 - Backing address is deterministic — use generate_backing_address tool
 - Optional: Add "AI Agent Vault" to standards for AI Prompt tab (display-only)
-- Alias path: symbol = base unit (e.g. "uvatom"), denomUnits = display units with decimals > 0 only, each denomUnit MUST have metadata with an image
-- All alias path and denomUnit metadata MUST include an \`image\` field (token logo URL)`,
+- Alias path: symbol = base unit (e.g. "uvatom"), denomUnits = display units with decimals > 0 only, each denomUnit MUST have PathMetadata with a placeholder uri
+- PathMetadata ONLY has \`{ uri, customData }\` — do NOT include image/name/description fields. Set metadata.uri to a placeholder like \`"ipfs://METADATA_ALIAS_<denom>"\` and register the image/name/description in the metadataPlaceholders sidecar keyed by that URI`,
     instructions: `## Smart Token Configuration
 
 ### Mental Model: Three Phases
@@ -195,9 +195,9 @@ MUST configure at least one alias path. Structure:
       "decimals": "6",
       "symbol": "vATOM",
       "isDefaultDisplay": true,
-      "metadata": { "uri": "ipfs://...", "customData": "" }
+      "metadata": { "uri": "ipfs://METADATA_ALIAS_uvatom_UNIT", "customData": "" }
     }],
-    "metadata": { "uri": "", "customData": "", "image": "https://example.com/token-logo.png" }
+    "metadata": { "uri": "ipfs://METADATA_ALIAS_uvatom", "customData": "" }
   }]
 }
 \`\`\`
@@ -205,10 +205,9 @@ MUST configure at least one alias path. Structure:
 Rules:
 - symbol = base unit symbol (e.g., "uvatom")
 - denomUnits = display units with decimals > 0 ONLY (base decimals 0 is implicit)
-- Each denomUnit MUST have metadata with an image field (often the same image as the base alias path)
-- The alias path itself MUST have metadata with an image field — this is the token logo shown in the UI
+- Each denomUnit and the path itself MUST have PathMetadata of the form \`{ uri, customData }\`. Use a placeholder URI like \`"ipfs://METADATA_ALIAS_<denom>"\` / \`"ipfs://METADATA_ALIAS_<denom>_UNIT"\`.
 - isDefaultDisplay: true for the primary display unit
-- **CRITICAL**: All metadata objects (alias path, denomUnits, cosmosCoinWrapperPaths) MUST include an \`image\` field with a valid URL. Missing images will be auto-fixed to a default but you should always provide a descriptive image.
+- **CRITICAL**: PathMetadata has EXACTLY two fields — \`uri\` and \`customData\`. Never add \`image\`, \`name\`, or \`description\` here. Register the name, description, and image for each placeholder URI in the \`metadataPlaceholders\` sidecar returned alongside the transaction — the metadata auto-apply flow uploads the off-chain JSON and substitutes the placeholder URIs with real IPFS URIs after deploy.
 
 ### Cosmos Coin Wrapper (Optional)
 
@@ -222,8 +221,8 @@ For wrapping native Cosmos SDK coins, use \`allowSpecialWrapping: true\` and \`c
       "sideA": { "amount": "1" },
       "sideB": [{ "amount": "1", "tokenIds": [{ "start": "1", "end": "1" }], "ownershipTimes": [{ "start": "1", "end": "18446744073709551615" }] }]
     },
-    "denomUnits": [{ "decimals": "6", "symbol": "ATOM", "isDefaultDisplay": true, "metadata": { "uri": "", "customData": "", "image": "https://example.com/token-logo.png" } }],
-    "metadata": { "uri": "", "customData": "", "image": "https://example.com/token-logo.png" },
+    "denomUnits": [{ "decimals": "6", "symbol": "ATOM", "isDefaultDisplay": true, "metadata": { "uri": "ipfs://METADATA_WRAPPER_uatom_UNIT", "customData": "" } }],
+    "metadata": { "uri": "ipfs://METADATA_WRAPPER_uatom", "customData": "" },
     "allowOverrideWithAnyValidToken": false
   }]
 }
@@ -284,8 +283,8 @@ Require ownership of a 2FA token to withdraw. Add mustOwnTokens to the unbacking
 
 ### Metadata Guidance
 
-- Collection metadata, token metadata, alias path metadata, and denomUnit metadata should all have descriptive names/descriptions and images
-- Do NOT use lazy placeholder names like "Backing Approval" — write real user-facing descriptions explaining what each approval does
+- Collection, token, alias path, and denomUnit metadata proto fields are ALL shaped as \`{ uri, customData }\`. Use placeholder URIs (\`ipfs://METADATA_COLLECTION\`, \`ipfs://METADATA_TOKEN_<id>\`, \`ipfs://METADATA_ALIAS_<denom>\`, etc.) and register the real names, descriptions, and images in the \`metadataPlaceholders\` sidecar keyed by those URIs. The auto-apply flow uploads the off-chain JSON and substitutes the placeholder URIs with real uploaded URIs after deploy.
+- Do NOT use lazy placeholder names like "Backing Approval" — write real user-facing descriptions inside the metadataPlaceholders entries explaining what each approval / collection / token does.
 
 ### Key Rules Summary
 
@@ -585,9 +584,9 @@ When enabling liquidity pools for a collection, follow these requirements:
          "decimals": "6",
          "symbol": "vATOM",
          "isDefaultDisplay": true,
-         "metadata": { "uri": "", "customData": "", "image": "https://example.com/token-logo.png" }
+         "metadata": { "uri": "ipfs://METADATA_ALIAS_uvatom_UNIT", "customData": "" }
        }],
-       "metadata": { "uri": "", "customData": "", "image": "https://example.com/token-logo.png" }
+       "metadata": { "uri": "ipfs://METADATA_ALIAS_uvatom", "customData": "" }
      }]
    }
    \`\`\`
@@ -596,7 +595,7 @@ When enabling liquidity pools for a collection, follow these requirements:
 
 - disablePoolCreation MUST be false (not true)
 - MUST configure at least one alias path (required for liquidity pools)
-- All alias path and denomUnit metadata MUST include an \`image\` field with a valid URL (token logo)
+- PathMetadata (on every aliasPath and denomUnit) is ONLY \`{ uri, customData }\`. Put the token logo in the off-chain JSON at the placeholder URI and register a matching entry in \`metadataPlaceholders\` — never put \`image\` on the proto.
 - Merkle challenges are NOT compatible with liquidity pools
 - This enables decentralized exchange (DEX) trading interfaces`
   },
@@ -1829,7 +1828,7 @@ MUST include an alias path so tokens display nicely:
   },
   "symbol": "<SYMBOL>",
   "denomUnits": [],
-  "metadata": { "uri": "", "customData": "", "image": "https://example.com/token-logo.png" }
+  "metadata": { "uri": "ipfs://METADATA_ALIAS_u<symbol_lowercase>", "customData": "" }
 }]
 \`\`\`
 

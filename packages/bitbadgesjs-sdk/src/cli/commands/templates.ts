@@ -80,7 +80,207 @@ async function emit(
     } catch (err) {
       process.stderr.write(`Review skipped: ${err instanceof Error ? err.message : String(err)}\n`);
     }
+
+    // Metadata To Upload — every placeholder URI on the tx that the
+    // metadata auto-apply flow will later substitute. The user (or a
+    // downstream tool) needs to produce JSON for each of these URIs and
+    // upload it somewhere the chain can resolve before broadcast.
+    try {
+      const placeholders = collectMetadataPlaceholders(data);
+      if (placeholders.length > 0) {
+        process.stderr.write('\n' + renderMetadataPlaceholders(placeholders, data._meta?.metadataPlaceholders) + '\n');
+      }
+    } catch (err) {
+      process.stderr.write(`Metadata placeholder scan skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+    }
   }
+}
+
+/**
+ * Walk a template's emitted transaction body and collect every placeholder
+ * metadata URI (`ipfs://METADATA_*`) along with a description of what it
+ * is and which fields the off-chain JSON should supply. The output powers
+ * the "Metadata To Upload" section the auto-review prints to stderr.
+ *
+ * Non-placeholder URIs (real IPFS CIDs, https://... links) are skipped —
+ * those are assumed to already resolve.
+ */
+interface MetadataPlaceholder {
+  uri: string;
+  kind: string;
+  location: string;
+  fields: string[];
+}
+
+function collectMetadataPlaceholders(data: any): MetadataPlaceholder[] {
+  const out: MetadataPlaceholder[] = [];
+  const seen = new Set<string>();
+  const value = data?.value || {};
+
+  const isPlaceholder = (uri: unknown): uri is string =>
+    typeof uri === 'string' && /^ipfs:\/\/METADATA_[A-Z]/.test(uri);
+
+  const push = (uri: string, kind: string, location: string, fields: string[]) => {
+    if (seen.has(uri)) return;
+    seen.add(uri);
+    out.push({ uri, kind, location, fields });
+  };
+
+  // Collection metadata
+  if (isPlaceholder(value?.collectionMetadata?.uri)) {
+    push(
+      value.collectionMetadata.uri,
+      'Collection',
+      'collectionMetadata.uri',
+      ['name', 'description', 'image']
+    );
+  }
+
+  // Per-token metadata
+  if (Array.isArray(value.tokenMetadata)) {
+    for (let i = 0; i < value.tokenMetadata.length; i++) {
+      const tm = value.tokenMetadata[i];
+      if (isPlaceholder(tm?.uri)) {
+        const ids = Array.isArray(tm.tokenIds) && tm.tokenIds.length > 0
+          ? tm.tokenIds.map((r: any) => `${r.start}-${r.end}`).join(', ')
+          : 'all';
+        push(
+          tm.uri,
+          `Token (ids: ${ids})`,
+          `tokenMetadata[${i}].uri`,
+          ['name', 'description', 'image']
+        );
+      }
+    }
+  }
+
+  // Approval metadata
+  if (Array.isArray(value.collectionApprovals)) {
+    for (let i = 0; i < value.collectionApprovals.length; i++) {
+      const a = value.collectionApprovals[i];
+      if (isPlaceholder(a?.uri)) {
+        push(
+          a.uri,
+          `Approval "${a.approvalId || i}"`,
+          `collectionApprovals[${i}].uri`,
+          ['name', 'description', 'image (must be "")']
+        );
+      }
+    }
+  }
+
+  // Alias path metadata (path level + each denomUnit)
+  if (Array.isArray(value.aliasPathsToAdd)) {
+    for (let i = 0; i < value.aliasPathsToAdd.length; i++) {
+      const ap = value.aliasPathsToAdd[i];
+      if (isPlaceholder(ap?.metadata?.uri)) {
+        push(
+          ap.metadata.uri,
+          `Alias path "${ap.denom || i}"`,
+          `aliasPathsToAdd[${i}].metadata.uri`,
+          ['name', 'description', 'image']
+        );
+      }
+      if (Array.isArray(ap?.denomUnits)) {
+        for (let j = 0; j < ap.denomUnits.length; j++) {
+          const du = ap.denomUnits[j];
+          if (isPlaceholder(du?.metadata?.uri)) {
+            push(
+              du.metadata.uri,
+              `Denom unit "${du.symbol || j}" of ${ap.denom || i}`,
+              `aliasPathsToAdd[${i}].denomUnits[${j}].metadata.uri`,
+              ['name', 'description', 'image']
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // Cosmos wrapper path metadata
+  if (Array.isArray(value.cosmosCoinWrapperPathsToAdd)) {
+    for (let i = 0; i < value.cosmosCoinWrapperPathsToAdd.length; i++) {
+      const wp = value.cosmosCoinWrapperPathsToAdd[i];
+      if (isPlaceholder(wp?.metadata?.uri)) {
+        push(
+          wp.metadata.uri,
+          `Wrapper path "${wp.denom || i}"`,
+          `cosmosCoinWrapperPathsToAdd[${i}].metadata.uri`,
+          ['name', 'description', 'image']
+        );
+      }
+      if (Array.isArray(wp?.denomUnits)) {
+        for (let j = 0; j < wp.denomUnits.length; j++) {
+          const du = wp.denomUnits[j];
+          if (isPlaceholder(du?.metadata?.uri)) {
+            push(
+              du.metadata.uri,
+              `Wrapper denom unit "${du.symbol || j}" of ${wp.denom || i}`,
+              `cosmosCoinWrapperPathsToAdd[${i}].denomUnits[${j}].metadata.uri`,
+              ['name', 'description', 'image']
+            );
+          }
+        }
+      }
+    }
+  }
+
+  return out;
+}
+
+/**
+ * Format the Metadata To Upload section — colorized on TTY, plain elsewhere.
+ * Accepts an optional sidecar `filled` map (usually from `data._meta.metadataPlaceholders`)
+ * so entries the template already filled in can be marked as "provided".
+ */
+function renderMetadataPlaceholders(
+  placeholders: MetadataPlaceholder[],
+  filled?: Record<string, { name?: string; description?: string; image?: string }>
+): string {
+  const { c } = makeColor(process.stderr);
+  const width = Math.min(80, (process.stderr as any).columns || 80);
+
+  const lines: string[] = [];
+  lines.push(c('gray', rule('━', width, 'Metadata To Upload')));
+  lines.push('');
+
+  const totalMissing = placeholders.filter((p) => !filled || !filled[p.uri]).length;
+  const totalProvided = placeholders.length - totalMissing;
+
+  for (const p of placeholders) {
+    const supplied = filled?.[p.uri];
+    const badge = supplied
+      ? `${c('green', '✓')} ${c('bold', c('green', 'PROVIDED '))}`
+      : `${c('yellow', '●')} ${c('bold', c('yellow', 'NEEDED   '))}`;
+    lines.push(`  ${badge}  ${c('dim', p.uri)}`);
+    lines.push(`      ${c('bold', p.kind)} — referenced by ${c('dim', p.location)}`);
+    if (supplied) {
+      const supplyBits: string[] = [];
+      if (supplied.name) supplyBits.push(`name: "${supplied.name}"`);
+      if (supplied.description) supplyBits.push(`description: "${supplied.description.slice(0, 40)}${supplied.description.length > 40 ? '…' : ''}"`);
+      if (supplied.image) supplyBits.push(`image: ${supplied.image.slice(0, 50)}${supplied.image.length > 50 ? '…' : ''}`);
+      if (supplyBits.length) lines.push(`      ${c('gray', '→')} ${supplyBits.join('  ')}`);
+    } else {
+      lines.push(`      ${c('gray', '→')} fields: ${p.fields.join(', ')}`);
+    }
+    lines.push('');
+  }
+
+  lines.push(c('gray', rule('━', width)));
+  const summaryParts = [
+    totalMissing > 0 ? c('yellow', `${totalMissing} needed`) : c('gray', `${totalMissing} needed`),
+    totalProvided > 0 ? c('green', `${totalProvided} provided`) : c('gray', `${totalProvided} provided`)
+  ];
+  lines.push(`  ${c('bold', 'Summary')}  ${summaryParts.join('  ·  ')}`);
+  lines.push(
+    c(
+      'dim',
+      '  Upload each Needed entry as off-chain JSON (name, description, image) and\n' +
+        '  substitute the placeholder URI with the real upload URI before broadcast.'
+    )
+  );
+  lines.push(c('gray', rule('━', width)));
+  return lines.join('\n');
 }
 
 /**

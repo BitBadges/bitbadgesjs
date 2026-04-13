@@ -39,17 +39,19 @@ export const addCosmosWrapperPathSchema = z.object({
       decimals: z.string().describe('Display decimals for this unit (e.g., "6"). Min 1, max 18.'),
       symbol: z.string().describe('Display symbol (e.g., "TOKEN"). Must only contain a-zA-Z, _, {, }, -.'),
       isDefaultDisplay: z.boolean().optional().describe('Whether this is the default display unit.'),
+      // PathMetadata only has { uri, customData }. Image/name/description
+      // live inside the off-chain JSON at metadata.uri and are handled by
+      // the metadata auto-apply flow.
       metadata: z.object({
         uri: z.string().optional().default(''),
-        customData: z.string().optional().default(''),
-        image: z.string().describe('Token logo URL. REQUIRED.')
+        customData: z.string().optional().default('')
       }).optional()
     })).describe('Denomination units for display. At least one with isDefaultDisplay: true required.'),
     allowOverrideWithAnyValidToken: z.boolean().optional().default(false).describe('If true, users can choose any valid token ID to wrap. If false (default), must match exact tokenIds in conversion.'),
+    // PathMetadata only has { uri, customData }. See note on denomUnits.
     metadata: z.object({
       uri: z.string().optional().default(''),
-      customData: z.string().optional().default(''),
-      image: z.string().optional().describe('Token logo URL. Recommended for display.')
+      customData: z.string().optional().default('')
     }).optional()
   })
 });
@@ -107,10 +109,10 @@ export const addCosmosWrapperPathTool = {
                 isDefaultDisplay: { type: 'boolean', description: 'Whether this is the default display unit.' },
                 metadata: {
                   type: 'object',
+                  description: 'PathMetadata — ONLY { uri, customData }. No image/name/description at this level.',
                   properties: {
-                    uri: { type: 'string' },
-                    customData: { type: 'string' },
-                    image: { type: 'string', description: 'Token logo URL. REQUIRED.' }
+                    uri: { type: 'string', description: 'Placeholder URI like "ipfs://METADATA_WRAPPER_<denom>_UNIT_<idx>". Substituted by the metadata auto-apply flow.' },
+                    customData: { type: 'string' }
                   }
                 }
               },
@@ -120,11 +122,10 @@ export const addCosmosWrapperPathTool = {
           allowOverrideWithAnyValidToken: { type: 'boolean', description: 'If true, users can choose any valid token ID to wrap. Default false.' },
           metadata: {
             type: 'object',
-            description: 'Path-level metadata.',
+            description: 'Path-level PathMetadata — ONLY { uri, customData }. Image/name/description live inside the off-chain JSON at metadata.uri.',
             properties: {
-              uri: { type: 'string' },
-              customData: { type: 'string' },
-              image: { type: 'string', description: 'Token logo URL. Recommended for display.' }
+              uri: { type: 'string', description: 'Placeholder URI like "ipfs://METADATA_WRAPPER_<denom>". Substituted by the metadata auto-apply flow.' },
+              customData: { type: 'string' }
             }
           }
         },
@@ -150,15 +151,34 @@ export function handleAddCosmosWrapperPath(input: AddCosmosWrapperPathInput) {
     return { success: false, error: `Symbol "${symbol}" contains invalid characters. Only a-zA-Z, _, {, }, - are allowed.` };
   }
 
-  // Propagate path-level image to denomUnits that are missing metadata/image
-  const pathImage = input.wrapperPath.metadata?.image || '';
+  // PathMetadata only has { uri, customData }. Strip any stray `image`
+  // field from the incoming wrapper path and denomUnits, and ensure each
+  // has a placeholder uri the metadata auto-apply flow can substitute.
+  // The image the caller passed must live inside the off-chain JSON at
+  // that uri, not on the proto.
+  if (input.wrapperPath.metadata) {
+    const { image: _ignoreImage, ...cleanPathMetadata } = input.wrapperPath.metadata as any;
+    input.wrapperPath.metadata = {
+      uri: cleanPathMetadata.uri || `ipfs://METADATA_WRAPPER_${denom}`,
+      customData: cleanPathMetadata.customData || ''
+    };
+    void _ignoreImage;
+  } else {
+    input.wrapperPath.metadata = { uri: `ipfs://METADATA_WRAPPER_${denom}`, customData: '' };
+  }
+
   if (input.wrapperPath.denomUnits && Array.isArray(input.wrapperPath.denomUnits)) {
-    input.wrapperPath.denomUnits = input.wrapperPath.denomUnits.map((unit: any) => {
-      if (!unit.metadata) {
-        unit.metadata = { uri: '', customData: '', image: pathImage };
-      } else if (!unit.metadata.image) {
-        unit.metadata.image = pathImage;
+    input.wrapperPath.denomUnits = input.wrapperPath.denomUnits.map((unit: any, idx: number) => {
+      if (!unit.metadata || typeof unit.metadata !== 'object') {
+        unit.metadata = { uri: `ipfs://METADATA_WRAPPER_${denom}_UNIT_${idx}`, customData: '' };
+        return unit;
       }
+      const { image: _dropImage, ...cleanUnitMetadata } = unit.metadata as any;
+      unit.metadata = {
+        uri: cleanUnitMetadata.uri || `ipfs://METADATA_WRAPPER_${denom}_UNIT_${idx}`,
+        customData: cleanUnitMetadata.customData || ''
+      };
+      void _dropImage;
       return unit;
     });
   }

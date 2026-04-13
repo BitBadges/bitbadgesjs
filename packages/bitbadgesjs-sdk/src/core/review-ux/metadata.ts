@@ -76,6 +76,15 @@ export const metadataChecks: UxCheck[] = [
   },
 
   // Alias paths without images
+  //
+  // Images for alias paths live inside the off-chain JSON referenced by
+  // metadata.uri — NOT on the proto. This check looks in the right place:
+  // the metadataPlaceholders sidecar keyed by the path/unit uri, which is
+  // what the auto-apply flow consumes. If the sidecar is missing for the
+  // relevant placeholder, the path will deploy without an image.
+  //
+  // Legacy .metadata.image fields on the proto are a shape error, not a
+  // "missing image" — verifyStandards already throws on that path.
   (value) => {
     const out: Finding[] = [];
     const aliasPaths: any[] = value?.aliasPaths || value?.aliasPathsToAdd || [];
@@ -85,18 +94,10 @@ export const metadataChecks: UxCheck[] = [
       const defaultUnit = denomUnits.find((u: any) => u.isDefaultDisplay);
       const unitMeta = defaultUnit?.metadata;
       const pathMeta = path.metadata;
-      const pathUri = pathMeta?.uri || '';
-      const unitUri = unitMeta?.uri || '';
-      const pathImage =
-        metadataPlaceholders[pathUri]?.image ||
-        pathMeta?.image ||
-        pathMeta?.metadata?.image ||
-        pathMeta?._metadataForUpload?.image;
-      const unitImage =
-        metadataPlaceholders[unitUri]?.image ||
-        unitMeta?.image ||
-        unitMeta?.metadata?.image ||
-        unitMeta?._metadataForUpload?.image;
+      const pathUri: string = pathMeta?.uri || '';
+      const unitUri: string = unitMeta?.uri || '';
+      const pathImage = metadataPlaceholders[pathUri]?.image;
+      const unitImage = metadataPlaceholders[unitUri]?.image;
       return isMissingImage(pathImage) && isMissingImage(unitImage);
     });
     if (missing.length > 0) {
@@ -107,8 +108,9 @@ export const metadataChecks: UxCheck[] = [
         category: 'metadata',
         localeKey: 'review_alias_no_images',
         params: { count: missing.length },
-        messageEn: `${missing.length} alias path(s) have no image on the default display unit.`,
-        recommendationEn: 'Add an image to path.metadata or the default denomUnit.metadata.'
+        messageEn: `${missing.length} alias path(s) have no image in their metadataPlaceholders sidecar.`,
+        recommendationEn:
+          'Provide an entry in metadataPlaceholders keyed by the path metadata.uri (and/or the default denomUnit metadata.uri) with name, description, and image. The on-chain PathMetadata proto only has { uri, customData } — images MUST live in the off-chain JSON at that URI.'
       });
     }
     return out;

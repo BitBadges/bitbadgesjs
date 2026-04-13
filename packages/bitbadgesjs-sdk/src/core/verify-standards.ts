@@ -1192,6 +1192,21 @@ function isFakeOrMissingImage(image: string | undefined): boolean {
   return FAKE_IMAGE_PATTERNS.some((p) => p.test(image));
 }
 
+/**
+ * True if a PathMetadata.uri is missing, blank, or matches one of the
+ * known fake/placeholder patterns. Empty `ipfs://METADATA_*` internal
+ * placeholders from the template/session flow count as VALID here — they
+ * intentionally mark "substitute this at deploy time" and are honoured by
+ * the metadata auto-apply layer.
+ */
+function isFakeOrMissingUri(uri: string | undefined): boolean {
+  if (!uri || uri.trim() === '') return true;
+  // Internal placeholders emitted by buildAliasPath / session builders
+  // are valid — they're substituted during the metadata auto-apply flow.
+  if (/^ipfs:\/\/METADATA_[A-Z]/.test(uri)) return false;
+  return FAKE_IMAGE_PATTERNS.some((p) => p.test(uri));
+}
+
 function verifyMetadataPlaceholders(value: any): StandardViolation[] {
   const violations: StandardViolation[] = [];
   const std = 'Common';
@@ -1232,7 +1247,11 @@ function verifyMetadataPlaceholders(value: any): StandardViolation[] {
     }
   }
 
-  // Check alias path metadata — ALL alias paths and denomUnits MUST have metadata with an image
+  // Check alias path metadata — PathMetadata only has {uri, customData}. The
+  // image lives inside the off-chain JSON referenced by `uri`. Every alias
+  // path and every denomUnit MUST have a metadata.uri set (ideally a
+  // placeholder like ipfs://METADATA_ALIAS_<denom> that gets substituted
+  // post-build via the metadata auto-apply flow).
   const aliasPaths = value.aliasPathsToAdd || [];
   for (let i = 0; i < aliasPaths.length; i++) {
     const ap = aliasPaths[i];
@@ -1240,18 +1259,26 @@ function verifyMetadataPlaceholders(value: any): StandardViolation[] {
       violations.push({
         standard: std,
         field: `aliasPathsToAdd[${i}].metadata`,
-        message: `Alias path "${ap.denom || i}" is missing metadata entirely. All alias paths MUST have metadata with a uri, customData, and image.`,
-        fix: `Add metadata: { uri: "", customData: "", image: "${BITBADGES_DEFAULT_IMAGE}" }.`
+        message: `Alias path "${ap.denom || i}" is missing PathMetadata entirely. All alias paths MUST have metadata: { uri, customData }.`,
+        fix: `Add metadata: { uri: "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}", customData: "" } and upload the image inside the JSON at that URI via the auto-apply flow.`
       });
-    } else if (isFakeOrMissingImage(ap.metadata?.image)) {
+    } else if (isFakeOrMissingUri(ap.metadata?.uri)) {
+      violations.push({
+        standard: std,
+        field: `aliasPathsToAdd[${i}].metadata.uri`,
+        message: `Alias path "${ap.denom || i}" metadata.uri is missing or is a fake placeholder. The image must live inside the off-chain JSON at this URI.`,
+        fix: `Set metadata.uri to a placeholder like "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}" (the metadata auto-apply flow replaces this with a real upload) or to a real uploaded URI directly.`
+      });
+    }
+    if ('image' in (ap.metadata || {})) {
       violations.push({
         standard: std,
         field: `aliasPathsToAdd[${i}].metadata.image`,
-        message: `Alias path metadata has no image or uses a fake placeholder. Use the BitBadges default: "${BITBADGES_DEFAULT_IMAGE}" or the user-provided image.`,
-        fix: `Set metadata.image to "${BITBADGES_DEFAULT_IMAGE}".`
+        message: `aliasPathsToAdd[${i}].metadata.image is not a valid field. PathMetadata only has { uri, customData }. Put the image inside the off-chain JSON referenced by metadata.uri.`,
+        fix: `Remove metadata.image and place the image field inside the JSON blob hosted at metadata.uri.`
       });
     }
-    // Check denomUnit metadata — each denomUnit MUST have metadata with an image
+    // Check denomUnit metadata — each denomUnit MUST have PathMetadata with uri
     if (Array.isArray(ap.denomUnits)) {
       for (let j = 0; j < ap.denomUnits.length; j++) {
         const du = ap.denomUnits[j];
@@ -1259,22 +1286,30 @@ function verifyMetadataPlaceholders(value: any): StandardViolation[] {
           violations.push({
             standard: std,
             field: `aliasPathsToAdd[${i}].denomUnits[${j}].metadata`,
-            message: `Denom unit "${du.symbol || j}" is missing metadata entirely. All denomUnits MUST have metadata with a uri, customData, and image.`,
-            fix: `Add metadata: { uri: "", customData: "", image: "${BITBADGES_DEFAULT_IMAGE}" }.`
+            message: `Denom unit "${du.symbol || j}" is missing PathMetadata entirely. All denomUnits MUST have metadata: { uri, customData }.`,
+            fix: `Add metadata: { uri: "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}_UNIT", customData: "" }.`
           });
-        } else if (isFakeOrMissingImage(du.metadata?.image)) {
+        } else if (isFakeOrMissingUri(du.metadata?.uri)) {
+          violations.push({
+            standard: std,
+            field: `aliasPathsToAdd[${i}].denomUnits[${j}].metadata.uri`,
+            message: `Denom unit "${du.symbol || j}" metadata.uri is missing or is a fake placeholder.`,
+            fix: `Set metadata.uri to a placeholder like "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}_UNIT" or to a real uploaded URI directly.`
+          });
+        }
+        if ('image' in (du.metadata || {})) {
           violations.push({
             standard: std,
             field: `aliasPathsToAdd[${i}].denomUnits[${j}].metadata.image`,
-            message: `Denom unit "${du.symbol || j}" metadata has no image or uses a fake placeholder.`,
-            fix: `Set metadata.image to "${BITBADGES_DEFAULT_IMAGE}".`
+            message: `denomUnits[${j}].metadata.image is not a valid field. PathMetadata only has { uri, customData }. Put the image inside the off-chain JSON referenced by metadata.uri.`,
+            fix: `Remove metadata.image and place the image field inside the JSON blob hosted at metadata.uri.`
           });
         }
       }
     }
   }
 
-  // Check cosmos coin wrapper path metadata
+  // Check cosmos coin wrapper path metadata — same PathMetadata shape
   const wrapperPaths = value.cosmosCoinWrapperPathsToAdd || [];
   for (let i = 0; i < wrapperPaths.length; i++) {
     const wp = wrapperPaths[i];
@@ -1282,15 +1317,23 @@ function verifyMetadataPlaceholders(value: any): StandardViolation[] {
       violations.push({
         standard: std,
         field: `cosmosCoinWrapperPathsToAdd[${i}].metadata`,
-        message: `Cosmos coin wrapper path is missing metadata entirely. MUST have metadata with image.`,
-        fix: `Add metadata: { uri: "", customData: "", image: "${BITBADGES_DEFAULT_IMAGE}" }.`
+        message: `Cosmos coin wrapper path is missing PathMetadata entirely. MUST have metadata: { uri, customData }.`,
+        fix: `Add metadata: { uri: "ipfs://METADATA_WRAPPER_${wp.denom || '<DENOM>'}", customData: "" }.`
       });
-    } else if (isFakeOrMissingImage(wp.metadata?.image)) {
+    } else if (isFakeOrMissingUri(wp.metadata?.uri)) {
+      violations.push({
+        standard: std,
+        field: `cosmosCoinWrapperPathsToAdd[${i}].metadata.uri`,
+        message: `Cosmos coin wrapper path metadata.uri is missing or is a fake placeholder.`,
+        fix: `Set metadata.uri to a placeholder like "ipfs://METADATA_WRAPPER_${wp.denom || '<DENOM>'}" or a real uploaded URI.`
+      });
+    }
+    if ('image' in (wp.metadata || {})) {
       violations.push({
         standard: std,
         field: `cosmosCoinWrapperPathsToAdd[${i}].metadata.image`,
-        message: `Cosmos coin wrapper path metadata has no image or uses a fake placeholder.`,
-        fix: `Set metadata.image to "${BITBADGES_DEFAULT_IMAGE}".`
+        message: `cosmosCoinWrapperPathsToAdd[${i}].metadata.image is not a valid field. PathMetadata only has { uri, customData }.`,
+        fix: `Remove metadata.image and place the image field inside the JSON blob hosted at metadata.uri.`
       });
     }
   }
