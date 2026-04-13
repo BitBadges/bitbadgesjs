@@ -745,6 +745,15 @@ export interface iVotingChallenge<T extends NumberType> {
    */
   customData?: string;
 
+  /**
+   * If true, all votes for this challenge are cleared after a successful transfer execution.
+   */
+  resetAfterExecution?: boolean;
+
+  /**
+   * Mandatory delay in milliseconds after quorum is reached before the transfer can execute.
+   */
+  delayAfterQuorum?: T;
 }
 
 /**
@@ -780,6 +789,8 @@ export interface iVoteProof<T extends NumberType> {
    */
   yesWeight: T;
 
+  /** Timestamp (unix ms) when this vote was cast. Set automatically by the chain. */
+  votedAt?: T;
 }
 
 /**
