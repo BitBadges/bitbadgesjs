@@ -1,12 +1,13 @@
 /**
  * Tool: review_collection
- * Unified deterministic review — combines audit + standards + UX checks into a
- * single ReviewResult. Prefer this over audit_collection / verify_standards.
+ * Unified deterministic review — combines audit + standards + UX checks
+ * into a single ReviewResult. This is the only review entry point
+ * exposed by the builder tool surface.
  *
  * Logic delegated to bitbadgesjs-sdk's reviewCollection().
  */
 
-import { reviewCollection, type ReviewResult, type ReviewContext, type FindingSource } from '../../../core/review.js';
+import { reviewCollection, type ReviewResult, type ReviewContext } from '../../../core/review.js';
 
 export const reviewCollectionTool = {
   name: 'review_collection',
@@ -35,45 +36,4 @@ export function handleReviewCollection(input: {
   context?: ReviewContext;
 }): ReviewResult {
   return reviewCollection(input.collection, input.context);
-}
-
-// ---------------------------------------------------------------------------
-// Deprecated shims — existing audit_collection / verify_standards builder tools
-// are kept working by routing through reviewCollection with skipSources.
-// These helpers are exposed for the registry to mark the tool descriptions
-// deprecated while preserving return shapes for one release.
-// ---------------------------------------------------------------------------
-
-export function auditOnly(collection: any, context?: string) {
-  const result = reviewCollection(collection, { skipSources: ['standards', 'ux'] as FindingSource[] });
-  return {
-    success: result.summary.verdict !== 'fail',
-    findings: result.findings.map((f) => ({
-      severity: f.severity,
-      category: f.category,
-      title: f.messageEn,
-      detail: f.messageEn,
-      recommendation: f.recommendationEn || ''
-    })),
-    summary: result.summary,
-    permissionSummary: {},
-    approvalSummary: [],
-    _deprecated: 'Use review_collection instead.',
-    _context: context
-  };
-}
-
-export function verifyStandardsOnly(collection: any) {
-  const result = reviewCollection(collection, { skipSources: ['audit', 'ux'] as FindingSource[] });
-  return {
-    valid: result.summary.critical === 0,
-    violations: result.findings.map((f) => ({
-      standard: f.category.replace(/^standards:/, ''),
-      field: f.code,
-      message: f.messageEn,
-      fix: f.recommendationEn
-    })),
-    standardsChecked: [],
-    _deprecated: 'Use review_collection instead.'
-  };
 }

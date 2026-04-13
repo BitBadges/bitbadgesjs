@@ -44,8 +44,7 @@ import {
   // Dynamic store
   buildDynamicStoreTool, handleBuildDynamicStore,
   queryDynamicStoreTool, handleQueryDynamicStore,
-  // Audit / explain
-  auditCollectionTool, handleAuditCollection,
+  // Explain
   explainCollectionTool, handleExplainCollection,
   // Unified review
   reviewCollectionTool, handleReviewCollection,
@@ -213,8 +212,7 @@ export const toolRegistry: Record<string, ToolEntry> = {
   // Unified review (preferred)
   review_collection: entry(reviewCollectionTool, handleReviewCollection),
 
-  // Audit / explain / claim
-  audit_collection: entry(auditCollectionTool, handleAuditCollection),
+  // Explain / claim
   explain_collection: entry(
     explainCollectionTool,
     handleExplainCollection,

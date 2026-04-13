@@ -67,10 +67,10 @@ export function fromAuditFinding(f: AuditFinding): Finding {
     code: 'review.audit.' + codeSuffix,
     severity: mapAuditSeverity(f.severity),
     source: 'audit',
-    // Audit findings are consumed by agents via MCP audit_collection /
-    // validate / review — the frontend sidebar filters them out by
-    // default so humans don't see the same issues the agent already
-    // handled during construction.
+    // Audit findings are consumed by agents via `review_collection` /
+    // `validate_transaction` — the frontend sidebar filters them out
+    // by default so humans don't see the same issues the agent
+    // already handled during construction.
     audience: 'agent',
     category: f.category,
     // Title and detail kept SEPARATE — the frontend adapter used to

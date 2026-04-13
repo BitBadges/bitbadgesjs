@@ -11,7 +11,7 @@ export type FindingSource = 'audit' | 'standards' | 'ux';
  * Who is this finding meant for?
  *
  * - `'agent'`  — produced by tooling that agents already consume
- *                (MCP `audit_collection`, `validate`, `review`). The
+ *                (`review_collection`, `validate_transaction`). The
  *                frontend review sidebar filters these out because the
  *                human user doesn't need to see the same issues the
  *                agent already handled during construction.

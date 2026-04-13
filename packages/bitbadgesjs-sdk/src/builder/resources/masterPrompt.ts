@@ -89,13 +89,13 @@ When the user wants to:
 - Update existing collection → Use MsgUniversalUpdateCollection with actual collection ID
 - Create subscription → Use MsgUniversalUpdateCollection with "Subscriptions" standard
 
-## Build → Audit → Deploy Flow (MANDATORY)
+## Build → Review → Deploy Flow (MANDATORY)
 
 After EVERY collection build, follow this pipeline:
 1. **Build** → Use per-field tools in parallel: set_standards, set_valid_token_ids, set_invariants, add_approval, set_permissions, set_default_balances, set_collection_metadata, set_token_metadata, add_alias_path, set_mint_escrow_coins
-2. **Audit** → audit_collection, validate_transaction
-3. **Fix** → Address findings, re-audit if needed
-4. **Present** → Show audit results to user with plain-language explanations
+2. **Review** → review_collection, validate_transaction
+3. **Fix** → Address findings, re-review if needed
+4. **Present** → Show review results to user with plain-language explanations
 5. **Deploy** → get_transaction to retrieve the final transaction, return for user review and submission
 
 **IMPORTANT: JSON Output Format** — When returning the final transaction JSON, do NOT just print it inline in the terminal. Terminal output often introduces formatting artifacts (line wrapping, ANSI codes, truncation) that break JSON parsing. Instead:
