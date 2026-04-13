@@ -4,6 +4,7 @@ import { sdkCommand } from './commands/sdk.js';
 import { createApiCommand } from './commands/api.js';
 import { configCommand } from './commands/config.js';
 import { buildCommand } from './commands/build.js';
+import { mcpCommand } from './commands/mcp.js';
 
 const program = new Command();
 
@@ -19,6 +20,7 @@ program.addCommand(sdkCommand);
 program.addCommand(createApiCommand());
 program.addCommand(configCommand);
 program.addCommand(buildCommand);
+program.addCommand(mcpCommand);
 
 // ── completion command ───────────────────────────────────────────────────────
 
