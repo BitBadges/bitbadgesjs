@@ -311,16 +311,9 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
 
       // --- Mint approval checks ---
       if (fromId === 'Mint') {
-        // Must have overridesFromOutgoingApprovals
-        if (!criteria.overridesFromOutgoingApprovals) {
-          findings.push({
-            severity: 'critical',
-            category: 'approval-bug',
-            title: `Mint approval "${approvalId}" missing overridesFromOutgoingApprovals`,
-            detail: 'Approvals with fromListId: "Mint" MUST have overridesFromOutgoingApprovals: true. Without this, the Mint address cannot send tokens and minting will fail.',
-            recommendation: 'Add overridesFromOutgoingApprovals: true to approvalCriteria.'
-          });
-        }
+        // Note: "mint approval missing overridesFromOutgoingApprovals" is
+        // handled by review-ux/approvals.ts (review.ux.mint_approval_missing_override)
+        // and was dropped here to stop double-reporting.
 
         // Check for unlimited mint (no amount limits and no transfer limits)
         const amounts = criteria.approvalAmounts as Record<string, unknown> | undefined;
@@ -472,17 +465,11 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         });
       }
 
-      // All -> specific address with no initiator restriction (forceful revocation)
-      if (fromId === 'All' && initiatedBy === 'All' && !criteria.requireToEqualsInitiatedBy) {
-        findings.push({
-          severity: 'critical',
-          category: 'transferability',
-          title: `Approval "${approvalId}" allows FORCEFUL transfers from anyone`,
-          detail: 'fromListId: "All" + initiatedByListId: "All" means ANYONE can initiate a transfer FROM any address. This allows forceful seizure/revocation of tokens.',
-          recommendation:
-            'Add requireToEqualsInitiatedBy: true, or restrict initiatedByListId to the token owner, or restrict fromListId to "!Mint" for voluntary transfers only.'
-        });
-      }
+      // Note: "approval allows FORCEFUL transfers" is handled by
+      // review-ux/approvals.ts (review.ux.forceful_transfers_allowed +
+      // review.ux.forceful_invariant_not_set) with the more complete
+      // 3-way logic (both set / only approvals / only invariant).
+      // Dropped here to stop double-reporting.
 
       // Specific from -> specific to with All initiator
       if (
@@ -572,15 +559,10 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         const crit = a.approvalCriteria as Record<string, unknown> | undefined;
         return !crit?.requireToEqualsInitiatedBy;
       });
-      if (potentialForceful) {
-        findings.push({
-          severity: 'warning',
-          category: 'transferability',
-          title: 'noForcefulPostMintTransfers is not set',
-          detail: 'The invariant noForcefulPostMintTransfers is false/unset, and there are approvals that could allow forceful transfers. The manager or third parties might be able to move tokens from holders without consent.',
-          recommendation: 'Set invariants.noForcefulPostMintTransfers: true if forceful transfers should never be possible.'
-        });
-      }
+      // Note: "noForcefulPostMintTransfers not set" is handled by
+      // review-ux/approvals.ts (review.ux.forceful_invariant_not_set).
+      // Dropped here to stop double-reporting.
+      void potentialForceful;
     }
 
     // ========================================
@@ -599,15 +581,11 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
       const hasCoinOverride = ((crit.coinTransfers as Array<Record<string, unknown>>) || []).some(
         (ct) => ct.overrideFromWithApproverAddress
       );
-      if (hasCoinOverride) {
-        findings.push({
-          severity: 'warning',
-          category: 'approval-design',
-          title: `Amount scaling with approver-funded payments ("${aId}")`,
-          detail: 'This approval uses allowAmountScaling with overrideFromWithApproverAddress on coin transfers. Users can multiply payment amounts drawn from the approver/escrow. This is expected for prediction markets and credit tokens but dangerous for bids or offers.',
-          recommendation: 'Verify maxScalingMultiplier is set to a reasonable cap. Review who can initiate transfers through this approval.'
-        });
-      }
+      // Note: "amount scaling with approver-funded payments" is handled
+      // by review-ux/approvals.ts (review.ux.amount_scaling_with_approver_funds).
+      // Dropped here to stop double-reporting.
+      void hasCoinOverride;
+      void aId;
     }
 
     // ========================================
@@ -669,29 +647,12 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
       }
     }
 
-    // Standards consistency
-    if (standards.includes('NFTs') && maxSupply !== '1') {
-      findings.push({
-        severity: 'warning',
-        category: 'standards',
-        title: 'NFT standard but maxSupplyPerId is not 1',
-        detail: `Collection has "NFTs" standard but maxSupplyPerId is "${maxSupply || '0'}". NFTs should have exactly 1 per token ID.`,
-        recommendation: 'Set invariants.maxSupplyPerId: "1" for NFT collections.'
-      });
-    }
-
-    if (standards.includes('Fungible Tokens') && col.validTokenIds) {
-      const hasMultipleTokenIds = col.validTokenIds.some((r) => r.start !== r.end && !(r.start === '1' && r.end === '1'));
-      if (hasMultipleTokenIds) {
-        findings.push({
-          severity: 'warning',
-          category: 'standards',
-          title: 'Fungible token with multiple token IDs',
-          detail: 'Fungible tokens typically use a single token ID (start: "1", end: "1"). Multiple token IDs may cause confusion.',
-          recommendation: 'Use validTokenIds: [{ start: "1", end: "1" }] for standard fungible tokens.'
-        });
-      }
-    }
+    // Standards consistency: "NFT standard but maxSupplyPerId is not 1"
+    // and "Fungible token with multiple token IDs" are handled by the
+    // skill-gated versions in review-ux/skills.ts
+    // (review.ux.nft_no_supply_cap, review.ux.fungible_multiple_ids).
+    // Dropped here to stop double-reporting.
+    void maxSupply;
 
     // ========================================
     // 7. SERIALIZATION CHECKS
@@ -816,16 +777,10 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         }
       }
     } else {
-      const hasMint = approvals.some((a) => a.fromListId === 'Mint');
-      if (hasMint && col.collectionId === '0') {
-        findings.push({
-          severity: 'warning',
-          category: 'approval-bug',
-          title: 'No defaultBalances specified with mint approvals',
-          detail: 'The collection has mint approvals but no defaultBalances. The chain defaults may not include autoApproveAllIncomingTransfers: true.',
-          recommendation: 'Explicitly set defaultBalances with autoApproveAllIncomingTransfers: true for mint collections.'
-        });
-      }
+      // Note: "autoApproveAllIncomingTransfers missing on mint
+      // collections" is handled by review-ux/approvals.ts
+      // (review.ux.auto_approve_disabled_on_mintable). Dropped here
+      // to stop double-reporting.
     }
 
     // ========================================

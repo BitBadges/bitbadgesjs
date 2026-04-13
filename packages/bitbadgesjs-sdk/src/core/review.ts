@@ -19,10 +19,10 @@
 import { auditCollection, type AuditFinding, type AuditSeverity } from './audit.js';
 import { verifyStandardsCompliance, type StandardViolation } from './verify-standards.js';
 import { runUxChecks } from './review-ux/index.js';
-import type { Finding, FindingSource, ReviewContext, ReviewResult, Severity } from './review-types.js';
+import type { Finding, FindingAudience, FindingSource, ReviewContext, ReviewResult, Severity } from './review-types.js';
 
 // Re-export the types so `reviewCollection` + types are importable from one entry.
-export type { Finding, FindingSource, ReviewContext, ReviewResult, Severity } from './review-types.js';
+export type { Finding, FindingAudience, FindingSource, ReviewContext, ReviewResult, Severity } from './review-types.js';
 
 // ---------------------------------------------------------------------------
 // Normalization helpers
@@ -67,6 +67,11 @@ export function fromAuditFinding(f: AuditFinding): Finding {
     code: 'review.audit.' + codeSuffix,
     severity: mapAuditSeverity(f.severity),
     source: 'audit',
+    // Audit findings are consumed by agents via MCP audit_collection /
+    // validate / review — the frontend sidebar filters them out by
+    // default so humans don't see the same issues the agent already
+    // handled during construction.
+    audience: 'agent',
     category: f.category,
     // Title and detail kept SEPARATE — the frontend adapter used to
     // render `messageEn` in both the title and detail slots, which
@@ -85,6 +90,9 @@ export function fromStandardsFinding(v: StandardViolation): Finding {
     code: 'review.standards.' + codeSuffix,
     severity: 'critical',
     source: 'standards',
+    // Standards violations block broadcast so both agent and human
+    // callers need to see them.
+    audience: 'both',
     category: 'standards:' + v.standard,
     messageEn: v.message,
     recommendationEn: v.fix
@@ -138,10 +146,29 @@ export function reviewCollection(collection: unknown, context?: ReviewContext): 
     deduped.push(f);
   }
 
+  // Audience filter — applied after dedup so both sources get a fair
+  // chance at winning the first-occurrence race, then we drop what the
+  // caller doesn't care about. `'both'` findings always pass.
+  // Fill in the default audience per source for any finding that didn't
+  // set one explicitly. `audit` → agent, `standards` → both, `ux` → human.
+  const withAudience: Finding[] = deduped.map((f) =>
+    f.audience
+      ? f
+      : {
+          ...f,
+          audience: f.source === 'audit' ? 'agent' : f.source === 'standards' ? 'both' : 'human'
+        }
+  );
+
+  const audienceFilter = ctx.audienceFilter;
+  const filtered = audienceFilter
+    ? withAudience.filter((f) => f.audience === audienceFilter || f.audience === 'both')
+    : withAudience;
+
   let critical = 0;
   let warning = 0;
   let info = 0;
-  for (const f of deduped) {
+  for (const f of filtered) {
     if (f.severity === 'critical') critical++;
     else if (f.severity === 'warning') warning++;
     else info++;
@@ -149,7 +176,7 @@ export function reviewCollection(collection: unknown, context?: ReviewContext): 
   const verdict: 'pass' | 'warn' | 'fail' = critical > 0 ? 'fail' : warning > 0 ? 'warn' : 'pass';
 
   return {
-    findings: deduped,
+    findings: filtered,
     summary: { critical, warning, info, verdict }
   };
 }

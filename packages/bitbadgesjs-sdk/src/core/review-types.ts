@@ -7,10 +7,35 @@
 export type Severity = 'critical' | 'warning' | 'info';
 export type FindingSource = 'audit' | 'standards' | 'ux';
 
+/**
+ * Who is this finding meant for?
+ *
+ * - `'agent'`  — produced by tooling that agents already consume
+ *                (MCP `audit_collection`, `validate`, `review`). The
+ *                frontend review sidebar filters these out because the
+ *                human user doesn't need to see the same issues the
+ *                agent already handled during construction.
+ * - `'human'`  — surfaced in the frontend review sidebar. These come
+ *                from the ported UX checks in `review-ux/*.ts` that the
+ *                frontend used to run inline pre-port.
+ * - `'both'`   — shown to both audiences. Standards violations default
+ *                to this because they block broadcast and are relevant
+ *                for both agents and humans.
+ */
+export type FindingAudience = 'agent' | 'human' | 'both';
+
 export interface Finding {
   code: string;
   severity: Severity;
   source: FindingSource;
+  /**
+   * Target audience for this finding. Optional on the raw emit; the
+   * `reviewCollection` aggregator fills in a default per-source
+   * (`audit` → `'agent'`, `standards` → `'both'`, `ux` → `'human'`) so
+   * individual checks don't have to set it. A check CAN override by
+   * setting an explicit audience at emit time.
+   */
+  audience?: FindingAudience;
   category: string;
   params?: Record<string, string | number | boolean>;
   messageEn: string;
@@ -46,6 +71,14 @@ export interface ReviewContext {
   appliedStandards?: string[];
   onChainCollection?: unknown;
   skipSources?: FindingSource[];
+  /**
+   * Filter findings by audience after aggregation. When set, any
+   * finding whose audience doesn't match is dropped from the result.
+   * The frontend review sidebar passes `'human'` to hide
+   * agent-oriented audit output; MCP/CLI callers leave this unset so
+   * they see everything.
+   */
+  audienceFilter?: FindingAudience;
 }
 
 export interface ReviewResult {
