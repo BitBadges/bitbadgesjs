@@ -15,7 +15,8 @@ import {
   encodeMsgFromJson,
   encodeMsgsFromJson,
   supportedJsonTypeUrls,
-  UnsupportedMessageTypeError
+  UnsupportedMessageTypeError,
+  InvalidMessageValueError
 } from './fromJson.js';
 import {
   encodeTokenizationMsgFromJson,
@@ -118,6 +119,42 @@ describe('encodeTokenizationMsgFromJson — tokenization tier', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(UnsupportedMessageTypeError);
       expect((err as UnsupportedMessageTypeError).typeUrl).toBe('/tokenization.MsgFake');
+    }
+  });
+});
+
+describe('InvalidMessageValueError — wrap wrapper-class crashes', () => {
+  it('wraps null value with typed error including the typeUrl', () => {
+    expect(() =>
+      encodeMsgFromJson({ typeUrl: '/tokenization.MsgCreateCollection', value: null })
+    ).toThrow(InvalidMessageValueError);
+    try {
+      encodeMsgFromJson({ typeUrl: '/tokenization.MsgCreateCollection', value: null });
+    } catch (err) {
+      expect((err as InvalidMessageValueError).typeUrl).toBe('/tokenization.MsgCreateCollection');
+      expect((err as Error).message).toContain('value cannot be null');
+    }
+  });
+
+  it('rejects non-object value (array, string, number)', () => {
+    for (const bad of [[], 'hello', 42] as any[]) {
+      expect(() =>
+        encodeMsgFromJson({ typeUrl: '/tokenization.MsgCreateCollection', value: bad })
+      ).toThrow(InvalidMessageValueError);
+    }
+  });
+
+  it('wraps wrapper-class field-access crashes with typeUrl context', () => {
+    // MsgTransferTokens with empty value used to crash with raw
+    // "Cannot read properties of undefined (reading 'map')".
+    // Now wrapped as InvalidMessageValueError with the typeUrl baked in.
+    try {
+      encodeMsgFromJson({ typeUrl: '/tokenization.MsgTransferTokens', value: {} });
+      fail('expected throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(InvalidMessageValueError);
+      expect((err as InvalidMessageValueError).typeUrl).toBe('/tokenization.MsgTransferTokens');
+      expect((err as Error).message).toContain('/tokenization.MsgTransferTokens');
     }
   });
 });

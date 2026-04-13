@@ -61,6 +61,28 @@ export class UnsupportedMessageTypeError extends Error {
   }
 }
 
+/**
+ * Error thrown when `encodeTokenizationMsgFromJson` recognized the typeUrl
+ * but the wrapper-class constructor threw on the malformed `value` (missing
+ * required fields, wrong types, etc.). Wraps the underlying TypeError so
+ * agents and HTTP callers see "/tokenization.MsgX: missing field foo"
+ * instead of a raw `Cannot read properties of undefined (reading 'foo')`
+ * stack trace.
+ */
+export class InvalidMessageValueError extends Error {
+  readonly typeUrl: string;
+  readonly cause: unknown;
+  constructor(typeUrl: string, cause: unknown) {
+    const causeMsg = cause instanceof Error ? cause.message : String(cause);
+    super(
+      `Invalid value for ${typeUrl}: ${causeMsg}. Check that all required fields are present and shaped correctly.`
+    );
+    this.name = 'InvalidMessageValueError';
+    this.typeUrl = typeUrl;
+    this.cause = cause;
+  }
+}
+
 type Builder = (value: any) => Message;
 
 // typeUrl → wrapper-class constructor. The wrapper classes normalize
@@ -107,6 +129,11 @@ const BUILDERS: Record<string, Builder> = {
  *
  * @throws {UnsupportedMessageTypeError} if the typeUrl isn't a known
  *   tokenization request message.
+ * @throws {InvalidMessageValueError} if the typeUrl is known but the
+ *   wrapper-class constructor crashed on the malformed value (missing
+ *   required fields, wrong types). Wraps the underlying TypeError with
+ *   the typeUrl baked into the message so agents see context-rich
+ *   errors instead of "Cannot read properties of undefined".
  */
 export function encodeTokenizationMsgFromJson(msg: any): Message {
   if (!msg || typeof msg !== 'object') {
@@ -121,7 +148,29 @@ export function encodeTokenizationMsgFromJson(msg: any): Message {
     throw new UnsupportedMessageTypeError(typeUrl);
   }
   const value = msg.value !== undefined ? msg.value : msg;
-  return builder(value);
+  // Reject obviously-wrong value shapes up front so the wrapper class
+  // doesn't get a chance to throw a confusing field-access error.
+  if (value === null) {
+    throw new InvalidMessageValueError(typeUrl, new Error('value cannot be null'));
+  }
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    throw new InvalidMessageValueError(
+      typeUrl,
+      new Error(`value must be an object, got ${Array.isArray(value) ? 'array' : typeof value}`)
+    );
+  }
+  try {
+    return builder(value);
+  } catch (cause) {
+    // Wrapper-class constructors crash on missing required fields with
+    // raw TypeErrors like "Cannot read properties of undefined (reading
+    // 'creator')". Wrap with typed error so agents see a clean
+    // "/tokenization.MsgX: <reason>" message.
+    if (cause instanceof UnsupportedMessageTypeError || cause instanceof InvalidMessageValueError) {
+      throw cause;
+    }
+    throw new InvalidMessageValueError(typeUrl, cause);
+  }
 }
 
 /** Convenience wrapper — map an array of JSON messages to proto in one call. */

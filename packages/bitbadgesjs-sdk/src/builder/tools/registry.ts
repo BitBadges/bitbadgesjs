@@ -278,6 +278,80 @@ export interface CallToolResult {
 }
 
 /**
+ * Pre-flight check against `tool.inputSchema` (JSON-Schema-shaped). Catches
+ * the two LLM-agent footguns that handlers were silently tolerating:
+ *
+ *   1. **Missing required field** — handler reads `args.foo.toString()` and
+ *      crashes with "Cannot read properties of undefined". An LLM agent
+ *      gets a stack trace instead of "missing required field 'foo'".
+ *
+ *   2. **Wrong arg key** — agent passes `tokenIds` instead of
+ *      `validTokenIds`. Without `additionalProperties: false`, the handler
+ *      silently treats the field as missing and proceeds; state never
+ *      gets set; the agent thinks the call succeeded.
+ *
+ * We check JSON Schema `required` always, and optionally `additionalProperties`
+ * when the tool's schema declares it `false`. Tools that DON'T set
+ * `additionalProperties: false` retain their existing tolerant behavior
+ * (some legitimately accept arbitrary kwargs).
+ */
+function preflightArgs(tool: any, args: any): { ok: true } | { ok: false; error: string } {
+  const schema = tool?.inputSchema;
+  if (!schema || typeof schema !== 'object') return { ok: true };
+  const argsObj = args && typeof args === 'object' && !Array.isArray(args) ? args : {};
+
+  // Required fields
+  if (Array.isArray(schema.required) && schema.required.length > 0) {
+    const missing: string[] = [];
+    for (const key of schema.required) {
+      if (argsObj[key] === undefined || argsObj[key] === null || argsObj[key] === '') {
+        missing.push(key);
+      }
+    }
+    if (missing.length > 0) {
+      const expected = Array.isArray(schema.required) ? schema.required.join(', ') : '';
+      return {
+        ok: false,
+        error: `Missing required field${missing.length > 1 ? 's' : ''}: ${missing.join(', ')}.${expected ? ` Expected: ${expected}` : ''}`
+      };
+    }
+  }
+
+  // Unknown fields (only when explicitly closed)
+  if (schema.additionalProperties === false && schema.properties && typeof schema.properties === 'object') {
+    const allowed = new Set(Object.keys(schema.properties));
+    const unknown = Object.keys(argsObj).filter((k) => !allowed.has(k));
+    if (unknown.length > 0) {
+      const allowedList = [...allowed].join(', ');
+      return {
+        ok: false,
+        error: `Unknown field${unknown.length > 1 ? 's' : ''}: ${unknown.join(', ')}. Allowed: ${allowedList}.`
+      };
+    }
+  }
+  return { ok: true };
+}
+
+/**
+ * Format a thrown error for tool consumers. Recognizes Zod issues and
+ * renders them as `path: message` lines instead of a giant JSON dump.
+ * Falls back to plain `error.message` for anything else.
+ */
+function formatToolError(err: unknown): string {
+  if (!err || typeof err !== 'object') return String(err);
+  const e = err as any;
+  // Zod errors have `issues: ZodIssue[]` with `path` + `message` per entry.
+  if (Array.isArray(e.issues) && e.issues.length > 0 && e.issues[0]?.message) {
+    const lines = e.issues.map((i: any) => {
+      const path = Array.isArray(i.path) && i.path.length > 0 ? i.path.join('.') : '(root)';
+      return `${path}: ${i.message}`;
+    });
+    return `Invalid input — ${e.issues.length} issue${e.issues.length > 1 ? 's' : ''}:\n  ${lines.join('\n  ')}`;
+  }
+  return e.message ? String(e.message) : String(err);
+}
+
+/**
  * Invoke a tool by name. Never throws — errors are captured into the result.
  */
 export async function callTool(name: string, args: any): Promise<CallToolResult> {
@@ -285,13 +359,21 @@ export async function callTool(name: string, args: any): Promise<CallToolResult>
   if (!tool) {
     return { text: `Unknown tool: ${name}`, result: null, isError: true };
   }
+  // Centralized pre-flight: catches missing-required and unknown-field
+  // mistakes BEFORE the handler runs. Without this, handlers dereferencing
+  // a missing field would crash with "Cannot read properties of undefined"
+  // and agents would get a stack trace instead of a structured error.
+  const pre = preflightArgs(tool.tool, args);
+  if (!pre.ok) {
+    return { text: `Error: ${pre.error}`, result: null, isError: true };
+  }
   try {
     const result = await tool.run(args);
     const text = tool.formatText ? tool.formatText(result) : JSON.stringify(result, null, 2);
     return { text, result };
   } catch (error) {
     return {
-      text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      text: `Error: ${formatToolError(error)}`,
       result: null,
       isError: true
     };

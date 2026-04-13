@@ -45,7 +45,7 @@ import {
   UnsupportedMessageTypeError
 } from './bitbadges/tokenization/fromJson.js';
 
-export { UnsupportedMessageTypeError } from './bitbadges/tokenization/fromJson.js';
+export { UnsupportedMessageTypeError, InvalidMessageValueError } from './bitbadges/tokenization/fromJson.js';
 
 type Builder = (value: any) => Message;
 
