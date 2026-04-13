@@ -1,0 +1,294 @@
+/**
+ * Central tool registry.
+ *
+ * Single source of truth for every MCP tool. Used by:
+ *  - src/server.ts (MCP stdio server — wraps entries into ListTools/CallTool handlers)
+ *  - external consumers (e.g. bitbadges-cli) that import this module and invoke
+ *    tools as plain functions, without the MCP protocol.
+ *
+ * Each entry has a `tool` schema (for discovery) and a `run` function that takes
+ * raw args and returns a structured result. An optional `formatText` controls how
+ * the result is serialized for the MCP text content block; by default we JSON
+ * stringify. The registry itself is protocol-agnostic — it never returns MCP
+ * content blocks directly.
+ */
+
+import {
+  // Utilities
+  lookupTokenInfoTool, handleLookupTokenInfo,
+  validateTransactionTool, handleValidateTransaction,
+  getCurrentTimestampTool, handleGetCurrentTimestamp,
+  // Components
+  generateBackingAddressTool, handleGenerateBackingAddress,
+  generateApprovalTool, handleGenerateApproval,
+  generatePermissionsTool, handleGeneratePermissions,
+  generateAliasPathTool, handleGenerateAliasPath,
+  // Address utilities
+  convertAddressTool, handleConvertAddress,
+  validateAddressTool, handleValidateAddress,
+  // Documentation
+  fetchDocsTool, handleFetchDocs,
+  // Query tools
+  queryCollectionTool, handleQueryCollection,
+  queryBalanceTool, handleQueryBalance,
+  simulateTransactionTool, handleSimulateTransaction,
+  verifyOwnershipTool, handleVerifyOwnership,
+  searchTool, handleSearch,
+  searchPluginsTool, handleSearchPlugins,
+  // Knowledge base
+  searchKnowledgeBaseTool, handleSearchKnowledgeBase,
+  diagnoseErrorTool, handleDiagnoseError,
+  // Collection analysis
+  analyzeCollectionTool, handleAnalyzeCollection,
+  buildTransferTool, handleBuildTransfer,
+  // Dynamic store
+  buildDynamicStoreTool, handleBuildDynamicStore,
+  queryDynamicStoreTool, handleQueryDynamicStore,
+  // Audit / explain
+  auditCollectionTool, handleAuditCollection,
+  explainCollectionTool, handleExplainCollection,
+  // Claim builder
+  buildClaimTool, handleBuildClaim,
+  // Standards compliance
+  verifyStandardsCompliance, formatVerificationResult,
+  // Session-based per-field tools (v2)
+  setStandardsTool, handleSetStandards,
+  setValidTokenIdsTool, handleSetValidTokenIds,
+  setDefaultBalancesTool, handleSetDefaultBalances,
+  setPermissionsTool, handleSetPermissions,
+  setInvariantsTool, handleSetInvariants,
+  setManagerTool, handleSetManager,
+  setCollectionMetadataTool, handleSetCollectionMetadata,
+  setTokenMetadataTool, handleSetTokenMetadata,
+  setCustomDataTool, handleSetCustomData,
+  setMintEscrowCoinsTool, handleSetMintEscrowCoins,
+  addApprovalTool, handleAddApproval,
+  removeApprovalTool, handleRemoveApproval,
+  setApprovalMetadataTool, handleSetApprovalMetadata,
+  addAliasPathTool, handleAddAliasPath,
+  removeAliasPathTool, handleRemoveAliasPath,
+  addCosmosWrapperPathTool, handleAddCosmosWrapperPath,
+  removeCosmosWrapperPathTool, handleRemoveCosmosWrapperPath,
+  addTransferTool, handleAddTransfer,
+  removeTransferTool, handleRemoveTransfer,
+  getTransactionTool, handleGetTransaction,
+  setIsArchivedTool, handleSetIsArchived,
+  generateUniqueIdTool, handleGenerateUniqueId,
+  generateWrapperAddressTool, handleGenerateWrapperAddress
+} from './index.js';
+
+import { getSkillInstructions, getAllSkillInstructions } from '../resources/index.js';
+
+// Re-export session persistence helpers so external consumers (e.g.
+// bitbadges-cli) can snapshot / restore session state across process
+// invocations without importing a second subpath.
+export { exportSession, importSession } from '../session/sessionState.js';
+
+// Re-export the resource registry so consumers get tools + resources from one
+// import. Resources are static documents (token registry, recipes, skill docs,
+// error patterns, etc.) — the other half of the MCP surface.
+export {
+  resourceRegistry,
+  listResources,
+  readResource,
+  type ResourceInfo,
+  type ResourceEntry,
+  type ReadResourceResult
+} from '../resources/registry.js';
+
+/** MCP tool schema shape — kept loose to avoid coupling to a specific SDK version. */
+export interface ToolSchema {
+  name: string;
+  description: string;
+  inputSchema: {
+    type: 'object';
+    properties?: Record<string, unknown>;
+    required?: string[];
+  };
+}
+
+export interface ToolEntry {
+  /** MCP-shaped schema for discovery (ListTools). */
+  tool: ToolSchema;
+  /** Invoke the tool. Receives raw args and returns a structured result. */
+  run: (args: any) => Promise<any> | any;
+  /**
+   * Optional custom text serializer for MCP content blocks.
+   * Defaults to `JSON.stringify(result, null, 2)`.
+   */
+  formatText?: (result: any) => string;
+}
+
+/** Helper to build a simple sync/async pass-through entry. */
+function entry(tool: any, run: (args: any) => any, formatText?: (result: any) => string): ToolEntry {
+  return { tool, run, formatText };
+}
+
+// Inline schemas for tools that were previously defined ad-hoc in server.ts
+const getSkillInstructionsTool: ToolSchema = {
+  name: 'get_skill_instructions',
+  description:
+    'Get detailed instructions for a specific skill. Skills: smart-token, fungible-token, nft-collection, quest, subscription, bb-402, ai-criteria-gate, minting, custom-2fa, immutability, liquidity-pools, payment-protocol, verified, tradable, address-list, burnable, multi-sig-voting, credit-token. Decision matrices are in bitbadges://recipes/all.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      skillId: {
+        type: 'string',
+        description:
+          'Skill ID: smart-token, minting, liquidity-pools, fungible-token, nft-collection, quest, subscription, immutability, custom-2fa, address-list, bb-402, burnable, multi-sig-voting, ai-criteria-gate, verified, payment-protocol, tradable, credit-token'
+      }
+    },
+    required: ['skillId']
+  }
+};
+
+const verifyStandardsTool: ToolSchema = {
+  name: 'verify_standards',
+  description:
+    'Verify that a collection transaction complies with BitBadges protocol standards (subscription, credit token, smart token, etc.). Returns violations with severity levels. Complements audit_collection which covers security — this covers standards compliance.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      transaction: { type: 'object', description: 'The transaction object to verify (MsgUniversalUpdateCollection or similar)' },
+      transactionJson: { type: 'string', description: 'The transaction as a JSON string (alternative to transaction object)' }
+    }
+  }
+};
+
+/**
+ * The tool registry. Keys are MCP tool names.
+ */
+export const toolRegistry: Record<string, ToolEntry> = {
+  // Utilities
+  lookup_token_info: entry(lookupTokenInfoTool, handleLookupTokenInfo),
+  validate_transaction: entry(validateTransactionTool, handleValidateTransaction),
+  get_current_timestamp: entry(getCurrentTimestampTool, handleGetCurrentTimestamp),
+
+  // Components
+  generate_backing_address: entry(generateBackingAddressTool, handleGenerateBackingAddress),
+  generate_approval: entry(generateApprovalTool, handleGenerateApproval),
+  generate_permissions: entry(generatePermissionsTool, handleGeneratePermissions),
+  generate_alias_path: entry(generateAliasPathTool, handleGenerateAliasPath),
+
+  // Skill instructions (inline)
+  get_skill_instructions: entry(getSkillInstructionsTool, (args: { skillId: string }) => {
+    const instruction = getSkillInstructions(args.skillId);
+    if (instruction) return instruction;
+    const allSkills = getAllSkillInstructions();
+    return {
+      error: `Skill "${args.skillId}" not found`,
+      available: allSkills.map((s) => s.id)
+    };
+  }),
+
+  // Address utilities
+  convert_address: entry(convertAddressTool, handleConvertAddress),
+  validate_address: entry(validateAddressTool, handleValidateAddress),
+
+  // Documentation
+  fetch_docs: entry(fetchDocsTool, async (args: any) => await handleFetchDocs(args)),
+
+  // Knowledge base
+  search_knowledge_base: entry(searchKnowledgeBaseTool, handleSearchKnowledgeBase),
+  diagnose_error: entry(diagnoseErrorTool, handleDiagnoseError),
+
+  // Query tools (require API key)
+  query_collection: entry(queryCollectionTool, async (args: any) => await handleQueryCollection(args)),
+  query_balance: entry(queryBalanceTool, async (args: any) => await handleQueryBalance(args)),
+  simulate_transaction: entry(simulateTransactionTool, async (args: any) => await handleSimulateTransaction(args)),
+  verify_ownership: entry(verifyOwnershipTool, async (args: any) => await handleVerifyOwnership(args)),
+  search: entry(searchTool, async (args: any) => await handleSearch(args)),
+  search_plugins: entry(searchPluginsTool, async (args: any) => await handleSearchPlugins(args)),
+
+  // Collection analysis
+  analyze_collection: entry(analyzeCollectionTool, async (args: any) => await handleAnalyzeCollection(args)),
+  build_transfer: entry(buildTransferTool, async (args: any) => await handleBuildTransfer(args)),
+
+  // Dynamic store
+  build_dynamic_store: entry(buildDynamicStoreTool, handleBuildDynamicStore),
+  query_dynamic_store: entry(queryDynamicStoreTool, async (args: any) => await handleQueryDynamicStore(args)),
+
+  // Audit / explain / claim
+  audit_collection: entry(auditCollectionTool, handleAuditCollection),
+  explain_collection: entry(
+    explainCollectionTool,
+    handleExplainCollection,
+    (result: any) => (result?.success ? result.explanation : JSON.stringify(result, null, 2))
+  ),
+  build_claim: entry(buildClaimTool, handleBuildClaim),
+
+  // Standards compliance (custom arg handling + formatter)
+  verify_standards: {
+    tool: verifyStandardsTool,
+    run: (args: any) => {
+      let tx = args;
+      if (typeof args?.transactionJson === 'string') {
+        tx = JSON.parse(args.transactionJson);
+      } else if (args?.transaction) {
+        tx = args.transaction;
+      }
+      return verifyStandardsCompliance(tx);
+    },
+    formatText: (result: any) => formatVerificationResult(result)
+  },
+
+  // Session-based per-field tools (v2)
+  set_standards: entry(setStandardsTool, handleSetStandards),
+  set_valid_token_ids: entry(setValidTokenIdsTool, handleSetValidTokenIds),
+  set_default_balances: entry(setDefaultBalancesTool, handleSetDefaultBalances),
+  set_permissions: entry(setPermissionsTool, handleSetPermissions),
+  set_invariants: entry(setInvariantsTool, handleSetInvariants),
+  set_manager: entry(setManagerTool, handleSetManager),
+  set_collection_metadata: entry(setCollectionMetadataTool, handleSetCollectionMetadata),
+  set_token_metadata: entry(setTokenMetadataTool, handleSetTokenMetadata),
+  set_custom_data: entry(setCustomDataTool, handleSetCustomData),
+  set_mint_escrow_coins: entry(setMintEscrowCoinsTool, handleSetMintEscrowCoins),
+  add_approval: entry(addApprovalTool, handleAddApproval),
+  remove_approval: entry(removeApprovalTool, handleRemoveApproval),
+  set_approval_metadata: entry(setApprovalMetadataTool, handleSetApprovalMetadata),
+  add_alias_path: entry(addAliasPathTool, handleAddAliasPath),
+  remove_alias_path: entry(removeAliasPathTool, handleRemoveAliasPath),
+  add_cosmos_wrapper_path: entry(addCosmosWrapperPathTool, handleAddCosmosWrapperPath),
+  remove_cosmos_wrapper_path: entry(removeCosmosWrapperPathTool, handleRemoveCosmosWrapperPath),
+  add_transfer: entry(addTransferTool, handleAddTransfer),
+  remove_transfer: entry(removeTransferTool, handleRemoveTransfer),
+  get_transaction: entry(getTransactionTool, handleGetTransaction),
+  set_is_archived: entry(setIsArchivedTool, handleSetIsArchived),
+  generate_unique_id: entry(generateUniqueIdTool, handleGenerateUniqueId),
+  generate_wrapper_address: entry(generateWrapperAddressTool, handleGenerateWrapperAddress)
+};
+
+/** List every registered tool schema in registry order. */
+export function listTools(): ToolSchema[] {
+  return Object.values(toolRegistry).map((e) => e.tool);
+}
+
+export interface CallToolResult {
+  /** Text representation suitable for MCP text content blocks. */
+  text: string;
+  /** Structured result from the handler (null on error). */
+  result: any;
+  /** True if the call threw. */
+  isError?: boolean;
+}
+
+/**
+ * Invoke a tool by name. Never throws — errors are captured into the result.
+ */
+export async function callTool(name: string, args: any): Promise<CallToolResult> {
+  const tool = toolRegistry[name];
+  if (!tool) {
+    return { text: `Unknown tool: ${name}`, result: null, isError: true };
+  }
+  try {
+    const result = await tool.run(args);
+    const text = tool.formatText ? tool.formatText(result) : JSON.stringify(result, null, 2);
+    return { text, result };
+  } catch (error) {
+    return {
+      text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      result: null,
+      isError: true
+    };
+  }
+}
