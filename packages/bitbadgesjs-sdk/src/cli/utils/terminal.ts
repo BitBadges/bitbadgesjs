@@ -245,7 +245,8 @@ export interface MetadataPlaceholderEntry {
  *
  * Accepts either a single Msg (`{typeUrl, value: {...}}`), the unwrapped
  * `value`, or a tx body with `messages[]` — pulls out the first
- * MsgUniversalUpdateCollection it finds.
+ * collection message it finds (MsgCreateCollection, MsgUpdateCollection,
+ * or legacy MsgUniversalUpdateCollection).
  */
 export function collectMetadataPlaceholders(input: any): MetadataPlaceholderEntry[] {
   const out: MetadataPlaceholderEntry[] = [];
@@ -254,7 +255,12 @@ export function collectMetadataPlaceholders(input: any): MetadataPlaceholderEntr
   // Locate the collection value.
   let value: any = null;
   if (Array.isArray(input?.messages)) {
-    const msg = input.messages.find((m: any) => m?.typeUrl?.includes('MsgUniversalUpdateCollection')) || input.messages[0];
+    const isCollection = (t: unknown) =>
+      typeof t === 'string' &&
+      (t.endsWith('.MsgCreateCollection') ||
+        t.endsWith('.MsgUpdateCollection') ||
+        t.endsWith('.MsgUniversalUpdateCollection'));
+    const msg = input.messages.find((m: any) => isCollection(m?.typeUrl)) || input.messages[0];
     value = msg?.value || msg;
   } else if (input?.value) {
     value = input.value;

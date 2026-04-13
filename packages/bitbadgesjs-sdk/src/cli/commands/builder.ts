@@ -299,6 +299,16 @@ builderCommand
           ? wrapped.messages[0]
           : wrapped;
 
+      // `review` and the metadata placeholder scan are collection-CRUD
+      // specific — they walk collectionApprovals, standards, etc. that
+      // only exist on MsgCreateCollection / MsgUpdateCollection / legacy
+      // MsgUniversalUpdateCollection. For user-level approval msgs,
+      // transfers, dynamic stores, and every other tokenization msg type,
+      // validate + simulate are the useful signal and review should stay
+      // silent (empty findings would be misleading).
+      const { isCollectionMsg } = await import('../utils/normalizeMsg.js');
+      const firstIsCollection = isCollectionMsg(firstMsg);
+
       let validation: any = null;
       if (opts.validate !== false) {
         const { validateTransaction } = await import('../../core/validate.js');
@@ -306,13 +316,13 @@ builderCommand
       }
 
       let review: any = null;
-      if (opts.review !== false) {
+      if (opts.review !== false && firstIsCollection) {
         const { reviewCollection } = await import('../../core/review.js');
         review = reviewCollection(wrapped);
       }
 
       let placeholders: ReturnType<typeof collectMetadataPlaceholders> = [];
-      if (opts.metadata !== false) {
+      if (opts.metadata !== false && firstIsCollection) {
         placeholders = collectMetadataPlaceholders(firstMsg);
       }
 
@@ -637,6 +647,128 @@ builderCommand
 
     if (checks.some((ch) => ch.status === 'fail')) process.exit(2);
   });
+
+// ── builder preview <input> ──────────────────────────────────────────────────
+//
+// Upload a built tx to the indexer and print a shareable bitbadges.io preview
+// URL. Lets agents/humans hand off a tx to a non-CLI reviewer for visual
+// inspection without giving them edit/submit rights. The endpoint is open
+// (no API key required); the unguessable code in the URL is the secret.
+// Lives 1 hour in the indexer's Redis cache.
+
+builderCommand
+  .command('preview <input>')
+  .description(
+    'Upload a tx to the indexer and print a shareable bitbadges.io preview URL. Input: JSON file, inline JSON, or - for stdin.'
+  )
+  .option('--testnet', 'Use testnet API URL')
+  .option('--local', 'Use local API URL (http://localhost:3001)')
+  .option('--url <url>', 'Custom API base URL')
+  .option(
+    '--frontend-url <url>',
+    'Override the bitbadges.io frontend base for the printed preview URL',
+    'https://bitbadges.io'
+  )
+  .option('--json', 'Output the structured upload result as JSON instead of just the URL')
+  .action(
+    async (
+      input: string,
+      opts: { testnet?: boolean; local?: boolean; url?: string; frontendUrl?: string; json?: boolean }
+    ) => {
+      const { readJsonInput, getApiUrl } = await import('../utils/io.js');
+
+      // Read + normalize. Templates emit a single Msg; verify/simulate
+      // wrap into {messages: [...]}. Preview accepts either shape.
+      const raw = readJsonInput(input);
+      const wrapped = ensureTxWrapper(raw);
+
+      // Lift `_meta.metadataPlaceholders` into a top-level sibling on the
+      // upload payload, then strip `_meta` from the messages so the
+      // indexer never sees the CLI annotation. Sidecar lookup priority:
+      // wrapper-level _meta first, then inner-Msg _meta (templates emit
+      // here).
+      const sidecar: Record<string, any> = {
+        ...((wrapped._meta && wrapped._meta.metadataPlaceholders) || {})
+      };
+      const { normalizeToCreateOrUpdate: _normalize } = await import('../utils/normalizeMsg.js');
+      const cleanedMessages = (wrapped.messages || []).map((m: any) => {
+        let cleaned = m;
+        if (m && typeof m === 'object' && m._meta) {
+          if (m._meta.metadataPlaceholders) {
+            for (const [k, v] of Object.entries(m._meta.metadataPlaceholders)) {
+              if (!sidecar[k]) sidecar[k] = v;
+            }
+          }
+          const { _meta: _drop, ...rest } = m;
+          void _drop;
+          cleaned = rest;
+        }
+        // Narrow Universal → MsgCreateCollection / MsgUpdateCollection so the
+        // shareable preview link shows the agent-facing message type.
+        return _normalize(cleaned);
+      });
+
+      const payload = {
+        transaction: {
+          messages: cleanedMessages,
+          ...(wrapped.memo ? { memo: wrapped.memo } : {}),
+          ...(wrapped.fee ? { fee: wrapped.fee } : {})
+        },
+        metadataPlaceholders: sidecar
+      };
+
+      // Direct fetch — apiRequest() requires an API key, but the preview
+      // endpoint is intentionally open.
+      const apiUrl = getApiUrl(opts);
+      const url = `${apiUrl}/api/v0/builder/preview`;
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        process.stderr.write(`Preview upload failed: ${err instanceof Error ? err.message : String(err)}\n`);
+        process.exit(2);
+      }
+
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        process.stderr.write(`Preview upload failed: HTTP ${response.status} ${text}\n`);
+        process.exit(2);
+      }
+
+      const result = (await response.json()) as {
+        success: boolean;
+        code: string;
+        expiresAt: number;
+        expiresIn: string;
+      };
+
+      const frontendBase = opts.frontendUrl || 'https://bitbadges.io';
+      const previewUrl = `${frontendBase.replace(/\/$/, '')}/builder/preview?code=${encodeURIComponent(result.code)}`;
+
+      if (opts.json) {
+        process.stdout.write(
+          JSON.stringify(
+            {
+              code: result.code,
+              url: previewUrl,
+              expiresAt: result.expiresAt,
+              expiresIn: result.expiresIn
+            },
+            null,
+            2
+          ) + '\n'
+        );
+      } else {
+        // URL on stdout so it's pipe-friendly. TTL reminder on stderr.
+        process.stdout.write(previewUrl + '\n');
+        process.stderr.write(`Expires in ${result.expiresIn}.\n`);
+      }
+    }
+  );
 
 // ── builder simulate <input> ─────────────────────────────────────────────────
 //

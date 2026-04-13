@@ -136,7 +136,7 @@ The complete transaction is a JSON object with this EXACT structure:
 
 {
   "messages": [
-    { "typeUrl": "/tokenization.MsgUniversalUpdateCollection", "value": {...} }
+    { "typeUrl": "/tokenization.MsgCreateCollection", "value": {...} }
   ],
   "memo": "Optional memo text",
   "fee": {
@@ -149,7 +149,7 @@ The complete transaction is a JSON object with this EXACT structure:
 1. All numbers as strings: "1" not 1, "0" not 0
 2. UintRange format: { "start": "1", "end": "18446744073709551615" }
 3. Max uint64: "18446744073709551615" (use for "forever" time ranges)
-4. collectionId: "0": Creates new collection OR references just-created collection`,
+4. New vs edit: use MsgCreateCollection to create a new collection, MsgUpdateCollection (with real collectionId) to edit one.`,
 
   messageTypes: `## Message Types
 
@@ -157,13 +157,15 @@ The complete transaction is a JSON object with this EXACT structure:
 
 | typeUrl | Purpose |
 |---------|---------|
-| /tokenization.MsgUniversalUpdateCollection | Create/update collections |
+| /tokenization.MsgCreateCollection | Create a new collection. Keeps \`defaultBalances\` and \`invariants\`; no \`collectionId\` and no \`updateXxxTimeline\` flags. |
+| /tokenization.MsgUpdateCollection | Edit an existing collection. Requires non-zero \`collectionId\` + \`updateXxxTimeline\` flags. Never set \`defaultBalances\` or \`invariants\` here. |
 | /tokenization.MsgCreateAddressLists | Create reusable address lists |
 | /tokenization.MsgUpdateUserApprovals | Update user-level approvals |
+| /tokenization.MsgTransferTokens | Mint or transfer tokens (commonly paired after Create for initial distribution) |
 
 ### Message Selection
-- **New collection**: MsgUniversalUpdateCollection with collectionId: "0"
-- **Update collection**: MsgUniversalUpdateCollection with actual ID`,
+- **New collection**: MsgCreateCollection (optionally followed by MsgTransferTokens for initial mint)
+- **Edit existing**: MsgUpdateCollection with the real \`collectionId\` and the \`updateXxxTimeline\` flags for the fields you intend to change.`,
 
   msgUniversalUpdateCollection: `## MsgUniversalUpdateCollection - Complete Structure
 

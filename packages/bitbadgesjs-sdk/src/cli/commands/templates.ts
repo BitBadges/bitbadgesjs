@@ -7,6 +7,7 @@ import {
   collectMetadataPlaceholders,
   renderSimulate
 } from '../utils/terminal.js';
+import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMsg.js';
 
 export const templatesCommand = new Command('templates').description('Deterministic transaction templates — flag-based generators for vaults, NFTs, subscriptions, bounties, and more.');
 
@@ -28,13 +29,15 @@ async function emit(
     simulate?: boolean;
   }
 ) {
-  // Apply --creator / --manager overrides to collection msgs
-  if (data.typeUrl?.includes('MsgUniversalUpdateCollection') && data.value) {
+  // Apply --creator / --manager overrides to collection msgs. Builders emit
+  // MsgUniversalUpdateCollection internally (superset) — the normalization
+  // into MsgCreateCollection / MsgUpdateCollection happens once, at the very
+  // end of emit(), right before we write the JSON out.
+  const isCollectionTx = isCollectionMsg(data);
+  if (isCollectionTx && data.value) {
     if (opts.creator) data.value.creator = opts.creator;
     if (opts.manager) data.value.manager = opts.manager;
   }
-
-  const isCollectionTx = data.typeUrl?.includes('MsgUniversalUpdateCollection');
 
   // Pre-fill the metadataPlaceholders sidecar from the user's --name /
   // --description / --image flags. Walk every placeholder URI in the tx
@@ -96,7 +99,13 @@ async function emit(
   // PROVIDED state. Chain proto serialization drops unknown top-level
   // fields, so the `_meta` annotation never reaches the wire — it's
   // purely a CLI / off-chain pipeline annotation.
-  output(data, { condensed: opts.condensed, outputFile: opts.outputFile });
+  // Narrow Universal → MsgCreateCollection / MsgUpdateCollection right at
+  // the write boundary. Agents and humans see the proto's real per-intent
+  // message type; only legacy internal tooling sees the Universal superset.
+  // The `_meta.metadataPlaceholders` sidecar is preserved — it rides on the
+  // same msg object and the chain strips unknown fields on serialization.
+  const outData = isCollectionTx ? normalizeToCreateOrUpdate(data) : data;
+  output(outData, { condensed: opts.condensed, outputFile: opts.outputFile });
 
   // --explain: run interpretTransaction and print human-readable summary.
   // Printed to stderr so it doesn't pollute the JSON pipe; shown above the
