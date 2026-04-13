@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { output, readJsonInput } from '../utils/io.js';
+import { renderReview, renderJsonBoundary } from '../utils/terminal.js';
 
 export const templatesCommand = new Command('templates').description('Deterministic transaction templates — flag-based generators for vaults, NFTs, subscriptions, bounties, and more.');
 
@@ -41,21 +42,13 @@ async function emit(
       // reviewCollection wants either a raw collection or a tx body with
       // messages[]. Templates emit a single Msg, so wrap it.
       const result = reviewCollection({ messages: [data] }, { selectedSkills: [] });
-      if (result.findings.length === 0) {
-        process.stderr.write(`✓ Review clean — verdict: ${result.summary.verdict}\n`);
-      } else {
-        const byLevel: Record<string, typeof result.findings> = { critical: [], warning: [], info: [] };
-        for (const f of result.findings) byLevel[f.severity].push(f);
-        process.stderr.write('── Review ──\n');
-        for (const level of ['critical', 'warning', 'info'] as const) {
-          for (const f of byLevel[level]) {
-            process.stderr.write(`[${level.toUpperCase()}] ${f.code} — ${f.messageEn}\n`);
-            if (f.recommendationEn) process.stderr.write(`  -> ${f.recommendationEn}\n`);
-          }
-        }
-        process.stderr.write(
-          `Summary: ${result.summary.critical} critical, ${result.summary.warning} warning, ${result.summary.info} info — verdict: ${result.summary.verdict}\n`
-        );
+      process.stderr.write(renderReview(result, { stream: process.stderr, title: 'Auto-Review' }) + '\n');
+      // Only print a boundary rule if stdout is going to the same terminal
+      // as stderr (e.g. user just runs the command interactively). If stdout
+      // is piped or redirected, the boundary would land in the JSON file,
+      // which is exactly what --json-only already protects against.
+      if ((process.stdout as any).isTTY && (process.stderr as any).isTTY) {
+        process.stderr.write(renderJsonBoundary(process.stderr) + '\n');
       }
     } catch (err) {
       process.stderr.write(`Review skipped: ${err instanceof Error ? err.message : String(err)}\n`);

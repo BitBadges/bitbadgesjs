@@ -225,23 +225,17 @@ builderCommand
       if (opts.json) {
         output(result, { ...opts, human: false });
       } else {
-        const lines: string[] = [];
-        const byLevel: Record<string, typeof result.findings> = { critical: [], warning: [], info: [] };
-        for (const f of result.findings) byLevel[f.severity].push(f);
-        for (const level of ['critical', 'warning', 'info'] as const) {
-          for (const f of byLevel[level]) {
-            lines.push(`[${level.toUpperCase()}] ${f.code} — ${f.messageEn}`);
-            if (f.recommendationEn) lines.push(`  -> ${f.recommendationEn}`);
-          }
-        }
-        lines.push('');
-        lines.push(
-          `Summary: ${result.summary.critical} critical, ${result.summary.warning} warning, ${result.summary.info} info — verdict: ${result.summary.verdict}`
-        );
-        const text = lines.join('\n');
+        const { renderReview } = await import('../utils/terminal.js');
+        // When writing to a file, target the "plain" rendering path by
+        // lying about the stream's TTY-ness — createWriteStream isn't a
+        // TTY, so makeColor() inside renderReview naturally drops ANSI.
+        const text = renderReview(result, { stream: process.stdout });
         if (opts.outputFile) {
           const fsMod = await import('fs');
-          fsMod.writeFileSync(opts.outputFile, text + '\n', 'utf-8');
+          // Strip any ANSI that snuck in (defensive — renderReview already
+          // disables colour when stdout isn't a TTY).
+          const plain = text.replace(/\x1b\[[0-9;]*m/g, '');
+          fsMod.writeFileSync(opts.outputFile, plain + '\n', 'utf-8');
           process.stderr.write(`Written to ${opts.outputFile}\n`);
         } else {
           console.log(text);
@@ -333,20 +327,39 @@ builderCommand
     if (opts.json) {
       output(result, { ...opts, human: false });
     } else {
+      const { makeColor, rule } = await import('../utils/terminal.js');
+      const { c } = makeColor(process.stdout);
+      const width = Math.min(80, (process.stdout as any).columns || 80);
       const lines: string[] = [];
+      lines.push(c('gray', rule('━', width, 'Validate')));
       if (result.issues.length === 0) {
-        lines.push('✓ No validation issues found');
-      } else {
-        for (const issue of result.issues) {
-          lines.push(`[${issue.severity.toUpperCase()}] ${issue.path}: ${issue.message}`);
-        }
         lines.push('');
-        lines.push(`Summary: ${result.issues.length} issue(s)`);
+        lines.push(`  ${c('green', '✓')} ${c('bold', 'Clean')} — no structural issues`);
+        lines.push('');
+      } else {
+        lines.push('');
+        for (const issue of result.issues) {
+          const levelColor = issue.severity === 'error' ? 'red' : 'yellow';
+          const badge = issue.severity === 'error' ? '■ ERROR  ' : '▲ WARNING';
+          lines.push(`  ${c(levelColor, c('bold', badge))}  ${c('dim', issue.path || '(root)')}`);
+          lines.push(`      ${issue.message}`);
+          lines.push('');
+        }
       }
+      lines.push(c('gray', rule('━', width)));
+      const errCount = result.issues.filter((i) => i.severity === 'error').length;
+      const warnCount = result.issues.filter((i) => i.severity === 'warning').length;
+      lines.push(
+        `  ${c('bold', 'Summary')}  ${errCount > 0 ? c('red', `${errCount} error`) : c('gray', `${errCount} error`)}  ·  ${
+          warnCount > 0 ? c('yellow', `${warnCount} warning`) : c('gray', `${warnCount} warning`)
+        }`
+      );
+      lines.push(c('gray', rule('━', width)));
       const text = lines.join('\n');
       if (opts.outputFile) {
         const fsMod = await import('fs');
-        fsMod.writeFileSync(opts.outputFile, text + '\n', 'utf-8');
+        const plain = text.replace(/\x1b\[[0-9;]*m/g, '');
+        fsMod.writeFileSync(opts.outputFile, plain + '\n', 'utf-8');
         process.stderr.write(`Written to ${opts.outputFile}\n`);
       } else {
         console.log(text);
