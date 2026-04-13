@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { output, readJsonInput } from '../utils/io.js';
-import { renderReview, renderJsonBoundary } from '../utils/terminal.js';
+import { renderReview, makeColor, rule } from '../utils/terminal.js';
 
 export const templatesCommand = new Command('templates').description('Deterministic transaction templates — flag-based generators for vaults, NFTs, subscriptions, bounties, and more.');
 
@@ -26,10 +26,33 @@ async function emit(
 
   const isCollectionTx = data.typeUrl?.includes('MsgUniversalUpdateCollection');
 
-  // Auto-review every produced collection tx. Findings go to stderr so the
-  // stdout stream stays pure JSON and pipes cleanly into `sign`/`broadcast`
-  // consumers. --json-only suppresses the review entirely for pipelines
-  // that don't want the noise.
+  // Emit the JSON payload FIRST. Scroll order on an interactive terminal
+  // naturally puts the most recently-written bytes at the bottom, so the
+  // review summary appearing *after* the JSON means the user's final
+  // eyeline lands on the review verdict — the most actionable bit.
+  //
+  // Stdout flushes synchronously for pipes/files and line-buffered for
+  // TTYs, so writing JSON before the stderr review keeps the visible
+  // order stable across both cases.
+  const { _meta, ...cleanData } = data;
+  output(cleanData, { condensed: opts.condensed, outputFile: opts.outputFile });
+
+  // --explain: run interpretTransaction and print human-readable summary.
+  // Printed to stderr so it doesn't pollute the JSON pipe; shown above the
+  // auto-review so the narrative ("what this tx does") precedes the
+  // critique ("what might be wrong with it").
+  if (opts.explain && isCollectionTx) {
+    const { interpretTransaction } = await import('../../core/interpret-transaction.js');
+    const explanation = interpretTransaction(data.value);
+    process.stderr.write('\n── Explanation ──\n' + explanation + '\n');
+  }
+
+  // Auto-review every produced collection tx. Runs both the design-level
+  // `reviewCollection()` checks (audit, standards, UX) and the low-level
+  // structural `validateTransaction()` checks so templates can't silently
+  // produce JSON that the chain would reject. Findings go to stderr so
+  // stdout stays pure JSON for sign/broadcast pipelines; --json-only
+  // suppresses both for callers that want zero stderr noise.
   //
   // We pass `selectedSkills: []` so the reviewer's skill-protocol matchers
   // don't run the "union of every skill" fan-out that defaults when the
@@ -37,34 +60,79 @@ async function emit(
   // still run `bitbadges-cli builder review <file>` for a full pass over
   // skills/standards they haven't declared on the collection yet.
   if (!opts.jsonOnly && isCollectionTx) {
+    // Static validation FIRST — if the JSON is structurally broken, the
+    // design review below is much less meaningful.
+    try {
+      const { validateTransaction } = await import('../../core/validate.js');
+      const wrapped = { messages: [data] };
+      const vResult = validateTransaction(wrapped);
+      process.stderr.write('\n' + renderValidate(vResult) + '\n');
+    } catch (err) {
+      process.stderr.write(`Validation skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+    }
+
     try {
       const { reviewCollection } = await import('../../core/review.js');
       // reviewCollection wants either a raw collection or a tx body with
       // messages[]. Templates emit a single Msg, so wrap it.
       const result = reviewCollection({ messages: [data] }, { selectedSkills: [] });
-      process.stderr.write(renderReview(result, { stream: process.stderr, title: 'Auto-Review' }) + '\n');
-      // Only print a boundary rule if stdout is going to the same terminal
-      // as stderr (e.g. user just runs the command interactively). If stdout
-      // is piped or redirected, the boundary would land in the JSON file,
-      // which is exactly what --json-only already protects against.
-      if ((process.stdout as any).isTTY && (process.stderr as any).isTTY) {
-        process.stderr.write(renderJsonBoundary(process.stderr) + '\n');
-      }
+      process.stderr.write('\n' + renderReview(result, { stream: process.stderr, title: 'Auto-Review' }) + '\n');
     } catch (err) {
       process.stderr.write(`Review skipped: ${err instanceof Error ? err.message : String(err)}\n`);
     }
   }
+}
 
-  // --explain: run interpretTransaction and print human-readable summary
-  if (opts.explain && isCollectionTx) {
-    const { interpretTransaction } = await import('../../core/interpret-transaction.js');
-    const explanation = interpretTransaction(data.value);
-    process.stderr.write('\n── Explanation ──\n' + explanation + '\n');
+/**
+ * Compact validation renderer for the auto-review path. Prints a single
+ * status line when clean, a short rule + findings block when not. Mirrors
+ * the shape of `builder validate` but scoped to auto-review stderr.
+ */
+function renderValidate(result: { valid: boolean; issues: Array<{ severity: string; path?: string; message: string }> }): string {
+  const { c } = makeColor(process.stderr);
+  const width = Math.min(80, (process.stderr as any).columns || 80);
+  const errors = result.issues.filter((i) => i.severity === 'error');
+  const warnings = result.issues.filter((i) => i.severity === 'warning');
+
+  const lines: string[] = [];
+  lines.push(c('gray', rule('━', width, 'Auto-Validate')));
+
+  if (result.issues.length === 0) {
+    lines.push('');
+    lines.push(`  ${c('green', '✓')} ${c('bold', 'Clean')} — no structural issues`);
+  } else {
+    lines.push('');
+    for (const issue of result.issues) {
+      const lc = issue.severity === 'error' ? 'red' : 'yellow';
+      const badge = issue.severity === 'error' ? '■ ERROR  ' : '▲ WARNING';
+      lines.push(`  ${c(lc, c('bold', badge))}  ${c('dim', issue.path || '(root)')}`);
+      for (const t of wrapLines(issue.message, width - 6)) {
+        lines.push(`      ${t}`);
+      }
+    }
+    lines.push('');
+    lines.push(
+      `  ${c('bold', 'Summary')}  ${errors.length > 0 ? c('red', `${errors.length} error`) : c('gray', '0 error')}  ·  ${
+        warnings.length > 0 ? c('yellow', `${warnings.length} warning`) : c('gray', '0 warning')
+      }`
+    );
   }
+  lines.push(c('gray', rule('━', width)));
+  return lines.join('\n');
+}
 
-  // Strip _meta before output — it's informational, not part of the msg
-  const { _meta, ...cleanData } = data;
-  output(cleanData, { condensed: opts.condensed, outputFile: opts.outputFile });
+function wrapLines(text: string, width: number): string[] {
+  if (width <= 10) return [text];
+  const words = text.split(/\s+/);
+  const out: string[] = [];
+  let line = '';
+  for (const w of words) {
+    if (!line.length) { line = w; continue; }
+    if (line.length + 1 + w.length > width) { out.push(line); line = w; }
+    else line += ' ' + w;
+  }
+  if (line.length) out.push(line);
+  return out;
 }
 
 const sharedOpts = (cmd: Command) =>
