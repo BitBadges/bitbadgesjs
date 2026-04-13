@@ -16,6 +16,9 @@ async function emit(
     explain?: boolean;
     creator?: string;
     manager?: string;
+    name?: string;
+    description?: string;
+    image?: string;
   }
 ) {
   // Apply --creator / --manager overrides to collection msgs
@@ -25,6 +28,51 @@ async function emit(
   }
 
   const isCollectionTx = data.typeUrl?.includes('MsgUniversalUpdateCollection');
+
+  // Pre-fill the metadataPlaceholders sidecar from the user's --name /
+  // --description / --image flags. Walk every placeholder URI in the tx
+  // and supply the user's content for any URI the template didn't already
+  // populate. Approval URIs derive a name from the approvalId so the
+  // user's "My Vault" doesn't accidentally label every approval as
+  // "My Vault" — they keep their own descriptive default.
+  if (isCollectionTx && (opts.name || opts.description || opts.image)) {
+    const meta = (data._meta = data._meta || {});
+    const sidecar: Record<string, { name: string; description: string; image: string }> = (meta.metadataPlaceholders =
+      meta.metadataPlaceholders || {});
+    const fallbackName = opts.name || 'Untitled';
+    const fallbackDescription = opts.description || '';
+    const fallbackImage = opts.image || 'ipfs://QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E';
+    const found = collectMetadataPlaceholders(data);
+    for (const p of found) {
+      if (sidecar[p.uri]) continue; // already filled by the template
+      // Approval / alias / wrapper / denom-unit URIs should keep a
+      // descriptive default rooted in their own identifier rather than
+      // the user's collection name.
+      if (p.uri.startsWith('ipfs://METADATA_APPROVAL_')) {
+        const approvalId = p.uri.replace('ipfs://METADATA_APPROVAL_', '');
+        sidecar[p.uri] = {
+          name: approvalId.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+          description: '',
+          image: '' // approval images MUST be empty per the standards
+        };
+        continue;
+      }
+      if (p.uri.startsWith('ipfs://METADATA_ALIAS_') || p.uri.startsWith('ipfs://METADATA_WRAPPER_')) {
+        sidecar[p.uri] = {
+          name: `${fallbackName} ${p.uri.startsWith('ipfs://METADATA_ALIAS_') ? 'alias path' : 'wrapper path'}`,
+          description: fallbackDescription,
+          image: fallbackImage
+        };
+        continue;
+      }
+      // Collection / token / anything else gets the user's flag values.
+      sidecar[p.uri] = {
+        name: fallbackName,
+        description: fallbackDescription,
+        image: fallbackImage
+      };
+    }
+  }
 
   // Emit the JSON payload FIRST. Scroll order on an interactive terminal
   // naturally puts the most recently-written bytes at the bottom, so the
@@ -335,7 +383,21 @@ function wrapLines(text: string, width: number): string[] {
   return out;
 }
 
-const sharedOpts = (cmd: Command) =>
+/**
+ * Add a shared option only if the per-template command hasn't already
+ * declared it. Avoids commander "duplicate flag" errors for templates
+ * (vault, subscription, bounty, …) that already define their own --name
+ * / --description / --image flags. Those template-level flags double as
+ * the metadataPlaceholders content because emit() reads opts.name etc.
+ * directly — no extra plumbing needed.
+ */
+function addOptionIfMissing(cmd: Command, flags: string, description: string): Command {
+  const longFlag = flags.match(/--[a-z][a-z0-9-]*/)?.[0];
+  if (longFlag && (cmd as any)._findOption?.(longFlag)) return cmd;
+  return cmd.option(flags, description);
+}
+
+const sharedOpts = (cmd: Command) => {
   cmd
     .option('--condensed', 'Output compact JSON (no whitespace)')
     .option('--output-file <path>', 'Write output to file')
@@ -344,6 +406,14 @@ const sharedOpts = (cmd: Command) =>
     .option('--explain', 'Print a human-readable explanation of the output to stderr (in addition to the auto-review)')
     .option('--creator <address>', 'Creator/sender address (bb1... or 0x...)')
     .option('--manager <address>', 'Collection manager address (bb1...)');
+  // Metadata flags — only added when the template doesn't already declare
+  // them. Templates that DO declare them keep their own description string;
+  // emit() reads opts.name / description / image regardless.
+  addOptionIfMissing(cmd, '--name <name>', 'Display name written into unfilled metadataPlaceholders entries (collection / tokens / alias paths)');
+  addOptionIfMissing(cmd, '--description <text>', 'Description written into unfilled metadataPlaceholders entries');
+  addOptionIfMissing(cmd, '--image <url>', 'Image URL written into unfilled metadataPlaceholders entries');
+  return cmd;
+};
 
 // ============================================================
 // Collection builders

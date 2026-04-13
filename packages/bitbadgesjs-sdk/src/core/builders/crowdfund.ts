@@ -160,7 +160,17 @@ export function buildCrowdfund(params: CrowdfundParams): any {
     }
   ];
 
-  const { collectionMetadata } = metadataPlaceholders(params.name || 'Crowdfund');
+  const { collectionMetadata, placeholders: collectionPlaceholders } = metadataPlaceholders(
+    params.name || 'Crowdfund'
+  );
+  const refundToken = singleTokenMetadata('1', 'Refund Token', 'Refundable share of the crowdfund pool.');
+  const progressToken = singleTokenMetadata('2', 'Progress Token', 'Tracks total deposits in the crowdfund pool.');
+
+  // Strip the per-token default that metadataPlaceholders() seeds — this
+  // template defines its own per-token entries below, so the default
+  // ipfs://METADATA_TOKEN_DEFAULT shouldn't end up in the sidecar.
+  const { 'ipfs://METADATA_TOKEN_DEFAULT': _drop, ...collectionOnlyPlaceholders } = collectionPlaceholders;
+  void _drop;
 
   return buildMsg({
     collectionApprovals,
@@ -179,9 +189,11 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       buildAliasPath('utotaldeposit', 'TOTALDEPOSIT', 0)
     ],
     collectionMetadata,
-    tokenMetadata: [
-      singleTokenMetadata('1', 'Refund Token'),
-      singleTokenMetadata('2', 'Progress Token')
-    ]
+    tokenMetadata: [refundToken.entry, progressToken.entry],
+    metadataPlaceholders: {
+      ...collectionOnlyPlaceholders,
+      [refundToken.placeholder.uri]: refundToken.placeholder.content,
+      [progressToken.placeholder.uri]: progressToken.placeholder.content
+    }
   });
 }

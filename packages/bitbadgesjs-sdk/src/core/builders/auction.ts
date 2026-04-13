@@ -74,7 +74,18 @@ export function buildAuction(params: AuctionParams): any {
     }
   ];
 
-  const { collectionMetadata } = metadataPlaceholders(params.name || 'Auction');
+  const { collectionMetadata, placeholders: collectionPlaceholders } = metadataPlaceholders(
+    params.name || 'Auction',
+    params.description,
+    params.image
+  );
+  const auctionItem = singleTokenMetadata('1', params.name || 'Auction Item', params.description, params.image);
+
+  // Same pattern as crowdfund: drop the default-token placeholder seeded by
+  // metadataPlaceholders() since this template defines its own per-token
+  // entry below.
+  const { 'ipfs://METADATA_TOKEN_DEFAULT': _drop, ...collectionOnlyPlaceholders } = collectionPlaceholders;
+  void _drop;
 
   return buildMsg({
     collectionApprovals,
@@ -89,6 +100,10 @@ export function buildAuction(params: AuctionParams): any {
     },
     aliasPathsToAdd: [buildAliasPath('uauction', 'AUCTION', 0)],
     collectionMetadata,
-    tokenMetadata: [singleTokenMetadata('1', params.name || 'Auction Item', params.description, params.image)]
+    tokenMetadata: [auctionItem.entry],
+    metadataPlaceholders: {
+      ...collectionOnlyPlaceholders,
+      [auctionItem.placeholder.uri]: auctionItem.placeholder.content
+    }
   });
 }

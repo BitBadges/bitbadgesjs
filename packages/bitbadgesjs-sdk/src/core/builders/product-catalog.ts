@@ -97,7 +97,17 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
 
   const collectionApprovals = [...purchaseApprovals, burnApproval];
 
-  const tokenMetadata = products.map((product, i) => singleTokenMetadata(String(i + 1), product.name));
+  // Per-product metadata: each product gets its own placeholder URI keyed
+  // by token id. Accumulate the sidecar entries so the auto-apply flow has
+  // full coverage.
+  const tokenMetadataAndPlaceholders = products.map((product, i) =>
+    singleTokenMetadata(String(i + 1), product.name)
+  );
+  const tokenMetadata = tokenMetadataAndPlaceholders.map((t) => t.entry);
+  const productPlaceholders: Record<string, { name: string; description: string; image: string }> = {};
+  for (const t of tokenMetadataAndPlaceholders) {
+    productPlaceholders[t.placeholder.uri] = t.placeholder.content;
+  }
 
   return buildMsg({
     collectionApprovals,
@@ -110,6 +120,7 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
       maxSupplyPerId: '0',
       noForcefulPostMintTransfers: false,
       disablePoolCreation: true
-    }
+    },
+    metadataPlaceholders: productPlaceholders
   });
 }

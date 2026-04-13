@@ -109,27 +109,71 @@ export function uniqueId(prefix?: string): string {
 
 // ── Common builder helpers ───────────────────────────────────────────────────
 
+/**
+ * A sidecar map of placeholder URI → off-chain metadata content. Templates
+ * accumulate these and attach them to the emitted Msg as `_meta.metadataPlaceholders`
+ * so the CLI's Metadata To Upload section (and any frontend consumer)
+ * knows which placeholder URIs already have content provided.
+ */
+export type PlaceholderSidecar = Record<string, { name: string; description: string; image: string }>;
+
+/**
+ * Build collection + default-token metadata using placeholder URIs that the
+ * metadata auto-apply flow understands. Returns three things:
+ *
+ *   - `collectionMetadata` and `tokenMetadata` to drop into `buildMsg(...)`
+ *   - `placeholders` — a sidecar map keyed by the placeholder URIs above,
+ *     populated with the supplied name/description/image (or sane defaults).
+ *
+ * Callers should merge the returned `placeholders` into their own sidecar and
+ * pass the combined map to `buildMsg({ ..., metadataPlaceholders })`, which
+ * surfaces it on the emitted Msg as `_meta.metadataPlaceholders`.
+ */
 export function metadataPlaceholders(name: string, description?: string, image?: string) {
+  const collectionUri = 'ipfs://METADATA_COLLECTION';
+  const tokenUri = 'ipfs://METADATA_TOKEN_DEFAULT';
+  const content = {
+    name,
+    description: description || '',
+    image: image || BITBADGES_DEFAULT_IMAGE
+  };
   return {
-    collectionMetadata: {
-      uri: DEFAULT_METADATA_URI,
-      customData: JSON.stringify({ name, description: description || '', image: image || BITBADGES_DEFAULT_IMAGE })
-    },
+    collectionMetadata: { uri: collectionUri, customData: '' },
     tokenMetadata: [
-      {
-        uri: DEFAULT_METADATA_URI,
-        customData: '',
-        tokenIds: FOREVER
-      }
-    ]
+      { uri: tokenUri, customData: '', tokenIds: FOREVER }
+    ],
+    placeholders: {
+      [collectionUri]: { ...content },
+      [tokenUri]: { ...content }
+    } as PlaceholderSidecar
   };
 }
 
+/**
+ * Build a per-token metadata entry using a placeholder URI scoped to the
+ * token id. Returns `{ entry, placeholder }`:
+ *
+ *   - `entry` is the object to push into `tokenMetadata: [...]`
+ *   - `placeholder` is the sidecar entry the caller should merge into its
+ *     accumulated PlaceholderSidecar and pass to buildMsg via
+ *     `metadataPlaceholders`.
+ */
 export function singleTokenMetadata(tokenId: string, name: string, description?: string, image?: string) {
+  const uri = `ipfs://METADATA_TOKEN_${tokenId}`;
   return {
-    uri: DEFAULT_METADATA_URI,
-    customData: JSON.stringify({ name, description: description || '', image: image || '' }),
-    tokenIds: [{ start: tokenId, end: tokenId }]
+    entry: {
+      uri,
+      customData: '',
+      tokenIds: [{ start: tokenId, end: tokenId }]
+    },
+    placeholder: {
+      uri,
+      content: {
+        name,
+        description: description || '',
+        image: image || BITBADGES_DEFAULT_IMAGE
+      }
+    }
   };
 }
 
@@ -152,8 +196,23 @@ export function buildMsg(params: {
   aliasPathsToAdd?: any[];
   cosmosCoinWrapperPathsToAdd?: any[];
   mintEscrowCoinsToTransfer?: any[];
+  /**
+   * Off-chain metadata sidecar the template accumulated. Attached to the
+   * output Msg as `_meta.metadataPlaceholders`. Templates that don't have
+   * specific content should still pass an empty {} so the auto-apply flow
+   * knows to treat default placeholder URIs as NEEDED.
+   */
+  metadataPlaceholders?: PlaceholderSidecar;
 }) {
-  return {
+  // Default to placeholder URIs (not the legacy DEFAULT_METADATA_URI). The
+  // metadata auto-apply flow recognizes `ipfs://METADATA_*` and substitutes
+  // them with real uploaded URIs after the off-chain JSON is provided.
+  const collectionMetadata = params.collectionMetadata || { uri: 'ipfs://METADATA_COLLECTION', customData: '' };
+  const tokenMetadata = params.tokenMetadata || [
+    { uri: 'ipfs://METADATA_TOKEN_DEFAULT', customData: '', tokenIds: FOREVER }
+  ];
+
+  const msg: any = {
     typeUrl: '/tokenization.MsgUniversalUpdateCollection',
     value: {
       creator: params.creator || '',
@@ -165,15 +224,15 @@ export function buildMsg(params: {
       updateManager: true,
       manager: params.manager || '',
       updateCollectionMetadata: true,
-      collectionMetadata: params.collectionMetadata || { uri: DEFAULT_METADATA_URI, customData: '' },
+      collectionMetadata,
       updateTokenMetadata: true,
-      tokenMetadata: params.tokenMetadata || [{ uri: DEFAULT_METADATA_URI, customData: '', tokenIds: FOREVER }],
+      tokenMetadata,
       updateCustomData: true,
       customData: params.customData || '',
       updateCollectionApprovals: true,
       collectionApprovals: params.collectionApprovals.map((a: any) => ({
         ...a,
-        uri: a.uri || DEFAULT_METADATA_URI
+        uri: a.uri || `ipfs://METADATA_APPROVAL_${a.approvalId || 'unnamed'}`
       })),
       updateStandards: true,
       standards: params.standards || [],
@@ -186,6 +245,14 @@ export function buildMsg(params: {
       cosmosCoinWrapperPathsToAdd: params.cosmosCoinWrapperPathsToAdd || []
     }
   };
+
+  // Attach the sidecar as a CLI-only `_meta` annotation. emit() in
+  // templates.ts strips this before writing the final JSON to stdout.
+  if (params.metadataPlaceholders && Object.keys(params.metadataPlaceholders).length > 0) {
+    msg._meta = { metadataPlaceholders: params.metadataPlaceholders };
+  }
+
+  return msg;
 }
 
 /**

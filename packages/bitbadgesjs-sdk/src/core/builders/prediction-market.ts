@@ -151,10 +151,9 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
 
   const collectionApprovals = [pairedMint, freeTransfer, preRedeem, settleYes, settleNo, settlePushYes, settlePushNo];
 
-  const tokenMetadata = [
-    singleTokenMetadata('1', 'YES', params.description, params.image),
-    singleTokenMetadata('2', 'NO', params.description, params.image)
-  ];
+  const yesToken = singleTokenMetadata('1', 'YES', params.description, params.image);
+  const noToken = singleTokenMetadata('2', 'NO', params.description, params.image);
+  const tokenMetadata = [yesToken.entry, noToken.entry];
 
   return buildMsg({
     collectionApprovals,
@@ -162,6 +161,10 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
     standards: ['Prediction Market'],
     collectionPermissions: frozenPermissions(),
     tokenMetadata,
+    metadataPlaceholders: {
+      [yesToken.placeholder.uri]: yesToken.placeholder.content,
+      [noToken.placeholder.uri]: noToken.placeholder.content
+    },
     invariants: {
       noCustomOwnershipTimes: true,
       maxSupplyPerId: '0',

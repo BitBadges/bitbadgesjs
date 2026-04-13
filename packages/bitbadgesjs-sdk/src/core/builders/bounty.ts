@@ -135,7 +135,7 @@ export function buildBounty(params: BountyParams): any {
     }
   ];
 
-  const { collectionMetadata, tokenMetadata } = metadataPlaceholders(params.name || 'Bounty');
+  const { collectionMetadata, tokenMetadata, placeholders } = metadataPlaceholders(params.name || 'Bounty');
 
   return buildMsg({
     collectionApprovals,
@@ -151,6 +151,7 @@ export function buildBounty(params: BountyParams): any {
     aliasPathsToAdd: [buildAliasPath('ubounty', 'BOUNTY', 0)],
     mintEscrowCoinsToTransfer: [{ amount: baseAmount, denom: coin.denom }],
     collectionMetadata,
-    tokenMetadata
+    tokenMetadata,
+    metadataPlaceholders: placeholders
   });
 }
