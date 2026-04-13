@@ -238,7 +238,16 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
     return new UintRangeArray(UintRange.FullRange());
   }
 
-  static From<T extends NumberType>(arr: iUintRange<T>[] | iUintRange<T> | UintRangeArray<T>): UintRangeArray<T> {
+  static From<T extends NumberType>(
+    arr: iUintRange<T>[] | iUintRange<T> | UintRangeArray<T> | null | undefined
+  ): UintRangeArray<T> {
+    // Defend against missing optional fields. Many wrapper-class
+    // constructors blindly call `UintRangeArray.From(msg.ownershipTimes)`
+    // (or similar) without checking presence first; passing undefined
+    // through would crash on `new UintRange(undefined)`. Treating
+    // null/undefined as an empty array matches the proto3 semantics
+    // (a missing repeated field is an empty list).
+    if (arr === null || arr === undefined) return new UintRangeArray();
     const wrappedArr = Array.isArray(arr) ? arr : [arr];
     return new UintRangeArray(...wrappedArr.map((i) => new UintRange(i)));
   }

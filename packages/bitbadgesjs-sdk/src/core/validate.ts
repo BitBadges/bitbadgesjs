@@ -1033,20 +1033,25 @@ export function validateTransaction(txBody: any): ValidationResult {
     if (_isCreate || _isUpdate || _isUniversal) {
       // --- Constructor sanity check: ensure all fields the SDK constructor expects exist ---
       // MsgCreateCollection has no `updateXxxTimeline` flags — every field
-      // you set IS set. The constructor check is gated on flag === true, so
-      // we pass it a flags-implied-true copy (not mutated on disk).
+      // you set IS set, and every field you DIDN'T set is simply absent
+      // (no "do not update" semantics, because there's nothing to update
+      // from). The downstream constructor check is gated on
+      // `updateXxx === true` + required field shape. For Create, only set
+      // the implied flag if the corresponding value field is actually
+      // present; missing fields mean "default empty" and shouldn't
+      // trigger "missing required object" errors.
       const _ctorValue: Record<string, unknown> = _isCreate
         ? {
             ...value,
-            updateValidTokenIds: true,
-            updateCollectionPermissions: true,
-            updateManager: true,
-            updateCollectionMetadata: true,
-            updateTokenMetadata: true,
-            updateCustomData: true,
-            updateCollectionApprovals: true,
-            updateStandards: true,
-            updateIsArchived: true
+            ...(value.validTokenIds !== undefined && { updateValidTokenIds: true }),
+            ...(value.collectionPermissions !== undefined && { updateCollectionPermissions: true }),
+            ...(value.manager !== undefined && { updateManager: true }),
+            ...(value.collectionMetadata !== undefined && { updateCollectionMetadata: true }),
+            ...(value.tokenMetadata !== undefined && { updateTokenMetadata: true }),
+            ...(value.customData !== undefined && { updateCustomData: true }),
+            ...(value.collectionApprovals !== undefined && { updateCollectionApprovals: true }),
+            ...(value.standards !== undefined && { updateStandards: true }),
+            ...(value.isArchived !== undefined && { updateIsArchived: true })
           }
         : value;
       validateMsgConstructorFields(_ctorValue, `${msgPath}.value`, issues);

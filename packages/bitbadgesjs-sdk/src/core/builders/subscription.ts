@@ -49,6 +49,20 @@ export function buildSubscription(params: SubscriptionParams): any {
     throw new Error('Subscription requires either --price/--denom/--recipient or --payouts array');
   }
 
+  // Subscription standard requires every coin transfer in the faucet
+  // approval to use a SINGLE denom — the SDK's
+  // `doesCollectionFollowSubscriptionProtocol()` rejects mixed-denom
+  // approvals because the subscription unit (one period × one price)
+  // doesn't translate to "X USDC + Y BADGE" semantically. Fail fast at
+  // build time with a clear hint instead of producing a tx that the
+  // frontend silently won't recognize as a subscription.
+  const uniqueDenoms = Array.from(new Set(payouts.map((p) => p.denom)));
+  if (uniqueDenoms.length > 1) {
+    throw new Error(
+      `Subscription must use a single denom across all payouts. Got ${uniqueDenoms.length}: ${uniqueDenoms.join(', ')}. Use one shared denom (e.g. all in USDC) or split into separate subscription collections.`
+    );
+  }
+
   const collectionApprovals = [];
 
   for (let tier = 1; tier <= tiers; tier++) {
@@ -93,7 +107,12 @@ export function buildSubscription(params: SubscriptionParams): any {
           overrideToWithInitiator: false
         })),
         overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true
+        // Subscriptions must NOT override the recipient's incoming approvals.
+        // The frontend's `doesCollectionFollowSubscriptionProtocol()` rejects
+        // subscription faucet approvals that override incoming, because the
+        // recipient still needs `autoApproveAllIncomingTransfers: true` to
+        // gate whether they actually receive the minted token.
+        overridesToIncomingApprovals: false
       }
     });
   }

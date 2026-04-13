@@ -34,6 +34,7 @@ import {
   DEFAULT_SESSIONS_DIR
 } from '../../builder/session/fileStore.js';
 import { templatesCommand } from './templates.js';
+import { addNetworkOptions } from '../utils/io.js';
 
 /**
  * Normalize loose CLI input into a transaction body with a `messages` array.
@@ -190,17 +191,16 @@ toolsCommand
 // findings. The review phase is the natural companion to the build phase,
 // so it lives under the same umbrella.
 
-builderCommand
-  .command('review <input>')
-  .description(
-    'Review a built transaction or collection for issues. Input: JSON file, inline JSON, numeric collection ID, or - for stdin.'
-  )
-  .option('--json', 'Output the full ReviewResult as JSON')
-  .option('--strict', 'Exit 1 on warnings (critical always exits 2)')
-  .option('--testnet', 'Use testnet API URL (for numeric collection IDs)')
-  .option('--local', 'Use local API URL (http://localhost:3001)')
-  .option('--url <url>', 'Custom API base URL')
-  .option('--output-file <path>', 'Write output to file instead of stdout')
+addNetworkOptions(
+  builderCommand
+    .command('review <input>')
+    .description(
+      'Review a built transaction or collection for issues. Input: JSON file, inline JSON, numeric collection ID, or - for stdin.'
+    )
+    .option('--json', 'Output the full ReviewResult as JSON')
+    .option('--strict', 'Exit 1 on warnings (critical always exits 2)')
+    .option('--output-file <path>', 'Write output to file instead of stdout')
+)
   .action(
     async (
       input: string,
@@ -257,17 +257,19 @@ builderCommand
 // Saves agents 3+ separate calls per build. Also gives humans a one-stop
 // diligence command for tx files they didn't build through templates.
 
-builderCommand
-  .command('verify <input>')
-  .description(
-    'Aggregate validate + review + metadata coverage check. Input: JSON file, inline JSON, or - for stdin.'
-  )
-  .option('--json', 'Output a structured aggregate JSON instead of rendered sections')
-  .option('--strict', 'Exit 1 on warnings (criticals always exit 2)')
-  .option('--no-validate', 'Skip the structural validation section')
-  .option('--no-review', 'Skip the design review section')
-  .option('--no-metadata', 'Skip the metadata coverage section')
-  .option('--output-file <path>', 'Write the rendered sections to a file instead of stdout')
+addNetworkOptions(
+  builderCommand
+    .command('verify <input>')
+    .description(
+      'Aggregate validate + review + metadata coverage check. Input: JSON file, inline JSON, or - for stdin.'
+    )
+    .option('--json', 'Output a structured aggregate JSON instead of rendered sections')
+    .option('--strict', 'Exit 1 on warnings (criticals always exit 2)')
+    .option('--no-validate', 'Skip the structural validation section')
+    .option('--no-review', 'Skip the design review section')
+    .option('--no-metadata', 'Skip the metadata coverage section')
+    .option('--output-file <path>', 'Write the rendered sections to a file instead of stdout')
+)
   .action(
     async (
       input: string,
@@ -291,13 +293,19 @@ builderCommand
       const raw = readJsonInput(input);
       const wrapped = ensureTxWrapper(raw);
 
-      // Locate the underlying Msg so the metadata scan can read its `_meta`
-      // sidecar (templates emit _meta via buildMsg). reviewCollection /
-      // validateTransaction tolerate either shape.
-      const firstMsg =
-        Array.isArray(wrapped?.messages) && wrapped.messages.length > 0
-          ? wrapped.messages[0]
-          : wrapped;
+      // Locate the first collection message (Create / Update / Universal)
+      // so the metadata scan + review pass operate on collection state,
+      // not whatever happens to be at index 0. This makes verify
+      // msg-type-agnostic: a tx like `[MsgTransferTokens, MsgCreateCollection]`
+      // (transfer first, e.g. via add_transfer + post-fact create) still
+      // correctly identifies the collection for review purposes. Falls
+      // back to messages[0] only when there's no collection msg at all,
+      // in which case the metadata + review sections will be skipped
+      // anyway (gated on `firstIsCollection` below).
+      const { isCollectionMsg } = await import('../utils/normalizeMsg.js');
+      const firstMsg = Array.isArray(wrapped?.messages) && wrapped.messages.length > 0
+        ? wrapped.messages.find((m: any) => isCollectionMsg(m)) ?? wrapped.messages[0]
+        : wrapped;
 
       // `review` and the metadata placeholder scan are collection-CRUD
       // specific — they walk collectionApprovals, standards, etc. that
@@ -306,7 +314,6 @@ builderCommand
       // transfers, dynamic stores, and every other tokenization msg type,
       // validate + simulate are the useful signal and review should stay
       // silent (empty findings would be misleading).
-      const { isCollectionMsg } = await import('../utils/normalizeMsg.js');
       const firstIsCollection = isCollectionMsg(firstMsg);
 
       let validation: any = null;
@@ -406,11 +413,12 @@ interface DoctorCheck {
   detail?: string;
 }
 
-builderCommand
-  .command('doctor')
-  .description('Environment + session health check. Verifies Node/SDK/config/API key/MCP bin/session integrity.')
-  .option('--json', 'Output the full DoctorReport as JSON')
-  .action(async (opts: { json?: boolean }) => {
+addNetworkOptions(
+  builderCommand
+    .command('doctor')
+    .description('Environment + session health check. Verifies Node/SDK/config/API key/MCP bin/session integrity.')
+    .option('--json', 'Output the full DoctorReport as JSON')
+).action(async (opts: { json?: boolean; network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string }) => {
     const checks: DoctorCheck[] = [];
 
     // 1. Node version
@@ -488,14 +496,22 @@ builderCommand
       checks.push({ name: 'Config file', status: 'fail', detail: (err as Error).message });
     }
 
-    // 4. API key reachable
+    // 4. API key reachable. Probe the network the user selected via
+    // --network/--local/--testnet (or mainnet by default), so `doctor`
+    // tells you whether THIS network is reachable instead of always
+    // hitting prod.
     try {
-      const { getApiKey, getApiUrl } = await import('../../builder/sdk/apiClient.js');
-      const key = getApiKey();
+      const { getApiUrl, getApiKeyForNetwork, resolveNetwork } = await import('../utils/io.js');
+      const key = getApiKeyForNetwork(opts);
+      const network = resolveNetwork(opts);
       if (!key) {
-        checks.push({ name: 'API key', status: 'skip', detail: 'no key set (BITBADGES_API_KEY or config.apiKey)' });
+        checks.push({
+          name: `API key (${network})`,
+          status: 'skip',
+          detail: `no key set (BITBADGES_API_KEY or config.apiKey${network !== 'mainnet' ? `/apiKey${network[0].toUpperCase() + network.slice(1)}` : ''})`
+        });
       } else {
-        const url = `${getApiUrl()}/api/v0/simulate`;
+        const url = `${getApiUrl(opts)}/api/v0/simulate`;
         try {
           const response = await fetch(url, {
             method: 'POST',
@@ -506,16 +522,16 @@ builderCommand
           // 4xx with a clear message is expected for an empty txs array.
           if (response.status >= 200 && response.status < 500) {
             checks.push({
-              name: 'API key',
+              name: `API key (${network})`,
               status: 'pass',
               detail: `${url} responded with HTTP ${response.status}`
             });
           } else {
-            checks.push({ name: 'API key', status: 'warn', detail: `HTTP ${response.status} from ${url}` });
+            checks.push({ name: `API key (${network})`, status: 'warn', detail: `HTTP ${response.status} from ${url}` });
           }
         } catch (err) {
           checks.push({
-            name: 'API key',
+            name: `API key (${network})`,
             status: 'warn',
             detail: `network error pinging ${url}: ${(err as Error).message}`
           });
@@ -656,24 +672,22 @@ builderCommand
 // (no API key required); the unguessable code in the URL is the secret.
 // Lives 1 hour in the indexer's Redis cache.
 
-builderCommand
-  .command('preview <input>')
-  .description(
-    'Upload a tx to the indexer and print a shareable bitbadges.io preview URL. Input: JSON file, inline JSON, or - for stdin.'
-  )
-  .option('--testnet', 'Use testnet API URL')
-  .option('--local', 'Use local API URL (http://localhost:3001)')
-  .option('--url <url>', 'Custom API base URL')
-  .option(
-    '--frontend-url <url>',
-    'Override the bitbadges.io frontend base for the printed preview URL',
-    'https://bitbadges.io'
-  )
-  .option('--json', 'Output the structured upload result as JSON instead of just the URL')
-  .action(
+addNetworkOptions(
+  builderCommand
+    .command('preview <input>')
+    .description(
+      'Upload a tx to the indexer and print a shareable bitbadges.io preview URL. Input: JSON file, inline JSON, or - for stdin.'
+    )
+    .option(
+      '--frontend-url <url>',
+      'Override the bitbadges.io frontend base for the printed preview URL',
+      'https://bitbadges.io'
+    )
+    .option('--json', 'Output the structured upload result as JSON instead of just the URL')
+).action(
     async (
       input: string,
-      opts: { testnet?: boolean; local?: boolean; url?: string; frontendUrl?: string; json?: boolean }
+      opts: { network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string; frontendUrl?: string; json?: boolean }
     ) => {
       const { readJsonInput, getApiUrl } = await import('../utils/io.js');
 
@@ -778,25 +792,40 @@ builderCommand
 // Auto-Simulate section the templates use when invoked with --simulate.
 // Requires BITBADGES_API_KEY (or `bitbadges-cli config set apiKey`).
 
-builderCommand
-  .command('simulate <input>')
-  .description(
-    'Dry-run a built tx against the BitBadges API simulate endpoint. Returns gas + per-address net balance changes. Input: JSON file, inline JSON, or - for stdin.'
-  )
-  .option('--json', 'Output the structured SimulateResult as JSON instead of a rendered section')
-  .option('--creator <address>', 'Override the simulation context address (default: bb1simulation)')
-  .action(async (input: string, opts: { json?: boolean; creator?: string }) => {
-    const { readJsonInput, output } = await import('../utils/io.js');
+addNetworkOptions(
+  builderCommand
+    .command('simulate <input>')
+    .description(
+      'Dry-run a built tx against the BitBadges API simulate endpoint. Returns gas + per-address net balance changes. Input: JSON file, inline JSON, or - for stdin.'
+    )
+    .option('--json', 'Output the structured SimulateResult as JSON instead of a rendered section')
+    .option('--creator <address>', 'Override the simulation context address (default: bb1simulation)')
+).action(async (
+    input: string,
+    opts: {
+      json?: boolean;
+      creator?: string;
+      network?: 'mainnet' | 'local' | 'testnet';
+      testnet?: boolean;
+      local?: boolean;
+      url?: string;
+    }
+  ) => {
+    const { readJsonInput, output, getApiUrl, getApiKeyForNetwork } = await import('../utils/io.js');
     const { simulateMessages } = await import('../../builder/tools/queries/simulateTransaction.js');
     const { renderSimulate } = await import('../utils/terminal.js');
-    const { getApiKey } = await import('../../builder/sdk/apiClient.js');
 
-    if (!getApiKey()) {
+    // Network-aware API key + URL resolution. The simulate endpoint is
+    // gated on an API key on mainnet/testnet but most local indexers
+    // accept any (or no) key — we still pass it through if present so
+    // local routes that DO check it (premium gates) keep working.
+    const apiKey = getApiKeyForNetwork(opts);
+    if (!apiKey) {
       process.stderr.write(
         renderSimulate(
           {
             success: false,
-            error: 'No API key. Set BITBADGES_API_KEY or run `bitbadges-cli config set apiKey <key>`.'
+            error: 'No API key. Set BITBADGES_API_KEY, run `bitbadges-cli config set apiKey <key>`, or pass --network local against a key-less local indexer.'
           },
           { stream: process.stderr }
         ) + '\n'
@@ -817,11 +846,37 @@ builderCommand
       process.exit(2);
     }
 
+    // Refuse to simulate user-level approval messages. They describe a
+    // state mutation on an existing collection's user-approval list, not
+    // a self-contained tx — set/append/delete semantics vary at runtime
+    // and dry-running against a fresh account isn't meaningful. Use
+    // `validate` + `review` instead.
+    const APPROVAL_RE =
+      /\.(MsgUpdateUserApprovals|MsgSetIncomingApproval|MsgSetOutgoingApproval|MsgDeleteIncomingApproval|MsgDeleteOutgoingApproval|MsgPurgeApprovals)$/;
+    const firstApprovalMsg = messages.find((m: any) => typeof m?.typeUrl === 'string' && APPROVAL_RE.test(m.typeUrl));
+    if (firstApprovalMsg) {
+      process.stderr.write(
+        renderSimulate(
+          {
+            success: false,
+            error:
+              `Cannot simulate user-level approval message (${firstApprovalMsg.typeUrl}). ` +
+              'Use `builder validate` and `builder review` to check it, or include it inside an ' +
+              'alternative approval message that wraps a full collection transaction.'
+          },
+          { stream: process.stderr }
+        ) + '\n'
+      );
+      process.exit(2);
+    }
+
     const result = await simulateMessages({
       messages,
       memo: wrapped.memo,
       fee: wrapped.fee,
-      creatorAddress: opts.creator
+      creatorAddress: opts.creator,
+      apiKey,
+      apiUrl: getApiUrl(opts)
     });
 
     if (opts.json) {
@@ -841,24 +896,23 @@ builderCommand
 // interpretCollection(). Numeric input is treated as a collection id and
 // fetched from the API.
 
-builderCommand
-  .command('explain <input>')
-  .description(
-    'Explain a transaction or collection in plain English. Input: JSON file, inline JSON, numeric collection ID, or - for stdin.'
-  )
-  .option('--testnet', 'Use testnet API URL (for numeric collection IDs)')
-  .option('--local', 'Use local API URL')
-  .option('--url <url>', 'Custom API base URL')
-  .option('--output-file <path>', 'Write output to file instead of stdout')
-  .action(
-    async (input: string, opts: { testnet?: boolean; local?: boolean; url?: string; outputFile?: string }) => {
-      const { readJsonInput, getApiUrl } = await import('../utils/io.js');
+addNetworkOptions(
+  builderCommand
+    .command('explain <input>')
+    .description(
+      'Explain a transaction or collection in plain English. Input: JSON file, inline JSON, numeric collection ID, or - for stdin.'
+    )
+    .option('--output-file <path>', 'Write output to file instead of stdout')
+).action(
+    async (input: string, opts: { network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string; outputFile?: string }) => {
+      const { readJsonInput, getApiUrl, getApiKeyForNetwork } = await import('../utils/io.js');
       let data: any;
       let fetchedCollection = false;
       if (/^\d+$/.test(input)) {
         const baseUrl = getApiUrl(opts);
+        const apiKey = getApiKeyForNetwork(opts) || '';
         const response = await fetch(`${baseUrl}/api/v0/collection/${input}`, {
-          headers: { 'x-api-key': process.env.BITBADGES_API_KEY || '' }
+          headers: { 'x-api-key': apiKey }
         });
         if (!response.ok) throw new Error(`Failed to fetch collection ${input}: HTTP ${response.status}`);
         data = await response.json();
@@ -867,15 +921,27 @@ builderCommand
         data = readJsonInput(input);
       }
 
-      // Auto-detect shape: if it has a top-level `value` that looks like a
-      // MsgUniversalUpdateCollection, interpret as tx; otherwise interpret as
-      // a collection. API-fetched collections always take the collection path.
+      // Auto-detect shape. Accepts three input shapes and unwraps each
+      // down to the collection `value` that `interpretTransaction` expects:
+      //
+      //   1. Single Msg  — `{ typeUrl, value: {...} }`                   → .value
+      //   2. Tx wrapper  — `{ messages: [{ typeUrl, value }, ...] }`     → first collection msg's value
+      //   3. Raw collection — no typeUrl, no messages, no value          → interpretCollection
+      //
+      // API-fetched collections always take the raw-collection path.
       let text: string;
-      if (fetchedCollection || (data && typeof data === 'object' && !data.typeUrl && !data.value)) {
+      const { isCollectionMsg } = await import('../utils/normalizeMsg.js');
+      const hasMessages = Array.isArray(data?.messages);
+      const firstCollectionMsg = hasMessages ? data.messages.find((m: any) => isCollectionMsg(m)) : null;
+
+      if (
+        fetchedCollection ||
+        (data && typeof data === 'object' && !data.typeUrl && !hasMessages && !data.value)
+      ) {
         const { interpretCollection } = await import('../../core/interpret.js');
         text = interpretCollection(data);
       } else {
-        const txBody = data.value ?? data;
+        const txBody = firstCollectionMsg?.value ?? data.value ?? data;
         const { interpretTransaction } = await import('../../core/interpret-transaction.js');
         text = interpretTransaction(txBody);
       }

@@ -31,7 +31,7 @@ export class MsgSetCollectionMetadata<T extends NumberType>
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
     this.collectionMetadata = msg.collectionMetadata;
-    this.canUpdateCollectionMetadata = msg.canUpdateCollectionMetadata.map((permission) => new ActionPermission(permission));
+    this.canUpdateCollectionMetadata = msg.canUpdateCollectionMetadata?.map((permission) => new ActionPermission(permission)) ?? [];
   }
 
   toProto(): prototokenization.MsgSetCollectionMetadata {

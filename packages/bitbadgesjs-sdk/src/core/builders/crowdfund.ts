@@ -108,6 +108,17 @@ export function buildCrowdfund(params: CrowdfundParams): any {
             overrideToWithInitiator: true
           }
         ],
+        // Chain rule: overrideFromWithApproverAddress requires
+        // maxNumTransfers to set at least one non-zero limit. Each
+        // backer can claim ONE success payout, so cap by initiator.
+        maxNumTransfers: {
+          overallMaxNumTransfers: '0',
+          perToAddressMaxNumTransfers: '0',
+          perFromAddressMaxNumTransfers: '0',
+          perInitiatedByAddressMaxNumTransfers: '1',
+          amountTrackerId: 'crowdfund-success',
+          resetTimeIntervals: { startTime: '0', intervalLength: '0' }
+        },
         predeterminedBalances: scalingBalances('1'),
         overridesFromOutgoingApprovals: true
       }
@@ -141,6 +152,15 @@ export function buildCrowdfund(params: CrowdfundParams): any {
             overrideToWithInitiator: true
           }
         ],
+        // Same chain rule — each backer can claim ONE refund.
+        maxNumTransfers: {
+          overallMaxNumTransfers: '0',
+          perToAddressMaxNumTransfers: '0',
+          perFromAddressMaxNumTransfers: '0',
+          perInitiatedByAddressMaxNumTransfers: '1',
+          amountTrackerId: 'crowdfund-refund',
+          resetTimeIntervals: { startTime: '0', intervalLength: '0' }
+        },
         allowAmountScaling: true,
         predeterminedBalances: scalingBalances('1'),
         overridesFromOutgoingApprovals: true,
@@ -184,10 +204,10 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       noForcefulPostMintTransfers: false,
       disablePoolCreation: true
     },
-    aliasPathsToAdd: [
-      buildAliasPath('urefund', 'REFUND', 0),
-      buildAliasPath('utotaldeposit', 'TOTALDEPOSIT', 0)
-    ],
+    // Refund + total-deposit tokens are 1-of-1 receipt-style — no
+    // fractional denom unit needed. The previous version added alias
+    // paths with `decimals: 0` which the chain rejects.
+    aliasPathsToAdd: [],
     collectionMetadata,
     tokenMetadata: [refundToken.entry, progressToken.entry],
     metadataPlaceholders: {

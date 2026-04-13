@@ -26,8 +26,8 @@ export class MsgSetValidTokenIds<T extends NumberType> extends CustomTypeClass<M
     super();
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
-    this.validTokenIds = msg.validTokenIds.map((range) => new UintRange(range));
-    this.canUpdateValidTokenIds = msg.canUpdateValidTokenIds.map((permission) => new TokenIdsActionPermission(permission));
+    this.validTokenIds = msg.validTokenIds?.map((range) => new UintRange(range)) ?? [];
+    this.canUpdateValidTokenIds = msg.canUpdateValidTokenIds?.map((permission) => new TokenIdsActionPermission(permission)) ?? [];
   }
 
   toProto(): prototokenization.MsgSetValidTokenIds {

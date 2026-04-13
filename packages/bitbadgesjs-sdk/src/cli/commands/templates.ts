@@ -8,6 +8,7 @@ import {
   renderSimulate
 } from '../utils/terminal.js';
 import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMsg.js';
+import { addNetworkOptions } from '../utils/io.js';
 
 export const templatesCommand = new Command('templates').description('Deterministic transaction templates — flag-based generators for vaults, NFTs, subscriptions, bounties, and more.');
 
@@ -27,16 +28,72 @@ async function emit(
     description?: string;
     image?: string;
     simulate?: boolean;
+    // Network selection — passed through addNetworkOptions on the
+    // shared sharedOpts() helper. Only consulted when --simulate is on.
+    network?: 'mainnet' | 'local' | 'testnet';
+    testnet?: boolean;
+    local?: boolean;
+    url?: string;
   }
 ) {
+  // User-level approval templates produce
+  // `/tokenization.MsgUpdateUserApprovals` and similar — they're not
+  // collection CRUD msgs but they still need the creator / manager
+  // backfill from CLI flags. Detect once and use the flag in two
+  // places below: (a) post-build creator override, (b) gating the
+  // auto-simulate path (we skip simulate for approval-style msgs
+  // because their semantics are state-change-on-existing-collection
+  // with set/append/delete variability — not a single tx the user
+  // wants to dry-run on a fresh chain).
+  const isUserApprovalTx =
+    typeof data?.typeUrl === 'string' &&
+    /\.(MsgUpdateUserApprovals|MsgSetIncomingApproval|MsgSetOutgoingApproval|MsgDeleteIncomingApproval|MsgDeleteOutgoingApproval|MsgPurgeApprovals)$/.test(
+      data.typeUrl
+    );
+
   // Apply --creator / --manager overrides to collection msgs. Builders emit
   // MsgUniversalUpdateCollection internally (superset) — the normalization
   // into MsgCreateCollection / MsgUpdateCollection happens once, at the very
   // end of emit(), right before we write the JSON out.
   const isCollectionTx = isCollectionMsg(data);
-  if (isCollectionTx && data.value) {
+  if ((isCollectionTx || isUserApprovalTx) && data.value) {
     if (opts.creator) data.value.creator = opts.creator;
+  }
+  if (isCollectionTx && data.value) {
     if (opts.manager) data.value.manager = opts.manager;
+
+    // Defensive backfill — last-mile safety net for templates that
+    // generate approvals without knowing the creator address.
+    //
+    // (1) `initiatedByListId === ''` → fill in with creator. The chain
+    //     rejects empty list IDs with "initiated by list id is
+    //     uninitialized". Any builder that genuinely wants a permissionless
+    //     list must explicitly set `'All'` — empty string is never valid.
+    //
+    // (2) `coinTransfers[].to === ''` → fill in with creator, BUT only
+    //     when `overrideToWithInitiator !== true`. The override flag tells
+    //     the chain to substitute `to` with the initiator at runtime
+    //     (correct for quest rewards, bounty payouts to claimants, etc.).
+    //     The empty `to` without the override means "refund the creator"
+    //     — typical for deny/expire branches in bounty/crowdfund/etc. where
+    //     the builder couldn't know the creator at build time.
+    const creatorForFallback = data.value.creator;
+    if (Array.isArray(data.value.collectionApprovals) && creatorForFallback) {
+      for (const approval of data.value.collectionApprovals) {
+        if (!approval || typeof approval !== 'object') continue;
+        if (approval.initiatedByListId === '') {
+          approval.initiatedByListId = creatorForFallback;
+        }
+        const cts = approval.approvalCriteria?.coinTransfers;
+        if (Array.isArray(cts)) {
+          for (const ct of cts) {
+            if (ct && ct.to === '' && ct.overrideToWithInitiator !== true) {
+              ct.to = creatorForFallback;
+            }
+          }
+        }
+      }
+    }
   }
 
   // Pre-fill the metadataPlaceholders sidecar from the user's --name /
@@ -129,7 +186,12 @@ async function emit(
   // context is unset. Templates know what they're building; the user can
   // still run `bitbadges-cli builder review <file>` for a full pass over
   // skills/standards they haven't declared on the collection yet.
-  if (!opts.jsonOnly && isCollectionTx) {
+  // Auto-validate runs for BOTH collection and user-approval templates
+  // (both produce structurally validatable txs). Auto-review and
+  // metadata + simulate are gated below — review only fires for
+  // collection txs (collection-specific rules), and simulate is
+  // refused for approval-style msgs entirely.
+  if (!opts.jsonOnly && (isCollectionTx || isUserApprovalTx)) {
     // Static validation FIRST — if the JSON is structurally broken, the
     // design review below is much less meaningful.
     try {
@@ -140,7 +202,9 @@ async function emit(
     } catch (err) {
       process.stderr.write(`Validation skipped: ${err instanceof Error ? err.message : String(err)}\n`);
     }
+  }
 
+  if (!opts.jsonOnly && isCollectionTx) {
     try {
       const { reviewCollection } = await import('../../core/review.js');
       // reviewCollection wants either a raw collection or a tx body with
@@ -174,10 +238,17 @@ async function emit(
     // /api/v0/simulate endpoint via simulateMessages(). Returns gasUsed +
     // parsed events + per-address net balance changes. Skips gracefully
     // if no API key is configured rather than hard-failing.
+    //
+    // Honors --network/--local/--testnet/--url so a `templates vault
+    // --simulate --network local` flow lands on the local indexer
+    // automatically.
     if (opts.simulate) {
       try {
-        const { getApiKey } = await import('../../builder/sdk/apiClient.js');
-        if (!getApiKey()) {
+        const { getApiUrl, getApiKeyForNetwork } = await import('../utils/io.js');
+        // getApiKeyForNetwork() already does env-var > config fallback,
+        // so we don't need a separate getApiKey() call.
+        const apiKey = getApiKeyForNetwork(opts);
+        if (!apiKey) {
           process.stderr.write(
             '\n' +
               renderSimulate(
@@ -194,7 +265,9 @@ async function emit(
           const { simulateMessages } = await import('../../builder/tools/queries/simulateTransaction.js');
           const result = await simulateMessages({
             messages: [data],
-            creatorAddress: opts.creator
+            creatorAddress: opts.creator,
+            apiKey,
+            apiUrl: getApiUrl(opts)
           });
           process.stderr.write(
             '\n' + renderSimulate(result, { stream: process.stderr, title: 'Auto-Simulate' }) + '\n'
@@ -204,6 +277,17 @@ async function emit(
         process.stderr.write(`Simulation skipped: ${err instanceof Error ? err.message : String(err)}\n`);
       }
     }
+  }
+
+  // Approval-template auto-simulate skip — sits OUTSIDE the
+  // collection-only block so it fires even when isCollectionTx is
+  // false. Approval msgs already get the Auto-Validate run above; we
+  // print the skip note once so the user understands why no gas is
+  // shown.
+  if (!opts.jsonOnly && opts.simulate && isUserApprovalTx) {
+    process.stderr.write(
+      '\nAuto-Simulate skipped — wrap user-level approvals inside an alternative approval message to simulate end-to-end. Auto-Validate ran above.\n'
+    );
   }
 }
 
@@ -235,6 +319,10 @@ const sharedOpts = (cmd: Command) => {
     .option('--creator <address>', 'Creator/sender address (bb1... or 0x...)')
     .option('--manager <address>', 'Collection manager address (bb1...)')
     .option('--simulate', 'Also simulate the tx against the BitBadges API and render gas + net changes (requires BITBADGES_API_KEY)');
+  // Network selection — only the --simulate path actually hits the
+  // API, but we add the flags universally so `templates vault
+  // --simulate --network local` works without parser surprises.
+  addNetworkOptions(cmd);
   // Metadata flags — only added when the template doesn't already declare
   // them. Templates that DO declare them keep their own description string;
   // emit() reads opts.name / description / image regardless.
@@ -440,7 +528,7 @@ sharedOpts(
 ).action(async (opts) => {
   const { buildAddressList } = await import('../../core/builders/address-list.js');
   if (opts.json) { emit(buildAddressList(readJsonInput(opts.json)), opts); return; }
-  emit(buildAddressList({ name: opts.name, image: opts.image, description: opts.description, manager: opts.manager }), opts);
+  emit(buildAddressList({ name: opts.name, image: opts.image, description: opts.description, manager: opts.manager, creator: opts.creator }), opts);
 });
 
 // ============================================================

@@ -7,6 +7,7 @@ import {
   resolveCoin,
   buildMsg,
   buildAliasPath,
+  sanitizeCosmosPathName,
   ibcBackedInvariants,
   generateAliasAddressForIBCBackedDenom,
   emptyPermissions,
@@ -93,13 +94,18 @@ export function buildSmartAccount(params: SmartAccountParams): any {
     canAddMoreCosmosCoinWrapperPaths: [alwaysLockedPermission()]
   };
 
-  const denomStr = 'u' + symbol.toLowerCase();
+  // Chain rule: cosmos wrapper path denom AND symbol must match
+  // `[a-zA-Z_{}-]+`. Sanitize the user-provided symbol once and
+  // derive the denom from the cleaned form so they round-trip through
+  // the chain validator without "invalid characters" rejections.
+  const cleanSymbol = sanitizeCosmosPathName(symbol, 'symbol');
+  const denomStr = 'u' + cleanSymbol.toLowerCase();
 
   return buildMsg({
     collectionApprovals,
     standards,
     invariants,
-    aliasPathsToAdd: [buildAliasPath(denomStr, symbol, coin.decimals, coin.image)],
+    aliasPathsToAdd: [buildAliasPath(denomStr, cleanSymbol, coin.decimals, coin.image)],
     collectionPermissions: permissions
   });
 }

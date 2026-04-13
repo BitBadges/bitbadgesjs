@@ -188,18 +188,33 @@ describe('subscription builder', () => {
     expect(mt.validTokenIds).toEqual([{ start: '1', end: '3' }]);
     expect(mt.collectionApprovals.length).toBe(3);
   });
-  test('multiple payouts', () => {
+  test('multiple payouts (single denom)', () => {
+    // Subscription protocol requires all coin transfers to share a denom.
+    // Treasury splits across multiple recipients with the same coin are
+    // legitimate; mixed denoms throw at build time (see builder.ts).
     const mp = val(buildSubscription({
       interval: 'monthly',
       payouts: [
         { recipient: 'bb1a', amount: 5, denom: 'USDC' },
-        { recipient: 'bb1b', amount: 3, denom: 'BADGE' }
+        { recipient: 'bb1b', amount: 3, denom: 'USDC' }
       ]
     }));
     const cts = mp.collectionApprovals[0].approvalCriteria.coinTransfers;
     expect(cts.length).toBe(2);
     expect(cts[0].to).toBe('bb1a');
     expect(cts[1].to).toBe('bb1b');
+  });
+
+  test('multiple payouts with mixed denoms throws', () => {
+    expect(() =>
+      buildSubscription({
+        interval: 'monthly',
+        payouts: [
+          { recipient: 'bb1a', amount: 5, denom: 'USDC' },
+          { recipient: 'bb1b', amount: 3, denom: 'BADGE' }
+        ]
+      })
+    ).toThrow(/single denom/);
   });
   test('passes verification', () => {
     expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Subscription')).toEqual([]);
@@ -462,7 +477,12 @@ describe('all collection builders pass verifyStandardsCompliance with zero viola
     ['smart-account (ai-agent)', buildSmartAccount({ backingCoin: 'BADGE', aiAgentVault: true })],
     ['subscription (single)', buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test' })],
     ['subscription (multi-tier)', buildSubscription({ interval: 'daily', price: 5, denom: 'BADGE', recipient: 'bb1r', tiers: 3 })],
-    ['subscription (multi-payout)', buildSubscription({ interval: 'monthly', payouts: [{ recipient: 'bb1a', amount: 5, denom: 'USDC' }, { recipient: 'bb1b', amount: 3, denom: 'BADGE' }] })],
+    // Subscription faucet approvals must use a SINGLE denom — see
+    // buildSubscription's runtime check and the proto-level
+    // `doesCollectionFollowSubscriptionProtocol()` rule. Multiple
+    // recipients sharing one denom is valid (treasury split); mixing
+    // denoms is not.
+    ['subscription (multi-payout)', buildSubscription({ interval: 'monthly', payouts: [{ recipient: 'bb1a', amount: 5, denom: 'USDC' }, { recipient: 'bb1b', amount: 3, denom: 'USDC' }] })],
     ['bounty', buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1v', recipient: 'bb1r' })],
     ['bounty (BADGE)', buildBounty({ amount: 50, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', expiration: '7d' })],
     ['crowdfund', buildCrowdfund({ goal: 1000, denom: 'USDC' })],

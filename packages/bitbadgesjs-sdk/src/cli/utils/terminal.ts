@@ -382,6 +382,10 @@ export interface SimulateResultLike {
   gasUsed?: string;
   parsedEvents?: any;
   netChanges?: any;
+  /** Raw Cosmos SDK simulation events. Contains approvalChange entries the
+   *  parsedEvents stream doesn't capture — high-value for agents reviewing
+   *  which approvals will exist on the collection after the tx executes. */
+  events?: any[];
   simulationError?: string;
   error?: string;
 }
@@ -456,6 +460,74 @@ export function renderSimulate(
   } else {
     lines.push('');
     lines.push(`  ${c('dim', 'No net balance changes detected.')}`);
+  }
+
+  // ── Approval changes ────────────────────────────────────────────────
+  // The chain emits one `approvalChange` event per approval mutation
+  // (created / updated / deleted). Most useful piece of an agent-facing
+  // simulate output — it tells them exactly which approvals will exist
+  // on the collection after the tx executes, BEFORE they broadcast.
+  // Walked from raw events instead of parsedEvents because
+  // parseSimulationEvents doesn't handle this event type.
+  const events: any[] = Array.isArray(result.events) ? result.events : [];
+  const approvalEvents = events.filter((e) => e?.type === 'approvalChange');
+  if (approvalEvents.length > 0) {
+    lines.push('');
+    lines.push(`  ${c('bold', 'Approval changes')} ${c('dim', `(${approvalEvents.length})`)}`);
+    for (const ev of approvalEvents) {
+      const attrs: Record<string, string> = {};
+      for (const a of ev.attributes || []) attrs[a.key] = a.value;
+      const action = attrs.action || 'changed';
+      const id = attrs.approvalId || '?';
+      const level = attrs.approvalLevel || '?';
+      const collId = attrs.collectionId || '?';
+      const approver = attrs.approverAddress ? ` by ${attrs.approverAddress.slice(0, 12)}…` : '';
+      const actionColor: 'green' | 'yellow' | 'red' =
+        action === 'created' ? 'green' : action === 'deleted' ? 'red' : 'yellow';
+      lines.push(
+        `    ${c(actionColor, '●')} ${c('bold', action)} ${c('dim', `[${level}]`)} ${id} ${c('dim', `on collection ${collId}${approver}`)}`
+      );
+    }
+  }
+
+  // ── Parsed transfer events ──────────────────────────────────────────
+  // Individual coin / badge / IBC transfers extracted from raw events.
+  // These complement the per-address Net changes summary by showing
+  // each leg of a multi-hop transfer, so agents can spot unexpected
+  // intermediate hops (e.g. a fee splitter routing through a third
+  // address).
+  const parsed: any = result.parsedEvents || {};
+  const coinXfers: any[] = Array.isArray(parsed.coinTransferEvents) ? parsed.coinTransferEvents : [];
+  const badgeXfers: any[] = Array.isArray(parsed.badgeTransferEvents) ? parsed.badgeTransferEvents : [];
+  const ibcXfers: any[] = Array.isArray(parsed.ibcTransferEvents) ? parsed.ibcTransferEvents : [];
+  const totalXfers = coinXfers.length + badgeXfers.length + ibcXfers.length;
+  if (totalXfers > 0) {
+    lines.push('');
+    lines.push(`  ${c('bold', 'Transfers')} ${c('dim', `(${totalXfers})`)}`);
+    for (const t of coinXfers) {
+      const from = (t.from || '').slice(0, 12) + (t.from?.length > 12 ? '…' : '');
+      const to = (t.to || '').slice(0, 12) + (t.to?.length > 12 ? '…' : '');
+      lines.push(`    ${c('dim', '→')} coin ${c('bold', String(t.amount))} ${t.denom} ${c('dim', `${from} → ${to}`)}`);
+    }
+    for (const t of badgeXfers) {
+      const from = (t.from || '').slice(0, 12) + (t.from?.length > 12 ? '…' : '');
+      const to = (t.to || '').slice(0, 12) + (t.to?.length > 12 ? '…' : '');
+      lines.push(
+        `    ${c('dim', '→')} badge ${c('bold', String(t.amount))} of collection ${t.collectionId} ${c('dim', `${from} → ${to}`)}`
+      );
+    }
+    for (const t of ibcXfers) {
+      lines.push(`    ${c('dim', '→')} ibc ${c('bold', String(t.amount))} ${t.denom} via ${t.sourceChannel || '?'}`);
+    }
+  }
+
+  // ── Raw event count footer ──────────────────────────────────────────
+  // Helps operators sanity-check that the chain actually executed
+  // something — a successful tx with 0 events almost always means a
+  // no-op (e.g. an Update msg that didn't change any field).
+  if (events.length > 0) {
+    lines.push('');
+    lines.push(`  ${c('dim', `${events.length} chain events emitted total`)}`);
   }
 
   lines.push('');

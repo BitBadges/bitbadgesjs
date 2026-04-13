@@ -99,6 +99,16 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
           overrideToWithInitiator: true
         }
       ],
+      // Chain rule: overrideFromWithApproverAddress requires
+      // maxNumTransfers to set at least one non-zero limit.
+      maxNumTransfers: {
+        overallMaxNumTransfers: '0',
+        perToAddressMaxNumTransfers: '0',
+        perFromAddressMaxNumTransfers: '0',
+        perInitiatedByAddressMaxNumTransfers: '1',
+        amountTrackerId: 'pm-buy',
+        resetTimeIntervals: { startTime: '0', intervalLength: '0' }
+      },
       requireFromEqualsInitiatedBy: true,
       overridesFromOutgoingApprovals: true,
       overridesToIncomingApprovals: true
@@ -131,6 +141,17 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
             overrideToWithInitiator: true
           }
         ],
+        // Chain rule: overrideFromWithApproverAddress requires
+        // maxNumTransfers to set at least one non-zero limit. Each
+        // settlement claim per holder.
+        maxNumTransfers: {
+          overallMaxNumTransfers: '0',
+          perToAddressMaxNumTransfers: '0',
+          perFromAddressMaxNumTransfers: '0',
+          perInitiatedByAddressMaxNumTransfers: '1',
+          amountTrackerId: approvalId,
+          resetTimeIntervals: { startTime: '0', intervalLength: '0' }
+        },
         votingChallenges: [
           {
             proposalId,

@@ -98,7 +98,12 @@ export function buildAuction(params: AuctionParams): any {
       noForcefulPostMintTransfers: false,
       disablePoolCreation: true
     },
-    aliasPathsToAdd: [buildAliasPath('uauction', 'AUCTION', 0)],
+    // Auctions are 1-of-1 NFTs — no fractional denom unit needed. The
+    // previous version added an alias path with `decimals: 0` which the
+    // chain rejected with "denom unit decimals cannot be 0". The auction
+    // doesn't need a fungible representation; the NFT itself is the only
+    // tradable surface.
+    aliasPathsToAdd: [],
     collectionMetadata,
     tokenMetadata: [auctionItem.entry],
     metadataPlaceholders: {

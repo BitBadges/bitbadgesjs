@@ -30,7 +30,7 @@ export class MsgSetCollectionApprovals<T extends NumberType>
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
     this.collectionApprovals = msg.collectionApprovals.map((approval) => new CollectionApproval(approval));
-    this.canUpdateCollectionApprovals = msg.canUpdateCollectionApprovals.map((permission) => new CollectionApprovalPermission(permission));
+    this.canUpdateCollectionApprovals = msg.canUpdateCollectionApprovals?.map((permission) => new CollectionApprovalPermission(permission)) ?? [];
   }
 
   toProto(): prototokenization.MsgSetCollectionApprovals {

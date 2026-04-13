@@ -11,6 +11,7 @@ import {
   parseDuration,
   buildMsg,
   buildAliasPath,
+  sanitizeCosmosPathName,
   ibcBackedInvariants,
   generateAliasAddressForIBCBackedDenom,
   emptyPermissions
@@ -30,7 +31,11 @@ export interface VaultParams {
 export function buildVault(params: VaultParams): any {
   const coin = resolveCoin(params.backingCoin);
   const backingAddr = generateAliasAddressForIBCBackedDenom(coin.denom);
-  const symbol = params.symbol || 'v' + coin.symbol;
+  // Sanitize the symbol to the chain's wrapper-path regex
+  // (`[a-zA-Z_{}-]+`) — see sanitizeCosmosPathName for the rule. Users
+  // commonly include digits ("vUSDC9", "BADGE2") that would be rejected
+  // at simulate time with "symbol contains invalid characters".
+  const symbol = sanitizeCosmosPathName(params.symbol || 'v' + coin.symbol, 'symbol');
 
   const collectionApprovals: any[] = [
     // Deposit (backing)
@@ -119,7 +124,10 @@ export function buildVault(params: VaultParams): any {
     collectionApprovals,
     standards: ['Smart Token', 'Vault'],
     invariants,
-    aliasPathsToAdd: [buildAliasPath('uvault', symbol, coin.decimals, coin.image)],
+    // Derive the denom from the (sanitized) symbol — chain enforces
+    // global denom uniqueness, so a hardcoded 'uvault' would collide
+    // for any user creating more than one vault on the same chain.
+    aliasPathsToAdd: [buildAliasPath('u' + symbol.toLowerCase(), symbol, coin.decimals, coin.image)],
     collectionPermissions: emptyPermissions()
   });
 }

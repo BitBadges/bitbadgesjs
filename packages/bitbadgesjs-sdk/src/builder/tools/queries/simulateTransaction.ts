@@ -81,29 +81,39 @@ export async function simulateMessages(params: {
   };
   creatorAddress?: string;
   chain?: string;
+  /** Override the resolved API key (e.g. CLI `--network local` flow). */
+  apiKey?: string;
+  /** Override the resolved API base URL (e.g. CLI `--url http://...`). */
+  apiUrl?: string;
 }): Promise<SimulateTransactionResult> {
   try {
     if (!params.messages || !Array.isArray(params.messages) || params.messages.length === 0) {
       return { success: false, error: 'Invalid transaction: empty or missing messages array' };
     }
 
-    const response = await simulateTx({
-      txs: [
-        {
-          context: {
-            address: params.creatorAddress || 'bb1simulation',
-            chain: params.chain || 'eth'
-          },
-          messages: params.messages,
-          memo: params.memo || '',
-          fee:
-            params.fee || {
-              amount: [{ denom: 'ubadge', amount: '5000' }],
-              gas: '500000'
-            }
-        }
-      ]
-    });
+    const response = await simulateTx(
+      {
+        txs: [
+          {
+            context: {
+              address: params.creatorAddress || 'bb1simulation',
+              chain: params.chain || 'eth'
+            },
+            messages: params.messages,
+            memo: params.memo || '',
+            fee:
+              params.fee || {
+                amount: [{ denom: 'ubadge', amount: '5000' }],
+                gas: '500000'
+              }
+          }
+        ]
+      },
+      // Pass per-call override config through to apiRequest so the
+      // CLI's --network/--url flags can hit a local indexer without
+      // requiring environment variables.
+      params.apiKey || params.apiUrl ? { apiKey: params.apiKey, apiUrl: params.apiUrl } : undefined
+    );
 
     if (!response.success) {
       return { success: false, error: response.error };

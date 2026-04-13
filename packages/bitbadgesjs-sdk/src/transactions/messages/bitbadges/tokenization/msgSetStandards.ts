@@ -26,7 +26,7 @@ export class MsgSetStandards<T extends NumberType> extends CustomTypeClass<MsgSe
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
     this.standards = msg.standards;
-    this.canUpdateStandards = msg.canUpdateStandards.map((permission) => new ActionPermission(permission));
+    this.canUpdateStandards = msg.canUpdateStandards?.map((permission) => new ActionPermission(permission)) ?? [];
   }
 
   toProto(): prototokenization.MsgSetStandards {

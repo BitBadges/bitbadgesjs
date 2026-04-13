@@ -8,6 +8,7 @@ import {
   resolveCoin,
   buildMsg,
   buildAliasPath,
+  sanitizeCosmosPathName,
   frozenPermissions,
   scalingBalances
 } from './shared.js';
@@ -23,7 +24,9 @@ export interface CreditTokenParams {
 export function buildCreditToken(params: CreditTokenParams): any {
   const coin = resolveCoin(params.paymentDenom);
   const tokensPerUnit = params.tokensPerUnit ?? 100;
-  const symbol = params.symbol || 'CREDIT';
+  // Same chain regex as smart-account / vault — strip non-allowed
+  // characters before deriving the lowercase denom. See sanitizeCosmosPathName.
+  const symbol = sanitizeCosmosPathName(params.symbol || 'CREDIT', 'symbol');
 
   const creditMint = {
     approvalId: 'credit-mint',

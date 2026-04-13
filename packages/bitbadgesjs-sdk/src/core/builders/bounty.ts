@@ -148,7 +148,10 @@ export function buildBounty(params: BountyParams): any {
       noForcefulPostMintTransfers: false,
       disablePoolCreation: true
     },
-    aliasPathsToAdd: [buildAliasPath('ubounty', 'BOUNTY', 0)],
+    // Bounty receipt is a 1-of-1 NFT-style token — no fractional denom
+    // unit needed. The previous version added an alias path with
+    // `decimals: 0` which the chain rejects.
+    aliasPathsToAdd: [],
     mintEscrowCoinsToTransfer: [{ amount: baseAmount, denom: coin.denom }],
     collectionMetadata,
     tokenMetadata,

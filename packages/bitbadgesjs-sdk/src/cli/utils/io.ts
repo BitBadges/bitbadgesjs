@@ -1,5 +1,6 @@
 import * as fs from 'fs';
-import { getConfigBaseUrl } from './config.js';
+import type { Command } from 'commander';
+import { getConfigBaseUrl, getConfigApiKey } from './config.js';
 
 /**
  * Read JSON input from multiple sources:
@@ -83,20 +84,52 @@ function formatHuman(obj: any, indent = 0): string {
 }
 
 /**
+ * Network shorthand for `--network mainnet|local|testnet`. Maps to the
+ * equivalent legacy boolean flag so existing flow inside `getApiUrl()`
+ * keeps working without branching.
+ */
+export type NetworkName = 'mainnet' | 'local' | 'testnet';
+
+export interface NetworkOptions {
+  /** Long-form network selector — `mainnet` | `local` | `testnet`. */
+  network?: NetworkName;
+  /** Legacy boolean shorthand. Equivalent to `--network testnet`. */
+  testnet?: boolean;
+  /** Legacy boolean shorthand. Equivalent to `--network local`. */
+  local?: boolean;
+  /** Custom API base URL — overrides every other selector. */
+  url?: string;
+}
+
+/**
+ * Resolve a network name from a mix of long-form and legacy flags.
+ * `--url` always wins; otherwise `--network` > `--local` > `--testnet`
+ * > env > config > mainnet default.
+ */
+export function resolveNetwork(options: NetworkOptions): NetworkName {
+  if (options.network) return options.network;
+  if (options.local) return 'local';
+  if (options.testnet) return 'testnet';
+  return 'mainnet';
+}
+
+/**
  * Resolve the API URL from CLI flags and environment variables.
  *
- * Priority: --url > --local > --testnet > BITBADGES_API_URL env > default production URL.
+ * Priority: --url > --network > --local > --testnet > BITBADGES_API_URL env > config > default production URL.
  */
-export function getApiUrl(options: { testnet?: boolean; local?: boolean; url?: string }): string {
+export function getApiUrl(options: NetworkOptions): string {
   if (options.url) {
     return options.url;
   }
-  if (options.local) {
+  const network = resolveNetwork(options);
+  if (network === 'local') {
     return 'http://localhost:3001';
   }
-  if (options.testnet) {
+  if (network === 'testnet') {
     return 'https://api.testnet.bitbadges.io';
   }
+  // mainnet — env wins over config which wins over default.
   if (process.env.BITBADGES_API_URL) {
     return process.env.BITBADGES_API_URL;
   }
@@ -106,4 +139,34 @@ export function getApiUrl(options: { testnet?: boolean; local?: boolean; url?: s
     return configUrl.replace(/\/api\/v0$/, '');
   }
   return 'https://api.bitbadges.io';
+}
+
+/**
+ * Resolve the API key for a given network. Priority: env var (BITBADGES_API_KEY)
+ * > network-scoped config key (apiKeyTestnet / apiKeyLocal) > default
+ * config apiKey. Mirrors `getApiUrl()`'s priority so a single
+ * `--network local` flag picks up both the local URL AND any local apiKey
+ * the user has stashed via `bitbadges-cli config set apiKeyLocal <key>`.
+ */
+export function getApiKeyForNetwork(options: NetworkOptions): string | undefined {
+  const envKey = process.env.BITBADGES_API_KEY;
+  if (envKey) return envKey;
+  return getConfigApiKey(resolveNetwork(options));
+}
+
+/**
+ * Add the four network-selection options to a Command in one call.
+ * Use this on every CLI command that makes an external API call so the
+ * flag surface stays consistent: `--network`, `--testnet`, `--local`,
+ * and `--url` all do the same job, with `--url` as the manual override.
+ */
+export function addNetworkOptions(cmd: Command): Command {
+  return cmd
+    .option(
+      '--network <name>',
+      'Network: mainnet | testnet | local. Picks the matching API base URL and config apiKey.'
+    )
+    .option('--testnet', 'Shortcut for --network testnet')
+    .option('--local', 'Shortcut for --network local (http://localhost:3001)')
+    .option('--url <url>', 'Custom API base URL (overrides --network)');
 }

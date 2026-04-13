@@ -26,7 +26,7 @@ export class MsgSetIsArchived<T extends NumberType> extends CustomTypeClass<MsgS
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
     this.isArchived = msg.isArchived;
-    this.canArchiveCollection = msg.canArchiveCollection.map((permission) => new ActionPermission(permission));
+    this.canArchiveCollection = msg.canArchiveCollection?.map((permission) => new ActionPermission(permission)) ?? [];
   }
 
   toProto(): prototokenization.MsgSetIsArchived {

@@ -261,13 +261,20 @@ export function buildMsg(params: {
  */
 export function buildUserApprovalMsg(params: {
   collectionId: string;
+  /**
+   * Optional creator override. The CLI's `emit()` backfills this from
+   * the `--creator` flag after build, so most templates don't need to
+   * pass it through. Provided here for callers that want to set it
+   * explicitly (e.g. unit tests, other tooling).
+   */
+  creator?: string;
   outgoingApprovals?: any[];
   incomingApprovals?: any[];
 }) {
   return {
     typeUrl: '/tokenization.MsgUpdateUserApprovals',
     value: {
-      creator: '',
+      creator: params.creator || '',
       collectionId: params.collectionId,
       updateOutgoingApprovals: (params.outgoingApprovals?.length ?? 0) > 0,
       outgoingApprovals: params.outgoingApprovals || [],
@@ -469,17 +476,71 @@ export function scalingBalances(amount: string, maxMultiplier?: string) {
  *   the off-chain JSON, not the on-chain PathMetadata. Will be surfaced
  *   through the metadata placeholder system.
  */
+/**
+ * Strip any character not in `[a-zA-Z_{}-]` from a candidate cosmos
+ * wrapper path denom or symbol. The chain regex
+ * `^[a-zA-Z_{}-]+$` is enforced by `ValidateCosmosWrapperPathSymbol`
+ * (chain side at validate_basic.go:80-94). Digits are common in
+ * user-supplied symbols (e.g. "vUSDC9", "BADGE2") and must be removed
+ * before they reach the chain.
+ *
+ * Throws if the result is empty so callers don't accidentally produce
+ * a wrapper path with no name.
+ */
+export function sanitizeCosmosPathName(input: string, label: 'denom' | 'symbol' = 'symbol'): string {
+  const cleaned = input.replace(/[^a-zA-Z_{}\-]/g, '');
+  if (cleaned.length === 0) {
+    throw new Error(
+      `sanitizeCosmosPathName: input "${input}" produced an empty ${label} after stripping invalid characters. Provide a value containing at least one letter (a-zA-Z), underscore, brace, or dash.`
+    );
+  }
+  return cleaned;
+}
+
 export function buildAliasPath(denom: string, symbol: string, decimals: number, image?: string) {
   // Keep the parameter for back-compat; the reviewer + metadata placeholder
   // layer will pick up the image via metadataPlaceholders, not the proto.
   void image;
+  // Chain rule: denom unit decimals must be > 0. The chain rejects
+  // `decimals: '0'` with "denom unit decimals cannot be 0". Fail fast at
+  // build time so callers get a clear error instead of a chain rejection
+  // ten steps later.
+  if (!Number.isInteger(decimals) || decimals < 1) {
+    throw new Error(
+      `buildAliasPath: decimals must be an integer >= 1 (got ${decimals}). Use 1 for whole-unit-only tokens (e.g. NFTs that still need an alias path) or skip the alias path entirely if no fungible representation is needed.`
+    );
+  }
+  // Both denom and symbol must satisfy the chain's wrapper-path regex
+  // (`[a-zA-Z_{}-]+`). Validate up-front so callers get a clear error
+  // instead of a chain "invalid characters" rejection at simulate time.
+  const re = /^[a-zA-Z_{}\-]+$/;
+  if (!re.test(denom)) {
+    throw new Error(
+      `buildAliasPath: denom "${denom}" contains invalid characters. Allowed: a-zA-Z, _, {, }, -. Use sanitizeCosmosPathName() to clean user input.`
+    );
+  }
+  if (!re.test(symbol)) {
+    throw new Error(
+      `buildAliasPath: symbol "${symbol}" contains invalid characters. Allowed: a-zA-Z, _, {, }, -. Use sanitizeCosmosPathName() to clean user input.`
+    );
+  }
   return {
     denom,
     conversion: {
       sideA: { amount: '1' },
       sideB: [{ amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: FOREVER }]
     },
-    symbol,
+    // Path-level symbol intentionally LEFT EMPTY. The chain validates
+    // path-level symbols and denom-unit-level symbols against the SAME
+    // `symbolPaths` map per tx (validatePathSymbols in
+    // msg_server_universal_update_collection.go:673). When both are set
+    // to the same string, the second insertion fails with "duplicate
+    // denom unit symbol", even though there's only one alias path with
+    // one denom unit. Skipping the path-level entry (chain check is
+    // gated on `if pathSymbol != ""`) avoids the spurious collision
+    // while keeping the user-facing symbol on the denom unit, which is
+    // what the frontend / wallets actually display.
+    symbol: '',
     denomUnits: [
       {
         decimals: String(decimals),

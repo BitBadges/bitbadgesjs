@@ -16,10 +16,28 @@ export interface ApiResponse<T> {
 }
 
 /**
- * Get the API key from environment variable
+ * Get the API key. Resolution order:
+ *   1. `BITBADGES_API_KEY` environment variable (highest priority — overrides
+ *      everything so CI / one-off shells can swap keys without touching disk).
+ *   2. `~/.bitbadges/config.json` `apiKey` field, populated via
+ *      `bitbadges-cli config set apiKey <key>`. Persistent default for
+ *      day-to-day use.
+ *
+ * Imported lazily so this module stays usable in environments where the
+ * filesystem helper isn't available (e.g. browser bundles via the SDK).
  */
 export function getApiKey(): string | undefined {
-  return process.env.BITBADGES_API_KEY;
+  const envKey = process.env.BITBADGES_API_KEY;
+  if (envKey) return envKey;
+  try {
+    // Lazy require to avoid pulling fs/os into non-Node consumers of the SDK.
+    // The CLI config helper is the source of truth for the on-disk format.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getConfigApiKey } = require('../../cli/utils/config.js');
+    return getConfigApiKey();
+  } catch {
+    return undefined;
+  }
 }
 
 /**
