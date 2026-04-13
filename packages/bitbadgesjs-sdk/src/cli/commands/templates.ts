@@ -1,35 +1,69 @@
 import { Command } from 'commander';
 import { output, readJsonInput } from '../utils/io.js';
 
-export const buildCommand = new Command('build').description('Template builders — generate MsgUniversalUpdateCollection or user approval JSON');
+export const templatesCommand = new Command('templates').description('Deterministic transaction templates — flag-based generators for vaults, NFTs, subscriptions, bounties, and more.');
 
 // ── Output helper ────────────────────────────────────────────────────────────
 
 
-async function emit(data: any, opts: { condensed?: boolean; outputFile?: string; dryRun?: boolean; explain?: boolean; creator?: string; manager?: string }) {
+async function emit(
+  data: any,
+  opts: {
+    condensed?: boolean;
+    outputFile?: string;
+    jsonOnly?: boolean;
+    explain?: boolean;
+    creator?: string;
+    manager?: string;
+  }
+) {
   // Apply --creator / --manager overrides to collection msgs
   if (data.typeUrl?.includes('MsgUniversalUpdateCollection') && data.value) {
     if (opts.creator) data.value.creator = opts.creator;
     if (opts.manager) data.value.manager = opts.manager;
   }
 
-  // --dry-run: run verifyStandardsCompliance and print violations
-  if (opts.dryRun && data.typeUrl?.includes('MsgUniversalUpdateCollection')) {
-    const { verifyStandardsCompliance } = await import('../../core/verify-standards.js');
-    const result = verifyStandardsCompliance({ messages: [data] });
-    if (result.valid) {
-      process.stderr.write(`✓ Passes all standard checks (${result.standardsChecked.length} checks run)\n`);
-    } else {
-      process.stderr.write(`✗ ${result.violations.length} violation(s) found:\n`);
-      for (const v of result.violations) {
-        process.stderr.write(`  [${v.standard}] ${v.field}: ${v.message}\n`);
-        if (v.fix) process.stderr.write(`    Fix: ${v.fix}\n`);
+  const isCollectionTx = data.typeUrl?.includes('MsgUniversalUpdateCollection');
+
+  // Auto-review every produced collection tx. Findings go to stderr so the
+  // stdout stream stays pure JSON and pipes cleanly into `sign`/`broadcast`
+  // consumers. --json-only suppresses the review entirely for pipelines
+  // that don't want the noise.
+  //
+  // We pass `selectedSkills: []` so the reviewer's skill-protocol matchers
+  // don't run the "union of every skill" fan-out that defaults when the
+  // context is unset. Templates know what they're building; the user can
+  // still run `bitbadges-cli builder review <file>` for a full pass over
+  // skills/standards they haven't declared on the collection yet.
+  if (!opts.jsonOnly && isCollectionTx) {
+    try {
+      const { reviewCollection } = await import('../../core/review.js');
+      // reviewCollection wants either a raw collection or a tx body with
+      // messages[]. Templates emit a single Msg, so wrap it.
+      const result = reviewCollection({ messages: [data] }, { selectedSkills: [] });
+      if (result.findings.length === 0) {
+        process.stderr.write(`✓ Review clean — verdict: ${result.summary.verdict}\n`);
+      } else {
+        const byLevel: Record<string, typeof result.findings> = { critical: [], warning: [], info: [] };
+        for (const f of result.findings) byLevel[f.severity].push(f);
+        process.stderr.write('── Review ──\n');
+        for (const level of ['critical', 'warning', 'info'] as const) {
+          for (const f of byLevel[level]) {
+            process.stderr.write(`[${level.toUpperCase()}] ${f.code} — ${f.messageEn}\n`);
+            if (f.recommendationEn) process.stderr.write(`  -> ${f.recommendationEn}\n`);
+          }
+        }
+        process.stderr.write(
+          `Summary: ${result.summary.critical} critical, ${result.summary.warning} warning, ${result.summary.info} info — verdict: ${result.summary.verdict}\n`
+        );
       }
+    } catch (err) {
+      process.stderr.write(`Review skipped: ${err instanceof Error ? err.message : String(err)}\n`);
     }
   }
 
   // --explain: run interpretTransaction and print human-readable summary
-  if (opts.explain && data.typeUrl?.includes('MsgUniversalUpdateCollection')) {
+  if (opts.explain && isCollectionTx) {
     const { interpretTransaction } = await import('../../core/interpret-transaction.js');
     const explanation = interpretTransaction(data.value);
     process.stderr.write('\n── Explanation ──\n' + explanation + '\n');
@@ -45,8 +79,8 @@ const sharedOpts = (cmd: Command) =>
     .option('--condensed', 'Output compact JSON (no whitespace)')
     .option('--output-file <path>', 'Write output to file')
     .option('--json <input>', 'Pass all params as JSON (file, inline, or - for stdin). Overrides individual flags.')
-    .option('--dry-run', 'Validate output against standard checks (violations to stderr)')
-    .option('--explain', 'Print human-readable explanation of the output (to stderr)')
+    .option('--json-only', 'Skip the automatic review — emit pure JSON to stdout with no stderr commentary')
+    .option('--explain', 'Print a human-readable explanation of the output to stderr (in addition to the auto-review)')
     .option('--creator <address>', 'Creator/sender address (bb1... or 0x...)')
     .option('--manager <address>', 'Collection manager address (bb1...)');
 
@@ -55,7 +89,7 @@ const sharedOpts = (cmd: Command) =>
 // ============================================================
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('vault')
     .description('Create an IBC-backed vault token')
     .requiredOption('--backing-coin <symbol>', 'Backing coin symbol (USDC, BADGE, ATOM, OSMO)')
@@ -77,7 +111,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('subscription')
     .description('Create a recurring subscription collection')
     .requiredOption('--interval <duration>', 'Interval: daily, monthly, annually, or shorthand (30d)')
@@ -103,7 +137,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('bounty')
     .description('Create a bounty escrow collection')
     .requiredOption('--amount <n>', 'Bounty amount (display units)')
@@ -119,7 +153,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('crowdfund')
     .description('Create a crowdfunding collection')
     .requiredOption('--goal <n>', 'Funding goal (display units)')
@@ -134,7 +168,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('auction')
     .description('Create an auction collection')
     .option('--bid-deadline <duration>', 'Bidding window', '7d')
@@ -149,7 +183,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('product-catalog')
     .description('Create a product catalog collection')
     .requiredOption('--products <json>', 'Product array JSON: [{"name","price","denom","maxSupply?","burn?"}]')
@@ -163,7 +197,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('prediction-market')
     .description('Create a binary prediction market (YES/NO)')
     .requiredOption('--verifier <address>', 'Market resolver address (bb1...)')
@@ -178,7 +212,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('smart-account')
     .description('Create an IBC-backed smart account')
     .requiredOption('--backing-coin <symbol>', 'Backing coin (USDC, BADGE, ATOM, OSMO)')
@@ -193,7 +227,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('credit-token')
     .description('Create a credit/prepaid token')
     .requiredOption('--payment-denom <symbol>', 'Payment coin (USDC, BADGE)')
@@ -208,7 +242,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('custom-2fa')
     .description('Create a custom 2FA token')
     .requiredOption('--name <name>', 'Token name')
@@ -223,7 +257,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('quests')
     .description('Create a quest/reward collection')
     .requiredOption('--reward <n>', 'Reward per claim (display units)')
@@ -237,7 +271,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('address-list')
     .description('Create an on-chain address list')
     .requiredOption('--name <name>', 'List name')
@@ -254,7 +288,7 @@ sharedOpts(
 // ============================================================
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('intent')
     .description('Create an OTC swap intent (user outgoing approval)')
     .requiredOption('--address <address>', 'Creator address (bb1...)')
@@ -271,7 +305,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('recurring-payment')
     .description('Create a recurring payment approval (user incoming)')
     .requiredOption('--collection-id <id>', 'Subscription collection ID')
@@ -287,7 +321,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('listing')
     .description('Create a marketplace listing (user outgoing approval)')
     .requiredOption('--address <address>', 'Seller address (bb1...)')
@@ -304,7 +338,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('bid')
     .description('Create a marketplace bid (user incoming approval)')
     .requiredOption('--address <address>', 'Bidder address (bb1...)')
@@ -320,7 +354,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('pm-sell-intent')
     .description('Create a prediction market sell intent (user outgoing approval)')
     .requiredOption('--address <address>', 'Seller address (bb1...)')
@@ -337,7 +371,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('pm-buy-intent')
     .description('Create a prediction market buy intent (user incoming approval)')
     .requiredOption('--address <address>', 'Buyer address (bb1...)')
