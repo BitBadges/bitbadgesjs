@@ -271,7 +271,13 @@ async function emit(
             apiUrl: getApiUrl(opts)
           });
           process.stderr.write(
-            '\n' + renderSimulate(result, { stream: process.stderr, title: 'Auto-Simulate' }) + '\n'
+            '\n' +
+              renderSimulate(result, {
+                stream: process.stderr,
+                title: 'Auto-Simulate',
+                events: opts.events ? 'full' : 'count'
+              }) +
+              '\n'
           );
         }
       } catch (err) {

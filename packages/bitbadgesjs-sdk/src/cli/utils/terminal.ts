@@ -446,12 +446,25 @@ export function renderSimulate(
   const badgeChanges: Record<string, Record<string, any>> = net.badgeChanges || {};
   const allAddresses = new Set<string>([...Object.keys(coinChanges), ...Object.keys(badgeChanges)]);
 
+  // Known chain-module addresses — surface them with a human label so a
+  // reader doesn't have to grep the addr set. Covers the Cosmos fee
+  // collector (both bb1 and cosmos prefixes) and our two string-keyed
+  // synthetic buckets populated by calculateNetChanges().
+  const WELL_KNOWN_ADDR_LABELS: Record<string, string> = {
+    bb17xpfvakm2amg962yls6f84z3kell8c5lnytnhv: 'Fee Collector',
+    cosmos17xpfvakm2amg962yls6f84z3kell8c5lserqta: 'Fee Collector',
+    'Network Fee': 'Network Fee',
+    'Protocol Fee': 'Protocol Fee',
+    'IBC Transfer': 'IBC Transfer'
+  };
+
   if (allAddresses.size > 0) {
     lines.push('');
     lines.push(`  ${c('bold', 'Net changes')}`);
     for (const addr of Array.from(allAddresses).sort()) {
-      const shortAddr = addr.length > 30 ? addr.slice(0, 12) + '…' + addr.slice(-6) : addr;
-      lines.push(`    ${c('dim', shortAddr)}`);
+      const label = WELL_KNOWN_ADDR_LABELS[addr];
+      const display = label ? `${label} (${addr})` : addr;
+      lines.push(`    ${c('dim', display)}`);
       const coins = coinChanges[addr] || {};
       for (const [denom, amount] of Object.entries(coins)) {
         const sign = String(amount).startsWith('-') ? c('red', String(amount)) : c('green', '+' + amount);
@@ -488,7 +501,7 @@ export function renderSimulate(
       const id = attrs.approvalId || '?';
       const level = attrs.approvalLevel || '?';
       const collId = attrs.collectionId || '?';
-      const approver = attrs.approverAddress ? ` by ${attrs.approverAddress.slice(0, 12)}…` : '';
+      const approver = attrs.approverAddress ? ` by ${attrs.approverAddress}` : '';
       const actionColor: 'green' | 'yellow' | 'red' =
         action === 'created' ? 'green' : action === 'deleted' ? 'red' : 'yellow';
       lines.push(
@@ -512,13 +525,13 @@ export function renderSimulate(
     lines.push('');
     lines.push(`  ${c('bold', 'Transfers')} ${c('dim', `(${totalXfers})`)}`);
     for (const t of coinXfers) {
-      const from = (t.from || '').slice(0, 12) + (t.from?.length > 12 ? '…' : '');
-      const to = (t.to || '').slice(0, 12) + (t.to?.length > 12 ? '…' : '');
+      const from = t.from || '';
+      const to = t.to || '';
       lines.push(`    ${c('dim', '→')} coin ${c('bold', String(t.amount))} ${t.denom} ${c('dim', `${from} → ${to}`)}`);
     }
     for (const t of badgeXfers) {
-      const from = (t.from || '').slice(0, 12) + (t.from?.length > 12 ? '…' : '');
-      const to = (t.to || '').slice(0, 12) + (t.to?.length > 12 ? '…' : '');
+      const from = t.from || '';
+      const to = t.to || '';
       lines.push(
         `    ${c('dim', '→')} badge ${c('bold', String(t.amount))} of collection ${t.collectionId} ${c('dim', `${from} → ${to}`)}`
       );

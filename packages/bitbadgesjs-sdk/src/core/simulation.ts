@@ -372,15 +372,25 @@ export function calculateNetChanges(
     coinChanges.get('Network Fee')!.set(feeDenom, coinChanges.get('Network Fee')!.get(feeDenom)! + feeAmount);
   }
 
-  // Known fee collector addresses — transfers to these are already represented by "Network Fee" above
+  // Known fee collector addresses. We only filter transfers TO these when
+  // the caller explicitly passed `fee` + `signerAddress` above — in that
+  // case the fee is already represented as "Network Fee" and we'd
+  // double-count by also aggregating the raw fee-collector transfer.
+  // When no fee arg is provided (the standalone/auto simulate path), the
+  // chain event IS the only signal we have, so include it like any other
+  // transfer — otherwise `coinChanges` ends up empty and the UI prints
+  // "No net balance changes detected." while the Transfers section below
+  // shows the fee transfer. That contradiction was bug #2.
   const FEE_COLLECTOR_ADDRESSES = new Set([
     'bb17xpfvakm2amg962yls6f84z3kell8c5lnytnhv',
     'cosmos17xpfvakm2amg962yls6f84z3kell8c5lserqta'
   ]);
+  const shouldFilterFeeCollector = Boolean(fee && signerAddress);
 
-  // Aggregate coin transfers (skip fee collector since it's already in "Network Fee")
+  // Aggregate coin transfers (skip fee collector only when fee was
+  // explicitly accounted for above).
   for (const event of parsed.coinTransferEvents) {
-    if (FEE_COLLECTOR_ADDRESSES.has(event.to)) continue;
+    if (shouldFilterFeeCollector && FEE_COLLECTOR_ADDRESSES.has(event.to)) continue;
 
     const amount = event.amount;
     const denom = event.denom;

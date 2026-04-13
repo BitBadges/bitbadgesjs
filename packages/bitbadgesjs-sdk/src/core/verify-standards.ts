@@ -1415,8 +1415,31 @@ function verifyApprovalTrackingFields(value: any): StandardViolation[] {
  * @returns VerificationResult with violations and checked standards
  */
 export function verifyStandardsCompliance(transaction: any): VerificationResult {
-  const msg = transaction?.messages?.[0] || transaction?.msgs?.[0];
-  const value = msg?.value || msg;
+  // Accept both shapes:
+  //   1. A tx wrapper       — `{ messages: [{ typeUrl, value: {...} }] }`
+  //   2. A bare msg          — `{ typeUrl, value: {...} }`
+  //   3. A bare collection value — `{ creator, collectionApprovals, ... }`
+  // reviewCollection passes #3 through after extractCollectionValue strips
+  // the wrapper, so we have to handle all three or it spuriously emits
+  // "Transaction has no messages" on every collection-value input.
+  let value: any = null;
+  if (transaction && typeof transaction === 'object') {
+    const msg = transaction.messages?.[0] || transaction.msgs?.[0];
+    if (msg) {
+      value = msg.value || msg;
+    } else if (transaction.value && typeof transaction.value === 'object') {
+      // Bare msg: { typeUrl, value }
+      value = transaction.value;
+    } else if (
+      transaction.collectionApprovals !== undefined ||
+      transaction.standards !== undefined ||
+      transaction.creator !== undefined
+    ) {
+      // Bare collection value — has the fields a CollectionValue would
+      // have (collectionApprovals / standards / creator).
+      value = transaction;
+    }
+  }
   if (!value) {
     return {
       valid: false,

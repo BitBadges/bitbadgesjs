@@ -14,6 +14,13 @@ export interface Finding {
   category: string;
   params?: Record<string, string | number | boolean>;
   messageEn: string;
+  /**
+   * Optional second-line detail. Frontend adapters render this in the
+   * `detail` slot below `messageEn`. Audit findings populate it from the
+   * legacy `f.detail` field; UX checks generally leave it empty (their
+   * `messageEn` is already self-contained).
+   */
+  detailEn?: string;
   recommendationEn?: string;
   /**
    * Optional stable key into the frontend locale file. When set, frontend

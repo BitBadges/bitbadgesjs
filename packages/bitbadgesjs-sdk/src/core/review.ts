@@ -68,7 +68,13 @@ export function fromAuditFinding(f: AuditFinding): Finding {
     severity: mapAuditSeverity(f.severity),
     source: 'audit',
     category: f.category,
-    messageEn: f.title + (f.detail ? ' — ' + f.detail : ''),
+    // Title and detail kept SEPARATE — the frontend adapter used to
+    // render `messageEn` in both the title and detail slots, which
+    // produced visible duplicate lines when the legacy joined-format
+    // ("title — detail") was returned. Splitting them lets the adapter
+    // populate the title and detail slots independently.
+    messageEn: f.title,
+    detailEn: f.detail,
     recommendationEn: f.recommendation
   };
 }
