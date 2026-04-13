@@ -567,6 +567,60 @@ export function validateApprovalCriteria(approvals: unknown[], path: string, iss
       }
     }
 
+    // --- approvalAmounts / maxNumTransfers: complete object required ---
+    // Proto defines these as fixed-shape messages. Missing sibling fields on a partially-
+    // populated object are a shape-error — the SDK constructor will produce undefined values
+    // that crash toProto(). Throw clearly so the AI fixes the shape rather than silently
+    // coercing. Also enforce that any non-zero limit must have an amountTrackerId so
+    // independent approvals don't share a tracker and cross-contaminate.
+    const AA_FIELDS = [
+      'overallApprovalAmount',
+      'perToAddressApprovalAmount',
+      'perFromAddressApprovalAmount',
+      'perInitiatedByAddressApprovalAmount'
+    ];
+    const MNT_FIELDS = [
+      'overallMaxNumTransfers',
+      'perToAddressMaxNumTransfers',
+      'perFromAddressMaxNumTransfers',
+      'perInitiatedByAddressMaxNumTransfers'
+    ];
+    const checkCompleteLimit = (
+      obj: Record<string, any> | undefined,
+      fields: string[],
+      label: string,
+      subPath: string
+    ) => {
+      if (!obj) return;
+      const missing = fields.filter((f) => !(f in obj));
+      if (missing.length > 0 && missing.length < fields.length) {
+        issues.push({
+          severity: 'error',
+          message: `${label} is missing sibling fields [${missing.join(', ')}]. The proto expects a complete object with all ${fields.length} amount fields (use "0" for unbounded). Partial objects produce undefined values and crash the SDK constructor.`,
+          path: `${approvalPath}.approvalCriteria.${subPath}`
+        });
+      }
+      // resetTimeIntervals must exist as an object if the parent is set
+      if (!obj.resetTimeIntervals || typeof obj.resetTimeIntervals !== 'object') {
+        issues.push({
+          severity: 'error',
+          message: `${label}.resetTimeIntervals is required. Use { startTime: "0", intervalLength: "0" } for no reset interval.`,
+          path: `${approvalPath}.approvalCriteria.${subPath}.resetTimeIntervals`
+        });
+      }
+      // amountTrackerId must be set when any non-zero limit is configured (prevents cross-contamination)
+      const hasLimit = fields.some((f) => obj[f] && String(obj[f]) !== '0');
+      if (hasLimit && (!obj.amountTrackerId || String(obj.amountTrackerId).trim() === '')) {
+        issues.push({
+          severity: 'error',
+          message: `${label} has a non-zero limit but amountTrackerId is empty. Set amountTrackerId to a unique string (typically the approvalId) so this tracker does not collide with other approvals.`,
+          path: `${approvalPath}.approvalCriteria.${subPath}.amountTrackerId`
+        });
+      }
+    };
+    checkCompleteLimit(criteria.approvalAmounts as Record<string, any> | undefined, AA_FIELDS, 'approvalAmounts', 'approvalAmounts');
+    checkCompleteLimit(criteria.maxNumTransfers as Record<string, any> | undefined, MNT_FIELDS, 'maxNumTransfers', 'maxNumTransfers');
+
     // predeterminedBalances + approvalAmounts — unusual combination warning
     const predet = criteria.predeterminedBalances as Record<string, any> | undefined;
     const amounts = criteria.approvalAmounts as Record<string, any> | undefined;
@@ -665,16 +719,77 @@ export function validateMsgConstructorFields(value: Record<string, unknown>, bas
     // Detailed field checks are handled by validatePermissions()
   }
 
-  // --- collectionMetadata: must be an object with uri ---
-  if (value.updateCollectionMetadata === true) {
+  // --- collectionMetadata: must be an object (not an array) with uri + customData ---
+  // Proto CollectionMetadata has only { uri, customData } — it is NOT a repeated field.
+  // Claude occasionally hallucinates an array (confusing it with tokenMetadata[]); reject loudly.
+  if (Array.isArray(value.collectionMetadata)) {
+    issues.push({
+      severity: 'error',
+      message:
+        'collectionMetadata must be an object { uri, customData }, not an array. You may be confusing it with tokenMetadata (which IS an array of { uri, customData, tokenIds }).',
+      path: `${basePath}.collectionMetadata`
+    });
+  } else if (value.updateCollectionMetadata === true) {
     if (!value.collectionMetadata || typeof value.collectionMetadata !== 'object') {
       issues.push({
         severity: 'error',
         message: 'collectionMetadata must be an object when updateCollectionMetadata is true.',
         path: `${basePath}.collectionMetadata`
       });
+    } else {
+      const cm = value.collectionMetadata as Record<string, unknown>;
+      if ('image' in cm || 'name' in cm || 'description' in cm) {
+        issues.push({
+          severity: 'error',
+          message:
+            'collectionMetadata only has { uri, customData } fields per the proto spec. Fields like "image", "name", and "description" belong inside the off-chain JSON referenced by uri (or in metadataPlaceholders), not directly on collectionMetadata.',
+          path: `${basePath}.collectionMetadata`
+        });
+      }
     }
   }
+
+  // --- aliasPathsToAdd / cosmosCoinWrapperPathsToAdd: PathMetadata has { uri, customData } ONLY ---
+  // The proto PathMetadata message has no image/name/description. Claude hallucinates these at the
+  // wrong nesting level (they belong inside the off-chain JSON at `uri`). Throw clearly.
+  const checkPathMetadata = (paths: unknown, parentField: string) => {
+    if (!Array.isArray(paths)) return;
+    (paths as unknown[]).forEach((p, i) => {
+      if (!p || typeof p !== 'object') return;
+      const path = p as Record<string, unknown>;
+      const md = path.metadata as Record<string, unknown> | undefined;
+      if (md && typeof md === 'object') {
+        for (const bad of ['image', 'name', 'description']) {
+          if (bad in md) {
+            issues.push({
+              severity: 'error',
+              message: `${parentField}[${i}].metadata.${bad} is not a valid field. PathMetadata only has { uri, customData } — put "${bad}" inside the off-chain JSON referenced by metadata.uri.`,
+              path: `${basePath}.${parentField}[${i}].metadata.${bad}`
+            });
+          }
+        }
+      }
+      if (Array.isArray(path.denomUnits)) {
+        (path.denomUnits as unknown[]).forEach((du, duIdx) => {
+          if (!du || typeof du !== 'object') return;
+          const duMd = (du as Record<string, unknown>).metadata as Record<string, unknown> | undefined;
+          if (duMd && typeof duMd === 'object') {
+            for (const bad of ['image', 'name', 'description']) {
+              if (bad in duMd) {
+                issues.push({
+                  severity: 'error',
+                  message: `${parentField}[${i}].denomUnits[${duIdx}].metadata.${bad} is not a valid field. PathMetadata only has { uri, customData }.`,
+                  path: `${basePath}.${parentField}[${i}].denomUnits[${duIdx}].metadata.${bad}`
+                });
+              }
+            }
+          }
+        });
+      }
+    });
+  };
+  checkPathMetadata(value.aliasPathsToAdd, 'aliasPathsToAdd');
+  checkPathMetadata(value.cosmosCoinWrapperPathsToAdd, 'cosmosCoinWrapperPathsToAdd');
 
   // --- defaultBalances: full structure check ---
   if (value.defaultBalances && typeof value.defaultBalances === 'object') {
