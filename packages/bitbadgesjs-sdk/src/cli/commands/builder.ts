@@ -23,7 +23,7 @@ import {
   resourceRegistry,
   listResources,
   readResource
-} from '../../mcp/tools/registry.js';
+} from '../../builder/tools/registry.js';
 
 const SESSIONS_DIR = path.join(os.homedir(), '.bitbadges', 'sessions');
 
@@ -79,13 +79,13 @@ function resolveSessionId(parsedArgs: any, sessionFlag: string | undefined): str
   return undefined;
 }
 
-export const mcpCommand = new Command('mcp').description(
-  'Invoke bitbadges-builder-mcp tools directly (no MCP protocol / no subprocess).'
+export const builderCommand = new Command('builder').description(
+  'Invoke BitBadges Builder tools directly (no MCP protocol / no subprocess).'
 );
 
 // ── mcp list ─────────────────────────────────────────────────────────────────
 
-mcpCommand
+builderCommand
   .command('list')
   .description('List every MCP tool with its schema as JSON.')
   .option('--names', 'Print only tool names, one per line')
@@ -101,7 +101,7 @@ mcpCommand
 
 // ── mcp call <tool> ──────────────────────────────────────────────────────────
 
-mcpCommand
+builderCommand
   .command('call <tool>')
   .description('Call an MCP tool by name. Args come from --args (JSON) or --args-file.')
   .option('--args <json>', 'Tool arguments as a JSON string')
@@ -169,7 +169,7 @@ mcpCommand
 
 // ── mcp session ──────────────────────────────────────────────────────────────
 
-const sessionCommand = mcpCommand
+const sessionCommand = builderCommand
   .command('session')
   .description('Inspect, dump, or reset persisted MCP builder sessions.');
 
@@ -212,7 +212,7 @@ sessionCommand
 
 // ── mcp resources ────────────────────────────────────────────────────────────
 
-const resourcesCommand = mcpCommand
+const resourcesCommand = builderCommand
   .command('resources')
   .description('Read static MCP resources (token registry, recipes, skills, docs, error patterns, ...).');
 

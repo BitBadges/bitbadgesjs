@@ -30,43 +30,43 @@
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
     },
-    "./mcp": {
-      "import": "./dist/esm/mcp/index.js",
-      "require": "./dist/cjs/mcp/index.js"
+    "./builder": {
+      "import": "./dist/esm/builder/index.js",
+      "require": "./dist/cjs/builder/index.js"
     },
-    "./mcp/registry": {
-      "import": "./dist/esm/mcp/tools/registry.js",
-      "require": "./dist/cjs/mcp/tools/registry.js"
+    "./builder/registry": {
+      "import": "./dist/esm/builder/tools/registry.js",
+      "require": "./dist/cjs/builder/tools/registry.js"
     },
-    "./mcp/tools": {
-      "import": "./dist/esm/mcp/tools/index.js",
-      "require": "./dist/cjs/mcp/tools/index.js"
+    "./builder/tools": {
+      "import": "./dist/esm/builder/tools/index.js",
+      "require": "./dist/cjs/builder/tools/index.js"
     },
-    "./mcp/resources": {
-      "import": "./dist/esm/mcp/resources/index.js",
-      "require": "./dist/cjs/mcp/resources/index.js"
+    "./builder/resources": {
+      "import": "./dist/esm/builder/resources/index.js",
+      "require": "./dist/cjs/builder/resources/index.js"
     },
-    "./mcp/skills": {
-      "import": "./dist/esm/mcp/resources/skillInstructions.js",
-      "require": "./dist/cjs/mcp/resources/skillInstructions.js"
+    "./builder/skills": {
+      "import": "./dist/esm/builder/resources/skillInstructions.js",
+      "require": "./dist/cjs/builder/resources/skillInstructions.js"
     },
-    "./mcp/session": {
-      "import": "./dist/esm/mcp/session/sessionState.js",
-      "require": "./dist/cjs/mcp/session/sessionState.js"
+    "./builder/session": {
+      "import": "./dist/esm/builder/session/sessionState.js",
+      "require": "./dist/cjs/builder/session/sessionState.js"
     }
   },
   "bin": {
     "bitbadges-cli": "./dist/cjs/cli/index.js",
-    "bitbadges-builder-mcp": "./dist/cjs/mcp/index.js"
+    "bitbadges-builder": "./dist/cjs/builder/index.js"
   },
   "typesVersions": {
     "*": {
-      "mcp": ["./dist/esm/mcp/index.d.ts"],
-      "mcp/registry": ["./dist/esm/mcp/tools/registry.d.ts"],
-      "mcp/tools": ["./dist/esm/mcp/tools/index.d.ts"],
-      "mcp/resources": ["./dist/esm/mcp/resources/index.d.ts"],
-      "mcp/skills": ["./dist/esm/mcp/resources/skillInstructions.d.ts"],
-      "mcp/session": ["./dist/esm/mcp/session/sessionState.d.ts"]
+      "builder": ["./dist/esm/builder/index.d.ts"],
+      "builder/registry": ["./dist/esm/builder/tools/registry.d.ts"],
+      "builder/tools": ["./dist/esm/builder/tools/index.d.ts"],
+      "builder/resources": ["./dist/esm/builder/resources/index.d.ts"],
+      "builder/skills": ["./dist/esm/builder/resources/skillInstructions.d.ts"],
+      "builder/session": ["./dist/esm/builder/session/sessionState.d.ts"]
     }
   },
   "files": [
