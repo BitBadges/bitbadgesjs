@@ -116,11 +116,27 @@ export function resolveNetwork(options: NetworkOptions): NetworkName {
 /**
  * Resolve the API URL from CLI flags and environment variables.
  *
- * Priority: --url > --network > --local > --testnet > BITBADGES_API_URL env > config > default production URL.
+ * Priority order (top wins):
+ *   1. `--url <url>` — explicit CLI override, applies regardless of network.
+ *   2. `BITBADGES_API_URL` env var — applies regardless of network.
+ *      Setting this lets you point the CLI at a private proxy / staging
+ *      indexer without having to invent a new `--network` value.
+ *   3. `--network local` → `http://localhost:3001`
+ *   4. `--network testnet` → `https://api.testnet.bitbadges.io`
+ *   5. Config file (`~/.bitbadges/config.json` `url` field).
+ *   6. Default production URL `https://api.bitbadges.io`.
+ *
+ * Note: the env var was previously only consulted for the mainnet branch,
+ * which silently ignored `BITBADGES_API_URL=http://my-proxy` when the
+ * caller passed `--network local`. The env var is now honored at all
+ * networks so a single shell-level export reaches every command.
  */
 export function getApiUrl(options: NetworkOptions): string {
   if (options.url) {
     return options.url;
+  }
+  if (process.env.BITBADGES_API_URL) {
+    return process.env.BITBADGES_API_URL;
   }
   const network = resolveNetwork(options);
   if (network === 'local') {
@@ -128,10 +144,6 @@ export function getApiUrl(options: NetworkOptions): string {
   }
   if (network === 'testnet') {
     return 'https://api.testnet.bitbadges.io';
-  }
-  // mainnet — env wins over config which wins over default.
-  if (process.env.BITBADGES_API_URL) {
-    return process.env.BITBADGES_API_URL;
   }
   const configUrl = getConfigBaseUrl();
   if (configUrl) {

@@ -59,6 +59,24 @@ describe('isCollectionMsg', () => {
     expect(isCollectionMsg({ typeUrl: 'tokenization.MsgCreateCollection' })).toBe(true);
     expect(isCollectionMsg({ typeUrl: 'tokenization.MsgUpdateCollection' })).toBe(true);
   });
+
+  it('REJECTS foreign-module typeUrls that share the suffix (security regression)', () => {
+    // Caught in round 4 sweep. Without the namespace check, ANY module
+    // with a MsgCreateCollection / MsgUpdateCollection / MsgUniversalUpdateCollection
+    // would silently get rewritten as a tokenization message.
+    expect(isCollectionMsg({ typeUrl: '/myext.MsgCreateCollection' })).toBe(false);
+    expect(isCollectionMsg({ typeUrl: '/somethingelse.MsgUpdateCollection' })).toBe(false);
+    expect(isCollectionMsg({ typeUrl: '/totally.fake.MsgUniversalUpdateCollection' })).toBe(false);
+  });
+
+  it('trims whitespace before matching (stdin-pipe regression)', () => {
+    // Caught in round 4 sweep. JSON files with trailing newlines or
+    // stdin pipes leave whitespace on string fields; without trimming
+    // the whole coercion path was silently bypassed.
+    expect(isCollectionMsg({ typeUrl: ' /tokenization.MsgCreateCollection ' })).toBe(true);
+    expect(isCollectionMsg({ typeUrl: '/tokenization.MsgCreateCollection\n' })).toBe(true);
+    expect(isCollectionMsg({ typeUrl: '\t/tokenization.MsgUpdateCollection' })).toBe(true);
+  });
 });
 
 describe('normalizeToCreateOrUpdate', () => {
@@ -148,6 +166,45 @@ describe('normalizeToCreateOrUpdate', () => {
     expect(normalizeToCreateOrUpdate(null)).toBe(null);
     expect(normalizeToCreateOrUpdate(undefined)).toBe(undefined);
     expect(normalizeToCreateOrUpdate('string' as any)).toBe('string');
+  });
+
+  it('treats empty-string and whitespace collectionId as new (Create)', () => {
+    // Round 4 regression: '' and '  0  ' used to fall into the Update
+    // branch, producing a useless `collectionId: ''` that the chain
+    // would reject with a confusing error.
+    const base = {
+      typeUrl: UNIVERSAL,
+      value: { creator: 'bb1abc', collectionId: '', defaultBalances: { x: 1 } }
+    };
+    expect(normalizeToCreateOrUpdate(base).typeUrl).toBe(CREATE);
+
+    const ws = {
+      typeUrl: UNIVERSAL,
+      value: { creator: 'bb1abc', collectionId: '   0   ', defaultBalances: { x: 1 } }
+    };
+    expect(normalizeToCreateOrUpdate(ws).typeUrl).toBe(CREATE);
+  });
+
+  it('coerces numeric collectionId to string and routes correctly', () => {
+    // Round 4 regression: number 0 was treated as Update, number 5 was
+    // emitted as a number (downstream proto encoders expect strings).
+    const newColl = { typeUrl: UNIVERSAL, value: { creator: 'bb1abc', collectionId: 0, defaultBalances: { x: 1 } } };
+    expect(normalizeToCreateOrUpdate(newColl).typeUrl).toBe(CREATE);
+
+    const existing = { typeUrl: UNIVERSAL, value: { creator: 'bb1abc', collectionId: 5 } };
+    const out = normalizeToCreateOrUpdate(existing);
+    expect(out.typeUrl).toBe(UPDATE);
+    expect(out.value.collectionId).toBe('5');
+    expect(typeof out.value.collectionId).toBe('string');
+  });
+
+  it('REJECTS foreign-module Universal typeUrls (security regression)', () => {
+    const foreign = {
+      typeUrl: '/myext.MsgUniversalUpdateCollection',
+      value: { creator: 'bb1abc', collectionId: '0' }
+    };
+    // Should pass through unchanged (not normalize foreign messages).
+    expect(normalizeToCreateOrUpdate(foreign).typeUrl).toBe('/myext.MsgUniversalUpdateCollection');
   });
 });
 

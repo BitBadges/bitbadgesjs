@@ -249,7 +249,15 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
     // (a missing repeated field is an empty list).
     if (arr === null || arr === undefined) return new UintRangeArray();
     const wrappedArr = Array.isArray(arr) ? arr : [arr];
-    return new UintRangeArray(...wrappedArr.map((i) => new UintRange(i)));
+    // Element-level defense: filter out null/undefined and reject
+    // non-object elements (numbers, strings, etc.) before constructing
+    // UintRange. Without this, `From([null])` crashes inside
+    // `new UintRange(null)` reading `.start` on null. Same defensive
+    // posture as the top-level guard above; just at the element level.
+    const safeElements = wrappedArr.filter(
+      (i): i is iUintRange<T> => i !== null && i !== undefined && typeof i === 'object'
+    );
+    return new UintRangeArray(...safeElements.map((i) => new UintRange(i)));
   }
 
   /**

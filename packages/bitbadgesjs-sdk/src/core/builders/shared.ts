@@ -524,6 +524,17 @@ export function buildAliasPath(denom: string, symbol: string, decimals: number, 
       `buildAliasPath: symbol "${symbol}" contains invalid characters. Allowed: a-zA-Z, _, {, }, -. Use sanitizeCosmosPathName() to clean user input.`
     );
   }
+  // Chain rule: denom and symbol can't be the same string because the
+  // chain validates them against a SHARED `symbolPaths` map per tx
+  // (msg_server_universal_update_collection.go validatePathSymbols).
+  // We already work around this by leaving the path-level symbol empty
+  // below; this guard catches any caller that might pass the same
+  // string for both fields explicitly.
+  if (denom === symbol) {
+    throw new Error(
+      `buildAliasPath: denom and symbol cannot be identical ("${denom}"). The chain rejects this with "duplicate denom unit symbol" because both fields are validated against the same per-tx map. Use different strings (e.g. denom="usymbol", symbol="SYMBOL").`
+    );
+  }
   return {
     denom,
     conversion: {

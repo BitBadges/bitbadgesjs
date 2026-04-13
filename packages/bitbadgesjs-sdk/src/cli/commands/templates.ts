@@ -451,7 +451,7 @@ sharedOpts(
     .command('prediction-market')
     .description('Create a binary prediction market (YES/NO)')
     .requiredOption('--verifier <address>', 'Market resolver address (bb1...)')
-    .option('--denom <symbol>', 'Payment coin (default: USDC)', 'USDC')
+    .option('--denom <symbol>', 'Payment coin', 'USDC')
     .option('--name <name>', 'Market question', 'Prediction Market')
     .option('--description <text>', 'Market details')
     .option('--image <url>', 'Market image URL')

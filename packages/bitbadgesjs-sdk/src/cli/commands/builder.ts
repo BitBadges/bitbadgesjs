@@ -82,9 +82,13 @@ function resolveSessionId(parsedArgs: any, sessionFlag: string | undefined): str
   return undefined;
 }
 
-export const builderCommand = new Command('builder').description(
-  'BitBadges Builder — deterministic templates, fine-grained tools, docs resources, and session state for composing token transactions.'
-);
+export const builderCommand = new Command('builder')
+  .description(
+    'BitBadges Builder — deterministic templates, fine-grained tools, docs resources, and session state for composing token transactions.'
+  )
+  // Print usage on `builder typo-not-a-real-command` instead of a bare
+  // commander error. Helps users discover the right subcommand name.
+  .showHelpAfterError('(see `bitbadges-cli builder --help` for the full subcommand list)');
 
 // ── builder templates ──────────────────────────────────────────────────────
 //
@@ -334,7 +338,18 @@ addNetworkOptions(
         collectMetadataPlaceholders
       } = await import('../utils/terminal.js');
 
-      const raw = readJsonInput(input);
+      // Defensive parse — `readJsonInput` throws on missing files and bad
+      // JSON; without a try/catch the whole command dumps a Node stack.
+      let raw: any;
+      try {
+        raw = readJsonInput(input);
+      } catch (err: any) {
+        process.stderr.write(
+          `Failed to parse input JSON: ${err?.message || err}\n` +
+            `Accepts: file path, @file.json, inline JSON, or - for stdin.\n`
+        );
+        process.exit(2);
+      }
       const wrapped = ensureTxWrapper(raw);
 
       // Locate the first collection message (Create / Update / Universal)
@@ -460,9 +475,13 @@ interface DoctorCheck {
 addNetworkOptions(
   builderCommand
     .command('doctor')
-    .description('Environment + session health check. Verifies Node/SDK/config/API key/MCP bin/session integrity.')
+    .description('Environment + session health check. Verifies Node/SDK/config/API key/MCP bin/session integrity. Pass --with-preview to also probe the indexer\'s shareable-preview upload + fetch roundtrip.')
     .option('--json', 'Output the full DoctorReport as JSON')
-).action(async (opts: { json?: boolean; network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string }) => {
+    .option(
+      '--with-preview',
+      'Add a preview-roundtrip probe: builds a minimal tx, POSTs it to /api/v0/builder/preview, GETs it back by code, and asserts the round trip is byte-equivalent. Catches indexer / Redis / preview-route regressions.'
+    )
+).action(async (opts: { json?: boolean; withPreview?: boolean; network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string }) => {
     const checks: DoctorCheck[] = [];
 
     // 1. Node version
@@ -663,6 +682,90 @@ addNetworkOptions(
       }
     } catch (err) {
       checks.push({ name: 'Sessions', status: 'fail', detail: (err as Error).message });
+    }
+
+    // 7. Optional preview-roundtrip probe (--with-preview).
+    //
+    // Builds a minimal MsgCreateCollection wrapper, POSTs it to
+    // /api/v0/builder/preview, GETs it back by code, and asserts the
+    // round trip preserves the typeUrl + sidecar shape. Catches
+    // regressions in the preview route, Redis storage, JSON parsing,
+    // and the SDK's preview command path itself in one shot. Skipped
+    // by default to keep `doctor` zero-side-effect; opt-in via
+    // --with-preview when you want a deeper local-network probe.
+    if (opts.withPreview) {
+      try {
+        const { getApiUrl: gAU, resolveNetwork: rN } = await import('../utils/io.js');
+        const network = rN(opts);
+        const baseUrl = gAU(opts);
+        const probeTx = {
+          transaction: {
+            messages: [
+              {
+                typeUrl: '/tokenization.MsgCreateCollection',
+                value: {
+                  creator: 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpdguex7',
+                  validTokenIds: [],
+                  standards: [],
+                  collectionApprovals: [],
+                  tokenMetadata: [],
+                  aliasPathsToAdd: [],
+                  cosmosCoinWrapperPathsToAdd: [],
+                  mintEscrowCoinsToTransfer: []
+                }
+              }
+            ]
+          },
+          metadataPlaceholders: {
+            'ipfs://METADATA_DOCTOR_PROBE': { name: 'doctor probe', description: '', image: '' }
+          }
+        };
+        const postRes = await fetch(`${baseUrl}/api/v0/builder/preview`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(probeTx)
+        });
+        if (!postRes.ok) {
+          checks.push({
+            name: `Preview roundtrip (${network})`,
+            status: 'fail',
+            detail: `POST /api/v0/builder/preview returned HTTP ${postRes.status}`
+          });
+        } else {
+          const { code } = (await postRes.json()) as { code: string };
+          const getRes = await fetch(`${baseUrl}/api/v0/builder/preview?code=${encodeURIComponent(code)}`);
+          if (!getRes.ok) {
+            checks.push({
+              name: `Preview roundtrip (${network})`,
+              status: 'fail',
+              detail: `GET /api/v0/builder/preview returned HTTP ${getRes.status} for the code we just uploaded (${code})`
+            });
+          } else {
+            const fetched = (await getRes.json()) as any;
+            const echoedTypeUrl = fetched?.transaction?.messages?.[0]?.typeUrl;
+            const sidecarKey = fetched?.metadataPlaceholders?.['ipfs://METADATA_DOCTOR_PROBE']?.name;
+            if (echoedTypeUrl !== '/tokenization.MsgCreateCollection' || sidecarKey !== 'doctor probe') {
+              checks.push({
+                name: `Preview roundtrip (${network})`,
+                status: 'fail',
+                detail: `Round trip mutated the payload — got typeUrl=${echoedTypeUrl}, sidecarName=${sidecarKey}`
+              });
+            } else {
+              checks.push({
+                name: `Preview roundtrip (${network})`,
+                status: 'pass',
+                detail: `${baseUrl}/api/v0/builder/preview · uploaded ${code} · fetched and verified`
+              });
+            }
+          }
+        }
+      } catch (err: any) {
+        checks.push({
+          name: 'Preview roundtrip',
+          status: 'fail',
+          detail: `network error: ${err?.message || err}`
+        });
+      }
     }
 
     // Render
@@ -1052,11 +1155,16 @@ addNetworkOptions(
 // and prints each issue with its path and level. Useful as a fast "is this
 // JSON even shaped right" check before running the fuller review.
 
-builderCommand
-  .command('validate <input>')
-  .description(
-    'Run static validation over a transaction JSON (structure, uint ranges, approval criteria, …). Input: JSON file, inline JSON, or - for stdin.'
-  )
+// validate is OFFLINE — no API calls. We still accept (and ignore) the
+// network flags via addNetworkOptions so users can pipe the same command
+// through any wrapper script without "unknown option '--local'" errors.
+addNetworkOptions(
+  builderCommand
+    .command('validate <input>')
+    .description(
+      'Run static validation over a transaction JSON (structure, uint ranges, approval criteria, …). Offline — no API calls. Input: JSON file, inline JSON, or - for stdin. Exits 1 on validation failure, 2 on parse failure.'
+    )
+)
   .option('--json', 'Output the full ValidationResult as JSON')
   .option('--output-file <path>', 'Write output to file instead of stdout')
   .action(async (input: string, opts: { json?: boolean; outputFile?: string }) => {
@@ -1160,7 +1268,7 @@ const sessionCommand = builderCommand
 
 sessionCommand
   .command('list')
-  .description(`List persisted session ids under ${DEFAULT_SESSIONS_DIR}.`)
+  .description('List persisted session ids under ~/.bitbadges/sessions/.')
   .action(() => {
     for (const id of listSessionFilesOnDisk()) {
       process.stdout.write(id + '\n');
