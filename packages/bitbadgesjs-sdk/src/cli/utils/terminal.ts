@@ -151,7 +151,7 @@ export function renderJsonBoundary(stream: NodeJS.WriteStream): string {
 }
 
 /** Wrap plain text to a column width, preserving word boundaries. */
-function wrap(text: string, width: number): string[] {
+export function wrap(text: string, width: number): string[] {
   if (width <= 10) return [text];
   const words = text.split(/\s+/);
   const out: string[] = [];
@@ -170,4 +170,350 @@ function wrap(text: string, width: number): string[] {
   }
   if (line.length) out.push(line);
   return out;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Validate / Metadata renderers — shared between templates auto-review and
+// the standalone `builder verify` command so output formatting stays in
+// lockstep across the build → verify flow.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface ValidationIssueLike {
+  severity: 'error' | 'warning';
+  path?: string;
+  message: string;
+}
+
+export interface ValidationResultLike {
+  valid: boolean;
+  issues: ValidationIssueLike[];
+}
+
+/**
+ * Render a ValidationResult for stderr/stdout. Title defaults to "Validate"
+ * but `emit()` in templates passes "Auto-Validate" to distinguish.
+ */
+export function renderValidate(
+  result: ValidationResultLike,
+  opts?: { stream?: NodeJS.WriteStream; title?: string }
+): string {
+  const stream = opts?.stream || process.stderr;
+  const { c } = makeColor(stream);
+  const width = Math.min(80, (stream as any).columns || 80);
+  const errors = result.issues.filter((i) => i.severity === 'error');
+  const warnings = result.issues.filter((i) => i.severity === 'warning');
+
+  const lines: string[] = [];
+  lines.push(c('gray', rule('━', width, opts?.title || 'Validate')));
+
+  if (result.issues.length === 0) {
+    lines.push('');
+    lines.push(`  ${c('green', '✓')} ${c('bold', 'Clean')} — no structural issues`);
+  } else {
+    lines.push('');
+    for (const issue of result.issues) {
+      const lc = issue.severity === 'error' ? 'red' : 'yellow';
+      const badge = issue.severity === 'error' ? '■ ERROR  ' : '▲ WARNING';
+      lines.push(`  ${c(lc, c('bold', badge))}  ${c('dim', issue.path || '(root)')}`);
+      for (const t of wrap(issue.message, width - 6)) {
+        lines.push(`      ${t}`);
+      }
+    }
+    lines.push('');
+    lines.push(
+      `  ${c('bold', 'Summary')}  ${
+        errors.length > 0 ? c('red', `${errors.length} error`) : c('gray', '0 error')
+      }  ·  ${warnings.length > 0 ? c('yellow', `${warnings.length} warning`) : c('gray', '0 warning')}`
+    );
+  }
+  lines.push(c('gray', rule('━', width)));
+  return lines.join('\n');
+}
+
+export interface MetadataPlaceholderEntry {
+  uri: string;
+  kind: string;
+  location: string;
+  fields: string[];
+}
+
+/**
+ * Walk a transaction body (or full tx with `messages: [...]`) and collect
+ * every `ipfs://METADATA_*` placeholder URI, tagged with what it is and
+ * where it lives. Used by both the templates auto-review and the
+ * standalone `builder verify` command.
+ *
+ * Accepts either a single Msg (`{typeUrl, value: {...}}`), the unwrapped
+ * `value`, or a tx body with `messages[]` — pulls out the first
+ * MsgUniversalUpdateCollection it finds.
+ */
+export function collectMetadataPlaceholders(input: any): MetadataPlaceholderEntry[] {
+  const out: MetadataPlaceholderEntry[] = [];
+  const seen = new Set<string>();
+
+  // Locate the collection value.
+  let value: any = null;
+  if (Array.isArray(input?.messages)) {
+    const msg = input.messages.find((m: any) => m?.typeUrl?.includes('MsgUniversalUpdateCollection')) || input.messages[0];
+    value = msg?.value || msg;
+  } else if (input?.value) {
+    value = input.value;
+  } else {
+    value = input;
+  }
+  if (!value || typeof value !== 'object') return out;
+
+  const isPlaceholder = (uri: unknown): uri is string =>
+    typeof uri === 'string' && /^ipfs:\/\/METADATA_[A-Z]/.test(uri);
+
+  const push = (uri: string, kind: string, location: string, fields: string[]) => {
+    if (seen.has(uri)) return;
+    seen.add(uri);
+    out.push({ uri, kind, location, fields });
+  };
+
+  // Collection metadata
+  if (isPlaceholder(value?.collectionMetadata?.uri)) {
+    push(value.collectionMetadata.uri, 'Collection', 'collectionMetadata.uri', ['name', 'description', 'image']);
+  }
+
+  // Per-token metadata
+  if (Array.isArray(value.tokenMetadata)) {
+    for (let i = 0; i < value.tokenMetadata.length; i++) {
+      const tm = value.tokenMetadata[i];
+      if (isPlaceholder(tm?.uri)) {
+        const ids = Array.isArray(tm.tokenIds) && tm.tokenIds.length > 0
+          ? tm.tokenIds.map((r: any) => `${r.start}-${r.end}`).join(', ')
+          : 'all';
+        push(tm.uri, `Token (ids: ${ids})`, `tokenMetadata[${i}].uri`, ['name', 'description', 'image']);
+      }
+    }
+  }
+
+  // Approval metadata
+  if (Array.isArray(value.collectionApprovals)) {
+    for (let i = 0; i < value.collectionApprovals.length; i++) {
+      const a = value.collectionApprovals[i];
+      if (isPlaceholder(a?.uri)) {
+        push(a.uri, `Approval "${a.approvalId || i}"`, `collectionApprovals[${i}].uri`, [
+          'name',
+          'description',
+          'image (must be "")'
+        ]);
+      }
+    }
+  }
+
+  // Alias path metadata (path level + each denomUnit)
+  if (Array.isArray(value.aliasPathsToAdd)) {
+    for (let i = 0; i < value.aliasPathsToAdd.length; i++) {
+      const ap = value.aliasPathsToAdd[i];
+      if (isPlaceholder(ap?.metadata?.uri)) {
+        push(ap.metadata.uri, `Alias path "${ap.denom || i}"`, `aliasPathsToAdd[${i}].metadata.uri`, [
+          'name',
+          'description',
+          'image'
+        ]);
+      }
+      if (Array.isArray(ap?.denomUnits)) {
+        for (let j = 0; j < ap.denomUnits.length; j++) {
+          const du = ap.denomUnits[j];
+          if (isPlaceholder(du?.metadata?.uri)) {
+            push(
+              du.metadata.uri,
+              `Denom unit "${du.symbol || j}" of ${ap.denom || i}`,
+              `aliasPathsToAdd[${i}].denomUnits[${j}].metadata.uri`,
+              ['name', 'description', 'image']
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // Cosmos wrapper path metadata
+  if (Array.isArray(value.cosmosCoinWrapperPathsToAdd)) {
+    for (let i = 0; i < value.cosmosCoinWrapperPathsToAdd.length; i++) {
+      const wp = value.cosmosCoinWrapperPathsToAdd[i];
+      if (isPlaceholder(wp?.metadata?.uri)) {
+        push(wp.metadata.uri, `Wrapper path "${wp.denom || i}"`, `cosmosCoinWrapperPathsToAdd[${i}].metadata.uri`, [
+          'name',
+          'description',
+          'image'
+        ]);
+      }
+      if (Array.isArray(wp?.denomUnits)) {
+        for (let j = 0; j < wp.denomUnits.length; j++) {
+          const du = wp.denomUnits[j];
+          if (isPlaceholder(du?.metadata?.uri)) {
+            push(
+              du.metadata.uri,
+              `Wrapper denom unit "${du.symbol || j}" of ${wp.denom || i}`,
+              `cosmosCoinWrapperPathsToAdd[${i}].denomUnits[${j}].metadata.uri`,
+              ['name', 'description', 'image']
+            );
+          }
+        }
+      }
+    }
+  }
+
+  return out;
+}
+
+export interface PlaceholderSidecar {
+  [uri: string]: { name?: string; description?: string; image?: string };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Simulate renderer — shared between templates --simulate auto-section and
+// the standalone `builder simulate` command.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface SimulateResultLike {
+  success: boolean;
+  valid?: boolean;
+  gasUsed?: string;
+  parsedEvents?: any;
+  netChanges?: any;
+  simulationError?: string;
+  error?: string;
+}
+
+/**
+ * Render a simulation result. Three states:
+ *   - hard error (no API key, network failure, etc.) → red error block
+ *   - valid: false (chain rejected the tx) → red CHAIN-REJECTED block + reason
+ *   - valid: true → green check + gasUsed + per-address net change diff
+ */
+export function renderSimulate(
+  result: SimulateResultLike,
+  opts?: { stream?: NodeJS.WriteStream; title?: string }
+): string {
+  const stream = opts?.stream || process.stderr;
+  const { c } = makeColor(stream);
+  const width = Math.min(80, (stream as any).columns || 80);
+  const title = opts?.title || 'Simulate';
+
+  const lines: string[] = [];
+  lines.push(c('gray', rule('━', width, title)));
+  lines.push('');
+
+  if (!result.success) {
+    lines.push(`  ${c('red', '■')} ${c('bold', c('red', 'ERROR    '))}  ${result.error || 'Unknown simulation failure'}`);
+    lines.push('');
+    lines.push(c('gray', rule('━', width)));
+    return lines.join('\n');
+  }
+
+  if (result.valid === false) {
+    lines.push(`  ${c('red', '■')} ${c('bold', c('red', 'REJECTED '))}  ${c('dim', 'chain rejected the tx during simulation')}`);
+    if (result.simulationError) {
+      for (const t of wrap(result.simulationError, width - 6)) {
+        lines.push(`      ${t}`);
+      }
+    }
+    lines.push('');
+    lines.push(c('gray', rule('━', width)));
+    return lines.join('\n');
+  }
+
+  // Valid path — show gas + net changes
+  lines.push(
+    `  ${c('green', '✓')} ${c('bold', c('green', 'VALID    '))}  ${c('dim', 'gas used:')} ${c('bold', result.gasUsed || 'unknown')}`
+  );
+
+  // Net changes summary — coin + badge per address
+  const net: any = result.netChanges || {};
+  const coinChanges: Record<string, Record<string, string>> = net.coinChanges || {};
+  const badgeChanges: Record<string, Record<string, any>> = net.badgeChanges || {};
+  const allAddresses = new Set<string>([...Object.keys(coinChanges), ...Object.keys(badgeChanges)]);
+
+  if (allAddresses.size > 0) {
+    lines.push('');
+    lines.push(`  ${c('bold', 'Net changes')}`);
+    for (const addr of Array.from(allAddresses).sort()) {
+      const shortAddr = addr.length > 30 ? addr.slice(0, 12) + '…' + addr.slice(-6) : addr;
+      lines.push(`    ${c('dim', shortAddr)}`);
+      const coins = coinChanges[addr] || {};
+      for (const [denom, amount] of Object.entries(coins)) {
+        const sign = String(amount).startsWith('-') ? c('red', String(amount)) : c('green', '+' + amount);
+        lines.push(`      ${c('dim', '·')} ${sign} ${denom}`);
+      }
+      const badges = badgeChanges[addr] || {};
+      for (const [collectionId, balance] of Object.entries(badges)) {
+        // BalanceArray is bigint-converted to string before render — print compact
+        const summary = JSON.stringify(balance).slice(0, 60);
+        lines.push(`      ${c('dim', '·')} collection ${collectionId}: ${c('dim', summary)}`);
+      }
+    }
+  } else {
+    lines.push('');
+    lines.push(`  ${c('dim', 'No net balance changes detected.')}`);
+  }
+
+  lines.push('');
+  lines.push(c('gray', rule('━', width)));
+  return lines.join('\n');
+}
+
+/**
+ * Render the Metadata To Upload section. `filled` is a sidecar map (usually
+ * `data._meta?.metadataPlaceholders`) keyed by placeholder URI — entries
+ * present in the map are rendered as PROVIDED, others as NEEDED.
+ */
+export function renderMetadataPlaceholders(
+  placeholders: MetadataPlaceholderEntry[],
+  filled?: PlaceholderSidecar,
+  opts?: { stream?: NodeJS.WriteStream; title?: string }
+): string {
+  const stream = opts?.stream || process.stderr;
+  const { c } = makeColor(stream);
+  const width = Math.min(80, (stream as any).columns || 80);
+
+  const lines: string[] = [];
+  lines.push(c('gray', rule('━', width, opts?.title || 'Metadata To Upload')));
+  lines.push('');
+
+  const totalMissing = placeholders.filter((p) => !filled || !filled[p.uri]).length;
+  const totalProvided = placeholders.length - totalMissing;
+
+  for (const p of placeholders) {
+    const supplied = filled?.[p.uri];
+    const badge = supplied
+      ? `${c('green', '✓')} ${c('bold', c('green', 'PROVIDED '))}`
+      : `${c('yellow', '●')} ${c('bold', c('yellow', 'NEEDED   '))}`;
+    lines.push(`  ${badge}  ${c('dim', p.uri)}`);
+    lines.push(`      ${c('bold', p.kind)} — referenced by ${c('dim', p.location)}`);
+    if (supplied) {
+      const supplyBits: string[] = [];
+      if (supplied.name) supplyBits.push(`name: "${supplied.name}"`);
+      if (supplied.description)
+        supplyBits.push(
+          `description: "${supplied.description.slice(0, 40)}${supplied.description.length > 40 ? '…' : ''}"`
+        );
+      if (supplied.image)
+        supplyBits.push(`image: ${supplied.image.slice(0, 50)}${supplied.image.length > 50 ? '…' : ''}`);
+      if (supplyBits.length) lines.push(`      ${c('gray', '→')} ${supplyBits.join('  ')}`);
+    } else {
+      lines.push(`      ${c('gray', '→')} fields: ${p.fields.join(', ')}`);
+    }
+    lines.push('');
+  }
+
+  lines.push(c('gray', rule('━', width)));
+  const summaryParts = [
+    totalMissing > 0 ? c('yellow', `${totalMissing} needed`) : c('gray', `${totalMissing} needed`),
+    totalProvided > 0 ? c('green', `${totalProvided} provided`) : c('gray', `${totalProvided} provided`)
+  ];
+  lines.push(`  ${c('bold', 'Summary')}  ${summaryParts.join('  ·  ')}`);
+  lines.push(
+    c(
+      'dim',
+      '  Upload each Needed entry as off-chain JSON (name, description, image) and\n' +
+        '  substitute the placeholder URI with the real upload URI before broadcast.'
+    )
+  );
+  lines.push(c('gray', rule('━', width)));
+  return lines.join('\n');
 }
