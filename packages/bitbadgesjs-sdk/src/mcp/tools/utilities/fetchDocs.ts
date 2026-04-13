@@ -144,6 +144,49 @@ function findTopicUrl(topic: string): string | null {
 }
 
 /**
+ * Strip a block-level HTML tag (and its contents) from a string.
+ *
+ * Uses a tempered-greedy token so nested `<` characters inside the block are
+ * consumed, and a flexible closing tag pattern that matches `</tag >` with
+ * trailing whitespace. Runs in a loop until the output is stable so partial
+ * bypasses like `<scr<script>ipt>...</script>` — where a single pass would
+ * leave `<script>...` exposed after removing the inner match — are fully
+ * eliminated.
+ */
+function stripTagBlock(html: string, tag: string): string {
+  const re = new RegExp(
+    `<${tag}\\b[^<]*(?:(?!<\\/${tag}\\s*>)<[^<]*)*<\\/${tag}\\s*>`,
+    'gi'
+  );
+  let current = html;
+  while (true) {
+    const next = current.replace(re, '');
+    if (next === current) return next;
+    current = next;
+  }
+}
+
+/**
+ * Decode the handful of HTML entities we care about in a single pass.
+ *
+ * Doing sequential `.replace()` calls is unsafe because an earlier decode can
+ * produce an entity-looking substring that a later decode then re-interprets
+ * (e.g. `&amp;lt;` → `&lt;` → `<`). A single regex with a lookup table means
+ * each source character position is decoded at most once.
+ */
+const ENTITY_MAP: Record<string, string> = {
+  nbsp: ' ',
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'"
+};
+function decodeHtmlEntities(input: string): string {
+  return input.replace(/&(nbsp|amp|lt|gt|quot|apos);/g, (_match, name: string) => ENTITY_MAP[name] ?? '');
+}
+
+/**
  * Fetch and extract content from a documentation page
  */
 async function fetchDocContent(url: string): Promise<string> {
@@ -161,23 +204,19 @@ async function fetchDocContent(url: string): Promise<string> {
 
     const html = await response.text();
 
-    // Extract main content (simple extraction, GitBook-based)
-    // Remove script and style tags
-    let content = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
-    content = content.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+    // Remove script / style blocks (loop-stable, permissive closing tag).
+    let content = stripTagBlock(html, 'script');
+    content = stripTagBlock(content, 'style');
 
-    // Remove HTML tags but keep text
+    // Remove remaining HTML tags but keep text
     content = content.replace(/<[^>]+>/g, ' ');
 
     // Clean up whitespace
     content = content.replace(/\s+/g, ' ').trim();
 
-    // Decode HTML entities
-    content = content.replace(/&nbsp;/g, ' ');
-    content = content.replace(/&amp;/g, '&');
-    content = content.replace(/&lt;/g, '<');
-    content = content.replace(/&gt;/g, '>');
-    content = content.replace(/&quot;/g, '"');
+    // Decode the small set of HTML entities we care about, in one pass so
+    // `&amp;lt;` does not double-unescape into `<`.
+    content = decodeHtmlEntities(content);
 
     // Truncate to reasonable length
     if (content.length > 10000) {
