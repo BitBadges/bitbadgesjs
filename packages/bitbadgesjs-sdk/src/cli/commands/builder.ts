@@ -1,14 +1,16 @@
 /**
- * `mcp` command group — reach every bitbadges-builder-mcp tool from the CLI.
+ * `builder` command group — reach every BitBadges Builder tool from the CLI.
  *
- * The MCP tool registry is imported as a plain library (see
- * src/mcp/tools/registry.ts). There is no subprocess, no stdio MCP protocol —
- * we just call the handlers directly.
+ * The builder tool registry is imported as a plain library (see
+ * src/builder/tools/registry.ts). Handlers are invoked directly — no
+ * subprocess and no MCP protocol on this path. The same registry is also
+ * exposed over stdio by src/builder/index.ts (see src/builder/server.ts) for
+ * Claude Desktop and other MCP clients, but that's a separate transport.
  *
  * Session state is persisted per-invocation via the file-backed store in
- * src/mcp/session/fileStore.ts so agents can compose a collection across many
- * `mcp call` invocations. This file contains no session persistence logic —
- * it's CLI wiring over library helpers.
+ * src/builder/session/fileStore.ts so agents can compose a collection across
+ * many `builder call` invocations. This file contains no session persistence
+ * logic — it's CLI wiring over library helpers.
  */
 
 import { Command } from 'commander';
@@ -21,7 +23,7 @@ import {
   resourceRegistry,
   listResources,
   readResource
-} from '../../mcp/tools/registry.js';
+} from '../../builder/tools/registry.js';
 import {
   loadSessionFromDisk,
   saveSessionToDisk,
@@ -30,7 +32,7 @@ import {
   resetSessionFile,
   sessionFilePath,
   DEFAULT_SESSIONS_DIR
-} from '../../mcp/session/fileStore.js';
+} from '../../builder/session/fileStore.js';
 
 function parseArgs(argsJson: string | undefined, argsFile: string | undefined): any {
   if (argsJson && argsFile) {
@@ -52,7 +54,7 @@ function parseArgs(argsJson: string | undefined, argsFile: string | undefined): 
 
 /**
  * If the tool's args mention a session id (via the conventional `sessionId`
- * field that the MCP v2 session tools use), return it. Otherwise fall back to
+ * field that the builder v2 session tools use), return it. Otherwise fall back to
  * the explicit --session flag. This keeps the default session isolated per
  * CLI user without forcing them to repeat the id on every call.
  */
@@ -62,15 +64,15 @@ function resolveSessionId(parsedArgs: any, sessionFlag: string | undefined): str
   return undefined;
 }
 
-export const mcpCommand = new Command('mcp').description(
-  'Invoke bitbadges-builder-mcp tools directly (no MCP protocol / no subprocess).'
+export const builderCommand = new Command('builder').description(
+  'Invoke BitBadges Builder tools directly (no subprocess, no MCP protocol — handlers called in-process).'
 );
 
-// ── mcp list ─────────────────────────────────────────────────────────────────
+// ── builder list ─────────────────────────────────────────────────────────────────
 
-mcpCommand
+builderCommand
   .command('list')
-  .description('List every MCP tool with its schema as JSON.')
+  .description('List every builder tool with its schema as JSON.')
   .option('--names', 'Print only tool names, one per line')
   .action((opts: { names?: boolean }) => {
     if (opts.names) {
@@ -82,18 +84,18 @@ mcpCommand
     process.stdout.write(JSON.stringify(listTools(), null, 2) + '\n');
   });
 
-// ── mcp call <tool> ──────────────────────────────────────────────────────────
+// ── builder call <tool> ──────────────────────────────────────────────────────────
 
-mcpCommand
+builderCommand
   .command('call <tool>')
-  .description('Call an MCP tool by name. Args come from --args (JSON) or --args-file.')
+  .description('Call a builder tool by name. Args come from --args (JSON) or --args-file.')
   .option('--args <json>', 'Tool arguments as a JSON string')
   .option('--args-file <path>', 'Tool arguments read from a JSON file')
   .option(
     '--session <id>',
     'Session id for stateful tools. Stored under ~/.bitbadges/sessions/<id>.json. Defaults to the id inside --args.sessionId, or the builtin default session.'
   )
-  .option('--raw', 'Print the structured result instead of the MCP text block')
+  .option('--raw', 'Print the structured result instead of the formatted text block')
   .action(async (toolName: string, opts: { args?: string; argsFile?: string; session?: string; raw?: boolean }) => {
     if (!toolRegistry[toolName]) {
       const available = Object.keys(toolRegistry).sort().join(', ');
@@ -150,11 +152,11 @@ mcpCommand
     }
   });
 
-// ── mcp session ──────────────────────────────────────────────────────────────
+// ── builder session ──────────────────────────────────────────────────────────────
 
-const sessionCommand = mcpCommand
+const sessionCommand = builderCommand
   .command('session')
-  .description('Inspect, dump, or reset persisted MCP builder sessions.');
+  .description('Inspect, dump, or reset persisted builder sessions.');
 
 sessionCommand
   .command('list')
@@ -185,11 +187,11 @@ sessionCommand
     resetSessionFile(id);
   });
 
-// ── mcp resources ────────────────────────────────────────────────────────────
+// ── builder resources ────────────────────────────────────────────────────────────
 
-const resourcesCommand = mcpCommand
+const resourcesCommand = builderCommand
   .command('resources')
-  .description('Read static MCP resources (token registry, recipes, skills, docs, error patterns, ...).');
+  .description('Read static builder resources (token registry, recipes, skills, docs, error patterns, ...).');
 
 resourcesCommand
   .command('list')

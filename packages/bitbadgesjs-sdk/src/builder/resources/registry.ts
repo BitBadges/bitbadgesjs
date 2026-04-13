@@ -2,7 +2,7 @@
  * Central resource registry.
  *
  * Mirrors the tool registry (src/tools/registry.ts). Single source of truth
- * for every MCP resource so the stdio server and library consumers
+ * for every builder resource so the stdio server and library consumers
  * (bitbadges-cli, bitbadgeschaind) see the same surface.
  *
  * A resource is a static-ish document addressed by URI. Unlike tools, reads
@@ -47,7 +47,7 @@ export interface ResourceEntry {
 }
 
 // Inline ResourceInfo for the skills resource — it was defined ad-hoc inside
-// server.ts before. Keeping the same metadata the MCP server used to expose.
+// server.ts before. Keeping the same metadata the stdio server used to expose.
 const skillsAllInfo: ResourceInfo = {
   uri: 'bitbadges://skills/all',
   name: 'Skill Instructions',

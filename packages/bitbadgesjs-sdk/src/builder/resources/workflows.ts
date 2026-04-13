@@ -13,7 +13,7 @@ export const workflowsResourceInfo = {
 const WORKFLOWS_CONTENT = {
   overview: `# BitBadges Workflow Chains
 
-Multi-step tool sequences for common operations. Each workflow lists the exact MCP tools to call in order.`,
+Multi-step tool sequences for common operations. Each workflow lists the exact builder tools to call in order.`,
 
   bb402Acquire: `## BB-402: Acquire Tokens to Gain Access
 

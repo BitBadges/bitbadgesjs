@@ -91,8 +91,10 @@ const TOPIC_URL_MAP: Record<string, string> = {
   'ai agents': 'https://docs.bitbadges.io/for-developers/ai-agents',
   'ai': 'https://docs.bitbadges.io/for-developers/ai-agents',
   'bots': 'https://docs.bitbadges.io/for-developers/ai-agents',
-  'mcp': 'https://docs.bitbadges.io/for-developers/ai-agents/mcp-builder-tools',
-  'mcp tools': 'https://docs.bitbadges.io/for-developers/ai-agents/mcp-builder-tools',
+  'builder': 'https://docs.bitbadges.io/for-developers/ai-agents/builder-tools',
+  'builder tools': 'https://docs.bitbadges.io/for-developers/ai-agents/builder-tools',
+  'mcp': 'https://docs.bitbadges.io/for-developers/ai-agents/builder-tools',
+  'mcp tools': 'https://docs.bitbadges.io/for-developers/ai-agents/builder-tools',
   'bot examples': 'https://docs.bitbadges.io/for-developers/ai-agents/bot-examples',
   'websocket': 'https://docs.bitbadges.io/for-developers/ai-agents/websocket-events',
   'websocket events': 'https://docs.bitbadges.io/for-developers/ai-agents/websocket-events',
@@ -193,7 +195,7 @@ async function fetchDocContent(url: string): Promise<string> {
   try {
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'BitBadges-Builder-MCP/1.0',
+        'User-Agent': 'BitBadges-Builder/1.0',
         'Accept': 'text/html,application/xhtml+xml'
       }
     });
@@ -241,7 +243,7 @@ async function fetchLlmsFullText(topic: string): Promise<string | null> {
   // Fetch and cache
   if (!llmsFullTextCache) {
     const response = await fetch('https://docs.bitbadges.io/llms-full.txt', {
-      headers: { 'User-Agent': 'BitBadges-Builder-MCP/1.0' }
+      headers: { 'User-Agent': 'BitBadges-Builder/1.0' }
     });
     if (!response.ok) return null;
     llmsFullTextCache = await response.text();

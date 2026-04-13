@@ -1,9 +1,9 @@
 /**
- * In-memory session state for the MCP builder v2.
+ * In-memory session state for the builder v2.
  *
  * Uses a Map keyed by sessionId for per-request isolation.
  * Each session holds a blank MsgUniversalUpdateCollection template that per-field tools mutate.
- * Auto-creates on first mutation. State is ephemeral — scoped to the MCP process lifetime.
+ * Auto-creates on first mutation. State is ephemeral — scoped to the process lifetime.
  *
  * Design principles:
  * - Set tools replace the entire field
@@ -41,7 +41,7 @@ export interface SessionTransaction {
 // Per-session state keyed by sessionId
 const sessions = new Map<string, SessionTransaction>();
 
-// Default sessionId when none is provided (MCP-direct / single-user mode)
+// Default sessionId when none is provided (builder-direct / single-user mode)
 const DEFAULT_SESSION_ID = '__default__';
 
 function resolveSessionId(sessionId?: string): string {

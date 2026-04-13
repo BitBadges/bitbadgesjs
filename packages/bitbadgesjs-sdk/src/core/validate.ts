@@ -1,8 +1,8 @@
 /**
  * Transaction validation utilities for BitBadges.
  *
- * Pure validation logic extracted from the MCP validate_transaction tool.
- * No Zod schemas, no MCP tool definitions, no MCP response formatting.
+ * Pure validation logic extracted from the builder validate_transaction tool.
+ * No Zod schemas, no tool definitions, no response formatting.
  *
  * @module
  */

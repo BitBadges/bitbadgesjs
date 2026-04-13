@@ -371,8 +371,8 @@ Section Navigation (use slugs from the tree view, separated by /):
   sdk docs messages                     All message type docs
   sdk docs messages/msg-transfer-tokens A specific message
   sdk docs examples                     Code examples and snippets
-  sdk docs mcp-builder-skills           All builder skills (same as "sdk skills")
-  sdk docs mcp-builder-skills/smart-token  A specific skill
+  sdk docs builder-skills               All builder skills (same as "sdk skills")
+  sdk docs builder-skills/smart-token   A specific skill
 
 Partial matching: "sdk docs approvals" finds the first section containing "approvals".
 
@@ -426,15 +426,17 @@ Cache: ~/.bitbadges/docs-cache.json | Refresh: sdk docs --refresh`)
     console.log(out.trim() || `No content found for "${section}".`);
   });
 
-// ── sdk skills (alias for sdk docs mcp-builder-skills) ──────────────────────
+// ── sdk skills (alias for sdk docs builder-skills) ──────────────────────
 
 sdkCommand
   .command('skills [skillId]')
-  .description('Shorthand for "sdk docs mcp-builder-skills" — list or show MCP Builder skills')
-  .addHelpText('after', '\nEquivalent to: sdk docs mcp-builder-skills / sdk docs mcp-builder-skills/<id>')
+  .description('Shorthand for "sdk docs builder-skills" — list or show BitBadges Builder skills')
+  .addHelpText('after', '\nEquivalent to: sdk docs builder-skills / sdk docs builder-skills/<id>')
   .action(async (skillId: string | undefined) => {
-    // Delegate to the docs command logic
-    const section = skillId ? `mcp-builder-skills/${skillId}` : 'mcp-builder-skills';
+    // Delegate to the docs command logic. The slug must exist in the loaded
+    // docs tree — coordinated with bitbadges-docs where this section is
+    // published.
+    const section = skillId ? `builder-skills/${skillId}` : 'builder-skills';
     sdkCommand.commands.find((c) => c.name() === 'docs')!.parseAsync(['node', 'docs', section]);
   });
 

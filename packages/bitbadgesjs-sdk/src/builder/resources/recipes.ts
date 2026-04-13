@@ -76,7 +76,7 @@ const api = new BitBadgesAPI({ apiUrl: 'https://api.bitbadges.io', apiKey: proce
 const balance = await api.getBalanceByAddress(collectionId, 'bb1address...');
 console.log(balance.balances); // Balance[]
 
-// Or via MCP: query_balance({ collectionId: "123", address: "bb1..." })`
+// Or via the builder: query_balance({ collectionId: "123", address: "bb1..." })`
   },
   {
     id: 'transfer-tokens',
@@ -110,7 +110,7 @@ const transferMsg = {
     name: 'Verify Token Ownership (Gate Access)',
     description: 'Check if an address owns specific tokens — use for gating',
     tags: ['verify', 'gate', 'access', 'ownership', 'check'],
-    code: `// Via MCP tool: verify_ownership
+    code: `// Via builder tool: verify_ownership
 // Supports AND/OR/NOT logic for complex ownership checks
 //
 // verify_ownership({
@@ -135,7 +135,7 @@ const hasToken = balance.balances.some(b =>
     tags: ['smart-token', 'ibc', 'usdc', 'wrapped', 'stablecoin', 'backing'],
     code: `// Smart Token Key Points:
 //
-// 1. Use generate_backing_address MCP tool to get the deterministic backing address
+// 1. Use generate_backing_address builder tool to get the deterministic backing address
 //    for an IBC denom (e.g., USDC → bb1backingaddr...)
 //
 // 2. Two approvals required (backing + unbacking). Transferable is common but optional:
@@ -218,7 +218,7 @@ const bb1Address = ethToCosmos('0x1234...');
 // BitBadges -> ETH
 const ethAddress = cosmosToEth('bb1...');
 
-// Or via MCP: convert_address({ address: "0x1234..." })
+// Or via the builder: convert_address({ address: "0x1234..." })
 
 // IMPORTANT: This is byte-level conversion (same key, different encoding)
 // This is NOT public key derivation — both addresses share the same key pair`
@@ -265,9 +265,9 @@ const withdrawMsg = {
 
 // Server-side verification:
 // 1. Client presents their address
-// 2. Server verifies ownership via MCP or API
+// 2. Server verifies ownership via the builder or API
 
-// Via MCP:
+// Via the builder:
 // verify_ownership({
 //   address: "bb1clientaddress...",
 //   requirements: {

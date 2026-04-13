@@ -38,7 +38,7 @@ export function handleReviewCollection(input: {
 }
 
 // ---------------------------------------------------------------------------
-// Deprecated shims — existing audit_collection / verify_standards MCP tools
+// Deprecated shims — existing audit_collection / verify_standards builder tools
 // are kept working by routing through reviewCollection with skipSources.
 // These helpers are exposed for the registry to mark the tool descriptions
 // deprecated while preserving return shapes for one release.

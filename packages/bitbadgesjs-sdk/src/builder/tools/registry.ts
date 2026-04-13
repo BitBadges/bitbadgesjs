@@ -1,15 +1,15 @@
 /**
  * Central tool registry.
  *
- * Single source of truth for every MCP tool. Used by:
- *  - src/server.ts (MCP stdio server — wraps entries into ListTools/CallTool handlers)
+ * Single source of truth for every builder tool. Used by:
+ *  - src/server.ts (Model Context Protocol (MCP) stdio transport — wraps entries into ListTools/CallTool handlers)
  *  - external consumers (e.g. bitbadges-cli) that import this module and invoke
- *    tools as plain functions, without the MCP protocol.
+ *    tools as plain functions, bypassing the MCP stdio transport.
  *
  * Each entry has a `tool` schema (for discovery) and a `run` function that takes
  * raw args and returns a structured result. An optional `formatText` controls how
- * the result is serialized for the MCP text content block; by default we JSON
- * stringify. The registry itself is protocol-agnostic — it never returns MCP
+ * the result is serialized for the text content block returned over MCP; by default we JSON
+ * stringify. The registry itself is protocol-agnostic — it never returns transport-shaped
  * content blocks directly.
  */
 
@@ -88,7 +88,7 @@ export { exportSession, importSession } from '../session/sessionState.js';
 
 // Re-export the resource registry so consumers get tools + resources from one
 // import. Resources are static documents (token registry, recipes, skill docs,
-// error patterns, etc.) — the other half of the MCP surface.
+// error patterns, etc.) — the other half of the builder surface.
 export {
   resourceRegistry,
   listResources,
@@ -98,7 +98,7 @@ export {
   type ReadResourceResult
 } from '../resources/registry.js';
 
-/** MCP tool schema shape — kept loose to avoid coupling to a specific SDK version. */
+/** Builder tool schema shape — kept loose to avoid coupling to a specific SDK version. */
 export interface ToolSchema {
   name: string;
   description: string;
@@ -115,7 +115,7 @@ export interface ToolEntry {
   /** Invoke the tool. Receives raw args and returns a structured result. */
   run: (args: any) => Promise<any> | any;
   /**
-   * Optional custom text serializer for MCP content blocks.
+   * Optional custom text serializer for MCP content blocks when used through the stdio transport.
    * Defaults to `JSON.stringify(result, null, 2)`.
    */
   formatText?: (result: any) => string;
@@ -158,7 +158,7 @@ const verifyStandardsTool: ToolSchema = {
 };
 
 /**
- * The tool registry. Keys are MCP tool names.
+ * The tool registry. Keys are builder tool names.
  */
 export const toolRegistry: Record<string, ToolEntry> = {
   // Utilities
