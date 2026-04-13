@@ -28,9 +28,18 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
   const yesTokenIds = [{ start: '1', end: '1' }];
   const noTokenIds = [{ start: '2', end: '2' }];
 
+  const randomId = () => Math.random().toString(16).slice(2, 18);
+  const mintId = randomId();
+  const transferId = randomId();
+  const redeemId = randomId();
+  const settleYesId = randomId();
+  const settleNoId = randomId();
+  const settlePushYesId = randomId();
+  const settlePushNoId = randomId();
+
   // 1. Paired Mint — mint both YES and NO by depositing USDC
   const pairedMint = {
-    approvalId: 'paired-mint',
+    approvalId: `pm-mint-${mintId}`,
     fromListId: 'Mint',
     toListId: 'All',
     initiatedByListId: 'All',
@@ -62,7 +71,7 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
 
   // 2. Free transfer — tokens are freely transferable
   const freeTransfer = {
-    approvalId: 'free-transfer',
+    approvalId: `pm-transfer-${transferId}`,
     fromListId: '!Mint',
     toListId: 'All',
     initiatedByListId: 'All',
@@ -75,7 +84,7 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
 
   // 3. Pre-Settlement Redeem — burn both YES+NO to get USDC back
   const preRedeem = {
-    approvalId: 'pre-redeem',
+    approvalId: `pm-redeem-${redeemId}`,
     fromListId: '!Mint',
     toListId: BURN_ADDRESS,
     initiatedByListId: 'All',
@@ -100,13 +109,16 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
         }
       ],
       // Chain rule: overrideFromWithApproverAddress requires
-      // maxNumTransfers to set at least one non-zero limit.
+      // maxNumTransfers to set at least one non-zero limit. Pre-redeem
+      // is unbounded (any holder can redeem any number of pairs) so we
+      // set overall to MAX_UINT64 rather than capping per initiator.
+      // Frontend PredictionMarketRegistry uses the same shape.
       maxNumTransfers: {
-        overallMaxNumTransfers: '0',
+        overallMaxNumTransfers: MAX_UINT64,
         perToAddressMaxNumTransfers: '0',
         perFromAddressMaxNumTransfers: '0',
-        perInitiatedByAddressMaxNumTransfers: '1',
-        amountTrackerId: 'pm-buy',
+        perInitiatedByAddressMaxNumTransfers: '0',
+        amountTrackerId: `pm-redeem-${redeemId}`,
         resetTimeIntervals: { startTime: '0', intervalLength: '0' }
       },
       requireFromEqualsInitiatedBy: true,
@@ -156,7 +168,7 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
           {
             proposalId,
             quorumThreshold: '100',
-            voters: [{ address: params.verifier, weight: '100' }]
+            voters: [{ address: params.verifier, weight: '1' }]
           }
         ],
         overridesFromOutgoingApprovals: true,
@@ -165,10 +177,10 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
     };
   }
 
-  const settleYes = settlementApproval('settle-yes', yesTokenIds, 'settlement-yes', '1');
-  const settleNo = settlementApproval('settle-no', noTokenIds, 'settlement-no', '1');
-  const settlePushYes = settlementApproval('settle-push-yes', yesTokenIds, 'settlement-push-yes', '1');
-  const settlePushNo = settlementApproval('settle-push-no', noTokenIds, 'settlement-push-no', '1');
+  const settleYes = settlementApproval(`pm-settle-yes-${settleYesId}`, yesTokenIds, `pm-settle-yes-${settleYesId}`, '1');
+  const settleNo = settlementApproval(`pm-settle-no-${settleNoId}`, noTokenIds, `pm-settle-no-${settleNoId}`, '1');
+  const settlePushYes = settlementApproval(`pm-settle-push-yes-${settlePushYesId}`, yesTokenIds, `pm-settle-push-yes-${settlePushYesId}`, '1');
+  const settlePushNo = settlementApproval(`pm-settle-push-no-${settlePushNoId}`, noTokenIds, `pm-settle-push-no-${settlePushNoId}`, '1');
 
   const collectionApprovals = [pairedMint, freeTransfer, preRedeem, settleYes, settleNo, settlePushYes, settlePushNo];
 

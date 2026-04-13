@@ -7,7 +7,6 @@ import {
   BURN_ADDRESS,
   buildMsg,
   emptyPermissions,
-  mintToBurnBalances,
   defaultBalances
 } from './shared.js';
 
@@ -45,9 +44,8 @@ export function buildAddressList(params: AddressListParams): any {
       ownershipTimes: FOREVER,
       version: '0',
       approvalCriteria: {
-        predeterminedBalances: mintToBurnBalances(),
         overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true
+        overridesToIncomingApprovals: false
       }
     },
     // Manager Remove — burn tokens to remove addresses. fromListId is
@@ -67,7 +65,7 @@ export function buildAddressList(params: AddressListParams): any {
       version: '0',
       approvalCriteria: {
         overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true
+        overridesToIncomingApprovals: false
       }
     }
   ];
@@ -79,8 +77,6 @@ export function buildAddressList(params: AddressListParams): any {
     collectionPermissions: emptyPermissions(),
     invariants: {
       noCustomOwnershipTimes: true,
-      maxSupplyPerId: '0',
-      noForcefulPostMintTransfers: false,
       disablePoolCreation: true
     },
     defaultBalances: defaultBalances({ autoApproveAllIncomingTransfers: true })

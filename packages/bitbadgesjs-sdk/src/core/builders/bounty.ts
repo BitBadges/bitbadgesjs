@@ -55,7 +55,7 @@ export function buildBounty(params: BountyParams): any {
           {
             proposalId: uniqueId('bounty-accept'),
             quorumThreshold: '100',
-            voters: [{ address: params.verifier, weight: '100' }]
+            voters: [{ address: params.verifier, weight: '1' }]
           }
         ],
         coinTransfers: [
@@ -90,7 +90,7 @@ export function buildBounty(params: BountyParams): any {
           {
             proposalId: uniqueId('bounty-deny'),
             quorumThreshold: '100',
-            voters: [{ address: params.verifier, weight: '100' }]
+            voters: [{ address: params.verifier, weight: '1' }]
           }
         ],
         coinTransfers: [
@@ -145,7 +145,7 @@ export function buildBounty(params: BountyParams): any {
     invariants: {
       noCustomOwnershipTimes: true,
       maxSupplyPerId: '0',
-      noForcefulPostMintTransfers: false,
+      noForcefulPostMintTransfers: true,
       disablePoolCreation: true
     },
     // Bounty receipt is a 1-of-1 NFT-style token — no fractional denom

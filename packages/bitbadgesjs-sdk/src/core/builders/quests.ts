@@ -23,13 +23,18 @@ export function buildQuests(params: QuestsParams): any {
   const coin = resolveCoin(params.denom);
   const rewardBase = toBaseUnits(params.reward, coin.decimals);
 
+  // The amountTrackerId must match the approvalId so claim counts are
+  // tracked against the same approval. Frontend registries derive the
+  // tracker from the approvalId param; mirror that pattern here.
+  const questApprovalId = `quest-approval-${Math.random().toString(16).slice(2, 10)}`;
+
   const collectionApprovals = [
     // Quest claim approval
     {
       fromListId: 'Mint',
       toListId: 'All',
       initiatedByListId: 'All',
-      approvalId: 'quest-approval',
+      approvalId: questApprovalId,
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
@@ -41,7 +46,7 @@ export function buildQuests(params: QuestsParams): any {
           perToAddressMaxNumTransfers: '0',
           perFromAddressMaxNumTransfers: '0',
           perInitiatedByAddressMaxNumTransfers: '0',
-          amountTrackerId: 'quest-tracker',
+          amountTrackerId: questApprovalId,
           resetTimeIntervals: { startTime: '0', intervalLength: '0' }
         },
         coinTransfers: [
@@ -61,7 +66,7 @@ export function buildQuests(params: QuestsParams): any {
       fromListId: '!Mint',
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
-      approvalId: 'burn',
+      approvalId: 'burnable-approval',
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
@@ -78,7 +83,7 @@ export function buildQuests(params: QuestsParams): any {
       noCustomOwnershipTimes: true,
       maxSupplyPerId: '0',
       noForcefulPostMintTransfers: false,
-      disablePoolCreation: true
+      disablePoolCreation: false
     },
     mintEscrowCoinsToTransfer: [
       { amount: String(BigInt(rewardBase) * BigInt(params.maxClaims)), denom: coin.denom }

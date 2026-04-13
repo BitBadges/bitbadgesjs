@@ -10,7 +10,6 @@ import {
   toBaseUnits,
   durationToTimestamp,
   buildMsg,
-  buildAliasPath,
   frozenPermissions,
   defaultBalances,
   metadataPlaceholders,
@@ -52,7 +51,7 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: 'deposit-refund',
-      transferTimes: FOREVER,
+      transferTimes: [{ start: '1', end: deadlineTs }],
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
       version: '0',
@@ -80,7 +79,7 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: crowdfunderAddr,
       initiatedByListId: 'All',
       approvalId: 'deposit-progress',
-      transferTimes: FOREVER,
+      transferTimes: [{ start: '1', end: deadlineTs }],
       tokenIds: [{ start: '2', end: '2' }],
       ownershipTimes: FOREVER,
       version: '0',
@@ -91,16 +90,20 @@ export function buildCrowdfund(params: CrowdfundParams): any {
         overridesToIncomingApprovals: true
       }
     },
-    // Success — creator withdraws funds after deadline if goal met.
-    // Same fallback story as deposit-progress: review surfaces the missing
-    // crowdfunder when the flag isn't provided.
+    // Success — crowdfunder withdraws funds after deadline if goal met.
+    // toListId is BURN_ADDRESS: the success approval burns the deposit
+    // receipt token and the coinTransfer (with
+    // overrideFromWithApproverAddress) routes the underlying funds to
+    // the crowdfunder via the escrow. Routing tokens to
+    // crowdfunderAddr directly would mint an NFT to them, which isn't
+    // the intended semantic.
     {
       fromListId: 'Mint',
-      toListId: crowdfunderAddr,
+      toListId: BURN_ADDRESS,
       initiatedByListId: crowdfunderAddr,
       approvalId: 'success',
       transferTimes: [{ start: deadlineTs, end: MAX_UINT64 }],
-      tokenIds: FOREVER,
+      tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
       version: '0',
       approvalCriteria: {
@@ -111,7 +114,7 @@ export function buildCrowdfund(params: CrowdfundParams): any {
             ownershipTimes: FOREVER,
             tokenIds: [{ start: '2', end: '2' }],
             overrideWithCurrentTime: true,
-            mustSatisfyForAllAssets: false
+            mustSatisfyForAllAssets: true
           }
         ],
         coinTransfers: [
@@ -122,14 +125,13 @@ export function buildCrowdfund(params: CrowdfundParams): any {
             overrideToWithInitiator: true
           }
         ],
-        // Chain rule: overrideFromWithApproverAddress requires
-        // maxNumTransfers to set at least one non-zero limit. Each
-        // backer can claim ONE success payout, so cap by initiator.
+        // Only one successful withdrawal ever — the crowdfunder claims
+        // the escrowed funds once. Frontend uses overall:1.
         maxNumTransfers: {
-          overallMaxNumTransfers: '0',
+          overallMaxNumTransfers: '1',
           perToAddressMaxNumTransfers: '0',
           perFromAddressMaxNumTransfers: '0',
-          perInitiatedByAddressMaxNumTransfers: '1',
+          perInitiatedByAddressMaxNumTransfers: '0',
           amountTrackerId: 'crowdfund-success',
           resetTimeIntervals: { startTime: '0', intervalLength: '0' }
         },
@@ -155,7 +157,7 @@ export function buildCrowdfund(params: CrowdfundParams): any {
             ownershipTimes: FOREVER,
             tokenIds: [{ start: '2', end: '2' }],
             overrideWithCurrentTime: true,
-            mustSatisfyForAllAssets: false
+            mustSatisfyForAllAssets: true
           }
         ],
         coinTransfers: [
@@ -166,12 +168,13 @@ export function buildCrowdfund(params: CrowdfundParams): any {
             overrideToWithInitiator: true
           }
         ],
-        // Same chain rule — each backer can claim ONE refund.
+        // Refunds unlimited in aggregate — each backer gates themselves
+        // via their own deposit receipt ownership (mustOwnTokens).
         maxNumTransfers: {
-          overallMaxNumTransfers: '0',
+          overallMaxNumTransfers: MAX_UINT64,
           perToAddressMaxNumTransfers: '0',
           perFromAddressMaxNumTransfers: '0',
-          perInitiatedByAddressMaxNumTransfers: '1',
+          perInitiatedByAddressMaxNumTransfers: '0',
           amountTrackerId: 'crowdfund-refund',
           resetTimeIntervals: { startTime: '0', intervalLength: '0' }
         },
@@ -188,7 +191,7 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       initiatedByListId: 'All',
       approvalId: 'burn',
       transferTimes: FOREVER,
-      tokenIds: FOREVER,
+      tokenIds: [{ start: '1', end: '2' }],
       ownershipTimes: FOREVER,
       version: '0'
     }

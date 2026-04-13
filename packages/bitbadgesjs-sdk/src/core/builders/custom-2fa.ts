@@ -32,15 +32,19 @@ export function buildCustom2FA(params: Custom2FAParams): any {
       ownershipTimes: FOREVER,
       version: '0',
       approvalCriteria: {
+        // Expiration is runtime-enforced by the frontend at mint time
+        // via `getCustom2FAOwnershipTimes()` + `allowPurgeIfExpired`;
+        // the approval itself doesn't encode a duration. Use an empty
+        // `startBalances` so the chain's "exactly one
+        // orderCalculationMethod flag must be true" rule doesn't fire
+        // (it only applies when startBalances is non-empty).
         predeterminedBalances: {
           manualBalances: [],
           incrementedBalances: {
-            startBalances: [
-              { amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: FOREVER }
-            ],
+            startBalances: [],
             incrementTokenIdsBy: '0',
             incrementOwnershipTimesBy: '0',
-            durationFromTimestamp: '300000',
+            durationFromTimestamp: '0',
             allowOverrideTimestamp: false,
             recurringOwnershipTimes: { startTime: '0', intervalLength: '0', chargePeriodLength: '0' },
             allowOverrideWithAnyValidToken: false,
@@ -51,13 +55,13 @@ export function buildCustom2FA(params: Custom2FAParams): any {
             useOverallNumTransfers: false,
             usePerToAddressNumTransfers: false,
             usePerFromAddressNumTransfers: false,
-            usePerInitiatedByAddressNumTransfers: true,
+            usePerInitiatedByAddressNumTransfers: false,
             useMerkleChallengeLeafIndex: false,
             challengeTrackerId: ''
           }
         },
         overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true,
+        overridesToIncomingApprovals: false,
         autoDeletionOptions: {
           afterOneUse: false,
           afterOverallMaxNumTransfers: false,

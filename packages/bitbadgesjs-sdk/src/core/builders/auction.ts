@@ -3,19 +3,15 @@
  * @module core/builders/auction
  */
 import {
-  MAX_UINT64,
   FOREVER,
   BURN_ADDRESS,
   parseDuration,
   durationToTimestamp,
   buildMsg,
-  buildAliasPath,
   frozenPermissions,
   defaultBalances,
   metadataPlaceholders,
   singleTokenMetadata,
-  mintToBurnBalances,
-  zeroAmounts,
   zeroMaxTransfers
 } from './shared.js';
 
@@ -25,37 +21,72 @@ export interface AuctionParams {
   name?: string;
   description?: string;
   image?: string;
+  /**
+   * Seller address — used as `initiatedByListId` on the mint-to-winner
+   * approval so only the seller can accept the winning bid. Falls back
+   * to the CLI-passed `creator` when not set.
+   */
+  seller?: string;
+  creator?: string;
 }
 
 export function buildAuction(params: AuctionParams): any {
   const bidDeadlineTs = durationToTimestamp(params.bidDeadline || '7d');
   const acceptEndTs = String(Number(bidDeadlineTs) + Number(parseDuration(params.acceptWindow || '7d')));
+  const sellerAddr = params.seller || params.creator || '';
+  const randomId = () => Math.random().toString(16).slice(2, 18);
+
+  // Mint the auction NFT (1x token 1) on settlement. The frontend
+  // AuctionRegistry calls this `mintToSellerBalances`, but the actual
+  // destination is set by the approval's `toListId` + the transfer
+  // recipient — this function just says "create 1 new token 1".
+  const mintOneTokenOneBalances = {
+    manualBalances: [],
+    orderCalculationMethod: {
+      useOverallNumTransfers: true,
+      usePerToAddressNumTransfers: false,
+      usePerFromAddressNumTransfers: false,
+      usePerInitiatedByAddressNumTransfers: false,
+      useMerkleChallengeLeafIndex: false,
+      challengeTrackerId: ''
+    },
+    incrementedBalances: {
+      startBalances: [
+        { amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: FOREVER }
+      ],
+      incrementTokenIdsBy: '0',
+      incrementOwnershipTimesBy: '0',
+      durationFromTimestamp: '0',
+      allowOverrideTimestamp: false,
+      recurringOwnershipTimes: { startTime: '0', intervalLength: '0', chargePeriodLength: '0' },
+      allowOverrideWithAnyValidToken: false,
+      allowAmountScaling: false,
+      maxScalingMultiplier: '0'
+    }
+  };
 
   const collectionApprovals = [
-    // Mint-to-Winner — seller accepts winning bid during accept window
+    // Mint-to-Winner — seller accepts winning bid during accept window.
+    // `initiatedByListId: sellerAddr` locks acceptance to the seller.
     {
       fromListId: 'Mint',
       toListId: 'All',
-      // 'All' — the auction contract / manager will accept the winning bid.
-      // Template users who want to lock this down to a specific bidder list
-      // should pass --initiated-by or patch the approval post-build.
-      initiatedByListId: 'All',
-      approvalId: 'mint-to-winner',
+      initiatedByListId: sellerAddr,
+      approvalId: `auction-mint-to-winner-${randomId()}`,
       transferTimes: [{ start: bidDeadlineTs, end: acceptEndTs }],
-      tokenIds: FOREVER,
+      tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
       version: '0',
       approvalCriteria: {
-        predeterminedBalances: mintToBurnBalances(),
+        predeterminedBalances: mintOneTokenOneBalances,
         maxNumTransfers: {
           ...zeroMaxTransfers('auction-tracker'),
           overallMaxNumTransfers: '1'
         },
         overridesFromOutgoingApprovals: true,
-        // Skill mandate: must be FALSE so the winning bidder's incoming
-        // payment intent (their bid approval) still gets matched. Setting
-        // this true would have the auction approval bypass the bidder's
-        // incoming approvals entirely, breaking the payment leg.
+        // Must be FALSE so the winning bidder's incoming payment intent
+        // (their bid approval) still gets matched. Setting this true
+        // would bypass the bidder's incoming approvals entirely.
         overridesToIncomingApprovals: false,
         autoDeletionOptions: {
           afterOneUse: true,
@@ -70,9 +101,9 @@ export function buildAuction(params: AuctionParams): any {
       fromListId: '!Mint',
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
-      approvalId: 'burn',
+      approvalId: `auction-burn-${randomId()}`,
       transferTimes: FOREVER,
-      tokenIds: FOREVER,
+      tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
       version: '0'
     }

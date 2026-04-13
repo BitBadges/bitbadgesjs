@@ -10,6 +10,7 @@ import {
   buildAliasPath,
   sanitizeCosmosPathName,
   frozenPermissions,
+  defaultBalances,
   scalingBalances
 } from './shared.js';
 
@@ -29,7 +30,7 @@ export function buildCreditToken(params: CreditTokenParams): any {
   const symbol = sanitizeCosmosPathName(params.symbol || 'CREDIT', 'symbol');
 
   const creditMint = {
-    approvalId: 'credit-mint',
+    approvalId: 'credit-scaled',
     fromListId: 'Mint',
     toListId: 'All',
     initiatedByListId: 'All',
@@ -63,10 +64,10 @@ export function buildCreditToken(params: CreditTokenParams): any {
     validTokenIds: [{ start: '1', end: '1' }],
     standards: ['Credit Token'],
     collectionPermissions: frozenPermissions(),
+    defaultBalances: defaultBalances({ autoApproveAllIncomingTransfers: true }),
     invariants: {
       noCustomOwnershipTimes: true,
-      maxSupplyPerId: '0',
-      noForcefulPostMintTransfers: false,
+      noForcefulPostMintTransfers: true,
       disablePoolCreation: true
     },
     aliasPathsToAdd: [buildAliasPath('u' + symbol.toLowerCase(), symbol, coin.decimals)]

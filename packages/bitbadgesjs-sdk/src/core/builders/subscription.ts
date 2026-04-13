@@ -92,10 +92,10 @@ export function buildSubscription(params: SubscriptionParams): any {
             maxScalingMultiplier: '0'
           },
           orderCalculationMethod: {
-            useOverallNumTransfers: false,
+            useOverallNumTransfers: true,
             usePerToAddressNumTransfers: false,
             usePerFromAddressNumTransfers: false,
-            usePerInitiatedByAddressNumTransfers: true,
+            usePerInitiatedByAddressNumTransfers: false,
             useMerkleChallengeLeafIndex: false,
             challengeTrackerId: ''
           }
@@ -140,7 +140,7 @@ export function buildSubscription(params: SubscriptionParams): any {
       noCustomOwnershipTimes: false,
       maxSupplyPerId: '0',
       noForcefulPostMintTransfers: false,
-      disablePoolCreation: true
+      disablePoolCreation: false
     },
     defaultBalances: defaultBalances({ autoApproveAllIncomingTransfers: true })
   });

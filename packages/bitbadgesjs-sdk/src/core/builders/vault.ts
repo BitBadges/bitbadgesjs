@@ -38,12 +38,15 @@ export function buildVault(params: VaultParams): any {
   const symbol = sanitizeCosmosPathName(params.symbol || 'v' + coin.symbol, 'symbol');
 
   const collectionApprovals: any[] = [
-    // Deposit (backing)
+    // Deposit (backing). `toListId` excludes the backing address itself
+    // so the backing alias can't receive its own wrapper tokens (which
+    // would be nonsensical and matches the frontend VaultApprovalRegistry
+    // default).
     {
       fromListId: backingAddr,
-      toListId: 'All',
+      toListId: `!${backingAddr}`,
       initiatedByListId: 'All',
-      approvalId: 'deposit',
+      approvalId: 'vault-deposit',
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -60,7 +63,7 @@ export function buildVault(params: VaultParams): any {
       fromListId: '!Mint',
       toListId: backingAddr,
       initiatedByListId: 'All',
-      approvalId: 'withdrawal',
+      approvalId: `vault-withdraw-${Math.random().toString(16).slice(2, 10)}`,
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -103,7 +106,7 @@ export function buildVault(params: VaultParams): any {
       fromListId: '!Mint',
       toListId: params.emergencyRecovery,
       initiatedByListId: params.emergencyRecovery,
-      approvalId: 'emergency-migration',
+      approvalId: 'vault-emergency-migration',
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,

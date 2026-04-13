@@ -34,7 +34,7 @@ export function buildSmartAccount(params: SmartAccountParams): any {
       fromListId: backingAddr,
       toListId: `!${backingAddr}`,
       initiatedByListId: 'All',
-      approvalId: 'smart-token-backing',
+      approvalId: 'smart-account-backing',
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -44,12 +44,15 @@ export function buildSmartAccount(params: SmartAccountParams): any {
         allowBackedMinting: true
       }
     },
-    // Unbacking
+    // Unbacking. `fromListId` excludes both Mint AND the backing alias
+    // itself so the backing address can't initiate circular unbacks.
+    // The colon-separated exclude syntax is how the chain allows
+    // specifying multiple excluded lists.
     {
-      fromListId: '!Mint',
+      fromListId: `!Mint:${backingAddr}`,
       toListId: backingAddr,
       initiatedByListId: 'All',
-      approvalId: 'smart-token-unbacking',
+      approvalId: 'smart-account-unbacking',
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -67,7 +70,7 @@ export function buildSmartAccount(params: SmartAccountParams): any {
       fromListId: '!Mint',
       toListId: 'All',
       initiatedByListId: 'All',
-      approvalId: 'free-transfer',
+      approvalId: 'transferable-approval',
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,

@@ -432,10 +432,11 @@ sharedOpts(
     .option('--name <name>', 'Item name', 'Auction')
     .option('--description <text>', 'Item description')
     .option('--image <url>', 'Item image URL')
+    .option('--seller <address>', 'Seller address — only this address can accept the winning bid (defaults to --creator)')
 ).action(async (opts) => {
   const { buildAuction } = await import('../../core/builders/auction.js');
   if (opts.json) { emit(buildAuction(readJsonInput(opts.json)), opts); return; }
-  emit(buildAuction({ bidDeadline: opts.bidDeadline, acceptWindow: opts.acceptWindow, name: opts.name, description: opts.description, image: opts.image }), opts);
+  emit(buildAuction({ bidDeadline: opts.bidDeadline, acceptWindow: opts.acceptWindow, name: opts.name, description: opts.description, image: opts.image, seller: opts.seller, creator: opts.creator }), opts);
 });
 
 sharedOpts(
