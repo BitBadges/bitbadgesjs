@@ -4,6 +4,18 @@ import { addAliasPath as addAliasPathToSession, getOrCreateSession } from '../..
 export const addAliasPathSchema = z.object({
   sessionId: z.string().optional().describe("Session ID for per-request isolation."),
   creatorAddress: z.string().optional(),
+  // Off-chain metadata for the path-level placeholder URI. These are stored
+  // in the session's metadataPlaceholders sidecar (NOT on the proto) and
+  // referenced by metadata.uri. The metadata auto-apply flow uploads the
+  // sidecar entries as off-chain JSON and substitutes the placeholder URIs.
+  pathName: z.string().optional().describe('Display name for this alias path (off-chain metadata). Stored in metadataPlaceholders sidecar.'),
+  pathDescription: z.string().optional().describe('1-2 sentence description for this alias path (off-chain metadata).'),
+  pathImage: z.string().optional().describe('Image URL or IMAGE_N placeholder for this alias path (off-chain metadata).'),
+  // Optional per-denomUnit display content. Indexed by unit position. Same
+  // routing — sidecar only, not the proto.
+  denomUnitName: z.string().optional().describe('Display name for the default denom unit (off-chain).'),
+  denomUnitDescription: z.string().optional().describe('Description for the default denom unit (off-chain).'),
+  denomUnitImage: z.string().optional().describe('Image URL or IMAGE_N placeholder for the default denom unit (off-chain).'),
   aliasPath: z.object({
     denom: z.string().describe('Base denom symbol (e.g., "uvatom", "uwusdc"). Must only contain a-zA-Z, _, {, }, -. NEVER use raw IBC denom (ibc/...).'),
     symbol: z.string().describe('Same as denom for the base unit.'),
@@ -35,12 +47,18 @@ export type AddAliasPathInput = z.infer<typeof addAliasPathSchema>;
 
 export const addAliasPathTool = {
   name: 'add_alias_path',
-  description: 'Add an alias path for ICS20-backed tokens or liquidity pools. Required for smart tokens. Decimals must match the IBC denom decimals. PathMetadata only has { uri, customData }; set uri to a placeholder like "ipfs://METADATA_ALIAS_<denom>" and put the image/name/description inside the off-chain JSON (the metadata auto-apply flow handles substitution).',
+  description: 'Add an alias path for ICS20-backed tokens or liquidity pools. Required for smart tokens. Decimals must match the IBC denom decimals. PathMetadata on-chain only has { uri, customData }; pass pathName / pathDescription / pathImage (and denomUnitName / Description / Image) as TOP-LEVEL params and they will be routed into the off-chain metadataPlaceholders sidecar keyed by an auto-generated placeholder URI.',
   inputSchema: {
     type: 'object' as const,
     properties: {
       sessionId: { type: 'string', description: 'Session ID.' },
       creatorAddress: { type: 'string' },
+      pathName: { type: 'string', description: 'Display name for the alias path. Stored off-chain in metadataPlaceholders.' },
+      pathDescription: { type: 'string', description: '1-2 sentence description for the alias path. Off-chain.' },
+      pathImage: { type: 'string', description: 'Image URL or IMAGE_N placeholder for the alias path. Off-chain.' },
+      denomUnitName: { type: 'string', description: 'Display name for the default denom unit. Off-chain.' },
+      denomUnitDescription: { type: 'string', description: 'Description for the default denom unit. Off-chain.' },
+      denomUnitImage: { type: 'string', description: 'Image URL or IMAGE_N placeholder for the default denom unit. Off-chain.' },
       aliasPath: {
         type: 'object',
         description: 'Alias path configuration for ICS20-backed tokens.',
@@ -127,38 +145,84 @@ export function handleAddAliasPath(input: AddAliasPathInput) {
   }
 
   // PathMetadata only has { uri, customData }. An `image` field at this
-  // level is invalid proto. Strip it from the incoming alias path and
-  // from each denomUnit, and ensure every PathMetadata has a placeholder
-  // uri the metadata auto-apply flow can substitute. The image the caller
-  // passed belongs inside the off-chain JSON at that uri, not on the proto.
+  // level is invalid proto. Strip any inbound `image` field and ensure
+  // every PathMetadata has a placeholder uri the metadata auto-apply flow
+  // can substitute. We then route any image/name/description the caller
+  // passed (either via the new top-level params or, defensively, via the
+  // legacy nested-on-metadata shape) into the session's metadataPlaceholders
+  // sidecar. Nothing about the image goes onto the on-chain proto.
+  let legacyPathImage: string | undefined;
+  let legacyPathName: string | undefined;
+  let legacyPathDescription: string | undefined;
   if (input.aliasPath.metadata) {
-    const { image: _ignoreImage, ...cleanPathMetadata } = input.aliasPath.metadata as any;
+    const { image, name, description, ...cleanPathMetadata } = input.aliasPath.metadata as any;
+    legacyPathImage = typeof image === 'string' ? image : undefined;
+    legacyPathName = typeof name === 'string' ? name : undefined;
+    legacyPathDescription = typeof description === 'string' ? description : undefined;
     input.aliasPath.metadata = {
       uri: cleanPathMetadata.uri || `ipfs://METADATA_ALIAS_${denom}`,
       customData: cleanPathMetadata.customData || ''
     };
-    void _ignoreImage;
   } else {
     input.aliasPath.metadata = { uri: `ipfs://METADATA_ALIAS_${denom}`, customData: '' };
   }
+  const pathUri = input.aliasPath.metadata!.uri as string;
 
+  // Track the default denom unit URI so we can attach off-chain metadata to
+  // the right placeholder.
+  let defaultUnitUri: string | undefined;
+  let legacyUnitImage: string | undefined;
+  let legacyUnitName: string | undefined;
+  let legacyUnitDescription: string | undefined;
   if (input.aliasPath.denomUnits && Array.isArray(input.aliasPath.denomUnits)) {
     input.aliasPath.denomUnits = input.aliasPath.denomUnits.map((unit: any, idx: number) => {
       if (!unit.metadata || typeof unit.metadata !== 'object') {
         unit.metadata = { uri: `ipfs://METADATA_ALIAS_${denom}_UNIT_${idx}`, customData: '' };
-        return unit;
+      } else {
+        const { image, name, description, ...cleanUnitMetadata } = unit.metadata as any;
+        if (unit.isDefaultDisplay || idx === 0) {
+          if (typeof image === 'string') legacyUnitImage = image;
+          if (typeof name === 'string') legacyUnitName = name;
+          if (typeof description === 'string') legacyUnitDescription = description;
+        }
+        unit.metadata = {
+          uri: cleanUnitMetadata.uri || `ipfs://METADATA_ALIAS_${denom}_UNIT_${idx}`,
+          customData: cleanUnitMetadata.customData || ''
+        };
       }
-      const { image: _dropImage, ...cleanUnitMetadata } = unit.metadata as any;
-      unit.metadata = {
-        uri: cleanUnitMetadata.uri || `ipfs://METADATA_ALIAS_${denom}_UNIT_${idx}`,
-        customData: cleanUnitMetadata.customData || ''
-      };
-      void _dropImage;
+      if ((unit.isDefaultDisplay || idx === 0) && !defaultUnitUri) {
+        defaultUnitUri = unit.metadata.uri;
+      }
       return unit;
     });
   }
 
-  getOrCreateSession(input.sessionId, input.creatorAddress);
+  // Persist the alias path itself into session state.
+  const session = getOrCreateSession(input.sessionId, input.creatorAddress);
   addAliasPathToSession(input.sessionId, input.aliasPath);
+
+  // Route off-chain metadata into the session's metadataPlaceholders sidecar.
+  // Top-level params win over legacy nested-on-metadata fields if both are set.
+  const pathName = input.pathName ?? legacyPathName;
+  const pathDescription = input.pathDescription ?? legacyPathDescription;
+  const pathImage = input.pathImage ?? legacyPathImage;
+  if (pathName || pathDescription || pathImage) {
+    session.metadataPlaceholders[pathUri] = {
+      name: pathName || session.metadataPlaceholders[pathUri]?.name || `${denom} alias path`,
+      description: pathDescription || session.metadataPlaceholders[pathUri]?.description || '',
+      image: pathImage || session.metadataPlaceholders[pathUri]?.image || ''
+    };
+  }
+  const unitName = input.denomUnitName ?? legacyUnitName;
+  const unitDescription = input.denomUnitDescription ?? legacyUnitDescription;
+  const unitImage = input.denomUnitImage ?? legacyUnitImage;
+  if (defaultUnitUri && (unitName || unitDescription || unitImage)) {
+    session.metadataPlaceholders[defaultUnitUri] = {
+      name: unitName || session.metadataPlaceholders[defaultUnitUri]?.name || `${denom} default unit`,
+      description: unitDescription || session.metadataPlaceholders[defaultUnitUri]?.description || '',
+      image: unitImage || session.metadataPlaceholders[defaultUnitUri]?.image || ''
+    };
+  }
+
   return { success: true, denom: input.aliasPath.denom };
 }

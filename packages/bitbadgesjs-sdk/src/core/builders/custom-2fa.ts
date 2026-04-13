@@ -7,7 +7,8 @@ import {
   BURN_ADDRESS,
   buildMsg,
   emptyPermissions,
-  alwaysLockedPermission
+  alwaysLockedPermission,
+  alwaysLockedTokenIdsPermission
 } from './shared.js';
 
 export interface Custom2FAParams {
@@ -105,7 +106,7 @@ export function buildCustom2FA(params: Custom2FAParams): any {
     canUpdateCustomData: [alwaysLockedPermission()],
     canUpdateManager: [],
     canUpdateCollectionMetadata: [],
-    canUpdateValidTokenIds: [alwaysLockedPermission()],
+    canUpdateValidTokenIds: [alwaysLockedTokenIdsPermission()],
     canUpdateTokenMetadata: [],
     canUpdateCollectionApprovals: [],
     canAddMoreAliasPaths: [alwaysLockedPermission()],
