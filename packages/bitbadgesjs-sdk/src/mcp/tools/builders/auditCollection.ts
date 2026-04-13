@@ -10,7 +10,7 @@ import { auditCollection, type AuditResult } from '../../../core/audit.js';
 
 export const auditCollectionTool = {
   name: 'audit_collection',
-  description: 'Audit a collection transaction or on-chain collection for security risks, design flaws, and common gotchas. Pass either a MsgUniversalUpdateCollection message or a raw collection object. Returns categorized findings with severity levels (critical/warning/info).',
+  description: '[DEPRECATED — use review_collection] Audit a collection transaction or on-chain collection for security risks. Pass either a MsgUniversalUpdateCollection message or a raw collection object. Returns categorized findings with severity levels.',
   inputSchema: {
     type: 'object' as const,
     properties: {

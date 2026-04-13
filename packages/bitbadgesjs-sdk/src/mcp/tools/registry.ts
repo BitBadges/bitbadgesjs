@@ -47,6 +47,8 @@ import {
   // Audit / explain
   auditCollectionTool, handleAuditCollection,
   explainCollectionTool, handleExplainCollection,
+  // Unified review
+  reviewCollectionTool, handleReviewCollection,
   // Claim builder
   buildClaimTool, handleBuildClaim,
   // Standards compliance
@@ -145,7 +147,7 @@ const getSkillInstructionsTool: ToolSchema = {
 const verifyStandardsTool: ToolSchema = {
   name: 'verify_standards',
   description:
-    'Verify that a collection transaction complies with BitBadges protocol standards (subscription, credit token, smart token, etc.). Returns violations with severity levels. Complements audit_collection which covers security — this covers standards compliance.',
+    '[DEPRECATED — use review_collection] Verify that a collection transaction complies with BitBadges protocol standards. Returns violations with severity levels.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -207,6 +209,9 @@ export const toolRegistry: Record<string, ToolEntry> = {
   // Dynamic store
   build_dynamic_store: entry(buildDynamicStoreTool, handleBuildDynamicStore),
   query_dynamic_store: entry(queryDynamicStoreTool, async (args: any) => await handleQueryDynamicStore(args)),
+
+  // Unified review (preferred)
+  review_collection: entry(reviewCollectionTool, handleReviewCollection),
 
   // Audit / explain / claim
   audit_collection: entry(auditCollectionTool, handleAuditCollection),
