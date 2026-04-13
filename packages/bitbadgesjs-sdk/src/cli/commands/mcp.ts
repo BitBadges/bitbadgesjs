@@ -2,52 +2,35 @@
  * `mcp` command group — reach every bitbadges-builder-mcp tool from the CLI.
  *
  * The MCP tool registry is imported as a plain library (see
- * bitbadges-builder-mcp/src/tools/registry.ts). There is no subprocess, no
- * stdio MCP protocol — we just call the handlers directly.
+ * src/mcp/tools/registry.ts). There is no subprocess, no stdio MCP protocol —
+ * we just call the handlers directly.
  *
- * Session state is persisted per-invocation under ~/.bitbadges/sessions/<id>.json
- * so agents can compose a collection across many `mcp call` invocations.
+ * Session state is persisted per-invocation via the file-backed store in
+ * src/mcp/session/fileStore.ts so agents can compose a collection across many
+ * `mcp call` invocations. This file contains no session persistence logic —
+ * it's CLI wiring over library helpers.
  */
 
 import { Command } from 'commander';
 import fs from 'fs';
-import os from 'os';
-import path from 'path';
 
 import {
   toolRegistry,
   listTools,
   callTool,
-  exportSession,
-  importSession,
   resourceRegistry,
   listResources,
   readResource
 } from '../../mcp/tools/registry.js';
-
-const SESSIONS_DIR = path.join(os.homedir(), '.bitbadges', 'sessions');
-
-function sessionFilePath(id: string): string {
-  return path.join(SESSIONS_DIR, `${id}.json`);
-}
-
-function loadSession(id: string): void {
-  const file = sessionFilePath(id);
-  if (!fs.existsSync(file)) return;
-  try {
-    const snapshot = JSON.parse(fs.readFileSync(file, 'utf-8'));
-    importSession(id, snapshot);
-  } catch (err) {
-    throw new Error(`Failed to load session "${id}" from ${file}: ${(err as Error).message}`);
-  }
-}
-
-function saveSession(id: string): void {
-  const snapshot = exportSession(id);
-  if (snapshot === null) return;
-  fs.mkdirSync(SESSIONS_DIR, { recursive: true });
-  fs.writeFileSync(sessionFilePath(id), JSON.stringify(snapshot, null, 2));
-}
+import {
+  loadSessionFromDisk,
+  saveSessionToDisk,
+  listSessionFilesOnDisk,
+  readSessionFileRaw,
+  resetSessionFile,
+  sessionFilePath,
+  DEFAULT_SESSIONS_DIR
+} from '../../mcp/session/fileStore.js';
 
 function parseArgs(argsJson: string | undefined, argsFile: string | undefined): any {
   if (argsJson && argsFile) {
@@ -133,7 +116,7 @@ mcpCommand
     // Load session from disk into the in-memory Map before dispatch.
     if (sessionId) {
       try {
-        loadSession(sessionId);
+        loadSessionFromDisk(sessionId);
       } catch (err) {
         process.stderr.write(`${(err as Error).message}\n`);
         process.exitCode = 1;
@@ -150,7 +133,7 @@ mcpCommand
     // Persist session state back to disk so the next invocation sees it.
     if (sessionId) {
       try {
-        saveSession(sessionId);
+        saveSessionToDisk(sessionId);
       } catch (err) {
         process.stderr.write(`Warning: failed to save session "${sessionId}": ${(err as Error).message}\n`);
       }
@@ -175,15 +158,10 @@ const sessionCommand = mcpCommand
 
 sessionCommand
   .command('list')
-  .description('List persisted session ids.')
+  .description(`List persisted session ids under ${DEFAULT_SESSIONS_DIR}.`)
   .action(() => {
-    if (!fs.existsSync(SESSIONS_DIR)) {
-      return;
-    }
-    for (const file of fs.readdirSync(SESSIONS_DIR)) {
-      if (file.endsWith('.json')) {
-        process.stdout.write(file.replace(/\.json$/, '') + '\n');
-      }
+    for (const id of listSessionFilesOnDisk()) {
+      process.stdout.write(id + '\n');
     }
   });
 
@@ -191,23 +169,20 @@ sessionCommand
   .command('show <id>')
   .description('Print a session snapshot as JSON.')
   .action((id: string) => {
-    const file = sessionFilePath(id);
-    if (!fs.existsSync(file)) {
-      process.stderr.write(`No session file at ${file}\n`);
+    const raw = readSessionFileRaw(id);
+    if (raw === null) {
+      process.stderr.write(`No session file at ${sessionFilePath(id)}\n`);
       process.exitCode = 1;
       return;
     }
-    process.stdout.write(fs.readFileSync(file, 'utf-8'));
+    process.stdout.write(raw);
   });
 
 sessionCommand
   .command('reset <id>')
   .description('Delete a persisted session file.')
   .action((id: string) => {
-    const file = sessionFilePath(id);
-    if (fs.existsSync(file)) {
-      fs.unlinkSync(file);
-    }
+    resetSessionFile(id);
   });
 
 // ── mcp resources ────────────────────────────────────────────────────────────
