@@ -21,6 +21,7 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'critical',
           source: 'ux',
           category: 'approvals',
+          localeKey: 'review_all_includes_mint',
           params: { name },
           messageEn: `Approval "${name}" uses fromListId "All", which accidentally includes "Mint".`,
           recommendationEn: 'Use a specific non-mint list or explicitly exclude the Mint address.'
@@ -42,6 +43,7 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'critical',
           source: 'ux',
           category: 'approvals',
+          localeKey: 'review_mint_approval_will_fail',
           params: { name },
           messageEn: `Mint approval "${name}" is missing overridesFromOutgoingApprovals — minting will fail on-chain.`,
           recommendationEn: `Set approvalCriteria.overridesFromOutgoingApprovals = true on "${name}".`
@@ -66,15 +68,47 @@ export const approvalsChecks: UxCheck[] = [
     });
     const hasOverrides = forcefulApprovals.length > 0;
 
-    if (hasOverrides || !invariantBlocksForceful) {
+    // Branch the detail locale key to match the old frontend's 3-way logic:
+    //   - hasOverrides && invariantBlocksForceful  -> review_forceful_both_set
+    //   - hasOverrides && !invariantBlocksForceful -> Forceful_Override_Warning_With_Count
+    //   - !hasOverrides && invariantBlocksForceful -> review_forceful_invariant_only
+    if (hasOverrides || invariantBlocksForceful) {
+      const detailKey =
+        hasOverrides && invariantBlocksForceful
+          ? 'review_forceful_both_set'
+          : hasOverrides
+            ? 'Forceful_Override_Warning_With_Count'
+            : 'review_forceful_invariant_only';
       out.push({
         code: 'review.ux.forceful_transfers_allowed',
         severity: 'critical',
         source: 'ux',
         category: 'approvals',
+        // Legacy frontend used three disjoint locale keys for this finding.
+        localeKeyTitle: 'Forceful_Override_Title',
+        localeKeyDetail: detailKey,
+        localeKeyFix: 'review_forceful_override_fix',
         params: { count: forcefulApprovals.length },
         messageEn: `Forceful transfers are allowed (${forcefulApprovals.length} override approval(s) present or invariant unset).`,
         recommendationEn: 'Set invariants.noForcefulPostMintTransfers and remove approval overrides unless intentional.'
+      });
+    }
+
+    // Legacy critical finding: forceful overrides exist but the immutable
+    // noForcefulPostMintTransfers invariant is not set. The frontend flagged
+    // this separately because the invariant is locked at creation time.
+    if (hasOverrides && !invariantBlocksForceful) {
+      out.push({
+        code: 'review.ux.forceful_invariant_not_set',
+        severity: 'critical',
+        source: 'ux',
+        category: 'approvals',
+        localeKey: 'review_forceful_invariant',
+        params: { count: forcefulApprovals.length },
+        messageEn:
+          'Forceful transfer overrides exist but the noForcefulPostMintTransfers invariant is not set — the invariant cannot be added after creation.',
+        recommendationEn:
+          'Enable invariants.noForcefulPostMintTransfers at creation to permanently block forceful transfers.'
       });
     }
     if (hasOverrides && invariantBlocksForceful) {
@@ -83,6 +117,7 @@ export const approvalsChecks: UxCheck[] = [
         severity: 'critical',
         source: 'ux',
         category: 'approvals',
+        localeKey: 'review_forceful_mismatch',
         messageEn:
           'Invariant blocks forceful transfers but approvals still set overridesFromOutgoingApprovals/overridesToIncomingApprovals — the transaction will fail on-chain.',
         recommendationEn: 'Either unset the invariant or remove the override flags from the listed approvals.'
@@ -102,6 +137,7 @@ export const approvalsChecks: UxCheck[] = [
         severity: 'info',
         source: 'ux',
         category: 'approvals',
+        localeKey: 'review_backing_override',
         messageEn: 'Backed-minting approvals set overrides — this is expected for smart-token flows.',
         recommendationEn: 'No action needed unless the backing flow is unintentional.'
       });
@@ -121,6 +157,7 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'critical',
           source: 'ux',
           category: 'approvals',
+          localeKey: 'review_no_auto_approve',
           messageEn:
             'Mint approvals exist but defaultBalances.autoApproveAllIncomingTransfers is not true — recipients will not receive minted tokens.',
           recommendationEn: 'Set defaultBalances.autoApproveAllIncomingTransfers = true.'
@@ -151,6 +188,7 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'critical',
           source: 'ux',
           category: 'approvals',
+          localeKey: 'review_infinite_drain',
           params: { name },
           messageEn: `Approval "${name}" pulls funds from the approver via overrideFromWithApproverAddress with no transfer limits — infinite drain risk.`,
           recommendationEn: 'Set an overallMaxNumTransfers or per-address cap on this approval.'
@@ -175,6 +213,7 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'warning',
           source: 'ux',
           category: 'approvals',
+          localeKey: 'review_scaling_approver',
           params: { name },
           messageEn: `Approval "${name}" combines amount scaling with approver-funded coin transfers — payouts may multiply unexpectedly.`,
           recommendationEn: 'Disable allowAmountScaling or use a non-approver funding address.'
@@ -205,6 +244,7 @@ export const approvalsChecks: UxCheck[] = [
             severity: 'warning',
             source: 'ux',
             category: 'approvals',
+            localeKey: 'review_per_user_exceeds_overall',
             params: { name, perUser: String(perVal), overall: String(overall) },
             messageEn: `Approval "${name}" per-user max (${perVal}) exceeds overall max (${overall}).`,
             recommendationEn: 'Raise overallMaxNumTransfers or lower the per-user limit.'
@@ -230,6 +270,10 @@ export const approvalsChecks: UxCheck[] = [
         severity: 'critical',
         source: 'ux',
         category: 'claims',
+        // Legacy frontend used three disjoint locale keys for this finding.
+        localeKeyTitle: 'Collection_uses_claims',
+        localeKeyDetail: 'Claim_Trust_Warning',
+        localeKeyFix: 'review_claims_trust_fix',
         messageEn:
           'Collection uses claims — users trust the claim backend (plugins, numUses, signatures) in addition to the on-chain logic.',
         recommendationEn: 'Review each claim plugin and confirm the off-chain backend is trustworthy.'
@@ -254,6 +298,7 @@ export const approvalsChecks: UxCheck[] = [
             severity: 'critical',
             source: 'ux',
             category: 'claims',
+            localeKey: 'review_claim_no_signin',
             params: { name: label },
             messageEn: `Claim "${label}" has no initiatedBy plugin — anyone can call it anonymously.`,
             recommendationEn: `Add an initiatedBy plugin (wallet sign-in / social auth) to "${label}".`
@@ -283,6 +328,7 @@ export const approvalsChecks: UxCheck[] = [
             severity: 'critical',
             source: 'ux',
             category: 'claims',
+            localeKey: 'review_claim_mismatch',
             params: { name: label, offChain: Number(offChainMax), onChain: Number(onChainMax) },
             messageEn: `Claim "${label}" offChain numUses (${offChainMax}) does not match on-chain overallMaxNumTransfers (${onChainMax}).`,
             recommendationEn: `Align the numUses plugin maxUses and the approval's overallMaxNumTransfers for "${label}".`
@@ -311,6 +357,7 @@ export const approvalsChecks: UxCheck[] = [
             severity: 'warning',
             source: 'ux',
             category: 'claims',
+            localeKey: 'review_claim_replay_risk',
             params: { name: label },
             messageEn: `Claim "${label}" has maxUsesPerLeaf != 1 — the same claim code can be replayed.`,
             recommendationEn: 'Set maxUsesPerLeaf to "1" unless replay is intentional.'
@@ -335,6 +382,7 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'warning',
           source: 'ux',
           category: 'approvals',
+          localeKey: 'review_counterparty_purge',
           params: { name },
           messageEn: `Approval "${name}" allows counterparty purge but initiatedByListId is not a single address.`,
           recommendationEn: 'Restrict initiatedByListId to a single address, or disable allowCounterpartyPurge.'
@@ -363,6 +411,7 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'warning',
           source: 'ux',
           category: 'approvals',
+          localeKey: 'review_default_balance_not_scannable',
           messageEn:
             'Default-balance approvals contain non-scannable features (coinTransfers, merkle challenges, or predetermined balances).',
           recommendationEn: 'Move these to regular collectionApprovals, or remove from default balances.'
@@ -383,6 +432,7 @@ export const approvalsChecks: UxCheck[] = [
       severity: 'warning',
       source: 'ux',
       category: 'approvals',
+      localeKey: 'review_wrapper_path_transferability',
       messageEn: 'Wrapper paths make the underlying token freely transferable via IBC, bypassing on-chain approvals.',
       recommendationEn: 'Confirm the wrapped token is intended to be a free-floating IBC asset.'
     });
@@ -393,6 +443,7 @@ export const approvalsChecks: UxCheck[] = [
         severity: 'critical',
         source: 'ux',
         category: 'approvals',
+        localeKey: 'review_wrapper_path_no_approval',
         messageEn: 'Wrapper paths exist but no approval has allowSpecialWrapping = true — wrapping will fail.',
         recommendationEn: 'Add an approval with approvalCriteria.allowSpecialWrapping = true.'
       });
@@ -421,6 +472,7 @@ export const approvalsChecks: UxCheck[] = [
             severity: 'warning',
             source: 'ux',
             category: 'approvals',
+            localeKey: 'review_reset_epoch_zero',
             params: { name },
             messageEn: `Approval "${name}" uses a reset interval with startTime 0 — epochs anchor to unix 0, not now.`,
             recommendationEn: 'Set resetTimeIntervals.startTime to a real timestamp (current time or launch).'
@@ -447,6 +499,7 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'warning',
           source: 'ux',
           category: 'approvals',
+          localeKey: 'review_royalty_missing_address',
           params: { name },
           messageEn: `Royalty on approval "${name}" has a percentage but no payout address.`,
           recommendationEn: 'Set royalty.payoutAddress or remove the percentage.'
@@ -458,6 +511,7 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'warning',
           source: 'ux',
           category: 'approvals',
+          localeKey: 'review_royalty_missing_percentage',
           params: { name },
           messageEn: `Royalty on approval "${name}" has a payout address but no percentage.`,
           recommendationEn: 'Set royalty.percentage or remove the payout address.'

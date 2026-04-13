@@ -32,6 +32,7 @@ export const metadataChecks: UxCheck[] = [
         severity: 'info',
         source: 'ux',
         category: 'metadata',
+        localeKey: 'review_placeholder_images',
         params: { count: placeholderImageEntries.length },
         messageEn: `${placeholderImageEntries.length} metadata entrie(s) use placeholder images.`,
         recommendationEn: 'Upload real images before publishing.'
@@ -65,6 +66,7 @@ export const metadataChecks: UxCheck[] = [
         severity: 'info',
         source: 'ux',
         category: 'metadata',
+        localeKey: 'review_unnamed_approvals',
         params: { names, count: unnamed.length },
         messageEn: `${unnamed.length} approval(s) have no display name: ${names}.`,
         recommendationEn: 'Add a name via approval.details or the approval metadata URI.'
@@ -103,6 +105,7 @@ export const metadataChecks: UxCheck[] = [
         severity: 'info',
         source: 'ux',
         category: 'metadata',
+        localeKey: 'review_alias_no_images',
         params: { count: missing.length },
         messageEn: `${missing.length} alias path(s) have no image on the default display unit.`,
         recommendationEn: 'Add an image to path.metadata or the default denomUnit.metadata.'

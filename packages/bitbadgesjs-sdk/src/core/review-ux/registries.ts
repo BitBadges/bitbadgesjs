@@ -39,7 +39,17 @@ export const registriesChecks: UxCheck[] = [
         severity: 'warning',
         source: 'ux',
         category: 'registries',
-        params: { symbols: symbols.join(', ') },
+        localeKey: 'review_alias_conflict',
+        // Legacy locale string uses `"{{symbols}}"` with symbols pre-joined by
+        // `", "` (note the inner quotes), plus a `{{first}}` for the singular
+        // variant suggesting e.g. `"wFOO"`. `count` drives i18next plural
+        // selection between `_detail_one`/`_detail_other` and
+        // `_fix_one`/`_fix_other`.
+        params: {
+          symbols: symbols.join('", "'),
+          first: symbols[0] || '',
+          count: symbols.length
+        },
         messageEn: `Alias path symbol(s) "${symbols.join(', ')}" collide with registered coin symbols.`,
         recommendationEn: 'Rename the alias path symbol(s) to avoid confusion with existing tokens.'
       });

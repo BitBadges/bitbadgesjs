@@ -37,6 +37,7 @@ export const diffChecks: UxCheck[] = [
         severity: 'critical',
         source: 'ux',
         category: 'diff',
+        localeKey: 'review_deleted_approvals',
         params: { names, count: deleted.length },
         messageEn: `${deleted.length} on-chain approval(s) would be deleted: ${names}.`,
         recommendationEn: 'Re-include any approvals that should persist, or confirm the deletion is intentional.'
@@ -70,6 +71,7 @@ export const diffChecks: UxCheck[] = [
           severity: 'critical',
           source: 'ux',
           category: 'diff',
+          localeKey: 'review_tracker_id_changed',
           params: { name: proposed.approvalId, trackers: changes.join(', ') },
           messageEn: `Approval "${proposed.approvalId}" changed tracker IDs (${changes.join(', ')}) — on-chain counters will reset.`,
           recommendationEn: 'Keep the existing tracker IDs unless a full reset is intentional.'
@@ -101,6 +103,7 @@ export const diffChecks: UxCheck[] = [
             severity: 'warning',
             source: 'ux',
             category: 'diff',
+            localeKey: 'review_claim_plugins_deleted',
             params: { name: claimLabel, plugins: names },
             messageEn: `Claim "${claimLabel}" deletes plugin(s): ${names}.`,
             recommendationEn: 'Confirm the deleted plugins are not required for existing claim codes.'
@@ -121,6 +124,7 @@ export const diffChecks: UxCheck[] = [
               severity: 'warning',
               source: 'ux',
               category: 'diff',
+              localeKey: 'review_claim_plugin_params_changed',
               params: { name: claimLabel, plugin: pp.pluginId },
               messageEn: `Claim "${claimLabel}" plugin "${pp.pluginId}" params changed.`,
               recommendationEn: 'Confirm existing users are not affected by the parameter change.'

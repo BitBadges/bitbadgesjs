@@ -30,6 +30,7 @@ export const permissionsChecks: UxCheck[] = [
           severity: 'warning',
           source: 'ux',
           category: 'permissions',
+          localeKey: 'review_permanently_permitted',
           params: { permission: permName },
           messageEn: `Permission "${permName}" is permanently permitted forever — it can never be forbidden.`,
           recommendationEn: 'Only lock permissions you are certain about. Consider leaving them neutral instead.'
@@ -56,6 +57,7 @@ export const permissionsChecks: UxCheck[] = [
         severity: 'warning',
         source: 'ux',
         category: 'permissions',
+        localeKey: 'review_backed_path_mint_not_locked',
         messageEn:
           'Backed path is set but the canUpdateCollectionApprovals permission is not permanently forbidden for the Mint list.',
         recommendationEn:

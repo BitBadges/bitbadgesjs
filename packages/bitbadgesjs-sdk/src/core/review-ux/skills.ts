@@ -37,6 +37,7 @@ export const skillChecks: UxCheck[] = [
             severity: 'warning',
             source: 'ux',
             category: 'skills',
+            localeKey: 'review_nft_no_supply_cap',
             messageEn: 'NFT collection has no maxSupplyPerId cap — multiple copies of the same token can be minted.',
             recommendationEn: 'Set invariants.maxSupplyPerId to "1" for true NFTs.'
           },
@@ -66,6 +67,7 @@ export const skillChecks: UxCheck[] = [
             severity: 'warning',
             source: 'ux',
             category: 'skills',
+            localeKey: 'review_fungible_multiple_ids',
             params: { count: totalIds },
             messageEn: `Fungible token skill selected but ${totalIds} token IDs are valid — fungibles typically use a single ID.`,
             recommendationEn: 'Collapse validTokenIds to a single range of 1 ID.'
@@ -106,6 +108,7 @@ export const skillChecks: UxCheck[] = [
                 severity: 'critical',
                 source: 'ux',
                 category: 'skills',
+                localeKey: `review_${key}_protocol`,
                 params: { protocol: standard },
                 messageEn: `Collection does not follow the ${standard} protocol shape required by the selected skill or standard.`,
                 recommendationEn: `Rebuild the collection using the ${standard} template, or remove the skill/standard.`
@@ -142,6 +145,7 @@ export const skillChecks: UxCheck[] = [
         severity: 'warning',
         source: 'ux',
         category: 'skills',
+        localeKey: 'review_no_mint_approvals',
         messageEn: 'No Mint approvals are present — nothing can be minted.',
         recommendationEn: 'Add an approval with fromListId = Mint, or use a smart-token backed minting flow.'
       });
@@ -165,10 +169,61 @@ export const skillChecks: UxCheck[] = [
         severity: 'warning',
         source: 'ux',
         category: 'skills',
+        localeKey: 'review_backed_path_multi_token',
         messageEn: 'Backed path smart tokens must have exactly 1 token ID.',
         recommendationEn: 'Set validTokenIds to a single range of 1.'
       });
     }
+    return out;
+  },
+
+  // Credit tokens should be non-transferable (increment-only)
+  (value, ctx) => {
+    const out: Finding[] = [];
+    if (!hasSkill(ctx, 'credit-token')) return out;
+    const nonMint = getApprovals(value).filter((a: any) => a.fromListId !== 'Mint' && a.fromListId !== 'All');
+    if (nonMint.length === 0) return out;
+    out.push(
+      tagSkill(
+        {
+          code: 'review.ux.credit_token_transfers_allowed',
+          severity: 'warning',
+          source: 'ux',
+          category: 'skills',
+          localeKey: 'review_credit_transfers',
+          params: { count: nonMint.length },
+          messageEn: `Credit token has ${nonMint.length} non-mint transfer approval(s) — credit tokens are typically non-transferable.`,
+          recommendationEn: 'Remove non-mint transfer approvals so credits can only be incremented, not sent between users.'
+        },
+        ctx,
+        'credit-token'
+      )
+    );
+    return out;
+  },
+
+  // Address list tokens should be non-transferable (admin-managed)
+  (value, ctx) => {
+    const out: Finding[] = [];
+    if (!hasSkill(ctx, 'address-list')) return out;
+    const nonMint = getApprovals(value).filter((a: any) => a.fromListId !== 'Mint' && a.fromListId !== 'All');
+    if (nonMint.length === 0) return out;
+    out.push(
+      tagSkill(
+        {
+          code: 'review.ux.addresslist_transfers_allowed',
+          severity: 'warning',
+          source: 'ux',
+          category: 'skills',
+          localeKey: 'review_addresslist_transfers',
+          params: { count: nonMint.length },
+          messageEn: `Address list token has ${nonMint.length} non-mint transfer approval(s) — membership tokens are typically non-transferable.`,
+          recommendationEn: 'Remove transfer approvals so membership is admin-managed only.'
+        },
+        ctx,
+        'address-list'
+      )
+    );
     return out;
   },
 
@@ -184,6 +239,7 @@ export const skillChecks: UxCheck[] = [
         severity: 'critical',
         source: 'ux',
         category: 'skills',
+        localeKey: 'review_lp_no_alias',
         messageEn: 'Liquidity Pools standard is set but the collection has no alias paths.',
         recommendationEn: 'Add at least one alias path to represent the pool LP denomination.'
       });

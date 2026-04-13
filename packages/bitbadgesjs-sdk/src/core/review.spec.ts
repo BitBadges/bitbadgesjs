@@ -134,6 +134,78 @@ describe('UX checks — representative sample', () => {
     expect(findByCode(findings, 'review.ux.diff_deleted_approvals')).toBeDefined();
   });
 
+  it('flags forceful_invariant_not_set when overrides exist without invariant', () => {
+    const findings = runUxChecks(
+      {
+        collectionApprovals: [
+          {
+            approvalId: 'forceful1',
+            fromListId: 'All',
+            approvalCriteria: { overridesFromOutgoingApprovals: true }
+          }
+        ],
+        invariants: {}
+      },
+      ctx
+    );
+    expect(findByCode(findings, 'review.ux.forceful_invariant_not_set')).toBeDefined();
+  });
+
+  it('forceful detail locale key branches on state', () => {
+    // Both set -> review_forceful_both_set
+    const both = runUxChecks(
+      {
+        collectionApprovals: [
+          {
+            approvalId: 'x',
+            fromListId: 'bb1user',
+            approvalCriteria: { overridesFromOutgoingApprovals: true }
+          }
+        ],
+        invariants: { noForcefulPostMintTransfers: true }
+      },
+      ctx
+    );
+    expect(findByCode(both, 'review.ux.forceful_transfers_allowed')?.localeKeyDetail).toBe(
+      'review_forceful_both_set'
+    );
+    // Invariant only -> review_forceful_invariant_only
+    const invOnly = runUxChecks(
+      { collectionApprovals: [], invariants: { noForcefulPostMintTransfers: true } },
+      ctx
+    );
+    // hasOverrides false, invariantBlocksForceful true — should NOT fire (current logic: fires only if hasOverrides || invariantBlocksForceful)
+    // Actually fires since invariantBlocksForceful true
+    expect(findByCode(invOnly, 'review.ux.forceful_transfers_allowed')?.localeKeyDetail).toBe(
+      'review_forceful_invariant_only'
+    );
+  });
+
+  it('flags credit_token_transfers_allowed when credit-token skill + non-mint approvals', () => {
+    const findings = runUxChecks(
+      {
+        collectionApprovals: [
+          { approvalId: 'm', fromListId: 'Mint', approvalCriteria: { overridesFromOutgoingApprovals: true } },
+          { approvalId: 't', fromListId: 'bb1holder', approvalCriteria: {} }
+        ]
+      },
+      { selectedSkills: ['credit-token'] }
+    );
+    expect(findByCode(findings, 'review.ux.credit_token_transfers_allowed')).toBeDefined();
+  });
+
+  it('flags addresslist_transfers_allowed when address-list skill + non-mint approvals', () => {
+    const findings = runUxChecks(
+      {
+        collectionApprovals: [
+          { approvalId: 't', fromListId: 'bb1holder', approvalCriteria: {} }
+        ]
+      },
+      { selectedSkills: ['address-list'] }
+    );
+    expect(findByCode(findings, 'review.ux.addresslist_transfers_allowed')).toBeDefined();
+  });
+
   it('flags reserved coin symbol collisions on alias paths', () => {
     const findings = runUxChecks(
       {
