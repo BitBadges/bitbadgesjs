@@ -47,6 +47,23 @@ export function makeColor(stream: NodeJS.WriteStream): { c: (code: keyof typeof 
   };
 }
 
+/**
+ * Colorize the `"amount":"<n>"` field inside a BalanceArray JSON string
+ * in-place — red for negative values, green for positive. Leaves the
+ * rest of the JSON untouched so the structure stays machine-readable.
+ * The regex is deliberately conservative: it only matches a string-
+ * quoted integer value right after the literal key `"amount":`.
+ */
+export function colorizeAmountsInJson(
+  json: string,
+  c: (code: 'red' | 'green', s: string) => string
+): string {
+  return json.replace(/"amount":"(-?\d+)"/g, (_match, amt: string) => {
+    const colored = amt.startsWith('-') ? c('red', amt) : c('green', '+' + amt);
+    return `"amount":"${colored}"`;
+  });
+}
+
 /** Build a horizontal rule filled with `ch` up to `width`, with an optional label. */
 export function rule(ch: string, width: number, label?: string): string {
   if (!label) return ch.repeat(width);
@@ -54,6 +71,7 @@ export function rule(ch: string, width: number, label?: string): string {
   const rem = Math.max(3, width - pre.length);
   return `${pre}${ch.repeat(rem)}`;
 }
+
 
 /**
  * Render a ReviewResult as terminal-friendly text.
@@ -470,11 +488,18 @@ export function renderSimulate(
         const sign = String(amount).startsWith('-') ? c('red', String(amount)) : c('green', '+' + amount);
         lines.push(`      ${c('dim', '·')} ${sign} ${denom}`);
       }
-      const badges = badgeChanges[addr] || {};
-      for (const [collectionId, balance] of Object.entries(badges)) {
-        // BalanceArray is bigint-converted to string before render — print compact
-        const summary = JSON.stringify(balance).slice(0, 60);
-        lines.push(`      ${c('dim', '·')} collection ${collectionId}: ${c('dim', summary)}`);
+      const tokens = badgeChanges[addr] || {};
+      for (const [collectionId, balance] of Object.entries(tokens)) {
+        // Full BalanceArray JSON — agents consume it directly, no
+        // truncation. Colorize the `"amount":"<n>"` field in-place so
+        // a reader can spot the sign at a glance without losing the
+        // raw JSON structure. Injected color escapes don't get wiped
+        // by an outer dim wrapper because we emit the JSON un-dimmed.
+        const json = JSON.stringify(balance);
+        const colorized = colorizeAmountsInJson(json, c);
+        lines.push(
+          `      ${c('dim', '·')} collection ${collectionId}: ${colorized}`
+        );
       }
     }
   } else {
@@ -527,17 +552,27 @@ export function renderSimulate(
     for (const t of coinXfers) {
       const from = t.from || '';
       const to = t.to || '';
-      lines.push(`    ${c('dim', '→')} coin ${c('bold', String(t.amount))} ${t.denom} ${c('dim', `${from} → ${to}`)}`);
+      const amtStr = String(t.amount);
+      const amt = amtStr.startsWith('-') ? c('red', amtStr) : c('green', '+' + amtStr);
+      lines.push(`    ${c('dim', '→')} ICS20 ${c('bold', amt)} ${t.denom} ${c('dim', `${from} → ${to}`)}`);
     }
     for (const t of badgeXfers) {
       const from = t.from || '';
       const to = t.to || '';
+      // Token transfer events carry a `balances` array, NOT a flat
+      // `amount`. Render the raw balances JSON so agents get the full
+      // (amount, tokenIds, ownershipTimes) tuple without lossy
+      // reformatting. Amounts inside the JSON are in-place colorized.
+      const json = Array.isArray(t.balances) ? JSON.stringify(t.balances) : '[]';
+      const colorized = colorizeAmountsInJson(json, c);
       lines.push(
-        `    ${c('dim', '→')} badge ${c('bold', String(t.amount))} of collection ${t.collectionId} ${c('dim', `${from} → ${to}`)}`
+        `    ${c('dim', '→')} token collection ${t.collectionId} ${colorized} ${c('dim', `${from} → ${to}`)}`
       );
     }
     for (const t of ibcXfers) {
-      lines.push(`    ${c('dim', '→')} ibc ${c('bold', String(t.amount))} ${t.denom} via ${t.sourceChannel || '?'}`);
+      const amtStr = String(t.amount);
+      const amt = amtStr.startsWith('-') ? c('red', amtStr) : c('green', '+' + amtStr);
+      lines.push(`    ${c('dim', '→')} ibc ${c('bold', amt)} ${t.denom} via ${t.sourceChannel || '?'}`);
     }
   }
 
@@ -600,12 +635,8 @@ export function renderMetadataPlaceholders(
     if (supplied) {
       const supplyBits: string[] = [];
       if (supplied.name) supplyBits.push(`name: "${supplied.name}"`);
-      if (supplied.description)
-        supplyBits.push(
-          `description: "${supplied.description.slice(0, 40)}${supplied.description.length > 40 ? '…' : ''}"`
-        );
-      if (supplied.image)
-        supplyBits.push(`image: ${supplied.image.slice(0, 50)}${supplied.image.length > 50 ? '…' : ''}`);
+      if (supplied.description) supplyBits.push(`description: "${supplied.description}"`);
+      if (supplied.image) supplyBits.push(`image: ${supplied.image}`);
       if (supplyBits.length) lines.push(`      ${c('gray', '→')} ${supplyBits.join('  ')}`);
     } else {
       lines.push(`      ${c('gray', '→')} fields: ${p.fields.join(', ')}`);
