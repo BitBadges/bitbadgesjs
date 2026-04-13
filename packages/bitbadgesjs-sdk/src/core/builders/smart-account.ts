@@ -10,7 +10,8 @@ import {
   ibcBackedInvariants,
   generateAliasAddressForIBCBackedDenom,
   emptyPermissions,
-  alwaysLockedPermission
+  alwaysLockedPermission,
+  alwaysLockedCollectionApprovalPermission
 } from './shared.js';
 
 export interface SmartAccountParams {
@@ -87,7 +88,7 @@ export function buildSmartAccount(params: SmartAccountParams): any {
 
   const permissions = {
     ...emptyPermissions(),
-    canUpdateCollectionApprovals: [alwaysLockedPermission()],
+    canUpdateCollectionApprovals: [alwaysLockedCollectionApprovalPermission()],
     canAddMoreAliasPaths: [alwaysLockedPermission()],
     canAddMoreCosmosCoinWrapperPaths: [alwaysLockedPermission()]
   };

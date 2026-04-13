@@ -212,8 +212,49 @@ export function buildUserApprovalMsg(params: {
 
 // ── Permission helpers ───────────────────────────────────────────────────────
 
+/**
+ * Bare action permission — used for canDeleteCollection, canArchiveCollection,
+ * canUpdateStandards, canUpdateCustomData, canUpdateManager,
+ * canUpdateCollectionMetadata, canAddMoreAliasPaths,
+ * canAddMoreCosmosCoinWrapperPaths. These permission types take no extra
+ * scoping fields.
+ */
 export function alwaysLockedPermission() {
   return { permanentlyPermittedTimes: [], permanentlyForbiddenTimes: FOREVER };
+}
+
+/**
+ * Token-scoped action permission — used for canUpdateValidTokenIds and
+ * canUpdateTokenMetadata, which require a `tokenIds` field that narrows
+ * which token IDs the permission applies to. Defaults to all token IDs.
+ */
+export function alwaysLockedTokenIdsPermission() {
+  return {
+    tokenIds: FOREVER,
+    permanentlyPermittedTimes: [],
+    permanentlyForbiddenTimes: FOREVER
+  };
+}
+
+/**
+ * Approval-scoped action permission — used for canUpdateCollectionApprovals.
+ * Requires fromListId / toListId / initiatedByListId plus tokenIds and
+ * transferTimes. Defaults to "all approvals, forever" so the resulting
+ * permission locks the whole approval set.
+ */
+export function alwaysLockedCollectionApprovalPermission() {
+  return {
+    fromListId: 'All',
+    toListId: 'All',
+    initiatedByListId: 'All',
+    transferTimes: FOREVER,
+    tokenIds: FOREVER,
+    approvalId: 'All',
+    amountTrackerId: 'All',
+    challengeTrackerId: 'All',
+    permanentlyPermittedTimes: [],
+    permanentlyForbiddenTimes: FOREVER
+  };
 }
 
 export function emptyPermissions() {
@@ -224,7 +265,7 @@ export function emptyPermissions() {
     canUpdateCustomData: [alwaysLockedPermission()],
     canUpdateManager: [],
     canUpdateCollectionMetadata: [],
-    canUpdateValidTokenIds: [alwaysLockedPermission()],
+    canUpdateValidTokenIds: [alwaysLockedTokenIdsPermission()],
     canUpdateTokenMetadata: [],
     canUpdateCollectionApprovals: [],
     canAddMoreAliasPaths: [alwaysLockedPermission()],
@@ -233,19 +274,18 @@ export function emptyPermissions() {
 }
 
 export function frozenPermissions() {
-  const locked = [alwaysLockedPermission()];
   return {
-    canDeleteCollection: locked,
-    canArchiveCollection: locked,
-    canUpdateStandards: locked,
-    canUpdateCustomData: locked,
-    canUpdateManager: locked,
-    canUpdateCollectionMetadata: locked,
-    canUpdateValidTokenIds: locked,
-    canUpdateTokenMetadata: locked,
-    canUpdateCollectionApprovals: locked,
-    canAddMoreAliasPaths: locked,
-    canAddMoreCosmosCoinWrapperPaths: locked
+    canDeleteCollection: [alwaysLockedPermission()],
+    canArchiveCollection: [alwaysLockedPermission()],
+    canUpdateStandards: [alwaysLockedPermission()],
+    canUpdateCustomData: [alwaysLockedPermission()],
+    canUpdateManager: [alwaysLockedPermission()],
+    canUpdateCollectionMetadata: [alwaysLockedPermission()],
+    canUpdateValidTokenIds: [alwaysLockedTokenIdsPermission()],
+    canUpdateTokenMetadata: [alwaysLockedTokenIdsPermission()],
+    canUpdateCollectionApprovals: [alwaysLockedCollectionApprovalPermission()],
+    canAddMoreAliasPaths: [alwaysLockedPermission()],
+    canAddMoreCosmosCoinWrapperPaths: [alwaysLockedPermission()]
   };
 }
 
@@ -267,7 +307,8 @@ export function defaultBalances(overrides?: Partial<{
       canUpdateIncomingApprovals: [],
       canUpdateOutgoingApprovals: [],
       canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
-      canUpdateAutoApproveSelfInitiatedOutgoingTransfers: []
+      canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
+      canUpdateAutoApproveAllIncomingTransfers: []
     },
     ...overrides
   };
@@ -349,8 +390,22 @@ export function scalingBalances(amount: string, maxMultiplier?: string) {
 
 // ── Alias path builder ───────────────────────────────────────────────────────
 
+/**
+ * Build an alias path for a denom. PathMetadata only accepts
+ * `{ uri, customData }` — the image belongs inside the off-chain JSON
+ * referenced by `metadata.uri`. We emit placeholder URIs by default so
+ * users / agents can either (a) leave them and substitute after upload
+ * via `builder metadata apply`, or (b) pass a real URI up front.
+ *
+ * @param image Optional image URI. Kept in the parameter list for callers
+ *   that already pass it, but currently unused — the image must live in
+ *   the off-chain JSON, not the on-chain PathMetadata. Will be surfaced
+ *   through the metadata placeholder system.
+ */
 export function buildAliasPath(denom: string, symbol: string, decimals: number, image?: string) {
-  const img = image || BITBADGES_DEFAULT_IMAGE;
+  // Keep the parameter for back-compat; the reviewer + metadata placeholder
+  // layer will pick up the image via metadataPlaceholders, not the proto.
+  void image;
   return {
     denom,
     conversion: {
@@ -363,10 +418,10 @@ export function buildAliasPath(denom: string, symbol: string, decimals: number, 
         decimals: String(decimals),
         symbol,
         isDefaultDisplay: true,
-        metadata: { uri: '', customData: '', image: img }
+        metadata: { uri: `ipfs://METADATA_ALIAS_${denom}_UNIT`, customData: '' }
       }
     ],
-    metadata: { uri: '', customData: '', image: img }
+    metadata: { uri: `ipfs://METADATA_ALIAS_${denom}`, customData: '' }
   };
 }
 

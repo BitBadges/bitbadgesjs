@@ -36,7 +36,10 @@ export function buildAuction(params: AuctionParams): any {
     {
       fromListId: 'Mint',
       toListId: 'All',
-      initiatedByListId: '',
+      // 'All' — the auction contract / manager will accept the winning bid.
+      // Template users who want to lock this down to a specific bidder list
+      // should pass --initiated-by or patch the approval post-build.
+      initiatedByListId: 'All',
       approvalId: 'mint-to-winner',
       transferTimes: [{ start: bidDeadlineTs, end: acceptEndTs }],
       tokenIds: FOREVER,
