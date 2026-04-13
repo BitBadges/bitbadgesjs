@@ -29,10 +29,45 @@
     ".": {
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
+    },
+    "./builder": {
+      "import": "./dist/esm/builder/index.js",
+      "require": "./dist/cjs/builder/index.js"
+    },
+    "./builder/registry": {
+      "import": "./dist/esm/builder/tools/registry.js",
+      "require": "./dist/cjs/builder/tools/registry.js"
+    },
+    "./builder/tools": {
+      "import": "./dist/esm/builder/tools/index.js",
+      "require": "./dist/cjs/builder/tools/index.js"
+    },
+    "./builder/resources": {
+      "import": "./dist/esm/builder/resources/index.js",
+      "require": "./dist/cjs/builder/resources/index.js"
+    },
+    "./builder/skills": {
+      "import": "./dist/esm/builder/resources/skillInstructions.js",
+      "require": "./dist/cjs/builder/resources/skillInstructions.js"
+    },
+    "./builder/session": {
+      "import": "./dist/esm/builder/session/sessionState.js",
+      "require": "./dist/cjs/builder/session/sessionState.js"
     }
   },
   "bin": {
-    "bitbadges-cli": "./dist/cjs/cli/index.js"
+    "bitbadges-cli": "./dist/cjs/cli/index.js",
+    "bitbadges-builder": "./dist/cjs/builder/index.js"
+  },
+  "typesVersions": {
+    "*": {
+      "builder": ["./dist/esm/builder/index.d.ts"],
+      "builder/registry": ["./dist/esm/builder/tools/registry.d.ts"],
+      "builder/tools": ["./dist/esm/builder/tools/index.d.ts"],
+      "builder/resources": ["./dist/esm/builder/resources/index.d.ts"],
+      "builder/skills": ["./dist/esm/builder/resources/skillInstructions.d.ts"],
+      "builder/session": ["./dist/esm/builder/session/sessionState.d.ts"]
+    }
   },
   "files": [
     "dist"
@@ -101,6 +136,7 @@
   },
   "dependencies": {
     "@bufbuild/protobuf": "^1.10.1",
+    "@modelcontextprotocol/sdk": "^1.0.0",
     "axios": "^1.14.0",
     "bech32": "^2.0.0",
     "commander": "^14.0.3",
@@ -108,6 +144,7 @@
     "ethers": "^6.13.4",
     "sha3": "^2.1.4",
     "typia": "^8.0.2",
-    "web3-validator": "^2.0.6"
+    "web3-validator": "^2.0.6",
+    "zod": "^3.22.0"
   }
 }
