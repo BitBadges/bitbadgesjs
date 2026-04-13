@@ -823,17 +823,26 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
     }
   }
 
-  // User royalties
-  if (criteria.userRoyalties) {
-    const ur = criteria.userRoyalties;
-    const percentage = big(ur.percentage);
-    const payoutAddress = ur.payoutAddress || 'unspecified';
-    if (percentage > 0n) {
-      const basisPoints = Number(percentage);
-      const pct = (basisPoints / 100).toFixed(2);
-      md += `**Royalties**: A royalty of **${pct}%** (${basisPoints} basis points) of the transfer value is automatically redistributed to \`${payoutAddress}\` on each transfer.\n\n`;
-    } else {
-      md += '**Royalties**: User royalties are configured. A portion of the transfer value is automatically distributed to the designated royalty recipients.\n\n';
+  // User approval settings (includes royalties)
+  if (criteria.userApprovalSettings) {
+    const settings = criteria.userApprovalSettings;
+    if (settings.disableUserCoinTransfers) {
+      md += '**User Coin Transfers**: Disabled by collection approval. User-level approvals cannot trigger coin transfers.\n\n';
+    }
+    if (settings.allowedDenoms && settings.allowedDenoms.length > 0) {
+      md += `**Allowed Denoms**: User-level coin transfers restricted to: ${settings.allowedDenoms.join(', ')}\n\n`;
+    }
+    if (settings.userRoyalties) {
+      const ur = settings.userRoyalties;
+      const percentage = big(ur.percentage);
+      const payoutAddress = ur.payoutAddress || 'unspecified';
+      if (percentage > 0n) {
+        const basisPoints = Number(percentage);
+        const pct = (basisPoints / 100).toFixed(2);
+        md += `**Royalties**: A royalty of **${pct}%** (${basisPoints} basis points) of the transfer value is automatically redistributed to \`${payoutAddress}\` on each transfer.\n\n`;
+      } else {
+        md += '**Royalties**: User royalties are configured. A portion of the transfer value is automatically distributed to the designated royalty recipients.\n\n';
+      }
     }
   }
 
