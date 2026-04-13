@@ -28,6 +28,7 @@ async function emit(
     description?: string;
     image?: string;
     simulate?: boolean;
+    events?: boolean;
     // Network selection — passed through addNetworkOptions on the
     // shared sharedOpts() helper. Only consulted when --simulate is on.
     network?: 'mainnet' | 'local' | 'testnet';
@@ -318,7 +319,8 @@ const sharedOpts = (cmd: Command) => {
     .option('--explain', 'Print a human-readable explanation of the output to stderr (in addition to the auto-review)')
     .option('--creator <address>', 'Creator/sender address (bb1... or 0x...)')
     .option('--manager <address>', 'Collection manager address (bb1...)')
-    .option('--simulate', 'Also simulate the tx against the BitBadges API and render gas + net changes (requires BITBADGES_API_KEY)');
+    .option('--simulate', 'Also simulate the tx against the BitBadges API and render gas + net changes (requires BITBADGES_API_KEY)')
+    .option('--events', 'When --simulate is set, dump the full raw chain events array (default: just the count)');
   // Network selection — only the --simulate path actually hits the
   // API, but we add the flags universally so `templates vault
   // --simulate --network local` works without parser surprises.
@@ -412,7 +414,7 @@ sharedOpts(
 ).action(async (opts) => {
   const { buildCrowdfund } = await import('../../core/builders/crowdfund.js');
   if (opts.json) { emit(buildCrowdfund(readJsonInput(opts.json)), opts); return; }
-  emit(buildCrowdfund({ goal: Number(opts.goal), denom: opts.denom, crowdfunder: opts.crowdfunder, deadline: opts.deadline, name: opts.name }), opts);
+  emit(buildCrowdfund({ goal: Number(opts.goal), denom: opts.denom, crowdfunder: opts.crowdfunder, deadline: opts.deadline, name: opts.name, creator: opts.creator }), opts);
 });
 
 sharedOpts(

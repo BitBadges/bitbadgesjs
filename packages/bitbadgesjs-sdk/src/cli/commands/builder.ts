@@ -204,23 +204,67 @@ addNetworkOptions(
   .action(
     async (
       input: string,
-      opts: { json?: boolean; strict?: boolean; testnet?: boolean; local?: boolean; url?: string; outputFile?: string }
+      opts: {
+        json?: boolean;
+        strict?: boolean;
+        network?: 'mainnet' | 'local' | 'testnet';
+        testnet?: boolean;
+        local?: boolean;
+        url?: string;
+        outputFile?: string;
+      }
     ) => {
-      const { readJsonInput, output, getApiUrl } = await import('../utils/io.js');
+      const { readJsonInput, output, getApiUrl, getApiKeyForNetwork } = await import('../utils/io.js');
       let data: unknown;
+      // Defensive input handling — both the numeric-id fetch and JSON
+      // parse used to throw uncaught Node errors on bad input. Wrap
+      // both so we get a friendly one-liner instead of a stack dump.
       if (/^\d+$/.test(input)) {
         const baseUrl = getApiUrl(opts);
-        const response = await fetch(`${baseUrl}/api/v0/collection/${input}`, {
-          headers: { 'x-api-key': process.env.BITBADGES_API_KEY || '' }
-        });
-        if (!response.ok) throw new Error(`Failed to fetch collection ${input}: HTTP ${response.status}`);
-        data = await response.json();
+        const apiKey = getApiKeyForNetwork(opts) || '';
+        try {
+          const response = await fetch(`${baseUrl}/api/v0/collection/${input}`, {
+            headers: { 'x-api-key': apiKey }
+          });
+          if (!response.ok) {
+            process.stderr.write(
+              `Could not fetch collection ${input} from ${baseUrl} — HTTP ${response.status}.\n` +
+                `Hint: --network local may not have a wired collection-by-id endpoint.\n` +
+                `Try passing the collection JSON directly instead of a numeric id.\n`
+            );
+            process.exit(2);
+          }
+          data = await response.json();
+        } catch (err: any) {
+          process.stderr.write(
+            `Could not reach ${baseUrl}/api/v0/collection/${input}: ${err?.message || err}\n`
+          );
+          process.exit(2);
+        }
       } else {
-        data = readJsonInput(input);
+        try {
+          data = readJsonInput(input);
+        } catch (err: any) {
+          process.stderr.write(
+            `Failed to parse input JSON: ${err?.message || err}\n` +
+              `Accepts: file path, @file.json, inline JSON, numeric collection id, or - for stdin.\n`
+          );
+          process.exit(2);
+        }
       }
 
       const { reviewCollection } = await import('../../core/review.js');
-      const result = reviewCollection(ensureTxWrapper(data));
+      let result;
+      try {
+        result = reviewCollection(ensureTxWrapper(data));
+      } catch (err: any) {
+        process.stderr.write(
+          `Could not review input: ${err?.message || err}\n` +
+            `\`builder review\` expects a transaction (with messages[]), a single Msg ({typeUrl,value}), ` +
+            `or a complete on-chain collection document.\n`
+        );
+        process.exit(2);
+      }
 
       if (opts.json) {
         output(result, { ...opts, human: false });
@@ -800,11 +844,13 @@ addNetworkOptions(
     )
     .option('--json', 'Output the structured SimulateResult as JSON instead of a rendered section')
     .option('--creator <address>', 'Override the simulation context address (default: bb1simulation)')
+    .option('--events', 'Dump the full raw chain events array in the rendered output (default: just the count)')
 ).action(async (
     input: string,
     opts: {
       json?: boolean;
       creator?: string;
+      events?: boolean;
       network?: 'mainnet' | 'local' | 'testnet';
       testnet?: boolean;
       local?: boolean;
@@ -882,7 +928,7 @@ addNetworkOptions(
     if (opts.json) {
       output(result, { ...opts, human: false });
     } else {
-      console.log(renderSimulate(result, { stream: process.stdout }));
+      console.log(renderSimulate(result, { stream: process.stdout, events: opts.events ? 'full' : 'count' }));
     }
 
     if (!result.success || result.valid === false) process.exit(2);
@@ -908,17 +954,44 @@ addNetworkOptions(
       const { readJsonInput, getApiUrl, getApiKeyForNetwork } = await import('../utils/io.js');
       let data: any;
       let fetchedCollection = false;
+
+      // Numeric input: try to fetch a collection by id from the indexer.
+      // Wrap in try/catch so a 404 / network failure produces a friendly
+      // error instead of a raw stack trace.
       if (/^\d+$/.test(input)) {
         const baseUrl = getApiUrl(opts);
         const apiKey = getApiKeyForNetwork(opts) || '';
-        const response = await fetch(`${baseUrl}/api/v0/collection/${input}`, {
-          headers: { 'x-api-key': apiKey }
-        });
-        if (!response.ok) throw new Error(`Failed to fetch collection ${input}: HTTP ${response.status}`);
-        data = await response.json();
-        fetchedCollection = true;
+        try {
+          const response = await fetch(`${baseUrl}/api/v0/collection/${input}`, {
+            headers: { 'x-api-key': apiKey }
+          });
+          if (!response.ok) {
+            process.stderr.write(
+              `Could not fetch collection ${input} from ${baseUrl} — HTTP ${response.status}.\n` +
+                `Hint: the indexer's collection-by-id endpoint may not be wired on --network local.\n` +
+                `Try passing the collection JSON directly (file or inline) instead of a numeric id.\n`
+            );
+            process.exit(2);
+          }
+          data = await response.json();
+          fetchedCollection = true;
+        } catch (err: any) {
+          process.stderr.write(
+            `Could not reach ${baseUrl}/api/v0/collection/${input}: ${err?.message || err}.\n` +
+              `Check that the network is reachable, or pass the collection JSON directly.\n`
+          );
+          process.exit(2);
+        }
       } else {
-        data = readJsonInput(input);
+        try {
+          data = readJsonInput(input);
+        } catch (err: any) {
+          process.stderr.write(
+            `Failed to parse input JSON: ${err?.message || err}.\n` +
+              `Accepts: file path, @file.json, inline JSON, numeric collection id, or - for stdin.\n`
+          );
+          process.exit(2);
+        }
       }
 
       // Auto-detect shape. Accepts three input shapes and unwraps each
@@ -929,21 +1002,37 @@ addNetworkOptions(
       //   3. Raw collection — no typeUrl, no messages, no value          → interpretCollection
       //
       // API-fetched collections always take the raw-collection path.
+      // Both interpret paths are wrapped in try/catch — they expect
+      // proto-shaped objects with required fields, and missing fields
+      // (e.g. minimal `{collectionId:"1"}` ad-hoc inputs) used to crash
+      // with `Cannot read properties of undefined (reading 'uri')`.
       let text: string;
       const { isCollectionMsg } = await import('../utils/normalizeMsg.js');
       const hasMessages = Array.isArray(data?.messages);
       const firstCollectionMsg = hasMessages ? data.messages.find((m: any) => isCollectionMsg(m)) : null;
 
-      if (
-        fetchedCollection ||
-        (data && typeof data === 'object' && !data.typeUrl && !hasMessages && !data.value)
-      ) {
-        const { interpretCollection } = await import('../../core/interpret.js');
-        text = interpretCollection(data);
-      } else {
-        const txBody = firstCollectionMsg?.value ?? data.value ?? data;
-        const { interpretTransaction } = await import('../../core/interpret-transaction.js');
-        text = interpretTransaction(txBody);
+      try {
+        if (
+          fetchedCollection ||
+          (data && typeof data === 'object' && !data.typeUrl && !hasMessages && !data.value)
+        ) {
+          const { interpretCollection } = await import('../../core/interpret.js');
+          text = interpretCollection(data);
+        } else {
+          const txBody = firstCollectionMsg?.value ?? data.value ?? data;
+          const { interpretTransaction } = await import('../../core/interpret-transaction.js');
+          text = interpretTransaction(txBody);
+        }
+      } catch (err: any) {
+        process.stderr.write(
+          `Could not interpret input: ${err?.message || err}.\n` +
+            `Hint: \`builder explain\` expects either a full transaction (with messages[]),\n` +
+            `a single Msg ({typeUrl, value}), a complete on-chain collection document\n` +
+            `(returned by query_collection), or a numeric collection id. Minimal ad-hoc\n` +
+            `JSON like {collectionId:"1"} is not a valid input — it lacks the fields the\n` +
+            `interpreter needs (collectionMetadata.uri, validTokenIds, etc).\n`
+        );
+        process.exit(2);
       }
 
       if (opts.outputFile) {
@@ -972,7 +1061,49 @@ builderCommand
   .option('--output-file <path>', 'Write output to file instead of stdout')
   .action(async (input: string, opts: { json?: boolean; outputFile?: string }) => {
     const { readJsonInput, output } = await import('../utils/io.js');
-    const data = ensureTxWrapper(readJsonInput(input));
+    let data: any;
+    try {
+      data = ensureTxWrapper(readJsonInput(input));
+    } catch (err: any) {
+      // Catch the readJsonInput parse error so we don't dump a raw Node
+      // stack on bad JSON. Output as a clean validation result so JSON
+      // mode stays consumable by tools.
+      const friendly = err?.message || String(err);
+      if (opts.json) {
+        const { output: outFn } = await import('../utils/io.js');
+        outFn(
+          { valid: false, issues: [{ severity: 'error', path: '(input)', message: friendly }] },
+          { ...opts, human: false }
+        );
+      } else {
+        process.stderr.write(`✗ Could not parse input: ${friendly}\n`);
+      }
+      process.exit(2);
+    }
+
+    // Empty messages array isn't a structural error per se but it's almost
+    // never what the user wanted. Surface as a warning so quiet-on-empty
+    // tx files don't slip through.
+    if (Array.isArray(data?.messages) && data.messages.length === 0) {
+      const result = {
+        valid: true,
+        issues: [
+          {
+            severity: 'warning' as const,
+            path: 'messages',
+            message: 'Transaction has an empty messages array. Did you forget to add any messages?'
+          }
+        ]
+      };
+      if (opts.json) {
+        output(result, { ...opts, human: false });
+      } else {
+        process.stderr.write('▲ WARNING  messages: Transaction has an empty messages array.\n');
+      }
+      process.exitCode = 1;
+      return;
+    }
+
     const { validateTransaction } = await import('../../core/validate.js');
     const result = validateTransaction(data);
 

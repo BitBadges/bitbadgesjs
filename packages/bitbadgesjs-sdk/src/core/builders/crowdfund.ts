@@ -24,12 +24,26 @@ export interface CrowdfundParams {
   crowdfunder?: string; // bb1... address — who receives funds on success (creator fills in if empty)
   deadline?: string; // duration shorthand, default "30d"
   name?: string;
+  /**
+   * Creator address — used as the default crowdfunder when `crowdfunder`
+   * isn't specified. The CLI passes this through from `--creator`.
+   * Without a real address the resulting tx is broken (the success/refund
+   * approvals would have `toListId: 'All'` which is meaningless for an
+   * escrow payout).
+   */
+  creator?: string;
 }
 
 export function buildCrowdfund(params: CrowdfundParams): any {
   const coin = resolveCoin(params.denom);
   const goalBase = toBaseUnits(params.goal, coin.decimals);
   const deadlineTs = durationToTimestamp(params.deadline || '30d');
+  // Resolve the crowdfunder destination once. Falling back to 'All'
+  // would produce an unsigned-payout-target collection that the chain
+  // would accept but no one could practically use. Prefer the explicit
+  // flag, then the creator (passed through from CLI --creator), and
+  // only as a last resort use 'All' (which the reviewer flags).
+  const crowdfunderAddr = params.crowdfunder || params.creator || 'All';
 
   const collectionApprovals = [
     // Deposit-Refund — public deposit, mints refund receipt (token 1)
@@ -63,7 +77,7 @@ export function buildCrowdfund(params: CrowdfundParams): any {
     // will flag the ambiguity so callers pass a concrete address.
     {
       fromListId: 'Mint',
-      toListId: params.crowdfunder || 'All',
+      toListId: crowdfunderAddr,
       initiatedByListId: 'All',
       approvalId: 'deposit-progress',
       transferTimes: FOREVER,
@@ -82,8 +96,8 @@ export function buildCrowdfund(params: CrowdfundParams): any {
     // crowdfunder when the flag isn't provided.
     {
       fromListId: 'Mint',
-      toListId: params.crowdfunder || 'All',
-      initiatedByListId: params.crowdfunder || 'All',
+      toListId: crowdfunderAddr,
+      initiatedByListId: crowdfunderAddr,
       approvalId: 'success',
       transferTimes: [{ start: deadlineTs, end: MAX_UINT64 }],
       tokenIds: FOREVER,

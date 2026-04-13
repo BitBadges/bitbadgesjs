@@ -52,7 +52,11 @@ export function buildAuction(params: AuctionParams): any {
           overallMaxNumTransfers: '1'
         },
         overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true,
+        // Skill mandate: must be FALSE so the winning bidder's incoming
+        // payment intent (their bid approval) still gets matched. Setting
+        // this true would have the auction approval bypass the bidder's
+        // incoming approvals entirely, breaking the payment leg.
+        overridesToIncomingApprovals: false,
         autoDeletionOptions: {
           afterOneUse: true,
           afterOverallMaxNumTransfers: true,

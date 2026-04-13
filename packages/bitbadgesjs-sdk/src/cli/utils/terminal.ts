@@ -395,13 +395,20 @@ export interface SimulateResultLike {
  *   - hard error (no API key, network failure, etc.) → red error block
  *   - valid: false (chain rejected the tx) → red CHAIN-REJECTED block + reason
  *   - valid: true → green check + gasUsed + per-address net change diff
+ *
+ * @param opts.events When `'full'` (or true), pretty-prints the entire raw
+ *   chain events array under a "Raw events" section. Default `'count'`
+ *   only shows the total event count (much shorter — the full dump is
+ *   typically 2000+ lines for a Create+Mint).
  */
 export function renderSimulate(
   result: SimulateResultLike,
-  opts?: { stream?: NodeJS.WriteStream; title?: string }
+  opts?: { stream?: NodeJS.WriteStream; title?: string; events?: 'count' | 'full' | boolean }
 ): string {
   const stream = opts?.stream || process.stderr;
   const { c } = makeColor(stream);
+  const eventMode: 'count' | 'full' =
+    opts?.events === true || opts?.events === 'full' ? 'full' : 'count';
   const width = Math.min(80, (stream as any).columns || 80);
   const title = opts?.title || 'Simulate';
 
@@ -521,13 +528,27 @@ export function renderSimulate(
     }
   }
 
-  // ── Raw event count footer ──────────────────────────────────────────
-  // Helps operators sanity-check that the chain actually executed
-  // something — a successful tx with 0 events almost always means a
-  // no-op (e.g. an Update msg that didn't change any field).
+  // ── Raw events ──────────────────────────────────────────────────────
+  // By default we just print the count (helps sanity-check that the
+  // chain actually executed something — a successful tx with 0 events
+  // almost always means a no-op). With `--events` (eventMode='full'),
+  // pretty-print the entire array. Useful for debugging chain hooks,
+  // approval matchers, IBC flows, etc.
   if (events.length > 0) {
-    lines.push('');
-    lines.push(`  ${c('dim', `${events.length} chain events emitted total`)}`);
+    if (eventMode === 'full') {
+      lines.push('');
+      lines.push(`  ${c('bold', 'Raw events')} ${c('dim', `(${events.length})`)}`);
+      // Pretty-print as JSON, indented 4 spaces so it lines up with
+      // the rest of the section. Strip terminal-color ANSI from inside
+      // the JSON if any.
+      const json = JSON.stringify(events, null, 2);
+      for (const line of json.split('\n')) {
+        lines.push(`    ${line}`);
+      }
+    } else {
+      lines.push('');
+      lines.push(`  ${c('dim', `${events.length} chain events emitted total — re-run with --events to dump the full array`)}`);
+    }
   }
 
   lines.push('');

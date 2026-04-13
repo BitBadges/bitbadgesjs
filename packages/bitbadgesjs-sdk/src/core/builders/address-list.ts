@@ -50,7 +50,12 @@ export function buildAddressList(params: AddressListParams): any {
         overridesToIncomingApprovals: true
       }
     },
-    // Manager Remove — burn tokens to remove addresses
+    // Manager Remove — burn tokens to remove addresses. fromListId is
+    // `'!Mint'` (NOT `'All'`) because the chain rejects `'All'` here
+    // with "Mint address cannot be included in address list with other
+    // addresses" (validate at msg_server_universal_update_collection.go:146).
+    // The earlier skill-audit suggestion to use `'All'` was wrong; the
+    // chain enforces the exclusion of Mint from address-list approvals.
     {
       fromListId: '!Mint',
       toListId: BURN_ADDRESS,
