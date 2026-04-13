@@ -66,10 +66,10 @@ function bigintToString(obj: unknown): unknown {
 
 /**
  * Reusable simulate helper used by both the MCP tool wrapper above and the
- * CLI's `builder simulate` / templates auto-simulate paths. Accepts a
- * `messages: []` array (already wrapped) plus an optional simulation
- * context — defaults to `bb1simulation` if no creator is known. Returns
- * the same SimulateTransactionResult shape so all callers render
+ * CLI's `builder simulate` / templates auto-simulate paths. Sends the
+ * agent-JSON single-tx shape (`{messages, memo, fee, creatorAddress}`)
+ * to the indexer's `/api/v0/simulate` endpoint and normalizes the raw
+ * LCD response into a `SimulateTransactionResult` so all callers render
  * identically through the terminal helpers.
  */
 export async function simulateMessages(params: {
@@ -80,7 +80,6 @@ export async function simulateMessages(params: {
     gas: string;
   };
   creatorAddress?: string;
-  chain?: string;
   /** Override the resolved API key (e.g. CLI `--network local` flow). */
   apiKey?: string;
   /** Override the resolved API base URL (e.g. CLI `--url http://...`). */
@@ -93,21 +92,10 @@ export async function simulateMessages(params: {
 
     const response = await simulateTx(
       {
-        txs: [
-          {
-            context: {
-              address: params.creatorAddress || 'bb1simulation',
-              chain: params.chain || 'eth'
-            },
-            messages: params.messages,
-            memo: params.memo || '',
-            fee:
-              params.fee || {
-                amount: [{ denom: 'ubadge', amount: '5000' }],
-                gas: '500000'
-              }
-          }
-        ]
+        messages: params.messages,
+        memo: params.memo || '',
+        fee: params.fee || { amount: [{ denom: 'ubadge', amount: '5000' }], gas: '500000' },
+        creatorAddress: params.creatorAddress
       },
       // Pass per-call override config through to apiRequest so the
       // CLI's --network/--url flags can hit a local indexer without
@@ -119,12 +107,19 @@ export async function simulateMessages(params: {
       return { success: false, error: response.error };
     }
 
-    const result = response.data?.results?.[0];
-    if (result?.error) {
-      return { success: true, valid: false, simulationError: result.error };
+    // Path 2 response is the raw LCD simulate shape:
+    //   { gas_info: { gas_used, gas_wanted }, result: { events: [...] } }
+    // On a chain-level rejection the indexer surfaces the message as
+    // response.data.error (via BitBadgesError passthrough) or as an
+    // error field on data itself.
+    const data: any = response.data;
+    const chainError = data?.error || data?.message;
+    if (chainError && !data?.gas_info && !data?.result) {
+      return { success: true, valid: false, simulationError: chainError };
     }
 
-    const events = (result?.events || []) as SimulationEvent[];
+    const gasUsed: string | undefined = data?.gas_info?.gas_used;
+    const events = ((data?.result?.events || []) as SimulationEvent[]);
     let parsedEvents: unknown = undefined;
     let netChanges: unknown = undefined;
     try {
@@ -139,8 +134,8 @@ export async function simulateMessages(params: {
     return {
       success: true,
       valid: true,
-      gasUsed: result?.gasUsed,
-      events: result?.events,
+      gasUsed,
+      events,
       parsedEvents,
       netChanges
     };

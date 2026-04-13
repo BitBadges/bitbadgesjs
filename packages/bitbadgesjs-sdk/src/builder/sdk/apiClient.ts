@@ -197,27 +197,36 @@ export async function getBalanceForToken(
 // Simulation APIs
 // ============================================
 
+/**
+ * Agent-JSON single-tx simulate request. Sent to the indexer's
+ * `/api/v0/simulate` Path 2. The indexer proto-encodes server-side
+ * via `encodeMsgsFromJson` and forwards to the LCD simulate endpoint.
+ *
+ * Previously this type wrapped a single tx in a `{txs: [...]}` "batch"
+ * envelope. The batch wrapper was never actually used as a batch
+ * (always exactly 1 element) and has been removed.
+ */
 export interface SimulateRequest {
-  txs: Array<{
-    context: {
-      address: string;
-      chain: string;
-    };
-    messages: unknown[];
-    memo?: string;
-    fee?: {
-      amount: Array<{ denom: string; amount: string }>;
-      gas: string;
-    };
-  }>;
+  messages: unknown[];
+  memo?: string;
+  fee?: {
+    amount: Array<{ denom: string; amount: string }>;
+    gas: string;
+  };
+  /** bb1… address of the tx signer. Optional if every message already
+   * has the same `value.creator`. */
+  creatorAddress?: string;
 }
 
+/**
+ * Raw LCD simulate response — what the indexer forwards back from
+ * `/cosmos/tx/v1beta1/simulate`. Consumers typically read
+ * `gas_info.gas_used` + `result.events`.
+ */
 export interface SimulateResponse {
-  results: Array<{
-    gasUsed?: string;
-    events?: unknown[];
-    error?: string;
-  }>;
+  gas_info?: { gas_used?: string; gas_wanted?: string };
+  result?: { events?: unknown[] };
+  error?: string;
 }
 
 export async function simulateTx(
