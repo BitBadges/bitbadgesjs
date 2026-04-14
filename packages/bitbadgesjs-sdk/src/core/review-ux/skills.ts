@@ -2,13 +2,15 @@
  * Skill-specific UX checks — NFT/fungible shape, protocol matchers, mint approvals,
  * liquidity pools, backed paths. Ported from frontend reviewItems.ts.
  *
- * When ctx.selectedSkills is undefined we run the union of all skill checks and
- * tag findings with params.requiresSkill so callers can filter.
+ * All checks in this file gate on the collection's declared `standards` or on
+ * structural markers (cosmosCoinBackedPath, allowBackedMinting, wrapper paths).
+ * We do NOT gate on `ctx.selectedSkills` — ctx-less callers like the indexer
+ * and MCP would otherwise misfire on every collection.
  */
 
-import type { Finding, ReviewContext } from '../review-types.js';
+import type { Finding } from '../review-types.js';
 import type { UxCheck } from './shared.js';
-import { hasSkill, getApprovals, getAllApprovals } from './shared.js';
+import { getApprovals, getAllApprovals } from './shared.js';
 import { doesCollectionFollowSubscriptionProtocol } from '../subscriptions.js';
 import { doesCollectionFollowQuestProtocol } from '../quests.js';
 import { doesCollectionFollowBountyProtocol } from '../bounties.js';
@@ -16,43 +18,36 @@ import { doesCollectionFollowCrowdfundProtocol } from '../crowdfunds.js';
 import { doesCollectionFollowAuctionProtocol } from '../auctions.js';
 import { doesCollectionFollowProductProtocol } from '../products.js';
 
-function tagSkill(f: Finding, ctx: ReviewContext, skill: string): Finding {
-  if (!ctx.selectedSkills) {
-    f.params = { ...(f.params || {}), requiresSkill: skill };
-  }
-  return f;
-}
-
 export const skillChecks: UxCheck[] = [
-  // NFT without maxSupplyPerId = 1
-  (value, ctx) => {
+  // NFT without maxSupplyPerId = 1. Gated on the NFTs standard (not the
+  // skill) so ctx-less callers like the indexer don't misfire on fungible
+  // / credit / address-list collections that legitimately have no cap.
+  (value) => {
     const out: Finding[] = [];
+    const standards: string[] = value?.standards || [];
+    if (!standards.includes('NFTs')) return out;
     const invariants = value?.invariants || {};
-    if (!hasSkill(ctx, 'nft-collection')) return out;
     if (!invariants.maxSupplyPerId || invariants.maxSupplyPerId === '0') {
-      out.push(
-        tagSkill(
-          {
-            code: 'review.ux.nft_no_supply_cap',
-            severity: 'warning',
-            source: 'ux',
-            category: 'skills',
-            localeKey: 'review_nft_no_supply_cap',
-            messageEn: 'NFT collection has no maxSupplyPerId cap — multiple copies of the same token can be minted.',
-            recommendationEn: 'Set invariants.maxSupplyPerId to "1" for true NFTs.'
-          },
-          ctx,
-          'nft-collection'
-        )
-      );
+      out.push({
+        code: 'review.ux.nft_no_supply_cap',
+        severity: 'warning',
+        source: 'ux',
+        category: 'skills',
+        localeKey: 'review_nft_no_supply_cap',
+        messageEn: 'NFT collection has no maxSupplyPerId cap — multiple copies of the same token can be minted.',
+        recommendationEn: 'Set invariants.maxSupplyPerId to "1" for true NFTs.'
+      });
     }
     return out;
   },
 
-  // Fungible token with multiple token IDs
-  (value, ctx) => {
+  // Fungible token with multiple token IDs. Gated on the Fungible Tokens
+  // standard (not the skill) so ctx-less callers don't misfire on NFT /
+  // multi-tier collections.
+  (value) => {
     const out: Finding[] = [];
-    if (!hasSkill(ctx, 'fungible-token')) return out;
+    const standards: string[] = value?.standards || [];
+    if (!standards.includes('Fungible Tokens')) return out;
     const validTokenIds: any[] = value?.validTokenIds || [];
     if (validTokenIds.length === 0) return out;
     const totalIds = validTokenIds.reduce(
@@ -60,63 +55,50 @@ export const skillChecks: UxCheck[] = [
       0
     );
     if (totalIds > 1) {
-      out.push(
-        tagSkill(
-          {
-            code: 'review.ux.fungible_multiple_token_ids',
-            severity: 'warning',
-            source: 'ux',
-            category: 'skills',
-            localeKey: 'review_fungible_multiple_ids',
-            params: { count: totalIds },
-            messageEn: `Fungible token skill selected but ${totalIds} token IDs are valid — fungibles typically use a single ID.`,
-            recommendationEn: 'Collapse validTokenIds to a single range of 1 ID.'
-          },
-          ctx,
-          'fungible-token'
-        )
-      );
+      out.push({
+        code: 'review.ux.fungible_multiple_token_ids',
+        severity: 'warning',
+        source: 'ux',
+        category: 'skills',
+        localeKey: 'review_fungible_multiple_ids',
+        params: { count: totalIds },
+        messageEn: `Fungible token with ${totalIds} valid token IDs — fungibles typically use a single ID.`,
+        recommendationEn: 'Collapse validTokenIds to a single range of 1 ID.'
+      });
     }
     return out;
   },
 
-  // Protocol matcher checks
-  (value, ctx) => {
+  // Protocol matcher checks — gated on declared standard only
+  (value) => {
     const out: Finding[] = [];
     const standards: string[] = value?.standards || [];
     const protocolChecks: Array<{
-      skill: string;
       standard: string;
       check: (c: any) => boolean;
       key: string;
     }> = [
-      { skill: 'subscription', standard: 'Subscriptions', check: doesCollectionFollowSubscriptionProtocol as any, key: 'subscription' },
-      { skill: 'quest', standard: 'Quests', check: doesCollectionFollowQuestProtocol as any, key: 'quest' },
-      { skill: 'bounty', standard: 'Bounty', check: doesCollectionFollowBountyProtocol as any, key: 'bounty' },
-      { skill: 'crowdfund', standard: 'Crowdfund', check: doesCollectionFollowCrowdfundProtocol as any, key: 'crowdfund' },
-      { skill: 'auction', standard: 'Auction', check: doesCollectionFollowAuctionProtocol as any, key: 'auction' },
-      { skill: 'product-catalog', standard: 'Products', check: doesCollectionFollowProductProtocol as any, key: 'product_catalog' }
+      { standard: 'Subscriptions', check: doesCollectionFollowSubscriptionProtocol as any, key: 'subscription' },
+      { standard: 'Quests', check: doesCollectionFollowQuestProtocol as any, key: 'quest' },
+      { standard: 'Bounty', check: doesCollectionFollowBountyProtocol as any, key: 'bounty' },
+      { standard: 'Crowdfund', check: doesCollectionFollowCrowdfundProtocol as any, key: 'crowdfund' },
+      { standard: 'Auction', check: doesCollectionFollowAuctionProtocol as any, key: 'auction' },
+      { standard: 'Products', check: doesCollectionFollowProductProtocol as any, key: 'product_catalog' }
     ];
-    for (const { skill, standard, check, key } of protocolChecks) {
-      if (!(hasSkill(ctx, skill) || standards.includes(standard))) continue;
+    for (const { standard, check, key } of protocolChecks) {
+      if (!standards.includes(standard)) continue;
       try {
         if (!check(value)) {
-          out.push(
-            tagSkill(
-              {
-                code: `review.ux.protocol_mismatch_${key}`,
-                severity: 'critical',
-                source: 'ux',
-                category: 'skills',
-                localeKey: `review_${key}_protocol`,
-                params: { protocol: standard },
-                messageEn: `Collection does not follow the ${standard} protocol shape required by the selected skill or standard.`,
-                recommendationEn: `Rebuild the collection using the ${standard} template, or remove the skill/standard.`
-              },
-              ctx,
-              skill
-            )
-          );
+          out.push({
+            code: `review.ux.protocol_mismatch_${key}`,
+            severity: 'critical',
+            source: 'ux',
+            category: 'skills',
+            localeKey: `review_${key}_protocol`,
+            params: { protocol: standard },
+            messageEn: `Collection does not follow the ${standard} protocol shape required by the selected skill or standard.`,
+            recommendationEn: `Rebuild the collection using the ${standard} template, or remove the skill/standard.`
+          });
         }
       } catch {
         // Collection may not be fully hydrated — skip
@@ -125,8 +107,10 @@ export const skillChecks: UxCheck[] = [
     return out;
   },
 
-  // No mint approvals (nothing can be minted)
-  (value, ctx) => {
+  // No mint approvals (nothing can be minted). Smart-token collections are
+  // excluded structurally via hasBackedMinting — they mint via backed paths
+  // / wrapper paths, not Mint approvals.
+  (value) => {
     const out: Finding[] = [];
     const approvals = getApprovals(value);
     const mintApprovals = approvals.filter((a: any) => a.fromListId === 'Mint');
@@ -134,12 +118,7 @@ export const skillChecks: UxCheck[] = [
       getAllApprovals(value).some((a: any) => a.approvalCriteria?.allowBackedMinting) ||
       (Array.isArray(value?.cosmosCoinWrapperPaths) && value.cosmosCoinWrapperPaths.length > 0) ||
       (Array.isArray(value?.cosmosCoinWrapperPathsToAdd) && value.cosmosCoinWrapperPathsToAdd.length > 0);
-    if (
-      mintApprovals.length === 0 &&
-      approvals.length > 0 &&
-      !hasSkill(ctx, 'smart-token') &&
-      !hasBackedMinting
-    ) {
+    if (mintApprovals.length === 0 && approvals.length > 0 && !hasBackedMinting) {
       out.push({
         code: 'review.ux.no_mint_approvals',
         severity: 'warning',
@@ -178,52 +157,42 @@ export const skillChecks: UxCheck[] = [
   },
 
   // Credit tokens should be non-transferable (increment-only)
-  (value, ctx) => {
+  (value) => {
     const out: Finding[] = [];
-    if (!hasSkill(ctx, 'credit-token')) return out;
+    const standards: string[] = value?.standards || [];
+    if (!standards.includes('Credit Token')) return out;
     const nonMint = getApprovals(value).filter((a: any) => a.fromListId !== 'Mint' && a.fromListId !== 'All');
     if (nonMint.length === 0) return out;
-    out.push(
-      tagSkill(
-        {
-          code: 'review.ux.credit_token_transfers_allowed',
-          severity: 'warning',
-          source: 'ux',
-          category: 'skills',
-          localeKey: 'review_credit_transfers',
-          params: { count: nonMint.length },
-          messageEn: `Credit token has ${nonMint.length} non-mint transfer approval(s) — credit tokens are typically non-transferable.`,
-          recommendationEn: 'Remove non-mint transfer approvals so credits can only be incremented, not sent between users.'
-        },
-        ctx,
-        'credit-token'
-      )
-    );
+    out.push({
+      code: 'review.ux.credit_token_transfers_allowed',
+      severity: 'warning',
+      source: 'ux',
+      category: 'skills',
+      localeKey: 'review_credit_transfers',
+      params: { count: nonMint.length },
+      messageEn: `Credit token has ${nonMint.length} non-mint transfer approval(s) — credit tokens are typically non-transferable.`,
+      recommendationEn: 'Remove non-mint transfer approvals so credits can only be incremented, not sent between users.'
+    });
     return out;
   },
 
   // Address list tokens should be non-transferable (admin-managed)
-  (value, ctx) => {
+  (value) => {
     const out: Finding[] = [];
-    if (!hasSkill(ctx, 'address-list')) return out;
+    const standards: string[] = value?.standards || [];
+    if (!standards.includes('Address List')) return out;
     const nonMint = getApprovals(value).filter((a: any) => a.fromListId !== 'Mint' && a.fromListId !== 'All');
     if (nonMint.length === 0) return out;
-    out.push(
-      tagSkill(
-        {
-          code: 'review.ux.addresslist_transfers_allowed',
-          severity: 'warning',
-          source: 'ux',
-          category: 'skills',
-          localeKey: 'review_addresslist_transfers',
-          params: { count: nonMint.length },
-          messageEn: `Address list token has ${nonMint.length} non-mint transfer approval(s) — membership tokens are typically non-transferable.`,
-          recommendationEn: 'Remove transfer approvals so membership is admin-managed only.'
-        },
-        ctx,
-        'address-list'
-      )
-    );
+    out.push({
+      code: 'review.ux.addresslist_transfers_allowed',
+      severity: 'warning',
+      source: 'ux',
+      category: 'skills',
+      localeKey: 'review_addresslist_transfers',
+      params: { count: nonMint.length },
+      messageEn: `Address list token has ${nonMint.length} non-mint transfer approval(s) — membership tokens are typically non-transferable.`,
+      recommendationEn: 'Remove transfer approvals so membership is admin-managed only.'
+    });
     return out;
   },
 

@@ -311,9 +311,8 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
 
       // --- Mint approval checks ---
       if (fromId === 'Mint') {
-        // Note: "mint approval missing overridesFromOutgoingApprovals" is
-        // handled by review-ux/approvals.ts (review.ux.mint_approval_missing_override)
-        // and was dropped here to stop double-reporting.
+        // "Mint approval missing overridesFromOutgoingApprovals" moved to
+        // review-ux/approvals.ts (review.ux.mint_approval_missing_override).
 
         // Check for unlimited mint (no amount limits and no transfer limits)
         const amounts = criteria.approvalAmounts as Record<string, unknown> | undefined;
@@ -465,11 +464,8 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         });
       }
 
-      // Note: "approval allows FORCEFUL transfers" is handled by
-      // review-ux/approvals.ts (review.ux.forceful_transfers_allowed +
-      // review.ux.forceful_invariant_not_set) with the more complete
-      // 3-way logic (both set / only approvals / only invariant).
-      // Dropped here to stop double-reporting.
+      // "Approval allows FORCEFUL transfers" moved to review-ux/approvals.ts
+      // (review.ux.forceful_transfers_allowed + review.ux.forceful_override_mismatch).
 
       // Specific from -> specific to with All initiator
       if (
@@ -549,44 +545,9 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
       });
     }
 
-    // Check noForcefulPostMintTransfers invariant
-    if (!invariants.noForcefulPostMintTransfers) {
-      const potentialForceful = approvals.some((a) => {
-        if (a.fromListId === 'Mint') return false;
-        const initiated = a.initiatedByListId as string;
-        const anyoneCanInitiate = initiated === 'All' || initiated === '!Mint' || initiated === 'AllWithMint';
-        if (!anyoneCanInitiate) return false;
-        const crit = a.approvalCriteria as Record<string, unknown> | undefined;
-        return !crit?.requireToEqualsInitiatedBy;
-      });
-      // Note: "noForcefulPostMintTransfers not set" is handled by
-      // review-ux/approvals.ts (review.ux.forceful_invariant_not_set).
-      // Dropped here to stop double-reporting.
-      void potentialForceful;
-    }
-
-    // ========================================
-    // 4b. AMOUNT SCALING RISK ANALYSIS
-    // ========================================
-
-    for (const a of approvals) {
-      const crit = a.approvalCriteria as Record<string, unknown> | undefined;
-      if (!crit) continue;
-      const incrementedBal = (crit.predeterminedBalances as Record<string, unknown> | undefined)?.incrementedBalances as
-        | Record<string, unknown>
-        | undefined;
-      if (!incrementedBal?.allowAmountScaling) continue;
-      const aId = (a as Record<string, unknown>).approvalId as string || 'unnamed';
-
-      const hasCoinOverride = ((crit.coinTransfers as Array<Record<string, unknown>>) || []).some(
-        (ct) => ct.overrideFromWithApproverAddress
-      );
-      // Note: "amount scaling with approver-funded payments" is handled
-      // by review-ux/approvals.ts (review.ux.amount_scaling_with_approver_funds).
-      // Dropped here to stop double-reporting.
-      void hasCoinOverride;
-      void aId;
-    }
+    // "noForcefulPostMintTransfers not set" and "amount scaling with
+    // approver-funded payments" moved to review-ux/approvals.ts
+    // (review.ux.forceful_transfers_allowed + review.ux.amount_scaling_with_approver_funds).
 
     // ========================================
     // 5. INVARIANTS ANALYSIS
@@ -647,12 +608,9 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
       }
     }
 
-    // Standards consistency: "NFT standard but maxSupplyPerId is not 1"
-    // and "Fungible token with multiple token IDs" are handled by the
-    // skill-gated versions in review-ux/skills.ts
-    // (review.ux.nft_no_supply_cap, review.ux.fungible_multiple_ids).
-    // Dropped here to stop double-reporting.
-    void maxSupply;
+    // Standards consistency ("NFT standard but maxSupplyPerId is not 1",
+    // "Fungible token with multiple token IDs") moved to review-ux/skills.ts
+    // (review.ux.nft_no_supply_cap, review.ux.fungible_multiple_token_ids).
 
     // ========================================
     // 7. SERIALIZATION CHECKS
@@ -776,12 +734,10 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
           });
         }
       }
-    } else {
-      // Note: "autoApproveAllIncomingTransfers missing on mint
-      // collections" is handled by review-ux/approvals.ts
-      // (review.ux.auto_approve_disabled_on_mintable). Dropped here
-      // to stop double-reporting.
     }
+    // "autoApproveAllIncomingTransfers missing on mint collections
+    // without defaultBalances set" moved to review-ux/approvals.ts
+    // (review.ux.auto_approve_disabled_on_mintable).
 
     // ========================================
     // BUILD SUMMARY

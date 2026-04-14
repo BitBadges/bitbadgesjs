@@ -68,25 +68,17 @@ export const approvalsChecks: UxCheck[] = [
     });
     const hasOverrides = forcefulApprovals.length > 0;
 
-    // Branch the detail locale key to match the old frontend's 3-way logic:
-    //   - hasOverrides && invariantBlocksForceful  -> review_forceful_both_set
-    //   - hasOverrides && !invariantBlocksForceful -> Forceful_Override_Warning_With_Count
-    //   - !hasOverrides && invariantBlocksForceful -> review_forceful_invariant_only
-    if (hasOverrides || invariantBlocksForceful) {
-      const detailKey =
-        hasOverrides && invariantBlocksForceful
-          ? 'review_forceful_both_set'
-          : hasOverrides
-            ? 'Forceful_Override_Warning_With_Count'
-            : 'review_forceful_invariant_only';
+    // Matches the old frontend's 2-push logic:
+    //   push 1 — hasOverrides || !invariantBlocksForceful
+    //   push 2 — hasOverrides && invariantBlocksForceful (mismatch)
+    if (hasOverrides || !invariantBlocksForceful) {
       out.push({
         code: 'review.ux.forceful_transfers_allowed',
         severity: 'critical',
         source: 'ux',
         category: 'approvals',
-        // Legacy frontend used three disjoint locale keys for this finding.
         localeKeyTitle: 'Forceful_Override_Title',
-        localeKeyDetail: detailKey,
+        localeKeyDetail: 'Forceful_Override_Warning_With_Count',
         localeKeyFix: 'review_forceful_override_fix',
         params: { count: forcefulApprovals.length },
         messageEn: `Forceful transfers are allowed (${forcefulApprovals.length} override approval(s) present or invariant unset).`,
@@ -94,23 +86,6 @@ export const approvalsChecks: UxCheck[] = [
       });
     }
 
-    // Legacy critical finding: forceful overrides exist but the immutable
-    // noForcefulPostMintTransfers invariant is not set. The frontend flagged
-    // this separately because the invariant is locked at creation time.
-    if (hasOverrides && !invariantBlocksForceful) {
-      out.push({
-        code: 'review.ux.forceful_invariant_not_set',
-        severity: 'critical',
-        source: 'ux',
-        category: 'approvals',
-        localeKey: 'review_forceful_invariant',
-        params: { count: forcefulApprovals.length },
-        messageEn:
-          'Forceful transfer overrides exist but the noForcefulPostMintTransfers invariant is not set — the invariant cannot be added after creation.',
-        recommendationEn:
-          'Enable invariants.noForcefulPostMintTransfers at creation to permanently block forceful transfers.'
-      });
-    }
     if (hasOverrides && invariantBlocksForceful) {
       out.push({
         code: 'review.ux.forceful_override_mismatch',
@@ -145,9 +120,12 @@ export const approvalsChecks: UxCheck[] = [
     return out;
   },
 
-  // autoApproveAllIncomingTransfers not true on mintable collections
-  (value) => {
+  // autoApproveAllIncomingTransfers not true on mintable collections.
+  // Skipped on updates: defaultBalances is immutable post-creation,
+  // so flagging it on an existing collection is noise the user can't fix.
+  (value, ctx) => {
     const out: Finding[] = [];
+    if (ctx.onChainCollection) return out;
     const mint = getApprovals(value).filter((a: any) => a.fromListId === 'Mint');
     if (mint.length > 0) {
       const autoApprove = value?.defaultBalances?.autoApproveAllIncomingTransfers;
@@ -274,9 +252,11 @@ export const approvalsChecks: UxCheck[] = [
         localeKeyTitle: 'Collection_uses_claims',
         localeKeyDetail: 'Claim_Trust_Warning',
         localeKeyFix: 'review_claims_trust_fix',
-        messageEn:
-          'Collection uses claims — users trust the claim backend (plugins, numUses, signatures) in addition to the on-chain logic.',
-        recommendationEn: 'Review each claim plugin and confirm the off-chain backend is trustworthy.'
+        messageEn: 'Collection uses claims',
+        detailEn:
+          'This collection uses off-chain claims, which introduces trust assumptions on BitBadges for managing claims and verifying criteria, as well as any third-party dependencies you add (passwords, codes, webhooks). Design accordingly, especially for high-value use cases. Design with off-chain failures in mind. For a fully on-chain or fully self-hosted solution, gate by your own on-chain dynamic store or by another token that you control.',
+        recommendationEn:
+          'If trust assumptions are unacceptable, consider using on-chain-only criteria instead of off-chain claims'
       });
     }
     return out;

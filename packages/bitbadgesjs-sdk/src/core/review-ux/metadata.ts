@@ -108,9 +108,9 @@ export const metadataChecks: UxCheck[] = [
         category: 'metadata',
         localeKey: 'review_alias_no_images',
         params: { count: missing.length },
-        messageEn: `${missing.length} alias path(s) have no image in their metadataPlaceholders sidecar.`,
-        recommendationEn:
-          'Provide an entry in metadataPlaceholders keyed by the path metadata.uri (and/or the default denomUnit metadata.uri) with name, description, and image. The on-chain PathMetadata proto only has { uri, customData } — images MUST live in the off-chain JSON at that URI.'
+        messageEn: 'Alias paths missing display images',
+        detailEn: `${missing.length} alias path(s) are missing a metadata image for the display unit. This image is shown when users view the token in wallets and exchanges.`,
+        recommendationEn: 'Add metadata images to all alias path display units'
       });
     }
     return out;

@@ -44,13 +44,3 @@ export function getAllApprovals(value: any): any[] {
     : [];
   return [...approvals, ...inc, ...out];
 }
-
-export function hasSkill(ctx: ReviewContext, id: string): boolean {
-  // If selectedSkills is undefined, run the union (return true so skill checks fire).
-  if (!ctx.selectedSkills) return true;
-  return ctx.selectedSkills.includes(id);
-}
-
-export function wasSkillGated(ctx: ReviewContext, id: string): boolean {
-  return !!ctx.selectedSkills && !ctx.selectedSkills.includes(id);
-}

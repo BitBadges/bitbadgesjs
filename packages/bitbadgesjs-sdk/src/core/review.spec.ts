@@ -134,7 +134,7 @@ describe('UX checks — representative sample', () => {
     expect(findByCode(findings, 'review.ux.diff_deleted_approvals')).toBeDefined();
   });
 
-  it('flags forceful_invariant_not_set when overrides exist without invariant', () => {
+  it('flags forceful_transfers_allowed when overrides exist without invariant', () => {
     const findings = runUxChecks(
       {
         collectionApprovals: [
@@ -148,11 +148,13 @@ describe('UX checks — representative sample', () => {
       },
       ctx
     );
-    expect(findByCode(findings, 'review.ux.forceful_invariant_not_set')).toBeDefined();
+    // Matches old frontend: overrides + no invariant -> single finding, no separate invariant check
+    expect(findByCode(findings, 'review.ux.forceful_transfers_allowed')).toBeDefined();
+    expect(findByCode(findings, 'review.ux.forceful_invariant_not_set')).toBeUndefined();
   });
 
-  it('forceful detail locale key branches on state', () => {
-    // Both set -> review_forceful_both_set
+  it('forceful mismatch fires when overrides exist AND invariant set', () => {
+    // Both set -> forceful_transfers_allowed + forceful_override_mismatch
     const both = runUxChecks(
       {
         collectionApprovals: [
@@ -166,42 +168,41 @@ describe('UX checks — representative sample', () => {
       },
       ctx
     );
-    expect(findByCode(both, 'review.ux.forceful_transfers_allowed')?.localeKeyDetail).toBe(
-      'review_forceful_both_set'
-    );
-    // Invariant only -> review_forceful_invariant_only
+    expect(findByCode(both, 'review.ux.forceful_transfers_allowed')).toBeDefined();
+    expect(findByCode(both, 'review.ux.forceful_override_mismatch')).toBeDefined();
+
+    // No overrides + invariant set -> no finding (matches old frontend case D)
     const invOnly = runUxChecks(
       { collectionApprovals: [], invariants: { noForcefulPostMintTransfers: true } },
       ctx
     );
-    // hasOverrides false, invariantBlocksForceful true — should NOT fire (current logic: fires only if hasOverrides || invariantBlocksForceful)
-    // Actually fires since invariantBlocksForceful true
-    expect(findByCode(invOnly, 'review.ux.forceful_transfers_allowed')?.localeKeyDetail).toBe(
-      'review_forceful_invariant_only'
-    );
+    expect(findByCode(invOnly, 'review.ux.forceful_transfers_allowed')).toBeUndefined();
+    expect(findByCode(invOnly, 'review.ux.forceful_override_mismatch')).toBeUndefined();
   });
 
-  it('flags credit_token_transfers_allowed when credit-token skill + non-mint approvals', () => {
+  it('flags credit_token_transfers_allowed when Credit Token standard + non-mint approvals', () => {
     const findings = runUxChecks(
       {
+        standards: ['Credit Token'],
         collectionApprovals: [
           { approvalId: 'm', fromListId: 'Mint', approvalCriteria: { overridesFromOutgoingApprovals: true } },
           { approvalId: 't', fromListId: 'bb1holder', approvalCriteria: {} }
         ]
       },
-      { selectedSkills: ['credit-token'] }
+      ctx
     );
     expect(findByCode(findings, 'review.ux.credit_token_transfers_allowed')).toBeDefined();
   });
 
-  it('flags addresslist_transfers_allowed when address-list skill + non-mint approvals', () => {
+  it('flags addresslist_transfers_allowed when Address List standard + non-mint approvals', () => {
     const findings = runUxChecks(
       {
+        standards: ['Address List'],
         collectionApprovals: [
           { approvalId: 't', fromListId: 'bb1holder', approvalCriteria: {} }
         ]
       },
-      { selectedSkills: ['address-list'] }
+      ctx
     );
     expect(findByCode(findings, 'review.ux.addresslist_transfers_allowed')).toBeDefined();
   });
