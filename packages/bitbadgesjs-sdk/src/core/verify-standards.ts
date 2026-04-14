@@ -682,11 +682,23 @@ function verifyCommonMintRules(value: any): StandardViolation[] {
     }
   }
 
-  // Mint approvals with predeterminedBalances must have exactly one orderCalculationMethod
+  // Mint approvals with predeterminedBalances must have exactly one
+  // orderCalculationMethod — but ONLY when `startBalances` is non-empty.
+  // The chain's `validate_basic.go` rule is "when using predetermined
+  // balances, exactly one order calculation can be set to true", and
+  // "using" means startBalances has entries to iterate. An approval
+  // with an empty startBalances array (e.g. custom-2fa, which enforces
+  // expiration at transfer time via allowPurgeIfExpired instead of
+  // predetermined increments) has nothing to order, so the
+  // orderCalculationMethod is irrelevant and the chain accepts all
+  // flags false. Matching chain semantics here keeps verify-standards
+  // aligned with live simulate behavior.
   for (const approval of mintApprovals) {
     const ac = approval.approvalCriteria || {};
     const pb = ac.predeterminedBalances;
-    if (pb?.orderCalculationMethod) {
+    const startBalances = pb?.incrementedBalances?.startBalances;
+    const hasStartBalances = Array.isArray(startBalances) && startBalances.length > 0;
+    if (pb?.orderCalculationMethod && hasStartBalances) {
       const ocm = pb.orderCalculationMethod;
       const trueCount = [
         ocm.useOverallNumTransfers,
@@ -700,7 +712,7 @@ function verifyCommonMintRules(value: any): StandardViolation[] {
         violations.push({
           standard: 'Common',
           field: `collectionApprovals[${approval.approvalId}].predeterminedBalances.orderCalculationMethod`,
-          message: `Approval "${approval.approvalId}" uses predeterminedBalances but no orderCalculationMethod is set to true. Exactly one must be true.`,
+          message: `Approval "${approval.approvalId}" uses predeterminedBalances.startBalances but no orderCalculationMethod is set to true. Exactly one must be true.`,
           fix: 'Set useOverallNumTransfers: true (most common default).'
         });
       } else if (trueCount > 1) {

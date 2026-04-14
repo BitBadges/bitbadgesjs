@@ -106,8 +106,10 @@ describe('vault builder', () => {
   test('has deposit and withdrawal approvals', () => {
     expect(r.collectionApprovals.length).toBe(2);
     const ids = r.collectionApprovals.map((a: any) => a.approvalId);
-    expect(ids).toContain('deposit');
-    expect(ids).toContain('withdrawal');
+    // Vault uses `vault-deposit` + a randomized `vault-withdraw-<hex>`
+    // id to match VaultApprovalRegistry's collision-avoidance pattern.
+    expect(ids).toContain('vault-deposit');
+    expect(ids.some((id: string) => id.startsWith('vault-withdraw-'))).toBe(true);
   });
 
   test('backing approvals have mustPrioritize and allowBackedMinting', () => {
@@ -117,16 +119,21 @@ describe('vault builder', () => {
     }
   });
 
+  // Helper: the withdraw approval has a random suffix, so tests find it
+  // by prefix rather than exact match.
+  const findWithdraw = (approvals: any[]) =>
+    approvals.find((a: any) => typeof a.approvalId === 'string' && a.approvalId.startsWith('vault-withdraw-'));
+
   test('daily withdraw limit adds approvalAmounts', () => {
     const limited = val(buildVault({ backingCoin: 'USDC', dailyWithdrawLimit: 100 }));
-    const withdrawal = limited.collectionApprovals.find((a: any) => a.approvalId === 'withdrawal');
+    const withdrawal = findWithdraw(limited.collectionApprovals);
     expect(withdrawal.approvalCriteria.approvalAmounts).toBeDefined();
     expect(withdrawal.approvalCriteria.approvalAmounts.perInitiatedByAddressApprovalAmount).toBe('100000000');
   });
 
   test('require2fa adds mustOwnTokens', () => {
     const twoFa = val(buildVault({ backingCoin: 'USDC', require2fa: '74' }));
-    const withdrawal = twoFa.collectionApprovals.find((a: any) => a.approvalId === 'withdrawal');
+    const withdrawal = findWithdraw(twoFa.collectionApprovals);
     expect(withdrawal.approvalCriteria.mustOwnTokens).toBeDefined();
     expect(withdrawal.approvalCriteria.mustOwnTokens[0].collectionId).toBe('74');
   });
@@ -134,7 +141,7 @@ describe('vault builder', () => {
   test('emergency recovery adds migration approval', () => {
     const recovery = val(buildVault({ backingCoin: 'USDC', emergencyRecovery: 'bb1recovery' }));
     expect(recovery.collectionApprovals.length).toBe(3);
-    const migration = recovery.collectionApprovals.find((a: any) => a.approvalId === 'emergency-migration');
+    const migration = recovery.collectionApprovals.find((a: any) => a.approvalId === 'vault-emergency-migration');
     expect(migration.toListId).toBe('bb1recovery');
   });
 
@@ -152,8 +159,10 @@ describe('smart-account builder', () => {
   test('has Smart Token standard', () => { expect(r.standards).toContain('Smart Token'); });
   test('has backing and unbacking', () => {
     const ids = r.collectionApprovals.map((a: any) => a.approvalId);
-    expect(ids).toContain('smart-token-backing');
-    expect(ids).toContain('smart-token-unbacking');
+    // Renamed in the parity pass to match CollectionApprovalRegistry's
+    // smart-account-* naming (frontend source of truth).
+    expect(ids).toContain('smart-account-backing');
+    expect(ids).toContain('smart-account-unbacking');
   });
   test('tradable adds Liquidity Pools', () => {
     const t = val(buildSmartAccount({ backingCoin: 'USDC', tradable: true }));
@@ -355,7 +364,7 @@ describe('quests builder', () => {
   test('has Quests standard', () => { expect(r.standards).toEqual(['Quests']); });
   test('correct escrow', () => { expect(r.mintEscrowCoinsToTransfer[0].amount).toBe('1000000000000'); });
   test('quest approval with escrow payout', () => {
-    const q = r.collectionApprovals.find((a: any) => a.approvalId === 'quest-approval');
+    const q = r.collectionApprovals.find((a: any) => a.approvalId === 'quests-approval');
     expect(q.approvalCriteria.coinTransfers[0].overrideFromWithApproverAddress).toBe(true);
     expect(q.approvalCriteria.coinTransfers[0].overrideToWithInitiator).toBe(true);
   });

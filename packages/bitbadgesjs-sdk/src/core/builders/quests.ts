@@ -23,10 +23,13 @@ export function buildQuests(params: QuestsParams): any {
   const coin = resolveCoin(params.denom);
   const rewardBase = toBaseUnits(params.reward, coin.decimals);
 
-  // The amountTrackerId must match the approvalId so claim counts are
-  // tracked against the same approval. Frontend registries derive the
-  // tracker from the approvalId param; mirror that pattern here.
-  const questApprovalId = `quest-approval-${Math.random().toString(16).slice(2, 10)}`;
+  // Fixed `'quests-approval'` id matches the frontend quests.tsx page
+  // which hardcodes this value when calling
+  // `CollectionApprovalRegistry.questsApproval({ approvalId: 'quests-approval' })`.
+  // Quests collections use a singleton claim approval (one per
+  // collection), so there's no collision risk that would justify a
+  // random suffix. The amountTrackerId mirrors the approvalId.
+  const questApprovalId = 'quests-approval';
 
   const collectionApprovals = [
     // Quest claim approval

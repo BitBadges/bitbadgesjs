@@ -102,7 +102,11 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: crowdfunderAddr,
       approvalId: 'success',
-      transferTimes: [{ start: deadlineTs, end: MAX_UINT64 }],
+      // Strictly AFTER deadline — `deadlineTs + 1` prevents the
+      // success claim from racing the final deposit at the exact
+      // deadline second. Matches CrowdfundRegistry's
+      // `{start: deadlineTime + 1n, end: MAX_UINT}`.
+      transferTimes: [{ start: String(BigInt(deadlineTs) + 1n), end: MAX_UINT64 }],
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
       version: '0',
@@ -145,7 +149,9 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'refund',
-      transferTimes: [{ start: deadlineTs, end: MAX_UINT64 }],
+      // Same `deadlineTs + 1` boundary as the success approval — no
+      // refunds at the exact deadline second, only strictly after.
+      transferTimes: [{ start: String(BigInt(deadlineTs) + 1n), end: MAX_UINT64 }],
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
       version: '0',
