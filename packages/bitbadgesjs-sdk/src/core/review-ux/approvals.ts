@@ -137,20 +137,26 @@ export const approvalsChecks: UxCheck[] = [
       });
     }
 
-    // Case B: no current forceful approvals + invariant not set.
-    // The invariant cannot be added after creation, so any future
-    // approval the manager adds could introduce forceful transfers.
-    // This is a real trust assumption — the holders of tokens in this
-    // collection are trusting the manager not to add a forceful
-    // approval later — so fire as `warning` rather than `info`.
+    // Case B: no current forceful approvals but the invariant does
+    // not block them (explicitly false OR unset — either way, the
+    // collection permits forceful transfers post-mint). The invariant
+    // is locked at creation time, so any approval the manager adds
+    // later could introduce forceful transfers. This is a real trust
+    // assumption worth surfacing as a `warning` — holders can't rely
+    // on forceful transfers being permanently impossible.
     //
-    // If transferability is already permanently locked via a blanket
-    // canUpdateCollectionApprovals forbidden entry, the warning is
-    // effectively neutralized (no future approvals can be added).
-    // Downgrade severity and append a note in that case.
+    // Special case: if transferability is already permanently locked
+    // via a blanket canUpdateCollectionApprovals forbidden entry, the
+    // warning is effectively neutralized (no future approvals can be
+    // added), so we downgrade severity and append a note.
     if (!hasOverrides && !invariantBlocksForceful) {
-      const baseDetail =
-        'The noForcefulPostMintTransfers invariant is not set. No approvals currently enable forceful transfers, but because the invariant cannot be added after creation, any future approval the manager adds could introduce them. Holders cannot rely on forceful transfers being permanently impossible.';
+      // Distinguish explicit-false from unset so the text is accurate.
+      const invariantValue = invariants.noForcefulPostMintTransfers;
+      const isExplicitFalse = invariantValue === false;
+      const stateText = isExplicitFalse
+        ? 'This collection has noForcefulPostMintTransfers set to false, which permits forceful post-mint transfers.'
+        : 'The noForcefulPostMintTransfers invariant is not set, which by default permits forceful post-mint transfers.';
+      const baseDetail = `${stateText} No approvals currently enable them, but since the invariant is locked at creation time, any approval the manager adds later could introduce forceful transfers.`;
       const suffix = transferabilityPermanentlyLocked
         ? ' This is likely redundant in your case — canUpdateCollectionApprovals is permanently locked, so no future approvals can be added anyway.'
         : '';
@@ -159,10 +165,10 @@ export const approvalsChecks: UxCheck[] = [
         severity: transferabilityPermanentlyLocked ? 'info' : 'warning',
         source: 'ux',
         category: 'approvals',
-        title: { en: 'Forceful transfers not locked at creation' },
+        title: { en: 'Forceful transfers permitted post-mint' },
         detail: { en: baseDetail + suffix },
         recommendation: {
-          en: 'Set invariants.noForcefulPostMintTransfers = true at creation if the collection should never permit forceful transfers. Leave unset only if future design may require them.'
+          en: 'If forceful transfers should be permanently impossible, set invariants.noForcefulPostMintTransfers = true at creation — it cannot be toggled later. If forceful transfers are intentional for this collection (auction settlement, subscription revoke, prediction market resolution, etc.), you can safely ignore this.'
         }
       });
     }
