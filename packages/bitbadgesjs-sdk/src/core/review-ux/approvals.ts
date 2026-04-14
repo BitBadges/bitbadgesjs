@@ -176,7 +176,7 @@ export const approvalsChecks: UxCheck[] = [
         severity: transferabilityPermanentlyLocked ? 'info' : 'critical',
         source: 'ux',
         category: 'approvals',
-        title: { en: 'Tokens can be moved without holder consent' },
+        title: { en: 'Forceful transfers are not permanently blocked' },
         detail: { en: baseDetail + suffix },
         recommendation: {
           en: 'If forceful transfers should be permanently impossible, set invariants.noForcefulPostMintTransfers = true at creation — it cannot be toggled later. If forceful transfers are intentional for this collection (auction settlement, subscription revoke, prediction market resolution, etc.), you can safely ignore this.'
