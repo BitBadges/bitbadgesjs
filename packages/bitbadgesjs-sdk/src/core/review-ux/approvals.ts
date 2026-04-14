@@ -152,7 +152,9 @@ export const approvalsChecks: UxCheck[] = [
   // matches diff.ts and works for all callers (frontend, CLI, indexer, MCP).
   (value) => {
     const out: Finding[] = [];
-    const isUpdate = value?.collectionId && String(value.collectionId) !== '0';
+    // collectionId stays string because it's not a "number-typed field"
+    // in the Msg class — it's an ID. BigIntify doesn't convert it.
+    const isUpdate = value?.collectionId && value.collectionId !== '0';
     if (isUpdate) return out;
     const mint = getApprovals(value).filter((a: any) => a.fromListId === 'Mint');
     if (mint.length > 0) {
@@ -191,7 +193,7 @@ export const approvalsChecks: UxCheck[] = [
         'perToAddressMaxNumTransfers',
         'perFromAddressMaxNumTransfers',
         'perInitiatedByAddressMaxNumTransfers'
-      ].some((k) => mnt[k] && String(mnt[k]) !== '0');
+      ].some((k) => mnt[k] !== undefined && mnt[k] !== 0n);
       if (!hasAnyLimit) {
         const name = approval.approvalId || 'unnamed';
         out.push({
@@ -250,15 +252,14 @@ export const approvalsChecks: UxCheck[] = [
     for (const approval of getApprovals(value)) {
       const mnt = approval.approvalCriteria?.maxNumTransfers || {};
       const overall = mnt.overallMaxNumTransfers;
-      if (!overall || String(overall) === '0') continue;
-      const overallNum = Number(overall);
+      if (overall === undefined || overall === 0n) continue;
       for (const perKey of [
         'perToAddressMaxNumTransfers',
         'perFromAddressMaxNumTransfers',
         'perInitiatedByAddressMaxNumTransfers'
       ] as const) {
         const perVal = mnt[perKey];
-        if (perVal && String(perVal) !== '0' && Number(perVal) > overallNum) {
+        if (perVal !== undefined && perVal !== 0n && perVal > overall) {
           const name = approval.approvalId || 'unnamed';
           const perUser = String(perVal);
           const overallStr = String(overall);
@@ -356,7 +357,7 @@ export const approvalsChecks: UxCheck[] = [
         const numUsesPlugin = plugins.find((p: any) => p.pluginId === 'numUses');
         if (!numUsesPlugin) continue;
         const offChainMax = numUsesPlugin.publicParams?.maxUses;
-        if (offChainMax == null || onChainMax == null || String(onChainMax) === '0') continue;
+        if (offChainMax == null || onChainMax == null || onChainMax === 0n) continue;
         if (Number(offChainMax) !== Number(onChainMax)) {
           const label = mc.claimConfig?.label || approval.approvalId || 'unnamed';
           const offChain = Number(offChainMax);
@@ -390,9 +391,9 @@ export const approvalsChecks: UxCheck[] = [
       for (const mc of challenges) {
         if (
           mc.claimConfig?.plugins?.length > 0 &&
-          mc.maxUsesPerLeaf &&
-          String(mc.maxUsesPerLeaf) !== '1' &&
-          String(mc.maxUsesPerLeaf) !== '0'
+          mc.maxUsesPerLeaf !== undefined &&
+          mc.maxUsesPerLeaf !== 1n &&
+          mc.maxUsesPerLeaf !== 0n
         ) {
           const label = mc.claimConfig?.label || approval.approvalId || 'unnamed';
           out.push({
@@ -530,9 +531,9 @@ export const approvalsChecks: UxCheck[] = [
       for (const field of ['approvalAmounts', 'maxNumTransfers'] as const) {
         const rti = criteria[field]?.resetTimeIntervals;
         if (!rti) continue;
-        const interval = String(rti.intervalLength || '0');
-        const start = String(rti.startTime || '0');
-        if (interval !== '0' && start === '0') {
+        const interval = rti.intervalLength ?? 0n;
+        const start = rti.startTime ?? 0n;
+        if (interval !== 0n && start === 0n) {
           const name = approval.approvalId || 'unnamed';
           const key = name;
           if (seen.has(key)) break;
@@ -565,7 +566,7 @@ export const approvalsChecks: UxCheck[] = [
     for (const approval of getApprovals(value)) {
       const royalty = approval.approvalCriteria?.userRoyalties;
       if (!royalty) continue;
-      const hasPercentage = royalty.percentage && String(royalty.percentage) !== '0';
+      const hasPercentage = royalty.percentage !== undefined && royalty.percentage !== 0n;
       const hasAddress = royalty.payoutAddress && royalty.payoutAddress !== '';
       const name = approval.approvalId || 'unnamed';
       if (hasPercentage && !hasAddress) {

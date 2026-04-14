@@ -13,9 +13,10 @@
 
 import { CollectionDoc } from '../api-indexer/docs-types/docs.js';
 import { doesCollectionFollowSubscriptionProtocol } from './subscriptions.js';
+import { normalizeForReview } from './review-normalize.js';
 
-const MAX_UINT64 = '18446744073709551615';
-const FOREVER = [{ start: '1', end: MAX_UINT64 }];
+const MAX_UINT64 = 18446744073709551615n;
+const FOREVER = [{ start: 1n, end: MAX_UINT64 }];
 const BURN_ADDRESS = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
 
 // ============================================================
@@ -41,12 +42,12 @@ export interface VerificationResult {
 
 function isForever(times: any[]): boolean {
   if (!Array.isArray(times) || times.length !== 1) return false;
-  return String(times[0]?.start) === '1' && String(times[0]?.end) === MAX_UINT64;
+  return times[0]?.start === 1n && times[0]?.end === MAX_UINT64;
 }
 
 function isSingleToken(tokenIds: any[]): boolean {
   if (!Array.isArray(tokenIds) || tokenIds.length !== 1) return false;
-  return String(tokenIds[0]?.start) === '1' && String(tokenIds[0]?.end) === '1';
+  return tokenIds[0]?.start === 1n && tokenIds[0]?.end === 1n;
 }
 
 function getApprovals(value: any): any[] {
@@ -197,7 +198,7 @@ function verifySubscription(value: any): StandardViolation[] {
 
   // validTokenIds must start at 1 (one range, supports multi-tier)
   const vt = value.validTokenIds;
-  if (!Array.isArray(vt) || vt.length !== 1 || String(vt[0]?.start) !== '1') {
+  if (!Array.isArray(vt) || vt.length !== 1 || vt[0]?.start !== 1n) {
     violations.push({
       standard: std,
       field: 'validTokenIds',
@@ -250,7 +251,7 @@ function verifySubscription(value: any): StandardViolation[] {
         field: `${prefix}.predeterminedBalances.incrementedBalances.startBalances`,
         message: `Subscription approval "${approval.approvalId}" startBalances must have exactly 1 entry.`
       });
-    } else if (String(ib.startBalances[0]?.amount) !== '1') {
+    } else if (ib.startBalances[0]?.amount !== 1n) {
       violations.push({
         standard: std,
         field: `${prefix}.predeterminedBalances.incrementedBalances.startBalances[0].amount`,
@@ -259,7 +260,7 @@ function verifySubscription(value: any): StandardViolation[] {
     }
 
     // durationFromTimestamp must be non-zero
-    if (!ib.durationFromTimestamp || String(ib.durationFromTimestamp) === '0') {
+    if (!ib.durationFromTimestamp || ib.durationFromTimestamp === 0n) {
       violations.push({
         standard: std,
         field: `${prefix}.predeterminedBalances.incrementedBalances.durationFromTimestamp`,
@@ -278,31 +279,31 @@ function verifySubscription(value: any): StandardViolation[] {
       });
     }
 
-    // incrementTokenIdsBy and incrementOwnershipTimesBy should be "0"
-    if (ib.incrementTokenIdsBy && String(ib.incrementTokenIdsBy) !== '0') {
+    // incrementTokenIdsBy and incrementOwnershipTimesBy should be 0
+    if (ib.incrementTokenIdsBy && ib.incrementTokenIdsBy !== 0n) {
       violations.push({
         standard: std,
         field: `${prefix}.predeterminedBalances.incrementedBalances.incrementTokenIdsBy`,
-        message: `Subscription approval "${approval.approvalId}" incrementTokenIdsBy should be "0" (single token ID for subscriptions).`
+        message: `Subscription approval "${approval.approvalId}" incrementTokenIdsBy should be 0 (single token ID for subscriptions).`
       });
     }
-    if (ib.incrementOwnershipTimesBy && String(ib.incrementOwnershipTimesBy) !== '0') {
+    if (ib.incrementOwnershipTimesBy && ib.incrementOwnershipTimesBy !== 0n) {
       violations.push({
         standard: std,
         field: `${prefix}.predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy`,
-        message: `Subscription approval "${approval.approvalId}" incrementOwnershipTimesBy should be "0".`
+        message: `Subscription approval "${approval.approvalId}" incrementOwnershipTimesBy should be 0.`
       });
     }
 
     // Mutual exclusivity: only ONE of durationFromTimestamp, incrementOwnershipTimesBy, recurringOwnershipTimes can be non-zero
     const rot = ib.recurringOwnershipTimes;
-    const hasDuration = ib.durationFromTimestamp && String(ib.durationFromTimestamp) !== '0';
-    const hasIncrement = ib.incrementOwnershipTimesBy && String(ib.incrementOwnershipTimesBy) !== '0';
+    const hasDuration = ib.durationFromTimestamp && ib.durationFromTimestamp !== 0n;
+    const hasIncrement = ib.incrementOwnershipTimesBy && ib.incrementOwnershipTimesBy !== 0n;
     const hasRecurring =
       rot &&
-      ((rot.startTime && String(rot.startTime) !== '0') ||
-        (rot.intervalLength && String(rot.intervalLength) !== '0') ||
-        (rot.chargePeriodLength && String(rot.chargePeriodLength) !== '0'));
+      ((rot.startTime && rot.startTime !== 0n) ||
+        (rot.intervalLength && rot.intervalLength !== 0n) ||
+        (rot.chargePeriodLength && rot.chargePeriodLength !== 0n));
     const activeCount = [hasDuration, hasIncrement, hasRecurring].filter(Boolean).length;
     if (activeCount > 1) {
       violations.push({
@@ -394,7 +395,7 @@ function verifyNFTCollection(value: any): StandardViolation[] {
   const invariants = getInvariants(value);
 
   // maxSupplyPerId should be "1" for true NFTs
-  if (!invariants.maxSupplyPerId || String(invariants.maxSupplyPerId) !== '1') {
+  if (!invariants.maxSupplyPerId || invariants.maxSupplyPerId !== 1n) {
     violations.push({
       standard: std,
       field: 'invariants.maxSupplyPerId',
@@ -761,7 +762,7 @@ function verifyBounty(value: any): StandardViolation[] {
     }
     // Each should have maxNumTransfers.overallMaxNumTransfers = 1
     const mnt = ac.maxNumTransfers;
-    if (mnt && String(mnt.overallMaxNumTransfers) !== '1') {
+    if (mnt && mnt.overallMaxNumTransfers !== 1n) {
       violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].maxNumTransfers`, message: `Bounty approval "${a.approvalId}" overallMaxNumTransfers must be "1".` });
     }
   }
@@ -786,7 +787,7 @@ function verifyCrowdfund(value: any): StandardViolation[] {
 
   // Must have 2 token IDs (refund + progress)
   const tokenIds = value.validTokenIds;
-  if (!Array.isArray(tokenIds) || tokenIds.length !== 1 || String(tokenIds[0]?.start) !== '1' || String(tokenIds[0]?.end) !== '2') {
+  if (!Array.isArray(tokenIds) || tokenIds.length !== 1 || tokenIds[0]?.start !== 1n || tokenIds[0]?.end !== 2n) {
     violations.push({ standard: std, field: 'validTokenIds', message: 'Crowdfund collections MUST have validTokenIds = [{ start: "1", end: "2" }] (refund + progress tokens).' });
   }
 
@@ -833,7 +834,7 @@ function verifyAuction(value: any): StandardViolation[] {
     }
     // Must have maxNumTransfers = 1
     const mnt = ac.maxNumTransfers;
-    if (mnt && String(mnt.overallMaxNumTransfers) !== '1') {
+    if (mnt && mnt.overallMaxNumTransfers !== 1n) {
       violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].maxNumTransfers`, message: `Auction mint-to-winner overallMaxNumTransfers must be "1".` });
     }
     // Transfer times should be bounded (not FOREVER)
@@ -885,7 +886,7 @@ function verifyPredictionMarket(value: any): StandardViolation[] {
 
   // Must have 2 token IDs (YES/NO)
   const tokenIds = value.validTokenIds;
-  if (!Array.isArray(tokenIds) || tokenIds.length !== 1 || String(tokenIds[0]?.start) !== '1' || String(tokenIds[0]?.end) !== '2') {
+  if (!Array.isArray(tokenIds) || tokenIds.length !== 1 || tokenIds[0]?.start !== 1n || tokenIds[0]?.end !== 2n) {
     violations.push({ standard: std, field: 'validTokenIds', message: 'Prediction market MUST have validTokenIds = [{ start: "1", end: "2" }] (YES + NO tokens).' });
   }
 
@@ -1446,31 +1447,14 @@ function verifyApprovalTrackingFields(value: any): StandardViolation[] {
  * @returns VerificationResult with violations and checked standards
  */
 export function verifyStandardsCompliance(transaction: any): VerificationResult {
-  // Accept both shapes:
-  //   1. A tx wrapper       — `{ messages: [{ typeUrl, value: {...} }] }`
-  //   2. A bare msg          — `{ typeUrl, value: {...} }`
-  //   3. A bare collection value — `{ creator, collectionApprovals, ... }`
-  // reviewCollection passes #3 through after extractCollectionValue strips
-  // the wrapper, so we have to handle all three or it spuriously emits
-  // "Transaction has no messages" on every collection-value input.
-  let value: any = null;
-  if (transaction && typeof transaction === 'object') {
-    const msg = transaction.messages?.[0] || transaction.msgs?.[0];
-    if (msg) {
-      value = msg.value || msg;
-    } else if (transaction.value && typeof transaction.value === 'object') {
-      // Bare msg: { typeUrl, value }
-      value = transaction.value;
-    } else if (
-      transaction.collectionApprovals !== undefined ||
-      transaction.standards !== undefined ||
-      transaction.creator !== undefined
-    ) {
-      // Bare collection value — has the fields a CollectionValue would
-      // have (collectionApprovals / standards / creator).
-      value = transaction;
-    }
-  }
+  // normalizeForReview unwraps tx/msg wrappers, mirrors aliasPaths field
+  // names, and converts all numeric fields to bigints via the Msg class's
+  // registered .convert(BigIntify). Every downstream check here assumes
+  // that normalized shape. Idempotent — safe to run on already-normalized
+  // input (reviewCollection pipeline) or raw input (direct callers like
+  // the builders test suite).
+  const normalized = normalizeForReview(transaction);
+  const value: any = normalized && typeof normalized === 'object' ? normalized : null;
   if (!value) {
     return {
       valid: false,

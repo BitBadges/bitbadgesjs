@@ -6,7 +6,7 @@ import type { Finding, ReviewContext } from '../review-types.js';
 
 export type UxCheck = (value: any, context: ReviewContext) => Finding[];
 
-export const MAX_UINT = '18446744073709551615';
+export const MAX_UINT = 18446744073709551615n;
 
 export const BITBADGES_DEFAULT_LOGO = 'QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E';
 

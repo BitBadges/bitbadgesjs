@@ -18,7 +18,7 @@ export const permissionsChecks: UxCheck[] = [
         const pt = entry.permanentlyPermittedTimes;
         if (
           Array.isArray(pt) &&
-          pt.some((t: any) => String(t.start) === '1' && String(t.end) === MAX_UINT)
+          pt.some((t: any) => t.start === 1n && t.end === MAX_UINT)
         ) {
           flagged = true;
           break;
@@ -53,7 +53,7 @@ export const permissionsChecks: UxCheck[] = [
     const permEntries: any[] = value?.collectionPermissions?.canUpdateCollectionApprovals || [];
     const hasMintLock = permEntries.some((e: any) => {
       const ft = e.permanentlyForbiddenTimes;
-      const isForbidden = Array.isArray(ft) && ft.some((t: any) => String(t.start) === '1' && String(t.end) === MAX_UINT);
+      const isForbidden = Array.isArray(ft) && ft.some((t: any) => t.start === 1n && t.end === MAX_UINT);
       return isForbidden && (e.fromListId === 'Mint' || e.fromListId === 'All');
     });
     if (!hasMintLock) {

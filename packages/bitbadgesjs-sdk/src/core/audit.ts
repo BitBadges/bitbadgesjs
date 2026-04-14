@@ -6,7 +6,9 @@
  * with severity levels so callers can programmatically inspect results.
  */
 
-const MAX_UINT64 = '18446744073709551615';
+import { normalizeForReview } from './review-normalize.js';
+
+const MAX_UINT64 = 18446744073709551615n;
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -46,8 +48,8 @@ export interface AuditResult {
 // ---------------------------------------------------------------------------
 
 interface UintRange {
-  start: string;
-  end: string;
+  start: bigint;
+  end: bigint;
 }
 
 interface PermissionEntry {
@@ -104,7 +106,7 @@ function isForever(ranges: UintRange[] | undefined): boolean {
   // Tolerate both string and bigint shapes. The SDK builders emit
   // strings; the frontend collection store uses bigints. Normalizing
   // via String() catches both uniformly.
-  return ranges.some((r) => String(r.start) === '1' && String(r.end) === MAX_UINT64);
+  return ranges.some((r) => r.start === 1n && r.end === MAX_UINT64);
 }
 
 function isForbidden(entries: PermissionEntry[] | undefined): boolean {
@@ -183,7 +185,10 @@ function extractCollection(input: Record<string, unknown>): CollectionValue {
  */
 export function auditCollection(input: { collection: Record<string, unknown>; context?: string }): AuditResult {
   try {
-    const col = extractCollection(input.collection);
+    // normalizeForReview unwraps tx/msg wrappers, mirrors aliasPaths
+    // field names, and converts all numeric fields to bigints via the
+    // Msg class's registered .convert(BigIntify). Idempotent.
+    const col = normalizeForReview(input.collection) as CollectionValue;
     const findings: AuditFinding[] = [];
     const context = (input.context || '').toLowerCase();
 
@@ -272,8 +277,8 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     // have maxSupplyPerId == 0, so gating on the NFTs standard prevents
     // false positives for every non-NFT collection.
     const colStandards: string[] = (col.standards as string[]) || [];
-    const maxSupply = invariants.maxSupplyPerId as string | undefined;
-    if (colStandards.includes('NFTs') && (!maxSupply || maxSupply === '0')) {
+    const maxSupply = invariants.maxSupplyPerId as bigint | undefined;
+    if (colStandards.includes('NFTs') && (maxSupply === undefined || maxSupply === 0n)) {
       findings.push({
         severity: 'info',
         category: 'supply',
@@ -344,12 +349,12 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
 
         const hasAmountLimit =
           amounts &&
-          ((amounts.overallApprovalAmount && String(amounts.overallApprovalAmount) !== '0') ||
-            (amounts.perInitiatedByAddressApprovalAmount && String(amounts.perInitiatedByAddressApprovalAmount) !== '0'));
+          ((amounts.overallApprovalAmount && amounts.overallApprovalAmount !== 0n) ||
+            (amounts.perInitiatedByAddressApprovalAmount && amounts.perInitiatedByAddressApprovalAmount !== 0n));
         const hasTransferLimit =
           transfers &&
-          ((transfers.overallMaxNumTransfers && String(transfers.overallMaxNumTransfers) !== '0') ||
-            (transfers.perInitiatedByAddressMaxNumTransfers && String(transfers.perInitiatedByAddressMaxNumTransfers) !== '0'));
+          ((transfers.overallMaxNumTransfers && transfers.overallMaxNumTransfers !== 0n) ||
+            (transfers.perInitiatedByAddressMaxNumTransfers && transfers.perInitiatedByAddressMaxNumTransfers !== 0n));
         const hasPredetermined =
           predetermined &&
           ((predetermined.incrementedBalances && Object.keys(predetermined.incrementedBalances as object).length > 0) ||
@@ -366,16 +371,10 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
           });
         }
 
-        // Public mint check
-        if (initiatedBy === 'All' && toId === 'All') {
-          findings.push({
-            severity: 'info',
-            category: 'approval-design',
-            title: `Mint approval "${approvalId}" is PUBLIC`,
-            detail: 'Anyone can mint tokens. initiatedByListId and toListId are both "All".',
-            recommendation: 'This is correct for public mints. For restricted mints, use a specific address or dynamic store challenge.'
-          });
-        }
+        // "Public mint" info finding removed — approvals are commonly
+        // gated via claim plugins, merkle challenges, dynamic stores, or
+        // out-of-band allowlists, and flagging All+All as noteworthy
+        // produced noise on every template that uses public mints.
       }
 
       // --- Backing address checks ---
@@ -619,14 +618,24 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     // 6. METADATA & STANDARDS CHECKS
     // ========================================
 
-    const collectionUri = col.collectionMetadata?.uri || '';
-    if (collectionUri.startsWith('ipfs://METADATA_') || collectionUri === '') {
+    // Collection metadata URI placeholder check — suppressed when the
+    // frontend WithDetails shape is present (nested metadata.metadata
+    // with inline name / image / description). In that state the URI is
+    // intentionally blank pre-upload; the auto-apply flow resolves it
+    // on submit. `ipfs://METADATA_*` internal placeholders from the
+    // session/template flow are also valid and don't trigger this.
+    const collectionMeta: any = col.collectionMetadata;
+    const collectionUri: string = collectionMeta?.uri || '';
+    const collectionInline = collectionMeta?.metadata;
+    const hasInlineContent = !!(collectionInline && (collectionInline.name || collectionInline.image || collectionInline.description));
+    const isInternalPlaceholder = /^ipfs:\/\/METADATA_[A-Z]/.test(collectionUri);
+    if (!hasInlineContent && !isInternalPlaceholder && collectionUri === '') {
       findings.push({
         severity: 'info',
         category: 'metadata',
-        title: 'Collection metadata URI is a placeholder',
-        detail: `URI is "${collectionUri}". This needs to be replaced with actual IPFS metadata before deployment.`,
-        recommendation: 'Upload metadata to IPFS and replace placeholder URIs. If using return transaction for user review, metadataPlaceholders handles this automatically.'
+        title: 'Collection metadata URI is not set',
+        detail: 'collectionMetadata.uri is empty. Upload metadata to IPFS and set the URI, or populate inline metadata so the auto-apply flow can substitute it on submit.',
+        recommendation: 'Set collectionMetadata.uri to an uploaded IPFS URI, or populate collectionMetadata.metadata with name/image/description so the auto-apply flow handles it.'
       });
     }
 

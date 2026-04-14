@@ -21,6 +21,9 @@ import { auditCollection, type AuditFinding, type AuditSeverity } from './audit.
 import { verifyStandardsCompliance, type StandardViolation } from './verify-standards.js';
 import { runUxChecks } from './review-ux/index.js';
 import type { Finding, FindingSource, Localized, ReviewContext, ReviewResult, Severity } from './review-types.js';
+import { normalizeForReview, extractCollectionValue } from './review-normalize.js';
+
+export { normalizeForReview, extractCollectionValue } from './review-normalize.js';
 
 // Re-export the types so `reviewCollection` + types are importable from one entry.
 export type { Finding, FindingSource, Localized, ReviewContext, ReviewResult, Severity } from './review-types.js';
@@ -28,65 +31,10 @@ export type { Finding, FindingSource, Localized, ReviewContext, ReviewResult, Se
 // ---------------------------------------------------------------------------
 // Normalization helpers
 // ---------------------------------------------------------------------------
-
-/**
- * Unwrap any of: transaction (`{ messages: [...] }`), raw message
- * (`{ typeUrl, value }`), or a bare collection value object. Ported from
- * the frontend `extractValue` helper in `reviewItems.ts`.
- */
-export function extractCollectionValue(input: unknown): any {
-  if (!input || typeof input !== 'object') return input;
-  const obj = input as any;
-  const messages = obj.messages || (Array.isArray(obj) ? obj : undefined);
-  if (messages && Array.isArray(messages) && messages.length > 0) {
-    const msg = messages[0];
-    return msg?.value || msg || input;
-  }
-  if (obj.value && typeof obj.value === 'object') return obj.value;
-  return obj;
-}
-
-/**
- * Deep-normalize a collection value for the review pipeline. Runs once at
- * the top of reviewCollection() so every downstream check can assume:
- *
- * - Numeric-like fields (bigint, number) are strings. audit / verify-standards
- *   / review-ux internals compare against string literals ('0', '1',
- *   MAX_UINT64) — this converts all three input types to that canonical
- *   form in one pass.
- * - Alias paths are present under BOTH `aliasPaths` and `aliasPathsToAdd`,
- *   so checks can look up either field without tolerating shape mismatch
- *   at every call site. Covers the difference between Msg create shape
- *   (`aliasPathsToAdd`) and frontend WIP / on-chain hydrated shape
- *   (`aliasPaths`).
- *
- * The walk is non-mutating — we return a fresh object tree, leaving the
- * caller's input untouched.
- */
-function stringifyNumbers(input: any): any {
-  if (input === null || input === undefined) return input;
-  const t = typeof input;
-  if (t === 'bigint') return input.toString();
-  // Numbers are normalized to strings too, for consistency. Booleans and
-  // regular strings pass through unchanged.
-  if (t === 'number') return Number.isFinite(input) ? String(input) : input;
-  if (t !== 'object') return input;
-  if (Array.isArray(input)) return input.map(stringifyNumbers);
-  const out: Record<string, any> = {};
-  for (const k of Object.keys(input)) out[k] = stringifyNumbers(input[k]);
-  return out;
-}
-
-export function normalizeForReview(input: unknown): any {
-  const raw = extractCollectionValue(input);
-  if (!raw || typeof raw !== 'object') return raw;
-  const value = stringifyNumbers(raw);
-  // Alias path field mirroring: whichever one the caller populated, make
-  // both available so downstream checks don't need to dual-read.
-  if (value.aliasPaths && !value.aliasPathsToAdd) value.aliasPathsToAdd = value.aliasPaths;
-  if (value.aliasPathsToAdd && !value.aliasPaths) value.aliasPaths = value.aliasPathsToAdd;
-  return value;
-}
+// extractCollectionValue + normalizeForReview live in ./review-normalize.js
+// so auditCollection and verifyStandardsCompliance can also run them
+// without creating a circular import. Re-exported above for callers who
+// import everything from this module.
 
 /**
  * Wrap a plain English string as a `Localized` bag. Used by adapters

@@ -92,12 +92,15 @@ describe('UX checks — representative sample', () => {
   });
 
   it('flags permission permanently permitted forever', () => {
+    // review-ux checks run after normalizeForReview has converted all
+    // numeric fields to bigints via the Msg class .convert(BigIntify)
+    // pipeline. Tests call runUxChecks directly so must supply bigints.
     const findings = runUxChecks(
       {
         collectionApprovals: [],
         collectionPermissions: {
           canUpdateCollectionMetadata: [
-            { permanentlyPermittedTimes: [{ start: '1', end: '18446744073709551615' }] }
+            { permanentlyPermittedTimes: [{ start: 1n, end: 18446744073709551615n }] }
           ]
         }
       },

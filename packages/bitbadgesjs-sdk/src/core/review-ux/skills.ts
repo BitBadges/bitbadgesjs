@@ -70,7 +70,7 @@ export const skillChecks: UxCheck[] = [
     const standards: string[] = value?.standards || [];
     if (!standards.includes('NFTs')) return out;
     const invariants = value?.invariants || {};
-    if (!invariants.maxSupplyPerId || String(invariants.maxSupplyPerId) === '0') {
+    if (!invariants.maxSupplyPerId || invariants.maxSupplyPerId === 0n) {
       out.push({
         code: 'review.ux.nft_no_supply_cap',
         severity: 'warning',
