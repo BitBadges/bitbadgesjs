@@ -67,8 +67,13 @@ export interface Finding {
 }
 
 export interface ReviewContext {
-  selectedSkills?: string[];
-  appliedStandards?: string[];
+  /**
+   * Prior on-chain collection state. Required for diff checks
+   * (deleted approvals, tracker-id changes, claim plugin diffs) and
+   * for update-only suppressions (e.g., auto_approve_disabled_on_mintable
+   * skips on updates because defaultBalances is immutable post-create).
+   * Everything else runs purely on the proposed collection's structure.
+   */
   onChainCollection?: unknown;
   skipSources?: FindingSource[];
   /**

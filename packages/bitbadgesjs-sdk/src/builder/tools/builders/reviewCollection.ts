@@ -12,7 +12,7 @@ import { reviewCollection, type ReviewResult, type ReviewContext } from '../../.
 export const reviewCollectionTool = {
   name: 'review_collection',
   description:
-    'Run the unified deterministic review on a collection transaction or on-chain collection. Returns audit + standards + UX findings merged into one ReviewResult with a single verdict. Accepts an optional context (selectedSkills, appliedStandards, onChainCollection, skipSources).',
+    'Run the unified deterministic review on a collection transaction or on-chain collection. Returns audit + standards + UX findings merged into one ReviewResult with a single verdict. Accepts an optional context (onChainCollection, skipSources, audienceFilter).',
   inputSchema: {
     type: 'object' as const,
     properties: {
@@ -24,7 +24,7 @@ export const reviewCollectionTool = {
       context: {
         type: 'object',
         description:
-          'Optional review context. Fields: selectedSkills (string[]), appliedStandards (string[]), onChainCollection (object, for diff checks), skipSources (array of "audit" | "standards" | "ux").'
+          'Optional review context. Fields: onChainCollection (object, prior on-chain state used by diff checks and update-only suppressions), skipSources (array of "audit" | "standards" | "ux" to skip whole families), audienceFilter ("agent" | "human" | "both" to filter findings by audience tag).'
       }
     },
     required: ['collection']

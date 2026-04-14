@@ -182,11 +182,6 @@ async function emit(
   // stdout stays pure JSON for sign/broadcast pipelines; --json-only
   // suppresses both for callers that want zero stderr noise.
   //
-  // We pass `selectedSkills: []` so the reviewer's skill-protocol matchers
-  // don't run the "union of every skill" fan-out that defaults when the
-  // context is unset. Templates know what they're building; the user can
-  // still run `bitbadges-cli builder review <file>` for a full pass over
-  // skills/standards they haven't declared on the collection yet.
   // Auto-validate runs for BOTH collection and user-approval templates
   // (both produce structurally validatable txs). Auto-review and
   // metadata + simulate are gated below — review only fires for
@@ -210,7 +205,7 @@ async function emit(
       const { reviewCollection } = await import('../../core/review.js');
       // reviewCollection wants either a raw collection or a tx body with
       // messages[]. Templates emit a single Msg, so wrap it.
-      const result = reviewCollection({ messages: [data] }, { selectedSkills: [] });
+      const result = reviewCollection({ messages: [data] });
       process.stderr.write('\n' + renderReview(result, { stream: process.stderr, title: 'Auto-Review' }) + '\n');
     } catch (err) {
       process.stderr.write(`Review skipped: ${err instanceof Error ? err.message : String(err)}\n`);
