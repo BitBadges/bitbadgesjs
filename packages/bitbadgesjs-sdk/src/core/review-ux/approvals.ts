@@ -88,11 +88,22 @@ export const approvalsChecks: UxCheck[] = [
     // redundant — we append a note to that effect.
     const transferabilityPermanentlyLocked = isTransferabilityPermanentlyLocked(value);
 
-    // Four outcome cases:
-    //   hasOverrides + !invariantBlocksForceful  → warning (verify intent)
-    //   hasOverrides + invariantBlocksForceful   → critical (on-chain failure)
-    //   !hasOverrides + !invariantBlocksForceful → info (future could enable, unless locked)
-    //   !hasOverrides + invariantBlocksForceful  → silent (locked as expected)
+    // Four outcome cases — one silent, three critical:
+    //   hasOverrides + !invariantBlocksForceful  → critical (tokens
+    //                                              can be moved without
+    //                                              holder consent; verify)
+    //   hasOverrides + invariantBlocksForceful   → critical (on-chain
+    //                                              failure at broadcast)
+    //   !hasOverrides + !invariantBlocksForceful → critical (invariant
+    //                                              can't be added later;
+    //                                              holders trust the
+    //                                              manager forever).
+    //                                              Exception: downgrade
+    //                                              to info when
+    //                                              transferability is
+    //                                              permanently locked.
+    //   !hasOverrides + invariantBlocksForceful  → silent (locked and
+    //                                              no overrides — safe)
     if (hasOverrides && !invariantBlocksForceful) {
       const names = forcefulApprovals
         .map((a: any) => a.approvalId || 'unnamed')
@@ -101,7 +112,7 @@ export const approvalsChecks: UxCheck[] = [
       const more = forcefulApprovals.length > 5 ? ` (+${forcefulApprovals.length - 5} more)` : '';
       out.push({
         code: 'review.ux.forceful_transfers_allowed',
-        severity: 'warning',
+        severity: 'critical',
         source: 'ux',
         category: 'approvals',
         title: { en: 'Forceful transfer overrides enabled' },
@@ -141,14 +152,14 @@ export const approvalsChecks: UxCheck[] = [
     // not block them (explicitly false OR unset — either way, the
     // collection permits forceful transfers post-mint). The invariant
     // is locked at creation time, so any approval the manager adds
-    // later could introduce forceful transfers. This is a real trust
-    // assumption worth surfacing as a `warning` — holders can't rely
-    // on forceful transfers being permanently impossible.
+    // later could introduce forceful transfers. Fires as `critical`
+    // because holders depend on transferability being stable and the
+    // current state is an unfixable trust assumption on the manager.
     //
     // Special case: if transferability is already permanently locked
     // via a blanket canUpdateCollectionApprovals forbidden entry, the
-    // warning is effectively neutralized (no future approvals can be
-    // added), so we downgrade severity and append a note.
+    // warning is neutralized (no future approvals can be added), so
+    // we downgrade to info and append a note.
     if (!hasOverrides && !invariantBlocksForceful) {
       // Distinguish explicit-false from unset so the text is accurate.
       const invariantValue = invariants.noForcefulPostMintTransfers;
@@ -162,7 +173,7 @@ export const approvalsChecks: UxCheck[] = [
         : '';
       out.push({
         code: 'review.ux.forceful_transfers_not_locked',
-        severity: transferabilityPermanentlyLocked ? 'info' : 'warning',
+        severity: transferabilityPermanentlyLocked ? 'info' : 'critical',
         source: 'ux',
         category: 'approvals',
         title: { en: 'Forceful transfers permitted post-mint' },
