@@ -47,6 +47,48 @@ export function extractCollectionValue(input: unknown): any {
 }
 
 /**
+ * Deep-normalize a collection value for the review pipeline. Runs once at
+ * the top of reviewCollection() so every downstream check can assume:
+ *
+ * - Numeric-like fields (bigint, number) are strings. audit / verify-standards
+ *   / review-ux internals compare against string literals ('0', '1',
+ *   MAX_UINT64) — this converts all three input types to that canonical
+ *   form in one pass.
+ * - Alias paths are present under BOTH `aliasPaths` and `aliasPathsToAdd`,
+ *   so checks can look up either field without tolerating shape mismatch
+ *   at every call site. Covers the difference between Msg create shape
+ *   (`aliasPathsToAdd`) and frontend WIP / on-chain hydrated shape
+ *   (`aliasPaths`).
+ *
+ * The walk is non-mutating — we return a fresh object tree, leaving the
+ * caller's input untouched.
+ */
+function stringifyNumbers(input: any): any {
+  if (input === null || input === undefined) return input;
+  const t = typeof input;
+  if (t === 'bigint') return input.toString();
+  // Numbers are normalized to strings too, for consistency. Booleans and
+  // regular strings pass through unchanged.
+  if (t === 'number') return Number.isFinite(input) ? String(input) : input;
+  if (t !== 'object') return input;
+  if (Array.isArray(input)) return input.map(stringifyNumbers);
+  const out: Record<string, any> = {};
+  for (const k of Object.keys(input)) out[k] = stringifyNumbers(input[k]);
+  return out;
+}
+
+export function normalizeForReview(input: unknown): any {
+  const raw = extractCollectionValue(input);
+  if (!raw || typeof raw !== 'object') return raw;
+  const value = stringifyNumbers(raw);
+  // Alias path field mirroring: whichever one the caller populated, make
+  // both available so downstream checks don't need to dual-read.
+  if (value.aliasPaths && !value.aliasPathsToAdd) value.aliasPathsToAdd = value.aliasPaths;
+  if (value.aliasPathsToAdd && !value.aliasPaths) value.aliasPaths = value.aliasPathsToAdd;
+  return value;
+}
+
+/**
  * Wrap a plain English string as a `Localized` bag. Used by adapters
  * that inherit legacy single-language content from audit / standards
  * internal shapes.
@@ -80,7 +122,8 @@ export function fromAuditFinding(f: AuditFinding): Finding {
     category: f.category,
     title: en(f.title),
     detail: en(f.detail),
-    recommendation: en(f.recommendation || 'No action required — surfaced for visibility.')
+    recommendation: en(f.recommendation || 'No action required — surfaced for visibility.'),
+    ...(f.agentOnly ? { agentOnly: true } : {})
   };
 }
 
@@ -105,7 +148,9 @@ export function fromStandardsFinding(v: StandardViolation): Finding {
 export function reviewCollection(collection: unknown, context?: ReviewContext): ReviewResult {
   const ctx: ReviewContext = context || {};
   const skip = new Set<FindingSource>(ctx.skipSources || []);
-  const value = extractCollectionValue(collection);
+  // Single normalization pass: bigint/number → string, alias path mirror.
+  // Every downstream check sees a canonical shape.
+  const value = normalizeForReview(collection);
 
   const findings: Finding[] = [];
 
@@ -120,7 +165,7 @@ export function reviewCollection(collection: unknown, context?: ReviewContext): 
 
   if (!skip.has('standards')) {
     try {
-      const std = verifyStandardsCompliance(collection);
+      const std = verifyStandardsCompliance(value);
       for (const v of std.violations || []) findings.push(fromStandardsFinding(v));
     } catch {
       // standards may not apply

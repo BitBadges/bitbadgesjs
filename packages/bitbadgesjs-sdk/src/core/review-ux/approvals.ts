@@ -152,7 +152,7 @@ export const approvalsChecks: UxCheck[] = [
   // matches diff.ts and works for all callers (frontend, CLI, indexer, MCP).
   (value) => {
     const out: Finding[] = [];
-    const isUpdate = value?.collectionId && value.collectionId !== '0';
+    const isUpdate = value?.collectionId && String(value.collectionId) !== '0';
     if (isUpdate) return out;
     const mint = getApprovals(value).filter((a: any) => a.fromListId === 'Mint');
     if (mint.length > 0) {
@@ -356,7 +356,7 @@ export const approvalsChecks: UxCheck[] = [
         const numUsesPlugin = plugins.find((p: any) => p.pluginId === 'numUses');
         if (!numUsesPlugin) continue;
         const offChainMax = numUsesPlugin.publicParams?.maxUses;
-        if (offChainMax == null || onChainMax == null || onChainMax === '0') continue;
+        if (offChainMax == null || onChainMax == null || String(onChainMax) === '0') continue;
         if (Number(offChainMax) !== Number(onChainMax)) {
           const label = mc.claimConfig?.label || approval.approvalId || 'unnamed';
           const offChain = Number(offChainMax);

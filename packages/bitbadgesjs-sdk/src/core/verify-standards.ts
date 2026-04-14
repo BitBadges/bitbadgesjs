@@ -174,8 +174,11 @@ function verifySmartToken(value: any): StandardViolation[] {
     });
   }
 
-  // Must have alias path
-  const hasAliasPath = (value.aliasPathsToAdd && value.aliasPathsToAdd.length > 0) || invariants.aliasPath;
+  // Must have alias path. Tolerate both field names:
+  //   - aliasPathsToAdd (MsgUniversalUpdateCollection create shape)
+  //   - aliasPaths (frontend collection store shape)
+  const aliasPaths = value.aliasPathsToAdd || value.aliasPaths || [];
+  const hasAliasPath = aliasPaths.length > 0 || invariants.aliasPath;
   if (!hasAliasPath) {
     violations.push({
       standard: std,
@@ -256,7 +259,7 @@ function verifySubscription(value: any): StandardViolation[] {
     }
 
     // durationFromTimestamp must be non-zero
-    if (!ib.durationFromTimestamp || ib.durationFromTimestamp === '0') {
+    if (!ib.durationFromTimestamp || String(ib.durationFromTimestamp) === '0') {
       violations.push({
         standard: std,
         field: `${prefix}.predeterminedBalances.incrementedBalances.durationFromTimestamp`,
@@ -276,14 +279,14 @@ function verifySubscription(value: any): StandardViolation[] {
     }
 
     // incrementTokenIdsBy and incrementOwnershipTimesBy should be "0"
-    if (ib.incrementTokenIdsBy && ib.incrementTokenIdsBy !== '0') {
+    if (ib.incrementTokenIdsBy && String(ib.incrementTokenIdsBy) !== '0') {
       violations.push({
         standard: std,
         field: `${prefix}.predeterminedBalances.incrementedBalances.incrementTokenIdsBy`,
         message: `Subscription approval "${approval.approvalId}" incrementTokenIdsBy should be "0" (single token ID for subscriptions).`
       });
     }
-    if (ib.incrementOwnershipTimesBy && ib.incrementOwnershipTimesBy !== '0') {
+    if (ib.incrementOwnershipTimesBy && String(ib.incrementOwnershipTimesBy) !== '0') {
       violations.push({
         standard: std,
         field: `${prefix}.predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy`,
@@ -293,13 +296,13 @@ function verifySubscription(value: any): StandardViolation[] {
 
     // Mutual exclusivity: only ONE of durationFromTimestamp, incrementOwnershipTimesBy, recurringOwnershipTimes can be non-zero
     const rot = ib.recurringOwnershipTimes;
-    const hasDuration = ib.durationFromTimestamp && ib.durationFromTimestamp !== '0';
-    const hasIncrement = ib.incrementOwnershipTimesBy && ib.incrementOwnershipTimesBy !== '0';
+    const hasDuration = ib.durationFromTimestamp && String(ib.durationFromTimestamp) !== '0';
+    const hasIncrement = ib.incrementOwnershipTimesBy && String(ib.incrementOwnershipTimesBy) !== '0';
     const hasRecurring =
       rot &&
-      ((rot.startTime && rot.startTime !== '0') ||
-        (rot.intervalLength && rot.intervalLength !== '0') ||
-        (rot.chargePeriodLength && rot.chargePeriodLength !== '0'));
+      ((rot.startTime && String(rot.startTime) !== '0') ||
+        (rot.intervalLength && String(rot.intervalLength) !== '0') ||
+        (rot.chargePeriodLength && String(rot.chargePeriodLength) !== '0'));
     const activeCount = [hasDuration, hasIncrement, hasRecurring].filter(Boolean).length;
     if (activeCount > 1) {
       violations.push({

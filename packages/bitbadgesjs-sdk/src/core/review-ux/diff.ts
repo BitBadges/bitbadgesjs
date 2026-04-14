@@ -21,7 +21,7 @@ export const diffChecks: UxCheck[] = [
   (value, ctx) => {
     const out: Finding[] = [];
     const onChain = normalizeOnChain(ctx.onChainCollection);
-    const isUpdate = value?.collectionId && value.collectionId !== '0' && value?.updateCollectionApprovals;
+    const isUpdate = value?.collectionId && String(value.collectionId) !== '0' && value?.updateCollectionApprovals;
     if (!isUpdate || !onChain) return out;
 
     const onChainApprovals: any[] = onChain.collectionApprovals || [];

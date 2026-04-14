@@ -22,6 +22,13 @@ export interface AuditFinding {
   title: string;
   detail: string;
   recommendation: string;
+  /**
+   * Hidden from human consumers (frontend sidebar) when true. Used for
+   * findings that just restate permission state ("canUpdateX is NEUTRAL")
+   * — redundant for humans who can already see the permissions tab, but
+   * useful for CLI / indexer / MCP agents who need a flat summary.
+   */
+  agentOnly?: boolean;
 }
 
 /** The complete result returned by {@link auditCollection}. */
@@ -94,7 +101,10 @@ interface CollectionValue {
 
 function isForever(ranges: UintRange[] | undefined): boolean {
   if (!ranges || ranges.length === 0) return false;
-  return ranges.some((r) => r.start === '1' && r.end === MAX_UINT64);
+  // Tolerate both string and bigint shapes. The SDK builders emit
+  // strings; the frontend collection store uses bigints. Normalizing
+  // via String() catches both uniformly.
+  return ranges.some((r) => String(r.start) === '1' && String(r.end) === MAX_UINT64);
 }
 
 function isForbidden(entries: PermissionEntry[] | undefined): boolean {
@@ -185,7 +195,8 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     // 1. MANAGER & CENTRALIZATION ANALYSIS
     // ========================================
 
-    // 1a. Manager exists
+    // 1a. Manager exists. Tagged agentOnly because the frontend permissions
+    // tab already shows the manager state — this finding just restates it.
     if (col.manager) {
       const managerState = permissionState(perms.canUpdateManager);
       if (managerState === 'NEUTRAL') {
@@ -194,7 +205,8 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
           category: 'centralization',
           title: 'Manager change permission is NEUTRAL',
           detail: `Manager is ${col.manager}. The canUpdateManager permission is neutral, meaning the manager could lock or transfer manager control at any time.`,
-          recommendation: 'Set canUpdateManager to FORBIDDEN to prevent manager address changes, or to PERMITTED if intentional.'
+          recommendation: 'Set canUpdateManager to FORBIDDEN to prevent manager address changes, or to PERMITTED if intentional.',
+          agentOnly: true
         });
       } else if (managerState === 'PERMITTED') {
         findings.push({
@@ -202,7 +214,8 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
           category: 'centralization',
           title: 'Manager can be changed permanently',
           detail: 'canUpdateManager is PERMITTED. The current manager can transfer control to any address at any time.',
-          recommendation: 'This is valid for multi-sig rotation or planned ownership transfer. Otherwise, set to FORBIDDEN.'
+          recommendation: 'This is valid for multi-sig rotation or planned ownership transfer. Otherwise, set to FORBIDDEN.',
+          agentOnly: true
         });
       }
     }
@@ -231,7 +244,9 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         category: 'centralization',
         title: `${neutralPerms.length} permission(s) are NEUTRAL (undecided)`,
         detail: `Neutral permissions: ${neutralPerms.join(', ')}. These can be changed to forbidden or permitted at any time by the manager.`,
-        recommendation: 'Consider locking permissions you are confident about. Neutral permissions signal uncertainty to users.'
+        recommendation: 'Consider locking permissions you are confident about. Neutral permissions signal uncertainty to users.',
+        // Redundant for humans who see the permissions tab. Agent-only.
+        agentOnly: true
       });
     }
 
@@ -239,7 +254,7 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     // 2. SUPPLY CONTROL & INFLATION
     // ========================================
 
-    // 2a. canUpdateValidTokenIds
+    // 2a. canUpdateValidTokenIds — agentOnly, see permissions tab note above.
     const validTokenIdState = permissionState(perms.canUpdateValidTokenIds);
     if (validTokenIdState !== 'FORBIDDEN') {
       findings.push({
@@ -247,19 +262,24 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         category: 'supply',
         title: 'Token ID creation is not locked',
         detail: `canUpdateValidTokenIds is ${validTokenIdState}. The manager can add new token IDs, which creates new supply.`,
-        recommendation: 'Set canUpdateValidTokenIds to FORBIDDEN if supply should be fixed. Even with locked mint approvals, new token IDs = new supply ranges.'
+        recommendation: 'Set canUpdateValidTokenIds to FORBIDDEN if supply should be fixed. Even with locked mint approvals, new token IDs = new supply ranges.',
+        agentOnly: true
       });
     }
 
-    // 2b. maxSupplyPerId invariant
+    // 2b. maxSupplyPerId invariant — only meaningful for NFT collections.
+    // Fungible / credit / address-list / vault collections legitimately
+    // have maxSupplyPerId == 0, so gating on the NFTs standard prevents
+    // false positives for every non-NFT collection.
+    const colStandards: string[] = (col.standards as string[]) || [];
     const maxSupply = invariants.maxSupplyPerId as string | undefined;
-    if (!maxSupply || maxSupply === '0') {
+    if (colStandards.includes('NFTs') && (!maxSupply || maxSupply === '0')) {
       findings.push({
         severity: 'info',
         category: 'supply',
         title: 'No per-token-ID supply cap (maxSupplyPerId = 0)',
         detail: 'maxSupplyPerId is 0 or unset, meaning unlimited tokens can exist per token ID. For NFTs, this should be "1".',
-        recommendation: 'Set maxSupplyPerId to "1" for NFTs, or an appropriate cap for fungible tokens.'
+        recommendation: 'Set maxSupplyPerId to "1" for NFTs.'
       });
     }
 
@@ -297,7 +317,10 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         category: 'transferability',
         title: 'Transfer rules can be modified',
         detail: `canUpdateCollectionApprovals is ${approvalPermState}. The manager can add, remove, or modify transfer approvals. This includes adding forceful transfer approvals.`,
-        recommendation: 'If transfer rules should be fixed, set canUpdateCollectionApprovals to FORBIDDEN. For compliance tokens, this may need to stay PERMITTED.'
+        recommendation: 'If transfer rules should be fixed, set canUpdateCollectionApprovals to FORBIDDEN. For compliance tokens, this may need to stay PERMITTED.',
+        // Permission state restatement — visible only to agents; humans see
+        // this in the permissions tab.
+        agentOnly: true
       });
     }
 
@@ -321,12 +344,12 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
 
         const hasAmountLimit =
           amounts &&
-          ((amounts.overallApprovalAmount && amounts.overallApprovalAmount !== '0') ||
-            (amounts.perInitiatedByAddressApprovalAmount && amounts.perInitiatedByAddressApprovalAmount !== '0'));
+          ((amounts.overallApprovalAmount && String(amounts.overallApprovalAmount) !== '0') ||
+            (amounts.perInitiatedByAddressApprovalAmount && String(amounts.perInitiatedByAddressApprovalAmount) !== '0'));
         const hasTransferLimit =
           transfers &&
-          ((transfers.overallMaxNumTransfers && transfers.overallMaxNumTransfers !== '0') ||
-            (transfers.perInitiatedByAddressMaxNumTransfers && transfers.perInitiatedByAddressMaxNumTransfers !== '0'));
+          ((transfers.overallMaxNumTransfers && String(transfers.overallMaxNumTransfers) !== '0') ||
+            (transfers.perInitiatedByAddressMaxNumTransfers && String(transfers.perInitiatedByAddressMaxNumTransfers) !== '0'));
         const hasPredetermined =
           predetermined &&
           ((predetermined.incrementedBalances && Object.keys(predetermined.incrementedBalances as object).length > 0) ||
@@ -554,7 +577,10 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     // ========================================
 
     if (invariants.cosmosCoinBackedPath) {
-      if (!col.aliasPathsToAdd || col.aliasPathsToAdd.length === 0) {
+      // Tolerate both shapes: create Msgs use aliasPathsToAdd, frontend
+      // collection store uses aliasPaths. Either one counts.
+      const aliasPaths = (col as any).aliasPaths || col.aliasPathsToAdd || [];
+      if (aliasPaths.length === 0) {
         findings.push({
           severity: 'info',
           category: 'smart-token',
