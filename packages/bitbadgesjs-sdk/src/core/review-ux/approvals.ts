@@ -6,7 +6,7 @@
 
 import type { Finding } from '../review-types.js';
 import type { UxCheck } from './shared.js';
-import { MAX_UINT, getApprovals, getAllApprovals } from './shared.js';
+import { MAX_UINT, getApprovals, getAllApprovals, isTransferabilityPermanentlyLocked } from './shared.js';
 
 export const approvalsChecks: UxCheck[] = [
   // P5-1: fromListId "All" on non-mint approvals accidentally allows minting
@@ -79,20 +79,14 @@ export const approvalsChecks: UxCheck[] = [
     const hasOverrides = forcefulApprovals.length > 0;
 
     // Is canUpdateCollectionApprovals permanently forbidden with a
-    // blanket All/All/All scope? If so, no future approvals can ever
-    // be added, so the "future approvals could enable forceful"
-    // warning below is redundant — we append a note to that effect.
-    const approvalPerms: any[] = value?.collectionPermissions?.canUpdateCollectionApprovals || [];
-    const transferabilityPermanentlyLocked = approvalPerms.some((p: any) => {
-      const isBlanket =
-        (p.fromListId === 'All' || p.fromListId === undefined) &&
-        (p.toListId === 'All' || p.toListId === undefined) &&
-        (p.initiatedByListId === 'All' || p.initiatedByListId === undefined);
-      const ft = p.permanentlyForbiddenTimes;
-      const isForever =
-        Array.isArray(ft) && ft.some((t: any) => t?.start === 1n && t?.end === MAX_UINT);
-      return isBlanket && isForever;
-    });
+    // true blanket scope? The helper below checks all 8 scope fields
+    // (fromListId / toListId / initiatedByListId / transferTimes /
+    // tokenIds / approvalId / amountTrackerId / challengeTrackerId)
+    // plus permanentlyForbiddenTimes covering forever. If so, no
+    // approvals can ever be added / removed / modified post-creation,
+    // and the "future approvals could enable forceful" finding is
+    // redundant — we append a note to that effect.
+    const transferabilityPermanentlyLocked = isTransferabilityPermanentlyLocked(value);
 
     // Four outcome cases:
     //   hasOverrides + !invariantBlocksForceful  → warning (verify intent)
@@ -144,27 +138,31 @@ export const approvalsChecks: UxCheck[] = [
     }
 
     // Case B: no current forceful approvals + invariant not set.
-    // The invariant cannot be added after creation, so a future approval
-    // COULD introduce forceful transfers. Fire as info (not a blocker).
-    // If transferability is already permanently locked via
-    // canUpdateCollectionApprovals All/All/All forbidden, append a note
-    // that the finding is likely redundant since no future approvals
-    // can be added anyway.
+    // The invariant cannot be added after creation, so any future
+    // approval the manager adds could introduce forceful transfers.
+    // This is a real trust assumption — the holders of tokens in this
+    // collection are trusting the manager not to add a forceful
+    // approval later — so fire as `warning` rather than `info`.
+    //
+    // If transferability is already permanently locked via a blanket
+    // canUpdateCollectionApprovals forbidden entry, the warning is
+    // effectively neutralized (no future approvals can be added).
+    // Downgrade severity and append a note in that case.
     if (!hasOverrides && !invariantBlocksForceful) {
       const baseDetail =
-        'The noForcefulPostMintTransfers invariant is not set. No approvals currently enable forceful transfers, but because the invariant cannot be added after creation, any future approval could.';
+        'The noForcefulPostMintTransfers invariant is not set. No approvals currently enable forceful transfers, but because the invariant cannot be added after creation, any future approval the manager adds could introduce them. Holders cannot rely on forceful transfers being permanently impossible.';
       const suffix = transferabilityPermanentlyLocked
-        ? ' This is likely redundant in your case — canUpdateCollectionApprovals is permanently locked (All/All/All forbidden), so no future approvals can be added anyway.'
+        ? ' This is likely redundant in your case — canUpdateCollectionApprovals is permanently locked, so no future approvals can be added anyway.'
         : '';
       out.push({
         code: 'review.ux.forceful_transfers_not_locked',
-        severity: 'info',
+        severity: transferabilityPermanentlyLocked ? 'info' : 'warning',
         source: 'ux',
         category: 'approvals',
         title: { en: 'Forceful transfers not locked at creation' },
         detail: { en: baseDetail + suffix },
         recommendation: {
-          en: 'Set invariants.noForcefulPostMintTransfers = true at creation if the collection should never permit forceful transfers. Leave unset if future design may require them.'
+          en: 'Set invariants.noForcefulPostMintTransfers = true at creation if the collection should never permit forceful transfers. Leave unset only if future design may require them.'
         }
       });
     }

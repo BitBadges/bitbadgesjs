@@ -310,14 +310,24 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     const hasScopedMintLock = approvalPerms.some(
       (p) => (p.fromListId === 'Mint' || p.fromListId === 'All') && isForever(p.permanentlyForbiddenTimes)
     );
-    // Blanket lock = scope "All/All/All" forbidden — covers every flow.
-    const hasBlanketLock = approvalPerms.some(
-      (p) =>
-        (p.fromListId === 'All' || p.fromListId === undefined) &&
-        (p.toListId === 'All' || p.toListId === undefined) &&
-        (p.initiatedByListId === 'All' || p.initiatedByListId === undefined) &&
-        isForever(p.permanentlyForbiddenTimes)
-    );
+    // Blanket lock: every one of the 8 CollectionApprovalPermission
+    // scope fields is set to its wildcard value AND
+    // permanentlyForbiddenTimes covers forever. Partial locks (e.g.
+    // "Mint scope forbidden forever") don't count — they only freeze
+    // a subset of the approval space. A blanket lock means no approval
+    // can ever be added / removed / modified post-creation, so
+    // transferability is permanently fixed.
+    const hasBlanketLock = approvalPerms.some((p: any) => {
+      if (p.fromListId !== 'All') return false;
+      if (p.toListId !== 'All') return false;
+      if (p.initiatedByListId !== 'All') return false;
+      if (!isForever(p.transferTimes)) return false;
+      if (!isForever(p.tokenIds)) return false;
+      if (p.approvalId !== 'All') return false;
+      if (p.amountTrackerId !== 'All') return false;
+      if (p.challengeTrackerId !== 'All') return false;
+      return isForever(p.permanentlyForbiddenTimes);
+    });
 
     const mintMutable =
       approvalPermState === 'PERMITTED' || (approvalPermState === 'NEUTRAL' && !hasScopedMintLock);
@@ -360,9 +370,9 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         severity: 'critical',
         category: 'transferability',
         title: 'Post-mint transfer approvals can be modified',
-        detail: `canUpdateCollectionApprovals is ${approvalPermState} and the collection has post-mint transfer approvals. The manager can add, remove, or modify transfer rules at any time — including introducing forceful transfer approvals that move tokens without holder consent. Holders cannot rely on the current transfer rules being stable.`,
+        detail: `canUpdateCollectionApprovals is ${approvalPermState} and the collection has post-mint transfer approvals. The manager can add, remove, or modify transfer rules at any time. Holders cannot rely on the current transfer rules being stable.`,
         recommendation:
-          'Lock canUpdateCollectionApprovals with a blanket "All/All/All" permanently-forbidden scope if transfer rules should be fixed. For compliance tokens that need ongoing manager control, this may need to stay neutral or permitted — in that case, document the trust assumption.'
+          'Permanently lock canUpdateCollectionApprovals if transfer rules should be fixed. For compliance tokens that need ongoing manager control, this may need to stay neutral or permitted — in that case, document the trust assumption.'
       });
     }
 
