@@ -489,25 +489,9 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
       // "Approval allows FORCEFUL transfers" moved to review-ux/approvals.ts
       // (review.ux.forceful_transfers_allowed + review.ux.forceful_override_mismatch).
 
-      // Specific from -> specific to with All initiator
-      if (
-        fromId !== 'Mint' &&
-        fromId !== '!Mint' &&
-        fromId !== 'All' &&
-        !fromId.startsWith('!') &&
-        toId !== 'All' &&
-        initiatedBy === 'All'
-      ) {
-        if (fromId !== toId) {
-          findings.push({
-            severity: 'info',
-            category: 'approval-design',
-            title: `Approval "${approvalId}" is a directed transfer channel`,
-            detail: `Allows transfers from ${fromId} to ${toId}, initiated by anyone.`,
-            recommendation: 'Verify this directed channel is intentional.'
-          });
-        }
-      }
+      // "Directed transfer channel" info finding removed — self-explanatory
+      // from the approval definition itself and produced noise on every
+      // smart-token backing/unbacking pair.
     }
 
     // 3c. Check for backing approval completeness (smart tokens need BOTH)
