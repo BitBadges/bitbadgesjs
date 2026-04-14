@@ -156,8 +156,8 @@ describe('UX checks — representative sample', () => {
     expect(findByCode(findings, 'review.ux.forceful_invariant_not_set')).toBeUndefined();
   });
 
-  it('forceful mismatch fires when overrides exist AND invariant set', () => {
-    // Both set -> forceful_transfers_allowed + forceful_override_mismatch
+  it('forceful mismatch fires as the only finding when overrides exist AND invariant set', () => {
+    // Both set -> forceful_override_mismatch only (critical; no duplicate warning)
     const both = runUxChecks(
       {
         collectionApprovals: [
@@ -171,10 +171,10 @@ describe('UX checks — representative sample', () => {
       },
       ctx
     );
-    expect(findByCode(both, 'review.ux.forceful_transfers_allowed')).toBeDefined();
+    expect(findByCode(both, 'review.ux.forceful_transfers_allowed')).toBeUndefined();
     expect(findByCode(both, 'review.ux.forceful_override_mismatch')).toBeDefined();
 
-    // No overrides + invariant set -> no finding (matches old frontend case D)
+    // No overrides + invariant set -> no finding (locked as expected)
     const invOnly = runUxChecks(
       { collectionApprovals: [], invariants: { noForcefulPostMintTransfers: true } },
       ctx

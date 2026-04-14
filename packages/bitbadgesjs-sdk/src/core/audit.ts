@@ -292,40 +292,77 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     // 3. APPROVAL ANALYSIS
     // ========================================
 
-    // 3a. canUpdateCollectionApprovals
+    // 3a. canUpdateCollectionApprovals — analyzed across three flows:
+    //     - mint approvals          (fromListId === 'Mint')       → supply risk if mutable
+    //     - backing mint approvals  (allowBackedMinting === true) → supply risk if mutable
+    //       (smart tokens don't use fromListId 'Mint'; the backing
+    //       address acts as the functional mint source, so mutable
+    //       backing approvals are the same class of unlimited-supply
+    //       risk as a mutable Mint approval)
+    //     - post-mint transfer approvals (everything else)        → transferability risk
+    //
+    // For each flow we ask: is the relevant subset of approvals
+    // mutable? An approval is "mutable" when canUpdateCollectionApprovals
+    // is PERMITTED, or it's NEUTRAL without a scoped forbidden lock
+    // covering that subset.
     const approvalPermState = permissionState(perms.canUpdateCollectionApprovals);
-
-    // Check if it's scoped or blanket
     const approvalPerms = perms.canUpdateCollectionApprovals || [];
     const hasScopedMintLock = approvalPerms.some(
       (p) => (p.fromListId === 'Mint' || p.fromListId === 'All') && isForever(p.permanentlyForbiddenTimes)
     );
+    // Blanket lock = scope "All/All/All" forbidden — covers every flow.
+    const hasBlanketLock = approvalPerms.some(
+      (p) =>
+        (p.fromListId === 'All' || p.fromListId === undefined) &&
+        (p.toListId === 'All' || p.toListId === undefined) &&
+        (p.initiatedByListId === 'All' || p.initiatedByListId === undefined) &&
+        isForever(p.permanentlyForbiddenTimes)
+    );
 
-    if (approvalPermState === 'PERMITTED' || (approvalPermState === 'NEUTRAL' && !hasScopedMintLock)) {
-      // Check if there are mint approvals - if so, this is a supply risk
-      const hasMintApproval = approvals.some((a) => a.fromListId === 'Mint');
-      if (hasMintApproval) {
-        findings.push({
-          severity: 'critical',
-          category: 'supply',
-          title: 'Mint approvals can be modified - UNLIMITED SUPPLY RISK',
-          detail: `canUpdateCollectionApprovals is ${approvalPermState} and the collection has mint approvals. The manager can add new mint approvals, change mint limits, or remove restrictions at any time. This effectively means unlimited supply.`,
-          recommendation:
-            'Lock canUpdateCollectionApprovals for mint-related approvals (fromListId: "Mint"). Use scoped approval permissions to lock mint while allowing transfer approval updates if needed.'
-        });
-      }
+    const mintMutable =
+      approvalPermState === 'PERMITTED' || (approvalPermState === 'NEUTRAL' && !hasScopedMintLock);
+    const transferMutable =
+      approvalPermState === 'PERMITTED' || (approvalPermState === 'NEUTRAL' && !hasBlanketLock);
+
+    const hasMintApproval = approvals.some((a) => a.fromListId === 'Mint');
+    const hasBackingApproval2 = approvals.some((a) => {
+      const crit = a.approvalCriteria as Record<string, unknown> | undefined;
+      return !!crit?.allowBackedMinting;
+    });
+    const hasNonMintApproval = approvals.some(
+      (a) => a.fromListId !== 'Mint' && !(a.approvalCriteria as Record<string, unknown>)?.allowBackedMinting
+    );
+
+    if (mintMutable && hasMintApproval) {
+      findings.push({
+        severity: 'critical',
+        category: 'supply',
+        title: 'Mint approvals can be modified — UNLIMITED SUPPLY RISK',
+        detail: `canUpdateCollectionApprovals is ${approvalPermState} and the collection has mint approvals. The manager can add new mint approvals, change mint limits, or remove restrictions at any time. This effectively means unlimited supply.`,
+        recommendation:
+          'Lock canUpdateCollectionApprovals for mint-related approvals (fromListId: "Mint"). Use scoped approval permissions to lock mint while allowing transfer approval updates if needed.'
+      });
     }
 
-    if (approvalPermState !== 'FORBIDDEN' && !hasScopedMintLock) {
+    if (mintMutable && hasBackingApproval2) {
       findings.push({
-        severity: 'warning',
+        severity: 'critical',
+        category: 'supply',
+        title: 'Backing approvals can be modified — UNLIMITED SUPPLY RISK',
+        detail: `canUpdateCollectionApprovals is ${approvalPermState} and the collection has backing approvals (allowBackedMinting = true). Backing approvals are the smart-token mint source — the manager can modify the 1:1 backing conversion, add new backing paths, or change limits at any time, which effectively means unlimited supply risk even though fromListId is not "Mint".`,
+        recommendation:
+          'Lock canUpdateCollectionApprovals for the backing address scope. Use scoped approval permissions to fix the backing configuration at creation and block future modifications.'
+      });
+    }
+
+    if (transferMutable && hasNonMintApproval) {
+      findings.push({
+        severity: 'critical',
         category: 'transferability',
-        title: 'Transfer rules can be modified',
-        detail: `canUpdateCollectionApprovals is ${approvalPermState}. The manager can add, remove, or modify transfer approvals. This includes adding forceful transfer approvals.`,
-        recommendation: 'If transfer rules should be fixed, set canUpdateCollectionApprovals to FORBIDDEN. For compliance tokens, this may need to stay PERMITTED.',
-        // Permission state restatement — visible only to agents; humans see
-        // this in the permissions tab.
-        agentOnly: true
+        title: 'Post-mint transfer approvals can be modified',
+        detail: `canUpdateCollectionApprovals is ${approvalPermState} and the collection has post-mint transfer approvals. The manager can add, remove, or modify transfer rules at any time — including introducing forceful transfer approvals that move tokens without holder consent. Holders cannot rely on the current transfer rules being stable.`,
+        recommendation:
+          'Lock canUpdateCollectionApprovals with a blanket "All/All/All" permanently-forbidden scope if transfer rules should be fixed. For compliance tokens that need ongoing manager control, this may need to stay neutral or permitted — in that case, document the trust assumption.'
       });
     }
 

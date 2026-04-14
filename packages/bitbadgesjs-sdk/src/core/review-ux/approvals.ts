@@ -78,62 +78,93 @@ export const approvalsChecks: UxCheck[] = [
     });
     const hasOverrides = forcefulApprovals.length > 0;
 
-    // Matches the old frontend's 2-push logic:
-    //   push 1 — hasOverrides || !invariantBlocksForceful
-    //   push 2 — hasOverrides && invariantBlocksForceful (mismatch)
-    if (hasOverrides || !invariantBlocksForceful) {
-      // Branch the message on which branch of the condition fired.
-      // Severity stays `warning` (not critical) — forceful transfers
-      // are a legitimate design choice for subscription revoke,
-      // auction seller settlement, prediction market resolution, and
-      // similar patterns. We surface the finding so the builder can
-      // verify intent, not block them.
-      let detailEn: string;
-      let recEn: string;
-      let titleEn: string;
-      if (hasOverrides) {
-        const names = forcefulApprovals
-          .map((a: any) => a.approvalId || 'unnamed')
-          .slice(0, 5)
-          .join(', ');
-        const more = forcefulApprovals.length > 5 ? ` (+${forcefulApprovals.length - 5} more)` : '';
-        titleEn = 'Forceful transfer overrides enabled';
-        detailEn = `${forcefulApprovals.length} non-mint approval(s) override outgoing or incoming consent: ${names}${more}. Tokens under these approvals can be moved without the holder's permission. This is a legitimate design choice for some flows (subscription revoke, auction settlement, prediction market resolution) — verify each listed approval is intentional.`;
-        recEn = invariantBlocksForceful
-          ? 'Verify each listed approval is intentional. If any should not allow forceful transfers, remove its override flags.'
-          : 'Verify each listed approval is intentional. If you never want forceful transfers beyond what is listed, set invariants.noForcefulPostMintTransfers = true at creation to permanently block future additions.';
-      } else {
-        titleEn = 'Forceful transfers not locked at creation';
-        detailEn =
-          'The noForcefulPostMintTransfers invariant is not set. No approvals currently enable forceful transfers, but because the invariant cannot be added later, any future approval could enable them.';
-        recEn =
-          'Set invariants.noForcefulPostMintTransfers = true at creation if the collection should never permit forceful transfers. Leave unset if future design may require them.';
-      }
+    // Is canUpdateCollectionApprovals permanently forbidden with a
+    // blanket All/All/All scope? If so, no future approvals can ever
+    // be added, so the "future approvals could enable forceful"
+    // warning below is redundant — we append a note to that effect.
+    const approvalPerms: any[] = value?.collectionPermissions?.canUpdateCollectionApprovals || [];
+    const transferabilityPermanentlyLocked = approvalPerms.some((p: any) => {
+      const isBlanket =
+        (p.fromListId === 'All' || p.fromListId === undefined) &&
+        (p.toListId === 'All' || p.toListId === undefined) &&
+        (p.initiatedByListId === 'All' || p.initiatedByListId === undefined);
+      const ft = p.permanentlyForbiddenTimes;
+      const isForever =
+        Array.isArray(ft) && ft.some((t: any) => t?.start === 1n && t?.end === MAX_UINT);
+      return isBlanket && isForever;
+    });
+
+    // Four outcome cases:
+    //   hasOverrides + !invariantBlocksForceful  → warning (verify intent)
+    //   hasOverrides + invariantBlocksForceful   → critical (on-chain failure)
+    //   !hasOverrides + !invariantBlocksForceful → info (future could enable, unless locked)
+    //   !hasOverrides + invariantBlocksForceful  → silent (locked as expected)
+    if (hasOverrides && !invariantBlocksForceful) {
+      const names = forcefulApprovals
+        .map((a: any) => a.approvalId || 'unnamed')
+        .slice(0, 5)
+        .join(', ');
+      const more = forcefulApprovals.length > 5 ? ` (+${forcefulApprovals.length - 5} more)` : '';
       out.push({
         code: 'review.ux.forceful_transfers_allowed',
         severity: 'warning',
         source: 'ux',
         category: 'approvals',
-        title: { en: titleEn },
-        detail: { en: detailEn },
-        recommendation: { en: recEn }
+        title: { en: 'Forceful transfer overrides enabled' },
+        detail: {
+          en: `${forcefulApprovals.length} non-mint approval(s) override outgoing or incoming consent: ${names}${more}. Tokens under these approvals can be moved without the holder's permission. This is a legitimate design choice for some flows (subscription revoke, auction settlement, prediction market resolution) — verify each listed approval is intentional.`
+        },
+        recommendation: {
+          en: 'Verify each listed approval is intentional. If any should not allow forceful transfers, remove its override flags.'
+        }
       });
     }
 
     if (hasOverrides && invariantBlocksForceful) {
+      const names = forcefulApprovals
+        .map((a: any) => a.approvalId || 'unnamed')
+        .slice(0, 5)
+        .join(', ');
+      const more = forcefulApprovals.length > 5 ? ` (+${forcefulApprovals.length - 5} more)` : '';
       out.push({
         code: 'review.ux.forceful_override_mismatch',
         severity: 'critical',
         source: 'ux',
         category: 'approvals',
         title: {
-          en: 'Forceful transfer mismatch — overrides will fail'
+          en: 'Forceful transfer mismatch — overrides will fail on-chain'
         },
         detail: {
-          en: 'Non-mint approvals have forceful overrides enabled, but the noForcefulPostMintTransfers invariant is also set. These overrides will be rejected on-chain. Either remove the overrides from the approvals or disable the invariant.'
+          en: `${forcefulApprovals.length} non-mint approval(s) set overridesFromOutgoingApprovals or overridesToIncomingApprovals: ${names}${more}. The noForcefulPostMintTransfers invariant is ALSO set to true, which the chain interprets as "no approval may ever override consent." These overrides will be rejected on-chain at broadcast time.`
         },
         recommendation: {
-          en: 'Remove the override flags from non-mint approvals, or disable the noForcefulPostMintTransfers invariant'
+          en: 'If the listed approvals need forceful transfers (auction settlement, prediction market resolution, subscription revoke, etc.), set invariants.noForcefulPostMintTransfers = false (or leave unset). If forceful transfers should be permanently blocked, remove the override flags from the listed approvals.'
+        }
+      });
+    }
+
+    // Case B: no current forceful approvals + invariant not set.
+    // The invariant cannot be added after creation, so a future approval
+    // COULD introduce forceful transfers. Fire as info (not a blocker).
+    // If transferability is already permanently locked via
+    // canUpdateCollectionApprovals All/All/All forbidden, append a note
+    // that the finding is likely redundant since no future approvals
+    // can be added anyway.
+    if (!hasOverrides && !invariantBlocksForceful) {
+      const baseDetail =
+        'The noForcefulPostMintTransfers invariant is not set. No approvals currently enable forceful transfers, but because the invariant cannot be added after creation, any future approval could.';
+      const suffix = transferabilityPermanentlyLocked
+        ? ' This is likely redundant in your case — canUpdateCollectionApprovals is permanently locked (All/All/All forbidden), so no future approvals can be added anyway.'
+        : '';
+      out.push({
+        code: 'review.ux.forceful_transfers_not_locked',
+        severity: 'info',
+        source: 'ux',
+        category: 'approvals',
+        title: { en: 'Forceful transfers not locked at creation' },
+        detail: { en: baseDetail + suffix },
+        recommendation: {
+          en: 'Set invariants.noForcefulPostMintTransfers = true at creation if the collection should never permit forceful transfers. Leave unset if future design may require them.'
         }
       });
     }
