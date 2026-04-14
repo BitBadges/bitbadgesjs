@@ -123,9 +123,12 @@ export const approvalsChecks: UxCheck[] = [
   // autoApproveAllIncomingTransfers not true on mintable collections.
   // Skipped on updates: defaultBalances is immutable post-creation,
   // so flagging it on an existing collection is noise the user can't fix.
-  (value, ctx) => {
+  // Update detection is structural (collectionId !== '0'), not ctx-based —
+  // matches diff.ts and works for all callers (frontend, CLI, indexer, MCP).
+  (value) => {
     const out: Finding[] = [];
-    if (ctx.onChainCollection) return out;
+    const isUpdate = value?.collectionId && value.collectionId !== '0';
+    if (isUpdate) return out;
     const mint = getApprovals(value).filter((a: any) => a.fromListId === 'Mint');
     if (mint.length > 0) {
       const autoApprove = value?.defaultBalances?.autoApproveAllIncomingTransfers;
