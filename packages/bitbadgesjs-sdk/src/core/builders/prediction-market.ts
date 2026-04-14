@@ -207,6 +207,8 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
   const yesToken = singleTokenMetadata('1', 'YES', params.description, params.image);
   const noToken = singleTokenMetadata('2', 'NO', params.description, params.image);
   const tokenMetadata = [yesToken.entry, noToken.entry];
+  const yesAlias = buildAliasPath('uyes', 'YES', coin.decimals, params.image, 'YES', params.description);
+  const noAlias = buildAliasPath('uno', 'NO', coin.decimals, params.image, 'NO', params.description);
 
   return buildMsg({
     collectionApprovals,
@@ -216,7 +218,9 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
     tokenMetadata,
     metadataPlaceholders: {
       [yesToken.placeholder.uri]: yesToken.placeholder.content,
-      [noToken.placeholder.uri]: noToken.placeholder.content
+      [noToken.placeholder.uri]: noToken.placeholder.content,
+      ...yesAlias.placeholders,
+      ...noAlias.placeholders
     },
     invariants: {
       noCustomOwnershipTimes: true,
@@ -226,9 +230,6 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
       noForcefulPostMintTransfers: true,
       disablePoolCreation: false
     },
-    aliasPathsToAdd: [
-      buildAliasPath('uyes', 'YES', coin.decimals),
-      buildAliasPath('uno', 'NO', coin.decimals)
-    ]
+    aliasPathsToAdd: [yesAlias.path, noAlias.path]
   });
 }

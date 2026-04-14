@@ -123,14 +123,24 @@ export function buildVault(params: VaultParams): any {
     disablePoolCreation: true
   };
 
+  // Derive the denom from the (sanitized) symbol — chain enforces
+  // global denom uniqueness, so a hardcoded 'uvault' would collide
+  // for any user creating more than one vault on the same chain.
+  const alias = buildAliasPath(
+    'u' + symbol.toLowerCase(),
+    symbol,
+    coin.decimals,
+    params.image || coin.image,
+    params.name,
+    params.description
+  );
+
   return buildMsg({
     collectionApprovals,
     standards: ['Smart Token', 'Vault'],
     invariants,
-    // Derive the denom from the (sanitized) symbol — chain enforces
-    // global denom uniqueness, so a hardcoded 'uvault' would collide
-    // for any user creating more than one vault on the same chain.
-    aliasPathsToAdd: [buildAliasPath('u' + symbol.toLowerCase(), symbol, coin.decimals, coin.image)],
+    aliasPathsToAdd: [alias.path],
+    metadataPlaceholders: { ...alias.placeholders },
     collectionPermissions: baselinePermissions()
   });
 }

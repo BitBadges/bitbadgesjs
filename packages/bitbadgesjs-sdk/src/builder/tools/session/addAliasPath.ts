@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { addAliasPath as addAliasPathToSession, getOrCreateSession } from '../../session/sessionState.js';
+import { addAliasPath as addAliasPathToSession, getOrCreateSession, getMsgPlaceholders } from '../../session/sessionState.js';
 
 export const addAliasPathSchema = z.object({
   sessionId: z.string().optional().describe("Session ID for per-request isolation."),
@@ -200,27 +200,29 @@ export function handleAddAliasPath(input: AddAliasPathInput) {
   // Persist the alias path itself into session state.
   const session = getOrCreateSession(input.sessionId, input.creatorAddress);
   addAliasPathToSession(input.sessionId, input.aliasPath);
+  const placeholders = getMsgPlaceholders(session);
 
-  // Route off-chain metadata into the session's metadataPlaceholders sidecar.
-  // Top-level params win over legacy nested-on-metadata fields if both are set.
+  // Route off-chain metadata into the per-msg metadataPlaceholders sidecar
+  // at `messages[0].value._meta.metadataPlaceholders`. Top-level params
+  // win over legacy nested-on-metadata fields if both are set.
   const pathName = input.pathName ?? legacyPathName;
   const pathDescription = input.pathDescription ?? legacyPathDescription;
   const pathImage = input.pathImage ?? legacyPathImage;
   if (pathName || pathDescription || pathImage) {
-    session.metadataPlaceholders[pathUri] = {
-      name: pathName || session.metadataPlaceholders[pathUri]?.name || `${denom} alias path`,
-      description: pathDescription || session.metadataPlaceholders[pathUri]?.description || '',
-      image: pathImage || session.metadataPlaceholders[pathUri]?.image || ''
+    placeholders[pathUri] = {
+      name: pathName || placeholders[pathUri]?.name || `${denom} alias path`,
+      description: pathDescription || placeholders[pathUri]?.description || '',
+      image: pathImage || placeholders[pathUri]?.image || ''
     };
   }
   const unitName = input.denomUnitName ?? legacyUnitName;
   const unitDescription = input.denomUnitDescription ?? legacyUnitDescription;
   const unitImage = input.denomUnitImage ?? legacyUnitImage;
   if (defaultUnitUri && (unitName || unitDescription || unitImage)) {
-    session.metadataPlaceholders[defaultUnitUri] = {
-      name: unitName || session.metadataPlaceholders[defaultUnitUri]?.name || `${denom} default unit`,
-      description: unitDescription || session.metadataPlaceholders[defaultUnitUri]?.description || '',
-      image: unitImage || session.metadataPlaceholders[defaultUnitUri]?.image || ''
+    placeholders[defaultUnitUri] = {
+      name: unitName || placeholders[defaultUnitUri]?.name || `${denom} default unit`,
+      description: unitDescription || placeholders[defaultUnitUri]?.description || '',
+      image: unitImage || placeholders[defaultUnitUri]?.image || ''
     };
   }
 

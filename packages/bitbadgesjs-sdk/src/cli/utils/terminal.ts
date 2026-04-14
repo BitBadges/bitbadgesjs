@@ -16,6 +16,37 @@
  * (https://no-color.org) force-disables colour.
  */
 
+import {
+  resolveCoinSymbol,
+  detectBalanceAliasSymbol,
+  formatHumanAmount,
+  type SimulateRenderCollection
+} from './simulateSymbols.js';
+
+/**
+ * Build the `(…)` suffix for an ICS20 coin line. `rawAmount` is the
+ * signed stringified integer as it appears in the simulate result
+ * (e.g. `"-5000"` or `"+5000"`). Returns an empty string if the
+ * denom isn't in the registry so the render stays a no-op.
+ */
+function coinSuffix(rawAmount: unknown, denom: string, c: (code: any, s: string) => string): string {
+  const info = resolveCoinSymbol(denom);
+  if (!info) return '';
+  let inner = info.symbol;
+  if (info.decimals > 0) {
+    // rawAmount may carry a leading '+' that BigInt() doesn't accept;
+    // strip it first. Any parse failure → plain symbol (no amount).
+    const cleaned = String(rawAmount).replace(/^\+/, '');
+    try {
+      const bi = BigInt(cleaned);
+      inner = `${formatHumanAmount(bi, info.decimals)} ${info.symbol}`;
+    } catch {
+      /* keep inner = symbol */
+    }
+  }
+  return ' ' + c('dim', `(${inner})`);
+}
+
 export type ColorFn = (s: string) => string;
 
 const OPEN: Record<string, string> = {
@@ -427,7 +458,19 @@ export interface SimulateResultLike {
  */
 export function renderSimulate(
   result: SimulateResultLike,
-  opts?: { stream?: NodeJS.WriteStream; title?: string; events?: 'count' | 'full' | boolean }
+  opts?: {
+    stream?: NodeJS.WriteStream;
+    title?: string;
+    events?: 'count' | 'full' | boolean;
+    /**
+     * Optional pre-fetched collection metadata keyed by collectionId.
+     * Populated by `prefetchSimulateCollections` in the CLI call sites —
+     * used to suffix balance lines with their alias/wrapper symbol when
+     * the balance shape cleanly maps to a path on the collection. When
+     * omitted, balance lines render exactly as before.
+     */
+    collectionCache?: Map<string, SimulateRenderCollection>;
+  }
 ): string {
   const stream = opts?.stream || process.stderr;
   const { c } = makeColor(stream);
@@ -492,7 +535,8 @@ export function renderSimulate(
       const coins = coinChanges[addr] || {};
       for (const [denom, amount] of Object.entries(coins)) {
         const sign = String(amount).startsWith('-') ? c('red', String(amount)) : c('green', '+' + amount);
-        lines.push(`      ${c('dim', '·')} ${sign} ${denom}`);
+        const suffix = coinSuffix(amount, denom, c);
+        lines.push(`      ${c('dim', '·')} ${sign} ${denom}${suffix}`);
       }
       const tokens = badgeChanges[addr] || {};
       for (const [collectionId, balance] of Object.entries(tokens)) {
@@ -503,8 +547,15 @@ export function renderSimulate(
         // by an outer dim wrapper because we emit the JSON un-dimmed.
         const json = JSON.stringify(balance);
         const colorized = colorizeAmountsInJson(json, c);
+        const col = opts?.collectionCache?.get(String(collectionId));
+        const alias = detectBalanceAliasSymbol(balance, col);
+        let suffix = '';
+        if (alias) {
+          const human = formatHumanAmount(alias.amount, alias.decimals);
+          suffix = ' ' + c('dim', `(${human} ${alias.symbol})`);
+        }
         lines.push(
-          `      ${c('dim', '·')} collection ${collectionId}: ${colorized}`
+          `      ${c('dim', '·')} collection ${collectionId}: ${colorized}${suffix}`
         );
       }
     }
@@ -560,7 +611,8 @@ export function renderSimulate(
       const to = t.to || '';
       const amtStr = String(t.amount);
       const amt = amtStr.startsWith('-') ? c('red', amtStr) : c('green', '+' + amtStr);
-      lines.push(`    ${c('dim', '→')} ICS20 ${c('bold', amt)} ${t.denom} ${c('dim', `${from} → ${to}`)}`);
+      const symSuffix = coinSuffix(amtStr, t.denom, c);
+      lines.push(`    ${c('dim', '→')} ICS20 ${c('bold', amt)} ${t.denom}${symSuffix} ${c('dim', `${from} → ${to}`)}`);
     }
     for (const t of badgeXfers) {
       const from = t.from || '';
@@ -571,14 +623,22 @@ export function renderSimulate(
       // reformatting. Amounts inside the JSON are in-place colorized.
       const json = Array.isArray(t.balances) ? JSON.stringify(t.balances) : '[]';
       const colorized = colorizeAmountsInJson(json, c);
+      const col = opts?.collectionCache?.get(String(t.collectionId));
+      const alias = detectBalanceAliasSymbol(t.balances, col);
+      let aliasSuffix = '';
+      if (alias) {
+        const human = formatHumanAmount(alias.amount, alias.decimals);
+        aliasSuffix = ' ' + c('dim', `(${human} ${alias.symbol})`);
+      }
       lines.push(
-        `    ${c('dim', '→')} token collection ${t.collectionId} ${colorized} ${c('dim', `${from} → ${to}`)}`
+        `    ${c('dim', '→')} token collection ${t.collectionId} ${colorized}${aliasSuffix} ${c('dim', `${from} → ${to}`)}`
       );
     }
     for (const t of ibcXfers) {
       const amtStr = String(t.amount);
       const amt = amtStr.startsWith('-') ? c('red', amtStr) : c('green', '+' + amtStr);
-      lines.push(`    ${c('dim', '→')} ibc ${c('bold', amt)} ${t.denom} via ${t.sourceChannel || '?'}`);
+      const symSuffix = coinSuffix(amtStr, t.denom, c);
+      lines.push(`    ${c('dim', '→')} ibc ${c('bold', amt)} ${t.denom}${symSuffix} via ${t.sourceChannel || '?'}`);
     }
   }
 
@@ -612,7 +672,7 @@ export function renderSimulate(
 
 /**
  * Render the Metadata To Upload section. `filled` is a sidecar map (usually
- * `data._meta?.metadataPlaceholders`) keyed by placeholder URI — entries
+ * `data.value?._meta?.metadataPlaceholders`) keyed by placeholder URI — entries
  * present in the map are rendered as PROVIDED, others as NEEDED.
  */
 export function renderMetadataPlaceholders(

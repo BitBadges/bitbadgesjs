@@ -103,12 +103,14 @@ export function buildSmartAccount(params: SmartAccountParams): any {
   // the chain validator without "invalid characters" rejections.
   const cleanSymbol = sanitizeCosmosPathName(symbol, 'symbol');
   const denomStr = 'u' + cleanSymbol.toLowerCase();
+  const alias = buildAliasPath(denomStr, cleanSymbol, coin.decimals, params.image || coin.image);
 
   return buildMsg({
     collectionApprovals,
     standards,
     invariants,
-    aliasPathsToAdd: [buildAliasPath(denomStr, cleanSymbol, coin.decimals, coin.image)],
+    aliasPathsToAdd: [alias.path],
+    metadataPlaceholders: { ...alias.placeholders },
     collectionPermissions: permissions
   });
 }

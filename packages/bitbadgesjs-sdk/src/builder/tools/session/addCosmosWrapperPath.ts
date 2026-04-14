@@ -19,7 +19,7 @@
  */
 
 import { z } from 'zod';
-import { addCosmosWrapperPath as addCosmosWrapperPathToSession, getOrCreateSession } from '../../session/sessionState.js';
+import { addCosmosWrapperPath as addCosmosWrapperPathToSession, getOrCreateSession, getMsgPlaceholders } from '../../session/sessionState.js';
 
 const VALID_CHARS = /^[a-zA-Z_{}-]+$/;
 
@@ -218,25 +218,26 @@ export function handleAddCosmosWrapperPath(input: AddCosmosWrapperPathInput) {
 
   const session = getOrCreateSession(input.sessionId, input.creatorAddress);
   addCosmosWrapperPathToSession(input.sessionId, input.wrapperPath);
+  const placeholders = getMsgPlaceholders(session);
 
   const pathName = input.pathName ?? legacyPathName;
   const pathDescription = input.pathDescription ?? legacyPathDescription;
   const pathImage = input.pathImage ?? legacyPathImage;
   if (pathName || pathDescription || pathImage) {
-    session.metadataPlaceholders[pathUri] = {
-      name: pathName || session.metadataPlaceholders[pathUri]?.name || `${denom} wrapper path`,
-      description: pathDescription || session.metadataPlaceholders[pathUri]?.description || '',
-      image: pathImage || session.metadataPlaceholders[pathUri]?.image || ''
+    placeholders[pathUri] = {
+      name: pathName || placeholders[pathUri]?.name || `${denom} wrapper path`,
+      description: pathDescription || placeholders[pathUri]?.description || '',
+      image: pathImage || placeholders[pathUri]?.image || ''
     };
   }
   const unitName = input.denomUnitName ?? legacyUnitName;
   const unitDescription = input.denomUnitDescription ?? legacyUnitDescription;
   const unitImage = input.denomUnitImage ?? legacyUnitImage;
   if (defaultUnitUri && (unitName || unitDescription || unitImage)) {
-    session.metadataPlaceholders[defaultUnitUri] = {
-      name: unitName || session.metadataPlaceholders[defaultUnitUri]?.name || `${denom} default unit`,
-      description: unitDescription || session.metadataPlaceholders[defaultUnitUri]?.description || '',
-      image: unitImage || session.metadataPlaceholders[defaultUnitUri]?.image || ''
+    placeholders[defaultUnitUri] = {
+      name: unitName || placeholders[defaultUnitUri]?.name || `${denom} default unit`,
+      description: unitDescription || placeholders[defaultUnitUri]?.description || '',
+      image: unitImage || placeholders[defaultUnitUri]?.image || ''
     };
   }
 

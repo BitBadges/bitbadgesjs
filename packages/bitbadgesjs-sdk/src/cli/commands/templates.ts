@@ -104,7 +104,7 @@ async function emit(
   // user's "My Vault" doesn't accidentally label every approval as
   // "My Vault" — they keep their own descriptive default.
   if (isCollectionTx && (opts.name || opts.description || opts.image)) {
-    const meta = (data._meta = data._meta || {});
+    const meta = (data.value._meta = data.value._meta || {});
     const sidecar: Record<string, { name: string; description: string; image: string }> = (meta.metadataPlaceholders =
       meta.metadataPlaceholders || {});
     const fallbackName = opts.name || 'Untitled';
@@ -151,17 +151,18 @@ async function emit(
   // TTYs, so writing JSON before the stderr review keeps the visible
   // order stable across both cases.
   //
-  // We deliberately keep `_meta.metadataPlaceholders` on the emitted JSON
-  // so that re-reading the file via `bitbadges-cli builder verify` (or
+  // We deliberately keep `value._meta.metadataPlaceholders` on the emitted
+  // JSON so that re-reading the file via `bitbadges-cli builder verify` (or
   // any other downstream tool that walks the same sidecar) preserves the
-  // PROVIDED state. Chain proto serialization drops unknown top-level
-  // fields, so the `_meta` annotation never reaches the wire — it's
-  // purely a CLI / off-chain pipeline annotation.
-  // Narrow Universal → MsgCreateCollection / MsgUpdateCollection right at
-  // the write boundary. Agents and humans see the proto's real per-intent
-  // message type; only legacy internal tooling sees the Universal superset.
-  // The `_meta.metadataPlaceholders` sidecar is preserved — it rides on the
-  // same msg object and the chain strips unknown fields on serialization.
+  // PROVIDED state. Chain proto serialization drops unknown fields on
+  // `value`, so the `_meta` annotation never reaches the wire — it's
+  // purely a CLI / off-chain pipeline annotation scoped to this specific
+  // msg. Narrow Universal → MsgCreateCollection / MsgUpdateCollection
+  // right at the write boundary. Agents and humans see the proto's real
+  // per-intent message type; only legacy internal tooling sees the
+  // Universal superset. The `value._meta.metadataPlaceholders` sidecar is
+  // preserved — it rides on the same msg.value and the chain strips
+  // unknown fields on serialization.
   const outData = isCollectionTx ? normalizeToCreateOrUpdate(data) : data;
   output(outData, { condensed: opts.condensed, outputFile: opts.outputFile });
 
@@ -220,7 +221,7 @@ async function emit(
       if (placeholders.length > 0) {
         process.stderr.write(
           '\n' +
-            renderMetadataPlaceholders(placeholders, data._meta?.metadataPlaceholders, {
+            renderMetadataPlaceholders(placeholders, data.value?._meta?.metadataPlaceholders, {
               stream: process.stderr
             }) +
             '\n'
@@ -259,9 +260,14 @@ async function emit(
           );
         } else {
           const { simulateMessages } = await import('../../builder/tools/queries/simulateTransaction.js');
+          const { prefetchSimulateCollections } = await import('../utils/simulateSymbols.js');
           const result = await simulateMessages({
             messages: [data],
             creatorAddress: opts.creator,
+            apiKey,
+            apiUrl: getApiUrl(opts)
+          });
+          const collectionCache = await prefetchSimulateCollections(result, {
             apiKey,
             apiUrl: getApiUrl(opts)
           });
@@ -270,7 +276,8 @@ async function emit(
               renderSimulate(result, {
                 stream: process.stderr,
                 title: 'Auto-Simulate',
-                events: opts.events ? 'full' : 'count'
+                events: opts.events ? 'full' : 'count',
+                collectionCache
               }) +
               '\n'
           );

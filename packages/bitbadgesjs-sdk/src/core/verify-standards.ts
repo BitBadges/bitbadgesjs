@@ -634,13 +634,37 @@ function verifyNonTransferable(value: any): StandardViolation[] {
 // Common Mint Approval Checks (run for ALL standards with mint approvals)
 // ============================================================
 
+/**
+ * True when the transaction targets an existing collection — i.e. it's
+ * an update, not a create. Detected by a non-"0" collectionId (chain
+ * convention for new collections). Used to skip structural checks on
+ * CREATE-ONLY fields (defaultBalances, invariants) that the chain
+ * ignores on MsgUpdateCollection and that the session layer already
+ * blocks the AI from modifying on update builds.
+ */
+function isUpdateTransaction(value: any): boolean {
+  const cid = value?.collectionId;
+  if (cid == null) return false;
+  const s = String(cid);
+  return s !== '' && s !== '0';
+}
+
 function verifyCommonMintRules(value: any): StandardViolation[] {
   const violations: StandardViolation[] = [];
   const mintApprovals = getMintApprovals(value);
   const defaultBalances = value.defaultBalances || {};
 
+  // defaultBalances is a CREATION-ONLY field — the chain ignores it on
+  // MsgUpdateCollection and the session layer blocks set_default_balances
+  // on updates. For an update tx the on-chain collection already has its
+  // defaultBalances set; we can't change it from this message anyway.
+  // Checking the tx body here fires on every update that adds or touches
+  // a Mint approval (see ses_1ps5eu91pxxa). Skip the auto-approve
+  // incoming rule for updates; it remains enforced on create.
+  const isUpdate = isUpdateTransaction(value);
+
   // If there are mint approvals, defaultBalances should have autoApproveAllIncomingTransfers
-  if (mintApprovals.length > 0) {
+  if (mintApprovals.length > 0 && !isUpdate) {
     if (
       defaultBalances.autoApproveAllIncomingTransfers !== true &&
       defaultBalances.autoApproveAllIncomingTransfers !== 'true'
@@ -804,8 +828,9 @@ function verifyAuction(value: any): StandardViolation[] {
   const approvals = getApprovals(value);
   const mintApprovals = getMintApprovals(value);
 
+  // Post-settlement state is valid: the mint-to-winner approval uses
+  // autoDeletionOptions.afterOneUse, so it's gone once the auction settles.
   if (mintApprovals.length === 0) {
-    violations.push({ standard: std, field: 'collectionApprovals', message: 'Auction requires at least one mint approval (mint-to-winner).' });
     return violations;
   }
 
@@ -1426,9 +1451,19 @@ function verifyApprovalTrackingFields(value: any): StandardViolation[] {
  * Runs with 0 AI tokens — pure structural validation.
  *
  * @param transaction - The full transaction object (with messages array)
+ * @param onChainCollection - Optional prior on-chain state. Required for
+ *   accurate verification of update transactions — the chain ignores
+ *   `defaultBalances` and `invariants` on MsgUpdateCollection, so those
+ *   fields are absent from the tx body even though the checks below
+ *   depend on them. When supplied, we splice the on-chain values onto
+ *   the verification view so every downstream check runs against the
+ *   full effective collection state.
  * @returns VerificationResult with violations and checked standards
  */
-export function verifyStandardsCompliance(transaction: any): VerificationResult {
+export function verifyStandardsCompliance(
+  transaction: any,
+  onChainCollection?: any
+): VerificationResult {
   // normalizeForReview unwraps tx/msg wrappers, mirrors aliasPaths field
   // names, and converts all numeric fields to bigints via the Msg class's
   // registered .convert(BigIntify). Every downstream check here assumes
@@ -1436,12 +1471,29 @@ export function verifyStandardsCompliance(transaction: any): VerificationResult 
   // input (reviewCollection pipeline) or raw input (direct callers like
   // the builders test suite).
   const normalized = normalizeForReview(transaction);
-  const value: any = normalized && typeof normalized === 'object' ? normalized : null;
+  let value: any = normalized && typeof normalized === 'object' ? normalized : null;
   if (!value) {
     return {
       valid: false,
       violations: [{ standard: 'Common', field: 'messages', message: 'Transaction has no messages.' }],
       standardsChecked: []
+    };
+  }
+
+  // For update transactions, overlay on-chain create-only fields onto
+  // the verification view. If the caller didn't supply on-chain state,
+  // the per-field checks already short-circuit via isUpdateTransaction()
+  // so they don't fire spurious "missing default" errors — see
+  // verifyCommonMintRules() and ses_1ps5eu91pxxa for the motivating case.
+  if (isUpdateTransaction(value) && onChainCollection && typeof onChainCollection === 'object') {
+    const chainValue =
+      (onChainCollection as any)?.messages?.[0]?.value ||
+      (onChainCollection as any)?.messages?.[0] ||
+      onChainCollection;
+    value = {
+      ...value,
+      defaultBalances: value.defaultBalances ?? chainValue?.defaultBalances,
+      invariants: value.invariants ?? chainValue?.invariants
     };
   }
 

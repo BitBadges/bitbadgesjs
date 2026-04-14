@@ -11,7 +11,6 @@ import {
   frozenPermissions,
   defaultBalances,
   metadataPlaceholders,
-  singleTokenMetadata,
   zeroMaxTransfers
 } from './shared.js';
 
@@ -109,18 +108,19 @@ export function buildAuction(params: AuctionParams): any {
     }
   ];
 
-  const { collectionMetadata, placeholders: collectionPlaceholders } = metadataPlaceholders(
+  // Auctions are 1-of-1 NFTs, so the token-level metadata is always an
+  // identical mirror of the collection-level metadata. Reuse the default
+  // token entry emitted by metadataPlaceholders() (keyed by
+  // ipfs://METADATA_TOKEN_DEFAULT, same content as the collection) and
+  // narrow its tokenIds range to [1,1] so it doesn't bleed into any
+  // future higher IDs. This matches the custom-2fa / single-NFT pattern
+  // where collection image == token image automatically — no separate
+  // tokenMetadata path to drift out of sync.
+  const { collectionMetadata, tokenMetadata, placeholders: collectionPlaceholders } = metadataPlaceholders(
     params.name || 'Auction',
     params.description,
     params.image
   );
-  const auctionItem = singleTokenMetadata('1', params.name || 'Auction Item', params.description, params.image);
-
-  // Same pattern as crowdfund: drop the default-token placeholder seeded by
-  // metadataPlaceholders() since this template defines its own per-token
-  // entry below.
-  const { 'ipfs://METADATA_TOKEN_DEFAULT': _drop, ...collectionOnlyPlaceholders } = collectionPlaceholders;
-  void _drop;
 
   return buildMsg({
     collectionApprovals,
@@ -142,10 +142,10 @@ export function buildAuction(params: AuctionParams): any {
     // tradable surface.
     aliasPathsToAdd: [],
     collectionMetadata,
-    tokenMetadata: [auctionItem.entry],
-    metadataPlaceholders: {
-      ...collectionOnlyPlaceholders,
-      [auctionItem.placeholder.uri]: auctionItem.placeholder.content
-    }
+    tokenMetadata: tokenMetadata.map((entry) => ({
+      ...entry,
+      tokenIds: [{ start: '1', end: '1' }]
+    })),
+    metadataPlaceholders: collectionPlaceholders
   });
 }

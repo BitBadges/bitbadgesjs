@@ -130,7 +130,26 @@ Create a collection of 100 unique NFTs with a public mint approval.
           "cosmosCoinBackedPath": null
         },
         "aliasPathsToAdd": [],
-        "cosmosCoinWrapperPathsToAdd": []
+        "cosmosCoinWrapperPathsToAdd": [],
+        "_meta": {
+          "metadataPlaceholders": {
+            "ipfs://METADATA_COLLECTION": {
+              "name": "My NFT Collection",
+              "description": "A collection of 100 unique NFTs.",
+              "image": "ipfs://QmCollectionImage..."
+            },
+            "ipfs://METADATA_TOKEN_{id}": {
+              "name": "My NFT Collection Token",
+              "description": "A unique NFT from the My NFT Collection.",
+              "image": "ipfs://QmTokenImage..."
+            },
+            "ipfs://METADATA_APPROVAL_mint": {
+              "name": "Public Mint",
+              "description": "Allows anyone to mint one NFT for 5 BADGE.",
+              "image": ""
+            }
+          }
+        }
       }
     }
   ],
@@ -138,23 +157,6 @@ Create a collection of 100 unique NFTs with a public mint approval.
   "fee": {
     "amount": [{ "denom": "ubadge", "amount": "5000" }],
     "gas": "500000"
-  },
-  "metadataPlaceholders": {
-    "ipfs://METADATA_COLLECTION": {
-      "name": "My NFT Collection",
-      "description": "A collection of 100 unique NFTs.",
-      "image": "ipfs://QmCollectionImage..."
-    },
-    "ipfs://METADATA_TOKEN_{id}": {
-      "name": "My NFT Collection Token",
-      "description": "A unique NFT from the My NFT Collection.",
-      "image": "ipfs://QmTokenImage..."
-    },
-    "ipfs://METADATA_APPROVAL_mint": {
-      "name": "Public Mint",
-      "description": "Allows anyone to mint one NFT for 5 BADGE.",
-      "image": ""
-    }
   }
 }
 \`\`\``,
@@ -253,7 +255,31 @@ Create a fungible token with unlimited supply.
           "cosmosCoinBackedPath": null
         },
         "aliasPathsToAdd": [],
-        "cosmosCoinWrapperPathsToAdd": []
+        "cosmosCoinWrapperPathsToAdd": [],
+        "_meta": {
+          "metadataPlaceholders": {
+            "ipfs://METADATA_COLLECTION": {
+              "name": "My Token",
+              "description": "A fungible token with unlimited supply.",
+              "image": "ipfs://QmTokenImage..."
+            },
+            "ipfs://METADATA_TOKEN": {
+              "name": "MY",
+              "description": "The MY token unit.",
+              "image": "ipfs://QmTokenImage..."
+            },
+            "ipfs://METADATA_APPROVAL_mint": {
+              "name": "Public Mint",
+              "description": "Allows anyone to mint tokens freely.",
+              "image": ""
+            },
+            "ipfs://METADATA_APPROVAL_transfer": {
+              "name": "Free Transfer",
+              "description": "Allows free transfer between users.",
+              "image": ""
+            }
+          }
+        }
       }
     }
   ],
@@ -261,28 +287,6 @@ Create a fungible token with unlimited supply.
   "fee": {
     "amount": [{ "denom": "ubadge", "amount": "5000" }],
     "gas": "500000"
-  },
-  "metadataPlaceholders": {
-    "ipfs://METADATA_COLLECTION": {
-      "name": "My Token",
-      "description": "A fungible token with unlimited supply.",
-      "image": "ipfs://QmTokenImage..."
-    },
-    "ipfs://METADATA_TOKEN": {
-      "name": "MY",
-      "description": "The MY token unit.",
-      "image": "ipfs://QmTokenImage..."
-    },
-    "ipfs://METADATA_APPROVAL_mint": {
-      "name": "Public Mint",
-      "description": "Allows anyone to mint tokens freely.",
-      "image": ""
-    },
-    "ipfs://METADATA_APPROVAL_transfer": {
-      "name": "Free Transfer",
-      "description": "Allows free transfer between users.",
-      "image": ""
-    }
   }
 }
 \`\`\``,

@@ -924,56 +924,76 @@ Before outputting JSON, verify:
 
   metadataPlaceholders: `## Metadata Placeholders System
 
-The metadataPlaceholders system allows you to generate metadata for collection, token, or approval metadata that will be automatically uploaded to IPFS.
+The metadataPlaceholders system allows you to generate metadata for collection, token, approval, and alias-path metadata that will be automatically uploaded to IPFS.
+
+The sidecar lives **inside the message**, at \`messages[i].value._meta.metadataPlaceholders\`. It is NOT a top-level sibling of \`messages\`. Every placeholder URI referenced by this message's body gets a matching entry in this map — no wrapper-level copy, no parallel shape.
 
 ### Format
 
 \`\`\`json
 {
-  "messages": [...],
-  "metadataPlaceholders": {
-    "ipfs://METADATA_COLLECTION": {
-      "name": "My Collection Name",
-      "description": "A description of the collection.",
-      "image": "https://example.com/image.png"
-    },
-    "ipfs://METADATA_TOKEN_1": {
-      "name": "Token Name",
-      "description": "Token description.",
-      "image": "https://example.com/token.png"
-    },
-    "ipfs://METADATA_APPROVAL_public-mint": {
-      "name": "Public Mint Approval",
-      "description": "Allows anyone to mint one token by paying 5 BADGE.",
-      "image": ""
-    },
-    "ipfs://METADATA_ALIAS_PATH": {
-      "name": "vATOM",
-      "description": "Wrapped ATOM token for liquidity pools.",
-      "image": "https://example.com/vatom.png"
+  "messages": [
+    {
+      "typeUrl": "/tokenization.MsgUniversalUpdateCollection",
+      "value": {
+        "collectionMetadata": { "uri": "ipfs://METADATA_COLLECTION", "customData": "" },
+        "tokenMetadata": [
+          { "uri": "ipfs://METADATA_TOKEN_1", "customData": "", "tokenIds": [{ "start": "1", "end": "1" }] }
+        ],
+        "collectionApprovals": [
+          { "approvalId": "public-mint", "uri": "ipfs://METADATA_APPROVAL_public-mint", "...": "..." }
+        ],
+        "aliasPathsToAdd": [
+          { "denom": "uvatom", "metadata": { "uri": "ipfs://METADATA_ALIAS_uvatom", "customData": "" }, "...": "..." }
+        ],
+        "_meta": {
+          "metadataPlaceholders": {
+            "ipfs://METADATA_COLLECTION": {
+              "name": "My Collection Name",
+              "description": "A description of the collection.",
+              "image": "https://example.com/image.png"
+            },
+            "ipfs://METADATA_TOKEN_1": {
+              "name": "Token Name",
+              "description": "Token description.",
+              "image": "https://example.com/token.png"
+            },
+            "ipfs://METADATA_APPROVAL_public-mint": {
+              "name": "Public Mint Approval",
+              "description": "Allows anyone to mint one token by paying 5 BADGE.",
+              "image": ""
+            },
+            "ipfs://METADATA_ALIAS_uvatom": {
+              "name": "vATOM",
+              "description": "Wrapped ATOM token for liquidity pools.",
+              "image": "https://example.com/vatom.png"
+            }
+          }
+        }
+      }
     }
-  }
+  ]
 }
 \`\`\`
 
 ### How It Works
 
-1. In your messages, use placeholder URIs like \`ipfs://METADATA_COLLECTION\`, \`ipfs://METADATA_TOKEN_1\`, etc.
-2. In the \`metadataPlaceholders\` object, provide the actual metadata for each placeholder URI
-3. The system will automatically replace the placeholder URIs with the provided metadata and upload to IPFS
+1. In your message body, use placeholder URIs like \`ipfs://METADATA_COLLECTION\`, \`ipfs://METADATA_TOKEN_1\`, etc.
+2. In the same message's \`value._meta.metadataPlaceholders\` object, provide the actual metadata for each placeholder URI.
+3. The system will automatically replace the placeholder URIs with the provided metadata and upload to IPFS.
 4. This works for:
    - Collection metadata (collectionMetadata.uri)
    - Token metadata (tokenMetadata[].uri)
    - Approval metadata (collectionApprovals[].uri)
-   - Alias path metadata (aliasPathsToAdd[].metadata.uri)
+   - Alias path metadata (aliasPathsToAdd[].metadata.uri and denomUnits[].metadata.uri)
 
 ### Important Notes
 
-- Approval metadata should have \`image: ""\` (empty string) as approvals don't have images
-- Collection and token metadata require \`name\`, \`description\`, and \`image\`
-- You can use any placeholder URI format (e.g., \`ipfs://METADATA_APPROVAL_public-mint\`)
-- The placeholder URI in the message must exactly match the key in \`metadataPlaceholders\`
-- Always include proper descriptions ending with periods`,
+- The sidecar lives at \`messages[0].value._meta.metadataPlaceholders\` — per-message, NOT at the tx wrapper level.
+- Approval metadata MUST have \`image: ""\` (empty string) — approvals don't have images.
+- Collection, token, and alias-path metadata require \`name\`, \`description\`, and \`image\`.
+- The placeholder URI in the message body must exactly match the key in \`_meta.metadataPlaceholders\`.
+- Always include proper descriptions ending with periods.`,
 
   evmQueryChallenges: `## EVM Query Challenges (v25+)
 

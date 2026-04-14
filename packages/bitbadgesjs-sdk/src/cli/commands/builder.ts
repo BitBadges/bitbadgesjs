@@ -400,7 +400,7 @@ addNetworkOptions(
             review,
             metadata: {
               placeholders,
-              filled: firstMsg?._meta?.metadataPlaceholders || {}
+              filled: firstMsg?.value?._meta?.metadataPlaceholders || {}
             }
           },
           { ...opts, human: false }
@@ -417,7 +417,7 @@ addNetworkOptions(
         }
         if (placeholders.length > 0) {
           lines.push(
-            renderMetadataPlaceholders(placeholders, firstMsg?._meta?.metadataPlaceholders, {
+            renderMetadataPlaceholders(placeholders, firstMsg?.value?._meta?.metadataPlaceholders, {
               stream: process.stdout
             })
           );
@@ -711,13 +711,19 @@ addNetworkOptions(
                   tokenMetadata: [],
                   aliasPathsToAdd: [],
                   cosmosCoinWrapperPathsToAdd: [],
-                  mintEscrowCoinsToTransfer: []
+                  mintEscrowCoinsToTransfer: [],
+                  // Canonical location for the placeholder sidecar —
+                  // per-msg, under value._meta. The old top-level
+                  // `metadataPlaceholders` sibling of `transaction` has
+                  // been removed.
+                  _meta: {
+                    metadataPlaceholders: {
+                      'ipfs://METADATA_DOCTOR_PROBE': { name: 'doctor probe', description: '', image: '' }
+                    }
+                  }
                 }
               }
             ]
-          },
-          metadataPlaceholders: {
-            'ipfs://METADATA_DOCTOR_PROBE': { name: 'doctor probe', description: '', image: '' }
           }
         };
         const postRes = await fetch(`${baseUrl}/api/v0/builder/preview`, {
@@ -743,7 +749,10 @@ addNetworkOptions(
           } else {
             const fetched = (await getRes.json()) as any;
             const echoedTypeUrl = fetched?.transaction?.messages?.[0]?.typeUrl;
-            const sidecarKey = fetched?.metadataPlaceholders?.['ipfs://METADATA_DOCTOR_PROBE']?.name;
+            const sidecarKey =
+              fetched?.transaction?.messages?.[0]?.value?._meta?.metadataPlaceholders?.[
+                'ipfs://METADATA_DOCTOR_PROBE'
+              ]?.name;
             if (echoedTypeUrl !== '/tokenization.MsgCreateCollection' || sidecarKey !== 'doctor probe') {
               checks.push({
                 name: `Preview roundtrip (${network})`,
@@ -843,39 +852,19 @@ addNetworkOptions(
       const raw = readJsonInput(input);
       const wrapped = ensureTxWrapper(raw);
 
-      // Lift `_meta.metadataPlaceholders` into a top-level sibling on the
-      // upload payload, then strip `_meta` from the messages so the
-      // indexer never sees the CLI annotation. Sidecar lookup priority:
-      // wrapper-level _meta first, then inner-Msg _meta (templates emit
-      // here).
-      const sidecar: Record<string, any> = {
-        ...((wrapped._meta && wrapped._meta.metadataPlaceholders) || {})
-      };
+      // The placeholder sidecar lives inside `msg.value._meta` per the
+      // single-source-of-truth contract — we just need to normalize the
+      // msg type (Universal → Create/Update) and the `_meta` field rides
+      // along inside the value. No lift-to-top-level, no strip.
       const { normalizeToCreateOrUpdate: _normalize } = await import('../utils/normalizeMsg.js');
-      const cleanedMessages = (wrapped.messages || []).map((m: any) => {
-        let cleaned = m;
-        if (m && typeof m === 'object' && m._meta) {
-          if (m._meta.metadataPlaceholders) {
-            for (const [k, v] of Object.entries(m._meta.metadataPlaceholders)) {
-              if (!sidecar[k]) sidecar[k] = v;
-            }
-          }
-          const { _meta: _drop, ...rest } = m;
-          void _drop;
-          cleaned = rest;
-        }
-        // Narrow Universal → MsgCreateCollection / MsgUpdateCollection so the
-        // shareable preview link shows the agent-facing message type.
-        return _normalize(cleaned);
-      });
+      const cleanedMessages = (wrapped.messages || []).map((m: any) => _normalize(m));
 
       const payload = {
         transaction: {
           messages: cleanedMessages,
           ...(wrapped.memo ? { memo: wrapped.memo } : {}),
           ...(wrapped.fee ? { fee: wrapped.fee } : {})
-        },
-        metadataPlaceholders: sidecar
+        }
       };
 
       // Direct fetch — apiRequest() requires an API key, but the preview
@@ -963,6 +952,7 @@ addNetworkOptions(
     const { readJsonInput, output, getApiUrl, getApiKeyForNetwork } = await import('../utils/io.js');
     const { simulateMessages } = await import('../../builder/tools/queries/simulateTransaction.js');
     const { renderSimulate } = await import('../utils/terminal.js');
+    const { prefetchSimulateCollections } = await import('../utils/simulateSymbols.js');
 
     // Network-aware API key + URL resolution. The simulate endpoint is
     // gated on an API key on mainnet/testnet but most local indexers
@@ -1031,7 +1021,21 @@ addNetworkOptions(
     if (opts.json) {
       output(result, { ...opts, human: false });
     } else {
-      console.log(renderSimulate(result, { stream: process.stdout, events: opts.events ? 'full' : 'count' }));
+      // Pre-fetch alias metadata for every collection referenced by
+      // the result so renderSimulate can suffix balance lines with
+      // their alias / wrapper-path symbol. Best-effort: a fetch
+      // failure just degrades to today's un-suffixed rendering.
+      const collectionCache = await prefetchSimulateCollections(result, {
+        apiKey,
+        apiUrl: getApiUrl(opts)
+      });
+      console.log(
+        renderSimulate(result, {
+          stream: process.stdout,
+          events: opts.events ? 'full' : 'count',
+          collectionCache
+        })
+      );
     }
 
     if (!result.success || result.valid === false) process.exit(2);

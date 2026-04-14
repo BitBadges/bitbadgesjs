@@ -111,7 +111,7 @@ export function uniqueId(prefix?: string): string {
 
 /**
  * A sidecar map of placeholder URI → off-chain metadata content. Templates
- * accumulate these and attach them to the emitted Msg as `_meta.metadataPlaceholders`
+ * accumulate these and attach them to the emitted Msg as `value._meta.metadataPlaceholders`
  * so the CLI's Metadata To Upload section (and any frontend consumer)
  * knows which placeholder URIs already have content provided.
  */
@@ -127,7 +127,7 @@ export type PlaceholderSidecar = Record<string, { name: string; description: str
  *
  * Callers should merge the returned `placeholders` into their own sidecar and
  * pass the combined map to `buildMsg({ ..., metadataPlaceholders })`, which
- * surfaces it on the emitted Msg as `_meta.metadataPlaceholders`.
+ * surfaces it on the emitted Msg as `value._meta.metadataPlaceholders`.
  */
 export function metadataPlaceholders(name: string, description?: string, image?: string) {
   const collectionUri = 'ipfs://METADATA_COLLECTION';
@@ -198,7 +198,7 @@ export function buildMsg(params: {
   mintEscrowCoinsToTransfer?: any[];
   /**
    * Off-chain metadata sidecar the template accumulated. Attached to the
-   * output Msg as `_meta.metadataPlaceholders`. Templates that don't have
+   * output Msg as `value._meta.metadataPlaceholders`. Templates that don't have
    * specific content should still pass an empty {} so the auto-apply flow
    * knows to treat default placeholder URIs as NEEDED.
    */
@@ -246,10 +246,17 @@ export function buildMsg(params: {
     }
   };
 
-  // Attach the sidecar as a CLI-only `_meta` annotation. emit() in
-  // templates.ts strips this before writing the final JSON to stdout.
+  // Attach the sidecar as a per-msg `_meta` annotation on value, keyed
+  // by placeholder URIs that only live inside this msg's body. This is
+  // the single canonical location for the placeholder sidecar; every
+  // producer writes here and every consumer reads from here. There is
+  // no top-level `tx.metadataPlaceholders` copy anywhere in the code-
+  // base. Proto classes strip unknown fields on round-trip, so any
+  // place that reconstructs the msg through a Msg class must preserve
+  // `value._meta` explicitly (see core/review-normalize.ts
+  // reattachInlineMetadata).
   if (params.metadataPlaceholders && Object.keys(params.metadataPlaceholders).length > 0) {
-    msg._meta = { metadataPlaceholders: params.metadataPlaceholders };
+    msg.value._meta = { metadataPlaceholders: params.metadataPlaceholders };
   }
 
   return msg;
@@ -529,10 +536,28 @@ export function sanitizeCosmosPathName(input: string, label: 'denom' | 'symbol' 
   return cleaned;
 }
 
-export function buildAliasPath(denom: string, symbol: string, decimals: number, image?: string) {
-  // Keep the parameter for back-compat; the reviewer + metadata placeholder
-  // layer will pick up the image via metadataPlaceholders, not the proto.
-  void image;
+/**
+ * Build an alias path entry for aliasPathsToAdd plus the matching metadata
+ * placeholder sidecar entries for both the path-level metadata URI and the
+ * denom unit's metadata URI. Returns `{ path, placeholders }`:
+ *
+ *   - `path` is the object to push into `aliasPathsToAdd: [...]`
+ *   - `placeholders` is a PlaceholderSidecar keyed by the two URIs the
+ *     path references. Callers should merge it into the accumulated
+ *     sidecar passed to buildMsg via `metadataPlaceholders`.
+ *
+ * Image/name/description intentionally flow through the sidecar — never
+ * onto the proto. The auto-apply flow on the frontend reads them from
+ * `metadataPlaceholders` keyed by the path/unit metadata URI.
+ */
+export function buildAliasPath(
+  denom: string,
+  symbol: string,
+  decimals: number,
+  image?: string,
+  name?: string,
+  description?: string
+) {
   // Chain rule: denom unit decimals must be > 0. The chain rejects
   // `decimals: '0'` with "denom unit decimals cannot be 0". Fail fast at
   // build time so callers get a clear error instead of a chain rejection
@@ -567,32 +592,45 @@ export function buildAliasPath(denom: string, symbol: string, decimals: number, 
       `buildAliasPath: denom and symbol cannot be identical ("${denom}"). The chain rejects this with "duplicate denom unit symbol" because both fields are validated against the same per-tx map. Use different strings (e.g. denom="usymbol", symbol="SYMBOL").`
     );
   }
+  const pathUri = `ipfs://METADATA_ALIAS_${denom}`;
+  const unitUri = `ipfs://METADATA_ALIAS_${denom}_UNIT`;
+  const content = {
+    name: name || symbol,
+    description: description || '',
+    image: image || BITBADGES_DEFAULT_IMAGE
+  };
   return {
-    denom,
-    conversion: {
-      sideA: { amount: '1' },
-      sideB: [{ amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: FOREVER }]
+    path: {
+      denom,
+      conversion: {
+        sideA: { amount: '1' },
+        sideB: [{ amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: FOREVER }]
+      },
+      // Path-level symbol intentionally LEFT EMPTY. The chain validates
+      // path-level symbols and denom-unit-level symbols against the SAME
+      // `symbolPaths` map per tx (validatePathSymbols in
+      // msg_server_universal_update_collection.go:673). When both are set
+      // to the same string, the second insertion fails with "duplicate
+      // denom unit symbol", even though there's only one alias path with
+      // one denom unit. Skipping the path-level entry (chain check is
+      // gated on `if pathSymbol != ""`) avoids the spurious collision
+      // while keeping the user-facing symbol on the denom unit, which is
+      // what the frontend / wallets actually display.
+      symbol: '',
+      denomUnits: [
+        {
+          decimals: String(decimals),
+          symbol,
+          isDefaultDisplay: true,
+          metadata: { uri: unitUri, customData: '' }
+        }
+      ],
+      metadata: { uri: pathUri, customData: '' }
     },
-    // Path-level symbol intentionally LEFT EMPTY. The chain validates
-    // path-level symbols and denom-unit-level symbols against the SAME
-    // `symbolPaths` map per tx (validatePathSymbols in
-    // msg_server_universal_update_collection.go:673). When both are set
-    // to the same string, the second insertion fails with "duplicate
-    // denom unit symbol", even though there's only one alias path with
-    // one denom unit. Skipping the path-level entry (chain check is
-    // gated on `if pathSymbol != ""`) avoids the spurious collision
-    // while keeping the user-facing symbol on the denom unit, which is
-    // what the frontend / wallets actually display.
-    symbol: '',
-    denomUnits: [
-      {
-        decimals: String(decimals),
-        symbol,
-        isDefaultDisplay: true,
-        metadata: { uri: `ipfs://METADATA_ALIAS_${denom}_UNIT`, customData: '' }
-      }
-    ],
-    metadata: { uri: `ipfs://METADATA_ALIAS_${denom}`, customData: '' }
+    placeholders: {
+      [pathUri]: { ...content },
+      [unitUri]: { ...content }
+    } as PlaceholderSidecar
   };
 }
 

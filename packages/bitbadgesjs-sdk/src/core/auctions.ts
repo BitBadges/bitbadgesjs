@@ -20,17 +20,21 @@ export const validateAuctionCollection = (collection: Readonly<iCollectionDoc<bi
     errors.push('validTokenIds must be exactly [{start: 1, end: 1}]');
   }
 
-  // 3. 1-2 approvals (mint-to-winner + optional burn)
+  // 3. 0-2 approvals (mint-to-winner + optional burn). The mint-to-winner
+  // approval uses autoDeletionOptions.afterOneUse, so once the auction
+  // settles it is removed from the collection — a valid post-settlement
+  // state with 0-1 remaining approvals.
   const approvals = collection.collectionApprovals;
-  if (approvals.length === 0 || approvals.length > 2) {
-    errors.push(`Expected 1-2 approvals, found ${approvals.length}`);
+  if (approvals.length > 2) {
+    errors.push(`Expected 0-2 approvals, found ${approvals.length}`);
   }
 
-  // 4. Find mint-to-winner approval
+  // 4. Find mint-to-winner approval. Absence is a valid post-settlement
+  // state (auto-deleted after one use) — skip mint-specific checks rather
+  // than flag a structural error.
   const mintApproval = approvals.find((a) => a.fromListId === 'Mint');
   if (!mintApproval) {
-    errors.push('Missing mint-to-winner approval (fromListId: "Mint")');
-    return { valid: false, errors, warnings };
+    return { valid: errors.length === 0, errors, warnings };
   }
 
   const ac = mintApproval.approvalCriteria;

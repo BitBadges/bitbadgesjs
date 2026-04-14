@@ -11,7 +11,6 @@ import {
   durationToTimestamp,
   uniqueId,
   buildMsg,
-  buildAliasPath,
   frozenPermissions,
   defaultBalances,
   metadataPlaceholders,

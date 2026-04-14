@@ -108,6 +108,13 @@ function reattachInlineMetadata(converted: any, raw: any): void {
       }
     }
   }
+  // Per-msg `_meta` sidecar — the proto class strips it as an unknown
+  // field, but the review-ux metadata checks read
+  // `value._meta.metadataPlaceholders` to decide whether placeholder
+  // entries have real content. Preserve it on the converted value.
+  if (raw?._meta && typeof raw._meta === 'object') {
+    converted._meta = raw._meta;
+  }
 }
 
 export function normalizeForReview(input: unknown): any {

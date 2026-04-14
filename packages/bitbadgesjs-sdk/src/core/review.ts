@@ -113,7 +113,7 @@ export function reviewCollection(collection: unknown, context?: ReviewContext): 
 
   if (!skip.has('standards')) {
     try {
-      const std = verifyStandardsCompliance(value);
+      const std = verifyStandardsCompliance(value, ctx.onChainCollection);
       for (const v of std.violations || []) findings.push(fromStandardsFinding(v));
     } catch {
       // standards may not apply

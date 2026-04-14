@@ -84,7 +84,7 @@ describe('UX checks — representative sample', () => {
     const findings = runUxChecks(
       {
         collectionApprovals: [],
-        metadataPlaceholders: { 'ipfs://METADATA_1': { image: 'ipfs://IMAGE_1' } }
+        _meta: { metadataPlaceholders: { 'ipfs://METADATA_1': { image: 'ipfs://IMAGE_1' } } }
       },
       ctx
     );
@@ -221,7 +221,7 @@ describe('reviewCollection — snapshot across sources', () => {
         { approvalId: 'all-list', fromListId: 'All', approvalCriteria: {} }
       ],
       standards: [],
-      metadataPlaceholders: { 'ipfs://METADATA_X': { image: 'ipfs://IMAGE_1' } }
+      _meta: { metadataPlaceholders: { 'ipfs://METADATA_X': { image: 'ipfs://IMAGE_1' } } }
     };
     const result = reviewCollection(broken);
     expect(result.summary.verdict).toBe('fail');

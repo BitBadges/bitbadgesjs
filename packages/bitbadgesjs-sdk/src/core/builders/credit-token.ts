@@ -59,6 +59,8 @@ export function buildCreditToken(params: CreditTokenParams): any {
     }
   };
 
+  const alias = buildAliasPath('u' + symbol.toLowerCase(), symbol, coin.decimals, undefined, params.name);
+
   return buildMsg({
     collectionApprovals: [creditMint],
     validTokenIds: [{ start: '1', end: '1' }],
@@ -70,6 +72,7 @@ export function buildCreditToken(params: CreditTokenParams): any {
       noForcefulPostMintTransfers: true,
       disablePoolCreation: true
     },
-    aliasPathsToAdd: [buildAliasPath('u' + symbol.toLowerCase(), symbol, coin.decimals)]
+    aliasPathsToAdd: [alias.path],
+    metadataPlaceholders: { ...alias.placeholders }
   });
 }
