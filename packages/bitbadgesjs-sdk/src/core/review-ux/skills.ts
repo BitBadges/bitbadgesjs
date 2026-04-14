@@ -247,26 +247,46 @@ export const skillChecks: UxCheck[] = [
     return out;
   },
 
-  // Address list tokens should be non-transferable (admin-managed)
+  // Quest / reward-payout escrow funding — any collection with a mint
+  // approval that pays out coins needs the mint escrow funded before
+  // users can claim. This check fires as a soft warning since escrow
+  // can be topped up post-creation by sending coins to the mint escrow
+  // address. Applies to Quest, Bounty, Subscription, Crowdfund, Auction
+  // payouts, or any standard where the mint approval transfers coins.
   (value) => {
     const out: Finding[] = [];
-    const standards: string[] = value?.standards || [];
-    if (!standards.includes('Address List')) return out;
-    const nonMint = getApprovals(value).filter((a: any) => a.fromListId !== 'Mint' && a.fromListId !== 'All');
-    if (nonMint.length === 0) return out;
+    const approvals = getApprovals(value);
+    const mintApprovals = approvals.filter((a: any) => a.fromListId === 'Mint');
+    if (mintApprovals.length === 0) return out;
+    // Collect required coins from every mint approval that transfers coins
+    const requiredDenoms = new Set<string>();
+    for (const a of mintApprovals) {
+      const coinTransfers: any[] = a.approvalCriteria?.coinTransfers || [];
+      for (const ct of coinTransfers) {
+        // approver-funded = pulls from the mint escrow
+        if (!ct.overrideFromWithApproverAddress) continue;
+        for (const coin of ct.coins || []) {
+          if (coin.denom) requiredDenoms.add(coin.denom);
+        }
+      }
+    }
+    if (requiredDenoms.size === 0) return out;
+    const escrowCoins: any[] = value?.mintEscrowCoinsToTransfer || [];
+    const escrowedDenoms = new Set<string>(escrowCoins.map((c: any) => c.denom).filter(Boolean));
+    const missing = [...requiredDenoms].filter((d) => !escrowedDenoms.has(d));
+    if (missing.length === 0) return out;
+    const denomList = missing.join(', ');
     out.push({
-      code: 'review.ux.addresslist_transfers_allowed',
+      code: 'review.ux.mint_escrow_unfunded',
       severity: 'warning',
       source: 'ux',
       category: 'skills',
-      title: {
-        en: 'Address list allows token transfers'
-      },
+      title: { en: 'Mint escrow is not funded at creation' },
       detail: {
-        en: 'Address list tokens are typically non-transferable (membership is managed by the admin). Transfer approvals exist which would allow users to send their membership token.'
+        en: `Mint approvals pay out ${denomList} from the mint escrow, but no mintEscrowCoinsToTransfer is set. Users will not be able to claim these rewards until the escrow is funded. You can top up the escrow at any time by sending coins to the mint escrow address — this is not a blocking issue.`
       },
       recommendation: {
-        en: 'Remove the transfer approvals to make address list tokens non-transferable'
+        en: 'Set mintEscrowCoinsToTransfer on the Msg to pre-fund at creation, or fund later by sending the required coins to the collection mint escrow address.'
       }
     });
     return out;

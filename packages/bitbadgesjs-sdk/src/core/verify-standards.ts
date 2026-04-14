@@ -572,30 +572,12 @@ function verifyCreditToken(value: any): StandardViolation[] {
   return violations;
 }
 
-function verifyQuest(value: any): StandardViolation[] {
-  const violations: StandardViolation[] = [];
-  const std = 'Quest';
-  const mintApprovals = getMintApprovals(value);
-
-  // Should have at least one mint approval with coinTransfers (reward payout)
-  const hasRewardApproval = mintApprovals.some(
-    (a: any) => a.approvalCriteria?.coinTransfers && a.approvalCriteria.coinTransfers.length > 0
-  );
-
-  // Check escrow vs payout — warning only (user can fund later)
-  if (hasRewardApproval) {
-    const escrowCoins = value.mintEscrowCoinsToTransfer || [];
-    if (escrowCoins.length === 0) {
-      violations.push({
-        standard: std,
-        field: 'mintEscrowCoinsToTransfer',
-        message:
-          'Quest has reward payouts but no escrow funding configured. Users will not be able to claim rewards until the escrow is funded. You can fund it later by sending coins to the mint escrow address.'
-      });
-    }
-  }
-
-  return violations;
+function verifyQuest(_value: any): StandardViolation[] {
+  // Quest-specific checks moved to review-ux/skills.ts so they can ship
+  // as soft warnings instead of critical standards violations. The user
+  // can fund mint escrow post-creation by sending coins to the escrow
+  // address, so "no escrow configured" is informational not blocking.
+  return [];
 }
 
 function verifyTradableNFT(value: any): StandardViolation[] {

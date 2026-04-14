@@ -82,23 +82,39 @@ export const approvalsChecks: UxCheck[] = [
     //   push 1 — hasOverrides || !invariantBlocksForceful
     //   push 2 — hasOverrides && invariantBlocksForceful (mismatch)
     if (hasOverrides || !invariantBlocksForceful) {
-      const count = forcefulApprovals.length;
-      // Branch the message so count=0 doesn't read awkwardly. When the
-      // only reason the check fires is the unset invariant, say so.
-      const detailEn = hasOverrides
-        ? `${count} non-mint approval(s) have forceful transfer overrides enabled${invariantBlocksForceful ? '' : ' and the noForcefulPostMintTransfers invariant is not set'}. Tokens can be moved without the holder's permission. Ensure this is intentional and that all parties understand the implications.`
-        : "The noForcefulPostMintTransfers invariant is not set at creation. It cannot be added later, so any future non-mint approval could enable forceful transfers that move tokens without the holder's permission.";
-      const recEn = hasOverrides
-        ? 'Remove the forceful transfer override flags from non-mint approvals, or set invariants.noForcefulPostMintTransfers = true at creation.'
-        : 'Set invariants.noForcefulPostMintTransfers = true at creation to permanently block forceful transfers on any future approval.';
+      // Branch the message on which branch of the condition fired.
+      // Severity stays `warning` (not critical) — forceful transfers
+      // are a legitimate design choice for subscription revoke,
+      // auction seller settlement, prediction market resolution, and
+      // similar patterns. We surface the finding so the builder can
+      // verify intent, not block them.
+      let detailEn: string;
+      let recEn: string;
+      let titleEn: string;
+      if (hasOverrides) {
+        const names = forcefulApprovals
+          .map((a: any) => a.approvalId || 'unnamed')
+          .slice(0, 5)
+          .join(', ');
+        const more = forcefulApprovals.length > 5 ? ` (+${forcefulApprovals.length - 5} more)` : '';
+        titleEn = 'Forceful transfer overrides enabled';
+        detailEn = `${forcefulApprovals.length} non-mint approval(s) override outgoing or incoming consent: ${names}${more}. Tokens under these approvals can be moved without the holder's permission. This is a legitimate design choice for some flows (subscription revoke, auction settlement, prediction market resolution) — verify each listed approval is intentional.`;
+        recEn = invariantBlocksForceful
+          ? 'Verify each listed approval is intentional. If any should not allow forceful transfers, remove its override flags.'
+          : 'Verify each listed approval is intentional. If you never want forceful transfers beyond what is listed, set invariants.noForcefulPostMintTransfers = true at creation to permanently block future additions.';
+      } else {
+        titleEn = 'Forceful transfers not locked at creation';
+        detailEn =
+          'The noForcefulPostMintTransfers invariant is not set. No approvals currently enable forceful transfers, but because the invariant cannot be added later, any future approval could enable them.';
+        recEn =
+          'Set invariants.noForcefulPostMintTransfers = true at creation if the collection should never permit forceful transfers. Leave unset if future design may require them.';
+      }
       out.push({
         code: 'review.ux.forceful_transfers_allowed',
-        severity: 'critical',
+        severity: 'warning',
         source: 'ux',
         category: 'approvals',
-        title: {
-          en: hasOverrides ? 'Forceful transfer overrides enabled' : 'Forceful transfers allowed — invariant not set'
-        },
+        title: { en: titleEn },
         detail: { en: detailEn },
         recommendation: { en: recEn }
       });
@@ -239,10 +255,10 @@ export const approvalsChecks: UxCheck[] = [
             en: `Amount scaling with approver-funded payments on "${name}"`
           },
           detail: {
-            en: 'This approval uses amount scaling with overrideFromWithApproverAddress. Users can multiply payment amounts drawn from the approver/escrow up to the maxScalingMultiplier. This is expected for prediction markets and credit tokens but dangerous for bids or offers.'
+            en: 'This approval uses amount scaling with overrideFromWithApproverAddress. Users can multiply payment amounts drawn from the approver/escrow up to the maxScalingMultiplier. Verify that the per-use amount under scaling makes sense for your use case.'
           },
           recommendation: {
-            en: 'Verify maxScalingMultiplier is set to a reasonable cap. Review who can initiate transfers through this approval.'
+            en: 'Verify maxScalingMultiplier is set to a reasonable cap and that the resulting per-use payout matches what the approval is meant to deliver.'
           }
         });
       }

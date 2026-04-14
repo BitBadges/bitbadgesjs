@@ -197,19 +197,6 @@ describe('UX checks — representative sample', () => {
     expect(findByCode(findings, 'review.ux.credit_token_transfers_allowed')).toBeDefined();
   });
 
-  it('flags addresslist_transfers_allowed when Address List standard + non-mint approvals', () => {
-    const findings = runUxChecks(
-      {
-        standards: ['Address List'],
-        collectionApprovals: [
-          { approvalId: 't', fromListId: 'bb1holder', approvalCriteria: {} }
-        ]
-      },
-      ctx
-    );
-    expect(findByCode(findings, 'review.ux.addresslist_transfers_allowed')).toBeDefined();
-  });
-
   it('flags reserved coin symbol collisions on alias paths', () => {
     const findings = runUxChecks(
       {
