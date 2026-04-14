@@ -18,6 +18,49 @@ import { doesCollectionFollowCrowdfundProtocol } from '../crowdfunds.js';
 import { doesCollectionFollowAuctionProtocol } from '../auctions.js';
 import { doesCollectionFollowProductProtocol } from '../products.js';
 
+interface ProtocolCopy {
+  title: string;
+  detail: string;
+  recommendation: string;
+}
+
+const PROTOCOL_COPY: Record<string, ProtocolCopy> = {
+  subscription: {
+    title: 'Collection does not follow the subscription protocol',
+    detail:
+      'This collection has the Subscriptions standard but does not meet all the requirements for a valid subscription. It may not work correctly with subscription features like auto-renewal and recurring payments.',
+    recommendation: 'Fix the subscription setup to follow the subscription protocol requirements'
+  },
+  quest: {
+    title: 'Collection does not follow the quest protocol',
+    detail:
+      'This collection has the Quests standard but does not meet all the requirements for a valid quest collection.',
+    recommendation: 'Fix the quest setup to follow the quest protocol requirements'
+  },
+  bounty: {
+    title: 'Collection does not follow the bounty protocol',
+    detail: 'This collection has the Bounty standard but does not meet all the requirements for a valid bounty.',
+    recommendation: 'Fix the bounty setup to follow the bounty protocol requirements'
+  },
+  crowdfund: {
+    title: 'Collection does not follow the crowdfund protocol',
+    detail:
+      'This collection has the Crowdfund standard but does not meet all the requirements for a valid crowdfund.',
+    recommendation: 'Fix the crowdfund setup to follow the crowdfund protocol requirements'
+  },
+  auction: {
+    title: 'Collection does not follow the auction protocol',
+    detail: 'This collection has the Auction standard but does not meet all the requirements for a valid auction.',
+    recommendation: 'Fix the auction setup to follow the auction protocol requirements'
+  },
+  product_catalog: {
+    title: 'Collection does not follow the product catalog protocol',
+    detail:
+      'This collection has the Products standard but does not meet all the requirements for a valid product catalog.',
+    recommendation: 'Fix the product catalog setup to follow the product catalog protocol requirements'
+  }
+};
+
 export const skillChecks: UxCheck[] = [
   // NFT without maxSupplyPerId = 1. Gated on the NFTs standard (not the
   // skill) so ctx-less callers like the indexer don't misfire on fungible
@@ -33,9 +76,15 @@ export const skillChecks: UxCheck[] = [
         severity: 'warning',
         source: 'ux',
         category: 'skills',
-        localeKey: 'review_nft_no_supply_cap',
-        messageEn: 'NFT collection has no maxSupplyPerId cap — multiple copies of the same token can be minted.',
-        recommendationEn: 'Set invariants.maxSupplyPerId to "1" for true NFTs.'
+        title: {
+          en: 'NFT without per-token supply cap'
+        },
+        detail: {
+          en: 'The per-token supply cap is not set to 1. Multiple copies of the same NFT token ID can be minted.'
+        },
+        recommendation: {
+          en: 'Set the per-token supply cap to 1 so each NFT token ID is unique'
+        }
       });
     }
     return out;
@@ -60,10 +109,15 @@ export const skillChecks: UxCheck[] = [
         severity: 'warning',
         source: 'ux',
         category: 'skills',
-        localeKey: 'review_fungible_multiple_ids',
-        params: { count: totalIds },
-        messageEn: `Fungible token with ${totalIds} valid token IDs — fungibles typically use a single ID.`,
-        recommendationEn: 'Collapse validTokenIds to a single range of 1 ID.'
+        title: {
+          en: 'Fungible token has multiple token IDs'
+        },
+        detail: {
+          en: `Expected a single token ID for a fungible token, but found ${totalIds} IDs. Fungible tokens typically use only token ID 1.`
+        },
+        recommendation: {
+          en: 'Change valid token IDs to only include token ID 1'
+        }
       });
     }
     return out;
@@ -89,15 +143,15 @@ export const skillChecks: UxCheck[] = [
       if (!standards.includes(standard)) continue;
       try {
         if (!check(value)) {
+          const copy = PROTOCOL_COPY[key];
           out.push({
             code: `review.ux.protocol_mismatch_${key}`,
             severity: 'critical',
             source: 'ux',
             category: 'skills',
-            localeKey: `review_${key}_protocol`,
-            params: { protocol: standard },
-            messageEn: `Collection does not follow the ${standard} protocol shape required by the selected skill or standard.`,
-            recommendationEn: `Rebuild the collection using the ${standard} template, or remove the skill/standard.`
+            title: { en: copy.title },
+            detail: { en: copy.detail },
+            recommendation: { en: copy.recommendation }
           });
         }
       } catch {
@@ -124,9 +178,15 @@ export const skillChecks: UxCheck[] = [
         severity: 'warning',
         source: 'ux',
         category: 'skills',
-        localeKey: 'review_no_mint_approvals',
-        messageEn: 'No Mint approvals are present — nothing can be minted.',
-        recommendationEn: 'Add an approval with fromListId = Mint, or use a smart-token backed minting flow.'
+        title: {
+          en: 'No mint approvals configured'
+        },
+        detail: {
+          en: 'The collection has transfer approvals but no mint approvals. No tokens can be created.'
+        },
+        recommendation: {
+          en: 'Add a mint approval so tokens can be created'
+        }
       });
     }
     return out;
@@ -148,9 +208,15 @@ export const skillChecks: UxCheck[] = [
         severity: 'warning',
         source: 'ux',
         category: 'skills',
-        localeKey: 'review_backed_path_multi_token',
-        messageEn: 'Backed path smart tokens must have exactly 1 token ID.',
-        recommendationEn: 'Set validTokenIds to a single range of 1.'
+        title: {
+          en: 'Smart token has multiple token IDs'
+        },
+        detail: {
+          en: 'IBC-backed smart tokens must have exactly one token ID. Multiple token IDs are not supported for backed collections.'
+        },
+        recommendation: {
+          en: 'Set valid token IDs to exactly one token (1-1)'
+        }
       });
     }
     return out;
@@ -168,10 +234,15 @@ export const skillChecks: UxCheck[] = [
       severity: 'warning',
       source: 'ux',
       category: 'skills',
-      localeKey: 'review_credit_transfers',
-      params: { count: nonMint.length },
-      messageEn: `Credit token has ${nonMint.length} non-mint transfer approval(s) — credit tokens are typically non-transferable.`,
-      recommendationEn: 'Remove non-mint transfer approvals so credits can only be incremented, not sent between users.'
+      title: {
+        en: 'Credit token allows transfers'
+      },
+      detail: {
+        en: 'Credit tokens are typically non-transferable (increment-only). This collection has non-mint transfer approvals which would allow credits to be sent between users.'
+      },
+      recommendation: {
+        en: 'Remove the non-mint transfer approvals to make this a non-transferable credit token'
+      }
     });
     return out;
   },
@@ -188,10 +259,15 @@ export const skillChecks: UxCheck[] = [
       severity: 'warning',
       source: 'ux',
       category: 'skills',
-      localeKey: 'review_addresslist_transfers',
-      params: { count: nonMint.length },
-      messageEn: `Address list token has ${nonMint.length} non-mint transfer approval(s) — membership tokens are typically non-transferable.`,
-      recommendationEn: 'Remove transfer approvals so membership is admin-managed only.'
+      title: {
+        en: 'Address list allows token transfers'
+      },
+      detail: {
+        en: 'Address list tokens are typically non-transferable (membership is managed by the admin). Transfer approvals exist which would allow users to send their membership token.'
+      },
+      recommendation: {
+        en: 'Remove the transfer approvals to make address list tokens non-transferable'
+      }
     });
     return out;
   },
@@ -208,9 +284,15 @@ export const skillChecks: UxCheck[] = [
         severity: 'critical',
         source: 'ux',
         category: 'skills',
-        localeKey: 'review_lp_no_alias',
-        messageEn: 'Liquidity Pools standard is set but the collection has no alias paths.',
-        recommendationEn: 'Add at least one alias path to represent the pool LP denomination.'
+        title: {
+          en: 'Liquidity Pools standard but no alias paths'
+        },
+        detail: {
+          en: 'This collection has the Liquidity Pools standard but no alias paths configured. Alias paths are required for DEX trading denomination display.'
+        },
+        recommendation: {
+          en: 'Add at least one alias path for the trading denomination'
+        }
       });
     }
     return out;

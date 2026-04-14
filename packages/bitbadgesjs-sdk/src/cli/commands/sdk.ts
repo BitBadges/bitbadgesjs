@@ -42,8 +42,9 @@ sdkCommand
       for (const f of result.findings) byLevel[f.severity].push(f);
       for (const level of ['critical', 'warning', 'info'] as const) {
         for (const f of byLevel[level]) {
-          lines.push(`[${level.toUpperCase()}] ${f.code} — ${f.messageEn}`);
-          if (f.recommendationEn) lines.push(`  -> ${f.recommendationEn}`);
+          lines.push(`[${level.toUpperCase()}] ${f.code} — ${f.title.en}`);
+          if (f.detail.en) lines.push(`  ${f.detail.en}`);
+          if (f.recommendation.en) lines.push(`  -> ${f.recommendation.en}`);
         }
       }
       lines.push('');

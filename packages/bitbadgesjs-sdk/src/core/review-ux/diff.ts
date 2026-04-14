@@ -32,15 +32,21 @@ export const diffChecks: UxCheck[] = [
     const deleted = onChainApprovals.filter((a: any) => a.approvalId && !proposedIds.has(a.approvalId));
     if (deleted.length > 0) {
       const names = deleted.map((a: any) => a.approvalId).slice(0, 3).join(', ');
+      const count = deleted.length;
       out.push({
         code: 'review.ux.diff_deleted_approvals',
         severity: 'critical',
         source: 'ux',
         category: 'diff',
-        localeKey: 'review_deleted_approvals',
-        params: { names, count: deleted.length },
-        messageEn: `${deleted.length} on-chain approval(s) would be deleted: ${names}.`,
-        recommendationEn: 'Re-include any approvals that should persist, or confirm the deletion is intentional.'
+        title: {
+          en: 'Existing approval rules removed'
+        },
+        detail: {
+          en: `${count} existing approval rule(s) will be removed: ${names}. All accumulated state (claim counts, transfer limits) for these rules will be lost.`
+        },
+        recommendation: {
+          en: 'If this is unintentional, add the removed approval rules back with their original IDs'
+        }
       });
     }
 
@@ -66,15 +72,22 @@ export const diffChecks: UxCheck[] = [
       if (ech && ech !== pch) changes.push('challenge tracker');
 
       if (changes.length > 0) {
+        const name = proposed.approvalId;
+        const trackers = changes.join(', ');
         out.push({
           code: 'review.ux.diff_tracker_id_changed',
           severity: 'critical',
           source: 'ux',
           category: 'diff',
-          localeKey: 'review_tracker_id_changed',
-          params: { name: proposed.approvalId, trackers: changes.join(', ') },
-          messageEn: `Approval "${proposed.approvalId}" changed tracker IDs (${changes.join(', ')}) — on-chain counters will reset.`,
-          recommendationEn: 'Keep the existing tracker IDs unless a full reset is intentional.'
+          title: {
+            en: `Tracker ID changed on "${name}"`
+          },
+          detail: {
+            en: `The ${trackers} ID was changed on an existing approval. This loses all accumulated state (used claims, transfer counts, amount tracking). If you want a fresh state, create a new approval instead.`
+          },
+          recommendation: {
+            en: `Restore the original tracker IDs on "${name}" to preserve on-chain state`
+          }
         });
       }
     }
@@ -103,10 +116,15 @@ export const diffChecks: UxCheck[] = [
             severity: 'warning',
             source: 'ux',
             category: 'diff',
-            localeKey: 'review_claim_plugins_deleted',
-            params: { name: claimLabel, plugins: names },
-            messageEn: `Claim "${claimLabel}" deletes plugin(s): ${names}.`,
-            recommendationEn: 'Confirm the deleted plugins are not required for existing claim codes.'
+            title: {
+              en: `Claim plugins removed on "${claimLabel}"`
+            },
+            detail: {
+              en: `The following claim plugins were removed: ${names}. This may invalidate existing claim flows and affect users who have already started claiming.`
+            },
+            recommendation: {
+              en: 'Verify that removing these plugins is intentional and won\'t break existing claim flows'
+            }
           });
         }
 
@@ -124,10 +142,15 @@ export const diffChecks: UxCheck[] = [
               severity: 'warning',
               source: 'ux',
               category: 'diff',
-              localeKey: 'review_claim_plugin_params_changed',
-              params: { name: claimLabel, plugin: pp.pluginId },
-              messageEn: `Claim "${claimLabel}" plugin "${pp.pluginId}" params changed.`,
-              recommendationEn: 'Confirm existing users are not affected by the parameter change.'
+              title: {
+                en: `Claim plugin "${pp.pluginId}" params changed on "${claimLabel}"`
+              },
+              detail: {
+                en: 'The parameters for this claim plugin were modified. This may affect existing claim state and could cause mismatches between off-chain claims and on-chain limits.'
+              },
+              recommendation: {
+                en: 'Verify the parameter changes are intentional and won\'t cause state mismatches with on-chain counters'
+              }
             });
           }
         }

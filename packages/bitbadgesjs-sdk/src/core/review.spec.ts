@@ -52,7 +52,7 @@ describe('adapters', () => {
     });
     expect(f.code).toMatch(/^review\.audit\./);
     expect(f.source).toBe('audit');
-    expect(f.recommendationEn).toBe('lock it');
+    expect(f.recommendation.en).toBe('lock it');
   });
 
   it('fromStandardsFinding marks source=standards and severity=critical', () => {
@@ -237,12 +237,16 @@ describe('reviewCollection — snapshot across sources', () => {
     expect(result.summary.verdict).toBe('fail');
     // Must include at least one ux finding
     expect(result.findings.some((f) => f.source === 'ux')).toBe(true);
-    // Every finding must have a stable code and english message
+    // Every finding must have a stable code and the three required localized strings
     for (const f of result.findings) {
       expect(typeof f.code).toBe('string');
       expect(f.code).toMatch(/^review\.(audit|standards|ux)\./);
-      expect(typeof f.messageEn).toBe('string');
-      expect(f.messageEn.length).toBeGreaterThan(0);
+      expect(typeof f.title.en).toBe('string');
+      expect(f.title.en.length).toBeGreaterThan(0);
+      expect(typeof f.detail.en).toBe('string');
+      expect(f.detail.en.length).toBeGreaterThan(0);
+      expect(typeof f.recommendation.en).toBe('string');
+      expect(f.recommendation.en.length).toBeGreaterThan(0);
     }
   });
 });

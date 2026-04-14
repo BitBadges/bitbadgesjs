@@ -27,15 +27,21 @@ export const metadataChecks: UxCheck[] = [
       ([key, meta]) => !key.includes('METADATA_APPROVAL_') && isPlaceholderImage(meta?.image)
     );
     if (placeholderImageEntries.length > 0) {
+      const count = placeholderImageEntries.length;
       out.push({
         code: 'review.ux.placeholder_images',
         severity: 'info',
         source: 'ux',
         category: 'metadata',
-        localeKey: 'review_placeholder_images',
-        params: { count: placeholderImageEntries.length },
-        messageEn: `${placeholderImageEntries.length} metadata entrie(s) use placeholder images.`,
-        recommendationEn: 'Upload real images before publishing.'
+        title: {
+          en: 'Metadata uses placeholder or default images'
+        },
+        detail: {
+          en: `${count} metadata entries use placeholder images or the default BitBadges logo. Consider uploading custom images for a more polished look.`
+        },
+        recommendation: {
+          en: 'Upload custom images for your collection and token metadata'
+        }
       });
     }
     return out;
@@ -66,10 +72,15 @@ export const metadataChecks: UxCheck[] = [
         severity: 'info',
         source: 'ux',
         category: 'metadata',
-        localeKey: 'review_unnamed_approvals',
-        params: { names, count: unnamed.length },
-        messageEn: `${unnamed.length} approval(s) have no display name: ${names}.`,
-        recommendationEn: 'Add a name via approval.details or the approval metadata URI.'
+        title: {
+          en: 'Some approval rules are missing names'
+        },
+        detail: {
+          en: `The following approval rules don't have a display name or description: ${names}. Adding names helps users understand what each rule does.`
+        },
+        recommendation: {
+          en: 'Add descriptive names and descriptions to all approval rules'
+        }
       });
     }
     return out;
@@ -101,16 +112,21 @@ export const metadataChecks: UxCheck[] = [
       return isMissingImage(pathImage) && isMissingImage(unitImage);
     });
     if (missing.length > 0) {
+      const count = missing.length;
       out.push({
         code: 'review.ux.alias_paths_missing_images',
         severity: 'info',
         source: 'ux',
         category: 'metadata',
-        localeKey: 'review_alias_no_images',
-        params: { count: missing.length },
-        messageEn: 'Alias paths missing display images',
-        detailEn: `${missing.length} alias path(s) are missing a metadata image for the display unit. This image is shown when users view the token in wallets and exchanges.`,
-        recommendationEn: 'Add metadata images to all alias path display units'
+        title: {
+          en: 'Alias paths missing display images'
+        },
+        detail: {
+          en: `${count} alias paths are missing a metadata image for the display unit. This image is shown when users view the token in wallets and exchanges.`
+        },
+        recommendation: {
+          en: 'Add metadata images to all alias path display units'
+        }
       });
     }
     return out;

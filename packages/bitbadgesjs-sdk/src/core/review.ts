@@ -8,9 +8,10 @@
  *   2. `verifyStandardsCompliance()` — protocol conformance (src/core/verify-standards.ts)
  *   3. `runUxChecks()` — the ported frontend UX checks (src/core/review-ux/*)
  *
- * All three are lifted into a single {@link Finding} shape with a stable
- * machine `code` (public API) and a hardcoded English message. Callers that
- * want localization can map `code` → `t(code)` and fall back to `messageEn`.
+ * All three are normalized into a single {@link Finding} shape with a
+ * stable machine `code`, a severity, and three required localized strings
+ * (`title`, `detail`, `recommendation`). Localization lives inline in the
+ * finding — callers never need to look up locale keys externally.
  *
  * The legacy `auditCollection` and `verifyStandardsCompliance` functions are
  * untouched — they keep working identically for direct callers.
@@ -19,10 +20,10 @@
 import { auditCollection, type AuditFinding, type AuditSeverity } from './audit.js';
 import { verifyStandardsCompliance, type StandardViolation } from './verify-standards.js';
 import { runUxChecks } from './review-ux/index.js';
-import type { Finding, FindingAudience, FindingSource, ReviewContext, ReviewResult, Severity } from './review-types.js';
+import type { Finding, FindingSource, Localized, ReviewContext, ReviewResult, Severity } from './review-types.js';
 
 // Re-export the types so `reviewCollection` + types are importable from one entry.
-export type { Finding, FindingAudience, FindingSource, ReviewContext, ReviewResult, Severity } from './review-types.js';
+export type { Finding, FindingSource, Localized, ReviewContext, ReviewResult, Severity } from './review-types.js';
 
 // ---------------------------------------------------------------------------
 // Normalization helpers
@@ -43,6 +44,15 @@ export function extractCollectionValue(input: unknown): any {
   }
   if (obj.value && typeof obj.value === 'object') return obj.value;
   return obj;
+}
+
+/**
+ * Wrap a plain English string as a `Localized` bag. Used by adapters
+ * that inherit legacy single-language content from audit / standards
+ * internal shapes.
+ */
+function en(s: string): Localized {
+  return { en: s };
 }
 
 // ---------------------------------------------------------------------------
@@ -67,35 +77,24 @@ export function fromAuditFinding(f: AuditFinding): Finding {
     code: 'review.audit.' + codeSuffix,
     severity: mapAuditSeverity(f.severity),
     source: 'audit',
-    // Audit findings are consumed by agents via `review_collection` /
-    // `validate_transaction` — the frontend sidebar filters them out
-    // by default so humans don't see the same issues the agent
-    // already handled during construction.
-    audience: 'agent',
     category: f.category,
-    // Title and detail kept SEPARATE — the frontend adapter used to
-    // render `messageEn` in both the title and detail slots, which
-    // produced visible duplicate lines when the legacy joined-format
-    // ("title — detail") was returned. Splitting them lets the adapter
-    // populate the title and detail slots independently.
-    messageEn: f.title,
-    detailEn: f.detail,
-    recommendationEn: f.recommendation
+    title: en(f.title),
+    detail: en(f.detail),
+    recommendation: en(f.recommendation || 'No action required — surfaced for visibility.')
   };
 }
 
 export function fromStandardsFinding(v: StandardViolation): Finding {
   const codeSuffix = snakeCase(v.standard || 'standard') + '.' + snakeCase(v.field || 'field');
+  const title = `${v.standard} standard violation: ${v.field}`;
   return {
     code: 'review.standards.' + codeSuffix,
     severity: 'critical',
     source: 'standards',
-    // Standards violations block broadcast so both agent and human
-    // callers need to see them.
-    audience: 'both',
     category: 'standards:' + v.standard,
-    messageEn: v.message,
-    recommendationEn: v.fix
+    title: en(title),
+    detail: en(v.message),
+    recommendation: en(v.fix || 'No action required — surfaced for visibility.')
   };
 }
 
@@ -146,24 +145,9 @@ export function reviewCollection(collection: unknown, context?: ReviewContext): 
     deduped.push(f);
   }
 
-  // Audience filter — applied after dedup so both sources get a fair
-  // chance at winning the first-occurrence race, then we drop what the
-  // caller doesn't care about. `'both'` findings always pass.
-  // Fill in the default audience per source for any finding that didn't
-  // set one explicitly. `audit` → agent, `standards` → both, `ux` → human.
-  const withAudience: Finding[] = deduped.map((f) =>
-    f.audience
-      ? f
-      : {
-          ...f,
-          audience: f.source === 'audit' ? 'agent' : f.source === 'standards' ? 'both' : 'human'
-        }
-  );
-
-  const audienceFilter = ctx.audienceFilter;
-  const filtered = audienceFilter
-    ? withAudience.filter((f) => f.audience === audienceFilter || f.audience === 'both')
-    : withAudience;
+  // Drop agent-only findings when the caller opted in via hideAgentOnly.
+  // Frontend humans set this. CLI / indexer / MCP leave it unset.
+  const filtered = ctx.hideAgentOnly ? deduped.filter((f) => !f.agentOnly) : deduped;
 
   let critical = 0;
   let warning = 0;

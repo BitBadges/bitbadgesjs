@@ -30,10 +30,15 @@ export const permissionsChecks: UxCheck[] = [
           severity: 'warning',
           source: 'ux',
           category: 'permissions',
-          localeKey: 'review_permanently_permitted',
-          params: { permission: permName },
-          messageEn: `Permission "${permName}" is permanently permitted forever — it can never be forbidden.`,
-          recommendationEn: 'Only lock permissions you are certain about. Consider leaving them neutral instead.'
+          title: {
+            en: `Permission "${permName}" is permanently permitted`
+          },
+          detail: {
+            en: 'This permission can never be locked or frozen in the future. Use neutral (empty) permissions instead to preserve the flexibility to lock it later.'
+          },
+          recommendation: {
+            en: 'Change the permission to neutral (empty array) instead of permanently permitted'
+          }
         });
       }
     }
@@ -57,11 +62,15 @@ export const permissionsChecks: UxCheck[] = [
         severity: 'warning',
         source: 'ux',
         category: 'permissions',
-        localeKey: 'review_backed_path_mint_not_locked',
-        messageEn:
-          'Backed path is set but the canUpdateCollectionApprovals permission is not permanently forbidden for the Mint list.',
-        recommendationEn:
-          'Add a canUpdateCollectionApprovals entry with fromListId = Mint and permanentlyForbiddenTimes = [1, MAX_UINT].'
+        title: {
+          en: 'Backed path but Mint permissions not locked'
+        },
+        detail: {
+          en: 'This collection uses IBC-backed minting but the permission to update Mint approvals is not permanently locked. The manager could add unauthorized mint approvals later.'
+        },
+        recommendation: {
+          en: 'Lock the permission to update Mint address approvals'
+        }
       });
     }
     return out;

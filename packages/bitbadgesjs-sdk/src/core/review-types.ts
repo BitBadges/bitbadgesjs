@@ -8,82 +8,68 @@ export type Severity = 'critical' | 'warning' | 'info';
 export type FindingSource = 'audit' | 'standards' | 'ux';
 
 /**
- * Who is this finding meant for?
+ * Localized string bag. `en` is always populated. Additional language
+ * codes (e.g. `es`) are optional — consumers should fall back to `en`
+ * when the user's preferred language is missing.
  *
- * - `'agent'`  — produced by tooling that agents already consume
- *                (`review_collection`, `validate_transaction`). The
- *                frontend review sidebar filters these out because the
- *                human user doesn't need to see the same issues the
- *                agent already handled during construction.
- * - `'human'`  — surfaced in the frontend review sidebar. These come
- *                from the ported UX checks in `review-ux/*.ts` that the
- *                frontend used to run inline pre-port.
- * - `'both'`   — shown to both audiences. Standards violations default
- *                to this because they block broadcast and are relevant
- *                for both agents and humans.
+ * Strings are pre-interpolated at finding-creation time. There is no
+ * runtime template substitution — if a check needs to inject a name or
+ * count, it builds the string inline via template literals.
  */
-export type FindingAudience = 'agent' | 'human' | 'both';
+export interface Localized {
+  en: string;
+  [lang: string]: string | undefined;
+}
 
+/**
+ * A single review finding. All three text fields (`title`, `detail`,
+ * `recommendation`) are required. Info-severity items whose recommendation
+ * is a no-op should still populate it with something like
+ * "No action required — surfaced for visibility."
+ */
 export interface Finding {
+  /** Stable machine identifier, e.g. `review.ux.forceful_transfers_allowed`. */
   code: string;
   severity: Severity;
   source: FindingSource;
-  /**
-   * Target audience for this finding. Optional on the raw emit; the
-   * `reviewCollection` aggregator fills in a default per-source
-   * (`audit` → `'agent'`, `standards` → `'both'`, `ux` → `'human'`) so
-   * individual checks don't have to set it. A check CAN override by
-   * setting an explicit audience at emit time.
-   */
-  audience?: FindingAudience;
+  /** Free-form grouping label (e.g. `approvals`, `metadata`, `diff`). */
   category: string;
-  params?: Record<string, string | number | boolean>;
-  messageEn: string;
+  /** Short label shown as the finding's headline. */
+  title: Localized;
+  /** Full explanation — the "why it matters" paragraph. */
+  detail: Localized;
+  /** How to fix it. Always populated. */
+  recommendation: Localized;
   /**
-   * Optional second-line detail. Frontend adapters render this in the
-   * `detail` slot below `messageEn`. Audit findings populate it from the
-   * legacy `f.detail` field; UX checks generally leave it empty (their
-   * `messageEn` is already self-contained).
+   * Agent-only escape hatch. When `true`, the finding is hidden from
+   * human consumers (frontend sidebar) but surfaced to agents
+   * (CLI / indexer / MCP). Default is `false` / absent — everyone sees
+   * the finding. Use sparingly for items that are genuinely
+   * agent-internal (e.g. meta-level tool feedback).
    */
-  detailEn?: string;
-  recommendationEn?: string;
-  /**
-   * Optional stable key into the frontend locale file. When set, frontend
-   * adapters should prefer `t(localeKey + '_title' / '_detail' / '_fix')`
-   * over `messageEn` / `recommendationEn`. Format: `review_<snake_case>`.
-   * Used for legacy parity with the pre-SDK frontend review items.
-   */
-  localeKey?: string;
-  /**
-   * Escape hatch when the three legacy locale keys for a finding don't share
-   * a common `_title` / `_detail` / `_fix` base (e.g. the old Forceful /
-   * Claims items which mix custom keys). If any of these is set, the adapter
-   * uses it directly and ignores the derived `localeKey` variant for that
-   * slot. `messageEn` / `recommendationEn` remain the final fallback.
-   */
-  localeKeyTitle?: string;
-  localeKeyDetail?: string;
-  localeKeyFix?: string;
+  agentOnly?: boolean;
 }
 
 export interface ReviewContext {
   /**
    * Prior on-chain collection state. Required for diff checks
    * (deleted approvals, tracker-id changes, claim plugin diffs) and
-   * for update-only suppressions (e.g., auto_approve_disabled_on_mintable
-   * skips on updates because defaultBalances is immutable post-create).
-   * Everything else runs purely on the proposed collection's structure.
+   * for update-only suppressions. Everything else runs purely on the
+   * proposed collection's structure.
    */
   onChainCollection?: unknown;
+  /**
+   * Skip whole finding families by source. Frontend humans can pass
+   * `['audit']` to hide design-noise, but the default is to show
+   * everything. Agents typically omit this entirely.
+   */
   skipSources?: FindingSource[];
   /**
-   * Filter findings by audience after aggregation. When set, any
-   * finding whose audience doesn't match is dropped from the result.
-   * The frontend review sidebar passes `'human'` to hide
-   * agent-oriented audit output; MCP/CLI callers leave this unset so
-   * they see everything.
+   * When `true`, drop findings tagged `agentOnly: true`. Frontend
+   * human consumers set this. CLI / indexer / MCP callers leave it
+   * unset (agents see everything).
    */
-  audienceFilter?: FindingAudience;
+  hideAgentOnly?: boolean;
 }
 
 export interface ReviewResult {

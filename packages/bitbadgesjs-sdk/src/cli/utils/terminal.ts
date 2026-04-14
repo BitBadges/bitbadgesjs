@@ -87,8 +87,9 @@ export function renderReview(
     findings: Array<{
       code: string;
       severity: 'critical' | 'warning' | 'info';
-      messageEn: string;
-      recommendationEn?: string;
+      title: { en: string };
+      detail: { en: string };
+      recommendation: { en: string };
     }>;
     summary: { critical: number; warning: number; info: number; verdict: string };
   },
@@ -124,11 +125,16 @@ export function renderReview(
         first = false;
         const badge = `${sigil[level]} ${labelFor[level]}`;
         lines.push(`  ${c(colorFor[level], c('bold', badge))}  ${c('dim', f.code)}`);
-        for (const textLine of wrap(f.messageEn, width - 6)) {
-          lines.push(`      ${textLine}`);
+        for (const textLine of wrap(f.title.en, width - 6)) {
+          lines.push(`      ${c('bold', textLine)}`);
         }
-        if (f.recommendationEn) {
-          for (const textLine of wrap(f.recommendationEn, width - 8)) {
+        if (f.detail.en) {
+          for (const textLine of wrap(f.detail.en, width - 6)) {
+            lines.push(`      ${textLine}`);
+          }
+        }
+        if (f.recommendation.en) {
+          for (const textLine of wrap(f.recommendation.en, width - 8)) {
             lines.push(`      ${c('gray', '→')} ${textLine}`);
           }
         }

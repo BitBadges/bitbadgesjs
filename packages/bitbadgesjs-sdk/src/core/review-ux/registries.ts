@@ -34,24 +34,21 @@ export const registriesChecks: UxCheck[] = [
             .map((u: any) => u.symbol)
         )
         .slice(0, 3);
+      const symbolsJoined = symbols.join('", "');
       out.push({
         code: 'review.ux.alias_symbol_reserved_collision',
         severity: 'warning',
         source: 'ux',
         category: 'registries',
-        localeKey: 'review_alias_conflict',
-        // Legacy locale string uses `"{{symbols}}"` with symbols pre-joined by
-        // `", "` (note the inner quotes), plus a `{{first}}` for the singular
-        // variant suggesting e.g. `"wFOO"`. `count` drives i18next plural
-        // selection between `_detail_one`/`_detail_other` and
-        // `_fix_one`/`_fix_other`.
-        params: {
-          symbols: symbols.join('", "'),
-          first: symbols[0] || '',
-          count: symbols.length
+        title: {
+          en: 'Alias symbol conflicts with an existing coin'
         },
-        messageEn: `Alias path symbol(s) "${symbols.join(', ')}" collide with registered coin symbols.`,
-        recommendationEn: 'Rename the alias path symbol(s) to avoid confusion with existing tokens.'
+        detail: {
+          en: `The symbols "${symbolsJoined}" match existing registered coins on the network. This can cause confusion. Use unique symbols with a "w" prefix instead.`
+        },
+        recommendation: {
+          en: 'Rename the conflicting alias symbols to avoid confusion with existing coins (e.g., prefix with "w")'
+        }
       });
     }
     return out;

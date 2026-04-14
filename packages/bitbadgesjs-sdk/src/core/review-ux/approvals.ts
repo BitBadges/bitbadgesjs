@@ -21,10 +21,15 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'critical',
           source: 'ux',
           category: 'approvals',
-          localeKey: 'review_all_includes_mint',
-          params: { name },
-          messageEn: `Approval "${name}" uses fromListId "All", which accidentally includes "Mint".`,
-          recommendationEn: 'Use a specific non-mint list or explicitly exclude the Mint address.'
+          title: {
+            en: `"${name}" uses fromListId "All" which includes Mint`
+          },
+          detail: {
+            en: 'The "All" address list includes the Mint address. This means this approval accidentally allows minting new tokens. Use "!Mint" instead for post-mint transfer approvals.'
+          },
+          recommendation: {
+            en: 'Change fromListId from "All" to "!Mint" to exclude the Mint address'
+          }
         });
       }
     }
@@ -43,10 +48,15 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'critical',
           source: 'ux',
           category: 'approvals',
-          localeKey: 'review_mint_approval_will_fail',
-          params: { name },
-          messageEn: `Mint approval "${name}" is missing overridesFromOutgoingApprovals — minting will fail on-chain.`,
-          recommendationEn: `Set approvalCriteria.overridesFromOutgoingApprovals = true on "${name}".`
+          title: {
+            en: `Mint approval "${name}" will fail`
+          },
+          detail: {
+            en: 'Mint approvals must have the outgoing override enabled. Without this, the Mint address cannot send tokens.'
+          },
+          recommendation: {
+            en: `Enable the outgoing override on mint approval "${name}"`
+          }
         });
       }
     }
@@ -72,17 +82,21 @@ export const approvalsChecks: UxCheck[] = [
     //   push 1 — hasOverrides || !invariantBlocksForceful
     //   push 2 — hasOverrides && invariantBlocksForceful (mismatch)
     if (hasOverrides || !invariantBlocksForceful) {
+      const count = forcefulApprovals.length;
       out.push({
         code: 'review.ux.forceful_transfers_allowed',
         severity: 'critical',
         source: 'ux',
         category: 'approvals',
-        localeKeyTitle: 'Forceful_Override_Title',
-        localeKeyDetail: 'Forceful_Override_Warning_With_Count',
-        localeKeyFix: 'review_forceful_override_fix',
-        params: { count: forcefulApprovals.length },
-        messageEn: `Forceful transfers are allowed (${forcefulApprovals.length} override approval(s) present or invariant unset).`,
-        recommendationEn: 'Set invariants.noForcefulPostMintTransfers and remove approval overrides unless intentional.'
+        title: {
+          en: 'Forceful transfer overrides enabled'
+        },
+        detail: {
+          en: `Currently ${count} non-mint approval(s) have forceful transfer overrides enabled, and/or the noForcefulPostMintTransfers invariant is not set. This means tokens can be moved without the holder's permission. Ensure this is intentional and that all parties understand the implications.`
+        },
+        recommendation: {
+          en: 'Remove the forceful transfer override flags from non-mint approvals'
+        }
       });
     }
 
@@ -92,10 +106,15 @@ export const approvalsChecks: UxCheck[] = [
         severity: 'critical',
         source: 'ux',
         category: 'approvals',
-        localeKey: 'review_forceful_mismatch',
-        messageEn:
-          'Invariant blocks forceful transfers but approvals still set overridesFromOutgoingApprovals/overridesToIncomingApprovals — the transaction will fail on-chain.',
-        recommendationEn: 'Either unset the invariant or remove the override flags from the listed approvals.'
+        title: {
+          en: 'Forceful transfer mismatch — overrides will fail'
+        },
+        detail: {
+          en: 'Non-mint approvals have forceful overrides enabled, but the noForcefulPostMintTransfers invariant is also set. These overrides will be rejected on-chain. Either remove the overrides from the approvals or disable the invariant.'
+        },
+        recommendation: {
+          en: 'Remove the override flags from non-mint approvals, or disable the noForcefulPostMintTransfers invariant'
+        }
       });
     }
 
@@ -112,9 +131,15 @@ export const approvalsChecks: UxCheck[] = [
         severity: 'info',
         source: 'ux',
         category: 'approvals',
-        localeKey: 'review_backing_override',
-        messageEn: 'Backed-minting approvals set overrides — this is expected for smart-token flows.',
-        recommendationEn: 'No action needed unless the backing flow is unintentional.'
+        title: {
+          en: 'Backing approval has unnecessary overrides'
+        },
+        detail: {
+          en: 'Backing and unbacking approvals have transfer overrides enabled, but these are irrelevant for protocol-controlled backing addresses. It is recommended to remove them for clarity.'
+        },
+        recommendation: {
+          en: 'Remove the transfer override flags from the backing and unbacking approvals'
+        }
       });
     }
     return out;
@@ -138,10 +163,15 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'critical',
           source: 'ux',
           category: 'approvals',
-          localeKey: 'review_no_auto_approve',
-          messageEn:
-            'Mint approvals exist but defaultBalances.autoApproveAllIncomingTransfers is not true — recipients will not receive minted tokens.',
-          recommendationEn: 'Set defaultBalances.autoApproveAllIncomingTransfers = true.'
+          title: {
+            en: 'Incoming transfers not auto-approved'
+          },
+          detail: {
+            en: 'This collection has mint approvals but incoming transfers are not auto-approved. Recipients must opt-in before they can receive minted tokens, which means minting will silently fail for most users.'
+          },
+          recommendation: {
+            en: 'Enable auto-approve for all incoming transfers in the default balance settings'
+          }
         });
       }
     }
@@ -169,10 +199,15 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'critical',
           source: 'ux',
           category: 'approvals',
-          localeKey: 'review_infinite_drain',
-          params: { name },
-          messageEn: `Approval "${name}" pulls funds from the approver via overrideFromWithApproverAddress with no transfer limits — infinite drain risk.`,
-          recommendationEn: 'Set an overallMaxNumTransfers or per-address cap on this approval.'
+          title: {
+            en: `Unlimited fund drain risk on "${name}"`
+          },
+          detail: {
+            en: 'This approval pays out from the escrow/approver on every transfer but has no transfer limit set. Anyone matching the approval can drain funds indefinitely.'
+          },
+          recommendation: {
+            en: 'Set a maximum number of transfers to cap the total payout'
+          }
         });
       }
     }
@@ -194,10 +229,15 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'warning',
           source: 'ux',
           category: 'approvals',
-          localeKey: 'review_scaling_approver',
-          params: { name },
-          messageEn: `Approval "${name}" combines amount scaling with approver-funded coin transfers — payouts may multiply unexpectedly.`,
-          recommendationEn: 'Disable allowAmountScaling or use a non-approver funding address.'
+          title: {
+            en: `Amount scaling with approver-funded payments on "${name}"`
+          },
+          detail: {
+            en: 'This approval uses amount scaling with overrideFromWithApproverAddress. Users can multiply payment amounts drawn from the approver/escrow up to the maxScalingMultiplier. This is expected for prediction markets and credit tokens but dangerous for bids or offers.'
+          },
+          recommendation: {
+            en: 'Verify maxScalingMultiplier is set to a reasonable cap. Review who can initiate transfers through this approval.'
+          }
         });
       }
     }
@@ -220,15 +260,22 @@ export const approvalsChecks: UxCheck[] = [
         const perVal = mnt[perKey];
         if (perVal && String(perVal) !== '0' && Number(perVal) > overallNum) {
           const name = approval.approvalId || 'unnamed';
+          const perUser = String(perVal);
+          const overallStr = String(overall);
           out.push({
             code: 'review.ux.per_user_exceeds_overall',
             severity: 'warning',
             source: 'ux',
             category: 'approvals',
-            localeKey: 'review_per_user_exceeds_overall',
-            params: { name, perUser: String(perVal), overall: String(overall) },
-            messageEn: `Approval "${name}" per-user max (${perVal}) exceeds overall max (${overall}).`,
-            recommendationEn: 'Raise overallMaxNumTransfers or lower the per-user limit.'
+            title: {
+              en: `Per-user limit exceeds overall limit on "${name}"`
+            },
+            detail: {
+              en: `A per-user limit (${perUser}) is higher than the overall limit (${overallStr}). The per-user limit can never be reached since the overall limit will be hit first.`
+            },
+            recommendation: {
+              en: 'Set the per-user limit to be less than or equal to the overall limit'
+            }
           });
           break;
         }
@@ -251,15 +298,16 @@ export const approvalsChecks: UxCheck[] = [
         severity: 'critical',
         source: 'ux',
         category: 'claims',
-        // Legacy frontend used three disjoint locale keys for this finding.
-        localeKeyTitle: 'Collection_uses_claims',
-        localeKeyDetail: 'Claim_Trust_Warning',
-        localeKeyFix: 'review_claims_trust_fix',
-        messageEn: 'Collection uses claims',
-        detailEn:
-          'This collection uses off-chain claims, which introduces trust assumptions on BitBadges for managing claims and verifying criteria, as well as any third-party dependencies you add (passwords, codes, webhooks). Design accordingly, especially for high-value use cases. Design with off-chain failures in mind. For a fully on-chain or fully self-hosted solution, gate by your own on-chain dynamic store or by another token that you control.',
-        recommendationEn:
-          'If trust assumptions are unacceptable, consider using on-chain-only criteria instead of off-chain claims'
+        title: {
+          en: 'Collection uses claims'
+        },
+        detail: {
+          en: 'This collection uses off-chain claims, which introduces trust assumptions on BitBadges for managing claims and verifying criteria, as well as any third-party dependencies you add (passwords, codes, webhooks). Design accordingly, especially for high-value use cases. Design with off-chain failures in mind. For a fully on-chain or fully self-hosted solution, gate by your own on-chain dynamic store or by another token that you control.',
+          es: 'Esta colección utiliza reclamaciones fuera de cadena, lo que introduce suposiciones de confianza en BitBadges para gestionar reclamaciones y verificar criterios, así como cualquier dependencia de terceros que agregue (contraseñas, códigos, webhooks). Diseñe en consecuencia, especialmente para casos de alto valor. Diseñe teniendo en cuenta posibles fallos fuera de cadena. Para una solución completamente en cadena o auto-alojada, controle el acceso mediante su propio almacén dinámico en cadena o mediante otro token que usted controle.'
+        },
+        recommendation: {
+          en: 'If trust assumptions are unacceptable, consider using on-chain-only criteria instead of off-chain claims'
+        }
       });
     }
     return out;
@@ -281,10 +329,15 @@ export const approvalsChecks: UxCheck[] = [
             severity: 'critical',
             source: 'ux',
             category: 'claims',
-            localeKey: 'review_claim_no_signin',
-            params: { name: label },
-            messageEn: `Claim "${label}" has no initiatedBy plugin — anyone can call it anonymously.`,
-            recommendationEn: `Add an initiatedBy plugin (wallet sign-in / social auth) to "${label}".`
+            title: {
+              en: `Claim "${label}" has no sign-in requirement`
+            },
+            detail: {
+              en: 'Claims default to no sign-in required. Without the sign-in plugin, anyone can claim without proving they own an address. For claims linked to on-chain transfers, sign-in is essential because users must sign the eventual transaction.'
+            },
+            recommendation: {
+              en: `Add the sign-in requirement plugin to the "${label}" claim`
+            }
           });
         }
       }
@@ -306,15 +359,22 @@ export const approvalsChecks: UxCheck[] = [
         if (offChainMax == null || onChainMax == null || onChainMax === '0') continue;
         if (Number(offChainMax) !== Number(onChainMax)) {
           const label = mc.claimConfig?.label || approval.approvalId || 'unnamed';
+          const offChain = Number(offChainMax);
+          const onChain = Number(onChainMax);
           out.push({
             code: 'review.ux.claim_numuses_mismatch',
             severity: 'critical',
             source: 'ux',
             category: 'claims',
-            localeKey: 'review_claim_mismatch',
-            params: { name: label, offChain: Number(offChainMax), onChain: Number(onChainMax) },
-            messageEn: `Claim "${label}" offChain numUses (${offChainMax}) does not match on-chain overallMaxNumTransfers (${onChainMax}).`,
-            recommendationEn: `Align the numUses plugin maxUses and the approval's overallMaxNumTransfers for "${label}".`
+            title: {
+              en: `Claim "${label}" has mismatched limits`
+            },
+            detail: {
+              en: `The claim allows ${offChain} uses but the on-chain transfer limit is ${onChain}. These must match — otherwise users can claim off-chain but fail on-chain, or on-chain slots go unused.`
+            },
+            recommendation: {
+              en: `Set both the claim max uses and the on-chain transfer limit to the same value for "${label}"`
+            }
           });
         }
       }
@@ -340,10 +400,15 @@ export const approvalsChecks: UxCheck[] = [
             severity: 'warning',
             source: 'ux',
             category: 'claims',
-            localeKey: 'review_claim_replay_risk',
-            params: { name: label },
-            messageEn: `Claim "${label}" has maxUsesPerLeaf != 1 — the same claim code can be replayed.`,
-            recommendationEn: 'Set maxUsesPerLeaf to "1" unless replay is intentional.'
+            title: {
+              en: `Claim "${label}" may be vulnerable to replay`
+            },
+            detail: {
+              en: 'maxUsesPerLeaf is not set to 1. Without this, the same claim proof could be reused multiple times.'
+            },
+            recommendation: {
+              en: 'Set maxUsesPerLeaf to 1 to ensure each claim code can only be used once'
+            }
           });
         }
       }
@@ -365,10 +430,15 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'warning',
           source: 'ux',
           category: 'approvals',
-          localeKey: 'review_counterparty_purge',
-          params: { name },
-          messageEn: `Approval "${name}" allows counterparty purge but initiatedByListId is not a single address.`,
-          recommendationEn: 'Restrict initiatedByListId to a single address, or disable allowCounterpartyPurge.'
+          title: {
+            en: `Counterparty purge on "${name}" requires single-address initiator`
+          },
+          detail: {
+            en: 'allowCounterpartyPurge is enabled but the initiatedByList is not a single address. The chain requires exactly one address to have purge rights.'
+          },
+          recommendation: {
+            en: 'Set initiatedByListId to a single bb1 address for counterparty purge to work'
+          }
         });
       }
     }
@@ -394,10 +464,15 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'warning',
           source: 'ux',
           category: 'approvals',
-          localeKey: 'review_default_balance_not_scannable',
-          messageEn:
-            'Default-balance approvals contain non-scannable features (coinTransfers, merkle challenges, or predetermined balances).',
-          recommendationEn: 'Move these to regular collectionApprovals, or remove from default balances.'
+          title: {
+            en: 'Default balance approvals not auto-scan compatible'
+          },
+          detail: {
+            en: 'Default balance approvals contain features that are not compatible with auto-scan mode (coin transfers, claims, predetermined balances, or signature challenges). These are creation-only and may cause issues.'
+          },
+          recommendation: {
+            en: 'Simplify default balance approvals to only use basic transfer rules without complex criteria'
+          }
         });
         return out;
       }
@@ -415,9 +490,15 @@ export const approvalsChecks: UxCheck[] = [
       severity: 'warning',
       source: 'ux',
       category: 'approvals',
-      localeKey: 'review_wrapper_path_transferability',
-      messageEn: 'Wrapper paths make the underlying token freely transferable via IBC, bypassing on-chain approvals.',
-      recommendationEn: 'Confirm the wrapped token is intended to be a free-floating IBC asset.'
+      title: {
+        en: 'Cosmos wrapper paths — transferability caveat'
+      },
+      detail: {
+        en: "This collection has cosmos wrapper paths. Once tokens are wrapped to ICS20, they are freely transferable via IBC regardless of your collection's transfer rules. BitBadges transferability only applies in the siloed (unwrapped) environment."
+      },
+      recommendation: {
+        en: 'Ensure transfer restrictions are enforced before wrapping, not after'
+      }
     });
     const hasWrapApproval = getApprovals(value).some((a: any) => a.approvalCriteria?.allowSpecialWrapping === true);
     if (!hasWrapApproval) {
@@ -426,9 +507,15 @@ export const approvalsChecks: UxCheck[] = [
         severity: 'critical',
         source: 'ux',
         category: 'approvals',
-        localeKey: 'review_wrapper_path_no_approval',
-        messageEn: 'Wrapper paths exist but no approval has allowSpecialWrapping = true — wrapping will fail.',
-        recommendationEn: 'Add an approval with approvalCriteria.allowSpecialWrapping = true.'
+        title: {
+          en: 'Cosmos wrapper path but no wrapping approval'
+        },
+        detail: {
+          en: 'Wrapper paths are configured but no approval has allowSpecialWrapping enabled. Wrapping and unwrapping will not function without this.'
+        },
+        recommendation: {
+          en: 'Add approvals with allowSpecialWrapping: true and mustPrioritize: true targeting the wrapper address'
+        }
       });
     }
     return out;
@@ -455,10 +542,15 @@ export const approvalsChecks: UxCheck[] = [
             severity: 'warning',
             source: 'ux',
             category: 'approvals',
-            localeKey: 'review_reset_epoch_zero',
-            params: { name },
-            messageEn: `Approval "${name}" uses a reset interval with startTime 0 — epochs anchor to unix 0, not now.`,
-            recommendationEn: 'Set resetTimeIntervals.startTime to a real timestamp (current time or launch).'
+            title: {
+              en: `Reset interval on "${name}" uses epoch start time`
+            },
+            detail: {
+              en: 'This approval has a time-based reset interval but the start time is set to 0 (January 1, 1970). This means resets happen at fixed UTC midnight boundaries, and users could exploit the boundary by making two withdrawals minutes apart across a reset. Use a recent timestamp as the start time instead.'
+            },
+            recommendation: {
+              en: 'Change the reset start time to a recent timestamp (use get_current_timestamp) instead of 0'
+            }
           });
           break;
         }
@@ -482,10 +574,15 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'warning',
           source: 'ux',
           category: 'approvals',
-          localeKey: 'review_royalty_missing_address',
-          params: { name },
-          messageEn: `Royalty on approval "${name}" has a percentage but no payout address.`,
-          recommendationEn: 'Set royalty.payoutAddress or remove the percentage.'
+          title: {
+            en: `Royalty on "${name}" has no payout address`
+          },
+          detail: {
+            en: 'A royalty percentage is set but no payout address. Royalties will not be sent anywhere.'
+          },
+          recommendation: {
+            en: 'Set a payout address for the royalty'
+          }
         });
       }
       if (!hasPercentage && hasAddress) {
@@ -494,10 +591,15 @@ export const approvalsChecks: UxCheck[] = [
           severity: 'warning',
           source: 'ux',
           category: 'approvals',
-          localeKey: 'review_royalty_missing_percentage',
-          params: { name },
-          messageEn: `Royalty on approval "${name}" has a payout address but no percentage.`,
-          recommendationEn: 'Set royalty.percentage or remove the payout address.'
+          title: {
+            en: `Royalty on "${name}" has no percentage`
+          },
+          detail: {
+            en: 'A royalty payout address is set but the percentage is zero. No royalties will be collected.'
+          },
+          recommendation: {
+            en: 'Set a royalty percentage or remove the payout address'
+          }
         });
       }
     }
