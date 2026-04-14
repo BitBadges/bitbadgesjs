@@ -105,11 +105,21 @@ export const metadataChecks: UxCheck[] = [
       const defaultUnit = denomUnits.find((u: any) => u.isDefaultDisplay);
       const unitMeta = defaultUnit?.metadata;
       const pathMeta = path.metadata;
+      // Three places a path image can live:
+      //   1. metadataPlaceholders sidecar keyed by pathMeta.uri (agent shape)
+      //   2. Same sidecar keyed by unitMeta.uri (denom unit variant)
+      //   3. Inline nested metadata.metadata.image (frontend WithDetails
+      //      shape, pre-upload state — the auto-apply flow will move this
+      //      to an IPFS URI on submit)
       const pathUri: string = pathMeta?.uri || '';
       const unitUri: string = unitMeta?.uri || '';
-      const pathImage = metadataPlaceholders[pathUri]?.image;
-      const unitImage = metadataPlaceholders[unitUri]?.image;
-      return isMissingImage(pathImage) && isMissingImage(unitImage);
+      const pathSidecarImage = metadataPlaceholders[pathUri]?.image;
+      const unitSidecarImage = metadataPlaceholders[unitUri]?.image;
+      const pathInlineImage = pathMeta?.metadata?.image;
+      const unitInlineImage = unitMeta?.metadata?.image;
+      const pathOk = !isMissingImage(pathSidecarImage) || !isMissingImage(pathInlineImage);
+      const unitOk = !isMissingImage(unitSidecarImage) || !isMissingImage(unitInlineImage);
+      return !pathOk && !unitOk;
     });
     if (missing.length > 0) {
       const count = missing.length;

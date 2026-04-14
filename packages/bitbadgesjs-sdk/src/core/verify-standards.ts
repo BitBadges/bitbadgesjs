@@ -1223,6 +1223,21 @@ function isFakeOrMissingUri(uri: string | undefined): boolean {
   return FAKE_IMAGE_PATTERNS.some((p) => p.test(uri));
 }
 
+/**
+ * True if a path metadata object is in the frontend "WithDetails" shape
+ * — a nested `metadata.metadata` object with inline name / image /
+ * description. The frontend stores this pre-upload; the metadata
+ * auto-apply flow uploads the inline content to IPFS and populates the
+ * `uri` field on submit. When in this state, the `uri` is intentionally
+ * blank and "missing URI" violations are false positives.
+ */
+function isPreApplyMetadata(m: any): boolean {
+  if (!m || typeof m !== 'object') return false;
+  const inner = m.metadata;
+  if (!inner || typeof inner !== 'object') return false;
+  return Boolean(inner.name || inner.image || inner.description);
+}
+
 function verifyMetadataPlaceholders(value: any): StandardViolation[] {
   const violations: StandardViolation[] = [];
   const std = 'Common';
@@ -1278,7 +1293,7 @@ function verifyMetadataPlaceholders(value: any): StandardViolation[] {
         message: `Alias path "${ap.denom || i}" is missing PathMetadata entirely. All alias paths MUST have metadata: { uri, customData }.`,
         fix: `Add metadata: { uri: "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}", customData: "" } and upload the image inside the JSON at that URI via the auto-apply flow.`
       });
-    } else if (isFakeOrMissingUri(ap.metadata?.uri)) {
+    } else if (isFakeOrMissingUri(ap.metadata?.uri) && !isPreApplyMetadata(ap.metadata)) {
       violations.push({
         standard: std,
         field: `aliasPathsToAdd[${i}].metadata.uri`,
@@ -1305,7 +1320,7 @@ function verifyMetadataPlaceholders(value: any): StandardViolation[] {
             message: `Denom unit "${du.symbol || j}" is missing PathMetadata entirely. All denomUnits MUST have metadata: { uri, customData }.`,
             fix: `Add metadata: { uri: "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}_UNIT", customData: "" }.`
           });
-        } else if (isFakeOrMissingUri(du.metadata?.uri)) {
+        } else if (isFakeOrMissingUri(du.metadata?.uri) && !isPreApplyMetadata(du.metadata)) {
           violations.push({
             standard: std,
             field: `aliasPathsToAdd[${i}].denomUnits[${j}].metadata.uri`,

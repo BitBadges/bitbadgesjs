@@ -515,16 +515,32 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     const standards = col.standards || [];
     const isSmartToken = standards.some((s) => s.toLowerCase().includes('smart token'));
 
+    // Use the canonical backing address from cosmosCoinBackedPath to
+    // identify backing / unbacking approvals structurally. An approval is:
+    //   - backing   (deposit)    when allowBackedMinting && fromListId == backingAddr
+    //   - unbacking (withdrawal) when allowBackedMinting && toListId   == backingAddr
+    // This is more reliable than guessing based on '!' prefixes on the
+    // opposite list, which misses valid shapes like `fromListId: 'AllWithoutMint'`.
+    const backingAddr = (invariants.cosmosCoinBackedPath as any)?.address as string | undefined;
+    const addrMatches = (listId: string | undefined, addr: string | undefined): boolean => {
+      if (!listId || !addr) return false;
+      if (listId === addr) return true;
+      // compound/negated lists containing the backing address also count
+      return listId.includes(addr);
+    };
+
     const hasBackingApproval = approvals.some((a) => {
       const crit = a.approvalCriteria as Record<string, unknown> | undefined;
-      if (crit?.allowBackedMinting && a.fromListId && !a.fromListId.startsWith('!')) return true;
+      if (crit?.allowBackedMinting && addrMatches(a.fromListId, backingAddr)) return true;
       if (a.approvalId && /backing/i.test(a.approvalId) && !/unbacking/i.test(a.approvalId)) return true;
+      if (a.approvalId && /vault-deposit/i.test(a.approvalId)) return true;
       return false;
     });
     const hasUnbackingApproval = approvals.some((a) => {
       const crit = a.approvalCriteria as Record<string, unknown> | undefined;
-      if (crit?.allowBackedMinting && a.toListId && a.fromListId && (a.fromListId.startsWith('!') || a.fromListId === 'All')) return true;
+      if (crit?.allowBackedMinting && addrMatches(a.toListId, backingAddr)) return true;
       if (a.approvalId && /unbacking/i.test(a.approvalId)) return true;
+      if (a.approvalId && /vault-withdraw/i.test(a.approvalId)) return true;
       return false;
     });
 
@@ -554,9 +570,17 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     // 4. TRANSFERABILITY ANALYSIS
     // ========================================
 
-    const hasTransferApproval = approvals.some(
-      (a) => a.fromListId === '!Mint' || (a.fromListId !== 'Mint' && !(a.approvalCriteria as Record<string, unknown>)?.allowBackedMinting)
-    );
+    // "Soulbound" = no way for tokens to leave their initial minter. Any of
+    // the following counts as a transfer path:
+    //   - A classic !Mint post-mint transfer approval
+    //   - Any non-mint approval that isn't backed minting (free P2P)
+    //   - Backed minting approvals (backing/unbacking) — these let users
+    //     deposit/withdraw from the backing address, which is a real
+    //     transfer path out of the soulbound interpretation
+    const hasTransferApproval =
+      approvals.some(
+        (a) => a.fromListId === '!Mint' || (a.fromListId !== 'Mint' && !(a.approvalCriteria as Record<string, unknown>)?.allowBackedMinting)
+      ) || hasBackingApproval || hasUnbackingApproval;
 
     if (!hasTransferApproval && approvals.length > 0) {
       findings.push({
