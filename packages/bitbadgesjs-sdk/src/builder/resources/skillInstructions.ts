@@ -2244,6 +2244,7 @@ Without this, the escrow has no funds and claims will fail.
 - Binary prediction market: "Will X happen by Y?" Users deposit USDC to mint paired YES+NO tokens. Trade YES↔NO on a liquidity pool. Verifier settles by voting. Winner redeems 1:1.
 - Token ID 1 = YES, Token ID 2 = NO (via alias paths with 6 decimals)
 - mintEscrowAddress holds all deposited USDC
+- invariants: \\\`noForcefulPostMintTransfers: true\\\` — locks non-mint approvals (redeem, settlement, transferable) from using \\\`overridesFromOutgoingApprovals\\\` or \\\`overridesToIncomingApprovals\\\`. Non-mint approvals rely on \\\`defaultBalances.autoApproveSelfInitiatedOutgoingTransfers: true\\\` for outgoing-side auth and on the burn destination for incoming-side auth
 - All permissions frozen after creation
 - 7 approvals: paired mint, freely transferable, pre-settlement redeem, yes-wins, no-wins, push-yes, push-no
 - Alias paths for YES (token 1) and NO (token 2) with 6 decimals
@@ -2841,6 +2842,7 @@ For bounties that require the verifier or submitter to hold a token from THIS co
 - maxScalingMultiplier: MAX_UINT for unrestricted scaling
 - Deposit coinTransfer.to = "Mint" (auto-resolves to escrow)
 - requireToEqualsInitiatedBy: true on deposit-refund (contributor receives their own refund token)
+- invariants: \\\`noForcefulPostMintTransfers: true\\\` — the refund approval (non-mint) MUST NOT set \\\`overridesFromOutgoingApprovals\\\` or \\\`overridesToIncomingApprovals\\\` (both must be false or omitted). It relies on \\\`defaultBalances.autoApproveSelfInitiatedOutgoingTransfers: true\\\` for the outgoing side and on the burn destination for the incoming side. The deposit-refund / deposit-progress / success approvals ARE Mint-side and keep \\\`overridesFromOutgoingApprovals: true\\\` as the chain requires, with \\\`overridesToIncomingApprovals: false\\\`
 - All permissions frozen after creation
 - DON'T use votingChallenges — goal tracking is via mustOwnTokens, not voting
 - DON'T forget allowAmountScaling on ALL 4 approvals
@@ -3069,10 +3071,14 @@ On-chain crowdfunding with automatic goal tracking. Contributors deposit coins a
 - initiatedByListId on mint-to-winner = seller address (only seller can accept)
 - maxNumTransfers = 1 on all approvals (one-shot)
 - overridesToIncomingApprovals: false on mint-to-winner (bidder's incoming approval handles payment)
+- Burn approval has NO override flags — relies on defaultBalances autoApproveSelfInitiatedOutgoingTransfers + burn destination
+- noForcefulPostMintTransfers: true in invariants (permanently locks out forceful transfers post-mint)
+- After settlement, the mint-to-winner approval is auto-deleted via afterOneUse — protocol validators treat a missing mint-to-winner as a valid post-settlement state, not an error
 - All permissions frozen after creation
 - DON'T use coinTransfers on collection approvals — payment happens via intent matching
 - DON'T set initiatedByListId to "All" on mint-to-winner — must be seller
 - DON'T set transferTimes to forever — must be bounded to accept window
+- DON'T put override flags on the burn approval — auction has noForcefulPostMintTransfers: true, so non-mint override flags would be invariant violations
 - DO use autoDeletionOptions.afterOneUse: true on mint-to-winner`,
     instructions: `## Auction Configuration
 
@@ -3085,7 +3091,8 @@ A single-item auction where the seller creates a collection, bidders place inten
 - Token ID 1 = The auctioned item
 - Standard: "Auction"
 - validTokenIds: [{ start: "1", end: "1" }]
-- invariants: { noCustomOwnershipTimes: true }
+- invariants: \\\`{ noCustomOwnershipTimes: true, maxSupplyPerId: "0", noForcefulPostMintTransfers: true, disablePoolCreation: true }\\\`
+- \\\`noForcefulPostMintTransfers: true\\\` locks the collection so no non-mint approval can ever use \\\`overridesFromOutgoingApprovals\\\` or \\\`overridesToIncomingApprovals\\\` — the burn approval below relies on \\\`defaultBalances\\\` auto-approve flags instead
 - All permissions frozen after creation
 
 ### Bidding Mechanism
@@ -3133,16 +3140,11 @@ Bids must have transferTimes that stay valid through the END of the accept windo
   "toListId": "<BURN_ADDRESS>",
   "initiatedByListId": "All",
   "tokenIds": [{ "start": "1", "end": "1" }],
-  "transferTimes": [{ "start": "1", "end": "18446744073709551615" }],
-  "approvalCriteria": {
-    "overridesFromOutgoingApprovals": true,
-    "overridesToIncomingApprovals": true,
-    "coinTransfers": [],
-    "maxNumTransfers": { "overallMaxNumTransfers": "1" },
-    "autoDeletionOptions": { "afterOneUse": true, "afterOverallMaxNumTransfers": true }
-  }
+  "transferTimes": [{ "start": "1", "end": "18446744073709551615" }]
 }
 \\\`\\\`\\\`
+
+> **No \\\`approvalCriteria\\\` overrides:** because the invariants lock \\\`noForcefulPostMintTransfers: true\\\`, the burn approval MUST NOT set \\\`overridesFromOutgoingApprovals\\\` or \\\`overridesToIncomingApprovals\\\`. It relies on \\\`defaultBalances.autoApproveSelfInitiatedOutgoingTransfers: true\\\` for the outgoing side and on the burn destination for the incoming side.
 
 ### Auction Flow
 
@@ -3155,7 +3157,7 @@ Bids must have transferTimes that stay valid through the END of the accept windo
 
 1. \\\`set_valid_token_ids\\\` — set [{ start: "1", end: "1" }]
 2. \\\`set_standards\\\` — set ["Auction"]
-3. \\\`set_invariants\\\` — set { noCustomOwnershipTimes: true }
+3. \\\`set_invariants\\\` — set \\\`{ noCustomOwnershipTimes: true, maxSupplyPerId: "0", noForcefulPostMintTransfers: true, disablePoolCreation: true }\\\`
 4. \\\`add_approval\\\` x2 — mint-to-winner, burn
 5. \\\`set_collection_metadata\\\` — auction title, description, image
 6. \\\`set_token_metadata\\\` — token 1 metadata (the item being auctioned)
@@ -3169,6 +3171,8 @@ Bids must have transferTimes that stay valid through the END of the accept windo
 - DON'T set initiatedByListId to "All" on mint-to-winner — only the seller can accept bids
 - DON'T set transferTimes to forever — MUST be bounded to accept window (bidDeadline → bidDeadline + acceptWindow)
 - DON'T set overridesToIncomingApprovals to true on mint-to-winner — must be false so the bidder's incoming approval (payment intent) is checked
+- DON'T add override flags to the burn approval — the invariant \\\`noForcefulPostMintTransfers: true\\\` rejects \\\`overridesFromOutgoingApprovals\\\` or \\\`overridesToIncomingApprovals\\\` on any non-mint approval
+- DON'T worry if the mint-to-winner approval is absent after settlement — \\\`autoDeletionOptions.afterOneUse: true\\\` removes it after the first successful mint, and the protocol validator accepts that as a valid post-settlement state
 - DON'T create a separate mint-to-seller approval — the token should not exist until the seller accepts a bid
 - DON'T forget autoDeletionOptions on mint-to-winner — without afterOneUse: true, the seller could mint to multiple bidders
 - DON'T forget that bids must have transferTimes valid through the END of the accept window, not just the bid deadline`
