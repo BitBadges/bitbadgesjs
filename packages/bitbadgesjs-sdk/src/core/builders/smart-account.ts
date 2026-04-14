@@ -10,7 +10,7 @@ import {
   sanitizeCosmosPathName,
   ibcBackedInvariants,
   generateAliasAddressForIBCBackedDenom,
-  emptyPermissions,
+  baselinePermissions,
   alwaysLockedPermission,
   alwaysLockedCollectionApprovalPermission
 } from './shared.js';
@@ -91,7 +91,7 @@ export function buildSmartAccount(params: SmartAccountParams): any {
   };
 
   const permissions = {
-    ...emptyPermissions(),
+    ...baselinePermissions(),
     canUpdateCollectionApprovals: [alwaysLockedCollectionApprovalPermission()],
     canAddMoreAliasPaths: [alwaysLockedPermission()],
     canAddMoreCosmosCoinWrapperPaths: [alwaysLockedPermission()]

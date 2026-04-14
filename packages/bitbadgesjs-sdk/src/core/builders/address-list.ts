@@ -6,7 +6,7 @@ import {
   FOREVER,
   BURN_ADDRESS,
   buildMsg,
-  emptyPermissions,
+  baselinePermissions,
   defaultBalances
 } from './shared.js';
 
@@ -74,7 +74,7 @@ export function buildAddressList(params: AddressListParams): any {
     collectionApprovals,
     standards: ['Address List'],
     manager: params.manager || '',
-    collectionPermissions: emptyPermissions(),
+    collectionPermissions: baselinePermissions(),
     invariants: {
       noCustomOwnershipTimes: true,
       disablePoolCreation: true

@@ -14,7 +14,7 @@ import {
   sanitizeCosmosPathName,
   ibcBackedInvariants,
   generateAliasAddressForIBCBackedDenom,
-  emptyPermissions
+  baselinePermissions
 } from './shared.js';
 
 export interface VaultParams {
@@ -131,7 +131,7 @@ export function buildVault(params: VaultParams): any {
     // global denom uniqueness, so a hardcoded 'uvault' would collide
     // for any user creating more than one vault on the same chain.
     aliasPathsToAdd: [buildAliasPath('u' + symbol.toLowerCase(), symbol, coin.decimals, coin.image)],
-    collectionPermissions: emptyPermissions()
+    collectionPermissions: baselinePermissions()
   });
 }
 

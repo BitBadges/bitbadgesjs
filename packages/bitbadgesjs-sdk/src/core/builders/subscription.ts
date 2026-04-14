@@ -8,7 +8,7 @@ import {
   toBaseUnits,
   parseDuration,
   buildMsg,
-  emptyPermissions,
+  baselinePermissions,
   defaultBalances
 } from './shared.js';
 
@@ -135,7 +135,7 @@ export function buildSubscription(params: SubscriptionParams): any {
     collectionApprovals,
     standards: ['Subscriptions'],
     validTokenIds: [{ start: '1', end: String(tiers) }],
-    collectionPermissions: emptyPermissions(),
+    collectionPermissions: baselinePermissions(),
     invariants: {
       noCustomOwnershipTimes: false,
       maxSupplyPerId: '0',

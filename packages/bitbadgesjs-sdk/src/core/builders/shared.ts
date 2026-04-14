@@ -220,7 +220,7 @@ export function buildMsg(params: {
       updateValidTokenIds: true,
       validTokenIds: params.validTokenIds || [{ start: '1', end: '1' }],
       updateCollectionPermissions: true,
-      collectionPermissions: params.collectionPermissions || emptyPermissions(),
+      collectionPermissions: params.collectionPermissions || baselinePermissions(),
       updateManager: true,
       manager: params.manager || '',
       updateCollectionMetadata: true,
@@ -331,7 +331,34 @@ export function alwaysLockedCollectionApprovalPermission() {
   };
 }
 
-export function emptyPermissions() {
+/**
+ * Baseline collection-permission set used as the default when a
+ * template doesn't override. **NOT actually empty** — six fields
+ * are pre-locked via `alwaysLockedPermission()`:
+ *
+ *   canDeleteCollection           locked (safety: never burn the collection)
+ *   canArchiveCollection          locked (safety: never archive)
+ *   canUpdateStandards            locked (the standards tag commits the schema)
+ *   canUpdateCustomData           locked (no ad-hoc proto-level mutations)
+ *   canUpdateValidTokenIds        locked (supply immutability)
+ *   canAddMoreAliasPaths          locked (no post-create alias path expansion)
+ *   canAddMoreCosmosCoinWrapperPaths locked (same for wrapper paths)
+ *
+ * The four permissions left OPEN (empty array = neutral):
+ *
+ *   canUpdateManager              manager can be rotated
+ *   canUpdateCollectionMetadata   manager can update the collection metadata URI
+ *   canUpdateTokenMetadata        manager can update per-token metadata
+ *   canUpdateCollectionApprovals  approval set can still be edited
+ *
+ * This is the "safe default for most mintable token collections" — the
+ * metadata + manager + approvals can still evolve, but the collection
+ * itself can't be deleted or have its standards/tokenIds shifted under
+ * holders. Templates that need total immutability use
+ * `frozenPermissions()` instead. Templates that need fully neutral
+ * (everything mutable) should construct their own permission object.
+ */
+export function baselinePermissions() {
   return {
     canDeleteCollection: [alwaysLockedPermission()],
     canArchiveCollection: [alwaysLockedPermission()],
@@ -346,6 +373,11 @@ export function emptyPermissions() {
     canAddMoreCosmosCoinWrapperPaths: [alwaysLockedPermission()]
   };
 }
+
+/** @deprecated Renamed to `baselinePermissions` — this helper returns
+ * the default-locked permission set, not an actually-empty one. Kept as
+ * an alias for one release so external consumers (if any) don't break. */
+export const emptyPermissions = baselinePermissions;
 
 export function frozenPermissions() {
   return {

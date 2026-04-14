@@ -8,7 +8,7 @@ import {
   resolveCoin,
   toBaseUnits,
   buildMsg,
-  emptyPermissions,
+  baselinePermissions,
   mintToBurnBalances
 } from './shared.js';
 
@@ -81,7 +81,7 @@ export function buildQuests(params: QuestsParams): any {
   return buildMsg({
     collectionApprovals,
     standards: ['Quests'],
-    collectionPermissions: emptyPermissions(),
+    collectionPermissions: baselinePermissions(),
     invariants: {
       noCustomOwnershipTimes: true,
       maxSupplyPerId: '0',

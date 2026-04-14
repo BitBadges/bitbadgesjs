@@ -127,12 +127,19 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
     }
   };
 
-  // 4-7. Settlement outcomes
+  // 4-7. Settlement outcomes. `burnAmount` is the number of tokens
+  // consumed per 1 coin of payout — 1 for a winning side (burn 1,
+  // get 1 back) and 2 for a push (burn 2, get 1 back). `allowAmountScaling: true`
+  // lets holders scale to whatever balance they actually hold, so
+  // the numbers here encode the ratio, not a hard minimum.
+  // Matches PredictionMarketRegistry.settlementApproval() in the
+  // frontend: `burnAmount = isPush ? depositAmount * 2n : depositAmount`.
   function settlementApproval(
     approvalId: string,
     tokenIds: any[],
     proposalId: string,
-    coinAmount: string
+    burnAmount: string,
+    payoutAmount: string
   ) {
     return {
       approvalId,
@@ -144,11 +151,11 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
       tokenIds,
       version: '0',
       approvalCriteria: {
-        predeterminedBalances: scalingBalances('1'),
+        predeterminedBalances: scalingBalances(burnAmount),
         coinTransfers: [
           {
             to: '',
-            coins: [{ amount: coinAmount, denom: coin.denom }],
+            coins: [{ amount: payoutAmount, denom: coin.denom }],
             overrideFromWithApproverAddress: true,
             overrideToWithInitiator: true
           }
@@ -177,10 +184,11 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
     };
   }
 
-  const settleYes = settlementApproval(`pm-settle-yes-${settleYesId}`, yesTokenIds, `pm-settle-yes-${settleYesId}`, '1');
-  const settleNo = settlementApproval(`pm-settle-no-${settleNoId}`, noTokenIds, `pm-settle-no-${settleNoId}`, '1');
-  const settlePushYes = settlementApproval(`pm-settle-push-yes-${settlePushYesId}`, yesTokenIds, `pm-settle-push-yes-${settlePushYesId}`, '1');
-  const settlePushNo = settlementApproval(`pm-settle-push-no-${settlePushNoId}`, noTokenIds, `pm-settle-push-no-${settlePushNoId}`, '1');
+  // Win: burn 1 token → 1 coin. Push: burn 2 tokens → 1 coin.
+  const settleYes = settlementApproval(`pm-settle-yes-${settleYesId}`, yesTokenIds, `pm-settle-yes-${settleYesId}`, '1', '1');
+  const settleNo = settlementApproval(`pm-settle-no-${settleNoId}`, noTokenIds, `pm-settle-no-${settleNoId}`, '1', '1');
+  const settlePushYes = settlementApproval(`pm-settle-push-yes-${settlePushYesId}`, yesTokenIds, `pm-settle-push-yes-${settlePushYesId}`, '2', '1');
+  const settlePushNo = settlementApproval(`pm-settle-push-no-${settlePushNoId}`, noTokenIds, `pm-settle-push-no-${settlePushNoId}`, '2', '1');
 
   const collectionApprovals = [pairedMint, freeTransfer, preRedeem, settleYes, settleNo, settlePushYes, settlePushNo];
 

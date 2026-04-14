@@ -26,6 +26,11 @@ export interface PmBuyIntentParams {
 }
 
 export function buildPmBuyIntent(params: PmBuyIntentParams): any {
+  if (!Number.isInteger(params.amount) || params.amount <= 0) {
+    throw new Error(
+      `buildPmBuyIntent: amount must be a positive integer (got ${params.amount}). Prediction market tokens are unitless counts, not fractional.`
+    );
+  }
   const coin = resolveCoin(params.denom);
   const basePrice = toBaseUnits(params.price, coin.decimals);
   const expirationTs = durationToTimestamp(params.expiration || '7d');

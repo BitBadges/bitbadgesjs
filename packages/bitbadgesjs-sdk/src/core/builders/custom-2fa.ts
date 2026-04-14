@@ -6,7 +6,7 @@ import {
   FOREVER,
   BURN_ADDRESS,
   buildMsg,
-  emptyPermissions,
+  baselinePermissions,
   alwaysLockedPermission,
   alwaysLockedTokenIdsPermission
 } from './shared.js';
