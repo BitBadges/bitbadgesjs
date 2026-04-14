@@ -50,8 +50,6 @@ import {
   reviewCollectionTool, handleReviewCollection,
   // Claim builder
   buildClaimTool, handleBuildClaim,
-  // Standards compliance
-  verifyStandardsCompliance, formatVerificationResult,
   // Session-based per-field tools (v2)
   setStandardsTool, handleSetStandards,
   setValidTokenIdsTool, handleSetValidTokenIds,
@@ -143,19 +141,6 @@ const getSkillInstructionsTool: ToolSchema = {
   }
 };
 
-const verifyStandardsTool: ToolSchema = {
-  name: 'verify_standards',
-  description:
-    '[DEPRECATED — use review_collection] Verify that a collection transaction complies with BitBadges protocol standards. Returns violations with severity levels.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      transaction: { type: 'object', description: 'The transaction object to verify (MsgUniversalUpdateCollection or similar)' },
-      transactionJson: { type: 'string', description: 'The transaction as a JSON string (alternative to transaction object)' }
-    }
-  }
-};
-
 /**
  * The tool registry. Keys are builder tool names.
  */
@@ -219,21 +204,6 @@ export const toolRegistry: Record<string, ToolEntry> = {
     (result: any) => (result?.success ? result.explanation : JSON.stringify(result, null, 2))
   ),
   build_claim: entry(buildClaimTool, handleBuildClaim),
-
-  // Standards compliance (custom arg handling + formatter)
-  verify_standards: {
-    tool: verifyStandardsTool,
-    run: (args: any) => {
-      let tx = args;
-      if (typeof args?.transactionJson === 'string') {
-        tx = JSON.parse(args.transactionJson);
-      } else if (args?.transaction) {
-        tx = args.transaction;
-      }
-      return verifyStandardsCompliance(tx);
-    },
-    formatText: (result: any) => formatVerificationResult(result)
-  },
 
   // Session-based per-field tools (v2)
   set_standards: entry(setStandardsTool, handleSetStandards),
