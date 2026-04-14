@@ -83,20 +83,24 @@ export const approvalsChecks: UxCheck[] = [
     //   push 2 — hasOverrides && invariantBlocksForceful (mismatch)
     if (hasOverrides || !invariantBlocksForceful) {
       const count = forcefulApprovals.length;
+      // Branch the message so count=0 doesn't read awkwardly. When the
+      // only reason the check fires is the unset invariant, say so.
+      const detailEn = hasOverrides
+        ? `${count} non-mint approval(s) have forceful transfer overrides enabled${invariantBlocksForceful ? '' : ' and the noForcefulPostMintTransfers invariant is not set'}. Tokens can be moved without the holder's permission. Ensure this is intentional and that all parties understand the implications.`
+        : "The noForcefulPostMintTransfers invariant is not set at creation. It cannot be added later, so any future non-mint approval could enable forceful transfers that move tokens without the holder's permission.";
+      const recEn = hasOverrides
+        ? 'Remove the forceful transfer override flags from non-mint approvals, or set invariants.noForcefulPostMintTransfers = true at creation.'
+        : 'Set invariants.noForcefulPostMintTransfers = true at creation to permanently block forceful transfers on any future approval.';
       out.push({
         code: 'review.ux.forceful_transfers_allowed',
         severity: 'critical',
         source: 'ux',
         category: 'approvals',
         title: {
-          en: 'Forceful transfer overrides enabled'
+          en: hasOverrides ? 'Forceful transfer overrides enabled' : 'Forceful transfers allowed — invariant not set'
         },
-        detail: {
-          en: `Currently ${count} non-mint approval(s) have forceful transfer overrides enabled, and/or the noForcefulPostMintTransfers invariant is not set. This means tokens can be moved without the holder's permission. Ensure this is intentional and that all parties understand the implications.`
-        },
-        recommendation: {
-          en: 'Remove the forceful transfer override flags from non-mint approvals'
-        }
+        detail: { en: detailEn },
+        recommendation: { en: recEn }
       });
     }
 

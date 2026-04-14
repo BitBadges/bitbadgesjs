@@ -51,6 +51,65 @@ function mirrorPathFieldNames(value: Record<string, any>): Record<string, any> {
   return out;
 }
 
+/**
+ * Re-attach fields that the proto-spec classes strip during conversion
+ * but that review checks still need to see. The SDK has two parallel
+ * class hierarchies: the "Msg" shape (proto-spec only) used by
+ * MsgUniversalUpdateCollection, and the "WithDetails" shape used by
+ * the frontend / on-chain hydrated state, which adds nested inline
+ * content not present in the proto. When we run the Msg class to get
+ * BigIntify conversion, the extra WithDetails fields are dropped.
+ *
+ * Specifically:
+ *   - PathMetadata only keeps { uri, customData }; WithDetails adds
+ *     a nested `metadata: { name, image, description }` for
+ *     pre-upload inline content.
+ *   - CollectionMetadata same.
+ *   - CollectionApproval only keeps proto fields; WithDetails adds
+ *     `details: { name, description, image }` for the approval card.
+ *
+ * This helper walks the raw (pre-conversion) input and copies those
+ * dropped fields onto the converted output. Non-mutating to the raw
+ * input; mutates the converted result in place.
+ */
+function reattachInlineMetadata(converted: any, raw: any): void {
+  // Collection metadata
+  const rawCm = raw?.collectionMetadata;
+  if (rawCm?.metadata && converted?.collectionMetadata) {
+    converted.collectionMetadata.metadata = rawCm.metadata;
+  }
+  // Alias paths (both field names may exist after mirroring)
+  for (const field of ['aliasPathsToAdd', 'aliasPaths'] as const) {
+    const rawList = raw?.[field];
+    const outList = converted?.[field];
+    if (!Array.isArray(rawList) || !Array.isArray(outList)) continue;
+    for (let i = 0; i < Math.min(rawList.length, outList.length); i++) {
+      const rawInline = rawList[i]?.metadata?.metadata;
+      if (rawInline && outList[i]?.metadata) outList[i].metadata.metadata = rawInline;
+      const rawUnits = rawList[i]?.denomUnits || [];
+      const outUnits = outList[i]?.denomUnits || [];
+      for (let j = 0; j < Math.min(rawUnits.length, outUnits.length); j++) {
+        const rawUnitInline = rawUnits[j]?.metadata?.metadata;
+        if (rawUnitInline && outUnits[j]?.metadata) outUnits[j].metadata.metadata = rawUnitInline;
+      }
+    }
+  }
+  // Approval details — each collectionApproval may have a WithDetails
+  // `details: { name, description, image }` sibling that the proto
+  // CollectionApproval class strips. The unnamed_approvals review check
+  // reads `a.details?.name`, so we need this back on the converted list.
+  const rawApprovals = raw?.collectionApprovals;
+  const outApprovals = converted?.collectionApprovals;
+  if (Array.isArray(rawApprovals) && Array.isArray(outApprovals)) {
+    for (let i = 0; i < Math.min(rawApprovals.length, outApprovals.length); i++) {
+      const rawDetails = rawApprovals[i]?.details;
+      if (rawDetails && outApprovals[i] !== undefined && outApprovals[i] !== null) {
+        outApprovals[i].details = rawDetails;
+      }
+    }
+  }
+}
+
 export function normalizeForReview(input: unknown): any {
   const raw = extractCollectionValue(input);
   if (!raw || typeof raw !== 'object') return raw;
@@ -66,6 +125,8 @@ export function normalizeForReview(input: unknown): any {
     if (converted.aliasPathsToAdd && !converted.aliasPaths) converted.aliasPaths = converted.aliasPathsToAdd;
     if (converted.cosmosCoinWrapperPathsToAdd && !converted.cosmosCoinWrapperPaths)
       converted.cosmosCoinWrapperPaths = converted.cosmosCoinWrapperPathsToAdd;
+    // Re-attach WithDetails inline metadata that the proto classes drop.
+    reattachInlineMetadata(converted, mirrored);
     return converted;
   } catch {
     // Fallback: if class construction/conversion fails (unknown shape),
