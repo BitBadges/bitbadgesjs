@@ -63,8 +63,11 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
           overrideToWithInitiator: false
         }
       ],
+      // Mint approval: outgoing override required by standard.
+      // Incoming: recipient auto-approves via defaultBalances +
+      // requireToEqualsInitiatedBy (depositor receives their own mint).
       overridesFromOutgoingApprovals: true,
-      overridesToIncomingApprovals: true,
+      overridesToIncomingApprovals: false,
       requireToEqualsInitiatedBy: true
     }
   };
@@ -121,9 +124,14 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
         amountTrackerId: `pm-redeem-${redeemId}`,
         resetTimeIntervals: { startTime: '0', intervalLength: '0' }
       },
-      requireFromEqualsInitiatedBy: true,
-      overridesFromOutgoingApprovals: true,
-      overridesToIncomingApprovals: true
+      // No overrides: holder self-initiates their own pair burn and
+      // auto-approves the outgoing side via defaultBalances
+      // (autoApproveSelfInitiatedOutgoingTransfers). No requireFromEqualsInitiatedBy
+      // either — leaving open-ended so a holder can delegate via their
+      // own user-level outgoing approval if they want.
+      // Burn-address destination auto-approves incoming.
+      overridesFromOutgoingApprovals: false,
+      overridesToIncomingApprovals: false
     }
   };
 
@@ -178,8 +186,12 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
             voters: [{ address: params.verifier, weight: '1' }]
           }
         ],
-        overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true
+        // No overrides: winning-side holder self-initiates their own
+        // settlement burn and auto-approves via defaultBalances. The
+        // verifier vote gates WHICH proposal can execute but the actual
+        // claim must come from the token holder.
+        overridesFromOutgoingApprovals: false,
+        overridesToIncomingApprovals: false
       }
     };
   }
@@ -209,7 +221,9 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
     invariants: {
       noCustomOwnershipTimes: true,
       maxSupplyPerId: '0',
-      noForcefulPostMintTransfers: false,
+      // Non-mint approvals (redeem, settlements) no longer use override
+      // flags, so forceful post-mint transfers can be permanently locked.
+      noForcefulPostMintTransfers: true,
       disablePoolCreation: false
     },
     aliasPathsToAdd: [

@@ -130,7 +130,9 @@ export function buildAuction(params: AuctionParams): any {
     invariants: {
       noCustomOwnershipTimes: true,
       maxSupplyPerId: '0',
-      noForcefulPostMintTransfers: false,
+      // Non-mint approvals (auction-burn) have no override flags, so
+      // forceful post-mint transfers can be permanently locked.
+      noForcefulPostMintTransfers: true,
       disablePoolCreation: true
     },
     // Auctions are 1-of-1 NFTs — no fractional denom unit needed. The

@@ -67,8 +67,10 @@ export function buildCrowdfund(params: CrowdfundParams): any {
             overrideToWithInitiator: false
           }
         ],
+        // Mint approval: outgoing override required by standard.
+        // Incoming: recipient auto-approves via defaultBalances.
         overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true
+        overridesToIncomingApprovals: false
       }
     },
     // Deposit-Progress — tracks total deposits via token 2 to creator.
@@ -86,8 +88,10 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       approvalCriteria: {
         allowAmountScaling: true,
         predeterminedBalances: scalingBalances('1'),
+        // Mint approval: outgoing override required by standard.
+        // Incoming: crowdfunder auto-approves via defaultBalances.
         overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true
+        overridesToIncomingApprovals: false
       }
     },
     // Success — crowdfunder withdraws funds after deadline if goal met.
@@ -186,8 +190,13 @@ export function buildCrowdfund(params: CrowdfundParams): any {
         },
         allowAmountScaling: true,
         predeterminedBalances: scalingBalances('1'),
-        overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true
+        // No overrides: holder self-initiates their own refund burn and
+        // auto-approves via defaultBalances. Previously both overrides
+        // were true, which let any third party initiate the burn and
+        // redirect the refund payout via overrideToWithInitiator —
+        // a theft vector closed.
+        overridesFromOutgoingApprovals: false,
+        overridesToIncomingApprovals: false
       }
     },
     // Burn — general burn, always allowed
@@ -224,7 +233,9 @@ export function buildCrowdfund(params: CrowdfundParams): any {
     invariants: {
       noCustomOwnershipTimes: true,
       maxSupplyPerId: '0',
-      noForcefulPostMintTransfers: false,
+      // Non-mint approvals (refund, burn) no longer use override flags,
+      // so forceful post-mint transfers can be permanently locked.
+      noForcefulPostMintTransfers: true,
       disablePoolCreation: true
     },
     // Refund + total-deposit tokens are 1-of-1 receipt-style — no
