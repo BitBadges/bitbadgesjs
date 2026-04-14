@@ -179,13 +179,13 @@ export const skillChecks: UxCheck[] = [
         source: 'ux',
         category: 'skills',
         title: {
-          en: 'No mint approvals configured'
+          en: 'No token-creation approvals configured'
         },
         detail: {
-          en: 'The collection has transfer approvals but no mint approvals. No tokens can be created.'
+          en: 'The collection has transfer approvals but no approvals that create new tokens. Nothing can enter circulation. Smart tokens that create supply via IBC backing or wrapper paths are excluded from this check.'
         },
         recommendation: {
-          en: 'Add a mint approval so tokens can be created'
+          en: 'Add a creation approval with fromListId: "Mint", or configure an IBC backing path / wrapper path if this is a smart token.'
         }
       });
     }

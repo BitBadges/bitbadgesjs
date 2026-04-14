@@ -25,7 +25,7 @@ export const approvalsChecks: UxCheck[] = [
             en: `"${name}" uses fromListId "All" which includes Mint`
           },
           detail: {
-            en: 'The "All" address list includes the Mint address. This means this approval accidentally allows minting new tokens. Use "!Mint" instead for post-mint transfer approvals.'
+            en: 'The "All" address list includes the Mint address. This approval accidentally allows new tokens to be created from the Mint address. Use "!Mint" instead for approvals that should only govern tokens already in circulation.'
           },
           recommendation: {
             en: 'Change fromListId from "All" to "!Mint" to exclude the Mint address'
@@ -176,7 +176,7 @@ export const approvalsChecks: UxCheck[] = [
         severity: transferabilityPermanentlyLocked ? 'info' : 'critical',
         source: 'ux',
         category: 'approvals',
-        title: { en: 'Forceful transfers permitted post-mint' },
+        title: { en: 'Tokens can be moved without holder consent' },
         detail: { en: baseDetail + suffix },
         recommendation: {
           en: 'If forceful transfers should be permanently impossible, set invariants.noForcefulPostMintTransfers = true at creation — it cannot be toggled later. If forceful transfers are intentional for this collection (auction settlement, subscription revoke, prediction market resolution, etc.), you can safely ignore this.'
@@ -235,7 +235,7 @@ export const approvalsChecks: UxCheck[] = [
             en: 'Incoming transfers not auto-approved'
           },
           detail: {
-            en: 'This collection has mint approvals but incoming transfers are not auto-approved. Recipients must opt-in before they can receive minted tokens, which means minting will silently fail for most users.'
+            en: 'This collection creates new tokens (it has approvals with fromListId: "Mint") but incoming transfers are not auto-approved. Recipients must opt-in before they can receive the created tokens, which means the creation flow will silently fail for most users.'
           },
           recommendation: {
             en: 'Enable auto-approve for all incoming transfers in the default balance settings'

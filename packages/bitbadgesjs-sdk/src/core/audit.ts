@@ -267,7 +267,7 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         category: 'supply',
         title: 'Token ID creation is not locked',
         detail: `canUpdateValidTokenIds is ${validTokenIdState}. The manager can add new token IDs, which creates new supply.`,
-        recommendation: 'Set canUpdateValidTokenIds to FORBIDDEN if supply should be fixed. Even with locked mint approvals, new token IDs = new supply ranges.',
+        recommendation: 'Set canUpdateValidTokenIds to FORBIDDEN if supply should be fixed. Even with locked token-creation approvals, new token IDs create new supply ranges.',
         agentOnly: true
       });
     }
@@ -348,7 +348,7 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         severity: 'critical',
         category: 'supply',
         title: 'Mint approvals can be modified — UNLIMITED SUPPLY RISK',
-        detail: `canUpdateCollectionApprovals is ${approvalPermState} and the collection has mint approvals. The manager can add new mint approvals, change mint limits, or remove restrictions at any time. This effectively means unlimited supply.`,
+        detail: `canUpdateCollectionApprovals is ${approvalPermState} and the collection has token-creation (Mint) approvals. The manager can add new creation approvals, change creation limits, or remove restrictions at any time. This effectively means unlimited supply.`,
         recommendation:
           'Lock canUpdateCollectionApprovals for mint-related approvals (fromListId: "Mint"). Use scoped approval permissions to lock mint while allowing transfer approval updates if needed.'
       });
@@ -359,7 +359,7 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         severity: 'critical',
         category: 'supply',
         title: 'Backing approvals can be modified — UNLIMITED SUPPLY RISK',
-        detail: `canUpdateCollectionApprovals is ${approvalPermState} and the collection has backing approvals (allowBackedMinting = true). Backing approvals are the smart-token mint source — the manager can modify the 1:1 backing conversion, add new backing paths, or change limits at any time, which effectively means unlimited supply risk even though fromListId is not "Mint".`,
+        detail: `canUpdateCollectionApprovals is ${approvalPermState} and the collection uses IBC backing to create tokens (allowBackedMinting = true). The manager can modify the 1:1 backing conversion, add new backing paths, or change limits at any time, which effectively means unlimited supply risk even though this is not a traditional "Mint" approval.`,
         recommendation:
           'Lock canUpdateCollectionApprovals for the backing address scope. Use scoped approval permissions to fix the backing configuration at creation and block future modifications.'
       });
@@ -411,10 +411,10 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
           findings.push({
             severity: 'critical',
             category: 'supply',
-            title: `Mint approval "${approvalId}" has NO supply limits`,
-            detail: 'This mint approval has no overallApprovalAmount, no maxNumTransfers, and no predeterminedBalances. Anyone matching the approval can mint unlimited tokens.',
+            title: `Mint approval "${approvalId}" has no supply limits`,
+            detail: 'This token-creation approval has no overallApprovalAmount, no maxNumTransfers, and no predeterminedBalances. Anyone matching the approval can create unlimited new tokens.',
             recommendation:
-              'Add approvalAmounts.overallApprovalAmount to cap total supply, or maxNumTransfers.overallMaxNumTransfers to cap mint count, or use predeterminedBalances for sequential allocation.'
+              'Add approvalAmounts.overallApprovalAmount to cap total supply, or maxNumTransfers.overallMaxNumTransfers to cap the creation count, or use predeterminedBalances for sequential allocation.'
           });
         }
 
@@ -616,9 +616,9 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
       findings.push({
         severity: 'info',
         category: 'transferability',
-        title: 'No post-mint transfer approval found (non-transferable / soulbound)',
-        detail: 'The collection has no approval allowing transfers between non-Mint addresses. Tokens are soulbound after minting.',
-        recommendation: 'If this is intentional (soulbound tokens), this is correct. Add a free-transfer approval (fromListId: "!Mint") if transfers should be allowed.'
+        title: 'Tokens are non-transferable / soulbound',
+        detail: 'The collection has no approval allowing tokens to move between non-Mint addresses. Tokens cannot leave their initial holder once they are in circulation.',
+        recommendation: 'If non-transferable tokens are intentional, this is correct. Otherwise add a free-transfer approval (fromListId: "!Mint") so holders can move tokens to other addresses.'
       });
     }
 
@@ -818,8 +818,8 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
           findings.push({
             severity: 'critical',
             category: 'approval-bug',
-            title: 'Missing autoApproveAllIncomingTransfers for mint collection',
-            detail: 'defaultBalances.autoApproveAllIncomingTransfers is not true, but the collection has mint approvals. Recipients will not be able to receive minted tokens.',
+            title: 'Recipients cannot receive newly created tokens',
+            detail: 'defaultBalances.autoApproveAllIncomingTransfers is not true, but the collection has token creation approvals (fromListId: "Mint"). Recipients will not be able to receive the tokens unless they first configure incoming approvals themselves.',
             recommendation: 'Set defaultBalances.autoApproveAllIncomingTransfers: true.'
           });
         }

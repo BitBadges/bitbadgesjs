@@ -649,7 +649,7 @@ function verifyCommonMintRules(value: any): StandardViolation[] {
         standard: 'Common',
         field: 'defaultBalances.autoApproveAllIncomingTransfers',
         message:
-          'Collections with mint approvals MUST have defaultBalances.autoApproveAllIncomingTransfers: true. Without this, recipients cannot receive minted tokens.',
+          'Collections with token-creation (Mint) approvals MUST have defaultBalances.autoApproveAllIncomingTransfers: true. Without this, recipients cannot receive newly created tokens.',
         fix: 'Set defaultBalances.autoApproveAllIncomingTransfers: true.'
       });
     }
