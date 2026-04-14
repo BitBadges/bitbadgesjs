@@ -434,54 +434,6 @@ export const approvalsChecks: UxCheck[] = [
     return out;
   },
 
-  // Predetermined balances missing order calculation method or incrementedBalances shape.
-  // Opinionated semantic guess — instead of auto-filling `useOverallNumTransfers = true`, which
-  // silently picks an ordering that may not match the author's intent, we surface this as a
-  // warning so the reviewer confirms the intended calculation method.
-  (value) => {
-    const out: Finding[] = [];
-    for (const approval of getAllApprovals(value)) {
-      const pb = approval.approvalCriteria?.predeterminedBalances;
-      if (!pb) continue;
-      const ocm = pb.orderCalculationMethod;
-      const flags = ocm
-        ? [
-            'useOverallNumTransfers',
-            'usePerToAddressNumTransfers',
-            'usePerFromAddressNumTransfers',
-            'usePerInitiatedByAddressNumTransfers',
-            'useMerkleChallengeLeafIndex'
-          ].filter((k: string) => ocm[k] === true)
-        : [];
-      if (!ocm || flags.length === 0) {
-        const name = approval.approvalId || 'unnamed';
-        out.push({
-          code: 'review.ux.predetermined_order_unset',
-          severity: 'warning',
-          source: 'ux',
-          category: 'approvals',
-          localeKey: 'review_predetermined_order_unset',
-          params: { name },
-          messageEn: `Approval "${name}" uses predeterminedBalances but no orderCalculationMethod flag is set. Pick exactly one (e.g. useOverallNumTransfers) to make the ordering explicit.`,
-          recommendationEn: 'Set one of useOverallNumTransfers / usePerToAddressNumTransfers / usePerFromAddressNumTransfers / usePerInitiatedByAddressNumTransfers / useMerkleChallengeLeafIndex on orderCalculationMethod.'
-        });
-      } else if (flags.length > 1) {
-        const name = approval.approvalId || 'unnamed';
-        out.push({
-          code: 'review.ux.predetermined_order_conflict',
-          severity: 'warning',
-          source: 'ux',
-          category: 'approvals',
-          localeKey: 'review_predetermined_order_conflict',
-          params: { name, flags: flags.join(', ') },
-          messageEn: `Approval "${name}" predeterminedBalances.orderCalculationMethod sets multiple flags (${flags.join(', ')}). Only one should be set.`,
-          recommendationEn: 'Keep exactly one of the use* flags true and set the others to false.'
-        });
-      }
-    }
-    return out;
-  },
-
   // Reset interval with startTime = 0
   (value) => {
     const out: Finding[] = [];
