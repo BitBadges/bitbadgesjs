@@ -9,16 +9,17 @@ export const sdkCommand = new Command('sdk').description('SDK analysis and utili
 
 sdkCommand
   .command('review <input>')
-  .description('Review a transaction or collection JSON for issues. Input: JSON file, inline JSON, collection ID, or - for stdin')
-  .option('--human', 'Output human-readable text instead of JSON')
+  .description('Review a transaction or collection for issues via reviewCollection(). Input: JSON file, inline JSON, collection ID, or - for stdin')
+  .option('--json', 'Output the full ReviewResult as JSON')
+  .option('--human', 'Force human-readable text output (default)')
+  .option('--strict', 'Exit 1 on warnings (critical always exits 2)')
   .option('--testnet', 'Use testnet API URL')
   .option('--local', 'Use local API URL (http://localhost:3001)')
   .option('--url <url>', 'Custom API base URL')
   .option('--output-file <path>', 'Write output to file instead of stdout')
-  .action(async (input: string, opts: { human?: boolean; testnet?: boolean; local?: boolean; url?: string; outputFile?: string }) => {
+  .action(async (input: string, opts: { json?: boolean; human?: boolean; strict?: boolean; testnet?: boolean; local?: boolean; url?: string; outputFile?: string }) => {
     let data;
     if (/^\d+$/.test(input)) {
-      // Numeric ID — fetch collection from API
       const baseUrl = getApiUrl(opts);
       const response = await fetch(`${baseUrl}/api/v0/collection/${input}`, {
         headers: { 'x-api-key': process.env.BITBADGES_API_KEY || '' }
@@ -28,62 +29,40 @@ sdkCommand
     } else {
       data = readJsonInput(input);
     }
-    const isTransaction = !!data.messages || !!data.msgs;
 
-    if (isTransaction) {
-      // Try enriched simulate via indexer first
-      const apiKey = process.env.BITBADGES_API_KEY;
-      const apiUrl = getApiUrl(opts);
+    const { reviewCollection } = await import('../../core/review.js');
+    const result = reviewCollection(data);
 
-      if (apiKey) {
-        try {
-          const axios = (await import('axios')).default;
-          const response = await axios.post(`${apiUrl}/api/v0/simulate`, data, {
-            headers: { 'x-api-key': apiKey, 'Content-Type': 'application/json' }
-          });
-          output(response.data, opts);
-          return;
-        } catch {
-          // Fall through to local analysis
-        }
-      }
-
-      // Local fallback
-      const { validateTransaction } = await import('../../core/validate.js');
-      const { auditCollection } = await import('../../core/audit.js');
-      const { verifyStandardsCompliance } = await import('../../core/verify-standards.js');
-
-      const validation = validateTransaction(data);
-      const standards = verifyStandardsCompliance(data);
-
-      // Try to extract collection from the first message for audit
-      const msg = data.messages?.[0] || data.msgs?.[0];
-      const value = msg?.value || msg;
-      let audit = null;
-      if (value) {
-        try {
-          audit = auditCollection({ collection: value });
-        } catch {
-          // Collection audit not applicable for this message type
-        }
-      }
-
-      output({ validation, standards, audit }, opts);
+    if (opts.json) {
+      output(result, { ...opts, human: false });
     } else {
-      // Collection review
-      const { auditCollection } = await import('../../core/audit.js');
-      const { verifyStandardsCompliance } = await import('../../core/verify-standards.js');
-
-      const audit = auditCollection({ collection: data });
-      let standards = null;
-      try {
-        standards = verifyStandardsCompliance(data);
-      } catch {
-        // Standards check may not apply to raw collections
+      // Human format — grouped by severity
+      const lines: string[] = [];
+      const byLevel: Record<string, typeof result.findings> = { critical: [], warning: [], info: [] };
+      for (const f of result.findings) byLevel[f.severity].push(f);
+      for (const level of ['critical', 'warning', 'info'] as const) {
+        for (const f of byLevel[level]) {
+          lines.push(`[${level.toUpperCase()}] ${f.code} — ${f.title.en}`);
+          if (f.detail.en) lines.push(`  ${f.detail.en}`);
+          if (f.recommendation.en) lines.push(`  -> ${f.recommendation.en}`);
+        }
       }
-
-      output({ audit, standards }, opts);
+      lines.push('');
+      lines.push(
+        `Summary: ${result.summary.critical} critical, ${result.summary.warning} warning, ${result.summary.info} info — verdict: ${result.summary.verdict}`
+      );
+      const text = lines.join('\n');
+      if (opts.outputFile) {
+        const fs = await import('fs');
+        fs.writeFileSync(opts.outputFile, text + '\n', 'utf-8');
+        process.stderr.write(`Written to ${opts.outputFile}\n`);
+      } else {
+        console.log(text);
+      }
     }
+
+    if (result.summary.critical > 0) process.exit(2);
+    if (opts.strict && result.summary.warning > 0) process.exit(1);
   });
 
 // ── sdk interpret-tx <input> ───────────────────────────────────────────────────
@@ -393,8 +372,8 @@ Section Navigation (use slugs from the tree view, separated by /):
   sdk docs messages                     All message type docs
   sdk docs messages/msg-transfer-tokens A specific message
   sdk docs examples                     Code examples and snippets
-  sdk docs mcp-builder-skills           All builder skills (same as "sdk skills")
-  sdk docs mcp-builder-skills/smart-token  A specific skill
+  sdk docs builder-skills               All builder skills (same as "sdk skills")
+  sdk docs builder-skills/smart-token   A specific skill
 
 Partial matching: "sdk docs approvals" finds the first section containing "approvals".
 
@@ -448,15 +427,17 @@ Cache: ~/.bitbadges/docs-cache.json | Refresh: sdk docs --refresh`)
     console.log(out.trim() || `No content found for "${section}".`);
   });
 
-// ── sdk skills (alias for sdk docs mcp-builder-skills) ──────────────────────
+// ── sdk skills (alias for sdk docs builder-skills) ──────────────────────
 
 sdkCommand
   .command('skills [skillId]')
-  .description('Shorthand for "sdk docs mcp-builder-skills" — list or show MCP Builder skills')
-  .addHelpText('after', '\nEquivalent to: sdk docs mcp-builder-skills / sdk docs mcp-builder-skills/<id>')
+  .description('Shorthand for "sdk docs builder-skills" — list or show BitBadges Builder skills')
+  .addHelpText('after', '\nEquivalent to: sdk docs builder-skills / sdk docs builder-skills/<id>')
   .action(async (skillId: string | undefined) => {
-    // Delegate to the docs command logic
-    const section = skillId ? `mcp-builder-skills/${skillId}` : 'mcp-builder-skills';
+    // Delegate to the docs command logic. The slug must exist in the loaded
+    // docs tree — coordinated with bitbadges-docs where this section is
+    // published.
+    const section = skillId ? `builder-skills/${skillId}` : 'builder-skills';
     sdkCommand.commands.find((c) => c.name() === 'docs')!.parseAsync(['node', 'docs', section]);
   });
 

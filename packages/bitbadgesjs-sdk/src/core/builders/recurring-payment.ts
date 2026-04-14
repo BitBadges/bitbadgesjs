@@ -48,13 +48,16 @@ export function buildRecurringPayment(params: RecurringPaymentParams): any {
           startBalances: [{ amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: FOREVER }],
           incrementTokenIdsBy: '0',
           incrementOwnershipTimesBy: '0',
+          // Chain rule: only ONE of `durationFromTimestamp`,
+          // `incrementOwnershipTimesBy`, or non-zero
+          // `recurringOwnershipTimes` can be set. `durationFromTimestamp`
+          // alone is enough for the subscriber-side approval — the
+          // interval is already encoded there. Setting
+          // `recurringOwnershipTimes` too would double-define the
+          // schedule and the validator throws.
           durationFromTimestamp: intervalMs,
           allowOverrideTimestamp: true,
-          recurringOwnershipTimes: {
-            startTime: String(Date.now()),
-            intervalLength: intervalMs,
-            chargePeriodLength: intervalMs
-          },
+          recurringOwnershipTimes: { startTime: '0', intervalLength: '0', chargePeriodLength: '0' },
           allowOverrideWithAnyValidToken: false,
           allowAmountScaling: false,
           maxScalingMultiplier: '0'

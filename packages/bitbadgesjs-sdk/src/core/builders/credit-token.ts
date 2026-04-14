@@ -8,7 +8,9 @@ import {
   resolveCoin,
   buildMsg,
   buildAliasPath,
+  sanitizeCosmosPathName,
   frozenPermissions,
+  defaultBalances,
   scalingBalances
 } from './shared.js';
 
@@ -23,10 +25,12 @@ export interface CreditTokenParams {
 export function buildCreditToken(params: CreditTokenParams): any {
   const coin = resolveCoin(params.paymentDenom);
   const tokensPerUnit = params.tokensPerUnit ?? 100;
-  const symbol = params.symbol || 'CREDIT';
+  // Same chain regex as smart-account / vault — strip non-allowed
+  // characters before deriving the lowercase denom. See sanitizeCosmosPathName.
+  const symbol = sanitizeCosmosPathName(params.symbol || 'CREDIT', 'symbol');
 
   const creditMint = {
-    approvalId: 'credit-mint',
+    approvalId: 'credit-scaled',
     fromListId: 'Mint',
     toListId: 'All',
     initiatedByListId: 'All',
@@ -55,17 +59,20 @@ export function buildCreditToken(params: CreditTokenParams): any {
     }
   };
 
+  const alias = buildAliasPath('u' + symbol.toLowerCase(), symbol, coin.decimals, undefined, params.name);
+
   return buildMsg({
     collectionApprovals: [creditMint],
     validTokenIds: [{ start: '1', end: '1' }],
     standards: ['Credit Token'],
     collectionPermissions: frozenPermissions(),
+    defaultBalances: defaultBalances({ autoApproveAllIncomingTransfers: true }),
     invariants: {
       noCustomOwnershipTimes: true,
-      maxSupplyPerId: '0',
-      noForcefulPostMintTransfers: false,
+      noForcefulPostMintTransfers: true,
       disablePoolCreation: true
     },
-    aliasPathsToAdd: [buildAliasPath('u' + symbol.toLowerCase(), symbol, coin.decimals)]
+    aliasPathsToAdd: [alias.path],
+    metadataPlaceholders: { ...alias.placeholders }
   });
 }

@@ -26,7 +26,7 @@ export class MsgSetCustomData<T extends NumberType> extends CustomTypeClass<MsgS
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
     this.customData = msg.customData;
-    this.canUpdateCustomData = msg.canUpdateCustomData.map((permission) => new ActionPermission(permission));
+    this.canUpdateCustomData = msg.canUpdateCustomData?.map((permission) => new ActionPermission(permission)) ?? [];
   }
 
   toProto(): prototokenization.MsgSetCustomData {

@@ -64,6 +64,89 @@ function bigintToString(obj: unknown): unknown {
   return obj;
 }
 
+/**
+ * Reusable simulate helper used by both the MCP tool wrapper above and the
+ * CLI's `builder simulate` / templates auto-simulate paths. Sends the
+ * agent-JSON single-tx shape (`{messages, memo, fee, creatorAddress}`)
+ * to the indexer's `/api/v0/simulate` endpoint and normalizes the raw
+ * LCD response into a `SimulateTransactionResult` so all callers render
+ * identically through the terminal helpers.
+ */
+export async function simulateMessages(params: {
+  messages: unknown[];
+  memo?: string;
+  fee?: {
+    amount: Array<{ denom: string; amount: string }>;
+    gas: string;
+  };
+  creatorAddress?: string;
+  /** Override the resolved API key (e.g. CLI `--network local` flow). */
+  apiKey?: string;
+  /** Override the resolved API base URL (e.g. CLI `--url http://...`). */
+  apiUrl?: string;
+}): Promise<SimulateTransactionResult> {
+  try {
+    if (!params.messages || !Array.isArray(params.messages) || params.messages.length === 0) {
+      return { success: false, error: 'Invalid transaction: empty or missing messages array' };
+    }
+
+    const response = await simulateTx(
+      {
+        messages: params.messages,
+        memo: params.memo || '',
+        fee: params.fee || { amount: [{ denom: 'ubadge', amount: '5000' }], gas: '500000' },
+        creatorAddress: params.creatorAddress
+      },
+      // Pass per-call override config through to apiRequest so the
+      // CLI's --network/--url flags can hit a local indexer without
+      // requiring environment variables.
+      params.apiKey || params.apiUrl ? { apiKey: params.apiKey, apiUrl: params.apiUrl } : undefined
+    );
+
+    if (!response.success) {
+      return { success: false, error: response.error };
+    }
+
+    // Path 2 response is the raw LCD simulate shape:
+    //   { gas_info: { gas_used, gas_wanted }, result: { events: [...] } }
+    // On a chain-level rejection the indexer surfaces the message as
+    // response.data.error (via BitBadgesError passthrough) or as an
+    // error field on data itself.
+    const data: any = response.data;
+    const chainError = data?.error || data?.message;
+    if (chainError && !data?.gas_info && !data?.result) {
+      return { success: true, valid: false, simulationError: chainError };
+    }
+
+    const gasUsed: string | undefined = data?.gas_info?.gas_used;
+    const events = ((data?.result?.events || []) as SimulationEvent[]);
+    let parsedEvents: unknown = undefined;
+    let netChanges: unknown = undefined;
+    try {
+      const parsed: ParsedSimulationEvents = parseSimulationEvents(events, []);
+      const net: NetBalanceChanges = calculateNetChanges(parsed);
+      parsedEvents = bigintToString(parsed);
+      netChanges = bigintToString(net);
+    } catch {
+      // If parsing fails, still return raw events — don't break the caller
+    }
+
+    return {
+      success: true,
+      valid: true,
+      gasUsed,
+      events,
+      parsedEvents,
+      netChanges
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Failed to simulate transaction: ' + (error instanceof Error ? error.message : String(error))
+    };
+  }
+}
+
 export async function handleSimulateTransaction(input: SimulateTransactionInput): Promise<SimulateTransactionResult> {
   try {
     // Normalize: accept either a pre-parsed object or a JSON string
@@ -90,71 +173,11 @@ export async function handleSimulateTransaction(input: SimulateTransactionInput)
       };
     }
 
-    // Validate basic structure
-    if (!tx.messages || !Array.isArray(tx.messages)) {
-      return {
-        success: false,
-        error: 'Invalid transaction: Missing "messages" array'
-      };
-    }
-
-    // Create simulation request
-    const response = await simulateTx({
-      txs: [{
-        context: {
-          address: 'bb1simulation',
-          chain: 'eth'
-        },
-        messages: tx.messages,
-        memo: tx.memo || '',
-        fee: tx.fee || {
-          amount: [{ denom: 'ubadge', amount: '5000' }],
-          gas: '500000'
-        }
-      }]
+    return simulateMessages({
+      messages: tx.messages,
+      memo: tx.memo,
+      fee: tx.fee
     });
-
-    if (!response.success) {
-      return {
-        success: false,
-        error: response.error
-      };
-    }
-
-    const result = response.data?.results?.[0];
-
-    if (result?.error) {
-      return {
-        success: true,
-        valid: false,
-        simulationError: result.error
-      };
-    }
-
-    // Parse events into structured output
-    const events = (result?.events || []) as SimulationEvent[];
-    let parsedEvents: unknown = undefined;
-    let netChanges: unknown = undefined;
-
-    try {
-      const parsed: ParsedSimulationEvents = parseSimulationEvents(events, []);
-      const net: NetBalanceChanges = calculateNetChanges(parsed);
-
-      // Convert bigint to string for JSON serialization
-      parsedEvents = bigintToString(parsed);
-      netChanges = bigintToString(net);
-    } catch {
-      // If parsing fails, still return raw events — don't break the tool
-    }
-
-    return {
-      success: true,
-      valid: true,
-      gasUsed: result?.gasUsed,
-      events: result?.events,
-      parsedEvents,
-      netChanges
-    };
   } catch (error) {
     return {
       success: false,

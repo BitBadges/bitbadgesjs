@@ -209,14 +209,17 @@ export function handleBuildClaim(input: BuildClaimInput): BuildClaimResult {
     claims: [claim]
   };
 
-  // Build helpful nextSteps
+  // Build helpful nextSteps. The submit URL respects BITBADGES_API_URL so
+  // agents pointed at testnet / local indexers see the correct endpoint
+  // in the rendered instructions instead of a hardcoded mainnet URL.
+  const apiUrl = process.env.BITBADGES_API_URL || 'https://api.bitbadges.io';
   const nextStepsParts: string[] = [];
 
   nextStepsParts.push(
     '## How to submit this claim\n' +
       'Send a POST request to the BitBadges API:\n' +
       '```\n' +
-      'POST https://api.bitbadges.io/api/v0/claims\n' +
+      `POST ${apiUrl}/api/v0/claims\n` +
       'Authorization: Bearer <YOUR_API_KEY>\n' +
       'Content-Type: application/json\n' +
       'Body: <the apiPayload object from this response>\n' +

@@ -11,7 +11,6 @@ import {
   durationToTimestamp,
   uniqueId,
   buildMsg,
-  buildAliasPath,
   frozenPermissions,
   defaultBalances,
   metadataPlaceholders,
@@ -55,7 +54,7 @@ export function buildBounty(params: BountyParams): any {
           {
             proposalId: uniqueId('bounty-accept'),
             quorumThreshold: '100',
-            voters: [{ address: params.verifier, weight: '100' }]
+            voters: [{ address: params.verifier, weight: '1' }]
           }
         ],
         coinTransfers: [
@@ -90,7 +89,7 @@ export function buildBounty(params: BountyParams): any {
           {
             proposalId: uniqueId('bounty-deny'),
             quorumThreshold: '100',
-            voters: [{ address: params.verifier, weight: '100' }]
+            voters: [{ address: params.verifier, weight: '1' }]
           }
         ],
         coinTransfers: [
@@ -135,7 +134,7 @@ export function buildBounty(params: BountyParams): any {
     }
   ];
 
-  const { collectionMetadata, tokenMetadata } = metadataPlaceholders(params.name || 'Bounty');
+  const { collectionMetadata, tokenMetadata, placeholders } = metadataPlaceholders(params.name || 'Bounty');
 
   return buildMsg({
     collectionApprovals,
@@ -145,12 +144,16 @@ export function buildBounty(params: BountyParams): any {
     invariants: {
       noCustomOwnershipTimes: true,
       maxSupplyPerId: '0',
-      noForcefulPostMintTransfers: false,
+      noForcefulPostMintTransfers: true,
       disablePoolCreation: true
     },
-    aliasPathsToAdd: [buildAliasPath('ubounty', 'BOUNTY', 0)],
+    // Bounty receipt is a 1-of-1 NFT-style token — no fractional denom
+    // unit needed. The previous version added an alias path with
+    // `decimals: 0` which the chain rejects.
+    aliasPathsToAdd: [],
     mintEscrowCoinsToTransfer: [{ amount: baseAmount, denom: coin.denom }],
     collectionMetadata,
-    tokenMetadata
+    tokenMetadata,
+    metadataPlaceholders: placeholders
   });
 }

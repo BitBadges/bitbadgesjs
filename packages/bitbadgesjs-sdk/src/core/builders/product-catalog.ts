@@ -31,12 +31,14 @@ export interface ProductCatalogParams {
 
 export function buildProductCatalog(params: ProductCatalogParams): any {
   const { products, storeAddress } = params;
+  const randomId = () => Math.random().toString(16).slice(2, 18);
 
   const purchaseApprovals = products.map((product, i) => {
     const idx = i + 1;
     const coin = resolveCoin(product.denom);
     const basePrice = toBaseUnits(product.price, coin.decimals);
     const tokenIds = [{ start: String(idx), end: String(idx) }];
+    const approvalId = `product-purchase-${randomId()}`;
 
     const predeterminedBalances = {
       ...mintToBurnBalances(),
@@ -47,7 +49,7 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
     };
 
     return {
-      approvalId: `purchase-${idx}`,
+      approvalId,
       fromListId: 'Mint',
       toListId: product.burn ? BURN_ADDRESS : 'All',
       initiatedByListId: 'All',
@@ -71,7 +73,7 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
               perToAddressMaxNumTransfers: '0',
               perFromAddressMaxNumTransfers: '0',
               perInitiatedByAddressMaxNumTransfers: '0',
-              amountTrackerId: `purchase-${idx}-tracker`,
+              amountTrackerId: approvalId,
               resetTimeIntervals: { startTime: '0', intervalLength: '0' }
             }
           : zeroMaxTransfers(),
@@ -84,7 +86,7 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
 
   // Burn approval: anyone can burn their tokens
   const burnApproval = {
-    approvalId: 'burn',
+    approvalId: `product-burn-${randomId()}`,
     fromListId: '!Mint',
     toListId: BURN_ADDRESS,
     initiatedByListId: 'All',
@@ -97,7 +99,17 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
 
   const collectionApprovals = [...purchaseApprovals, burnApproval];
 
-  const tokenMetadata = products.map((product, i) => singleTokenMetadata(String(i + 1), product.name));
+  // Per-product metadata: each product gets its own placeholder URI keyed
+  // by token id. Accumulate the sidecar entries so the auto-apply flow has
+  // full coverage.
+  const tokenMetadataAndPlaceholders = products.map((product, i) =>
+    singleTokenMetadata(String(i + 1), product.name)
+  );
+  const tokenMetadata = tokenMetadataAndPlaceholders.map((t) => t.entry);
+  const productPlaceholders: Record<string, { name: string; description: string; image: string }> = {};
+  for (const t of tokenMetadataAndPlaceholders) {
+    productPlaceholders[t.placeholder.uri] = t.placeholder.content;
+  }
 
   return buildMsg({
     collectionApprovals,
@@ -107,9 +119,8 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
     tokenMetadata,
     invariants: {
       noCustomOwnershipTimes: true,
-      maxSupplyPerId: '0',
-      noForcefulPostMintTransfers: false,
       disablePoolCreation: true
-    }
+    },
+    metadataPlaceholders: productPlaceholders
   });
 }

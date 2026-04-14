@@ -59,5 +59,6 @@ export * from './validate.js';
 export * from './blankCriteria.js';
 export * from './audit.js';
 export * from './verify-standards.js';
+export * from './review.js';
 
 export * from './builders/index.js';

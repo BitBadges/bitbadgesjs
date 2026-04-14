@@ -109,27 +109,71 @@ export function uniqueId(prefix?: string): string {
 
 // ── Common builder helpers ───────────────────────────────────────────────────
 
+/**
+ * A sidecar map of placeholder URI → off-chain metadata content. Templates
+ * accumulate these and attach them to the emitted Msg as `value._meta.metadataPlaceholders`
+ * so the CLI's Metadata To Upload section (and any frontend consumer)
+ * knows which placeholder URIs already have content provided.
+ */
+export type PlaceholderSidecar = Record<string, { name: string; description: string; image: string }>;
+
+/**
+ * Build collection + default-token metadata using placeholder URIs that the
+ * metadata auto-apply flow understands. Returns three things:
+ *
+ *   - `collectionMetadata` and `tokenMetadata` to drop into `buildMsg(...)`
+ *   - `placeholders` — a sidecar map keyed by the placeholder URIs above,
+ *     populated with the supplied name/description/image (or sane defaults).
+ *
+ * Callers should merge the returned `placeholders` into their own sidecar and
+ * pass the combined map to `buildMsg({ ..., metadataPlaceholders })`, which
+ * surfaces it on the emitted Msg as `value._meta.metadataPlaceholders`.
+ */
 export function metadataPlaceholders(name: string, description?: string, image?: string) {
+  const collectionUri = 'ipfs://METADATA_COLLECTION';
+  const tokenUri = 'ipfs://METADATA_TOKEN_DEFAULT';
+  const content = {
+    name,
+    description: description || '',
+    image: image || BITBADGES_DEFAULT_IMAGE
+  };
   return {
-    collectionMetadata: {
-      uri: DEFAULT_METADATA_URI,
-      customData: JSON.stringify({ name, description: description || '', image: image || BITBADGES_DEFAULT_IMAGE })
-    },
+    collectionMetadata: { uri: collectionUri, customData: '' },
     tokenMetadata: [
-      {
-        uri: DEFAULT_METADATA_URI,
-        customData: '',
-        tokenIds: FOREVER
-      }
-    ]
+      { uri: tokenUri, customData: '', tokenIds: FOREVER }
+    ],
+    placeholders: {
+      [collectionUri]: { ...content },
+      [tokenUri]: { ...content }
+    } as PlaceholderSidecar
   };
 }
 
+/**
+ * Build a per-token metadata entry using a placeholder URI scoped to the
+ * token id. Returns `{ entry, placeholder }`:
+ *
+ *   - `entry` is the object to push into `tokenMetadata: [...]`
+ *   - `placeholder` is the sidecar entry the caller should merge into its
+ *     accumulated PlaceholderSidecar and pass to buildMsg via
+ *     `metadataPlaceholders`.
+ */
 export function singleTokenMetadata(tokenId: string, name: string, description?: string, image?: string) {
+  const uri = `ipfs://METADATA_TOKEN_${tokenId}`;
   return {
-    uri: DEFAULT_METADATA_URI,
-    customData: JSON.stringify({ name, description: description || '', image: image || '' }),
-    tokenIds: [{ start: tokenId, end: tokenId }]
+    entry: {
+      uri,
+      customData: '',
+      tokenIds: [{ start: tokenId, end: tokenId }]
+    },
+    placeholder: {
+      uri,
+      content: {
+        name,
+        description: description || '',
+        image: image || BITBADGES_DEFAULT_IMAGE
+      }
+    }
   };
 }
 
@@ -152,8 +196,23 @@ export function buildMsg(params: {
   aliasPathsToAdd?: any[];
   cosmosCoinWrapperPathsToAdd?: any[];
   mintEscrowCoinsToTransfer?: any[];
+  /**
+   * Off-chain metadata sidecar the template accumulated. Attached to the
+   * output Msg as `value._meta.metadataPlaceholders`. Templates that don't have
+   * specific content should still pass an empty {} so the auto-apply flow
+   * knows to treat default placeholder URIs as NEEDED.
+   */
+  metadataPlaceholders?: PlaceholderSidecar;
 }) {
-  return {
+  // Default to placeholder URIs (not the legacy DEFAULT_METADATA_URI). The
+  // metadata auto-apply flow recognizes `ipfs://METADATA_*` and substitutes
+  // them with real uploaded URIs after the off-chain JSON is provided.
+  const collectionMetadata = params.collectionMetadata || { uri: 'ipfs://METADATA_COLLECTION', customData: '' };
+  const tokenMetadata = params.tokenMetadata || [
+    { uri: 'ipfs://METADATA_TOKEN_DEFAULT', customData: '', tokenIds: FOREVER }
+  ];
+
+  const msg: any = {
     typeUrl: '/tokenization.MsgUniversalUpdateCollection',
     value: {
       creator: params.creator || '',
@@ -161,19 +220,19 @@ export function buildMsg(params: {
       updateValidTokenIds: true,
       validTokenIds: params.validTokenIds || [{ start: '1', end: '1' }],
       updateCollectionPermissions: true,
-      collectionPermissions: params.collectionPermissions || emptyPermissions(),
+      collectionPermissions: params.collectionPermissions || baselinePermissions(),
       updateManager: true,
       manager: params.manager || '',
       updateCollectionMetadata: true,
-      collectionMetadata: params.collectionMetadata || { uri: DEFAULT_METADATA_URI, customData: '' },
+      collectionMetadata,
       updateTokenMetadata: true,
-      tokenMetadata: params.tokenMetadata || [{ uri: DEFAULT_METADATA_URI, customData: '', tokenIds: FOREVER }],
+      tokenMetadata,
       updateCustomData: true,
       customData: params.customData || '',
       updateCollectionApprovals: true,
       collectionApprovals: params.collectionApprovals.map((a: any) => ({
         ...a,
-        uri: a.uri || DEFAULT_METADATA_URI
+        uri: a.uri || `ipfs://METADATA_APPROVAL_${a.approvalId || 'unnamed'}`
       })),
       updateStandards: true,
       standards: params.standards || [],
@@ -186,6 +245,21 @@ export function buildMsg(params: {
       cosmosCoinWrapperPathsToAdd: params.cosmosCoinWrapperPathsToAdd || []
     }
   };
+
+  // Attach the sidecar as a per-msg `_meta` annotation on value, keyed
+  // by placeholder URIs that only live inside this msg's body. This is
+  // the single canonical location for the placeholder sidecar; every
+  // producer writes here and every consumer reads from here. There is
+  // no top-level `tx.metadataPlaceholders` copy anywhere in the code-
+  // base. Proto classes strip unknown fields on round-trip, so any
+  // place that reconstructs the msg through a Msg class must preserve
+  // `value._meta` explicitly (see core/review-normalize.ts
+  // reattachInlineMetadata).
+  if (params.metadataPlaceholders && Object.keys(params.metadataPlaceholders).length > 0) {
+    msg.value._meta = { metadataPlaceholders: params.metadataPlaceholders };
+  }
+
+  return msg;
 }
 
 /**
@@ -194,13 +268,20 @@ export function buildMsg(params: {
  */
 export function buildUserApprovalMsg(params: {
   collectionId: string;
+  /**
+   * Optional creator override. The CLI's `emit()` backfills this from
+   * the `--creator` flag after build, so most templates don't need to
+   * pass it through. Provided here for callers that want to set it
+   * explicitly (e.g. unit tests, other tooling).
+   */
+  creator?: string;
   outgoingApprovals?: any[];
   incomingApprovals?: any[];
 }) {
   return {
     typeUrl: '/tokenization.MsgUpdateUserApprovals',
     value: {
-      creator: '',
+      creator: params.creator || '',
       collectionId: params.collectionId,
       updateOutgoingApprovals: (params.outgoingApprovals?.length ?? 0) > 0,
       outgoingApprovals: params.outgoingApprovals || [],
@@ -212,11 +293,79 @@ export function buildUserApprovalMsg(params: {
 
 // ── Permission helpers ───────────────────────────────────────────────────────
 
+/**
+ * Bare action permission — used for canDeleteCollection, canArchiveCollection,
+ * canUpdateStandards, canUpdateCustomData, canUpdateManager,
+ * canUpdateCollectionMetadata, canAddMoreAliasPaths,
+ * canAddMoreCosmosCoinWrapperPaths. These permission types take no extra
+ * scoping fields.
+ */
 export function alwaysLockedPermission() {
   return { permanentlyPermittedTimes: [], permanentlyForbiddenTimes: FOREVER };
 }
 
-export function emptyPermissions() {
+/**
+ * Token-scoped action permission — used for canUpdateValidTokenIds and
+ * canUpdateTokenMetadata, which require a `tokenIds` field that narrows
+ * which token IDs the permission applies to. Defaults to all token IDs.
+ */
+export function alwaysLockedTokenIdsPermission() {
+  return {
+    tokenIds: FOREVER,
+    permanentlyPermittedTimes: [],
+    permanentlyForbiddenTimes: FOREVER
+  };
+}
+
+/**
+ * Approval-scoped action permission — used for canUpdateCollectionApprovals.
+ * Requires fromListId / toListId / initiatedByListId plus tokenIds and
+ * transferTimes. Defaults to "all approvals, forever" so the resulting
+ * permission locks the whole approval set.
+ */
+export function alwaysLockedCollectionApprovalPermission() {
+  return {
+    fromListId: 'All',
+    toListId: 'All',
+    initiatedByListId: 'All',
+    transferTimes: FOREVER,
+    tokenIds: FOREVER,
+    approvalId: 'All',
+    amountTrackerId: 'All',
+    challengeTrackerId: 'All',
+    permanentlyPermittedTimes: [],
+    permanentlyForbiddenTimes: FOREVER
+  };
+}
+
+/**
+ * Baseline collection-permission set used as the default when a
+ * template doesn't override. **NOT actually empty** — six fields
+ * are pre-locked via `alwaysLockedPermission()`:
+ *
+ *   canDeleteCollection           locked (safety: never burn the collection)
+ *   canArchiveCollection          locked (safety: never archive)
+ *   canUpdateStandards            locked (the standards tag commits the schema)
+ *   canUpdateCustomData           locked (no ad-hoc proto-level mutations)
+ *   canUpdateValidTokenIds        locked (supply immutability)
+ *   canAddMoreAliasPaths          locked (no post-create alias path expansion)
+ *   canAddMoreCosmosCoinWrapperPaths locked (same for wrapper paths)
+ *
+ * The four permissions left OPEN (empty array = neutral):
+ *
+ *   canUpdateManager              manager can be rotated
+ *   canUpdateCollectionMetadata   manager can update the collection metadata URI
+ *   canUpdateTokenMetadata        manager can update per-token metadata
+ *   canUpdateCollectionApprovals  approval set can still be edited
+ *
+ * This is the "safe default for most mintable token collections" — the
+ * metadata + manager + approvals can still evolve, but the collection
+ * itself can't be deleted or have its standards/tokenIds shifted under
+ * holders. Templates that need total immutability use
+ * `frozenPermissions()` instead. Templates that need fully neutral
+ * (everything mutable) should construct their own permission object.
+ */
+export function baselinePermissions() {
   return {
     canDeleteCollection: [alwaysLockedPermission()],
     canArchiveCollection: [alwaysLockedPermission()],
@@ -224,7 +373,7 @@ export function emptyPermissions() {
     canUpdateCustomData: [alwaysLockedPermission()],
     canUpdateManager: [],
     canUpdateCollectionMetadata: [],
-    canUpdateValidTokenIds: [alwaysLockedPermission()],
+    canUpdateValidTokenIds: [alwaysLockedTokenIdsPermission()],
     canUpdateTokenMetadata: [],
     canUpdateCollectionApprovals: [],
     canAddMoreAliasPaths: [alwaysLockedPermission()],
@@ -232,20 +381,24 @@ export function emptyPermissions() {
   };
 }
 
+/** @deprecated Renamed to `baselinePermissions` — this helper returns
+ * the default-locked permission set, not an actually-empty one. Kept as
+ * an alias for one release so external consumers (if any) don't break. */
+export const emptyPermissions = baselinePermissions;
+
 export function frozenPermissions() {
-  const locked = [alwaysLockedPermission()];
   return {
-    canDeleteCollection: locked,
-    canArchiveCollection: locked,
-    canUpdateStandards: locked,
-    canUpdateCustomData: locked,
-    canUpdateManager: locked,
-    canUpdateCollectionMetadata: locked,
-    canUpdateValidTokenIds: locked,
-    canUpdateTokenMetadata: locked,
-    canUpdateCollectionApprovals: locked,
-    canAddMoreAliasPaths: locked,
-    canAddMoreCosmosCoinWrapperPaths: locked
+    canDeleteCollection: [alwaysLockedPermission()],
+    canArchiveCollection: [alwaysLockedPermission()],
+    canUpdateStandards: [alwaysLockedPermission()],
+    canUpdateCustomData: [alwaysLockedPermission()],
+    canUpdateManager: [alwaysLockedPermission()],
+    canUpdateCollectionMetadata: [alwaysLockedPermission()],
+    canUpdateValidTokenIds: [alwaysLockedTokenIdsPermission()],
+    canUpdateTokenMetadata: [alwaysLockedTokenIdsPermission()],
+    canUpdateCollectionApprovals: [alwaysLockedCollectionApprovalPermission()],
+    canAddMoreAliasPaths: [alwaysLockedPermission()],
+    canAddMoreCosmosCoinWrapperPaths: [alwaysLockedPermission()]
   };
 }
 
@@ -267,7 +420,8 @@ export function defaultBalances(overrides?: Partial<{
       canUpdateIncomingApprovals: [],
       canUpdateOutgoingApprovals: [],
       canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
-      canUpdateAutoApproveSelfInitiatedOutgoingTransfers: []
+      canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
+      canUpdateAutoApproveAllIncomingTransfers: []
     },
     ...overrides
   };
@@ -349,24 +503,134 @@ export function scalingBalances(amount: string, maxMultiplier?: string) {
 
 // ── Alias path builder ───────────────────────────────────────────────────────
 
-export function buildAliasPath(denom: string, symbol: string, decimals: number, image?: string) {
-  const img = image || BITBADGES_DEFAULT_IMAGE;
+/**
+ * Build an alias path for a denom. PathMetadata only accepts
+ * `{ uri, customData }` — the image belongs inside the off-chain JSON
+ * referenced by `metadata.uri`. We emit placeholder URIs by default so
+ * users / agents can either (a) leave them and substitute after upload
+ * via `builder metadata apply`, or (b) pass a real URI up front.
+ *
+ * @param image Optional image URI. Kept in the parameter list for callers
+ *   that already pass it, but currently unused — the image must live in
+ *   the off-chain JSON, not the on-chain PathMetadata. Will be surfaced
+ *   through the metadata placeholder system.
+ */
+/**
+ * Strip any character not in `[a-zA-Z_{}-]` from a candidate cosmos
+ * wrapper path denom or symbol. The chain regex
+ * `^[a-zA-Z_{}-]+$` is enforced by `ValidateCosmosWrapperPathSymbol`
+ * (chain side at validate_basic.go:80-94). Digits are common in
+ * user-supplied symbols (e.g. "vUSDC9", "BADGE2") and must be removed
+ * before they reach the chain.
+ *
+ * Throws if the result is empty so callers don't accidentally produce
+ * a wrapper path with no name.
+ */
+export function sanitizeCosmosPathName(input: string, label: 'denom' | 'symbol' = 'symbol'): string {
+  const cleaned = input.replace(/[^a-zA-Z_{}\-]/g, '');
+  if (cleaned.length === 0) {
+    throw new Error(
+      `sanitizeCosmosPathName: input "${input}" produced an empty ${label} after stripping invalid characters. Provide a value containing at least one letter (a-zA-Z), underscore, brace, or dash.`
+    );
+  }
+  return cleaned;
+}
+
+/**
+ * Build an alias path entry for aliasPathsToAdd plus the matching metadata
+ * placeholder sidecar entries for both the path-level metadata URI and the
+ * denom unit's metadata URI. Returns `{ path, placeholders }`:
+ *
+ *   - `path` is the object to push into `aliasPathsToAdd: [...]`
+ *   - `placeholders` is a PlaceholderSidecar keyed by the two URIs the
+ *     path references. Callers should merge it into the accumulated
+ *     sidecar passed to buildMsg via `metadataPlaceholders`.
+ *
+ * Image/name/description intentionally flow through the sidecar — never
+ * onto the proto. The auto-apply flow on the frontend reads them from
+ * `metadataPlaceholders` keyed by the path/unit metadata URI.
+ */
+export function buildAliasPath(
+  denom: string,
+  symbol: string,
+  decimals: number,
+  image?: string,
+  name?: string,
+  description?: string
+) {
+  // Chain rule: denom unit decimals must be > 0. The chain rejects
+  // `decimals: '0'` with "denom unit decimals cannot be 0". Fail fast at
+  // build time so callers get a clear error instead of a chain rejection
+  // ten steps later.
+  if (!Number.isInteger(decimals) || decimals < 1) {
+    throw new Error(
+      `buildAliasPath: decimals must be an integer >= 1 (got ${decimals}). Use 1 for whole-unit-only tokens (e.g. NFTs that still need an alias path) or skip the alias path entirely if no fungible representation is needed.`
+    );
+  }
+  // Both denom and symbol must satisfy the chain's wrapper-path regex
+  // (`[a-zA-Z_{}-]+`). Validate up-front so callers get a clear error
+  // instead of a chain "invalid characters" rejection at simulate time.
+  const re = /^[a-zA-Z_{}\-]+$/;
+  if (!re.test(denom)) {
+    throw new Error(
+      `buildAliasPath: denom "${denom}" contains invalid characters. Allowed: a-zA-Z, _, {, }, -. Use sanitizeCosmosPathName() to clean user input.`
+    );
+  }
+  if (!re.test(symbol)) {
+    throw new Error(
+      `buildAliasPath: symbol "${symbol}" contains invalid characters. Allowed: a-zA-Z, _, {, }, -. Use sanitizeCosmosPathName() to clean user input.`
+    );
+  }
+  // Chain rule: denom and symbol can't be the same string because the
+  // chain validates them against a SHARED `symbolPaths` map per tx
+  // (msg_server_universal_update_collection.go validatePathSymbols).
+  // We already work around this by leaving the path-level symbol empty
+  // below; this guard catches any caller that might pass the same
+  // string for both fields explicitly.
+  if (denom === symbol) {
+    throw new Error(
+      `buildAliasPath: denom and symbol cannot be identical ("${denom}"). The chain rejects this with "duplicate denom unit symbol" because both fields are validated against the same per-tx map. Use different strings (e.g. denom="usymbol", symbol="SYMBOL").`
+    );
+  }
+  const pathUri = `ipfs://METADATA_ALIAS_${denom}`;
+  const unitUri = `ipfs://METADATA_ALIAS_${denom}_UNIT`;
+  const content = {
+    name: name || symbol,
+    description: description || '',
+    image: image || BITBADGES_DEFAULT_IMAGE
+  };
   return {
-    denom,
-    conversion: {
-      sideA: { amount: '1' },
-      sideB: [{ amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: FOREVER }]
+    path: {
+      denom,
+      conversion: {
+        sideA: { amount: '1' },
+        sideB: [{ amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: FOREVER }]
+      },
+      // Path-level symbol intentionally LEFT EMPTY. The chain validates
+      // path-level symbols and denom-unit-level symbols against the SAME
+      // `symbolPaths` map per tx (validatePathSymbols in
+      // msg_server_universal_update_collection.go:673). When both are set
+      // to the same string, the second insertion fails with "duplicate
+      // denom unit symbol", even though there's only one alias path with
+      // one denom unit. Skipping the path-level entry (chain check is
+      // gated on `if pathSymbol != ""`) avoids the spurious collision
+      // while keeping the user-facing symbol on the denom unit, which is
+      // what the frontend / wallets actually display.
+      symbol: '',
+      denomUnits: [
+        {
+          decimals: String(decimals),
+          symbol,
+          isDefaultDisplay: true,
+          metadata: { uri: unitUri, customData: '' }
+        }
+      ],
+      metadata: { uri: pathUri, customData: '' }
     },
-    symbol,
-    denomUnits: [
-      {
-        decimals: String(decimals),
-        symbol,
-        isDefaultDisplay: true,
-        metadata: { uri: '', customData: '', image: img }
-      }
-    ],
-    metadata: { uri: '', customData: '', image: img }
+    placeholders: {
+      [pathUri]: { ...content },
+      [unitUri]: { ...content }
+    } as PlaceholderSidecar
   };
 }
 

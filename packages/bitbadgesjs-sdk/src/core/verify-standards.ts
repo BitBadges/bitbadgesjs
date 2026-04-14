@@ -13,9 +13,10 @@
 
 import { CollectionDoc } from '../api-indexer/docs-types/docs.js';
 import { doesCollectionFollowSubscriptionProtocol } from './subscriptions.js';
+import { normalizeForReview } from './review-normalize.js';
 
-const MAX_UINT64 = '18446744073709551615';
-const FOREVER = [{ start: '1', end: MAX_UINT64 }];
+const MAX_UINT64 = 18446744073709551615n;
+const FOREVER = [{ start: 1n, end: MAX_UINT64 }];
 const BURN_ADDRESS = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
 
 // ============================================================
@@ -41,12 +42,12 @@ export interface VerificationResult {
 
 function isForever(times: any[]): boolean {
   if (!Array.isArray(times) || times.length !== 1) return false;
-  return String(times[0]?.start) === '1' && String(times[0]?.end) === MAX_UINT64;
+  return times[0]?.start === 1n && times[0]?.end === MAX_UINT64;
 }
 
 function isSingleToken(tokenIds: any[]): boolean {
   if (!Array.isArray(tokenIds) || tokenIds.length !== 1) return false;
-  return String(tokenIds[0]?.start) === '1' && String(tokenIds[0]?.end) === '1';
+  return tokenIds[0]?.start === 1n && tokenIds[0]?.end === 1n;
 }
 
 function getApprovals(value: any): any[] {
@@ -174,8 +175,11 @@ function verifySmartToken(value: any): StandardViolation[] {
     });
   }
 
-  // Must have alias path
-  const hasAliasPath = (value.aliasPathsToAdd && value.aliasPathsToAdd.length > 0) || invariants.aliasPath;
+  // Must have alias path. Tolerate both field names:
+  //   - aliasPathsToAdd (MsgUniversalUpdateCollection create shape)
+  //   - aliasPaths (frontend collection store shape)
+  const aliasPaths = value.aliasPathsToAdd || value.aliasPaths || [];
+  const hasAliasPath = aliasPaths.length > 0 || invariants.aliasPath;
   if (!hasAliasPath) {
     violations.push({
       standard: std,
@@ -194,7 +198,7 @@ function verifySubscription(value: any): StandardViolation[] {
 
   // validTokenIds must start at 1 (one range, supports multi-tier)
   const vt = value.validTokenIds;
-  if (!Array.isArray(vt) || vt.length !== 1 || String(vt[0]?.start) !== '1') {
+  if (!Array.isArray(vt) || vt.length !== 1 || vt[0]?.start !== 1n) {
     violations.push({
       standard: std,
       field: 'validTokenIds',
@@ -247,7 +251,7 @@ function verifySubscription(value: any): StandardViolation[] {
         field: `${prefix}.predeterminedBalances.incrementedBalances.startBalances`,
         message: `Subscription approval "${approval.approvalId}" startBalances must have exactly 1 entry.`
       });
-    } else if (String(ib.startBalances[0]?.amount) !== '1') {
+    } else if (ib.startBalances[0]?.amount !== 1n) {
       violations.push({
         standard: std,
         field: `${prefix}.predeterminedBalances.incrementedBalances.startBalances[0].amount`,
@@ -256,7 +260,7 @@ function verifySubscription(value: any): StandardViolation[] {
     }
 
     // durationFromTimestamp must be non-zero
-    if (!ib.durationFromTimestamp || ib.durationFromTimestamp === '0') {
+    if (!ib.durationFromTimestamp || ib.durationFromTimestamp === 0n) {
       violations.push({
         standard: std,
         field: `${prefix}.predeterminedBalances.incrementedBalances.durationFromTimestamp`,
@@ -275,31 +279,31 @@ function verifySubscription(value: any): StandardViolation[] {
       });
     }
 
-    // incrementTokenIdsBy and incrementOwnershipTimesBy should be "0"
-    if (ib.incrementTokenIdsBy && ib.incrementTokenIdsBy !== '0') {
+    // incrementTokenIdsBy and incrementOwnershipTimesBy should be 0
+    if (ib.incrementTokenIdsBy && ib.incrementTokenIdsBy !== 0n) {
       violations.push({
         standard: std,
         field: `${prefix}.predeterminedBalances.incrementedBalances.incrementTokenIdsBy`,
-        message: `Subscription approval "${approval.approvalId}" incrementTokenIdsBy should be "0" (single token ID for subscriptions).`
+        message: `Subscription approval "${approval.approvalId}" incrementTokenIdsBy should be 0 (single token ID for subscriptions).`
       });
     }
-    if (ib.incrementOwnershipTimesBy && ib.incrementOwnershipTimesBy !== '0') {
+    if (ib.incrementOwnershipTimesBy && ib.incrementOwnershipTimesBy !== 0n) {
       violations.push({
         standard: std,
         field: `${prefix}.predeterminedBalances.incrementedBalances.incrementOwnershipTimesBy`,
-        message: `Subscription approval "${approval.approvalId}" incrementOwnershipTimesBy should be "0".`
+        message: `Subscription approval "${approval.approvalId}" incrementOwnershipTimesBy should be 0.`
       });
     }
 
     // Mutual exclusivity: only ONE of durationFromTimestamp, incrementOwnershipTimesBy, recurringOwnershipTimes can be non-zero
     const rot = ib.recurringOwnershipTimes;
-    const hasDuration = ib.durationFromTimestamp && ib.durationFromTimestamp !== '0';
-    const hasIncrement = ib.incrementOwnershipTimesBy && ib.incrementOwnershipTimesBy !== '0';
+    const hasDuration = ib.durationFromTimestamp && ib.durationFromTimestamp !== 0n;
+    const hasIncrement = ib.incrementOwnershipTimesBy && ib.incrementOwnershipTimesBy !== 0n;
     const hasRecurring =
       rot &&
-      ((rot.startTime && rot.startTime !== '0') ||
-        (rot.intervalLength && rot.intervalLength !== '0') ||
-        (rot.chargePeriodLength && rot.chargePeriodLength !== '0'));
+      ((rot.startTime && rot.startTime !== 0n) ||
+        (rot.intervalLength && rot.intervalLength !== 0n) ||
+        (rot.chargePeriodLength && rot.chargePeriodLength !== 0n));
     const activeCount = [hasDuration, hasIncrement, hasRecurring].filter(Boolean).length;
     if (activeCount > 1) {
       violations.push({
@@ -391,7 +395,7 @@ function verifyNFTCollection(value: any): StandardViolation[] {
   const invariants = getInvariants(value);
 
   // maxSupplyPerId should be "1" for true NFTs
-  if (!invariants.maxSupplyPerId || String(invariants.maxSupplyPerId) !== '1') {
+  if (!invariants.maxSupplyPerId || invariants.maxSupplyPerId !== 1n) {
     violations.push({
       standard: std,
       field: 'invariants.maxSupplyPerId',
@@ -568,30 +572,12 @@ function verifyCreditToken(value: any): StandardViolation[] {
   return violations;
 }
 
-function verifyQuest(value: any): StandardViolation[] {
-  const violations: StandardViolation[] = [];
-  const std = 'Quest';
-  const mintApprovals = getMintApprovals(value);
-
-  // Should have at least one mint approval with coinTransfers (reward payout)
-  const hasRewardApproval = mintApprovals.some(
-    (a: any) => a.approvalCriteria?.coinTransfers && a.approvalCriteria.coinTransfers.length > 0
-  );
-
-  // Check escrow vs payout — warning only (user can fund later)
-  if (hasRewardApproval) {
-    const escrowCoins = value.mintEscrowCoinsToTransfer || [];
-    if (escrowCoins.length === 0) {
-      violations.push({
-        standard: std,
-        field: 'mintEscrowCoinsToTransfer',
-        message:
-          'Quest has reward payouts but no escrow funding configured. Users will not be able to claim rewards until the escrow is funded. You can fund it later by sending coins to the mint escrow address.'
-      });
-    }
-  }
-
-  return violations;
+function verifyQuest(_value: any): StandardViolation[] {
+  // Quest-specific checks moved to review-ux/skills.ts so they can ship
+  // as soft warnings instead of critical standards violations. The user
+  // can fund mint escrow post-creation by sending coins to the escrow
+  // address, so "no escrow configured" is informational not blocking.
+  return [];
 }
 
 function verifyTradableNFT(value: any): StandardViolation[] {
@@ -648,13 +634,37 @@ function verifyNonTransferable(value: any): StandardViolation[] {
 // Common Mint Approval Checks (run for ALL standards with mint approvals)
 // ============================================================
 
+/**
+ * True when the transaction targets an existing collection — i.e. it's
+ * an update, not a create. Detected by a non-"0" collectionId (chain
+ * convention for new collections). Used to skip structural checks on
+ * CREATE-ONLY fields (defaultBalances, invariants) that the chain
+ * ignores on MsgUpdateCollection and that the session layer already
+ * blocks the AI from modifying on update builds.
+ */
+function isUpdateTransaction(value: any): boolean {
+  const cid = value?.collectionId;
+  if (cid == null) return false;
+  const s = String(cid);
+  return s !== '' && s !== '0';
+}
+
 function verifyCommonMintRules(value: any): StandardViolation[] {
   const violations: StandardViolation[] = [];
   const mintApprovals = getMintApprovals(value);
   const defaultBalances = value.defaultBalances || {};
 
+  // defaultBalances is a CREATION-ONLY field — the chain ignores it on
+  // MsgUpdateCollection and the session layer blocks set_default_balances
+  // on updates. For an update tx the on-chain collection already has its
+  // defaultBalances set; we can't change it from this message anyway.
+  // Checking the tx body here fires on every update that adds or touches
+  // a Mint approval (see ses_1ps5eu91pxxa). Skip the auto-approve
+  // incoming rule for updates; it remains enforced on create.
+  const isUpdate = isUpdateTransaction(value);
+
   // If there are mint approvals, defaultBalances should have autoApproveAllIncomingTransfers
-  if (mintApprovals.length > 0) {
+  if (mintApprovals.length > 0 && !isUpdate) {
     if (
       defaultBalances.autoApproveAllIncomingTransfers !== true &&
       defaultBalances.autoApproveAllIncomingTransfers !== 'true'
@@ -663,7 +673,7 @@ function verifyCommonMintRules(value: any): StandardViolation[] {
         standard: 'Common',
         field: 'defaultBalances.autoApproveAllIncomingTransfers',
         message:
-          'Collections with mint approvals MUST have defaultBalances.autoApproveAllIncomingTransfers: true. Without this, recipients cannot receive minted tokens.',
+          'Collections with token-creation (Mint) approvals MUST have defaultBalances.autoApproveAllIncomingTransfers: true. Without this, recipients cannot receive newly created tokens.',
         fix: 'Set defaultBalances.autoApproveAllIncomingTransfers: true.'
       });
     }
@@ -682,11 +692,24 @@ function verifyCommonMintRules(value: any): StandardViolation[] {
     }
   }
 
-  // Mint approvals with predeterminedBalances must have exactly one orderCalculationMethod
+  // Mint approvals with predeterminedBalances must have exactly one
+  // orderCalculationMethod — but ONLY when the predetermined balances
+  // are actually being used. Per `approvalCriteriaUsesPredeterminedBalances`,
+  // that means either `incrementedBalances.startBalances` OR
+  // `manualBalances` is non-empty. The chain's `validate_basic.go` rule
+  // is "when using predetermined balances, exactly one order calculation
+  // can be set to true". An approval with both arrays empty (e.g.
+  // custom-2fa, which enforces expiration via allowPurgeIfExpired) has
+  // nothing to order, so the chain accepts all flags false.
   for (const approval of mintApprovals) {
     const ac = approval.approvalCriteria || {};
     const pb = ac.predeterminedBalances;
-    if (pb?.orderCalculationMethod) {
+    const incStart = pb?.incrementedBalances?.startBalances;
+    const manual = pb?.manualBalances;
+    const usesPredetermined =
+      (Array.isArray(incStart) && incStart.length > 0) ||
+      (Array.isArray(manual) && manual.length > 0);
+    if (pb?.orderCalculationMethod && usesPredetermined) {
       const ocm = pb.orderCalculationMethod;
       const trueCount = [
         ocm.useOverallNumTransfers,
@@ -700,7 +723,7 @@ function verifyCommonMintRules(value: any): StandardViolation[] {
         violations.push({
           standard: 'Common',
           field: `collectionApprovals[${approval.approvalId}].predeterminedBalances.orderCalculationMethod`,
-          message: `Approval "${approval.approvalId}" uses predeterminedBalances but no orderCalculationMethod is set to true. Exactly one must be true.`,
+          message: `Approval "${approval.approvalId}" uses predeterminedBalances (incrementedBalances.startBalances or manualBalances) but no orderCalculationMethod is set to true. Exactly one must be true.`,
           fix: 'Set useOverallNumTransfers: true (most common default).'
         });
       } else if (trueCount > 1) {
@@ -745,7 +768,7 @@ function verifyBounty(value: any): StandardViolation[] {
     }
     // Each should have maxNumTransfers.overallMaxNumTransfers = 1
     const mnt = ac.maxNumTransfers;
-    if (mnt && String(mnt.overallMaxNumTransfers) !== '1') {
+    if (mnt && mnt.overallMaxNumTransfers !== 1n) {
       violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].maxNumTransfers`, message: `Bounty approval "${a.approvalId}" overallMaxNumTransfers must be "1".` });
     }
   }
@@ -770,7 +793,7 @@ function verifyCrowdfund(value: any): StandardViolation[] {
 
   // Must have 2 token IDs (refund + progress)
   const tokenIds = value.validTokenIds;
-  if (!Array.isArray(tokenIds) || tokenIds.length !== 1 || String(tokenIds[0]?.start) !== '1' || String(tokenIds[0]?.end) !== '2') {
+  if (!Array.isArray(tokenIds) || tokenIds.length !== 1 || tokenIds[0]?.start !== 1n || tokenIds[0]?.end !== 2n) {
     violations.push({ standard: std, field: 'validTokenIds', message: 'Crowdfund collections MUST have validTokenIds = [{ start: "1", end: "2" }] (refund + progress tokens).' });
   }
 
@@ -805,8 +828,9 @@ function verifyAuction(value: any): StandardViolation[] {
   const approvals = getApprovals(value);
   const mintApprovals = getMintApprovals(value);
 
+  // Post-settlement state is valid: the mint-to-winner approval uses
+  // autoDeletionOptions.afterOneUse, so it's gone once the auction settles.
   if (mintApprovals.length === 0) {
-    violations.push({ standard: std, field: 'collectionApprovals', message: 'Auction requires at least one mint approval (mint-to-winner).' });
     return violations;
   }
 
@@ -817,7 +841,7 @@ function verifyAuction(value: any): StandardViolation[] {
     }
     // Must have maxNumTransfers = 1
     const mnt = ac.maxNumTransfers;
-    if (mnt && String(mnt.overallMaxNumTransfers) !== '1') {
+    if (mnt && mnt.overallMaxNumTransfers !== 1n) {
       violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].maxNumTransfers`, message: `Auction mint-to-winner overallMaxNumTransfers must be "1".` });
     }
     // Transfer times should be bounded (not FOREVER)
@@ -869,7 +893,7 @@ function verifyPredictionMarket(value: any): StandardViolation[] {
 
   // Must have 2 token IDs (YES/NO)
   const tokenIds = value.validTokenIds;
-  if (!Array.isArray(tokenIds) || tokenIds.length !== 1 || String(tokenIds[0]?.start) !== '1' || String(tokenIds[0]?.end) !== '2') {
+  if (!Array.isArray(tokenIds) || tokenIds.length !== 1 || tokenIds[0]?.start !== 1n || tokenIds[0]?.end !== 2n) {
     violations.push({ standard: std, field: 'validTokenIds', message: 'Prediction market MUST have validTokenIds = [{ start: "1", end: "2" }] (YES + NO tokens).' });
   }
 
@@ -1192,6 +1216,36 @@ function isFakeOrMissingImage(image: string | undefined): boolean {
   return FAKE_IMAGE_PATTERNS.some((p) => p.test(image));
 }
 
+/**
+ * True if a PathMetadata.uri is missing, blank, or matches one of the
+ * known fake/placeholder patterns. Empty `ipfs://METADATA_*` internal
+ * placeholders from the template/session flow count as VALID here — they
+ * intentionally mark "substitute this at deploy time" and are honoured by
+ * the metadata auto-apply layer.
+ */
+function isFakeOrMissingUri(uri: string | undefined): boolean {
+  if (!uri || uri.trim() === '') return true;
+  // Internal placeholders emitted by buildAliasPath / session builders
+  // are valid — they're substituted during the metadata auto-apply flow.
+  if (/^ipfs:\/\/METADATA_[A-Z]/.test(uri)) return false;
+  return FAKE_IMAGE_PATTERNS.some((p) => p.test(uri));
+}
+
+/**
+ * True if a path metadata object is in the frontend "WithDetails" shape
+ * — a nested `metadata.metadata` object with inline name / image /
+ * description. The frontend stores this pre-upload; the metadata
+ * auto-apply flow uploads the inline content to IPFS and populates the
+ * `uri` field on submit. When in this state, the `uri` is intentionally
+ * blank and "missing URI" violations are false positives.
+ */
+function isPreApplyMetadata(m: any): boolean {
+  if (!m || typeof m !== 'object') return false;
+  const inner = m.metadata;
+  if (!inner || typeof inner !== 'object') return false;
+  return Boolean(inner.name || inner.image || inner.description);
+}
+
 function verifyMetadataPlaceholders(value: any): StandardViolation[] {
   const violations: StandardViolation[] = [];
   const std = 'Common';
@@ -1232,7 +1286,11 @@ function verifyMetadataPlaceholders(value: any): StandardViolation[] {
     }
   }
 
-  // Check alias path metadata — ALL alias paths and denomUnits MUST have metadata with an image
+  // Check alias path metadata — PathMetadata only has {uri, customData}. The
+  // image lives inside the off-chain JSON referenced by `uri`. Every alias
+  // path and every denomUnit MUST have a metadata.uri set (ideally a
+  // placeholder like ipfs://METADATA_ALIAS_<denom> that gets substituted
+  // post-build via the metadata auto-apply flow).
   const aliasPaths = value.aliasPathsToAdd || [];
   for (let i = 0; i < aliasPaths.length; i++) {
     const ap = aliasPaths[i];
@@ -1240,18 +1298,26 @@ function verifyMetadataPlaceholders(value: any): StandardViolation[] {
       violations.push({
         standard: std,
         field: `aliasPathsToAdd[${i}].metadata`,
-        message: `Alias path "${ap.denom || i}" is missing metadata entirely. All alias paths MUST have metadata with a uri, customData, and image.`,
-        fix: `Add metadata: { uri: "", customData: "", image: "${BITBADGES_DEFAULT_IMAGE}" }.`
+        message: `Alias path "${ap.denom || i}" is missing PathMetadata entirely. All alias paths MUST have metadata: { uri, customData }.`,
+        fix: `Add metadata: { uri: "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}", customData: "" } and upload the image inside the JSON at that URI via the auto-apply flow.`
       });
-    } else if (isFakeOrMissingImage(ap.metadata?.image)) {
+    } else if (isFakeOrMissingUri(ap.metadata?.uri) && !isPreApplyMetadata(ap.metadata)) {
+      violations.push({
+        standard: std,
+        field: `aliasPathsToAdd[${i}].metadata.uri`,
+        message: `Alias path "${ap.denom || i}" metadata.uri is missing or is a fake placeholder. The image must live inside the off-chain JSON at this URI.`,
+        fix: `Set metadata.uri to a placeholder like "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}" (the metadata auto-apply flow replaces this with a real upload) or to a real uploaded URI directly.`
+      });
+    }
+    if ('image' in (ap.metadata || {})) {
       violations.push({
         standard: std,
         field: `aliasPathsToAdd[${i}].metadata.image`,
-        message: `Alias path metadata has no image or uses a fake placeholder. Use the BitBadges default: "${BITBADGES_DEFAULT_IMAGE}" or the user-provided image.`,
-        fix: `Set metadata.image to "${BITBADGES_DEFAULT_IMAGE}".`
+        message: `aliasPathsToAdd[${i}].metadata.image is not a valid field. PathMetadata only has { uri, customData }. Put the image inside the off-chain JSON referenced by metadata.uri.`,
+        fix: `Remove metadata.image and place the image field inside the JSON blob hosted at metadata.uri.`
       });
     }
-    // Check denomUnit metadata — each denomUnit MUST have metadata with an image
+    // Check denomUnit metadata — each denomUnit MUST have PathMetadata with uri
     if (Array.isArray(ap.denomUnits)) {
       for (let j = 0; j < ap.denomUnits.length; j++) {
         const du = ap.denomUnits[j];
@@ -1259,22 +1325,30 @@ function verifyMetadataPlaceholders(value: any): StandardViolation[] {
           violations.push({
             standard: std,
             field: `aliasPathsToAdd[${i}].denomUnits[${j}].metadata`,
-            message: `Denom unit "${du.symbol || j}" is missing metadata entirely. All denomUnits MUST have metadata with a uri, customData, and image.`,
-            fix: `Add metadata: { uri: "", customData: "", image: "${BITBADGES_DEFAULT_IMAGE}" }.`
+            message: `Denom unit "${du.symbol || j}" is missing PathMetadata entirely. All denomUnits MUST have metadata: { uri, customData }.`,
+            fix: `Add metadata: { uri: "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}_UNIT", customData: "" }.`
           });
-        } else if (isFakeOrMissingImage(du.metadata?.image)) {
+        } else if (isFakeOrMissingUri(du.metadata?.uri) && !isPreApplyMetadata(du.metadata)) {
+          violations.push({
+            standard: std,
+            field: `aliasPathsToAdd[${i}].denomUnits[${j}].metadata.uri`,
+            message: `Denom unit "${du.symbol || j}" metadata.uri is missing or is a fake placeholder.`,
+            fix: `Set metadata.uri to a placeholder like "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}_UNIT" or to a real uploaded URI directly.`
+          });
+        }
+        if ('image' in (du.metadata || {})) {
           violations.push({
             standard: std,
             field: `aliasPathsToAdd[${i}].denomUnits[${j}].metadata.image`,
-            message: `Denom unit "${du.symbol || j}" metadata has no image or uses a fake placeholder.`,
-            fix: `Set metadata.image to "${BITBADGES_DEFAULT_IMAGE}".`
+            message: `denomUnits[${j}].metadata.image is not a valid field. PathMetadata only has { uri, customData }. Put the image inside the off-chain JSON referenced by metadata.uri.`,
+            fix: `Remove metadata.image and place the image field inside the JSON blob hosted at metadata.uri.`
           });
         }
       }
     }
   }
 
-  // Check cosmos coin wrapper path metadata
+  // Check cosmos coin wrapper path metadata — same PathMetadata shape
   const wrapperPaths = value.cosmosCoinWrapperPathsToAdd || [];
   for (let i = 0; i < wrapperPaths.length; i++) {
     const wp = wrapperPaths[i];
@@ -1282,15 +1356,23 @@ function verifyMetadataPlaceholders(value: any): StandardViolation[] {
       violations.push({
         standard: std,
         field: `cosmosCoinWrapperPathsToAdd[${i}].metadata`,
-        message: `Cosmos coin wrapper path is missing metadata entirely. MUST have metadata with image.`,
-        fix: `Add metadata: { uri: "", customData: "", image: "${BITBADGES_DEFAULT_IMAGE}" }.`
+        message: `Cosmos coin wrapper path is missing PathMetadata entirely. MUST have metadata: { uri, customData }.`,
+        fix: `Add metadata: { uri: "ipfs://METADATA_WRAPPER_${wp.denom || '<DENOM>'}", customData: "" }.`
       });
-    } else if (isFakeOrMissingImage(wp.metadata?.image)) {
+    } else if (isFakeOrMissingUri(wp.metadata?.uri)) {
+      violations.push({
+        standard: std,
+        field: `cosmosCoinWrapperPathsToAdd[${i}].metadata.uri`,
+        message: `Cosmos coin wrapper path metadata.uri is missing or is a fake placeholder.`,
+        fix: `Set metadata.uri to a placeholder like "ipfs://METADATA_WRAPPER_${wp.denom || '<DENOM>'}" or a real uploaded URI.`
+      });
+    }
+    if ('image' in (wp.metadata || {})) {
       violations.push({
         standard: std,
         field: `cosmosCoinWrapperPathsToAdd[${i}].metadata.image`,
-        message: `Cosmos coin wrapper path metadata has no image or uses a fake placeholder.`,
-        fix: `Set metadata.image to "${BITBADGES_DEFAULT_IMAGE}".`
+        message: `cosmosCoinWrapperPathsToAdd[${i}].metadata.image is not a valid field. PathMetadata only has { uri, customData }.`,
+        fix: `Remove metadata.image and place the image field inside the JSON blob hosted at metadata.uri.`
       });
     }
   }
@@ -1369,16 +1451,49 @@ function verifyApprovalTrackingFields(value: any): StandardViolation[] {
  * Runs with 0 AI tokens — pure structural validation.
  *
  * @param transaction - The full transaction object (with messages array)
+ * @param onChainCollection - Optional prior on-chain state. Required for
+ *   accurate verification of update transactions — the chain ignores
+ *   `defaultBalances` and `invariants` on MsgUpdateCollection, so those
+ *   fields are absent from the tx body even though the checks below
+ *   depend on them. When supplied, we splice the on-chain values onto
+ *   the verification view so every downstream check runs against the
+ *   full effective collection state.
  * @returns VerificationResult with violations and checked standards
  */
-export function verifyStandardsCompliance(transaction: any): VerificationResult {
-  const msg = transaction?.messages?.[0] || transaction?.msgs?.[0];
-  const value = msg?.value || msg;
+export function verifyStandardsCompliance(
+  transaction: any,
+  onChainCollection?: any
+): VerificationResult {
+  // normalizeForReview unwraps tx/msg wrappers, mirrors aliasPaths field
+  // names, and converts all numeric fields to bigints via the Msg class's
+  // registered .convert(BigIntify). Every downstream check here assumes
+  // that normalized shape. Idempotent — safe to run on already-normalized
+  // input (reviewCollection pipeline) or raw input (direct callers like
+  // the builders test suite).
+  const normalized = normalizeForReview(transaction);
+  let value: any = normalized && typeof normalized === 'object' ? normalized : null;
   if (!value) {
     return {
       valid: false,
       violations: [{ standard: 'Common', field: 'messages', message: 'Transaction has no messages.' }],
       standardsChecked: []
+    };
+  }
+
+  // For update transactions, overlay on-chain create-only fields onto
+  // the verification view. If the caller didn't supply on-chain state,
+  // the per-field checks already short-circuit via isUpdateTransaction()
+  // so they don't fire spurious "missing default" errors — see
+  // verifyCommonMintRules() and ses_1ps5eu91pxxa for the motivating case.
+  if (isUpdateTransaction(value) && onChainCollection && typeof onChainCollection === 'object') {
+    const chainValue =
+      (onChainCollection as any)?.messages?.[0]?.value ||
+      (onChainCollection as any)?.messages?.[0] ||
+      onChainCollection;
+    value = {
+      ...value,
+      defaultBalances: value.defaultBalances ?? chainValue?.defaultBalances,
+      invariants: value.invariants ?? chainValue?.invariants
     };
   }
 

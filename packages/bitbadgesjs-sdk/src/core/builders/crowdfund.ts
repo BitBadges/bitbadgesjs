@@ -10,7 +10,6 @@ import {
   toBaseUnits,
   durationToTimestamp,
   buildMsg,
-  buildAliasPath,
   frozenPermissions,
   defaultBalances,
   metadataPlaceholders,
@@ -24,12 +23,26 @@ export interface CrowdfundParams {
   crowdfunder?: string; // bb1... address — who receives funds on success (creator fills in if empty)
   deadline?: string; // duration shorthand, default "30d"
   name?: string;
+  /**
+   * Creator address — used as the default crowdfunder when `crowdfunder`
+   * isn't specified. The CLI passes this through from `--creator`.
+   * Without a real address the resulting tx is broken (the success/refund
+   * approvals would have `toListId: 'All'` which is meaningless for an
+   * escrow payout).
+   */
+  creator?: string;
 }
 
 export function buildCrowdfund(params: CrowdfundParams): any {
   const coin = resolveCoin(params.denom);
   const goalBase = toBaseUnits(params.goal, coin.decimals);
   const deadlineTs = durationToTimestamp(params.deadline || '30d');
+  // Resolve the crowdfunder destination once. Falling back to 'All'
+  // would produce an unsigned-payout-target collection that the chain
+  // would accept but no one could practically use. Prefer the explicit
+  // flag, then the creator (passed through from CLI --creator), and
+  // only as a last resort use 'All' (which the reviewer flags).
+  const crowdfunderAddr = params.crowdfunder || params.creator || 'All';
 
   const collectionApprovals = [
     // Deposit-Refund — public deposit, mints refund receipt (token 1)
@@ -38,7 +51,7 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: 'deposit-refund',
-      transferTimes: FOREVER,
+      transferTimes: [{ start: '1', end: deadlineTs }],
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
       version: '0',
@@ -54,35 +67,51 @@ export function buildCrowdfund(params: CrowdfundParams): any {
             overrideToWithInitiator: false
           }
         ],
+        // Mint approval: outgoing override required by standard.
+        // Incoming: recipient auto-approves via defaultBalances.
         overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true
+        overridesToIncomingApprovals: false
       }
     },
-    // Deposit-Progress — tracks total deposits via token 2 to creator
+    // Deposit-Progress — tracks total deposits via token 2 to creator.
+    // toListId falls back to 'All' if --crowdfunder isn't set; the reviewer
+    // will flag the ambiguity so callers pass a concrete address.
     {
       fromListId: 'Mint',
-      toListId: params.crowdfunder || '',
+      toListId: crowdfunderAddr,
       initiatedByListId: 'All',
       approvalId: 'deposit-progress',
-      transferTimes: FOREVER,
+      transferTimes: [{ start: '1', end: deadlineTs }],
       tokenIds: [{ start: '2', end: '2' }],
       ownershipTimes: FOREVER,
       version: '0',
       approvalCriteria: {
         allowAmountScaling: true,
         predeterminedBalances: scalingBalances('1'),
+        // Mint approval: outgoing override required by standard.
+        // Incoming: crowdfunder auto-approves via defaultBalances.
         overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true
+        overridesToIncomingApprovals: false
       }
     },
-    // Success — creator withdraws funds after deadline if goal met
+    // Success — crowdfunder withdraws funds after deadline if goal met.
+    // toListId is BURN_ADDRESS: the success approval burns the deposit
+    // receipt token and the coinTransfer (with
+    // overrideFromWithApproverAddress) routes the underlying funds to
+    // the crowdfunder via the escrow. Routing tokens to
+    // crowdfunderAddr directly would mint an NFT to them, which isn't
+    // the intended semantic.
     {
       fromListId: 'Mint',
-      toListId: params.crowdfunder || '',
-      initiatedByListId: params.crowdfunder || '',
+      toListId: BURN_ADDRESS,
+      initiatedByListId: crowdfunderAddr,
       approvalId: 'success',
-      transferTimes: [{ start: deadlineTs, end: MAX_UINT64 }],
-      tokenIds: FOREVER,
+      // Strictly AFTER deadline — `deadlineTs + 1` prevents the
+      // success claim from racing the final deposit at the exact
+      // deadline second. Matches CrowdfundRegistry's
+      // `{start: deadlineTime + 1n, end: MAX_UINT}`.
+      transferTimes: [{ start: String(BigInt(deadlineTs) + 1n), end: MAX_UINT64 }],
+      tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
       version: '0',
       approvalCriteria: {
@@ -93,7 +122,7 @@ export function buildCrowdfund(params: CrowdfundParams): any {
             ownershipTimes: FOREVER,
             tokenIds: [{ start: '2', end: '2' }],
             overrideWithCurrentTime: true,
-            mustSatisfyForAllAssets: false
+            mustSatisfyForAllAssets: true
           }
         ],
         coinTransfers: [
@@ -104,6 +133,16 @@ export function buildCrowdfund(params: CrowdfundParams): any {
             overrideToWithInitiator: true
           }
         ],
+        // Only one successful withdrawal ever — the crowdfunder claims
+        // the escrowed funds once. Frontend uses overall:1.
+        maxNumTransfers: {
+          overallMaxNumTransfers: '1',
+          perToAddressMaxNumTransfers: '0',
+          perFromAddressMaxNumTransfers: '0',
+          perInitiatedByAddressMaxNumTransfers: '0',
+          amountTrackerId: 'crowdfund-success',
+          resetTimeIntervals: { startTime: '0', intervalLength: '0' }
+        },
         predeterminedBalances: scalingBalances('1'),
         overridesFromOutgoingApprovals: true
       }
@@ -114,7 +153,9 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'refund',
-      transferTimes: [{ start: deadlineTs, end: MAX_UINT64 }],
+      // Same `deadlineTs + 1` boundary as the success approval — no
+      // refunds at the exact deadline second, only strictly after.
+      transferTimes: [{ start: String(BigInt(deadlineTs) + 1n), end: MAX_UINT64 }],
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
       version: '0',
@@ -126,7 +167,7 @@ export function buildCrowdfund(params: CrowdfundParams): any {
             ownershipTimes: FOREVER,
             tokenIds: [{ start: '2', end: '2' }],
             overrideWithCurrentTime: true,
-            mustSatisfyForAllAssets: false
+            mustSatisfyForAllAssets: true
           }
         ],
         coinTransfers: [
@@ -137,10 +178,25 @@ export function buildCrowdfund(params: CrowdfundParams): any {
             overrideToWithInitiator: true
           }
         ],
+        // Refunds unlimited in aggregate — each backer gates themselves
+        // via their own deposit receipt ownership (mustOwnTokens).
+        maxNumTransfers: {
+          overallMaxNumTransfers: MAX_UINT64,
+          perToAddressMaxNumTransfers: '0',
+          perFromAddressMaxNumTransfers: '0',
+          perInitiatedByAddressMaxNumTransfers: '0',
+          amountTrackerId: 'crowdfund-refund',
+          resetTimeIntervals: { startTime: '0', intervalLength: '0' }
+        },
         allowAmountScaling: true,
         predeterminedBalances: scalingBalances('1'),
-        overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true
+        // No overrides: holder self-initiates their own refund burn and
+        // auto-approves via defaultBalances. Previously both overrides
+        // were true, which let any third party initiate the burn and
+        // redirect the refund payout via overrideToWithInitiator —
+        // a theft vector closed.
+        overridesFromOutgoingApprovals: false,
+        overridesToIncomingApprovals: false
       }
     },
     // Burn — general burn, always allowed
@@ -150,13 +206,23 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       initiatedByListId: 'All',
       approvalId: 'burn',
       transferTimes: FOREVER,
-      tokenIds: FOREVER,
+      tokenIds: [{ start: '1', end: '2' }],
       ownershipTimes: FOREVER,
       version: '0'
     }
   ];
 
-  const { collectionMetadata } = metadataPlaceholders(params.name || 'Crowdfund');
+  const { collectionMetadata, placeholders: collectionPlaceholders } = metadataPlaceholders(
+    params.name || 'Crowdfund'
+  );
+  const refundToken = singleTokenMetadata('1', 'Refund Token', 'Refundable share of the crowdfund pool.');
+  const progressToken = singleTokenMetadata('2', 'Progress Token', 'Tracks total deposits in the crowdfund pool.');
+
+  // Strip the per-token default that metadataPlaceholders() seeds — this
+  // template defines its own per-token entries below, so the default
+  // ipfs://METADATA_TOKEN_DEFAULT shouldn't end up in the sidecar.
+  const { 'ipfs://METADATA_TOKEN_DEFAULT': _drop, ...collectionOnlyPlaceholders } = collectionPlaceholders;
+  void _drop;
 
   return buildMsg({
     collectionApprovals,
@@ -167,17 +233,21 @@ export function buildCrowdfund(params: CrowdfundParams): any {
     invariants: {
       noCustomOwnershipTimes: true,
       maxSupplyPerId: '0',
-      noForcefulPostMintTransfers: false,
+      // Non-mint approvals (refund, burn) no longer use override flags,
+      // so forceful post-mint transfers can be permanently locked.
+      noForcefulPostMintTransfers: true,
       disablePoolCreation: true
     },
-    aliasPathsToAdd: [
-      buildAliasPath('urefund', 'REFUND', 0),
-      buildAliasPath('utotaldeposit', 'TOTALDEPOSIT', 0)
-    ],
+    // Refund + total-deposit tokens are 1-of-1 receipt-style — no
+    // fractional denom unit needed. The previous version added alias
+    // paths with `decimals: 0` which the chain rejects.
+    aliasPathsToAdd: [],
     collectionMetadata,
-    tokenMetadata: [
-      singleTokenMetadata('1', 'Refund Token'),
-      singleTokenMetadata('2', 'Progress Token')
-    ]
+    tokenMetadata: [refundToken.entry, progressToken.entry],
+    metadataPlaceholders: {
+      ...collectionOnlyPlaceholders,
+      [refundToken.placeholder.uri]: refundToken.placeholder.content,
+      [progressToken.placeholder.uri]: progressToken.placeholder.content
+    }
   });
 }

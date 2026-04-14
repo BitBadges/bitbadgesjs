@@ -16,10 +16,28 @@ export interface ApiResponse<T> {
 }
 
 /**
- * Get the API key from environment variable
+ * Get the API key. Resolution order:
+ *   1. `BITBADGES_API_KEY` environment variable (highest priority — overrides
+ *      everything so CI / one-off shells can swap keys without touching disk).
+ *   2. `~/.bitbadges/config.json` `apiKey` field, populated via
+ *      `bitbadges-cli config set apiKey <key>`. Persistent default for
+ *      day-to-day use.
+ *
+ * Imported lazily so this module stays usable in environments where the
+ * filesystem helper isn't available (e.g. browser bundles via the SDK).
  */
 export function getApiKey(): string | undefined {
-  return process.env.BITBADGES_API_KEY;
+  const envKey = process.env.BITBADGES_API_KEY;
+  if (envKey) return envKey;
+  try {
+    // Lazy require to avoid pulling fs/os into non-Node consumers of the SDK.
+    // The CLI config helper is the source of truth for the on-disk format.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getConfigApiKey } = require('../../cli/utils/config.js');
+    return getConfigApiKey();
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -179,27 +197,36 @@ export async function getBalanceForToken(
 // Simulation APIs
 // ============================================
 
+/**
+ * Agent-JSON single-tx simulate request. Sent to the indexer's
+ * `/api/v0/simulate` Path 2. The indexer proto-encodes server-side
+ * via `encodeMsgsFromJson` and forwards to the LCD simulate endpoint.
+ *
+ * Previously this type wrapped a single tx in a `{txs: [...]}` "batch"
+ * envelope. The batch wrapper was never actually used as a batch
+ * (always exactly 1 element) and has been removed.
+ */
 export interface SimulateRequest {
-  txs: Array<{
-    context: {
-      address: string;
-      chain: string;
-    };
-    messages: unknown[];
-    memo?: string;
-    fee?: {
-      amount: Array<{ denom: string; amount: string }>;
-      gas: string;
-    };
-  }>;
+  messages: unknown[];
+  memo?: string;
+  fee?: {
+    amount: Array<{ denom: string; amount: string }>;
+    gas: string;
+  };
+  /** bb1… address of the tx signer. Optional if every message already
+   * has the same `value.creator`. */
+  creatorAddress?: string;
 }
 
+/**
+ * Raw LCD simulate response — what the indexer forwards back from
+ * `/cosmos/tx/v1beta1/simulate`. Consumers typically read
+ * `gas_info.gas_used` + `result.events`.
+ */
 export interface SimulateResponse {
-  results: Array<{
-    gasUsed?: string;
-    events?: unknown[];
-    error?: string;
-  }>;
+  gas_info?: { gas_used?: string; gas_wanted?: string };
+  result?: { events?: unknown[] };
+  error?: string;
 }
 
 export async function simulateTx(

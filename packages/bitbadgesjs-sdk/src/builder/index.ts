@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 
 /**
- * BitBadges Builder MCP Server
+ * BitBadges Builder — Model Context Protocol (MCP) stdio server bin.
  *
- * Enable natural language collection creation via MCP.
+ * Entry point when users run `bitbadges-builder` or point Claude Desktop at
+ * this package as an MCP server. The actual tool/resource handlers live in
+ * `./tools/registry.ts` and `./resources/registry.ts` — this file is just
+ * the stdio transport + lifecycle wrapper. For in-process use, import the
+ * registry directly or call `bitbadges-cli builder …`.
  *
- * Example usage:
+ * Example natural-language usage (via an MCP client):
  * > "Create a 1:1 backed USDC stablecoin with 100 USDC/day spend limit"
  *
  * Supported collection types:

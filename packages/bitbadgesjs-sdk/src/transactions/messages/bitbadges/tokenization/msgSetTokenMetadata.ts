@@ -27,7 +27,7 @@ export class MsgSetTokenMetadata<T extends NumberType> extends CustomTypeClass<M
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
     this.tokenMetadata = msg.tokenMetadata.map((tm) => new TokenMetadata(tm));
-    this.canUpdateTokenMetadata = msg.canUpdateTokenMetadata.map((permission) => new TokenIdsActionPermission(permission));
+    this.canUpdateTokenMetadata = msg.canUpdateTokenMetadata?.map((permission) => new TokenIdsActionPermission(permission)) ?? [];
   }
 
   toProto(): prototokenization.MsgSetTokenMetadata {

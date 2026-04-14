@@ -89,13 +89,13 @@ When the user wants to:
 - Update existing collection → Use MsgUniversalUpdateCollection with actual collection ID
 - Create subscription → Use MsgUniversalUpdateCollection with "Subscriptions" standard
 
-## Build → Audit → Deploy Flow (MANDATORY)
+## Build → Review → Deploy Flow (MANDATORY)
 
 After EVERY collection build, follow this pipeline:
 1. **Build** → Use per-field tools in parallel: set_standards, set_valid_token_ids, set_invariants, add_approval, set_permissions, set_default_balances, set_collection_metadata, set_token_metadata, add_alias_path, set_mint_escrow_coins
-2. **Audit** → audit_collection, validate_transaction
-3. **Fix** → Address findings, re-audit if needed
-4. **Present** → Show audit results to user with plain-language explanations
+2. **Review** → review_collection, validate_transaction
+3. **Fix** → Address findings, re-review if needed
+4. **Present** → Show review results to user with plain-language explanations
 5. **Deploy** → get_transaction to retrieve the final transaction, return for user review and submission
 
 **IMPORTANT: JSON Output Format** — When returning the final transaction JSON, do NOT just print it inline in the terminal. Terminal output often introduces formatting artifacts (line wrapping, ANSI codes, truncation) that break JSON parsing. Instead:
@@ -136,7 +136,7 @@ The complete transaction is a JSON object with this EXACT structure:
 
 {
   "messages": [
-    { "typeUrl": "/tokenization.MsgUniversalUpdateCollection", "value": {...} }
+    { "typeUrl": "/tokenization.MsgCreateCollection", "value": {...} }
   ],
   "memo": "Optional memo text",
   "fee": {
@@ -149,7 +149,7 @@ The complete transaction is a JSON object with this EXACT structure:
 1. All numbers as strings: "1" not 1, "0" not 0
 2. UintRange format: { "start": "1", "end": "18446744073709551615" }
 3. Max uint64: "18446744073709551615" (use for "forever" time ranges)
-4. collectionId: "0": Creates new collection OR references just-created collection`,
+4. New vs edit: use MsgCreateCollection to create a new collection, MsgUpdateCollection (with real collectionId) to edit one.`,
 
   messageTypes: `## Message Types
 
@@ -157,13 +157,15 @@ The complete transaction is a JSON object with this EXACT structure:
 
 | typeUrl | Purpose |
 |---------|---------|
-| /tokenization.MsgUniversalUpdateCollection | Create/update collections |
+| /tokenization.MsgCreateCollection | Create a new collection. Keeps \`defaultBalances\` and \`invariants\`; no \`collectionId\` and no \`updateXxxTimeline\` flags. |
+| /tokenization.MsgUpdateCollection | Edit an existing collection. Requires non-zero \`collectionId\` + \`updateXxxTimeline\` flags. Never set \`defaultBalances\` or \`invariants\` here. |
 | /tokenization.MsgCreateAddressLists | Create reusable address lists |
 | /tokenization.MsgUpdateUserApprovals | Update user-level approvals |
+| /tokenization.MsgTransferTokens | Mint or transfer tokens (commonly paired after Create for initial distribution) |
 
 ### Message Selection
-- **New collection**: MsgUniversalUpdateCollection with collectionId: "0"
-- **Update collection**: MsgUniversalUpdateCollection with actual ID`,
+- **New collection**: MsgCreateCollection (optionally followed by MsgTransferTokens for initial mint)
+- **Edit existing**: MsgUpdateCollection with the real \`collectionId\` and the \`updateXxxTimeline\` flags for the fields you intend to change.`,
 
   msgUniversalUpdateCollection: `## MsgUniversalUpdateCollection - Complete Structure
 
@@ -922,56 +924,76 @@ Before outputting JSON, verify:
 
   metadataPlaceholders: `## Metadata Placeholders System
 
-The metadataPlaceholders system allows you to generate metadata for collection, token, or approval metadata that will be automatically uploaded to IPFS.
+The metadataPlaceholders system allows you to generate metadata for collection, token, approval, and alias-path metadata that will be automatically uploaded to IPFS.
+
+The sidecar lives **inside the message**, at \`messages[i].value._meta.metadataPlaceholders\`. It is NOT a top-level sibling of \`messages\`. Every placeholder URI referenced by this message's body gets a matching entry in this map — no wrapper-level copy, no parallel shape.
 
 ### Format
 
 \`\`\`json
 {
-  "messages": [...],
-  "metadataPlaceholders": {
-    "ipfs://METADATA_COLLECTION": {
-      "name": "My Collection Name",
-      "description": "A description of the collection.",
-      "image": "https://example.com/image.png"
-    },
-    "ipfs://METADATA_TOKEN_1": {
-      "name": "Token Name",
-      "description": "Token description.",
-      "image": "https://example.com/token.png"
-    },
-    "ipfs://METADATA_APPROVAL_public-mint": {
-      "name": "Public Mint Approval",
-      "description": "Allows anyone to mint one token by paying 5 BADGE.",
-      "image": ""
-    },
-    "ipfs://METADATA_ALIAS_PATH": {
-      "name": "vATOM",
-      "description": "Wrapped ATOM token for liquidity pools.",
-      "image": "https://example.com/vatom.png"
+  "messages": [
+    {
+      "typeUrl": "/tokenization.MsgUniversalUpdateCollection",
+      "value": {
+        "collectionMetadata": { "uri": "ipfs://METADATA_COLLECTION", "customData": "" },
+        "tokenMetadata": [
+          { "uri": "ipfs://METADATA_TOKEN_1", "customData": "", "tokenIds": [{ "start": "1", "end": "1" }] }
+        ],
+        "collectionApprovals": [
+          { "approvalId": "public-mint", "uri": "ipfs://METADATA_APPROVAL_public-mint", "...": "..." }
+        ],
+        "aliasPathsToAdd": [
+          { "denom": "uvatom", "metadata": { "uri": "ipfs://METADATA_ALIAS_uvatom", "customData": "" }, "...": "..." }
+        ],
+        "_meta": {
+          "metadataPlaceholders": {
+            "ipfs://METADATA_COLLECTION": {
+              "name": "My Collection Name",
+              "description": "A description of the collection.",
+              "image": "https://example.com/image.png"
+            },
+            "ipfs://METADATA_TOKEN_1": {
+              "name": "Token Name",
+              "description": "Token description.",
+              "image": "https://example.com/token.png"
+            },
+            "ipfs://METADATA_APPROVAL_public-mint": {
+              "name": "Public Mint Approval",
+              "description": "Allows anyone to mint one token by paying 5 BADGE.",
+              "image": ""
+            },
+            "ipfs://METADATA_ALIAS_uvatom": {
+              "name": "vATOM",
+              "description": "Wrapped ATOM token for liquidity pools.",
+              "image": "https://example.com/vatom.png"
+            }
+          }
+        }
+      }
     }
-  }
+  ]
 }
 \`\`\`
 
 ### How It Works
 
-1. In your messages, use placeholder URIs like \`ipfs://METADATA_COLLECTION\`, \`ipfs://METADATA_TOKEN_1\`, etc.
-2. In the \`metadataPlaceholders\` object, provide the actual metadata for each placeholder URI
-3. The system will automatically replace the placeholder URIs with the provided metadata and upload to IPFS
+1. In your message body, use placeholder URIs like \`ipfs://METADATA_COLLECTION\`, \`ipfs://METADATA_TOKEN_1\`, etc.
+2. In the same message's \`value._meta.metadataPlaceholders\` object, provide the actual metadata for each placeholder URI.
+3. The system will automatically replace the placeholder URIs with the provided metadata and upload to IPFS.
 4. This works for:
    - Collection metadata (collectionMetadata.uri)
    - Token metadata (tokenMetadata[].uri)
    - Approval metadata (collectionApprovals[].uri)
-   - Alias path metadata (aliasPathsToAdd[].metadata.uri)
+   - Alias path metadata (aliasPathsToAdd[].metadata.uri and denomUnits[].metadata.uri)
 
 ### Important Notes
 
-- Approval metadata should have \`image: ""\` (empty string) as approvals don't have images
-- Collection and token metadata require \`name\`, \`description\`, and \`image\`
-- You can use any placeholder URI format (e.g., \`ipfs://METADATA_APPROVAL_public-mint\`)
-- The placeholder URI in the message must exactly match the key in \`metadataPlaceholders\`
-- Always include proper descriptions ending with periods`,
+- The sidecar lives at \`messages[0].value._meta.metadataPlaceholders\` — per-message, NOT at the tx wrapper level.
+- Approval metadata MUST have \`image: ""\` (empty string) — approvals don't have images.
+- Collection, token, and alias-path metadata require \`name\`, \`description\`, and \`image\`.
+- The placeholder URI in the message body must exactly match the key in \`_meta.metadataPlaceholders\`.
+- Always include proper descriptions ending with periods.`,
 
   evmQueryChallenges: `## EVM Query Challenges (v25+)
 

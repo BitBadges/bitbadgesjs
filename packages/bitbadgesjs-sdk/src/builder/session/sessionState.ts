@@ -1,9 +1,9 @@
 /**
- * In-memory session state for the MCP builder v2.
+ * In-memory session state for the builder v2.
  *
  * Uses a Map keyed by sessionId for per-request isolation.
  * Each session holds a blank MsgUniversalUpdateCollection template that per-field tools mutate.
- * Auto-creates on first mutation. State is ephemeral — scoped to the MCP process lifetime.
+ * Auto-creates on first mutation. State is ephemeral — scoped to the process lifetime.
  *
  * Design principles:
  * - Set tools replace the entire field
@@ -33,15 +33,31 @@ export interface SessionTransaction {
     typeUrl: string;
     value: Record<string, any>;
   }>;
-  metadataPlaceholders: Record<string, { name: string; description: string; image: string }>;
   /** Approval IDs that existed when the session was initialized (for update flows) */
   originalApprovalIds?: Set<string>;
+}
+
+/**
+ * Get or create the per-msg metadataPlaceholders sidecar on the first
+ * message's value. Canonical location: `session.messages[0].value._meta.metadataPlaceholders`.
+ * There is no session-level top-level sidecar — the sidecar belongs to
+ * the msg whose body references the placeholder URIs.
+ */
+export function getMsgPlaceholders(session: SessionTransaction): Record<string, { name: string; description: string; image: string }> {
+  const value = session.messages[0].value;
+  if (!value._meta || typeof value._meta !== 'object') {
+    value._meta = {};
+  }
+  if (!value._meta.metadataPlaceholders || typeof value._meta.metadataPlaceholders !== 'object') {
+    value._meta.metadataPlaceholders = {};
+  }
+  return value._meta.metadataPlaceholders;
 }
 
 // Per-session state keyed by sessionId
 const sessions = new Map<string, SessionTransaction>();
 
-// Default sessionId when none is provided (MCP-direct / single-user mode)
+// Default sessionId when none is provided (builder-direct / single-user mode)
 const DEFAULT_SESSION_ID = '__default__';
 
 function resolveSessionId(sessionId?: string): string {
@@ -100,8 +116,7 @@ export function getOrCreateSession(sessionId?: string, creatorAddress?: string):
           aliasPathsToAdd: [],
           cosmosCoinWrapperPathsToAdd: []
         }
-      }],
-      metadataPlaceholders: {}
+      }]
     };
     sessions.set(sid, session);
   }
@@ -141,7 +156,6 @@ export function exportSession(sessionId?: string): any | null {
   if (!session) return null;
   return {
     messages: session.messages,
-    metadataPlaceholders: session.metadataPlaceholders,
     originalApprovalIds: session.originalApprovalIds ? Array.from(session.originalApprovalIds) : undefined
   };
 }
@@ -159,7 +173,6 @@ export function importSession(sessionId: string | undefined, snapshot: any): voi
   }
   const restored: SessionTransaction = {
     messages: snapshot.messages,
-    metadataPlaceholders: snapshot.metadataPlaceholders || {},
     originalApprovalIds: Array.isArray(snapshot.originalApprovalIds)
       ? new Set<string>(snapshot.originalApprovalIds)
       : undefined
@@ -248,7 +261,7 @@ export function setCollectionMetadata(sessionId: string | undefined, name: strin
   const uri = 'ipfs://METADATA_COLLECTION';
   value.collectionMetadata = { uri, customData: '' };
   value.updateCollectionMetadata = true;
-  s.metadataPlaceholders[uri] = { name, description, image: sanitizeImage(image) };
+  getMsgPlaceholders(s)[uri] = { name, description, image: sanitizeImage(image) };
 }
 
 export function setTokenMetadata(
@@ -277,7 +290,7 @@ export function setTokenMetadata(
     value.tokenMetadata = [...(value.tokenMetadata || []), entry];
   }
   value.updateTokenMetadata = true;
-  s.metadataPlaceholders[uriKey] = { name, description, image: sanitizeImage(image) };
+  getMsgPlaceholders(s)[uriKey] = { name, description, image: sanitizeImage(image) };
 }
 
 // ============================================================
@@ -306,9 +319,10 @@ export function addApproval(sessionId: string | undefined, approval: Record<stri
   approvals[idx].uri = approvals[idx].uri || uri;
   approvals[idx].customData = approvals[idx].customData || '';
   approvals[idx].version = approvals[idx].version || '0';
-  if (!s.metadataPlaceholders[uri]) {
+  const placeholders = getMsgPlaceholders(s);
+  if (!placeholders[uri]) {
     const approvalTitle = (approvalId as string).replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
-    s.metadataPlaceholders[uri] = { name: approvalTitle, description: '', image: '' };
+    placeholders[uri] = { name: approvalTitle, description: '', image: '' };
   }
 }
 
@@ -327,7 +341,7 @@ export function removeApproval(sessionId: string | undefined, approvalId: string
 export function setApprovalMetadata(sessionId: string | undefined, approvalId: string, name: string, description: string, image: string = ''): void {
   const s = getOrCreateSession(sessionId);
   const uri = `ipfs://METADATA_APPROVAL_${approvalId}`;
-  s.metadataPlaceholders[uri] = { name, description, image };
+  getMsgPlaceholders(s)[uri] = { name, description, image };
 
   const value = s.messages[0].value;
   const approvals: any[] = value.collectionApprovals || [];

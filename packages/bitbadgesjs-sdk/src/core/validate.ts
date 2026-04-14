@@ -1,8 +1,8 @@
 /**
  * Transaction validation utilities for BitBadges.
  *
- * Pure validation logic extracted from the MCP validate_transaction tool.
- * No Zod schemas, no MCP tool definitions, no MCP response formatting.
+ * Pure validation logic extracted from the builder validate_transaction tool.
+ * No Zod schemas, no tool definitions, no response formatting.
  *
  * @module
  */
@@ -273,7 +273,23 @@ export function validateSubscriptionApproval(approval: Record<string, unknown>, 
 /**
  * Validate approvals array — list IDs, Mint rules, backing address rules, required fields.
  */
-export function validateApprovals(approvals: unknown[], path: string, issues: ValidationIssue[], standards?: string[]): void {
+/**
+ * Approval level — determines which rules apply. Collection approvals carry
+ * the full `ApprovalCriteria` proto (overridesFromOutgoingApprovals,
+ * allowBackedMinting, etc.); user-level outgoing/incoming approvals carry
+ * the narrower `OutgoingApprovalCriteria` / `IncomingApprovalCriteria`
+ * proto types that omit the collection-only fields. Rules that reference
+ * those omitted fields are skipped when the level isn't 'collection'.
+ */
+export type ApprovalLevel = 'collection' | 'outgoing' | 'incoming';
+
+export function validateApprovals(
+  approvals: unknown[],
+  path: string,
+  issues: ValidationIssue[],
+  standards?: string[],
+  level: ApprovalLevel = 'collection'
+): void {
   const isSubscription = Array.isArray(standards) && standards.includes('Subscriptions');
 
   approvals.forEach((approval, index) => {
@@ -284,7 +300,9 @@ export function validateApprovals(approvals: unknown[], path: string, issues: Va
     const a = approval as Record<string, unknown>;
     const approvalPath = `${path}[${index}]`;
 
-    // Check list IDs
+    // Check list IDs — `fromListId` is absent on UserOutgoingApproval and
+    // `toListId` is absent on UserIncomingApproval, so the `in a` guard
+    // cleanly skips the missing field at each level.
     (['fromListId', 'toListId', 'initiatedByListId'] as const).forEach((field) => {
       if (field in a && typeof a[field] === 'string') {
         if (!isValidListId(a[field] as string)) {
@@ -297,7 +315,12 @@ export function validateApprovals(approvals: unknown[], path: string, issues: Va
       }
     });
 
-    // "Mint" must only appear in fromListId — it is the minting source, not a destination or initiator.
+    // "Mint" must only appear in fromListId — it is the minting source, not
+    // a destination or initiator. Applies at every level: even a user-level
+    // outgoing approval can't legitimately have `toListId: "Mint"`, and
+    // `initiatedByListId: "Mint"` is nonsense everywhere. On incoming,
+    // `fromListId: "Mint"` IS legitimate (receiving from the mint source)
+    // and is intentionally not checked here.
     if (typeof a.toListId === 'string' && (a.toListId === 'Mint' || (a.toListId as string).includes('Mint'))) {
       issues.push({
         severity: 'error',
@@ -313,36 +336,42 @@ export function validateApprovals(approvals: unknown[], path: string, issues: Va
       });
     }
 
-    // Check Mint approval override
-    if (a.fromListId === 'Mint') {
-      const criteria = a.approvalCriteria as Record<string, unknown> | undefined;
-      if (criteria && criteria.overridesFromOutgoingApprovals !== true) {
-        issues.push({
-          severity: 'error',
-          message: 'Mint approvals MUST have overridesFromOutgoingApprovals: true',
-          path: `${approvalPath}.approvalCriteria.overridesFromOutgoingApprovals`
-        });
+    // The next three rules inspect collection-only criteria fields
+    // (`overridesFromOutgoingApprovals`, `allowBackedMinting`) and the
+    // Subscriptions standard which only lives on the collection. Skip
+    // entirely for user-level approvals.
+    if (level === 'collection') {
+      // Check Mint approval override
+      if (a.fromListId === 'Mint') {
+        const criteria = a.approvalCriteria as Record<string, unknown> | undefined;
+        if (criteria && criteria.overridesFromOutgoingApprovals !== true) {
+          issues.push({
+            severity: 'error',
+            message: 'Mint approvals MUST have overridesFromOutgoingApprovals: true',
+            path: `${approvalPath}.approvalCriteria.overridesFromOutgoingApprovals`
+          });
+        }
+
+        // Subscription-specific validations
+        if (isSubscription) {
+          validateSubscriptionApproval(a, approvalPath, issues);
+        }
       }
 
-      // Subscription-specific validations
-      if (isSubscription) {
-        validateSubscriptionApproval(a, approvalPath, issues);
+      // Check backing address approvals should NOT have overridesFromOutgoingApprovals: true
+      if (typeof a.fromListId === 'string' && (a.fromListId as string).startsWith('bb1') && !(a.fromListId as string).includes('Mint')) {
+        const criteria = a.approvalCriteria as Record<string, unknown> | undefined;
+        if (criteria && criteria.overridesFromOutgoingApprovals === true && criteria.allowBackedMinting === true) {
+          issues.push({
+            severity: 'warning',
+            message: 'Backing address approvals should NOT have overridesFromOutgoingApprovals: true',
+            path: `${approvalPath}.approvalCriteria.overridesFromOutgoingApprovals`
+          });
+        }
       }
     }
 
-    // Check backing address approvals should NOT have overridesFromOutgoingApprovals: true
-    if (typeof a.fromListId === 'string' && (a.fromListId as string).startsWith('bb1') && !(a.fromListId as string).includes('Mint')) {
-      const criteria = a.approvalCriteria as Record<string, unknown> | undefined;
-      if (criteria && criteria.overridesFromOutgoingApprovals === true && criteria.allowBackedMinting === true) {
-        issues.push({
-          severity: 'warning',
-          message: 'Backing address approvals should NOT have overridesFromOutgoingApprovals: true',
-          path: `${approvalPath}.approvalCriteria.overridesFromOutgoingApprovals`
-        });
-      }
-    }
-
-    // Check approvalId exists
+    // Check approvalId exists — applies at every level.
     if (!a.approvalId || typeof a.approvalId !== 'string') {
       issues.push({
         severity: 'error',
@@ -567,6 +596,60 @@ export function validateApprovalCriteria(approvals: unknown[], path: string, iss
       }
     }
 
+    // --- approvalAmounts / maxNumTransfers: complete object required ---
+    // Proto defines these as fixed-shape messages. Missing sibling fields on a partially-
+    // populated object are a shape-error — the SDK constructor will produce undefined values
+    // that crash toProto(). Throw clearly so the AI fixes the shape rather than silently
+    // coercing. Also enforce that any non-zero limit must have an amountTrackerId so
+    // independent approvals don't share a tracker and cross-contaminate.
+    const AA_FIELDS = [
+      'overallApprovalAmount',
+      'perToAddressApprovalAmount',
+      'perFromAddressApprovalAmount',
+      'perInitiatedByAddressApprovalAmount'
+    ];
+    const MNT_FIELDS = [
+      'overallMaxNumTransfers',
+      'perToAddressMaxNumTransfers',
+      'perFromAddressMaxNumTransfers',
+      'perInitiatedByAddressMaxNumTransfers'
+    ];
+    const checkCompleteLimit = (
+      obj: Record<string, any> | undefined,
+      fields: string[],
+      label: string,
+      subPath: string
+    ) => {
+      if (!obj) return;
+      const missing = fields.filter((f) => !(f in obj));
+      if (missing.length > 0 && missing.length < fields.length) {
+        issues.push({
+          severity: 'error',
+          message: `${label} is missing sibling fields [${missing.join(', ')}]. The proto expects a complete object with all ${fields.length} amount fields (use "0" for unbounded). Partial objects produce undefined values and crash the SDK constructor.`,
+          path: `${approvalPath}.approvalCriteria.${subPath}`
+        });
+      }
+      // resetTimeIntervals must exist as an object if the parent is set
+      if (!obj.resetTimeIntervals || typeof obj.resetTimeIntervals !== 'object') {
+        issues.push({
+          severity: 'error',
+          message: `${label}.resetTimeIntervals is required. Use { startTime: "0", intervalLength: "0" } for no reset interval.`,
+          path: `${approvalPath}.approvalCriteria.${subPath}.resetTimeIntervals`
+        });
+      }
+      // amountTrackerId must be set when any non-zero limit is configured (prevents cross-contamination)
+      const hasLimit = fields.some((f) => obj[f] && String(obj[f]) !== '0');
+      if (hasLimit && (!obj.amountTrackerId || String(obj.amountTrackerId).trim() === '')) {
+        issues.push({
+          severity: 'error',
+          message: `${label} has a non-zero limit but amountTrackerId is empty. Set amountTrackerId to a unique string (typically the approvalId) so this tracker does not collide with other approvals.`,
+          path: `${approvalPath}.approvalCriteria.${subPath}.amountTrackerId`
+        });
+      }
+    };
+    checkCompleteLimit(criteria.approvalAmounts as Record<string, any> | undefined, AA_FIELDS, 'approvalAmounts', 'approvalAmounts');
+    checkCompleteLimit(criteria.maxNumTransfers as Record<string, any> | undefined, MNT_FIELDS, 'maxNumTransfers', 'maxNumTransfers');
+
     // predeterminedBalances + approvalAmounts — unusual combination warning
     const predet = criteria.predeterminedBalances as Record<string, any> | undefined;
     const amounts = criteria.approvalAmounts as Record<string, any> | undefined;
@@ -665,16 +748,77 @@ export function validateMsgConstructorFields(value: Record<string, unknown>, bas
     // Detailed field checks are handled by validatePermissions()
   }
 
-  // --- collectionMetadata: must be an object with uri ---
-  if (value.updateCollectionMetadata === true) {
+  // --- collectionMetadata: must be an object (not an array) with uri + customData ---
+  // Proto CollectionMetadata has only { uri, customData } — it is NOT a repeated field.
+  // Claude occasionally hallucinates an array (confusing it with tokenMetadata[]); reject loudly.
+  if (Array.isArray(value.collectionMetadata)) {
+    issues.push({
+      severity: 'error',
+      message:
+        'collectionMetadata must be an object { uri, customData }, not an array. You may be confusing it with tokenMetadata (which IS an array of { uri, customData, tokenIds }).',
+      path: `${basePath}.collectionMetadata`
+    });
+  } else if (value.updateCollectionMetadata === true) {
     if (!value.collectionMetadata || typeof value.collectionMetadata !== 'object') {
       issues.push({
         severity: 'error',
         message: 'collectionMetadata must be an object when updateCollectionMetadata is true.',
         path: `${basePath}.collectionMetadata`
       });
+    } else {
+      const cm = value.collectionMetadata as Record<string, unknown>;
+      if ('image' in cm || 'name' in cm || 'description' in cm) {
+        issues.push({
+          severity: 'error',
+          message:
+            'collectionMetadata only has { uri, customData } fields per the proto spec. Fields like "image", "name", and "description" belong inside the off-chain JSON referenced by uri (or in metadataPlaceholders), not directly on collectionMetadata.',
+          path: `${basePath}.collectionMetadata`
+        });
+      }
     }
   }
+
+  // --- aliasPathsToAdd / cosmosCoinWrapperPathsToAdd: PathMetadata has { uri, customData } ONLY ---
+  // The proto PathMetadata message has no image/name/description. Claude hallucinates these at the
+  // wrong nesting level (they belong inside the off-chain JSON at `uri`). Throw clearly.
+  const checkPathMetadata = (paths: unknown, parentField: string) => {
+    if (!Array.isArray(paths)) return;
+    (paths as unknown[]).forEach((p, i) => {
+      if (!p || typeof p !== 'object') return;
+      const path = p as Record<string, unknown>;
+      const md = path.metadata as Record<string, unknown> | undefined;
+      if (md && typeof md === 'object') {
+        for (const bad of ['image', 'name', 'description']) {
+          if (bad in md) {
+            issues.push({
+              severity: 'error',
+              message: `${parentField}[${i}].metadata.${bad} is not a valid field. PathMetadata only has { uri, customData } — put "${bad}" inside the off-chain JSON referenced by metadata.uri.`,
+              path: `${basePath}.${parentField}[${i}].metadata.${bad}`
+            });
+          }
+        }
+      }
+      if (Array.isArray(path.denomUnits)) {
+        (path.denomUnits as unknown[]).forEach((du, duIdx) => {
+          if (!du || typeof du !== 'object') return;
+          const duMd = (du as Record<string, unknown>).metadata as Record<string, unknown> | undefined;
+          if (duMd && typeof duMd === 'object') {
+            for (const bad of ['image', 'name', 'description']) {
+              if (bad in duMd) {
+                issues.push({
+                  severity: 'error',
+                  message: `${parentField}[${i}].denomUnits[${duIdx}].metadata.${bad} is not a valid field. PathMetadata only has { uri, customData }.`,
+                  path: `${basePath}.${parentField}[${i}].denomUnits[${duIdx}].metadata.${bad}`
+                });
+              }
+            }
+          }
+        });
+      }
+    });
+  };
+  checkPathMetadata(value.aliasPathsToAdd, 'aliasPathsToAdd');
+  checkPathMetadata(value.cosmosCoinWrapperPathsToAdd, 'cosmosCoinWrapperPathsToAdd');
 
   // --- defaultBalances: full structure check ---
   if (value.defaultBalances && typeof value.defaultBalances === 'object') {
@@ -876,10 +1020,41 @@ export function validateTransaction(txBody: any): ValidationResult {
 
     const value = message.value as Record<string, unknown>;
 
-    // Validate MsgUniversalUpdateCollection
-    if (message.typeUrl === '/tokenization.MsgUniversalUpdateCollection') {
+    // Validate MsgCreateCollection / MsgUpdateCollection / legacy
+    // MsgUniversalUpdateCollection. All three share the collection
+    // configuration shape — Create omits `collectionId` + the update flags,
+    // Update rejects `defaultBalances` + `invariants`. Validation is
+    // field-driven, not type-url-driven, so the same rules apply and we
+    // only branch on type-url for the two create/update-specific checks.
+    const _tUrl = typeof message.typeUrl === 'string' ? message.typeUrl : '';
+    const _isCreate = _tUrl.endsWith('.MsgCreateCollection');
+    const _isUpdate = _tUrl.endsWith('.MsgUpdateCollection');
+    const _isUniversal = _tUrl.endsWith('.MsgUniversalUpdateCollection');
+    if (_isCreate || _isUpdate || _isUniversal) {
       // --- Constructor sanity check: ensure all fields the SDK constructor expects exist ---
-      validateMsgConstructorFields(value, `${msgPath}.value`, issues);
+      // MsgCreateCollection has no `updateXxxTimeline` flags — every field
+      // you set IS set, and every field you DIDN'T set is simply absent
+      // (no "do not update" semantics, because there's nothing to update
+      // from). The downstream constructor check is gated on
+      // `updateXxx === true` + required field shape. For Create, only set
+      // the implied flag if the corresponding value field is actually
+      // present; missing fields mean "default empty" and shouldn't
+      // trigger "missing required object" errors.
+      const _ctorValue: Record<string, unknown> = _isCreate
+        ? {
+            ...value,
+            ...(value.validTokenIds !== undefined && { updateValidTokenIds: true }),
+            ...(value.collectionPermissions !== undefined && { updateCollectionPermissions: true }),
+            ...(value.manager !== undefined && { updateManager: true }),
+            ...(value.collectionMetadata !== undefined && { updateCollectionMetadata: true }),
+            ...(value.tokenMetadata !== undefined && { updateTokenMetadata: true }),
+            ...(value.customData !== undefined && { updateCustomData: true }),
+            ...(value.collectionApprovals !== undefined && { updateCollectionApprovals: true }),
+            ...(value.standards !== undefined && { updateStandards: true }),
+            ...(value.isArchived !== undefined && { updateIsArchived: true })
+          }
+        : value;
+      validateMsgConstructorFields(_ctorValue, `${msgPath}.value`, issues);
 
       // --- mintEscrowCoinsToTransfer max 1 ---
       if (Array.isArray(value.mintEscrowCoinsToTransfer) && (value.mintEscrowCoinsToTransfer as unknown[]).length > 1) {
@@ -896,7 +1071,7 @@ export function validateTransaction(txBody: any): ValidationResult {
       if (!value.creator || typeof value.creator !== 'string') {
         issues.push({
           severity: 'error',
-          message: 'MsgUniversalUpdateCollection missing "creator" field',
+          message: 'Collection message missing "creator" field',
           path: `${msgPath}.value.creator`
         });
       } else if (!(value.creator as string).startsWith('bb1')) {
@@ -907,13 +1082,43 @@ export function validateTransaction(txBody: any): ValidationResult {
         });
       }
 
-      // Check collectionId
-      if (!('collectionId' in value)) {
+      // Check collectionId — required on Update/Universal, must be absent
+      // (or "0") on Create per proto. We only flag the Update case.
+      if (_isUpdate) {
+        if (!('collectionId' in value) || value.collectionId === '0' || value.collectionId === 0) {
+          issues.push({
+            severity: 'error',
+            message: 'MsgUpdateCollection requires a non-zero "collectionId"',
+            path: `${msgPath}.value.collectionId`
+          });
+        }
+      } else if (_isUniversal && !('collectionId' in value)) {
         issues.push({
           severity: 'error',
           message: 'MsgUniversalUpdateCollection missing "collectionId" field',
           path: `${msgPath}.value.collectionId`
         });
+      }
+
+      // Chain-only fields that are illegal on Update (proto comment on
+      // invariants: "set upon genesis and cannot be modified"; Update drops
+      // `defaultBalances` entirely). Catch these at static validation so
+      // the user sees the problem before the chain rejects the tx.
+      if (_isUpdate) {
+        if (value.defaultBalances !== undefined) {
+          issues.push({
+            severity: 'error',
+            message: 'MsgUpdateCollection must not set "defaultBalances" (create-only field).',
+            path: `${msgPath}.value.defaultBalances`
+          });
+        }
+        if (value.invariants !== undefined) {
+          issues.push({
+            severity: 'error',
+            message: 'MsgUpdateCollection must not set "invariants" (set at genesis only).',
+            path: `${msgPath}.value.invariants`
+          });
+        }
       }
 
       // Validate collectionApprovals
@@ -923,13 +1128,30 @@ export function validateTransaction(txBody: any): ValidationResult {
         validateApprovalCriteria(value.collectionApprovals as unknown[], `${msgPath}.value.collectionApprovals`, issues);
       }
 
-      // Validate approval criteria in defaultBalances
+      // Validate approval criteria in defaultBalances. These live on the
+      // collection msg but are user-level approvals (the default the user
+      // gets on first receipt), so validate them with the matching level
+      // to avoid false positives from collection-only rules.
       if (value.defaultBalances && typeof value.defaultBalances === 'object') {
         const db = value.defaultBalances as Record<string, unknown>;
         if (Array.isArray(db.incomingApprovals)) {
+          validateApprovals(
+            db.incomingApprovals as unknown[],
+            `${msgPath}.value.defaultBalances.incomingApprovals`,
+            issues,
+            undefined,
+            'incoming'
+          );
           validateApprovalCriteria(db.incomingApprovals as unknown[], `${msgPath}.value.defaultBalances.incomingApprovals`, issues);
         }
         if (Array.isArray(db.outgoingApprovals)) {
+          validateApprovals(
+            db.outgoingApprovals as unknown[],
+            `${msgPath}.value.defaultBalances.outgoingApprovals`,
+            issues,
+            undefined,
+            'outgoing'
+          );
           validateApprovalCriteria(db.outgoingApprovals as unknown[], `${msgPath}.value.defaultBalances.outgoingApprovals`, issues);
         }
       }
@@ -984,6 +1206,106 @@ export function validateTransaction(txBody: any): ValidationResult {
             });
           }
         }
+      }
+    }
+
+    // ── User-level approval messages ────────────────────────────────────
+    //
+    // MsgUpdateUserApprovals / MsgSetIncomingApproval / MsgSetOutgoingApproval
+    // all carry UserIncomingApproval / UserOutgoingApproval objects that
+    // share the same `approvalCriteria` shape as collection approvals — so
+    // we reuse `validateApprovals` + `validateApprovalCriteria` against
+    // them. The CLI is the only consumer of user-level validation; the
+    // frontend / indexer AI builder stay CRUD-collection-scoped per product
+    // decision.
+    //
+    // Shared creator-field check first, then per-msg field dispatch.
+    const _isUserApprovalMsg =
+      message.typeUrl === '/tokenization.MsgUpdateUserApprovals' ||
+      message.typeUrl === '/tokenization.MsgSetIncomingApproval' ||
+      message.typeUrl === '/tokenization.MsgSetOutgoingApproval' ||
+      message.typeUrl === '/tokenization.MsgDeleteIncomingApproval' ||
+      message.typeUrl === '/tokenization.MsgDeleteOutgoingApproval' ||
+      message.typeUrl === '/tokenization.MsgPurgeApprovals';
+    if (_isUserApprovalMsg) {
+      if (!value.creator || typeof value.creator !== 'string') {
+        issues.push({
+          severity: 'error',
+          message: `${message.typeUrl} missing "creator" field`,
+          path: `${msgPath}.value.creator`
+        });
+      } else if (!(value.creator as string).startsWith('bb1')) {
+        issues.push({
+          severity: 'warning',
+          message: 'Creator address should start with "bb1"',
+          path: `${msgPath}.value.creator`
+        });
+      }
+      // collectionId is required & non-zero on every user-level approval msg.
+      if (!('collectionId' in value) || value.collectionId === '0' || value.collectionId === 0) {
+        issues.push({
+          severity: 'error',
+          message: `${message.typeUrl} requires a non-zero "collectionId"`,
+          path: `${msgPath}.value.collectionId`
+        });
+      }
+    }
+
+    if (message.typeUrl === '/tokenization.MsgUpdateUserApprovals') {
+      if (value.updateOutgoingApprovals === true && Array.isArray(value.outgoingApprovals)) {
+        validateApprovals(
+          value.outgoingApprovals as unknown[],
+          `${msgPath}.value.outgoingApprovals`,
+          issues,
+          undefined,
+          'outgoing'
+        );
+        validateApprovalCriteria(value.outgoingApprovals as unknown[], `${msgPath}.value.outgoingApprovals`, issues);
+      }
+      if (value.updateIncomingApprovals === true && Array.isArray(value.incomingApprovals)) {
+        validateApprovals(
+          value.incomingApprovals as unknown[],
+          `${msgPath}.value.incomingApprovals`,
+          issues,
+          undefined,
+          'incoming'
+        );
+        validateApprovalCriteria(value.incomingApprovals as unknown[], `${msgPath}.value.incomingApprovals`, issues);
+      }
+    }
+
+    if (
+      message.typeUrl === '/tokenization.MsgSetIncomingApproval' ||
+      message.typeUrl === '/tokenization.MsgSetOutgoingApproval'
+    ) {
+      if (!value.approval || typeof value.approval !== 'object') {
+        issues.push({
+          severity: 'error',
+          message: `${message.typeUrl} missing "approval" object`,
+          path: `${msgPath}.value.approval`
+        });
+      } else {
+        // validateApprovals / validateApprovalCriteria expect an array —
+        // wrap the single approval. The rendered path will read
+        // `.approval[0]` but the user knows they only set one.
+        const single = [value.approval as unknown];
+        const level: ApprovalLevel =
+          message.typeUrl === '/tokenization.MsgSetIncomingApproval' ? 'incoming' : 'outgoing';
+        validateApprovals(single, `${msgPath}.value.approval`, issues, undefined, level);
+        validateApprovalCriteria(single, `${msgPath}.value.approval`, issues);
+      }
+    }
+
+    if (
+      message.typeUrl === '/tokenization.MsgDeleteIncomingApproval' ||
+      message.typeUrl === '/tokenization.MsgDeleteOutgoingApproval'
+    ) {
+      if (!value.approvalId || typeof value.approvalId !== 'string' || !(value.approvalId as string).trim()) {
+        issues.push({
+          severity: 'error',
+          message: `${message.typeUrl} requires a non-empty "approvalId"`,
+          path: `${msgPath}.value.approvalId`
+        });
       }
     }
 

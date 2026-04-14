@@ -79,4 +79,43 @@ describe('UintRange and UintRangeArray', () => {
     const index = sortedArr.searchIndex(11n);
     expect(index === 0n).toBe(true);
   });
+
+  describe('UintRangeArray.From defensive guards', () => {
+    it('null/undefined → empty array', () => {
+      expect(UintRangeArray.From(null).length).toBe(0);
+      expect(UintRangeArray.From(undefined).length).toBe(0);
+    });
+
+    it('single-object form accepted', () => {
+      const arr = UintRangeArray.From({ start: '1', end: '5' });
+      expect(arr.length).toBe(1);
+      expect(String(arr[0].start)).toBe('1');
+    });
+
+    it('null/undefined elements filtered out (regression: would crash inside new UintRange(null))', () => {
+      // Round 4 sweep: subagent caught that From([null]) crashed with
+      // "Cannot read properties of null (reading 'start')". The
+      // top-level guard wasn't enough — element-level filtering needed.
+      const arr = UintRangeArray.From([
+        null as any,
+        undefined as any,
+        { start: '1', end: '5' },
+        null as any,
+        { start: '7', end: '9' }
+      ]);
+      expect(arr.length).toBe(2);
+      expect(String(arr[0].start)).toBe('1');
+      expect(String(arr[1].start)).toBe('7');
+    });
+
+    it('non-object elements (numbers, strings) filtered out', () => {
+      const arr = UintRangeArray.From([
+        123 as any,
+        'string' as any,
+        { start: '1', end: '5' }
+      ]);
+      expect(arr.length).toBe(1);
+      expect(String(arr[0].start)).toBe('1');
+    });
+  });
 });

@@ -64,7 +64,7 @@ export function formatTokenRegistryForDisplay(): string {
   output += '| Symbol | IBC Denom | Decimals | Backing Address |\n';
   output += '|--------|-----------|----------|------------------|\n';
   for (const token of content.tokens) {
-    output += `| ${token.symbol} | ${token.ibcDenom.slice(0, 20)}... | ${token.decimals} | ${token.backingAddress.slice(0, 15)}... |\n`;
+    output += `| ${token.symbol} | ${token.ibcDenom} | ${token.decimals} | ${token.backingAddress} |\n`;
   }
 
   output += '\n## Native Coins\n\n';

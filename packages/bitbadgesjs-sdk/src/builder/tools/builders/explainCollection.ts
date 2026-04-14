@@ -5,7 +5,7 @@
  * No API key required — purely local analysis.
  *
  * Uses interpretCollection() from bitbadgesjs-sdk as the core explanation engine,
- * with MCP-specific input normalization and developer/auditor extras on top.
+ * with builder-specific input normalization and developer/auditor extras on top.
  */
 
 import { interpretCollection } from '../../../core/interpret.js';
@@ -57,7 +57,7 @@ interface ApprovalData {
 }
 
 /**
- * Unwraps the raw MCP input into a flat collection-like object.
+ * Unwraps the raw tool input into a flat collection-like object.
  * Handles build results, MsgUniversalUpdateCollection, on-chain query results, etc.
  */
 function normalizeInput(input: Record<string, unknown>): Record<string, unknown> {

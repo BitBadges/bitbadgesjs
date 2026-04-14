@@ -106,8 +106,10 @@ describe('vault builder', () => {
   test('has deposit and withdrawal approvals', () => {
     expect(r.collectionApprovals.length).toBe(2);
     const ids = r.collectionApprovals.map((a: any) => a.approvalId);
-    expect(ids).toContain('deposit');
-    expect(ids).toContain('withdrawal');
+    // Vault uses `vault-deposit` + a randomized `vault-withdraw-<hex>`
+    // id to match VaultApprovalRegistry's collision-avoidance pattern.
+    expect(ids).toContain('vault-deposit');
+    expect(ids.some((id: string) => id.startsWith('vault-withdraw-'))).toBe(true);
   });
 
   test('backing approvals have mustPrioritize and allowBackedMinting', () => {
@@ -117,16 +119,21 @@ describe('vault builder', () => {
     }
   });
 
+  // Helper: the withdraw approval has a random suffix, so tests find it
+  // by prefix rather than exact match.
+  const findWithdraw = (approvals: any[]) =>
+    approvals.find((a: any) => typeof a.approvalId === 'string' && a.approvalId.startsWith('vault-withdraw-'));
+
   test('daily withdraw limit adds approvalAmounts', () => {
     const limited = val(buildVault({ backingCoin: 'USDC', dailyWithdrawLimit: 100 }));
-    const withdrawal = limited.collectionApprovals.find((a: any) => a.approvalId === 'withdrawal');
+    const withdrawal = findWithdraw(limited.collectionApprovals);
     expect(withdrawal.approvalCriteria.approvalAmounts).toBeDefined();
     expect(withdrawal.approvalCriteria.approvalAmounts.perInitiatedByAddressApprovalAmount).toBe('100000000');
   });
 
   test('require2fa adds mustOwnTokens', () => {
     const twoFa = val(buildVault({ backingCoin: 'USDC', require2fa: '74' }));
-    const withdrawal = twoFa.collectionApprovals.find((a: any) => a.approvalId === 'withdrawal');
+    const withdrawal = findWithdraw(twoFa.collectionApprovals);
     expect(withdrawal.approvalCriteria.mustOwnTokens).toBeDefined();
     expect(withdrawal.approvalCriteria.mustOwnTokens[0].collectionId).toBe('74');
   });
@@ -134,7 +141,7 @@ describe('vault builder', () => {
   test('emergency recovery adds migration approval', () => {
     const recovery = val(buildVault({ backingCoin: 'USDC', emergencyRecovery: 'bb1recovery' }));
     expect(recovery.collectionApprovals.length).toBe(3);
-    const migration = recovery.collectionApprovals.find((a: any) => a.approvalId === 'emergency-migration');
+    const migration = recovery.collectionApprovals.find((a: any) => a.approvalId === 'vault-emergency-migration');
     expect(migration.toListId).toBe('bb1recovery');
   });
 
@@ -152,8 +159,10 @@ describe('smart-account builder', () => {
   test('has Smart Token standard', () => { expect(r.standards).toContain('Smart Token'); });
   test('has backing and unbacking', () => {
     const ids = r.collectionApprovals.map((a: any) => a.approvalId);
-    expect(ids).toContain('smart-token-backing');
-    expect(ids).toContain('smart-token-unbacking');
+    // Renamed in the parity pass to match CollectionApprovalRegistry's
+    // smart-account-* naming (frontend source of truth).
+    expect(ids).toContain('smart-account-backing');
+    expect(ids).toContain('smart-account-unbacking');
   });
   test('tradable adds Liquidity Pools', () => {
     const t = val(buildSmartAccount({ backingCoin: 'USDC', tradable: true }));
@@ -188,18 +197,33 @@ describe('subscription builder', () => {
     expect(mt.validTokenIds).toEqual([{ start: '1', end: '3' }]);
     expect(mt.collectionApprovals.length).toBe(3);
   });
-  test('multiple payouts', () => {
+  test('multiple payouts (single denom)', () => {
+    // Subscription protocol requires all coin transfers to share a denom.
+    // Treasury splits across multiple recipients with the same coin are
+    // legitimate; mixed denoms throw at build time (see builder.ts).
     const mp = val(buildSubscription({
       interval: 'monthly',
       payouts: [
         { recipient: 'bb1a', amount: 5, denom: 'USDC' },
-        { recipient: 'bb1b', amount: 3, denom: 'BADGE' }
+        { recipient: 'bb1b', amount: 3, denom: 'USDC' }
       ]
     }));
     const cts = mp.collectionApprovals[0].approvalCriteria.coinTransfers;
     expect(cts.length).toBe(2);
     expect(cts[0].to).toBe('bb1a');
     expect(cts[1].to).toBe('bb1b');
+  });
+
+  test('multiple payouts with mixed denoms throws', () => {
+    expect(() =>
+      buildSubscription({
+        interval: 'monthly',
+        payouts: [
+          { recipient: 'bb1a', amount: 5, denom: 'USDC' },
+          { recipient: 'bb1b', amount: 3, denom: 'BADGE' }
+        ]
+      })
+    ).toThrow(/single denom/);
   });
   test('passes verification', () => {
     expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Subscription')).toEqual([]);
@@ -340,7 +364,7 @@ describe('quests builder', () => {
   test('has Quests standard', () => { expect(r.standards).toEqual(['Quests']); });
   test('correct escrow', () => { expect(r.mintEscrowCoinsToTransfer[0].amount).toBe('1000000000000'); });
   test('quest approval with escrow payout', () => {
-    const q = r.collectionApprovals.find((a: any) => a.approvalId === 'quest-approval');
+    const q = r.collectionApprovals.find((a: any) => a.approvalId === 'quests-approval');
     expect(q.approvalCriteria.coinTransfers[0].overrideFromWithApproverAddress).toBe(true);
     expect(q.approvalCriteria.coinTransfers[0].overrideToWithInitiator).toBe(true);
   });
@@ -462,7 +486,12 @@ describe('all collection builders pass verifyStandardsCompliance with zero viola
     ['smart-account (ai-agent)', buildSmartAccount({ backingCoin: 'BADGE', aiAgentVault: true })],
     ['subscription (single)', buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test' })],
     ['subscription (multi-tier)', buildSubscription({ interval: 'daily', price: 5, denom: 'BADGE', recipient: 'bb1r', tiers: 3 })],
-    ['subscription (multi-payout)', buildSubscription({ interval: 'monthly', payouts: [{ recipient: 'bb1a', amount: 5, denom: 'USDC' }, { recipient: 'bb1b', amount: 3, denom: 'BADGE' }] })],
+    // Subscription faucet approvals must use a SINGLE denom — see
+    // buildSubscription's runtime check and the proto-level
+    // `doesCollectionFollowSubscriptionProtocol()` rule. Multiple
+    // recipients sharing one denom is valid (treasury split); mixing
+    // denoms is not.
+    ['subscription (multi-payout)', buildSubscription({ interval: 'monthly', payouts: [{ recipient: 'bb1a', amount: 5, denom: 'USDC' }, { recipient: 'bb1b', amount: 3, denom: 'USDC' }] })],
     ['bounty', buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1v', recipient: 'bb1r' })],
     ['bounty (BADGE)', buildBounty({ amount: 50, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', expiration: '7d' })],
     ['crowdfund', buildCrowdfund({ goal: 1000, denom: 'USDC' })],

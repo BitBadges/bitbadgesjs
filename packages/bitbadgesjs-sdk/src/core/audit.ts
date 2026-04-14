@@ -6,7 +6,9 @@
  * with severity levels so callers can programmatically inspect results.
  */
 
-const MAX_UINT64 = '18446744073709551615';
+import { normalizeForReview } from './review-normalize.js';
+
+const MAX_UINT64 = 18446744073709551615n;
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -22,6 +24,13 @@ export interface AuditFinding {
   title: string;
   detail: string;
   recommendation: string;
+  /**
+   * Hidden from human consumers (frontend sidebar) when true. Used for
+   * findings that just restate permission state ("canUpdateX is NEUTRAL")
+   * — redundant for humans who can already see the permissions tab, but
+   * useful for CLI / indexer / MCP agents who need a flat summary.
+   */
+  agentOnly?: boolean;
 }
 
 /** The complete result returned by {@link auditCollection}. */
@@ -39,8 +48,8 @@ export interface AuditResult {
 // ---------------------------------------------------------------------------
 
 interface UintRange {
-  start: string;
-  end: string;
+  start: bigint;
+  end: bigint;
 }
 
 interface PermissionEntry {
@@ -94,7 +103,10 @@ interface CollectionValue {
 
 function isForever(ranges: UintRange[] | undefined): boolean {
   if (!ranges || ranges.length === 0) return false;
-  return ranges.some((r) => r.start === '1' && r.end === MAX_UINT64);
+  // Tolerate both string and bigint shapes. The SDK builders emit
+  // strings; the frontend collection store uses bigints. Normalizing
+  // via String() catches both uniformly.
+  return ranges.some((r) => r.start === 1n && r.end === MAX_UINT64);
 }
 
 function isForbidden(entries: PermissionEntry[] | undefined): boolean {
@@ -173,7 +185,10 @@ function extractCollection(input: Record<string, unknown>): CollectionValue {
  */
 export function auditCollection(input: { collection: Record<string, unknown>; context?: string }): AuditResult {
   try {
-    const col = extractCollection(input.collection);
+    // normalizeForReview unwraps tx/msg wrappers, mirrors aliasPaths
+    // field names, and converts all numeric fields to bigints via the
+    // Msg class's registered .convert(BigIntify). Idempotent.
+    const col = normalizeForReview(input.collection) as CollectionValue;
     const findings: AuditFinding[] = [];
     const context = (input.context || '').toLowerCase();
 
@@ -185,7 +200,8 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     // 1. MANAGER & CENTRALIZATION ANALYSIS
     // ========================================
 
-    // 1a. Manager exists
+    // 1a. Manager exists. Tagged agentOnly because the frontend permissions
+    // tab already shows the manager state — this finding just restates it.
     if (col.manager) {
       const managerState = permissionState(perms.canUpdateManager);
       if (managerState === 'NEUTRAL') {
@@ -194,7 +210,8 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
           category: 'centralization',
           title: 'Manager change permission is NEUTRAL',
           detail: `Manager is ${col.manager}. The canUpdateManager permission is neutral, meaning the manager could lock or transfer manager control at any time.`,
-          recommendation: 'Set canUpdateManager to FORBIDDEN to prevent manager address changes, or to PERMITTED if intentional.'
+          recommendation: 'Set canUpdateManager to FORBIDDEN to prevent manager address changes, or to PERMITTED if intentional.',
+          agentOnly: true
         });
       } else if (managerState === 'PERMITTED') {
         findings.push({
@@ -202,7 +219,8 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
           category: 'centralization',
           title: 'Manager can be changed permanently',
           detail: 'canUpdateManager is PERMITTED. The current manager can transfer control to any address at any time.',
-          recommendation: 'This is valid for multi-sig rotation or planned ownership transfer. Otherwise, set to FORBIDDEN.'
+          recommendation: 'This is valid for multi-sig rotation or planned ownership transfer. Otherwise, set to FORBIDDEN.',
+          agentOnly: true
         });
       }
     }
@@ -231,7 +249,9 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         category: 'centralization',
         title: `${neutralPerms.length} permission(s) are NEUTRAL (undecided)`,
         detail: `Neutral permissions: ${neutralPerms.join(', ')}. These can be changed to forbidden or permitted at any time by the manager.`,
-        recommendation: 'Consider locking permissions you are confident about. Neutral permissions signal uncertainty to users.'
+        recommendation: 'Consider locking permissions you are confident about. Neutral permissions signal uncertainty to users.',
+        // Redundant for humans who see the permissions tab. Agent-only.
+        agentOnly: true
       });
     }
 
@@ -239,7 +259,7 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     // 2. SUPPLY CONTROL & INFLATION
     // ========================================
 
-    // 2a. canUpdateValidTokenIds
+    // 2a. canUpdateValidTokenIds — agentOnly, see permissions tab note above.
     const validTokenIdState = permissionState(perms.canUpdateValidTokenIds);
     if (validTokenIdState !== 'FORBIDDEN') {
       findings.push({
@@ -247,19 +267,24 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         category: 'supply',
         title: 'Token ID creation is not locked',
         detail: `canUpdateValidTokenIds is ${validTokenIdState}. The manager can add new token IDs, which creates new supply.`,
-        recommendation: 'Set canUpdateValidTokenIds to FORBIDDEN if supply should be fixed. Even with locked mint approvals, new token IDs = new supply ranges.'
+        recommendation: 'Set canUpdateValidTokenIds to FORBIDDEN if supply should be fixed. Even with locked token-creation approvals, new token IDs create new supply ranges.',
+        agentOnly: true
       });
     }
 
-    // 2b. maxSupplyPerId invariant
-    const maxSupply = invariants.maxSupplyPerId as string | undefined;
-    if (!maxSupply || maxSupply === '0') {
+    // 2b. maxSupplyPerId invariant — only meaningful for NFT collections.
+    // Fungible / credit / address-list / vault collections legitimately
+    // have maxSupplyPerId == 0, so gating on the NFTs standard prevents
+    // false positives for every non-NFT collection.
+    const colStandards: string[] = (col.standards as string[]) || [];
+    const maxSupply = invariants.maxSupplyPerId as bigint | undefined;
+    if (colStandards.includes('NFTs') && (maxSupply === undefined || maxSupply === 0n)) {
       findings.push({
         severity: 'info',
         category: 'supply',
         title: 'No per-token-ID supply cap (maxSupplyPerId = 0)',
         detail: 'maxSupplyPerId is 0 or unset, meaning unlimited tokens can exist per token ID. For NFTs, this should be "1".',
-        recommendation: 'Set maxSupplyPerId to "1" for NFTs, or an appropriate cap for fungible tokens.'
+        recommendation: 'Set maxSupplyPerId to "1" for NFTs.'
       });
     }
 
@@ -267,37 +292,87 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     // 3. APPROVAL ANALYSIS
     // ========================================
 
-    // 3a. canUpdateCollectionApprovals
+    // 3a. canUpdateCollectionApprovals — analyzed across three flows:
+    //     - mint approvals          (fromListId === 'Mint')       → supply risk if mutable
+    //     - backing mint approvals  (allowBackedMinting === true) → supply risk if mutable
+    //       (smart tokens don't use fromListId 'Mint'; the backing
+    //       address acts as the functional mint source, so mutable
+    //       backing approvals are the same class of unlimited-supply
+    //       risk as a mutable Mint approval)
+    //     - post-mint transfer approvals (everything else)        → transferability risk
+    //
+    // For each flow we ask: is the relevant subset of approvals
+    // mutable? An approval is "mutable" when canUpdateCollectionApprovals
+    // is PERMITTED, or it's NEUTRAL without a scoped forbidden lock
+    // covering that subset.
     const approvalPermState = permissionState(perms.canUpdateCollectionApprovals);
-
-    // Check if it's scoped or blanket
     const approvalPerms = perms.canUpdateCollectionApprovals || [];
     const hasScopedMintLock = approvalPerms.some(
       (p) => (p.fromListId === 'Mint' || p.fromListId === 'All') && isForever(p.permanentlyForbiddenTimes)
     );
+    // Blanket lock: every one of the 8 CollectionApprovalPermission
+    // scope fields is set to its wildcard value AND
+    // permanentlyForbiddenTimes covers forever. Partial locks (e.g.
+    // "Mint scope forbidden forever") don't count — they only freeze
+    // a subset of the approval space. A blanket lock means no approval
+    // can ever be added / removed / modified post-creation, so
+    // transferability is permanently fixed.
+    const hasBlanketLock = approvalPerms.some((p: any) => {
+      if (p.fromListId !== 'All') return false;
+      if (p.toListId !== 'All') return false;
+      if (p.initiatedByListId !== 'All') return false;
+      if (!isForever(p.transferTimes)) return false;
+      if (!isForever(p.tokenIds)) return false;
+      if (p.approvalId !== 'All') return false;
+      if (p.amountTrackerId !== 'All') return false;
+      if (p.challengeTrackerId !== 'All') return false;
+      return isForever(p.permanentlyForbiddenTimes);
+    });
 
-    if (approvalPermState === 'PERMITTED' || (approvalPermState === 'NEUTRAL' && !hasScopedMintLock)) {
-      // Check if there are mint approvals - if so, this is a supply risk
-      const hasMintApproval = approvals.some((a) => a.fromListId === 'Mint');
-      if (hasMintApproval) {
-        findings.push({
-          severity: 'critical',
-          category: 'supply',
-          title: 'Mint approvals can be modified - UNLIMITED SUPPLY RISK',
-          detail: `canUpdateCollectionApprovals is ${approvalPermState} and the collection has mint approvals. The manager can add new mint approvals, change mint limits, or remove restrictions at any time. This effectively means unlimited supply.`,
-          recommendation:
-            'Lock canUpdateCollectionApprovals for mint-related approvals (fromListId: "Mint"). Use scoped approval permissions to lock mint while allowing transfer approval updates if needed.'
-        });
-      }
+    const mintMutable =
+      approvalPermState === 'PERMITTED' || (approvalPermState === 'NEUTRAL' && !hasScopedMintLock);
+    const transferMutable =
+      approvalPermState === 'PERMITTED' || (approvalPermState === 'NEUTRAL' && !hasBlanketLock);
+
+    const hasMintApproval = approvals.some((a) => a.fromListId === 'Mint');
+    const hasBackingApproval2 = approvals.some((a) => {
+      const crit = a.approvalCriteria as Record<string, unknown> | undefined;
+      return !!crit?.allowBackedMinting;
+    });
+    const hasNonMintApproval = approvals.some(
+      (a) => a.fromListId !== 'Mint' && !(a.approvalCriteria as Record<string, unknown>)?.allowBackedMinting
+    );
+
+    if (mintMutable && hasMintApproval) {
+      findings.push({
+        severity: 'critical',
+        category: 'supply',
+        title: 'Mint approvals can be modified — UNLIMITED SUPPLY RISK',
+        detail: `canUpdateCollectionApprovals is ${approvalPermState} and the collection has token-creation (Mint) approvals. The manager can add new creation approvals, change creation limits, or remove restrictions at any time. This effectively means unlimited supply.`,
+        recommendation:
+          'Lock canUpdateCollectionApprovals for mint-related approvals (fromListId: "Mint"). Use scoped approval permissions to lock mint while allowing transfer approval updates if needed.'
+      });
     }
 
-    if (approvalPermState !== 'FORBIDDEN' && !hasScopedMintLock) {
+    if (mintMutable && hasBackingApproval2) {
       findings.push({
-        severity: 'warning',
+        severity: 'critical',
+        category: 'supply',
+        title: 'Backing approvals can be modified — UNLIMITED SUPPLY RISK',
+        detail: `canUpdateCollectionApprovals is ${approvalPermState} and the collection uses IBC backing to create tokens (allowBackedMinting = true). The manager can modify the 1:1 backing conversion, add new backing paths, or change limits at any time, which effectively means unlimited supply risk even though this is not a traditional "Mint" approval.`,
+        recommendation:
+          'Lock canUpdateCollectionApprovals for the backing address scope. Use scoped approval permissions to fix the backing configuration at creation and block future modifications.'
+      });
+    }
+
+    if (transferMutable && hasNonMintApproval) {
+      findings.push({
+        severity: 'critical',
         category: 'transferability',
-        title: 'Transfer rules can be modified',
-        detail: `canUpdateCollectionApprovals is ${approvalPermState}. The manager can add, remove, or modify transfer approvals. This includes adding forceful transfer approvals.`,
-        recommendation: 'If transfer rules should be fixed, set canUpdateCollectionApprovals to FORBIDDEN. For compliance tokens, this may need to stay PERMITTED.'
+        title: 'Post-mint transfer approvals can be modified',
+        detail: `canUpdateCollectionApprovals is ${approvalPermState} and the collection has post-mint transfer approvals. The manager can add, remove, or modify transfer rules at any time. Holders cannot rely on the current transfer rules being stable.`,
+        recommendation:
+          'Permanently lock canUpdateCollectionApprovals if transfer rules should be fixed. For compliance tokens that need ongoing manager control, this may need to stay neutral or permitted — in that case, document the trust assumption.'
       });
     }
 
@@ -311,16 +386,8 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
 
       // --- Mint approval checks ---
       if (fromId === 'Mint') {
-        // Must have overridesFromOutgoingApprovals
-        if (!criteria.overridesFromOutgoingApprovals) {
-          findings.push({
-            severity: 'critical',
-            category: 'approval-bug',
-            title: `Mint approval "${approvalId}" missing overridesFromOutgoingApprovals`,
-            detail: 'Approvals with fromListId: "Mint" MUST have overridesFromOutgoingApprovals: true. Without this, the Mint address cannot send tokens and minting will fail.',
-            recommendation: 'Add overridesFromOutgoingApprovals: true to approvalCriteria.'
-          });
-        }
+        // "Mint approval missing overridesFromOutgoingApprovals" moved to
+        // review-ux/approvals.ts (review.ux.mint_approval_missing_override).
 
         // Check for unlimited mint (no amount limits and no transfer limits)
         const amounts = criteria.approvalAmounts as Record<string, unknown> | undefined;
@@ -329,12 +396,12 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
 
         const hasAmountLimit =
           amounts &&
-          ((amounts.overallApprovalAmount && amounts.overallApprovalAmount !== '0') ||
-            (amounts.perInitiatedByAddressApprovalAmount && amounts.perInitiatedByAddressApprovalAmount !== '0'));
+          ((amounts.overallApprovalAmount && amounts.overallApprovalAmount !== 0n) ||
+            (amounts.perInitiatedByAddressApprovalAmount && amounts.perInitiatedByAddressApprovalAmount !== 0n));
         const hasTransferLimit =
           transfers &&
-          ((transfers.overallMaxNumTransfers && transfers.overallMaxNumTransfers !== '0') ||
-            (transfers.perInitiatedByAddressMaxNumTransfers && transfers.perInitiatedByAddressMaxNumTransfers !== '0'));
+          ((transfers.overallMaxNumTransfers && transfers.overallMaxNumTransfers !== 0n) ||
+            (transfers.perInitiatedByAddressMaxNumTransfers && transfers.perInitiatedByAddressMaxNumTransfers !== 0n));
         const hasPredetermined =
           predetermined &&
           ((predetermined.incrementedBalances && Object.keys(predetermined.incrementedBalances as object).length > 0) ||
@@ -344,23 +411,17 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
           findings.push({
             severity: 'critical',
             category: 'supply',
-            title: `Mint approval "${approvalId}" has NO supply limits`,
-            detail: 'This mint approval has no overallApprovalAmount, no maxNumTransfers, and no predeterminedBalances. Anyone matching the approval can mint unlimited tokens.',
+            title: `Mint approval "${approvalId}" has no supply limits`,
+            detail: 'This token-creation approval has no overallApprovalAmount, no maxNumTransfers, and no predeterminedBalances. Anyone matching the approval can create unlimited new tokens.',
             recommendation:
-              'Add approvalAmounts.overallApprovalAmount to cap total supply, or maxNumTransfers.overallMaxNumTransfers to cap mint count, or use predeterminedBalances for sequential allocation.'
+              'Add approvalAmounts.overallApprovalAmount to cap total supply, or maxNumTransfers.overallMaxNumTransfers to cap the creation count, or use predeterminedBalances for sequential allocation.'
           });
         }
 
-        // Public mint check
-        if (initiatedBy === 'All' && toId === 'All') {
-          findings.push({
-            severity: 'info',
-            category: 'approval-design',
-            title: `Mint approval "${approvalId}" is PUBLIC`,
-            detail: 'Anyone can mint tokens. initiatedByListId and toListId are both "All".',
-            recommendation: 'This is correct for public mints. For restricted mints, use a specific address or dynamic store challenge.'
-          });
-        }
+        // "Public mint" info finding removed — approvals are commonly
+        // gated via claim plugins, merkle challenges, dynamic stores, or
+        // out-of-band allowlists, and flagging All+All as noteworthy
+        // produced noise on every template that uses public mints.
       }
 
       // --- Backing address checks ---
@@ -472,53 +533,44 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         });
       }
 
-      // All -> specific address with no initiator restriction (forceful revocation)
-      if (fromId === 'All' && initiatedBy === 'All' && !criteria.requireToEqualsInitiatedBy) {
-        findings.push({
-          severity: 'critical',
-          category: 'transferability',
-          title: `Approval "${approvalId}" allows FORCEFUL transfers from anyone`,
-          detail: 'fromListId: "All" + initiatedByListId: "All" means ANYONE can initiate a transfer FROM any address. This allows forceful seizure/revocation of tokens.',
-          recommendation:
-            'Add requireToEqualsInitiatedBy: true, or restrict initiatedByListId to the token owner, or restrict fromListId to "!Mint" for voluntary transfers only.'
-        });
-      }
+      // "Approval allows FORCEFUL transfers" moved to review-ux/approvals.ts
+      // (review.ux.forceful_transfers_allowed + review.ux.forceful_override_mismatch).
 
-      // Specific from -> specific to with All initiator
-      if (
-        fromId !== 'Mint' &&
-        fromId !== '!Mint' &&
-        fromId !== 'All' &&
-        !fromId.startsWith('!') &&
-        toId !== 'All' &&
-        initiatedBy === 'All'
-      ) {
-        if (fromId !== toId) {
-          findings.push({
-            severity: 'info',
-            category: 'approval-design',
-            title: `Approval "${approvalId}" is a directed transfer channel`,
-            detail: `Allows transfers from ${fromId} to ${toId}, initiated by anyone.`,
-            recommendation: 'Verify this directed channel is intentional.'
-          });
-        }
-      }
+      // "Directed transfer channel" info finding removed — self-explanatory
+      // from the approval definition itself and produced noise on every
+      // smart-token backing/unbacking pair.
     }
 
     // 3c. Check for backing approval completeness (smart tokens need BOTH)
     const standards = col.standards || [];
     const isSmartToken = standards.some((s) => s.toLowerCase().includes('smart token'));
 
+    // Use the canonical backing address from cosmosCoinBackedPath to
+    // identify backing / unbacking approvals structurally. An approval is:
+    //   - backing   (deposit)    when allowBackedMinting && fromListId == backingAddr
+    //   - unbacking (withdrawal) when allowBackedMinting && toListId   == backingAddr
+    // This is more reliable than guessing based on '!' prefixes on the
+    // opposite list, which misses valid shapes like `fromListId: 'AllWithoutMint'`.
+    const backingAddr = (invariants.cosmosCoinBackedPath as any)?.address as string | undefined;
+    const addrMatches = (listId: string | undefined, addr: string | undefined): boolean => {
+      if (!listId || !addr) return false;
+      if (listId === addr) return true;
+      // compound/negated lists containing the backing address also count
+      return listId.includes(addr);
+    };
+
     const hasBackingApproval = approvals.some((a) => {
       const crit = a.approvalCriteria as Record<string, unknown> | undefined;
-      if (crit?.allowBackedMinting && a.fromListId && !a.fromListId.startsWith('!')) return true;
+      if (crit?.allowBackedMinting && addrMatches(a.fromListId, backingAddr)) return true;
       if (a.approvalId && /backing/i.test(a.approvalId) && !/unbacking/i.test(a.approvalId)) return true;
+      if (a.approvalId && /vault-deposit/i.test(a.approvalId)) return true;
       return false;
     });
     const hasUnbackingApproval = approvals.some((a) => {
       const crit = a.approvalCriteria as Record<string, unknown> | undefined;
-      if (crit?.allowBackedMinting && a.toListId && a.fromListId && (a.fromListId.startsWith('!') || a.fromListId === 'All')) return true;
+      if (crit?.allowBackedMinting && addrMatches(a.toListId, backingAddr)) return true;
       if (a.approvalId && /unbacking/i.test(a.approvalId)) return true;
+      if (a.approvalId && /vault-withdraw/i.test(a.approvalId)) return true;
       return false;
     });
 
@@ -548,74 +600,41 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     // 4. TRANSFERABILITY ANALYSIS
     // ========================================
 
-    const hasTransferApproval = approvals.some(
-      (a) => a.fromListId === '!Mint' || (a.fromListId !== 'Mint' && !(a.approvalCriteria as Record<string, unknown>)?.allowBackedMinting)
-    );
+    // "Soulbound" = no way for tokens to leave their initial minter. Any of
+    // the following counts as a transfer path:
+    //   - A classic !Mint post-mint transfer approval
+    //   - Any non-mint approval that isn't backed minting (free P2P)
+    //   - Backed minting approvals (backing/unbacking) — these let users
+    //     deposit/withdraw from the backing address, which is a real
+    //     transfer path out of the soulbound interpretation
+    const hasTransferApproval =
+      approvals.some(
+        (a) => a.fromListId === '!Mint' || (a.fromListId !== 'Mint' && !(a.approvalCriteria as Record<string, unknown>)?.allowBackedMinting)
+      ) || hasBackingApproval || hasUnbackingApproval;
 
     if (!hasTransferApproval && approvals.length > 0) {
       findings.push({
         severity: 'info',
         category: 'transferability',
-        title: 'No post-mint transfer approval found (non-transferable / soulbound)',
-        detail: 'The collection has no approval allowing transfers between non-Mint addresses. Tokens are soulbound after minting.',
-        recommendation: 'If this is intentional (soulbound tokens), this is correct. Add a free-transfer approval (fromListId: "!Mint") if transfers should be allowed.'
+        title: 'Tokens are non-transferable / soulbound',
+        detail: 'The collection has no approval allowing tokens to move between non-Mint addresses. Tokens cannot leave their initial holder once they are in circulation.',
+        recommendation: 'If non-transferable tokens are intentional, this is correct. Otherwise add a free-transfer approval (fromListId: "!Mint") so holders can move tokens to other addresses.'
       });
     }
 
-    // Check noForcefulPostMintTransfers invariant
-    if (!invariants.noForcefulPostMintTransfers) {
-      const potentialForceful = approvals.some((a) => {
-        if (a.fromListId === 'Mint') return false;
-        const initiated = a.initiatedByListId as string;
-        const anyoneCanInitiate = initiated === 'All' || initiated === '!Mint' || initiated === 'AllWithMint';
-        if (!anyoneCanInitiate) return false;
-        const crit = a.approvalCriteria as Record<string, unknown> | undefined;
-        return !crit?.requireToEqualsInitiatedBy;
-      });
-      if (potentialForceful) {
-        findings.push({
-          severity: 'warning',
-          category: 'transferability',
-          title: 'noForcefulPostMintTransfers is not set',
-          detail: 'The invariant noForcefulPostMintTransfers is false/unset, and there are approvals that could allow forceful transfers. The manager or third parties might be able to move tokens from holders without consent.',
-          recommendation: 'Set invariants.noForcefulPostMintTransfers: true if forceful transfers should never be possible.'
-        });
-      }
-    }
-
-    // ========================================
-    // 4b. AMOUNT SCALING RISK ANALYSIS
-    // ========================================
-
-    for (const a of approvals) {
-      const crit = a.approvalCriteria as Record<string, unknown> | undefined;
-      if (!crit) continue;
-      const incrementedBal = (crit.predeterminedBalances as Record<string, unknown> | undefined)?.incrementedBalances as
-        | Record<string, unknown>
-        | undefined;
-      if (!incrementedBal?.allowAmountScaling) continue;
-      const aId = (a as Record<string, unknown>).approvalId as string || 'unnamed';
-
-      const hasCoinOverride = ((crit.coinTransfers as Array<Record<string, unknown>>) || []).some(
-        (ct) => ct.overrideFromWithApproverAddress
-      );
-      if (hasCoinOverride) {
-        findings.push({
-          severity: 'warning',
-          category: 'approval-design',
-          title: `Amount scaling with approver-funded payments ("${aId}")`,
-          detail: 'This approval uses allowAmountScaling with overrideFromWithApproverAddress on coin transfers. Users can multiply payment amounts drawn from the approver/escrow. This is expected for prediction markets and credit tokens but dangerous for bids or offers.',
-          recommendation: 'Verify maxScalingMultiplier is set to a reasonable cap. Review who can initiate transfers through this approval.'
-        });
-      }
-    }
+    // "noForcefulPostMintTransfers not set" and "amount scaling with
+    // approver-funded payments" moved to review-ux/approvals.ts
+    // (review.ux.forceful_transfers_allowed + review.ux.amount_scaling_with_approver_funds).
 
     // ========================================
     // 5. INVARIANTS ANALYSIS
     // ========================================
 
     if (invariants.cosmosCoinBackedPath) {
-      if (!col.aliasPathsToAdd || col.aliasPathsToAdd.length === 0) {
+      // Tolerate both shapes: create Msgs use aliasPathsToAdd, frontend
+      // collection store uses aliasPaths. Either one counts.
+      const aliasPaths = (col as any).aliasPaths || col.aliasPathsToAdd || [];
+      if (aliasPaths.length === 0) {
         findings.push({
           severity: 'info',
           category: 'smart-token',
@@ -630,14 +649,24 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     // 6. METADATA & STANDARDS CHECKS
     // ========================================
 
-    const collectionUri = col.collectionMetadata?.uri || '';
-    if (collectionUri.startsWith('ipfs://METADATA_') || collectionUri === '') {
+    // Collection metadata URI placeholder check — suppressed when the
+    // frontend WithDetails shape is present (nested metadata.metadata
+    // with inline name / image / description). In that state the URI is
+    // intentionally blank pre-upload; the auto-apply flow resolves it
+    // on submit. `ipfs://METADATA_*` internal placeholders from the
+    // session/template flow are also valid and don't trigger this.
+    const collectionMeta: any = col.collectionMetadata;
+    const collectionUri: string = collectionMeta?.uri || '';
+    const collectionInline = collectionMeta?.metadata;
+    const hasInlineContent = !!(collectionInline && (collectionInline.name || collectionInline.image || collectionInline.description));
+    const isInternalPlaceholder = /^ipfs:\/\/METADATA_[A-Z]/.test(collectionUri);
+    if (!hasInlineContent && !isInternalPlaceholder && collectionUri === '') {
       findings.push({
         severity: 'info',
         category: 'metadata',
-        title: 'Collection metadata URI is a placeholder',
-        detail: `URI is "${collectionUri}". This needs to be replaced with actual IPFS metadata before deployment.`,
-        recommendation: 'Upload metadata to IPFS and replace placeholder URIs. If using return transaction for user review, metadataPlaceholders handles this automatically.'
+        title: 'Collection metadata URI is not set',
+        detail: 'collectionMetadata.uri is empty. Upload metadata to IPFS and set the URI, or populate inline metadata so the auto-apply flow can substitute it on submit.',
+        recommendation: 'Set collectionMetadata.uri to an uploaded IPFS URI, or populate collectionMetadata.metadata with name/image/description so the auto-apply flow handles it.'
       });
     }
 
@@ -669,29 +698,9 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
       }
     }
 
-    // Standards consistency
-    if (standards.includes('NFTs') && maxSupply !== '1') {
-      findings.push({
-        severity: 'warning',
-        category: 'standards',
-        title: 'NFT standard but maxSupplyPerId is not 1',
-        detail: `Collection has "NFTs" standard but maxSupplyPerId is "${maxSupply || '0'}". NFTs should have exactly 1 per token ID.`,
-        recommendation: 'Set invariants.maxSupplyPerId: "1" for NFT collections.'
-      });
-    }
-
-    if (standards.includes('Fungible Tokens') && col.validTokenIds) {
-      const hasMultipleTokenIds = col.validTokenIds.some((r) => r.start !== r.end && !(r.start === '1' && r.end === '1'));
-      if (hasMultipleTokenIds) {
-        findings.push({
-          severity: 'warning',
-          category: 'standards',
-          title: 'Fungible token with multiple token IDs',
-          detail: 'Fungible tokens typically use a single token ID (start: "1", end: "1"). Multiple token IDs may cause confusion.',
-          recommendation: 'Use validTokenIds: [{ start: "1", end: "1" }] for standard fungible tokens.'
-        });
-      }
-    }
+    // Standards consistency ("NFT standard but maxSupplyPerId is not 1",
+    // "Fungible token with multiple token IDs") moved to review-ux/skills.ts
+    // (review.ux.nft_no_supply_cap, review.ux.fungible_multiple_token_ids).
 
     // ========================================
     // 7. SERIALIZATION CHECKS
@@ -809,24 +818,16 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
           findings.push({
             severity: 'critical',
             category: 'approval-bug',
-            title: 'Missing autoApproveAllIncomingTransfers for mint collection',
-            detail: 'defaultBalances.autoApproveAllIncomingTransfers is not true, but the collection has mint approvals. Recipients will not be able to receive minted tokens.',
+            title: 'Recipients cannot receive newly created tokens',
+            detail: 'defaultBalances.autoApproveAllIncomingTransfers is not true, but the collection has token creation approvals (fromListId: "Mint"). Recipients will not be able to receive the tokens unless they first configure incoming approvals themselves.',
             recommendation: 'Set defaultBalances.autoApproveAllIncomingTransfers: true.'
           });
         }
       }
-    } else {
-      const hasMint = approvals.some((a) => a.fromListId === 'Mint');
-      if (hasMint && col.collectionId === '0') {
-        findings.push({
-          severity: 'warning',
-          category: 'approval-bug',
-          title: 'No defaultBalances specified with mint approvals',
-          detail: 'The collection has mint approvals but no defaultBalances. The chain defaults may not include autoApproveAllIncomingTransfers: true.',
-          recommendation: 'Explicitly set defaultBalances with autoApproveAllIncomingTransfers: true for mint collections.'
-        });
-      }
     }
+    // "autoApproveAllIncomingTransfers missing on mint collections
+    // without defaultBalances set" moved to review-ux/approvals.ts
+    // (review.ux.auto_approve_disabled_on_mintable).
 
     // ========================================
     // BUILD SUMMARY

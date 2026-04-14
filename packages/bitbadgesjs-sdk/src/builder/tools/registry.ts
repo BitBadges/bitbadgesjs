@@ -1,15 +1,15 @@
 /**
  * Central tool registry.
  *
- * Single source of truth for every MCP tool. Used by:
- *  - src/server.ts (MCP stdio server — wraps entries into ListTools/CallTool handlers)
+ * Single source of truth for every builder tool. Used by:
+ *  - src/server.ts (Model Context Protocol (MCP) stdio transport — wraps entries into ListTools/CallTool handlers)
  *  - external consumers (e.g. bitbadges-cli) that import this module and invoke
- *    tools as plain functions, without the MCP protocol.
+ *    tools as plain functions, bypassing the MCP stdio transport.
  *
  * Each entry has a `tool` schema (for discovery) and a `run` function that takes
  * raw args and returns a structured result. An optional `formatText` controls how
- * the result is serialized for the MCP text content block; by default we JSON
- * stringify. The registry itself is protocol-agnostic — it never returns MCP
+ * the result is serialized for the text content block returned over MCP; by default we JSON
+ * stringify. The registry itself is protocol-agnostic — it never returns transport-shaped
  * content blocks directly.
  */
 
@@ -44,13 +44,12 @@ import {
   // Dynamic store
   buildDynamicStoreTool, handleBuildDynamicStore,
   queryDynamicStoreTool, handleQueryDynamicStore,
-  // Audit / explain
-  auditCollectionTool, handleAuditCollection,
+  // Explain
   explainCollectionTool, handleExplainCollection,
+  // Unified review
+  reviewCollectionTool, handleReviewCollection,
   // Claim builder
   buildClaimTool, handleBuildClaim,
-  // Standards compliance
-  verifyStandardsCompliance, formatVerificationResult,
   // Session-based per-field tools (v2)
   setStandardsTool, handleSetStandards,
   setValidTokenIdsTool, handleSetValidTokenIds,
@@ -86,7 +85,7 @@ export { exportSession, importSession } from '../session/sessionState.js';
 
 // Re-export the resource registry so consumers get tools + resources from one
 // import. Resources are static documents (token registry, recipes, skill docs,
-// error patterns, etc.) — the other half of the MCP surface.
+// error patterns, etc.) — the other half of the builder surface.
 export {
   resourceRegistry,
   listResources,
@@ -96,7 +95,7 @@ export {
   type ReadResourceResult
 } from '../resources/registry.js';
 
-/** MCP tool schema shape — kept loose to avoid coupling to a specific SDK version. */
+/** Builder tool schema shape — kept loose to avoid coupling to a specific SDK version. */
 export interface ToolSchema {
   name: string;
   description: string;
@@ -113,7 +112,7 @@ export interface ToolEntry {
   /** Invoke the tool. Receives raw args and returns a structured result. */
   run: (args: any) => Promise<any> | any;
   /**
-   * Optional custom text serializer for MCP content blocks.
+   * Optional custom text serializer for MCP content blocks when used through the stdio transport.
    * Defaults to `JSON.stringify(result, null, 2)`.
    */
   formatText?: (result: any) => string;
@@ -142,21 +141,8 @@ const getSkillInstructionsTool: ToolSchema = {
   }
 };
 
-const verifyStandardsTool: ToolSchema = {
-  name: 'verify_standards',
-  description:
-    'Verify that a collection transaction complies with BitBadges protocol standards (subscription, credit token, smart token, etc.). Returns violations with severity levels. Complements audit_collection which covers security — this covers standards compliance.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      transaction: { type: 'object', description: 'The transaction object to verify (MsgUniversalUpdateCollection or similar)' },
-      transactionJson: { type: 'string', description: 'The transaction as a JSON string (alternative to transaction object)' }
-    }
-  }
-};
-
 /**
- * The tool registry. Keys are MCP tool names.
+ * The tool registry. Keys are builder tool names.
  */
 export const toolRegistry: Record<string, ToolEntry> = {
   // Utilities
@@ -208,29 +194,16 @@ export const toolRegistry: Record<string, ToolEntry> = {
   build_dynamic_store: entry(buildDynamicStoreTool, handleBuildDynamicStore),
   query_dynamic_store: entry(queryDynamicStoreTool, async (args: any) => await handleQueryDynamicStore(args)),
 
-  // Audit / explain / claim
-  audit_collection: entry(auditCollectionTool, handleAuditCollection),
+  // Unified review (preferred)
+  review_collection: entry(reviewCollectionTool, handleReviewCollection),
+
+  // Explain / claim
   explain_collection: entry(
     explainCollectionTool,
     handleExplainCollection,
     (result: any) => (result?.success ? result.explanation : JSON.stringify(result, null, 2))
   ),
   build_claim: entry(buildClaimTool, handleBuildClaim),
-
-  // Standards compliance (custom arg handling + formatter)
-  verify_standards: {
-    tool: verifyStandardsTool,
-    run: (args: any) => {
-      let tx = args;
-      if (typeof args?.transactionJson === 'string') {
-        tx = JSON.parse(args.transactionJson);
-      } else if (args?.transaction) {
-        tx = args.transaction;
-      }
-      return verifyStandardsCompliance(tx);
-    },
-    formatText: (result: any) => formatVerificationResult(result)
-  },
 
   // Session-based per-field tools (v2)
   set_standards: entry(setStandardsTool, handleSetStandards),
@@ -273,6 +246,80 @@ export interface CallToolResult {
 }
 
 /**
+ * Pre-flight check against `tool.inputSchema` (JSON-Schema-shaped). Catches
+ * the two LLM-agent footguns that handlers were silently tolerating:
+ *
+ *   1. **Missing required field** — handler reads `args.foo.toString()` and
+ *      crashes with "Cannot read properties of undefined". An LLM agent
+ *      gets a stack trace instead of "missing required field 'foo'".
+ *
+ *   2. **Wrong arg key** — agent passes `tokenIds` instead of
+ *      `validTokenIds`. Without `additionalProperties: false`, the handler
+ *      silently treats the field as missing and proceeds; state never
+ *      gets set; the agent thinks the call succeeded.
+ *
+ * We check JSON Schema `required` always, and optionally `additionalProperties`
+ * when the tool's schema declares it `false`. Tools that DON'T set
+ * `additionalProperties: false` retain their existing tolerant behavior
+ * (some legitimately accept arbitrary kwargs).
+ */
+function preflightArgs(tool: any, args: any): { ok: true } | { ok: false; error: string } {
+  const schema = tool?.inputSchema;
+  if (!schema || typeof schema !== 'object') return { ok: true };
+  const argsObj = args && typeof args === 'object' && !Array.isArray(args) ? args : {};
+
+  // Required fields
+  if (Array.isArray(schema.required) && schema.required.length > 0) {
+    const missing: string[] = [];
+    for (const key of schema.required) {
+      if (argsObj[key] === undefined || argsObj[key] === null || argsObj[key] === '') {
+        missing.push(key);
+      }
+    }
+    if (missing.length > 0) {
+      const expected = Array.isArray(schema.required) ? schema.required.join(', ') : '';
+      return {
+        ok: false,
+        error: `Missing required field${missing.length > 1 ? 's' : ''}: ${missing.join(', ')}.${expected ? ` Expected: ${expected}` : ''}`
+      };
+    }
+  }
+
+  // Unknown fields (only when explicitly closed)
+  if (schema.additionalProperties === false && schema.properties && typeof schema.properties === 'object') {
+    const allowed = new Set(Object.keys(schema.properties));
+    const unknown = Object.keys(argsObj).filter((k) => !allowed.has(k));
+    if (unknown.length > 0) {
+      const allowedList = [...allowed].join(', ');
+      return {
+        ok: false,
+        error: `Unknown field${unknown.length > 1 ? 's' : ''}: ${unknown.join(', ')}. Allowed: ${allowedList}.`
+      };
+    }
+  }
+  return { ok: true };
+}
+
+/**
+ * Format a thrown error for tool consumers. Recognizes Zod issues and
+ * renders them as `path: message` lines instead of a giant JSON dump.
+ * Falls back to plain `error.message` for anything else.
+ */
+function formatToolError(err: unknown): string {
+  if (!err || typeof err !== 'object') return String(err);
+  const e = err as any;
+  // Zod errors have `issues: ZodIssue[]` with `path` + `message` per entry.
+  if (Array.isArray(e.issues) && e.issues.length > 0 && e.issues[0]?.message) {
+    const lines = e.issues.map((i: any) => {
+      const path = Array.isArray(i.path) && i.path.length > 0 ? i.path.join('.') : '(root)';
+      return `${path}: ${i.message}`;
+    });
+    return `Invalid input — ${e.issues.length} issue${e.issues.length > 1 ? 's' : ''}:\n  ${lines.join('\n  ')}`;
+  }
+  return e.message ? String(e.message) : String(err);
+}
+
+/**
  * Invoke a tool by name. Never throws — errors are captured into the result.
  */
 export async function callTool(name: string, args: any): Promise<CallToolResult> {
@@ -280,13 +327,21 @@ export async function callTool(name: string, args: any): Promise<CallToolResult>
   if (!tool) {
     return { text: `Unknown tool: ${name}`, result: null, isError: true };
   }
+  // Centralized pre-flight: catches missing-required and unknown-field
+  // mistakes BEFORE the handler runs. Without this, handlers dereferencing
+  // a missing field would crash with "Cannot read properties of undefined"
+  // and agents would get a stack trace instead of a structured error.
+  const pre = preflightArgs(tool.tool, args);
+  if (!pre.ok) {
+    return { text: `Error: ${pre.error}`, result: null, isError: true };
+  }
   try {
     const result = await tool.run(args);
     const text = tool.formatText ? tool.formatText(result) : JSON.stringify(result, null, 2);
     return { text, result };
   } catch (error) {
     return {
-      text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      text: `Error: ${formatToolError(error)}`,
       result: null,
       isError: true
     };

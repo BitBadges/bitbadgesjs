@@ -82,18 +82,23 @@ export const validateCrowdfundCollection = (collection: Readonly<iCollectionDoc<
   details.goalAmount = success.approvalCriteria?.mustOwnTokens?.[0]?.amountRange?.start;
 
   // Validate deposit-refund
+  // overridesFromOutgoingApprovals is required by the Mint approval standard.
+  // overridesToIncomingApprovals is NOT required — the recipient
+  // auto-approves via defaultBalances.autoApproveAllIncomingTransfers and/or
+  // autoApproveSelfInitiatedIncomingTransfers, so the collection-level
+  // incoming override would be redundant. Setting it to true is allowed
+  // but not required; setting it to false is the preferred default.
   const drCriteria = depositRefund.approvalCriteria;
   if (!drCriteria?.overridesFromOutgoingApprovals) errors.push('Deposit-refund: overridesFromOutgoingApprovals must be true');
-  if (!drCriteria?.overridesToIncomingApprovals) errors.push('Deposit-refund: overridesToIncomingApprovals must be true');
   if (!drCriteria?.requireToEqualsInitiatedBy) errors.push('Deposit-refund: requireToEqualsInitiatedBy must be true');
   const drIb = drCriteria?.predeterminedBalances?.incrementedBalances;
   if (!drIb?.allowAmountScaling) errors.push('Deposit-refund: allowAmountScaling must be true');
   if (!drCriteria?.coinTransfers?.length) errors.push('Deposit-refund: must have coinTransfers');
 
   // Validate deposit-progress
+  // Same incoming-override rationale as deposit-refund.
   const dpCriteria = depositProgress.approvalCriteria;
   if (!dpCriteria?.overridesFromOutgoingApprovals) errors.push('Deposit-progress: overridesFromOutgoingApprovals must be true');
-  if (!dpCriteria?.overridesToIncomingApprovals) errors.push('Deposit-progress: overridesToIncomingApprovals must be true');
   const dpIb = dpCriteria?.predeterminedBalances?.incrementedBalances;
   if (!dpIb?.allowAmountScaling) errors.push('Deposit-progress: allowAmountScaling must be true');
 

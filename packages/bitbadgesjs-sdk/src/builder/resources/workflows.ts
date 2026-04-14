@@ -13,7 +13,7 @@ export const workflowsResourceInfo = {
 const WORKFLOWS_CONTENT = {
   overview: `# BitBadges Workflow Chains
 
-Multi-step tool sequences for common operations. Each workflow lists the exact MCP tools to call in order.`,
+Multi-step tool sequences for common operations. Each workflow lists the exact builder tools to call in order.`,
 
   bb402Acquire: `## BB-402: Acquire Tokens to Gain Access
 
@@ -213,8 +213,8 @@ Step 1: Build the collection
   → Use per-field tools: set_standards, set_valid_token_ids, set_invariants, add_approval, set_permissions, set_default_balances, set_collection_metadata, set_token_metadata, add_alias_path, set_mint_escrow_coins
   → Use get_transaction to retrieve the built transaction
 
-Step 2: Audit
-  → audit_collection(collection: result.transaction, context: "nft art collection")
+Step 2: Review
+  → review_collection(collection: result.transaction, context: "nft art collection")
   → Review all CRITICAL findings — these MUST be fixed
   → Review all WARNING findings — decide if they're intentional
 
@@ -223,8 +223,8 @@ Step 3: Fix critical issues
   → Common fixes: add overridesFromOutgoingApprovals, add supply limits,
     lock permissions, set autoApproveAllIncomingTransfers
 
-Step 4: Re-audit
-  → audit_collection(collection: fixedTransaction)
+Step 4: Re-review
+  → review_collection(collection: fixedTransaction)
   → Verify no more CRITICAL findings
 
 Step 5: Deploy
@@ -232,10 +232,10 @@ Step 5: Deploy
   → Return transaction JSON for user to sign with their wallet and broadcast
 \`\`\`
 
-Can also audit existing on-chain collections:
+Can also review existing on-chain collections:
 \`\`\`
 Step 1: → query_collection(collectionId)
-Step 2: → audit_collection(collection: queryResult, context: "description")
+Step 2: → review_collection(collection: queryResult, context: "description")
 Step 3: → Present findings to user
 \`\`\``
 };

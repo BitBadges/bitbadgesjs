@@ -36,8 +36,8 @@ export const SKILL_INSTRUCTIONS: SkillInstruction[] = [
 - Unbacking fromListId uses "!Mint:backingAddress" syntax (excludes both Mint and backing address — meaning only regular holders can unback)
 - Backing address is deterministic — use generate_backing_address tool
 - Optional: Add "AI Agent Vault" to standards for AI Prompt tab (display-only)
-- Alias path: symbol = base unit (e.g. "uvatom"), denomUnits = display units with decimals > 0 only, each denomUnit MUST have metadata with an image
-- All alias path and denomUnit metadata MUST include an \`image\` field (token logo URL)`,
+- Alias path: symbol = base unit (e.g. "uvatom"), denomUnits = display units with decimals > 0 only, each denomUnit MUST have PathMetadata with a placeholder uri
+- PathMetadata ONLY has \`{ uri, customData }\` — do NOT include image/name/description fields. Set metadata.uri to a placeholder like \`"ipfs://METADATA_ALIAS_<denom>"\` and register the image/name/description in the metadataPlaceholders sidecar keyed by that URI`,
     instructions: `## Smart Token Configuration
 
 ### Mental Model: Three Phases
@@ -195,9 +195,9 @@ MUST configure at least one alias path. Structure:
       "decimals": "6",
       "symbol": "vATOM",
       "isDefaultDisplay": true,
-      "metadata": { "uri": "ipfs://...", "customData": "" }
+      "metadata": { "uri": "ipfs://METADATA_ALIAS_uvatom_UNIT", "customData": "" }
     }],
-    "metadata": { "uri": "", "customData": "", "image": "https://example.com/token-logo.png" }
+    "metadata": { "uri": "ipfs://METADATA_ALIAS_uvatom", "customData": "" }
   }]
 }
 \`\`\`
@@ -205,10 +205,9 @@ MUST configure at least one alias path. Structure:
 Rules:
 - symbol = base unit symbol (e.g., "uvatom")
 - denomUnits = display units with decimals > 0 ONLY (base decimals 0 is implicit)
-- Each denomUnit MUST have metadata with an image field (often the same image as the base alias path)
-- The alias path itself MUST have metadata with an image field — this is the token logo shown in the UI
+- Each denomUnit and the path itself MUST have PathMetadata of the form \`{ uri, customData }\`. Use a placeholder URI like \`"ipfs://METADATA_ALIAS_<denom>"\` / \`"ipfs://METADATA_ALIAS_<denom>_UNIT"\`.
 - isDefaultDisplay: true for the primary display unit
-- **CRITICAL**: All metadata objects (alias path, denomUnits, cosmosCoinWrapperPaths) MUST include an \`image\` field with a valid URL. Missing images will be auto-fixed to a default but you should always provide a descriptive image.
+- **CRITICAL**: PathMetadata has EXACTLY two fields — \`uri\` and \`customData\`. Never add \`image\`, \`name\`, or \`description\` here. Register the name, description, and image for each placeholder URI in the \`metadataPlaceholders\` sidecar returned alongside the transaction — the metadata auto-apply flow uploads the off-chain JSON and substitutes the placeholder URIs with real IPFS URIs after deploy.
 
 ### Cosmos Coin Wrapper (Optional)
 
@@ -222,8 +221,8 @@ For wrapping native Cosmos SDK coins, use \`allowSpecialWrapping: true\` and \`c
       "sideA": { "amount": "1" },
       "sideB": [{ "amount": "1", "tokenIds": [{ "start": "1", "end": "1" }], "ownershipTimes": [{ "start": "1", "end": "18446744073709551615" }] }]
     },
-    "denomUnits": [{ "decimals": "6", "symbol": "ATOM", "isDefaultDisplay": true, "metadata": { "uri": "", "customData": "", "image": "https://example.com/token-logo.png" } }],
-    "metadata": { "uri": "", "customData": "", "image": "https://example.com/token-logo.png" },
+    "denomUnits": [{ "decimals": "6", "symbol": "ATOM", "isDefaultDisplay": true, "metadata": { "uri": "ipfs://METADATA_WRAPPER_uatom_UNIT", "customData": "" } }],
+    "metadata": { "uri": "ipfs://METADATA_WRAPPER_uatom", "customData": "" },
     "allowOverrideWithAnyValidToken": false
   }]
 }
@@ -284,8 +283,8 @@ Require ownership of a 2FA token to withdraw. Add mustOwnTokens to the unbacking
 
 ### Metadata Guidance
 
-- Collection metadata, token metadata, alias path metadata, and denomUnit metadata should all have descriptive names/descriptions and images
-- Do NOT use lazy placeholder names like "Backing Approval" — write real user-facing descriptions explaining what each approval does
+- Collection, token, alias path, and denomUnit metadata proto fields are ALL shaped as \`{ uri, customData }\`. Use placeholder URIs (\`ipfs://METADATA_COLLECTION\`, \`ipfs://METADATA_TOKEN_<id>\`, \`ipfs://METADATA_ALIAS_<denom>\`, etc.) and register the real names, descriptions, and images in the \`metadataPlaceholders\` sidecar keyed by those URIs. The auto-apply flow uploads the off-chain JSON and substitutes the placeholder URIs with real uploaded URIs after deploy.
+- Do NOT use lazy placeholder names like "Backing Approval" — write real user-facing descriptions inside the metadataPlaceholders entries explaining what each approval / collection / token does.
 
 ### Key Rules Summary
 
@@ -585,9 +584,9 @@ When enabling liquidity pools for a collection, follow these requirements:
          "decimals": "6",
          "symbol": "vATOM",
          "isDefaultDisplay": true,
-         "metadata": { "uri": "", "customData": "", "image": "https://example.com/token-logo.png" }
+         "metadata": { "uri": "ipfs://METADATA_ALIAS_uvatom_UNIT", "customData": "" }
        }],
-       "metadata": { "uri": "", "customData": "", "image": "https://example.com/token-logo.png" }
+       "metadata": { "uri": "ipfs://METADATA_ALIAS_uvatom", "customData": "" }
      }]
    }
    \`\`\`
@@ -596,7 +595,7 @@ When enabling liquidity pools for a collection, follow these requirements:
 
 - disablePoolCreation MUST be false (not true)
 - MUST configure at least one alias path (required for liquidity pools)
-- All alias path and denomUnit metadata MUST include an \`image\` field with a valid URL (token logo)
+- PathMetadata (on every aliasPath and denomUnit) is ONLY \`{ uri, customData }\`. Put the token logo in the off-chain JSON at the placeholder URI and register a matching entry in \`metadataPlaceholders\` — never put \`image\` on the proto.
 - Merkle challenges are NOT compatible with liquidity pools
 - This enables decentralized exchange (DEX) trading interfaces`
   },
@@ -1188,7 +1187,7 @@ When creating a Custom-2FA collection, follow these requirements:
 - Manager can add (mint) and remove (burn) addresses
 - No peer-to-peer transfers
 - Requires TWO approvals: manager-add (minting) + manager-remove (burn to bb1qqq...s7gvmv)
-- After building, proceed with audit_collection + validate_transaction as normal`,
+- After building, proceed with review_collection + validate_transaction as normal`,
     instructions: `## Address List Token Type
 
 Use per-field tools to create this collection. It requires:
@@ -1201,7 +1200,7 @@ Use per-field tools to create this collection. It requires:
 
 This creates a token collection where list membership = owning x1 of token ID 1. The manager can add (mint) and remove (burn) addresses. No peer-to-peer transfers.
 
-After building, proceed with audit_collection and validate_transaction as normal.`
+After building, proceed with review_collection and validate_transaction as normal.`
   },
   {
     id: 'bb-402',
@@ -1829,7 +1828,7 @@ MUST include an alias path so tokens display nicely:
   },
   "symbol": "<SYMBOL>",
   "denomUnits": [],
-  "metadata": { "uri": "", "customData": "", "image": "https://example.com/token-logo.png" }
+  "metadata": { "uri": "ipfs://METADATA_ALIAS_u<symbol_lowercase>", "customData": "" }
 }]
 \`\`\`
 
@@ -2245,6 +2244,7 @@ Without this, the escrow has no funds and claims will fail.
 - Binary prediction market: "Will X happen by Y?" Users deposit USDC to mint paired YES+NO tokens. Trade YES↔NO on a liquidity pool. Verifier settles by voting. Winner redeems 1:1.
 - Token ID 1 = YES, Token ID 2 = NO (via alias paths with 6 decimals)
 - mintEscrowAddress holds all deposited USDC
+- invariants: \\\`noForcefulPostMintTransfers: true\\\` — locks non-mint approvals (redeem, settlement, transferable) from using \\\`overridesFromOutgoingApprovals\\\` or \\\`overridesToIncomingApprovals\\\`. Non-mint approvals rely on \\\`defaultBalances.autoApproveSelfInitiatedOutgoingTransfers: true\\\` for outgoing-side auth and on the burn destination for incoming-side auth
 - All permissions frozen after creation
 - 7 approvals: paired mint, freely transferable, pre-settlement redeem, yes-wins, no-wins, push-yes, push-no
 - Alias paths for YES (token 1) and NO (token 2) with 6 decimals
@@ -2842,6 +2842,7 @@ For bounties that require the verifier or submitter to hold a token from THIS co
 - maxScalingMultiplier: MAX_UINT for unrestricted scaling
 - Deposit coinTransfer.to = "Mint" (auto-resolves to escrow)
 - requireToEqualsInitiatedBy: true on deposit-refund (contributor receives their own refund token)
+- invariants: \\\`noForcefulPostMintTransfers: true\\\` — the refund approval (non-mint) MUST NOT set \\\`overridesFromOutgoingApprovals\\\` or \\\`overridesToIncomingApprovals\\\` (both must be false or omitted). It relies on \\\`defaultBalances.autoApproveSelfInitiatedOutgoingTransfers: true\\\` for the outgoing side and on the burn destination for the incoming side. The deposit-refund / deposit-progress / success approvals ARE Mint-side and keep \\\`overridesFromOutgoingApprovals: true\\\` as the chain requires, with \\\`overridesToIncomingApprovals: false\\\`
 - All permissions frozen after creation
 - DON'T use votingChallenges — goal tracking is via mustOwnTokens, not voting
 - DON'T forget allowAmountScaling on ALL 4 approvals
@@ -3070,10 +3071,14 @@ On-chain crowdfunding with automatic goal tracking. Contributors deposit coins a
 - initiatedByListId on mint-to-winner = seller address (only seller can accept)
 - maxNumTransfers = 1 on all approvals (one-shot)
 - overridesToIncomingApprovals: false on mint-to-winner (bidder's incoming approval handles payment)
+- Burn approval has NO override flags — relies on defaultBalances autoApproveSelfInitiatedOutgoingTransfers + burn destination
+- noForcefulPostMintTransfers: true in invariants (permanently locks out forceful transfers post-mint)
+- After settlement, the mint-to-winner approval is auto-deleted via afterOneUse — protocol validators treat a missing mint-to-winner as a valid post-settlement state, not an error
 - All permissions frozen after creation
 - DON'T use coinTransfers on collection approvals — payment happens via intent matching
 - DON'T set initiatedByListId to "All" on mint-to-winner — must be seller
 - DON'T set transferTimes to forever — must be bounded to accept window
+- DON'T put override flags on the burn approval — auction has noForcefulPostMintTransfers: true, so non-mint override flags would be invariant violations
 - DO use autoDeletionOptions.afterOneUse: true on mint-to-winner`,
     instructions: `## Auction Configuration
 
@@ -3086,7 +3091,8 @@ A single-item auction where the seller creates a collection, bidders place inten
 - Token ID 1 = The auctioned item
 - Standard: "Auction"
 - validTokenIds: [{ start: "1", end: "1" }]
-- invariants: { noCustomOwnershipTimes: true }
+- invariants: \\\`{ noCustomOwnershipTimes: true, maxSupplyPerId: "0", noForcefulPostMintTransfers: true, disablePoolCreation: true }\\\`
+- \\\`noForcefulPostMintTransfers: true\\\` locks the collection so no non-mint approval can ever use \\\`overridesFromOutgoingApprovals\\\` or \\\`overridesToIncomingApprovals\\\` — the burn approval below relies on \\\`defaultBalances\\\` auto-approve flags instead
 - All permissions frozen after creation
 
 ### Bidding Mechanism
@@ -3134,16 +3140,11 @@ Bids must have transferTimes that stay valid through the END of the accept windo
   "toListId": "<BURN_ADDRESS>",
   "initiatedByListId": "All",
   "tokenIds": [{ "start": "1", "end": "1" }],
-  "transferTimes": [{ "start": "1", "end": "18446744073709551615" }],
-  "approvalCriteria": {
-    "overridesFromOutgoingApprovals": true,
-    "overridesToIncomingApprovals": true,
-    "coinTransfers": [],
-    "maxNumTransfers": { "overallMaxNumTransfers": "1" },
-    "autoDeletionOptions": { "afterOneUse": true, "afterOverallMaxNumTransfers": true }
-  }
+  "transferTimes": [{ "start": "1", "end": "18446744073709551615" }]
 }
 \\\`\\\`\\\`
+
+> **No \\\`approvalCriteria\\\` overrides:** because the invariants lock \\\`noForcefulPostMintTransfers: true\\\`, the burn approval MUST NOT set \\\`overridesFromOutgoingApprovals\\\` or \\\`overridesToIncomingApprovals\\\`. It relies on \\\`defaultBalances.autoApproveSelfInitiatedOutgoingTransfers: true\\\` for the outgoing side and on the burn destination for the incoming side.
 
 ### Auction Flow
 
@@ -3156,7 +3157,7 @@ Bids must have transferTimes that stay valid through the END of the accept windo
 
 1. \\\`set_valid_token_ids\\\` — set [{ start: "1", end: "1" }]
 2. \\\`set_standards\\\` — set ["Auction"]
-3. \\\`set_invariants\\\` — set { noCustomOwnershipTimes: true }
+3. \\\`set_invariants\\\` — set \\\`{ noCustomOwnershipTimes: true, maxSupplyPerId: "0", noForcefulPostMintTransfers: true, disablePoolCreation: true }\\\`
 4. \\\`add_approval\\\` x2 — mint-to-winner, burn
 5. \\\`set_collection_metadata\\\` — auction title, description, image
 6. \\\`set_token_metadata\\\` — token 1 metadata (the item being auctioned)
@@ -3170,6 +3171,8 @@ Bids must have transferTimes that stay valid through the END of the accept windo
 - DON'T set initiatedByListId to "All" on mint-to-winner — only the seller can accept bids
 - DON'T set transferTimes to forever — MUST be bounded to accept window (bidDeadline → bidDeadline + acceptWindow)
 - DON'T set overridesToIncomingApprovals to true on mint-to-winner — must be false so the bidder's incoming approval (payment intent) is checked
+- DON'T add override flags to the burn approval — the invariant \\\`noForcefulPostMintTransfers: true\\\` rejects \\\`overridesFromOutgoingApprovals\\\` or \\\`overridesToIncomingApprovals\\\` on any non-mint approval
+- DON'T worry if the mint-to-winner approval is absent after settlement — \\\`autoDeletionOptions.afterOneUse: true\\\` removes it after the first successful mint, and the protocol validator accepts that as a valid post-settlement state
 - DON'T create a separate mint-to-seller approval — the token should not exist until the seller accepts a bid
 - DON'T forget autoDeletionOptions on mint-to-winner — without afterOneUse: true, the seller could mint to multiple bidders
 - DON'T forget that bids must have transferTimes valid through the END of the accept window, not just the bid deadline`
@@ -3186,7 +3189,7 @@ Bids must have transferTimes that stay valid through the END of the accept windo
 - Each purchase approval: fromListId="Mint", toListId="All" (or burn address if burn-on-purchase), 1 coinTransfer paying the store address
 - Payment goes directly to store address (NOT to escrow) — overrideFromWithApproverAddress: false
 - Each product has independent price, supply limit (maxNumTransfers), and burn-on-purchase toggle
-- predeterminedBalances.startBalances: 1x of that product's token ID
+- predeterminedBalances.incrementedBalances.startBalances: 1x of that product's token ID
 - Optional burn approval: !Mint → burn address, no coinTransfers
 - invariants: { noCustomOwnershipTimes: true }
 - All permissions frozen after creation

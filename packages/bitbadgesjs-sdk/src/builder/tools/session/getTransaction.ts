@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { getTransaction as getTransactionFromSession, getOrCreateSession, ensureStringNumbers } from '../../session/sessionState.js';
+import { normalizeTxMessages } from '../../../cli/utils/normalizeMsg.js';
 
 export const getTransactionSchema = z.object({
   sessionId: z.string().optional().describe("Session ID for per-request isolation."),
@@ -50,5 +51,9 @@ export function handleGetTransaction(input: GetTransactionInput) {
   const sanitized = ensureStringNumbers(transaction);
   // Replace any unreplaced IMAGE_N placeholders with default logo
   const cleaned = replaceUnresolvedImagePlaceholders(sanitized);
-  return { success: true, transaction: cleaned };
+  // Narrow Universal → MsgCreateCollection / MsgUpdateCollection at this
+  // agent-facing boundary. Session storage stays on Universal (superset)
+  // so internal mutators don't have to branch on message type.
+  const normalized = normalizeTxMessages(cleaned);
+  return { success: true, transaction: normalized };
 }

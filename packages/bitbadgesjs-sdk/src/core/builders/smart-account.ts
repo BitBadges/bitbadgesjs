@@ -7,10 +7,12 @@ import {
   resolveCoin,
   buildMsg,
   buildAliasPath,
+  sanitizeCosmosPathName,
   ibcBackedInvariants,
   generateAliasAddressForIBCBackedDenom,
-  emptyPermissions,
-  alwaysLockedPermission
+  baselinePermissions,
+  alwaysLockedPermission,
+  alwaysLockedCollectionApprovalPermission
 } from './shared.js';
 
 export interface SmartAccountParams {
@@ -32,7 +34,7 @@ export function buildSmartAccount(params: SmartAccountParams): any {
       fromListId: backingAddr,
       toListId: `!${backingAddr}`,
       initiatedByListId: 'All',
-      approvalId: 'smart-token-backing',
+      approvalId: 'smart-account-backing',
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -42,12 +44,15 @@ export function buildSmartAccount(params: SmartAccountParams): any {
         allowBackedMinting: true
       }
     },
-    // Unbacking
+    // Unbacking. `fromListId` excludes both Mint AND the backing alias
+    // itself so the backing address can't initiate circular unbacks.
+    // The colon-separated exclude syntax is how the chain allows
+    // specifying multiple excluded lists.
     {
-      fromListId: '!Mint',
+      fromListId: `!Mint:${backingAddr}`,
       toListId: backingAddr,
       initiatedByListId: 'All',
-      approvalId: 'smart-token-unbacking',
+      approvalId: 'smart-account-unbacking',
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -65,7 +70,7 @@ export function buildSmartAccount(params: SmartAccountParams): any {
       fromListId: '!Mint',
       toListId: 'All',
       initiatedByListId: 'All',
-      approvalId: 'free-transfer',
+      approvalId: 'transferable-approval',
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -86,19 +91,26 @@ export function buildSmartAccount(params: SmartAccountParams): any {
   };
 
   const permissions = {
-    ...emptyPermissions(),
-    canUpdateCollectionApprovals: [alwaysLockedPermission()],
+    ...baselinePermissions(),
+    canUpdateCollectionApprovals: [alwaysLockedCollectionApprovalPermission()],
     canAddMoreAliasPaths: [alwaysLockedPermission()],
     canAddMoreCosmosCoinWrapperPaths: [alwaysLockedPermission()]
   };
 
-  const denomStr = 'u' + symbol.toLowerCase();
+  // Chain rule: cosmos wrapper path denom AND symbol must match
+  // `[a-zA-Z_{}-]+`. Sanitize the user-provided symbol once and
+  // derive the denom from the cleaned form so they round-trip through
+  // the chain validator without "invalid characters" rejections.
+  const cleanSymbol = sanitizeCosmosPathName(symbol, 'symbol');
+  const denomStr = 'u' + cleanSymbol.toLowerCase();
+  const alias = buildAliasPath(denomStr, cleanSymbol, coin.decimals, params.image || coin.image);
 
   return buildMsg({
     collectionApprovals,
     standards,
     invariants,
-    aliasPathsToAdd: [buildAliasPath(denomStr, symbol, coin.decimals, coin.image)],
+    aliasPathsToAdd: [alias.path],
+    metadataPlaceholders: { ...alias.placeholders },
     collectionPermissions: permissions
   });
 }

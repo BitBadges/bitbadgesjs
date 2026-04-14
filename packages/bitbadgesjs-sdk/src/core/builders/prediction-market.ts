@@ -28,9 +28,18 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
   const yesTokenIds = [{ start: '1', end: '1' }];
   const noTokenIds = [{ start: '2', end: '2' }];
 
+  const randomId = () => Math.random().toString(16).slice(2, 18);
+  const mintId = randomId();
+  const transferId = randomId();
+  const redeemId = randomId();
+  const settleYesId = randomId();
+  const settleNoId = randomId();
+  const settlePushYesId = randomId();
+  const settlePushNoId = randomId();
+
   // 1. Paired Mint — mint both YES and NO by depositing USDC
   const pairedMint = {
-    approvalId: 'paired-mint',
+    approvalId: `pm-mint-${mintId}`,
     fromListId: 'Mint',
     toListId: 'All',
     initiatedByListId: 'All',
@@ -54,15 +63,18 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
           overrideToWithInitiator: false
         }
       ],
+      // Mint approval: outgoing override required by standard.
+      // Incoming: recipient auto-approves via defaultBalances +
+      // requireToEqualsInitiatedBy (depositor receives their own mint).
       overridesFromOutgoingApprovals: true,
-      overridesToIncomingApprovals: true,
+      overridesToIncomingApprovals: false,
       requireToEqualsInitiatedBy: true
     }
   };
 
   // 2. Free transfer — tokens are freely transferable
   const freeTransfer = {
-    approvalId: 'free-transfer',
+    approvalId: `pm-transfer-${transferId}`,
     fromListId: '!Mint',
     toListId: 'All',
     initiatedByListId: 'All',
@@ -75,7 +87,7 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
 
   // 3. Pre-Settlement Redeem — burn both YES+NO to get USDC back
   const preRedeem = {
-    approvalId: 'pre-redeem',
+    approvalId: `pm-redeem-${redeemId}`,
     fromListId: '!Mint',
     toListId: BURN_ADDRESS,
     initiatedByListId: 'All',
@@ -99,18 +111,43 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
           overrideToWithInitiator: true
         }
       ],
-      requireFromEqualsInitiatedBy: true,
-      overridesFromOutgoingApprovals: true,
-      overridesToIncomingApprovals: true
+      // Chain rule: overrideFromWithApproverAddress requires
+      // maxNumTransfers to set at least one non-zero limit. Pre-redeem
+      // is unbounded (any holder can redeem any number of pairs) so we
+      // set overall to MAX_UINT64 rather than capping per initiator.
+      // Frontend PredictionMarketRegistry uses the same shape.
+      maxNumTransfers: {
+        overallMaxNumTransfers: MAX_UINT64,
+        perToAddressMaxNumTransfers: '0',
+        perFromAddressMaxNumTransfers: '0',
+        perInitiatedByAddressMaxNumTransfers: '0',
+        amountTrackerId: `pm-redeem-${redeemId}`,
+        resetTimeIntervals: { startTime: '0', intervalLength: '0' }
+      },
+      // No overrides: holder self-initiates their own pair burn and
+      // auto-approves the outgoing side via defaultBalances
+      // (autoApproveSelfInitiatedOutgoingTransfers). No requireFromEqualsInitiatedBy
+      // either — leaving open-ended so a holder can delegate via their
+      // own user-level outgoing approval if they want.
+      // Burn-address destination auto-approves incoming.
+      overridesFromOutgoingApprovals: false,
+      overridesToIncomingApprovals: false
     }
   };
 
-  // 4-7. Settlement outcomes
+  // 4-7. Settlement outcomes. `burnAmount` is the number of tokens
+  // consumed per 1 coin of payout — 1 for a winning side (burn 1,
+  // get 1 back) and 2 for a push (burn 2, get 1 back). `allowAmountScaling: true`
+  // lets holders scale to whatever balance they actually hold, so
+  // the numbers here encode the ratio, not a hard minimum.
+  // Matches PredictionMarketRegistry.settlementApproval() in the
+  // frontend: `burnAmount = isPush ? depositAmount * 2n : depositAmount`.
   function settlementApproval(
     approvalId: string,
     tokenIds: any[],
     proposalId: string,
-    coinAmount: string
+    burnAmount: string,
+    payoutAmount: string
   ) {
     return {
       approvalId,
@@ -122,39 +159,56 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
       tokenIds,
       version: '0',
       approvalCriteria: {
-        predeterminedBalances: scalingBalances('1'),
+        predeterminedBalances: scalingBalances(burnAmount),
         coinTransfers: [
           {
             to: '',
-            coins: [{ amount: coinAmount, denom: coin.denom }],
+            coins: [{ amount: payoutAmount, denom: coin.denom }],
             overrideFromWithApproverAddress: true,
             overrideToWithInitiator: true
           }
         ],
+        // Chain rule: overrideFromWithApproverAddress requires
+        // maxNumTransfers to set at least one non-zero limit. Each
+        // settlement claim per holder.
+        maxNumTransfers: {
+          overallMaxNumTransfers: '0',
+          perToAddressMaxNumTransfers: '0',
+          perFromAddressMaxNumTransfers: '0',
+          perInitiatedByAddressMaxNumTransfers: '1',
+          amountTrackerId: approvalId,
+          resetTimeIntervals: { startTime: '0', intervalLength: '0' }
+        },
         votingChallenges: [
           {
             proposalId,
             quorumThreshold: '100',
-            voters: [{ address: params.verifier, weight: '100' }]
+            voters: [{ address: params.verifier, weight: '1' }]
           }
         ],
-        overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true
+        // No overrides: winning-side holder self-initiates their own
+        // settlement burn and auto-approves via defaultBalances. The
+        // verifier vote gates WHICH proposal can execute but the actual
+        // claim must come from the token holder.
+        overridesFromOutgoingApprovals: false,
+        overridesToIncomingApprovals: false
       }
     };
   }
 
-  const settleYes = settlementApproval('settle-yes', yesTokenIds, 'settlement-yes', '1');
-  const settleNo = settlementApproval('settle-no', noTokenIds, 'settlement-no', '1');
-  const settlePushYes = settlementApproval('settle-push-yes', yesTokenIds, 'settlement-push-yes', '1');
-  const settlePushNo = settlementApproval('settle-push-no', noTokenIds, 'settlement-push-no', '1');
+  // Win: burn 1 token → 1 coin. Push: burn 2 tokens → 1 coin.
+  const settleYes = settlementApproval(`pm-settle-yes-${settleYesId}`, yesTokenIds, `pm-settle-yes-${settleYesId}`, '1', '1');
+  const settleNo = settlementApproval(`pm-settle-no-${settleNoId}`, noTokenIds, `pm-settle-no-${settleNoId}`, '1', '1');
+  const settlePushYes = settlementApproval(`pm-settle-push-yes-${settlePushYesId}`, yesTokenIds, `pm-settle-push-yes-${settlePushYesId}`, '2', '1');
+  const settlePushNo = settlementApproval(`pm-settle-push-no-${settlePushNoId}`, noTokenIds, `pm-settle-push-no-${settlePushNoId}`, '2', '1');
 
   const collectionApprovals = [pairedMint, freeTransfer, preRedeem, settleYes, settleNo, settlePushYes, settlePushNo];
 
-  const tokenMetadata = [
-    singleTokenMetadata('1', 'YES', params.description, params.image),
-    singleTokenMetadata('2', 'NO', params.description, params.image)
-  ];
+  const yesToken = singleTokenMetadata('1', 'YES', params.description, params.image);
+  const noToken = singleTokenMetadata('2', 'NO', params.description, params.image);
+  const tokenMetadata = [yesToken.entry, noToken.entry];
+  const yesAlias = buildAliasPath('uyes', 'YES', coin.decimals, params.image, 'YES', params.description);
+  const noAlias = buildAliasPath('uno', 'NO', coin.decimals, params.image, 'NO', params.description);
 
   return buildMsg({
     collectionApprovals,
@@ -162,15 +216,20 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
     standards: ['Prediction Market'],
     collectionPermissions: frozenPermissions(),
     tokenMetadata,
+    metadataPlaceholders: {
+      [yesToken.placeholder.uri]: yesToken.placeholder.content,
+      [noToken.placeholder.uri]: noToken.placeholder.content,
+      ...yesAlias.placeholders,
+      ...noAlias.placeholders
+    },
     invariants: {
       noCustomOwnershipTimes: true,
       maxSupplyPerId: '0',
-      noForcefulPostMintTransfers: false,
+      // Non-mint approvals (redeem, settlements) no longer use override
+      // flags, so forceful post-mint transfers can be permanently locked.
+      noForcefulPostMintTransfers: true,
       disablePoolCreation: false
     },
-    aliasPathsToAdd: [
-      buildAliasPath('uyes', 'YES', coin.decimals),
-      buildAliasPath('uno', 'NO', coin.decimals)
-    ]
+    aliasPathsToAdd: [yesAlias.path, noAlias.path]
   });
 }

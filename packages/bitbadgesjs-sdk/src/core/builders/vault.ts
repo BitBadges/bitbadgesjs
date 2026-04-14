@@ -11,9 +11,10 @@ import {
   parseDuration,
   buildMsg,
   buildAliasPath,
+  sanitizeCosmosPathName,
   ibcBackedInvariants,
   generateAliasAddressForIBCBackedDenom,
-  emptyPermissions
+  baselinePermissions
 } from './shared.js';
 
 export interface VaultParams {
@@ -30,15 +31,22 @@ export interface VaultParams {
 export function buildVault(params: VaultParams): any {
   const coin = resolveCoin(params.backingCoin);
   const backingAddr = generateAliasAddressForIBCBackedDenom(coin.denom);
-  const symbol = params.symbol || 'v' + coin.symbol;
+  // Sanitize the symbol to the chain's wrapper-path regex
+  // (`[a-zA-Z_{}-]+`) — see sanitizeCosmosPathName for the rule. Users
+  // commonly include digits ("vUSDC9", "BADGE2") that would be rejected
+  // at simulate time with "symbol contains invalid characters".
+  const symbol = sanitizeCosmosPathName(params.symbol || 'v' + coin.symbol, 'symbol');
 
   const collectionApprovals: any[] = [
-    // Deposit (backing)
+    // Deposit (backing). `toListId` excludes the backing address itself
+    // so the backing alias can't receive its own wrapper tokens (which
+    // would be nonsensical and matches the frontend VaultApprovalRegistry
+    // default).
     {
       fromListId: backingAddr,
-      toListId: 'All',
+      toListId: `!${backingAddr}`,
       initiatedByListId: 'All',
-      approvalId: 'deposit',
+      approvalId: 'vault-deposit',
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -55,7 +63,7 @@ export function buildVault(params: VaultParams): any {
       fromListId: '!Mint',
       toListId: backingAddr,
       initiatedByListId: 'All',
-      approvalId: 'withdrawal',
+      approvalId: `vault-withdraw-${Math.random().toString(16).slice(2, 10)}`,
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -98,7 +106,7 @@ export function buildVault(params: VaultParams): any {
       fromListId: '!Mint',
       toListId: params.emergencyRecovery,
       initiatedByListId: params.emergencyRecovery,
-      approvalId: 'emergency-migration',
+      approvalId: 'vault-emergency-migration',
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -115,12 +123,25 @@ export function buildVault(params: VaultParams): any {
     disablePoolCreation: true
   };
 
+  // Derive the denom from the (sanitized) symbol — chain enforces
+  // global denom uniqueness, so a hardcoded 'uvault' would collide
+  // for any user creating more than one vault on the same chain.
+  const alias = buildAliasPath(
+    'u' + symbol.toLowerCase(),
+    symbol,
+    coin.decimals,
+    params.image || coin.image,
+    params.name,
+    params.description
+  );
+
   return buildMsg({
     collectionApprovals,
     standards: ['Smart Token', 'Vault'],
     invariants,
-    aliasPathsToAdd: [buildAliasPath('uvault', symbol, coin.decimals, coin.image)],
-    collectionPermissions: emptyPermissions()
+    aliasPathsToAdd: [alias.path],
+    metadataPlaceholders: { ...alias.placeholders },
+    collectionPermissions: baselinePermissions()
   });
 }
 

@@ -3,19 +3,14 @@
  * @module core/builders/auction
  */
 import {
-  MAX_UINT64,
   FOREVER,
   BURN_ADDRESS,
   parseDuration,
   durationToTimestamp,
   buildMsg,
-  buildAliasPath,
   frozenPermissions,
   defaultBalances,
   metadataPlaceholders,
-  singleTokenMetadata,
-  mintToBurnBalances,
-  zeroAmounts,
   zeroMaxTransfers
 } from './shared.js';
 
@@ -25,31 +20,73 @@ export interface AuctionParams {
   name?: string;
   description?: string;
   image?: string;
+  /**
+   * Seller address — used as `initiatedByListId` on the mint-to-winner
+   * approval so only the seller can accept the winning bid. Falls back
+   * to the CLI-passed `creator` when not set.
+   */
+  seller?: string;
+  creator?: string;
 }
 
 export function buildAuction(params: AuctionParams): any {
   const bidDeadlineTs = durationToTimestamp(params.bidDeadline || '7d');
   const acceptEndTs = String(Number(bidDeadlineTs) + Number(parseDuration(params.acceptWindow || '7d')));
+  const sellerAddr = params.seller || params.creator || '';
+  const randomId = () => Math.random().toString(16).slice(2, 18);
+
+  // Mint the auction NFT (1x token 1) on settlement. The frontend
+  // AuctionRegistry calls this `mintToSellerBalances`, but the actual
+  // destination is set by the approval's `toListId` + the transfer
+  // recipient — this function just says "create 1 new token 1".
+  const mintOneTokenOneBalances = {
+    manualBalances: [],
+    orderCalculationMethod: {
+      useOverallNumTransfers: true,
+      usePerToAddressNumTransfers: false,
+      usePerFromAddressNumTransfers: false,
+      usePerInitiatedByAddressNumTransfers: false,
+      useMerkleChallengeLeafIndex: false,
+      challengeTrackerId: ''
+    },
+    incrementedBalances: {
+      startBalances: [
+        { amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: FOREVER }
+      ],
+      incrementTokenIdsBy: '0',
+      incrementOwnershipTimesBy: '0',
+      durationFromTimestamp: '0',
+      allowOverrideTimestamp: false,
+      recurringOwnershipTimes: { startTime: '0', intervalLength: '0', chargePeriodLength: '0' },
+      allowOverrideWithAnyValidToken: false,
+      allowAmountScaling: false,
+      maxScalingMultiplier: '0'
+    }
+  };
 
   const collectionApprovals = [
-    // Mint-to-Winner — seller accepts winning bid during accept window
+    // Mint-to-Winner — seller accepts winning bid during accept window.
+    // `initiatedByListId: sellerAddr` locks acceptance to the seller.
     {
       fromListId: 'Mint',
       toListId: 'All',
-      initiatedByListId: '',
-      approvalId: 'mint-to-winner',
+      initiatedByListId: sellerAddr,
+      approvalId: `auction-mint-to-winner-${randomId()}`,
       transferTimes: [{ start: bidDeadlineTs, end: acceptEndTs }],
-      tokenIds: FOREVER,
+      tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
       version: '0',
       approvalCriteria: {
-        predeterminedBalances: mintToBurnBalances(),
+        predeterminedBalances: mintOneTokenOneBalances,
         maxNumTransfers: {
           ...zeroMaxTransfers('auction-tracker'),
           overallMaxNumTransfers: '1'
         },
         overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true,
+        // Must be FALSE so the winning bidder's incoming payment intent
+        // (their bid approval) still gets matched. Setting this true
+        // would bypass the bidder's incoming approvals entirely.
+        overridesToIncomingApprovals: false,
         autoDeletionOptions: {
           afterOneUse: true,
           afterOverallMaxNumTransfers: true,
@@ -63,15 +100,27 @@ export function buildAuction(params: AuctionParams): any {
       fromListId: '!Mint',
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
-      approvalId: 'burn',
+      approvalId: `auction-burn-${randomId()}`,
       transferTimes: FOREVER,
-      tokenIds: FOREVER,
+      tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
       version: '0'
     }
   ];
 
-  const { collectionMetadata } = metadataPlaceholders(params.name || 'Auction');
+  // Auctions are 1-of-1 NFTs, so the token-level metadata is always an
+  // identical mirror of the collection-level metadata. Reuse the default
+  // token entry emitted by metadataPlaceholders() (keyed by
+  // ipfs://METADATA_TOKEN_DEFAULT, same content as the collection) and
+  // narrow its tokenIds range to [1,1] so it doesn't bleed into any
+  // future higher IDs. This matches the custom-2fa / single-NFT pattern
+  // where collection image == token image automatically — no separate
+  // tokenMetadata path to drift out of sync.
+  const { collectionMetadata, tokenMetadata, placeholders: collectionPlaceholders } = metadataPlaceholders(
+    params.name || 'Auction',
+    params.description,
+    params.image
+  );
 
   return buildMsg({
     collectionApprovals,
@@ -81,11 +130,22 @@ export function buildAuction(params: AuctionParams): any {
     invariants: {
       noCustomOwnershipTimes: true,
       maxSupplyPerId: '0',
-      noForcefulPostMintTransfers: false,
+      // Non-mint approvals (auction-burn) have no override flags, so
+      // forceful post-mint transfers can be permanently locked.
+      noForcefulPostMintTransfers: true,
       disablePoolCreation: true
     },
-    aliasPathsToAdd: [buildAliasPath('uauction', 'AUCTION', 0)],
+    // Auctions are 1-of-1 NFTs — no fractional denom unit needed. The
+    // previous version added an alias path with `decimals: 0` which the
+    // chain rejected with "denom unit decimals cannot be 0". The auction
+    // doesn't need a fungible representation; the NFT itself is the only
+    // tradable surface.
+    aliasPathsToAdd: [],
     collectionMetadata,
-    tokenMetadata: [singleTokenMetadata('1', params.name || 'Auction Item', params.description, params.image)]
+    tokenMetadata: tokenMetadata.map((entry) => ({
+      ...entry,
+      tokenIds: [{ start: '1', end: '1' }]
+    })),
+    metadataPlaceholders: collectionPlaceholders
   });
 }

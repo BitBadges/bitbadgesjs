@@ -28,7 +28,7 @@ const FRONTEND_DOCS_CONTENT = {
 
 ### Address Handling
 - Always validate addresses before use (0x or bb1 format)
-- Use \`convert_address\` MCP tool or SDK's \`ethToCosmos\`/\`cosmosToEth\` for format conversion
+- Use the \`convert_address\` builder tool or SDK's \`ethToCosmos\`/\`cosmosToEth\` for format conversion
 - Display resolved names when available
 
 ### Amount Display
@@ -37,7 +37,7 @@ const FRONTEND_DOCS_CONTENT = {
 - Show both the human-readable amount and denomination
 
 ### Transaction Flow
-- Build transaction JSON (via MCP tools or manually)
+- Build transaction JSON (via builder tools or manually)
 - Present to user for review before signing
 - User signs with their wallet (MetaMask for EVM, Keplr for Cosmos)
 - Broadcast the signed transaction
@@ -46,7 +46,7 @@ const FRONTEND_DOCS_CONTENT = {
   collectionPatterns: `## Working with Collections
 
 ### Fetching Collection Data
-Use the BitBadges API (via SDK or MCP \`query_collection\` tool):
+Use the BitBadges API (via SDK or the builder's \`query_collection\` tool):
 \`\`\`typescript
 import { BitBadgesAPI } from 'bitbadgesjs-sdk';
 
@@ -79,7 +79,7 @@ const protocolData = JSON.parse(collection.customData || '{}');
   transactionPatterns: `## Transaction Patterns
 
 ### Building and Submitting
-1. Build transaction JSON using MCP tools or construct manually
+1. Build transaction JSON using builder tools or construct manually
 2. Validate with \`validate_transaction\` tool
 3. Present to user for review
 4. User signs with their wallet

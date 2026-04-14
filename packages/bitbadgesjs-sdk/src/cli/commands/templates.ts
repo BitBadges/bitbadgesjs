@@ -1,61 +1,353 @@
 import { Command } from 'commander';
 import { output, readJsonInput } from '../utils/io.js';
+import {
+  renderReview,
+  renderValidate,
+  renderMetadataPlaceholders,
+  collectMetadataPlaceholders,
+  renderSimulate
+} from '../utils/terminal.js';
+import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMsg.js';
+import { addNetworkOptions } from '../utils/io.js';
 
-export const buildCommand = new Command('build').description('Template builders — generate MsgUniversalUpdateCollection or user approval JSON');
+export const templatesCommand = new Command('templates').description('Deterministic transaction templates — flag-based generators for vaults, NFTs, subscriptions, bounties, and more.');
 
 // ── Output helper ────────────────────────────────────────────────────────────
 
 
-async function emit(data: any, opts: { condensed?: boolean; outputFile?: string; dryRun?: boolean; explain?: boolean; creator?: string; manager?: string }) {
-  // Apply --creator / --manager overrides to collection msgs
-  if (data.typeUrl?.includes('MsgUniversalUpdateCollection') && data.value) {
-    if (opts.creator) data.value.creator = opts.creator;
-    if (opts.manager) data.value.manager = opts.manager;
+async function emit(
+  data: any,
+  opts: {
+    condensed?: boolean;
+    outputFile?: string;
+    jsonOnly?: boolean;
+    explain?: boolean;
+    creator?: string;
+    manager?: string;
+    name?: string;
+    description?: string;
+    image?: string;
+    simulate?: boolean;
+    events?: boolean;
+    // Network selection — passed through addNetworkOptions on the
+    // shared sharedOpts() helper. Only consulted when --simulate is on.
+    network?: 'mainnet' | 'local' | 'testnet';
+    testnet?: boolean;
+    local?: boolean;
+    url?: string;
   }
+) {
+  // User-level approval templates produce
+  // `/tokenization.MsgUpdateUserApprovals` and similar — they're not
+  // collection CRUD msgs but they still need the creator / manager
+  // backfill from CLI flags. Detect once and use the flag in two
+  // places below: (a) post-build creator override, (b) gating the
+  // auto-simulate path (we skip simulate for approval-style msgs
+  // because their semantics are state-change-on-existing-collection
+  // with set/append/delete variability — not a single tx the user
+  // wants to dry-run on a fresh chain).
+  const isUserApprovalTx =
+    typeof data?.typeUrl === 'string' &&
+    /\.(MsgUpdateUserApprovals|MsgSetIncomingApproval|MsgSetOutgoingApproval|MsgDeleteIncomingApproval|MsgDeleteOutgoingApproval|MsgPurgeApprovals)$/.test(
+      data.typeUrl
+    );
 
-  // --dry-run: run verifyStandardsCompliance and print violations
-  if (opts.dryRun && data.typeUrl?.includes('MsgUniversalUpdateCollection')) {
-    const { verifyStandardsCompliance } = await import('../../core/verify-standards.js');
-    const result = verifyStandardsCompliance({ messages: [data] });
-    if (result.valid) {
-      process.stderr.write(`✓ Passes all standard checks (${result.standardsChecked.length} checks run)\n`);
-    } else {
-      process.stderr.write(`✗ ${result.violations.length} violation(s) found:\n`);
-      for (const v of result.violations) {
-        process.stderr.write(`  [${v.standard}] ${v.field}: ${v.message}\n`);
-        if (v.fix) process.stderr.write(`    Fix: ${v.fix}\n`);
+  // Apply --creator / --manager overrides to collection msgs. Builders emit
+  // MsgUniversalUpdateCollection internally (superset) — the normalization
+  // into MsgCreateCollection / MsgUpdateCollection happens once, at the very
+  // end of emit(), right before we write the JSON out.
+  const isCollectionTx = isCollectionMsg(data);
+  if ((isCollectionTx || isUserApprovalTx) && data.value) {
+    if (opts.creator) data.value.creator = opts.creator;
+  }
+  if (isCollectionTx && data.value) {
+    if (opts.manager) data.value.manager = opts.manager;
+
+    // Defensive backfill — last-mile safety net for templates that
+    // generate approvals without knowing the creator address.
+    //
+    // (1) `initiatedByListId === ''` → fill in with creator. The chain
+    //     rejects empty list IDs with "initiated by list id is
+    //     uninitialized". Any builder that genuinely wants a permissionless
+    //     list must explicitly set `'All'` — empty string is never valid.
+    //
+    // (2) `coinTransfers[].to === ''` → fill in with creator, BUT only
+    //     when `overrideToWithInitiator !== true`. The override flag tells
+    //     the chain to substitute `to` with the initiator at runtime
+    //     (correct for quest rewards, bounty payouts to claimants, etc.).
+    //     The empty `to` without the override means "refund the creator"
+    //     — typical for deny/expire branches in bounty/crowdfund/etc. where
+    //     the builder couldn't know the creator at build time.
+    const creatorForFallback = data.value.creator;
+    if (Array.isArray(data.value.collectionApprovals) && creatorForFallback) {
+      for (const approval of data.value.collectionApprovals) {
+        if (!approval || typeof approval !== 'object') continue;
+        if (approval.initiatedByListId === '') {
+          approval.initiatedByListId = creatorForFallback;
+        }
+        const cts = approval.approvalCriteria?.coinTransfers;
+        if (Array.isArray(cts)) {
+          for (const ct of cts) {
+            if (ct && ct.to === '' && ct.overrideToWithInitiator !== true) {
+              ct.to = creatorForFallback;
+            }
+          }
+        }
       }
     }
   }
 
-  // --explain: run interpretTransaction and print human-readable summary
-  if (opts.explain && data.typeUrl?.includes('MsgUniversalUpdateCollection')) {
+  // Pre-fill the metadataPlaceholders sidecar from the user's --name /
+  // --description / --image flags. Walk every placeholder URI in the tx
+  // and supply the user's content for any URI the template didn't already
+  // populate. Approval URIs derive a name from the approvalId so the
+  // user's "My Vault" doesn't accidentally label every approval as
+  // "My Vault" — they keep their own descriptive default.
+  if (isCollectionTx && (opts.name || opts.description || opts.image)) {
+    const meta = (data.value._meta = data.value._meta || {});
+    const sidecar: Record<string, { name: string; description: string; image: string }> = (meta.metadataPlaceholders =
+      meta.metadataPlaceholders || {});
+    const fallbackName = opts.name || 'Untitled';
+    const fallbackDescription = opts.description || '';
+    const fallbackImage = opts.image || 'ipfs://QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E';
+    const found = collectMetadataPlaceholders(data);
+    for (const p of found) {
+      if (sidecar[p.uri]) continue; // already filled by the template
+      // Approval / alias / wrapper / denom-unit URIs should keep a
+      // descriptive default rooted in their own identifier rather than
+      // the user's collection name.
+      if (p.uri.startsWith('ipfs://METADATA_APPROVAL_')) {
+        const approvalId = p.uri.replace('ipfs://METADATA_APPROVAL_', '');
+        sidecar[p.uri] = {
+          name: approvalId.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+          description: '',
+          image: '' // approval images MUST be empty per the standards
+        };
+        continue;
+      }
+      if (p.uri.startsWith('ipfs://METADATA_ALIAS_') || p.uri.startsWith('ipfs://METADATA_WRAPPER_')) {
+        sidecar[p.uri] = {
+          name: `${fallbackName} ${p.uri.startsWith('ipfs://METADATA_ALIAS_') ? 'alias path' : 'wrapper path'}`,
+          description: fallbackDescription,
+          image: fallbackImage
+        };
+        continue;
+      }
+      // Collection / token / anything else gets the user's flag values.
+      sidecar[p.uri] = {
+        name: fallbackName,
+        description: fallbackDescription,
+        image: fallbackImage
+      };
+    }
+  }
+
+  // Emit the JSON payload FIRST. Scroll order on an interactive terminal
+  // naturally puts the most recently-written bytes at the bottom, so the
+  // review summary appearing *after* the JSON means the user's final
+  // eyeline lands on the review verdict — the most actionable bit.
+  //
+  // Stdout flushes synchronously for pipes/files and line-buffered for
+  // TTYs, so writing JSON before the stderr review keeps the visible
+  // order stable across both cases.
+  //
+  // We deliberately keep `value._meta.metadataPlaceholders` on the emitted
+  // JSON so that re-reading the file via `bitbadges-cli builder verify` (or
+  // any other downstream tool that walks the same sidecar) preserves the
+  // PROVIDED state. Chain proto serialization drops unknown fields on
+  // `value`, so the `_meta` annotation never reaches the wire — it's
+  // purely a CLI / off-chain pipeline annotation scoped to this specific
+  // msg. Narrow Universal → MsgCreateCollection / MsgUpdateCollection
+  // right at the write boundary. Agents and humans see the proto's real
+  // per-intent message type; only legacy internal tooling sees the
+  // Universal superset. The `value._meta.metadataPlaceholders` sidecar is
+  // preserved — it rides on the same msg.value and the chain strips
+  // unknown fields on serialization.
+  const outData = isCollectionTx ? normalizeToCreateOrUpdate(data) : data;
+  output(outData, { condensed: opts.condensed, outputFile: opts.outputFile });
+
+  // --explain: run interpretTransaction and print human-readable summary.
+  // Printed to stderr so it doesn't pollute the JSON pipe; shown above the
+  // auto-review so the narrative ("what this tx does") precedes the
+  // critique ("what might be wrong with it").
+  if (opts.explain && isCollectionTx) {
     const { interpretTransaction } = await import('../../core/interpret-transaction.js');
     const explanation = interpretTransaction(data.value);
     process.stderr.write('\n── Explanation ──\n' + explanation + '\n');
   }
 
-  // Strip _meta before output — it's informational, not part of the msg
-  const { _meta, ...cleanData } = data;
-  output(cleanData, { condensed: opts.condensed, outputFile: opts.outputFile });
+  // Auto-review every produced collection tx. Runs both the design-level
+  // `reviewCollection()` checks (audit, standards, UX) and the low-level
+  // structural `validateTransaction()` checks so templates can't silently
+  // produce JSON that the chain would reject. Findings go to stderr so
+  // stdout stays pure JSON for sign/broadcast pipelines; --json-only
+  // suppresses both for callers that want zero stderr noise.
+  //
+  // Auto-validate runs for BOTH collection and user-approval templates
+  // (both produce structurally validatable txs). Auto-review and
+  // metadata + simulate are gated below — review only fires for
+  // collection txs (collection-specific rules), and simulate is
+  // refused for approval-style msgs entirely.
+  if (!opts.jsonOnly && (isCollectionTx || isUserApprovalTx)) {
+    // Static validation FIRST — if the JSON is structurally broken, the
+    // design review below is much less meaningful.
+    try {
+      const { validateTransaction } = await import('../../core/validate.js');
+      const wrapped = { messages: [data] };
+      const vResult = validateTransaction(wrapped);
+      process.stderr.write('\n' + renderValidate(vResult, { stream: process.stderr, title: 'Auto-Validate' }) + '\n');
+    } catch (err) {
+      process.stderr.write(`Validation skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+    }
+  }
+
+  if (!opts.jsonOnly && isCollectionTx) {
+    try {
+      const { reviewCollection } = await import('../../core/review.js');
+      // reviewCollection wants either a raw collection or a tx body with
+      // messages[]. Templates emit a single Msg, so wrap it.
+      const result = reviewCollection({ messages: [data] });
+      process.stderr.write('\n' + renderReview(result, { stream: process.stderr, title: 'Auto-Review' }) + '\n');
+    } catch (err) {
+      process.stderr.write(`Review skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+    }
+
+    // Metadata To Upload — every placeholder URI on the tx that the
+    // metadata auto-apply flow will later substitute. The user (or a
+    // downstream tool) needs to produce JSON for each of these URIs and
+    // upload it somewhere the chain can resolve before broadcast.
+    try {
+      const placeholders = collectMetadataPlaceholders(data);
+      if (placeholders.length > 0) {
+        process.stderr.write(
+          '\n' +
+            renderMetadataPlaceholders(placeholders, data.value?._meta?.metadataPlaceholders, {
+              stream: process.stderr
+            }) +
+            '\n'
+        );
+      }
+    } catch (err) {
+      process.stderr.write(`Metadata placeholder scan skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+    }
+
+    // Auto-Simulate — opt-in via --simulate. Posts to the BitBadges API's
+    // /api/v0/simulate endpoint via simulateMessages(). Returns gasUsed +
+    // parsed events + per-address net balance changes. Skips gracefully
+    // if no API key is configured rather than hard-failing.
+    //
+    // Honors --network/--local/--testnet/--url so a `templates vault
+    // --simulate --network local` flow lands on the local indexer
+    // automatically.
+    if (opts.simulate) {
+      try {
+        const { getApiUrl, getApiKeyForNetwork } = await import('../utils/io.js');
+        // getApiKeyForNetwork() already does env-var > config fallback,
+        // so we don't need a separate getApiKey() call.
+        const apiKey = getApiKeyForNetwork(opts);
+        if (!apiKey) {
+          process.stderr.write(
+            '\n' +
+              renderSimulate(
+                {
+                  success: false,
+                  error:
+                    'Auto-Simulate skipped — no API key. Set BITBADGES_API_KEY or run `bitbadges-cli config set apiKey <key>`.'
+                },
+                { stream: process.stderr, title: 'Auto-Simulate' }
+              ) +
+              '\n'
+          );
+        } else {
+          const { simulateMessages } = await import('../../builder/tools/queries/simulateTransaction.js');
+          const { prefetchSimulateCollections } = await import('../utils/simulateSymbols.js');
+          const result = await simulateMessages({
+            messages: [data],
+            creatorAddress: opts.creator,
+            apiKey,
+            apiUrl: getApiUrl(opts)
+          });
+          const collectionCache = await prefetchSimulateCollections(result, {
+            apiKey,
+            apiUrl: getApiUrl(opts)
+          });
+          process.stderr.write(
+            '\n' +
+              renderSimulate(result, {
+                stream: process.stderr,
+                title: 'Auto-Simulate',
+                events: opts.events ? 'full' : 'count',
+                collectionCache
+              }) +
+              '\n'
+          );
+        }
+      } catch (err) {
+        process.stderr.write(`Simulation skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+      }
+    }
+  }
+
+  // Approval-template auto-simulate skip — sits OUTSIDE the
+  // collection-only block so it fires even when isCollectionTx is
+  // false. Approval msgs already get the Auto-Validate run above; we
+  // print the skip note once so the user understands why no gas is
+  // shown.
+  if (!opts.jsonOnly && opts.simulate && isUserApprovalTx) {
+    process.stderr.write(
+      '\nAuto-Simulate skipped — wrap user-level approvals inside an alternative approval message to simulate end-to-end. Auto-Validate ran above.\n'
+    );
+  }
 }
 
-const sharedOpts = (cmd: Command) =>
+// renderValidate, renderMetadataPlaceholders, and collectMetadataPlaceholders
+// live in src/cli/utils/terminal.ts so the standalone `builder verify`
+// command and the templates auto-review path share one implementation.
+
+/**
+ * Add a shared option only if the per-template command hasn't already
+ * declared it. Avoids commander "duplicate flag" errors for templates
+ * (vault, subscription, bounty, …) that already define their own --name
+ * / --description / --image flags. Those template-level flags double as
+ * the metadataPlaceholders content because emit() reads opts.name etc.
+ * directly — no extra plumbing needed.
+ */
+function addOptionIfMissing(cmd: Command, flags: string, description: string): Command {
+  const longFlag = flags.match(/--[a-z][a-z0-9-]*/)?.[0];
+  if (longFlag && (cmd as any)._findOption?.(longFlag)) return cmd;
+  return cmd.option(flags, description);
+}
+
+const sharedOpts = (cmd: Command) => {
   cmd
     .option('--condensed', 'Output compact JSON (no whitespace)')
     .option('--output-file <path>', 'Write output to file')
     .option('--json <input>', 'Pass all params as JSON (file, inline, or - for stdin). Overrides individual flags.')
-    .option('--dry-run', 'Validate output against standard checks (violations to stderr)')
-    .option('--explain', 'Print human-readable explanation of the output (to stderr)')
+    .option('--json-only', 'Skip the automatic review — emit pure JSON to stdout with no stderr commentary')
+    .option('--explain', 'Print a human-readable explanation of the output to stderr (in addition to the auto-review)')
     .option('--creator <address>', 'Creator/sender address (bb1... or 0x...)')
-    .option('--manager <address>', 'Collection manager address (bb1...)');
+    .option('--manager <address>', 'Collection manager address (bb1...)')
+    .option('--simulate', 'Also simulate the tx against the BitBadges API and render gas + net changes (requires BITBADGES_API_KEY)')
+    .option('--events', 'When --simulate is set, dump the full raw chain events array (default: just the count)');
+  // Network selection — only the --simulate path actually hits the
+  // API, but we add the flags universally so `templates vault
+  // --simulate --network local` works without parser surprises.
+  addNetworkOptions(cmd);
+  // Metadata flags — only added when the template doesn't already declare
+  // them. Templates that DO declare them keep their own description string;
+  // emit() reads opts.name / description / image regardless.
+  addOptionIfMissing(cmd, '--name <name>', 'Display name written into unfilled metadataPlaceholders entries (collection / tokens / alias paths)');
+  addOptionIfMissing(cmd, '--description <text>', 'Description written into unfilled metadataPlaceholders entries');
+  addOptionIfMissing(cmd, '--image <url>', 'Image URL written into unfilled metadataPlaceholders entries');
+  return cmd;
+};
 
 // ============================================================
 // Collection builders
 // ============================================================
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('vault')
     .description('Create an IBC-backed vault token')
     .requiredOption('--backing-coin <symbol>', 'Backing coin symbol (USDC, BADGE, ATOM, OSMO)')
@@ -77,7 +369,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('subscription')
     .description('Create a recurring subscription collection')
     .requiredOption('--interval <duration>', 'Interval: daily, monthly, annually, or shorthand (30d)')
@@ -103,7 +395,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('bounty')
     .description('Create a bounty escrow collection')
     .requiredOption('--amount <n>', 'Bounty amount (display units)')
@@ -119,7 +411,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('crowdfund')
     .description('Create a crowdfunding collection')
     .requiredOption('--goal <n>', 'Funding goal (display units)')
@@ -130,11 +422,11 @@ sharedOpts(
 ).action(async (opts) => {
   const { buildCrowdfund } = await import('../../core/builders/crowdfund.js');
   if (opts.json) { emit(buildCrowdfund(readJsonInput(opts.json)), opts); return; }
-  emit(buildCrowdfund({ goal: Number(opts.goal), denom: opts.denom, crowdfunder: opts.crowdfunder, deadline: opts.deadline, name: opts.name }), opts);
+  emit(buildCrowdfund({ goal: Number(opts.goal), denom: opts.denom, crowdfunder: opts.crowdfunder, deadline: opts.deadline, name: opts.name, creator: opts.creator }), opts);
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('auction')
     .description('Create an auction collection')
     .option('--bid-deadline <duration>', 'Bidding window', '7d')
@@ -142,14 +434,15 @@ sharedOpts(
     .option('--name <name>', 'Item name', 'Auction')
     .option('--description <text>', 'Item description')
     .option('--image <url>', 'Item image URL')
+    .option('--seller <address>', 'Seller address — only this address can accept the winning bid (defaults to --creator)')
 ).action(async (opts) => {
   const { buildAuction } = await import('../../core/builders/auction.js');
   if (opts.json) { emit(buildAuction(readJsonInput(opts.json)), opts); return; }
-  emit(buildAuction({ bidDeadline: opts.bidDeadline, acceptWindow: opts.acceptWindow, name: opts.name, description: opts.description, image: opts.image }), opts);
+  emit(buildAuction({ bidDeadline: opts.bidDeadline, acceptWindow: opts.acceptWindow, name: opts.name, description: opts.description, image: opts.image, seller: opts.seller, creator: opts.creator }), opts);
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('product-catalog')
     .description('Create a product catalog collection')
     .requiredOption('--products <json>', 'Product array JSON: [{"name","price","denom","maxSupply?","burn?"}]')
@@ -163,11 +456,11 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('prediction-market')
     .description('Create a binary prediction market (YES/NO)')
     .requiredOption('--verifier <address>', 'Market resolver address (bb1...)')
-    .option('--denom <symbol>', 'Payment coin (default: USDC)', 'USDC')
+    .option('--denom <symbol>', 'Payment coin', 'USDC')
     .option('--name <name>', 'Market question', 'Prediction Market')
     .option('--description <text>', 'Market details')
     .option('--image <url>', 'Market image URL')
@@ -178,7 +471,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('smart-account')
     .description('Create an IBC-backed smart account')
     .requiredOption('--backing-coin <symbol>', 'Backing coin (USDC, BADGE, ATOM, OSMO)')
@@ -193,7 +486,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('credit-token')
     .description('Create a credit/prepaid token')
     .requiredOption('--payment-denom <symbol>', 'Payment coin (USDC, BADGE)')
@@ -208,7 +501,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('custom-2fa')
     .description('Create a custom 2FA token')
     .requiredOption('--name <name>', 'Token name')
@@ -223,7 +516,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('quests')
     .description('Create a quest/reward collection')
     .requiredOption('--reward <n>', 'Reward per claim (display units)')
@@ -237,7 +530,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('address-list')
     .description('Create an on-chain address list')
     .requiredOption('--name <name>', 'List name')
@@ -246,7 +539,7 @@ sharedOpts(
 ).action(async (opts) => {
   const { buildAddressList } = await import('../../core/builders/address-list.js');
   if (opts.json) { emit(buildAddressList(readJsonInput(opts.json)), opts); return; }
-  emit(buildAddressList({ name: opts.name, image: opts.image, description: opts.description, manager: opts.manager }), opts);
+  emit(buildAddressList({ name: opts.name, image: opts.image, description: opts.description, manager: opts.manager, creator: opts.creator }), opts);
 });
 
 // ============================================================
@@ -254,7 +547,7 @@ sharedOpts(
 // ============================================================
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('intent')
     .description('Create an OTC swap intent (user outgoing approval)')
     .requiredOption('--address <address>', 'Creator address (bb1...)')
@@ -271,7 +564,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('recurring-payment')
     .description('Create a recurring payment approval (user incoming)')
     .requiredOption('--collection-id <id>', 'Subscription collection ID')
@@ -287,7 +580,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('listing')
     .description('Create a marketplace listing (user outgoing approval)')
     .requiredOption('--address <address>', 'Seller address (bb1...)')
@@ -304,7 +597,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('bid')
     .description('Create a marketplace bid (user incoming approval)')
     .requiredOption('--address <address>', 'Bidder address (bb1...)')
@@ -320,7 +613,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('pm-sell-intent')
     .description('Create a prediction market sell intent (user outgoing approval)')
     .requiredOption('--address <address>', 'Seller address (bb1...)')
@@ -337,7 +630,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  buildCommand
+  templatesCommand
     .command('pm-buy-intent')
     .description('Create a prediction market buy intent (user incoming approval)')
     .requiredOption('--address <address>', 'Buyer address (bb1...)')

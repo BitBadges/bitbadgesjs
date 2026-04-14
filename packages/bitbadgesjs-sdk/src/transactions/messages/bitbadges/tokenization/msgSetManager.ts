@@ -26,7 +26,7 @@ export class MsgSetManager<T extends NumberType> extends CustomTypeClass<MsgSetM
     this.creator = msg.creator;
     this.collectionId = msg.collectionId;
     this.manager = msg.manager;
-    this.canUpdateManager = msg.canUpdateManager.map((permission) => new ActionPermission(permission));
+    this.canUpdateManager = msg.canUpdateManager?.map((permission) => new ActionPermission(permission)) ?? [];
   }
 
   toProto(): prototokenization.MsgSetManager {

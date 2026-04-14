@@ -3,7 +3,6 @@ import { Command } from 'commander';
 import { sdkCommand } from './commands/sdk.js';
 import { createApiCommand } from './commands/api.js';
 import { configCommand } from './commands/config.js';
-import { buildCommand } from './commands/build.js';
 import { builderCommand } from './commands/builder.js';
 
 const program = new Command();
@@ -19,7 +18,6 @@ program.option('--help-json', 'Output all commands as structured JSON (for LLMs)
 program.addCommand(sdkCommand);
 program.addCommand(createApiCommand());
 program.addCommand(configCommand);
-program.addCommand(buildCommand);
 program.addCommand(builderCommand);
 
 // ── completion command ───────────────────────────────────────────────────────

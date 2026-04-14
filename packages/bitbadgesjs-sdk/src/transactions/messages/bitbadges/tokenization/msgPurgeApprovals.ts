@@ -29,7 +29,7 @@ export class MsgPurgeApprovals<T extends NumberType> extends CustomTypeClass<Msg
     this.purgeExpired = msg.purgeExpired;
     this.approverAddress = msg.approverAddress;
     this.purgeCounterpartyApprovals = msg.purgeCounterpartyApprovals;
-    this.approvalsToPurge = msg.approvalsToPurge.map((approval) => new ApprovalIdentifierDetails(approval));
+    this.approvalsToPurge = msg.approvalsToPurge?.map((approval) => new ApprovalIdentifierDetails(approval)) ?? [];
   }
 
   toProto(): prototokenization.MsgPurgeApprovals {
