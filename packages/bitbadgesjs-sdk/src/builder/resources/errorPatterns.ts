@@ -86,9 +86,34 @@ export const ERROR_PATTERNS: ErrorPattern[] = [
   {
     name: 'Missing autoApproveAllIncomingTransfers',
     category: 'approval',
-    triggers: ['incoming', 'cannot receive', 'recipient', 'autoApprove', 'incoming transfer not approved'],
-    explanation: 'The recipient hasn\'t approved incoming transfers. For public-mint collections, defaultBalances must include autoApproveAllIncomingTransfers: true.',
-    fix: 'In your MsgUniversalUpdateCollection, add to defaultBalances: { autoApproveAllIncomingTransfers: true }. This allows all users to receive tokens by default.',
+    triggers: [
+      'incoming',
+      'cannot receive',
+      'recipient',
+      'autoApprove',
+      'autoApproveAllIncomingTransfers',
+      'incoming transfer not approved',
+      'defaultBalances.autoApproveAllIncomingTransfers',
+      'Collections with token-creation (Mint) approvals MUST have defaultBalances.autoApproveAllIncomingTransfers'
+    ],
+    explanation: 'Collections with token-creation (Mint) approvals require defaultBalances.autoApproveAllIncomingTransfers: true so newly-minted tokens can land in recipients\' accounts without each recipient pre-approving incoming transfers. This applies to BOTH create and update flows: on an UPDATE flow (MsgUniversalUpdateCollection against an existing collection) you must ALSO set updateDefaultBalances: true on the message itself — otherwise the defaultBalances block is ignored, the update is a no-op from the chain\'s perspective, and the standards check re-fires on the next round.',
+    fix: 'CREATE flow: in your MsgUniversalUpdateCollection, set defaultBalances.autoApproveAllIncomingTransfers: true. UPDATE flow (editing an existing subscription / collection): set BOTH `updateDefaultBalances: true` AND `defaultBalances.autoApproveAllIncomingTransfers: true` on the message. Do NOT touch canUpdateValidTokenIds or other permission fields while fixing this error — it is unrelated and doing so will introduce a regression.',
+    example: '{ "updateDefaultBalances": true, "defaultBalances": { "autoApproveAllIncomingTransfers": true, "balances": [], "incomingApprovals": [], "outgoingApprovals": [], "userPermissions": { "canUpdateIncomingApprovals": [], "canUpdateOutgoingApprovals": [], "canUpdateAutoApproveAllIncomingTransfers": [] } } }'
+  },
+  {
+    name: 'Missing fee denom on transaction',
+    category: 'signing',
+    triggers: [
+      'fee.amount[0].denom is required',
+      'fee.amount[0].denom',
+      'jsonToTxBytes: fee.amount',
+      'fee denom',
+      'missing fee denom',
+      'Pass the denom the caller intends to pay fees in'
+    ],
+    explanation: 'The transaction fee object is missing `amount[0].denom`. `jsonToTxBytes` requires the caller to explicitly name the denom the fee is paid in (e.g. "ubadge") — the chain does not assume a default. This typically happens when a builder emits `fee: { amount: [{ amount: "5000" }], gas: "500000" }` without a `denom` field, or constructs `fee.amount` as an empty array.',
+    fix: 'Set the full fee object on the transaction: `fee: { amount: [{ denom: "ubadge", amount: "5000" }], gas: "500000" }`. On BitBadges mainnet/testnet the fee denom is always `ubadge`. Do NOT use `abadge` (that is the 18-decimal EVM-side denom) and do NOT leave `amount` empty — include at least one `{ denom, amount }` entry.',
+    example: '{ "fee": { "amount": [{ "denom": "ubadge", "amount": "5000" }], "gas": "500000" } }'
   },
   {
     name: 'Smart token backing address mismatch',
@@ -214,6 +239,37 @@ export const ERROR_PATTERNS: ErrorPattern[] = [
     fix: 'Call generate_unique_id with a descriptive prefix for each new approval. For existing approvals being updated, preserve the original ID.',
   }
 ];
+
+/**
+ * Case-insensitive substring match of an error string against every
+ * pattern's `triggers`. Returns all matching patterns in declaration order.
+ *
+ * This is the canonical entry point used by the indexer's AI-builder fix
+ * loop (`buildFixPrompt`) to look up remediation text for a given validation
+ * or simulation error BEFORE asking the model to retry. The loop depends on
+ * the shape `{ name, category, triggers, explanation, fix, example? }[]`
+ * being stable — if you rename fields here, bump the indexer consumer in
+ * lockstep.
+ *
+ * Matching is intentionally a simple case-insensitive `includes` against
+ * each trigger — patterns are curated and short enough that a full regex
+ * engine would be overkill and would also drag in trigger-escaping
+ * responsibility on every ERROR_PATTERNS edit.
+ */
+export function findMatchingErrorPatterns(errorString: string): ErrorPattern[] {
+  if (!errorString) return [];
+  const lower = errorString.toLowerCase();
+  const hits: ErrorPattern[] = [];
+  for (const pattern of ERROR_PATTERNS) {
+    for (const trigger of pattern.triggers) {
+      if (trigger && lower.includes(trigger.toLowerCase())) {
+        hits.push(pattern);
+        break;
+      }
+    }
+  }
+  return hits;
+}
 
 export const errorPatternsResourceInfo = {
   uri: 'bitbadges://errors/patterns',
