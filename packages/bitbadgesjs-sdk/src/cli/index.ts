@@ -4,6 +4,8 @@ import { sdkCommand } from './commands/sdk.js';
 import { createApiCommand } from './commands/api.js';
 import { configCommand } from './commands/config.js';
 import { builderCommand } from './commands/builder.js';
+import { broadcastWithHotWalletCommand } from './commands/broadcastWithHotWallet.js';
+import { hotWalletCommand } from './commands/hotWallet.js';
 
 const program = new Command();
 
@@ -19,6 +21,8 @@ program.addCommand(sdkCommand);
 program.addCommand(createApiCommand());
 program.addCommand(configCommand);
 program.addCommand(builderCommand);
+program.addCommand(broadcastWithHotWalletCommand);
+program.addCommand(hotWalletCommand);
 
 // ── completion command ───────────────────────────────────────────────────────
 
