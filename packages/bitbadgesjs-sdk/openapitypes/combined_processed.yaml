@@ -4905,6 +4905,176 @@ paths:
       security:
         - apiKey: []
       x-internal: false
+  /api/{version}/builder/preview:
+    post:
+      operationId: postBuilderPreview
+      summary: Upload a Builder Preview
+      tags:
+        - Builder
+      description: |-
+        Upload a built transaction to the indexer and receive a short,
+        shareable code. The `bitbadges-cli builder preview` command uses this
+        endpoint to hand off a locally-constructed transaction to a reviewer
+        via a `https://bitbadges.io/builder/preview?code=<code>` URL.
+
+        The placeholder sidecar (if any) must live inside each message at
+        `transaction.messages[i].value._meta.metadataPlaceholders`. A
+        top-level `metadataPlaceholders` field is rejected with 400 so
+        clients cannot silently drift off the canonical shape.
+
+        **Premium-gated.** Callers without a premium-tier API key receive a
+        402 Payment Required response. Uploads expire after 1 hour.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - transaction
+              properties:
+                transaction:
+                  type: object
+                  description: |-
+                    The full transaction object to store. Must have a
+                    non-empty `messages` array. Metadata placeholders, if
+                    any, live inside each message at
+                    `value._meta.metadataPlaceholders` — NOT at the top
+                    level.
+                  required:
+                    - messages
+                  properties:
+                    messages:
+                      type: array
+                      items:
+                        type: object
+                        additionalProperties: true
+                    memo:
+                      type: string
+                    fee:
+                      type: object
+                      additionalProperties: true
+                  additionalProperties: true
+              additionalProperties: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - code
+                  - expiresAt
+                  - expiresIn
+                properties:
+                  success:
+                    type: boolean
+                  code:
+                    type: string
+                    description: |-
+                      The preview code. Format: `prv_<8 lowercase
+                      alphanumeric>`. Use as the `code` query parameter on
+                      `GET /api/{version}/builder/preview` or as the
+                      `?code=` parameter on
+                      `https://bitbadges.io/builder/preview`.
+                  expiresAt:
+                    type: integer
+                    format: int64
+                    description: Expiry time in epoch milliseconds.
+                  expiresIn:
+                    type: string
+                    description: Human-readable TTL (currently `"1 hour"`).
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '402':
+          description: Payment Required — premium-tier API key needed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+    get:
+      operationId: getBuilderPreview
+      summary: Fetch a Builder Preview
+      tags:
+        - Builder
+      description: |-
+        Retrieve a previously-uploaded builder preview by code. Used by the
+        frontend `/builder/preview?code=…` page to render a read-only
+        StreamlinedBuilderPreview for a reviewer. Returns 404 if the code
+        has expired (uploads live for 1 hour) and 400 if the code shape is
+        invalid.
+
+        **Premium-gated.** Callers without a premium-tier API key receive a
+        402 Payment Required response.
+      parameters:
+        - in: query
+          name: code
+          required: true
+          schema:
+            type: string
+            description: |-
+              The preview code returned by
+              `POST /api/{version}/builder/preview`. Must match the pattern
+              `prv_[a-z0-9]{8}`.
+            pattern: '^prv_[a-z0-9]{8}$'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - transaction
+                properties:
+                  success:
+                    type: boolean
+                  transaction:
+                    type: object
+                    description: The stored transaction object.
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '402':
+          description: Payment Required — premium-tier API key needed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '404':
+          description: Preview not found or expired (1 hour TTL).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
   /api/{version}/pools:
     get:
       operationId: getAllPools
