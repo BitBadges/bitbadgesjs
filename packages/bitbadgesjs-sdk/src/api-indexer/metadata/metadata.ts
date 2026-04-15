@@ -116,7 +116,7 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
   /**
    * Returns a new Metadata object with default placeholder values. By default, it returns as <bigint> type, but you can convert it with `.convert` method.
    * ```ts
-   * import { Numberify } from 'bitbadgesjs-sdk'
+   * import { Numberify } from 'bitbadges'
    * const metadata = Metadata.DefaultPlaceholderMetadata().convert(Numberify)
    * ```
    */
@@ -130,7 +130,7 @@ export class Metadata<T extends NumberType> extends BaseNumberTypeClass<Metadata
   /**
    * Returns a new Metadata object with default placeholder values. By default, it returns as <bigint> type, but you can convert it with `.convert` method.
    * ```ts
-   * import { Numberify } from 'bitbadgesjs-sdk'
+   * import { Numberify } from 'bitbadges'
    * const metadata = Metadata.ErrorMetadata().convert(Numberify)
    * ```
    */

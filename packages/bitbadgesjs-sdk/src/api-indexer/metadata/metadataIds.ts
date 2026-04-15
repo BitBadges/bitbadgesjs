@@ -15,7 +15,7 @@ import { getConverterFunction } from '@/common/base.js';
  *
  * @example
  * ```ts
- * import { getMetadataIdForTokenId } from 'bitbadgesjs-sdk'
+ * import { getMetadataIdForTokenId } from 'bitbadges'
  * const collection: BitBadgesCollection<bigint> = { ... }
  * const tokenId = 123n
  * const metadataId = getMetadataIdForTokenId(tokenId, collection.getTokenMetadataTimelineValue())
@@ -24,7 +24,7 @@ import { getConverterFunction } from '@/common/base.js';
  * @example
  * This can also be used with the BitBadges collection interface
  * ```ts
- * import { BitBadgesCollection } from 'bitbadgesjs-sdk'
+ * import { BitBadgesCollection } from 'bitbadges'
  * const collection: BitBadgesCollection<bigint> = { ... }
  * const tokenId = 123n
  * const metadataId = collection.getMetadataIdForTokenId(tokenId)
@@ -66,7 +66,7 @@ export const getMetadataIdForTokenId = <T extends NumberType>(tokenId: T, tokenM
  *
  * @example
  * ```ts
- * import { getMetadataIdsForUri } from 'bitbadgesjs-sdk'
+ * import { getMetadataIdsForUri } from 'bitbadges'
  * const collection: BitBadgesCollection<bigint> = { ... }
  * const uri = 'https://bitbadges.io/collection/1/badge/1'
  * const metadataIds = getMetadataIdsForUri(uri, collection.getTokenMetadataTimelineValue())
@@ -75,7 +75,7 @@ export const getMetadataIdForTokenId = <T extends NumberType>(tokenId: T, tokenM
  * @example
  * This can also be used with the BitBadges collection interface
  * ```ts
- * import { BitBadgesCollection } from 'bitbadgesjs-sdk'
+ * import { BitBadgesCollection } from 'bitbadges'
  * const collection: BitBadgesCollection<bigint> = { ... }
  * const uri = 'https://bitbadges.io/collection/1/badge/1'
  * const metadataIds = collection.getMetadataIdsForUri(uri)
@@ -174,7 +174,7 @@ export function getMaxMetadataId<T extends NumberType>(tokenMetadata: TokenMetad
  *
  * @example
  * ```ts
- * import { getUrisForMetadataId } from 'bitbadgesjs-sdk'
+ * import { getUrisForMetadataId } from 'bitbadges'
  * const collection: BitBadgesCollection<bigint> = { ... }
  * const metadataId = 123n
  * const uris = getUrisForMetadataId(metadataId, collection.getTokenMetadataTimelineValue())
@@ -183,7 +183,7 @@ export function getMaxMetadataId<T extends NumberType>(tokenMetadata: TokenMetad
  * @example
  * This can also be used with the BitBadges collection interface
  * ```ts
- * import { BitBadgesCollection } from 'bitbadgesjs-sdk'
+ * import { BitBadgesCollection } from 'bitbadges'
  * const collection: BitBadgesCollection<bigint> = { ... }
  * const metadataId = 123n
  * const uris = collection.getUrisForMetadataId(metadataId)
@@ -235,7 +235,7 @@ export function getUrisForMetadataIds<T extends NumberType>(metadataIds: T[], co
  *
  * @example
  * ```ts
- * import { getTokenIdsForMetadataId } from 'bitbadgesjs-sdk'
+ * import { getTokenIdsForMetadataId } from 'bitbadges'
  * const collection: BitBadgesCollection<bigint> = { ... }
  * const metadataId = 123n
  * const tokenIds = getTokenIdsForMetadataId(metadataId, collection.getTokenMetadataTimelineValue())
@@ -244,7 +244,7 @@ export function getUrisForMetadataIds<T extends NumberType>(metadataIds: T[], co
  * @example
  * This can also be used with the BitBadges collection interface
  * ```ts
- * import { BitBadgesCollection } from 'bitbadgesjs-sdk'
+ * import { BitBadgesCollection } from 'bitbadges'
  * const collection: BitBadgesCollection<bigint> = { ... }
  * const metadataId = 123n
  * const tokenIds = collection.getTokenIdsForMetadataId(metadataId)

@@ -22,7 +22,7 @@ const FRONTEND_DOCS_CONTENT = {
 - **Framework**: Next.js (Pages Router)
 - **UI Library**: Ant Design (antd)
 - **State**: React Context + custom hooks
-- **SDK**: \`bitbadgesjs-sdk\` for all BitBadges types and API calls
+- **SDK**: \`bitbadges\` for all BitBadges types and API calls
 
 ## Key Concepts (Framework-Agnostic)
 
@@ -48,7 +48,7 @@ const FRONTEND_DOCS_CONTENT = {
 ### Fetching Collection Data
 Use the BitBadges API (via SDK or the builder's \`query_collection\` tool):
 \`\`\`typescript
-import { BitBadgesAPI } from 'bitbadgesjs-sdk';
+import { BitBadgesAPI } from 'bitbadges';
 
 const api = new BitBadgesAPI({ apiUrl: 'https://api.bitbadges.io', apiKey: YOUR_KEY });
 const collection = await api.getCollection(collectionId);
@@ -88,7 +88,7 @@ const protocolData = JSON.parse(collection.customData || '{}');
 ### Wallet Integration Options
 - **EVM wallets** (MetaMask, WalletConnect): Call EVM precompiles at known addresses
 - **Cosmos wallets** (Keplr): Use signDirect with the transaction's SignDoc
-- **SDK adapters**: \`bitbadgesjs-sdk\` provides \`GenericEvmAdapter\` and \`GenericCosmosAdapter\` for server-side signing`,
+- **SDK adapters**: \`bitbadges\` provides \`GenericEvmAdapter\` and \`GenericCosmosAdapter\` for server-side signing`,
 
   bestPractices: `## Best Practices
 

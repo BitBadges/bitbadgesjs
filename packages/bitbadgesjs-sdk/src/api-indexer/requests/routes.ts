@@ -7,7 +7,7 @@ import { CollectionId } from '@/interfaces/index.js';
  *
  * @example
  * ```ts
- * import { BitBadgesApiRoutes } from 'bitbadgesjs-sdk'
+ * import { BitBadgesApiRoutes } from 'bitbadges'
  * const url = `https://api.bitbadges.io${BitBadgesApiRoutes.GetStatusRoute()}`
  * ```
  *

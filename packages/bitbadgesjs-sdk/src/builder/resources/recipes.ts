@@ -69,7 +69,7 @@ export const RECIPES: Recipe[] = [
     name: 'Check Token Balance',
     description: 'Query a specific address balance in a collection',
     tags: ['balance', 'query', 'ownership', 'check'],
-    code: `import { BitBadgesAPI } from 'bitbadgesjs-sdk';
+    code: `import { BitBadgesAPI } from 'bitbadges';
 
 const api = new BitBadgesAPI({ apiUrl: 'https://api.bitbadges.io', apiKey: process.env.BITBADGES_API_KEY });
 
@@ -119,7 +119,7 @@ const transferMsg = {
 // })
 
 // Via SDK:
-import { BitBadgesAPI } from 'bitbadgesjs-sdk';
+import { BitBadgesAPI } from 'bitbadges';
 
 const api = new BitBadgesAPI({ apiUrl: 'https://api.bitbadges.io', apiKey: process.env.BITBADGES_API_KEY });
 const balance = await api.getBalanceByAddress('123', 'bb1address...');
@@ -195,7 +195,7 @@ ws.on('message', (data) => {
 // 1. Create claim via developer portal at https://bitbadges.io
 // 2. Use claims API to check/trigger programmatically:
 
-import { BitBadgesAPI } from 'bitbadgesjs-sdk';
+import { BitBadgesAPI } from 'bitbadges';
 const api = new BitBadgesAPI({ apiUrl: 'https://api.bitbadges.io', apiKey: process.env.BITBADGES_API_KEY });
 
 // Check claim eligibility
@@ -210,7 +210,7 @@ const api = new BitBadgesAPI({ apiUrl: 'https://api.bitbadges.io', apiKey: proce
     name: 'Convert Between Address Formats',
     description: 'Convert ETH (0x) <-> BitBadges (bb1) addresses',
     tags: ['address', 'convert', 'eth', 'cosmos', 'bb1', '0x'],
-    code: `import { ethToCosmos, cosmosToEth } from 'bitbadgesjs-sdk';
+    code: `import { ethToCosmos, cosmosToEth } from 'bitbadges';
 
 // ETH -> BitBadges
 const bb1Address = ethToCosmos('0x1234...');
@@ -278,7 +278,7 @@ const withdrawMsg = {
 // })
 
 // Via SDK:
-import { BitBadgesAPI } from 'bitbadgesjs-sdk';
+import { BitBadgesAPI } from 'bitbadges';
 const api = new BitBadgesAPI({ apiUrl: 'https://api.bitbadges.io', apiKey: process.env.BITBADGES_API_KEY });
 
 async function verifyAccess(userAddress: string): Promise<boolean> {
