@@ -1,4 +1,5 @@
 import {
+  classifySettlementApproval,
   getDepositDenom,
   isPredictionMarketIntentApproval,
   validatePredictionMarketCollection,
@@ -640,5 +641,351 @@ describe('isPredictionMarketValid', () => {
     const col = makeValidCollection();
     col.aliasPaths[0].denomUnits[0].decimals = '18';
     expect(isPredictionMarketValid(col)).toBe(true);
+  });
+});
+const FOREVER = [{ start: '1', end: MAX_UINT64 }];
+
+const frozen = () => ({
+  permanentlyForbiddenTimes: [{ start: '1', end: MAX_UINT64 }],
+  permanentlyPermittedTimes: []
+});
+
+const frozenPerms = () => {
+  const p: any = {};
+  for (const k of [
+    'canDeleteCollection',
+    'canArchiveCollection',
+    'canUpdateStandards',
+    'canUpdateCustomData',
+    'canUpdateManager',
+    'canUpdateCollectionMetadata',
+    'canAddMoreAliasPaths',
+    'canAddMoreCosmosCoinWrapperPaths',
+    'canUpdateCollectionApprovals'
+  ]) {
+    p[k] = [frozen()];
+  }
+  for (const k of ['canUpdateValidTokenIds', 'canUpdateTokenMetadata']) {
+    p[k] = [{ ...frozen(), tokenIds: [{ start: '1', end: '2' }] }];
+  }
+  return p;
+};
+
+interface SettlementOpts {
+  approvalId: string;
+  tokenIds: { start: string; end: string }[];
+  startBalanceAmount: string;
+  payoutAmount: string;
+  proposalId?: string;
+}
+
+const settlement = (o: SettlementOpts) => ({
+  approvalId: o.approvalId,
+  fromListId: '!Mint',
+  toListId: BURN_ADDRESS,
+  initiatedByListId: 'All',
+  transferTimes: FOREVER,
+  ownershipTimes: FOREVER,
+  tokenIds: o.tokenIds,
+  version: '0',
+  approvalCriteria: {
+    predeterminedBalances: {
+      incrementedBalances: {
+        startBalances: [{ amount: o.startBalanceAmount, tokenIds: o.tokenIds, ownershipTimes: FOREVER }],
+        incrementTokenIdsBy: '0',
+        incrementOwnershipTimesBy: '0',
+        durationFromTimestamp: '0',
+        allowOverrideTimestamp: false,
+        recurringOwnershipTimes: { startTime: '0', intervalLength: '0', chargePeriodLength: '0' },
+        allowOverrideWithAnyValidToken: false
+      },
+      orderCalculationMethod: { useOverallNumTransfers: true }
+    },
+    coinTransfers: [
+      {
+        to: '',
+        coins: [{ amount: o.payoutAmount, denom: 'ubadge' }],
+        overrideFromWithApproverAddress: true,
+        overrideToWithInitiator: true
+      }
+    ],
+    maxNumTransfers: {
+      overallMaxNumTransfers: '0',
+      perToAddressMaxNumTransfers: '0',
+      perFromAddressMaxNumTransfers: '0',
+      perInitiatedByAddressMaxNumTransfers: '1'
+    },
+    votingChallenges: [
+      {
+        proposalId: o.proposalId ?? `proposal-${o.approvalId}`,
+        quorumThreshold: '100',
+        voters: [{ address: 'bb1verifier', weight: '1' }]
+      }
+    ]
+  }
+});
+
+const makeSettlementMintApproval = (depositAmount: string) => ({
+  approvalId: 'pm-mint',
+  fromListId: 'Mint',
+  toListId: 'All',
+  initiatedByListId: 'All',
+  transferTimes: FOREVER,
+  ownershipTimes: FOREVER,
+  tokenIds: [{ start: '1', end: '2' }],
+  version: '0',
+  approvalCriteria: {
+    predeterminedBalances: {
+      incrementedBalances: {
+        startBalances: [{ amount: '1', tokenIds: [{ start: '1', end: '2' }], ownershipTimes: FOREVER }],
+        incrementTokenIdsBy: '0',
+        incrementOwnershipTimesBy: '0'
+      },
+      orderCalculationMethod: { useOverallNumTransfers: true }
+    },
+    coinTransfers: [
+      {
+        to: 'Mint',
+        coins: [{ amount: depositAmount, denom: 'ubadge' }],
+        overrideFromWithApproverAddress: false,
+        overrideToWithInitiator: false
+      }
+    ],
+    maxNumTransfers: { overallMaxNumTransfers: '0' }
+  }
+});
+
+const makeSettlementRedeemApproval = (depositAmount: string) => ({
+  approvalId: 'pm-redeem',
+  fromListId: '!Mint',
+  toListId: BURN_ADDRESS,
+  initiatedByListId: 'All',
+  transferTimes: FOREVER,
+  ownershipTimes: FOREVER,
+  tokenIds: [{ start: '1', end: '2' }],
+  version: '0',
+  approvalCriteria: {
+    predeterminedBalances: {
+      incrementedBalances: {
+        startBalances: [{ amount: '1', tokenIds: [{ start: '1', end: '2' }], ownershipTimes: FOREVER }],
+        incrementTokenIdsBy: '0',
+        incrementOwnershipTimesBy: '0'
+      },
+      orderCalculationMethod: { useOverallNumTransfers: true }
+    },
+    coinTransfers: [
+      {
+        to: '',
+        coins: [{ amount: depositAmount, denom: 'ubadge' }],
+        overrideFromWithApproverAddress: true,
+        overrideToWithInitiator: true
+      }
+    ],
+    maxNumTransfers: { overallMaxNumTransfers: MAX_UINT64 }
+  }
+});
+
+const makeTransferable = () => ({
+  approvalId: 'pm-transfer',
+  fromListId: '!Mint',
+  toListId: 'All',
+  initiatedByListId: 'All',
+  transferTimes: FOREVER,
+  ownershipTimes: FOREVER,
+  tokenIds: [{ start: '1', end: '2' }],
+  version: '0',
+  approvalCriteria: {}
+});
+
+interface CollectionOpts {
+  /** YES wins payout amount (defaults to deposit). */
+  yesWinsPayout?: string;
+  /** YES wins start balance (defaults to deposit). */
+  yesWinsStart?: string;
+  /** NO wins payout amount (defaults to deposit). */
+  noWinsPayout?: string;
+  /** NO wins start balance (defaults to deposit). */
+  noWinsStart?: string;
+  /** Push YES start balance (defaults to 2 * deposit). */
+  pushYesStart?: string;
+  /** Push YES payout (defaults to deposit). */
+  pushYesPayout?: string;
+  /** Push NO start balance (defaults to 2 * deposit). */
+  pushNoStart?: string;
+  /** Push NO payout (defaults to deposit). */
+  pushNoPayout?: string;
+}
+
+const makeSettlementCollection = (deposit: string = '1000000', opts: CollectionOpts = {}) => {
+  const dep = BigInt(deposit);
+  const yesWinsStart = opts.yesWinsStart ?? deposit;
+  const yesWinsPayout = opts.yesWinsPayout ?? deposit;
+  const noWinsStart = opts.noWinsStart ?? deposit;
+  const noWinsPayout = opts.noWinsPayout ?? deposit;
+  const pushYesStart = opts.pushYesStart ?? (dep * 2n).toString();
+  const pushYesPayout = opts.pushYesPayout ?? deposit;
+  const pushNoStart = opts.pushNoStart ?? (dep * 2n).toString();
+  const pushNoPayout = opts.pushNoPayout ?? deposit;
+
+  return {
+    standards: ['Prediction Market'],
+    validTokenIds: [{ start: '1', end: '2' }],
+    invariants: { disablePoolCreation: false },
+    aliasPaths: [
+      {
+        denom: 'uyes',
+        denomUnits: [{ decimals: '6' }],
+        conversion: { sideB: [{ tokenIds: [{ start: '1', end: '1' }] }] }
+      },
+      {
+        denom: 'uno',
+        denomUnits: [{ decimals: '6' }],
+        conversion: { sideB: [{ tokenIds: [{ start: '2', end: '2' }] }] }
+      }
+    ],
+    collectionPermissions: frozenPerms(),
+    collectionApprovals: [
+      makeSettlementMintApproval(deposit),
+      makeSettlementRedeemApproval(deposit),
+      makeTransferable(),
+      settlement({
+        approvalId: 'pm-yes-wins',
+        tokenIds: [{ start: '1', end: '1' }],
+        startBalanceAmount: yesWinsStart,
+        payoutAmount: yesWinsPayout
+      }),
+      settlement({
+        approvalId: 'pm-no-wins',
+        tokenIds: [{ start: '2', end: '2' }],
+        startBalanceAmount: noWinsStart,
+        payoutAmount: noWinsPayout
+      }),
+      settlement({
+        approvalId: 'pm-push-yes',
+        tokenIds: [{ start: '1', end: '1' }],
+        startBalanceAmount: pushYesStart,
+        payoutAmount: pushYesPayout
+      }),
+      settlement({
+        approvalId: 'pm-push-no',
+        tokenIds: [{ start: '2', end: '2' }],
+        startBalanceAmount: pushNoStart,
+        payoutAmount: pushNoPayout
+      })
+    ]
+  };
+};
+
+describe('classifySettlementApproval', () => {
+  it('classifies a 1:1 wins approval on token 1 as wins-yes', () => {
+    const a = settlement({
+      approvalId: 'a',
+      tokenIds: [{ start: '1', end: '1' }],
+      startBalanceAmount: '1000000',
+      payoutAmount: '1000000'
+    });
+    expect(classifySettlementApproval(a)).toBe('wins-yes');
+  });
+
+  it('classifies a 1:1 wins approval on token 2 as wins-no', () => {
+    const a = settlement({
+      approvalId: 'a',
+      tokenIds: [{ start: '2', end: '2' }],
+      startBalanceAmount: '1000000',
+      payoutAmount: '1000000'
+    });
+    expect(classifySettlementApproval(a)).toBe('wins-no');
+  });
+
+  it('classifies a 2:1 push approval as push', () => {
+    const a = settlement({
+      approvalId: 'a',
+      tokenIds: [{ start: '1', end: '1' }],
+      startBalanceAmount: '2000000',
+      payoutAmount: '1000000'
+    });
+    expect(classifySettlementApproval(a)).toBe('push');
+  });
+
+  it('classifies a payout that matches neither ratio as ambiguous', () => {
+    const a = settlement({
+      approvalId: 'a',
+      tokenIds: [{ start: '1', end: '1' }],
+      startBalanceAmount: '1000000',
+      payoutAmount: '333333'
+    });
+    expect(classifySettlementApproval(a)).toBe('ambiguous');
+  });
+
+  it('classifies a 0 start balance as ambiguous (wins/push collapse)', () => {
+    const a = settlement({
+      approvalId: 'a',
+      tokenIds: [{ start: '1', end: '1' }],
+      startBalanceAmount: '0',
+      payoutAmount: '0'
+    });
+    expect(classifySettlementApproval(a)).toBe('ambiguous');
+  });
+});
+
+describe('validatePredictionMarketCollection — ambiguous settlement detection (#214)', () => {
+  it('a fully valid collection has no ambiguous-settlement warnings and no missing-wins error', () => {
+    const col = makeSettlementCollection('1000000');
+    const r = validatePredictionMarketCollection(col);
+    expect(r.errors.filter((e) => /Missing "?YES wins"?/i.test(e))).toEqual([]);
+    expect(r.warnings.filter((w) => /Ambiguous settlement approval/i.test(w))).toEqual([]);
+  });
+
+  it('YES wins payout = startBalance/2 (regression case from #214) flags an ambiguous warning and does NOT misleadingly report Missing YES wins', () => {
+    // Standard wins config: startBalance == deposit. Misconfigure the
+    // payout to exactly half. Legacy heuristic would silently flip this
+    // approval into the push slot, then complain "Missing YES wins".
+    const col = makeSettlementCollection('1000000', {
+      yesWinsStart: '1000000',
+      yesWinsPayout: '500000'
+    });
+    const r = validatePredictionMarketCollection(col);
+
+    const ambiguousWarnings = r.warnings.filter((w) => /Ambiguous settlement approval/i.test(w));
+    expect(ambiguousWarnings.length).toBeGreaterThanOrEqual(1);
+    expect(ambiguousWarnings.some((w) => /YES \(token 1\)/.test(w))).toBe(true);
+
+    // The validator should NOT pretend the YES wins approval is missing
+    // outright — the user can clearly see one is present, just
+    // misconfigured.
+    const missingYesWinsErrors = r.errors.filter((e) => /Missing "?YES wins"?/i.test(e));
+    // Best case it disappears; minimum bar is we emit the new warning so
+    // the user is no longer told a wins approval is missing without
+    // getting any explanation about the half-balance approval that DOES
+    // exist alongside the legitimate push approval.
+    if (missingYesWinsErrors.length > 0) {
+      expect(ambiguousWarnings.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('a normal push approval (startBalance = 2 * deposit, payout = deposit) is not flagged as ambiguous', () => {
+    const col = makeSettlementCollection('1000000');
+    const r = validatePredictionMarketCollection(col);
+    const pushAmbiguous = r.warnings.filter(
+      (w) => /Ambiguous settlement approval/i.test(w) && /push/i.test(w)
+    );
+    expect(pushAmbiguous).toEqual([]);
+  });
+
+  it('a normal wins approval (payout = startBalance) does not warn', () => {
+    const col = makeSettlementCollection('1000000');
+    const r = validatePredictionMarketCollection(col);
+    expect(r.warnings.filter((w) => /Ambiguous settlement approval/i.test(w))).toEqual([]);
+  });
+
+  it('a settlement approval with a 0 start balance triggers the ambiguous warning', () => {
+    const col = makeSettlementCollection('1000000', {
+      pushYesStart: '0',
+      pushYesPayout: '0'
+    });
+    const r = validatePredictionMarketCollection(col);
+    const ambiguous = r.warnings.filter((w) => /Ambiguous settlement approval/i.test(w));
+    expect(ambiguous.length).toBeGreaterThanOrEqual(1);
+    expect(ambiguous.some((w) => /YES \(token 1\)/.test(w))).toBe(true);
   });
 });

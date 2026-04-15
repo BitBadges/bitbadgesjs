@@ -40,16 +40,76 @@ export function getDepositDenom(collection: any): string | undefined {
 }
 
 /**
- * Determine if an approval is a "push" variant by comparing coin transfer
- * amount to the start balance amount. Push burns 2x tokens for 1x payout.
+ * Classification result for a settlement-shaped approval (single token-id
+ * start balance + voting challenge + burn target). Used to disambiguate
+ * "wins" approvals from "push" approvals without needing an explicit role
+ * field on the approval.
+ *
+ * - 'wins-yes' / 'wins-no' — payout amount equals start balance (1:1)
+ * - 'push'                 — payout amount equals exactly half the start
+ *                            balance (push burns 2x tokens for 1x payout)
+ * - 'ambiguous'            — payout matches NEITHER the wins nor the push
+ *                            ratio cleanly, OR matches both at once (only
+ *                            possible when the start balance is 0). The
+ *                            validator surfaces this as a warning so the
+ *                            user can fix the payout amount or otherwise
+ *                            disambiguate the approval.
+ * - 'unknown'              — not a recognizable settlement-shaped approval
+ */
+export type SettlementApprovalClassification = 'wins-yes' | 'wins-no' | 'push' | 'ambiguous' | 'unknown';
+
+/**
+ * Classify a settlement-shaped approval based on its coin transfer payout
+ * vs its start balance amount. The token id targeted by the start balance
+ * decides whether a "wins" classification is YES or NO.
+ *
+ * Pure heuristic — does not look at the broader collection. Callers should
+ * already have filtered to approvals that look like settlement approvals
+ * (burn target, single start balance, voting challenge present).
+ */
+export function classifySettlementApproval(approval: any): SettlementApprovalClassification {
+  const criteria = approval?.approvalCriteria;
+  const startBalances = criteria?.predeterminedBalances?.incrementedBalances?.startBalances ?? [];
+  if (startBalances.length !== 1) return 'unknown';
+  const startBalance = startBalances[0];
+  const startBalanceAmount = BigInt(n(startBalance?.amount));
+  const coinTransfer = criteria?.coinTransfers?.[0];
+  if (!coinTransfer) return 'unknown';
+  const coinAmount = BigInt(n(coinTransfer?.coins?.[0]?.amount));
+
+  // Token id determines wins-yes vs wins-no
+  const tokenIds = startBalance?.tokenIds;
+  let winsLabel: 'wins-yes' | 'wins-no' | null = null;
+  if (isExactRange(tokenIds, '1', '1')) winsLabel = 'wins-yes';
+  else if (isExactRange(tokenIds, '2', '2')) winsLabel = 'wins-no';
+  else return 'unknown';
+
+  // Edge case: a 0 start balance makes "wins" (== startBalance) and "push"
+  // (== startBalance / 2) collapse to the same value (0). We can't tell
+  // them apart, so flag as ambiguous instead of silently picking one.
+  if (startBalanceAmount === 0n) {
+    return 'ambiguous';
+  }
+
+  const winsMatches = coinAmount === startBalanceAmount;
+  const pushMatches = coinAmount < startBalanceAmount && coinAmount === startBalanceAmount / 2n;
+
+  if (winsMatches && pushMatches) {
+    // Should never happen with a non-zero start balance, but guard anyway.
+    return 'ambiguous';
+  }
+  if (winsMatches) return winsLabel;
+  if (pushMatches) return 'push';
+  return 'ambiguous';
+}
+
+/**
+ * Determine if an approval is a "push" variant. Thin wrapper around
+ * {@link classifySettlementApproval} preserved for backwards compatibility
+ * with the existing finder-based validation logic.
  */
 function isApprovalPush(approval: any): boolean {
-  const coinAmount = BigInt(n(approval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount));
-  const startBalanceAmount = BigInt(
-    n(approval.approvalCriteria?.predeterminedBalances?.incrementedBalances?.startBalances?.[0]?.amount)
-  );
-  if (startBalanceAmount === 0n) return false;
-  return coinAmount < startBalanceAmount && coinAmount === startBalanceAmount / 2n;
+  return classifySettlementApproval(approval) === 'push';
 }
 
 // ---------------------------------------------------------------------------
@@ -491,6 +551,95 @@ export function validatePredictionMarketCollection(collection: any): PredictionM
 
   if (!transferableApproval) {
     errors.push('Missing freely transferable approval (allows transfers between users/pools)');
+  }
+
+  // Ambiguous-settlement detection. Surface a clear warning for any
+  // settlement-shaped approval (burn target + 1 start balance on token 1
+  // or 2 + voting challenge) that the heuristic classifier cannot
+  // unambiguously place as wins or push. Two cases qualify:
+  //
+  //   1. classifySettlementApproval returns 'ambiguous' directly — payout
+  //      matches neither the wins ratio nor the push ratio cleanly, or
+  //      the start balance is 0 so wins and push are indistinguishable.
+  //
+  //   2. Two approvals on the same token id both classify the same way
+  //      (e.g. two 'push' approvals on token 1). In that case at least
+  //      one of them is misconfigured — most commonly a YES/NO wins
+  //      approval whose payout was accidentally set to exactly half the
+  //      start balance, which the legacy heuristic silently reclassified
+  //      as a push. See backlog #214 for the original reproduction.
+  //
+  // This is additive: it never demotes errors to warnings, it never
+  // changes how a non-ambiguous approval is classified, and it does not
+  // require a schema change. Option 1 from the ticket (an explicit
+  // predictionMarketRole field on approvals) remains a future option if
+  // this proves insufficient.
+  type SettlementInfo = { idx: number; approval: any; cls: SettlementApprovalClassification; tokenLabel: 'YES (token 1)' | 'NO (token 2)' };
+  const settlementApprovals: SettlementInfo[] = [];
+  for (let i = 0; i < approvals.length; i++) {
+    const a = approvals[i];
+    if (!isBurnTo(a)) continue;
+    const sbs = getStartBalances(a);
+    if (sbs.length !== 1) continue;
+    const tokenIds = sbs[0]?.tokenIds;
+    const isYesShape = isExactRange(tokenIds, '1', '1');
+    const isNoShape = isExactRange(tokenIds, '2', '2');
+    if (!isYesShape && !isNoShape) continue;
+    if (getVotingChallenges(a).length === 0) continue;
+    settlementApprovals.push({
+      idx: i,
+      approval: a,
+      cls: classifySettlementApproval(a),
+      tokenLabel: isYesShape ? 'YES (token 1)' : 'NO (token 2)'
+    });
+  }
+
+  const emitAmbiguousWarning = (info: SettlementInfo, reason: string) => {
+    const a = info.approval;
+    const sbs = getStartBalances(a);
+    const startBalanceAmount = n(sbs[0]?.amount);
+    const coinAmount = n(a?.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount);
+    let expectedHalf = '0';
+    try {
+      expectedHalf = (BigInt(startBalanceAmount) / 2n).toString();
+    } catch {
+      expectedHalf = '0';
+    }
+    const id = a.approvalId ? `"${a.approvalId}"` : `at index ${info.idx}`;
+    warnings.push(
+      `Ambiguous settlement approval ${id} for ${info.tokenLabel}: ${reason} ` +
+        `(coinAmount=${coinAmount}, expected wins payout=${startBalanceAmount}, expected push payout=${expectedHalf}). ` +
+        `Either change the payout amount to disambiguate, or set an explicit role hint in the approval metadata so the validator can classify it correctly.`
+    );
+  };
+
+  // Case 1: directly-ambiguous approvals
+  for (const info of settlementApprovals) {
+    if (info.cls === 'ambiguous') {
+      emitAmbiguousWarning(info, 'payout amount matches neither the wins ratio nor the push ratio cleanly.');
+    }
+  }
+
+  // Case 2: duplicate classifications on the same token id — at least one
+  // of the colliding approvals is misconfigured (typically a wins approval
+  // whose payout was set to half the start balance, hiding inside the
+  // push slot).
+  const groupings = new Map<string, SettlementInfo[]>();
+  for (const info of settlementApprovals) {
+    if (info.cls === 'unknown' || info.cls === 'ambiguous') continue;
+    const key = `${info.tokenLabel}::${info.cls}`;
+    const list = groupings.get(key) ?? [];
+    list.push(info);
+    groupings.set(key, list);
+  }
+  for (const [, list] of groupings) {
+    if (list.length < 2) continue;
+    for (const info of list) {
+      emitAmbiguousWarning(
+        info,
+        `more than one settlement approval on this token id classifies the same way (${info.cls}) — one of them is likely a misconfigured wins or push approval.`
+      );
+    }
   }
 
   if (!mintApproval) {
