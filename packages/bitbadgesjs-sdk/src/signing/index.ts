@@ -7,7 +7,7 @@
  * @example
  * ```typescript
  * // Browser wallet (Keplr)
- * import { BitBadgesSigningClient, GenericCosmosAdapter } from 'bitbadgesjs-sdk';
+ * import { BitBadgesSigningClient, GenericCosmosAdapter } from 'bitbadges';
  *
  * const adapter = await GenericCosmosAdapter.fromKeplr('bitbadges-1');
  * const client = new BitBadgesSigningClient({ adapter });
@@ -22,7 +22,7 @@
  * const client = new BitBadgesSigningClient({ adapter });
  *
  * // EVM wallet (ethers.js)
- * import { BitBadgesSigningClient, GenericEvmAdapter } from 'bitbadgesjs-sdk';
+ * import { BitBadgesSigningClient, GenericEvmAdapter } from 'bitbadges';
  * import { BrowserProvider } from 'ethers';
  *
  * const provider = new BrowserProvider(window.ethereum);

@@ -456,7 +456,7 @@ addNetworkOptions(
 // One-shot environment + session health check. Six independent probes:
 //
 //   1. Node version (must be ≥ 18)
-//   2. SDK package + version (loaded from bitbadgesjs-sdk's own package.json)
+//   2. SDK package + version (loaded from the bitbadges package.json)
 //   3. CLI config file at ~/.bitbadges/config.json
 //   4. API key reachable (pings /api/v0/simulate with a no-op request)
 //   5. MCP stdio bin presence + smoke launch
@@ -493,14 +493,15 @@ addNetworkOptions(
       checks.push({
         name: 'Node version',
         status: 'fail',
-        detail: `v${nodeVersion} — bitbadgesjs-sdk requires Node 18+`
+        detail: `v${nodeVersion} — bitbadges requires Node 18+`
       });
     }
 
     // 2. SDK version (best-effort lookup via process.argv[1] → walk up
-    // for nearest bitbadgesjs-sdk/package.json). Compatible with both the
-    // CJS and ESM dist builds since neither __dirname nor import.meta.url
-    // would reliably resolve the same way across the two.
+    // for nearest package.json with name 'bitbadges' or legacy 'bitbadgesjs-sdk').
+    // Compatible with both CJS and ESM dist builds since neither __dirname nor
+    // import.meta.url would reliably resolve the same way across the two.
+    const sdkPackageNames = ['bitbadges', 'bitbadgesjs-sdk'];
     try {
       const pathMod = await import('path');
       const fsMod = await import('fs');
@@ -513,7 +514,7 @@ addNetworkOptions(
         if (fsMod.existsSync(candidate)) {
           try {
             const pkg = JSON.parse(fsMod.readFileSync(candidate, 'utf-8'));
-            if (pkg.name === 'bitbadgesjs-sdk') {
+            if (sdkPackageNames.includes(pkg.name)) {
               pkgPath = candidate;
               break;
             }
@@ -527,12 +528,12 @@ addNetworkOptions(
       }
       if (pkgPath) {
         const pkg = JSON.parse(fsMod.readFileSync(pkgPath, 'utf-8'));
-        checks.push({ name: 'SDK package', status: 'pass', detail: `bitbadgesjs-sdk@${pkg.version}` });
+        checks.push({ name: 'SDK package', status: 'pass', detail: `${pkg.name}@${pkg.version}` });
       } else {
         checks.push({
           name: 'SDK package',
           status: 'warn',
-          detail: 'Could not locate bitbadgesjs-sdk package.json from CLI entry'
+          detail: 'Could not locate bitbadges package.json from CLI entry'
         });
       }
     } catch (err) {
@@ -617,7 +618,7 @@ addNetworkOptions(
         if (fsMod.existsSync(candidate)) {
           try {
             const pkg = JSON.parse(fsMod.readFileSync(candidate, 'utf-8'));
-            if (pkg.name === 'bitbadgesjs-sdk') {
+            if (sdkPackageNames.includes(pkg.name)) {
               pkgRoot = dir;
               break;
             }
@@ -647,7 +648,7 @@ addNetworkOptions(
           checks.push({
             name: 'MCP stdio bin',
             status: 'warn',
-            detail: 'dist/cjs/builder/index.js not found — run `npm run build` in bitbadgesjs-sdk'
+            detail: 'dist/cjs/builder/index.js not found — run `npm run build` in the bitbadges package'
           });
         }
       }

@@ -297,7 +297,7 @@ import { DeleteConnectedAccountSuccessResponse, GetConnectedAccountsSuccessRespo
   iGetDeveloperAppsPayload
  * convertFunction is used to convert any responses returned by the API to your desired NumberType.
  * ```typescript
- * import { BigIntify, Stringify, Numberify, BitBadgesAPI } from "bitbadgesjs-sdk";
+ * import { BigIntify, Stringify, Numberify, BitBadgesAPI } from "bitbadges";
  * const BitBadgesApi = new BitBadgesAPI({ convertFunction: BigIntify, ....})
  * const collections = await BitBadgesApi.getCollections(...);
  * ```

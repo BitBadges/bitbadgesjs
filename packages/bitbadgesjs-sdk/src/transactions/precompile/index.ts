@@ -6,7 +6,7 @@
  *
  * @example
  * ```typescript
- * import { convertMessageToPrecompileCall, TOKENIZATION_PRECOMPILE_ADDRESS } from 'bitbadgesjs-sdk';
+ * import { convertMessageToPrecompileCall, TOKENIZATION_PRECOMPILE_ADDRESS } from 'bitbadges';
  *
  * const msg = new MsgCreateCollection({...});
  * const { functionName, data, jsonMsg } = convertMessageToPrecompileCall(msg, evmAddress);
