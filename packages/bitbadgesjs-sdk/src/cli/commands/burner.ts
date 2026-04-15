@@ -1,8 +1,8 @@
 /**
- * `bitbadges-cli hot-wallet` — manage persisted throwaway hot wallets.
+ * `bitbadges-cli burner` — manage persisted throwaway burners.
  *
  * Subcommands:
- *   - list            : print all saved hot wallets (status, balance on request)
+ *   - list            : print all saved burners (status, balance on request)
  *   - show <selector> : print one record
  *   - resume <selector>: re-enter the broadcast flow for a pending wallet
  *   - sweep <selector> --to bb1... : bank-send remaining dust out
@@ -14,37 +14,66 @@ import { Command } from 'commander';
 import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import {
-  listHotWallets,
-  findHotWallet,
-  deleteHotWallet,
-  loadHotWalletAdapter,
+  listBurners,
+  findBurner,
+  deleteBurner,
+  loadBurnerAdapter,
   fetchBalance,
-  runHotWalletBroadcast,
-  type HotWalletRecord,
-  type HotWalletNetwork
-} from '../utils/hotWallet.js';
+  runBurnerCreate,
+  type BurnerWalletRecord,
+  type BurnerNetwork
+} from '../utils/burner.js';
 import { BitBadgesSigningClient } from '../../signing/BitBadgesSigningClient.js';
 
-export const hotWalletCommand = new Command('hot-wallet').description(
-  'Manage throwaway hot wallets used by `broadcast-with-hot-wallet` — list, resume, sweep, forget.'
-);
+export const burnerCommand = new Command('burner')
+  .usage(' ')
+  .summary('Manage throwaway dust-only burners used by `create-with-burner`.')
+  .description(
+    [
+      'Manage the throwaway, dust-only burners created by',
+      '`bitbadges-cli create-with-burner`.',
+      '',
+      'These wallets are single-use, disposable signers that exist only to put',
+      'ONE create-collection tx on-chain. They are stored in PLAINTEXT under',
+      '~/.bitbadges/burners/ (mode 0600) so you can recover dust or resume',
+      'an interrupted broadcast.',
+      '',
+      'CRITICAL:',
+      '  • These wallets are CREATE-COLLECTION ONLY. They have no authority',
+      '    over the collections they signed into existence — ownership lives',
+      '    on the `--manager` address you passed at broadcast time. Never use',
+      '    them for updates, transfers, approvals, or manager permission',
+      '    changes.',
+      '  • Dust only. Never fund these addresses with meaningful amounts.',
+      '    Anyone with read access to your ~/.bitbadges/burners/ directory',
+      "    can spend what's in them.",
+      '',
+      'Subcommands:',
+      '  list    — show every saved wallet',
+      '  show    — print one record (includes mnemonic)',
+      '  resume  — re-enter a paused or failed broadcast for a saved wallet',
+      '  sweep   — pull any remaining balance out to a real address',
+      '  forget  — delete a recovery file after confirmation'
+    ].join('\n')
+  );
 
 // ── list ─────────────────────────────────────────────────────────────────────
 
-hotWalletCommand
+burnerCommand
   .command('list')
-  .description('List all saved hot wallets')
+  .usage(' ')
+  .description('List all saved burners')
   .option('--network <name>', 'Only show wallets for a specific network')
   .option('--json', 'Emit as JSON instead of a table')
   .action((opts: any) => {
-    let wallets = listHotWallets();
+    let wallets = listBurners();
     if (opts.network) wallets = wallets.filter((w) => w.network === opts.network);
     if (opts.json) {
       process.stdout.write(JSON.stringify(wallets, null, 2) + '\n');
       return;
     }
     if (wallets.length === 0) {
-      process.stderr.write('No hot wallets saved.\n');
+      process.stderr.write('No burners saved.\n');
       return;
     }
     for (const w of wallets) {
@@ -56,14 +85,15 @@ hotWalletCommand
 
 // ── show ─────────────────────────────────────────────────────────────────────
 
-hotWalletCommand
+burnerCommand
   .command('show')
-  .description('Show the raw record for one hot wallet')
+  .usage('<selector>')
+  .description('Show the raw record for one burner')
   .argument('<selector>', 'Address or recovery file path')
   .action((selector: string) => {
-    const rec = findHotWallet(selector);
+    const rec = findBurner(selector);
     if (!rec) {
-      process.stderr.write(`No hot wallet found for selector: ${selector}\n`);
+      process.stderr.write(`No burner found for selector: ${selector}\n`);
       process.exit(1);
     }
     // Intentionally prints the mnemonic — it's a throwaway and the user
@@ -73,9 +103,10 @@ hotWalletCommand
 
 // ── resume ───────────────────────────────────────────────────────────────────
 
-const resumeCmd = hotWalletCommand
+const resumeCmd = burnerCommand
   .command('resume')
-  .description('Resume a pending hot-wallet broadcast (reuses the funded wallet, re-fetches sequence).')
+  .usage('<selector>')
+  .description('Resume a pending burner broadcast (reuses the funded wallet, re-fetches sequence).')
   .argument('<selector>', 'Address or recovery file path')
   .requiredOption('--msg-file <path>', 'Path to the msg JSON to broadcast (same msg you originally intended)')
   .requiredOption('--manager <address>', 'Collection manager address (bb1...)')
@@ -86,16 +117,16 @@ const resumeCmd = hotWalletCommand
   .option('--poll-timeout <seconds>', 'Seconds to wait for funding', '60');
 addNetworkOptions(resumeCmd);
 resumeCmd.action(async (selector: string, opts: any) => {
-  const rec = findHotWallet(selector);
+  const rec = findBurner(selector);
   if (!rec) {
-    process.stderr.write(`No hot wallet found for selector: ${selector}\n`);
+    process.stderr.write(`No burner found for selector: ${selector}\n`);
     process.exit(1);
   }
   const fs = await import('fs');
   const msg = JSON.parse(fs.readFileSync(opts.msgFile, 'utf-8'));
 
   const networkName = resolveNetwork({ ...opts, network: opts.network || rec.network });
-  const network = networkName as HotWalletNetwork;
+  const network = networkName as BurnerNetwork;
   if (network !== rec.network) {
     process.stderr.write(
       `Refusing to resume: wallet is on "${rec.network}" but you asked for "${network}".\n`
@@ -106,7 +137,7 @@ resumeCmd.action(async (selector: string, opts: any) => {
   const nodeUrl = NETWORK_CONFIGS[network as NetworkMode].nodeUrl;
   const apiKey = getApiKeyForNetwork({ ...opts, network });
 
-  const result = await runHotWalletBroadcast({
+  const result = await runBurnerCreate({
     msg,
     network,
     apiUrl,
@@ -126,9 +157,10 @@ resumeCmd.action(async (selector: string, opts: any) => {
 
 // ── sweep ────────────────────────────────────────────────────────────────────
 
-const sweepCmd = hotWalletCommand
+const sweepCmd = burnerCommand
   .command('sweep')
-  .description('Send the hot wallet\'s remaining balance to another address and mark it swept.')
+  .usage('<selector>')
+  .description('Send the burner\'s remaining balance to another address and mark it swept.')
   .argument('<selector>', 'Address or recovery file path')
   .requiredOption('--to <address>', 'Recipient address (bb1...)')
   .option('--denom <denom>', 'Coin denom to sweep', 'ubadge')
@@ -136,9 +168,9 @@ const sweepCmd = hotWalletCommand
   .option('--gas <number>', 'Gas limit', '200000');
 addNetworkOptions(sweepCmd);
 sweepCmd.action(async (selector: string, opts: any) => {
-  const rec = findHotWallet(selector);
+  const rec = findBurner(selector);
   if (!rec) {
-    process.stderr.write(`No hot wallet found for selector: ${selector}\n`);
+    process.stderr.write(`No burner found for selector: ${selector}\n`);
     process.exit(1);
   }
   const network = rec.network;
@@ -161,7 +193,7 @@ sweepCmd.action(async (selector: string, opts: any) => {
     process.exit(1);
   }
 
-  const adapter = await loadHotWalletAdapter(rec);
+  const adapter = await loadBurnerAdapter(rec);
   const client = new BitBadgesSigningClient({
     adapter,
     network: network as NetworkMode,
@@ -175,7 +207,7 @@ sweepCmd.action(async (selector: string, opts: any) => {
   // encodeMsgFromJson path for unknown proto msg types; MsgSend lives in
   // the cosmos.bank.v1beta1 namespace and is handled by the proto encoder
   // in createTxBroadcastBody. We pass a { typeUrl, value } shape so it
-  // flows through the same JSON path the broadcast-with-hot-wallet
+  // flows through the same JSON path the create-with-burner
   // command uses.
   const { encodeMsgFromJson } = await import('../../transactions/messages/fromJson.js');
   let protoMsg;
@@ -209,15 +241,16 @@ sweepCmd.action(async (selector: string, opts: any) => {
 
 // ── forget ───────────────────────────────────────────────────────────────────
 
-hotWalletCommand
+burnerCommand
   .command('forget')
-  .description('Delete the recovery file for a hot wallet (the on-chain wallet still exists).')
+  .usage('<selector>')
+  .description('Delete the recovery file for a burner (the on-chain wallet still exists).')
   .argument('<selector>', 'Address or recovery file path')
   .option('--yes', 'Skip confirmation prompt')
   .action(async (selector: string, opts: any) => {
-    const rec = findHotWallet(selector);
+    const rec = findBurner(selector);
     if (!rec || !rec.filePath) {
-      process.stderr.write(`No hot wallet found for selector: ${selector}\n`);
+      process.stderr.write(`No burner found for selector: ${selector}\n`);
       process.exit(1);
     }
     if (!opts.yes) {
@@ -232,10 +265,10 @@ hotWalletCommand
         return;
       }
     }
-    deleteHotWallet(rec.filePath!);
+    deleteBurner(rec.filePath!);
     process.stderr.write(`Deleted ${rec.filePath}\n`);
   });
 
 // Reference these to silence unused-import lint for types that downstream
 // consumers may want to pull off the command module.
-export type { HotWalletRecord };
+export type { BurnerWalletRecord };

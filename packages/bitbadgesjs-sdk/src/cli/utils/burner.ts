@@ -1,14 +1,14 @@
 /**
  * Hot-wallet helpers for the CLI.
  *
- * A "hot wallet" here is a throwaway Cosmos signer the CLI generates per
+ * A "burner" here is a throwaway Cosmos signer the CLI generates per
  * broadcast so users (and agents) can create collections without bringing
  * their own wallet. The wallet signs exactly one tx and is intentionally
  * disposable: collection ownership is captured by the `manager` field on
- * the msg, not the signer, so the hot wallet has no lasting authority.
+ * the msg, not the signer, so the burner has no lasting authority.
  *
- * Keys are persisted in plaintext under `~/.bitbadges/hot-wallets/` (or
- * `$BITBADGES_CONFIG_DIR/hot-wallets/`) with mode 0600. This is the
+ * Keys are persisted in plaintext under `~/.bitbadges/burners/` (or
+ * `$BITBADGES_CONFIG_DIR/burners/`) with mode 0600. This is the
  * intentional tradeoff — these wallets are short-lived and low-value, so
  * the ability to recover dust or resume an interrupted broadcast matters
  * more than keystore encryption.
@@ -33,23 +33,23 @@ import {
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-export type HotWalletNetwork = NetworkMode;
+export type BurnerNetwork = NetworkMode;
 
-export type HotWalletStatus =
+export type BurnerStatus =
   | 'pending'
   | 'funded'
   | 'broadcast'
   | 'failed'
   | 'swept';
 
-export interface HotWalletRecord {
+export interface BurnerWalletRecord {
   version: 1;
   address: string;
   mnemonic: string;
-  network: HotWalletNetwork;
+  network: BurnerNetwork;
   chainId: string;
   createdAt: string;
-  status: HotWalletStatus;
+  status: BurnerStatus;
   manager?: string;
   msgTypeUrl?: string;
   txHash?: string;
@@ -60,26 +60,26 @@ export interface HotWalletRecord {
 
 // ── Store ────────────────────────────────────────────────────────────────────
 
-function hotWalletDir(): string {
+function burnerDir(): string {
   const base = process.env.BITBADGES_CONFIG_DIR || path.join(os.homedir(), '.bitbadges');
-  return path.join(base, 'hot-wallets');
+  return path.join(base, 'burners');
 }
 
 function ensureDir(): string {
-  const dir = hotWalletDir();
+  const dir = burnerDir();
   if (!fs.existsSync(dir)) {
-    // 0700 so siblings can't enumerate hot wallets
+    // 0700 so siblings can't enumerate burners
     fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   }
   return dir;
 }
 
-function recordFilename(record: HotWalletRecord): string {
+function recordFilename(record: BurnerWalletRecord): string {
   const safeTs = record.createdAt.replace(/[:.]/g, '-');
   return `${safeTs}-${record.address}.json`;
 }
 
-export function saveHotWallet(record: HotWalletRecord): string {
+export function saveBurner(record: BurnerWalletRecord): string {
   const dir = ensureDir();
   const filePath = path.join(dir, recordFilename(record));
   const { filePath: _omit, ...toWrite } = record;
@@ -87,25 +87,25 @@ export function saveHotWallet(record: HotWalletRecord): string {
   return filePath;
 }
 
-export function updateHotWallet(filePath: string, patch: Partial<HotWalletRecord>): HotWalletRecord {
+export function updateBurner(filePath: string, patch: Partial<BurnerWalletRecord>): BurnerWalletRecord {
   const raw = fs.readFileSync(filePath, 'utf-8');
-  const record = JSON.parse(raw) as HotWalletRecord;
-  const next: HotWalletRecord = { ...record, ...patch };
+  const record = JSON.parse(raw) as BurnerWalletRecord;
+  const next: BurnerWalletRecord = { ...record, ...patch };
   delete (next as any).filePath;
   fs.writeFileSync(filePath, JSON.stringify(next, null, 2), { mode: 0o600 });
   return { ...next, filePath };
 }
 
-export function listHotWallets(): HotWalletRecord[] {
-  const dir = hotWalletDir();
+export function listBurners(): BurnerWalletRecord[] {
+  const dir = burnerDir();
   if (!fs.existsSync(dir)) return [];
   const entries = fs.readdirSync(dir).filter((f) => f.endsWith('.json'));
-  const records: HotWalletRecord[] = [];
+  const records: BurnerWalletRecord[] = [];
   for (const name of entries) {
     const filePath = path.join(dir, name);
     try {
       const raw = fs.readFileSync(filePath, 'utf-8');
-      const parsed = JSON.parse(raw) as HotWalletRecord;
+      const parsed = JSON.parse(raw) as BurnerWalletRecord;
       records.push({ ...parsed, filePath });
     } catch {
       // Skip unreadable / malformed files rather than erroring out — the
@@ -116,28 +116,28 @@ export function listHotWallets(): HotWalletRecord[] {
   return records;
 }
 
-export function findHotWallet(selector: string): HotWalletRecord | undefined {
+export function findBurner(selector: string): BurnerWalletRecord | undefined {
   if (fs.existsSync(selector)) {
     const raw = fs.readFileSync(selector, 'utf-8');
-    return { ...(JSON.parse(raw) as HotWalletRecord), filePath: selector };
+    return { ...(JSON.parse(raw) as BurnerWalletRecord), filePath: selector };
   }
-  return listHotWallets().find((r) => r.address === selector || r.filePath === selector);
+  return listBurners().find((r) => r.address === selector || r.filePath === selector);
 }
 
-export function deleteHotWallet(filePath: string): void {
+export function deleteBurner(filePath: string): void {
   if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 }
 
 // ── Wallet generation ────────────────────────────────────────────────────────
 
 /**
- * Generate a fresh Cosmos hot wallet and persist it to disk under the
+ * Generate a fresh Cosmos burner and persist it to disk under the
  * given network. Uses ethers' random HD wallet (mnemonic-seeded secp256k1
  * on the standard Ethereum derivation path — matches what the rest of the
  * SDK does for server-side Cosmos signing).
  */
-export async function generateHotWallet(network: HotWalletNetwork): Promise<{
-  record: HotWalletRecord;
+export async function generateBurner(network: BurnerNetwork): Promise<{
+  record: BurnerWalletRecord;
   filePath: string;
   adapter: GenericCosmosAdapter;
 }> {
@@ -151,7 +151,7 @@ export async function generateHotWallet(network: HotWalletNetwork): Promise<{
   const chainId = NETWORK_CONFIGS[network].cosmosChainId;
   const adapter = await GenericCosmosAdapter.fromMnemonic(mnemonic, chainId);
 
-  const record: HotWalletRecord = {
+  const record: BurnerWalletRecord = {
     version: 1,
     address: adapter.address,
     mnemonic,
@@ -160,11 +160,11 @@ export async function generateHotWallet(network: HotWalletNetwork): Promise<{
     createdAt: new Date().toISOString(),
     status: 'pending'
   };
-  const filePath = saveHotWallet(record);
+  const filePath = saveBurner(record);
   return { record: { ...record, filePath }, filePath, adapter };
 }
 
-export async function loadHotWalletAdapter(record: HotWalletRecord): Promise<GenericCosmosAdapter> {
+export async function loadBurnerAdapter(record: BurnerWalletRecord): Promise<GenericCosmosAdapter> {
   return GenericCosmosAdapter.fromMnemonic(record.mnemonic, record.chainId);
 }
 
@@ -240,13 +240,13 @@ export async function requestFaucet(apiUrl: string, address: string, apiKey?: st
 
 /**
  * Decide whether a msg is a supported create-collection shape for the
- * hot-wallet path. Accepts: MsgCreateCollection (already narrowed), and
+ * burner path. Accepts: MsgCreateCollection (already narrowed), and
  * MsgUniversalUpdateCollection in "new collection" mode (no collectionId,
  * or collectionId === '0'). Anything else (update, transfer, approval,
  * etc.) is rejected because the ephemeral signer can't meaningfully own
  * ongoing state.
  */
-export function isSupportedHotWalletMsg(msg: any): boolean {
+export function isSupportedBurnerMsg(msg: any): boolean {
   if (!isCollectionMsg(msg)) return false;
   const t: string = (msg.typeUrl || '').trim();
   if (t === TYPE_URL_CREATE || t.endsWith('.MsgCreateCollection')) return true;
@@ -262,9 +262,9 @@ export function isSupportedHotWalletMsg(msg: any): boolean {
 
 // ── Orchestrator ─────────────────────────────────────────────────────────────
 
-export interface RunHotWalletBroadcastOptions {
+export interface RunBurnerCreateOptions {
   msg: any;
-  network: HotWalletNetwork;
+  network: BurnerNetwork;
   apiUrl: string;
   nodeUrl: string;
   manager?: string;
@@ -272,12 +272,12 @@ export interface RunHotWalletBroadcastOptions {
   apiKey?: string;
   fee?: { amount: string; denom: string };
   gas?: number;
-  reuseRecord?: HotWalletRecord;
+  reuseRecord?: BurnerWalletRecord;
   nonInteractive?: boolean;
   pollTimeoutMs?: number;
 }
 
-export interface RunHotWalletBroadcastResult {
+export interface RunBurnerCreateResult {
   success: boolean;
   txHash?: string;
   collectionId?: string;
@@ -303,39 +303,39 @@ async function promptLine(question: string): Promise<string> {
 }
 
 /**
- * Core hot-wallet broadcast flow. Reusable from both the top-level
- * `broadcast-with-hot-wallet` command and `hot-wallet resume`, so a
+ * Core burner broadcast flow. Reusable from both the top-level
+ * `create-with-burner` command and `burner resume`, so a
  * broadcast that gets interrupted mid-poll can be resumed later without
  * losing the funded wallet.
  */
-export async function runHotWalletBroadcast(
-  opts: RunHotWalletBroadcastOptions
-): Promise<RunHotWalletBroadcastResult> {
+export async function runBurnerCreate(
+  opts: RunBurnerCreateOptions
+): Promise<RunBurnerCreateResult> {
   // 1. Validate msg shape up front — we never want to generate a wallet
   //    or hit the faucet for a msg that we'll refuse later.
-  if (!isSupportedHotWalletMsg(opts.msg)) {
+  if (!isSupportedBurnerMsg(opts.msg)) {
     throw new Error(
-      `Unsupported msg for hot-wallet broadcast: ${opts.msg?.typeUrl}. ` +
+      `Unsupported msg for burner broadcast: ${opts.msg?.typeUrl}. ` +
         `Only MsgCreateCollection and MsgUniversalUpdateCollection (new, collectionId=0) are accepted — ` +
         `the ephemeral signer has no lasting authority, so updates/transfers/approvals cannot use this path.`
     );
   }
 
   // 2. Wallet: either reuse a provided record or generate fresh.
-  let record: HotWalletRecord;
+  let record: BurnerWalletRecord;
   let adapter: GenericCosmosAdapter;
   let recoveryPath: string;
   if (opts.reuseRecord) {
     record = opts.reuseRecord;
-    recoveryPath = record.filePath || saveHotWallet(record);
-    adapter = await loadHotWalletAdapter(record);
-    process.stderr.write(`Reusing hot wallet ${record.address} (${recoveryPath})\n`);
+    recoveryPath = record.filePath || saveBurner(record);
+    adapter = await loadBurnerAdapter(record);
+    process.stderr.write(`Reusing burner ${record.address} (${recoveryPath})\n`);
   } else {
-    const gen = await generateHotWallet(opts.network);
+    const gen = await generateBurner(opts.network);
     record = gen.record;
     recoveryPath = gen.filePath;
     adapter = gen.adapter;
-    process.stderr.write(`Generated hot wallet ${record.address}\n`);
+    process.stderr.write(`Generated burner ${record.address}\n`);
     process.stderr.write(`Recovery file: ${recoveryPath}\n`);
   }
 
@@ -356,7 +356,7 @@ export async function runHotWalletBroadcast(
   }
   const narrowed = normalizeToCreateOrUpdate(universal);
 
-  updateHotWallet(recoveryPath, {
+  updateBurner(recoveryPath, {
     manager: universal.value.manager,
     msgTypeUrl: narrowed.typeUrl
   });
@@ -374,13 +374,13 @@ export async function runHotWalletBroadcast(
       }
     } else {
       process.stderr.write(
-        `\nManual funding required. Send any amount of BADGE to:\n  ${record.address}\non network "${opts.network}".\n`
+        `\nManual funding required. Send any amount of tokens to:\n  ${record.address}\non network "${opts.network}".\n`
       );
       if (opts.nonInteractive) {
         process.stderr.write(
-          `Non-interactive mode — exiting. Run \`bitbadges-cli hot-wallet resume ${record.address}\` after funding.\n`
+          `Non-interactive mode — exiting. Run \`bitbadges-cli burner resume ${record.address}\` after funding.\n`
         );
-        updateHotWallet(recoveryPath, { status: 'pending' });
+        updateBurner(recoveryPath, { status: 'pending' });
         return { success: false, ephemeralAddress: record.address, recoveryPath, paused: true };
       }
       await promptLine('Press Enter once the funding tx has landed... ');
@@ -401,14 +401,14 @@ export async function runHotWalletBroadcast(
       if (opts.nonInteractive || !isTTY()) {
         process.stderr.write(
           `Still no account on-chain after ${Math.round(pollTimeout / 1000)}s. Non-interactive mode — saving and exiting.\n` +
-            `Run \`bitbadges-cli hot-wallet resume ${record.address}\` to retry later.\n`
+            `Run \`bitbadges-cli burner resume ${record.address}\` to retry later.\n`
         );
-        updateHotWallet(recoveryPath, { status: 'pending' });
+        updateBurner(recoveryPath, { status: 'pending' });
         return { success: false, ephemeralAddress: record.address, recoveryPath, paused: true };
       }
 
       process.stderr.write(
-        `\nStill no account after ${Math.round((pollTimeout * attempts) / 1000)}s. Your hot wallet is saved at ${recoveryPath}.\n`
+        `\nStill no account after ${Math.round((pollTimeout * attempts) / 1000)}s. Your burner is saved at ${recoveryPath}.\n`
       );
       const answer = (
         await promptLine('Keep waiting (w) / retry faucet (r) / pause & exit (p) / give up (g)? [w] ')
@@ -424,11 +424,11 @@ export async function runHotWalletBroadcast(
         continue;
       }
       if (answer === 'p') {
-        updateHotWallet(recoveryPath, { status: 'pending' });
+        updateBurner(recoveryPath, { status: 'pending' });
         return { success: false, ephemeralAddress: record.address, recoveryPath, paused: true };
       }
       if (answer === 'g') {
-        updateHotWallet(recoveryPath, { status: 'failed', error: 'User gave up during polling' });
+        updateBurner(recoveryPath, { status: 'failed', error: 'User gave up during polling' });
         return {
           success: false,
           ephemeralAddress: record.address,
@@ -441,7 +441,7 @@ export async function runHotWalletBroadcast(
     process.stderr.write(`Hot wallet ${record.address} is already funded on-chain — skipping faucet.\n`);
   }
 
-  updateHotWallet(recoveryPath, { status: 'funded' });
+  updateBurner(recoveryPath, { status: 'funded' });
 
   // 6. Convert the JSON msg into a proto Message and broadcast. Wrap in
   //    try/catch so any failure mode updates the recovery file before we
@@ -451,7 +451,7 @@ export async function runHotWalletBroadcast(
     protoMsg = encodeMsgFromJson(narrowed);
   } catch (err: any) {
     const errMsg = err?.message || String(err);
-    updateHotWallet(recoveryPath, { status: 'failed', error: `encode failed: ${errMsg}` });
+    updateBurner(recoveryPath, { status: 'failed', error: `encode failed: ${errMsg}` });
     throw new Error(`Failed to encode msg for broadcast: ${errMsg}`);
   }
 
@@ -480,7 +480,7 @@ export async function runHotWalletBroadcast(
   });
 
   if (!result.success) {
-    updateHotWallet(recoveryPath, {
+    updateBurner(recoveryPath, {
       status: 'failed',
       error: result.error || `broadcast failed with code ${result.code}`,
       txHash: result.txHash || undefined
@@ -501,7 +501,7 @@ export async function runHotWalletBroadcast(
   if (!collectionId && result.txHash) {
     collectionId = await fetchCollectionIdFromTx(opts.nodeUrl, result.txHash);
   }
-  updateHotWallet(recoveryPath, {
+  updateBurner(recoveryPath, {
     status: 'broadcast',
     txHash: result.txHash,
     collectionId
@@ -564,26 +564,26 @@ function extractCollectionIdFromResponse(raw: any): string | undefined {
 
 // ── Wallet picker ────────────────────────────────────────────────────────────
 
-export interface WalletPickerChoice {
+export interface BurnerPickerChoice {
   kind: 'new' | 'reuse';
-  record?: HotWalletRecord;
+  record?: BurnerWalletRecord;
 }
 
 /**
- * Interactive picker. Shows the user's existing hot wallets on the given
+ * Interactive picker. Shows the user's existing burners on the given
  * network with live balances, plus a "create new" option. Non-TTY callers
  * bypass the prompt entirely and always get `{ kind: 'new' }`.
  */
-export async function pickHotWallet(opts: {
-  network: HotWalletNetwork;
+export async function pickBurner(opts: {
+  network: BurnerNetwork;
   nodeUrl: string;
   forceNew?: boolean;
   reuseSelector?: string;
-}): Promise<WalletPickerChoice> {
+}): Promise<BurnerPickerChoice> {
   if (opts.forceNew) return { kind: 'new' };
   if (opts.reuseSelector) {
-    const rec = findHotWallet(opts.reuseSelector);
-    if (!rec) throw new Error(`No hot wallet found for selector: ${opts.reuseSelector}`);
+    const rec = findBurner(opts.reuseSelector);
+    if (!rec) throw new Error(`No burner found for selector: ${opts.reuseSelector}`);
     if (rec.network !== opts.network) {
       throw new Error(
         `Hot wallet ${rec.address} is on network "${rec.network}" but you asked to broadcast on "${opts.network}". Refusing to cross networks.`
@@ -593,7 +593,7 @@ export async function pickHotWallet(opts: {
   }
   if (!isTTY()) return { kind: 'new' };
 
-  const all = listHotWallets().filter((r) => r.network === opts.network);
+  const all = listBurners().filter((r) => r.network === opts.network);
   if (all.length === 0) return { kind: 'new' };
 
   // Fetch balances in parallel so the picker doesn't serialize N HTTPs
@@ -601,13 +601,13 @@ export async function pickHotWallet(opts: {
 
   process.stderr.write(
     '\n' +
-      '\x1b[33m⚠  HOT WALLET — throwaway burner keys, stored in plaintext.\x1b[0m\n' +
-      `   Files live under ${hotWalletDir()} with mode 0600.\n` +
+      '\x1b[33m⚠  BURNER WALLET — throwaway burner keys, stored in plaintext.\x1b[0m\n' +
+      `   Files live under ${burnerDir()} with mode 0600.\n` +
       `   Anyone with read access to that folder can spend the dust in these wallets.\n` +
-      `   The collection itself is owned by --manager, not the hot wallet, so these keys\n` +
+      `   The collection itself is owned by --manager, not the burner, so these keys\n` +
       `   are disposable by design. Don't reuse them for anything of value.\n\n` +
-      `Pick a hot wallet for this broadcast (network: ${opts.network}):\n\n` +
-      `  [0]  ✨ Create a new hot wallet\n`
+      `Pick a burner for this broadcast (network: ${opts.network}):\n\n` +
+      `  [0]  ✨ Create a new burner\n`
   );
   all.forEach((r, i) => {
     const bal = balances[i];

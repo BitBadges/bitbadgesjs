@@ -34,6 +34,8 @@ import {
   DEFAULT_SESSIONS_DIR
 } from '../../builder/session/fileStore.js';
 import { templatesCommand } from './templates.js';
+import { createWithBurnerCommand } from './createWithBurner.js';
+import { burnerCommand } from './burner.js';
 import { addNetworkOptions } from '../utils/io.js';
 
 /**
@@ -97,6 +99,8 @@ export const builderCommand = new Command('builder')
 // lives in its own file.
 
 builderCommand.addCommand(templatesCommand);
+builderCommand.addCommand(createWithBurnerCommand);
+builderCommand.addCommand(burnerCommand);
 
 // ── builder tools ──────────────────────────────────────────────────────────
 //
