@@ -3,6 +3,9 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   setupFiles: ['./jest.setup.js'],
+  // Only run .spec.ts files under src/ — skip compiled output under dist/.
+  roots: ['<rootDir>/src'],
+  testMatch: ['**/*.spec.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
 
