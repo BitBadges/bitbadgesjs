@@ -111,11 +111,27 @@ const transferMsg = {
     description: 'Check if an address owns specific tokens — use for gating',
     tags: ['verify', 'gate', 'access', 'ownership', 'check'],
     code: `// Via builder tool: verify_ownership
-// Supports AND/OR/NOT logic for complex ownership checks
 //
+// Shorthand — the common single-collection case (BB-402 and most gating):
 // verify_ownership({
 //   address: "bb1...",
-//   requirements: { collectionId: "123", tokenIds: [{ start: "1", end: "1" }] }
+//   collectionId: "123"
+//   // Optional: tokenId (default "1"), tokenIdEnd (default = tokenId), minAmount (default "1")
+// })
+//
+// Advanced — full AssetConditionGroup JSON for AND/OR/NOT logic across multiple assets:
+// verify_ownership({
+//   address: "bb1...",
+//   requirements: JSON.stringify({
+//     $and: [
+//       { assets: [{ collectionId: "123", tokenIds: [{ start: "1", end: "1" }],
+//                    ownershipTimes: [{ start: "1", end: "18446744073709551615" }],
+//                    amountRange: { start: "1", end: "18446744073709551615" } }] },
+//       { assets: [{ collectionId: "456", tokenIds: [{ start: "1", end: "1" }],
+//                    ownershipTimes: [{ start: "1", end: "18446744073709551615" }],
+//                    amountRange: { start: "1", end: "18446744073709551615" } }] }
+//     ]
+//   })
 // })
 
 // Via SDK:
@@ -267,14 +283,24 @@ const withdrawMsg = {
 // 1. Client presents their address
 // 2. Server verifies ownership via the builder or API
 
-// Via the builder:
+// Via the builder (shorthand — covers the ~80% single-collection gate case):
 // verify_ownership({
 //   address: "bb1clientaddress...",
-//   requirements: {
-//     collectionId: "789",
-//     tokenIds: [{ start: "1", end: "1" }],
-//     amountRange: { start: "1", end: "18446744073709551615" }
-//   }
+//   collectionId: "789"
+//   // Optional: tokenId (default "1"), tokenIdEnd, minAmount (default "1")
+// })
+//
+// Via the builder (advanced — stringified AssetConditionGroup for AND/OR/NOT logic):
+// verify_ownership({
+//   address: "bb1clientaddress...",
+//   requirements: JSON.stringify({
+//     assets: [{
+//       collectionId: "789",
+//       tokenIds: [{ start: "1", end: "1" }],
+//       ownershipTimes: [{ start: "1", end: "18446744073709551615" }],
+//       amountRange: { start: "1", end: "18446744073709551615" }
+//     }]
+//   })
 // })
 
 // Via SDK:

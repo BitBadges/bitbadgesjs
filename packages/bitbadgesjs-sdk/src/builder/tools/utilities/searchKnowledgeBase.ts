@@ -101,34 +101,43 @@ function splitBySections(content: string, source: string, category: KnowledgeSec
 }
 
 /**
- * Score relevance of a section to a query
+ * Score relevance of a section to a query.
+ *
+ * The short-section bonus is a **tiebreaker**, not a baseline: a section with
+ * zero keyword hits always scores 0 regardless of length. This prevents the
+ * caller's `.filter(s => s.relevance > 0)` from admitting every short section
+ * for nonsense queries (see backlog #0223).
  */
 function scoreRelevance(section: KnowledgeSection, queryTerms: string[]): number {
   const contentLower = section.content.toLowerCase();
   const sectionLower = section.section.toLowerCase();
-  let score = 0;
+  let keywordScore = 0;
 
   for (const term of queryTerms) {
     const termLower = term.toLowerCase();
 
     // Exact phrase match in section title
     if (sectionLower.includes(termLower)) {
-      score += 10;
+      keywordScore += 10;
     }
 
     // Count occurrences in content
     const regex = new RegExp(termLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
     const matches = contentLower.match(regex);
     if (matches) {
-      score += Math.min(matches.length * 2, 10);
+      keywordScore += Math.min(matches.length * 2, 10);
     }
   }
 
-  // Bonus for shorter, more focused sections
-  if (section.content.length < 500) score += 2;
-  if (section.content.length < 200) score += 2;
+  // No keyword hit → not a match, regardless of section length.
+  if (keywordScore === 0) return 0;
 
-  return score;
+  // Tiebreaker: prefer shorter, more focused sections on top of a real match.
+  let bonus = 0;
+  if (section.content.length < 500) bonus += 2;
+  if (section.content.length < 200) bonus += 2;
+
+  return keywordScore + bonus;
 }
 
 /**
@@ -197,7 +206,11 @@ export function handleSearchKnowledgeBase(input: SearchKnowledgeBaseInput): Sear
   }));
 
   return {
-    success: true,
+    // No-match queries (e.g. nonsense input, or a real query that hits zero
+    // sections) should surface as success=false so the LLM caller knows to
+    // try a different phrasing or fall back to the built-in `tip`, rather
+    // than continuing as if a diagnosis had been found (see backlog #0223).
+    success: scored.length > 0,
     query,
     results,
     totalMatches: scored.length

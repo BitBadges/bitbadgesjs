@@ -163,26 +163,19 @@ describe('handleSearchKnowledgeBase', () => {
     });
   });
 
-  describe('no-match query', () => {
-    // NOTE — this test documents a known BUG (see backlog/0223):
-    // `scoreRelevance` applies a +2/+2 "short section" bonus unconditionally,
-    // even when the query terms don't match the section at all. As a result,
-    // any query returns every short section in the knowledge base with a
-    // non-zero relevance. This test pins the current (wrong) behavior so
-    // we'll know when it changes. When the bug is fixed, flip this to
-    // `expect(res.success).toBe(false)`.
-    it('BUG: short sections always match (pins current behavior — see backlog/0223)', () => {
+  describe('no-match query (backlog #0223 fix)', () => {
+    // Previously pinned the BUG where `scoreRelevance` applied a +2/+2
+    // "short section" bonus unconditionally, so every nonsense query still
+    // matched every short section. Fix (#0223): return 0 when keywordScore
+    // is 0, so the short-section bonus only acts as a tiebreaker on real
+    // matches. Expected behavior: nonsense query → success=false, 0 results.
+    it('nonsense query with zero keyword hits returns success=false, 0 results', () => {
       const res = handleSearchKnowledgeBase({
         query: 'zxqvwmplqr xqzvmrjkwh qrstvwxyzz'
       });
-      // Current behavior: short sections score +2 or +4 even with zero keyword hits.
-      expect(res.totalMatches).toBeGreaterThan(0);
-      for (const r of res.results) {
-        // Every "match" here should be short — that's the only reason it scored.
-        expect(r.content.length).toBeLessThan(500);
-        // Max possible from the short-section bonus: 4 (2 for <500, 2 for <200)
-        expect(r.relevance).toBeLessThanOrEqual(4);
-      }
+      expect(res.success).toBe(false);
+      expect(res.results).toEqual([]);
+      expect(res.totalMatches).toBe(0);
     });
   });
 });

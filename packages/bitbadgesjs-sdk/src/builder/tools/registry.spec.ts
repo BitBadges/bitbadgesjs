@@ -93,6 +93,44 @@ describe('callTool — pre-flight arg validation', () => {
     });
   });
 
+  describe('verify_ownership shorthand (backlog #0225)', () => {
+    // These exercise the registry dispatch → preflight → handler path for the
+    // restored shorthand form. The API call itself will fail (no API key in
+    // the test env) but that's fine — we only care that preflight accepts
+    // `{address, collectionId}` and that the request reaches the handler.
+    it('accepts `address` + `collectionId` through preflight (shorthand)', async () => {
+      const res = await callTool('verify_ownership', {
+        address: 'bb1abcxyzabcxyzabcxyzabcxyzabcxyz',
+        collectionId: '42'
+      });
+      // Not a preflight error — either the handler ran (returning an API-key
+      // error) or it succeeded. In either case, `isError` is false at the
+      // registry level; errors surface in `result.error`.
+      expect(res.isError).toBeFalsy();
+      expect(res.result).not.toBeNull();
+      expect(typeof (res.result as any).success).toBe('boolean');
+    });
+
+    it('missing both `collectionId` and `requirements` → handler-level error (not preflight)', async () => {
+      const res = await callTool('verify_ownership', {
+        address: 'bb1abcxyzabcxyzabcxyzabcxyzabcxyz'
+      });
+      // Preflight only enforces `required: ['address']` — the either/or check
+      // lives in the handler + Zod refine, so the error surfaces via the
+      // handler's result, not the registry's isError path.
+      expect(res.isError).toBeFalsy();
+      expect((res.result as any).success).toBe(false);
+      expect((res.result as any).error).toMatch(/collectionId.*requirements|requirements.*collectionId/);
+    });
+
+    it('missing `address` → preflight rejects before the handler runs', async () => {
+      const res = await callTool('verify_ownership', { collectionId: '42' });
+      expect(res.isError).toBe(true);
+      expect(res.text).toMatch(/Missing required field/);
+      expect(res.text).toMatch(/address/);
+    });
+  });
+
   describe('coverage sanity', () => {
     it('all 51+ registered tools have an inputSchema', () => {
       // If a tool slips into the registry without an inputSchema, the
