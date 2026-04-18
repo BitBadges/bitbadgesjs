@@ -1176,32 +1176,10 @@ When creating a Custom-2FA collection, follow these requirements:
 - Calculate expiration timestamps correctly (milliseconds since epoch)
 - Tokens automatically expire and can be purged after expiration`
   },
-  {
-    id: 'address-list',
-    name: 'Address List',
-    category: 'token-type',
-    description: 'On-chain managed address list where membership = owning x1 of token ID 1',
-    summary: `On-chain address list. Use per-field tools: set_standards(["Address List"]), add_approval (manager-add + manager-remove), set_permissions, set_invariants.
-
-- List membership = owning x1 of token ID 1
-- Manager can add (mint) and remove (burn) addresses
-- No peer-to-peer transfers
-- Requires TWO approvals: manager-add (minting) + manager-remove (burn to bb1qqq...s7gvmv)
-- After building, proceed with review_collection + validate_transaction as normal`,
-    instructions: `## Address List Token Type
-
-Use per-field tools to create this collection. It requires:
-1. set_standards(["Address List"])
-2. set_valid_token_ids([{ start: "1", end: "1" }])
-3. add_approval — manager-add: fromListId "Mint", toListId "All", initiatedByListId = manager address, overridesFromOutgoingApprovals: true, overridesToIncomingApprovals: true
-4. add_approval — manager-remove: fromListId "!Mint", toListId burn address (bb1qqq...s7gvmv), initiatedByListId = manager address, overridesFromOutgoingApprovals: true, overridesToIncomingApprovals: true
-5. set_permissions — lock canDeleteCollection, canUpdateStandards, canUpdateValidTokenIds
-6. set_invariants — noCustomOwnershipTimes: true, disablePoolCreation: true
-
-This creates a token collection where list membership = owning x1 of token ID 1. The manager can add (mint) and remove (burn) addresses. No peer-to-peer transfers.
-
-After building, proceed with review_collection and validate_transaction as normal.`
-  },
+  // NOTE: the previous short `address-list` entry lived here. The authoritative
+  // entry (with the frontend-required "manager-add" / "manager-remove" approvalIds
+  // and the burn address) is kept later in this array and is the only one that
+  // ships now. See backlog #0240.
   {
     id: 'bb-402',
     name: 'BB-402 Token-Gated Access',

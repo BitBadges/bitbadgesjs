@@ -17,6 +17,7 @@
  */
 
 import { callTool, toolRegistry } from './registry.js';
+import { getAllSkillInstructions, getSkillInstructions } from '../resources/index.js';
 
 describe('callTool — pre-flight arg validation', () => {
   describe('missing required field', () => {
@@ -144,6 +145,47 @@ describe('callTool — pre-flight arg validation', () => {
         }
       }
       expect(missing).toEqual([]);
+    });
+  });
+
+  describe('get_skill_instructions — description stays in sync with SKILL_INSTRUCTIONS (backlog #0241)', () => {
+    const entry = (toolRegistry as any).get_skill_instructions;
+    const tool = entry.tool;
+    const realIds = getAllSkillInstructions().map((s) => s.id).sort();
+
+    it('tool description lists every real skill ID', () => {
+      for (const id of realIds) {
+        expect(tool.description).toContain(id);
+      }
+    });
+
+    it('skillId parameter description lists every real skill ID', () => {
+      const paramDesc = tool.inputSchema.properties.skillId.description as string;
+      for (const id of realIds) {
+        expect(paramDesc).toContain(id);
+      }
+    });
+
+    it('tool description does not mention retired skills (ai-criteria-gate, verified)', () => {
+      expect(tool.description).not.toMatch(/ai-criteria-gate/);
+      expect(tool.description).not.toMatch(/\bverified\b/);
+    });
+  });
+
+  describe('address-list skill instruction (backlog #0240)', () => {
+    it('appears exactly once in SKILL_INSTRUCTIONS', () => {
+      const matches = getAllSkillInstructions().filter((s) => s.id === 'address-list');
+      expect(matches).toHaveLength(1);
+    });
+
+    it('getSkillInstructions returns the authoritative entry with manager-add + manager-remove approvalIds', () => {
+      const skill = getSkillInstructions('address-list');
+      expect(skill).not.toBeNull();
+      // The authoritative entry explicitly documents the EXACT approvalIds
+      // the frontend depends on.
+      expect(skill!.instructions).toMatch(/manager-add/);
+      expect(skill!.instructions).toMatch(/manager-remove/);
+      expect(skill!.instructions).toMatch(/bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv/);
     });
   });
 });

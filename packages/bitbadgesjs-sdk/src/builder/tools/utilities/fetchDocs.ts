@@ -1,12 +1,24 @@
 /**
  * Tool: fetch_docs
- * Fetch live documentation from docs.bitbadges.io
+ *
+ * Search the curated `llms-full.txt` export on docs.bitbadges.io.
+ *
+ * History: this tool previously carried an 85-entry hardcoded topic → URL map
+ * plus an HTML-scraping pipeline (entity decoding, tag stripping, 10k-char
+ * truncation), with `llms-full.txt` search as a fallback only. Per backlog
+ * #0237 we deleted the map + HTML path and promoted `llms-full.txt` to the
+ * single source. The rationale is simple: `llms-full.txt` is the docs site's
+ * own LLM-optimized export, so (a) every new docs page is picked up
+ * automatically the next time the cache expires, (b) there is no
+ * HTML-structure coupling, and (c) the public schema and return shape are
+ * unchanged.
  */
-
 import { z } from 'zod';
 
 export const fetchDocsSchema = z.object({
-  topic: z.string().describe('The topic to search for (e.g., "claims", "approvals", "SDK usage")')
+  topic: z
+    .string()
+    .describe('Keywords, concept, or question — e.g. "claims", "approvals", "how do I mint"')
 });
 
 export type FetchDocsInput = z.infer<typeof fetchDocsSchema>;
@@ -21,322 +33,120 @@ export interface FetchDocsResult {
 
 export const fetchDocsTool = {
   name: 'fetch_docs',
-  description: 'Fetch live documentation from docs.bitbadges.io for a topic',
+  description:
+    'Search live BitBadges documentation by keyword. Ranks sections from the curated llms-full.txt export on docs.bitbadges.io and returns the top matches.',
   inputSchema: {
     type: 'object' as const,
     properties: {
       topic: {
         type: 'string',
-        description: 'The topic to search for (e.g., "claims", "approvals", "SDK usage")'
+        description:
+          'Keywords, concept, or question — e.g. "claims", "approvals", "how do I mint"'
       }
     },
     required: ['topic']
   }
 };
 
-/**
- * Map common topics to documentation URLs
- */
-const TOPIC_URL_MAP: Record<string, string> = {
-  // Core concepts
-  'approvals': 'https://docs.bitbadges.io/learn/transferability',
-  'transferability': 'https://docs.bitbadges.io/learn/transferability',
-  'permissions': 'https://docs.bitbadges.io/learn/permissions',
-  'balances': 'https://docs.bitbadges.io/for-developers/concepts/balances',
-  'minting': 'https://docs.bitbadges.io/learn/minting-and-circulating-supply',
-  'supply': 'https://docs.bitbadges.io/learn/minting-and-circulating-supply',
+const LLMS_FULL_URL = 'https://docs.bitbadges.io/llms-full.txt';
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_SECTIONS = 3;
+const MAX_SECTION_CHARS = 3000;
 
-  // SDK
-  'sdk': 'https://docs.bitbadges.io/for-developers/bitbadges-sdk/overview',
-  'sdk usage': 'https://docs.bitbadges.io/for-developers/bitbadges-sdk/overview',
-  'address conversion': 'https://docs.bitbadges.io/for-developers/bitbadges-sdk/common-snippets/address-conversions',
+let cache: { text: string; fetchedAt: number } | null = null;
 
-  // API
-  'api': 'https://docs.bitbadges.io/for-developers/bitbadges-api/api',
-  'api key': 'https://docs.bitbadges.io/for-developers/bitbadges-api/api',
-
-  // Claims
-  'claims': 'https://docs.bitbadges.io/for-developers/claim-builder/overview',
-  'claim builder': 'https://docs.bitbadges.io/for-developers/claim-builder/overview',
-
-  // Smart tokens
-  'smart tokens': 'https://docs.bitbadges.io/learn/ibc-backed-minting',
-  'ibc': 'https://docs.bitbadges.io/learn/ibc-backed-minting',
-  'backed minting': 'https://docs.bitbadges.io/learn/ibc-backed-minting',
-
-  // Messages
-  'messages': 'https://docs.bitbadges.io/x-tokenization/messages/README',
-  'msg': 'https://docs.bitbadges.io/x-tokenization/messages/README',
-  'msguniversalupdatecollection': 'https://docs.bitbadges.io/x-tokenization/messages/msg-universal-update-collection',
-  'msgtransfertokens': 'https://docs.bitbadges.io/x-tokenization/messages/msg-transfer-tokens',
-
-  // Examples
-  'examples': 'https://docs.bitbadges.io/x-tokenization/examples/README',
-
-  // Sign in
-  'sign in': 'https://docs.bitbadges.io/for-developers/sign-in-with-bitbadges/overview',
-  'siwbb': 'https://docs.bitbadges.io/for-developers/sign-in-with-bitbadges/overview',
-  'oauth': 'https://docs.bitbadges.io/for-developers/sign-in-with-bitbadges/overview',
-
-  // Blockchain
-  'blockchain': 'https://docs.bitbadges.io/for-developers/bitbadges-blockchain/run-a-node',
-  'node': 'https://docs.bitbadges.io/for-developers/bitbadges-blockchain/run-a-node',
-
-  // Overview
-  'overview': 'https://docs.bitbadges.io/overview/what-is-bitbadges',
-  'what is bitbadges': 'https://docs.bitbadges.io/overview/what-is-bitbadges',
-  'getting started': 'https://docs.bitbadges.io/for-developers/getting-started',
-
-  // AI Agents & Bots
-  'ai agents': 'https://docs.bitbadges.io/for-developers/ai-agents',
-  'ai': 'https://docs.bitbadges.io/for-developers/ai-agents',
-  'bots': 'https://docs.bitbadges.io/for-developers/ai-agents',
-  'builder': 'https://docs.bitbadges.io/for-developers/ai-agents/builder-tools',
-  'builder tools': 'https://docs.bitbadges.io/for-developers/ai-agents/builder-tools',
-  'mcp': 'https://docs.bitbadges.io/for-developers/ai-agents/builder-tools',
-  'mcp tools': 'https://docs.bitbadges.io/for-developers/ai-agents/builder-tools',
-  'bot examples': 'https://docs.bitbadges.io/for-developers/ai-agents/bot-examples',
-  'websocket': 'https://docs.bitbadges.io/for-developers/ai-agents/websocket-events',
-  'websocket events': 'https://docs.bitbadges.io/for-developers/ai-agents/websocket-events',
-  'machine discovery': 'https://docs.bitbadges.io/for-developers/ai-agents/capabilities-json',
-  'capabilities': 'https://docs.bitbadges.io/for-developers/ai-agents/capabilities-json',
-  'vault tutorial': 'https://docs.bitbadges.io/for-developers/ai-agents/openclaw-vault-tutorial',
-  'faucet': 'https://docs.bitbadges.io/for-developers/ai-agents/testnet-faucet',
-  'testnet faucet': 'https://docs.bitbadges.io/for-developers/ai-agents/testnet-faucet',
-
-  // Claims extended
-  'claims ai': 'https://docs.bitbadges.io/for-developers/claim-builder/leveraging-ai',
-  'leveraging ai': 'https://docs.bitbadges.io/for-developers/claim-builder/leveraging-ai',
-  'dynamic stores': 'https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores',
-  'plugins': 'https://docs.bitbadges.io/for-developers/claim-builder/custom-plugins-webhooks',
-  'webhooks': 'https://docs.bitbadges.io/for-developers/claim-builder/custom-plugins-webhooks',
-  'zapier': 'https://docs.bitbadges.io/for-developers/claim-builder/integrate-with-zapier',
-
-  // BB-402
-  'bb-402': 'https://docs.bitbadges.io/x-tokenization/bb-402-token-gated-api-access',
-  'token gated': 'https://docs.bitbadges.io/x-tokenization/bb-402-token-gated-api-access',
-  'gated api': 'https://docs.bitbadges.io/x-tokenization/bb-402-token-gated-api-access',
-
-  // EVM
-  'evm': 'https://docs.bitbadges.io/x-tokenization/evm-compatibility',
-  'evm compatibility': 'https://docs.bitbadges.io/x-tokenization/evm-compatibility',
-  'precompiles': 'https://docs.bitbadges.io/x-tokenization/evm-compatibility',
-  'solidity': 'https://docs.bitbadges.io/x-tokenization/evm-compatibility'
-};
-
-/**
- * Find the best matching URL for a topic
- */
-function findTopicUrl(topic: string): string | null {
-  const normalizedTopic = topic.toLowerCase().trim();
-
-  // Direct match
-  if (TOPIC_URL_MAP[normalizedTopic]) {
-    return TOPIC_URL_MAP[normalizedTopic];
+/** Fetch `llms-full.txt`, caching the body for CACHE_TTL_MS. Throws on HTTP failure. */
+async function loadLlmsFull(): Promise<string> {
+  if (cache && Date.now() - cache.fetchedAt < CACHE_TTL_MS) {
+    return cache.text;
   }
+  const response = await fetch(LLMS_FULL_URL, {
+    headers: { 'User-Agent': 'BitBadges-Builder/1.0' }
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  }
+  const text = await response.text();
+  cache = { text, fetchedAt: Date.now() };
+  return text;
+}
 
-  // Partial match
-  for (const [key, url] of Object.entries(TOPIC_URL_MAP)) {
-    if (normalizedTopic.includes(key) || key.includes(normalizedTopic)) {
-      return url;
+/**
+ * Score a section against a set of search terms. Counts raw term occurrences
+ * and awards a bonus when a term appears in the section's header (first
+ * line). Tokens appear in both the numerator and the header bonus so a
+ * multi-word query like "address list" ranks sections with both tokens
+ * higher than those with only one.
+ */
+function scoreSection(section: string, terms: string[]): number {
+  if (terms.length === 0) return 0;
+  const lower = section.toLowerCase();
+  let score = 0;
+  for (const term of terms) {
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const matches = lower.match(new RegExp(escaped, 'g'));
+    if (matches) score += matches.length;
+  }
+  const headerMatch = section.match(/^#{1,3}\s+(.+)/);
+  if (headerMatch) {
+    const header = headerMatch[1].toLowerCase();
+    for (const term of terms) {
+      if (header.includes(term)) score += 5;
     }
   }
-
-  return null;
+  return score;
 }
 
-/**
- * Strip a block-level HTML tag (and its contents) from a string.
- *
- * Uses a tempered-greedy token so nested `<` characters inside the block are
- * consumed, and a flexible closing tag pattern that matches `</tag >` with
- * trailing whitespace. Runs in a loop until the output is stable so partial
- * bypasses like `<scr<script>ipt>...</script>` — where a single pass would
- * leave `<script>...` exposed after removing the inner match — are fully
- * eliminated.
- */
-function stripTagBlock(html: string, tag: string): string {
-  const re = new RegExp(
-    `<${tag}\\b[^<]*(?:(?!<\\/${tag}\\s*>)<[^<]*)*<\\/${tag}\\s*>`,
-    'gi'
-  );
-  let current = html;
-  while (true) {
-    const next = current.replace(re, '');
-    if (next === current) return next;
-    current = next;
-  }
+function truncate(text: string, max: number): string {
+  if (text.length <= max) return text;
+  return text.substring(0, max) + '\n...[truncated]';
 }
 
-/**
- * Decode the handful of HTML entities we care about in a single pass.
- *
- * Doing sequential `.replace()` calls is unsafe because an earlier decode can
- * produce an entity-looking substring that a later decode then re-interprets
- * (e.g. `&amp;lt;` → `&lt;` → `<`). A single regex with a lookup table means
- * each source character position is decoded at most once.
- */
-const ENTITY_MAP: Record<string, string> = {
-  nbsp: ' ',
-  amp: '&',
-  lt: '<',
-  gt: '>',
-  quot: '"',
-  apos: "'"
-};
-function decodeHtmlEntities(input: string): string {
-  return input.replace(/&(nbsp|amp|lt|gt|quot|apos);/g, (_match, name: string) => ENTITY_MAP[name] ?? '');
-}
-
-/**
- * Fetch and extract content from a documentation page
- */
-async function fetchDocContent(url: string): Promise<string> {
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'BitBadges-Builder/1.0',
-        'Accept': 'text/html,application/xhtml+xml'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const html = await response.text();
-
-    // Remove script / style blocks (loop-stable, permissive closing tag).
-    let content = stripTagBlock(html, 'script');
-    content = stripTagBlock(content, 'style');
-
-    // Remove remaining HTML tags but keep text
-    content = content.replace(/<[^>]+>/g, ' ');
-
-    // Clean up whitespace
-    content = content.replace(/\s+/g, ' ').trim();
-
-    // Decode the small set of HTML entities we care about, in one pass so
-    // `&amp;lt;` does not double-unescape into `<`.
-    content = decodeHtmlEntities(content);
-
-    // Truncate to reasonable length
-    if (content.length > 10000) {
-      content = content.substring(0, 10000) + '...\n\n[Content truncated. Visit the URL for full documentation.]';
-    }
-
-    return content;
-  } catch (error) {
-    throw new Error(`Failed to fetch: ${error instanceof Error ? error.message : String(error)}`);
-  }
-}
-
-/**
- * Cache for llms-full.txt content (fetched once, reused)
- */
-let llmsFullTextCache: string | null = null;
-
-/**
- * Fetch llms-full.txt and search for relevant sections by keyword
- */
-async function fetchLlmsFullText(topic: string): Promise<string | null> {
-  // Fetch and cache
-  if (!llmsFullTextCache) {
-    const response = await fetch('https://docs.bitbadges.io/llms-full.txt', {
-      headers: { 'User-Agent': 'BitBadges-Builder/1.0' }
-    });
-    if (!response.ok) return null;
-    llmsFullTextCache = await response.text();
-  }
-
-  const text = llmsFullTextCache;
-  const topicLower = topic.toLowerCase();
-  const terms = topicLower.split(/\s+/).filter(t => t.length > 2);
-
-  // Split into sections by markdown headers
-  const sections = text.split(/(?=^#{1,3}\s)/m);
-
-  // Score each section by keyword relevance
-  const scored = sections
-    .map(section => {
-      let score = 0;
-      const sectionLower = section.toLowerCase();
-      for (const term of terms) {
-        const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-        const matches = sectionLower.match(regex);
-        if (matches) score += matches.length;
-      }
-      // Bonus for header match
-      const headerMatch = section.match(/^#{1,3}\s+(.+)/);
-      if (headerMatch) {
-        const header = headerMatch[1].toLowerCase();
-        for (const term of terms) {
-          if (header.includes(term)) score += 5;
-        }
-      }
-      return { section, score };
-    })
-    .filter(s => s.score > 0)
-    .sort((a, b) => b.score - a.score);
-
-  if (scored.length === 0) return null;
-
-  // Return top 3 most relevant sections, truncated
-  let result = `# Search results for "${topic}" from docs.bitbadges.io\n\n`;
-  for (const s of scored.slice(0, 3)) {
-    const trimmed = s.section.trim();
-    result += trimmed.length > 3000 ? trimmed.substring(0, 3000) + '\n...[truncated]' : trimmed;
-    result += '\n\n---\n\n';
-  }
-
-  return result.length > 100 ? result : null;
+/** Test hook — drop the cached llms-full.txt body. Not part of the public MCP surface. */
+export function __resetFetchDocsCache(): void {
+  cache = null;
 }
 
 export async function handleFetchDocs(input: FetchDocsInput): Promise<FetchDocsResult> {
+  const { topic } = input;
   try {
-    const { topic } = input;
+    const text = await loadLlmsFull();
+    const sections = text.split(/(?=^#{1,3}\s)/m);
+    const terms = topic
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((t) => t.length > 2);
 
-    // Find matching URL
-    const url = findTopicUrl(topic);
+    const scored = sections
+      .map((section) => ({ section, score: scoreSection(section, terms) }))
+      .filter((s) => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, MAX_SECTIONS);
 
-    if (!url) {
-      // Fallback: search llms-full.txt for the topic
-      try {
-        const fallbackContent = await fetchLlmsFullText(topic);
-        if (fallbackContent) {
-          return {
-            success: true,
-            topic,
-            content: fallbackContent,
-            url: 'https://docs.bitbadges.io/llms-full.txt'
-          };
-        }
-      } catch {
-        // Fallback failed, continue to error
-      }
-
-      const availableTopics = Object.keys(TOPIC_URL_MAP).slice(0, 20).join(', ');
+    if (scored.length === 0) {
       return {
         success: false,
         topic,
-        error: `No documentation found for topic "${topic}". Try one of: ${availableTopics}. Or visit https://docs.bitbadges.io directly.`
+        error: `No docs sections matched "${topic}". Try broader keywords, or visit ${LLMS_FULL_URL} directly.`
       };
     }
 
-    // Fetch the content
-    const content = await fetchDocContent(url);
+    const header = `# Search results for "${topic}" from docs.bitbadges.io\n\n`;
+    const body = scored
+      .map((s) => truncate(s.section.trim(), MAX_SECTION_CHARS))
+      .join('\n\n---\n\n');
 
     return {
       success: true,
       topic,
-      content,
-      url
+      content: header + body,
+      url: LLMS_FULL_URL
     };
   } catch (error) {
     return {
       success: false,
-      topic: input.topic,
-      error: `Failed to fetch documentation: ${error instanceof Error ? error.message : String(error)}`
+      topic,
+      error: `Failed to fetch docs: ${error instanceof Error ? error.message : String(error)}`
     };
   }
 }
