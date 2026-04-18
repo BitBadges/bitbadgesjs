@@ -123,18 +123,29 @@ function entry(tool: any, run: (args: any) => any, formatText?: (result: any) =>
   return { tool, run, formatText };
 }
 
-// Inline schemas for tools that were previously defined ad-hoc in server.ts
+// Inline schemas for tools that were previously defined ad-hoc in server.ts.
+//
+// The `get_skill_instructions` tool surface is derived from the live
+// `SKILL_INSTRUCTIONS` array at module init — see backlog #0241. A previous
+// hard-coded list drifted: it advertised two IDs that no longer existed and
+// omitted six that did, leading agents to request nonexistent skills and miss
+// curated ones (auto-mint, prediction-market, bounty, crowdfund, auction,
+// product-catalog). Computing the list here means every future skill addition
+// appears in the tool description automatically — no manual sync required.
+const availableSkillIds = getAllSkillInstructions()
+  .map((s) => s.id)
+  .sort();
+const skillIdList = availableSkillIds.join(', ');
+
 const getSkillInstructionsTool: ToolSchema = {
   name: 'get_skill_instructions',
-  description:
-    'Get detailed instructions for a specific skill. Skills: smart-token, fungible-token, nft-collection, quest, subscription, bb-402, ai-criteria-gate, minting, custom-2fa, immutability, liquidity-pools, payment-protocol, verified, tradable, address-list, burnable, multi-sig-voting, credit-token. Decision matrices are in bitbadges://recipes/all.',
+  description: `Get detailed instructions for a specific skill. Skills: ${skillIdList}. Decision matrices are in bitbadges://recipes/all.`,
   inputSchema: {
     type: 'object',
     properties: {
       skillId: {
         type: 'string',
-        description:
-          'Skill ID: smart-token, minting, liquidity-pools, fungible-token, nft-collection, quest, subscription, immutability, custom-2fa, address-list, bb-402, burnable, multi-sig-voting, ai-criteria-gate, verified, payment-protocol, tradable, credit-token'
+        description: `Skill ID. One of: ${skillIdList}.`
       }
     },
     required: ['skillId']
