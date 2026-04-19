@@ -2,14 +2,16 @@
 
 The official TypeScript SDK for interacting with the BitBadges blockchain, API, and indexer.
 
-[![npm version](https://badge.fury.io/js/bitbadgesjs-sdk.svg)](https://www.npmjs.com/package/bitbadgesjs-sdk)
+[![npm version](https://badge.fury.io/js/bitbadges.svg)](https://www.npmjs.com/package/bitbadges)
+
+> Previously published as `bitbadgesjs-sdk`. If you have old imports or install commands referencing that name, update them to `bitbadges`.
 
 ## Installation
 
 ```bash
-npm install bitbadgesjs-sdk
+npm install bitbadges
 # or
-bun add bitbadgesjs-sdk
+bun add bitbadges
 ```
 
 ## Quick Start
@@ -17,7 +19,7 @@ bun add bitbadgesjs-sdk
 ### 1. Initialize the API Client
 
 ```typescript
-import { BitBadgesAPI, BigIntify } from 'bitbadgesjs-sdk';
+import { BitBadgesAPI, BigIntify } from 'bitbadges';
 
 const api = new BitBadgesAPI({
   convertFunction: BigIntify,
@@ -102,7 +104,7 @@ const api = new BitBadgesAPI({
 The SDK uses a flexible `NumberType` system supporting `bigint`, `number`, and `string` to handle large blockchain values safely.
 
 ```typescript
-import { BigIntify, Stringify, Numberify } from 'bitbadgesjs-sdk';
+import { BigIntify, Stringify, Numberify } from 'bitbadges';
 
 // Always use BigIntify for large numbers (recommended)
 const collectionId = BigIntify('12345678901234567890');
@@ -125,7 +127,7 @@ The SDK has three type layers:
 | **Proto** | `proto.Balance` | Blockchain serialization (strings only) |
 
 ```typescript
-import { Balance, UintRange } from 'bitbadgesjs-sdk';
+import { Balance, UintRange } from 'bitbadges';
 
 // Create instances with classes
 const balance = new Balance({
@@ -179,7 +181,7 @@ try {
 ### Address Utilities
 
 ```typescript
-import { convertToBitBadgesAddress, isAddressValid } from 'bitbadgesjs-sdk';
+import { convertToBitBadgesAddress, isAddressValid } from 'bitbadges';
 
 // Validate a BitBadges address
 const isValid = isAddressValid('bb1abc...');
@@ -191,7 +193,7 @@ const bbAddress = convertToBitBadgesAddress('bb1abc...');
 ## Module Structure
 
 ```
-bitbadgesjs-sdk/
+bitbadges/
 ├── core/           # Balance, UintRange, Approvals, Permissions
 ├── api-indexer/    # BitBadgesAPI client and response types
 ├── transactions/   # Message builders (MsgTransferTokens, etc.)
@@ -206,19 +208,19 @@ bitbadgesjs-sdk/
 
 ```typescript
 // API Client
-import { BitBadgesAPI } from 'bitbadgesjs-sdk';
+import { BitBadgesAPI } from 'bitbadges';
 
 // Number Conversion
-import { BigIntify, Stringify, Numberify } from 'bitbadgesjs-sdk';
+import { BigIntify, Stringify, Numberify } from 'bitbadges';
 
 // Core Classes
-import { Balance, UintRange, Transfer, CollectionApproval } from 'bitbadgesjs-sdk';
+import { Balance, UintRange, Transfer, CollectionApproval } from 'bitbadges';
 
 // Address Utilities
-import { convertToBitBadgesAddress, isAddressValid } from 'bitbadgesjs-sdk';
+import { convertToBitBadgesAddress, isAddressValid } from 'bitbadges';
 
 // Transaction Messages
-import { MsgTransferTokens, MsgCreateCollection } from 'bitbadgesjs-sdk';
+import { MsgTransferTokens, MsgCreateCollection } from 'bitbadges';
 ```
 
 ## Version Compatibility
@@ -240,7 +242,7 @@ import { MsgTransferTokens, MsgCreateCollection } from 'bitbadgesjs-sdk';
 
 ```bash
 # Install specific version for your chain
-npm install bitbadgesjs-sdk@^0.30.0
+npm install bitbadges@^0.30.0
 ```
 
 ## Troubleshooting
