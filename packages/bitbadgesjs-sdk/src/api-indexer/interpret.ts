@@ -8,9 +8,9 @@
  */
 import type { NumberType } from '../common/string-numbers.js';
 import { GO_MAX_UINT_64 } from '../common/math.js';
-import type { iBitBadgesCollection } from '../api-indexer/BitBadgesCollection.js';
-import { BitBadgesCollection } from '../api-indexer/BitBadgesCollection.js';
-import { getMintApprovals, getNonMintApprovals } from './approval-utils.js';
+import type { iBitBadgesCollection } from './BitBadgesCollection.js';
+import { BitBadgesCollection } from './BitBadgesCollection.js';
+import { getMintApprovals, getNonMintApprovals } from '../core/approval-utils.js';
 import {
   big,
   permState,
@@ -34,7 +34,7 @@ import {
   durationToHuman,
   denomToHuman,
   amountToHuman
-} from './interpret-shared.js';
+} from '../core/interpret-shared.js';
 
 // Re-export helpers so existing consumers of interpret.js still work
 export { timestampToDate, durationToHuman, denomToHuman, amountToHuman };

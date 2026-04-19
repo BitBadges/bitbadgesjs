@@ -8,7 +8,7 @@
  * with builder-specific input normalization and developer/auditor extras on top.
  */
 
-import { interpretCollection } from '../../../core/interpret.js';
+import { interpretCollection } from '../../../api-indexer/interpret.js';
 import { BitBadgesCollection } from '../../../api-indexer/BitBadgesCollection.js';
 import type { NumberType } from '../../../common/string-numbers.js';
 

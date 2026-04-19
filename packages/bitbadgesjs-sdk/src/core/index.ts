@@ -29,7 +29,11 @@ export * from './simulation.js';
 export * from './prediction-markets.js';
 export * from './bounties.js';
 export * from './auctions.js';
-export * from './interpret.js';
+// NOTE: interpret.js was moved to ../api-indexer/interpret.js to avoid a circular import
+// (interpretCollection depends on the BitBadgesCollection runtime class, whose module graph
+// transitively loads parts of core/, which produced a "Super expression must either be null
+// or a function" error at load time). api-indexer/index.ts now re-exports it, so top-level
+// `import { interpretCollection } from 'bitbadges'` still works.
 export * from './interpret-transaction.js';
 // Selectively re-export shared builders (helpers like timestampToDate are already re-exported by interpret.js)
 export {

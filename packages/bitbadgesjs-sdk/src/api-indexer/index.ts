@@ -6,5 +6,7 @@ export * from './docs-types/index.js';
 export * from './BitBadgesApi.js';
 export * from './BitBadgesCollection.js';
 export * from './BitBadgesUserInfo.js';
+// Moved here from core/ to break a runtime circular import (see comment in core/index.ts).
+export * from './interpret.js';
 export * from './requests/index.js';
 export * from './responses/index.js';
