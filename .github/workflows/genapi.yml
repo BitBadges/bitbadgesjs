@@ -2,6 +2,8 @@ name: Generate API Documentation
 
 on:
   push:
+    branches:
+      - main
     paths:
       - "packages/bitbadgesjs-sdk/**"
   workflow_dispatch:
