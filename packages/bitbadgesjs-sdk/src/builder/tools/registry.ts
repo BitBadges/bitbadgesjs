@@ -50,6 +50,8 @@ import {
   reviewCollectionTool, handleReviewCollection,
   // Claim builder
   buildClaimTool, handleBuildClaim,
+  // Claim redemption (5-call flow → 1 call)
+  redeemClaimTool, handleRedeemClaim,
   // Session-based per-field tools (v2)
   setStandardsTool, handleSetStandards,
   setValidTokenIdsTool, handleSetValidTokenIds,
@@ -215,6 +217,7 @@ export const toolRegistry: Record<string, ToolEntry> = {
     (result: any) => (result?.success ? result.explanation : JSON.stringify(result, null, 2))
   ),
   build_claim: entry(buildClaimTool, handleBuildClaim),
+  redeem_claim: entry(redeemClaimTool, async (args: any) => await handleRedeemClaim(args)),
 
   // Session-based per-field tools (v2)
   set_standards: entry(setStandardsTool, handleSetStandards),

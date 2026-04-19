@@ -352,3 +352,160 @@ export async function searchPlugins(
   const endpoint = `/api/v0/plugins/search${queryString ? `?${queryString}` : ''}`;
   return apiRequest<SearchPluginsResponse>(endpoint, 'GET', undefined, config);
 }
+
+// ============================================
+// Claim Redemption APIs
+// ============================================
+//
+// Thin wrappers over the four indexer endpoints the `redeem_claim` MCP tool
+// orchestrates. Each mirrors the `BitBadgesApi.*` method name so that an
+// agent that previously pieced together the raw flow (see
+// `bitbadges-docs/for-developers/ai-agents/claims-for-agents.md`) can follow
+// the same verbs here if they need to bypass the one-shot tool.
+
+/**
+ * Minimal claim details shape used by `redeem_claim` to discover plugin
+ * `instanceId`s and any linked on-chain collection/tracker details. We use
+ * an ad-hoc local interface here (instead of importing `iClaimDetails` from
+ * the full SDK types) to keep the builder module free of bigint/NumberType
+ * machinery — it just needs the fields the MCP tool branches on.
+ */
+export interface ClaimPluginSummary {
+  pluginId: string;
+  instanceId: string;
+  [key: string]: unknown;
+}
+
+export interface ClaimTrackerDetails {
+  collectionId: string | number | bigint;
+  approvalId: string;
+  challengeTrackerId: string;
+  approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
+  approverAddress: string;
+}
+
+export interface ClaimSummary {
+  claimId: string;
+  standaloneClaim?: boolean;
+  collectionId?: string | number | bigint;
+  trackerDetails?: ClaimTrackerDetails;
+  plugins: ClaimPluginSummary[];
+  [key: string]: unknown;
+}
+
+export interface GetClaimsResponse {
+  claims: ClaimSummary[];
+  bookmark?: string;
+}
+
+export async function getClaims(
+  claimIds: string[],
+  config?: ApiClientConfig
+): Promise<ApiResponse<GetClaimsResponse>> {
+  return apiRequest<GetClaimsResponse>(
+    '/api/v1/claims/fetch',
+    'POST',
+    { claimsToFetch: claimIds.map((claimId) => ({ claimId })) },
+    config
+  );
+}
+
+export interface CompleteClaimResponse {
+  claimAttemptId: string;
+}
+
+export async function completeClaim(
+  claimId: string,
+  address: string,
+  payload: Record<string, unknown>,
+  config?: ApiClientConfig
+): Promise<ApiResponse<CompleteClaimResponse>> {
+  return apiRequest<CompleteClaimResponse>(
+    `/api/v0/claims/complete/${claimId}/${address}`,
+    'POST',
+    payload,
+    config
+  );
+}
+
+export interface ClaimAttemptStatusResponse {
+  success: boolean;
+  error: string;
+  /** The on-chain code. Only provided for on-chain token claims. */
+  code?: string;
+  bitbadgesAddress: string;
+}
+
+export async function getClaimAttemptStatus(
+  claimAttemptId: string,
+  config?: ApiClientConfig
+): Promise<ApiResponse<ClaimAttemptStatusResponse>> {
+  return apiRequest<ClaimAttemptStatusResponse>(
+    `/api/v0/claims/status/${claimAttemptId}`,
+    'POST',
+    {},
+    config
+  );
+}
+
+export interface ReservedClaimCodesResponse {
+  reservedCodes?: string[];
+  leafSignatures?: string[];
+}
+
+export async function getReservedClaimCodes(
+  claimId: string,
+  address: string,
+  config?: ApiClientConfig
+): Promise<ApiResponse<ReservedClaimCodesResponse>> {
+  return apiRequest<ReservedClaimCodesResponse>(
+    `/api/v0/claims/reserved/${claimId}/${address}`,
+    'POST',
+    {},
+    config
+  );
+}
+
+export interface MerkleProofAunt {
+  aunt: string;
+  onRight: boolean;
+}
+
+export interface MerkleProofInfoDetail {
+  proofObj: MerkleProofAunt[];
+  isValidProof: boolean;
+  leafIndex: number;
+  leaf: string;
+}
+
+export interface MerkleProofInfoResponse {
+  allProofDetails: MerkleProofInfoDetail[];
+}
+
+export interface GetMerkleProofInfoRequest {
+  collectionId: string | number | bigint;
+  approvalId: string;
+  approvalLevel: 'collection' | 'incoming' | 'outgoing' | '';
+  approverAddress: string;
+  leaves: string[];
+  challengeTrackerId: string;
+  bitbadgesAddress?: string;
+  claimCodes?: string[];
+}
+
+export async function getMerkleProofInfo(
+  request: GetMerkleProofInfoRequest,
+  config?: ApiClientConfig
+): Promise<ApiResponse<MerkleProofInfoResponse>> {
+  // The indexer accepts bigint/number/string for collectionId but expects
+  // it serialized as-is. Stringify defensively so we don't surface
+  // `TypeError: Do not know how to serialize a BigInt` on JSON.stringify.
+  const collectionId =
+    typeof request.collectionId === 'bigint' ? request.collectionId.toString() : request.collectionId;
+  return apiRequest<MerkleProofInfoResponse>(
+    '/api/v0/merkleProofInfo',
+    'POST',
+    { ...request, collectionId },
+    config
+  );
+}

@@ -320,6 +320,52 @@ async function verifyAccess(userAddress: string): Promise<boolean> {
 // });`
   },
   {
+    id: 'redeem-code-gated-claim',
+    name: 'Redeem a Code-Gated Claim (one-shot)',
+    description:
+      'Complete a claim on behalf of a user and, for on-chain gated claims, get back a ready-to-sign MsgTransferTokens — all in a single MCP tool call.',
+    tags: ['claim', 'redeem', 'code-gated', 'merkle', 'agents'],
+    code: `// Redeem a claim in one call. Collapses the 5-step flow from the docs
+// (completeClaim -> poll status -> getReservedClaimCodes ->
+// getMerkleProofInfo -> hand-stitch MsgTransferTokens) into one tool call.
+//
+// Use flat verbs (\`code\`, \`password\`, \`whitelist\`) — redeem_claim
+// auto-maps them onto the plugin instanceId the claim was created with.
+//
+// Standalone (off-chain) claim:
+redeem_claim({
+  claimId: "abc123",
+  address: "bb1user...",
+  inputs: { code: "xyz" }
+})
+// → { success: true, claimAttemptId, code?, onChain: false }
+//
+// On-chain gated claim (auto-builds MsgTransferTokens):
+redeem_claim({
+  claimId: "abc123",
+  address: "bb1user...",
+  inputs: { code: "xyz" }
+})
+// → { success: true, claimAttemptId, code, onChain: true,
+//     transaction: { messages: [MsgTransferTokens{...}], memo, fee } }
+//
+// The returned transaction is the same shape build_transfer emits, so:
+const redeem = await redeem_claim({ claimId, address, inputs: { code } });
+if (redeem.transaction) {
+  await simulate_transaction({ transaction: redeem.transaction });
+  // then hand transaction to the user to sign + broadcast
+}
+//
+// Opt out of the transfer build (e.g. to batch with other messages):
+redeem_claim({ claimId, address, inputs: { code }, returnTransfer: false });
+//
+// Power-user: pass the full per-instanceId body instead of flat verbs:
+redeem_claim({
+  claimId, address,
+  inputs: { "codes-gate-custom-id": { code: "xyz" } }
+});`
+  },
+  {
     id: 'bounty-escrow',
     name: 'Bounty Escrow Pattern',
     description: 'Create a bounty with escrow, verifier arbitration, and expiration',
