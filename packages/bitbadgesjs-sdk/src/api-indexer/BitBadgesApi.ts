@@ -293,12 +293,11 @@ import { DeleteConnectedAccountSuccessResponse, GetConnectedAccountsSuccessRespo
 /**
  * This is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.
  * See official documentation for more details and examples. Must pass in a valid API key.
- *,
-  iGetDeveloperAppsPayload
+ *
  * convertFunction is used to convert any responses returned by the API to your desired NumberType.
  * ```typescript
  * import { BigIntify, Stringify, Numberify, BitBadgesAPI } from "bitbadges";
- * const BitBadgesApi = new BitBadgesAPI({ convertFunction: BigIntify, ....})
+ * const BitBadgesApi = new BitBadgesAPI({ convertFunction: BigIntify, apiKey: '...' });
  * const collections = await BitBadgesApi.getCollections(...);
  * ```
  *
