@@ -11,9 +11,9 @@
  * These validators ensure the structural skeleton is correct.
  */
 
-import { CollectionDoc } from '../api-indexer/docs-types/docs.js';
-import { doesCollectionFollowSubscriptionProtocol } from './subscriptions.js';
-import { normalizeForReview } from './review-normalize.js';
+import { CollectionDoc } from './docs-types/docs.js';
+import { doesCollectionFollowSubscriptionProtocol } from '../core/subscriptions.js';
+import { normalizeForReview } from '../core/review-normalize.js';
 
 const MAX_UINT64 = 18446744073709551615n;
 const FOREVER = [{ start: 1n, end: MAX_UINT64 }];

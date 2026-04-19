@@ -18,7 +18,7 @@
  */
 
 import { auditCollection, type AuditFinding, type AuditSeverity } from './audit.js';
-import { verifyStandardsCompliance, type StandardViolation } from './verify-standards.js';
+import { verifyStandardsCompliance, type StandardViolation } from '../api-indexer/verify-standards.js';
 import { runUxChecks } from './review-ux/index.js';
 import type { Finding, FindingSource, Localized, ReviewContext, ReviewResult, Severity } from './review-types.js';
 import { normalizeForReview, extractCollectionValue } from './review-normalize.js';

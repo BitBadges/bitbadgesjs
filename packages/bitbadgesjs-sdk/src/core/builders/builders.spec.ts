@@ -4,7 +4,7 @@
  * Verifies that all builders produce valid { typeUrl, value } JSON
  * that passes the SDK's verifyStandardsCompliance checks.
  */
-import { verifyStandardsCompliance } from '../verify-standards.js';
+import { verifyStandardsCompliance } from '../../api-indexer/verify-standards.js';
 
 import { buildVault } from './vault.js';
 import { buildSubscription } from './subscription.js';
