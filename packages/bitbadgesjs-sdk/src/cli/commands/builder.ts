@@ -1128,7 +1128,7 @@ addNetworkOptions(
           fetchedCollection ||
           (data && typeof data === 'object' && !data.typeUrl && !hasMessages && !data.value)
         ) {
-          const { interpretCollection } = await import('../../core/interpret.js');
+          const { interpretCollection } = await import('../../api-indexer/interpret.js');
           text = interpretCollection(data);
         } else {
           const txBody = firstCollectionMsg?.value ?? data.value ?? data;

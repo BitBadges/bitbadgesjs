@@ -106,7 +106,7 @@ sdkCommand
     } else {
       data = readJsonInput(input);
     }
-    const { interpretCollection } = await import('../../core/interpret.js');
+    const { interpretCollection } = await import('../../api-indexer/interpret.js');
     const result = interpretCollection(data);
     if (opts.outputFile) {
       const fs = await import('fs');

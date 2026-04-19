@@ -1,8 +1,8 @@
 /**
  * Tests for interpret.ts - interpretCollection function
  */
-import { BitBadgesCollection } from '../api-indexer/BitBadgesCollection.js';
-import type { iBitBadgesCollection } from '../api-indexer/BitBadgesCollection.js';
+import { BitBadgesCollection } from './BitBadgesCollection.js';
+import type { iBitBadgesCollection } from './BitBadgesCollection.js';
 import { interpretCollection, timestampToDate, durationToHuman, denomToHuman, amountToHuman } from './interpret.js';
 
 const GO_MAX = 18446744073709551615n;
