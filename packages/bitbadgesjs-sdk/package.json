@@ -1,7 +1,7 @@
 {
   "name": "bitbadges",
   "description": "BitBadges — programmable tokens on Cosmos. SDK, CLI, and builder tools for humans and agents. (Previously published as 'bitbadgesjs-sdk'.)",
-  "version": "0.34.1",
+  "version": "0.34.2",
   "license": "MIT",
   "keywords": [
     "bitbadges",
@@ -62,12 +62,24 @@
   },
   "typesVersions": {
     "*": {
-      "builder": ["./dist/esm/builder/index.d.ts"],
-      "builder/registry": ["./dist/esm/builder/tools/registry.d.ts"],
-      "builder/tools": ["./dist/esm/builder/tools/index.d.ts"],
-      "builder/resources": ["./dist/esm/builder/resources/index.d.ts"],
-      "builder/skills": ["./dist/esm/builder/resources/skillInstructions.d.ts"],
-      "builder/session": ["./dist/esm/builder/session/sessionState.d.ts"]
+      "builder": [
+        "./dist/esm/builder/index.d.ts"
+      ],
+      "builder/registry": [
+        "./dist/esm/builder/tools/registry.d.ts"
+      ],
+      "builder/tools": [
+        "./dist/esm/builder/tools/index.d.ts"
+      ],
+      "builder/resources": [
+        "./dist/esm/builder/resources/index.d.ts"
+      ],
+      "builder/skills": [
+        "./dist/esm/builder/resources/skillInstructions.d.ts"
+      ],
+      "builder/session": [
+        "./dist/esm/builder/session/sessionState.d.ts"
+      ]
     }
   },
   "files": [
