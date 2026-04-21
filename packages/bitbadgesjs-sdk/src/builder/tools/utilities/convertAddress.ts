@@ -1,10 +1,17 @@
 /**
  * Tool: convert_address
- * Convert between ETH (0x) and BitBadges (bb1) address formats
+ * Convert between ETH (0x) and BitBadges (bb1) address formats.
+ *
+ * Thin wrapper over the SDK's canonical address helpers in
+ * `src/address-converter/converter.ts`. Do not reimplement bech32 here —
+ * keeping one source of truth guarantees the MCP tool agrees with the rest
+ * of the SDK (and therefore with the indexer and chain) on checksum rules,
+ * aliases (`Mint`), and `bbvaloper` handling.
  */
 
 import { z } from 'zod';
-import { bech32 } from 'bech32';
+import { convertToBitBadgesAddress, convertToEthAddress, getChainForAddress } from '../../../address-converter/converter.js';
+import { SupportedChain } from '../../../common/types.js';
 
 export const convertAddressSchema = z.object({
   address: z.string().describe('The address to convert (0x... or bb1...)'),
@@ -42,55 +49,18 @@ export const convertAddressTool = {
   }
 };
 
-/**
- * Convert Ethereum address to Cosmos (bb1) address
- */
-function ethToCosmos(ethAddress: string): string {
-  // Remove 0x prefix if present
-  const cleanAddress = ethAddress.toLowerCase().replace('0x', '');
-
-  // Convert hex string to bytes
-  const addressBytes = Buffer.from(cleanAddress, 'hex');
-
-  // Encode to bech32 with bb prefix
-  const words = bech32.toWords(addressBytes);
-  return bech32.encode('bb', words);
-}
-
-/**
- * Convert Cosmos (bb1) address to Ethereum address
- */
-function cosmosToEth(cosmosAddress: string): string {
-  // Decode bech32
-  const decoded = bech32.decode(cosmosAddress);
-
-  // Convert words back to bytes
-  const addressBytes = Buffer.from(bech32.fromWords(decoded.words));
-
-  // Convert to hex with 0x prefix
-  return '0x' + addressBytes.toString('hex');
-}
-
-/**
- * Detect address format
- */
-function detectFormat(address: string): 'eth' | 'cosmos' | 'unknown' {
-  if (address.startsWith('0x') && address.length === 42) {
-    return 'eth';
-  }
-  if (address.startsWith('bb1')) {
-    return 'cosmos';
-  }
+function chainToFormat(chain: SupportedChain): 'eth' | 'bitbadges' | 'unknown' {
+  if (chain === SupportedChain.ETH) return 'eth';
+  if (chain === SupportedChain.COSMOS) return 'bitbadges';
   return 'unknown';
 }
 
 export function handleConvertAddress(input: ConvertAddressInput): ConvertAddressResult {
   try {
     const { address } = input;
-    const sourceFormat = detectFormat(address);
 
-    // Auto-detect target format if not specified
-    const targetFormat = input.targetFormat || (sourceFormat === 'eth' ? 'bitbadges' : 'eth');
+    const chain = getChainForAddress(address);
+    const sourceFormat = chainToFormat(chain);
 
     if (sourceFormat === 'unknown') {
       return {
@@ -99,36 +69,22 @@ export function handleConvertAddress(input: ConvertAddressInput): ConvertAddress
       };
     }
 
-    // Check if already in target format
-    if ((sourceFormat === 'eth' && targetFormat === 'eth') ||
-        (sourceFormat === 'cosmos' && targetFormat === 'bitbadges')) {
-      return {
-        success: true,
-        originalAddress: address,
-        convertedAddress: address,
-        originalFormat: sourceFormat === 'eth' ? 'eth' : 'bitbadges',
-        targetFormat: targetFormat
-      };
-    }
+    const targetFormat = input.targetFormat ?? (sourceFormat === 'eth' ? 'bitbadges' : 'eth');
 
-    // Convert
-    let convertedAddress: string;
-    if (sourceFormat === 'eth' && targetFormat === 'bitbadges') {
-      convertedAddress = ethToCosmos(address);
-    } else if (sourceFormat === 'cosmos' && targetFormat === 'eth') {
-      convertedAddress = cosmosToEth(address);
-    } else {
+    const converted = targetFormat === 'eth' ? convertToEthAddress(address) : convertToBitBadgesAddress(address);
+
+    if (!converted) {
       return {
         success: false,
-        error: `Cannot convert from ${sourceFormat} to ${targetFormat}`
+        error: `Failed to convert address "${address}" to ${targetFormat}. Check format and checksum.`
       };
     }
 
     return {
       success: true,
       originalAddress: address,
-      convertedAddress,
-      originalFormat: sourceFormat === 'eth' ? 'eth' : 'bitbadges',
+      convertedAddress: converted,
+      originalFormat: sourceFormat,
       targetFormat
     };
   } catch (error) {

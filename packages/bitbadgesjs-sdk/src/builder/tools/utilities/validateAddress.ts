@@ -1,10 +1,20 @@
 /**
  * Tool: validate_address
- * Check if an address is valid and detect its chain type
+ * Check if an address is valid and detect its chain type.
+ *
+ * Thin wrapper over the SDK's canonical address helpers in
+ * `src/address-converter/converter.ts`. This guarantees the MCP tool applies
+ * the same checksum and prefix rules as the rest of the SDK (and therefore
+ * as the indexer and chain).
  */
 
 import { z } from 'zod';
-import { bech32 } from 'bech32';
+import {
+  convertToBitBadgesAddress,
+  getChainForAddress,
+  isAddressValid
+} from '../../../address-converter/converter.js';
+import { SupportedChain } from '../../../common/types.js';
 
 export const validateAddressSchema = z.object({
   address: z.string().describe('The address to validate')
@@ -40,44 +50,10 @@ export const validateAddressTool = {
   }
 };
 
-/**
- * Validate an Ethereum address
- */
-function isValidEthAddress(address: string): boolean {
-  if (!address.startsWith('0x')) {
-    return false;
-  }
-  if (address.length !== 42) {
-    return false;
-  }
-  // Check if it's valid hex
-  const hexPart = address.slice(2);
-  return /^[0-9a-fA-F]+$/.test(hexPart);
-}
-
-/**
- * Validate a Cosmos/BitBadges address
- */
-function isValidCosmosAddress(address: string): { valid: boolean; prefix?: string } {
-  try {
-    const decoded = bech32.decode(address);
-    return {
-      valid: true,
-      prefix: decoded.prefix
-    };
-  } catch {
-    return { valid: false };
-  }
-}
-
-/**
- * Normalize an address to lowercase
- */
-function normalizeAddress(address: string, chain: 'eth' | 'cosmos'): string {
-  if (chain === 'eth') {
-    return address.toLowerCase();
-  }
-  return address.toLowerCase();
+function chainLabel(chain: SupportedChain): 'eth' | 'cosmos' | 'unknown' {
+  if (chain === SupportedChain.ETH) return 'eth';
+  if (chain === SupportedChain.COSMOS) return 'cosmos';
+  return 'unknown';
 }
 
 export function handleValidateAddress(input: ValidateAddressInput): ValidateAddressResult {
@@ -93,14 +69,30 @@ export function handleValidateAddress(input: ValidateAddressInput): ValidateAddr
       };
     }
 
-    // Check for ETH address
-    if (address.startsWith('0x')) {
-      const isValid = isValidEthAddress(address);
+    const chain = getChainForAddress(address);
+    const chainName = chainLabel(chain);
+
+    if (chain === SupportedChain.UNKNOWN) {
       return {
         success: true,
-        valid: isValid,
-        chain: 'eth',
-        normalized: isValid ? normalizeAddress(address, 'eth') : undefined,
+        valid: false,
+        chain: 'unknown',
+        details: {
+          length: address.length,
+          format: 'unknown'
+        },
+        error: 'Address format not recognized. Expected 0x... (ETH) or bb1... (BitBadges)'
+      };
+    }
+
+    const valid = isAddressValid(address, chain);
+
+    if (chain === SupportedChain.ETH) {
+      return {
+        success: true,
+        valid,
+        chain: chainName,
+        normalized: valid ? address.toLowerCase() : undefined,
         details: {
           prefix: '0x',
           length: address.length,
@@ -109,48 +101,20 @@ export function handleValidateAddress(input: ValidateAddressInput): ValidateAddr
       };
     }
 
-    // Check for Cosmos/BitBadges address
-    if (address.startsWith('bb1') || address.startsWith('cosmos1')) {
-      const cosmosResult = isValidCosmosAddress(address);
-      return {
-        success: true,
-        valid: cosmosResult.valid,
-        chain: 'cosmos',
-        normalized: cosmosResult.valid ? normalizeAddress(address, 'cosmos') : undefined,
-        details: {
-          prefix: cosmosResult.prefix,
-          length: address.length,
-          format: 'bech32'
-        }
-      };
-    }
-
-    // Try to decode as generic bech32
-    const cosmosResult = isValidCosmosAddress(address);
-    if (cosmosResult.valid) {
-      return {
-        success: true,
-        valid: true,
-        chain: 'cosmos',
-        normalized: normalizeAddress(address, 'cosmos'),
-        details: {
-          prefix: cosmosResult.prefix,
-          length: address.length,
-          format: 'bech32'
-        }
-      };
-    }
-
-    // Unknown format
+    // COSMOS: derive canonical bb1 form via the SDK helper so `bbvaloper` and
+    // other bb-prefixed addresses are normalized consistently.
+    const canonical = valid ? convertToBitBadgesAddress(address) : '';
+    const prefix = address.startsWith('bbvaloper') ? 'bbvaloper' : address.startsWith('bb') ? 'bb' : undefined;
     return {
       success: true,
-      valid: false,
-      chain: 'unknown',
+      valid,
+      chain: chainName,
+      normalized: valid ? (canonical || address.toLowerCase()) : undefined,
       details: {
+        prefix,
         length: address.length,
-        format: 'unknown'
-      },
-      error: 'Address format not recognized. Expected 0x... (ETH) or bb1... (BitBadges)'
+        format: 'bech32'
+      }
     };
   } catch (error) {
     return {

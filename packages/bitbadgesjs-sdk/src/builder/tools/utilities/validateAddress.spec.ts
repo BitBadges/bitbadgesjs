@@ -1,19 +1,17 @@
 /**
  * Tests for `validate_address` builder tool.
  *
- * validateAddress is called by the LLM builder to confirm user-supplied addresses
- * before putting them into on-chain transactions. Misclassifying a valid address
- * or accepting an invalid one would cause downstream tx failures, so the
- * function must be airtight across every input shape we actually encounter:
+ * validateAddress is a thin wrapper over the SDK's canonical address helpers
+ * (`getChainForAddress`, `isAddressValid`, `convertToBitBadgesAddress`). The
+ * MCP tool should return the same answer the rest of the SDK (and therefore
+ * the indexer and chain) would return for the same address.
  *
- *   - empty / whitespace strings
- *   - 0x prefix with invalid length / invalid hex
- *   - valid 20-byte ETH addresses (mixed case)
- *   - bb1 / cosmos1 bech32 addresses with valid + invalid checksums
- *   - generic bech32 addresses from other chains (osmo1, ibc channel ids, etc.)
- *   - strings that look like addresses but aren't
- *
- * Each branch in `handleValidateAddress` is exercised at least once.
+ * Scope: only `0x` (ETH) and `bb`-prefixed (BitBadges bech32, including
+ * `bbvaloper`) addresses count as "known". Other bech32 prefixes
+ * (`cosmos1`, `osmo1`, `juno1`, etc.) are not BitBadges-supported chains and
+ * report as `chain: 'unknown'`. This matches `getChainForAddress` and avoids
+ * the prior footgun where `validate_address` would accept a foreign bech32
+ * that subsequently broke any BitBadges tool downstream.
  */
 
 import { handleValidateAddress } from './validateAddress.js';
@@ -55,11 +53,23 @@ describe('handleValidateAddress', () => {
       expect(res.details?.length).toBe(42);
     });
 
-    it('accepts a well-formed 0x address with mixed case and normalizes to lowercase', () => {
+    it('rejects a mixed-case 0x address that fails the EIP-55 checksum', () => {
+      // Mixed-case addresses must satisfy the EIP-55 checksum. This one does
+      // not, so the canonical SDK helper rejects it — a correctness tighten
+      // over the old hand-rolled `/^[0-9a-fA-F]+$/` check that accepted it.
       const addr = '0xAbCdEf0123456789aBcDeF0123456789AbCdEf01';
       const res = handleValidateAddress({ address: addr });
+      expect(res.valid).toBe(false);
+      expect(res.chain).toBe('eth');
+    });
+
+    it('accepts a valid EIP-55 checksummed 0x address', () => {
+      // Derived by round-tripping an all-lowercase form through the SDK's
+      // checksum encoder.
+      const addr = '0x742d35cC6634c0532925A3b844bc9E7595F0beB1';
+      const res = handleValidateAddress({ address: addr });
       expect(res.valid).toBe(true);
-      expect(res.normalized).toBe(addr.toLowerCase());
+      expect(res.chain).toBe('eth');
     });
 
     it('rejects a 0x address that is too short (41 chars)', () => {
@@ -102,7 +112,6 @@ describe('handleValidateAddress', () => {
       expect(res.chain).toBe('cosmos');
       expect(res.details?.prefix).toBe('bb');
       expect(res.details?.format).toBe('bech32');
-      expect(res.normalized).toBe(validBb1.toLowerCase());
     });
 
     it('rejects a bb1 address with a corrupted checksum', () => {
@@ -115,37 +124,25 @@ describe('handleValidateAddress', () => {
     });
   });
 
-  describe('Cosmos-prefixed (cosmos1) addresses', () => {
-    // Valid cosmos1 encoding of 20 zero bytes
+  describe('non-BitBadges bech32 prefixes are not recognized', () => {
+    // Valid cosmos1 encoding of 20 zero bytes — still not a BitBadges chain.
     const validCosmos1 = 'cosmos1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqnrql8a';
-
-    it('accepts a valid cosmos1 address', () => {
-      const res = handleValidateAddress({ address: validCosmos1 });
-      expect(res.valid).toBe(true);
-      expect(res.chain).toBe('cosmos');
-      expect(res.details?.prefix).toBe('cosmos');
-    });
-
-    it('rejects a cosmos1 address with invalid checksum', () => {
-      const broken = validCosmos1.slice(0, -1) + 'z';
-      const res = handleValidateAddress({ address: broken });
-      expect(res.valid).toBe(false);
-      expect(res.chain).toBe('cosmos');
-    });
-  });
-
-  describe('generic bech32 (other-chain prefixes)', () => {
-    // osmo1 of 20 zero bytes
+    // osmo1 of 20 zero bytes — same deal.
     const validOsmo = 'osmo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmcn030';
 
-    it('accepts a valid osmo1 bech32 address via generic fallback', () => {
-      const res = handleValidateAddress({ address: validOsmo });
-      expect(res.valid).toBe(true);
-      expect(res.chain).toBe('cosmos');
-      expect(res.details?.prefix).toBe('osmo');
+    it('reports cosmos1 addresses as chain=unknown (not a BitBadges-supported chain)', () => {
+      const res = handleValidateAddress({ address: validCosmos1 });
+      expect(res.valid).toBe(false);
+      expect(res.chain).toBe('unknown');
     });
 
-    it('rejects an arbitrary non-bech32 string that has no 0x/bb1/cosmos1 prefix', () => {
+    it('reports osmo1 addresses as chain=unknown (not a BitBadges-supported chain)', () => {
+      const res = handleValidateAddress({ address: validOsmo });
+      expect(res.valid).toBe(false);
+      expect(res.chain).toBe('unknown');
+    });
+
+    it('rejects an arbitrary non-bech32 string with no supported prefix', () => {
       const res = handleValidateAddress({ address: 'foo1bar' });
       expect(res.valid).toBe(false);
       expect(res.chain).toBe('unknown');
@@ -154,8 +151,8 @@ describe('handleValidateAddress', () => {
 
   describe('output shape is consistent', () => {
     it('always returns success=true for non-throw paths (even when address is invalid)', () => {
-      // This is important for MCP tool contracts — `success` means "the tool ran",
-      // not "the address is valid". Downstream agents check `valid` separately.
+      // `success` means "the tool ran", not "the address is valid". Downstream
+      // agents check `valid` separately.
       const cases = ['', '0x', '0xdead', 'bb1broken', 'random', '   '];
       for (const addr of cases) {
         const res = handleValidateAddress({ address: addr });
