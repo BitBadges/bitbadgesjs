@@ -14,6 +14,27 @@ npm install bitbadges
 bun add bitbadges
 ```
 
+## AI agents / MCP builder
+
+If you are building with an AI agent (Claude, Cursor, etc.), the recommended path is the bundled MCP builder server — it exposes per-field tools for constructing BitBadges transactions end-to-end with built-in validation, review, and examples.
+
+The package ships three bins:
+
+- `bitbadges` / `bitbadges-cli` — interactive CLI helpers
+- `bitbadges-builder` — the stdio MCP server (entry point: `src/builder/index.ts`)
+
+Point your MCP client at it:
+
+```bash
+# Claude Code
+claude mcp add bitbadges-builder bitbadges-builder
+```
+
+Full walkthrough, tool reference, and skill instructions:
+<https://docs.bitbadges.io/for-developers/ai-agents/builder-tools>
+
+Hand-rolled transaction construction via the classes below is still supported as a low-level alternative, but the MCP builder is the expected entry point for agent-driven workflows.
+
 ## Quick Start
 
 ### 1. Initialize the API Client

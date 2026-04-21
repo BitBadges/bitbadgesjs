@@ -90,7 +90,7 @@ Collection approvals can override user-level approvals:
 
 ### v29 Approval Criteria Additions
 
-- **altTimeChecks**: Now supports \`offlineMonths\` (1-12), \`offlineDaysOfMonth\` (1-31), \`offlineWeeksOfYear\` (ISO 1-52), \`timezoneOffsetMinutes\`, and \`timezoneOffsetNegative\` in addition to the existing offlineHours/offlineDays.
+- **altTimeChecks**: Now supports \`offlineMonths\` (1-12), \`offlineDaysOfMonth\` (1-31), \`offlineWeeksOfYear\` (ISO 1-53 — ISO 8601 weeks reach 53 in long years such as 2026), \`timezoneOffsetMinutes\` (0-840; 840 = UTC+14), and \`timezoneOffsetNegative\` in addition to the existing offlineHours/offlineDays.
 - **votingChallenges**: New \`resetAfterExecution\` (bool) resets votes after a successful transfer. New \`delayAfterQuorum\` (Uint, ms) adds a timelock between quorum and execution.
 - **userApprovalSettings**: New field on approvalCriteria with \`allowedDenoms\` (string[]) and \`disableUserCoinTransfers\` (bool) to control user-level approval behavior.`,
 

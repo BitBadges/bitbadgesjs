@@ -5,20 +5,21 @@ This guide provides comprehensive information for AI agents working with the Bit
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Installation & Setup](#installation--setup)
-3. [Core Concepts](#core-concepts)
-4. [API Client Usage](#api-client-usage)
-5. [Transaction Building](#transaction-building)
-6. [Address Conversion](#address-conversion)
-7. [Module Structure](#module-structure)
-8. [Common Patterns](#common-patterns)
-9. [Best Practices](#best-practices)
+2. [MCP Builder — Recommended Path](#mcp-builder--recommended-path)
+3. [Installation & Setup](#installation--setup)
+4. [Core Concepts](#core-concepts)
+5. [API Client Usage](#api-client-usage)
+6. [Transaction Building](#transaction-building)
+7. [Address Conversion](#address-conversion)
+8. [Module Structure](#module-structure)
+9. [Common Patterns](#common-patterns)
+10. [Best Practices](#best-practices)
 
 ---
 
 ## Overview
 
-The BitBadges SDK (`bitbadgesjs-sdk`) is a TypeScript library that provides tools for interacting with the BitBadges blockchain, API, and indexer. It's designed to work with multiple BitBadges chain versions and provides type-safe interfaces for all operations.
+The BitBadges SDK (published on npm as `bitbadges`, formerly `bitbadgesjs-sdk`) is a TypeScript library that provides tools for interacting with the BitBadges blockchain, API, and indexer. It's designed to work with multiple BitBadges chain versions and provides type-safe interfaces for all operations.
 
 ### Key Features
 
@@ -46,8 +47,45 @@ The SDK is versioned to match BitBadges chain versions:
 | v21                     | 0.26.x            |
 | v22                     | 0.27.x            |
 | v23                     | 0.28.x            |
+| v27+                    | 0.34.x            |
 
-**Current SDK Version**: 0.28.0 (compatible with BitBadges v23)
+**Current SDK Version**: 0.34.3 (compatible with BitBadges v27+). The package is published as `bitbadges` on npm — the old `bitbadgesjs-sdk` name is deprecated.
+
+---
+
+## MCP Builder — Recommended Path
+
+If you are an AI agent building a BitBadges transaction, the MCP builder server is the default entry point. It is bundled with this package as the `bitbadges-builder` bin (source: `src/builder/`) and exposes per-field tools, built-in validation, a review pass, and a recipe library for common token shapes.
+
+### Why use it
+
+- One tool per field (e.g. `set_valid_token_ids`, `add_approval`, `set_permissions`) keeps prompts small and errors localized.
+- `review_collection` and `validate_transaction` run a static audit before you ship a transaction.
+- Skill instructions, example transactions, and the master prompt are all loaded as MCP resources — no need to scrape docs.
+- The builder emits `MsgUniversalUpdateCollection` throughout, which is what every in-repo example and the chain's `tokenization` module expect.
+
+### Register with your MCP client
+
+```bash
+# Claude Code
+claude mcp add bitbadges-builder bitbadges-builder
+```
+
+For other MCP clients, point at the `bitbadges-builder` executable installed alongside this package and speak stdio.
+
+### Full docs
+
+<https://docs.bitbadges.io/for-developers/ai-agents/builder-tools>
+
+### When to fall back to the classes below
+
+Use direct class-based transaction construction when:
+
+- You need a message type the builder does not yet expose.
+- You are writing server-side code that cannot run an MCP client.
+- You are building non-transaction flows (API-only usage, read paths, balance math).
+
+For every new-collection / update-collection / subscription flow, prefer the MCP builder.
 
 ---
 
@@ -57,11 +95,13 @@ The SDK is versioned to match BitBadges chain versions:
 
 ```bash
 # Using npm
-npm install bitbadgesjs-sdk@^0.28.0
+npm install bitbadges
 
 # Using bun (recommended for this repository)
-bun add bitbadgesjs-sdk@^0.28.0
+bun add bitbadges
 ```
+
+> The package was previously published as `bitbadgesjs-sdk`. If you have install commands or imports referencing that name, update them to `bitbadges`.
 
 ### Basic Import
 

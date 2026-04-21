@@ -211,7 +211,7 @@ export const addApprovalSchema = z.object({
     evmQueryChallenges: z.array(z.any()).optional().describe('EVM contract query requirements. Advanced — use search_knowledge_base for details.'),
     votingChallenges: z.array(z.any()).optional().describe('Multi-sig voting requirements. Supports resetAfterExecution (bool, resets votes after quorum met) and delayAfterQuorum (Uint ms, delay before execution). Advanced — use search_knowledge_base for details.'),
     ethSignatureChallenges: z.array(z.any()).optional().describe('ETH signature requirements. Advanced — use search_knowledge_base for details.'),
-    altTimeChecks: z.any().optional().describe('Offline time blocking. Supports offlineHours (0-23), offlineDays (0=Sun-6=Sat), offlineMonths (1-12), offlineDaysOfMonth (1-31), offlineWeeksOfYear (ISO 1-52), timezoneOffsetMinutes (Uint), timezoneOffsetNegative (bool). Advanced — use search_knowledge_base for details.'),
+    altTimeChecks: z.any().optional().describe('Offline time blocking. Supports offlineHours (0-23), offlineDays (0=Sun-6=Sat), offlineMonths (1-12), offlineDaysOfMonth (1-31), offlineWeeksOfYear (ISO 1-53 — long years like 2026 reach 53), timezoneOffsetMinutes (0-840; 840 = UTC+14 Kiribati), timezoneOffsetNegative (bool). Advanced — use search_knowledge_base for details.'),
     userApprovalSettings: z.object({
       allowedDenoms: z.array(z.string()).optional().describe('Restrict which coin denominations can be used in user-level coinTransfers.'),
       disableUserCoinTransfers: z.boolean().optional().describe('If true, disable user-level coin transfers entirely for this approval.'),
@@ -402,7 +402,7 @@ export const addApprovalTool = {
           evmQueryChallenges: { type: 'array', description: 'EVM contract query requirements. Advanced — use search_knowledge_base for details.' },
           votingChallenges: { type: 'array', description: 'Multi-sig voting requirements. Supports resetAfterExecution and delayAfterQuorum. Advanced — use search_knowledge_base for details.' },
           ethSignatureChallenges: { type: 'array', description: 'ETH signature requirements. Advanced — use search_knowledge_base for details.' },
-          altTimeChecks: { type: 'object', description: 'Offline time blocking. Supports offlineHours, offlineDays, offlineMonths, offlineDaysOfMonth, offlineWeeksOfYear, timezoneOffsetMinutes, timezoneOffsetNegative. Advanced — use search_knowledge_base for details.' },
+          altTimeChecks: { type: 'object', description: 'Offline time blocking. Supports offlineHours (0-23), offlineDays (0-6), offlineMonths (1-12), offlineDaysOfMonth (1-31), offlineWeeksOfYear (ISO 1-53), timezoneOffsetMinutes (0-840), timezoneOffsetNegative. Advanced — use search_knowledge_base for details.' },
           userApprovalSettings: {
             type: 'object',
             description: 'User-level approval settings (v29). Controls allowed denoms and user coin transfer behavior.',
