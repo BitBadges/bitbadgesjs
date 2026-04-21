@@ -218,7 +218,7 @@ const LEARNINGS: LearningEntry[] = [
   {
     topic: 'approvals',
     title: 'altTimeChecks for business-hours restrictions',
-    content: 'The altTimeChecks field on approval criteria allows denying transfers during specific UTC hours (offlineHours: 0-23), days of week (offlineDays: 0=Sunday to 6=Saturday), months (offlineMonths: 1-12), days of month (offlineDaysOfMonth: 1-31), or ISO weeks (offlineWeeksOfYear: 1-52). Use timezoneOffsetMinutes (Uint) and timezoneOffsetNegative (bool) to adjust from UTC. Works in addition to transferTimes. Useful for compliance/RWA tokens that should only trade during business hours.',
+    content: 'The altTimeChecks field on approval criteria allows denying transfers during specific UTC hours (offlineHours: 0-23), days of week (offlineDays: 0=Sunday to 6=Saturday), months (offlineMonths: 1-12), days of month (offlineDaysOfMonth: 1-31), or ISO weeks (offlineWeeksOfYear: 1-53 — ISO 8601 long years like 2026 reach week 53). Use timezoneOffsetMinutes (0-840; 840 = UTC+14 Kiribati) and timezoneOffsetNegative (bool) to adjust from UTC. Works in addition to transferTimes. Useful for compliance/RWA tokens that should only trade during business hours.',
     severity: 'tip'
   },
   {
