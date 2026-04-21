@@ -136,7 +136,7 @@ The complete transaction is a JSON object with this EXACT structure:
 
 {
   "messages": [
-    { "typeUrl": "/tokenization.MsgCreateCollection", "value": {...} }
+    { "typeUrl": "/tokenization.MsgUniversalUpdateCollection", "value": {...} }
   ],
   "memo": "Optional memo text",
   "fee": {
@@ -149,7 +149,7 @@ The complete transaction is a JSON object with this EXACT structure:
 1. All numbers as strings: "1" not 1, "0" not 0
 2. UintRange format: { "start": "1", "end": "18446744073709551615" }
 3. Max uint64: "18446744073709551615" (use for "forever" time ranges)
-4. New vs edit: use MsgCreateCollection to create a new collection, MsgUpdateCollection (with real collectionId) to edit one.`,
+4. New vs edit: use MsgUniversalUpdateCollection with collectionId: "0" to create a new collection, or with a real collectionId to edit an existing one.`,
 
   messageTypes: `## Message Types
 
@@ -157,15 +157,16 @@ The complete transaction is a JSON object with this EXACT structure:
 
 | typeUrl | Purpose |
 |---------|---------|
-| /tokenization.MsgCreateCollection | Create a new collection. Keeps \`defaultBalances\` and \`invariants\`; no \`collectionId\` and no \`updateXxxTimeline\` flags. |
-| /tokenization.MsgUpdateCollection | Edit an existing collection. Requires non-zero \`collectionId\` + \`updateXxxTimeline\` flags. Never set \`defaultBalances\` or \`invariants\` here. |
+| /tokenization.MsgUniversalUpdateCollection | Create a new collection (\`collectionId: "0"\`) or edit an existing one (real \`collectionId\` + \`updateXxxTimeline\` flags). This is the message the builder session tools emit. |
 | /tokenization.MsgCreateAddressLists | Create reusable address lists |
 | /tokenization.MsgUpdateUserApprovals | Update user-level approvals |
-| /tokenization.MsgTransferTokens | Mint or transfer tokens (commonly paired after Create for initial distribution) |
+| /tokenization.MsgTransferTokens | Mint or transfer tokens (commonly paired after the Universal Update for initial distribution) |
 
 ### Message Selection
-- **New collection**: MsgCreateCollection (optionally followed by MsgTransferTokens for initial mint)
-- **Edit existing**: MsgUpdateCollection with the real \`collectionId\` and the \`updateXxxTimeline\` flags for the fields you intend to change.`,
+- **New collection**: MsgUniversalUpdateCollection with \`collectionId: "0"\` (optionally followed by MsgTransferTokens for initial mint)
+- **Edit existing**: MsgUniversalUpdateCollection with the real \`collectionId\` and the \`updateXxxTimeline\` flags for the fields you intend to change.
+
+> MsgCreateCollection and MsgUpdateCollection are lower-level alternatives that the chain also accepts, but the builder session tools and every example in this guide emit MsgUniversalUpdateCollection. Stick to that.`,
 
   msgUniversalUpdateCollection: `## MsgUniversalUpdateCollection - Complete Structure
 
@@ -524,9 +525,9 @@ For senderChecks/recipientChecks/initiatorChecks, ONLY these fields are valid:
       { "start": "1", "end": "1" }  // Block transfers on the 1st of each month (1-31)
     ],
     "offlineWeeksOfYear": [
-      { "start": "52", "end": "52" }  // Block transfers during ISO week 52 (1-52)
+      { "start": "53", "end": "53" }  // Block transfers during ISO week 53 (valid range 1-53; long ISO years like 2026 reach 53)
     ],
-    "timezoneOffsetMinutes": "300",  // Timezone offset in minutes (e.g., 300 = UTC-5 or UTC+5)
+    "timezoneOffsetMinutes": "300",  // Timezone offset in minutes. Valid range 0-840 (840 = UTC+14, Kiribati).
     "timezoneOffsetNegative": true   // If true, offset is negative (UTC-5). If false, positive (UTC+5).
   }
 }
