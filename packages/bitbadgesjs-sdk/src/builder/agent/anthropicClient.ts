@@ -12,9 +12,36 @@
 
 import { PeerDependencyError } from './errors.js';
 
-const SUPPORTED_RANGE = '>=0.80.0 <1.0.0';
+const SUPPORTED_MIN_MAJOR = 0;
+const SUPPORTED_MIN_MINOR = 80;
+const SUPPORTED_MAX_MAJOR = 1;
+const SUPPORTED_RANGE = `>=${SUPPORTED_MIN_MAJOR}.${SUPPORTED_MIN_MINOR}.0 <${SUPPORTED_MAX_MAJOR}.0.0`;
 
 let cachedModule: any | null = null;
+
+/**
+ * Parse `x.y.z` from the loaded module's VERSION export and enforce
+ * the supported range. Runs once at module load (cachedModule boundary)
+ * so the cost is negligible. Silently skips the check if VERSION is
+ * absent or unparseable — we'd rather attempt to proceed than hard-fail
+ * on a future SDK that renames the field.
+ */
+function assertSupportedVersion(mod: any): void {
+  const raw = mod?.VERSION ?? mod?.default?.VERSION ?? mod?.Anthropic?.VERSION;
+  if (typeof raw !== 'string') return;
+  const m = raw.match(/^(\d+)\.(\d+)\.(\d+)/);
+  if (!m) return;
+  const major = Number(m[1]);
+  const minor = Number(m[2]);
+  const tooOld = major < SUPPORTED_MIN_MAJOR || (major === SUPPORTED_MIN_MAJOR && minor < SUPPORTED_MIN_MINOR);
+  const tooNew = major >= SUPPORTED_MAX_MAJOR;
+  if (tooOld || tooNew) {
+    throw new PeerDependencyError(
+      `@anthropic-ai/sdk version ${raw} detected; BitBadgesAgent requires ${SUPPORTED_RANGE}. ` +
+        `Install a compatible version, e.g. npm install @anthropic-ai/sdk@^0.82`
+    );
+  }
+}
 
 /** Loads @anthropic-ai/sdk dynamically. Throws PeerDependencyError if missing. */
 export async function loadAnthropicSdk(): Promise<any> {
@@ -26,6 +53,7 @@ export async function loadAnthropicSdk(): Promise<any> {
     // build, defeating the peer-dep design.
     const modSpecifier = '@anthropic-ai/sdk';
     const mod: any = await (Function('s', 'return import(s)') as any)(modSpecifier);
+    assertSupportedVersion(mod);
     cachedModule = mod.default ?? mod;
     return cachedModule;
   } catch (err) {

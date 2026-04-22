@@ -53,7 +53,13 @@ export class BitBadgesAgent {
   private readonly sessionStore: KVStore;
   private readonly hooks: AgentHooks;
   private client: any = null;
-  private abortController: AbortController | null = null;
+  /**
+   * Per-build abort controllers. A Set rather than a single field so
+   * concurrent `build()` calls on one agent instance (common in Express
+   * servers) don't clobber each other. `agent.abort()` aborts every
+   * in-flight build.
+   */
+  private readonly inFlightControllers = new Set<AbortController>();
 
   constructor(options: BitBadgesAgentOptions) {
     if (!options) {
@@ -110,9 +116,9 @@ export class BitBadgesAgent {
     this.hooks = options.hooks ?? {};
   }
 
-  /** Cancel the in-flight build, if any. */
+  /** Cancel every in-flight build on this agent instance. */
   abort(): void {
-    this.abortController?.abort();
+    for (const c of this.inFlightControllers) c.abort();
   }
 
   /** The resolved Anthropic model info (id + pricing) for this agent. */
@@ -135,7 +141,19 @@ export class BitBadgesAgent {
     return collectImageReferences(transaction);
   }
 
-  /** Main entry — build (or update/refine) a collection from a natural-language prompt. */
+  /**
+   * Main entry — build (or update/refine) a collection from a natural-language prompt.
+   *
+   * NOTE on prompt trust: the raw `prompt` argument is intentionally NOT
+   * run through `containsInjection`. BitBadgesAgent is BYO-key; the
+   * caller controls their own key and their own prompts, so screening
+   * would just get in the way of legitimate uses (research, fine-tuning,
+   * bots with well-formed prompts). Server-side consumers that expose
+   * this agent to untrusted users (e.g. the BitBadges indexer) apply
+   * `containsInjection` at their trust boundary before calling
+   * `build()`. Community-skill text coming from third parties IS
+   * sanitized here — see `prompt.ts` `fetchCommunitySkillsSection`.
+   */
   async build(prompt: string, options?: BuildOptions): Promise<BuildResult> {
     if (!prompt || typeof prompt !== 'string') {
       throw new BitBadgesAgentError('`prompt` is required and must be a string', 'INVALID_PROMPT');
@@ -145,9 +163,11 @@ export class BitBadgesAgent {
     const mode: BuildMode = options?.mode ?? this.options.defaultMode ?? 'create';
     const sessionId = options?.sessionId ?? `agent-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-    // Build-level abort wraps caller's signal (if any)
+    // Per-build abort controller — tracked in the inFlightControllers
+    // set so agent.abort() can cancel every concurrent build without
+    // the last-writer-wins race a single instance field would create.
     const abortController = new AbortController();
-    this.abortController = abortController;
+    this.inFlightControllers.add(abortController);
     const signal = abortController.signal;
     const callerSignal = options?.abortSignal;
     if (callerSignal) {
@@ -155,6 +175,21 @@ export class BitBadgesAgent {
       else callerSignal.addEventListener('abort', () => abortController.abort(), { once: true });
     }
 
+    try {
+      return await this.runBuild(prompt, options, sessionId, mode, creatorAddress, signal);
+    } finally {
+      this.inFlightControllers.delete(abortController);
+    }
+  }
+
+  private async runBuild(
+    prompt: string,
+    options: BuildOptions | undefined,
+    sessionId: string,
+    mode: BuildMode,
+    creatorAddress: string,
+    signal: AbortSignal
+  ): Promise<BuildResult> {
     // Resolve Anthropic client lazily — supports OAuth token, API key, or a pre-built client.
     this.client ??= await getAnthropicClient({
       client: this.options.anthropicClient,
@@ -234,8 +269,10 @@ export class BitBadgesAgent {
     let totalCostUsd = loopResult.totalCostUsd;
 
     // --- Extract current transaction from the SDK session ---
-    const currentTransaction = (await handleGetTransaction({ sessionId } as any)).transaction ?? (await handleGetTransaction({ sessionId } as any));
-    let transaction = currentTransaction?.transaction ?? currentTransaction;
+    // Single call — the handler's result may wrap the tx (`{ transaction }`)
+    // or return it directly; handle both without invoking twice.
+    const txResponse: any = await handleGetTransaction({ sessionId } as any);
+    let transaction = txResponse?.transaction ?? txResponse;
 
     // --- Validation gate (unless off) ---
     const strictness: ValidationStrictness = this.options.validation ?? DEFAULTS.validation;
