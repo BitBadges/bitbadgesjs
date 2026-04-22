@@ -257,6 +257,11 @@ export class Map<T extends NumberType> extends BaseNumberTypeClass<Map<T>> imple
 }
 
 /**
+ * @deprecated The chain's `x/maps` module was removed in bitbadgeschain
+ * v30 (commit `858870de`, 2026-04-20). Any transaction built with this
+ * message will be rejected at routing by any v30+ node. This class will
+ * be removed in the next major SDK release. See backlog #0297.
+ *
  * @category Transactions
  */
 export class MsgCreateMap<T extends NumberType> extends BaseNumberTypeClass<MsgCreateMap<T>> implements iMsgCreateMap<T> {
@@ -301,6 +306,11 @@ export class MsgCreateMap<T extends NumberType> extends BaseNumberTypeClass<MsgC
 }
 
 /**
+ * @deprecated The chain's `x/maps` module was removed in bitbadgeschain
+ * v30 (commit `858870de`, 2026-04-20). Any transaction built with this
+ * message will be rejected at routing by any v30+ node. This class will
+ * be removed in the next major SDK release. See backlog #0297.
+ *
  * @category Transactions
  */
 export class MsgUpdateMap<T extends NumberType> extends BaseNumberTypeClass<MsgUpdateMap<T>> implements iMsgUpdateMap<T> {
@@ -342,6 +352,11 @@ export class MsgUpdateMap<T extends NumberType> extends BaseNumberTypeClass<MsgU
 }
 
 /**
+ * @deprecated The chain's `x/maps` module was removed in bitbadgeschain
+ * v30 (commit `858870de`, 2026-04-20). Any transaction built with this
+ * message will be rejected at routing by any v30+ node. This class will
+ * be removed in the next major SDK release. See backlog #0297.
+ *
  * @category Transactions
  */
 export class MsgDeleteMap extends CustomTypeClass<MsgDeleteMap> implements iMsgDeleteMap {
@@ -360,6 +375,11 @@ export class MsgDeleteMap extends CustomTypeClass<MsgDeleteMap> implements iMsgD
 }
 
 /**
+ * @deprecated The chain's `x/maps` module was removed in bitbadgeschain
+ * v30 (commit `858870de`, 2026-04-20). Any transaction built with this
+ * message will be rejected at routing by any v30+ node. This class will
+ * be removed in the next major SDK release. See backlog #0297.
+ *
  * @category Transactions
  */
 export class MsgSetValue extends CustomTypeClass<MsgSetValue> implements iMsgSetValue {
