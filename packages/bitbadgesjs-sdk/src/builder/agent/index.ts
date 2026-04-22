@@ -18,6 +18,11 @@ export { MemoryStore, FileStore, type KVStore, type KVStoreSetOptions, type File
 export { substituteImages, collectImageReferences, type ImageMap } from './images.js';
 export { MODELS, resolveModel, computeCostUsd } from './models.js';
 export {
+  createBitBadgesCommunitySkillsFetcher,
+  type BitBadgesCommunitySkillsFetcherOptions
+} from './communitySkills.js';
+export { getAllSkillInstructions, type SkillInstruction } from '../resources/skillInstructions.js';
+export {
   BitBadgesAgentError,
   ValidationFailedError,
   QuotaExceededError,

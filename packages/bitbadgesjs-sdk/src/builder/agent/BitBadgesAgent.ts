@@ -14,12 +14,12 @@
  */
 
 import { handleGetTransaction } from '../tools/index.js';
-import { getAllSkillInstructions } from '../resources/skillInstructions.js';
+import { getAllSkillInstructions, type SkillInstruction } from '../resources/skillInstructions.js';
 import { getAnthropicClient } from './anthropicClient.js';
 import { AbortedError, BitBadgesAgentError, QuotaExceededError, ValidationFailedError } from './errors.js';
 import { substituteImages, collectImageReferences, type ImageMap } from './images.js';
 import { resolveModel, type ModelInfo } from './models.js';
-import { assemblePromptParts, buildFixPrompt, buildSystemPrompt, getSystemPromptHash } from './prompt.js';
+import { assemblePromptParts, assembleExportPrompt, buildFixPrompt, buildSystemPrompt, getSystemPromptHash } from './prompt.js';
 import { MemoryStore, type KVStore } from './sessionStore.js';
 import { createAgentToolRegistry, type AgentToolRegistry } from './toolAdapter.js';
 import { runAgentLoop } from './loop.js';
@@ -114,6 +114,26 @@ export class BitBadgesAgent {
     });
     this.sessionStore = options.sessionStore ?? new MemoryStore();
     this.hooks = options.hooks ?? {};
+
+    // One-time construction-time warning: if the configured skill set
+    // includes any skill whose instructions reference on-chain collection
+    // IDs (e.g. smart-token → collections 42 / 87) AND no bitbadgesApiKey
+    // is configured, the agent won't be able to call query_collection to
+    // fetch those live examples. The build still runs, but the LLM loses
+    // a useful grounding signal.
+    if (!resolvedBitbadgesApiKey && options.skills && options.skills.length > 0) {
+      const allSkills = getAllSkillInstructions();
+      const skillsWithRefs = allSkills.filter(
+        (s) => options.skills!.includes(s.id) && (s.referenceCollectionIds?.length ?? 0) > 0
+      );
+      if (skillsWithRefs.length > 0 && options.debug) {
+        console.warn(
+          `[BitBadgesAgent] Skills ${skillsWithRefs.map((s) => s.id).join(', ')} reference on-chain collections ` +
+            `but no bitbadgesApiKey is configured. query_collection calls will fail mid-loop. ` +
+            `Set bitbadgesApiKey or BITBADGES_API_KEY env to enable.`
+        );
+      }
+    }
   }
 
   /** Cancel every in-flight build on this agent instance. */
@@ -139,6 +159,76 @@ export class BitBadgesAgent {
   /** Helper — list IMAGE_N tokens referenced in a transaction. */
   collectImageReferences(transaction: any): string[] {
     return collectImageReferences(transaction);
+  }
+
+  /**
+   * List every skill available to this agent. Respects the
+   * constructor's `skills` whitelist if one was set — returns only
+   * the allowed subset. Zero network, synchronous.
+   *
+   * Useful for building a skill picker UI or logging what's on offer.
+   */
+  listSkills(): SkillInstruction[] {
+    const all = getAllSkillInstructions();
+    if (!this.options.skills || this.options.skills.length === 0) return all;
+    const allowed = new Set(this.options.skills);
+    return all.filter((s) => allowed.has(s.id));
+  }
+
+  /**
+   * Look up a single skill by id. Returns `null` when the id isn't
+   * recognized (or isn't allowed by the constructor whitelist).
+   */
+  describeSkill(id: string): SkillInstruction | null {
+    if (this.options.skills && this.options.skills.length > 0) {
+      if (!this.options.skills.includes(id)) return null;
+    }
+    return getAllSkillInstructions().find((s) => s.id === id) ?? null;
+  }
+
+  /**
+   * Assemble a one-shot prompt suitable for pasting into a raw LLM
+   * UI (Claude.ai, ChatGPT, Gemini) that has no BitBadges tools
+   * available. The returned string combines the export-mode system
+   * prompt — which carries the full Output Format JSON spec — with
+   * the assembled user message, so the model can emit the final
+   * transaction JSON directly.
+   *
+   * Same inputs as `build()`. No Anthropic call is made.
+   */
+  async exportPrompt(
+    prompt: string,
+    options?: BuildOptions
+  ): Promise<{ prompt: string; communitySkillsIncluded: string[] }> {
+    if (!prompt || typeof prompt !== 'string') {
+      throw new BitBadgesAgentError('`prompt` is required and must be a string', 'INVALID_PROMPT');
+    }
+    const creatorAddress =
+      options?.creatorAddress ?? this.options.defaultCreatorAddress ?? 'bb1examplecreator000000000000000000000000';
+    const mode: BuildMode = options?.mode ?? this.options.defaultMode ?? 'create';
+    const effectiveSkills = this.options.skills
+      ? (options?.selectedSkills ?? []).filter((s) => this.options.skills!.includes(s))
+      : (options?.selectedSkills ?? []);
+
+    return assembleExportPrompt(
+      {
+        prompt,
+        creatorAddress,
+        selectedSkills: effectiveSkills,
+        promptSkillIds: options?.promptSkillIds ?? [],
+        contextHelpers: options?.contextHelpers,
+        metadata: options?.metadata,
+        availableImagePlaceholders: options?.availableImagePlaceholders,
+        isRefinement: mode === 'refine',
+        isUpdate: mode === 'update',
+        existingCollectionId: options?.existingCollectionId,
+        sessionId: options?.sessionId,
+        originalPrompt: options?.originalPrompt,
+        priorRefinePrompts: options?.priorRefinePrompts,
+        diffLog: options?.diffLog
+      },
+      { communitySkillsFetcher: this.options.communitySkillsFetcher }
+    );
   }
 
   /**
@@ -202,9 +292,25 @@ export class BitBadgesAgent {
     const hooks: AgentHooks = { ...this.hooks, ...(options?.hooks ?? {}) };
     const debug = !!this.options.debug;
 
+    const requestedSkills = options?.selectedSkills ?? [];
     const effectiveSkills = this.options.skills
-      ? (options?.selectedSkills ?? []).filter((s) => this.options.skills!.includes(s))
-      : (options?.selectedSkills ?? []);
+      ? requestedSkills.filter((s) => this.options.skills!.includes(s))
+      : requestedSkills;
+
+    // Unknown-skill warning — surface only in debug mode so we don't
+    // spam production logs for callers passing arbitrary tags. No
+    // throw: unknown IDs drop silently (getSkillContent returns null
+    // and the section ends up empty), matching legacy behavior.
+    if (debug && requestedSkills.length > 0) {
+      const validIds = new Set(getAllSkillInstructions().map((s) => s.id));
+      const unknown = requestedSkills.filter((s) => !validIds.has(s));
+      if (unknown.length > 0) {
+        console.warn(
+          `[BitBadgesAgent] Unknown selectedSkills dropped: ${unknown.join(', ')}. ` +
+            `Valid skills: ${[...validIds].sort().join(', ')}`
+        );
+      }
+    }
 
     // Load any prior conversation from the session store (for refinement across HTTP boundaries)
     let existingMessages: any[] | undefined;
