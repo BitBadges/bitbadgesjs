@@ -18,7 +18,7 @@ import { handleGetTransaction } from '../tools/index.js';
 import { getOrCreateSession } from '../session/sessionState.js';
 import { getAllSkillInstructions, type SkillInstruction } from '../resources/skillInstructions.js';
 import { getAnthropicClient } from './anthropicClient.js';
-import { AbortedError, BitBadgesBuilderAgentError, QuotaExceededError, ValidationFailedError } from './errors.js';
+import { AbortedError, BitBadgesBuilderAgentError, ValidationFailedError } from './errors.js';
 import { containsInjection } from './sanitize.js';
 import { substituteImages, collectImageReferences, type ImageMap } from './images.js';
 import { resolveModel, type ModelInfo } from './models.js';
@@ -452,30 +452,22 @@ export class BitBadgesBuilderAgent {
       // Fold the inference LLM call into the caller's token budget via
       // onTokenUsage. Round 0 signals "pre-build inference"; the
       // indexer's ledger sums inputTokens + outputTokens uniformly so
-      // this keeps billing consistent with a normal round.
+      // this keeps billing consistent with a normal round. Errors
+      // propagate unchanged — the indexer's TokenLedger throws its
+      // own error class and callers `instanceof`-check against it.
       if (inferenceResult.tokenUsage && hooks?.onTokenUsage) {
-        try {
-          await hooks.onTokenUsage({
-            inputTokens: inferenceResult.tokenUsage.inputTokens,
-            outputTokens: inferenceResult.tokenUsage.outputTokens,
-            cacheCreationTokens: inferenceResult.tokenUsage.cacheCreationTokens,
-            cacheReadTokens: inferenceResult.tokenUsage.cacheReadTokens,
-            round: 0,
-            cumulativeTokens: inferenceResult.tokenUsage.inputTokens + inferenceResult.tokenUsage.outputTokens,
-            cumulativeCacheCreationTokens: inferenceResult.tokenUsage.cacheCreationTokens,
-            cumulativeCacheReadTokens: inferenceResult.tokenUsage.cacheReadTokens,
-            cumulativeCostUsd: inferenceResult.tokenUsage.costUsd,
-            model: inferenceResult.tokenUsage.model
-          });
-        } catch {
-          // If a quota-enforcing hook throws here, propagate so the
-          // caller sees the budget overrun before we burn more tokens
-          // on the main build.
-          throw new QuotaExceededError(
-            inferenceResult.tokenUsage.inputTokens + inferenceResult.tokenUsage.outputTokens,
-            this.options.maxTokensPerBuild ?? DEFAULTS.maxTokensPerBuild
-          );
-        }
+        await hooks.onTokenUsage({
+          inputTokens: inferenceResult.tokenUsage.inputTokens,
+          outputTokens: inferenceResult.tokenUsage.outputTokens,
+          cacheCreationTokens: inferenceResult.tokenUsage.cacheCreationTokens,
+          cacheReadTokens: inferenceResult.tokenUsage.cacheReadTokens,
+          round: 0,
+          cumulativeTokens: inferenceResult.tokenUsage.inputTokens + inferenceResult.tokenUsage.outputTokens,
+          cumulativeCacheCreationTokens: inferenceResult.tokenUsage.cacheCreationTokens,
+          cumulativeCacheReadTokens: inferenceResult.tokenUsage.cacheReadTokens,
+          cumulativeCostUsd: inferenceResult.tokenUsage.costUsd,
+          model: inferenceResult.tokenUsage.model
+        });
       }
 
       if (hooks?.onLog) {

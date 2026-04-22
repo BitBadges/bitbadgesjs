@@ -223,8 +223,15 @@ export function parseInferenceResponse(
   allowedIds: Set<string>
 ): { tokenType: string | null; confidence: 'high' | 'low' | null; reasoning?: string } {
   const trimmed = raw.trim();
-  // Claude may wrap the JSON in ```json fences despite instructions; strip once.
-  const unfenced = trimmed.replace(/^```(?:json)?\s*|\s*```$/g, '').trim();
+  // Claude may wrap the JSON in ```json fences despite instructions;
+  // strip once. Split into two anchored replaces + trim rather than
+  // one alternation with `\s*` — avoids the polynomial-regex-on-
+  // uncontrolled-input footgun CodeQL flagged.
+  let unfenced = trimmed;
+  if (unfenced.startsWith('```')) {
+    unfenced = unfenced.replace(/^```(?:json)?/, '').trimStart();
+    unfenced = unfenced.replace(/```$/, '').trimEnd();
+  }
   let obj: any;
   try {
     obj = JSON.parse(unfenced);
