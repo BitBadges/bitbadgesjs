@@ -1250,7 +1250,7 @@ paths:
               $ref: '#/components/schemas/iCreateDynamicDataStorePayload'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
     put:
       operationId: updateDynamicDataStore
       summary: Update Dynamic Data Store
@@ -1296,7 +1296,7 @@ paths:
               $ref: '#/components/schemas/iUpdateDynamicDataStorePayload'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
     delete:
       operationId: deleteDynamicDataStore
       summary: Delete Dynamic Data Store
@@ -1343,7 +1343,7 @@ paths:
               $ref: '#/components/schemas/iDeleteDynamicDataStorePayload'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
   /application/{applicationId}:
     get:
       operationId: getApplication
@@ -4696,7 +4696,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /api/{version}/pools/byDenom:
     get:
@@ -4742,7 +4742,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /api/{version}/pools/byAssets:
     get:
@@ -4788,7 +4788,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /api/{version}/pools/{poolId}:
     get:
@@ -4839,7 +4839,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /api/{version}/swaps/estimate:
     post:
@@ -4884,7 +4884,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /api/{version}/assetPairs:
     get:
@@ -4930,7 +4930,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /api/{version}/assetPairs/topGainers:
     get:
@@ -4976,7 +4976,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /api/{version}/assetPairs/topLosers:
     get:
@@ -5022,7 +5022,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /api/{version}/assetPairs/highestVolume:
     get:
@@ -5068,7 +5068,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /api/{version}/assetPairs/priceSorted:
     get:
@@ -5114,7 +5114,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /api/{version}/assetPairs/weeklyTopGainers:
     get:
@@ -5160,7 +5160,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /api/{version}/assetPairs/weeklyTopLosers:
     get:
@@ -5206,7 +5206,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /api/{version}/assetPairs/search:
     get:
@@ -5252,7 +5252,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /api/{version}/assetPairs/byDenoms:
     post:
@@ -5297,7 +5297,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /swapActivities:
     get:
@@ -5350,7 +5350,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /onChainDynamicStore/{storeId}:
     get:
@@ -5395,7 +5395,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /onChainDynamicStores/by-creator/{address}:
     get:
@@ -5440,7 +5440,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /onChainDynamicStore/{storeId}/value/{address}:
     get:
@@ -5491,7 +5491,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /onChainDynamicStore/{storeId}/values:
     get:
@@ -5553,7 +5553,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   # /merkleProofInfo:
   #   post:
