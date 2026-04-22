@@ -167,7 +167,20 @@ export interface ToolExecutionContext {
   callerAddress: string;
 }
 
-/** Hook callbacks — all async/best-effort; rejections are swallowed so hooks can't hang a build. */
+/**
+ * Hook callbacks.
+ *
+ * `onTokenUsage` is **load-bearing**: it is awaited, and any thrown
+ * error or rejected Promise propagates out of `agent.build()`. This
+ * is how consumers enforce per-build quotas — throw from
+ * `onTokenUsage` when the caller's budget is exhausted and the loop
+ * aborts cleanly.
+ *
+ * The other three hooks (`onToolCall`, `onStatusUpdate`,
+ * `onCompletion`) are observability-only — they run fire-and-forget;
+ * rejections are swallowed so a misbehaving logger can't hang a
+ * build.
+ */
 export interface AgentHooks {
   onTokenUsage?: (usage: TokenUsage) => void | Promise<void>;
   onToolCall?: (event: ToolCallEvent) => void | Promise<void>;

@@ -210,14 +210,22 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
       totalTokens += roundTokens;
       totalCostUsd += computeCostUsd(inputTokens, outputTokens, model);
 
-      fireHook(hooks?.onTokenUsage, {
-        inputTokens,
-        outputTokens,
-        round,
-        cumulativeTokens: totalTokens,
-        cumulativeCostUsd: totalCostUsd,
-        model: model.id
-      });
+      // onTokenUsage is LOAD-BEARING (not fire-and-forget). Consumers use
+      // it to enforce per-build quotas — e.g. the BitBadges indexer's
+      // TokenLedger throws out of here when cumulative scaled usage
+      // crosses the user's budget. Awaited + throws propagate. Other
+      // hooks (onToolCall, onStatusUpdate, onCompletion) stay
+      // fire-and-forget because they're observability-only.
+      if (hooks?.onTokenUsage) {
+        await hooks.onTokenUsage({
+          inputTokens,
+          outputTokens,
+          round,
+          cumulativeTokens: totalTokens,
+          cumulativeCostUsd: totalCostUsd,
+          model: model.id
+        });
+      }
 
       if (totalTokens > maxTokensPerBuild) {
         throw new QuotaExceededError(totalTokens, maxTokensPerBuild);
