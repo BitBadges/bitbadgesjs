@@ -1,138 +1,66 @@
 /**
- * Address conversion utilities for the MCP builder.
- *
- * Thin adapter that maps the builder's historical names onto the SDK's
- * canonical `@category Address Utils` exports from
- * `src/address-converter/converter.ts`. No duplicated bech32 plumbing
- * lives in this file anymore.
- *
- * Behaviour shifts versus the pre-adapter implementation (see backlog
- * #0280 — all corrections):
- *
- *   1. Mixed-case `0x` addresses with invalid EIP-55 checksums are now
- *      rejected — matching chain and frontend behaviour.
- *   2. `bbvaloper1...` validator addresses pass through `ensureBb1`
- *      unchanged instead of being dropped/mangled.
- *   3. 32-byte module-derived `bb1` addresses round-trip through
- *      `toEthAddress`/`cosmosToEth` as a non-standard 64-char `0x`
- *      string instead of throwing. The canonical `convertToEthAddress`
- *      path hex-encodes the full bech32 payload, so callers that
- *      previously caught the throw now see a well-formed but
- *      longer-than-20-byte `0x...` value — use `validateAddress` /
- *      `isModuleDerived` if you need to reject it explicitly.
- *   4. `ethToCosmos` (alias of `mustConvertToBitBadgesAddress`) is now
- *      idempotent: passing a valid `bb1...` address returns it
- *      unchanged. The previous implementation threw on any non-`0x`
- *      input. Consumers that relied on `ethToCosmos` as an ETH-only
- *      validator should switch to `validateAddress` or an explicit
- *      `0x` prefix check.
+ * Address conversion utilities for BitBadges
+ * Converts between ETH (0x) and BitBadges (bb1) address formats
  */
-import { bech32 } from 'bech32';
 
-import {
-  convertToBitBadgesAddress,
-  convertToEthAddress,
-  getChainForAddress,
-  isAddressValid,
-  mustConvertToBitBadgesAddress,
-  mustConvertToEthAddress
-} from '../../address-converter/converter.js';
-import { SupportedChain } from '../../common/types.js';
+import { bech32 } from 'bech32';
+import crypto from 'crypto';
 
 const BITBADGES_PREFIX = 'bb';
 
-const PASSTHROUGH_SPECIALS = new Set(['Mint', 'All', 'None', 'Total', 'AllWithMint']);
-
-function isSpecialAddressAlias(address: string): boolean {
-  return (
-    PASSTHROUGH_SPECIALS.has(address) ||
-    address.startsWith('!') ||
-    address.startsWith('AllWithout') ||
-    address.startsWith('bbvaloper')
-  );
+/**
+ * Check if a string is a valid hex string
+ */
+function isHex(str: string): boolean {
+  return /^[0-9a-fA-F]+$/.test(str);
 }
 
-/** True when the bech32 payload under a `bb1...` address is 32 bytes
- *  (module-derived alias address) rather than the standard 20.
+/**
+ * Convert Ethereum address (0x) to BitBadges address (bb1)
  */
-function isModuleDerivedBb1(address: string): boolean {
+export function ethToCosmos(ethAddress: string): string {
+  if (!ethAddress.startsWith('0x')) {
+    throw new Error('Invalid ETH address: must start with 0x');
+  }
+
+  const hex = ethAddress.slice(2);
+  if (hex.length !== 40 || !isHex(hex)) {
+    throw new Error('Invalid ETH address: must be 40 hex characters after 0x');
+  }
+
+  const bytes = Buffer.from(hex, 'hex');
+  const words = bech32.toWords(bytes);
+  return bech32.encode(BITBADGES_PREFIX, words);
+}
+
+/**
+ * Convert BitBadges address (bb1) to Ethereum address (0x)
+ */
+export function cosmosToEth(cosmosAddress: string): string {
+  if (!cosmosAddress.startsWith(BITBADGES_PREFIX + '1')) {
+    throw new Error(`Invalid BitBadges address: must start with ${BITBADGES_PREFIX}1`);
+  }
+
   try {
-    const decoded = bech32.decode(address);
+    const decoded = bech32.decode(cosmosAddress);
     const bytes = Buffer.from(bech32.fromWords(decoded.words));
-    return bytes.length === 32;
-  } catch {
-    return false;
+
+    // Check for 20-byte addresses (standard ETH format)
+    if (bytes.length !== 20) {
+      throw new Error('Address is not a standard 20-byte address (may be a module-derived address)');
+    }
+
+    return '0x' + bytes.toString('hex');
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Failed to decode BitBadges address');
   }
 }
 
 /**
- * Convert an Ethereum `0x...` address to a BitBadges `bb1...` address.
- * Delegates to the SDK's canonical `mustConvertToBitBadgesAddress`,
- * which enforces EIP-55 mixed-case checksums and rejects malformed hex.
- *
- * Note: idempotent for valid `bb1...` input — passing an already-
- * converted address returns it unchanged (pre-adapter impl threw).
- * Use `validateAddress` if you need strict ETH-only validation.
- */
-export const ethToCosmos = mustConvertToBitBadgesAddress;
-
-/**
- * Convert a BitBadges `bb1...` address to an Ethereum `0x...` address.
- * Delegates to the SDK's canonical `mustConvertToEthAddress`.
- *
- * Throws when the input is not a supported bech32/hex address.
- *
- * For 32-byte module-derived `bb1` payloads the canonical converter
- * hex-encodes the full payload rather than throwing — callers receive
- * a non-standard 64-char `0x...` string. Use `validateAddress` and
- * inspect `isModuleDerived` when a strict 20-byte contract is required.
- */
-export const cosmosToEth = mustConvertToEthAddress;
-
-/**
- * Convert any supported address to `bb1...` form. Throws on
- * unconvertible input. Delegates to the SDK canonical converter.
- *
- * Idempotent for valid `bb1...` input.
- */
-export const toBitBadgesAddress = mustConvertToBitBadgesAddress;
-
-/**
- * Convert any supported address to `0x...` form. Throws on
- * unconvertible input. Delegates to the SDK canonical converter.
- *
- * For 32-byte module-derived `bb1` payloads, returns a non-standard
- * 64-char `0x...` string rather than throwing (see `cosmosToEth`).
- */
-export const toEthAddress = mustConvertToEthAddress;
-
-/**
- * Ensure address is in `bb1...` form, passing through special values.
- *
- * Pass-through cases:
- *   - Empty/falsy input
- *   - Reserved aliases: `Mint`, `All`, `None`, `Total`, `AllWithMint`
- *   - Negation prefix: `!...`
- *   - `AllWithout*` variants
- *   - Validator addresses: `bbvaloper...`
- *
- * Conversion cases:
- *   - 0x / supported non-bb1 inputs are converted via
- *     `convertToBitBadgesAddress`. If conversion fails (returns empty),
- *     the original string is returned so downstream validation can
- *     surface the bad input.
- */
-export function ensureBb1(address: string): string {
-  if (!address) return address;
-  if (isSpecialAddressAlias(address)) return address;
-  if (address.startsWith(BITBADGES_PREFIX + '1')) return address;
-  const converted = convertToBitBadgesAddress(address);
-  return converted || address;
-}
-
-/**
- * Result shape for `validateAddress`. Kept for backward compatibility
- * with existing consumers in the builder subtree.
+ * Validate an address and return its type
  */
 export interface AddressValidationResult {
   valid: boolean;
@@ -142,56 +70,113 @@ export interface AddressValidationResult {
   error?: string;
 }
 
-function chainToString(chain: SupportedChain): 'eth' | 'cosmos' | 'unknown' {
-  if (chain === SupportedChain.ETH) return 'eth';
-  if (chain === SupportedChain.COSMOS) return 'cosmos';
-  return 'unknown';
-}
-
-/**
- * Validate an address and report the detected chain.
- *
- * Uses the SDK's canonical `isAddressValid` + `getChainForAddress`, so
- * all builder tools inherit EIP-55 checksum enforcement and any future
- * canonical rules for free.
- */
 export function validateAddress(address: string): AddressValidationResult {
-  const chain = getChainForAddress(address);
-  const chainStr = chainToString(chain);
-  const valid = !!address && isAddressValid(address, chain);
-
-  if (!valid) {
-    const error =
-      chainStr === 'unknown'
-        ? `Unknown address format: must start with 0x (ETH) or ${BITBADGES_PREFIX}1 (BitBadges)`
-        : `Invalid ${chainStr} address: ${address}`;
-    return { valid: false, chain: chainStr, normalized: address, isModuleDerived: false, error };
+  // Check ETH format
+  if (address.startsWith('0x')) {
+    const hex = address.slice(2);
+    if (hex.length === 40 && isHex(hex)) {
+      return {
+        valid: true,
+        chain: 'eth',
+        normalized: address.toLowerCase(),
+        isModuleDerived: false
+      };
+    }
+    return {
+      valid: false,
+      chain: 'unknown',
+      normalized: address,
+      isModuleDerived: false,
+      error: 'Invalid ETH address: must be 40 hex characters after 0x'
+    };
   }
 
-  const isModuleDerived = chainStr === 'cosmos' && isModuleDerivedBb1(address);
-  const normalized =
-    chainStr === 'eth'
-      ? address.toLowerCase()
-      : convertToBitBadgesAddress(address) || address;
+  // Check BitBadges (Cosmos) format
+  if (address.startsWith(BITBADGES_PREFIX + '1')) {
+    try {
+      const decoded = bech32.decode(address);
+      const bytes = Buffer.from(bech32.fromWords(decoded.words));
 
-  return { valid: true, chain: chainStr, normalized, isModuleDerived };
+      // 20-byte = standard address, 32-byte = module-derived
+      const isModuleDerived = bytes.length === 32;
+
+      return {
+        valid: true,
+        chain: 'cosmos',
+        normalized: address.toLowerCase(),
+        isModuleDerived
+      };
+    } catch {
+      return {
+        valid: false,
+        chain: 'unknown',
+        normalized: address,
+        isModuleDerived: false,
+        error: 'Invalid BitBadges address: failed to decode bech32'
+      };
+    }
+  }
+
+  return {
+    valid: false,
+    chain: 'unknown',
+    normalized: address,
+    isModuleDerived: false,
+    error: 'Unknown address format: must start with 0x (ETH) or bb1 (BitBadges)'
+  };
 }
 
 /**
- * Convert 0x-style addresses within a compound list-id string.
- *
- * Handles shapes like:
- *   - `0x742d...`
- *   - `!Mint:0x742d...`
- *   - `!(AllWithout:0x742d...:bb1abc...)`
- *
- * Splits on `:`, normalizes each 0x-prefixed segment via `ensureBb1`,
- * and reassembles — preserving the optional `!` prefix and surrounding
- * parentheses.
+ * Convert any address to BitBadges format
+ * If already bb1, returns as-is
+ * If 0x, converts to bb1
+ */
+export function toBitBadgesAddress(address: string): string {
+  if (address.startsWith(BITBADGES_PREFIX + '1')) {
+    return address;
+  }
+  if (address.startsWith('0x')) {
+    return ethToCosmos(address);
+  }
+  throw new Error('Unknown address format');
+}
+
+/**
+ * Ensure address is in bb1... format, passing through special values.
+ * - If already bb1..., returns as-is
+ * - If 0x..., converts to bb1...
+ * - Special values (Mint, All, None, Total, !, AllWithout*) pass through unchanged
+ * - Empty/falsy values pass through unchanged
+ */
+export function ensureBb1(address: string): string {
+  if (!address) return address;
+
+  // Pass through special/reserved list values
+  if (['Mint', 'All', 'None', 'Total', 'AllWithMint'].includes(address) ||
+      address.startsWith('!') ||
+      address.startsWith('AllWithout') ||
+      address.startsWith(BITBADGES_PREFIX + '1')) {
+    return address;
+  }
+
+  // Convert 0x to bb1
+  if (address.startsWith('0x') && address.length === 42) {
+    return ethToCosmos(address);
+  }
+
+  // Unknown format — return as-is, let downstream validation catch it
+  return address;
+}
+
+/**
+ * Convert 0x addresses within a compound list ID string.
+ * Handles formats like "0x742d...", "!Mint:0x742d...", "AllWithout:0x742d...:bb1abc..."
+ * Splits on ":", converts each part that looks like an address, reassembles.
  */
 export function ensureBb1ListId(listId: string): string {
   if (!listId) return listId;
 
+  // Handle ! prefix
   let prefix = '';
   let rest = listId;
   if (rest.startsWith('!')) {
@@ -199,6 +184,7 @@ export function ensureBb1ListId(listId: string): string {
     rest = rest.substring(1);
   }
 
+  // Handle parentheses
   let parenPrefix = '';
   let parenSuffix = '';
   if (rest.startsWith('(') && rest.endsWith(')')) {
@@ -207,7 +193,8 @@ export function ensureBb1ListId(listId: string): string {
     rest = rest.substring(1, rest.length - 1);
   }
 
-  const parts = rest.split(':').map((part) => {
+  // Split on : and convert each part
+  const parts = rest.split(':').map(part => {
     if (part.startsWith('0x') && part.length === 42) {
       return ensureBb1(part);
     }
@@ -215,4 +202,20 @@ export function ensureBb1ListId(listId: string): string {
   });
 
   return prefix + parenPrefix + parts.join(':') + parenSuffix;
+}
+
+/**
+ * Convert any standard address to ETH format
+ * If already 0x, returns as-is
+ * If bb1 (20-byte), converts to 0x
+ * Module-derived addresses cannot be converted to ETH format
+ */
+export function toEthAddress(address: string): string {
+  if (address.startsWith('0x')) {
+    return address;
+  }
+  if (address.startsWith(BITBADGES_PREFIX + '1')) {
+    return cosmosToEth(address);
+  }
+  throw new Error('Unknown address format');
 }
