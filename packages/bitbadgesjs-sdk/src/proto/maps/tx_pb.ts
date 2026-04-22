@@ -3,6 +3,11 @@
 /* eslint-disable */
 // @ts-nocheck
 
+// DEPRECATED: The chain's x/maps module was removed in bitbadgeschain v30
+// (commit 858870de, 2026-04-20). Any transaction built with these message
+// types will be rejected at routing by any v30+ node. These types will be
+// removed in the next major SDK release. See backlog ticket #0297.
+
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { Params } from "./params_pb.js";
