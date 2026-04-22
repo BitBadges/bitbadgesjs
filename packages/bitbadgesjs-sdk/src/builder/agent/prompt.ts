@@ -314,7 +314,11 @@ export async function formatContextHelpers(ctx: any): Promise<string> {
 
 function buildSelectedSkillsSection(selectedSkills: string[], useSummariesOnly: boolean): string {
   if (selectedSkills.length === 0) return '';
-  const uniqueSkills = [...new Set(selectedSkills)];
+  // Canonicalize skill ordering so the same skill set submitted in a
+  // different order hits the same Anthropic prompt-cache key. Without
+  // the sort, N! orderings of the same skill set would each create a
+  // separate cache entry.
+  const uniqueSkills = [...new Set(selectedSkills)].sort();
 
   if (useSummariesOnly) {
     let section = '\n## Token Type Context (Reference Only)\n';
@@ -526,20 +530,52 @@ There is only ONE uploaded image. Use IMAGE_1 as the image for EVERY metadataPla
       ? `\nPrior refinement history (in chronological order):\n${ctx.priorRefinePrompts.map((p: string, i: number) => `${i + 1}. ${p}`).join('\n')}\n`
       : '';
   const diffLogSection = isRefinement && ctx.diffLog ? `\nTransaction change log (condensed diffs between versions, +added/-removed):\n${ctx.diffLog.slice(0, 8000)}\n` : '';
-  const uniqueSkills = [...new Set(selectedSkills)];
+  // Sorted for stable prompt-cache keys — see buildSelectedSkillsSection.
+  const uniqueSkills = [...new Set(selectedSkills)].sort();
 
-  const userMessage = `## Request
+  // ------------------------------------------------------------------
+  // Cache-aware user-message layout.
+  //
+  // Anthropic prompt caching reads from cache for any text that matches
+  // the same canonical prefix within the 5-minute TTL. We split the
+  // user message into two pieces so the stable "skills" chunk lives at
+  // a cache boundary, separate from the per-request tail:
+  //
+  //   stableSkills  = selectedSkillsSection + promptSkillsSection   ← cacheable
+  //   dynamicTail   = request hdr + context + metadata + refinement + prompt
+  //
+  // The loop places `cache_control: { type: 'ephemeral' }` on
+  // `stableSkills` so identical skill sets (post-sort canonicalization)
+  // hit the cache across requests. Permission constraints are
+  // intentionally in the dynamic tail because they vary per
+  // collectionId on update flows.
+  // ------------------------------------------------------------------
+  const stableSkills = `${selectedSkillsSection}${promptSkillsSection}`;
+
+  const dynamicTail = `## Request
 \`\`\`
 action: ${action}
 creator: ${creatorAddress}${collectionRef}
 skills: [${uniqueSkills.join(', ')}]
 \`\`\`
-${metadataSection}${contextSection}${selectedSkillsSection}${promptSkillsSection}${permissionConstraintsSection}
+${metadataSection}${contextSection}${permissionConstraintsSection}
 ${originalPromptSection}${priorRefineSection}${diffLogSection}
 ${isRefinement ? 'Refinement instructions' : 'Description'}:
 ${prompt}${updateNote}`;
 
-  return { systemPrompt, userMessage, communitySkillsIncluded };
+  // Legacy single-string form (backward compat for assembleExportPrompt
+  // and any caller that doesn't know about cache blocks).
+  const userMessage = stableSkills ? `${stableSkills}\n\n${dynamicTail}` : dynamicTail;
+
+  // Structured form consumed by the cache-aware agent loop.
+  const userContent: Array<{ type: 'text'; text: string; cache_control?: { type: 'ephemeral' } }> = stableSkills
+    ? [
+        { type: 'text', text: stableSkills, cache_control: { type: 'ephemeral' } },
+        { type: 'text', text: dynamicTail }
+      ]
+    : [{ type: 'text', text: dynamicTail }];
+
+  return { systemPrompt, userMessage, userContent, communitySkillsIncluded };
 }
 
 // ============================================================

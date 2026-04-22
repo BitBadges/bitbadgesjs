@@ -34,8 +34,25 @@ export function resolveModel(name: ModelName | string | undefined): ModelInfo {
   return { id: name, inputPerMTok: MODELS.opus.inputPerMTok, outputPerMTok: MODELS.opus.outputPerMTok };
 }
 
-export function computeCostUsd(inputTokens: number, outputTokens: number, model: ModelInfo): number {
+/**
+ * Anthropic prompt-cache pricing multipliers relative to regular input token cost.
+ * See https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#pricing
+ *   - cache creation (write): 1.25x base input rate
+ *   - cache read:             0.10x base input rate
+ */
+export const CACHE_WRITE_MULTIPLIER = 1.25;
+export const CACHE_READ_MULTIPLIER = 0.1;
+
+export function computeCostUsd(
+  inputTokens: number,
+  outputTokens: number,
+  model: ModelInfo,
+  cacheCreationTokens = 0,
+  cacheReadTokens = 0
+): number {
   const inCost = (inputTokens / 1_000_000) * model.inputPerMTok;
   const outCost = (outputTokens / 1_000_000) * model.outputPerMTok;
-  return inCost + outCost;
+  const cacheWriteCost = (cacheCreationTokens / 1_000_000) * model.inputPerMTok * CACHE_WRITE_MULTIPLIER;
+  const cacheReadCost = (cacheReadTokens / 1_000_000) * model.inputPerMTok * CACHE_READ_MULTIPLIER;
+  return inCost + outCost + cacheWriteCost + cacheReadCost;
 }

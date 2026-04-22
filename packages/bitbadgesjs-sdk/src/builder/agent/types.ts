@@ -28,15 +28,31 @@ export interface ModelInfo {
 
 /** Structured token usage event from the agent loop. */
 export interface TokenUsage {
-  /** Input tokens consumed this round. */
+  /** Input tokens consumed this round (excludes cached tokens). */
   inputTokens: number;
   /** Output tokens generated this round. */
   outputTokens: number;
+  /**
+   * Tokens written to Anthropic's prompt cache this round (cache miss
+   * on the stable prefix — cost ~1.25x regular input). Zero on cache
+   * hits or when caching is disabled.
+   */
+  cacheCreationTokens: number;
+  /**
+   * Tokens read from cache this round (cost ~0.1x regular input).
+   * This is where the cost savings come from; a healthy cache-hit
+   * setup has cacheReadTokens >> inputTokens on steady-state traffic.
+   */
+  cacheReadTokens: number;
   /** Which round this event fired on (0-indexed). */
   round: number;
-  /** Cumulative input+output tokens for this build. */
+  /** Cumulative input+output tokens for this build (excludes cache counters). */
   cumulativeTokens: number;
-  /** Cumulative USD cost for this build. */
+  /** Cumulative cache-creation tokens across rounds. */
+  cumulativeCacheCreationTokens: number;
+  /** Cumulative cache-read tokens across rounds. */
+  cumulativeCacheReadTokens: number;
+  /** Cumulative USD cost for this build (includes cache multipliers). */
   cumulativeCostUsd: number;
   /** Model used. */
   model: string;
@@ -101,7 +117,20 @@ export interface PromptContext {
 
 export interface PromptParts {
   systemPrompt: string;
+  /** Legacy single-string user message (stable + dynamic concatenated). */
   userMessage: string;
+  /**
+   * Structured user-message content blocks. The first block (when
+   * present and non-empty) is marked `cache_control: ephemeral` —
+   * this is the stable skills prefix shared across requests with the
+   * same canonical skill set. Dynamic per-request content (request
+   * header, metadata, refinement history, prompt) sits in the
+   * trailing block with no cache mark.
+   *
+   * Consumers that need raw text should read `userMessage`; the agent
+   * loop reads `userContent` to get the cache boundaries.
+   */
+  userContent: Array<{ type: 'text'; text: string; cache_control?: { type: 'ephemeral' } }>;
   communitySkillsIncluded: string[];
 }
 
@@ -196,7 +225,15 @@ export interface BuildTrace {
   toolCalls: ToolCallEvent[];
   rounds: number;
   fixRounds: number;
+  /**
+   * Cumulative input+output tokens for the build. For cache breakdowns
+   * see `cacheCreationTokens` / `cacheReadTokens`.
+   */
   tokensUsed: number;
+  /** Cumulative tokens written to Anthropic's prompt cache. */
+  cacheCreationTokens: number;
+  /** Cumulative tokens served from cache (cheap reads). */
+  cacheReadTokens: number;
   costUsd: number;
   model: string;
   systemPromptHash: string;

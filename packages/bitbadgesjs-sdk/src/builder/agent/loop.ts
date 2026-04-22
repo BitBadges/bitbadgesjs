@@ -19,6 +19,13 @@ export interface AgentLoopParams {
   client: any; // Anthropic client (peer dep).
   systemPrompt: string;
   userMessage: string;
+  /**
+   * Structured user-message content blocks with cache boundaries.
+   * When provided, the loop uses this (not `userMessage`) to send
+   * cache-marked content to Anthropic. Falls back to `userMessage`
+   * as a single unmarked text block when absent.
+   */
+  userContent?: Array<{ type: 'text'; text: string; cache_control?: { type: 'ephemeral' } }>;
   registry: AgentToolRegistry;
   sessionId: string;
   creatorAddress: string;
@@ -34,6 +41,10 @@ export interface AgentLoopParams {
   startingTokens?: number;
   /** Starting cumulative USD cost. */
   startingCostUsd?: number;
+  /** Starting cumulative cache-creation tokens (carries across fix-loop rounds). */
+  startingCacheCreationTokens?: number;
+  /** Starting cumulative cache-read tokens (carries across fix-loop rounds). */
+  startingCacheReadTokens?: number;
 }
 
 export interface AgentLoopResult {
@@ -43,6 +54,10 @@ export interface AgentLoopResult {
   rounds: number;
   totalTokens: number;
   totalCostUsd: number;
+  /** Cumulative tokens written to Anthropic's prompt cache. */
+  cacheCreationTokens: number;
+  /** Cumulative tokens served from Anthropic's prompt cache. */
+  cacheReadTokens: number;
 }
 
 const COMPRESSIBLE_TOOLS = new Set([
@@ -166,16 +181,27 @@ function fireHook(fn: ((...args: any[]) => any) | undefined, ...args: any[]) {
 
 export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopResult> {
   const {
-    client, systemPrompt, userMessage, registry, maxRounds, maxTokensPerBuild, anthropicTimeoutMs,
+    client, systemPrompt, userMessage, userContent, registry, maxRounds, maxTokensPerBuild, anthropicTimeoutMs,
     existingMessages, model, sessionId, creatorAddress, abortSignal, hooks, debug,
-    startingTokens = 0, startingCostUsd = 0
+    startingTokens = 0, startingCostUsd = 0,
+    startingCacheCreationTokens = 0, startingCacheReadTokens = 0
   } = params;
 
-  const messages: any[] = existingMessages ? [...existingMessages, { role: 'user', content: userMessage }] : [{ role: 'user', content: userMessage }];
+  // Prefer cache-aware content blocks when provided; fall back to a
+  // single-block unmarked string for legacy callers / fix-round replays.
+  const initialUserBlocks = userContent && userContent.length > 0
+    ? userContent
+    : [{ type: 'text' as const, text: userMessage }];
+
+  const messages: any[] = existingMessages
+    ? [...existingMessages, { role: 'user', content: initialUserBlocks }]
+    : [{ role: 'user', content: initialUserBlocks }];
   const toolCalls: ToolCallEvent[] = [];
   let finalText = '';
   let totalTokens = startingTokens;
   let totalCostUsd = startingCostUsd;
+  let cacheCreationTokens = startingCacheCreationTokens;
+  let cacheReadTokens = startingCacheReadTokens;
   let rounds = 0;
 
   if (debug) {
@@ -206,9 +232,15 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
       rounds++;
       const inputTokens = response.usage?.input_tokens ?? 0;
       const outputTokens = response.usage?.output_tokens ?? 0;
+      // Anthropic reports prompt-cache usage on the `usage` object.
+      // Snake-case in the raw HTTP shape; kept as-is by the SDK client.
+      const roundCacheCreation = response.usage?.cache_creation_input_tokens ?? 0;
+      const roundCacheRead = response.usage?.cache_read_input_tokens ?? 0;
       const roundTokens = inputTokens + outputTokens;
       totalTokens += roundTokens;
-      totalCostUsd += computeCostUsd(inputTokens, outputTokens, model);
+      cacheCreationTokens += roundCacheCreation;
+      cacheReadTokens += roundCacheRead;
+      totalCostUsd += computeCostUsd(inputTokens, outputTokens, model, roundCacheCreation, roundCacheRead);
 
       // onTokenUsage is LOAD-BEARING (not fire-and-forget). Consumers use
       // it to enforce per-build quotas — e.g. the BitBadges indexer's
@@ -220,8 +252,12 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
         await hooks.onTokenUsage({
           inputTokens,
           outputTokens,
+          cacheCreationTokens: roundCacheCreation,
+          cacheReadTokens: roundCacheRead,
           round,
           cumulativeTokens: totalTokens,
+          cumulativeCacheCreationTokens: cacheCreationTokens,
+          cumulativeCacheReadTokens: cacheReadTokens,
           cumulativeCostUsd: totalCostUsd,
           model: model.id
         });
@@ -232,7 +268,10 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
       }
 
       if (debug) {
-        console.error(`[bitbadges-agent] round ${round + 1}/${maxRounds} stop_reason=${response.stop_reason} tokens_in=${inputTokens} out=${outputTokens}`);
+        console.error(
+          `[bitbadges-agent] round ${round + 1}/${maxRounds} stop_reason=${response.stop_reason} ` +
+          `tokens_in=${inputTokens} out=${outputTokens} cache_write=${roundCacheCreation} cache_read=${roundCacheRead}`
+        );
       }
 
       const textParts = response.content
@@ -295,5 +334,5 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
     throw err;
   }
 
-  return { messages, toolCalls, finalText, rounds, totalTokens, totalCostUsd };
+  return { messages, toolCalls, finalText, rounds, totalTokens, totalCostUsd, cacheCreationTokens, cacheReadTokens };
 }

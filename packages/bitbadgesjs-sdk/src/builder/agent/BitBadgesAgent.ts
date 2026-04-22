@@ -250,6 +250,7 @@ export class BitBadgesAgent {
       client: this.client,
       systemPrompt: promptParts.systemPrompt,
       userMessage: promptParts.userMessage,
+      userContent: promptParts.userContent,
       registry: this.registry,
       sessionId,
       creatorAddress,
@@ -267,6 +268,8 @@ export class BitBadgesAgent {
     let fixRounds = 0;
     let totalTokens = loopResult.totalTokens;
     let totalCostUsd = loopResult.totalCostUsd;
+    let cacheCreationTokens = loopResult.cacheCreationTokens;
+    let cacheReadTokens = loopResult.cacheReadTokens;
 
     // --- Extract current transaction from the SDK session ---
     // Single call — the handler's result may wrap the tx (`{ transaction }`)
@@ -300,6 +303,8 @@ export class BitBadgesAgent {
           client: this.client,
           systemPrompt: promptParts.systemPrompt,
           userMessage: fixUserMsg,
+          // Fix-round message is dynamic error guidance — no cache value
+          // in marking it, so send as a plain string (no userContent).
           registry: this.registry,
           sessionId,
           creatorAddress,
@@ -312,11 +317,15 @@ export class BitBadgesAgent {
           hooks,
           debug,
           startingTokens: totalTokens,
-          startingCostUsd: totalCostUsd
+          startingCostUsd: totalCostUsd,
+          startingCacheCreationTokens: cacheCreationTokens,
+          startingCacheReadTokens: cacheReadTokens
         });
         rounds += loopResult.rounds;
         totalTokens = loopResult.totalTokens;
         totalCostUsd = loopResult.totalCostUsd;
+        cacheCreationTokens = loopResult.cacheCreationTokens;
+        cacheReadTokens = loopResult.cacheReadTokens;
 
         const freshTxResp = await handleGetTransaction({ sessionId } as any);
         transaction = (freshTxResp as any)?.transaction ?? freshTxResp;
@@ -354,6 +363,8 @@ export class BitBadgesAgent {
       rounds,
       fixRounds,
       tokensUsed: totalTokens,
+      cacheCreationTokens,
+      cacheReadTokens,
       costUsd: totalCostUsd,
       model: this.model.id,
       systemPromptHash
@@ -387,7 +398,10 @@ export class BitBadgesAgent {
         const msgCount = Array.isArray(this.transaction?.messages) ? this.transaction.messages.length : 0;
         const validityStr = this.valid ? 'valid' : `${this.errors.length} error${this.errors.length === 1 ? '' : 's'}`;
         const costStr = this.costUsd.toFixed(4);
-        return `BitBadgesAgent build: ${msgCount} message(s), ${validityStr}, ${this.tokensUsed.toLocaleString()} tokens, $${costStr}, ${this.rounds} round(s)${this.fixRounds ? ` + ${this.fixRounds} fix` : ''}`;
+        const cacheStr = this.trace.cacheReadTokens > 0
+          ? `, cache ${this.trace.cacheReadTokens.toLocaleString()} read / ${this.trace.cacheCreationTokens.toLocaleString()} write`
+          : '';
+        return `BitBadgesAgent build: ${msgCount} message(s), ${validityStr}, ${this.tokensUsed.toLocaleString()} tokens${cacheStr}, $${costStr}, ${this.rounds} round(s)${this.fixRounds ? ` + ${this.fixRounds} fix` : ''}`;
       }
     };
 
