@@ -21,9 +21,11 @@ export {
   WORKFLOW_UPDATE,
   WORKFLOW_REFINEMENT,
   BUILDER_SYSTEM_PROMPT,
+  BUILDER_SYSTEM_PROMPT_FOR_EXPORT,
   buildSystemPrompt,
   formatContextHelpers,
   assemblePromptParts,
+  assembleExportPrompt,
   buildFixPrompt,
   findMatchingErrorPatterns,
   getSystemPromptHash

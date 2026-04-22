@@ -263,6 +263,85 @@ export function buildSystemPrompt(mode: 'create' | 'update' | 'refine' = 'create
 
 export const BUILDER_SYSTEM_PROMPT = buildSystemPrompt('create');
 
+/**
+ * System prompt for **copy-paste to a raw LLM UI** (Claude.ai,
+ * ChatGPT, Gemini, etc.). There are no tools in that environment, so
+ * the LLM must emit the final transaction JSON directly. This prompt
+ * swaps the tool-calling workflow for an explicit Output Format
+ * section that specifies the `MsgUniversalUpdateCollection` shape +
+ * the `metadataPlaceholders` sidecar layout.
+ *
+ * Used by `assemblePromptParts(ctx, { forExport: true })` and by the
+ * indexer's `/export-prompt` route.
+ */
+export const BUILDER_SYSTEM_PROMPT_FOR_EXPORT = `You are the BitBadges AI Builder. You construct token collections using the BitBadges Builder tools. Follow the workflow below for every build.
+
+${DOMAIN_KNOWLEDGE}
+
+## Output Format
+The final output is a JSON object whose \`messages[i].value._meta.metadataPlaceholders\` holds the per-msg placeholder sidecar. The \`get_transaction\` tool returns this structure — include it as-is in your output. There is NO top-level \`metadataPlaceholders\` field; every entry lives inside the message that references its URIs.
+
+\`\`\`json
+{
+  "messages": [
+    {
+      "typeUrl": "/tokenization.MsgUniversalUpdateCollection",
+      "value": {
+        "...": "all on-chain fields",
+        "_meta": {
+          "metadataPlaceholders": {
+            "ipfs://METADATA_COLLECTION": { "name": "Collection Name", "description": "Description.", "image": "https://..." },
+            "ipfs://METADATA_TOKEN_1": { "name": "Token Name", "description": "Description.", "image": "https://..." },
+            "ipfs://METADATA_APPROVAL_<approvalId>": { "name": "Approval Name", "description": "What this approval does.", "image": "" }
+          }
+        }
+      }
+    }
+  ]
+}
+\`\`\`
+
+Rules:
+- ON-CHAIN metadata fields in messages have EXACTLY two keys: { uri, customData }.
+  Nothing else. No image, no name, no description at the proto level. This
+  applies to collectionMetadata, tokenMetadata[], approvals[].uri, and EVERY
+  PathMetadata (aliasPathsToAdd[].metadata, denomUnits[].metadata,
+  cosmosCoinWrapperPathsToAdd[].metadata).
+- Every on-chain metadata uri MUST be a placeholder of the form
+  "ipfs://METADATA_*" and MUST have a matching entry in the per-msg
+  \`value._meta.metadataPlaceholders\` sidecar of the SAME message that
+  references that URI.
+- Each sidecar entry is where image / name / description actually
+  live. These are the OFF-CHAIN fields that the auto-apply flow uploads and
+  substitutes back into the uri after deploy.
+- Collection and token placeholders: name, description, and image are required.
+- Approval placeholders: image MUST be "" (empty string); name + description
+  still required.
+- Metadata descriptions: 1-2 sentences, specific, end with periods.
+
+Images: The request will specify whether images are available. If available,
+use the listed IMAGE_N placeholders as the "image" field INSIDE
+metadataPlaceholders entries — NEVER as a field directly on on-chain
+metadata. If no images are uploaded, use the default logo URI the request
+provides inside the same sidecar entries. NEVER use IMAGE_N placeholders
+unless the request explicitly lists them as available.
+
+${SECURITY_SECTION}
+
+## Workflow
+1. UNDERSTAND: Read the request and inlined skill instructions. If the request involves features not covered by your skills, use the BitBadges domain knowledge above. Take best interpretation — do not ask clarifying questions.
+2. BUILD: Construct the full \`MsgUniversalUpdateCollection\` message body:
+   - standards, validTokenIds, invariants — collection structure
+   - collectionApprovals — one entry per approval, with approvalCriteria (payments, limits, overrides, etc.)
+   - collectionPermissions — use the locked-approvals pattern by default
+   - defaultBalances — almost always: empty balances, all auto-approve flags true
+   - collectionMetadataTimeline, tokenMetadataTimeline — descriptive content
+   - aliasPathsToAdd — for ICS20-backed smart tokens
+   - For claims: include claimConfig in merkleChallenges with plugins
+3. AUTO-MINT (if user requests minting to specific addresses): Append a MsgTransferTokens. See Auto-Mint section. Max 4 transfer messages per transaction.
+4. VERIFY: Mentally check validTokenIds covers all referenced token IDs, approval IDs are unique and descriptive, amountTrackerId is set when maxNumTransfers is non-zero, predeterminedBalances has all three required sub-fields.
+5. OUTPUT: Emit the complete transaction JSON with metadataPlaceholders sidecars. No prose, no \`\`\`json fences — just the JSON object so it can be copy-pasted directly into the BitBadges UI's Paste Transaction step.`;
+
 // ============================================================
 // Context formatting
 // ============================================================
@@ -460,7 +539,20 @@ Key:
 
 export async function assemblePromptParts(
   ctx: PromptContext,
-  options?: { communitySkillsFetcher?: CommunitySkillsFetcher; systemPromptOverride?: string; systemPromptAppend?: string }
+  options?: {
+    communitySkillsFetcher?: CommunitySkillsFetcher;
+    systemPromptOverride?: string;
+    systemPromptAppend?: string;
+    /**
+     * When true, swap the tool-calling workflow system prompt for the
+     * `BUILDER_SYSTEM_PROMPT_FOR_EXPORT` variant — same domain
+     * knowledge, but with an explicit Output Format section telling
+     * the LLM to emit the final transaction JSON directly. Used by
+     * the indexer's /export-prompt route and by the frontend's
+     * "copy the prompt into Claude.ai" path.
+     */
+    forExport?: boolean;
+  }
 ): Promise<PromptParts> {
   const {
     prompt,
@@ -511,9 +603,20 @@ There is only ONE uploaded image. Use IMAGE_1 as the image for EVERY metadataPla
     permissionConstraintsSection = await buildPermissionConstraintsSection(existingCollectionId);
   }
 
-  // System prompt — honor override, else default, then optional append
+  // System prompt selection:
+  //   1. explicit override wins (power users replacing the whole thing)
+  //   2. forExport = the no-tools variant with the Output Format section
+  //   3. otherwise = the mode-appropriate tool-calling variant
+  // systemPromptAppend is layered on top of whichever base is chosen.
   const mode: 'create' | 'update' | 'refine' = isUpdate ? 'update' : isRefinement ? 'refine' : 'create';
-  let systemPrompt = options?.systemPromptOverride ?? buildSystemPrompt(mode);
+  let systemPrompt: string;
+  if (options?.systemPromptOverride) {
+    systemPrompt = options.systemPromptOverride;
+  } else if (options?.forExport) {
+    systemPrompt = BUILDER_SYSTEM_PROMPT_FOR_EXPORT;
+  } else {
+    systemPrompt = buildSystemPrompt(mode);
+  }
   if (options?.systemPromptAppend) {
     systemPrompt = `${systemPrompt}\n\n## Additional Guidance (from consumer)\n${options.systemPromptAppend}`;
   }
@@ -635,6 +738,25 @@ export function buildFixPrompt(errors: string[], advisoryNotes: string[], round:
     `After fixing, call validate_transaction and simulate_transaction to verify your fixes work.`
   );
   return sections.join('\n');
+}
+
+/**
+ * Assemble a single-string prompt suitable for copy-pasting into a
+ * raw LLM UI (Claude.ai, ChatGPT, Gemini). Joins the no-tools
+ * system prompt with the user message.
+ *
+ * Used by the indexer's `/api/v0/builder/ai-build/export-prompt`
+ * route and by the frontend's "copy prompt" self-host path.
+ */
+export async function assembleExportPrompt(
+  ctx: PromptContext,
+  options?: { communitySkillsFetcher?: CommunitySkillsFetcher }
+): Promise<{ prompt: string; communitySkillsIncluded: string[] }> {
+  const result = await assemblePromptParts(ctx, { ...options, forExport: true });
+  return {
+    prompt: `${result.systemPrompt}\n\n${result.userMessage}`,
+    communitySkillsIncluded: result.communitySkillsIncluded
+  };
 }
 
 /** Stable 12-hex-char hash of a prompt string — used for telemetry to pin which prompt version built which tx. */

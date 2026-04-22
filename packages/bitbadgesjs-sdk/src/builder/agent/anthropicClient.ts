@@ -43,25 +43,32 @@ function assertSupportedVersion(mod: any): void {
   }
 }
 
-/** Loads @anthropic-ai/sdk dynamically. Throws PeerDependencyError if missing. */
+/** Loads @anthropic-ai/sdk dynamically. Throws PeerDependencyError if missing or out of range. */
 export async function loadAnthropicSdk(): Promise<any> {
   if (cachedModule) return cachedModule;
+
+  // Step 1: resolve the module. Only "module not installed" failures are
+  // translated to the generic "please install" error — so the version-check
+  // error thrown in step 2 doesn't get swallowed and re-labeled as missing.
+  let mod: any;
   try {
-    // Use a runtime-resolved string so bundlers + TS don't follow this
-    // peer dep. Importing '@anthropic-ai/sdk' directly would require
-    // consumers to have @types/@anthropic-ai/sdk installed during SDK
-    // build, defeating the peer-dep design.
+    // Runtime-resolved string so bundlers + TS don't follow this peer dep.
     const modSpecifier = '@anthropic-ai/sdk';
-    const mod: any = await (Function('s', 'return import(s)') as any)(modSpecifier);
-    assertSupportedVersion(mod);
-    cachedModule = mod.default ?? mod;
-    return cachedModule;
+    mod = await (Function('s', 'return import(s)') as any)(modSpecifier);
   } catch (err) {
     throw new PeerDependencyError(
       `@anthropic-ai/sdk is required to use BitBadgesAgent but is not installed. ` +
         `Install it with: npm install @anthropic-ai/sdk (supported range: ${SUPPORTED_RANGE})`
     );
   }
+
+  // Step 2: enforce the supported range. Lets the caller see the real
+  // "version X detected; requires Y" message instead of a misleading
+  // "not installed" message.
+  assertSupportedVersion(mod);
+
+  cachedModule = mod.default ?? mod;
+  return cachedModule;
 }
 
 /**
