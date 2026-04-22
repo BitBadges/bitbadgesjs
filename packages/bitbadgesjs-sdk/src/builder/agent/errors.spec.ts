@@ -1,13 +1,13 @@
 /**
  * Tests for typed error classes. The load-bearing contract is:
  * `instanceof` dispatch must work from a consumer's catch block,
- * even if they only have the parent `BitBadgesAgentError` type in
+ * even if they only have the parent `BitBadgesBuilderAgentError` type in
  * scope — that relies on the `Object.setPrototypeOf` fix in each
  * constructor.
  */
 
 import {
-  BitBadgesAgentError,
+  BitBadgesBuilderAgentError,
   ValidationFailedError,
   QuotaExceededError,
   AnthropicAuthError,
@@ -16,19 +16,19 @@ import {
   SimulationError
 } from './errors.js';
 
-describe('BitBadgesAgentError — base class', () => {
+describe('BitBadgesBuilderAgentError — base class', () => {
   it('has name, code, statusCode, and is an instanceof Error', () => {
-    const e = new BitBadgesAgentError('boom');
+    const e = new BitBadgesBuilderAgentError('boom');
     expect(e).toBeInstanceOf(Error);
-    expect(e).toBeInstanceOf(BitBadgesAgentError);
-    expect(e.name).toBe('BitBadgesAgentError');
+    expect(e).toBeInstanceOf(BitBadgesBuilderAgentError);
+    expect(e.name).toBe('BitBadgesBuilderAgentError');
     expect(e.code).toBe('BITBADGES_AGENT_ERROR');
     expect(e.statusCode).toBe(500);
     expect(e.message).toBe('boom');
   });
 
   it('accepts custom code and statusCode', () => {
-    const e = new BitBadgesAgentError('x', 'MY_CODE', 418);
+    const e = new BitBadgesBuilderAgentError('x', 'MY_CODE', 418);
     expect(e.code).toBe('MY_CODE');
     expect(e.statusCode).toBe(418);
   });
@@ -49,10 +49,10 @@ describe('ValidationFailedError', () => {
     expect(e.advisoryNotes).toEqual(advisory);
   });
 
-  it('instanceof dispatch — is both ValidationFailedError and BitBadgesAgentError', () => {
+  it('instanceof dispatch — is both ValidationFailedError and BitBadgesBuilderAgentError', () => {
     const e = new ValidationFailedError(errors, tx);
     expect(e).toBeInstanceOf(ValidationFailedError);
-    expect(e).toBeInstanceOf(BitBadgesAgentError);
+    expect(e).toBeInstanceOf(BitBadgesBuilderAgentError);
     expect(e).toBeInstanceOf(Error);
   });
 
@@ -88,10 +88,10 @@ describe('QuotaExceededError', () => {
     expect(e.tokenCap).toBe(1_500_000);
   });
 
-  it('instanceof dispatch — both QuotaExceededError and BitBadgesAgentError', () => {
+  it('instanceof dispatch — both QuotaExceededError and BitBadgesBuilderAgentError', () => {
     const e = new QuotaExceededError(100, 50);
     expect(e).toBeInstanceOf(QuotaExceededError);
-    expect(e).toBeInstanceOf(BitBadgesAgentError);
+    expect(e).toBeInstanceOf(BitBadgesBuilderAgentError);
   });
 
   it('code/statusCode are QUOTA_EXCEEDED / 402', () => {
@@ -115,10 +115,10 @@ describe('AbortedError', () => {
     expect(b.partialTokens).toBe(12345);
   });
 
-  it('instanceof dispatch — both AbortedError and BitBadgesAgentError', () => {
+  it('instanceof dispatch — both AbortedError and BitBadgesBuilderAgentError', () => {
     const e = new AbortedError();
     expect(e).toBeInstanceOf(AbortedError);
-    expect(e).toBeInstanceOf(BitBadgesAgentError);
+    expect(e).toBeInstanceOf(BitBadgesBuilderAgentError);
   });
 
   it('code/statusCode are ABORTED / 499', () => {
@@ -137,7 +137,7 @@ describe('AnthropicAuthError', () => {
   it('instanceof dispatch', () => {
     const e = new AnthropicAuthError();
     expect(e).toBeInstanceOf(AnthropicAuthError);
-    expect(e).toBeInstanceOf(BitBadgesAgentError);
+    expect(e).toBeInstanceOf(BitBadgesBuilderAgentError);
   });
 });
 
@@ -150,7 +150,7 @@ describe('PeerDependencyError', () => {
   it('instanceof dispatch', () => {
     const e = new PeerDependencyError('x');
     expect(e).toBeInstanceOf(PeerDependencyError);
-    expect(e).toBeInstanceOf(BitBadgesAgentError);
+    expect(e).toBeInstanceOf(BitBadgesBuilderAgentError);
   });
 });
 
@@ -169,7 +169,7 @@ describe('SimulationError', () => {
   it('instanceof dispatch', () => {
     const e = new SimulationError('x');
     expect(e).toBeInstanceOf(SimulationError);
-    expect(e).toBeInstanceOf(BitBadgesAgentError);
+    expect(e).toBeInstanceOf(BitBadgesBuilderAgentError);
   });
 });
 
@@ -178,7 +178,7 @@ describe('instanceof discrimination in a catch block', () => {
     if (err instanceof QuotaExceededError) return 'quota';
     if (err instanceof ValidationFailedError) return 'validation';
     if (err instanceof AbortedError) return 'aborted';
-    if (err instanceof BitBadgesAgentError) return 'agent';
+    if (err instanceof BitBadgesBuilderAgentError) return 'agent';
     return 'other';
   }
 

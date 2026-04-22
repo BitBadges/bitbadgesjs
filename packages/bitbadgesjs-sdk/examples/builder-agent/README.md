@@ -1,4 +1,4 @@
-# BitBadgesAgent examples
+# BitBadgesBuilderAgent examples
 
 Three scripts showing how to use the programmatic BitBadges AI builder.
 
@@ -16,7 +16,7 @@ export BITBADGES_API_KEY=bb-...
 ### 1. `zero-config.ts` — simplest possible usage
 
 ```ts
-const agent = new BitBadgesAgent({ anthropicKey: process.env.ANTHROPIC_API_KEY });
+const agent = new BitBadgesBuilderAgent({ anthropicKey: process.env.ANTHROPIC_API_KEY });
 const result = await agent.build('create a subscription for $10/mo');
 console.log(result.transaction);
 ```

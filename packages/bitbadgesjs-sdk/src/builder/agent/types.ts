@@ -1,5 +1,5 @@
 /**
- * Shared types for BitBadgesAgent.
+ * Shared types for BitBadgesBuilderAgent.
  *
  * Public types are re-exported from the package entry (`bitbadges/builder/agent`).
  * Internal-only types stay here and are imported by filename within the agent/ dir.
@@ -296,8 +296,8 @@ export interface BuildResult {
   toString(): string;
 }
 
-/** Options passed to `BitBadgesAgent` constructor. */
-export interface BitBadgesAgentOptions {
+/** Options passed to `BitBadgesBuilderAgent` constructor. */
+export interface BitBadgesBuilderAgentOptions {
   /** Anthropic API key — BYO. Falls back to ANTHROPIC_API_KEY env. */
   anthropicKey?: string;
   /** Anthropic OAuth bearer token — alternative to anthropicKey. Falls back to ANTHROPIC_AUTH_TOKEN / ANTHROPIC_OAUTH_TOKEN env. */

@@ -1,5 +1,5 @@
 /**
- * Model catalog for BitBadgesAgent.
+ * Model catalog for BitBadgesBuilderAgent.
  *
  * Maps friendly names → actual Anthropic model IDs + pricing.
  * Pricing is used for the `costUsd` field on BuildResult.

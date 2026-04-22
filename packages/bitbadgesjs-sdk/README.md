@@ -28,9 +28,9 @@ export ANTHROPIC_API_KEY=sk-...
 ```
 
 ```ts
-import { BitBadgesAgent } from 'bitbadges/builder/agent';
+import { BitBadgesBuilderAgent } from 'bitbadges/builder/agent';
 
-const agent = new BitBadgesAgent({ anthropicKey: process.env.ANTHROPIC_API_KEY });
+const agent = new BitBadgesBuilderAgent({ anthropicKey: process.env.ANTHROPIC_API_KEY });
 const result = await agent.build('create a subscription token for $10/month');
 console.log(result.transaction);
 ```

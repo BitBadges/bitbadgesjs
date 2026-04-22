@@ -1,5 +1,5 @@
 /**
- * BitBadgesAgent — DIY example using `bitbadges/builder/internals`.
+ * BitBadgesBuilderAgent — DIY example using `bitbadges/builder/internals`.
  *
  * The /internals subpath is UNSTABLE and may break in minor releases.
  * Use it when you want to run your own agent loop (different LLM,

@@ -1,5 +1,5 @@
 /**
- * BitBadgesAgent — customization example.
+ * BitBadgesBuilderAgent — customization example.
  *
  * Demonstrates the bounded-customization surface: skill filter,
  * system prompt append, hooks, file-backed session store, model
@@ -8,14 +8,14 @@
  */
 
 import {
-  BitBadgesAgent,
+  BitBadgesBuilderAgent,
   FileStore,
   ValidationFailedError,
   QuotaExceededError
 } from '../../src/builder/agent/index.js';
 
 async function main() {
-  const agent = new BitBadgesAgent({
+  const agent = new BitBadgesBuilderAgent({
     anthropicKey: process.env.ANTHROPIC_API_KEY,
     bitbadgesApiKey: process.env.BITBADGES_API_KEY, // optional
     model: 'sonnet',

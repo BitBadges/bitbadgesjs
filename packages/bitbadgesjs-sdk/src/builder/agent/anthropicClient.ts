@@ -1,7 +1,7 @@
 /**
  * Peer-dependency-safe accessor for `@anthropic-ai/sdk`.
  *
- * BitBadgesAgent does NOT hard-depend on `@anthropic-ai/sdk` — it's a
+ * BitBadgesBuilderAgent does NOT hard-depend on `@anthropic-ai/sdk` — it's a
  * peerDependency (marked optional). Consumers install it themselves,
  * so their Anthropic API keys never touch BitBadges infrastructure.
  *
@@ -37,7 +37,7 @@ function assertSupportedVersion(mod: any): void {
   const tooNew = major >= SUPPORTED_MAX_MAJOR;
   if (tooOld || tooNew) {
     throw new PeerDependencyError(
-      `@anthropic-ai/sdk version ${raw} detected; BitBadgesAgent requires ${SUPPORTED_RANGE}. ` +
+      `@anthropic-ai/sdk version ${raw} detected; BitBadgesBuilderAgent requires ${SUPPORTED_RANGE}. ` +
         `Install a compatible version, e.g. npm install @anthropic-ai/sdk@^0.82`
     );
   }
@@ -113,7 +113,7 @@ export async function loadAnthropicSdk(): Promise<any> {
 
   if (!mod) {
     throw new PeerDependencyError(
-      `@anthropic-ai/sdk is required to use BitBadgesAgent but could not be resolved from any ` +
+      `@anthropic-ai/sdk is required to use BitBadgesBuilderAgent but could not be resolved from any ` +
         `known location (bare import, consumer CWD, SDK location). Install it in your project: ` +
         `npm install @anthropic-ai/sdk (supported range: ${SUPPORTED_RANGE}). ` +
         (lastError ? `Last resolution error: ${(lastError as any)?.message ?? String(lastError)}` : '')

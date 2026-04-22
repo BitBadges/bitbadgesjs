@@ -1,5 +1,5 @@
 /**
- * Typed error classes for BitBadgesAgent.
+ * Typed error classes for BitBadgesBuilderAgent.
  *
  * Consumers can dispatch on `instanceof` to handle categories
  * distinctly:
@@ -13,19 +13,19 @@
  * ```
  */
 
-export class BitBadgesAgentError extends Error {
+export class BitBadgesBuilderAgentError extends Error {
   readonly code: string;
   readonly statusCode: number;
   constructor(message: string, code = 'BITBADGES_AGENT_ERROR', statusCode = 500) {
     super(message);
-    this.name = 'BitBadgesAgentError';
+    this.name = 'BitBadgesBuilderAgentError';
     this.code = code;
     this.statusCode = statusCode;
-    Object.setPrototypeOf(this, BitBadgesAgentError.prototype);
+    Object.setPrototypeOf(this, BitBadgesBuilderAgentError.prototype);
   }
 }
 
-export class ValidationFailedError extends BitBadgesAgentError {
+export class ValidationFailedError extends BitBadgesBuilderAgentError {
   readonly errors: readonly { code: string; message: string; path?: string; fixHint?: string }[];
   readonly transaction: any;
   readonly advisoryNotes: readonly string[];
@@ -47,7 +47,7 @@ export class ValidationFailedError extends BitBadgesAgentError {
   }
 }
 
-export class QuotaExceededError extends BitBadgesAgentError {
+export class QuotaExceededError extends BitBadgesBuilderAgentError {
   readonly tokensUsed: number;
   readonly tokenCap: number;
   constructor(tokensUsed: number, tokenCap: number) {
@@ -59,7 +59,7 @@ export class QuotaExceededError extends BitBadgesAgentError {
   }
 }
 
-export class AnthropicAuthError extends BitBadgesAgentError {
+export class AnthropicAuthError extends BitBadgesBuilderAgentError {
   constructor(detail?: string) {
     super(
       `Anthropic authentication failed. Check that ANTHROPIC_API_KEY is set and valid.${detail ? ` (${detail})` : ''}`,
@@ -71,7 +71,7 @@ export class AnthropicAuthError extends BitBadgesAgentError {
   }
 }
 
-export class AbortedError extends BitBadgesAgentError {
+export class AbortedError extends BitBadgesBuilderAgentError {
   readonly partialTokens: number;
   constructor(partialTokens = 0) {
     super('Build was aborted by the caller', 'ABORTED', 499);
@@ -81,7 +81,7 @@ export class AbortedError extends BitBadgesAgentError {
   }
 }
 
-export class PeerDependencyError extends BitBadgesAgentError {
+export class PeerDependencyError extends BitBadgesBuilderAgentError {
   constructor(detail: string) {
     super(detail, 'PEER_DEPENDENCY_ERROR', 500);
     this.name = 'PeerDependencyError';
@@ -89,7 +89,7 @@ export class PeerDependencyError extends BitBadgesAgentError {
   }
 }
 
-export class SimulationError extends BitBadgesAgentError {
+export class SimulationError extends BitBadgesBuilderAgentError {
   readonly detail?: string;
   constructor(detail?: string) {
     super(`Simulation failed: ${detail ?? 'unknown error'}`, 'SIMULATION_ERROR', 400);

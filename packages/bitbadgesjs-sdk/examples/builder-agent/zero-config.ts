@@ -1,5 +1,5 @@
 /**
- * BitBadgesAgent — zero-config example.
+ * BitBadgesBuilderAgent — zero-config example.
  *
  * Requires `ANTHROPIC_API_KEY` in the environment (or pass
  * `anthropicKey` explicitly).  `BITBADGES_API_KEY` is optional — only
@@ -9,10 +9,10 @@
  *   ANTHROPIC_API_KEY=sk-... npx ts-node examples/builder-agent/zero-config.ts
  */
 
-import { BitBadgesAgent } from '../../src/builder/agent/index.js';
+import { BitBadgesBuilderAgent } from '../../src/builder/agent/index.js';
 
 async function main() {
-  const agent = new BitBadgesAgent({
+  const agent = new BitBadgesBuilderAgent({
     anthropicKey: process.env.ANTHROPIC_API_KEY,
     defaultCreatorAddress: 'bb1examplecreator000000000000000000000000'
   });

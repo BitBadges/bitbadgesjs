@@ -4,16 +4,16 @@
  * Users import from `bitbadges/builder/agent`:
  *
  * ```ts
- * import { BitBadgesAgent } from 'bitbadges/builder/agent';
+ * import { BitBadgesBuilderAgent } from 'bitbadges/builder/agent';
  *
- * const agent = new BitBadgesAgent({ anthropicKey: process.env.ANTHROPIC_API_KEY });
+ * const agent = new BitBadgesBuilderAgent({ anthropicKey: process.env.ANTHROPIC_API_KEY });
  * const result = await agent.build('mint 1000 fungible tokens');
  * ```
  *
  * Unstable low-level primitives live under `bitbadges/builder/internals`.
  */
 
-export { BitBadgesAgent } from './BitBadgesAgent.js';
+export { BitBadgesBuilderAgent } from './BitBadgesBuilderAgent.js';
 export { MemoryStore, FileStore, type KVStore, type KVStoreSetOptions, type FileStoreOptions } from './sessionStore.js';
 export { substituteImages, collectImageReferences, type ImageMap } from './images.js';
 export { MODELS, resolveModel, computeCostUsd } from './models.js';
@@ -26,7 +26,7 @@ export {
 } from './communitySkills.js';
 export { getAllSkillInstructions, type SkillInstruction } from '../resources/skillInstructions.js';
 export {
-  BitBadgesAgentError,
+  BitBadgesBuilderAgentError,
   ValidationFailedError,
   QuotaExceededError,
   AnthropicAuthError,
@@ -37,7 +37,7 @@ export {
 
 export type {
   // Options
-  BitBadgesAgentOptions,
+  BitBadgesBuilderAgentOptions,
   BuildOptions,
   BuildMode,
   ValidationStrictness,

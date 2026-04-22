@@ -1,5 +1,5 @@
 /**
- * BitBadgesAgent — open-source AI builder for BitBadges collections.
+ * BitBadgesBuilderAgent — open-source AI builder for BitBadges collections.
  *
  * Users bring their own Anthropic API key. BitBadges never sees keys
  * nor proxies requests. The full prompt, tools, validation fix loop,
@@ -7,7 +7,7 @@
  *
  * Zero-config:
  * ```ts
- * const agent = new BitBadgesAgent({ anthropicKey: process.env.ANTHROPIC_API_KEY });
+ * const agent = new BitBadgesBuilderAgent({ anthropicKey: process.env.ANTHROPIC_API_KEY });
  * const result = await agent.build('create a subscription token for $10/mo');
  * console.log(result.transaction);
  * ```
@@ -18,7 +18,7 @@ import { handleGetTransaction } from '../tools/index.js';
 import { getOrCreateSession } from '../session/sessionState.js';
 import { getAllSkillInstructions, type SkillInstruction } from '../resources/skillInstructions.js';
 import { getAnthropicClient } from './anthropicClient.js';
-import { AbortedError, BitBadgesAgentError, QuotaExceededError, ValidationFailedError } from './errors.js';
+import { AbortedError, BitBadgesBuilderAgentError, QuotaExceededError, ValidationFailedError } from './errors.js';
 import { containsInjection } from './sanitize.js';
 import { substituteImages, collectImageReferences, type ImageMap } from './images.js';
 import { resolveModel, type ModelInfo } from './models.js';
@@ -29,7 +29,7 @@ import { runAgentLoop } from './loop.js';
 import { runValidationGate, type ValidationGateResult } from './validation.js';
 import type {
   AgentHooks,
-  BitBadgesAgentOptions,
+  BitBadgesBuilderAgentOptions,
   BuildMode,
   BuildOptions,
   BuildResult,
@@ -49,8 +49,8 @@ const DEFAULTS = {
   sessionTtlSeconds: 2 * 60 * 60
 };
 
-export class BitBadgesAgent {
-  private readonly options: BitBadgesAgentOptions;
+export class BitBadgesBuilderAgent {
+  private readonly options: BitBadgesBuilderAgentOptions;
   private readonly model: ModelInfo;
   private readonly registry: AgentToolRegistry;
   private readonly sessionStore: KVStore;
@@ -72,9 +72,9 @@ export class BitBadgesAgent {
    */
   private readonly inFlightControllers = new Set<AbortController>();
 
-  constructor(options: BitBadgesAgentOptions) {
+  constructor(options: BitBadgesBuilderAgentOptions) {
     if (!options) {
-      throw new BitBadgesAgentError('BitBadgesAgent requires options', 'INVALID_OPTIONS');
+      throw new BitBadgesBuilderAgentError('BitBadgesBuilderAgent requires options', 'INVALID_OPTIONS');
     }
     // Resolve Anthropic creds up front so we can fail fast with a clear error.
     const envAnthropicKey = typeof process !== 'undefined' ? process.env.ANTHROPIC_API_KEY : undefined;
@@ -87,8 +87,8 @@ export class BitBadgesAgent {
       !!envAnthropicKey ||
       !!envAnthropicAuth;
     if (!hasAnthropicCreds) {
-      throw new BitBadgesAgentError(
-        'BitBadgesAgent requires Anthropic credentials. Provide one of: `anthropicKey` (API key), `anthropicAuthToken` (OAuth), `anthropicClient` (pre-built), or set ANTHROPIC_API_KEY / ANTHROPIC_OAUTH_TOKEN in the environment. BitBadges never stores API keys.',
+      throw new BitBadgesBuilderAgentError(
+        'BitBadgesBuilderAgent requires Anthropic credentials. Provide one of: `anthropicKey` (API key), `anthropicAuthToken` (OAuth), `anthropicClient` (pre-built), or set ANTHROPIC_API_KEY / ANTHROPIC_OAUTH_TOKEN in the environment. BitBadges never stores API keys.',
         'MISSING_ANTHROPIC_CREDS'
       );
     }
@@ -97,7 +97,7 @@ export class BitBadgesAgent {
       const valid = new Set(getAllSkillInstructions().map((s) => s.id));
       const bad = options.skills.filter((s) => !valid.has(s));
       if (bad.length > 0) {
-        throw new BitBadgesAgentError(
+        throw new BitBadgesBuilderAgentError(
           `Unknown skills: ${bad.join(', ')}. Valid skills: ${[...valid].sort().join(', ')}`,
           'INVALID_SKILLS'
         );
@@ -111,13 +111,13 @@ export class BitBadgesAgent {
     // instructions" input fails fast rather than silently subverting
     // the base prompt. Both slots are checked under the same policy.
     if (options.systemPromptAppend && containsInjection(options.systemPromptAppend)) {
-      throw new BitBadgesAgentError(
+      throw new BitBadgesBuilderAgentError(
         '`systemPromptAppend` contains prompt-injection patterns. Sanitize end-user input before passing.',
         'INVALID_SYSTEM_PROMPT_APPEND'
       );
     }
     if (options.systemPrompt && containsInjection(options.systemPrompt)) {
-      throw new BitBadgesAgentError(
+      throw new BitBadgesBuilderAgentError(
         '`systemPrompt` (full replace) contains prompt-injection patterns. The full-replace option bypasses base-prompt protections; sanitize first.',
         'INVALID_SYSTEM_PROMPT'
       );
@@ -158,7 +158,7 @@ export class BitBadgesAgent {
       );
       if (skillsWithRefs.length > 0 && options.debug) {
         console.warn(
-          `[BitBadgesAgent] Skills ${skillsWithRefs.map((s) => s.id).join(', ')} reference on-chain collections ` +
+          `[BitBadgesBuilderAgent] Skills ${skillsWithRefs.map((s) => s.id).join(', ')} reference on-chain collections ` +
             `but no bitbadgesApiKey is configured. query_collection calls will fail mid-loop. ` +
             `Set bitbadgesApiKey or BITBADGES_API_KEY env to enable.`
         );
@@ -231,7 +231,7 @@ export class BitBadgesAgent {
     options?: BuildOptions
   ): Promise<{ prompt: string; communitySkillsIncluded: string[] }> {
     if (!prompt || typeof prompt !== 'string') {
-      throw new BitBadgesAgentError('`prompt` is required and must be a string', 'INVALID_PROMPT');
+      throw new BitBadgesBuilderAgentError('`prompt` is required and must be a string', 'INVALID_PROMPT');
     }
     const creatorAddress =
       options?.creatorAddress ?? this.options.defaultCreatorAddress ?? 'bb1examplecreator000000000000000000000000';
@@ -272,7 +272,7 @@ export class BitBadgesAgent {
    * Main entry — build (or update/refine) a collection from a natural-language prompt.
    *
    * NOTE on prompt trust: the raw `prompt` argument is intentionally NOT
-   * run through `containsInjection`. BitBadgesAgent is BYO-key; the
+   * run through `containsInjection`. BitBadgesBuilderAgent is BYO-key; the
    * caller controls their own key and their own prompts, so screening
    * would just get in the way of legitimate uses (research, fine-tuning,
    * bots with well-formed prompts). Server-side consumers that expose
@@ -283,7 +283,7 @@ export class BitBadgesAgent {
    */
   async build(prompt: string, options?: BuildOptions): Promise<BuildResult> {
     if (!prompt || typeof prompt !== 'string') {
-      throw new BitBadgesAgentError('`prompt` is required and must be a string', 'INVALID_PROMPT');
+      throw new BitBadgesBuilderAgentError('`prompt` is required and must be a string', 'INVALID_PROMPT');
     }
 
     const creatorAddress = options?.creatorAddress ?? this.options.defaultCreatorAddress ?? 'bb1auto-creator';
@@ -377,7 +377,7 @@ export class BitBadgesAgent {
       const unknown = requestedSkills.filter((s) => !validIds.has(s));
       if (unknown.length > 0) {
         console.warn(
-          `[BitBadgesAgent] Unknown selectedSkills dropped: ${unknown.join(', ')}. ` +
+          `[BitBadgesBuilderAgent] Unknown selectedSkills dropped: ${unknown.join(', ')}. ` +
             `Valid skills: ${[...validIds].sort().join(', ')}`
         );
       }
@@ -663,7 +663,7 @@ export class BitBadgesAgent {
         const cacheStr = this.trace.cacheReadTokens > 0
           ? `, cache ${this.trace.cacheReadTokens.toLocaleString()} read / ${this.trace.cacheCreationTokens.toLocaleString()} write`
           : '';
-        return `BitBadgesAgent build: ${msgCount} message(s), ${validityStr}, ${this.tokensUsed.toLocaleString()} tokens${cacheStr}, $${costStr}, ${this.rounds} round(s)${this.fixRounds ? ` + ${this.fixRounds} fix` : ''}`;
+        return `BitBadgesBuilderAgent build: ${msgCount} message(s), ${validityStr}, ${this.tokensUsed.toLocaleString()} tokens${cacheStr}, $${costStr}, ${this.rounds} round(s)${this.fixRounds ? ` + ${this.fixRounds} fix` : ''}`;
       }
     };
 

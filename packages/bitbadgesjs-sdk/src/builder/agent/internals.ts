@@ -8,7 +8,7 @@
  * prompts). It is explicitly NOT subject to semver — anything here
  * may be renamed or removed in a minor version.
  *
- * If you can do your job with `BitBadgesAgent` from
+ * If you can do your job with `BitBadgesBuilderAgent` from
  * `bitbadges/builder/agent`, use that instead.
  */
 

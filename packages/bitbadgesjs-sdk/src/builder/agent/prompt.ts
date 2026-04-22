@@ -1,5 +1,5 @@
 /**
- * Prompt assembly for BitBadgesAgent.
+ * Prompt assembly for BitBadgesBuilderAgent.
  *
  * Ported from the BitBadges indexer so the SDK is a self-contained
  * open-source agent — callers bring their own Anthropic key and every

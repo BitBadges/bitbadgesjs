@@ -1,7 +1,7 @@
 /**
  * KVStore — pluggable session-state backend.
  *
- * BitBadgesAgent uses this to persist conversation messages and
+ * BitBadgesBuilderAgent uses this to persist conversation messages and
  * running token counts across requests (so refinement works even
  * when the agent is instantiated per-request).
  *

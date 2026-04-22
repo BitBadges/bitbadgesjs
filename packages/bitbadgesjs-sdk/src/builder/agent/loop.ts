@@ -10,7 +10,7 @@
  *  - `maxTokensPerBuild` is enforced via `QuotaExceededError`.
  */
 
-import { AbortedError, AnthropicAuthError, BitBadgesAgentError, QuotaExceededError } from './errors.js';
+import { AbortedError, AnthropicAuthError, BitBadgesBuilderAgentError, QuotaExceededError } from './errors.js';
 import { computeCostUsd, type ModelInfo } from './models.js';
 import type { AgentHooks, ToolCallEvent } from './types.js';
 import type { AgentToolRegistry } from './toolAdapter.js';
@@ -205,8 +205,8 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
   let rounds = 0;
 
   if (debug) {
-    console.error('[bitbadges-agent] SYSTEM PROMPT:\n' + systemPrompt);
-    console.error('[bitbadges-agent] USER MESSAGE:\n' + userMessage);
+    console.error('[bitbadges-builder-agent] SYSTEM PROMPT:\n' + systemPrompt);
+    console.error('[bitbadges-builder-agent] USER MESSAGE:\n' + userMessage);
   }
 
   try {
@@ -269,7 +269,7 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
 
       if (debug) {
         console.error(
-          `[bitbadges-agent] round ${round + 1}/${maxRounds} stop_reason=${response.stop_reason} ` +
+          `[bitbadges-builder-agent] round ${round + 1}/${maxRounds} stop_reason=${response.stop_reason} ` +
           `tokens_in=${inputTokens} out=${outputTokens} cache_write=${roundCacheCreation} cache_read=${roundCacheRead}`
         );
       }
@@ -331,7 +331,7 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
         fireHook(hooks?.onToolCall, event);
 
         if (debug) {
-          console.error(`[bitbadges-agent] tool ${toolUse.name} (${durationMs}ms): ${resultString.slice(0, 400)}`);
+          console.error(`[bitbadges-builder-agent] tool ${toolUse.name} (${durationMs}ms): ${resultString.slice(0, 400)}`);
         }
 
         toolResultContents.push({ type: 'tool_result', tool_use_id: toolUse.id, content: resultString });
@@ -343,7 +343,7 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
       compressOldToolResults(messages);
     }
   } catch (err: any) {
-    if (err instanceof BitBadgesAgentError) throw err;
+    if (err instanceof BitBadgesBuilderAgentError) throw err;
     // Preserve original error shape but attach token usage so caller can track partial cost.
     err.partialTokens = totalTokens;
     throw err;
