@@ -13,12 +13,6 @@ import { Stringify } from '@/common/string-numbers.js';
 /**
  * MsgSetCustomData sets the custom data timeline and canUpdateCustomData permission.
  *
- * @deprecated The chain-side custom-data keeper was removed alongside the
- * `x/maps` and `x/anchor` modules in bitbadgeschain v30 (commit `858870de`,
- * 2026-04-20). Any transaction built with this message will be rejected at
- * routing by any v30+ node. This class will be removed in the next major
- * SDK release. See backlog #0297.
- *
  * @category Transactions
  */
 export class MsgSetCustomData<T extends NumberType> extends CustomTypeClass<MsgSetCustomData<T>> implements iMsgSetCustomData<T> {
