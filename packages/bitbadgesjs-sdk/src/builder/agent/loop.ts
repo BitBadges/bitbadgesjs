@@ -274,11 +274,26 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
         );
       }
 
+      fireHook(hooks?.onLog, {
+        type: 'info',
+        label: `Round ${round + 1}`,
+        data: {
+          stop_reason: response.stop_reason,
+          input_tokens: inputTokens,
+          output_tokens: outputTokens,
+          cache_creation_tokens: roundCacheCreation,
+          cache_read_tokens: roundCacheRead
+        }
+      });
+
       const textParts = response.content
         .filter((b: any) => b.type === 'text')
         .map((b: any) => b.text);
       const roundText = textParts.join('\n');
-      if (roundText) finalText = roundText;
+      if (roundText) {
+        finalText = roundText;
+        fireHook(hooks?.onLog, { type: 'ai_text', label: 'AI response', data: roundText });
+      }
 
       const toolUses = response.content.filter((b: any) => b.type === 'tool_use');
       if (toolUses.length === 0) break;

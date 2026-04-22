@@ -204,7 +204,10 @@ describe('BitBadgesAgent — end-to-end with mocked Anthropic', () => {
   });
 
   it('throws ValidationFailedError in strict mode when gate fails', async () => {
-    // Drive a single tool_use that does nothing useful, then stop.
+    // Empty builds are now VALID by default (session template has
+    // neutral collectionPermissions). Force a validation failure via
+    // a simulator that always reports non-advisory failure — the gate
+    // counts simulation failures as hard errors.
     const client = makeMockClient([
       {
         usage: { input_tokens: 100, output_tokens: 50 },
@@ -218,6 +221,7 @@ describe('BitBadgesAgent — end-to-end with mocked Anthropic', () => {
       anthropicKey: 'unused',
       validation: 'strict',
       fixLoopMaxRounds: 0, // no fixes
+      simulate: async () => ({ valid: false, error: 'forced simulation failure for test' }),
       defaultCreatorAddress: 'bb1test'
     });
 
@@ -238,6 +242,7 @@ describe('BitBadgesAgent — end-to-end with mocked Anthropic', () => {
       anthropicKey: 'unused',
       validation: 'lenient',
       fixLoopMaxRounds: 0,
+      simulate: async () => ({ valid: false, error: 'forced simulation failure for test' }),
       defaultCreatorAddress: 'bb1test'
     });
 
@@ -480,8 +485,9 @@ describe('BitBadgesAgent — onCompletion always fires', () => {
     const agent = new BitBadgesAgent({
       anthropicClient: client,
       anthropicKey: 'unused',
-      validation: 'strict', // will throw — gate fails on empty session
+      validation: 'strict', // will throw via forced simulation failure
       fixLoopMaxRounds: 0,
+      simulate: async () => ({ valid: false, error: 'forced failure for test' }),
       hooks: { onCompletion },
       defaultCreatorAddress: 'bb1test'
     });

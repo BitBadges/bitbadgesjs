@@ -522,6 +522,10 @@ export class BitBadgesAgent {
         creatorAddress,
         abortSignal: signal,
         simulate: this.options.simulate,
+        // Forward the gate's info/validation log entries to the
+        // agent's onLog hook so consumers (indexer dev-replay) see
+        // pass/fail + per-source error counts.
+        onLog: hooks.onLog as any,
         onChainSnapshot: options?.existingCollectionId && this.options.onChainSnapshotFetcher
           ? await this.options.onChainSnapshotFetcher(options.existingCollectionId).catch(() => null)
           : undefined
@@ -581,7 +585,8 @@ export class BitBadgesAgent {
           transaction,
           creatorAddress,
           abortSignal: signal,
-          simulate: this.options.simulate
+          simulate: this.options.simulate,
+          onLog: hooks.onLog as any
         });
       }
 

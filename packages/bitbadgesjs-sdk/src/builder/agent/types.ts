@@ -197,6 +197,19 @@ export interface ToolExecutionContext {
 }
 
 /**
+ * Generic mid-build log entry — catch-all for observability signals
+ * that don't fit the more specific hooks. Emitted for round
+ * boundaries, AI text output, validation gate pass/fail, mid-build
+ * errors, and other diagnostic info. Indexers typically wire this
+ * to their session-log / dev-replay / audit pipelines.
+ */
+export interface AgentLogEntry {
+  type: 'info' | 'ai_text' | 'validation' | 'error';
+  label: string;
+  data?: unknown;
+}
+
+/**
  * Hook callbacks.
  *
  * `onTokenUsage` is **load-bearing**: it is awaited, and any thrown
@@ -205,16 +218,26 @@ export interface ToolExecutionContext {
  * `onTokenUsage` when the caller's budget is exhausted and the loop
  * aborts cleanly.
  *
- * The other three hooks (`onToolCall`, `onStatusUpdate`,
- * `onCompletion`) are observability-only — they run fire-and-forget;
- * rejections are swallowed so a misbehaving logger can't hang a
- * build.
+ * `onCompletion` is awaited (in the success path) and fire-and-forget
+ * (in the error path, via the outer finally). It always fires exactly
+ * once per build.
+ *
+ * The rest (`onToolCall`, `onStatusUpdate`, `onLog`) are
+ * observability-only — fire-and-forget, rejections swallowed so a
+ * misbehaving logger can't hang a build.
  */
 export interface AgentHooks {
   onTokenUsage?: (usage: TokenUsage) => void | Promise<void>;
   onToolCall?: (event: ToolCallEvent) => void | Promise<void>;
   onStatusUpdate?: (status: string) => void | Promise<void>;
   onCompletion?: (trace: BuildTrace) => void | Promise<void>;
+  /**
+   * Generic log sink for mid-build diagnostic events. Fired for
+   * round starts, AI text output, validation gate results, and
+   * intermediate errors. Consumers typically pipe this into their
+   * session-log / dev-replay tooling.
+   */
+  onLog?: (entry: AgentLogEntry) => void | Promise<void>;
 }
 
 /** Full trace of a single build — passed to `onCompletion` and returned in `BuildResult.trace`. */

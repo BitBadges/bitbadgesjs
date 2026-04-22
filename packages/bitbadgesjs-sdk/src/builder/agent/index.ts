@@ -47,6 +47,7 @@ export type {
   Warning,
   // Hooks
   AgentHooks,
+  AgentLogEntry,
   TokenUsage,
   ToolCallEvent,
   // Custom tools / injectables
