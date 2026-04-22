@@ -373,7 +373,14 @@ export async function formatContextHelpers(ctx: any): Promise<string> {
       } else if (claim.mode === 'builder' && Array.isArray(claim.plugins)) {
         const pluginSummary = claim.plugins
           .map((p: any) => {
+            // Sort publicParams keys so identical plugin configs produce
+            // identical prompt text regardless of object-construction
+            // order. Without this sort, Object.entries() ordering can
+            // drift between calls with the same logical inputs, which
+            // silently busts Anthropic's prompt-cache key on the
+            // cache_control: ephemeral block.
             const params = Object.entries(p.publicParams || {})
+              .sort(([a], [b]) => a.localeCompare(b))
               .map(([k, v]) => `${k}=${v}`)
               .join(', ');
             return params ? `${p.pluginId}(${params})` : p.pluginId;
