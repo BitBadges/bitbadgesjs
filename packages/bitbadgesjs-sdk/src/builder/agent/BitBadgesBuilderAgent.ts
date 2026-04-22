@@ -601,7 +601,7 @@ export class BitBadgesBuilderAgent {
       await this.sessionStore.set(
         sessionId,
         JSON.stringify({ messages: loopResult.messages, transaction, tokensUsed: totalTokens }),
-        { ttlSeconds: DEFAULTS.sessionTtlSeconds }
+        { ttlSeconds: this.options.sessionTtlSeconds ?? DEFAULTS.sessionTtlSeconds }
       );
     } catch {
       // non-fatal
@@ -746,8 +746,16 @@ export class BitBadgesBuilderAgent {
   /**
    * Validate an existing transaction object without running the agent
    * loop. Useful for CI checks or re-running validation after manual edits.
+   *
+   * When `existingCollectionId` is supplied AND the agent was configured
+   * with an `onChainSnapshotFetcher`, the validation gate pulls the live
+   * on-chain snapshot for diff-based review — matching the update-mode
+   * behavior inside `build()`.
    */
-  async validate(transaction: any, creatorAddress?: string): Promise<{
+  async validate(
+    transaction: any,
+    options?: { creatorAddress?: string; existingCollectionId?: string; abortSignal?: AbortSignal }
+  ): Promise<{
     valid: boolean;
     errors: StructuredError[];
     warnings: Warning[];
@@ -755,10 +763,16 @@ export class BitBadgesBuilderAgent {
     simulation: any | null;
     audit: any | null;
   }> {
+    const onChainSnapshot =
+      options?.existingCollectionId && this.options.onChainSnapshotFetcher
+        ? await this.options.onChainSnapshotFetcher(options.existingCollectionId).catch(() => null)
+        : undefined;
     const gate = await runValidationGate({
       transaction,
-      creatorAddress: creatorAddress ?? this.options.defaultCreatorAddress ?? '',
-      simulate: this.options.simulate
+      creatorAddress: options?.creatorAddress ?? this.options.defaultCreatorAddress ?? '',
+      simulate: this.options.simulate,
+      abortSignal: options?.abortSignal,
+      onChainSnapshot
     });
     return {
       valid: gate.valid,

@@ -149,13 +149,20 @@ describe('createAgentToolRegistry — execute behavior', () => {
     expect(parsed.error).toBe('kaboom');
   });
 
-  it('result > 100KB is truncated with the trailing marker', async () => {
+  it('result > 100KB is wrapped in a valid-JSON truncation envelope', async () => {
     const huge = 'a'.repeat(150_000);
     const custom = makeCustom('huge', async () => huge);
     const reg = createAgentToolRegistry({ add: [custom] });
     const result = await reg.execute('huge', {}, { sessionId: 's', callerAddress: '' });
-    expect(result.length).toBeLessThanOrEqual(100_000 + 200);
-    expect(result).toMatch(/truncated — result too large/);
+    // The LLM has to parse this — it MUST be valid JSON, not a slice
+    // with a text-suffix marker.
+    const parsed = JSON.parse(result);
+    expect(parsed._truncated).toBe(true);
+    expect(parsed.originalBytes).toBe(150_000);
+    expect(typeof parsed.preview).toBe('string');
+    expect(parsed.preview.length).toBeGreaterThan(1000);
+    // Whole envelope still fits under the cap with room to spare.
+    expect(result.length).toBeLessThan(100_000);
   });
 
   it('result just under 100KB is NOT truncated', async () => {

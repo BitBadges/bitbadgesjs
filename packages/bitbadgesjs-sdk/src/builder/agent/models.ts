@@ -21,7 +21,7 @@ export const MODELS: Record<ModelName, ModelInfo> = {
     outputPerMTok: 15.0
   },
   opus: {
-    id: 'claude-opus-4-6',
+    id: 'claude-opus-4-7',
     inputPerMTok: 5.0,
     outputPerMTok: 25.0
   }

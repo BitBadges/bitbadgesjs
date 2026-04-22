@@ -145,7 +145,16 @@ export function createAgentToolRegistry(options?: CreateRegistryOptions): AgentT
       try {
         const result = await fn(args, ctx);
         const s = typeof result === 'string' ? result : JSON.stringify(result);
-        if (s.length > 100_000) return s.slice(0, 100_000) + '\n[...truncated — result too large]';
+        if (s.length > 100_000) {
+          // Return valid JSON so the LLM doesn't choke trying to parse a
+          // slice + text-suffix combo. Preview is sized to comfortably
+          // fit the whole wrapper under 100KB even after JSON escaping.
+          return JSON.stringify({
+            _truncated: true,
+            originalBytes: s.length,
+            preview: s.slice(0, 90_000)
+          });
+        }
         return s;
       } catch (err: any) {
         return JSON.stringify({ error: err?.message || 'Tool execution failed' });

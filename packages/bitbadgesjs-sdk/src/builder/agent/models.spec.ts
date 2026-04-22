@@ -34,7 +34,7 @@ describe('resolveModel', () => {
 
   it('resolves friendly name "opus"', () => {
     const info = resolveModel('opus');
-    expect(info.id).toBe('claude-opus-4-6');
+    expect(info.id).toBe('claude-opus-4-7');
   });
 
   it('unknown string is treated as a raw Anthropic model ID with opus pricing fallback', () => {
