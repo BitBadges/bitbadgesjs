@@ -18,7 +18,7 @@ export type ModelName = 'haiku' | 'sonnet' | 'opus';
 
 /** Cost/quality metadata for each supported model. */
 export interface ModelInfo {
-  /** Anthropic model ID (e.g. "claude-opus-4-6"). */
+  /** Anthropic model ID (e.g. "claude-opus-4-7"). */
   id: string;
   /** USD per 1M input tokens. */
   inputPerMTok: number;
@@ -347,6 +347,13 @@ export interface BitBadgesBuilderAgentOptions {
 
   /** Pluggable session store. Default: new MemoryStore(). */
   sessionStore?: KVStore;
+  /**
+   * TTL in seconds for persisted session snapshots (refinement replay).
+   * Default: 7200 (2h). Raise for multi-day refinement flows; stores
+   * that ignore TTL (e.g. a consumer Redis adapter with its own
+   * eviction) may safely disregard this value.
+   */
+  sessionTtlSeconds?: number;
 
   /** Pluggable community-skills fetcher (indexer plugs in Mongo; default no-op). */
   communitySkillsFetcher?: CommunitySkillsFetcher;

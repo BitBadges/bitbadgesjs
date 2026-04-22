@@ -65,7 +65,11 @@ const COMPRESSIBLE_TOOLS = new Set([
   'set_standards', 'set_valid_token_ids', 'set_default_balances',
   'set_collection_metadata', 'set_token_metadata', 'set_approval_metadata',
   'set_mint_escrow_coins', 'get_transaction',
-  'search_knowledge_base', 'fetch_docs', 'lookup_claim_plugins', 'query_collection'
+  'search_knowledge_base', 'fetch_docs', 'lookup_claim_plugins', 'query_collection',
+  // Validation + simulation tool results are often chunky (issue arrays,
+  // stack traces, gas dumps) and the summarizer already knows how to
+  // condense them — only the most recent two results need to stay raw.
+  'simulate_transaction', 'validate_transaction'
 ]);
 
 function summarizeToolResult(toolName: string, content: string): string {
@@ -344,8 +348,15 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
     }
   } catch (err: any) {
     if (err instanceof BitBadgesBuilderAgentError) throw err;
-    // Preserve original error shape but attach token usage so caller can track partial cost.
-    err.partialTokens = totalTokens;
+    // Preserve original error shape but attach token usage so caller
+    // can track partial cost. Guard the assignment — some errors (frozen
+    // objects, primitives thrown as "errors") can't take new props and
+    // would turn a real error into a cryptic TypeError.
+    try {
+      err.partialTokens = totalTokens;
+    } catch {
+      // best-effort — caller still gets the original error
+    }
     throw err;
   }
 

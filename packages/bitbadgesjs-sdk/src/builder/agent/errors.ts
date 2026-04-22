@@ -62,7 +62,10 @@ export class QuotaExceededError extends BitBadgesBuilderAgentError {
 export class AnthropicAuthError extends BitBadgesBuilderAgentError {
   constructor(detail?: string) {
     super(
-      `Anthropic authentication failed. Check that ANTHROPIC_API_KEY is set and valid.${detail ? ` (${detail})` : ''}`,
+      `Anthropic authentication failed. Verify that your Anthropic credentials are valid — ` +
+        `either an API key (ANTHROPIC_API_KEY / anthropicKey) or an OAuth token ` +
+        `(ANTHROPIC_AUTH_TOKEN / ANTHROPIC_OAUTH_TOKEN / anthropicAuthToken).` +
+        `${detail ? ` (${detail})` : ''}`,
       'ANTHROPIC_AUTH_ERROR',
       503
     );

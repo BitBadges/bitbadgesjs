@@ -7,7 +7,7 @@
  * stub out the whole peer dep.
  */
 
-import { BitBadgesBuilderAgent, MemoryStore, ValidationFailedError } from './index.js';
+import { BitBadgesBuilderAgent, MemoryStore, QuotaExceededError, ValidationFailedError } from './index.js';
 
 describe('BitBadgesBuilderAgent', () => {
   it('throws a clear error when no Anthropic credentials are provided', () => {
@@ -97,7 +97,7 @@ describe('BitBadgesBuilderAgent', () => {
 
   it('supports opus model override', () => {
     const agent = new BitBadgesBuilderAgent({ anthropicKey: 'test-key', model: 'opus' });
-    expect(agent.modelInfo.id).toBe('claude-opus-4-6');
+    expect(agent.modelInfo.id).toBe('claude-opus-4-7');
   });
 
   it('substituteImages swaps IMAGE_N tokens inside nested structures', () => {
@@ -582,5 +582,140 @@ describe('toolAdapter — mergeDefaults undefined filter', () => {
       await registry.execute('echo_tool', { apiKey: null }, { sessionId: 's', callerAddress: 'bb1' })
     );
     expect(out2.apiKey).toBeNull();
+  });
+});
+
+describe('BitBadgesBuilderAgent — healthCheck', () => {
+  it('returns anthropic.ok=true when the probe call succeeds', async () => {
+    const probe = jest.fn(async () => ({
+      usage: { input_tokens: 1, output_tokens: 0 },
+      stop_reason: 'end_turn',
+      content: [{ type: 'text', text: 'pong' }]
+    }));
+    const agent = new BitBadgesBuilderAgent({
+      anthropicClient: { messages: { create: probe } },
+      anthropicKey: 'unused'
+    });
+    const report = await agent.healthCheck();
+    expect(report.anthropic.ok).toBe(true);
+    expect(report.anthropic.model).toBe(agent.modelInfo.id);
+    expect(probe).toHaveBeenCalledTimes(1);
+    // bitbadgesApi is optional — with no key configured, it's marked not configured and not ok.
+    expect(report.bitbadgesApi.configured).toBe(false);
+    expect(report.bitbadgesApi.ok).toBe(false);
+  });
+
+  it('returns anthropic.ok=false and captures the error message when the probe throws', async () => {
+    const agent = new BitBadgesBuilderAgent({
+      anthropicClient: {
+        messages: {
+          create: async () => {
+            throw new Error('simulated auth failure');
+          }
+        }
+      },
+      anthropicKey: 'unused'
+    });
+    const report = await agent.healthCheck();
+    expect(report.anthropic.ok).toBe(false);
+    expect(report.anthropic.error).toMatch(/simulated auth failure/);
+  });
+});
+
+describe('BitBadgesBuilderAgent — validate()', () => {
+  it('runs the validation gate on a pre-built transaction and returns a structured result', async () => {
+    const agent = new BitBadgesBuilderAgent({
+      anthropicKey: 'k',
+      defaultCreatorAddress: 'bb1test'
+    });
+    const tx = { messages: [{ value: { creator: 'bb1test', collectionId: '0' } }] };
+    const result = await agent.validate(tx);
+    expect(result).toHaveProperty('valid');
+    expect(result).toHaveProperty('errors');
+    expect(Array.isArray(result.errors)).toBe(true);
+  });
+
+  it('consults the onChainSnapshotFetcher when existingCollectionId is supplied', async () => {
+    const fetcher = jest.fn(async (id: string) => ({ collectionId: id, fakeSnapshot: true }));
+    const agent = new BitBadgesBuilderAgent({
+      anthropicKey: 'k',
+      defaultCreatorAddress: 'bb1test',
+      onChainSnapshotFetcher: fetcher
+    });
+    const tx = { messages: [{ value: { creator: 'bb1test', collectionId: '42' } }] };
+    await agent.validate(tx, { existingCollectionId: '42' });
+    expect(fetcher).toHaveBeenCalledWith('42');
+  });
+
+  it('does not call the snapshot fetcher when existingCollectionId is omitted', async () => {
+    const fetcher = jest.fn(async () => null);
+    const agent = new BitBadgesBuilderAgent({
+      anthropicKey: 'k',
+      defaultCreatorAddress: 'bb1test',
+      onChainSnapshotFetcher: fetcher
+    });
+    const tx = { messages: [{ value: { creator: 'bb1test' } }] };
+    await agent.validate(tx);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+});
+
+describe('BitBadgesBuilderAgent — token quota cap', () => {
+  function makeMockClient(scripted: any[]) {
+    let i = 0;
+    return {
+      messages: { create: async () => scripted[i++ % scripted.length] }
+    };
+  }
+
+  it('throws QuotaExceededError when cumulative tokens exceed maxTokensPerBuild', async () => {
+    // One round that reports 500 input + 600 output = 1100 tokens,
+    // tripping the 1000-token cap.
+    const client = makeMockClient([
+      {
+        usage: { input_tokens: 500, output_tokens: 600 },
+        stop_reason: 'end_turn',
+        content: [{ type: 'text', text: 'done' }]
+      }
+    ]);
+    const agent = new BitBadgesBuilderAgent({
+      anthropicClient: client,
+      anthropicKey: 'unused',
+      validation: 'off',
+      maxTokensPerBuild: 1000,
+      defaultCreatorAddress: 'bb1test'
+    });
+    await expect(agent.build('any prompt')).rejects.toBeInstanceOf(QuotaExceededError);
+  });
+});
+
+describe('BitBadgesBuilderAgent — sessionTtlSeconds override', () => {
+  it('threads the configured TTL through to the session store set call', async () => {
+    // Capture the ttlSeconds that gets passed to set().
+    const setSpy = jest.fn(async (_key: string, _value: string, _opts?: { ttlSeconds?: number }) => {});
+    const agent = new BitBadgesBuilderAgent({
+      anthropicClient: {
+        messages: {
+          create: async () => ({
+            usage: { input_tokens: 1, output_tokens: 1 },
+            stop_reason: 'end_turn',
+            content: [{ type: 'text', text: 'done' }]
+          })
+        }
+      },
+      anthropicKey: 'unused',
+      validation: 'off',
+      sessionTtlSeconds: 60 * 60 * 24, // 24h
+      sessionStore: {
+        get: async () => null,
+        set: setSpy,
+        delete: async () => {}
+      },
+      defaultCreatorAddress: 'bb1test'
+    });
+    await agent.build('any');
+    expect(setSpy).toHaveBeenCalled();
+    const opts = setSpy.mock.calls[0][2];
+    expect(opts).toMatchObject({ ttlSeconds: 60 * 60 * 24 });
   });
 });

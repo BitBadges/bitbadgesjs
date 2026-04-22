@@ -11,11 +11,15 @@
 export type ImageMap = Record<string, string>;
 
 /**
- * Recursively replace `IMAGE_N` strings inside the transaction with
- * values from `images`. Only string fields named `image` are rewritten;
- * keys unrelated to image references are left alone.
+ * Recursively replace `IMAGE_N` strings anywhere in the transaction with
+ * values from `images`. Every string value is checked — the key name is
+ * not inspected, so an `IMAGE_2` reference under `description`, `uri`,
+ * or any other field is substituted just like one under `image`. This
+ * matches the frontend's `replaceImagePlaceholders` behavior.
  *
- * Returns a new transaction object — the original is not mutated.
+ * Non-string values, non-matching strings, and strings whose token has
+ * no matching entry in `images` are left alone. Returns a new
+ * transaction object — the original is not mutated.
  */
 export function substituteImages<T>(transaction: T, images: ImageMap): T {
   if (!images || Object.keys(images).length === 0) return transaction;
