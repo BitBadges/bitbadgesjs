@@ -86,8 +86,16 @@ export async function getAnthropicClient(opts: {
   baseURL?: string;
 }): Promise<any> {
   if (opts.client) return opts.client;
-  const Anthropic = await loadAnthropicSdk();
-  const ctor = Anthropic.Anthropic ?? Anthropic;
+
+  // `loadAnthropicSdk` returns `mod.default ?? mod`. That IS the
+  // Anthropic constructor (verified: .name === "Anthropic", has
+  // .messages on instance). DO NOT descend into `.Anthropic` on the
+  // class — that property exists but points at BaseAnthropic (an
+  // internal parent with no `.messages` resource). Previous code did
+  // `Anthropic.Anthropic ?? Anthropic` and accidentally landed on
+  // BaseAnthropic, producing "Cannot read properties of undefined
+  // (reading 'create')" the moment any build ran.
+  const ctor = await loadAnthropicSdk();
 
   const authToken =
     opts.authToken ??
@@ -98,14 +106,21 @@ export async function getAnthropicClient(opts: {
 
   if (!authToken && !apiKey) {
     throw new PeerDependencyError(
-      'No Anthropic credentials found. Provide one of: `anthropicKey` (API key), `anthropicAuthToken` (OAuth), or set ANTHROPIC_API_KEY / ANTHROPIC_OAUTH_TOKEN in the environment.'
+      'No Anthropic credentials found. Provide one of: `anthropicKey` (API key), `anthropicAuthToken` (OAuth token, e.g. from Claude Code), or a pre-built `anthropicClient`. Env fallbacks: ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN, ANTHROPIC_OAUTH_TOKEN.'
     );
   }
 
-  // The Anthropic SDK accepts either apiKey or authToken. Prefer OAuth when both are set.
+  // Anthropic v0.80+ rejects OAuth bearer tokens unless the
+  // `anthropic-beta: oauth-2025-04-20` header is explicitly set.
+  // API keys do not need it. We detect OAuth-vs-key by which credential
+  // was supplied and add the header only for the OAuth path.
   const clientOpts: Record<string, unknown> = { baseURL: opts.baseURL };
-  if (authToken) clientOpts.authToken = authToken;
-  else clientOpts.apiKey = apiKey;
+  if (authToken) {
+    clientOpts.authToken = authToken;
+    clientOpts.defaultHeaders = { 'anthropic-beta': 'oauth-2025-04-20' };
+  } else {
+    clientOpts.apiKey = apiKey;
+  }
 
   return new ctor(clientOpts);
 }

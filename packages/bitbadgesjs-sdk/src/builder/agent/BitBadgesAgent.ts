@@ -13,10 +13,13 @@
  * ```
  */
 
+import { randomUUID } from 'crypto';
 import { handleGetTransaction } from '../tools/index.js';
+import { getOrCreateSession } from '../session/sessionState.js';
 import { getAllSkillInstructions, type SkillInstruction } from '../resources/skillInstructions.js';
 import { getAnthropicClient } from './anthropicClient.js';
 import { AbortedError, BitBadgesAgentError, QuotaExceededError, ValidationFailedError } from './errors.js';
+import { containsInjection } from './sanitize.js';
 import { substituteImages, collectImageReferences, type ImageMap } from './images.js';
 import { resolveModel, type ModelInfo } from './models.js';
 import { assemblePromptParts, assembleExportPrompt, buildFixPrompt, buildSystemPrompt, getSystemPromptHash } from './prompt.js';
@@ -53,6 +56,14 @@ export class BitBadgesAgent {
   private readonly sessionStore: KVStore;
   private readonly hooks: AgentHooks;
   private client: any = null;
+  /**
+   * Pending init promise for the Anthropic client. Shared across
+   * concurrent `build()` calls so multiple parallel builds don't each
+   * fire their own `getAnthropicClient()` init — the last one's result
+   * would overwrite via `this.client ??=`, silently losing an earlier
+   * init error and wasting work.
+   */
+  private clientInitPromise: Promise<any> | null = null;
   /**
    * Per-build abort controllers. A Set rather than a single field so
    * concurrent `build()` calls on one agent instance (common in Express
@@ -91,6 +102,19 @@ export class BitBadgesAgent {
           'INVALID_SKILLS'
         );
       }
+    }
+
+    // Consumer-supplied systemPromptAppend is concatenated directly into
+    // the system prompt. For hosted/server deployments this is the same
+    // risk as accepting any user text there — callers running untrusted
+    // systemPromptAppend values should sanitize before passing. Best-effort
+    // injection check so an obvious "ignore your instructions" append
+    // fails fast rather than silently subverting the base prompt.
+    if (options.systemPromptAppend && containsInjection(options.systemPromptAppend)) {
+      throw new BitBadgesAgentError(
+        '`systemPromptAppend` contains prompt-injection patterns. Sanitize end-user input before passing.',
+        'INVALID_SYSTEM_PROMPT_APPEND'
+      );
     }
 
     // Resolve BitBadges API credentials — used by query/search tools.
@@ -227,7 +251,14 @@ export class BitBadgesAgent {
         priorRefinePrompts: options?.priorRefinePrompts,
         diffLog: options?.diffLog
       },
-      { communitySkillsFetcher: this.options.communitySkillsFetcher }
+      {
+        communitySkillsFetcher: this.options.communitySkillsFetcher,
+        // Thread the ctor's append slot through so exportPrompt produces
+        // the same system-prompt shape as build(). Previously missed —
+        // users setting systemPromptAppend saw their customization land
+        // in interactive builds but not in exported prompts.
+        systemPromptAppend: this.options.systemPromptAppend
+      }
     );
   }
 
@@ -251,7 +282,23 @@ export class BitBadgesAgent {
 
     const creatorAddress = options?.creatorAddress ?? this.options.defaultCreatorAddress ?? 'bb1auto-creator';
     const mode: BuildMode = options?.mode ?? this.options.defaultMode ?? 'create';
-    const sessionId = options?.sessionId ?? `agent-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    // Session IDs are guessable if we use `Math.random()`. CodeQL flags
+    // this as a security smell (insecure randomness in security
+    // context); `crypto.randomUUID()` is the right default. Callers
+    // can still pass their own `sessionId`.
+    const sessionId = options?.sessionId ?? `agent-${randomUUID()}`;
+
+    // Pre-populate the SDK's in-process session with the creator
+    // address. Session-mutating tools (set_standards, add_approval,
+    // ...) default creator from context when they hit getOrCreateSession
+    // for the first time — but if the LLM calls a non-session tool
+    // first (search_knowledge_base, fetch_docs), the session is never
+    // created with the creator and the final tx has `value.creator = ""`.
+    // Pre-init here guarantees the creator lands on the template up
+    // front, matching the legacy indexer flow that called
+    // `getOrCreateSession(sid, safeCreatorAddress)` explicitly before
+    // the agent loop.
+    getOrCreateSession(sessionId, creatorAddress);
 
     // Per-build abort controller — tracked in the inFlightControllers
     // set so agent.abort() can cancel every concurrent build without
@@ -280,13 +327,31 @@ export class BitBadgesAgent {
     creatorAddress: string,
     signal: AbortSignal
   ): Promise<BuildResult> {
-    // Resolve Anthropic client lazily — supports OAuth token, API key, or a pre-built client.
-    this.client ??= await getAnthropicClient({
-      client: this.options.anthropicClient,
-      apiKey: this.options.anthropicKey,
-      authToken: this.options.anthropicAuthToken,
-      baseURL: this.options.anthropicBaseUrl
-    });
+    // Resolve Anthropic client lazily — supports OAuth token, API key,
+    // or a pre-built client. Concurrent builds share a single init
+    // promise so we don't double-fire getAnthropicClient() on race.
+    // Clearing clientInitPromise on failure allows subsequent retries
+    // to re-attempt init after a transient error.
+    if (!this.client) {
+      if (!this.clientInitPromise) {
+        this.clientInitPromise = getAnthropicClient({
+          client: this.options.anthropicClient,
+          apiKey: this.options.anthropicKey,
+          authToken: this.options.anthropicAuthToken,
+          baseURL: this.options.anthropicBaseUrl
+        }).then(
+          (c) => {
+            this.client = c;
+            return c;
+          },
+          (err) => {
+            this.clientInitPromise = null;
+            throw err;
+          }
+        );
+      }
+      await this.clientInitPromise;
+    }
 
     // Merge per-build hook overrides on top of constructor hooks
     const hooks: AgentHooks = { ...this.hooks, ...(options?.hooks ?? {}) };
@@ -382,6 +447,13 @@ export class BitBadgesAgent {
     // or return it directly; handle both without invoking twice.
     const txResponse: any = await handleGetTransaction({ sessionId } as any);
     let transaction = txResponse?.transaction ?? txResponse;
+    // Sanity: if get_transaction gave us nothing (agent returned before
+    // any session-mutating tool ran, or the handler failed silently),
+    // fall back to a minimal shell rather than letting `undefined`
+    // cascade through validation + downstream sanity checks.
+    if (!transaction || typeof transaction !== 'object') {
+      transaction = { messages: [] };
+    }
 
     // --- Validation gate (unless off) ---
     const strictness: ValidationStrictness = this.options.validation ?? DEFAULTS.validation;

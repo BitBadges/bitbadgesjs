@@ -82,8 +82,15 @@ export function createAgentToolRegistry(options?: CreateRegistryOptions): AgentT
   const mergeDefaults = (args: any): any => {
     if (!defaultArgs || Object.keys(defaultArgs).length === 0) return args;
     const incoming = args && typeof args === 'object' && !Array.isArray(args) ? args : {};
-    // Explicit args win over defaults — defaults only fill in missing keys.
-    return { ...defaultArgs, ...incoming };
+    // Explicit args win over defaults, but `undefined` must NOT knock
+    // out a set default — that's the classic `{ ...defaults, foo:
+    // undefined }` footgun. Strip undefined keys from the incoming
+    // object before merging.
+    const definedIncoming: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(incoming)) {
+      if (v !== undefined) definedIncoming[k] = v;
+    }
+    return { ...defaultArgs, ...definedIncoming };
   };
 
   // Builtins first — in their natural registry order

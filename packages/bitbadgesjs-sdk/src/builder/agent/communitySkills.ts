@@ -34,9 +34,22 @@ interface CommunitySkillsApiResponse {
 const DEFAULT_API_URL = 'https://api.bitbadges.io';
 const DEFAULT_TIMEOUT_MS = 5000;
 
+/** Is this URL pointing at a local dev server? Used to relax the
+ *  API-key requirement when developers are iterating against a local
+ *  indexer (no key required in dev — mirrors the auth-bypass the
+ *  indexer already applies to its own routes). */
+function isLocalUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.hostname === 'localhost' || u.hostname === '127.0.0.1' || u.hostname === '0.0.0.0' || u.hostname.endsWith('.localhost');
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Construct a `CommunitySkillsFetcher` that resolves promptSkillIds
- * against the public BitBadges API.
+ * against the BitBadges API (public or localhost).
  */
 export function createBitBadgesCommunitySkillsFetcher(
   options: BitBadgesCommunitySkillsFetcherOptions = {}
@@ -49,15 +62,18 @@ export function createBitBadgesCommunitySkillsFetcher(
     DEFAULT_API_URL;
   const fetchImpl = options.fetchFn ?? (typeof fetch !== 'undefined' ? fetch : undefined);
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const localMode = isLocalUrl(resolvedApiUrl);
 
   return async function fetchCommunitySkills(
     promptSkillIds: string[],
     _creatorAddress: string
   ): Promise<Array<{ name: string; promptText: string }>> {
     if (!promptSkillIds || promptSkillIds.length === 0) return [];
-    if (!resolvedApiKey) {
-      // No key configured — silently return nothing. The agent still runs;
-      // users just miss the community-skill injection they would have gotten.
+    if (!resolvedApiKey && !localMode) {
+      // No key + production URL — silently return nothing. Agent still
+      // runs; users just miss the community-skill injection. Local dev
+      // mode skips the key requirement since local indexers don't gate
+      // their own routes for developer convenience.
       return [];
     }
     if (!fetchImpl) {
@@ -69,12 +85,11 @@ export function createBitBadgesCommunitySkillsFetcher(
     const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
     try {
       const url = `${resolvedApiUrl.replace(/\/$/, '')}/api/v0/builder/community-skills?ids=${encodeURIComponent(promptSkillIds.join(','))}`;
+      const headers: Record<string, string> = { Accept: 'application/json' };
+      if (resolvedApiKey) headers['x-api-key'] = resolvedApiKey;
       const response = await fetchImpl(url, {
         method: 'GET',
-        headers: {
-          'x-api-key': resolvedApiKey,
-          'Accept': 'application/json'
-        },
+        headers,
         signal: controller.signal
       });
       if (!response.ok) return [];

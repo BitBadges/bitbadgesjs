@@ -750,7 +750,12 @@ export function buildFixPrompt(errors: string[], advisoryNotes: string[], round:
  */
 export async function assembleExportPrompt(
   ctx: PromptContext,
-  options?: { communitySkillsFetcher?: CommunitySkillsFetcher }
+  options?: {
+    communitySkillsFetcher?: CommunitySkillsFetcher;
+    /** Same append slot as `assemblePromptParts` — keeps exportPrompt
+     *  consistent with build() when the caller has set systemPromptAppend. */
+    systemPromptAppend?: string;
+  }
 ): Promise<{ prompt: string; communitySkillsIncluded: string[] }> {
   const result = await assemblePromptParts(ctx, { ...options, forExport: true });
   return {
