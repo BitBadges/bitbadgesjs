@@ -246,3 +246,164 @@ describe('BitBadgesAgent — end-to-end with mocked Anthropic', () => {
     expect(result.errors.length).toBeGreaterThan(0);
   });
 });
+
+describe('BitBadgesAgent — skill introspection', () => {
+  it('listSkills() returns a non-empty set by default', () => {
+    const agent = new BitBadgesAgent({ anthropicKey: 'k' });
+    const skills = agent.listSkills();
+    expect(skills.length).toBeGreaterThan(0);
+    expect(skills.every((s) => typeof s.id === 'string' && typeof s.name === 'string')).toBe(true);
+  });
+
+  it('listSkills() respects the constructor skill whitelist', () => {
+    const agent = new BitBadgesAgent({ anthropicKey: 'k', skills: ['nft-collection'] });
+    const skills = agent.listSkills();
+    expect(skills.length).toBe(1);
+    expect(skills[0].id).toBe('nft-collection');
+  });
+
+  it('describeSkill returns the skill for a known id', () => {
+    const agent = new BitBadgesAgent({ anthropicKey: 'k' });
+    const s = agent.describeSkill('nft-collection');
+    expect(s).not.toBeNull();
+    expect(s!.id).toBe('nft-collection');
+  });
+
+  it('describeSkill returns null for a bogus id', () => {
+    const agent = new BitBadgesAgent({ anthropicKey: 'k' });
+    expect(agent.describeSkill('not-a-real-skill')).toBeNull();
+  });
+
+  it('describeSkill returns null for an id outside the whitelist', () => {
+    const agent = new BitBadgesAgent({ anthropicKey: 'k', skills: ['nft-collection'] });
+    // smart-token is a real skill but not in our whitelist
+    expect(agent.describeSkill('smart-token')).toBeNull();
+    // the whitelisted one still resolves
+    expect(agent.describeSkill('nft-collection')).not.toBeNull();
+  });
+});
+
+describe('BitBadgesAgent — exportPrompt', () => {
+  it('returns { prompt, communitySkillsIncluded } with Output Format in the prompt', async () => {
+    const agent = new BitBadgesAgent({
+      anthropicKey: 'k',
+      defaultCreatorAddress: 'bb1test'
+    });
+    const res = await agent.exportPrompt('mint 100 nfts', { selectedSkills: ['nft-collection'] });
+    expect(res).toHaveProperty('prompt');
+    expect(res).toHaveProperty('communitySkillsIncluded');
+    expect(Array.isArray(res.communitySkillsIncluded)).toBe(true);
+    expect(res.prompt).toContain('Output Format');
+    expect(res.prompt).toContain('mint 100 nfts');
+  });
+
+  it('filters selectedSkills against the constructor whitelist', async () => {
+    const agent = new BitBadgesAgent({
+      anthropicKey: 'k',
+      skills: ['nft-collection'],
+      defaultCreatorAddress: 'bb1test'
+    });
+    // smart-token is real but not whitelisted — should be dropped from the skill section
+    const res = await agent.exportPrompt('build a thing', {
+      selectedSkills: ['nft-collection', 'smart-token']
+    });
+    expect(res.prompt).toContain('nft-collection');
+    // The per-skill section header ("### smart-token") should not exist
+    expect(res.prompt).not.toMatch(/### smart-token/);
+  });
+
+  it('throws on invalid prompt', async () => {
+    const agent = new BitBadgesAgent({ anthropicKey: 'k' });
+    // @ts-expect-error — intentional bad input
+    await expect(agent.exportPrompt(123)).rejects.toThrow(/prompt/i);
+    await expect(agent.exportPrompt('')).rejects.toThrow(/prompt/i);
+  });
+});
+
+describe('BitBadgesAgent — concurrency + abort', () => {
+  function makeMockClient(scripted: any[]) {
+    let i = 0;
+    return {
+      messages: {
+        create: async () => scripted[i++ % scripted.length]
+      }
+    };
+  }
+
+  it('concurrent build() calls complete independently (no shared-state bugs)', async () => {
+    // Script: one tool_use round then stop. Two concurrent builds should
+    // each get their own session + their own round counts.
+    const script = [
+      {
+        usage: { input_tokens: 10, output_tokens: 5 },
+        stop_reason: 'tool_use',
+        content: [
+          { type: 'tool_use', id: 'toolu_1', name: 'get_transaction', input: {} }
+        ]
+      },
+      {
+        usage: { input_tokens: 15, output_tokens: 3 },
+        stop_reason: 'end_turn',
+        content: [{ type: 'text', text: 'ok' }]
+      }
+    ];
+    const client = makeMockClient(script);
+    const agent = new BitBadgesAgent({
+      anthropicClient: client,
+      anthropicKey: 'unused',
+      validation: 'off',
+      defaultCreatorAddress: 'bb1test'
+    });
+
+    const [a, b] = await Promise.all([agent.build('first'), agent.build('second')]);
+    expect(a.valid).toBe(true);
+    expect(b.valid).toBe(true);
+    // Each ran its own loop (rounds >= 1)
+    expect(a.rounds).toBeGreaterThan(0);
+    expect(b.rounds).toBeGreaterThan(0);
+    // Token counters shouldn't have cross-bled (trivial check — both > 0)
+    expect(a.tokensUsed).toBeGreaterThan(0);
+    expect(b.tokensUsed).toBeGreaterThan(0);
+  });
+
+  it('abort() cancels every in-flight build', async () => {
+    // Anthropic SDK receives the signal as the SECOND argument, via
+    // `client.messages.create(params, { signal })`. Mirror that here so
+    // the hang honors the abort.
+    const hangingClient: any = {
+      messages: {
+        create: (_params: any, opts?: { signal?: AbortSignal }) =>
+          new Promise((_resolve, reject) => {
+            const sig = opts?.signal;
+            const fire = () => {
+              const e = new Error('aborted');
+              (e as any).name = 'AbortError';
+              reject(e);
+            };
+            if (sig?.aborted) {
+              fire();
+              return;
+            }
+            sig?.addEventListener('abort', fire);
+          })
+      }
+    };
+
+    const agent = new BitBadgesAgent({
+      anthropicClient: hangingClient,
+      anthropicKey: 'unused',
+      validation: 'off',
+      defaultCreatorAddress: 'bb1test'
+    });
+
+    const p1 = agent.build('first');
+    const p2 = agent.build('second');
+    // Let the builds register their controllers with the agent.
+    await new Promise((r) => setImmediate(r));
+    agent.abort();
+
+    const results = await Promise.allSettled([p1, p2]);
+    expect(results[0].status).toBe('rejected');
+    expect(results[1].status).toBe('rejected');
+  }, 10_000);
+});
