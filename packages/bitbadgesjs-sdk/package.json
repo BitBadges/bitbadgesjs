@@ -1,7 +1,7 @@
 {
   "name": "bitbadges",
   "description": "BitBadges — programmable tokens on Cosmos. SDK, CLI, and builder tools for humans and agents. (Previously published as 'bitbadgesjs-sdk'.)",
-  "version": "0.34.3",
+  "version": "0.35.0",
   "license": "MIT",
   "keywords": [
     "bitbadges",
@@ -53,6 +53,14 @@
     "./builder/session": {
       "import": "./dist/esm/builder/session/sessionState.js",
       "require": "./dist/cjs/builder/session/sessionState.js"
+    },
+    "./builder/agent": {
+      "import": "./dist/esm/builder/agent/index.js",
+      "require": "./dist/cjs/builder/agent/index.js"
+    },
+    "./builder/internals": {
+      "import": "./dist/esm/builder/agent/internals.js",
+      "require": "./dist/cjs/builder/agent/internals.js"
     }
   },
   "bin": {
@@ -79,6 +87,12 @@
       ],
       "builder/session": [
         "./dist/esm/builder/session/sessionState.d.ts"
+      ],
+      "builder/agent": [
+        "./dist/esm/builder/agent/index.d.ts"
+      ],
+      "builder/internals": [
+        "./dist/esm/builder/agent/internals.d.ts"
       ]
     }
   },
@@ -159,5 +173,13 @@
     "typia": "^8.0.2",
     "web3-validator": "^2.0.6",
     "zod": "^3.22.0"
+  },
+  "peerDependencies": {
+    "@anthropic-ai/sdk": ">=0.80.0 <1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@anthropic-ai/sdk": {
+      "optional": true
+    }
   }
 }

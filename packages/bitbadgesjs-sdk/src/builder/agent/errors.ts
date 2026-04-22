@@ -1,0 +1,103 @@
+/**
+ * Typed error classes for BitBadgesBuilderAgent.
+ *
+ * Consumers can dispatch on `instanceof` to handle categories
+ * distinctly:
+ *
+ * ```ts
+ * try { await agent.build(prompt) } catch (e) {
+ *   if (e instanceof QuotaExceededError) retryLater();
+ *   else if (e instanceof ValidationFailedError) showErrors(e.errors);
+ *   else throw e;
+ * }
+ * ```
+ */
+
+export class BitBadgesBuilderAgentError extends Error {
+  readonly code: string;
+  readonly statusCode: number;
+  constructor(message: string, code = 'BITBADGES_AGENT_ERROR', statusCode = 500) {
+    super(message);
+    this.name = 'BitBadgesBuilderAgentError';
+    this.code = code;
+    this.statusCode = statusCode;
+    Object.setPrototypeOf(this, BitBadgesBuilderAgentError.prototype);
+  }
+}
+
+export class ValidationFailedError extends BitBadgesBuilderAgentError {
+  readonly errors: readonly { code: string; message: string; path?: string; fixHint?: string }[];
+  readonly transaction: any;
+  readonly advisoryNotes: readonly string[];
+  constructor(
+    errors: { code: string; message: string; path?: string; fixHint?: string }[],
+    transaction: any,
+    advisoryNotes: string[] = []
+  ) {
+    super(
+      `Validation failed with ${errors.length} error${errors.length === 1 ? '' : 's'}: ${errors.map((e) => e.message).join('; ')}`,
+      'VALIDATION_FAILED',
+      400
+    );
+    this.name = 'ValidationFailedError';
+    this.errors = errors;
+    this.transaction = transaction;
+    this.advisoryNotes = advisoryNotes;
+    Object.setPrototypeOf(this, ValidationFailedError.prototype);
+  }
+}
+
+export class QuotaExceededError extends BitBadgesBuilderAgentError {
+  readonly tokensUsed: number;
+  readonly tokenCap: number;
+  constructor(tokensUsed: number, tokenCap: number) {
+    super(`Token budget exceeded: used ${tokensUsed} of ${tokenCap}`, 'QUOTA_EXCEEDED', 402);
+    this.name = 'QuotaExceededError';
+    this.tokensUsed = tokensUsed;
+    this.tokenCap = tokenCap;
+    Object.setPrototypeOf(this, QuotaExceededError.prototype);
+  }
+}
+
+export class AnthropicAuthError extends BitBadgesBuilderAgentError {
+  constructor(detail?: string) {
+    super(
+      `Anthropic authentication failed. Verify that your Anthropic credentials are valid — ` +
+        `either an API key (ANTHROPIC_API_KEY / anthropicKey) or an OAuth token ` +
+        `(ANTHROPIC_AUTH_TOKEN / ANTHROPIC_OAUTH_TOKEN / anthropicAuthToken).` +
+        `${detail ? ` (${detail})` : ''}`,
+      'ANTHROPIC_AUTH_ERROR',
+      503
+    );
+    this.name = 'AnthropicAuthError';
+    Object.setPrototypeOf(this, AnthropicAuthError.prototype);
+  }
+}
+
+export class AbortedError extends BitBadgesBuilderAgentError {
+  readonly partialTokens: number;
+  constructor(partialTokens = 0) {
+    super('Build was aborted by the caller', 'ABORTED', 499);
+    this.name = 'AbortedError';
+    this.partialTokens = partialTokens;
+    Object.setPrototypeOf(this, AbortedError.prototype);
+  }
+}
+
+export class PeerDependencyError extends BitBadgesBuilderAgentError {
+  constructor(detail: string) {
+    super(detail, 'PEER_DEPENDENCY_ERROR', 500);
+    this.name = 'PeerDependencyError';
+    Object.setPrototypeOf(this, PeerDependencyError.prototype);
+  }
+}
+
+export class SimulationError extends BitBadgesBuilderAgentError {
+  readonly detail?: string;
+  constructor(detail?: string) {
+    super(`Simulation failed: ${detail ?? 'unknown error'}`, 'SIMULATION_ERROR', 400);
+    this.name = 'SimulationError';
+    this.detail = detail;
+    Object.setPrototypeOf(this, SimulationError.prototype);
+  }
+}

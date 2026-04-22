@@ -89,7 +89,27 @@ export function getOrCreateSession(sessionId?: string, creatorAddress?: string):
           updateTokenMetadata: true,
           tokenMetadata: [],
           updateCollectionPermissions: true,
-          collectionPermissions: {},
+          // All 11 permission fields default to neutral ([]). The chain
+          // message type requires every field to be an array. An empty
+          // object {} is invalid — and a build that skips
+          // `set_permissions` entirely would produce an empty object,
+          // fail validation, and burn the fix loop trying to recover.
+          // Defaulting to all-neutral keeps "basic builds work" as a
+          // guarantee. Calling `set_permissions` still overwrites this
+          // whole object, so no conflict.
+          collectionPermissions: {
+            canDeleteCollection: [],
+            canArchiveCollection: [],
+            canUpdateStandards: [],
+            canUpdateCustomData: [],
+            canUpdateManager: [],
+            canUpdateCollectionMetadata: [],
+            canUpdateValidTokenIds: [],
+            canUpdateTokenMetadata: [],
+            canUpdateCollectionApprovals: [],
+            canAddMoreAliasPaths: [],
+            canAddMoreCosmosCoinWrapperPaths: []
+          },
           updateInvariants: true,
           invariants: null,
           updateDefaultBalances: true,

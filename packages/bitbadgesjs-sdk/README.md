@@ -14,26 +14,55 @@ npm install bitbadges
 bun add bitbadges
 ```
 
-## AI agents / MCP builder
+## AI agents — three ways to build
 
-If you are building with an AI agent (Claude, Cursor, etc.), the recommended path is the bundled MCP builder server — it exposes per-field tools for constructing BitBadges transactions end-to-end with built-in validation, review, and examples.
+Pick the path that fits your use case. All three produce the same on-chain collection transactions.
 
-The package ships three bins:
+### 1. Programmatic agent (BYO Anthropic key)
 
-- `bitbadges` / `bitbadges-cli` — interactive CLI helpers
-- `bitbadges-builder` — the stdio MCP server (entry point: `src/builder/index.ts`)
-
-Point your MCP client at it:
+Scriptable from Node / TypeScript. You bring your own Anthropic API key; BitBadges never sees it.
 
 ```bash
-# Claude Code
+npm install bitbadges @anthropic-ai/sdk
+export ANTHROPIC_API_KEY=sk-...
+```
+
+```ts
+import { BitBadgesBuilderAgent } from 'bitbadges/builder/agent';
+
+const agent = new BitBadgesBuilderAgent({ anthropicKey: process.env.ANTHROPIC_API_KEY });
+const result = await agent.build('create a subscription token for $10/month');
+console.log(result.transaction);
+```
+
+Supports OAuth tokens (`anthropicAuthToken` or `ANTHROPIC_OAUTH_TOKEN` env), a
+BitBadges API key for query/search tools (`bitbadgesApiKey` or `BITBADGES_API_KEY`
+env), skills filter, system prompt additions, hooks, pluggable session store,
+typed errors, cost reporting, image placeholder substitution, health checks,
+and a `/internals` escape hatch for DIY loops.
+
+Examples: `examples/builder-agent/`. Full guide:
+<https://docs.bitbadges.io/for-developers/ai-agents/programmatic-agent>
+
+### 2. MCP builder (Claude Desktop / Cursor / Claude Code)
+
+Zero-code path for human-in-the-loop builds. Point your MCP client at the
+bundled `bitbadges-builder` stdio server:
+
+```bash
 claude mcp add bitbadges-builder bitbadges-builder
 ```
 
 Full walkthrough, tool reference, and skill instructions:
 <https://docs.bitbadges.io/for-developers/ai-agents/builder-tools>
 
-Hand-rolled transaction construction via the classes below is still supported as a low-level alternative, but the MCP builder is the expected entry point for agent-driven workflows.
+### 3. Hand-rolled transactions via SDK classes
+
+For non-AI workflows, import the message builders directly — see the Quick Start below.
+
+The package ships three bins:
+- `bitbadges` / `bitbadges-cli` — interactive CLI helpers
+- `bitbadges-builder` — the stdio MCP server (entry point: `src/builder/index.ts`)
 
 ## Quick Start
 
