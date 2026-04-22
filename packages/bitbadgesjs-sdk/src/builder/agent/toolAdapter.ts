@@ -93,12 +93,34 @@ export function createAgentToolRegistry(options?: CreateRegistryOptions): AgentT
     return { ...defaultArgs, ...definedIncoming };
   };
 
+  // Inject the agent's ToolExecutionContext (sessionId + callerAddress)
+  // into every tool call. Critical for session-mutating tools
+  // (set_permissions, add_approval, set_standards, etc.) which
+  // internally call `getOrCreateSession(input.sessionId, input.creatorAddress)`
+  // — they read sessionId from ARGS, not ctx. Without this injection
+  // the LLM's tool calls would hit the SDK's default session and the
+  // agent's `handleGetTransaction({ sessionId })` would read an empty
+  // template, producing a blank final tx even though every tool call
+  // "succeeded".
+  //
+  // Ordering: args spread first (LLM input), ctx overrides sessionId
+  // + creatorAddress (the LLM cannot override the agent's session
+  // binding), defaultArgs fills in any remaining missing keys.
+  const injectCtx = (args: any, ctx: ToolExecutionContext): any => {
+    const withCtx = {
+      ...((args && typeof args === 'object' && !Array.isArray(args)) ? args : {}),
+      sessionId: ctx.sessionId,
+      creatorAddress: ctx.callerAddress
+    };
+    return mergeDefaults(withCtx);
+  };
+
   // Builtins first — in their natural registry order
   for (const [name, entry] of Object.entries(builtinToolRegistry)) {
     if (remove.has(name)) continue;
     if (customByName.has(name)) continue; // custom takes precedence
     definitions.push(toAnthropicTool(name, entry));
-    executors.set(name, async (args: any) => entry.run(mergeDefaults(args)));
+    executors.set(name, async (args: any, ctx: ToolExecutionContext) => entry.run(injectCtx(args, ctx)));
   }
 
   // Custom tools appended at the end
@@ -108,7 +130,7 @@ export function createAgentToolRegistry(options?: CreateRegistryOptions): AgentT
       description: custom.definition.description,
       input_schema: custom.definition.input_schema
     });
-    executors.set(custom.definition.name, async (args, ctx) => custom.execute(mergeDefaults(args), ctx));
+    executors.set(custom.definition.name, async (args, ctx) => custom.execute(injectCtx(args, ctx), ctx));
   }
 
   const names = definitions.map((d) => d.name);

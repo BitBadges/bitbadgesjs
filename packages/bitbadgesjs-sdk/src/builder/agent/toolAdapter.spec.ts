@@ -56,7 +56,7 @@ describe('createAgentToolRegistry — add custom tool', () => {
     expect(last.name).toBe('custom_tool');
   });
 
-  it('execute() routes to the custom handler and passes ctx', async () => {
+  it('execute() routes to the custom handler and injects ctx into args', async () => {
     const handler = jest.fn(async (args: any, ctx: any) => ({ gotArgs: args, gotCtx: ctx }));
     const custom = makeCustom('custom_tool', handler);
     const reg = createAgentToolRegistry({ add: [custom] });
@@ -64,7 +64,10 @@ describe('createAgentToolRegistry — add custom tool', () => {
     const result = await reg.execute('custom_tool', { hello: 'world' }, ctx);
     expect(handler).toHaveBeenCalledTimes(1);
     const parsed = JSON.parse(result);
-    expect(parsed.gotArgs).toEqual({ hello: 'world' });
+    // sessionId + creatorAddress from ctx are auto-injected into args
+    // so session-mutating tools hit the agent's bound session. Verified
+    // the original `hello` stays intact.
+    expect(parsed.gotArgs).toEqual({ hello: 'world', sessionId: 'sess-1', creatorAddress: 'bb1x' });
     expect(parsed.gotCtx).toEqual(ctx);
   });
 
@@ -88,9 +91,16 @@ describe('createAgentToolRegistry — defaultArgs', () => {
       defaultArgs: { apiKey: 'k', apiUrl: 'https://api.example' }
     });
 
-    await reg.execute('inspect', { foo: 'bar' }, { sessionId: 's', callerAddress: '' });
+    await reg.execute('inspect', { foo: 'bar' }, { sessionId: 's', callerAddress: 'bb1c' });
     const callArgs = handler.mock.calls[0][0];
-    expect(callArgs).toEqual({ apiKey: 'k', apiUrl: 'https://api.example', foo: 'bar' });
+    // ctx values (sessionId, creatorAddress) are auto-injected too.
+    expect(callArgs).toEqual({
+      apiKey: 'k',
+      apiUrl: 'https://api.example',
+      foo: 'bar',
+      sessionId: 's',
+      creatorAddress: 'bb1c'
+    });
   });
 
   it('explicit args override defaults (explicit wins)', async () => {
