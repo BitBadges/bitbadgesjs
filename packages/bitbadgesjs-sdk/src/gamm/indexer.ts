@@ -193,14 +193,14 @@ export interface iGetPoolInfoByIdSuccessResponse {
 // SWAP TYPES
 // ============================================================================
 
-interface MultiChainMsg {
+export interface MultiChainMsg {
   chain_id: string;
   path: string[];
   msg: string;
   msg_type_url: string;
 }
 
-interface EvmTx {
+export interface EvmTx {
   chain_id: string;
   to: string;
   value: string;
