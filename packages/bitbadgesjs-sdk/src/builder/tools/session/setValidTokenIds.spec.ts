@@ -115,7 +115,9 @@ describe('handleSetValidTokenIds', () => {
         ]
       });
       expect(res.success).toBe(false);
-      // Session should not exist since validation failed before getOrCreateSession is called
+      // Validation aborted before any session was written to. Calling
+      // getOrCreateSession() here creates a fresh blank session whose
+      // validTokenIds default is [].
       const session = getOrCreateSession();
       expect(session.messages[0].value.validTokenIds).toEqual([]);
     });
@@ -123,8 +125,11 @@ describe('handleSetValidTokenIds', () => {
 
   describe('session mutation', () => {
     it('writes tokenIds into the session and flips updateValidTokenIds', () => {
-      handleSetValidTokenIds({ tokenIds: [{ start: '1', end: '5' }] });
       const session = getOrCreateSession();
+      // updateValidTokenIds defaults to true, so the assertion below would be
+      // vacuous without first resetting to false.
+      session.messages[0].value.updateValidTokenIds = false;
+      handleSetValidTokenIds({ tokenIds: [{ start: '1', end: '5' }] });
       expect(session.messages[0].value.validTokenIds).toEqual([{ start: '1', end: '5' }]);
       expect(session.messages[0].value.updateValidTokenIds).toBe(true);
     });

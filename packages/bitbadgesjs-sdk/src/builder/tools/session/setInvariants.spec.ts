@@ -19,10 +19,14 @@ describe('handleSetInvariants', () => {
   beforeEach(() => resetAllSessions());
 
   it('writes a simple noCustomOwnershipTimes=true invariant', () => {
+    const session = getOrCreateSession();
+    // updateInvariants defaults to true, so the assertion below would be
+    // vacuous without first resetting to false.
+    session.messages[0].value.updateInvariants = false;
     const res = handleSetInvariants({ invariants: { noCustomOwnershipTimes: true } });
     expect(res.success).toBe(true);
-    expect(getOrCreateSession().messages[0].value.invariants).toEqual({ noCustomOwnershipTimes: true });
-    expect(getOrCreateSession().messages[0].value.updateInvariants).toBe(true);
+    expect(session.messages[0].value.invariants).toEqual({ noCustomOwnershipTimes: true });
+    expect(session.messages[0].value.updateInvariants).toBe(true);
   });
 
   it('writes a subscription-style invariant (noCustomOwnershipTimes=false, maxSupplyPerId=1)', () => {

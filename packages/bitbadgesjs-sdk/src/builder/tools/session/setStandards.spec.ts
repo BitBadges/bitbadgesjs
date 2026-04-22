@@ -97,8 +97,12 @@ describe('handleSetStandards', () => {
 
   describe('session mutation', () => {
     it('flips updateStandards=true', () => {
+      const session = getOrCreateSession();
+      // updateStandards defaults to true, so the assertion below would be
+      // vacuous without first resetting to false.
+      session.messages[0].value.updateStandards = false;
       handleSetStandards({ standards: ['NFTs'] });
-      expect(getOrCreateSession().messages[0].value.updateStandards).toBe(true);
+      expect(session.messages[0].value.updateStandards).toBe(true);
     });
 
     it('replaces standards on re-call', () => {
