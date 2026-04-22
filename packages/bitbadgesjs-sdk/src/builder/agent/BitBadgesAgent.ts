@@ -104,16 +104,22 @@ export class BitBadgesAgent {
       }
     }
 
-    // Consumer-supplied systemPromptAppend is concatenated directly into
-    // the system prompt. For hosted/server deployments this is the same
-    // risk as accepting any user text there — callers running untrusted
-    // systemPromptAppend values should sanitize before passing. Best-effort
-    // injection check so an obvious "ignore your instructions" append
-    // fails fast rather than silently subverting the base prompt.
+    // Consumer-supplied systemPromptAppend + systemPrompt are
+    // concatenated into / replace the system prompt. Callers running
+    // untrusted values (end-user text) should sanitize before passing
+    // either. Best-effort injection check so obvious "ignore your
+    // instructions" input fails fast rather than silently subverting
+    // the base prompt. Both slots are checked under the same policy.
     if (options.systemPromptAppend && containsInjection(options.systemPromptAppend)) {
       throw new BitBadgesAgentError(
         '`systemPromptAppend` contains prompt-injection patterns. Sanitize end-user input before passing.',
         'INVALID_SYSTEM_PROMPT_APPEND'
+      );
+    }
+    if (options.systemPrompt && containsInjection(options.systemPrompt)) {
+      throw new BitBadgesAgentError(
+        '`systemPrompt` (full replace) contains prompt-injection patterns. The full-replace option bypasses base-prompt protections; sanitize first.',
+        'INVALID_SYSTEM_PROMPT'
       );
     }
 
@@ -416,6 +422,48 @@ export class BitBadgesAgent {
 
     const systemPromptHash = getSystemPromptHash(promptParts.systemPrompt);
 
+    // --- onCompletion always-fires accumulator ---
+    // Previously onCompletion was called only on success. The hook's
+    // documented contract is observability-only + fire-and-forget —
+    // callers doing cleanup (flush logs, record final state) need it
+    // on failures too. We maintain a mutable accumulator and fire the
+    // hook in the finally block below with whatever state was reached
+    // before the throw.
+    let accRounds = 0;
+    let accFixRounds = 0;
+    let accTotalTokens = 0;
+    let accTotalCostUsd = 0;
+    let accCacheCreationTokens = 0;
+    let accCacheReadTokens = 0;
+    let accMessages: any[] = [];
+    let accToolCalls: any[] = [];
+    let onCompletionFired = false;
+    const fireOnCompletion = () => {
+      if (onCompletionFired) return;
+      onCompletionFired = true;
+      if (!hooks.onCompletion) return;
+      try {
+        const r = hooks.onCompletion({
+          systemPrompt: promptParts.systemPrompt,
+          userMessage: promptParts.userMessage,
+          messages: accMessages,
+          toolCalls: accToolCalls,
+          rounds: accRounds,
+          fixRounds: accFixRounds,
+          tokensUsed: accTotalTokens,
+          cacheCreationTokens: accCacheCreationTokens,
+          cacheReadTokens: accCacheReadTokens,
+          costUsd: accTotalCostUsd,
+          model: this.model.id,
+          systemPromptHash
+        });
+        if (r && typeof (r as any).catch === 'function') (r as any).catch(() => {});
+      } catch {
+        // Swallow — observability hooks must not turn into build errors.
+      }
+    };
+
+    try {
     // --- Run main agent loop ---
     let loopResult = await runAgentLoop({
       client: this.client,
@@ -441,6 +489,15 @@ export class BitBadgesAgent {
     let totalCostUsd = loopResult.totalCostUsd;
     let cacheCreationTokens = loopResult.cacheCreationTokens;
     let cacheReadTokens = loopResult.cacheReadTokens;
+
+    // Sync accumulator so an onCompletion in the finally has current state.
+    accRounds = rounds;
+    accTotalTokens = totalTokens;
+    accTotalCostUsd = totalCostUsd;
+    accCacheCreationTokens = cacheCreationTokens;
+    accCacheReadTokens = cacheReadTokens;
+    accMessages = loopResult.messages;
+    accToolCalls = loopResult.toolCalls;
 
     // --- Extract current transaction from the SDK session ---
     // Single call — the handler's result may wrap the tx (`{ transaction }`)
@@ -505,6 +562,18 @@ export class BitBadgesAgent {
         cacheCreationTokens = loopResult.cacheCreationTokens;
         cacheReadTokens = loopResult.cacheReadTokens;
 
+        // Keep accumulator aligned after each fix round so
+        // onCompletion in the outer finally sees the latest state
+        // even if the next iteration throws.
+        accRounds = rounds;
+        accFixRounds = fixRounds;
+        accTotalTokens = totalTokens;
+        accTotalCostUsd = totalCostUsd;
+        accCacheCreationTokens = cacheCreationTokens;
+        accCacheReadTokens = cacheReadTokens;
+        accMessages = loopResult.messages;
+        accToolCalls = [...accToolCalls, ...loopResult.toolCalls];
+
         const freshTxResp = await handleGetTransaction({ sessionId } as any);
         transaction = (freshTxResp as any)?.transaction ?? freshTxResp;
 
@@ -548,11 +617,21 @@ export class BitBadgesAgent {
       systemPromptHash
     };
 
-    // Fire completion hook
-    try {
-      const r = hooks.onCompletion?.(trace);
-      if (r && typeof (r as any).catch === 'function') (r as any).catch(() => {});
-    } catch { /* swallow */ }
+    // Sync final accumulator state before firing onCompletion so both
+    // the success path here and the finally-block path see the same
+    // numbers.
+    accRounds = rounds;
+    accFixRounds = fixRounds;
+    accTotalTokens = totalTokens;
+    accTotalCostUsd = totalCostUsd;
+    accCacheCreationTokens = cacheCreationTokens;
+    accCacheReadTokens = cacheReadTokens;
+    accMessages = loopResult.messages;
+    // Fire completion hook on the success path. The outer finally
+    // below ALSO calls fireOnCompletion() — it's idempotent, so if
+    // we throw between here and the finally the hook still fires
+    // exactly once.
+    fireOnCompletion();
 
     const warnings: Warning[] = gate ? gate.advisoryNotes.map((n) => ({ category: 'advisory', message: n })) : [];
     const structuredErrors = gate ? structureErrors(gate) : [];
@@ -583,7 +662,14 @@ export class BitBadgesAgent {
       }
     };
 
-    return result;
+      return result;
+    } finally {
+      // Always fire onCompletion, even on throw. Observability hooks
+      // doing cleanup (flush logs, record final state) would otherwise
+      // silently drop failed-build traces. Idempotent — if the success
+      // path already fired it, this is a no-op.
+      fireOnCompletion();
+    }
   }
 
   /**
