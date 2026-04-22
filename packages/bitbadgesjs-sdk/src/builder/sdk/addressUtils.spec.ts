@@ -67,6 +67,13 @@ describe('addressUtils — ethToCosmos', () => {
   it('throws on non-hex characters', () => {
     expect(() => ethToCosmos('0x' + 'z'.repeat(40))).toThrow();
   });
+
+  it('is idempotent for a valid bb1 input (does not throw)', () => {
+    // #0280 note: ethToCosmos now aliases mustConvertToBitBadgesAddress,
+    // which treats a well-formed bb1 address as already-converted.
+    // Pre-adapter impl threw for any non-0x input.
+    expect(ethToCosmos(BB1_ZERO)).toBe(BB1_ZERO);
+  });
 });
 
 describe('addressUtils — cosmosToEth', () => {
@@ -163,15 +170,19 @@ describe('addressUtils — toEthAddress', () => {
     expect(() => toEthAddress('foo')).toThrow();
   });
 
-  it('round-trips 32-byte module-derived addresses without throwing', () => {
+  it('round-trips 32-byte module-derived addresses as a non-standard 0x hex', () => {
     // Pre-adapter impl threw "not a standard 20-byte address"; canonical
-    // converter instead returns the full hex payload (#0280). Consumers
-    // that previously relied on the throw were papering over an empty
-    // branch — they now get a usable hex string.
+    // converter instead hex-encodes the full bech32 payload (#0280). The
+    // return value is a well-formed but longer-than-20-byte 0x string
+    // (64 hex chars + '0x' prefix = length 66) — callers that need to
+    // reject these should check length or use validateAddress.
     const { bech32 } = require('bech32');
     const module32 = bech32.encode('bb', bech32.toWords(Buffer.alloc(32, 0)));
     expect(() => toEthAddress(module32)).not.toThrow();
-    expect(toEthAddress(module32)).toMatch(/^0x/);
+    const hex = toEthAddress(module32);
+    expect(hex).toMatch(/^0x/);
+    // 32-byte payload → 64 hex chars + '0x' prefix = length 66
+    expect(hex.length).toBe(66);
   });
 });
 
