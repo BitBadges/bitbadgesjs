@@ -541,8 +541,8 @@ Key escrow rules:
   {
     id: 'liquidity-pools',
     name: 'Liquidity Pools',
-    category: 'standard',
-    description: 'Liquidity pool standard with the "Liquidity Pools" protocol standard tag',
+    category: 'token-type',
+    description: 'Liquidity pool standard with the "Liquidity Pools" protocol standard tag — used for tradable assets that can be swapped on a DEX',
     summary: `Required standards: ["Liquidity Pools"]
 
 - MUST set invariants.disablePoolCreation: false

@@ -27,6 +27,7 @@ import { MemoryStore, type KVStore } from './sessionStore.js';
 import { createAgentToolRegistry, type AgentToolRegistry } from './toolAdapter.js';
 import { runAgentLoop } from './loop.js';
 import { runValidationGate, type ValidationGateResult } from './validation.js';
+import { inferTokenTypeFromPrompt, getTokenTypeSkills } from './tokenTypeInference.js';
 import type {
   AgentHooks,
   BitBadgesBuilderAgentOptions,
@@ -385,14 +386,114 @@ export class BitBadgesBuilderAgent {
 
     // Load any prior conversation from the session store (for refinement across HTTP boundaries)
     let existingMessages: any[] | undefined;
+    let existingSessionTransaction: any = null;
     try {
       const raw = await this.sessionStore.get(sessionId);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed?.messages)) existingMessages = parsed.messages;
+        if (parsed && typeof parsed.transaction === 'object') existingSessionTransaction = parsed.transaction;
       }
     } catch {
       // ignore — store read errors are non-fatal
+    }
+
+    // --- Smart token-type inference ----------------------------------
+    // Runs only when the caller didn't supply a token-type skill. Non
+    // token-type skills (community / additional-context) don't block
+    // inference — they coexist with an inferred token type. For
+    // refine/update flows we fold prior intent + existing standards
+    // into the inference context, so a short "fix this" doesn't strip
+    // the classifier of the signal it needs.
+    const tokenTypeSkillIds = new Set(getTokenTypeSkills().map((s) => s.id));
+    const effectiveSkillsHasTokenType = effectiveSkills.some((s) => tokenTypeSkillIds.has(s));
+    const inferFlag =
+      options?.autoInferTokenType ?? this.options.autoInferTokenType ?? true;
+    const shouldInferTokenType =
+      inferFlag &&
+      !effectiveSkillsHasTokenType &&
+      !!prompt &&
+      !!this.client;
+
+    let inferredTokenType: string | null | undefined = undefined;
+    let inferredTokenTypeSource: 'standards' | 'llm' | undefined = undefined;
+    let inferredTokenTypeReasoning: string | undefined = undefined;
+    let finalSkills = effectiveSkills;
+
+    if (shouldInferTokenType) {
+      let existingSnapshot: any = null;
+      if (options?.existingCollectionId && this.options.onChainSnapshotFetcher) {
+        existingSnapshot = await this.options.onChainSnapshotFetcher(options.existingCollectionId).catch(() => null);
+      }
+      const inferenceCtx = {
+        prompt,
+        mode,
+        originalPrompt: options?.originalPrompt,
+        priorRefinePrompts: options?.priorRefinePrompts,
+        existingTransaction: existingSessionTransaction ?? existingSnapshot,
+        allowedTokenTypeIds: this.options.skills
+          ? this.options.skills.filter((s) => tokenTypeSkillIds.has(s))
+          : undefined,
+        anthropicClient: this.client,
+        abortSignal: signal,
+        debug
+      };
+      const inferenceResult = await inferTokenTypeFromPrompt(inferenceCtx);
+      inferredTokenType = inferenceResult.tokenType;
+      if (inferenceResult.tokenType && inferenceResult.source) {
+        inferredTokenTypeSource = inferenceResult.source;
+        inferredTokenTypeReasoning = inferenceResult.reasoning;
+        // Prepend (don't append) — token types are most load-bearing,
+        // and buildSelectedSkillsSection sorts for cache stability so
+        // order is purely a readability choice.
+        finalSkills = [inferenceResult.tokenType, ...effectiveSkills];
+      }
+
+      // Fold the inference LLM call into the caller's token budget via
+      // onTokenUsage. Round 0 signals "pre-build inference"; the
+      // indexer's ledger sums inputTokens + outputTokens uniformly so
+      // this keeps billing consistent with a normal round.
+      if (inferenceResult.tokenUsage && hooks?.onTokenUsage) {
+        try {
+          await hooks.onTokenUsage({
+            inputTokens: inferenceResult.tokenUsage.inputTokens,
+            outputTokens: inferenceResult.tokenUsage.outputTokens,
+            cacheCreationTokens: inferenceResult.tokenUsage.cacheCreationTokens,
+            cacheReadTokens: inferenceResult.tokenUsage.cacheReadTokens,
+            round: 0,
+            cumulativeTokens: inferenceResult.tokenUsage.inputTokens + inferenceResult.tokenUsage.outputTokens,
+            cumulativeCacheCreationTokens: inferenceResult.tokenUsage.cacheCreationTokens,
+            cumulativeCacheReadTokens: inferenceResult.tokenUsage.cacheReadTokens,
+            cumulativeCostUsd: inferenceResult.tokenUsage.costUsd,
+            model: inferenceResult.tokenUsage.model
+          });
+        } catch {
+          // If a quota-enforcing hook throws here, propagate so the
+          // caller sees the budget overrun before we burn more tokens
+          // on the main build.
+          throw new QuotaExceededError(
+            inferenceResult.tokenUsage.inputTokens + inferenceResult.tokenUsage.outputTokens,
+            this.options.maxTokensPerBuild ?? DEFAULTS.maxTokensPerBuild
+          );
+        }
+      }
+
+      if (hooks?.onLog) {
+        try {
+          hooks.onLog({
+            type: 'info',
+            label: 'token-type inferred',
+            data: {
+              inferred: inferenceResult.tokenType,
+              source: inferenceResult.source,
+              confidence: inferenceResult.confidence,
+              reasoning: inferenceResult.reasoning
+            }
+          });
+        } catch {
+          // Observability hook — never let it break the build.
+        }
+      }
     }
 
     // Assemble prompt — honor `systemPrompt` full replace and `systemPromptAppend`
@@ -400,7 +501,7 @@ export class BitBadgesBuilderAgent {
       {
         prompt,
         creatorAddress,
-        selectedSkills: effectiveSkills,
+        selectedSkills: finalSkills,
         promptSkillIds: options?.promptSkillIds ?? [],
         contextHelpers: options?.contextHelpers,
         metadata: options?.metadata,
@@ -656,6 +757,9 @@ export class BitBadgesBuilderAgent {
       rounds,
       fixRounds,
       trace,
+      inferredTokenType,
+      inferredTokenTypeSource,
+      inferredTokenTypeReasoning,
       toString() {
         const msgCount = Array.isArray(this.transaction?.messages) ? this.transaction.messages.length : 0;
         const validityStr = this.valid ? 'valid' : `${this.errors.length} error${this.errors.length === 1 ? '' : 's'}`;

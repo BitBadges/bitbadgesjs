@@ -292,6 +292,18 @@ export interface BuildResult {
   fixRounds: number;
   /** Full trace — messages, tool calls, etc. */
   trace: BuildTrace;
+  /**
+   * Token-type skill id picked by the smart auto-inference step, or
+   * `null` when inference ran but didn't find a high-confidence match
+   * (freestyle build). `undefined` when inference was skipped
+   * entirely — e.g. the caller already supplied a token-type skill,
+   * or `autoInferTokenType` was turned off.
+   */
+  inferredTokenType?: string | null;
+  /** Provenance of `inferredTokenType` — `'standards'` (existing-collection fast-path) or `'llm'` (haiku classifier). */
+  inferredTokenTypeSource?: 'standards' | 'llm';
+  /** One-sentence explanation of the inference pick, surfaced for UI display. */
+  inferredTokenTypeReasoning?: string;
   /** Human-readable one-paragraph summary of what the build did. */
   toString(): string;
 }
@@ -372,6 +384,15 @@ export interface BitBadgesBuilderAgentOptions {
 
   /** Default creator address (can be overridden per build). */
   defaultCreatorAddress?: string;
+
+  /**
+   * Auto-infer a single token-type skill when `selectedSkills` has no
+   * token-type entry. High-confidence matches are prepended to the
+   * build's skill list; non-matches are left alone (freestyle build is
+   * a valid outcome). Default: `true`. Non-token-type skills
+   * (community / additional-context) do not block inference.
+   */
+  autoInferTokenType?: boolean;
 }
 
 /** Options passed to `agent.build()`. Narrower than the constructor. */
@@ -391,4 +412,6 @@ export interface BuildOptions {
   abortSignal?: AbortSignal;
   /** Per-build hook overrides (merge on top of constructor hooks). */
   hooks?: AgentHooks;
+  /** Per-build override of `autoInferTokenType`. Undefined → fall back to the constructor option (default `true`). */
+  autoInferTokenType?: boolean;
 }

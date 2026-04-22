@@ -184,6 +184,7 @@ describe('BitBadgesBuilderAgent — end-to-end with mocked Anthropic', () => {
 
     const agent = new BitBadgesBuilderAgent({
       anthropicClient: client,
+      autoInferTokenType: false,
       anthropicKey: 'unused-with-client',
       validation: 'off', // skip validation in this smoke test — tx is empty
       hooks: { onToolCall, onTokenUsage, onCompletion },
@@ -218,6 +219,7 @@ describe('BitBadgesBuilderAgent — end-to-end with mocked Anthropic', () => {
 
     const agent = new BitBadgesBuilderAgent({
       anthropicClient: client,
+      autoInferTokenType: false,
       anthropicKey: 'unused',
       validation: 'strict',
       fixLoopMaxRounds: 0, // no fixes
@@ -239,6 +241,7 @@ describe('BitBadgesBuilderAgent — end-to-end with mocked Anthropic', () => {
 
     const agent = new BitBadgesBuilderAgent({
       anthropicClient: client,
+      autoInferTokenType: false,
       anthropicKey: 'unused',
       validation: 'lenient',
       fixLoopMaxRounds: 0,
@@ -355,6 +358,7 @@ describe('BitBadgesBuilderAgent — concurrency + abort', () => {
     const client = makeMockClient(script);
     const agent = new BitBadgesBuilderAgent({
       anthropicClient: client,
+      autoInferTokenType: false,
       anthropicKey: 'unused',
       validation: 'off',
       defaultCreatorAddress: 'bb1test'
@@ -396,6 +400,7 @@ describe('BitBadgesBuilderAgent — concurrency + abort', () => {
 
     const agent = new BitBadgesBuilderAgent({
       anthropicClient: hangingClient,
+      autoInferTokenType: false,
       anthropicKey: 'unused',
       validation: 'off',
       defaultCreatorAddress: 'bb1test'
@@ -484,6 +489,7 @@ describe('BitBadgesBuilderAgent — onCompletion always fires', () => {
     ]);
     const agent = new BitBadgesBuilderAgent({
       anthropicClient: client,
+      autoInferTokenType: false,
       anthropicKey: 'unused',
       validation: 'strict', // will throw via forced simulation failure
       fixLoopMaxRounds: 0,
@@ -511,6 +517,7 @@ describe('BitBadgesBuilderAgent — onCompletion always fires', () => {
     ]);
     const agent = new BitBadgesBuilderAgent({
       anthropicClient: client,
+      autoInferTokenType: false,
       anthropicKey: 'unused',
       validation: 'off',
       hooks: { onCompletion },
@@ -680,6 +687,7 @@ describe('BitBadgesBuilderAgent — token quota cap', () => {
     ]);
     const agent = new BitBadgesBuilderAgent({
       anthropicClient: client,
+      autoInferTokenType: false,
       anthropicKey: 'unused',
       validation: 'off',
       maxTokensPerBuild: 1000,
@@ -704,6 +712,7 @@ describe('BitBadgesBuilderAgent — sessionTtlSeconds override', () => {
         }
       },
       anthropicKey: 'unused',
+      autoInferTokenType: false,
       validation: 'off',
       sessionTtlSeconds: 60 * 60 * 24, // 24h
       sessionStore: {
@@ -717,5 +726,123 @@ describe('BitBadgesBuilderAgent — sessionTtlSeconds override', () => {
     expect(setSpy).toHaveBeenCalled();
     const opts = setSpy.mock.calls[0][2];
     expect(opts).toMatchObject({ ttlSeconds: 60 * 60 * 24 });
+  });
+});
+
+describe('BitBadgesBuilderAgent — autoInferTokenType wiring', () => {
+  // Inference prepends one messages.create call before the main build,
+  // so any test here must feed at least two scripted responses.
+  function makeScriptedClient(scripted: any[]) {
+    let i = 0;
+    return {
+      messages: {
+        create: jest.fn(async () => scripted[i++])
+      }
+    };
+  }
+
+  function mainBuildResponse(text = 'done') {
+    return {
+      usage: { input_tokens: 50, output_tokens: 20 },
+      stop_reason: 'end_turn',
+      content: [{ type: 'text', text }]
+    };
+  }
+
+  function inferenceResponse(id: string | null, confidence: 'high' | 'low' = 'high') {
+    return {
+      usage: { input_tokens: 120, output_tokens: 40 },
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify({ id, confidence, reasoning: 'test' })
+        }
+      ]
+    };
+  }
+
+  it('runs inference when no token-type skill is in selectedSkills and populates result.inferredTokenType', async () => {
+    const client = makeScriptedClient([inferenceResponse('subscription'), mainBuildResponse()]);
+    const agent = new BitBadgesBuilderAgent({
+      anthropicClient: client,
+      anthropicKey: 'unused',
+      validation: 'off',
+      defaultCreatorAddress: 'bb1test'
+    });
+    const result = await agent.build('monthly subscription for $10');
+    expect(result.inferredTokenType).toBe('subscription');
+    expect(result.inferredTokenTypeSource).toBe('llm');
+    expect(client.messages.create).toHaveBeenCalledTimes(2);
+  });
+
+  it('skips inference entirely when selectedSkills already contains a token-type', async () => {
+    const client = makeScriptedClient([mainBuildResponse()]);
+    const agent = new BitBadgesBuilderAgent({
+      anthropicClient: client,
+      anthropicKey: 'unused',
+      validation: 'off',
+      defaultCreatorAddress: 'bb1test'
+    });
+    const result = await agent.build('anything', { selectedSkills: ['nft-collection'] });
+    expect(result.inferredTokenType).toBeUndefined();
+    expect(client.messages.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('per-build autoInferTokenType=false overrides the constructor default', async () => {
+    const client = makeScriptedClient([mainBuildResponse()]);
+    const agent = new BitBadgesBuilderAgent({
+      anthropicClient: client,
+      anthropicKey: 'unused',
+      validation: 'off',
+      defaultCreatorAddress: 'bb1test'
+    });
+    const result = await agent.build('vague request', { autoInferTokenType: false });
+    expect(result.inferredTokenType).toBeUndefined();
+    expect(client.messages.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('records inferredTokenType=null (freestyle) when inference returns low confidence', async () => {
+    const client = makeScriptedClient([inferenceResponse(null, 'low'), mainBuildResponse()]);
+    const agent = new BitBadgesBuilderAgent({
+      anthropicClient: client,
+      anthropicKey: 'unused',
+      validation: 'off',
+      defaultCreatorAddress: 'bb1test'
+    });
+    const result = await agent.build('some vague description');
+    expect(result.inferredTokenType).toBeNull();
+    expect(result.inferredTokenTypeSource).toBeUndefined();
+  });
+
+  it('constructor skills whitelist narrows the inference candidate set', async () => {
+    const client = makeScriptedClient([
+      // Claude picks a whitelisted id; this should survive the filter.
+      inferenceResponse('subscription'),
+      mainBuildResponse()
+    ]);
+    const agent = new BitBadgesBuilderAgent({
+      anthropicClient: client,
+      anthropicKey: 'unused',
+      validation: 'off',
+      skills: ['subscription', 'fungible-token'],
+      defaultCreatorAddress: 'bb1test'
+    });
+    const result = await agent.build('monthly sub for $10');
+    expect(result.inferredTokenType).toBe('subscription');
+  });
+
+  it('fires onTokenUsage for the inference round with round=0', async () => {
+    const client = makeScriptedClient([inferenceResponse('smart-token'), mainBuildResponse()]);
+    const onTokenUsage = jest.fn();
+    const agent = new BitBadgesBuilderAgent({
+      anthropicClient: client,
+      anthropicKey: 'unused',
+      validation: 'off',
+      hooks: { onTokenUsage },
+      defaultCreatorAddress: 'bb1test'
+    });
+    await agent.build('wrap USDC 1:1');
+    const rounds = onTokenUsage.mock.calls.map((c: any[]) => c[0].round);
+    expect(rounds).toContain(0);
   });
 });
