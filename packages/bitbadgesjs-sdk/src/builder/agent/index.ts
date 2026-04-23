@@ -26,6 +26,19 @@ export {
 } from './communitySkills.js';
 export { getAllSkillInstructions, type SkillInstruction } from '../resources/skillInstructions.js';
 export {
+  inferTokenTypeFromPrompt,
+  getTokenTypeSkillIds,
+  getTokenTypeSkills,
+  extractStandards,
+  inferFromStandards,
+  buildInferenceSystemPrompt,
+  buildInferenceUserPrompt,
+  parseInferenceResponse,
+  STANDARD_TO_TOKEN_TYPE,
+  type TokenTypeInferenceInput,
+  type TokenTypeInferenceResult
+} from './tokenTypeInference.js';
+export {
   BitBadgesBuilderAgentError,
   ValidationFailedError,
   QuotaExceededError,
