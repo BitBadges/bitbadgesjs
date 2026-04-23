@@ -177,10 +177,20 @@ export function resetAllSessions(): void {
 /**
  * Append a review flag (from `flag_review_item` tool) to the session's
  * accumulator. Drained into BuildResult.reviewFlags at build end.
+ *
+ * Dedupes against existing flags with the same (message, chosen) pair.
+ * The agent may re-emit an inherited flag during a refinement without
+ * realizing it's already in the session (inherited flags load at
+ * build start, don't appear in the model's context). Dedup makes the
+ * emit idempotent so duplicates don't pile up across refinements.
  */
 export function addReviewFlag(sessionId: string | undefined, flag: ReviewFlag): void {
   const sid = resolveSessionId(sessionId);
   const existing = sessionReviewFlags.get(sid) ?? [];
+  const isDuplicate = existing.some(
+    (f) => f.message === flag.message && f.chosen === flag.chosen
+  );
+  if (isDuplicate) return;
   existing.push(flag);
   sessionReviewFlags.set(sid, existing);
 }
