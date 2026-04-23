@@ -1724,11 +1724,10 @@ When enabling trading for NFTs, follow these requirements:
 
 - Increment-only, non-transferable (soulbound) fungible token purchased with ICS20 denom
 - validTokenIds: [{ "start": "1", "end": "1" }] (single token ID)
-- collectionApprovals: ONLY Mint approvals (no transferable/burnable approvals)
+- ONE Mint approval with approvalId "credit-scaled" using allowAmountScaling (single scaled approval supersedes the legacy 8-10 tier approach; legacy tiers still supported for backward compat but deprecated)
 - Lock canUpdateCollectionApprovals (empty array = frozen)
 - defaultBalances: autoApproveAllIncomingTransfers: true, autoApproveSelfInitiatedOutgoingTransfers: true, autoApproveSelfInitiatedIncomingTransfers: true
-- All Mint approvals: overridesFromOutgoingApprovals: true, mustPrioritize: true
-- Denomination tiers: create 8-10 approval tiers (credit-1, credit-5, credit-10, etc.) for greedy decomposition
+- Credit-scaled approval: overridesFromOutgoingApprovals: true, mustPrioritize: true, coinTransfers[0].coins[0].amount = "1" (micro-payment unit)
 - MUST include alias path for display
 - All permissions locked (empty arrays)
 - Key difference from Smart Token: one-way minting only, no backing/unbacking, no transferability`,
@@ -1756,108 +1755,63 @@ Credit tokens are designed for systems that track consumption off-chain. The on-
 
 ### Required Structure
 
-1. **Standards**: MUST include "Credit Token"
-   - \`"standards": ["Credit Token"]\`
-
-2. **validTokenIds**: Single fungible token ID
-   - \`"validTokenIds": [{ "start": "1", "end": "1" }]\`
-
-3. **Non-transferable (Soulbound)**: Only mint approvals allowed
-   - \`collectionApprovals\` should ONLY contain approvals with \`"fromListId": "Mint"\`
-   - No transferable-approval or burnable-approval
-   - Lock \`canUpdateCollectionApprovals\` (empty array = frozen)
-
-4. **Auto-approve incoming**: defaultBalances MUST have:
+1. **Standards**: \`"standards": ["Credit Token"]\`
+2. **validTokenIds**: \`[{ "start": "1", "end": "1" }]\` (single fungible token ID)
+3. **One scaled Mint approval** (see "The Scaled Credit Approval" below) — NO other approvals. Credit tokens are soulbound: no transfer, no burn.
+4. **defaultBalances** must auto-approve all transfer directions:
    - \`"autoApproveAllIncomingTransfers": true\`
    - \`"autoApproveSelfInitiatedOutgoingTransfers": true\`
    - \`"autoApproveSelfInitiatedIncomingTransfers": true\`
+5. **Alias path REQUIRED** for display (see below).
+6. **All permissions frozen** (every \`collectionPermissions\` field = \`[]\`).
 
-5. **Mint Approvals with coinTransfers**: Each approval mints tokens in exchange for payment
-   - \`"fromListId": "Mint"\`
-   - \`"toListId": "All"\`
-   - \`"initiatedByListId": "All"\`
-   - \`"overridesFromOutgoingApprovals": true\` (REQUIRED for all Mint approvals)
-   - \`"mustPrioritize": true\`
-   - \`coinTransfers\`: specifies payment amount and recipient
+### The Scaled Credit Approval (single approval — replaces tiers)
 
-### Conversion Rate Pattern
+The purchase form uses **amount scaling** to support arbitrary purchase sizes in ONE approval. Users pick a quantity on the frontend; the chain scales \`startBalances\` and \`coinTransfers\` by the multiplier. Base unit of the approval: **1 micro-payment → tokensPerUnit micro-tokens**.
 
-The conversion rate is: X base units of ICS20 denom = Y tokens minted.
+**\`approvalId\` MUST be exactly \`"credit-scaled"\`** — the frontend purchase form detects scaled approvals by this id. Both tracker ids (\`amountTrackerId\` in \`approvalAmounts\` and \`maxNumTransfers\`) must also equal \`"credit-scaled"\`.
 
-For example, if 1 USDC (1,000,000 base units) = 100,000 tokens:
-- \`coinTransfers.coins[0].amount\`: "1000000" (1 USDC in base units)
-- \`predeterminedBalances.incrementedBalances.startBalances[0].amount\`: "100000" (tokens minted)
+#### Conversion rate
 
-### Denomination Tiers
+Pick \`tokensPerUnit\` (the value that goes into \`startBalances[0].amount\`) so that 1 micro-unit of payment = \`tokensPerUnit\` micro-units of credit. When the token's decimals match the payment denom's decimals (the common case), \`tokensPerUnit\` equals the display rate (e.g. "1 USDC → 100 TOKEN" means \`tokensPerUnit = "100"\`).
 
-Create multiple approval tiers for bulk purchases. Each tier has a unique \`approvalId\` (\`credit-<multiplier>\`) and mints a proportional amount of tokens. The frontend uses greedy decomposition to break any purchase amount into the fewest transactions.
+Formula (general case): \`tokensPerUnit = displayRate × 10^(tokenDecimals - paymentDecimals)\`.
 
-**Choose 8-10 tiers** that make sense for the token's use case and expected purchase sizes. Cover a wide range from small to very large. The tiers are NOT hardcoded — pick the most applicable and efficient denominations for the specific token.
+#### Template
 
-Example tiers (1 USDC = 100K tokens, but adapt to your use case):
-| approvalId | Payment | Tokens Minted |
-|---|---|---|
-| credit-1 | 1 USDC | 100,000 |
-| credit-5 | 5 USDC | 500,000 |
-| credit-10 | 10 USDC | 1,000,000 |
-| credit-50 | 50 USDC | 5,000,000 |
-| credit-100 | 100 USDC | 10,000,000 |
-| credit-500 | 500 USDC | 50,000,000 |
-| credit-1000 | 1,000 USDC | 100,000,000 |
-| credit-10000 | 10,000 USDC | 1,000,000,000 |
-| credit-100000 | 100,000 USDC | 10,000,000,000 |
-| credit-1000000000 | 1B USDC | 100T tokens |
-
-The multiplier in the approvalId (e.g., \`credit-50\`) represents the number of base payment units. Each tier's payment = multiplier × base payment amount, and tokens minted = multiplier × tokens per unit.
-
-### Alias Path (REQUIRED)
-
-MUST include an alias path so tokens display nicely:
-\`\`\`json
-"aliasPathsToAdd": [{
-  "denom": "u<symbol_lowercase>",
-  "conversion": {
-    "sideA": { "amount": "1" },
-    "sideB": [{ "amount": "1", "ownershipTimes": [{"start":"1","end":"18446744073709551615"}], "tokenIds": [{"start":"1","end":"1"}] }]
-  },
-  "symbol": "<SYMBOL>",
-  "denomUnits": [],
-  "metadata": { "uri": "ipfs://METADATA_ALIAS_u<symbol_lowercase>", "customData": "" }
-}]
-\`\`\`
-
-### Approval Template
-
-Each mint approval follows this structure:
 \`\`\`json
 {
-  "toListId": "All",
   "fromListId": "Mint",
+  "toListId": "All",
   "initiatedByListId": "All",
   "transferTimes": [{ "start": "1", "end": "18446744073709551615" }],
   "tokenIds": [{ "start": "1", "end": "1" }],
   "ownershipTimes": [{ "start": "1", "end": "18446744073709551615" }],
-  "approvalId": "credit-<amount>",
+  "approvalId": "credit-scaled",
   "uri": "",
   "customData": "",
+  "version": "0",
   "approvalCriteria": {
     "predeterminedBalances": {
       "manualBalances": [],
       "incrementedBalances": {
-        "startBalances": [{ "amount": "<tokens_to_mint>", "tokenIds": [{"start":"1","end":"1"}], "ownershipTimes": [{"start":"1","end":"18446744073709551615"}] }],
+        "startBalances": [{ "amount": "<tokensPerUnit>", "tokenIds": [{"start":"1","end":"1"}], "ownershipTimes": [{"start":"1","end":"18446744073709551615"}] }],
         "incrementTokenIdsBy": "0",
         "incrementOwnershipTimesBy": "0",
+        "durationFromTimestamp": "0",
         "allowOverrideTimestamp": false,
         "recurringOwnershipTimes": { "startTime": "0", "intervalLength": "0", "chargePeriodLength": "0" },
-        "allowOverrideWithAnyValidToken": false
+        "allowOverrideWithAnyValidToken": false,
+        "allowAmountScaling": true,
+        "maxScalingMultiplier": "18446744073709551615"
       },
       "orderCalculationMethod": { "useOverallNumTransfers": true, "usePerToAddressNumTransfers": false, "usePerFromAddressNumTransfers": false, "usePerInitiatedByAddressNumTransfers": false, "useMerkleChallengeLeafIndex": false, "challengeTrackerId": "" }
     },
-    "approvalAmounts": { "overallApprovalAmount": "0", "perToAddressApprovalAmount": "0", "perFromAddressApprovalAmount": "0", "perInitiatedByAddressApprovalAmount": "0", "amountTrackerId": "credit-<amount>", "resetTimeIntervals": { "startTime": "0", "intervalLength": "0" } },
-    "maxNumTransfers": { "overallMaxNumTransfers": "0", "perToAddressMaxNumTransfers": "0", "perFromAddressMaxNumTransfers": "0", "perInitiatedByAddressMaxNumTransfers": "0", "amountTrackerId": "credit-<amount>", "resetTimeIntervals": { "startTime": "0", "intervalLength": "0" } },
+    "approvalAmounts": { "overallApprovalAmount": "0", "perToAddressApprovalAmount": "0", "perFromAddressApprovalAmount": "0", "perInitiatedByAddressApprovalAmount": "0", "amountTrackerId": "credit-scaled", "resetTimeIntervals": { "startTime": "0", "intervalLength": "0" } },
+    "maxNumTransfers": { "overallMaxNumTransfers": "0", "perToAddressMaxNumTransfers": "0", "perFromAddressMaxNumTransfers": "0", "perInitiatedByAddressMaxNumTransfers": "0", "amountTrackerId": "credit-scaled", "resetTimeIntervals": { "startTime": "0", "intervalLength": "0" } },
     "coinTransfers": [{
       "to": "<payment_recipient_address>",
-      "coins": [{ "amount": "<payment_base_units>", "denom": "<ics20_denom>" }],
+      "coins": [{ "amount": "1", "denom": "<ics20_denom>" }],
       "overrideFromWithApproverAddress": false,
       "overrideToWithInitiator": false
     }],
@@ -1866,9 +1820,26 @@ Each mint approval follows this structure:
     "overridesFromOutgoingApprovals": true,
     "overridesToIncomingApprovals": false,
     "mustPrioritize": true
-  },
-  "version": 0
+  }
 }
+\`\`\`
+
+> **Legacy (deprecated, do not produce):** older credit-token collections shipped 8-10 fixed-amount approvals with ids \`credit-1\`, \`credit-5\`, \`credit-10\`, …, \`credit-1000000000\`. The frontend still renders those for backward compatibility but new builds MUST use the single \`credit-scaled\` approval above. Do not mix the two.
+
+### Alias Path (REQUIRED)
+
+MUST include an alias path so tokens display nicely. The alias path REQUIRES at least one \`denomUnits\` entry with \`decimals > 0\` — the chain rejects an empty or zero-decimal denom units array with "denom unit decimals cannot be 0". Pick a sensible display exponent (6 is typical for fungible tokens):
+\`\`\`json
+"aliasPathsToAdd": [{
+  "denom": "u<symbol_lowercase>",
+  "conversion": {
+    "sideA": { "amount": "1" },
+    "sideB": [{ "amount": "1", "ownershipTimes": [{"start":"1","end":"18446744073709551615"}], "tokenIds": [{"start":"1","end":"1"}] }]
+  },
+  "symbol": "<SYMBOL>",
+  "denomUnits": [{ "decimals": "6", "symbol": "<SYMBOL>", "isDefaultDisplay": true, "metadata": { "uri": "ipfs://METADATA_ALIAS_<symbol_lowercase>_UNIT", "customData": "" } }],
+  "metadata": { "uri": "ipfs://METADATA_ALIAS_u<symbol_lowercase>", "customData": "" }
+}]
 \`\`\`
 
 ### Permissions (All Locked)
@@ -1895,23 +1866,18 @@ All permissions should be locked (empty arrays = frozen):
 - **Increment-only** — tokens can only be minted (purchased), never redeemed, burned, or decreased
 - **Non-transferable** — soulbound, no peer-to-peer transfers. If users need transferability, use Smart Token instead
 - **No backing/unbacking** — one-way minting only, no cosmosCoinBackedPath
-- **Multiple tiers** — different approval amounts for bulk purchases via greedy decomposition
+- **Single scaled approval** — one \`credit-scaled\` approval with \`allowAmountScaling: true\` handles all purchase sizes
 - **Credits never expire** — ownership times cover full range
-
-### Frontend Integration
-
-The Credit Token standard has a dedicated view page that shows:
-1. User's current token balance (using the alias path for display)
-2. Purchase form with DenomAmountSelectWithMax for the payment denom
-3. Conversion rate display (X denom = Y tokens)
-4. Multi-tier transaction decomposition for optimal gas usage
 
 ## Common Mistakes
 
-- DON'T add transferable or burnable approvals — credit tokens are increment-only and non-transferable (soulbound). Only Mint approvals are allowed.
-- DON'T forget mustPrioritize: true on all credit token Mint approvals — required for correct tier matching.
+- DON'T ship the legacy \`credit-1 / credit-5 / credit-10 / …\` tier approvals on new collections — produce ONE approval with \`approvalId: "credit-scaled"\` instead.
+- DON'T forget \`allowAmountScaling: true\` on the \`credit-scaled\` approval — without it the frontend can't scale payments.
+- DON'T set \`coinTransfers[0].coins[0].amount\` to anything other than \`"1"\` on the scaled approval — the amount is the per-micro-unit rate; the frontend multiplies at purchase time.
+- DON'T add transferable or burnable approvals — credit tokens are soulbound. Only the one scaled Mint approval.
+- DON'T forget \`mustPrioritize: true\` — required so the scaled approval wins during purchase.
 - DON'T forget the alias path — credit tokens will not display properly without one.
-- DON'T use numbers instead of strings for amounts — all values must be string-encoded ("100000" not 100000).
+- DON'T use numbers instead of strings for amounts — all values must be string-encoded.
 - DON'T confuse credit tokens with smart tokens — credit tokens are one-way minting only with no backing/unbacking or transferability.`
   },
   // escrow-pact removed — functionality merged into payment-protocol
@@ -2072,9 +2038,11 @@ The frontend identifies address list approvals by their EXACT approvalIds. Using
 
 ### Manager-Remove Approval (forceful burn to remove)
 
+\`fromListId\` MUST be **"!Mint"** (All except Mint). Using "All" is rejected by the chain with "Mint address cannot be included in address list with other addresses" — the Mint slot can only appear in a list by itself.
+
 \`\`\`json
 {
-  "fromListId": "All",
+  "fromListId": "!Mint",
   "toListId": "bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv",
   "initiatedByListId": "bb1creator...",
   "transferTimes": [{ "start": "1", "end": "18446744073709551615" }],
@@ -2089,6 +2057,10 @@ The frontend identifies address list approvals by their EXACT approvalIds. Using
   "version": "0"
 }
 \`\`\`
+
+### Invariants
+
+DO NOT set \`noForcefulPostMintTransfers: true\` on address-list collections. That invariant would block manager-remove from burning tokens (since its \`overridesFromOutgoingApprovals: true\` is only chain-allowed when \`fromListId\` is exactly "Mint"). The manager MUST be able to forcibly burn a list member's token, so leave that invariant off. Other default invariants (e.g. \`noCustomOwnershipTimes\`) are fine.
 
 ### Default Balances
 
