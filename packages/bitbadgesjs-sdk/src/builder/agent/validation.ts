@@ -14,6 +14,8 @@
 
 import { handleValidateTransaction as builderValidateTransaction, handleReviewCollection } from '../tools/index.js';
 import { isAdvisorySimulationError, parseSimulationError } from './simulationErrorPatterns.js';
+import { runDesignChecks } from '../../core/design-decisions/index.js';
+import type { DesignDecisionsResult } from '../../core/review-types.js';
 import type { TransactionSimulator } from './types.js';
 
 export interface SimulationResult {
@@ -63,6 +65,8 @@ export interface ValidationGateResult {
   hardErrors: string[];
   advisoryNotes: string[];
   counts: HardErrorCounts;
+  /** Informational ✓/✗/n-a checks about what the collection IS. No effect on `valid`. */
+  designDecisions: DesignDecisionsResult | null;
 }
 
 export async function runValidationGate(params: ValidationGateParams): Promise<ValidationGateResult> {
@@ -152,6 +156,18 @@ export async function runValidationGate(params: ValidationGateParams): Promise<V
       }
     : null;
 
+  // Informational design decisions — pure read of what the collection IS.
+  // Swallow errors so a bad check never blocks the gate; `null` means
+  // the collection wasn't a shape we could analyze.
+  let designDecisions: DesignDecisionsResult | null = null;
+  if (msg) {
+    try {
+      designDecisions = runDesignChecks(msg);
+    } catch (e: any) {
+      if (onLog) await onLog({ type: 'error', label: 'Design decisions threw', data: { error: e?.message || String(e) } });
+    }
+  }
+
   const valid = hardErrors.length === 0;
 
   if (onLog) {
@@ -167,5 +183,5 @@ export async function runValidationGate(params: ValidationGateParams): Promise<V
     });
   }
 
-  return { valid, validation, audit, simulation, hardErrors, advisoryNotes, counts };
+  return { valid, validation, audit, simulation, hardErrors, advisoryNotes, counts, designDecisions };
 }

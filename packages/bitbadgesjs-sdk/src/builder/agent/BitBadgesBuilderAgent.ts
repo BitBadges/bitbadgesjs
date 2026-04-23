@@ -28,6 +28,7 @@ import { createAgentToolRegistry, type AgentToolRegistry } from './toolAdapter.j
 import { runAgentLoop } from './loop.js';
 import { runValidationGate, type ValidationGateResult } from './validation.js';
 import { inferTokenTypeFromPrompt, getTokenTypeSkills } from './tokenTypeInference.js';
+import type { DesignDecisionsResult } from '../../core/review-types.js';
 import type {
   AgentHooks,
   BitBadgesBuilderAgentOptions,
@@ -744,6 +745,7 @@ export class BitBadgesBuilderAgent {
       validation: gate?.validation ?? { valid: true, issues: [] },
       simulation: gate?.simulation ?? null,
       audit: gate?.audit ?? null,
+      designDecisions: gate?.designDecisions ?? null,
       tokensUsed: totalTokens,
       costUsd: totalCostUsd,
       rounds,
@@ -858,6 +860,7 @@ export class BitBadgesBuilderAgent {
     validation: any;
     simulation: any | null;
     audit: any | null;
+    designDecisions: DesignDecisionsResult | null;
   }> {
     const onChainSnapshot =
       options?.existingCollectionId && this.options.onChainSnapshotFetcher
@@ -876,7 +879,8 @@ export class BitBadgesBuilderAgent {
       warnings: gate.advisoryNotes.map((n) => ({ category: 'advisory', message: n })),
       validation: gate.validation,
       simulation: gate.simulation,
-      audit: gate.audit
+      audit: gate.audit,
+      designDecisions: gate.designDecisions
     };
   }
 }

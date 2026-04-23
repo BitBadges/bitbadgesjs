@@ -66,5 +66,7 @@ export * from './audit.js';
 // It creates a runtime `new CollectionDoc(...)`, which requires docs-types/docs.js — and that chain
 // used to reach back into core/ mid-load, producing a "Super expression" error.
 export * from './review.js';
+export { runDesignChecks, standardsDecisions, supplyDecisions, transferabilityDecisions, backingDecisions } from './design-decisions/index.js';
+export type { DesignDecision, DesignDecisionsResult, DesignDecisionStatus } from './review-types.js';
 
 export * from './builders/index.js';
