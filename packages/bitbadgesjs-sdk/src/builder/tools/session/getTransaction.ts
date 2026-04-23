@@ -23,6 +23,32 @@ export const getTransactionTool = {
 };
 
 const IMAGE_PLACEHOLDER_REGEX = /^IMAGE_\d+$/;
+/**
+ * Legacy BitBadges default logo URI. The prompt used to instruct the
+ * LLM to hardcode this when no images were uploaded; it's been
+ * removed, but we still scrub it defensively in case the prompt
+ * cache / training data leaks it into the output.
+ */
+const LEGACY_BB_LOGO_URI = 'ipfs://QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E';
+
+/** True iff a string needs to be swapped for generated art. */
+function isUnresolvedImage(s: string): boolean {
+  return IMAGE_PLACEHOLDER_REGEX.test(s) || s === LEGACY_BB_LOGO_URI;
+}
+
+/**
+ * Approval-metadata placeholders are REQUIRED to have `image: ""` by
+ * protocol convention (see the Images section in the system prompt).
+ * Non-approval placeholders (collection, token, alias path) should
+ * have a real image — an empty string there means the LLM left the
+ * field unfilled, and we want to fill it in. This heuristic picks
+ * them apart based on the sidecar key naming convention the prompt
+ * enforces.
+ */
+function isApprovalPlaceholderKey(key: string): boolean {
+  const k = key.toUpperCase();
+  return k.includes('APPROVAL') || k.includes('MERKLE');
+}
 
 /**
  * Find the collection's display name inside the built transaction.
@@ -61,22 +87,25 @@ function extractCollectionName(tx: any): string {
 }
 
 /**
- * Walk the transaction and replace every unresolved `IMAGE_N` string
- * with a single generated placeholder-art data URI. We generate ONCE
- * per call (seeded by the collection name) and reuse the result for
- * every placeholder — this matches the common real-world pattern
- * where a collection uses one image across collection + tokens +
- * alias paths + denom units. Callers that want per-asset variety
- * should invoke `generate_placeholder_art` directly before setting
- * metadata — this post-step only fills what the LLM left unresolved.
+ * Generic recursive replace — swaps any string that qualifies as
+ * "unresolved" (IMAGE_N or the legacy BitBadges default-logo URI)
+ * with the single per-build generated art URI. Runs on every field
+ * in the transaction, including the sidecar.
  *
- * Existing strings that look like real URIs (https://, ipfs://,
- * data:) are NEVER touched.
+ * We generate ONCE per call (seeded by the collection name) and
+ * reuse the result — matches the common real-world pattern where
+ * a collection uses one image across collection + tokens + alias
+ * paths + denom units. Callers that want per-asset variety should
+ * invoke `generate_placeholder_art` directly before setting
+ * metadata; this post-step only fills what the LLM left unresolved.
+ *
+ * Real URIs (https://, ipfs://, data:) are NEVER touched EXCEPT the
+ * one legacy BitBadges default-logo hash that we explicitly scrub.
  */
 function replaceUnresolvedImagePlaceholders(obj: any, fallbackUri: string): any {
   if (obj === null || obj === undefined) return obj;
   if (typeof obj === 'string') {
-    return IMAGE_PLACEHOLDER_REGEX.test(obj) ? fallbackUri : obj;
+    return isUnresolvedImage(obj) ? fallbackUri : obj;
   }
   if (Array.isArray(obj)) return obj.map((v) => replaceUnresolvedImagePlaceholders(v, fallbackUri));
   if (typeof obj === 'object') {
@@ -89,14 +118,65 @@ function replaceUnresolvedImagePlaceholders(obj: any, fallbackUri: string): any 
   return obj;
 }
 
-/** Cheap scan for any lingering `IMAGE_N` strings. Short-circuits when it finds one. */
+/**
+ * Targeted sidecar pass — walks `_meta.metadataPlaceholders` on each
+ * message and fills EMPTY-STRING images for non-approval entries.
+ * Approval placeholders are required to have `image: ""` by protocol
+ * convention and are left alone.
+ *
+ * Returns a count of fills performed so the caller can include it in
+ * observability / log output.
+ */
+function fillEmptyImagesInSidecar(tx: any, fallbackUri: string): number {
+  if (!tx || typeof tx !== 'object') return 0;
+  const msgs = Array.isArray(tx.messages) ? tx.messages : tx.msgs;
+  if (!Array.isArray(msgs)) return 0;
+  let filled = 0;
+  for (const msg of msgs) {
+    const body = msg?.value ?? msg;
+    const meta = body?._meta ?? body?.meta;
+    const placeholders = meta?.metadataPlaceholders;
+    if (!placeholders || typeof placeholders !== 'object') continue;
+    for (const [key, entry] of Object.entries(placeholders)) {
+      if (!entry || typeof entry !== 'object') continue;
+      if (isApprovalPlaceholderKey(key)) continue;
+      const e = entry as any;
+      if (e.image === '' || e.image === undefined || e.image === null) {
+        e.image = fallbackUri;
+        filled++;
+      }
+    }
+  }
+  return filled;
+}
+
+/** Predicate: is there any string in the tree that needs a swap? */
 function hasUnresolvedImagePlaceholder(obj: any): boolean {
   if (obj === null || obj === undefined) return false;
-  if (typeof obj === 'string') return IMAGE_PLACEHOLDER_REGEX.test(obj);
+  if (typeof obj === 'string') return isUnresolvedImage(obj);
   if (Array.isArray(obj)) return obj.some(hasUnresolvedImagePlaceholder);
   if (typeof obj === 'object') {
     for (const val of Object.values(obj)) {
       if (hasUnresolvedImagePlaceholder(val)) return true;
+    }
+  }
+  return false;
+}
+
+/** Predicate: is there any empty image on a non-approval sidecar entry? */
+function hasEmptyNonApprovalImage(tx: any): boolean {
+  if (!tx || typeof tx !== 'object') return false;
+  const msgs = Array.isArray(tx.messages) ? tx.messages : tx.msgs;
+  if (!Array.isArray(msgs)) return false;
+  for (const msg of msgs) {
+    const body = msg?.value ?? msg;
+    const placeholders = (body?._meta ?? body?.meta)?.metadataPlaceholders;
+    if (!placeholders || typeof placeholders !== 'object') continue;
+    for (const [key, entry] of Object.entries(placeholders)) {
+      if (!entry || typeof entry !== 'object') continue;
+      if (isApprovalPlaceholderKey(key)) continue;
+      const img = (entry as any).image;
+      if (img === '' || img === undefined || img === null) return true;
     }
   }
   return false;
@@ -107,15 +187,29 @@ export function handleGetTransaction(input: GetTransactionInput) {
   // Ensure all numbers are strings (common LLM mistake)
   const sanitized = ensureStringNumbers(transaction);
 
-  // Post-step: fill any unresolved IMAGE_N with generated placeholder
-  // art. Generated ONCE per call and reused for every placeholder —
-  // matches the common "one image across the collection" pattern and
-  // avoids token-counts explosion when a collection has many tokens.
+  // Post-step: fill any unresolved image slot with generated
+  // placeholder art. Generated ONCE per call and reused for every
+  // slot — matches the common "one image across the collection"
+  // pattern and avoids token-cost explosion on many-token builds.
+  //
+  // Three kinds of slots get filled:
+  //   1. IMAGE_N placeholders the LLM wrote but nothing substituted
+  //   2. The legacy BitBadges default-logo URI (scrubbed defensively
+  //      in case prompt-cache residue or training data leaks it)
+  //   3. Empty-string images on NON-approval sidecar placeholders
+  //      (approval placeholders require image="" and are left alone)
   let cleaned = sanitized;
-  if (hasUnresolvedImagePlaceholder(sanitized)) {
+  const needsGenericFill = hasUnresolvedImagePlaceholder(sanitized);
+  const needsSidecarFill = hasEmptyNonApprovalImage(sanitized);
+  if (needsGenericFill || needsSidecarFill) {
     const seed = extractCollectionName(sanitized);
     const art = generatePlaceholderArt({ seed });
-    cleaned = replaceUnresolvedImagePlaceholders(sanitized, art.imageUri);
+    if (needsGenericFill) {
+      cleaned = replaceUnresolvedImagePlaceholders(sanitized, art.imageUri);
+    }
+    if (needsSidecarFill) {
+      fillEmptyImagesInSidecar(cleaned, art.imageUri);
+    }
   }
 
   // Narrow Universal → MsgCreateCollection / MsgUpdateCollection at this

@@ -53,7 +53,7 @@ export type GeneratePlaceholderArtToolInput = z.infer<typeof generatePlaceholder
 export const generatePlaceholderArtTool = {
   name: 'generate_placeholder_art',
   description:
-    'Generate a deterministic SVG placeholder image as a data: URI. Use when the user has NOT supplied an image for the asset — drop the returned `imageUri` directly into the `image` field of set_collection_metadata / set_token_metadata / alias path helpers. Do NOT wrap the URI in IMAGE_N — it IS the final value. Prefer calling this over using the BitBadges default logo for unnamed assets.',
+    'Generate a deterministic SVG placeholder image as a data: URI. CALL THIS AS YOUR FIRST TOOL WHENEVER THE USER DID NOT UPLOAD IMAGES. Pass the collection name as `seed`. Use the returned `imageUri` verbatim in the `image` field of set_collection_metadata, every set_token_metadata, and every alias / denom-unit metadata call — reuse the SAME imageUri across all of them unless each asset has a meaningfully distinct identity. Do NOT wrap the URI in IMAGE_N, do NOT hardcode the old BitBadges default logo.',
   inputSchema: {
     type: 'object' as const,
     properties: {
