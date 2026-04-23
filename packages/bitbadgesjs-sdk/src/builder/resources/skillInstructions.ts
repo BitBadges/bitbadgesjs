@@ -1832,20 +1832,39 @@ The single approval's shape is fully canonical — use the preset instead of han
 add_preset_approval({
   presetId: "credit-token.scaled",
   params: {
-    paymentDenom: "<ics20 denom, e.g. ibc/... or a native denom>",
+    paymentDenom: "<ics20 denom — native like 'ubadge', 'uatom', or an 'ibc/...' hash>",
     paymentRecipient: "<bb1... creator or treasury address>",
-    tokensPerUnit: "<tokens minted per 1 base unit of payment>"
+    tokensPerUnit: "<base-unit ratio; see Conversion rate below>"
   }
 })
 \`\`\`
 
 Discover params + other credit-token presets with \`list_presets({skill: "credit-token"})\`. Presets route through the same validators as hand-built approvals — output is structurally identical. Use \`overrides\` for small tweaks (custom \`transferTimes\` window, etc.); for shape changes the preset doesn't cover, fall back to \`add_approval\`.
 
-#### Conversion rate
+#### Conversion rate — \`tokensPerUnit\` is a BASE-UNIT ratio
 
-Pick \`tokensPerUnit\` (the value that goes into \`startBalances[0].amount\`) so that 1 micro-unit of payment = \`tokensPerUnit\` micro-units of credit. When the token's decimals match the payment denom's decimals (the common case), \`tokensPerUnit\` equals the display rate (e.g. "1 USDC → 100 TOKEN" means \`tokensPerUnit = "100"\`).
+Like every chain amount, \`tokensPerUnit\` is in base units — specifically, it's a ratio of two base-unit amounts: **how many micro-tokens to mint per ONE micro-unit of payment**. Because the preset's coinTransfer is fixed at \`"1"\` micro-payment-unit and the chain scales both sides together at purchase, the ratio you write here is the per-micro-unit mint rate directly.
 
-Formula (general case): \`tokensPerUnit = displayRate × 10^(tokenDecimals - paymentDecimals)\`.
+**Computation:**
+
+Given a user-stated rate "X display-payment-units → Y display-token-units", with payment decimals \`Dp\` and token decimals \`Dt\`:
+
+\`\`\`
+tokensPerUnit = (Y × 10^Dt) / (X × 10^Dp)
+             = (Y / X) × 10^(Dt - Dp)
+\`\`\`
+
+When \`Dt === Dp\` (the common case — the frontend mint form auto-matches token decimals to payment decimals), \`10^(Dt - Dp) = 1\`, so \`tokensPerUnit = Y / X\` — **just the user's stated ratio, no zeros appended**.
+
+**Worked examples (assume matching decimals):**
+- "1 payment → 100 tokens" → \`tokensPerUnit: "100"\`
+- "1 payment → 1000 tokens" → \`tokensPerUnit: "1000"\`
+- "1 payment → 1 token" → \`tokensPerUnit: "1"\`
+- "5 payment → 100 tokens" → \`tokensPerUnit: "20"\` (100 / 5)
+
+**Common mistake to avoid:** do not multiply by \`10^Dt\` alone (e.g. \`100 × 10^6 = 100000000\`). That converts display-tokens to micro-tokens but forgets that the payment side is ALSO already in micro-units — the two conversions cancel. If a sanity check shows your number has Dp+ trailing zeros per display unit the user stated, you've double-converted.
+
+For mismatched decimals: call \`lookup_token_info\` to confirm both decimals, then use the full formula.
 
 #### Template
 

@@ -22,7 +22,7 @@ const ScaledParams = z.object({
   paymentDenom: z.string().describe('ICS20 denom users pay in (e.g. an ibc/... hash or a native denom).'),
   paymentRecipient: z.string().describe('bb1... address that receives payments.'),
   tokensPerUnit: z.string().describe(
-    'Tokens minted per ONE base unit of payment (both typically 6 decimals, so "100" means 1 USDC → 100 TOKEN).'
+    'BASE-UNIT ratio: how many MICRO tokens are minted per ONE MICRO unit of payment. Both sides are in base units — when tokenDecimals === paymentDecimals (the common case, frontend auto-matches), the ratio equals the user\'s display rate verbatim (e.g. "1 USDC = 100 TOKEN" → "100"). For mismatched decimals: compute (tokensDisplay × 10^tokenDecimals) / (paymentDisplay × 10^paymentDecimals).'
   )
 });
 type ScaledParams = z.infer<typeof ScaledParams>;
