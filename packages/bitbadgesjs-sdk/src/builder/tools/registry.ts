@@ -71,6 +71,7 @@ import {
   addTransferTool, handleAddTransfer,
   removeTransferTool, handleRemoveTransfer,
   getTransactionTool, handleGetTransaction,
+  generatePlaceholderArtTool, handleGeneratePlaceholderArt,
   setIsArchivedTool, handleSetIsArchived,
   generateUniqueIdTool, handleGenerateUniqueId,
   generateWrapperAddressTool, handleGenerateWrapperAddress
@@ -237,6 +238,7 @@ export const toolRegistry: Record<string, ToolEntry> = {
   add_transfer: entry(addTransferTool, handleAddTransfer),
   remove_transfer: entry(removeTransferTool, handleRemoveTransfer),
   get_transaction: entry(getTransactionTool, handleGetTransaction),
+  generate_placeholder_art: entry(generatePlaceholderArtTool, handleGeneratePlaceholderArt),
   set_is_archived: entry(setIsArchivedTool, handleSetIsArchived),
   generate_unique_id: entry(generateUniqueIdTool, handleGenerateUniqueId),
   generate_wrapper_address: entry(generateWrapperAddressTool, handleGenerateWrapperAddress)

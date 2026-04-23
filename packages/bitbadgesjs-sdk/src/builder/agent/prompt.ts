@@ -322,9 +322,24 @@ Rules:
 Images: The request will specify whether images are available. If available,
 use the listed IMAGE_N placeholders as the "image" field INSIDE
 metadataPlaceholders entries — NEVER as a field directly on on-chain
-metadata. If no images are uploaded, use the default logo URI the request
-provides inside the same sidecar entries. NEVER use IMAGE_N placeholders
-unless the request explicitly lists them as available.
+metadata. NEVER use IMAGE_N placeholders unless the request explicitly
+lists them as available.
+
+When no images are uploaded, the "image" field should still be set. You
+have two options, pick whichever fits:
+  - Preferred: call generate_placeholder_art(seed: <asset name>) to get
+    a data:image/svg+xml;base64,... URI and use it directly as the image
+    value. Deterministic; same seed → same art. One generated image can
+    be reused across collection + tokens + alias paths + denom units —
+    that's the common pattern and saves tool calls. Only generate
+    distinct art per-asset when each asset has a meaningfully different
+    name/identity.
+  - Fallback: use a placeholder IMAGE_N string — a post-step in
+    get_transaction will auto-generate one piece of art (seeded by the
+    collection name) and fill every unresolved IMAGE_N with it.
+Do NOT hardcode the old BitBadges default logo (QmNTpiz...) — it's no
+longer the fallback. Existing real URIs (https://, ipfs://, data:) are
+never overwritten; only unresolved IMAGE_N strings get filled in.
 
 ${SECURITY_SECTION}
 

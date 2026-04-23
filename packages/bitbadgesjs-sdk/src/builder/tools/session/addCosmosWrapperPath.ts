@@ -32,10 +32,10 @@ export const addCosmosWrapperPathSchema = z.object({
   // JSON and substitutes the placeholder URIs.
   pathName: z.string().optional().describe('Display name for this wrapper path (off-chain metadata).'),
   pathDescription: z.string().optional().describe('1-2 sentence description for this wrapper path (off-chain metadata).'),
-  pathImage: z.string().optional().describe('Image URL or IMAGE_N placeholder for this wrapper path (off-chain metadata).'),
+  pathImage: z.string().optional().describe('Image value for this wrapper path (off-chain metadata). Accepts IMAGE_N, https://, ipfs://, or data:image/svg+xml;base64,... (from generate_placeholder_art). Reusing the collection image here is fine.'),
   denomUnitName: z.string().optional().describe('Display name for the default denom unit (off-chain).'),
   denomUnitDescription: z.string().optional().describe('Description for the default denom unit (off-chain).'),
-  denomUnitImage: z.string().optional().describe('Image URL or IMAGE_N placeholder for the default denom unit (off-chain).'),
+  denomUnitImage: z.string().optional().describe('Image value for the default denom unit (off-chain). Accepts IMAGE_N, https://, ipfs://, or data:image/svg+xml;base64,... (from generate_placeholder_art). Reusing the collection image here is fine.'),
   wrapperPath: z.object({
     denom: z.string().describe('Custom denom for the wrapped ICS20 coin (e.g., "utoken", "uwrapped"). Must only contain a-zA-Z, _, {, }, -. This creates a NEW denom — do NOT use an existing IBC denom.'),
     symbol: z.string().describe('Symbol for the base unit. Usually same as denom.'),

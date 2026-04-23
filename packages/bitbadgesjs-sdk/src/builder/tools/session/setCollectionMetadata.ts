@@ -6,7 +6,7 @@ export const setCollectionMetadataSchema = z.object({
   creatorAddress: z.string().optional(),
   name: z.string().describe('Collection name. Must be specific and user-facing (e.g., "Premium Membership", "5 ATOM Monthly Subscription").'),
   description: z.string().describe('Collection description. 1-2 sentences, specific, ends with a period.'),
-  image: z.string().describe('Image URL or placeholder. Use IMAGE_1, IMAGE_2 etc. if user uploaded images. Use BitBadges default logo "ipfs://QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E" if no image available.')
+  image: z.string().describe('Image value. Accepts any of: IMAGE_N placeholder (when user uploaded images), https:// URL, ipfs:// URI, or data:image/svg+xml;base64,... URI from generate_placeholder_art. If no image is available, prefer calling generate_placeholder_art and pasting its imageUri here; an IMAGE_N string you leave unresolved will be auto-filled with generated art at get_transaction time.')
 });
 
 export type SetCollectionMetadataInput = z.infer<typeof setCollectionMetadataSchema>;
@@ -21,7 +21,7 @@ export const setCollectionMetadataTool = {
       creatorAddress: { type: 'string' },
       name: { type: 'string', description: 'Collection name. Specific and user-facing.' },
       description: { type: 'string', description: '1-2 sentences, ends with period.' },
-      image: { type: 'string', description: 'Image URL or IMAGE_N placeholder.' }
+      image: { type: 'string', description: 'IMAGE_N, https://, ipfs://, or data:image/svg+xml;base64,... (from generate_placeholder_art).' }
     },
     required: ['name', 'description', 'image']
   }
