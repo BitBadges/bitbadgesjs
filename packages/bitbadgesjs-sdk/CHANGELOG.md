@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.35.1]
+
+### New Features
+
+- **Smart token-type inference** (`BitBadgesBuilderAgent`): When the caller's `selectedSkills` has no token-type entry, the agent auto-classifies the prompt and prepends a single high-confidence token-type skill. Two signals: deterministic standards → skill lookup (for refine/update flows with an existing collection) and a haiku classifier fallback. Returns `null` when confidence is low — freestyle build is a valid outcome. Surfaced as `result.inferredTokenType` / `inferredTokenTypeSource` / `inferredTokenTypeReasoning`.
+  - New constructor option `autoInferTokenType?: boolean` (default `true`) and per-build `BuildOptions.autoInferTokenType` override.
+  - New exports: `inferTokenTypeFromPrompt`, `getTokenTypeSkillIds`, `getTokenTypeSkills`, `STANDARD_TO_TOKEN_TYPE`, `extractStandards`, `inferFromStandards`.
+  - `liquidity-pools` skill recategorized from `'standard'` to `'token-type'` to match the frontend marketplace grouping.
+
+- **Deterministic SVG placeholder-art generator**: Replaces the hardcoded BitBadges default logo fallback with `data:image/svg+xml;base64,...` art seeded by the collection name. Five center-aligned presets (`gradient-mono`, `geometric-tile`, `orbital`, `mesh`, `glyph`; `letterform` remains callable via explicit pin) × 24 curated palettes.
+  - New MCP tool `generate_placeholder_art({ seed, style?, symbol?, vibe?, paletteName? })` — returns `imageUri`.
+  - `get_transaction` post-step now fills unresolved `IMAGE_N` placeholders, scrubs legacy default-logo URIs, and fills empty-string images on non-approval sidecar entries — all reusing one generated piece of art per build.
+  - System prompt mandates calling `generate_placeholder_art` as the first tool call when no images are uploaded.
+
+### Installation
+
+```bash
+npm install bitbadges@0.35.1
+```
+
 ## [0.31.0] - BREAKING CHANGES
 
 ### Breaking Changes
