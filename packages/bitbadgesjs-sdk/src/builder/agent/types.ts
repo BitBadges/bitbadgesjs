@@ -208,6 +208,14 @@ export interface AgentLogEntry {
   type: 'info' | 'ai_text' | 'validation' | 'error';
   label: string;
   data?: unknown;
+  /**
+   * Wall-clock duration attributable to this entry, in ms. Populated
+   * for phase-boundary events (round_complete, validation_gate_complete,
+   * fix_loop_complete, build_complete, etc.) and for tool-result
+   * entries. Absent on instantaneous events (ai_text, info without a
+   * bracketed phase, errors).
+   */
+  durationMs?: number;
 }
 
 /**
@@ -259,6 +267,8 @@ export interface BuildTrace {
   /** Cumulative tokens served from cache (cheap reads). */
   cacheReadTokens: number;
   costUsd: number;
+  /** Total wall-clock duration of the build in milliseconds. */
+  durationMs: number;
   model: string;
   systemPromptHash: string;
 }
@@ -297,6 +307,8 @@ export interface BuildResult {
   rounds: number;
   /** Number of validation fix-loop rounds executed. */
   fixRounds: number;
+  /** Total wall-clock duration of the build in milliseconds. */
+  durationMs: number;
   /** Full trace — messages, tool calls, etc. */
   trace: BuildTrace;
   /**

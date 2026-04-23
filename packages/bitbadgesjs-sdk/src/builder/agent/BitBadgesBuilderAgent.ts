@@ -365,6 +365,22 @@ export class BitBadgesBuilderAgent {
     const hooks: AgentHooks = { ...this.hooks, ...(options?.hooks ?? {}) };
     const debug = !!this.options.debug;
 
+    // Phase timing — each `logPhase()` emits an info entry via onLog
+    // with durationMs since the mark was started. Consumers pipe these
+    // into session logs / dashboards. Swallows throws so a misbehaving
+    // log sink can't break a build. Cheap (Date.now + object literal).
+    const buildStartMs = Date.now();
+    const logPhase = (label: string, startMs: number, data?: unknown): void => {
+      if (!hooks.onLog) return;
+      try {
+        const durationMs = Date.now() - startMs;
+        const r = hooks.onLog({ type: 'info', label, durationMs, data });
+        if (r && typeof (r as any).catch === 'function') (r as any).catch(() => {});
+      } catch {
+        // Observability hook — never let it break the build.
+      }
+    };
+
     const requestedSkills = options?.selectedSkills ?? [];
     const effectiveSkills = this.options.skills
       ? requestedSkills.filter((s) => this.options.skills!.includes(s))
@@ -490,6 +506,7 @@ export class BitBadgesBuilderAgent {
     }
 
     // Assemble prompt — honor `systemPrompt` full replace and `systemPromptAppend`
+    const promptAssemblyStartMs = Date.now();
     const promptParts = await assemblePromptParts(
       {
         prompt,
@@ -515,6 +532,7 @@ export class BitBadgesBuilderAgent {
     );
 
     const systemPromptHash = getSystemPromptHash(promptParts.systemPrompt);
+    logPhase('prompt_assembly_complete', promptAssemblyStartMs);
 
     // --- onCompletion always-fires accumulator ---
     // Previously onCompletion was called only on success. The hook's
@@ -548,6 +566,7 @@ export class BitBadgesBuilderAgent {
           cacheCreationTokens: accCacheCreationTokens,
           cacheReadTokens: accCacheReadTokens,
           costUsd: accTotalCostUsd,
+          durationMs: Date.now() - buildStartMs,
           model: this.model.id,
           systemPromptHash
         });
@@ -559,6 +578,7 @@ export class BitBadgesBuilderAgent {
 
     try {
     // --- Run main agent loop ---
+    const mainLoopStartMs = Date.now();
     let loopResult = await runAgentLoop({
       client: this.client,
       systemPrompt: promptParts.systemPrompt,
@@ -576,6 +596,7 @@ export class BitBadgesBuilderAgent {
       hooks,
       debug
     });
+    logPhase('main_loop_complete', mainLoopStartMs, { rounds: loopResult.rounds, tokens: loopResult.totalTokens });
 
     let rounds = loopResult.rounds;
     let fixRounds = 0;
@@ -611,6 +632,7 @@ export class BitBadgesBuilderAgent {
     let gate: ValidationGateResult | null = null;
 
     if (strictness !== 'off') {
+      const validationGateStartMs = Date.now();
       gate = await runValidationGate({
         transaction,
         creatorAddress,
@@ -624,9 +646,11 @@ export class BitBadgesBuilderAgent {
           ? await this.options.onChainSnapshotFetcher(options.existingCollectionId).catch(() => null)
           : undefined
       });
+      logPhase('validation_gate_complete', validationGateStartMs, { valid: gate.valid, errorCount: gate.hardErrors.length });
 
       // --- Validation fix loop ---
       const fixLoopMax = this.options.fixLoopMaxRounds ?? DEFAULTS.fixLoopMaxRounds;
+      const fixLoopStartMs = Date.now();
       while (gate && !gate.valid && fixRounds < fixLoopMax) {
         fixRounds++;
         if (signal.aborted) throw new AbortedError(totalTokens);
@@ -683,6 +707,10 @@ export class BitBadgesBuilderAgent {
           onLog: hooks.onLog as any
         });
       }
+      // Only log fix-loop duration if we actually entered it.
+      if (fixRounds > 0) {
+        logPhase('fix_loop_complete', fixLoopStartMs, { fixRounds, finalValid: gate?.valid === true });
+      }
 
       if (!gate.valid && strictness === 'strict') {
         const errors = structureErrors(gate);
@@ -701,6 +729,9 @@ export class BitBadgesBuilderAgent {
       // non-fatal
     }
 
+    const buildDurationMs = Date.now() - buildStartMs;
+    logPhase('build_complete', buildStartMs, { valid: gate?.valid ?? true, rounds, fixRounds, tokens: totalTokens });
+
     const trace: BuildTrace = {
       systemPrompt: promptParts.systemPrompt,
       userMessage: promptParts.userMessage,
@@ -712,6 +743,7 @@ export class BitBadgesBuilderAgent {
       cacheCreationTokens,
       cacheReadTokens,
       costUsd: totalCostUsd,
+      durationMs: buildDurationMs,
       model: this.model.id,
       systemPromptHash
     };
@@ -750,6 +782,7 @@ export class BitBadgesBuilderAgent {
       costUsd: totalCostUsd,
       rounds,
       fixRounds,
+      durationMs: buildDurationMs,
       trace,
       inferredTokenType,
       inferredTokenTypeSource,
