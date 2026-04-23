@@ -230,7 +230,20 @@ For wrapping native Cosmos SDK coins, use \`allowSpecialWrapping: true\` and \`c
 
 ### Optional: Unbacking Withdraw Limits
 
-Add approvalAmounts to the unbacking approval to enforce daily or total withdraw limits:
+Add approvalAmounts to the unbacking approval to enforce daily or total withdraw limits.
+
+**CRITICAL — approvalAmounts are in BASE UNITS, not display units.** The value you write is in the alias denom's base units (e.g. \`uusdc\`, \`uatom\`), NOT the display unit (USDC, ATOM). You MUST convert by multiplying the user's stated amount by 10^decimals.
+
+For a 6-decimal denom (USDC, ATOM, vUSDC, etc.):
+
+| User says (display)     | Write as (base units) |
+|-------------------------|-----------------------|
+| 1 USDC / day            | "1000000"             |
+| 100 USDC / day          | "100000000"           |
+| **1000 USDC / day**     | **"1000000000"** (nine zeros, NOT six) |
+| 10000 USDC / day        | "10000000000"         |
+
+Formula: \`base_units = display_amount * 10^decimals\`. For 6 decimals, that's **display_amount followed by six zeros**. Always sanity-check: 1 display unit = 10^decimals base units, so "1000000" (six zeros) = 1 display unit, NOT 1000. A common mistake is to compute "1000 × 10^6 = 1000000" (wrong; it's 1,000,000,000).
 
 \`\`\`json
 {
@@ -240,7 +253,7 @@ Add approvalAmounts to the unbacking approval to enforce daily or total withdraw
     "overridesFromOutgoingApprovals": false,
     "approvalAmounts": {
       "overallApprovalAmount": "0",
-      "perFromAddressApprovalAmount": "1000000",
+      "perFromAddressApprovalAmount": "1000000000",
       "perToAddressApprovalAmount": "0",
       "perInitiatedByAddressApprovalAmount": "0",
       "amountTrackerId": "daily-withdraw-limit",
@@ -250,9 +263,12 @@ Add approvalAmounts to the unbacking approval to enforce daily or total withdraw
 }
 \`\`\`
 
+The example above encodes a **1000 USDC/day** limit (1000 × 10^6 = 1,000,000,000 base units).
+
 - **Daily limit**: Use perFromAddressApprovalAmount with resetTimeIntervals.intervalLength: "86400000" (24 hours in ms)
 - **Total limit**: Use overallApprovalAmount with intervalLength: "0" (no reset)
 - amountTrackerId must be unique per approval
+- **When refining**: if the user reports "rate is X currently" and the on-chain value is already in base units, compare apples to apples — convert their stated X to base units via the formula above BEFORE concluding whether the current value matches.
 
 ### Optional: 2FA on Unbacking
 
