@@ -102,14 +102,31 @@ export function handleAddPresetApproval(input: AddPresetApprovalInput) {
   // Render + merge overrides + hand to the existing add_approval path
   // so all downstream machinery (address normalization, list-id
   // validation, claim-secret population, session state update) runs.
-  const rendered = preset.render(parsed.data);
+  //
+  // Renders can throw synchronously — e.g. a preset that calls
+  // `BigInt(params.someField)` will throw SyntaxError on a non-integer
+  // string. We must NOT let that escape the tool — the agent contract
+  // is always a structured `{success, error}` envelope, and an
+  // unhandled exception would bubble out of the tool loop.
+  let rendered;
+  try {
+    rendered = preset.render(parsed.data);
+  } catch (err: any) {
+    return {
+      success: false,
+      error: `Preset "${input.presetId}" render failed: ${err?.message ?? String(err)}. Check that numeric params (timestamps, amounts, goal/deadline values) are integer strings like "1000000" — not scientific notation ("1e6"), suffixed units ("5min"), or decimals.`
+    };
+  }
   const merged = input.overrides
     ? deepMergeOverrides(rendered, input.overrides as Record<string, unknown>)
     : rendered;
 
+  // Explicit fields must come AFTER the spread so an override can't
+  // silently reroute session state by placing `sessionId` /
+  // `creatorAddress` keys inside its overrides object.
   return handleAddApproval({
+    ...(merged as any),
     sessionId: input.sessionId,
-    creatorAddress: input.creatorAddress,
-    ...(merged as any)
+    creatorAddress: input.creatorAddress
   });
 }

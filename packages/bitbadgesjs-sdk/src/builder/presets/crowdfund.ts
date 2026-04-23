@@ -144,8 +144,6 @@ const SettlementParams = z.object({
 type SettlementParams = z.infer<typeof SettlementParams>;
 
 function renderSuccess(p: SettlementParams): RenderedApproval {
-  const goalMinusOne = (BigInt(p.goalAmount) - 1n).toString();
-  void goalMinusOne; // only used for refund
   return {
     fromListId: 'Mint',
     toListId: BURN_ADDRESS,
