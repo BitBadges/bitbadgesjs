@@ -43,18 +43,34 @@ export function transferabilityDecisions(collection: any): DesignDecision[] {
       : `${postMintTransferApprovals.length} post-mint transfer approval(s)`
   });
 
-  // Forceful-transfer invariant — genesis-locked if true.
+  // Forceful-transfer invariant — genesis-locked if true. The check is
+  // only meaningful when post-mint transfers can structurally happen at
+  // all; on a fully non-transferable collection there are no holder-to-
+  // holder approvals to be forceful *about*, so emitting `fail` for the
+  // unset invariant would read as a misleading verdict next to a green
+  // "Non-transferable (soulbound)" pill.
   const forcefulForbidden = !!collection.invariants?.noForcefulPostMintTransfers;
-  out.push({
-    code: 'design.transferability.no_forceful_transfers',
-    category: 'transferability',
-    title: { en: 'No forceful post-mint transfers' },
-    detail: forcefulForbidden
-      ? { en: 'Collection invariant permanently forbids approvals that override user-level incoming/outgoing approvals. Holders cannot be forcibly transferred against.' }
-      : { en: 'The forceful-transfer invariant is off. Approvals with overrides could be added that bypass user-level approvals.' },
-    status: forcefulForbidden ? 'pass' : 'fail',
-    evidence: `invariants.noForcefulPostMintTransfers = ${forcefulForbidden}`
-  });
+  if (nonTransferable && !forcefulForbidden) {
+    out.push({
+      code: 'design.transferability.no_forceful_transfers',
+      category: 'transferability',
+      title: { en: 'No forceful post-mint transfers' },
+      detail: { en: 'Not applicable — the collection has no post-mint transfer approvals, so there are no forceful overrides to forbid.' },
+      status: 'n/a',
+      evidence: 'invariants.noForcefulPostMintTransfers = false; non-transferable = true'
+    });
+  } else {
+    out.push({
+      code: 'design.transferability.no_forceful_transfers',
+      category: 'transferability',
+      title: { en: 'No forceful post-mint transfers' },
+      detail: forcefulForbidden
+        ? { en: 'Collection invariant permanently forbids approvals that override user-level incoming/outgoing approvals. Holders cannot be forcibly transferred against.' }
+        : { en: 'The forceful-transfer invariant is off. Approvals with overrides could be added that bypass user-level approvals.' },
+      status: forcefulForbidden ? 'pass' : 'fail',
+      evidence: `invariants.noForcefulPostMintTransfers = ${forcefulForbidden}`
+    });
+  }
 
   return out;
 }

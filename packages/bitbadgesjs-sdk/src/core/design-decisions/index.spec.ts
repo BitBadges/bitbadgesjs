@@ -171,12 +171,26 @@ describe('transferabilityDecisions', () => {
     expect(findByCode(out, 'design.transferability.no_forceful_transfers')!.status).toBe('pass');
   });
 
-  it('fail "no forceful transfers" when the invariant is false or missing', () => {
+  it('fail "no forceful transfers" when the collection is transferable and the invariant is false', () => {
     const out = transferabilityDecisions({
-      collectionApprovals: [],
+      collectionApprovals: [
+        { fromListId: 'All', toListId: 'All' }
+      ],
       invariants: {}
     });
     expect(findByCode(out, 'design.transferability.no_forceful_transfers')!.status).toBe('fail');
+  });
+
+  it('n/a "no forceful transfers" when the collection is non-transferable and invariant is unset', () => {
+    // Non-transferable + invariant off — the check would be a misleading
+    // `fail` (no post-mint transfers exist to be forceful about), so it
+    // should soften to `n/a` rather than alarm the reviewer.
+    const out = transferabilityDecisions({
+      collectionApprovals: [{ fromListId: 'Mint', toListId: 'All' }],
+      invariants: {}
+    });
+    expect(findByCode(out, 'design.transferability.non_transferable')!.status).toBe('pass');
+    expect(findByCode(out, 'design.transferability.no_forceful_transfers')!.status).toBe('n/a');
   });
 });
 

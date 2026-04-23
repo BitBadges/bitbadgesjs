@@ -363,7 +363,7 @@ export function renderDesignDecisions(
   const summaryParts = [
     pass > 0 ? c('green', `${pass} pass`) : c('gray', `${pass} pass`),
     fail > 0 ? c('red', `${fail} fail`) : c('gray', `${fail} fail`),
-    `${na} n/a`
+    c('gray', `${na} n/a`)
   ];
   lines.push(`  ${c('bold', 'Summary')}  ${summaryParts.join('  ·  ')}`);
   lines.push(c('gray', rule('━', width)));
