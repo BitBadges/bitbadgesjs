@@ -5,6 +5,7 @@
 export * from './queryCollection.js';
 export * from './queryBalance.js';
 export * from './simulateTransaction.js';
+export * from './listPresets.js';
 export * from './verifyOwnership.js';
 export * from './search.js';
 export * from './analyzeCollection.js';
