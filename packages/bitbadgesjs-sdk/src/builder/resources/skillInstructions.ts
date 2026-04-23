@@ -845,6 +845,24 @@ IMPORTANT: predeterminedBalances and approvalAmounts are INCOMPATIBLE — use on
 
 When creating a subscription collection, you MUST follow these EXACT requirements:
 
+### Preferred path: preset (one short tool call)
+
+The faucet approval is fully canonical. Use \`subscription.faucet\`:
+
+\`\`\`
+add_preset_approval({
+  presetId: "subscription.faucet",
+  params: {
+    paymentRecipient: "bb1...",
+    paymentDenom: "<ibc/... or native>",
+    paymentAmount: "<base units>",
+    durationMs: "2592000000"   // monthly; daily="86400000", annual="31536000000"
+  }
+})
+\`\`\`
+
+\`list_presets({skill: "subscription"})\` for params. Fall back to \`add_approval\` for exotic variants (multi-token tiers, manager-only mints, etc.).
+
 ### Required Structure
 
 1. **Standards**: MUST include "Subscriptions"
@@ -1127,6 +1145,16 @@ Three common permission configurations:
     instructions: `## Custom-2FA Configuration
 
 When creating a Custom-2FA collection, follow these requirements:
+
+### Preferred path: preset (one short tool call)
+
+The mint approval is canonical — use \`custom-2fa.mint\`:
+
+\`\`\`
+add_preset_approval({ presetId: "custom-2fa.mint", params: { managerAddress: "bb1..." } })
+\`\`\`
+
+The actual token expiration is set per-mint via the MsgTransferTokens \`ownershipTimes\` window (e.g. now → now + 5*60*1000 ms). The approval itself just enables the Mint path with auto-purge.
 
 ### Required Structure
 
@@ -1505,6 +1533,23 @@ Use Approach 1 only for simple scenarios like: "create an invoice for 10 BADGE" 
 
 Each approval is an invoice/milestone with coinTransfers. Uses the **ListView** display standard. Only for simple one-shot payments — no escrow, no hold-and-release, no refunds.
 
+**Preferred path: preset per line item.** Each invoice / milestone / bounty entry has a canonical shape — use \`payment-protocol.invoice\`:
+
+\`\`\`
+add_preset_approval({
+  presetId: "payment-protocol.invoice",
+  params: {
+    approvalId: "invoice-1",
+    payerAddress: "bb1...",
+    payeeAddress: "bb1...",
+    amount: "<base units>",
+    denom: "<denom>"
+  }
+})
+\`\`\`
+
+Call once per line item. For escrow / hold-and-release (Approach 2) use the smart-token skill.
+
 **Required:**
 - Standards: ["ListView:Milestones"] or ["ListView:Invoice Requests"] or ["ListView:Bounties"]
 - Each item = one collection-level approval with:
@@ -1676,6 +1721,14 @@ The primitives (mustOwnTokens, transferTimes, votingChallenges, amount caps, bal
 
 When enabling trading for NFTs, follow these requirements:
 
+### Preferred path: preset (one short tool call)
+
+The free-transfer approval is fully canonical (takes no params):
+
+\`\`\`
+add_preset_approval({ presetId: "tradable.transferable", params: {} })
+\`\`\`
+
 ### Required Structure
 
 1. **Standards**: MUST include "NFTMarketplace", "NFTs", and "NFTPricingDenom:ubadge"
@@ -1770,6 +1823,23 @@ Credit tokens are designed for systems that track consumption off-chain. The on-
 The purchase form uses **amount scaling** to support arbitrary purchase sizes in ONE approval. Users pick a quantity on the frontend; the chain scales \`startBalances\` and \`coinTransfers\` by the multiplier. Base unit of the approval: **1 micro-payment → tokensPerUnit micro-tokens**.
 
 **\`approvalId\` MUST be exactly \`"credit-scaled"\`** — the frontend purchase form detects scaled approvals by this id. Both tracker ids (\`amountTrackerId\` in \`approvalAmounts\` and \`maxNumTransfers\`) must also equal \`"credit-scaled"\`.
+
+#### Preferred path: preset (short call, canonical shape)
+
+The single approval's shape is fully canonical — use the preset instead of hand-writing the 60-line approvalCriteria JSON:
+
+\`\`\`
+add_preset_approval({
+  presetId: "credit-token.scaled",
+  params: {
+    paymentDenom: "<ics20 denom, e.g. ibc/... or a native denom>",
+    paymentRecipient: "<bb1... creator or treasury address>",
+    tokensPerUnit: "<tokens minted per 1 base unit of payment>"
+  }
+})
+\`\`\`
+
+Discover params + other credit-token presets with \`list_presets({skill: "credit-token"})\`. Presets route through the same validators as hand-built approvals — output is structurally identical. Use \`overrides\` for small tweaks (custom \`transferTimes\` window, etc.); for shape changes the preset doesn't cover, fall back to \`add_approval\`.
 
 #### Conversion rate
 
@@ -2002,6 +2072,17 @@ For expiring tokens, calculate timestamps:
     instructions: `## Address List Configuration
 
 An address list collection represents membership as token ownership: owning x1 of token ID 1 = being on the list. The manager controls membership by minting (adding) and burning (removing) tokens.
+
+### Preferred path: presets (two short tool calls)
+
+Both approvals are fully canonical — the ONLY param that varies is the manager/creator address. Use the presets:
+
+\`\`\`
+add_preset_approval({ presetId: "address-list.manager-add",    params: { creatorAddress: "bb1..." } })
+add_preset_approval({ presetId: "address-list.manager-remove", params: { creatorAddress: "bb1..." } })
+\`\`\`
+
+\`list_presets({skill: "address-list"})\` enumerates them. For non-canonical variants (e.g. a committee instead of a single manager) fall back to raw \`add_approval\`.
 
 ### CRITICAL: Exact Approval IDs Required
 
@@ -2265,6 +2346,22 @@ Two alias paths are REQUIRED — one for YES (token 1) and one for NO (token 2):
 ### 7 Approvals
 
 **CRITICAL: All amounts in startBalances must be in BASE units (micro-units). Since YES/NO tokens have 6 decimals, 1 display token = 1,000,000 base units. Use "1000000" (not "1") for startBalance amounts when minting 1 display-YES + 1 display-NO per deposit.**
+
+### Preferred path: presets (seven short tool calls)
+
+All seven approvals are fully canonical. Use the presets below instead of hand-writing 7 × 60-line approvalCriteria blocks. Every preset only needs the USDC denom (and a verifier address for the outcome-gated approvals):
+
+\`\`\`
+add_preset_approval({ presetId: "prediction-market.paired-mint",            params: { usdcDenom } })
+add_preset_approval({ presetId: "prediction-market.transferable",           params: {} })
+add_preset_approval({ presetId: "prediction-market.pre-settlement-redeem",  params: { usdcDenom } })
+add_preset_approval({ presetId: "prediction-market.yes-wins",               params: { usdcDenom, verifierAddress } })
+add_preset_approval({ presetId: "prediction-market.no-wins",                params: { usdcDenom, verifierAddress } })
+add_preset_approval({ presetId: "prediction-market.push-yes",               params: { usdcDenom, verifierAddress } })
+add_preset_approval({ presetId: "prediction-market.push-no",                params: { usdcDenom, verifierAddress } })
+\`\`\`
+
+Discover with \`list_presets({skill: "prediction-market"})\`. Fall back to raw \`add_approval\` only for non-standard variants.
 
 #### 1. Paired Mint (deposit 1 USDC → receive 1 YES + 1 NO)
 
@@ -2688,6 +2785,27 @@ The escrow is funded upfront at collection creation via \`mintEscrowCoinsToTrans
 
 All 3 approvals share the same structure: Mint → burn address, 1x token ID 1. The token is just a vehicle to trigger the approval engine's coinTransfer. Each approval has maxNumTransfers = 1 (one-shot).
 
+### Preferred path: presets (three short tool calls)
+
+All three approvals are fully canonical — bounty.accept, bounty.deny, bounty.expire cover the shape. The agent still generates the approvalId + proposalId suffixes (via \`generate_unique_id\` or similar) and passes them as params.
+
+\`\`\`
+add_preset_approval({
+  presetId: "bounty.accept",
+  params: { approvalId, proposalId, payoutTo: recipient, verifierAddress, denom, amount, expirationMs }
+})
+add_preset_approval({
+  presetId: "bounty.deny",
+  params: { approvalId, proposalId, payoutTo: submitter, verifierAddress, denom, amount, expirationMs }
+})
+add_preset_approval({
+  presetId: "bounty.expire",
+  params: { approvalId, refundTo: submitter, denom, amount, expirationMs }
+})
+\`\`\`
+
+\`list_presets({skill: "bounty"})\` lists params. For non-standard variants (multi-verifier quorum, variable amounts), use raw \`add_approval\`.
+
 ### 1. Accept (bounty-accept-*)
 Verifier votes accept → mint-to-burn → coins to recipient.
 
@@ -2832,6 +2950,15 @@ On-chain crowdfunding with automatic goal tracking. Contributors deposit coins a
 - All permissions frozen after creation
 
 ### 4 Required Approvals
+
+### Preferred path: presets (four short tool calls)
+
+\`\`\`
+add_preset_approval({ presetId: "crowdfund.deposit-refund",   params: { denom, deadlineMs, crowdfunderAddress } })
+add_preset_approval({ presetId: "crowdfund.deposit-progress", params: { denom, deadlineMs, crowdfunderAddress } })
+add_preset_approval({ presetId: "crowdfund.success-withdraw", params: { denom, deadlineMs, crowdfunderAddress, goalAmount } })
+add_preset_approval({ presetId: "crowdfund.refund",           params: { denom, deadlineMs, crowdfunderAddress, goalAmount } })
+\`\`\`
 
 #### 1. Deposit-Refund (contributor pays coins → receives Token 1)
 
@@ -3067,6 +3194,20 @@ Bidders set user-level outgoing approvals on their own accounts that say "I will
 
 Bids must have transferTimes that stay valid through the END of the accept window (not just the bid deadline), so the seller can match them during the entire accept period.
 
+### Preferred path: presets (two short tool calls)
+
+\`\`\`
+add_preset_approval({
+  presetId: "auction.mint-to-winner",
+  params: {
+    sellerAddress: "bb1...",
+    bidDeadlineMs: "<unix ms>",
+    acceptWindowEndMs: "<unix ms>"
+  }
+})
+add_preset_approval({ presetId: "auction.burn", params: {} })
+\`\`\`
+
 ### 2 Approvals
 
 #### 1. Mint-to-Winner (seller mints NFT directly to winning bidder during accept window)
@@ -3181,6 +3322,27 @@ A multi-product storefront where each product is a separate token ID. Buyers pay
 ### Approval Structure
 
 Each product gets its own purchase approval. There's also an optional global burn approval.
+
+### Preferred path: presets (one call per product + optional burn)
+
+Call \`products.purchase\` once per product (productIndex 1..N). Add \`products.burn\` once if you need the global burn/redeem:
+
+\`\`\`
+add_preset_approval({
+  presetId: "products.purchase",
+  params: {
+    productIndex: 1,
+    storeAddress: "bb1...",
+    priceAmount: "<base units>",
+    denom: "<denom>",
+    supplyLimit: "0",          // "0" = unlimited
+    burnOnPurchase: false       // true = token minted straight to burn (receipt-style)
+  }
+})
+
+// Optional:
+add_preset_approval({ presetId: "products.burn", params: { numProducts: <N> } })
+\`\`\`
 
 #### Purchase Approval (per product)
 

@@ -10,6 +10,7 @@ export * from './setCustomData.js';
 export * from './setIsArchived.js';
 export * from './setMintEscrowCoins.js';
 export * from './addApproval.js';
+export * from './addPresetApproval.js';
 export * from './removeApproval.js';
 export * from './setApprovalMetadata.js';
 export * from './addAliasPath.js';
