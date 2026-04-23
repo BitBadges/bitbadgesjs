@@ -15,7 +15,7 @@
 
 import { randomUUID } from 'crypto';
 import { handleGetTransaction } from '../tools/index.js';
-import { getOrCreateSession, drainReviewFlags, addReviewFlag, getReviewFlags } from '../session/sessionState.js';
+import { getOrCreateSession, drainReviewFlags, getReviewFlags } from '../session/sessionState.js';
 import { getAllSkillInstructions, type SkillInstruction } from '../resources/skillInstructions.js';
 import { getAnthropicClient } from './anthropicClient.js';
 import { AbortedError, BitBadgesBuilderAgentError, ValidationFailedError } from './errors.js';
@@ -410,20 +410,13 @@ export class BitBadgesBuilderAgent {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed?.messages)) existingMessages = parsed.messages;
         if (parsed && typeof parsed.transaction === 'object') existingSessionTransaction = parsed.transaction;
-        // Carry forward review flags from prior builds. Dedup inside addReviewFlag
-        // handles the case where the agent re-emits an inherited flag without
-        // realizing it's already in the session. Stale-flag caveat: a flag whose
-        // underlying field was just modified in this refinement is carried forward
-        // as-is; we don't diff session state to auto-expire. The UI can surface
-        // flagged_at for freshness; agent can also drop via subsequent logic if
-        // needed. Simple carry > missing data.
-        if (Array.isArray(parsed?.reviewFlags)) {
-          for (const f of parsed.reviewFlags) {
-            if (f && typeof f === 'object' && typeof f.message === 'string') {
-              addReviewFlag(sessionId, f);
-            }
-          }
-        }
+        // NOTE: we persist `reviewFlags` on the session snapshot below for
+        // forensics / debugging, but we do NOT load them back into the
+        // session accumulator on resume. Cumulative accumulation across
+        // refinements is a UI concern: each build's BuildResult.reviewFlags
+        // contains ONLY the flags raised in THAT build. Consumers (e.g.
+        // the frontend AI builder) append + dedupe across builds to form
+        // the cumulative list shown to the user.
       }
     } catch {
       // ignore — store read errors are non-fatal
