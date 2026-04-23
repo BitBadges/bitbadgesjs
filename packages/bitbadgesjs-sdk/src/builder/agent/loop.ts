@@ -173,6 +173,27 @@ const STATUS_MAP: Record<string, string> = {
   lookup_claim_plugins: 'Researching...', lookup_token_info: 'Researching...'
 };
 
+/**
+ * Return a copy of the messages array with cache_control stripped from
+ * every content block. Used when resuming from session state so prior
+ * builds' cache markers don't accumulate past Anthropic's 4-block cap.
+ * We only need cache_control on the NEWEST user message each request;
+ * the prompt cache hits anyway via longest-shared-prefix matching.
+ */
+function stripCacheControl(messages: any[]): any[] {
+  return messages.map((msg) => {
+    if (!msg || !Array.isArray(msg.content)) return msg;
+    const cleanedContent = msg.content.map((block: any) => {
+      if (block && typeof block === 'object' && 'cache_control' in block) {
+        const { cache_control: _drop, ...rest } = block;
+        return rest;
+      }
+      return block;
+    });
+    return { ...msg, content: cleanedContent };
+  });
+}
+
 function fireHook(fn: ((...args: any[]) => any) | undefined, ...args: any[]) {
   if (!fn) return;
   try {
@@ -197,8 +218,20 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
     ? userContent
     : [{ type: 'text' as const, text: userMessage }];
 
-  const messages: any[] = existingMessages
-    ? [...existingMessages, { role: 'user', content: initialUserBlocks }]
+  // When resuming from session state, strip cache_control from all
+  // historical message blocks. Anthropic limits a request to 4
+  // cache_control blocks; each build adds one on the new user message's
+  // stableSkills chunk (plus 1 on system + 1 on tools = 3 baseline),
+  // so after two refinements a resumed session would carry 5 → 400
+  // "A maximum of 4 blocks with cache_control may be provided."
+  //
+  // Only the NEWEST user message needs a cache boundary — Anthropic's
+  // prompt cache works by longest shared prefix, so marking the tail
+  // is sufficient; historical blocks are cached implicitly.
+  const priorMessages = existingMessages ? stripCacheControl(existingMessages) : undefined;
+
+  const messages: any[] = priorMessages
+    ? [...priorMessages, { role: 'user', content: initialUserBlocks }]
     : [{ role: 'user', content: initialUserBlocks }];
   const toolCalls: ToolCallEvent[] = [];
   let finalText = '';
