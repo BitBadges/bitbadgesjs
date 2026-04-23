@@ -28,6 +28,7 @@ import { createAgentToolRegistry, type AgentToolRegistry } from './toolAdapter.j
 import { runAgentLoop } from './loop.js';
 import { runValidationGate, type ValidationGateResult } from './validation.js';
 import { inferTokenTypeFromPrompt, getTokenTypeSkills } from './tokenTypeInference.js';
+import type { DesignDecisionsResult } from '../../core/review-types.js';
 import type {
   AgentHooks,
   BitBadgesBuilderAgentOptions,
@@ -859,7 +860,7 @@ export class BitBadgesBuilderAgent {
     validation: any;
     simulation: any | null;
     audit: any | null;
-    designDecisions: import('../../core/review-types.js').DesignDecisionsResult | null;
+    designDecisions: DesignDecisionsResult | null;
   }> {
     const onChainSnapshot =
       options?.existingCollectionId && this.options.onChainSnapshotFetcher

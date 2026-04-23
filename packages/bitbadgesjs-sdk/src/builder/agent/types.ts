@@ -6,6 +6,7 @@
  */
 
 import type { KVStore } from './sessionStore.js';
+import type { DesignDecisionsResult } from '../../core/review-types.js';
 
 /** High-level build mode passed to the agent. */
 export type BuildMode = 'create' | 'update' | 'refine';
@@ -287,7 +288,7 @@ export interface BuildResult {
    * of `audit`'s "might need attention" surface. `null` when the build did
    * not produce a collection-shape message.
    */
-  designDecisions: import('../../core/review-types.js').DesignDecisionsResult | null;
+  designDecisions: DesignDecisionsResult | null;
   /** Total tokens used across all rounds (input + output). */
   tokensUsed: number;
   /** USD cost across all rounds. */
