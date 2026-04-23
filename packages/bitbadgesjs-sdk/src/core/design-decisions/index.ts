@@ -17,7 +17,6 @@
 
 import type { DesignDecision, DesignDecisionsResult } from '../review-types.js';
 import { standardsDecisions } from './standards.js';
-import { metadataDecisions } from './metadata.js';
 import { supplyDecisions } from './supply.js';
 import { transferabilityDecisions } from './transferability.js';
 import { backingDecisions } from './backing.js';
@@ -27,7 +26,6 @@ export type DesignCheck = (collection: any) => DesignDecision[];
 
 const ALL_CHECKS: DesignCheck[] = [
   standardsDecisions,
-  metadataDecisions,
   supplyDecisions,
   transferabilityDecisions,
   backingDecisions
@@ -58,4 +56,4 @@ export function runDesignChecks(collection: unknown): DesignDecisionsResult {
   return { decisions, summary: { pass, fail, na } };
 }
 
-export { standardsDecisions, metadataDecisions, supplyDecisions, transferabilityDecisions, backingDecisions };
+export { standardsDecisions, supplyDecisions, transferabilityDecisions, backingDecisions };

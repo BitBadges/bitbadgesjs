@@ -9,7 +9,6 @@
 import {
   runDesignChecks,
   standardsDecisions,
-  metadataDecisions,
   supplyDecisions,
   transferabilityDecisions,
   backingDecisions
@@ -98,47 +97,6 @@ describe('standardsDecisions', () => {
     });
     const quest = findByCode(out, 'design.standards.quest');
     expect(quest!.status).toBe('n/a');
-  });
-});
-
-// ---------------------------------------------------------------------------
-// metadata
-// ---------------------------------------------------------------------------
-
-describe('metadataDecisions', () => {
-  it('pass when every slot has a concrete URI', () => {
-    const out = metadataDecisions({
-      collectionMetadata: { uri: 'ipfs://real-hash' },
-      tokenMetadata: [{ uri: 'ipfs://real-token' }]
-    });
-    expect(findByCode(out, 'design.metadata.all_populated')!.status).toBe('pass');
-  });
-
-  it('pass when a placeholder URI is backed by inline content', () => {
-    const out = metadataDecisions({
-      collectionMetadata: {
-        uri: 'ipfs://METADATA_COLLECTION_0',
-        metadata: { name: 'Great collection', image: 'ipfs://img' }
-      },
-      tokenMetadata: []
-    });
-    expect(findByCode(out, 'design.metadata.all_populated')!.status).toBe('pass');
-  });
-
-  it('fail when collection metadata is an empty placeholder', () => {
-    const out = metadataDecisions({
-      collectionMetadata: { uri: 'ipfs://METADATA_COLLECTION_0' },
-      tokenMetadata: [{ uri: 'ipfs://real-token' }]
-    });
-    expect(findByCode(out, 'design.metadata.all_populated')!.status).toBe('fail');
-  });
-
-  it('fail when a token metadata entry is an empty placeholder', () => {
-    const out = metadataDecisions({
-      collectionMetadata: { uri: 'ipfs://real' },
-      tokenMetadata: [{ uri: 'ipfs://real' }, { uri: 'ipfs://METADATA_TOKEN_1' }]
-    });
-    expect(findByCode(out, 'design.metadata.all_populated')!.status).toBe('fail');
   });
 });
 

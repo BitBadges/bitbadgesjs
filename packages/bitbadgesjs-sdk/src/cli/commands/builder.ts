@@ -320,7 +320,7 @@ addNetworkOptions(
     .option('--no-validate', 'Skip the structural validation section')
     .option('--no-review', 'Skip the design review section')
     .option('--no-metadata', 'Skip the metadata coverage section')
-    .option('--no-design', 'Skip the design decisions (informational ✓/✗) section')
+    .option('--design', 'Include the design decisions (informational ✓/✗) section. Hidden by default while the surface is being iterated on; the underlying decisions still appear in --json output.')
     .option('--output-file <path>', 'Write the rendered sections to a file instead of stdout')
 )
   .action(
@@ -394,8 +394,12 @@ addNetworkOptions(
         review = reviewCollection(wrapped);
       }
 
+      // Always compute design decisions when we have a collection — they
+      // surface in `--json` output for tool consumers. The human-readable
+      // section below is opt-in via `--design` while we iterate on what
+      // belongs in this surface.
       let design: any = null;
-      if (opts.design !== false && firstIsCollection) {
+      if (firstIsCollection) {
         const { runDesignChecks } = await import('../../core/design-decisions/index.js');
         design = runDesignChecks(wrapped);
       }
@@ -429,7 +433,7 @@ addNetworkOptions(
           lines.push(renderReview(review, { stream: process.stdout }));
           lines.push('');
         }
-        if (design) {
+        if (design && opts.design === true) {
           lines.push(renderDesignDecisions(design, { stream: process.stdout }));
           lines.push('');
         }
