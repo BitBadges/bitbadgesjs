@@ -242,7 +242,19 @@ export const TOKEN_EFFICIENCY = `## Token Efficiency & Round Budget
 
 **Keep tool arguments minimal.** Metadata fields: write the minimal required shape. Do NOT echo back base64 image strings from prior tool results — the server tracks them by placeholder URI.
 
-**After a successful verification, stop with NO text.** If verification fails, fix and retry up to 3 times — otherwise output the error and stop.`;
+**After a successful verification, stop with NO text.** If verification fails, fix and retry up to 3 times — otherwise output the error and stop.
+
+**get_transaction is TERMINAL.** Once you call get_transaction:
+- You must NOT emit another tool call
+- You must NOT echo the transaction JSON back as text output — it was already returned by the tool
+- You must NOT summarize what you built, explain warnings, or add any commentary
+- The next and final message MUST be end_turn with EMPTY text content
+- Echoing the transaction as text is ~2500 wasted output tokens = ~30 wasted seconds of wall time per build. Do not do this.
+
+**review_collection findings are graded.** The result has severity tiers: \`critical\`, \`warning\`, \`info\`.
+- Only \`critical\` findings warrant a fix-and-retry in the main loop — these block the transaction.
+- \`warning\` and \`info\` findings are advisory. Do NOT attempt to fix them in the main loop; they will surface to the user via review output. Stop and output the transaction.
+- Do not paraphrase or re-prioritize: trust the severity the tool returned.`;
 
 export const SELF_REVIEW_SECTION = `## Flagging Review Items
 
@@ -273,7 +285,14 @@ Call \`flag_review_item\` WHENEVER you are not fully confident in a decision. Yo
 - User asks for feature X that standard Y doesn't support — flag: substituted closest alternative, severity high
 - User asks for "a voting token" without specifying count — flag: picked 10 voters as reasonable default, severity medium
 
-Call \`flag_review_item\` INLINE at the moment of the decision, not at the end.`;
+Call \`flag_review_item\` INLINE at the moment of the decision, not at the end.
+
+**Subscription / recurring-payment specific flags to ALWAYS consider:**
+- If the user didn't specify who receives payment → flag: "Payment recipient defaulted to creator address (user did not specify). Alternative: a separate treasury address."
+- If the user said "per month" without a day-count → flag: "Interpreted 'month' as 30 days (2592000000 ms). Alternative: 28/31 days."
+- If the user didn't specify initiated-by scope → flag: "Mint is public (initiatedByListId: All). Alternative: whitelist-only mint."
+
+These three cases alone cover ~80% of ambiguity-defaults in subscription builds. If you picked any of them without the user saying so explicitly, flag it.`;
 
 export const WORKFLOW_NEW_BUILD = `## Workflow
 1. UNDERSTAND: Read the request and inlined skill instructions. If the request involves features not covered by skills, call search_knowledge_base. Take best interpretation — do not ask clarifying questions.
