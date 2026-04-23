@@ -282,6 +282,12 @@ export interface BuildResult {
   simulation: any | null;
   /** Audit shape with `findings` + `summary` + full `review`. */
   audit: any | null;
+  /**
+   * Informational ✓/✗/n-a checks about what the collection IS — the inverse
+   * of `audit`'s "might need attention" surface. `null` when the build did
+   * not produce a collection-shape message.
+   */
+  designDecisions: import('../../core/review-types.js').DesignDecisionsResult | null;
   /** Total tokens used across all rounds (input + output). */
   tokensUsed: number;
   /** USD cost across all rounds. */

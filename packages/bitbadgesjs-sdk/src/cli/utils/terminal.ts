@@ -285,6 +285,97 @@ export function renderValidate(
   return lines.join('\n');
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Design decisions renderer — the inverse of renderReview. Review items are
+// actionable (severity + fix); design decisions are informational (pass/fail/
+// n-a). Rendering is grouped by category so readers can scan Standards,
+// Metadata, Supply, etc. as coherent blocks.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface DesignDecisionLike {
+  code: string;
+  category: string;
+  title: { en: string };
+  detail: { en: string };
+  status: 'pass' | 'fail' | 'n/a';
+  evidence?: string;
+}
+
+export interface DesignDecisionsResultLike {
+  decisions: DesignDecisionLike[];
+  summary: { pass: number; fail: number; na: number };
+}
+
+export function renderDesignDecisions(
+  result: DesignDecisionsResultLike,
+  opts?: { stream?: NodeJS.WriteStream; title?: string }
+): string {
+  const stream = opts?.stream || process.stderr;
+  const { c } = makeColor(stream);
+  const width = Math.min(80, (stream as any).columns || 80);
+  const title = opts?.title || 'Design Decisions';
+
+  const lines: string[] = [];
+  lines.push(c('gray', rule('━', width, title)));
+
+  if (result.decisions.length === 0) {
+    lines.push('');
+    lines.push(`  ${c('gray', '·')} No design decisions emitted`);
+    lines.push('');
+    lines.push(c('gray', rule('━', width)));
+    return lines.join('\n');
+  }
+
+  // Group by category while preserving first-seen order.
+  const categoryOrder: string[] = [];
+  const byCategory: Record<string, DesignDecisionLike[]> = {};
+  for (const d of result.decisions) {
+    if (!byCategory[d.category]) {
+      byCategory[d.category] = [];
+      categoryOrder.push(d.category);
+    }
+    byCategory[d.category].push(d);
+  }
+
+  const sigil = { pass: '✓', fail: '✗', 'n/a': '·' } as const;
+  const colorFor = { pass: 'green', fail: 'red', 'n/a': 'gray' } as const;
+
+  let firstCat = true;
+  for (const cat of categoryOrder) {
+    if (!firstCat) lines.push('');
+    firstCat = false;
+    lines.push(`  ${c('bold', prettyCategory(cat))}`);
+    for (const d of byCategory[cat]) {
+      const sg = sigil[d.status];
+      const co = colorFor[d.status];
+      lines.push(`    ${c(co, sg)}  ${c('bold', d.title.en)}  ${c('dim', d.code)}`);
+      if (d.evidence) {
+        for (const t of wrap(d.evidence, width - 8)) {
+          lines.push(`        ${c('dim', t)}`);
+        }
+      }
+    }
+  }
+
+  lines.push('');
+  lines.push(c('gray', rule('━', width)));
+  const { pass, fail, na } = result.summary;
+  const summaryParts = [
+    pass > 0 ? c('green', `${pass} pass`) : c('gray', `${pass} pass`),
+    fail > 0 ? c('red', `${fail} fail`) : c('gray', `${fail} fail`),
+    `${na} n/a`
+  ];
+  lines.push(`  ${c('bold', 'Summary')}  ${summaryParts.join('  ·  ')}`);
+  lines.push(c('gray', rule('━', width)));
+
+  return lines.join('\n');
+}
+
+function prettyCategory(cat: string): string {
+  if (!cat) return 'Other';
+  return cat.charAt(0).toUpperCase() + cat.slice(1).replace(/[_-]/g, ' ');
+}
+
 export interface MetadataPlaceholderEntry {
   uri: string;
   kind: string;

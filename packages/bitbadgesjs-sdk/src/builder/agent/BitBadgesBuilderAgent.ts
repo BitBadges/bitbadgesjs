@@ -744,6 +744,7 @@ export class BitBadgesBuilderAgent {
       validation: gate?.validation ?? { valid: true, issues: [] },
       simulation: gate?.simulation ?? null,
       audit: gate?.audit ?? null,
+      designDecisions: gate?.designDecisions ?? null,
       tokensUsed: totalTokens,
       costUsd: totalCostUsd,
       rounds,
@@ -858,6 +859,7 @@ export class BitBadgesBuilderAgent {
     validation: any;
     simulation: any | null;
     audit: any | null;
+    designDecisions: import('../../core/review-types.js').DesignDecisionsResult | null;
   }> {
     const onChainSnapshot =
       options?.existingCollectionId && this.options.onChainSnapshotFetcher
@@ -876,7 +878,8 @@ export class BitBadgesBuilderAgent {
       warnings: gate.advisoryNotes.map((n) => ({ category: 'advisory', message: n })),
       validation: gate.validation,
       simulation: gate.simulation,
-      audit: gate.audit
+      audit: gate.audit,
+      designDecisions: gate.designDecisions
     };
   }
 }
