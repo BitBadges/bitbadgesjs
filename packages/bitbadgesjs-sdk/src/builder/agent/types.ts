@@ -301,13 +301,30 @@ export type ReviewFlagSeverity = 'low' | 'medium' | 'high';
 export interface ReviewFlag {
   kind: ReviewFlagKind;
   severity: ReviewFlagSeverity;
-  /** One-sentence description of what's being flagged. */
+  /**
+   * One-sentence human-readable description. Plain English, no
+   * technical jargon, no JSON field names, no base-unit numbers —
+   * this is what the user reads in the UI.
+   */
   message: string;
-  /** Concrete value / interpretation / workaround the agent picked. */
+  /**
+   * Concrete value / interpretation the agent picked, phrased for a
+   * non-technical user ("Anyone can subscribe", "30 days", "1000 USDC").
+   * No JSON field names, no base units, no bb1/ibc/ipfs strings.
+   */
   chosen: string;
-  /** Optional: the most likely alternative, or what the user might have wanted. */
+  /**
+   * Optional: the most likely alternative, in the same plain-English
+   * style. Shown to the user as "did you mean X instead?"
+   */
   alternative?: string;
-  /** Optional: dotted path into the transaction where this applies (e.g., "messages[0].value.collectionApprovals[1].approvalCriteria.approvalAmounts"). */
+  /**
+   * Optional technical path into the transaction where this applies
+   * (e.g., "messages[0].value.collectionApprovals[1].approvalCriteria.approvalAmounts").
+   * UI-only field — intended for the frontend to HIGHLIGHT the
+   * affected tx field, NOT to render as user-visible text.
+   * Never put user-facing explanation here.
+   */
   fieldPath?: string;
 }
 

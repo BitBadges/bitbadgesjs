@@ -288,11 +288,39 @@ Call \`flag_review_item\` WHENEVER you are not fully confident in a decision. Yo
 Call \`flag_review_item\` INLINE at the moment of the decision, not at the end.
 
 **Subscription / recurring-payment specific flags to ALWAYS consider:**
-- If the user didn't specify who receives payment → flag: "Payment recipient defaulted to creator address (user did not specify). Alternative: a separate treasury address."
-- If the user said "per month" without a day-count → flag: "Interpreted 'month' as 30 days (2592000000 ms). Alternative: 28/31 days."
-- If the user didn't specify initiated-by scope → flag: "Mint is public (initiatedByListId: All). Alternative: whitelist-only mint."
+- If the user didn't specify who receives payment → flag: "Payments go to you (the creator). Alternative: a separate treasury address."
+- If the user said "per month" without a day-count → flag: "Treated 'month' as 30 days. Alternative: 28 or 31 days."
+- If the user didn't specify who can buy → flag: "Anyone can subscribe. Alternative: restrict to a whitelist."
 
-These three cases alone cover ~80% of ambiguity-defaults in subscription builds. If you picked any of them without the user saying so explicitly, flag it.`;
+These three cases alone cover ~80% of ambiguity-defaults in subscription builds. If you picked any of them without the user saying so explicitly, flag it.
+
+## User-facing language in review flags — STRICT
+
+Every \`flag_review_item\` field that a user will read MUST be in plain, non-technical English:
+
+- **\`message\`, \`chosen\`, \`alternative\`**: No JSON field names ("initiatedByListId", "approvalCriteria"), no code identifiers, no internal jargon ("mint approval", "fromListId", "permanentlyForbiddenTimes"). Say "anyone can subscribe" not "initiatedByListId: All". Say "who can create new tokens" not "the mint approval's initiated-by scope".
+- **No raw values**: don't put "2592000000 ms" (base unit) in a user-facing string — write "30 days". Don't put "1000000000" — write "1000 USDC".
+- **No IPFS hashes, bb1 addresses, or ibc/denom strings** in user-facing fields.
+- **No brackets or code formatting** in \`message\` — \`ipfs://...\`, \`MsgCreateCollection\`, etc. are internal.
+
+The \`fieldPath\` field is TECHNICAL — it exists only as a UI hint for the frontend to highlight the relevant tx field. Never put user-facing explanation in it.
+
+If you must reference a field by name because the user's prompt used that name, put it in \`fieldPath\` (for the UI to highlight), not in \`message\`/\`chosen\`/\`alternative\`.
+
+**Test every string you're about to emit:** would someone with zero BitBadges knowledge understand it? If they'd need to look up a word — it's jargon, rewrite.
+
+Translation cheat sheet (internal term → how to phrase it for users):
+
+- \`initiatedByListId\` / \`fromListId\` / \`toListId\` → "who can subscribe" / "who sends" / "who receives"
+- \`approvalCriteria\` / "mint approval" → "subscription rule" or "mint rule"
+- \`permanentlyForbiddenTimes\` / "frozen approval" → "locked permanently" / "cannot be changed later"
+- \`overridesFromOutgoingApprovals\` / \`mustPrioritize\` → don't mention at all; these are internal plumbing
+- Base units (e.g. 5000000, 2592000000, ibc/...) → always convert: "5 ATOM", "30 days", "USDC"
+- \`bb1...\` addresses → "you (the creator)", "the manager", "the treasury address"
+- \`ipfs://...\` / \`data:image/...\` → "the image you uploaded" / "a placeholder image"
+- \`MsgCreateCollection\`, proto type URLs → just don't mention them
+
+When in doubt, omit the flag over writing a jargon-y one — "no flag" is always better than "a confusing flag that looks like a bug report."`;
 
 export const WORKFLOW_NEW_BUILD = `## Workflow
 1. UNDERSTAND: Read the request and inlined skill instructions. If the request involves features not covered by skills, call search_knowledge_base. Take best interpretation — do not ask clarifying questions.
