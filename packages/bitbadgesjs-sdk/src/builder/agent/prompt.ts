@@ -200,31 +200,29 @@ available, use those as the "image" field INSIDE metadataPlaceholders
 entries (NEVER as a field directly on on-chain metadata). NEVER use
 IMAGE_N placeholders unless the request explicitly lists them.
 
-NO IMAGES UPLOADED — this is the default path. Follow exactly:
-  1. Call generate_placeholder_art({ seed: <collection name> }) as
-     your FIRST tool call, before any set_*_metadata call. It returns
-     { imageUri: "data:image/svg+xml;base64,..." }.
-  2. Use that single imageUri verbatim for the "image" field on the
-     collection AND on every token AND on every alias path /
-     denom-unit metadata. Reuse is the expected pattern — do NOT
-     call generate_placeholder_art multiple times for one build
-     unless each asset has a meaningfully distinct identity (e.g.,
-     Gold Pass vs Silver Pass in the same collection).
-  3. If you somehow forget steps 1-2 and leave IMAGE_N strings
-     unresolved, get_transaction will auto-fill them at the end —
-     but you should still call the tool explicitly so the pick
-     surfaces in the tool-call log.
-
-NEVER use the old BitBadges default logo
-(ipfs://QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E). It's no
-longer a valid fallback and get_transaction will rewrite it.
+NO IMAGES UPLOADED — leave the "image" field BLANK (empty string "")
+in metadataPlaceholders entries. Do NOT generate art, do NOT paste
+base64, do NOT hardcode any URI. \`get_transaction\` auto-fills every
+blank image with a deterministic SVG seeded by the collection name —
+this keeps your output tokens tight and avoids echoing large base64
+strings across tool calls.
 
 Existing real URIs (https://, ipfs://, data:) that the user supplied
 are ALWAYS preserved and never overwritten.
 
 APPROVAL METADATA — the "image" field inside approval placeholders
 MUST remain "" (empty string). The post-step leaves approval
-entries alone.`;
+entries alone.
+
+OPTIONAL art-style control — you may include an \`_artHints\` sidecar
+on the collection metadataPlaceholders entry to influence the
+generated placeholder:
+\`\`\`json
+{ "_artHints": { "symbol": "vUS", "style": "gradient-mono", "vibe": "tech", "paletteName": "emerald" } }
+\`\`\`
+All fields optional. Only use this if the user's prompt hints at a
+specific aesthetic; otherwise leave it off and let the hash-derived
+defaults handle it.`;
 
 export const TOKEN_EFFICIENCY = `## Token Efficiency & Round Budget
 
@@ -233,7 +231,7 @@ export const TOKEN_EFFICIENCY = `## Token Efficiency & Round Budget
 **Zero text output between tool calls.** Do not write "Now I'll verify...", "Let me fetch...", "I'll flag...", or any transition text. Jump straight to the next tool call. The only legal text output is (a) a final error explanation you cannot fix, or (b) empty after a successful verify.
 
 **Batch aggressively in one round.** When rounds are correctly batched, a fungible/subscription/NFT build looks like:
-- Round 1: lookup_token_info + generate_unique_id + generate_placeholder_art (all parallel)
+- Round 1: lookup_token_info + generate_unique_id (parallel; placeholder art is auto-filled server-side — no tool call needed)
 - Round 2: set_standards + set_valid_token_ids + set_invariants + set_permissions + set_default_balances + set_collection_metadata + set_token_metadata + add_approval + set_approval_metadata + add_alias_path (all parallel, single round)
 - Round 3: validate_transaction + review_collection + simulate_transaction (all parallel)
 - Round 4: get_transaction + flag_review_item calls + stop

@@ -72,7 +72,6 @@ import {
   addTransferTool, handleAddTransfer,
   removeTransferTool, handleRemoveTransfer,
   getTransactionTool, handleGetTransaction,
-  generatePlaceholderArtTool, handleGeneratePlaceholderArt,
   setIsArchivedTool, handleSetIsArchived,
   generateUniqueIdTool, handleGenerateUniqueId,
   generateWrapperAddressTool, handleGenerateWrapperAddress
@@ -240,7 +239,13 @@ export const toolRegistry: Record<string, ToolEntry> = {
   add_transfer: entry(addTransferTool, handleAddTransfer),
   remove_transfer: entry(removeTransferTool, handleRemoveTransfer),
   get_transaction: entry(getTransactionTool, handleGetTransaction),
-  generate_placeholder_art: entry(generatePlaceholderArtTool, handleGeneratePlaceholderArt),
+  // NOTE: `generate_placeholder_art` removed from the LLM tool catalog.
+  // The builder agent no longer calls it — get_transaction auto-fills
+  // any blank `image` field with a deterministic SVG seeded by the
+  // collection name. This removes ~1 round + all the base64 echoes the
+  // LLM used to propagate across set_*_metadata calls. See
+  // tools/session/getTransaction.ts for the fill logic, and the
+  // `_artHints` sidecar escape hatch documented there.
   set_is_archived: entry(setIsArchivedTool, handleSetIsArchived),
   generate_unique_id: entry(generateUniqueIdTool, handleGenerateUniqueId),
   generate_wrapper_address: entry(generateWrapperAddressTool, handleGenerateWrapperAddress)

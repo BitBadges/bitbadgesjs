@@ -87,6 +87,37 @@ function extractCollectionName(tx: any): string {
 }
 
 /**
+ * Look for an `_artHints` sidecar on the collection's metadataPlaceholders
+ * entry. The LLM can optionally include it to influence the placeholder
+ * art — all fields optional:
+ *   { symbol?, style?, vibe?, paletteName? }
+ *
+ * Returns null if the sidecar isn't present or doesn't parse. Silently
+ * ignores unknown keys — we only forward the four we document.
+ */
+function extractArtHints(tx: any): { symbol?: string; style?: string; vibe?: string; paletteName?: string } | null {
+  if (!tx || typeof tx !== 'object') return null;
+  const msgs = Array.isArray(tx.messages) ? tx.messages : tx.msgs;
+  const body = msgs?.[0]?.value ?? msgs?.[0];
+  if (!body || typeof body !== 'object') return null;
+  const placeholders = (body._meta ?? body.meta)?.metadataPlaceholders;
+  if (!placeholders || typeof placeholders !== 'object') return null;
+  for (const [, entry] of Object.entries(placeholders)) {
+    if (!entry || typeof entry !== 'object') continue;
+    const hints = (entry as any)._artHints;
+    if (hints && typeof hints === 'object') {
+      const out: { symbol?: string; style?: string; vibe?: string; paletteName?: string } = {};
+      if (typeof hints.symbol === 'string') out.symbol = hints.symbol;
+      if (typeof hints.style === 'string') out.style = hints.style;
+      if (typeof hints.vibe === 'string') out.vibe = hints.vibe;
+      if (typeof hints.paletteName === 'string') out.paletteName = hints.paletteName;
+      return out;
+    }
+  }
+  return null;
+}
+
+/**
  * Generic recursive replace — swaps any string that qualifies as
  * "unresolved" (IMAGE_N or the legacy BitBadges default-logo URI)
  * with the single per-build generated art URI. Runs on every field
@@ -203,7 +234,14 @@ export function handleGetTransaction(input: GetTransactionInput) {
   const needsSidecarFill = hasEmptyNonApprovalImage(sanitized);
   if (needsGenericFill || needsSidecarFill) {
     const seed = extractCollectionName(sanitized);
-    const art = generatePlaceholderArt({ seed });
+    const hints = extractArtHints(sanitized);
+    const art = generatePlaceholderArt({
+      seed,
+      symbol: hints?.symbol,
+      style: hints?.style as any,
+      vibe: hints?.vibe as any,
+      paletteName: hints?.paletteName
+    });
     if (needsGenericFill) {
       cleaned = replaceUnresolvedImagePlaceholders(sanitized, art.imageUri);
     }
