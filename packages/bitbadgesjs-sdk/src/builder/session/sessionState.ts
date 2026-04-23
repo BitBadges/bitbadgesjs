@@ -14,6 +14,7 @@
 
 import { ensureBb1 } from '../sdk/addressUtils.js';
 import type { ReviewFlag } from '../agent/types.js';
+import { sanitizeReviewFlags } from './reviewFlagSanitizer.js';
 
 const MAX_UINT64 = '18446744073709551615';
 const DEFAULT_IMAGE = 'ipfs://QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E';
@@ -198,12 +199,20 @@ export function addReviewFlag(sessionId: string | undefined, flag: ReviewFlag): 
 /**
  * Read + drain the session's review flags. Returns a copy; accumulator is cleared.
  * Called by BitBadgesBuilderAgent at build end.
+ *
+ * Passes every flag through a deterministic jargon scrubber before
+ * returning. Belt-and-suspenders with the prompt: the prompt tells
+ * the model NOT to leak JSON field names / raw addresses / proto
+ * type URLs into user-facing strings, and this catches what slips
+ * through. The model's `kind`/`severity`/`fieldPath` pass through
+ * unchanged (fieldPath is UI-only and may legitimately carry the
+ * technical path for highlight purposes).
  */
 export function drainReviewFlags(sessionId?: string): ReviewFlag[] {
   const sid = resolveSessionId(sessionId);
   const flags = sessionReviewFlags.get(sid) ?? [];
   sessionReviewFlags.delete(sid);
-  return flags;
+  return sanitizeReviewFlags(flags);
 }
 
 /**
