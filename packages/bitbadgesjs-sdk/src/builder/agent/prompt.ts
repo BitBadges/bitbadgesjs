@@ -191,6 +191,41 @@ Collection-level constraints enforced on-chain (e.g., noCustomOwnershipTimes, ma
 - **defaultBalances**: Almost always: empty balances, empty approvals, all auto-approve flags true
 - **All numeric values MUST be strings** — "1" not 1. UintRange: { "start": "string", "end": "string" }. Max uint64: "18446744073709551615"`;
 
+export const IMAGES_SECTION = `## Images
+
+The request will specify whether images are available.
+
+UPLOADED IMAGES — when the request lists IMAGE_N placeholders as
+available, use those as the "image" field INSIDE metadataPlaceholders
+entries (NEVER as a field directly on on-chain metadata). NEVER use
+IMAGE_N placeholders unless the request explicitly lists them.
+
+NO IMAGES UPLOADED — this is the default path. Follow exactly:
+  1. Call generate_placeholder_art({ seed: <collection name> }) as
+     your FIRST tool call, before any set_*_metadata call. It returns
+     { imageUri: "data:image/svg+xml;base64,..." }.
+  2. Use that single imageUri verbatim for the "image" field on the
+     collection AND on every token AND on every alias path /
+     denom-unit metadata. Reuse is the expected pattern — do NOT
+     call generate_placeholder_art multiple times for one build
+     unless each asset has a meaningfully distinct identity (e.g.,
+     Gold Pass vs Silver Pass in the same collection).
+  3. If you somehow forget steps 1-2 and leave IMAGE_N strings
+     unresolved, get_transaction will auto-fill them at the end —
+     but you should still call the tool explicitly so the pick
+     surfaces in the tool-call log.
+
+NEVER use the old BitBadges default logo
+(ipfs://QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E). It's no
+longer a valid fallback and get_transaction will rewrite it.
+
+Existing real URIs (https://, ipfs://, data:) that the user supplied
+are ALWAYS preserved and never overwritten.
+
+APPROVAL METADATA — the "image" field inside approval placeholders
+MUST remain "" (empty string). The post-step leaves approval
+entries alone.`;
+
 export const TOKEN_EFFICIENCY = `## Token Efficiency
 - NEVER narrate, summarize, or recap what you built. A separate system generates the user-facing summary.
 - After verification passes, stop immediately with no text output.
@@ -258,7 +293,7 @@ export function buildSystemPrompt(mode: 'create' | 'update' | 'refine' = 'create
 
   const workflow = mode === 'update' ? WORKFLOW_UPDATE : mode === 'refine' ? WORKFLOW_REFINEMENT : WORKFLOW_NEW_BUILD;
 
-  return `${intro}\n\n${SECURITY_SECTION}\n\n${DOMAIN_KNOWLEDGE}\n\n${TOKEN_EFFICIENCY}\n\n${workflow}`;
+  return `${intro}\n\n${SECURITY_SECTION}\n\n${DOMAIN_KNOWLEDGE}\n\n${IMAGES_SECTION}\n\n${TOKEN_EFFICIENCY}\n\n${workflow}`;
 }
 
 export const BUILDER_SYSTEM_PROMPT = buildSystemPrompt('create');
@@ -319,12 +354,7 @@ Rules:
   still required.
 - Metadata descriptions: 1-2 sentences, specific, end with periods.
 
-Images: The request will specify whether images are available. If available,
-use the listed IMAGE_N placeholders as the "image" field INSIDE
-metadataPlaceholders entries — NEVER as a field directly on on-chain
-metadata. If no images are uploaded, use the default logo URI the request
-provides inside the same sidecar entries. NEVER use IMAGE_N placeholders
-unless the request explicitly lists them as available.
+${IMAGES_SECTION}
 
 ${SECURITY_SECTION}
 
