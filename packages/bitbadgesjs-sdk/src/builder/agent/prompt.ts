@@ -226,11 +226,23 @@ APPROVAL METADATA — the "image" field inside approval placeholders
 MUST remain "" (empty string). The post-step leaves approval
 entries alone.`;
 
-export const TOKEN_EFFICIENCY = `## Token Efficiency
-- NEVER narrate, summarize, or recap what you built. A separate system generates the user-facing summary.
-- After verification passes, stop immediately with no text output.
-- Only output text when you need to explain an error you cannot fix.
-- Call multiple tools in the SAME round (parallel tool calls) when possible.`;
+export const TOKEN_EFFICIENCY = `## Token Efficiency & Round Budget
+
+**Target: complete new builds in 3-4 rounds total.** Every additional round adds seconds of latency the user pays for. Treat rounds as expensive.
+
+**Zero text output between tool calls.** Do not write "Now I'll verify...", "Let me fetch...", "I'll flag...", or any transition text. Jump straight to the next tool call. The only legal text output is (a) a final error explanation you cannot fix, or (b) empty after a successful verify.
+
+**Batch aggressively in one round.** When rounds are correctly batched, a fungible/subscription/NFT build looks like:
+- Round 1: lookup_token_info + generate_unique_id + generate_placeholder_art (all parallel)
+- Round 2: set_standards + set_valid_token_ids + set_invariants + set_permissions + set_default_balances + set_collection_metadata + set_token_metadata + add_approval + set_approval_metadata + add_alias_path (all parallel, single round)
+- Round 3: validate_transaction + review_collection + simulate_transaction (all parallel)
+- Round 4: get_transaction + flag_review_item calls + stop
+
+**Do NOT call get_transaction before verification.** validate_transaction, review_collection, and simulate_transaction read session state directly — they do not need the tx JSON as input.
+
+**Keep tool arguments minimal.** Metadata fields: write the minimal required shape. Do NOT echo back base64 image strings from prior tool results — the server tracks them by placeholder URI.
+
+**After a successful verification, stop with NO text.** If verification fails, fix and retry up to 3 times — otherwise output the error and stop.`;
 
 export const SELF_REVIEW_SECTION = `## Flagging Review Items
 
@@ -277,7 +289,7 @@ export const WORKFLOW_NEW_BUILD = `## Workflow
    - All tools can be called in parallel in one round
 3. AUTO-MINT (if user requests minting to specific addresses): Call add_transfer to append a MsgTransferTokens. See Auto-Mint section. Do this BEFORE verification.
 4. SELF-REVIEW: Before VERIFY, scan back over your decisions. For EVERY assumption, substitution, default, or ambiguity-resolution you made that you haven't already flagged inline, call flag_review_item NOW. This is your final pass — it's cheap insurance, and under-flagging is worse than over-flagging.
-5. VERIFY (MANDATORY): Call validate_transaction, review_collection, and simulate_transaction in parallel. Fix errors with targeted remove_approval + re-add (max 3 attempts). Once verification passes, STOP IMMEDIATELY.
+5. VERIFY (MANDATORY): Call validate_transaction, review_collection, and simulate_transaction in parallel in ONE round. If ALL pass: STOP IMMEDIATELY — do NOT self-correct, do NOT "polish", do NOT add extra tweaks. If any fail with hard errors: output a text explanation and stop; the SDK fix loop runs afterwards and will handle retries with focused error context. You self-correcting in the main loop wastes rounds that the fix loop can handle with less prompt overhead.
 6. OUTPUT: Call get_transaction to return the final JSON.`;
 
 export const WORKFLOW_UPDATE = `## Workflow
