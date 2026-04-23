@@ -94,10 +94,15 @@ export function deriveSymbol(seed: string): string {
     .toUpperCase();
 }
 
+/**
+ * Presets eligible for `style: 'auto'` hash-picks. Center-aligned
+ * layouts only — `letterform` is intentionally excluded (its
+ * oversized letter bleeds off-center by design), but remains callable
+ * via explicit `style: 'letterform'` for callers who want that look.
+ */
 const ALL_STYLES: Array<Exclude<PlaceholderArtStyle, 'auto'>> = [
   'gradient-mono',
   'geometric-tile',
-  'letterform',
   'orbital',
   'mesh',
   'glyph'
@@ -105,9 +110,9 @@ const ALL_STYLES: Array<Exclude<PlaceholderArtStyle, 'auto'>> = [
 
 const VIBE_BIAS: Record<PlaceholderArtVibe, Array<Exclude<PlaceholderArtStyle, 'auto'>>> = {
   playful: ['mesh', 'gradient-mono', 'orbital'],
-  serious: ['letterform', 'geometric-tile', 'glyph'],
+  serious: ['geometric-tile', 'glyph', 'gradient-mono'],
   tech: ['orbital', 'geometric-tile', 'gradient-mono'],
-  organic: ['mesh', 'gradient-mono', 'letterform']
+  organic: ['mesh', 'gradient-mono', 'glyph']
 };
 
 /** Resolve `style: 'auto'` to a concrete preset, optionally vibe-biased. */
