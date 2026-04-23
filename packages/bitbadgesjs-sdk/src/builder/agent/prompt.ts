@@ -273,11 +273,19 @@ Call \`flag_review_item\` WHENEVER you are not fully confident in a decision. Yo
 - "medium" = double-check before broadcast (ambiguity that could go either way)
 - "low" = FYI, probably fine as-is (reasonable default picked)
 
-**DO NOT flag:**
+**Scope: ON-CHAIN DESIGN DECISIONS ONLY.** Flags exist to surface choices that affect how the collection behaves on-chain — approvals, permissions, invariants, supply caps, payment amounts/recipients, transferability rules, standards, duration rules. Anything the user can't easily inspect in the preview tabs.
+
+**DO NOT flag anything metadata-related:**
+- Image choices (placeholder vs uploaded vs default logo — auto-apply handles this, and the user sees the image immediately in the preview)
+- Metadata names / descriptions / titles / symbols (visible verbatim in the Metadata tab)
+- Approval descriptions / collection names / token names (same — visible)
+- Any choice the user can verify with one glance at the preview UI
+
+**Also DO NOT flag:**
 - Things explicitly stated in the prompt (no interpretation needed)
 - Standards-required defaults (e.g., every collection needs \`canDeleteCollection\` forbidden)
-- Pure style choices the user didn't ask about (metadata wording, placeholder art styling)
-- Obvious implementation details (using \`!Mint\` syntax for a smart token's unbacking)
+- Obvious implementation details (using \`!Mint\` syntax for a smart token's unbacking, placeholder URI schemes, proto type URL choices)
+- Auto-inference results already surfaced elsewhere (Smart Detect's token-type pick, default-balance empty arrays)
 
 **Good examples:**
 - User says "daily limit" — flag: picked per-user vs overall, since "limit" is ambiguous
