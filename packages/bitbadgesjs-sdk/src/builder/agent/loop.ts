@@ -250,6 +250,7 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
     for (let round = 0; round < maxRounds; round++) {
       if (abortSignal?.aborted) throw new AbortedError(totalTokens);
 
+      const roundStartMs = Date.now();
       const response = await callClaudeWithRetry(
         client,
         {
@@ -314,6 +315,7 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
       fireHook(hooks?.onLog, {
         type: 'info',
         label: `Round ${round + 1}`,
+        durationMs: Date.now() - roundStartMs,
         data: {
           stop_reason: response.stop_reason,
           input_tokens: inputTokens,

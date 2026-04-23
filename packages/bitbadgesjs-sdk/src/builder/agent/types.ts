@@ -208,6 +208,14 @@ export interface AgentLogEntry {
   type: 'info' | 'ai_text' | 'validation' | 'error';
   label: string;
   data?: unknown;
+  /**
+   * Wall-clock duration attributable to this entry, in ms. Populated
+   * for phase-boundary events (round_complete, validation_gate_complete,
+   * fix_loop_complete, build_complete, etc.) and for tool-result
+   * entries. Absent on instantaneous events (ai_text, info without a
+   * bracketed phase, errors).
+   */
+  durationMs?: number;
 }
 
 /**
@@ -259,8 +267,65 @@ export interface BuildTrace {
   /** Cumulative tokens served from cache (cheap reads). */
   cacheReadTokens: number;
   costUsd: number;
+  /** Total wall-clock duration of the build in milliseconds. */
+  durationMs: number;
   model: string;
   systemPromptHash: string;
+}
+
+/**
+ * A review flag the agent self-surfaced during the build via the
+ * `flag_review_item` tool. Populated regardless of whether the
+ * post-build LLM auditor is enabled — this is the builder
+ * reflecting on its OWN decisions, not a second model reviewing the
+ * finished transaction.
+ *
+ * Use cases the agent should flag:
+ *  - Assumptions made to resolve ambiguity in the prompt
+ *  - Substitutions when the underlying standard can't fully support
+ *    what the user asked for
+ *  - Places where multiple valid answers existed and the agent picked one
+ *  - Defaults chosen without the user specifying a value
+ *  - Interpretations of loose phrasing
+ */
+export type ReviewFlagKind =
+  | 'assumption'
+  | 'substitution'
+  | 'unsupported_request'
+  | 'clarification_needed'
+  | 'design_choice'
+  | 'other';
+
+export type ReviewFlagSeverity = 'low' | 'medium' | 'high';
+
+export interface ReviewFlag {
+  kind: ReviewFlagKind;
+  severity: ReviewFlagSeverity;
+  /**
+   * One-sentence human-readable description. Plain English, no
+   * technical jargon, no JSON field names, no base-unit numbers —
+   * this is what the user reads in the UI.
+   */
+  message: string;
+  /**
+   * Concrete value / interpretation the agent picked, phrased for a
+   * non-technical user ("Anyone can subscribe", "30 days", "1000 USDC").
+   * No JSON field names, no base units, no bb1/ibc/ipfs strings.
+   */
+  chosen: string;
+  /**
+   * Optional: the most likely alternative, in the same plain-English
+   * style. Shown to the user as "did you mean X instead?"
+   */
+  alternative?: string;
+  /**
+   * Optional technical path into the transaction where this applies
+   * (e.g., "messages[0].value.collectionApprovals[1].approvalCriteria.approvalAmounts").
+   * UI-only field — intended for the frontend to HIGHLIGHT the
+   * affected tx field, NOT to render as user-visible text.
+   * Never put user-facing explanation here.
+   */
+  fieldPath?: string;
 }
 
 /** Return value of `agent.build()`. Fully typed for IntelliSense. */
@@ -297,6 +362,14 @@ export interface BuildResult {
   rounds: number;
   /** Number of validation fix-loop rounds executed. */
   fixRounds: number;
+  /** Total wall-clock duration of the build in milliseconds. */
+  durationMs: number;
+  /**
+   * Review flags the agent self-surfaced during the build via
+   * `flag_review_item`. Empty array when nothing was flagged.
+   * Always populated regardless of audit setting.
+   */
+  reviewFlags: ReviewFlag[];
   /** Full trace — messages, tool calls, etc. */
   trace: BuildTrace;
   /**

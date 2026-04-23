@@ -143,6 +143,24 @@ export function handleAddAliasPath(input: AddAliasPathInput) {
   if (symbol && !VALID_CHARS.test(symbol)) {
     return { success: false, error: `Symbol "${symbol}" contains invalid characters. Only a-zA-Z, _, {, }, - are allowed.` };
   }
+  // Chain iterates `for _, denomUnit := range path.DenomUnits` and rejects
+  // any entry with decimals.IsZero() — "denom unit decimals cannot be 0".
+  // An EMPTY denomUnits[] is valid (loop body never runs) and means "only
+  // the base denom/symbol with 0 implicit decimals, no display units."
+  // Catch explicit zero-decimal entries locally so the LLM sees a clear
+  // actionable message instead of a chain-level 500 that burns a retry.
+  const denomUnits = input.aliasPath.denomUnits;
+  if (Array.isArray(denomUnits)) {
+    for (const [idx, unit] of denomUnits.entries()) {
+      const dec = (unit as any)?.decimals;
+      if (dec === undefined || dec === null || String(dec) === '0' || String(dec) === '') {
+        return {
+          success: false,
+          error: `denomUnits[${idx}].decimals must be > 0 (got "${dec}"). Base decimals (0) is implicit in denom/symbol — don't add a denomUnit entry for it. To declare a display unit, pick an exponent like "6" for fungible tokens. To skip display units entirely, pass denomUnits: [].`
+        };
+      }
+    }
+  }
 
   // PathMetadata only has { uri, customData }. An `image` field at this
   // level is invalid proto. Strip any inbound `image` field and ensure
