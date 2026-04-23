@@ -15,7 +15,7 @@
 
 import { randomUUID } from 'crypto';
 import { handleGetTransaction } from '../tools/index.js';
-import { getOrCreateSession } from '../session/sessionState.js';
+import { getOrCreateSession, drainReviewFlags } from '../session/sessionState.js';
 import { getAllSkillInstructions, type SkillInstruction } from '../resources/skillInstructions.js';
 import { getAnthropicClient } from './anthropicClient.js';
 import { AbortedError, BitBadgesBuilderAgentError, ValidationFailedError } from './errors.js';
@@ -730,7 +730,17 @@ export class BitBadgesBuilderAgent {
     }
 
     const buildDurationMs = Date.now() - buildStartMs;
-    logPhase('build_complete', buildStartMs, { valid: gate?.valid ?? true, rounds, fixRounds, tokens: totalTokens });
+    // Drain any review flags the agent self-surfaced via flag_review_item
+    // during the build. Separate from the post-run LLM auditor (which is
+    // gated by llmAuditorEnabled); these always surface regardless.
+    const reviewFlags = drainReviewFlags(sessionId);
+    logPhase('build_complete', buildStartMs, {
+      valid: gate?.valid ?? true,
+      rounds,
+      fixRounds,
+      tokens: totalTokens,
+      reviewFlags: reviewFlags.length
+    });
 
     const trace: BuildTrace = {
       systemPrompt: promptParts.systemPrompt,
@@ -783,6 +793,7 @@ export class BitBadgesBuilderAgent {
       rounds,
       fixRounds,
       durationMs: buildDurationMs,
+      reviewFlags,
       trace,
       inferredTokenType,
       inferredTokenTypeSource,

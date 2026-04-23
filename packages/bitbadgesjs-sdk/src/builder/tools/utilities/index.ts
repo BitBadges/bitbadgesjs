@@ -17,3 +17,6 @@ export * from './fetchDocs.js';
 export * from './searchKnowledgeBase.js';
 export * from './diagnoseError.js';
 export * from './generateUniqueId.js';
+
+// Self-review
+export * from './flagReviewItem.js';

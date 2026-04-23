@@ -18,6 +18,7 @@ import {
   lookupTokenInfoTool, handleLookupTokenInfo,
   validateTransactionTool, handleValidateTransaction,
   getCurrentTimestampTool, handleGetCurrentTimestamp,
+  flagReviewItemTool, handleFlagReviewItem,
   // Components
   generateBackingAddressTool, handleGenerateBackingAddress,
   generateApprovalTool, handleGenerateApproval,
@@ -161,6 +162,7 @@ export const toolRegistry: Record<string, ToolEntry> = {
   lookup_token_info: entry(lookupTokenInfoTool, handleLookupTokenInfo),
   validate_transaction: entry(validateTransactionTool, handleValidateTransaction),
   get_current_timestamp: entry(getCurrentTimestampTool, handleGetCurrentTimestamp),
+  flag_review_item: entry(flagReviewItemTool, handleFlagReviewItem),
 
   // Components
   generate_backing_address: entry(generateBackingAddressTool, handleGenerateBackingAddress),

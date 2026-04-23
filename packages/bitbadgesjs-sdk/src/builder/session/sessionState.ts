@@ -13,6 +13,7 @@
  */
 
 import { ensureBb1 } from '../sdk/addressUtils.js';
+import type { ReviewFlag } from '../agent/types.js';
 
 const MAX_UINT64 = '18446744073709551615';
 const DEFAULT_IMAGE = 'ipfs://QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E';
@@ -56,6 +57,12 @@ export function getMsgPlaceholders(session: SessionTransaction): Record<string, 
 
 // Per-session state keyed by sessionId
 const sessions = new Map<string, SessionTransaction>();
+
+// Review flags accumulated per session via the `flag_review_item` tool.
+// Kept separate from SessionTransaction so they don't leak into
+// getCollectionValue() / the wire transaction. Drained into
+// BuildResult.reviewFlags by BitBadgesBuilderAgent at build end.
+const sessionReviewFlags = new Map<string, ReviewFlag[]>();
 
 // Default sessionId when none is provided (builder-direct / single-user mode)
 const DEFAULT_SESSION_ID = '__default__';
@@ -154,7 +161,9 @@ export function getCollectionValue(sessionId?: string, creatorAddress?: string):
  * Reset a specific session (or the default session).
  */
 export function resetSession(sessionId?: string): void {
-  sessions.delete(resolveSessionId(sessionId));
+  const sid = resolveSessionId(sessionId);
+  sessions.delete(sid);
+  sessionReviewFlags.delete(sid);
 }
 
 /**
@@ -162,6 +171,37 @@ export function resetSession(sessionId?: string): void {
  */
 export function resetAllSessions(): void {
   sessions.clear();
+  sessionReviewFlags.clear();
+}
+
+/**
+ * Append a review flag (from `flag_review_item` tool) to the session's
+ * accumulator. Drained into BuildResult.reviewFlags at build end.
+ */
+export function addReviewFlag(sessionId: string | undefined, flag: ReviewFlag): void {
+  const sid = resolveSessionId(sessionId);
+  const existing = sessionReviewFlags.get(sid) ?? [];
+  existing.push(flag);
+  sessionReviewFlags.set(sid, existing);
+}
+
+/**
+ * Read + drain the session's review flags. Returns a copy; accumulator is cleared.
+ * Called by BitBadgesBuilderAgent at build end.
+ */
+export function drainReviewFlags(sessionId?: string): ReviewFlag[] {
+  const sid = resolveSessionId(sessionId);
+  const flags = sessionReviewFlags.get(sid) ?? [];
+  sessionReviewFlags.delete(sid);
+  return flags;
+}
+
+/**
+ * Non-destructive read of the session's current review flags. Useful for
+ * in-process callers that want to peek without draining.
+ */
+export function getReviewFlags(sessionId?: string): ReviewFlag[] {
+  return sessionReviewFlags.get(resolveSessionId(sessionId)) ?? [];
 }
 
 /**

@@ -273,6 +273,44 @@ export interface BuildTrace {
   systemPromptHash: string;
 }
 
+/**
+ * A review flag the agent self-surfaced during the build via the
+ * `flag_review_item` tool. Populated regardless of whether the
+ * post-build LLM auditor is enabled — this is the builder
+ * reflecting on its OWN decisions, not a second model reviewing the
+ * finished transaction.
+ *
+ * Use cases the agent should flag:
+ *  - Assumptions made to resolve ambiguity in the prompt
+ *  - Substitutions when the underlying standard can't fully support
+ *    what the user asked for
+ *  - Places where multiple valid answers existed and the agent picked one
+ *  - Defaults chosen without the user specifying a value
+ *  - Interpretations of loose phrasing
+ */
+export type ReviewFlagKind =
+  | 'assumption'
+  | 'substitution'
+  | 'unsupported_request'
+  | 'clarification_needed'
+  | 'design_choice'
+  | 'other';
+
+export type ReviewFlagSeverity = 'low' | 'medium' | 'high';
+
+export interface ReviewFlag {
+  kind: ReviewFlagKind;
+  severity: ReviewFlagSeverity;
+  /** One-sentence description of what's being flagged. */
+  message: string;
+  /** Concrete value / interpretation / workaround the agent picked. */
+  chosen: string;
+  /** Optional: the most likely alternative, or what the user might have wanted. */
+  alternative?: string;
+  /** Optional: dotted path into the transaction where this applies (e.g., "messages[0].value.collectionApprovals[1].approvalCriteria.approvalAmounts"). */
+  fieldPath?: string;
+}
+
 /** Return value of `agent.build()`. Fully typed for IntelliSense. */
 export interface BuildResult {
   /** True when validation passed (or strictness allowed partial results). */
@@ -309,6 +347,12 @@ export interface BuildResult {
   fixRounds: number;
   /** Total wall-clock duration of the build in milliseconds. */
   durationMs: number;
+  /**
+   * Review flags the agent self-surfaced during the build via
+   * `flag_review_item`. Empty array when nothing was flagged.
+   * Always populated regardless of audit setting.
+   */
+  reviewFlags: ReviewFlag[];
   /** Full trace — messages, tool calls, etc. */
   trace: BuildTrace;
   /**
