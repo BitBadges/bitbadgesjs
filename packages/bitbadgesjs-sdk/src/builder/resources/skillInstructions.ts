@@ -307,7 +307,7 @@ Require ownership of a 2FA token to withdraw. Add mustOwnTokens to the unbacking
 1. **NO fromListId: "Mint" approvals**: Tokens are created via IBC backing, not traditional minting
 2. **Use allowBackedMinting: true** in both backing and unbacking approvals
 3. **Use mustPrioritize: true** (required for IBC backed operations)
-4. **Backing approval**: overridesFromOutgoingApprovals: true is RECOMMENDED (backing addresses auto-set their approvals, so it works either way, but true is good practice). **Unbacking approval**: MUST be false (sender is a regular user)
+4. **overridesFromOutgoingApprovals**: leave unset or false on BOTH backing and unbacking approvals. The backing address is protocol-controlled but we still manage its approvals at the protocol level — treat it like any regular user whose outgoing approvals are externally managed. Don't set \`overridesFromOutgoingApprovals: true\` as a "best practice" — adding overrides where they aren't needed is actively worse than omitting them.
 5. **Unbacking fromListId**: Use \`!Mint:backingAddress\` syntax — excludes both Mint and backing address so only regular holders can send tokens back
 6. **MUST create backing + unbacking approvals**. Transferable approval is common but optional (omit for vaults/escrows)
 7. **MUST configure alias path** with matching decimals
