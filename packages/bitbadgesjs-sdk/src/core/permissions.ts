@@ -409,17 +409,31 @@ export class CollectionPermissions<T extends NumberType> extends BaseNumberTypeC
 
   constructor(msg: iCollectionPermissions<T>) {
     super();
-    this.canDeleteCollection = msg.canDeleteCollection.map((x) => new ActionPermission(x));
-    this.canArchiveCollection = msg.canArchiveCollection.map((x) => new ActionPermission(x));
-    this.canUpdateStandards = msg.canUpdateStandards.map((x) => new ActionPermission(x));
-    this.canUpdateCustomData = msg.canUpdateCustomData.map((x) => new ActionPermission(x));
-    this.canUpdateManager = msg.canUpdateManager.map((x) => new ActionPermission(x));
-    this.canUpdateCollectionMetadata = msg.canUpdateCollectionMetadata.map((x) => new ActionPermission(x));
-    this.canUpdateValidTokenIds = msg.canUpdateValidTokenIds.map((x) => new TokenIdsActionPermission(x));
-    this.canUpdateTokenMetadata = msg.canUpdateTokenMetadata.map((x) => new TokenIdsActionPermission(x));
-    this.canUpdateCollectionApprovals = msg.canUpdateCollectionApprovals.map((x) => new CollectionApprovalPermission(x));
-    this.canAddMoreAliasPaths = msg.canAddMoreAliasPaths.map((x) => new ActionPermission(x));
-    this.canAddMoreCosmosCoinWrapperPaths = msg.canAddMoreCosmosCoinWrapperPaths.map((x) => new ActionPermission(x));
+    // Default any missing `canX` array to `[]` before mapping. Session
+    // state built up incrementally (e.g. from the MCP builder's
+    // `set_permissions` tool, which patches only the fields the agent
+    // writes) may arrive here with a subset of the 11 arrays populated.
+    // Without this normalization a single missing field turns into a
+    // raw `TypeError: undefined is not an object (evaluating
+    // 'msg.canX.map')`, which the outer dispatcher wraps in a generic
+    // "Invalid value for /tokenization.MsgUniversalUpdateCollection"
+    // shell — agents see no actionable hint about which field was
+    // missing and loop retrying the same setter. Normalizing here is
+    // the single choke point for every call path (wrapper-class
+    // construction, convert(), fromJson()), so no caller has to
+    // remember to fill in the blanks. See backlog #0327.
+    const arr = <X>(v: X[] | undefined): X[] => (Array.isArray(v) ? v : []);
+    this.canDeleteCollection = arr(msg.canDeleteCollection).map((x) => new ActionPermission(x));
+    this.canArchiveCollection = arr(msg.canArchiveCollection).map((x) => new ActionPermission(x));
+    this.canUpdateStandards = arr(msg.canUpdateStandards).map((x) => new ActionPermission(x));
+    this.canUpdateCustomData = arr(msg.canUpdateCustomData).map((x) => new ActionPermission(x));
+    this.canUpdateManager = arr(msg.canUpdateManager).map((x) => new ActionPermission(x));
+    this.canUpdateCollectionMetadata = arr(msg.canUpdateCollectionMetadata).map((x) => new ActionPermission(x));
+    this.canUpdateValidTokenIds = arr(msg.canUpdateValidTokenIds).map((x) => new TokenIdsActionPermission(x));
+    this.canUpdateTokenMetadata = arr(msg.canUpdateTokenMetadata).map((x) => new TokenIdsActionPermission(x));
+    this.canUpdateCollectionApprovals = arr(msg.canUpdateCollectionApprovals).map((x) => new CollectionApprovalPermission(x));
+    this.canAddMoreAliasPaths = arr(msg.canAddMoreAliasPaths).map((x) => new ActionPermission(x));
+    this.canAddMoreCosmosCoinWrapperPaths = arr(msg.canAddMoreCosmosCoinWrapperPaths).map((x) => new ActionPermission(x));
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CollectionPermissions<U> {
@@ -1010,7 +1024,9 @@ export class CollectionPermissionsWithDetails<T extends NumberType>
 
   constructor(data: iCollectionPermissionsWithDetails<T>) {
     super(data);
-    this.canUpdateCollectionApprovals = data.canUpdateCollectionApprovals.map(
+    // Mirror the base-class guard — partial session state may also
+    // omit this field. See backlog #0327.
+    this.canUpdateCollectionApprovals = (Array.isArray(data.canUpdateCollectionApprovals) ? data.canUpdateCollectionApprovals : []).map(
       (canUpdateCollectionApproval) => new CollectionApprovalPermissionWithDetails(canUpdateCollectionApproval)
     );
   }
