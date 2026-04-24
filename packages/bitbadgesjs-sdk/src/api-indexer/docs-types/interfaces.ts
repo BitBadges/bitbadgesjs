@@ -1071,7 +1071,6 @@ export interface iApplicationPage<T extends NumberType> {
  * @category Interfaces
  */
 export interface iApiKeyDoc extends Doc {
-  tier?: string;
   label: string;
   apiKey: string;
   bitbadgesAddress: string;
@@ -1079,12 +1078,6 @@ export interface iApiKeyDoc extends Doc {
   lastRequest: number;
   createdAt: number;
   intendedUse: string;
-
-  // Stripe-related fields
-  stripeSubscriptionId?: string;
-  subscriptionStatus?: string;
-  currentPeriodEnd?: number;
-  cancelAtPeriodEnd?: boolean;
 }
 
 /**
