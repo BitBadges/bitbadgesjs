@@ -54,7 +54,6 @@ import {
   CreateClaimSuccessResponse,
   CreateDeveloperAppSuccessResponse,
   CreateDynamicDataStoreSuccessResponse,
-  CreatePaymentIntentSuccessResponse,
   CreatePluginSuccessResponse,
   CreateSIWBBRequestSuccessResponse,
   CreateUtilityPageSuccessResponse,
@@ -145,8 +144,6 @@ import {
   iCreateDeveloperAppPayload,
   iCreateDynamicDataStorePayload,
   iCreateDynamicDataStoreSuccessResponse,
-  iCreatePaymentIntentPayload,
-  iCreatePaymentIntentSuccessResponse,
   iCreatePluginPayload,
   iCreateSIWBBRequestPayload,
   iCreateSIWBBRequestSuccessResponse,
@@ -3016,26 +3013,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         payload
       );
       return new AddApprovalDetailsToOffChainStorageSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Creates a payment intent for the user to pay.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/createPaymentIntent`
-   * - **SDK Function Call**: `await BitBadgesApi.createPaymentIntent(payload);`
-   */
-  public async createPaymentIntent(payload: iCreatePaymentIntentPayload): Promise<CreatePaymentIntentSuccessResponse> {
-    try {
-      const response = await this.axios.post<iCreatePaymentIntentSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CreatePaymentIntentRoute()}`,
-        payload
-      );
-      return new CreatePaymentIntentSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
