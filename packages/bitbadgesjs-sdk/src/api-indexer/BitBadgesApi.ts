@@ -54,7 +54,6 @@ import {
   CreateClaimSuccessResponse,
   CreateDeveloperAppSuccessResponse,
   CreateDynamicDataStoreSuccessResponse,
-  CreatePaymentIntentSuccessResponse,
   CreatePluginSuccessResponse,
   CreateSIWBBRequestSuccessResponse,
   CreateUtilityPageSuccessResponse,
@@ -145,8 +144,6 @@ import {
   iCreateDeveloperAppPayload,
   iCreateDynamicDataStorePayload,
   iCreateDynamicDataStoreSuccessResponse,
-  iCreatePaymentIntentPayload,
-  iCreatePaymentIntentSuccessResponse,
   iCreatePluginPayload,
   iCreateSIWBBRequestPayload,
   iCreateSIWBBRequestSuccessResponse,
@@ -288,7 +285,6 @@ import {
   iGetTransferActivityForUserPayload,
   iGetTransferActivityForUserSuccessResponse
 } from './requests/wrappers.js';
-import { DeleteConnectedAccountSuccessResponse, GetConnectedAccountsSuccessResponse } from './responses/stripe.js';
 
 /**
  * This is the BitBadgesAPI class which provides all typed API calls to the BitBadges API.
@@ -3024,26 +3020,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
   }
 
   /**
-   * Creates a payment intent for the user to pay.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/createPaymentIntent`
-   * - **SDK Function Call**: `await BitBadgesApi.createPaymentIntent(payload);`
-   */
-  public async createPaymentIntent(payload: iCreatePaymentIntentPayload): Promise<CreatePaymentIntentSuccessResponse> {
-    try {
-      const response = await this.axios.post<iCreatePaymentIntentSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CreatePaymentIntentRoute()}`,
-        payload
-      );
-      return new CreatePaymentIntentSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
    * Gets the API keys.
    *
    * @remarks
@@ -3137,44 +3113,6 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         payload
       );
       return new ScheduleTokenRefreshSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Gets all connected Stripe accounts.
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/stripe/connected-accounts`
-   * - **SDK Function Call**: `await BitBadgesApi.getConnectedAccounts();`
-   */
-  public async getConnectedAccounts(): Promise<GetConnectedAccountsSuccessResponse> {
-    try {
-      const response = await this.axios.get<GetConnectedAccountsSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetConnectedAccountsRoute()}`
-      );
-      return new GetConnectedAccountsSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Deletes a connected Stripe account.
-   *
-   * @remarks
-   * - **API Route**: `DELETE /api/v0/stripe/connected-accounts/:accountId`
-   * - **SDK Function Call**: `await BitBadgesApi.deleteConnectedAccount(accountId);`
-   */
-  public async deleteConnectedAccount(accountId: string): Promise<DeleteConnectedAccountSuccessResponse> {
-    try {
-      const response = await this.axios.delete<DeleteConnectedAccountSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.DeleteConnectedAccountRoute(accountId)}`
-      );
-      return new DeleteConnectedAccountSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

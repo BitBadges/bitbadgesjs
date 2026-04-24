@@ -1094,7 +1094,6 @@ export class ApplicationPage<T extends NumberType> extends BaseNumberTypeClass<A
 export class ApiKeyDoc extends CustomTypeClass<ApiKeyDoc> implements iApiKeyDoc {
   _docId: string;
   _id?: string;
-  tier?: string;
   label: string;
   apiKey: string;
   bitbadgesAddress: BitBadgesAddress;
@@ -1102,16 +1101,11 @@ export class ApiKeyDoc extends CustomTypeClass<ApiKeyDoc> implements iApiKeyDoc 
   lastRequest: number;
   createdAt: number;
   intendedUse: string;
-  stripeSubscriptionId?: string;
-  subscriptionStatus?: string;
-  currentPeriodEnd?: number;
-  cancelAtPeriodEnd?: boolean;
 
   constructor(data: iApiKeyDoc) {
     super();
     this._docId = data._docId;
     this._id = data._id;
-    this.tier = data.tier;
     this.label = data.label;
     this.apiKey = data.apiKey;
     this.bitbadgesAddress = data.bitbadgesAddress;
@@ -1119,10 +1113,6 @@ export class ApiKeyDoc extends CustomTypeClass<ApiKeyDoc> implements iApiKeyDoc 
     this.lastRequest = data.lastRequest;
     this.createdAt = data.createdAt;
     this.intendedUse = data.intendedUse;
-    this.stripeSubscriptionId = data.stripeSubscriptionId;
-    this.subscriptionStatus = data.subscriptionStatus;
-    this.currentPeriodEnd = data.currentPeriodEnd;
-    this.cancelAtPeriodEnd = data.cancelAtPeriodEnd;
   }
 }
 
@@ -1716,19 +1706,19 @@ export class CreatorCreditsDoc<T extends NumberType> extends BaseNumberTypeClass
   _id?: string;
   credits: T;
   creditsLimit?: T;
-  aiTokensUsed?: T;
+  apiTokensUsed?: T;
 
   constructor(data: iCreatorCreditsDoc<T>) {
     super();
     this.credits = data.credits;
     this.creditsLimit = data.creditsLimit;
-    this.aiTokensUsed = data.aiTokensUsed;
+    this.apiTokensUsed = data.apiTokensUsed;
     this._docId = data._docId;
     this._id = data._id;
   }
 
   getNumberFieldNames(): string[] {
-    return ['credits', 'creditsLimit', 'aiTokensUsed'];
+    return ['credits', 'creditsLimit', 'apiTokensUsed'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreatorCreditsDoc<U> {

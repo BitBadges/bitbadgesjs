@@ -2681,39 +2681,6 @@ export interface iGetPluginPayload {}
 /**
  * @category API Requests / Responses
  */
-export interface iCreatePaymentIntentPayload {
-  /** The amount in USD to pay */
-  amount: number;
-  /** Purpose of the payment */
-  purpose: 'credits' | 'deposit';
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iCreatePaymentIntentSuccessResponse {
-  /** The payment intent client secret */
-  clientSecret: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class CreatePaymentIntentSuccessResponse
-  extends CustomTypeClass<CreatePaymentIntentSuccessResponse>
-  implements iCreatePaymentIntentSuccessResponse
-{
-  clientSecret: string;
-
-  constructor(data: iCreatePaymentIntentSuccessResponse) {
-    super();
-    this.clientSecret = data.clientSecret;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
 export interface iGetPluginSuccessResponse<T extends NumberType> {
   plugin: iPluginDoc<T>;
 }

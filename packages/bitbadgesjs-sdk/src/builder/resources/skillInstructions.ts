@@ -1798,9 +1798,9 @@ When a user mints credit tokens, the payment (coinTransfers) goes directly to a 
 
 Credit tokens are designed for systems that track consumption off-chain. The on-chain token balance represents \`totalCreditsPaidFor\` — the total credits ever purchased. An off-chain system tracks \`totalUsed\`. The remaining budget is simply \`balance - totalUsed\`.
 
-**Example: BitBadges AI Builder (Collection 23, AITOKEN)**
-- User purchases 10 USDC → receives 1,000,000 AITOKEN (on-chain balance = 1,000,000)
-- User makes AI builder requests → backend tracks \`totalUsed\` (e.g., 250,000 tokens used)
+**Example: BitBadges API Credits (Collection 23 / 80, APITOKEN)**
+- User purchases 10 USDC → receives 1,000,000 APITOKEN (on-chain balance = 1,000,000)
+- User makes API calls (including the AI Builder) → backend tracks \`totalUsed\` (e.g., 250,000 APITOKEN used)
 - Remaining budget = on-chain balance (1,000,000) - totalUsed (250,000) = 750,000
 - User purchases 5 more USDC → on-chain balance increments to 2,000,000
 - Remaining budget = 2,000,000 - 250,000 = 1,750,000

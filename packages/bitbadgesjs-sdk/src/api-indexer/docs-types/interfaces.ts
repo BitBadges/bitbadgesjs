@@ -1071,7 +1071,6 @@ export interface iApplicationPage<T extends NumberType> {
  * @category Interfaces
  */
 export interface iApiKeyDoc extends Doc {
-  tier?: string;
   label: string;
   apiKey: string;
   bitbadgesAddress: string;
@@ -1079,12 +1078,6 @@ export interface iApiKeyDoc extends Doc {
   lastRequest: number;
   createdAt: number;
   intendedUse: string;
-
-  // Stripe-related fields
-  stripeSubscriptionId?: string;
-  subscriptionStatus?: string;
-  currentPeriodEnd?: number;
-  cancelAtPeriodEnd?: boolean;
 }
 
 /**
@@ -1617,8 +1610,8 @@ export interface iCreatorCreditsDoc<T extends NumberType> extends Doc {
   credits: T;
   /** The limit of credits */
   creditsLimit?: T;
-  /** AI Builder tokens used this billing period */
-  aiTokensUsed?: T;
+  /** Unified APITOKEN spend counter — charged by both the AI Builder and the main API-metering middleware against the same on-chain APITOKEN balance. 1 USDC = 100,000 APITOKEN. */
+  apiTokensUsed?: T;
 }
 
 /**
