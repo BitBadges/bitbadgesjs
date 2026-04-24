@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.35.3]
+
+### Breaking Changes
+
+- **Removed Stripe surface area entirely.** BitBadges billing has migrated from Stripe tiers / subscriptions to on-chain APITOKEN credits (ticket #0333). If you were using any of these, migrate off before upgrading:
+  - `BitBadgesAdminAPI.createPaymentIntent()`, `getConnectedAccounts()`, `deleteConnectedAccount()` — methods removed
+  - `CreatePaymentIntentRoute`, `GetConnectedAccountsRoute`, `DeleteConnectedAccountRoute` — route helpers removed
+  - `iCreatePaymentIntentPayload`, `iCreatePaymentIntentSuccessResponse`, `CreatePaymentIntentSuccessResponse` — request/response types removed
+  - `GetConnectedAccountsSuccessResponse`, `DeleteConnectedAccountSuccessResponse` — response types removed (`responses/stripe.ts` deleted)
+- **Removed Stripe-related fields from `iApiKeyDoc` / `ApiKeyDoc`**: `tier`, `stripeSubscriptionId`, `subscriptionStatus`, `currentPeriodEnd`, `cancelAtPeriodEnd`. Access-control is now address-level; the API key is a pure lookup token, and billing reads from `iCreatorCreditsDoc.apiTokensUsed` against the on-chain APITOKEN balance.
+- **Unified `iCreatorCreditsDoc` counter**: dropped the separate `aiTokensUsed` and `apiRequestsUsed` fields in favor of a single `apiTokensUsed` that captures combined spend across the AI Builder and the main API-metering middleware.
+
+### Installation
+
+```bash
+npm install bitbadges@0.35.3
+```
+
 ## [0.35.1]
 
 ### New Features
