@@ -95,9 +95,6 @@ export class BitBadgesApiRoutes {
 
   static CreatePaymentIntentRoute = () => '/api/v0/stripe/createPaymentIntent';
 
-  static GetConnectedAccountsRoute = () => '/api/v0/stripe/connected-accounts';
-  static DeleteConnectedAccountRoute = (accountId: string) => `/api/v0/stripe/connected-accounts/${accountId}`;
-
   static GetCodesFromSeedHelperRoute = () => '/api/v0/codes';
 
   static GetDynamicDataStoreRoute = (dynamicStoreId: string) => `/api/v0/dynamicStore/${dynamicStoreId.toString()}`;
