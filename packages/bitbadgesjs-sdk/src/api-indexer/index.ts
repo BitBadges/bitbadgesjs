@@ -10,4 +10,3 @@ export * from './BitBadgesUserInfo.js';
 export * from './interpret.js';
 export * from './verify-standards.js';
 export * from './requests/index.js';
-export * from './responses/index.js';
