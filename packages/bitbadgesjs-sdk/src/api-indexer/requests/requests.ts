@@ -4441,7 +4441,7 @@ export class GetSwapActivitiesPayload extends CustomTypeClass<GetSwapActivitiesP
 /**
  * @category API Requests / Responses
  */
-export interface iGetSwapActivitiesSuccessResponse<T extends NumberType = NumberType> {
+export interface iGetSwapActivitiesSuccessResponse<T extends NumberType> {
   swapActivities: Array<{
     _docId: string;
     blockHeight: T;
@@ -4455,7 +4455,7 @@ export interface iGetSwapActivitiesSuccessResponse<T extends NumberType = Number
 /**
  * @category API Requests / Responses
  */
-export class GetSwapActivitiesSuccessResponse<T extends NumberType = NumberType>
+export class GetSwapActivitiesSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetSwapActivitiesSuccessResponse<T>>
   implements iGetSwapActivitiesSuccessResponse<T>
 {
@@ -4496,14 +4496,14 @@ export class GetOnChainDynamicStorePayload extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface iGetOnChainDynamicStoreSuccessResponse<T extends NumberType = NumberType> {
+export interface iGetOnChainDynamicStoreSuccessResponse<T extends NumberType> {
   store: iDynamicStoreDocWithDetails<T>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetOnChainDynamicStoreSuccessResponse<T extends NumberType = NumberType>
+export class GetOnChainDynamicStoreSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetOnChainDynamicStoreSuccessResponse<T>>
   implements iGetOnChainDynamicStoreSuccessResponse<T>
 {
@@ -4536,14 +4536,14 @@ export class GetOnChainDynamicStoresByCreatorPayload extends EmptyResponseClass 
 /**
  * @category API Requests / Responses
  */
-export interface iGetOnChainDynamicStoresByCreatorSuccessResponse<T extends NumberType = NumberType> {
+export interface iGetOnChainDynamicStoresByCreatorSuccessResponse<T extends NumberType> {
   stores: iDynamicStoreDocWithDetails<T>[];
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetOnChainDynamicStoresByCreatorSuccessResponse<T extends NumberType = NumberType>
+export class GetOnChainDynamicStoresByCreatorSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetOnChainDynamicStoresByCreatorSuccessResponse<T>>
   implements iGetOnChainDynamicStoresByCreatorSuccessResponse<T>
 {
@@ -4579,12 +4579,12 @@ export class GetOnChainDynamicStoreValuePayload extends EmptyResponseClass {}
 /**
  * @category API Requests / Responses
  */
-export interface iGetOnChainDynamicStoreValueSuccessResponse<T extends NumberType = NumberType> extends iDynamicStoreValueDoc<T> {}
+export interface iGetOnChainDynamicStoreValueSuccessResponse<T extends NumberType> extends iDynamicStoreValueDoc<T> {}
 
 /**
  * @category API Requests / Responses
  */
-export class GetOnChainDynamicStoreValueSuccessResponse<T extends NumberType = NumberType>
+export class GetOnChainDynamicStoreValueSuccessResponse<T extends NumberType>
   extends DynamicStoreValueDoc<T>
   implements iGetOnChainDynamicStoreValueSuccessResponse<T>
 {
@@ -4626,7 +4626,7 @@ export class GetOnChainDynamicStoreValuesPaginatedPayload
 /**
  * @category API Requests / Responses
  */
-export interface iGetOnChainDynamicStoreValuesPaginatedSuccessResponse<T extends NumberType = NumberType> {
+export interface iGetOnChainDynamicStoreValuesPaginatedSuccessResponse<T extends NumberType> {
   values: iDynamicStoreValueDoc<T>[];
   pagination: PaginationInfo;
 }
@@ -4634,7 +4634,7 @@ export interface iGetOnChainDynamicStoreValuesPaginatedSuccessResponse<T extends
 /**
  * @category API Requests / Responses
  */
-export class GetOnChainDynamicStoreValuesPaginatedSuccessResponse<T extends NumberType = NumberType>
+export class GetOnChainDynamicStoreValuesPaginatedSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetOnChainDynamicStoreValuesPaginatedSuccessResponse<T>>
   implements iGetOnChainDynamicStoreValuesPaginatedSuccessResponse<T>
 {
