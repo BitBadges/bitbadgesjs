@@ -1097,10 +1097,11 @@ export class ApiKeyDoc extends CustomTypeClass<ApiKeyDoc> implements iApiKeyDoc 
   label: string;
   apiKey: string;
   bitbadgesAddress: BitBadgesAddress;
-  numRequests: number;
-  lastRequest: number;
   createdAt: number;
   intendedUse: string;
+  totalRequests: number;
+  lastRequestAt: number;
+  totalCreditsSpent: number;
 
   constructor(data: iApiKeyDoc) {
     super();
@@ -1109,10 +1110,11 @@ export class ApiKeyDoc extends CustomTypeClass<ApiKeyDoc> implements iApiKeyDoc 
     this.label = data.label;
     this.apiKey = data.apiKey;
     this.bitbadgesAddress = data.bitbadgesAddress;
-    this.numRequests = data.numRequests;
-    this.lastRequest = data.lastRequest;
     this.createdAt = data.createdAt;
     this.intendedUse = data.intendedUse;
+    this.totalRequests = data.totalRequests;
+    this.lastRequestAt = data.lastRequestAt;
+    this.totalCreditsSpent = data.totalCreditsSpent;
   }
 }
 

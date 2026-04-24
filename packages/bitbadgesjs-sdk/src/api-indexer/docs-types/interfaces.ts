@@ -1074,10 +1074,15 @@ export interface iApiKeyDoc extends Doc {
   label: string;
   apiKey: string;
   bitbadgesAddress: string;
-  numRequests: number;
-  lastRequest: number;
   createdAt: number;
   intendedUse: string;
+  /** Cumulative lifetime request count for this key — never resets.
+   *  Populated by the server-side Redis flush worker every ~5s (#0337). */
+  totalRequests: number;
+  /** Epoch millis of the most recent request served by this key. */
+  lastRequestAt: number;
+  /** Cumulative credits (base units — APITOKEN) spent via this key. */
+  totalCreditsSpent: number;
 }
 
 /**
