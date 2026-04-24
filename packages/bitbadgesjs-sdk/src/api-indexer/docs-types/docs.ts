@@ -1707,18 +1707,20 @@ export class CreatorCreditsDoc<T extends NumberType> extends BaseNumberTypeClass
   credits: T;
   creditsLimit?: T;
   aiTokensUsed?: T;
+  apiRequestsUsed?: T;
 
   constructor(data: iCreatorCreditsDoc<T>) {
     super();
     this.credits = data.credits;
     this.creditsLimit = data.creditsLimit;
     this.aiTokensUsed = data.aiTokensUsed;
+    this.apiRequestsUsed = data.apiRequestsUsed;
     this._docId = data._docId;
     this._id = data._id;
   }
 
   getNumberFieldNames(): string[] {
-    return ['credits', 'creditsLimit', 'aiTokensUsed'];
+    return ['credits', 'creditsLimit', 'aiTokensUsed', 'apiRequestsUsed'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreatorCreditsDoc<U> {

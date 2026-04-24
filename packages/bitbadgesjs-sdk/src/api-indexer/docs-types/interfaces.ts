@@ -1612,6 +1612,8 @@ export interface iCreatorCreditsDoc<T extends NumberType> extends Doc {
   creditsLimit?: T;
   /** AI Builder tokens used this billing period */
   aiTokensUsed?: T;
+  /** API requests consumed against the BADGE CREDITS gating collection (1 request = 1 credit). */
+  apiRequestsUsed?: T;
 }
 
 /**
