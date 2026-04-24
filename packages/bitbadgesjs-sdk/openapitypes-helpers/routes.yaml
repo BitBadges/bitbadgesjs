@@ -1250,7 +1250,7 @@ paths:
               $ref: '#/components/schemas/iCreateDynamicDataStorePayload'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
     put:
       operationId: updateDynamicDataStore
       summary: Update Dynamic Data Store
@@ -1296,7 +1296,7 @@ paths:
               $ref: '#/components/schemas/iUpdateDynamicDataStorePayload'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
     delete:
       operationId: deleteDynamicDataStore
       summary: Delete Dynamic Data Store
@@ -1343,7 +1343,7 @@ paths:
               $ref: '#/components/schemas/iDeleteDynamicDataStorePayload'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
   /application/{applicationId}:
     get:
       operationId: getApplication
@@ -5350,7 +5350,7 @@ paths:
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
         - apiKey: []
-      x-internal: false
+      x-internal: true
 
   /onChainDynamicStore/{storeId}:
     get:
