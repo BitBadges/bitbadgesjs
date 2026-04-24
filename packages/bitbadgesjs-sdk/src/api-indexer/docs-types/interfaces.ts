@@ -1076,13 +1076,15 @@ export interface iApiKeyDoc extends Doc {
   bitbadgesAddress: string;
   createdAt: number;
   intendedUse: string;
-  /** Cumulative lifetime request count for this key — never resets.
-   *  Populated by the server-side Redis flush worker every ~5s (#0337). */
-  totalRequests: number;
+  /** Cumulative lifetime request count for this key. Populated by the
+   *  indexer's Redis credit flush (#0337). Semantic note: as of 0337
+   *  this is cumulative-never-reset; pre-0337 it was daily-per-key. */
+  numRequests: number;
   /** Epoch millis of the most recent request served by this key. */
-  lastRequestAt: number;
-  /** Cumulative credits (base units — APITOKEN) spent via this key. */
-  totalCreditsSpent: number;
+  lastRequest: number;
+  /** Cumulative credits (base units — APITOKEN) spent via this key.
+   *  Added in 0337; optional for back-compat with docs written before. */
+  totalCreditsSpent?: number;
 }
 
 /**
