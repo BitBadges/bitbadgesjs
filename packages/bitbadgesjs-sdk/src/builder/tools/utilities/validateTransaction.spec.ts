@@ -2,16 +2,17 @@
  * Tests for `validate_transaction`.
  *
  * Thin wrapper around core/validate.ts — its job is to:
- *   1. Accept either a JSON string OR a pre-parsed object (via `transaction`)
- *   2. Normalize to JSON, parse it, and type-check (must be an object)
- *   3. Pass the parsed object to the full SDK validator
- *   4. Wrap parse/type errors in the standard issues[] format
+ *   1. Accept either a JSON string, a pre-parsed object (via `transaction`),
+ *      OR auto-fill from the current session state when neither is given
+ *   2. Normalize to an object, type-check, and pass to the full SDK validator
+ *   3. Wrap parse/type errors in the standard issues[] format
  *
  * Tests below hit every branch in the normalization layer. Business-logic
  * coverage lives in `src/core/validate.spec.ts` (separate suite).
  */
 
 import { handleValidateTransaction } from './validateTransaction.js';
+import { resetAllSessions, setStandards, addApproval } from '../../session/sessionState.js';
 
 describe('handleValidateTransaction — input normalization', () => {
   const validTx = {
@@ -21,6 +22,13 @@ describe('handleValidateTransaction — input normalization', () => {
     // Other fields may produce validator warnings, but the wrapper itself
     // doesn't care — it just needs to reach the inner `validateTransaction`.
   };
+
+  // Keep session state clean between tests — the wrapper falls back to
+  // session state now (#0326), so stale state from one test can leak into
+  // the next.
+  beforeEach(() => {
+    resetAllSessions();
+  });
 
   describe('transactionJson input', () => {
     it('accepts a valid JSON string and delegates to the core validator', () => {
@@ -40,10 +48,20 @@ describe('handleValidateTransaction — input normalization', () => {
       expect(res.issues[0].message).toMatch(/Invalid JSON/);
     });
 
-    it('treats an empty-string transactionJson as unparseable JSON', () => {
+    it('treats an empty-string transactionJson as "no input" and auto-fills from session (NOT "Unexpected EOF")', () => {
+      // Previously this returned "Invalid JSON: Unexpected EOF" — an
+      // unrecoverable error that agents loop on. Post-#0326, an empty
+      // string is treated like "no input provided" — the wrapper
+      // auto-fills from session state and returns the real validation
+      // issues (e.g. "missing creator") from the SDK validator, which
+      // the agent CAN act on.
       const res = handleValidateTransaction({ transactionJson: '' });
       expect(res.valid).toBe(false);
-      expect(res.issues[0].message).toMatch(/Invalid JSON/);
+      expect(res.issues.length).toBeGreaterThan(0);
+      for (const issue of res.issues) {
+        expect(issue.message).not.toMatch(/Unexpected EOF/);
+        expect(issue.message).not.toMatch(/Invalid JSON/);
+      }
     });
 
     it('rejects top-level JSON values that are not objects (arrays)', () => {
@@ -94,15 +112,51 @@ describe('handleValidateTransaction — input normalization', () => {
     });
   });
 
-  describe('missing-input edge cases', () => {
-    it('without transaction or transactionJson, returns an Invalid JSON issue (empty string path)', () => {
-      // The wrapper's `??` fallback turns missing input into '' → JSON.parse fails.
-      // (The Zod `.refine` schema would catch this *before* the wrapper runs in
-      // real MCP usage, but handleValidateTransaction itself is defensively
-      // callable with missing fields.)
+  describe('session-state auto-fill (#0326)', () => {
+    it('without transaction or transactionJson, auto-fills from session state', () => {
+      // Populate session state via the same per-field setters the MCP
+      // agent uses.
+      const sessionId = 'test-session-validate-autofill';
+      const creator = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
+      setStandards(sessionId, ['BitBadges']);
+      addApproval(sessionId, {
+        fromListId: 'Mint',
+        toListId: 'All',
+        initiatedByListId: 'All',
+        transferTimes: [{ start: '1', end: '18446744073709551615' }],
+        tokenIds: [{ start: '1', end: '1' }],
+        ownershipTimes: [{ start: '1', end: '18446744073709551615' }],
+        approvalId: 'test-approval',
+        approvalCriteria: {}
+      });
+
+      // Agent-style call with no tx args — must NOT return "Invalid JSON:
+      // Unexpected EOF" (the bug #0326 fixed). Should either validate the
+      // session tx or return validation issues from the SDK validator.
+      const res = handleValidateTransaction({ sessionId, creatorAddress: creator } as any);
+      expect(res).toHaveProperty('valid');
+      expect(Array.isArray(res.issues)).toBe(true);
+      for (const issue of res.issues) {
+        expect(issue.message).not.toMatch(/Unexpected EOF/);
+        expect(issue.message).not.toMatch(/No transaction to validate/);
+      }
+    });
+
+    it('without any input and a fresh (auto-created) session, returns real validator issues — NOT "Unexpected EOF"', () => {
+      // No args at all. getOrCreateSession returns a template tx with
+      // all 11 canX permission arrays defaulted to []; validator runs
+      // against that template and surfaces real issues (e.g. missing
+      // creator) the agent can fix. Critically, this path must NOT
+      // surface "Invalid JSON: Unexpected EOF" — the bug pattern that
+      // caused #0326.
       const res = handleValidateTransaction({} as any);
       expect(res.valid).toBe(false);
-      expect(res.issues[0].message).toMatch(/Invalid JSON/);
+      expect(res.issues.length).toBeGreaterThan(0);
+      for (const issue of res.issues) {
+        expect(issue.severity).toBeDefined();
+        expect(issue.message).not.toMatch(/Unexpected EOF/);
+        expect(issue.message).not.toMatch(/Invalid JSON/);
+      }
     });
   });
 });
