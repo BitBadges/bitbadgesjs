@@ -1706,21 +1706,19 @@ export class CreatorCreditsDoc<T extends NumberType> extends BaseNumberTypeClass
   _id?: string;
   credits: T;
   creditsLimit?: T;
-  aiTokensUsed?: T;
-  apiRequestsUsed?: T;
+  apiTokensUsed?: T;
 
   constructor(data: iCreatorCreditsDoc<T>) {
     super();
     this.credits = data.credits;
     this.creditsLimit = data.creditsLimit;
-    this.aiTokensUsed = data.aiTokensUsed;
-    this.apiRequestsUsed = data.apiRequestsUsed;
+    this.apiTokensUsed = data.apiTokensUsed;
     this._docId = data._docId;
     this._id = data._id;
   }
 
   getNumberFieldNames(): string[] {
-    return ['credits', 'creditsLimit', 'aiTokensUsed', 'apiRequestsUsed'];
+    return ['credits', 'creditsLimit', 'apiTokensUsed'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreatorCreditsDoc<U> {

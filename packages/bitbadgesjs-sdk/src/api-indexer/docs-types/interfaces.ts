@@ -1610,10 +1610,8 @@ export interface iCreatorCreditsDoc<T extends NumberType> extends Doc {
   credits: T;
   /** The limit of credits */
   creditsLimit?: T;
-  /** AI Builder tokens used this billing period */
-  aiTokensUsed?: T;
-  /** API requests consumed against the BADGE CREDITS gating collection (1 request = 1 credit). */
-  apiRequestsUsed?: T;
+  /** Unified APITOKEN spend counter — charged by both the AI Builder and the main API-metering middleware against the same on-chain APITOKEN balance. 1 USDC = 100,000 APITOKEN. */
+  apiTokensUsed?: T;
 }
 
 /**
