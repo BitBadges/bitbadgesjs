@@ -219,6 +219,9 @@ tags:
   - name: Utility Pages
     description: Endpoints for managing utility pages
   - name: Miscellaneous
+    description: Endpoints that don't fit other categories
+  - name: Maps and Protocols
+    description: Endpoints for maps and protocols (on-chain key-value stores and standardized metadata schemes)
   - name: Assets
     description: Endpoints for asset pair operations, liquidity pools, and swap analytics
 paths:
@@ -1405,7 +1408,7 @@ paths:
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetStatusSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getstatus)**
       tags:
-        - Miscellanous
+        - Miscellaneous
       responses:
         '200':
           content:
