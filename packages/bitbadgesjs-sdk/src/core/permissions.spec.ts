@@ -677,6 +677,48 @@ describe('CollectionPermissions', () => {
       });
       expect(perms.canDeleteCollection.length).toBe(1);
     });
+
+    // Regression coverage for backlog #0327 — partial session state
+    // (e.g. from the MCP builder's incremental set_permissions tool)
+    // used to crash with `TypeError: undefined is not an object
+    // (evaluating 'msg.canDeleteCollection.map')`. Missing `canX`
+    // arrays should now default to `[]`.
+    it('defaults missing canX arrays to [] instead of throwing', () => {
+      // Cast to any — intentionally exercising the partial-input
+      // behavior the wrapper-class contract is supposed to tolerate.
+      const perms = new CollectionPermissions({
+        canArchiveCollection: [
+          new ActionPermission({
+            permanentlyPermittedTimes: [],
+            permanentlyForbiddenTimes: [{ start: 1n, end: 100n }]
+          })
+        ]
+        // All other canX fields omitted on purpose.
+      } as any);
+      expect(perms.canArchiveCollection.length).toBe(1);
+      expect(perms.canDeleteCollection).toEqual([]);
+      expect(perms.canUpdateStandards).toEqual([]);
+      expect(perms.canUpdateCustomData).toEqual([]);
+      expect(perms.canUpdateManager).toEqual([]);
+      expect(perms.canUpdateCollectionMetadata).toEqual([]);
+      expect(perms.canUpdateValidTokenIds).toEqual([]);
+      expect(perms.canUpdateTokenMetadata).toEqual([]);
+      expect(perms.canUpdateCollectionApprovals).toEqual([]);
+      expect(perms.canAddMoreAliasPaths).toEqual([]);
+      expect(perms.canAddMoreCosmosCoinWrapperPaths).toEqual([]);
+    });
+
+    it('accepts an entirely empty object without throwing', () => {
+      const perms = new CollectionPermissions({} as any);
+      expect(perms.canDeleteCollection).toEqual([]);
+      expect(perms.canAddMoreCosmosCoinWrapperPaths).toEqual([]);
+    });
+
+    it('CollectionPermissionsWithDetails mirrors the same guard', () => {
+      const perms = new CollectionPermissionsWithDetails({} as any);
+      expect(perms.canDeleteCollection).toEqual([]);
+      expect(perms.canUpdateCollectionApprovals).toEqual([]);
+    });
   });
 
   describe('validateUpdate', () => {

@@ -27,7 +27,7 @@ info:
 
     ### OAuth 2.0 (Sign In with BitBadges)
     For performing actions on behalf of other users, use the standard OAuth 2.0 flow via Sign In with BitBadges.
-    See the [Sign In with BitBadges documentation](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges) for details.
+    See the [Sign In with BitBadges documentation](https://docs.bitbadges.io/for-developers/sign-in-with-bitbadges) for details.
 
     You will pass the access token in the Authorization header:
     ```
@@ -336,7 +336,7 @@ paths:
         - `readAuthenticationCodes` - Required if fetching private authentication codes
 
         Documentation References / Tutorials:
-        - **[Managing Views](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-views)**
+        - **[Managing Views](https://docs.bitbadges.io/for-developers/bitbadges-api/concepts/managing-views)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAccountsPayload)**
@@ -508,7 +508,7 @@ paths:
         - `readPrivateClaimData` - Required if fetching private claim data (must also be the manager)
 
         Documentation References / Tutorials:
-        - **[Managing Views](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-views)**
+        - **[Managing Views](https://docs.bitbadges.io/for-developers/bitbadges-api/concepts/managing-views)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionsPayload)**
@@ -1657,8 +1657,8 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
-        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claims/api-reference)**
+        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claims)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCompleteClaimPayload)**
@@ -1741,8 +1741,8 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
-        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claims/api-reference)**
+        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claims)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSimulateClaimPayload)**
@@ -1810,8 +1810,8 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
-        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claims/api-reference)**
+        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claims)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetReservedClaimCodesPayload)**
@@ -1875,8 +1875,8 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
-        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claims/api-reference)**
+        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claims)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptStatusPayload)**
@@ -2118,7 +2118,7 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
+        - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/sign-in-with-bitbadges)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRotateSIWBBRequestPayload)**
@@ -2170,7 +2170,7 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
+        - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/sign-in-with-bitbadges)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteSIWBBRequestPayload)**
@@ -2223,7 +2223,7 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
+        - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/sign-in-with-bitbadges)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateSIWBBRequestPayload)**
@@ -2280,7 +2280,7 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/authenticating-with-bitbadges)**
+        - **[Sign In with BitBadges](https://docs.bitbadges.io/for-developers/sign-in-with-bitbadges)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSIWBBRequestsForDeveloperAppPayload)**
@@ -2548,8 +2548,8 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
-        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claims/api-reference)**
+        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claims)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchClaimsPayload)**
@@ -2606,8 +2606,8 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
-        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claims/api-reference)**
+        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claims)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimsPayloadV1)**
@@ -2659,8 +2659,8 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
-        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claims/api-reference)**
+        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claims)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateClaimPayload)**
@@ -2720,8 +2720,8 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
-        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claims/api-reference)**
+        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claims)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateClaimPayload)**
@@ -2776,8 +2776,8 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claim-builder/auto-complete-claims-w-bitbadges-api)**
-        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claim-builder)**
+        - **[Completing Claims](https://docs.bitbadges.io/for-developers/claims/api-reference)**
+        - **[All About BitBadges Claims](https://docs.bitbadges.io/for-developers/claims)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteClaimPayload)**
@@ -3000,7 +3000,7 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
+        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claims/dynamic-stores)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)**
@@ -3053,7 +3053,7 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
+        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claims/dynamic-stores)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iPerformStoreActionPayload)**
@@ -3104,7 +3104,7 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
+        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claims/dynamic-stores)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataStoresPayload)**
@@ -3155,7 +3155,7 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
+        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claims/dynamic-stores)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchDynamicDataStoresPayload)**
@@ -3207,7 +3207,7 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claim-builder/dynamic-stores)**
+        - **[Dynamic Stores](https://docs.bitbadges.io/for-developers/claims/dynamic-stores)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDynamicDataActivityPayload)**
