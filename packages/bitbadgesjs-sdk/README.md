@@ -147,6 +147,10 @@ const api = new BitBadgesAPI({
 
 > **Note**: The SDK uses defensive checks (`typeof process !== 'undefined'`) to support both environments. No polyfills needed.
 
+## Network configuration
+
+The SDK ships preset network configs (`mainnet`, `testnet`, `local`) used by `BitBadgesSigningClient` and the CLI's `--testnet` / `--local` flags. **Testnet is temporarily offline as of 2026-04-25** to reduce hosting costs — selecting `network: 'testnet'`, passing `--testnet`, or setting `network = testnet` in `~/.bitbadges/config.json` will throw a clear error pointing at mainnet. All testnet URLs and chain IDs are preserved in the config so the network can be revived by flipping a single `disabled` flag. If you're running a private chain at the testnet chain ID for local development, set `BITBADGES_TESTNET_OFFLINE=false` in your environment to bypass the assertion. See [docs.bitbadges.io](https://docs.bitbadges.io/for-developers/bitbadges-blockchain/testnet-mode) for full details.
+
 ## Core Concepts
 
 ### Number Types

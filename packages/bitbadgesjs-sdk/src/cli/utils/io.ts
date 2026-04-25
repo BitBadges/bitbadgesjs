@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import type { Command } from 'commander';
 import { getConfigBaseUrl, getConfigApiKey } from './config.js';
+import { assertNetworkAvailable } from '../../signing/types.js';
 
 /**
  * Read JSON input from multiple sources:
@@ -139,6 +140,9 @@ export function getApiUrl(options: NetworkOptions): string {
     return process.env.BITBADGES_API_URL;
   }
   const network = resolveNetwork(options);
+  // Fail fast if the resolved network is currently disabled. Override via
+  // BITBADGES_TESTNET_OFFLINE=false for local dev pointing at a private chain.
+  assertNetworkAvailable(network);
   if (network === 'local') {
     return 'http://localhost:3001';
   }

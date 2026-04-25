@@ -6,6 +6,7 @@ import {
   SUPPORTED_CONFIG_KEYS,
   type ConfigKey,
 } from '../utils/config.js';
+import { assertNetworkAvailable } from '../../signing/types.js';
 
 export const configCommand = new Command('config').description(
   'Manage CLI configuration (~/.bitbadges/config.json)'
@@ -53,6 +54,19 @@ configCommand
       console.error('Invalid network value. Must be one of: mainnet, testnet, local');
       process.exitCode = 1;
       return;
+    }
+
+    // Fail fast if the user tries to persist a currently-disabled network
+    // (e.g. testnet is temporarily offline). This catches misconfiguration
+    // at config-write time rather than at every later command.
+    if (key === 'network') {
+      try {
+        assertNetworkAvailable(value);
+      } catch (err) {
+        console.error((err as Error).message);
+        process.exitCode = 1;
+        return;
+      }
     }
 
     const config = loadConfig();

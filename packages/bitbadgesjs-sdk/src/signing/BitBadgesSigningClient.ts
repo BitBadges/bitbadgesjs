@@ -7,6 +7,7 @@ import axios, { type AxiosInstance } from 'axios';
 import type { WalletAdapter } from './adapters/WalletAdapter.js';
 import {
   NETWORK_CONFIGS,
+  assertNetworkAvailable,
   type AccountInfo,
   type BroadcastResult,
   type NetworkConfig,
@@ -90,6 +91,9 @@ export class BitBadgesSigningClient {
 
     // Resolve network configuration from preset or custom values
     const network: NetworkMode = options.network || 'mainnet';
+    // Fail fast if the selected network is currently disabled (e.g. testnet
+    // shutdown). Override via BITBADGES_TESTNET_OFFLINE=false for local dev.
+    assertNetworkAvailable(network);
     const baseConfig = NETWORK_CONFIGS[network];
 
     this.networkConfig = {
