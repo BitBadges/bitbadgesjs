@@ -56,7 +56,7 @@ export type {
 } from './types.js';
 
 // Network configuration presets
-export { NETWORK_CONFIGS } from './types.js';
+export { NETWORK_CONFIGS, assertNetworkAvailable } from './types.js';
 
 // Adapters
 export {

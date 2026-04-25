@@ -89,6 +89,13 @@ export interface NetworkConfig {
   evmChainId: number;
   /** EVM JSON-RPC URL for server-side EVM signing */
   evmRpcUrl: string;
+  /**
+   * If true, this network is currently offline / disabled. Selecting it
+   * will throw via `assertNetworkAvailable` unless the override env var
+   * `BITBADGES_TESTNET_OFFLINE=false` is set. URL fields are kept intact
+   * so the network can be revived by flipping this flag back to false.
+   */
+  disabled?: boolean;
 }
 
 /**
@@ -105,11 +112,15 @@ export const NETWORK_CONFIGS: Record<NetworkMode, NetworkConfig> = {
     evmRpcUrl: 'https://evm-rpc.bitbadges.io'
   },
   testnet: {
+    // NOTE: Testnet is temporarily offline as of 2026-04-25 to reduce hosting
+    // costs. URL fields are intentionally preserved so the network can be
+    // revived by flipping `disabled` back to false. See `assertNetworkAvailable`.
     apiUrl: 'https://api.bitbadges.io/testnet',
     nodeUrl: 'https://lcd-testnet.bitbadges.io',
     cosmosChainId: 'bitbadges-2',
     evmChainId: 50025,
-    evmRpcUrl: 'https://evm-rpc-testnet.bitbadges.io'
+    evmRpcUrl: 'https://evm-rpc-testnet.bitbadges.io',
+    disabled: true
   },
   local: {
     apiUrl: 'http://localhost:3001',
@@ -119,6 +130,37 @@ export const NETWORK_CONFIGS: Record<NetworkMode, NetworkConfig> = {
     evmRpcUrl: 'http://localhost:8545'
   }
 };
+
+/**
+ * Throws a descriptive error if the requested network is currently
+ * disabled in `NETWORK_CONFIGS`. Acts as the single choke point for the
+ * temporary testnet shutdown so SDK consumers fail fast with a clear
+ * message instead of silently hitting dead hosts.
+ *
+ * Override hatch: set `BITBADGES_TESTNET_OFFLINE=false` in the
+ * environment to bypass the assertion (useful when running a private
+ * chain at the testnet chain ID for local development).
+ *
+ * @category Signing
+ */
+export function assertNetworkAvailable(network: string): void {
+  // Guarded process access — SDK runs in browsers too.
+  const env = typeof process !== 'undefined' ? process.env : undefined;
+  if (env && env.BITBADGES_TESTNET_OFFLINE === 'false') {
+    return;
+  }
+
+  const config = (NETWORK_CONFIGS as Record<string, NetworkConfig | undefined>)[network];
+  if (config?.disabled === true) {
+    throw new Error(
+      'BitBadges testnet is temporarily offline as of 2026-04-25 to reduce hosting costs. ' +
+        'Please use mainnet (https://bitbadges.io) until further notice. ' +
+        'To override (e.g. for local dev pointing at a private chain), set the env var ' +
+        'BITBADGES_TESTNET_OFFLINE=false. ' +
+        'See https://docs.bitbadges.io/for-developers/bitbadges-blockchain/testnet-mode for details.'
+    );
+  }
+}
 
 /**
  * Options for the signing client.

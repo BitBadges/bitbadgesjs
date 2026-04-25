@@ -3,6 +3,7 @@
  * Uses native fetch. Adds x-api-key header. Returns parsed JSON.
  */
 
+import { assertNetworkAvailable } from '../../signing/types.js';
 import { getConfigApiKey, getConfigBaseUrl } from './config.js';
 
 export interface ApiRequestOptions {
@@ -31,7 +32,11 @@ export function resolveBaseUrl(options?: {
 }): string {
   if (options?.baseUrl) return options.baseUrl;
   if (options?.local) return 'http://localhost:3001/api/v0';
-  if (options?.testnet) return 'https://api.testnet.bitbadges.io/api/v0';
+  if (options?.testnet) {
+    // Fail fast if testnet is currently disabled. Override via env var.
+    assertNetworkAvailable('testnet');
+    return 'https://api.testnet.bitbadges.io/api/v0';
+  }
   if (process.env.BITBADGES_API_URL) return process.env.BITBADGES_API_URL;
   const configUrl = getConfigBaseUrl();
   if (configUrl) return configUrl;

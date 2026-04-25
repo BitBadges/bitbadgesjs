@@ -3,6 +3,17 @@ import type { WalletAdapter } from './adapters/WalletAdapter.js';
 import type { SigningResult, EvmTransaction } from './types.js';
 import type { TransactionPayload } from '@/transactions/messages/base.js';
 
+// Restore env between tests so the BITBADGES_TESTNET_OFFLINE override doesn't
+// leak across test cases.
+const ORIGINAL_TESTNET_OFFLINE = process.env.BITBADGES_TESTNET_OFFLINE;
+afterEach(() => {
+  if (ORIGINAL_TESTNET_OFFLINE === undefined) {
+    delete process.env.BITBADGES_TESTNET_OFFLINE;
+  } else {
+    process.env.BITBADGES_TESTNET_OFFLINE = ORIGINAL_TESTNET_OFFLINE;
+  }
+});
+
 // Mock axios
 jest.mock('axios', () => ({
   create: jest.fn(() => ({
@@ -86,7 +97,7 @@ describe('BitBadgesSigningClient', () => {
         adapter,
         apiUrl: 'https://custom-api.example.com',
         nodeUrl: 'https://custom-node.example.com:1317',
-        network: 'testnet',
+        network: 'mainnet',
         sequenceRetryEnabled: false,
         maxSequenceRetries: 5,
         gasMultiplier: 1.5,
@@ -94,6 +105,21 @@ describe('BitBadgesSigningClient', () => {
       });
 
       expect(client.address).toBe(adapter.address);
+    });
+
+    it('should throw when network is testnet (temporarily offline)', () => {
+      const adapter = new MockCosmosAdapter();
+      expect(() => new BitBadgesSigningClient({ adapter, network: 'testnet' })).toThrow(
+        /testnet is temporarily offline/i
+      );
+    });
+
+    it('should allow testnet when BITBADGES_TESTNET_OFFLINE=false override is set', () => {
+      process.env.BITBADGES_TESTNET_OFFLINE = 'false';
+      const adapter = new MockCosmosAdapter();
+      const client = new BitBadgesSigningClient({ adapter, network: 'testnet' });
+      expect(client).toBeDefined();
+      expect(client.config.cosmosChainId).toBe('bitbadges-2');
     });
 
     it('should handle EVM adapter address conversion', () => {
@@ -214,12 +240,11 @@ describe('SigningClientOptions', () => {
   it('should respect network mode', () => {
     const adapter = new MockCosmosAdapter();
     const clientMainnet = new BitBadgesSigningClient({ adapter, network: 'mainnet' });
-    const clientTestnet = new BitBadgesSigningClient({ adapter, network: 'testnet' });
     const clientLocal = new BitBadgesSigningClient({ adapter, network: 'local' });
 
-    // All should be created successfully
+    // Mainnet + local should be created successfully. Testnet is currently
+    // disabled and is covered by the dedicated throw / override tests above.
     expect(clientMainnet).toBeDefined();
-    expect(clientTestnet).toBeDefined();
     expect(clientLocal).toBeDefined();
   });
 

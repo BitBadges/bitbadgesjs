@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { assertNetworkAvailable } from '../../signing/types.js';
 
 export interface Config {
   apiKey?: string;
@@ -63,6 +64,10 @@ export function getConfigApiKey(network?: 'mainnet' | 'testnet' | 'local'): stri
 export function getConfigBaseUrl(): string | undefined {
   const config = loadConfig();
   if (config.url) return config.url;
+  // Fail fast if the persisted network is currently disabled. Override via
+  // BITBADGES_TESTNET_OFFLINE=false. We only assert when the user has actually
+  // selected a network in their config — undefined means "default to mainnet".
+  if (config.network) assertNetworkAvailable(config.network);
   switch (config.network) {
     case 'testnet':
       return 'https://api.testnet.bitbadges.io/api/v0';
