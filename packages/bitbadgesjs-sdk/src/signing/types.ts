@@ -154,9 +154,14 @@ export function assertNetworkAvailable(network: string): void {
   if (config?.disabled === true) {
     throw new Error(
       'BitBadges testnet is temporarily offline as of 2026-04-25 to reduce hosting costs. ' +
-        'Please use mainnet (https://bitbadges.io) until further notice. ' +
-        'To override (e.g. for local dev pointing at a private chain), set the env var ' +
-        'BITBADGES_TESTNET_OFFLINE=false. ' +
+        'Mainnet now serves as a chaosnet — fully live, but safe to experiment on: ' +
+        'network gas fees can be set to zero while activity is low, and you can transact ' +
+        'with worthless tokens like CHAOS instead of real-value assets. ' +
+        "Switch to mainnet (network: 'mainnet') to test contracts, transactions, and " +
+        'integrations on the live network without spending anything real — just choose ' +
+        'your assets accordingly. ' +
+        'To override this guard for local dev (e.g. a private chain at the testnet chain ID), ' +
+        'set BITBADGES_TESTNET_OFFLINE=false. ' +
         'See https://docs.bitbadges.io/for-developers/bitbadges-blockchain/testnet-mode for details.'
     );
   }
