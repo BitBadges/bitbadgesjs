@@ -1,7 +1,7 @@
 {
   "name": "bitbadges",
   "description": "BitBadges — programmable tokens on Cosmos. SDK, CLI, and builder tools for humans and agents. (Previously published as 'bitbadgesjs-sdk'.)",
-  "version": "0.35.3",
+  "version": "0.35.4",
   "license": "MIT",
   "keywords": [
     "bitbadges",
