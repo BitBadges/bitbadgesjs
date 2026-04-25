@@ -149,7 +149,11 @@ const api = new BitBadgesAPI({
 
 ## Network configuration
 
-The SDK ships preset network configs (`mainnet`, `testnet`, `local`) used by `BitBadgesSigningClient` and the CLI's `--testnet` / `--local` flags. **Testnet is temporarily offline as of 2026-04-25** to reduce hosting costs — selecting `network: 'testnet'`, passing `--testnet`, or setting `network = testnet` in `~/.bitbadges/config.json` will throw a clear error pointing at mainnet. All testnet URLs and chain IDs are preserved in the config so the network can be revived by flipping a single `disabled` flag. If you're running a private chain at the testnet chain ID for local development, set `BITBADGES_TESTNET_OFFLINE=false` in your environment to bypass the assertion. See [docs.bitbadges.io](https://docs.bitbadges.io/for-developers/bitbadges-blockchain/testnet-mode) for full details.
+The SDK ships preset network configs (`mainnet`, `testnet`, `local`) used by `BitBadgesSigningClient` and the CLI's `--testnet` / `--local` flags.
+
+**Testnet is temporarily offline as of 2026-04-25** to reduce hosting costs. In the meantime, BitBadges **mainnet operates as a chaosnet** — fully live, but safe to experiment on. Network gas fees can be set to zero while activity is low, and you can transact with worthless tokens like CHAOS instead of real-value assets. Point your code at `network: 'mainnet'` to test contracts, transactions, and integrations on the live network without spending anything real — just choose your assets accordingly.
+
+Selecting `network: 'testnet'`, passing `--testnet`, or setting `network = testnet` in `~/.bitbadges/config.json` will throw a clear error nudging you toward mainnet. All testnet URLs and chain IDs are preserved in the config so the network can be revived by flipping a single `disabled` flag. If you're running a private chain at the testnet chain ID for local development, set `BITBADGES_TESTNET_OFFLINE=false` in your environment to bypass the assertion. See [docs.bitbadges.io](https://docs.bitbadges.io/for-developers/bitbadges-blockchain/testnet-mode) for full details.
 
 ## Core Concepts
 
