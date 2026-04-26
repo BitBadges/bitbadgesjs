@@ -119,6 +119,7 @@
     "prepare": "ts-patch install && typia patch",
     "dep-check": "madge --circular ./src/index.ts --warning --ts-config ./tsconfig.json --exclude 'api-indexer/docs-types/interfaces.ts|interfaces/badges/*|interfaces/types/*'",
     "generate-api-routes": "bun scripts/generate-api-routes.ts",
+    "gen-llm-mirrors": "bun scripts/gen-llm-mirrors.ts",
     "publish-w-docs": "bash ./scripts/check_and_publish.sh"
   },
   "devDependencies": {
