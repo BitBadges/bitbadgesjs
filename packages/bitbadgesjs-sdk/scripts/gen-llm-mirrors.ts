@@ -33,9 +33,14 @@ const here =
     ? __dirname
     : dirname(fileURLToPath(import.meta.url));
 
+// Plugin skills are organized into two top-level groups: build/ for the
+// 22 generated SKILL.md files (one per SKILL_INSTRUCTIONS id) and
+// operations/ for the 7 hand-written runtime skills (review, simulate,
+// query, address, claim, broadcast, explain). The generator only emits
+// into build/.
 const PLUGIN_SKILLS_DIR =
   process.env.PLUGIN_SKILLS_DIR ||
-  join(here, '../../../../bitbadges-plugin/skills');
+  join(here, '../../../../bitbadges-plugin/skills/build');
 
 const CURSOR_RULES_DIR =
   process.env.CURSOR_RULES_DIR ||
