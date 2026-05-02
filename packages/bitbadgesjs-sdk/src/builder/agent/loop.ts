@@ -1,29 +1,39 @@
 /**
- * Agent loop — Claude conversation loop with tool execution.
+ * Agent loop — provider-agnostic conversation loop with tool execution.
  *
- * Ported from bitbadges-indexer/src/routes/ai-builder/core/agentLoop.ts.
- * Changes for the SDK port:
- *  - Takes an opaque Anthropic client (dynamically loaded peer dep).
- *  - No TokenLedger / i18n coupling.
+ * Refactored to drive an `LLMProvider` (Anthropic, OpenAI, …) instead
+ * of a hardcoded Anthropic client. The internal canonical message
+ * shape stays Anthropic-style content blocks (`text`, `tool_use`,
+ * `tool_result`); each provider translates at the wire boundary.
+ *
+ *  - Anthropic auth + retry semantics preserved verbatim.
+ *  - `maxTokensPerBuild` is enforced via `QuotaExceededError`.
  *  - Hooks (`onToolCall`, `onTokenUsage`, `onStatusUpdate`) fire
  *    fire-and-forget so consumer callbacks can't hang a build.
- *  - `maxTokensPerBuild` is enforced via `QuotaExceededError`.
  */
 
 import { AbortedError, AnthropicAuthError, BitBadgesBuilderAgentError, QuotaExceededError } from './errors.js';
 import { computeCostUsd, type ModelInfo } from './models.js';
 import type { AgentHooks, ToolCallEvent } from './types.js';
 import type { AgentToolRegistry } from './toolAdapter.js';
+import type {
+  LLMProvider,
+  ProviderChatArgs,
+  ProviderChatResponse,
+  ProviderToolDefinition
+} from './providers/types.js';
 
 export interface AgentLoopParams {
-  client: any; // Anthropic client (peer dep).
+  /** Concrete LLM provider (Anthropic / OpenAI / …) — already initialized. */
+  provider: LLMProvider;
   systemPrompt: string;
   userMessage: string;
   /**
    * Structured user-message content blocks with cache boundaries.
    * When provided, the loop uses this (not `userMessage`) to send
    * cache-marked content to Anthropic. Falls back to `userMessage`
-   * as a single unmarked text block when absent.
+   * as a single unmarked text block when absent. OpenAI ignores
+   * cache markers — translation handled inside the provider.
    */
   userContent?: Array<{ type: 'text'; text: string; cache_control?: { type: 'ephemeral' } }>;
   registry: AgentToolRegistry;
@@ -32,6 +42,7 @@ export interface AgentLoopParams {
   model: ModelInfo;
   maxRounds: number;
   maxTokensPerBuild: number;
+  /** Per-request timeout passed through to the provider. Anthropic-style. */
   anthropicTimeoutMs: number;
   existingMessages?: any[];
   abortSignal?: AbortSignal;
@@ -130,23 +141,27 @@ export function compressOldToolResults(messages: any[]) {
   }
 }
 
-async function callClaudeWithRetry(
-  client: any,
-  params: any,
-  timeoutMs: number,
+async function callProviderWithRetry(
+  provider: LLMProvider,
+  args: ProviderChatArgs,
   maxRetries: number,
   abortSignal?: AbortSignal
-): Promise<any> {
+): Promise<ProviderChatResponse> {
   let lastError: any = null;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     if (abortSignal?.aborted) throw new AbortedError();
     try {
-      return await client.messages.create({ ...params, stream: false }, { timeout: timeoutMs, signal: abortSignal });
+      return await provider.chat(args);
     } catch (err: any) {
       if (abortSignal?.aborted || err?.name === 'AbortError' || err?.name === 'APIUserAbortError') {
         throw new AbortedError();
       }
+      // Auth errors propagate as AnthropicAuthError for back-compat —
+      // the indexer's error mapping already special-cases this code.
+      // The Anthropic provider wraps 401/403 itself; OpenAI surfaces a
+      // raw status — handle here for both.
       if (err?.status === 401 || err?.status === 403) {
+        if (err instanceof AnthropicAuthError) throw err;
         throw new AnthropicAuthError(err?.message);
       }
       lastError = err;
@@ -204,9 +219,29 @@ function fireHook(fn: ((...args: any[]) => any) | undefined, ...args: any[]) {
   }
 }
 
+/**
+ * Translate the agent's tool registry into the unified provider tool
+ * shape, marking the last entry with `cache_control: ephemeral` so
+ * the Anthropic provider can pin the prompt-cache boundary at the
+ * tools tail. Other providers ignore the marker.
+ */
+function buildProviderTools(registry: AgentToolRegistry): ProviderToolDefinition[] {
+  return registry.definitions.map((t, i) => {
+    const def: ProviderToolDefinition = {
+      name: t.name,
+      description: t.description,
+      inputSchema: t.input_schema
+    };
+    if (i === registry.definitions.length - 1) {
+      def.cacheControl = { type: 'ephemeral' };
+    }
+    return def;
+  });
+}
+
 export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopResult> {
   const {
-    client, systemPrompt, userMessage, userContent, registry, maxRounds, maxTokensPerBuild, anthropicTimeoutMs,
+    provider, systemPrompt, userMessage, userContent, registry, maxRounds, maxTokensPerBuild, anthropicTimeoutMs,
     existingMessages, model, sessionId, creatorAddress, abortSignal, hooks, debug,
     startingTokens = 0, startingCostUsd = 0,
     startingCacheCreationTokens = 0, startingCacheReadTokens = 0
@@ -246,34 +281,35 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
     console.error('[bitbadges-builder-agent] USER MESSAGE:\n' + userMessage);
   }
 
+  // Build provider-translated tools once — same registry, same
+  // ordering, same cache-boundary on the last entry every round.
+  const providerTools = provider.toolsForRequest(buildProviderTools(registry));
+
   try {
     for (let round = 0; round < maxRounds; round++) {
       if (abortSignal?.aborted) throw new AbortedError(totalTokens);
 
       const roundStartMs = Date.now();
-      const response = await callClaudeWithRetry(
-        client,
+      const response = await callProviderWithRetry(
+        provider,
         {
           model: model.id,
-          max_tokens: 8192,
-          system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
-          tools: registry.definitions.map((t, i) =>
-            i === registry.definitions.length - 1 ? { ...t, cache_control: { type: 'ephemeral' } } : t
-          ),
-          messages
+          system: [{ type: 'text', text: systemPrompt, cacheControl: { type: 'ephemeral' } }],
+          tools: providerTools,
+          messages,
+          maxTokens: 8192,
+          timeoutMs: anthropicTimeoutMs,
+          abortSignal
         },
-        anthropicTimeoutMs,
         2,
         abortSignal
       );
 
       rounds++;
-      const inputTokens = response.usage?.input_tokens ?? 0;
-      const outputTokens = response.usage?.output_tokens ?? 0;
-      // Anthropic reports prompt-cache usage on the `usage` object.
-      // Snake-case in the raw HTTP shape; kept as-is by the SDK client.
-      const roundCacheCreation = response.usage?.cache_creation_input_tokens ?? 0;
-      const roundCacheRead = response.usage?.cache_read_input_tokens ?? 0;
+      const inputTokens = response.usage.inputTokens;
+      const outputTokens = response.usage.outputTokens;
+      const roundCacheCreation = response.usage.cacheCreationTokens ?? 0;
+      const roundCacheRead = response.usage.cacheReadTokens ?? 0;
       const roundTokens = inputTokens + outputTokens;
       totalTokens += roundTokens;
       cacheCreationTokens += roundCacheCreation;
@@ -307,7 +343,7 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
 
       if (debug) {
         console.error(
-          `[bitbadges-builder-agent] round ${round + 1}/${maxRounds} stop_reason=${response.stop_reason} ` +
+          `[bitbadges-builder-agent] round ${round + 1}/${maxRounds} stop_reason=${response.stopReason} ` +
           `tokens_in=${inputTokens} out=${outputTokens} cache_write=${roundCacheCreation} cache_read=${roundCacheRead}`
         );
       }
@@ -317,7 +353,7 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
         label: `Round ${round + 1}`,
         durationMs: Date.now() - roundStartMs,
         data: {
-          stop_reason: response.stop_reason,
+          stop_reason: response.stopReason,
           input_tokens: inputTokens,
           output_tokens: outputTokens,
           cache_creation_tokens: roundCacheCreation,
@@ -325,19 +361,16 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
         }
       });
 
-      const textParts = response.content
-        .filter((b: any) => b.type === 'text')
-        .map((b: any) => b.text);
-      const roundText = textParts.join('\n');
+      const roundText = response.text;
       if (roundText) {
         finalText = roundText;
         fireHook(hooks?.onLog, { type: 'ai_text', label: 'AI response', data: roundText });
       }
 
-      const toolUses = response.content.filter((b: any) => b.type === 'tool_use');
+      const toolUses = response.toolCalls;
       if (toolUses.length === 0) break;
 
-      messages.push({ role: 'assistant', content: response.content });
+      messages.push(response.rawAssistantMessage);
       const toolResultContents: any[] = [];
 
       for (const toolUse of toolUses) {
@@ -349,7 +382,7 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
         const startedAt = Date.now();
         let resultString: string;
         try {
-          resultString = await registry.execute(toolUse.name, toolUse.input as any, { sessionId, callerAddress: creatorAddress });
+          resultString = await registry.execute(toolUse.name, toolUse.arguments as any, { sessionId, callerAddress: creatorAddress });
         } catch (e: any) {
           resultString = JSON.stringify({ error: `Tool execution failed: ${e?.message || String(e)}` });
         }
@@ -361,7 +394,7 @@ export async function runAgentLoop(params: AgentLoopParams): Promise<AgentLoopRe
 
         const event: ToolCallEvent = {
           name: toolUse.name,
-          input: toolUse.input,
+          input: toolUse.arguments,
           output: parsedOutput,
           durationMs,
           round

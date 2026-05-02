@@ -48,6 +48,11 @@ export {
   SimulationError
 } from './errors.js';
 
+// Multi-provider abstraction — Anthropic by default, OpenAI optional.
+// Adding a new provider = drop a file in src/builder/agent/providers/.
+export { getProvider, AnthropicProvider, OpenAIProvider, SUPPORTED_PROVIDERS } from './providers/index.js';
+export type { LLMProvider, ProviderName } from './providers/index.js';
+
 export type {
   // Options
   BitBadgesBuilderAgentOptions,

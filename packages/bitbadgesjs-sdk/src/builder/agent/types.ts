@@ -390,13 +390,40 @@ export interface BuildResult {
 
 /** Options passed to `BitBadgesBuilderAgent` constructor. */
 export interface BitBadgesBuilderAgentOptions {
-  /** Anthropic API key — BYO. Falls back to ANTHROPIC_API_KEY env. */
+  /**
+   * LLM provider — selects which SDK the optional self-driving loop
+   * dispatches against. Default: `'anthropic'`.
+   *
+   * Adding a new provider is a one-file drop-in (see
+   * `src/builder/agent/providers/`). Today: `'anthropic'` (default,
+   * uses `@anthropic-ai/sdk`) and `'openai'` (uses the `openai`
+   * package's chat-completions API).
+   */
+  provider?: 'anthropic' | 'openai';
+
+  /**
+   * Generic API key for the active provider. When `provider` is
+   * `'anthropic'`, equivalent to `anthropicKey`. When `'openai'`,
+   * falls back to `OPENAI_API_KEY` env. Provider-specific aliases
+   * (`anthropicKey`) take precedence when both are supplied.
+   */
+  apiKey?: string;
+  /** Generic base-URL override for the active provider (proxies, gateways). */
+  baseURL?: string;
+  /**
+   * Pre-built provider SDK client — bypasses internal SDK loading +
+   * credential checks. Generic equivalent of `anthropicClient`; the
+   * provider-specific alias still works for back-compat.
+   */
+  providerClient?: any;
+
+  /** Anthropic API key — BYO. Alias for `apiKey` when provider is anthropic. Falls back to ANTHROPIC_API_KEY env. */
   anthropicKey?: string;
   /** Anthropic OAuth bearer token — alternative to anthropicKey. Falls back to ANTHROPIC_AUTH_TOKEN / ANTHROPIC_OAUTH_TOKEN env. */
   anthropicAuthToken?: string;
-  /** Optional pre-built Anthropic client (takes precedence over anthropicKey / anthropicAuthToken). */
+  /** Optional pre-built Anthropic client (takes precedence over anthropicKey / anthropicAuthToken). Alias for `providerClient`. */
   anthropicClient?: any;
-  /** Optional custom Anthropic base URL (proxies, gateways, etc.). */
+  /** Optional custom Anthropic base URL (proxies, gateways, etc.). Alias for `baseURL` when provider is anthropic. */
   anthropicBaseUrl?: string;
 
   /** BitBadges API key — used by query/search/simulate tools. Falls back to BITBADGES_API_KEY env. Optional — tools that need it fail clearly if missing. */

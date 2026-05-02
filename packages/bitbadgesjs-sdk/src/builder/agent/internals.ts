@@ -62,3 +62,18 @@ export { containsInjection } from './sanitize.js';
 
 // Anthropic client loader
 export { loadAnthropicSdk, getAnthropicClient } from './anthropicClient.js';
+
+// Provider abstraction (multi-LLM dispatcher: Anthropic / OpenAI / …)
+export { getProvider, AnthropicProvider, OpenAIProvider, SUPPORTED_PROVIDERS } from './providers/index.js';
+export type {
+  LLMProvider,
+  LLMProviderConfig,
+  ProviderName,
+  ProviderChatArgs,
+  ProviderChatResponse,
+  ProviderToolDefinition,
+  ProviderMessage,
+  ProviderUsage,
+  ProviderToolCall,
+  ProviderSystemBlock
+} from './providers/index.js';

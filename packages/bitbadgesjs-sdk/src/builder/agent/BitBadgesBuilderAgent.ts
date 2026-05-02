@@ -1,23 +1,32 @@
 /**
  * BitBadgesBuilderAgent — open-source AI builder for BitBadges collections.
  *
- * Users bring their own Anthropic API key. BitBadges never sees keys
+ * Users bring their own LLM provider key. BitBadges never sees keys
  * nor proxies requests. The full prompt, tools, validation fix loop,
  * and session storage are bundled.
  *
- * Zero-config:
+ * Zero-config (Anthropic, the default):
  * ```ts
  * const agent = new BitBadgesBuilderAgent({ anthropicKey: process.env.ANTHROPIC_API_KEY });
  * const result = await agent.build('create a subscription token for $10/mo');
  * console.log(result.transaction);
  * ```
+ *
+ * OpenAI:
+ * ```ts
+ * const agent = new BitBadgesBuilderAgent({ provider: 'openai', apiKey: process.env.OPENAI_API_KEY });
+ * ```
+ *
+ * The legacy `anthropicKey` / `anthropicAuthToken` / `anthropicClient`
+ * options remain supported and behave as before — they're just an
+ * alias for `{ provider: 'anthropic', ... }`.
  */
 
 import { randomUUID } from 'crypto';
 import { handleGetTransaction } from '../tools/index.js';
 import { getOrCreateSession, drainReviewFlags, getReviewFlags } from '../session/sessionState.js';
 import { getAllSkillInstructions, type SkillInstruction } from '../resources/skillInstructions.js';
-import { getAnthropicClient } from './anthropicClient.js';
+import { getProvider, type LLMProvider, type ProviderName } from './providers/index.js';
 import { AbortedError, BitBadgesBuilderAgentError, ValidationFailedError } from './errors.js';
 import { containsInjection } from './sanitize.js';
 import { substituteImages, collectImageReferences, type ImageMap } from './images.js';
@@ -57,15 +66,15 @@ export class BitBadgesBuilderAgent {
   private readonly registry: AgentToolRegistry;
   private readonly sessionStore: KVStore;
   private readonly hooks: AgentHooks;
-  private client: any = null;
+  private readonly provider: LLMProvider;
   /**
-   * Pending init promise for the Anthropic client. Shared across
-   * concurrent `build()` calls so multiple parallel builds don't each
-   * fire their own `getAnthropicClient()` init — the last one's result
-   * would overwrite via `this.client ??=`, silently losing an earlier
-   * init error and wasting work.
+   * Pending init promise for the provider's underlying client. Shared
+   * across concurrent `build()` calls so multiple parallel builds
+   * don't each fire their own `provider.init()` — the last one's
+   * result would overwrite, silently losing an earlier init error and
+   * wasting work.
    */
-  private clientInitPromise: Promise<any> | null = null;
+  private providerInitPromise: Promise<void> | null = null;
   /**
    * Per-build abort controllers. A Set rather than a single field so
    * concurrent `build()` calls on one agent instance (common in Express
@@ -78,22 +87,44 @@ export class BitBadgesBuilderAgent {
     if (!options) {
       throw new BitBadgesBuilderAgentError('BitBadgesBuilderAgent requires options', 'INVALID_OPTIONS');
     }
-    // Resolve Anthropic creds up front so we can fail fast with a clear error.
-    const envAnthropicKey = typeof process !== 'undefined' ? process.env.ANTHROPIC_API_KEY : undefined;
-    const envAnthropicAuth =
-      typeof process !== 'undefined' ? process.env.ANTHROPIC_AUTH_TOKEN || process.env.ANTHROPIC_OAUTH_TOKEN : undefined;
-    const hasAnthropicCreds =
-      !!options.anthropicClient ||
-      !!options.anthropicKey ||
-      !!options.anthropicAuthToken ||
-      !!envAnthropicKey ||
-      !!envAnthropicAuth;
-    if (!hasAnthropicCreds) {
-      throw new BitBadgesBuilderAgentError(
-        'BitBadgesBuilderAgent requires Anthropic credentials. Provide one of: `anthropicKey` (API key), `anthropicAuthToken` (OAuth), `anthropicClient` (pre-built), or set ANTHROPIC_API_KEY / ANTHROPIC_OAUTH_TOKEN in the environment. BitBadges never stores API keys.',
-        'MISSING_ANTHROPIC_CREDS'
-      );
+
+    // Default to Anthropic so existing callers (`new
+    // BitBadgesBuilderAgent({ anthropicKey })`) keep working unchanged.
+    const providerName: ProviderName = (options.provider ?? 'anthropic') as ProviderName;
+
+    // Resolve credentials per provider. Anthropic remains the BYO-key
+    // default; OpenAI gets its own gate. Adding a new provider here
+    // means: add an env-var check + error message tailored to that
+    // provider's docs.
+    if (providerName === 'anthropic') {
+      const envAnthropicKey = typeof process !== 'undefined' ? process.env.ANTHROPIC_API_KEY : undefined;
+      const envAnthropicAuth =
+        typeof process !== 'undefined' ? process.env.ANTHROPIC_AUTH_TOKEN || process.env.ANTHROPIC_OAUTH_TOKEN : undefined;
+      const hasAnthropicCreds =
+        !!options.anthropicClient ||
+        !!options.anthropicKey ||
+        !!options.anthropicAuthToken ||
+        !!options.apiKey ||
+        !!envAnthropicKey ||
+        !!envAnthropicAuth;
+      if (!hasAnthropicCreds) {
+        throw new BitBadgesBuilderAgentError(
+          'BitBadgesBuilderAgent requires Anthropic credentials. Provide one of: `anthropicKey` (API key), `anthropicAuthToken` (OAuth), `anthropicClient` (pre-built), or set ANTHROPIC_API_KEY / ANTHROPIC_OAUTH_TOKEN in the environment. BitBadges never stores API keys.',
+          'MISSING_ANTHROPIC_CREDS'
+        );
+      }
+    } else if (providerName === 'openai') {
+      const envOpenAiKey = typeof process !== 'undefined' ? process.env.OPENAI_API_KEY : undefined;
+      const hasOpenAiCreds = !!options.providerClient || !!options.apiKey || !!envOpenAiKey;
+      if (!hasOpenAiCreds) {
+        throw new BitBadgesBuilderAgentError(
+          'BitBadgesBuilderAgent (openai provider) requires an OpenAI API key. Provide `apiKey`, `providerClient` (pre-built), or set OPENAI_API_KEY in the environment.',
+          'MISSING_OPENAI_CREDS'
+        );
+      }
     }
+
+    this.provider = getProvider(providerName);
 
     if (options.skills && options.skills.length > 0) {
       const valid = new Set(getAllSkillInstructions().map((s) => s.id));
@@ -171,6 +202,29 @@ export class BitBadgesBuilderAgent {
   /** Cancel every in-flight build on this agent instance. */
   abort(): void {
     for (const c of this.inFlightControllers) c.abort();
+  }
+
+  /**
+   * Lazily initialize the underlying provider client. Concurrent
+   * builds share the in-flight init promise; on failure we clear the
+   * promise so a retry can re-attempt init after a transient error.
+   */
+  private async ensureProviderInitialized(): Promise<void> {
+    if (this.provider.client) return;
+    if (!this.providerInitPromise) {
+      this.providerInitPromise = Promise.resolve(
+        this.provider.init({
+          client: this.options.providerClient ?? this.options.anthropicClient,
+          apiKey: this.options.apiKey ?? this.options.anthropicKey,
+          authToken: this.options.anthropicAuthToken,
+          baseURL: this.options.baseURL ?? this.options.anthropicBaseUrl
+        })
+      ).catch((err) => {
+        this.providerInitPromise = null;
+        throw err;
+      });
+    }
+    await this.providerInitPromise;
   }
 
   /** The resolved Anthropic model info (id + pricing) for this agent. */
@@ -335,31 +389,11 @@ export class BitBadgesBuilderAgent {
     creatorAddress: string,
     signal: AbortSignal
   ): Promise<BuildResult> {
-    // Resolve Anthropic client lazily — supports OAuth token, API key,
-    // or a pre-built client. Concurrent builds share a single init
-    // promise so we don't double-fire getAnthropicClient() on race.
-    // Clearing clientInitPromise on failure allows subsequent retries
-    // to re-attempt init after a transient error.
-    if (!this.client) {
-      if (!this.clientInitPromise) {
-        this.clientInitPromise = getAnthropicClient({
-          client: this.options.anthropicClient,
-          apiKey: this.options.anthropicKey,
-          authToken: this.options.anthropicAuthToken,
-          baseURL: this.options.anthropicBaseUrl
-        }).then(
-          (c) => {
-            this.client = c;
-            return c;
-          },
-          (err) => {
-            this.clientInitPromise = null;
-            throw err;
-          }
-        );
-      }
-      await this.clientInitPromise;
-    }
+    // Resolve provider lazily. Concurrent builds share a single init
+    // promise so we don't double-fire provider.init() on race.
+    // Clearing providerInitPromise on failure allows subsequent
+    // retries to re-attempt init after a transient error.
+    await this.ensureProviderInitialized();
 
     // Merge per-build hook overrides on top of constructor hooks
     const hooks: AgentHooks = { ...this.hooks, ...(options?.hooks ?? {}) };
@@ -433,11 +467,17 @@ export class BitBadgesBuilderAgent {
     const effectiveSkillsHasTokenType = effectiveSkills.some((s) => tokenTypeSkillIds.has(s));
     const inferFlag =
       options?.autoInferTokenType ?? this.options.autoInferTokenType ?? true;
+    // Token-type inference uses an Anthropic-haiku-tuned classifier
+    // and a strict JSON output contract. Other providers may not
+    // honor the same contract reliably, so we skip inference unless
+    // the active provider is Anthropic. Freestyle (no inferred type)
+    // is an explicitly valid build outcome.
     const shouldInferTokenType =
       inferFlag &&
       !effectiveSkillsHasTokenType &&
       !!prompt &&
-      !!this.client;
+      this.provider.name === 'anthropic' &&
+      !!this.provider.client;
 
     let inferredTokenType: string | null | undefined = undefined;
     let inferredTokenTypeSource: 'standards' | 'llm' | undefined = undefined;
@@ -458,7 +498,7 @@ export class BitBadgesBuilderAgent {
         allowedTokenTypeIds: this.options.skills
           ? this.options.skills.filter((s) => tokenTypeSkillIds.has(s))
           : undefined,
-        anthropicClient: this.client,
+        anthropicClient: this.provider.client,
         abortSignal: signal,
         debug
       };
@@ -587,7 +627,7 @@ export class BitBadgesBuilderAgent {
     // --- Run main agent loop ---
     const mainLoopStartMs = Date.now();
     let loopResult = await runAgentLoop({
-      client: this.client,
+      provider: this.provider,
       systemPrompt: promptParts.systemPrompt,
       userMessage: promptParts.userMessage,
       userContent: promptParts.userContent,
@@ -664,7 +704,7 @@ export class BitBadgesBuilderAgent {
 
         const fixUserMsg = buildFixPrompt(gate.hardErrors, gate.advisoryNotes, fixRounds, fixLoopMax);
         loopResult = await runAgentLoop({
-          client: this.client,
+          provider: this.provider,
           systemPrompt: promptParts.systemPrompt,
           userMessage: fixUserMsg,
           // Fix-round message is dynamic error guidance — no cache value
@@ -848,9 +888,15 @@ export class BitBadgesBuilderAgent {
   }
 
   /**
-   * Quick round-trip to verify credentials work. Makes a 1-token probe call
-   * to Anthropic and (if configured) a small request against BitBadges API.
-   * Returns a structured health report — does not throw on failure.
+   * Quick round-trip to verify credentials work. Makes a 1-token
+   * probe call to the active LLM provider and (if configured) a small
+   * request against BitBadges API. Returns a structured health
+   * report — does not throw on failure.
+   *
+   * The `anthropic` field name is preserved for backwards
+   * compatibility — when the provider is OpenAI the field still
+   * carries the probe result, just for a different vendor. Look at
+   * the agent's `provider` field if you need to disambiguate.
    */
   async healthCheck(): Promise<{
     anthropic: { ok: boolean; model?: string; error?: string };
@@ -862,16 +908,12 @@ export class BitBadgesBuilderAgent {
     };
 
     try {
-      this.client ??= await getAnthropicClient({
-        client: this.options.anthropicClient,
-        apiKey: this.options.anthropicKey,
-        authToken: this.options.anthropicAuthToken,
-        baseURL: this.options.anthropicBaseUrl
-      });
-      await this.client.messages.create({
+      await this.ensureProviderInitialized();
+      await this.provider.chat({
         model: this.model.id,
-        max_tokens: 1,
-        messages: [{ role: 'user', content: 'ping' }]
+        system: '',
+        messages: [{ role: 'user', content: 'ping' }],
+        maxTokens: 1
       });
       report.anthropic.ok = true;
       report.anthropic.model = this.model.id;
