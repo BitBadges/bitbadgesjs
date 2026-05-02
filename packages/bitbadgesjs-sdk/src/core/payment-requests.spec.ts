@@ -142,6 +142,15 @@ describe('validatePaymentRequestCollection — no-escrow inversion invariants', 
     const r = validatePaymentRequestCollection(c);
     expect(r.errors.some((e: string) => e.includes('Pay and deny approvals must share the same initiatedByListId'))).toBe(true);
   });
+
+  it('rejects payer == recipient (self-payment is a no-op)', () => {
+    const c = fresh();
+    // Force the pay approval's recipient to equal the payer.
+    c.collectionApprovals[0].approvalCriteria.coinTransfers[0].to = PAYER;
+    const r = validatePaymentRequestCollection(c);
+    expect(r.valid).toBe(false);
+    expect(r.errors.some((e: string) => e.includes('recipient must not equal the payer'))).toBe(true);
+  });
 });
 
 describe('validatePaymentRequestCollection — approval shape', () => {

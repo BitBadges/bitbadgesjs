@@ -45,6 +45,15 @@ export interface PaymentRequestParams {
 }
 
 export function buildPaymentRequest(params: PaymentRequestParams): any {
+  // Self-payments are a no-op that bypass the standard's intent. The
+  // SDK validator + indexer-side verifier both enforce this; failing
+  // fast at build time gives callers a clearer error than the chain
+  // simulation reject.
+  if (params.payer && params.recipient && params.payer === params.recipient) {
+    throw new Error(
+      `buildPaymentRequest: payer and recipient must be different addresses (got "${params.payer}" for both). A PaymentRequest is a payment from payer TO recipient.`
+    );
+  }
   const coin = resolveCoin(params.denom);
   const baseAmount = toBaseUnits(params.amount, coin.decimals);
   const expirationTs = durationToTimestamp(params.expiration || '30d');

@@ -80,6 +80,14 @@ export const validatePaymentRequestCollection = (
       errors.push('Pay approval must have overrideFromWithApproverAddress=false (debit initiator/payer, not escrow)');
     }
     if (!ct.to) errors.push('Pay approval coinTransfer must specify recipient address');
+    // Payer (the initiator scoped via initiatedByListId) MUST NOT be the
+    // recipient — a PaymentRequest is a payment FROM payer TO recipient,
+    // and a self-payment is a no-op that bypasses the entire intent of
+    // the standard. Compare against the pay approval's initiator scope.
+    const payerListId = withCoinTransfer[0].initiatedByListId;
+    if (ct.to && payerListId && ct.to === payerListId) {
+      errors.push('Pay approval recipient must not equal the payer (initiatedByListId)');
+    }
   }
 
   // 8. All approvals must NOT use votingChallenges. Approval gating happens

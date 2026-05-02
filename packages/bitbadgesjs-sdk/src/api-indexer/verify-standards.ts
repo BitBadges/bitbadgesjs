@@ -785,9 +785,15 @@ function verifyPaymentRequest(value: any): StandardViolation[] {
   if (withCoinTransfer.length !== 1) {
     violations.push({ standard: std, field: 'collectionApprovals.coinTransfers', message: `PaymentRequest must have exactly 1 approval with a coinTransfer (pay). Found ${withCoinTransfer.length}.` });
   } else {
-    const ct = withCoinTransfer[0].approvalCriteria.coinTransfers[0];
+    const payApproval = withCoinTransfer[0];
+    const ct = payApproval.approvalCriteria.coinTransfers[0];
     if (ct.overrideFromWithApproverAddress === true || ct.overrideFromWithApproverAddress === 'true') {
       violations.push({ standard: std, field: 'collectionApprovals.coinTransfers[0].overrideFromWithApproverAddress', message: 'PaymentRequest pay approval MUST have overrideFromWithApproverAddress=false (debit initiator/payer, not escrow).' });
+    }
+    // Payer (initiator) must not equal the recipient — self-payment is
+    // a no-op that bypasses the intent of the standard.
+    if (ct.to && payApproval.initiatedByListId && ct.to === payApproval.initiatedByListId) {
+      violations.push({ standard: std, field: 'collectionApprovals.coinTransfers[0].to', message: 'PaymentRequest pay recipient MUST NOT equal the payer (initiatedByListId).' });
     }
   }
 
