@@ -12,6 +12,23 @@
  * anything in it. The pipeline below validates and sanitizes
  * defensively, returning `null` on any failure rather than throwing or
  * surfacing attacker-controlled shapes.
+ *
+ * ## Cost note
+ *
+ * Inline customData is stored on-chain — every byte costs gas
+ * (~10 gas/byte) and the bytes live in chain state forever. Use it
+ * for the metadata wrapper (name, description, attributes, links to
+ * images) — NOT for image bytes or any large/binary payload.
+ *
+ * If you want zero-hosting AND an image, see `generatePlaceholderArt`
+ * (re-exported from this module): produces a deterministic 1-8 KB
+ * `data:image/svg+xml;base64,...` URI you can drop straight into the
+ * `image` field. You still pay ~80k gas for the 8 KB of SVG bytes,
+ * so it's a convenience trade-off, not a free lunch.
+ *
+ * For full pricing breakdown see the cost-considerations callout in
+ * the BitBadges docs (`token-standard/learn/collection-setup-fields.md
+ * #cost-considerations-keep-images-off-chain`).
  */
 import { BigIntify } from '@/common/string-numbers.js';
 import { Metadata, type iMetadata } from './metadata.js';
