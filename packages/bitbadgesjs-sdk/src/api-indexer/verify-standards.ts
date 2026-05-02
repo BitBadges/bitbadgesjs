@@ -14,6 +14,18 @@
 import { CollectionDoc } from './docs-types/docs.js';
 import { doesCollectionFollowSubscriptionProtocol } from '../core/subscriptions.js';
 import { normalizeForReview } from '../core/review-normalize.js';
+import { parseInlineCustomData } from './metadata/inlineCustomData.js';
+
+/**
+ * True if a metadata entity carries inline JSON in `customData` that
+ * resolves to a valid Metadata via parseInlineCustomData. Used by the
+ * placeholder-URI / missing-URI checks below to suppress warnings for
+ * the inline-customData configuration (Phase 1 of metadata hosting).
+ */
+function hasInlineCustomData(m: any): boolean {
+  if (!m || typeof m !== 'object') return false;
+  return parseInlineCustomData(typeof m.customData === 'string' ? m.customData : '') !== null;
+}
 
 const MAX_UINT64 = 18446744073709551615n;
 const FOREVER = [{ start: 1n, end: MAX_UINT64 }];
@@ -1088,12 +1100,12 @@ function verifyApprovalMetadata(value: any): StandardViolation[] {
     // Check: if the collection uses placeholder metadata pattern, approvals should match
     const collUri = value.collectionMetadata?.uri || '';
     const usesPlaceholders = collUri.startsWith('ipfs://METADATA_');
-    if (usesPlaceholders && (!a.uri || a.uri === '')) {
+    if (usesPlaceholders && (!a.uri || a.uri === '') && !hasInlineCustomData(a)) {
       violations.push({
         standard: 'Common',
         field: `collectionApprovals[${id}].uri`,
-        message: `Approval "${id}" has no metadata URI. All approvals should have a placeholder URI (e.g. "ipfs://METADATA_APPROVAL_${id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}") with corresponding metadata set via set_metadata_placeholders. The frontend renders approval cards and needs name/description/image for each.`,
-        fix: `Set uri to a placeholder like "ipfs://METADATA_APPROVAL_${id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}" and call set_metadata_placeholders with a descriptive name and description for this approval.`
+        message: `Approval "${id}" has no metadata URI. All approvals should have a placeholder URI (e.g. "ipfs://METADATA_APPROVAL_${id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}") with corresponding metadata set via set_metadata_placeholders, OR carry inline JSON metadata in customData. The frontend renders approval cards and needs name/description for each.`,
+        fix: `Set uri to a placeholder like "ipfs://METADATA_APPROVAL_${id.toUpperCase().replace(/[^A-Z0-9]/g, '_')}" and call set_metadata_placeholders with a descriptive name and description, or write {"name":"...","description":"..."} JSON into customData.`
       });
     }
   }
@@ -1366,12 +1378,16 @@ function verifyMetadataPlaceholders(value: any): StandardViolation[] {
         message: `Alias path "${ap.denom || i}" is missing PathMetadata entirely. All alias paths MUST have metadata: { uri, customData }.`,
         fix: `Add metadata: { uri: "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}", customData: "" } and upload the image inside the JSON at that URI via the auto-apply flow.`
       });
-    } else if (isFakeOrMissingUri(ap.metadata?.uri) && !isPreApplyMetadata(ap.metadata)) {
+    } else if (
+      isFakeOrMissingUri(ap.metadata?.uri) &&
+      !isPreApplyMetadata(ap.metadata) &&
+      !hasInlineCustomData(ap.metadata)
+    ) {
       violations.push({
         standard: std,
         field: `aliasPathsToAdd[${i}].metadata.uri`,
-        message: `Alias path "${ap.denom || i}" metadata.uri is missing or is a fake placeholder. The image must live inside the off-chain JSON at this URI.`,
-        fix: `Set metadata.uri to a placeholder like "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}" (the metadata auto-apply flow replaces this with a real upload) or to a real uploaded URI directly.`
+        message: `Alias path "${ap.denom || i}" metadata.uri is missing or is a fake placeholder, and metadata.customData does not carry inline JSON metadata. The image must live inside the off-chain JSON at this URI (or inline in customData).`,
+        fix: `Set metadata.uri to a placeholder like "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}" (the metadata auto-apply flow replaces this with a real upload), to a real uploaded URI directly, or stash {"name":"...","image":"...","description":"..."} JSON in metadata.customData.`
       });
     }
     if ('image' in (ap.metadata || {})) {
@@ -1393,12 +1409,16 @@ function verifyMetadataPlaceholders(value: any): StandardViolation[] {
             message: `Denom unit "${du.symbol || j}" is missing PathMetadata entirely. All denomUnits MUST have metadata: { uri, customData }.`,
             fix: `Add metadata: { uri: "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}_UNIT", customData: "" }.`
           });
-        } else if (isFakeOrMissingUri(du.metadata?.uri) && !isPreApplyMetadata(du.metadata)) {
+        } else if (
+          isFakeOrMissingUri(du.metadata?.uri) &&
+          !isPreApplyMetadata(du.metadata) &&
+          !hasInlineCustomData(du.metadata)
+        ) {
           violations.push({
             standard: std,
             field: `aliasPathsToAdd[${i}].denomUnits[${j}].metadata.uri`,
-            message: `Denom unit "${du.symbol || j}" metadata.uri is missing or is a fake placeholder.`,
-            fix: `Set metadata.uri to a placeholder like "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}_UNIT" or to a real uploaded URI directly.`
+            message: `Denom unit "${du.symbol || j}" metadata.uri is missing or is a fake placeholder, and metadata.customData does not carry inline JSON metadata.`,
+            fix: `Set metadata.uri to a placeholder like "ipfs://METADATA_ALIAS_${ap.denom || '<DENOM>'}_UNIT", to a real uploaded URI directly, or stash inline JSON metadata in metadata.customData.`
           });
         }
         if ('image' in (du.metadata || {})) {
@@ -1424,12 +1444,12 @@ function verifyMetadataPlaceholders(value: any): StandardViolation[] {
         message: `Cosmos coin wrapper path is missing PathMetadata entirely. MUST have metadata: { uri, customData }.`,
         fix: `Add metadata: { uri: "ipfs://METADATA_WRAPPER_${wp.denom || '<DENOM>'}", customData: "" }.`
       });
-    } else if (isFakeOrMissingUri(wp.metadata?.uri)) {
+    } else if (isFakeOrMissingUri(wp.metadata?.uri) && !hasInlineCustomData(wp.metadata)) {
       violations.push({
         standard: std,
         field: `cosmosCoinWrapperPathsToAdd[${i}].metadata.uri`,
-        message: `Cosmos coin wrapper path metadata.uri is missing or is a fake placeholder.`,
-        fix: `Set metadata.uri to a placeholder like "ipfs://METADATA_WRAPPER_${wp.denom || '<DENOM>'}" or a real uploaded URI.`
+        message: `Cosmos coin wrapper path metadata.uri is missing or is a fake placeholder, and metadata.customData does not carry inline JSON metadata.`,
+        fix: `Set metadata.uri to a placeholder like "ipfs://METADATA_WRAPPER_${wp.denom || '<DENOM>'}", a real uploaded URI, or stash inline JSON metadata in metadata.customData.`
       });
     }
     if ('image' in (wp.metadata || {})) {
