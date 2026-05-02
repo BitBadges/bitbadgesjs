@@ -692,31 +692,23 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
       }
     }
 
-    // Approval metadata image check. Approvals carry name+description
-    // only — never image. When the URI is a real IPFS link we can't
-    // peek inside, so emit a soft reminder. When the metadata is
-    // stashed inline in customData, we CAN inspect it; only emit the
-    // reminder if the inline payload accidentally carries an image.
+    // Approval metadata is typically text-only (name + description).
+    // Images on approvals are supported but uncommon — most approval
+    // surfaces in the UI render text only. When inline customData
+    // carries an image we can detect it; flag as a low-priority
+    // suggestion, not a violation.
     for (const appr of approvals) {
       const apprUri: string = appr.uri || '';
       const apprCustomData: string = typeof appr.customData === 'string' ? appr.customData : '';
-      if (apprUri && apprUri !== '' && !apprUri.startsWith('ipfs://METADATA_')) {
-        findings.push({
-          severity: 'info',
-          category: 'metadata',
-          title: `Approval "${appr.approvalId}" has metadata URI`,
-          detail: `Approval metadata images MUST be empty string (""). Verify the metadata at ${apprUri} has image: "".`,
-          recommendation: 'Ensure approval metadata has image: "" (empty string). Non-empty images on approvals cause display issues.'
-        });
-      } else if (apprUri === '' && apprCustomData !== '') {
+      if (apprUri === '' && apprCustomData !== '') {
         const inline = parseInlineCustomData(apprCustomData);
         if (inline && inline.image && inline.image !== '') {
           findings.push({
             severity: 'info',
             category: 'metadata',
             title: `Approval "${appr.approvalId}" inline customData carries an image`,
-            detail: 'Approval metadata images MUST be empty string (""). The inline JSON in customData includes a non-empty image field.',
-            recommendation: 'Remove the image field from the inline JSON in customData (or set it to "").'
+            detail: 'Approval metadata is typically text-only (name + description). Images on approvals are supported but most surfaces render text only.',
+            recommendation: 'Consider omitting the image field unless you have a UI surface that renders it.'
           });
         }
       }
