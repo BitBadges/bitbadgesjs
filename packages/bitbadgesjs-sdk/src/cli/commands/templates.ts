@@ -412,6 +412,31 @@ sharedOpts(
 
 sharedOpts(
   templatesCommand
+    .command('payment-request')
+    .description('Create an agent-initiated payment request (no-escrow inverse of bounty)')
+    .requiredOption('--amount <n>', 'Payment amount (display units)')
+    .requiredOption('--denom <symbol>', 'Coin (USDC, BADGE)')
+    .requiredOption('--payer <address>', 'Payer address (bb1...) — the human approver')
+    .requiredOption('--recipient <address>', 'Recipient address (bb1...) — agent/merchant')
+    .option('--expiration <duration>', 'Expiration duration', '30d')
+    .option('--name <name>', 'Collection name', 'Payment Request')
+    .option('--context <text>', 'Rationale shown to the payer at approval time (≥100 chars recommended)')
+).action(async (opts) => {
+  const { buildPaymentRequest } = await import('../../core/builders/payment-request.js');
+  if (opts.json) { emit(buildPaymentRequest(readJsonInput(opts.json)), opts); return; }
+  emit(buildPaymentRequest({
+    amount: Number(opts.amount),
+    denom: opts.denom,
+    payer: opts.payer,
+    recipient: opts.recipient,
+    expiration: opts.expiration,
+    name: opts.name,
+    context: opts.context
+  }), opts);
+});
+
+sharedOpts(
+  templatesCommand
     .command('crowdfund')
     .description('Create a crowdfunding collection')
     .requiredOption('--goal <n>', 'Funding goal (display units)')

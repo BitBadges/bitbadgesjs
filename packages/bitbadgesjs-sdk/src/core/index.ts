@@ -28,6 +28,7 @@ export * from './cosmos-wrappers.js';
 export * from './simulation.js';
 export * from './prediction-markets.js';
 export * from './bounties.js';
+export * from './payment-requests.js';
 export * from './auctions.js';
 // NOTE: interpret.js was moved to ../api-indexer/interpret.js to avoid a circular import
 // (interpretCollection depends on the BitBadgesCollection runtime class, whose module graph

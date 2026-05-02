@@ -16,6 +16,7 @@ import type { Preset, PresetDescriptor, RenderedApproval } from './types.js';
 import { CREDIT_TOKEN_PRESETS } from './credit-token.js';
 import { ADDRESS_LIST_PRESETS } from './address-list.js';
 import { BOUNTY_PRESETS } from './bounty.js';
+import { PAYMENT_REQUEST_PRESETS } from './payment-request.js';
 import { PREDICTION_MARKET_PRESETS } from './prediction-market.js';
 import { SUBSCRIPTION_PRESETS } from './subscription.js';
 import { CUSTOM_2FA_PRESETS } from './custom-2fa.js';
@@ -34,6 +35,7 @@ const ALL_PRESETS: Preset<any>[] = [
   ...CREDIT_TOKEN_PRESETS,
   ...ADDRESS_LIST_PRESETS,
   ...BOUNTY_PRESETS,
+  ...PAYMENT_REQUEST_PRESETS,
   ...PREDICTION_MARKET_PRESETS,
   ...SUBSCRIPTION_PRESETS,
   ...CUSTOM_2FA_PRESETS,

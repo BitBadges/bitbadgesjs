@@ -90,6 +90,7 @@ export const STANDARD_TO_TOKEN_TYPE: ReadonlyArray<{ standard: string; skillId: 
   { standard: 'Address List', skillId: 'address-list' },
   { standard: 'Quest', skillId: 'quest' },
   { standard: 'Bounty', skillId: 'bounty' },
+  { standard: 'PaymentRequest', skillId: 'payment-request' },
   { standard: 'Crowdfund', skillId: 'crowdfund' },
   { standard: 'Auction', skillId: 'auction' },
   { standard: 'Products', skillId: 'product-catalog' },

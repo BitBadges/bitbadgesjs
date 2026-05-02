@@ -740,6 +740,67 @@ function verifyCommonMintRules(value: any): StandardViolation[] {
 }
 
 // ============================================================
+// PaymentRequest Validator
+// ============================================================
+
+function verifyPaymentRequest(value: any): StandardViolation[] {
+  const violations: StandardViolation[] = [];
+  const std = 'PaymentRequest';
+  const approvals = getApprovals(value);
+
+  if (!isSingleToken(value.validTokenIds)) {
+    violations.push({ standard: std, field: 'validTokenIds', message: 'PaymentRequest collections MUST have validTokenIds = [{ start: "1", end: "1" }].' });
+  }
+
+  // Must have 2 approvals: pay, deny
+  if (approvals.length < 2) {
+    violations.push({ standard: std, field: 'collectionApprovals', message: `PaymentRequest requires at least 2 approvals (pay, deny). Found ${approvals.length}.` });
+  }
+
+  const mintApprovals = approvals.filter((a: any) => a.fromListId === 'Mint');
+  for (const a of mintApprovals) {
+    const ac = a.approvalCriteria || {};
+    if (ac.overridesFromOutgoingApprovals !== true && ac.overridesFromOutgoingApprovals !== 'true') {
+      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].overridesFromOutgoingApprovals`, message: `PaymentRequest approval "${a.approvalId}" MUST have overridesFromOutgoingApprovals: true.` });
+    }
+    if (ac.overridesToIncomingApprovals !== true && ac.overridesToIncomingApprovals !== 'true') {
+      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].overridesToIncomingApprovals`, message: `PaymentRequest approval "${a.approvalId}" MUST have overridesToIncomingApprovals: true.` });
+    }
+    const mnt = ac.maxNumTransfers;
+    if (mnt && mnt.overallMaxNumTransfers !== 1n) {
+      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].maxNumTransfers`, message: `PaymentRequest approval "${a.approvalId}" overallMaxNumTransfers must be "1".` });
+    }
+    // Inverse-of-Bounty invariant: PaymentRequest must never use voting.
+    // Approval gating happens via initiatedByListId scoped to the payer.
+    if (ac.votingChallenges && ac.votingChallenges.length > 0) {
+      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].votingChallenges`, message: `PaymentRequest approval "${a.approvalId}" MUST NOT use votingChallenges — gating happens via initiatedByListId.` });
+    }
+  }
+
+  // Exactly one approval may carry a coinTransfer (the pay approval).
+  // It must NOT use overrideFromWithApproverAddress — the chain default
+  // routes "from" to the initiator (the payer), which is the whole
+  // point of the no-escrow inversion.
+  const withCoinTransfer = mintApprovals.filter((a: any) => a.approvalCriteria?.coinTransfers?.length > 0);
+  if (withCoinTransfer.length !== 1) {
+    violations.push({ standard: std, field: 'collectionApprovals.coinTransfers', message: `PaymentRequest must have exactly 1 approval with a coinTransfer (pay). Found ${withCoinTransfer.length}.` });
+  } else {
+    const payApproval = withCoinTransfer[0];
+    const ct = payApproval.approvalCriteria.coinTransfers[0];
+    if (ct.overrideFromWithApproverAddress === true || ct.overrideFromWithApproverAddress === 'true') {
+      violations.push({ standard: std, field: 'collectionApprovals.coinTransfers[0].overrideFromWithApproverAddress', message: 'PaymentRequest pay approval MUST have overrideFromWithApproverAddress=false (debit initiator/payer, not escrow).' });
+    }
+    // Payer (initiator) must not equal the recipient — self-payment is
+    // a no-op that bypasses the intent of the standard.
+    if (ct.to && payApproval.initiatedByListId && ct.to === payApproval.initiatedByListId) {
+      violations.push({ standard: std, field: 'collectionApprovals.coinTransfers[0].to', message: 'PaymentRequest pay recipient MUST NOT equal the payer (initiatedByListId).' });
+    }
+  }
+
+  return violations;
+}
+
+// ============================================================
 // Bounty Validator
 // ============================================================
 
@@ -968,6 +1029,7 @@ const STANDARD_VALIDATORS: Record<string, (value: any) => StandardViolation[]> =
   NFTMarketplace: verifyTradableNFT,
   'Non-Transferable': verifyNonTransferable,
   Bounty: verifyBounty,
+  PaymentRequest: verifyPaymentRequest,
   Crowdfund: verifyCrowdfund,
   Auction: verifyAuction,
   Products: verifyProducts,
@@ -996,6 +1058,9 @@ const STANDARD_ALIASES: Record<string, string> = {
   Tradable: 'NFTMarketplace',
   'Non-Transferable': 'Non-Transferable',
   Bounty: 'Bounty',
+  PaymentRequest: 'PaymentRequest',
+  'Payment Request': 'PaymentRequest',
+  Invoice: 'PaymentRequest',
   Crowdfund: 'Crowdfund',
   Auction: 'Auction',
   Products: 'Products',
