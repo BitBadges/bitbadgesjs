@@ -1,8 +1,9 @@
 import { Command } from 'commander';
-import { output, readJsonInput } from '../utils/io.js';
+import { output, readJsonInput, addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
 import { renderReview, renderValidate, renderResolvedMetadata, renderSimulate } from '../utils/terminal.js';
 import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMsg.js';
-import { addNetworkOptions } from '../utils/io.js';
+import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
+import { runBurnerCreate, pickBurner, type BurnerNetwork } from '../utils/burner.js';
 
 export const templatesCommand = new Command('templates').description('Deterministic transaction templates — flag-based generators for vaults, NFTs, subscriptions, bounties, and more.');
 
@@ -24,11 +25,26 @@ async function emit(
     simulate?: boolean;
     events?: boolean;
     // Network selection — passed through addNetworkOptions on the
-    // shared sharedOpts() helper. Only consulted when --simulate is on.
+    // shared sharedOpts() helper. Consulted by --simulate AND
+    // --deploy-with-burner.
     network?: 'mainnet' | 'local' | 'testnet';
     testnet?: boolean;
     local?: boolean;
     url?: string;
+    nodeUrl?: string;
+    apiKey?: string;
+    // --deploy-with-burner — broadcast the just-built msg via the
+    // ephemeral burner flow, equivalent to piping the JSON output
+    // into `bb cli builder create-with-burner`.
+    deployWithBurner?: boolean;
+    fund?: 'faucet' | 'manual';
+    fee?: string;
+    feeDenom?: string;
+    gas?: string | number;
+    new?: boolean;
+    reuse?: string;
+    nonInteractive?: boolean;
+    pollTimeout?: string | number;
   }
 ) {
   // User-level approval templates produce
@@ -230,6 +246,73 @@ async function emit(
       '\nAuto-Simulate skipped — wrap user-level approvals inside an alternative approval message to simulate end-to-end. Auto-Validate ran above.\n'
     );
   }
+
+  // ── --deploy-with-burner ────────────────────────────────────────────────
+  // Composes the template + create-with-burner pipeline into one step.
+  // Equivalent to piping the JSON output to `bb cli builder
+  // create-with-burner --msg-stdin --manager <addr>`. CREATE-ONLY: the
+  // burner flow rejects updates, transfers, approvals — runBurnerCreate
+  // throws a clear error if the resolved msg isn't MsgCreateCollection
+  // (or MsgUniversalUpdateCollection with collectionId=0).
+  if (opts.deployWithBurner) {
+    if (!opts.manager) {
+      process.stderr.write(
+        '\nError: --deploy-with-burner requires --manager <bb1...>. The burner is a throwaway signer; the manager address captures lasting collection ownership.\n'
+      );
+      process.exit(2);
+    }
+
+    const networkName = resolveNetwork(opts);
+    const network: BurnerNetwork = networkName as NetworkMode;
+    const apiUrl = getApiUrl(opts);
+    const nodeUrl = (opts as any).nodeUrl || NETWORK_CONFIGS[network].nodeUrl;
+    const apiKey = getApiKeyForNetwork(opts);
+
+    if ((opts.fund ?? 'faucet') === 'faucet' && !apiKey && network !== 'local') {
+      process.stderr.write(
+        'Warning: --fund faucet requires an API key on non-local networks. Set BITBADGES_API_KEY or `bb cli config set apiKey <key>`.\n'
+      );
+    }
+
+    const choice = await pickBurner({
+      network,
+      nodeUrl,
+      forceNew: Boolean(opts.new),
+      reuseSelector: opts.reuse
+    });
+
+    try {
+      const result = await runBurnerCreate({
+        msg: outData,
+        network,
+        apiUrl,
+        nodeUrl,
+        manager: opts.manager,
+        fund: opts.fund === 'manual' ? 'manual' : 'faucet',
+        apiKey,
+        fee: { amount: String(opts.fee ?? '0'), denom: String(opts.feeDenom ?? 'ubadge') },
+        gas: Number(opts.gas ?? 400000),
+        reuseRecord: choice.kind === 'reuse' ? choice.record : undefined,
+        nonInteractive: Boolean(opts.nonInteractive) || !process.stdout.isTTY,
+        pollTimeoutMs: Number(opts.pollTimeout ?? 60) * 1000
+      });
+
+      const payload = {
+        success: result.success,
+        ephemeralAddress: result.ephemeralAddress,
+        recoveryPath: result.recoveryPath,
+        txHash: result.txHash,
+        collectionId: result.collectionId ?? null,
+        paused: result.paused,
+        error: result.error
+      };
+      process.stdout.write('\n' + JSON.stringify(payload, null, 2) + '\n');
+      if (!result.success && !result.paused) process.exit(1);
+    } catch (err: any) {
+      process.stderr.write(`Burner deploy failed: ${err?.message || err}\n`);
+      process.exit(1);
+    }
+  }
 }
 
 // renderValidate and renderResolvedMetadata live in src/cli/utils/terminal.ts.
@@ -273,6 +356,20 @@ const sharedOpts = (cmd: Command) => {
   addOptionIfMissing(cmd, '--name <name>', 'Mode 2: collection name (required with --image + --description if --uri not set)');
   addOptionIfMissing(cmd, '--description <text>', 'Mode 2: collection description (required with --name + --image if --uri not set)');
   addOptionIfMissing(cmd, '--image <url>', 'Mode 2: collection image URI (required with --name + --description if --uri not set)');
+  // --deploy-with-burner — collapses the template + create-with-burner
+  // pipeline into a single command. CREATE-ONLY: rejects updates,
+  // transfers, approvals (the burner is a one-shot signer; ownership
+  // lives on --manager). Equivalent to:
+  //   bb cli builder templates <preset> ... | bb cli builder create-with-burner --msg-stdin --manager <addr>
+  cmd.option('--deploy-with-burner', 'After building, broadcast via the throwaway burner flow (CREATE-ONLY). Requires --manager.');
+  cmd.option('--fund <mode>', 'When deploying: funding source for the burner (faucet | manual)', 'faucet');
+  cmd.option('--fee <amount>', 'When deploying: fee amount in base units', '0');
+  cmd.option('--fee-denom <denom>', 'When deploying: fee denom', 'ubadge');
+  cmd.option('--gas <number>', 'When deploying: gas limit', '400000');
+  cmd.option('--new', 'When deploying: skip the burner picker and always create a fresh wallet');
+  cmd.option('--reuse <selector>', 'When deploying: reuse a specific saved burner by address or recovery file path');
+  cmd.option('--non-interactive', 'When deploying: never prompt; on any prompt point save state and exit for later resume');
+  cmd.option('--poll-timeout <seconds>', 'When deploying: seconds to wait for funding to land before prompting/exiting', '60');
   return cmd;
 };
 
