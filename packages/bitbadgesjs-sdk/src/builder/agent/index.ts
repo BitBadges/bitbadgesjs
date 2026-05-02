@@ -33,7 +33,8 @@ export {
   inferFromStandards,
   buildInferenceSystemPrompt,
   buildInferenceUserPrompt,
-  parseInferenceResponse,
+  buildInferenceSchema,
+  validateInferenceObject,
   STANDARD_TO_TOKEN_TYPE,
   type TokenTypeInferenceInput,
   type TokenTypeInferenceResult
@@ -47,6 +48,11 @@ export {
   PeerDependencyError,
   SimulationError
 } from './errors.js';
+
+// Multi-provider abstraction — Anthropic by default, OpenAI optional.
+// Adding a new provider = drop a file in src/builder/agent/providers/.
+export { getProvider, AnthropicProvider, OpenAIProvider, SUPPORTED_PROVIDERS } from './providers/index.js';
+export type { LLMProvider, ProviderName } from './providers/index.js';
 
 export type {
   // Options

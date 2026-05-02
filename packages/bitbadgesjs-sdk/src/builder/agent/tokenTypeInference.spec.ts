@@ -1,11 +1,14 @@
 /**
  * Unit tests for the smart token-type inference module.
  *
- * The LLM branch is exercised via a fake `anthropicClient` that
- * returns a canned response shape — no peer-dep required.
+ * The LLM branch is exercised via a fake `LLMProvider.classify()`
+ * implementation that returns a canned response — no peer-dep required.
+ * Both Anthropic and OpenAI providers route through the same
+ * `provider.classify()` boundary so a single fake covers both.
  */
 
 import {
+  buildInferenceSchema,
   buildInferenceSystemPrompt,
   buildInferenceUserPrompt,
   extractStandards,
@@ -13,30 +16,36 @@ import {
   getTokenTypeSkills,
   inferFromStandards,
   inferTokenTypeFromPrompt,
-  parseInferenceResponse,
+  validateInferenceObject,
   STANDARD_TO_TOKEN_TYPE
 } from './tokenTypeInference.js';
+import type { LLMProvider, ProviderClassifyArgs, ProviderClassifyResponse } from './providers/types.js';
 
-function makeFakeClient(response: any, opts: { captureArgs?: { value: any } } = {}) {
+function makeFakeProvider(
+  result: { parsed: Record<string, unknown> | null; usage?: any; model?: string; costUsd?: number } | { error: Error },
+  opts: { captureArgs?: { value: any }; name?: string; defaultClassifyModel?: string } = {}
+): LLMProvider & { classifyMock: jest.Mock } {
+  const classifyMock = jest.fn(async (args: ProviderClassifyArgs): Promise<ProviderClassifyResponse> => {
+    if (opts.captureArgs) opts.captureArgs.value = args;
+    if ('error' in result) throw result.error;
+    return {
+      parsed: result.parsed,
+      text: result.parsed ? JSON.stringify(result.parsed) : '',
+      usage: result.usage ?? { inputTokens: 120, outputTokens: 40, cacheCreationTokens: 0, cacheReadTokens: 0 },
+      model: result.model ?? args.model,
+      costUsd: result.costUsd ?? 0
+    };
+  });
   return {
-    messages: {
-      create: jest.fn(async (args: any) => {
-        if (opts.captureArgs) opts.captureArgs.value = args;
-        return response;
-      })
-    }
-  };
-}
-
-function mkMessagesResponse(bodyText: string) {
-  return {
-    content: [{ type: 'text', text: bodyText }],
-    usage: {
-      input_tokens: 120,
-      output_tokens: 40,
-      cache_creation_input_tokens: 0,
-      cache_read_input_tokens: 0
-    }
+    name: opts.name ?? 'anthropic',
+    client: {},
+    init: () => undefined,
+    toolsForRequest: () => [],
+    chat: () => Promise.reject(new Error('not used in tests')),
+    defaultModel: () => 'unused',
+    defaultClassifyModel: () => opts.defaultClassifyModel ?? 'claude-haiku-4-5-20251001',
+    classify: classifyMock,
+    classifyMock
   };
 }
 
@@ -132,12 +141,12 @@ describe('inferFromStandards (deterministic fast-path)', () => {
   });
 });
 
-describe('parseInferenceResponse', () => {
+describe('validateInferenceObject', () => {
   const allowed = new Set(['subscription', 'smart-token']);
 
   it('accepts a valid high-confidence pick', () => {
-    const r = parseInferenceResponse(
-      '{"id":"subscription","confidence":"high","reasoning":"recurring $10/mo"}',
+    const r = validateInferenceObject(
+      { id: 'subscription', confidence: 'high', reasoning: 'recurring $10/mo' },
       allowed
     );
     expect(r.tokenType).toBe('subscription');
@@ -145,17 +154,9 @@ describe('parseInferenceResponse', () => {
     expect(r.reasoning).toBe('recurring $10/mo');
   });
 
-  it('strips ```json fences that Claude occasionally adds', () => {
-    const r = parseInferenceResponse(
-      '```json\n{"id":"smart-token","confidence":"high","reasoning":"wraps USDC"}\n```',
-      allowed
-    );
-    expect(r.tokenType).toBe('smart-token');
-  });
-
   it('returns null when confidence is not high', () => {
-    const r = parseInferenceResponse(
-      '{"id":"subscription","confidence":"low","reasoning":"ambiguous"}',
+    const r = validateInferenceObject(
+      { id: 'subscription', confidence: 'low', reasoning: 'ambiguous' },
       allowed
     );
     expect(r.tokenType).toBeNull();
@@ -163,23 +164,37 @@ describe('parseInferenceResponse', () => {
   });
 
   it('returns null when id is not allowed', () => {
-    const r = parseInferenceResponse(
-      '{"id":"fungible-token","confidence":"high","reasoning":"x"}',
+    const r = validateInferenceObject(
+      { id: 'fungible-token', confidence: 'high', reasoning: 'x' },
       allowed
     );
     expect(r.tokenType).toBeNull();
   });
 
   it('handles null id as explicit freestyle', () => {
-    const r = parseInferenceResponse('{"id":null,"confidence":"high","reasoning":"too vague"}', allowed);
+    const r = validateInferenceObject(
+      { id: null, confidence: 'high', reasoning: 'too vague' },
+      allowed
+    );
     expect(r.tokenType).toBeNull();
     expect(r.confidence).toBe('high');
   });
 
-  it('returns null on malformed JSON', () => {
-    const r = parseInferenceResponse('not json', allowed);
-    expect(r.tokenType).toBeNull();
-    expect(r.confidence).toBeNull();
+  it('returns null on non-object input (provider parse failure)', () => {
+    expect(validateInferenceObject(null, allowed).tokenType).toBeNull();
+    expect(validateInferenceObject('string', allowed).tokenType).toBeNull();
+    expect(validateInferenceObject([], allowed).tokenType).toBeNull();
+  });
+});
+
+describe('buildInferenceSchema', () => {
+  it('produces a strict-output-friendly schema with allowed ids in enum', () => {
+    const schema = buildInferenceSchema(['subscription', 'smart-token']);
+    expect(schema.type).toBe('object');
+    expect(schema.required).toEqual(['id', 'confidence', 'reasoning']);
+    expect(schema.additionalProperties).toBe(false);
+    expect((schema.properties.id as any).enum).toEqual(['subscription', 'smart-token', null]);
+    expect((schema.properties.confidence as any).enum).toEqual(['high', 'low']);
   });
 });
 
@@ -244,109 +259,142 @@ describe('buildInferenceSystemPrompt', () => {
   });
 });
 
-describe('inferTokenTypeFromPrompt (end-to-end with fake client)', () => {
-  it('fast-paths existing standards without calling Claude', async () => {
-    const client = makeFakeClient(mkMessagesResponse(''));
+describe('inferTokenTypeFromPrompt (end-to-end with fake provider)', () => {
+  it('fast-paths existing standards without calling provider.classify', async () => {
+    const provider = makeFakeProvider({ parsed: null });
     const r = await inferTokenTypeFromPrompt({
       prompt: 'fix the supply cap',
       mode: 'refine',
       existingTransaction: { standards: ['Smart Token'] },
-      anthropicClient: client
+      provider
     });
     expect(r.tokenType).toBe('smart-token');
     expect(r.source).toBe('standards');
     expect(r.confidence).toBe('high');
-    expect(client.messages.create).not.toHaveBeenCalled();
+    expect(provider.classifyMock).not.toHaveBeenCalled();
     expect(r.tokenUsage).toBeUndefined();
   });
 
-  it('calls Claude when no standards signal is available', async () => {
-    const client = makeFakeClient(
-      mkMessagesResponse(
-        '{"id":"subscription","confidence":"high","reasoning":"recurring monthly payment pattern"}'
-      )
-    );
+  it('calls provider.classify when no standards signal is available (anthropic)', async () => {
+    const provider = makeFakeProvider({
+      parsed: { id: 'subscription', confidence: 'high', reasoning: 'recurring monthly payment pattern' },
+      model: 'claude-haiku-4-5-20251001',
+      costUsd: 0.000234
+    });
     const r = await inferTokenTypeFromPrompt({
       prompt: 'monthly subscription for $10, max 500 subscribers',
       mode: 'create',
-      anthropicClient: client
+      provider
     });
     expect(r.tokenType).toBe('subscription');
     expect(r.source).toBe('llm');
     expect(r.tokenUsage?.model).toMatch(/haiku/);
-    expect(client.messages.create).toHaveBeenCalledTimes(1);
+    expect(r.tokenUsage?.costUsd).toBe(0.000234);
+    expect(provider.classifyMock).toHaveBeenCalledTimes(1);
   });
 
-  it('returns null when Claude reports low confidence', async () => {
-    const client = makeFakeClient(
-      mkMessagesResponse('{"id":"fungible-token","confidence":"low","reasoning":"too vague"}')
+  it('uses gpt-4o-mini when provider is openai', async () => {
+    const captured = { value: null as any };
+    const provider = makeFakeProvider(
+      { parsed: { id: 'subscription', confidence: 'high', reasoning: 'monthly recurring' }, model: 'gpt-4o-mini' },
+      { captureArgs: captured, name: 'openai', defaultClassifyModel: 'gpt-4o-mini' }
     );
     const r = await inferTokenTypeFromPrompt({
+      prompt: 'monthly subscription for $10',
+      provider
+    });
+    expect(r.tokenType).toBe('subscription');
+    expect(r.tokenUsage?.model).toBe('gpt-4o-mini');
+    expect(captured.value.model).toBe('gpt-4o-mini');
+  });
+
+  it('honors an explicit modelId override', async () => {
+    const captured = { value: null as any };
+    const provider = makeFakeProvider(
+      { parsed: { id: 'subscription', confidence: 'high', reasoning: '...' } },
+      { captureArgs: captured }
+    );
+    await inferTokenTypeFromPrompt({
+      prompt: 'monthly subscription',
+      provider,
+      modelId: 'claude-sonnet-4-6'
+    });
+    expect(captured.value.model).toBe('claude-sonnet-4-6');
+  });
+
+  it('returns null when classify reports low confidence', async () => {
+    const provider = makeFakeProvider({
+      parsed: { id: 'fungible-token', confidence: 'low', reasoning: 'too vague' }
+    });
+    const r = await inferTokenTypeFromPrompt({
       prompt: 'I want to make some kind of token thing for my community',
-      anthropicClient: client
+      provider
     });
     expect(r.tokenType).toBeNull();
     expect(r.confidence).toBe('low');
     expect(r.source).toBeNull();
   });
 
-  it('returns null on network errors (freestyle is valid)', async () => {
-    const client = {
-      messages: {
-        create: jest.fn(async () => {
-          throw new Error('network down');
-        })
-      }
-    };
-    const r = await inferTokenTypeFromPrompt({
-      prompt: 'any prompt',
-      anthropicClient: client
-    });
+  it('returns null on classify errors (freestyle is valid)', async () => {
+    const provider = makeFakeProvider({ error: new Error('network down') });
+    const r = await inferTokenTypeFromPrompt({ prompt: 'any prompt', provider });
     expect(r.tokenType).toBeNull();
     expect(r.source).toBeNull();
-    expect(client.messages.create).toHaveBeenCalledTimes(1);
+    expect(provider.classifyMock).toHaveBeenCalledTimes(1);
   });
 
-  it('returns null when anthropicClient is absent and no standards hint', async () => {
+  it('returns null when provider is absent and no standards hint', async () => {
     const r = await inferTokenTypeFromPrompt({
       prompt: 'anything',
-      anthropicClient: null
+      provider: undefined as unknown as LLMProvider
     });
     expect(r.tokenType).toBeNull();
+  });
+
+  it('returns null when classify returns parsed=null (parse failure)', async () => {
+    const provider = makeFakeProvider({ parsed: null });
+    const r = await inferTokenTypeFromPrompt({
+      prompt: 'something',
+      provider
+    });
+    expect(r.tokenType).toBeNull();
+    expect(provider.classifyMock).toHaveBeenCalledTimes(1);
   });
 
   it('restricts candidates via allowedTokenTypeIds', async () => {
     const captured = { value: null as any };
-    const client = makeFakeClient(
-      mkMessagesResponse('{"id":"fungible-token","confidence":"high","reasoning":"..."}'),
+    const provider = makeFakeProvider(
+      { parsed: { id: 'fungible-token', confidence: 'high', reasoning: '...' } },
       { captureArgs: captured }
     );
     const r = await inferTokenTypeFromPrompt({
       prompt: 'simple fungible token',
       allowedTokenTypeIds: ['subscription'],
-      anthropicClient: client
+      provider
     });
     // fungible-token is not in the allowlist → must be rejected.
     expect(r.tokenType).toBeNull();
-    const sysText: string = captured.value.system[0].text;
+    const sysText: string = captured.value.systemPrompt;
     expect(sysText).toContain('subscription');
     expect(sysText).not.toContain('`fungible-token`');
+    // Schema enum is also restricted to the allow-list + null.
+    expect((captured.value.schema.properties.id as any).enum).toEqual(['subscription', null]);
   });
 
-  it('sends a cache_control hint on the system prompt', async () => {
+  it('sends a systemCacheControl hint for Anthropic prompt-cache stability', async () => {
     const captured = { value: null as any };
-    const client = makeFakeClient(
-      mkMessagesResponse('{"id":null,"confidence":"low","reasoning":"..."}'),
+    const provider = makeFakeProvider(
+      { parsed: { id: null, confidence: 'low', reasoning: '...' } },
       { captureArgs: captured }
     );
-    await inferTokenTypeFromPrompt({ prompt: 'x', anthropicClient: client });
-    expect(captured.value.system[0].cache_control).toEqual({ type: 'ephemeral' });
+    await inferTokenTypeFromPrompt({ prompt: 'x', provider });
+    expect(captured.value.systemCacheControl).toEqual({ type: 'ephemeral' });
   });
 
-  it('folds refine context into the user message', async () => {
+  it('folds refine context into the user prompt', async () => {
     const captured = { value: null as any };
-    const client = makeFakeClient(
-      mkMessagesResponse('{"id":"fungible-token","confidence":"high","reasoning":"gov token"}'),
+    const provider = makeFakeProvider(
+      { parsed: { id: 'fungible-token', confidence: 'high', reasoning: 'gov token' } },
       { captureArgs: captured }
     );
     await inferTokenTypeFromPrompt({
@@ -354,11 +402,11 @@ describe('inferTokenTypeFromPrompt (end-to-end with fake client)', () => {
       mode: 'refine',
       originalPrompt: 'make a governance token called GOV, supply 1000',
       priorRefinePrompts: ['add a logo'],
-      anthropicClient: client
+      provider
     });
-    const userMsg: string = captured.value.messages[0].content;
-    expect(userMsg).toContain('Original build intent');
-    expect(userMsg).toContain('governance token');
-    expect(userMsg).toContain('Current refinement turn');
+    const userPrompt: string = captured.value.userPrompt;
+    expect(userPrompt).toContain('Original build intent');
+    expect(userPrompt).toContain('governance token');
+    expect(userPrompt).toContain('Current refinement turn');
   });
 });

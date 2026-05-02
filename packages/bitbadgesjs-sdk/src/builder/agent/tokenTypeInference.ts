@@ -15,15 +15,18 @@
  *      that immediately — no LLM call needed. This is the dominant
  *      signal for update/refine flows where the user prompt is often
  *      just "fix this" or "raise the supply".
- *   2. A haiku classification call against the enriched prompt
- *      (original intent + recent refinement turns + current prompt +
- *      standards hint when available). Strict JSON output contract;
- *      only `confidence: "high"` results are accepted.
+ *   2. A small-model classification call (Anthropic Haiku or
+ *      OpenAI gpt-4o-mini) against the enriched prompt (original
+ *      intent + recent refinement turns + current prompt + standards
+ *      hint when available). Strict JSON output contract; only
+ *      `confidence: "high"` results are accepted. The provider's
+ *      `classify()` method handles native schema enforcement on
+ *      OpenAI; Anthropic relies on the tuned system-prompt contract.
  */
 
-import { MODELS, computeCostUsd, type ModelInfo } from './models.js';
 import { getAllSkillInstructions, type SkillInstruction } from '../resources/skillInstructions.js';
 import type { AgentHooks, BuildMode } from './types.js';
+import type { LLMProvider, ProviderJsonSchema } from './providers/types.js';
 
 export interface TokenTypeInferenceInput {
   /** Current user prompt (create) or refinement turn (refine) or update instruction (update). */
@@ -41,8 +44,10 @@ export interface TokenTypeInferenceInput {
   /** Explicit standards list override — if set, takes precedence over `existingTransaction.standards`. */
   existingStandards?: string[];
 
-  anthropicClient: any;
-  model?: ModelInfo;
+  /** LLM provider — used to dispatch the classification call. Each provider picks its own small/fast classify model. */
+  provider: LLMProvider;
+  /** Override the provider's default classify model (e.g. `'gpt-4o-mini'`, `'claude-haiku-4-5-20251001'`). */
+  modelId?: string;
   /** Per-inference timeout (ms). Default: 30_000. */
   timeoutMs?: number;
   abortSignal?: AbortSignal;
@@ -216,38 +221,56 @@ export function buildInferenceUserPrompt(input: {
 }
 
 /**
- * Normalize a Claude response into a validated `TokenTypeInferenceResult`.
- * Extracted so tests can exercise parsing without mocking the full client.
+ * Validate a parsed classify response against the allow-list. Both
+ * providers return a parsed object via `provider.classify()` — this
+ * is the post-parse gate that enforces the SDK's `confidence: high`
+ * contract independent of provider.
  */
-export function parseInferenceResponse(
-  raw: string,
+export function validateInferenceObject(
+  obj: unknown,
   allowedIds: Set<string>
 ): { tokenType: string | null; confidence: 'high' | 'low' | null; reasoning?: string } {
-  const trimmed = raw.trim();
-  // Claude may wrap the JSON in ```json fences despite instructions;
-  // strip once. Split into two anchored replaces + trim rather than
-  // one alternation with `\s*` — avoids the polynomial-regex-on-
-  // uncontrolled-input footgun CodeQL flagged.
-  let unfenced = trimmed;
-  if (unfenced.startsWith('```')) {
-    unfenced = unfenced.replace(/^```(?:json)?/, '').trimStart();
-    unfenced = unfenced.replace(/```$/, '').trimEnd();
-  }
-  let obj: any;
-  try {
-    obj = JSON.parse(unfenced);
-  } catch {
-    return { tokenType: null, confidence: null };
-  }
   if (!obj || typeof obj !== 'object') return { tokenType: null, confidence: null };
-  const id = typeof obj.id === 'string' ? obj.id : null;
+  const o = obj as Record<string, unknown>;
+  const id = typeof o.id === 'string' ? o.id : null;
   const confidence =
-    obj.confidence === 'high' || obj.confidence === 'low' ? (obj.confidence as 'high' | 'low') : null;
-  const reasoning = typeof obj.reasoning === 'string' ? obj.reasoning.slice(0, 240) : undefined;
+    o.confidence === 'high' || o.confidence === 'low' ? (o.confidence as 'high' | 'low') : null;
+  const reasoning = typeof o.reasoning === 'string' ? (o.reasoning as string).slice(0, 240) : undefined;
   if (!id || !allowedIds.has(id) || confidence !== 'high') {
     return { tokenType: null, confidence, reasoning };
   }
   return { tokenType: id, confidence, reasoning };
+}
+
+/**
+ * The strict JSON schema describing the classifier's expected output.
+ * Used natively by OpenAI's structured-output mode and documented in
+ * prose in the system prompt for Anthropic.
+ */
+export function buildInferenceSchema(allowedIds: string[]): ProviderJsonSchema {
+  return {
+    type: 'object',
+    properties: {
+      id: {
+        // OpenAI strict mode supports `["string", "null"]` to express nullable.
+        // Anthropic ignores schema entirely; the prose contract enforces it.
+        type: ['string', 'null'],
+        enum: [...allowedIds, null],
+        description: 'One of the allowed token-type skill ids, or null if no high-confidence match.'
+      },
+      confidence: {
+        type: 'string',
+        enum: ['high', 'low'],
+        description: 'Pick `high` only when the request maps unambiguously to the chosen id; `low` otherwise.'
+      },
+      reasoning: {
+        type: 'string',
+        description: 'One short sentence explaining the pick. Under 20 words.'
+      }
+    },
+    required: ['id', 'confidence', 'reasoning'],
+    additionalProperties: false
+  };
 }
 
 /**
@@ -257,7 +280,7 @@ export function parseInferenceResponse(
 export async function inferTokenTypeFromPrompt(
   input: TokenTypeInferenceInput
 ): Promise<TokenTypeInferenceResult> {
-  const { prompt, anthropicClient, abortSignal, debug } = input;
+  const { prompt, provider, abortSignal, debug } = input;
   if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
     return { tokenType: null, confidence: null, source: null };
   }
@@ -292,12 +315,12 @@ export async function inferTokenTypeFromPrompt(
     };
   }
 
-  // --- Signal 2: haiku LLM classification ----------------------------
-  if (!anthropicClient) {
+  // --- Signal 2: provider-dispatched classification ------------------
+  if (!provider) {
     return { tokenType: null, confidence: null, source: null };
   }
 
-  const model: ModelInfo = input.model ?? MODELS.haiku;
+  const modelId = input.modelId ?? provider.defaultClassifyModel();
   const timeoutMs = input.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const systemPrompt = buildInferenceSystemPrompt(catalog);
   const userPrompt = buildInferenceUserPrompt({
@@ -307,6 +330,7 @@ export async function inferTokenTypeFromPrompt(
     priorRefinePrompts: input.priorRefinePrompts,
     existingStandards: standards
   });
+  const schema = buildInferenceSchema([...allowedIds]);
 
   const controller = new AbortController();
   const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
@@ -316,56 +340,41 @@ export async function inferTokenTypeFromPrompt(
   }
 
   try {
-    const response: any = await anthropicClient.messages.create(
-      {
-        model: model.id,
-        max_tokens: 200,
-        temperature: 0,
-        system: [
-          {
-            type: 'text',
-            text: systemPrompt,
-            cache_control: { type: 'ephemeral' }
-          }
-        ],
-        messages: [{ role: 'user', content: userPrompt }]
-      },
-      { signal: controller.signal }
-    );
+    const response = await provider.classify({
+      model: modelId,
+      systemPrompt,
+      userPrompt,
+      schema,
+      schemaName: 'bitbadges_token_type_inference',
+      maxTokens: 200,
+      temperature: 0,
+      timeoutMs,
+      abortSignal: controller.signal,
+      systemCacheControl: { type: 'ephemeral' }
+    });
 
-    const textBlock = Array.isArray(response?.content)
-      ? response.content.find((b: any) => b?.type === 'text')
-      : null;
-    const rawText = typeof textBlock?.text === 'string' ? textBlock.text : '';
-    const parsed = parseInferenceResponse(rawText, allowedIds);
-
-    const usage = response?.usage ?? {};
-    const inputTokens = Number(usage.input_tokens ?? 0) || 0;
-    const outputTokens = Number(usage.output_tokens ?? 0) || 0;
-    const cacheCreationTokens = Number(usage.cache_creation_input_tokens ?? 0) || 0;
-    const cacheReadTokens = Number(usage.cache_read_input_tokens ?? 0) || 0;
-    const costUsd = computeCostUsd(inputTokens, outputTokens, model, cacheCreationTokens, cacheReadTokens);
+    const validated = validateInferenceObject(response.parsed, allowedIds);
 
     const result: TokenTypeInferenceResult = {
-      tokenType: parsed.tokenType,
-      confidence: parsed.confidence,
-      source: parsed.tokenType ? 'llm' : null,
-      reasoning: parsed.reasoning,
+      tokenType: validated.tokenType,
+      confidence: validated.confidence,
+      source: validated.tokenType ? 'llm' : null,
+      reasoning: validated.reasoning,
       tokenUsage: {
-        inputTokens,
-        outputTokens,
-        cacheCreationTokens,
-        cacheReadTokens,
-        costUsd,
-        model: model.id
+        inputTokens: response.usage.inputTokens,
+        outputTokens: response.usage.outputTokens,
+        cacheCreationTokens: response.usage.cacheCreationTokens ?? 0,
+        cacheReadTokens: response.usage.cacheReadTokens ?? 0,
+        costUsd: response.costUsd,
+        model: response.model
       }
     };
 
     if (debug) {
       console.error(
-        `[bitbadges-builder-agent] tokenTypeInference model=${model.id} ` +
+        `[bitbadges-builder-agent] tokenTypeInference provider=${provider.name} model=${response.model} ` +
           `pick=${result.tokenType ?? 'null'} confidence=${result.confidence ?? 'null'} ` +
-          `tokens_in=${inputTokens} out=${outputTokens}`
+          `tokens_in=${response.usage.inputTokens} out=${response.usage.outputTokens}`
       );
     }
 
