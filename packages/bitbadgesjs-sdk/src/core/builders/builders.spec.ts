@@ -9,6 +9,7 @@ import { verifyStandardsCompliance } from '../../api-indexer/verify-standards.js
 import { buildVault } from './vault.js';
 import { buildSubscription } from './subscription.js';
 import { buildBounty } from './bounty.js';
+import { buildPaymentRequest } from './payment-request.js';
 import { buildCrowdfund } from './crowdfund.js';
 import { buildAuction } from './auction.js';
 import { buildProductCatalog } from './product-catalog.js';
@@ -252,6 +253,51 @@ describe('bounty builder', () => {
   });
   test('passes verification', () => {
     expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Bounty')).toEqual([]);
+  });
+});
+
+describe('payment-request builder', () => {
+  const msg = buildPaymentRequest({
+    amount: 10,
+    denom: 'USDC',
+    payer: 'bb1payer',
+    recipient: 'bb1recipient',
+    context: 'Agent X requesting payment for completed task Y on behalf of org Z under approved budget envelope.'
+  });
+  const r = val(msg);
+
+  test('has PaymentRequest standard', () => { expect(r.standards).toEqual(['PaymentRequest']); });
+  test('3 approvals', () => {
+    expect(r.collectionApprovals.length).toBe(3);
+    const ids = r.collectionApprovals.map((a: any) => a.approvalId);
+    expect(ids).toContain('payment-request-pay');
+    expect(ids).toContain('payment-request-deny');
+    expect(ids).toContain('payment-request-expire');
+  });
+  test('NO mintEscrowCoinsToTransfer (no-escrow inversion vs. Bounty)', () => {
+    expect(r.mintEscrowCoinsToTransfer).toEqual([]);
+  });
+  test('pay approval debits initiator (overrideFromWithApproverAddress=false)', () => {
+    const pay = r.collectionApprovals.find((a: any) => a.approvalId === 'payment-request-pay');
+    expect(pay.approvalCriteria.coinTransfers.length).toBe(1);
+    expect(pay.approvalCriteria.coinTransfers[0].overrideFromWithApproverAddress).toBe(false);
+    expect(pay.approvalCriteria.coinTransfers[0].to).toBe('bb1recipient');
+  });
+  test('pay+deny gated to payer, expire open to All', () => {
+    const pay = r.collectionApprovals.find((a: any) => a.approvalId === 'payment-request-pay');
+    const deny = r.collectionApprovals.find((a: any) => a.approvalId === 'payment-request-deny');
+    const expire = r.collectionApprovals.find((a: any) => a.approvalId === 'payment-request-expire');
+    expect(pay.initiatedByListId).toBe('bb1payer');
+    expect(deny.initiatedByListId).toBe('bb1payer');
+    expect(expire.initiatedByListId).toBe('All');
+  });
+  test('no votingChallenges (gating is via initiatedByListId, not voting)', () => {
+    for (const a of r.collectionApprovals) {
+      expect(a.approvalCriteria.votingChallenges).toBeUndefined();
+    }
+  });
+  test('passes verification', () => {
+    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'PaymentRequest')).toEqual([]);
   });
 });
 

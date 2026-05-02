@@ -12,6 +12,7 @@
 export { buildVault, type VaultParams } from './vault.js';
 export { buildSubscription, type SubscriptionParams, type SubscriptionPayout } from './subscription.js';
 export { buildBounty, type BountyParams } from './bounty.js';
+export { buildPaymentRequest, type PaymentRequestParams } from './payment-request.js';
 export { buildCrowdfund, type CrowdfundParams } from './crowdfund.js';
 export { buildAuction, type AuctionParams } from './auction.js';
 export { buildProductCatalog, type ProductCatalogParams, type ProductItem } from './product-catalog.js';

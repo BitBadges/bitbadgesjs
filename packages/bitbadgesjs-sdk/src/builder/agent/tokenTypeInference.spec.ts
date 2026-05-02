@@ -56,6 +56,7 @@ describe('tokenTypeInference catalog helpers', () => {
       'liquidity-pools',
       'quest',
       'bounty',
+      'payment-request',
       'crowdfund',
       'auction',
       'product-catalog',

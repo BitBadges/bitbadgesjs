@@ -2930,6 +2930,142 @@ All permissions MUST be frozen (permanentlyForbiddenTimes: fullRange):
 For bounties that require the verifier or submitter to hold a token from THIS collection (e.g., a reputation badge), use collectionId "0" in mustOwnTokens. The chain resolves "0" to the current collection ID at runtime, which is especially useful at creation time when the real ID is not yet known.`
   },
   {
+    id: 'payment-request',
+    name: 'PaymentRequest',
+    category: 'token-type',
+    description: 'Agent-initiated payment request with no escrow. The agent (or any address) creates a collection requesting payment from a targeted human payer. The payer approves AND pays from their own wallet in a single action. Inverse of Bounty.',
+    summary: `Required standards: ["PaymentRequest"]
+
+- 1 token ID (vehicle for approval engine — minted directly to burn)
+- 3 collection-level approvals: pay, deny, expire
+- Each approval: Mint → burn 1x token ID 1
+- Pay approval triggers a coinTransfer FROM the payer's wallet TO the recipient
+- NO mintEscrowCoinsToTransfer — payment debits the payer's wallet at execution time
+- Approval gating via initiatedByListId scoped to the payer (no votingChallenges)
+- Fixed payment amount, no amount scaling
+- All approvals maxNumTransfers = 1 (one-shot)
+- All permissions frozen after creation
+- Expiration enforced via transferTimes windows`,
+    instructions: `# PaymentRequest Standard
+
+## Mental Model
+
+PaymentRequest is the **inverse of Bounty**: instead of an escrow-based reward where the submitter pre-funds and the verifier votes, this is an agent-initiated payment request where the targeted human payer approves AND pays from their own wallet in one action.
+
+Two parties:
+- **Requester** (agent or merchant): Creates the collection, specifies payer + amount + recipient
+- **Payer** (human): Sees the request, decides to approve+pay or deny
+
+There's NO escrow. The payment doesn't move until the payer signs the approval. Funds debit directly from the payer's wallet at execution because the pay approval uses \`overrideFromWithApproverAddress: false\` — the chain default routes the coinTransfer's "from" to the initiator (the payer, scoped via \`initiatedByListId\`).
+
+This is the on-chain equivalent of Stripe Link's spend-request flow: the agent presents a payable artifact with rationale, the human approves, the credential settles. Mirror the rationale-bound, single-use, expiry-gated pattern — but with chain rails instead of card rails.
+
+## Token Structure
+
+- Token ID 1 = PaymentRequest token (vehicle for approval engine)
+- validTokenIds: [{ start: "1", end: "1" }]
+- No alias path needed (1-of-1 receipt-style token)
+
+## 3 Required Approvals
+
+All 3 approvals share: Mint → burn address, 1x token ID 1, maxNumTransfers = 1, overridesFromOutgoingApprovals=true, overridesToIncomingApprovals=true. NO votingChallenges (gating is via initiatedByListId, not voting).
+
+### Preferred path: presets (three short tool calls)
+
+\`\`\`
+add_preset_approval({
+  presetId: "payment-request.pay",
+  params: { approvalId, payer, recipient, denom, amount, expirationMs }
+})
+add_preset_approval({
+  presetId: "payment-request.deny",
+  params: { approvalId, payer, expirationMs }
+})
+add_preset_approval({
+  presetId: "payment-request.expire",
+  params: { approvalId, expirationMs }
+})
+\`\`\`
+
+\`list_presets({skill: "payment-request"})\` lists params. For non-standard variants (multi-payer quorum, partial payments, line items), use raw \`add_approval\`.
+
+### 1. Pay (payment-request-pay-*)
+Payer approves → mint-to-burn → coins move from payer to recipient.
+
+Key fields:
+- fromListId: "Mint"
+- toListId: burn address (bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv)
+- initiatedByListId: payer's bb1... address (NOT "All" — gates approval to just the payer)
+- coinTransfers: [{ to: recipientAddress, overrideFromWithApproverAddress: FALSE, overrideToWithInitiator: false, coins: [{ denom, amount }] }]
+  - **CRITICAL**: \`overrideFromWithApproverAddress\` MUST be false. The chain default routes "from" to the initiator (the payer). Setting true would attempt to debit a non-existent escrow → tx fails.
+- transferTimes: [{ start: "1", end: expirationTimestamp }]
+- maxNumTransfers.overallMaxNumTransfers: "1"
+
+### 2. Deny (payment-request-deny-*)
+Payer rejects → mint-to-burn → no coin transfer. Records denial state for indexers/UIs.
+
+Same as Pay but:
+- NO coinTransfers (or empty array)
+- Same initiatedByListId (payer)
+- Same transferTimes (concurrent with pay)
+
+### 3. Expire (payment-request-expire-*)
+After expiration → mint-to-burn → no coin transfer. Anyone can finalize. Records terminal state.
+
+- initiatedByListId: "All" (anyone can finalize)
+- NO coinTransfers
+- transferTimes: [{ start: expirationTimestamp + 1, end: "18446744073709551615" }]
+
+## Settlement Flow
+
+1. Agent (or merchant) creates the collection — NO escrow funded.
+2. Payer sees the request in their dashboard / wallet (rationale, line items, amount).
+3. Payer either:
+   - **Approves+pays**: signs MsgTransferTokens from Mint → burn (1x token ID 1) with prioritizedApprovals targeting the pay approval. Coins debit from their wallet to the recipient automatically.
+   - **Denies**: signs MsgTransferTokens targeting the deny approval. No coins move.
+4. If neither happens before expiration, anyone can call the expire approval to mark terminal.
+
+## Key Differences from Bounty
+
+- **NO mintEscrowCoinsToTransfer** at the collection level
+- **Pay approval uses overrideFromWithApproverAddress: FALSE** (Bounty uses true)
+- **No votingChallenges** — gating is via initiatedByListId scoped to payer
+- **Deny + expire have no coinTransfers** — no funds need to be returned (no escrow to refund)
+- **initiatedByListId varies**: pay/deny use payer's address; expire uses "All"
+- Same 3-approval shape, same mint-to-burn vehicle, same frozen permissions
+
+## Creation Flow (Tool Calls)
+
+1. Use per-field tools to initialize the collection
+2. \`set_valid_token_ids\` — set [{ start: "1", end: "1" }]
+3. \`set_standards\` — set ["PaymentRequest"]
+4. \`set_invariants\` — set { noCustomOwnershipTimes: true, disablePoolCreation: true, noForcefulPostMintTransfers: true }
+5. **DO NOT** call set_mint_escrow_coins — there's no escrow
+6. \`add_preset_approval\` x3 — pay, deny, expire (or \`add_approval\` for raw)
+7. \`set_permissions\` — freeze all permissions
+8. \`set_collection_metadata\` — name + the rationale (≥100 chars recommended; mirror Stripe Link's bar)
+9. \`set_token_metadata\` — token 1 metadata
+10. \`validate_transaction\` — verify structure (verifyPaymentRequest enforces the no-escrow invariants)
+11. \`simulate_transaction\` — dry run
+
+## Permissions
+
+All permissions MUST be frozen (same set as Bounty).
+
+## Common Mistakes
+
+- **DON'T set overrideFromWithApproverAddress=true on the pay approval** — that's the Bounty pattern. PaymentRequest needs false so the chain debits the payer (initiator), not a non-existent escrow.
+- **DON'T add votingChallenges** — PaymentRequest gating is via initiatedByListId, not voting. Voting is a Bounty construct.
+- **DON'T fund mintEscrowCoinsToTransfer** — there is no escrow. The payer pays at execution time.
+- **DON'T set initiatedByListId to "All" on pay/deny** — that would let anyone approve. Lock to the specific payer's address.
+- **DON'T forget the rationale** in collection metadata description — it's what the human reads to decide. Aim for ≥100 chars (Stripe Link's bar) to force agents to justify the spend.
+- **DON'T use overrideToWithInitiator** on the coinTransfer — the recipient is hardcoded.
+
+## Relationship to the Invoices Standard
+
+The existing \`Invoices\` standard validates a single payer-as-initiator approval — useful as a building block, but it has no deny/expire branches and no targeted-payer scoping. PaymentRequest is a more constrained, agent-payments-specific subset: same payment direction (initiator → address), but with the bounty-shaped 3-approval lifecycle for explicit HITL approval/denial/expiry states. Consumers that want any payer-initiated payment can match \`Invoices\`; consumers that want the agent-payments artifact specifically should match \`PaymentRequest\`.`
+  },
+  {
     id: 'crowdfund',
     name: 'Crowdfund',
     category: 'token-type',
