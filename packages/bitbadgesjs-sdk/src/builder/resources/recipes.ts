@@ -351,22 +351,22 @@ async function verifyAccess(userAddress: string): Promise<boolean> {
     name: 'PaymentRequest (no-escrow agent payment)',
     description: 'Agent-initiated payment request — payer approves AND pays from their wallet in one action. Inverse of Bounty.',
     tags: ['payment-request', 'invoice', 'agent-payments', 'hitl', 'no-escrow'],
-    code: `// PaymentRequest Standard — 3 Approvals (NO escrow up front)
-// All 3 approvals: Mint → burn (1x token ID 1), maxNumTransfers=1 (one-shot)
+    code: `// PaymentRequest Standard — 2 Approvals (NO escrow up front)
+// Both approvals: Mint → burn (1x token ID 1), maxNumTransfers=1 (one-shot),
+// transferTimes [1, expiration]. After the deadline neither can fire —
+// expiration is implicit (no separate expire branch needed because
+// there's no escrow to refund).
 //
-// 1. Pay: Mint → burn, coinTransfers payer → recipient, transferTimes [1, expiration]
+// 1. Pay: Mint → burn, coinTransfers payer → recipient
 //          initiatedByListId = payer's bb1... address
-// 2. Deny: Mint → burn, NO coinTransfer, transferTimes [1, expiration]
+// 2. Deny: Mint → burn, NO coinTransfer
 //          initiatedByListId = payer's bb1... address
-// 3. Expire: Mint → burn, NO coinTransfer, transferTimes [expiration+1, MAX]
-//            initiatedByListId = "All"
 //
 // Key: NO mintEscrowCoinsToTransfer — payment debits payer's wallet at execution
 // Key: Pay's coinTransfer uses overrideFromWithApproverAddress=FALSE
 //      (chain default routes "from" to the initiator/payer)
 // Key: NO votingChallenges — gating is via initiatedByListId scoped to payer
-// Key: Rationale belongs in collection metadata description (≥100 chars
-//      recommended; mirrors Stripe Link's spend-request bar)
+// Key: Rationale belongs in collection metadata description
 //
 // Settlement: payer signs MsgTransferTokens with prioritizedApprovals targeting
 // the pay approval. Coin debit fires from payer's wallet to recipient.

@@ -752,9 +752,9 @@ function verifyPaymentRequest(value: any): StandardViolation[] {
     violations.push({ standard: std, field: 'validTokenIds', message: 'PaymentRequest collections MUST have validTokenIds = [{ start: "1", end: "1" }].' });
   }
 
-  // Must have 3 approvals: pay, deny, expire
-  if (approvals.length < 3) {
-    violations.push({ standard: std, field: 'collectionApprovals', message: `PaymentRequest requires at least 3 approvals (pay, deny, expire). Found ${approvals.length}.` });
+  // Must have 2 approvals: pay, deny
+  if (approvals.length < 2) {
+    violations.push({ standard: std, field: 'collectionApprovals', message: `PaymentRequest requires at least 2 approvals (pay, deny). Found ${approvals.length}.` });
   }
 
   const mintApprovals = approvals.filter((a: any) => a.fromListId === 'Mint');

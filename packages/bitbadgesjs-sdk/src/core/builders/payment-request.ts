@@ -13,13 +13,11 @@
  * @module core/builders/payment-request
  */
 import {
-  MAX_UINT64,
   FOREVER,
   BURN_ADDRESS,
   resolveCoin,
   toBaseUnits,
   durationToTimestamp,
-  uniqueId,
   buildMsg,
   frozenPermissions,
   defaultBalances,
@@ -110,28 +108,11 @@ export function buildPaymentRequest(params: PaymentRequestParams): any {
         overridesFromOutgoingApprovals: true,
         overridesToIncomingApprovals: true
       }
-    },
-    // Expire — anyone can mark expired after the approval window. No
-    // coinTransfer; just records the terminal state.
-    {
-      fromListId: 'Mint',
-      toListId: BURN_ADDRESS,
-      initiatedByListId: 'All',
-      approvalId: 'payment-request-expire',
-      transferTimes: [{ start: String(BigInt(expirationTs) + 1n), end: MAX_UINT64 }],
-      tokenIds: FOREVER,
-      ownershipTimes: FOREVER,
-      version: '0',
-      approvalCriteria: {
-        predeterminedBalances: mintToBurnBalances(),
-        maxNumTransfers: {
-          ...zeroMaxTransfers('payment-request-expire-tracker'),
-          overallMaxNumTransfers: '1'
-        },
-        overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true
-      }
     }
+    // No expire approval — both pay and deny are time-gated to
+    // [1, expirationTs], so neither can fire after the deadline.
+    // Expiration is implicit; clients compute "expired" from the
+    // current time vs. transferTimes[0].end.
   ];
 
   const description = params.context

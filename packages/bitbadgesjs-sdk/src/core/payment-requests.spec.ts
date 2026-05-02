@@ -54,24 +54,10 @@ const makeDenyApproval = () => ({
   }
 });
 
-const makeExpireApproval = () => ({
-  approvalId: 'payment-request-expire',
-  fromListId: 'Mint',
-  toListId: BURN,
-  initiatedByListId: 'All',
-  transferTimes: [{ start: 1001n, end: 2000n }],
-  tokenIds: [{ start: 1n, end: 1n }],
-  approvalCriteria: {
-    overridesFromOutgoingApprovals: true,
-    overridesToIncomingApprovals: true,
-    maxNumTransfers: { overallMaxNumTransfers: 1n }
-  }
-});
-
 const makeValidCollection = (): any => ({
   standards: ['PaymentRequest'],
   validTokenIds: [{ start: 1n, end: 1n }],
-  collectionApprovals: [makePayApproval(), makeDenyApproval(), makeExpireApproval()],
+  collectionApprovals: [makePayApproval(), makeDenyApproval()],
   collectionPermissions: {}
 });
 
@@ -154,9 +140,27 @@ describe('validatePaymentRequestCollection — no-escrow inversion invariants', 
 });
 
 describe('validatePaymentRequestCollection — approval shape', () => {
-  it('rejects when fewer than 3 approvals', () => {
+  it('rejects when fewer than 2 approvals', () => {
     const c = fresh();
-    c.collectionApprovals = [makePayApproval(), makeDenyApproval()];
+    c.collectionApprovals = [makePayApproval()];
+    expect(validatePaymentRequestCollection(c).valid).toBe(false);
+  });
+
+  it('rejects more than 2 approvals (e.g. an expire branch is forbidden)', () => {
+    const c = fresh();
+    c.collectionApprovals.push({
+      approvalId: 'payment-request-expire',
+      fromListId: 'Mint',
+      toListId: BURN,
+      initiatedByListId: 'All',
+      transferTimes: [{ start: 1001n, end: 2000n }],
+      tokenIds: [{ start: 1n, end: 1n }],
+      approvalCriteria: {
+        overridesFromOutgoingApprovals: true,
+        overridesToIncomingApprovals: true,
+        maxNumTransfers: { overallMaxNumTransfers: 1n }
+      }
+    });
     expect(validatePaymentRequestCollection(c).valid).toBe(false);
   });
 
@@ -164,13 +168,6 @@ describe('validatePaymentRequestCollection — approval shape', () => {
     const c = fresh();
     c.validTokenIds = [{ start: 1n, end: 2n }];
     expect(validatePaymentRequestCollection(c).errors).toContain('validTokenIds must be exactly [{start: 1, end: 1}]');
-  });
-
-  it('rejects when expire starts inside the pay/deny window', () => {
-    const c = fresh();
-    c.collectionApprovals[2].transferTimes = [{ start: 500n, end: 1500n }];
-    const r = validatePaymentRequestCollection(c);
-    expect(r.errors.some((e: string) => e.includes('Expire approval must start after pay/deny expiration'))).toBe(true);
   });
 
   it('rejects when fromListId is not "Mint"', () => {

@@ -3,13 +3,17 @@
  * requests where the payer approves AND pays from their own wallet in a
  * single action. No escrow up front.
  *
- * Three approvals form the canonical PaymentRequest:
+ * Two approvals form the canonical PaymentRequest:
  *   - pay     — payer initiates → coin transfer fires from payer's wallet
  *               to the recipient. transferTimes [1, expirationMs].
  *   - deny    — payer initiates → no coin transfer; mints token vehicle
  *               to record denial state. transferTimes [1, expirationMs].
- *   - expire  — anyone can finalize after deadline. No coin transfer.
- *               transferTimes [expirationMs+1, MAX_UINT64].
+ *
+ * Expiration is implicit: once the deadline passes, neither approval
+ * can fire and the request becomes inert. No separate expire approval
+ * is needed because there's no escrow to refund — the token vehicle
+ * can stay un-minted forever and clients compute "expired" from the
+ * current time.
  *
  * Key inversion vs. Bounty: pay's coinTransfer uses
  * `overrideFromWithApproverAddress: false` so the proto default routes
@@ -41,12 +45,6 @@ const PaymentRequestDenyParams = z.object({
   expirationMs: z.string().describe('Unix millisecond timestamp. transferTimes runs [1, expirationMs] (same window as pay).')
 });
 type PaymentRequestDenyParams = z.infer<typeof PaymentRequestDenyParams>;
-
-const PaymentRequestExpireParams = z.object({
-  approvalId: z.string().describe('Pre-generated unique id (typically "payment-request-expire_<random>").'),
-  expirationMs: z.string().describe('Unix ms timestamp. transferTimes runs [expirationMs+1, MAX_UINT64] — only callable after pay/deny window closes.')
-});
-type PaymentRequestExpireParams = z.infer<typeof PaymentRequestExpireParams>;
 
 const mintToBurnPredeterminedBalances = {
   manualBalances: [],
@@ -147,46 +145,13 @@ function renderDeny(p: PaymentRequestDenyParams): RenderedApproval {
   };
 }
 
-function renderExpire(p: PaymentRequestExpireParams): RenderedApproval {
-  return {
-    fromListId: 'Mint',
-    toListId: BURN_ADDRESS,
-    initiatedByListId: 'All',
-    transferTimes: [{ start: (BigInt(p.expirationMs) + 1n).toString(), end: MAX_UINT64 }],
-    tokenIds: TOKEN_ID_1,
-    ownershipTimes: FOREVER_OWNERSHIP,
-    approvalId: p.approvalId,
-    uri: '',
-    customData: '',
-    version: '0',
-    approvalCriteria: {
-      overridesFromOutgoingApprovals: true,
-      overridesToIncomingApprovals: true,
-      predeterminedBalances: mintToBurnPredeterminedBalances,
-      maxNumTransfers: {
-        overallMaxNumTransfers: '1',
-        perToAddressMaxNumTransfers: '0',
-        perFromAddressMaxNumTransfers: '0',
-        perInitiatedByAddressMaxNumTransfers: '0',
-        amountTrackerId: p.approvalId,
-        resetTimeIntervals: { startTime: '0', intervalLength: '0' }
-      },
-      coinTransfers: [],
-      merkleChallenges: [],
-      mustOwnTokens: [],
-      votingChallenges: [],
-      mustPrioritize: false
-    }
-  };
-}
-
 export const PAYMENT_REQUEST_PRESETS: Preset<any>[] = [
   {
     presetId: 'payment-request.pay',
     skillId: 'payment-request',
     name: 'PaymentRequest — pay approval',
     description:
-      'Payer initiates → mints 1x token ID 1 to burn, fires coinTransfer from payer to recipient. transferTimes [1, expiration]; initiatedByListId locks execution to the payer. overrideFromWithApproverAddress=false so the chain debits the initiator (payer) directly — no escrow. Pair with payment-request.deny and payment-request.expire.',
+      'Payer initiates → mints 1x token ID 1 to burn, fires coinTransfer from payer to recipient. transferTimes [1, expiration]; initiatedByListId locks execution to the payer. overrideFromWithApproverAddress=false so the chain debits the initiator (payer) directly — no escrow. Pair with payment-request.deny.',
     paramsSchema: PaymentRequestPayParams,
     render: renderPay
   },
@@ -198,14 +163,5 @@ export const PAYMENT_REQUEST_PRESETS: Preset<any>[] = [
       'Payer rejects → mints 1x token ID 1 to burn, no coin transfer. Just records the denial state for indexers/UIs. Same window and initiator as pay; separate approvalId.',
     paramsSchema: PaymentRequestDenyParams,
     render: renderDeny
-  },
-  {
-    presetId: 'payment-request.expire',
-    skillId: 'payment-request',
-    name: 'PaymentRequest — expire approval',
-    description:
-      'Anyone can finalize an expired request after the deadline passes. No coin transfer. Gated purely by transferTimes [expirationMs+1, MAX]. Separate approvalId from pay/deny.',
-    paramsSchema: PaymentRequestExpireParams,
-    render: renderExpire
   }
 ];
