@@ -10,13 +10,17 @@ import {
   buildMsg,
   frozenPermissions,
   defaultBalances,
-  metadataPlaceholders,
-  zeroMaxTransfers
+  zeroMaxTransfers,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError
 } from './shared.js';
 
 export interface AuctionParams {
   bidDeadline?: string; // duration shorthand, default "7d"
   acceptWindow?: string; // duration shorthand, default "7d"
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
   name?: string;
   description?: string;
   image?: string;
@@ -108,19 +112,18 @@ export function buildAuction(params: AuctionParams): any {
     }
   ];
 
-  // Auctions are 1-of-1 NFTs, so the token-level metadata is always an
-  // identical mirror of the collection-level metadata. Reuse the default
-  // token entry emitted by metadataPlaceholders() (keyed by
-  // ipfs://METADATA_TOKEN_DEFAULT, same content as the collection) and
-  // narrow its tokenIds range to [1,1] so it doesn't bleed into any
-  // future higher IDs. This matches the custom-2fa / single-NFT pattern
-  // where collection image == token image automatically — no separate
-  // tokenMetadata path to drift out of sync.
-  const { collectionMetadata, tokenMetadata, placeholders: collectionPlaceholders } = metadataPlaceholders(
-    params.name || 'Auction',
-    params.description,
-    params.image
-  );
+  // Auctions are 1-of-1 NFTs — token-level metadata mirrors the
+  // collection-level metadata. Reuse the same source for both so they
+  // can't drift.
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('auction collectionMetadata', ['name', 'image', 'description']);
+  }
 
   return buildMsg({
     collectionApprovals,
@@ -141,11 +144,7 @@ export function buildAuction(params: AuctionParams): any {
     // doesn't need a fungible representation; the NFT itself is the only
     // tradable surface.
     aliasPathsToAdd: [],
-    collectionMetadata,
-    tokenMetadata: tokenMetadata.map((entry) => ({
-      ...entry,
-      tokenIds: [{ start: '1', end: '1' }]
-    })),
-    metadataPlaceholders: collectionPlaceholders
+    collectionMetadata: collectionSource,
+    tokenMetadata: [tokenMetadataEntry([{ start: '1', end: '1' }], collectionSource, 'auction NFT')]
   });
 }

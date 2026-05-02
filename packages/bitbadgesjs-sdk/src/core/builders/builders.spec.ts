@@ -36,6 +36,9 @@ function verifyBuilder(msg: any) {
   return verifyStandardsCompliance({ messages: [msg] });
 }
 
+/** Required metadata fields for collection-style builders (post-#0371). */
+const META = { name: 'Test', description: 'Test description for the spec.', image: 'ipfs://test-image' };
+
 // ── Shared utility tests ─────────────────────────────────────────────────────
 
 describe('shared utilities', () => {
@@ -85,7 +88,7 @@ describe('shared utilities', () => {
 // ── Collection builder tests ─────────────────────────────────────────────────
 
 describe('vault builder', () => {
-  const msg = buildVault({ backingCoin: 'USDC' });
+  const msg = buildVault({ backingCoin: 'USDC', ...META });
   const r = val(msg);
 
   test('produces { typeUrl, value }', () => {
@@ -126,21 +129,21 @@ describe('vault builder', () => {
     approvals.find((a: any) => typeof a.approvalId === 'string' && a.approvalId.startsWith('vault-withdraw-'));
 
   test('daily withdraw limit adds approvalAmounts', () => {
-    const limited = val(buildVault({ backingCoin: 'USDC', dailyWithdrawLimit: 100 }));
+    const limited = val(buildVault({ backingCoin: 'USDC', dailyWithdrawLimit: 100, ...META }));
     const withdrawal = findWithdraw(limited.collectionApprovals);
     expect(withdrawal.approvalCriteria.approvalAmounts).toBeDefined();
     expect(withdrawal.approvalCriteria.approvalAmounts.perInitiatedByAddressApprovalAmount).toBe('100000000');
   });
 
   test('require2fa adds mustOwnTokens', () => {
-    const twoFa = val(buildVault({ backingCoin: 'USDC', require2fa: '74' }));
+    const twoFa = val(buildVault({ backingCoin: 'USDC', require2fa: '74', ...META }));
     const withdrawal = findWithdraw(twoFa.collectionApprovals);
     expect(withdrawal.approvalCriteria.mustOwnTokens).toBeDefined();
     expect(withdrawal.approvalCriteria.mustOwnTokens[0].collectionId).toBe('74');
   });
 
   test('emergency recovery adds migration approval', () => {
-    const recovery = val(buildVault({ backingCoin: 'USDC', emergencyRecovery: 'bb1recovery' }));
+    const recovery = val(buildVault({ backingCoin: 'USDC', emergencyRecovery: 'bb1recovery', ...META }));
     expect(recovery.collectionApprovals.length).toBe(3);
     const migration = recovery.collectionApprovals.find((a: any) => a.approvalId === 'vault-emergency-migration');
     expect(migration.toListId).toBe('bb1recovery');
@@ -154,7 +157,7 @@ describe('vault builder', () => {
 });
 
 describe('smart-account builder', () => {
-  const msg = buildSmartAccount({ backingCoin: 'USDC' });
+  const msg = buildSmartAccount({ backingCoin: 'USDC', ...META });
   const r = val(msg);
 
   test('has Smart Token standard', () => { expect(r.standards).toContain('Smart Token'); });
@@ -166,12 +169,12 @@ describe('smart-account builder', () => {
     expect(ids).toContain('smart-account-unbacking');
   });
   test('tradable adds Liquidity Pools', () => {
-    const t = val(buildSmartAccount({ backingCoin: 'USDC', tradable: true }));
+    const t = val(buildSmartAccount({ backingCoin: 'USDC', tradable: true, ...META }));
     expect(t.standards).toContain('Liquidity Pools');
     expect(t.invariants.disablePoolCreation).toBe(false);
   });
   test('aiAgentVault adds standard', () => {
-    const t = val(buildSmartAccount({ backingCoin: 'USDC', aiAgentVault: true }));
+    const t = val(buildSmartAccount({ backingCoin: 'USDC', aiAgentVault: true, ...META }));
     expect(t.standards).toContain('AI Agent Vault');
   });
   test('passes verification', () => {
@@ -180,7 +183,7 @@ describe('smart-account builder', () => {
 });
 
 describe('subscription builder', () => {
-  const msg = buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test' });
+  const msg = buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', ...META });
   const r = val(msg);
 
   test('has Subscriptions standard', () => { expect(r.standards).toEqual(['Subscriptions']); });
@@ -194,7 +197,7 @@ describe('subscription builder', () => {
   });
   test('noCustomOwnershipTimes is false', () => { expect(r.invariants.noCustomOwnershipTimes).toBe(false); });
   test('multi-tier', () => {
-    const mt = val(buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', tiers: 3 }));
+    const mt = val(buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', tiers: 3, ...META }));
     expect(mt.validTokenIds).toEqual([{ start: '1', end: '3' }]);
     expect(mt.collectionApprovals.length).toBe(3);
   });
@@ -207,7 +210,8 @@ describe('subscription builder', () => {
       payouts: [
         { recipient: 'bb1a', amount: 5, denom: 'USDC' },
         { recipient: 'bb1b', amount: 3, denom: 'USDC' }
-      ]
+      ],
+      ...META
     }));
     const cts = mp.collectionApprovals[0].approvalCriteria.coinTransfers;
     expect(cts.length).toBe(2);
@@ -232,7 +236,7 @@ describe('subscription builder', () => {
 });
 
 describe('bounty builder', () => {
-  const msg = buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1verifier', recipient: 'bb1recipient' });
+  const msg = buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1verifier', recipient: 'bb1recipient', ...META });
   const r = val(msg);
 
   test('has Bounty standard', () => { expect(r.standards).toEqual(['Bounty']); });
@@ -262,7 +266,9 @@ describe('payment-request builder', () => {
     denom: 'USDC',
     payer: 'bb1payer',
     recipient: 'bb1recipient',
-    context: 'Agent X requesting payment for completed task Y on behalf of org Z under approved budget envelope.'
+    context: 'Agent X requesting payment for completed task Y on behalf of org Z under approved budget envelope.',
+    name: 'Test',
+    image: 'ipfs://test-image'
   });
   const r = val(msg);
 
@@ -299,14 +305,14 @@ describe('payment-request builder', () => {
 });
 
 describe('crowdfund builder', () => {
-  const msg = buildCrowdfund({ goal: 1000, denom: 'USDC' });
+  const msg = buildCrowdfund({ goal: 1000, denom: 'USDC', ...META });
   const r = val(msg);
 
   test('has Crowdfund standard', () => { expect(r.standards).toEqual(['Crowdfund']); });
   test('2 token IDs', () => { expect(r.validTokenIds).toEqual([{ start: '1', end: '2' }]); });
   test('at least 4 approvals', () => { expect(r.collectionApprovals.length).toBeGreaterThanOrEqual(4); });
   test('crowdfunder address used', () => {
-    const cf = val(buildCrowdfund({ goal: 1000, denom: 'USDC', crowdfunder: 'bb1fund' }));
+    const cf = val(buildCrowdfund({ goal: 1000, denom: 'USDC', crowdfunder: 'bb1fund', ...META }));
     const progress = cf.collectionApprovals.find((a: any) => a.approvalId === 'deposit-progress');
     expect(progress.toListId).toBe('bb1fund');
   });
@@ -316,7 +322,7 @@ describe('crowdfund builder', () => {
 });
 
 describe('auction builder', () => {
-  const msg = buildAuction({});
+  const msg = buildAuction({ ...META });
   const r = val(msg);
 
   test('has Auction standard', () => { expect(r.standards).toEqual(['Auction']); });
@@ -336,7 +342,8 @@ describe('auction builder', () => {
 describe('product-catalog builder', () => {
   const msg = buildProductCatalog({
     products: [{ name: 'T-Shirt', price: 25, denom: 'USDC' }, { name: 'Mug', price: 15, denom: 'USDC', maxSupply: 50 }],
-    storeAddress: 'bb1store'
+    storeAddress: 'bb1store',
+    ...META
   });
   const r = val(msg);
 
@@ -354,7 +361,7 @@ describe('product-catalog builder', () => {
 });
 
 describe('prediction-market builder', () => {
-  const msg = buildPredictionMarket({ verifier: 'bb1verifier' });
+  const msg = buildPredictionMarket({ verifier: 'bb1verifier', ...META });
   const r = val(msg);
 
   test('has Prediction Market standard', () => { expect(r.standards).toEqual(['Prediction Market']); });
@@ -373,7 +380,7 @@ describe('prediction-market builder', () => {
 });
 
 describe('credit-token builder', () => {
-  const msg = buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1recipient' });
+  const msg = buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1recipient', ...META });
   const r = val(msg);
 
   test('has Credit Token standard', () => { expect(r.standards).toEqual(['Credit Token']); });
@@ -386,14 +393,14 @@ describe('credit-token builder', () => {
 });
 
 describe('custom-2fa builder', () => {
-  const msg = buildCustom2FA({ name: 'My 2FA Token' });
+  const msg = buildCustom2FA({ name: 'My 2FA Token', description: 'A 2FA token for testing.', image: 'ipfs://test-image' });
   const r = val(msg);
 
   test('has Custom-2FA standard', () => { expect(r.standards).toEqual(['Custom-2FA']); });
   test('allowPurgeIfExpired', () => { expect(r.collectionApprovals[0].approvalCriteria.autoDeletionOptions.allowPurgeIfExpired).toBe(true); });
   test('disablePoolCreation', () => { expect(r.invariants.disablePoolCreation).toBe(true); });
   test('burnable adds burn approval', () => {
-    expect(val(buildCustom2FA({ name: 'Test', burnable: true })).collectionApprovals.length).toBe(2);
+    expect(val(buildCustom2FA({ name: 'Test', description: 'A 2FA token for testing.', image: 'ipfs://test-image', burnable: true })).collectionApprovals.length).toBe(2);
   });
   test('passes verification', () => {
     expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Custom-2FA')).toEqual([]);
@@ -401,7 +408,7 @@ describe('custom-2fa builder', () => {
 });
 
 describe('quests builder', () => {
-  const msg = buildQuests({ reward: 10, denom: 'BADGE', maxClaims: 100 });
+  const msg = buildQuests({ reward: 10, denom: 'BADGE', maxClaims: 100, ...META });
   const r = val(msg);
 
   test('has Quests standard', () => { expect(r.standards).toEqual(['Quests']); });
@@ -417,7 +424,7 @@ describe('quests builder', () => {
 });
 
 describe('address-list builder', () => {
-  const msg = buildAddressList({ name: 'My List' });
+  const msg = buildAddressList({ name: 'My List', description: 'A test list.', image: 'ipfs://test-image' });
   const r = val(msg);
 
   test('has Address List standard', () => { expect(r.standards).toEqual(['Address List']); });
@@ -522,34 +529,34 @@ describe('pm-buy-intent builder', () => {
 
 describe('all collection builders pass verifyStandardsCompliance with zero violations', () => {
   const builders: [string, any][] = [
-    ['vault', buildVault({ backingCoin: 'USDC' })],
-    ['vault (with limits)', buildVault({ backingCoin: 'USDC', dailyWithdrawLimit: 100, require2fa: '74', emergencyRecovery: 'bb1recovery' })],
-    ['smart-account', buildSmartAccount({ backingCoin: 'USDC' })],
-    ['smart-account (tradable)', buildSmartAccount({ backingCoin: 'USDC', tradable: true })],
-    ['smart-account (ai-agent)', buildSmartAccount({ backingCoin: 'BADGE', aiAgentVault: true })],
-    ['subscription (single)', buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test' })],
-    ['subscription (multi-tier)', buildSubscription({ interval: 'daily', price: 5, denom: 'BADGE', recipient: 'bb1r', tiers: 3 })],
+    ['vault', buildVault({ backingCoin: 'USDC', ...META })],
+    ['vault (with limits)', buildVault({ backingCoin: 'USDC', dailyWithdrawLimit: 100, require2fa: '74', emergencyRecovery: 'bb1recovery', ...META })],
+    ['smart-account', buildSmartAccount({ backingCoin: 'USDC', ...META })],
+    ['smart-account (tradable)', buildSmartAccount({ backingCoin: 'USDC', tradable: true, ...META })],
+    ['smart-account (ai-agent)', buildSmartAccount({ backingCoin: 'BADGE', aiAgentVault: true, ...META })],
+    ['subscription (single)', buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', ...META })],
+    ['subscription (multi-tier)', buildSubscription({ interval: 'daily', price: 5, denom: 'BADGE', recipient: 'bb1r', tiers: 3, ...META })],
     // Subscription faucet approvals must use a SINGLE denom — see
     // buildSubscription's runtime check and the proto-level
     // `doesCollectionFollowSubscriptionProtocol()` rule. Multiple
     // recipients sharing one denom is valid (treasury split); mixing
     // denoms is not.
-    ['subscription (multi-payout)', buildSubscription({ interval: 'monthly', payouts: [{ recipient: 'bb1a', amount: 5, denom: 'USDC' }, { recipient: 'bb1b', amount: 3, denom: 'USDC' }] })],
-    ['bounty', buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1v', recipient: 'bb1r' })],
-    ['bounty (BADGE)', buildBounty({ amount: 50, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', expiration: '7d' })],
-    ['crowdfund', buildCrowdfund({ goal: 1000, denom: 'USDC' })],
-    ['crowdfund (with crowdfunder)', buildCrowdfund({ goal: 500, denom: 'BADGE', crowdfunder: 'bb1fund', deadline: '14d' })],
-    ['auction', buildAuction({})],
-    ['auction (custom times)', buildAuction({ bidDeadline: '3d', acceptWindow: '1d' })],
-    ['product-catalog', buildProductCatalog({ products: [{ name: 'Item', price: 10, denom: 'USDC' }], storeAddress: 'bb1s' })],
-    ['product-catalog (multi)', buildProductCatalog({ products: [{ name: 'A', price: 5, denom: 'BADGE' }, { name: 'B', price: 10, denom: 'USDC', maxSupply: 50, burn: true }], storeAddress: 'bb1s' })],
-    ['prediction-market', buildPredictionMarket({ verifier: 'bb1v' })],
-    ['credit-token', buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1r' })],
-    ['credit-token (custom)', buildCreditToken({ paymentDenom: 'BADGE', recipient: 'bb1r', symbol: 'CRED', tokensPerUnit: 50 })],
-    ['custom-2fa', buildCustom2FA({ name: 'My 2FA' })],
-    ['custom-2fa (burnable)', buildCustom2FA({ name: 'Burnable 2FA', burnable: true })],
-    ['quests', buildQuests({ reward: 10, denom: 'BADGE', maxClaims: 100 })],
-    ['address-list', buildAddressList({ name: 'My List' })],
+    ['subscription (multi-payout)', buildSubscription({ interval: 'monthly', payouts: [{ recipient: 'bb1a', amount: 5, denom: 'USDC' }, { recipient: 'bb1b', amount: 3, denom: 'USDC' }], ...META })],
+    ['bounty', buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1v', recipient: 'bb1r', ...META })],
+    ['bounty (BADGE)', buildBounty({ amount: 50, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', expiration: '7d', ...META })],
+    ['crowdfund', buildCrowdfund({ goal: 1000, denom: 'USDC', ...META })],
+    ['crowdfund (with crowdfunder)', buildCrowdfund({ goal: 500, denom: 'BADGE', crowdfunder: 'bb1fund', deadline: '14d', ...META })],
+    ['auction', buildAuction({ ...META })],
+    ['auction (custom times)', buildAuction({ bidDeadline: '3d', acceptWindow: '1d', ...META })],
+    ['product-catalog', buildProductCatalog({ products: [{ name: 'Item', price: 10, denom: 'USDC' }], storeAddress: 'bb1s', ...META })],
+    ['product-catalog (multi)', buildProductCatalog({ products: [{ name: 'A', price: 5, denom: 'BADGE' }, { name: 'B', price: 10, denom: 'USDC', maxSupply: 50, burn: true }], storeAddress: 'bb1s', ...META })],
+    ['prediction-market', buildPredictionMarket({ verifier: 'bb1v', ...META })],
+    ['credit-token', buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1r', ...META })],
+    ['credit-token (custom)', buildCreditToken({ paymentDenom: 'BADGE', recipient: 'bb1r', symbol: 'CRED', tokensPerUnit: 50, ...META })],
+    ['custom-2fa', buildCustom2FA({ name: 'My 2FA', description: 'A 2FA token.', image: 'ipfs://test-image' })],
+    ['custom-2fa (burnable)', buildCustom2FA({ name: 'Burnable 2FA', burnable: true, description: 'A burnable 2FA token.', image: 'ipfs://test-image' })],
+    ['quests', buildQuests({ reward: 10, denom: 'BADGE', maxClaims: 100, ...META })],
+    ['address-list', buildAddressList({ name: 'My List', description: 'A test list.', image: 'ipfs://test-image' })],
   ];
 
   for (const [name, msg] of builders) {
@@ -581,24 +588,24 @@ describe('error handling', () => {
   });
 
   test('buildBounty with zero amount still produces valid structure', () => {
-    const msg = buildBounty({ amount: 0, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r' });
+    const msg = buildBounty({ amount: 0, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', ...META });
     expect(msg.typeUrl).toBe('/tokenization.MsgUniversalUpdateCollection');
     expect(msg.value.collectionApprovals.length).toBe(3);
   });
 
   test('buildProductCatalog with empty products produces burn-only collection', () => {
-    const msg = buildProductCatalog({ products: [], storeAddress: 'bb1s' });
+    const msg = buildProductCatalog({ products: [], storeAddress: 'bb1s', ...META });
     // Only burn approval, no purchase approvals
     expect(msg.value.collectionApprovals.length).toBe(1);
   });
 
   test('buildCrowdfund goal of 1 base unit works', () => {
-    const msg = buildCrowdfund({ goal: 0.000001, denom: 'USDC' });
+    const msg = buildCrowdfund({ goal: 0.000001, denom: 'USDC', ...META });
     expect(msg.value.collectionApprovals.length).toBeGreaterThanOrEqual(4);
   });
 
   test('buildAuction with very short windows works', () => {
-    const msg = buildAuction({ bidDeadline: '1m', acceptWindow: '1m' });
+    const msg = buildAuction({ bidDeadline: '1m', acceptWindow: '1m', ...META });
     expect(msg.typeUrl).toBe('/tokenization.MsgUniversalUpdateCollection');
   });
 

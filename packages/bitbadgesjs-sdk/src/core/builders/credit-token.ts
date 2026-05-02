@@ -11,7 +11,10 @@ import {
   sanitizeCosmosPathName,
   frozenPermissions,
   defaultBalances,
-  scalingBalances
+  scalingBalances,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError
 } from './shared.js';
 
 export interface CreditTokenParams {
@@ -19,7 +22,11 @@ export interface CreditTokenParams {
   recipient: string; // bb1... payment recipient
   symbol?: string; // default "CREDIT"
   tokensPerUnit?: number; // tokens per 1 display unit of payment, default 100
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
   name?: string;
+  description?: string;
+  image?: string;
 }
 
 export function buildCreditToken(params: CreditTokenParams): any {
@@ -59,7 +66,22 @@ export function buildCreditToken(params: CreditTokenParams): any {
     }
   };
 
-  const alias = buildAliasPath('u' + symbol.toLowerCase(), symbol, coin.decimals, undefined, params.name);
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('credit-token collectionMetadata', ['name', 'image', 'description']);
+  }
+  const aliasPath = buildAliasPath({
+    denom: 'u' + symbol.toLowerCase(),
+    symbol,
+    decimals: coin.decimals,
+    pathMetadata: collectionSource,
+    unitMetadata: collectionSource
+  });
 
   return buildMsg({
     collectionApprovals: [creditMint],
@@ -72,7 +94,8 @@ export function buildCreditToken(params: CreditTokenParams): any {
       noForcefulPostMintTransfers: true,
       disablePoolCreation: true
     },
-    aliasPathsToAdd: [alias.path],
-    metadataPlaceholders: { ...alias.placeholders }
+    aliasPathsToAdd: [aliasPath],
+    collectionMetadata: collectionSource,
+    tokenMetadata: [tokenMetadataEntry([{ start: '1', end: '1' }], collectionSource, 'credit token')]
   });
 }

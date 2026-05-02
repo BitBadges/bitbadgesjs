@@ -11,12 +11,16 @@ import {
   buildAliasPath,
   frozenPermissions,
   scalingBalances,
-  singleTokenMetadata
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError
 } from './shared.js';
 
 export interface PredictionMarketParams {
   verifier: string; // bb1... resolver address
   denom?: string; // payment coin, defaults to USDC (use BADGE for testnet)
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
   name?: string;
   description?: string;
   image?: string;
@@ -204,24 +208,51 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
 
   const collectionApprovals = [pairedMint, freeTransfer, preRedeem, settleYes, settleNo, settlePushYes, settlePushNo];
 
-  const yesToken = singleTokenMetadata('1', 'YES', params.description, params.image);
-  const noToken = singleTokenMetadata('2', 'NO', params.description, params.image);
-  const tokenMetadata = [yesToken.entry, noToken.entry];
-  const yesAlias = buildAliasPath('uyes', 'YES', coin.decimals, params.image, 'YES', params.description);
-  const noAlias = buildAliasPath('uno', 'NO', coin.decimals, params.image, 'NO', params.description);
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('prediction-market collectionMetadata', ['name', 'image', 'description']);
+  }
+
+  // YES/NO outcome tokens use fixed names regardless of caller --name
+  // (the standard expects these). In inline mode we serialize them
+  // with the caller's image + description.
+  const yesSource: any = params.uri
+    ? { uri: params.uri }
+    : { inlineMetadata: { name: 'YES', description: params.description as string, image: params.image as string } };
+  const noSource: any = params.uri
+    ? { uri: params.uri }
+    : { inlineMetadata: { name: 'NO', description: params.description as string, image: params.image as string } };
+
+  const yesAlias = buildAliasPath({
+    denom: 'uyes',
+    symbol: 'YES',
+    decimals: coin.decimals,
+    pathMetadata: yesSource,
+    unitMetadata: yesSource
+  });
+  const noAlias = buildAliasPath({
+    denom: 'uno',
+    symbol: 'NO',
+    decimals: coin.decimals,
+    pathMetadata: noSource,
+    unitMetadata: noSource
+  });
 
   return buildMsg({
     collectionApprovals,
     validTokenIds: [{ start: '1', end: '2' }],
     standards: ['Prediction Market'],
     collectionPermissions: frozenPermissions(),
-    tokenMetadata,
-    metadataPlaceholders: {
-      [yesToken.placeholder.uri]: yesToken.placeholder.content,
-      [noToken.placeholder.uri]: noToken.placeholder.content,
-      ...yesAlias.placeholders,
-      ...noAlias.placeholders
-    },
+    collectionMetadata: collectionSource,
+    tokenMetadata: [
+      tokenMetadataEntry([{ start: '1', end: '1' }], yesSource, 'YES token'),
+      tokenMetadataEntry([{ start: '2', end: '2' }], noSource, 'NO token')
+    ],
     invariants: {
       noCustomOwnershipTimes: true,
       maxSupplyPerId: '0',
@@ -230,6 +261,6 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
       noForcefulPostMintTransfers: true,
       disablePoolCreation: false
     },
-    aliasPathsToAdd: [yesAlias.path, noAlias.path]
+    aliasPathsToAdd: [yesAlias, noAlias]
   });
 }

@@ -12,12 +12,19 @@ import {
   generateAliasAddressForIBCBackedDenom,
   baselinePermissions,
   alwaysLockedPermission,
-  alwaysLockedCollectionApprovalPermission
+  alwaysLockedCollectionApprovalPermission,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError
 } from './shared.js';
 
 export interface SmartAccountParams {
   backingCoin: string;
   symbol?: string;
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
+  name?: string;
+  description?: string;
   image?: string;
   tradable?: boolean;
   aiAgentVault?: boolean; // adds 'AI Agent Vault' standard tag
@@ -103,14 +110,30 @@ export function buildSmartAccount(params: SmartAccountParams): any {
   // the chain validator without "invalid characters" rejections.
   const cleanSymbol = sanitizeCosmosPathName(symbol, 'symbol');
   const denomStr = 'u' + cleanSymbol.toLowerCase();
-  const alias = buildAliasPath(denomStr, cleanSymbol, coin.decimals, params.image || coin.image);
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('smart-account collectionMetadata', ['name', 'image', 'description']);
+  }
+  const aliasPath = buildAliasPath({
+    denom: denomStr,
+    symbol: cleanSymbol,
+    decimals: coin.decimals,
+    pathMetadata: collectionSource,
+    unitMetadata: collectionSource
+  });
 
   return buildMsg({
     collectionApprovals,
     standards,
     invariants,
-    aliasPathsToAdd: [alias.path],
-    metadataPlaceholders: { ...alias.placeholders },
+    aliasPathsToAdd: [aliasPath],
+    collectionMetadata: collectionSource,
+    tokenMetadata: [tokenMetadataEntry(FOREVER, collectionSource, 'smart account token')],
     collectionPermissions: permissions
   });
 }

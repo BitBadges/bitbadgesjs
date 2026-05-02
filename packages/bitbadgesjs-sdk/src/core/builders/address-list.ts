@@ -7,11 +7,16 @@ import {
   BURN_ADDRESS,
   buildMsg,
   baselinePermissions,
-  defaultBalances
+  defaultBalances,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError
 } from './shared.js';
 
 export interface AddressListParams {
-  name: string;
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
+  name?: string;
   image?: string;
   description?: string;
   manager?: string; // bb1... address that can add/remove members (defaults to creator)
@@ -70,6 +75,16 @@ export function buildAddressList(params: AddressListParams): any {
     }
   ];
 
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('address-list collectionMetadata', ['name', 'image', 'description']);
+  }
+
   return buildMsg({
     collectionApprovals,
     standards: ['Address List'],
@@ -79,6 +94,8 @@ export function buildAddressList(params: AddressListParams): any {
       noCustomOwnershipTimes: true,
       disablePoolCreation: true
     },
-    defaultBalances: defaultBalances({ autoApproveAllIncomingTransfers: true })
+    defaultBalances: defaultBalances({ autoApproveAllIncomingTransfers: true }),
+    collectionMetadata: collectionSource,
+    tokenMetadata: [tokenMetadataEntry([{ start: '1', end: '1' }], collectionSource, 'list-membership token')]
   });
 }

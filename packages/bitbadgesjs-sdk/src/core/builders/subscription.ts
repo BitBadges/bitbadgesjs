@@ -9,7 +9,10 @@ import {
   parseDuration,
   buildMsg,
   baselinePermissions,
-  defaultBalances
+  defaultBalances,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError
 } from './shared.js';
 
 export interface SubscriptionPayout {
@@ -28,7 +31,11 @@ export interface SubscriptionParams {
   payouts?: SubscriptionPayout[];
   tiers?: number; // number of tiers, default 1
   transferable?: boolean; // allow post-mint P2P transfers of subscription tokens
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
   name?: string;
+  description?: string;
+  image?: string;
 }
 
 export function buildSubscription(params: SubscriptionParams): any {
@@ -131,6 +138,16 @@ export function buildSubscription(params: SubscriptionParams): any {
     });
   }
 
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('subscription collectionMetadata', ['name', 'image', 'description']);
+  }
+
   return buildMsg({
     collectionApprovals,
     standards: ['Subscriptions'],
@@ -142,6 +159,8 @@ export function buildSubscription(params: SubscriptionParams): any {
       noForcefulPostMintTransfers: false,
       disablePoolCreation: false
     },
-    defaultBalances: defaultBalances({ autoApproveAllIncomingTransfers: true })
+    defaultBalances: defaultBalances({ autoApproveAllIncomingTransfers: true }),
+    collectionMetadata: collectionSource,
+    tokenMetadata: [tokenMetadataEntry([{ start: '1', end: String(tiers) }], collectionSource, 'subscription token')]
   });
 }

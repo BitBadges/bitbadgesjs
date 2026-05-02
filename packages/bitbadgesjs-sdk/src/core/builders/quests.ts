@@ -9,14 +9,21 @@ import {
   toBaseUnits,
   buildMsg,
   baselinePermissions,
-  mintToBurnBalances
+  mintToBurnBalances,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError
 } from './shared.js';
 
 export interface QuestsParams {
   reward: number; // display units per claim
   denom: string; // USDC, BADGE
   maxClaims: number;
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
   name?: string;
+  description?: string;
+  image?: string;
 }
 
 export function buildQuests(params: QuestsParams): any {
@@ -78,6 +85,16 @@ export function buildQuests(params: QuestsParams): any {
     }
   ];
 
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('quests collectionMetadata', ['name', 'image', 'description']);
+  }
+
   return buildMsg({
     collectionApprovals,
     standards: ['Quests'],
@@ -90,6 +107,8 @@ export function buildQuests(params: QuestsParams): any {
     },
     mintEscrowCoinsToTransfer: [
       { amount: String(BigInt(rewardBase) * BigInt(params.maxClaims)), denom: coin.denom }
-    ]
+    ],
+    collectionMetadata: collectionSource,
+    tokenMetadata: [tokenMetadataEntry([{ start: '1', end: '1' }], collectionSource, 'quest token')]
   });
 }

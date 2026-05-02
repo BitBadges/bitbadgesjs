@@ -110,76 +110,138 @@ export function uniqueId(prefix?: string): string {
 // ── Common builder helpers ───────────────────────────────────────────────────
 
 /**
- * A sidecar map of placeholder URI → off-chain metadata content. Templates
- * accumulate these and attach them to the emitted Msg as `value._meta.metadataPlaceholders`
- * so the CLI's Metadata To Upload section (and any frontend consumer)
- * knows which placeholder URIs already have content provided.
+ * Per-preset metadata field shape. Approvals are functional/text-based and
+ * MUST NOT carry an image; everything else requires name + image + description.
  */
-export type PlaceholderSidecar = Record<string, { name: string; description: string; image: string }>;
+export type MetadataPreset =
+  | 'collection'
+  | 'token'
+  | 'aliasPath'
+  | 'wrapperPath'
+  | 'addressList'
+  | 'dynamicStore'
+  | 'approval';
 
 /**
- * Build collection + default-token metadata using placeholder URIs that the
- * metadata auto-apply flow understands. Returns three things:
- *
- *   - `collectionMetadata` and `tokenMetadata` to drop into `buildMsg(...)`
- *   - `placeholders` — a sidecar map keyed by the placeholder URIs above,
- *     populated with the supplied name/description/image (or sane defaults).
- *
- * Callers should merge the returned `placeholders` into their own sidecar and
- * pass the combined map to `buildMsg({ ..., metadataPlaceholders })`, which
- * surfaces it on the emitted Msg as `value._meta.metadataPlaceholders`.
+ * Inline metadata input for the two-mode builder contract. Approvals
+ * pass `inlineMetadata: { name, description }` (no image); every other
+ * preset requires `name`, `image`, and `description`.
  */
-export function metadataPlaceholders(name: string, description?: string, image?: string) {
-  const collectionUri = 'ipfs://METADATA_COLLECTION';
-  const tokenUri = 'ipfs://METADATA_TOKEN_DEFAULT';
-  const content = {
-    name,
-    description: description || '',
-    image: image || BITBADGES_DEFAULT_IMAGE
-  };
-  return {
-    collectionMetadata: { uri: collectionUri, customData: '' },
-    tokenMetadata: [
-      { uri: tokenUri, customData: '', tokenIds: FOREVER }
-    ],
-    placeholders: {
-      [collectionUri]: { ...content },
-      [tokenUri]: { ...content }
-    } as PlaceholderSidecar
-  };
+export interface InlineMetadataInput {
+  name: string;
+  description: string;
+  /** Required for every preset except `approval`. */
+  image?: string;
+  /** Optional pass-through fields, serialized verbatim into customData. */
+  bannerImage?: string;
+  category?: string;
+  externalUrl?: string;
+  tags?: string[];
+  socials?: Record<string, string>;
+  attributes?: { type: string; name: string; value: string | number | boolean }[];
 }
 
 /**
- * Build a per-token metadata entry using a placeholder URI scoped to the
- * token id. Returns `{ entry, placeholder }`:
- *
- *   - `entry` is the object to push into `tokenMetadata: [...]`
- *   - `placeholder` is the sidecar entry the caller should merge into its
- *     accumulated PlaceholderSidecar and pass to buildMsg via
- *     `metadataPlaceholders`.
+ * Two accepted modes per metadata-bearing entity:
+ *   1. `{ uri }` — caller has already hosted the JSON; goes straight to
+ *      the on-chain `uri` field, customData stays empty.
+ *   2. `{ inlineMetadata }` — serialized to JSON and stashed in
+ *      customData; on-chain `uri` stays empty.
  */
-export function singleTokenMetadata(tokenId: string, name: string, description?: string, image?: string) {
-  const uri = `ipfs://METADATA_TOKEN_${tokenId}`;
-  return {
-    entry: {
-      uri,
-      customData: '',
-      tokenIds: [{ start: tokenId, end: tokenId }]
-    },
-    placeholder: {
-      uri,
-      content: {
-        name,
-        description: description || '',
-        image: image || BITBADGES_DEFAULT_IMAGE
-      }
+export type MetadataSource =
+  | { uri: string; inlineMetadata?: undefined }
+  | { uri?: undefined; inlineMetadata: InlineMetadataInput };
+
+/** Thrown when neither mode is satisfied for a required metadata entity. */
+export class MetadataMissingError extends Error {
+  constructor(label: string, requiredFields: string[]) {
+    super(
+      `${label}: metadata is required. Pass either { uri: "..." } or { inlineMetadata: { ${requiredFields.join(', ')} } }.`
+    );
+    this.name = 'MetadataMissingError';
+  }
+}
+
+function requiredFieldsFor(preset: MetadataPreset): string[] {
+  if (preset === 'approval') return ['name', 'description'];
+  return ['name', 'image', 'description'];
+}
+
+function validateInlineMetadata(meta: InlineMetadataInput, preset: MetadataPreset, label: string): void {
+  if (!meta.name || typeof meta.name !== 'string') {
+    throw new MetadataMissingError(label, requiredFieldsFor(preset));
+  }
+  if (!meta.description || typeof meta.description !== 'string') {
+    throw new MetadataMissingError(label, requiredFieldsFor(preset));
+  }
+  if (preset === 'approval') {
+    if (meta.image && meta.image !== '') {
+      throw new Error(`${label}: approval metadata must not include image (approvals are text-only).`);
     }
-  };
+  } else {
+    if (!meta.image || typeof meta.image !== 'string') {
+      throw new MetadataMissingError(label, requiredFieldsFor(preset));
+    }
+  }
+}
+
+/**
+ * Resolve a MetadataSource into the on-chain `(uri, customData)` pair.
+ * Throws `MetadataMissingError` when neither mode is provided. Inline
+ * mode serializes the validated metadata into customData; URI mode
+ * leaves customData empty.
+ */
+export function resolveMetadataPair(
+  source: MetadataSource | undefined,
+  preset: MetadataPreset,
+  label: string
+): { uri: string; customData: string } {
+  if (!source) throw new MetadataMissingError(label, requiredFieldsFor(preset));
+  if (source.uri !== undefined) {
+    if (typeof source.uri !== 'string' || source.uri.length === 0) {
+      throw new MetadataMissingError(label, requiredFieldsFor(preset));
+    }
+    return { uri: source.uri, customData: '' };
+  }
+  validateInlineMetadata(source.inlineMetadata, preset, label);
+  // Serialize only the known fields — drop anything caller passes that
+  // isn't part of InlineMetadataInput so customData stays predictable.
+  const { name, description, image, bannerImage, category, externalUrl, tags, socials, attributes } =
+    source.inlineMetadata;
+  const payload: Record<string, unknown> = { name, description };
+  if (preset !== 'approval' && image) payload.image = image;
+  if (bannerImage) payload.bannerImage = bannerImage;
+  if (category) payload.category = category;
+  if (externalUrl) payload.externalUrl = externalUrl;
+  if (tags) payload.tags = tags;
+  if (socials) payload.socials = socials;
+  if (attributes) payload.attributes = attributes;
+  return { uri: '', customData: JSON.stringify(payload) };
+}
+
+/**
+ * Build a per-token metadata entry. The caller supplies a token id
+ * (or range) and a metadata source; the returned entry is ready to
+ * push into `tokenMetadata: [...]`.
+ */
+export function tokenMetadataEntry(
+  tokenIds: { start: string; end: string }[] | string,
+  source: MetadataSource,
+  label?: string
+) {
+  const ids = typeof tokenIds === 'string' ? [{ start: tokenIds, end: tokenIds }] : tokenIds;
+  const display = label || (typeof tokenIds === 'string' ? `token ${tokenIds}` : 'token');
+  const { uri, customData } = resolveMetadataPair(source, 'token', display);
+  return { uri, customData, tokenIds: ids };
 }
 
 /**
  * Build a complete MsgUniversalUpdateCollection with collectionId "0" (new collection).
  * Output is wrapped in { typeUrl, value } for direct use with signing clients.
+ *
+ * Collection metadata + at least one tokenMetadata entry are REQUIRED — the
+ * builder throws `MetadataMissingError` if neither a uri nor an
+ * inlineMetadata source is provided. There is no placeholder fallback.
  */
 export function buildMsg(params: {
   collectionApprovals: any[];
@@ -188,8 +250,13 @@ export function buildMsg(params: {
   collectionPermissions?: any;
   creator?: string;
   manager?: string;
-  collectionMetadata?: any;
-  tokenMetadata?: any[];
+  /** Either pre-resolved `{uri, customData}` or a MetadataSource. Required. */
+  collectionMetadata: { uri: string; customData: string } | MetadataSource;
+  /**
+   * Pre-resolved token metadata entries (already shaped via
+   * `tokenMetadataEntry`). Required — must have at least one entry.
+   */
+  tokenMetadata: { uri: string; customData: string; tokenIds: any[] }[];
   customData?: string;
   defaultBalances?: any;
   invariants?: any;
@@ -197,20 +264,30 @@ export function buildMsg(params: {
   cosmosCoinWrapperPathsToAdd?: any[];
   mintEscrowCoinsToTransfer?: any[];
   /**
-   * Off-chain metadata sidecar the template accumulated. Attached to the
-   * output Msg as `value._meta.metadataPlaceholders`. Templates that don't have
-   * specific content should still pass an empty {} so the auto-apply flow
-   * knows to treat default placeholder URIs as NEEDED.
+   * Per-approval metadata. Map approvalId → MetadataSource. Approvals
+   * not listed here keep an empty `(uri, customData)` pair on the
+   * emitted msg — that's only valid when the approval will never need
+   * a frontend-rendered card.
    */
-  metadataPlaceholders?: PlaceholderSidecar;
+  approvalMetadata?: Record<string, MetadataSource>;
 }) {
-  // Default to placeholder URIs (not the legacy DEFAULT_METADATA_URI). The
-  // metadata auto-apply flow recognizes `ipfs://METADATA_*` and substitutes
-  // them with real uploaded URIs after the off-chain JSON is provided.
-  const collectionMetadata = params.collectionMetadata || { uri: 'ipfs://METADATA_COLLECTION', customData: '' };
-  const tokenMetadata = params.tokenMetadata || [
-    { uri: 'ipfs://METADATA_TOKEN_DEFAULT', customData: '', tokenIds: FOREVER }
-  ];
+  const collectionMetadata = isPair(params.collectionMetadata)
+    ? params.collectionMetadata
+    : resolveMetadataPair(params.collectionMetadata, 'collection', 'collectionMetadata');
+
+  if (!Array.isArray(params.tokenMetadata) || params.tokenMetadata.length === 0) {
+    throw new MetadataMissingError('tokenMetadata', ['name', 'image', 'description']);
+  }
+
+  const collectionApprovals = params.collectionApprovals.map((a: any) => {
+    const src = params.approvalMetadata?.[a.approvalId];
+    if (src) {
+      const { uri, customData } = resolveMetadataPair(src, 'approval', `approval "${a.approvalId}"`);
+      return { ...a, uri, customData };
+    }
+    if (a.uri || a.customData) return a;
+    return { ...a, uri: '', customData: '' };
+  });
 
   const msg: any = {
     typeUrl: '/tokenization.MsgUniversalUpdateCollection',
@@ -226,14 +303,11 @@ export function buildMsg(params: {
       updateCollectionMetadata: true,
       collectionMetadata,
       updateTokenMetadata: true,
-      tokenMetadata,
+      tokenMetadata: params.tokenMetadata,
       updateCustomData: true,
       customData: params.customData || '',
       updateCollectionApprovals: true,
-      collectionApprovals: params.collectionApprovals.map((a: any) => ({
-        ...a,
-        uri: a.uri || `ipfs://METADATA_APPROVAL_${a.approvalId || 'unnamed'}`
-      })),
+      collectionApprovals,
       updateStandards: true,
       standards: params.standards || [],
       updateIsArchived: false,
@@ -246,20 +320,36 @@ export function buildMsg(params: {
     }
   };
 
-  // Attach the sidecar as a per-msg `_meta` annotation on value, keyed
-  // by placeholder URIs that only live inside this msg's body. This is
-  // the single canonical location for the placeholder sidecar; every
-  // producer writes here and every consumer reads from here. There is
-  // no top-level `tx.metadataPlaceholders` copy anywhere in the code-
-  // base. Proto classes strip unknown fields on round-trip, so any
-  // place that reconstructs the msg through a Msg class must preserve
-  // `value._meta` explicitly (see core/review-normalize.ts
-  // reattachInlineMetadata).
-  if (params.metadataPlaceholders && Object.keys(params.metadataPlaceholders).length > 0) {
-    msg.value._meta = { metadataPlaceholders: params.metadataPlaceholders };
-  }
-
   return msg;
+}
+
+function isPair(v: any): v is { uri: string; customData: string } {
+  return v && typeof v === 'object' && typeof v.uri === 'string' && typeof v.customData === 'string';
+}
+
+/**
+ * Helper for builders that accept flat `name`/`description`/`image`/`uri`
+ * params (the historical CLI shape). Resolves to a MetadataSource —
+ * `{uri}` if a uri is given, `{inlineMetadata}` otherwise. Throws via
+ * resolveMetadataPair downstream when neither is satisfied.
+ */
+export function metadataFromFlat(params: {
+  uri?: string;
+  name?: string;
+  description?: string;
+  image?: string;
+}): MetadataSource | undefined {
+  if (params.uri && params.uri.length > 0) return { uri: params.uri };
+  if (params.name || params.description || params.image) {
+    return {
+      inlineMetadata: {
+        name: params.name || '',
+        description: params.description || '',
+        image: params.image
+      }
+    };
+  }
+  return undefined;
 }
 
 /**
@@ -537,27 +627,20 @@ export function sanitizeCosmosPathName(input: string, label: 'denom' | 'symbol' 
 }
 
 /**
- * Build an alias path entry for aliasPathsToAdd plus the matching metadata
- * placeholder sidecar entries for both the path-level metadata URI and the
- * denom unit's metadata URI. Returns `{ path, placeholders }`:
- *
- *   - `path` is the object to push into `aliasPathsToAdd: [...]`
- *   - `placeholders` is a PlaceholderSidecar keyed by the two URIs the
- *     path references. Callers should merge it into the accumulated
- *     sidecar passed to buildMsg via `metadataPlaceholders`.
- *
- * Image/name/description intentionally flow through the sidecar — never
- * onto the proto. The auto-apply flow on the frontend reads them from
- * `metadataPlaceholders` keyed by the path/unit metadata URI.
+ * Build an alias path entry for aliasPathsToAdd. Each path requires
+ * BOTH a path-level metadata source AND a denom-unit metadata source —
+ * they're two separate on-chain `(uri, customData)` pairs. Pass either
+ * `{ uri }` or `{ inlineMetadata: { name, image, description } }` for
+ * each (per the per-preset shape).
  */
-export function buildAliasPath(
-  denom: string,
-  symbol: string,
-  decimals: number,
-  image?: string,
-  name?: string,
-  description?: string
-) {
+export function buildAliasPath(params: {
+  denom: string;
+  symbol: string;
+  decimals: number;
+  pathMetadata: MetadataSource;
+  unitMetadata: MetadataSource;
+}) {
+  const { denom, symbol, decimals } = params;
   // Chain rule: denom unit decimals must be > 0. The chain rejects
   // `decimals: '0'` with "denom unit decimals cannot be 0". Fail fast at
   // build time so callers get a clear error instead of a chain rejection
@@ -592,45 +675,34 @@ export function buildAliasPath(
       `buildAliasPath: denom and symbol cannot be identical ("${denom}"). The chain rejects this with "duplicate denom unit symbol" because both fields are validated against the same per-tx map. Use different strings (e.g. denom="usymbol", symbol="SYMBOL").`
     );
   }
-  const pathUri = `ipfs://METADATA_ALIAS_${denom}`;
-  const unitUri = `ipfs://METADATA_ALIAS_${denom}_UNIT`;
-  const content = {
-    name: name || symbol,
-    description: description || '',
-    image: image || BITBADGES_DEFAULT_IMAGE
-  };
+  const pathPair = resolveMetadataPair(params.pathMetadata, 'aliasPath', `aliasPath "${denom}".metadata`);
+  const unitPair = resolveMetadataPair(params.unitMetadata, 'aliasPath', `aliasPath "${denom}".denomUnits[0].metadata`);
   return {
-    path: {
-      denom,
-      conversion: {
-        sideA: { amount: '1' },
-        sideB: [{ amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: FOREVER }]
-      },
-      // Path-level symbol intentionally LEFT EMPTY. The chain validates
-      // path-level symbols and denom-unit-level symbols against the SAME
-      // `symbolPaths` map per tx (validatePathSymbols in
-      // msg_server_universal_update_collection.go:673). When both are set
-      // to the same string, the second insertion fails with "duplicate
-      // denom unit symbol", even though there's only one alias path with
-      // one denom unit. Skipping the path-level entry (chain check is
-      // gated on `if pathSymbol != ""`) avoids the spurious collision
-      // while keeping the user-facing symbol on the denom unit, which is
-      // what the frontend / wallets actually display.
-      symbol: '',
-      denomUnits: [
-        {
-          decimals: String(decimals),
-          symbol,
-          isDefaultDisplay: true,
-          metadata: { uri: unitUri, customData: '' }
-        }
-      ],
-      metadata: { uri: pathUri, customData: '' }
+    denom,
+    conversion: {
+      sideA: { amount: '1' },
+      sideB: [{ amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: FOREVER }]
     },
-    placeholders: {
-      [pathUri]: { ...content },
-      [unitUri]: { ...content }
-    } as PlaceholderSidecar
+    // Path-level symbol intentionally LEFT EMPTY. The chain validates
+    // path-level symbols and denom-unit-level symbols against the SAME
+    // `symbolPaths` map per tx (validatePathSymbols in
+    // msg_server_universal_update_collection.go:673). When both are set
+    // to the same string, the second insertion fails with "duplicate
+    // denom unit symbol", even though there's only one alias path with
+    // one denom unit. Skipping the path-level entry (chain check is
+    // gated on `if pathSymbol != ""`) avoids the spurious collision
+    // while keeping the user-facing symbol on the denom unit, which is
+    // what the frontend / wallets actually display.
+    symbol: '',
+    denomUnits: [
+      {
+        decimals: String(decimals),
+        symbol,
+        isDefaultDisplay: true,
+        metadata: unitPair
+      }
+    ],
+    metadata: pathPair
   };
 }
 

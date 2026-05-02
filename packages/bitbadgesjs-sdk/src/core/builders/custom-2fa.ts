@@ -8,11 +8,16 @@ import {
   buildMsg,
   baselinePermissions,
   alwaysLockedPermission,
-  alwaysLockedTokenIdsPermission
+  alwaysLockedTokenIdsPermission,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError
 } from './shared.js';
 
 export interface Custom2FAParams {
-  name: string;
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
+  name?: string;
   image?: string;
   description?: string;
   burnable?: boolean;
@@ -117,6 +122,16 @@ export function buildCustom2FA(params: Custom2FAParams): any {
     canAddMoreCosmosCoinWrapperPaths: [alwaysLockedPermission()]
   };
 
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('custom-2fa collectionMetadata', ['name', 'image', 'description']);
+  }
+
   return buildMsg({
     collectionApprovals,
     standards: ['Custom-2FA'],
@@ -126,6 +141,8 @@ export function buildCustom2FA(params: Custom2FAParams): any {
       maxSupplyPerId: '0',
       noForcefulPostMintTransfers: false,
       disablePoolCreation: true
-    }
+    },
+    collectionMetadata: collectionSource,
+    tokenMetadata: [tokenMetadataEntry([{ start: '1', end: '1' }], collectionSource, '2FA token')]
   });
 }

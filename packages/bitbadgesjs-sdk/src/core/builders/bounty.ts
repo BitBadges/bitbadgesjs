@@ -13,10 +13,12 @@ import {
   buildMsg,
   frozenPermissions,
   defaultBalances,
-  metadataPlaceholders,
   mintToBurnBalances,
   zeroAmounts,
-  zeroMaxTransfers
+  zeroMaxTransfers,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError
 } from './shared.js';
 
 export interface BountyParams {
@@ -25,7 +27,11 @@ export interface BountyParams {
   verifier: string; // bb1... address
   recipient: string; // bb1... address
   expiration?: string; // duration shorthand, default "30d"
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
   name?: string;
+  description?: string;
+  image?: string;
 }
 
 export function buildBounty(params: BountyParams): any {
@@ -134,7 +140,15 @@ export function buildBounty(params: BountyParams): any {
     }
   ];
 
-  const { collectionMetadata, tokenMetadata, placeholders } = metadataPlaceholders(params.name || 'Bounty');
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('bounty collectionMetadata', ['name', 'image', 'description']);
+  }
 
   return buildMsg({
     collectionApprovals,
@@ -152,8 +166,7 @@ export function buildBounty(params: BountyParams): any {
     // `decimals: 0` which the chain rejects.
     aliasPathsToAdd: [],
     mintEscrowCoinsToTransfer: [{ amount: baseAmount, denom: coin.denom }],
-    collectionMetadata,
-    tokenMetadata,
-    metadataPlaceholders: placeholders
+    collectionMetadata: collectionSource,
+    tokenMetadata: [tokenMetadataEntry(FOREVER, collectionSource, 'bounty receipt')]
   });
 }
