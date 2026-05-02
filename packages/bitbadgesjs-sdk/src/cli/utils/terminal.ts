@@ -810,8 +810,20 @@ export function renderMetadataPlaceholders(
   lines.push(
     c(
       'dim',
-      '  Upload each Needed entry as off-chain JSON (name, description, image) and\n' +
-        '  substitute the placeholder URI with the real upload URI before broadcast.'
+      '  For each Needed entry, choose a hosting option:\n' +
+        '\n' +
+        '  • IPFS (Pinata, web3.storage, etc.) — durable, content-addressed.\n' +
+        '    Most common path. Substitute the placeholder URI with ipfs://<cid>.\n' +
+        '\n' +
+        '  • HTTPS host (S3, your own server) — chain stores the URL only.\n' +
+        '    No permanence guarantee — if the host goes down or the URL changes,\n' +
+        '    the metadata is lost.\n' +
+        '\n' +
+        '  • Inline on-chain via customData — set uri to "" and put the JSON in\n' +
+        '    customData directly. No hosting, ~250B on-chain wrapper. Example:\n' +
+        '      uri: "",\n' +
+        '      customData: \'{"name":"...","description":"...","image":"ipfs://..."}\'\n' +
+        '    Image stays a URL — do NOT inline image bytes (gas cost).'
     )
   );
   lines.push(c('gray', rule('━', width)));
