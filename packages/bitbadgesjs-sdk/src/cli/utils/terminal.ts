@@ -810,10 +810,205 @@ export function renderMetadataPlaceholders(
   lines.push(
     c(
       'dim',
-      '  Upload each Needed entry as off-chain JSON (name, description, image) and\n' +
-        '  substitute the placeholder URI with the real upload URI before broadcast.'
+      '  For each Needed entry, choose a hosting option:\n' +
+        '\n' +
+        '  • IPFS (Pinata, web3.storage, etc.) — durable, content-addressed.\n' +
+        '    Most common path. Substitute the placeholder URI with ipfs://<cid>.\n' +
+        '\n' +
+        '  • HTTPS host (S3, your own server) — chain stores the URL only.\n' +
+        '    No permanence guarantee — if the host goes down or the URL changes,\n' +
+        '    the metadata is lost.\n' +
+        '\n' +
+        '  • Inline on-chain via customData — set uri to "" and put the JSON in\n' +
+        '    customData directly. No hosting, ~250B on-chain wrapper. Example:\n' +
+        '      uri: "",\n' +
+        '      customData: \'{"name":"...","description":"...","image":"ipfs://..."}\'\n' +
+        '    Image stays a URL — do NOT inline image bytes (gas cost).'
     )
   );
   lines.push(c('gray', rule('━', width)));
   return lines.join('\n');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Resolved Metadata renderer — replaces the old Metadata To Upload section
+// for the CLI templates two-mode contract path. Walks the emitted msg and
+// shows each metadata-bearing entity's final on-chain (uri, customData)
+// pair, classifying each as URI mode or INLINE mode.
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface ResolvedEntry {
+  kind: string;
+  location: string;
+  uri: string;
+  customData: string;
+}
+
+function collectResolvedEntries(input: any): ResolvedEntry[] {
+  const out: ResolvedEntry[] = [];
+  let value: any = null;
+  if (Array.isArray(input?.messages)) {
+    const isCollection = (t: unknown) =>
+      typeof t === 'string' &&
+      (t.endsWith('.MsgCreateCollection') ||
+        t.endsWith('.MsgUpdateCollection') ||
+        t.endsWith('.MsgUniversalUpdateCollection'));
+    const msg = input.messages.find((m: any) => isCollection(m?.typeUrl)) || input.messages[0];
+    value = msg?.value || msg;
+  } else if (input?.value) {
+    value = input.value;
+  } else {
+    value = input;
+  }
+  if (!value || typeof value !== 'object') return out;
+
+  const push = (kind: string, location: string, m: any) => {
+    if (!m) return;
+    out.push({ kind, location, uri: typeof m.uri === 'string' ? m.uri : '', customData: typeof m.customData === 'string' ? m.customData : '' });
+  };
+
+  if (value.collectionMetadata) push('Collection', 'collectionMetadata', value.collectionMetadata);
+  if (Array.isArray(value.tokenMetadata)) {
+    for (let i = 0; i < value.tokenMetadata.length; i++) {
+      const tm = value.tokenMetadata[i];
+      const ids = Array.isArray(tm?.tokenIds) && tm.tokenIds.length > 0
+        ? tm.tokenIds.map((r: any) => `${r.start}-${r.end}`).join(', ')
+        : 'all';
+      push(`Token (ids: ${ids})`, `tokenMetadata[${i}]`, tm);
+    }
+  }
+  if (Array.isArray(value.collectionApprovals)) {
+    for (let i = 0; i < value.collectionApprovals.length; i++) {
+      const a = value.collectionApprovals[i];
+      push(`Approval "${a?.approvalId || i}"`, `collectionApprovals[${i}]`, a);
+    }
+  }
+  if (Array.isArray(value.aliasPathsToAdd)) {
+    for (let i = 0; i < value.aliasPathsToAdd.length; i++) {
+      const ap = value.aliasPathsToAdd[i];
+      push(`Alias path "${ap?.denom || i}"`, `aliasPathsToAdd[${i}].metadata`, ap?.metadata);
+      if (Array.isArray(ap?.denomUnits)) {
+        for (let j = 0; j < ap.denomUnits.length; j++) {
+          const du = ap.denomUnits[j];
+          push(`Denom unit "${du?.symbol || j}" of ${ap?.denom || i}`, `aliasPathsToAdd[${i}].denomUnits[${j}].metadata`, du?.metadata);
+        }
+      }
+    }
+  }
+  if (Array.isArray(value.cosmosCoinWrapperPathsToAdd)) {
+    for (let i = 0; i < value.cosmosCoinWrapperPathsToAdd.length; i++) {
+      const wp = value.cosmosCoinWrapperPathsToAdd[i];
+      push(`Wrapper path "${wp?.denom || i}"`, `cosmosCoinWrapperPathsToAdd[${i}].metadata`, wp?.metadata);
+      if (Array.isArray(wp?.denomUnits)) {
+        for (let j = 0; j < wp.denomUnits.length; j++) {
+          const du = wp.denomUnits[j];
+          push(`Wrapper denom unit "${du?.symbol || j}" of ${wp?.denom || i}`, `cosmosCoinWrapperPathsToAdd[${i}].denomUnits[${j}].metadata`, du?.metadata);
+        }
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Render the resolved on-chain `(uri, customData)` pair for each
+ * metadata-bearing entity in the emitted msg. Categorizes each as
+ *   - URI    — `uri` non-empty, `customData` empty (mode 1)
+ *   - INLINE — `uri` empty, `customData` is JSON metadata (mode 2)
+ *   - EMPTY  — both empty (only valid for approvals that won't render)
+ *   - MIXED  — both non-empty (uri wins per the resolution rule, but
+ *              shown so the user notices)
+ * For INLINE entries, parses the customData JSON to surface a quick
+ * name/image preview so the user can verify content at a glance.
+ */
+export function renderResolvedMetadata(
+  input: any,
+  opts?: { stream?: NodeJS.WriteStream; title?: string }
+): string {
+  const stream = opts?.stream || process.stderr;
+  const { c } = makeColor(stream);
+  const width = Math.min(80, (stream as any).columns || 80);
+  const entries = collectResolvedEntries(input);
+
+  const lines: string[] = [];
+  lines.push(c('gray', rule('━', width, opts?.title || 'Resolved Metadata')));
+  lines.push('');
+
+  if (entries.length === 0) {
+    lines.push(`  ${c('gray', '·')} No metadata-bearing entities`);
+    lines.push('');
+    lines.push(c('gray', rule('━', width)));
+    return lines.join('\n');
+  }
+
+  let uriCount = 0;
+  let inlineCount = 0;
+  let emptyCount = 0;
+  let mixedCount = 0;
+
+  for (const e of entries) {
+    const hasUri = e.uri.length > 0;
+    const hasCustom = e.customData.length > 0;
+    let mode: 'URI' | 'INLINE' | 'EMPTY' | 'MIXED';
+    let badge: string;
+    if (hasUri && hasCustom) {
+      mode = 'MIXED';
+      mixedCount++;
+      badge = `${c('yellow', '▲')} ${c('bold', c('yellow', 'MIXED   '))}`;
+    } else if (hasUri) {
+      mode = 'URI';
+      uriCount++;
+      badge = `${c('cyan', '●')} ${c('bold', c('cyan', 'URI     '))}`;
+    } else if (hasCustom) {
+      mode = 'INLINE';
+      inlineCount++;
+      badge = `${c('green', '✓')} ${c('bold', c('green', 'INLINE  '))}`;
+    } else {
+      mode = 'EMPTY';
+      emptyCount++;
+      badge = `${c('gray', '·')} ${c('bold', c('gray', 'EMPTY   '))}`;
+    }
+    lines.push(`  ${badge}  ${c('bold', e.kind)}  ${c('dim', e.location)}`);
+    if (mode === 'URI' || mode === 'MIXED') {
+      lines.push(`      ${c('gray', '→')} uri: ${e.uri}`);
+    }
+    if (mode === 'INLINE' || mode === 'MIXED') {
+      const preview = previewInlineCustomData(e.customData);
+      lines.push(`      ${c('gray', '→')} customData: ${preview}`);
+    }
+    if (mode === 'EMPTY') {
+      lines.push(`      ${c('gray', '→')} (no metadata — only valid for approvals that don't surface in UI)`);
+    }
+    lines.push('');
+  }
+
+  lines.push(c('gray', rule('━', width)));
+  const summaryParts = [
+    uriCount > 0 ? c('cyan', `${uriCount} URI`) : c('gray', `${uriCount} URI`),
+    inlineCount > 0 ? c('green', `${inlineCount} inline`) : c('gray', `${inlineCount} inline`),
+    emptyCount > 0 ? c('gray', `${emptyCount} empty`) : c('gray', `${emptyCount} empty`),
+    mixedCount > 0 ? c('yellow', `${mixedCount} mixed (uri wins)`) : c('gray', `${mixedCount} mixed`)
+  ];
+  lines.push(`  ${c('bold', 'Summary')}  ${summaryParts.join('  ·  ')}`);
+  lines.push(c('gray', rule('━', width)));
+  return lines.join('\n');
+}
+
+function previewInlineCustomData(raw: string): string {
+  if (raw.length > 200) {
+    return `<inline JSON, ${raw.length} bytes>`;
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      const bits: string[] = [];
+      if (typeof parsed.name === 'string') bits.push(`name: "${parsed.name}"`);
+      if (typeof parsed.image === 'string') bits.push(`image: ${parsed.image}`);
+      if (typeof parsed.description === 'string' && parsed.description.length <= 60) bits.push(`description: "${parsed.description}"`);
+      return bits.length > 0 ? bits.join('  ') : `<inline JSON, ${raw.length} bytes>`;
+    }
+  } catch {
+    /* fall through */
+  }
+  return `<inline JSON, ${raw.length} bytes>`;
 }

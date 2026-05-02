@@ -7,6 +7,7 @@
  */
 
 import { normalizeForReview } from './review-normalize.js';
+import { parseInlineCustomData } from '../api-indexer/metadata/inlineCustomData.js';
 
 const MAX_UINT64 = 18446744073709551615n;
 
@@ -649,24 +650,30 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     // 6. METADATA & STANDARDS CHECKS
     // ========================================
 
-    // Collection metadata URI placeholder check — suppressed when the
-    // frontend WithDetails shape is present (nested metadata.metadata
-    // with inline name / image / description). In that state the URI is
-    // intentionally blank pre-upload; the auto-apply flow resolves it
-    // on submit. `ipfs://METADATA_*` internal placeholders from the
-    // session/template flow are also valid and don't trigger this.
+    // Collection metadata URI presence — three valid configurations:
+    //   1. `uri` is a real (or `ipfs://METADATA_*` placeholder) URI.
+    //   2. The frontend WithDetails shape is present (nested
+    //      metadata.metadata with inline name/image/description) and
+    //      the auto-apply flow will hoist it to a real URI on submit.
+    //   3. `customData` carries inline JSON metadata (the indexer
+    //      resolves it stateless via parseInlineCustomData).
+    // Only emit the info finding when none of these apply.
     const collectionMeta: any = col.collectionMetadata;
     const collectionUri: string = collectionMeta?.uri || '';
+    const collectionCustomData: string = typeof collectionMeta?.customData === 'string' ? collectionMeta.customData : '';
     const collectionInline = collectionMeta?.metadata;
     const hasInlineContent = !!(collectionInline && (collectionInline.name || collectionInline.image || collectionInline.description));
     const isInternalPlaceholder = /^ipfs:\/\/METADATA_[A-Z]/.test(collectionUri);
-    if (!hasInlineContent && !isInternalPlaceholder && collectionUri === '') {
+    const hasInlineCustomData = !!parseInlineCustomData(collectionCustomData);
+    if (!hasInlineContent && !isInternalPlaceholder && collectionUri === '' && !hasInlineCustomData) {
       findings.push({
         severity: 'info',
         category: 'metadata',
         title: 'Collection metadata URI is not set',
-        detail: 'collectionMetadata.uri is empty. Upload metadata to IPFS and set the URI, or populate inline metadata so the auto-apply flow can substitute it on submit.',
-        recommendation: 'Set collectionMetadata.uri to an uploaded IPFS URI, or populate collectionMetadata.metadata with name/image/description so the auto-apply flow handles it.'
+        detail:
+          'collectionMetadata.uri is empty and collectionMetadata.customData does not carry inline JSON metadata. Set the URI to an uploaded IPFS URI, populate inline metadata for the auto-apply flow, or stash inline JSON metadata directly in customData (zero-config alternative to IPFS hosting).',
+        recommendation:
+          'Pick one: (a) set collectionMetadata.uri to an uploaded IPFS URI, (b) populate collectionMetadata.metadata with name/image/description for the auto-apply flow, or (c) write {"name":"...","image":"...","description":"..."} JSON into collectionMetadata.customData.'
       });
     }
 
@@ -685,16 +692,25 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
       }
     }
 
-    // Approval metadata image check
+    // Approval metadata is typically text-only (name + description).
+    // Images on approvals are supported but uncommon — most approval
+    // surfaces in the UI render text only. When inline customData
+    // carries an image we can detect it; flag as a low-priority
+    // suggestion, not a violation.
     for (const appr of approvals) {
-      if (appr.uri && appr.uri !== '' && !appr.uri.startsWith('ipfs://METADATA_')) {
-        findings.push({
-          severity: 'info',
-          category: 'metadata',
-          title: `Approval "${appr.approvalId}" has metadata URI`,
-          detail: `Approval metadata images MUST be empty string (""). Verify the metadata at ${appr.uri} has image: "".`,
-          recommendation: 'Ensure approval metadata has image: "" (empty string). Non-empty images on approvals cause display issues.'
-        });
+      const apprUri: string = appr.uri || '';
+      const apprCustomData: string = typeof appr.customData === 'string' ? appr.customData : '';
+      if (apprUri === '' && apprCustomData !== '') {
+        const inline = parseInlineCustomData(apprCustomData);
+        if (inline && inline.image && inline.image !== '') {
+          findings.push({
+            severity: 'info',
+            category: 'metadata',
+            title: `Approval "${appr.approvalId}" inline customData carries an image`,
+            detail: 'Approval metadata is typically text-only (name + description). Images on approvals are supported but most surfaces render text only.',
+            recommendation: 'Consider omitting the image field unless you have a UI surface that renders it.'
+          });
+        }
       }
     }
 

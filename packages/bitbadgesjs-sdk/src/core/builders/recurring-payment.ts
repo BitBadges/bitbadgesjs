@@ -14,7 +14,8 @@ import {
   parseDuration,
   durationToTimestamp,
   uniqueId,
-  buildUserApprovalMsg
+  buildUserApprovalMsg,
+  approvalMetadata
 } from './shared.js';
 
 export interface RecurringPaymentParams {
@@ -35,6 +36,10 @@ export function buildRecurringPayment(params: RecurringPaymentParams): any {
 
   const approval = {
     approvalId: id,
+    ...approvalMetadata(
+      'Recurring Approval',
+      'This approves the charge / transfer on a recurring basis.'
+    ),
     fromListId: 'Mint',
     initiatedByListId: 'All',
     transferTimes: [{ start: '1', end: expirationTs }],

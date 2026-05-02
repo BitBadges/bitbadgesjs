@@ -12,9 +12,11 @@ import {
   buildMsg,
   frozenPermissions,
   defaultBalances,
-  metadataPlaceholders,
-  singleTokenMetadata,
-  scalingBalances
+  scalingBalances,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface CrowdfundParams {
@@ -22,7 +24,11 @@ export interface CrowdfundParams {
   denom: string;
   crowdfunder?: string; // bb1... address — who receives funds on success (creator fills in if empty)
   deadline?: string; // duration shorthand, default "30d"
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
   name?: string;
+  description?: string;
+  image?: string;
   /**
    * Creator address — used as the default crowdfunder when `crowdfunder`
    * isn't specified. The CLI passes this through from `--creator`.
@@ -51,6 +57,10 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: 'deposit-refund',
+      ...approvalMetadata(
+        'Deposit',
+        'Contribute USDC and receive a refund token'
+      ),
       transferTimes: [{ start: '1', end: deadlineTs }],
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
@@ -81,6 +91,10 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: crowdfunderAddr,
       initiatedByListId: 'All',
       approvalId: 'deposit-progress',
+      ...approvalMetadata(
+        'Progress Tracker',
+        'Tracks cumulative contributions to crowdfunder'
+      ),
       transferTimes: [{ start: '1', end: deadlineTs }],
       tokenIds: [{ start: '2', end: '2' }],
       ownershipTimes: FOREVER,
@@ -106,6 +120,10 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: crowdfunderAddr,
       approvalId: 'success',
+      ...approvalMetadata(
+        'Withdraw',
+        'Crowdfunder withdraws funds when goal is met'
+      ),
       // Strictly AFTER deadline — `deadlineTs + 1` prevents the
       // success claim from racing the final deposit at the exact
       // deadline second. Matches CrowdfundRegistry's
@@ -153,6 +171,10 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'refund',
+      ...approvalMetadata(
+        'Refund',
+        'After deadline, burn refund token to reclaim deposit'
+      ),
       // Same `deadlineTs + 1` boundary as the success approval — no
       // refunds at the exact deadline second, only strictly after.
       transferTimes: [{ start: String(BigInt(deadlineTs) + 1n), end: MAX_UINT64 }],
@@ -205,6 +227,7 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'burn',
+      ...approvalMetadata('Burn', 'Burn leftover refund tokens'),
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '2' }],
       ownershipTimes: FOREVER,
@@ -212,17 +235,40 @@ export function buildCrowdfund(params: CrowdfundParams): any {
     }
   ];
 
-  const { collectionMetadata, placeholders: collectionPlaceholders } = metadataPlaceholders(
-    params.name || 'Crowdfund'
-  );
-  const refundToken = singleTokenMetadata('1', 'Refund Token', 'Refundable share of the crowdfund pool.');
-  const progressToken = singleTokenMetadata('2', 'Progress Token', 'Tracks total deposits in the crowdfund pool.');
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('crowdfund collectionMetadata', ['name', 'image', 'description']);
+  }
 
-  // Strip the per-token default that metadataPlaceholders() seeds — this
-  // template defines its own per-token entries below, so the default
-  // ipfs://METADATA_TOKEN_DEFAULT shouldn't end up in the sidecar.
-  const { 'ipfs://METADATA_TOKEN_DEFAULT': _drop, ...collectionOnlyPlaceholders } = collectionPlaceholders;
-  void _drop;
+  // Per-token metadata: refund + progress receipts use distinct fixed
+  // names regardless of the caller's --name (the standard expects
+  // these specific receipt names). When the caller passed --uri,
+  // they've taken responsibility for hosting the per-token JSON too
+  // and we reuse the same uri. In inline mode we serialize the
+  // standard receipt names + the caller's image.
+  const refundSource: any = params.uri
+    ? { uri: params.uri }
+    : {
+        inlineMetadata: {
+          name: 'Refund Token',
+          description: 'Refundable share of the crowdfund pool.',
+          image: params.image as string
+        }
+      };
+  const progressSource: any = params.uri
+    ? { uri: params.uri }
+    : {
+        inlineMetadata: {
+          name: 'Progress Token',
+          description: 'Tracks total deposits in the crowdfund pool.',
+          image: params.image as string
+        }
+      };
 
   return buildMsg({
     collectionApprovals,
@@ -242,12 +288,10 @@ export function buildCrowdfund(params: CrowdfundParams): any {
     // fractional denom unit needed. The previous version added alias
     // paths with `decimals: 0` which the chain rejects.
     aliasPathsToAdd: [],
-    collectionMetadata,
-    tokenMetadata: [refundToken.entry, progressToken.entry],
-    metadataPlaceholders: {
-      ...collectionOnlyPlaceholders,
-      [refundToken.placeholder.uri]: refundToken.placeholder.content,
-      [progressToken.placeholder.uri]: progressToken.placeholder.content
-    }
+    collectionMetadata: collectionSource,
+    tokenMetadata: [
+      tokenMetadataEntry([{ start: '1', end: '1' }], refundSource, 'refund token'),
+      tokenMetadataEntry([{ start: '2', end: '2' }], progressSource, 'progress token')
+    ]
   });
 }

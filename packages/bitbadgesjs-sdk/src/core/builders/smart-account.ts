@@ -12,12 +12,20 @@ import {
   generateAliasAddressForIBCBackedDenom,
   baselinePermissions,
   alwaysLockedPermission,
-  alwaysLockedCollectionApprovalPermission
+  alwaysLockedCollectionApprovalPermission,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface SmartAccountParams {
   backingCoin: string;
   symbol?: string;
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
+  name?: string;
+  description?: string;
   image?: string;
   tradable?: boolean;
   aiAgentVault?: boolean; // adds 'AI Agent Vault' standard tag
@@ -35,6 +43,10 @@ export function buildSmartAccount(params: SmartAccountParams): any {
       toListId: `!${backingAddr}`,
       initiatedByListId: 'All',
       approvalId: 'smart-account-backing',
+      ...approvalMetadata(
+        'Deposit Approval',
+        'Allows deposits by sending tokens to the backing address.'
+      ),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -53,6 +65,10 @@ export function buildSmartAccount(params: SmartAccountParams): any {
       toListId: backingAddr,
       initiatedByListId: 'All',
       approvalId: 'smart-account-unbacking',
+      ...approvalMetadata(
+        'Withdraw Approval',
+        'Allows withdrawals by receiving tokens from the backing address.'
+      ),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -71,6 +87,10 @@ export function buildSmartAccount(params: SmartAccountParams): any {
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: 'transferable-approval',
+      ...approvalMetadata(
+        'Transferable',
+        'Allow holders to transfer smart account tokens between addresses.'
+      ),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -103,14 +123,30 @@ export function buildSmartAccount(params: SmartAccountParams): any {
   // the chain validator without "invalid characters" rejections.
   const cleanSymbol = sanitizeCosmosPathName(symbol, 'symbol');
   const denomStr = 'u' + cleanSymbol.toLowerCase();
-  const alias = buildAliasPath(denomStr, cleanSymbol, coin.decimals, params.image || coin.image);
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('smart-account collectionMetadata', ['name', 'image', 'description']);
+  }
+  const aliasPath = buildAliasPath({
+    denom: denomStr,
+    symbol: cleanSymbol,
+    decimals: coin.decimals,
+    pathMetadata: collectionSource,
+    unitMetadata: collectionSource
+  });
 
   return buildMsg({
     collectionApprovals,
     standards,
     invariants,
-    aliasPathsToAdd: [alias.path],
-    metadataPlaceholders: { ...alias.placeholders },
+    aliasPathsToAdd: [aliasPath],
+    collectionMetadata: collectionSource,
+    tokenMetadata: [tokenMetadataEntry(FOREVER, collectionSource, 'smart account token')],
     collectionPermissions: permissions
   });
 }

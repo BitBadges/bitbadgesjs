@@ -13,10 +13,13 @@ import {
   buildMsg,
   frozenPermissions,
   defaultBalances,
-  metadataPlaceholders,
   mintToBurnBalances,
   zeroAmounts,
-  zeroMaxTransfers
+  zeroMaxTransfers,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface BountyParams {
@@ -25,7 +28,11 @@ export interface BountyParams {
   verifier: string; // bb1... address
   recipient: string; // bb1... address
   expiration?: string; // duration shorthand, default "30d"
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
   name?: string;
+  description?: string;
+  image?: string;
 }
 
 export function buildBounty(params: BountyParams): any {
@@ -40,6 +47,10 @@ export function buildBounty(params: BountyParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'bounty-accept',
+      ...approvalMetadata(
+        'Accept',
+        'Verifier accepts bounty — payout to recipient'
+      ),
       transferTimes: [{ start: '1', end: expirationTs }],
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -75,6 +86,10 @@ export function buildBounty(params: BountyParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'bounty-deny',
+      ...approvalMetadata(
+        'Deny',
+        'Verifier denies bounty — refund to submitter'
+      ),
       transferTimes: [{ start: '1', end: expirationTs }],
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -110,6 +125,10 @@ export function buildBounty(params: BountyParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'bounty-expire',
+      ...approvalMetadata(
+        'Expire',
+        'Bounty expired — refund to submitter'
+      ),
       transferTimes: [{ start: String(BigInt(expirationTs) + 1n), end: MAX_UINT64 }],
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -134,7 +153,15 @@ export function buildBounty(params: BountyParams): any {
     }
   ];
 
-  const { collectionMetadata, tokenMetadata, placeholders } = metadataPlaceholders(params.name || 'Bounty');
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('bounty collectionMetadata', ['name', 'image', 'description']);
+  }
 
   return buildMsg({
     collectionApprovals,
@@ -152,8 +179,7 @@ export function buildBounty(params: BountyParams): any {
     // `decimals: 0` which the chain rejects.
     aliasPathsToAdd: [],
     mintEscrowCoinsToTransfer: [{ amount: baseAmount, denom: coin.denom }],
-    collectionMetadata,
-    tokenMetadata,
-    metadataPlaceholders: placeholders
+    collectionMetadata: collectionSource,
+    tokenMetadata: [tokenMetadataEntry(FOREVER, collectionSource, 'bounty receipt')]
   });
 }

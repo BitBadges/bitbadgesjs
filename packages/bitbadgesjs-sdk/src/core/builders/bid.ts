@@ -12,7 +12,8 @@ import {
   toBaseUnits,
   durationToTimestamp,
   uniqueId,
-  buildUserApprovalMsg
+  buildUserApprovalMsg,
+  approvalMetadata
 } from './shared.js';
 
 export interface BidParams {
@@ -41,6 +42,10 @@ export function buildBid(params: BidParams): any {
 
   const approval = {
     approvalId: id,
+    ...approvalMetadata(
+      'Bid',
+      'This approval is a proposal for this address to receive a token if certain conditions are met.'
+    ),
     fromListId: 'All',
     initiatedByListId: 'All',
     transferTimes: [{ start: '1', end: expirationTs }],

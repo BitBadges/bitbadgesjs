@@ -9,14 +9,22 @@ import {
   toBaseUnits,
   buildMsg,
   baselinePermissions,
-  mintToBurnBalances
+  mintToBurnBalances,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface QuestsParams {
   reward: number; // display units per claim
   denom: string; // USDC, BADGE
   maxClaims: number;
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
   name?: string;
+  description?: string;
+  image?: string;
 }
 
 export function buildQuests(params: QuestsParams): any {
@@ -38,6 +46,10 @@ export function buildQuests(params: QuestsParams): any {
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: questApprovalId,
+      ...approvalMetadata(
+        'Complete This Quest!',
+        'Meet the criteria of the quest and earn your rewards.'
+      ),
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
@@ -70,6 +82,7 @@ export function buildQuests(params: QuestsParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'burnable-approval',
+      ...approvalMetadata('Burn', 'Burn quest tokens to the burn address.'),
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
@@ -77,6 +90,16 @@ export function buildQuests(params: QuestsParams): any {
       approvalCriteria: {}
     }
   ];
+
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('quests collectionMetadata', ['name', 'image', 'description']);
+  }
 
   return buildMsg({
     collectionApprovals,
@@ -90,6 +113,8 @@ export function buildQuests(params: QuestsParams): any {
     },
     mintEscrowCoinsToTransfer: [
       { amount: String(BigInt(rewardBase) * BigInt(params.maxClaims)), denom: coin.denom }
-    ]
+    ],
+    collectionMetadata: collectionSource,
+    tokenMetadata: [tokenMetadataEntry([{ start: '1', end: '1' }], collectionSource, 'quest token')]
   });
 }

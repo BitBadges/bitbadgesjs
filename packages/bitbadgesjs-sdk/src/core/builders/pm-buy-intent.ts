@@ -12,7 +12,8 @@ import {
   toBaseUnits,
   durationToTimestamp,
   uniqueId,
-  buildUserApprovalMsg
+  buildUserApprovalMsg,
+  approvalMetadata
 } from './shared.js';
 
 export interface PmBuyIntentParams {
@@ -39,6 +40,10 @@ export function buildPmBuyIntent(params: PmBuyIntentParams): any {
 
   const approval = {
     approvalId: id,
+    ...approvalMetadata(
+      'Buy prediction tokens',
+      'Receive prediction market outcome tokens in exchange for an escrowed payment.'
+    ),
     fromListId: 'All',
     initiatedByListId: 'All',
     transferTimes: [{ start: '1', end: expirationTs }],

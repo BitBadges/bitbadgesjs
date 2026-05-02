@@ -14,11 +14,17 @@ import {
   sanitizeCosmosPathName,
   ibcBackedInvariants,
   generateAliasAddressForIBCBackedDenom,
-  baselinePermissions
+  baselinePermissions,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface VaultParams {
   backingCoin: string; // USDC, BADGE, ATOM, OSMO
+  /** Pre-hosted collection metadata URI. If provided, `name`/`image`/`description` are ignored. */
+  uri?: string;
   name?: string;
   symbol?: string;
   image?: string;
@@ -47,6 +53,10 @@ export function buildVault(params: VaultParams): any {
       toListId: `!${backingAddr}`,
       initiatedByListId: 'All',
       approvalId: 'vault-deposit',
+      ...approvalMetadata(
+        'Deposit',
+        'Open deposit — anyone can deposit backing coins to mint vault tokens.'
+      ),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -64,6 +74,10 @@ export function buildVault(params: VaultParams): any {
       toListId: backingAddr,
       initiatedByListId: 'All',
       approvalId: `vault-withdraw-${Math.random().toString(16).slice(2, 10)}`,
+      ...approvalMetadata(
+        'Withdrawal',
+        'Burn vault tokens to withdraw backing coins.'
+      ),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -107,6 +121,10 @@ export function buildVault(params: VaultParams): any {
       toListId: params.emergencyRecovery,
       initiatedByListId: params.emergencyRecovery,
       approvalId: 'vault-emergency-migration',
+      ...approvalMetadata(
+        'Emergency Migration',
+        'Emergency fund migration to a recovery address.'
+      ),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -126,21 +144,30 @@ export function buildVault(params: VaultParams): any {
   // Derive the denom from the (sanitized) symbol — chain enforces
   // global denom uniqueness, so a hardcoded 'uvault' would collide
   // for any user creating more than one vault on the same chain.
-  const alias = buildAliasPath(
-    'u' + symbol.toLowerCase(),
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('vault collectionMetadata', ['name', 'image', 'description']);
+  }
+  const aliasPath = buildAliasPath({
+    denom: 'u' + symbol.toLowerCase(),
     symbol,
-    coin.decimals,
-    params.image || coin.image,
-    params.name,
-    params.description
-  );
+    decimals: coin.decimals,
+    pathMetadata: collectionSource,
+    unitMetadata: collectionSource
+  });
 
   return buildMsg({
     collectionApprovals,
     standards: ['Smart Token', 'Vault'],
     invariants,
-    aliasPathsToAdd: [alias.path],
-    metadataPlaceholders: { ...alias.placeholders },
+    aliasPathsToAdd: [aliasPath],
+    collectionMetadata: collectionSource,
+    tokenMetadata: [tokenMetadataEntry(FOREVER, collectionSource, 'vault token')],
     collectionPermissions: baselinePermissions()
   });
 }

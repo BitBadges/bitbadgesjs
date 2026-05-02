@@ -9,10 +9,13 @@ import {
   toBaseUnits,
   buildMsg,
   frozenPermissions,
-  singleTokenMetadata,
   mintToBurnBalances,
   zeroMaxTransfers,
-  zeroAmounts
+  zeroAmounts,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface ProductItem {
@@ -21,12 +24,20 @@ export interface ProductItem {
   denom: string; // USDC, BADGE
   maxSupply?: number; // 0 = unlimited
   burn?: boolean; // burn on purchase
+  /** Optional pre-hosted per-product metadata URI. */
+  uri?: string;
+  description?: string;
+  image?: string;
 }
 
 export interface ProductCatalogParams {
   products: ProductItem[];
   storeAddress: string; // bb1... payment recipient
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
   name?: string;
+  description?: string;
+  image?: string;
 }
 
 export function buildProductCatalog(params: ProductCatalogParams): any {
@@ -50,6 +61,10 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
 
     return {
       approvalId,
+      ...approvalMetadata(
+        'Purchase',
+        'Buy this product at the listed price.'
+      ),
       fromListId: 'Mint',
       toListId: product.burn ? BURN_ADDRESS : 'All',
       initiatedByListId: 'All',
@@ -87,6 +102,7 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
   // Burn approval: anyone can burn their tokens
   const burnApproval = {
     approvalId: `product-burn-${randomId()}`,
+    ...approvalMetadata('Burn', 'Burn product token'),
     fromListId: '!Mint',
     toListId: BURN_ADDRESS,
     initiatedByListId: 'All',
@@ -99,28 +115,50 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
 
   const collectionApprovals = [...purchaseApprovals, burnApproval];
 
-  // Per-product metadata: each product gets its own placeholder URI keyed
-  // by token id. Accumulate the sidecar entries so the auto-apply flow has
-  // full coverage.
-  const tokenMetadataAndPlaceholders = products.map((product, i) =>
-    singleTokenMetadata(String(i + 1), product.name)
-  );
-  const tokenMetadata = tokenMetadataAndPlaceholders.map((t) => t.entry);
-  const productPlaceholders: Record<string, { name: string; description: string; image: string }> = {};
-  for (const t of tokenMetadataAndPlaceholders) {
-    productPlaceholders[t.placeholder.uri] = t.placeholder.content;
+  // Per-product metadata: each product becomes one tokenMetadata entry
+  // keyed by the token id. The product itself supplies name (required);
+  // optional `--uri`/`--image`/`--description` flow per product, with
+  // the catalog-level image/description as fallback.
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description: params.description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('product-catalog collectionMetadata', ['name', 'image', 'description']);
+  }
+
+  const tokenMetadata = products.map((product, i) => {
+    const idStr = String(i + 1);
+    const productSource: any = product.uri
+      ? { uri: product.uri }
+      : {
+          inlineMetadata: {
+            name: product.name,
+            description: product.description || product.name,
+            image: (product.image || params.image) as string
+          }
+        };
+    return tokenMetadataEntry([{ start: idStr, end: idStr }], productSource, `product "${product.name}"`);
+  });
+
+  // Empty-products case still needs at least one tokenMetadata entry —
+  // emit a single full-range placeholder mirroring the collection.
+  if (tokenMetadata.length === 0) {
+    tokenMetadata.push(tokenMetadataEntry(FOREVER, collectionSource, 'product placeholder'));
   }
 
   return buildMsg({
     collectionApprovals,
-    validTokenIds: [{ start: '1', end: String(products.length) }],
+    validTokenIds: [{ start: '1', end: String(products.length || 1) }],
     standards: ['Products'],
     collectionPermissions: frozenPermissions(),
+    collectionMetadata: collectionSource,
     tokenMetadata,
     invariants: {
       noCustomOwnershipTimes: true,
       disablePoolCreation: true
-    },
-    metadataPlaceholders: productPlaceholders
+    }
   });
 }

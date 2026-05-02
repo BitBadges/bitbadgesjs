@@ -21,9 +21,12 @@ import {
   buildMsg,
   frozenPermissions,
   defaultBalances,
-  metadataPlaceholders,
   mintToBurnBalances,
-  zeroMaxTransfers
+  zeroMaxTransfers,
+  tokenMetadataEntry,
+  metadataFromFlat,
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface PaymentRequestParams {
@@ -32,12 +35,15 @@ export interface PaymentRequestParams {
   payer: string; // bb1... address — the human approver/payer
   recipient: string; // bb1... address — agent/merchant receiving funds
   expiration?: string; // duration shorthand, default "30d"
+  /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
+  uri?: string;
   name?: string;
+  image?: string;
   /**
    * Free-form rationale shown to the payer at approval time. Mirrors
    * Stripe Link's ≥100 char `context` requirement — agents must justify
-   * the spend in human-readable terms. Surfaced via the off-chain
-   * metadata sidecar (collection description), not on-chain proto fields.
+   * the spend in human-readable terms. Used as the collection description
+   * (in inline mode) or appended to the auto-generated default.
    */
   context?: string;
 }
@@ -66,6 +72,10 @@ export function buildPaymentRequest(params: PaymentRequestParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: params.payer,
       approvalId: 'payment-request-pay',
+      ...approvalMetadata(
+        'Pay',
+        'Approve and pay from your wallet'
+      ),
       transferTimes: [{ start: '1', end: expirationTs }],
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -95,6 +105,7 @@ export function buildPaymentRequest(params: PaymentRequestParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: params.payer,
       approvalId: 'payment-request-deny',
+      ...approvalMetadata('Deny', 'Reject this payment request'),
       transferTimes: [{ start: '1', end: expirationTs }],
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -115,14 +126,24 @@ export function buildPaymentRequest(params: PaymentRequestParams): any {
     // current time vs. transferTimes[0].end.
   ];
 
+  // PaymentRequest's description has a special semantic: --context is
+  // the payer-facing rationale that the standard requires. If the
+  // caller passes --context (and didn't pass --uri), use it as the
+  // inline description verbatim; otherwise the caller MUST supply
+  // --description (or --uri) explicitly.
   const description = params.context
     ? `${params.context}\n\nPayer: ${params.payer}\nAmount: ${params.amount} ${coin.symbol}`
-    : `Payment request for ${params.amount} ${coin.symbol}`;
+    : undefined;
 
-  const { collectionMetadata, tokenMetadata, placeholders } = metadataPlaceholders(
-    params.name || 'Payment Request',
-    description
-  );
+  const collectionSource = metadataFromFlat({
+    uri: params.uri,
+    name: params.name,
+    description,
+    image: params.image
+  });
+  if (!collectionSource) {
+    throw new MetadataMissingError('payment-request collectionMetadata', ['name', 'image', 'description']);
+  }
 
   return buildMsg({
     collectionApprovals,
@@ -140,8 +161,7 @@ export function buildPaymentRequest(params: PaymentRequestParams): any {
     // KEY INVERSION vs. Bounty: NO mintEscrowCoinsToTransfer. The pay
     // approval debits the payer's wallet directly via initiator routing
     // when they execute the approval — there's no pre-funded escrow.
-    collectionMetadata,
-    tokenMetadata,
-    metadataPlaceholders: placeholders
+    collectionMetadata: collectionSource,
+    tokenMetadata: [tokenMetadataEntry(FOREVER, collectionSource, 'payment request receipt')]
   });
 }

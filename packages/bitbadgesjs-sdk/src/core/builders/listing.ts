@@ -12,7 +12,8 @@ import {
   toBaseUnits,
   durationToTimestamp,
   uniqueId,
-  buildUserApprovalMsg
+  buildUserApprovalMsg,
+  approvalMetadata
 } from './shared.js';
 
 export interface ListingParams {
@@ -43,6 +44,10 @@ export function buildListing(params: ListingParams): any {
 
   const approval = {
     approvalId: id,
+    ...approvalMetadata(
+      'Listing',
+      'This approval is a conditional offer to transfer a token from this address if certain conditions are met.'
+    ),
     toListId: 'All',
     initiatedByListId: 'All',
     transferTimes: [{ start: '1', end: expirationTs }],
