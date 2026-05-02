@@ -13,7 +13,8 @@ import {
   zeroMaxTransfers,
   tokenMetadataEntry,
   metadataFromFlat,
-  MetadataMissingError
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface AuctionParams {
@@ -76,6 +77,10 @@ export function buildAuction(params: AuctionParams): any {
       toListId: 'All',
       initiatedByListId: sellerAddr,
       approvalId: `auction-mint-to-winner-${randomId()}`,
+      ...approvalMetadata(
+        'Accept Bid',
+        'Seller mints the NFT directly to the winning bidder during the accept window'
+      ),
       transferTimes: [{ start: bidDeadlineTs, end: acceptEndTs }],
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
@@ -105,6 +110,7 @@ export function buildAuction(params: AuctionParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: `auction-burn-${randomId()}`,
+      ...approvalMetadata('Burn', 'Burn the auction token'),
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,

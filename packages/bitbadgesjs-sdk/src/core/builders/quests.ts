@@ -12,7 +12,8 @@ import {
   mintToBurnBalances,
   tokenMetadataEntry,
   metadataFromFlat,
-  MetadataMissingError
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface QuestsParams {
@@ -45,6 +46,10 @@ export function buildQuests(params: QuestsParams): any {
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: questApprovalId,
+      ...approvalMetadata(
+        'Complete This Quest!',
+        'Meet the criteria of the quest and earn your rewards.'
+      ),
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
@@ -77,6 +82,7 @@ export function buildQuests(params: QuestsParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'burnable-approval',
+      ...approvalMetadata('Burn', 'Burn quest tokens to the burn address.'),
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,

@@ -18,7 +18,8 @@ import {
   zeroMaxTransfers,
   tokenMetadataEntry,
   metadataFromFlat,
-  MetadataMissingError
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface BountyParams {
@@ -46,6 +47,10 @@ export function buildBounty(params: BountyParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'bounty-accept',
+      ...approvalMetadata(
+        'Accept',
+        'Verifier accepts bounty — payout to recipient'
+      ),
       transferTimes: [{ start: '1', end: expirationTs }],
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -81,6 +86,10 @@ export function buildBounty(params: BountyParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'bounty-deny',
+      ...approvalMetadata(
+        'Deny',
+        'Verifier denies bounty — refund to submitter'
+      ),
       transferTimes: [{ start: '1', end: expirationTs }],
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -116,6 +125,10 @@ export function buildBounty(params: BountyParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'bounty-expire',
+      ...approvalMetadata(
+        'Expire',
+        'Bounty expired — refund to submitter'
+      ),
       transferTimes: [{ start: String(BigInt(expirationTs) + 1n), end: MAX_UINT64 }],
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,

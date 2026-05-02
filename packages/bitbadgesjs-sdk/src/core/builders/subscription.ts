@@ -12,7 +12,8 @@ import {
   defaultBalances,
   tokenMetadataEntry,
   metadataFromFlat,
-  MetadataMissingError
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface SubscriptionPayout {
@@ -78,6 +79,10 @@ export function buildSubscription(params: SubscriptionParams): any {
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: `subscription-tier-${tier}`,
+      ...approvalMetadata(
+        'Subscription Faucet',
+        'This is the minting faucet for subscriptions. This sets the price on the collection-level.'
+      ),
       transferTimes: FOREVER,
       tokenIds: [{ start: String(tier), end: String(tier) }],
       ownershipTimes: FOREVER,
@@ -130,6 +135,10 @@ export function buildSubscription(params: SubscriptionParams): any {
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: 'free-transfer',
+      ...approvalMetadata(
+        'Transferable',
+        'Allow holders to transfer subscription tokens between addresses.'
+      ),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,

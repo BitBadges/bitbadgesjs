@@ -10,7 +10,8 @@ import {
   defaultBalances,
   tokenMetadataEntry,
   metadataFromFlat,
-  MetadataMissingError
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface AddressListParams {
@@ -44,6 +45,10 @@ export function buildAddressList(params: AddressListParams): any {
       toListId: 'All',
       initiatedByListId: initiatedBy,
       approvalId: 'manager-add',
+      ...approvalMetadata(
+        'Add to List',
+        'Allows the manager to add addresses by minting membership tokens'
+      ),
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
@@ -64,6 +69,10 @@ export function buildAddressList(params: AddressListParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: initiatedBy,
       approvalId: 'manager-remove',
+      ...approvalMetadata(
+        'Remove from List',
+        'Allows the manager to remove addresses by burning membership tokens'
+      ),
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,

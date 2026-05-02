@@ -15,7 +15,8 @@ import {
   alwaysLockedCollectionApprovalPermission,
   tokenMetadataEntry,
   metadataFromFlat,
-  MetadataMissingError
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface SmartAccountParams {
@@ -42,6 +43,10 @@ export function buildSmartAccount(params: SmartAccountParams): any {
       toListId: `!${backingAddr}`,
       initiatedByListId: 'All',
       approvalId: 'smart-account-backing',
+      ...approvalMetadata(
+        'Deposit Approval',
+        'Allows deposits by sending tokens to the backing address.'
+      ),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -60,6 +65,10 @@ export function buildSmartAccount(params: SmartAccountParams): any {
       toListId: backingAddr,
       initiatedByListId: 'All',
       approvalId: 'smart-account-unbacking',
+      ...approvalMetadata(
+        'Withdraw Approval',
+        'Allows withdrawals by receiving tokens from the backing address.'
+      ),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -78,6 +87,10 @@ export function buildSmartAccount(params: SmartAccountParams): any {
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: 'transferable-approval',
+      ...approvalMetadata(
+        'Transferable',
+        'Allow holders to transfer smart account tokens between addresses.'
+      ),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,

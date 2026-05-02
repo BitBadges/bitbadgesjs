@@ -17,7 +17,8 @@ import {
   baselinePermissions,
   tokenMetadataEntry,
   metadataFromFlat,
-  MetadataMissingError
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface VaultParams {
@@ -52,6 +53,10 @@ export function buildVault(params: VaultParams): any {
       toListId: `!${backingAddr}`,
       initiatedByListId: 'All',
       approvalId: 'vault-deposit',
+      ...approvalMetadata(
+        'Deposit',
+        'Open deposit — anyone can deposit backing coins to mint vault tokens.'
+      ),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -69,6 +74,10 @@ export function buildVault(params: VaultParams): any {
       toListId: backingAddr,
       initiatedByListId: 'All',
       approvalId: `vault-withdraw-${Math.random().toString(16).slice(2, 10)}`,
+      ...approvalMetadata(
+        'Withdrawal',
+        'Burn vault tokens to withdraw backing coins.'
+      ),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -112,6 +121,10 @@ export function buildVault(params: VaultParams): any {
       toListId: params.emergencyRecovery,
       initiatedByListId: params.emergencyRecovery,
       approvalId: 'vault-emergency-migration',
+      ...approvalMetadata(
+        'Emergency Migration',
+        'Emergency fund migration to a recovery address.'
+      ),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,

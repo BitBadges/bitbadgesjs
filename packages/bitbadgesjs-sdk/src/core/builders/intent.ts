@@ -14,7 +14,8 @@ import {
   durationToTimestamp,
   uniqueId,
   mintToBurnBalances,
-  buildUserApprovalMsg
+  buildUserApprovalMsg,
+  approvalMetadata
 } from './shared.js';
 
 export interface IntentParams {
@@ -37,6 +38,10 @@ export function buildIntent(params: IntentParams): any {
 
   const approval = {
     approvalId: id,
+    ...approvalMetadata(
+      'Intent',
+      'Atomic OTC swap — pay one denom and receive another in a single transfer.'
+    ),
     toListId: 'All',
     initiatedByListId: 'All',
     transferTimes: [{ start: '1', end: expirationTs }],

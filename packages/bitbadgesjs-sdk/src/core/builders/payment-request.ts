@@ -25,7 +25,8 @@ import {
   zeroMaxTransfers,
   tokenMetadataEntry,
   metadataFromFlat,
-  MetadataMissingError
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface PaymentRequestParams {
@@ -71,6 +72,10 @@ export function buildPaymentRequest(params: PaymentRequestParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: params.payer,
       approvalId: 'payment-request-pay',
+      ...approvalMetadata(
+        'Pay',
+        'Approve and pay from your wallet'
+      ),
       transferTimes: [{ start: '1', end: expirationTs }],
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -100,6 +105,7 @@ export function buildPaymentRequest(params: PaymentRequestParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: params.payer,
       approvalId: 'payment-request-deny',
+      ...approvalMetadata('Deny', 'Reject this payment request'),
       transferTimes: [{ start: '1', end: expirationTs }],
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,

@@ -11,7 +11,8 @@ import {
   alwaysLockedTokenIdsPermission,
   tokenMetadataEntry,
   metadataFromFlat,
-  MetadataMissingError
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface Custom2FAParams {
@@ -32,6 +33,10 @@ export function buildCustom2FA(params: Custom2FAParams): any {
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: 'custom-2fa-mint',
+      ...approvalMetadata(
+        'Issue 2FA token',
+        'Mint a short-lived two-factor authentication token. Tokens auto-expire so they cannot be reused.'
+      ),
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
@@ -84,6 +89,7 @@ export function buildCustom2FA(params: Custom2FAParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'burn',
+      ...approvalMetadata('Burn', 'Burn 2FA tokens to the burn address.'),
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
@@ -99,6 +105,10 @@ export function buildCustom2FA(params: Custom2FAParams): any {
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: 'free-transfer',
+      ...approvalMetadata(
+        'Transferable',
+        'Allow holders to transfer 2FA tokens between addresses.'
+      ),
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,

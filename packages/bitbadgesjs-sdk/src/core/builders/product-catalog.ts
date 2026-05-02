@@ -14,7 +14,8 @@ import {
   zeroAmounts,
   tokenMetadataEntry,
   metadataFromFlat,
-  MetadataMissingError
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface ProductItem {
@@ -60,6 +61,10 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
 
     return {
       approvalId,
+      ...approvalMetadata(
+        'Purchase',
+        'Buy this product at the listed price.'
+      ),
       fromListId: 'Mint',
       toListId: product.burn ? BURN_ADDRESS : 'All',
       initiatedByListId: 'All',
@@ -97,6 +102,7 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
   // Burn approval: anyone can burn their tokens
   const burnApproval = {
     approvalId: `product-burn-${randomId()}`,
+    ...approvalMetadata('Burn', 'Burn product token'),
     fromListId: '!Mint',
     toListId: BURN_ADDRESS,
     initiatedByListId: 'All',

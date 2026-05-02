@@ -15,7 +15,8 @@ import {
   scalingBalances,
   tokenMetadataEntry,
   metadataFromFlat,
-  MetadataMissingError
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface CrowdfundParams {
@@ -56,6 +57,10 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: 'deposit-refund',
+      ...approvalMetadata(
+        'Deposit',
+        'Contribute USDC and receive a refund token'
+      ),
       transferTimes: [{ start: '1', end: deadlineTs }],
       tokenIds: [{ start: '1', end: '1' }],
       ownershipTimes: FOREVER,
@@ -86,6 +91,10 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: crowdfunderAddr,
       initiatedByListId: 'All',
       approvalId: 'deposit-progress',
+      ...approvalMetadata(
+        'Progress Tracker',
+        'Tracks cumulative contributions to crowdfunder'
+      ),
       transferTimes: [{ start: '1', end: deadlineTs }],
       tokenIds: [{ start: '2', end: '2' }],
       ownershipTimes: FOREVER,
@@ -111,6 +120,10 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: crowdfunderAddr,
       approvalId: 'success',
+      ...approvalMetadata(
+        'Withdraw',
+        'Crowdfunder withdraws funds when goal is met'
+      ),
       // Strictly AFTER deadline — `deadlineTs + 1` prevents the
       // success claim from racing the final deposit at the exact
       // deadline second. Matches CrowdfundRegistry's
@@ -158,6 +171,10 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'refund',
+      ...approvalMetadata(
+        'Refund',
+        'After deadline, burn refund token to reclaim deposit'
+      ),
       // Same `deadlineTs + 1` boundary as the success approval — no
       // refunds at the exact deadline second, only strictly after.
       transferTimes: [{ start: String(BigInt(deadlineTs) + 1n), end: MAX_UINT64 }],
@@ -210,6 +227,7 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
       approvalId: 'burn',
+      ...approvalMetadata('Burn', 'Burn leftover refund tokens'),
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '2' }],
       ownershipTimes: FOREVER,

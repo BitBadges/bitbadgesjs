@@ -14,7 +14,8 @@ import {
   scalingBalances,
   tokenMetadataEntry,
   metadataFromFlat,
-  MetadataMissingError
+  MetadataMissingError,
+  approvalMetadata
 } from './shared.js';
 
 export interface CreditTokenParams {
@@ -38,6 +39,10 @@ export function buildCreditToken(params: CreditTokenParams): any {
 
   const creditMint = {
     approvalId: 'credit-scaled',
+    ...approvalMetadata(
+      'Mint credits',
+      'Pay the configured price to mint credit tokens at the fixed exchange rate.'
+    ),
     fromListId: 'Mint',
     toListId: 'All',
     initiatedByListId: 'All',
