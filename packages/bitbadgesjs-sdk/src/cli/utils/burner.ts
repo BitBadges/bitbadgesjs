@@ -520,12 +520,14 @@ export async function runBurnerCreate(
  * Poll the LCD for a given tx hash and pull the created collection ID
  * out of its events. The sync-mode broadcast response returned from the
  * indexer doesn't include block events (check_tx runs before the block
- * commits), so we re-query once the block lands. We try up to ~6s — one
- * extra block at the current ~4s block time is plenty.
+ * commits), so we re-query once the block lands. We try up to ~20s —
+ * mainnet block time is ~4s but LCD indexing lag past the commit can
+ * push the tx past a tighter window, leaving callers with a successful
+ * txHash but no collectionId.
  */
 async function fetchCollectionIdFromTx(nodeUrl: string, txHash: string): Promise<string | undefined> {
   const axios = (await import('axios')).default;
-  const attempts = 3;
+  const attempts = 10;
   const delayMs = 2_000;
   for (let i = 0; i < attempts; i++) {
     try {

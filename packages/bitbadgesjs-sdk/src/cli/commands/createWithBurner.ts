@@ -222,7 +222,7 @@ createWithBurnerCommand.action(async (input: string | undefined, opts: any) => {
       ephemeralAddress: result.ephemeralAddress,
       recoveryPath: result.recoveryPath,
       txHash: result.txHash,
-      collectionId: result.collectionId,
+      collectionId: result.collectionId ?? null,
       paused: result.paused,
       error: result.error
     };

@@ -98,6 +98,8 @@ export interface NetworkOptions {
   testnet?: boolean;
   /** Legacy boolean shorthand. Equivalent to `--network local`. */
   local?: boolean;
+  /** Boolean shorthand. Equivalent to `--network mainnet`. */
+  mainnet?: boolean;
   /** Custom API base URL — overrides every other selector. */
   url?: string;
 }
@@ -105,12 +107,13 @@ export interface NetworkOptions {
 /**
  * Resolve a network name from a mix of long-form and legacy flags.
  * `--url` always wins; otherwise `--network` > `--local` > `--testnet`
- * > env > config > mainnet default.
+ * > `--mainnet` > env > config > mainnet default.
  */
 export function resolveNetwork(options: NetworkOptions): NetworkName {
   if (options.network) return options.network;
   if (options.local) return 'local';
   if (options.testnet) return 'testnet';
+  if (options.mainnet) return 'mainnet';
   return 'mainnet';
 }
 
@@ -182,6 +185,7 @@ export function addNetworkOptions(cmd: Command): Command {
       '--network <name>',
       'Network: mainnet | testnet | local. Picks the matching API base URL and config apiKey.'
     )
+    .option('--mainnet', 'Shortcut for --network mainnet')
     .option('--testnet', 'Shortcut for --network testnet')
     .option('--local', 'Shortcut for --network local (http://localhost:3001)')
     .option('--url <url>', 'Custom API base URL (overrides --network)');
