@@ -328,6 +328,28 @@ function isPair(v: any): v is { uri: string; customData: string } {
 }
 
 /**
+ * Hardcoded inline metadata for a builder-emitted approval.
+ *
+ * Approvals are text-only (no image). Builders use this to attach a
+ * template-specific name + description to each approval so the
+ * indexer can surface meaningful details without a remote fetch.
+ *
+ * Spread directly into an approval object alongside `approvalId`:
+ *
+ *   {
+ *     approvalId: 'bounty-accept',
+ *     ...approvalMetadata('Accept bounty', 'Verifier approves...'),
+ *     ...rest
+ *   }
+ *
+ * The values are intentionally NOT user-customizable — they describe
+ * what the approval IS within the template.
+ */
+export function approvalMetadata(name: string, description: string): { customData: string } {
+  return { customData: JSON.stringify({ name, description }) };
+}
+
+/**
  * Helper for builders that accept flat `name`/`description`/`image`/`uri`
  * params (the historical CLI shape). Resolves to a MetadataSource —
  * `{uri}` if a uri is given, `{inlineMetadata}` otherwise. Throws via
