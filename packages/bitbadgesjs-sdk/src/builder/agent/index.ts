@@ -33,7 +33,8 @@ export {
   inferFromStandards,
   buildInferenceSystemPrompt,
   buildInferenceUserPrompt,
-  parseInferenceResponse,
+  buildInferenceSchema,
+  validateInferenceObject,
   STANDARD_TO_TOKEN_TYPE,
   type TokenTypeInferenceInput,
   type TokenTypeInferenceResult

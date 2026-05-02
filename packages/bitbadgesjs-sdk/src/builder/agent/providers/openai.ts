@@ -23,12 +23,28 @@ import type {
   LLMProviderConfig,
   ProviderChatArgs,
   ProviderChatResponse,
+  ProviderClassifyArgs,
+  ProviderClassifyResponse,
   ProviderToolDefinition,
   ProviderMessage,
   ProviderToolCall
 } from './types.js';
 
 const DEFAULT_MODEL = 'gpt-4o-mini';
+const DEFAULT_CLASSIFY_MODEL = 'gpt-4o-mini';
+
+/** Per-1M-token pricing for OpenAI models we care about — used by `classify`. */
+const OPENAI_PRICING: Record<string, { input: number; output: number }> = {
+  'gpt-4o-mini': { input: 0.15, output: 0.6 },
+  'gpt-4o': { input: 2.5, output: 10.0 },
+  'gpt-4.1-mini': { input: 0.4, output: 1.6 },
+  'gpt-4.1-nano': { input: 0.1, output: 0.4 }
+};
+
+function priceForOpenAiModel(modelId: string): { input: number; output: number } {
+  // Unknown models fall through to gpt-4o pricing as a safe upper bound.
+  return OPENAI_PRICING[modelId] ?? OPENAI_PRICING['gpt-4o'];
+}
 
 let cachedSdk: any | null = null;
 
@@ -114,6 +130,89 @@ export class OpenAIProvider implements LLMProvider {
 
   defaultModel(): string {
     return DEFAULT_MODEL;
+  }
+
+  defaultClassifyModel(): string {
+    return DEFAULT_CLASSIFY_MODEL;
+  }
+
+  /**
+   * JSON-schema-constrained inference using OpenAI's structured-output
+   * mode. The schema is enforced server-side (`strict: true`) so the
+   * response is guaranteed to be valid JSON matching the contract,
+   * giving OpenAI users the same reliability as Anthropic Haiku's
+   * tuned-prompt JSON contract.
+   *
+   * Models that don't support `json_schema` (older `gpt-3.5*` / some
+   * `gpt-4` snapshots) will surface the API's error directly — caller
+   * (`tokenTypeInference`) treats any throw as a no-pick freestyle.
+   */
+  async classify(args: ProviderClassifyArgs): Promise<ProviderClassifyResponse> {
+    if (!this.client) {
+      throw new Error('OpenAIProvider.classify called before init()');
+    }
+
+    // OpenAI strict mode requires `additionalProperties: false` and
+    // every property listed in `required`. We default the former here
+    // and trust the caller to supply the latter via `schema.required`.
+    const schemaForApi: Record<string, unknown> = {
+      ...args.schema,
+      additionalProperties: args.schema.additionalProperties ?? false
+    };
+
+    const params: Record<string, unknown> = {
+      model: args.model,
+      messages: [
+        { role: 'system', content: args.systemPrompt },
+        { role: 'user', content: args.userPrompt }
+      ],
+      max_tokens: args.maxTokens ?? 200,
+      temperature: args.temperature ?? 0,
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: args.schemaName,
+          strict: true,
+          schema: schemaForApi
+        }
+      }
+    };
+
+    const requestOpts: Record<string, unknown> = {};
+    if (args.timeoutMs !== undefined) requestOpts.timeout = args.timeoutMs;
+    if (args.abortSignal) requestOpts.signal = args.abortSignal;
+
+    const response: any = await this.client.chat.completions.create(params, requestOpts);
+
+    const choice = response?.choices?.[0] ?? {};
+    const message = choice?.message ?? {};
+    const text = typeof message.content === 'string' ? message.content : '';
+    let parsed: Record<string, unknown> | null = null;
+    try {
+      const obj = text ? JSON.parse(text) : null;
+      parsed = obj && typeof obj === 'object' && !Array.isArray(obj) ? (obj as Record<string, unknown>) : null;
+    } catch {
+      parsed = null;
+    }
+
+    const usage = response?.usage ?? {};
+    const inputTokens = Number(usage.prompt_tokens ?? 0) || 0;
+    const outputTokens = Number(usage.completion_tokens ?? 0) || 0;
+    const price = priceForOpenAiModel(args.model);
+    const costUsd = (inputTokens / 1_000_000) * price.input + (outputTokens / 1_000_000) * price.output;
+
+    return {
+      parsed,
+      text,
+      usage: {
+        inputTokens,
+        outputTokens,
+        cacheCreationTokens: 0,
+        cacheReadTokens: 0
+      },
+      model: args.model,
+      costUsd
+    };
   }
 
   toolsForRequest(tools: ProviderToolDefinition[]): unknown {

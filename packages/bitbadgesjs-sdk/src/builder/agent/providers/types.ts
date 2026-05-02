@@ -111,6 +111,48 @@ export interface ProviderChatResponse {
   rawAssistantMessage: ProviderMessage;
 }
 
+/** JSON Schema (Draft-07 subset) for provider-side classification. */
+export interface ProviderJsonSchema {
+  type: 'object';
+  properties: Record<string, unknown>;
+  required?: string[];
+  additionalProperties?: boolean;
+}
+
+/** Provider-neutral classification args (small/fast/cheap structured-output call). */
+export interface ProviderClassifyArgs {
+  /** Model id to use (e.g. `claude-haiku-4-5-20251001`, `gpt-4o-mini`). */
+  model: string;
+  /** Classifier instructions. Should describe the schema in prose for providers without native JSON-schema enforcement. */
+  systemPrompt: string;
+  /** Content to classify. */
+  userPrompt: string;
+  /** JSON Schema for the response object. Used natively by OpenAI's strict `response_format`; documented in `systemPrompt` for Anthropic. */
+  schema: ProviderJsonSchema;
+  /** Schema name (passed to OpenAI's `response_format.json_schema.name`). */
+  schemaName: string;
+  maxTokens?: number;
+  /** Defaults to 0 — classification wants determinism. */
+  temperature?: number;
+  timeoutMs?: number;
+  abortSignal?: AbortSignal;
+  /** Anthropic-only cache marker on the system prompt. Other providers ignore. */
+  systemCacheControl?: { type: 'ephemeral' };
+}
+
+/** Provider-neutral classification response. */
+export interface ProviderClassifyResponse {
+  /** Parsed JSON object — null if parsing failed (caller treats as no-pick). */
+  parsed: Record<string, unknown> | null;
+  /** Raw response text (for debug + fallback parsing). */
+  text: string;
+  usage: ProviderUsage;
+  /** Echo of `args.model` so callers don't have to plumb it through. */
+  model: string;
+  /** USD cost for this single classify call — provider knows its own pricing. */
+  costUsd: number;
+}
+
 /** The provider contract. */
 export interface LLMProvider {
   /** Stable identifier, e.g. 'anthropic' / 'openai'. */
@@ -125,8 +167,17 @@ export interface LLMProvider {
   /** Make one chat call. */
   chat(args: ProviderChatArgs): Promise<ProviderChatResponse>;
 
-  /** Default model id when caller didn't override. */
+  /** Default model id for the chat loop when caller didn't override. */
   defaultModel(): string;
+
+  /** Default small/fast model id for classification calls (token-type inference). */
+  defaultClassifyModel(): string;
+
+  /**
+   * Run a JSON-schema-constrained inference call. Used by the agent's
+   * pre-build token-type classifier. Cheap, deterministic, single round.
+   */
+  classify(args: ProviderClassifyArgs): Promise<ProviderClassifyResponse>;
 
   /**
    * Provider-specific raw client, exposed for legacy code paths

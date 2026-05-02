@@ -12,12 +12,30 @@ import type {
   LLMProviderConfig,
   ProviderChatArgs,
   ProviderChatResponse,
+  ProviderClassifyArgs,
+  ProviderClassifyResponse,
   ProviderToolDefinition,
   ProviderMessage,
   ProviderToolCall
 } from './types.js';
 
 const DEFAULT_MODEL = 'claude-sonnet-4-6';
+const DEFAULT_CLASSIFY_MODEL = 'claude-haiku-4-5-20251001';
+
+/** Per-1M-token pricing for Anthropic models we care about — used by `classify`. */
+const ANTHROPIC_PRICING: Record<string, { input: number; output: number }> = {
+  'claude-haiku-4-5-20251001': { input: 1.0, output: 5.0 },
+  'claude-sonnet-4-6': { input: 3.0, output: 15.0 },
+  'claude-opus-4-7': { input: 5.0, output: 25.0 }
+};
+/** Anthropic prompt-cache multipliers — see https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching#pricing */
+const CACHE_WRITE_MULTIPLIER = 1.25;
+const CACHE_READ_MULTIPLIER = 0.1;
+
+function priceForAnthropicModel(modelId: string): { input: number; output: number } {
+  // Unknown models fall through to Opus pricing as a safe upper bound.
+  return ANTHROPIC_PRICING[modelId] ?? ANTHROPIC_PRICING['claude-opus-4-7'];
+}
 
 export class AnthropicProvider implements LLMProvider {
   readonly name = 'anthropic';
@@ -35,6 +53,75 @@ export class AnthropicProvider implements LLMProvider {
 
   defaultModel(): string {
     return DEFAULT_MODEL;
+  }
+
+  defaultClassifyModel(): string {
+    return DEFAULT_CLASSIFY_MODEL;
+  }
+
+  /**
+   * JSON-schema-constrained inference. Anthropic doesn't have a
+   * server-side `response_format`-style enforcement, so we describe
+   * the schema in the system prompt (caller already does this) and
+   * parse the text response loosely — matching the existing Haiku
+   * token-type contract that's been tuned in production.
+   */
+  async classify(args: ProviderClassifyArgs): Promise<ProviderClassifyResponse> {
+    if (!this.client) {
+      throw new Error('AnthropicProvider.classify called before init()');
+    }
+
+    const system = args.systemCacheControl
+      ? [{ type: 'text', text: args.systemPrompt, cache_control: args.systemCacheControl }]
+      : args.systemPrompt;
+
+    const params: Record<string, unknown> = {
+      model: args.model,
+      max_tokens: args.maxTokens ?? 200,
+      temperature: args.temperature ?? 0,
+      system,
+      messages: [{ role: 'user', content: args.userPrompt }]
+    };
+
+    const requestOpts: Record<string, unknown> = {};
+    if (args.timeoutMs !== undefined) requestOpts.timeout = args.timeoutMs;
+    if (args.abortSignal) requestOpts.signal = args.abortSignal;
+
+    let response: any;
+    try {
+      response = await this.client.messages.create(params, requestOpts);
+    } catch (err: any) {
+      if (err?.status === 401 || err?.status === 403) {
+        throw new AnthropicAuthError(err?.message);
+      }
+      throw err;
+    }
+
+    const textBlock = Array.isArray(response?.content)
+      ? response.content.find((b: any) => b?.type === 'text')
+      : null;
+    const text = typeof textBlock?.text === 'string' ? textBlock.text : '';
+    const parsed = parseLooseJson(text);
+
+    const usage = response?.usage ?? {};
+    const inputTokens = Number(usage.input_tokens ?? 0) || 0;
+    const outputTokens = Number(usage.output_tokens ?? 0) || 0;
+    const cacheCreationTokens = Number(usage.cache_creation_input_tokens ?? 0) || 0;
+    const cacheReadTokens = Number(usage.cache_read_input_tokens ?? 0) || 0;
+    const price = priceForAnthropicModel(args.model);
+    const costUsd =
+      (inputTokens / 1_000_000) * price.input +
+      (outputTokens / 1_000_000) * price.output +
+      (cacheCreationTokens / 1_000_000) * price.input * CACHE_WRITE_MULTIPLIER +
+      (cacheReadTokens / 1_000_000) * price.input * CACHE_READ_MULTIPLIER;
+
+    return {
+      parsed,
+      text,
+      usage: { inputTokens, outputTokens, cacheCreationTokens, cacheReadTokens },
+      model: args.model,
+      costUsd
+    };
   }
 
   /**
@@ -149,4 +236,26 @@ export function normalizeAnthropicResponse(response: any): ProviderChatResponse 
     },
     rawAssistantMessage
   };
+}
+
+/**
+ * Parse a model JSON response that might come fenced (```json … ```).
+ * Returns null on any failure — callers treat that as a no-pick.
+ *
+ * Two anchored replaces + trim instead of a single alternation regex
+ * with `\s*` to avoid the polynomial-regex-on-uncontrolled-input
+ * footgun CodeQL flagged on the legacy parser.
+ */
+function parseLooseJson(raw: string): Record<string, unknown> | null {
+  let unfenced = raw.trim();
+  if (unfenced.startsWith('```')) {
+    unfenced = unfenced.replace(/^```(?:json)?/, '').trimStart();
+    unfenced = unfenced.replace(/```$/, '').trimEnd();
+  }
+  try {
+    const obj = JSON.parse(unfenced);
+    return obj && typeof obj === 'object' && !Array.isArray(obj) ? (obj as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
 }

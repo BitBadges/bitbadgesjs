@@ -467,16 +467,15 @@ export class BitBadgesBuilderAgent {
     const effectiveSkillsHasTokenType = effectiveSkills.some((s) => tokenTypeSkillIds.has(s));
     const inferFlag =
       options?.autoInferTokenType ?? this.options.autoInferTokenType ?? true;
-    // Token-type inference uses an Anthropic-haiku-tuned classifier
-    // and a strict JSON output contract. Other providers may not
-    // honor the same contract reliably, so we skip inference unless
-    // the active provider is Anthropic. Freestyle (no inferred type)
-    // is an explicitly valid build outcome.
+    // Token-type inference dispatches through `provider.classify()` —
+    // Anthropic uses the Haiku-tuned JSON contract; OpenAI uses native
+    // structured outputs (`response_format: json_schema, strict: true`).
+    // Skip inference if no client is initialized; freestyle (no
+    // inferred type) is an explicitly valid build outcome regardless.
     const shouldInferTokenType =
       inferFlag &&
       !effectiveSkillsHasTokenType &&
       !!prompt &&
-      this.provider.name === 'anthropic' &&
       !!this.provider.client;
 
     let inferredTokenType: string | null | undefined = undefined;
@@ -498,7 +497,7 @@ export class BitBadgesBuilderAgent {
         allowedTokenTypeIds: this.options.skills
           ? this.options.skills.filter((s) => tokenTypeSkillIds.has(s))
           : undefined,
-        anthropicClient: this.provider.client,
+        provider: this.provider,
         abortSignal: signal,
         debug
       };
