@@ -520,6 +520,95 @@ login`. Switch active address with `auth use <addr>`; inspect with
 `auth status [--check]` and `auth whoami`. Full reference:
 <https://docs.bitbadges.io/for-developers/cli/auth-commands>.
 
+#### Confirming a tx landed: `tx status` / `tx wait`
+
+After `deploy` (or any external broadcast) returns a `txHash`, use the
+`tx` verb to confirm the tx committed. It hits the chain's REST/RPC
+directly — Cosmos LCD first, with automatic fall-through to the EVM
+JSON-RPC for `eth_sendRawTransaction`-broadcast hashes. No indexer
+round-trip.
+
+```bash
+# One-shot status — exit 0 if committed, 1 if chain-fail, 2 if RPC error / not found.
+bitbadges-cli tx status 0F46899E... --mainnet --format json
+
+# Poll until committed (default 60s timeout).
+bitbadges-cli tx wait $TXHASH --mainnet --timeout 120 --format json
+```
+
+The JSON envelope wraps `{height, code, gasUsed, events, collectionId, via}`
+where `via` is `"cosmos"` or `"evm"` depending on which RPC family
+matched. `--format text` renders a compact summary instead.
+
+#### Output envelope: `--format json`
+
+`tx`, `explain`, and `api --search` (and other newer verbs) emit a
+uniform envelope when called with `--format json` (or in non-TTY pipes
+by default):
+
+```json
+{
+  "ok": true,
+  "data": { ... },
+  "warnings": [{"code": "...", "message": "..."}],
+  "hint": "optional next-step suggestion",
+  "error": null
+}
+```
+
+On error: `{ok: false, data: null, error: {code, message, details?}, hint?}`.
+Agents should branch on `ok` and consume `error.code` for retry logic;
+`hint` is populated on common failure modes (auth-rejected, 401/403,
+tx-wait-timeout, deploy insufficient-funds) to cut retry loops in half.
+
+Older commands (`build`, `check`, `simulate`, `preview`, `doctor`)
+still use their pre-existing `--json` flag shape. The unified envelope
+will roll out across all commands in a follow-up release.
+
+#### `--quiet` / `BB_QUIET=1`
+
+Silences stderr commentary (auto-review banners, validation summaries,
+"Written to ..." notices). Errors still emit. Useful when piping into
+agent context windows.
+
+```bash
+bitbadges-cli build vault --backing-coin USDC ... --json-only --quiet \
+  | bitbadges-cli deploy --burner --manager bb1... --msg-stdin
+```
+
+#### Discovering API routes: `api --search` + `--schema`
+
+The indexer exposes 100+ routes under `bitbadges-cli api`. To find a
+route without grepping docs, scan the registry:
+
+```bash
+bitbadges-cli api --search swap                     # text columns
+bitbadges-cli api --search balance --format json    # JSON list
+```
+
+To inspect a route's request/response shape without making an API call:
+
+```bash
+bitbadges-cli api assets estimate-swap --schema
+bitbadges-cli api tokens get-collection --schema
+```
+
+`--schema` returns route metadata (method, path, sdkLinks, body
+fields, query params) so agents can construct valid request bodies
+offline.
+
+#### Dry-running a `deploy`
+
+`deploy --dry-run` runs the simulation without generating a wallet,
+hitting the faucet, or broadcasting:
+
+```bash
+bitbadges-cli deploy vault.json --burner --dry-run --manager bb1... --mainnet
+```
+
+Returns expected gas + balance changes; exits non-zero on simulator
+rejection so agents can branch on success before committing real funds.
+
 ### Error Handling
 
 All API methods return promises that reject with an `ErrorResponse` on failure:
