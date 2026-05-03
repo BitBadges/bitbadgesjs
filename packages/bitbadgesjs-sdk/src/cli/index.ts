@@ -11,6 +11,7 @@ import { simulateCommand } from './commands/simulate.js';
 import { previewCommand } from './commands/preview.js';
 import { deployCommand } from './commands/deploy.js';
 import { txCommand } from './commands/tx.js';
+import { signCommand } from './commands/sign.js';
 
 // Indexer access
 import { createApiCommand } from './commands/api.js';
@@ -74,7 +75,7 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   },
   {
     title: 'Indexer access',
-    commands: [createApiCommand(), authCommand]
+    commands: [createApiCommand(), authCommand, signCommand]
   },
   {
     title: 'Local state',

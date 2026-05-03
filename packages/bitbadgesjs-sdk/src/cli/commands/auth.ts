@@ -12,6 +12,7 @@
 import * as fs from 'fs';
 import { Command } from 'commander';
 import { resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
+import { bridgeSign, resolveFrontendUrl } from '../auth/browser-bridge.js';
 import {
   AuthSession,
   Network,
@@ -201,10 +202,14 @@ export const authCommand = new Command('auth').description(
 addNetworkOptions(authCommand.command('login'))
   .description('One-shot Blockin login: fetches challenge, posts your signature, stores session cookie.')
   .requiredOption('--address <addr>', "Native address (bb1... for Cosmos, 0x... for ETH).")
-  .requiredOption('--signature <sig>', 'Signature over the challenge message (hex or base64).')
-  .option('--public-key <b64>', 'Compressed pubkey, base64. REQUIRED for Cosmos addresses (CosmosDriver verifier needs it).')
+  .option('--signature <sig>', 'Signature over the challenge message (hex or base64). Omit when using --browser.')
+  .option('--public-key <b64>', 'Compressed pubkey, base64. REQUIRED for Cosmos signatures unless --browser is set.')
   .option('--message <text>', 'The exact challenge message that was signed (typically from `auth challenge`).')
   .option('--message-file <path>', 'Read challenge message from file (use `-` for stdin).')
+  .option('--browser', 'Open the BitBadges /sign page in the default browser and use the connected wallet to sign. Mutually exclusive with --signature.')
+  .option('--frontend-url <url>', 'Override the frontend base URL used by --browser (defaults to bitbadges.io / testnet.bitbadges.io / localhost:3000 by network).')
+  .option('--no-open', 'With --browser: print the sign URL to stderr instead of auto-launching the browser.')
+  .option('--timeout <seconds>', 'With --browser: how long to wait for the wallet signature before giving up (default 300, max 1800).')
   .option('--2fa <code>', '6-digit TOTP code (if account has 2FA enabled).')
   .option('--2fa-backup <code>', 'Backup recovery code (alternative to --2fa).')
   .action(async (opts) => {
@@ -212,8 +217,15 @@ addNetworkOptions(authCommand.command('login'))
     const baseUrl = resolveBaseUrl({ testnet: opts.testnet, local: opts.local, baseUrl: opts.url });
     const apiKey = resolveApiKey(opts.apiKey, network);
     const chain = detectChain(opts.address);
-    if (chain === 'Cosmos' && !opts.publicKey) {
-      throw new Error('--public-key is required for Cosmos signatures (CosmosDriver verifier needs it). Get it from `sign-arbitrary` output.');
+
+    if (opts.browser && opts.signature) {
+      throw new Error('--browser and --signature are mutually exclusive. Pick one path.');
+    }
+    if (!opts.browser && !opts.signature) {
+      throw new Error('Either --signature <sig> or --browser is required.');
+    }
+    if (!opts.browser && chain === 'Cosmos' && !opts.publicKey) {
+      throw new Error('--public-key is required for Cosmos signatures (CosmosDriver verifier needs it). Get it from `sign-arbitrary` output, or use --browser.');
     }
 
     let message = readMessage({ message: opts.message, messageFile: opts.messageFile });
@@ -252,12 +264,44 @@ addNetworkOptions(authCommand.command('login'))
       cookies = fresh.cookies;
     }
 
+    let signatureToVerify: string = opts.signature ?? '';
+    let publicKeyToVerify: string | undefined = opts.publicKey;
+
+    if (opts.browser) {
+      if (!message) {
+        throw new Error('Internal error: missing challenge message before browser bridge.');
+      }
+      const frontendUrl = resolveFrontendUrl(network, opts.frontendUrl);
+      const requestedTimeoutSec = opts.timeout ? Math.min(1800, Math.max(60, Number(opts.timeout))) : 300;
+      process.stderr.write(`\nOpening browser to ${frontendUrl}/sign for wallet signature...\n`);
+      const result = await bridgeSign({
+        mode: 'login',
+        payload: { message, expectedAddress: opts.address, chain: chain === 'ETH' ? 'evm' : 'cosmos' },
+        baseUrl,
+        frontendUrl,
+        apiKey,
+        timeoutMs: requestedTimeoutSec * 1000,
+        noOpen: opts.open === false,
+      });
+      if (result.error) {
+        throw new Error(`Browser sign cancelled or rejected: ${result.error}`);
+      }
+      if (!result.signature) {
+        throw new Error('Browser bridge returned no signature.');
+      }
+      signatureToVerify = result.signature;
+      publicKeyToVerify = result.publicKey ?? publicKeyToVerify;
+      if (chain === 'Cosmos' && !publicKeyToVerify) {
+        throw new Error('Browser bridge did not return a publicKey for the Cosmos signature; cannot complete /auth/verify.');
+      }
+    }
+
     let verify;
     try {
       verify = await postVerify(baseUrl, apiKey, formatCookieHeaderFromMany(cookies), {
         message,
-        signature: opts.signature,
-        publicKey: opts.publicKey,
+        signature: signatureToVerify,
+        publicKey: publicKeyToVerify,
       });
     } catch (err: any) {
       // Targeted hint:" — the most common failure mode here is an
