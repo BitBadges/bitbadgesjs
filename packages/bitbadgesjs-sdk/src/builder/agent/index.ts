@@ -54,6 +54,22 @@ export {
 export { getProvider, AnthropicProvider, OpenAIProvider, SUPPORTED_PROVIDERS } from './providers/index.js';
 export type { LLMProvider, ProviderName } from './providers/index.js';
 
+// Observability — TraceEmitter abstraction passed via the `tracer`
+// option on BitBadgesBuilderAgent. Vendor adapters (LangFuse / OTEL)
+// ship as separate packages; SDK core ships only NoopEmitter (default,
+// zero overhead) + InMemoryEmitter (tests + reference impl).
+export {
+  NoopEmitter,
+  InMemoryEmitter,
+  type TraceEmitter,
+  type Span,
+  type SpanAttributes,
+  type SpanId,
+  type SpanStatus,
+  type TraceId,
+  type SpanRecord
+} from '../tracing/index.js';
+
 export type {
   // Options
   BitBadgesBuilderAgentOptions,
