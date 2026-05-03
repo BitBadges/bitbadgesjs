@@ -105,8 +105,9 @@ export const genTxPayloadCommand = new Command('gen-tx-payload')
   .argument('[input]', 'Msg JSON file path, "-" for stdin, or inline JSON. Accepts a single {typeUrl, value} or an array.')
   .option('--msg-file <path>', 'Read msg JSON from a file')
   .option('--msg-stdin', 'Read msg JSON from stdin')
-  .requiredOption('--from <address>', 'Signer address (bb1.../0x...). Used to fetch account info and select payload shape. If 0x... is supplied, the bb1-equivalent is auto-derived for the Cosmos sender and EVM payload is also generated.')
-  .option('--evm-from <0x...>', 'Generate EVM payload for this address in addition to the Cosmos sender. Use when you want both signDirect AND evmTx outputs.')
+  .requiredOption('--from <address>', 'Signer address (bb1.../0x...). Used to fetch account info and select payload shape. With 0x... → emits evmTx (and signDirect if a public key is on chain). With bb1... → emits signDirect; add --with-evm-tx to also emit evmTx.')
+  .option('--evm-from <0x...>', 'Use this EVM address for the evmTx payload alongside a bb1 sender. Implies --with-evm-tx.')
+  .option('--with-evm-tx', 'Force-emit the evmTx precompile call alongside the Cosmos payloads. Useful when --from is bb1 and you also want a ready-to-send EVM tx.')
   .option('--public-key <b64>', 'Base64 compressed pubkey. Required if not fetched from indexer (--no-fetch) or if account is not yet onchain.')
   .option('--account-number <n>', 'Override account number (skip indexer round-trip for this field)')
   .option('--sequence <n>', 'Override sequence (skip indexer round-trip for this field)')
@@ -129,12 +130,27 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
 
   // Resolve sender / EVM address. The user passes one address via --from;
   // we derive the other when an EVM payload is wanted (--from is 0x... OR
-  // --evm-from is set explicitly).
+  // --evm-from is set explicitly OR --with-evm-tx is set with a bb1 --from).
   const fromIsEvm = String(opts.from).startsWith('0x');
   const senderAddress: string = fromIsEvm
     ? evmToCosmosAddress(opts.from, 'bb')
     : opts.from;
-  const evmAddress: string | undefined = opts.evmFrom ?? (fromIsEvm ? opts.from : undefined);
+  // EVM address resolution:
+  //  - explicit --evm-from wins
+  //  - else if --from is 0x..., use that
+  //  - else if --with-evm-tx is set, derive from bb1 sender via cosmosToEthAddress (best-effort; user can override)
+  let evmAddress: string | undefined = opts.evmFrom ?? (fromIsEvm ? opts.from : undefined);
+  if (!evmAddress && opts.withEvmTx) {
+    // bb1 → 0x derivation. The SDK's converter handles this.
+    try {
+      const { convertToEthAddress } = await import('../../address-converter/converter.js');
+      evmAddress = convertToEthAddress(senderAddress);
+    } catch (err: any) {
+      process.stderr.write(`Failed to derive EVM address from ${senderAddress}: ${err?.message || err}\n`);
+      process.stderr.write('Pass --evm-from 0x... explicitly.\n');
+      process.exit(2);
+    }
+  }
 
   const networkName = resolveNetwork(opts);
   const baseUrl = getApiUrl(opts);
@@ -153,10 +169,10 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
         const info = await fetchAccountInfo(baseUrl, apiKey, senderAddress);
         if (accountNumber === undefined) accountNumber = info.accountNumber;
         if (sequence === undefined) sequence = info.sequence;
-        if (!publicKey) publicKey = info.publicKey;
+        if (!publicKey && info.publicKey) publicKey = info.publicKey;
       } catch (err: any) {
         process.stderr.write(`Indexer fetch failed: ${err?.message || err}\n`);
-        process.stderr.write('If running offline, pass --no-fetch with --account-number, --sequence, and --public-key.\n');
+        process.stderr.write('If running offline, pass --no-fetch with --account-number and --sequence (and --public-key if you want Cosmos sign payloads).\n');
         process.exit(1);
       }
     }
@@ -166,8 +182,21 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
     process.stderr.write('Missing --account-number / --sequence. Re-run without --no-fetch, or supply both flags.\n');
     process.exit(2);
   }
-  if (!publicKey) {
-    process.stderr.write('Missing public key. Pass --public-key <b64>, or omit --no-fetch so the indexer can supply it (account must be seen onchain first).\n');
+
+  // publicKey is required for Cosmos sign payloads (signDirect, legacyAmino).
+  // It's NOT required if only evmTx is wanted — i.e. when --from is 0x...
+  // and there's no public key on file yet (Privy-only sign-in). In that
+  // case, drop the cosmos sender so createTransactionPayload only emits
+  // evmTx — the EVM tx is self-signing (no separate pubkey for the
+  // Cosmos AuthInfo).
+  const wantCosmosPayloads = !!publicKey;
+  if (!wantCosmosPayloads && !evmAddress) {
+    process.stderr.write(
+      'No public key available for ' + senderAddress + ' and no EVM address provided. ' +
+      'Either:\n' +
+      '  • Pass --public-key <b64> (for Cosmos signDirect/legacyAmino), or\n' +
+      '  • Use an EVM address via --from 0x... or --evm-from 0x... (emits evmTx only).\n'
+    );
     process.exit(2);
   }
 
@@ -195,12 +224,16 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
   try {
     payload = createTransactionPayload(
       {
-        sender: {
-          address: senderAddress,
-          sequence: sequence,
-          accountNumber: accountNumber,
-          publicKey: publicKey,
-        },
+        ...(wantCosmosPayloads
+          ? {
+              sender: {
+                address: senderAddress,
+                sequence: sequence,
+                accountNumber: accountNumber,
+                publicKey: publicKey!,
+              },
+            }
+          : {}),
         fee: { amount: fee, denom, gas },
         memo,
         chainIdOverride: chainId,
@@ -215,32 +248,53 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
 
   // Serialize the proto TxBody / AuthInfo to base64 so the JSON output is
   // self-contained. signBytes is already a string. evmTx is plain JSON.
-  const envelope = {
-    chain: evmAddress ? (senderAddress ? 'cosmos+evm' : 'evm') : 'cosmos',
+  const envelope: any = {
+    chain: evmAddress ? (wantCosmosPayloads ? 'cosmos+evm' : 'evm') : 'cosmos',
     chainId,
-    sender: { address: senderAddress, accountNumber: String(accountNumber), sequence: String(sequence), publicKey },
-    ...(evmAddress ? { evmAddress } : {}),
     fee: { amount: fee, denom, gas },
     memo,
     messages: messagesInput,
-    signDirect: {
+  };
+  if (wantCosmosPayloads) {
+    envelope.sender = { address: senderAddress, accountNumber: String(accountNumber), sequence: String(sequence), publicKey };
+    envelope.signDirect = {
       bodyBytes: bytesToBase64(payload.signDirect.body.toBinary()),
       authInfoBytes: bytesToBase64(payload.signDirect.authInfo.toBinary()),
       signBytes: payload.signDirect.signBytes,
-    },
-    legacyAmino: {
+    };
+    envelope.legacyAmino = {
       bodyBytes: bytesToBase64(payload.legacyAmino.body.toBinary()),
       authInfoBytes: bytesToBase64(payload.legacyAmino.authInfo.toBinary()),
       signBytes: payload.legacyAmino.signBytes,
-    },
-    ...(payload.evmTx ? { evmTx: payload.evmTx } : {}),
-    instructions: [
-      'signDirect.signBytes is what you sign for SIGN_MODE_DIRECT (Cosmos default).',
-      'legacyAmino.signBytes is what hardware wallets sign for SIGN_MODE_AMINO.',
-      'evmTx is a precompile call ready for ethers/viem: `signer.sendTransaction({to, data, value})`.',
-      'Once signed: rebuild a TxRaw {bodyBytes, authInfoBytes, [signature]} and POST to /api/v0/broadcast.',
-    ],
-  };
+    };
+  }
+  if (evmAddress) {
+    envelope.evmAddress = evmAddress;
+  }
+  if (payload.evmTx) {
+    // Augment the precompile call with everything an external EVM signer
+    // (ethers/viem/hardware) needs to construct an EIP-1559 tx without
+    // re-fetching anything: chainId, recommended gasLimit, and a hint
+    // string for the precompile function.
+    envelope.evmTx = {
+      ...payload.evmTx,
+      chainId: NETWORK_CONFIGS[networkName].evmChainId,
+      gasLimit: gas,
+    };
+  }
+  // Broadcast endpoint hint so callers don't have to know our routes.
+  envelope.broadcastEndpoint = `${normalizeIndexerBase(baseUrl)}/broadcast`;
+  envelope.instructions = [
+    ...(wantCosmosPayloads ? [
+      'Cosmos signing — pick one mode:',
+      '  SIGN_MODE_DIRECT: sign signDirect.signBytes; assemble TxRaw{bodyBytes, authInfoBytes, [signature]} and POST to broadcastEndpoint.',
+      '  SIGN_MODE_AMINO:  sign legacyAmino.signBytes (for hardware wallets that already speak amino).',
+    ] : []),
+    ...(payload.evmTx ? [
+      'EVM signing — build an EIP-1559 tx with: { chainId: evmTx.chainId, to: evmTx.to, data: evmTx.data, value: evmTx.value, gasLimit: evmTx.gasLimit }, sign with your EVM key, send via any RPC.',
+    ] : []),
+    'Need a tx-bytes-only flow without managing TxRaw assembly? Use `bitbadges-cli deploy --browser --sign-only` instead — that hands the wallet the signing UI and returns ready-to-broadcast bytes.',
+  ];
 
   process.stdout.write(JSON.stringify(envelope, null, 2) + '\n');
 });
