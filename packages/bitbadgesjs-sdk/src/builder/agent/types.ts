@@ -7,6 +7,7 @@
 
 import type { KVStore } from './sessionStore.js';
 import type { DesignDecisionsResult } from '../../core/review-types.js';
+import type { TraceEmitter } from '../tracing/index.js';
 
 /** High-level build mode passed to the agent. */
 export type BuildMode = 'create' | 'update' | 'refine';
@@ -485,6 +486,24 @@ export interface BitBadgesBuilderAgentOptions {
 
   /** Lifecycle hooks. */
   hooks?: AgentHooks;
+
+  /**
+   * Optional trace emitter — observability over every phase boundary
+   * (prompt assembly, LLM round, tool call, validation, fix loop,
+   * audit). Defaults to {@link NoopEmitter} so consumers pay zero
+   * overhead unless they opt in.
+   *
+   * Adapter ecosystem lives outside SDK core: indexer bridges spans
+   * to its existing Mongo `SessionLogEntry[]` shape; vendor adapters
+   * (LangFuse / OTEL / Braintrust) ship as separate packages.
+   *
+   * The emitter is responsible for capturing wall-clock `startTime`
+   * at `startSpan(...)` time and maintaining a span stack for
+   * `parentSpanId` auto-inference. See `src/builder/tracing/types.ts`.
+   *
+   * @category Builder
+   */
+  tracer?: TraceEmitter;
 
   /** Log full prompt + responses to stderr. Default: false. */
   debug?: boolean;

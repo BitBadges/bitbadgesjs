@@ -36,6 +36,7 @@ import { MemoryStore, type KVStore } from './sessionStore.js';
 import { createAgentToolRegistry, type AgentToolRegistry } from './toolAdapter.js';
 import { runAgentLoop } from './loop.js';
 import { runValidationGate, type ValidationGateResult } from './validation.js';
+import { NoopEmitter, type TraceEmitter } from '../tracing/index.js';
 import { inferTokenTypeFromPrompt, getTokenTypeSkills } from './tokenTypeInference.js';
 import type { DesignDecisionsResult } from '../../core/review-types.js';
 import type {
@@ -67,6 +68,17 @@ export class BitBadgesBuilderAgent {
   private readonly sessionStore: KVStore;
   private readonly hooks: AgentHooks;
   private readonly provider: LLMProvider;
+  /**
+   * Trace emitter — defaults to {@link NoopEmitter} so consumers pay
+   * zero overhead unless they opt in. Wired through every phase
+   * boundary in `build()` so a future LangFuse / OTEL adapter is a
+   * one-week swap, not a data-pipeline migration.
+   *
+   * The `_spanStack` is held inside the emitter (each emitter
+   * implementation maintains its own LIFO stack); the agent only
+   * needs to call `tracer.startSpan(...)` and `span.end(...)`.
+   */
+  private readonly tracer: TraceEmitter;
   /**
    * Pending init promise for the provider's underlying client. Shared
    * across concurrent `build()` calls so multiple parallel builds
@@ -177,6 +189,7 @@ export class BitBadgesBuilderAgent {
     });
     this.sessionStore = options.sessionStore ?? new MemoryStore();
     this.hooks = options.hooks ?? {};
+    this.tracer = options.tracer ?? new NoopEmitter();
 
     // One-time construction-time warning: if the configured skill set
     // includes any skill whose instructions reference on-chain collection
@@ -415,6 +428,32 @@ export class BitBadgesBuilderAgent {
       }
     };
 
+    // Tracer scaffolding — runs alongside `logPhase` rather than
+    // replacing it. The on-end `logPhase` semantics stay intact for
+    // existing onLog consumers; the tracer additionally captures
+    // wall-clock startTime + parent-span IDs (managed by the emitter's
+    // own LIFO stack) so future LangFuse / OTEL adapters can render a
+    // trace tree, not just a flat list of completed phases.
+    //
+    // `tracer` defaults to NoopEmitter (zero overhead) so any consumer
+    // who didn't opt in pays nothing.
+    const tracer = this.tracer;
+    const buildSpan = tracer.startSpan('build', {
+      traceId: sessionId,
+      mode,
+      model: this.model.id,
+      'creator.address': creatorAddress
+    });
+    const startPhaseSpan = (name: string, attrs?: Record<string, unknown>) =>
+      tracer.startSpan(name, { traceId: sessionId, ...(attrs || {}) });
+    const endSpanSafely = (span: { end: (a?: any) => void }, attrs?: Record<string, unknown>): void => {
+      try {
+        span.end(attrs);
+      } catch {
+        /* observability — never let a misbehaving emitter break the build */
+      }
+    };
+
     const requestedSkills = options?.selectedSkills ?? [];
     const effectiveSkills = this.options.skills
       ? requestedSkills.filter((s) => this.options.skills!.includes(s))
@@ -553,6 +592,7 @@ export class BitBadgesBuilderAgent {
 
     // Assemble prompt — honor `systemPrompt` full replace and `systemPromptAppend`
     const promptAssemblyStartMs = Date.now();
+    const promptAssemblySpan = startPhaseSpan('prompt_assembly', { skillCount: finalSkills.length });
     const promptParts = await assemblePromptParts(
       {
         prompt,
@@ -578,6 +618,7 @@ export class BitBadgesBuilderAgent {
     );
 
     const systemPromptHash = getSystemPromptHash(promptParts.systemPrompt);
+    endSpanSafely(promptAssemblySpan);
     logPhase('prompt_assembly_complete', promptAssemblyStartMs);
 
     // --- onCompletion always-fires accumulator ---
@@ -625,6 +666,7 @@ export class BitBadgesBuilderAgent {
     try {
     // --- Run main agent loop ---
     const mainLoopStartMs = Date.now();
+    const mainLoopSpan = startPhaseSpan('main_loop');
     let loopResult = await runAgentLoop({
       provider: this.provider,
       systemPrompt: promptParts.systemPrompt,
@@ -642,6 +684,7 @@ export class BitBadgesBuilderAgent {
       hooks,
       debug
     });
+    endSpanSafely(mainLoopSpan, { rounds: loopResult.rounds, tokens: loopResult.totalTokens });
     logPhase('main_loop_complete', mainLoopStartMs, { rounds: loopResult.rounds, tokens: loopResult.totalTokens });
 
     let rounds = loopResult.rounds;
@@ -679,6 +722,7 @@ export class BitBadgesBuilderAgent {
 
     if (strictness !== 'off') {
       const validationGateStartMs = Date.now();
+      const validationGateSpan = startPhaseSpan('validation_gate');
       gate = await runValidationGate({
         transaction,
         creatorAddress,
@@ -692,11 +736,13 @@ export class BitBadgesBuilderAgent {
           ? await this.options.onChainSnapshotFetcher(options.existingCollectionId).catch(() => null)
           : undefined
       });
+      endSpanSafely(validationGateSpan, { valid: gate.valid, errorCount: gate.hardErrors.length });
       logPhase('validation_gate_complete', validationGateStartMs, { valid: gate.valid, errorCount: gate.hardErrors.length });
 
       // --- Validation fix loop ---
       const fixLoopMax = this.options.fixLoopMaxRounds ?? DEFAULTS.fixLoopMaxRounds;
       const fixLoopStartMs = Date.now();
+      const fixLoopSpan = startPhaseSpan('fix_loop');
       while (gate && !gate.valid && fixRounds < fixLoopMax) {
         fixRounds++;
         if (signal.aborted) throw new AbortedError(totalTokens);
@@ -755,6 +801,7 @@ export class BitBadgesBuilderAgent {
       }
       // Only log fix-loop duration if we actually entered it.
       if (fixRounds > 0) {
+        endSpanSafely(fixLoopSpan, { fixRounds, finalValid: gate?.valid === true });
         logPhase('fix_loop_complete', fixLoopStartMs, { fixRounds, finalValid: gate?.valid === true });
       }
 
@@ -789,13 +836,27 @@ export class BitBadgesBuilderAgent {
     // during the build. Separate from the post-run LLM auditor (which is
     // gated by llmAuditorEnabled); these always surface regardless.
     const reviewFlags = drainReviewFlags(sessionId);
-    logPhase('build_complete', buildStartMs, {
+    const buildSummary = {
       valid: gate?.valid ?? true,
       rounds,
       fixRounds,
       tokens: totalTokens,
-      reviewFlags: reviewFlags.length
-    });
+      reviewFlags: reviewFlags.length,
+      durationMs: buildDurationMs
+    };
+    endSpanSafely(buildSpan, buildSummary);
+    // Best-effort tracer flush — batching emitters (HTTP exporters)
+    // need a kick at end-of-build. NoopEmitter / synchronous emitters
+    // ignore. Wrapped because flush() is allowed to throw / reject.
+    if (typeof tracer.flush === 'function') {
+      try {
+        const r = tracer.flush();
+        if (r && typeof (r as any).catch === 'function') (r as any).catch(() => {});
+      } catch {
+        /* observability — never break the build */
+      }
+    }
+    logPhase('build_complete', buildStartMs, buildSummary);
 
     const trace: BuildTrace = {
       systemPrompt: promptParts.systemPrompt,
