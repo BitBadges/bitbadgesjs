@@ -80,11 +80,21 @@ function base64UrlEncodeJson(obj: unknown): string {
   return Buffer.from(json, 'utf8').toString('base64url');
 }
 
+function normalizeIndexerBase(baseUrl: string): string {
+  // Some callers pass the indexer root (`http://localhost:3001`) and others
+  // pass it with the `/api/v0` suffix already attached. Normalize so the
+  // bridge always hits `<root>/api/v0/sign/payload` regardless of which
+  // shape the caller supplied.
+  const trimmed = baseUrl.replace(/\/$/, '');
+  return /\/api\/v\d+$/.test(trimmed) ? trimmed : `${trimmed}/api/v0`;
+}
+
 async function uploadPayload(baseUrl: string, apiKey: string | undefined, payload: BridgePayload): Promise<string> {
   if (!apiKey) {
     throw new Error('Cannot upload large sign payload: no API key. Set BITBADGES_API_KEY or pass --api-key.');
   }
-  const res = await fetch(`${baseUrl}/sign/payload`, {
+  const url = `${normalizeIndexerBase(baseUrl)}/sign/payload`;
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

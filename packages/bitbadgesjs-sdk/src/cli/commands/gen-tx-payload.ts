@@ -18,16 +18,6 @@
 import * as fs from 'fs';
 import { Command } from 'commander';
 import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
-import {
-  createBodyWithMultipleMessages,
-  createFee,
-  createSignerInfo,
-  createAuthInfo,
-  createSignDoc,
-  createStdSignDigestFromProto,
-  SIGN_DIRECT,
-  LEGACY_AMINO,
-} from '../../transactions/messages/transaction.js';
 import { NETWORK_CONFIGS } from '../../signing/types.js';
 
 interface MsgEntry {
@@ -74,10 +64,15 @@ interface FetchedAccountInfo {
   publicKey?: string;
 }
 
+function normalizeIndexerBase(baseUrl: string): string {
+  const trimmed = baseUrl.replace(/\/$/, '');
+  return /\/api\/v\d+$/.test(trimmed) ? trimmed : `${trimmed}/api/v0`;
+}
+
 async function fetchAccountInfo(baseUrl: string, apiKey: string | undefined, address: string): Promise<FetchedAccountInfo> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (apiKey) headers['x-api-key'] = apiKey;
-  const res = await fetch(`${baseUrl}/users`, {
+  const res = await fetch(`${normalizeIndexerBase(baseUrl)}/users`, {
     method: 'POST',
     headers,
     body: JSON.stringify({ accountsToFetch: [{ address }] }),
@@ -95,10 +90,6 @@ async function fetchAccountInfo(baseUrl: string, apiKey: string | undefined, add
     sequence: Number(acct.sequence ?? 0),
     publicKey: acct.publicKey?.key ?? acct.publicKey,
   };
-}
-
-function bytesToBase64(b: Uint8Array): string {
-  return Buffer.from(b).toString('base64');
 }
 
 export const genTxPayloadCommand = new Command('gen-tx-payload')
@@ -162,23 +153,18 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
     process.exit(2);
   }
 
-  // Build all the bytes the external signer might need.
+  // Build the metadata envelope an external signer needs. The CLI does NOT
+  // proto-encode the messages here — that requires the per-message-type
+  // SDK class which is heavy to plumb. Instead the caller is expected to
+  // handle its own proto encoding (ethers/viem for EVM-wrapped, cosmjs
+  // Registry for Cosmos, etc.) using the canonical message JSON we emit.
+  // What we DO populate is the fiddly state-fetching part: account number,
+  // sequence, public key, chain id, fee, memo — the things you'd otherwise
+  // have to hit the indexer / chain LCD for separately.
   const fee = String(opts.fee ?? '0');
   const denom = String(opts.feeDenom ?? 'ubadge');
   const gas = Number(opts.gas ?? 400000);
   const memo = String(opts.memo ?? '');
-
-  const body = createBodyWithMultipleMessages(messagesInput, memo);
-  const feeMessage = createFee(fee, denom, gas);
-  const pubKeyBytes = new Uint8Array(Buffer.from(publicKey, 'base64'));
-
-  const directSignerInfo = createSignerInfo(pubKeyBytes, sequence, SIGN_DIRECT);
-  const directAuthInfo = createAuthInfo(directSignerInfo, feeMessage);
-  const directSignDoc = createSignDoc(body.toBinary(), directAuthInfo.toBinary(), chainId, accountNumber);
-
-  const aminoSignerInfo = createSignerInfo(pubKeyBytes, sequence, LEGACY_AMINO);
-  const aminoAuthInfo = createAuthInfo(aminoSignerInfo, feeMessage);
-  const aminoSignBytes = createStdSignDigestFromProto(messagesInput, memo, fee, denom, gas, sequence, accountNumber, chainId);
 
   const envelope = {
     chain: opts.from.startsWith('0x') ? 'evm' : 'cosmos',
@@ -190,21 +176,16 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
     fee: { amount: fee, denom, gas: String(gas) },
     memo,
     messages: messagesInput,
-    bodyBytes: bytesToBase64(body.toBinary()),
-    authInfo: {
-      direct: bytesToBase64(directAuthInfo.toBinary()),
-      amino: bytesToBase64(aminoAuthInfo.toBinary()),
-    },
-    signBytes: {
-      // SIGN_MODE_DIRECT: protobuf-encoded SignDoc. Sign these bytes.
-      direct: bytesToBase64(directSignDoc.toBinary()),
-      // SIGN_MODE_AMINO: stable JSON-canonical digest. For hardware wallets.
-      amino: aminoSignBytes,
-    },
-    instructions: {
-      direct: 'Sign signBytes.direct with your private key (secp256k1 over keccak256(bytes)). Submit the signature back via `bitbadges-cli api broadcast-tx` or POST /api/v0/broadcast with txBytes built from createTxRaw(bodyBytes, authInfo.direct, [signature]).',
-      amino: 'Sign signBytes.amino with your private key (legacy amino path, useful for hardware wallets that already support cosmos amino signing).',
-    },
+    instructions: [
+      'This envelope contains the per-account state needed to construct a Cosmos SignDoc.',
+      'The CLI has fetched accountNumber, sequence, publicKey, and chainId for you.',
+      'To sign and broadcast:',
+      '  1. Build a Cosmos TxBody from `messages` (use the cosmjs Registry that matches each typeUrl).',
+      '  2. Build AuthInfo from `publicKey`, `sequence`, and `fee`.',
+      '  3. Build SignDoc from bodyBytes + authInfoBytes + chainId + accountNumber.',
+      '  4. Sign SignDoc.toBinary() with your private key (secp256k1).',
+      '  5. POST a TxRaw {bodyBytes, authInfoBytes, [signature]} to the chain or BitBadges /api/v0/broadcast.',
+    ],
   };
 
   process.stdout.write(JSON.stringify(envelope, null, 2) + '\n');
