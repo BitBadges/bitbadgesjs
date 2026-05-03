@@ -150,6 +150,22 @@ export function removeSession(network: Network, address: string): void {
   saveAuthStore(store);
 }
 
+/**
+ * Update only the rolling expiry on a stored session. Cookie value
+ * stays put — express-session keeps the SID stable across rolls and
+ * only resets Max-Age. No-op if the session is gone (e.g. user ran
+ * `auth logout` mid-flight). Skip writes that would shorten the
+ * existing expiry — out-of-order responses shouldn't claw back time.
+ */
+export function refreshSessionExpiry(network: Network, address: string, expiresAt: number): void {
+  const store = loadAuthStore();
+  const session = store.networks[network]?.sessions[address];
+  if (!session) return;
+  if (expiresAt <= session.expiresAt) return;
+  session.expiresAt = expiresAt;
+  saveAuthStore(store);
+}
+
 export function setActive(network: Network, address: string): void {
   const store = loadAuthStore();
   const n = ensureNetwork(store, network);

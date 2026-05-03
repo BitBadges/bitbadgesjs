@@ -195,6 +195,7 @@ function buildRouteCommand(route: ApiRoute): Command {
       // and --as-address are explicit opt-ins to keep silent session injection
       // out of the default code path.
       let cookie: string | undefined;
+      let cookieRef: { network: 'mainnet' | 'testnet' | 'local'; address: string } | undefined;
       if (opts.asAddress || opts.withSession) {
         const { getActiveSession, getSession, formatCookieHeader } = await import('../utils/auth-store.js');
         const sessionNetwork: 'mainnet' | 'testnet' | 'local' = network ?? 'mainnet';
@@ -212,6 +213,8 @@ function buildRouteCommand(route: ApiRoute): Command {
           );
         }
         cookie = formatCookieHeader(session);
+        // Ref so apiRequest can persist the rolled Set-Cookie expiry.
+        cookieRef = { network: sessionNetwork, address: session.address };
       }
 
       // Build path params map
@@ -300,6 +303,7 @@ function buildRouteCommand(route: ApiRoute): Command {
         apiKey,
         baseUrl,
         cookie,
+        cookieRef,
       });
 
       const formatted = opts.condensed

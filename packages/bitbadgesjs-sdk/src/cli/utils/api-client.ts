@@ -4,6 +4,12 @@
  */
 
 import { assertNetworkAvailable } from '../../signing/types.js';
+import {
+  Network,
+  extractSetCookies,
+  pickSessionCookie,
+  refreshSessionExpiry,
+} from './auth-store.js';
 import { getConfigApiKey, getConfigBaseUrl } from './config.js';
 
 export interface ApiRequestOptions {
@@ -14,6 +20,12 @@ export interface ApiRequestOptions {
   baseUrl?: string;
   /** Optional Cookie header value (e.g. "bitbadges=s%3A..."). Set via `auth login`. */
   cookie?: string;
+  /**
+   * Pointer back to the stored session so the rolled Set-Cookie expiry
+   * (express-session is `rolling: true`) gets persisted to auth.json.
+   * Leave undefined for non-session calls or one-shot cookie attaches.
+   */
+  cookieRef?: { network: Network; address: string };
 }
 
 /**
@@ -82,7 +94,7 @@ export function resolveApiKey(explicit?: string, network?: 'mainnet' | 'testnet'
  * Makes an HTTP request to the BitBadges API and returns parsed JSON.
  */
 export async function apiRequest(options: ApiRequestOptions): Promise<any> {
-  const { method, path, body, apiKey, baseUrl, cookie } = options;
+  const { method, path, body, apiKey, baseUrl, cookie, cookieRef } = options;
 
   const url = `${baseUrl}${path}`;
 
@@ -108,6 +120,19 @@ export async function apiRequest(options: ApiRequestOptions): Promise<any> {
   }
 
   const response = await fetch(url, fetchOptions);
+
+  // Indexer runs express-session with rolling: true — every authenticated
+  // response carries a fresh Set-Cookie that resets Max-Age to 7d. Capture
+  // it back to auth.json so the local expiresAt tracks reality. The SID
+  // itself is stable across rolls; only the expiry advances.
+  if (cookieRef) {
+    try {
+      const rolled = pickSessionCookie(extractSetCookies(response.headers));
+      if (rolled) refreshSessionExpiry(cookieRef.network, cookieRef.address, rolled.expiresAt);
+    } catch {
+      /* best-effort — never let a roll-write failure poison the response */
+    }
+  }
 
   const text = await response.text();
 
