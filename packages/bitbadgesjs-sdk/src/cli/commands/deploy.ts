@@ -156,28 +156,52 @@ RELATED
 
 export const deployCommand = new Command('deploy')
   .description(LONG_DESCRIPTION)
-  .summary('Broadcast a create-collection msg. Today: --burner is the only supported path.')
+  .summary('Broadcast a msg. Pick one path: --burner (throwaway signer) or --browser (your wallet via /sign handoff).')
   .usage(' ')
   .argument('[input]', 'Msg JSON file path, "-" for stdin, or inline JSON')
-  // Required path flag. Only `--burner` is implemented today; the flag
-  // is required-explicit to leave room for future paths (`--from <key>`
-  // for chain-binary signing, `--api-broadcast` for posting a pre-signed
-  // tx) without making any of them the silent default.
-  .requiredOption('--burner', 'Use the throwaway burner-wallet path. Currently the only supported deploy path.')
+  // Path selection. Exactly one of --burner / --browser must be set;
+  // the action handler enforces this. Leaves room for future paths
+  // (`--from <key>` for chain-binary signing, `--api-broadcast` for
+  // posting a pre-signed tx) without making any of them the silent
+  // default.
+  .option('--burner', 'Use the throwaway burner-wallet path (CREATE-ONLY). Requires --manager.')
+  .option('--browser', 'Hand off to the BitBadges /sign page in the browser; sign with your connected wallet (Keplr / MetaMask / etc.).')
+  .option('--frontend-url <url>', 'With --browser: override the frontend base URL (defaults vary by network).')
+  .option('--no-open', 'With --browser: print the sign URL to stderr instead of auto-launching the browser.')
+  .option('--timeout <seconds>', 'With --browser: how long to wait for the wallet to confirm (default 300, max 1800).')
+  .option('--port <n>', 'With --browser: pin the loopback listener port (default: random). Use this for SSH-forwarded dev setups.')
+  .option('--expected-address <addr>', 'With --browser: bb1.../0x... that the connected wallet must match. Defaults to --manager.')
+  .option('--sign-only', 'With --browser: have the wallet SIGN the tx but not broadcast. Returns the signed tx bytes to the CLI so the caller can broadcast on its own (retry, batch, custodial submit). Result lands in stdout JSON as `signedTx`.')
   .option('--msg-file <path>', 'Read msg JSON from a file')
   .option('--msg-stdin', 'Read msg JSON from stdin')
-  .requiredOption('--manager <address>', 'Address that will own the created collection (bb1...). Required — refuses to create orphaned collections.')
-  .option('--fund <mode>', 'Funding source for the burner: faucet | manual', 'faucet')
+  .option('--manager <address>', 'Address that will own the created collection (bb1...). Required for --burner; recommended for --browser.')
+  .option('--fund <mode>', 'With --burner: funding source for the burner (faucet | manual)', 'faucet')
   .option('--fee <amount>', 'Fee amount in base units (e.g. "0" or "5000")', '0')
   .option('--fee-denom <denom>', 'Fee denom', 'ubadge')
   .option('--gas <number>', 'Gas limit', '400000')
-  .option('--new', 'Skip the picker and always create a fresh burner')
-  .option('--reuse <selector>', 'Reuse a specific saved burner by address or recovery file path')
-  .option('--non-interactive', 'Never prompt; on any prompt point, save state and exit for later resume. Also forced when stdout is not a TTY.')
-  .option('--poll-timeout <seconds>', 'Seconds to wait for funding to land before prompting/exiting', '60')
-  .option('--dry-run', 'Simulate the tx and print expected gas + balance changes; never broadcast. No wallet is generated, no funding is requested.');
+  .option('--new', 'With --burner: skip the picker and always create a fresh burner')
+  .option('--reuse <selector>', 'With --burner: reuse a specific saved burner by address or recovery file path')
+  .option('--non-interactive', 'With --burner: never prompt; on any prompt point, save state and exit for later resume. Also forced when stdout is not a TTY.')
+  .option('--poll-timeout <seconds>', 'With --burner: seconds to wait for funding to land before prompting/exiting', '60')
+  .option('--dry-run', 'Simulate the tx and print expected gas + balance changes; never broadcast.');
 addNetworkOptions(deployCommand);
 deployCommand.action(async (input: string | undefined, opts: any) => {
+  // 0. Path selection — exactly one of --burner / --browser.
+  const useBurner = Boolean(opts.burner);
+  const useBrowser = Boolean(opts.browser);
+  if (useBurner && useBrowser) {
+    process.stderr.write('Error: --burner and --browser are mutually exclusive.\n');
+    process.exit(2);
+  }
+  if (!useBurner && !useBrowser && !opts.dryRun) {
+    process.stderr.write('Error: pick a deploy path — --burner (throwaway signer) or --browser (your connected wallet via /sign).\n');
+    process.exit(2);
+  }
+  if (useBurner && !opts.manager) {
+    process.stderr.write('Error: --burner requires --manager <bb1...>. The burner is a throwaway signer; the manager captures lasting collection ownership.\n');
+    process.exit(2);
+  }
+
   // 1. Resolve network + endpoints
   const networkName = resolveNetwork(opts);
   // The CLI's `mainnet | local | testnet` types line up 1:1 with the
@@ -187,7 +211,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
   const nodeUrl = opts.nodeUrl || NETWORK_CONFIGS[network].nodeUrl;
   const apiKey = getApiKeyForNetwork(opts);
 
-  if (opts.fund === 'faucet' && !apiKey && network !== 'local') {
+  if (useBurner && opts.fund === 'faucet' && !apiKey && network !== 'local') {
     process.stderr.write(
       'Warning: --fund faucet requires an API key on non-local networks. Set BITBADGES_API_KEY or `bitbadges-cli config set apiKey <key>`.\n'
     );
@@ -260,6 +284,62 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       process.exit(0);
     } catch (err: any) {
       process.stderr.write(`Dry-run simulate failed: ${err?.message || err}\n`);
+      process.exit(1);
+    }
+  }
+
+  // 2.7 --browser short-circuit: hand off to the BitBadges /sign page,
+  // let the user's connected wallet sign and broadcast, capture the tx
+  // hash on the loopback listener. Frontend-side TxModal handles
+  // account number / sequence / gas / fees auto-fetch from the indexer.
+  if (useBrowser) {
+    if (msg && msg.value && opts.manager && !msg.value.manager) {
+      msg.value.manager = opts.manager;
+    }
+    const { bridgeSign, resolveFrontendUrl } = await import('../auth/browser-bridge.js');
+    const frontendUrl = resolveFrontendUrl(networkName, opts.frontendUrl);
+    const expectedAddress = opts.expectedAddress ?? opts.manager;
+    const requestedTimeoutSec = opts.timeout ? Math.min(1800, Math.max(60, Number(opts.timeout))) : 300;
+    process.stderr.write(`\nOpening browser to ${frontendUrl}/sign for wallet signature + broadcast...\n`);
+    try {
+      const result = await bridgeSign({
+        mode: 'tx',
+        payload: {
+          chain: 'cosmos',
+          txsInfo: [{ type: msg.typeUrl, msg: msg.value }],
+          expectedAddress,
+          signOnly: !!opts.signOnly,
+        },
+        baseUrl: apiUrl,
+        frontendUrl,
+        apiKey,
+        timeoutMs: requestedTimeoutSec * 1000,
+        noOpen: opts.open === false,
+        port: opts.port ? Number(opts.port) : undefined,
+      });
+      if (result.error) {
+        process.stderr.write(`Browser broadcast cancelled or rejected: ${result.error}\n`);
+        process.exit(1);
+      }
+      const payload: any = opts.signOnly
+        ? {
+            success: !!result.signedTx,
+            path: 'browser',
+            mode: 'sign-only',
+            signedTx: result.signedTx ?? null,
+            chain: result.chain ?? 'cosmos',
+          }
+        : {
+            success: !!result.hash,
+            path: 'browser',
+            mode: 'sign-and-broadcast',
+            txHash: result.hash ?? null,
+            chain: result.chain ?? 'cosmos',
+          };
+      process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
+      process.exit(payload.success ? 0 : 1);
+    } catch (err: any) {
+      process.stderr.write(`Browser broadcast failed: ${err?.message || err}\n`);
       process.exit(1);
     }
   }

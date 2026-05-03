@@ -38,6 +38,12 @@ async function emit(
     // ephemeral burner flow, equivalent to piping the JSON output
     // into `bb cli deploy --burner`.
     deployWithBurner?: boolean;
+    deployWithBrowser?: boolean;
+    signOnly?: boolean;
+    frontendUrl?: string;
+    open?: boolean;
+    timeout?: string | number;
+    expectedAddress?: string;
     fund?: 'faucet' | 'manual';
     fee?: string;
     feeDenom?: string;
@@ -253,6 +259,70 @@ async function emit(
     );
   }
 
+  // ── --deploy-with-browser ───────────────────────────────────────────────
+  // Composes build + browser-bridge broadcast in one step. Equivalent
+  // to piping the JSON output to `bb cli deploy --browser --msg-stdin
+  // --manager <addr>`. The connected wallet on /sign page signs and
+  // broadcasts; account number / sequence / gas / fees are auto-handled
+  // frontend-side by TxModal.
+  if (opts.deployWithBrowser) {
+    if (opts.deployWithBurner) {
+      process.stderr.write(
+        '\nError: --deploy-with-browser and --deploy-with-burner are mutually exclusive.\n'
+      );
+      process.exit(2);
+    }
+    const networkName = resolveNetwork(opts);
+    const apiUrl = getApiUrl(opts);
+    const apiKey = getApiKeyForNetwork(opts);
+    const { bridgeSign, resolveFrontendUrl } = await import('../auth/browser-bridge.js');
+    const frontendUrl = resolveFrontendUrl(networkName, opts.frontendUrl);
+    const expectedAddress = opts.expectedAddress ?? opts.manager ?? opts.creator;
+    const requestedTimeoutSec = opts.timeout ? Math.min(1800, Math.max(60, Number(opts.timeout))) : 300;
+    process.stderr.write(`\nOpening browser to ${frontendUrl}/sign for wallet signature + broadcast...\n`);
+    try {
+      const result = await bridgeSign({
+        mode: 'tx',
+        payload: {
+          chain: 'cosmos',
+          txsInfo: [{ type: outData.typeUrl, msg: outData.value }],
+          expectedAddress,
+          signOnly: !!opts.signOnly,
+        },
+        baseUrl: apiUrl,
+        frontendUrl,
+        apiKey,
+        timeoutMs: requestedTimeoutSec * 1000,
+        noOpen: opts.open === false,
+      });
+      if (result.error) {
+        process.stderr.write(`Browser broadcast cancelled or rejected: ${result.error}\n`);
+        process.exit(1);
+      }
+      const payload: any = opts.signOnly
+        ? {
+            success: !!result.signedTx,
+            path: 'browser',
+            mode: 'sign-only',
+            signedTx: result.signedTx ?? null,
+            chain: result.chain ?? 'cosmos',
+          }
+        : {
+            success: !!result.hash,
+            path: 'browser',
+            mode: 'sign-and-broadcast',
+            txHash: result.hash ?? null,
+            chain: result.chain ?? 'cosmos',
+          };
+      process.stdout.write('\n' + JSON.stringify(payload, null, 2) + '\n');
+      if (!payload.success) process.exit(1);
+      return;
+    } catch (err: any) {
+      process.stderr.write(`Browser broadcast failed: ${err?.message || err}\n`);
+      process.exit(1);
+    }
+  }
+
   // ── --deploy-with-burner ────────────────────────────────────────────────
   // Composes the build + burner-deploy pipeline into one step.
   // Equivalent to piping the JSON output to `bb cli deploy --burner
@@ -368,14 +438,20 @@ const sharedOpts = (cmd: Command) => {
   // lives on --manager). Equivalent to:
   //   bb cli build <preset> ... | bb cli deploy --burner --msg-stdin --manager <addr>
   cmd.option('--deploy-with-burner', 'After building, broadcast via the throwaway burner flow (CREATE-ONLY). Requires --manager.');
-  cmd.option('--fund <mode>', 'When deploying: funding source for the burner (faucet | manual)', 'faucet');
+  cmd.option('--deploy-with-browser', 'After building, hand off to the BitBadges /sign page for wallet signature + broadcast. Pairs with your connected wallet (Keplr, MetaMask, etc.).');
+  cmd.option('--sign-only', 'With --deploy-with-browser: have the wallet sign but not broadcast — returns the signed tx bytes for caller-controlled broadcast.');
+  cmd.option('--frontend-url <url>', 'With --deploy-with-browser: override the frontend base URL.');
+  cmd.option('--no-open', 'With --deploy-with-browser: print the sign URL instead of auto-launching the browser.');
+  cmd.option('--timeout <seconds>', 'With --deploy-with-browser: how long to wait for the wallet to confirm (default 300, max 1800).');
+  cmd.option('--expected-address <addr>', 'With --deploy-with-browser: bb1.../0x... that the connected wallet must match. Defaults to --manager / --creator.');
+  cmd.option('--fund <mode>', 'With --deploy-with-burner: funding source for the burner (faucet | manual)', 'faucet');
   cmd.option('--fee <amount>', 'When deploying: fee amount in base units', '0');
   cmd.option('--fee-denom <denom>', 'When deploying: fee denom', 'ubadge');
   cmd.option('--gas <number>', 'When deploying: gas limit', '400000');
-  cmd.option('--new', 'When deploying: skip the burner picker and always create a fresh wallet');
-  cmd.option('--reuse <selector>', 'When deploying: reuse a specific saved burner by address or recovery file path');
-  cmd.option('--non-interactive', 'When deploying: never prompt; on any prompt point save state and exit for later resume');
-  cmd.option('--poll-timeout <seconds>', 'When deploying: seconds to wait for funding to land before prompting/exiting', '60');
+  cmd.option('--new', 'With --deploy-with-burner: skip the burner picker and always create a fresh wallet');
+  cmd.option('--reuse <selector>', 'With --deploy-with-burner: reuse a specific saved burner by address or recovery file path');
+  cmd.option('--non-interactive', 'With --deploy-with-burner: never prompt; on any prompt point save state and exit for later resume');
+  cmd.option('--poll-timeout <seconds>', 'With --deploy-with-burner: seconds to wait for funding to land before prompting/exiting', '60');
   return cmd;
 };
 
