@@ -169,6 +169,7 @@ export const deployCommand = new Command('deploy')
   .option('--frontend-url <url>', 'With --browser: override the frontend base URL (defaults vary by network).')
   .option('--no-open', 'With --browser: print the sign URL to stderr instead of auto-launching the browser.')
   .option('--timeout <seconds>', 'With --browser: how long to wait for the wallet to confirm (default 300, max 1800).')
+  .option('--port <n>', 'With --browser: pin the loopback listener port (default: random). Use this for SSH-forwarded dev setups.')
   .option('--expected-address <addr>', 'With --browser: bb1.../0x... that the connected wallet must match. Defaults to --manager.')
   .option('--msg-file <path>', 'Read msg JSON from a file')
   .option('--msg-stdin', 'Read msg JSON from stdin')
@@ -312,6 +313,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
         apiKey,
         timeoutMs: requestedTimeoutSec * 1000,
         noOpen: opts.open === false,
+        port: opts.port ? Number(opts.port) : undefined,
       });
       if (result.error) {
         process.stderr.write(`Browser broadcast cancelled or rejected: ${result.error}\n`);

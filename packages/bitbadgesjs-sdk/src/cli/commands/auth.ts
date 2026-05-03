@@ -210,6 +210,7 @@ addNetworkOptions(authCommand.command('login'))
   .option('--frontend-url <url>', 'Override the frontend base URL used by --browser (defaults to bitbadges.io / testnet.bitbadges.io / localhost:3000 by network).')
   .option('--no-open', 'With --browser: print the sign URL to stderr instead of auto-launching the browser.')
   .option('--timeout <seconds>', 'With --browser: how long to wait for the wallet signature before giving up (default 300, max 1800).')
+  .option('--port <n>', 'With --browser: pin the loopback listener port (default: random). Use this for SSH-forwarded dev setups.')
   .option('--2fa <code>', '6-digit TOTP code (if account has 2FA enabled).')
   .option('--2fa-backup <code>', 'Backup recovery code (alternative to --2fa).')
   .action(async (opts) => {
@@ -282,6 +283,7 @@ addNetworkOptions(authCommand.command('login'))
         apiKey,
         timeoutMs: requestedTimeoutSec * 1000,
         noOpen: opts.open === false,
+        port: opts.port ? Number(opts.port) : undefined,
       });
       if (result.error) {
         throw new Error(`Browser sign cancelled or rejected: ${result.error}`);

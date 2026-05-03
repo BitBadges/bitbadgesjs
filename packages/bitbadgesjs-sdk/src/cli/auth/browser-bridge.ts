@@ -53,6 +53,10 @@ export interface BridgeOptions {
   timeoutMs?: number; // default 5min
   /** Set to true to skip auto-launching the browser (print URL instead). */
   noOpen?: boolean;
+  /** Pin the loopback listener port. Default: random ephemeral. Useful for SSH-forwarded dev setups. */
+  port?: number;
+  /** Hostname to embed in the return URL (default 127.0.0.1). Use 'localhost' or a custom hostname when the browser is remote and reaches the listener via tunnel. */
+  loopbackHost?: string;
 }
 
 const INLINE_PAYLOAD_THRESHOLD = 2 * 1024;
@@ -253,10 +257,12 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
       }
     });
 
-    server.listen(0, '127.0.0.1', async () => {
+    const bindPort = opts.port ?? 0;
+    const loopbackHost = opts.loopbackHost ?? '127.0.0.1';
+    server.listen(bindPort, '127.0.0.1', async () => {
       const addr = server.address() as AddressInfo;
       const port = addr.port;
-      const returnUrl = `http://127.0.0.1:${port}/callback`;
+      const returnUrl = `http://${loopbackHost}:${port}/callback`;
       const fullUrl =
         `${opts.frontendUrl.replace(/\/$/, '')}/sign?mode=${encodeURIComponent(opts.mode)}` +
         `&${payloadParam}` +

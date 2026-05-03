@@ -38,7 +38,8 @@ export const signWithBrowserCommand = new Command('sign-with-browser')
   .option('--expected-address <addr>', 'Require the connected wallet to match this address (bb1... / 0x...).')
   .option('--frontend-url <url>', 'Override the frontend base URL.')
   .option('--no-open', 'Print the sign URL instead of auto-launching the browser.')
-  .option('--timeout <seconds>', 'How long to wait for the wallet (default 300, max 1800).');
+  .option('--timeout <seconds>', 'How long to wait for the wallet (default 300, max 1800).')
+  .option('--port <n>', 'Pin the loopback listener port (default: random ephemeral). Use this when your browser is on a different machine and you need a stable SSH port-forward.');
 addNetworkOptions(signWithBrowserCommand);
 signWithBrowserCommand.action(async (positional: string | undefined, opts: any) => {
   let message: string;
@@ -66,6 +67,7 @@ signWithBrowserCommand.action(async (positional: string | undefined, opts: any) 
       apiKey,
       timeoutMs: requestedTimeoutSec * 1000,
       noOpen: opts.open === false,
+      port: opts.port ? Number(opts.port) : undefined,
     });
     if (result.error) {
       process.stderr.write(`Sign cancelled or rejected: ${result.error}\n`);
