@@ -7,11 +7,10 @@
  * wallet to redirect back with a signature/tx hash, and returns the
  * result.
  *
- * Inspired by `gh auth login --web` and `npm login --auth-type=web`:
- *   - State nonce echoed back on every redirect for CSRF-style binding.
- *   - 6-digit PIN displayed in the terminal AND on the /sign page so the
- *     user can cross-verify they're looking at the page their CLI just
- *     launched (defense against ambient phishing tabs).
+ * Security model:
+ *   - State nonce echoed back on every redirect for CSRF-style binding —
+ *     a forged callback from another tab can't return a result because
+ *     it doesn't know the nonce.
  *   - Loopback-only (`127.0.0.1`); the /sign page enforces this on its
  *     end too. RFC 8252 §7.3 native-app loopback exception.
  */
@@ -70,18 +69,9 @@ export interface BridgeOptions {
 
 const INLINE_PAYLOAD_THRESHOLD = 2 * 1024;
 const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000;
-const PIN_LENGTH = 6;
 
 function randomState(): string {
   return crypto.randomBytes(16).toString('base64url');
-}
-
-function randomPin(): string {
-  let out = '';
-  for (let i = 0; i < PIN_LENGTH; i++) {
-    out += crypto.randomInt(0, 10).toString();
-  }
-  return out;
 }
 
 function base64UrlEncodeJson(obj: unknown): string {
@@ -182,13 +172,12 @@ async function tryOpen(url: string): Promise<void> {
 }
 
 export interface BridgeStartOptions extends BridgeOptions {
-  /** Stream the PIN + URL to stderr before opening. Default true. */
-  printPin?: boolean;
+  /** Stream the launch URL to stderr before opening. Default true. */
+  printUrl?: boolean;
 }
 
 export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult> {
   const state = randomState();
-  const pin = randomPin();
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
   // Encode payload — inline base64 for small, short-code upload for large.
@@ -287,12 +276,10 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
         `${opts.frontendUrl.replace(/\/$/, '')}/sign?mode=${encodeURIComponent(opts.mode)}` +
         `&${payloadParam}` +
         `&return=${encodeURIComponent(returnUrl)}` +
-        `&state=${encodeURIComponent(state)}` +
-        `&pin=${encodeURIComponent(pin)}`;
+        `&state=${encodeURIComponent(state)}`;
 
-      if (opts.printPin !== false) {
-        process.stderr.write(`\nFirst, copy your one-time code: ${pin}\n`);
-        process.stderr.write(`Press Enter to open the browser, or paste this URL manually:\n${fullUrl}\n\n`);
+      if (opts.printUrl !== false) {
+        process.stderr.write(`\nOpening browser to sign. If it doesn't open, paste this URL manually:\n${fullUrl}\n\n`);
       }
 
       timer = setTimeout(() => {
