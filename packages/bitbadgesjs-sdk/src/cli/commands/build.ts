@@ -39,6 +39,7 @@ async function emit(
     // into `bb cli deploy --burner`.
     deployWithBurner?: boolean;
     deployWithBrowser?: boolean;
+    signOnly?: boolean;
     frontendUrl?: string;
     open?: boolean;
     timeout?: string | number;
@@ -286,6 +287,7 @@ async function emit(
           chain: 'cosmos',
           txsInfo: [{ type: outData.typeUrl, msg: outData.value }],
           expectedAddress,
+          signOnly: !!opts.signOnly,
         },
         baseUrl: apiUrl,
         frontendUrl,
@@ -297,12 +299,21 @@ async function emit(
         process.stderr.write(`Browser broadcast cancelled or rejected: ${result.error}\n`);
         process.exit(1);
       }
-      const payload = {
-        success: !!result.hash,
-        path: 'browser',
-        txHash: result.hash ?? null,
-        chain: result.chain ?? 'cosmos',
-      };
+      const payload: any = opts.signOnly
+        ? {
+            success: !!result.signedTx,
+            path: 'browser',
+            mode: 'sign-only',
+            signedTx: result.signedTx ?? null,
+            chain: result.chain ?? 'cosmos',
+          }
+        : {
+            success: !!result.hash,
+            path: 'browser',
+            mode: 'sign-and-broadcast',
+            txHash: result.hash ?? null,
+            chain: result.chain ?? 'cosmos',
+          };
       process.stdout.write('\n' + JSON.stringify(payload, null, 2) + '\n');
       if (!payload.success) process.exit(1);
       return;
@@ -428,6 +439,7 @@ const sharedOpts = (cmd: Command) => {
   //   bb cli build <preset> ... | bb cli deploy --burner --msg-stdin --manager <addr>
   cmd.option('--deploy-with-burner', 'After building, broadcast via the throwaway burner flow (CREATE-ONLY). Requires --manager.');
   cmd.option('--deploy-with-browser', 'After building, hand off to the BitBadges /sign page for wallet signature + broadcast. Pairs with your connected wallet (Keplr, MetaMask, etc.).');
+  cmd.option('--sign-only', 'With --deploy-with-browser: have the wallet sign but not broadcast — returns the signed tx bytes for caller-controlled broadcast.');
   cmd.option('--frontend-url <url>', 'With --deploy-with-browser: override the frontend base URL.');
   cmd.option('--no-open', 'With --deploy-with-browser: print the sign URL instead of auto-launching the browser.');
   cmd.option('--timeout <seconds>', 'With --deploy-with-browser: how long to wait for the wallet to confirm (default 300, max 1800).');

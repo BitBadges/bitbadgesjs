@@ -171,6 +171,7 @@ export const deployCommand = new Command('deploy')
   .option('--timeout <seconds>', 'With --browser: how long to wait for the wallet to confirm (default 300, max 1800).')
   .option('--port <n>', 'With --browser: pin the loopback listener port (default: random). Use this for SSH-forwarded dev setups.')
   .option('--expected-address <addr>', 'With --browser: bb1.../0x... that the connected wallet must match. Defaults to --manager.')
+  .option('--sign-only', 'With --browser: have the wallet SIGN the tx but not broadcast. Returns the signed tx bytes to the CLI so the caller can broadcast on its own (retry, batch, custodial submit). Result lands in stdout JSON as `signedTx`.')
   .option('--msg-file <path>', 'Read msg JSON from a file')
   .option('--msg-stdin', 'Read msg JSON from stdin')
   .option('--manager <address>', 'Address that will own the created collection (bb1...). Required for --burner; recommended for --browser.')
@@ -307,6 +308,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
           chain: 'cosmos',
           txsInfo: [{ type: msg.typeUrl, msg: msg.value }],
           expectedAddress,
+          signOnly: !!opts.signOnly,
         },
         baseUrl: apiUrl,
         frontendUrl,
@@ -319,12 +321,21 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
         process.stderr.write(`Browser broadcast cancelled or rejected: ${result.error}\n`);
         process.exit(1);
       }
-      const payload = {
-        success: !!result.hash,
-        path: 'browser',
-        txHash: result.hash ?? null,
-        chain: result.chain ?? 'cosmos',
-      };
+      const payload: any = opts.signOnly
+        ? {
+            success: !!result.signedTx,
+            path: 'browser',
+            mode: 'sign-only',
+            signedTx: result.signedTx ?? null,
+            chain: result.chain ?? 'cosmos',
+          }
+        : {
+            success: !!result.hash,
+            path: 'browser',
+            mode: 'sign-and-broadcast',
+            txHash: result.hash ?? null,
+            chain: result.chain ?? 'cosmos',
+          };
       process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
       process.exit(payload.success ? 0 : 1);
     } catch (err: any) {

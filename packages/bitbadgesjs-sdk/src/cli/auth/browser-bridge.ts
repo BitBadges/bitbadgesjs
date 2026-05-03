@@ -32,6 +32,13 @@ export interface BridgePayload {
   expectedAddress?: string;
   /** Optional chain-id hint for tx mode (mainnet/testnet/stagenet selection). */
   chainId?: string;
+  /**
+   * When true (tx mode only): the page signs the tx but does NOT broadcast.
+   * Returns the signed tx_bytes (base64) to the loopback listener so the CLI
+   * can submit/retry/batch on its own. Useful for caller-controlled
+   * broadcast (custodial signers, retry-with-backoff, parallel sequencing).
+   */
+  signOnly?: boolean;
 }
 
 export interface BridgeResult {
@@ -40,6 +47,8 @@ export interface BridgeResult {
   publicKey?: string;
   hash?: string;
   chain?: 'cosmos' | 'evm';
+  /** Sign-only mode: base64-encoded TxRaw bytes, ready to POST to /api/v0/broadcast. */
+  signedTx?: string;
   /** When set, the user cancelled or the page reported an error. */
   error?: string;
 }
@@ -244,6 +253,7 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
         address: params.get('address') ?? undefined,
         publicKey: params.get('publicKey') ?? undefined,
         hash: params.get('hash') ?? undefined,
+        signedTx: params.get('signedTx') ?? undefined,
         chain: (params.get('chain') as 'cosmos' | 'evm' | null) ?? undefined,
       };
 
