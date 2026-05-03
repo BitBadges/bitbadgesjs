@@ -64,6 +64,44 @@ The package ships three bins:
 - `bitbadges` / `bitbadges-cli` — interactive CLI helpers
 - `bitbadges-builder` — the stdio MCP server (entry point: `src/builder/index.ts`)
 
+## CLI authentication (headless / agentic)
+
+For endpoints that require a user-scoped session (anything gated by
+`Full Access` on the indexer), `bitbadges-cli auth` runs the Blockin
+challenge → verify dance and persists the resulting cookie under
+`~/.bitbadges/auth.json` (mode 0600), keyed by network + address.
+Subsequent `api` calls opt in via `--with-session`.
+
+The flow is **wallet-agnostic** — the CLI never touches a private key.
+The signature comes from any external producer: the chain binary's
+`bitbadgeschaind sign-arbitrary` (recommended for headless agents),
+MetaMask / Keplr (paste-in), a hardware wallet, a custodial signer.
+
+```bash
+# 1. Fetch a challenge (saves nonce locally for the verify step)
+bitbadges-cli auth challenge --address bb1...
+
+# 2. Sign the printed message with whatever signer you have. Headless
+#    Cosmos example using the chain binary:
+bitbadgeschaind sign-arbitrary mykey "$(bitbadges-cli auth challenge --address bb1...)"
+
+# 3. Post the signature — stores the session cookie
+bitbadges-cli auth login \
+  --address bb1... \
+  --signature <hex|base64> \
+  --public-key <b64>      # required for Cosmos addresses
+
+# 4. Make authenticated requests
+bitbadges-cli api accounts get-account --body '{"address":"bb1..."}' --with-session
+```
+
+Other subcommands: `auth status [--check]`, `auth use <addr>`,
+`auth whoami`, `auth logout [--all]`, `auth path`. 2FA accounts pass
+`--2fa <totp>` (or `--2fa-backup <code>`) to `auth login`. Multi-account
+support is built in — store as many addresses as you want, switch via
+`auth use`. Full reference:
+<https://docs.bitbadges.io/for-developers/cli/auth-commands>
+
 ## Quick Start
 
 ### 1. Initialize the API Client
