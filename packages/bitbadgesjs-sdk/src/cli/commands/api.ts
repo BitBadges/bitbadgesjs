@@ -149,9 +149,12 @@ function buildRouteCommand(route: ApiRoute): Command {
     `[${route.method}] ${route.path} -- ${route.description}`
   );
 
-  // Positional arguments for path params
+  // Positional arguments for path params. Marked optional in commander so
+  // `--schema` works without supplying them; the action handler validates
+  // they're present for actual API calls and emits the same
+  // "missing required argument" error commander would have.
   for (const param of route.pathParams) {
-    cmd = cmd.argument(`<${param}>`, `Path parameter: ${param}`);
+    cmd = cmd.argument(`[${param}]`, `Path parameter: ${param}`);
   }
 
   // Common options
@@ -164,6 +167,7 @@ function buildRouteCommand(route: ApiRoute): Command {
     .option('--query <params>', 'Query string params as JSON object (e.g. \'{"bookmark":"x"}\')')
     .option('--condensed', 'Output condensed JSON (no whitespace)', false)
     .option('--dry-run', 'Show request details without sending', false)
+    .option('--schema', 'Print the request body + response JSONSchema for this route, no API call', false)
     .option('--output-file <path>', 'Write output to file instead of stdout')
     .option('--with-session', 'Attach the cookie of the active address (set via `auth use`) for the resolved network', false)
     .option('--as-address <addr>', 'Attach the cookie of the given address (overrides --with-session)');
@@ -177,6 +181,40 @@ function buildRouteCommand(route: ApiRoute): Command {
   cmd.action(async (...args: any[]) => {
     // Commander passes positional args first, then the options object, then the command
     const opts = args[route.pathParams.length];
+
+    // --schema short-circuit: print JSONSchema-ish doc without an API call.
+    // We don't have full JSONSchema in the registry today; emit the rich
+    // metadata we DO have (sdkLinks + bodyFields + queryParams + schemas).
+    // Agents get a deterministic shape they can consume; full JSONSchema
+    // generation can land alongside the OpenAPI pipeline upgrade.
+    if (opts.schema) {
+      const schemaPayload = {
+        name: route.name,
+        method: route.method,
+        path: route.path,
+        description: route.description,
+        pathParams: route.pathParams,
+        hasBody: route.hasBody,
+        sdkLinks: route.sdkLinks ?? null,
+        queryParams: route.queryParams ?? [],
+        bodyFields: route.bodyFields ?? [],
+        requestSchema: route.requestSchema ?? null,
+        responseSchema: route.responseSchema ?? null,
+        example: route.example ?? null
+      };
+      const out = opts.condensed ? JSON.stringify(schemaPayload) : JSON.stringify(schemaPayload, null, 2);
+      process.stdout.write(out + '\n');
+      return;
+    }
+
+    // Validate path params present for non-schema actual API calls.
+    // (Schema short-circuit above already returned.)
+    for (let i = 0; i < route.pathParams.length; i++) {
+      if (args[i] === undefined) {
+        process.stderr.write(`error: missing required argument '${route.pathParams[i]}'\n`);
+        process.exit(1);
+      }
+    }
 
     try {
       const network: 'mainnet' | 'testnet' | 'local' | undefined = opts.testnet
@@ -323,6 +361,12 @@ function buildRouteCommand(route: ApiRoute): Command {
       } else {
         process.stderr.write(`Error: ${err.message}\n`);
       }
+      // Surface the targeted auth hint surfaced by api-client.ts for
+      // 401/403 paths. Keeps the on-error UX one line longer than the
+      // raw response body, but cuts the agent's retry-loop in half.
+      if (err.hint) {
+        process.stderr.write(`Hint: ${err.hint}\n`);
+      }
       process.exitCode = 1;
     }
   });
@@ -334,6 +378,47 @@ export function createApiCommand(): Command {
   const api = new Command('api').description(
     `BitBadges Indexer API client (${ROUTES.length} routes). Call any API endpoint from the CLI.\n\nRoutes are grouped by category. Use "api all <command>" for a flat list.`
   );
+
+  // Discovery: `api --search <kw>` scans the route registry over name,
+  // path, tag, and description. Substring match (case-insensitive). Lets
+  // agents surface "what route does X" without spawning per-route
+  // wrappers. JSON output is direct (no envelope) so it matches the rest
+  // of the `api` command's raw-passthrough contract.
+  api
+    .option('--search <kw>', 'Search routes by keyword (matches name, path, tag, description). Case-insensitive substring.')
+    .option('--format <fmt>', 'Output format for --search: json | text', 'text')
+    .action((opts: { search?: string; format?: string }) => {
+      if (!opts.search) {
+        api.outputHelp();
+        return;
+      }
+      const kw = opts.search.toLowerCase();
+      const matches = ROUTES.filter((r) => {
+        const hay = [r.name, r.path, r.tag, r.description].filter(Boolean).join(' ').toLowerCase();
+        return hay.includes(kw);
+      }).map((r) => ({
+        name: r.name,
+        method: r.method,
+        path: r.path,
+        tag: r.tag,
+        description: r.description
+      }));
+      if (opts.format === 'json') {
+        process.stdout.write(JSON.stringify(matches, null, 2) + '\n');
+        return;
+      }
+      if (matches.length === 0) {
+        process.stdout.write(`No routes match "${opts.search}".\n`);
+        return;
+      }
+      const nameW = Math.max(...matches.map((m) => m.name.length));
+      const methodW = Math.max(...matches.map((m) => m.method.length));
+      for (const m of matches) {
+        process.stdout.write(
+          `${m.name.padEnd(nameW)}  ${m.method.padEnd(methodW)}  ${m.path}\n      ${m.description}\n\n`
+        );
+      }
+    });
 
   // Create tag-based group commands
   const groups: Record<string, Command> = {};

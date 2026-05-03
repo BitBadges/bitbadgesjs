@@ -150,6 +150,16 @@ export async function apiRequest(options: ApiRequestOptions): Promise<any> {
     const err = new Error(`API error: ${errorMessage}`);
     (err as any).status = response.status;
     (err as any).response = parsed;
+    // Targeted hint:" — only on 401/403 (Full Access required) when the
+    // caller didn't already attach a session cookie. Generic auth-failure
+    // errors are 401/403 with no cookie attached → the agent skipped the
+    // login step. Cookie attached but still 401 → session expired or
+    // scoped wrong; re-login is the right next step either way.
+    if (response.status === 401 || response.status === 403) {
+      (err as any).hint = cookie
+        ? 'Session may be expired or scoped wrong — run `bitbadges-cli auth login` again.'
+        : 'This route requires user-scoped auth — run `bitbadges-cli auth login`, then retry with `--with-session`.';
+    }
     throw err;
   }
 
