@@ -12,6 +12,8 @@ export interface ApiRequestOptions {
   body?: any;
   apiKey?: string;
   baseUrl?: string;
+  /** Optional Cookie header value (e.g. "bitbadges=s%3A..."). Set via `auth login`. */
+  cookie?: string;
 }
 
 /**
@@ -80,13 +82,17 @@ export function resolveApiKey(explicit?: string, network?: 'mainnet' | 'testnet'
  * Makes an HTTP request to the BitBadges API and returns parsed JSON.
  */
 export async function apiRequest(options: ApiRequestOptions): Promise<any> {
-  const { method, path, body, apiKey, baseUrl } = options;
+  const { method, path, body, apiKey, baseUrl, cookie } = options;
 
   const url = `${baseUrl}${path}`;
 
   const headers: Record<string, string> = {
     'x-api-key': apiKey || '',
   };
+
+  if (cookie) {
+    headers['Cookie'] = cookie;
+  }
 
   if (body !== undefined) {
     headers['Content-Type'] = 'application/json';
