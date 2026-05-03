@@ -61,6 +61,10 @@
     "./builder/internals": {
       "import": "./dist/esm/builder/agent/internals.js",
       "require": "./dist/cjs/builder/agent/internals.js"
+    },
+    "./builder/tracing": {
+      "import": "./dist/esm/builder/tracing/index.js",
+      "require": "./dist/cjs/builder/tracing/index.js"
     }
   },
   "bin": {
@@ -93,6 +97,9 @@
       ],
       "builder/internals": [
         "./dist/esm/builder/agent/internals.d.ts"
+      ],
+      "builder/tracing": [
+        "./dist/esm/builder/tracing/index.d.ts"
       ]
     }
   },
