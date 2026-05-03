@@ -11,7 +11,8 @@ import { simulateCommand } from './commands/simulate.js';
 import { previewCommand } from './commands/preview.js';
 import { deployCommand } from './commands/deploy.js';
 import { txCommand } from './commands/tx.js';
-import { signCommand } from './commands/sign.js';
+import { signWithBrowserCommand } from './commands/sign-with-browser.js';
+import { genTxPayloadCommand } from './commands/gen-tx-payload.js';
 
 // Indexer access
 import { createApiCommand } from './commands/api.js';
@@ -71,11 +72,11 @@ if (process.argv.includes('--quiet')) {
 const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   {
     title: 'Build & ship a transaction',
-    commands: [buildCommand, toolsCommand, toolCommand, checkCommand, explainCommand, simulateCommand, previewCommand, deployCommand, txCommand]
+    commands: [buildCommand, toolsCommand, toolCommand, checkCommand, explainCommand, simulateCommand, previewCommand, genTxPayloadCommand, deployCommand, txCommand]
   },
   {
     title: 'Indexer access',
-    commands: [createApiCommand(), authCommand, signCommand]
+    commands: [createApiCommand(), authCommand, signWithBrowserCommand]
   },
   {
     title: 'Local state',

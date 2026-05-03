@@ -1,5 +1,5 @@
 /**
- * `bitbadges-cli sign --browser <message-or-file>` — hand an arbitrary
+ * `bitbadges-cli sign-with-browser <message-or-file>` — hand an arbitrary
  * message off to the user's browser wallet (Keplr / MetaMask / etc.) for
  * signature, then return the signature + address as JSON on stdout.
  *
@@ -29,19 +29,18 @@ function readMessage(opts: { message?: string; messageFile?: string; positional?
   throw new Error('No message provided. Pass --message <text>, --message-file <path>, a positional arg, or pipe via stdin.');
 }
 
-export const signCommand = new Command('sign')
+export const signWithBrowserCommand = new Command('sign-with-browser')
   .description('Hand an arbitrary message to a browser wallet for signature, return signature + address.')
   .summary('Browser-bridge personal sign for any message.')
   .argument('[input]', 'Inline message, "-" for stdin, or "@path" for a file')
   .option('--message <text>', 'The message to sign (inline)')
   .option('--message-file <path>', 'Read message from file ("-" for stdin)')
-  .requiredOption('--browser', 'Required: this command only supports the browser-bridge path today.')
   .option('--expected-address <addr>', 'Require the connected wallet to match this address (bb1... / 0x...).')
   .option('--frontend-url <url>', 'Override the frontend base URL.')
   .option('--no-open', 'Print the sign URL instead of auto-launching the browser.')
   .option('--timeout <seconds>', 'How long to wait for the wallet (default 300, max 1800).');
-addNetworkOptions(signCommand);
-signCommand.action(async (positional: string | undefined, opts: any) => {
+addNetworkOptions(signWithBrowserCommand);
+signWithBrowserCommand.action(async (positional: string | undefined, opts: any) => {
   let message: string;
   try {
     message = readMessage({ message: opts.message, messageFile: opts.messageFile, positional });

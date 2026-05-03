@@ -77,11 +77,15 @@ function base64UrlEncodeJson(obj: unknown): string {
 }
 
 async function uploadPayload(baseUrl: string, apiKey: string | undefined, payload: BridgePayload): Promise<string> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (apiKey) headers['x-api-key'] = apiKey;
+  if (!apiKey) {
+    throw new Error('Cannot upload large sign payload: no API key. Set BITBADGES_API_KEY or pass --api-key.');
+  }
   const res = await fetch(`${baseUrl}/sign/payload`, {
     method: 'POST',
-    headers,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+    },
     body: JSON.stringify({ payload }),
   });
   const text = await res.text();
