@@ -7,7 +7,7 @@
  * this package as an MCP server. The actual tool/resource handlers live in
  * `./tools/registry.ts` and `./resources/registry.ts` — this file is just
  * the stdio transport + lifecycle wrapper. For in-process use, import the
- * registry directly or call `bitbadges-cli builder …`.
+ * registry directly or call `bitbadges-cli <verb>` (build/check/tool/...).
  *
  * Example natural-language usage (via an MCP client):
  * > "Create a 1:1 backed USDC stablecoin with 100 USDC/day spend limit"

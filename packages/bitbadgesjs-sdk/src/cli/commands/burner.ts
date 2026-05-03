@@ -27,11 +27,11 @@ import { BitBadgesSigningClient } from '../../signing/BitBadgesSigningClient.js'
 
 export const burnerCommand = new Command('burner')
   .usage(' ')
-  .summary('Manage throwaway dust-only burners used by `create-with-burner`.')
+  .summary('Manage throwaway dust-only burners used by `deploy --burner`.')
   .description(
     [
       'Manage the throwaway, dust-only burners created by',
-      '`bitbadges-cli create-with-burner`.',
+      '`bitbadges-cli deploy --burner`.',
       '',
       'These wallets are single-use, disposable signers that exist only to put',
       'ONE create-collection tx on-chain. They are stored in PLAINTEXT under',
@@ -207,7 +207,7 @@ sweepCmd.action(async (selector: string, opts: any) => {
   // encodeMsgFromJson path for unknown proto msg types; MsgSend lives in
   // the cosmos.bank.v1beta1 namespace and is handled by the proto encoder
   // in createTxBroadcastBody. We pass a { typeUrl, value } shape so it
-  // flows through the same JSON path the create-with-burner
+  // flows through the same JSON path the `deploy --burner`
   // command uses.
   const { encodeMsgFromJson } = await import('../../transactions/messages/fromJson.js');
   let protoMsg;

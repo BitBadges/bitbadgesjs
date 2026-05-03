@@ -76,7 +76,7 @@ function bigintToString(obj: unknown): unknown {
 
 /**
  * Reusable simulate helper used by both the MCP tool wrapper above and the
- * CLI's `builder simulate` / templates auto-simulate paths. Sends the
+ * CLI's `simulate` / `build` auto-simulate paths. Sends the
  * agent-JSON single-tx shape (`{messages, memo, fee, creatorAddress}`)
  * to the indexer's `/api/v0/simulate` endpoint and normalizes the raw
  * LCD response into a `SimulateTransactionResult` so all callers render

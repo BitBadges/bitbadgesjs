@@ -4913,7 +4913,7 @@ paths:
         - Builder
       description: |-
         Upload a built transaction to the indexer and receive a short,
-        shareable code. The `bitbadges-cli builder preview` command uses this
+        shareable code. The `bitbadges-cli preview` command uses this
         endpoint to hand off a locally-constructed transaction to a reviewer
         via a `https://bitbadges.io/builder/preview?code=<code>` URL.
 

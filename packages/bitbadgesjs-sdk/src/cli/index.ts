@@ -1,86 +1,195 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { sdkCommand } from './commands/sdk.js';
+
+// Build & ship a transaction
+import { buildCommand } from './commands/build.js';
+import { toolsCommand } from './commands/tools.js';
+import { toolCommand } from './commands/tool.js';
+import { checkCommand } from './commands/check.js';
+import { explainCommand } from './commands/explain.js';
+import { simulateCommand } from './commands/simulate.js';
+import { previewCommand } from './commands/preview.js';
+import { deployCommand } from './commands/deploy.js';
+
+// Indexer access
 import { createApiCommand } from './commands/api.js';
-import { configCommand } from './commands/config.js';
-import { builderCommand } from './commands/builder.js';
 import { authCommand } from './commands/auth.js';
+
+// Local state
+import { configCommand } from './commands/config.js';
+import { burnerCommand } from './commands/burner.js';
+import { sessionCommand } from './commands/session.js';
+
+// Discovery
+import { docsCommand } from './commands/docs.js';
+import { skillsCommand } from './commands/skills.js';
+import { resourcesCommand } from './commands/resources.js';
+import { doctorCommand } from './commands/doctor.js';
+
+// Address & lookup utilities
+import { addressCommand } from './commands/address.js';
+import { aliasCommand } from './commands/alias.js';
+import { lookupCommand } from './commands/lookup.js';
+import { genListIdCommand } from './commands/gen-list-id.js';
+
+// Misc
+import { makeCompletionCommand } from './commands/completion.js';
 
 const program = new Command();
 
-program.name('bitbadges-cli').description('BitBadges CLI — SDK utilities and indexer API commands').version('0.1.0');
+program
+  .name('bitbadges-cli')
+  .description('BitBadges CLI — flat verb-first surface for building, inspecting, and shipping token transactions')
+  .version('0.1.0');
 
 // ── Global option: --help-json ───────────────────────────────────────────────
 
 program.option('--help-json', 'Output all commands as structured JSON (for LLMs)');
 
-// ── Register commands ────────────────────────────────────────────────────────
+// ── Help groups ──────────────────────────────────────────────────────────────
+//
+// The command tree is intentionally flat — no `sdk` / `builder` umbrella
+// nouns. Discovery via `--help` would otherwise be a wall of ~20 verbs, so
+// we attach a `helpGroup` tag to each command and emit a sectioned
+// after-help block. Tree shape stays flat; help layout stays organized.
 
-program.addCommand(sdkCommand);
-program.addCommand(createApiCommand());
-program.addCommand(configCommand);
-program.addCommand(builderCommand);
-program.addCommand(authCommand);
+const HELP_GROUPS: { title: string; commands: Command[] }[] = [
+  {
+    title: 'Build & ship a transaction',
+    commands: [buildCommand, toolsCommand, toolCommand, checkCommand, explainCommand, simulateCommand, previewCommand, deployCommand]
+  },
+  {
+    title: 'Indexer access',
+    commands: [createApiCommand(), authCommand]
+  },
+  {
+    title: 'Local state',
+    commands: [configCommand, burnerCommand, sessionCommand]
+  },
+  {
+    title: 'Discovery',
+    commands: [docsCommand, skillsCommand, resourcesCommand, doctorCommand]
+  },
+  {
+    title: 'Address & lookup utilities',
+    commands: [addressCommand, aliasCommand, lookupCommand, genListIdCommand]
+  }
+];
 
-// ── completion command ───────────────────────────────────────────────────────
+const completionCommand = makeCompletionCommand(program);
+HELP_GROUPS.push({ title: 'Misc', commands: [completionCommand] });
 
-program
-  .command('completion')
-  .description('Generate shell completion script (bash/zsh)')
-  .action(() => {
-    const topLevelNames = program.commands.map((c) => c.name()).join(' ');
+// ── Register every command at the top level ─────────────────────────────────
 
-    // Gather second-level subcommands
-    const caseEntries = program.commands
-      .map((cmd) => {
-        const subs = cmd.commands?.map((s: any) => s.name()).join(' ');
-        if (!subs) return null;
-        return `      ${cmd.name()}) COMPREPLY=( $(compgen -W "${subs}" -- "$cur") ) ;;`;
-      })
-      .filter(Boolean)
-      .join('\n');
-
-    const script = `
-# bitbadges-cli completion — add to your .bashrc / .zshrc:
-#   eval "$(bitbadges-cli completion)"
-
-_bitbadges_cli_completions() {
-  local cur prev
-  cur="\${COMP_WORDS[COMP_CWORD]}"
-  prev="\${COMP_WORDS[COMP_CWORD-1]}"
-
-  if [ "$COMP_CWORD" -eq 1 ]; then
-    COMPREPLY=( $(compgen -W "${topLevelNames}" -- "$cur") )
-    return
-  fi
-
-  case "$prev" in
-${caseEntries}
-  esac
+for (const group of HELP_GROUPS) {
+  for (const cmd of group.commands) {
+    program.addCommand(cmd);
+  }
 }
 
-complete -F _bitbadges_cli_completions bitbadges-cli
+// ── Grouped --help override ─────────────────────────────────────────────────
+//
+// Commander's default help lumps every command into one alphabetized list.
+// Override the formatter so commands appear under their group heading,
+// and the group sequence matches our verb pipeline (build → check →
+// deploy) rather than alphabet.
 
-# For zsh, also add:
-# autoload -U +X bashcompinit && bashcompinit
-`.trimStart();
+// Grouped help: emit a sectioned "Commands:" block on the root --help.
+// Commander's default formatter produces one alphabetized list — since we
+// have ~20 verbs at the top level, that's a wall of text. Override only
+// the root formatter; subcommand help still uses the default flat layout.
+program.configureHelp({
+  formatHelp: (cmd, helper) => {
+    const isRoot = cmd === program;
+    if (!isRoot) {
+      // Defer to the default formatter for non-root commands.
+      // Commander's Help class exposes a default formatHelp via the same
+      // `helper` instance — but configureHelp replaced ours, so we need
+      // to assemble it manually for subcommands. The minimal version is
+      // good enough since auth/burner/etc all have their own
+      // addHelpText() blocks where they want richer output.
+      return defaultFormatHelp(cmd, helper);
+    }
 
-    process.stdout.write(script);
-  });
+    const sections: string[] = [];
+    sections.push(`Usage: ${helper.commandUsage(cmd)}`);
+    const desc = helper.commandDescription(cmd);
+    if (desc) sections.push('', desc);
 
-// ── --help-json handler ──────────────────────────────────────────────────────
+    const optList = helper.visibleOptions(cmd);
+    if (optList.length > 0) {
+      sections.push('', 'Options:');
+      for (const opt of optList) {
+        sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
+      }
+    }
+
+    const visibleByName = new Map<string, Command>();
+    for (const c of helper.visibleCommands(cmd)) visibleByName.set(c.name(), c);
+
+    sections.push('', 'Commands:');
+    for (const group of HELP_GROUPS) {
+      const groupVisible = group.commands.filter((c) => visibleByName.has(c.name()));
+      if (groupVisible.length === 0) continue;
+      sections.push('', `  ${group.title}:`);
+      for (const c of groupVisible) {
+        sections.push(`    ${helper.subcommandTerm(c).padEnd(28)}  ${helper.subcommandDescription(c)}`);
+      }
+    }
+
+    return sections.join('\n') + '\n';
+  }
+});
+
+function defaultFormatHelp(cmd: Command, helper: any): string {
+  // Minimal flat formatter for non-root commands. Commander's stock
+  // implementation pads more carefully but the visible difference is
+  // negligible for our subcommands.
+  const sections: string[] = [];
+  sections.push(`Usage: ${helper.commandUsage(cmd)}`);
+  const desc = helper.commandDescription(cmd);
+  if (desc) sections.push('', desc);
+
+  const argList = helper.visibleArguments(cmd);
+  if (argList.length > 0) {
+    sections.push('', 'Arguments:');
+    for (const arg of argList) {
+      sections.push(`  ${helper.argumentTerm(arg).padEnd(28)}  ${helper.argumentDescription(arg)}`);
+    }
+  }
+
+  const optList = helper.visibleOptions(cmd);
+  if (optList.length > 0) {
+    sections.push('', 'Options:');
+    for (const opt of optList) {
+      sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
+    }
+  }
+
+  const subList = helper.visibleCommands(cmd);
+  if (subList.length > 0) {
+    sections.push('', 'Commands:');
+    for (const sub of subList) {
+      sections.push(`  ${helper.subcommandTerm(sub).padEnd(28)}  ${helper.subcommandDescription(sub)}`);
+    }
+  }
+
+  return sections.join('\n') + '\n';
+}
+
+// ── --help-json handler ─────────────────────────────────────────────────────
 
 function extractCommandTree(cmd: Command): any {
   const args = (cmd as any)._args?.map((a: any) => ({
     name: a.name(),
     required: a.required,
-    description: a.description,
+    description: a.description
   })) || [];
 
   const options = cmd.options.map((o: any) => ({
     flags: o.flags,
     description: o.description,
-    defaultValue: o.defaultValue,
+    defaultValue: o.defaultValue
   }));
 
   const subcommands = cmd.commands.map((sub: Command) => extractCommandTree(sub));
@@ -90,16 +199,13 @@ function extractCommandTree(cmd: Command): any {
     description: cmd.description(),
     ...(args.length > 0 ? { arguments: args } : {}),
     ...(options.length > 0 ? { options } : {}),
-    ...(subcommands.length > 0 ? { subcommands } : {}),
+    ...(subcommands.length > 0 ? { subcommands } : {})
   };
 }
 
-// ── Parse ────────────────────────────────────────────────────────────────────
-
-// Check for --help-json before commander parses (so it works as a global flag)
 if (process.argv.includes('--help-json')) {
   const tree = {
-    commands: program.commands.map((cmd) => extractCommandTree(cmd)),
+    commands: program.commands.map((cmd) => extractCommandTree(cmd))
   };
   process.stdout.write(JSON.stringify(tree, null, 2) + '\n');
   process.exit(0);

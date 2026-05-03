@@ -4,7 +4,7 @@
  * Wraps the builder tool/resource registry in the MCP protocol so Claude
  * Desktop and other MCP clients can reach it over stdio. Tool handlers
  * themselves live in `src/builder/tools/registry.ts` and are used unchanged
- * by the in-process CLI path (`bitbadges-cli builder`) and by library
+ * by the in-process CLI path (`bitbadges-cli build/check/explain/...`) and by library
  * consumers (indexer, chain binary delegation, etc.) — the MCP server is
  * just one presentation layer among several.
  */

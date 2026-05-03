@@ -304,9 +304,9 @@ async function promptLine(question: string): Promise<string> {
 
 /**
  * Core burner broadcast flow. Reusable from both the top-level
- * `create-with-burner` command and `burner resume`, so a
- * broadcast that gets interrupted mid-poll can be resumed later without
- * losing the funded wallet.
+ * `deploy --burner` command and `burner resume`, so a broadcast that
+ * gets interrupted mid-poll can be resumed later without losing the
+ * funded wallet.
  */
 export async function runBurnerCreate(
   opts: RunBurnerCreateOptions

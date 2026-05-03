@@ -5,7 +5,7 @@ import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMs
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import { runBurnerCreate, pickBurner, type BurnerNetwork } from '../utils/burner.js';
 
-export const templatesCommand = new Command('templates').description('Deterministic transaction templates — flag-based generators for vaults, NFTs, subscriptions, bounties, and more.');
+export const buildCommand = new Command('build').description('Deterministic transaction builders — flag-based generators for vaults, NFTs, subscriptions, bounties, and more. Output: ready-to-sign JSON. To broadcast, pipe into `bb cli deploy --burner`.');
 
 // ── Output helper ────────────────────────────────────────────────────────────
 
@@ -35,7 +35,7 @@ async function emit(
     apiKey?: string;
     // --deploy-with-burner — broadcast the just-built msg via the
     // ephemeral burner flow, equivalent to piping the JSON output
-    // into `bb cli builder create-with-burner`.
+    // into `bb cli deploy --burner`.
     deployWithBurner?: boolean;
     fund?: 'faucet' | 'manual';
     fee?: string;
@@ -248,12 +248,12 @@ async function emit(
   }
 
   // ── --deploy-with-burner ────────────────────────────────────────────────
-  // Composes the template + create-with-burner pipeline into one step.
-  // Equivalent to piping the JSON output to `bb cli builder
-  // create-with-burner --msg-stdin --manager <addr>`. CREATE-ONLY: the
-  // burner flow rejects updates, transfers, approvals — runBurnerCreate
-  // throws a clear error if the resolved msg isn't MsgCreateCollection
-  // (or MsgUniversalUpdateCollection with collectionId=0).
+  // Composes the build + burner-deploy pipeline into one step.
+  // Equivalent to piping the JSON output to `bb cli deploy --burner
+  // --msg-stdin --manager <addr>`. CREATE-ONLY: the burner flow rejects
+  // updates, transfers, approvals — runBurnerCreate throws a clear error
+  // if the resolved msg isn't MsgCreateCollection (or
+  // MsgUniversalUpdateCollection with collectionId=0).
   if (opts.deployWithBurner) {
     if (!opts.manager) {
       process.stderr.write(
@@ -356,11 +356,11 @@ const sharedOpts = (cmd: Command) => {
   addOptionIfMissing(cmd, '--name <name>', 'Mode 2: collection name (required with --image + --description if --uri not set)');
   addOptionIfMissing(cmd, '--description <text>', 'Mode 2: collection description (required with --name + --image if --uri not set)');
   addOptionIfMissing(cmd, '--image <url>', 'Mode 2: collection image URI (required with --name + --description if --uri not set)');
-  // --deploy-with-burner — collapses the template + create-with-burner
+  // --deploy-with-burner — collapses the build + burner-deploy
   // pipeline into a single command. CREATE-ONLY: rejects updates,
   // transfers, approvals (the burner is a one-shot signer; ownership
   // lives on --manager). Equivalent to:
-  //   bb cli builder templates <preset> ... | bb cli builder create-with-burner --msg-stdin --manager <addr>
+  //   bb cli build <preset> ... | bb cli deploy --burner --msg-stdin --manager <addr>
   cmd.option('--deploy-with-burner', 'After building, broadcast via the throwaway burner flow (CREATE-ONLY). Requires --manager.');
   cmd.option('--fund <mode>', 'When deploying: funding source for the burner (faucet | manual)', 'faucet');
   cmd.option('--fee <amount>', 'When deploying: fee amount in base units', '0');
@@ -378,7 +378,7 @@ const sharedOpts = (cmd: Command) => {
 // ============================================================
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('vault')
     .description('Create an IBC-backed vault token. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--backing-coin <symbol>', 'Backing coin symbol (USDC, BADGE, ATOM, OSMO)')
@@ -397,7 +397,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('subscription')
     .description('Create a recurring subscription collection. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--interval <duration>', 'Interval: daily, monthly, annually, or shorthand (30d)')
@@ -430,7 +430,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('bounty')
     .description('Create a bounty escrow collection. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--amount <n>', 'Bounty amount (display units)')
@@ -448,7 +448,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('payment-request')
     .description('Create an agent-initiated payment request (no-escrow inverse of bounty). Metadata: pass --uri OR --name + --image + (--description OR --context).')
     .requiredOption('--amount <n>', 'Payment amount (display units)')
@@ -474,7 +474,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('crowdfund')
     .description('Create a crowdfunding collection. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--goal <n>', 'Funding goal (display units)')
@@ -491,7 +491,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('auction')
     .description('Create an auction collection. Metadata: pass --uri OR --name + --image + --description.')
     .option('--bid-deadline <duration>', 'Bidding window', '7d')
@@ -508,7 +508,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('product-catalog')
     .description('Create a product catalog collection. Metadata: pass --uri OR --name + --image + --description (per-product image/description live inside the products JSON).')
     .requiredOption('--products <json>', 'Product array JSON: [{"name","price","denom","maxSupply?","burn?","uri?","image?","description?"}]')
@@ -524,7 +524,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('prediction-market')
     .description('Create a binary prediction market (YES/NO). Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--verifier <address>', 'Market resolver address (bb1...)')
@@ -539,7 +539,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('smart-account')
     .description('Create an IBC-backed smart account. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--backing-coin <symbol>', 'Backing coin (USDC, BADGE, ATOM, OSMO)')
@@ -556,7 +556,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('credit-token')
     .description('Create a credit/prepaid token. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--payment-denom <symbol>', 'Payment coin (USDC, BADGE)')
@@ -574,7 +574,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('custom-2fa')
     .description('Create a custom 2FA token. Metadata: pass --uri OR --name + --image + --description.')
     .option('--burnable', 'Allow burning')
@@ -589,7 +589,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('quests')
     .description('Create a quest/reward collection. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--reward <n>', 'Reward per claim (display units)')
@@ -605,7 +605,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('address-list')
     .description('Create an on-chain address list. Metadata: pass --uri OR --name + --image + --description.')
 ).action(async (opts) => {
@@ -622,7 +622,7 @@ sharedOpts(
 // ============================================================
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('intent')
     .description('Create an OTC swap intent (user outgoing approval)')
     .requiredOption('--address <address>', 'Creator address (bb1...)')
@@ -639,7 +639,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('recurring-payment')
     .description('Create a recurring payment approval (user incoming)')
     .requiredOption('--collection-id <id>', 'Subscription collection ID')
@@ -655,7 +655,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('listing')
     .description('Create a marketplace listing (user outgoing approval)')
     .requiredOption('--address <address>', 'Seller address (bb1...)')
@@ -672,7 +672,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('bid')
     .description('Create a marketplace bid (user incoming approval)')
     .requiredOption('--address <address>', 'Bidder address (bb1...)')
@@ -688,7 +688,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('pm-sell-intent')
     .description('Create a prediction market sell intent (user outgoing approval)')
     .requiredOption('--address <address>', 'Seller address (bb1...)')
@@ -705,7 +705,7 @@ sharedOpts(
 });
 
 sharedOpts(
-  templatesCommand
+  buildCommand
     .command('pm-buy-intent')
     .description('Create a prediction market buy intent (user incoming approval)')
     .requiredOption('--address <address>', 'Buyer address (bb1...)')

@@ -61,7 +61,11 @@ Full walkthrough, tool reference, and skill instructions:
 For non-AI workflows, import the message builders directly — see the Quick Start below.
 
 The package ships three bins:
-- `bitbadges` / `bitbadges-cli` — interactive CLI helpers
+- `bitbadges` / `bitbadges-cli` — flat verb-first CLI: `build`, `check`,
+  `explain`, `simulate`, `preview`, `deploy`, `tool`, `tools`, plus
+  `api`, `auth`, `config`, `burner`, `session`, `docs`, `skills`,
+  `resources`, `doctor`, `address`, `alias`, `lookup`, `gen-list-id`.
+  Run `bitbadges-cli --help` for the grouped overview.
 - `bitbadges-builder` — the stdio MCP server (entry point: `src/builder/index.ts`)
 
 ## CLI authentication (headless / agentic)
