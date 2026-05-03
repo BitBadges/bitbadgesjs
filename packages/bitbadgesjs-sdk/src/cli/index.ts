@@ -13,6 +13,7 @@ import { deployCommand } from './commands/deploy.js';
 import { txCommand } from './commands/tx.js';
 import { signWithBrowserCommand } from './commands/sign-with-browser.js';
 import { genTxPayloadCommand } from './commands/gen-tx-payload.js';
+import { genPubKeyCommand } from './commands/gen-pub-key.js';
 
 // Indexer access
 import { createApiCommand } from './commands/api.js';
@@ -76,7 +77,7 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   },
   {
     title: 'Indexer access',
-    commands: [createApiCommand(), authCommand, signWithBrowserCommand]
+    commands: [createApiCommand(), authCommand, signWithBrowserCommand, genPubKeyCommand]
   },
   {
     title: 'Local state',
