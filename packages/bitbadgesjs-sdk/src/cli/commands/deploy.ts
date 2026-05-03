@@ -174,7 +174,8 @@ export const deployCommand = new Command('deploy')
   .option('--new', 'Skip the picker and always create a fresh burner')
   .option('--reuse <selector>', 'Reuse a specific saved burner by address or recovery file path')
   .option('--non-interactive', 'Never prompt; on any prompt point, save state and exit for later resume. Also forced when stdout is not a TTY.')
-  .option('--poll-timeout <seconds>', 'Seconds to wait for funding to land before prompting/exiting', '60');
+  .option('--poll-timeout <seconds>', 'Seconds to wait for funding to land before prompting/exiting', '60')
+  .option('--dry-run', 'Simulate the tx and print expected gas + balance changes; never broadcast. No wallet is generated, no funding is requested.');
 addNetworkOptions(deployCommand);
 deployCommand.action(async (input: string | undefined, opts: any) => {
   // 1. Resolve network + endpoints
@@ -199,6 +200,68 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
   } catch (err: any) {
     process.stderr.write(`${err?.message || err}\n`);
     process.exit(2);
+  }
+
+  // Shape sanity check — match the level of detail `check` provides on
+  // shape mismatches. `deploy` expects a single Msg `{typeUrl, value}`,
+  // not a tx wrapper. Fail loudly before generating a wallet or hitting
+  // the faucet.
+  if (!msg || typeof msg !== 'object' || typeof msg.typeUrl !== 'string' || !msg.value) {
+    const got =
+      msg == null
+        ? String(msg)
+        : Array.isArray(msg)
+          ? `array (length ${msg.length})`
+          : typeof msg === 'object'
+            ? `object with keys [${Object.keys(msg).join(', ')}]`
+            : typeof msg;
+    process.stderr.write(
+      `Deploy input has an unexpected shape — expected a single Msg \`{typeUrl, value}\`.\n` +
+        `Got: ${got}.\n` +
+        `If you have a tx wrapper \`{messages: [...]}\`, extract the first message before piping into deploy.\n`
+    );
+    process.exit(2);
+  }
+
+  // 2.5 --dry-run short-circuit: simulate the tx and exit before any
+  // wallet is generated, funding is requested, or broadcast happens.
+  // Backfill the manager so the simulation matches what `runBurnerCreate`
+  // would broadcast (the orchestrator does the same backfill internally).
+  if (opts.dryRun) {
+    if (!apiKey && network !== 'local') {
+      process.stderr.write(
+        '--dry-run requires an API key on non-local networks (simulate hits the BitBadges API). ' +
+          'Set BITBADGES_API_KEY or `bitbadges-cli config set apiKey <key>`.\n'
+      );
+      process.exit(2);
+    }
+    if (msg && msg.value && opts.manager && !msg.value.manager) {
+      msg.value.manager = opts.manager;
+    }
+
+    const { simulateMessages } = await import('../../builder/tools/queries/simulateTransaction.js');
+    const { renderSimulate } = await import('../utils/terminal.js');
+    const { prefetchSimulateCollections } = await import('../utils/simulateSymbols.js');
+    try {
+      const result = await simulateMessages({
+        messages: [msg],
+        apiKey: apiKey || '',
+        apiUrl
+      });
+      if (process.stdout.isTTY) {
+        const collectionCache = await prefetchSimulateCollections(result, { apiKey: apiKey || '', apiUrl });
+        process.stdout.write(
+          renderSimulate(result, { stream: process.stdout, events: 'count', collectionCache }) + '\n'
+        );
+      } else {
+        process.stdout.write(JSON.stringify({ dryRun: true, ...result }, null, 2) + '\n');
+      }
+      if (!result.success || result.valid === false) process.exit(1);
+      process.exit(0);
+    } catch (err: any) {
+      process.stderr.write(`Dry-run simulate failed: ${err?.message || err}\n`);
+      process.exit(1);
+    }
   }
 
   // 3. Wallet picker (interactive on TTY, bypassed otherwise or via flags)
@@ -226,6 +289,18 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       pollTimeoutMs: Number(opts.pollTimeout) * 1000
     });
 
+    // Targeted hint:" — when the burner failed because the hot wallet
+    // came up short on dust (faucet refused, manual funding too small,
+    // or the wallet got swept between funding and broadcast), the
+    // recovery path is always the same: pull what's left out via
+    // `burner sweep` so it doesn't get lost in a one-shot wallet.
+    const errStr = String(result.error ?? '').toLowerCase();
+    const looksLikeInsufficient =
+      errStr.includes('insufficient') || errStr.includes('not enough') || errStr.includes('balance');
+    const hint = looksLikeInsufficient && result.ephemeralAddress
+      ? `Run \`bitbadges-cli burner sweep ${result.ephemeralAddress} --to <your-real-address>\` to recover dust, or wait for the faucet to refill.`
+      : undefined;
+
     const payload = {
       success: result.success,
       ephemeralAddress: result.ephemeralAddress,
@@ -233,7 +308,8 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       txHash: result.txHash,
       collectionId: result.collectionId ?? null,
       paused: result.paused,
-      error: result.error
+      error: result.error,
+      ...(hint ? { hint } : {})
     };
     process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
     if (!result.success && !result.paused) process.exit(1);

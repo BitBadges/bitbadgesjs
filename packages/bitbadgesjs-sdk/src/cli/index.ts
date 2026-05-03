@@ -10,6 +10,7 @@ import { explainCommand } from './commands/explain.js';
 import { simulateCommand } from './commands/simulate.js';
 import { previewCommand } from './commands/preview.js';
 import { deployCommand } from './commands/deploy.js';
+import { txCommand } from './commands/tx.js';
 
 // Indexer access
 import { createApiCommand } from './commands/api.js';
@@ -42,9 +43,22 @@ program
   .description('BitBadges CLI — flat verb-first surface for building, inspecting, and shipping token transactions')
   .version('0.1.0');
 
-// ── Global option: --help-json ───────────────────────────────────────────────
+// ── Global options ───────────────────────────────────────────────────────────
+//
+// --help-json is parsed below by inspecting argv directly (Commander
+// emits it as a global option).
+//
+// --quiet is a hint to per-command stderr commentary helpers; the actual
+// gate is `BB_QUIET=1` env var which Commander forwards to every action.
+// We propagate the flag into the env var so utilities anywhere can call
+// `isQuiet()` without reading commander state.
 
 program.option('--help-json', 'Output all commands as structured JSON (for LLMs)');
+program.option('--quiet', 'Silence stderr commentary (auto-review banners, "Written to" notices, etc). Errors still emit. Equivalent to BB_QUIET=1.');
+
+if (process.argv.includes('--quiet')) {
+  process.env.BB_QUIET = '1';
+}
 
 // ── Help groups ──────────────────────────────────────────────────────────────
 //
@@ -56,7 +70,7 @@ program.option('--help-json', 'Output all commands as structured JSON (for LLMs)
 const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   {
     title: 'Build & ship a transaction',
-    commands: [buildCommand, toolsCommand, toolCommand, checkCommand, explainCommand, simulateCommand, previewCommand, deployCommand]
+    commands: [buildCommand, toolsCommand, toolCommand, checkCommand, explainCommand, simulateCommand, previewCommand, deployCommand, txCommand]
   },
   {
     title: 'Indexer access',

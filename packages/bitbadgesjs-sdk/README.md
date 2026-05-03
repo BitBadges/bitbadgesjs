@@ -106,6 +106,61 @@ support is built in — store as many addresses as you want, switch via
 `auth use`. Full reference:
 <https://docs.bitbadges.io/for-developers/cli/auth-commands>
 
+## CLI verbs for the agent loop
+
+Three verbs cover the build → ship → confirm loop:
+
+```bash
+# 1. Build (deterministic, flag-driven)
+bitbadges-cli build vault --backing-coin USDC --name "..." \
+    --image https://... --description "..." --json-only > vault.json
+
+# 2. Dry-run before spending (NEW: deploy --dry-run)
+#    Calls simulate; never broadcasts. Exits non-zero on rejection.
+bitbadges-cli deploy vault.json --burner --dry-run --manager bb1... --mainnet
+
+# 3. Real deploy
+bitbadges-cli deploy vault.json --burner --manager bb1... --mainnet --format json
+
+# 4. Confirm it landed (NEW: tx wait)
+#    Hits chain LCD; falls through to EVM RPC for keccak256 hashes.
+bitbadges-cli tx wait $TXHASH --mainnet --timeout 60 --format json
+
+# 5. Plain-English audit of what was built (NEW: explain --format json)
+bitbadges-cli explain vault.json --format json
+```
+
+Discovery without per-route wrappers:
+
+```bash
+bitbadges-cli api --search swap                       # list matching routes
+bitbadges-cli api assets estimate-swap --schema       # route shape, no API call
+```
+
+Pipe-friendly: pass `--quiet` (or `BB_QUIET=1`) to silence stderr
+commentary across every command.
+
+## Output envelope
+
+The `tx`, `explain`, and `api --search` verbs (with broader rollout
+to follow) emit a uniform JSON envelope on `--format json` (the
+default for non-TTY pipes):
+
+```json
+{
+  "ok": true,
+  "data": { ... },
+  "warnings": [],
+  "hint": "optional next-step suggestion",
+  "error": null
+}
+```
+
+On error: `{ok: false, data: null, error: {code, message, details?}, hint?}`.
+Common failure modes (auth-rejected, 401/403, tx-wait-timeout, deploy
+insufficient-funds) populate `hint` with a one-liner that points at
+the recovery action — designed to cut agent retry loops in half.
+
 ## Quick Start
 
 ### 1. Initialize the API Client

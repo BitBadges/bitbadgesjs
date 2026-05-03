@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { output, readJsonInput, addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
+import { isQuiet } from '../utils/envelope.js';
 import { renderReview, renderValidate, renderResolvedMetadata, renderSimulate } from '../utils/terminal.js';
 import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMsg.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
@@ -126,7 +127,7 @@ async function emit(
   // Printed to stderr so it doesn't pollute the JSON pipe; shown above the
   // auto-review so the narrative ("what this tx does") precedes the
   // critique ("what might be wrong with it").
-  if (opts.explain && isCollectionTx) {
+  if (opts.explain && isCollectionTx && !isQuiet()) {
     const { interpretTransaction } = await import('../../core/interpret-transaction.js');
     const explanation = interpretTransaction(data.value);
     process.stderr.write('\n── Explanation ──\n' + explanation + '\n');
@@ -144,7 +145,12 @@ async function emit(
   // metadata + simulate are gated below — review only fires for
   // collection txs (collection-specific rules), and simulate is
   // refused for approval-style msgs entirely.
-  if (!opts.jsonOnly && (isCollectionTx || isUserApprovalTx)) {
+  // `--quiet` (and `BB_QUIET=1`) suppresses commentary streams just like
+  // `--json-only`, but stays scoped to commentary — actual errors still
+  // emit. Use the same gate so the four banners below follow one rule.
+  const suppressCommentary = !!opts.jsonOnly || isQuiet();
+
+  if (!suppressCommentary && (isCollectionTx || isUserApprovalTx)) {
     // Static validation FIRST — if the JSON is structurally broken, the
     // design review below is much less meaningful.
     try {
@@ -157,7 +163,7 @@ async function emit(
     }
   }
 
-  if (!opts.jsonOnly && isCollectionTx) {
+  if (!suppressCommentary && isCollectionTx) {
     try {
       const { reviewCollection } = await import('../../core/review.js');
       // reviewCollection wants either a raw collection or a tx body with

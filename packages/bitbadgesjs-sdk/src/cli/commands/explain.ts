@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { addNetworkOptions } from '../utils/io.js';
+import { addFormatOptions, resolveFormat, successEnvelope } from '../utils/envelope.js';
 
 /**
  * Plain-English explanation of a transaction body or a collection.
@@ -8,13 +9,15 @@ import { addNetworkOptions } from '../utils/io.js';
  * interpretCollection(). Numeric input is treated as a collection id and
  * fetched from the API.
  */
-export const explainCommand = addNetworkOptions(
-  new Command('explain')
-    .description('Explain a transaction or collection in plain English. Input: JSON file, inline JSON, numeric collection ID, or - for stdin.')
-    .argument('<input>', 'Tx / collection JSON file path, inline JSON, numeric collection id, or "-" for stdin')
-    .option('--output-file <path>', 'Write output to file instead of stdout')
+export const explainCommand = addFormatOptions(
+  addNetworkOptions(
+    new Command('explain')
+      .description('Explain a transaction or collection in plain English. Input: JSON file, inline JSON, numeric collection ID, or - for stdin.')
+      .argument('<input>', 'Tx / collection JSON file path, inline JSON, numeric collection id, or "-" for stdin')
+      .option('--output-file <path>', 'Write output to file instead of stdout')
+  )
 ).action(
-  async (input: string, opts: { network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string; outputFile?: string }) => {
+  async (input: string, opts: { network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string; outputFile?: string; format?: string; json?: boolean }) => {
     const { readJsonInput, getApiUrl, getApiKeyForNetwork } = await import('../utils/io.js');
     let data: any;
     let fetchedCollection = false;
@@ -61,6 +64,9 @@ export const explainCommand = addNetworkOptions(
     //   2. Tx wrapper  — `{ messages: [{ typeUrl, value }, ...] }`     → first collection msg's value
     //   3. Raw collection — no typeUrl, no messages, no value          → interpretCollection
     let text: string;
+    let kind: 'collection' | 'tx' | 'msg';
+    let messages: Array<{ typeUrl: string; summary: string }> = [];
+
     const { isCollectionMsg } = await import('../utils/normalizeMsg.js');
     const hasMessages = Array.isArray(data?.messages);
     const firstCollectionMsg = hasMessages ? data.messages.find((m: any) => isCollectionMsg(m)) : null;
@@ -72,10 +78,34 @@ export const explainCommand = addNetworkOptions(
       ) {
         const { interpretCollection } = await import('../../api-indexer/interpret.js');
         text = interpretCollection(data);
+        kind = 'collection';
       } else {
         const txBody = firstCollectionMsg?.value ?? data.value ?? data;
         const { interpretTransaction } = await import('../../core/interpret-transaction.js');
         text = interpretTransaction(txBody);
+        // Populate the per-message array so JSON callers can branch on shape.
+        // Each entry's `summary` is the same prose interpretation run against
+        // that single message's value — agents that want a per-msg breakdown
+        // get one without us baking a structured-findings extractor.
+        if (hasMessages) {
+          kind = 'tx';
+          for (const m of data.messages) {
+            const value = m?.value ?? m;
+            const typeUrl = String(m?.typeUrl ?? '');
+            let summary = '';
+            try {
+              summary = interpretTransaction(value);
+            } catch {
+              summary = '(could not interpret message)';
+            }
+            messages.push({ typeUrl, summary });
+          }
+        } else if (data?.typeUrl && data?.value) {
+          kind = 'msg';
+          messages.push({ typeUrl: String(data.typeUrl), summary: text });
+        } else {
+          kind = 'tx';
+        }
       }
     } catch (err: any) {
       process.stderr.write(
@@ -89,12 +119,17 @@ export const explainCommand = addNetworkOptions(
       process.exit(2);
     }
 
+    const format = resolveFormat({ format: opts.format, json: opts.json });
+    const output = format === 'json'
+      ? JSON.stringify(successEnvelope({ kind, messages, fullText: text }), null, 2) + '\n'
+      : text + '\n';
+
     if (opts.outputFile) {
       const fsMod = await import('fs');
-      fsMod.writeFileSync(opts.outputFile, text + '\n', 'utf-8');
+      fsMod.writeFileSync(opts.outputFile, output, 'utf-8');
       process.stderr.write(`Written to ${opts.outputFile}\n`);
     } else {
-      console.log(text);
+      process.stdout.write(output);
     }
   }
 );
