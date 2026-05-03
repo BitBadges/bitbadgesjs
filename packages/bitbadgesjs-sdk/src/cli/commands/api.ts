@@ -164,7 +164,9 @@ function buildRouteCommand(route: ApiRoute): Command {
     .option('--query <params>', 'Query string params as JSON object (e.g. \'{"bookmark":"x"}\')')
     .option('--condensed', 'Output condensed JSON (no whitespace)', false)
     .option('--dry-run', 'Show request details without sending', false)
-    .option('--output-file <path>', 'Write output to file instead of stdout');
+    .option('--output-file <path>', 'Write output to file instead of stdout')
+    .option('--with-session', 'Attach the cookie of the active address (set via `auth use`) for the resolved network', false)
+    .option('--as-address <addr>', 'Attach the cookie of the given address (overrides --with-session)');
 
   // Append rich documentation from the OpenAPI spec
   const afterHelp = buildAfterHelpText(route);
@@ -188,6 +190,32 @@ function buildRouteCommand(route: ApiRoute): Command {
         local: opts.local,
         baseUrl: opts.url,
       });
+
+      // Resolve optional session cookie. Never auto-attach; both --with-session
+      // and --as-address are explicit opt-ins to keep silent session injection
+      // out of the default code path.
+      let cookie: string | undefined;
+      let cookieRef: { network: 'mainnet' | 'testnet' | 'local'; address: string } | undefined;
+      if (opts.asAddress || opts.withSession) {
+        const { getActiveSession, getSession, formatCookieHeader } = await import('../utils/auth-store.js');
+        const sessionNetwork: 'mainnet' | 'testnet' | 'local' = network ?? 'mainnet';
+        const session = opts.asAddress
+          ? getSession(sessionNetwork, opts.asAddress)
+          : getActiveSession(sessionNetwork);
+        if (!session) {
+          throw new Error(
+            `No stored session for ${opts.asAddress ?? 'active address'} on ${sessionNetwork}. Run \`bitbadges-cli auth login\`.`,
+          );
+        }
+        if (Date.now() > session.expiresAt) {
+          throw new Error(
+            `Stored session for ${session.address} on ${sessionNetwork} expired at ${new Date(session.expiresAt).toISOString()}. Re-run \`bitbadges-cli auth login\`.`,
+          );
+        }
+        cookie = formatCookieHeader(session);
+        // Ref so apiRequest can persist the rolled Set-Cookie expiry.
+        cookieRef = { network: sessionNetwork, address: session.address };
+      }
 
       // Build path params map
       const pathParamValues: Record<string, string> = {};
@@ -259,6 +287,7 @@ function buildRouteCommand(route: ApiRoute): Command {
           url: `${baseUrl}${resolvedPath}`,
           headers: {
             'x-api-key': apiKey ? apiKey.slice(0, 4) + '****' : '(none)',
+            ...(cookie ? { Cookie: cookie.split('=')[0] + '=****' } : {}),
             ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
           },
           body: body ?? null,
@@ -273,6 +302,8 @@ function buildRouteCommand(route: ApiRoute): Command {
         body,
         apiKey,
         baseUrl,
+        cookie,
+        cookieRef,
       });
 
       const formatted = opts.condensed

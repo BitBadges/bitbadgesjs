@@ -461,20 +461,64 @@ console.log('Next bookmark:', activityResponse.pagination.bookmark);
 
 ### Authentication
 
-For authenticated endpoints, set an access token:
+There are three ways to authenticate against the indexer, depending on
+the surface and the scope you need.
+
+#### App-scoped: API key
+
+The default for read-mostly programmatic access. Required on every
+indexer call, but not sufficient on its own for `Full Access` routes
+(account-mutating, key-managing, signed-data-publishing endpoints).
 
 ```typescript
-// Set access token for authenticated requests
-api.setAccessToken('your-access-token');
-
-// Make authenticated request
-const accountInfo = await api.getAccount({
-  address: 'bb1abc...'
+const api = new BitBadgesAPI({
+  convertFunction: BigIntify,
+  apiKey: process.env.BITBADGES_API_KEY,
 });
+```
 
-// Clear access token
+#### User-scoped (in-process): set an access token
+
+For server code that already obtained a Blockin / SIWBB token through
+its own flow (e.g. a web backend that owns the user session):
+
+```typescript
+api.setAccessToken('your-access-token');
+const accountInfo = await api.getAccount({ address: 'bb1abc...' });
 api.unsetAccessToken();
 ```
+
+#### User-scoped (CLI / agentic): `bitbadges-cli auth`
+
+For headless agents and CLI workflows that need a `Full Access`
+session without a browser. The CLI runs the Blockin challenge → verify
+flow and stores the resulting cookie under `~/.bitbadges/auth.json`
+(mode 0600, multi-account, multi-network), then `api --with-session`
+attaches it on subsequent calls.
+
+The flow is **wallet-agnostic** — the CLI never touches a private key.
+Pair it with the chain binary's `bitbadgeschaind sign-arbitrary` for
+fully headless Cosmos signing, or paste in a signature from MetaMask /
+Keplr / a hardware wallet / a custodial signer.
+
+```bash
+# Headless three-step (chain-binary signer)
+MSG=$(bitbadges-cli auth challenge --address bb1...)
+SIG_JSON=$(bitbadgeschaind sign-arbitrary mykey "$MSG")
+bitbadges-cli auth login \
+  --address    "$(echo "$SIG_JSON" | jq -r .address)" \
+  --signature  "$(echo "$SIG_JSON" | jq -r .signature)" \
+  --public-key "$(echo "$SIG_JSON" | jq -r .pubKey)" \
+  --message    "$MSG"
+
+# Make a Full Access request
+bitbadges-cli api accounts get-account --body '{"address":"bb1..."}' --with-session
+```
+
+2FA accounts pass `--2fa <totp>` (or `--2fa-backup <code>`) to `auth
+login`. Switch active address with `auth use <addr>`; inspect with
+`auth status [--check]` and `auth whoami`. Full reference:
+<https://docs.bitbadges.io/for-developers/cli/auth-commands>.
 
 ### Error Handling
 
