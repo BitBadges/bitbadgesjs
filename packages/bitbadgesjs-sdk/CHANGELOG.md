@@ -3,6 +3,68 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.36.0]
+
+### Breaking Changes — `bitbadges-cli` flat verb-first redesign
+
+The CLI surface was flattened — the `sdk` and `builder` umbrella nouns are gone. Every former `bitbadges-cli sdk <verb>` and `bitbadges-cli builder <verb>` is now `bitbadges-cli <verb>`. Clean break, no back-compat aliases — beta status earned the rename.
+
+**Folded duplicates:**
+
+| Before | After |
+|---|---|
+| `sdk review` + `builder review` + `builder verify` + `builder validate` | `check` (with `--depth structural \| review \| full`; default `full`) |
+| `sdk interpret-tx` + `sdk interpret-collection` + `builder explain` | `explain` (auto-detects tx vs collection from input shape) |
+| `sdk status` + `builder doctor` | `doctor` |
+
+**Generalized:**
+
+- `builder create-with-burner` → `deploy --burner` (required `--burner` flag — reserves space for future `--from <key>` and `--api-broadcast` paths without making any of them the silent default).
+
+**Hoisted out of `builder`:**
+
+- `builder templates <name>` → `build <name>`
+- `builder tools list` → `tools` (plural, lists)
+- `builder tools call <name>` → `tool <name>` (singular, invokes — kubectl-style)
+- `builder burner` → `burner`
+- `builder session` → `session`
+- `builder resources` → `resources`
+
+**Hoisted out of `sdk`:**
+
+- `sdk docs` / `sdk skills` → `docs` / `skills`
+- `sdk address` / `sdk alias` → `address` / `alias`
+- `sdk lookup-token` → `lookup`
+- `sdk gen-list-id` → `gen-list-id`
+
+**`bitbadges-cli --help`** emits a sectioned overview (Build & Ship / Indexer / Local State / Discovery / Address & lookup / Misc). The tree itself is flat — group structure exists only in the help renderer.
+
+Tracked in [bitbadges-autopilot backlog #0376](https://github.com/trevormil/bitbadges-autopilot/blob/main/backlog/0376-cli-flat-verb-first-redesign.md). Companion PRs: [bitbadgeschain#89](https://github.com/BitBadges/bitbadgeschain/pull/89), [bitbadges-frontend#193](https://github.com/BitBadges/bitbadges-frontend/pull/193), [bitbadges-plugin#2](https://github.com/BitBadges/bitbadges-plugin/pull/2), [bitbadges-docs#61](https://github.com/trevormil/bitbadges-docs/pull/61), [bitbadges-indexer#154](https://github.com/BitBadges/bitbadges-indexer/pull/154).
+
+### Migration
+
+Drop the umbrella prefix on every CLI invocation; everything else is the same flag set.
+
+```bash
+# Before
+bitbadges-cli builder templates vault --backing-coin USDC
+bitbadges-cli sdk review tx.json
+bitbadges-cli sdk status
+bitbadges-cli builder create-with-burner --msg-file col.json --manager bb1...
+
+# After
+bitbadges-cli build vault --backing-coin USDC
+bitbadges-cli check tx.json
+bitbadges-cli doctor
+bitbadges-cli deploy --burner --msg-file col.json --manager bb1...
+```
+
+### Installation
+
+```bash
+npm install bitbadges@0.36.0
+```
+
 ## [0.35.3]
 
 ### Breaking Changes
