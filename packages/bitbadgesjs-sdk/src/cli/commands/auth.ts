@@ -252,11 +252,27 @@ addNetworkOptions(authCommand.command('login'))
       cookies = fresh.cookies;
     }
 
-    const verify = await postVerify(baseUrl, apiKey, formatCookieHeaderFromMany(cookies), {
-      message,
-      signature: opts.signature,
-      publicKey: opts.publicKey,
-    });
+    let verify;
+    try {
+      verify = await postVerify(baseUrl, apiKey, formatCookieHeaderFromMany(cookies), {
+        message,
+        signature: opts.signature,
+        publicKey: opts.publicKey,
+      });
+    } catch (err: any) {
+      // Targeted hint:" — the most common failure mode here is an
+      // expired challenge or a signature that doesn't match the
+      // message. Both root-cause to "challenge state drifted from
+      // signature" and the fix is identical: re-run challenge → sign
+      // → verify in tight succession.
+      process.stderr.write(`${err?.message ?? err}\n`);
+      process.stderr.write(
+        'Hint: re-fetch with `bitbadges-cli auth challenge --address ' +
+          opts.address +
+          '`, sign the new message, then retry `auth login`.\n'
+      );
+      process.exit(1);
+    }
 
     let finalCookie = verify.sessionCookie;
     let allCookies = verify.allCookies;

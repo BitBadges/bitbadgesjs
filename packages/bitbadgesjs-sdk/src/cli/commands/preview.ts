@@ -28,6 +28,24 @@ export const previewCommand = addNetworkOptions(
     const raw = readJsonInput(input);
     const wrapped = ensureTxWrapper(raw);
 
+    // Shape sanity check — match the level of detail `check` provides on
+    // shape mismatches so agents don't have to guess what was wrong.
+    if (!wrapped || typeof wrapped !== 'object' || !Array.isArray(wrapped.messages) || wrapped.messages.length === 0) {
+      const got =
+        wrapped == null
+          ? String(wrapped)
+          : Array.isArray(wrapped)
+            ? `array (length ${wrapped.length})`
+            : typeof wrapped === 'object'
+              ? `object with keys [${Object.keys(wrapped).join(', ')}]`
+              : typeof wrapped;
+      process.stderr.write(
+        `Preview input has an unexpected shape — expected \`{messages: [{typeUrl, value}, ...]}\` or a single Msg \`{typeUrl, value}\`.\n` +
+          `Got: ${got}.\n`
+      );
+      process.exit(2);
+    }
+
     // Normalize msg type (Universal → Create/Update). The placeholder
     // sidecar lives inside `msg.value._meta` per the single-source-of-
     // truth contract — rides along inside the value automatically.

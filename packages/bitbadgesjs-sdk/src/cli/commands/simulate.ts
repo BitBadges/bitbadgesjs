@@ -57,9 +57,24 @@ export const simulateCommand = addNetworkOptions(
   const wrapped = ensureTxWrapper(raw);
   const messages = Array.isArray(wrapped?.messages) ? wrapped.messages : [];
   if (messages.length === 0) {
+    // Match `check`'s level of detail on shape mismatches — agents
+    // shouldn't have to guess what was wrong with their input.
+    const got =
+      wrapped == null
+        ? String(wrapped)
+        : Array.isArray(wrapped)
+          ? `array (length ${wrapped.length})`
+          : typeof wrapped === 'object'
+            ? `object with keys [${Object.keys(wrapped).join(', ')}]`
+            : typeof wrapped;
     process.stderr.write(
       renderSimulate(
-        { success: false, error: 'No messages found in input. Expected `{messages: [...]}` or a single Msg.' },
+        {
+          success: false,
+          error:
+            'Simulate input has an unexpected shape — expected `{messages: [{typeUrl, value}, ...]}` or a single Msg `{typeUrl, value}`. ' +
+            `Got: ${got}.`
+        },
         { stream: process.stderr }
       ) + '\n'
     );
