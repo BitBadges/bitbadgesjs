@@ -1,19 +1,23 @@
 /**
- * `bitbadges-cli builder create-with-burner`
+ * `bitbadges-cli deploy --burner`
  *
- * Creates a new collection using a throwaway ephemeral wallet as the signer.
- * The burner is generated per-run, persisted to `~/.bitbadges/burners/`,
- * funded via the indexer faucet (or manually by the user), then signs the
- * tx. Collection ownership is captured by the `manager` field on the msg,
- * so the burner has no lasting authority.
+ * Broadcasts a transaction. Today only the `--burner` path is implemented —
+ * a throwaway ephemeral wallet is generated per-run, persisted to
+ * `~/.bitbadges/burners/`, funded via the indexer faucet (or manually),
+ * and signs exactly one create-collection tx. Collection ownership is
+ * captured by the `manager` field on the msg, so the burner has no
+ * lasting authority. The required `--burner` flag reserves space for
+ * future deploy paths (`--from <key>` for chain-binary signing,
+ * `--api-broadcast` for posting a pre-signed tx) without breaking
+ * existing scripts.
  *
  * Input is always JSON — either from `--msg-file <path>`, `--msg-stdin`,
  * or a positional file argument. The canonical happy path is to pipe a
- * template's stdout straight in:
+ * builder's stdout straight in:
  *
- *   bitbadges-cli builder templates subscription --interval monthly \
+ *   bitbadges-cli build subscription --interval monthly \
  *     --price 10 --denom USDC --recipient bb1... \
- *     | bitbadges-cli create-with-burner --msg-stdin \
+ *     | bitbadges-cli deploy --burner --msg-stdin \
  *         --manager bb1... --local
  */
 
@@ -131,30 +135,35 @@ DISADVANTAGES
     you can't efficiently clean up.
 
 TYPICAL USAGE
-  Pipe a template's JSON straight in:
+  Pipe a builder's JSON straight in:
 
-    bitbadges-cli builder templates subscription --interval monthly \\
+    bitbadges-cli build subscription --interval monthly \\
         --price 10 --denom USDC --recipient bb1your-payout... \\
-      | bitbadges-cli builder create-with-burner --msg-stdin \\
+      | bitbadges-cli deploy --burner --msg-stdin \\
           --manager bb1your-real-address... --local
 
   Or pass a file:
 
-    bitbadges-cli builder create-with-burner --msg-file col.json \\
+    bitbadges-cli deploy --burner --msg-file col.json \\
         --manager bb1your-real-address... --testnet
 
 RELATED
-  bitbadges-cli builder burner list                 — see every saved
-  bitbadges-cli builder burner resume <selector>    — retry a paused run
-  bitbadges-cli builder burner sweep  <selector>    — recover dust
-  bitbadges-cli builder burner forget <selector>    — delete recovery file
+  bitbadges-cli burner list                 — see every saved
+  bitbadges-cli burner resume <selector>    — retry a paused run
+  bitbadges-cli burner sweep  <selector>    — recover dust
+  bitbadges-cli burner forget <selector>    — delete recovery file
 `.trim();
 
-export const createWithBurnerCommand = new Command('create-with-burner')
+export const deployCommand = new Command('deploy')
   .description(LONG_DESCRIPTION)
-  .summary('Broadcast a create-collection msg using a throwaway dust-only burner. CREATE ONLY.')
+  .summary('Broadcast a create-collection msg. Today: --burner is the only supported path.')
   .usage(' ')
   .argument('[input]', 'Msg JSON file path, "-" for stdin, or inline JSON')
+  // Required path flag. Only `--burner` is implemented today; the flag
+  // is required-explicit to leave room for future paths (`--from <key>`
+  // for chain-binary signing, `--api-broadcast` for posting a pre-signed
+  // tx) without making any of them the silent default.
+  .requiredOption('--burner', 'Use the throwaway burner-wallet path. Currently the only supported deploy path.')
   .option('--msg-file <path>', 'Read msg JSON from a file')
   .option('--msg-stdin', 'Read msg JSON from stdin')
   .requiredOption('--manager <address>', 'Address that will own the created collection (bb1...). Required — refuses to create orphaned collections.')
@@ -166,8 +175,8 @@ export const createWithBurnerCommand = new Command('create-with-burner')
   .option('--reuse <selector>', 'Reuse a specific saved burner by address or recovery file path')
   .option('--non-interactive', 'Never prompt; on any prompt point, save state and exit for later resume. Also forced when stdout is not a TTY.')
   .option('--poll-timeout <seconds>', 'Seconds to wait for funding to land before prompting/exiting', '60');
-addNetworkOptions(createWithBurnerCommand);
-createWithBurnerCommand.action(async (input: string | undefined, opts: any) => {
+addNetworkOptions(deployCommand);
+deployCommand.action(async (input: string | undefined, opts: any) => {
   // 1. Resolve network + endpoints
   const networkName = resolveNetwork(opts);
   // The CLI's `mainnet | local | testnet` types line up 1:1 with the
