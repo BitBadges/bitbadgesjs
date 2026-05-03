@@ -97,17 +97,50 @@ async function uploadPayload(baseUrl: string, apiKey: string | undefined, payloa
   return body.code as string;
 }
 
+// Theme-aware HTML pages served by the loopback listener. Uses
+// `prefers-color-scheme` so light + dark browsers both render
+// readable text on a sensible background. No JS — no auto-close
+// (the user closes the tab themselves once they see the result).
+const PAGE_STYLES = `
+  :root { color-scheme: light dark; }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    max-width: 520px;
+    margin: 80px auto;
+    text-align: center;
+    padding: 0 16px;
+    background: #fff;
+    color: #111;
+  }
+  h2 { margin-bottom: 12px; }
+  p { color: #444; }
+  .ok { color: #1e8a4a; }
+  .err { color: #c2360b; }
+  .muted { color: #777; font-size: 13px; margin-top: 24px; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #15161a; color: #e8e8ec; }
+    p { color: #b8b8bf; }
+    .ok { color: #4ade80; }
+    .err { color: #f87171; }
+    .muted { color: #888; }
+  }
+`;
+
+function pageHtml(title: string, statusClass: string, statusText: string, body: string): string {
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>${PAGE_STYLES}</style></head><body><h2 class="${statusClass}">${statusText}</h2>${body}<p class="muted">You can close this tab.</p></body></html>`;
+}
+
 function successPage(): string {
-  return `<!doctype html><html><head><meta charset="utf-8"><title>BitBadges CLI</title></head><body style="font-family: system-ui, sans-serif; max-width: 480px; margin: 60px auto; text-align: center; padding: 0 16px;"><h2 style="color: #2a7;">Signed</h2><p>You can close this tab and return to your terminal.</p><script>setTimeout(function(){ try { window.close(); } catch(e) {} }, 1500);</script></body></html>`;
+  return pageHtml('BitBadges CLI', 'ok', 'Signed', '<p>The result was returned to the terminal that opened this tab.</p>');
 }
 
 function errorPage(msg: string): string {
   const safe = msg.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' } as Record<string, string>)[c]);
-  return `<!doctype html><html><head><meta charset="utf-8"><title>BitBadges CLI — error</title></head><body style="font-family: system-ui, sans-serif; max-width: 480px; margin: 60px auto; text-align: center; padding: 0 16px;"><h2 style="color: #c33;">Sign request rejected</h2><p>${safe}</p><p>You can close this tab.</p></body></html>`;
+  return pageHtml('BitBadges CLI — error', 'err', 'Sign request rejected', `<p>${safe}</p>`);
 }
 
 function gonePage(): string {
-  return `<!doctype html><html><head><meta charset="utf-8"><title>BitBadges CLI</title></head><body style="font-family: system-ui, sans-serif; max-width: 480px; margin: 60px auto; text-align: center; padding: 0 16px;"><h2>Already received</h2><p>This sign request already returned a result. You can close this tab.</p></body></html>`;
+  return pageHtml('BitBadges CLI', '', 'Already received', '<p>This sign request already returned a result.</p>');
 }
 
 /**
