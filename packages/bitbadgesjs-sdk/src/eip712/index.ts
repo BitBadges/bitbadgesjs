@@ -13,10 +13,12 @@
  * `cosmos/evm/ethereum/eip712/` (v0.6.0 — the version the BitBadges chain
  * pins). Updating that dependency may require updating this module.
  */
+export * from './broadcast.js';
 export * from './build.js';
 export * from './domain.js';
 export * from './hash.js';
 export * from './message.js';
+export * from './recover.js';
 export * from './sanitize.js';
 export * from './types.js';
 export * from './types-builder.js';

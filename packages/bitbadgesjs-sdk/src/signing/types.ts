@@ -225,6 +225,18 @@ export interface SignAndBroadcastOptions {
   simulate?: boolean;
   /** Gas multiplier for simulation result. Default: uses client's gasMultiplier */
   gasMultiplier?: number;
+  /**
+   * Override the broadcast path:
+   *   - `cosmos`     — sign with the adapter's `signDirect` (Keplr / Leap / mnemonic).
+   *   - `precompile` — encode the message as an EVM tx through the precompile.
+   *   - `eip712`     — sign as a Cosmos legacyAmino tx via `eth_signTypedData_v4`
+   *                    (EVM wallet signs the Cosmos message directly).
+   * Default: auto-derived from the adapter (`cosmos` for Cosmos adapters,
+   * `precompile` for EVM adapters). Set `eip712` when you want to broadcast
+   * a Cosmos message signed with an EVM wallet — useful for messages the
+   * precompile path doesn't cover, or for off-chain proofs.
+   */
+  mode?: 'cosmos' | 'precompile' | 'eip712';
 }
 
 /**
@@ -305,12 +317,17 @@ export interface WalletAdapterInterface {
   /** Estimate gas for an EVM transaction (for EVM wallets) */
   estimateEvmGas?(tx: EvmTransaction): Promise<bigint>;
 
+  /** Sign EIP-712 typed-data (for EVM wallets) */
+  signTypedData?(typed: any): Promise<string>;
+
   /** Check if the adapter supports SignDirect signing */
   supportsSignDirect(): boolean;
   /** Check if the adapter supports Amino signing */
   supportsSignAmino(): boolean;
   /** Check if the adapter supports EVM transactions */
   supportsEvmTransaction(): boolean;
+  /** Check if the adapter supports EIP-712 typed-data signing */
+  supportsSignTypedData(): boolean;
 }
 
 /**
