@@ -1,5 +1,6 @@
 import { Coin } from '@/proto/cosmos/base/v1beta1/coin_pb.js';
 import { PubKey as SECP256k1 } from '@/proto/cosmos/crypto/secp256k1/keys_pb.js';
+import { PubKey as ETHSECP256k1 } from '@/proto/cosmos/evm/crypto/v1/ethsecp256k1/keys_pb.js';
 import { SignMode } from '@/proto/cosmos/tx/signing/v1beta1/signing_pb.js';
 import { AuthInfo, Fee, ModeInfo, ModeInfo_Single, SignDoc, SignerInfo, TxBody } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
 import { convertProtoMessageToObject } from '@/transactions/amino/objectConverter.js';
@@ -83,6 +84,37 @@ export function createSignerInfo(publicKey: Uint8Array, sequence: number, mode: 
   });
 
   return signerInfo;
+}
+
+/**
+ * Variant of `createSignerInfo` that wraps the public key as
+ * `cosmos.evm.crypto.v1.ethsecp256k1.PubKey` instead of the standard
+ * Cosmos `secp256k1.PubKey`. This is required for EIP-712-signed txs:
+ * the chain's ante handler dispatches on PubKey type, and only
+ * `ethsecp256k1.PubKey.VerifySignature` has the EIP-712 fallback that
+ * recognizes signatures over the typed-data hash instead of the raw
+ * sign bytes.
+ */
+export function createSignerInfoEthsecp256k1(publicKey: Uint8Array, sequence: number, mode: number) {
+  const pubkey: MessageGenerated = {
+    message: new ETHSECP256k1({
+      key: publicKey as Uint8Array<ArrayBuffer>
+    }),
+    path: 'cosmos.evm.crypto.v1.ethsecp256k1.PubKey'
+  };
+
+  return new SignerInfo({
+    publicKey: createAnyMessage(pubkey),
+    modeInfo: new ModeInfo({
+      sum: {
+        value: new ModeInfo_Single({
+          mode
+        }),
+        case: 'single'
+      }
+    }),
+    sequence: BigInt(sequence)
+  });
 }
 
 export function createAuthInfo(signerInfo: SignerInfo, fee: Fee) {
