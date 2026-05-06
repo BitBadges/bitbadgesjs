@@ -17,16 +17,6 @@ import type { EIP712TypedData } from './types.js';
 export interface BuildEIP712Args {
   /** Proto messages (raw bufbuild Message instances or pre-wrapped MessageGenerated). */
   messages: any[];
-  /**
-   * Optional. The SDK class instances that produced `messages` (e.g.
-   * `MsgCreateCollection`, `MsgUpdateUserApprovals`, etc., each exposing
-   * `getNumberFieldNames`). When provided, the amino-JSON pruner walks
-   * this graph to derive the set of field names that need `""` → `"0"`
-   * coercion (gogoproto `Uint` customtype). When omitted, falls back to
-   * `messages` — works if messages are SDK instances; degrades to no
-   * coercion if messages are raw bufbuild protos.
-   */
-  sdkSourceMessages?: unknown[];
   /** Cosmos chain-id string, e.g. "bitbadges-1" or "bitbadges-2". */
   cosmosChainId: string;
   /** EIP-155 numeric chain id (50024 mainnet, 50025 testnet, 90123 local). */
@@ -42,7 +32,7 @@ export function buildEIP712TypedData(args: BuildEIP712Args): EIP712TypedData {
     // Already a wrapped { message, path } envelope?
     m && typeof m === 'object' && 'path' in m && 'message' in m ? (m as MessageGenerated) : createProtoMsg(m)
   );
-  const aminoMsgs = convertProtoMessagesToAmino(generated, args.sdkSourceMessages ?? args.messages);
+  const aminoMsgs = convertProtoMessagesToAmino(generated);
   const stdFee = createStdFee(args.fee.amount, args.fee.denom, args.fee.gas);
   const signDoc = makeSignDoc(aminoMsgs, stdFee, args.cosmosChainId, args.memo ?? '', args.accountNumber, args.sequence);
   return wrapTxToTypedData(signDoc as unknown as Record<string, unknown>, args.eip155ChainId);
