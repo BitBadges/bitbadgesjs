@@ -11,7 +11,7 @@ import { UserBalanceStore } from "./user_balance_store_pb.js";
 import { AddressList } from "./address_lists_pb.js";
 import { ApprovalTracker } from "./approval_tracking_pb.js";
 import { DynamicStore, DynamicStoreValue } from "./dynamic_stores_pb.js";
-import { VoteProof } from "./challenges_pb.js";
+import { VoteProof, VotingChallengeTracker } from "./challenges_pb.js";
 
 /**
  * GenesisState defines the tokens module's genesis state.
@@ -125,11 +125,31 @@ export class GenesisState extends Message<GenesisState> {
   collectionStats: CollectionStats[] = [];
 
   /**
-   * this line is used by starport scaffolding # genesis/proto/state
-   *
    * @generated from field: repeated string collectionStatsIds = 22;
    */
   collectionStatsIds: string[] = [];
+
+  /**
+   * @generated from field: repeated tokenization.VotingChallengeTracker votingChallengeTrackers = 23;
+   */
+  votingChallengeTrackers: VotingChallengeTracker[] = [];
+
+  /**
+   * @generated from field: repeated string votingChallengeTrackerStoreKeys = 24;
+   */
+  votingChallengeTrackerStoreKeys: string[] = [];
+
+  /**
+   * @generated from field: string nextAddressListCounter = 25;
+   */
+  nextAddressListCounter = "";
+
+  /**
+   * this line is used by starport scaffolding # genesis/proto/state
+   *
+   * @generated from field: repeated string reservedProtocolAddresses = 26;
+   */
+  reservedProtocolAddresses: string[] = [];
 
   constructor(data?: PartialMessage<GenesisState>) {
     super();
@@ -161,6 +181,10 @@ export class GenesisState extends Message<GenesisState> {
     { no: 20, name: "votingTrackerStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
     { no: 21, name: "collectionStats", kind: "message", T: CollectionStats, repeated: true },
     { no: 22, name: "collectionStatsIds", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 23, name: "votingChallengeTrackers", kind: "message", T: VotingChallengeTracker, repeated: true },
+    { no: 24, name: "votingChallengeTrackerStoreKeys", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 25, name: "nextAddressListCounter", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 26, name: "reservedProtocolAddresses", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisState {
