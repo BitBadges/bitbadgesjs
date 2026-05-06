@@ -9,7 +9,7 @@ import type { Any } from '@bufbuild/protobuf';
 import { Keccak } from 'sha3';
 import { makeSignDoc, serializeSignDoc, StdFee } from './signDoc.js';
 import type { MessageGenerated } from './utils.js';
-import { createAnyMessage } from './utils.js';
+import { createAnyMessage, dropEmptyProtoSubMessages } from './utils.js';
 
 export const SIGN_DIRECT = SignMode.DIRECT;
 export const LEGACY_AMINO = SignMode.LEGACY_AMINO_JSON;
@@ -91,6 +91,11 @@ function pruneAminoEmpties(value: unknown): unknown {
 // objects to Amino representations using the registry.
 export function convertProtoMessagesToAmino(protoMessages: MessageGenerated[]) {
   return protoMessages.map((wrappedProtoMsg) => {
+    // Drop effectively-empty sub-messages from the proto BEFORE
+    // converting to amino JSON so the typed-data tree we sign matches
+    // what the chain reconstructs from the broadcast wire bytes (which
+    // also have these dropped — see `createAnyMessage`).
+    dropEmptyProtoSubMessages(wrappedProtoMsg.message);
     const protoObject = convertProtoMessageToObject(wrappedProtoMsg.message);
     const aminoMsg = AminoTypes.toAmino(protoObject) as { type: string; value: unknown };
     // Prune omitempty defaults inside `value` to match gogoproto's
