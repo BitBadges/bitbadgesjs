@@ -1,5 +1,6 @@
 import type { EvmTransaction, SigningResult } from '../types.js';
 import type { TransactionPayload } from '@/transactions/messages/base.js';
+import type { EIP712TypedData } from '@/eip712/types.js';
 
 /**
  * Base interface for wallet adapters.
@@ -48,6 +49,16 @@ export interface WalletAdapter {
    */
   estimateEvmGas?(tx: EvmTransaction): Promise<bigint>;
 
+  /**
+   * Sign EIP-712 typed-data with the wallet.
+   * Only implemented by EVM wallet adapters; lets BitBadges Cosmos
+   * messages be signed via the standard EVM signing flow
+   * (`eth_signTypedData_v4` / `Signer.signTypedData`) so any EVM
+   * wallet can produce a valid Cosmos transaction signature.
+   * Returns a `0x...`-prefixed 65-byte hex signature (r || s || v).
+   */
+  signTypedData?(typed: EIP712TypedData): Promise<string>;
+
   /** Check if the adapter supports SignDirect signing */
   supportsSignDirect(): boolean;
 
@@ -56,6 +67,9 @@ export interface WalletAdapter {
 
   /** Check if the adapter supports EVM transactions */
   supportsEvmTransaction(): boolean;
+
+  /** Check if the adapter supports EIP-712 typed-data signing */
+  supportsSignTypedData(): boolean;
 }
 
 /**
@@ -72,6 +86,7 @@ export abstract class BaseWalletAdapter implements WalletAdapter {
   signDirect?(payload: TransactionPayload, accountNumber: number): Promise<SigningResult>;
   sendEvmTransaction?(tx: EvmTransaction): Promise<string>;
   estimateEvmGas?(tx: EvmTransaction): Promise<bigint>;
+  signTypedData?(typed: EIP712TypedData): Promise<string>;
 
   supportsSignDirect(): boolean {
     return typeof this.signDirect === 'function';
@@ -83,5 +98,9 @@ export abstract class BaseWalletAdapter implements WalletAdapter {
 
   supportsEvmTransaction(): boolean {
     return typeof this.sendEvmTransaction === 'function';
+  }
+
+  supportsSignTypedData(): boolean {
+    return typeof this.signTypedData === 'function';
   }
 }

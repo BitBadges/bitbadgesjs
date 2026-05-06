@@ -11,6 +11,8 @@ import { createTxRaw } from './txRaw.js';
 import type { MessageGenerated } from './utils.js';
 import { normalizeMessagesIfNecessary, createProtoMsg } from './utils.js';
 import { convertMessageToPrecompileCall, convertMessagesToExecuteMultiple, areAllTokenizationMessages, type SupportedSdkMessage, detectMessageType, evmToCosmosAddress } from '../precompile/index.js';
+import { buildEIP712TypedData, eip155ChainIdFromCosmosChainId } from '@/eip712/build.js';
+import type { EIP712TypedData } from '@/eip712/types.js';
 
 interface LegacyTxContext {
   chain: Chain;
@@ -56,6 +58,13 @@ export interface TxContext {
    * - If both are provided: Both Cosmos payloads and evmTx will be generated
    */
   evmAddress?: string;
+  /**
+   * Override the EIP-155 numeric chain id used when building the EIP-712
+   * typed-data payload. Default: derived from `testnet` (50024 mainnet,
+   * 50025 testnet). Required for custom chains (e.g. 90123 for local
+   * devnet) since they don't match the default mapping.
+   */
+  eip155ChainIdOverride?: number;
 }
 
 /**
@@ -118,6 +127,14 @@ export interface TransactionPayload {
     /** Function name (for debugging/logging) */
     functionName: string;
   };
+  /**
+   * EIP-712 typed-data payload (`{ domain, types, primaryType, message }`)
+   * for the same Cosmos messages, ready to sign with `eth_signTypedData_v4`
+   * (MetaMask / Privy / Coinbase Smart Wallet) or our own `hashTypedData`.
+   * Present when sender is provided. Compatible with the Cosmos EVM ante
+   * handler's EIP-712 verification path.
+   */
+  eip712?: EIP712TypedData;
 }
 
 const wrapExternalTxContext = (context: TxContext): LegacyTxContext | null => {
@@ -209,18 +226,21 @@ export const createTransactionPayload = (
 
   const txContext: LegacyTxContext | null = wrapExternalTxContext(context);
 
-  return createTransactionPayloadFromTxContext(txContext, messages, context.evmAddress);
+  return createTransactionPayloadFromTxContext(txContext, messages, context.evmAddress, context.eip155ChainIdOverride, context.testnet);
 };
 
 const createTransactionPayloadFromTxContext = (
   txContext: LegacyTxContext | null,
   messages: Message | Message[],
-  evmAddress?: string
+  evmAddress?: string,
+  eip155ChainIdOverride?: number,
+  testnet?: boolean
 ): TransactionPayload => {
   messages = wrapTypeToArray(messages);
 
   // Generate Cosmos payloads only if sender is provided
   let cosmosPayload: { signDirect?: TransactionPayload['signDirect']; legacyAmino?: TransactionPayload['legacyAmino'] } = {};
+  let eip712Payload: EIP712TypedData | undefined;
 
   if (txContext) {
     // Convert messages to proto format for Cosmos payloads
@@ -247,6 +267,34 @@ const createTransactionPayloadFromTxContext = (
       signDirect: payload.signDirect,
       legacyAmino: payload.legacyAmino
     };
+
+    // EIP-712 typed-data — built from the same Amino msg set so any wallet
+    // capable of `eth_signTypedData_v4` can sign Cosmos txs without going
+    // through the precompile. Failures here are non-fatal: a Msg type
+    // missing an Amino converter (e.g. poolmanager today) just leaves
+    // `eip712` undefined; signDirect / legacyAmino still work.
+    try {
+      const eip155 =
+        eip155ChainIdOverride ??
+        eip155ChainIdFromCosmosChainId(txContext.chain.chainId);
+      eip712Payload = buildEIP712TypedData({
+        messages: generatedMsgs,
+        cosmosChainId: txContext.chain.cosmosChainId,
+        eip155ChainId: eip155,
+        fee: { amount: txContext.fee.amount, denom: txContext.fee.denom, gas: parseInt(txContext.fee.gas, 10) },
+        memo: txContext.memo,
+        sequence: txContext.sender.sequence,
+        accountNumber: txContext.sender.accountNumber
+      });
+    } catch (err) {
+      // Surface in dev — silent failure here would leak into hard-to-debug
+      // signing failures downstream — but don't block payload creation.
+      // testnet flag isn't directly available here; reuse the param if set.
+      if (testnet) {
+        // eslint-disable-next-line no-console
+        console.warn('eip712 payload not built:', (err as Error).message);
+      }
+    }
   }
 
   // Generate EVM transaction only if evmAddress is provided
@@ -324,7 +372,8 @@ const createTransactionPayloadFromTxContext = (
 
   return {
     ...cosmosPayload,
-    ...(evmTx && { evmTx })
+    ...(evmTx && { evmTx }),
+    ...(eip712Payload && { eip712: eip712Payload })
   } as TransactionPayload;
 };
 

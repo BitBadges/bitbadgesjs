@@ -1,6 +1,8 @@
 import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
+import { buildEIP712TypedData, buildEip712TxBroadcastBody, recoverEvmPublicKey } from '@/eip712/index.js';
 import { generateEndpointAccount, type AccountResponse } from '@/node-rest-api/account.js';
 import { createTransactionPayload, createTxBroadcastBody, type TxContext } from '@/transactions/messages/base.js';
+import { createProtoMsg } from '@/transactions/messages/utils.js';
 import type { Fee } from '@/transactions/messages/common.js';
 import type { Message } from '@bufbuild/protobuf';
 import axios, { type AxiosInstance } from 'axios';
@@ -484,12 +486,21 @@ export class BitBadgesSigningClient {
    * @returns Broadcast result including transaction hash
    */
   async signAndBroadcast(messages: TransactionMessage[], options?: SignAndBroadcastOptions): Promise<BroadcastResult> {
-    // EVM path
-    if (this.adapter.chainType === 'evm') {
+    // Explicit mode override beats adapter-based dispatch.
+    if (options?.mode === 'eip712') {
+      return this.signAndBroadcastEip712(messages, options);
+    }
+    if (options?.mode === 'cosmos') {
+      return this.signAndBroadcastCosmos(messages, options);
+    }
+    if (options?.mode === 'precompile') {
       return this.signAndBroadcastEvm(messages, options);
     }
 
-    // Cosmos path
+    // Default dispatch: chainType decides.
+    if (this.adapter.chainType === 'evm') {
+      return this.signAndBroadcastEvm(messages, options);
+    }
     return this.signAndBroadcastCosmos(messages, options);
   }
 
@@ -612,6 +623,123 @@ export class BitBadgesSigningClient {
   private isSequenceMismatchError(message?: string): boolean {
     if (!message) return false;
     return message.includes('account sequence mismatch') || message.includes('incorrect account sequence');
+  }
+
+  /**
+   * Sign and broadcast a Cosmos message via EIP-712 typed-data signed
+   * by an EVM wallet.
+   *
+   * The EVM wallet signs the EIP-712 hash of the Amino StdSignDoc; the
+   * resulting signature attaches to a regular legacyAmino-mode TxRaw
+   * with an `ethsecp256k1.PubKey` SignerInfo. The chain's
+   * `cosmos/evm` ante handler dispatches on PubKey type and uses the
+   * EIP-712 fallback inside `ethsecp256k1.VerifySignature` to accept
+   * the signature without any special tx envelope.
+   *
+   * @param messages - Cosmos messages to include in the tx.
+   * @param options - Standard sign-and-broadcast options. `mode` is
+   *   ignored here (this method is the eip712 mode).
+   */
+  private async signAndBroadcastEip712(
+    messages: TransactionMessage[],
+    options?: SignAndBroadcastOptions,
+    retryCount = 0
+  ): Promise<BroadcastResult> {
+    if (!this.adapter.signTypedData) {
+      throw new Error('Adapter does not support EIP-712 typed-data signing (signTypedData missing)');
+    }
+
+    const accountInfo = await this.getAccountInfo();
+    const protoMessages = this.normalizeMessages(messages);
+    const generated = protoMessages.map((m) => createProtoMsg(m));
+
+    // Determine fee — same path as the Cosmos broadcast for consistency.
+    let fee: Fee;
+    if (options?.fee) {
+      fee = options.fee;
+    } else if (options?.simulate !== false) {
+      try {
+        const simResult = await this.simulate(messages, { memo: options?.memo });
+        const multiplier = options?.gasMultiplier || this.gasMultiplier;
+        const adjustedGas = Math.ceil(simResult.gasUsed * multiplier);
+        fee = this.calculateFee(adjustedGas);
+      } catch {
+        fee = this.calculateFee(this.defaultGasLimit);
+      }
+    } else {
+      fee = this.calculateFee(this.defaultGasLimit);
+    }
+
+    // Build the EIP-712 typed-data the wallet will sign.
+    const typed = buildEIP712TypedData({
+      messages: generated,
+      cosmosChainId: this.chainId,
+      eip155ChainId: this.evmChainId,
+      fee: { amount: fee.amount, denom: fee.denom, gas: parseInt(fee.gas, 10) },
+      memo: options?.memo,
+      sequence: accountInfo.sequence,
+      accountNumber: accountInfo.accountNumber
+    });
+
+    // Sign via the EVM wallet (eth_signTypedData_v4 / Signer.signTypedData).
+    const signatureHex = await this.adapter.signTypedData(typed);
+
+    // Recover the compressed pubkey from the signature so we can
+    // populate the AuthInfo's SignerInfo with the right key. Most EVM
+    // wallets don't expose `eth_getPublicKey`, so this is the canonical
+    // way to obtain it.
+    const { compressedPubKeyBytes } = recoverEvmPublicKey(typed, signatureHex);
+
+    // Build the broadcast body using the SAME (sequence, fee, memo,
+    // messages) the user signed. Drift here = ante handler rejects.
+    const broadcastBody = buildEip712TxBroadcastBody({
+      messages: generated,
+      compressedPubKey: compressedPubKeyBytes,
+      sequence: accountInfo.sequence,
+      fee: { amount: fee.amount, denom: fee.denom, gas: parseInt(fee.gas, 10) },
+      memo: options?.memo,
+      signatureHex
+    });
+
+    try {
+      const response = await this.axiosInstance.post(`${this.apiUrl}/api/v0/broadcast`, JSON.parse(broadcastBody));
+      const txResponse = response.data.tx_response;
+      const code = txResponse?.code || 0;
+
+      if (code !== 0 && this.isSequenceMismatchError(txResponse?.raw_log)) {
+        if (this.sequenceRetryEnabled && retryCount < this.maxSequenceRetries) {
+          this.clearCache();
+          return this.signAndBroadcastEip712(messages, options, retryCount + 1);
+        }
+      }
+
+      if (code === 0 && this.cachedAccountInfo) {
+        this.cachedAccountInfo.sequence += 1;
+      }
+
+      return {
+        txHash: txResponse?.txhash || '',
+        rawResponse: response.data,
+        success: code === 0,
+        error: code !== 0 ? txResponse?.raw_log : undefined,
+        code
+      };
+    } catch (error: any) {
+      const rawLog = error?.response?.data?.tx_response?.raw_log || error?.message || '';
+      if (this.isSequenceMismatchError(rawLog)) {
+        if (this.sequenceRetryEnabled && retryCount < this.maxSequenceRetries) {
+          this.clearCache();
+          return this.signAndBroadcastEip712(messages, options, retryCount + 1);
+        }
+      }
+      return {
+        txHash: '',
+        rawResponse: error?.response?.data || null,
+        success: false,
+        error: rawLog || 'EIP-712 broadcast failed',
+        code: -1
+      };
+    }
   }
 
   /**
