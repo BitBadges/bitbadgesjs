@@ -1,6 +1,6 @@
 {
   "name": "bitbadges",
-  "description": "BitBadges — programmable tokens on Cosmos. SDK, CLI, and builder tools for humans and agents. (Previously published as 'bitbadgesjs-sdk'.)",
+  "description": "BitBadges \u2014 programmable tokens on Cosmos. SDK, CLI, and builder tools for humans and agents. (Previously published as 'bitbadgesjs-sdk'.)",
   "version": "0.37.1",
   "license": "MIT",
   "keywords": [
@@ -109,7 +109,7 @@
   "sideEffects": false,
   "scripts": {
     "alias": "tsc-alias -p tsconfig.build.json && tsc-alias -p tsconfig-esm.build.json",
-    "build": "rm -rf dist && tsc --build tsconfig.build.json && tsc --build tsconfig-esm.build.json && bun run alias && bun run fixup && bun run dep-check",
+    "build": "bun run gen:customtypes && rm -rf dist && tsc --build tsconfig.build.json && tsc --build tsconfig-esm.build.json && bun run alias && bun run fixup && bun run dep-check",
     "routes-check": "ts-node ./scripts/check_routes_consistency.ts ../../../bitbadges-indexer/src/indexer.ts  ./openapitypes-helpers/routes.yaml",
     "clean": "tsc --build tsconfig.build.json --clean  && shx rm -rf coverage *.log junit.xml dist && jest --clearCache",
     "fixup": "./scripts/fixup.sh",
@@ -126,7 +126,8 @@
     "prepare": "ts-patch install && typia patch",
     "dep-check": "madge --circular ./src/index.ts --warning --ts-config ./tsconfig.json --exclude 'api-indexer/docs-types/interfaces.ts|interfaces/badges/*|interfaces/types/*'",
     "generate-api-routes": "bun scripts/generate-api-routes.ts",
-    "publish-w-docs": "bash ./scripts/check_and_publish.sh"
+    "publish-w-docs": "bash ./scripts/check_and_publish.sh",
+    "gen:customtypes": "bun scripts/generate-customtype-fields.ts"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
