@@ -279,6 +279,11 @@ const createTransactionPayloadFromTxContext = (
         eip155ChainIdFromCosmosChainId(txContext.chain.chainId);
       eip712Payload = buildEIP712TypedData({
         messages: generatedMsgs,
+        // The original input often includes SDK class instances exposing
+        // `getNumberFieldNames` — pass them through so the amino-JSON
+        // pruner can dynamically derive the Uint customtype set instead
+        // of relying on a hardcoded list.
+        sdkSourceMessages: messages,
         cosmosChainId: txContext.chain.cosmosChainId,
         eip155ChainId: eip155,
         fee: { amount: txContext.fee.amount, denom: txContext.fee.denom, gas: parseInt(txContext.fee.gas, 10) },
