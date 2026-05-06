@@ -23,30 +23,40 @@ export function keccak256ToBase64(content: Uint8Array) {
   return Buffer.from(bytes).toString('base64');
 }
 
-// Field names that are typed `string` in the .proto IDL but tagged
-// `(gogoproto.customtype) = "Uint"` — i.e. cosmos-sdk math.Uint.
-// On the chain side these emit `"0"` for the zero value (non-nullable
-// customtype, no omitempty). bufbuild's `toJson({emitDefaultValues:true})`
-// emits `""` for unset string fields, including these. We coerce
-// `""` → `"0"` for any property whose key matches, so the SDK's
-// amino JSON matches the chain's `MarshalAminoJSON` output.
+// Walks `value` (an SDK message instance, nested class graph, or plain
+// object/array tree) and accumulates the union of `getNumberFieldNames()`
+// returned by every BaseNumberTypeClass-style instance encountered.
 //
-// Generated from `grep '(gogoproto.customtype) = "Uint"' bitbadgeschain/proto/`.
-// If a future proto adds a new Uint field, add its name here (or
-// regenerate the set).
-const UINT_CUSTOMTYPE_FIELD_NAMES = new Set<string>([
-  'affiliate_percentage', 'amount', 'approvalTrackerVersions', 'challengeTrackers', 'chargePeriodLength',
-  'collectionId', 'collectionStatsIds', 'decimals', 'delayAfterQuorum', 'durationFromTimestamp',
-  'end', 'ethSignatureTrackers', 'expectedProofLength', 'gasLimit', 'holderCount',
-  'incrementOwnershipTimesBy', 'incrementTokenIdsBy', 'intervalLength', 'lastUpdatedAt',
-  'maxScalingMultiplier', 'maxSupplyPerId', 'maxUsesPerLeaf', 'nextAddressListCounter',
-  'nextCollectionId', 'nextDynamicStoreId', 'nextManagerSplitterId', 'numPurged', 'numTransfers',
-  'overallApprovalAmount', 'overallMaxNumTransfers', 'overrideTimestamp', 'percentage',
-  'perFromAddressApprovalAmount', 'perFromAddressMaxNumTransfers', 'perInitiatedByAddressApprovalAmount',
-  'perInitiatedByAddressMaxNumTransfers', 'perToAddressApprovalAmount', 'perToAddressMaxNumTransfers',
-  'quorumReachedTimestamp', 'quorumThreshold', 'scalingMultiplier', 'start', 'startTime', 'storeId',
-  'timezoneOffsetMinutes', 'total_amount', 'version', 'votedAt', 'weight', 'yesWeight'
-]);
+// We use this set to drive the `""` → `"0"` coercion in pruneAminoEmpties:
+// the chain treats these fields as cosmos-sdk `math.Uint` (string-typed in
+// the .proto IDL, tagged `(gogoproto.customtype) = "Uint"`, non-nullable,
+// no omitempty), so the chain's `MarshalAminoJSON` emits `"0"` for the
+// zero value. bufbuild's `toJson({emitDefaultValues:true})` emits `""` for
+// any unset string field, customtype or not, so we have to fix it back up.
+//
+// Discovering the names dynamically from the message instance graph keeps
+// this in sync as new Msg / nested types add `getNumberFieldNames` —
+// no hand-maintained allow-list.
+export function collectNumberFieldNames(value: unknown, acc: Set<string> = new Set()): Set<string> {
+  if (!value || typeof value !== 'object') return acc;
+  if (Array.isArray(value)) {
+    for (const item of value) collectNumberFieldNames(item, acc);
+    return acc;
+  }
+  const v = value as { getNumberFieldNames?: () => string[] };
+  if (typeof v.getNumberFieldNames === 'function') {
+    try {
+      for (const name of v.getNumberFieldNames()) acc.add(name);
+    } catch {
+      // Swallow: some classes call this method only with a populated `this`;
+      // we keep walking even if one node throws.
+    }
+  }
+  for (const k of Object.keys(value as object)) {
+    collectNumberFieldNames((value as Record<string, unknown>)[k], acc);
+  }
+  return acc;
+}
 
 // Recursively strips fields that gogoproto's `MarshalAminoJSON`
 // omits via `omitempty`: empty strings, `false` bools, empty arrays,
@@ -55,27 +65,29 @@ const UINT_CUSTOMTYPE_FIELD_NAMES = new Set<string>([
 // dropped to zero (e.g. `senderChecks: {}`). `"0"` strings stay
 // (Uint custom types are non-`omitempty` and emit `"0"` for zero).
 //
-// Also coerces `""` → `"0"` for fields whose key matches a known
-// gogoproto Uint customtype (see `UINT_CUSTOMTYPE_FIELD_NAMES`),
-// because bufbuild emits `""` for unset string fields but the chain
-// emits `"0"` for unset Uint customs.
+// `uintFieldNames` is the set of property names whose `""` should be
+// coerced to `"0"` before omitempty pruning (see `collectNumberFieldNames`
+// for how it's discovered). When the set is empty, the function still
+// works for plain omitempty pruning but won't recover Uint zeros — the
+// EIP-712 path always provides a populated set; non-EIP-712 callers
+// (e.g. raw proto-only inputs) get pure pruning.
 //
 // Required for EIP-712 typed-data parity. The chain's verifier
 // reconstructs the signDoc by re-amino-marshaling the proto messages
 // via Go's `MarshalAminoJSON`, which prunes these defaults. If the
 // SDK's typed-data includes them, the keccak diverges from the
 // chain's reconstruction → "signature verification failed".
-function pruneAminoEmpties(value: unknown): unknown {
+function pruneAminoEmpties(value: unknown, uintFieldNames: ReadonlySet<string>): unknown {
   if (Array.isArray(value)) {
-    return value.map(pruneAminoEmpties);
+    return value.map((item) => pruneAminoEmpties(item, uintFieldNames));
   }
   if (value !== null && typeof value === 'object') {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(value)) {
-      let pv = pruneAminoEmpties(v);
+      let pv = pruneAminoEmpties(v, uintFieldNames);
       // Coerce empty-string Uint customs to "0" before omitempty checks
       // so they emit (chain always emits Uint zero as "0").
-      if (pv === '' && UINT_CUSTOMTYPE_FIELD_NAMES.has(k)) {
+      if (pv === '' && uintFieldNames.has(k)) {
         pv = '0';
       }
       if (pv === '' || pv === false || pv === null || pv === undefined) continue;
@@ -87,9 +99,19 @@ function pruneAminoEmpties(value: unknown): unknown {
   return value;
 }
 
-// Converts an array of Protobuf MessageGenerated
-// objects to Amino representations using the registry.
-export function convertProtoMessagesToAmino(protoMessages: MessageGenerated[]) {
+// Converts an array of Protobuf MessageGenerated objects to Amino
+// representations using the registry.
+//
+// `sdkSourceMessages` is optional but strongly recommended for the EIP-712
+// path: the original SDK class instances (or anything implementing
+// `getNumberFieldNames`) used to derive the Uint customtype set. When
+// omitted, Uint coercion is skipped — fine for paths that don't go
+// through EIP-712 verification.
+export function convertProtoMessagesToAmino(
+  protoMessages: MessageGenerated[],
+  sdkSourceMessages?: unknown[]
+) {
+  const uintFieldNames = collectNumberFieldNames(sdkSourceMessages ?? []);
   return protoMessages.map((wrappedProtoMsg) => {
     // Drop effectively-empty sub-messages from the proto BEFORE
     // converting to amino JSON so the typed-data tree we sign matches
@@ -103,7 +125,7 @@ export function convertProtoMessagesToAmino(protoMessages: MessageGenerated[]) {
     // as-is — `type` is always non-empty, `value` is always an object.
     return {
       type: aminoMsg.type,
-      value: pruneAminoEmpties(aminoMsg.value)
+      value: pruneAminoEmpties(aminoMsg.value, uintFieldNames)
     };
   });
 }
