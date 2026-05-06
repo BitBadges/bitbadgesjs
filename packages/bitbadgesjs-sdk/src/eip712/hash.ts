@@ -58,6 +58,18 @@ function formatType(name: string, fields: { name: string; type: string }[] | und
   if (!fields) {
     throw new Error(`eip712/hash: type '${name}' is missing from the types map`);
   }
+  // go-ethereum's `apitypes.TypedData.EncodeType` quirk: it always writes
+  // `(`, iterates fields appending `,`, then `Truncate(len-1)` and writes
+  // `)`. The truncate is intended to strip a trailing `,` between fields,
+  // but for an empty fields list the loop never runs, so it strips the
+  // `(` instead — producing `TypeName)` for empty struct types.
+  // The chain's `apitypes.TypedDataAndHash` depends on this exact byte
+  // layout for the EIP-712 typeHash. Mirror it so SDK-side hashing
+  // (used for ecRecover → SignerInfo pubkey) matches what the chain
+  // recomputes during signature verification.
+  if (fields.length === 0) {
+    return `${name})`;
+  }
   return `${name}(${fields.map((f) => `${f.type} ${f.name}`).join(',')})`;
 }
 
