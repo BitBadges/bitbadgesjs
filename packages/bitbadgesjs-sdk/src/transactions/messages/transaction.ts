@@ -23,12 +23,83 @@ export function keccak256ToBase64(content: Uint8Array) {
   return Buffer.from(bytes).toString('base64');
 }
 
+// Field names that are typed `string` in the .proto IDL but tagged
+// `(gogoproto.customtype) = "Uint"` — i.e. cosmos-sdk math.Uint.
+// On the chain side these emit `"0"` for the zero value (non-nullable
+// customtype, no omitempty). bufbuild's `toJson({emitDefaultValues:true})`
+// emits `""` for unset string fields, including these. We coerce
+// `""` → `"0"` for any property whose key matches, so the SDK's
+// amino JSON matches the chain's `MarshalAminoJSON` output.
+//
+// Generated from `grep '(gogoproto.customtype) = "Uint"' bitbadgeschain/proto/`.
+// If a future proto adds a new Uint field, add its name here (or
+// regenerate the set).
+const UINT_CUSTOMTYPE_FIELD_NAMES = new Set<string>([
+  'affiliate_percentage', 'amount', 'approvalTrackerVersions', 'challengeTrackers', 'chargePeriodLength',
+  'collectionId', 'collectionStatsIds', 'decimals', 'delayAfterQuorum', 'durationFromTimestamp',
+  'end', 'ethSignatureTrackers', 'expectedProofLength', 'gasLimit', 'holderCount',
+  'incrementOwnershipTimesBy', 'incrementTokenIdsBy', 'intervalLength', 'lastUpdatedAt',
+  'maxScalingMultiplier', 'maxSupplyPerId', 'maxUsesPerLeaf', 'nextAddressListCounter',
+  'nextCollectionId', 'nextDynamicStoreId', 'nextManagerSplitterId', 'numPurged', 'numTransfers',
+  'overallApprovalAmount', 'overallMaxNumTransfers', 'overrideTimestamp', 'percentage',
+  'perFromAddressApprovalAmount', 'perFromAddressMaxNumTransfers', 'perInitiatedByAddressApprovalAmount',
+  'perInitiatedByAddressMaxNumTransfers', 'perToAddressApprovalAmount', 'perToAddressMaxNumTransfers',
+  'quorumReachedTimestamp', 'quorumThreshold', 'scalingMultiplier', 'start', 'startTime', 'storeId',
+  'timezoneOffsetMinutes', 'total_amount', 'version', 'votedAt', 'weight', 'yesWeight'
+]);
+
+// Recursively strips fields that gogoproto's `MarshalAminoJSON`
+// omits via `omitempty`: empty strings, `false` bools, empty arrays,
+// `null`, and `undefined`. Empty objects (`{}`) are kept — gogoproto
+// emits the field with a struct value even when all inner fields
+// dropped to zero (e.g. `senderChecks: {}`). `"0"` strings stay
+// (Uint custom types are non-`omitempty` and emit `"0"` for zero).
+//
+// Also coerces `""` → `"0"` for fields whose key matches a known
+// gogoproto Uint customtype (see `UINT_CUSTOMTYPE_FIELD_NAMES`),
+// because bufbuild emits `""` for unset string fields but the chain
+// emits `"0"` for unset Uint customs.
+//
+// Required for EIP-712 typed-data parity. The chain's verifier
+// reconstructs the signDoc by re-amino-marshaling the proto messages
+// via Go's `MarshalAminoJSON`, which prunes these defaults. If the
+// SDK's typed-data includes them, the keccak diverges from the
+// chain's reconstruction → "signature verification failed".
+function pruneAminoEmpties(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(pruneAminoEmpties);
+  }
+  if (value !== null && typeof value === 'object') {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) {
+      let pv = pruneAminoEmpties(v);
+      // Coerce empty-string Uint customs to "0" before omitempty checks
+      // so they emit (chain always emits Uint zero as "0").
+      if (pv === '' && UINT_CUSTOMTYPE_FIELD_NAMES.has(k)) {
+        pv = '0';
+      }
+      if (pv === '' || pv === false || pv === null || pv === undefined) continue;
+      if (Array.isArray(pv) && pv.length === 0) continue;
+      out[k] = pv;
+    }
+    return out;
+  }
+  return value;
+}
+
 // Converts an array of Protobuf MessageGenerated
 // objects to Amino representations using the registry.
 export function convertProtoMessagesToAmino(protoMessages: MessageGenerated[]) {
   return protoMessages.map((wrappedProtoMsg) => {
     const protoObject = convertProtoMessageToObject(wrappedProtoMsg.message);
-    return AminoTypes.toAmino(protoObject);
+    const aminoMsg = AminoTypes.toAmino(protoObject) as { type: string; value: unknown };
+    // Prune omitempty defaults inside `value` to match gogoproto's
+    // MarshalAminoJSON output. The wrapper `{type, value}` itself stays
+    // as-is — `type` is always non-empty, `value` is always an object.
+    return {
+      type: aminoMsg.type,
+      value: pruneAminoEmpties(aminoMsg.value)
+    };
   });
 }
 
