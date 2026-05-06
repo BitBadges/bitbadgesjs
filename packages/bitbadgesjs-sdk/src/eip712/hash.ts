@@ -58,18 +58,20 @@ function formatType(name: string, fields: { name: string; type: string }[] | und
   if (!fields) {
     throw new Error(`eip712/hash: type '${name}' is missing from the types map`);
   }
-  // go-ethereum's `apitypes.TypedData.EncodeType` quirk: it always writes
-  // `(`, iterates fields appending `,`, then `Truncate(len-1)` and writes
-  // `)`. The truncate is intended to strip a trailing `,` between fields,
-  // but for an empty fields list the loop never runs, so it strips the
-  // `(` instead — producing `TypeName)` for empty struct types.
-  // The chain's `apitypes.TypedDataAndHash` depends on this exact byte
-  // layout for the EIP-712 typeHash. Mirror it so SDK-side hashing
-  // (used for ecRecover → SignerInfo pubkey) matches what the chain
-  // recomputes during signature verification.
-  if (fields.length === 0) {
-    return `${name})`;
-  }
+  // Standard EIP-712 encodeType per `@metamask/eth-sig-util`: empty
+  // struct types render as `TypeName()`. This is what MetaMask /
+  // Privy / Coinbase Smart Wallet `eth_signTypedData_v4` use to
+  // compute the digest the user's key signs. SDK-side hashing must
+  // match so `ecRecover` yields the actual signer's pubkey for
+  // SignerInfo.
+  //
+  // NOTE: go-ethereum's `apitypes.TypedData.EncodeType` has a
+  // longstanding bug where empty types render as `TypeName)` (the
+  // `Truncate(len-1)` strips `(` when there are no fields to strip
+  // a trailing `,` from). cosmos/evm's verifier inherits this bug.
+  // The chain-side fix lives in our cosmos-evm fork — we DO NOT
+  // mirror the bug here, because MM (the signer) does it the
+  // correct way and that's the digest we need to recover from.
   return `${name}(${fields.map((f) => `${f.type} ${f.name}`).join(',')})`;
 }
 
