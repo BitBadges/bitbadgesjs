@@ -29,12 +29,17 @@ export interface TransferWalkthroughInput {
   amount?: string;
   tokenIds?: string;
   /**
-   * Skip every prompt. Picks the first viable collection-level approval
-   * matching the from→to direction, no prioritized user approvals, no
-   * precalculation, default amount=1, default tokenIds=all valid. Use
-   * for scripts and CI; humans should leave this off.
+   * Skip every prompt. Emits the transfer with no prioritizedApprovals
+   * (chain picks the matching approval itself), no precalculation,
+   * default amount=1, default tokenIds=all valid. Use for scripts and
+   * CI; humans should leave this off.
    */
   yes?: boolean;
+}
+
+export function isYes(input: string): boolean {
+  const v = input.trim().toLowerCase();
+  return v === 'y' || v === 'yes';
 }
 
 interface ApprovalCandidate {
@@ -125,6 +130,7 @@ export async function runTransferWalkthrough(input: TransferWalkthroughInput): P
 
   const toRaw = input.to || (await prompt('To address (bb1... / 0x...): '));
   if (!toRaw) throw new Error('To address is required');
+  if (toRaw === 'Mint') throw new Error('To address cannot be "Mint" — that\'s only valid as the From address.');
   const to = ensureBb1(toRaw);
 
   // ── Fetch collection ─────────────────────────────────────────────
@@ -202,16 +208,43 @@ export async function runTransferWalkthrough(input: TransferWalkthroughInput): P
       const pickedLevels = new Set(picks.map((i) => candidates[i].level));
       if (pickedLevels.has('collection')) {
         const ans = await prompt('Only check the prioritized COLLECTION approvals? [y/N] ');
-        onlyCheckPrioritizedCollectionApprovals = ans.toLowerCase() === 'y';
+        onlyCheckPrioritizedCollectionApprovals = isYes(ans);
       }
       if (pickedLevels.has('outgoing')) {
         const ans = await prompt('Only check the prioritized OUTGOING approvals? [y/N] ');
-        onlyCheckPrioritizedOutgoingApprovals = ans.toLowerCase() === 'y';
+        onlyCheckPrioritizedOutgoingApprovals = isYes(ans);
       }
       if (pickedLevels.has('incoming')) {
         const ans = await prompt('Only check the prioritized INCOMING approvals? [y/N] ');
-        onlyCheckPrioritizedIncomingApprovals = ans.toLowerCase() === 'y';
+        onlyCheckPrioritizedIncomingApprovals = isYes(ans);
       }
+    }
+  }
+
+  // ── Heads-up warnings for picked approvals ─────────────────────
+  // Surface payment / must-own / backed flags BEFORE the precalc and
+  // amount prompts, so the user knows what side conditions the
+  // approval will impose on this transfer.
+  if (!input.yes && prioritizedApprovals.length > 0) {
+    const warnings: string[] = [];
+    for (const p of prioritizedApprovals) {
+      const c = candidates.find((c) => c.approvalId === p.approvalId && c.level === p.approvalLevel);
+      if (!c) continue;
+      const criteria = (c.raw.approvalCriteria as Record<string, any>) || {};
+      const cts = Array.isArray(criteria.coinTransfers) ? criteria.coinTransfers : [];
+      for (const ct of cts) {
+        const coins = Array.isArray(ct.coins) ? ct.coins : [];
+        const desc = coins.map((co: any) => `${co.amount} ${co.denom}`).join(' + ');
+        if (desc) warnings.push(`"${c.approvalId}" requires payment of ${desc} to ${ct.to || '<initiator>'}`);
+      }
+      if (Array.isArray(criteria.mustOwnTokens) && criteria.mustOwnTokens.length > 0) {
+        warnings.push(`"${c.approvalId}" requires the initiator to own tokens from ${criteria.mustOwnTokens.length} prerequisite collection(s)`);
+      }
+    }
+    if (warnings.length > 0) {
+      process.stderr.write('\nHeads up — picked approvals impose:\n');
+      for (const w of warnings) process.stderr.write(`  • ${w}\n`);
+      process.stderr.write('\n');
     }
   }
 
@@ -221,19 +254,23 @@ export async function runTransferWalkthrough(input: TransferWalkthroughInput): P
   // precalculateBalancesFromApproval. With it set, the transfer's
   // explicit `balances` field is omitted (chain computes from the
   // approval's predetermined rule).
+  //
+  // Display index is renumbered 1..N within the precalc list (NOT the
+  // candidate-list index from the earlier display) — keeps the user's
+  // typing-target visible right above the prompt.
   const precalcCandidates = prioritizedApprovals
-    .map((p, idx) => ({ p, idx, c: candidates.find((c) => c.approvalId === p.approvalId && c.level === p.approvalLevel) }))
+    .map((p) => ({ p, c: candidates.find((c) => c.approvalId === p.approvalId && c.level === p.approvalLevel) }))
     .filter((x) => x.c?.hasPredeterminedBalances);
 
   let precalculateBalancesFromApproval: any = undefined;
   if (precalcCandidates.length > 0 && !input.yes) {
     process.stderr.write('\nThe following prioritized approvals have predetermined balances:\n');
-    for (const x of precalcCandidates) {
-      process.stderr.write(`  ${x.idx + 1}. "${x.p.approvalId}" (${x.p.approvalLevel})\n`);
-    }
+    precalcCandidates.forEach((x, i) => {
+      process.stderr.write(`  ${i + 1}. "${x.p.approvalId}" (${x.p.approvalLevel})\n`);
+    });
     const which = await prompt('Use which one for precalculation? (index, blank=skip): ');
-    const idx = parseInt(which.trim(), 10) - 1;
-    const target = precalcCandidates.find((x) => x.idx === idx);
+    const i = parseInt(which.trim(), 10) - 1;
+    const target = precalcCandidates[i];
     if (target) {
       precalculateBalancesFromApproval = {
         approvalId: target.p.approvalId,
@@ -241,6 +278,16 @@ export async function runTransferWalkthrough(input: TransferWalkthroughInput): P
         approverAddress: target.p.approverAddress,
         version: target.p.version
       };
+      // scalingMultiplier — when the predetermined approval defines a
+      // per-step amount and the user wants to consume N steps at once.
+      // The other PrecalculationOptions (overrideTimestamp,
+      // tokenIdsOverride) are advanced and stay opt-in via raw JSON
+      // edit for v1.
+      const scaleStr = await prompt('Scaling multiplier (how many predetermined steps to consume in this tx) [1]: ');
+      const scaleTrimmed = scaleStr.trim();
+      if (scaleTrimmed && scaleTrimmed !== '1') {
+        precalculateBalancesFromApproval.precalculationOptions = { scalingMultiplier: scaleTrimmed };
+      }
     }
   }
 
@@ -254,12 +301,15 @@ export async function runTransferWalkthrough(input: TransferWalkthroughInput): P
   }
 
   // ── Build the Transfer ──────────────────────────────────────────
+  // Always emit prioritizedApprovals as an array (use [] when empty) —
+  // the validator warns on omitted prioritizedApprovals because the
+  // chain treats missing-vs-empty subtly differently in some paths.
   const transfer: Record<string, unknown> = {
     from,
     toAddresses: [to],
+    prioritizedApprovals,
     ...(balances ? { balances } : {})
   };
-  if (prioritizedApprovals.length > 0) transfer.prioritizedApprovals = prioritizedApprovals;
   if (onlyCheckPrioritizedCollectionApprovals) transfer.onlyCheckPrioritizedCollectionApprovals = true;
   if (onlyCheckPrioritizedOutgoingApprovals) transfer.onlyCheckPrioritizedOutgoingApprovals = true;
   if (onlyCheckPrioritizedIncomingApprovals) transfer.onlyCheckPrioritizedIncomingApprovals = true;

@@ -9,8 +9,23 @@ import {
   parseTokenIdSpec,
   parseIndexList,
   toCandidate,
-  summarize
+  summarize,
+  isYes
 } from './walkthrough-transfer.js';
+
+describe('isYes', () => {
+  it('accepts y/Y/yes/YES (any case, with whitespace)', () => {
+    for (const v of ['y', 'Y', 'yes', 'YES', 'Yes', '  y  ', 'yEs']) {
+      expect(isYes(v)).toBe(true);
+    }
+  });
+
+  it('rejects everything else (default = no)', () => {
+    for (const v of ['', 'n', 'no', 'maybe', 'sure', '1', 'true']) {
+      expect(isYes(v)).toBe(false);
+    }
+  });
+});
 
 describe('parseTokenIdSpec', () => {
   it('returns the all-tokens range for blank/all', () => {
