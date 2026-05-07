@@ -69,12 +69,18 @@ async function emit(
       data.typeUrl
     );
 
+  // Transfer txs (`bb cli build transfer`) flow through here too. They
+  // get auto-validate + auto-simulate, but skip review/metadata/explain
+  // (those are collection-specific).
+  const isTransferTx =
+    typeof data?.typeUrl === 'string' && data.typeUrl === '/tokenization.MsgTransferTokens';
+
   // Apply --creator / --manager overrides to collection msgs. Builders emit
   // MsgUniversalUpdateCollection internally (superset) — the normalization
   // into MsgCreateCollection / MsgUpdateCollection happens once, at the very
   // end of emit(), right before we write the JSON out.
   const isCollectionTx = isCollectionMsg(data);
-  if ((isCollectionTx || isUserApprovalTx) && data.value) {
+  if ((isCollectionTx || isUserApprovalTx || isTransferTx) && data.value) {
     if (opts.creator) data.value.creator = opts.creator;
   }
   if (isCollectionTx && data.value) {
@@ -156,7 +162,7 @@ async function emit(
   // emit. Use the same gate so the four banners below follow one rule.
   const suppressCommentary = !!opts.jsonOnly || isQuiet();
 
-  if (!suppressCommentary && (isCollectionTx || isUserApprovalTx)) {
+  if (!suppressCommentary && (isCollectionTx || isUserApprovalTx || isTransferTx)) {
     // Static validation FIRST — if the JSON is structurally broken, the
     // design review below is much less meaningful.
     try {
@@ -191,60 +197,66 @@ async function emit(
       process.stderr.write(`Resolved-metadata preview skipped: ${err instanceof Error ? err.message : String(err)}\n`);
     }
 
-    // Auto-Simulate — opt-in via --simulate. Posts to the BitBadges API's
-    // /api/v0/simulate endpoint via simulateMessages(). Returns gasUsed +
-    // parsed events + per-address net balance changes. Skips gracefully
-    // if no API key is configured rather than hard-failing.
-    //
-    // Honors --network/--local/--testnet/--url so a `templates vault
-    // --simulate --network local` flow lands on the local indexer
-    // automatically.
-    if (opts.simulate) {
-      try {
-        const { getApiUrl, getApiKeyForNetwork } = await import('../utils/io.js');
-        // getApiKeyForNetwork() already does env-var > config fallback,
-        // so we don't need a separate getApiKey() call.
-        const apiKey = getApiKeyForNetwork(opts);
-        if (!apiKey) {
-          process.stderr.write(
-            '\n' +
-              renderSimulate(
-                {
-                  success: false,
-                  error:
-                    'Auto-Simulate skipped — no API key. Set BITBADGES_API_KEY or run `bitbadges-cli config set apiKey <key>`.'
-                },
-                { stream: process.stderr, title: 'Auto-Simulate' }
-              ) +
-              '\n'
-          );
-        } else {
-          const { simulateMessages } = await import('../../builder/tools/queries/simulateTransaction.js');
-          const { prefetchSimulateCollections } = await import('../utils/simulateSymbols.js');
-          const result = await simulateMessages({
-            messages: [data],
-            creatorAddress: opts.creator,
-            apiKey,
-            apiUrl: getApiUrl(opts)
-          });
-          const collectionCache = await prefetchSimulateCollections(result, {
-            apiKey,
-            apiUrl: getApiUrl(opts)
-          });
-          process.stderr.write(
-            '\n' +
-              renderSimulate(result, {
-                stream: process.stderr,
-                title: 'Auto-Simulate',
-                events: opts.events ? 'full' : 'count',
-                collectionCache
-              }) +
-              '\n'
-          );
-        }
-      } catch (err) {
-        process.stderr.write(`Simulation skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+  }
+
+  // Auto-Simulate — opt-in via --simulate. Posts to the BitBadges API's
+  // /api/v0/simulate endpoint via simulateMessages(). Returns gasUsed +
+  // parsed events + per-address net balance changes. Skips gracefully
+  // if no API key is configured rather than hard-failing.
+  //
+  // Honors --network/--local/--testnet/--url so a `templates vault
+  // --simulate --network local` flow lands on the local indexer
+  // automatically.
+  //
+  // Lives OUTSIDE the collection-only block so transfers (which can't
+  // be reviewed but CAN be simulated end-to-end) reach it. User-approval
+  // txs get a skip note further down.
+  if (!suppressCommentary && opts.simulate && (isCollectionTx || isTransferTx)) {
+    try {
+      const { getApiUrl, getApiKeyForNetwork } = await import('../utils/io.js');
+      const apiKey = getApiKeyForNetwork(opts);
+      if (!apiKey) {
+        process.stderr.write(
+          '\n' +
+            renderSimulate(
+              {
+                success: false,
+                error:
+                  'Auto-Simulate skipped — no API key. Set BITBADGES_API_KEY or run `bitbadges-cli config set apiKey <key>`.'
+              },
+              { stream: process.stderr, title: 'Auto-Simulate' }
+            ) +
+            '\n'
+        );
+      } else {
+        const { simulateMessages } = await import('../../builder/tools/queries/simulateTransaction.js');
+        const { prefetchSimulateCollections } = await import('../utils/simulateSymbols.js');
+        // For transfer txs, the signer is `data.value.creator`. For
+        // collection builders, fall back to --creator.
+        const simulateCreator = isTransferTx ? data?.value?.creator : opts.creator;
+        const result = await simulateMessages({
+          messages: [data],
+          creatorAddress: simulateCreator,
+          apiKey,
+          apiUrl: getApiUrl(opts)
+        });
+        const collectionCache = await prefetchSimulateCollections(result, {
+          apiKey,
+          apiUrl: getApiUrl(opts)
+        });
+        process.stderr.write(
+          '\n' +
+            renderSimulate(result, {
+              stream: process.stderr,
+              title: 'Auto-Simulate',
+              events: opts.events ? 'full' : 'count',
+              collectionCache
+            }) +
+            '\n'
+        );
       }
+    } catch (err) {
+      process.stderr.write(`Simulation skipped: ${err instanceof Error ? err.message : String(err)}\n`);
     }
   }
 
@@ -801,4 +813,40 @@ sharedOpts(
   const { buildPmBuyIntent } = await import('../../core/builders/pm-buy-intent.js');
   if (opts.json) { emit(buildPmBuyIntent(readJsonInput(opts.json)), opts); return; }
   emit(buildPmBuyIntent({ address: opts.address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom: opts.denom, expiration: opts.expiration }), opts);
+});
+
+// ============================================================
+// Transfer walkthrough (interactive)
+// ============================================================
+
+sharedOpts(
+  buildCommand
+    .command('transfer')
+    .description('Interactive walkthrough for MsgTransferTokens — fetches the collection + sender outgoing + recipient incoming approvals and walks you through picking prioritizedApprovals, only-check scopes, precalculation, and balances. Any flag can short-circuit the prompt for that step. Requires BITBADGES_API_KEY.')
+    .option('--collection-id <id>', 'Collection ID')
+    .option('--from <address>', 'Sender address (bb1.../0x...) — use "Mint" for minting')
+    .option('--to <address>', 'Recipient address (bb1.../0x...)')
+    .option('--amount <n>', 'Per-recipient amount (used when not precalculated)')
+    .option('--token-ids <spec>', 'Token IDs (e.g. "1-5", "1,3,5", "all")')
+    .option('--yes', 'Non-interactive: skip all prompts. Picks no prioritized approvals, no precalc, default amount=1, default tokenIds=all valid. Use for scripts/CI.')
+).action(async (opts) => {
+  if (!process.env.BITBADGES_API_KEY) {
+    // Fall through to runtime API-key resolution; the apiClient will
+    // emit a clear error if neither env nor config has one.
+  }
+  const { runTransferWalkthrough } = await import('../utils/walkthrough-transfer.js');
+  try {
+    const msg = await runTransferWalkthrough({
+      collectionId: opts.collectionId,
+      from: opts.from,
+      to: opts.to,
+      amount: opts.amount,
+      tokenIds: opts.tokenIds,
+      yes: !!opts.yes
+    });
+    emit(msg, opts);
+  } catch (err: any) {
+    process.stderr.write(`\nTransfer walkthrough failed: ${err?.message || err}\n`);
+    process.exit(1);
+  }
 });
