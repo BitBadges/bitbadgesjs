@@ -802,3 +802,39 @@ sharedOpts(
   if (opts.json) { emit(buildPmBuyIntent(readJsonInput(opts.json)), opts); return; }
   emit(buildPmBuyIntent({ address: opts.address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom: opts.denom, expiration: opts.expiration }), opts);
 });
+
+// ============================================================
+// Transfer walkthrough (interactive)
+// ============================================================
+
+sharedOpts(
+  buildCommand
+    .command('transfer')
+    .description('Interactive walkthrough for MsgTransferTokens — fetches the collection + sender outgoing + recipient incoming approvals and walks you through picking prioritizedApprovals, only-check scopes, precalculation, and balances. Any flag can short-circuit the prompt for that step. Requires BITBADGES_API_KEY.')
+    .option('--collection-id <id>', 'Collection ID')
+    .option('--from <address>', 'Sender address (bb1.../0x...) — use "Mint" for minting')
+    .option('--to <address>', 'Recipient address (bb1.../0x...)')
+    .option('--amount <n>', 'Per-recipient amount (used when not precalculated)')
+    .option('--token-ids <spec>', 'Token IDs (e.g. "1-5", "1,3,5", "all")')
+    .option('--yes', 'Non-interactive: skip all prompts. Picks no prioritized approvals, no precalc, default amount=1, default tokenIds=all valid. Use for scripts/CI.')
+).action(async (opts) => {
+  if (!process.env.BITBADGES_API_KEY) {
+    // Fall through to runtime API-key resolution; the apiClient will
+    // emit a clear error if neither env nor config has one.
+  }
+  const { runTransferWalkthrough } = await import('../utils/walkthrough-transfer.js');
+  try {
+    const msg = await runTransferWalkthrough({
+      collectionId: opts.collectionId,
+      from: opts.from,
+      to: opts.to,
+      amount: opts.amount,
+      tokenIds: opts.tokenIds,
+      yes: !!opts.yes
+    });
+    emit(msg, opts);
+  } catch (err: any) {
+    process.stderr.write(`\nTransfer walkthrough failed: ${err?.message || err}\n`);
+    process.exit(1);
+  }
+});
