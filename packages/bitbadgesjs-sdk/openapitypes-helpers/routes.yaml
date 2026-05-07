@@ -254,9 +254,6 @@ paths:
         Scopes
         - `readProfile` - Required for private profile information like notification preferences, social connections, etc.
 
-        Couple Notes:
-        - **[Native Chain Algorithm](https://docs.bitbadges.io/for-developers/bitbadges-api/concepts/native-chain-algorithm)**
-
         Note: The `views` and corresponding fields like `tokensCollected`, etc will be blank with this simple
         GET but are provided in the response for compatibility with the SDK. To actually fetch these views, use the POST
         batch route or the individual view routes.
@@ -2823,7 +2820,7 @@ paths:
         Generates a unique code based on a seed and a zero-based index. This is used for the Codes plugin with claims.
 
         Documentation References / Tutorials:
-        - **[Codes Plugin](https://docs.bitbadges.io/for-developers/claim-builder/universal-approach-claim-codes)**
+        - **[Codes Plugin](https://docs.bitbadges.io/for-developers/claims/built-in-plugins)**
 
       tags:
         - Claims
@@ -2884,8 +2881,8 @@ paths:
         ```
 
         Documentation References / Tutorials:
-        - **[Getting Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/getting-claims)**
-        - **[Managing Claims](https://docs.bitbadges.io/for-developers/bitbadges-api/tutorials/managing-claims)**
+        - **[Claims API Reference](https://docs.bitbadges.io/for-developers/claims/api-reference)**
+        - **[Designing Claims](https://docs.bitbadges.io/for-developers/claims/designing-claims)**
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetClaimAttemptsPayload)**
