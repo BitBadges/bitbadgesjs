@@ -43,3 +43,24 @@ export type {
   ChallengeParams,
   VerifyChallengeOptions
 } from './blockin/index.js';
+
+// Placeholder-art generator — deterministic SVG data URIs for use as
+// image fields anywhere a consumer wants an "intentional placeholder"
+// without an IPFS roundtrip. Used by the AI Builder and the frontend
+// ImageSelect's "Generate" affordance.
+export {
+  generatePlaceholderArt,
+  hashSeed,
+  deriveSymbol,
+  resolveStyle,
+  PALETTES,
+  pickPalette,
+  GLYPH_NAMES
+} from './builder/generators/placeholder-art/index.js';
+export type {
+  GeneratePlaceholderArtInput,
+  GeneratePlaceholderArtResult,
+  PlaceholderArtStyle,
+  PlaceholderArtVibe,
+  Palette
+} from './builder/generators/placeholder-art/index.js';
