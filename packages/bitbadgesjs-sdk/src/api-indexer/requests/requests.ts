@@ -70,6 +70,8 @@ import { BaseNumberTypeClass, ConvertOptions, CustomTypeClass, ParsedQs, convert
 import { type NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
 import { ClaimDetails, iChallengeDetails, iChallengeInfoDetailsUpdate } from '@/core/approvals.js';
+import type { iLiquidityPoolInfoDoc } from '@/gamm/indexer.js';
+import type { iCollectionApproval } from '@/interfaces/types/approvals.js';
 import type { iBatchTokenDetails } from '@/core/batch-utils.js';
 import { VerifySIWBBOptions, iSiwbbChallenge } from '@/core/blockin.js';
 import { UintRangeArray } from '@/core/uintRanges.js';
@@ -5107,12 +5109,24 @@ export interface iGetOrderbookDepthPayload {
 /**
  * @category API Requests / Responses
  */
+/**
+ * @category API Requests / Responses
+ *
+ * Mirrors the indexer's OrderbookDepthModel doc shape. `bids` and `listings`
+ * are price-keyed maps where the key is a price tier (string-serialized
+ * number) and the value is the cumulative depth at that price.
+ */
+export interface iOrderbookDepth {
+  _docId: string;
+  collectionId: string;
+  tokenId: string;
+  denom?: string;
+  bids: Record<string, number>;
+  listings: Record<string, number>;
+}
+
 export interface iGetOrderbookDepthSuccessResponse {
-  // TODO: Tighten when the indexer's OrderbookDepthModel doc is mirrored in
-  // bitbadgesjs-sdk. Today the shape is `{ _docId, collectionId, tokenId, denom,
-  // bids: Record<priceTier, ...>, listings: Record<priceTier, ...> }` but the
-  // inner price-keyed maps are not stable enough to encode in the SDK yet.
-  orderbookDepth: unknown;
+  orderbookDepth: iOrderbookDepth | null;
 }
 
 /**
@@ -5121,7 +5135,7 @@ export interface iGetOrderbookDepthSuccessResponse {
 export class GetOrderbookDepthSuccessResponse extends CustomTypeClass<GetOrderbookDepthSuccessResponse>
   implements iGetOrderbookDepthSuccessResponse
 {
-  orderbookDepth: unknown;
+  orderbookDepth: iOrderbookDepth | null;
 
   constructor(data: iGetOrderbookDepthSuccessResponse) {
     super();
@@ -5251,7 +5265,7 @@ export interface iGetPoolsBatchPayload {
  * from `bitbadgesjs-sdk/gamm` if needed.
  */
 export interface iGetPoolsBatchSuccessResponse<T extends NumberType> {
-  pools: unknown[];
+  pools: iLiquidityPoolInfoDoc<T>[];
   count: number;
   /** Echo of T for variance. */
   _t?: T;
@@ -5264,7 +5278,7 @@ export class GetPoolsBatchSuccessResponse<T extends NumberType>
   extends BaseNumberTypeClass<GetPoolsBatchSuccessResponse<T>>
   implements iGetPoolsBatchSuccessResponse<T>
 {
-  pools: unknown[];
+  pools: iLiquidityPoolInfoDoc<T>[];
   count: number;
 
   constructor(data: iGetPoolsBatchSuccessResponse<T>) {
@@ -5470,12 +5484,11 @@ export interface iGetPredictionDetailPayload {}
  */
 export interface iGetPredictionDetailSuccessResponse {
   /**
-   * Parsed prediction-market data plus the collection's serialized approval
-   * documents. `approvals` is left as `unknown[]` because the indexer
-   * JSON-serializes BigInts before sending; downstream code that needs
-   * a typed view should cast via the SDK's `iApprovalDoc`.
+   * Parsed prediction-market data plus the collection's approval documents.
+   * Approvals arrive over the wire as JSON (BigInts serialized to strings) —
+   * use the SDK's `.convert(BigIntify)` to get a `bigint`-typed view.
    */
-  prediction: iPredictionMarketApiData & { approvals: unknown[] };
+  prediction: iPredictionMarketApiData & { approvals: iCollectionApproval<string>[] };
 }
 
 /**
@@ -5485,7 +5498,7 @@ export class GetPredictionDetailSuccessResponse
   extends CustomTypeClass<GetPredictionDetailSuccessResponse>
   implements iGetPredictionDetailSuccessResponse
 {
-  prediction: iPredictionMarketApiData & { approvals: unknown[] };
+  prediction: iPredictionMarketApiData & { approvals: iCollectionApproval<string>[] };
 
   constructor(data: iGetPredictionDetailSuccessResponse) {
     super();
