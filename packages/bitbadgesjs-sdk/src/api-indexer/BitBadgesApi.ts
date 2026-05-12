@@ -224,6 +224,72 @@ import {
   iGetUserBalancesPayload,
   iGetUserBalancesSuccessResponse,
   GetUserBalancesSuccessResponse,
+  iGetAllListingsPayload,
+  iGetAllListingsSuccessResponse,
+  GetAllListingsSuccessResponse,
+  iGetCollectionOffersPayload,
+  iGetCollectionOffersSuccessResponse,
+  GetCollectionOffersSuccessResponse,
+  iGetListingsForTokenIdPayload,
+  iGetListingsForTokenIdSuccessResponse,
+  GetListingsForTokenIdSuccessResponse,
+  iGetOffersForTokenIdPayload,
+  iGetOffersForTokenIdSuccessResponse,
+  GetOffersForTokenIdSuccessResponse,
+  iGetOrderbookDepthPayload,
+  iGetOrderbookDepthSuccessResponse,
+  GetOrderbookDepthSuccessResponse,
+  iGetCandlestickDataPayload,
+  iGetCandlestickDataSuccessResponse,
+  GetCandlestickDataSuccessResponse,
+  iGetLiquidityPairPriceHistoryPayload,
+  iGetLiquidityPairPriceHistorySuccessResponse,
+  GetLiquidityPairPriceHistorySuccessResponse,
+  iGetPoolsBatchPayload,
+  iGetPoolsBatchSuccessResponse,
+  GetPoolsBatchSuccessResponse,
+  iGetVoteByProposalIdPayload,
+  iGetVoteByProposalIdSuccessResponse,
+  GetVoteByProposalIdSuccessResponse,
+  iGetVotesByCollectionPayload,
+  iGetVotesByCollectionSuccessResponse,
+  GetVotesByCollectionSuccessResponse,
+  iGetVotesByVoterPayload,
+  iGetVotesByVoterSuccessResponse,
+  GetVotesByVoterSuccessResponse,
+  iGetPredictionsPayload,
+  iGetPredictionsSuccessResponse,
+  GetPredictionsSuccessResponse,
+  iGetPredictionDetailPayload,
+  iGetPredictionDetailSuccessResponse,
+  GetPredictionDetailSuccessResponse,
+  iGetPredictionPricesPayload,
+  iGetPredictionPricesSuccessResponse,
+  GetPredictionPricesSuccessResponse,
+  iBroadcastTxEvmPayload,
+  iBroadcastTxEvmSuccessResponse,
+  BroadcastTxEvmSuccessResponse,
+  iSimulateTxEvmPayload,
+  iSimulateTxEvmSuccessResponse,
+  SimulateTxEvmSuccessResponse,
+  iGetPromptSkillPayload,
+  iGetPromptSkillSuccessResponse,
+  GetPromptSkillSuccessResponse,
+  iFetchPromptSkillsPayload,
+  iFetchPromptSkillsSuccessResponse,
+  FetchPromptSkillsSuccessResponse,
+  iSearchPromptSkillsPayload,
+  iSearchPromptSkillsSuccessResponse,
+  SearchPromptSkillsSuccessResponse,
+  iCreatePromptSkillPayload,
+  iCreatePromptSkillSuccessResponse,
+  CreatePromptSkillSuccessResponse,
+  iUpdatePromptSkillPayload,
+  iUpdatePromptSkillSuccessResponse,
+  UpdatePromptSkillSuccessResponse,
+  iDeletePromptSkillPayload,
+  iDeletePromptSkillSuccessResponse,
+  DeletePromptSkillSuccessResponse,
   iGetUtilityPagePayload,
   iGetUtilityPagesPayload,
   iOauthRevokePayload,
@@ -3385,6 +3451,706 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
       await this.handleApiError(error);
       return Promise.reject(error);
     }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // DEX / marketplace — per-token + per-collection listings & offers.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Get all open listings for a collection (denom-scoped, lowest-ask first).
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId/allListings`
+   * - **SDK Function Call**: `await BitBadgesApi.getAllListings(collectionId, { denom: 'ubadge' });`
+   */
+  public async getAllListings(collectionId: CollectionId, payload: iGetAllListingsPayload): Promise<GetAllListingsSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetAllListingsPayload> = typia.validate<iGetAllListingsPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetAllListingsSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetAllListingsRoute(collectionId)}`,
+        { params: payload }
+      );
+      return new GetAllListingsSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get all collection-wide offers (any-token bids on the collection).
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId/collectionOffers`
+   * - **SDK Function Call**: `await BitBadgesApi.getCollectionOffers(collectionId, { denom: 'ubadge' });`
+   */
+  public async getCollectionOffers(
+    collectionId: CollectionId,
+    payload: iGetCollectionOffersPayload
+  ): Promise<GetCollectionOffersSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetCollectionOffersPayload> = typia.validate<iGetCollectionOffersPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetCollectionOffersSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionOffersRoute(collectionId)}`,
+        { params: payload }
+      );
+      return new GetCollectionOffersSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get the open listings for a specific token within a collection.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId/listings/:tokenId`
+   * - **SDK Function Call**: `await BitBadgesApi.getListingsForTokenId(collectionId, tokenId, { denom: 'ubadge' });`
+   */
+  public async getListingsForTokenId(
+    collectionId: CollectionId,
+    tokenId: NumberType,
+    payload: iGetListingsForTokenIdPayload
+  ): Promise<GetListingsForTokenIdSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetListingsForTokenIdPayload> = typia.validate<iGetListingsForTokenIdPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetListingsForTokenIdSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetListingsForTokenIdRoute(collectionId, tokenId)}`,
+        { params: payload }
+      );
+      return new GetListingsForTokenIdSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get the open offers (bids) for a specific token within a collection.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId/offers/:tokenId`
+   * - **SDK Function Call**: `await BitBadgesApi.getOffersForTokenId(collectionId, tokenId, { denom: 'ubadge' });`
+   */
+  public async getOffersForTokenId(
+    collectionId: CollectionId,
+    tokenId: NumberType,
+    payload: iGetOffersForTokenIdPayload
+  ): Promise<GetOffersForTokenIdSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetOffersForTokenIdPayload> = typia.validate<iGetOffersForTokenIdPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetOffersForTokenIdSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetOffersForTokenIdRoute(collectionId, tokenId)}`,
+        { params: payload }
+      );
+      return new GetOffersForTokenIdSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get aggregated bid/ask depth for a single (collection, tokenId, denom).
+   * Returns an empty orderbook if no doc exists yet for that key.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId/orderbook/:tokenId`
+   * - **SDK Function Call**: `await BitBadgesApi.getOrderbookDepth(collectionId, tokenId, { denom: 'ubadge' });`
+   */
+  public async getOrderbookDepth(
+    collectionId: CollectionId,
+    tokenId: NumberType,
+    payload: iGetOrderbookDepthPayload
+  ): Promise<GetOrderbookDepthSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGetOrderbookDepthPayload> = typia.validate<iGetOrderbookDepthPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetOrderbookDepthSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetOrderbookDepthRoute(collectionId, tokenId)}`,
+        { params: payload }
+      );
+      return new GetOrderbookDepthSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get OHLCV candlestick data for a specific (collection, token, denom).
+   * Aggregates the last 100 trades into 1-hour buckets.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/collection/:collectionId/candlestick/:tokenId`
+   * - **SDK Function Call**: `await BitBadgesApi.getCandlestickData(collectionId, tokenId, { denom: 'ubadge' });`
+   */
+  public async getCandlestickData(
+    collectionId: CollectionId,
+    tokenId: NumberType,
+    payload: iGetCandlestickDataPayload
+  ): Promise<GetCandlestickDataSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetCandlestickDataPayload> = typia.validate<iGetCandlestickDataPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iGetCandlestickDataSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCandlestickDataRoute(collectionId, tokenId)}`,
+        payload
+      );
+      return new GetCandlestickDataSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get price history for a liquidity-pair asset (one entry per timeframe bucket, last 100).
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/liquidityPairPriceHistory`
+   * - **SDK Function Call**: `await BitBadgesApi.getLiquidityPairPriceHistory({ asset: 'ubadge', timeframe: '10m' });`
+   */
+  public async getLiquidityPairPriceHistory(
+    payload: iGetLiquidityPairPriceHistoryPayload
+  ): Promise<GetLiquidityPairPriceHistorySuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetLiquidityPairPriceHistoryPayload> = typia.validate<iGetLiquidityPairPriceHistoryPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetLiquidityPairPriceHistorySuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetLiquidityPairPriceHistoryRoute()}`,
+        { params: payload }
+      );
+      return new GetLiquidityPairPriceHistorySuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Fetch multiple liquidity pools by ID in a single request (max 100).
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/pools/batch`
+   * - **SDK Function Call**: `await BitBadgesApi.getPoolsBatch({ poolIds: ['1','2','3'] });`
+   */
+  public async getPoolsBatch(payload: iGetPoolsBatchPayload): Promise<GetPoolsBatchSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetPoolsBatchPayload> = typia.validate<iGetPoolsBatchPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iGetPoolsBatchSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetPoolsBatchRoute()}`,
+        payload
+      );
+      return new GetPoolsBatchSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Governance / voting / predictions.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Get a single vote document by proposal ID. Totals are recalculated against
+   * the current voter set (filters out voters who were removed).
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/vote/:proposalId`
+   * - **SDK Function Call**: `await BitBadgesApi.getVoteByProposalId(proposalId);`
+   */
+  public async getVoteByProposalId(
+    proposalId: string,
+    payload?: iGetVoteByProposalIdPayload
+  ): Promise<GetVoteByProposalIdSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetVoteByProposalIdPayload> = typia.validate<iGetVoteByProposalIdPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetVoteByProposalIdSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetVoteByProposalIdRoute(proposalId)}`
+      );
+      return new GetVoteByProposalIdSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get all votes scoped to a collection, paginated.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/collection/:collectionId/votes`
+   * - **SDK Function Call**: `await BitBadgesApi.getVotesByCollection(collectionId, { bookmark });`
+   */
+  public async getVotesByCollection(
+    collectionId: CollectionId,
+    payload?: iGetVotesByCollectionPayload
+  ): Promise<GetVotesByCollectionSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetVotesByCollectionPayload> = typia.validate<iGetVotesByCollectionPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetVotesByCollectionSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetVotesByCollectionRoute(collectionId)}`,
+        { params: payload }
+      );
+      return new GetVotesByCollectionSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get all votes cast by a specific voter address, paginated.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/voter/:voter/votes`
+   * - **SDK Function Call**: `await BitBadgesApi.getVotesByVoter(voterAddress, { bookmark });`
+   */
+  public async getVotesByVoter(
+    voter: NativeAddress,
+    payload?: iGetVotesByVoterPayload
+  ): Promise<GetVotesByVoterSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetVotesByVoterPayload> = typia.validate<iGetVotesByVoterPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetVotesByVoterSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetVotesByVoterRoute(voter)}`,
+        { params: payload }
+      );
+      return new GetVotesByVoterSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Browse all active prediction markets (returns up to 50 newest collections
+   * tagged with the `Prediction Market` standard).
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/predictions`
+   * - **SDK Function Call**: `await BitBadgesApi.getPredictions();`
+   */
+  public async getPredictions(payload?: iGetPredictionsPayload): Promise<GetPredictionsSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGetPredictionsPayload> = typia.validate<iGetPredictionsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetPredictionsSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetPredictionsRoute()}`);
+      return new GetPredictionsSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get detail (parsed + raw approvals) for a single prediction market.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/predictions/:collectionId`
+   * - **SDK Function Call**: `await BitBadgesApi.getPredictionDetail(collectionId);`
+   */
+  public async getPredictionDetail(
+    collectionId: CollectionId,
+    payload?: iGetPredictionDetailPayload
+  ): Promise<GetPredictionDetailSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGetPredictionDetailPayload> = typia.validate<iGetPredictionDetailPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetPredictionDetailSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetPredictionDetailRoute(collectionId)}`
+      );
+      return new GetPredictionDetailSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get price-history for a prediction market's YES/NO tokens.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/predictions/:collectionId/prices`
+   * - **SDK Function Call**: `await BitBadgesApi.getPredictionPrices(collectionId, { timeframe: '1h' });`
+   */
+  public async getPredictionPrices(
+    collectionId: CollectionId,
+    payload?: iGetPredictionPricesPayload
+  ): Promise<GetPredictionPricesSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGetPredictionPricesPayload> = typia.validate<iGetPredictionPricesPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetPredictionPricesSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetPredictionPricesRoute(collectionId)}`,
+        { params: payload }
+      );
+      return new GetPredictionPricesSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Trait filtering — pre-existing handlers, typed wrappers added per #0393.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Filter tokens in a collection by tags, attributes, categories, or price range.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/collection/:collectionId/filter`
+   * - **SDK Function Call**: `await BitBadgesApi.filterTokens(collectionId, { tags: ['rare'] });`
+   */
+  public async filterTokens(
+    collectionId: CollectionId,
+    payload: iFilterTokensInCollectionPayload
+  ): Promise<FilterTokensInCollectionSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iFilterTokensInCollectionPayload> = typia.validate<iFilterTokensInCollectionPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<FilterTokensInCollectionSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.FilterTokensInCollectionRoute(collectionId)}`,
+        payload
+      );
+      return new FilterTokensInCollectionSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get filter suggestions (tags + attribute values with counts and floor prices)
+   * for a collection. Useful for building filter UIs.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/collection/:collectionId/filterSuggestions`
+   * - **SDK Function Call**: `await BitBadgesApi.getFilterSuggestions(collectionId);`
+   */
+  public async getFilterSuggestions(
+    collectionId: CollectionId,
+    payload?: iFilterSuggestionsPayload
+  ): Promise<FilterSuggestionsSuccessResponse> {
+    return this.filterSuggestions(collectionId, payload);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // EVM broadcast / simulate (BitBadges-EVM specific).
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Broadcast an EVM transaction wrapped in `MsgEthereumTx`. Returns both the
+   * EVM keccak hash (`txhash`) and the cosmos-side wrapping hash (`cosmosTxHash`)
+   * so consumers can look up the tx in either environment.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/broadcast-evm`
+   * - **SDK Function Call**: `await BitBadgesApi.broadcastTxEvm({ mode: 'evm', evmTx: { to, data, signer_address } });`
+   */
+  public async broadcastTxEvm(payload: iBroadcastTxEvmPayload): Promise<BroadcastTxEvmSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iBroadcastTxEvmPayload> = typia.validate<iBroadcastTxEvmPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iBroadcastTxEvmSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.BroadcastTxEvmRoute()}`,
+        payload
+      );
+      return new BroadcastTxEvmSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Simulate an EVM transaction (estimate gas + revert-check) via eth_call.
+   * Includes special handling for BitBadges precompile addresses.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/simulate-evm`
+   * - **SDK Function Call**: `await BitBadgesApi.simulateTxEvm({ mode: 'evm', evmTx: { to, data, signer_address } });`
+   */
+  public async simulateTxEvm(payload: iSimulateTxEvmPayload): Promise<SimulateTxEvmSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iSimulateTxEvmPayload> = typia.validate<iSimulateTxEvmPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iSimulateTxEvmSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.SimulateTxEvmRoute()}`,
+        payload
+      );
+      return new SimulateTxEvmSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // PromptSkill — full CRUD + discovery.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Get a single prompt skill by ID. Only returns approved+published skills
+   * unless the caller is the owner (which requires Full Access auth).
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/promptSkill/:promptSkillId`
+   * - **SDK Function Call**: `await BitBadgesApi.getPromptSkill(promptSkillId);`
+   */
+  public async getPromptSkill(promptSkillId: string, payload?: iGetPromptSkillPayload): Promise<GetPromptSkillSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGetPromptSkillPayload> = typia.validate<iGetPromptSkillPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetPromptSkillSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetPromptSkillRoute(promptSkillId)}`
+      );
+      return new GetPromptSkillSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Search prompt skills by name, category, or creator address.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/promptSkills/search`
+   * - **SDK Function Call**: `await BitBadgesApi.searchPromptSkills({ searchValue: 'audit' });`
+   */
+  public async searchPromptSkills(payload?: iSearchPromptSkillsPayload): Promise<SearchPromptSkillsSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iSearchPromptSkillsPayload> = typia.validate<iSearchPromptSkillsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iSearchPromptSkillsSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.SearchPromptSkillsRoute()}`,
+        { params: payload }
+      );
+      return new SearchPromptSkillsSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Batch-fetch prompt skills by ID (1–25 per call).
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/promptSkills/fetch`
+   * - **SDK Function Call**: `await BitBadgesApi.fetchPromptSkills({ promptSkillIds: ['a','b'] });`
+   */
+  public async fetchPromptSkills(payload: iFetchPromptSkillsPayload): Promise<FetchPromptSkillsSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iFetchPromptSkillsPayload> = typia.validate<iFetchPromptSkillsPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iFetchPromptSkillsSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.FetchPromptSkillsRoute()}`,
+        payload
+      );
+      return new FetchPromptSkillsSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Create a new prompt skill.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/promptSkills`
+   * - **Authentication**: Full Access scope required.
+   * - **SDK Function Call**: `await BitBadgesApi.createPromptSkill(payload);`
+   */
+  public async createPromptSkill(payload: iCreatePromptSkillPayload): Promise<CreatePromptSkillSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iCreatePromptSkillPayload> = typia.validate<iCreatePromptSkillPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iCreatePromptSkillSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDPromptSkillsRoute()}`,
+        payload
+      );
+      return new CreatePromptSkillSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Update an existing prompt skill (owner-only).
+   *
+   * @remarks
+   * - **API Route**: `PUT /api/v0/promptSkills`
+   * - **Authentication**: Full Access scope required.
+   * - **SDK Function Call**: `await BitBadgesApi.updatePromptSkill(payload);`
+   */
+  public async updatePromptSkill(payload: iUpdatePromptSkillPayload): Promise<UpdatePromptSkillSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iUpdatePromptSkillPayload> = typia.validate<iUpdatePromptSkillPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.put<iUpdatePromptSkillSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDPromptSkillsRoute()}`,
+        payload
+      );
+      return new UpdatePromptSkillSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Soft-delete a prompt skill (sets `approvalStatus: 'rejected'` and `deletedAt`).
+   *
+   * @remarks
+   * - **API Route**: `DELETE /api/v0/promptSkills`
+   * - **Authentication**: Full Access scope required.
+   * - **SDK Function Call**: `await BitBadgesApi.deletePromptSkill({ promptSkillId });`
+   */
+  public async deletePromptSkill(payload: iDeletePromptSkillPayload): Promise<DeletePromptSkillSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iDeletePromptSkillPayload> = typia.validate<iDeletePromptSkillPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.delete<iDeletePromptSkillSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDPromptSkillsRoute()}`,
+        { data: payload }
+      );
+      return new DeletePromptSkillSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Developer-app discovery (fetch + search). CRUD already exists above.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Batch-fetch developer apps (paginated). Distinct from `searchDeveloperApps`
+   * in that the indexer scopes results to the authenticated user's own apps.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/developerApps/fetch`
+   * - **SDK Function Call**: `await BitBadgesApi.fetchDeveloperApps({ clientId });`
+   */
+  public async fetchDeveloperApps(payload: iGetDeveloperAppsPayload): Promise<GetDeveloperAppsSuccessResponse<T>> {
+    return this.getDeveloperApps(payload);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // API key management — full CRUD already lives above. Add `fetchApiKeys`
+  // as a typed alias for the POST /apiKeys/fetch route to match the
+  // documented pattern (`getApiKeys` is the existing wrapper).
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Batch-fetch API keys for the authenticated user. Alias for `getApiKeys`
+   * exposed under the `fetch*` naming convention.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/apiKeys/fetch`
+   * - **SDK Function Call**: `await BitBadgesApi.fetchApiKeys();`
+   */
+  public async fetchApiKeys(payload?: iGetApiKeysPayload): Promise<GetApiKeysSuccessResponse> {
+    return this.getApiKeys(payload ?? {});
+  }
+
+  /**
+   * Open the global browse / explore page payload. Alias for `getBrowse` exposed
+   * under the lowercase name so the operationId in routes.yaml matches.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/browse`
+   * - **SDK Function Call**: `await BitBadgesApi.browse({ ... });`
+   */
+  public async browse(payload: iGetBrowsePayload): Promise<GetBrowseSuccessResponse<T>> {
+    return this.getBrowse(payload);
   }
 }
 
