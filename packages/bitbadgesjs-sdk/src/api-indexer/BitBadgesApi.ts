@@ -2,6 +2,7 @@ import type { NumberType } from '@/common/string-numbers.js';
 import { BitBadgesCollection, GetCollectionsSuccessResponse, iGetCollectionsPayload } from './BitBadgesCollection.js';
 
 import type { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/index.js';
+import type { iEstimateSwapPayload, iEstimateSwapSuccessResponse } from '@/gamm/indexer.js';
 import typia from 'typia';
 import type { GetAccountSuccessResponse, GetAccountsSuccessResponse, iGetAccountPayload, iGetAccountsPayload } from './BitBadgesUserInfo.js';
 import { BitBadgesUserInfo } from './BitBadgesUserInfo.js';
@@ -83,12 +84,17 @@ import {
   GetSignInChallengeSuccessResponse,
   GetStatusSuccessResponse,
   GetSwapActivitiesSuccessResponse,
+  GetSwapAssetsSuccessResponse,
+  GetSwapBalancesSuccessResponse,
+  GetSwapChainsSuccessResponse,
+  GetSwapStatusSuccessResponse,
   GetSkipAssetsSuccessResponse,
   GetSkipBalancesSuccessResponse,
   GetSkipChainsSuccessResponse,
   GetSkipTxStatusSuccessResponse,
   GetIntentsSuccessResponse,
   FilterCollectionApprovalsSuccessResponse,
+  TrackSwapSuccessResponse,
   TrackSkipTxSuccessResponse,
   GetTokensFromFaucetSuccessResponse,
   GetUtilityPageSuccessResponse,
@@ -189,6 +195,14 @@ import {
   iGetStatusSuccessResponse,
   iGetSwapActivitiesPayload,
   iGetSwapActivitiesSuccessResponse,
+  iGetSwapAssetsPayload,
+  iGetSwapAssetsSuccessResponse,
+  iGetSwapBalancesPayload,
+  iGetSwapBalancesSuccessResponse,
+  iGetSwapChainsPayload,
+  iGetSwapChainsSuccessResponse,
+  iGetSwapStatusPayload,
+  iGetSwapStatusSuccessResponse,
   iGetSkipAssetsPayload,
   iGetSkipAssetsSuccessResponse,
   iGetSkipBalancesPayload,
@@ -201,6 +215,8 @@ import {
   iGetIntentsSuccessResponse,
   iFilterCollectionApprovalsPayload,
   iFilterCollectionApprovalsSuccessResponse,
+  iTrackSwapPayload,
+  iTrackSwapSuccessResponse,
   iTrackSkipTxPayload,
   iTrackSkipTxSuccessResponse,
   iGetTokensFromFaucetPayload,
@@ -295,6 +311,13 @@ import {
  * @see [BitBadges API Documentation](https://docs.bitbadges.io/for-developers/bitbadges-api/api)
  */
 export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
+  /**
+   * Dedupe set for legacy /skip/* deprecation warnings. Each old method
+   * warns at most once per process so dev tooling doesn't flood logs.
+   * Static because the warning is global to the SDK, not per-instance.
+   */
+  private static readonly warnedLegacySkipMethods = new Set<string>();
+
   constructor(apiDetails: iBitBadgesApi<T>) {
     super(apiDetails);
   }
@@ -2328,133 +2351,247 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
+   * Get consolidated cross-chain assets (Skip:Go + CoinsRegistry + verified BitBadges asset metadata).
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/swap/assets`
+   * - **SDK Function Call**: `await BitBadgesApi.getSwapAssets({ includeSvm: false, includeCw20: false });`
+   * - The indexer merges Skip:Go assets with BB-side CoinsRegistry entries and verified AssetInfoDoc rows for the BitBadges chain. Non-BitBadges chains pass through Skip unmodified.
+   * - Each asset carries a `source` (`'skip' | 'coinregistry' | 'verified' | 'native'`) and an optional `isWrapped` flag for verified `badgeslp:/badges:` wrapped denoms.
+   */
+  public async getSwapAssets(payload?: iGetSwapAssetsPayload): Promise<GetSwapAssetsSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGetSwapAssetsPayload> = typia.validate<iGetSwapAssetsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetSwapAssetsSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSwapAssetsRoute()}`,
+        { params: payload }
+      );
+      return new GetSwapAssetsSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get cross-chain chain registry (Skip:Go chains filtered to BitBadges-allowed chains).
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/swap/chains`
+   * - **SDK Function Call**: `await BitBadgesApi.getSwapChains({ includeSvm: false, onlyTestnets: false });`
+   * - Same behavior as the legacy `/skip/chains` endpoint; no merge layer (chains are Skip's domain).
+   */
+  public async getSwapChains(payload?: iGetSwapChainsPayload): Promise<GetSwapChainsSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGetSwapChainsPayload> = typia.validate<iGetSwapChainsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetSwapChainsSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSwapChainsRoute()}`,
+        { params: payload }
+      );
+      return new GetSwapChainsSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get consolidated cross-chain balances for one or more (chain, address) pairs.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/swap/balances`
+   * - **SDK Function Call**: `await BitBadgesApi.getSwapBalances({ chains: { 'bitbadges-1': ['bb1...'] } });`
+   * - For BitBadges chains, the indexer merges Skip-returned balances with on-chain bank balances for CoinsRegistry denoms Skip didn't report and computed wrappable amounts for verified `badgeslp:/badges:` denoms. Each balance row may carry `decimals`, `symbol`, and a `source` tag.
+   */
+  public async getSwapBalances(payload: iGetSwapBalancesPayload): Promise<GetSwapBalancesSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGetSwapBalancesPayload> = typia.validate<iGetSwapBalancesPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iGetSwapBalancesSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSwapBalancesRoute()}`,
+        payload
+      );
+      return new GetSwapBalancesSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Estimate a swap from a token-in denom to a token-out denom across one or more chains.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/swap/estimate`
+   * - **SDK Function Call**: `await BitBadgesApi.estimateSwap({ tokenIn: '1000000ubadge', tokenOutDenom: 'uusdc', chainIdsToAddresses: { 'bitbadges-1': 'bb1...' }, slippageTolerancePercent: 1 });`
+   * - Honors a `--local-only` flag to restrict the route to BitBadges native pools (no Skip:Go rerouting).
+   */
+  public async estimateSwap(payload: iEstimateSwapPayload): Promise<iEstimateSwapSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iEstimateSwapPayload> = typia.validate<iEstimateSwapPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iEstimateSwapSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.EstimateSwapRoute()}`,
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Register a broadcast tx with the cross-chain tracker.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/swap/track`
+   * - **SDK Function Call**: `await BitBadgesApi.trackSwap({ txHash, chainId, tokenIn: '1000ubadge' });`
+   * - When called by an authenticated user, the indexer writes a tracking doc keyed by `${txHash}-${chainId}` so subsequent `getSwapStatus` calls can short-circuit.
+   */
+  public async trackSwap(payload: iTrackSwapPayload): Promise<TrackSwapSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iTrackSwapPayload> = typia.validate<iTrackSwapPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iTrackSwapSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.TrackSwapRoute()}`,
+        payload
+      );
+      return new TrackSwapSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get the status of a tracked swap transaction.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/swap/status`
+   * - **SDK Function Call**: `await BitBadgesApi.getSwapStatus({ txHash, chainId });`
+   * - The indexer enriches the upstream response with a `swapEventInfo` field derived from BitBadges on-chain swap events when the final destination is BitBadges.
+   */
+  public async getSwapStatus(payload: iGetSwapStatusPayload): Promise<GetSwapStatusSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGetSwapStatusPayload> = typia.validate<iGetSwapStatusPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetSwapStatusSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSwapStatusRoute()}`,
+        { params: payload }
+      );
+      return new GetSwapStatusSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Warn once per legacy /skip/* SDK method, in dev-mode environments only.
+   * Browser dev = localhost; Node dev = NODE_ENV === 'development'.
+   * Idempotent — uses a private set to dedupe.
+   */
+  private warnLegacySkipMethod(oldName: string, newName: string): void {
+    const isBrowserDev = typeof window !== 'undefined' && typeof window.location !== 'undefined' && window.location.hostname === 'localhost';
+    const isNodeDev = typeof process !== 'undefined' && typeof process.env !== 'undefined' && process.env.NODE_ENV === 'development';
+    if (!isBrowserDev && !isNodeDev) return;
+    if (BitBadgesAPI.warnedLegacySkipMethods.has(oldName)) return;
+    BitBadgesAPI.warnedLegacySkipMethods.add(oldName);
+    console.warn(`[bitbadgesjs] BitBadgesAPI.${oldName}() is deprecated — use BitBadgesAPI.${newName}() instead.`);
+  }
+
+  /**
+   * @deprecated Use `getSwapAssets` instead. This is a thin wrapper that forwards to the consolidated `/swap/assets` endpoint.
+   *
    * Get Skip:Go cross-chain assets (filtered to BitBadges-allowed chains).
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/skip/assets`
-   * - **SDK Function Call**: `await BitBadgesApi.getSkipAssets({ includeSvm: false, includeCw20: false });`
-   * - Indexer proxies https://api.skip.build/v2/fungible/assets and applies BitBadges' chain/asset allowlist.
+   * - **API Route**: `GET /api/v0/swap/assets` (was `/api/v0/skip/assets`)
    */
   public async getSkipAssets(payload?: iGetSkipAssetsPayload): Promise<GetSkipAssetsSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iGetSkipAssetsPayload> = typia.validate<iGetSkipAssetsPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<iGetSkipAssetsSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSkipAssetsRoute()}`,
-        { params: payload }
-      );
-      return new GetSkipAssetsSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
+    this.warnLegacySkipMethod('getSkipAssets', 'getSwapAssets');
+    const swapResponse = await this.getSwapAssets(payload as iGetSwapAssetsPayload | undefined);
+    // The new response shape is a strict superset (adds source/isWrapped per asset).
+    // Construct the legacy class with the same data so callers get the legacy class type.
+    return new GetSkipAssetsSuccessResponse({ chain_to_assets_map: swapResponse.chain_to_assets_map as Record<string, unknown> });
   }
 
   /**
+   * @deprecated Use `getSwapChains` instead. This is a thin wrapper that forwards to the consolidated `/swap/chains` endpoint.
+   *
    * Get Skip:Go cross-chain chain registry (filtered to BitBadges-allowed chains).
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/skip/chains`
-   * - **SDK Function Call**: `await BitBadgesApi.getSkipChains({ includeSvm: false, onlyTestnets: false });`
-   * - Indexer proxies https://api.skip.build/v2/info/chains and applies BitBadges' chain allowlist (incl. pretty-name overrides for EVM chains).
+   * - **API Route**: `GET /api/v0/swap/chains` (was `/api/v0/skip/chains`)
    */
   public async getSkipChains(payload?: iGetSkipChainsPayload): Promise<GetSkipChainsSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iGetSkipChainsPayload> = typia.validate<iGetSkipChainsPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<iGetSkipChainsSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSkipChainsRoute()}`,
-        { params: payload }
-      );
-      return new GetSkipChainsSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
+    this.warnLegacySkipMethod('getSkipChains', 'getSwapChains');
+    const swapResponse = await this.getSwapChains(payload as iGetSwapChainsPayload | undefined);
+    return new GetSkipChainsSuccessResponse({ chains: swapResponse.chains });
   }
 
   /**
+   * @deprecated Use `getSwapBalances` instead. This is a thin wrapper that forwards to the consolidated `/swap/balances` endpoint.
+   *
    * Get Skip:Go balances for one or more (chain, address) pairs.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/skip/balances`
-   * - **SDK Function Call**: `await BitBadgesApi.getSkipBalances({ chains: { 'bitbadges-1': ['bb1...'] } });`
-   * - Indexer proxies https://api.skip.build/v2/info/balances.
+   * - **API Route**: `POST /api/v0/swap/balances` (was `/api/v0/skip/balances`)
    */
   public async getSkipBalances(payload: iGetSkipBalancesPayload): Promise<GetSkipBalancesSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iGetSkipBalancesPayload> = typia.validate<iGetSkipBalancesPayload>(payload);
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iGetSkipBalancesSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSkipBalancesRoute()}`,
-        payload
-      );
-      return new GetSkipBalancesSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
+    this.warnLegacySkipMethod('getSkipBalances', 'getSwapBalances');
+    const swapResponse = await this.getSwapBalances(payload as iGetSwapBalancesPayload);
+    // GetSkipBalancesSuccessResponse uses an index signature; copy properties through.
+    return new GetSkipBalancesSuccessResponse({ ...swapResponse } as iGetSkipBalancesSuccessResponse);
   }
 
   /**
-   * Register a broadcast tx with Skip:Go tracking.
+   * @deprecated Use `trackSwap` instead. This is a thin wrapper that forwards to the consolidated `/swap/track` endpoint.
+   *
+   * Register a broadcast tx with cross-chain tracking.
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/skip/v2/tx/track`
-   * - **SDK Function Call**: `await BitBadgesApi.trackSkipTx({ txHash, chainId, tokenIn: '1000ubadge' });`
-   * - Side-effect: when called by an authenticated user, the indexer writes a SkipSwapTransaction doc keyed by `${txHash}-${chainId}` so subsequent `getSkipTxStatus` calls can short-circuit.
+   * - **API Route**: `POST /api/v0/swap/track` (was `/api/v0/skip/v2/tx/track`)
    */
   public async trackSkipTx(payload: iTrackSkipTxPayload): Promise<TrackSkipTxSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iTrackSkipTxPayload> = typia.validate<iTrackSkipTxPayload>(payload);
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iTrackSkipTxSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.TrackSkipTxRoute()}`,
-        payload
-      );
-      return new TrackSkipTxSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
+    this.warnLegacySkipMethod('trackSkipTx', 'trackSwap');
+    const swapResponse = await this.trackSwap(payload as iTrackSwapPayload);
+    return new TrackSkipTxSuccessResponse({ ...swapResponse } as iTrackSkipTxSuccessResponse);
   }
 
   /**
+   * @deprecated Use `getSwapStatus` instead. This is a thin wrapper that forwards to the consolidated `/swap/status` endpoint.
+   *
    * Get the status of a tracked Skip:Go transaction.
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/skip/v2/tx/status`
-   * - **SDK Function Call**: `await BitBadgesApi.getSkipTxStatus({ txHash, chainId });`
-   * - Indexer enriches the upstream response with a `swapEventInfo` field derived from BitBadges on-chain swap events when the final destination is BitBadges.
+   * - **API Route**: `GET /api/v0/swap/status` (was `/api/v0/skip/v2/tx/status`)
    */
   public async getSkipTxStatus(payload: iGetSkipTxStatusPayload): Promise<GetSkipTxStatusSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iGetSkipTxStatusPayload> = typia.validate<iGetSkipTxStatusPayload>(payload);
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<iGetSkipTxStatusSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSkipTxStatusRoute()}`,
-        { params: payload }
-      );
-      return new GetSkipTxStatusSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
+    this.warnLegacySkipMethod('getSkipTxStatus', 'getSwapStatus');
+    const swapResponse = await this.getSwapStatus(payload as iGetSwapStatusPayload);
+    return new GetSkipTxStatusSuccessResponse({ ...swapResponse } as iGetSkipTxStatusSuccessResponse);
   }
 
   /**
