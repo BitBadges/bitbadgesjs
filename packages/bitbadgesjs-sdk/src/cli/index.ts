@@ -38,6 +38,7 @@ import { genListIdCommand } from './commands/gen-list-id.js';
 
 // Swap / DEX
 import { swapCommand } from './commands/swap.js';
+import { balancesCommand } from './commands/balances.js';
 
 // Misc
 import { makeCompletionCommand } from './commands/completion.js';
@@ -96,7 +97,7 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   },
   {
     title: 'Swap & DEX',
-    commands: [swapCommand]
+    commands: [swapCommand, balancesCommand]
   }
 ];
 
