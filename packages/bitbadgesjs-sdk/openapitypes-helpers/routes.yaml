@@ -543,7 +543,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/iGetCollectionsPayload'
-  '/collection/{collectionId}/balance/{address}/{tokenId}':
+  '/collection/{collectionId}/{tokenId}/balance/{address}':
     get:
       operationId: getBalanceByAddressSpecificToken
       summary: Get Balance By Address - Specific Token
@@ -720,54 +720,6 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/iGetClaimPayload'
-      security:
-        - apiKey: []
-      x-internal: false
-  /claims/success/{claimId}/{address}:
-    get:
-      operationId: checkClaimSuccess
-      summary: Check Claim Successes By User
-      description: |
-        Checks if a claim has been successfully completed.
-
-        This returns a success count based on how many times the user has completed the claim.
-
-        For on-demand claims, this will return 1 if the user has completed the claim. For indexed claims, this will return the number of times the user has completed the claim.
-
-        Note that this will not work if the claim hides its state.
-
-        ```tsx
-        const res = await BitBadgesApi.checkClaimSuccess(claimId, address);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckClaimSuccessPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckClaimSuccessSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#checkclaimsuccess)**
-      tags:
-        - Claims
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iCheckClaimSuccessSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: claimId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: address
-          in: path
-          required: true
-          schema:
-            type: string
       security:
         - apiKey: []
       x-internal: false
@@ -1009,7 +961,7 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-  /utilityPage/{utilityPageId}:
+  /utilityPages/{listingId}:
     get:
       operationId: getUtilityPage
       summary: Get Utility Page
@@ -1041,7 +993,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
       parameters:
-        - name: utilityPageId
+        - name: listingId
           in: path
           description: Utility listing ID
           required: true
@@ -3977,7 +3929,7 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-  /api/v0/collection/amountTracker:
+  '/collection/{collectionId}/amountTracker':
     get:
       operationId: getCollectionAmountTrackerById
       summary: Get Collection Amount Tracker By ID
@@ -3995,6 +3947,12 @@ paths:
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionAmountTrackerByIdSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getcollectionamounttrackerbyid)**
       parameters:
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
         - name: payload
           in: query
           explode: true
@@ -4016,7 +3974,7 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-  /api/v0/collection/challengeTracker:
+  '/collection/{collectionId}/challengeTracker':
     get:
       operationId: getCollectionChallengeTrackerById
       summary: Get Collection Challenge Tracker By ID
@@ -4034,6 +3992,12 @@ paths:
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionChallengeTrackerByIdSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getcollectionchallengetrackerbyid)**
       parameters:
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
         - name: payload
           in: query
           explode: true
@@ -5246,105 +5210,104 @@ paths:
   #       - apiKey: []
   #     x-internal: false
 
-  # '/collection/{collectionId}/filter':
-  #   post:
-  #     operationId: filterTokensInCollection
-  #     summary: Filter Tokens in Collection
-  #     tags:
-  #       - Tokens
-  #     description: |
-  #       Filters tokens in a collection based on various criteria (attributes, tags, etc.).
+  '/collection/{collectionId}/filter':
+    post:
+      operationId: filterTokens
+      summary: Filter Tokens in Collection
+      tags:
+        - Tokens
+      description: |
+        Filters tokens in a collection based on various criteria (attributes, tags, categories, price range, etc.). Returns matching token ID ranges with pagination.
 
-  #       ```tsx
-  #       const res = await BitBadgesApi.filterTokensInCollection(collectionId, {
-  #         filters: { tags: ['rare'] },
-  #         bookmark: '',
-  #         sortBy: { tokenId: 1 }
-  #       });
-  #       ```
+        ```tsx
+        const res = await BitBadgesApi.filterTokens(collectionId, {
+          tags: ['rare'],
+          attributes: [{ name: 'background', value: 'gold' }],
+          bookmark: ''
+        });
+        ```
 
-  #       SDK Links:
-  #       - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterTokensInCollectionPayload)**
-  #       - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterTokensInCollectionSuccessResponse)**
-  #       - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#filtertokensincollection)**
-  #     parameters:
-  #       - name: x-api-key
-  #         in: header
-  #         description: BitBadges API Key for authentication
-  #         required: true
-  #         schema:
-  #           type: string
-  #       - name: collectionId
-  #         in: path
-  #         description: Collection ID
-  #         required: true
-  #         schema:
-  #           type: string
-  #     requestBody:
-  #       required: true
-  #       content:
-  #         application/json:
-  #           schema:
-  #             $ref: '#/components/schemas/iFilterTokensInCollectionPayload'
-  #     responses:
-  #       '200':
-  #         description: Success response
-  #         content:
-  #           application/json:
-  #             schema:
-  #               $ref: '#/components/schemas/iFilterTokensInCollectionSuccessResponse'
-  #       '400':
-  #         $ref: '#/components/responses/BadRequestResponse'
-  #       '500':
-  #         $ref: '#/components/responses/InternalServerErrorResponse'
-  #     security:
-  #       - apiKey: []
-  #     x-internal: false
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterTokensInCollectionPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterTokensInCollectionSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#filtertokens)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iFilterTokensInCollectionPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iFilterTokensInCollectionSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
 
-  # '/collection/{collectionId}/filterSuggestions':
-  #   post:
-  #     operationId: getFilterSuggestions
-  #     summary: Get Filter Suggestions
-  #     tags:
-  #       - Tokens
-  #     description: |
-  #       Gets filter suggestions (tags, attributes, etc.) for a collection. Useful for building filter UIs.
+  '/collection/{collectionId}/filterSuggestions':
+    post:
+      operationId: getFilterSuggestions
+      summary: Get Filter Suggestions
+      tags:
+        - Tokens
+      description: |
+        Gets filter suggestions (tags, attributes, floor prices) for a collection. Useful for building filter UIs over a collection's token metadata.
 
-  #       ```tsx
-  #       const res = await BitBadgesApi.getFilterSuggestions(collectionId);
-  #       ```
+        ```tsx
+        const res = await BitBadgesApi.getFilterSuggestions(collectionId);
+        ```
 
-  #       SDK Links:
-  #       - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetFilterSuggestionsPayload)**
-  #       - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterSuggestionsSuccessResponse)**
-  #       - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getfiltersuggestions)**
-  #     parameters:
-  #       - name: x-api-key
-  #         in: header
-  #         description: BitBadges API Key for authentication
-  #         required: true
-  #         schema:
-  #           type: string
-  #       - name: collectionId
-  #         in: path
-  #         description: Collection ID
-  #         required: true
-  #         schema:
-  #           type: string
-  #     responses:
-  #       '200':
-  #         description: Success response
-  #         content:
-  #           application/json:
-  #             schema:
-  #               $ref: '#/components/schemas/iFilterSuggestionsSuccessResponse'
-  #       '400':
-  #         $ref: '#/components/responses/BadRequestResponse'
-  #       '500':
-  #         $ref: '#/components/responses/InternalServerErrorResponse'
-  #     security:
-  #       - apiKey: []
-  #     x-internal: false
+        SDK Links:
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterSuggestionsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getfiltersuggestions)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iFilterSuggestionsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
 
   /api/{version}/swap/assets:
     get:
@@ -5937,6 +5900,1654 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/iFilterCollectionApprovalsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  # ────────────────────────────────────────────────────────────────────────
+  # DEX / marketplace — per-token + per-collection listings, offers,
+  # orderbook depth, candlestick data, liquidity-pair price history, and
+  # batch pool fetch. Mirrors indexer handlers in `src/routes/balances.ts`,
+  # `src/routes/orderbookDepth.ts`, `src/routes/candlestick.ts`,
+  # `src/routes/collections.ts` (price history), and `src/routes/pools.ts`.
+  # ────────────────────────────────────────────────────────────────────────
+
+  /collection/{collectionId}/allListings:
+    get:
+      operationId: getAllListings
+      summary: Get All Listings for Collection
+      tags:
+        - Tokens
+      description: |
+        Lists all open token listings across the collection for a given denom, sorted lowest-ask first. Returns up to 25 listings.
+
+        ```tsx
+        const res = await BitBadgesApi.getAllListings(collectionId, { denom: 'ubadge' });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAllListingsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAllListingsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getalllistings)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetAllListingsPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetAllListingsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /collection/{collectionId}/collectionOffers:
+    get:
+      operationId: getCollectionOffers
+      summary: Get Collection-Wide Offers
+      tags:
+        - Tokens
+      description: |
+        Lists open collection-wide offers (any-token bids on the collection) for a given denom, sorted highest-bid first. Returns up to 5 offers.
+
+        ```tsx
+        const res = await BitBadgesApi.getCollectionOffers(collectionId, { denom: 'ubadge' });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionOffersPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionOffersSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getcollectionoffers)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetCollectionOffersPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetCollectionOffersSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /collection/{collectionId}/listings/{tokenId}:
+    get:
+      operationId: getListingsForTokenId
+      summary: Get Listings For Token
+      tags:
+        - Tokens
+      description: |
+        Lists open listings for a specific token within a collection. Returns up to 25 lowest-ask listings for the given denom.
+
+        ```tsx
+        const res = await BitBadgesApi.getListingsForTokenId(collectionId, tokenId, { denom: 'ubadge' });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetListingsForTokenIdPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetListingsForTokenIdSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getlistingsfortokenid)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
+        - name: tokenId
+          in: path
+          description: Token ID
+          required: true
+          schema:
+            type: integer
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetListingsForTokenIdPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetListingsForTokenIdSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /collection/{collectionId}/offers/{tokenId}:
+    get:
+      operationId: getOffersForTokenId
+      summary: Get Offers For Token
+      tags:
+        - Tokens
+      description: |
+        Lists open offers (bids) for a specific token within a collection. Returns up to 5 highest-bid offers for the given denom.
+
+        ```tsx
+        const res = await BitBadgesApi.getOffersForTokenId(collectionId, tokenId, { denom: 'ubadge' });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOffersForTokenIdPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOffersForTokenIdSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getoffersfortokenid)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
+        - name: tokenId
+          in: path
+          description: Token ID
+          required: true
+          schema:
+            type: integer
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetOffersForTokenIdPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetOffersForTokenIdSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /collection/{collectionId}/orderbook/{tokenId}:
+    get:
+      operationId: getOrderbookDepth
+      summary: Get Orderbook Depth
+      tags:
+        - Tokens
+      description: |
+        Aggregated bid/ask depth for a single (collection, tokenId, denom). Returns an empty orderbook if no doc exists yet for that key.
+
+        ```tsx
+        const res = await BitBadgesApi.getOrderbookDepth(collectionId, tokenId, { denom: 'ubadge' });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOrderbookDepthPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetOrderbookDepthSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getorderbookdepth)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
+        - name: tokenId
+          in: path
+          description: Token ID
+          required: true
+          schema:
+            type: integer
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetOrderbookDepthPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetOrderbookDepthSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /collection/{collectionId}/candlestick/{tokenId}:
+    post:
+      operationId: getCandlestickData
+      summary: Get Candlestick Data
+      tags:
+        - Tokens
+      description: |
+        Returns OHLCV candlestick data for a specific (collection, tokenId, denom), aggregated from the last 100 trades into 1-hour buckets.
+
+        ```tsx
+        const res = await BitBadgesApi.getCandlestickData(collectionId, tokenId, { denom: 'ubadge' });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCandlestickDataPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCandlestickDataSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getcandlestickdata)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
+        - name: tokenId
+          in: path
+          description: Token ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iGetCandlestickDataPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetCandlestickDataSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /liquidityPairPriceHistory:
+    get:
+      operationId: getLiquidityPairPriceHistory
+      summary: Get Liquidity Pair Price History
+      tags:
+        - Assets
+      description: |
+        Returns up to 100 most-recent price-history entries for a liquidity-pair asset, filtered by timeframe (defaults to `10m`).
+
+        ```tsx
+        const res = await BitBadgesApi.getLiquidityPairPriceHistory({ asset: 'ubadge', timeframe: '10m' });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetLiquidityPairPriceHistoryPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetLiquidityPairPriceHistorySuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getliquiditypairpricehistory)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?asset=ubadge&timeframe=10m)
+          required: true
+          schema:
+            $ref: '#/components/schemas/iGetLiquidityPairPriceHistoryPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetLiquidityPairPriceHistorySuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /pools/batch:
+    post:
+      operationId: getPoolsBatch
+      summary: Get Pools (Batch)
+      tags:
+        - Assets
+      description: |
+        Fetch multiple liquidity pools by ID in a single request (max 100 per call).
+
+        ```tsx
+        const res = await BitBadgesApi.getPoolsBatch({ poolIds: ['1','2','3'] });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPoolsBatchPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPoolsBatchSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getpoolsbatch)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iGetPoolsBatchPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetPoolsBatchSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  # ────────────────────────────────────────────────────────────────────────
+  # Governance / voting / prediction markets.
+  # Mirrors indexer handlers in `src/routes/votes.ts` and
+  # `src/routes/predictions.ts`.
+  # ────────────────────────────────────────────────────────────────────────
+
+  /collection/{collectionId}/votes:
+    get:
+      operationId: getVotesByCollection
+      summary: Get Votes By Collection
+      tags:
+        - Tokens
+      description: |
+        Lists all vote documents scoped to a collection (paginated). Vote totals
+        are recalculated against the current voter set so that voters removed
+        from the challenge are filtered out and totals reflect only the active
+        cohort.
+
+        ```tsx
+        const res = await BitBadgesApi.getVotesByCollection(collectionId, { bookmark: '' });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetVotesByCollectionPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetVotesByCollectionSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getvotesbycollection)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?bookmark=...&limit=25)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetVotesByCollectionPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetVotesByCollectionSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /vote/{proposalId}:
+    get:
+      operationId: getVoteByProposalId
+      summary: Get Vote By Proposal ID
+      tags:
+        - Tokens
+      description: |
+        Returns the single vote document for a proposal, with totals recalculated against the current voter set.
+
+        ```tsx
+        const res = await BitBadgesApi.getVoteByProposalId(proposalId);
+        ```
+
+        SDK Links:
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetVoteByProposalIdSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getvotebyproposalid)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: proposalId
+          in: path
+          description: Proposal ID (the `_docId` of the vote document)
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetVoteByProposalIdSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '404':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /voter/{voter}/votes:
+    get:
+      operationId: getVotesByVoter
+      summary: Get Votes By Voter
+      tags:
+        - Accounts
+      description: |
+        Lists all votes cast by a specific voter address (paginated). Totals are recalculated against the current voter set.
+
+        ```tsx
+        const res = await BitBadgesApi.getVotesByVoter('bb1...', { bookmark: '' });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetVotesByVoterPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetVotesByVoterSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getvotesbyvoter)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: voter
+          in: path
+          description: Voter address (bb1.../0x...)
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?bookmark=...&limit=25)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetVotesByVoterPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetVotesByVoterSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /predictions:
+    get:
+      operationId: getPredictions
+      summary: Browse Prediction Markets
+      tags:
+        - Tokens
+      description: |
+        Returns up to 50 newest collections tagged with the `Prediction Market` standard, with parsed market metadata (status, YES/NO prices, deposit terms).
+
+        ```tsx
+        const res = await BitBadgesApi.getPredictions();
+        ```
+
+        SDK Links:
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPredictionsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getpredictions)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetPredictionsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /predictions/{collectionId}:
+    get:
+      operationId: getPredictionDetail
+      summary: Get Prediction Market Detail
+      tags:
+        - Tokens
+      description: |
+        Returns parsed prediction-market data plus the collection's full serialized approval documents (so the frontend can construct transactions).
+
+        ```tsx
+        const res = await BitBadgesApi.getPredictionDetail(collectionId);
+        ```
+
+        SDK Links:
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPredictionDetailSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getpredictiondetail)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetPredictionDetailSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '404':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /predictions/{collectionId}/prices:
+    get:
+      operationId: getPredictionPrices
+      summary: Get Prediction Market Price History
+      tags:
+        - Tokens
+      description: |
+        Returns price-history series for a prediction market's YES/NO tokens. Filter by timeframe (`10m`, `1h`, `1d` — defaults to `1h`).
+
+        ```tsx
+        const res = await BitBadgesApi.getPredictionPrices(collectionId, { timeframe: '1h' });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPredictionPricesPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPredictionPricesSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getpredictionprices)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?timeframe=1h)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetPredictionPricesPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetPredictionPricesSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  # ────────────────────────────────────────────────────────────────────────
+  # Intents — no-address browse variant. The `/intents/{address}` variant
+  # lives above with operationId `getIntents`; this is the no-scope variant
+  # the typed SDK method `BitBadgesApi.getIntents()` (no args) hits.
+  # operationId is intentionally distinct so the CLI regen script doesn't
+  # collide on duplicate command names.
+  # ────────────────────────────────────────────────────────────────────────
+
+  /intents:
+    get:
+      operationId: browseIntents
+      summary: Browse All Intents
+      tags:
+        - Assets
+      description: |
+        Browse-list variant of `/intents/{address}`. Returns only active, funded, non-used intent approvals — no approver scoping.
+
+        Note: the SDK's `getIntents()` method covers BOTH this and the address-scoped variant by accepting an optional `address` argument. This entry exists so the no-address form is documented in the spec.
+
+        ```tsx
+        const res = await BitBadgesApi.getIntents();
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetIntentsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetIntentsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getintents)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetIntentsPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetIntentsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  # ────────────────────────────────────────────────────────────────────────
+  # EVM broadcast / simulate (BitBadges-EVM specific).
+  # ────────────────────────────────────────────────────────────────────────
+
+  /broadcast-evm:
+    post:
+      operationId: broadcastTxEvm
+      summary: Broadcast EVM Transaction
+      tags:
+        - Transactions
+      description: |
+        Broadcast an EVM transaction wrapped in `MsgEthereumTx`. Returns both the EVM keccak hash (`txhash`) and the cosmos-side wrapping hash (`cosmosTxHash`) so consumers can look up the tx in either environment.
+
+        ```tsx
+        const res = await BitBadgesApi.broadcastTxEvm({
+          mode: 'evm',
+          evmTx: { to, data, signer_address }
+        });
+        ```
+
+        Documentation References / Tutorials:
+        - **[Create, Generate, and Sign Txs](https://docs.bitbadges.io/for-developers/create-and-broadcast-txs)**
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iBroadcastTxEvmPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iBroadcastTxEvmSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#broadcasttxevm)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iBroadcastTxEvmPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iBroadcastTxEvmSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /simulate-evm:
+    post:
+      operationId: simulateTxEvm
+      summary: Simulate EVM Transaction
+      tags:
+        - Transactions
+      description: |
+        Simulate an EVM transaction (estimate gas + revert-check) via `eth_call`. Includes special handling for BitBadges precompile addresses.
+
+        ```tsx
+        const res = await BitBadgesApi.simulateTxEvm({
+          mode: 'evm',
+          evmTx: { to, data, signer_address }
+        });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSimulateTxEvmPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSimulateTxEvmSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#simulatetxevm)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iSimulateTxEvmPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iSimulateTxEvmSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  # ────────────────────────────────────────────────────────────────────────
+  # Plugin CRUD — write side. Read side (getPlugin, getPlugins,
+  # searchPlugins, getCreatorPlugins) already lives above.
+  # ────────────────────────────────────────────────────────────────────────
+
+  /plugins:
+    post:
+      operationId: createPlugin
+      summary: Create Plugin
+      tags:
+        - Plugins
+      description: |
+        Create a new claim integration plugin.
+
+        ```tsx
+        const res = await BitBadgesApi.createPlugin(payload);
+        ```
+
+        Scopes: `Full Access`
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreatePluginPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreatePluginSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createplugin)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iCreatePluginPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iCreatePluginSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+    put:
+      operationId: updatePlugin
+      summary: Update Plugin
+      tags:
+        - Plugins
+      description: |
+        Update an existing plugin (owner-only).
+
+        ```tsx
+        const res = await BitBadgesApi.updatePlugin(payload);
+        ```
+
+        Scopes: `Full Access`
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdatePluginPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdatePluginSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateplugin)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iUpdatePluginPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iUpdatePluginSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+    delete:
+      operationId: deletePlugin
+      summary: Delete Plugin
+      tags:
+        - Plugins
+      description: |
+        Delete a plugin (owner-only).
+
+        ```tsx
+        const res = await BitBadgesApi.deletePlugin({ pluginId });
+        ```
+
+        Scopes: `Full Access`
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeletePluginPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeletePluginSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteplugin)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iDeletePluginPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iDeletePluginSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  # ────────────────────────────────────────────────────────────────────────
+  # PromptSkill — full CRUD + discovery.
+  # ────────────────────────────────────────────────────────────────────────
+
+  /promptSkill/{promptSkillId}:
+    get:
+      operationId: getPromptSkill
+      summary: Get Prompt Skill
+      tags:
+        - Miscellaneous
+      description: |
+        Get a single prompt skill by ID. Only returns approved+published skills unless the caller is the owner.
+
+        ```tsx
+        const res = await BitBadgesApi.getPromptSkill(promptSkillId);
+        ```
+
+        SDK Links:
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPromptSkillSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getpromptskill)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: promptSkillId
+          in: path
+          description: Prompt skill ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetPromptSkillSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '404':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /promptSkills/search:
+    get:
+      operationId: searchPromptSkills
+      summary: Search Prompt Skills
+      tags:
+        - Miscellaneous
+      description: |
+        Search prompt skills by name, category, or creator address.
+
+        ```tsx
+        const res = await BitBadgesApi.searchPromptSkills({ searchValue: 'audit' });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchPromptSkillsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchPromptSkillsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchpromptskills)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?searchValue=...)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iSearchPromptSkillsPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iSearchPromptSkillsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /promptSkills/fetch:
+    post:
+      operationId: fetchPromptSkills
+      summary: Fetch Prompt Skills (Batch)
+      tags:
+        - Miscellaneous
+      description: |
+        Batch-fetch prompt skills by ID (1–25 per call).
+
+        ```tsx
+        const res = await BitBadgesApi.fetchPromptSkills({ promptSkillIds: ['a', 'b'] });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFetchPromptSkillsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFetchPromptSkillsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#fetchpromptskills)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iFetchPromptSkillsPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iFetchPromptSkillsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /promptSkills:
+    post:
+      operationId: createPromptSkill
+      summary: Create Prompt Skill
+      tags:
+        - Miscellaneous
+      description: |
+        Create a new prompt skill. Requires `Full Access` scope.
+
+        ```tsx
+        const res = await BitBadgesApi.createPromptSkill(payload);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreatePromptSkillPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreatePromptSkillSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createpromptskill)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iCreatePromptSkillPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iCreatePromptSkillSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+    put:
+      operationId: updatePromptSkill
+      summary: Update Prompt Skill
+      tags:
+        - Miscellaneous
+      description: |
+        Update an existing prompt skill (owner-only). Requires `Full Access` scope.
+
+        ```tsx
+        const res = await BitBadgesApi.updatePromptSkill(payload);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdatePromptSkillPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdatePromptSkillSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updatepromptskill)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iUpdatePromptSkillPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iUpdatePromptSkillSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+    delete:
+      operationId: deletePromptSkill
+      summary: Delete Prompt Skill
+      tags:
+        - Miscellaneous
+      description: |
+        Soft-delete a prompt skill (sets `approvalStatus: 'rejected'` and `deletedAt`). Requires `Full Access` scope.
+
+        ```tsx
+        const res = await BitBadgesApi.deletePromptSkill({ promptSkillId });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeletePromptSkillPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeletePromptSkillSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deletepromptskill)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iDeletePromptSkillPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iDeletePromptSkillSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  # ────────────────────────────────────────────────────────────────────────
+  # Developer-app discovery (search + batch fetch). CRUD lives above.
+  # ────────────────────────────────────────────────────────────────────────
+
+  /developerApps/search:
+    get:
+      operationId: searchDeveloperApps
+      summary: Search Developer Apps
+      tags:
+        - Sign In with BitBadges
+      description: |
+        Search developer apps owned by the authenticated user, paginated.
+
+        ```tsx
+        const res = await BitBadgesApi.searchDeveloperApps({ bookmark: '' });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchDeveloperAppsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchDeveloperAppsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchdeveloperapps)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?bookmark=...)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iSearchDeveloperAppsPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iSearchDeveloperAppsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /developerApps/fetch:
+    post:
+      operationId: fetchDeveloperApps
+      summary: Fetch Developer Apps (Batch)
+      tags:
+        - Sign In with BitBadges
+      description: |
+        Batch-fetch developer apps. Pass `clientId` to retrieve a specific app (does not return the client secret).
+
+        ```tsx
+        const res = await BitBadgesApi.fetchDeveloperApps({ clientId });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDeveloperAppsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetDeveloperAppsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#fetchdeveloperapps)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iGetDeveloperAppsPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetDeveloperAppsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  # ────────────────────────────────────────────────────────────────────────
+  # API key management — full CRUD.
+  # ────────────────────────────────────────────────────────────────────────
+
+  /apiKeys:
+    post:
+      operationId: createApiKey
+      summary: Create API Key
+      tags:
+        - Miscellaneous
+      description: |
+        Create a new API key for the authenticated user. Requires `Full Access` scope.
+
+        ```tsx
+        const res = await BitBadgesApi.createApiKey(payload);
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateApiKeyPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateApiKeySuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createapikey)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iCreateApiKeyPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iCreateApiKeySuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+    delete:
+      operationId: deleteApiKey
+      summary: Delete API Key
+      tags:
+        - Miscellaneous
+      description: |
+        Delete an API key. Requires `Full Access` scope.
+
+        ```tsx
+        const res = await BitBadgesApi.deleteApiKey({ key });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteApiKeyPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteApiKeySuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteapikey)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iDeleteApiKeyPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iDeleteApiKeySuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /apiKeys/fetch:
+    post:
+      operationId: fetchApiKeys
+      summary: Fetch API Keys
+      tags:
+        - Miscellaneous
+      description: |
+        List API keys for the authenticated user. Requires `Full Access` scope.
+
+        ```tsx
+        const res = await BitBadgesApi.fetchApiKeys();
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetApiKeysPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetApiKeysSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#fetchapikeys)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iGetApiKeysPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetApiKeysSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /apiKeys/rotate:
+    post:
+      operationId: rotateApiKey
+      summary: Rotate API Key
+      tags:
+        - Miscellaneous
+      description: |
+        Rotate an existing API key (issues a new secret and invalidates the prior one). Requires `Full Access` scope.
+
+        ```tsx
+        const res = await BitBadgesApi.rotateApiKey({ key });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRotateApiKeyPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iRotateApiKeySuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#rotateapikey)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iRotateApiKeyPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iRotateApiKeySuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  # ────────────────────────────────────────────────────────────────────────
+  # Browse / explore page.
+  # ────────────────────────────────────────────────────────────────────────
+
+  /browse:
+    post:
+      operationId: browse
+      summary: Browse Collections, Tokens, Users
+      tags:
+        - Miscellaneous
+      description: |
+        Returns aggregated `browse` page data — collections, tokens, users curated for the explore experience. Heavy endpoint; results are cached for 15 minutes server-side.
+
+        ```tsx
+        const res = await BitBadgesApi.browse({ ... });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBrowsePayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetBrowseSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#browse)**
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iGetBrowsePayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetBrowseSuccessResponse'
         '400':
           $ref: '#/components/responses/BadRequestResponse'
         '500':
