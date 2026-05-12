@@ -114,6 +114,7 @@ export class BitBadgesApiRoutes {
   static GetSiwbbRequestsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/requests/siwbb`;
   static GetTransferActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/tokens`;
   static GetTokensByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/tokens`;
+  static GetUserBalancesRoute = (address: NativeAddress) => `/api/v0/account/${address}/balances`;
 
   static GetClaimActivityByTypeForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/claims`;
   static GetPointsActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/points`;
@@ -134,6 +135,21 @@ export class BitBadgesApiRoutes {
 
   static GetSwapActivitiesRoute = () => '/api/v0/swapActivities';
 
+  // ── Consolidated /swap/* routes (preferred). ──
+  // The indexer's /swap/assets and /swap/balances merge Skip:Go + CoinsRegistry +
+  // verified AssetInfoDoc into a single response. /swap/chains, /swap/estimate,
+  // /swap/track, and /swap/status are aliases over the same legacy handlers.
+  static GetSwapAssetsRoute = () => '/api/v0/swap/assets';
+  static GetSwapChainsRoute = () => '/api/v0/swap/chains';
+  static GetSwapBalancesRoute = () => '/api/v0/swap/balances';
+  static EstimateSwapRoute = () => '/api/v0/swap/estimate';
+  static TrackSwapRoute = () => '/api/v0/swap/track';
+  static GetSwapStatusRoute = () => '/api/v0/swap/status';
+
+  // ── Legacy /skip/* routes (deprecated). ──
+  // Kept for backward compatibility — the indexer keeps them live as
+  // deprecation shims that log a one-line warning and forward to the same
+  // underlying handler. SDK consumers should migrate to the /swap/* equivalents.
   static GetSkipAssetsRoute = () => '/api/v0/skip/assets';
   static GetSkipChainsRoute = () => '/api/v0/skip/chains';
   static GetSkipBalancesRoute = () => '/api/v0/skip/balances';

@@ -10,6 +10,7 @@ import {
   ApiKeyDoc,
   ApprovalItemDoc,
   ApprovalTrackerDoc,
+  BalanceDoc,
   BalanceDocWithDetails,
   DeveloperAppDoc,
   DynamicDataDoc,
@@ -28,6 +29,7 @@ import {
   iApiKeyDoc,
   iApprovalItemDoc,
   iApprovalTrackerDoc,
+  iBalanceDoc,
   iBalanceDocWithDetails,
   iClaimActivityDoc,
   iDynamicDataDoc,
@@ -4521,6 +4523,261 @@ export class GetSkipTxStatusSuccessResponse extends CustomTypeClass<GetSkipTxSta
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Consolidated /swap/* response types.
+//
+// The new /swap/assets and /swap/balances endpoints merge three sources:
+//   1. Skip:Go upstream
+//   2. The SDK's CoinsRegistry (BB-side IBC-20 metadata)
+//   3. Verified AssetInfoDoc entries (BB-native + wrapped badgeslp:/badges:)
+//
+// Each asset / balance entry carries a `source` tag so consumers know
+// where it came from, and asset entries may carry `isWrapped` for the
+// wrapped-badge case.
+//
+// /swap/chains, /swap/estimate, /swap/track, and /swap/status are
+// transparent aliases over the legacy handlers, so they re-use the
+// existing iGetSkip*Payload / iEstimateSwapPayload shapes (declared
+// elsewhere in this file or in gamm/indexer.ts).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Provenance marker for entries returned by the consolidated /swap/* endpoints.
+ *  - `skip` — upstream Skip:Go API
+ *  - `coinregistry` — BitBadges SDK's CoinsRegistry (IBC-20 metadata)
+ *  - `verified` — verified AssetInfoDoc (BB-native or wrapped badgeslp:/badges:)
+ *  - `native` — chain-native denom (e.g. `ubadge`)
+ * @category API Requests / Responses
+ */
+export type SwapAssetSource = 'skip' | 'coinregistry' | 'verified' | 'native';
+
+/**
+ * Get Swap Assets
+ * Route: GET /api/v0/swap/assets
+ *
+ * Same query shape as `/skip/assets`. Response merges Skip:Go assets
+ * with CoinsRegistry + verified AssetInfoDoc entries for BitBadges chains;
+ * other chains pass through unmodified.
+ * @category API Requests / Responses
+ */
+export interface iGetSwapAssetsPayload {
+  /** Include Solana / SVM chain assets. Defaults to false. */
+  includeSvm?: boolean;
+  /** Include CW20 token assets. Defaults to false. */
+  includeCw20?: boolean;
+}
+
+/**
+ * A single asset entry in the consolidated /swap/assets response.
+ *
+ * Mirrors Skip's asset shape (denom, chain_id, origin_*, symbol, name,
+ * logo_uri, decimals) and adds `source` + `isWrapped`.
+ * @category API Requests / Responses
+ */
+export interface iSwapAsset {
+  denom: string;
+  chain_id: string;
+  origin_denom?: string;
+  origin_chain_id?: string;
+  symbol?: string;
+  name?: string;
+  logo_uri?: string;
+  decimals?: number;
+  /** Where this entry came from. */
+  source: SwapAssetSource;
+  /** True iff this is a wrapped BitBadges denom (badgeslp:/badges:) sourced from a verified AssetInfoDoc. */
+  isWrapped?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetSwapAssetsSuccessResponse {
+  /** Map of chain_id → consolidated assets payload. */
+  chain_to_assets_map: Record<string, { assets: iSwapAsset[] }>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetSwapAssetsSuccessResponse extends CustomTypeClass<GetSwapAssetsSuccessResponse> implements iGetSwapAssetsSuccessResponse {
+  chain_to_assets_map: Record<string, { assets: iSwapAsset[] }>;
+
+  constructor(data: iGetSwapAssetsSuccessResponse) {
+    super();
+    this.chain_to_assets_map = data.chain_to_assets_map;
+  }
+}
+
+/**
+ * Get Swap Chains
+ * Route: GET /api/v0/swap/chains
+ *
+ * Transparent alias of `/skip/chains` — same Skip:Go chain registry response shape.
+ * @category API Requests / Responses
+ */
+export interface iGetSwapChainsPayload {
+  /** Include Solana / SVM chains. Defaults to false. */
+  includeSvm?: boolean;
+  /** Return testnets only. Defaults to false. */
+  onlyTestnets?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetSwapChainsSuccessResponse {
+  /** Chain entries (mirrors Skip:Go /v2/info/chains). */
+  chains: Array<{
+    chain_id: string;
+    [key: string]: unknown;
+  }>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetSwapChainsSuccessResponse extends CustomTypeClass<GetSwapChainsSuccessResponse> implements iGetSwapChainsSuccessResponse {
+  chains: Array<{ chain_id: string; [key: string]: unknown }>;
+
+  constructor(data: iGetSwapChainsSuccessResponse) {
+    super();
+    this.chains = data.chains;
+  }
+}
+
+/**
+ * Get Swap Balances
+ * Route: POST /api/v0/swap/balances
+ *
+ * Same request shape as `/skip/balances`. Response is normalized to
+ * `{ balances: { [chainId]: { [address]: iSwapBalance[] } } }`. For
+ * BitBadges chains, server-side enrichment adds CoinsRegistry bank
+ * balances + computed wrappable amounts for verified badgeslp:/badges: denoms.
+ * @category API Requests / Responses
+ */
+export interface iGetSwapBalancesPayload {
+  /**
+   * Map of chain_id → either an array of addresses, or an object with an address and optional denoms.
+   * Mirrors Skip:Go /v2/info/balances.
+   */
+  chains: Record<string, string[] | { address: string; denoms?: string[] }>;
+}
+
+/**
+ * A single balance entry in the consolidated /swap/balances response.
+ * @category API Requests / Responses
+ */
+export interface iSwapBalance {
+  denom: string;
+  amount: string;
+  decimals?: number;
+  symbol?: string;
+  /** Where this entry came from. Absent for legacy passthrough rows. */
+  source?: SwapAssetSource;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetSwapBalancesSuccessResponse {
+  /** balances[chainId][address] = array of consolidated balance entries. */
+  balances: Record<string, Record<string, iSwapBalance[]>>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetSwapBalancesSuccessResponse extends CustomTypeClass<GetSwapBalancesSuccessResponse> implements iGetSwapBalancesSuccessResponse {
+  balances: Record<string, Record<string, iSwapBalance[]>>;
+
+  constructor(data: iGetSwapBalancesSuccessResponse) {
+    super();
+    this.balances = data.balances;
+  }
+}
+
+/**
+ * Track Swap
+ * Route: POST /api/v0/swap/track
+ *
+ * Transparent alias of `/skip/v2/tx/track`. Same request/response shape.
+ * @category API Requests / Responses
+ */
+export interface iTrackSwapPayload {
+  /** Transaction hash to track (snake_case Skip:Go form). */
+  tx_hash?: string;
+  /** Transaction hash to track (camelCase SDK form). */
+  txHash?: string;
+  /** Source chain ID (snake_case Skip:Go form). */
+  chain_id?: string;
+  /** Source chain ID (camelCase SDK form). */
+  chainId?: string;
+  /** Optional token in amount with denom (e.g. "1000ubadge") — surfaces in the swap-activity row. */
+  tokenIn?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iTrackSwapSuccessResponse {
+  /** Skip:Go track-tx response (echoes tx hash + chain id, plus tracking metadata). */
+  [key: string]: unknown;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class TrackSwapSuccessResponse extends CustomTypeClass<TrackSwapSuccessResponse> implements iTrackSwapSuccessResponse {
+  [key: string]: unknown;
+
+  constructor(data: iTrackSwapSuccessResponse) {
+    super();
+    Object.assign(this, data);
+  }
+}
+
+/**
+ * Get Swap Status
+ * Route: GET /api/v0/swap/status
+ *
+ * Transparent alias of `/skip/v2/tx/status`. Same response shape — the
+ * indexer enriches the upstream payload with `swapEventInfo` when the
+ * destination is a BitBadges on-chain swap.
+ * @category API Requests / Responses
+ */
+export interface iGetSwapStatusPayload {
+  /** Transaction hash to look up. */
+  txHash: string;
+  /** Optional source chain ID — required for some tx hashes that aren't globally unique. */
+  chainId?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetSwapStatusSuccessResponse {
+  /** Skip:Go tx-status payload (transfers, state, etc). */
+  transfers?: unknown[];
+  /** Injected by the indexer when the final destination is a BitBadges on-chain swap. */
+  swapEventInfo?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetSwapStatusSuccessResponse extends CustomTypeClass<GetSwapStatusSuccessResponse> implements iGetSwapStatusSuccessResponse {
+  transfers?: unknown[];
+  swapEventInfo?: Record<string, unknown>;
+  [key: string]: unknown;
+
+  constructor(data: iGetSwapStatusSuccessResponse) {
+    super();
+    Object.assign(this, data);
+  }
+}
+
 /**
  * Get Intents (Approval Items of approvalType "intent")
  * Route: GET /api/v0/intents (browse all) or GET /api/v0/intents/:address (specific user)
@@ -4624,5 +4881,70 @@ export class FilterCollectionApprovalsSuccessResponse<T extends NumberType>
     options?: ConvertOptions
   ): FilterCollectionApprovalsSuccessResponse<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FilterCollectionApprovalsSuccessResponse<U>;
+  }
+}
+
+/**
+ * Get User Balances
+ * Route: GET /api/v0/account/:address/balances
+ *
+ * Lean alternative to fetching `/users` with a `tokensCollected` view.
+ * Returns ONLY the balance docs (no account wrapper, no metadata), so it
+ * is the cheapest call for read-side flows that just need balances.
+ *
+ * Use `getAccounts` / `getAccountsAndUpdate` when you also need account
+ * fields (profile, bio, sequence, etc.).
+ * @category API Requests / Responses
+ */
+export interface iGetUserBalancesPayload {
+  /** Pagination bookmark from the previous response. */
+  bookmark?: string;
+  /** Page size. Indexer-enforced max applies. */
+  limit?: number;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetUserBalancesPayload implements iGetUserBalancesPayload {
+  bookmark?: string;
+  limit?: number;
+
+  constructor(data: iGetUserBalancesPayload) {
+    this.bookmark = data.bookmark;
+    this.limit = data.limit;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetUserBalancesSuccessResponse<T extends NumberType> {
+  /** Balance docs for the address — one per (collectionId, address) pair the user holds. */
+  docs: iBalanceDoc<T>[];
+  pagination: { bookmark: string; hasMore: boolean };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetUserBalancesSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetUserBalancesSuccessResponse<T>>
+  implements iGetUserBalancesSuccessResponse<T>
+{
+  docs: BalanceDoc<T>[];
+  pagination: { bookmark: string; hasMore: boolean };
+
+  constructor(data: iGetUserBalancesSuccessResponse<T>) {
+    super();
+    this.docs = data.docs.map((doc) => new BalanceDoc(doc));
+    this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(
+    convertFunction: (val: NumberType) => U,
+    options?: ConvertOptions
+  ): GetUserBalancesSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetUserBalancesSuccessResponse<U>;
   }
 }

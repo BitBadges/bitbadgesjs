@@ -1,7 +1,7 @@
 /**
- * `bitbadges-cli swap` — cross-chain swap helpers built on the indexer's
- * Skip:Go passthrough endpoints plus BitBadges' own swap-estimate and
- * activity/intent routes.
+ * `bitbadges-cli swap` — cross-chain swap helpers built on the consolidated
+ * `/swap/*` indexer endpoints (assets, chains, balances, estimate, track,
+ * status) plus BitBadges' own activity/intent routes.
  *
  * Wallet-agnostic. This command never signs or broadcasts — it only
  * inspects swap state (assets, chains, balances, route estimates, tx
@@ -105,12 +105,12 @@ export const swapCommand = new Command('swap').description(
 
 addOutputFlags(
   addNetworkFlags(swapCommand.command('assets'))
-    .description('List Skip:Go assets across BitBadges-allowed chains.')
+    .description('List cross-chain assets (Skip:Go + BitBadges CoinsRegistry + verified asset metadata).')
     .option('--include-svm', 'Include Solana / SVM chain assets', false)
     .option('--include-cw20', 'Include CW20 token assets', false)
 ).action(async (opts: NetworkFlags & OutputFlags & { includeSvm?: boolean; includeCw20?: boolean }) => {
   try {
-    const path = appendQuery('/skip/assets', {
+    const path = appendQuery('/swap/assets', {
       includeSvm: opts.includeSvm ? 'true' : undefined,
       includeCw20: opts.includeCw20 ? 'true' : undefined
     });
@@ -125,12 +125,12 @@ addOutputFlags(
 
 addOutputFlags(
   addNetworkFlags(swapCommand.command('chains'))
-    .description('List Skip:Go chain registry entries for BitBadges-allowed chains.')
+    .description('List cross-chain chain registry entries for BitBadges-allowed chains.')
     .option('--include-svm', 'Include Solana / SVM chains', false)
     .option('--only-testnets', 'Return testnets only', false)
 ).action(async (opts: NetworkFlags & OutputFlags & { includeSvm?: boolean; onlyTestnets?: boolean }) => {
   try {
-    const path = appendQuery('/skip/chains', {
+    const path = appendQuery('/swap/chains', {
       includeSvm: opts.includeSvm ? 'true' : undefined,
       onlyTestnets: opts.onlyTestnets ? 'true' : undefined
     });
@@ -146,7 +146,7 @@ addOutputFlags(
 addOutputFlags(
   addNetworkFlags(swapCommand.command('balances'))
     .description(
-      'Fetch Skip:Go balances. Pass a JSON object mapping chain_id → addresses array (or { address, denoms? }). Use "-" or @file.json to read from stdin/file.'
+      'Fetch consolidated balances. Pass a JSON object mapping chain_id → addresses array (or { address, denoms? }). Use "-" or @file.json to read from stdin/file. For BitBadges chains, response includes server-side wrappable amounts for verified badge denoms.'
     )
     .argument(
       '<chains-to-addresses-json>',
@@ -158,7 +158,7 @@ addOutputFlags(
     if (chainsArg === '-') raw = fs.readFileSync(0, 'utf-8');
     else if (chainsArg.startsWith('@')) raw = fs.readFileSync(chainsArg.slice(1), 'utf-8');
     const chains = JSON.parse(raw);
-    const res = await callApi('POST', '/skip/balances', opts, { chains });
+    const res = await callApi('POST', '/swap/balances', opts, { chains });
     emit(res, opts);
   } catch (err) {
     emitError(err);
@@ -206,7 +206,7 @@ addOutputFlags(
         slippageTolerancePercent: opts.slippage ?? '1',
         isLocalOnly: !!opts.localOnly
       };
-      const res = await callApi('POST', '/swaps/estimate', opts, body);
+      const res = await callApi('POST', '/swap/estimate', opts, body);
       emit(res, opts);
     } catch (err) {
       emitError(err);
@@ -219,32 +219,49 @@ addOutputFlags(
 addOutputFlags(
   addNetworkFlags(swapCommand.command('track'))
     .description(
-      'Initiate Skip:Go tracking on a broadcast tx, or fetch its current status. Without --status, registers the tx; with --status, fetches the latest state.'
+      'Initiate cross-chain tracking on a broadcast tx. Pairs with `bb swap status` to fetch the current state afterward.'
     )
     .argument('<tx-hash>', 'Broadcast tx hash (Cosmos sha256 or EVM keccak256)')
     .option('--chain-id <id>', 'Source chain ID (e.g. "bitbadges-1", "1")')
     .option('--token-in <amount-denom>', 'Optional token-in seed (e.g. "1000000ubadge") — surfaces in the swap activity row')
-    .option('--status', 'Fetch /skip/v2/tx/status instead of /skip/v2/tx/track (use after a track call)', false)
 ).action(
   async (
     txHash: string,
-    opts: NetworkFlags & OutputFlags & { chainId?: string; tokenIn?: string; status?: boolean }
+    opts: NetworkFlags & OutputFlags & { chainId?: string; tokenIn?: string }
   ) => {
     try {
-      if (opts.status) {
-        const path = appendQuery('/skip/v2/tx/status', {
-          txHash,
-          chainId: opts.chainId
-        });
-        const res = await callApi('GET', path, opts);
-        emit(res, opts);
-      } else {
-        const body: Record<string, string> = { txHash };
-        if (opts.chainId) body.chainId = opts.chainId;
-        if (opts.tokenIn) body.tokenIn = opts.tokenIn;
-        const res = await callApi('POST', '/skip/v2/tx/track', opts, body);
-        emit(res, opts);
-      }
+      const body: Record<string, string> = { txHash };
+      if (opts.chainId) body.chainId = opts.chainId;
+      if (opts.tokenIn) body.tokenIn = opts.tokenIn;
+      const res = await callApi('POST', '/swap/track', opts, body);
+      emit(res, opts);
+    } catch (err) {
+      emitError(err);
+    }
+  }
+);
+
+// ── swap status ─────────────────────────────────────────────────────────
+
+addOutputFlags(
+  addNetworkFlags(swapCommand.command('status'))
+    .description(
+      'Fetch the current status of a tracked cross-chain tx. Use after `bb swap track`.'
+    )
+    .argument('<tx-hash>', 'Broadcast tx hash (Cosmos sha256 or EVM keccak256)')
+    .option('--chain-id <id>', 'Source chain ID (e.g. "bitbadges-1", "1")')
+).action(
+  async (
+    txHash: string,
+    opts: NetworkFlags & OutputFlags & { chainId?: string }
+  ) => {
+    try {
+      const path = appendQuery('/swap/status', {
+        txHash,
+        chainId: opts.chainId
+      });
+      const res = await callApi('GET', path, opts);
+      emit(res, opts);
     } catch (err) {
       emitError(err);
     }

@@ -3602,6 +3602,64 @@ paths:
         - apiKey: []
       x-internal: false
 
+  /account/{address}/balances:
+    get:
+      operationId: getUserBalances
+      summary: Get User Balances
+      tags:
+        - Accounts
+      description: |-
+        Lean alternative to fetching `/users` with a `tokensCollected` view.
+        Returns ONLY the balance docs for the address (no account wrapper,
+        no metadata, no view envelope), so it is the cheapest call for
+        read-side flows that just need balances.
+
+        Use the `/users` route (`getAccounts`) when you also need account
+        fields (profile, sequence, etc.) or other views in the same request.
+
+        ```tsx
+        await BitBadgesApi.getUserBalances("bb1...", { limit: 100 });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUserBalancesPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUserBalancesSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getuserbalances)**
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetUserBalancesSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: address
+          in: path
+          description: Account address (bb1... or any equivalent address form)
+          required: true
+          schema:
+            type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetUserBalancesPayload'
+      security:
+        - apiKey: []
+      x-internal: false
+
   /account/{address}/activity/claims:
     get:
       operationId: getClaimActivityForUser
@@ -4287,16 +4345,59 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/swaps/estimate:
+  /api/{version}/swap/estimate:
     post:
       operationId: estimateSwap
       summary: Estimate Swap
       description: |
-        Estimates the output amount for a swap operation.
+        Estimates the output amount for a swap operation across one or more chains.
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iEstimateSwapPayload)**
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iEstimateSwapSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#estimateswap)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iEstimateSwapPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iEstimateSwapSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/swaps/estimate:
+    post:
+      operationId: estimateSwapLegacy
+      deprecated: true
+      summary: '[DEPRECATED] Estimate Swap'
+      description: |
+        Deprecated alias of `POST /api/{version}/swap/estimate`. Same request/response shape. Use the `/swap/estimate` path instead.
       tags:
         - Assets
       parameters:
@@ -5245,16 +5346,268 @@ paths:
   #       - apiKey: []
   #     x-internal: false
 
+  /api/{version}/swap/assets:
+    get:
+      operationId: getSwapAssets
+      summary: Get Swap Assets
+      description: |
+        Lists consolidated cross-chain assets for BitBadges-allowed chains. Merges Skip:Go assets with BitBadges' SDK CoinsRegistry entries and verified AssetInfoDoc entries for the BitBadges chain. Non-BitBadges chains pass through Skip unmodified.
+
+        Each asset carries a `source` (`'skip' | 'coinregistry' | 'verified' | 'native'`) and an optional `isWrapped` flag for verified `badgeslp:/badges:` wrapped denoms.
+
+        ```tsx
+        const res = await BitBadgesApi.getSwapAssets({ includeSvm: false, includeCw20: false });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSwapAssetsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSwapAssetsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getswapassets)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetSwapAssetsPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetSwapAssetsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/swap/chains:
+    get:
+      operationId: getSwapChains
+      summary: Get Swap Chains
+      description: |
+        Lists cross-chain chain registry entries filtered to BitBadges-allowed chains. Transparent alias of the underlying Skip:Go `/v2/info/chains` proxy (no merge layer — chains are Skip's domain).
+
+        ```tsx
+        const res = await BitBadgesApi.getSwapChains({ includeSvm: false, onlyTestnets: false });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSwapChainsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSwapChainsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getswapchains)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetSwapChainsPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetSwapChainsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/swap/balances:
+    post:
+      operationId: getSwapBalances
+      summary: Get Swap Balances
+      description: |
+        Fetches consolidated balances across one or more (chain, address) pairs. For BitBadges chains, merges Skip-returned balances with on-chain bank balances for CoinsRegistry denoms Skip didn't report and computed wrappable amounts for verified `badgeslp:/badges:` denoms. Each balance row may carry `decimals`, `symbol`, and a `source` tag.
+
+        ```tsx
+        const res = await BitBadgesApi.getSwapBalances({ chains: { 'bitbadges-1': ['bb1...'] } });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSwapBalancesPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSwapBalancesSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getswapbalances)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iGetSwapBalancesPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetSwapBalancesSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/swap/track:
+    post:
+      operationId: trackSwap
+      summary: Track Swap Transaction
+      description: |
+        Registers a broadcast tx with the cross-chain tracker. When called by an authenticated user, the indexer also writes a tracking doc keyed by `{txHash}-{chainId}` so subsequent `getSwapStatus` lookups can short-circuit.
+
+        ```tsx
+        const res = await BitBadgesApi.trackSwap({ txHash, chainId, tokenIn: '1000ubadge' });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iTrackSwapPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iTrackSwapSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#trackswap)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iTrackSwapPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iTrackSwapSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/swap/status:
+    get:
+      operationId: getSwapStatus
+      summary: Get Swap Transaction Status
+      description: |
+        Fetches the current status of a tracked cross-chain transaction. The indexer enriches the upstream response with a `swapEventInfo` field derived from BitBadges on-chain swap events when the final destination is BitBadges.
+
+        ```tsx
+        const res = await BitBadgesApi.getSwapStatus({ txHash, chainId });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSwapStatusPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSwapStatusSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getswapstatus)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: true
+          schema:
+            $ref: '#/components/schemas/iGetSwapStatusPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetSwapStatusSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
   /api/{version}/skip/assets:
     get:
       operationId: getSkipAssets
-      summary: Get Skip:Go Assets
+      deprecated: true
+      summary: '[DEPRECATED] Get Skip:Go Assets'
       description: |
-        Lists Skip:Go cross-chain assets filtered to BitBadges-allowed chains. The indexer proxies Skip:Go's `/v2/fungible/assets` and applies BitBadges' chain/asset allowlist.
-
-        ```tsx
-        const res = await BitBadgesApi.getSkipAssets({ includeSvm: false, includeCw20: false });
-        ```
+        Deprecated. Use `GET /api/{version}/swap/assets` — the indexer keeps this path live as a thin shim that logs a one-line warning and forwards to the consolidated handler.
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSkipAssetsPayload)**
@@ -5299,13 +5652,10 @@ paths:
   /api/{version}/skip/chains:
     get:
       operationId: getSkipChains
-      summary: Get Skip:Go Chains
+      deprecated: true
+      summary: '[DEPRECATED] Get Skip:Go Chains'
       description: |
-        Lists Skip:Go cross-chain chain registry entries filtered to BitBadges-allowed chains. The indexer proxies Skip:Go's `/v2/info/chains` and applies pretty-name overrides for EVM chains.
-
-        ```tsx
-        const res = await BitBadgesApi.getSkipChains({ includeSvm: false, onlyTestnets: false });
-        ```
+        Deprecated. Use `GET /api/{version}/swap/chains` — the indexer keeps this path live as a thin shim that logs a one-line warning and forwards to the consolidated handler.
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSkipChainsPayload)**
@@ -5350,13 +5700,10 @@ paths:
   /api/{version}/skip/balances:
     post:
       operationId: getSkipBalances
-      summary: Get Skip:Go Balances
+      deprecated: true
+      summary: '[DEPRECATED] Get Skip:Go Balances'
       description: |
-        Fetches balances across one or more (chain, address) pairs via the Skip:Go `/v2/info/balances` proxy.
-
-        ```tsx
-        const res = await BitBadgesApi.getSkipBalances({ chains: { 'bitbadges-1': ['bb1...'] } });
-        ```
+        Deprecated. Use `POST /api/{version}/swap/balances` — the indexer keeps this path live as a thin shim that logs a one-line warning and forwards to the consolidated handler.
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSkipBalancesPayload)**
@@ -5400,13 +5747,10 @@ paths:
   /api/{version}/skip/v2/tx/track:
     post:
       operationId: trackSkipTx
-      summary: Track Skip:Go Transaction
+      deprecated: true
+      summary: '[DEPRECATED] Track Skip:Go Transaction'
       description: |
-        Registers a broadcast tx with Skip:Go's cross-chain tracking service. When called by an authenticated user, the indexer also writes a SkipSwapTransaction doc keyed by `{txHash}-{chainId}` so subsequent status lookups can short-circuit.
-
-        ```tsx
-        const res = await BitBadgesApi.trackSkipTx({ txHash, chainId, tokenIn: '1000ubadge' });
-        ```
+        Deprecated. Use `POST /api/{version}/swap/track` — the indexer keeps this path live as a thin shim that logs a one-line warning and forwards to the consolidated handler.
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iTrackSkipTxPayload)**
@@ -5450,13 +5794,10 @@ paths:
   /api/{version}/skip/v2/tx/status:
     get:
       operationId: getSkipTxStatus
-      summary: Get Skip:Go Transaction Status
+      deprecated: true
+      summary: '[DEPRECATED] Get Skip:Go Transaction Status'
       description: |
-        Fetches the current status of a tracked Skip:Go transaction. The indexer enriches the upstream response with a `swapEventInfo` field derived from BitBadges on-chain swap events when the final destination is BitBadges.
-
-        ```tsx
-        const res = await BitBadgesApi.getSkipTxStatus({ txHash, chainId });
-        ```
+        Deprecated. Use `GET /api/{version}/swap/status` — the indexer keeps this path live as a thin shim that logs a one-line warning and forwards to the consolidated handler.
 
         SDK Links:
         - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSkipTxStatusPayload)**

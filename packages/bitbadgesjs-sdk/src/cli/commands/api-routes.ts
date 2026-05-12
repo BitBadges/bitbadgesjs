@@ -71,12 +71,13 @@ export const TAG_DESCRIPTIONS: Record<string, string> = {
   'stores': 'Dynamic data store routes',
   'onchain-stores': 'On-chain dynamic store routes',
   'pages': 'Utility page routes',
+  'maps': 'On-chain map and protocol routes',
   'assets': 'DEX, pools, and asset pair routes',
   'misc': 'Miscellaneous routes',
 };
 
 // ---------------------------------------------------------------------------
-// Routes (111 total)
+// Routes (106 total)
 // ---------------------------------------------------------------------------
 
 export const ROUTES: ApiRoute[] = [
@@ -151,6 +152,20 @@ export const ROUTES: ApiRoute[] = [
       request: 'iGetTokensViewForUserPayload',
       response: 'iGetTokensViewForUserSuccessResponse',
       function: 'BitBadgesAPI.GetTokensViewForUser',
+    },
+  },
+  {
+    name: 'get-user-balances',
+    tag: 'accounts',
+    method: 'GET',
+    path: '/account/{address}/balances',
+    description: 'Get User Balances',
+    pathParams: ['address'],
+    hasBody: false,
+    sdkLinks: {
+      request: 'iGetUserBalancesPayload',
+      response: 'iGetUserBalancesSuccessResponse',
+      function: 'BitBadgesAPI.getUserBalances',
     },
   },
   {
@@ -415,6 +430,20 @@ export const ROUTES: ApiRoute[] = [
     sdkLinks: {
       response: 'iGetCollectionClaimsSuccessResponse',
       function: 'BitBadgesAPI.getCollectionClaims',
+    },
+  },
+  {
+    name: 'filter-collection-approvals',
+    tag: 'tokens',
+    method: 'POST',
+    path: '/collection/{collectionId}/filterApprovals',
+    description: 'Filter Collection Approvals',
+    pathParams: ['collectionId'],
+    hasBody: true,
+    sdkLinks: {
+      request: 'iFilterCollectionApprovalsPayload',
+      response: 'iFilterCollectionApprovalsSuccessResponse',
+      function: 'BitBadgesAPI.filterCollectionApprovals',
     },
   },
   // =========================================================================
@@ -1225,7 +1254,7 @@ export const ROUTES: ApiRoute[] = [
     name: 'estimate-swap',
     tag: 'assets',
     method: 'POST',
-    path: '/api/{version}/swaps/estimate',
+    path: '/api/{version}/swap/estimate',
     description: 'Estimate Swap',
     pathParams: ['version'],
     hasBody: true,
@@ -1233,6 +1262,20 @@ export const ROUTES: ApiRoute[] = [
       request: 'iEstimateSwapPayload',
       response: 'iEstimateSwapSuccessResponse',
       function: 'BitBadgesAPI.estimateSwap',
+    },
+  },
+  {
+    name: 'estimate-swap-legacy',
+    tag: 'assets',
+    method: 'POST',
+    path: '/api/{version}/swaps/estimate',
+    description: '[DEPRECATED] Estimate Swap',
+    pathParams: ['version'],
+    hasBody: true,
+    sdkLinks: {
+      request: 'iEstimateSwapPayload',
+      response: 'iEstimateSwapSuccessResponse',
+      function: 'BitBadgesAPI.estimateSwapLegacy',
     },
   },
   {
@@ -1379,17 +1422,83 @@ export const ROUTES: ApiRoute[] = [
     },
   },
   {
+    name: 'get-swap-assets',
+    tag: 'assets',
+    method: 'GET',
+    path: '/api/{version}/swap/assets',
+    description: 'Get Swap Assets',
+    pathParams: ['version'],
+    hasBody: false,
+    sdkLinks: {
+      request: 'iGetSwapAssetsPayload',
+      response: 'iGetSwapAssetsSuccessResponse',
+      function: 'BitBadgesAPI.getSwapAssets',
+    },
+  },
+  {
+    name: 'get-swap-chains',
+    tag: 'assets',
+    method: 'GET',
+    path: '/api/{version}/swap/chains',
+    description: 'Get Swap Chains',
+    pathParams: ['version'],
+    hasBody: false,
+    sdkLinks: {
+      request: 'iGetSwapChainsPayload',
+      response: 'iGetSwapChainsSuccessResponse',
+      function: 'BitBadgesAPI.getSwapChains',
+    },
+  },
+  {
+    name: 'get-swap-balances',
+    tag: 'assets',
+    method: 'POST',
+    path: '/api/{version}/swap/balances',
+    description: 'Get Swap Balances',
+    pathParams: ['version'],
+    hasBody: true,
+    sdkLinks: {
+      request: 'iGetSwapBalancesPayload',
+      response: 'iGetSwapBalancesSuccessResponse',
+      function: 'BitBadgesAPI.getSwapBalances',
+    },
+  },
+  {
+    name: 'track-swap',
+    tag: 'assets',
+    method: 'POST',
+    path: '/api/{version}/swap/track',
+    description: 'Track Swap Transaction',
+    pathParams: ['version'],
+    hasBody: true,
+    sdkLinks: {
+      request: 'iTrackSwapPayload',
+      response: 'iTrackSwapSuccessResponse',
+      function: 'BitBadgesAPI.trackSwap',
+    },
+  },
+  {
+    name: 'get-swap-status',
+    tag: 'assets',
+    method: 'GET',
+    path: '/api/{version}/swap/status',
+    description: 'Get Swap Transaction Status',
+    pathParams: ['version'],
+    hasBody: false,
+    sdkLinks: {
+      request: 'iGetSwapStatusPayload',
+      response: 'iGetSwapStatusSuccessResponse',
+      function: 'BitBadgesAPI.getSwapStatus',
+    },
+  },
+  {
     name: 'get-skip-assets',
     tag: 'assets',
     method: 'GET',
     path: '/api/{version}/skip/assets',
-    description: 'Get Skip:Go assets (filtered to BitBadges-allowed chains)',
+    description: '[DEPRECATED] Get Skip:Go Assets',
     pathParams: ['version'],
     hasBody: false,
-    queryParams: [
-      { name: 'includeSvm', description: 'Include Solana/SVM chain assets', required: false },
-      { name: 'includeCw20', description: 'Include CW20 token assets', required: false },
-    ],
     sdkLinks: {
       request: 'iGetSkipAssetsPayload',
       response: 'iGetSkipAssetsSuccessResponse',
@@ -1401,13 +1510,9 @@ export const ROUTES: ApiRoute[] = [
     tag: 'assets',
     method: 'GET',
     path: '/api/{version}/skip/chains',
-    description: 'Get Skip:Go chain registry (filtered to BitBadges-allowed chains)',
+    description: '[DEPRECATED] Get Skip:Go Chains',
     pathParams: ['version'],
     hasBody: false,
-    queryParams: [
-      { name: 'includeSvm', description: 'Include Solana/SVM chains', required: false },
-      { name: 'onlyTestnets', description: 'Return testnets only', required: false },
-    ],
     sdkLinks: {
       request: 'iGetSkipChainsPayload',
       response: 'iGetSkipChainsSuccessResponse',
@@ -1419,7 +1524,7 @@ export const ROUTES: ApiRoute[] = [
     tag: 'assets',
     method: 'POST',
     path: '/api/{version}/skip/balances',
-    description: 'Get Skip:Go balances for one or more (chain, address) pairs',
+    description: '[DEPRECATED] Get Skip:Go Balances',
     pathParams: ['version'],
     hasBody: true,
     sdkLinks: {
@@ -1433,7 +1538,7 @@ export const ROUTES: ApiRoute[] = [
     tag: 'assets',
     method: 'POST',
     path: '/api/{version}/skip/v2/tx/track',
-    description: 'Register a broadcast tx with Skip:Go cross-chain tracking',
+    description: '[DEPRECATED] Track Skip:Go Transaction',
     pathParams: ['version'],
     hasBody: true,
     sdkLinks: {
@@ -1447,13 +1552,9 @@ export const ROUTES: ApiRoute[] = [
     tag: 'assets',
     method: 'GET',
     path: '/api/{version}/skip/v2/tx/status',
-    description: 'Get the status of a tracked Skip:Go transaction',
+    description: '[DEPRECATED] Get Skip:Go Transaction Status',
     pathParams: ['version'],
     hasBody: false,
-    queryParams: [
-      { name: 'txHash', description: 'Transaction hash to look up', required: true },
-      { name: 'chainId', description: 'Optional source chain ID', required: false },
-    ],
     sdkLinks: {
       request: 'iGetSkipTxStatusPayload',
       response: 'iGetSkipTxStatusSuccessResponse',
@@ -1465,33 +1566,13 @@ export const ROUTES: ApiRoute[] = [
     tag: 'assets',
     method: 'GET',
     path: '/intents/{address}',
-    description: 'Get exchange-approval intents (pass address for user-scoped, omit for global browse)',
+    description: 'Get Exchange-Approval Intents',
     pathParams: ['address'],
     hasBody: false,
-    queryParams: [
-      { name: 'includeAll', description: 'Include used/expired/inactive intents (only with address)', required: false },
-      { name: 'payDenom', description: 'Filter by the denom the intent pays out', required: false },
-      { name: 'receiveDenom', description: 'Filter by the denom the intent expects to receive', required: false },
-      { name: 'collectionId', description: 'Filter by collection ID', required: false },
-    ],
     sdkLinks: {
       request: 'iGetIntentsPayload',
       response: 'iGetIntentsSuccessResponse',
       function: 'BitBadgesAPI.getIntents',
-    },
-  },
-  {
-    name: 'filter-collection-approvals',
-    tag: 'tokens',
-    method: 'POST',
-    path: '/collection/{collectionId}/filterApprovals',
-    description: 'Filter approval items for a collection by a Mongo-style query (use "any" as collectionId to search across all collections)',
-    pathParams: ['collectionId'],
-    hasBody: true,
-    sdkLinks: {
-      request: 'iFilterCollectionApprovalsPayload',
-      response: 'iFilterCollectionApprovalsSuccessResponse',
-      function: 'BitBadgesAPI.filterCollectionApprovals',
     },
   },
   // =========================================================================
