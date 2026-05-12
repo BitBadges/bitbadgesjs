@@ -33,7 +33,6 @@ import {
   MsgExecuteUniversalUpdateCollection,
   MsgUpdateManagerSplitter
 } from '@/proto/managersplitter/tx_pb.js';
-import { MsgExecuteContractCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/tx_pb.js';
 import { AminoMsg } from '../messages/signDoc.js';
 import { createAminoConverter } from './objectConverter.js';
 
@@ -291,8 +290,6 @@ export function createManagerSplitterAminoConverters(): AminoConverters {
 
 export function createWasmXAminoConverters(): AminoConverters {
   return {
-    ...createAminoConverter(MsgExecuteContractCompat, 'wasmx/MsgExecuteContractCompat'),
-    ...createAminoConverter(MsgInstantiateContractCompat, 'wasmx/MsgInstantiateContractCompat'),
     ...createAminoConverter(MsgExecuteContract, 'wasm/MsgExecuteContract'),
     ...createAminoConverter(MsgStoreCode, 'wasm/MsgStoreCode'),
     ...createAminoConverter(MsgInstantiateContract, 'wasm/MsgInstantiateContract')

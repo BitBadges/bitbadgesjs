@@ -85,7 +85,6 @@ import {
   MsgExecuteUniversalUpdateCollection,
   MsgUpdateManagerSplitter
 } from '@/proto/managersplitter/tx_pb.js';
-import { MsgExecuteContractCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/index.js';
 import { MsgTransfer } from '@/proto/ibc/index.js';
 import {
   MsgJoinPool,
@@ -152,8 +151,6 @@ export const ProtoTypeRegistry: ReturnType<typeof createRegistry> = createRegist
   MsgSetValidTokenIds,
   MsgUniversalUpdateCollection,
   MsgUpdateDynamicStore,
-  MsgExecuteContractCompat,
-  MsgInstantiateContractCompat,
   MsgExecuteContract,
   MsgStoreCode,
   MsgInstantiateContract,
