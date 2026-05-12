@@ -36,6 +36,9 @@ import { aliasCommand } from './commands/alias.js';
 import { lookupCommand } from './commands/lookup.js';
 import { genListIdCommand } from './commands/gen-list-id.js';
 
+// Swap / DEX
+import { swapCommand } from './commands/swap.js';
+
 // Misc
 import { makeCompletionCommand } from './commands/completion.js';
 
@@ -90,6 +93,10 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   {
     title: 'Address & lookup utilities',
     commands: [addressCommand, aliasCommand, lookupCommand, genListIdCommand]
+  },
+  {
+    title: 'Swap & DEX',
+    commands: [swapCommand]
   }
 ];
 

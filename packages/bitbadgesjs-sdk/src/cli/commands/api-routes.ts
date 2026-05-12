@@ -76,7 +76,7 @@ export const TAG_DESCRIPTIONS: Record<string, string> = {
 };
 
 // ---------------------------------------------------------------------------
-// Routes (104 total)
+// Routes (111 total)
 // ---------------------------------------------------------------------------
 
 export const ROUTES: ApiRoute[] = [
@@ -1376,6 +1376,122 @@ export const ROUTES: ApiRoute[] = [
     sdkLinks: {
       response: 'iGetSwapActivitiesSuccessResponse',
       function: 'BitBadgesAPI.getSwapActivities',
+    },
+  },
+  {
+    name: 'get-skip-assets',
+    tag: 'assets',
+    method: 'GET',
+    path: '/api/{version}/skip/assets',
+    description: 'Get Skip:Go assets (filtered to BitBadges-allowed chains)',
+    pathParams: ['version'],
+    hasBody: false,
+    queryParams: [
+      { name: 'includeSvm', description: 'Include Solana/SVM chain assets', required: false },
+      { name: 'includeCw20', description: 'Include CW20 token assets', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetSkipAssetsPayload',
+      response: 'iGetSkipAssetsSuccessResponse',
+      function: 'BitBadgesAPI.getSkipAssets',
+    },
+  },
+  {
+    name: 'get-skip-chains',
+    tag: 'assets',
+    method: 'GET',
+    path: '/api/{version}/skip/chains',
+    description: 'Get Skip:Go chain registry (filtered to BitBadges-allowed chains)',
+    pathParams: ['version'],
+    hasBody: false,
+    queryParams: [
+      { name: 'includeSvm', description: 'Include Solana/SVM chains', required: false },
+      { name: 'onlyTestnets', description: 'Return testnets only', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetSkipChainsPayload',
+      response: 'iGetSkipChainsSuccessResponse',
+      function: 'BitBadgesAPI.getSkipChains',
+    },
+  },
+  {
+    name: 'get-skip-balances',
+    tag: 'assets',
+    method: 'POST',
+    path: '/api/{version}/skip/balances',
+    description: 'Get Skip:Go balances for one or more (chain, address) pairs',
+    pathParams: ['version'],
+    hasBody: true,
+    sdkLinks: {
+      request: 'iGetSkipBalancesPayload',
+      response: 'iGetSkipBalancesSuccessResponse',
+      function: 'BitBadgesAPI.getSkipBalances',
+    },
+  },
+  {
+    name: 'track-skip-tx',
+    tag: 'assets',
+    method: 'POST',
+    path: '/api/{version}/skip/v2/tx/track',
+    description: 'Register a broadcast tx with Skip:Go cross-chain tracking',
+    pathParams: ['version'],
+    hasBody: true,
+    sdkLinks: {
+      request: 'iTrackSkipTxPayload',
+      response: 'iTrackSkipTxSuccessResponse',
+      function: 'BitBadgesAPI.trackSkipTx',
+    },
+  },
+  {
+    name: 'get-skip-tx-status',
+    tag: 'assets',
+    method: 'GET',
+    path: '/api/{version}/skip/v2/tx/status',
+    description: 'Get the status of a tracked Skip:Go transaction',
+    pathParams: ['version'],
+    hasBody: false,
+    queryParams: [
+      { name: 'txHash', description: 'Transaction hash to look up', required: true },
+      { name: 'chainId', description: 'Optional source chain ID', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetSkipTxStatusPayload',
+      response: 'iGetSkipTxStatusSuccessResponse',
+      function: 'BitBadgesAPI.getSkipTxStatus',
+    },
+  },
+  {
+    name: 'get-intents',
+    tag: 'assets',
+    method: 'GET',
+    path: '/intents/{address}',
+    description: 'Get exchange-approval intents (pass address for user-scoped, omit for global browse)',
+    pathParams: ['address'],
+    hasBody: false,
+    queryParams: [
+      { name: 'includeAll', description: 'Include used/expired/inactive intents (only with address)', required: false },
+      { name: 'payDenom', description: 'Filter by the denom the intent pays out', required: false },
+      { name: 'receiveDenom', description: 'Filter by the denom the intent expects to receive', required: false },
+      { name: 'collectionId', description: 'Filter by collection ID', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetIntentsPayload',
+      response: 'iGetIntentsSuccessResponse',
+      function: 'BitBadgesAPI.getIntents',
+    },
+  },
+  {
+    name: 'filter-collection-approvals',
+    tag: 'tokens',
+    method: 'POST',
+    path: '/collection/{collectionId}/filterApprovals',
+    description: 'Filter approval items for a collection by a Mongo-style query (use "any" as collectionId to search across all collections)',
+    pathParams: ['collectionId'],
+    hasBody: true,
+    sdkLinks: {
+      request: 'iFilterCollectionApprovalsPayload',
+      response: 'iFilterCollectionApprovalsSuccessResponse',
+      function: 'BitBadgesAPI.filterCollectionApprovals',
     },
   },
   // =========================================================================
