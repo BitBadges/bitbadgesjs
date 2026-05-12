@@ -17,7 +17,7 @@ import type { ReviewFlag } from '../agent/types.js';
 import { sanitizeReviewFlags } from './reviewFlagSanitizer.js';
 
 const MAX_UINT64 = '18446744073709551615';
-const DEFAULT_IMAGE = 'ipfs://QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E';
+const DEFAULT_IMAGE = 'ipfs://QmdZH9YT1GoMRsiCqSsJi57bmZiV2C6bCT8r8tZHeULDKS';
 
 /**
  * Sanitize image value — if it's not a valid URL/IPFS/placeholder, use default logo.
