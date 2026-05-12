@@ -543,7 +543,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/iGetCollectionsPayload'
-  '/collection/{collectionId}/balance/{address}/{tokenId}':
+  '/collection/{collectionId}/{tokenId}/balance/{address}':
     get:
       operationId: getBalanceByAddressSpecificToken
       summary: Get Balance By Address - Specific Token
@@ -720,54 +720,6 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/iGetClaimPayload'
-      security:
-        - apiKey: []
-      x-internal: false
-  /claims/success/{claimId}/{address}:
-    get:
-      operationId: checkClaimSuccess
-      summary: Check Claim Successes By User
-      description: |
-        Checks if a claim has been successfully completed.
-
-        This returns a success count based on how many times the user has completed the claim.
-
-        For on-demand claims, this will return 1 if the user has completed the claim. For indexed claims, this will return the number of times the user has completed the claim.
-
-        Note that this will not work if the claim hides its state.
-
-        ```tsx
-        const res = await BitBadgesApi.checkClaimSuccess(claimId, address);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckClaimSuccessPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckClaimSuccessSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#checkclaimsuccess)**
-      tags:
-        - Claims
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iCheckClaimSuccessSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: claimId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: address
-          in: path
-          required: true
-          schema:
-            type: string
       security:
         - apiKey: []
       x-internal: false
@@ -1009,7 +961,7 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-  /utilityPage/{utilityPageId}:
+  /utilityPages/{listingId}:
     get:
       operationId: getUtilityPage
       summary: Get Utility Page
@@ -1041,7 +993,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
       parameters:
-        - name: utilityPageId
+        - name: listingId
           in: path
           description: Utility listing ID
           required: true
@@ -3977,7 +3929,7 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-  /api/v0/collection/amountTracker:
+  '/collection/{collectionId}/amountTracker':
     get:
       operationId: getCollectionAmountTrackerById
       summary: Get Collection Amount Tracker By ID
@@ -3995,6 +3947,12 @@ paths:
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionAmountTrackerByIdSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getcollectionamounttrackerbyid)**
       parameters:
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
         - name: payload
           in: query
           explode: true
@@ -4016,7 +3974,7 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-  /api/v0/collection/challengeTracker:
+  '/collection/{collectionId}/challengeTracker':
     get:
       operationId: getCollectionChallengeTrackerById
       summary: Get Collection Challenge Tracker By ID
@@ -4034,6 +3992,12 @@ paths:
         - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionChallengeTrackerByIdSuccessResponse)**
         - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getcollectionchallengetrackerbyid)**
       parameters:
+        - name: collectionId
+          in: path
+          description: Collection ID
+          required: true
+          schema:
+            type: string
         - name: payload
           in: query
           explode: true
