@@ -36,8 +36,6 @@ import {
   DynamicDataHandlerData,
   DynamicDataHandlerType,
   iApiKeyDoc,
-  iApplicationDoc,
-  iApplicationPage,
   iApprovalItemDoc,
   iBaseStats,
   iCollectionStatsDoc,
@@ -1057,37 +1055,6 @@ export class TierWithOptionalWeight<T extends NumberType>
 }
 
 /**
- * @inheritDoc iApplicationPage
- * @category Indexer
- */
-export class ApplicationPage<T extends NumberType> extends BaseNumberTypeClass<ApplicationPage<T>> implements iApplicationPage<T> {
-  metadata: Metadata<T>;
-  pageId: string;
-  type?: string;
-  points?: TierWithOptionalWeight<T>[];
-
-  constructor(data: iApplicationPage<T>) {
-    super();
-    this.metadata = new Metadata(data.metadata);
-    this.pageId = data.pageId;
-    this.type = data.type;
-    this.points = data.points?.map((point) => new TierWithOptionalWeight(point));
-  }
-
-  getNumberFieldNames(): string[] {
-    return [];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApplicationPage<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApplicationPage<U>;
-  }
-
-  clone(): ApplicationPage<T> {
-    return super.clone() as ApplicationPage<T>;
-  }
-}
-
-/**
  * @inheritDoc iApiKeyDoc
  * @category Indexer
  */
@@ -1113,46 +1080,6 @@ export class ApiKeyDoc extends CustomTypeClass<ApiKeyDoc> implements iApiKeyDoc 
     this.lastRequest = data.lastRequest;
     this.createdAt = data.createdAt;
     this.intendedUse = data.intendedUse;
-  }
-}
-
-/**
- * @inheritDoc iApplicationDoc
- * @category Indexer
- */
-export class ApplicationDoc<T extends NumberType> extends BaseNumberTypeClass<ApplicationDoc<T>> implements iApplicationDoc<T> {
-  _docId: string;
-  _id?: string;
-  applicationId: string;
-  createdAt: UNIXMilliTimestamp<T>;
-  lastUpdated?: UNIXMilliTimestamp<T>;
-  createdBy: BitBadgesAddress;
-  managedBy: BitBadgesAddress;
-  metadata: iMetadata<T>;
-  type: string;
-
-  pages: ApplicationPage<T>[];
-
-  constructor(data: iApplicationDoc<T>) {
-    super();
-    this._docId = data._docId;
-    this._id = data._id;
-    this.applicationId = data.applicationId;
-    this.createdAt = data.createdAt;
-    this.lastUpdated = data.lastUpdated;
-    this.createdBy = data.createdBy;
-    this.managedBy = data.managedBy;
-    this.metadata = data.metadata;
-    this.pages = data.pages.map((page) => new ApplicationPage(page));
-    this.type = data.type;
-  }
-
-  getNumberFieldNames(): string[] {
-    return ['createdAt', 'lastUpdated'];
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): ApplicationDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as ApplicationDoc<U>;
   }
 }
 

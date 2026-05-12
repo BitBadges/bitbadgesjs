@@ -89,7 +89,6 @@ export const STANDARD_TO_TOKEN_TYPE: ReadonlyArray<{ standard: string; skillId: 
   { standard: 'Fungible Token', skillId: 'fungible-token' },
   { standard: 'NFT Collection', skillId: 'nft-collection' },
   { standard: 'Subscription', skillId: 'subscription' },
-  { standard: 'Custom 2FA', skillId: 'custom-2fa' },
   { standard: 'Payment Protocol', skillId: 'payment-protocol' },
   { standard: 'Credit Token', skillId: 'credit-token' },
   { standard: 'Address List', skillId: 'address-list' },

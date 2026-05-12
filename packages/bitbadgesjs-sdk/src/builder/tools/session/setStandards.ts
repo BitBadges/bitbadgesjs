@@ -4,7 +4,7 @@ import { setStandards as setStandardsInSession, getOrCreateSession } from '../..
 export const setStandardsSchema = z.object({
   sessionId: z.string().optional().describe("Session ID for per-request isolation."),
   creatorAddress: z.string().optional(),
-  standards: z.array(z.string()).describe('Standards array. Common: ["Fungible Tokens"], ["NFTs"], ["Subscriptions"], ["Smart Token"], ["Address List"], ["Custom-2FA"]. For tradable NFTs: ["NFTs", "NFTMarketplace", "NFTPricingDenom:ubadge"]. For AI vaults: ["Smart Token", "AI Agent Vault"].')
+  standards: z.array(z.string()).describe('Standards array. Common: ["Fungible Tokens"], ["NFTs"], ["Subscriptions"], ["Smart Token"], ["Address List"]. For tradable NFTs: ["NFTs", "NFTMarketplace", "NFTPricingDenom:ubadge"]. For AI vaults: ["Smart Token", "AI Agent Vault"].')
 });
 
 export type SetStandardsInput = z.infer<typeof setStandardsSchema>;
@@ -25,7 +25,7 @@ export const setStandardsTool = {
 
 const KNOWN_STANDARDS = new Set([
   'Subscriptions', 'Quests', 'Products', 'IBC Token Factory', 'Smart Token',
-  'Credit Token', 'Custom-2FA', 'Address List', 'Fungible Tokens', 'NFTs',
+  'Credit Token', 'Address List', 'Fungible Tokens', 'NFTs',
   'NFTMarketplace', 'Tradable', 'Liquidity Pools', 'Non-Transferable',
   'No User Ownership', 'AI Agent Vault', 'AI Agent Stablecoin',
   'Leaderboard', 'Milestones', 'Invoices', '1 of 1', 'Issuer-Controlled Tokens'

@@ -19,7 +19,6 @@ export { buildProductCatalog, type ProductCatalogParams, type ProductItem } from
 export { buildPredictionMarket, type PredictionMarketParams } from './prediction-market.js';
 export { buildSmartAccount, type SmartAccountParams } from './smart-account.js';
 export { buildCreditToken, type CreditTokenParams } from './credit-token.js';
-export { buildCustom2FA, type Custom2FAParams } from './custom-2fa.js';
 export { buildQuests, type QuestsParams } from './quests.js';
 export { buildAddressList, type AddressListParams } from './address-list.js';
 

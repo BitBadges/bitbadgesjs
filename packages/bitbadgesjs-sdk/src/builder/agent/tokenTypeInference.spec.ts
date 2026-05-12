@@ -52,13 +52,12 @@ function makeFakeProvider(
 describe('tokenTypeInference catalog helpers', () => {
   it('getTokenTypeSkillIds includes every user-facing core token type', () => {
     const ids = getTokenTypeSkillIds();
-    // The 15 frontend marketplace entries — all should be present.
+    // The frontend marketplace entries — all should be present.
     for (const expected of [
       'smart-token',
       'fungible-token',
       'nft-collection',
       'subscription',
-      'custom-2fa',
       'credit-token',
       'address-list',
       'payment-protocol',

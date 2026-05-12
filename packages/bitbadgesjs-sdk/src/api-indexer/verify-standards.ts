@@ -489,41 +489,6 @@ function verifyAddressList(value: any): StandardViolation[] {
   return violations;
 }
 
-function verifyCustom2FA(value: any): StandardViolation[] {
-  const violations: StandardViolation[] = [];
-  const std = 'Custom-2FA';
-  const approvals = getApprovals(value);
-  const invariants = getInvariants(value);
-
-  // Must have at least one approval with autoDeletionOptions.allowPurgeIfExpired
-  const has2FAApproval = approvals.some(
-    (a: any) =>
-      a.approvalCriteria?.autoDeletionOptions?.allowPurgeIfExpired === true ||
-      a.approvalCriteria?.autoDeletionOptions?.allowPurgeIfExpired === 'true'
-  );
-
-  if (!has2FAApproval) {
-    violations.push({
-      standard: std,
-      field: 'collectionApprovals.approvalCriteria.autoDeletionOptions',
-      message:
-        'Custom-2FA collections MUST have at least one approval with autoDeletionOptions.allowPurgeIfExpired: true so expired 2FA tokens can be cleaned up.'
-    });
-  }
-
-  // Pool creation should be disabled for 2FA tokens
-  if (invariants.disablePoolCreation !== true && invariants.disablePoolCreation !== 'true') {
-    violations.push({
-      standard: std,
-      field: 'invariants.disablePoolCreation',
-      message: 'Custom-2FA collections should have disablePoolCreation: true. 2FA tokens should not be tradable on DEX.',
-      fix: 'Set invariants.disablePoolCreation to true.'
-    });
-  }
-
-  return violations;
-}
-
 function verifyLiquidityPools(value: any): StandardViolation[] {
   const violations: StandardViolation[] = [];
   const std = 'Liquidity Pools';
@@ -710,8 +675,7 @@ function verifyCommonMintRules(value: any): StandardViolation[] {
   // that means either `incrementedBalances.startBalances` OR
   // `manualBalances` is non-empty. The chain's `validate_basic.go` rule
   // is "when using predetermined balances, exactly one order calculation
-  // can be set to true". An approval with both arrays empty (e.g.
-  // custom-2fa, which enforces expiration via allowPurgeIfExpired) has
+  // can be set to true". An approval with both arrays empty has
   // nothing to order, so the chain accepts all flags false.
   for (const approval of mintApprovals) {
     const ac = approval.approvalCriteria || {};
@@ -1034,7 +998,6 @@ const STANDARD_VALIDATORS: Record<string, (value: any) => StandardViolation[]> =
   'Fungible Tokens': verifyFungibleToken,
   NFTs: verifyNFTCollection,
   'Address List': verifyAddressList,
-  'Custom-2FA': verifyCustom2FA,
   'Liquidity Pools': verifyLiquidityPools,
   'Credit Token': verifyCreditToken,
   Quests: verifyQuest,
@@ -1061,7 +1024,6 @@ const STANDARD_ALIASES: Record<string, string> = {
   NFTs: 'NFTs',
   'NFT Collection': 'NFTs',
   'Address List': 'Address List',
-  'Custom-2FA': 'Custom-2FA',
   'Liquidity Pools': 'Liquidity Pools',
   'Credit Token': 'Credit Token',
   Quests: 'Quests',

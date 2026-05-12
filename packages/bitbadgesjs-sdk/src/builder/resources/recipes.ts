@@ -29,7 +29,6 @@ export const RECIPES: Recipe[] = [
 // | Recurring payment         | Subscription     | "Subscriptions"                             | durationFromTimestamp, allowOverrideTimestamp    |
 // | Wrapped IBC asset         | Smart Token      | "Smart Token"                               | cosmosCoinBackedPath, alias paths               |
 // | Vault / escrow            | Smart Token      | "Smart Token"                               | Non-transferable variant                        |
-// | Time-expiring auth        | Custom 2FA       | "Custom-2FA"                                | allowPurgeIfExpired                             |
 // | Managed address list      | Address List     | "Address List"                              | Manager add/remove addresses                    |
 // | Invoices / payments       | Payment Protocol | "ListView:..."                              | coinTransfer-based approvals                    |
 // | Bounty / escrow           | Bounty           | "Bounty"                                    | 5 approvals, verifier voting, expiration        |

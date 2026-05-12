@@ -204,7 +204,7 @@ export const addApprovalSchema = z.object({
       .describe('Sender must NOT equal initiator.'),
     autoDeletionOptions: z.object({
       afterOneUse: z.boolean().optional().default(false),
-      allowPurgeIfExpired: z.boolean().optional().default(false).describe('MUST be true for Custom-2FA tokens.')
+      allowPurgeIfExpired: z.boolean().optional().default(false).describe('Allow purging tokens after their ownership window expires.')
     }).optional(),
     userRoyalties: z.any().optional().describe('Royalty requirements. Advanced — use search_knowledge_base for details.'),
     dynamicStoreChallenges: z.array(z.any()).optional().describe('Dynamic store checks. Advanced — use search_knowledge_base for details.'),
@@ -394,7 +394,7 @@ export const addApprovalTool = {
             description: 'Auto-deletion rules.',
             properties: {
               afterOneUse: { type: 'boolean', description: 'Delete approval after one use.' },
-              allowPurgeIfExpired: { type: 'boolean', description: 'MUST be true for Custom-2FA tokens.' }
+              allowPurgeIfExpired: { type: 'boolean', description: 'Allow purging tokens after their ownership window expires.' }
             }
           },
           userRoyalties: { type: 'object', description: 'Royalty requirements. Advanced — use search_knowledge_base for details.' },

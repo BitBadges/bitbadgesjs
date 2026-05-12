@@ -16,7 +16,6 @@ import { buildProductCatalog } from './product-catalog.js';
 import { buildPredictionMarket } from './prediction-market.js';
 import { buildSmartAccount } from './smart-account.js';
 import { buildCreditToken } from './credit-token.js';
-import { buildCustom2FA } from './custom-2fa.js';
 import { buildQuests } from './quests.js';
 import { buildAddressList } from './address-list.js';
 import { buildIntent } from './intent.js';
@@ -133,13 +132,6 @@ describe('vault builder', () => {
     const withdrawal = findWithdraw(limited.collectionApprovals);
     expect(withdrawal.approvalCriteria.approvalAmounts).toBeDefined();
     expect(withdrawal.approvalCriteria.approvalAmounts.perInitiatedByAddressApprovalAmount).toBe('100000000');
-  });
-
-  test('require2fa adds mustOwnTokens', () => {
-    const twoFa = val(buildVault({ backingCoin: 'USDC', require2fa: '74', ...META }));
-    const withdrawal = findWithdraw(twoFa.collectionApprovals);
-    expect(withdrawal.approvalCriteria.mustOwnTokens).toBeDefined();
-    expect(withdrawal.approvalCriteria.mustOwnTokens[0].collectionId).toBe('74');
   });
 
   test('emergency recovery adds migration approval', () => {
@@ -392,21 +384,6 @@ describe('credit-token builder', () => {
   });
 });
 
-describe('custom-2fa builder', () => {
-  const msg = buildCustom2FA({ name: 'My 2FA Token', description: 'A 2FA token for testing.', image: 'ipfs://test-image' });
-  const r = val(msg);
-
-  test('has Custom-2FA standard', () => { expect(r.standards).toEqual(['Custom-2FA']); });
-  test('allowPurgeIfExpired', () => { expect(r.collectionApprovals[0].approvalCriteria.autoDeletionOptions.allowPurgeIfExpired).toBe(true); });
-  test('disablePoolCreation', () => { expect(r.invariants.disablePoolCreation).toBe(true); });
-  test('burnable adds burn approval', () => {
-    expect(val(buildCustom2FA({ name: 'Test', description: 'A 2FA token for testing.', image: 'ipfs://test-image', burnable: true })).collectionApprovals.length).toBe(2);
-  });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Custom-2FA')).toEqual([]);
-  });
-});
-
 describe('quests builder', () => {
   const msg = buildQuests({ reward: 10, denom: 'BADGE', maxClaims: 100, ...META });
   const r = val(msg);
@@ -530,7 +507,7 @@ describe('pm-buy-intent builder', () => {
 describe('all collection builders pass verifyStandardsCompliance with zero violations', () => {
   const builders: [string, any][] = [
     ['vault', buildVault({ backingCoin: 'USDC', ...META })],
-    ['vault (with limits)', buildVault({ backingCoin: 'USDC', dailyWithdrawLimit: 100, require2fa: '74', emergencyRecovery: 'bb1recovery', ...META })],
+    ['vault (with limits)', buildVault({ backingCoin: 'USDC', dailyWithdrawLimit: 100, emergencyRecovery: 'bb1recovery', ...META })],
     ['smart-account', buildSmartAccount({ backingCoin: 'USDC', ...META })],
     ['smart-account (tradable)', buildSmartAccount({ backingCoin: 'USDC', tradable: true, ...META })],
     ['smart-account (ai-agent)', buildSmartAccount({ backingCoin: 'BADGE', aiAgentVault: true, ...META })],
@@ -553,8 +530,6 @@ describe('all collection builders pass verifyStandardsCompliance with zero viola
     ['prediction-market', buildPredictionMarket({ verifier: 'bb1v', ...META })],
     ['credit-token', buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1r', ...META })],
     ['credit-token (custom)', buildCreditToken({ paymentDenom: 'BADGE', recipient: 'bb1r', symbol: 'CRED', tokensPerUnit: 50, ...META })],
-    ['custom-2fa', buildCustom2FA({ name: 'My 2FA', description: 'A 2FA token.', image: 'ipfs://test-image' })],
-    ['custom-2fa (burnable)', buildCustom2FA({ name: 'Burnable 2FA', burnable: true, description: 'A burnable 2FA token.', image: 'ipfs://test-image' })],
     ['quests', buildQuests({ reward: 10, denom: 'BADGE', maxClaims: 100, ...META })],
     ['address-list', buildAddressList({ name: 'My List', description: 'A test list.', image: 'ipfs://test-image' })],
   ];

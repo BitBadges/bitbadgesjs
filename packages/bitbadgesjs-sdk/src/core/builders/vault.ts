@@ -4,7 +4,6 @@
  */
 import {
   FOREVER,
-  MAX_UINT64,
   BURN_ADDRESS,
   resolveCoin,
   toBaseUnits,
@@ -30,7 +29,6 @@ export interface VaultParams {
   image?: string;
   description?: string;
   dailyWithdrawLimit?: number; // max withdrawal per day (display units), 0 = unlimited
-  require2fa?: string; // 2FA collection ID — if set, withdrawals require 2FA token ownership
   emergencyRecovery?: string; // bb1... recovery address for emergency migration
 }
 
@@ -68,7 +66,7 @@ export function buildVault(params: VaultParams): any {
         overridesToIncomingApprovals: true
       }
     },
-    // Withdrawal (unbacking) — with optional daily limit and 2FA
+    // Withdrawal (unbacking) — with optional daily limit
     {
       fromListId: '!Mint',
       toListId: backingAddr,
@@ -99,16 +97,6 @@ export function buildVault(params: VaultParams): any {
               intervalLength: String(86400000)
             }
           }
-        } : {}),
-        ...(params.require2fa ? {
-          mustOwnTokens: [{
-            collectionId: params.require2fa,
-            amountRange: { start: '1', end: MAX_UINT64 },
-            ownershipTimes: FOREVER,
-            tokenIds: [{ start: '1', end: '1' }],
-            overrideWithCurrentTime: true,
-            mustSatisfyForAllAssets: false
-          }]
         } : {})
       }
     }

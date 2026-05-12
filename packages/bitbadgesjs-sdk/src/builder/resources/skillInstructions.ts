@@ -46,7 +46,7 @@ Think about smart tokens in three distinct phases:
 
 1. **Phase 1 — Deposits (Backing)**: Users send IBC coins (e.g. USDC) to the backing address and receive wrapped tokens 1:1. This is the on-ramp.
 2. **Phase 2 — Transferability (While Backed)**: While tokens exist in the wrapped silo, can users transfer them peer-to-peer? This is the key design decision — transferable for wrapped assets, non-transferable for vaults/escrows.
-3. **Phase 3 — Withdrawals (Unbacking)**: Users send wrapped tokens back to the backing address and receive their IBC coins 1:1. This is the off-ramp. Rate limits, 2FA, and other controls go here.
+3. **Phase 3 — Withdrawals (Unbacking)**: Users send wrapped tokens back to the backing address and receive their IBC coins 1:1. This is the off-ramp. Rate limits and other controls go here.
 
 Each phase maps to at least one collection approval. Design each phase independently — they are orthogonal concerns.
 
@@ -269,33 +269,6 @@ The example above encodes a **1000 USDC/day** limit (1000 × 10^6 = 1,000,000,00
 - **Total limit**: Use overallApprovalAmount with intervalLength: "0" (no reset)
 - amountTrackerId must be unique per approval
 - **When refining**: if the user reports "rate is X currently" and the on-chain value is already in base units, compare apples to apples — convert their stated X to base units via the formula above BEFORE concluding whether the current value matches.
-
-### Optional: 2FA on Unbacking
-
-Require ownership of a 2FA token to withdraw. Add mustOwnTokens to the unbacking approval:
-
-\`\`\`json
-{
-  "approvalCriteria": {
-    "mustPrioritize": true,
-    "allowBackedMinting": true,
-    "overridesFromOutgoingApprovals": false,
-    "mustOwnTokens": [{
-      "collectionId": "74",
-      "amountRange": { "start": "1", "end": "18446744073709551615" },
-      "ownershipTimes": [{ "start": "1", "end": "18446744073709551615" }],
-      "tokenIds": [{ "start": "1", "end": "18446744073709551615" }],
-      "overrideWithCurrentTime": true,
-      "mustSatisfyForAllAssets": false,
-      "ownershipCheckParty": "initiator"
-    }]
-  }
-}
-\`\`\`
-
-- collectionId: the 2FA collection ID
-- overrideWithCurrentTime: true ensures the check uses the current time (important for expiring 2FA tokens)
-- ownershipCheckParty: "initiator" checks the person initiating the withdrawal
 
 ### Metadata Guidance
 
@@ -1130,96 +1103,6 @@ Three common permission configurations:
 - DON'T forget that unfrozen Mint approval permissions means the manager can mint unlimited tokens — freeze canUpdateCollectionApprovals for Mint if supply should be fixed.
 - DON'T confuse empty permission array [] (neutral/unset) with a frozen permission — empty means the field is still updatable.`
   },
-  {
-    id: 'custom-2fa',
-    name: 'Custom 2FA',
-    category: 'token-type',
-    description: 'Two-factor authentication for transfers using a secondary approval address',
-    summary: `Required standards: ["Custom-2FA"]
-
-- autoDeletionOptions.allowPurgeIfExpired: MUST be true
-- Approval name MUST contain "Custom 2FA"
-- Use time-dependent ownershipTimes in MsgTransferTokens (not forever)
-- Calculate timestamps: current time + expiration duration (milliseconds since epoch)
-- Tokens automatically expire and can be purged after expiration`,
-    instructions: `## Custom-2FA Configuration
-
-When creating a Custom-2FA collection, follow these requirements:
-
-### Preferred path: preset (one short tool call)
-
-The mint approval is canonical — use \`custom-2fa.mint\`:
-
-\`\`\`
-add_preset_approval({ presetId: "custom-2fa.mint", params: { managerAddress: "bb1..." } })
-\`\`\`
-
-The actual token expiration is set per-mint via the MsgTransferTokens \`ownershipTimes\` window (e.g. now → now + 5*60*1000 ms). The approval itself just enables the Mint path with auto-purge.
-
-### Required Structure
-
-1. **Standards**: MUST include "Custom-2FA"
-   - "standards": ["Custom-2FA"]
-
-2. **Approval Requirements**:
-   - autoDeletionOptions.allowPurgeIfExpired: MUST be true
-   - This allows expired tokens to be automatically purged
-   - Approval name MUST contain "Custom 2FA"
-
-3. **Time-Dependent Ownership**: Use time-dependent ownershipTimes in MsgTransferTokens
-   - Calculate timestamps: current time + expiration duration
-   - Example: 5 minutes = Date.now() + (5 * 60 * 1000)
-
-### Complete Example
-
-\`\`\`json
-{
-  "messages": [
-    {
-      "typeUrl": "/tokenization.MsgUniversalUpdateCollection",
-      "value": {
-        "standards": ["Custom-2FA"],
-        "collectionApprovals": [{
-          "fromListId": "Mint",
-          "toListId": "All",
-          "initiatedByListId": "bb1manager...",
-          "approvalId": "2fa-mint",
-          "tokenIds": [{ "start": "1", "end": "18446744073709551615" }],
-          "transferTimes": [{ "start": "1", "end": "18446744073709551615" }],
-          "ownershipTimes": [{ "start": "1", "end": "18446744073709551615" }],
-          "approvalCriteria": {
-            "overridesFromOutgoingApprovals": true,
-            "autoDeletionOptions": { "allowPurgeIfExpired": true }
-          }
-        }]
-      }
-    },
-    {
-      "typeUrl": "/tokenization.MsgTransferTokens",
-      "value": {
-        "collectionId": "0",
-        "transfers": [{
-          "from": "Mint",
-          "toAddresses": ["bb1recipient..."],
-          "balances": [{
-            "amount": "1",
-            "tokenIds": [{ "start": "1", "end": "1" }],
-            "ownershipTimes": [{ "start": "1706000000000", "end": "1706000300000" }]
-          }]
-        }]
-      }
-    }
-  ]
-}
-\`\`\`
-
-### 2FA-Specific Gotchas
-
-- MUST set allowPurgeIfExpired: true
-- Use time-dependent ownershipTimes in transfers (not forever)
-- Calculate expiration timestamps correctly (milliseconds since epoch)
-- Tokens automatically expire and can be purged after expiration`
-  },
   // NOTE: the previous short `address-list` entry lived here. The authoritative
   // entry (with the frontend-required "manager-add" / "manager-remove" approvalIds
   // and the burn address) is kept later in this array and is the only one that
@@ -1509,7 +1392,7 @@ Two approaches:
 - **Approach 1 (coinTransfer-based)**: Simple one-shot payments. Each approval = one invoice/milestone with coinTransfers.
   - Standards: ["ListView:Milestones"] or ["ListView:Invoice Requests"] or ["ListView:Bounties"]
   - Each approval: fromListId "Mint", coinTransfers for payment, overridesFromOutgoingApprovals: true
-  - ListView incompatible with: Subscriptions, Smart Tokens, Custom 2FA, Liquidity Pools, Tradable NFTs
+  - ListView incompatible with: Subscriptions, Smart Tokens, Liquidity Pools, Tradable NFTs
 - **Approach 2 (Escrow)**: Funds held in IBC-backed smart token until conditions are met.
   - Standards: ["Smart Token"]
   - USDC/ATOM backed 1:1 into single token ID. Approvals control deposit, release, refund, dispute, timeout.

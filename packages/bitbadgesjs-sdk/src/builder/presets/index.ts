@@ -19,7 +19,6 @@ import { BOUNTY_PRESETS } from './bounty.js';
 import { PAYMENT_REQUEST_PRESETS } from './payment-request.js';
 import { PREDICTION_MARKET_PRESETS } from './prediction-market.js';
 import { SUBSCRIPTION_PRESETS } from './subscription.js';
-import { CUSTOM_2FA_PRESETS } from './custom-2fa.js';
 import { TRADABLE_PRESETS } from './tradable.js';
 import { AUCTION_PRESETS } from './auction.js';
 import { PRODUCTS_PRESETS } from './products.js';
@@ -38,7 +37,6 @@ const ALL_PRESETS: Preset<any>[] = [
   ...PAYMENT_REQUEST_PRESETS,
   ...PREDICTION_MARKET_PRESETS,
   ...SUBSCRIPTION_PRESETS,
-  ...CUSTOM_2FA_PRESETS,
   ...TRADABLE_PRESETS,
   ...AUCTION_PRESETS,
   ...PRODUCTS_PRESETS,

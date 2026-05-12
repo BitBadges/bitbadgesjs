@@ -478,7 +478,6 @@ sharedOpts(
     .requiredOption('--backing-coin <symbol>', 'Backing coin symbol (USDC, BADGE, ATOM, OSMO)')
     .option('--symbol <symbol>', 'Display symbol (e.g. vUSDC)')
     .option('--daily-withdraw-limit <n>', 'Max daily withdrawal (display units)')
-    .option('--require-2fa <collectionId>', '2FA collection ID for withdrawal gating')
     .option('--emergency-recovery <address>', 'Recovery address for emergency migration')
 ).action(async (opts) => {
   const { buildVault } = await import('../../core/builders/vault.js');
@@ -486,7 +485,7 @@ sharedOpts(
   emit(buildVault({
     backingCoin: opts.backingCoin, uri: opts.uri, name: opts.name, symbol: opts.symbol, image: opts.image,
     description: opts.description, dailyWithdrawLimit: opts.dailyWithdrawLimit ? Number(opts.dailyWithdrawLimit) : undefined,
-    require2fa: opts.require2fa, emergencyRecovery: opts.emergencyRecovery
+    emergencyRecovery: opts.emergencyRecovery
   }), opts);
 });
 
@@ -664,21 +663,6 @@ sharedOpts(
     paymentDenom: opts.paymentDenom, recipient: opts.recipient, symbol: opts.symbol,
     tokensPerUnit: Number(opts.tokensPerUnit),
     uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
-  }), opts);
-});
-
-sharedOpts(
-  buildCommand
-    .command('custom-2fa')
-    .description('Create a custom 2FA token. Metadata: pass --uri OR --name + --image + --description.')
-    .option('--burnable', 'Allow burning')
-    .option('--transferable', 'Allow post-mint P2P transfers')
-).action(async (opts) => {
-  const { buildCustom2FA } = await import('../../core/builders/custom-2fa.js');
-  if (opts.json) { emit(buildCustom2FA(readJsonInput(opts.json)), opts); return; }
-  emit(buildCustom2FA({
-    uri: opts.uri, name: opts.name, image: opts.image, description: opts.description,
-    burnable: !!opts.burnable, transferable: !!opts.transferable
   }), opts);
 });
 

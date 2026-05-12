@@ -1053,23 +1053,6 @@ export interface iTierWithOptionalWeight<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iApplicationPage<T extends NumberType> {
-  /** The page ID */
-  pageId: string;
-
-  /** The type of the page */
-  type?: string;
-
-  /** Metadata for the page */
-  metadata: iMetadata<T>;
-
-  /** Points to display in the page */
-  points?: iTierWithOptionalWeight<T>[];
-}
-
-/**
- * @category Interfaces
- */
 export interface iApiKeyDoc extends Doc {
   label: string;
   apiKey: string;
@@ -1078,37 +1061,6 @@ export interface iApiKeyDoc extends Doc {
   lastRequest: number;
   createdAt: number;
   intendedUse: string;
-}
-
-/**
- * @category Interfaces
- */
-export interface iApplicationDoc<T extends NumberType> extends Doc {
-  /** The application ID */
-  applicationId: string;
-
-  /**
-   * Type of the application
-   */
-  type: string;
-
-  /** The BitBadges address of the user who created this application */
-  createdBy: BitBadgesAddress;
-
-  /** The BitBadges address of the user who is currently managing this */
-  managedBy: BitBadgesAddress;
-
-  /** The time the application was created */
-  createdAt: UNIXMilliTimestamp<T>;
-
-  /** The last updated timestamp */
-  lastUpdated?: UNIXMilliTimestamp<T>;
-
-  /** The overall metadata for the application */
-  metadata: iMetadata<T>;
-
-  /** The pages for the application */
-  pages: iApplicationPage<T>[];
 }
 
 /**
