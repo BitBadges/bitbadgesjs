@@ -30,7 +30,6 @@ import type {
 } from '@/interfaces/types/core.js';
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/types/permissions.js';
 import type { iUserBalanceStore } from '@/interfaces/types/userBalances.js';
-import type { iMap, iValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
 
 /**
  * @category API Requests / Responses
@@ -1053,23 +1052,6 @@ export interface iTierWithOptionalWeight<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iApplicationPage<T extends NumberType> {
-  /** The page ID */
-  pageId: string;
-
-  /** The type of the page */
-  type?: string;
-
-  /** Metadata for the page */
-  metadata: iMetadata<T>;
-
-  /** Points to display in the page */
-  points?: iTierWithOptionalWeight<T>[];
-}
-
-/**
- * @category Interfaces
- */
 export interface iApiKeyDoc extends Doc {
   label: string;
   apiKey: string;
@@ -1078,37 +1060,6 @@ export interface iApiKeyDoc extends Doc {
   lastRequest: number;
   createdAt: number;
   intendedUse: string;
-}
-
-/**
- * @category Interfaces
- */
-export interface iApplicationDoc<T extends NumberType> extends Doc {
-  /** The application ID */
-  applicationId: string;
-
-  /**
-   * Type of the application
-   */
-  type: string;
-
-  /** The BitBadges address of the user who created this application */
-  createdBy: BitBadgesAddress;
-
-  /** The BitBadges address of the user who is currently managing this */
-  managedBy: BitBadgesAddress;
-
-  /** The time the application was created */
-  createdAt: UNIXMilliTimestamp<T>;
-
-  /** The last updated timestamp */
-  lastUpdated?: UNIXMilliTimestamp<T>;
-
-  /** The overall metadata for the application */
-  metadata: iMetadata<T>;
-
-  /** The pages for the application */
-  pages: iApplicationPage<T>[];
 }
 
 /**
@@ -1946,11 +1897,6 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iMapDoc<T extends NumberType> extends Doc, iMapWithValues<T> {}
-
-/**
- * @category Interfaces
- */
 export interface iUpdateHistory<T extends NumberType> {
   /** The transaction hash of the on-chain transaction that updated this. */
   txHash: string;
@@ -1960,19 +1906,6 @@ export interface iUpdateHistory<T extends NumberType> {
   blockTimestamp: UNIXMilliTimestamp<T>;
   /** The indexer's timestamp of the update. This is provided in some cases because the time of indexing may be inconsistent with the time of the block. */
   timestamp: UNIXMilliTimestamp<T>;
-}
-
-/**
- * @inheritDoc iMap
- * @category Interfaces
- */
-export interface iMapWithValues<T extends NumberType> extends iMap<T> {
-  /** The (key, value) pairs for the maps that are set. */
-  values: { [key: string]: iValueStore };
-  /** The fetched/populated metadata for the map (if any). This is the actual metadata object with name, image, description, etc. */
-  populatedMetadata?: iMetadata<T>;
-  /** The update history for the map. Maps are maintained through blockchain transactions. */
-  updateHistory: iUpdateHistory<T>[];
 }
 
 /**

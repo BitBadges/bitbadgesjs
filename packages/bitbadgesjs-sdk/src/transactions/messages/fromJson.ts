@@ -20,8 +20,8 @@
  *      (delegate/undelegate/redelegate), distribution (withdraw reward),
  *      IBC transfer, authz (grant/revoke/exec). Hand-registered below.
  *
- *   3. **Everything else** — gamm, cosmos.group, wasmx, cosmwasm, maps,
- *      anchor, managersplitter. Not registered yet; unsupported typeUrls
+ *   3. **Everything else** — gamm, cosmos.group, cosmwasm, maps,
+ *      managersplitter. Not registered yet; unsupported typeUrls
  *      raise `UnsupportedMessageTypeError` so callers can either fall
  *      back to client-side proto-encoding + tx_bytes upload or open an
  *      issue to add coverage.

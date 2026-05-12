@@ -8,13 +8,11 @@ import { ClaimActivityDoc, PointsActivityDoc, TransferActivityDoc } from '@/api-
 import {
   AccessTokenDoc,
   ApiKeyDoc,
-  ApplicationDoc,
   ApprovalTrackerDoc,
   DeveloperAppDoc,
   DynamicDataDoc,
   DynamicStoreDocWithDetails,
   DynamicStoreValueDoc,
-  MapWithValues,
   PluginDoc,
   SIWBBRequestDoc,
   StatusDoc,
@@ -26,8 +24,6 @@ import {
   DynamicDataHandlerType,
   UpdateClaimRequest,
   iApiKeyDoc,
-  iApplicationDoc,
-  iApplicationPage,
   iApprovalTrackerDoc,
   iClaimActivityDoc,
   iDynamicDataDoc,
@@ -55,7 +51,6 @@ import {
   type iClaimDetails,
   type iClaimReward,
   type iDeveloperAppDoc,
-  type iMapWithValues,
   type iPluginDoc,
   type iPromptSkillDoc,
   type iStatusDoc,
@@ -305,8 +300,6 @@ export interface iGetSearchSuccessResponse<T extends NumberType> {
     collection: iBitBadgesCollection<T>;
     tokenIds: iUintRange<T>[];
   }[];
-  maps: iMapWithValues<T>[];
-  applications?: iApplicationDoc<T>[];
   claims?: iClaimDetails<T>[];
   utilityPages?: iUtilityPageDoc<T>[];
 }
@@ -325,8 +318,6 @@ export class GetSearchSuccessResponse<T extends NumberType>
     collection: BitBadgesCollection<T>;
     tokenIds: UintRangeArray<T>;
   }[];
-  maps: MapWithValues<T>[];
-  applications?: ApplicationDoc<T>[];
   claims?: ClaimDetails<T>[];
   utilityPages?: UtilityPageDoc<T>[];
 
@@ -340,8 +331,6 @@ export class GetSearchSuccessResponse<T extends NumberType>
         tokenIds: UintRangeArray.From(token.tokenIds)
       };
     });
-    this.maps = data.maps.map((map) => new MapWithValues(map));
-    this.applications = data.applications?.map((group) => new ApplicationDoc(group));
     this.claims = data.claims?.map((claim) => new ClaimDetails(claim));
     this.utilityPages = data.utilityPages?.map((utilityPage) => new UtilityPageDoc(utilityPage));
   }
@@ -1139,12 +1128,7 @@ export interface iVerifySignInPayload {
  */
 export interface iVerifySignInSuccessResponse {
   /**
-   * True if 2FA is set up and verification is required.
-   */
-  requires2FA?: boolean;
-
-  /**
-   * Message indicating 2FA is required.
+   * Optional informational message returned by the indexer.
    */
   message?: string;
 }
@@ -1154,12 +1138,10 @@ export interface iVerifySignInSuccessResponse {
  * @category API Requests / Responses
  */
 export class VerifySignInSuccessResponse extends CustomTypeClass<VerifySignInSuccessResponse> implements iVerifySignInSuccessResponse {
-  requires2FA?: boolean;
   message?: string;
 
   constructor(data: iVerifySignInSuccessResponse) {
     super();
-    this.requires2FA = data.requires2FA;
     this.message = data.message;
   }
 }
@@ -1341,20 +1323,6 @@ export interface iCheckSignInStatusSuccessResponse {
     username: string;
   };
 
-  /**
-   * True if 2FA is verified in session.
-   */
-  twoFAVerified?: boolean;
-
-  /**
-   * True if 2FA is set up but not verified.
-   */
-  requires2FA?: boolean;
-
-  /**
-   * Timestamp when 2FA was verified.
-   */
-  twoFAVerifiedAt?: number;
 }
 
 /**
@@ -1408,9 +1376,6 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
   address: string;
   bitbadgesAddress: string;
   chain: SupportedChain;
-  twoFAVerified?: boolean;
-  requires2FA?: boolean;
-  twoFAVerifiedAt?: number;
 
   constructor(data: iCheckSignInStatusSuccessResponse) {
     super();
@@ -1440,9 +1405,6 @@ export class CheckSignInStatusSuccessResponse extends CustomTypeClass<CheckSignI
     this.address = data.address;
     this.bitbadgesAddress = data.bitbadgesAddress;
     this.chain = data.chain;
-    this.twoFAVerified = data.twoFAVerified;
-    this.requires2FA = data.requires2FA;
-    this.twoFAVerifiedAt = data.twoFAVerifiedAt;
   }
 }
 
@@ -1540,8 +1502,6 @@ export interface iGetBrowseSuccessResponse<T extends NumberType> {
       tokenIds: iUintRange<T>[];
     }[];
   };
-  applications?: { [category: string]: iApplicationDoc<T>[] };
-  maps: { [category: string]: iMapWithValues<T>[] };
   claims?: { [category: string]: iClaimDetails<T>[] };
   claimActivity?: iClaimActivityDoc<T>[];
   pointsActivity?: iPointsActivityDoc<T>[];
@@ -1564,8 +1524,6 @@ export class GetBrowseSuccessResponse<T extends NumberType>
       tokenIds: UintRangeArray<T>;
     }[];
   };
-  applications?: { [category: string]: ApplicationDoc<T>[] };
-  maps: { [category: string]: MapWithValues<T>[] };
   claims?: { [category: string]: ClaimDetails<T>[] };
   claimActivity?: ClaimActivityDoc<T>[];
   pointsActivity?: PointsActivityDoc<T>[];
@@ -1600,26 +1558,12 @@ export class GetBrowseSuccessResponse<T extends NumberType>
       },
       {} as { [category: string]: { collection: BitBadgesCollection<T>; tokenIds: UintRangeArray<T> }[] }
     );
-    this.applications = Object.keys(data.applications ?? {}).reduce(
-      (acc, category) => {
-        acc[category] = (data.applications ?? {})[category].map((group) => new ApplicationDoc(group));
-        return acc;
-      },
-      {} as { [category: string]: ApplicationDoc<T>[] }
-    );
     this.utilityPages = Object.keys(data.utilityPages ?? {}).reduce(
       (acc, category) => {
         acc[category] = (data.utilityPages ?? {})[category].map((utilityPage) => new UtilityPageDoc(utilityPage));
         return acc;
       },
       {} as { [category: string]: UtilityPageDoc<T>[] }
-    );
-    this.maps = Object.keys(data.maps).reduce(
-      (acc, category) => {
-        acc[category] = data.maps[category].map((map) => new MapWithValues(map));
-        return acc;
-      },
-      {} as { [category: string]: MapWithValues<T>[] }
     );
     this.claims = data.claims
       ? Object.keys(data.claims).reduce(
@@ -3504,348 +3448,6 @@ export interface iDeleteApiKeySuccessResponse {}
  * @category API Requests / Responses
  */
 export class DeleteApiKeySuccessResponse extends EmptyResponseClass {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iSearchApplicationsPayload {
-  /** The search value to search for */
-  bookmark?: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class SearchApplicationsPayload extends CustomTypeClass<SearchApplicationsPayload> implements iSearchApplicationsPayload {
-  bookmark?: string;
-
-  constructor(payload: iSearchApplicationsPayload) {
-    super();
-    this.bookmark = payload.bookmark;
-  }
-
-  static FromQuery(query: ParsedQs): SearchApplicationsPayload {
-    return new SearchApplicationsPayload({
-      bookmark: query.bookmark?.toString()
-    });
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetApplicationPayload {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetApplicationSuccessResponse<T extends NumberType> {
-  application: iApplicationDoc<T> | undefined;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetApplicationSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetApplicationSuccessResponse<T>>
-  implements iGetApplicationSuccessResponse<T>
-{
-  application: ApplicationDoc<T> | undefined;
-
-  constructor(data: iGetApplicationSuccessResponse<T>) {
-    super();
-    this.application = data.application ? new ApplicationDoc<T>(data.application) : undefined;
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetApplicationSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetApplicationSuccessResponse<U>;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetApplicationsPayload {
-  /** The specific IDs to fetch */
-  applicationIds: string[];
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetApplicationsSuccessResponse<T extends NumberType> {
-  docs: (iApplicationDoc<T> | undefined)[];
-  pagination: {
-    bookmark: string;
-    hasMore: boolean;
-  };
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetApplicationsSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetApplicationsSuccessResponse<T>>
-  implements iGetApplicationsSuccessResponse<T>
-{
-  docs: (ApplicationDoc<T> | undefined)[];
-  pagination: {
-    bookmark: string;
-    hasMore: boolean;
-  };
-
-  constructor(data: iGetApplicationsSuccessResponse<T>) {
-    super();
-    this.docs = data.docs.map((doc) => (doc ? new ApplicationDoc<T>(doc) : undefined));
-    this.pagination = data.pagination;
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetApplicationsSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetApplicationsSuccessResponse<U>;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iSearchApplicationsSuccessResponse<T extends NumberType> extends iGetApplicationsSuccessResponse<T> {}
-
-/**
- * @category API Requests / Responses
- */
-export class SearchApplicationsSuccessResponse<T extends NumberType>
-  extends GetApplicationsSuccessResponse<T>
-  implements iSearchApplicationsSuccessResponse<T>
-{
-  constructor(data: iSearchApplicationsSuccessResponse<T>) {
-    super(data);
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iCreateApplicationPayload {
-  /** The overall metadata for the application */
-  metadata: iMetadataWithoutInternals<NumberType>;
-
-  /** The pages in the application */
-  pages: iApplicationPage<NumberType>[];
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iCreateApplicationSuccessResponse<T extends NumberType> {
-  doc: iApplicationDoc<T>;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class CreateApplicationSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<CreateApplicationSuccessResponse<T>>
-  implements iCreateApplicationSuccessResponse<T>
-{
-  doc: ApplicationDoc<T>;
-
-  constructor(data: iCreateApplicationSuccessResponse<T>) {
-    super();
-    this.doc = new ApplicationDoc<T>(data.doc);
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): CreateApplicationSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CreateApplicationSuccessResponse<U>;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iUpdateApplicationPayload {
-  /** The application ID to update */
-  applicationId: string;
-
-  /** The overall metadata for the application */
-  metadata: iMetadataWithoutInternals<NumberType>;
-
-  /** The pages in the application */
-  pages: iApplicationPage<NumberType>[];
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iUpdateApplicationSuccessResponse<T extends NumberType> {
-  doc: iApplicationDoc<T>;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class UpdateApplicationSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<UpdateApplicationSuccessResponse<T>>
-  implements iUpdateApplicationSuccessResponse<T>
-{
-  doc: ApplicationDoc<T>;
-
-  constructor(data: iUpdateApplicationSuccessResponse<T>) {
-    super();
-    this.doc = new ApplicationDoc<T>(data.doc);
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): UpdateApplicationSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as UpdateApplicationSuccessResponse<U>;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iDeleteApplicationPayload {
-  /** The application ID to delete */
-  applicationId: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iDeleteApplicationSuccessResponse {}
-
-/**
- * @category API Requests / Responses
- */
-export class DeleteApplicationSuccessResponse extends EmptyResponseClass {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iCalculatePointsPayload {
-  /** The application ID to calculate points for */
-  applicationId: string;
-  /** The page ID to calculate points for */
-  pageId: string;
-  /** The address to calculate points for */
-  address?: NativeAddress;
-  /** The pagination bookmark to start from */
-  bookmark?: string;
-  /** Skip the cache and calculate points from scratch */
-  skipCache?: boolean;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iPointsValue {
-  address: BitBadgesAddress;
-  points: number;
-  lastCalculatedAt: number;
-  claimSuccessCounts?: { [claimId: string]: number };
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iCalculatePointsSuccessResponse {
-  values: iPointsValue[];
-  pagination: {
-    bookmark: string;
-    hasMore: boolean;
-  };
-}
-
-/**
- * @category API Requests / Responses
- */
-export class CalculatePointsSuccessResponse extends CustomTypeClass<CalculatePointsSuccessResponse> implements iCalculatePointsSuccessResponse {
-  values: iPointsValue[];
-  pagination: {
-    bookmark: string;
-    hasMore: boolean;
-  };
-
-  constructor(data: iCalculatePointsSuccessResponse) {
-    super();
-    this.values = data.values;
-    this.pagination = data.pagination;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetPointsActivityPayload {
-  /** The application ID to get points activity for */
-  applicationId: string;
-  /** The page ID to get points activity for */
-  pageId: string;
-  /** The pagination bookmark to start from */
-  bookmark?: string;
-  /** The specific address to get points activity for */
-  address?: NativeAddress;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetPointsActivityPayload extends CustomTypeClass<GetPointsActivityPayload> implements iGetPointsActivityPayload {
-  applicationId: string;
-  pageId: string;
-  bookmark?: string;
-  address?: NativeAddress;
-
-  constructor(payload: iGetPointsActivityPayload) {
-    super();
-    this.applicationId = payload.applicationId;
-    this.pageId = payload.pageId;
-    this.bookmark = payload.bookmark;
-    this.address = payload.address;
-  }
-
-  static FromQuery(query: ParsedQs): GetPointsActivityPayload {
-    return new GetPointsActivityPayload({
-      applicationId: query.applicationId?.toString() ?? '',
-      pageId: query.pageId?.toString() ?? '',
-      bookmark: query.bookmark?.toString(),
-      address: (query.address?.toString() ?? '') as NativeAddress
-    });
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetPointsActivitySuccessResponse<T extends NumberType> {
-  docs: iPointsActivityDoc<T>[];
-  pagination: {
-    bookmark: string;
-    hasMore: boolean;
-  };
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetPointsActivitySuccessResponse<T extends NumberType>
-  extends CustomTypeClass<GetPointsActivitySuccessResponse<T>>
-  implements iGetPointsActivitySuccessResponse<T>
-{
-  docs: PointsActivityDoc<T>[];
-  pagination: {
-    bookmark: string;
-    hasMore: boolean;
-  };
-
-  constructor(data: iGetPointsActivitySuccessResponse<T>) {
-    super();
-    this.docs = data.docs.map((doc) => new PointsActivityDoc<T>(doc));
-    this.pagination = data.pagination;
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetPointsActivitySuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetPointsActivitySuccessResponse<U>;
-  }
-}
 
 /**
  * @category API Requests / Responses

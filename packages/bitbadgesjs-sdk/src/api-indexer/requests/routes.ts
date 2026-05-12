@@ -85,11 +85,6 @@ export class BitBadgesApiRoutes {
   static GetCreatorPluginsRoute = () => '/api/v0/plugins/creator';
   static CRUDPluginRoute = () => '/api/v0/plugins';
 
-  static GetMapsRoute = () => '/api/v0/maps';
-  static GetMapValuesRoute = () => '/api/v0/mapValues';
-  static GetMapRoute = (mapId: string) => `/api/v0/map/${mapId.toString()}`;
-  static GetMapValueRoute = (mapId: string, key: string) => `/api/v0/mapValue/${mapId.toString()}/${key.toString()}`;
-
   static GetActiveAuthorizationsRoute = () => '/api/v0/oauth/authorizations';
   static OauthRevokeRoute = () => '/api/v0/siwbb/token/revoke';
 
@@ -106,13 +101,6 @@ export class BitBadgesApiRoutes {
 
   static PerformStoreActionSingleWithBodyAuthRoute = () => `/api/v0/storeActions/single`;
   static PerformStoreActionBatchWithBodyAuthRoute = () => `/api/v0/storeActions/batch`;
-
-  static GetApplicationRoute = (applicationId: string) => `/api/v0/application/${applicationId.toString()}`;
-  static GetApplicationsRoute = () => '/api/v0/applications/fetch';
-  static SearchApplicationsRoute = () => '/api/v0/applications/search';
-  static CRUDApplicationsRoute = () => '/api/v0/applications';
-  static CalculatePointsRoute = () => '/api/v0/applications/points';
-  static GetPointsActivityRoute = () => '/api/v0/applications/points/activity';
 
   static GetUtilityPageRoute = (utilityPageId: string) => `/api/v0/utilityPage/${utilityPageId.toString()}`;
   static GetUtilityPagesRoute = () => '/api/v0/utilityPages/fetch';

@@ -28,29 +28,14 @@ import {
   iRefreshMetadataPayload
 } from './requests/collections.js';
 import {
-  GetMapSuccessResponse,
-  GetMapValueSuccessResponse,
-  GetMapValuesSuccessResponse,
-  GetMapsSuccessResponse,
-  iGetMapPayload,
-  iGetMapSuccessResponse,
-  iGetMapValueSuccessResponse,
-  iGetMapValuesPayload,
-  iGetMapValuesSuccessResponse,
-  iGetMapsPayload,
-  iGetMapsSuccessResponse
-} from './requests/maps.js';
-import {
   AddApprovalDetailsToOffChainStorageSuccessResponse,
   AddToIpfsSuccessResponse,
   BatchStoreActionSuccessResponse,
   BroadcastTxSuccessResponse,
-  CalculatePointsSuccessResponse,
   CheckClaimSuccessSuccessResponse,
   CheckSignInStatusSuccessResponse,
   CompleteClaimSuccessResponse,
   CreateApiKeySuccessResponse,
-  CreateApplicationSuccessResponse,
   CreateClaimSuccessResponse,
   CreateDeveloperAppSuccessResponse,
   CreateDynamicDataStoreSuccessResponse,
@@ -58,7 +43,6 @@ import {
   CreateSIWBBRequestSuccessResponse,
   CreateUtilityPageSuccessResponse,
   DeleteApiKeySuccessResponse,
-  DeleteApplicationSuccessResponse,
   DeleteClaimSuccessResponse,
   DeleteDeveloperAppSuccessResponse,
   DeleteDynamicDataStoreSuccessResponse,
@@ -71,8 +55,6 @@ import {
   GenericVerifyAssetsSuccessResponse,
   GetActiveAuthorizationsSuccessResponse,
   GetApiKeysSuccessResponse,
-  GetApplicationSuccessResponse,
-  GetApplicationsSuccessResponse,
   GetBrowseSuccessResponse,
   GetClaimAttemptStatusSuccessResponse,
   GetClaimAttemptsSuccessResponse,
@@ -95,7 +77,6 @@ import {
   GetPluginErrorsSuccessResponse,
   GetPluginSuccessResponse,
   GetPluginsSuccessResponse,
-  GetPointsActivitySuccessResponse,
   GetReservedClaimCodesSuccessResponse,
   GetSIWBBRequestsForDeveloperAppSuccessResponse,
   GetSearchSuccessResponse,
@@ -110,7 +91,6 @@ import {
   RotateApiKeySuccessResponse,
   RotateSIWBBRequestSuccessResponse,
   ScheduleTokenRefreshSuccessResponse,
-  SearchApplicationsSuccessResponse,
   SearchClaimsSuccessResponse,
   SearchDeveloperAppsSuccessResponse,
   SearchDynamicDataStoresSuccessResponse,
@@ -120,7 +100,6 @@ import {
   SimulateClaimSuccessResponse,
   SimulateTxSuccessResponse,
   UpdateAccountInfoSuccessResponse,
-  UpdateApplicationSuccessResponse,
   UpdateClaimSuccessResponse,
   UpdateDeveloperAppSuccessResponse,
   UpdateDynamicDataStoreSuccessResponse,
@@ -133,13 +112,11 @@ import {
   iAddToIpfsSuccessResponse,
   iBroadcastTxPayload,
   iBroadcastTxSuccessResponse,
-  iCalculatePointsPayload,
   iCheckSignInStatusPayload,
   iCheckSignInStatusSuccessResponse,
   iCompleteClaimPayload,
   iCompleteClaimSuccessResponse,
   iCreateApiKeyPayload,
-  iCreateApplicationPayload,
   iCreateClaimPayload,
   iCreateDeveloperAppPayload,
   iCreateDynamicDataStorePayload,
@@ -149,7 +126,6 @@ import {
   iCreateSIWBBRequestSuccessResponse,
   iCreateUtilityPagePayload,
   iDeleteApiKeyPayload,
-  iDeleteApplicationPayload,
   iDeleteClaimPayload,
   iDeleteDeveloperAppPayload,
   iDeleteDynamicDataStorePayload,
@@ -167,8 +143,6 @@ import {
   iGenericVerifyAssetsSuccessResponse,
   iGetActiveAuthorizationsPayload,
   iGetApiKeysPayload,
-  iGetApplicationPayload,
-  iGetApplicationsPayload,
   iGetBrowsePayload,
   iGetBrowseSuccessResponse,
   iGetClaimAttemptStatusSuccessResponse,
@@ -196,8 +170,6 @@ import {
   iGetPluginErrorsPayload,
   iGetPluginPayload,
   iGetPluginsPayload,
-  iGetPointsActivityPayload,
-  iGetPointsActivitySuccessResponse,
   iGetReservedClaimCodesPayload,
   iGetReservedClaimCodesSuccessResponse,
   iGetSIWBBRequestsForDeveloperAppPayload,
@@ -221,7 +193,6 @@ import {
   iRotateSIWBBRequestPayload,
   iRotateSIWBBRequestSuccessResponse,
   iScheduleTokenRefreshPayload,
-  iSearchApplicationsPayload,
   iSearchClaimsPayload,
   iSearchDeveloperAppsPayload,
   iSearchDynamicDataStoresPayload,
@@ -235,7 +206,6 @@ import {
   iSimulateTxSuccessResponse,
   iUpdateAccountInfoPayload,
   iUpdateAccountInfoSuccessResponse,
-  iUpdateApplicationPayload,
   iUpdateClaimPayload,
   iUpdateDeveloperAppPayload,
   iUpdateDynamicDataStorePayload,
@@ -908,91 +878,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Get maps by ID
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/maps`
-   * - **SDK Function Call**: `await BitBadgesApi.getMaps(payload);`
-   */
-  public async getMaps(payload: iGetMapsPayload): Promise<GetMapsSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetMapsPayload> = typia.validate<iGetMapsPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iGetMapsSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetMapsRoute()}`, payload);
-      return new GetMapsSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Get map by ID
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/map/{mapId}`
-   * - **SDK Function Call**: `await BitBadgesApi.getMap(payload);`
-   */
-  public async getMap(mapId: string, payload?: iGetMapPayload): Promise<GetMapSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetMapPayload> = typia.validate<iGetMapPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<iGetMapSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetMapRoute(mapId)}`, {
-        params: payload
-      });
-      return new GetMapSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Get map values
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/mapValues`
-   * - **SDK Function Call**: `await BitBadgesApi.getMapValues(payload);`
-   */
-  public async getMapValues(payload: iGetMapValuesPayload): Promise<GetMapValuesSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iGetMapValuesPayload> = typia.validate<iGetMapValuesPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iGetMapValuesSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetMapValuesRoute()}`, payload);
-      return new GetMapValuesSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Get map value by ID
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/mapValue/{mapId}/{key}`
-   * - **SDK Function Call**: `await BitBadgesApi.getMapValue(mapId, key);`
-   */
-  public async getMapValue(mapId: string, key: string): Promise<GetMapValueSuccessResponse> {
-    try {
-      const response = await this.axios.get<iGetMapValueSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetMapValueRoute(mapId, key)}`);
-      return new GetMapValueSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
    * Filters tokens in a collection based on multiple filter values.
    *
    * @remarks
@@ -1305,178 +1190,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         { params: payload }
       );
       return new SearchDynamicDataStoresSuccessResponse<Q, NumberType>(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Gets applications.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/applications/fetch`
-   * - **SDK Function Call**: `await BitBadgesApi.getApplications(payload);`
-   */
-  public async getApplications(payload: iGetApplicationsPayload): Promise<GetApplicationsSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetApplicationsPayload> = typia.validate<iGetApplicationsPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<GetApplicationsSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetApplicationsRoute()}`,
-        payload
-      );
-      return new GetApplicationsSuccessResponse<T>(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Searches for applications.
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/applications/search`
-   * - **SDK Function Call**: `await BitBadgesApi.searchApplications(payload);`
-   */
-  public async searchApplications(payload: iSearchApplicationsPayload): Promise<SearchApplicationsSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iSearchApplicationsPayload> = typia.validate<iSearchApplicationsPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<SearchApplicationsSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.SearchApplicationsRoute()}`,
-        { params: payload }
-      );
-      return new SearchApplicationsSuccessResponse<T>(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Creates an application.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/applications`
-   * - **SDK Function Call**: `await BitBadgesApi.createApplication(payload);`
-   * - **Authentication**: Must be signed in.
-   */
-  public async createApplication(payload: iCreateApplicationPayload): Promise<CreateApplicationSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iCreateApplicationPayload> = typia.validate<iCreateApplicationPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<CreateApplicationSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDApplicationsRoute()}`,
-        payload
-      );
-      return new CreateApplicationSuccessResponse<T>(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Updates an application.
-   *
-   * @remarks
-   * - **API Route**: `PUT /api/v0/applications`
-   * - **SDK Function Call**: `await BitBadgesApi.updateApplication(payload);`
-   * - **Authentication**: Must be signed in.
-   */
-  public async updateApplication(payload: iUpdateApplicationPayload): Promise<UpdateApplicationSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iUpdateApplicationPayload> = typia.validate<iUpdateApplicationPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.put<UpdateApplicationSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDApplicationsRoute()}`,
-        payload
-      );
-      return new UpdateApplicationSuccessResponse<T>(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Deletes an application.
-   *
-   * @remarks
-   * - **API Route**: `DELETE /api/v0/applications`
-   * - **SDK Function Call**: `await BitBadgesApi.deleteApplication(payload);`
-   * - **Authentication**: Must be signed in.
-   */
-  public async deleteApplication(payload: iDeleteApplicationPayload): Promise<DeleteApplicationSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iDeleteApplicationPayload> = typia.validate<iDeleteApplicationPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.delete<DeleteApplicationSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.CRUDApplicationsRoute()}`, {
-        data: payload
-      });
-      return new DeleteApplicationSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Calculates points for a page in an application and caches the result.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/applications/points`
-   * - **SDK Function Call**: `await BitBadgesApi.calculatePoints(payload);`
-   */
-  public async calculatePoints(payload: iCalculatePointsPayload): Promise<CalculatePointsSuccessResponse> {
-    try {
-      const response = await this.axios.post<CalculatePointsSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CalculatePointsRoute()}`,
-        payload
-      );
-      return new CalculatePointsSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Gets points activity for an application.
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/applications/points/activity`
-   * - **SDK Function Call**: `await BitBadgesApi.getPointsActivity(payload);`
-   */
-  public async getPointsActivity<T extends NumberType>(payload: iGetPointsActivityPayload): Promise<GetPointsActivitySuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetPointsActivityPayload> = typia.validate<iGetPointsActivityPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<iGetPointsActivitySuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetPointsActivityRoute()}`,
-        { params: payload }
-      );
-      return new GetPointsActivitySuccessResponse<T>(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
@@ -2078,37 +1791,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         params: payload
       });
       return new GetClaimSuccessResponse<T>(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Get an application by ID.
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/application/:applicationId`
-   * - **SDK Function Call**: `await BitBadgesApi.getApplication(applicationId, { ... });`
-   *
-   * @example
-   * ```typescript
-   * const res = await BitBadgesApi.getApplication("app123", { ... });
-   * console.log(res);
-   * ```
-   */
-  public async getApplication(applicationId: string, payload?: iGetApplicationPayload): Promise<GetApplicationSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetApplicationPayload> = typia.validate<iGetApplicationPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<GetApplicationSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetApplicationRoute(applicationId)}`,
-        { params: payload }
-      );
-      return new GetApplicationSuccessResponse<T>(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

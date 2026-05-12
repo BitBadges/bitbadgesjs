@@ -71,7 +71,6 @@ export const TAG_DESCRIPTIONS: Record<string, string> = {
   'stores': 'Dynamic data store routes',
   'onchain-stores': 'On-chain dynamic store routes',
   'pages': 'Utility page routes',
-  'maps': 'On-chain map and protocol routes',
   'assets': 'DEX, pools, and asset pair routes',
   'misc': 'Miscellaneous routes',
 };
@@ -802,121 +801,6 @@ export const ROUTES: ApiRoute[] = [
     },
   },
   // =========================================================================
-  // Developer apps and applications
-  // =========================================================================
-  {
-    name: 'get-application',
-    tag: 'apps',
-    method: 'GET',
-    path: '/application/{applicationId}',
-    description: 'Get Application',
-    pathParams: ['applicationId'],
-    hasBody: false,
-    sdkLinks: {
-      request: 'iGetApplicationPayload',
-      response: 'iGetApplicationSuccessResponse',
-      function: 'BitBadgesAPI.getApplication',
-    },
-  },
-  {
-    name: 'search-applications',
-    tag: 'apps',
-    method: 'GET',
-    path: '/applications/search',
-    description: 'Search Applications',
-    pathParams: [],
-    hasBody: false,
-    sdkLinks: {
-      request: 'iSearchApplicationsPayload',
-      response: 'iSearchApplicationsSuccessResponse',
-      function: 'BitBadgesAPI.searchApplications',
-    },
-  },
-  {
-    name: 'get-applications',
-    tag: 'apps',
-    method: 'POST',
-    path: '/applications/fetch',
-    description: 'Get Applications - Batch',
-    pathParams: [],
-    hasBody: true,
-    sdkLinks: {
-      request: 'iGetApplicationsPayload',
-      response: 'iGetApplicationsSuccessResponse',
-      function: 'BitBadgesAPI.getApplications',
-    },
-  },
-  {
-    name: 'create-application',
-    tag: 'apps',
-    method: 'POST',
-    path: '/applications',
-    description: 'Create Application',
-    pathParams: [],
-    hasBody: true,
-    sdkLinks: {
-      request: 'iCreateApplicationPayload',
-      response: 'iCreateApplicationSuccessResponse',
-      function: 'BitBadgesAPI.createApplication',
-    },
-  },
-  {
-    name: 'update-application',
-    tag: 'apps',
-    method: 'PUT',
-    path: '/applications',
-    description: 'Update Application',
-    pathParams: [],
-    hasBody: true,
-    sdkLinks: {
-      request: 'iUpdateApplicationPayload',
-      response: 'iUpdateApplicationSuccessResponse',
-      function: 'BitBadgesAPI.updateApplication',
-    },
-  },
-  {
-    name: 'delete-application',
-    tag: 'apps',
-    method: 'DELETE',
-    path: '/applications',
-    description: 'Delete Application',
-    pathParams: [],
-    hasBody: true,
-    sdkLinks: {
-      request: 'iDeleteApplicationPayload',
-      response: 'iDeleteApplicationSuccessResponse',
-      function: 'BitBadgesAPI.deleteApplication',
-    },
-  },
-  {
-    name: 'calculate-points',
-    tag: 'apps',
-    method: 'POST',
-    path: '/applications/points',
-    description: 'Calculate Points',
-    pathParams: [],
-    hasBody: true,
-    sdkLinks: {
-      request: 'iCalculatePointsPayload',
-      response: 'iCalculatePointsSuccessResponse',
-      function: 'BitBadgesAPI.calculatePoints',
-    },
-  },
-  {
-    name: 'get-points-activity',
-    tag: 'apps',
-    method: 'GET',
-    path: '/applications/points/activity',
-    description: 'Get Points Activity',
-    pathParams: [],
-    hasBody: false,
-    sdkLinks: {
-      request: 'iGetPointsActivityPayload',
-      response: 'iGetPointsActivitySuccessResponse',
-      function: 'BitBadgesAPI.getPointsActivity',
-    },
-  },
-  // =========================================================================
   // Plugin management routes
   // =========================================================================
   {
@@ -1276,64 +1160,6 @@ export const ROUTES: ApiRoute[] = [
       request: 'iDeleteUtilityPagePayload',
       response: 'iDeleteUtilityPageSuccessResponse',
       function: 'BitBadgesAPI.deleteUtilityPage',
-    },
-  },
-  // =========================================================================
-  // On-chain map and protocol routes
-  // =========================================================================
-  {
-    name: 'get-map',
-    tag: 'maps',
-    method: 'GET',
-    path: '/maps/{mapId}',
-    description: 'Get Map',
-    pathParams: ['mapId'],
-    hasBody: false,
-    sdkLinks: {
-      request: 'iGetMapPayload',
-      response: 'iGetMapSuccessResponse',
-      function: 'BitBadgesAPI.getMap',
-    },
-  },
-  {
-    name: 'get-maps',
-    tag: 'maps',
-    method: 'POST',
-    path: '/maps',
-    description: 'Get Maps - Batch',
-    pathParams: [],
-    hasBody: true,
-    sdkLinks: {
-      request: 'iGetMapsPayload',
-      response: 'iGetMapsSuccessResponse',
-      function: 'BitBadgesAPI.getMaps',
-    },
-  },
-  {
-    name: 'get-map-values',
-    tag: 'maps',
-    method: 'POST',
-    path: '/mapValues',
-    description: 'Get Map Values - Batch',
-    pathParams: [],
-    hasBody: true,
-    sdkLinks: {
-      request: 'iGetMapValuesPayload',
-      response: 'iGetMapValuesSuccessResponse',
-      function: 'BitBadgesAPI.getMapValues',
-    },
-  },
-  {
-    name: 'get-map-value',
-    tag: 'maps',
-    method: 'GET',
-    path: '/mapValue/{mapId}/{key}',
-    description: 'Get Map Value',
-    pathParams: ['mapId', 'key'],
-    hasBody: false,
-    sdkLinks: {
-      response: 'iGetMapValueSuccessResponse',
-      function: 'BitBadgesAPI.getMapValue',
     },
   },
   // =========================================================================

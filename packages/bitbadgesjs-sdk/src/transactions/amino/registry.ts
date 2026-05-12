@@ -1,4 +1,3 @@
-import { MsgAddCustomData } from '@/proto/anchor/tx_pb.js';
 import {
   MsgCastVote,
   MsgCreateAddressLists,
@@ -34,7 +33,6 @@ import {
   MsgExecuteUniversalUpdateCollection,
   MsgUpdateManagerSplitter
 } from '@/proto/managersplitter/tx_pb.js';
-import { MsgExecuteContractCompat, MsgInstantiateContractCompat } from '@/proto/wasmx/tx_pb.js';
 import { AminoMsg } from '../messages/signDoc.js';
 import { createAminoConverter } from './objectConverter.js';
 
@@ -292,8 +290,6 @@ export function createManagerSplitterAminoConverters(): AminoConverters {
 
 export function createWasmXAminoConverters(): AminoConverters {
   return {
-    ...createAminoConverter(MsgExecuteContractCompat, 'wasmx/MsgExecuteContractCompat'),
-    ...createAminoConverter(MsgInstantiateContractCompat, 'wasmx/MsgInstantiateContractCompat'),
     ...createAminoConverter(MsgExecuteContract, 'wasm/MsgExecuteContract'),
     ...createAminoConverter(MsgStoreCode, 'wasm/MsgStoreCode'),
     ...createAminoConverter(MsgInstantiateContract, 'wasm/MsgInstantiateContract')
@@ -306,12 +302,6 @@ export function createMapsAminoConverters(): AminoConverters {
     ...createAminoConverter(MsgDeleteMap, 'maps/DeleteMap'),
     ...createAminoConverter(MsgSetValue, 'maps/SetValue'),
     ...createAminoConverter(MsgUpdateMap, 'maps/UpdateMap')
-  };
-}
-
-export function createAnchorAminoConverters(): AminoConverters {
-  return {
-    ...createAminoConverter(MsgAddCustomData, 'anchor/AddCustomData')
   };
 }
 
@@ -351,7 +341,6 @@ export function createDefaultAminoConverters() {
     ...createDefaultCosmosAminoConverters(),
     ...createTokenizationAminoConverters(),
     ...createWasmXAminoConverters(),
-    ...createAnchorAminoConverters(),
     ...createMapsAminoConverters(),
     ...createManagerSplitterAminoConverters(),
     ...createIBCAminoConverters(),
