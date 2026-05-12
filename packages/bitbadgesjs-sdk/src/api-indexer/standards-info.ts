@@ -68,8 +68,6 @@ export interface iPredictionMarketInfo {
   yesPrice: number;
   /** NO outcome implied probability, 0..1. */
   noPrice: number;
-  /** Pre-fetched aggregate deposits across both outcomes (extra fetch). */
-  totalDeposited?: bigint;
 }
 
 /**
