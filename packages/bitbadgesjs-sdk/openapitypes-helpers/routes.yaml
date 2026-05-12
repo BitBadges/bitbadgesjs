@@ -5245,6 +5245,365 @@ paths:
   #       - apiKey: []
   #     x-internal: false
 
+  /api/{version}/skip/assets:
+    get:
+      operationId: getSkipAssets
+      summary: Get Skip:Go Assets
+      description: |
+        Lists Skip:Go cross-chain assets filtered to BitBadges-allowed chains. The indexer proxies Skip:Go's `/v2/fungible/assets` and applies BitBadges' chain/asset allowlist.
+
+        ```tsx
+        const res = await BitBadgesApi.getSkipAssets({ includeSvm: false, includeCw20: false });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSkipAssetsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSkipAssetsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getskipassets)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetSkipAssetsPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetSkipAssetsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/skip/chains:
+    get:
+      operationId: getSkipChains
+      summary: Get Skip:Go Chains
+      description: |
+        Lists Skip:Go cross-chain chain registry entries filtered to BitBadges-allowed chains. The indexer proxies Skip:Go's `/v2/info/chains` and applies pretty-name overrides for EVM chains.
+
+        ```tsx
+        const res = await BitBadgesApi.getSkipChains({ includeSvm: false, onlyTestnets: false });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSkipChainsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSkipChainsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getskipchains)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetSkipChainsPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetSkipChainsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/skip/balances:
+    post:
+      operationId: getSkipBalances
+      summary: Get Skip:Go Balances
+      description: |
+        Fetches balances across one or more (chain, address) pairs via the Skip:Go `/v2/info/balances` proxy.
+
+        ```tsx
+        const res = await BitBadgesApi.getSkipBalances({ chains: { 'bitbadges-1': ['bb1...'] } });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSkipBalancesPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSkipBalancesSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getskipbalances)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iGetSkipBalancesPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetSkipBalancesSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/skip/v2/tx/track:
+    post:
+      operationId: trackSkipTx
+      summary: Track Skip:Go Transaction
+      description: |
+        Registers a broadcast tx with Skip:Go's cross-chain tracking service. When called by an authenticated user, the indexer also writes a SkipSwapTransaction doc keyed by `{txHash}-{chainId}` so subsequent status lookups can short-circuit.
+
+        ```tsx
+        const res = await BitBadgesApi.trackSkipTx({ txHash, chainId, tokenIn: '1000ubadge' });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iTrackSkipTxPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iTrackSkipTxSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#trackskiptx)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iTrackSkipTxPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iTrackSkipTxSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /api/{version}/skip/v2/tx/status:
+    get:
+      operationId: getSkipTxStatus
+      summary: Get Skip:Go Transaction Status
+      description: |
+        Fetches the current status of a tracked Skip:Go transaction. The indexer enriches the upstream response with a `swapEventInfo` field derived from BitBadges on-chain swap events when the final destination is BitBadges.
+
+        ```tsx
+        const res = await BitBadgesApi.getSkipTxStatus({ txHash, chainId });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSkipTxStatusPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetSkipTxStatusSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getskiptxstatus)**
+      tags:
+        - Assets
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: true
+          schema:
+            $ref: '#/components/schemas/iGetSkipTxStatusPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetSkipTxStatusSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /intents/{address}:
+    get:
+      operationId: getIntents
+      summary: Get Exchange-Approval Intents
+      description: |
+        Lists intent-type exchange approvals. With an address path param, scopes to that approver (combine with `includeAll=true` to include used/expired/inactive intents). Without an address, returns the global browse list (active/funded/non-used only). Note: the SDK exposes the no-address variant by passing `undefined` to `getIntents()`.
+
+        ```tsx
+        const res = await BitBadgesApi.getIntents('bb1...', { includeAll: true });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetIntentsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetIntentsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getintents)**
+      tags:
+        - Assets
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: address
+          in: path
+          description: Approver address (bb1.../0x...). Omit (route /intents) for global browse.
+          required: true
+          schema:
+            type: string
+        - name: payload
+          in: query
+          explode: true
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetIntentsPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetIntentsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
+  /collection/{collectionId}/filterApprovals:
+    post:
+      operationId: filterCollectionApprovals
+      summary: Filter Collection Approvals
+      description: |
+        Filters approval items for a collection by a Mongo-style query and returns the matching approvers' balance docs. Pass `'any'` as `collectionId` to search across all collections.
+
+        ```tsx
+        const res = await BitBadgesApi.filterCollectionApprovals('1', {
+          query: { approvalType: 'intent', isActive: true },
+          sortBy: { _id: -1 }
+        });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterCollectionApprovalsPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iFilterCollectionApprovalsSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#filtercollectionapprovals)**
+      tags:
+        - Tokens
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: collectionId
+          in: path
+          description: Collection ID (or "any" to search across every collection)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/iFilterCollectionApprovalsPayload'
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iFilterCollectionApprovalsSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+
 components:
   responses:
     ErrorResponse:

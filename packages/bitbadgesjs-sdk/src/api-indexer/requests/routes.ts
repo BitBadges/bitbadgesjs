@@ -133,6 +133,15 @@ export class BitBadgesApiRoutes {
   static GetCollectionChallengeTrackerByIdRoute = () => `/api/v0/collection/challengeTracker`;
 
   static GetSwapActivitiesRoute = () => '/api/v0/swapActivities';
+
+  static GetSkipAssetsRoute = () => '/api/v0/skip/assets';
+  static GetSkipChainsRoute = () => '/api/v0/skip/chains';
+  static GetSkipBalancesRoute = () => '/api/v0/skip/balances';
+  static TrackSkipTxRoute = () => '/api/v0/skip/v2/tx/track';
+  static GetSkipTxStatusRoute = () => '/api/v0/skip/v2/tx/status';
+  static GetIntentsRoute = (address?: NativeAddress) => (address ? `/api/v0/intents/${address}` : `/api/v0/intents`);
+  static FilterCollectionApprovalsRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/filterApprovals`;
+
   static GetOnChainDynamicStoreRoute = (storeId: string) => `/api/v0/onChainDynamicStore/${storeId.toString()}`;
   static GetOnChainDynamicStoresByCreatorRoute = (address: NativeAddress) => `/api/v0/onChainDynamicStores/by-creator/${address}`;
   static GetOnChainDynamicStoreValueRoute = (storeId: string, address: NativeAddress) =>
