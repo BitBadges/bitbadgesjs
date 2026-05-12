@@ -164,13 +164,15 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
    * indexer recomputes on each fetch rather than caching.
    *
    * The key is the standard name (e.g. "NFTMarketplace"); the value is a
-   * `{ conforms, errors? }` object where `errors` lists rule violations when
-   * `conforms` is false.
+   * `{ conforms, errors?, warnings? }` object where `errors` lists rule
+   * violations that cause `conforms` to be false, and `warnings` lists soft
+   * advisories that do not affect conformance.
    */
   standardsConformance?: {
     [standardName: string]: {
       conforms: boolean;
       errors?: string[];
+      warnings?: string[];
     };
   };
 }
@@ -235,6 +237,7 @@ export class BitBadgesCollection<T extends NumberType>
     [standardName: string]: {
       conforms: boolean;
       errors?: string[];
+      warnings?: string[];
     };
   };
 
