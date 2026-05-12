@@ -1281,7 +1281,6 @@ function isLazyMetadata(text: string): boolean {
   return LAZY_METADATA_PATTERNS.some((p) => p.test(trimmed));
 }
 
-const BITBADGES_DEFAULT_IMAGE = 'ipfs://QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E';
 const FAKE_IMAGE_PATTERNS = [
   /^ipfs:\/\/Qm(NonExistent|Placeholder|Example|Default|Test|TODO|TBD|XXXXX)/i,
   /^ipfs:\/\/baf(NonExistent|Placeholder|Example|Default|Test|TODO)/i,

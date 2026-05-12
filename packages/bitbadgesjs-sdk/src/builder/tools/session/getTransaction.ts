@@ -24,16 +24,23 @@ export const getTransactionTool = {
 
 const IMAGE_PLACEHOLDER_REGEX = /^IMAGE_\d+$/;
 /**
- * Legacy BitBadges default logo URI. The prompt used to instruct the
- * LLM to hardcode this when no images were uploaded; it's been
- * removed, but we still scrub it defensively in case the prompt
- * cache / training data leaks it into the output.
+ * Default-placeholder URIs we scrub out and replace with per-collection
+ * generated art. The prompt instructs the LLM to use one of these when
+ * no images were uploaded; we swap them out so every AI build gets a
+ * unique placeholder instead of all looking identical.
+ *
+ * The legacy hash is kept in the list defensively — prompt cache /
+ * training data may leak it into output even after the prompt is
+ * updated to the new URI.
  */
-const LEGACY_BB_LOGO_URI = 'ipfs://QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E';
+const DEFAULT_PLACEHOLDER_URIS = new Set([
+  'ipfs://QmdZH9YT1GoMRsiCqSsJi57bmZiV2C6bCT8r8tZHeULDKS',
+  'ipfs://QmNTpizCkY5tcMpPMf1kkn7Y5YxFQo3oT54A9oKP5ijP9E'
+]);
 
 /** True iff a string needs to be swapped for generated art. */
 function isUnresolvedImage(s: string): boolean {
-  return IMAGE_PLACEHOLDER_REGEX.test(s) || s === LEGACY_BB_LOGO_URI;
+  return IMAGE_PLACEHOLDER_REGEX.test(s) || DEFAULT_PLACEHOLDER_URIS.has(s);
 }
 
 /**
