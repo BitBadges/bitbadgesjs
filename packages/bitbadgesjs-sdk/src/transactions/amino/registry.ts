@@ -1,4 +1,3 @@
-import { MsgAddCustomData } from '@/proto/anchor/tx_pb.js';
 import {
   MsgCastVote,
   MsgCreateAddressLists,
@@ -309,12 +308,6 @@ export function createMapsAminoConverters(): AminoConverters {
   };
 }
 
-export function createAnchorAminoConverters(): AminoConverters {
-  return {
-    ...createAminoConverter(MsgAddCustomData, 'anchor/AddCustomData')
-  };
-}
-
 export function createIBCAminoConverters(): AminoConverters {
   return {
     ...createAminoConverter(MsgTransfer, 'ibc/MsgTransfer')
@@ -351,7 +344,6 @@ export function createDefaultAminoConverters() {
     ...createDefaultCosmosAminoConverters(),
     ...createTokenizationAminoConverters(),
     ...createWasmXAminoConverters(),
-    ...createAnchorAminoConverters(),
     ...createMapsAminoConverters(),
     ...createManagerSplitterAminoConverters(),
     ...createIBCAminoConverters(),

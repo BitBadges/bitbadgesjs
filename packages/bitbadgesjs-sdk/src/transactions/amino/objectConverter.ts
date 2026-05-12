@@ -1,4 +1,3 @@
-import { MsgAddCustomData } from '@/proto/anchor/index.js';
 import { MsgExec, MsgGrant, MsgRevoke, GenericAuthorization } from '@/proto/cosmos/authz/v1beta1/index.js';
 import { MsgSend, MsgMultiSend, SendAuthorization } from '@/proto/cosmos/bank/v1beta1/index.js';
 import {
@@ -166,7 +165,6 @@ export const ProtoTypeRegistry: ReturnType<typeof createRegistry> = createRegist
   MsgUpdateManagerSplitter,
   MsgDeleteManagerSplitter,
   MsgExecuteUniversalUpdateCollection,
-  MsgAddCustomData,
   MsgGrant,
   MsgRevoke,
   GenericAuthorization,
