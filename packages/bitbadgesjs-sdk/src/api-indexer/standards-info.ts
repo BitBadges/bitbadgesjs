@@ -3,10 +3,11 @@
  * `standardsInfo`. Companion to `standardsConformance` — for each declared
  * standard, the indexer attaches a small object here.
  *
- * Scope is intentionally lean: only data that requires an extra fetch (e.g. an
- * escrow balance) or is a derived status enum lives here. Anything already on
- * the collection doc (approvals, metadata, amounts, recipients) is NOT
- * duplicated and should be derived client-side.
+ * Scope is intentionally lean: only derived status enums and other small
+ * summary fields live here. Anything already on the collection doc
+ * (approvals, metadata, amounts, recipients) is NOT duplicated and should be
+ * derived client-side. Escrow/bank balances are intentionally excluded —
+ * fetch them separately via the existing bank-balance routes if needed.
  *
  * Numeric fields use `bigint` directly because these objects are produced by
  * the indexer and consumed as-is; they are not part of the generic
@@ -22,8 +23,6 @@
  */
 export interface iBountyInfo {
   status: 'pending' | 'accepted' | 'denied' | 'expired';
-  /** Pre-fetched balance on the mint module escrow account (extra fetch). */
-  escrowBalance?: { denom: string; amount: bigint };
 }
 
 /**
@@ -38,14 +37,15 @@ export interface iPaymentRequestInfo {
 /**
  * Core details for the Crowdfund standard.
  *
+ * `funded` is derived from the success tracker (the on-chain handler having
+ * run). `expired` covers any post-deadline state where success hasn't
+ * executed — without an escrow read we can't distinguish "goal met but not
+ * yet withdrawn" from "goal not met".
+ *
  * @category Standards Info
  */
 export interface iCrowdfundInfo {
-  status: 'active' | 'goal_met' | 'expired_no_fund' | 'funded';
-  /** Pre-fetched raised amount on the mint module escrow account (extra fetch). */
-  raised: { denom: string; amount: bigint };
-  /** Integer 0-100 (or higher if oversubscribed). */
-  progressPercent: number;
+  status: 'active' | 'expired' | 'funded';
 }
 
 /**

@@ -8,8 +8,6 @@ import type { BitBadgesCollection } from './BitBadgesCollection.js';
  * @category Standards Info
  */
 export interface StandardInfoCtx {
-  /** Pre-fetched escrow balances on the mint module account (used by Bounty/Crowdfund). */
-  mintEscrowBalances?: { denom: string; amount: bigint }[];
   /**
    * Optional pre-fetched prediction market state (used by Prediction Market).
    * Indexer fills with the typed shape; SDK interface stays loose to avoid a
