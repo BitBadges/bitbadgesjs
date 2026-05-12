@@ -32,7 +32,6 @@ import {
   AddToIpfsSuccessResponse,
   BatchStoreActionSuccessResponse,
   BroadcastTxSuccessResponse,
-  CalculatePointsSuccessResponse,
   CheckClaimSuccessSuccessResponse,
   CheckSignInStatusSuccessResponse,
   CompleteClaimSuccessResponse,
@@ -78,7 +77,6 @@ import {
   GetPluginErrorsSuccessResponse,
   GetPluginSuccessResponse,
   GetPluginsSuccessResponse,
-  GetPointsActivitySuccessResponse,
   GetReservedClaimCodesSuccessResponse,
   GetSIWBBRequestsForDeveloperAppSuccessResponse,
   GetSearchSuccessResponse,
@@ -114,7 +112,6 @@ import {
   iAddToIpfsSuccessResponse,
   iBroadcastTxPayload,
   iBroadcastTxSuccessResponse,
-  iCalculatePointsPayload,
   iCheckSignInStatusPayload,
   iCheckSignInStatusSuccessResponse,
   iCompleteClaimPayload,
@@ -173,8 +170,6 @@ import {
   iGetPluginErrorsPayload,
   iGetPluginPayload,
   iGetPluginsPayload,
-  iGetPointsActivityPayload,
-  iGetPointsActivitySuccessResponse,
   iGetReservedClaimCodesPayload,
   iGetReservedClaimCodesSuccessResponse,
   iGetSIWBBRequestsForDeveloperAppPayload,
@@ -1195,51 +1190,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         { params: payload }
       );
       return new SearchDynamicDataStoresSuccessResponse<Q, NumberType>(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Calculates points for a page in an application and caches the result.
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/applications/points`
-   * - **SDK Function Call**: `await BitBadgesApi.calculatePoints(payload);`
-   */
-  public async calculatePoints(payload: iCalculatePointsPayload): Promise<CalculatePointsSuccessResponse> {
-    try {
-      const response = await this.axios.post<CalculatePointsSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CalculatePointsRoute()}`,
-        payload
-      );
-      return new CalculatePointsSuccessResponse(response.data);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Gets points activity for an application.
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/applications/points/activity`
-   * - **SDK Function Call**: `await BitBadgesApi.getPointsActivity(payload);`
-   */
-  public async getPointsActivity<T extends NumberType>(payload: iGetPointsActivityPayload): Promise<GetPointsActivitySuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetPointsActivityPayload> = typia.validate<iGetPointsActivityPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<iGetPointsActivitySuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetPointsActivityRoute()}`,
-        { params: payload }
-      );
-      return new GetPointsActivitySuccessResponse<T>(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

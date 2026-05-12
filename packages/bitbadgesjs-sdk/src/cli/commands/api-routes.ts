@@ -801,37 +801,6 @@ export const ROUTES: ApiRoute[] = [
     },
   },
   // =========================================================================
-  // Points (formerly under Applications)
-  // =========================================================================
-  {
-    name: 'calculate-points',
-    tag: 'apps',
-    method: 'POST',
-    path: '/applications/points',
-    description: 'Calculate Points',
-    pathParams: [],
-    hasBody: true,
-    sdkLinks: {
-      request: 'iCalculatePointsPayload',
-      response: 'iCalculatePointsSuccessResponse',
-      function: 'BitBadgesAPI.calculatePoints',
-    },
-  },
-  {
-    name: 'get-points-activity',
-    tag: 'apps',
-    method: 'GET',
-    path: '/applications/points/activity',
-    description: 'Get Points Activity',
-    pathParams: [],
-    hasBody: false,
-    sdkLinks: {
-      request: 'iGetPointsActivityPayload',
-      response: 'iGetPointsActivitySuccessResponse',
-      function: 'BitBadgesAPI.getPointsActivity',
-    },
-  },
-  // =========================================================================
   // Plugin management routes
   // =========================================================================
   {

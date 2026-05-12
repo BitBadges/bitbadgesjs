@@ -102,9 +102,6 @@ export class BitBadgesApiRoutes {
   static PerformStoreActionSingleWithBodyAuthRoute = () => `/api/v0/storeActions/single`;
   static PerformStoreActionBatchWithBodyAuthRoute = () => `/api/v0/storeActions/batch`;
 
-  static CalculatePointsRoute = () => '/api/v0/applications/points';
-  static GetPointsActivityRoute = () => '/api/v0/applications/points/activity';
-
   static GetUtilityPageRoute = (utilityPageId: string) => `/api/v0/utilityPage/${utilityPageId.toString()}`;
   static GetUtilityPagesRoute = () => '/api/v0/utilityPages/fetch';
   static SearchUtilityPagesRoute = () => '/api/v0/utilityPages/search';
