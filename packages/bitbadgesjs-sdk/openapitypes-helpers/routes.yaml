@@ -3602,6 +3602,64 @@ paths:
         - apiKey: []
       x-internal: false
 
+  /account/{address}/balances:
+    get:
+      operationId: getUserBalances
+      summary: Get User Balances
+      tags:
+        - Accounts
+      description: |-
+        Lean alternative to fetching `/users` with a `tokensCollected` view.
+        Returns ONLY the balance docs for the address (no account wrapper,
+        no metadata, no view envelope), so it is the cheapest call for
+        read-side flows that just need balances.
+
+        Use the `/users` route (`getAccounts`) when you also need account
+        fields (profile, sequence, etc.) or other views in the same request.
+
+        ```tsx
+        await BitBadgesApi.getUserBalances("bb1...", { limit: 100 });
+        ```
+
+        SDK Links:
+        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUserBalancesPayload)**
+        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetUserBalancesSuccessResponse)**
+        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getuserbalances)**
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/iGetUserBalancesSuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      parameters:
+        - name: x-api-key
+          in: header
+          description: BitBadges API Key for authentication
+          required: true
+          schema:
+            type: string
+        - name: address
+          in: path
+          description: Account address (bb1... or any equivalent address form)
+          required: true
+          schema:
+            type: string
+        - in: query
+          explode: true
+          name: payload
+          description: The payload for the request. Anything here should be specified as query parameters (e.g. ?key1=value1&key2=)
+          required: false
+          schema:
+            $ref: '#/components/schemas/iGetUserBalancesPayload'
+      security:
+        - apiKey: []
+      x-internal: false
+
   /account/{address}/activity/claims:
     get:
       operationId: getClaimActivityForUser

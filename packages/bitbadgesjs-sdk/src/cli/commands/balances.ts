@@ -187,10 +187,10 @@ addOutputFlags(
 
 // ── balances bitbadges ─────────────────────────────────────────────────────
 //
-// Indexer-backed. Wraps three SDK methods:
-//   getAccounts(viewsToFetch: tokensCollected)  — full default
-//   getBalanceByAddress(collectionId, address)  — single collection
-//   getBalanceByAddressSpecificToken(...)       — single token in collection
+// Indexer-backed. Wraps three SDK routes:
+//   GET /account/:address/balances              — lean default (docs only)
+//   GET /collection/:id/balance/:address        — single collection
+//   GET /collection/:id/:tokenId/balance/:addr  — single token in collection
 //
 // We invoke the underlying HTTP routes directly via `apiRequest` so the
 // CLI doesn't have to instantiate a typed BitBadgesAPI client (same
@@ -200,7 +200,7 @@ interface BitBadgesFlags extends NetworkFlags, OutputFlags {
   collection?: string;
   token?: string;
   bookmark?: string;
-  viewId?: string;
+  limit?: string;
 }
 
 addOutputFlags(
@@ -210,7 +210,7 @@ addOutputFlags(
       .description(
         [
           'Query BitBadges-standard token balances (the multi-tokenId, time-ranged shape).',
-          'Default: returns ALL collection balances for the user (via account views).',
+          'Default: returns ALL collection balances for the user (lean docs-only endpoint).',
           '--collection: filter to a single collection.',
           '--token: filter to a single token within --collection.',
           "Does NOT include fungibles — for those, use 'bb balances ics20' or 'bb balances assets'."
@@ -219,8 +219,8 @@ addOutputFlags(
       .argument('<address>', 'BitBadges native address (bb1...) or any equivalent address form')
       .option('--collection <id>', 'Restrict to a single collection ID')
       .option('--token <n>', 'Restrict to a single token ID (requires --collection)')
-      .option('--bookmark <b>', 'Pagination bookmark for the tokensCollected view (default mode only)')
-      .option('--view-id <id>', 'Custom view ID for tokensCollected (default mode only)', 'cli-balances')
+      .option('--bookmark <b>', 'Pagination bookmark from a previous response (default mode only)')
+      .option('--limit <n>', 'Page size for the default mode (indexer-enforced max applies)')
   )
 ).action(async (address: string, opts: BitBadgesFlags) => {
   try {
@@ -250,24 +250,19 @@ addOutputFlags(
       return;
     }
 
-    // No --collection: aggregate via getAccounts with a tokensCollected
-    // view. We use the plural /users endpoint (iGetAccountsPayload)
-    // because the singular /user does not accept viewsToFetch.
-    const body = {
-      accountsToFetch: [
-        {
-          address,
-          viewsToFetch: [
-            {
-              viewId: opts.viewId ?? 'cli-balances',
-              viewType: 'tokensCollected',
-              bookmark: opts.bookmark ?? ''
-            }
-          ]
-        }
-      ]
-    };
-    const res = await callApi('POST', '/users', opts, body);
+    // No --collection: hit the lean per-user balances endpoint. Returns
+    // only the balance docs (no account wrapper, no view envelope) — cheaper
+    // than POST /users with a tokensCollected view for read-only flows.
+    const limitNum = opts.limit ? Number(opts.limit) : undefined;
+    if (opts.limit && (limitNum === undefined || !Number.isFinite(limitNum) || limitNum <= 0)) {
+      process.stderr.write(`Error: --limit must be a positive integer. Got: ${opts.limit}\n`);
+      process.exit(1);
+    }
+    const path = appendQuery(`/account/${encodeURIComponent(address)}/balances`, {
+      bookmark: opts.bookmark,
+      limit: limitNum
+    });
+    const res = await callApi('GET', path, opts);
     emit(res, opts);
   } catch (err) {
     emitError(err);

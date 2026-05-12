@@ -221,6 +221,9 @@ import {
   iTrackSkipTxSuccessResponse,
   iGetTokensFromFaucetPayload,
   iGetTokensFromFaucetSuccessResponse,
+  iGetUserBalancesPayload,
+  iGetUserBalancesSuccessResponse,
+  GetUserBalancesSuccessResponse,
   iGetUtilityPagePayload,
   iGetUtilityPagesPayload,
   iOauthRevokePayload,
@@ -698,6 +701,43 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    */
   public async getAccount(payload: iGetAccountPayload): Promise<GetAccountSuccessResponse<T>> {
     return await BitBadgesUserInfo.GetAccount(this, payload);
+  }
+
+  /**
+   * Gets the BitBadges-standard balance docs for a user.
+   *
+   * Lean alternative to fetching `/users` with a `tokensCollected` view —
+   * returns only the balance docs (no account wrapper, no metadata).
+   * Use this when you just need the balances and want to skip the
+   * full account-fetch round trip.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/account/:address/balances`
+   * - **SDK Function Call**: `await BitBadgesApi.getUserBalances(address, { bookmark, limit });`
+   *
+   * @example
+   * ```typescript
+   * const res = await BitBadgesApi.getUserBalances("bb1...", { limit: 100 });
+   * console.log(res.docs, res.pagination);
+   * ```
+   */
+  public async getUserBalances(address: NativeAddress, payload?: iGetUserBalancesPayload): Promise<GetUserBalancesSuccessResponse<T>> {
+    try {
+      const safePayload: iGetUserBalancesPayload = payload ?? {};
+      const validateRes: typia.IValidation<iGetUserBalancesPayload> = typia.validate<iGetUserBalancesPayload>(safePayload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetUserBalancesSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetUserBalancesRoute(address)}`,
+        { params: safePayload }
+      );
+      return new GetUserBalancesSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
   }
 
   /**

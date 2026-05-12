@@ -10,6 +10,7 @@ import {
   ApiKeyDoc,
   ApprovalItemDoc,
   ApprovalTrackerDoc,
+  BalanceDoc,
   BalanceDocWithDetails,
   DeveloperAppDoc,
   DynamicDataDoc,
@@ -28,6 +29,7 @@ import {
   iApiKeyDoc,
   iApprovalItemDoc,
   iApprovalTrackerDoc,
+  iBalanceDoc,
   iBalanceDocWithDetails,
   iClaimActivityDoc,
   iDynamicDataDoc,
@@ -4879,5 +4881,70 @@ export class FilterCollectionApprovalsSuccessResponse<T extends NumberType>
     options?: ConvertOptions
   ): FilterCollectionApprovalsSuccessResponse<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FilterCollectionApprovalsSuccessResponse<U>;
+  }
+}
+
+/**
+ * Get User Balances
+ * Route: GET /api/v0/account/:address/balances
+ *
+ * Lean alternative to fetching `/users` with a `tokensCollected` view.
+ * Returns ONLY the balance docs (no account wrapper, no metadata), so it
+ * is the cheapest call for read-side flows that just need balances.
+ *
+ * Use `getAccounts` / `getAccountsAndUpdate` when you also need account
+ * fields (profile, bio, sequence, etc.).
+ * @category API Requests / Responses
+ */
+export interface iGetUserBalancesPayload {
+  /** Pagination bookmark from the previous response. */
+  bookmark?: string;
+  /** Page size. Indexer-enforced max applies. */
+  limit?: number;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetUserBalancesPayload implements iGetUserBalancesPayload {
+  bookmark?: string;
+  limit?: number;
+
+  constructor(data: iGetUserBalancesPayload) {
+    this.bookmark = data.bookmark;
+    this.limit = data.limit;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetUserBalancesSuccessResponse<T extends NumberType> {
+  /** Balance docs for the address — one per (collectionId, address) pair the user holds. */
+  docs: iBalanceDoc<T>[];
+  pagination: { bookmark: string; hasMore: boolean };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetUserBalancesSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetUserBalancesSuccessResponse<T>>
+  implements iGetUserBalancesSuccessResponse<T>
+{
+  docs: BalanceDoc<T>[];
+  pagination: { bookmark: string; hasMore: boolean };
+
+  constructor(data: iGetUserBalancesSuccessResponse<T>) {
+    super();
+    this.docs = data.docs.map((doc) => new BalanceDoc(doc));
+    this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(
+    convertFunction: (val: NumberType) => U,
+    options?: ConvertOptions
+  ): GetUserBalancesSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetUserBalancesSuccessResponse<U>;
   }
 }
