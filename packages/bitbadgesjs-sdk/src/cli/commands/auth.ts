@@ -109,8 +109,6 @@ interface VerifyResult {
   sessionCookie: ParsedCookie;
   /** All Set-Cookie values from /auth/verify, in order — replay these on subsequent calls in the same flow. */
   allCookies: ParsedCookie[];
-  requires2FA: boolean;
-  twoFAMessage?: string;
 }
 
 async function postVerify(
@@ -135,29 +133,7 @@ async function postVerify(
   return {
     sessionCookie,
     allCookies: r.setCookies,
-    requires2FA: !!r.body?.requires2FA,
-    twoFAMessage: r.body?.message,
   };
-}
-
-async function complete2FA(
-  baseUrl: string,
-  apiKey: string,
-  cookieHeader: string,
-  address: string,
-  code: string,
-  isBackup: boolean,
-): Promise<{ sessionCookie: ParsedCookie | null }> {
-  const body: Record<string, string> = { address };
-  if (isBackup) body.backupCode = code;
-  else body.totpCode = code;
-
-  const r = await rawPost(`${baseUrl}/2fa/offline/verify`, { 'x-api-key': apiKey, Cookie: cookieHeader }, body);
-  if (r.status !== 200) {
-    const msg = r.body?.error || r.body?.errorMessage || `HTTP ${r.status}`;
-    throw new Error(`2FA verification failed: ${msg}`);
-  }
-  return { sessionCookie: pickSessionCookie(r.setCookies) };
 }
 
 function persistSession(args: {
@@ -211,8 +187,6 @@ addNetworkOptions(authCommand.command('login'))
   .option('--no-open', 'With --browser: print the sign URL to stderr instead of auto-launching the browser.')
   .option('--timeout <seconds>', 'With --browser: how long to wait for the wallet signature before giving up (default 300, max 1800).')
   .option('--port <n>', 'With --browser: pin the loopback listener port (default: random). Use this for SSH-forwarded dev setups.')
-  .option('--2fa <code>', '6-digit TOTP code (if account has 2FA enabled).')
-  .option('--2fa-backup <code>', 'Backup recovery code (alternative to --2fa).')
   .action(async (opts) => {
     const network = resolveNetwork(opts);
     const baseUrl = resolveBaseUrl({ testnet: opts.testnet, local: opts.local, baseUrl: opts.url });
@@ -320,27 +294,7 @@ addNetworkOptions(authCommand.command('login'))
       process.exit(1);
     }
 
-    let finalCookie = verify.sessionCookie;
-    let allCookies = verify.allCookies;
-    const totp = (opts as any)['2fa'] as string | undefined;
-    const backup = (opts as any)['2faBackup'] as string | undefined;
-    if (verify.requires2FA) {
-      if (!totp && !backup) {
-        process.stderr.write(
-          `\nAccount has 2FA enabled. Re-run with --2fa <totp-code> or --2fa-backup <code>.\n`,
-        );
-        process.exit(2);
-      }
-      const stepUp = await complete2FA(
-        baseUrl,
-        apiKey,
-        formatCookieHeaderFromMany(allCookies),
-        opts.address,
-        (totp || backup)!,
-        !!backup,
-      );
-      if (stepUp.sessionCookie) finalCookie = stepUp.sessionCookie;
-    }
+    const finalCookie = verify.sessionCookie;
 
     const session = persistSession({
       network,
@@ -398,13 +352,11 @@ addNetworkOptions(authCommand.command('verify'))
   .option('--public-key <b64>', 'Compressed pubkey, base64. REQUIRED for Cosmos addresses.')
   .option('--message <text>', 'The exact challenge message that was signed.')
   .option('--message-file <path>', 'Read challenge message from file (use `-` for stdin).')
-  .option('--2fa <code>', '6-digit TOTP code (if 2FA enabled).')
-  .option('--2fa-backup <code>', 'Backup recovery code (alternative to --2fa).')
   .action(async (opts) => {
     // Same flow as `login` — kept as a separate subcommand purely for
     // discoverability / muscle memory parity with the two-step flow.
     await authCommand.commands.find((c) => c.name() === 'login')!.parseAsync(
-      ['login', ...rebuildArgs(opts, ['address', 'signature', 'publicKey', 'message', 'messageFile', '2fa', '2faBackup', 'testnet', 'local', 'url', 'apiKey'])],
+      ['login', ...rebuildArgs(opts, ['address', 'signature', 'publicKey', 'message', 'messageFile', 'testnet', 'local', 'url', 'apiKey'])],
       { from: 'user' },
     );
   });
