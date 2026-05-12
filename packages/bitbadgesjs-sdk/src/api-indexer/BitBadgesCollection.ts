@@ -92,6 +92,7 @@ import {
   RefreshStatusSuccessResponse
 } from './requests/collections.js';
 import { BitBadgesApiRoutes } from './requests/routes.js';
+import type { iStandardsInfo } from './standards-info.js';
 
 const NEW_COLLECTION_ID = '0';
 
@@ -175,6 +176,15 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
       warnings?: string[];
     };
   };
+
+  /**
+   * Per-standard core-details object attached by the indexer. Companion to
+   * `standardsConformance`. Only contains data that requires an extra fetch
+   * (e.g. an escrow balance) or is a derived status enum — does NOT duplicate
+   * data already on the collection doc (approvals, metadata, amounts), which
+   * is derivable client-side.
+   */
+  standardsInfo?: iStandardsInfo;
 }
 
 /**
@@ -241,6 +251,8 @@ export class BitBadgesCollection<T extends NumberType>
     };
   };
 
+  standardsInfo?: iStandardsInfo;
+
   constructor(data: iBitBadgesCollection<T>) {
     super(data);
     this.invariants = new CollectionInvariantsWithDetails(data.invariants);
@@ -263,6 +275,7 @@ export class BitBadgesCollection<T extends NumberType>
     this.cosmosCoinWrapperPaths = data.cosmosCoinWrapperPaths.map((x) => new CosmosCoinWrapperPathWithDetails(x));
     this.aliasPaths = data.aliasPaths.map((x) => new AliasPathWithDetails(x));
     this.standardsConformance = data.standardsConformance;
+    this.standardsInfo = data.standardsInfo;
   }
 
   getNumberFieldNames(): string[] {
