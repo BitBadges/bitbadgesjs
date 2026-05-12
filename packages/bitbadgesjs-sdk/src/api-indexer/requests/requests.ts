@@ -8,7 +8,9 @@ import { ClaimActivityDoc, PointsActivityDoc, TransferActivityDoc } from '@/api-
 import {
   AccessTokenDoc,
   ApiKeyDoc,
+  ApprovalItemDoc,
   ApprovalTrackerDoc,
+  BalanceDocWithDetails,
   DeveloperAppDoc,
   DynamicDataDoc,
   DynamicStoreDocWithDetails,
@@ -24,7 +26,9 @@ import {
   DynamicDataHandlerType,
   UpdateClaimRequest,
   iApiKeyDoc,
+  iApprovalItemDoc,
   iApprovalTrackerDoc,
+  iBalanceDocWithDetails,
   iClaimActivityDoc,
   iDynamicDataDoc,
   iDynamicStoreDocWithDetails,
@@ -4325,5 +4329,300 @@ export class SearchPromptSkillsSuccessResponse extends CustomTypeClass<SearchPro
     super();
     this.promptSkills = data.promptSkills;
     this.bookmark = data.bookmark;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Skip:Go passthrough types (cross-chain swap routing).
+//
+// The indexer proxies a subset of Skip:Go endpoints
+// (https://docs.skip.build/go/api-reference/prod). Payload + response
+// shapes mirror the upstream Skip:Go API verbatim — kept as loose
+// `Record<string, unknown>` / `[key: string]: any` index signatures
+// because Skip:Go evolves its schema independently of BitBadges and we
+// don't want to break SDK consumers when they add a field.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Get Skip Assets
+ * Route: GET /api/v0/skip/assets
+ * @category API Requests / Responses
+ */
+export interface iGetSkipAssetsPayload {
+  /** Include Solana / SVM chain assets. Defaults to false. */
+  includeSvm?: boolean;
+  /** Include CW20 token assets. Defaults to false. */
+  includeCw20?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetSkipAssetsSuccessResponse {
+  /** Map of chain_id → assets payload (mirrors Skip:Go /v2/fungible/assets). */
+  chain_to_assets_map: Record<string, unknown>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetSkipAssetsSuccessResponse extends CustomTypeClass<GetSkipAssetsSuccessResponse> implements iGetSkipAssetsSuccessResponse {
+  chain_to_assets_map: Record<string, unknown>;
+
+  constructor(data: iGetSkipAssetsSuccessResponse) {
+    super();
+    this.chain_to_assets_map = data.chain_to_assets_map;
+  }
+}
+
+/**
+ * Get Skip Chains
+ * Route: GET /api/v0/skip/chains
+ * @category API Requests / Responses
+ */
+export interface iGetSkipChainsPayload {
+  /** Include Solana / SVM chains. Defaults to false. */
+  includeSvm?: boolean;
+  /** Return testnets only. Defaults to false. */
+  onlyTestnets?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetSkipChainsSuccessResponse {
+  /** Chain entries (mirrors Skip:Go /v2/info/chains). */
+  chains: Array<{
+    chain_id: string;
+    [key: string]: unknown;
+  }>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetSkipChainsSuccessResponse extends CustomTypeClass<GetSkipChainsSuccessResponse> implements iGetSkipChainsSuccessResponse {
+  chains: Array<{ chain_id: string; [key: string]: unknown }>;
+
+  constructor(data: iGetSkipChainsSuccessResponse) {
+    super();
+    this.chains = data.chains;
+  }
+}
+
+/**
+ * Get Skip Balances
+ * Route: POST /api/v0/skip/balances
+ * @category API Requests / Responses
+ */
+export interface iGetSkipBalancesPayload {
+  /**
+   * Map of chain_id → either an array of addresses, or an object with an address and optional denoms.
+   * Mirrors Skip:Go /v2/info/balances.
+   */
+  chains: Record<string, string[] | { address: string; denoms?: string[] }>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetSkipBalancesSuccessResponse {
+  /** Skip:Go balance payload (shape varies by request). */
+  [key: string]: unknown;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetSkipBalancesSuccessResponse extends CustomTypeClass<GetSkipBalancesSuccessResponse> implements iGetSkipBalancesSuccessResponse {
+  [key: string]: unknown;
+
+  constructor(data: iGetSkipBalancesSuccessResponse) {
+    super();
+    Object.assign(this, data);
+  }
+}
+
+/**
+ * Track Skip Tx
+ * Route: POST /api/v0/skip/v2/tx/track
+ *
+ * Initiates Skip:Go tracking for a broadcast tx. Accepts both snake_case
+ * (matches Skip:Go) and camelCase (matches SDK conventions); the indexer
+ * normalizes either form before forwarding.
+ * @category API Requests / Responses
+ */
+export interface iTrackSkipTxPayload {
+  /** Transaction hash to track (snake_case Skip:Go form). */
+  tx_hash?: string;
+  /** Transaction hash to track (camelCase SDK form). */
+  txHash?: string;
+  /** Source chain ID (snake_case Skip:Go form). */
+  chain_id?: string;
+  /** Source chain ID (camelCase SDK form). */
+  chainId?: string;
+  /** Optional token in amount with denom (e.g. "1000ubadge"). Used to seed the swap event row in the indexer DB. */
+  tokenIn?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iTrackSkipTxSuccessResponse {
+  /** Skip:Go track-tx response (echoes tx hash + chain id, plus tracking metadata). */
+  [key: string]: unknown;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class TrackSkipTxSuccessResponse extends CustomTypeClass<TrackSkipTxSuccessResponse> implements iTrackSkipTxSuccessResponse {
+  [key: string]: unknown;
+
+  constructor(data: iTrackSkipTxSuccessResponse) {
+    super();
+    Object.assign(this, data);
+  }
+}
+
+/**
+ * Get Skip Tx Status
+ * Route: GET /api/v0/skip/v2/tx/status
+ * @category API Requests / Responses
+ */
+export interface iGetSkipTxStatusPayload {
+  /** Transaction hash to look up. */
+  txHash: string;
+  /** Optional source chain ID — required for some tx hashes that aren't globally unique. */
+  chainId?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetSkipTxStatusSuccessResponse {
+  /** Skip:Go tx-status payload (transfers, state, etc). Indexer may inject `swapEventInfo` derived from on-chain swap events. */
+  transfers?: unknown[];
+  swapEventInfo?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetSkipTxStatusSuccessResponse extends CustomTypeClass<GetSkipTxStatusSuccessResponse> implements iGetSkipTxStatusSuccessResponse {
+  transfers?: unknown[];
+  swapEventInfo?: Record<string, unknown>;
+  [key: string]: unknown;
+
+  constructor(data: iGetSkipTxStatusSuccessResponse) {
+    super();
+    Object.assign(this, data);
+  }
+}
+
+/**
+ * Get Intents (Approval Items of approvalType "intent")
+ * Route: GET /api/v0/intents (browse all) or GET /api/v0/intents/:address (specific user)
+ *
+ * "Intents" are pre-signed exchange approvals that swap one denom for
+ * another. The browse endpoint (`/intents`) returns only active, funded,
+ * non-used intents. The user-scoped endpoint (`/intents/:address`)
+ * can return everything when `includeAll=true`.
+ * @category API Requests / Responses
+ */
+export interface iGetIntentsPayload {
+  /**
+   * When fetching a specific user's intents, set to `true` to include
+   * used/expired/inactive/underfunded intents. Server returns 400 if
+   * passed without a path-level address.
+   */
+  includeAll?: boolean;
+  /** Filter by the denom the intent pays out. */
+  payDenom?: string;
+  /** Filter by the denom the intent expects to receive. */
+  receiveDenom?: string;
+  /** Filter to intents scoped to a specific collection. */
+  collectionId?: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetIntentsSuccessResponse<T extends NumberType> {
+  /** Approval item docs of type `intent`, sorted newest first. */
+  intents: Array<iApprovalItemDoc<T>>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetIntentsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetIntentsSuccessResponse<T>>
+  implements iGetIntentsSuccessResponse<T>
+{
+  intents: ApprovalItemDoc<T>[];
+
+  constructor(data: iGetIntentsSuccessResponse<T>) {
+    super();
+    this.intents = data.intents.map((x) => new ApprovalItemDoc(x));
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetIntentsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetIntentsSuccessResponse<U>;
+  }
+}
+
+/**
+ * Filter Collection Approvals
+ * Route: POST /api/v0/collection/:collectionId/filterApprovals
+ *
+ * Free-form mongo-style filter against the approval-item store, scoped
+ * to a single collection (or all collections when `collectionId === 'any'`).
+ * Returns the balance docs of the approvers that match.
+ *
+ * The `query` and `sortBy` fields are intentionally untyped — the
+ * indexer forwards them to the underlying mongoose query so callers
+ * can filter on any indexed field (approverAddress, approvalType,
+ * isActive, sufficientBalances, intentPayDenom, etc.).
+ * @category API Requests / Responses
+ */
+export interface iFilterCollectionApprovalsPayload {
+  /** Mongo-style filter object (matches the ApprovalItemDoc shape). */
+  query: Record<string, unknown>;
+  /** Mongo-style sort object (e.g. `{ _id: -1 }`). */
+  sortBy: Record<string, unknown>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iFilterCollectionApprovalsSuccessResponse<T extends NumberType> {
+  /** Balance docs (with off-chain details applied) for the approvers matching the filter. */
+  docs: iBalanceDocWithDetails<T>[];
+  pagination: PaginationInfo;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class FilterCollectionApprovalsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<FilterCollectionApprovalsSuccessResponse<T>>
+  implements iFilterCollectionApprovalsSuccessResponse<T>
+{
+  docs: BalanceDocWithDetails<T>[];
+  pagination: PaginationInfo;
+
+  constructor(data: iFilterCollectionApprovalsSuccessResponse<T>) {
+    super();
+    this.docs = data.docs.map((x) => new BalanceDocWithDetails(x));
+    this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(
+    convertFunction: (val: NumberType) => U,
+    options?: ConvertOptions
+  ): FilterCollectionApprovalsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as FilterCollectionApprovalsSuccessResponse<U>;
   }
 }

@@ -83,6 +83,13 @@ import {
   GetSignInChallengeSuccessResponse,
   GetStatusSuccessResponse,
   GetSwapActivitiesSuccessResponse,
+  GetSkipAssetsSuccessResponse,
+  GetSkipBalancesSuccessResponse,
+  GetSkipChainsSuccessResponse,
+  GetSkipTxStatusSuccessResponse,
+  GetIntentsSuccessResponse,
+  FilterCollectionApprovalsSuccessResponse,
+  TrackSkipTxSuccessResponse,
   GetTokensFromFaucetSuccessResponse,
   GetUtilityPageSuccessResponse,
   GetUtilityPagesSuccessResponse,
@@ -182,6 +189,20 @@ import {
   iGetStatusSuccessResponse,
   iGetSwapActivitiesPayload,
   iGetSwapActivitiesSuccessResponse,
+  iGetSkipAssetsPayload,
+  iGetSkipAssetsSuccessResponse,
+  iGetSkipBalancesPayload,
+  iGetSkipBalancesSuccessResponse,
+  iGetSkipChainsPayload,
+  iGetSkipChainsSuccessResponse,
+  iGetSkipTxStatusPayload,
+  iGetSkipTxStatusSuccessResponse,
+  iGetIntentsPayload,
+  iGetIntentsSuccessResponse,
+  iFilterCollectionApprovalsPayload,
+  iFilterCollectionApprovalsSuccessResponse,
+  iTrackSkipTxPayload,
+  iTrackSkipTxSuccessResponse,
   iGetTokensFromFaucetPayload,
   iGetTokensFromFaucetSuccessResponse,
   iGetUtilityPagePayload,
@@ -2300,6 +2321,193 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         { params: payload }
       );
       return new GetSwapActivitiesSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get Skip:Go cross-chain assets (filtered to BitBadges-allowed chains).
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/skip/assets`
+   * - **SDK Function Call**: `await BitBadgesApi.getSkipAssets({ includeSvm: false, includeCw20: false });`
+   * - Indexer proxies https://api.skip.build/v2/fungible/assets and applies BitBadges' chain/asset allowlist.
+   */
+  public async getSkipAssets(payload?: iGetSkipAssetsPayload): Promise<GetSkipAssetsSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGetSkipAssetsPayload> = typia.validate<iGetSkipAssetsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetSkipAssetsSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSkipAssetsRoute()}`,
+        { params: payload }
+      );
+      return new GetSkipAssetsSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get Skip:Go cross-chain chain registry (filtered to BitBadges-allowed chains).
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/skip/chains`
+   * - **SDK Function Call**: `await BitBadgesApi.getSkipChains({ includeSvm: false, onlyTestnets: false });`
+   * - Indexer proxies https://api.skip.build/v2/info/chains and applies BitBadges' chain allowlist (incl. pretty-name overrides for EVM chains).
+   */
+  public async getSkipChains(payload?: iGetSkipChainsPayload): Promise<GetSkipChainsSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGetSkipChainsPayload> = typia.validate<iGetSkipChainsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetSkipChainsSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSkipChainsRoute()}`,
+        { params: payload }
+      );
+      return new GetSkipChainsSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get Skip:Go balances for one or more (chain, address) pairs.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/skip/balances`
+   * - **SDK Function Call**: `await BitBadgesApi.getSkipBalances({ chains: { 'bitbadges-1': ['bb1...'] } });`
+   * - Indexer proxies https://api.skip.build/v2/info/balances.
+   */
+  public async getSkipBalances(payload: iGetSkipBalancesPayload): Promise<GetSkipBalancesSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGetSkipBalancesPayload> = typia.validate<iGetSkipBalancesPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iGetSkipBalancesSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSkipBalancesRoute()}`,
+        payload
+      );
+      return new GetSkipBalancesSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Register a broadcast tx with Skip:Go tracking.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/skip/v2/tx/track`
+   * - **SDK Function Call**: `await BitBadgesApi.trackSkipTx({ txHash, chainId, tokenIn: '1000ubadge' });`
+   * - Side-effect: when called by an authenticated user, the indexer writes a SkipSwapTransaction doc keyed by `${txHash}-${chainId}` so subsequent `getSkipTxStatus` calls can short-circuit.
+   */
+  public async trackSkipTx(payload: iTrackSkipTxPayload): Promise<TrackSkipTxSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iTrackSkipTxPayload> = typia.validate<iTrackSkipTxPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iTrackSkipTxSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.TrackSkipTxRoute()}`,
+        payload
+      );
+      return new TrackSkipTxSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get the status of a tracked Skip:Go transaction.
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/skip/v2/tx/status`
+   * - **SDK Function Call**: `await BitBadgesApi.getSkipTxStatus({ txHash, chainId });`
+   * - Indexer enriches the upstream response with a `swapEventInfo` field derived from BitBadges on-chain swap events when the final destination is BitBadges.
+   */
+  public async getSkipTxStatus(payload: iGetSkipTxStatusPayload): Promise<GetSkipTxStatusSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iGetSkipTxStatusPayload> = typia.validate<iGetSkipTxStatusPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetSkipTxStatusSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSkipTxStatusRoute()}`,
+        { params: payload }
+      );
+      return new GetSkipTxStatusSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Get exchange-approval "intents" — either the global browse list (no address)
+   * or a specific user's intents (pass an address; combine with `includeAll: true`
+   * to include used/expired/inactive ones).
+   *
+   * @remarks
+   * - **API Route**: `GET /api/v0/intents` (no address) or `GET /api/v0/intents/:address`
+   * - **SDK Function Call**: `await BitBadgesApi.getIntents('bb1...', { includeAll: true });`
+   */
+  public async getIntents(address?: NativeAddress, payload?: iGetIntentsPayload): Promise<GetIntentsSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetIntentsPayload> = typia.validate<iGetIntentsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetIntentsSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetIntentsRoute(address)}`,
+        { params: payload }
+      );
+      return new GetIntentsSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Filter approval items for a collection by a Mongo-style query, returning the
+   * matching approvers' balance docs. Pass `'any'` as `collectionId` to search across
+   * all collections.
+   *
+   * @remarks
+   * - **API Route**: `POST /api/v0/collection/:collectionId/filterApprovals`
+   * - **SDK Function Call**: `await BitBadgesApi.filterCollectionApprovals('1', { query: { approvalType: 'intent', isActive: true }, sortBy: { _id: -1 } });`
+   */
+  public async filterCollectionApprovals(
+    collectionId: CollectionId,
+    payload: iFilterCollectionApprovalsPayload
+  ): Promise<FilterCollectionApprovalsSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iFilterCollectionApprovalsPayload> = typia.validate<iFilterCollectionApprovalsPayload>(payload);
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iFilterCollectionApprovalsSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.FilterCollectionApprovalsRoute(collectionId)}`,
+        payload
+      );
+      return new FilterCollectionApprovalsSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);

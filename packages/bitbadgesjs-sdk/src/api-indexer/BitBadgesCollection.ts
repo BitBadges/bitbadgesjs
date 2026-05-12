@@ -156,6 +156,23 @@ export interface iBitBadgesCollection<T extends NumberType> extends iCollectionD
 
   /** Collection-level invariants with EVM query challenge metadata populated (WithDetails). */
   invariants: iCollectionInvariantsWithDetails<T>;
+
+  /**
+   * Standards conformance results for this collection. Populated by the indexer
+   * after evaluating each declared standard (e.g. NFTMarketplace, NFTPricingDenom)
+   * against the on-chain collection state. Conformance is deterministic, so the
+   * indexer recomputes on each fetch rather than caching.
+   *
+   * The key is the standard name (e.g. "NFTMarketplace"); the value is a
+   * `{ conforms, errors? }` object where `errors` lists rule violations when
+   * `conforms` is false.
+   */
+  standardsConformance?: {
+    [standardName: string]: {
+      conforms: boolean;
+      errors?: string[];
+    };
+  };
 }
 
 /**
@@ -214,6 +231,13 @@ export class BitBadgesCollection<T extends NumberType>
 
   invariants: CollectionInvariantsWithDetails<T>;
 
+  standardsConformance?: {
+    [standardName: string]: {
+      conforms: boolean;
+      errors?: string[];
+    };
+  };
+
   constructor(data: iBitBadgesCollection<T>) {
     super(data);
     this.invariants = new CollectionInvariantsWithDetails(data.invariants);
@@ -235,6 +259,7 @@ export class BitBadgesCollection<T extends NumberType>
     this.tokenFloorPrices = data.tokenFloorPrices?.map((x) => new TokenFloorPriceDoc(x));
     this.cosmosCoinWrapperPaths = data.cosmosCoinWrapperPaths.map((x) => new CosmosCoinWrapperPathWithDetails(x));
     this.aliasPaths = data.aliasPaths.map((x) => new AliasPathWithDetails(x));
+    this.standardsConformance = data.standardsConformance;
   }
 
   getNumberFieldNames(): string[] {
