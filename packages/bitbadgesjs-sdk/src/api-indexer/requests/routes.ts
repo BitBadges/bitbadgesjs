@@ -163,4 +163,41 @@ export class BitBadgesApiRoutes {
   static GetOnChainDynamicStoreValueRoute = (storeId: string, address: NativeAddress) =>
     `/api/v0/onChainDynamicStore/${storeId.toString()}/value/${address}`;
   static GetOnChainDynamicStoreValuesPaginatedRoute = (storeId: string) => `/api/v0/onChainDynamicStore/${storeId.toString()}/values`;
+
+  // ── DEX / marketplace — per-token & per-collection listings/offers/orderbook. ──
+  static GetAllListingsRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/allListings`;
+  static GetCollectionOffersRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/collectionOffers`;
+  static GetListingsForTokenIdRoute = (collectionId: CollectionId, tokenId: NumberType) =>
+    `/api/v0/collection/${collectionId.toString()}/listings/${tokenId.toString()}`;
+  static GetOffersForTokenIdRoute = (collectionId: CollectionId, tokenId: NumberType) =>
+    `/api/v0/collection/${collectionId.toString()}/offers/${tokenId.toString()}`;
+  static GetOrderbookDepthRoute = (collectionId: CollectionId, tokenId: NumberType) =>
+    `/api/v0/collection/${collectionId.toString()}/orderbook/${tokenId.toString()}`;
+  static GetCandlestickDataRoute = (collectionId: CollectionId, tokenId: NumberType) =>
+    `/api/v0/collection/${collectionId.toString()}/candlestick/${tokenId.toString()}`;
+
+  static GetLiquidityPairPriceHistoryRoute = () => '/api/v0/liquidityPairPriceHistory';
+  static GetPoolsBatchRoute = () => '/api/v0/pools/batch';
+
+  // ── Governance / voting / predictions. ──
+  static GetVotesByCollectionRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/votes`;
+  static GetVoteByProposalIdRoute = (proposalId: string) => `/api/v0/vote/${proposalId}`;
+  static GetVotesByVoterRoute = (voter: NativeAddress) => `/api/v0/voter/${voter}/votes`;
+
+  static GetPredictionsRoute = () => '/api/v0/predictions';
+  static GetPredictionDetailRoute = (collectionId: CollectionId) => `/api/v0/predictions/${collectionId.toString()}`;
+  static GetPredictionPricesRoute = (collectionId: CollectionId) => `/api/v0/predictions/${collectionId.toString()}/prices`;
+
+  // ── Trait filtering (handlers exist on indexer side already — typed wrappers added in PR #0393). ──
+  // FilterTokensInCollectionRoute and FilterSuggestionsRoute already defined above.
+
+  // ── EVM broadcast / simulate (BitBadges-EVM specific). ──
+  static BroadcastTxEvmRoute = () => '/api/v0/broadcast-evm';
+  static SimulateTxEvmRoute = () => '/api/v0/simulate-evm';
+
+  // ── PromptSkill CRUD + discovery. ──
+  static GetPromptSkillRoute = (promptSkillId: string) => `/api/v0/promptSkill/${promptSkillId}`;
+  static SearchPromptSkillsRoute = () => '/api/v0/promptSkills/search';
+  static FetchPromptSkillsRoute = () => '/api/v0/promptSkills/fetch';
+  static CRUDPromptSkillsRoute = () => '/api/v0/promptSkills';
 }

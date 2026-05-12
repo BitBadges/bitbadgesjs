@@ -4948,3 +4948,737 @@ export class GetUserBalancesSuccessResponse<T extends NumberType>
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetUserBalancesSuccessResponse<U>;
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DEX / marketplace — per-token + per-collection listings & offers.
+// Mirror the indexer handlers in `src/routes/balances.ts`.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetAllListingsPayload {
+  /** Denom to filter listings by (e.g. `ubadge`). */
+  denom: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetAllListingsSuccessResponse<T extends NumberType> {
+  listings: iApprovalItemDoc<T>[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetAllListingsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetAllListingsSuccessResponse<T>>
+  implements iGetAllListingsSuccessResponse<T>
+{
+  listings: ApprovalItemDoc<T>[];
+
+  constructor(data: iGetAllListingsSuccessResponse<T>) {
+    super();
+    this.listings = data.listings.map((doc) => new ApprovalItemDoc(doc));
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetAllListingsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetAllListingsSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetCollectionOffersPayload {
+  /** Denom to filter offers by (e.g. `ubadge`). */
+  denom: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetCollectionOffersSuccessResponse<T extends NumberType> {
+  offers: iApprovalItemDoc<T>[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetCollectionOffersSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetCollectionOffersSuccessResponse<T>>
+  implements iGetCollectionOffersSuccessResponse<T>
+{
+  offers: ApprovalItemDoc<T>[];
+
+  constructor(data: iGetCollectionOffersSuccessResponse<T>) {
+    super();
+    this.offers = data.offers.map((doc) => new ApprovalItemDoc(doc));
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetCollectionOffersSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCollectionOffersSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetListingsForTokenIdPayload {
+  /** Denom to filter listings by (e.g. `ubadge`). */
+  denom: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetListingsForTokenIdSuccessResponse<T extends NumberType> {
+  listings: iApprovalItemDoc<T>[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetListingsForTokenIdSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetListingsForTokenIdSuccessResponse<T>>
+  implements iGetListingsForTokenIdSuccessResponse<T>
+{
+  listings: ApprovalItemDoc<T>[];
+
+  constructor(data: iGetListingsForTokenIdSuccessResponse<T>) {
+    super();
+    this.listings = data.listings.map((doc) => new ApprovalItemDoc(doc));
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetListingsForTokenIdSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetListingsForTokenIdSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetOffersForTokenIdPayload {
+  /** Denom to filter offers by (e.g. `ubadge`). */
+  denom: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetOffersForTokenIdSuccessResponse<T extends NumberType> {
+  offers: iApprovalItemDoc<T>[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOffersForTokenIdSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetOffersForTokenIdSuccessResponse<T>>
+  implements iGetOffersForTokenIdSuccessResponse<T>
+{
+  offers: ApprovalItemDoc<T>[];
+
+  constructor(data: iGetOffersForTokenIdSuccessResponse<T>) {
+    super();
+    this.offers = data.offers.map((doc) => new ApprovalItemDoc(doc));
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetOffersForTokenIdSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetOffersForTokenIdSuccessResponse<U>;
+  }
+}
+
+/**
+ * Aggregated bid/ask depth for a single (collectionId, tokenId, denom).
+ * Indexer side stores the doc keyed by `${collectionId}:${tokenId}:${denom}`.
+ * Inner shape is intentionally untyped — bid/listing aggregations evolve
+ * independently of this SDK and the doc's `bids` / `listings` are price-keyed
+ * maps. Treat as opaque on the client.
+ *
+ * @category API Requests / Responses
+ */
+export interface iGetOrderbookDepthPayload {
+  /** Denom to filter the orderbook by (e.g. `ubadge`). */
+  denom: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetOrderbookDepthSuccessResponse {
+  // TODO: Tighten when the indexer's OrderbookDepthModel doc is mirrored in
+  // bitbadgesjs-sdk. Today the shape is `{ _docId, collectionId, tokenId, denom,
+  // bids: Record<priceTier, ...>, listings: Record<priceTier, ...> }` but the
+  // inner price-keyed maps are not stable enough to encode in the SDK yet.
+  orderbookDepth: unknown;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetOrderbookDepthSuccessResponse extends CustomTypeClass<GetOrderbookDepthSuccessResponse>
+  implements iGetOrderbookDepthSuccessResponse
+{
+  orderbookDepth: unknown;
+
+  constructor(data: iGetOrderbookDepthSuccessResponse) {
+    super();
+    this.orderbookDepth = data.orderbookDepth;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetCandlestickDataPayload {
+  /** Denom for the candlestick price/volume aggregation (e.g. `ubadge`). */
+  denom: string;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetCandlestickDataSuccessResponse<T extends NumberType> {
+  candlesticks: Array<{
+    timestamp: T;
+    open: T;
+    high: T;
+    low: T;
+    close: T;
+    volume: T;
+    numberOfTrades: T;
+  }>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetCandlestickDataSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetCandlestickDataSuccessResponse<T>>
+  implements iGetCandlestickDataSuccessResponse<T>
+{
+  candlesticks: Array<{ timestamp: T; open: T; high: T; low: T; close: T; volume: T; numberOfTrades: T }>;
+
+  constructor(data: iGetCandlestickDataSuccessResponse<T>) {
+    super();
+    this.candlesticks = data.candlesticks;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetCandlestickDataSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetCandlestickDataSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetLiquidityPairPriceHistoryPayload {
+  /** Asset identifier (e.g. `badgeslp:123:uyes` or `ubadge`). */
+  asset: string;
+  /** Aggregation timeframe. Defaults to `'10m'` on the indexer when omitted. */
+  timeframe?: '10m' | '1h' | '1d' | string;
+}
+
+/**
+ * @category API Requests / Responses
+ *
+ * The indexer streams the matching `AssetPriceHistoryDoc` rows verbatim. We
+ * leave the inner shape as a structural interface rather than re-using the
+ * gamm `iAssetPriceHistoryDoc` class to avoid a circular import cost in
+ * this requests file.
+ */
+export interface iGetLiquidityPairPriceHistorySuccessResponse<T extends NumberType> {
+  docs: Array<{
+    _id?: string;
+    _docId: string;
+    asset: string;
+    price: number;
+    timestamp: T;
+    timeframe?: string;
+    high?: number;
+    low?: number;
+    open?: number;
+    [k: string]: unknown;
+  }>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetLiquidityPairPriceHistorySuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetLiquidityPairPriceHistorySuccessResponse<T>>
+  implements iGetLiquidityPairPriceHistorySuccessResponse<T>
+{
+  docs: iGetLiquidityPairPriceHistorySuccessResponse<T>['docs'];
+
+  constructor(data: iGetLiquidityPairPriceHistorySuccessResponse<T>) {
+    super();
+    this.docs = data.docs;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(
+    convertFunction: (val: NumberType) => U,
+    options?: ConvertOptions
+  ): GetLiquidityPairPriceHistorySuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetLiquidityPairPriceHistorySuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetPoolsBatchPayload {
+  /** Pool IDs to fetch (max 100). */
+  poolIds: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ *
+ * Inner `pools` shape mirrors the indexer's `LiquidityPoolInfoDoc` rows —
+ * left as `unknown` so this requests file doesn't need to depend on the
+ * `gamm` module. Typed consumers can cast through `LiquidityPoolInfoDoc<T>`
+ * from `bitbadgesjs-sdk/gamm` if needed.
+ */
+export interface iGetPoolsBatchSuccessResponse<T extends NumberType> {
+  pools: unknown[];
+  count: number;
+  /** Echo of T for variance. */
+  _t?: T;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetPoolsBatchSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetPoolsBatchSuccessResponse<T>>
+  implements iGetPoolsBatchSuccessResponse<T>
+{
+  pools: unknown[];
+  count: number;
+
+  constructor(data: iGetPoolsBatchSuccessResponse<T>) {
+    super();
+    this.pools = data.pools;
+    this.count = data.count;
+  }
+
+  getNumberFieldNames(): string[] {
+    return [];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetPoolsBatchSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetPoolsBatchSuccessResponse<U>;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Governance / voting / prediction markets.
+// Mirror indexer handlers in `src/routes/votes.ts` and `src/routes/predictions.ts`.
+//
+// `VoteDoc` lives in the indexer (not the SDK) — vote payloads here surface
+// the recalculated-totals shape the API actually returns. Untyped inner
+// fields (`voters`, `votes`) are intentional: their nested shape is dictated
+// by the indexer's vote-tally recalculation step, which we don't model here.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iVoteApiData<T extends NumberType> {
+  _docId: string;
+  collectionId: string;
+  approvalLevel: string;
+  approverAddress?: string;
+  approvalId: string;
+  proposalId: string;
+  quorumThreshold: T;
+  voters: Array<{ address: string; weight: T }>;
+  votes: Array<{ voter: string; yesWeight: T; lastUpdated: T }>;
+  totalYesWeight: T;
+  totalNoWeight: T;
+  totalPossibleWeight: T;
+  uri?: string;
+  customData?: string;
+  lastUpdated: T;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetVoteByProposalIdPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetVoteByProposalIdSuccessResponse<T extends NumberType> {
+  vote: iVoteApiData<T>;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetVoteByProposalIdSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetVoteByProposalIdSuccessResponse<T>>
+  implements iGetVoteByProposalIdSuccessResponse<T>
+{
+  vote: iVoteApiData<T>;
+
+  constructor(data: iGetVoteByProposalIdSuccessResponse<T>) {
+    super();
+    this.vote = data.vote;
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetVoteByProposalIdSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetVoteByProposalIdSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetVotesByCollectionPayload {
+  bookmark?: string;
+  limit?: number;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetVotesByCollectionSuccessResponse<T extends NumberType> {
+  votes: iVoteApiData<T>[];
+  pagination: PaginationInfo;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetVotesByCollectionSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetVotesByCollectionSuccessResponse<T>>
+  implements iGetVotesByCollectionSuccessResponse<T>
+{
+  votes: iVoteApiData<T>[];
+  pagination: PaginationInfo;
+
+  constructor(data: iGetVotesByCollectionSuccessResponse<T>) {
+    super();
+    this.votes = data.votes;
+    this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetVotesByCollectionSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetVotesByCollectionSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetVotesByVoterPayload {
+  bookmark?: string;
+  limit?: number;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetVotesByVoterSuccessResponse<T extends NumberType> {
+  votes: iVoteApiData<T>[];
+  pagination: PaginationInfo;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetVotesByVoterSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetVotesByVoterSuccessResponse<T>>
+  implements iGetVotesByVoterSuccessResponse<T>
+{
+  votes: iVoteApiData<T>[];
+  pagination: PaginationInfo;
+
+  constructor(data: iGetVotesByVoterSuccessResponse<T>) {
+    super();
+    this.votes = data.votes;
+    this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetVotesByVoterSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetVotesByVoterSuccessResponse<U>;
+  }
+}
+
+/**
+ * Parsed prediction-market data the indexer returns from
+ * `parsePredictionMarketData()`. Fields mirror `src/routes/predictions.ts`.
+ *
+ * @category API Requests / Responses
+ */
+export interface iPredictionMarketApiData {
+  collectionId: string;
+  metadataUri: string;
+  customData: string;
+  verifierAddress: string;
+  depositDenom: string;
+  depositAmount: string;
+  status: 'active' | 'resolved-yes' | 'resolved-no' | 'resolved-push' | string;
+  yesPrice: number;
+  noPrice: number;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetPredictionsPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetPredictionsSuccessResponse {
+  predictions: iPredictionMarketApiData[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetPredictionsSuccessResponse extends CustomTypeClass<GetPredictionsSuccessResponse> implements iGetPredictionsSuccessResponse {
+  predictions: iPredictionMarketApiData[];
+
+  constructor(data: iGetPredictionsSuccessResponse) {
+    super();
+    this.predictions = data.predictions;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetPredictionDetailPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetPredictionDetailSuccessResponse {
+  /**
+   * Parsed prediction-market data plus the collection's serialized approval
+   * documents. `approvals` is left as `unknown[]` because the indexer
+   * JSON-serializes BigInts before sending; downstream code that needs
+   * a typed view should cast via the SDK's `iApprovalDoc`.
+   */
+  prediction: iPredictionMarketApiData & { approvals: unknown[] };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetPredictionDetailSuccessResponse
+  extends CustomTypeClass<GetPredictionDetailSuccessResponse>
+  implements iGetPredictionDetailSuccessResponse
+{
+  prediction: iPredictionMarketApiData & { approvals: unknown[] };
+
+  constructor(data: iGetPredictionDetailSuccessResponse) {
+    super();
+    this.prediction = data.prediction;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetPredictionPricesPayload {
+  /** Price-history aggregation timeframe. Defaults to `'1h'` on the indexer. */
+  timeframe?: '10m' | '1h' | '1d';
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetPredictionPricesSuccessResponse {
+  prices: {
+    yes: Array<{ time: number; value: number }>;
+    no: Array<{ time: number; value: number }>;
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetPredictionPricesSuccessResponse
+  extends CustomTypeClass<GetPredictionPricesSuccessResponse>
+  implements iGetPredictionPricesSuccessResponse
+{
+  prices: { yes: Array<{ time: number; value: number }>; no: Array<{ time: number; value: number }> };
+
+  constructor(data: iGetPredictionPricesSuccessResponse) {
+    super();
+    this.prices = data.prices;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EVM broadcast / simulate (BitBadges-EVM specific). Cosmos-side broadcast
+// is the existing `broadcastTx` / `simulateTx`. These are separate handlers
+// that wrap `MsgEthereumTx` and return both EVM and cosmos tx hashes.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iBroadcastTxEvmPayload {
+  mode: 'evm';
+  evmTx?: {
+    to: string;
+    data: string;
+    value?: string;
+    signer_address?: string;
+    chain_id?: string;
+  };
+  /** Optional already-broadcast EVM tx hash to track. */
+  txHash?: string;
+  /** Optional raw EVM-encoded tx bytes (hex string or Uint8Array). */
+  tx_bytes?: string | Uint8Array;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iBroadcastTxEvmSuccessResponse {
+  /** The EVM keccak256 transaction hash. */
+  txhash: string;
+  /**
+   * The cosmos-side `MsgEthereumTx` wrapping hash. Cosmos tooling (explorer,
+   * indexer, Skip Go tracker) must use this hash — `txhash` alone won't
+   * resolve there. May be `undefined` if the tx didn't mine in time.
+   */
+  cosmosTxHash?: string;
+  success: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class BroadcastTxEvmSuccessResponse
+  extends CustomTypeClass<BroadcastTxEvmSuccessResponse>
+  implements iBroadcastTxEvmSuccessResponse
+{
+  txhash: string;
+  cosmosTxHash?: string;
+  success: boolean;
+
+  constructor(data: iBroadcastTxEvmSuccessResponse) {
+    super();
+    this.txhash = data.txhash;
+    this.cosmosTxHash = data.cosmosTxHash;
+    this.success = data.success;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iSimulateTxEvmPayload {
+  mode: 'evm';
+  evmTx: {
+    to: string;
+    data: string;
+    value?: string;
+    signer_address: string;
+    chain_id?: string;
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iSimulateTxEvmSuccessResponse {
+  /** Estimated gas as a decimal string. */
+  gas_used: string;
+  success: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class SimulateTxEvmSuccessResponse
+  extends CustomTypeClass<SimulateTxEvmSuccessResponse>
+  implements iSimulateTxEvmSuccessResponse
+{
+  gas_used: string;
+  success: boolean;
+
+  constructor(data: iSimulateTxEvmSuccessResponse) {
+    super();
+    this.gas_used = data.gas_used;
+    this.success = data.success;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PromptSkill — individual GET + batch fetch.
+// Create / update / delete / search types already exist above.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetPromptSkillPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetPromptSkillSuccessResponse {
+  promptSkill: iPromptSkillDoc;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetPromptSkillSuccessResponse extends CustomTypeClass<GetPromptSkillSuccessResponse> implements iGetPromptSkillSuccessResponse {
+  promptSkill: iPromptSkillDoc;
+
+  constructor(data: iGetPromptSkillSuccessResponse) {
+    super();
+    this.promptSkill = data.promptSkill;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iFetchPromptSkillsPayload {
+  /** IDs to fetch (1–25). */
+  promptSkillIds: string[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iFetchPromptSkillsSuccessResponse {
+  promptSkills: iPromptSkillDoc[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class FetchPromptSkillsSuccessResponse
+  extends CustomTypeClass<FetchPromptSkillsSuccessResponse>
+  implements iFetchPromptSkillsSuccessResponse
+{
+  promptSkills: iPromptSkillDoc[];
+
+  constructor(data: iFetchPromptSkillsSuccessResponse) {
+    super();
+    this.promptSkills = data.promptSkills;
+  }
+}
