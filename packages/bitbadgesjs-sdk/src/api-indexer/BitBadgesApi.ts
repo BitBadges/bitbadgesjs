@@ -2496,6 +2496,19 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
+   * @deprecated Use `estimateSwap` instead. Pass-through shim kept so the
+   * documented legacy `POST /api/v0/swaps/estimate` route (which the indexer
+   * still serves as a deprecation alias) stays callable from generated SDK
+   * clients. New code should call `estimateSwap`.
+   */
+  public async estimateSwapLegacy(payload: iEstimateSwapPayload): Promise<iEstimateSwapSuccessResponse> {
+    if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'development') {
+      console.warn('[deprecated] BitBadgesApi.estimateSwapLegacy — use estimateSwap which targets /api/v0/swap/estimate');
+    }
+    return this.estimateSwap(payload);
+  }
+
+  /**
    * Register a broadcast tx with the cross-chain tracker.
    *
    * @remarks
