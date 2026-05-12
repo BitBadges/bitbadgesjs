@@ -1225,7 +1225,7 @@ export const ROUTES: ApiRoute[] = [
     name: 'estimate-swap',
     tag: 'assets',
     method: 'POST',
-    path: '/api/{version}/swaps/estimate',
+    path: '/api/{version}/swap/estimate',
     description: 'Estimate Swap',
     pathParams: ['version'],
     hasBody: true,
@@ -1379,11 +1379,96 @@ export const ROUTES: ApiRoute[] = [
     },
   },
   {
+    name: 'get-swap-assets',
+    tag: 'assets',
+    method: 'GET',
+    path: '/api/{version}/swap/assets',
+    description: 'Get consolidated cross-chain assets (Skip:Go + CoinsRegistry + verified BitBadges assets)',
+    pathParams: ['version'],
+    hasBody: false,
+    queryParams: [
+      { name: 'includeSvm', description: 'Include Solana/SVM chain assets', required: false },
+      { name: 'includeCw20', description: 'Include CW20 token assets', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetSwapAssetsPayload',
+      response: 'iGetSwapAssetsSuccessResponse',
+      function: 'BitBadgesAPI.getSwapAssets',
+    },
+  },
+  {
+    name: 'get-swap-chains',
+    tag: 'assets',
+    method: 'GET',
+    path: '/api/{version}/swap/chains',
+    description: 'Get cross-chain chain registry (filtered to BitBadges-allowed chains)',
+    pathParams: ['version'],
+    hasBody: false,
+    queryParams: [
+      { name: 'includeSvm', description: 'Include Solana/SVM chains', required: false },
+      { name: 'onlyTestnets', description: 'Return testnets only', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetSwapChainsPayload',
+      response: 'iGetSwapChainsSuccessResponse',
+      function: 'BitBadgesAPI.getSwapChains',
+    },
+  },
+  {
+    name: 'get-swap-balances',
+    tag: 'assets',
+    method: 'POST',
+    path: '/api/{version}/swap/balances',
+    description: 'Get consolidated cross-chain balances for one or more (chain, address) pairs',
+    pathParams: ['version'],
+    hasBody: true,
+    sdkLinks: {
+      request: 'iGetSwapBalancesPayload',
+      response: 'iGetSwapBalancesSuccessResponse',
+      function: 'BitBadgesAPI.getSwapBalances',
+    },
+  },
+  {
+    name: 'track-swap',
+    tag: 'assets',
+    method: 'POST',
+    path: '/api/{version}/swap/track',
+    description: 'Register a broadcast tx with cross-chain tracking',
+    pathParams: ['version'],
+    hasBody: true,
+    sdkLinks: {
+      request: 'iTrackSwapPayload',
+      response: 'iTrackSwapSuccessResponse',
+      function: 'BitBadgesAPI.trackSwap',
+    },
+  },
+  {
+    name: 'get-swap-status',
+    tag: 'assets',
+    method: 'GET',
+    path: '/api/{version}/swap/status',
+    description: 'Get the status of a tracked cross-chain transaction',
+    pathParams: ['version'],
+    hasBody: false,
+    queryParams: [
+      { name: 'txHash', description: 'Transaction hash to look up', required: true },
+      { name: 'chainId', description: 'Optional source chain ID', required: false },
+    ],
+    sdkLinks: {
+      request: 'iGetSwapStatusPayload',
+      response: 'iGetSwapStatusSuccessResponse',
+      function: 'BitBadgesAPI.getSwapStatus',
+    },
+  },
+  // ── Legacy /skip/* entries (deprecated). Kept for backward-compat with consumers
+  // that still call BitBadgesAPI.getSkip* / trackSkipTx — the SDK methods themselves
+  // route through the new /swap/* endpoints under the hood.
+  {
     name: 'get-skip-assets',
     tag: 'assets',
     method: 'GET',
     path: '/api/{version}/skip/assets',
-    description: 'Get Skip:Go assets (filtered to BitBadges-allowed chains)',
+    description: '[DEPRECATED] Use /swap/assets. Get Skip:Go assets (filtered to BitBadges-allowed chains)',
     pathParams: ['version'],
     hasBody: false,
     queryParams: [
@@ -1401,7 +1486,7 @@ export const ROUTES: ApiRoute[] = [
     tag: 'assets',
     method: 'GET',
     path: '/api/{version}/skip/chains',
-    description: 'Get Skip:Go chain registry (filtered to BitBadges-allowed chains)',
+    description: '[DEPRECATED] Use /swap/chains. Get Skip:Go chain registry (filtered to BitBadges-allowed chains)',
     pathParams: ['version'],
     hasBody: false,
     queryParams: [
@@ -1419,7 +1504,7 @@ export const ROUTES: ApiRoute[] = [
     tag: 'assets',
     method: 'POST',
     path: '/api/{version}/skip/balances',
-    description: 'Get Skip:Go balances for one or more (chain, address) pairs',
+    description: '[DEPRECATED] Use /swap/balances. Get Skip:Go balances for one or more (chain, address) pairs',
     pathParams: ['version'],
     hasBody: true,
     sdkLinks: {
@@ -1433,7 +1518,7 @@ export const ROUTES: ApiRoute[] = [
     tag: 'assets',
     method: 'POST',
     path: '/api/{version}/skip/v2/tx/track',
-    description: 'Register a broadcast tx with Skip:Go cross-chain tracking',
+    description: '[DEPRECATED] Use /swap/track. Register a broadcast tx with Skip:Go cross-chain tracking',
     pathParams: ['version'],
     hasBody: true,
     sdkLinks: {
@@ -1447,7 +1532,7 @@ export const ROUTES: ApiRoute[] = [
     tag: 'assets',
     method: 'GET',
     path: '/api/{version}/skip/v2/tx/status',
-    description: 'Get the status of a tracked Skip:Go transaction',
+    description: '[DEPRECATED] Use /swap/status. Get the status of a tracked Skip:Go transaction',
     pathParams: ['version'],
     hasBody: false,
     queryParams: [
