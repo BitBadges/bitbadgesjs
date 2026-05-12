@@ -30,7 +30,6 @@ import type {
 } from '@/interfaces/types/core.js';
 import type { iCollectionPermissions, iUserPermissionsWithDetails } from '@/interfaces/types/permissions.js';
 import type { iUserBalanceStore } from '@/interfaces/types/userBalances.js';
-import type { iMap, iValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
 
 /**
  * @category API Requests / Responses
@@ -1898,11 +1897,6 @@ export interface iSIWBBRequestDoc<T extends NumberType> extends Doc {
 /**
  * @category Interfaces
  */
-export interface iMapDoc<T extends NumberType> extends Doc, iMapWithValues<T> {}
-
-/**
- * @category Interfaces
- */
 export interface iUpdateHistory<T extends NumberType> {
   /** The transaction hash of the on-chain transaction that updated this. */
   txHash: string;
@@ -1912,19 +1906,6 @@ export interface iUpdateHistory<T extends NumberType> {
   blockTimestamp: UNIXMilliTimestamp<T>;
   /** The indexer's timestamp of the update. This is provided in some cases because the time of indexing may be inconsistent with the time of the block. */
   timestamp: UNIXMilliTimestamp<T>;
-}
-
-/**
- * @inheritDoc iMap
- * @category Interfaces
- */
-export interface iMapWithValues<T extends NumberType> extends iMap<T> {
-  /** The (key, value) pairs for the maps that are set. */
-  values: { [key: string]: iValueStore };
-  /** The fetched/populated metadata for the map (if any). This is the actual metadata object with name, image, description, etc. */
-  populatedMetadata?: iMetadata<T>;
-  /** The update history for the map. Maps are maintained through blockchain transactions. */
-  updateHistory: iUpdateHistory<T>[];
 }
 
 /**

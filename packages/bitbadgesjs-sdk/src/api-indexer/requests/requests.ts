@@ -13,7 +13,6 @@ import {
   DynamicDataDoc,
   DynamicStoreDocWithDetails,
   DynamicStoreValueDoc,
-  MapWithValues,
   PluginDoc,
   SIWBBRequestDoc,
   StatusDoc,
@@ -52,7 +51,6 @@ import {
   type iClaimDetails,
   type iClaimReward,
   type iDeveloperAppDoc,
-  type iMapWithValues,
   type iPluginDoc,
   type iPromptSkillDoc,
   type iStatusDoc,
@@ -302,7 +300,6 @@ export interface iGetSearchSuccessResponse<T extends NumberType> {
     collection: iBitBadgesCollection<T>;
     tokenIds: iUintRange<T>[];
   }[];
-  maps: iMapWithValues<T>[];
   claims?: iClaimDetails<T>[];
   utilityPages?: iUtilityPageDoc<T>[];
 }
@@ -321,7 +318,6 @@ export class GetSearchSuccessResponse<T extends NumberType>
     collection: BitBadgesCollection<T>;
     tokenIds: UintRangeArray<T>;
   }[];
-  maps: MapWithValues<T>[];
   claims?: ClaimDetails<T>[];
   utilityPages?: UtilityPageDoc<T>[];
 
@@ -335,7 +331,6 @@ export class GetSearchSuccessResponse<T extends NumberType>
         tokenIds: UintRangeArray.From(token.tokenIds)
       };
     });
-    this.maps = data.maps.map((map) => new MapWithValues(map));
     this.claims = data.claims?.map((claim) => new ClaimDetails(claim));
     this.utilityPages = data.utilityPages?.map((utilityPage) => new UtilityPageDoc(utilityPage));
   }
@@ -1507,7 +1502,6 @@ export interface iGetBrowseSuccessResponse<T extends NumberType> {
       tokenIds: iUintRange<T>[];
     }[];
   };
-  maps: { [category: string]: iMapWithValues<T>[] };
   claims?: { [category: string]: iClaimDetails<T>[] };
   claimActivity?: iClaimActivityDoc<T>[];
   pointsActivity?: iPointsActivityDoc<T>[];
@@ -1530,7 +1524,6 @@ export class GetBrowseSuccessResponse<T extends NumberType>
       tokenIds: UintRangeArray<T>;
     }[];
   };
-  maps: { [category: string]: MapWithValues<T>[] };
   claims?: { [category: string]: ClaimDetails<T>[] };
   claimActivity?: ClaimActivityDoc<T>[];
   pointsActivity?: PointsActivityDoc<T>[];
@@ -1571,13 +1564,6 @@ export class GetBrowseSuccessResponse<T extends NumberType>
         return acc;
       },
       {} as { [category: string]: UtilityPageDoc<T>[] }
-    );
-    this.maps = Object.keys(data.maps).reduce(
-      (acc, category) => {
-        acc[category] = data.maps[category].map((map) => new MapWithValues(map));
-        return acc;
-      },
-      {} as { [category: string]: MapWithValues<T>[] }
     );
     this.claims = data.claims
       ? Object.keys(data.claims).reduce(

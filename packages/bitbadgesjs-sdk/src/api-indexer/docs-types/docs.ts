@@ -27,7 +27,6 @@ import { UintRange, UintRangeArray } from '@/core/uintRanges.js';
 import { UserBalanceStore } from '@/core/userBalances.js';
 import type { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/types/core.js';
 import type { iUserBalanceStore } from '@/interfaces/types/userBalances.js';
-import { Map, ValueStore } from '@/transactions/messages/bitbadges/maps/index.js';
 import type { Doc } from '../base.js';
 import type { iMetadata } from '../metadata/metadata.js';
 import { Metadata } from '../metadata/metadata.js';
@@ -80,8 +79,6 @@ import {
   type iFetchDoc,
   type iIPFSTotalsDoc,
   type iLatestBlockStatus,
-  type iMapDoc,
-  type iMapWithValues,
   type iMerkleChallengeTrackerDoc,
   type iNotificationPreferences,
   type iPluginDoc,
@@ -2132,54 +2129,6 @@ export interface ErrorDoc {
   _id?: string;
   error: string;
   function: string;
-}
-
-/**
- * @inheritDoc iMapWithValues
- * @category Maps
- */
-export class MapWithValues<T extends NumberType> extends Map<T> implements iMapWithValues<T> {
-  values: { [key: string]: ValueStore };
-  populatedMetadata?: Metadata<T>;
-  updateHistory: UpdateHistory<T>[];
-
-  constructor(data: iMapWithValues<T>) {
-    super(data);
-    this.values = Object.fromEntries(Object.entries(data.values).map(([key, value]) => [key, new ValueStore(value)]));
-    this.populatedMetadata = data.populatedMetadata ? new Metadata(data.populatedMetadata) : undefined;
-    this.updateHistory = data.updateHistory.map((update) => new UpdateHistory(update));
-  }
-
-  getNumberFieldNames(): string[] {
-    return super.getNumberFieldNames();
-  }
-
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): MapWithValues<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapWithValues<U>;
-  }
-}
-
-/**
- * @inheritDoc iMapDoc
- * @category Maps
- */
-export class MapDoc<T extends NumberType> extends MapWithValues<T> implements iMapDoc<T> {
-  _docId: string;
-  _id?: string;
-
-  constructor(data: iMapDoc<T>) {
-    super(data);
-    this._docId = data._docId;
-    this._id = data._id;
-  }
-
-  getNumberFieldNames(): string[] {
-    return super.getNumberFieldNames();
-  }
-
-  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): MapDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as MapDoc<U>;
-  }
 }
 
 /**

@@ -85,11 +85,6 @@ export class BitBadgesApiRoutes {
   static GetCreatorPluginsRoute = () => '/api/v0/plugins/creator';
   static CRUDPluginRoute = () => '/api/v0/plugins';
 
-  static GetMapsRoute = () => '/api/v0/maps';
-  static GetMapValuesRoute = () => '/api/v0/mapValues';
-  static GetMapRoute = (mapId: string) => `/api/v0/map/${mapId.toString()}`;
-  static GetMapValueRoute = (mapId: string, key: string) => `/api/v0/mapValue/${mapId.toString()}/${key.toString()}`;
-
   static GetActiveAuthorizationsRoute = () => '/api/v0/oauth/authorizations';
   static OauthRevokeRoute = () => '/api/v0/siwbb/token/revoke';
 

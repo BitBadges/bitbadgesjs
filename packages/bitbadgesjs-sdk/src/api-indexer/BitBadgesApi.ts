@@ -28,19 +28,6 @@ import {
   iRefreshMetadataPayload
 } from './requests/collections.js';
 import {
-  GetMapSuccessResponse,
-  GetMapValueSuccessResponse,
-  GetMapValuesSuccessResponse,
-  GetMapsSuccessResponse,
-  iGetMapPayload,
-  iGetMapSuccessResponse,
-  iGetMapValueSuccessResponse,
-  iGetMapValuesPayload,
-  iGetMapValuesSuccessResponse,
-  iGetMapsPayload,
-  iGetMapsSuccessResponse
-} from './requests/maps.js';
-import {
   AddApprovalDetailsToOffChainStorageSuccessResponse,
   AddToIpfsSuccessResponse,
   BatchStoreActionSuccessResponse,
@@ -893,91 +880,6 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    */
   public async getRefreshStatus(collectionId: CollectionId): Promise<RefreshStatusSuccessResponse<NumberType>> {
     return await BitBadgesCollection.GetRefreshStatus(this, collectionId);
-  }
-
-  /**
-   * Get maps by ID
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/maps`
-   * - **SDK Function Call**: `await BitBadgesApi.getMaps(payload);`
-   */
-  public async getMaps(payload: iGetMapsPayload): Promise<GetMapsSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetMapsPayload> = typia.validate<iGetMapsPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iGetMapsSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetMapsRoute()}`, payload);
-      return new GetMapsSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Get map by ID
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/map/{mapId}`
-   * - **SDK Function Call**: `await BitBadgesApi.getMap(payload);`
-   */
-  public async getMap(mapId: string, payload?: iGetMapPayload): Promise<GetMapSuccessResponse<T>> {
-    try {
-      const validateRes: typia.IValidation<iGetMapPayload> = typia.validate<iGetMapPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.get<iGetMapSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetMapRoute(mapId)}`, {
-        params: payload
-      });
-      return new GetMapSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Get map values
-   *
-   * @remarks
-   * - **API Route**: `POST /api/v0/mapValues`
-   * - **SDK Function Call**: `await BitBadgesApi.getMapValues(payload);`
-   */
-  public async getMapValues(payload: iGetMapValuesPayload): Promise<GetMapValuesSuccessResponse> {
-    try {
-      const validateRes: typia.IValidation<iGetMapValuesPayload> = typia.validate<iGetMapValuesPayload>(payload ?? {});
-      if (!validateRes.success) {
-        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
-      }
-
-      const response = await this.axios.post<iGetMapValuesSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetMapValuesRoute()}`, payload);
-      return new GetMapValuesSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
-  }
-
-  /**
-   * Get map value by ID
-   *
-   * @remarks
-   * - **API Route**: `GET /api/v0/mapValue/{mapId}/{key}`
-   * - **SDK Function Call**: `await BitBadgesApi.getMapValue(mapId, key);`
-   */
-  public async getMapValue(mapId: string, key: string): Promise<GetMapValueSuccessResponse> {
-    try {
-      const response = await this.axios.get<iGetMapValueSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetMapValueRoute(mapId, key)}`);
-      return new GetMapValueSuccessResponse(response.data).convert(this.ConvertFunction);
-    } catch (error) {
-      await this.handleApiError(error);
-      return Promise.reject(error);
-    }
   }
 
   /**
