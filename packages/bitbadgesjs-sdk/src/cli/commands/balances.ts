@@ -20,6 +20,7 @@
 import { Command } from 'commander';
 import * as fs from 'node:fs';
 import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
+import { requireBb1Address } from '../utils/address.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 
 // ── Shared flag / output helpers (mirrors swap.ts) ─────────────────────────
@@ -213,17 +214,22 @@ addOutputFlags(
           'Default: returns ALL collection balances for the user (lean docs-only endpoint).',
           '--collection: filter to a single collection.',
           '--token: filter to a single token within --collection.',
+          'Auto-normalizes 0x → bb1 client-side; a stderr notice prints the canonical form.',
           "Does NOT include fungibles — for those, use 'bb balances ics20' or 'bb balances assets'."
         ].join('\n  ')
       )
-      .argument('<address>', 'BitBadges native address (bb1...) or any equivalent address form')
+      .argument('<address>', 'BitBadges native address (bb1...) or 0x form — auto-converted to bb1')
       .option('--collection <id>', 'Restrict to a single collection ID')
       .option('--token <n>', 'Restrict to a single token ID (requires --collection)')
       .option('--bookmark <b>', 'Pagination bookmark from a previous response (default mode only)')
       .option('--limit <n>', 'Page size for the default mode (indexer-enforced max applies)')
   )
-).action(async (address: string, opts: BitBadgesFlags) => {
+).action(async (rawAddress: string, opts: BitBadgesFlags) => {
   try {
+    // Normalize 0x → bb1 client-side so the user sees the canonical form
+    // and we fail fast on truly malformed input.
+    const address = requireBb1Address(rawAddress, '<address> argument to bb balances bitbadges');
+
     // Flag-combination validation: --token requires --collection.
     if (opts.token && !opts.collection) {
       process.stderr.write(
