@@ -7,9 +7,12 @@
  * and signs exactly one create-collection tx. Collection ownership is
  * captured by the `manager` field on the msg, so the burner has no
  * lasting authority. The required `--burner` flag reserves space for
- * future deploy paths (`--from <key>` for chain-binary signing,
- * `--api-broadcast` for posting a pre-signed tx) without breaking
- * existing scripts.
+ * future deploy paths without breaking existing scripts.
+ *
+ * `--with-keyring --from <name>` is the chain-binary path: extract the
+ * msg JSON and print the `bitbadgeschaind tx tokenization <verb>`
+ * one-liner the user should run. Intentionally prints rather than spawns
+ * — see `cli/utils/keyring-command.ts` for the rationale.
  *
  * Input is always JSON — either from `--msg-file <path>`, `--msg-stdin`,
  * or a positional file argument. The canonical happy path is to pipe a
@@ -27,6 +30,7 @@ import * as fs from 'fs';
 import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import { runBurnerCreate, pickBurner, type BurnerNetwork } from '../utils/burner.js';
+import { buildKeyringCommand } from '../utils/keyring-command.js';
 
 function readMsgInput(opts: { msgFile?: string; msgStdin?: boolean; input?: string }): any {
   let raw: string;
@@ -166,6 +170,11 @@ export const deployCommand = new Command('deploy')
   // default.
   .option('--burner', 'Use the throwaway burner-wallet path (CREATE-ONLY). Requires --manager.')
   .option('--browser', 'Hand off to the BitBadges /sign page in the browser; sign with your connected wallet (Keplr / MetaMask / etc.).')
+  .option('--with-keyring', 'Emit the `bitbadgeschaind tx ...` one-liner to sign with a chain-binary keyring. Requires --from. Prints rather than spawns — copy + run the printed command to broadcast.')
+  .option('--from <name>', 'With --with-keyring: keyring identity to sign as (e.g. "alice"). Maps to the binary\'s --from flag.')
+  .option('--binary <name>', 'With --with-keyring: chain binary name on PATH', 'bitbadgeschaind')
+  .option('--keyring-backend <backend>', 'With --with-keyring: keyring backend (os | file | test | pass | kwallet)', 'os')
+  .option('--gas-adjustment <n>', 'With --with-keyring: gas-adjustment passthrough', '1.3')
   .option('--frontend-url <url>', 'With --browser: override the frontend base URL (defaults vary by network).')
   .option('--no-open', 'With --browser: print the sign URL to stderr instead of auto-launching the browser.')
   .option('--timeout <seconds>', 'With --browser: how long to wait for the wallet to confirm (default 300, max 1800).')
@@ -186,30 +195,42 @@ export const deployCommand = new Command('deploy')
   .option('--dry-run', 'Simulate the tx and print expected gas + balance changes; never broadcast.');
 addNetworkOptions(deployCommand);
 deployCommand.action(async (input: string | undefined, opts: any) => {
-  // 0. Path selection — exactly one of --burner / --browser.
+  // 0. Path selection — exactly one of --burner / --browser / --with-keyring.
   const useBurner = Boolean(opts.burner);
   const useBrowser = Boolean(opts.browser);
-  if (useBurner && useBrowser) {
-    process.stderr.write('Error: --burner and --browser are mutually exclusive.\n');
+  const useKeyring = Boolean(opts.withKeyring);
+  const pathsPicked = [useBurner, useBrowser, useKeyring].filter(Boolean).length;
+  if (pathsPicked > 1) {
+    process.stderr.write('Error: --burner, --browser, and --with-keyring are mutually exclusive.\n');
     process.exit(2);
   }
-  if (!useBurner && !useBrowser && !opts.dryRun) {
-    process.stderr.write('Error: pick a deploy path — --burner (throwaway signer) or --browser (your connected wallet via /sign).\n');
+  if (pathsPicked === 0 && !opts.dryRun) {
+    process.stderr.write(
+      'Error: pick a deploy path — --burner (throwaway signer), --browser (connected wallet via /sign), or --with-keyring --from <name> (chain-binary keyring).\n'
+    );
     process.exit(2);
   }
   if (useBurner && !opts.manager) {
     process.stderr.write('Error: --burner requires --manager <bb1...>. The burner is a throwaway signer; the manager captures lasting collection ownership.\n');
     process.exit(2);
   }
+  if (useKeyring && !opts.from) {
+    process.stderr.write('Error: --with-keyring requires --from <name>. Pass the keyring identity to sign as.\n');
+    process.exit(2);
+  }
 
-  // 1. Resolve network + endpoints
+  // 1. Resolve network + endpoints. `getApiUrl` asserts network
+  // availability (testnet-offline gate), which the keyring path doesn't
+  // need — keyring talks to the chain RPC directly, never the indexer.
+  // Resolve lazily so `--with-keyring --testnet` works against a private
+  // testnet RPC without flipping BITBADGES_TESTNET_OFFLINE.
   const networkName = resolveNetwork(opts);
   // The CLI's `mainnet | local | testnet` types line up 1:1 with the
   // signing client's NetworkMode; assert here so the compiler is happy.
   const network: BurnerNetwork = networkName as NetworkMode;
-  const apiUrl = getApiUrl(opts);
+  const apiUrl = useKeyring ? '' : getApiUrl(opts);
   const nodeUrl = opts.nodeUrl || NETWORK_CONFIGS[network].nodeUrl;
-  const apiKey = getApiKeyForNetwork(opts);
+  const apiKey = useKeyring ? undefined : getApiKeyForNetwork(opts);
 
   if (useBurner && opts.fund === 'faucet' && !apiKey && network !== 'local') {
     process.stderr.write(
@@ -342,6 +363,48 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       process.stderr.write(`Browser broadcast failed: ${err?.message || err}\n`);
       process.exit(1);
     }
+  }
+
+  // 2.8 --with-keyring short-circuit: emit the bitbadgeschaind tx
+  // one-liner the user should run. Does not spawn the binary, sign, or
+  // broadcast — see cli/utils/keyring-command.ts for rationale.
+  if (useKeyring) {
+    // Honor an explicit --gas if the user set it; otherwise default to
+    // `auto` so --gas-adjustment is meaningful. The deploy-level default
+    // of '400000' is the right value for in-process burner signing, not
+    // for the chain binary's estimation flow.
+    const gasSource = deployCommand.getOptionValueSource('gas');
+    const gas = gasSource === 'default' || gasSource === undefined ? 'auto' : String(opts.gas);
+
+    let result;
+    try {
+      result = buildKeyringCommand({
+        msg,
+        from: String(opts.from),
+        network: networkName,
+        binary: String(opts.binary ?? 'bitbadgeschaind'),
+        keyringBackend: String(opts.keyringBackend ?? 'os'),
+        gas,
+        gasAdjustment: String(opts.gasAdjustment ?? '1.3'),
+        manager: opts.manager ? String(opts.manager) : undefined,
+        nodeUrl: opts.url ? undefined : undefined
+      });
+    } catch (err: any) {
+      process.stderr.write(`${err?.message || err}\n`);
+      process.exit(2);
+    }
+
+    if (!process.env.BB_QUIET) {
+      process.stderr.write(`\nWrote msg JSON to ${result.msgFilePath}\nRun:\n\n`);
+    }
+    process.stdout.write(result.commandLine + '\n');
+    if (!process.env.BB_QUIET) {
+      process.stderr.write(
+        '\n  Append extra flags after the line (e.g. --fees 5000ubadge --memo "...").\n' +
+          '  Use --keyring-backend test for non-interactive CI signing.\n'
+      );
+    }
+    process.exit(0);
   }
 
   // 3. Wallet picker (interactive on TTY, bypassed otherwise or via flags)
