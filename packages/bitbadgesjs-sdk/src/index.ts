@@ -27,7 +27,6 @@ export * from './address-converter/index.js';
 export * from './node-rest-api/index.js';
 export * from './gamm/index.js';
 export * from './signing/index.js';
-export * from './registry/index.js';
 
 // Re-export SIWBB types by name so consumers (indexer's auth/siwe
 // module, frontend siwbb authorize page) can `import { ChallengeParams }

@@ -1,48 +1,40 @@
 /**
- * `bitbadges-cli assets` — browse the BitBadges asset registry, optionally
- * enriched with CoinGecko spot prices and indexer asset-pair analytics.
+ * `bitbadges-cli assets` — browse the BitBadges chain's asset pairs as
+ * served by the indexer.
  *
- * Mirrors the frontend's BrowseAssetsTab data shape so an agent can pull
- * the same view a human sees on bitbadges.io. Three subcommands:
+ * Single source of truth: the indexer's `/assetPairs` endpoint family.
+ * NO static asset registry, NO CoinGecko — every field (price, decimals,
+ * symbol, logo) comes from `AssetInfoDoc` records the indexer maintains.
+ * Same data flow the frontend's BrowseAssetsTab uses.
  *
- *   list   — flat list of every asset in the SDK registry
- *   show   — single asset, full metadata + spot USD price
- *   browse — joined view: top performers (gainers/losers/volume) from
- *            the indexer's /assetPairs/* endpoints + registry metadata +
- *            spot USD prices
+ * Subcommands:
+ *   list   GET  /assetPairs                    paginated list
+ *   show   POST /assetPairs/byDenoms           single asset by denom
+ *          GET  /assetPairs/search?text=...    fallback if input looks like a symbol
+ *   browse GET  /assetPairs/{topGainers,topLosers,highestVolume,weeklyTopGainers}
+ *   price  POST /assetPairs/byDenoms           prices for one or more denoms
  *
- * `list` and `show` work without an indexer key — they only need
- * CoinGecko (which doesn't require auth on the free tier). `browse` calls
- * the indexer and needs `--api-key` or BITBADGES_API_KEY env var.
+ * Cross-chain assets (ETH, etc) are out of scope for this command — they
+ * live in `bb swap` (Skip:Go-backed) since BitBadges doesn't index them
+ * natively.
  */
 
 import { Command } from 'commander';
-import axios from 'axios';
 import * as fs from 'node:fs';
-import { getAllAssets, findAsset, resolveCoinGeckoId, type EnhancedAsset } from '../../registry/index.js';
 import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
-
-const COINGECKO_BASE = 'https://api.coingecko.com/api/v3';
 
 interface NetworkFlags { testnet?: boolean; local?: boolean; url?: string; apiKey?: string; }
 interface OutputFlags { outputFile?: string; condensed?: boolean; }
-interface PriceFlags { withPrices?: boolean; vsCurrency?: string; include24hChange?: boolean; }
 
 function addNetworkFlags(cmd: Command): Command {
   return cmd
     .option('--testnet', 'Use testnet API', false)
     .option('--local', 'Use local API (localhost:3001)', false)
     .option('--url <url>', 'Custom API base URL')
-    .option('--api-key <key>', 'BitBadges API key (for indexer-backed subcommands)');
+    .option('--api-key <key>', 'BitBadges API key');
 }
 function addOutputFlags(cmd: Command): Command {
   return cmd.option('--output-file <path>', 'Write to file').option('--condensed', 'Single-line JSON', false);
-}
-function addPriceFlags(cmd: Command): Command {
-  return cmd
-    .option('--with-prices', 'Fetch spot USD prices via CoinGecko (one batch call)', false)
-    .option('--vs-currency <ccy>', 'Quote currency for --with-prices (lowercase)', 'usd')
-    .option('--include-24h-change', '24h price change %', false);
 }
 function emit(result: unknown, opts: OutputFlags): void {
   const formatted = opts.condensed ? JSON.stringify(result) : JSON.stringify(result, null, 2);
@@ -64,95 +56,92 @@ async function callApi(method: 'GET' | 'POST', path: string, opts: NetworkFlags,
   return apiRequest({ method, path, body, apiKey, baseUrl });
 }
 
-type PriceMap = Record<string, Record<string, number>>;
-
-async function fetchCoinGeckoPrices(ids: string[], vsCurrency: string, include24hChange: boolean): Promise<PriceMap> {
-  if (ids.length === 0) return {};
-  const params = new URLSearchParams({ ids: ids.join(','), vs_currencies: vsCurrency });
-  if (include24hChange) params.set('include_24hr_change', 'true');
-  const url = `${COINGECKO_BASE}/simple/price?${params.toString()}`;
+/** Resolve a user-supplied symbol-or-denom to the canonical denom via the indexer search. */
+async function resolveDenom(input: string, opts: NetworkFlags): Promise<string | undefined> {
+  // Inputs that look like chain denoms (ubadge, ibc/..., badgeslp:..., factory/...) pass through.
+  // Lowercase-only on purpose — uppercase strings are symbols (USDC, BADGE) and need indexer search.
+  if (/^(u[a-z]|ibc\/|badges|factory\/)/.test(input)) return input;
+  // Otherwise treat as a symbol — search the indexer.
   try {
-    const r = await axios.get<PriceMap>(url, { timeout: 10_000 });
-    return r.data;
-  } catch (err: any) {
-    process.stderr.write(`Warning: CoinGecko request failed (${err?.response?.status ?? err?.code ?? 'unknown'}). Continuing without prices.\n`);
-    return {};
+    const res = await callApi('GET', `/assetPairs/search?query=${encodeURIComponent(input)}`, opts);
+    const arr = Array.isArray(res?.assetPairs) ? res.assetPairs : [];
+    const exact = arr.find((p: any) => p?.symbol?.toUpperCase() === input.toUpperCase());
+    return (exact ?? arr[0])?.asset;
+  } catch {
+    return undefined;
   }
-}
-
-/** Attach `price.{usd, usd_24h_change}` to each asset when available. */
-function attachPrices(assets: EnhancedAsset[], prices: PriceMap, vsCurrency: string, include24hChange: boolean): any[] {
-  return assets.map((a) => {
-    const cg = a.coingecko_id ? prices[a.coingecko_id] : undefined;
-    if (!cg) return a;
-    const price: Record<string, number> = {};
-    if (cg[vsCurrency] !== undefined) price[vsCurrency] = cg[vsCurrency];
-    if (include24hChange && cg[`${vsCurrency}_24h_change`] !== undefined) {
-      price[`${vsCurrency}_24h_change`] = cg[`${vsCurrency}_24h_change`];
-    }
-    return { ...a, price };
-  });
 }
 
 // ── assets (parent) ──────────────────────────────────────────────────────────
 
 export const assetsCommand = new Command('assets').description(
-  'Browse the canonical asset registry. List / show / browse — mirrors the bitbadges.io BrowseAssetsTab data shape.'
+  'Browse the BitBadges chain assets via the indexer. Source-of-truth: /assetPairs (same as BrowseAssetsTab).'
 );
 
 // ── assets list ──────────────────────────────────────────────────────────────
 
 addOutputFlags(
-  addPriceFlags(
+  addNetworkFlags(
     assetsCommand
       .command('list')
-      .description('List every asset in the SDK registry. Pass --with-prices to attach spot CoinGecko prices.')
+      .description('Paginated list of every asset pair on the chain. Returns AssetInfoDoc records from the indexer.')
+      .option('--bookmark <b>', 'Pagination bookmark')
+      .option('--sort-by <field>', 'Sort field (price | volume24h | volume7d | percentageChange24h | percentageChange7d). Default: volume24h.')
+      .option('--sort-direction <dir>', 'Sort direction (asc | desc). Default: desc.')
+      .option('--limit <n>', 'Page size (1–100)')
+      .option('--tags <list>', 'Comma-separated tag filter')
   )
-).action(async (opts: OutputFlags & PriceFlags) => {
-  const assets = getAllAssets();
-  let payload: any[] = assets;
-  if (opts.withPrices) {
-    const ids = Array.from(new Set(assets.map((a) => a.coingecko_id).filter(Boolean)));
-    const prices = await fetchCoinGeckoPrices(ids, (opts.vsCurrency || 'usd').toLowerCase(), !!opts.include24hChange);
-    payload = attachPrices(assets, prices, (opts.vsCurrency || 'usd').toLowerCase(), !!opts.include24hChange);
+).action(async (opts: NetworkFlags & OutputFlags & { bookmark?: string; sortBy?: string; sortDirection?: string; limit?: string; tags?: string }) => {
+  try {
+    const qs = new URLSearchParams();
+    if (opts.bookmark) qs.set('bookmark', opts.bookmark);
+    if (opts.sortBy) qs.set('sortBy', opts.sortBy);
+    if (opts.sortDirection) qs.set('sortDirection', opts.sortDirection);
+    if (opts.limit) qs.set('limit', opts.limit);
+    if (opts.tags) qs.set('tags', opts.tags);
+    const path = qs.toString() ? `/assetPairs?${qs.toString()}` : '/assetPairs';
+    const res = await callApi('GET', path, opts);
+    emit(res, opts);
+  } catch (err: any) {
+    fail(1, err?.message ?? String(err));
   }
-  emit({ count: assets.length, assets: payload }, opts);
 });
 
 // ── assets show ──────────────────────────────────────────────────────────────
 
 addOutputFlags(
-  addPriceFlags(
+  addNetworkFlags(
     assetsCommand
       .command('show')
-      .description('Show full metadata for a single asset. Resolves by symbol (ATOM), denom (uatom), or CoinGecko ID (cosmos).')
-      .argument('<symbol-or-denom>', 'Asset symbol, denom, or CoinGecko ID')
+      .description('Show a single asset pair. Pass a denom (ubadge, ibc/...) or a symbol (BADGE) — symbols resolve via /assetPairs/search.')
+      .argument('<denom-or-symbol>', 'Asset denom or symbol')
   )
-).action(async (input: string, opts: OutputFlags & PriceFlags) => {
-  const asset = findAsset(input);
-  if (!asset) {
-    fail(2, `no asset matched "${input}". Try a symbol (ATOM), denom (uatom), or CoinGecko ID (cosmos).`);
+).action(async (input: string, opts: NetworkFlags & OutputFlags) => {
+  try {
+    const denom = await resolveDenom(input, opts);
+    if (!denom) {
+      fail(2, `no asset matched "${input}". Try a denom (ubadge, ibc/...), or check 'bb assets list' for known symbols.`);
+    }
+    const res = await callApi('POST', '/assetPairs/byDenoms', opts, { denoms: [denom] });
+    const pair = res?.assetPairs?.[0];
+    if (!pair) {
+      fail(2, `no asset pair found for denom "${denom}".`);
+    }
+    emit(pair, opts);
+  } catch (err: any) {
+    fail(1, err?.message ?? String(err));
   }
-  let payload: any = asset;
-  if (opts.withPrices && asset!.coingecko_id) {
-    const vs = (opts.vsCurrency || 'usd').toLowerCase();
-    const prices = await fetchCoinGeckoPrices([asset!.coingecko_id], vs, !!opts.include24hChange);
-    payload = attachPrices([asset!], prices, vs, !!opts.include24hChange)[0];
-  }
-  emit(payload, opts);
 });
 
 // ── assets browse ────────────────────────────────────────────────────────────
 
 addOutputFlags(
-  addPriceFlags(
-    addNetworkFlags(
-      assetsCommand
-        .command('browse')
-        .description('Top performers view — pulls top gainers/losers/highest-volume from the indexer, enriches with SDK registry metadata, optionally attaches spot USD prices. Mirrors the bitbadges.io BrowseAssetsTab.')
-    )
+  addNetworkFlags(
+    assetsCommand
+      .command('browse')
+      .description('Top performers view — top gainers (24h + weekly), top losers, and highest-volume asset pairs. Mirrors the bitbadges.io BrowseAssetsTab.')
   )
-).action(async (opts: NetworkFlags & OutputFlags & PriceFlags & { limit?: string }) => {
+).action(async (opts: NetworkFlags & OutputFlags) => {
   try {
     const [topGainers24h, topLosers24h, highestVolume, topGainers7d] = await Promise.all([
       callApi('GET', '/assetPairs/topGainers', opts).catch((e) => ({ _error: e?.message ?? String(e) })),
@@ -160,89 +149,58 @@ addOutputFlags(
       callApi('GET', '/assetPairs/highestVolume', opts).catch((e) => ({ _error: e?.message ?? String(e) })),
       callApi('GET', '/assetPairs/weeklyTopGainers', opts).catch((e) => ({ _error: e?.message ?? String(e) }))
     ]);
-
-    // Collect all denoms involved so we can resolve registry metadata + CG IDs in one pass.
-    const denomsSeen = new Set<string>();
-    const collect = (pairs: any) => {
-      const arr = Array.isArray(pairs?.assetPairs) ? pairs.assetPairs : Array.isArray(pairs) ? pairs : [];
-      for (const p of arr) {
-        for (const d of [p?.baseDenom, p?.quoteDenom, p?.denom]) {
-          if (typeof d === 'string') denomsSeen.add(d);
-        }
-      }
-    };
-    collect(topGainers24h);
-    collect(topLosers24h);
-    collect(highestVolume);
-    collect(topGainers7d);
-
-    // Resolve registry metadata for each known denom.
-    const registry: Record<string, EnhancedAsset> = {};
-    for (const d of denomsSeen) {
-      const a = findAsset(d);
-      if (a) registry[d] = a;
-    }
-
-    let prices: PriceMap = {};
-    if (opts.withPrices) {
-      const cgIds = Array.from(
-        new Set(
-          Object.values(registry)
-            .map((a) => a.coingecko_id)
-            .filter(Boolean)
-        )
-      );
-      prices = await fetchCoinGeckoPrices(cgIds, (opts.vsCurrency || 'usd').toLowerCase(), !!opts.include24hChange);
-    }
-
-    emit(
-      {
-        topGainers24h,
-        topLosers24h,
-        highestVolume,
-        topGainers7d,
-        registry,
-        ...(opts.withPrices ? { prices, vsCurrency: (opts.vsCurrency || 'usd').toLowerCase() } : {})
-      },
-      opts
-    );
+    emit({ topGainers24h, topLosers24h, highestVolume, topGainers7d }, opts);
   } catch (err: any) {
     fail(1, err?.message ?? String(err));
   }
 });
 
 // ── assets price ─────────────────────────────────────────────────────────────
-//
-// Convenience alias for `bb price` scoped to the registry: only accepts
-// symbols/denoms/CoinGecko-IDs that resolve in the registry. Errors fast
-// on unknown inputs (vs `bb price` which passes through verbatim).
 
 addOutputFlags(
-  addPriceFlags(
+  addNetworkFlags(
     assetsCommand
       .command('price')
-      .description('Strict-registry price lookup. Errors on unknown symbols. For best-effort (passthrough) behavior use `bb price`.')
-      .argument('<symbols-or-denoms...>', 'BitBadges symbols (ATOM), denoms (uatom), or CoinGecko IDs (cosmos). Repeated or comma-separated.')
+      .description('Indexer-served USD prices for one or more assets. Accepts denoms (ubadge) or symbols (BADGE — auto-resolved via /assetPairs/search).')
+      .argument('<denoms-or-symbols...>', 'Repeated args or comma-separated. e.g. ubadge, BADGE, ibc/F082B65C...')
   )
-).action(async (rawInputs: string[], opts: OutputFlags & PriceFlags) => {
-  const inputs = rawInputs.flatMap((v) => v.split(',')).map((v) => v.trim()).filter(Boolean);
-  const resolved: { input: string; coingeckoId: string; asset?: EnhancedAsset }[] = [];
-  const unresolved: string[] = [];
-  for (const input of inputs) {
-    const cgId = resolveCoinGeckoId(input);
-    if (cgId) {
-      resolved.push({ input, coingeckoId: cgId, asset: findAsset(input) });
-    } else {
-      unresolved.push(input);
+).action(async (rawInputs: string[], opts: NetworkFlags & OutputFlags) => {
+  try {
+    const inputs = rawInputs.flatMap((v) => v.split(',')).map((v) => v.trim()).filter(Boolean);
+    if (inputs.length === 0) fail(2, 'at least one denom or symbol required');
+
+    const denoms: { input: string; denom?: string }[] = [];
+    for (const input of inputs) {
+      const denom = await resolveDenom(input, opts);
+      denoms.push({ input, denom });
     }
+    const unresolved = denoms.filter((d) => !d.denom).map((d) => d.input);
+    const resolvedDenoms = denoms.filter((d) => d.denom).map((d) => d.denom as string);
+
+    const res = resolvedDenoms.length > 0
+      ? await callApi('POST', '/assetPairs/byDenoms', opts, { denoms: resolvedDenoms })
+      : { assetPairs: [] };
+
+    const byDenom = new Map<string, any>();
+    for (const pair of res.assetPairs ?? []) byDenom.set(pair.asset, pair);
+
+    const prices = denoms.map(({ input, denom }) => {
+      if (!denom) return { input, error: 'unresolved — pass a denom (ubadge, ibc/...) or a known symbol' };
+      const pair = byDenom.get(denom);
+      if (!pair) return { input, denom, error: 'not indexed' };
+      return {
+        input,
+        denom,
+        symbol: pair.symbol,
+        price: pair.price,
+        percentageChange24h: pair.percentageChange24h,
+        volume24h: pair.volume24h,
+        lastUpdated: pair.lastUpdated
+      };
+    });
+
+    emit({ prices, ...(unresolved.length > 0 ? { unresolved } : {}) }, opts);
+  } catch (err: any) {
+    fail(1, err?.message ?? String(err));
   }
-  if (unresolved.length > 0) {
-    fail(2, `unknown inputs: ${unresolved.join(', ')}. Use 'bb assets list' to see known symbols, or 'bb price' for passthrough lookup.`);
-  }
-  const ids = Array.from(new Set(resolved.map((r) => r.coingeckoId)));
-  const prices = await fetchCoinGeckoPrices(ids, (opts.vsCurrency || 'usd').toLowerCase(), !!opts.include24hChange);
-  emit({
-    resolved,
-    prices
-  }, opts);
 });

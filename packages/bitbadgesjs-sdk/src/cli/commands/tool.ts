@@ -45,7 +45,21 @@ export const toolCommand = new Command('tool')
     'Session id for stateful tools. Stored under ~/.bitbadges/sessions/<id>.json. Defaults to the id inside --args.sessionId, or the builtin default session.'
   )
   .option('--raw', 'Print the structured result instead of the formatted text block')
-  .action(async (toolName: string, opts: { args?: string; argsFile?: string; session?: string; raw?: boolean }) => {
+  .option('--local', 'Point indexer-backed tools at localhost:3001', false)
+  .option('--testnet', 'Point indexer-backed tools at the testnet API', false)
+  .option('--url <url>', 'Custom indexer base URL for this invocation (overrides --local/--testnet)')
+  .action(async (toolName: string, opts: { args?: string; argsFile?: string; session?: string; raw?: boolean; local?: boolean; testnet?: boolean; url?: string }) => {
+    // Resolve indexer URL — tools read BITBADGES_API_URL from env, so we
+    // set it for the lifetime of this CLI invocation. Explicit --url wins,
+    // then --local, then --testnet, then whatever env is already set.
+    if (opts.url) {
+      process.env.BITBADGES_API_URL = opts.url;
+    } else if (opts.local) {
+      process.env.BITBADGES_API_URL = 'http://localhost:3001';
+    } else if (opts.testnet) {
+      process.env.BITBADGES_API_URL = 'https://api-testnet.bitbadges.io';
+    }
+
     if (!toolRegistry[toolName]) {
       const available = Object.keys(toolRegistry).sort().join(', ');
       process.stderr.write(`Unknown tool: ${toolName}\nAvailable tools: ${available}\n`);
@@ -93,7 +107,14 @@ export const toolCommand = new Command('tool')
       process.stdout.write(result.text + '\n');
     }
 
-    if (result.isError) {
+    // Tools may surface failures two ways:
+    //   1. `result.isError = true` (the wrapper throws / rejects)
+    //   2. `result.result.success === false` (validator returns a structured
+    //      failure but doesn't throw — common for validate_transaction et al)
+    // Honor both so `bb tool ... && next` and `set -e` scripts can branch.
+    const structuredFail =
+      result.result && typeof result.result === 'object' && (result.result as any).success === false;
+    if (result.isError || structuredFail) {
       process.exitCode = 1;
     }
   });

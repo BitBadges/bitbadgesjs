@@ -25,7 +25,7 @@ addressCommand
 
 addressCommand
   .command('validate <address>')
-  .description('Validate an address and detect its chain')
+  .description('Validate an address and detect its chain. Exits 0 when valid, 2 when invalid — so scripts can branch on exit code.')
   .action(async (address: string) => {
     const { isAddressValid, getChainForAddress } = await import('../../address-converter/converter.js');
 
@@ -34,4 +34,5 @@ addressCommand
     const chainLabel = chain === 'Cosmos' ? 'BitBadges' : chain === 'ETH' ? 'Ethereum' : 'Unknown';
 
     console.log(JSON.stringify({ valid, chain: chainLabel, address }, null, 2));
+    if (!valid) process.exit(2);
   });

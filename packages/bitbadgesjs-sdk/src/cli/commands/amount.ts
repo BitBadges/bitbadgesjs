@@ -158,14 +158,16 @@ addOutputFlags(
     .description('Compute the minimum acceptable amount given an expected amount and a slippage tolerance.')
     .requiredOption('--expected <raw>', 'Expected raw amount')
     .option('--slippage-pct <pct>', 'Slippage tolerance as percent (e.g. 0.5 = 0.5%)')
+    .option('--slippage <pct>', 'Alias for --slippage-pct (e.g. 0.5 = 0.5%)')
     .option('--slippage-bps <bps>', 'Slippage tolerance as basis points (e.g. 50 = 0.5%)')
     .option('--round <mode>', 'Rounding mode. Default: ROUND_DOWN', 'ROUND_DOWN')
 ).action((opts: any) => {
   const expected = BigInt(opts.expected);
   let tolerance: number | undefined;
-  if (opts.slippagePct !== undefined) tolerance = Number(opts.slippagePct) / 100;
+  const pct = opts.slippagePct ?? opts.slippage;
+  if (pct !== undefined) tolerance = Number(pct) / 100;
   if (opts.slippageBps !== undefined) tolerance = Number(opts.slippageBps) / 10000;
-  if (tolerance === undefined) fail(2, 'either --slippage-pct or --slippage-bps is required');
+  if (tolerance === undefined) fail(2, 'either --slippage-pct (or --slippage) or --slippage-bps is required');
   if (!(tolerance! >= 0 && tolerance! < 1)) fail(2, `slippage tolerance must be in [0, 1) (got ${tolerance})`);
   const mode = parseRoundingMode(opts.round);
   const minAmount = CosmosCoinUtils.calculateMinAmount(expected, tolerance!, mode);

@@ -648,13 +648,19 @@ sharedOpts(
   buildCommand
     .command('prediction-market')
     .description('Create a binary prediction market (YES/NO). Metadata: pass --uri OR --name + --image + --description.')
-    .requiredOption('--verifier <address>', 'Market resolver address (bb1...)')
+    .option('--verifier <address>', 'Market resolver address (bb1...)')
+    .option('--resolver <address>', 'Alias for --verifier — matches the help-text label.')
     .option('--denom <symbol>', 'Payment coin', 'USDC')
 ).action(async (opts) => {
   const { buildPredictionMarket } = await import('../../core/builders/prediction-market.js');
   if (opts.json) { emit(buildPredictionMarket(readJsonInput(opts.json)), opts); return; }
+  const verifier = opts.verifier ?? opts.resolver;
+  if (!verifier) {
+    process.stderr.write('Error: --verifier (or --resolver) is required.\n');
+    process.exit(2);
+  }
   emit(buildPredictionMarket({
-    verifier: opts.verifier, denom: opts.denom,
+    verifier, denom: opts.denom,
     uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
   }), opts);
 });
@@ -686,15 +692,21 @@ sharedOpts(
   buildCommand
     .command('credit-token')
     .description('Create a credit/prepaid token. Metadata: pass --uri OR --name + --image + --description.')
-    .requiredOption('--payment-denom <symbol>', 'Payment coin (USDC, BADGE)')
+    .option('--payment-denom <symbol>', 'Payment coin (USDC, BADGE)')
+    .option('--denom <symbol>', 'Alias for --payment-denom — for consistency with the other builders.')
     .requiredOption('--recipient <address>', 'Payment recipient (bb1...)')
     .option('--symbol <symbol>', 'Token symbol', 'CREDIT')
     .option('--tokens-per-unit <n>', 'Tokens per 1 display unit of payment', '100')
 ).action(async (opts) => {
   const { buildCreditToken } = await import('../../core/builders/credit-token.js');
   if (opts.json) { emit(buildCreditToken(readJsonInput(opts.json)), opts); return; }
+  const paymentDenom = opts.paymentDenom ?? opts.denom;
+  if (!paymentDenom) {
+    process.stderr.write('Error: --payment-denom (or --denom) is required.\n');
+    process.exit(2);
+  }
   emit(buildCreditToken({
-    paymentDenom: opts.paymentDenom, recipient: opts.recipient, symbol: opts.symbol,
+    paymentDenom, recipient: opts.recipient, symbol: opts.symbol,
     tokensPerUnit: Number(opts.tokensPerUnit),
     uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
   }), opts);
@@ -859,23 +871,23 @@ sharedOpts(
 // a BitBadges tokenized token use `bb build transfer` instead, which
 // emits MsgTransferTokens.
 
-buildCommand
-  .command('send')
-  .description(
-    'Generate a standard cosmos.bank.v1beta1.MsgSend (bank send). For fee top-ups, returning dust, ' +
-      'or any plain coin transfer that bypasses BitBadges tokenization. For BitBadges token transfers, use `bb build transfer`.'
-  )
-  .requiredOption('--from <address>', 'Sender address (bb1.../0x... auto-normalized)')
-  .requiredOption('--to <address>', 'Recipient address (bb1.../0x... auto-normalized)')
-  .requiredOption(
-    '--amount <n>',
-    'Amount to send. Interpreted as display units when --denom is a known symbol (USDC, BADGE, ATOM, OSMO); ' +
-      'as base units when --denom is a raw chain denom (ubadge, ibc/...). Use --base-units to force base-unit interpretation either way.'
-  )
-  .requiredOption('--denom <symbol-or-denom>', 'Coin symbol (USDC, BADGE) or raw chain denom (ubadge, ibc/...)')
-  .option('--base-units', 'Treat --amount as already-in-base-units, skipping the symbol→decimals conversion')
-  .option('--condensed', 'Output compact JSON (no whitespace)')
-  .option('--output-file <path>', 'Write output to file')
+sharedOpts(
+  buildCommand
+    .command('send')
+    .description(
+      'Generate a standard cosmos.bank.v1beta1.MsgSend (bank send). For fee top-ups, returning dust, ' +
+        'or any plain coin transfer that bypasses BitBadges tokenization. For BitBadges token transfers, use `bb build transfer`.'
+    )
+    .requiredOption('--from <address>', 'Sender address (bb1.../0x... auto-normalized)')
+    .requiredOption('--to <address>', 'Recipient address (bb1.../0x... auto-normalized)')
+    .requiredOption(
+      '--amount <n>',
+      'Amount to send. Interpreted as display units when --denom is a known symbol (USDC, BADGE, ATOM, OSMO); ' +
+        'as base units when --denom is a raw chain denom (ubadge, ibc/...). Use --base-units to force base-unit interpretation either way.'
+    )
+    .requiredOption('--denom <symbol-or-denom>', 'Coin symbol (USDC, BADGE) or raw chain denom (ubadge, ibc/...)')
+    .option('--base-units', 'Treat --amount as already-in-base-units, skipping the symbol→decimals conversion')
+)
   .action(async (opts) => {
     try {
       const { requireBb1Address } = await import('../utils/address.js');
