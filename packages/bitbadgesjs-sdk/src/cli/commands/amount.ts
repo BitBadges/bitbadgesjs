@@ -19,45 +19,23 @@
  */
 
 import { Command } from 'commander';
-import * as fs from 'node:fs';
 import { CosmosCoinUtils, RoundingMode, createCosmosCoin } from '../../core/coin-utils.js';
 import { getMaxWrappableAmount } from '../../core/balances.js';
 import { resolveCoin } from '../../core/builders/shared.js';
-import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
+import {
+  addIndexerNetworkOptions as addNetworkFlags,
+  addIndexerOutputOptions as addOutputFlags,
+  callIndexer as callApi,
+  emitIndexerResult as emit,
+  type IndexerNetworkFlags as NetworkFlags,
+  type IndexerOutputFlags as OutputFlags,
+} from '../utils/indexer-options.js';
 import { BitBadgesCollection } from '../../api-indexer/BitBadgesCollection.js';
 import { BigIntify } from '../../common/string-numbers.js';
 
-interface NetworkFlags { testnet?: boolean; local?: boolean; url?: string; apiKey?: string; }
-interface OutputFlags { outputFile?: string; condensed?: boolean; }
-
-function addNetworkFlags(cmd: Command): Command {
-  return cmd
-    .option('--testnet', 'Use testnet API', false)
-    .option('--local', 'Use local API (localhost:3001)', false)
-    .option('--url <url>', 'Custom API base URL')
-    .option('--api-key <key>', 'BitBadges API key');
-}
-function addOutputFlags(cmd: Command): Command {
-  return cmd.option('--output-file <path>', 'Write output to file').option('--condensed', 'Single-line JSON', false);
-}
-function emit(result: unknown, opts: OutputFlags): void {
-  const formatted = opts.condensed ? JSON.stringify(result) : JSON.stringify(result, null, 2);
-  if (opts.outputFile) {
-    fs.writeFileSync(opts.outputFile, formatted + '\n', 'utf-8');
-    process.stderr.write(`Written to ${opts.outputFile}\n`);
-  } else {
-    process.stdout.write(formatted + '\n');
-  }
-}
 function fail(code: number, message: string): never {
   process.stderr.write(`Error: ${message}\n`);
   process.exit(code);
-}
-async function callApi(method: 'GET' | 'POST', path: string, opts: NetworkFlags, body?: unknown): Promise<any> {
-  const network = opts.testnet ? 'testnet' : opts.local ? 'local' : 'mainnet';
-  const apiKey = resolveApiKey(opts.apiKey, network);
-  const baseUrl = resolveBaseUrl({ testnet: opts.testnet, local: opts.local, baseUrl: opts.url });
-  return apiRequest({ method, path, body, apiKey, baseUrl });
 }
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
   const res = await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts);

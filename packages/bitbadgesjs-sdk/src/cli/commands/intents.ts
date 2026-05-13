@@ -20,8 +20,16 @@
 
 import { Command } from 'commander';
 import * as crypto from 'node:crypto';
-import * as fs from 'node:fs';
-import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
+import {
+  addIndexerNetworkOptions as addNetworkFlags,
+  addIndexerOutputOptions as addOutputFlags,
+  callIndexer as callApi,
+  emitIndexerResult as emit,
+  emitIndexerError as emitError,
+  resolveIndexerNetwork as resolveNetwork,
+  type IndexerNetworkFlags as NetworkFlags,
+  type IndexerOutputFlags as OutputFlags,
+} from '../utils/indexer-options.js';
 import { requireBb1Address } from '../utils/address.js';
 import {
   buildIntentApproval,
@@ -30,28 +38,8 @@ import {
 } from '../../core/intents.js';
 import { UintRangeArray } from '../../core/uintRanges.js';
 
-// ── Shared flag / output helpers (mirrors swap.ts / balances.ts) ──────────
-
-interface NetworkFlags {
-  testnet?: boolean;
-  local?: boolean;
-  url?: string;
-  apiKey?: string;
-}
-
-interface OutputFlags {
-  outputFile?: string;
-  condensed?: boolean;
-}
-
 interface CollectionFlag {
   collectionId?: string;
-}
-
-function resolveNetwork(opts: NetworkFlags): 'mainnet' | 'testnet' | 'local' {
-  if (opts.testnet) return 'testnet';
-  if (opts.local) return 'local';
-  return 'mainnet';
 }
 
 function resolveCollectionId(opts: NetworkFlags & CollectionFlag): string {
@@ -59,61 +47,11 @@ function resolveCollectionId(opts: NetworkFlags & CollectionFlag): string {
   return intentExchangeCollectionId(resolveNetwork(opts));
 }
 
-function addNetworkFlags(cmd: Command): Command {
-  return cmd
-    .option('--testnet', 'Use testnet API + testnet intent collection', false)
-    .option('--local', 'Use local API + local intent collection', false)
-    .option('--url <url>', 'Custom API base URL (overrides --testnet/--local/config)')
-    .option('--api-key <key>', 'BitBadges API key (overrides BITBADGES_API_KEY env)');
-}
-
 function addCollectionFlag(cmd: Command): Command {
   return cmd.option(
     '--collection-id <id>',
     'Override the auto-resolved intent exchange collection ID (mainnet=81, testnet/local=24)'
   );
-}
-
-function addOutputFlags(cmd: Command): Command {
-  return cmd
-    .option('--output-file <path>', 'Write output to file instead of stdout')
-    .option('--condensed', 'Emit single-line JSON instead of pretty-printed', false);
-}
-
-function emit(result: unknown, opts: OutputFlags): void {
-  const formatted = opts.condensed
-    ? JSON.stringify(result, jsonBigIntReplacer)
-    : JSON.stringify(result, jsonBigIntReplacer, 2);
-  if (opts.outputFile) {
-    fs.writeFileSync(opts.outputFile, formatted + '\n', 'utf-8');
-    process.stderr.write(`Written to ${opts.outputFile}\n`);
-  } else {
-    process.stdout.write(formatted + '\n');
-  }
-}
-
-function jsonBigIntReplacer(_key: string, value: unknown): unknown {
-  if (typeof value === 'bigint') return value.toString();
-  return value;
-}
-
-function emitError(err: unknown): never {
-  const e = err as { message?: string; response?: unknown; hint?: string };
-  if (e?.response !== undefined) process.stderr.write(JSON.stringify(e.response, null, 2) + '\n');
-  else process.stderr.write(`Error: ${e?.message ?? String(err)}\n`);
-  if (e?.hint) process.stderr.write(`Hint: ${e.hint}\n`);
-  process.exit(1);
-}
-
-async function callApi(
-  method: 'GET' | 'POST',
-  path: string,
-  opts: NetworkFlags,
-  body?: unknown
-): Promise<any> {
-  const apiKey = resolveApiKey(opts.apiKey, resolveNetwork(opts));
-  const baseUrl = resolveBaseUrl({ testnet: opts.testnet, local: opts.local, baseUrl: opts.url });
-  return apiRequest({ method, path, body, apiKey, baseUrl });
 }
 
 function appendQuery(path: string, params: Record<string, string | number | boolean | undefined>): string {

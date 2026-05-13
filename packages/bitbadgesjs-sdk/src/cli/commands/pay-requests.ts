@@ -16,9 +16,16 @@
  * PaymentRequestView).
  */
 
-import { Command } from 'commander';
-import * as fs from 'node:fs';
-import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
+import { Command, Option } from 'commander';
+import {
+  addIndexerNetworkOptions as addNetworkFlags,
+  addIndexerOutputOptions,
+  callIndexer as callApi,
+  emitIndexerResult as emit,
+  emitIndexerError as emitError,
+  type IndexerNetworkFlags as NetworkFlags,
+  type IndexerOutputFlags,
+} from '../utils/indexer-options.js';
 import { requireBb1Address } from '../utils/address.js';
 import {
   doesCollectionFollowPaymentRequestProtocol,
@@ -30,69 +37,15 @@ import {
   type PaymentRequestStatus
 } from '../../core/payment-requests.js';
 
-// ── Shared flag / output helpers (mirrors swap.ts / balances.ts) ──────────
-
-interface NetworkFlags {
-  testnet?: boolean;
-  local?: boolean;
-  url?: string;
-  apiKey?: string;
-}
-
-interface OutputFlags {
-  outputFile?: string;
-  condensed?: boolean;
-  json?: boolean;
-}
-
-function addNetworkFlags(cmd: Command): Command {
-  return cmd
-    .option('--testnet', 'Use testnet API', false)
-    .option('--local', 'Use local API (localhost:3001)', false)
-    .option('--url <url>', 'Custom API base URL (overrides --testnet/--local/config)')
-    .option('--api-key <key>', 'BitBadges API key (overrides BITBADGES_API_KEY env)');
-}
+// `pay-requests` historically declared a `--json` flag that was never read
+// (output already defaults to JSON). Keep it as a hidden alias so any
+// script passing it doesn't break, but stop documenting it.
+type OutputFlags = IndexerOutputFlags & { json?: boolean };
 
 function addOutputFlags(cmd: Command): Command {
-  return cmd
-    .option('--output-file <path>', 'Write output to file instead of stdout')
-    .option('--condensed', 'Emit single-line JSON instead of pretty-printed', false)
-    .option('--json', 'Force JSON output (default when piping; auto-disabled in human mode)', false);
-}
-
-function emit(result: unknown, opts: OutputFlags): void {
-  const formatted = opts.condensed ? JSON.stringify(result) : JSON.stringify(result, null, 2);
-  if (opts.outputFile) {
-    fs.writeFileSync(opts.outputFile, formatted + '\n', 'utf-8');
-    process.stderr.write(`Written to ${opts.outputFile}\n`);
-  } else {
-    process.stdout.write(formatted + '\n');
-  }
-}
-
-function emitError(err: unknown): never {
-  const e = err as { message?: string; response?: unknown; hint?: string };
-  if (e?.response !== undefined) {
-    process.stderr.write(JSON.stringify(e.response, null, 2) + '\n');
-  } else {
-    process.stderr.write(`Error: ${e?.message ?? String(err)}\n`);
-  }
-  if (e?.hint) {
-    process.stderr.write(`Hint: ${e.hint}\n`);
-  }
-  process.exit(1);
-}
-
-async function callApi(
-  method: 'GET' | 'POST',
-  path: string,
-  opts: NetworkFlags,
-  body?: unknown
-): Promise<any> {
-  const network = opts.testnet ? 'testnet' : opts.local ? 'local' : 'mainnet';
-  const apiKey = resolveApiKey(opts.apiKey, network);
-  const baseUrl = resolveBaseUrl({ testnet: opts.testnet, local: opts.local, baseUrl: opts.url });
-  return apiRequest({ method, path, body, apiKey, baseUrl });
+  return addIndexerOutputOptions(cmd).addOption(
+    new Option('--json', 'Legacy alias — output is JSON by default. Retained for backwards compat.').hideHelp()
+  );
 }
 
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
