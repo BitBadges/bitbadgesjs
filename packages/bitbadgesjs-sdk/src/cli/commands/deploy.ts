@@ -31,6 +31,72 @@ import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } fro
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import { runBurnerCreate, pickBurner, type BurnerNetwork } from '../utils/burner.js';
 import { buildKeyringCommand, buildKeyringMultiCommand } from '../utils/keyring-command.js';
+import {
+  extractEntityFromEvents,
+  waitForIndexer,
+  type ExtractedEntity,
+  type WaitForIndexerResult
+} from '../utils/wait-for-indexer.js';
+
+/**
+ * Parse the `--wait-for-indexer` flag value. The flag is optional and may
+ * appear with or without a value:
+ *   absent          → undefined (no wait)
+ *   --wait-for-indexer        → 30_000 (default)
+ *   --wait-for-indexer 5000   → 5000
+ *   --wait-for-indexer=5000   → 5000
+ *
+ * Commander hands us either `true` (flag with no value), a numeric
+ * string, or undefined (flag absent). Anything else is a user typo and
+ * we exit with code 2 rather than silently defaulting.
+ */
+function parseWaitFlag(raw: unknown): number | undefined {
+  if (raw === undefined) return undefined;
+  if (raw === true || raw === '') return 30_000;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) {
+    process.stderr.write(`Error: --wait-for-indexer expects a positive number (ms). Got: ${String(raw)}\n`);
+    process.exit(2);
+  }
+  return Math.floor(n);
+}
+
+/**
+ * Pull a tx's events from the Cosmos LCD given its hash. Used by the
+ * browser path: the /sign flow returns a hash but not the event payload,
+ * so we have to round-trip the LCD before we can pluck the entity id.
+ * Retries briefly because the LCD is also eventually-consistent on its
+ * `/cosmos/tx/v1beta1/txs/<hash>` route (block must be committed +
+ * indexed).
+ */
+async function fetchTxEvents(nodeUrl: string, txHash: string): Promise<any[] | undefined> {
+  const attempts = 10;
+  const delayMs = 1_500;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const res = await fetch(`${nodeUrl}/cosmos/tx/v1beta1/txs/${txHash}`);
+      if (res.ok) {
+        const data = await res.json();
+        const events = (data as any)?.tx_response?.events;
+        if (Array.isArray(events)) return events;
+      }
+    } catch {
+      /* network blip — retry */
+    }
+    await new Promise((r) => setTimeout(r, delayMs));
+  }
+  return undefined;
+}
+
+/**
+ * Render a one-line summary of a successful indexer hit. We intentionally
+ * keep this terse — the full body lives in the JSON envelope, and the
+ * human-readable note on stderr is just confirmation that the entity is
+ * visible.
+ */
+function summarizeIndexerHit(result: { entity: string; id: string; attempts: number; elapsedMs: number }): string {
+  return `Indexer caught up: ${result.entity} ${result.id} visible after ${result.attempts} attempt(s) / ${result.elapsedMs}ms.`;
+}
 
 function readMsgInput(opts: { msgFile?: string; msgStdin?: boolean; input?: string }): any {
   let raw: string;
@@ -192,6 +258,10 @@ export const deployCommand = new Command('deploy')
   .option('--reuse <selector>', 'With --burner: reuse a specific saved burner by address or recovery file path')
   .option('--non-interactive', 'With --burner: never prompt; on any prompt point, save state and exit for later resume. Also forced when stdout is not a TTY.')
   .option('--poll-timeout <seconds>', 'With --burner: seconds to wait for funding to land before prompting/exiting', '60')
+  .option(
+    '--wait-for-indexer [timeout-ms]',
+    'After broadcast: poll the indexer until the created entity (collection / dynamic store) is visible, or until [timeout-ms] elapses (default 30000ms). Skipped when the tx has no recognizable entity id.'
+  )
   .option('--dry-run', 'Simulate the tx and print expected gas + balance changes; never broadcast.');
 addNetworkOptions(deployCommand);
 deployCommand.action(async (input: string | undefined, opts: any) => {
@@ -391,6 +461,52 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
             txHash: result.hash ?? null,
             chain: result.chain ?? 'cosmos',
           };
+
+      // Optional: hold the CLI open until the indexer surfaces whatever
+      // the tx created. Browser flow doesn't return tx events inline, so
+      // we re-fetch the tx from the Cosmos LCD using the returned hash,
+      // pull the first recognizable entity id (collection / store), and
+      // poll the indexer for it. Sign-only short-circuits — there is no
+      // broadcast to wait on.
+      const waitTimeoutMsBrowser = parseWaitFlag(opts.waitForIndexer);
+      if (
+        waitTimeoutMsBrowser !== undefined &&
+        !opts.signOnly &&
+        payload.success &&
+        result.hash &&
+        result.chain !== 'evm'
+      ) {
+        const waitStart = Date.now();
+        const events = await fetchTxEvents(nodeUrl, result.hash);
+        const target = extractEntityFromEvents(events);
+        if (target) {
+          const remaining = Math.max(1_000, waitTimeoutMsBrowser - (Date.now() - waitStart));
+          process.stderr.write(
+            `Waiting for indexer to surface ${target.entity} ${target.id} (timeout ${remaining}ms)...\n`
+          );
+          const waited = await waitForIndexer(target, { apiUrl, apiKey, timeoutMs: remaining });
+          if (waited.ok) {
+            process.stderr.write(summarizeIndexerHit(waited) + '\n');
+          } else {
+            process.stderr.write(
+              `Indexer didn't catch up within ${waitTimeoutMsBrowser}ms — the tx broadcast succeeded, your ${target.entity} may show up shortly.\n`
+            );
+          }
+          payload.waited = {
+            entity: waited.entity,
+            id: waited.id,
+            attempts: waited.attempts,
+            elapsedMs: waited.elapsedMs,
+            ok: waited.ok,
+            ...(waited.ok ? { body: waited.body } : { lastStatus: waited.lastStatus })
+          };
+        } else {
+          process.stderr.write(
+            `--wait-for-indexer: no recognizable entity id in tx events (likely a non-create msg). Skipping wait.\n`
+          );
+        }
+      }
+
       process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
       process.exit(payload.success ? 0 : 1);
     } catch (err: any) {
@@ -518,7 +634,30 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       ? `Run \`bitbadges-cli burner sweep ${result.ephemeralAddress} --to <your-real-address>\` to recover dust, or wait for the faucet to refill.`
       : undefined;
 
-    const payload = {
+    // Optional: hold the CLI open until the indexer has caught up with
+    // the broadcast. The burner flow is CREATE-COLLECTION-only, so the
+    // entity is always `collection` keyed by the returned collectionId
+    // (which itself comes from a brief LCD poll inside runBurnerCreate).
+    // If no id surfaced, skip — we'd be polling for an entity the chain
+    // never emitted.
+    let waited: WaitForIndexerResult | undefined;
+    const waitTimeoutMs = parseWaitFlag(opts.waitForIndexer);
+    if (result.success && waitTimeoutMs !== undefined && result.collectionId) {
+      const target: ExtractedEntity = { entity: 'collection', id: result.collectionId };
+      process.stderr.write(
+        `Waiting for indexer to surface ${target.entity} ${target.id} (timeout ${waitTimeoutMs}ms)...\n`
+      );
+      waited = await waitForIndexer(target, { apiUrl, apiKey, timeoutMs: waitTimeoutMs });
+      if (waited.ok) {
+        process.stderr.write(summarizeIndexerHit(waited) + '\n');
+      } else {
+        process.stderr.write(
+          `Indexer didn't catch up within ${waitTimeoutMs}ms — the tx broadcast succeeded, your ${target.entity} may show up shortly.\n`
+        );
+      }
+    }
+
+    const payload: any = {
       success: result.success,
       ephemeralAddress: result.ephemeralAddress,
       recoveryPath: result.recoveryPath,
@@ -528,6 +667,16 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       error: result.error,
       ...(hint ? { hint } : {})
     };
+    if (waited) {
+      payload.waited = {
+        entity: waited.entity,
+        id: waited.id,
+        attempts: waited.attempts,
+        elapsedMs: waited.elapsedMs,
+        ok: waited.ok,
+        ...(waited.ok ? { body: waited.body } : { lastStatus: waited.lastStatus })
+      };
+    }
     process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
     if (!result.success && !result.paused) process.exit(1);
     if (result.paused) process.exit(0);
