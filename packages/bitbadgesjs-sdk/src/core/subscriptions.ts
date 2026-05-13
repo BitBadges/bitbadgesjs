@@ -1,7 +1,16 @@
 import { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
-import type { iCollectionApproval, iPredeterminedBalances, iResetTimeIntervals, iUserIncomingApproval } from '@/interfaces/types/approvals.js';
+import type {
+  iCollectionApproval,
+  iPredeterminedBalances,
+  iResetTimeIntervals,
+  iUserIncomingApproval,
+  iUserIncomingApprovalWithDetails
+} from '@/interfaces/types/approvals.js';
+import type { iUintRange } from '@/interfaces/types/core.js';
 import { UintRangeArray } from './uintRanges.js';
+import { AddressList } from './addressLists.js';
+import type { iCollectionApprovalWithDetails } from './approvals.js';
 
 export const getCurrentInterval = (resetTimeIntervals: iResetTimeIntervals<bigint> | undefined) => {
   // If no resets, we just treat it as one big interval
@@ -326,3 +335,159 @@ export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>,
 
   return true;
 };
+
+// ── End-user helper (lifted from frontend UserIncomingApprovalRegistry) ────
+//
+// Factory for the user's recurring approval — the consent doc a subscriber
+// adds to their incoming approvals so the subscription faucet can auto-mint
+// each interval. Composed into a MsgUpdateUserApprovals at the caller's
+// boundary.
+//
+// Source of truth was `src/utils/UserIncomingApprovalRegistry.ts` in the
+// frontend, which was the only place this shape was constructed before this
+// lift. The FE used `i18next.t()` for the `details.name` / `description`
+// strings; this version accepts an optional override and falls back to
+// the parent subscription approval's `details` (mirroring the FE's
+// `{...subscriptionApproval.details, name, description}` spread).
+
+const RECURRING_CHARGE_PERIOD_CAP_MS = 604800000n; // 1 week — caps short-interval grace windows.
+
+export interface UserRecurringApprovalArgs {
+  /** The faucet (collection-side) subscription approval this recurring approval consents to. */
+  subscriptionApproval: iCollectionApprovalWithDetails<bigint>;
+  /** First charge window's start time, in ms since epoch. */
+  firstIntervalStartTime: bigint;
+  /** Optional tip added on top of the base subscription amount each interval. Pass 0n for no tip. */
+  ubadgeTipAmount: bigint;
+  /** Outer window during which the recurring approval is active. Typically `UintRangeArray.FullRanges()`. */
+  transferTimes: UintRangeArray<bigint>;
+  /** Approval id — caller picks; usually a fresh UUID. */
+  approvalId: string;
+  /** Token ids the subscription mints. Lifted directly from the faucet approval. */
+  tokenIds: iUintRange<bigint>[];
+  /** Coin denom — must match the faucet's coinTransfer denom. */
+  denom: string;
+  /** Optional override for `details.name`. Defaults to "Recurring Approval". */
+  detailsName?: string;
+  /** Optional override for `details.description`. Defaults to a short English string. */
+  detailsDescription?: string;
+}
+
+/**
+ * Build the user-side recurring approval doc for a subscription.
+ * Matches the shape `UserIncomingApprovalRegistry.userRecurringApproval`
+ * produced in the frontend — lifted here so the CLI and any other off-FE
+ * caller can compose `MsgUpdateUserApprovals` payloads.
+ */
+export function userRecurringApproval(args: UserRecurringApprovalArgs): iUserIncomingApprovalWithDetails<bigint> {
+  const {
+    subscriptionApproval,
+    firstIntervalStartTime,
+    ubadgeTipAmount,
+    transferTimes,
+    approvalId,
+    tokenIds,
+    denom,
+    detailsName,
+    detailsDescription
+  } = args;
+
+  const intervalLength = BigInt(
+    subscriptionApproval.approvalCriteria?.predeterminedBalances?.incrementedBalances.durationFromTimestamp ?? 0
+  );
+  const chargePeriodLength =
+    intervalLength < RECURRING_CHARGE_PERIOD_CAP_MS ? intervalLength : RECURRING_CHARGE_PERIOD_CAP_MS;
+
+  let subscriptionAmount = 0n;
+  for (const coinTransfer of subscriptionApproval.approvalCriteria?.coinTransfers ?? []) {
+    subscriptionAmount += BigInt(coinTransfer.coins[0].amount);
+  }
+
+  return {
+    fromList: AddressList.Reserved('Mint'),
+    fromListId: 'Mint',
+    initiatedByList: AddressList.AllAddresses(),
+    initiatedByListId: 'All',
+    transferTimes,
+    tokenIds,
+    ownershipTimes: UintRangeArray.FullRanges(),
+    approvalId,
+    approvalCriteria: {
+      coinTransfers: [
+        {
+          to: '',
+          overrideFromWithApproverAddress: true,
+          overrideToWithInitiator: true,
+          coins: [
+            {
+              amount: ubadgeTipAmount + subscriptionAmount,
+              denom
+            }
+          ]
+        }
+      ],
+      predeterminedBalances: {
+        manualBalances: [],
+        orderCalculationMethod: {
+          useOverallNumTransfers: true,
+          usePerToAddressNumTransfers: false,
+          usePerFromAddressNumTransfers: false,
+          usePerInitiatedByAddressNumTransfers: false,
+          useMerkleChallengeLeafIndex: false,
+          challengeTrackerId: ''
+        },
+        incrementedBalances: {
+          startBalances: [{ amount: 1n, tokenIds, ownershipTimes: UintRangeArray.FullRanges() }],
+          incrementTokenIdsBy: 0n,
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: 0n,
+          allowOverrideTimestamp: false,
+          allowOverrideWithAnyValidToken: false,
+          allowAmountScaling: false,
+          maxScalingMultiplier: 0n,
+          recurringOwnershipTimes: {
+            startTime: firstIntervalStartTime,
+            intervalLength,
+            chargePeriodLength
+          }
+        }
+      },
+      maxNumTransfers: {
+        overallMaxNumTransfers: 1n,
+        perToAddressMaxNumTransfers: 0n,
+        perFromAddressMaxNumTransfers: 0n,
+        perInitiatedByAddressMaxNumTransfers: 0n,
+        amountTrackerId: approvalId,
+        resetTimeIntervals: {
+          startTime: firstIntervalStartTime,
+          intervalLength
+        }
+      },
+      approvalAmounts: {
+        overallApprovalAmount: 0n,
+        perFromAddressApprovalAmount: 0n,
+        perToAddressApprovalAmount: 0n,
+        perInitiatedByAddressApprovalAmount: 0n,
+        amountTrackerId: approvalId,
+        resetTimeIntervals: {
+          startTime: 0n,
+          intervalLength: 0n
+        }
+      },
+      merkleChallenges: [],
+      mustOwnTokens: [],
+      dynamicStoreChallenges: [],
+      ethSignatureChallenges: [],
+      votingChallenges: [],
+      evmQueryChallenges: [],
+      requireToEqualsInitiatedBy: false,
+      requireFromEqualsInitiatedBy: false
+    },
+    details: {
+      ...(subscriptionApproval.details ?? {}),
+      name: detailsName ?? 'Recurring Approval',
+      description: detailsDescription ?? 'Allows the subscription faucet to mint each interval to your address.'
+    } as any,
+    version: 0n
+  } as iUserIncomingApprovalWithDetails<bigint>;
+}

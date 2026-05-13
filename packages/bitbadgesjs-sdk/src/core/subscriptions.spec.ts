@@ -16,9 +16,11 @@ import {
   getNextChargeTime,
   doesCollectionFollowSubscriptionProtocol,
   isSubscriptionFaucetApproval,
-  isUserRecurringApproval
+  isUserRecurringApproval,
+  userRecurringApproval
 } from './subscriptions.js';
 import { GO_MAX_UINT_64 } from '../common/math.js';
+import { UintRangeArray } from './uintRanges.js';
 
 // ---- fixture helpers -----------------------------------------------------
 
@@ -680,5 +682,101 @@ describe('isUserRecurringApproval', () => {
     userApproval.approvalCriteria.maxNumTransfers.resetTimeIntervals.intervalLength = longInterval;
 
     expect(isUserRecurringApproval(userApproval, longIntervalSubscription)).toBe(true);
+  });
+});
+
+// ===========================================================================
+// userRecurringApproval (lifted from frontend UserIncomingApprovalRegistry)
+// ===========================================================================
+
+describe('userRecurringApproval', () => {
+  const faucetForFactory = () =>
+    ({
+      ...makeFaucetApproval(),
+      details: { name: 'Sub Faucet', description: 'monthly', image: '', categories: [], tags: [] }
+    }) as any;
+
+  it('produces an iUserIncomingApprovalWithDetails matching isUserRecurringApproval()', () => {
+    const subscriptionApproval = faucetForFactory();
+    const result = userRecurringApproval({
+      subscriptionApproval,
+      firstIntervalStartTime: 0n,
+      ubadgeTipAmount: 0n,
+      transferTimes: UintRangeArray.FullRanges(),
+      approvalId: 'fixed-id-for-test',
+      tokenIds: [{ start: 1n, end: 1n }],
+      denom: 'ubadge'
+    });
+
+    // Round-trips through the structural validator that gates the FE's
+    // "is this user's recurring approval matching the faucet?" check.
+    expect(isUserRecurringApproval(result as any, subscriptionApproval)).toBe(true);
+  });
+
+  it('adds the tip on top of the faucet base amount', () => {
+    const subscriptionApproval = faucetForFactory(); // base = 100 ubadge
+    const tip = 25n;
+    const result = userRecurringApproval({
+      subscriptionApproval,
+      firstIntervalStartTime: 0n,
+      ubadgeTipAmount: tip,
+      transferTimes: UintRangeArray.FullRanges(),
+      approvalId: 'fixed-id-for-test',
+      tokenIds: [{ start: 1n, end: 1n }],
+      denom: 'ubadge'
+    });
+    expect(result.approvalCriteria!.coinTransfers![0].coins[0].amount).toBe(125n);
+  });
+
+  it('caps chargePeriodLength to 1 week (604800000ms) when interval exceeds a week', () => {
+    const longSubscription = faucetForFactory();
+    const month = 30n * 24n * 60n * 60n * 1000n;
+    longSubscription.approvalCriteria.predeterminedBalances.incrementedBalances.durationFromTimestamp = month;
+    const result = userRecurringApproval({
+      subscriptionApproval: longSubscription,
+      firstIntervalStartTime: 0n,
+      ubadgeTipAmount: 0n,
+      transferTimes: UintRangeArray.FullRanges(),
+      approvalId: 'fixed-id-for-test',
+      tokenIds: [{ start: 1n, end: 1n }],
+      denom: 'ubadge'
+    });
+    const rot = result.approvalCriteria!.predeterminedBalances!.incrementedBalances.recurringOwnershipTimes!;
+    expect(rot.intervalLength).toBe(month);
+    expect(rot.chargePeriodLength).toBe(604800000n);
+  });
+
+  it('uses the same value for resetTimeIntervals.intervalLength and recurringOwnershipTimes.intervalLength', () => {
+    const subscriptionApproval = faucetForFactory();
+    const result = userRecurringApproval({
+      subscriptionApproval,
+      firstIntervalStartTime: 99n,
+      ubadgeTipAmount: 0n,
+      transferTimes: UintRangeArray.FullRanges(),
+      approvalId: 'fixed-id-for-test',
+      tokenIds: [{ start: 1n, end: 1n }],
+      denom: 'ubadge'
+    });
+    const interval = result.approvalCriteria!.predeterminedBalances!.incrementedBalances.recurringOwnershipTimes!.intervalLength;
+    const resetInterval = result.approvalCriteria!.maxNumTransfers!.resetTimeIntervals!.intervalLength;
+    expect(interval).toBe(resetInterval);
+    expect(result.approvalCriteria!.maxNumTransfers!.resetTimeIntervals!.startTime).toBe(99n);
+  });
+
+  it('honors detailsName / detailsDescription overrides', () => {
+    const subscriptionApproval = faucetForFactory();
+    const result = userRecurringApproval({
+      subscriptionApproval,
+      firstIntervalStartTime: 0n,
+      ubadgeTipAmount: 0n,
+      transferTimes: UintRangeArray.FullRanges(),
+      approvalId: 'fixed-id-for-test',
+      tokenIds: [{ start: 1n, end: 1n }],
+      denom: 'ubadge',
+      detailsName: 'My Custom Name',
+      detailsDescription: 'desc'
+    });
+    expect((result.details as any).name).toBe('My Custom Name');
+    expect((result.details as any).description).toBe('desc');
   });
 });

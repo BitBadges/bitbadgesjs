@@ -7,7 +7,16 @@
  * starts after the accept/deny expiration.
  */
 
-import { validateBountyCollection, doesCollectionFollowBountyProtocol } from './bounties.js';
+import {
+  validateBountyCollection,
+  doesCollectionFollowBountyProtocol,
+  extractBountyDetails,
+  deriveBountyStatusFallback,
+  isExpireApprovalExecuted,
+  buildBountyAcceptTx,
+  buildBountyDenyTx,
+  buildBountyRefundMsg
+} from './bounties.js';
 
 const BURN = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
 const VERIFIER = 'bb1verifier';
@@ -333,5 +342,115 @@ describe('doesCollectionFollowBountyProtocol', () => {
 
   it('returns true for a valid collection', () => {
     expect(doesCollectionFollowBountyProtocol(makeValidCollection())).toBe(true);
+  });
+});
+
+// ── End-user helper tests ──────────────────────────────────────────────────
+
+describe('extractBountyDetails', () => {
+  it('splits a valid Bounty collection into accept/deny/expire + metadata', () => {
+    const c = makeValidCollection();
+    const details = extractBountyDetails(c.collectionApprovals);
+    expect(details).not.toBeNull();
+    expect(details!.acceptApproval.approvalId).toBe('accept');
+    expect(details!.denyApproval.approvalId).toBe('deny');
+    expect(details!.expireApproval.approvalId).toBe('expire');
+    expect(details!.verifierAddress).toBe(VERIFIER);
+    expect(details!.recipientAddress).toBe('bb1recipient');
+    expect(details!.submitterAddress).toBe('bb1submitter');
+    expect(details!.expirationTime).toBe(1000n);
+    expect(details!.depositCoins).toEqual([{ denom: 'ubadge', amount: 100n }]);
+  });
+
+  it('returns null when there are not exactly 2 voting approvals + 1 non-voting', () => {
+    expect(extractBountyDetails([makeAcceptApproval()] as any)).toBeNull();
+    expect(
+      extractBountyDetails([makeAcceptApproval(), makeDenyApproval()] as any)
+    ).toBeNull();
+  });
+
+  it('is order-independent (shuffled input)', () => {
+    const details = extractBountyDetails([
+      makeExpireApproval(),
+      makeDenyApproval(),
+      makeAcceptApproval()
+    ] as any);
+    expect(details).not.toBeNull();
+    expect(details!.acceptApproval.approvalId).toBe('accept');
+  });
+});
+
+describe('deriveBountyStatusFallback', () => {
+  it('returns "pending" before deadline', () => {
+    expect(deriveBountyStatusFallback(BigInt(Date.now() + 60000))).toBe('pending');
+  });
+  it('returns "expired" after deadline', () => {
+    expect(deriveBountyStatusFallback(BigInt(Date.now() - 60000))).toBe('expired');
+  });
+  it('returns "pending" for zero', () => {
+    expect(deriveBountyStatusFallback(0n)).toBe('pending');
+  });
+});
+
+describe('isExpireApprovalExecuted', () => {
+  it('returns true when the matching tracker has numTransfers > 0', () => {
+    const expire = makeExpireApproval();
+    const collection: any = {
+      approvalTrackers: [{ approvalId: 'expire', trackerType: 'overall', numTransfers: 1n }]
+    };
+    expect(isExpireApprovalExecuted(expire as any, collection)).toBe(true);
+  });
+
+  it('returns false when no tracker is present', () => {
+    const expire = makeExpireApproval();
+    expect(isExpireApprovalExecuted(expire as any, { approvalTrackers: [] } as any)).toBe(false);
+  });
+
+  it('ignores trackers for other approval ids or other tracker types', () => {
+    const expire = makeExpireApproval();
+    const collection: any = {
+      approvalTrackers: [
+        { approvalId: 'accept', trackerType: 'overall', numTransfers: 5n },
+        { approvalId: 'expire', trackerType: 'per-from', numTransfers: 5n }
+      ]
+    };
+    expect(isExpireApprovalExecuted(expire as any, collection)).toBe(false);
+  });
+});
+
+describe('buildBountyAcceptTx / DenyTx / RefundMsg', () => {
+  it('Accept produces a 2-msg tx wrapper (vote, transfer) targeting the accept approval', () => {
+    const c = makeValidCollection();
+    const details = extractBountyDetails(c.collectionApprovals)!;
+    const tx = buildBountyAcceptTx(VERIFIER, '7', details.acceptApproval);
+    expect(tx.messages).toHaveLength(2);
+    expect(tx.messages[0].typeUrl).toBe('/tokenization.MsgCastVote');
+    expect((tx.messages[0].value as any).approval_id).toBe('accept');
+    expect((tx.messages[0].value as any).yes_weight).toBe('100');
+    expect(tx.messages[1].typeUrl).toBe('/tokenization.MsgTransferTokens');
+    expect((tx.messages[1].value as any).transfers[0].prioritizedApprovals[0].approvalId).toBe('accept');
+  });
+
+  it('Deny targets the deny approval id in both msgs', () => {
+    const c = makeValidCollection();
+    const details = extractBountyDetails(c.collectionApprovals)!;
+    const tx = buildBountyDenyTx(VERIFIER, '7', details.denyApproval);
+    expect((tx.messages[0].value as any).approval_id).toBe('deny');
+    expect((tx.messages[1].value as any).transfers[0].prioritizedApprovals[0].approvalId).toBe('deny');
+  });
+
+  it('Refund is a single MsgTransferTokens (no vote step)', () => {
+    const c = makeValidCollection();
+    const details = extractBountyDetails(c.collectionApprovals)!;
+    const msg = buildBountyRefundMsg('bb1submitter', '7', details.expireApproval);
+    expect(msg.typeUrl).toBe('/tokenization.MsgTransferTokens');
+    expect((msg.value as any).transfers[0].prioritizedApprovals[0].approvalId).toBe('expire');
+  });
+
+  it('output is JSON-stringifiable (no raw bigints)', () => {
+    const c = makeValidCollection();
+    const details = extractBountyDetails(c.collectionApprovals)!;
+    const tx = buildBountyAcceptTx(VERIFIER, '7', details.acceptApproval);
+    expect(() => JSON.stringify(tx)).not.toThrow();
   });
 });

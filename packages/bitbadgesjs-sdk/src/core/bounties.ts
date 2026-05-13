@@ -1,4 +1,5 @@
 import { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
+import type { iCollectionApproval } from '@/interfaces/types/approvals.js';
 
 export interface BountyValidationResult {
   valid: boolean;
@@ -104,3 +105,222 @@ export const validateBountyCollection = (collection: Readonly<iCollectionDoc<big
 export const doesCollectionFollowBountyProtocol = (collection: Readonly<iCollectionDoc<bigint>>): boolean => {
   return validateBountyCollection(collection).valid;
 };
+
+// ── End-user helpers (lifted from frontend BountyView) ─────────────────────
+//
+// These let an off-FE caller (CLI, agent, integration script) inspect a
+// Bounty collection's 3 approvals + status + build the accept/deny/refund
+// msgs without re-implementing the same logic. Source of truth for the
+// shape is the FE's BountyView, which has been the canonical
+// implementation since the standard shipped.
+
+/** Lifecycle states for a Bounty. Mirrors `iBountyInfo.status` from the indexer. */
+export type BountyStatus = 'pending' | 'accepted' | 'denied' | 'expired';
+
+export interface BountyDetails {
+  acceptApproval: iCollectionApproval<bigint>;
+  denyApproval: iCollectionApproval<bigint>;
+  expireApproval: iCollectionApproval<bigint>;
+  verifierAddress: string;
+  recipientAddress: string;
+  submitterAddress: string;
+  depositCoins: { denom: string; amount: bigint }[];
+  expirationTime: bigint;
+}
+
+/**
+ * Split a Bounty collection's 3 approvals into accept / deny / expire.
+ * - Accept and deny both carry a votingChallenge.
+ * - Expire has no votingChallenge — it's the deadline-fallback refund.
+ * - Accept pays recipient; deny pays submitter. They're disambiguated by
+ *   whose address the coinTransfer targets (the expire approval's payout
+ *   address IS the submitter).
+ *
+ * Returns null on shape mismatch; caller should treat that as non-conformant.
+ */
+export function extractBountyDetails(
+  approvals: ReadonlyArray<iCollectionApproval<bigint>>
+): BountyDetails | null {
+  const withVoting = approvals.filter((a) => (a.approvalCriteria?.votingChallenges?.length ?? 0) > 0);
+  const withoutVoting = approvals.filter((a) => (a.approvalCriteria?.votingChallenges?.length ?? 0) === 0);
+  if (withVoting.length !== 2 || withoutVoting.length !== 1) return null;
+
+  const expireApproval = withoutVoting[0];
+  const submitterAddress = expireApproval.approvalCriteria?.coinTransfers?.[0]?.to ?? '';
+
+  const acceptApproval = withVoting.find((a) => a.approvalCriteria?.coinTransfers?.[0]?.to !== submitterAddress);
+  const denyApproval = withVoting.find((a) => a.approvalCriteria?.coinTransfers?.[0]?.to === submitterAddress);
+  if (!acceptApproval || !denyApproval) return null;
+
+  const verifierAddress = acceptApproval.approvalCriteria?.votingChallenges?.[0]?.voters?.[0]?.address ?? '';
+  const recipientAddress = acceptApproval.approvalCriteria?.coinTransfers?.[0]?.to ?? '';
+  const depositCoins = (acceptApproval.approvalCriteria?.coinTransfers?.[0]?.coins ?? []).map((c: any) => ({
+    denom: String(c.denom),
+    amount: BigInt(c.amount)
+  }));
+  const expirationTime = BigInt(acceptApproval.transferTimes?.[0]?.end ?? 0);
+
+  return {
+    acceptApproval,
+    denyApproval,
+    expireApproval,
+    verifierAddress,
+    recipientAddress,
+    submitterAddress,
+    depositCoins,
+    expirationTime
+  };
+}
+
+/**
+ * Distinguishes "window closed but expire not yet fired" from "expire branch executed".
+ * The indexer collapses both into `status === 'expired'`, so this finer distinction
+ * must come from the local approvalTracker. Used for the expire branch only —
+ * accept/deny use the indexer status directly.
+ */
+export function isExpireApprovalExecuted(
+  approval: iCollectionApproval<bigint>,
+  collection: Readonly<iCollectionDoc<bigint>>
+): boolean {
+  const trackers = (collection as any)?.approvalTrackers ?? [];
+  const tracker = trackers.find(
+    (t: any) => t.approvalId === approval.approvalId && t.trackerType === 'overall'
+  );
+  return !!tracker && BigInt(tracker.numTransfers ?? 0) > 0n;
+}
+
+/**
+ * Fallback status when the indexer hasn't enriched `collection.standardsInfo.Bounty`
+ * (preview / freshly-broadcast collections). Returns 'expired' past the deadline,
+ * 'pending' otherwise. Cannot derive 'accepted'/'denied' from FE state alone.
+ */
+export function deriveBountyStatusFallback(expirationMs: bigint): BountyStatus {
+  if (expirationMs > 0n && BigInt(Date.now()) > expirationMs) return 'expired';
+  return 'pending';
+}
+
+const BOUNTY_BURN_ADDRESS = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
+const BOUNTY_MAX_UINT64 = '18446744073709551615';
+
+export interface BountyVoteMsg {
+  typeUrl: '/tokenization.MsgCastVote';
+  value: Record<string, unknown>;
+}
+
+export interface BountyTransferMsg {
+  typeUrl: '/tokenization.MsgTransferTokens';
+  value: Record<string, unknown>;
+}
+
+/** Multi-msg tx wrapper used by accept/deny — the order is vote → transfer. */
+export interface BountyTxWrapper {
+  messages: [BountyVoteMsg, BountyTransferMsg];
+}
+
+function buildBountyTransferMsg(
+  creator: string,
+  collectionId: string,
+  approval: iCollectionApproval<bigint>
+): BountyTransferMsg {
+  return {
+    typeUrl: '/tokenization.MsgTransferTokens',
+    value: {
+      creator,
+      collectionId: String(collectionId),
+      transfers: [
+        {
+          from: 'Mint',
+          toAddresses: [BOUNTY_BURN_ADDRESS],
+          balances: [
+            {
+              amount: '1',
+              tokenIds: [{ start: '1', end: '1' }],
+              ownershipTimes: [{ start: '1', end: BOUNTY_MAX_UINT64 }]
+            }
+          ],
+          prioritizedApprovals: [
+            {
+              approvalId: approval.approvalId,
+              approvalLevel: 'collection',
+              approverAddress: '',
+              version: '0'
+            }
+          ],
+          onlyCheckPrioritizedCollectionApprovals: true,
+          onlyCheckPrioritizedOutgoingApprovals: false,
+          onlyCheckPrioritizedIncomingApprovals: false,
+          memo: ''
+        }
+      ]
+    }
+  };
+}
+
+function buildBountyVoteMsg(
+  creator: string,
+  collectionId: string,
+  approval: iCollectionApproval<bigint>,
+  yesWeight: string = '100'
+): BountyVoteMsg {
+  const proposalId = approval.approvalCriteria?.votingChallenges?.[0]?.proposalId ?? '';
+  return {
+    typeUrl: '/tokenization.MsgCastVote',
+    value: {
+      creator,
+      collection_id: String(collectionId),
+      approval_level: 'collection',
+      approver_address: '',
+      approval_id: approval.approvalId,
+      proposal_id: proposalId,
+      yes_weight: yesWeight
+    }
+  };
+}
+
+/**
+ * Build the 2-msg tx wrapper the verifier signs to ACCEPT a bounty:
+ * MsgCastVote(yes_weight=100) on the accept approval's proposal, then
+ * MsgTransferTokens that fires the accept approval (payout to recipient).
+ */
+export function buildBountyAcceptTx(
+  creator: string,
+  collectionId: string,
+  acceptApproval: iCollectionApproval<bigint>
+): BountyTxWrapper {
+  return {
+    messages: [
+      buildBountyVoteMsg(creator, collectionId, acceptApproval),
+      buildBountyTransferMsg(creator, collectionId, acceptApproval)
+    ]
+  };
+}
+
+/**
+ * Build the 2-msg tx wrapper the verifier signs to DENY a bounty:
+ * same shape as accept, but targeting the deny approval (payout to submitter).
+ */
+export function buildBountyDenyTx(
+  creator: string,
+  collectionId: string,
+  denyApproval: iCollectionApproval<bigint>
+): BountyTxWrapper {
+  return {
+    messages: [
+      buildBountyVoteMsg(creator, collectionId, denyApproval),
+      buildBountyTransferMsg(creator, collectionId, denyApproval)
+    ]
+  };
+}
+
+/**
+ * Build the single MsgTransferTokens that fires the expire approval —
+ * available to anyone after the deadline passes; refunds the submitter
+ * from escrow.
+ */
+export function buildBountyRefundMsg(
+  creator: string,
+  collectionId: string,
+  expireApproval: iCollectionApproval<bigint>
+): BountyTransferMsg {
+  return buildBountyTransferMsg(creator, collectionId, expireApproval);
+}
