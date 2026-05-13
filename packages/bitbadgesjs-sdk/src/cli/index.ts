@@ -38,6 +38,7 @@ import { lookupCommand } from './commands/lookup.js';
 import { genListIdCommand } from './commands/gen-list-id.js';
 import { amountCommand } from './commands/amount.js';
 import { urlCommand } from './commands/url.js';
+import { dynamicStoresCommand } from './commands/dynamic-stores.js';
 
 // Swap / DEX
 import { swapCommand } from './commands/swap.js';
@@ -130,7 +131,8 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
       auctionsCommand,
       predictionMarketsCommand,
       smartTokensCommand,
-      nftsCommand
+      nftsCommand,
+      dynamicStoresCommand
     ]
   }
 ];
