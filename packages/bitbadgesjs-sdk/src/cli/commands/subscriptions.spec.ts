@@ -11,12 +11,23 @@ describe('subscriptionsCommand shape', () => {
     expect(names).toEqual([
       'build',
       'cancel',
+      'charge-due',
       'claim',
       'enable-renewal',
       'list',
       'status',
       'subscribe'
     ]);
+  });
+
+  it('charge-due requires --creator and accepts --tier + --dry-run', () => {
+    const cmd = subscriptionsCommand.commands.find((c) => c.name() === 'charge-due');
+    expect(cmd).toBeDefined();
+    const required = (cmd! as any).options.filter((o: any) => o.required).map((o: any) => o.long);
+    expect(required).toContain('--creator');
+    const flagNames = (cmd! as any).options.map((o: any) => o.long);
+    expect(flagNames).toContain('--tier');
+    expect(flagNames).toContain('--dry-run');
   });
 
   it('tx-build subcommands require --creator', () => {

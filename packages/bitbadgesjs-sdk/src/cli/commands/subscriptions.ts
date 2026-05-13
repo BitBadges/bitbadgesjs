@@ -28,8 +28,10 @@ import {
   getNextChargeTime,
   userRecurringApproval
 } from '../../core/subscriptions.js';
+import { getBalanceForIdAndTime } from '../../core/balances.js';
 import { UintRangeArray } from '../../core/uintRanges.js';
 import { BitBadgesCollection } from '../../api-indexer/BitBadgesCollection.js';
+import { BalanceDoc } from '../../api-indexer/docs-types/docs.js';
 import { BigIntify } from '../../common/string-numbers.js';
 
 interface NetworkFlags {
@@ -504,6 +506,215 @@ addOutputFlags(
       );
 
       emit({ messages: [claim, enableRenewal] }, opts);
+    } catch (err) {
+      emitError(err);
+    }
+  }
+);
+
+// ── subscriptions charge-due ─────────────────────────────────────────────
+//
+// Operator-side runner: emit the MsgTransferTokens batch that fulfills
+// every subscriber whose current interval is due. Mirrors the
+// subscription block of `indexer/setup/recurring_script.ts` (lines
+// 313-409 in the source), but as a CLI verb so a bot or the collection
+// manager can run it from cron without the full indexer setup.
+//
+// Pipeline: `bb subscriptions charge-due 28 --creator <bot> --local |
+//            bb deploy --with-keyring --from operator --keyring-backend test --local`
+
+interface OwnerBalanceDoc {
+  bitbadgesAddress: string;
+  balances?: any[];
+  incomingApprovals?: any[];
+}
+
+async function fetchAllCollectionOwners(
+  collectionId: string,
+  opts: NetworkFlags
+): Promise<OwnerBalanceDoc[]> {
+  const owners: OwnerBalanceDoc[] = [];
+  let bookmark: string | undefined;
+  // Paginate until exhausted. Indexer caps page at 25 docs.
+  for (let safety = 0; safety < 200; safety++) {
+    const path = `/collection/${encodeURIComponent(collectionId)}/owners${
+      bookmark ? `?bookmark=${encodeURIComponent(bookmark)}` : ''
+    }`;
+    const res = await callApi('GET', path, opts);
+    const batch: any[] = res?.owners ?? [];
+    // Convert uint64 strings to bigints so downstream `isUserRecurringApproval`
+    // / `getBalanceForIdAndTime` checks compare like-for-like.
+    for (const raw of batch) {
+      try {
+        owners.push(new BalanceDoc(raw).convert(BigIntify) as unknown as OwnerBalanceDoc);
+      } catch {
+        owners.push(raw as OwnerBalanceDoc);
+      }
+    }
+    bookmark = res?.pagination?.bookmark;
+    if (!bookmark || !res?.pagination?.hasMore) break;
+  }
+  return owners;
+}
+
+function buildChargeMsg(
+  creator: string,
+  collectionId: string,
+  faucetApproval: any,
+  userApproval: any,
+  recipientAddress: string,
+  overrideTimestamp: bigint
+): MsgTransferTokensEnvelope {
+  return {
+    typeUrl: '/tokenization.MsgTransferTokens',
+    value: {
+      creator,
+      collectionId: String(collectionId),
+      transfers: [
+        {
+          from: 'Mint',
+          toAddresses: [recipientAddress],
+          balances: [],
+          precalculateBalancesFromApproval: {
+            approvalId: faucetApproval.approvalId,
+            approvalLevel: 'collection',
+            approverAddress: '',
+            version: String(faucetApproval.version ?? '0'),
+            precalculationOptions: {
+              overrideTimestamp: overrideTimestamp.toString()
+            }
+          },
+          prioritizedApprovals: [
+            {
+              approvalId: faucetApproval.approvalId,
+              approvalLevel: 'collection',
+              approverAddress: '',
+              version: String(faucetApproval.version ?? '0')
+            },
+            {
+              approvalId: userApproval.approvalId,
+              approvalLevel: 'incoming',
+              approverAddress: recipientAddress,
+              version: String(userApproval.version ?? '0')
+            }
+          ],
+          memo: ''
+        }
+      ]
+    }
+  };
+}
+
+addOutputFlags(
+  addNetworkFlags(
+    subscriptionsCommand
+      .command('charge-due')
+      .description(
+        'Operator: emit MsgTransferTokens for every subscriber whose current interval is due (faucet mint + tip transfer in one). Multi-msg wrapper — pipe to `bb deploy` (typically --with-keyring --from <bot>). Mirrors indexer/setup/recurring_script.ts.'
+      )
+      .argument('<collection-id>', 'Subscription collection ID')
+      .requiredOption('--creator <address>', 'Operator/bot address that will sign the resulting tx (bb1.../0x — auto-normalized)')
+      .option('--tier <approvalId>', 'Limit to a single faucet tier')
+      .option('--dry-run', 'List due subscribers without emitting the msg batch', false)
+  )
+).action(
+  async (
+    collectionId: string,
+    opts: NetworkFlags & OutputFlags & { creator: string; tier?: string; dryRun?: boolean }
+  ) => {
+    try {
+      const creator = requireBb1Address(opts.creator, '--creator');
+      const collection = await fetchCollection(collectionId, opts);
+      validateOrExit(collection, 'subscriptions charge-due');
+
+      let faucets = listFaucets(collection);
+      if (opts.tier) {
+        faucets = faucets.filter((f: any) => f.approvalId === opts.tier);
+        if (faucets.length === 0) {
+          process.stderr.write(`Error: no faucet approval with id "${opts.tier}".\n`);
+          process.exit(2);
+        }
+      }
+
+      const owners = await fetchAllCollectionOwners(String(collectionId), opts);
+      const now = BigInt(Date.now());
+      const due: Array<{
+        msg: MsgTransferTokensEnvelope;
+        recipientAddress: string;
+        approvalId: string;
+        chargePeriodStartMs: string;
+      }> = [];
+
+      for (const faucet of faucets) {
+        for (const ownerDoc of owners) {
+          const recipientAddress = ownerDoc.bitbadgesAddress;
+          if (!recipientAddress) continue;
+
+          const userApproval = (ownerDoc.incomingApprovals ?? []).find((a: any) =>
+            isUserRecurringApproval(a, faucet)
+          );
+          if (!userApproval) continue;
+
+          const predetermined = userApproval.approvalCriteria?.predeterminedBalances;
+          const nextChargeTime = getNextChargeTime(predetermined);
+          if (!nextChargeTime) continue;
+
+          const gracePeriod = BigInt(
+            predetermined?.incrementedBalances?.recurringOwnershipTimes?.chargePeriodLength ?? 0
+          );
+          const withinCurrentInterval =
+            now > nextChargeTime && now < nextChargeTime + gracePeriod;
+          if (!withinCurrentInterval) continue;
+
+          // Skip if this interval is already fulfilled — the subscriber
+          // already owns the token for the upcoming window.
+          const startOfNextInterval = nextChargeTime + gracePeriod - 1n;
+          const approvalTokenId = BigInt(userApproval.tokenIds?.[0]?.start ?? 0);
+          const existing = getBalanceForIdAndTime(
+            approvalTokenId,
+            startOfNextInterval,
+            (ownerDoc.balances ?? []) as any
+          );
+          if (existing > 0n) continue;
+
+          due.push({
+            msg: buildChargeMsg(
+              creator,
+              String(collectionId),
+              faucet,
+              userApproval,
+              recipientAddress,
+              startOfNextInterval
+            ),
+            recipientAddress,
+            approvalId: faucet.approvalId,
+            chargePeriodStartMs: nextChargeTime.toString()
+          });
+        }
+      }
+
+      if (opts.dryRun) {
+        emit(
+          {
+            collectionId: String(collectionId),
+            due: due.length,
+            entries: due.map(({ recipientAddress, approvalId, chargePeriodStartMs }) => ({
+              recipientAddress,
+              approvalId,
+              chargePeriodStartMs
+            }))
+          },
+          opts
+        );
+        return;
+      }
+
+      if (due.length === 0) {
+        emit({ collectionId: String(collectionId), due: 0, messages: [] }, opts);
+        return;
+      }
+
+      emit({ messages: due.map((d) => d.msg) }, opts);
     } catch (err) {
       emitError(err);
     }
