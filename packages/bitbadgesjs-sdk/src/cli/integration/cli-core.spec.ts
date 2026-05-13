@@ -160,9 +160,11 @@ describe('cli-core integration', () => {
       if (!ready) return;
       // Use the zero ETH address — pure conversion test, no chain query needed
       // to land on a known bb1; we just want to verify the --address handling.
+      // The harness sets BB_QUIET=1 by default; clear it here so the
+      // "Normalized …" stderr line we're asserting on is actually emitted.
       const out = runCli(
         ['balances', 'bitbadges', '0x0000000000000000000000000000000000000000', '--local'],
-        { throwOnError: false }
+        { throwOnError: false, env: { BB_QUIET: '' } }
       );
       // Either success (account doc exists) or 404 from indexer; either is fine
       // — we're testing the address-normalize path.
@@ -181,7 +183,7 @@ describe('cli-core integration', () => {
       if (out.exitCode === 0) {
         expect(out.json).toBeDefined();
       } else {
-        expect(out.stderr + out.stdout).toMatch(/Skip|not enabled|404|503/i);
+        expect(out.stderr + out.stdout).toMatch(/Skip|not enabled|404|503|API key/i);
       }
     });
 
@@ -191,7 +193,7 @@ describe('cli-core integration', () => {
       if (out.exitCode === 0) {
         expect(out.json).toBeDefined();
       } else {
-        expect(out.stderr + out.stdout).toMatch(/Skip|not enabled|404|503/i);
+        expect(out.stderr + out.stdout).toMatch(/Skip|not enabled|404|503|API key/i);
       }
     });
   });

@@ -606,9 +606,26 @@ sharedOpts(
 sharedOpts(
   buildCommand
     .command('product-catalog')
-    .description('Create a product catalog collection. Metadata: pass --uri OR --name + --image + --description (per-product image/description live inside the products JSON).')
-    .requiredOption('--products <json>', 'Product array JSON: [{"name","price","denom","maxSupply?","burn?","uri?","image?","description?"}]')
-    .requiredOption('--store-address <address>', 'Payment recipient (bb1...)')
+    .description(
+      'Create a product catalog collection. One token-id per product (1, 2, 3, ...). ' +
+        'Each product becomes a "Purchase" approval that buyers consume to mint the SKU. ' +
+        'Metadata: pass --uri OR --name + --image + --description (per-product image/description live inside the products JSON).'
+    )
+    .requiredOption(
+      '--products <json>',
+      'Product array JSON, one object per SKU. Fields:\n' +
+        '  name (string, required)        — display name\n' +
+        '  price (number, required)       — display units (e.g. 9.99 for $9.99 USDC)\n' +
+        '  denom (string, required)       — payment coin symbol (USDC, BADGE, ...) or full denom\n' +
+        '  maxSupply (number, optional)   — cap on units sold; omit/0 = unlimited\n' +
+        '  burn (boolean, optional)       — true → burn-on-purchase (consumable); false/omit → buyer keeps the SKU (collectible)\n' +
+        '  uri (string, optional)         — pre-hosted per-product metadata URI\n' +
+        '  image, description (optional)  — inline metadata; used when uri is absent'
+    )
+    .requiredOption(
+      '--store-address <address>',
+      'Payment recipient (bb1.../0x — auto-normalized). Every purchase routes its `price * denom` here.'
+    )
 ).action(async (opts) => {
   const { buildProductCatalog } = await import('../../core/builders/product-catalog.js');
   if (opts.json) { emit(buildProductCatalog(readJsonInput(opts.json)), opts); return; }
@@ -636,17 +653,23 @@ sharedOpts(
 
 sharedOpts(
   buildCommand
-    .command('smart-account')
-    .description('Create an IBC-backed smart account. Metadata: pass --uri OR --name + --image + --description.')
+    .command('smart-token')
+    .description(
+      'Create a Smart Token — an IBC-backed token that users deposit into (lock backing coin) and withdraw from (burn token, release backing coin). ' +
+        'Vault collections are Smart Tokens with the cosmosCoinBackedPath invariant. ' +
+        'Metadata: pass --uri OR --name + --image + --description.'
+    )
     .requiredOption('--backing-coin <symbol>', 'Backing coin (USDC, BADGE, ATOM, OSMO)')
-    .option('--symbol <symbol>', 'Display symbol')
-    .option('--tradable', 'Enable liquidity pool trading')
-    .option('--ai-agent-vault', 'Add AI Agent Vault standard tag')
+    .option('--symbol <symbol>', 'Display symbol (default: v<backing>)')
+    .option('--tradable', 'Enable liquidity pool trading (adds "Liquidity Pools" standard tag)')
+    .option('--ai-agent-vault', 'Add "AI Agent Vault" standard tag (display hint only)')
+    .option('--allow-forceful-transfers', 'Allow forceful post-mint transfers (default: locked off — the safe default for vault-like Smart Tokens)')
 ).action(async (opts) => {
-  const { buildSmartAccount } = await import('../../core/builders/smart-account.js');
-  if (opts.json) { emit(buildSmartAccount(readJsonInput(opts.json)), opts); return; }
-  emit(buildSmartAccount({
+  const { buildSmartToken } = await import('../../core/builders/smart-token.js');
+  if (opts.json) { emit(buildSmartToken(readJsonInput(opts.json)), opts); return; }
+  emit(buildSmartToken({
     backingCoin: opts.backingCoin, symbol: opts.symbol, tradable: !!opts.tradable, aiAgentVault: !!opts.aiAgentVault,
+    allowForcefulPostMintTransfers: !!opts.allowForcefulTransfers,
     uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
   }), opts);
 });
@@ -816,6 +839,79 @@ sharedOpts(
   if (opts.json) { emit(buildPmBuyIntent(readJsonInput(opts.json)), opts); return; }
   emit(buildPmBuyIntent({ address: opts.address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom: opts.denom, expiration: opts.expiration }), opts);
 });
+
+// ============================================================
+// Cosmos bank MsgSend (low-level coin transfer, not BitBadges tokens)
+// ============================================================
+//
+// MsgSend is the stock cosmos-sdk bank send — it moves a coin denom
+// (ubadge, ibc/...) between accounts and bypasses the BitBadges
+// tokenization module entirely. Use this for fee top-ups, returning
+// dust, paying a verifier off-chain-arranged invoice, etc. For moving
+// a BitBadges tokenized token use `bb build transfer` instead, which
+// emits MsgTransferTokens.
+
+buildCommand
+  .command('send')
+  .description(
+    'Generate a standard cosmos.bank.v1beta1.MsgSend (bank send). For fee top-ups, returning dust, ' +
+      'or any plain coin transfer that bypasses BitBadges tokenization. For BitBadges token transfers, use `bb build transfer`.'
+  )
+  .requiredOption('--from <address>', 'Sender address (bb1.../0x... auto-normalized)')
+  .requiredOption('--to <address>', 'Recipient address (bb1.../0x... auto-normalized)')
+  .requiredOption(
+    '--amount <n>',
+    'Amount to send. Interpreted as display units when --denom is a known symbol (USDC, BADGE, ATOM, OSMO); ' +
+      'as base units when --denom is a raw chain denom (ubadge, ibc/...). Use --base-units to force base-unit interpretation either way.'
+  )
+  .requiredOption('--denom <symbol-or-denom>', 'Coin symbol (USDC, BADGE) or raw chain denom (ubadge, ibc/...)')
+  .option('--base-units', 'Treat --amount as already-in-base-units, skipping the symbol→decimals conversion')
+  .option('--condensed', 'Output compact JSON (no whitespace)')
+  .option('--output-file <path>', 'Write output to file')
+  .action(async (opts) => {
+    try {
+      const { requireBb1Address } = await import('../utils/address.js');
+      const { resolveCoin, toBaseUnits } = await import('../../core/builders/shared.js');
+      const fromAddress = requireBb1Address(opts.from, '--from');
+      const toAddress = requireBb1Address(opts.to, '--to');
+      let denom: string;
+      let amount: string;
+      if (opts.baseUnits) {
+        // Caller wants raw base units regardless of how --denom resolves.
+        denom = opts.denom;
+        amount = String(opts.amount).replace(/[_,]/g, '');
+        if (!/^\d+$/.test(amount)) {
+          process.stderr.write(`Error: --amount must be a non-negative integer when --base-units is set, got "${opts.amount}"\n`);
+          process.exit(2);
+        }
+      } else {
+        const resolved = resolveCoin(opts.denom);
+        denom = resolved.denom;
+        // Resolved symbol → display units + decimals. Resolved raw denom
+        // → resolveCoin returns decimals from registry; same path.
+        amount = toBaseUnits(Number(opts.amount), resolved.decimals);
+      }
+      const msg = {
+        typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+        value: {
+          fromAddress,
+          toAddress,
+          amount: [{ denom, amount }]
+        }
+      };
+      const text = opts.condensed ? JSON.stringify(msg) : JSON.stringify(msg, null, 2);
+      if (opts.outputFile) {
+        const fs = await import('node:fs');
+        fs.writeFileSync(opts.outputFile, text + '\n', 'utf-8');
+        if (!isQuiet({})) process.stderr.write(`Written to ${opts.outputFile}\n`);
+      } else {
+        process.stdout.write(text + '\n');
+      }
+    } catch (err: any) {
+      process.stderr.write(`Error: ${err?.message || err}\n`);
+      process.exit(1);
+    }
+  });
 
 // ============================================================
 // Transfer walkthrough (interactive)

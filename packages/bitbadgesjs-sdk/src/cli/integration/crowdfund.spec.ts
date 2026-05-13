@@ -178,4 +178,12 @@ describe('crowdfund integration', () => {
     );
     expect(out.stderr).toMatch(/does not match crowdfunder|doesn't match crowdfunder/i);
   }, 30000);
+
+  it('conformance throw — show on a non-Crowdfund collection exits non-zero', async () => {
+    if (!ready) return;
+    // Collection 1 (BADGE) is not a Crowdfund — validator must reject.
+    const out = runCli(['crowdfund', 'show', '1', '--local'], { throwOnError: false, parseJson: false });
+    expect(out.exitCode).not.toBe(0);
+    expect(out.stderr + out.stdout).toMatch(/not.*found|not.*valid|Crowdfund/i);
+  }, 30000);
 });

@@ -19,6 +19,24 @@ function isExactRange(arr: any[] | undefined, start: string, end: string): boole
   return n(arr[0].start) === start && n(arr[0].end) === end;
 }
 
+/**
+ * Check whether ANY of the four `maxNumTransfers` fields is non-zero. The
+ * chain only requires "some bounded limit" when an approval uses
+ * `overrideFromWithApproverAddress` — overall/perTo/perFrom/perInitiatedBy
+ * all count. Our builders pick `perInitiatedByAddress: 1` for settlement
+ * (one-shot per verifier) which the chain accepts; the validator used to
+ * only check `overall` and would reject the builder's own output.
+ */
+function hasAnyNonZeroTransferLimit(mnt: any): boolean {
+  if (!mnt) return false;
+  return (
+    n(mnt.overallMaxNumTransfers) !== '0' ||
+    n(mnt.perToAddressMaxNumTransfers) !== '0' ||
+    n(mnt.perFromAddressMaxNumTransfers) !== '0' ||
+    n(mnt.perInitiatedByAddressMaxNumTransfers) !== '0'
+  );
+}
+
 /** Check if permanentlyForbiddenTimes covers the full uint64 range. */
 function isFrozen(permArr: any[] | undefined): boolean {
   if (!Array.isArray(permArr) || permArr.length === 0) return false;
@@ -255,8 +273,10 @@ function validateRedeemApproval(approval: any, errors: string[]): void {
     errors.push(`${prefix}: startBalances must cover both YES (token 1) and NO (token 2)`);
   }
 
-  if (n(criteria.maxNumTransfers?.overallMaxNumTransfers) === '0') {
-    errors.push(`${prefix}: overallMaxNumTransfers must be > 0 when using overrideFromWithApproverAddress`);
+  if (!hasAnyNonZeroTransferLimit(criteria.maxNumTransfers)) {
+    errors.push(
+      `${prefix}: maxNumTransfers must set a non-zero limit on at least one axis (overall/perTo/perFrom/perInitiatedBy) when using overrideFromWithApproverAddress`
+    );
   }
 }
 
@@ -317,8 +337,10 @@ function validateSettlementApproval(
     }
   }
 
-  if (n(criteria.maxNumTransfers?.overallMaxNumTransfers) === '0') {
-    errors.push(`${prefix}: overallMaxNumTransfers must be > 0 when using overrideFromWithApproverAddress`);
+  if (!hasAnyNonZeroTransferLimit(criteria.maxNumTransfers)) {
+    errors.push(
+      `${prefix}: maxNumTransfers must set a non-zero limit on at least one axis (overall/perTo/perFrom/perInitiatedBy) when using overrideFromWithApproverAddress`
+    );
   }
 
   const votingChallenges = criteria.votingChallenges ?? [];
@@ -402,7 +424,12 @@ export function validatePredictionMarketCollection(collection: any): PredictionM
   }
 
   // 3. Alias paths
-  const aliasPaths = collection.aliasPaths ?? [];
+  // Accept either the indexer's materialized `aliasPaths` (post-deploy) or
+  // the source MSG field `aliasPathsToAdd` (pre-deploy). Both shapes carry
+  // identical {denom, conversion, ...} entries, so downstream checks work
+  // unchanged. This keeps the validator usable for `bb check` on freshly
+  // built MSGs without a chain round-trip.
+  const aliasPaths = collection.aliasPaths ?? collection.aliasPathsToAdd ?? [];
   if (aliasPaths.length !== 2) {
     errors.push(`Must have exactly 2 alias paths (YES and NO), got ${aliasPaths.length}`);
   } else {

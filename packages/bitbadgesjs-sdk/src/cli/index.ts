@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import * as fs from 'node:fs';
 import { Command } from 'commander';
 
 // Build & ship a transaction
@@ -50,6 +51,7 @@ import { productsCommand } from './commands/products.js';
 import { crowdfundCommand } from './commands/crowdfund.js';
 import { auctionsCommand } from './commands/auctions.js';
 import { predictionMarketsCommand } from './commands/prediction-markets.js';
+import { smartTokensCommand } from './commands/smart-tokens.js';
 import { nftsCommand } from './commands/nfts.js';
 
 // Misc
@@ -123,6 +125,7 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
       crowdfundCommand,
       auctionsCommand,
       predictionMarketsCommand,
+      smartTokensCommand,
       nftsCommand
     ]
   }
@@ -259,7 +262,30 @@ if (process.argv.includes('--help-json')) {
   const tree = {
     commands: program.commands.map((cmd) => extractCommandTree(cmd))
   };
-  process.stdout.write(JSON.stringify(tree, null, 2) + '\n');
+  const json = JSON.stringify(tree, null, 2) + '\n';
+  // Use `fs.writeSync(1, ...)` rather than `process.stdout.write(...)` so
+  // the entire ~150KB tree lands before we exit. process.stdout's async
+  // write returns false past the OS pipe buffer (~64KB on Linux), and the
+  // drain callback doesn't suspend the rest of this module — so without
+  // a sync write the file would fall through to `program.parse()` and
+  // emit stale help text after a truncated JSON document. fs.writeSync
+  // writes the full buffer synchronously; nothing left to drain.
+  const buf = Buffer.from(json, 'utf-8');
+  let written = 0;
+  while (written < buf.length) {
+    written += fs.writeSync(1, buf, written, buf.length - written);
+  }
+  process.exit(0);
+}
+
+// When invoked with no args, show the full grouped --help by default.
+// Commander's stock behavior prints a minimal "Usage:" stanza and exits —
+// agents and humans both reach for the long form (commands + groups).
+// Detect "no positional args + no help-json + no quiet-only" and route
+// through `outputHelp()` which uses our custom grouped formatter.
+const onlyGlobalFlags = process.argv.slice(2).every((a) => a === '--quiet');
+if (process.argv.length <= 2 || onlyGlobalFlags) {
+  program.outputHelp();
   process.exit(0);
 }
 

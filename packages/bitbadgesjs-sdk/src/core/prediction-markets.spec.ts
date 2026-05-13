@@ -547,14 +547,21 @@ describe('validatePredictionMarketCollection', () => {
     expect(r.errors.some((e) => e.includes('Pre-settlement redeem approval: coin transfer overrideFromWithApproverAddress must be true'))).toBe(true);
   });
 
-  it('fails when redeem approval has overallMaxNumTransfers of 0', () => {
+  it('fails when redeem approval has every maxNumTransfers axis at 0', () => {
+    // The chain rule is "non-zero on ANY axis" when using
+    // overrideFromWithApproverAddress. Zero out all four to trip the
+    // validator. (The builder happens to use overall=MAX_UINT64 for redeem
+    // and perInitiator=1 for settlement — both satisfy the rule.)
     const col: any = makeValidCollection();
     const redeem = col.collectionApprovals.find(
       (a: any) => a.fromListId === '!Mint' && a.toListId === BURN_ADDRESS && !(a.approvalCriteria.votingChallenges ?? []).length
     );
     redeem.approvalCriteria.maxNumTransfers.overallMaxNumTransfers = '0';
+    redeem.approvalCriteria.maxNumTransfers.perToAddressMaxNumTransfers = '0';
+    redeem.approvalCriteria.maxNumTransfers.perFromAddressMaxNumTransfers = '0';
+    redeem.approvalCriteria.maxNumTransfers.perInitiatedByAddressMaxNumTransfers = '0';
     const r = validatePredictionMarketCollection(col);
-    expect(r.errors.some((e) => e.includes('Pre-settlement redeem approval: overallMaxNumTransfers must be > 0'))).toBe(true);
+    expect(r.errors.some((e) => e.includes('Pre-settlement redeem approval: maxNumTransfers must set a non-zero limit'))).toBe(true);
   });
 
   it('fails when settlement approval is missing voting challenges', () => {

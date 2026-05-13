@@ -108,6 +108,10 @@ function validateOrExit(collection: any, ctx: string): void {
     }
     process.exit(2);
   }
+  if (result.warnings.length > 0 && process.env.BB_QUIET !== '1') {
+    process.stderr.write(`Warnings for ${ctx}:\n`);
+    for (const w of result.warnings) process.stderr.write(`  - ${w}\n`);
+  }
 }
 
 function resolveStatus(collection: any, expirationTime: bigint): BountyStatus {

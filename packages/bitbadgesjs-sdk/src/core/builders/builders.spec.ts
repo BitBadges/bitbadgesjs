@@ -14,7 +14,7 @@ import { buildCrowdfund } from './crowdfund.js';
 import { buildAuction } from './auction.js';
 import { buildProductCatalog } from './product-catalog.js';
 import { buildPredictionMarket } from './prediction-market.js';
-import { buildSmartAccount } from './smart-account.js';
+import { buildSmartToken } from './smart-token.js';
 import { buildCreditToken } from './credit-token.js';
 import { buildCustom2FA } from './custom-2fa.js';
 import { buildQuests } from './quests.js';
@@ -156,25 +156,23 @@ describe('vault builder', () => {
   });
 });
 
-describe('smart-account builder', () => {
-  const msg = buildSmartAccount({ backingCoin: 'USDC', ...META });
+describe('smart-token builder', () => {
+  const msg = buildSmartToken({ backingCoin: 'USDC', ...META });
   const r = val(msg);
 
   test('has Smart Token standard', () => { expect(r.standards).toContain('Smart Token'); });
-  test('has backing and unbacking', () => {
+  test('has deposit and withdraw approvals', () => {
     const ids = r.collectionApprovals.map((a: any) => a.approvalId);
-    // Renamed in the parity pass to match CollectionApprovalRegistry's
-    // smart-account-* naming (frontend source of truth).
-    expect(ids).toContain('smart-account-backing');
-    expect(ids).toContain('smart-account-unbacking');
+    expect(ids).toContain('smart-token-deposit');
+    expect(ids).toContain('smart-token-withdraw');
   });
   test('tradable adds Liquidity Pools', () => {
-    const t = val(buildSmartAccount({ backingCoin: 'USDC', tradable: true, ...META }));
+    const t = val(buildSmartToken({ backingCoin: 'USDC', tradable: true, ...META }));
     expect(t.standards).toContain('Liquidity Pools');
     expect(t.invariants.disablePoolCreation).toBe(false);
   });
   test('aiAgentVault adds standard', () => {
-    const t = val(buildSmartAccount({ backingCoin: 'USDC', aiAgentVault: true, ...META }));
+    const t = val(buildSmartToken({ backingCoin: 'USDC', aiAgentVault: true, ...META }));
     expect(t.standards).toContain('AI Agent Vault');
   });
   test('passes verification', () => {
@@ -531,9 +529,9 @@ describe('all collection builders pass verifyStandardsCompliance with zero viola
   const builders: [string, any][] = [
     ['vault', buildVault({ backingCoin: 'USDC', ...META })],
     ['vault (with limits)', buildVault({ backingCoin: 'USDC', dailyWithdrawLimit: 100, require2fa: '74', emergencyRecovery: 'bb1recovery', ...META })],
-    ['smart-account', buildSmartAccount({ backingCoin: 'USDC', ...META })],
-    ['smart-account (tradable)', buildSmartAccount({ backingCoin: 'USDC', tradable: true, ...META })],
-    ['smart-account (ai-agent)', buildSmartAccount({ backingCoin: 'BADGE', aiAgentVault: true, ...META })],
+    ['smart-token', buildSmartToken({ backingCoin: 'USDC', ...META })],
+    ['smart-token (tradable)', buildSmartToken({ backingCoin: 'USDC', tradable: true, ...META })],
+    ['smart-token (ai-agent)', buildSmartToken({ backingCoin: 'BADGE', aiAgentVault: true, ...META })],
     ['subscription (single)', buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', ...META })],
     ['subscription (multi-tier)', buildSubscription({ interval: 'daily', price: 5, denom: 'BADGE', recipient: 'bb1r', tiers: 3, ...META })],
     // Subscription faucet approvals must use a SINGLE denom — see

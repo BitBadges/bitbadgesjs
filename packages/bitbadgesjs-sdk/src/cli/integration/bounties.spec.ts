@@ -121,13 +121,11 @@ describe('bounties integration', () => {
 
     const tmp = writeMsgToTmp(acceptMsg.json, 'bounty-accept');
     const tx = await deployMsgViaKeyring(tmp, verifier.name);
-    // Note: deployMsgViaKeyring only captures the FIRST txhash from the
-    // chained command (the MsgCastVote). The follow-up MsgTransferTokens
-    // is broadcast after `sleep 6` but isn't surfaced here. Asserting on
-    // the vote tx code is the closest reliable signal that the keyring
-    // path executed cleanly; we then rely on the indexer-status flip to
-    // confirm the transfer landed.
+    // 2-msg envelope → primary (MsgCastVote) + 1 additional (MsgTransferTokens).
+    // Both must commit cleanly (code 0) before the indexer status flips.
     expect(tx.code).toBe(0);
+    expect(tx.additionalTxs).toHaveLength(1);
+    expect(tx.additionalTxs[0].code).toBe(0);
 
     // Indexer-side status update may lag. Poll up to 45s.
     const start = Date.now();

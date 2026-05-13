@@ -19,6 +19,13 @@ export interface DeployedTx {
   /** Block height the tx landed in. */
   height?: number;
   rawLog?: string;
+  /**
+   * For multi-msg envelopes the chain-binary emits one tx per msg in
+   * sequence. `txHash`/`code`/`collectionId` reflect the FIRST tx; the
+   * rest land here so callers that care (e.g. asserting all sub-txs
+   * succeeded) can inspect them. Empty for single-msg deploys.
+   */
+  additionalTxs: DeployedTx[];
 }
 
 /**
@@ -68,14 +75,23 @@ export async function deployMsgViaKeyring(
       throw new Error(`deployMsgViaKeyring failed (attempt ${attempt + 1}):\n${trimmed}`);
     }
   }
-  const m = out!.match(/txhash: ([A-F0-9]+)/);
-  if (!m) {
+  // Multi-msg envelopes produce N "txhash: <hex>" lines (one per msg
+  // sub-tx, since the chain-binary's tx subcommands only take one msg
+  // each — see deploy.ts `buildKeyringMultiCommand`). Capture them all
+  // so callers can assert on every sub-tx.
+  const matches = [...out!.matchAll(/txhash: ([A-F0-9]+)/g)];
+  if (matches.length === 0) {
     throw new Error(`Could not extract txhash from chain-binary output:\n${out!.slice(0, 800)}`);
   }
-  const txHash = m[1];
+  const [primary, ...extras] = matches.map((m) => m[1]);
 
-  // 3. Poll the RPC for the tx result.
-  return await waitForTx(txHash);
+  // 3. Poll the RPC for each tx result.
+  const primaryTx = await waitForTx(primary);
+  const additionalTxs: DeployedTx[] = [];
+  for (const h of extras) {
+    additionalTxs.push(await waitForTx(h));
+  }
+  return { ...primaryTx, additionalTxs };
 }
 
 export async function waitForTx(txHash: string, timeoutMs = 30000): Promise<DeployedTx> {
@@ -100,7 +116,8 @@ export async function waitForTx(txHash: string, timeoutMs = 30000): Promise<Depl
           code: Number(tr.code ?? 0),
           collectionId,
           height: Number(parsed.result?.height ?? 0),
-          rawLog: tr.log
+          rawLog: tr.log,
+          additionalTxs: []
         };
       }
     } catch {
@@ -184,7 +201,11 @@ export async function waitForIndexerCollection(collectionId: string, timeoutMs =
     }
     await sleep(500);
   }
-  throw new Error(`Indexer did not surface collection ${collectionId} after ${timeoutMs}ms`);
+  throw new Error(
+    `Indexer did not surface collection ${collectionId} after ${timeoutMs}ms. ` +
+      `This usually means the indexer is lagging — check that it's running and processing blocks ` +
+      `(curl ${env.indexerUrl}/api/v0/status), or bump timeoutMs if the chain is slow.`
+  );
 }
 
 /**

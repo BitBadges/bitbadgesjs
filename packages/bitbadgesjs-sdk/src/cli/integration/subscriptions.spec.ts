@@ -234,4 +234,14 @@ describe('subscriptions integration', () => {
     expect(Array.isArray(out.json.entries)).toBe(true);
     expect(out.json.entries.length).toBe(0);
   }, 30000);
+
+  it('conformance throw — list on a non-Subscriptions collection exits non-zero', async () => {
+    if (!ready) return;
+    // Collection 1 (BADGE) is not a Subscriptions — validator must reject.
+    // Use `list` rather than `status` because `status` requires --address;
+    // we want to test the standards guard, not arg parsing.
+    const out = runCli(['subscriptions', 'list', '1', '--local'], { throwOnError: false, parseJson: false });
+    expect(out.exitCode).not.toBe(0);
+    expect(out.stderr + out.stdout).toMatch(/not.*found|not.*valid|Subscriptions/i);
+  }, 30000);
 });

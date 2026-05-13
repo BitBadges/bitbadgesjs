@@ -8,8 +8,13 @@ import { Command } from 'commander';
  */
 export function makeCompletionCommand(program: Command): Command {
   return new Command('completion')
-    .description('Generate shell completion script (bash/zsh).')
-    .action(() => {
+    .description('Generate shell completion script. Output is bash-compatible (works in zsh via `bashcompinit`).')
+    .argument('[shell]', 'Optional shell hint: bash | zsh. Currently informational only — the same script works for both.')
+    .action((shell?: string) => {
+      if (shell && !['bash', 'zsh'].includes(shell.toLowerCase())) {
+        process.stderr.write(`Unknown shell "${shell}". Supported: bash, zsh.\n`);
+        process.exit(2);
+      }
       const topLevelNames = program.commands.map((c) => c.name()).join(' ');
 
       const caseEntries = program.commands

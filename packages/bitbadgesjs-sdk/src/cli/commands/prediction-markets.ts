@@ -73,11 +73,19 @@ function validateOrExit(collection: any, ctx: string): void {
     process.stderr.write(`Error: collection not found while running ${ctx}.\n`);
     process.exit(2);
   }
-  if (!isPredictionMarketValid(collection)) {
-    const r = validatePredictionMarketCollection(collection);
+  const result = validatePredictionMarketCollection(collection);
+  if (!result.valid) {
     process.stderr.write(`Error: collection is not a valid Prediction Market (failed in ${ctx}):\n`);
-    for (const e of r.errors) process.stderr.write(`  - ${e}\n`);
+    for (const e of result.errors) process.stderr.write(`  - ${e}\n`);
+    if (result.warnings.length > 0) {
+      process.stderr.write('Warnings:\n');
+      for (const w of result.warnings) process.stderr.write(`  - ${w}\n`);
+    }
     process.exit(2);
+  }
+  if (result.warnings.length > 0 && process.env.BB_QUIET !== '1') {
+    process.stderr.write(`Warnings for ${ctx}:\n`);
+    for (const w of result.warnings) process.stderr.write(`  - ${w}\n`);
   }
 }
 

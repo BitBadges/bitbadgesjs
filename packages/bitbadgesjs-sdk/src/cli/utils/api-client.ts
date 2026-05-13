@@ -160,6 +160,16 @@ export async function apiRequest(options: ApiRequestOptions): Promise<any> {
         ? 'Session may be expired or scoped wrong — run `bitbadges-cli auth login` again.'
         : 'This route requires user-scoped auth — run `bitbadges-cli auth login`, then retry with `--with-session`.';
     }
+    if (response.status === 404 && /\/collection\//.test(path)) {
+      // /collection/:id 404 is the most common indexer-lag symptom: a tx
+      // committed on chain but the indexer hasn't surfaced the doc yet.
+      // The catch-up window is usually <5s on local, <30s on mainnet/testnet.
+      // (We don't know if the caller just deployed the collection vs.
+      // looked up a never-existed ID, so we keep the hint conditional in
+      // tone — "if you just deployed" rather than asserting lag.)
+      (err as any).hint =
+        'If this collection was just deployed, the indexer may not have caught up yet — retry in a few seconds. Otherwise the collection ID does not exist.';
+    }
     throw err;
   }
 

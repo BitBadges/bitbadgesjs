@@ -16,9 +16,13 @@ const KNOWN_SYSTEM_APPROVAL_PREFIXES = [
   'transferable',
   'burnable-approval',
   'burnable',
-  // Two naming conventions in the SDK: core/builders uses
-  // smart-account-*, builder/tools/components uses smart-token-*.
-  // Accept either.
+  // Smart Token deposit/withdraw approvals. Legacy collections used
+  // smart-account-backing / smart-account-unbacking and smart-token-backing /
+  // -unbacking; new collections (post-rename) use smart-token-deposit /
+  // -withdraw. All four forms accepted for backwards compatibility.
+  'smart-token-deposit',
+  'smart-token-withdraw',
+  'smart-token-transferable',
   'smart-account-backing',
   'smart-account-unbacking',
   'smart-token-backing',

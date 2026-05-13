@@ -11,8 +11,17 @@ export interface Config {
   url?: string;
 }
 
-const CONFIG_DIR = path.join(os.homedir(), '.bitbadges');
-const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json');
+// Resolved lazily — tests override via BITBADGES_CONFIG_DIR so they don't
+// fight ts-jest's process.env / os.homedir() coupling (which doesn't
+// re-read HOME inside the worker after import). Production callers leave
+// the env var unset and pick up ~/.bitbadges.
+function configDir(): string {
+  if (process.env.BITBADGES_CONFIG_DIR) return process.env.BITBADGES_CONFIG_DIR;
+  return path.join(os.homedir(), '.bitbadges');
+}
+function configPath(): string {
+  return path.join(configDir(), 'config.json');
+}
 
 export const SUPPORTED_CONFIG_KEYS = ['apiKey', 'apiKeyTestnet', 'apiKeyLocal', 'network', 'url'] as const;
 export type ConfigKey = (typeof SUPPORTED_CONFIG_KEYS)[number];
@@ -22,8 +31,9 @@ export type ConfigKey = (typeof SUPPORTED_CONFIG_KEYS)[number];
  */
 export function loadConfig(): Config {
   try {
-    if (!fs.existsSync(CONFIG_PATH)) return {};
-    const raw = fs.readFileSync(CONFIG_PATH, 'utf-8');
+    const p = configPath();
+    if (!fs.existsSync(p)) return {};
+    const raw = fs.readFileSync(p, 'utf-8');
     return JSON.parse(raw) as Config;
   } catch {
     return {};
@@ -34,17 +44,18 @@ export function loadConfig(): Config {
  * Writes config to ~/.bitbadges/config.json. Creates directory if needed.
  */
 export function saveConfig(config: Config): void {
-  if (!fs.existsSync(CONFIG_DIR)) {
-    fs.mkdirSync(CONFIG_DIR, { recursive: true });
+  const dir = configDir();
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2) + '\n', 'utf-8');
+  fs.writeFileSync(configPath(), JSON.stringify(config, null, 2) + '\n', 'utf-8');
 }
 
 /**
  * Returns the config file path.
  */
 export function getConfigPath(): string {
-  return CONFIG_PATH;
+  return configPath();
 }
 
 /**

@@ -19,25 +19,6 @@
  *   8. (skipped) verifier resolve — depends on settlement approval lookup,
  *      which is sometimes unreliable across indexer reorgs
  *
- * KNOWN BUG (found while writing this spec, 2026-05-13):
- *   `buildPredictionMarket` produces a collection whose on-chain shape the
- *   chain accepts (deploy returns code 0, indexer surfaces it), but which
- *   `validatePredictionMarketCollection` then hard-rejects with errors:
- *     - NO alias path (uno) conversion must target token ID 2
- *     - YES wins approval: overallMaxNumTransfers must be > 0 when using
- *       overrideFromWithApproverAddress
- *     - Missing "NO wins" settlement approval
- *     - Push YES approval: overallMaxNumTransfers must be > 0 when using
- *       overrideFromWithApproverAddress
- *     - Missing "Push NO" settlement approval
- *   Because every read/trade verb (show, status, deposit, buy-yes, buy-no,
- *   sell-yes, sell-no, redeem, resolve) gates on `validateOrExit`, this
- *   entire CLI surface is broken
- *   against the builder's own output. Those tests are it.skip'd below; the
- *   build+cancel paths (which don't run the validator) stay enabled. File
- *   a fix-up ticket on `core/builders/prediction-market.ts` and/or relax
- *   the validator in `core/prediction-markets.ts` before unskipping.
- *
  * Skipped automatically when preflight fails.
  */
 
@@ -91,10 +72,7 @@ describe('prediction-markets integration', () => {
     await waitForIndexerCollection(collectionId);
   }, 90000);
 
-  // SKIPPED: validator-gated. See KNOWN BUG note at the top of the file —
-  // builder output doesn't satisfy the SDK's own PredictionMarket validator,
-  // so every read/trade verb that calls `validateOrExit` exits with code 2.
-  it.skip('show returns mintEscrowAddress + status (active or fallback)', async () => {
+  it('show returns mintEscrowAddress + status (active or fallback)', async () => {
     if (!ready || !collectionId) return;
     const show = runCli(['prediction-markets', 'show', collectionId, '--local']);
     expect(show.json.collectionId).toBe(collectionId);
@@ -103,17 +81,14 @@ describe('prediction-markets integration', () => {
     expect(show.json.status === 'active' || show.json.status === null || typeof show.json.status === 'string').toBe(true);
   }, 30000);
 
-  // SKIPPED: validator-gated. Same root cause as `show`.
-  it.skip('status returns active (or null with active fallback)', async () => {
+  it('status returns active (or null with active fallback)', async () => {
     if (!ready || !collectionId) return;
     const status = runCli(['prediction-markets', 'status', collectionId, '--local']);
     expect(status.json.collectionId).toBe(collectionId);
     expect(status.json.status).toBeTruthy();
   }, 30000);
 
-  // SKIPPED: validator-gated AND mint-approval-id lookup requires a valid
-  // PM collection. Unskip once the builder/validator mismatch is fixed.
-  it.skip('alice deposits 100 USDC → chain code 0 (mints 100 YES + 100 NO)', async () => {
+  it('alice deposits 100 USDC → chain code 0 (mints 100 YES + 100 NO)', async () => {
     if (!ready || !collectionId) return;
     const depositor = alice();
 
@@ -130,8 +105,7 @@ describe('prediction-markets integration', () => {
     expect(tx.code).toBe(0);
   }, 90000);
 
-  // SKIPPED: validator-gated.
-  it.skip('charlie places a BUY-YES intent → chain code 0 (MsgSetIncomingApproval)', async () => {
+  it('charlie places a BUY-YES intent → chain code 0 (MsgSetIncomingApproval)', async () => {
     if (!ready || !collectionId) return;
     const trader = charlie();
     await fundPersona('alice', trader.address, '500000000', USDC_DENOM);
@@ -152,8 +126,7 @@ describe('prediction-markets integration', () => {
     expect(tx.code).toBe(0);
   }, 90000);
 
-  // SKIPPED: validator-gated.
-  it.skip('charlie places a SELL-NO intent → MsgSetOutgoingApproval (chain may reject)', async () => {
+  it('charlie places a SELL-NO intent → MsgSetOutgoingApproval (chain may reject)', async () => {
     if (!ready || !collectionId) return;
     const trader = charlie();
 
@@ -177,10 +150,9 @@ describe('prediction-markets integration', () => {
   it('cancel emits MsgDeleteIncomingApproval with the supplied approval id', async () => {
     if (!ready || !collectionId) return;
     const trader = charlie();
-    // `cancel` does NOT call `validateOrExit`, so it works against any
-    // collection — even one the validator rejects. Use a synthetic
-    // approval id since the buy-yes flow that would normally produce one
-    // is currently skipped (see KNOWN BUG note above).
+    // `cancel` doesn't read or set state — just emits a delete-intent
+    // msg. Use a synthetic approval id since asserting the msg shape is
+    // sufficient for CLI-surface coverage.
     const fakeApprovalId = crypto.randomBytes(16).toString('hex');
 
     const cancelMsg = runCli([
@@ -196,10 +168,7 @@ describe('prediction-markets integration', () => {
     // approval. Msg-shape assertion is sufficient for CLI-surface coverage.
   }, 30000);
 
-  // SKIPPED: validator-gated (resolve calls validateOrExit) AND depends
-  // on settlement approval lookup. Will fail with the same builder/validator
-  // mismatch errors as the other read/trade verbs.
-  it.skip('verifier resolve --outcome yes → chain code 0 (MsgCastVote)', async () => {
+  it('verifier resolve --outcome yes → chain code 0 (MsgCastVote)', async () => {
     if (!ready || !collectionId) return;
     const verifier = charlie();
 
@@ -215,4 +184,12 @@ describe('prediction-markets integration', () => {
     const tx = await deployMsgViaKeyring(tmp, verifier.name);
     expect(tx.code).toBe(0);
   }, 90000);
+
+  it('conformance throw — show on a non-PM collection exits non-zero', async () => {
+    if (!ready) return;
+    // Collection 1 (BADGE) is not a Prediction Market — validator must reject.
+    const out = runCli(['prediction-markets', 'show', '1', '--local'], { throwOnError: false, parseJson: false });
+    expect(out.exitCode).not.toBe(0);
+    expect(out.stderr + out.stdout).toMatch(/not.*found|not.*valid|Prediction Market/i);
+  }, 30000);
 });

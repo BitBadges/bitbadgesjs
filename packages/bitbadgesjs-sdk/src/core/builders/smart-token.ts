@@ -1,6 +1,20 @@
 /**
- * Smart Account builder — creates a MsgUniversalUpdateCollection for a smart account token.
- * @module core/builders/smart-account
+ * Smart Token builder — creates a MsgUniversalUpdateCollection for a Smart Token.
+ *
+ * A Smart Token is a 1:1 IBC-backed token: users deposit some backing coin
+ * (USDC, BADGE, ATOM, ...) and receive an equivalent amount of the
+ * collection's token; withdraw burns the token and releases the backing
+ * coin back. Variants:
+ *   - tradable: adds 'Liquidity Pools' standard tag and a free-transfer
+ *     approval for use with on-chain DEX pools.
+ *   - aiAgentVault: adds 'AI Agent Vault' standard tag.
+ *
+ * Vaults are NOT a separate standard — they're Smart Tokens with the
+ * cosmosCoinBackedPath invariant. The FE's `SmartAccountLayout` (legacy
+ * folder name; the standard tag and display name are "Smart Token") is
+ * what users see when they visit a Smart Token collection.
+ *
+ * @module core/builders/smart-token
  */
 import {
   FOREVER,
@@ -19,7 +33,7 @@ import {
   approvalMetadata
 } from './shared.js';
 
-export interface SmartAccountParams {
+export interface SmartTokenParams {
   backingCoin: string;
   symbol?: string;
   /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
@@ -28,23 +42,37 @@ export interface SmartAccountParams {
   description?: string;
   image?: string;
   tradable?: boolean;
-  aiAgentVault?: boolean; // adds 'AI Agent Vault' standard tag
+  /** Adds the 'AI Agent Vault' standard tag — purely a discovery hint. */
+  aiAgentVault?: boolean;
+  /**
+   * Override the chain-level invariant. Smart Tokens default to LOCKED forceful
+   * post-mint transfers (the safer default for vault-like wallets) — set this
+   * to `true` only if you need a delegated approval flow that uses
+   * `force=true` in MsgTransferTokens.
+   */
+  allowForcefulPostMintTransfers?: boolean;
 }
 
-export function buildSmartAccount(params: SmartAccountParams): any {
+/** Stable IDs for the deposit/withdraw approvals — matched by `extractSmartTokenDetails`. */
+export const SMART_TOKEN_DEPOSIT_APPROVAL_ID = 'smart-token-deposit';
+export const SMART_TOKEN_WITHDRAW_APPROVAL_ID = 'smart-token-withdraw';
+export const SMART_TOKEN_TRANSFERABLE_APPROVAL_ID = 'smart-token-transferable';
+
+export function buildSmartToken(params: SmartTokenParams): any {
   const coin = resolveCoin(params.backingCoin);
   const backingAddr = generateAliasAddressForIBCBackedDenom(coin.denom);
   const symbol = params.symbol || ('v' + coin.symbol);
 
   const collectionApprovals: any[] = [
-    // Backing
+    // Deposit: backing address → user. User sends IBC coin to backing
+    // alias; chain auto-mints equivalent Smart Token to the user.
     {
       fromListId: backingAddr,
       toListId: `!${backingAddr}`,
       initiatedByListId: 'All',
-      approvalId: 'smart-account-backing',
+      approvalId: SMART_TOKEN_DEPOSIT_APPROVAL_ID,
       ...approvalMetadata(
-        'Deposit Approval',
+        'Deposit',
         'Allows deposits by sending tokens to the backing address.'
       ),
       transferTimes: FOREVER,
@@ -56,17 +84,17 @@ export function buildSmartAccount(params: SmartAccountParams): any {
         allowBackedMinting: true
       }
     },
-    // Unbacking. `fromListId` excludes both Mint AND the backing alias
-    // itself so the backing address can't initiate circular unbacks.
-    // The colon-separated exclude syntax is how the chain allows
-    // specifying multiple excluded lists.
+    // Withdraw: user → backing address. `fromListId` excludes both Mint
+    // AND the backing alias itself so the backing address can't initiate
+    // circular unbacks. The colon-separated exclude syntax lets us
+    // specify multiple excluded lists in one toListId.
     {
       fromListId: `!Mint:${backingAddr}`,
       toListId: backingAddr,
       initiatedByListId: 'All',
-      approvalId: 'smart-account-unbacking',
+      approvalId: SMART_TOKEN_WITHDRAW_APPROVAL_ID,
       ...approvalMetadata(
-        'Withdraw Approval',
+        'Withdraw',
         'Allows withdrawals by receiving tokens from the backing address.'
       ),
       transferTimes: FOREVER,
@@ -86,10 +114,10 @@ export function buildSmartAccount(params: SmartAccountParams): any {
       fromListId: '!Mint',
       toListId: 'All',
       initiatedByListId: 'All',
-      approvalId: 'transferable-approval',
+      approvalId: SMART_TOKEN_TRANSFERABLE_APPROVAL_ID,
       ...approvalMetadata(
         'Transferable',
-        'Allow holders to transfer smart account tokens between addresses.'
+        'Allow holders to transfer Smart Token units between addresses.'
       ),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
@@ -107,7 +135,13 @@ export function buildSmartAccount(params: SmartAccountParams): any {
 
   const invariants = {
     ...ibcBackedInvariants(coin.denom),
-    disablePoolCreation: !params.tradable
+    disablePoolCreation: !params.tradable,
+    // Smart Tokens default to LOCKED forceful post-mint transfers. The
+    // shared `ibcBackedInvariants()` helper leaves this at false, which
+    // bb check flags as CRITICAL — and for wallet-like Smart Tokens
+    // that's the right default. Vault/credit-token still use the shared
+    // helper directly and are unaffected by this override.
+    noForcefulPostMintTransfers: !params.allowForcefulPostMintTransfers
   };
 
   const permissions = {
@@ -130,7 +164,7 @@ export function buildSmartAccount(params: SmartAccountParams): any {
     image: params.image
   });
   if (!collectionSource) {
-    throw new MetadataMissingError('smart-account collectionMetadata', ['name', 'image', 'description']);
+    throw new MetadataMissingError('smart-token collectionMetadata', ['name', 'image', 'description']);
   }
   const aliasPath = buildAliasPath({
     denom: denomStr,
@@ -146,7 +180,7 @@ export function buildSmartAccount(params: SmartAccountParams): any {
     invariants,
     aliasPathsToAdd: [aliasPath],
     collectionMetadata: collectionSource,
-    tokenMetadata: [tokenMetadataEntry(FOREVER, collectionSource, 'smart account token')],
+    tokenMetadata: [tokenMetadataEntry(FOREVER, collectionSource, 'Smart Token unit')],
     collectionPermissions: permissions
   });
 }
