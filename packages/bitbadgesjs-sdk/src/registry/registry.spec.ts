@@ -11,6 +11,14 @@ describe('asset registry', () => {
     expect(symbols).toContain('ATOM');
     expect(symbols).toContain('USDC');
     expect(symbols).toContain('OSMO');
+    expect(symbols).toContain('ETH');
+  });
+
+  it('exposes ETH with 18 decimals + ethereum coingecko ID', () => {
+    const eth = findAsset('ETH');
+    expect(eth?.symbol).toBe('ETH');
+    expect(eth?.decimals).toBe(18);
+    expect(eth?.coingecko_id).toBe('ethereum');
   });
 
   it('getAllAssets returns the flat list', () => {

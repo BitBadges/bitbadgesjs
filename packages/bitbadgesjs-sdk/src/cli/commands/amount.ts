@@ -289,7 +289,14 @@ addOutputFlags(
 function pickWrapperPath(collection: any, kind: string, index: number): any {
   const paths = kind === 'alias' ? collection.aliasPaths : collection.cosmosCoinWrapperPaths;
   if (!Array.isArray(paths) || paths.length === 0) {
-    fail(2, `collection has no ${kind === 'alias' ? 'alias' : 'cosmos-coin-wrapper'} paths`);
+    // Smart Tokens populate aliasPaths (not cosmosCoinWrapperPaths) — most
+    // users hit this trying the default --path-kind cosmos-coin against a
+    // Smart Token. Surface that hint inline rather than making them dig.
+    const otherKind = kind === 'alias' ? 'cosmos-coin' : 'alias';
+    const otherPaths = kind === 'alias' ? collection.cosmosCoinWrapperPaths : collection.aliasPaths;
+    const hasOther = Array.isArray(otherPaths) && otherPaths.length > 0;
+    const hint = hasOther ? ` — try --path-kind ${otherKind} (this collection populates the ${otherKind} side instead).` : '';
+    fail(2, `collection has no ${kind === 'alias' ? 'alias' : 'cosmos-coin-wrapper'} paths${hint}`);
   }
   if (index < 0 || index >= paths.length) {
     fail(2, `--path-index ${index} out of range (collection has ${paths.length} ${kind === 'alias' ? 'alias' : 'cosmos-coin-wrapper'} paths)`);

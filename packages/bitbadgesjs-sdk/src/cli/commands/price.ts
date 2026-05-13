@@ -139,6 +139,10 @@ through verbatim — any CoinGecko ID at coingecko.com/coins/list still works.
     }
 
     // Map of resolved-ID → original-input, for inputs that were aliased.
+    // Always emit the nested { prices, aliasedFrom } shape so downstream
+    // consumers (agents, tests, scripts) can parse one consistent envelope
+    // regardless of whether the caller passed a symbol or a raw CoinGecko ID.
+    // `aliasedFrom` is always present; empty `{}` when no aliasing occurred.
     const aliasedFrom = resolved
       .filter((r) => r.id !== r.original)
       .reduce<Record<string, string>>((acc, r) => {
@@ -146,8 +150,7 @@ through verbatim — any CoinGecko ID at coingecko.com/coins/list still works.
         return acc;
       }, {});
 
-    const payload =
-      Object.keys(aliasedFrom).length > 0 ? { prices, aliasedFrom } : (prices as Record<string, unknown>);
+    const payload = { prices, aliasedFrom };
     const env = successEnvelope(payload, {
       hint: coinIds.some((id) => !prices[id])
         ? `Some IDs returned no data — try a BitBadges symbol (ATOM/USDC/OSMO/BADGE) or check coingecko.com/coins/list.`

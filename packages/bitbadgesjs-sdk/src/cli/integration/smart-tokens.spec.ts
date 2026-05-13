@@ -19,7 +19,7 @@
  */
 
 import { preflightIntegration } from './harness/preflight.js';
-import { alice } from './harness/personas.js';
+import { alice, charlie } from './harness/personas.js';
 import { runCli } from './harness/cli.js';
 import { deployMsgViaKeyring, fundPersona, waitForIndexerCollection, writeMsgToTmp } from './harness/chain.js';
 import * as fs from 'node:fs';
@@ -122,5 +122,73 @@ describe('smart-tokens integration', () => {
     const out = runCli(['smart-tokens', 'show', '1', '--local'], { throwOnError: false, parseJson: false });
     expect(out.exitCode).not.toBe(0);
     expect(out.stderr + out.stdout).toMatch(/not.*found|not.*valid|Smart Token/i);
+  }, 30000);
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Multi-persona path — charlie is a brand-new user funded with just enough
+  // USDC to round-trip a deposit and a withdraw. Mirrors the real agent
+  // flow: alice publishes the vault, third parties join.
+  // ───────────────────────────────────────────────────────────────────────────
+  it('charlie deposits 3 USDC then withdraws 1 vUSDC against alice\'s vault', async () => {
+    if (!ready || !collectionId) return;
+    const consumer = charlie();
+    // Fund charlie with enough USDC to deposit 3 + chain fees buffer.
+    try { await fundPersona('alice', consumer.address, '10000000', USDC_DENOM); } catch { /* already funded */ }
+
+    const depositMsg = runCli([
+      'smart-tokens', 'deposit', collectionId,
+      '--creator', consumer.address,
+      '--amount', '3',
+      '--local'
+    ]);
+    expect(depositMsg.json.typeUrl).toBe('/tokenization.MsgTransferTokens');
+    const depositTmp = writeMsgToTmp(depositMsg.json, 'st-charlie-deposit');
+    const depositTx = await deployMsgViaKeyring(depositTmp, consumer.name);
+    expect(depositTx.code).toBe(0);
+
+    const withdrawMsg = runCli([
+      'smart-tokens', 'withdraw', collectionId,
+      '--creator', consumer.address,
+      '--amount', '1',
+      '--local'
+    ]);
+    const withdrawTmp = writeMsgToTmp(withdrawMsg.json, 'st-charlie-withdraw');
+    const withdrawTx = await deployMsgViaKeyring(withdrawTmp, consumer.name);
+    expect(withdrawTx.code).toBe(0);
+  }, 120000);
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // `bb amount` wrap previews — verifies the wrapper-path resolution against
+  // a real on-chain Smart Token. Smart Tokens populate `aliasPaths` (not
+  // `cosmosCoinWrapperPaths`), so the agent must pass --path-kind alias.
+  // ───────────────────────────────────────────────────────────────────────────
+  it('amount wrap-preview/unwrap-preview resolve against the smart token alias path', () => {
+    if (!ready || !collectionId) return;
+    const wrap = runCli(['amount', 'wrap-preview', collectionId, '--coin-amount', '1000000', '--path-kind', 'alias', '--local']);
+    expect(wrap.json.coinAmount).toBe('1000000');
+    expect(wrap.json.wrappedTokens).toBe('1000000'); // 1:1 conversion
+    expect(wrap.json.pathKind).toBe('alias');
+
+    const unwrap = runCli(['amount', 'unwrap-preview', collectionId, '--token-amount', '3', '--path-kind', 'alias', '--local']);
+    expect(unwrap.json.tokenAmount).toBe('3');
+    expect(unwrap.json.coinAmount).toBe('3');
+  }, 30000);
+
+  it('amount max-wrappable returns 0 for an address with no Smart Token balance and surfaces the alias hint on the default path-kind', () => {
+    if (!ready || !collectionId) return;
+    // Default --path-kind cosmos-coin must fail with an alias hint (Smart
+    // Token wrapper data lives in aliasPaths, not cosmosCoinWrapperPaths).
+    const out = runCli(
+      ['amount', 'max-wrappable', collectionId, '--address', alice().address, '--local'],
+      { throwOnError: false, parseJson: false }
+    );
+    expect(out.exitCode).not.toBe(0);
+    expect(out.stderr).toMatch(/--path-kind alias/);
+
+    // With the correct path-kind, alice (no Smart Token balance) → 0.
+    const ok = runCli(
+      ['amount', 'max-wrappable', collectionId, '--address', alice().address, '--path-kind', 'alias', '--local']
+    );
+    expect(ok.json.maxWrappable).toBe('0');
   }, 30000);
 });
