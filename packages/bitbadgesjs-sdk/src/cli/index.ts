@@ -44,6 +44,7 @@ import { balancesCommand } from './commands/balances.js';
 import { payRequestsCommand } from './commands/pay-requests.js';
 import { bountiesCommand } from './commands/bounties.js';
 import { subscriptionsCommand } from './commands/subscriptions.js';
+import { intentsCommand } from './commands/intents.js';
 
 // Misc
 import { makeCompletionCommand } from './commands/completion.js';
@@ -106,7 +107,7 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   },
   {
     title: 'Standards (end-user actions)',
-    commands: [payRequestsCommand, bountiesCommand, subscriptionsCommand]
+    commands: [payRequestsCommand, bountiesCommand, subscriptionsCommand, intentsCommand]
   }
 ];
 

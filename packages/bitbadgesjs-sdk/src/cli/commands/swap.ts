@@ -17,7 +17,6 @@
 import { Command } from 'commander';
 import * as fs from 'node:fs';
 import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
-import { requireBb1Address } from '../utils/address.js';
 
 interface NetworkFlags {
   testnet?: boolean;
@@ -99,7 +98,7 @@ function appendQuery(path: string, params: Record<string, string | number | bool
 // ── swap (parent) ──────────────────────────────────────────────────────
 
 export const swapCommand = new Command('swap').description(
-  'Cross-chain swap helpers — assets, chains, balances, route estimates, tracking, activity, intents.'
+  'Cross-chain swap helpers — assets, chains, balances, route estimates, tracking, activity. (Intent Exchange moved to top-level `bb intents`.)'
 );
 
 // ── swap assets ─────────────────────────────────────────────────────────
@@ -285,43 +284,5 @@ addOutputFlags(
   }
 });
 
-// ── swap intents ────────────────────────────────────────────────────────
-
-addOutputFlags(
-  addNetworkFlags(swapCommand.command('intents'))
-    .description(
-      'List intent-type exchange approvals. Default = global browse (active/funded only). Pass --mine <address> to scope to a single approver and include used/inactive rows.'
-    )
-    .option(
-      '--mine <address>',
-      'Restrict to intents created by this address (also includes used/inactive). Accepts bb1... or 0x... — auto-normalized to bb1.'
-    )
-    .option('--pay-denom <denom>', 'Filter by the denom the intent pays out')
-    .option('--receive-denom <denom>', 'Filter by the denom the intent expects to receive')
-    .option('--collection-id <id>', 'Filter to a specific collection ID')
-).action(
-  async (
-    opts: NetworkFlags &
-      OutputFlags & {
-        mine?: string;
-        payDenom?: string;
-        receiveDenom?: string;
-        collectionId?: string;
-      }
-  ) => {
-    try {
-      const mine = opts.mine ? requireBb1Address(opts.mine, '--mine') : undefined;
-      const base = mine ? `/intents/${encodeURIComponent(mine)}` : '/intents';
-      const path = appendQuery(base, {
-        includeAll: mine ? 'true' : undefined,
-        payDenom: opts.payDenom,
-        receiveDenom: opts.receiveDenom,
-        collectionId: opts.collectionId
-      });
-      const res = await callApi('GET', path, opts);
-      emit(res, opts);
-    } catch (err) {
-      emitError(err);
-    }
-  }
-);
+// (intents — moved to top-level `bb intents`, with create/fill/cancel/show
+// added beyond the original swap-scoped list-only view.)

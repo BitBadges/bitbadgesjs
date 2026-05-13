@@ -170,7 +170,7 @@ describe('buildKeyringCommand', () => {
   it('throws on an unsupported typeUrl with a helpful error', () => {
     expect(() =>
       buildKeyringCommand({
-        msg: { typeUrl: '/tokenization.MsgCastVote', value: {} },
+        msg: { typeUrl: '/tokenization.MsgTotallyUnknownVerb', value: {} },
         from: 'alice',
         network: 'mainnet',
         binary: 'bitbadgeschaind',

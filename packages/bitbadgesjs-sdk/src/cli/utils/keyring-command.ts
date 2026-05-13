@@ -98,13 +98,18 @@ export interface KeyringCommandResult {
  * expected to catch and convert to a CLI error.
  */
 export function buildKeyringCommand(opts: KeyringCommandOptions): KeyringCommandResult {
-  const subcommand = TYPE_URL_TO_SUBCOMMAND[opts.msg.typeUrl];
-  if (!subcommand) {
-    const supported = Object.keys(TYPE_URL_TO_SUBCOMMAND).sort().join('\n  - ');
+  const jsonArgSubcommand = TYPE_URL_TO_SUBCOMMAND[opts.msg.typeUrl];
+  const positionalBuilder = POSITIONAL_BUILDERS[opts.msg.typeUrl];
+
+  if (!jsonArgSubcommand && !positionalBuilder) {
+    const supported = [
+      ...Object.keys(TYPE_URL_TO_SUBCOMMAND),
+      ...Object.keys(POSITIONAL_BUILDERS)
+    ].sort().join('\n  - ');
     throw new Error(
-      `--with-keyring does not support typeUrl "${opts.msg.typeUrl}" (it has no [tx-json-or-file] chain-binary subcommand).\n` +
+      `--with-keyring does not support typeUrl "${opts.msg.typeUrl}" — no chain-binary subcommand mapping.\n` +
         `Supported verbs:\n  - ${supported}\n` +
-        `For positional-arg msgs (cast-vote, delete-collection, etc.) run \`${opts.binary} tx tokenization --help\` and compose the command manually.`
+        `For unmapped msgs run \`${opts.binary} tx tokenization --help\` and compose the command manually.`
     );
   }
 
@@ -115,19 +120,41 @@ export function buildKeyringCommand(opts: KeyringCommandOptions): KeyringCommand
     value.manager = opts.manager;
   }
 
-  const msgFilePath =
-    opts.msgFilePath ?? path.join(os.tmpdir(), `bb-msg-${crypto.randomBytes(4).toString('hex')}.json`);
-  fs.writeFileSync(msgFilePath, JSON.stringify(value, null, 2) + '\n', { mode: 0o600 });
-
   const network = CHAIN_BINARY_NETWORK[opts.network];
   const chainId = opts.chainId ?? network.chainId;
   const nodeUrl = opts.nodeUrl ?? network.rpc;
+
+  // For JSON-arg msgs the whole `value` is written to a single tmp file
+  // and passed as the lone positional. For positional msgs (set-*-approval
+  // takes a sub-JSON for the approval field; others take only scalars),
+  // the builder writes whatever JSON it needs via the `writeJson` callback.
+  let msgFilePath = '';
+  let head: string;
+  let subcommand: string;
+  if (jsonArgSubcommand) {
+    msgFilePath =
+      opts.msgFilePath ?? path.join(os.tmpdir(), `bb-msg-${crypto.randomBytes(4).toString('hex')}.json`);
+    fs.writeFileSync(msgFilePath, JSON.stringify(value, null, 2) + '\n', { mode: 0o600 });
+    head = `${opts.binary} tx tokenization ${jsonArgSubcommand} ${msgFilePath}`;
+    subcommand = jsonArgSubcommand;
+  } else {
+    const writeJson = (data: unknown): string => {
+      const p = path.join(os.tmpdir(), `bb-msg-${crypto.randomBytes(4).toString('hex')}.json`);
+      fs.writeFileSync(p, JSON.stringify(data, null, 2) + '\n', { mode: 0o600 });
+      // Track the first-written path so callers / tests can see it.
+      if (!msgFilePath) msgFilePath = p;
+      return p;
+    };
+    const parts = positionalBuilder!(value, writeJson);
+    head = `${opts.binary} tx tokenization ${parts.join(' ')}`;
+    subcommand = parts[0];
+  }
 
   // Multi-line for terminal readability. Each continuation line is
   // indented 4 spaces; the final --yes line has no trailing backslash
   // so an accidental extra newline doesn't break the paste.
   const commandLine = [
-    `${opts.binary} tx tokenization ${subcommand} ${msgFilePath} \\`,
+    `${head} \\`,
     `    --from ${opts.from} \\`,
     `    --chain-id ${chainId} \\`,
     `    --node ${nodeUrl} \\`,
@@ -159,11 +186,21 @@ export const KEYRING_SUPPORTED_TYPE_URLS: readonly string[] = Object.freeze(Obje
 
 /**
  * Positional-arg msg → chain-binary subcommand line builder. The chain
- * binary's `tx_cast_vote.go` etc. take positional arguments, not a JSON
- * blob. We emit the same flag layout the JSON-arg path uses, with
- * positional args inlined.
+ * binary's `tx_cast_vote.go` / `tx_set_outgoing_approval.go` etc. take
+ * positional arguments, not a JSON blob. We emit the same flag layout
+ * the JSON-arg path uses, with positional args inlined.
+ *
+ * Some verbs (e.g. set-outgoing-approval) accept a JSON-blob as one of
+ * the positionals — `writeJson` is provided so builders can write to
+ * tmp and pass back the path. The builder records the path in
+ * `msgFilePaths` via the `pushTmpFile` callback.
  */
-const POSITIONAL_BUILDERS: Record<string, (value: Record<string, unknown>) => string[]> = {
+type PositionalBuilder = (
+  value: Record<string, unknown>,
+  writeJson: (data: unknown) => string
+) => string[];
+
+const POSITIONAL_BUILDERS: Record<string, PositionalBuilder> = {
   '/tokenization.MsgCastVote': (v) => {
     // Use: cast-vote [collection-id] [approval-level] [approver-address] [approval-id] [proposal-id] [yes-weight]
     const collectionId = String(v.collection_id ?? v.collectionId ?? '');
@@ -181,6 +218,30 @@ const POSITIONAL_BUILDERS: Record<string, (value: Record<string, unknown>) => st
       shellQuote(proposalId),
       shellQuote(yesWeight)
     ];
+  },
+  '/tokenization.MsgSetOutgoingApproval': (v, writeJson) => {
+    // Use: set-outgoing-approval [collection-id] [approval-json-or-file]
+    const collectionId = String(v.collectionId ?? v.collection_id ?? '');
+    const approvalJsonPath = writeJson(v.approval);
+    return ['set-outgoing-approval', shellQuote(collectionId), approvalJsonPath];
+  },
+  '/tokenization.MsgSetIncomingApproval': (v, writeJson) => {
+    // Use: set-incoming-approval [collection-id] [approval-json-or-file]
+    const collectionId = String(v.collectionId ?? v.collection_id ?? '');
+    const approvalJsonPath = writeJson(v.approval);
+    return ['set-incoming-approval', shellQuote(collectionId), approvalJsonPath];
+  },
+  '/tokenization.MsgDeleteOutgoingApproval': (v) => {
+    // Use: delete-outgoing-approval [collection-id] [approval-id]
+    const collectionId = String(v.collectionId ?? v.collection_id ?? '');
+    const approvalId = String(v.approvalId ?? v.approval_id ?? '');
+    return ['delete-outgoing-approval', shellQuote(collectionId), shellQuote(approvalId)];
+  },
+  '/tokenization.MsgDeleteIncomingApproval': (v) => {
+    // Use: delete-incoming-approval [collection-id] [approval-id]
+    const collectionId = String(v.collectionId ?? v.collection_id ?? '');
+    const approvalId = String(v.approvalId ?? v.approval_id ?? '');
+    return ['delete-incoming-approval', shellQuote(collectionId), shellQuote(approvalId)];
   }
 };
 
@@ -243,7 +304,13 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
       msgFilePaths.push(msgFilePath);
       head = `${opts.binary} tx tokenization ${jsonArgSubcommand} ${msgFilePath}`;
     } else if (positionalBuilder) {
-      const parts = positionalBuilder((m.value ?? {}) as Record<string, unknown>);
+      const writeJson = (data: unknown): string => {
+        const p = path.join(os.tmpdir(), `bb-msg-${crypto.randomBytes(4).toString('hex')}.json`);
+        fs.writeFileSync(p, JSON.stringify(data, null, 2) + '\n', { mode: 0o600 });
+        msgFilePaths.push(p);
+        return p;
+      };
+      const parts = positionalBuilder((m.value ?? {}) as Record<string, unknown>, writeJson);
       head = `${opts.binary} tx tokenization ${parts.join(' ')}`;
     } else {
       const supported = [...Object.keys(TYPE_URL_TO_SUBCOMMAND), ...Object.keys(POSITIONAL_BUILDERS)].sort();
