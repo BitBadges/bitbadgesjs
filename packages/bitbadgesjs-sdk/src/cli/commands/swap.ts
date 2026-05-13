@@ -17,6 +17,7 @@
 import { Command } from 'commander';
 import * as fs from 'node:fs';
 import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
+import { requireBb1Address } from '../utils/address.js';
 
 interface NetworkFlags {
   testnet?: boolean;
@@ -291,7 +292,10 @@ addOutputFlags(
     .description(
       'List intent-type exchange approvals. Default = global browse (active/funded only). Pass --mine <address> to scope to a single approver and include used/inactive rows.'
     )
-    .option('--mine <address>', 'Restrict to intents created by this address (also includes used/inactive)')
+    .option(
+      '--mine <address>',
+      'Restrict to intents created by this address (also includes used/inactive). Accepts bb1... or 0x... — auto-normalized to bb1.'
+    )
     .option('--pay-denom <denom>', 'Filter by the denom the intent pays out')
     .option('--receive-denom <denom>', 'Filter by the denom the intent expects to receive')
     .option('--collection-id <id>', 'Filter to a specific collection ID')
@@ -306,9 +310,10 @@ addOutputFlags(
       }
   ) => {
     try {
-      const base = opts.mine ? `/intents/${encodeURIComponent(opts.mine)}` : '/intents';
+      const mine = opts.mine ? requireBb1Address(opts.mine, '--mine') : undefined;
+      const base = mine ? `/intents/${encodeURIComponent(mine)}` : '/intents';
       const path = appendQuery(base, {
-        includeAll: opts.mine ? 'true' : undefined,
+        includeAll: mine ? 'true' : undefined,
         payDenom: opts.payDenom,
         receiveDenom: opts.receiveDenom,
         collectionId: opts.collectionId
