@@ -95,6 +95,31 @@ export const ASSET_REGISTRY: AssetRegistry = {
           { chain_id: 'cosmoshub-4', chain_name: 'cosmoshub', enabled: true, priority: 2 }
         ]
       } as object)
+    },
+    {
+      // Ether bridged to a Cosmos chain (decimals=18 → 'wei' style raw units).
+      // Listed here so `bb price ETH`, `bb assets show ETH`, and Smart Token
+      // builders that take a `--backing-coin` flag can resolve ETH the same
+      // way they resolve ATOM/USDC/etc.
+      denom: 'weth-wei',
+      symbol: 'ETH',
+      name: 'Ether',
+      decimals: 18,
+      chain_id: 'ethereum-1',
+      logo_URIs: {
+        png: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/_non-cosmos/ethereum/images/eth-white.png',
+        svg: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/_non-cosmos/ethereum/images/eth-white.svg'
+      },
+      coingecko_id: 'ethereum',
+      description:
+        'Ether (ETH) is the native cryptocurrency of the Ethereum network. Bridged into Cosmos via Axelar / canonical bridges.',
+      ...({
+        is_native: false,
+        ibc_chains: [
+          { chain_id: 'osmosis-1', chain_name: 'osmosis', enabled: true, priority: 1 },
+          { chain_id: 'bitbadges-1', chain_name: 'bitbadges', enabled: true, priority: 2 }
+        ]
+      } as object)
     }
   ]
 };
