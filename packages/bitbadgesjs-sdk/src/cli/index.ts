@@ -49,6 +49,8 @@ import { creditTokensCommand } from './commands/credit-tokens.js';
 import { productsCommand } from './commands/products.js';
 import { crowdfundCommand } from './commands/crowdfund.js';
 import { auctionsCommand } from './commands/auctions.js';
+import { predictionMarketsCommand } from './commands/prediction-markets.js';
+import { nftsCommand } from './commands/nfts.js';
 
 // Misc
 import { makeCompletionCommand } from './commands/completion.js';
@@ -119,7 +121,9 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
       creditTokensCommand,
       productsCommand,
       crowdfundCommand,
-      auctionsCommand
+      auctionsCommand,
+      predictionMarketsCommand,
+      nftsCommand
     ]
   }
 ];
