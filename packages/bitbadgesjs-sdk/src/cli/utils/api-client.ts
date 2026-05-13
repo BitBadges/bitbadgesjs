@@ -119,7 +119,23 @@ export async function apiRequest(options: ApiRequestOptions): Promise<any> {
     fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
   }
 
-  const response = await fetch(url, fetchOptions);
+  let response: Response;
+  try {
+    response = await fetch(url, fetchOptions);
+  } catch (err: any) {
+    // Network-level failures (DNS, connection refused, TLS) all surface as
+    // a single `TypeError: fetch failed` via undici with no context. Re-throw
+    // with the resolved URL embedded + a targeted hint so agents can tell
+    // apart "wrong URL" / "indexer down" / "firewall" without re-reading the
+    // source.
+    const msg = err?.cause?.code
+      ? `${err.message} (${err.cause.code})`
+      : err?.message || String(err);
+    const wrapped = new Error(`Network error reaching ${url}: ${msg}`);
+    (wrapped as any).hint =
+      'Could not reach the indexer. Check: (1) the URL is correct (--url / --local / --testnet), (2) the indexer is running, (3) network/firewall.';
+    throw wrapped;
+  }
 
   // Indexer runs express-session with rolling: true — every authenticated
   // response carries a fresh Set-Cookie that resets Max-Age to 7d. Capture
