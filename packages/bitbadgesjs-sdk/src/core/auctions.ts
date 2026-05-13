@@ -74,34 +74,100 @@ export const doesCollectionFollowAuctionProtocol = (collection: Readonly<iCollec
 };
 
 // ── End-user helpers (lifted from FE AuctionView + AuctionBidsTab) ────────
+//
+// Status model mirrors the FE's 4-phase enum (auction has two distinct
+// active windows: bidding, then accepting). 'sold' = mint-to-winner
+// approval auto-deleted after fill; 'expired' = past acceptDeadline
+// without a fill.
 
-export type AuctionStatus = 'live' | 'pending-settlement' | 'settled';
+export type AuctionStatus = 'bidding' | 'accepting' | 'sold' | 'expired';
+
+const AUCTION_BURN_ADDRESS = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
 
 export interface AuctionDetails {
-  mintApproval: iCollectionApproval<bigint>;
+  /** The Mint→All approval that grants the winning bidder the token. Null after settlement. */
+  mintApproval: iCollectionApproval<bigint> | null;
+  /** Same approval as mintApproval (aliased) — kept for status-tracker lookups. Null post-settlement. */
+  transferApproval: iCollectionApproval<bigint> | null;
+  /** Optional cleanup approval that burns the listing token. */
+  burnApproval: iCollectionApproval<bigint> | null;
   sellerAddress: string;
+  /** transferTimes[0].start on the mint approval — the moment open bidding ends. */
+  bidDeadline: bigint;
+  /** transferTimes[0].end on the mint approval — the moment accepting closes. */
   acceptDeadline: bigint;
 }
 
-/** Extract auction shape. Returns null when the mint-to-winner approval is missing (post-settlement state). */
+/**
+ * Extract auction shape. When the mint-to-winner approval is missing (post-settlement),
+ * returns a zeroed `AuctionDetails` with `mintApproval: null` instead of null — callers
+ * use `mintApproval == null` to detect the settled state, with `burnApproval` still
+ * exposed for cleanup-tracker reads.
+ */
 export function extractAuctionDetails(
   approvals: ReadonlyArray<iCollectionApproval<bigint>>
 ): AuctionDetails | null {
-  const mintApproval = approvals.find((a) => a.fromListId === 'Mint');
-  if (!mintApproval) return null;
+  if (approvals.length > 2) return null;
+
+  const mintToWinner = approvals.find((a) => a.fromListId === 'Mint' && a.toListId === 'All') ?? null;
+  const burnApproval = approvals.find((a) => a.toListId === AUCTION_BURN_ADDRESS) ?? null;
+
+  if (!mintToWinner) {
+    return {
+      mintApproval: null,
+      transferApproval: null,
+      burnApproval,
+      sellerAddress: '',
+      bidDeadline: 0n,
+      acceptDeadline: 0n
+    };
+  }
+
   return {
-    mintApproval,
-    sellerAddress: mintApproval.initiatedByListId ?? '',
-    acceptDeadline: BigInt(mintApproval.transferTimes?.[0]?.end ?? 0)
+    mintApproval: mintToWinner,
+    transferApproval: mintToWinner,
+    burnApproval,
+    sellerAddress: mintToWinner.initiatedByListId ?? '',
+    bidDeadline: BigInt(mintToWinner.transferTimes?.[0]?.start ?? 0),
+    acceptDeadline: BigInt(mintToWinner.transferTimes?.[0]?.end ?? 0)
   };
 }
 
-export function deriveAuctionStatus(approvals: ReadonlyArray<iCollectionApproval<bigint>>, acceptDeadline: bigint): AuctionStatus {
-  // If the mint-to-winner approval auto-deleted (afterOneUse), the auction settled.
-  if (!approvals.find((a) => a.fromListId === 'Mint')) return 'settled';
+/**
+ * Fallback status derivation for pre-indexed / mint-preview collections where
+ * the indexer hasn't attached `standardsInfo.Auction.status` yet. The indexer
+ * is the source of truth for live collections — prefer that when available.
+ */
+export function deriveAuctionStatusFallback(
+  details: AuctionDetails,
+  collection: Readonly<iCollectionDoc<bigint>>
+): AuctionStatus {
+  // Mint-to-winner auto-deleted = sold.
+  if (!details.mintApproval) return 'sold';
+
+  const trackers = (collection as any)?.approvalTrackers ?? [];
+  const tracker = trackers.find(
+    (t: any) => t.approvalId === details.transferApproval?.approvalId && t.trackerType === 'overall'
+  );
+  if (tracker && BigInt(tracker.numTransfers ?? 0) > 0n) return 'sold';
+
   const now = BigInt(Date.now());
-  if (now > acceptDeadline && acceptDeadline > 0n) return 'pending-settlement';
-  return 'live';
+  if (now > details.acceptDeadline) return 'expired';
+  if (now > details.bidDeadline) return 'accepting';
+  return 'bidding';
+}
+
+/**
+ * Convenience: server-status-with-fallback. Prefers the indexer-attached
+ * `standardsInfo.Auction.status` when available, otherwise derives locally.
+ */
+export function getAuctionStatus(
+  details: AuctionDetails,
+  collection: Readonly<iCollectionDoc<bigint>>
+): AuctionStatus {
+  const serverStatus = (collection as any)?.standardsInfo?.Auction?.status as AuctionStatus | undefined;
+  if (serverStatus) return serverStatus;
+  return deriveAuctionStatusFallback(details, collection);
 }
 
 // ── Bid intent factory ───────────────────────────────────────────────────

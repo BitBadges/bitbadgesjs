@@ -12,7 +12,7 @@ import {
   doesCollectionFollowAuctionProtocol,
   validateAuctionCollection,
   extractAuctionDetails,
-  deriveAuctionStatus,
+  getAuctionStatus,
   buildAuctionBidApproval,
   buildAcceptAuctionBidMsg
 } from '../../core/auctions.js';
@@ -90,7 +90,7 @@ addOutputFlags(
     auctionsCommand
       .command('list')
       .description('Browse Auction collections.')
-      .option('--open', 'Only return live auctions (not pending-settlement or settled)', false)
+      .option('--open', 'Only return bidding/accepting auctions (omit sold / expired)', false)
   )
 ).action(async (opts: NetworkFlags & OutputFlags & { open?: boolean }) => {
   try {
@@ -100,7 +100,9 @@ addOutputFlags(
     if (opts.open) {
       collections = collections.filter((c: any) => {
         const d = extractAuctionDetails(c.collectionApprovals);
-        return d && deriveAuctionStatus(c.collectionApprovals, d.acceptDeadline) === 'live';
+        if (!d) return false;
+        const s = getAuctionStatus(d, c);
+        return s === 'bidding' || s === 'accepting';
       });
     }
     const summary = collections.map((c: any) => {
@@ -108,8 +110,9 @@ addOutputFlags(
       return {
         collectionId: String(c.collectionId ?? c._docId ?? ''),
         sellerAddress: d?.sellerAddress ?? null,
+        bidDeadline: d?.bidDeadline?.toString() ?? null,
         acceptDeadline: d?.acceptDeadline?.toString() ?? null,
-        status: d ? deriveAuctionStatus(c.collectionApprovals, d.acceptDeadline) : 'settled'
+        status: d ? getAuctionStatus(d, c) : 'sold'
       };
     });
     emit(summary, opts);
@@ -128,12 +131,13 @@ addOutputFlags(
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'auctions show');
     const details = extractAuctionDetails(collection.collectionApprovals);
-    const status = details ? deriveAuctionStatus(collection.collectionApprovals, details.acceptDeadline) : 'settled';
+    const status = details ? getAuctionStatus(details, collection) : 'sold';
     emit({
       collectionId: String(collectionId),
       sellerAddress: details?.sellerAddress ?? null,
+      bidDeadline: details?.bidDeadline?.toString() ?? null,
       acceptDeadline: details?.acceptDeadline?.toString() ?? null,
-      mintApprovalId: details?.mintApproval.approvalId ?? null,
+      mintApprovalId: details?.mintApproval?.approvalId ?? null,
       mintEscrowAddress: collection.mintEscrowAddress ?? null,
       status
     }, opts);
@@ -144,7 +148,7 @@ addOutputFlags(
   addNetworkFlags(
     auctionsCommand
       .command('status')
-      .description('Resolve current status: live / pending-settlement / settled.')
+      .description('Resolve current status: bidding / accepting / sold / expired.')
       .argument('<collection-id>', 'Auction collection ID')
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags) => {
@@ -152,7 +156,7 @@ addOutputFlags(
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'auctions status');
     const details = extractAuctionDetails(collection.collectionApprovals);
-    const status = details ? deriveAuctionStatus(collection.collectionApprovals, details.acceptDeadline) : 'settled';
+    const status = details ? getAuctionStatus(details, collection) : 'sold';
     emit({ collectionId: String(collectionId), status }, opts);
   } catch (err) { emitError(err); }
 });
@@ -178,7 +182,7 @@ addOutputFlags(
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'auctions place-bid');
       const details = extractAuctionDetails(collection.collectionApprovals);
-      if (!details) {
+      if (!details || !details.mintApproval) {
         process.stderr.write('Error: auction has already settled (no mint approval present); cannot place new bids.\n');
         process.exit(2);
       }
@@ -244,7 +248,7 @@ addOutputFlags(
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'auctions accept-bid');
       const details = extractAuctionDetails(collection.collectionApprovals);
-      if (!details) {
+      if (!details || !details.mintApproval) {
         process.stderr.write('Error: auction has already settled; no mint approval to fire.\n');
         process.exit(2);
       }

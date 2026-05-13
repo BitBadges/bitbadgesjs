@@ -76,7 +76,7 @@ describe('extractCreditTokenTiers', () => {
     expect(tiers[0].isScaled).toBe(true);
     expect(tiers[0].approvalId).toBe('credit-scaled');
     expect(tiers[0].paymentDenom).toBe('uusdc');
-    expect(tiers[0].mintAmount).toBe('100');
+    expect(tiers[0].mintAmount).toBe(100n);
   });
 
   it('extracts legacy tiers with parsed value', () => {

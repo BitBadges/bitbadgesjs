@@ -22,16 +22,16 @@ export interface CreditTokenTier {
   value: number;
   /** Payment denom (chain-side; ibc/... or ubadge). */
   paymentDenom: string;
-  /** Amount of paymentDenom per `value` units, in base units (bigint as string). */
-  paymentAmount: string;
+  /** Amount of paymentDenom per `value` units, in base units. */
+  paymentAmount: bigint;
   /** Amount of credit token minted per `value` units. */
-  mintAmount: string;
+  mintAmount: bigint;
   /** Address that receives the payment (the seller). */
   recipient: string;
   /** True for the scaled-balances variant (buyer picks multiplier). */
   isScaled: boolean;
   /** For scaled tier: max multiplier (chain-enforced upper bound). */
-  maxMultiplier?: string;
+  maxMultiplier?: bigint;
 }
 
 /**
@@ -61,17 +61,17 @@ export function extractCreditTokenTiers(
     const coinTransfer = approval.approvalCriteria?.coinTransfers?.[0];
     if (!coinTransfer) continue;
     const paymentDenom = coinTransfer.coins[0]?.denom ?? '';
-    const paymentAmount = String(coinTransfer.coins[0]?.amount ?? '0');
+    const paymentAmount = BigInt(coinTransfer.coins[0]?.amount ?? '0');
     const recipient = coinTransfer.to ?? '';
 
     const startBalance = approval.approvalCriteria?.predeterminedBalances?.incrementedBalances?.startBalances?.[0];
-    const mintAmount = String(startBalance?.amount ?? '0');
+    const mintAmount = BigInt(startBalance?.amount ?? '0');
 
     const allowAmountScaling =
       approval.approvalCriteria?.predeterminedBalances?.incrementedBalances?.allowAmountScaling ?? false;
 
     if (allowAmountScaling) {
-      const maxMultiplier = String(
+      const maxMultiplier = BigInt(
         approval.approvalCriteria?.predeterminedBalances?.incrementedBalances?.maxScalingMultiplier ?? '0'
       );
       tiers.push({
@@ -136,10 +136,10 @@ export function buildPurchaseCreditTokenMsg(
 
   if (tier.isScaled) {
     const multiplier =
-      tier.maxMultiplier && tier.maxMultiplier !== '0' && units > BigInt(tier.maxMultiplier)
-        ? BigInt(tier.maxMultiplier)
+      tier.maxMultiplier !== undefined && tier.maxMultiplier > 0n && units > tier.maxMultiplier
+        ? tier.maxMultiplier
         : units;
-    const mintTotal = BigInt(tier.mintAmount) * multiplier;
+    const mintTotal = tier.mintAmount * multiplier;
     return {
       typeUrl: '/tokenization.MsgTransferTokens',
       value: {

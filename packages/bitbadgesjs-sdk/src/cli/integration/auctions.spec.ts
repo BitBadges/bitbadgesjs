@@ -8,7 +8,7 @@
  * Flow exercised:
  *   1. alice builds + deploys an Auction collection (30d bid + 30d accept windows)
  *   2. indexer indexes it
- *   3. `bb auctions show` returns sellerAddress=alice, status='live'
+ *   3. `bb auctions show` returns sellerAddress=alice, status='bidding'|'accepting'
  *   4. `bb auctions status` mirrors the same
  *   5. charlie places a bid (MsgSetIncomingApproval) → deploy → chain code 0
  *      (the approval id from the emit is captured for the cancel step)
@@ -93,23 +93,23 @@ describe('auctions integration', () => {
     await waitForIndexerCollection(collectionId);
   }, 90000);
 
-  it('show returns sellerAddress=alice, status=live', async () => {
+  it('show returns sellerAddress=alice, status=bidding|accepting', async () => {
     if (!ready || !collectionId) return;
     const seller = alice();
     const show = runCli(['auctions', 'show', collectionId, '--local']);
     expect(show.json.collectionId).toBe(collectionId);
     expect(show.json.sellerAddress).toBe(seller.address);
-    expect(show.json.status).toBe('live');
+    expect(['bidding', 'accepting']).toContain(show.json.status);
   }, 30000);
 
-  it('status mirrors show (live)', async () => {
+  it('status mirrors show (active)', async () => {
     if (!ready || !collectionId) return;
     const status = runCli(['auctions', 'status', collectionId, '--local']);
     expect(status.json.collectionId).toBe(collectionId);
-    // status may report 'live' under normal conditions; allow
-    // 'pending-settlement' as a benign alternative if the indexer
-    // already saw bids land between place-bid + this check on a re-run.
-    expect(status.json.status).toMatch(/live|pending-settlement/);
+    // status reports 'bidding' (pre-bidDeadline) or 'accepting' (between
+    // bidDeadline and acceptDeadline) for a live auction. Either is fine
+    // depending on test timing.
+    expect(status.json.status).toMatch(/bidding|accepting/);
   }, 30000);
 
   it('charlie places a bid → MsgSetIncomingApproval → chain code 0', async () => {
