@@ -46,11 +46,31 @@ export async function deployMsgViaKeyring(
     { stdio: ['ignore', fs.openSync(scriptPath, 'w'), 'pipe'], encoding: 'utf-8', env: { ...process.env, BB_QUIET: '1' }, timeout: 15000 }
   );
 
-  // 2. Execute the printed command.
-  const out = execFileSync('bash', [scriptPath], { encoding: 'utf-8', timeout: 30000 }).toString();
-  const m = out.match(/txhash: ([A-F0-9]+)/);
+  // 2. Execute the printed command. Retry once on "account sequence
+  // mismatch" — concurrent specs under --runInBand can still see stale
+  // sequence numbers when txs land back-to-back without the indexer
+  // catching up. A 2s pause + retry is the cheapest fix.
+  let out: string;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      out = execFileSync('bash', [scriptPath], { encoding: 'utf-8', timeout: 60000 }).toString();
+      break;
+    } catch (err: any) {
+      const stderr = String(err?.stderr ?? '') + String(err?.stdout ?? '');
+      const isSequenceMismatch = /account sequence mismatch/i.test(stderr);
+      if (isSequenceMismatch && attempt < 2) {
+        await sleep(2000);
+        continue;
+      }
+      // Truncate the chain-binary's noisy `Usage:` dump in the error
+      // message so the test failure is readable.
+      const trimmed = stderr.split(/\n/).filter((l) => !l.startsWith('  ') && !l.startsWith('     ')).join('\n').slice(0, 800);
+      throw new Error(`deployMsgViaKeyring failed (attempt ${attempt + 1}):\n${trimmed}`);
+    }
+  }
+  const m = out!.match(/txhash: ([A-F0-9]+)/);
   if (!m) {
-    throw new Error(`Could not extract txhash from chain-binary output:\n${out}`);
+    throw new Error(`Could not extract txhash from chain-binary output:\n${out!.slice(0, 800)}`);
   }
   const txHash = m[1];
 
@@ -111,23 +131,39 @@ export async function fundPersona(
   const network = options.network ?? 'local';
   const chainId = network === 'testnet' ? 'bitbadges-2' : 'bitbadges-1';
   const nodeUrl = network === 'local' ? 'http://localhost:26657' : env.rpcUrl;
-  const out = execFileSync(
-    env.chainBin,
-    [
-      'tx', 'bank', 'send', fromName, toAddress, `${amount}${denom}`,
-      '--from', fromName,
-      '--chain-id', chainId,
-      '--node', nodeUrl,
-      '--keyring-backend', env.keyringBackend,
-      '--gas', 'auto', '--gas-adjustment', '1.3',
-      '--fees', options.fees ?? '0ubadge',
-      '--yes',
-      '--output', 'json'
-    ],
-    { encoding: 'utf-8', timeout: 30000 }
-  ).toString();
-  const m = out.match(/"txhash":\s*"([A-F0-9]+)"/);
-  if (!m) throw new Error(`fundPersona: no txhash in output:\n${out}`);
+  let out: string;
+  // Same sequence-mismatch retry as deployMsgViaKeyring — bank send is
+  // routinely called back-to-back from spec beforeAll() blocks, which
+  // hits the same chain-binary race when the previous tx is in mempool.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      out = execFileSync(
+        env.chainBin,
+        [
+          'tx', 'bank', 'send', fromName, toAddress, `${amount}${denom}`,
+          '--from', fromName,
+          '--chain-id', chainId,
+          '--node', nodeUrl,
+          '--keyring-backend', env.keyringBackend,
+          '--gas', 'auto', '--gas-adjustment', '1.3',
+          '--fees', options.fees ?? '0ubadge',
+          '--yes',
+          '--output', 'json'
+        ],
+        { encoding: 'utf-8', timeout: 30000 }
+      ).toString();
+      break;
+    } catch (err: any) {
+      const stderr = String(err?.stderr ?? '') + String(err?.stdout ?? '');
+      if (/account sequence mismatch/i.test(stderr) && attempt < 2) {
+        await sleep(2000);
+        continue;
+      }
+      throw new Error(`fundPersona failed (attempt ${attempt + 1}): ${stderr.slice(0, 400)}`);
+    }
+  }
+  const m = out!.match(/"txhash":\s*"([A-F0-9]+)"/);
+  if (!m) throw new Error(`fundPersona: no txhash in output:\n${out!}`);
   return await waitForTx(m[1]);
 }
 
