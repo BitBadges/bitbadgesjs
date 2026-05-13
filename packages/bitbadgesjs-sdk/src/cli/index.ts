@@ -284,6 +284,27 @@ if (process.argv.includes('--help-json')) {
   process.exit(0);
 }
 
+// ── Top-level error handler ─────────────────────────────────────────────────
+//
+// Commander itself prints a friendly "error: required option ..." line and
+// exits non-zero on flag-shape errors, but anything thrown from inside an
+// .action() handler (e.g. SDK validation errors from `bb build *`) hits
+// Node's default uncaughtException printer, which dumps a 5-line stack
+// trace. That noise drowns out the actual error message and is useless for
+// agents reading stderr. Install handlers that print a single clean
+// "Error: <message>" line and exit 1. Stacks are still available via
+// `BB_DEBUG=1` for humans debugging the CLI itself.
+function reportFatal(err: unknown): void {
+  const msg = err instanceof Error ? err.message : String(err);
+  process.stderr.write(`Error: ${msg}\n`);
+  if (process.env.BB_DEBUG === '1' && err instanceof Error && err.stack) {
+    process.stderr.write(err.stack + '\n');
+  }
+  process.exit(1);
+}
+process.on('uncaughtException', reportFatal);
+process.on('unhandledRejection', reportFatal);
+
 // When invoked with no args, show the full grouped --help by default.
 // Commander's stock behavior prints a minimal "Usage:" stanza and exits —
 // agents and humans both reach for the long form (commands + groups).

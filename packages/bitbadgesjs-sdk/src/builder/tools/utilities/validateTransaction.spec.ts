@@ -142,6 +142,38 @@ describe('handleValidateTransaction — input normalization', () => {
       }
     });
 
+    it('accepts the single-msg envelope `{ typeUrl, value }` that `bb build *` emits', () => {
+      // Locked against the CLI e2e smoke (2026-05-13 build-pipeline). Before
+      // this normalization step, agents that piped `bb build smart-token
+      // --json-only` straight into `bb tool validate_transaction` hit
+      // "Transaction must have a 'messages' array" — confusing because
+      // the envelope IS the message and `bb check` already wraps it.
+      const envelope = {
+        typeUrl: '/tokenization.MsgCreateCollection',
+        value: {
+          creator: 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv',
+          standards: ['BitBadges']
+        }
+      };
+      const res = handleValidateTransaction({ transaction: envelope });
+      // Must NOT surface the "messages array missing" error — the wrapper
+      // re-wraps single-msg envelopes into { messages: [...] } first.
+      for (const issue of res.issues) {
+        expect(issue.message).not.toMatch(/"messages" array/);
+      }
+    });
+
+    it('accepts the envelope shape via transactionJson too (string path)', () => {
+      const envelope = JSON.stringify({
+        typeUrl: '/tokenization.MsgCreateCollection',
+        value: { creator: 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv' }
+      });
+      const res = handleValidateTransaction({ transactionJson: envelope });
+      for (const issue of res.issues) {
+        expect(issue.message).not.toMatch(/"messages" array/);
+      }
+    });
+
     it('without any input and a fresh (auto-created) session, returns real validator issues — NOT "Unexpected EOF"', () => {
       // No args at all. getOrCreateSession returns a template tx with
       // all 11 canX permission arrays defaulted to []; validator runs

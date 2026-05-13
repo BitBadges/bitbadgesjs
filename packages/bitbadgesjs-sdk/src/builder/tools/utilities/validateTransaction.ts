@@ -108,6 +108,17 @@ export function handleValidateTransaction(input: ValidateTransactionInput): Vali
     };
   }
 
+  // Accept the single-msg envelope shape that every `bb build *` template
+  // emits: `{ typeUrl, value }`. Without this wrap step agents that pipe
+  // `bb build smart-token --json-only` straight into validate_transaction
+  // hit a baffling "Transaction must have a 'messages' array" error.
+  // Mirrors the normalization that `bb check` already does in
+  // `src/cli/commands/check.ts:23`.
+  const maybe = tx as Record<string, unknown>;
+  if (!Array.isArray(maybe.messages) && typeof maybe.typeUrl === 'string' && maybe.value) {
+    tx = { messages: [tx] };
+  }
+
   // Delegate to SDK
   return validateTransaction(tx);
 }
