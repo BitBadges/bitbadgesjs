@@ -186,4 +186,30 @@ describe('crowdfund integration', () => {
     expect(out.exitCode).not.toBe(0);
     expect(out.stderr + out.stdout).toMatch(/not.*found|not.*valid|Crowdfund/i);
   }, 30000);
+
+  it('list surfaces our crowdfund (regression: bigintify-before-validate)', async () => {
+    if (!ready || !collectionId) return;
+    // Regression guard: before the fix, `bb crowdfund list` filtered out
+    // every browse row because `validateCrowdfundCollection` compares
+    // tokenIds against 1n/2n bigints — string ids from `/browse` silently
+    // failed validation. With the fix, our just-deployed crowdfund must
+    // appear in the global list.
+    const list = runCli(['crowdfund', 'list', '--local']);
+    expect(Array.isArray(list.json)).toBe(true);
+    const ours = list.json.find((row: any) => row.collectionId === collectionId);
+    expect(ours).toBeDefined();
+    expect(ours.crowdfunderAddress).toBe(alice().address);
+    expect(ours.depositDenom).toMatch(/^ibc\//);
+    expect(['active', 'expired-or-funded']).toContain(ours.status);
+  }, 30000);
+
+  it('list --mine <crowdfunder> scopes correctly', async () => {
+    if (!ready || !collectionId) return;
+    const list = runCli(['crowdfund', 'list', '--mine', alice().address, '--local']);
+    expect(Array.isArray(list.json)).toBe(true);
+    // Every row should belong to alice.
+    for (const row of list.json) {
+      expect(row.crowdfunderAddress).toBe(alice().address);
+    }
+  }, 30000);
 });

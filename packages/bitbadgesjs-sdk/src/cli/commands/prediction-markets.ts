@@ -19,7 +19,6 @@ import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.j
 import { requireBb1Address } from '../utils/address.js';
 import {
   validatePredictionMarketCollection,
-  isPredictionMarketValid,
   classifySettlementApproval,
   derivePredictionMarketStatusFallback,
   buildPredictionMarketBuyIntent,
@@ -139,12 +138,23 @@ addOutputFlags(
   )
 ).action(async (opts: NetworkFlags & OutputFlags & { open?: boolean }) => {
   try {
-    const res = await callApi('POST', '/browse', opts, { type: 'collections', category: 'predictionMarket' });
-    const all: any[] = res?.collections?.predictionMarket ?? res?.collections ?? [];
-    const collections = all.filter((c: any) => isPredictionMarketValid(c));
+    // /browse?category=predictionMarket is unreliable on local/testnet — the
+    // indexer doesn't always tag PM rows under that key (was returning 0
+    // rows even for known-good PM collections). The /predictions endpoint
+    // is the authoritative list; it includes verifier/denom/prices/status.
+    const res = await callApi('GET', '/predictions', opts);
+    const all: any[] = res?.predictions ?? res?.markets ?? (Array.isArray(res) ? res : []);
+    let collections = all;
+    if (opts.open) {
+      collections = collections.filter((c: any) => c?.status === 'active' || c?.status == null);
+    }
     const summary = collections.map((c: any) => ({
       collectionId: String(c.collectionId ?? c._docId ?? ''),
-      status: c?.standardsInfo?.['Prediction Market']?.status ?? null
+      verifierAddress: c.verifierAddress ?? null,
+      depositDenom: c.depositDenom ?? null,
+      yesPrice: c.yesPrice ?? null,
+      noPrice: c.noPrice ?? null,
+      status: c.status ?? null
     }));
     emit(summary, opts);
   } catch (err) { emitError(err); }

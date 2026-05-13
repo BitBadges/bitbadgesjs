@@ -119,10 +119,27 @@ addOutputFlags(
   try {
     const res = await callApi('POST', '/browse', opts, { type: 'collections', category: 'crowdfund' });
     const all: any[] = res?.collections?.crowdfund ?? res?.collections ?? [];
-    let collections = all.filter((c: any) => doesCollectionFollowCrowdfundProtocol(c));
+    // BigIntify each row before validation — `validateCrowdfundCollection`
+    // checks tokenId===1n / start===2n etc., which silently fails when
+    // the indexer returns string token ids. Without this conversion the
+    // list filter would drop every row.
+    const normalized = all.map((c: any) => {
+      try { return new BitBadgesCollection(c).convert(BigIntify); } catch { return c; }
+    });
+    let collections = normalized.filter((c: any) => doesCollectionFollowCrowdfundProtocol(c));
     if (opts.mine) {
       const bb1 = requireBb1Address(opts.mine, '--mine');
       collections = collections.filter((c: any) => extractCrowdfundDetails(c.collectionApprovals)?.crowdfunderAddress === bb1);
+    }
+    if (opts.open) {
+      // Deadline-only filter — we don't read per-collection balances at
+      // list scope. 'active' = deadline-in-future; everything past
+      // deadline is either funded or expired-refunding (need raised).
+      const now = BigInt(Date.now());
+      collections = collections.filter((c: any) => {
+        const d = extractCrowdfundDetails(c.collectionApprovals);
+        return d && d.deadlineTime > now;
+      });
     }
     const summary = collections.map((c: any) => {
       const d = extractCrowdfundDetails(c.collectionApprovals)!;
@@ -131,7 +148,10 @@ addOutputFlags(
         crowdfunderAddress: d.crowdfunderAddress,
         depositDenom: d.depositDenom,
         goalAmount: d.goalAmount.toString(),
-        deadlineTime: d.deadlineTime.toString()
+        deadlineTime: d.deadlineTime.toString(),
+        // Deadline-only fallback status — `crowdfund show <id>` returns the
+        // full status with raised balance.
+        status: d.deadlineTime > BigInt(Date.now()) ? 'active' : 'expired-or-funded'
       };
     });
     emit(summary, opts);

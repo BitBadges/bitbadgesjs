@@ -192,4 +192,18 @@ describe('prediction-markets integration', () => {
     expect(out.exitCode).not.toBe(0);
     expect(out.stderr + out.stdout).toMatch(/not.*found|not.*valid|Prediction Market/i);
   }, 30000);
+
+  it('list surfaces our prediction market (regression: /predictions, not /browse)', async () => {
+    if (!ready || !collectionId) return;
+    // Regression guard: `bb prediction-markets list` was hitting
+    // /browse?category=predictionMarket which returns 0 rows even for
+    // known-good PM collections on local/testnet. Switched to the
+    // /predictions endpoint, which is the authoritative list.
+    const list = runCli(['prediction-markets', 'list', '--local']);
+    expect(Array.isArray(list.json)).toBe(true);
+    const ours = list.json.find((row: any) => row.collectionId === collectionId);
+    expect(ours).toBeDefined();
+    expect(ours.verifierAddress).toBe(charlie().address);
+    expect(ours.depositDenom).toMatch(/^ibc\//);
+  }, 30000);
 });
