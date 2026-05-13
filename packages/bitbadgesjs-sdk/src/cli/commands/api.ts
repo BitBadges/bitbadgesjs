@@ -375,9 +375,15 @@ function buildRouteCommand(route: ApiRoute): Command {
 }
 
 export function createApiCommand(): Command {
+  // Keep `.description(...)` to a single line. Commander uses it verbatim
+  // in the top-level `bitbadges-cli --help` listing, where embedded
+  // newlines break the column alignment of sibling commands. The longer
+  // "grouped by category" note lives in `addHelpText('after', ...)` so it
+  // still shows when the user runs `bitbadges-cli api --help`.
   const api = new Command('api').description(
-    `BitBadges Indexer API client (${ROUTES.length} routes). Call any API endpoint from the CLI.\n\nRoutes are grouped by category. Use "api all <command>" for a flat list.`
+    `BitBadges Indexer API client (${ROUTES.length} routes). Call any API endpoint from the CLI.`
   );
+  api.addHelpText('after', '\nRoutes are grouped by category. Use "api all <command>" for a flat list.\n');
 
   // Discovery: `api --search <kw>` scans the route registry over name,
   // path, tag, and description. Substring match (case-insensitive). Lets
