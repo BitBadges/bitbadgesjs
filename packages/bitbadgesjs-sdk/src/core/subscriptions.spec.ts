@@ -763,7 +763,7 @@ describe('userRecurringApproval', () => {
     expect(result.approvalCriteria!.maxNumTransfers!.resetTimeIntervals!.startTime).toBe(99n);
   });
 
-  it('honors detailsName / detailsDescription overrides', () => {
+  it('does NOT attach FE-only enrichment fields (fromList / initiatedByList / details)', () => {
     const subscriptionApproval = faucetForFactory();
     const result = userRecurringApproval({
       subscriptionApproval,
@@ -773,10 +773,16 @@ describe('userRecurringApproval', () => {
       approvalId: 'fixed-id-for-test',
       tokenIds: [{ start: 1n, end: 1n }],
       denom: 'ubadge',
-      detailsName: 'My Custom Name',
-      detailsDescription: 'desc'
+      detailsName: 'ignored',
+      detailsDescription: 'ignored'
     });
-    expect((result.details as any).name).toBe('My Custom Name');
-    expect((result.details as any).description).toBe('desc');
+    // The chain's strict-JSON parser rejects unknown fields on
+    // UserIncomingApproval / IncomingApprovalCriteria. The SDK helper
+    // emits proto-shape only; FE callers wrap and re-attach display
+    // fields.
+    expect((result as any).fromList).toBeUndefined();
+    expect((result as any).initiatedByList).toBeUndefined();
+    expect((result as any).details).toBeUndefined();
+    expect((result.approvalCriteria as any).requireToEqualsInitiatedBy).toBeUndefined();
   });
 });

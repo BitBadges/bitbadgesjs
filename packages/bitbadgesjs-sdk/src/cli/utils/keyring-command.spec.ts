@@ -224,7 +224,7 @@ describe('buildKeyringMultiCommand', () => {
     // Vote block uses positional args
     expect(result.commandLine).toContain('bitbadgeschaind tx tokenization cast-vote 7 collection');
     expect(result.commandLine).toContain("'' accept prop-abc 100");
-    expect(result.commandLine).toContain('--yes && \\');
+    expect(result.commandLine).toContain('--yes && sleep 6 && \\');
     // Transfer block uses [tx-json-or-file]
     expect(result.commandLine).toMatch(
       /bitbadgeschaind tx tokenization transfer-tokens \/[^ \n]+\.json/

@@ -236,7 +236,7 @@ describe('subscription builder', () => {
 });
 
 describe('bounty builder', () => {
-  const msg = buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1verifier', recipient: 'bb1recipient', ...META });
+  const msg = buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1verifier', recipient: 'bb1recipient', submitter: 'bb1submitter', ...META });
   const r = val(msg);
 
   test('has Bounty standard', () => { expect(r.standards).toEqual(['Bounty']); });
@@ -542,8 +542,8 @@ describe('all collection builders pass verifyStandardsCompliance with zero viola
     // recipients sharing one denom is valid (treasury split); mixing
     // denoms is not.
     ['subscription (multi-payout)', buildSubscription({ interval: 'monthly', payouts: [{ recipient: 'bb1a', amount: 5, denom: 'USDC' }, { recipient: 'bb1b', amount: 3, denom: 'USDC' }], ...META })],
-    ['bounty', buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1v', recipient: 'bb1r', ...META })],
-    ['bounty (BADGE)', buildBounty({ amount: 50, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', expiration: '7d', ...META })],
+    ['bounty', buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', ...META })],
+    ['bounty (BADGE)', buildBounty({ amount: 50, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', expiration: '7d', ...META })],
     ['crowdfund', buildCrowdfund({ goal: 1000, denom: 'USDC', ...META })],
     ['crowdfund (with crowdfunder)', buildCrowdfund({ goal: 500, denom: 'BADGE', crowdfunder: 'bb1fund', deadline: '14d', ...META })],
     ['auction', buildAuction({ ...META })],
@@ -588,7 +588,7 @@ describe('error handling', () => {
   });
 
   test('buildBounty with zero amount still produces valid structure', () => {
-    const msg = buildBounty({ amount: 0, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', ...META });
+    const msg = buildBounty({ amount: 0, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', ...META });
     expect(msg.typeUrl).toBe('/tokenization.MsgUniversalUpdateCollection');
     expect(msg.value.collectionApprovals.length).toBe(3);
   });

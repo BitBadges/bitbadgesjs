@@ -29,6 +29,8 @@ import {
   userRecurringApproval
 } from '../../core/subscriptions.js';
 import { UintRangeArray } from '../../core/uintRanges.js';
+import { BitBadgesCollection } from '../../api-indexer/BitBadgesCollection.js';
+import { BigIntify } from '../../common/string-numbers.js';
 
 interface NetworkFlags {
   testnet?: boolean;
@@ -100,7 +102,15 @@ async function callApi(
 
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
   const res = await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts);
-  return res?.collection ?? res;
+  const raw = res?.collection ?? res;
+  if (!raw) return raw;
+  // Indexer ships uint64s as strings; validators below expect bigints.
+  // Convert at the boundary so downstream protocol checks compare like-for-like.
+  try {
+    return new BitBadgesCollection(raw).convert(BigIntify);
+  } catch {
+    return raw;
+  }
 }
 
 async function fetchUserBalances(collectionId: string, address: string, opts: NetworkFlags): Promise<any> {

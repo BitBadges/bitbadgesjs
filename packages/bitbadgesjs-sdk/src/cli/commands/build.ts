@@ -531,12 +531,14 @@ sharedOpts(
     .requiredOption('--denom <symbol>', 'Coin (USDC, BADGE)')
     .requiredOption('--verifier <address>', 'Verifier address (bb1...)')
     .requiredOption('--recipient <address>', 'Recipient address (bb1...)')
+    .requiredOption('--submitter <address>', 'Submitter address (bb1...) — receives the refund on deny / expire. Typically the bounty creator.')
     .option('--expiration <duration>', 'Expiration duration', '30d')
 ).action(async (opts) => {
   const { buildBounty } = await import('../../core/builders/bounty.js');
   if (opts.json) { emit(buildBounty(readJsonInput(opts.json)), opts); return; }
   emit(buildBounty({
     amount: Number(opts.amount), denom: opts.denom, verifier: opts.verifier, recipient: opts.recipient,
+    submitter: opts.submitter,
     expiration: opts.expiration, uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
   }), opts);
 });

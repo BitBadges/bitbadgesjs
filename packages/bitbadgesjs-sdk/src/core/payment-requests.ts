@@ -38,8 +38,11 @@ export const validatePaymentRequestCollection = (
   if (!collection.standards?.includes('PaymentRequest')) errors.push('Missing "PaymentRequest" standard');
 
   // 2. validTokenIds = exactly [{1,1}]
+  // Coerce via BigInt() since the indexer's HTTP responses ship uint64 as
+  // strings (`"1"`) but the SDK's internal types are bigint. Without
+  // coercion these validators silently reject indexer-shaped collections.
   const vt = collection.validTokenIds;
-  if (!vt || vt.length !== 1 || vt[0].start !== 1n || vt[0].end !== 1n) {
+  if (!vt || vt.length !== 1 || BigInt(vt[0].start) !== 1n || BigInt(vt[0].end) !== 1n) {
     errors.push('validTokenIds must be exactly [{start: 1, end: 1}]');
   }
 
@@ -59,7 +62,7 @@ export const validatePaymentRequestCollection = (
   // 5. Both: maxNumTransfers.overallMaxNumTransfers = 1
   for (const a of approvals) {
     const mnt = a.approvalCriteria?.maxNumTransfers;
-    if (!mnt || mnt.overallMaxNumTransfers !== 1n) {
+    if (!mnt || BigInt(mnt.overallMaxNumTransfers) !== 1n) {
       errors.push(`Approval "${a.approvalId}": overallMaxNumTransfers must be 1`);
     }
   }
@@ -113,10 +116,12 @@ export const validatePaymentRequestCollection = (
     const start1 = approvals[1].transferTimes?.[0]?.start;
     const end0 = approvals[0].transferTimes?.[0]?.end;
     const end1 = approvals[1].transferTimes?.[0]?.end;
-    if (start0 !== 1n || start1 !== 1n) {
+    if (start0 == null || start1 == null || BigInt(start0) !== 1n || BigInt(start1) !== 1n) {
       errors.push('Pay and deny transferTimes must start at 1 (active immediately)');
     }
-    if (end0 !== end1) errors.push('Pay and deny must have the same expiration time');
+    if (end0 == null || end1 == null || BigInt(end0) !== BigInt(end1)) {
+      errors.push('Pay and deny must have the same expiration time');
+    }
   }
 
   return { valid: errors.length === 0, errors, warnings };

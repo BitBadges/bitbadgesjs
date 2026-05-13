@@ -17,7 +17,9 @@ export const validateBountyCollection = (collection: Readonly<iCollectionDoc<big
 
   // 2. validTokenIds = exactly [{1,1}]
   const vt = collection.validTokenIds;
-  if (!vt || vt.length !== 1 || vt[0].start !== 1n || vt[0].end !== 1n) {
+  // Coerce via BigInt() since the indexer's HTTP responses ship uint64 as
+  // strings — see payment-requests.ts for the same reason.
+  if (!vt || vt.length !== 1 || BigInt(vt[0].start) !== 1n || BigInt(vt[0].end) !== 1n) {
     errors.push('validTokenIds must be exactly [{start: 1, end: 1}]');
   }
 
@@ -37,7 +39,7 @@ export const validateBountyCollection = (collection: Readonly<iCollectionDoc<big
   // 5. All 3: maxNumTransfers.overallMaxNumTransfers = 1
   for (const a of approvals) {
     const mnt = a.approvalCriteria?.maxNumTransfers;
-    if (!mnt || mnt.overallMaxNumTransfers !== 1n) {
+    if (!mnt || BigInt(mnt.overallMaxNumTransfers) !== 1n) {
       errors.push(`Approval "${a.approvalId}": overallMaxNumTransfers must be 1`);
     }
   }
@@ -81,13 +83,15 @@ export const validateBountyCollection = (collection: Readonly<iCollectionDoc<big
     // Same transferTimes end
     const end0 = withVoting[0].transferTimes?.[0]?.end;
     const end1 = withVoting[1].transferTimes?.[0]?.end;
-    if (end0 !== end1) errors.push('Accept and deny must have the same expiration time');
+    if (end0 == null || end1 == null || BigInt(end0) !== BigInt(end1)) {
+      errors.push('Accept and deny must have the same expiration time');
+    }
   }
 
   // 10. Expire transferTimes starts after accept/deny
   if (withVoting.length >= 1 && withoutVoting.length === 1) {
-    const votingEnd = withVoting[0].transferTimes?.[0]?.end ?? 0n;
-    const expireStart = withoutVoting[0].transferTimes?.[0]?.start ?? 0n;
+    const votingEnd = BigInt(withVoting[0].transferTimes?.[0]?.end ?? 0);
+    const expireStart = BigInt(withoutVoting[0].transferTimes?.[0]?.start ?? 0);
     if (expireStart <= votingEnd) errors.push('Expire approval must start after accept/deny expiration');
   }
 

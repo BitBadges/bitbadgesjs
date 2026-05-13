@@ -434,6 +434,12 @@ export function alwaysLockedTokenIdsPermission() {
  * Requires fromListId / toListId / initiatedByListId plus tokenIds and
  * transferTimes. Defaults to "all approvals, forever" so the resulting
  * permission locks the whole approval set.
+ *
+ * Fields mirror the chain proto `CollectionApprovalPermission` (9 fields).
+ * Earlier revisions of this helper also emitted `amountTrackerId` and
+ * `challengeTrackerId`, but those don't exist on the permission proto —
+ * the chain binary's strict JSON parser rejects them with
+ * `unknown field "amountTrackerId" in types.CollectionApprovalPermission`.
  */
 export function alwaysLockedCollectionApprovalPermission() {
   return {
@@ -442,9 +448,8 @@ export function alwaysLockedCollectionApprovalPermission() {
     initiatedByListId: 'All',
     transferTimes: FOREVER,
     tokenIds: FOREVER,
+    ownershipTimes: FOREVER,
     approvalId: 'All',
-    amountTrackerId: 'All',
-    challengeTrackerId: 'All',
     permanentlyPermittedTimes: [],
     permanentlyForbiddenTimes: FOREVER
   };

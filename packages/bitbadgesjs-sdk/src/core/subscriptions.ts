@@ -375,11 +375,12 @@ export interface UserRecurringApprovalArgs {
 
 /**
  * Build the user-side recurring approval doc for a subscription.
- * Matches the shape `UserIncomingApprovalRegistry.userRecurringApproval`
- * produced in the frontend — lifted here so the CLI and any other off-FE
- * caller can compose `MsgUpdateUserApprovals` payloads.
+ * Returns the chain-friendly proto shape (`iUserIncomingApproval<bigint>`)
+ * — no `fromList` / `initiatedByList` / `details` FE-enrichment fields.
+ * The FE wrapper in `UserIncomingApprovalRegistry.userRecurringApproval`
+ * re-attaches those for its own display layer.
  */
-export function userRecurringApproval(args: UserRecurringApprovalArgs): iUserIncomingApprovalWithDetails<bigint> {
+export function userRecurringApproval(args: UserRecurringApprovalArgs): iUserIncomingApproval<bigint> {
   const {
     subscriptionApproval,
     firstIntervalStartTime,
@@ -403,10 +404,13 @@ export function userRecurringApproval(args: UserRecurringApprovalArgs): iUserInc
     subscriptionAmount += BigInt(coinTransfer.coins[0].amount);
   }
 
+  // Return proto-shape iUserIncomingApproval (no fromList / initiatedByList
+  // class-instance fields and no details. The chain binary's strict-JSON
+  // parser rejects unknown fields like `fromList` on UserIncomingApproval;
+  // the FE wrapper in UserIncomingApprovalRegistry re-adds them for its
+  // own display layer.
   return {
-    fromList: AddressList.Reserved('Mint'),
     fromListId: 'Mint',
-    initiatedByList: AddressList.AllAddresses(),
     initiatedByListId: 'All',
     transferTimes,
     tokenIds,
@@ -480,14 +484,18 @@ export function userRecurringApproval(args: UserRecurringApprovalArgs): iUserInc
       ethSignatureChallenges: [],
       votingChallenges: [],
       evmQueryChallenges: [],
-      requireToEqualsInitiatedBy: false,
+      // IncomingApprovalCriteria proto only has requireFromEqualsInitiatedBy
+      // (no requireToEquals* — "to" is always the user themselves on an
+      // incoming approval). Emitting requireToEqualsInitiatedBy fails the
+      // chain binary's strict-JSON parser.
       requireFromEqualsInitiatedBy: false
     },
-    details: {
-      ...(subscriptionApproval.details ?? {}),
-      name: detailsName ?? 'Recurring Approval',
-      description: detailsDescription ?? 'Allows the subscription faucet to mint each interval to your address.'
-    } as any,
     version: 0n
-  } as iUserIncomingApprovalWithDetails<bigint>;
+    // NOTE: detailsName / detailsDescription on the args object are
+    // intentionally IGNORED. They were inherited from the FE
+    // signature but `details` is a FE-only enrichment that the chain's
+    // strict-JSON parser rejects. Consumers that need display strings
+    // should re-attach `details` themselves (the FE wrapper in
+    // UserIncomingApprovalRegistry does exactly this).
+  } as iUserIncomingApproval<bigint>;
 }

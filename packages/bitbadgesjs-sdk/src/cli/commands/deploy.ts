@@ -433,7 +433,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
           result.msgFilePaths.length > 0
             ? `Wrote ${result.msgFilePaths.length} msg JSON file(s):\n  ${result.msgFilePaths.join('\n  ')}\n`
             : '';
-        process.stderr.write(`\n${filesNote}Multi-msg tx — chain-binary's tx subcommands only take one msg, so the\nbelow runs them in sequence. NOT atomic: if a later step fails, earlier\nsteps remain on-chain. For atomic multi-msg, use --burner or --browser.\n\nRun:\n\n`);
+        process.stderr.write(`\n${filesNote}Multi-msg tx — chain-binary's tx subcommands only take one msg, so the\nbelow runs them in sequence with a 6s sleep between blocks to avoid\nsequence-skew. NOT atomic: if a later step fails, earlier steps remain\non-chain. For atomic multi-msg, use --burner or --browser.\n\nRun:\n\n`);
       }
       process.stdout.write(result.commandLine + '\n');
       if (!process.env.BB_QUIET) {

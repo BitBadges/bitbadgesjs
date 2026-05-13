@@ -261,7 +261,13 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
       `    --node ${nodeUrl} \\`,
       `    --keyring-backend ${opts.keyringBackend} \\`,
       `    --gas ${opts.gas} --gas-adjustment ${opts.gasAdjustment} \\`,
-      isLast ? '    --yes' : '    --yes && \\'
+      // Between blocks: insert `sleep 6 &&` so the next tx's sequence
+      // lookup happens after the previous one has committed. Without
+      // this, the second tx hits "account sequence mismatch" because
+      // the chain binary fetches the sequence at start-of-tx, and the
+      // first tx is still in the mempool when the second one fires.
+      // Block time is ~5s on BitBadges; 6s is the safe minimum.
+      isLast ? '    --yes' : '    --yes && sleep 6 && \\'
     ].join('\n');
     blocks.push(block);
   }
