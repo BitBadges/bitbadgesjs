@@ -2,11 +2,11 @@
  * `bitbadges-cli price` — quick USD price lookup via the public CoinGecko
  * `/simple/price` endpoint.
  *
- * Wallet-agnostic, read-only. Accepts one or more CoinGecko coin IDs
- * (e.g. `cosmos`, `osmosis`, `bitcoin`) — symbols-only lookup is
- * intentionally NOT supported because CoinGecko's symbol space collides
- * (multiple coins share each symbol). If you don't know the ID, look it
- * up at coingecko.com/coins/list once and reuse.
+ * Wallet-agnostic, read-only. Accepts BitBadges symbols (ATOM, USDC, OSMO,
+ * BADGE), raw chain denoms (uatom, ubadge), or canonical CoinGecko IDs
+ * (cosmos, usd-coin, osmosis, bitbadges) — they're all resolved through
+ * the SDK's asset registry. Unmapped inputs are passed through verbatim so
+ * any CoinGecko ID still works.
  *
  * The frontend has a 5-min in-memory cache for hot reloads; the CLI is a
  * one-shot process so caching is pointless — every invocation makes one
@@ -16,6 +16,7 @@
 import { Command } from 'commander';
 import axios from 'axios';
 import { addFormatOptions, resolveFormat, successEnvelope, errorEnvelope, writeJsonEnvelope } from '../utils/envelope.js';
+import { resolveCoinGeckoId } from '../../registry/index.js';
 
 const COINGECKO_BASE = 'https://api.coingecko.com/api/v3';
 
@@ -32,6 +33,23 @@ type PriceMap = Record<string, Record<string, number>>;
 
 function splitCsv(values: string[]): string[] {
   return values.flatMap((v) => v.split(',')).map((v) => v.trim()).filter(Boolean);
+}
+
+/**
+ * Resolve each input through the SDK asset registry. Unmapped inputs
+ * pass through verbatim so unknown CoinGecko IDs still work.
+ * Order preserved, duplicates dropped (first input wins for `original`).
+ */
+function resolveToCoinGeckoIds(inputs: string[]): { id: string; original: string }[] {
+  const seen = new Set<string>();
+  const out: { id: string; original: string }[] = [];
+  for (const input of inputs) {
+    const id = resolveCoinGeckoId(input) ?? input;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push({ id, original: input });
+  }
+  return out;
 }
 
 async function fetchPrices(coinIds: string[], opts: PriceFlags): Promise<PriceMap> {
@@ -69,8 +87,8 @@ function renderText(prices: PriceMap, coinIds: string[], vsCurrency: string): st
 
 export const priceCommand = addFormatOptions(
   new Command('price')
-    .description('Quick USD (or other-currency) price lookup via CoinGecko. Accepts CoinGecko coin IDs (e.g. `cosmos`, `osmosis`) — not token symbols.')
-    .argument('<coin-ids...>', 'CoinGecko coin IDs. Accepts repeated args ("cosmos osmosis") or comma-separated ("cosmos,osmosis").')
+    .description('Quick USD (or other-currency) price lookup via CoinGecko. Accepts BitBadges symbols (ATOM/USDC/OSMO/BADGE), raw denoms (uatom/ubadge), or CoinGecko IDs (cosmos/osmosis/...) — symbols are resolved via the SDK asset registry.')
+    .argument('<coin-ids...>', 'Symbols, denoms, or CoinGecko IDs. Repeated args or comma-separated.')
     .option('--vs-currency <ccy>', 'Quote currency (lowercase). Default: usd. Examples: eur, btc, eth.', 'usd')
     .option('--include-24h-change', '24h price change %.', false)
     .option('--include-24h-vol', '24h trading volume.', false)
@@ -80,20 +98,31 @@ export const priceCommand = addFormatOptions(
     'after',
     `
 Examples:
-  bb price cosmos
-  bb price cosmos osmosis ethereum --include-24h-change
-  bb price cosmos,bitcoin --vs-currency eur
+  bb price ATOM                       # symbol → 'cosmos' on CoinGecko
+  bb price ATOM USDC OSMO BADGE       # symbols batched
+  bb price uatom,ubadge               # denoms (CSV)
+  bb price cosmos osmosis --include-24h-change
+  bb price BADGE --vs-currency eur
 
-Lookup CoinGecko IDs at https://api.coingecko.com/api/v3/coins/list.
+Symbol resolution uses the SDK asset registry. Unmapped inputs are passed
+through verbatim — any CoinGecko ID at coingecko.com/coins/list still works.
 `
   )
   .action(async (rawCoinIds: string[], opts: PriceFlags) => {
-    const coinIds = splitCsv(rawCoinIds);
-    if (coinIds.length === 0) {
-      const env = errorEnvelope('USAGE', 'At least one coin ID required.', undefined, 'Try `bb price cosmos osmosis`.');
+    const splitInputs = splitCsv(rawCoinIds);
+    if (splitInputs.length === 0) {
+      const env = errorEnvelope(
+        'USAGE',
+        'At least one coin ID required.',
+        undefined,
+        'Try `bb price ATOM USDC` (symbols) or `bb price cosmos osmosis` (CoinGecko IDs).'
+      );
       writeJsonEnvelope(env);
       process.exit(2);
     }
+
+    const resolved = resolveToCoinGeckoIds(splitInputs);
+    const coinIds = resolved.map((r) => r.id);
 
     const vsCurrency = (opts.vsCurrency || 'usd').toLowerCase();
     let prices: PriceMap;
@@ -109,9 +138,19 @@ Lookup CoinGecko IDs at https://api.coingecko.com/api/v3/coins/list.
       process.exit(1);
     }
 
-    const env = successEnvelope(prices, {
+    // Map of resolved-ID → original-input, for inputs that were aliased.
+    const aliasedFrom = resolved
+      .filter((r) => r.id !== r.original)
+      .reduce<Record<string, string>>((acc, r) => {
+        acc[r.id] = r.original;
+        return acc;
+      }, {});
+
+    const payload =
+      Object.keys(aliasedFrom).length > 0 ? { prices, aliasedFrom } : (prices as Record<string, unknown>);
+    const env = successEnvelope(payload, {
       hint: coinIds.some((id) => !prices[id])
-        ? `Some IDs returned no data — check coingecko.com/coins/list for canonical IDs.`
+        ? `Some IDs returned no data — try a BitBadges symbol (ATOM/USDC/OSMO/BADGE) or check coingecko.com/coins/list.`
         : undefined
     });
 

@@ -35,9 +35,9 @@ describe('priceCommand shape', () => {
     }
   });
 
-  it('description mentions CoinGecko + that IDs (not symbols) are required', () => {
+  it('description mentions CoinGecko + symbol/registry resolution', () => {
     const desc = priceCommand.description();
     expect(desc).toMatch(/CoinGecko/i);
-    expect(desc).toMatch(/coin IDs|coin-?id/i);
+    expect(desc).toMatch(/symbol|registry/i);
   });
 });
