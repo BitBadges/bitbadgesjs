@@ -36,13 +36,26 @@ function addOutputFlags(cmd: Command): Command {
 }
 
 function emit(result: unknown, opts: OutputFlags): void {
-  const formatted = opts.condensed ? JSON.stringify(result) : JSON.stringify(result, null, 2);
+  const formatted = opts.condensed
+    ? JSON.stringify(result, jsonBigIntReplacer)
+    : JSON.stringify(result, jsonBigIntReplacer, 2);
   if (opts.outputFile) {
     fs.writeFileSync(opts.outputFile, formatted + '\n', 'utf-8');
     process.stderr.write(`Written to ${opts.outputFile}\n`);
   } else {
     process.stdout.write(formatted + '\n');
   }
+}
+
+/**
+ * Bigint → string replacer. `extractCreditTokenTiers` returns tier objects
+ * carrying bigint fields (paymentAmount, mintAmount, maxMultiplier) since
+ * those are uint64 on chain. Without this replacer, raw `JSON.stringify`
+ * throws "Do not know how to serialize a BigInt".
+ */
+function jsonBigIntReplacer(_key: string, value: unknown): unknown {
+  if (typeof value === 'bigint') return value.toString();
+  return value;
 }
 
 function emitError(err: unknown): never {
@@ -166,6 +179,12 @@ addOutputFlags(
         process.stderr.write(
           `Error: no matching tier. Available: ${tiers.map((t) => t.approvalId).join(', ')}.\n`
         );
+        process.exit(2);
+      }
+      // Reject non-integer --units up-front; raw `BigInt(...)` throws
+      // "Cannot convert <val> to a BigInt" which is too low-level for end users.
+      if (!/^-?\d+$/.test(opts.units.trim())) {
+        process.stderr.write(`Error: --units must be a positive integer, got "${opts.units}".\n`);
         process.exit(2);
       }
       const units = BigInt(opts.units);

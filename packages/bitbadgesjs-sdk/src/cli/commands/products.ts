@@ -153,6 +153,12 @@ addOutputFlags(
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'products purchase');
       const products = extractAllProducts(collection.collectionApprovals);
+      // Reject non-integer --token-id up-front so users get an actionable
+      // error instead of the raw `BigInt(...)` SyntaxError.
+      if (!/^-?\d+$/.test(opts.tokenId.trim())) {
+        process.stderr.write(`Error: --token-id must be a positive integer, got "${opts.tokenId}".\n`);
+        process.exit(2);
+      }
       const tokenId = BigInt(opts.tokenId);
       const product = products.find((p) => p.tokenId === tokenId);
       if (!product) {

@@ -155,6 +155,28 @@ describe('credit-tokens integration', () => {
     expect(out.stderr + out.stdout).toMatch(/units.*>\s*0|must be > 0|invalid|Error/i);
   }, 30000);
 
+  it('purchase --units <non-integer> exits with an actionable error (not raw BigInt SyntaxError)', async () => {
+    if (!ready || !collectionId) return;
+    const buyer = charlie();
+    const out = runCli(
+      [
+        'credit-tokens',
+        'purchase',
+        collectionId,
+        '--creator', buyer.address,
+        '--units', 'not-a-number',
+        '--local'
+      ],
+      { throwOnError: false, parseJson: false }
+    );
+    expect(out.exitCode).not.toBe(0);
+    // The CLI rejects non-integer up front with a friendly message; we
+    // explicitly assert NOT the raw "Cannot convert ... to a BigInt"
+    // SyntaxError that used to leak through.
+    expect(out.stderr + out.stdout).toMatch(/--units.*integer/i);
+    expect(out.stderr + out.stdout).not.toMatch(/Cannot convert .* to a BigInt/);
+  }, 30000);
+
   it('conformance throw — show on a non-Credit-Token collection exits 2', async () => {
     if (!ready) return;
     // Collection `1` on a fresh local chain is either missing or not a

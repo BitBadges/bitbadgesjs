@@ -235,6 +235,24 @@ describe('subscriptions integration', () => {
     expect(out.json.entries.length).toBe(0);
   }, 30000);
 
+  it('enable-renewal --tip <non-integer> exits with an actionable error (not raw BigInt SyntaxError)', async () => {
+    if (!ready || !collectionId) return;
+    const subscriber = charlie();
+    const out = runCli(
+      [
+        'subscriptions', 'enable-renewal', collectionId,
+        '--creator', subscriber.address,
+        '--tier', approvalId ?? 'sub-1',
+        '--tip', 'not-a-number',
+        '--local'
+      ],
+      { throwOnError: false, parseJson: false }
+    );
+    expect(out.exitCode).not.toBe(0);
+    expect(out.stderr + out.stdout).toMatch(/--tip.*integer/i);
+    expect(out.stderr + out.stdout).not.toMatch(/Cannot convert .* to a BigInt/);
+  }, 30000);
+
   it('conformance throw — list on a non-Subscriptions collection exits non-zero', async () => {
     if (!ready) return;
     // Collection 1 (BADGE) is not a Subscriptions — validator must reject.

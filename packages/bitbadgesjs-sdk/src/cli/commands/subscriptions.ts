@@ -82,6 +82,20 @@ function jsonBigIntReplacer(_key: string, value: unknown): unknown {
   return value;
 }
 
+/**
+ * Parse a non-negative integer CLI flag into a bigint. Throws via
+ * process.exit(2) with an actionable message when the input isn't a
+ * positive integer, so users don't see the raw `BigInt(...)` SyntaxError.
+ */
+function parseNonNegativeIntFlag(value: string | undefined, flagName: string): bigint {
+  const raw = (value ?? '0').trim();
+  if (!/^\d+$/.test(raw)) {
+    process.stderr.write(`Error: ${flagName} must be a non-negative integer, got "${value}".\n`);
+    process.exit(2);
+  }
+  return BigInt(raw);
+}
+
 function emitError(err: unknown): never {
   const e = err as { message?: string; response?: unknown; hint?: string };
   if (e?.response !== undefined) process.stderr.write(JSON.stringify(e.response, null, 2) + '\n');
@@ -400,7 +414,7 @@ addOutputFlags(
       validateOrExit(collection, 'subscriptions enable-renewal');
       const faucet = pickFaucet(listFaucets(collection), opts.tier, 'subscriptions enable-renewal');
 
-      const tip = BigInt(opts.tip ?? '0');
+      const tip = parseNonNegativeIntFlag(opts.tip, '--tip');
       const denom = faucet.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.denom ?? 'ubadge';
       const newApproval = userRecurringApproval({
         subscriptionApproval: faucet,
@@ -496,7 +510,7 @@ addOutputFlags(
 
       const claim = buildClaimMsg(creator, String(collectionId), faucet);
 
-      const tip = BigInt(opts.tip ?? '0');
+      const tip = parseNonNegativeIntFlag(opts.tip, '--tip');
       const denom = faucet.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.denom ?? 'ubadge';
       const newApproval = userRecurringApproval({
         subscriptionApproval: faucet,
