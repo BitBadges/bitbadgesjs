@@ -91,11 +91,10 @@ describe('credit-tokens integration', () => {
     expect(out.json.standards).toContain('Credit Token');
     expect(Array.isArray(out.json.tiers)).toBe(true);
     expect(out.json.tiers.length).toBeGreaterThan(0);
-    // Alias path metadata (denom/symbol/decimals) may be null on legacy
-    // builds, so we only assert the keys are present (not their values).
+    // Alias-path denom is surfaced (symbol/decimals were dropped from
+    // `show` since the chain proto doesn't carry them through to the
+    // indexer doc — use `bb lookup <denom>` to resolve those if needed).
     expect(out.json).toHaveProperty('denom');
-    expect(out.json).toHaveProperty('symbol');
-    expect(out.json).toHaveProperty('decimals');
   }, 30000);
 
   it('charlie purchases 5 units → MsgTransferTokens balances=500 → chain code 0', async () => {

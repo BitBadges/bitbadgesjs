@@ -192,18 +192,13 @@ describe('subscriptions integration', () => {
 
   // SKIP: real bug — `subscriptions cancel` re-reads existing user incoming
   // approvals from the indexer and forwards them back in MsgUpdateUserApprovals.
-  // The indexer's serialization includes `initiatedByList` (legacy alias?), but
-  // the chain's UserIncomingApproval proto rejects with:
-  //   `unknown field "initiatedByList" in types.UserIncomingApproval`
-  // CLI emits a structurally-valid MsgUpdateUserApprovals (msg shape passes
-  // expectations below), but the on-chain submission fails. Either:
-  //   (a) indexer should ship the canonical chain field name, or
-  //   (b) `subscriptions cancel` should sanitize approvals via the SDK
-  //       converter before re-emitting them.
-  // enable-renewal works because it constructs the approval from
-  // `userRecurringApproval()` (SDK-side) and doesn't round-trip via indexer.
-  // File ticket: indexer→chain UserIncomingApproval field mismatch.
-  it.skip('cancel → code 0 (emits MsgUpdateUserApprovals without the recurring)', async () => {
+  // Originally skipped because the indexer ships FE-enrichment fields
+  // (`initiatedByList`, `fromList`, `details`) on user incoming approvals
+  // — those aren't on the chain's `UserIncomingApproval` proto, so a
+  // direct round-trip via cancel hit `unknown field "initiatedByList"`.
+  // FIX: `cli/commands/subscriptions.ts` now strips those fields via
+  // `stripFeEnrichmentFromApproval` before emitting.
+  it('cancel → code 0 (emits MsgUpdateUserApprovals without the recurring)', async () => {
     if (!ready || !collectionId || !approvalId) return;
     const subscriber = charlie();
 

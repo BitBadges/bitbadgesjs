@@ -114,14 +114,17 @@ addOutputFlags(
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'credit-tokens show');
     const tiers = extractCreditTokenTiers(collection.collectionApprovals);
+    // `aliasPath.{symbol,decimals}` are the FE-build-time metadata; the
+    // indexer's collection doc exposes paths via `aliasPaths[].denom`
+    // only (chain proto doesn't carry symbol/decimals through). Use the
+    // denom for display; let the caller resolve symbol+decimals via
+    // `bb lookup <denom>` if needed.
     const aliasPath = (collection.aliasPaths ?? collection.aliasPathsToAdd ?? [])[0];
     emit(
       {
         collectionId: String(collectionId),
         standards: collection.standards ?? [],
         denom: aliasPath?.denom ?? null,
-        symbol: aliasPath?.symbol ?? null,
-        decimals: aliasPath?.decimals ?? null,
         tiers
       },
       opts

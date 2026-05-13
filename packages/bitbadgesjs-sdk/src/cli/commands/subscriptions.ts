@@ -213,6 +213,22 @@ interface MsgUpdateUserApprovalsEnvelope {
   value: Record<string, unknown>;
 }
 
+/**
+ * Strip FE-enrichment fields from a user-incoming-approval doc so it
+ * round-trips through `MsgUpdateUserApprovals` without the chain
+ * rejecting `unknown field "initiatedByList"` etc. The indexer ships
+ * `fromList`, `initiatedByList`, `details` for display purposes — those
+ * fields don't exist on the chain's `UserIncomingApproval` proto.
+ *
+ * Only impacts the cancel / preserve-others path where we re-fetch
+ * existing approvals from the indexer and forward them.
+ */
+function stripFeEnrichmentFromApproval(approval: any): any {
+  if (!approval || typeof approval !== 'object') return approval;
+  const { fromList: _f, initiatedByList: _i, details: _d, ...rest } = approval;
+  return rest;
+}
+
 function buildUpdateApprovalsMsg(
   creator: string,
   collectionId: string,
@@ -224,7 +240,7 @@ function buildUpdateApprovalsMsg(
       creator,
       collectionId: String(collectionId),
       updateIncomingApprovals: true,
-      incomingApprovals
+      incomingApprovals: incomingApprovals.map(stripFeEnrichmentFromApproval)
     }
   };
 }
