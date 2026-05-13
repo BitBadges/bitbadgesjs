@@ -5,6 +5,7 @@ export * from './approval-utils.js';
 export * from './balances.js';
 export * from './batch-utils.js';
 export * from './coin.js';
+export * from './coin-utils.js';
 export * from './misc.js';
 export * from './permissions.js';
 export * from './permission-utils.js';

@@ -36,10 +36,12 @@ import { addressCommand } from './commands/address.js';
 import { aliasCommand } from './commands/alias.js';
 import { lookupCommand } from './commands/lookup.js';
 import { genListIdCommand } from './commands/gen-list-id.js';
+import { amountCommand } from './commands/amount.js';
 
 // Swap / DEX
 import { swapCommand } from './commands/swap.js';
 import { balancesCommand } from './commands/balances.js';
+import { priceCommand } from './commands/price.js';
 
 // Standard-specific end-user surfaces
 import { payRequestsCommand } from './commands/pay-requests.js';
@@ -107,11 +109,11 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   },
   {
     title: 'Address & lookup utilities',
-    commands: [addressCommand, aliasCommand, lookupCommand, genListIdCommand]
+    commands: [addressCommand, aliasCommand, lookupCommand, genListIdCommand, amountCommand]
   },
   {
     title: 'Swap & DEX',
-    commands: [swapCommand, balancesCommand]
+    commands: [swapCommand, balancesCommand, priceCommand]
   },
   {
     title: 'Standards (end-user actions)',
