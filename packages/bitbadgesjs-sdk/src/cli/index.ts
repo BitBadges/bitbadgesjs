@@ -45,6 +45,10 @@ import { payRequestsCommand } from './commands/pay-requests.js';
 import { bountiesCommand } from './commands/bounties.js';
 import { subscriptionsCommand } from './commands/subscriptions.js';
 import { intentsCommand } from './commands/intents.js';
+import { creditTokensCommand } from './commands/credit-tokens.js';
+import { productsCommand } from './commands/products.js';
+import { crowdfundCommand } from './commands/crowdfund.js';
+import { auctionsCommand } from './commands/auctions.js';
 
 // Misc
 import { makeCompletionCommand } from './commands/completion.js';
@@ -107,7 +111,16 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   },
   {
     title: 'Standards (end-user actions)',
-    commands: [payRequestsCommand, bountiesCommand, subscriptionsCommand, intentsCommand]
+    commands: [
+      payRequestsCommand,
+      bountiesCommand,
+      subscriptionsCommand,
+      intentsCommand,
+      creditTokensCommand,
+      productsCommand,
+      crowdfundCommand,
+      auctionsCommand
+    ]
   }
 ];
 

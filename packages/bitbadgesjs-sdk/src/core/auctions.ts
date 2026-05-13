@@ -1,5 +1,7 @@
 import { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
+import type { iCollectionApproval } from '@/interfaces/types/approvals.js';
+import { UintRangeArray } from './uintRanges.js';
 
 export interface AuctionValidationResult {
   valid: boolean;
@@ -69,3 +71,202 @@ export const validateAuctionCollection = (collection: Readonly<iCollectionDoc<bi
 export const doesCollectionFollowAuctionProtocol = (collection: Readonly<iCollectionDoc<bigint>>): boolean => {
   return validateAuctionCollection(collection).valid;
 };
+
+// ── End-user helpers (lifted from FE AuctionView + AuctionBidsTab) ────────
+
+export type AuctionStatus = 'live' | 'pending-settlement' | 'settled';
+
+export interface AuctionDetails {
+  mintApproval: iCollectionApproval<bigint>;
+  sellerAddress: string;
+  acceptDeadline: bigint;
+}
+
+/** Extract auction shape. Returns null when the mint-to-winner approval is missing (post-settlement state). */
+export function extractAuctionDetails(
+  approvals: ReadonlyArray<iCollectionApproval<bigint>>
+): AuctionDetails | null {
+  const mintApproval = approvals.find((a) => a.fromListId === 'Mint');
+  if (!mintApproval) return null;
+  return {
+    mintApproval,
+    sellerAddress: mintApproval.initiatedByListId ?? '',
+    acceptDeadline: BigInt(mintApproval.transferTimes?.[0]?.end ?? 0)
+  };
+}
+
+export function deriveAuctionStatus(approvals: ReadonlyArray<iCollectionApproval<bigint>>, acceptDeadline: bigint): AuctionStatus {
+  // If the mint-to-winner approval auto-deleted (afterOneUse), the auction settled.
+  if (!approvals.find((a) => a.fromListId === 'Mint')) return 'settled';
+  const now = BigInt(Date.now());
+  if (now > acceptDeadline && acceptDeadline > 0n) return 'pending-settlement';
+  return 'live';
+}
+
+// ── Bid intent factory ───────────────────────────────────────────────────
+//
+// Bids are buyer-side INCOMING approvals declaring "I want to receive
+// 1 of token-X and pay <amount> <denom> for it". The seller's accept-bid
+// flow fills them. Lifted from the FE's
+// `UserOutgoingApprovalRegistry.predictionMarketBuyIntent` — same shape,
+// applies to auctions and prediction markets alike.
+
+export interface AuctionBidArgs {
+  /** Bidder address (will be the `to` on the approval). */
+  bidderAddress: string;
+  /** Token id the bidder wants to receive. Most auctions use 1. */
+  tokenId: bigint;
+  /** Number of tokens (almost always 1 for auctions). */
+  tokenAmount: bigint;
+  /** Denom of payment (e.g. 'uusdc', 'ubadge'). */
+  paymentDenom: string;
+  /** Amount of payment in base units. */
+  paymentAmount: bigint;
+  /** Validity window for the bid — typically [1, acceptDeadline]. */
+  transferTimes: UintRangeArray<bigint>;
+  /** Approval id — caller picks. */
+  approvalId: string;
+}
+
+/**
+ * Build the buyer-side incoming-approval (a "bid"). Use with
+ * `MsgSetIncomingApproval` to post the bid on-chain. Proto-shape only —
+ * no FE-only `fromList`/`toList`/`details` enrichment.
+ */
+export function buildAuctionBidApproval(args: AuctionBidArgs): Record<string, unknown> {
+  const { bidderAddress, tokenId, tokenAmount, paymentDenom, paymentAmount, transferTimes, approvalId } = args;
+  const tokenIds = [{ start: tokenId, end: tokenId }];
+  return {
+    fromListId: 'All',
+    initiatedByListId: 'All',
+    transferTimes,
+    tokenIds,
+    ownershipTimes: UintRangeArray.FullRanges(),
+    approvalId,
+    version: 0n,
+    approvalCriteria: {
+      autoDeletionOptions: {
+        afterOneUse: true,
+        afterOverallMaxNumTransfers: true,
+        allowCounterpartyPurge: false,
+        allowPurgeIfExpired: true
+      },
+      coinTransfers: [
+        {
+          to: '',
+          overrideFromWithApproverAddress: true,
+          overrideToWithInitiator: true,
+          coins: [{ amount: paymentAmount, denom: paymentDenom }]
+        }
+      ],
+      predeterminedBalances: {
+        manualBalances: [],
+        orderCalculationMethod: {
+          useOverallNumTransfers: true,
+          usePerToAddressNumTransfers: false,
+          usePerFromAddressNumTransfers: false,
+          usePerInitiatedByAddressNumTransfers: false,
+          useMerkleChallengeLeafIndex: false,
+          challengeTrackerId: ''
+        },
+        incrementedBalances: {
+          startBalances: [{ amount: tokenAmount, tokenIds, ownershipTimes: UintRangeArray.FullRanges() }],
+          incrementTokenIdsBy: 0n,
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: 0n,
+          allowOverrideTimestamp: false,
+          allowOverrideWithAnyValidToken: false,
+          allowAmountScaling: false,
+          maxScalingMultiplier: 0n,
+          recurringOwnershipTimes: { startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }
+        }
+      },
+      maxNumTransfers: {
+        overallMaxNumTransfers: 1n,
+        perToAddressMaxNumTransfers: 0n,
+        perFromAddressMaxNumTransfers: 0n,
+        perInitiatedByAddressMaxNumTransfers: 0n,
+        amountTrackerId: approvalId,
+        resetTimeIntervals: { startTime: 0n, intervalLength: 0n }
+      },
+      approvalAmounts: {
+        overallApprovalAmount: 0n,
+        perFromAddressApprovalAmount: 0n,
+        perToAddressApprovalAmount: 0n,
+        perInitiatedByAddressApprovalAmount: 0n,
+        amountTrackerId: approvalId,
+        resetTimeIntervals: { startTime: 0n, intervalLength: 0n }
+      },
+      merkleChallenges: [],
+      mustOwnTokens: [],
+      dynamicStoreChallenges: [],
+      ethSignatureChallenges: [],
+      votingChallenges: [],
+      evmQueryChallenges: [],
+      requireFromEqualsInitiatedBy: false
+    }
+  };
+}
+
+// ── Accept-bid msg builder ───────────────────────────────────────────────
+//
+// Accepting a bid is a single MsgTransferTokens that prioritizes BOTH
+// the bid's incoming approval (so the bidder's coinTransfer fires and
+// debits their wallet) AND the auction's mint-to-winner collection
+// approval (so the prize is minted).
+
+const AUCTION_MAX_UINT64 = '18446744073709551615';
+void GO_MAX_UINT_64;
+
+export interface AcceptAuctionBidMsg {
+  typeUrl: '/tokenization.MsgTransferTokens';
+  value: Record<string, unknown>;
+}
+
+export function buildAcceptAuctionBidMsg(
+  seller: string,
+  collectionId: string,
+  bidApprovalId: string,
+  bidderAddress: string,
+  mintApprovalId: string,
+  tokenAmount: bigint = 1n
+): AcceptAuctionBidMsg {
+  return {
+    typeUrl: '/tokenization.MsgTransferTokens',
+    value: {
+      creator: seller,
+      collectionId: String(collectionId),
+      transfers: [
+        {
+          from: 'Mint',
+          toAddresses: [bidderAddress],
+          balances: [
+            {
+              amount: tokenAmount.toString(),
+              tokenIds: [{ start: '1', end: '1' }],
+              ownershipTimes: [{ start: '1', end: AUCTION_MAX_UINT64 }]
+            }
+          ],
+          prioritizedApprovals: [
+            {
+              approvalId: mintApprovalId,
+              approvalLevel: 'collection',
+              approverAddress: '',
+              version: '0'
+            },
+            {
+              approvalId: bidApprovalId,
+              approvalLevel: 'incoming',
+              approverAddress: bidderAddress,
+              version: '0'
+            }
+          ],
+          onlyCheckPrioritizedCollectionApprovals: true,
+          onlyCheckPrioritizedOutgoingApprovals: false,
+          onlyCheckPrioritizedIncomingApprovals: true,
+          memo: ''
+        }
+      ]
+    }
+  };
+}

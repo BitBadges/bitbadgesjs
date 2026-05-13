@@ -1,7 +1,9 @@
 import { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
+import type { iCollectionApproval } from '@/interfaces/types/approvals.js';
 
 const BURN_ADDRESS = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
+const MAX_UINT64 = '18446744073709551615';
 
 export interface CrowdfundValidationResult {
   valid: boolean;
@@ -147,3 +149,282 @@ export const validateCrowdfundCollection = (collection: Readonly<iCollectionDoc<
 export const doesCollectionFollowCrowdfundProtocol = (collection: Readonly<iCollectionDoc<bigint>>): boolean => {
   return validateCrowdfundCollection(collection).valid;
 };
+
+// ── End-user helpers (lifted from FE CrowdfundView) ───────────────────────
+
+export type CrowdfundStatus = 'active' | 'funded' | 'goal-met-pending-settle' | 'expired-refunding';
+
+export interface CrowdfundDetails {
+  depositRefundApproval: iCollectionApproval<bigint>;
+  depositProgressApproval: iCollectionApproval<bigint>;
+  successApproval: iCollectionApproval<bigint>;
+  refundApproval: iCollectionApproval<bigint>;
+  crowdfunderAddress: string;
+  goalAmount: bigint;
+  depositDenom: string;
+  deadlineTime: bigint;
+}
+
+/**
+ * Split a crowdfund's 4 approvals into deposit-refund / deposit-progress /
+ * success / refund + extract config. Returns null on shape mismatch.
+ * Lifted from FE `CrowdfundView.extractDetails`.
+ */
+export function extractCrowdfundDetails(
+  approvals: ReadonlyArray<iCollectionApproval<bigint>>
+): CrowdfundDetails | null {
+  const depositRefund = approvals.find(
+    (a) => a.fromListId === 'Mint' && a.toListId === 'All' && (a.approvalCriteria?.coinTransfers?.length ?? 0) > 0
+  );
+  const depositProgress = approvals.find(
+    (a) =>
+      a.fromListId === 'Mint' &&
+      a.toListId !== 'All' &&
+      a.toListId !== BURN_ADDRESS &&
+      (a.approvalCriteria?.coinTransfers?.length ?? 0) === 0
+  );
+  const success = approvals.find(
+    (a) =>
+      a.fromListId === 'Mint' &&
+      a.toListId === BURN_ADDRESS &&
+      (a.approvalCriteria?.mustOwnTokens?.length ?? 0) > 0
+  );
+  const refund = approvals.find(
+    (a) =>
+      a.fromListId === '!Mint' &&
+      a.toListId === BURN_ADDRESS &&
+      (a.approvalCriteria?.coinTransfers?.length ?? 0) > 0
+  );
+  if (!depositRefund || !depositProgress || !success || !refund) return null;
+
+  return {
+    depositRefundApproval: depositRefund,
+    depositProgressApproval: depositProgress,
+    successApproval: success,
+    refundApproval: refund,
+    crowdfunderAddress: depositProgress.toListId ?? '',
+    goalAmount: BigInt(success.approvalCriteria?.mustOwnTokens?.[0]?.amountRange?.start ?? 0),
+    depositDenom: String(depositRefund.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.denom ?? ''),
+    deadlineTime: BigInt(depositRefund.transferTimes?.[0]?.end ?? 0)
+  };
+}
+
+/** Compute status from indexer/standardsInfo if available, else from on-chain state + clock. */
+export function deriveCrowdfundStatus(deadlineMs: bigint, raised: bigint, goal: bigint): CrowdfundStatus {
+  const now = BigInt(Date.now());
+  if (raised >= goal) return now > deadlineMs ? 'funded' : 'goal-met-pending-settle';
+  if (now > deadlineMs) return 'expired-refunding';
+  return 'active';
+}
+
+// ── Msg builders ──────────────────────────────────────────────────────────
+
+interface MsgEnvelope {
+  typeUrl: '/tokenization.MsgTransferTokens';
+  value: Record<string, unknown>;
+}
+
+const fullOwnershipTimes = [{ start: '1', end: MAX_UINT64 }];
+
+/**
+ * Build the 2-msg contribute tx. Pipe to `bb deploy` — single tx, two
+ * transfers inside it (mint token-1 to contributor + mint token-2 to
+ * crowdfunder), each fired via its own deposit approval.
+ */
+export function buildContributeCrowdfundTx(
+  creator: string,
+  collectionId: string,
+  details: CrowdfundDetails,
+  amount: bigint
+): { messages: [MsgEnvelope] } {
+  if (amount <= 0n) throw new Error('buildContributeCrowdfundTx: --amount must be > 0');
+  return {
+    messages: [
+      {
+        typeUrl: '/tokenization.MsgTransferTokens',
+        value: {
+          creator,
+          collectionId: String(collectionId),
+          transfers: [
+            {
+              from: 'Mint',
+              toAddresses: [creator],
+              balances: [
+                {
+                  amount: amount.toString(),
+                  tokenIds: [{ start: '1', end: '1' }],
+                  ownershipTimes: fullOwnershipTimes
+                }
+              ],
+              prioritizedApprovals: [
+                {
+                  approvalId: details.depositRefundApproval.approvalId,
+                  approvalLevel: 'collection',
+                  approverAddress: '',
+                  version: '0'
+                }
+              ],
+              onlyCheckPrioritizedCollectionApprovals: true,
+              onlyCheckPrioritizedOutgoingApprovals: false,
+              onlyCheckPrioritizedIncomingApprovals: false,
+              memo: ''
+            },
+            {
+              from: 'Mint',
+              toAddresses: [details.crowdfunderAddress],
+              balances: [
+                {
+                  amount: amount.toString(),
+                  tokenIds: [{ start: '2', end: '2' }],
+                  ownershipTimes: fullOwnershipTimes
+                }
+              ],
+              prioritizedApprovals: [
+                {
+                  approvalId: details.depositProgressApproval.approvalId,
+                  approvalLevel: 'collection',
+                  approverAddress: '',
+                  version: '0'
+                }
+              ],
+              onlyCheckPrioritizedCollectionApprovals: true,
+              onlyCheckPrioritizedOutgoingApprovals: false,
+              onlyCheckPrioritizedIncomingApprovals: false,
+              memo: ''
+            }
+          ]
+        }
+      }
+    ]
+  };
+}
+
+/**
+ * Build the crowdfunder-side withdraw tx (only callable when goal met).
+ * Fires the success approval to drain escrow + burns the crowdfunder's
+ * accumulated progress tokens. 2-msg.
+ */
+export function buildWithdrawCrowdfundTx(
+  creator: string,
+  collectionId: string,
+  details: CrowdfundDetails,
+  raised: bigint,
+  burnApprovalId?: string
+): { messages: MsgEnvelope[] } {
+  const messages: MsgEnvelope[] = [
+    {
+      typeUrl: '/tokenization.MsgTransferTokens',
+      value: {
+        creator,
+        collectionId: String(collectionId),
+        transfers: [
+          {
+            from: 'Mint',
+            toAddresses: [BURN_ADDRESS],
+            balances: [
+              {
+                amount: raised.toString(),
+                tokenIds: [{ start: '1', end: '1' }],
+                ownershipTimes: fullOwnershipTimes
+              }
+            ],
+            prioritizedApprovals: [
+              {
+                approvalId: details.successApproval.approvalId,
+                approvalLevel: 'collection',
+                approverAddress: '',
+                version: '0'
+              }
+            ],
+            onlyCheckPrioritizedCollectionApprovals: true,
+            onlyCheckPrioritizedOutgoingApprovals: false,
+            onlyCheckPrioritizedIncomingApprovals: false,
+            memo: ''
+          }
+        ]
+      }
+    },
+    {
+      typeUrl: '/tokenization.MsgTransferTokens',
+      value: {
+        creator,
+        collectionId: String(collectionId),
+        transfers: [
+          {
+            from: creator,
+            toAddresses: [BURN_ADDRESS],
+            balances: [
+              {
+                amount: raised.toString(),
+                tokenIds: [{ start: '2', end: '2' }],
+                ownershipTimes: fullOwnershipTimes
+              }
+            ],
+            prioritizedApprovals: burnApprovalId
+              ? [
+                  {
+                    approvalId: burnApprovalId,
+                    approvalLevel: 'collection',
+                    approverAddress: '',
+                    version: '0'
+                  }
+                ]
+              : [],
+            onlyCheckPrioritizedCollectionApprovals: !!burnApprovalId,
+            onlyCheckPrioritizedOutgoingApprovals: false,
+            onlyCheckPrioritizedIncomingApprovals: false,
+            memo: ''
+          }
+        ]
+      }
+    }
+  ];
+  return { messages };
+}
+
+/**
+ * Build the contributor-side refund tx — fires the refund approval to
+ * pull funds back out of escrow. Single MsgTransferTokens.
+ */
+export function buildRefundCrowdfundMsg(
+  creator: string,
+  collectionId: string,
+  details: CrowdfundDetails,
+  amount: bigint
+): MsgEnvelope {
+  if (amount <= 0n) throw new Error('buildRefundCrowdfundMsg: --amount must be > 0');
+  return {
+    typeUrl: '/tokenization.MsgTransferTokens',
+    value: {
+      creator,
+      collectionId: String(collectionId),
+      transfers: [
+        {
+          from: creator,
+          toAddresses: [BURN_ADDRESS],
+          balances: [
+            {
+              amount: amount.toString(),
+              tokenIds: [{ start: '1', end: '1' }],
+              ownershipTimes: fullOwnershipTimes
+            }
+          ],
+          prioritizedApprovals: [
+            {
+              approvalId: details.refundApproval.approvalId,
+              approvalLevel: 'collection',
+              approverAddress: '',
+              version: '0'
+            }
+          ],
+          onlyCheckPrioritizedCollectionApprovals: true,
+          onlyCheckPrioritizedOutgoingApprovals: false,
+          onlyCheckPrioritizedIncomingApprovals: false,
+          memo: ''
+        }
+      ]
+    }
+  };
+}
+
+void GO_MAX_UINT_64; // keep import; future use for timeline bounds

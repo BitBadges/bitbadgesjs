@@ -278,3 +278,113 @@ export const isProductApproval = (approval: iCollectionApproval<bigint>) => {
 
   return true;
 };
+
+// ── End-user helpers (lifted from frontend ProductCatalogView) ────────────
+
+export interface ExtractedProduct {
+  tokenId: bigint;
+  approvalId: string;
+  storeAddress: string;
+  priceCoins: { denom: string; amount: bigint }[];
+  maxSupply: bigint;
+  amountTrackerId: string;
+  burnOnPurchase: boolean;
+}
+
+/**
+ * Frontend-flavored looser check than `isProductApproval` — used to
+ * enumerate the products in a catalog rather than to validate
+ * conformance. Mirrors the FE's `ProductCatalogRegistry.isProductCatalogPurchaseApproval`.
+ */
+export function isProductCatalogPurchaseApproval(approval: iCollectionApproval<bigint>): boolean {
+  if (approval.fromListId !== 'Mint') return false;
+  if (!approval.approvalCriteria) return false;
+  if (!approval.approvalCriteria.overridesFromOutgoingApprovals) return false;
+  if (!approval.approvalCriteria.overridesToIncomingApprovals) return false;
+  const ct = approval.approvalCriteria.coinTransfers;
+  if (!ct || ct.length < 1) return false;
+  if (!ct[0].to) return false;
+  if (!ct[0].coins?.length) return false;
+  return true;
+}
+
+const PRODUCT_BURN_ADDRESS = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
+
+/**
+ * Extract every product from a collection's approvals — sorted by token ID.
+ * Lifted from FE `ProductCatalogView.extractAllProducts`.
+ */
+export function extractAllProducts(approvals: ReadonlyArray<iCollectionApproval<bigint>>): ExtractedProduct[] {
+  return approvals
+    .filter(isProductCatalogPurchaseApproval)
+    .map((a) => ({
+      tokenId: BigInt(a.tokenIds?.[0]?.start ?? 1),
+      approvalId: a.approvalId ?? '',
+      storeAddress: a.approvalCriteria?.coinTransfers?.[0]?.to ?? '',
+      priceCoins: (a.approvalCriteria?.coinTransfers?.[0]?.coins ?? []).map((c: any) => ({
+        denom: String(c.denom),
+        amount: BigInt(c.amount)
+      })),
+      maxSupply: BigInt(a.approvalCriteria?.maxNumTransfers?.overallMaxNumTransfers ?? 0),
+      amountTrackerId: a.approvalCriteria?.maxNumTransfers?.amountTrackerId ?? '',
+      burnOnPurchase: a.toListId === PRODUCT_BURN_ADDRESS
+    }))
+    .sort((a, b) => (a.tokenId < b.tokenId ? -1 : a.tokenId > b.tokenId ? 1 : 0));
+}
+
+const PRODUCT_MAX_UINT64 = '18446744073709551615';
+
+export interface PurchaseProductMsg {
+  typeUrl: '/tokenization.MsgTransferTokens';
+  value: Record<string, unknown>;
+}
+
+/**
+ * Build the MsgTransferTokens that purchases one unit of a given product.
+ * Uses `precalculateBalancesFromApproval` so the chain figures out the
+ * mint balance from the approval definition. Routes to the burn address
+ * if the product is `burnOnPurchase` (consumable goods), else to creator.
+ */
+export function buildPurchaseProductMsg(
+  creator: string,
+  collectionId: string,
+  product: ExtractedProduct
+): PurchaseProductMsg {
+  const recipient = product.burnOnPurchase ? PRODUCT_BURN_ADDRESS : creator;
+  return {
+    typeUrl: '/tokenization.MsgTransferTokens',
+    value: {
+      creator,
+      collectionId: String(collectionId),
+      transfers: [
+        {
+          from: 'Mint',
+          toAddresses: [recipient],
+          balances: [],
+          precalculateBalancesFromApproval: {
+            approvalId: product.approvalId,
+            approvalLevel: 'collection',
+            approverAddress: '',
+            version: '0',
+            precalculationOptions: { overrideTimestamp: '0', tokenIdsOverride: [] }
+          },
+          prioritizedApprovals: [
+            {
+              approvalId: product.approvalId,
+              approvalLevel: 'collection',
+              approverAddress: '',
+              version: '0'
+            }
+          ],
+          onlyCheckPrioritizedCollectionApprovals: true,
+          onlyCheckPrioritizedOutgoingApprovals: false,
+          onlyCheckPrioritizedIncomingApprovals: false,
+          memo: ''
+        }
+      ]
+    }
+  };
+}
+
+// Reuse PRODUCT_MAX_UINT64 to silence the unused-const warning if ever needed downstream.
+void PRODUCT_MAX_UINT64;
