@@ -40,6 +40,11 @@ import { genListIdCommand } from './commands/gen-list-id.js';
 import { swapCommand } from './commands/swap.js';
 import { balancesCommand } from './commands/balances.js';
 
+// Standard-specific end-user surfaces
+import { payRequestsCommand } from './commands/pay-requests.js';
+import { bountiesCommand } from './commands/bounties.js';
+import { subscriptionsCommand } from './commands/subscriptions.js';
+
 // Misc
 import { makeCompletionCommand } from './commands/completion.js';
 
@@ -98,6 +103,10 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   {
     title: 'Swap & DEX',
     commands: [swapCommand, balancesCommand]
+  },
+  {
+    title: 'Standards (end-user actions)',
+    commands: [payRequestsCommand, bountiesCommand, subscriptionsCommand]
   }
 ];
 

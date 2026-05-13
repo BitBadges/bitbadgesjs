@@ -141,3 +141,133 @@ export function buildKeyringCommand(opts: KeyringCommandOptions): KeyringCommand
 
 /** Surface the supported set so tests + help text stay in sync. */
 export const KEYRING_SUPPORTED_TYPE_URLS: readonly string[] = Object.freeze(Object.keys(TYPE_URL_TO_SUBCOMMAND));
+
+// ── Multi-msg support ────────────────────────────────────────────────────
+//
+// Bounty accept/deny and any future multi-msg flow emit `{messages: [...]}`
+// wrappers. The chain binary's `tx tokenization <verb>` subcommands only
+// take ONE msg each, so we emit one command per msg and chain them with
+// `&&`. Each command signs + broadcasts independently.
+//
+// Atomicity caveat (recorded so future readers don't re-litigate): the
+// chained commands are NOT one atomic tx — if msg N+1 fails on-chain, the
+// effect of msgs [1..N] persists. For bounty this is fine: MsgCastVote is
+// idempotent (the vote stays cast even if the subsequent transfer fails),
+// and the user can re-run just the failing tail. Use the `bb deploy`
+// browser/burner paths if you need true atomicity (those build a single
+// multi-msg tx via the signing client).
+
+/**
+ * Positional-arg msg → chain-binary subcommand line builder. The chain
+ * binary's `tx_cast_vote.go` etc. take positional arguments, not a JSON
+ * blob. We emit the same flag layout the JSON-arg path uses, with
+ * positional args inlined.
+ */
+const POSITIONAL_BUILDERS: Record<string, (value: Record<string, unknown>) => string[]> = {
+  '/tokenization.MsgCastVote': (v) => {
+    // Use: cast-vote [collection-id] [approval-level] [approver-address] [approval-id] [proposal-id] [yes-weight]
+    const collectionId = String(v.collection_id ?? v.collectionId ?? '');
+    const approvalLevel = String(v.approval_level ?? v.approvalLevel ?? '');
+    const approverAddress = String(v.approver_address ?? v.approverAddress ?? '');
+    const approvalId = String(v.approval_id ?? v.approvalId ?? '');
+    const proposalId = String(v.proposal_id ?? v.proposalId ?? '');
+    const yesWeight = String(v.yes_weight ?? v.yesWeight ?? '');
+    return [
+      'cast-vote',
+      shellQuote(collectionId),
+      shellQuote(approvalLevel),
+      shellQuote(approverAddress),
+      shellQuote(approvalId),
+      shellQuote(proposalId),
+      shellQuote(yesWeight)
+    ];
+  }
+};
+
+/** Conservative shell-quote for positional args. Wraps in single quotes if any non-safe char is present. */
+function shellQuote(s: string): string {
+  if (s === '') return "''";
+  if (/^[A-Za-z0-9_\-./:@]+$/.test(s)) return s;
+  // Escape single quotes via the standard bash idiom.
+  return `'${s.replace(/'/g, `'\\''`)}'`;
+}
+
+export interface KeyringMultiCommandResult {
+  /** Absolute paths of any JSON files written (for JSON-arg msgs in the chain). */
+  msgFilePaths: string[];
+  /** Multi-line command string. Each msg becomes a `bitbadgeschaind tx ...` block; blocks are chained with `&&`. */
+  commandLine: string;
+}
+
+export interface KeyringMultiCommandOptions {
+  messages: Array<{ typeUrl: string; value: unknown }>;
+  from: string;
+  network: 'mainnet' | 'testnet' | 'local';
+  binary: string;
+  keyringBackend: string;
+  gas: string;
+  gasAdjustment: string;
+  manager?: string;
+  nodeUrl?: string;
+  chainId?: string;
+}
+
+/**
+ * Build the printable command pipeline for a multi-msg tx. Each msg
+ * becomes its own `bitbadgeschaind tx tokenization <verb>` invocation;
+ * the resulting commands are chained with ` && \` so a failure in one
+ * step stops the rest.
+ */
+export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): KeyringMultiCommandResult {
+  const network = CHAIN_BINARY_NETWORK[opts.network];
+  const chainId = opts.chainId ?? network.chainId;
+  const nodeUrl = opts.nodeUrl ?? network.rpc;
+  const msgFilePaths: string[] = [];
+
+  const blocks: string[] = [];
+  for (let i = 0; i < opts.messages.length; i++) {
+    const m = opts.messages[i];
+    const jsonArgSubcommand = TYPE_URL_TO_SUBCOMMAND[m.typeUrl];
+    const positionalBuilder = POSITIONAL_BUILDERS[m.typeUrl];
+
+    let head: string;
+    if (jsonArgSubcommand) {
+      // Backfill manager on create-collection (mirrors single-msg path).
+      const value: Record<string, unknown> =
+        m.value && typeof m.value === 'object' ? { ...(m.value as Record<string, unknown>) } : {};
+      if (opts.manager && !value.manager && m.typeUrl === '/tokenization.MsgCreateCollection') {
+        value.manager = opts.manager;
+      }
+      const msgFilePath = path.join(os.tmpdir(), `bb-msg-${crypto.randomBytes(4).toString('hex')}.json`);
+      fs.writeFileSync(msgFilePath, JSON.stringify(value, null, 2) + '\n', { mode: 0o600 });
+      msgFilePaths.push(msgFilePath);
+      head = `${opts.binary} tx tokenization ${jsonArgSubcommand} ${msgFilePath}`;
+    } else if (positionalBuilder) {
+      const parts = positionalBuilder((m.value ?? {}) as Record<string, unknown>);
+      head = `${opts.binary} tx tokenization ${parts.join(' ')}`;
+    } else {
+      const supported = [...Object.keys(TYPE_URL_TO_SUBCOMMAND), ...Object.keys(POSITIONAL_BUILDERS)].sort();
+      throw new Error(
+        `--with-keyring: message[${i}] typeUrl "${m.typeUrl}" has no chain-binary subcommand mapping.\n` +
+          `Supported:\n  - ${supported.join('\n  - ')}`
+      );
+    }
+
+    const isLast = i === opts.messages.length - 1;
+    const block = [
+      `${head} \\`,
+      `    --from ${opts.from} \\`,
+      `    --chain-id ${chainId} \\`,
+      `    --node ${nodeUrl} \\`,
+      `    --keyring-backend ${opts.keyringBackend} \\`,
+      `    --gas ${opts.gas} --gas-adjustment ${opts.gasAdjustment} \\`,
+      isLast ? '    --yes' : '    --yes && \\'
+    ].join('\n');
+    blocks.push(block);
+  }
+
+  return { msgFilePaths, commandLine: blocks.join('\n') };
+}
+
+/** Positional-arg msg types the keyring path can handle in multi-msg mode. */
+export const KEYRING_POSITIONAL_TYPE_URLS: readonly string[] = Object.freeze(Object.keys(POSITIONAL_BUILDERS));

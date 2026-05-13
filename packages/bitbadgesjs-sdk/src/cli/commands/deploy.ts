@@ -30,7 +30,7 @@ import * as fs from 'fs';
 import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import { runBurnerCreate, pickBurner, type BurnerNetwork } from '../utils/burner.js';
-import { buildKeyringCommand } from '../utils/keyring-command.js';
+import { buildKeyringCommand, buildKeyringMultiCommand } from '../utils/keyring-command.js';
 
 function readMsgInput(opts: { msgFile?: string; msgStdin?: boolean; input?: string }): any {
   let raw: string;
@@ -238,35 +238,65 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
     );
   }
 
-  // 2. Load msg JSON
-  let msg: any;
+  // 2. Load msg JSON. Accept two shapes:
+  //   - Single Msg:   { typeUrl, value }
+  //   - Tx wrapper:   { messages: [{typeUrl, value}, ...] }
+  // Internally we normalize to an array. Single-msg actions (most of the
+  // CLI) emit shape 1; multi-msg actions (bounty accept/deny) emit shape 2.
+  let rawInput: any;
   try {
-    msg = readMsgInput({ msgFile: opts.msgFile, msgStdin: opts.msgStdin, input });
+    rawInput = readMsgInput({ msgFile: opts.msgFile, msgStdin: opts.msgStdin, input });
   } catch (err: any) {
     process.stderr.write(`${err?.message || err}\n`);
     process.exit(2);
   }
 
-  // Shape sanity check — match the level of detail `check` provides on
-  // shape mismatches. `deploy` expects a single Msg `{typeUrl, value}`,
-  // not a tx wrapper. Fail loudly before generating a wallet or hitting
-  // the faucet.
-  if (!msg || typeof msg !== 'object' || typeof msg.typeUrl !== 'string' || !msg.value) {
+  let messages: any[];
+  if (rawInput && typeof rawInput === 'object' && Array.isArray(rawInput.messages)) {
+    messages = rawInput.messages;
+    if (messages.length === 0) {
+      process.stderr.write('Deploy input has an empty `messages` array — nothing to broadcast.\n');
+      process.exit(2);
+    }
+  } else if (
+    rawInput &&
+    typeof rawInput === 'object' &&
+    typeof rawInput.typeUrl === 'string' &&
+    rawInput.value
+  ) {
+    messages = [rawInput];
+  } else {
     const got =
-      msg == null
-        ? String(msg)
-        : Array.isArray(msg)
-          ? `array (length ${msg.length})`
-          : typeof msg === 'object'
-            ? `object with keys [${Object.keys(msg).join(', ')}]`
-            : typeof msg;
+      rawInput == null
+        ? String(rawInput)
+        : Array.isArray(rawInput)
+          ? `array (length ${rawInput.length})`
+          : typeof rawInput === 'object'
+            ? `object with keys [${Object.keys(rawInput).join(', ')}]`
+            : typeof rawInput;
     process.stderr.write(
-      `Deploy input has an unexpected shape — expected a single Msg \`{typeUrl, value}\`.\n` +
-        `Got: ${got}.\n` +
-        `If you have a tx wrapper \`{messages: [...]}\`, extract the first message before piping into deploy.\n`
+      `Deploy input has an unexpected shape — expected a single Msg \`{typeUrl, value}\` or a tx wrapper \`{messages: [{typeUrl, value}, ...]}\`.\n` +
+        `Got: ${got}.\n`
     );
     process.exit(2);
   }
+
+  // Validate each msg in the array has the {typeUrl, value} shape.
+  for (let i = 0; i < messages.length; i++) {
+    const m = messages[i];
+    if (!m || typeof m !== 'object' || typeof m.typeUrl !== 'string' || !m.value) {
+      process.stderr.write(
+        `Deploy input: message[${i}] is missing \`typeUrl\` or \`value\`. Got: ${JSON.stringify(m)?.slice(0, 100) ?? String(m)}\n`
+      );
+      process.exit(2);
+    }
+  }
+
+  // Most legacy paths (burner, dry-run, browser) take a single msg.
+  // Keep `msg` as the first one for those branches; the keyring branch
+  // handles the full array.
+  const msg: any = messages[0];
+  const isMultiMsg = messages.length > 1;
 
   // 2.5 --dry-run short-circuit: simulate the tx and exit before any
   // wallet is generated, funding is requested, or broadcast happens.
@@ -313,8 +343,12 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
   // let the user's connected wallet sign and broadcast, capture the tx
   // hash on the loopback listener. Frontend-side TxModal handles
   // account number / sequence / gas / fees auto-fetch from the indexer.
+  // Multi-msg txs are passed through as-is — /sign supports the array.
   if (useBrowser) {
-    if (msg && msg.value && opts.manager && !msg.value.manager) {
+    // Backfill manager only on a single-msg create-collection (legacy
+    // single-msg shape). Multi-msg txs are application-built and
+    // shouldn't be mutated post-hoc.
+    if (!isMultiMsg && msg && msg.value && opts.manager && !msg.value.manager) {
       msg.value.manager = opts.manager;
     }
     const { bridgeSign, resolveFrontendUrl } = await import('../auth/browser-bridge.js');
@@ -327,7 +361,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
         mode: 'tx',
         payload: {
           chain: 'cosmos',
-          txsInfo: [{ type: msg.typeUrl, msg: msg.value }],
+          txsInfo: messages.map((m: any) => ({ type: m.typeUrl, msg: m.value })),
           expectedAddress,
           signOnly: !!opts.signOnly,
         },
@@ -375,19 +409,47 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
     // for the chain binary's estimation flow.
     const gasSource = deployCommand.getOptionValueSource('gas');
     const gas = gasSource === 'default' || gasSource === undefined ? 'auto' : String(opts.gas);
+    const sharedKeyringOpts = {
+      from: String(opts.from),
+      network: networkName,
+      binary: String(opts.binary ?? 'bitbadgeschaind'),
+      keyringBackend: String(opts.keyringBackend ?? 'os'),
+      gas,
+      gasAdjustment: String(opts.gasAdjustment ?? '1.3'),
+      manager: opts.manager ? String(opts.manager) : undefined
+    };
+
+    if (isMultiMsg) {
+      let result;
+      try {
+        result = buildKeyringMultiCommand({ ...sharedKeyringOpts, messages });
+      } catch (err: any) {
+        process.stderr.write(`${err?.message || err}\n`);
+        process.exit(2);
+      }
+
+      if (!process.env.BB_QUIET) {
+        const filesNote =
+          result.msgFilePaths.length > 0
+            ? `Wrote ${result.msgFilePaths.length} msg JSON file(s):\n  ${result.msgFilePaths.join('\n  ')}\n`
+            : '';
+        process.stderr.write(`\n${filesNote}Multi-msg tx — chain-binary's tx subcommands only take one msg, so the\nbelow runs them in sequence. NOT atomic: if a later step fails, earlier\nsteps remain on-chain. For atomic multi-msg, use --burner or --browser.\n\nRun:\n\n`);
+      }
+      process.stdout.write(result.commandLine + '\n');
+      if (!process.env.BB_QUIET) {
+        process.stderr.write(
+          '\n  Append extra flags inside any step (e.g. --fees 5000ubadge --memo "...").\n' +
+            '  Use --keyring-backend test for non-interactive CI signing.\n'
+        );
+      }
+      process.exit(0);
+    }
 
     let result;
     try {
       result = buildKeyringCommand({
         msg,
-        from: String(opts.from),
-        network: networkName,
-        binary: String(opts.binary ?? 'bitbadgeschaind'),
-        keyringBackend: String(opts.keyringBackend ?? 'os'),
-        gas,
-        gasAdjustment: String(opts.gasAdjustment ?? '1.3'),
-        manager: opts.manager ? String(opts.manager) : undefined,
-        nodeUrl: opts.url ? undefined : undefined
+        ...sharedKeyringOpts
       });
     } catch (err: any) {
       process.stderr.write(`${err?.message || err}\n`);
@@ -405,6 +467,18 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       );
     }
     process.exit(0);
+  }
+
+  // Burner path is CREATE-ONLY (the wallet is throwaway and dust-funded
+  // exactly for one create-collection tx). Multi-msg txs aren't part of
+  // that flow and would silently use the wrong gas / wrong manager
+  // backfill if we let them through.
+  if (useBurner && isMultiMsg) {
+    process.stderr.write(
+      'Error: --burner does not support multi-msg txs (it is CREATE-ONLY).\n' +
+        'For multi-msg actions like bounty accept/deny, use --browser (atomic) or --with-keyring (sequential).\n'
+    );
+    process.exit(2);
   }
 
   // 3. Wallet picker (interactive on TTY, bypassed otherwise or via flags)
