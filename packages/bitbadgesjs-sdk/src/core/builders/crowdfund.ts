@@ -67,7 +67,9 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       version: '0',
       approvalCriteria: {
         requireToEqualsInitiatedBy: true,
-        allowAmountScaling: true,
+        // `allowAmountScaling` lives inside predeterminedBalances.incrementedBalances
+        // (set by `scalingBalances`). Was duplicated here too — chain proto
+        // rejected with "unknown field allowAmountScaling in ApprovalCriteria".
         predeterminedBalances: scalingBalances('1'),
         coinTransfers: [
           {
@@ -100,8 +102,23 @@ export function buildCrowdfund(params: CrowdfundParams): any {
       ownershipTimes: FOREVER,
       version: '0',
       approvalCriteria: {
-        allowAmountScaling: true,
-        predeterminedBalances: scalingBalances('1'),
+        predeterminedBalances: (() => {
+          // scalingBalances hardcodes startBalance tokenIds to [{1,1}];
+          // override for token-2 (the progress tracker). Without this,
+          // chain rejects: "amount scaling: transfer is not an evenly
+          // divisible multiple of the base balance" because the
+          // approval would generate tokenIds=[{1,1}] when we need token-2.
+          const base = scalingBalances('1');
+          return {
+            ...base,
+            incrementedBalances: {
+              ...base.incrementedBalances,
+              startBalances: [
+                { amount: '1', tokenIds: [{ start: '2', end: '2' }], ownershipTimes: FOREVER }
+              ]
+            }
+          };
+        })(),
         // Mint approval: outgoing override required by standard.
         // Incoming: crowdfunder auto-approves via defaultBalances.
         overridesFromOutgoingApprovals: true,
@@ -210,7 +227,6 @@ export function buildCrowdfund(params: CrowdfundParams): any {
           amountTrackerId: 'crowdfund-refund',
           resetTimeIntervals: { startTime: '0', intervalLength: '0' }
         },
-        allowAmountScaling: true,
         predeterminedBalances: scalingBalances('1'),
         // No overrides: holder self-initiates their own refund burn and
         // auto-approves via defaultBalances. Previously both overrides

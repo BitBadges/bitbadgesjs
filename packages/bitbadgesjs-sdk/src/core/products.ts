@@ -25,7 +25,8 @@ export const validateProductCatalogCollection = (collection: Readonly<iCollectio
 
   // 2. validTokenIds starts at 1n
   const tokenIds = UintRangeArray.From(collection.validTokenIds).sortAndMerge().convert(BigInt);
-  if (tokenIds.length === 0 || tokenIds[0].start !== 1n) {
+  // BigInt-coerce — indexer's HTTP responses ship uint64 as strings.
+  if (tokenIds.length === 0 || BigInt(tokenIds[0].start) !== 1n) {
     errors.push('validTokenIds must start at 1');
   }
 
@@ -101,7 +102,7 @@ export const validateProductCatalogCollection = (collection: Readonly<iCollectio
     if (!ib) {
       errors.push(`${prefix}: must have predeterminedBalances.incrementedBalances`);
     } else {
-      if (ib.startBalances.length !== 1 || ib.startBalances[0].amount !== 1n) {
+      if (ib.startBalances.length !== 1 || BigInt(ib.startBalances[0].amount) !== 1n) {
         errors.push(`${prefix}: predeterminedBalances startBalances amount must be 1`);
       }
     }

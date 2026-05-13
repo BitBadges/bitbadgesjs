@@ -1,0 +1,162 @@
+/**
+ * Chain + indexer helpers — wait for tx to commit, extract collectionId
+ * from tx events, poll the indexer until a collection is queryable.
+ */
+
+import { execFileSync } from 'node:child_process';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import * as crypto from 'node:crypto';
+import { loadIntegrationEnv } from './preflight.js';
+
+export interface DeployedTx {
+  txHash: string;
+  /** Chain code (0 = success). */
+  code: number;
+  /** First collectionId emitted in events, if any. */
+  collectionId?: string;
+  /** Block height the tx landed in. */
+  height?: number;
+  rawLog?: string;
+}
+
+/**
+ * Pipe a msg/tx JSON through `bb deploy --with-keyring --from <persona>
+ * --local` and execute the printed command synchronously. Returns the
+ * tx hash + result extracted from the RPC.
+ */
+const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
+
+export async function deployMsgViaKeyring(
+  msgFilePath: string,
+  signerName: string,
+  network: 'mainnet' | 'testnet' | 'local' = 'local',
+  extraDeployFlags: string[] = []
+): Promise<DeployedTx> {
+  const env = loadIntegrationEnv();
+  const cliEntry = path.resolve(__dirname, '../../../../dist/cjs/cli/index.js');
+  const networkFlag = `--${network}`;
+
+  // 1. Print the chain-binary command.
+  const scriptPath = path.join(os.tmpdir(), `bb-deploy-${crypto.randomBytes(4).toString('hex')}.sh`);
+  execFileSync(
+    'node',
+    [cliEntry, 'deploy', '--with-keyring', '--from', signerName, '--keyring-backend', env.keyringBackend, '--msg-file', msgFilePath, networkFlag, ...extraDeployFlags],
+    { stdio: ['ignore', fs.openSync(scriptPath, 'w'), 'pipe'], encoding: 'utf-8', env: { ...process.env, BB_QUIET: '1' }, timeout: 15000 }
+  );
+
+  // 2. Execute the printed command.
+  const out = execFileSync('bash', [scriptPath], { encoding: 'utf-8', timeout: 30000 }).toString();
+  const m = out.match(/txhash: ([A-F0-9]+)/);
+  if (!m) {
+    throw new Error(`Could not extract txhash from chain-binary output:\n${out}`);
+  }
+  const txHash = m[1];
+
+  // 3. Poll the RPC for the tx result.
+  return await waitForTx(txHash);
+}
+
+export async function waitForTx(txHash: string, timeoutMs = 30000): Promise<DeployedTx> {
+  const env = loadIntegrationEnv();
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const url = `${env.rpcUrl}/tx?hash=0x${txHash}`;
+    try {
+      const res = execFileSync('curl', ['-sS', url], { encoding: 'utf-8', timeout: 5000 }).toString();
+      const parsed = JSON.parse(res);
+      if (!parsed.error) {
+        const tr = parsed.result?.tx_result ?? {};
+        const events: Array<{ type: string; attributes: Array<{ key: string; value: string }> }> = tr.events ?? [];
+        let collectionId: string | undefined;
+        for (const e of events) {
+          for (const a of e.attributes ?? []) {
+            if (a.key === 'collectionId' && !collectionId) collectionId = a.value;
+          }
+        }
+        return {
+          txHash,
+          code: Number(tr.code ?? 0),
+          collectionId,
+          height: Number(parsed.result?.height ?? 0),
+          rawLog: tr.log
+        };
+      }
+    } catch {
+      // ignore; retry
+    }
+    await sleep(300);
+  }
+  throw new Error(`Timed out waiting for tx ${txHash} after ${timeoutMs}ms`);
+}
+
+/**
+ * Fund a persona from another (rich) persona via `bitbadgeschaind tx bank send`.
+ * Useful in setUp before a test that requires the target persona to have
+ * a specific denom in their wallet. Returns the tx result.
+ *
+ * On a fresh local chain, only certain keys (alice) have a genesis allocation
+ * across multiple denoms; charlie/bob typically start with dust. Tests that
+ * need a payer/buyer/contributor to actually pay should call this first.
+ */
+export async function fundPersona(
+  fromName: string,
+  toAddress: string,
+  amount: string,
+  denom: string,
+  options: { network?: 'mainnet' | 'testnet' | 'local'; fees?: string } = {}
+): Promise<DeployedTx> {
+  const env = loadIntegrationEnv();
+  const network = options.network ?? 'local';
+  const chainId = network === 'testnet' ? 'bitbadges-2' : 'bitbadges-1';
+  const nodeUrl = network === 'local' ? 'http://localhost:26657' : env.rpcUrl;
+  const out = execFileSync(
+    env.chainBin,
+    [
+      'tx', 'bank', 'send', fromName, toAddress, `${amount}${denom}`,
+      '--from', fromName,
+      '--chain-id', chainId,
+      '--node', nodeUrl,
+      '--keyring-backend', env.keyringBackend,
+      '--gas', 'auto', '--gas-adjustment', '1.3',
+      '--fees', options.fees ?? '0ubadge',
+      '--yes',
+      '--output', 'json'
+    ],
+    { encoding: 'utf-8', timeout: 30000 }
+  ).toString();
+  const m = out.match(/"txhash":\s*"([A-F0-9]+)"/);
+  if (!m) throw new Error(`fundPersona: no txhash in output:\n${out}`);
+  return await waitForTx(m[1]);
+}
+
+/** Block until the indexer has indexed a collection (returns 200 on GET). */
+export async function waitForIndexerCollection(collectionId: string, timeoutMs = 30000): Promise<void> {
+  const env = loadIntegrationEnv();
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const res = execFileSync(
+        'curl',
+        ['-sS', '-o', '/dev/null', '-w', '%{http_code}', `${env.indexerUrl}/api/v0/collection/${collectionId}`],
+        { encoding: 'utf-8', timeout: 5000 }
+      ).toString().trim();
+      if (res === '200') return;
+    } catch {
+      // retry
+    }
+    await sleep(500);
+  }
+  throw new Error(`Indexer did not surface collection ${collectionId} after ${timeoutMs}ms`);
+}
+
+/**
+ * Write a msg/tx wrapper JSON to a tmp file and return the path.
+ * Convenience wrapper used in many specs.
+ */
+export function writeMsgToTmp(data: any, suffix = 'msg'): string {
+  const p = path.join(os.tmpdir(), `bb-integ-${suffix}-${crypto.randomBytes(4).toString('hex')}.json`);
+  fs.writeFileSync(p, typeof data === 'string' ? data : JSON.stringify(data), 'utf-8');
+  return p;
+}

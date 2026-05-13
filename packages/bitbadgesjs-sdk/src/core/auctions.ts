@@ -17,8 +17,9 @@ export const validateAuctionCollection = (collection: Readonly<iCollectionDoc<bi
   if (!collection.standards?.includes('Auction')) errors.push('Missing "Auction" standard');
 
   // 2. validTokenIds = exactly [{1,1}]
+  // BigInt-coerce — indexer's HTTP responses ship uint64 as strings.
   const vt = collection.validTokenIds;
-  if (!vt || vt.length !== 1 || vt[0].start !== 1n || vt[0].end !== 1n) {
+  if (!vt || vt.length !== 1 || BigInt(vt[0].start) !== 1n || BigInt(vt[0].end) !== 1n) {
     errors.push('validTokenIds must be exactly [{start: 1, end: 1}]');
   }
 
@@ -42,7 +43,7 @@ export const validateAuctionCollection = (collection: Readonly<iCollectionDoc<bi
   const ac = mintApproval.approvalCriteria;
 
   // 5. maxNumTransfers = 1
-  if (!ac?.maxNumTransfers || ac.maxNumTransfers.overallMaxNumTransfers !== 1n) {
+  if (!ac?.maxNumTransfers || BigInt(ac.maxNumTransfers.overallMaxNumTransfers) !== 1n) {
     errors.push('Mint-to-winner overallMaxNumTransfers must be 1');
   }
 

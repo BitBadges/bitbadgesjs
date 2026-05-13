@@ -16,6 +16,8 @@ import {
   buildAuctionBidApproval,
   buildAcceptAuctionBidMsg
 } from '../../core/auctions.js';
+import { BitBadgesCollection } from '../../api-indexer/BitBadgesCollection.js';
+import { BigIntify } from '../../common/string-numbers.js';
 import { UintRangeArray } from '../../core/uintRanges.js';
 
 interface NetworkFlags { testnet?: boolean; local?: boolean; url?: string; apiKey?: string; }
@@ -54,7 +56,9 @@ async function callApi(method: 'GET' | 'POST', path: string, opts: NetworkFlags,
 }
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
   const res = await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts);
-  return res?.collection ?? res;
+  const raw = res?.collection ?? res;
+  if (!raw) return raw;
+  try { return new BitBadgesCollection(raw).convert(BigIntify); } catch { return raw; }
 }
 function validateOrExit(collection: any, ctx: string): void {
   if (!collection) {
