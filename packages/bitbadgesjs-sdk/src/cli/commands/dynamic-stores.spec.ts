@@ -10,9 +10,9 @@ describe('dynamicStoresCommand shape', () => {
   it('exposes the documented subcommands', () => {
     const names = dynamicStoresCommand.commands.map((c) => c.name()).sort();
     expect(names).toEqual([
-      'activity',
       'add',
       'batch',
+      'by-creator',
       'create',
       'delete',
       'get-value',
@@ -65,13 +65,18 @@ describe('dynamicStoresCommand shape', () => {
     expect((c as any)._args.map((a: any) => a.name())).toEqual(['store-id', 'address']);
   });
 
-  it('search takes <query>', () => {
+  it('search takes <name>', () => {
     const c = dynamicStoresCommand.commands.find((cmd) => cmd.name() === 'search')!;
-    expect((c as any)._args.map((a: any) => a.name())).toEqual(['query']);
+    expect((c as any)._args.map((a: any) => a.name())).toEqual(['name']);
+  });
+
+  it('by-creator takes <address>', () => {
+    const c = dynamicStoresCommand.commands.find((cmd) => cmd.name() === 'by-creator')!;
+    expect((c as any)._args.map((a: any) => a.name())).toEqual(['address']);
   });
 
   it('read commands accept network flags', () => {
-    for (const verb of ['show', 'get-value', 'list-values', 'batch', 'activity', 'search']) {
+    for (const verb of ['show', 'get-value', 'list-values', 'batch', 'by-creator', 'search']) {
       const c = dynamicStoresCommand.commands.find((cmd) => cmd.name() === verb)!;
       const longs = (c.options as any[]).map((o) => o.long);
       expect(longs).toEqual(expect.arrayContaining(['--testnet', '--local', '--url', '--api-key']));

@@ -9,13 +9,18 @@
  *   add           Bulk MsgSetDynamicStoreValue with value=true   (multi-msg tx)
  *   remove        Bulk MsgSetDynamicStoreValue with value=false  (multi-msg tx)
  *
- * Read subcommands hit the indexer:
+ * Read subcommands hit the indexer's on-chain endpoints (NOT the
+ * /dynamicStore/* family — those are off-chain claim-state stores
+ * gated behind Blockin auth, different concept):
  *
- *   show          /dynamicStore/<id>
- *   get-value     /dynamicStore/<id>/value?address=...
- *   list-values   /dynamicStore/<id>/values
- *   batch         POST /dynamicStores/fetch  (paginated multi-store fetch)
- *   activity      /dynamicStores/activity
+ *   show          GET  /onChainDynamicStore/<id>
+ *   get-value     GET  /onChainDynamicStore/<id>/value/<address>
+ *   list-values   GET  /onChainDynamicStore/<id>/values
+ *   by-creator    GET  /onChainDynamicStores/by-creator/<address>
+ *   search        GET  /onChainDynamicStores/search?name=<q>
+ *
+ * There is no batch fetch or activity feed on-chain. `batch` is
+ * implemented client-side as N parallel `show` calls.
  *
  * The model: each store maps `address → boolean`. `defaultValue` controls
  * the answer for addresses NOT explicitly set. So "add address to allowlist"
@@ -220,7 +225,7 @@ addOutputFlags(
   )
 ).action(async (storeId: string, opts: NetworkFlags & OutputFlags) => {
   try {
-    const res = await callApi('GET', `/dynamicStore/${encodeURIComponent(storeId)}`, opts);
+    const res = await callApi('GET', `/onChainDynamicStore/${encodeURIComponent(storeId)}`, opts);
     emit(res, opts);
   } catch (err: any) {
     fail(1, err?.message ?? String(err));
@@ -242,7 +247,7 @@ addOutputFlags(
     const target = requireBb1Address(address, 'address');
     const res = await callApi(
       'GET',
-      `/dynamicStore/${encodeURIComponent(storeId)}/value?address=${encodeURIComponent(target)}`,
+      `/onChainDynamicStore/${encodeURIComponent(storeId)}/value/${encodeURIComponent(target)}`,
       opts
     );
     emit(res, opts);
@@ -264,46 +269,53 @@ addOutputFlags(
 ).action(async (storeId: string, opts: NetworkFlags & OutputFlags & { bookmark?: string }) => {
   try {
     const qs = opts.bookmark ? `?bookmark=${encodeURIComponent(opts.bookmark)}` : '';
-    const res = await callApi('GET', `/dynamicStore/${encodeURIComponent(storeId)}/values${qs}`, opts);
+    const res = await callApi('GET', `/onChainDynamicStore/${encodeURIComponent(storeId)}/values${qs}`, opts);
     emit(res, opts);
   } catch (err: any) {
     fail(1, err?.message ?? String(err));
   }
 });
 
-// ── batch (multi-store fetch) ────────────────────────────────────────────────
+// ── batch (no on-chain batch endpoint — fan out client-side) ────────────────
 
 addOutputFlags(
   addNetworkFlags(
     dynamicStoresCommand
       .command('batch')
-      .description('Batch-fetch multiple dynamic stores in one request.')
+      .description('Fetch multiple on-chain dynamic stores. Implemented as parallel show calls (no native batch endpoint).')
       .argument('<store-ids...>', 'Store IDs (repeated or comma-separated)')
   )
 ).action(async (rawIds: string[], opts: NetworkFlags & OutputFlags) => {
   try {
     const ids = splitCsv(rawIds);
     if (ids.length === 0) fail(2, 'at least one store ID required');
-    const res = await callApi('POST', '/dynamicStores/fetch', opts, { dynamicStoreIds: ids });
-    emit(res, opts);
+    const stores = await Promise.all(ids.map(async (id) => {
+      try {
+        const res = await callApi('GET', `/onChainDynamicStore/${encodeURIComponent(id)}`, opts);
+        return { storeId: id, ...res };
+      } catch (err: any) {
+        return { storeId: id, error: err?.message ?? String(err) };
+      }
+    }));
+    emit({ stores }, opts);
   } catch (err: any) {
     fail(1, err?.message ?? String(err));
   }
 });
 
-// ── activity ─────────────────────────────────────────────────────────────────
+// ── by-creator ───────────────────────────────────────────────────────────────
 
 addOutputFlags(
   addNetworkFlags(
     dynamicStoresCommand
-      .command('activity')
-      .description('Recent dynamic-store activity feed.')
-      .option('--bookmark <b>', 'Pagination bookmark')
+      .command('by-creator')
+      .description('List on-chain dynamic stores created by a specific address.')
+      .argument('<address>', 'Creator address (bb1.../0x — auto-normalized)')
   )
-).action(async (opts: NetworkFlags & OutputFlags & { bookmark?: string }) => {
+).action(async (address: string, opts: NetworkFlags & OutputFlags) => {
   try {
-    const qs = opts.bookmark ? `?bookmark=${encodeURIComponent(opts.bookmark)}` : '';
-    const res = await callApi('GET', `/dynamicStores/activity${qs}`, opts);
+    const target = requireBb1Address(address, 'address');
+    const res = await callApi('GET', `/onChainDynamicStores/by-creator/${encodeURIComponent(target)}`, opts);
     emit(res, opts);
   } catch (err: any) {
     fail(1, err?.message ?? String(err));
@@ -316,14 +328,13 @@ addOutputFlags(
   addNetworkFlags(
     dynamicStoresCommand
       .command('search')
-      .description('Free-text search for dynamic stores (URI / customData / creator).')
-      .argument('<query>', 'Search text')
-      .option('--bookmark <b>', 'Pagination bookmark')
+      .description('Search on-chain dynamic stores by name (URI metadata). Min 2 chars.')
+      .argument('<name>', 'Search text (matched against store name)')
   )
-).action(async (query: string, opts: NetworkFlags & OutputFlags & { bookmark?: string }) => {
+).action(async (name: string, opts: NetworkFlags & OutputFlags) => {
   try {
-    const qs = `?query=${encodeURIComponent(query)}${opts.bookmark ? `&bookmark=${encodeURIComponent(opts.bookmark)}` : ''}`;
-    const res = await callApi('GET', `/dynamicStores/search${qs}`, opts);
+    const qs = `?name=${encodeURIComponent(name)}`;
+    const res = await callApi('GET', `/onChainDynamicStores/search${qs}`, opts);
     emit(res, opts);
   } catch (err: any) {
     fail(1, err?.message ?? String(err));

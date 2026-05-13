@@ -189,9 +189,19 @@ addOutputFlags(
     const collection = await fetchCollection(collectionId, opts);
     if (!collection) fail(2, `collection ${collectionId} not found`);
     const path = pickWrapperPath(collection, opts.pathKind, Number(opts.pathIndex));
-    const balancesRes = await callApi('GET', `/collection/${encodeURIComponent(collectionId)}/${encodeURIComponent(opts.address)}/balance`, opts);
-    const userBalances = balancesRes?.balance?.balances ?? balancesRes?.balances ?? [];
-    const maxWrappable = getMaxWrappableAmount(path as any, userBalances);
+    // The indexer returns 404 when an address has never received tokens
+    // in this collection — for max-wrappable that's equivalent to "user
+    // has 0 of every token id", so we swallow the 404 and pass an empty
+    // balance array. Any other error propagates.
+    let userBalances: unknown[] = [];
+    try {
+      const balancesRes = await callApi('GET', `/collection/${encodeURIComponent(collectionId)}/${encodeURIComponent(opts.address)}/balance`, opts);
+      userBalances = balancesRes?.balance?.balances ?? balancesRes?.balances ?? [];
+    } catch (err: any) {
+      const msg = String(err?.message ?? err);
+      if (!/not found/i.test(msg) && !/404/.test(msg)) throw err;
+    }
+    const maxWrappable = getMaxWrappableAmount(path as any, userBalances as any);
     emit({
       collectionId,
       address: opts.address,

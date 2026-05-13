@@ -188,6 +188,67 @@ describe('buildKeyringCommand', () => {
   });
 });
 
+describe('dynamic-store positional builders', () => {
+  // The chain-binary's dynamic-store verbs take positional args, not a
+  // JSON blob — these builders are exercised end-to-end by the
+  // dynamic-stores.spec.ts integration suite, but we lock the command-
+  // line shape here so a refactor doesn't silently drop them.
+  const exec = (typeUrl: string, value: any) =>
+    buildKeyringCommand({
+      msg: { typeUrl, value },
+      from: 'alice',
+      network: 'local',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'test',
+      gas: 'auto',
+      gasAdjustment: '1.3',
+      msgFilePath: tmpPath()
+    }).commandLine;
+
+  it('MsgCreateDynamicStore → create-dynamic-store <default-value>', () => {
+    const cmd = exec('/tokenization.MsgCreateDynamicStore', { creator: 'bb1abc', defaultValue: true });
+    expect(cmd).toContain('bitbadgeschaind tx tokenization create-dynamic-store true');
+  });
+
+  it('MsgUpdateDynamicStore → update-dynamic-store <id> <default> <enabled>', () => {
+    const cmd = exec('/tokenization.MsgUpdateDynamicStore', {
+      creator: 'bb1abc', storeId: '42', defaultValue: true, globalEnabled: false
+    });
+    expect(cmd).toContain('update-dynamic-store 42 true false');
+  });
+
+  it('MsgDeleteDynamicStore → delete-dynamic-store <id>', () => {
+    const cmd = exec('/tokenization.MsgDeleteDynamicStore', { creator: 'bb1abc', storeId: '7' });
+    expect(cmd).toContain('delete-dynamic-store 7');
+  });
+
+  it('MsgSetDynamicStoreValue → set-dynamic-store-value <id> <addr> <value>', () => {
+    const cmd = exec('/tokenization.MsgSetDynamicStoreValue', {
+      creator: 'bb1abc', storeId: '7', address: 'bb1charlie', value: true
+    });
+    expect(cmd).toContain('set-dynamic-store-value 7 bb1charlie true');
+  });
+
+  it('MsgUpdateDynamicStore defaults globalEnabled to true when omitted', () => {
+    const cmd = exec('/tokenization.MsgUpdateDynamicStore', {
+      creator: 'bb1abc', storeId: '5'
+    });
+    // default-value defaults to false, globalEnabled defaults to true
+    expect(cmd).toContain('update-dynamic-store 5 false true');
+  });
+
+  it('all four dynamic-store typeUrls are listed in KEYRING_POSITIONAL_TYPE_URLS', () => {
+    expect(KEYRING_POSITIONAL_TYPE_URLS).toEqual(
+      expect.arrayContaining([
+        '/tokenization.MsgCreateDynamicStore',
+        '/tokenization.MsgUpdateDynamicStore',
+        '/tokenization.MsgDeleteDynamicStore',
+        '/tokenization.MsgSetDynamicStoreValue'
+      ])
+    );
+  });
+});
+
 describe('buildKeyringMultiCommand', () => {
   const transferMsg = {
     typeUrl: '/tokenization.MsgTransferTokens',

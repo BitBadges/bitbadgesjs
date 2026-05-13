@@ -345,7 +345,7 @@ addOutputFlags(
     .option('--bookmark <b>', 'Pagination bookmark')
 ).action(async (denomA: string, denomB: string, opts: any) => {
   try {
-    const path = appendQuery('/pools/byAssets', { denomA, denomB, bookmark: opts.bookmark });
+    const path = appendQuery('/pools/byAssets', { asset1: denomA, asset2: denomB, bookmark: opts.bookmark });
     const res = await callApi('GET', path, opts);
     emit(res, opts);
   } catch (err) {

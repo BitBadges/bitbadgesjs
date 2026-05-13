@@ -242,6 +242,45 @@ const POSITIONAL_BUILDERS: Record<string, PositionalBuilder> = {
     const collectionId = String(v.collectionId ?? v.collection_id ?? '');
     const approvalId = String(v.approvalId ?? v.approval_id ?? '');
     return ['delete-incoming-approval', shellQuote(collectionId), shellQuote(approvalId)];
+  },
+  '/tokenization.MsgCreateDynamicStore': (v) => {
+    // Use: create-dynamic-store [default-value]
+    // Chain-binary only takes the boolean positional; uri/customData on
+    // the msg are silently dropped here (the chain-binary doesn't accept
+    // a JSON blob for this verb). Set them via a follow-up
+    // `update-dynamic-store` if needed, or use `bb deploy --browser`
+    // for the full-fidelity path.
+    const defaultValue = Boolean(v.defaultValue ?? v.default_value ?? false);
+    return ['create-dynamic-store', String(defaultValue)];
+  },
+  '/tokenization.MsgUpdateDynamicStore': (v) => {
+    // Use: update-dynamic-store [store-id] [default-value] [global-enabled]
+    const storeId = String(v.storeId ?? v.store_id ?? '');
+    const defaultValue = Boolean(v.defaultValue ?? v.default_value ?? false);
+    const globalEnabled = Boolean(v.globalEnabled ?? v.global_enabled ?? true);
+    return [
+      'update-dynamic-store',
+      shellQuote(storeId),
+      String(defaultValue),
+      String(globalEnabled)
+    ];
+  },
+  '/tokenization.MsgDeleteDynamicStore': (v) => {
+    // Use: delete-dynamic-store [store-id]
+    const storeId = String(v.storeId ?? v.store_id ?? '');
+    return ['delete-dynamic-store', shellQuote(storeId)];
+  },
+  '/tokenization.MsgSetDynamicStoreValue': (v) => {
+    // Use: set-dynamic-store-value [store-id] [address] [value]
+    const storeId = String(v.storeId ?? v.store_id ?? '');
+    const address = String(v.address ?? '');
+    const value = Boolean(v.value ?? false);
+    return [
+      'set-dynamic-store-value',
+      shellQuote(storeId),
+      shellQuote(address),
+      String(value)
+    ];
   }
 };
 
