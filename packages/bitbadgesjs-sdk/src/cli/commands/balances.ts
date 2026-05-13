@@ -18,85 +18,18 @@
  */
 
 import { Command } from 'commander';
-import * as fs from 'node:fs';
-import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
+import {
+  addIndexerNetworkOptions as addNetworkFlags,
+  addIndexerOutputOptions as addOutputFlags,
+  callIndexer as callApi,
+  emitIndexerResult as emit,
+  emitIndexerError as emitError,
+  resolveIndexerNetwork as resolveNetwork,
+  type IndexerNetworkFlags as NetworkFlags,
+  type IndexerOutputFlags as OutputFlags,
+} from '../utils/indexer-options.js';
 import { requireBb1Address } from '../utils/address.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
-
-// ── Shared flag / output helpers (mirrors swap.ts) ─────────────────────────
-
-interface NetworkFlags {
-  testnet?: boolean;
-  local?: boolean;
-  url?: string;
-  apiKey?: string;
-}
-
-interface OutputFlags {
-  outputFile?: string;
-  condensed?: boolean;
-}
-
-function resolveNetwork(opts: NetworkFlags): NetworkMode {
-  if (opts.testnet) return 'testnet';
-  if (opts.local) return 'local';
-  return 'mainnet';
-}
-
-function addNetworkFlags(cmd: Command): Command {
-  return cmd
-    .option('--testnet', 'Use BitBadges testnet (API + LCD)', false)
-    .option('--local', 'Use local API (localhost:3001) and local LCD (localhost:1317)', false)
-    .option('--url <url>', 'Custom API base URL (overrides --testnet/--local/config)')
-    .option('--api-key <key>', 'BitBadges API key (overrides BITBADGES_API_KEY env)');
-}
-
-function addOutputFlags(cmd: Command): Command {
-  return cmd
-    .option('--output-file <path>', 'Write JSON response to file instead of stdout')
-    .option('--condensed', 'Emit single-line JSON instead of pretty-printed', false);
-}
-
-function emit(result: unknown, opts: OutputFlags): void {
-  const formatted = opts.condensed ? JSON.stringify(result) : JSON.stringify(result, null, 2);
-  if (opts.outputFile) {
-    fs.writeFileSync(opts.outputFile, formatted + '\n', 'utf-8');
-    process.stderr.write(`Written to ${opts.outputFile}\n`);
-  } else {
-    process.stdout.write(formatted + '\n');
-  }
-}
-
-interface ApiErrorShape {
-  message?: string;
-  response?: unknown;
-  hint?: string;
-}
-
-function emitError(err: unknown): never {
-  const e = err as ApiErrorShape;
-  if (e?.response !== undefined) {
-    process.stderr.write(JSON.stringify(e.response, null, 2) + '\n');
-  } else {
-    process.stderr.write(`Error: ${e?.message ?? String(err)}\n`);
-  }
-  if (e?.hint) {
-    process.stderr.write(`Hint: ${e.hint}\n`);
-  }
-  process.exit(1);
-}
-
-async function callApi(
-  method: 'GET' | 'POST',
-  path: string,
-  opts: NetworkFlags,
-  body?: unknown
-): Promise<unknown> {
-  const network = resolveNetwork(opts);
-  const apiKey = resolveApiKey(opts.apiKey, network);
-  const baseUrl = resolveBaseUrl({ testnet: opts.testnet, local: opts.local, baseUrl: opts.url });
-  return apiRequest({ method, path, body, apiKey, baseUrl });
-}
 
 function appendQuery(path: string, params: Record<string, string | number | boolean | undefined>): string {
   const search = new URLSearchParams();

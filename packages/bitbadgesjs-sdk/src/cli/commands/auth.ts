@@ -12,6 +12,10 @@
 import * as fs from 'fs';
 import { Command } from 'commander';
 import { resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
+import {
+  addIndexerNetworkOptions,
+  resolveIndexerNetwork,
+} from '../utils/indexer-options.js';
 import { bridgeSign, resolveFrontendUrl } from '../auth/browser-bridge.js';
 import {
   AuthSession,
@@ -41,9 +45,7 @@ interface NetworkOptions {
 }
 
 function resolveNetwork(opts: NetworkOptions): Network {
-  if (opts.testnet) return 'testnet';
-  if (opts.local) return 'local';
-  return 'mainnet';
+  return resolveIndexerNetwork(opts);
 }
 
 function detectChain(address: string): 'Cosmos' | 'ETH' {
@@ -162,11 +164,7 @@ function persistSession(args: {
 }
 
 function addNetworkOptions<T extends Command>(cmd: T): T {
-  return cmd
-    .option('--testnet', 'Use testnet API', false)
-    .option('--local', 'Use local API (localhost:3001)', false)
-    .option('--url <url>', 'Custom API base URL (overrides --testnet/--local/config)')
-    .option('--api-key <key>', 'BitBadges API key (overrides BITBADGES_API_KEY env)') as T;
+  return addIndexerNetworkOptions(cmd) as T;
 }
 
 export const authCommand = new Command('auth').description(
