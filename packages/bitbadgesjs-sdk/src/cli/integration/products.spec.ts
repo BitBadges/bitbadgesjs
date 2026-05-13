@@ -154,6 +154,25 @@ describe('products integration', () => {
     expect(out.stderr + out.stdout).toMatch(/no product with token ID 999/i);
   }, 30000);
 
+  it('purchase --token-id <non-integer> exits with an actionable error (not raw BigInt SyntaxError)', async () => {
+    if (!ready || !collectionId) return;
+    const shopper = charlie();
+    const out = runCli(
+      [
+        'products',
+        'purchase',
+        collectionId,
+        '--creator', shopper.address,
+        '--token-id', 'not-a-number',
+        '--local'
+      ],
+      { throwOnError: false, parseJson: false }
+    );
+    expect(out.exitCode).not.toBe(0);
+    expect(out.stderr + out.stdout).toMatch(/--token-id.*integer/i);
+    expect(out.stderr + out.stdout).not.toMatch(/Cannot convert .* to a BigInt/);
+  }, 30000);
+
   it('conformance throw — show on a non-Product collection exits 2', async () => {
     if (!ready) return;
     // Collection `1` on a fresh local chain is either missing or not a
