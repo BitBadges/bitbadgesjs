@@ -81,7 +81,15 @@ async function emit(
   // end of emit(), right before we write the JSON out.
   const isCollectionTx = isCollectionMsg(data);
   if ((isCollectionTx || isUserApprovalTx || isTransferTx) && data.value) {
-    if (opts.creator) data.value.creator = opts.creator;
+    // Approval-style builders (intent / listing / bid / recurring-payment /
+    // pm-buy-intent / pm-sell-intent) require --address (the user-of-record
+    // who owns the approval). The chain also requires a non-empty `creator`
+    // on the wrapping MsgUpdateUserApprovals — without it the deploy step
+    // emits `creator: ""` and broadcast fails with "creator is required".
+    // Default --creator from --address when --creator is omitted, so the
+    // happy path is one fewer flag to pass.
+    const fallbackCreator = opts.creator || (isUserApprovalTx ? (opts as any).address : undefined);
+    if (fallbackCreator) data.value.creator = fallbackCreator;
   }
   if (isCollectionTx && data.value) {
     if (opts.manager) data.value.manager = opts.manager;
