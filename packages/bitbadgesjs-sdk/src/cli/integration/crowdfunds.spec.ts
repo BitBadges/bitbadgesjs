@@ -1,5 +1,5 @@
 /**
- * Integration: `bb crowdfund` end-to-end.
+ * Integration: `bb crowdfunds` end-to-end. (Legacy `bb crowdfund` alias also covered.)
  *
  * Personas:
  *   - alice → crowdfunder (creates the campaign, has genesis USDC)
@@ -8,9 +8,9 @@
  * Flow exercised:
  *   1. alice builds + deploys a Crowdfund collection (goal 1000 USDC)
  *   2. indexer indexes it
- *   3. `bb crowdfund show` returns goal=1e9 (1000 × 1e6 base units), status='active'
- *   4. `bb crowdfund status` mirrors the same view
- *   5. charlie pipes `crowdfund contribute` → `deploy --with-keyring` → chain code 0
+ *   3. `bb crowdfunds show` returns goal=1e9 (1000 × 1e6 base units), status='active'
+ *   4. `bb crowdfunds status` mirrors the same view
+ *   5. charlie pipes `crowdfunds contribute` → `deploy --with-keyring` → chain code 0
  *      (single MsgTransferTokens with 2 transfers inside: mint-1 to charlie + mint-2 to alice)
  *   6. raised flips upward (or accept indexer lag with a stderr log)
  *   7. Negative: charlie (not the crowdfunder) running `withdraw` surfaces the
@@ -60,7 +60,7 @@ async function fundWithRetry(
   }
 }
 
-describe('crowdfund integration', () => {
+describe('crowdfunds integration', () => {
   let ready = false;
   let collectionId: string | undefined;
 
@@ -75,7 +75,7 @@ describe('crowdfund integration', () => {
 
     runCli(
       [
-        'crowdfund',
+        'crowdfunds',
         'build',
         '--goal', String(GOAL_DISPLAY),
         '--denom', 'USDC',
@@ -100,7 +100,7 @@ describe('crowdfund integration', () => {
   it('show returns goal=1e9, raised=0, status=active', async () => {
     if (!ready || !collectionId) return;
     const crowdfunder = alice();
-    const show = runCli(['crowdfund', 'show', collectionId, '--local']);
+    const show = runCli(['crowdfunds', 'show', collectionId, '--local']);
     expect(show.json.collectionId).toBe(collectionId);
     expect(show.json.crowdfunderAddress).toBe(crowdfunder.address);
     expect(show.json.depositDenom).toBe(USDC_DENOM);
@@ -111,7 +111,7 @@ describe('crowdfund integration', () => {
 
   it('status mirrors show (active, raised=0, goal=1e9)', async () => {
     if (!ready || !collectionId) return;
-    const status = runCli(['crowdfund', 'status', collectionId, '--local']);
+    const status = runCli(['crowdfunds', 'status', collectionId, '--local']);
     expect(status.json.collectionId).toBe(collectionId);
     expect(status.json.goal).toBe(GOAL_BASE);
     expect(status.json.raised).toBe('0');
@@ -129,12 +129,12 @@ describe('crowdfund integration', () => {
     await fundWithRetry('alice', contributor.address, '200000000', USDC_DENOM);
 
     const contributeMsg = runCli([
-      'crowdfund', 'contribute', collectionId,
+      'crowdfunds', 'contribute', collectionId,
       '--creator', contributor.address,
       '--amount', CONTRIBUTE_BASE,
       '--local'
     ]);
-    // crowdfund contribute emits a SINGLE MsgTransferTokens envelope
+    // crowdfunds contribute emits a SINGLE MsgTransferTokens envelope
     // (with 2 transfers inside — mint-1 to charlie, mint-2 to alice).
     expect(contributeMsg.json.typeUrl).toBe('/tokenization.MsgTransferTokens');
     expect(Array.isArray(contributeMsg.json.value.transfers)).toBe(true);
@@ -152,13 +152,13 @@ describe('crowdfund integration', () => {
     const start = Date.now();
     let raised = '0';
     while (Date.now() - start < 45000) {
-      raised = runCli(['crowdfund', 'status', collectionId, '--local']).json.raised;
+      raised = runCli(['crowdfunds', 'status', collectionId, '--local']).json.raised;
       if (raised !== '0') break;
       await new Promise((r) => setTimeout(r, 2000));
     }
     if (raised === '0') {
       process.stderr.write(
-        `[integration] crowdfund raised still 0 after 45s — indexer may be lagging. Tx was code 0 on chain.\n`
+        `[integration] crowdfunds raised still 0 after 45s — indexer may be lagging. Tx was code 0 on chain.\n`
       );
     }
     // Either the indexer caught up (raised >= 100,000,000) or it didn't
@@ -173,7 +173,7 @@ describe('crowdfund integration', () => {
     // mismatch warning to stderr (and also a raised < goal warning,
     // since goal isn't met). We just verify the mismatch surfaces.
     const out = runCli(
-      ['crowdfund', 'withdraw', collectionId, '--creator', contributor.address, '--local'],
+      ['crowdfunds', 'withdraw', collectionId, '--creator', contributor.address, '--local'],
       { throwOnError: false, parseJson: false }
     );
     expect(out.stderr).toMatch(/does not match crowdfunder|doesn't match crowdfunder/i);
@@ -182,19 +182,19 @@ describe('crowdfund integration', () => {
   it('conformance throw — show on a non-Crowdfund collection exits non-zero', async () => {
     if (!ready) return;
     // Collection 1 (BADGE) is not a Crowdfund — validator must reject.
-    const out = runCli(['crowdfund', 'show', '1', '--local'], { throwOnError: false, parseJson: false });
+    const out = runCli(['crowdfunds', 'show', '1', '--local'], { throwOnError: false, parseJson: false });
     expect(out.exitCode).not.toBe(0);
     expect(out.stderr + out.stdout).toMatch(/not.*found|not.*valid|Crowdfund/i);
   }, 30000);
 
   it('list surfaces our crowdfund (regression: bigintify-before-validate)', async () => {
     if (!ready || !collectionId) return;
-    // Regression guard: before the fix, `bb crowdfund list` filtered out
+    // Regression guard: before the fix, `bb crowdfunds list` filtered out
     // every browse row because `validateCrowdfundCollection` compares
     // tokenIds against 1n/2n bigints — string ids from `/browse` silently
     // failed validation. With the fix, our just-deployed crowdfund must
     // appear in the global list.
-    const list = runCli(['crowdfund', 'list', '--local']);
+    const list = runCli(['crowdfunds', 'list', '--local']);
     expect(Array.isArray(list.json)).toBe(true);
     const ours = list.json.find((row: any) => row.collectionId === collectionId);
     expect(ours).toBeDefined();
@@ -205,7 +205,7 @@ describe('crowdfund integration', () => {
 
   it('list --mine <crowdfunder> scopes correctly', async () => {
     if (!ready || !collectionId) return;
-    const list = runCli(['crowdfund', 'list', '--mine', alice().address, '--local']);
+    const list = runCli(['crowdfunds', 'list', '--mine', alice().address, '--local']);
     expect(Array.isArray(list.json)).toBe(true);
     // Every row should belong to alice.
     for (const row of list.json) {

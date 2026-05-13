@@ -1,6 +1,11 @@
 /**
- * `bitbadges-cli crowdfund` — end-user surface for the Crowdfund standard.
+ * `bitbadges-cli crowdfunds` — end-user surface for the Crowdfund standard.
  * Mirrors the FE's `CrowdfundView`.
+ *
+ * `crowdfund` (singular) is retained as a hidden alias for backwards compat
+ * with scripts that pre-date the rename. New code / docs should use the
+ * plural form, which matches every other standards command (`bb auctions`,
+ * `bb credit-tokens`, `bb prediction-markets`, etc).
  */
 
 import { Command } from 'commander';
@@ -103,13 +108,15 @@ async function readRaised(collection: any, opts: NetworkFlags, details: any): Pr
   }
 }
 
-export const crowdfundCommand = new Command('crowdfund').description(
-  'End-user surface for the Crowdfund standard — list / show / status / contribute / withdraw / refund / build.'
-);
+export const crowdfundsCommand = new Command('crowdfunds')
+  .alias('crowdfund')
+  .description(
+    'End-user surface for the Crowdfund standard — list / show / status / contribute / withdraw / refund / build.'
+  );
 
 addOutputFlags(
   addNetworkFlags(
-    crowdfundCommand
+    crowdfundsCommand
       .command('list')
       .description('Browse Crowdfund collections.')
       .option('--mine <address>', 'Restrict to crowdfunds initiated by this crowdfunder address')
@@ -160,7 +167,7 @@ addOutputFlags(
 
 addOutputFlags(
   addNetworkFlags(
-    crowdfundCommand
+    crowdfundsCommand
       .command('show')
       .description('Render a Crowdfund collection — goal / raised / deadline / status.')
       .argument('<collection-id>', 'Crowdfund collection ID')
@@ -187,7 +194,7 @@ addOutputFlags(
 
 addOutputFlags(
   addNetworkFlags(
-    crowdfundCommand
+    crowdfundsCommand
       .command('status')
       .description('Resolve current status: active / funded / goal-met-pending-settle / expired-refunding.')
       .argument('<collection-id>', 'Crowdfund collection ID')
@@ -209,7 +216,7 @@ addOutputFlags(
 
 addOutputFlags(
   addNetworkFlags(
-    crowdfundCommand
+    crowdfundsCommand
       .command('contribute')
       .description('Emit a 2-msg tx that contributes <amount> to the crowdfund. Pipe to `bb deploy`.')
       .argument('<collection-id>', 'Crowdfund collection ID')
@@ -230,7 +237,7 @@ addOutputFlags(
 
 addOutputFlags(
   addNetworkFlags(
-    crowdfundCommand
+    crowdfundsCommand
       .command('withdraw')
       .description('Crowdfunder-only: emit the 2-msg withdraw tx (drain escrow + burn progress tokens) when goal is met. Pipe to `bb deploy`.')
       .argument('<collection-id>', 'Crowdfund collection ID')
@@ -263,7 +270,7 @@ addOutputFlags(
 
 addOutputFlags(
   addNetworkFlags(
-    crowdfundCommand
+    crowdfundsCommand
       .command('refund')
       .description('Contributor refund (after deadline if goal not met): emit single MsgTransferTokens. Pipe to `bb deploy`.')
       .argument('<collection-id>', 'Crowdfund collection ID')
@@ -284,14 +291,21 @@ addOutputFlags(
   } catch (err) { emitError(err); }
 });
 
-crowdfundCommand
+crowdfundsCommand
   .command('build')
   .description('Alias for `bb build crowdfund` — creator-side: construct a CREATE-COLLECTION tx for a new crowdfund.')
   .helpOption(false).allowUnknownOption().allowExcessArguments()
   .action(async () => {
     const { buildCommand } = await import('./build.js');
     const argv = process.argv;
-    const startIdx = argv.findIndex((a, i) => a === 'build' && argv[i - 1] === 'crowdfund');
+    // Locate `build` whose immediate predecessor is the standards verb —
+    // matches either the canonical `crowdfunds` or the legacy `crowdfund`
+    // alias so scripts using either form forward correctly.
+    const startIdx = argv.findIndex(
+      (a, i) => a === 'build' && (argv[i - 1] === 'crowdfunds' || argv[i - 1] === 'crowdfund')
+    );
     const forward = startIdx >= 0 ? argv.slice(startIdx + 1) : [];
+    // Inner `bb build crowdfund` preset remains singular — that's the
+    // collection-preset name, not the standards-command name.
     await buildCommand.parseAsync(['crowdfund', ...forward], { from: 'user' });
   });
