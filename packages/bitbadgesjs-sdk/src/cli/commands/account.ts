@@ -249,6 +249,7 @@ addOutputFlags(
   addNetworkFlags(
     accountCommand
       .command('profile')
+      .aliases(['account'])
       .description('Fetch profile + on-chain LCD bank balances. Wraps GET /user.')
       .requiredOption('--address <addr>', 'Address to look up (bb1.../0x — auto-normalized to bb1)')
   )

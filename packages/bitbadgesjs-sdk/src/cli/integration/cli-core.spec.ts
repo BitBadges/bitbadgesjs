@@ -42,10 +42,10 @@ describe('cli-core integration', () => {
     it('convert bb1 → 0x round-trips deterministically', () => {
       if (!ready) return;
       const zeroEth = '0x0000000000000000000000000000000000000000';
-      const toBb1 = runCli(['address', 'convert', zeroEth, '--to', 'bb1'], { parseJson: false });
-      expect(toBb1.stdout.trim()).toBe('bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv');
-      const backToEth = runCli(['address', 'convert', toBb1.stdout.trim(), '--to', '0x'], { parseJson: false });
-      expect(backToEth.stdout.trim().toLowerCase()).toBe(zeroEth);
+      const toBb1 = runCli(['address', 'convert', zeroEth, '--to', 'bb1']);
+      expect(toBb1.json.result).toBe('bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv');
+      const backToEth = runCli(['address', 'convert', toBb1.json.result, '--to', '0x']);
+      expect(backToEth.json.result.toLowerCase()).toBe(zeroEth);
     });
   });
 
@@ -55,10 +55,10 @@ describe('cli-core integration', () => {
     it('with no symbol lists all known tokens', () => {
       if (!ready) return;
       const out = runCli(['lookup']);
-      expect(Array.isArray(out.json)).toBe(true);
-      expect(out.json.length).toBeGreaterThan(0);
+      expect(Array.isArray(out.json.tokens)).toBe(true);
+      expect(out.json.tokens.length).toBeGreaterThan(0);
       // Spot check: BADGE and USDC should be in the registry.
-      const symbols = out.json.map((t: any) => t.symbol);
+      const symbols = out.json.tokens.map((t: any) => t.symbol);
       expect(symbols).toContain('BADGE');
     });
 
@@ -72,9 +72,9 @@ describe('cli-core integration', () => {
 
     it('exits non-zero on unknown symbol', () => {
       if (!ready) return;
-      const out = runCli(['lookup', 'NOSUCHTOKEN'], { throwOnError: false, parseJson: false });
-      expect(out.exitCode).not.toBe(0);
-      expect(out.stderr).toMatch(/Unknown token/);
+      const out = runCli(['lookup', 'NOSUCHTOKEN'], { throwOnError: false });
+      expect(out.envelope.ok).toBe(false);
+      expect(out.envelope.error.message).toMatch(/Unknown token/);
     });
   });
 
@@ -83,17 +83,17 @@ describe('cli-core integration', () => {
   describe('bb alias', () => {
     it('for-mint-escrow <id> returns a deterministic bb1 address', () => {
       if (!ready) return;
-      const out = runCli(['alias', 'for-mint-escrow', '42'], { parseJson: false });
-      expect(out.stdout.trim()).toMatch(/^bb1/);
+      const out = runCli(['alias', 'for-mint-escrow', '42']);
+      expect(out.json.address).toMatch(/^bb1/);
       // Determinism: same input → same output
-      const again = runCli(['alias', 'for-mint-escrow', '42'], { parseJson: false });
-      expect(again.stdout.trim()).toBe(out.stdout.trim());
+      const again = runCli(['alias', 'for-mint-escrow', '42']);
+      expect(again.json.address).toBe(out.json.address);
     });
 
     it('for-ibc-backing <denom> returns an alias address', () => {
       if (!ready) return;
-      const out = runCli(['alias', 'for-ibc-backing', 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349'], { parseJson: false });
-      expect(out.stdout.trim()).toMatch(/^bb1/);
+      const out = runCli(['alias', 'for-ibc-backing', 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349']);
+      expect(out.json.address).toMatch(/^bb1/);
     });
   });
 
