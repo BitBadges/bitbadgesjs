@@ -47,8 +47,8 @@ describe('credit-tokens integration', () => {
 
     runCli(
       [
-        'credit-tokens',
         'build',
+        'credit-token',
         '--payment-denom', 'USDC',
         '--recipient', creator.address,
         '--name', 'Test Credits',

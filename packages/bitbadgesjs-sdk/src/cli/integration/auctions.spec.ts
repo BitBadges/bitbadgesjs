@@ -72,8 +72,8 @@ describe('auctions integration', () => {
 
     runCli(
       [
-        'auctions',
         'build',
+        'auction',
         '--seller', seller.address,
         '--bid-deadline', '30d',
         '--accept-window', '30d',
@@ -217,7 +217,7 @@ describe('auctions accept-bid happy path (sold transition)', () => {
     const buildTmp = path.join(os.tmpdir(), `auc-accept-build-${crypto.randomBytes(4).toString('hex')}.json`);
     runCli(
       [
-        'auctions', 'build',
+        'build', 'auction',
         '--seller', seller.address,
         '--bid-deadline', '10s',
         '--accept-window', '30d',
@@ -337,7 +337,7 @@ describe('auctions expired state (no bid, both windows closed)', () => {
     const buildTmp = path.join(os.tmpdir(), `auc-expired-${crypto.randomBytes(4).toString('hex')}.json`);
     runCli(
       [
-        'auctions', 'build',
+        'build', 'auction',
         '--seller', seller.address,
         '--bid-deadline', '5s',
         '--accept-window', '5s',

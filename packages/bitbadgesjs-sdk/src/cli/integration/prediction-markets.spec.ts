@@ -52,8 +52,8 @@ describe('prediction-markets integration', () => {
 
     runCli(
       [
-        'prediction-markets',
         'build',
+        'prediction-market',
         '--verifier', verifier.address,
         '--denom', 'USDC',
         '--name', 'Test Market',

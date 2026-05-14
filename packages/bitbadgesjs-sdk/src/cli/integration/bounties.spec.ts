@@ -58,8 +58,8 @@ describe('bounties integration', () => {
 
     runCli(
       [
-        'bounties',
         'build',
+        'bounty',
         '--submitter', submitter.address,
         '--verifier', verifier.address,
         '--recipient', recipient.address,

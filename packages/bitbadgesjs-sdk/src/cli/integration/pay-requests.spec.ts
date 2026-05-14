@@ -45,8 +45,8 @@ describe('pay-requests integration', () => {
 
     runCli(
       [
-        'pay-requests',
         'build',
+        'payment-request',
         '--payer', payer.address,
         '--recipient', recipient.address,
         '--amount', '100',
