@@ -252,7 +252,7 @@ burnerCommand
   .usage('<selector>')
   .description('Delete the recovery file for a burner (the on-chain wallet still exists).')
   .argument('<selector>', 'Address or recovery file path')
-  .option('--yes', 'Skip confirmation prompt')
+  .option('-y, --yes', 'Skip confirmation prompt')
   .action(async (selector: string, opts: any) => {
     const rec = findBurner(selector);
     if (!rec || !rec.filePath) {
