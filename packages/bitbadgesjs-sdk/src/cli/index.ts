@@ -89,8 +89,6 @@ class GroupedHelp extends Help {
 
 // Build & ship a transaction
 import { buildCommand } from './commands/build.js';
-import { toolsCommand } from './commands/tools.js';
-import { toolCommand } from './commands/tool.js';
 import { checkCommand } from './commands/check.js';
 import { explainCommand } from './commands/explain.js';
 import { simulateCommand } from './commands/simulate.js';
@@ -99,7 +97,6 @@ import { deployCommand } from './commands/deploy.js';
 import { txCommand } from './commands/tx.js';
 import { signWithBrowserCommand } from './commands/sign-with-browser.js';
 import { genTxPayloadCommand } from './commands/gen-tx-payload.js';
-import { genPubKeyCommand } from './commands/gen-pub-key.js';
 
 // Indexer access
 import { createApiCommand } from './commands/api.js';
@@ -111,10 +108,10 @@ import { burnerCommand } from './commands/burner.js';
 import { sessionCommand } from './commands/session.js';
 
 // Discovery
-import { docsCommand } from './commands/docs.js';
-import { skillsCommand } from './commands/skills.js';
-import { resourcesCommand } from './commands/resources.js';
 import { doctorCommand } from './commands/doctor.js';
+
+// Dev / agent surface (v2: tools/tool/resources/docs/skills/gen-pub-key)
+import { devCommand } from './commands/dev.js';
 
 // Address & lookup utilities
 import { amountCommand } from './commands/amount.js';
@@ -179,11 +176,11 @@ if (process.argv.includes('--quiet')) {
 const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   {
     title: 'Build & ship a transaction',
-    commands: [buildCommand, toolsCommand, toolCommand, checkCommand, explainCommand, simulateCommand, previewCommand, deployCommand, txCommand]
+    commands: [buildCommand, checkCommand, explainCommand, simulateCommand, previewCommand, deployCommand, txCommand]
   },
   {
     title: 'Indexer access',
-    commands: [createApiCommand(), authCommand, genPubKeyCommand]
+    commands: [createApiCommand(), authCommand]
   },
   {
     title: 'Local state',
@@ -191,7 +188,11 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   },
   {
     title: 'Discovery',
-    commands: [docsCommand, skillsCommand, resourcesCommand, doctorCommand]
+    commands: [doctorCommand]
+  },
+  {
+    title: 'Dev / agent surface',
+    commands: [devCommand]
   },
   {
     title: 'Account & lookup',
@@ -297,6 +298,60 @@ program.addCommand(genListIdAlias);
 // grouped help.
 program.addCommand(signWithBrowserCommand);
 program.addCommand(genTxPayloadCommand);
+
+// Dev/agent surface aliases. Old top-level forms (`tools`, `tool`,
+// `resources`, `docs`, `skills`, `gen-pub-key`) all lived at the root
+// of the v1 CLI. v2 nests them under `bb dev`. Each old form stays
+// reachable for one release; banner emits via `makeDeprecatedAlias`.
+const toolsAlias = makeDeprecatedAlias({
+  oldName: 'tools',
+  newPath: 'bb dev tools list',
+  description: 'Deprecated — use `bb dev tools list` instead.',
+  forward: (args) => ['dev', 'tools', 'list', ...args],
+  target: program,
+});
+const toolAlias = makeDeprecatedAlias({
+  oldName: 'tool',
+  newPath: 'bb dev tools call',
+  description: 'Deprecated — use `bb dev tools call <name>` instead.',
+  forward: (args) => ['dev', 'tools', 'call', ...args],
+  target: program,
+});
+const resourcesAlias = makeDeprecatedAlias({
+  oldName: 'resources',
+  newPath: 'bb dev resources',
+  description: 'Deprecated — use `bb dev resources` instead.',
+  forward: (args) => ['dev', 'resources', ...args],
+  target: program,
+});
+const docsAlias = makeDeprecatedAlias({
+  oldName: 'docs',
+  newPath: 'bb dev docs',
+  description: 'Deprecated — use `bb dev docs` instead.',
+  forward: (args) => ['dev', 'docs', ...args],
+  target: program,
+});
+const skillsAlias = makeDeprecatedAlias({
+  oldName: 'skills',
+  newPath: 'bb dev skills',
+  description: 'Deprecated — use `bb dev skills` instead.',
+  forward: (args) => ['dev', 'skills', ...args],
+  target: program,
+});
+const genPubKeyAlias = makeDeprecatedAlias({
+  oldName: 'gen-pub-key',
+  newPath: 'bb dev gen-pub-key',
+  description: 'Deprecated — use `bb dev gen-pub-key` instead.',
+  forward: (args) => ['dev', 'gen-pub-key', ...args],
+  target: program,
+});
+
+program.addCommand(toolsAlias);
+program.addCommand(toolAlias);
+program.addCommand(resourcesAlias);
+program.addCommand(docsAlias);
+program.addCommand(skillsAlias);
+program.addCommand(genPubKeyAlias);
 
 // ── `cli` umbrella — back-compat alias for the v1 `bb cli <cmd>` shape ──────
 //
