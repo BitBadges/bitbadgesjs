@@ -92,7 +92,11 @@ addOutputFlags(
       emit({ typeUrl: '/tokenization.MsgSetIncomingApproval', value: { creator, collectionId: String(collectionId), approval } }, opts);
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb nfts bid 42 --creator bb1bidder...xyz --price 1.5 --denom USDC --token-id 7 | bb deploy
+  $ bb nfts bid 42 --creator bb1bidder...xyz --price 1.5 --denom USDC --expiry 24h | bb deploy
+`);
 
 // ── list (sell-side outgoing approval) ───────────────────────────────────
 
@@ -143,7 +147,11 @@ addOutputFlags(
       emit({ typeUrl: '/tokenization.MsgSetOutgoingApproval', value: { creator, collectionId: String(collectionId), approval } }, opts);
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb nfts list 42 --creator bb1seller...xyz --token-id 7 --price 5 --denom USDC | bb deploy
+  $ bb nfts list 42 --creator bb1seller...xyz --token-id 7 --price 5 --denom USDC --expiry 30d --max-sales 1 | bb deploy
+`);
 
 // ── cancel ───────────────────────────────────────────────────────────────
 
@@ -175,7 +183,11 @@ addOutputFlags(
       emit({ typeUrl, value: { creator, collectionId: String(collectionId), approvalId } }, opts);
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb nfts cancel 42 a1b2c3d4e5f6 --creator bb1owner...xyz --side listing | bb deploy
+  $ bb nfts cancel 42 a1b2c3d4e5f6 --creator bb1owner...xyz --side bid | bb deploy
+`);
 
 // ── buy (fill a listing) ─────────────────────────────────────────────────
 
@@ -211,7 +223,10 @@ addOutputFlags(
       );
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb nfts buy 42 7 --creator bb1buyer...xyz --approval-id a1b2c3d4e5f6 --seller bb1seller...xyz | bb deploy
+`);
 
 // ── sell (fill a bid) ────────────────────────────────────────────────────
 
@@ -247,7 +262,10 @@ addOutputFlags(
       );
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb nfts sell 42 7 --creator bb1seller...xyz --approval-id a1b2c3d4e5f6 --bidder bb1bidder...xyz | bb deploy
+`);
 
 // ── orders (view open) ───────────────────────────────────────────────────
 

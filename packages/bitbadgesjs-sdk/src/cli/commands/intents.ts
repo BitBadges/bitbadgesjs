@@ -243,7 +243,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb intents create --creator bb1maker...xyz --pay-denom BADGE --pay-amount 100 --receive-denom USDC --receive-amount 50 | bb deploy
+  $ bb intents create --creator bb1maker...xyz --pay-denom BADGE --pay-amount 100 --receive-denom USDC --receive-amount 50 --valid-until 7d | bb deploy
+`);
 
 // ── intents fill ──────────────────────────────────────────────────────────
 
@@ -299,7 +303,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb intents fill a1b2c3d4e5f6 --creator bb1filler...xyz | bb deploy
+  $ bb intents fill a1b2c3d4e5f6 --creator bb1filler...xyz --approver bb1maker...xyz | bb deploy
+`);
 
 // ── intents cancel ────────────────────────────────────────────────────────
 
@@ -338,4 +346,7 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb intents cancel a1b2c3d4e5f6 --creator bb1maker...xyz | bb deploy
+`);

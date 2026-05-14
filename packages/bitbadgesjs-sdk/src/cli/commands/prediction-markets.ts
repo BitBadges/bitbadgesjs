@@ -262,10 +262,23 @@ const tradeOpts = (cmd: Command, side: 'yes' | 'no', dir: 'buy' | 'sell') =>
     .option('--expiry <when>', 'Approval expiry: ms-since-epoch or duration (24h, 7d). Default 24h.')
     .option('--approval-id <id>', 'Override the random approval id');
 
-addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-yes'), 'yes', 'buy'))).action(buyAction('yes'));
-addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-no'), 'no', 'buy'))).action(buyAction('no'));
-addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('sell-yes'), 'yes', 'sell'))).action(sellAction('yes'));
-addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('sell-no'), 'no', 'sell'))).action(sellAction('no'));
+addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-yes'), 'yes', 'buy'))).action(buyAction('yes')).addHelpText('after', `
+Examples:
+  $ bb prediction-markets buy-yes 55 --creator bb1trader...xyz --token-amount 100 --payment-amount 40 --denom USDC | bb deploy
+  $ bb prediction-markets buy-yes 55 --creator bb1trader...xyz --token-amount 100 --payment-amount 40 --denom USDC --expiry 7d | bb deploy
+`);
+addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-no'), 'no', 'buy'))).action(buyAction('no')).addHelpText('after', `
+Examples:
+  $ bb prediction-markets buy-no 55 --creator bb1trader...xyz --token-amount 100 --payment-amount 60 --denom USDC | bb deploy
+`);
+addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('sell-yes'), 'yes', 'sell'))).action(sellAction('yes')).addHelpText('after', `
+Examples:
+  $ bb prediction-markets sell-yes 55 --creator bb1trader...xyz --token-amount 50 --payment-amount 25 --denom USDC | bb deploy
+`);
+addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('sell-no'), 'no', 'sell'))).action(sellAction('no')).addHelpText('after', `
+Examples:
+  $ bb prediction-markets sell-no 55 --creator bb1trader...xyz --token-amount 50 --payment-amount 30 --denom USDC | bb deploy
+`);
 
 // ── Cancel ───────────────────────────────────────────────────────────────
 
@@ -292,7 +305,11 @@ addOutputFlags(
       value: { creator, collectionId: String(collectionId), approvalId }
     }, opts);
   } catch (err) { emitError(err); }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb prediction-markets cancel 55 a1b2c3d4e5f6 --creator bb1trader...xyz --side buy | bb deploy
+  $ bb prediction-markets cancel 55 a1b2c3d4e5f6 --creator bb1trader...xyz --side sell | bb deploy
+`);
 
 // ── Deposit ──────────────────────────────────────────────────────────────
 
@@ -317,7 +334,10 @@ addOutputFlags(
     }
     emit(buildPredictionMarketDepositMsg(creator, String(collectionId), BigInt(opts.amount), settle.mintApprovalId), opts);
   } catch (err) { emitError(err); }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb prediction-markets deposit 55 --creator bb1lp...xyz --amount 1000000 | bb deploy
+`);
 
 // ── Redeem ───────────────────────────────────────────────────────────────
 
@@ -369,7 +389,11 @@ addOutputFlags(
       emit(tx.messages.length === 1 ? tx.messages[0] : tx, opts);
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb prediction-markets redeem 55 --creator bb1holder...xyz --state active --pair-amount 50000 | bb deploy
+  $ bb prediction-markets redeem 55 --creator bb1holder...xyz --state yes-wins --yes-balance 100000 | bb deploy
+`);
 
 // ── Resolve (verifier) ───────────────────────────────────────────────────
 
@@ -396,7 +420,11 @@ addOutputFlags(
     const tx = buildPredictionMarketResolveTx(creator, String(collectionId), outcome, settle);
     emit(tx.messages.length === 1 ? tx.messages[0] : tx, opts);
   } catch (err) { emitError(err); }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb prediction-markets resolve 55 --creator bb1verifier...xyz --outcome yes | bb deploy
+  $ bb prediction-markets resolve 55 --creator bb1verifier...xyz --outcome push | bb deploy
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build prediction-market ...` (the canonical builder) instead.

@@ -212,7 +212,10 @@ addOutputFlags(
   } catch (err) {
     emitError(err);
   }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb pay-requests pay 31 --creator bb1payer...xyz | bb deploy
+`);
 
 // ── pay-requests deny ─────────────────────────────────────────────────────
 
@@ -242,7 +245,10 @@ addOutputFlags(
   } catch (err) {
     emitError(err);
   }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb pay-requests deny 31 --creator bb1payer...xyz | bb deploy
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build payment-request ...` (the canonical builder) instead.

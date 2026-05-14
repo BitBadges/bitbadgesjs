@@ -86,7 +86,11 @@ addOutputFlags(
     },
     opts
   );
-});
+}).addHelpText('after', `
+Examples:
+  $ bb dynamic-stores create --creator bb1owner...xyz --default-value false | bb deploy
+  $ bb dynamic-stores create --creator bb1owner...xyz --uri https://example.com/store.json --custom-data "kyc-allowlist" | bb deploy
+`);
 
 // ── update ───────────────────────────────────────────────────────────────────
 
@@ -113,7 +117,11 @@ addOutputFlags(
     if (opts.customData !== undefined) value.customData = opts.customData;
     emit({ typeUrl: '/tokenization.MsgUpdateDynamicStore', value }, opts);
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb dynamic-stores update 9 --creator bb1owner...xyz --global-enabled false | bb deploy
+  $ bb dynamic-stores update 9 --creator bb1owner...xyz --uri https://example.com/v2.json | bb deploy
+`);
 
 // ── delete ───────────────────────────────────────────────────────────────────
 
@@ -132,7 +140,10 @@ addOutputFlags(
     },
     opts
   );
-});
+}).addHelpText('after', `
+Examples:
+  $ bb dynamic-stores delete 9 --creator bb1owner...xyz | bb deploy
+`);
 
 // ── set-value (single) ───────────────────────────────────────────────────────
 
@@ -157,7 +168,10 @@ addOutputFlags(
       opts
     );
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb dynamic-stores set-value 9 bb1user...xyz true --creator bb1owner...xyz | bb deploy
+`);
 
 // ── add / remove (bulk, multi-msg) ───────────────────────────────────────────
 
@@ -181,7 +195,11 @@ addOutputFlags(
     .argument('<store-id>', 'Dynamic store ID')
     .argument('<addresses...>', 'Target addresses (repeated or comma-separated)')
     .requiredOption('--creator <address>', 'Tx creator')
-).action(bulkSetValue(true));
+).action(bulkSetValue(true)).addHelpText('after', `
+Examples:
+  $ bb dynamic-stores add 9 bb1user1...xyz bb1user2...xyz --creator bb1owner...xyz | bb deploy
+  $ bb dynamic-stores add 9 bb1user1...xyz,bb1user2...xyz --creator bb1owner...xyz | bb deploy
+`);
 
 addOutputFlags(
   dynamicStoresCommand
@@ -190,7 +208,10 @@ addOutputFlags(
     .argument('<store-id>', 'Dynamic store ID')
     .argument('<addresses...>', 'Target addresses')
     .requiredOption('--creator <address>', 'Tx creator')
-).action(bulkSetValue(false));
+).action(bulkSetValue(false)).addHelpText('after', `
+Examples:
+  $ bb dynamic-stores remove 9 bb1user1...xyz bb1user2...xyz --creator bb1owner...xyz | bb deploy
+`);
 
 // ── show (read single) ───────────────────────────────────────────────────────
 

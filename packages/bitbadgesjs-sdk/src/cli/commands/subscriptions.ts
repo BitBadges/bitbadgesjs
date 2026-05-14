@@ -328,7 +328,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb subscriptions claim 28 --creator bb1subscriber...xyz | bb deploy
+  $ bb subscriptions claim 28 --creator bb1subscriber...xyz --tier pro-tier | bb deploy
+`);
 
 // ── subscriptions enable-renewal ─────────────────────────────────────────
 
@@ -386,7 +390,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb subscriptions enable-renewal 28 --creator bb1subscriber...xyz | bb deploy
+  $ bb subscriptions enable-renewal 28 --creator bb1subscriber...xyz --tier pro-tier --tip 1000 | bb deploy
+`);
 
 // ── subscriptions cancel ─────────────────────────────────────────────────
 
@@ -422,7 +430,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb subscriptions cancel 28 --creator bb1subscriber...xyz | bb deploy
+  $ bb subscriptions cancel 28 --creator bb1subscriber...xyz --tier pro-tier | bb deploy
+`);
 
 // ── subscriptions subscribe (multi-msg) ──────────────────────────────────
 
@@ -481,7 +493,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb subscriptions subscribe 28 --creator bb1subscriber...xyz | bb deploy
+  $ bb subscriptions subscribe 28 --creator bb1subscriber...xyz --tier pro-tier --tip 500 | bb deploy
+`);
 
 // ── subscriptions charge-due ─────────────────────────────────────────────
 //
@@ -690,7 +706,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb subscriptions charge-due 28 --creator bb1operator...xyz --dry-run
+  $ bb subscriptions charge-due 28 --creator bb1operator...xyz | bb deploy --with-keyring --from operator
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build subscription ...` (the canonical builder) instead.

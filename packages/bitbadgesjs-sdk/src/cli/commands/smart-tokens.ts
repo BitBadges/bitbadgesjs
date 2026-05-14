@@ -210,7 +210,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb smart-tokens deposit 88 --creator bb1user...xyz --amount 10 | bb deploy
+  $ bb smart-tokens deposit 88 --creator bb1user...xyz --amount 10000000 --base-units | bb deploy
+`);
 
 // ── smart-tokens withdraw ────────────────────────────────────────────────────
 
@@ -262,7 +266,10 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb smart-tokens withdraw 88 --creator bb1user...xyz --amount 5 | bb deploy
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build smart-token ...` (the canonical builder) instead.

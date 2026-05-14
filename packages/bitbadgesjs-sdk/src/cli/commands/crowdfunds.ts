@@ -225,7 +225,11 @@ addOutputFlags(
     // Single-msg per the helper output; bb deploy will accept either shape.
     emit(tx.messages[0], opts);
   } catch (err) { emitError(err); }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb crowdfunds contribute 7 --creator bb1backer...xyz --amount 100 | bb deploy
+  $ bb crowdfunds contribute 7 --creator bb1backer...xyz --amount 100000000 --base-units | bb deploy
+`);
 
 addOutputFlags(
   addNetworkFlags(
@@ -258,7 +262,10 @@ addOutputFlags(
     const tx = buildWithdrawCrowdfundTx(creator, String(collectionId), details, raised, burnApprovalId);
     emit(tx, opts);
   } catch (err) { emitError(err); }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb crowdfunds withdraw 7 --creator bb1crowdfunder...xyz | bb deploy
+`);
 
 addOutputFlags(
   addNetworkFlags(
@@ -288,7 +295,10 @@ addOutputFlags(
     }
     emit(buildRefundCrowdfundMsg(creator, String(collectionId), details, BigInt(amountStr)), opts);
   } catch (err) { emitError(err); }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb crowdfunds refund 7 --creator bb1backer...xyz --amount 100 | bb deploy
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build crowdfund ...` (the canonical builder) instead.

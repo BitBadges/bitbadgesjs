@@ -220,7 +220,10 @@ addOutputFlags(
   } catch (err) {
     emitError(err);
   }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb bounties accept 17 --creator bb1verifier...xyz | bb deploy
+`);
 
 // ── bounties deny ────────────────────────────────────────────────────────
 
@@ -250,7 +253,10 @@ addOutputFlags(
   } catch (err) {
     emitError(err);
   }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb bounties deny 17 --creator bb1verifier...xyz | bb deploy
+`);
 
 // ── bounties claim-refund ────────────────────────────────────────────────
 
@@ -284,7 +290,10 @@ addOutputFlags(
   } catch (err) {
     emitError(err);
   }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb bounties claim-refund 17 --creator bb1submitter...xyz | bb deploy
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build bounty ...` (the canonical builder) instead.

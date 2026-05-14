@@ -185,7 +185,11 @@ addOutputFlags(
       }, opts);
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb auctions place-bid 42 --creator bb1abc...xyz --amount 25 --denom USDC | bb deploy
+  $ bb auctions place-bid 42 --creator bb1abc...xyz --amount 25000000 --denom USDC --base-units | bb deploy
+`);
 
 addOutputFlags(
   addNetworkFlags(
@@ -204,7 +208,10 @@ addOutputFlags(
       value: { creator, collectionId: String(collectionId), approvalId }
     }, opts);
   } catch (err) { emitError(err); }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb auctions cancel-bid 42 a1b2c3d4e5f6 --creator bb1abc...xyz | bb deploy
+`);
 
 addOutputFlags(
   addNetworkFlags(
@@ -243,7 +250,10 @@ addOutputFlags(
       );
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb auctions accept-bid 42 a1b2c3d4e5f6 --creator bb1seller...xyz --bidder bb1buyer...xyz | bb deploy
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build auction ...` (the canonical builder) instead.

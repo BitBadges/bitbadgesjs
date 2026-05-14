@@ -145,7 +145,10 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb products purchase 12 --creator bb1buyer...xyz --token-id 3 | bb deploy
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build product-catalog ...` (the canonical builder) instead.

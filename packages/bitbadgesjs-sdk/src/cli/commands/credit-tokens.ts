@@ -147,7 +147,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb credit-tokens purchase 23 --creator bb1buyer...xyz --units 10 | bb deploy
+  $ bb credit-tokens purchase 23 --creator bb1buyer...xyz --units 10 --tier premium-tier | bb deploy
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build credit-token ...` (the canonical builder) instead.
