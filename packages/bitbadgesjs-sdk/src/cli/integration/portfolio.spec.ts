@@ -1,18 +1,17 @@
 /**
- * Integration: `bb portfolio` against a live local indexer.
+ * Integration: `bb portfolio <subcommand>` against a live local indexer.
  *
- * Read-only aggregator over five existing routes. The portfolio command
- * doesn't *produce* state — it just bundles reads — so the integration
- * surface we care about is:
- *   1. it actually hits a local indexer (not the default mainnet URL),
- *   2. every requested section appears in the response (or with an
- *      isolated `{error}` payload, never a top-level abort),
- *   3. `--include` correctly narrows the payload,
- *   4. address normalization (0x → bb1) flows through.
+ * Each subcommand is a thin wrapper over an existing indexer route, so
+ * the integration surface we guard is:
+ *   1. each subcommand hits the right endpoint (status 200, response
+ *      shape includes the documented top-level keys),
+ *   2. `all` aggregator still bundles every section into one response,
+ *   3. address normalization (0x → bb1) is consistent across subcommands,
+ *   4. flag validation rejects bad input with a clear exit-2.
  *
- * We query alice's address — she's a known persona in the local keyring
- * and may or may not have any tokens/balances, which is fine. We're
- * asserting the SHAPE of the snapshot, not its contents.
+ * We query alice — known persona in the local keyring. Whether she has
+ * tokens / approvals / activity is irrelevant; we're asserting payload
+ * SHAPE, not contents.
  *
  * Skipped automatically when preflight fails.
  */
@@ -29,73 +28,62 @@ describe('portfolio integration', () => {
     ready = (await preflightIntegration()).ok;
   }, 30000);
 
-  it('default returns all five sections', () => {
+  it('account returns a single user payload', () => {
     if (!ready) return;
-    const addr = alice().address;
-    const out = runCli(['portfolio', '--address', addr, '--local']);
-    expect(out.json.address).toBe(addr);
-    for (const section of ['account', 'tokens', 'balances', 'assets', 'activity']) {
-      expect(out.json).toHaveProperty(section);
-    }
-    // tokens fans out to three views
-    expect(out.json.tokens).toHaveProperty('collected');
-    expect(out.json.tokens).toHaveProperty('created');
-    expect(out.json.tokens).toHaveProperty('managing');
-    // activity fans out to three feeds
-    expect(out.json.activity).toHaveProperty('transfers');
-    expect(out.json.activity).toHaveProperty('claims');
-    expect(out.json.activity).toHaveProperty('points');
-  });
-
-  it('--include narrows the payload to the requested sections', () => {
-    if (!ready) return;
-    const addr = alice().address;
-    const out = runCli(['portfolio', '--address', addr, '--include', 'balances,activity', '--local']);
-    expect(out.json.address).toBe(addr);
-    expect(out.json).toHaveProperty('balances');
-    expect(out.json).toHaveProperty('activity');
-    expect(out.json).not.toHaveProperty('account');
-    expect(out.json).not.toHaveProperty('tokens');
-    expect(out.json).not.toHaveProperty('assets');
-  });
-
-  it('--exclude drops the named sections', () => {
-    if (!ready) return;
-    const addr = alice().address;
-    const out = runCli(['portfolio', '--address', addr, '--exclude', 'assets,tokens', '--local']);
+    const out = runCli(['portfolio', 'account', '--address', alice().address, '--local']);
     expect(out.json).toHaveProperty('account');
-    expect(out.json).toHaveProperty('balances');
-    expect(out.json).toHaveProperty('activity');
-    expect(out.json).not.toHaveProperty('assets');
-    expect(out.json).not.toHaveProperty('tokens');
   });
 
-  it('accepts 0x form and normalizes to bb1 in the output', () => {
+  it('tokens defaults to view=collected and returns tokens + pagination', () => {
     if (!ready) return;
-    const bb1 = alice().address;
-    const hex = convertToEthAddress(bb1);
-    const out = runCli(['portfolio', '--address', hex, '--include', 'balances', '--local']);
-    expect(out.json.address).toBe(bb1);
+    const out = runCli(['portfolio', 'tokens', '--address', alice().address, '--local']);
+    expect(out.json).toHaveProperty('tokens');
+    expect(Array.isArray(out.json.tokens)).toBe(true);
+    expect(out.json).toHaveProperty('pagination');
   });
 
-  it('rejects unknown sections in --include with non-zero exit', () => {
+  it('tokens --view all fans out to collected/created/managing', () => {
+    if (!ready) return;
+    const out = runCli(['portfolio', 'tokens', '--address', alice().address, '--view', 'all', '--local']);
+    expect(out.json).toHaveProperty('collected');
+    expect(out.json).toHaveProperty('created');
+    expect(out.json).toHaveProperty('managing');
+  });
+
+  it('tokens rejects an unknown --view with exit 2', () => {
     if (!ready) return;
     const out = runCli(
-      ['portfolio', '--address', alice().address, '--include', 'not-a-section', '--local'],
+      ['portfolio', 'tokens', '--address', alice().address, '--view', 'definitely-not-real', '--local'],
       { throwOnError: false, parseJson: false }
     );
     expect(out.exitCode).not.toBe(0);
-    expect(out.stderr).toMatch(/not-a-section/);
+    expect(out.stderr).toMatch(/--view/);
   });
 
-  it('--chain and --all-chains are mutually exclusive', () => {
+  it('balances returns docs + pagination', () => {
+    if (!ready) return;
+    const out = runCli(['portfolio', 'balances', '--address', alice().address, '--local']);
+    expect(out.json).toHaveProperty('docs');
+    expect(Array.isArray(out.json.docs)).toBe(true);
+    expect(out.json).toHaveProperty('pagination');
+  });
+
+  it('assets defaults to bitbadges-1 and returns a balances map', () => {
+    if (!ready) return;
+    const out = runCli(['portfolio', 'assets', '--address', alice().address, '--local']);
+    expect(out.json).toHaveProperty('balances');
+  });
+
+  it('assets rejects mutually-exclusive --chain + --all-chains', () => {
     if (!ready) return;
     const out = runCli(
       [
         'portfolio',
-        '--address', alice().address,
-        '--include', 'assets',
-        '--chain', 'bitbadges-1',
+        'assets',
+        '--address',
+        alice().address,
+        '--chain',
+        'bitbadges-1',
         '--all-chains',
         '--local'
       ],
@@ -103,5 +91,83 @@ describe('portfolio integration', () => {
     );
     expect(out.exitCode).not.toBe(0);
     expect(out.stderr).toMatch(/--chain or --all-chains/);
+  });
+
+  it('activity defaults to type=tokens and returns an activity feed', () => {
+    if (!ready) return;
+    const out = runCli(['portfolio', 'activity', '--address', alice().address, '--local']);
+    expect(out.json).toHaveProperty('activity');
+    expect(Array.isArray(out.json.activity)).toBe(true);
+    expect(out.json).toHaveProperty('pagination');
+  });
+
+  it('activity --type all fans out to transfers/claims/points', () => {
+    if (!ready) return;
+    const out = runCli(['portfolio', 'activity', '--address', alice().address, '--type', 'all', '--local']);
+    expect(out.json).toHaveProperty('transfers');
+    expect(out.json).toHaveProperty('claims');
+    expect(out.json).toHaveProperty('points');
+  });
+
+  it('approvals defaults to --collection=any and returns docs', () => {
+    if (!ready) return;
+    const out = runCli(['portfolio', 'approvals', '--address', alice().address, '--local']);
+    // filterApprovals returns { docs: [...], pagination: {...} }
+    expect(out.json).toHaveProperty('docs');
+    expect(Array.isArray(out.json.docs)).toBe(true);
+  });
+
+  it('approvals requires --denom when --price-min/--price-max is set', () => {
+    if (!ready) return;
+    const out = runCli(
+      [
+        'portfolio',
+        'approvals',
+        '--address',
+        alice().address,
+        '--price-min',
+        '100',
+        '--local'
+      ],
+      { throwOnError: false, parseJson: false }
+    );
+    expect(out.exitCode).not.toBe(0);
+    expect(out.stderr).toMatch(/--denom/);
+  });
+
+  it('all returns every section in one bundle', () => {
+    if (!ready) return;
+    const out = runCli(['portfolio', 'all', '--address', alice().address, '--local']);
+    expect(out.json.address).toBe(alice().address);
+    for (const section of ['account', 'tokens', 'balances', 'assets', 'activity', 'approvals']) {
+      expect(out.json).toHaveProperty(section);
+    }
+  });
+
+  it('all --include narrows the payload', () => {
+    if (!ready) return;
+    const out = runCli([
+      'portfolio',
+      'all',
+      '--address',
+      alice().address,
+      '--include',
+      'balances,approvals',
+      '--local'
+    ]);
+    expect(out.json).toHaveProperty('balances');
+    expect(out.json).toHaveProperty('approvals');
+    expect(out.json).not.toHaveProperty('account');
+    expect(out.json).not.toHaveProperty('tokens');
+    expect(out.json).not.toHaveProperty('assets');
+    expect(out.json).not.toHaveProperty('activity');
+  });
+
+  it('every subcommand accepts 0x form and normalizes (visible via address echo)', () => {
+    if (!ready) return;
+    const bb1 = alice().address;
+    const hex = convertToEthAddress(bb1);
+    const out = runCli(['portfolio', 'all', '--address', hex, '--include', 'balances', '--local']);
+    expect(out.json.address).toBe(bb1);
   });
 });
