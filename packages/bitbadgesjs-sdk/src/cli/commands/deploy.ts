@@ -25,7 +25,11 @@
  */
 
 import { Command } from 'commander';
+import { spawnSync } from 'node:child_process';
 import * as fs from 'fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import * as crypto from 'node:crypto';
 
 import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
@@ -96,6 +100,71 @@ async function fetchTxEvents(nodeUrl: string, txHash: string): Promise<any[] | u
  */
 function summarizeIndexerHit(result: { entity: string; id: string; attempts: number; elapsedMs: number }): string {
   return `Indexer caught up: ${result.entity} ${result.id} visible after ${result.attempts} attempt(s) / ${result.elapsedMs}ms.`;
+}
+
+interface ChainTxResult {
+  code: number;
+  height: number;
+  rawLog?: string;
+  events: any[];
+}
+
+/**
+ * Full tx-result fetcher for the `--exec` path: the LCD's
+ * `/cosmos/tx/v1beta1/txs/<hash>` returns the same payload `fetchTxEvents`
+ * reads, but we need `code` / `height` / `raw_log` too so the JSON envelope
+ * matches what burner/browser emit.
+ */
+async function fetchTxResult(nodeUrl: string, txHash: string): Promise<ChainTxResult | undefined> {
+  const attempts = 10;
+  const delayMs = 1_500;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const res = await fetch(`${nodeUrl}/cosmos/tx/v1beta1/txs/${txHash}`);
+      if (res.ok) {
+        const data = await res.json();
+        const tr = (data as any)?.tx_response;
+        if (tr && (tr.txhash || tr.code !== undefined)) {
+          return {
+            code: Number(tr.code ?? 0),
+            height: Number(tr.height ?? 0),
+            rawLog: tr.raw_log,
+            events: Array.isArray(tr.events) ? tr.events : []
+          };
+        }
+      }
+    } catch {
+      /* network blip — retry */
+    }
+    await new Promise((r) => setTimeout(r, delayMs));
+  }
+  return undefined;
+}
+
+/**
+ * Write the chain-binary command line to a tmp script and `bash`-exec it.
+ * stdin + stderr are inherited so keyring password prompts and gas
+ * estimates surface on the user's TTY; stdout is captured so we can
+ * regex out the txhash(es). Matches the harness pattern at
+ * `cli/integration/harness/chain.ts`.
+ */
+function execKeyringScript(commandLine: string): { stdout: string; status: number } {
+  const scriptPath = path.join(os.tmpdir(), `bb-deploy-${crypto.randomBytes(4).toString('hex')}.sh`);
+  fs.writeFileSync(scriptPath, commandLine + '\n', { mode: 0o700 });
+  try {
+    const result = spawnSync('bash', [scriptPath], {
+      stdio: ['inherit', 'pipe', 'inherit'],
+      encoding: 'utf-8',
+      timeout: 120_000
+    });
+    return { stdout: String(result.stdout ?? ''), status: result.status ?? 1 };
+  } finally {
+    try {
+      fs.unlinkSync(scriptPath);
+    } catch {
+      /* best-effort cleanup */
+    }
+  }
 }
 
 function readMsgInput(opts: { msgFile?: string; msgStdin?: boolean; input?: string }): any {
@@ -236,7 +305,8 @@ export const deployCommand = new Command('deploy')
   // default.
   .option('--burner', 'Use the throwaway burner-wallet path (CREATE-ONLY). Requires --manager.')
   .option('--browser', 'Hand off to the BitBadges /sign page in the browser; sign with your connected wallet (Keplr / MetaMask / etc.).')
-  .option('--with-keyring', 'Emit the `bitbadgeschaind tx ...` one-liner to sign with a chain-binary keyring. Requires --from. Prints rather than spawns — copy + run the printed command to broadcast.')
+  .option('--with-keyring', 'Emit the `bitbadgeschaind tx ...` one-liner to sign with a chain-binary keyring. Requires --from. Prints rather than spawns by default — pair with --exec to run the command in place.')
+  .option('--exec', 'With --with-keyring: actually run the printed `bitbadgeschaind tx ...` command rather than printing it. Inherits your TTY so keyring password prompts work, captures the txhash, and emits the same JSON envelope as --burner/--browser. Multi-msg txs run sequentially (NOT atomic) — see warning at runtime.')
   .option('--from <name>', 'With --with-keyring: keyring identity to sign as (e.g. "alice"). Maps to the binary\'s --from flag.')
   .option('--binary <name>', 'With --with-keyring: chain binary name on PATH', 'bitbadgeschaind')
   .option('--keyring-backend <backend>', 'With --with-keyring: keyring backend (os | file | test | pass | kwallet)', 'os')
@@ -286,6 +356,10 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
   }
   if (useKeyring && !opts.from) {
     process.stderr.write('Error: --with-keyring requires --from <name>. Pass the keyring identity to sign as.\n');
+    process.exit(2);
+  }
+  if (opts.exec && !useKeyring) {
+    process.stderr.write('Error: --exec only applies to --with-keyring. The --burner and --browser paths already broadcast.\n');
     process.exit(2);
   }
 
@@ -535,54 +609,149 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       manager: opts.manager ? String(opts.manager) : undefined
     };
 
-    if (isMultiMsg) {
-      let result;
-      try {
-        result = buildKeyringMultiCommand({ ...sharedKeyringOpts, messages });
-      } catch (err: any) {
-        process.stderr.write(`${err?.message || err}\n`);
-        process.exit(2);
-      }
-
-      if (!process.env.BB_QUIET) {
-        const filesNote =
-          result.msgFilePaths.length > 0
-            ? `Wrote ${result.msgFilePaths.length} msg JSON file(s):\n  ${result.msgFilePaths.join('\n  ')}\n`
-            : '';
-        process.stderr.write(`\n${filesNote}Multi-msg tx — chain-binary's tx subcommands only take one msg, so the\nbelow runs them in sequence with a 6s sleep between blocks to avoid\nsequence-skew. NOT atomic: if a later step fails, earlier steps remain\non-chain. For atomic multi-msg, use --burner or --browser.\n\nRun:\n\n`);
-      }
-      process.stdout.write(result.commandLine + '\n');
-      if (!process.env.BB_QUIET) {
-        process.stderr.write(
-          '\n  Append extra flags inside any step (e.g. --fees 5000ubadge --memo "...").\n' +
-            '  Use --keyring-backend test for non-interactive CI signing.\n'
-        );
-      }
-      process.exit(0);
-    }
-
-    let result;
+    let commandLine: string;
+    let msgFilePaths: string[];
     try {
-      result = buildKeyringCommand({
-        msg,
-        ...sharedKeyringOpts
-      });
+      if (isMultiMsg) {
+        const r = buildKeyringMultiCommand({ ...sharedKeyringOpts, messages });
+        commandLine = r.commandLine;
+        msgFilePaths = r.msgFilePaths;
+      } else {
+        const r = buildKeyringCommand({ msg, ...sharedKeyringOpts });
+        commandLine = r.commandLine;
+        msgFilePaths = [r.msgFilePath];
+      }
     } catch (err: any) {
       process.stderr.write(`${err?.message || err}\n`);
       process.exit(2);
     }
 
-    if (!process.env.BB_QUIET) {
-      process.stderr.write(`\nWrote msg JSON to ${result.msgFilePath}\nRun:\n\n`);
+    const useExec = Boolean(opts.exec);
+
+    // Print-only path (legacy default): emit the command + helper notes
+    // and exit. The user copy/pastes to broadcast.
+    if (!useExec) {
+      if (!process.env.BB_QUIET) {
+        if (isMultiMsg) {
+          const filesNote =
+            msgFilePaths.length > 0
+              ? `Wrote ${msgFilePaths.length} msg JSON file(s):\n  ${msgFilePaths.join('\n  ')}\n`
+              : '';
+          process.stderr.write(`\n${filesNote}Multi-msg tx — chain-binary's tx subcommands only take one msg, so the\nbelow runs them in sequence with a 6s sleep between blocks to avoid\nsequence-skew. NOT atomic: if a later step fails, earlier steps remain\non-chain. For atomic multi-msg, use --burner or --browser.\n\nRun:\n\n`);
+        } else {
+          process.stderr.write(`\nWrote msg JSON to ${msgFilePaths[0]}\nRun:\n\n`);
+        }
+      }
+      process.stdout.write(commandLine + '\n');
+      if (!process.env.BB_QUIET) {
+        const flagsHint = isMultiMsg
+          ? '\n  Append extra flags inside any step (e.g. --fees 5000ubadge --memo "...").\n'
+          : '\n  Append extra flags after the line (e.g. --fees 5000ubadge --memo "...").\n';
+        process.stderr.write(
+          flagsHint + '  Use --keyring-backend test for non-interactive CI signing.\n' +
+            '  Or pass --exec to run the command in place (TTY-friendly).\n'
+        );
+      }
+      process.exit(0);
     }
-    process.stdout.write(result.commandLine + '\n');
-    if (!process.env.BB_QUIET) {
+
+    // --exec path: run the printed command in place and emit a JSON
+    // envelope that matches the burner/browser shape. stdin + stderr
+    // inherit so keyring password prompts work; stdout is captured so
+    // we can pluck the txhash(es). Multi-msg note still applies — the
+    // sub-txs are sequenced with 6s sleeps, NOT atomic.
+    if (isMultiMsg && !process.env.BB_QUIET) {
       process.stderr.write(
-        '\n  Append extra flags after the line (e.g. --fees 5000ubadge --memo "...").\n' +
-          '  Use --keyring-backend test for non-interactive CI signing.\n'
+        '\nMulti-msg --exec: running ' + messages.length + ' sequential tx(s) with 6s sleeps between blocks.\n' +
+          'NOT atomic — if a later step fails on-chain, earlier steps stay committed.\n' +
+          'For atomic multi-msg, use --browser instead.\n\n'
       );
+    } else if (!process.env.BB_QUIET) {
+      process.stderr.write(`\nExecuting (msg JSON at ${msgFilePaths[0]})...\n\n`);
     }
-    process.exit(0);
+
+    const execResult = execKeyringScript(commandLine);
+    const txHashMatches = [...execResult.stdout.matchAll(/txhash:\s*([A-F0-9]+)/gi)];
+    const hashes = txHashMatches.map((m) => m[1]);
+
+    if (execResult.status !== 0 || hashes.length === 0) {
+      process.stderr.write(
+        `\n--exec failed (chain-binary exit ${execResult.status}, ${hashes.length} txhash(es) parsed from stdout).\n` +
+          (execResult.stdout ? `--- stdout (first 800 chars) ---\n${execResult.stdout.slice(0, 800)}\n` : '')
+      );
+      process.exit(1);
+    }
+
+    // Fetch the full tx result for each broadcasted tx so the envelope
+    // carries code / height / events. The chain-binary's exit code only
+    // reflects broadcast success — the tx itself may still have a
+    // non-zero on-chain `code`.
+    const [primaryHash, ...extraHashes] = hashes;
+    const primaryResult = await fetchTxResult(nodeUrl, primaryHash);
+    const additionalTxs: Array<{ txHash: string; code: number; height: number; rawLog?: string }> = [];
+    for (const h of extraHashes) {
+      const r = await fetchTxResult(nodeUrl, h);
+      additionalTxs.push({
+        txHash: h,
+        code: r?.code ?? -1,
+        height: r?.height ?? 0,
+        rawLog: r?.rawLog
+      });
+    }
+
+    const allCodesOk = (primaryResult?.code ?? -1) === 0 && additionalTxs.every((t) => t.code === 0);
+    const payload: any = {
+      success: allCodesOk,
+      path: 'keyring',
+      mode: 'sign-and-broadcast',
+      txHash: primaryHash,
+      chain: 'cosmos',
+      code: primaryResult?.code,
+      height: primaryResult?.height,
+      rawLog: primaryResult?.rawLog,
+      ...(additionalTxs.length > 0 ? { additionalTxs } : {})
+    };
+
+    // Optional indexer wait (matches burner/browser parity). Uses events
+    // from the primary tx to extract the entity id.
+    const waitTimeoutMsKeyring = parseWaitFlag(opts.waitForIndexer);
+    if (waitTimeoutMsKeyring !== undefined && payload.success && primaryResult?.events) {
+      const target = extractEntityFromEvents(primaryResult.events);
+      if (target) {
+        const realApiUrl = getApiUrl(opts);
+        const realApiKey = getApiKeyForNetwork(opts);
+        process.stderr.write(
+          `Waiting for indexer to surface ${target.entity} ${target.id} (timeout ${waitTimeoutMsKeyring}ms)...\n`
+        );
+        const waited = await waitForIndexer(target, {
+          apiUrl: realApiUrl,
+          apiKey: realApiKey,
+          timeoutMs: waitTimeoutMsKeyring
+        });
+        if (waited.ok) {
+          process.stderr.write(summarizeIndexerHit(waited) + '\n');
+        } else {
+          process.stderr.write(
+            `Indexer didn't catch up within ${waitTimeoutMsKeyring}ms — the tx broadcast succeeded, your ${target.entity} may show up shortly.\n`
+          );
+        }
+        payload.waited = {
+          entity: waited.entity,
+          id: waited.id,
+          attempts: waited.attempts,
+          elapsedMs: waited.elapsedMs,
+          ok: waited.ok,
+          ...(waited.ok ? { body: waited.body } : { lastStatus: waited.lastStatus })
+        };
+      } else {
+        process.stderr.write(
+          `--wait-for-indexer: no recognizable entity id in tx events (likely a non-create msg). Skipping wait.\n`
+        );
+      }
+    }
+
+    process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
+    process.exit(payload.success ? 0 : 1);
   }
 
   // Burner path is CREATE-ONLY (the wallet is throwaway and dust-funded
