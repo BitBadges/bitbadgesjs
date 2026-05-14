@@ -1,17 +1,20 @@
 /**
  * "Did you mean?" wiring for unknown commands and unknown flags.
  *
- * Commander ships a `showSuggestionAfterError(true)` toggle that enables
- * Levenshtein-based suggestions for BOTH unknown subcommands and unknown
- * options — but only on the Command instance it's called on. Settings do
- * NOT inherit down the subcommand tree, so a `bb collections crreate`
- * typo (where the unknown lives at depth 2) gets no suggestion unless
- * `collections` itself has the toggle on.
+ * Commander 14 defaults `_showSuggestionAfterError` to `true` on every
+ * Command, and the toggle DOES propagate down the tree via
+ * `copyInheritedSettings`. So in practice suggestions fire out of the
+ * box for both unknown subcommands and unknown options at any depth.
  *
- * `enableSuggestionsTreeWide` walks the full command tree and flips the
- * toggle on every Command, so the suggestion fires regardless of which
- * subcommand level the typo lands at. Call once at the bottom of CLI
- * wiring AFTER all commands (including aliases) are registered.
+ * `enableSuggestionsTreeWide` is a defensive helper: it walks the full
+ * command tree and explicitly sets the toggle on every node. Today this
+ * is a no-op (the flag is already true). Tomorrow, if a Commander upgrade
+ * changes the default or a subtree gets the flag turned off by some
+ * other plumbing (e.g. a future `addCommand` hijack), this guarantees
+ * suggestions stay on.
+ *
+ * Call once at the bottom of CLI wiring AFTER all commands (including
+ * deprecated aliases) are registered.
  */
 import type { Command } from 'commander';
 

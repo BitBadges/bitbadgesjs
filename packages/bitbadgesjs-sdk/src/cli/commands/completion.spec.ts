@@ -103,11 +103,12 @@ describe('makeCompletionCommand', () => {
 
   it('includes both short and long flag forms in the flag-name completion list', () => {
     const out = runCompletion();
-    // `-q, --quiet` should put both `-q` and `--quiet` into the flag list.
-    const rootBranchMatch = out.match(/''\)[\s\S]*?return ;;/);
-    expect(rootBranchMatch).not.toBeNull();
-    expect(rootBranchMatch![0]).toMatch(/-q/);
-    expect(rootBranchMatch![0]).toMatch(/--quiet/);
+    // `-q, --quiet` should put both `-q` and `--quiet` into the same
+    // flag-name compgen -W list under the root case branch.
+    const flagListLine = out
+      .split('\n')
+      .find((line) => line.includes('compgen -W') && line.includes('-q') && line.includes('--quiet'));
+    expect(flagListLine).toBeDefined();
   });
 
   it('accepts bash and zsh shell hints', () => {

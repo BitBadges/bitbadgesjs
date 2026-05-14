@@ -21,10 +21,20 @@ describe('bb completion', () => {
   it('emits a bash-compatible completion script', () => {
     const out = runCli(['completion'], { parseJson: false });
     expect(out.exitCode).toBe(0);
-    // Must include the function definition + at least one subcommand name.
-    expect(out.stdout).toContain('_bitbadges_cli_completions()');
+    // Must include the function definition + at least one subcommand name +
+    // the registrations for both binary names.
+    expect(out.stdout).toContain('_bitbadges_cli_complete()');
     expect(out.stdout).toContain('build');
     expect(out.stdout).toContain('compgen');
+    expect(out.stdout).toContain('complete -F _bitbadges_cli_complete bitbadges-cli');
+    expect(out.stdout).toContain('complete -F _bitbadges_cli_complete bb');
+  });
+
+  it('emits a nested case branch for at least one multi-level command path', () => {
+    // v2 of the generator walks the full tree, so `auctions create` (or
+    // any other 2-level subcommand) should appear as a quoted case key.
+    const out = runCli(['completion'], { parseJson: false });
+    expect(out.stdout).toMatch(/'(auctions|bounties|subscriptions|crowdfunds|smart-tokens|nfts) [a-z-]+'\)/);
   });
 });
 
