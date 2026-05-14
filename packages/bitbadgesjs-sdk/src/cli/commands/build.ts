@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { output, readJsonInput, addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
 import { isQuiet } from '../utils/envelope.js';
+import { tagHelpGroups } from '../utils/help-groups.js';
 import { renderReview, renderValidate, renderResolvedMetadata, renderSimulate } from '../utils/terminal.js';
 import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMsg.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
@@ -472,6 +473,46 @@ const sharedOpts = (cmd: Command) => {
   cmd.option('--reuse <selector>', 'With --deploy-with-burner: reuse a specific saved burner by address or recovery file path');
   cmd.option('--non-interactive', 'With --deploy-with-burner: never prompt; on any prompt point save state and exit for later resume');
   cmd.option('--poll-timeout <seconds>', 'With --deploy-with-burner: seconds to wait for funding to land before prompting/exiting', '60');
+
+  // Tag every shared flag with a help group so --help renders them in
+  // categories under "Options:" (per-command flags stay ungrouped at the
+  // top). See cli/utils/help-groups.ts for the rendered order.
+  tagHelpGroups(cmd, {
+    '--uri': 'Metadata',
+    '--name': 'Metadata',
+    '--description': 'Metadata',
+    '--image': 'Metadata',
+    '--condensed': 'Output',
+    '--output-file': 'Output',
+    '--json': 'Output',
+    '--json-only': 'Output',
+    '--explain': 'Output',
+    '--network': 'Network',
+    '--mainnet': 'Network',
+    '--testnet': 'Network',
+    '--local': 'Network',
+    '--url': 'Network',
+    '--creator': 'Builder',
+    '--manager': 'Builder',
+    '--simulate': 'Builder',
+    '--events': 'Builder',
+    '--deploy-with-burner': 'Deploy',
+    '--deploy-with-browser': 'Deploy',
+    '--sign-only': 'Deploy',
+    '--frontend-url': 'Deploy',
+    '--no-open': 'Deploy',
+    '--timeout': 'Deploy',
+    '--expected-address': 'Deploy',
+    '--fund': 'Deploy',
+    '--fee': 'Deploy',
+    '--fee-denom': 'Deploy',
+    '--gas': 'Deploy',
+    '--new': 'Deploy',
+    '--reuse': 'Deploy',
+    '--non-interactive': 'Deploy',
+    '--poll-timeout': 'Deploy'
+  });
+
   return cmd;
 };
 

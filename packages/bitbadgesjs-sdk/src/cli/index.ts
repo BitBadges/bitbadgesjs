@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import * as fs from 'node:fs';
 import { Command, Help } from 'commander';
+import { HELP_GROUP_ORDER } from './utils/help-groups.js';
 
 // Apply a custom Help subclass globally so every command + sub-subcommand
 // inherits the "Required: / Options:" split, not just the root. Commander
@@ -24,8 +25,11 @@ class GroupedHelp extends Help {
     }
 
     // Split into Required (declared with `.requiredOption(...)`, Commander
-    // sets `mandatory = true`) and Options (everything else, including
-    // `-h, --help`). This is the whole point of the override.
+    // sets `mandatory = true`) and Options. Within Options, sub-group by
+    // `helpGroupHeading` (set via `option.helpGroup(name)`) — per-command
+    // flags (no group) render first, then shared categories in
+    // HELP_GROUP_ORDER. Keeps command-specific knobs at the top and
+    // pushes verbose deploy/builder/network plumbing to the bottom.
     const optList = helper.visibleOptions(cmd);
     const requiredOpts = optList.filter((o: any) => o.mandatory);
     const optionalOpts = optList.filter((o: any) => !o.mandatory);
@@ -37,8 +41,29 @@ class GroupedHelp extends Help {
     }
     if (optionalOpts.length > 0) {
       sections.push('', 'Options:');
+      const ungrouped: any[] = [];
+      const byGroup = new Map<string, any[]>();
       for (const opt of optionalOpts) {
+        const g = (opt as any).helpGroupHeading;
+        if (!g) { ungrouped.push(opt); continue; }
+        if (!byGroup.has(g)) byGroup.set(g, []);
+        byGroup.get(g)!.push(opt);
+      }
+      // Per-command flags first (no subheader)
+      for (const opt of ungrouped) {
         sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
+      }
+      const orderedGroups = [
+        ...HELP_GROUP_ORDER,
+        ...Array.from(byGroup.keys()).filter((g) => !(HELP_GROUP_ORDER as readonly string[]).includes(g))
+      ];
+      for (const group of orderedGroups) {
+        const groupOpts = byGroup.get(group);
+        if (!groupOpts || groupOpts.length === 0) continue;
+        sections.push('', `  ${group}:`);
+        for (const opt of groupOpts) {
+          sections.push(`    ${helper.optionTerm(opt).padEnd(26)}  ${helper.optionDescription(opt)}`);
+        }
       }
     }
 

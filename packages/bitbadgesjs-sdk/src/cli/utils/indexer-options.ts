@@ -60,11 +60,15 @@ export type IndexerFlags = IndexerNetworkFlags & IndexerOutputFlags;
  * larger plumbing change is intentionally NOT in this sweep.
  */
 export function addIndexerNetworkOptions(cmd: Command): Command {
-  return cmd
+  cmd
     .option('--testnet', 'Use testnet API', false)
     .option('--local', 'Use local API (localhost:3001)', false)
     .option('--url <url>', 'Custom API base URL (overrides --testnet/--local/config)')
     .option('--api-key <key>', 'BitBadges API key (overrides BITBADGES_API_KEY env)');
+  for (const flag of ['--testnet', '--local', '--url', '--api-key']) {
+    (cmd as any)._findOption?.(flag)?.helpGroup('Network');
+  }
+  return cmd;
 }
 
 /**
@@ -74,9 +78,13 @@ export function addIndexerNetworkOptions(cmd: Command): Command {
  * should prefer `addFormatOptions` from `./envelope.ts` instead.
  */
 export function addIndexerOutputOptions(cmd: Command): Command {
-  return cmd
+  cmd
     .option('--output-file <path>', 'Write JSON response to file instead of stdout')
     .option('--condensed', 'Emit single-line JSON instead of pretty-printed', false);
+  for (const flag of ['--output-file', '--condensed']) {
+    (cmd as any)._findOption?.(flag)?.helpGroup('Output');
+  }
+  return cmd;
 }
 
 /**
