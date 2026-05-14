@@ -125,6 +125,8 @@ import { swapCommand } from './commands/swap.js';
 import { balancesCommand } from './commands/balances.js';
 import { priceCommand } from './commands/price.js';
 import { assetsCommand } from './commands/assets.js';
+import { poolsCommand } from './commands/pools.js';
+import { pairsCommand } from './commands/pairs.js';
 
 // Standard-specific end-user surfaces
 import { payRequestsCommand } from './commands/pay-requests.js';
@@ -200,7 +202,7 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   },
   {
     title: 'Swap & DEX',
-    commands: [swapCommand, balancesCommand, priceCommand, assetsCommand]
+    commands: [swapCommand, poolsCommand, pairsCommand, balancesCommand, priceCommand, assetsCommand]
   },
   {
     title: 'Standards (end-user actions)',
