@@ -19,6 +19,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
+import { bbError, BBErrorCode } from '../utils/envelope.js';
 
 type FeedbackFlags = NetworkFlags & OutputFlags & {
   type?: 'feedback' | 'feature-idea';
@@ -43,15 +44,15 @@ devFeedbackCommand
     try {
       const trimmed = (message ?? '').trim();
       if (!trimmed) {
-        throw new Error('Feedback message cannot be empty.');
+        throw bbError(BBErrorCode.INVALID_INPUT, 'Feedback message cannot be empty.');
       }
       if (trimmed.length > 2000) {
-        throw new Error(`Feedback message is ${trimmed.length} chars; the indexer limit is 2000.`);
+        throw bbError(BBErrorCode.INVALID_INPUT, `Feedback message is ${trimmed.length} chars; the indexer limit is 2000.`);
       }
 
       const type = opts.type ?? 'feedback';
       if (!FEEDBACK_TYPES.includes(type)) {
-        throw new Error(`--type must be one of: ${FEEDBACK_TYPES.join(', ')} (got "${type}")`);
+        throw bbError(BBErrorCode.INVALID_INPUT, `--type must be one of: ${FEEDBACK_TYPES.join(', ')} (got "${type}")`);
       }
 
       // Source-tag for the `page` field — mirrors the FE's `router.asPath`

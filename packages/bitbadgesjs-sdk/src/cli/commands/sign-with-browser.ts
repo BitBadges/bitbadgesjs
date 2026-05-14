@@ -18,7 +18,7 @@ import * as fs from 'fs';
 import { Command } from 'commander';
 import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
 import { bridgeSign, resolveFrontendUrl } from '../auth/browser-bridge.js';
-import { emit, emitError, commentary } from '../utils/envelope.js';
+import { emit, emitError, commentary, bbError, BBErrorCode } from '../utils/envelope.js';
 import { emitDeprecation } from '../utils/deprecation.js';
 
 function readMessage(opts: { message?: string; messageFile?: string; positional?: string }): string {
@@ -33,7 +33,7 @@ function readMessage(opts: { message?: string; messageFile?: string; positional?
     return opts.positional;
   }
   if (!process.stdin.isTTY) return fs.readFileSync(0, 'utf-8');
-  throw new Error('No message provided. Pass --message <text>, --message-file <path>, a positional arg, or pipe via stdin.');
+  throw bbError(BBErrorCode.INVALID_INPUT, 'No message provided. Pass --message <text>, --message-file <path>, a positional arg, or pipe via stdin.');
 }
 
 /**

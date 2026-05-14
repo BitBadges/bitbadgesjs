@@ -12,6 +12,8 @@ import { addNetworkOptions, resolveNetwork, type NetworkOptions } from '../utils
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import {
   addOutputOptions,
+  bbError,
+  BBErrorCode,
   errorEnvelope,
   successEnvelope,
   writeJsonEnvelope
@@ -74,7 +76,7 @@ async function fetchCosmosTx(nodeUrl: string, hash: string): Promise<FetchResult
   try {
     res = await fetch(url);
   } catch (err: any) {
-    throw new Error(`Failed to reach chain RPC at ${nodeUrl}: ${err?.message || err}`);
+    throw bbError(BBErrorCode.NETWORK_ERROR, `Failed to reach chain RPC at ${nodeUrl}: ${err?.message || err}`);
   }
   const text = await res.text();
   let body: any;
@@ -114,7 +116,7 @@ async function fetchEvmTx(evmRpcUrl: string, hash: string): Promise<FetchResult>
       body: JSON.stringify(reqBody)
     });
   } catch (err: any) {
-    throw new Error(`Failed to reach EVM RPC at ${evmRpcUrl}: ${err?.message || err}`);
+    throw bbError(BBErrorCode.NETWORK_ERROR, `Failed to reach EVM RPC at ${evmRpcUrl}: ${err?.message || err}`);
   }
   const text = await res.text();
   let body: any;

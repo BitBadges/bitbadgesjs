@@ -28,7 +28,7 @@ import { NETWORK_CONFIGS } from '../../signing/types.js';
 import { createTransactionPayload } from '../../transactions/messages/base.js';
 import { encodeTokenizationMsgFromJson, supportedTokenizationTypeUrls } from '../../transactions/messages/bitbadges/tokenization/fromJson.js';
 import { evmToCosmosAddress } from '../../transactions/precompile/helpers.js';
-import { emit, emitError } from '../utils/envelope.js';
+import { emit, emitError, bbError, BBErrorCode } from '../utils/envelope.js';
 import { emitDeprecation } from '../utils/deprecation.js';
 import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
 
@@ -50,12 +50,12 @@ function readMsgInput(opts: { input?: string; msgFile?: string; msgStdin?: boole
   } else if (!process.stdin.isTTY) {
     raw = fs.readFileSync(0, 'utf-8');
   } else {
-    throw new Error('No msg input. Pass a positional file/-, --msg-file, --msg-stdin, or pipe via stdin.');
+    throw bbError(BBErrorCode.INVALID_INPUT, 'No msg input. Pass a positional file/-, --msg-file, --msg-stdin, or pipe via stdin.');
   }
   try {
     return JSON.parse(raw);
   } catch (err: any) {
-    throw new Error(`Failed to parse msg JSON: ${err?.message || err}`);
+    throw bbError(BBErrorCode.INVALID_INPUT, `Failed to parse msg JSON: ${err?.message || err}`);
   }
 }
 
@@ -63,7 +63,7 @@ function normalizeMessages(input: unknown): MsgEntry[] {
   const arr = Array.isArray(input) ? input : [input];
   for (const m of arr) {
     if (!m || typeof m !== 'object' || typeof (m as any).typeUrl !== 'string' || !(m as any).value) {
-      throw new Error('Each message must be `{typeUrl: string, value: object}`. Received: ' + JSON.stringify(m));
+      throw bbError(BBErrorCode.INVALID_INPUT, 'Each message must be `{typeUrl: string, value: object}`. Received: ' + JSON.stringify(m));
     }
   }
   return arr as MsgEntry[];
@@ -89,12 +89,12 @@ async function fetchAccountInfo(baseUrl: string, apiKey: string | undefined, add
     body: JSON.stringify({ accountsToFetch: [{ address }] }),
   });
   if (!res.ok) {
-    throw new Error(`Failed to fetch account info for ${address}: HTTP ${res.status} ${await res.text()}`);
+    throw bbError(BBErrorCode.NETWORK_ERROR, `Failed to fetch account info for ${address}: HTTP ${res.status} ${await res.text()}`);
   }
   const body = await res.json();
   const acct = (body?.accounts ?? [])[0];
   if (!acct) {
-    throw new Error(`Indexer returned no account for ${address}. Has it been seen onchain yet?`);
+    throw bbError(BBErrorCode.NETWORK_ERROR, `Indexer returned no account for ${address}. Has it been seen onchain yet?`);
   }
   return {
     accountNumber: Number(acct.accountNumber ?? 0),

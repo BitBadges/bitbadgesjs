@@ -16,6 +16,7 @@
  */
 
 import { parseDuration } from '../../core/builders/shared.js';
+import { bbError, BBErrorCode } from './envelope.js';
 
 /**
  * Parse a time flag value into ms-since-epoch as a bigint.
@@ -29,7 +30,7 @@ import { parseDuration } from '../../core/builders/shared.js';
  */
 export function parseTimeFlag(input: string, ctx: string): bigint {
   if (!input || typeof input !== 'string' || input.trim().length === 0) {
-    throw new Error(`Missing time value for ${ctx}.`);
+    throw bbError(BBErrorCode.INVALID_INPUT, `Missing time value for ${ctx}.`);
   }
   const trimmed = input.trim();
 
@@ -46,7 +47,8 @@ export function parseTimeFlag(input: string, ctx: string): bigint {
   try {
     deltaMs = BigInt(parseDuration(trimmed));
   } catch (err: any) {
-    throw new Error(
+    throw bbError(
+      BBErrorCode.INVALID_INPUT,
       `Invalid time value "${input}" for ${ctx}. Accepts: ms-since-epoch (e.g. 1748140800000) or duration shorthand (e.g. 24h, 7d, 30d, monthly). ${err?.message ?? ''}`
     );
   }
