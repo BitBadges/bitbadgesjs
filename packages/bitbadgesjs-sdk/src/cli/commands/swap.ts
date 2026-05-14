@@ -16,74 +16,15 @@
 
 import { Command } from 'commander';
 import * as fs from 'node:fs';
-import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
-import { requireBb1Address } from '../utils/address.js';
-
-interface NetworkFlags {
-  testnet?: boolean;
-  local?: boolean;
-  url?: string;
-  apiKey?: string;
-}
-
-interface OutputFlags {
-  outputFile?: string;
-  condensed?: boolean;
-}
-
-function resolveNetwork(opts: NetworkFlags): 'mainnet' | 'testnet' | 'local' | undefined {
-  if (opts.testnet) return 'testnet';
-  if (opts.local) return 'local';
-  return undefined;
-}
-
-function addNetworkFlags(cmd: Command): Command {
-  return cmd
-    .option('--testnet', 'Use testnet API', false)
-    .option('--local', 'Use local API (localhost:3001)', false)
-    .option('--url <url>', 'Custom API base URL (overrides --testnet/--local/config)')
-    .option('--api-key <key>', 'BitBadges API key (overrides BITBADGES_API_KEY env)');
-}
-
-function addOutputFlags(cmd: Command): Command {
-  return cmd
-    .option('--output-file <path>', 'Write JSON response to file instead of stdout')
-    .option('--condensed', 'Emit single-line JSON instead of pretty-printed', false);
-}
-
-function emit(result: unknown, opts: OutputFlags): void {
-  const formatted = opts.condensed ? JSON.stringify(result) : JSON.stringify(result, null, 2);
-  if (opts.outputFile) {
-    fs.writeFileSync(opts.outputFile, formatted + '\n', 'utf-8');
-    process.stderr.write(`Written to ${opts.outputFile}\n`);
-  } else {
-    process.stdout.write(formatted + '\n');
-  }
-}
-
-function emitError(err: any): never {
-  if (err?.response) {
-    process.stderr.write(JSON.stringify(err.response, null, 2) + '\n');
-  } else {
-    process.stderr.write(`Error: ${err?.message ?? String(err)}\n`);
-  }
-  if (err?.hint) {
-    process.stderr.write(`Hint: ${err.hint}\n`);
-  }
-  process.exit(1);
-}
-
-async function callApi(
-  method: 'GET' | 'POST',
-  path: string,
-  opts: NetworkFlags,
-  body?: unknown
-): Promise<unknown> {
-  const network = resolveNetwork(opts);
-  const apiKey = resolveApiKey(opts.apiKey, network);
-  const baseUrl = resolveBaseUrl({ testnet: opts.testnet, local: opts.local, baseUrl: opts.url });
-  return apiRequest({ method, path, body, apiKey, baseUrl });
-}
+import {
+  addIndexerNetworkOptions as addNetworkFlags,
+  addIndexerOutputOptions as addOutputFlags,
+  callIndexer as callApi,
+  emitIndexerResult as emit,
+  emitIndexerError as emitError,
+  type IndexerNetworkFlags as NetworkFlags,
+  type IndexerOutputFlags as OutputFlags,
+} from '../utils/indexer-options.js';
 
 function appendQuery(path: string, params: Record<string, string | number | boolean | undefined>): string {
   const search = new URLSearchParams();
@@ -99,7 +40,7 @@ function appendQuery(path: string, params: Record<string, string | number | bool
 // ── swap (parent) ──────────────────────────────────────────────────────
 
 export const swapCommand = new Command('swap').description(
-  'Cross-chain swap helpers — assets, chains, balances, route estimates, tracking, activity, intents.'
+  'Cross-chain swap helpers — assets, chains, balances, route estimates, tracking, activity. (Intent Exchange moved to top-level `bb intents`.)'
 );
 
 // ── swap assets ─────────────────────────────────────────────────────────
@@ -285,43 +226,163 @@ addOutputFlags(
   }
 });
 
-// ── swap intents ────────────────────────────────────────────────────────
+// ── swap pools ──────────────────────────────────────────────────────────
+//
+// Liquidity pool browser — list, show, by-denom, by-assets. The indexer
+// already serves these under /pools/* — we just provide a typed CLI view.
+// User-side pool shares (chain query, not indexer) is tracked in backlog
+// 0394 (typed SDK chain-query client).
+
+const poolsCommand = swapCommand.command('pools').description('Liquidity pool browser — list, show, by-denom, by-assets.');
 
 addOutputFlags(
-  addNetworkFlags(swapCommand.command('intents'))
-    .description(
-      'List intent-type exchange approvals. Default = global browse (active/funded only). Pass --mine <address> to scope to a single approver and include used/inactive rows.'
-    )
-    .option(
-      '--mine <address>',
-      'Restrict to intents created by this address (also includes used/inactive). Accepts bb1... or 0x... — auto-normalized to bb1.'
-    )
-    .option('--pay-denom <denom>', 'Filter by the denom the intent pays out')
-    .option('--receive-denom <denom>', 'Filter by the denom the intent expects to receive')
-    .option('--collection-id <id>', 'Filter to a specific collection ID')
-).action(
-  async (
-    opts: NetworkFlags &
-      OutputFlags & {
-        mine?: string;
-        payDenom?: string;
-        receiveDenom?: string;
-        collectionId?: string;
-      }
-  ) => {
+  addNetworkFlags(poolsCommand.command('list'))
+    .description('Paginated list of all liquidity pools. Default sort: most recent liquidity update.')
+    .option('--bookmark <b>', 'Pagination bookmark from a previous response')
+    .option('--sort-by <field>', 'liquidity | volume | dailyVolume | weeklyVolume | monthlyVolume | allTimeVolume | lastLiquidityUpdate | lastVolumeUpdate', 'liquidity')
+    .option('--sort-order <dir>', 'asc | desc', 'desc')
+).action(async (opts: any) => {
+  try {
+    const path = appendQuery('/pools', { bookmark: opts.bookmark, sortBy: opts.sortBy, sortOrder: opts.sortOrder });
+    const res = await callApi('GET', path, opts);
+    emit(res, opts);
+  } catch (err) {
+    emitError(err);
+  }
+});
+
+addOutputFlags(
+  addNetworkFlags(poolsCommand.command('show'))
+    .description('Fetch a single pool by ID — assets, total liquidity, total shares, volume buckets.')
+    .argument('<pool-id>', 'Pool ID')
+).action(async (poolId: string, opts: any) => {
+  try {
+    const res = await callApi('GET', `/pools/${encodeURIComponent(poolId)}`, opts);
+    emit(res, opts);
+  } catch (err) {
+    emitError(err);
+  }
+});
+
+addOutputFlags(
+  addNetworkFlags(poolsCommand.command('by-denom'))
+    .description('Pools containing a given denom (e.g. ubadge or ibc/...).')
+    .argument('<denom>', 'Denom string')
+    .option('--bookmark <b>', 'Pagination bookmark')
+).action(async (denom: string, opts: any) => {
+  try {
+    const path = appendQuery('/pools/byDenom', { denom, bookmark: opts.bookmark });
+    const res = await callApi('GET', path, opts);
+    emit(res, opts);
+  } catch (err) {
+    emitError(err);
+  }
+});
+
+addOutputFlags(
+  addNetworkFlags(poolsCommand.command('by-assets'))
+    .description('Pools containing a specific asset pair (order-insensitive).')
+    .argument('<denom-a>', 'First denom')
+    .argument('<denom-b>', 'Second denom')
+    .option('--bookmark <b>', 'Pagination bookmark')
+).action(async (denomA: string, denomB: string, opts: any) => {
+  try {
+    const path = appendQuery('/pools/byAssets', { asset1: denomA, asset2: denomB, bookmark: opts.bookmark });
+    const res = await callApi('GET', path, opts);
+    emit(res, opts);
+  } catch (err) {
+    emitError(err);
+  }
+});
+
+addOutputFlags(
+  addNetworkFlags(poolsCommand.command('batch'))
+    .description('Batch fetch multiple pools by ID. Pass IDs as repeated args or comma-separated.')
+    .argument('<pool-ids...>', 'Pool IDs')
+).action(async (poolIds: string[], opts: any) => {
+  try {
+    const ids = poolIds.flatMap((v) => v.split(',')).map((v) => v.trim()).filter(Boolean);
+    if (ids.length === 0) {
+      process.stderr.write('Error: at least one pool ID required.\n');
+      process.exit(2);
+    }
+    const res = await callApi('POST', '/pools/batch', opts, { poolIds: ids });
+    emit(res, opts);
+  } catch (err) {
+    emitError(err);
+  }
+});
+
+// ── swap asset-pairs analytics (top gainers / losers / volume) ──────────
+//
+// Asset-pair analytics live under /assetPairs/* on the indexer.
+
+const pairsCommand = swapCommand.command('asset-pairs').description('Asset-pair analytics — top gainers/losers, highest volume, price-sorted, text search.');
+
+for (const [verb, endpoint, desc] of [
+  ['top-gainers', '/assetPairs/topGainers', 'Top-gaining asset pairs in the last 24h.'],
+  ['top-losers', '/assetPairs/topLosers', 'Top-losing asset pairs in the last 24h.'],
+  ['highest-volume', '/assetPairs/highestVolume', 'Asset pairs sorted by 24h volume.'],
+  ['weekly-top-gainers', '/assetPairs/weeklyTopGainers', 'Top-gaining asset pairs in the last 7d.'],
+  ['weekly-top-losers', '/assetPairs/weeklyTopLosers', 'Top-losing asset pairs in the last 7d.'],
+  ['price-sorted', '/assetPairs/priceSorted', 'Asset pairs sorted by current price.']
+] as const) {
+  addOutputFlags(
+    addNetworkFlags(pairsCommand.command(verb))
+      .description(desc)
+      .option('--bookmark <b>', 'Pagination bookmark')
+      .option('--limit <n>', 'Limit results (server-side cap may apply)')
+  ).action(async (opts: any) => {
     try {
-      const mine = opts.mine ? requireBb1Address(opts.mine, '--mine') : undefined;
-      const base = mine ? `/intents/${encodeURIComponent(mine)}` : '/intents';
-      const path = appendQuery(base, {
-        includeAll: mine ? 'true' : undefined,
-        payDenom: opts.payDenom,
-        receiveDenom: opts.receiveDenom,
-        collectionId: opts.collectionId
-      });
+      const path = appendQuery(endpoint, { bookmark: opts.bookmark, limit: opts.limit });
       const res = await callApi('GET', path, opts);
       emit(res, opts);
     } catch (err) {
       emitError(err);
     }
+  });
+}
+
+addOutputFlags(
+  addNetworkFlags(pairsCommand.command('list'))
+    .description('Paginated list of asset pairs.')
+    .option('--bookmark <b>', 'Pagination bookmark')
+).action(async (opts: any) => {
+  try {
+    const res = await callApi('GET', appendQuery('/assetPairs', { bookmark: opts.bookmark }), opts);
+    emit(res, opts);
+  } catch (err) {
+    emitError(err);
   }
-);
+});
+
+addOutputFlags(
+  addNetworkFlags(pairsCommand.command('search'))
+    .description('Free-text search across asset pairs (denom + symbol).')
+    .argument('<query>', 'Search text')
+    .option('--bookmark <b>', 'Pagination bookmark')
+).action(async (query: string, opts: any) => {
+  try {
+    const res = await callApi('GET', appendQuery('/assetPairs/search', { query, bookmark: opts.bookmark }), opts);
+    emit(res, opts);
+  } catch (err) {
+    emitError(err);
+  }
+});
+
+addOutputFlags(
+  addNetworkFlags(pairsCommand.command('by-denoms'))
+    .description('Fetch asset pairs that include any of the given denoms.')
+    .argument('<denoms...>', 'Denoms (repeated or comma-separated)')
+).action(async (denoms: string[], opts: any) => {
+  try {
+    const list = denoms.flatMap((v) => v.split(',')).map((v) => v.trim()).filter(Boolean);
+    const res = await callApi('POST', '/assetPairs/byDenoms', opts, { denoms: list });
+    emit(res, opts);
+  } catch (err) {
+    emitError(err);
+  }
+});
+
+// (intents — moved to top-level `bb intents`, with create/fill/cancel/show
+// added beyond the original swap-scoped list-only view.)

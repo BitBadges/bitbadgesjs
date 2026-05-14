@@ -179,7 +179,19 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
       tokenIds,
       version: '0',
       approvalCriteria: {
-        predeterminedBalances: scalingBalances(burnAmount),
+        // `scalingBalances()` defaults tokenIds to [{1,1}] for the
+        // common single-token case. Override to the per-side range so
+        // the YES vs NO settlement payouts target the right token —
+        // otherwise the validator (and any FE classifier) sees four
+        // identical-looking approvals on token 1 and can't tell which
+        // is wins-yes vs push-no etc.
+        predeterminedBalances: {
+          ...scalingBalances(burnAmount),
+          incrementedBalances: {
+            ...scalingBalances(burnAmount).incrementedBalances,
+            startBalances: [{ amount: burnAmount, tokenIds, ownershipTimes: FOREVER }]
+          }
+        },
         coinTransfers: [
           {
             to: '',
@@ -272,7 +284,11 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
     symbol: 'NO',
     decimals: coin.decimals,
     pathMetadata: noSource,
-    unitMetadata: noSource
+    unitMetadata: noSource,
+    // NO token is token ID 2 (YES is token 1). Without this override the
+    // default [{1,1}] silently wraps the YES token, which the round-trip
+    // validator catches and the FE denom resolver gets wrong.
+    tokenIdRange: { start: '2', end: '2' }
   });
 
   return buildMsg({

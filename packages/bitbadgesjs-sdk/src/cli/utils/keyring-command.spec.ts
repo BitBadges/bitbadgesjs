@@ -1,7 +1,12 @@
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { buildKeyringCommand, KEYRING_SUPPORTED_TYPE_URLS } from './keyring-command.js';
+import {
+  buildKeyringCommand,
+  buildKeyringMultiCommand,
+  KEYRING_SUPPORTED_TYPE_URLS,
+  KEYRING_POSITIONAL_TYPE_URLS
+} from './keyring-command.js';
 
 function tmpPath(): string {
   return path.join(os.tmpdir(), `bb-msg-test-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.json`);
@@ -165,7 +170,7 @@ describe('buildKeyringCommand', () => {
   it('throws on an unsupported typeUrl with a helpful error', () => {
     expect(() =>
       buildKeyringCommand({
-        msg: { typeUrl: '/tokenization.MsgCastVote', value: {} },
+        msg: { typeUrl: '/tokenization.MsgTotallyUnknownVerb', value: {} },
         from: 'alice',
         network: 'mainnet',
         binary: 'bitbadgeschaind',
@@ -180,5 +185,163 @@ describe('buildKeyringCommand', () => {
     expect(KEYRING_SUPPORTED_TYPE_URLS).toContain('/tokenization.MsgCreateCollection');
     expect(KEYRING_SUPPORTED_TYPE_URLS).toContain('/tokenization.MsgTransferTokens');
     expect(KEYRING_SUPPORTED_TYPE_URLS.length).toBeGreaterThanOrEqual(14);
+  });
+});
+
+describe('dynamic-store positional builders', () => {
+  // The chain-binary's dynamic-store verbs take positional args, not a
+  // JSON blob — these builders are exercised end-to-end by the
+  // dynamic-stores.spec.ts integration suite, but we lock the command-
+  // line shape here so a refactor doesn't silently drop them.
+  const exec = (typeUrl: string, value: any) =>
+    buildKeyringCommand({
+      msg: { typeUrl, value },
+      from: 'alice',
+      network: 'local',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'test',
+      gas: 'auto',
+      gasAdjustment: '1.3',
+      msgFilePath: tmpPath()
+    }).commandLine;
+
+  it('MsgCreateDynamicStore → create-dynamic-store <default-value>', () => {
+    const cmd = exec('/tokenization.MsgCreateDynamicStore', { creator: 'bb1abc', defaultValue: true });
+    expect(cmd).toContain('bitbadgeschaind tx tokenization create-dynamic-store true');
+  });
+
+  it('MsgUpdateDynamicStore → update-dynamic-store <id> <default> <enabled>', () => {
+    const cmd = exec('/tokenization.MsgUpdateDynamicStore', {
+      creator: 'bb1abc', storeId: '42', defaultValue: true, globalEnabled: false
+    });
+    expect(cmd).toContain('update-dynamic-store 42 true false');
+  });
+
+  it('MsgDeleteDynamicStore → delete-dynamic-store <id>', () => {
+    const cmd = exec('/tokenization.MsgDeleteDynamicStore', { creator: 'bb1abc', storeId: '7' });
+    expect(cmd).toContain('delete-dynamic-store 7');
+  });
+
+  it('MsgSetDynamicStoreValue → set-dynamic-store-value <id> <addr> <value>', () => {
+    const cmd = exec('/tokenization.MsgSetDynamicStoreValue', {
+      creator: 'bb1abc', storeId: '7', address: 'bb1charlie', value: true
+    });
+    expect(cmd).toContain('set-dynamic-store-value 7 bb1charlie true');
+  });
+
+  it('MsgUpdateDynamicStore defaults globalEnabled to true when omitted', () => {
+    const cmd = exec('/tokenization.MsgUpdateDynamicStore', {
+      creator: 'bb1abc', storeId: '5'
+    });
+    // default-value defaults to false, globalEnabled defaults to true
+    expect(cmd).toContain('update-dynamic-store 5 false true');
+  });
+
+  it('all four dynamic-store typeUrls are listed in KEYRING_POSITIONAL_TYPE_URLS', () => {
+    expect(KEYRING_POSITIONAL_TYPE_URLS).toEqual(
+      expect.arrayContaining([
+        '/tokenization.MsgCreateDynamicStore',
+        '/tokenization.MsgUpdateDynamicStore',
+        '/tokenization.MsgDeleteDynamicStore',
+        '/tokenization.MsgSetDynamicStoreValue'
+      ])
+    );
+  });
+});
+
+describe('buildKeyringMultiCommand', () => {
+  const transferMsg = {
+    typeUrl: '/tokenization.MsgTransferTokens',
+    value: {
+      creator: 'bb1qqq',
+      collectionId: '7',
+      transfers: [{ prioritizedApprovals: [{ approvalId: 'accept' }] }]
+    }
+  };
+
+  const voteMsg = {
+    typeUrl: '/tokenization.MsgCastVote',
+    value: {
+      creator: 'bb1qqq',
+      collection_id: '7',
+      approval_level: 'collection',
+      approver_address: '',
+      approval_id: 'accept',
+      proposal_id: 'prop-abc',
+      yes_weight: '100'
+    }
+  };
+
+  it('emits a 2-block command chained with && for a bounty accept (vote + transfer)', () => {
+    const result = buildKeyringMultiCommand({
+      messages: [voteMsg, transferMsg],
+      from: 'alice',
+      network: 'mainnet',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'os',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    });
+    // Vote block uses positional args
+    expect(result.commandLine).toContain('bitbadgeschaind tx tokenization cast-vote 7 collection');
+    expect(result.commandLine).toContain("'' accept prop-abc 100");
+    expect(result.commandLine).toContain('--yes && sleep 6 && \\');
+    // Transfer block uses [tx-json-or-file]
+    expect(result.commandLine).toMatch(
+      /bitbadgeschaind tx tokenization transfer-tokens \/[^ \n]+\.json/
+    );
+    // Exactly one tmp file written (for the JSON-arg transfer; the vote uses positional args)
+    expect(result.msgFilePaths).toHaveLength(1);
+    // Last block must NOT have trailing &&
+    expect(result.commandLine.trim().endsWith('--yes')).toBe(true);
+  });
+
+  it('writes only the inner value of JSON-arg msgs (not the typeUrl wrapper)', () => {
+    const result = buildKeyringMultiCommand({
+      messages: [voteMsg, transferMsg],
+      from: 'alice',
+      network: 'mainnet',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'os',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    });
+    const written = JSON.parse(fs.readFileSync(result.msgFilePaths[0], 'utf-8'));
+    expect(written).toEqual(transferMsg.value);
+    fs.unlinkSync(result.msgFilePaths[0]);
+  });
+
+  it('throws on a typeUrl that has neither JSON-arg nor positional support', () => {
+    expect(() =>
+      buildKeyringMultiCommand({
+        messages: [{ typeUrl: '/tokenization.MsgUnknown', value: {} }],
+        from: 'alice',
+        network: 'mainnet',
+        binary: 'bitbadgeschaind',
+        keyringBackend: 'os',
+        gas: 'auto',
+        gasAdjustment: '1.3'
+      })
+    ).toThrow(/has no chain-binary subcommand mapping/);
+  });
+
+  it('exports KEYRING_POSITIONAL_TYPE_URLS including MsgCastVote', () => {
+    expect(KEYRING_POSITIONAL_TYPE_URLS).toContain('/tokenization.MsgCastVote');
+  });
+
+  it('honors network/binary/backend overrides per block', () => {
+    const result = buildKeyringMultiCommand({
+      messages: [voteMsg, transferMsg],
+      from: 'alice',
+      network: 'local',
+      binary: 'bb',
+      keyringBackend: 'test',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    });
+    expect(result.commandLine).toContain('bb tx tokenization cast-vote');
+    expect(result.commandLine).toContain('--node http://localhost:26657');
+    expect(result.commandLine).toContain('--keyring-backend test');
+    expect(result.commandLine).toContain('--chain-id bitbadges-1');
   });
 });

@@ -131,15 +131,38 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
 
   const tokenMetadata = products.map((product, i) => {
     const idStr = String(i + 1);
-    const productSource: any = product.uri
-      ? { uri: product.uri }
-      : {
-          inlineMetadata: {
-            name: product.name,
-            description: product.description || product.name,
-            image: (product.image || params.image) as string
-          }
-        };
+    // Per-product inline metadata falls back to the catalog-level
+    // metadata when a field is omitted. Without this fallback, agents
+    // that pass `--uri <catalog.json>` AND a minimal `--products` array
+    // (just `name` + `price` + `denom` per product) hit
+    // MetadataMissingError because per-product image/description aren't
+    // explicitly set. The catalog-level uri/image/description is the
+    // sensible default for every product that doesn't override it.
+    let productSource: any;
+    if (product.uri) {
+      productSource = { uri: product.uri };
+    } else if (product.image || params.image) {
+      productSource = {
+        inlineMetadata: {
+          name: product.name,
+          description: product.description || product.name,
+          image: (product.image || params.image) as string
+        }
+      };
+    } else if (params.uri) {
+      // Catalog-level URI but no per-product image — fall back to the
+      // catalog URI as the per-token metadata source. Buyers see the
+      // catalog metadata for SKUs that didn't ship their own.
+      productSource = { uri: params.uri };
+    } else {
+      productSource = {
+        inlineMetadata: {
+          name: product.name,
+          description: product.description || product.name,
+          image: ''
+        }
+      };
+    }
     return tokenMetadataEntry([{ start: idStr, end: idStr }], productSource, `product "${product.name}"`);
   });
 

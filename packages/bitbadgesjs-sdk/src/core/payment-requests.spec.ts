@@ -11,7 +11,11 @@
 
 import {
   validatePaymentRequestCollection,
-  doesCollectionFollowPaymentRequestProtocol
+  doesCollectionFollowPaymentRequestProtocol,
+  extractPaymentRequestDetails,
+  derivePaymentRequestStatusFallback,
+  buildPaymentRequestPayMsg,
+  buildPaymentRequestDenyMsg
 } from './payment-requests.js';
 
 const BURN = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
@@ -180,5 +184,86 @@ describe('validatePaymentRequestCollection — approval shape', () => {
     const c = fresh();
     c.collectionApprovals[0].toListId = 'bb1other';
     expect(validatePaymentRequestCollection(c).errors.some((e: string) => e.includes('toListId must be burn address'))).toBe(true);
+  });
+});
+
+// ── End-user helper tests ──────────────────────────────────────────────────
+
+describe('extractPaymentRequestDetails', () => {
+  it('splits a valid PR collection into pay + deny + metadata', () => {
+    const c = makeValidCollection();
+    const details = extractPaymentRequestDetails(c.collectionApprovals);
+    expect(details).not.toBeNull();
+    expect(details!.payApproval.approvalId).toBe('payment-request-pay');
+    expect(details!.denyApproval.approvalId).toBe('payment-request-deny');
+    expect(details!.payerAddress).toBe(PAYER);
+    expect(details!.recipientAddress).toBe(RECIPIENT);
+    expect(details!.expirationTime).toBe(1000n);
+    expect(details!.paymentCoins).toEqual([{ denom: 'uusdc', amount: 10000000n }]);
+  });
+
+  it('returns null when no pay approval (no coinTransfers)', () => {
+    expect(extractPaymentRequestDetails([makeDenyApproval(), makeDenyApproval()] as any)).toBeNull();
+  });
+
+  it('returns null when deny approval window does not match pay end', () => {
+    const pay = makePayApproval();
+    const deny = makeDenyApproval();
+    deny.transferTimes[0].end = 9999n;
+    expect(extractPaymentRequestDetails([pay, deny] as any)).toBeNull();
+  });
+
+  it('is order-independent (deny first, pay second)', () => {
+    const details = extractPaymentRequestDetails([makeDenyApproval(), makePayApproval()] as any);
+    expect(details).not.toBeNull();
+    expect(details!.payApproval.approvalId).toBe('payment-request-pay');
+  });
+});
+
+describe('derivePaymentRequestStatusFallback', () => {
+  it('returns "pending" when expiration is in the future', () => {
+    const future = BigInt(Date.now() + 60000);
+    expect(derivePaymentRequestStatusFallback(future)).toBe('pending');
+  });
+
+  it('returns "expired" when expiration is in the past', () => {
+    const past = BigInt(Date.now() - 60000);
+    expect(derivePaymentRequestStatusFallback(past)).toBe('expired');
+  });
+
+  it('returns "pending" for zero expiration (no deadline configured)', () => {
+    expect(derivePaymentRequestStatusFallback(0n)).toBe('pending');
+  });
+});
+
+describe('buildPaymentRequestPayMsg / DenyMsg', () => {
+  it('emits a JSON-ready MsgTransferTokens envelope targeting the pay approval', () => {
+    const pay = makePayApproval();
+    const msg = buildPaymentRequestPayMsg(PAYER, '42', pay as any);
+    expect(msg.typeUrl).toBe('/tokenization.MsgTransferTokens');
+    expect((msg.value as any).creator).toBe(PAYER);
+    expect((msg.value as any).collectionId).toBe('42');
+    const transfer = (msg.value as any).transfers[0];
+    expect(transfer.prioritizedApprovals[0].approvalId).toBe('payment-request-pay');
+    expect(transfer.onlyCheckPrioritizedCollectionApprovals).toBe(true);
+    expect(transfer.from).toBe('Mint');
+    expect(transfer.toAddresses).toEqual([BURN]);
+  });
+
+  it('Deny msg points at the deny approval id', () => {
+    const deny = makeDenyApproval();
+    const msg = buildPaymentRequestDenyMsg(PAYER, '42', deny as any);
+    expect((msg.value as any).transfers[0].prioritizedApprovals[0].approvalId).toBe('payment-request-deny');
+  });
+
+  it('output is JSON-stringifiable (uint64s are strings, not bigints)', () => {
+    const pay = makePayApproval();
+    const msg = buildPaymentRequestPayMsg(PAYER, '42', pay as any);
+    expect(() => JSON.stringify(msg)).not.toThrow();
+    const transfer = (msg.value as any).transfers[0];
+    expect(typeof transfer.balances[0].amount).toBe('string');
+    expect(typeof transfer.balances[0].tokenIds[0].start).toBe('string');
+    expect(typeof transfer.balances[0].ownershipTimes[0].end).toBe('string');
+    expect(typeof transfer.prioritizedApprovals[0].version).toBe('string');
   });
 });

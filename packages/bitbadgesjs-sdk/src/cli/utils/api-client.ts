@@ -119,7 +119,23 @@ export async function apiRequest(options: ApiRequestOptions): Promise<any> {
     fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
   }
 
-  const response = await fetch(url, fetchOptions);
+  let response: Response;
+  try {
+    response = await fetch(url, fetchOptions);
+  } catch (err: any) {
+    // Network-level failures (DNS, connection refused, TLS) all surface as
+    // a single `TypeError: fetch failed` via undici with no context. Re-throw
+    // with the resolved URL embedded + a targeted hint so agents can tell
+    // apart "wrong URL" / "indexer down" / "firewall" without re-reading the
+    // source.
+    const msg = err?.cause?.code
+      ? `${err.message} (${err.cause.code})`
+      : err?.message || String(err);
+    const wrapped = new Error(`Network error reaching ${url}: ${msg}`);
+    (wrapped as any).hint =
+      'Could not reach the indexer. Check: (1) the URL is correct (--url / --local / --testnet), (2) the indexer is running, (3) network/firewall.';
+    throw wrapped;
+  }
 
   // Indexer runs express-session with rolling: true — every authenticated
   // response carries a fresh Set-Cookie that resets Max-Age to 7d. Capture
@@ -159,6 +175,16 @@ export async function apiRequest(options: ApiRequestOptions): Promise<any> {
       (err as any).hint = cookie
         ? 'Session may be expired or scoped wrong — run `bitbadges-cli auth login` again.'
         : 'This route requires user-scoped auth — run `bitbadges-cli auth login`, then retry with `--with-session`.';
+    }
+    if (response.status === 404 && /\/collection\//.test(path)) {
+      // /collection/:id 404 is the most common indexer-lag symptom: a tx
+      // committed on chain but the indexer hasn't surfaced the doc yet.
+      // The catch-up window is usually <5s on local, <30s on mainnet/testnet.
+      // (We don't know if the caller just deployed the collection vs.
+      // looked up a never-existed ID, so we keep the hint conditional in
+      // tone — "if you just deployed" rather than asserting lag.)
+      (err as any).hint =
+        'If this collection was just deployed, the indexer may not have caught up yet — retry in a few seconds. Otherwise the collection ID does not exist.';
     }
     throw err;
   }

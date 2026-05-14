@@ -434,6 +434,12 @@ export function alwaysLockedTokenIdsPermission() {
  * Requires fromListId / toListId / initiatedByListId plus tokenIds and
  * transferTimes. Defaults to "all approvals, forever" so the resulting
  * permission locks the whole approval set.
+ *
+ * Fields mirror the chain proto `CollectionApprovalPermission` (9 fields).
+ * Earlier revisions of this helper also emitted `amountTrackerId` and
+ * `challengeTrackerId`, but those don't exist on the permission proto —
+ * the chain binary's strict JSON parser rejects them with
+ * `unknown field "amountTrackerId" in types.CollectionApprovalPermission`.
  */
 export function alwaysLockedCollectionApprovalPermission() {
   return {
@@ -442,9 +448,8 @@ export function alwaysLockedCollectionApprovalPermission() {
     initiatedByListId: 'All',
     transferTimes: FOREVER,
     tokenIds: FOREVER,
+    ownershipTimes: FOREVER,
     approvalId: 'All',
-    amountTrackerId: 'All',
-    challengeTrackerId: 'All',
     permanentlyPermittedTimes: [],
     permanentlyForbiddenTimes: FOREVER
   };
@@ -661,8 +666,15 @@ export function buildAliasPath(params: {
   decimals: number;
   pathMetadata: MetadataSource;
   unitMetadata: MetadataSource;
+  // Token-ID range this alias path wraps. Defaults to [{1,1}] for the
+  // common single-token case. Multi-token collections (e.g. prediction
+  // markets which need a separate uno path for token 2) must pass their
+  // target range explicitly — otherwise the path silently wraps the
+  // wrong token and round-trip validators fall over.
+  tokenIdRange?: { start: string; end: string };
 }) {
   const { denom, symbol, decimals } = params;
+  const tokenIdRange = params.tokenIdRange ?? { start: '1', end: '1' };
   // Chain rule: denom unit decimals must be > 0. The chain rejects
   // `decimals: '0'` with "denom unit decimals cannot be 0". Fail fast at
   // build time so callers get a clear error instead of a chain rejection
@@ -703,7 +715,7 @@ export function buildAliasPath(params: {
     denom,
     conversion: {
       sideA: { amount: '1' },
-      sideB: [{ amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: FOREVER }]
+      sideB: [{ amount: '1', tokenIds: [tokenIdRange], ownershipTimes: FOREVER }]
     },
     // Path-level symbol intentionally LEFT EMPTY. The chain validates
     // path-level symbols and denom-unit-level symbols against the SAME

@@ -27,6 +27,14 @@ export interface BountyParams {
   denom: string; // USDC, BADGE, etc.
   verifier: string; // bb1... address
   recipient: string; // bb1... address
+  /**
+   * Submitter address (bb1...) — receives the refund on deny / expire.
+   * Required: the chain rejects empty `to` when `overrideToWithInitiator`
+   * is false (which it must be for these branches, since the verifier is
+   * the initiator on deny — we want refunds to go to the submitter, not
+   * to the verifier who triggers them).
+   */
+  submitter: string;
   expiration?: string; // duration shorthand, default "30d"
   /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
   uri?: string;
@@ -36,6 +44,16 @@ export interface BountyParams {
 }
 
 export function buildBounty(params: BountyParams): any {
+  if (!params.submitter) {
+    throw new Error(
+      'buildBounty: --submitter is required (receives the refund on deny / expire).'
+    );
+  }
+  if (params.submitter === params.recipient) {
+    throw new Error(
+      'buildBounty: --submitter and --recipient must differ. SDK validator checks accept.to !== deny.to (recipient vs submitter).'
+    );
+  }
   const coin = resolveCoin(params.denom);
   const baseAmount = toBaseUnits(params.amount, coin.decimals);
   const expirationTs = durationToTimestamp(params.expiration || '30d');
@@ -109,7 +127,7 @@ export function buildBounty(params: BountyParams): any {
         ],
         coinTransfers: [
           {
-            to: '',
+            to: params.submitter,
             coins: [{ amount: baseAmount, denom: coin.denom }],
             overrideFromWithApproverAddress: true,
             overrideToWithInitiator: false
@@ -141,7 +159,7 @@ export function buildBounty(params: BountyParams): any {
         },
         coinTransfers: [
           {
-            to: '',
+            to: params.submitter,
             coins: [{ amount: baseAmount, denom: coin.denom }],
             overrideFromWithApproverAddress: true,
             overrideToWithInitiator: false

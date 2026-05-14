@@ -19,6 +19,24 @@ function isExactRange(arr: any[] | undefined, start: string, end: string): boole
   return n(arr[0].start) === start && n(arr[0].end) === end;
 }
 
+/**
+ * Check whether ANY of the four `maxNumTransfers` fields is non-zero. The
+ * chain only requires "some bounded limit" when an approval uses
+ * `overrideFromWithApproverAddress` — overall/perTo/perFrom/perInitiatedBy
+ * all count. Our builders pick `perInitiatedByAddress: 1` for settlement
+ * (one-shot per verifier) which the chain accepts; the validator used to
+ * only check `overall` and would reject the builder's own output.
+ */
+function hasAnyNonZeroTransferLimit(mnt: any): boolean {
+  if (!mnt) return false;
+  return (
+    n(mnt.overallMaxNumTransfers) !== '0' ||
+    n(mnt.perToAddressMaxNumTransfers) !== '0' ||
+    n(mnt.perFromAddressMaxNumTransfers) !== '0' ||
+    n(mnt.perInitiatedByAddressMaxNumTransfers) !== '0'
+  );
+}
+
 /** Check if permanentlyForbiddenTimes covers the full uint64 range. */
 function isFrozen(permArr: any[] | undefined): boolean {
   if (!Array.isArray(permArr) || permArr.length === 0) return false;
@@ -255,8 +273,10 @@ function validateRedeemApproval(approval: any, errors: string[]): void {
     errors.push(`${prefix}: startBalances must cover both YES (token 1) and NO (token 2)`);
   }
 
-  if (n(criteria.maxNumTransfers?.overallMaxNumTransfers) === '0') {
-    errors.push(`${prefix}: overallMaxNumTransfers must be > 0 when using overrideFromWithApproverAddress`);
+  if (!hasAnyNonZeroTransferLimit(criteria.maxNumTransfers)) {
+    errors.push(
+      `${prefix}: maxNumTransfers must set a non-zero limit on at least one axis (overall/perTo/perFrom/perInitiatedBy) when using overrideFromWithApproverAddress`
+    );
   }
 }
 
@@ -317,8 +337,10 @@ function validateSettlementApproval(
     }
   }
 
-  if (n(criteria.maxNumTransfers?.overallMaxNumTransfers) === '0') {
-    errors.push(`${prefix}: overallMaxNumTransfers must be > 0 when using overrideFromWithApproverAddress`);
+  if (!hasAnyNonZeroTransferLimit(criteria.maxNumTransfers)) {
+    errors.push(
+      `${prefix}: maxNumTransfers must set a non-zero limit on at least one axis (overall/perTo/perFrom/perInitiatedBy) when using overrideFromWithApproverAddress`
+    );
   }
 
   const votingChallenges = criteria.votingChallenges ?? [];
@@ -402,7 +424,12 @@ export function validatePredictionMarketCollection(collection: any): PredictionM
   }
 
   // 3. Alias paths
-  const aliasPaths = collection.aliasPaths ?? [];
+  // Accept either the indexer's materialized `aliasPaths` (post-deploy) or
+  // the source MSG field `aliasPathsToAdd` (pre-deploy). Both shapes carry
+  // identical {denom, conversion, ...} entries, so downstream checks work
+  // unchanged. This keeps the validator usable for `bb check` on freshly
+  // built MSGs without a chain round-trip.
+  const aliasPaths = collection.aliasPaths ?? collection.aliasPathsToAdd ?? [];
   if (aliasPaths.length !== 2) {
     errors.push(`Must have exactly 2 alias paths (YES and NO), got ${aliasPaths.length}`);
   } else {
@@ -755,4 +782,349 @@ export function validatePredictionMarketCollection(collection: any): PredictionM
  */
 export function isPredictionMarketValid(collection: any): boolean {
   return validatePredictionMarketCollection(collection).valid;
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// End-user helpers (lifted from FE prediction/* components)
+// ──────────────────────────────────────────────────────────────────────────
+
+import { UintRangeArray } from './uintRanges.js';
+
+export type PredictionMarketStatus = 'active' | 'closed' | 'resolved-yes' | 'resolved-no' | 'resolved-push';
+
+/** Conservative status fallback when the indexer hasn't enriched standardsInfo yet. */
+export function derivePredictionMarketStatusFallback(deadlineMs: bigint): PredictionMarketStatus {
+  if (deadlineMs > 0n && BigInt(Date.now()) > deadlineMs) return 'closed';
+  return 'active';
+}
+
+export interface PredictionMarketSideArgs {
+  /** Trader address — the approval owner. */
+  address: string;
+  /** Market collection ID (each prediction market is its own collection). */
+  collectionId: string;
+  /** 1 = YES, 2 = NO. */
+  tokenId: bigint;
+  /** Quantity of YES/NO tokens being bought or sold. */
+  tokenAmount: bigint;
+  /** Payment denom (typically the deposit denom or a badgeslp:* alias). */
+  paymentDenom: string;
+  /** Payment amount in base units. */
+  paymentAmount: bigint;
+  /** Active window — typically a single range covering the trading period. */
+  transferTimes: UintRangeArray<bigint>;
+  /** Approval id — caller picks; usually a fresh random hex. */
+  approvalId: string;
+}
+
+/**
+ * Build a prediction-market BUY intent — INCOMING approval where the
+ * creator wants to RECEIVE `tokenAmount` of token-id (1=YES / 2=NO) and
+ * pays `paymentAmount` of `paymentDenom`. Proto-shape only.
+ *
+ * Pair with `MsgSetIncomingApproval` to post on-chain. Mirrors the FE's
+ * `UserOutgoingApprovalRegistry.predictionMarketBuyIntent` (the FE name
+ * is misleading — it's an incoming approval, posted via MsgSetIncomingApproval).
+ */
+export function buildPredictionMarketBuyIntent(args: PredictionMarketSideArgs): Record<string, unknown> {
+  const tokenIds = [{ start: args.tokenId, end: args.tokenId }];
+  return {
+    fromListId: 'All',
+    initiatedByListId: 'All',
+    transferTimes: args.transferTimes,
+    tokenIds,
+    ownershipTimes: UintRangeArray.FullRanges(),
+    approvalId: args.approvalId,
+    version: 0n,
+    approvalCriteria: {
+      autoDeletionOptions: {
+        afterOneUse: true,
+        afterOverallMaxNumTransfers: true,
+        allowCounterpartyPurge: false,
+        allowPurgeIfExpired: true
+      },
+      coinTransfers: [
+        {
+          to: '',
+          overrideFromWithApproverAddress: true,
+          overrideToWithInitiator: true,
+          coins: [{ amount: args.paymentAmount, denom: args.paymentDenom }]
+        }
+      ],
+      predeterminedBalances: {
+        manualBalances: [],
+        orderCalculationMethod: {
+          useOverallNumTransfers: true,
+          usePerToAddressNumTransfers: false,
+          usePerFromAddressNumTransfers: false,
+          usePerInitiatedByAddressNumTransfers: false,
+          useMerkleChallengeLeafIndex: false,
+          challengeTrackerId: ''
+        },
+        incrementedBalances: {
+          startBalances: [{ amount: args.tokenAmount, tokenIds, ownershipTimes: UintRangeArray.FullRanges() }],
+          incrementTokenIdsBy: 0n,
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: 0n,
+          allowOverrideTimestamp: false,
+          allowOverrideWithAnyValidToken: false,
+          allowAmountScaling: false,
+          maxScalingMultiplier: 0n,
+          recurringOwnershipTimes: { startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }
+        }
+      },
+      maxNumTransfers: {
+        overallMaxNumTransfers: 1n,
+        perToAddressMaxNumTransfers: 0n,
+        perFromAddressMaxNumTransfers: 0n,
+        perInitiatedByAddressMaxNumTransfers: 0n,
+        amountTrackerId: args.approvalId,
+        resetTimeIntervals: { startTime: 0n, intervalLength: 0n }
+      },
+      approvalAmounts: {
+        overallApprovalAmount: 0n,
+        perFromAddressApprovalAmount: 0n,
+        perToAddressApprovalAmount: 0n,
+        perInitiatedByAddressApprovalAmount: 0n,
+        amountTrackerId: args.approvalId,
+        resetTimeIntervals: { startTime: 0n, intervalLength: 0n }
+      },
+      merkleChallenges: [],
+      mustOwnTokens: [],
+      dynamicStoreChallenges: [],
+      ethSignatureChallenges: [],
+      votingChallenges: [],
+      evmQueryChallenges: [],
+      requireFromEqualsInitiatedBy: false
+    }
+  };
+}
+
+/**
+ * Build a prediction-market SELL intent — OUTGOING approval where the
+ * creator wants to SEND `tokenAmount` of token-id (1=YES / 2=NO) and
+ * receive `paymentAmount` of `paymentDenom`. Proto-shape only.
+ */
+export function buildPredictionMarketSellIntent(args: PredictionMarketSideArgs): Record<string, unknown> {
+  const tokenIds = [{ start: args.tokenId, end: args.tokenId }];
+  return {
+    toListId: 'All',
+    initiatedByListId: 'All',
+    transferTimes: args.transferTimes,
+    tokenIds,
+    ownershipTimes: UintRangeArray.FullRanges(),
+    approvalId: args.approvalId,
+    version: 0n,
+    approvalCriteria: {
+      autoDeletionOptions: {
+        afterOneUse: true,
+        afterOverallMaxNumTransfers: true,
+        allowCounterpartyPurge: false,
+        allowPurgeIfExpired: true
+      },
+      requireToDoesNotEqualInitiatedBy: false,
+      coinTransfers: [
+        {
+          to: args.address,
+          overrideFromWithApproverAddress: false,
+          overrideToWithInitiator: false,
+          coins: [{ amount: args.paymentAmount, denom: args.paymentDenom }]
+        }
+      ],
+      predeterminedBalances: {
+        manualBalances: [],
+        orderCalculationMethod: {
+          useOverallNumTransfers: true,
+          usePerToAddressNumTransfers: false,
+          usePerFromAddressNumTransfers: false,
+          usePerInitiatedByAddressNumTransfers: false,
+          useMerkleChallengeLeafIndex: false,
+          challengeTrackerId: ''
+        },
+        incrementedBalances: {
+          startBalances: [{ amount: args.tokenAmount, tokenIds, ownershipTimes: UintRangeArray.FullRanges() }],
+          incrementTokenIdsBy: 0n,
+          incrementOwnershipTimesBy: 0n,
+          durationFromTimestamp: 0n,
+          allowOverrideTimestamp: false,
+          allowOverrideWithAnyValidToken: false,
+          allowAmountScaling: false,
+          maxScalingMultiplier: 0n,
+          recurringOwnershipTimes: { startTime: 0n, intervalLength: 0n, chargePeriodLength: 0n }
+        }
+      },
+      maxNumTransfers: {
+        overallMaxNumTransfers: 1n,
+        perToAddressMaxNumTransfers: 0n,
+        perFromAddressMaxNumTransfers: 0n,
+        perInitiatedByAddressMaxNumTransfers: 0n,
+        amountTrackerId: args.approvalId,
+        resetTimeIntervals: { startTime: 0n, intervalLength: 0n }
+      },
+      approvalAmounts: {
+        overallApprovalAmount: 0n,
+        perFromAddressApprovalAmount: 0n,
+        perToAddressApprovalAmount: 0n,
+        perInitiatedByAddressApprovalAmount: 0n,
+        amountTrackerId: args.approvalId,
+        resetTimeIntervals: { startTime: 0n, intervalLength: 0n }
+      },
+      merkleChallenges: [],
+      mustOwnTokens: [],
+      dynamicStoreChallenges: [],
+      ethSignatureChallenges: [],
+      votingChallenges: [],
+      evmQueryChallenges: []
+    }
+  };
+}
+
+// ── Deposit / Redeem / Resolve msg builders ───────────────────────────────
+
+interface MsgEnvelope {
+  typeUrl: '/tokenization.MsgTransferTokens' | '/tokenization.MsgCastVote';
+  value: Record<string, unknown>;
+}
+
+const PM_FULL_OWNERSHIP = [{ start: '1', end: MAX_UINT64 }];
+
+/** Deposit msg: mint paired YES+NO tokens 1:1 against the depositDenom. Single MsgTransferTokens, two transfers. */
+export function buildPredictionMarketDepositMsg(
+  creator: string,
+  collectionId: string,
+  amount: bigint,
+  mintApprovalId: string
+): MsgEnvelope {
+  if (amount <= 0n) throw new Error('buildPredictionMarketDepositMsg: --amount must be > 0');
+  return {
+    typeUrl: '/tokenization.MsgTransferTokens',
+    value: {
+      creator,
+      collectionId: String(collectionId),
+      transfers: [
+        {
+          from: 'Mint',
+          toAddresses: [creator],
+          balances: [
+            { amount: amount.toString(), tokenIds: [{ start: '1', end: '1' }], ownershipTimes: PM_FULL_OWNERSHIP },
+            { amount: amount.toString(), tokenIds: [{ start: '2', end: '2' }], ownershipTimes: PM_FULL_OWNERSHIP }
+          ],
+          prioritizedApprovals: [
+            { approvalId: mintApprovalId, approvalLevel: 'collection', approverAddress: '', version: '0' }
+          ],
+          onlyCheckPrioritizedCollectionApprovals: true,
+          onlyCheckPrioritizedOutgoingApprovals: false,
+          onlyCheckPrioritizedIncomingApprovals: false,
+          memo: ''
+        }
+      ]
+    }
+  };
+}
+
+export interface RedeemArgs {
+  creator: string;
+  collectionId: string;
+  state: 'active' | 'push' | 'yes-wins' | 'no-wins';
+  pairAmount?: bigint;
+  yesBalance?: bigint;
+  noBalance?: bigint;
+  redeemApprovalId?: string;
+  yesWinsApprovalId?: string;
+  noWinsApprovalId?: string;
+  pushYesApprovalId?: string;
+  pushNoApprovalId?: string;
+}
+
+/**
+ * Build redeem msgs by state. Mirrors `PredictionRedeemPanel.tsx`:
+ *   - active: burn YES+NO pairs to reclaim depositDenom 1:1.
+ *   - push: burn YES + NO separately, each gets half payout.
+ *   - yes-wins / no-wins: redeem winner 1:1, burn loser without payout.
+ *
+ * Returns `{messages: [...]}` ready for `bb deploy`. Emits empty array
+ * when nothing is redeemable.
+ */
+export function buildPredictionMarketRedeemTx(args: RedeemArgs): { messages: MsgEnvelope[] } {
+  const msgs: MsgEnvelope[] = [];
+  const cid = String(args.collectionId);
+
+  const burn = (amount: bigint, start: string, end: string, approvalId?: string): MsgEnvelope => ({
+    typeUrl: '/tokenization.MsgTransferTokens',
+    value: {
+      creator: args.creator,
+      collectionId: cid,
+      transfers: [
+        {
+          from: args.creator,
+          toAddresses: [BURN_ADDRESS],
+          balances: [
+            { amount: amount.toString(), tokenIds: [{ start, end }], ownershipTimes: PM_FULL_OWNERSHIP }
+          ],
+          prioritizedApprovals: approvalId
+            ? [{ approvalId, approvalLevel: 'collection', approverAddress: '', version: '0' }]
+            : [],
+          onlyCheckPrioritizedCollectionApprovals: !!approvalId,
+          onlyCheckPrioritizedOutgoingApprovals: false,
+          onlyCheckPrioritizedIncomingApprovals: false,
+          memo: ''
+        }
+      ]
+    }
+  });
+
+  if (args.state === 'active') {
+    const pairs = args.pairAmount ?? 0n;
+    if (pairs > 0n) msgs.push(burn(pairs, '1', '2', args.redeemApprovalId));
+  } else if (args.state === 'push') {
+    if ((args.yesBalance ?? 0n) > 0n) msgs.push(burn(args.yesBalance!, '1', '1', args.pushYesApprovalId));
+    if ((args.noBalance ?? 0n) > 0n) msgs.push(burn(args.noBalance!, '2', '2', args.pushNoApprovalId));
+  } else if (args.state === 'yes-wins') {
+    if ((args.yesBalance ?? 0n) > 0n) msgs.push(burn(args.yesBalance!, '1', '1', args.yesWinsApprovalId));
+    if ((args.noBalance ?? 0n) > 0n) msgs.push(burn(args.noBalance!, '2', '2'));
+  } else {
+    // no-wins
+    if ((args.noBalance ?? 0n) > 0n) msgs.push(burn(args.noBalance!, '2', '2', args.noWinsApprovalId));
+    if ((args.yesBalance ?? 0n) > 0n) msgs.push(burn(args.yesBalance!, '1', '1'));
+  }
+
+  return { messages: msgs };
+}
+
+/**
+ * Verifier-side resolve. Single MsgCastVote for yes/no, two for push.
+ * Approval IDs come from the FE's classifySettlementApproval/standardsInfo.
+ */
+export function buildPredictionMarketResolveTx(
+  creator: string,
+  collectionId: string,
+  outcome: 'yes' | 'no' | 'push',
+  approvals: { yesWinsApprovalId?: string; noWinsApprovalId?: string; pushYesApprovalId?: string; pushNoApprovalId?: string }
+): { messages: MsgEnvelope[] } {
+  const cid = String(collectionId);
+  const voteMsg = (approvalId: string): MsgEnvelope => ({
+    typeUrl: '/tokenization.MsgCastVote',
+    value: {
+      creator,
+      collection_id: cid,
+      approval_level: 'collection',
+      approver_address: '',
+      approval_id: approvalId,
+      proposal_id: approvalId,
+      yes_weight: '100'
+    }
+  });
+
+  if (outcome === 'yes') {
+    if (!approvals.yesWinsApprovalId) throw new Error('Missing yesWinsApprovalId');
+    return { messages: [voteMsg(approvals.yesWinsApprovalId)] };
+  }
+  if (outcome === 'no') {
+    if (!approvals.noWinsApprovalId) throw new Error('Missing noWinsApprovalId');
+    return { messages: [voteMsg(approvals.noWinsApprovalId)] };
+  }
+  if (!approvals.pushYesApprovalId || !approvals.pushNoApprovalId) {
+    throw new Error('Missing pushYesApprovalId / pushNoApprovalId for outcome=push');
+  }
+  return { messages: [voteMsg(approvals.pushYesApprovalId), voteMsg(approvals.pushNoApprovalId)] };
 }

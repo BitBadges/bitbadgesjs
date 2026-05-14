@@ -21,6 +21,10 @@ import {
   resolveApiKey,
   resolveBaseUrl,
 } from '../utils/api-client.js';
+import {
+  addIndexerNetworkOptions,
+  addIndexerOutputOptions,
+} from '../utils/indexer-options.js';
 import { ROUTES, TAG_DESCRIPTIONS, type ApiRoute } from './api-routes.js';
 
 // ---------------------------------------------------------------------------
@@ -157,18 +161,17 @@ function buildRouteCommand(route: ApiRoute): Command {
     cmd = cmd.argument(`[${param}]`, `Path parameter: ${param}`);
   }
 
-  // Common options
-  cmd
+  // Common options. Network + output flags come from the shared
+  // `indexer-options` helpers so every indexer-hitting command exposes
+  // the same `--testnet` / `--local` / `--url` / `--api-key` /
+  // `--output-file` / `--condensed` surface. The per-route extras
+  // (`--body`, `--query`, `--dry-run`, `--schema`, `--with-session`,
+  // `--as-address`) stay inline here — they're API-client specific.
+  addIndexerOutputOptions(addIndexerNetworkOptions(cmd))
     .option('--body <json>', 'Request body: inline JSON, @file.json, or - for stdin')
-    .option('--api-key <key>', 'BitBadges API key (overrides BITBADGES_API_KEY env)')
-    .option('--testnet', 'Use testnet API', false)
-    .option('--local', 'Use local API (localhost:3001)', false)
-    .option('--url <url>', 'Custom API base URL (overrides all other URL options)')
     .option('--query <params>', 'Query string params as JSON object (e.g. \'{"bookmark":"x"}\')')
-    .option('--condensed', 'Output condensed JSON (no whitespace)', false)
     .option('--dry-run', 'Show request details without sending', false)
     .option('--schema', 'Print the request body + response JSONSchema for this route, no API call', false)
-    .option('--output-file <path>', 'Write output to file instead of stdout')
     .option('--with-session', 'Attach the cookie of the active address (set via `auth use`) for the resolved network', false)
     .option('--as-address <addr>', 'Attach the cookie of the given address (overrides --with-session)');
 

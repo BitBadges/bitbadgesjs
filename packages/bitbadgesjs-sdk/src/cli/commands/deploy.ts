@@ -30,7 +30,73 @@ import * as fs from 'fs';
 import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import { runBurnerCreate, pickBurner, type BurnerNetwork } from '../utils/burner.js';
-import { buildKeyringCommand } from '../utils/keyring-command.js';
+import { buildKeyringCommand, buildKeyringMultiCommand } from '../utils/keyring-command.js';
+import {
+  extractEntityFromEvents,
+  waitForIndexer,
+  type ExtractedEntity,
+  type WaitForIndexerResult
+} from '../utils/wait-for-indexer.js';
+
+/**
+ * Parse the `--wait-for-indexer` flag value. The flag is optional and may
+ * appear with or without a value:
+ *   absent          → undefined (no wait)
+ *   --wait-for-indexer        → 30_000 (default)
+ *   --wait-for-indexer 5000   → 5000
+ *   --wait-for-indexer=5000   → 5000
+ *
+ * Commander hands us either `true` (flag with no value), a numeric
+ * string, or undefined (flag absent). Anything else is a user typo and
+ * we exit with code 2 rather than silently defaulting.
+ */
+function parseWaitFlag(raw: unknown): number | undefined {
+  if (raw === undefined) return undefined;
+  if (raw === true || raw === '') return 30_000;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n <= 0) {
+    process.stderr.write(`Error: --wait-for-indexer expects a positive number (ms). Got: ${String(raw)}\n`);
+    process.exit(2);
+  }
+  return Math.floor(n);
+}
+
+/**
+ * Pull a tx's events from the Cosmos LCD given its hash. Used by the
+ * browser path: the /sign flow returns a hash but not the event payload,
+ * so we have to round-trip the LCD before we can pluck the entity id.
+ * Retries briefly because the LCD is also eventually-consistent on its
+ * `/cosmos/tx/v1beta1/txs/<hash>` route (block must be committed +
+ * indexed).
+ */
+async function fetchTxEvents(nodeUrl: string, txHash: string): Promise<any[] | undefined> {
+  const attempts = 10;
+  const delayMs = 1_500;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const res = await fetch(`${nodeUrl}/cosmos/tx/v1beta1/txs/${txHash}`);
+      if (res.ok) {
+        const data = await res.json();
+        const events = (data as any)?.tx_response?.events;
+        if (Array.isArray(events)) return events;
+      }
+    } catch {
+      /* network blip — retry */
+    }
+    await new Promise((r) => setTimeout(r, delayMs));
+  }
+  return undefined;
+}
+
+/**
+ * Render a one-line summary of a successful indexer hit. We intentionally
+ * keep this terse — the full body lives in the JSON envelope, and the
+ * human-readable note on stderr is just confirmation that the entity is
+ * visible.
+ */
+function summarizeIndexerHit(result: { entity: string; id: string; attempts: number; elapsedMs: number }): string {
+  return `Indexer caught up: ${result.entity} ${result.id} visible after ${result.attempts} attempt(s) / ${result.elapsedMs}ms.`;
+}
 
 function readMsgInput(opts: { msgFile?: string; msgStdin?: boolean; input?: string }): any {
   let raw: string;
@@ -192,6 +258,10 @@ export const deployCommand = new Command('deploy')
   .option('--reuse <selector>', 'With --burner: reuse a specific saved burner by address or recovery file path')
   .option('--non-interactive', 'With --burner: never prompt; on any prompt point, save state and exit for later resume. Also forced when stdout is not a TTY.')
   .option('--poll-timeout <seconds>', 'With --burner: seconds to wait for funding to land before prompting/exiting', '60')
+  .option(
+    '--wait-for-indexer [timeout-ms]',
+    'After broadcast: poll the indexer until the created entity (collection / dynamic store) is visible, or until [timeout-ms] elapses (default 30000ms). Skipped when the tx has no recognizable entity id.'
+  )
   .option('--dry-run', 'Simulate the tx and print expected gas + balance changes; never broadcast.');
 addNetworkOptions(deployCommand);
 deployCommand.action(async (input: string | undefined, opts: any) => {
@@ -238,35 +308,65 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
     );
   }
 
-  // 2. Load msg JSON
-  let msg: any;
+  // 2. Load msg JSON. Accept two shapes:
+  //   - Single Msg:   { typeUrl, value }
+  //   - Tx wrapper:   { messages: [{typeUrl, value}, ...] }
+  // Internally we normalize to an array. Single-msg actions (most of the
+  // CLI) emit shape 1; multi-msg actions (bounty accept/deny) emit shape 2.
+  let rawInput: any;
   try {
-    msg = readMsgInput({ msgFile: opts.msgFile, msgStdin: opts.msgStdin, input });
+    rawInput = readMsgInput({ msgFile: opts.msgFile, msgStdin: opts.msgStdin, input });
   } catch (err: any) {
     process.stderr.write(`${err?.message || err}\n`);
     process.exit(2);
   }
 
-  // Shape sanity check — match the level of detail `check` provides on
-  // shape mismatches. `deploy` expects a single Msg `{typeUrl, value}`,
-  // not a tx wrapper. Fail loudly before generating a wallet or hitting
-  // the faucet.
-  if (!msg || typeof msg !== 'object' || typeof msg.typeUrl !== 'string' || !msg.value) {
+  let messages: any[];
+  if (rawInput && typeof rawInput === 'object' && Array.isArray(rawInput.messages)) {
+    messages = rawInput.messages;
+    if (messages.length === 0) {
+      process.stderr.write('Deploy input has an empty `messages` array — nothing to broadcast.\n');
+      process.exit(2);
+    }
+  } else if (
+    rawInput &&
+    typeof rawInput === 'object' &&
+    typeof rawInput.typeUrl === 'string' &&
+    rawInput.value
+  ) {
+    messages = [rawInput];
+  } else {
     const got =
-      msg == null
-        ? String(msg)
-        : Array.isArray(msg)
-          ? `array (length ${msg.length})`
-          : typeof msg === 'object'
-            ? `object with keys [${Object.keys(msg).join(', ')}]`
-            : typeof msg;
+      rawInput == null
+        ? String(rawInput)
+        : Array.isArray(rawInput)
+          ? `array (length ${rawInput.length})`
+          : typeof rawInput === 'object'
+            ? `object with keys [${Object.keys(rawInput).join(', ')}]`
+            : typeof rawInput;
     process.stderr.write(
-      `Deploy input has an unexpected shape — expected a single Msg \`{typeUrl, value}\`.\n` +
-        `Got: ${got}.\n` +
-        `If you have a tx wrapper \`{messages: [...]}\`, extract the first message before piping into deploy.\n`
+      `Deploy input has an unexpected shape — expected a single Msg \`{typeUrl, value}\` or a tx wrapper \`{messages: [{typeUrl, value}, ...]}\`.\n` +
+        `Got: ${got}.\n`
     );
     process.exit(2);
   }
+
+  // Validate each msg in the array has the {typeUrl, value} shape.
+  for (let i = 0; i < messages.length; i++) {
+    const m = messages[i];
+    if (!m || typeof m !== 'object' || typeof m.typeUrl !== 'string' || !m.value) {
+      process.stderr.write(
+        `Deploy input: message[${i}] is missing \`typeUrl\` or \`value\`. Got: ${JSON.stringify(m)?.slice(0, 100) ?? String(m)}\n`
+      );
+      process.exit(2);
+    }
+  }
+
+  // Most legacy paths (burner, dry-run, browser) take a single msg.
+  // Keep `msg` as the first one for those branches; the keyring branch
+  // handles the full array.
+  const msg: any = messages[0];
+  const isMultiMsg = messages.length > 1;
 
   // 2.5 --dry-run short-circuit: simulate the tx and exit before any
   // wallet is generated, funding is requested, or broadcast happens.
@@ -313,8 +413,12 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
   // let the user's connected wallet sign and broadcast, capture the tx
   // hash on the loopback listener. Frontend-side TxModal handles
   // account number / sequence / gas / fees auto-fetch from the indexer.
+  // Multi-msg txs are passed through as-is — /sign supports the array.
   if (useBrowser) {
-    if (msg && msg.value && opts.manager && !msg.value.manager) {
+    // Backfill manager only on a single-msg create-collection (legacy
+    // single-msg shape). Multi-msg txs are application-built and
+    // shouldn't be mutated post-hoc.
+    if (!isMultiMsg && msg && msg.value && opts.manager && !msg.value.manager) {
       msg.value.manager = opts.manager;
     }
     const { bridgeSign, resolveFrontendUrl } = await import('../auth/browser-bridge.js');
@@ -327,7 +431,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
         mode: 'tx',
         payload: {
           chain: 'cosmos',
-          txsInfo: [{ type: msg.typeUrl, msg: msg.value }],
+          txsInfo: messages.map((m: any) => ({ type: m.typeUrl, msg: m.value })),
           expectedAddress,
           signOnly: !!opts.signOnly,
         },
@@ -357,6 +461,52 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
             txHash: result.hash ?? null,
             chain: result.chain ?? 'cosmos',
           };
+
+      // Optional: hold the CLI open until the indexer surfaces whatever
+      // the tx created. Browser flow doesn't return tx events inline, so
+      // we re-fetch the tx from the Cosmos LCD using the returned hash,
+      // pull the first recognizable entity id (collection / store), and
+      // poll the indexer for it. Sign-only short-circuits — there is no
+      // broadcast to wait on.
+      const waitTimeoutMsBrowser = parseWaitFlag(opts.waitForIndexer);
+      if (
+        waitTimeoutMsBrowser !== undefined &&
+        !opts.signOnly &&
+        payload.success &&
+        result.hash &&
+        result.chain !== 'evm'
+      ) {
+        const waitStart = Date.now();
+        const events = await fetchTxEvents(nodeUrl, result.hash);
+        const target = extractEntityFromEvents(events);
+        if (target) {
+          const remaining = Math.max(1_000, waitTimeoutMsBrowser - (Date.now() - waitStart));
+          process.stderr.write(
+            `Waiting for indexer to surface ${target.entity} ${target.id} (timeout ${remaining}ms)...\n`
+          );
+          const waited = await waitForIndexer(target, { apiUrl, apiKey, timeoutMs: remaining });
+          if (waited.ok) {
+            process.stderr.write(summarizeIndexerHit(waited) + '\n');
+          } else {
+            process.stderr.write(
+              `Indexer didn't catch up within ${waitTimeoutMsBrowser}ms — the tx broadcast succeeded, your ${target.entity} may show up shortly.\n`
+            );
+          }
+          payload.waited = {
+            entity: waited.entity,
+            id: waited.id,
+            attempts: waited.attempts,
+            elapsedMs: waited.elapsedMs,
+            ok: waited.ok,
+            ...(waited.ok ? { body: waited.body } : { lastStatus: waited.lastStatus })
+          };
+        } else {
+          process.stderr.write(
+            `--wait-for-indexer: no recognizable entity id in tx events (likely a non-create msg). Skipping wait.\n`
+          );
+        }
+      }
+
       process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
       process.exit(payload.success ? 0 : 1);
     } catch (err: any) {
@@ -375,19 +525,47 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
     // for the chain binary's estimation flow.
     const gasSource = deployCommand.getOptionValueSource('gas');
     const gas = gasSource === 'default' || gasSource === undefined ? 'auto' : String(opts.gas);
+    const sharedKeyringOpts = {
+      from: String(opts.from),
+      network: networkName,
+      binary: String(opts.binary ?? 'bitbadgeschaind'),
+      keyringBackend: String(opts.keyringBackend ?? 'os'),
+      gas,
+      gasAdjustment: String(opts.gasAdjustment ?? '1.3'),
+      manager: opts.manager ? String(opts.manager) : undefined
+    };
+
+    if (isMultiMsg) {
+      let result;
+      try {
+        result = buildKeyringMultiCommand({ ...sharedKeyringOpts, messages });
+      } catch (err: any) {
+        process.stderr.write(`${err?.message || err}\n`);
+        process.exit(2);
+      }
+
+      if (!process.env.BB_QUIET) {
+        const filesNote =
+          result.msgFilePaths.length > 0
+            ? `Wrote ${result.msgFilePaths.length} msg JSON file(s):\n  ${result.msgFilePaths.join('\n  ')}\n`
+            : '';
+        process.stderr.write(`\n${filesNote}Multi-msg tx — chain-binary's tx subcommands only take one msg, so the\nbelow runs them in sequence with a 6s sleep between blocks to avoid\nsequence-skew. NOT atomic: if a later step fails, earlier steps remain\non-chain. For atomic multi-msg, use --burner or --browser.\n\nRun:\n\n`);
+      }
+      process.stdout.write(result.commandLine + '\n');
+      if (!process.env.BB_QUIET) {
+        process.stderr.write(
+          '\n  Append extra flags inside any step (e.g. --fees 5000ubadge --memo "...").\n' +
+            '  Use --keyring-backend test for non-interactive CI signing.\n'
+        );
+      }
+      process.exit(0);
+    }
 
     let result;
     try {
       result = buildKeyringCommand({
         msg,
-        from: String(opts.from),
-        network: networkName,
-        binary: String(opts.binary ?? 'bitbadgeschaind'),
-        keyringBackend: String(opts.keyringBackend ?? 'os'),
-        gas,
-        gasAdjustment: String(opts.gasAdjustment ?? '1.3'),
-        manager: opts.manager ? String(opts.manager) : undefined,
-        nodeUrl: opts.url ? undefined : undefined
+        ...sharedKeyringOpts
       });
     } catch (err: any) {
       process.stderr.write(`${err?.message || err}\n`);
@@ -405,6 +583,18 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       );
     }
     process.exit(0);
+  }
+
+  // Burner path is CREATE-ONLY (the wallet is throwaway and dust-funded
+  // exactly for one create-collection tx). Multi-msg txs aren't part of
+  // that flow and would silently use the wrong gas / wrong manager
+  // backfill if we let them through.
+  if (useBurner && isMultiMsg) {
+    process.stderr.write(
+      'Error: --burner does not support multi-msg txs (it is CREATE-ONLY).\n' +
+        'For multi-msg actions like bounty accept/deny, use --browser (atomic) or --with-keyring (sequential).\n'
+    );
+    process.exit(2);
   }
 
   // 3. Wallet picker (interactive on TTY, bypassed otherwise or via flags)
@@ -444,7 +634,30 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       ? `Run \`bitbadges-cli burner sweep ${result.ephemeralAddress} --to <your-real-address>\` to recover dust, or wait for the faucet to refill.`
       : undefined;
 
-    const payload = {
+    // Optional: hold the CLI open until the indexer has caught up with
+    // the broadcast. The burner flow is CREATE-COLLECTION-only, so the
+    // entity is always `collection` keyed by the returned collectionId
+    // (which itself comes from a brief LCD poll inside runBurnerCreate).
+    // If no id surfaced, skip — we'd be polling for an entity the chain
+    // never emitted.
+    let waited: WaitForIndexerResult | undefined;
+    const waitTimeoutMs = parseWaitFlag(opts.waitForIndexer);
+    if (result.success && waitTimeoutMs !== undefined && result.collectionId) {
+      const target: ExtractedEntity = { entity: 'collection', id: result.collectionId };
+      process.stderr.write(
+        `Waiting for indexer to surface ${target.entity} ${target.id} (timeout ${waitTimeoutMs}ms)...\n`
+      );
+      waited = await waitForIndexer(target, { apiUrl, apiKey, timeoutMs: waitTimeoutMs });
+      if (waited.ok) {
+        process.stderr.write(summarizeIndexerHit(waited) + '\n');
+      } else {
+        process.stderr.write(
+          `Indexer didn't catch up within ${waitTimeoutMs}ms — the tx broadcast succeeded, your ${target.entity} may show up shortly.\n`
+        );
+      }
+    }
+
+    const payload: any = {
       success: result.success,
       ephemeralAddress: result.ephemeralAddress,
       recoveryPath: result.recoveryPath,
@@ -454,6 +667,16 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       error: result.error,
       ...(hint ? { hint } : {})
     };
+    if (waited) {
+      payload.waited = {
+        entity: waited.entity,
+        id: waited.id,
+        attempts: waited.attempts,
+        elapsedMs: waited.elapsedMs,
+        ok: waited.ok,
+        ...(waited.ok ? { body: waited.body } : { lastStatus: waited.lastStatus })
+      };
+    }
     process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
     if (!result.success && !result.paused) process.exit(1);
     if (result.paused) process.exit(0);

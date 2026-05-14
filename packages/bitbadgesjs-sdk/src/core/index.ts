@@ -5,6 +5,7 @@ export * from './approval-utils.js';
 export * from './balances.js';
 export * from './batch-utils.js';
 export * from './coin.js';
+export * from './coin-utils.js';
 export * from './misc.js';
 export * from './permissions.js';
 export * from './permission-utils.js';
@@ -30,6 +31,8 @@ export * from './prediction-markets.js';
 export * from './bounties.js';
 export * from './payment-requests.js';
 export * from './auctions.js';
+export * from './smart-tokens.js';
+export * from './credit-tokens.js';
 // NOTE: interpret.js was moved to ../api-indexer/interpret.js to avoid a circular import
 // (interpretCollection depends on the BitBadgesCollection runtime class, whose module graph
 // transitively loads parts of core/, which produced a "Super expression must either be null

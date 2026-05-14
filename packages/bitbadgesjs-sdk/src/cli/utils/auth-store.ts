@@ -65,11 +65,19 @@ interface AuthFile {
   networks: Partial<Record<Network, NetworkStore>>;
 }
 
-const AUTH_DIR = path.join(os.homedir(), '.bitbadges');
-const AUTH_PATH = path.join(AUTH_DIR, 'auth.json');
+// Resolved lazily — mirrors config.ts so tests can override the parent
+// directory via BITBADGES_CONFIG_DIR without fighting ts-jest's HOME
+// coupling. Production callers leave the env var unset.
+function authDir(): string {
+  if (process.env.BITBADGES_CONFIG_DIR) return process.env.BITBADGES_CONFIG_DIR;
+  return path.join(os.homedir(), '.bitbadges');
+}
+function authPath(): string {
+  return path.join(authDir(), 'auth.json');
+}
 
 export function getAuthPath(): string {
-  return AUTH_PATH;
+  return authPath();
 }
 
 /**
@@ -78,25 +86,28 @@ export function getAuthPath(): string {
  * stored credentials. Auto-chmods to 0600 if found with looser perms.
  */
 export function loadAuthStore(): AuthFile {
-  if (!fs.existsSync(AUTH_PATH)) {
+  const p = authPath();
+  if (!fs.existsSync(p)) {
     return { version: 1, networks: {} };
   }
-  enforceFileMode(AUTH_PATH);
-  const raw = fs.readFileSync(AUTH_PATH, 'utf-8');
+  enforceFileMode(p);
+  const raw = fs.readFileSync(p, 'utf-8');
   const parsed = JSON.parse(raw) as AuthFile;
   if (parsed.version !== 1) {
-    throw new Error(`Unsupported auth.json version ${parsed.version} at ${AUTH_PATH}`);
+    throw new Error(`Unsupported auth.json version ${parsed.version} at ${p}`);
   }
   if (!parsed.networks) parsed.networks = {};
   return parsed;
 }
 
 export function saveAuthStore(store: AuthFile): void {
-  if (!fs.existsSync(AUTH_DIR)) {
-    fs.mkdirSync(AUTH_DIR, { recursive: true, mode: 0o700 });
+  const dir = authDir();
+  const p = authPath();
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   }
-  fs.writeFileSync(AUTH_PATH, JSON.stringify(store, null, 2) + '\n', { encoding: 'utf-8', mode: 0o600 });
-  enforceFileMode(AUTH_PATH);
+  fs.writeFileSync(p, JSON.stringify(store, null, 2) + '\n', { encoding: 'utf-8', mode: 0o600 });
+  enforceFileMode(p);
 }
 
 function enforceFileMode(p: string): void {

@@ -1,5 +1,90 @@
 #!/usr/bin/env node
-import { Command } from 'commander';
+import * as fs from 'node:fs';
+import { Command, Help } from 'commander';
+import { HELP_GROUP_ORDER } from './utils/help-groups.js';
+
+// Apply a custom Help subclass globally so every command + sub-subcommand
+// inherits the "Required: / Options:" split, not just the root. Commander
+// doesn't inherit `.configureHelp(...)` down the subcommand tree, so for
+// deep commands like `bb intents create --help` we need to override at the
+// `Help` class level. Defined here so the override is in scope before any
+// subcommand is instantiated.
+class GroupedHelp extends Help {
+  formatHelp(cmd: Command, helper: Help): string {
+    const sections: string[] = [];
+    sections.push(`Usage: ${helper.commandUsage(cmd)}`);
+    const desc = helper.commandDescription(cmd);
+    if (desc) sections.push('', desc);
+
+    const argList = helper.visibleArguments(cmd);
+    if (argList.length > 0) {
+      sections.push('', 'Arguments:');
+      for (const arg of argList) {
+        sections.push(`  ${helper.argumentTerm(arg).padEnd(28)}  ${helper.argumentDescription(arg)}`);
+      }
+    }
+
+    // Split into Required (declared with `.requiredOption(...)`, Commander
+    // sets `mandatory = true`) and Options. Within Options, sub-group by
+    // `helpGroupHeading` (set via `option.helpGroup(name)`) — per-command
+    // flags (no group) render first, then shared categories in
+    // HELP_GROUP_ORDER. Keeps command-specific knobs at the top and
+    // pushes verbose deploy/builder/network plumbing to the bottom.
+    const optList = helper.visibleOptions(cmd);
+    const requiredOpts = optList.filter((o: any) => o.mandatory);
+    const optionalOpts = optList.filter((o: any) => !o.mandatory);
+    if (requiredOpts.length > 0) {
+      sections.push('', 'Required:');
+      for (const opt of requiredOpts) {
+        sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
+      }
+    }
+    if (optionalOpts.length > 0) {
+      sections.push('', 'Options:');
+      const ungrouped: any[] = [];
+      const byGroup = new Map<string, any[]>();
+      for (const opt of optionalOpts) {
+        const g = (opt as any).helpGroupHeading;
+        if (!g) { ungrouped.push(opt); continue; }
+        if (!byGroup.has(g)) byGroup.set(g, []);
+        byGroup.get(g)!.push(opt);
+      }
+      // Per-command flags first (no subheader)
+      for (const opt of ungrouped) {
+        sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
+      }
+      const orderedGroups = [
+        ...HELP_GROUP_ORDER,
+        ...Array.from(byGroup.keys()).filter((g) => !(HELP_GROUP_ORDER as readonly string[]).includes(g))
+      ];
+      for (const group of orderedGroups) {
+        const groupOpts = byGroup.get(group);
+        if (!groupOpts || groupOpts.length === 0) continue;
+        sections.push('', `  ${group}:`);
+        for (const opt of groupOpts) {
+          sections.push(`    ${helper.optionTerm(opt).padEnd(26)}  ${helper.optionDescription(opt)}`);
+        }
+      }
+    }
+
+    const subList = helper.visibleCommands(cmd);
+    if (subList.length > 0) {
+      sections.push('', 'Commands:');
+      for (const sub of subList) {
+        sections.push(`  ${helper.subcommandTerm(sub).padEnd(28)}  ${helper.subcommandDescription(sub)}`);
+      }
+    }
+
+    return sections.join('\n') + '\n';
+  }
+}
+
+// Replace Command.prototype.createHelp so every Command — including
+// subcommands constructed inside the imports below — picks up GroupedHelp.
+// Must run BEFORE any `new Command(...)` calls.
+(Command.prototype as any).createHelp = function () {
+  return Object.assign(new GroupedHelp(), this.configureHelp());
+};
 
 // Build & ship a transaction
 import { buildCommand } from './commands/build.js';
@@ -35,10 +120,28 @@ import { addressCommand } from './commands/address.js';
 import { aliasCommand } from './commands/alias.js';
 import { lookupCommand } from './commands/lookup.js';
 import { genListIdCommand } from './commands/gen-list-id.js';
+import { amountCommand } from './commands/amount.js';
+import { urlCommand } from './commands/url.js';
+import { dynamicStoresCommand } from './commands/dynamic-stores.js';
 
 // Swap / DEX
 import { swapCommand } from './commands/swap.js';
 import { balancesCommand } from './commands/balances.js';
+import { priceCommand } from './commands/price.js';
+import { assetsCommand } from './commands/assets.js';
+
+// Standard-specific end-user surfaces
+import { payRequestsCommand } from './commands/pay-requests.js';
+import { bountiesCommand } from './commands/bounties.js';
+import { subscriptionsCommand } from './commands/subscriptions.js';
+import { intentsCommand } from './commands/intents.js';
+import { creditTokensCommand } from './commands/credit-tokens.js';
+import { productsCommand } from './commands/products.js';
+import { crowdfundsCommand } from './commands/crowdfunds.js';
+import { auctionsCommand } from './commands/auctions.js';
+import { predictionMarketsCommand } from './commands/prediction-markets.js';
+import { smartTokensCommand } from './commands/smart-tokens.js';
+import { nftsCommand } from './commands/nfts.js';
 
 // Misc
 import { makeCompletionCommand } from './commands/completion.js';
@@ -93,11 +196,28 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   },
   {
     title: 'Address & lookup utilities',
-    commands: [addressCommand, aliasCommand, lookupCommand, genListIdCommand]
+    commands: [addressCommand, aliasCommand, lookupCommand, genListIdCommand, amountCommand, urlCommand]
   },
   {
     title: 'Swap & DEX',
-    commands: [swapCommand, balancesCommand]
+    commands: [swapCommand, balancesCommand, priceCommand, assetsCommand]
+  },
+  {
+    title: 'Standards (end-user actions)',
+    commands: [
+      payRequestsCommand,
+      bountiesCommand,
+      subscriptionsCommand,
+      intentsCommand,
+      creditTokensCommand,
+      productsCommand,
+      crowdfundsCommand,
+      auctionsCommand,
+      predictionMarketsCommand,
+      smartTokensCommand,
+      nftsCommand,
+      dynamicStoresCommand
+    ]
   }
 ];
 
@@ -183,10 +303,25 @@ function defaultFormatHelp(cmd: Command, helper: any): string {
     }
   }
 
+  // Split options into Required (`.requiredOption(...)`, Commander sets
+  // `mandatory = true`) and Options (everything else). Help-bearing flags
+  // like `-h, --help` stay in Options. Commander's stock layout lumps
+  // them together; on commands with 10+ flags it's hard to tell at a
+  // glance which ones the user MUST pass — especially for chained
+  // builder calls (`bb intents create --amount X --denom Y ...`).
   const optList = helper.visibleOptions(cmd);
-  if (optList.length > 0) {
+  const requiredOpts = optList.filter((o: any) => o.mandatory);
+  const optionalOpts = optList.filter((o: any) => !o.mandatory);
+
+  if (requiredOpts.length > 0) {
+    sections.push('', 'Required:');
+    for (const opt of requiredOpts) {
+      sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
+    }
+  }
+  if (optionalOpts.length > 0) {
     sections.push('', 'Options:');
-    for (const opt of optList) {
+    for (const opt of optionalOpts) {
       sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
     }
   }
@@ -232,7 +367,51 @@ if (process.argv.includes('--help-json')) {
   const tree = {
     commands: program.commands.map((cmd) => extractCommandTree(cmd))
   };
-  process.stdout.write(JSON.stringify(tree, null, 2) + '\n');
+  const json = JSON.stringify(tree, null, 2) + '\n';
+  // Use `fs.writeSync(1, ...)` rather than `process.stdout.write(...)` so
+  // the entire ~150KB tree lands before we exit. process.stdout's async
+  // write returns false past the OS pipe buffer (~64KB on Linux), and the
+  // drain callback doesn't suspend the rest of this module — so without
+  // a sync write the file would fall through to `program.parse()` and
+  // emit stale help text after a truncated JSON document. fs.writeSync
+  // writes the full buffer synchronously; nothing left to drain.
+  const buf = Buffer.from(json, 'utf-8');
+  let written = 0;
+  while (written < buf.length) {
+    written += fs.writeSync(1, buf, written, buf.length - written);
+  }
+  process.exit(0);
+}
+
+// ── Top-level error handler ─────────────────────────────────────────────────
+//
+// Commander itself prints a friendly "error: required option ..." line and
+// exits non-zero on flag-shape errors, but anything thrown from inside an
+// .action() handler (e.g. SDK validation errors from `bb build *`) hits
+// Node's default uncaughtException printer, which dumps a 5-line stack
+// trace. That noise drowns out the actual error message and is useless for
+// agents reading stderr. Install handlers that print a single clean
+// "Error: <message>" line and exit 1. Stacks are still available via
+// `BB_DEBUG=1` for humans debugging the CLI itself.
+function reportFatal(err: unknown): void {
+  const msg = err instanceof Error ? err.message : String(err);
+  process.stderr.write(`Error: ${msg}\n`);
+  if (process.env.BB_DEBUG === '1' && err instanceof Error && err.stack) {
+    process.stderr.write(err.stack + '\n');
+  }
+  process.exit(1);
+}
+process.on('uncaughtException', reportFatal);
+process.on('unhandledRejection', reportFatal);
+
+// When invoked with no args, show the full grouped --help by default.
+// Commander's stock behavior prints a minimal "Usage:" stanza and exits —
+// agents and humans both reach for the long form (commands + groups).
+// Detect "no positional args + no help-json + no quiet-only" and route
+// through `outputHelp()` which uses our custom grouped formatter.
+const onlyGlobalFlags = process.argv.slice(2).every((a) => a === '--quiet');
+if (process.argv.length <= 2 || onlyGlobalFlags) {
+  program.outputHelp();
   process.exit(0);
 }
 

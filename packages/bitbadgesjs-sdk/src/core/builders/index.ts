@@ -17,7 +17,13 @@ export { buildCrowdfund, type CrowdfundParams } from './crowdfund.js';
 export { buildAuction, type AuctionParams } from './auction.js';
 export { buildProductCatalog, type ProductCatalogParams, type ProductItem } from './product-catalog.js';
 export { buildPredictionMarket, type PredictionMarketParams } from './prediction-market.js';
-export { buildSmartAccount, type SmartAccountParams } from './smart-account.js';
+export {
+  buildSmartToken,
+  type SmartTokenParams,
+  SMART_TOKEN_DEPOSIT_APPROVAL_ID,
+  SMART_TOKEN_WITHDRAW_APPROVAL_ID,
+  SMART_TOKEN_TRANSFERABLE_APPROVAL_ID
+} from './smart-token.js';
 export { buildCreditToken, type CreditTokenParams } from './credit-token.js';
 export { buildCustom2FA, type Custom2FAParams } from './custom-2fa.js';
 export { buildQuests, type QuestsParams } from './quests.js';
