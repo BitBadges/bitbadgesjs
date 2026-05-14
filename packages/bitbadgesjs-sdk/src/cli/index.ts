@@ -179,11 +179,11 @@ if (process.argv.includes('--quiet')) {
 const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   {
     title: 'Build & ship a transaction',
-    commands: [buildCommand, toolsCommand, toolCommand, checkCommand, explainCommand, simulateCommand, previewCommand, genTxPayloadCommand, deployCommand, txCommand]
+    commands: [buildCommand, toolsCommand, toolCommand, checkCommand, explainCommand, simulateCommand, previewCommand, deployCommand, txCommand]
   },
   {
     title: 'Indexer access',
-    commands: [createApiCommand(), authCommand, signWithBrowserCommand, genPubKeyCommand]
+    commands: [createApiCommand(), authCommand, genPubKeyCommand]
   },
   {
     title: 'Local state',
@@ -289,6 +289,14 @@ program.addCommand(addressAlias);
 program.addCommand(lookupAlias);
 program.addCommand(aliasAlias);
 program.addCommand(genListIdAlias);
+
+// Signing commands absorbed into `deploy` flags. The standalone commands
+// still work for one release — they emit the deprecation banner from
+// inside their action handlers (see sign-with-browser.ts / gen-tx-payload.ts),
+// so we just register them at top level without putting them in the
+// grouped help.
+program.addCommand(signWithBrowserCommand);
+program.addCommand(genTxPayloadCommand);
 
 // ── `cli` umbrella — back-compat alias for the v1 `bb cli <cmd>` shape ──────
 //
