@@ -495,7 +495,7 @@ const sharedOpts = (cmd: Command) => {
     .option('--explain', 'Print a human-readable explanation of the output to stderr (in addition to the auto-review)')
     .option('--creator <address>', 'Creator/sender address (bb1... or 0x...)')
     .option('--manager <address>', 'Collection manager address (bb1...)')
-    .option('--simulate', 'Also simulate the tx against the BitBadges API and render gas + net changes (requires BITBADGES_API_KEY)')
+    .option('--simulate', 'After building, additionally call the BitBadges API simulate endpoint and render gas + net changes (requires BITBADGES_API_KEY). Distinct from `bb deploy --dry-run`, which simulates then exits without broadcasting.')
     .option('--events', 'When --simulate is set, dump the full raw chain events array (default: just the count)');
   // Network selection — only the --simulate path actually hits the
   // API, but we add the flags universally so `templates vault
@@ -1090,7 +1090,7 @@ sharedOpts(
     .option('--to <address>', 'Recipient address (bb1.../0x...)')
     .option('--amount <n>', 'Per-recipient amount (used when not precalculated)')
     .option('--token-ids <spec>', 'Token IDs (e.g. "1-5", "1,3,5", "all")')
-    .option('--yes', 'Non-interactive: skip all prompts. Picks no prioritized approvals, no precalc, default amount=1, default tokenIds=all valid. Use for scripts/CI.')
+    .option('-y, --yes', 'Non-interactive: skip all prompts. Picks no prioritized approvals, no precalc, default amount=1, default tokenIds=all valid. Use for scripts/CI.')
 ).action(async (opts) => {
   if (!process.env.BITBADGES_API_KEY) {
     // Fall through to runtime API-key resolution; the apiClient will

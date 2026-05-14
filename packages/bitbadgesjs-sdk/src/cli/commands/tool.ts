@@ -5,10 +5,11 @@ import {
   loadSessionFromDisk,
   saveSessionToDisk
 } from '../../builder/session/fileStore.js';
+import { bbError, BBErrorCode } from '../utils/envelope.js';
 
 function parseArgs(argsJson: string | undefined, argsFile: string | undefined): any {
   if (argsJson && argsFile) {
-    throw new Error('Pass either --args or --args-file, not both');
+    throw bbError(BBErrorCode.INVALID_INPUT, 'Pass either --args or --args-file, not both');
   }
   if (argsFile) {
     const raw = fs.readFileSync(argsFile, 'utf-8');
@@ -18,7 +19,7 @@ function parseArgs(argsJson: string | undefined, argsFile: string | undefined): 
     try {
       return JSON.parse(argsJson);
     } catch (err) {
-      throw new Error(`--args is not valid JSON: ${(err as Error).message}`);
+      throw bbError(BBErrorCode.INVALID_INPUT, `--args is not valid JSON: ${(err as Error).message}`);
     }
   }
   return {};

@@ -33,50 +33,68 @@ function envWithCfgDir(): Record<string, string> {
 // ── bb config ────────────────────────────────────────────────────────────────
 
 describe('bb config', () => {
-  it('show prints "no configuration" on a fresh tmpdir', () => {
-    const out = runCli(['config', 'show'], { env: envWithCfgDir(), parseJson: false });
+  // `bb config` is the deprecated v1 alias forwarding to `bb settings`
+  // (see cli/index.ts). The settings command now emits a JSON envelope
+  // on stdout instead of plaintext, so each assertion below reads the
+  // parsed `{ok, data, error}` shape. The deprecation banner that the
+  // alias prints lives on stderr and is not under test here.
+  //
+  // runCli auto-unwraps the envelope: `out.json` is `envelope.data` and
+  // `out.envelope` is the full envelope including ok/error/warnings.
+
+  it('show emits an empty config envelope on a fresh tmpdir', () => {
+    const out = runCli(['config', 'show'], { env: envWithCfgDir() });
     expect(out.exitCode).toBe(0);
-    expect(out.stdout).toMatch(/no configuration set/);
+    expect(out.envelope?.ok).toBe(true);
+    expect(out.json?.config).toEqual({});
+    expect(typeof out.json?.configPath).toBe('string');
   });
 
   it('set persists a value and show reads it back', () => {
     const apiKey = 'sk_test_abcd1234efgh5678';
     const setOut = runCli(['config', 'set', 'apiKey', apiKey], {
       env: envWithCfgDir(),
-      parseJson: false
     });
     expect(setOut.exitCode).toBe(0);
+    expect(setOut.envelope?.ok).toBe(true);
     // Masked echo: first 4 + asterisks + last 4
-    expect(setOut.stdout).toContain('sk_t');
-    expect(setOut.stdout).toContain('5678');
+    expect(setOut.json?.value).toContain('sk_t');
+    expect(setOut.json?.value).toContain('5678');
 
-    const showOut = runCli(['config', 'show'], { env: envWithCfgDir(), parseJson: false });
-    expect(showOut.stdout).toContain('apiKey');
-    expect(showOut.stdout).toContain('sk_t');
+    const showOut = runCli(['config', 'show'], { env: envWithCfgDir() });
+    expect(showOut.json?.config?.apiKey).toContain('sk_t');
+    expect(showOut.json?.config?.apiKey).toContain('5678');
   });
 
   it('set rejects an unknown key', () => {
     const out = runCli(['config', 'set', 'bogusKey', 'value'], {
-      env: envWithCfgDir(), throwOnError: false, parseJson: false
+      env: envWithCfgDir(),
+      throwOnError: false,
     });
     expect(out.exitCode).not.toBe(0);
-    expect(out.stderr).toMatch(/Unknown config key/);
+    expect(out.envelope?.ok).toBe(false);
+    expect(out.envelope?.error?.code).toBe('invalid_input');
+    expect(out.envelope?.error?.message).toMatch(/Unknown config key/);
   });
 
   it('set rejects an invalid network value', () => {
     const out = runCli(['config', 'set', 'network', 'bogus'], {
-      env: envWithCfgDir(), throwOnError: false, parseJson: false
+      env: envWithCfgDir(),
+      throwOnError: false,
     });
     expect(out.exitCode).not.toBe(0);
-    expect(out.stderr).toMatch(/Invalid network value/);
+    expect(out.envelope?.ok).toBe(false);
+    expect(out.envelope?.error?.code).toBe('invalid_input');
+    expect(out.envelope?.error?.message).toMatch(/Invalid network value/);
   });
 
   it('unset removes a previously set key', () => {
-    runCli(['config', 'set', 'apiKey', 'sk_xxxxxxxx'], { env: envWithCfgDir(), parseJson: false });
-    const unsetOut = runCli(['config', 'unset', 'apiKey'], { env: envWithCfgDir(), parseJson: false });
+    runCli(['config', 'set', 'apiKey', 'sk_xxxxxxxx'], { env: envWithCfgDir() });
+    const unsetOut = runCli(['config', 'unset', 'apiKey'], { env: envWithCfgDir() });
     expect(unsetOut.exitCode).toBe(0);
-    const showOut = runCli(['config', 'show'], { env: envWithCfgDir(), parseJson: false });
-    expect(showOut.stdout).toMatch(/no configuration set/);
+    expect(unsetOut.json?.removed).toBe('apiKey');
+    const showOut = runCli(['config', 'show'], { env: envWithCfgDir() });
+    expect(showOut.json?.config).toEqual({});
   });
 });
 

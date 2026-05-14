@@ -347,7 +347,7 @@ export const deployCommand = new Command('deploy')
     '--wait-for-indexer [timeout-ms]',
     'After broadcast: poll the indexer until the created entity (collection / dynamic store) is visible, or until [timeout-ms] elapses (default 30000ms). Skipped when the tx has no recognizable entity id.'
   )
-  .option('--dry-run', 'Simulate the tx and print expected gas + balance changes; never broadcast.')
+  .option('--dry-run', 'Simulate the tx and print expected gas + balance changes; never broadcast. (Distinct from `bb build --simulate`, which augments build output but does not broadcast either way.)')
   // --message + --gen-payload: absorbed modes from the v1 standalone
   // `sign-with-browser` and `gen-tx-payload` commands (#0399). The former
   // hands an arbitrary message to a browser wallet for personal-sign;

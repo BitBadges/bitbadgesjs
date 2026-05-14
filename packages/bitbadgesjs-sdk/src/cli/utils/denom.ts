@@ -122,11 +122,11 @@ export function requireBbDenom(input: string, ctx: string): string {
  */
 export function requireSkipGoDenom(input: string, ctx: string): string {
   if (!input || typeof input !== 'string' || input.trim().length === 0) {
-    throw new Error(`Missing denom for ${ctx}.`);
+    throw bbError(BBErrorCode.UNKNOWN_TOKEN, `Missing denom for ${ctx}.`);
   }
   const trimmed = input.trim();
   if (trimmed !== input) {
-    throw new Error(`Denom "${input}" for ${ctx} has leading/trailing whitespace.`);
+    throw bbError(BBErrorCode.UNKNOWN_TOKEN, `Denom "${input}" for ${ctx} has leading/trailing whitespace.`);
   }
   // Anything else — a u-prefix native denom, an ibc/... hash, a factory
   // path, etc. — is the caller's responsibility. Skip's resolver will

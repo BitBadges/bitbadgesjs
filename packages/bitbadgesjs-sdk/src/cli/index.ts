@@ -199,6 +199,7 @@ import { nftsCommand } from './commands/nfts.js';
 // Misc
 import { makeCompletionCommand } from './commands/completion.js';
 import { maybePrintFirstRunBanner } from './utils/first-run.js';
+import { enableSuggestionsTreeWide } from './utils/suggestions.js';
 
 // First-run policies + tab-completion banner. Runs before Commander parses
 // so the user sees it ahead of any actual output, even on `bb --help`.
@@ -237,9 +238,9 @@ program.addHelpText(
 // `isQuiet()` without reading commander state.
 
 program.option('--help-json', 'Output all commands as structured JSON (for LLMs)');
-program.option('--quiet', 'Silence stderr commentary (auto-review banners, "Written to" notices, etc). Errors still emit. Equivalent to BB_QUIET=1.');
+program.option('-q, --quiet', 'Silence stderr commentary (auto-review banners, "Written to" notices, etc). Errors still emit. Equivalent to BB_QUIET=1.');
 
-if (process.argv.includes('--quiet')) {
+if (process.argv.includes('--quiet') || process.argv.includes('-q')) {
   process.env.BB_QUIET = '1';
 }
 
@@ -509,6 +510,13 @@ const cliAliasCommand = new Command('cli')
   });
 program.addCommand(cliAliasCommand);
 
+// ── "Did you mean?" for typos ───────────────────────────────────────────────
+//
+// Levenshtein suggestions on unknown subcommands AND unknown flags. Toggle
+// has to be applied to every Command in the tree (Commander does not
+// inherit it), so we run after all top-level + alias registration.
+enableSuggestionsTreeWide(program);
+
 // ── Grouped --help override ─────────────────────────────────────────────────
 //
 // Commander's default help lumps every command into one alphabetized list.
@@ -697,7 +705,7 @@ process.on('unhandledRejection', reportFatal);
 // agents and humans both reach for the long form (commands + groups).
 // Detect "no positional args + no help-json + no quiet-only" and route
 // through `outputHelp()` which uses our custom grouped formatter.
-const onlyGlobalFlags = process.argv.slice(2).every((a) => a === '--quiet');
+const onlyGlobalFlags = process.argv.slice(2).every((a) => a === '--quiet' || a === '-q');
 if (process.argv.length <= 2 || onlyGlobalFlags) {
   program.outputHelp();
   process.exit(0);

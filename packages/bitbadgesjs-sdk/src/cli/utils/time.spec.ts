@@ -68,4 +68,18 @@ describe('parseTimeFlag', () => {
       expect(e.message).toContain('--valid-until');
     }
   });
+
+  it('tags thrown errors with BBErrorCode.INVALID_INPUT', () => {
+    // Both the empty-input and the unparseable-duration paths should
+    // carry the canonical envelope code so agents can dispatch on it
+    // (instead of falling back to the catch-all cli_error).
+    for (const bad of ['', 'next week']) {
+      try {
+        parseTimeFlag(bad, '--expiry');
+        throw new Error('expected throw');
+      } catch (e: any) {
+        expect(e.code).toBe('invalid_input');
+      }
+    }
+  });
 });

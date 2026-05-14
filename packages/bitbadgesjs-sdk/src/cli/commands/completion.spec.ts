@@ -1,13 +1,14 @@
 /**
  * Unit tests for completion.ts.
  *
- * Generates a bash/zsh completion script by walking a Commander program's
- * command tree. We construct a tiny synthetic program here so the test
- * stays decoupled from the real top-level CLI (which evolves with every
- * verb add/rename).
+ * The v2 generator walks the full Commander tree and emits a nested
+ * case-statement bash script. We construct a small synthetic program
+ * with two levels of nesting, an enum option (`argChoices`), a path-
+ * hinted option, and a short-flag option — then assert each gets a
+ * corresponding completion branch in the emitted script.
  */
 
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { makeCompletionCommand } from './completion.js';
 
 describe('makeCompletionCommand', () => {
@@ -47,38 +48,73 @@ describe('makeCompletionCommand', () => {
     sub.command('vault');
     sub.command('nft');
     root.command('flat-cmd');
+    // Enum option on root → triggers flag-value branch with the choices.
+    root.addOption(new Option('--shell <shell>', 'Target shell').choices(['bash', 'zsh']));
+    // Path-hinted option (longName ends with "-file") → triggers `compgen -f`.
+    root.option('--output-file <path>', 'Write output to file');
+    // Short-flag combo to verify both forms get a completion entry.
+    root.option('-q, --quiet', 'Quiet mode');
     return root;
   }
 
-  it('emits a bash-compatible script with top-level names + nested case entries', async () => {
+  function runCompletion(args: string[] = []): string {
     const program = makeFixtureProgram();
     const completion = makeCompletionCommand(program);
     const cap = captureStdout();
     try {
-      await completion.parseAsync([], { from: 'user' });
+      completion.parseAsync(args, { from: 'user' });
     } finally {
       cap.restore();
     }
-    const out = cap.chunks.join('');
-    // Top-level names enumerated
-    expect(out).toMatch(/build flat-cmd/);
-    // Nested subcommands for `build`
-    expect(out).toMatch(/build\)\s*COMPREPLY=.+vault nft/);
-    // Bash completion bookkeeping
-    expect(out).toMatch(/complete -F _bitbadges_cli_completions/);
+    return cap.chunks.join('');
+  }
+
+  it('registers completion against both `bitbadges-cli` and `bb`', () => {
+    const out = runCompletion();
+    expect(out).toMatch(/complete -F _bitbadges_cli_complete bitbadges-cli/);
+    expect(out).toMatch(/complete -F _bitbadges_cli_complete bb/);
   });
 
-  it('accepts bash and zsh shell hints', async () => {
+  it('emits a branch for the root (empty key) with top-level subcommands', () => {
+    const out = runCompletion();
+    // Root branch is keyed on the empty string. Top-level subcommands
+    // (`build`, `flat-cmd`) appear in the compgen -W list for the
+    // subcommand-completion fallback (the else branch under `if [[ "$cur" == -* ]]`).
+    expect(out).toMatch(/''\)[\s\S]*build flat-cmd/);
+  });
+
+  it('emits a nested branch for `build` listing its children (vault, nft)', () => {
+    const out = runCompletion();
+    expect(out).toMatch(/'build'\)[\s\S]*vault nft/);
+  });
+
+  it('emits enum value completion for options declared with .choices()', () => {
+    const out = runCompletion();
+    // The Option `--shell` was declared with choices(['bash', 'zsh']).
+    // The script should have a `--shell) COMPREPLY=( compgen -W 'bash zsh' )` line.
+    expect(out).toMatch(/--shell\)\s*COMPREPLY=\(\s*\$\(compgen -W 'bash zsh'/);
+  });
+
+  it('emits file completion for path-hinted options', () => {
+    const out = runCompletion();
+    // `--output-file` matches the path heuristic → defer to bash file completion.
+    expect(out).toMatch(/--output-file\)\s*COMPREPLY=\(\s*\$\(compgen -f/);
+  });
+
+  it('includes both short and long flag forms in the flag-name completion list', () => {
+    const out = runCompletion();
+    // `-q, --quiet` should put both `-q` and `--quiet` into the same
+    // flag-name compgen -W list under the root case branch.
+    const flagListLine = out
+      .split('\n')
+      .find((line) => line.includes('compgen -W') && line.includes('-q') && line.includes('--quiet'));
+    expect(flagListLine).toBeDefined();
+  });
+
+  it('accepts bash and zsh shell hints', () => {
     for (const shell of ['bash', 'zsh', 'BASH', 'ZSH']) {
-      const program = makeFixtureProgram();
-      const completion = makeCompletionCommand(program);
-      const cap = captureStdout();
-      try {
-        await completion.parseAsync([shell], { from: 'user' });
-      } finally {
-        cap.restore();
-      }
-      expect(cap.chunks.join('')).toMatch(/bitbadges-cli completion/);
+      const out = runCompletion([shell]);
+      expect(out).toMatch(/bitbadges-cli completion/);
     }
   });
 
