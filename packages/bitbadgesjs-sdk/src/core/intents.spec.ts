@@ -29,8 +29,12 @@ describe('buildIntentApproval', () => {
     approvalId: 'test-intent'
   };
 
-  it('produces an outgoing approval with toListId=All + initiatedByListId=All', () => {
+  it('produces an outgoing approval with fromListId=creator + toListId=All + initiatedByListId=All', () => {
     const approval = buildIntentApproval(args);
+    // fromListId must be the creator's address — pinning the shape so a
+    // future refactor can't silently drop it back to the proto default of
+    // "" (the lifted FE original had this invariant baked in).
+    expect(approval.fromListId).toBe(ALICE);
     expect(approval.toListId).toBe('All');
     expect(approval.initiatedByListId).toBe('All');
     expect(approval.approvalId).toBe('test-intent');

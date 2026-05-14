@@ -71,6 +71,14 @@ export function buildIntentApproval(args: IntentApprovalArgs): Record<string, un
   const tokenIds: iUintRange<bigint>[] = [{ start: 1n, end: 1n }];
 
   return {
+    // `fromListId` MUST be the creator's address — matches the original
+    // FE shape (UserOutgoingApprovalRegistry.intentApproval). The proto
+    // defaults `fromListId` to "" when omitted, which the chain may
+    // accept today but is not the documented intent ("only my address
+    // can fire this outgoing approval"). Setting it explicitly preserves
+    // the FE's invariant so consumers swapping from the local copy to
+    // the SDK helper see no shape change.
+    fromListId: address,
     toListId: 'All',
     initiatedByListId: 'All',
     transferTimes,
