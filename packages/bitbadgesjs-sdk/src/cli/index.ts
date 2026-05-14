@@ -123,6 +123,7 @@ import { genListIdCommand } from './commands/gen-list-id.js';
 import { amountCommand } from './commands/amount.js';
 import { urlCommand } from './commands/url.js';
 import { dynamicStoresCommand } from './commands/dynamic-stores.js';
+import { portfolioCommand } from './commands/portfolio.js';
 
 // Swap / DEX
 import { swapCommand } from './commands/swap.js';
@@ -196,7 +197,7 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   },
   {
     title: 'Address & lookup utilities',
-    commands: [addressCommand, aliasCommand, lookupCommand, genListIdCommand, amountCommand, urlCommand]
+    commands: [addressCommand, aliasCommand, lookupCommand, portfolioCommand, genListIdCommand, amountCommand, urlCommand]
   },
   {
     title: 'Swap & DEX',
