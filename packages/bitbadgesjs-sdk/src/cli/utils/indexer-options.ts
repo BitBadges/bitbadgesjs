@@ -33,6 +33,7 @@
 import type { Command } from 'commander';
 import { apiRequest, resolveApiKey, resolveBaseUrl } from './api-client.js';
 import { emit, emitError } from './envelope.js';
+import { addUnifiedNetworkOptions } from './network-options.js';
 
 export interface IndexerNetworkFlags {
   testnet?: boolean;
@@ -49,26 +50,17 @@ export interface IndexerOutputFlags {
 export type IndexerFlags = IndexerNetworkFlags & IndexerOutputFlags;
 
 /**
- * Add the four standard network-selection flags every indexer-hitting
- * command should accept: `--testnet`, `--local`, `--url`, `--api-key`.
+ * Add the indexer-side network-selection flags.
  *
- * Note: this is the legacy 4-flag surface. The newer `addNetworkOptions`
- * helper in `./io.ts` adds `--network` / `--mainnet` shorthand on top,
- * but most indexer commands still use the legacy form — switching them
- * to the long-form would mean threading `--network` through
- * `resolveBaseUrl` (which only understands the booleans today). That
- * larger plumbing change is intentionally NOT in this sweep.
+ * @deprecated Use {@link addUnifiedNetworkOptions} from
+ *   `./network-options.js` directly — this is a thin compatibility
+ *   shim that delegates to it. Historically this helper exposed only
+ *   `--testnet` / `--local` / `--url` / `--api-key`; the unified
+ *   surface adds `--network <name>` / `--mainnet` on top so users can
+ *   pass the same flag style to every command.
  */
 export function addIndexerNetworkOptions(cmd: Command): Command {
-  cmd
-    .option('--testnet', 'Use testnet API', false)
-    .option('--local', 'Use local API (localhost:3001)', false)
-    .option('--url <url>', 'Custom API base URL (overrides --testnet/--local/config)')
-    .option('--api-key <key>', 'BitBadges API key (overrides BITBADGES_API_KEY env)');
-  for (const flag of ['--testnet', '--local', '--url', '--api-key']) {
-    (cmd as any)._findOption?.(flag)?.helpGroup('Network');
-  }
-  return cmd;
+  return addUnifiedNetworkOptions(cmd);
 }
 
 /**
