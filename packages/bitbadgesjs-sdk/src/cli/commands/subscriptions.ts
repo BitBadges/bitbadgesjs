@@ -366,7 +366,7 @@ addOutputFlags(
         firstIntervalStartTime: BigInt(Date.now()),
         ubadgeTipAmount: tip,
         transferTimes: UintRangeArray.FullRanges(),
-        approvalId: crypto.randomUUID(),
+        approvalId: crypto.randomBytes(16).toString('hex'),
         tokenIds: faucet.tokenIds,
         denom
       });
@@ -470,7 +470,7 @@ addOutputFlags(
         firstIntervalStartTime: BigInt(Date.now()),
         ubadgeTipAmount: tip,
         transferTimes: UintRangeArray.FullRanges(),
-        approvalId: crypto.randomUUID(),
+        approvalId: crypto.randomBytes(16).toString('hex'),
         tokenIds: faucet.tokenIds,
         denom
       });
