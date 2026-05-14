@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'bun:test';
 import { Command } from 'commander';
 import { addUnifiedNetworkOptions } from './network-options.js';
 import { addIndexerNetworkOptions } from './indexer-options.js';

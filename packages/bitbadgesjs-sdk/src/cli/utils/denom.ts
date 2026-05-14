@@ -23,6 +23,7 @@
  */
 import { resolveCoin } from '../../core/builders/shared.js';
 import { MAINNET_COINS_REGISTRY } from '../../common/constants.js';
+import { bbError, BBErrorCode } from './envelope.js';
 
 /**
  * The canonical default fee denom for BitBadges-side transactions. `ubadge`
@@ -58,7 +59,10 @@ const U_PREFIX_RE = /^u[a-z][a-z0-9]*$/;
  */
 export function requireBbDenom(input: string, ctx: string): string {
   if (!input || typeof input !== 'string' || input.trim().length === 0) {
-    throw new Error(`Missing denom for ${ctx}. Pass a symbol (BADGE, USDC, ATOM, …) or canonical denom (ubadge, ibc/...).`);
+    throw bbError(
+      BBErrorCode.UNKNOWN_TOKEN,
+      `Missing denom for ${ctx}. Pass a symbol (BADGE, USDC, ATOM, …) or canonical denom (ubadge, ibc/...).`
+    );
   }
   const trimmed = input.trim();
 
@@ -87,7 +91,8 @@ export function requireBbDenom(input: string, ctx: string): string {
   // isn't `ubadge` is almost certainly an origin-chain native denom that
   // a user mistakenly thinks works on BitBadges.
   if (U_PREFIX_RE.test(trimmed) && trimmed !== 'ubadge') {
-    throw new Error(
+    throw bbError(
+      BBErrorCode.UNKNOWN_TOKEN,
       `"${trimmed}" is not a valid BitBadges denom for ${ctx}. On BitBadges, only "ubadge" uses the u-prefix; other tokens (USDC, ATOM, …) are "ibc/<SHA>" IBC denoms. Try the display symbol (e.g. "USDC") or run \`bb assets show <symbol>\` to see the canonical form.`
     );
   }
@@ -98,7 +103,8 @@ export function requireBbDenom(input: string, ctx: string): string {
     .map((c) => c.symbol)
     .filter((s, i, a) => a.indexOf(s) === i)
     .join(', ');
-  throw new Error(
+  throw bbError(
+    BBErrorCode.UNKNOWN_TOKEN,
     `Unknown denom "${trimmed}" for ${ctx}. Supported symbols: ${supported}. Or pass a canonical denom (ubadge, ibc/<SHA>).`
   );
 }

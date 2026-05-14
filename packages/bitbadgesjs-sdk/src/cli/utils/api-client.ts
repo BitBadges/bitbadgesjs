@@ -11,6 +11,7 @@ import {
   refreshSessionExpiry,
 } from './auth-store.js';
 import { getConfigApiKey, getConfigBaseUrl } from './config.js';
+import { bbError, BBErrorCode } from './envelope.js';
 
 export interface ApiRequestOptions {
   method: string;
@@ -85,7 +86,8 @@ export function resolveApiKey(explicit?: string, network?: 'mainnet' | 'testnet'
   const configKey = getConfigApiKey(network);
   if (configKey) return configKey;
 
-  throw new Error(
+  throw bbError(
+    BBErrorCode.MISSING_API_KEY,
     'No API key. Pass --api-key, run `bb settings set apiKey <key>`, or see `bb settings --help` for env-var alternatives.'
   );
 }

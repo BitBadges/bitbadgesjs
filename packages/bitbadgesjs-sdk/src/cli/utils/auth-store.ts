@@ -12,6 +12,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import { bbError, BBErrorCode } from './envelope.js';
 
 export type Network = 'mainnet' | 'testnet' | 'local';
 
@@ -181,7 +182,10 @@ export function setActive(network: Network, address: string): void {
   const store = loadAuthStore();
   const n = ensureNetwork(store, network);
   if (!n.sessions[address]) {
-    throw new Error(`No session stored for ${address} on ${network}; run \`bb auth login\` first.`);
+    throw bbError(
+      BBErrorCode.NOT_AUTHENTICATED,
+      `No session stored for ${address} on ${network}; run \`bb auth login\` first.`
+    );
   }
   n.active = address;
   saveAuthStore(store);

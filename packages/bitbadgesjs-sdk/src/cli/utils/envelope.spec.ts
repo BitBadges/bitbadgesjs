@@ -11,7 +11,9 @@ import {
   successEnvelope,
   errorEnvelope,
   isQuiet,
-  writeJsonEnvelope
+  writeJsonEnvelope,
+  bbError,
+  BBErrorCode
 } from './envelope.js';
 import { Writable } from 'node:stream';
 
@@ -61,6 +63,39 @@ describe('errorEnvelope', () => {
   it('attaches hint when provided', () => {
     const e = errorEnvelope('X', 'msg', undefined, 'try this');
     expect(e.hint).toBe('try this');
+  });
+});
+
+describe('bbError', () => {
+  it('produces an Error carrying .code and .message', () => {
+    const err = bbError(BBErrorCode.UNKNOWN_TOKEN, 'bad denom');
+    expect(err).toBeInstanceOf(Error);
+    expect((err as any).code).toBe('unknown_token');
+    expect(err.message).toBe('bad denom');
+  });
+
+  it('accepts a hint and attaches as .hint', () => {
+    const err = bbError(BBErrorCode.MISSING_API_KEY, 'no key', 'pass --api-key');
+    expect((err as any).hint).toBe('pass --api-key');
+  });
+
+  it('accepts plain string codes (escape hatch for bespoke domains)', () => {
+    const err = bbError('burner_not_found', 'no burner');
+    expect((err as any).code).toBe('burner_not_found');
+  });
+});
+
+describe('BBErrorCode', () => {
+  it('exports the canonical taxonomy', () => {
+    expect(BBErrorCode.CLI_ERROR).toBe('cli_error');
+    expect(BBErrorCode.UNKNOWN_TOKEN).toBe('unknown_token');
+    expect(BBErrorCode.MISSING_API_KEY).toBe('missing_api_key');
+    expect(BBErrorCode.NOT_AUTHENTICATED).toBe('not_authenticated');
+    expect(BBErrorCode.INVALID_ADDRESS).toBe('invalid_address');
+    expect(BBErrorCode.INVALID_INPUT).toBe('invalid_input');
+    expect(BBErrorCode.NETWORK_ERROR).toBe('network_error');
+    expect(BBErrorCode.TX_VALIDATION_FAILED).toBe('tx_validation_failed');
+    expect(BBErrorCode.BROADCAST_FAILED).toBe('broadcast_failed');
   });
 });
 
