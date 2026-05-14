@@ -1,6 +1,65 @@
 #!/usr/bin/env node
 import * as fs from 'node:fs';
-import { Command } from 'commander';
+import { Command, Help } from 'commander';
+
+// Apply a custom Help subclass globally so every command + sub-subcommand
+// inherits the "Required: / Options:" split, not just the root. Commander
+// doesn't inherit `.configureHelp(...)` down the subcommand tree, so for
+// deep commands like `bb intents create --help` we need to override at the
+// `Help` class level. Defined here so the override is in scope before any
+// subcommand is instantiated.
+class GroupedHelp extends Help {
+  formatHelp(cmd: Command, helper: Help): string {
+    const sections: string[] = [];
+    sections.push(`Usage: ${helper.commandUsage(cmd)}`);
+    const desc = helper.commandDescription(cmd);
+    if (desc) sections.push('', desc);
+
+    const argList = helper.visibleArguments(cmd);
+    if (argList.length > 0) {
+      sections.push('', 'Arguments:');
+      for (const arg of argList) {
+        sections.push(`  ${helper.argumentTerm(arg).padEnd(28)}  ${helper.argumentDescription(arg)}`);
+      }
+    }
+
+    // Split into Required (declared with `.requiredOption(...)`, Commander
+    // sets `mandatory = true`) and Options (everything else, including
+    // `-h, --help`). This is the whole point of the override.
+    const optList = helper.visibleOptions(cmd);
+    const requiredOpts = optList.filter((o: any) => o.mandatory);
+    const optionalOpts = optList.filter((o: any) => !o.mandatory);
+    if (requiredOpts.length > 0) {
+      sections.push('', 'Required:');
+      for (const opt of requiredOpts) {
+        sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
+      }
+    }
+    if (optionalOpts.length > 0) {
+      sections.push('', 'Options:');
+      for (const opt of optionalOpts) {
+        sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
+      }
+    }
+
+    const subList = helper.visibleCommands(cmd);
+    if (subList.length > 0) {
+      sections.push('', 'Commands:');
+      for (const sub of subList) {
+        sections.push(`  ${helper.subcommandTerm(sub).padEnd(28)}  ${helper.subcommandDescription(sub)}`);
+      }
+    }
+
+    return sections.join('\n') + '\n';
+  }
+}
+
+// Replace Command.prototype.createHelp so every Command — including
+// subcommands constructed inside the imports below — picks up GroupedHelp.
+// Must run BEFORE any `new Command(...)` calls.
+(Command.prototype as any).createHelp = function () {
+  return Object.assign(new GroupedHelp(), this.configureHelp());
+};
 
 // Build & ship a transaction
 import { buildCommand } from './commands/build.js';
@@ -219,10 +278,25 @@ function defaultFormatHelp(cmd: Command, helper: any): string {
     }
   }
 
+  // Split options into Required (`.requiredOption(...)`, Commander sets
+  // `mandatory = true`) and Options (everything else). Help-bearing flags
+  // like `-h, --help` stay in Options. Commander's stock layout lumps
+  // them together; on commands with 10+ flags it's hard to tell at a
+  // glance which ones the user MUST pass — especially for chained
+  // builder calls (`bb intents create --amount X --denom Y ...`).
   const optList = helper.visibleOptions(cmd);
-  if (optList.length > 0) {
+  const requiredOpts = optList.filter((o: any) => o.mandatory);
+  const optionalOpts = optList.filter((o: any) => !o.mandatory);
+
+  if (requiredOpts.length > 0) {
+    sections.push('', 'Required:');
+    for (const opt of requiredOpts) {
+      sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
+    }
+  }
+  if (optionalOpts.length > 0) {
     sections.push('', 'Options:');
-    for (const opt of optList) {
+    for (const opt of optionalOpts) {
       sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
     }
   }
