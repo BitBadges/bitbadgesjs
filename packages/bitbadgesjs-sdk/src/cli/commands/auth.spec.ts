@@ -43,14 +43,14 @@ describe('authCommand shape', () => {
     );
   });
 
-  it('challenge requires --address and exposes --json + --no-save-pending', () => {
+  it('challenge requires --address and exposes --no-save-pending (envelope is always JSON post-#0398)', () => {
     const challenge = authCommand.commands.find((c) => c.name() === 'challenge')!;
     const requiredLongs = (challenge.options as any[])
       .filter((o) => o.required)
       .map((o) => o.long);
     expect(requiredLongs).toContain('--address');
     const longs = (challenge.options as any[]).map((o) => o.long);
-    expect(longs).toEqual(expect.arrayContaining(['--json', '--no-save-pending']));
+    expect(longs).toEqual(expect.arrayContaining(['--no-save-pending']));
   });
 
   it('use takes <address>', () => {

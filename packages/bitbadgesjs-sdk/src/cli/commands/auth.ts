@@ -305,17 +305,16 @@ addNetworkOptions(authCommand.command('login'))
     });
     clearPendingChallenge(network, opts.address);
 
-    process.stdout.write(
-      `Logged in as ${opts.address} on ${network}. Expires ${new Date(session.expiresAt).toISOString()}.\n`,
-    );
+    const { emit, commentary } = await import('../utils/envelope.js');
+    commentary(`Logged in as ${opts.address} on ${network}. Expires ${new Date(session.expiresAt).toISOString()}.`);
+    emit({ address: opts.address, network, expiresAt: session.expiresAt, chain });
   });
 
 // ── auth challenge ──────────────────────────────────────────────────
 
 addNetworkOptions(authCommand.command('challenge'))
-  .description('Fetch a Blockin challenge for an address. Print the message your signer must sign.')
+  .description('Fetch a Blockin challenge for an address. The message your signer must sign lives at envelope.data.message.')
   .requiredOption('--address <addr>', "Native address (bb1... or 0x...).")
-  .option('--json', 'Output {message, nonce} as JSON.', false)
   .option('--no-save-pending', 'Do not persist the challenge cookie locally (advanced).')
   .action(async (opts) => {
     const network = resolveNetwork(opts);
@@ -331,11 +330,12 @@ addNetworkOptions(authCommand.command('challenge'))
       setPendingChallenge(network, opts.address, challenge.message, challenge.cookies, baseUrl);
     }
 
-    if (opts.json) {
-      process.stdout.write(JSON.stringify({ message: challenge.message, nonce: challenge.nonce }) + '\n');
-    } else {
-      process.stdout.write(challenge.message + '\n');
-    }
+    // The challenge message used to be emitted bare to stdout for direct
+    // copy/paste into a signer; agents (and `jq -r .data.message`) can
+    // get the same string out of the envelope, which keeps the surface
+    // consistent.
+    const { emit } = await import('../utils/envelope.js');
+    emit({ message: challenge.message, nonce: challenge.nonce });
   });
 
 // ── auth verify ─────────────────────────────────────────────────────
@@ -387,15 +387,20 @@ addNetworkOptions(authCommand.command('status'))
       return active ? [{ network, session: active }] : [];
     })();
 
+    const { emit, commentary } = await import('../utils/envelope.js');
+
     if (sessions.length === 0) {
-      process.stdout.write('No stored sessions. Run `bitbadges-cli auth login`.\n');
+      commentary('No stored sessions. Run `bitbadges-cli auth login`.');
+      emit({ sessions: [] });
       return;
     }
 
+    const out: any[] = [];
     for (const { network, session } of sessions) {
       const expiry = new Date(session.expiresAt).toISOString();
-      const status = Date.now() > session.expiresAt ? 'EXPIRED' : 'valid';
-      let serverCheck = '';
+      const status = Date.now() > session.expiresAt ? 'expired' : 'valid';
+      let serverSignedIn: boolean | null = null;
+      let serverError: string | null = null;
       if (opts.check) {
         try {
           const r = await rawPost(
@@ -403,15 +408,32 @@ addNetworkOptions(authCommand.command('status'))
             { Cookie: formatCookieHeader(session) },
             {},
           );
-          serverCheck = r.body?.signedIn ? ' [server: signed-in]' : ' [server: NOT signed in]';
+          serverSignedIn = !!r.body?.signedIn;
         } catch (err: any) {
-          serverCheck = ` [server check failed: ${err.message}]`;
+          serverError = err.message;
         }
       }
-      process.stdout.write(
-        `${network.padEnd(8)}  ${session.address}  ${session.chain}  expires=${expiry} (${status})${serverCheck}\n`,
+      const summary = {
+        network,
+        address: session.address,
+        chain: session.chain,
+        expiresAt: expiry,
+        status,
+        ...(opts.check ? { serverSignedIn, serverError } : {})
+      };
+      out.push(summary);
+      commentary(
+        `${network.padEnd(8)}  ${session.address}  ${session.chain}  expires=${expiry} (${status})` +
+          (opts.check
+            ? serverError
+              ? ` [server check failed: ${serverError}]`
+              : serverSignedIn
+                ? ' [server: signed-in]'
+                : ' [server: NOT signed in]'
+            : '')
       );
     }
+    emit({ sessions: out });
   });
 
 // ── auth logout ─────────────────────────────────────────────────────
@@ -427,12 +449,17 @@ addNetworkOptions(authCommand.command('logout'))
       return session ? [{ network, session }] : [];
     })();
 
+    const { emit, commentary } = await import('../utils/envelope.js');
+
     if (targets.length === 0) {
-      process.stdout.write('No matching session to log out.\n');
+      commentary('No matching session to log out.');
+      emit({ loggedOut: [] });
       return;
     }
 
+    const loggedOut: any[] = [];
     for (const { network, session } of targets) {
+      let serverError: string | null = null;
       try {
         await rawPost(
           `${session.indexerUrl}/auth/logout`,
@@ -440,11 +467,16 @@ addNetworkOptions(authCommand.command('logout'))
           { signOutBlockin: true, signOutEmail: true },
         );
       } catch (err: any) {
-        process.stderr.write(`(server logout failed for ${session.address} on ${network}: ${err.message}; removing local record anyway)\n`);
+        serverError = err.message;
+        process.stderr.write(
+          `(server logout failed for ${session.address} on ${network}: ${err.message}; removing local record anyway)\n`
+        );
       }
       removeSession(network, session.address);
-      process.stdout.write(`Logged out ${session.address} on ${network}.\n`);
+      loggedOut.push({ network, address: session.address, serverError });
+      commentary(`Logged out ${session.address} on ${network}.`);
     }
+    emit({ loggedOut });
   });
 
 // ── auth use ────────────────────────────────────────────────────────
@@ -455,7 +487,9 @@ addNetworkOptions(authCommand.command('use'))
   .action(async (address: string, opts) => {
     const network = resolveNetwork(opts);
     setActive(network, address);
-    process.stdout.write(`Active on ${network} is now ${address}.\n`);
+    const { emit, commentary } = await import('../utils/envelope.js');
+    commentary(`Active on ${network} is now ${address}.`);
+    emit({ network, active: address });
   });
 
 // ── auth whoami ─────────────────────────────────────────────────────
@@ -465,13 +499,16 @@ addNetworkOptions(authCommand.command('whoami'))
   .action(async (opts) => {
     const network = resolveNetwork(opts);
     const session = getActiveSession(network);
+    const { emit, emitError, commentary } = await import('../utils/envelope.js');
     if (!session) {
-      process.stdout.write(`No active session on ${network}. Run \`bitbadges-cli auth login\`.\n`);
-      process.exit(1);
+      emitError(
+        new Error(`No active session on ${network}. Run \`bitbadges-cli auth login\`.`),
+        { code: 'no_active_session', exitCode: 1 }
+      );
     }
-    process.stdout.write(
-      `${session.address} on ${network}  (chain=${session.chain}, expires=${new Date(session.expiresAt).toISOString()})\n`,
-    );
+    const expiresAt = new Date(session!.expiresAt).toISOString();
+    commentary(`${session!.address} on ${network}  (chain=${session!.chain}, expires=${expiresAt})`);
+    emit({ address: session!.address, network, chain: session!.chain, expiresAt });
   });
 
 // ── auth path ───────────────────────────────────────────────────────
@@ -479,6 +516,7 @@ addNetworkOptions(authCommand.command('whoami'))
 authCommand
   .command('path')
   .description('Print the path of the local auth store (~/.bitbadges/auth.json).')
-  .action(() => {
-    process.stdout.write(getAuthPath() + '\n');
+  .action(async () => {
+    const { emit } = await import('../utils/envelope.js');
+    emit({ path: getAuthPath() });
   });

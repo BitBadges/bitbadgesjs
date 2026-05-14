@@ -108,49 +108,55 @@ describe('bb burner', () => {
     };
   }
 
-  it('list returns "No burners saved." when none exist', () => {
-    const out = runCli(['burner', 'list'], { env: envWithCfgDir(), parseJson: false });
+  it('list returns an empty wallets array when none exist', () => {
+    // The "No burners saved" stderr commentary is gated by --quiet /
+    // BB_QUIET (runCli sets BB_QUIET=1 for clean stdout assertions), so
+    // we don't check it here — agents care about the structured
+    // data.wallets:[] signal anyway.
+    const out = runCli(['burner', 'list'], { env: envWithCfgDir() });
     expect(out.exitCode).toBe(0);
-    expect(out.stderr + out.stdout).toMatch(/No burners saved/);
+    expect(out.json.wallets).toEqual([]);
   });
 
-  it('list prints seeded burners', () => {
+  it('list surfaces seeded burners in envelope.data.wallets', () => {
     seedBurner(exampleRecord({ address: 'bb1one', createdAt: '2026-05-01T00:00:00.000Z' }));
     seedBurner(exampleRecord({ address: 'bb1two', createdAt: '2026-05-02T00:00:00.000Z' }));
-    const out = runCli(['burner', 'list'], { env: envWithCfgDir(), parseJson: false });
-    expect(out.stdout).toContain('bb1one');
-    expect(out.stdout).toContain('bb1two');
+    const out = runCli(['burner', 'list'], { env: envWithCfgDir() });
+    const addresses = out.json.wallets.map((w: any) => w.address);
+    expect(addresses).toContain('bb1one');
+    expect(addresses).toContain('bb1two');
   });
 
-  it('list --json emits an array of records', () => {
+  it('list always emits envelope.data.wallets — no separate --json flag', () => {
     seedBurner(exampleRecord({ address: 'bb1jsontest' }));
-    const out = runCli(['burner', 'list', '--json'], { env: envWithCfgDir() });
-    expect(Array.isArray(out.json)).toBe(true);
-    expect(out.json.length).toBe(1);
-    expect(out.json[0].address).toBe('bb1jsontest');
+    const out = runCli(['burner', 'list'], { env: envWithCfgDir() });
+    expect(Array.isArray(out.json.wallets)).toBe(true);
+    expect(out.json.wallets.length).toBe(1);
+    expect(out.json.wallets[0].address).toBe('bb1jsontest');
   });
 
   it('list --network filters by network', () => {
     seedBurner(exampleRecord({ address: 'bb1mainnet', network: 'mainnet' }));
     seedBurner(exampleRecord({ address: 'bb1local', network: 'local', createdAt: '2026-05-02T00:00:00.000Z' }));
-    const out = runCli(['burner', 'list', '--network', 'local', '--json'], { env: envWithCfgDir() });
-    expect(out.json.length).toBe(1);
-    expect(out.json[0].address).toBe('bb1local');
+    const out = runCli(['burner', 'list', '--network', 'local'], { env: envWithCfgDir() });
+    expect(out.json.wallets.length).toBe(1);
+    expect(out.json.wallets[0].address).toBe('bb1local');
   });
 
   it('show returns the seeded record by address', () => {
     seedBurner(exampleRecord({ address: 'bb1showme' }));
-    const out = runCli(['burner', 'show', 'bb1showme'], { env: envWithCfgDir(), parseJson: false });
+    const out = runCli(['burner', 'show', 'bb1showme'], { env: envWithCfgDir() });
     expect(out.exitCode).toBe(0);
-    expect(out.stdout).toContain('bb1showme');
+    expect(out.json.address).toBe('bb1showme');
   });
 
-  it('show with unknown selector exits non-zero', () => {
+  it('show with unknown selector exits non-zero with an error envelope', () => {
     const out = runCli(['burner', 'show', 'bb1missing'], {
-      env: envWithCfgDir(), throwOnError: false, parseJson: false
+      env: envWithCfgDir(), throwOnError: false
     });
     expect(out.exitCode).not.toBe(0);
-    expect(out.stderr).toMatch(/No burner found/);
+    expect(out.envelope.ok).toBe(false);
+    expect(out.envelope.error.message).toMatch(/No burner found/);
   });
 
   it('forget deletes the recovery file', () => {

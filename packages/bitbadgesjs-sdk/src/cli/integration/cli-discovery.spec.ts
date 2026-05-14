@@ -14,25 +14,25 @@
 import { runCli } from './harness/cli.js';
 
 describe('bb tools', () => {
-  it('lists every tool with a JSON schema (default JSON dump)', () => {
+  it('lists every tool with a JSON schema in envelope.data.tools', () => {
     const out = runCli(['tools']);
     expect(out.exitCode).toBe(0);
-    expect(Array.isArray(out.json)).toBe(true);
-    expect(out.json.length).toBeGreaterThan(0);
+    expect(Array.isArray(out.json.tools)).toBe(true);
+    expect(out.json.tools.length).toBeGreaterThan(0);
     // Each entry must have at least name + description + inputSchema.
-    for (const t of out.json) {
+    for (const t of out.json.tools) {
       expect(typeof t.name).toBe('string');
       expect(typeof t.description).toBe('string');
       expect(t.inputSchema).toBeDefined();
     }
   });
 
-  it('--names emits one tool name per line', () => {
-    const out = runCli(['tools', '--names'], { parseJson: false });
+  it('--names surfaces tool names in envelope.data.names', () => {
+    const out = runCli(['tools', '--names']);
     expect(out.exitCode).toBe(0);
-    const names = out.stdout.split('\n').filter((l) => l.trim());
+    const names: string[] = out.json.names;
+    expect(Array.isArray(names)).toBe(true);
     expect(names.length).toBeGreaterThan(0);
-    // Sanity check: well-known tools must be present.
     expect(names).toContain('validate_transaction');
     expect(names).toContain('lookup_token_info');
   });
@@ -58,29 +58,30 @@ describe('bb tool <name>', () => {
 });
 
 describe('bb resources', () => {
-  it('list returns an array of resource descriptors', () => {
+  it('list returns resource descriptors in envelope.data.resources', () => {
     const out = runCli(['resources', 'list']);
     expect(out.exitCode).toBe(0);
-    expect(Array.isArray(out.json)).toBe(true);
-    expect(out.json.length).toBeGreaterThan(0);
-    for (const r of out.json) {
+    expect(Array.isArray(out.json.resources)).toBe(true);
+    expect(out.json.resources.length).toBeGreaterThan(0);
+    for (const r of out.json.resources) {
       expect(typeof r.uri).toBe('string');
       expect(r.uri).toMatch(/^bitbadges:\/\//);
       expect(typeof r.name).toBe('string');
     }
   });
 
-  it('read returns the body of a known resource', () => {
+  it('read returns the body of a known resource in envelope.data.text', () => {
     const list = runCli(['resources', 'list']);
-    const first = list.json[0];
-    const out = runCli(['resources', 'read', first.uri], { parseJson: false });
+    const first = list.json.resources[0];
+    const out = runCli(['resources', 'read', first.uri]);
     expect(out.exitCode).toBe(0);
-    expect(out.stdout.length).toBeGreaterThan(0);
+    expect(typeof out.json.text).toBe('string');
+    expect(out.json.text.length).toBeGreaterThan(0);
   });
 
   it('read on an unknown URI exits non-zero', () => {
     const out = runCli(['resources', 'read', 'bitbadges://does-not-exist'], {
-      throwOnError: false, parseJson: false
+      throwOnError: false
     });
     expect(out.exitCode).not.toBe(0);
   });

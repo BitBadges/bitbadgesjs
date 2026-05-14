@@ -23,6 +23,7 @@ import { NETWORK_CONFIGS } from '../../signing/types.js';
 import { createTransactionPayload } from '../../transactions/messages/base.js';
 import { encodeTokenizationMsgFromJson, supportedTokenizationTypeUrls } from '../../transactions/messages/bitbadges/tokenization/fromJson.js';
 import { evmToCosmosAddress } from '../../transactions/precompile/helpers.js';
+import { emit, emitError } from '../utils/envelope.js';
 
 interface MsgEntry {
   typeUrl: string;
@@ -124,8 +125,7 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
     const raw = readMsgInput({ input: positional, msgFile: opts.msgFile, msgStdin: opts.msgStdin });
     messagesInput = normalizeMessages(raw);
   } catch (err: any) {
-    process.stderr.write(`${err?.message || err}\n`);
-    process.exit(2);
+    emitError(err, { code: 'invalid_input', exitCode: 2 });
   }
 
   // Resolve sender / EVM address. The user passes one address via --from;
@@ -146,9 +146,12 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
       const { convertToEthAddress } = await import('../../address-converter/converter.js');
       evmAddress = convertToEthAddress(senderAddress);
     } catch (err: any) {
-      process.stderr.write(`Failed to derive EVM address from ${senderAddress}: ${err?.message || err}\n`);
-      process.stderr.write('Pass --evm-from 0x... explicitly.\n');
-      process.exit(2);
+      emitError(
+        new Error(
+          `Failed to derive EVM address from ${senderAddress}: ${err?.message || err}. Pass --evm-from 0x... explicitly.`
+        ),
+        { code: 'evm_derive_failed', exitCode: 2 }
+      );
     }
   }
 
@@ -171,16 +174,21 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
         if (sequence === undefined) sequence = info.sequence;
         if (!publicKey && info.publicKey) publicKey = info.publicKey;
       } catch (err: any) {
-        process.stderr.write(`Indexer fetch failed: ${err?.message || err}\n`);
-        process.stderr.write('If running offline, pass --no-fetch with --account-number and --sequence (and --public-key if you want Cosmos sign payloads).\n');
-        process.exit(1);
+        emitError(
+          new Error(
+            `Indexer fetch failed: ${err?.message || err}. If running offline, pass --no-fetch with --account-number and --sequence (and --public-key if you want Cosmos sign payloads).`
+          ),
+          { code: 'indexer_fetch_failed', exitCode: 1 }
+        );
       }
     }
   }
 
   if (accountNumber === undefined || sequence === undefined) {
-    process.stderr.write('Missing --account-number / --sequence. Re-run without --no-fetch, or supply both flags.\n');
-    process.exit(2);
+    emitError(
+      new Error('Missing --account-number / --sequence. Re-run without --no-fetch, or supply both flags.'),
+      { code: 'missing_account_info', exitCode: 2 }
+    );
   }
 
   // publicKey is required for Cosmos sign payloads (signDirect, legacyAmino).
@@ -191,13 +199,14 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
   // Cosmos AuthInfo).
   const wantCosmosPayloads = !!publicKey;
   if (!wantCosmosPayloads && !evmAddress) {
-    process.stderr.write(
-      'No public key available for ' + senderAddress + ' and no EVM address provided. ' +
-      'Either:\n' +
-      '  • Pass --public-key <b64> (for Cosmos signDirect/legacyAmino), or\n' +
-      '  • Use an EVM address via --from 0x... or --evm-from 0x... (emits evmTx only).\n'
+    emitError(
+      new Error(
+        'No public key available for ' + senderAddress + ' and no EVM address provided. ' +
+          'Either: (1) pass --public-key <b64> (for Cosmos signDirect/legacyAmino), or ' +
+          '(2) use an EVM address via --from 0x... or --evm-from 0x... (emits evmTx only).'
+      ),
+      { code: 'missing_signer', exitCode: 2 }
     );
-    process.exit(2);
   }
 
   // Convert each {typeUrl, value} JSON into a proto Message via the SDK's
@@ -207,9 +216,12 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
   try {
     protoMessages = messagesInput.map((m) => encodeTokenizationMsgFromJson(m));
   } catch (err: any) {
-    process.stderr.write(`Failed to encode message: ${err?.message || err}\n`);
-    process.stderr.write(`Supported typeUrls: ${supportedTokenizationTypeUrls().join(', ')}\n`);
-    process.exit(2);
+    emitError(
+      new Error(
+        `Failed to encode message: ${err?.message || err}. Supported typeUrls: ${supportedTokenizationTypeUrls().join(', ')}`
+      ),
+      { code: 'encode_failed', exitCode: 2 }
+    );
   }
 
   // Hand the proto messages to createTransactionPayload — the same SDK
@@ -242,8 +254,7 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
       protoMessages
     );
   } catch (err: any) {
-    process.stderr.write(`createTransactionPayload failed: ${err?.message || err}\n`);
-    process.exit(1);
+    emitError(err, { code: 'create_payload_failed', exitCode: 1 });
   }
 
   // Serialize the proto TxBody / AuthInfo to base64 so the JSON output is
@@ -296,5 +307,5 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
     'Need a tx-bytes-only flow without managing TxRaw assembly? Use `bitbadges-cli deploy --browser --sign-only` instead — that hands the wallet the signing UI and returns ready-to-broadcast bytes.',
   ];
 
-  process.stdout.write(JSON.stringify(envelope, null, 2) + '\n');
+  emit(envelope);
 });

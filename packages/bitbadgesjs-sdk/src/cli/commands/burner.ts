@@ -12,6 +12,7 @@
 import { Command } from 'commander';
 
 import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
+import { emit, emitError, commentary } from '../utils/envelope.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import {
   listBurners,
@@ -64,23 +65,20 @@ burnerCommand
   .usage(' ')
   .description('List all saved burners')
   .option('--network <name>', 'Only show wallets for a specific network')
-  .option('--json', 'Emit as JSON instead of a table')
   .action((opts: any) => {
     let wallets = listBurners();
     if (opts.network) wallets = wallets.filter((w) => w.network === opts.network);
-    if (opts.json) {
-      process.stdout.write(JSON.stringify(wallets, null, 2) + '\n');
-      return;
-    }
     if (wallets.length === 0) {
-      process.stderr.write('No burners saved.\n');
+      commentary('No burners saved.');
+      emit({ wallets: [] });
       return;
     }
     for (const w of wallets) {
-      process.stdout.write(
-        `${w.createdAt}  ${w.network.padEnd(7)}  ${w.status.padEnd(9)}  ${w.address}  ${w.txHash ? `tx=${w.txHash.slice(0, 12)}…` : ''}\n`
+      commentary(
+        `${w.createdAt}  ${w.network.padEnd(7)}  ${w.status.padEnd(9)}  ${w.address}  ${w.txHash ? `tx=${w.txHash.slice(0, 12)}…` : ''}`
       );
     }
+    emit({ wallets });
   });
 
 // ── show ─────────────────────────────────────────────────────────────────────
@@ -93,12 +91,14 @@ burnerCommand
   .action((selector: string) => {
     const rec = findBurner(selector);
     if (!rec) {
-      process.stderr.write(`No burner found for selector: ${selector}\n`);
-      process.exit(1);
+      emitError(new Error(`No burner found for selector: ${selector}`), {
+        code: 'burner_not_found',
+        exitCode: 1
+      });
     }
-    // Intentionally prints the mnemonic — it's a throwaway and the user
-    // may want to recover via Keplr or similar.
-    process.stdout.write(JSON.stringify(rec, null, 2) + '\n');
+    // Intentionally surfaces the mnemonic in `data.mnemonic` — it's a
+    // throwaway and the user may want to recover via Keplr or similar.
+    emit(rec);
   });
 
 // ── resume ───────────────────────────────────────────────────────────────────
@@ -119,8 +119,10 @@ addNetworkOptions(resumeCmd);
 resumeCmd.action(async (selector: string, opts: any) => {
   const rec = findBurner(selector);
   if (!rec) {
-    process.stderr.write(`No burner found for selector: ${selector}\n`);
-    process.exit(1);
+    emitError(new Error(`No burner found for selector: ${selector}`), {
+      code: 'burner_not_found',
+      exitCode: 1
+    });
   }
   const fs = await import('fs');
   const msg = JSON.parse(fs.readFileSync(opts.msgFile, 'utf-8'));
@@ -151,7 +153,7 @@ resumeCmd.action(async (selector: string, opts: any) => {
     nonInteractive: !process.stdout.isTTY,
     pollTimeoutMs: Number(opts.pollTimeout) * 1000
   });
-  process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+  emit(result);
   if (!result.success && !result.paused) process.exit(1);
 });
 
@@ -236,7 +238,7 @@ sweepCmd.action(async (selector: string, opts: any) => {
     process.stderr.write(`Sweep failed: ${result.error}\n`);
     process.exit(1);
   }
-  process.stdout.write(JSON.stringify({ success: true, txHash: result.txHash, swept: sendAmount.toString() }, null, 2) + '\n');
+  emit({ success: true, txHash: result.txHash, swept: sendAmount.toString() });
 });
 
 // ── forget ───────────────────────────────────────────────────────────────────

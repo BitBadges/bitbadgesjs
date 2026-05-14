@@ -45,10 +45,10 @@ describe('createApiCommand shape', () => {
     expect(all.commands.length).toBeGreaterThan(50);
   });
 
-  it('exposes --search + --format flags at the top level', () => {
+  it('exposes --search at the top level (envelope is always JSON post-#0398)', () => {
     const api = createApiCommand();
     const longs = (api.options as any[]).map((o) => o.long);
-    expect(longs).toEqual(expect.arrayContaining(['--search', '--format']));
+    expect(longs).toEqual(expect.arrayContaining(['--search']));
   });
 
   it('group commands carry a "<n> routes" suffix in their description', () => {
@@ -74,7 +74,7 @@ describe('api --search', () => {
     };
   };
 
-  it('returns no-match message when keyword has no hits', async () => {
+  it('returns an empty matches array when keyword has no hits', async () => {
     const api = createApiCommand();
     const cap = captureStdout();
     try {
@@ -85,23 +85,26 @@ describe('api --search', () => {
     } finally {
       cap.restore();
     }
-    expect(cap.out()).toMatch(/No routes match/);
+    const env = JSON.parse(cap.out().trim());
+    expect(env.ok).toBe(true);
+    expect(env.data.matches).toEqual([]);
   });
 
-  it('--format json emits an array of route metadata', async () => {
+  it('--search emits an envelope with route metadata in data.matches', async () => {
     const api = createApiCommand();
     const cap = captureStdout();
     try {
-      await api.parseAsync(['--search', 'account', '--format', 'json'], {
+      await api.parseAsync(['--search', 'account'], {
         from: 'user',
       });
     } finally {
       cap.restore();
     }
-    const parsed = JSON.parse(cap.out().trim());
-    expect(Array.isArray(parsed)).toBe(true);
-    expect(parsed.length).toBeGreaterThan(0);
-    for (const m of parsed) {
+    const env = JSON.parse(cap.out().trim());
+    expect(env.ok).toBe(true);
+    expect(Array.isArray(env.data.matches)).toBe(true);
+    expect(env.data.matches.length).toBeGreaterThan(0);
+    for (const m of env.data.matches) {
       expect(m).toEqual(
         expect.objectContaining({
           name: expect.any(String),
