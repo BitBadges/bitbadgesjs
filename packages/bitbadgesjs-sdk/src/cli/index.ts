@@ -199,6 +199,7 @@ import { nftsCommand } from './commands/nfts.js';
 // Misc
 import { makeCompletionCommand } from './commands/completion.js';
 import { maybePrintFirstRunBanner } from './utils/first-run.js';
+import { enableSuggestionsTreeWide } from './utils/suggestions.js';
 
 // First-run policies + tab-completion banner. Runs before Commander parses
 // so the user sees it ahead of any actual output, even on `bb --help`.
@@ -508,6 +509,13 @@ const cliAliasCommand = new Command('cli')
     await program.parseAsync(args, { from: 'user' });
   });
 program.addCommand(cliAliasCommand);
+
+// ── "Did you mean?" for typos ───────────────────────────────────────────────
+//
+// Levenshtein suggestions on unknown subcommands AND unknown flags. Toggle
+// has to be applied to every Command in the tree (Commander does not
+// inherit it), so we run after all top-level + alias registration.
+enableSuggestionsTreeWide(program);
 
 // ── Grouped --help override ─────────────────────────────────────────────────
 //
