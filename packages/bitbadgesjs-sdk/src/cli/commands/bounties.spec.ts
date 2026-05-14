@@ -10,7 +10,8 @@ import { bountiesCommand } from './bounties.js';
 describe('bountiesCommand shape', () => {
   it('exposes the documented subcommand verbs', () => {
     const names = bountiesCommand.commands.map((c) => c.name()).sort();
-    expect(names).toEqual(['accept', 'build', 'claim-refund', 'deny', 'list', 'show', 'status']);
+    // Per-standard `build` removed in CLI v2 (#0399); use `bb build bounty`.
+    expect(names).toEqual(['accept', 'claim-refund', 'deny', 'list', 'show', 'status']);
   });
 
   it('accept / deny / claim-refund all require --creator', () => {
@@ -36,9 +37,8 @@ describe('bountiesCommand shape', () => {
     expect(flagNames).toContain('--open');
   });
 
-  it('build alias is registered and matches the standard contract', () => {
+  it('no longer registers a `build` subcommand — use `bb build bounty` instead', () => {
     const build = bountiesCommand.commands.find((c) => c.name() === 'build');
-    expect(build).toBeDefined();
-    expect(build!.description()).toMatch(/Alias for `bb build bounty`/);
+    expect(build).toBeUndefined();
   });
 });

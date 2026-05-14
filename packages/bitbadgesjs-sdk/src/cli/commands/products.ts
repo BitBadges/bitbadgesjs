@@ -50,7 +50,7 @@ function validateOrExit(collection: any, ctx: string): void {
 }
 
 export const productsCommand = new Command('products').description(
-  'End-user surface for the Products standard — list / show / purchase / build.'
+  'End-user surface for the Products standard — list / show / purchase. Build new via `bb build product-catalog`.'
 );
 
 addOutputFlags(
@@ -147,16 +147,5 @@ addOutputFlags(
   }
 );
 
-productsCommand
-  .command('build')
-  .description('Alias for `bb build product-catalog` — creator-side: construct a CREATE-COLLECTION tx for a new product catalog.')
-  .helpOption(false)
-  .allowUnknownOption()
-  .allowExcessArguments()
-  .action(async () => {
-    const { buildCommand } = await import('./build.js');
-    const argv = process.argv;
-    const startIdx = argv.findIndex((a, i) => a === 'build' && argv[i - 1] === 'products');
-    const forward = startIdx >= 0 ? argv.slice(startIdx + 1) : [];
-    await buildCommand.parseAsync(['product-catalog', ...forward], { from: 'user' });
-  });
+// Per-standard `build` subcommand removed in CLI v2 (#0399).
+// Use `bb build product-catalog ...` (the canonical builder) instead.

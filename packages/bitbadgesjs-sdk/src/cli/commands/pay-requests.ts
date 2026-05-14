@@ -7,7 +7,9 @@
  *   pay-requests pay     — emit MsgTransferTokens targeting the pay approval
  *   pay-requests deny    — emit MsgTransferTokens targeting the deny approval
  *   pay-requests status  — fetch indexer status (paid / denied / pending / expired)
- *   pay-requests build   — alias for `bb build payment-request`
+ *
+ * Creator-side construction lives at `bb build payment-request` — the
+ * per-standard `build` subcommand was removed in CLI v2 (#0399).
  *
  * Every subcommand validates standards conformance via the SDK's
  * `doesCollectionFollowPaymentRequestProtocol` + `validatePaymentRequestCollection`
@@ -88,7 +90,7 @@ function resolveStatus(collection: any, expirationTime: bigint): PaymentRequestS
 // ── pay-requests (parent) ─────────────────────────────────────────────────
 
 export const payRequestsCommand = new Command('pay-requests').description(
-  'End-user surface for the PaymentRequest standard — list / show / pay / deny / status / build. Every action validates conformance before emitting.'
+  'End-user surface for the PaymentRequest standard — list / show / pay / deny / status. Build new via `bb build payment-request`. Every action validates conformance before emitting.'
 );
 
 // ── pay-requests list ─────────────────────────────────────────────────────
@@ -253,24 +255,5 @@ addOutputFlags(
   }
 });
 
-// ── pay-requests build (alias) ────────────────────────────────────────────
-
-payRequestsCommand
-  .command('build')
-  .description(
-    'Alias for `bb build payment-request` — creator-side: construct a CREATE-COLLECTION tx for a new PaymentRequest. All flags pass through (including --help).'
-  )
-  // Disable the alias's own --help so `bb pay-requests build --help` flows
-  // through to `bb build payment-request --help` (the real flag surface).
-  .helpOption(false)
-  .allowUnknownOption()
-  .allowExcessArguments()
-  .action(async () => {
-    const { buildCommand } = await import('./build.js');
-    // Forward everything after `pay-requests build` in argv to the
-    // underlying `bb build payment-request` command.
-    const argv = process.argv;
-    const startIdx = argv.findIndex((a, i) => a === 'build' && argv[i - 1] === 'pay-requests');
-    const forward = startIdx >= 0 ? argv.slice(startIdx + 1) : [];
-    await buildCommand.parseAsync(['payment-request', ...forward], { from: 'user' });
-  });
+// Per-standard `build` subcommand removed in CLI v2 (#0399).
+// Use `bb build payment-request ...` (the canonical builder) instead.

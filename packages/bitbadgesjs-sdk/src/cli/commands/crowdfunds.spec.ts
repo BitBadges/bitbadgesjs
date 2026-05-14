@@ -13,8 +13,8 @@ describe('crowdfundsCommand shape', () => {
 
   it('exposes the documented subcommand verbs', () => {
     const names = crowdfundsCommand.commands.map((c) => c.name()).sort();
+    // Per-standard `build` removed in CLI v2 (#0399); use `bb build crowdfund`.
     expect(names).toEqual([
-      'build',
       'contribute',
       'list',
       'refund',
@@ -53,9 +53,8 @@ describe('crowdfundsCommand shape', () => {
     }
   });
 
-  it('build alias is registered and points at `bb build crowdfund`', () => {
+  it('no longer registers a `build` subcommand — use `bb build crowdfund` instead', () => {
     const build = crowdfundsCommand.commands.find((c) => c.name() === 'build');
-    expect(build).toBeDefined();
-    expect(build!.description()).toMatch(/Alias for `bb build crowdfund`/);
+    expect(build).toBeUndefined();
   });
 });

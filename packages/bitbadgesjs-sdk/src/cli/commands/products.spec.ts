@@ -11,7 +11,8 @@ import { productsCommand } from './products.js';
 describe('productsCommand shape', () => {
   it('exposes the documented subcommand verbs', () => {
     const names = productsCommand.commands.map((c) => c.name()).sort();
-    expect(names).toEqual(['build', 'list', 'purchase', 'show']);
+    // Per-standard `build` removed in CLI v2 (#0399); use `bb build product-catalog`.
+    expect(names).toEqual(['list', 'purchase', 'show']);
   });
 
   it('purchase requires --creator and --token-id', () => {
@@ -29,10 +30,9 @@ describe('productsCommand shape', () => {
     }
   });
 
-  it('build alias is registered and points at `bb build product-catalog`', () => {
+  it('no longer registers a `build` subcommand — use `bb build product-catalog` instead', () => {
     const build = productsCommand.commands.find((c) => c.name() === 'build');
-    expect(build).toBeDefined();
-    expect(build!.description()).toMatch(/Alias for `bb build product-catalog`/);
+    expect(build).toBeUndefined();
   });
 
   it('every verb supports the network + output flags', () => {

@@ -15,7 +15,8 @@ import { payRequestsCommand } from './pay-requests.js';
 describe('payRequestsCommand shape', () => {
   it('exposes the documented subcommand verbs', () => {
     const names = payRequestsCommand.commands.map((c) => c.name()).sort();
-    expect(names).toEqual(['build', 'deny', 'list', 'pay', 'show', 'status']);
+    // Per-standard `build` removed in CLI v2 (#0399); use `bb build payment-request`.
+    expect(names).toEqual(['deny', 'list', 'pay', 'show', 'status']);
   });
 
   it('pay requires --creator', () => {
@@ -47,9 +48,8 @@ describe('payRequestsCommand shape', () => {
     expect(flagNames).toContain('--open');
   });
 
-  it('build alias is registered', () => {
+  it('no longer registers a `build` subcommand — use `bb build payment-request` instead', () => {
     const build = payRequestsCommand.commands.find((c) => c.name() === 'build');
-    expect(build).toBeDefined();
-    expect(build!.description()).toMatch(/Alias for `bb build payment-request`/);
+    expect(build).toBeUndefined();
   });
 });

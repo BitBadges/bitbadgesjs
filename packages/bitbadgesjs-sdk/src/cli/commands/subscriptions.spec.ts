@@ -8,8 +8,8 @@ import { subscriptionsCommand } from './subscriptions.js';
 describe('subscriptionsCommand shape', () => {
   it('exposes the documented subcommand verbs', () => {
     const names = subscriptionsCommand.commands.map((c) => c.name()).sort();
+    // Per-standard `build` removed in CLI v2 (#0399); use `bb build subscription`.
     expect(names).toEqual([
-      'build',
       'cancel',
       'charge-due',
       'claim',
@@ -61,9 +61,8 @@ describe('subscriptionsCommand shape', () => {
     }
   });
 
-  it('build alias is registered and points at `bb build subscription`', () => {
+  it('no longer registers a `build` subcommand — use `bb build subscription` instead', () => {
     const build = subscriptionsCommand.commands.find((c) => c.name() === 'build');
-    expect(build).toBeDefined();
-    expect(build!.description()).toMatch(/Alias for `bb build subscription`/);
+    expect(build).toBeUndefined();
   });
 });

@@ -5,7 +5,9 @@
  *   credit-tokens list <collection>          List all credit-* tiers
  *   credit-tokens show <collection>          Render details + status
  *   credit-tokens purchase <collection>      Buy N units via the scaled tier
- *   credit-tokens build                      Alias for `bb build credit-token`
+ *
+ * Creator-side construction lives at `bb build credit-token` — the
+ * per-standard `build` subcommand was removed in CLI v2 (#0399).
  */
 
 import { Command } from 'commander';
@@ -46,7 +48,7 @@ function validateOrExit(collection: any, ctx: string): void {
 // ── credit-tokens (parent) ────────────────────────────────────────────────
 
 export const creditTokensCommand = new Command('credit-tokens').description(
-  'End-user surface for the Credit Token standard — list tiers / show / purchase / build.'
+  'End-user surface for the Credit Token standard — list tiers / show / purchase. Build new via `bb build credit-token`.'
 );
 
 addOutputFlags(
@@ -147,16 +149,5 @@ addOutputFlags(
   }
 );
 
-creditTokensCommand
-  .command('build')
-  .description('Alias for `bb build credit-token` — creator-side: construct a CREATE-COLLECTION tx for a new Credit Token.')
-  .helpOption(false)
-  .allowUnknownOption()
-  .allowExcessArguments()
-  .action(async () => {
-    const { buildCommand } = await import('./build.js');
-    const argv = process.argv;
-    const startIdx = argv.findIndex((a, i) => a === 'build' && argv[i - 1] === 'credit-tokens');
-    const forward = startIdx >= 0 ? argv.slice(startIdx + 1) : [];
-    await buildCommand.parseAsync(['credit-token', ...forward], { from: 'user' });
-  });
+// Per-standard `build` subcommand removed in CLI v2 (#0399).
+// Use `bb build credit-token ...` (the canonical builder) instead.

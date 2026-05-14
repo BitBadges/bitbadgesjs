@@ -98,7 +98,7 @@ function findSettlementApprovals(collection: any): {
 }
 
 export const predictionMarketsCommand = new Command('prediction-markets').description(
-  'End-user surface for the Prediction Market standard — list / show / status / buy / sell / cancel / deposit / redeem / resolve / build.'
+  'End-user surface for the Prediction Market standard — list / show / status / buy / sell / cancel / deposit / redeem / resolve. Build new via `bb build prediction-market`.'
 );
 
 addOutputFlags(
@@ -383,16 +383,5 @@ addOutputFlags(
   } catch (err) { emitError(err); }
 });
 
-// ── build alias ──────────────────────────────────────────────────────────
-
-predictionMarketsCommand
-  .command('build')
-  .description('Alias for `bb build prediction-market` — creator-side: construct a CREATE-COLLECTION tx for a new market.')
-  .helpOption(false).allowUnknownOption().allowExcessArguments()
-  .action(async () => {
-    const { buildCommand } = await import('./build.js');
-    const argv = process.argv;
-    const startIdx = argv.findIndex((a, i) => a === 'build' && argv[i - 1] === 'prediction-markets');
-    const forward = startIdx >= 0 ? argv.slice(startIdx + 1) : [];
-    await buildCommand.parseAsync(['prediction-market', ...forward], { from: 'user' });
-  });
+// Per-standard `build` subcommand removed in CLI v2 (#0399).
+// Use `bb build prediction-market ...` (the canonical builder) instead.

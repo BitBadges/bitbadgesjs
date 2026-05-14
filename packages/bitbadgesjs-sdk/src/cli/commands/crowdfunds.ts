@@ -97,7 +97,7 @@ async function readRaised(collection: any, opts: NetworkFlags, details: any): Pr
 export const crowdfundsCommand = new Command('crowdfunds')
   .alias('crowdfund')
   .description(
-    'End-user surface for the Crowdfund standard — list / show / status / contribute / withdraw / refund / build.'
+    'End-user surface for the Crowdfund standard — list / show / status / contribute / withdraw / refund. Build new via `bb build crowdfund`.'
   );
 
 addOutputFlags(
@@ -277,21 +277,5 @@ addOutputFlags(
   } catch (err) { emitError(err); }
 });
 
-crowdfundsCommand
-  .command('build')
-  .description('Alias for `bb build crowdfund` — creator-side: construct a CREATE-COLLECTION tx for a new crowdfund.')
-  .helpOption(false).allowUnknownOption().allowExcessArguments()
-  .action(async () => {
-    const { buildCommand } = await import('./build.js');
-    const argv = process.argv;
-    // Locate `build` whose immediate predecessor is the standards verb —
-    // matches either the canonical `crowdfunds` or the legacy `crowdfund`
-    // alias so scripts using either form forward correctly.
-    const startIdx = argv.findIndex(
-      (a, i) => a === 'build' && (argv[i - 1] === 'crowdfunds' || argv[i - 1] === 'crowdfund')
-    );
-    const forward = startIdx >= 0 ? argv.slice(startIdx + 1) : [];
-    // Inner `bb build crowdfund` preset remains singular — that's the
-    // collection-preset name, not the standards-command name.
-    await buildCommand.parseAsync(['crowdfund', ...forward], { from: 'user' });
-  });
+// Per-standard `build` subcommand removed in CLI v2 (#0399).
+// Use `bb build crowdfund ...` (the canonical builder) instead.

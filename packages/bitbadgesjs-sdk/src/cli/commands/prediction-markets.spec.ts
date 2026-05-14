@@ -13,8 +13,8 @@ import { predictionMarketsCommand } from './prediction-markets.js';
 describe('predictionMarketsCommand shape', () => {
   it('exposes the documented subcommand verbs', () => {
     const names = predictionMarketsCommand.commands.map((c) => c.name()).sort();
+    // Per-standard `build` removed in CLI v2 (#0399); use `bb build prediction-market`.
     expect(names).toEqual([
-      'build',
       'buy-no',
       'buy-yes',
       'cancel',
@@ -83,9 +83,8 @@ describe('predictionMarketsCommand shape', () => {
     expect(flagNames).toContain('--open');
   });
 
-  it('build alias is registered', () => {
+  it('no longer registers a `build` subcommand — use `bb build prediction-market` instead', () => {
     const build = predictionMarketsCommand.commands.find((c) => c.name() === 'build');
-    expect(build).toBeDefined();
-    expect(build!.description()).toMatch(/Alias for `bb build prediction-market`/);
+    expect(build).toBeUndefined();
   });
 });
