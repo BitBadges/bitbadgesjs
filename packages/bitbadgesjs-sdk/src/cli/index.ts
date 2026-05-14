@@ -611,35 +611,34 @@ if (process.argv.includes('--help-json')) {
   const tree = {
     commands: program.commands.map((cmd) => extractCommandTree(cmd))
   };
-  const json = JSON.stringify(tree, null, 2) + '\n';
-  // Use `fs.writeSync(1, ...)` rather than `process.stdout.write(...)` so
-  // the entire ~150KB tree lands before we exit. process.stdout's async
-  // write returns false past the OS pipe buffer (~64KB on Linux), and the
-  // drain callback doesn't suspend the rest of this module — so without
-  // a sync write the file would fall through to `program.parse()` and
-  // emit stale help text after a truncated JSON document. fs.writeSync
-  // writes the full buffer synchronously; nothing left to drain.
-  const buf = Buffer.from(json, 'utf-8');
-  let written = 0;
-  while (written < buf.length) {
-    try {
-      written += fs.writeSync(1, buf, written, buf.length - written);
-    } catch (err: any) {
-      // The parent (e.g. spawnSync, test harness) may not have drained
-      // its pipe buffer yet for a large JSON tree. EAGAIN means the
-      // pipe is momentarily full — yield once with a short sleep so
-      // the reader can catch up, then retry.
-      if (err?.code === 'EAGAIN') {
-        // Synchronous-yield via Atomics.wait so we don't fall through
-        // to the rest of the module before retrying.
-        const sab = new SharedArrayBuffer(4);
-        Atomics.wait(new Int32Array(sab), 0, 0, 10);
-        continue;
-      }
-      throw err;
+  // Pretty-print only for interactive readers (humans on a TTY). Pipes,
+  // spawnSync collectors, agentic shells get the compact form so the
+  // output fits in standard maxBuffer (~1MB). Pretty-printed tree is
+  // ~1.4MB, compact is ~500KB.
+  const pretty = !!process.stdout.isTTY;
+  const json = JSON.stringify(tree, null, pretty ? 2 : 0) + '\n';
+  // Async write + 'drain' wait pattern. process.stdout.write returns
+  // false once the OS pipe buffer (~64KB on Linux) fills; the 'drain'
+  // event fires when the reader (e.g. spawnSync's pipe collector)
+  // catches up. We can't simply fs.writeSync — it throws EAGAIN on
+  // non-blocking pipes, and Atomics.wait retry doesn't yield enough
+  // for the parent to drain under a tight test timeout.
+  //
+  // The rest of this module (Commander wiring, program.parse()) runs
+  // synchronously after this IIFE returns control. `program.parse()`
+  // with `--help-json` as the only arg is a no-op (Commander recognises
+  // the option but has no default handler), so falling through is
+  // benign. The IIFE's `process.exit(0)` fires once the JSON has been
+  // fully flushed and ends the process for real.
+  (async () => {
+    if (!process.stdout.write(json)) {
+      await new Promise<void>((resolve) => process.stdout.once('drain', () => resolve()));
     }
-  }
-  process.exit(0);
+    process.exit(0);
+  })().catch((err) => {
+    process.stderr.write(`Error emitting --help-json: ${(err as Error)?.message ?? err}\n`);
+    process.exit(1);
+  });
 }
 
 // ── Top-level error handler ─────────────────────────────────────────────────
@@ -674,4 +673,8 @@ if (process.argv.length <= 2 || onlyGlobalFlags) {
   process.exit(0);
 }
 
-program.parse();
+// --help-json has its own emit path (above). Skip Commander's parse so
+// it doesn't fall back to printing help text alongside the JSON.
+if (!process.argv.includes('--help-json')) {
+  program.parse();
+}
