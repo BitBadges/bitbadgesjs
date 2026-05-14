@@ -9,7 +9,7 @@ import { runBurnerCreate, pickBurner, type BurnerNetwork } from '../utils/burner
 import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
 
-export const buildCommand = new Command('build').description('Deterministic transaction builders — flag-based generators for vaults, NFTs, subscriptions, bounties, and more. Output: ready-to-sign JSON. To broadcast, pipe into `bb cli deploy --burner`.');
+export const buildCommand = new Command('build').description('Deterministic transaction builders — flag-based generators for vaults, NFTs, subscriptions, bounties, and more. Output: ready-to-sign JSON. To broadcast, pipe into `bb deploy --burner`.');
 
 // ── Output helper ────────────────────────────────────────────────────────────
 
@@ -260,7 +260,7 @@ async function emit(
         const skipResult = {
           success: false,
           error:
-            'Auto-Simulate skipped — no API key. Set BITBADGES_API_KEY or run `bitbadges-cli config set apiKey <key>`.'
+            'Auto-Simulate skipped — no API key. Pass --api-key or run `bb settings set apiKey <key>`.'
         };
         meta.simulate = skipResult;
         warnings.push({
@@ -427,7 +427,7 @@ async function emit(
 
     if ((opts.fund ?? 'faucet') === 'faucet' && !apiKey && network !== 'local') {
       process.stderr.write(
-        'Warning: --fund faucet requires an API key on non-local networks. Set BITBADGES_API_KEY or `bb cli config set apiKey <key>`.\n'
+        'Warning: --fund faucet requires an API key on non-local networks. Pass --api-key or run `bb settings set apiKey <key>`.\n'
       );
     }
 

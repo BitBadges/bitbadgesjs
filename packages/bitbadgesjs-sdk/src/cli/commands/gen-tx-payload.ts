@@ -323,7 +323,7 @@ export async function runGenPayload(
     ...(payload.evmTx ? [
       'EVM signing — build an EIP-1559 tx with: { chainId: evmTx.chainId, to: evmTx.to, data: evmTx.data, value: evmTx.value, gasLimit: evmTx.gasLimit }, sign with your EVM key, send via any RPC.',
     ] : []),
-    'Need a tx-bytes-only flow without managing TxRaw assembly? Use `bitbadges-cli deploy --browser --sign-only` instead — that hands the wallet the signing UI and returns ready-to-broadcast bytes.',
+    'Need a tx-bytes-only flow without managing TxRaw assembly? Use `bb deploy --browser --sign-only` instead — that hands the wallet the signing UI and returns ready-to-broadcast bytes.',
   ];
 
   emit(envelope);

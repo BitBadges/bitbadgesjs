@@ -86,7 +86,7 @@ export function resolveApiKey(explicit?: string, network?: 'mainnet' | 'testnet'
   if (configKey) return configKey;
 
   throw new Error(
-    'No API key provided. Set BITBADGES_API_KEY env var, pass --api-key <key>, or run `bitbadges-cli config set apiKey <key>`.'
+    'No API key. Pass --api-key, run `bb settings set apiKey <key>`, or see `bb settings --help` for env-var alternatives.'
   );
 }
 
@@ -173,8 +173,8 @@ export async function apiRequest(options: ApiRequestOptions): Promise<any> {
     // scoped wrong; re-login is the right next step either way.
     if (response.status === 401 || response.status === 403) {
       (err as any).hint = cookie
-        ? 'Session may be expired or scoped wrong — run `bitbadges-cli auth login` again.'
-        : 'This route requires user-scoped auth — run `bitbadges-cli auth login`, then retry with `--with-session`.';
+        ? 'Session may be expired or scoped wrong — run `bb auth login` again.'
+        : 'This route requires user-scoped auth — run `bb auth login`, then retry with `--with-session`.';
     }
     if (response.status === 404 && /\/collection\//.test(path)) {
       // /collection/:id 404 is the most common indexer-lag symptom: a tx

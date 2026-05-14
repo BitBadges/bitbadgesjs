@@ -259,7 +259,7 @@ CRITICAL — DUST ONLY, NEVER REAL FUNDS
       you don't fully control
 
   If you accidentally funded one with more than dust, use
-  \`bitbadges-cli burner sweep <selector> --to <your-real-address>\`
+  \`bb burner sweep <selector> --to <your-real-address>\`
   to pull the balance back out immediately.
 
 ADVANTAGES
@@ -291,21 +291,21 @@ DISADVANTAGES
 TYPICAL USAGE
   Pipe a builder's JSON straight in:
 
-    bitbadges-cli build subscription --interval monthly \\
+    bb build subscription --interval monthly \\
         --price 10 --denom USDC --recipient bb1your-payout... \\
-      | bitbadges-cli deploy --burner --msg-stdin \\
+      | bb deploy --burner --msg-stdin \\
           --manager bb1your-real-address... --local
 
   Or pass a file:
 
-    bitbadges-cli deploy --burner --msg-file col.json \\
+    bb deploy --burner --msg-file col.json \\
         --manager bb1your-real-address... --testnet
 
 RELATED
-  bitbadges-cli burner list                 — see every saved
-  bitbadges-cli burner resume <selector>    — retry a paused run
-  bitbadges-cli burner sweep  <selector>    — recover dust
-  bitbadges-cli burner forget <selector>    — delete recovery file
+  bb burner list                 — see every saved
+  bb burner resume <selector>    — retry a paused run
+  bb burner sweep  <selector>    — recover dust
+  bb burner forget <selector>    — delete recovery file
 `.trim();
 
 export const deployCommand = new Command('deploy')
@@ -448,7 +448,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
 
   if (useBurner && opts.fund === 'faucet' && !apiKey && network !== 'local') {
     process.stderr.write(
-      'Warning: --fund faucet requires an API key on non-local networks. Set BITBADGES_API_KEY or `bitbadges-cli config set apiKey <key>`.\n'
+      'Warning: --fund faucet requires an API key on non-local networks. Pass --api-key or run `bb settings set apiKey <key>`.\n'
     );
   }
 
@@ -520,7 +520,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
     if (!apiKey && network !== 'local') {
       process.stderr.write(
         '--dry-run requires an API key on non-local networks (simulate hits the BitBadges API). ' +
-          'Set BITBADGES_API_KEY or `bitbadges-cli config set apiKey <key>`.\n'
+          'Pass --api-key or run `bb settings set apiKey <key>`.\n'
       );
       process.exit(2);
     }
@@ -869,7 +869,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
     const looksLikeInsufficient =
       errStr.includes('insufficient') || errStr.includes('not enough') || errStr.includes('balance');
     const hint = looksLikeInsufficient && result.ephemeralAddress
-      ? `Run \`bitbadges-cli burner sweep ${result.ephemeralAddress} --to <your-real-address>\` to recover dust, or wait for the faucet to refill.`
+      ? `Run \`bb burner sweep ${result.ephemeralAddress} --to <your-real-address>\` to recover dust, or wait for the faucet to refill.`
       : undefined;
 
     // Optional: hold the CLI open until the indexer has caught up with

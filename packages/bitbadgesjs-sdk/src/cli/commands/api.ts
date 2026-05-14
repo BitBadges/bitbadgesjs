@@ -247,12 +247,12 @@ function buildRouteCommand(route: ApiRoute): Command {
           : getActiveSession(sessionNetwork);
         if (!session) {
           throw new Error(
-            `No stored session for ${opts.asAddress ?? 'active address'} on ${sessionNetwork}. Run \`bitbadges-cli auth login\`.`,
+            `No stored session for ${opts.asAddress ?? 'active address'} on ${sessionNetwork}. Run \`bb auth login\`.`,
           );
         }
         if (Date.now() > session.expiresAt) {
           throw new Error(
-            `Stored session for ${session.address} on ${sessionNetwork} expired at ${new Date(session.expiresAt).toISOString()}. Re-run \`bitbadges-cli auth login\`.`,
+            `Stored session for ${session.address} on ${sessionNetwork} expired at ${new Date(session.expiresAt).toISOString()}. Re-run \`bb auth login\`.`,
           );
         }
         cookie = formatCookieHeader(session);

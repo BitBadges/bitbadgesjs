@@ -181,7 +181,7 @@ export function setActive(network: Network, address: string): void {
   const store = loadAuthStore();
   const n = ensureNetwork(store, network);
   if (!n.sessions[address]) {
-    throw new Error(`No session stored for ${address} on ${network}; run \`bitbadges-cli auth login\` first.`);
+    throw new Error(`No session stored for ${address} on ${network}; run \`bb auth login\` first.`);
   }
   n.active = address;
   saveAuthStore(store);

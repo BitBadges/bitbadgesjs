@@ -34,7 +34,7 @@ export const burnerCommand = new Command('burner')
   .description(
     [
       'Manage the throwaway, dust-only burners created by',
-      '`bitbadges-cli deploy --burner`.',
+      '`bb deploy --burner`.',
       '',
       'These wallets are single-use, disposable signers that exist only to put',
       'ONE create-collection tx on-chain. They are stored in PLAINTEXT under',

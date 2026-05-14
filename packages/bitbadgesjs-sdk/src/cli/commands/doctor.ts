@@ -217,7 +217,7 @@ export const doctorCommand = addNetworkOptions(
       checks.push({
         name: 'Sessions',
         status: 'warn',
-        detail: `${parseable} parseable, ${corrupt} corrupt — run \`bitbadges-cli session reset <id>\` on broken ones`
+        detail: `${parseable} parseable, ${corrupt} corrupt — run \`bb session reset <id>\` on broken ones`
       });
     } else {
       checks.push({ name: 'Sessions', status: 'pass', detail: `${parseable} session(s) on disk` });
