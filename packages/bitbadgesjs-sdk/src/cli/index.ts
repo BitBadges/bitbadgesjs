@@ -2,6 +2,7 @@
 import * as fs from 'node:fs';
 import { Command, Help } from 'commander';
 import { HELP_GROUP_ORDER } from './utils/help-groups.js';
+import { emitDeprecation } from './utils/deprecation.js';
 
 // Apply a custom Help subclass globally so every command + sub-subcommand
 // inherits the "Required: / Options:" split, not just the root. Commander
@@ -232,6 +233,43 @@ for (const group of HELP_GROUPS) {
     program.addCommand(cmd);
   }
 }
+
+// ── `cli` umbrella — back-compat alias for the v1 `bb cli <cmd>` shape ──────
+//
+// Pre-v2 the chain-binary forwarder routed every Node CLI invocation as
+// `bb cli <subcmd> [args...]`. v2 flattens to `bb <subcmd>`. To avoid
+// breaking existing scripts / docs / muscle memory, this `cli` parent
+// catches the v1 form, prints a one-line deprecation banner, then
+// re-dispatches the remaining argv through the root program.
+//
+// Reached when:
+//   1. The user invokes `bitbadges-cli cli <subcmd>` directly (rare today,
+//      but the chain wrapper will start passing `cli` through in a
+//      companion bitbadgeschain PR).
+//   2. Anyone has scripted against the v1 layout and explicitly types
+//      `bitbadges-cli cli build vault`.
+//
+// Banner is suppressed when `BB_QUIET=1`. The actual dispatch uses
+// `parseAsync(..., { from: 'user' })` so positional args + flags reach
+// the target command exactly as written.
+
+const cliAliasCommand = new Command('cli')
+  .description('Deprecated alias: every command is now top-level. `bb cli <cmd>` → `bb <cmd>`.')
+  .helpOption(false)
+  .allowUnknownOption()
+  .allowExcessArguments()
+  .argument('[args...]', 'Forwarded to the corresponding top-level command')
+  .action(async (args: string[]) => {
+    if (!args || args.length === 0) {
+      // `bb cli` with no subcommand: show root --help and emit the banner.
+      emitDeprecation('bb cli', 'bb <cmd>');
+      program.outputHelp();
+      return;
+    }
+    emitDeprecation(`bb cli ${args[0]}`, `bb ${args[0]}`);
+    await program.parseAsync(args, { from: 'user' });
+  });
+program.addCommand(cliAliasCommand);
 
 // ── Grouped --help override ─────────────────────────────────────────────────
 //
