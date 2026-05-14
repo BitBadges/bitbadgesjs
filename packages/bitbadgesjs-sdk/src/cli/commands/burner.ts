@@ -26,6 +26,7 @@ import {
 } from '../utils/burner.js';
 import { BitBadgesSigningClient } from '../../signing/BitBadgesSigningClient.js';
 import { requireBbDenom } from '../utils/denom.js';
+import { requireBb1AddressStrict } from '../utils/address.js';
 
 export const burnerCommand = new Command('burner')
   .usage(' ')
@@ -216,11 +217,12 @@ sweepCmd.action(async (selector: string, opts: any) => {
   const { encodeMsgFromJson } = await import('../../transactions/messages/fromJson.js');
   let protoMsg;
   try {
+    const toAddress = requireBb1AddressStrict(opts.to, '--to');
     protoMsg = encodeMsgFromJson({
       typeUrl: '/cosmos.bank.v1beta1.MsgSend',
       value: {
         fromAddress: rec.address,
-        toAddress: opts.to,
+        toAddress,
         amount: [{ denom, amount: sendAmount.toString() }]
       }
     });

@@ -17,6 +17,7 @@ import {
   resolveIndexerNetwork,
 } from '../utils/indexer-options.js';
 import { bridgeSign, resolveFrontendUrl } from '../auth/browser-bridge.js';
+import { tryBb1Address } from '../utils/address.js';
 import {
   AuthSession,
   Network,
@@ -49,8 +50,28 @@ function resolveNetwork(opts: NetworkOptions): Network {
 }
 
 function detectChain(address: string): 'Cosmos' | 'ETH' {
-  if (address.startsWith('0x')) return 'ETH';
-  if (address.startsWith('bb1')) return 'Cosmos';
+  if (address.startsWith('0x')) {
+    // Loose-format check: 0x + 40 hex chars (case-insensitive). Skip the
+    // EIP-55 checksum validation here — auth accepts lowercased EVM
+    // addresses too. Tight enough to reject obvious garbage.
+    if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+      throw new Error(
+        `Invalid ETH address "${address}": expected 0x + 40 hex chars. Auth accepts bb1... (Cosmos) or 0x... (ETH).`
+      );
+    }
+    return 'ETH';
+  }
+  if (address.startsWith('bb1')) {
+    // Use the converter to validate bech32 decode. A malformed bb1
+    // string (e.g. "bb1invalid") returns "" from the converter; treat
+    // that as "garbage in, garbage out" and throw with a fix-it hint.
+    if (!tryBb1Address(address)) {
+      throw new Error(
+        `Invalid bb1 address "${address}": bech32 decode failed. Run \`bb account convert <address>\` to canonicalize.`
+      );
+    }
+    return 'Cosmos';
+  }
   throw new Error(`Cannot detect chain from address ${address}: must start with 'bb1' or '0x'`);
 }
 

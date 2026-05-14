@@ -23,7 +23,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1AddressStrict } from '../utils/address.js';
 import { requireBbDenom } from '../utils/denom.js';
 import {
   validatePredictionMarketCollection,
@@ -191,7 +191,7 @@ function buyAction(side: 'yes' | 'no') {
     opts: NetworkFlags & OutputFlags & { creator: string; tokenAmount: string; paymentAmount: string; denom: string; expiry?: string; approvalId?: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const paymentDenom = requireBbDenom(opts.denom, '--denom');
       await fetchCollection(collectionId, opts).then((c) => validateOrExit(c, `prediction-markets buy-${side}`));
       const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 24 * 60 * 60 * 1000);
@@ -217,7 +217,7 @@ function sellAction(side: 'yes' | 'no') {
     opts: NetworkFlags & OutputFlags & { creator: string; tokenAmount: string; paymentAmount: string; denom: string; expiry?: string; approvalId?: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const paymentDenom = requireBbDenom(opts.denom, '--denom');
       await fetchCollection(collectionId, opts).then((c) => validateOrExit(c, `prediction-markets sell-${side}`));
       const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 24 * 60 * 60 * 1000);
@@ -269,7 +269,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, approvalId: string, opts: NetworkFlags & OutputFlags & { creator: string; side: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const isBuy = opts.side === 'buy';
     if (opts.side !== 'buy' && opts.side !== 'sell') {
       process.stderr.write(`Error: --side must be "buy" or "sell" (got "${opts.side}").\n`);
@@ -295,7 +295,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; amount: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'prediction-markets deposit');
     const settle = findSettlementApprovals(collection);
@@ -327,7 +327,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; state: string; pairAmount?: string; yesBalance?: string; noBalance?: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'prediction-markets redeem');
       const settle = findSettlementApprovals(collection);
@@ -372,7 +372,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; outcome: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'prediction-markets resolve');
     const settle = findSettlementApprovals(collection);

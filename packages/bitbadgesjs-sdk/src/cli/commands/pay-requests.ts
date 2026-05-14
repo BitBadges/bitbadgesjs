@@ -28,7 +28,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 import {
   doesCollectionFollowPaymentRequestProtocol,
   validatePaymentRequestCollection,
@@ -209,7 +209,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'pay-requests pay');
     const details = extractPaymentRequestDetails(collection.collectionApprovals)!;
@@ -239,7 +239,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'pay-requests deny');
     const details = extractPaymentRequestDetails(collection.collectionApprovals)!;

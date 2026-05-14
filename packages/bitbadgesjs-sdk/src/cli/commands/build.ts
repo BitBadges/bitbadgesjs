@@ -7,6 +7,7 @@ import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMs
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import { runBurnerCreate, pickBurner, type BurnerNetwork } from '../utils/burner.js';
 import { requireBbDenom } from '../utils/denom.js';
+import { requireBb1AddressStrict } from '../utils/address.js';
 
 export const buildCommand = new Command('build').description('Deterministic transaction builders — flag-based generators for vaults, NFTs, subscriptions, bounties, and more. Output: ready-to-sign JSON. To broadcast, pipe into `bb cli deploy --burner`.');
 
@@ -628,13 +629,16 @@ sharedOpts(
         if (p && typeof p === 'object' && typeof p.denom === 'string') {
           p.denom = requireBbDenom(p.denom, '--payouts entry denom');
         }
+        if (p && typeof p === 'object' && typeof p.recipient === 'string') {
+          p.recipient = requireBb1AddressStrict(p.recipient, '--payouts entry recipient');
+        }
       }
     }
     params.payouts = payouts;
   } else {
     params.price = Number(opts.price);
     params.denom = opts.denom ? requireBbDenom(opts.denom, '--denom') : opts.denom;
-    params.recipient = opts.recipient;
+    params.recipient = opts.recipient ? requireBb1AddressStrict(opts.recipient, '--recipient') : opts.recipient;
   }
   emit(buildSubscription(params), opts);
 });
@@ -653,9 +657,12 @@ sharedOpts(
   const { buildBounty } = await import('../../core/builders/bounty.js');
   if (opts.json) { emit(buildBounty(readJsonInput(opts.json)), opts); return; }
   const denom = requireBbDenom(opts.denom, '--denom');
+  const verifier = requireBb1AddressStrict(opts.verifier, '--verifier');
+  const recipient = requireBb1AddressStrict(opts.recipient, '--recipient');
+  const submitter = requireBb1AddressStrict(opts.submitter, '--submitter');
   emit(buildBounty({
-    amount: Number(opts.amount), denom, verifier: opts.verifier, recipient: opts.recipient,
-    submitter: opts.submitter,
+    amount: Number(opts.amount), denom, verifier, recipient,
+    submitter,
     expiration: opts.expiration, uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
   }), opts);
 });
@@ -674,11 +681,13 @@ sharedOpts(
   const { buildPaymentRequest } = await import('../../core/builders/payment-request.js');
   if (opts.json) { emit(buildPaymentRequest(readJsonInput(opts.json)), opts); return; }
   const denom = requireBbDenom(opts.denom, '--denom');
+  const payer = requireBb1AddressStrict(opts.payer, '--payer');
+  const recipient = requireBb1AddressStrict(opts.recipient, '--recipient');
   emit(buildPaymentRequest({
     amount: Number(opts.amount),
     denom,
-    payer: opts.payer,
-    recipient: opts.recipient,
+    payer,
+    recipient,
     expiration: opts.expiration,
     uri: opts.uri,
     name: opts.name,
@@ -699,8 +708,9 @@ sharedOpts(
   const { buildCrowdfund } = await import('../../core/builders/crowdfund.js');
   if (opts.json) { emit(buildCrowdfund(readJsonInput(opts.json)), opts); return; }
   const denom = requireBbDenom(opts.denom, '--denom');
+  const crowdfunder = opts.crowdfunder ? requireBb1AddressStrict(opts.crowdfunder, '--crowdfunder') : opts.crowdfunder;
   emit(buildCrowdfund({
-    goal: Number(opts.goal), denom, crowdfunder: opts.crowdfunder, deadline: opts.deadline,
+    goal: Number(opts.goal), denom, crowdfunder, deadline: opts.deadline,
     uri: opts.uri, name: opts.name, description: opts.description, image: opts.image, creator: opts.creator
   }), opts);
 });
@@ -749,8 +759,9 @@ sharedOpts(
   const { buildProductCatalog } = await import('../../core/builders/product-catalog.js');
   if (opts.json) { emit(buildProductCatalog(readJsonInput(opts.json)), opts); return; }
   const products = JSON.parse(opts.products);
+  const storeAddress = requireBb1AddressStrict(opts.storeAddress, '--store-address');
   emit(buildProductCatalog({
-    products, storeAddress: opts.storeAddress,
+    products, storeAddress,
     uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
   }), opts);
 });
@@ -765,11 +776,12 @@ sharedOpts(
 ).action(async (opts) => {
   const { buildPredictionMarket } = await import('../../core/builders/prediction-market.js');
   if (opts.json) { emit(buildPredictionMarket(readJsonInput(opts.json)), opts); return; }
-  const verifier = opts.verifier ?? opts.resolver;
-  if (!verifier) {
+  const verifierRaw = opts.verifier ?? opts.resolver;
+  if (!verifierRaw) {
     process.stderr.write('Error: --verifier (or --resolver) is required.\n');
     process.exit(2);
   }
+  const verifier = requireBb1AddressStrict(verifierRaw, opts.verifier ? '--verifier' : '--resolver');
   const denom = requireBbDenom(opts.denom, '--denom');
   emit(buildPredictionMarket({
     verifier, denom,
@@ -818,8 +830,9 @@ sharedOpts(
     process.exit(2);
   }
   const paymentDenom = requireBbDenom(paymentDenomRaw, opts.paymentDenom ? '--payment-denom' : '--denom');
+  const recipient = requireBb1AddressStrict(opts.recipient, '--recipient');
   emit(buildCreditToken({
-    paymentDenom, recipient: opts.recipient, symbol: opts.symbol,
+    paymentDenom, recipient, symbol: opts.symbol,
     tokensPerUnit: Number(opts.tokensPerUnit),
     uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
   }), opts);
@@ -890,7 +903,8 @@ sharedOpts(
   if (opts.json) { emit(buildIntent(readJsonInput(opts.json)), opts); return; }
   const payDenom = requireBbDenom(opts.payDenom, '--pay-denom');
   const receiveDenom = requireBbDenom(opts.receiveDenom, '--receive-denom');
-  emit(buildIntent({ address: opts.address, collectionId: opts.collectionId, payDenom, payAmount: Number(opts.payAmount), receiveDenom, receiveAmount: Number(opts.receiveAmount), expiration: opts.expiration }), opts);
+  const address = requireBb1AddressStrict(opts.address, '--address');
+  emit(buildIntent({ address, collectionId: opts.collectionId, payDenom, payAmount: Number(opts.payAmount), receiveDenom, receiveAmount: Number(opts.receiveAmount), expiration: opts.expiration }), opts);
 });
 
 sharedOpts(
@@ -907,7 +921,8 @@ sharedOpts(
   const { buildRecurringPayment } = await import('../../core/builders/recurring-payment.js');
   if (opts.json) { emit(buildRecurringPayment(readJsonInput(opts.json)), opts); return; }
   const denom = requireBbDenom(opts.denom, '--denom');
-  emit(buildRecurringPayment({ collectionId: opts.collectionId, amount: Number(opts.amount), denom, interval: opts.interval, recipient: opts.recipient, expiration: opts.expiration }), opts);
+  const recipient = requireBb1AddressStrict(opts.recipient, '--recipient');
+  emit(buildRecurringPayment({ collectionId: opts.collectionId, amount: Number(opts.amount), denom, interval: opts.interval, recipient, expiration: opts.expiration }), opts);
 });
 
 sharedOpts(
@@ -925,7 +940,8 @@ sharedOpts(
   const { buildListing } = await import('../../core/builders/listing.js');
   if (opts.json) { emit(buildListing(readJsonInput(opts.json)), opts); return; }
   const denom = requireBbDenom(opts.denom, '--denom');
-  emit(buildListing({ address: opts.address, collectionId: opts.collectionId, tokenIds: opts.tokenIds, price: Number(opts.price), denom, maxSales: Number(opts.maxSales), expiration: opts.expiration }), opts);
+  const address = requireBb1AddressStrict(opts.address, '--address');
+  emit(buildListing({ address, collectionId: opts.collectionId, tokenIds: opts.tokenIds, price: Number(opts.price), denom, maxSales: Number(opts.maxSales), expiration: opts.expiration }), opts);
 });
 
 sharedOpts(
@@ -942,7 +958,8 @@ sharedOpts(
   const { buildBid } = await import('../../core/builders/bid.js');
   if (opts.json) { emit(buildBid(readJsonInput(opts.json)), opts); return; }
   const denom = requireBbDenom(opts.denom, '--denom');
-  emit(buildBid({ address: opts.address, collectionId: opts.collectionId, tokenIds: opts.tokenIds, price: Number(opts.price), denom, expiration: opts.expiration }), opts);
+  const address = requireBb1AddressStrict(opts.address, '--address');
+  emit(buildBid({ address, collectionId: opts.collectionId, tokenIds: opts.tokenIds, price: Number(opts.price), denom, expiration: opts.expiration }), opts);
 });
 
 sharedOpts(
@@ -960,7 +977,8 @@ sharedOpts(
   const { buildPmSellIntent } = await import('../../core/builders/pm-sell-intent.js');
   if (opts.json) { emit(buildPmSellIntent(readJsonInput(opts.json)), opts); return; }
   const denom = requireBbDenom(opts.denom, '--denom');
-  emit(buildPmSellIntent({ address: opts.address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom, expiration: opts.expiration }), opts);
+  const address = requireBb1AddressStrict(opts.address, '--address');
+  emit(buildPmSellIntent({ address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom, expiration: opts.expiration }), opts);
 });
 
 sharedOpts(
@@ -978,7 +996,8 @@ sharedOpts(
   const { buildPmBuyIntent } = await import('../../core/builders/pm-buy-intent.js');
   if (opts.json) { emit(buildPmBuyIntent(readJsonInput(opts.json)), opts); return; }
   const denom = requireBbDenom(opts.denom, '--denom');
-  emit(buildPmBuyIntent({ address: opts.address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom, expiration: opts.expiration }), opts);
+  const address = requireBb1AddressStrict(opts.address, '--address');
+  emit(buildPmBuyIntent({ address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom, expiration: opts.expiration }), opts);
 });
 
 // ============================================================
@@ -1011,10 +1030,10 @@ sharedOpts(
 )
   .action(async (opts) => {
     try {
-      const { requireBb1Address } = await import('../utils/address.js');
+      const { requireBb1AddressStrict } = await import('../utils/address.js');
       const { resolveCoin, toBaseUnits } = await import('../../core/builders/shared.js');
-      const fromAddress = requireBb1Address(opts.from, '--from');
-      const toAddress = requireBb1Address(opts.to, '--to');
+      const fromAddress = requireBb1AddressStrict(opts.from, '--from');
+      const toAddress = requireBb1AddressStrict(opts.to, '--to');
       let denom: string;
       let amount: string;
       if (opts.baseUnits) {

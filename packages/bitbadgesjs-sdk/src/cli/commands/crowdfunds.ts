@@ -10,7 +10,7 @@
 
 import { Command } from 'commander';
 import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 import { emit, emitError } from '../utils/envelope.js';
 import {
   doesCollectionFollowCrowdfundProtocol,
@@ -211,7 +211,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; amount: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'crowdfund contribute');
     const details = extractCrowdfundDetails(collection.collectionApprovals)!;
@@ -231,7 +231,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'crowdfund withdraw');
     const details = extractCrowdfundDetails(collection.collectionApprovals)!;
@@ -265,7 +265,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; amount: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'crowdfund refund');
     const details = extractCrowdfundDetails(collection.collectionApprovals)!;

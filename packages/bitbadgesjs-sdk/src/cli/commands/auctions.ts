@@ -14,7 +14,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1AddressStrict } from '../utils/address.js';
 import { requireBbDenom } from '../utils/denom.js';
 import {
   doesCollectionFollowAuctionProtocol,
@@ -151,7 +151,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; amount: string; denom: string; approvalId?: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const paymentDenom = requireBbDenom(opts.denom, '--denom');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'auctions place-bid');
@@ -192,7 +192,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, approvalId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     emit({
       typeUrl: '/tokenization.MsgDeleteIncomingApproval',
       value: { creator, collectionId: String(collectionId), approvalId }
@@ -217,8 +217,8 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; bidder: string }
   ) => {
     try {
-      const seller = requireBb1Address(opts.creator, '--creator');
-      const bidder = requireBb1Address(opts.bidder, '--bidder');
+      const seller = requireBb1AddressStrict(opts.creator, '--creator');
+      const bidder = requireBb1AddressStrict(opts.bidder, '--bidder');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'auctions accept-bid');
       const details = extractAuctionDetails(collection.collectionApprovals);

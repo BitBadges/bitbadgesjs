@@ -37,7 +37,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 
 function fail(code: number, msg: string): never {
   process.stderr.write(`Error: ${msg}\n`);
@@ -72,7 +72,7 @@ addOutputFlags(
     .option('--uri <uri>', 'Optional metadata URI')
     .option('--custom-data <text>', 'Optional custom data string')
 ).action((opts: OutputFlags & { creator: string; defaultValue: string; uri?: string; customData?: string }) => {
-  const creator = requireBb1Address(opts.creator, '--creator');
+  const creator = requireBb1AddressStrict(opts.creator, '--creator');
   const defaultValue = parseBool(opts.defaultValue, '--default-value');
   emit(
     {
@@ -105,7 +105,7 @@ addOutputFlags(
     storeId: string,
     opts: OutputFlags & { creator: string; defaultValue?: string; globalEnabled?: string; uri?: string; customData?: string }
   ) => {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const value: Record<string, unknown> = { creator, storeId: String(storeId) };
     if (opts.defaultValue !== undefined) value.defaultValue = parseBool(opts.defaultValue, '--default-value');
     if (opts.globalEnabled !== undefined) value.globalEnabled = parseBool(opts.globalEnabled, '--global-enabled');
@@ -124,7 +124,7 @@ addOutputFlags(
     .argument('<store-id>', 'Dynamic store ID')
     .requiredOption('--creator <address>', 'Tx creator')
 ).action((storeId: string, opts: OutputFlags & { creator: string }) => {
-  const creator = requireBb1Address(opts.creator, '--creator');
+  const creator = requireBb1AddressStrict(opts.creator, '--creator');
   emit(
     {
       typeUrl: '/tokenization.MsgDeleteDynamicStore',
@@ -146,8 +146,8 @@ addOutputFlags(
     .requiredOption('--creator <address>', 'Tx creator')
 ).action(
   (storeId: string, address: string, valueStr: string, opts: OutputFlags & { creator: string }) => {
-    const creator = requireBb1Address(opts.creator, '--creator');
-    const target = requireBb1Address(address, 'address');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
+    const target = requireBb1AddressStrict(address, '<address> argument');
     const value = parseBool(valueStr, 'value');
     emit(
       {
@@ -163,8 +163,8 @@ addOutputFlags(
 
 function bulkSetValue(value: boolean) {
   return (storeId: string, rawAddresses: string[], opts: OutputFlags & { creator: string }) => {
-    const creator = requireBb1Address(opts.creator, '--creator');
-    const addresses = splitCsv(rawAddresses).map((a) => requireBb1Address(a, 'address'));
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
+    const addresses = splitCsv(rawAddresses).map((a) => requireBb1AddressStrict(a, '<addresses> argument'));
     if (addresses.length === 0) fail(2, 'at least one address required');
     const messages = addresses.map((address) => ({
       typeUrl: '/tokenization.MsgSetDynamicStoreValue',

@@ -25,7 +25,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 import { requireBbDenom } from '../utils/denom.js';
 import {
   buildOrderbookBidApproval,
@@ -67,7 +67,7 @@ addOutputFlags(
     }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const paymentDenom = requireBbDenom(opts.denom, '--denom');
       const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
@@ -112,7 +112,7 @@ addOutputFlags(
     }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const paymentDenom = requireBbDenom(opts.denom, '--denom');
       const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 30 * 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
@@ -150,7 +150,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; side: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       if (opts.side !== 'bid' && opts.side !== 'listing') {
         process.stderr.write(`Error: --side must be "bid" or "listing" (got "${opts.side}").\n`);
         process.exit(2);
@@ -184,8 +184,8 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; approvalId: string; seller: string; tokenAmount?: string }
   ) => {
     try {
-      const buyer = requireBb1Address(opts.creator, '--creator');
-      const seller = requireBb1Address(opts.seller, '--seller');
+      const buyer = requireBb1AddressStrict(opts.creator, '--creator');
+      const seller = requireBb1AddressStrict(opts.seller, '--seller');
       emit(
         buildFillListingMsg(buyer, String(collectionId), {
           approvalId: opts.approvalId,
@@ -220,8 +220,8 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; approvalId: string; bidder: string; tokenAmount?: string }
   ) => {
     try {
-      const seller = requireBb1Address(opts.creator, '--creator');
-      const bidder = requireBb1Address(opts.bidder, '--bidder');
+      const seller = requireBb1AddressStrict(opts.creator, '--creator');
+      const bidder = requireBb1AddressStrict(opts.bidder, '--bidder');
       emit(
         buildFillBidMsg(seller, String(collectionId), {
           approvalId: opts.approvalId,

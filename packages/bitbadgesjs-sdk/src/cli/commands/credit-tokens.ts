@@ -20,7 +20,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1AddressStrict } from '../utils/address.js';
 import {
   doesCollectionFollowCreditTokenProtocol,
   extractCreditTokenTiers,
@@ -120,7 +120,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; units: string; tier?: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'credit-tokens purchase');
       const tiers = extractCreditTokenTiers(collection.collectionApprovals);

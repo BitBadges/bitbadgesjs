@@ -30,7 +30,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 import { requireBbDenom } from '../utils/denom.js';
 import {
   buildIntentApproval,
@@ -190,7 +190,7 @@ addOutputFlags(
       }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const payDenom = requireBbDenom(opts.payDenom, '--pay-denom');
       const receiveDenom = requireBbDenom(opts.receiveDenom, '--receive-denom');
       if (payDenom === receiveDenom) {
@@ -254,12 +254,12 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & CollectionFlag & { creator: string; approver?: string }
   ) => {
     try {
-      const fillerAddress = requireBb1Address(opts.creator, '--creator');
+      const fillerAddress = requireBb1AddressStrict(opts.creator, '--creator');
       const collectionId = resolveCollectionId(opts);
 
       // Resolve approverAddress. The /intents feed returns approverAddress
       // on each row; if --approver was provided, use that instead.
-      let approverAddress = opts.approver ? requireBb1Address(opts.approver, '--approver') : '';
+      let approverAddress = opts.approver ? requireBb1AddressStrict(opts.approver, '--approver') : '';
       if (!approverAddress) {
         const path = appendQuery('/intents', { collectionId: opts.collectionId });
         const res = await callApi('GET', path, opts);
@@ -306,7 +306,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & CollectionFlag & { creator: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collectionId = resolveCollectionId(opts);
       emit(
         {

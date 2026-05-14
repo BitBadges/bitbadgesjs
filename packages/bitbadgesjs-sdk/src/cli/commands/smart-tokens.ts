@@ -26,7 +26,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1AddressStrict } from '../utils/address.js';
 import {
   doesCollectionFollowSmartTokenProtocol,
   validateSmartTokenCollection,
@@ -184,7 +184,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; amount: string; baseUnits?: boolean }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'smart-tokens deposit');
       const details = extractSmartTokenDetails(collection)!;
@@ -236,7 +236,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; amount: string; baseUnits?: boolean }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'smart-tokens withdraw');
       const details = extractSmartTokenDetails(collection)!;
