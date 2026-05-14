@@ -103,7 +103,7 @@ import { createApiCommand } from './commands/api.js';
 import { authCommand } from './commands/auth.js';
 
 // Local state
-import { configCommand } from './commands/config.js';
+import { settingsCommand } from './commands/settings.js';
 import { burnerCommand } from './commands/burner.js';
 import { sessionCommand } from './commands/session.js';
 
@@ -184,7 +184,7 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   },
   {
     title: 'Local state',
-    commands: [configCommand, burnerCommand, sessionCommand]
+    commands: [settingsCommand, burnerCommand, sessionCommand]
   },
   {
     title: 'Discovery',
@@ -352,6 +352,18 @@ program.addCommand(resourcesAlias);
 program.addCommand(docsAlias);
 program.addCommand(skillsAlias);
 program.addCommand(genPubKeyAlias);
+
+// `config` → `settings` rename. Frees `bb config` for the chain binary
+// (client.toml management) once the flat namespace ships chain-side.
+// Old `bb config ...` form works for one release with the banner.
+const configAlias = makeDeprecatedAlias({
+  oldName: 'config',
+  newPath: 'bb settings',
+  description: 'Deprecated — use `bb settings` instead.',
+  forward: (args) => ['settings', ...args],
+  target: program,
+});
+program.addCommand(configAlias);
 
 // ── `cli` umbrella — back-compat alias for the v1 `bb cli <cmd>` shape ──────
 //
