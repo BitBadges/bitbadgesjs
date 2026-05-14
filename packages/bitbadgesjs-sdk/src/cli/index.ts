@@ -198,6 +198,13 @@ import { nftsCommand } from './commands/nfts.js';
 
 // Misc
 import { makeCompletionCommand } from './commands/completion.js';
+import { maybePrintFirstRunBanner } from './utils/first-run.js';
+
+// First-run policies + tab-completion banner. Runs before Commander parses
+// so the user sees it ahead of any actual output, even on `bb --help`.
+// Best-effort: never blocks, never throws. Suppressed via BB_QUIET=1 or
+// once `firstRunAcknowledgedAt` is set in ~/.bitbadges/config.json.
+maybePrintFirstRunBanner(process.argv);
 
 const program = new Command();
 
