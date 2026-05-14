@@ -37,7 +37,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 
 function fail(code: number, msg: string): never {
   process.stderr.write(`Error: ${msg}\n`);
@@ -72,7 +72,7 @@ addOutputFlags(
     .option('--uri <uri>', 'Optional metadata URI')
     .option('--custom-data <text>', 'Optional custom data string')
 ).action((opts: OutputFlags & { creator: string; defaultValue: string; uri?: string; customData?: string }) => {
-  const creator = requireBb1Address(opts.creator, '--creator');
+  const creator = requireBb1AddressStrict(opts.creator, '--creator');
   const defaultValue = parseBool(opts.defaultValue, '--default-value');
   emit(
     {
@@ -86,7 +86,11 @@ addOutputFlags(
     },
     opts
   );
-});
+}).addHelpText('after', `
+Examples:
+  $ bb dynamic-stores create --creator bb1owner...xyz --default-value false | bb deploy
+  $ bb dynamic-stores create --creator bb1owner...xyz --uri https://example.com/store.json --custom-data "kyc-allowlist" | bb deploy
+`);
 
 // ── update ───────────────────────────────────────────────────────────────────
 
@@ -105,7 +109,7 @@ addOutputFlags(
     storeId: string,
     opts: OutputFlags & { creator: string; defaultValue?: string; globalEnabled?: string; uri?: string; customData?: string }
   ) => {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const value: Record<string, unknown> = { creator, storeId: String(storeId) };
     if (opts.defaultValue !== undefined) value.defaultValue = parseBool(opts.defaultValue, '--default-value');
     if (opts.globalEnabled !== undefined) value.globalEnabled = parseBool(opts.globalEnabled, '--global-enabled');
@@ -113,7 +117,11 @@ addOutputFlags(
     if (opts.customData !== undefined) value.customData = opts.customData;
     emit({ typeUrl: '/tokenization.MsgUpdateDynamicStore', value }, opts);
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb dynamic-stores update 9 --creator bb1owner...xyz --global-enabled false | bb deploy
+  $ bb dynamic-stores update 9 --creator bb1owner...xyz --uri https://example.com/v2.json | bb deploy
+`);
 
 // ── delete ───────────────────────────────────────────────────────────────────
 
@@ -124,7 +132,7 @@ addOutputFlags(
     .argument('<store-id>', 'Dynamic store ID')
     .requiredOption('--creator <address>', 'Tx creator')
 ).action((storeId: string, opts: OutputFlags & { creator: string }) => {
-  const creator = requireBb1Address(opts.creator, '--creator');
+  const creator = requireBb1AddressStrict(opts.creator, '--creator');
   emit(
     {
       typeUrl: '/tokenization.MsgDeleteDynamicStore',
@@ -132,7 +140,10 @@ addOutputFlags(
     },
     opts
   );
-});
+}).addHelpText('after', `
+Examples:
+  $ bb dynamic-stores delete 9 --creator bb1owner...xyz | bb deploy
+`);
 
 // ── set-value (single) ───────────────────────────────────────────────────────
 
@@ -146,8 +157,8 @@ addOutputFlags(
     .requiredOption('--creator <address>', 'Tx creator')
 ).action(
   (storeId: string, address: string, valueStr: string, opts: OutputFlags & { creator: string }) => {
-    const creator = requireBb1Address(opts.creator, '--creator');
-    const target = requireBb1Address(address, 'address');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
+    const target = requireBb1AddressStrict(address, '<address> argument');
     const value = parseBool(valueStr, 'value');
     emit(
       {
@@ -157,14 +168,17 @@ addOutputFlags(
       opts
     );
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb dynamic-stores set-value 9 bb1user...xyz true --creator bb1owner...xyz | bb deploy
+`);
 
 // ── add / remove (bulk, multi-msg) ───────────────────────────────────────────
 
 function bulkSetValue(value: boolean) {
   return (storeId: string, rawAddresses: string[], opts: OutputFlags & { creator: string }) => {
-    const creator = requireBb1Address(opts.creator, '--creator');
-    const addresses = splitCsv(rawAddresses).map((a) => requireBb1Address(a, 'address'));
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
+    const addresses = splitCsv(rawAddresses).map((a) => requireBb1AddressStrict(a, '<addresses> argument'));
     if (addresses.length === 0) fail(2, 'at least one address required');
     const messages = addresses.map((address) => ({
       typeUrl: '/tokenization.MsgSetDynamicStoreValue',
@@ -181,7 +195,11 @@ addOutputFlags(
     .argument('<store-id>', 'Dynamic store ID')
     .argument('<addresses...>', 'Target addresses (repeated or comma-separated)')
     .requiredOption('--creator <address>', 'Tx creator')
-).action(bulkSetValue(true));
+).action(bulkSetValue(true)).addHelpText('after', `
+Examples:
+  $ bb dynamic-stores add 9 bb1user1...xyz bb1user2...xyz --creator bb1owner...xyz | bb deploy
+  $ bb dynamic-stores add 9 bb1user1...xyz,bb1user2...xyz --creator bb1owner...xyz | bb deploy
+`);
 
 addOutputFlags(
   dynamicStoresCommand
@@ -190,7 +208,10 @@ addOutputFlags(
     .argument('<store-id>', 'Dynamic store ID')
     .argument('<addresses...>', 'Target addresses')
     .requiredOption('--creator <address>', 'Tx creator')
-).action(bulkSetValue(false));
+).action(bulkSetValue(false)).addHelpText('after', `
+Examples:
+  $ bb dynamic-stores remove 9 bb1user1...xyz bb1user2...xyz --creator bb1owner...xyz | bb deploy
+`);
 
 // ── show (read single) ───────────────────────────────────────────────────────
 

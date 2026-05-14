@@ -26,7 +26,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1AddressStrict } from '../utils/address.js';
 import {
   doesCollectionFollowSmartTokenProtocol,
   validateSmartTokenCollection,
@@ -184,7 +184,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; amount: string; baseUnits?: boolean }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'smart-tokens deposit');
       const details = extractSmartTokenDetails(collection)!;
@@ -210,7 +210,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb smart-tokens deposit 88 --creator bb1user...xyz --amount 10 | bb deploy
+  $ bb smart-tokens deposit 88 --creator bb1user...xyz --amount 10000000 --base-units | bb deploy
+`);
 
 // ── smart-tokens withdraw ────────────────────────────────────────────────────
 
@@ -236,7 +240,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; amount: string; baseUnits?: boolean }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'smart-tokens withdraw');
       const details = extractSmartTokenDetails(collection)!;
@@ -262,7 +266,10 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb smart-tokens withdraw 88 --creator bb1user...xyz --amount 5 | bb deploy
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build smart-token ...` (the canonical builder) instead.

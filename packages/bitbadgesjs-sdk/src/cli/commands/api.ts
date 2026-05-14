@@ -25,7 +25,7 @@ import {
   addIndexerNetworkOptions,
   addIndexerOutputOptions,
 } from '../utils/indexer-options.js';
-import { emit, emitError } from '../utils/envelope.js';
+import { emit, emitError, bbError, BBErrorCode } from '../utils/envelope.js';
 import { ROUTES, TAG_DESCRIPTIONS, type ApiRoute } from './api-routes.js';
 
 // ---------------------------------------------------------------------------
@@ -246,13 +246,15 @@ function buildRouteCommand(route: ApiRoute): Command {
           ? getSession(sessionNetwork, opts.asAddress)
           : getActiveSession(sessionNetwork);
         if (!session) {
-          throw new Error(
-            `No stored session for ${opts.asAddress ?? 'active address'} on ${sessionNetwork}. Run \`bitbadges-cli auth login\`.`,
+          throw bbError(
+            BBErrorCode.NOT_AUTHENTICATED,
+            `No stored session for ${opts.asAddress ?? 'active address'} on ${sessionNetwork}. Run \`bb auth login\`.`
           );
         }
         if (Date.now() > session.expiresAt) {
-          throw new Error(
-            `Stored session for ${session.address} on ${sessionNetwork} expired at ${new Date(session.expiresAt).toISOString()}. Re-run \`bitbadges-cli auth login\`.`,
+          throw bbError(
+            BBErrorCode.NOT_AUTHENTICATED,
+            `Stored session for ${session.address} on ${sessionNetwork} expired at ${new Date(session.expiresAt).toISOString()}. Re-run \`bb auth login\`.`
           );
         }
         cookie = formatCookieHeader(session);

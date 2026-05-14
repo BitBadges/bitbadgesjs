@@ -25,7 +25,10 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
+import { requireBbDenom } from '../utils/denom.js';
+import { resolveAmount } from '../utils/amount.js';
+import { parseTimeFlag } from '../utils/time.js';
 import {
   buildOrderbookBidApproval,
   buildOrderbookListingApproval,
@@ -48,12 +51,13 @@ addOutputFlags(
         'Emit MsgSetIncomingApproval that places a bid on a token. Omit --token-id for a collection-wide bid (any token in the collection).'
       )
       .argument('<collection-id>', 'Collection ID')
-      .requiredOption('--creator <address>', 'Bidder address (bb1.../0x — auto-normalized)')
-      .requiredOption('--price <amount>', 'Bid amount in base units')
-      .requiredOption('--denom <denom>', 'Payment denom (ubadge / ibc/...)')
+      .requiredOption('--creator <address>', 'Bidder address (bb1...) — strict; run `bb account convert` for 0x')
+      .requiredOption('--price <amount>', 'Bid amount. Display units for symbol denoms (USDC → 1.5 USDC), base units for chain denoms (ubadge / ibc/...). Use --base-units to force base-units.')
+      .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+      .option('--base-units', 'Treat --price as already-in-base-units')
       .option('--token-id <n>', 'Specific token ID to bid on (omit for collection-wide bid)')
       .option('--token-amount <n>', 'Number of tokens (default 1)', '1')
-      .option('--expiry <ms>', 'Bid expiry ms-since-epoch (default: 7 days from now)')
+      .option('--expiry <when>', 'Bid expiry: ms-since-epoch (1748140800000) or duration (7d, 24h, monthly). Default 7d.')
       .option('--approval-id <id>', 'Override the random approval id')
       .option('--max-fills <n>', 'Cap on partial fills (default 1)', '1')
   )
@@ -61,20 +65,26 @@ addOutputFlags(
   async (
     collectionId: string,
     opts: NetworkFlags & OutputFlags & {
-      creator: string; price: string; denom: string;
+      creator: string; price: string; denom: string; baseUnits?: boolean;
       tokenId?: string; tokenAmount?: string; expiry?: string; approvalId?: string; maxFills?: string;
     }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
-      const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
+      const { denom: paymentDenom, amount: paymentAmountStr } = resolveAmount(
+        opts.price,
+        opts.denom,
+        Boolean(opts.baseUnits),
+        { amountFlag: '--price', denomFlag: '--denom' }
+      );
+      const end = opts.expiry ? parseTimeFlag(opts.expiry, '--expiry') : BigInt(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
       const approval = buildOrderbookBidApproval({
         address: creator,
         tokenId: opts.tokenId ? BigInt(opts.tokenId) : undefined,
         tokenAmount: BigInt(opts.tokenAmount ?? '1'),
-        paymentAmount: BigInt(opts.price),
-        paymentDenom: opts.denom,
+        paymentAmount: BigInt(paymentAmountStr),
+        paymentDenom,
         transferTimes: UintRangeArray.From([{ start: 1n, end }]),
         approvalId,
         maxNumTransfers: BigInt(opts.maxFills ?? '1')
@@ -82,7 +92,11 @@ addOutputFlags(
       emit({ typeUrl: '/tokenization.MsgSetIncomingApproval', value: { creator, collectionId: String(collectionId), approval } }, opts);
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb nfts bid 42 --creator bb1bidder...xyz --price 1.5 --denom USDC --token-id 7 | bb deploy
+  $ bb nfts bid 42 --creator bb1bidder...xyz --price 1.5 --denom USDC --expiry 24h | bb deploy
+`);
 
 // ── list (sell-side outgoing approval) ───────────────────────────────────
 
@@ -92,33 +106,40 @@ addOutputFlags(
       .command('list')
       .description('Emit MsgSetOutgoingApproval that lists a token for sale.')
       .argument('<collection-id>', 'Collection ID')
-      .requiredOption('--creator <address>', 'Seller address (bb1.../0x — auto-normalized)')
+      .requiredOption('--creator <address>', 'Seller address (bb1...) — strict; run `bb account convert` for 0x')
       .requiredOption('--token-id <n>', 'Token ID to list')
-      .requiredOption('--price <amount>', 'Asking price in base units')
-      .requiredOption('--denom <denom>', 'Payment denom (ubadge / ibc/...)')
+      .requiredOption('--price <amount>', 'Asking price. Display units for symbol denoms, base units for chain denoms. Use --base-units to force base-units.')
+      .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+      .option('--base-units', 'Treat --price as already-in-base-units')
       .option('--token-amount <n>', 'Number of tokens (default 1)', '1')
       .option('--max-sales <n>', 'Allow multiple fills of this listing (default 1)', '1')
-      .option('--expiry <ms>', 'Listing expiry ms-since-epoch (default: 30 days from now)')
+      .option('--expiry <when>', 'Listing expiry: ms-since-epoch or duration (7d, 30d, monthly). Default 30d.')
       .option('--approval-id <id>', 'Override the random approval id')
   )
 ).action(
   async (
     collectionId: string,
     opts: NetworkFlags & OutputFlags & {
-      creator: string; tokenId: string; price: string; denom: string;
+      creator: string; tokenId: string; price: string; denom: string; baseUnits?: boolean;
       tokenAmount?: string; maxSales?: string; expiry?: string; approvalId?: string;
     }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
-      const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
+      const { denom: paymentDenom, amount: paymentAmountStr } = resolveAmount(
+        opts.price,
+        opts.denom,
+        Boolean(opts.baseUnits),
+        { amountFlag: '--price', denomFlag: '--denom' }
+      );
+      const end = opts.expiry ? parseTimeFlag(opts.expiry, '--expiry') : BigInt(Date.now() + 30 * 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
       const approval = buildOrderbookListingApproval({
         address: creator,
         tokenId: BigInt(opts.tokenId),
         tokenAmount: BigInt(opts.tokenAmount ?? '1'),
-        paymentAmount: BigInt(opts.price),
-        paymentDenom: opts.denom,
+        paymentAmount: BigInt(paymentAmountStr),
+        paymentDenom,
         transferTimes: UintRangeArray.From([{ start: 1n, end }]),
         approvalId,
         maxNumTransfers: BigInt(opts.maxSales ?? '1')
@@ -126,7 +147,11 @@ addOutputFlags(
       emit({ typeUrl: '/tokenization.MsgSetOutgoingApproval', value: { creator, collectionId: String(collectionId), approval } }, opts);
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb nfts list 42 --creator bb1seller...xyz --token-id 7 --price 5 --denom USDC | bb deploy
+  $ bb nfts list 42 --creator bb1seller...xyz --token-id 7 --price 5 --denom USDC --expiry 30d --max-sales 1 | bb deploy
+`);
 
 // ── cancel ───────────────────────────────────────────────────────────────
 
@@ -147,7 +172,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; side: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       if (opts.side !== 'bid' && opts.side !== 'listing') {
         process.stderr.write(`Error: --side must be "bid" or "listing" (got "${opts.side}").\n`);
         process.exit(2);
@@ -158,7 +183,11 @@ addOutputFlags(
       emit({ typeUrl, value: { creator, collectionId: String(collectionId), approvalId } }, opts);
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb nfts cancel 42 a1b2c3d4e5f6 --creator bb1owner...xyz --side listing | bb deploy
+  $ bb nfts cancel 42 a1b2c3d4e5f6 --creator bb1owner...xyz --side bid | bb deploy
+`);
 
 // ── buy (fill a listing) ─────────────────────────────────────────────────
 
@@ -181,8 +210,8 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; approvalId: string; seller: string; tokenAmount?: string }
   ) => {
     try {
-      const buyer = requireBb1Address(opts.creator, '--creator');
-      const seller = requireBb1Address(opts.seller, '--seller');
+      const buyer = requireBb1AddressStrict(opts.creator, '--creator');
+      const seller = requireBb1AddressStrict(opts.seller, '--seller');
       emit(
         buildFillListingMsg(buyer, String(collectionId), {
           approvalId: opts.approvalId,
@@ -194,7 +223,10 @@ addOutputFlags(
       );
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb nfts buy 42 7 --creator bb1buyer...xyz --approval-id a1b2c3d4e5f6 --seller bb1seller...xyz | bb deploy
+`);
 
 // ── sell (fill a bid) ────────────────────────────────────────────────────
 
@@ -217,8 +249,8 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; approvalId: string; bidder: string; tokenAmount?: string }
   ) => {
     try {
-      const seller = requireBb1Address(opts.creator, '--creator');
-      const bidder = requireBb1Address(opts.bidder, '--bidder');
+      const seller = requireBb1AddressStrict(opts.creator, '--creator');
+      const bidder = requireBb1AddressStrict(opts.bidder, '--bidder');
       emit(
         buildFillBidMsg(seller, String(collectionId), {
           approvalId: opts.approvalId,
@@ -230,7 +262,10 @@ addOutputFlags(
       );
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb nfts sell 42 7 --creator bb1seller...xyz --approval-id a1b2c3d4e5f6 --bidder bb1bidder...xyz | bb deploy
+`);
 
 // ── orders (view open) ───────────────────────────────────────────────────
 
@@ -241,7 +276,7 @@ addOutputFlags(
       .description('Query open bids + listings for a token. Use --mine to scope to caller.')
       .argument('<collection-id>', 'Collection ID')
       .argument('<token-id>', 'Token ID')
-      .option('--denom <denom>', 'Optional denom filter')
+      .option('--denom <symbol|denom>', 'Optional denom filter. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
       .option('--mine <address>', 'Restrict to orders owned by this address (bb1.../0x — auto-normalized)')
       .option('--collection-offers', 'Also include collection-wide bids', false)
   )
@@ -252,7 +287,8 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { denom?: string; mine?: string; collectionOffers?: boolean }
   ) => {
     try {
-      const params = opts.denom ? `?denom=${encodeURIComponent(opts.denom)}` : '';
+      const denomFilter = opts.denom ? requireBbDenom(opts.denom, '--denom') : undefined;
+      const params = denomFilter ? `?denom=${encodeURIComponent(denomFilter)}` : '';
       const [listings, offers, collectionOffers] = await Promise.all([
         callApi('GET', `/collection/${encodeURIComponent(collectionId)}/listings/${encodeURIComponent(tokenId)}${params}`, opts).catch(() => ({ listings: [] })),
         callApi('GET', `/collection/${encodeURIComponent(collectionId)}/offers/${encodeURIComponent(tokenId)}${params}`, opts).catch(() => ({ offers: [] })),

@@ -30,6 +30,7 @@ import { encodeTokenizationMsgFromJson, supportedTokenizationTypeUrls } from '..
 import { evmToCosmosAddress } from '../../transactions/precompile/helpers.js';
 import { emit, emitError } from '../utils/envelope.js';
 import { emitDeprecation } from '../utils/deprecation.js';
+import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
 
 interface MsgEntry {
   typeUrl: string;
@@ -121,7 +122,7 @@ export const genTxPayloadCommand = new Command('gen-tx-payload')
   .option('--chain-id <id>', 'Cosmos chain ID override (default per network: bitbadges-1 / etc)')
   .option('--memo <text>', 'Optional tx memo', '')
   .option('--fee <amount>', 'Fee amount in base units', '0')
-  .option('--fee-denom <denom>', 'Fee denom', 'ubadge')
+  .option('--fee-denom <symbol|denom>', 'Fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', DEFAULT_FEE_DENOM)
   .option('--gas <number>', 'Gas limit', '400000')
   .option('--no-fetch', 'Skip the indexer account-info round-trip; require --account-number, --sequence, and --public-key via flags. Useful for offline / air-gapped flows.');
 addNetworkOptions(genTxPayloadCommand);
@@ -246,7 +247,7 @@ export async function runGenPayload(
   // function the dashboard's TxModal uses. Returns signDirect +
   // legacyAmino (when sender is set) and evmTx (when evmAddress is set).
   const fee = String(opts.fee ?? '0');
-  const denom = String(opts.feeDenom ?? 'ubadge');
+  const denom = requireBbDenom(String(opts.feeDenom ?? DEFAULT_FEE_DENOM), '--fee-denom');
   const gas = String(opts.gas ?? 400000);
   const memo = String(opts.memo ?? '');
 
@@ -322,7 +323,7 @@ export async function runGenPayload(
     ...(payload.evmTx ? [
       'EVM signing — build an EIP-1559 tx with: { chainId: evmTx.chainId, to: evmTx.to, data: evmTx.data, value: evmTx.value, gasLimit: evmTx.gasLimit }, sign with your EVM key, send via any RPC.',
     ] : []),
-    'Need a tx-bytes-only flow without managing TxRaw assembly? Use `bitbadges-cli deploy --browser --sign-only` instead — that hands the wallet the signing UI and returns ready-to-broadcast bytes.',
+    'Need a tx-bytes-only flow without managing TxRaw assembly? Use `bb deploy --browser --sign-only` instead — that hands the wallet the signing UI and returns ready-to-broadcast bytes.',
   ];
 
   emit(envelope);

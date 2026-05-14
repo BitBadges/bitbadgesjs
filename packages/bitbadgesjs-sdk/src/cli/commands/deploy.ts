@@ -41,6 +41,7 @@ import {
   type ExtractedEntity,
   type WaitForIndexerResult
 } from '../utils/wait-for-indexer.js';
+import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
 
 /**
  * Parse the `--wait-for-indexer` flag value. The flag is optional and may
@@ -258,7 +259,7 @@ CRITICAL — DUST ONLY, NEVER REAL FUNDS
       you don't fully control
 
   If you accidentally funded one with more than dust, use
-  \`bitbadges-cli burner sweep <selector> --to <your-real-address>\`
+  \`bb burner sweep <selector> --to <your-real-address>\`
   to pull the balance back out immediately.
 
 ADVANTAGES
@@ -290,21 +291,21 @@ DISADVANTAGES
 TYPICAL USAGE
   Pipe a builder's JSON straight in:
 
-    bitbadges-cli build subscription --interval monthly \\
+    bb build subscription --interval monthly \\
         --price 10 --denom USDC --recipient bb1your-payout... \\
-      | bitbadges-cli deploy --burner --msg-stdin \\
+      | bb deploy --burner --msg-stdin \\
           --manager bb1your-real-address... --local
 
   Or pass a file:
 
-    bitbadges-cli deploy --burner --msg-file col.json \\
+    bb deploy --burner --msg-file col.json \\
         --manager bb1your-real-address... --testnet
 
 RELATED
-  bitbadges-cli burner list                 — see every saved
-  bitbadges-cli burner resume <selector>    — retry a paused run
-  bitbadges-cli burner sweep  <selector>    — recover dust
-  bitbadges-cli burner forget <selector>    — delete recovery file
+  bb burner list                 — see every saved
+  bb burner resume <selector>    — retry a paused run
+  bb burner sweep  <selector>    — recover dust
+  bb burner forget <selector>    — delete recovery file
 `.trim();
 
 export const deployCommand = new Command('deploy')
@@ -336,7 +337,7 @@ export const deployCommand = new Command('deploy')
   .option('--manager <address>', 'Address that will own the created collection (bb1...). Required for --burner; recommended for --browser.')
   .option('--fund <mode>', 'With --burner: funding source for the burner (faucet | manual)', 'faucet')
   .option('--fee <amount>', 'Fee amount in base units (e.g. "0" or "5000")', '0')
-  .option('--fee-denom <denom>', 'Fee denom', 'ubadge')
+  .option('--fee-denom <symbol|denom>', 'Fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', DEFAULT_FEE_DENOM)
   .option('--gas <number>', 'Gas limit', '400000')
   .option('--new', 'With --burner: skip the picker and always create a fresh burner')
   .option('--reuse <selector>', 'With --burner: reuse a specific saved burner by address or recovery file path')
@@ -447,7 +448,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
 
   if (useBurner && opts.fund === 'faucet' && !apiKey && network !== 'local') {
     process.stderr.write(
-      'Warning: --fund faucet requires an API key on non-local networks. Set BITBADGES_API_KEY or `bitbadges-cli config set apiKey <key>`.\n'
+      'Warning: --fund faucet requires an API key on non-local networks. Pass --api-key or run `bb settings set apiKey <key>`.\n'
     );
   }
 
@@ -519,7 +520,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
     if (!apiKey && network !== 'local') {
       process.stderr.write(
         '--dry-run requires an API key on non-local networks (simulate hits the BitBadges API). ' +
-          'Set BITBADGES_API_KEY or `bitbadges-cli config set apiKey <key>`.\n'
+          'Pass --api-key or run `bb settings set apiKey <key>`.\n'
       );
       process.exit(2);
     }
@@ -852,7 +853,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       manager: opts.manager,
       fund: opts.fund === 'manual' ? 'manual' : 'faucet',
       apiKey,
-      fee: { amount: String(opts.fee), denom: String(opts.feeDenom || 'ubadge') },
+      fee: { amount: String(opts.fee), denom: requireBbDenom(String(opts.feeDenom || DEFAULT_FEE_DENOM), '--fee-denom') },
       gas: Number(opts.gas),
       reuseRecord: choice.kind === 'reuse' ? choice.record : undefined,
       nonInteractive: Boolean(opts.nonInteractive) || !process.stdout.isTTY,
@@ -868,7 +869,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
     const looksLikeInsufficient =
       errStr.includes('insufficient') || errStr.includes('not enough') || errStr.includes('balance');
     const hint = looksLikeInsufficient && result.ephemeralAddress
-      ? `Run \`bitbadges-cli burner sweep ${result.ephemeralAddress} --to <your-real-address>\` to recover dust, or wait for the faucet to refill.`
+      ? `Run \`bb burner sweep ${result.ephemeralAddress} --to <your-real-address>\` to recover dust, or wait for the faucet to refill.`
       : undefined;
 
     // Optional: hold the CLI open until the indexer has caught up with

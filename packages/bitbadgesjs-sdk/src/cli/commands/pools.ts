@@ -27,6 +27,7 @@ import {
   emitIndexerResult as emit,
   emitIndexerError as emitError,
 } from '../utils/indexer-options.js';
+import { requireBbDenom } from '../utils/denom.js';
 
 function appendQuery(path: string, params: Record<string, string | number | boolean | undefined>): string {
   const search = new URLSearchParams();
@@ -79,12 +80,13 @@ export function registerPools(parent: Command): void {
 
   addOutputFlags(
     addNetworkFlags(parent.command('by-denom'))
-      .description('Pools containing a given denom (e.g. ubadge or ibc/...).')
-      .argument('<denom>', 'Denom string')
+      .description('Pools containing a given denom (BADGE, USDC, … or canonical denom).')
+      .argument('<symbol|denom>', 'Symbol (BADGE, USDC) or canonical denom (ubadge, ibc/...)')
       .option('--bookmark <b>', 'Pagination bookmark')
   ).action(async (denom: string, opts: any) => {
     try {
-      const path = appendQuery('/pools/byDenom', { denom, bookmark: opts.bookmark });
+      const canonical = requireBbDenom(denom, '<denom> argument to bb pools by-denom');
+      const path = appendQuery('/pools/byDenom', { denom: canonical, bookmark: opts.bookmark });
       const res = await callApi('GET', path, opts);
       emit(res, opts);
     } catch (err) {
@@ -95,12 +97,14 @@ export function registerPools(parent: Command): void {
   addOutputFlags(
     addNetworkFlags(parent.command('by-assets'))
       .description('Pools containing a specific asset pair (order-insensitive).')
-      .argument('<denom-a>', 'First denom')
-      .argument('<denom-b>', 'Second denom')
+      .argument('<denom-a>', 'First symbol or canonical denom')
+      .argument('<denom-b>', 'Second symbol or canonical denom')
       .option('--bookmark <b>', 'Pagination bookmark')
   ).action(async (denomA: string, denomB: string, opts: any) => {
     try {
-      const path = appendQuery('/pools/byAssets', { asset1: denomA, asset2: denomB, bookmark: opts.bookmark });
+      const a = requireBbDenom(denomA, '<denom-a> argument to bb pools by-assets');
+      const b = requireBbDenom(denomB, '<denom-b> argument to bb pools by-assets');
+      const path = appendQuery('/pools/byAssets', { asset1: a, asset2: b, bookmark: opts.bookmark });
       const res = await callApi('GET', path, opts);
       emit(res, opts);
     } catch (err) {

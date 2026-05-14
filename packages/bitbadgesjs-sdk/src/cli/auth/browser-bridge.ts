@@ -18,6 +18,7 @@
 import http from 'http';
 import { AddressInfo } from 'net';
 import crypto from 'crypto';
+import { bbError, BBErrorCode } from '../utils/envelope.js';
 
 export type BridgeMode = 'login' | 'msg' | 'tx';
 
@@ -90,7 +91,10 @@ function normalizeIndexerBase(baseUrl: string): string {
 
 async function uploadPayload(baseUrl: string, apiKey: string | undefined, payload: BridgePayload): Promise<string> {
   if (!apiKey) {
-    throw new Error('Cannot upload large sign payload: no API key. Set BITBADGES_API_KEY or pass --api-key.');
+    throw bbError(
+      BBErrorCode.MISSING_API_KEY,
+      'Cannot upload large sign payload: no API key. Pass --api-key, or run `bb settings set apiKey <key>`.'
+    );
   }
   const url = `${normalizeIndexerBase(baseUrl)}/sign/payload`;
   const res = await fetch(url, {

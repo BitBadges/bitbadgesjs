@@ -10,18 +10,73 @@ import { emitDeprecation } from './utils/deprecation.js';
 // deep commands like `bb intents create --help` we need to override at the
 // `Help` class level. Defined here so the override is in scope before any
 // subcommand is instantiated.
+// ── Layout primitives ────────────────────────────────────────────────────────
+// TERM_COL: clamp on the term column. A term longer than this drops its
+//   description onto the next line, indented to TERM_COL+leftPad, instead
+//   of pushing the whole section's descriptions further right.
+// HELP_WIDTH: total width budget. Descriptions reflow at this width,
+//   re-indented to keep the column alignment intact.
+const TERM_COL = 30;
+const HELP_WIDTH = Math.max(80, process.stdout.columns ?? 100);
+
+/** Word-wrap `text` to `width` chars, indenting every line (including the
+ *  first) by `indent`. Preserves existing line breaks. */
+function wrapText(text: string, width: number, indent: string): string {
+  const out: string[] = [];
+  for (const para of text.split('\n')) {
+    if (!para) { out.push(indent); continue; }
+    let line = '';
+    for (const word of para.split(/\s+/)) {
+      if (!word) continue;
+      if (line && line.length + 1 + word.length > width) {
+        out.push(indent + line);
+        line = word;
+      } else {
+        line = line ? `${line} ${word}` : word;
+      }
+    }
+    if (line) out.push(indent + line);
+  }
+  return out.join('\n');
+}
+
+/** Render one term/description row with two niceties over Commander's
+ *  default `padEnd` + raw concat:
+ *   1. If `term` is longer than `termCol`, emit it on its own line and put
+ *      the description on the next line, indented to `leftPad + termCol`.
+ *      Stops one long term from blowing out the whole section.
+ *   2. The description is word-wrapped to fit within HELP_WIDTH and the
+ *      continuation lines are re-indented to match the description column.
+ */
+function renderRow(term: string, description: string, leftPad: number, termCol: number = TERM_COL): string {
+  const left = ' '.repeat(leftPad);
+  const descIndentLen = leftPad + termCol + 2; // +2 gap between term and desc
+  const descIndent = ' '.repeat(descIndentLen);
+  const descWidth = Math.max(20, HELP_WIDTH - descIndentLen);
+  const wrapped = description ? wrapText(description, descWidth, descIndent) : '';
+  if (term.length <= termCol) {
+    return wrapped ? `${left}${term.padEnd(termCol)}  ${wrapped.trimStart()}` : `${left}${term}`;
+  }
+  return wrapped ? `${left}${term}\n${wrapped}` : `${left}${term}`;
+}
+
 class GroupedHelp extends Help {
+
   formatHelp(cmd: Command, helper: Help): string {
     const sections: string[] = [];
     sections.push(`Usage: ${helper.commandUsage(cmd)}`);
     const desc = helper.commandDescription(cmd);
-    if (desc) sections.push('', desc);
+    if (desc) {
+      // Wrap the top description to the full help width so long blurbs
+      // don't bleed past the terminal edge.
+      sections.push('', wrapText(desc, HELP_WIDTH, ''));
+    }
 
     const argList = helper.visibleArguments(cmd);
     if (argList.length > 0) {
       sections.push('', 'Arguments:');
       for (const arg of argList) {
-        sections.push(`  ${helper.argumentTerm(arg).padEnd(28)}  ${helper.argumentDescription(arg)}`);
+        sections.push(renderRow(helper.argumentTerm(arg), helper.argumentDescription(arg), 2));
       }
     }
 
@@ -37,7 +92,7 @@ class GroupedHelp extends Help {
     if (requiredOpts.length > 0) {
       sections.push('', 'Required:');
       for (const opt of requiredOpts) {
-        sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
+        sections.push(renderRow(helper.optionTerm(opt), helper.optionDescription(opt), 2));
       }
     }
     if (optionalOpts.length > 0) {
@@ -52,7 +107,7 @@ class GroupedHelp extends Help {
       }
       // Per-command flags first (no subheader)
       for (const opt of ungrouped) {
-        sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
+        sections.push(renderRow(helper.optionTerm(opt), helper.optionDescription(opt), 2));
       }
       const orderedGroups = [
         ...HELP_GROUP_ORDER,
@@ -63,7 +118,7 @@ class GroupedHelp extends Help {
         if (!groupOpts || groupOpts.length === 0) continue;
         sections.push('', `  ${group}:`);
         for (const opt of groupOpts) {
-          sections.push(`    ${helper.optionTerm(opt).padEnd(26)}  ${helper.optionDescription(opt)}`);
+          sections.push(renderRow(helper.optionTerm(opt), helper.optionDescription(opt), 4, TERM_COL - 2));
         }
       }
     }
@@ -72,7 +127,7 @@ class GroupedHelp extends Help {
     if (subList.length > 0) {
       sections.push('', 'Commands:');
       for (const sub of subList) {
-        sections.push(`  ${helper.subcommandTerm(sub).padEnd(28)}  ${helper.subcommandDescription(sub)}`);
+        sections.push(renderRow(helper.subcommandTerm(sub), helper.subcommandDescription(sub), 2));
       }
     }
 
@@ -143,6 +198,13 @@ import { nftsCommand } from './commands/nfts.js';
 
 // Misc
 import { makeCompletionCommand } from './commands/completion.js';
+import { maybePrintFirstRunBanner } from './utils/first-run.js';
+
+// First-run policies + tab-completion banner. Runs before Commander parses
+// so the user sees it ahead of any actual output, even on `bb --help`.
+// Best-effort: never blocks, never throws. Suppressed via BB_QUIET=1 or
+// once `firstRunAcknowledgedAt` is set in ~/.bitbadges/config.json.
+maybePrintFirstRunBanner(process.argv);
 
 const program = new Command();
 
@@ -150,6 +212,19 @@ program
   .name('bitbadges-cli')
   .description('BitBadges CLI — flat verb-first surface for building, inspecting, and shipping token transactions')
   .version('0.1.0');
+
+// ── Policies disclaimer ──────────────────────────────────────────────────────
+//
+// Every `--help` invocation ends with a link to the published terms /
+// privacy / acceptable-use policies. Required for production CLIs that
+// emit user-attributable content (feedback submissions, on-chain txs,
+// hosted-API calls). Mirrored copy lives at bitbadges-frontend's
+// pages/policies.tsx.
+program.addHelpText(
+  'after',
+  '\nTerms, privacy, and acceptable-use policies: https://bitbadges.io/policies\n' +
+  'By using `bitbadges-cli` you agree to the policies linked above.\n'
+);
 
 // ── Global options ───────────────────────────────────────────────────────────
 //
@@ -225,6 +300,36 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
 
 const completionCommand = makeCompletionCommand(program);
 HELP_GROUPS.push({ title: 'Misc', commands: [completionCommand] });
+
+// ── Per-standard `build` alias subcommands ──────────────────────────────────
+//
+// Each standard parent gains a `build` subcommand that forwards to the
+// canonical `bb build <type>`. Restores v1 ergonomics (`bb auctions build
+// ...` works the same as `bb build auction ...`) while keeping the
+// single source of truth for build logic. Standards without a 1:1 build
+// counterpart (nfts, dynamic-stores) are skipped.
+import { makeBuildAlias } from './utils/build-alias.js';
+const STANDARD_BUILD_ALIASES: Record<string, string> = {
+  auctions: 'auction',
+  bounties: 'bounty',
+  crowdfunds: 'crowdfund',
+  'credit-tokens': 'credit-token',
+  intents: 'intent',
+  'pay-requests': 'payment-request',
+  'prediction-markets': 'prediction-market',
+  products: 'product-catalog',
+  'smart-tokens': 'smart-token',
+  subscriptions: 'subscription'
+};
+const standardsByName = new Map<string, Command>();
+for (const group of HELP_GROUPS) {
+  for (const cmd of group.commands) standardsByName.set(cmd.name(), cmd);
+}
+for (const [standardName, buildSubtype] of Object.entries(STANDARD_BUILD_ALIASES)) {
+  const parent = standardsByName.get(standardName);
+  if (!parent) continue;
+  parent.addCommand(makeBuildAlias(buildSubtype, buildCommand));
+}
 
 // ── Register every command at the top level ─────────────────────────────────
 
@@ -431,13 +536,13 @@ program.configureHelp({
     const sections: string[] = [];
     sections.push(`Usage: ${helper.commandUsage(cmd)}`);
     const desc = helper.commandDescription(cmd);
-    if (desc) sections.push('', desc);
+    if (desc) sections.push('', wrapText(desc, HELP_WIDTH, ''));
 
     const optList = helper.visibleOptions(cmd);
     if (optList.length > 0) {
       sections.push('', 'Options:');
       for (const opt of optList) {
-        sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
+        sections.push(renderRow(helper.optionTerm(opt), helper.optionDescription(opt), 2));
       }
     }
 
@@ -450,7 +555,7 @@ program.configureHelp({
       if (groupVisible.length === 0) continue;
       sections.push('', `  ${group.title}:`);
       for (const c of groupVisible) {
-        sections.push(`    ${helper.subcommandTerm(c).padEnd(28)}  ${helper.subcommandDescription(c)}`);
+        sections.push(renderRow(helper.subcommandTerm(c), helper.subcommandDescription(c), 4, TERM_COL - 2));
       }
     }
 
@@ -459,28 +564,25 @@ program.configureHelp({
 });
 
 function defaultFormatHelp(cmd: Command, helper: any): string {
-  // Minimal flat formatter for non-root commands. Commander's stock
-  // implementation pads more carefully but the visible difference is
-  // negligible for our subcommands.
+  // Minimal flat formatter for non-root commands. Uses the shared
+  // renderRow/wrapText helpers so column alignment + description reflow
+  // stay consistent with GroupedHelp.
   const sections: string[] = [];
   sections.push(`Usage: ${helper.commandUsage(cmd)}`);
   const desc = helper.commandDescription(cmd);
-  if (desc) sections.push('', desc);
+  if (desc) sections.push('', wrapText(desc, HELP_WIDTH, ''));
 
   const argList = helper.visibleArguments(cmd);
   if (argList.length > 0) {
     sections.push('', 'Arguments:');
     for (const arg of argList) {
-      sections.push(`  ${helper.argumentTerm(arg).padEnd(28)}  ${helper.argumentDescription(arg)}`);
+      sections.push(renderRow(helper.argumentTerm(arg), helper.argumentDescription(arg), 2));
     }
   }
 
   // Split options into Required (`.requiredOption(...)`, Commander sets
   // `mandatory = true`) and Options (everything else). Help-bearing flags
-  // like `-h, --help` stay in Options. Commander's stock layout lumps
-  // them together; on commands with 10+ flags it's hard to tell at a
-  // glance which ones the user MUST pass — especially for chained
-  // builder calls (`bb intents create --amount X --denom Y ...`).
+  // like `-h, --help` stay in Options.
   const optList = helper.visibleOptions(cmd);
   const requiredOpts = optList.filter((o: any) => o.mandatory);
   const optionalOpts = optList.filter((o: any) => !o.mandatory);
@@ -488,13 +590,13 @@ function defaultFormatHelp(cmd: Command, helper: any): string {
   if (requiredOpts.length > 0) {
     sections.push('', 'Required:');
     for (const opt of requiredOpts) {
-      sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
+      sections.push(renderRow(helper.optionTerm(opt), helper.optionDescription(opt), 2));
     }
   }
   if (optionalOpts.length > 0) {
     sections.push('', 'Options:');
     for (const opt of optionalOpts) {
-      sections.push(`  ${helper.optionTerm(opt).padEnd(28)}  ${helper.optionDescription(opt)}`);
+      sections.push(renderRow(helper.optionTerm(opt), helper.optionDescription(opt), 2));
     }
   }
 
@@ -502,7 +604,7 @@ function defaultFormatHelp(cmd: Command, helper: any): string {
   if (subList.length > 0) {
     sections.push('', 'Commands:');
     for (const sub of subList) {
-      sections.push(`  ${helper.subcommandTerm(sub).padEnd(28)}  ${helper.subcommandDescription(sub)}`);
+      sections.push(renderRow(helper.subcommandTerm(sub), helper.subcommandDescription(sub), 2));
     }
   }
 
@@ -539,20 +641,34 @@ if (process.argv.includes('--help-json')) {
   const tree = {
     commands: program.commands.map((cmd) => extractCommandTree(cmd))
   };
-  const json = JSON.stringify(tree, null, 2) + '\n';
-  // Use `fs.writeSync(1, ...)` rather than `process.stdout.write(...)` so
-  // the entire ~150KB tree lands before we exit. process.stdout's async
-  // write returns false past the OS pipe buffer (~64KB on Linux), and the
-  // drain callback doesn't suspend the rest of this module — so without
-  // a sync write the file would fall through to `program.parse()` and
-  // emit stale help text after a truncated JSON document. fs.writeSync
-  // writes the full buffer synchronously; nothing left to drain.
-  const buf = Buffer.from(json, 'utf-8');
-  let written = 0;
-  while (written < buf.length) {
-    written += fs.writeSync(1, buf, written, buf.length - written);
-  }
-  process.exit(0);
+  // Pretty-print only for interactive readers (humans on a TTY). Pipes,
+  // spawnSync collectors, agentic shells get the compact form so the
+  // output fits in standard maxBuffer (~1MB). Pretty-printed tree is
+  // ~1.4MB, compact is ~500KB.
+  const pretty = !!process.stdout.isTTY;
+  const json = JSON.stringify(tree, null, pretty ? 2 : 0) + '\n';
+  // Async write + 'drain' wait pattern. process.stdout.write returns
+  // false once the OS pipe buffer (~64KB on Linux) fills; the 'drain'
+  // event fires when the reader (e.g. spawnSync's pipe collector)
+  // catches up. We can't simply fs.writeSync — it throws EAGAIN on
+  // non-blocking pipes, and Atomics.wait retry doesn't yield enough
+  // for the parent to drain under a tight test timeout.
+  //
+  // The rest of this module (Commander wiring, program.parse()) runs
+  // synchronously after this IIFE returns control. `program.parse()`
+  // with `--help-json` as the only arg is a no-op (Commander recognises
+  // the option but has no default handler), so falling through is
+  // benign. The IIFE's `process.exit(0)` fires once the JSON has been
+  // fully flushed and ends the process for real.
+  (async () => {
+    if (!process.stdout.write(json)) {
+      await new Promise<void>((resolve) => process.stdout.once('drain', () => resolve()));
+    }
+    process.exit(0);
+  })().catch((err) => {
+    process.stderr.write(`Error emitting --help-json: ${(err as Error)?.message ?? err}\n`);
+    process.exit(1);
+  });
 }
 
 // ── Top-level error handler ─────────────────────────────────────────────────
@@ -587,4 +703,8 @@ if (process.argv.length <= 2 || onlyGlobalFlags) {
   process.exit(0);
 }
 
-program.parse();
+// --help-json has its own emit path (above). Skip Commander's parse so
+// it doesn't fall back to printing help text alongside the JSON.
+if (!process.argv.includes('--help-json')) {
+  program.parse();
+}

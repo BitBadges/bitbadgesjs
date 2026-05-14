@@ -47,7 +47,7 @@ export const simulateCommand = addNetworkOptions(
       renderSimulate(
         {
           success: false,
-          error: 'No API key. Set BITBADGES_API_KEY, run `bitbadges-cli config set apiKey <key>`, or pass --network local against a key-less local indexer.'
+          error: 'No API key. Pass --api-key, run `bb settings set apiKey <key>`, or pass --network local against a key-less local indexer.'
         },
         { stream: process.stderr }
       ) + '\n'

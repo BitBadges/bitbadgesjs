@@ -25,6 +25,8 @@ import {
   type BurnerNetwork
 } from '../utils/burner.js';
 import { BitBadgesSigningClient } from '../../signing/BitBadgesSigningClient.js';
+import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
+import { requireBb1AddressStrict } from '../utils/address.js';
 
 export const burnerCommand = new Command('burner')
   .usage(' ')
@@ -32,7 +34,7 @@ export const burnerCommand = new Command('burner')
   .description(
     [
       'Manage the throwaway, dust-only burners created by',
-      '`bitbadges-cli deploy --burner`.',
+      '`bb deploy --burner`.',
       '',
       'These wallets are single-use, disposable signers that exist only to put',
       'ONE create-collection tx on-chain. They are stored in PLAINTEXT under',
@@ -112,7 +114,7 @@ const resumeCmd = burnerCommand
   .requiredOption('--manager <address>', 'Collection manager address (bb1...)')
   .option('--fund <mode>', 'Funding mode if the wallet is still unfunded', 'faucet')
   .option('--fee <amount>', 'Fee amount in base units', '0')
-  .option('--fee-denom <denom>', 'Fee denom', 'ubadge')
+  .option('--fee-denom <symbol|denom>', 'Fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', DEFAULT_FEE_DENOM)
   .option('--gas <number>', 'Gas limit', '400000')
   .option('--poll-timeout <seconds>', 'Seconds to wait for funding', '60');
 addNetworkOptions(resumeCmd);
@@ -147,7 +149,7 @@ resumeCmd.action(async (selector: string, opts: any) => {
     manager: opts.manager,
     fund: opts.fund === 'manual' ? 'manual' : 'faucet',
     apiKey,
-    fee: { amount: String(opts.fee), denom: String(opts.feeDenom || 'ubadge') },
+    fee: { amount: String(opts.fee), denom: requireBbDenom(String(opts.feeDenom || DEFAULT_FEE_DENOM), '--fee-denom') },
     gas: Number(opts.gas),
     reuseRecord: rec,
     nonInteractive: !process.stdout.isTTY,
@@ -165,7 +167,7 @@ const sweepCmd = burnerCommand
   .description('Send the burner\'s remaining balance to another address and mark it swept.')
   .argument('<selector>', 'Address or recovery file path')
   .requiredOption('--to <address>', 'Recipient address (bb1...)')
-  .option('--denom <denom>', 'Coin denom to sweep', 'ubadge')
+  .option('--denom <symbol|denom>', 'Coin denom to sweep. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', DEFAULT_FEE_DENOM)
   .option('--fee <amount>', 'Fee amount', '0')
   .option('--gas <number>', 'Gas limit', '200000');
 addNetworkOptions(sweepCmd);
@@ -180,9 +182,10 @@ sweepCmd.action(async (selector: string, opts: any) => {
   const apiUrl = getApiUrl({ ...opts, network });
   const apiKey = getApiKeyForNetwork({ ...opts, network });
 
-  const balance = await fetchBalance(nodeUrl, rec.address, opts.denom);
+  const denom = requireBbDenom(String(opts.denom || DEFAULT_FEE_DENOM), '--denom');
+  const balance = await fetchBalance(nodeUrl, rec.address, denom);
   if (balance === 0n) {
-    process.stderr.write(`Hot wallet ${rec.address} has zero ${opts.denom} balance — nothing to sweep.\n`);
+    process.stderr.write(`Hot wallet ${rec.address} has zero ${denom} balance — nothing to sweep.\n`);
     return;
   }
   // Reserve the fee from the swept amount.
@@ -214,12 +217,13 @@ sweepCmd.action(async (selector: string, opts: any) => {
   const { encodeMsgFromJson } = await import('../../transactions/messages/fromJson.js');
   let protoMsg;
   try {
+    const toAddress = requireBb1AddressStrict(opts.to, '--to');
     protoMsg = encodeMsgFromJson({
       typeUrl: '/cosmos.bank.v1beta1.MsgSend',
       value: {
         fromAddress: rec.address,
-        toAddress: opts.to,
-        amount: [{ denom: opts.denom, amount: sendAmount.toString() }]
+        toAddress,
+        amount: [{ denom, amount: sendAmount.toString() }]
       }
     });
   } catch (err: any) {
@@ -231,7 +235,7 @@ sweepCmd.action(async (selector: string, opts: any) => {
   }
 
   const result = await client.signAndBroadcast([protoMsg], {
-    fee: { amount: opts.fee || '0', denom: opts.denom, gas: String(opts.gas) },
+    fee: { amount: opts.fee || '0', denom, gas: String(opts.gas) },
     simulate: false
   });
   if (!result.success) {

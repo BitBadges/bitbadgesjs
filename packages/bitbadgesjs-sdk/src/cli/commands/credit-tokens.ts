@@ -20,7 +20,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1AddressStrict } from '../utils/address.js';
 import {
   doesCollectionFollowCreditTokenProtocol,
   extractCreditTokenTiers,
@@ -120,7 +120,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; units: string; tier?: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'credit-tokens purchase');
       const tiers = extractCreditTokenTiers(collection.collectionApprovals);
@@ -147,7 +147,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb credit-tokens purchase 23 --creator bb1buyer...xyz --units 10 | bb deploy
+  $ bb credit-tokens purchase 23 --creator bb1buyer...xyz --units 10 --tier premium-tier | bb deploy
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build credit-token ...` (the canonical builder) instead.

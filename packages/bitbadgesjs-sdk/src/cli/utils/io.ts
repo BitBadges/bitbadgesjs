@@ -3,6 +3,7 @@ import type { Command } from 'commander';
 import { getConfigBaseUrl, getConfigApiKey } from './config.js';
 import { assertNetworkAvailable } from '../../signing/types.js';
 import { emit } from './envelope.js';
+import { addUnifiedNetworkOptions } from './network-options.js';
 
 /**
  * Read JSON input from multiple sources:
@@ -137,19 +138,15 @@ export function getApiKeyForNetwork(options: NetworkOptions): string | undefined
 }
 
 /**
- * Add the four network-selection options to a Command in one call.
- * Use this on every CLI command that makes an external API call so the
- * flag surface stays consistent: `--network`, `--testnet`, `--local`,
- * and `--url` all do the same job, with `--url` as the manual override.
+ * Add the burner/deploy-side network-selection options to a Command.
+ *
+ * @deprecated Use {@link addUnifiedNetworkOptions} from
+ *   `./network-options.js` directly — this is a thin compatibility
+ *   shim that delegates to it. Historically this helper omitted
+ *   `--api-key` (burner/deploy fell back to BITBADGES_API_KEY env);
+ *   the unified surface exposes it on every command so the same
+ *   override style works everywhere.
  */
 export function addNetworkOptions(cmd: Command): Command {
-  return cmd
-    .option(
-      '--network <name>',
-      'Network: mainnet | testnet | local. Picks the matching API base URL and config apiKey.'
-    )
-    .option('--mainnet', 'Shortcut for --network mainnet')
-    .option('--testnet', 'Shortcut for --network testnet')
-    .option('--local', 'Shortcut for --network local (http://localhost:3001)')
-    .option('--url <url>', 'Custom API base URL (overrides --network)');
+  return addUnifiedNetworkOptions(cmd);
 }

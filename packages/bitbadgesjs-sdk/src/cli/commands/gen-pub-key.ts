@@ -251,8 +251,8 @@ genPubKeyCommand.action(async (opts) => {
             '  1. Sign this exact message with your wallet (Keplr signArbitrary, hardware wallet, or any ADR-36-capable signer):\n\n' +
             `    ${PUBKEY_DERIVATION_MESSAGE}\n\n` +
             '  2. Re-run with the resulting base64 signature:\n' +
-            `     bitbadges-cli gen-pub-key --address ${address} --signature <base64>\n\n` +
-            '  Print the message verbatim with: bitbadges-cli gen-pub-key --print-message'
+            `     bb gen-pub-key --address ${address} --signature <base64>\n\n` +
+            '  Print the message verbatim with: bb gen-pub-key --print-message'
         ),
         { code: 'pubkey_not_found', exitCode: 2 }
       );

@@ -191,23 +191,43 @@ describe('cli build pipeline integration', () => {
       expect(out.json.value.amount[0].amount).toBe('1000000');
     });
 
-    it('0x address is auto-normalized to bb1', () => {
-      const out = runCli([
-        'build', 'send',
-        '--from', '0x0000000000000000000000000000000000000000',
-        '--to', RECIPIENT,
-        '--amount', '1', '--denom', 'BADGE'
-      ]);
+    it('0x address rejects strictly with a `bb account convert` hint', () => {
+      // Post-v2.1 strict mode: msg-emit address flags throw on 0x input.
+      const out = runCli(
+        [
+          'build', 'send',
+          '--from', '0x0000000000000000000000000000000000000000',
+          '--to', RECIPIENT,
+          '--amount', '1', '--denom', 'BADGE'
+        ],
+        { throwOnError: false, parseJson: false }
+      );
+      expect(out.exitCode).not.toBe(0);
+      expect(out.stderr).toMatch(/bb1\.\.\. address/);
+      expect(out.stderr).toMatch(/bb account convert/);
+    });
+
+    it('BB_ADDRESS_AUTO_CONVERT=1 restores lenient 0x→bb1 normalization', () => {
+      // Back-compat escape hatch for one release.
+      const out = runCli(
+        [
+          'build', 'send',
+          '--from', '0x0000000000000000000000000000000000000000',
+          '--to', RECIPIENT,
+          '--amount', '1', '--denom', 'BADGE'
+        ],
+        { env: { BB_ADDRESS_AUTO_CONVERT: '1' } }
+      );
       expect(out.json.value.fromAddress).toBe('bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv');
     });
 
-    it('rejects an unknown coin symbol with a clear error', () => {
+    it('rejects an unknown denom symbol with a clear error', () => {
       const out = runCli(
         ['build', 'send', '--from', CREATOR, '--to', RECIPIENT, '--amount', '1', '--denom', 'NOSUCHCOIN'],
         { throwOnError: false, parseJson: false }
       );
       expect(out.exitCode).not.toBe(0);
-      expect(out.stderr).toMatch(/Unknown coin/i);
+      expect(out.stderr).toMatch(/Unknown denom|Unknown coin/i);
     });
 
     it('rejects non-integer base-units amount', () => {

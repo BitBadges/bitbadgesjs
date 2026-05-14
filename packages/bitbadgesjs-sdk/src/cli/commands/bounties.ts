@@ -28,7 +28,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 import {
   doesCollectionFollowBountyProtocol,
   validateBountyCollection,
@@ -206,7 +206,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'bounties accept');
     const details = extractBountyDetails(collection.collectionApprovals)!;
@@ -220,7 +220,10 @@ addOutputFlags(
   } catch (err) {
     emitError(err);
   }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb bounties accept 17 --creator bb1verifier...xyz | bb deploy
+`);
 
 // ── bounties deny ────────────────────────────────────────────────────────
 
@@ -236,7 +239,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'bounties deny');
     const details = extractBountyDetails(collection.collectionApprovals)!;
@@ -250,7 +253,10 @@ addOutputFlags(
   } catch (err) {
     emitError(err);
   }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb bounties deny 17 --creator bb1verifier...xyz | bb deploy
+`);
 
 // ── bounties claim-refund ────────────────────────────────────────────────
 
@@ -266,7 +272,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'bounties claim-refund');
     const details = extractBountyDetails(collection.collectionApprovals)!;
@@ -284,7 +290,10 @@ addOutputFlags(
   } catch (err) {
     emitError(err);
   }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb bounties claim-refund 17 --creator bb1submitter...xyz | bb deploy
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build bounty ...` (the canonical builder) instead.

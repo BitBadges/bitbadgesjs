@@ -36,6 +36,58 @@ export interface EnvelopeError {
   details?: unknown;
 }
 
+/**
+ * Canonical error-code taxonomy for envelope.error.code.
+ *
+ * Most CLI commands previously emitted bespoke string codes
+ * (`cli_error`, `burner_not_found`, `invalid_input`, etc). Enumerating
+ * the common cross-cutting ones here keeps agents able to branch on a
+ * stable set without reverse-engineering each verb's codes.
+ *
+ * Conventions:
+ *   - Bespoke domain codes (e.g. `burner_not_found`, `sign_rejected`)
+ *     can still be passed as plain strings to `emitError({ code })`.
+ *   - When a code clearly maps to one of these buckets, prefer the
+ *     enum value so agents can dispatch on a finite set.
+ *   - The catch-all when no code is passed is {@link BBErrorCode.CLI_ERROR}.
+ */
+export const BBErrorCode = {
+  /** Catch-all. Default when `emitError()` is called without a code. */
+  CLI_ERROR: 'cli_error',
+  /** User passed a flag value that violates input validation. */
+  INVALID_INPUT: 'invalid_input',
+  /** Address rejected by `requireBb1Address[Strict]`. */
+  INVALID_ADDRESS: 'invalid_address',
+  /** Denom rejected by `requireBbDenom` (incl. the u-prefix trap). */
+  UNKNOWN_TOKEN: 'unknown_token',
+  /** Required API key absent (env / flag / config all empty). */
+  MISSING_API_KEY: 'missing_api_key',
+  /** User-scoped auth required but no session is loaded. */
+  NOT_AUTHENTICATED: 'not_authenticated',
+  /** Network call to indexer / chain RPC failed (transport / 5xx). */
+  NETWORK_ERROR: 'network_error',
+  /** Tx pre-flight validation failed (audit / simulate / dry-run). */
+  TX_VALIDATION_FAILED: 'tx_validation_failed',
+  /** Tx broadcast itself failed (chain rejected, gas, sequence). */
+  BROADCAST_FAILED: 'broadcast_failed'
+} as const;
+
+export type BBErrorCodeValue = (typeof BBErrorCode)[keyof typeof BBErrorCode];
+
+/**
+ * Build an `Error` that already carries `.code` so it flows through
+ * `emitError(err)` without the caller having to pass `{ code }`
+ * explicitly. Use this for validators and other deep helpers that
+ * want their thrown errors to surface a specific taxonomy code in
+ * the envelope.
+ */
+export function bbError(code: BBErrorCodeValue | string, message: string, hint?: string): Error {
+  const err = new Error(message) as Error & { code: string; hint?: string };
+  err.code = code;
+  if (hint) err.hint = hint;
+  return err;
+}
+
 export interface Envelope<T = unknown> {
   ok: boolean;
   data: T | null;
@@ -139,7 +191,10 @@ interface ApiErrorShape {
  * a generic `cli_error`. Callers passing a domain code should construct
  * the envelope directly via `errorEnvelope()` and write it themselves.
  */
-export function emitError(err: unknown, opts: EmitOptions & { exitCode?: number; code?: string } = {}): never {
+export function emitError(
+  err: unknown,
+  opts: EmitOptions & { exitCode?: number; code?: string | BBErrorCodeValue } = {}
+): never {
   const e = err as ApiErrorShape;
   const message = (() => {
     if (e?.response !== undefined) {
@@ -152,7 +207,7 @@ export function emitError(err: unknown, opts: EmitOptions & { exitCode?: number;
     }
     return e?.message ?? String(err);
   })();
-  const code = opts.code ?? e?.code ?? 'cli_error';
+  const code = opts.code ?? e?.code ?? BBErrorCode.CLI_ERROR;
   const env = errorEnvelope(code, message, e?.response, e?.hint);
   const text = opts.condensed
     ? JSON.stringify(env, bigIntReplacer)

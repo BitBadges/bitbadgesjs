@@ -25,6 +25,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
+import { requireSkipGoDenom } from '../utils/denom.js';
 
 function appendQuery(path: string, params: Record<string, string | number | boolean | undefined>): string {
   const search = new URLSearchParams();
@@ -138,11 +139,16 @@ addOutputFlags(
       }
   ) => {
     try {
+      // Swap accepts origin-chain native denoms (uusdc / uatom / …) and
+      // cross-chain ibc/... forms; validate against the permissive
+      // Skip:Go contract rather than the strict BitBadges one.
+      const fromDenom = requireSkipGoDenom(from, '<from> argument to bb swap estimate');
+      const toDenom = requireSkipGoDenom(to, '<to> argument to bb swap estimate');
       const addresses = opts.addresses ? JSON.parse(opts.addresses) : {};
       const body = {
-        tokenIn: `${amount}${from}`,
+        tokenIn: `${amount}${fromDenom}`,
         tokenInChainId: opts.sourceChain ?? 'bitbadges-1',
-        tokenOutDenom: to,
+        tokenOutDenom: toDenom,
         tokenOutChainId: opts.destChain ?? 'bitbadges-1',
         chainIdsToAddresses: addresses,
         slippageTolerancePercent: opts.slippage ?? '1',

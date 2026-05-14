@@ -5,7 +5,7 @@
  * malformed input, stderr normalization notice gating).
  */
 
-import { tryBb1Address, requireBb1Address } from './address.js';
+import { tryBb1Address, requireBb1Address, requireBb1AddressStrict } from './address.js';
 
 // Zero-address pair — deterministic and stable across SDK versions.
 // 0x000...000 ↔ bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv.
@@ -78,5 +78,62 @@ describe('requireBb1Address', () => {
     requireBb1Address(ZERO_BB1, '<address>');
     const stderrCall = stderrSpy.mock.calls.map((c) => c[0]).join('');
     expect(stderrCall).not.toContain('Normalized');
+  });
+});
+
+describe('requireBb1AddressStrict', () => {
+  let exitSpy: jest.SpyInstance;
+  let stderrSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    exitSpy = jest.spyOn(process, 'exit').mockImplementation(((_code?: number) => {
+      throw new Error('process.exit');
+    }) as never);
+    stderrSpy = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+  });
+
+  afterEach(() => {
+    exitSpy.mockRestore();
+    stderrSpy.mockRestore();
+    delete process.env.BB_ADDRESS_AUTO_CONVERT;
+  });
+
+  it('returns bb1 for valid bb1 input', () => {
+    expect(requireBb1AddressStrict(ZERO_BB1, '--creator')).toBe(ZERO_BB1);
+    expect(exitSpy).not.toHaveBeenCalled();
+  });
+
+  it('REJECTS 0x input with a bb account convert hint', () => {
+    expect(() => requireBb1AddressStrict(ZERO_ETH, '--creator')).toThrow('process.exit');
+    const stderrText = stderrSpy.mock.calls.map((c) => c[0]).join('');
+    expect(stderrText).toContain('--creator');
+    expect(stderrText).toContain('0x form');
+    expect(stderrText).toContain('bb account convert');
+    expect(stderrText).toContain('BB_ADDRESS_AUTO_CONVERT=1');
+  });
+
+  it('REJECTS empty input with a clear error', () => {
+    expect(() => requireBb1AddressStrict('', '--creator')).toThrow('process.exit');
+    const stderrText = stderrSpy.mock.calls.map((c) => c[0]).join('');
+    expect(stderrText).toContain('--creator requires a bb1... address');
+  });
+
+  it('rejects malformed bb1 input', () => {
+    expect(() => requireBb1AddressStrict('bb1garbage', '--creator')).toThrow('process.exit');
+    const stderrText = stderrSpy.mock.calls.map((c) => c[0]).join('');
+    expect(stderrText).toContain('invalid bb1 address');
+  });
+
+  it('honors BB_ADDRESS_AUTO_CONVERT=1 by delegating to requireBb1Address', () => {
+    process.env.BB_ADDRESS_AUTO_CONVERT = '1';
+    expect(requireBb1AddressStrict(ZERO_ETH, '--creator')).toBe(ZERO_BB1);
+    expect(exitSpy).not.toHaveBeenCalled();
+    const stderrText = stderrSpy.mock.calls.map((c) => c[0]).join('');
+    // The lenient path emits a "Normalized X → Y" notice (unless BB_QUIET).
+    expect(stderrText).toContain('Normalized');
+  });
+
+  it('does NOT silently convert when env var is unset', () => {
+    expect(() => requireBb1AddressStrict(ZERO_ETH, '--creator')).toThrow('process.exit');
   });
 });

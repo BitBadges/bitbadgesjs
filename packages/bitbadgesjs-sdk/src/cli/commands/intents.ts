@@ -30,7 +30,10 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
+import { requireBbDenom } from '../utils/denom.js';
+import { resolveAmount } from '../utils/amount.js';
+import { parseTimeFlag } from '../utils/time.js';
 import {
   buildIntentApproval,
   buildIntentFillTx,
@@ -85,8 +88,8 @@ addOutputFlags(
           '--mine <address>',
           'Restrict to intents created by this address (bb1.../0x — auto-normalized). Also includes used/inactive.'
         )
-        .option('--pay-denom <denom>', 'Filter by the denom the intent pays out')
-        .option('--receive-denom <denom>', 'Filter by the denom the intent expects to receive')
+        .option('--pay-denom <symbol|denom>', 'Filter by the denom the intent pays out. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+        .option('--receive-denom <symbol|denom>', 'Filter by the denom the intent expects to receive. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     )
   )
 ).action(
@@ -101,12 +104,14 @@ addOutputFlags(
   ) => {
     try {
       const mine = opts.mine ? requireBb1Address(opts.mine, '--mine') : undefined;
+      const payDenom = opts.payDenom ? requireBbDenom(opts.payDenom, '--pay-denom') : undefined;
+      const receiveDenom = opts.receiveDenom ? requireBbDenom(opts.receiveDenom, '--receive-denom') : undefined;
       const collectionId = opts.collectionId; // explicit override; otherwise indexer scopes globally
       const base = mine ? `/intents/${encodeURIComponent(mine)}` : '/intents';
       const path = appendQuery(base, {
         includeAll: mine ? 'true' : undefined,
-        payDenom: opts.payDenom,
-        receiveDenom: opts.receiveDenom,
+        payDenom,
+        receiveDenom,
         collectionId
       });
       const res = await callApi('GET', path, opts);
@@ -161,13 +166,14 @@ addOutputFlags(
           'Emit MsgSetOutgoingApproval for a new intent ("I pay X if you send me Y"). Pipe to `bb deploy`.'
         )
         .requiredOption('--creator <address>', 'Intent creator address (bb1.../0x — auto-normalized)')
-        .requiredOption('--pay-denom <denom>', 'Denom you OFFER (chain-side denom; ibc/... or ubadge)')
-        .requiredOption('--pay-amount <amount>', 'Amount of pay denom in base units')
-        .requiredOption('--receive-denom <denom>', 'Denom you EXPECT in return')
-        .requiredOption('--receive-amount <amount>', 'Amount of receive denom in base units')
+        .requiredOption('--pay-denom <symbol|denom>', 'Denom you OFFER. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+        .requiredOption('--pay-amount <amount>', 'Amount of pay denom. Display units for symbol denoms, base units for chain denoms. Use --base-units to force base-units.')
+        .requiredOption('--receive-denom <symbol|denom>', 'Denom you EXPECT in return. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+        .requiredOption('--receive-amount <amount>', 'Amount of receive denom. Display units for symbol denoms, base units for chain denoms.')
+        .option('--base-units', 'Treat --pay-amount and --receive-amount as already-in-base-units')
         .option(
-          '--valid-until <ms>',
-          'Optional expiration as ms-since-epoch (default: ~30 days from now)'
+          '--valid-until <when>',
+          'Optional expiration: ms-since-epoch or duration (24h, 7d, 30d, monthly). Default 30d.'
         )
         .option('--approval-id <id>', 'Override the auto-generated approval id (random hex by default)')
     )
@@ -182,28 +188,42 @@ addOutputFlags(
         payAmount: string;
         receiveDenom: string;
         receiveAmount: string;
+        baseUnits?: boolean;
         validUntil?: string;
         approvalId?: string;
       }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
-      if (opts.payDenom === opts.receiveDenom) {
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
+      const baseUnits = Boolean(opts.baseUnits);
+      const { denom: payDenom, amount: payAmountStr } = resolveAmount(
+        opts.payAmount,
+        opts.payDenom,
+        baseUnits,
+        { amountFlag: '--pay-amount', denomFlag: '--pay-denom' }
+      );
+      const { denom: receiveDenom, amount: receiveAmountStr } = resolveAmount(
+        opts.receiveAmount,
+        opts.receiveDenom,
+        baseUnits,
+        { amountFlag: '--receive-amount', denomFlag: '--receive-denom' }
+      );
+      if (payDenom === receiveDenom) {
         process.stderr.write('Error: --pay-denom and --receive-denom must differ.\n');
         process.exit(2);
       }
       const validUntil = opts.validUntil
-        ? BigInt(opts.validUntil)
+        ? parseTimeFlag(opts.validUntil, '--valid-until')
         : BigInt(Date.now() + 30 * 24 * 60 * 60 * 1000);
       const collectionId = resolveCollectionId(opts);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
 
       const approval = buildIntentApproval({
         address: creator,
-        payDenom: opts.payDenom,
-        payAmount: BigInt(opts.payAmount),
-        receiveDenom: opts.receiveDenom,
-        receiveAmount: BigInt(opts.receiveAmount),
+        payDenom,
+        payAmount: BigInt(payAmountStr),
+        receiveDenom,
+        receiveAmount: BigInt(receiveAmountStr),
         transferTimes: UintRangeArray.From([{ start: 1n, end: validUntil }]),
         approvalId
       });
@@ -223,7 +243,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb intents create --creator bb1maker...xyz --pay-denom BADGE --pay-amount 100 --receive-denom USDC --receive-amount 50 | bb deploy
+  $ bb intents create --creator bb1maker...xyz --pay-denom BADGE --pay-amount 100 --receive-denom USDC --receive-amount 50 --valid-until 7d | bb deploy
+`);
 
 // ── intents fill ──────────────────────────────────────────────────────────
 
@@ -249,12 +273,12 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & CollectionFlag & { creator: string; approver?: string }
   ) => {
     try {
-      const fillerAddress = requireBb1Address(opts.creator, '--creator');
+      const fillerAddress = requireBb1AddressStrict(opts.creator, '--creator');
       const collectionId = resolveCollectionId(opts);
 
       // Resolve approverAddress. The /intents feed returns approverAddress
       // on each row; if --approver was provided, use that instead.
-      let approverAddress = opts.approver ? requireBb1Address(opts.approver, '--approver') : '';
+      let approverAddress = opts.approver ? requireBb1AddressStrict(opts.approver, '--approver') : '';
       if (!approverAddress) {
         const path = appendQuery('/intents', { collectionId: opts.collectionId });
         const res = await callApi('GET', path, opts);
@@ -279,7 +303,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb intents fill a1b2c3d4e5f6 --creator bb1filler...xyz | bb deploy
+  $ bb intents fill a1b2c3d4e5f6 --creator bb1filler...xyz --approver bb1maker...xyz | bb deploy
+`);
 
 // ── intents cancel ────────────────────────────────────────────────────────
 
@@ -301,7 +329,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & CollectionFlag & { creator: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collectionId = resolveCollectionId(opts);
       emit(
         {
@@ -318,4 +346,7 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb intents cancel a1b2c3d4e5f6 --creator bb1maker...xyz | bb deploy
+`);

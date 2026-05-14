@@ -9,6 +9,10 @@ export interface Config {
   apiKeyLocal?: string;
   network?: 'mainnet' | 'testnet' | 'local';
   url?: string;
+  /** ms-since-epoch when the user first ran any `bb` command and saw the
+   *  policies / tab-completion banner. Used to suppress the banner on
+   *  subsequent invocations. See `maybePrintFirstRunBanner()`. */
+  firstRunAcknowledgedAt?: number;
 }
 
 // Resolved lazily — tests override via BITBADGES_CONFIG_DIR so they don't

@@ -14,7 +14,8 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1AddressStrict } from '../utils/address.js';
+import { resolveAmount } from '../utils/amount.js';
 import {
   doesCollectionFollowAuctionProtocol,
   validateAuctionCollection,
@@ -139,18 +140,25 @@ addOutputFlags(
       .command('place-bid')
       .description('Emit MsgSetIncomingApproval that places a bid on the auction. Pipe to `bb deploy`.')
       .argument('<collection-id>', 'Auction collection ID')
-      .requiredOption('--creator <address>', 'Bidder address (bb1.../0x — auto-normalized)')
-      .requiredOption('--amount <n>', 'Bid amount in base units')
-      .requiredOption('--denom <denom>', 'Payment denom (uusdc / ubadge / ibc/...)')
+      .requiredOption('--creator <address>', 'Bidder address (bb1...) — strict; run `bb account convert` for 0x')
+      .requiredOption('--amount <n>', 'Bid amount. Display units when --denom is a symbol (BADGE → 1.5 BADGE), base units when --denom is a chain denom (ubadge / ibc/...). Use --base-units to force base-units.')
+      .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+      .option('--base-units', 'Treat --amount as already-in-base-units')
       .option('--approval-id <id>', 'Approval id for the bid (random by default)')
   )
 ).action(
   async (
     collectionId: string,
-    opts: NetworkFlags & OutputFlags & { creator: string; amount: string; denom: string; approvalId?: string }
+    opts: NetworkFlags & OutputFlags & { creator: string; amount: string; denom: string; baseUnits?: boolean; approvalId?: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
+      const { denom: paymentDenom, amount: paymentAmountStr } = resolveAmount(
+        opts.amount,
+        opts.denom,
+        Boolean(opts.baseUnits),
+        { amountFlag: '--amount', denomFlag: '--denom' }
+      );
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'auctions place-bid');
       const details = extractAuctionDetails(collection.collectionApprovals);
@@ -166,8 +174,8 @@ addOutputFlags(
         bidderAddress: creator,
         tokenId: 1n,
         tokenAmount: 1n,
-        paymentDenom: opts.denom,
-        paymentAmount: BigInt(opts.amount),
+        paymentDenom,
+        paymentAmount: BigInt(paymentAmountStr),
         transferTimes,
         approvalId
       });
@@ -177,7 +185,11 @@ addOutputFlags(
       }, opts);
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb auctions place-bid 42 --creator bb1abc...xyz --amount 25 --denom USDC | bb deploy
+  $ bb auctions place-bid 42 --creator bb1abc...xyz --amount 25000000 --denom USDC --base-units | bb deploy
+`);
 
 addOutputFlags(
   addNetworkFlags(
@@ -190,13 +202,16 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, approvalId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     emit({
       typeUrl: '/tokenization.MsgDeleteIncomingApproval',
       value: { creator, collectionId: String(collectionId), approvalId }
     }, opts);
   } catch (err) { emitError(err); }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb auctions cancel-bid 42 a1b2c3d4e5f6 --creator bb1abc...xyz | bb deploy
+`);
 
 addOutputFlags(
   addNetworkFlags(
@@ -215,8 +230,8 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; bidder: string }
   ) => {
     try {
-      const seller = requireBb1Address(opts.creator, '--creator');
-      const bidder = requireBb1Address(opts.bidder, '--bidder');
+      const seller = requireBb1AddressStrict(opts.creator, '--creator');
+      const bidder = requireBb1AddressStrict(opts.bidder, '--bidder');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'auctions accept-bid');
       const details = extractAuctionDetails(collection.collectionApprovals);
@@ -235,7 +250,10 @@ addOutputFlags(
       );
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb auctions accept-bid 42 a1b2c3d4e5f6 --creator bb1seller...xyz --bidder bb1buyer...xyz | bb deploy
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build auction ...` (the canonical builder) instead.

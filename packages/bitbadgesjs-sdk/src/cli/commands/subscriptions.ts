@@ -29,7 +29,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 import {
   doesCollectionFollowSubscriptionProtocol,
   isSubscriptionFaucetApproval,
@@ -319,7 +319,7 @@ addOutputFlags(
 ).action(
   async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; tier?: string }) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'subscriptions claim');
       const faucet = pickFaucet(listFaucets(collection), opts.tier, 'subscriptions claim');
@@ -328,7 +328,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb subscriptions claim 28 --creator bb1subscriber...xyz | bb deploy
+  $ bb subscriptions claim 28 --creator bb1subscriber...xyz --tier pro-tier | bb deploy
+`);
 
 // ── subscriptions enable-renewal ─────────────────────────────────────────
 
@@ -350,7 +354,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; tier?: string; tip?: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'subscriptions enable-renewal');
       const faucet = pickFaucet(listFaucets(collection), opts.tier, 'subscriptions enable-renewal');
@@ -362,7 +366,7 @@ addOutputFlags(
         firstIntervalStartTime: BigInt(Date.now()),
         ubadgeTipAmount: tip,
         transferTimes: UintRangeArray.FullRanges(),
-        approvalId: crypto.randomUUID(),
+        approvalId: crypto.randomBytes(16).toString('hex'),
         tokenIds: faucet.tokenIds,
         denom
       });
@@ -386,7 +390,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb subscriptions enable-renewal 28 --creator bb1subscriber...xyz | bb deploy
+  $ bb subscriptions enable-renewal 28 --creator bb1subscriber...xyz --tier pro-tier --tip 1000 | bb deploy
+`);
 
 // ── subscriptions cancel ─────────────────────────────────────────────────
 
@@ -404,7 +412,7 @@ addOutputFlags(
 ).action(
   async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; tier?: string }) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'subscriptions cancel');
       const faucet = pickFaucet(listFaucets(collection), opts.tier, 'subscriptions cancel');
@@ -422,7 +430,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb subscriptions cancel 28 --creator bb1subscriber...xyz | bb deploy
+  $ bb subscriptions cancel 28 --creator bb1subscriber...xyz --tier pro-tier | bb deploy
+`);
 
 // ── subscriptions subscribe (multi-msg) ──────────────────────────────────
 
@@ -444,7 +456,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; tier?: string; tip?: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'subscriptions subscribe');
       const faucet = pickFaucet(listFaucets(collection), opts.tier, 'subscriptions subscribe');
@@ -458,7 +470,7 @@ addOutputFlags(
         firstIntervalStartTime: BigInt(Date.now()),
         ubadgeTipAmount: tip,
         transferTimes: UintRangeArray.FullRanges(),
-        approvalId: crypto.randomUUID(),
+        approvalId: crypto.randomBytes(16).toString('hex'),
         tokenIds: faucet.tokenIds,
         denom
       });
@@ -481,7 +493,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb subscriptions subscribe 28 --creator bb1subscriber...xyz | bb deploy
+  $ bb subscriptions subscribe 28 --creator bb1subscriber...xyz --tier pro-tier --tip 500 | bb deploy
+`);
 
 // ── subscriptions charge-due ─────────────────────────────────────────────
 //
@@ -594,7 +610,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; tier?: string; dryRun?: boolean }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'subscriptions charge-due');
 
@@ -690,7 +706,11 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb subscriptions charge-due 28 --creator bb1operator...xyz --dry-run
+  $ bb subscriptions charge-due 28 --creator bb1operator...xyz | bb deploy --with-keyring --from operator
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build subscription ...` (the canonical builder) instead.

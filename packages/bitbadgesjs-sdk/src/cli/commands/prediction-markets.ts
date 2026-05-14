@@ -23,7 +23,9 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1AddressStrict } from '../utils/address.js';
+import { resolveAmount } from '../utils/amount.js';
+import { parseTimeFlag } from '../utils/time.js';
 import {
   validatePredictionMarketCollection,
   classifySettlementApproval,
@@ -187,20 +189,26 @@ addOutputFlags(
 function buyAction(side: 'yes' | 'no') {
   return async (
     collectionId: string,
-    opts: NetworkFlags & OutputFlags & { creator: string; tokenAmount: string; paymentAmount: string; denom: string; expiry?: string; approvalId?: string }
+    opts: NetworkFlags & OutputFlags & { creator: string; tokenAmount: string; paymentAmount: string; denom: string; baseUnits?: boolean; expiry?: string; approvalId?: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
+      const { denom: paymentDenom, amount: paymentAmountStr } = resolveAmount(
+        opts.paymentAmount,
+        opts.denom,
+        Boolean(opts.baseUnits),
+        { amountFlag: '--payment-amount', denomFlag: '--denom' }
+      );
       await fetchCollection(collectionId, opts).then((c) => validateOrExit(c, `prediction-markets buy-${side}`));
-      const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 24 * 60 * 60 * 1000);
+      const end = opts.expiry ? parseTimeFlag(opts.expiry, '--expiry') : BigInt(Date.now() + 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
       const approval = buildPredictionMarketBuyIntent({
         address: creator,
         collectionId: String(collectionId),
         tokenId: side === 'yes' ? 1n : 2n,
         tokenAmount: BigInt(opts.tokenAmount),
-        paymentDenom: opts.denom,
-        paymentAmount: BigInt(opts.paymentAmount),
+        paymentDenom,
+        paymentAmount: BigInt(paymentAmountStr),
         transferTimes: UintRangeArray.From([{ start: 1n, end }]),
         approvalId
       });
@@ -212,20 +220,26 @@ function buyAction(side: 'yes' | 'no') {
 function sellAction(side: 'yes' | 'no') {
   return async (
     collectionId: string,
-    opts: NetworkFlags & OutputFlags & { creator: string; tokenAmount: string; paymentAmount: string; denom: string; expiry?: string; approvalId?: string }
+    opts: NetworkFlags & OutputFlags & { creator: string; tokenAmount: string; paymentAmount: string; denom: string; baseUnits?: boolean; expiry?: string; approvalId?: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
+      const { denom: paymentDenom, amount: paymentAmountStr } = resolveAmount(
+        opts.paymentAmount,
+        opts.denom,
+        Boolean(opts.baseUnits),
+        { amountFlag: '--payment-amount', denomFlag: '--denom' }
+      );
       await fetchCollection(collectionId, opts).then((c) => validateOrExit(c, `prediction-markets sell-${side}`));
-      const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 24 * 60 * 60 * 1000);
+      const end = opts.expiry ? parseTimeFlag(opts.expiry, '--expiry') : BigInt(Date.now() + 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
       const approval = buildPredictionMarketSellIntent({
         address: creator,
         collectionId: String(collectionId),
         tokenId: side === 'yes' ? 1n : 2n,
         tokenAmount: BigInt(opts.tokenAmount),
-        paymentDenom: opts.denom,
-        paymentAmount: BigInt(opts.paymentAmount),
+        paymentDenom,
+        paymentAmount: BigInt(paymentAmountStr),
         transferTimes: UintRangeArray.From([{ start: 1n, end }]),
         approvalId
       });
@@ -240,17 +254,31 @@ const tradeOpts = (cmd: Command, side: 'yes' | 'no', dir: 'buy' | 'sell') =>
       `Emit Msg${dir === 'buy' ? 'SetIncomingApproval' : 'SetOutgoingApproval'} that ${dir === 'buy' ? 'buys' : 'sells'} ${side.toUpperCase()} tokens (token-id ${side === 'yes' ? '1' : '2'}). Pipe to \`bb deploy\`.`
     )
     .argument('<collection-id>', 'Prediction Market collection ID')
-    .requiredOption('--creator <address>', 'Trader address (bb1.../0x — auto-normalized)')
-    .requiredOption('--token-amount <n>', `Quantity of ${side.toUpperCase()} tokens to ${dir}`)
-    .requiredOption('--payment-amount <n>', 'Payment side amount in base units')
-    .requiredOption('--denom <denom>', 'Payment denom (deposit-denom or badgeslp:* alias)')
-    .option('--expiry <ms>', 'Approval expiry (ms-since-epoch). Defaults to 24h from now.')
+    .requiredOption('--creator <address>', 'Trader address (bb1...) — strict; run `bb account convert` for 0x')
+    .requiredOption('--token-amount <n>', `Quantity of ${side.toUpperCase()} tokens to ${dir} (always base units of the on-chain token id)`)
+    .requiredOption('--payment-amount <n>', 'Payment side amount. Display units for symbol denoms, base units for chain denoms. Use --base-units to force base-units.')
+    .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...) or badgeslp:* alias.')
+    .option('--base-units', 'Treat --payment-amount as already-in-base-units')
+    .option('--expiry <when>', 'Approval expiry: ms-since-epoch or duration (24h, 7d). Default 24h.')
     .option('--approval-id <id>', 'Override the random approval id');
 
-addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-yes'), 'yes', 'buy'))).action(buyAction('yes'));
-addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-no'), 'no', 'buy'))).action(buyAction('no'));
-addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('sell-yes'), 'yes', 'sell'))).action(sellAction('yes'));
-addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('sell-no'), 'no', 'sell'))).action(sellAction('no'));
+addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-yes'), 'yes', 'buy'))).action(buyAction('yes')).addHelpText('after', `
+Examples:
+  $ bb prediction-markets buy-yes 55 --creator bb1trader...xyz --token-amount 100 --payment-amount 40 --denom USDC | bb deploy
+  $ bb prediction-markets buy-yes 55 --creator bb1trader...xyz --token-amount 100 --payment-amount 40 --denom USDC --expiry 7d | bb deploy
+`);
+addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-no'), 'no', 'buy'))).action(buyAction('no')).addHelpText('after', `
+Examples:
+  $ bb prediction-markets buy-no 55 --creator bb1trader...xyz --token-amount 100 --payment-amount 60 --denom USDC | bb deploy
+`);
+addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('sell-yes'), 'yes', 'sell'))).action(sellAction('yes')).addHelpText('after', `
+Examples:
+  $ bb prediction-markets sell-yes 55 --creator bb1trader...xyz --token-amount 50 --payment-amount 25 --denom USDC | bb deploy
+`);
+addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('sell-no'), 'no', 'sell'))).action(sellAction('no')).addHelpText('after', `
+Examples:
+  $ bb prediction-markets sell-no 55 --creator bb1trader...xyz --token-amount 50 --payment-amount 30 --denom USDC | bb deploy
+`);
 
 // ── Cancel ───────────────────────────────────────────────────────────────
 
@@ -266,7 +294,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, approvalId: string, opts: NetworkFlags & OutputFlags & { creator: string; side: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const isBuy = opts.side === 'buy';
     if (opts.side !== 'buy' && opts.side !== 'sell') {
       process.stderr.write(`Error: --side must be "buy" or "sell" (got "${opts.side}").\n`);
@@ -277,7 +305,11 @@ addOutputFlags(
       value: { creator, collectionId: String(collectionId), approvalId }
     }, opts);
   } catch (err) { emitError(err); }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb prediction-markets cancel 55 a1b2c3d4e5f6 --creator bb1trader...xyz --side buy | bb deploy
+  $ bb prediction-markets cancel 55 a1b2c3d4e5f6 --creator bb1trader...xyz --side sell | bb deploy
+`);
 
 // ── Deposit ──────────────────────────────────────────────────────────────
 
@@ -292,7 +324,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; amount: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'prediction-markets deposit');
     const settle = findSettlementApprovals(collection);
@@ -302,7 +334,10 @@ addOutputFlags(
     }
     emit(buildPredictionMarketDepositMsg(creator, String(collectionId), BigInt(opts.amount), settle.mintApprovalId), opts);
   } catch (err) { emitError(err); }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb prediction-markets deposit 55 --creator bb1lp...xyz --amount 1000000 | bb deploy
+`);
 
 // ── Redeem ───────────────────────────────────────────────────────────────
 
@@ -324,7 +359,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; state: string; pairAmount?: string; yesBalance?: string; noBalance?: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'prediction-markets redeem');
       const settle = findSettlementApprovals(collection);
@@ -354,7 +389,11 @@ addOutputFlags(
       emit(tx.messages.length === 1 ? tx.messages[0] : tx, opts);
     } catch (err) { emitError(err); }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb prediction-markets redeem 55 --creator bb1holder...xyz --state active --pair-amount 50000 | bb deploy
+  $ bb prediction-markets redeem 55 --creator bb1holder...xyz --state yes-wins --yes-balance 100000 | bb deploy
+`);
 
 // ── Resolve (verifier) ───────────────────────────────────────────────────
 
@@ -369,7 +408,7 @@ addOutputFlags(
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; outcome: string }) => {
   try {
-    const creator = requireBb1Address(opts.creator, '--creator');
+    const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'prediction-markets resolve');
     const settle = findSettlementApprovals(collection);
@@ -381,7 +420,11 @@ addOutputFlags(
     const tx = buildPredictionMarketResolveTx(creator, String(collectionId), outcome, settle);
     emit(tx.messages.length === 1 ? tx.messages[0] : tx, opts);
   } catch (err) { emitError(err); }
-});
+}).addHelpText('after', `
+Examples:
+  $ bb prediction-markets resolve 55 --creator bb1verifier...xyz --outcome yes | bb deploy
+  $ bb prediction-markets resolve 55 --creator bb1verifier...xyz --outcome push | bb deploy
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build prediction-market ...` (the canonical builder) instead.

@@ -13,7 +13,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address } from '../utils/address.js';
+import { requireBb1AddressStrict } from '../utils/address.js';
 import {
   doesCollectionFollowProductCatalogProtocol,
   validateProductCatalogCollection,
@@ -122,7 +122,7 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { creator: string; tokenId: string }
   ) => {
     try {
-      const creator = requireBb1Address(opts.creator, '--creator');
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'products purchase');
       const products = extractAllProducts(collection.collectionApprovals);
@@ -145,7 +145,10 @@ addOutputFlags(
       emitError(err);
     }
   }
-);
+).addHelpText('after', `
+Examples:
+  $ bb products purchase 12 --creator bb1buyer...xyz --token-id 3 | bb deploy
+`);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build product-catalog ...` (the canonical builder) instead.
