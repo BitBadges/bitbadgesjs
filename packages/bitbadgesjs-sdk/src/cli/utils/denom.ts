@@ -27,6 +27,7 @@ import { MAINNET_COINS_REGISTRY } from '../../common/constants.js';
 const IBC_DENOM_RE = /^ibc\/[A-F0-9]{64}$/i;
 const FACTORY_DENOM_RE = /^factory\/[a-zA-Z0-9_:./-]+$/;
 const BADGES_DENOM_RE = /^badges:[a-zA-Z0-9_:.-]+$/;
+const BADGESLP_DENOM_RE = /^badgeslp:[a-zA-Z0-9_:.-]+$/;
 const U_PREFIX_RE = /^u[a-z][a-z0-9]*$/;
 
 /**
@@ -37,6 +38,7 @@ const U_PREFIX_RE = /^u[a-z][a-z0-9]*$/;
  *   - the literal `ubadge`
  *   - `ibc/<64 hex chars>` IBC denoms
  *   - `badges:*` collection-token denoms
+ *   - `badgeslp:*` LP-token aliases (prediction market deposit denoms)
  *   - `factory/*` token-factory denoms
  *
  * REJECTS `u*`-prefix denoms other than `ubadge` (so `uusdc`, `uatom`,
@@ -72,6 +74,7 @@ export function requireBbDenom(input: string, ctx: string): string {
   if (IBC_DENOM_RE.test(trimmed)) return trimmed;
   if (FACTORY_DENOM_RE.test(trimmed)) return trimmed;
   if (BADGES_DENOM_RE.test(trimmed)) return trimmed;
+  if (BADGESLP_DENOM_RE.test(trimmed)) return trimmed;
 
   // The `u*` trap: anything starting with `u` followed by lowercase that
   // isn't `ubadge` is almost certainly an origin-chain native denom that

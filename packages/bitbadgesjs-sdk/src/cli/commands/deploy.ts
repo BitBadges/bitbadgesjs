@@ -41,6 +41,7 @@ import {
   type ExtractedEntity,
   type WaitForIndexerResult
 } from '../utils/wait-for-indexer.js';
+import { requireBbDenom } from '../utils/denom.js';
 
 /**
  * Parse the `--wait-for-indexer` flag value. The flag is optional and may
@@ -336,7 +337,7 @@ export const deployCommand = new Command('deploy')
   .option('--manager <address>', 'Address that will own the created collection (bb1...). Required for --burner; recommended for --browser.')
   .option('--fund <mode>', 'With --burner: funding source for the burner (faucet | manual)', 'faucet')
   .option('--fee <amount>', 'Fee amount in base units (e.g. "0" or "5000")', '0')
-  .option('--fee-denom <denom>', 'Fee denom', 'ubadge')
+  .option('--fee-denom <symbol|denom>', 'Fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', 'ubadge')
   .option('--gas <number>', 'Gas limit', '400000')
   .option('--new', 'With --burner: skip the picker and always create a fresh burner')
   .option('--reuse <selector>', 'With --burner: reuse a specific saved burner by address or recovery file path')
@@ -852,7 +853,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       manager: opts.manager,
       fund: opts.fund === 'manual' ? 'manual' : 'faucet',
       apiKey,
-      fee: { amount: String(opts.fee), denom: String(opts.feeDenom || 'ubadge') },
+      fee: { amount: String(opts.fee), denom: requireBbDenom(String(opts.feeDenom || 'ubadge'), '--fee-denom') },
       gas: Number(opts.gas),
       reuseRecord: choice.kind === 'reuse' ? choice.record : undefined,
       nonInteractive: Boolean(opts.nonInteractive) || !process.stdout.isTTY,

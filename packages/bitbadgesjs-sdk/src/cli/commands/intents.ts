@@ -31,6 +31,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1Address } from '../utils/address.js';
+import { requireBbDenom } from '../utils/denom.js';
 import {
   buildIntentApproval,
   buildIntentFillTx,
@@ -85,8 +86,8 @@ addOutputFlags(
           '--mine <address>',
           'Restrict to intents created by this address (bb1.../0x — auto-normalized). Also includes used/inactive.'
         )
-        .option('--pay-denom <denom>', 'Filter by the denom the intent pays out')
-        .option('--receive-denom <denom>', 'Filter by the denom the intent expects to receive')
+        .option('--pay-denom <symbol|denom>', 'Filter by the denom the intent pays out. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+        .option('--receive-denom <symbol|denom>', 'Filter by the denom the intent expects to receive. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     )
   )
 ).action(
@@ -101,12 +102,14 @@ addOutputFlags(
   ) => {
     try {
       const mine = opts.mine ? requireBb1Address(opts.mine, '--mine') : undefined;
+      const payDenom = opts.payDenom ? requireBbDenom(opts.payDenom, '--pay-denom') : undefined;
+      const receiveDenom = opts.receiveDenom ? requireBbDenom(opts.receiveDenom, '--receive-denom') : undefined;
       const collectionId = opts.collectionId; // explicit override; otherwise indexer scopes globally
       const base = mine ? `/intents/${encodeURIComponent(mine)}` : '/intents';
       const path = appendQuery(base, {
         includeAll: mine ? 'true' : undefined,
-        payDenom: opts.payDenom,
-        receiveDenom: opts.receiveDenom,
+        payDenom,
+        receiveDenom,
         collectionId
       });
       const res = await callApi('GET', path, opts);
@@ -161,9 +164,9 @@ addOutputFlags(
           'Emit MsgSetOutgoingApproval for a new intent ("I pay X if you send me Y"). Pipe to `bb deploy`.'
         )
         .requiredOption('--creator <address>', 'Intent creator address (bb1.../0x — auto-normalized)')
-        .requiredOption('--pay-denom <denom>', 'Denom you OFFER (chain-side denom; ibc/... or ubadge)')
+        .requiredOption('--pay-denom <symbol|denom>', 'Denom you OFFER. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
         .requiredOption('--pay-amount <amount>', 'Amount of pay denom in base units')
-        .requiredOption('--receive-denom <denom>', 'Denom you EXPECT in return')
+        .requiredOption('--receive-denom <symbol|denom>', 'Denom you EXPECT in return. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
         .requiredOption('--receive-amount <amount>', 'Amount of receive denom in base units')
         .option(
           '--valid-until <ms>',
@@ -188,7 +191,9 @@ addOutputFlags(
   ) => {
     try {
       const creator = requireBb1Address(opts.creator, '--creator');
-      if (opts.payDenom === opts.receiveDenom) {
+      const payDenom = requireBbDenom(opts.payDenom, '--pay-denom');
+      const receiveDenom = requireBbDenom(opts.receiveDenom, '--receive-denom');
+      if (payDenom === receiveDenom) {
         process.stderr.write('Error: --pay-denom and --receive-denom must differ.\n');
         process.exit(2);
       }
@@ -200,9 +205,9 @@ addOutputFlags(
 
       const approval = buildIntentApproval({
         address: creator,
-        payDenom: opts.payDenom,
+        payDenom,
         payAmount: BigInt(opts.payAmount),
-        receiveDenom: opts.receiveDenom,
+        receiveDenom,
         receiveAmount: BigInt(opts.receiveAmount),
         transferTimes: UintRangeArray.From([{ start: 1n, end: validUntil }]),
         approvalId

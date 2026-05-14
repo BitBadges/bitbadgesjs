@@ -15,6 +15,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1Address } from '../utils/address.js';
+import { requireBbDenom } from '../utils/denom.js';
 import {
   doesCollectionFollowAuctionProtocol,
   validateAuctionCollection,
@@ -141,7 +142,7 @@ addOutputFlags(
       .argument('<collection-id>', 'Auction collection ID')
       .requiredOption('--creator <address>', 'Bidder address (bb1.../0x — auto-normalized)')
       .requiredOption('--amount <n>', 'Bid amount in base units')
-      .requiredOption('--denom <denom>', 'Payment denom (uusdc / ubadge / ibc/...)')
+      .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
       .option('--approval-id <id>', 'Approval id for the bid (random by default)')
   )
 ).action(
@@ -151,6 +152,7 @@ addOutputFlags(
   ) => {
     try {
       const creator = requireBb1Address(opts.creator, '--creator');
+      const paymentDenom = requireBbDenom(opts.denom, '--denom');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'auctions place-bid');
       const details = extractAuctionDetails(collection.collectionApprovals);
@@ -166,7 +168,7 @@ addOutputFlags(
         bidderAddress: creator,
         tokenId: 1n,
         tokenAmount: 1n,
-        paymentDenom: opts.denom,
+        paymentDenom,
         paymentAmount: BigInt(opts.amount),
         transferTimes,
         approvalId

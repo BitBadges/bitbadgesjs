@@ -24,6 +24,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1Address } from '../utils/address.js';
+import { requireBbDenom } from '../utils/denom.js';
 import {
   validatePredictionMarketCollection,
   classifySettlementApproval,
@@ -191,6 +192,7 @@ function buyAction(side: 'yes' | 'no') {
   ) => {
     try {
       const creator = requireBb1Address(opts.creator, '--creator');
+      const paymentDenom = requireBbDenom(opts.denom, '--denom');
       await fetchCollection(collectionId, opts).then((c) => validateOrExit(c, `prediction-markets buy-${side}`));
       const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
@@ -199,7 +201,7 @@ function buyAction(side: 'yes' | 'no') {
         collectionId: String(collectionId),
         tokenId: side === 'yes' ? 1n : 2n,
         tokenAmount: BigInt(opts.tokenAmount),
-        paymentDenom: opts.denom,
+        paymentDenom,
         paymentAmount: BigInt(opts.paymentAmount),
         transferTimes: UintRangeArray.From([{ start: 1n, end }]),
         approvalId
@@ -216,6 +218,7 @@ function sellAction(side: 'yes' | 'no') {
   ) => {
     try {
       const creator = requireBb1Address(opts.creator, '--creator');
+      const paymentDenom = requireBbDenom(opts.denom, '--denom');
       await fetchCollection(collectionId, opts).then((c) => validateOrExit(c, `prediction-markets sell-${side}`));
       const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
@@ -224,7 +227,7 @@ function sellAction(side: 'yes' | 'no') {
         collectionId: String(collectionId),
         tokenId: side === 'yes' ? 1n : 2n,
         tokenAmount: BigInt(opts.tokenAmount),
-        paymentDenom: opts.denom,
+        paymentDenom,
         paymentAmount: BigInt(opts.paymentAmount),
         transferTimes: UintRangeArray.From([{ start: 1n, end }]),
         approvalId
@@ -243,7 +246,7 @@ const tradeOpts = (cmd: Command, side: 'yes' | 'no', dir: 'buy' | 'sell') =>
     .requiredOption('--creator <address>', 'Trader address (bb1.../0x — auto-normalized)')
     .requiredOption('--token-amount <n>', `Quantity of ${side.toUpperCase()} tokens to ${dir}`)
     .requiredOption('--payment-amount <n>', 'Payment side amount in base units')
-    .requiredOption('--denom <denom>', 'Payment denom (deposit-denom or badgeslp:* alias)')
+    .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...) or badgeslp:* alias.')
     .option('--expiry <ms>', 'Approval expiry (ms-since-epoch). Defaults to 24h from now.')
     .option('--approval-id <id>', 'Override the random approval id');
 

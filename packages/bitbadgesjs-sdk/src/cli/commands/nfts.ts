@@ -26,6 +26,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1Address } from '../utils/address.js';
+import { requireBbDenom } from '../utils/denom.js';
 import {
   buildOrderbookBidApproval,
   buildOrderbookListingApproval,
@@ -50,7 +51,7 @@ addOutputFlags(
       .argument('<collection-id>', 'Collection ID')
       .requiredOption('--creator <address>', 'Bidder address (bb1.../0x — auto-normalized)')
       .requiredOption('--price <amount>', 'Bid amount in base units')
-      .requiredOption('--denom <denom>', 'Payment denom (ubadge / ibc/...)')
+      .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
       .option('--token-id <n>', 'Specific token ID to bid on (omit for collection-wide bid)')
       .option('--token-amount <n>', 'Number of tokens (default 1)', '1')
       .option('--expiry <ms>', 'Bid expiry ms-since-epoch (default: 7 days from now)')
@@ -67,6 +68,7 @@ addOutputFlags(
   ) => {
     try {
       const creator = requireBb1Address(opts.creator, '--creator');
+      const paymentDenom = requireBbDenom(opts.denom, '--denom');
       const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
       const approval = buildOrderbookBidApproval({
@@ -74,7 +76,7 @@ addOutputFlags(
         tokenId: opts.tokenId ? BigInt(opts.tokenId) : undefined,
         tokenAmount: BigInt(opts.tokenAmount ?? '1'),
         paymentAmount: BigInt(opts.price),
-        paymentDenom: opts.denom,
+        paymentDenom,
         transferTimes: UintRangeArray.From([{ start: 1n, end }]),
         approvalId,
         maxNumTransfers: BigInt(opts.maxFills ?? '1')
@@ -95,7 +97,7 @@ addOutputFlags(
       .requiredOption('--creator <address>', 'Seller address (bb1.../0x — auto-normalized)')
       .requiredOption('--token-id <n>', 'Token ID to list')
       .requiredOption('--price <amount>', 'Asking price in base units')
-      .requiredOption('--denom <denom>', 'Payment denom (ubadge / ibc/...)')
+      .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
       .option('--token-amount <n>', 'Number of tokens (default 1)', '1')
       .option('--max-sales <n>', 'Allow multiple fills of this listing (default 1)', '1')
       .option('--expiry <ms>', 'Listing expiry ms-since-epoch (default: 30 days from now)')
@@ -111,6 +113,7 @@ addOutputFlags(
   ) => {
     try {
       const creator = requireBb1Address(opts.creator, '--creator');
+      const paymentDenom = requireBbDenom(opts.denom, '--denom');
       const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 30 * 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
       const approval = buildOrderbookListingApproval({
@@ -118,7 +121,7 @@ addOutputFlags(
         tokenId: BigInt(opts.tokenId),
         tokenAmount: BigInt(opts.tokenAmount ?? '1'),
         paymentAmount: BigInt(opts.price),
-        paymentDenom: opts.denom,
+        paymentDenom,
         transferTimes: UintRangeArray.From([{ start: 1n, end }]),
         approvalId,
         maxNumTransfers: BigInt(opts.maxSales ?? '1')
@@ -241,7 +244,7 @@ addOutputFlags(
       .description('Query open bids + listings for a token. Use --mine to scope to caller.')
       .argument('<collection-id>', 'Collection ID')
       .argument('<token-id>', 'Token ID')
-      .option('--denom <denom>', 'Optional denom filter')
+      .option('--denom <symbol|denom>', 'Optional denom filter. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
       .option('--mine <address>', 'Restrict to orders owned by this address (bb1.../0x — auto-normalized)')
       .option('--collection-offers', 'Also include collection-wide bids', false)
   )
@@ -252,7 +255,8 @@ addOutputFlags(
     opts: NetworkFlags & OutputFlags & { denom?: string; mine?: string; collectionOffers?: boolean }
   ) => {
     try {
-      const params = opts.denom ? `?denom=${encodeURIComponent(opts.denom)}` : '';
+      const denomFilter = opts.denom ? requireBbDenom(opts.denom, '--denom') : undefined;
+      const params = denomFilter ? `?denom=${encodeURIComponent(denomFilter)}` : '';
       const [listings, offers, collectionOffers] = await Promise.all([
         callApi('GET', `/collection/${encodeURIComponent(collectionId)}/listings/${encodeURIComponent(tokenId)}${params}`, opts).catch(() => ({ listings: [] })),
         callApi('GET', `/collection/${encodeURIComponent(collectionId)}/offers/${encodeURIComponent(tokenId)}${params}`, opts).catch(() => ({ offers: [] })),

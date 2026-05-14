@@ -29,9 +29,9 @@ describe('swap pools surface', () => {
     expect((show as any)._args.map((a: any) => a.name())).toEqual(['pool-id']);
   });
 
-  it('by-denom takes <denom>', () => {
+  it('by-denom takes <symbol|denom>', () => {
     const c = pools.commands.find((c) => c.name() === 'by-denom')!;
-    expect((c as any)._args.map((a: any) => a.name())).toEqual(['denom']);
+    expect((c as any)._args.map((a: any) => a.name())).toEqual(['symbol|denom']);
   });
 
   it('by-assets takes <denom-a> <denom-b>', () => {

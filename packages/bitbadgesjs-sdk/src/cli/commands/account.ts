@@ -44,6 +44,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1Address } from '../utils/address.js';
+import { requireBbDenom } from '../utils/denom.js';
 import {
   addOutputOptions as addOutputOptionsEnv,
   emit as emitEnv,
@@ -156,14 +157,15 @@ function buildApprovalsQuery(address: string, flags: ApprovalsFilterFlags): { qu
     query['approval.approvalCriteria.coinTransfers'] = { $elemMatch: { $exists: true } };
   }
 
+  const denom = flags.denom ? requireBbDenom(flags.denom, '--denom') : undefined;
   if (flags.priceMin !== undefined || flags.priceMax !== undefined) {
     const priceFilter: Record<string, unknown> = { $exists: true };
     if (flags.priceMin !== undefined) priceFilter.$gte = Number(flags.priceMin);
     if (flags.priceMax !== undefined) priceFilter.$lte = Number(flags.priceMax);
     query.price = priceFilter;
-    if (flags.denom) query.denom = flags.denom;
-  } else if (flags.denom) {
-    query.denom = flags.denom;
+    if (denom) query.denom = denom;
+  } else if (denom) {
+    query.denom = denom;
   }
 
   let sortBy: Record<string, 1 | -1> | undefined;
@@ -457,7 +459,7 @@ addOutputFlags(
       .option('--has-coin-transfers', 'Only approvals with a coin-transfer leg (subscriptions, listings, paid claims)', false)
       .option('--price-min <n>', 'Lower bound on approval.price (use with --denom)')
       .option('--price-max <n>', 'Upper bound on approval.price (use with --denom)')
-      .option('--denom <denom>', 'Restrict price filter to this denom')
+      .option('--denom <symbol|denom>', 'Restrict price filter to this denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
       .option('--sort <order>', 'price-asc | price-desc (default: server order)')
   )
 ).action(async (opts: ApprovalsFlags) => {

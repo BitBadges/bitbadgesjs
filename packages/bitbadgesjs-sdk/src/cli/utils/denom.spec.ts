@@ -36,6 +36,10 @@ describe('requireBbDenom', () => {
     expect(requireBbDenom('badges:49:chaosnet', 'place-bid')).toBe('badges:49:chaosnet');
   });
 
+  it('accepts badgeslp:* denoms (LP/prediction market deposit aliases)', () => {
+    expect(requireBbDenom('badgeslp:99:utoken', '--denom')).toBe('badgeslp:99:utoken');
+  });
+
   it('REJECTS uusdc with a clear hint', () => {
     expect(() => requireBbDenom('uusdc', 'place-bid')).toThrow(/not a valid BitBadges denom/);
     expect(() => requireBbDenom('uusdc', 'place-bid')).toThrow(/ibc/);

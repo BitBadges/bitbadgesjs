@@ -6,6 +6,7 @@ import { renderReview, renderValidate, renderResolvedMetadata, renderSimulate, c
 import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMsg.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import { runBurnerCreate, pickBurner, type BurnerNetwork } from '../utils/burner.js';
+import { requireBbDenom } from '../utils/denom.js';
 
 export const buildCommand = new Command('build').description('Deterministic transaction builders — flag-based generators for vaults, NFTs, subscriptions, bounties, and more. Output: ready-to-sign JSON. To broadcast, pipe into `bb cli deploy --burner`.');
 
@@ -445,7 +446,7 @@ async function emit(
         manager: opts.manager,
         fund: opts.fund === 'manual' ? 'manual' : 'faucet',
         apiKey,
-        fee: { amount: String(opts.fee ?? '0'), denom: String(opts.feeDenom ?? 'ubadge') },
+        fee: { amount: String(opts.fee ?? '0'), denom: requireBbDenom(String(opts.feeDenom ?? 'ubadge'), '--fee-denom') },
         gas: Number(opts.gas ?? 400000),
         reuseRecord: choice.kind === 'reuse' ? choice.record : undefined,
         nonInteractive: Boolean(opts.nonInteractive) || !process.stdout.isTTY,
@@ -525,7 +526,7 @@ const sharedOpts = (cmd: Command) => {
   cmd.option('--expected-address <addr>', 'With --deploy-with-browser: bb1.../0x... that the connected wallet must match. Defaults to --manager / --creator.');
   cmd.option('--fund <mode>', 'With --deploy-with-burner: funding source for the burner (faucet | manual)', 'faucet');
   cmd.option('--fee <amount>', 'When deploying: fee amount in base units', '0');
-  cmd.option('--fee-denom <denom>', 'When deploying: fee denom', 'ubadge');
+  cmd.option('--fee-denom <symbol|denom>', 'When deploying: fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', 'ubadge');
   cmd.option('--gas <number>', 'When deploying: gas limit', '400000');
   cmd.option('--new', 'With --deploy-with-burner: skip the burner picker and always create a fresh wallet');
   cmd.option('--reuse <selector>', 'With --deploy-with-burner: reuse a specific saved burner by address or recovery file path');
@@ -603,7 +604,7 @@ sharedOpts(
     .description('Create a recurring subscription collection. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--interval <duration>', 'Interval: daily, monthly, annually, or shorthand (30d)')
     .option('--price <amount>', 'Price per interval (display units) — use with --denom/--recipient')
-    .option('--denom <symbol>', 'Payment coin (USDC, BADGE)')
+    .option('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .option('--recipient <address>', 'Payout address (bb1...)')
     .option('--payouts <json>', 'Multiple payouts JSON: [{"recipient","amount","denom"}]')
     .option('--tiers <n>', 'Number of tiers', '1')
@@ -621,10 +622,18 @@ sharedOpts(
     image: opts.image
   };
   if (opts.payouts) {
-    params.payouts = JSON.parse(opts.payouts);
+    const payouts = JSON.parse(opts.payouts);
+    if (Array.isArray(payouts)) {
+      for (const p of payouts) {
+        if (p && typeof p === 'object' && typeof p.denom === 'string') {
+          p.denom = requireBbDenom(p.denom, '--payouts entry denom');
+        }
+      }
+    }
+    params.payouts = payouts;
   } else {
     params.price = Number(opts.price);
-    params.denom = opts.denom;
+    params.denom = opts.denom ? requireBbDenom(opts.denom, '--denom') : opts.denom;
     params.recipient = opts.recipient;
   }
   emit(buildSubscription(params), opts);
@@ -635,7 +644,7 @@ sharedOpts(
     .command('bounty')
     .description('Create a bounty escrow collection. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--amount <n>', 'Bounty amount (display units)')
-    .requiredOption('--denom <symbol>', 'Coin (USDC, BADGE)')
+    .requiredOption('--denom <symbol|denom>', 'Coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .requiredOption('--verifier <address>', 'Verifier address (bb1...)')
     .requiredOption('--recipient <address>', 'Recipient address (bb1...)')
     .requiredOption('--submitter <address>', 'Submitter address (bb1...) — receives the refund on deny / expire. Typically the bounty creator.')
@@ -643,8 +652,9 @@ sharedOpts(
 ).action(async (opts) => {
   const { buildBounty } = await import('../../core/builders/bounty.js');
   if (opts.json) { emit(buildBounty(readJsonInput(opts.json)), opts); return; }
+  const denom = requireBbDenom(opts.denom, '--denom');
   emit(buildBounty({
-    amount: Number(opts.amount), denom: opts.denom, verifier: opts.verifier, recipient: opts.recipient,
+    amount: Number(opts.amount), denom, verifier: opts.verifier, recipient: opts.recipient,
     submitter: opts.submitter,
     expiration: opts.expiration, uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
   }), opts);
@@ -655,7 +665,7 @@ sharedOpts(
     .command('payment-request')
     .description('Create an agent-initiated payment request (no-escrow inverse of bounty). Metadata: pass --uri OR --name + --image + (--description OR --context).')
     .requiredOption('--amount <n>', 'Payment amount (display units)')
-    .requiredOption('--denom <symbol>', 'Coin (USDC, BADGE)')
+    .requiredOption('--denom <symbol|denom>', 'Coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .requiredOption('--payer <address>', 'Payer address (bb1...) — the human approver')
     .requiredOption('--recipient <address>', 'Recipient address (bb1...) — agent/merchant')
     .option('--expiration <duration>', 'Expiration duration', '30d')
@@ -663,9 +673,10 @@ sharedOpts(
 ).action(async (opts) => {
   const { buildPaymentRequest } = await import('../../core/builders/payment-request.js');
   if (opts.json) { emit(buildPaymentRequest(readJsonInput(opts.json)), opts); return; }
+  const denom = requireBbDenom(opts.denom, '--denom');
   emit(buildPaymentRequest({
     amount: Number(opts.amount),
-    denom: opts.denom,
+    denom,
     payer: opts.payer,
     recipient: opts.recipient,
     expiration: opts.expiration,
@@ -681,14 +692,15 @@ sharedOpts(
     .command('crowdfund')
     .description('Create a crowdfunding collection. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--goal <n>', 'Funding goal (display units)')
-    .requiredOption('--denom <symbol>', 'Coin (USDC, BADGE)')
+    .requiredOption('--denom <symbol|denom>', 'Coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .option('--crowdfunder <address>', 'Who receives funds on success (bb1...)')
     .option('--deadline <duration>', 'Deadline duration', '30d')
 ).action(async (opts) => {
   const { buildCrowdfund } = await import('../../core/builders/crowdfund.js');
   if (opts.json) { emit(buildCrowdfund(readJsonInput(opts.json)), opts); return; }
+  const denom = requireBbDenom(opts.denom, '--denom');
   emit(buildCrowdfund({
-    goal: Number(opts.goal), denom: opts.denom, crowdfunder: opts.crowdfunder, deadline: opts.deadline,
+    goal: Number(opts.goal), denom, crowdfunder: opts.crowdfunder, deadline: opts.deadline,
     uri: opts.uri, name: opts.name, description: opts.description, image: opts.image, creator: opts.creator
   }), opts);
 });
@@ -749,7 +761,7 @@ sharedOpts(
     .description('Create a binary prediction market (YES/NO). Metadata: pass --uri OR --name + --image + --description.')
     .option('--verifier <address>', 'Market resolver address (bb1...)')
     .option('--resolver <address>', 'Alias for --verifier — matches the help-text label.')
-    .option('--denom <symbol>', 'Payment coin', 'USDC')
+    .option('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', 'USDC')
 ).action(async (opts) => {
   const { buildPredictionMarket } = await import('../../core/builders/prediction-market.js');
   if (opts.json) { emit(buildPredictionMarket(readJsonInput(opts.json)), opts); return; }
@@ -758,8 +770,9 @@ sharedOpts(
     process.stderr.write('Error: --verifier (or --resolver) is required.\n');
     process.exit(2);
   }
+  const denom = requireBbDenom(opts.denom, '--denom');
   emit(buildPredictionMarket({
-    verifier, denom: opts.denom,
+    verifier, denom,
     uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
   }), opts);
 });
@@ -791,19 +804,20 @@ sharedOpts(
   buildCommand
     .command('credit-token')
     .description('Create a credit/prepaid token. Metadata: pass --uri OR --name + --image + --description.')
-    .option('--payment-denom <symbol>', 'Payment coin (USDC, BADGE)')
-    .option('--denom <symbol>', 'Alias for --payment-denom — for consistency with the other builders.')
+    .option('--payment-denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+    .option('--denom <symbol|denom>', 'Alias for --payment-denom — for consistency with the other builders.')
     .requiredOption('--recipient <address>', 'Payment recipient (bb1...)')
     .option('--symbol <symbol>', 'Token symbol', 'CREDIT')
     .option('--tokens-per-unit <n>', 'Tokens per 1 display unit of payment', '100')
 ).action(async (opts) => {
   const { buildCreditToken } = await import('../../core/builders/credit-token.js');
   if (opts.json) { emit(buildCreditToken(readJsonInput(opts.json)), opts); return; }
-  const paymentDenom = opts.paymentDenom ?? opts.denom;
-  if (!paymentDenom) {
+  const paymentDenomRaw = opts.paymentDenom ?? opts.denom;
+  if (!paymentDenomRaw) {
     process.stderr.write('Error: --payment-denom (or --denom) is required.\n');
     process.exit(2);
   }
+  const paymentDenom = requireBbDenom(paymentDenomRaw, opts.paymentDenom ? '--payment-denom' : '--denom');
   emit(buildCreditToken({
     paymentDenom, recipient: opts.recipient, symbol: opts.symbol,
     tokensPerUnit: Number(opts.tokensPerUnit),
@@ -831,13 +845,14 @@ sharedOpts(
     .command('quests')
     .description('Create a quest/reward collection. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--reward <n>', 'Reward per claim (display units)')
-    .requiredOption('--denom <symbol>', 'Reward coin (USDC, BADGE)')
+    .requiredOption('--denom <symbol|denom>', 'Reward coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .requiredOption('--max-claims <n>', 'Maximum number of claims')
 ).action(async (opts) => {
   const { buildQuests } = await import('../../core/builders/quests.js');
   if (opts.json) { emit(buildQuests(readJsonInput(opts.json)), opts); return; }
+  const denom = requireBbDenom(opts.denom, '--denom');
   emit(buildQuests({
-    reward: Number(opts.reward), denom: opts.denom, maxClaims: Number(opts.maxClaims),
+    reward: Number(opts.reward), denom, maxClaims: Number(opts.maxClaims),
     uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
   }), opts);
 });
@@ -865,15 +880,17 @@ sharedOpts(
     .description('Create an OTC swap intent (user outgoing approval)')
     .requiredOption('--address <address>', 'Creator address (bb1...)')
     .requiredOption('--collection-id <id>', 'Intent Exchange collection ID')
-    .requiredOption('--pay-denom <symbol>', 'What you send (USDC, BADGE)')
+    .requiredOption('--pay-denom <symbol|denom>', 'What you send. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .requiredOption('--pay-amount <n>', 'Amount you send (display units)')
-    .requiredOption('--receive-denom <symbol>', 'What you receive (USDC, BADGE)')
+    .requiredOption('--receive-denom <symbol|denom>', 'What you receive. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .requiredOption('--receive-amount <n>', 'Amount you receive (display units)')
     .option('--expiration <duration>', 'How long intent stays open', '7d')
 ).action(async (opts) => {
   const { buildIntent } = await import('../../core/builders/intent.js');
   if (opts.json) { emit(buildIntent(readJsonInput(opts.json)), opts); return; }
-  emit(buildIntent({ address: opts.address, collectionId: opts.collectionId, payDenom: opts.payDenom, payAmount: Number(opts.payAmount), receiveDenom: opts.receiveDenom, receiveAmount: Number(opts.receiveAmount), expiration: opts.expiration }), opts);
+  const payDenom = requireBbDenom(opts.payDenom, '--pay-denom');
+  const receiveDenom = requireBbDenom(opts.receiveDenom, '--receive-denom');
+  emit(buildIntent({ address: opts.address, collectionId: opts.collectionId, payDenom, payAmount: Number(opts.payAmount), receiveDenom, receiveAmount: Number(opts.receiveAmount), expiration: opts.expiration }), opts);
 });
 
 sharedOpts(
@@ -882,14 +899,15 @@ sharedOpts(
     .description('Create a recurring payment approval (user incoming)')
     .requiredOption('--collection-id <id>', 'Subscription collection ID')
     .requiredOption('--amount <n>', 'Payment amount per interval (display units)')
-    .requiredOption('--denom <symbol>', 'Payment coin (USDC, BADGE)')
+    .requiredOption('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .requiredOption('--interval <duration>', 'Payment interval (daily, monthly, annually)')
     .requiredOption('--recipient <address>', 'Who receives payments (bb1...)')
     .option('--expiration <duration>', 'How long subscription lasts', '365d')
 ).action(async (opts) => {
   const { buildRecurringPayment } = await import('../../core/builders/recurring-payment.js');
   if (opts.json) { emit(buildRecurringPayment(readJsonInput(opts.json)), opts); return; }
-  emit(buildRecurringPayment({ collectionId: opts.collectionId, amount: Number(opts.amount), denom: opts.denom, interval: opts.interval, recipient: opts.recipient, expiration: opts.expiration }), opts);
+  const denom = requireBbDenom(opts.denom, '--denom');
+  emit(buildRecurringPayment({ collectionId: opts.collectionId, amount: Number(opts.amount), denom, interval: opts.interval, recipient: opts.recipient, expiration: opts.expiration }), opts);
 });
 
 sharedOpts(
@@ -900,13 +918,14 @@ sharedOpts(
     .requiredOption('--collection-id <id>', 'Collection ID to list from')
     .requiredOption('--token-ids <range>', 'Token ID range (e.g. "1-5" or "1")')
     .requiredOption('--price <n>', 'Asking price (display units)')
-    .requiredOption('--denom <symbol>', 'Price coin (USDC, BADGE)')
+    .requiredOption('--denom <symbol|denom>', 'Price coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .option('--max-sales <n>', 'Maximum number of sales', '1')
     .option('--expiration <duration>', 'Listing duration', '30d')
 ).action(async (opts) => {
   const { buildListing } = await import('../../core/builders/listing.js');
   if (opts.json) { emit(buildListing(readJsonInput(opts.json)), opts); return; }
-  emit(buildListing({ address: opts.address, collectionId: opts.collectionId, tokenIds: opts.tokenIds, price: Number(opts.price), denom: opts.denom, maxSales: Number(opts.maxSales), expiration: opts.expiration }), opts);
+  const denom = requireBbDenom(opts.denom, '--denom');
+  emit(buildListing({ address: opts.address, collectionId: opts.collectionId, tokenIds: opts.tokenIds, price: Number(opts.price), denom, maxSales: Number(opts.maxSales), expiration: opts.expiration }), opts);
 });
 
 sharedOpts(
@@ -917,12 +936,13 @@ sharedOpts(
     .requiredOption('--collection-id <id>', 'Collection ID to bid on')
     .requiredOption('--token-ids <range>', 'Token ID range (e.g. "1-5" or "1")')
     .requiredOption('--price <n>', 'Bid price (display units)')
-    .requiredOption('--denom <symbol>', 'Price coin (USDC, BADGE)')
+    .requiredOption('--denom <symbol|denom>', 'Price coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .option('--expiration <duration>', 'Bid duration', '7d')
 ).action(async (opts) => {
   const { buildBid } = await import('../../core/builders/bid.js');
   if (opts.json) { emit(buildBid(readJsonInput(opts.json)), opts); return; }
-  emit(buildBid({ address: opts.address, collectionId: opts.collectionId, tokenIds: opts.tokenIds, price: Number(opts.price), denom: opts.denom, expiration: opts.expiration }), opts);
+  const denom = requireBbDenom(opts.denom, '--denom');
+  emit(buildBid({ address: opts.address, collectionId: opts.collectionId, tokenIds: opts.tokenIds, price: Number(opts.price), denom, expiration: opts.expiration }), opts);
 });
 
 sharedOpts(
@@ -934,12 +954,13 @@ sharedOpts(
     .requiredOption('--token <yes|no>', 'Which outcome token to sell')
     .requiredOption('--amount <n>', 'Number of tokens to sell')
     .requiredOption('--price <n>', 'Total payment amount (display units)')
-    .requiredOption('--denom <symbol>', 'Payment coin (USDC, BADGE)')
+    .requiredOption('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .option('--expiration <duration>', 'How long intent stays open', '7d')
 ).action(async (opts) => {
   const { buildPmSellIntent } = await import('../../core/builders/pm-sell-intent.js');
   if (opts.json) { emit(buildPmSellIntent(readJsonInput(opts.json)), opts); return; }
-  emit(buildPmSellIntent({ address: opts.address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom: opts.denom, expiration: opts.expiration }), opts);
+  const denom = requireBbDenom(opts.denom, '--denom');
+  emit(buildPmSellIntent({ address: opts.address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom, expiration: opts.expiration }), opts);
 });
 
 sharedOpts(
@@ -951,12 +972,13 @@ sharedOpts(
     .requiredOption('--token <yes|no>', 'Which outcome token to buy')
     .requiredOption('--amount <n>', 'Number of tokens to buy')
     .requiredOption('--price <n>', 'Total payment amount (display units)')
-    .requiredOption('--denom <symbol>', 'Payment coin (USDC, BADGE)')
+    .requiredOption('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .option('--expiration <duration>', 'How long intent stays open', '7d')
 ).action(async (opts) => {
   const { buildPmBuyIntent } = await import('../../core/builders/pm-buy-intent.js');
   if (opts.json) { emit(buildPmBuyIntent(readJsonInput(opts.json)), opts); return; }
-  emit(buildPmBuyIntent({ address: opts.address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom: opts.denom, expiration: opts.expiration }), opts);
+  const denom = requireBbDenom(opts.denom, '--denom');
+  emit(buildPmBuyIntent({ address: opts.address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom, expiration: opts.expiration }), opts);
 });
 
 // ============================================================
@@ -997,14 +1019,18 @@ sharedOpts(
       let amount: string;
       if (opts.baseUnits) {
         // Caller wants raw base units regardless of how --denom resolves.
-        denom = opts.denom;
+        denom = requireBbDenom(opts.denom, '--denom');
         amount = String(opts.amount).replace(/[_,]/g, '');
         if (!/^\d+$/.test(amount)) {
           process.stderr.write(`Error: --amount must be a non-negative integer when --base-units is set, got "${opts.amount}"\n`);
           process.exit(2);
         }
       } else {
-        const resolved = resolveCoin(opts.denom);
+        // requireBbDenom catches uusdc/uatom/uosmo before resolveCoin
+        // even sees them; resolveCoin then handles the canonical
+        // baseDenom path.
+        const validated = requireBbDenom(opts.denom, '--denom');
+        const resolved = resolveCoin(validated);
         denom = resolved.denom;
         // Resolved symbol → display units + decimals. Resolved raw denom
         // → resolveCoin returns decimals from registry; same path.
