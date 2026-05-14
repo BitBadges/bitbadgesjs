@@ -25,7 +25,7 @@ import {
   type BurnerNetwork
 } from '../utils/burner.js';
 import { BitBadgesSigningClient } from '../../signing/BitBadgesSigningClient.js';
-import { requireBbDenom } from '../utils/denom.js';
+import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
 
 export const burnerCommand = new Command('burner')
@@ -114,7 +114,7 @@ const resumeCmd = burnerCommand
   .requiredOption('--manager <address>', 'Collection manager address (bb1...)')
   .option('--fund <mode>', 'Funding mode if the wallet is still unfunded', 'faucet')
   .option('--fee <amount>', 'Fee amount in base units', '0')
-  .option('--fee-denom <symbol|denom>', 'Fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', 'ubadge')
+  .option('--fee-denom <symbol|denom>', 'Fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', DEFAULT_FEE_DENOM)
   .option('--gas <number>', 'Gas limit', '400000')
   .option('--poll-timeout <seconds>', 'Seconds to wait for funding', '60');
 addNetworkOptions(resumeCmd);
@@ -149,7 +149,7 @@ resumeCmd.action(async (selector: string, opts: any) => {
     manager: opts.manager,
     fund: opts.fund === 'manual' ? 'manual' : 'faucet',
     apiKey,
-    fee: { amount: String(opts.fee), denom: requireBbDenom(String(opts.feeDenom || 'ubadge'), '--fee-denom') },
+    fee: { amount: String(opts.fee), denom: requireBbDenom(String(opts.feeDenom || DEFAULT_FEE_DENOM), '--fee-denom') },
     gas: Number(opts.gas),
     reuseRecord: rec,
     nonInteractive: !process.stdout.isTTY,
@@ -167,7 +167,7 @@ const sweepCmd = burnerCommand
   .description('Send the burner\'s remaining balance to another address and mark it swept.')
   .argument('<selector>', 'Address or recovery file path')
   .requiredOption('--to <address>', 'Recipient address (bb1...)')
-  .option('--denom <symbol|denom>', 'Coin denom to sweep. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', 'ubadge')
+  .option('--denom <symbol|denom>', 'Coin denom to sweep. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', DEFAULT_FEE_DENOM)
   .option('--fee <amount>', 'Fee amount', '0')
   .option('--gas <number>', 'Gas limit', '200000');
 addNetworkOptions(sweepCmd);
@@ -182,7 +182,7 @@ sweepCmd.action(async (selector: string, opts: any) => {
   const apiUrl = getApiUrl({ ...opts, network });
   const apiKey = getApiKeyForNetwork({ ...opts, network });
 
-  const denom = requireBbDenom(String(opts.denom || 'ubadge'), '--denom');
+  const denom = requireBbDenom(String(opts.denom || DEFAULT_FEE_DENOM), '--denom');
   const balance = await fetchBalance(nodeUrl, rec.address, denom);
   if (balance === 0n) {
     process.stderr.write(`Hot wallet ${rec.address} has zero ${denom} balance — nothing to sweep.\n`);

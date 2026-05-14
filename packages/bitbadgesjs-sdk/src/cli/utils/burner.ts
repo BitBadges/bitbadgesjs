@@ -30,6 +30,7 @@ import {
   TYPE_URL_CREATE,
   TYPE_URL_UNIVERSAL
 } from './normalizeMsg.js';
+import { DEFAULT_FEE_DENOM } from './denom.js';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -176,7 +177,7 @@ export async function loadBurnerAdapter(record: BurnerWalletRecord): Promise<Gen
  * BitBadgesSigningClient because this is a read path that doesn't need a
  * signer bound to the balance's address.
  */
-export async function fetchBalance(nodeUrl: string, address: string, denom = 'ubadge'): Promise<bigint> {
+export async function fetchBalance(nodeUrl: string, address: string, denom: string = DEFAULT_FEE_DENOM): Promise<bigint> {
   const axios = (await import('axios')).default;
   try {
     const res = await axios.get(`${nodeUrl}/cosmos/bank/v1beta1/balances/${address}/by_denom`, {
@@ -469,7 +470,7 @@ export async function runBurnerCreate(
 
   const fee = {
     amount: opts.fee?.amount ?? '0',
-    denom: opts.fee?.denom ?? 'ubadge',
+    denom: opts.fee?.denom ?? DEFAULT_FEE_DENOM,
     gas: String(opts.gas ?? DEFAULT_GAS)
   };
 

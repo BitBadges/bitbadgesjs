@@ -6,7 +6,7 @@ import { renderReview, renderValidate, renderResolvedMetadata, renderSimulate, c
 import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMsg.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import { runBurnerCreate, pickBurner, type BurnerNetwork } from '../utils/burner.js';
-import { requireBbDenom } from '../utils/denom.js';
+import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
 
 export const buildCommand = new Command('build').description('Deterministic transaction builders — flag-based generators for vaults, NFTs, subscriptions, bounties, and more. Output: ready-to-sign JSON. To broadcast, pipe into `bb cli deploy --burner`.');
@@ -447,7 +447,7 @@ async function emit(
         manager: opts.manager,
         fund: opts.fund === 'manual' ? 'manual' : 'faucet',
         apiKey,
-        fee: { amount: String(opts.fee ?? '0'), denom: requireBbDenom(String(opts.feeDenom ?? 'ubadge'), '--fee-denom') },
+        fee: { amount: String(opts.fee ?? '0'), denom: requireBbDenom(String(opts.feeDenom ?? DEFAULT_FEE_DENOM), '--fee-denom') },
         gas: Number(opts.gas ?? 400000),
         reuseRecord: choice.kind === 'reuse' ? choice.record : undefined,
         nonInteractive: Boolean(opts.nonInteractive) || !process.stdout.isTTY,
@@ -527,7 +527,7 @@ const sharedOpts = (cmd: Command) => {
   cmd.option('--expected-address <addr>', 'With --deploy-with-browser: bb1.../0x... that the connected wallet must match. Defaults to --manager / --creator.');
   cmd.option('--fund <mode>', 'With --deploy-with-burner: funding source for the burner (faucet | manual)', 'faucet');
   cmd.option('--fee <amount>', 'When deploying: fee amount in base units', '0');
-  cmd.option('--fee-denom <symbol|denom>', 'When deploying: fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', 'ubadge');
+  cmd.option('--fee-denom <symbol|denom>', 'When deploying: fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', DEFAULT_FEE_DENOM);
   cmd.option('--gas <number>', 'When deploying: gas limit', '400000');
   cmd.option('--new', 'With --deploy-with-burner: skip the burner picker and always create a fresh wallet');
   cmd.option('--reuse <selector>', 'With --deploy-with-burner: reuse a specific saved burner by address or recovery file path');

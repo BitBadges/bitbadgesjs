@@ -24,6 +24,13 @@
 import { resolveCoin } from '../../core/builders/shared.js';
 import { MAINNET_COINS_REGISTRY } from '../../common/constants.js';
 
+/**
+ * The canonical default fee denom for BitBadges-side transactions. `ubadge`
+ * is the only u-prefix denom valid on BitBadges (everything else lives as
+ * `ibc/<SHA>`). Centralized here so CLI verbs don't drift on the default.
+ */
+export const DEFAULT_FEE_DENOM = 'ubadge';
+
 const IBC_DENOM_RE = /^ibc\/[A-F0-9]{64}$/i;
 const FACTORY_DENOM_RE = /^factory\/[a-zA-Z0-9_:./-]+$/;
 const BADGES_DENOM_RE = /^badges:[a-zA-Z0-9_:.-]+$/;

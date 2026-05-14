@@ -30,7 +30,7 @@ import { encodeTokenizationMsgFromJson, supportedTokenizationTypeUrls } from '..
 import { evmToCosmosAddress } from '../../transactions/precompile/helpers.js';
 import { emit, emitError } from '../utils/envelope.js';
 import { emitDeprecation } from '../utils/deprecation.js';
-import { requireBbDenom } from '../utils/denom.js';
+import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
 
 interface MsgEntry {
   typeUrl: string;
@@ -122,7 +122,7 @@ export const genTxPayloadCommand = new Command('gen-tx-payload')
   .option('--chain-id <id>', 'Cosmos chain ID override (default per network: bitbadges-1 / etc)')
   .option('--memo <text>', 'Optional tx memo', '')
   .option('--fee <amount>', 'Fee amount in base units', '0')
-  .option('--fee-denom <symbol|denom>', 'Fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', 'ubadge')
+  .option('--fee-denom <symbol|denom>', 'Fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', DEFAULT_FEE_DENOM)
   .option('--gas <number>', 'Gas limit', '400000')
   .option('--no-fetch', 'Skip the indexer account-info round-trip; require --account-number, --sequence, and --public-key via flags. Useful for offline / air-gapped flows.');
 addNetworkOptions(genTxPayloadCommand);
@@ -247,7 +247,7 @@ export async function runGenPayload(
   // function the dashboard's TxModal uses. Returns signDirect +
   // legacyAmino (when sender is set) and evmTx (when evmAddress is set).
   const fee = String(opts.fee ?? '0');
-  const denom = requireBbDenom(String(opts.feeDenom ?? 'ubadge'), '--fee-denom');
+  const denom = requireBbDenom(String(opts.feeDenom ?? DEFAULT_FEE_DENOM), '--fee-denom');
   const gas = String(opts.gas ?? 400000);
   const memo = String(opts.memo ?? '');
 
