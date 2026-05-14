@@ -117,14 +117,11 @@ import { resourcesCommand } from './commands/resources.js';
 import { doctorCommand } from './commands/doctor.js';
 
 // Address & lookup utilities
-import { addressCommand } from './commands/address.js';
-import { aliasCommand } from './commands/alias.js';
-import { lookupCommand } from './commands/lookup.js';
-import { genListIdCommand } from './commands/gen-list-id.js';
 import { amountCommand } from './commands/amount.js';
 import { urlCommand } from './commands/url.js';
 import { dynamicStoresCommand } from './commands/dynamic-stores.js';
-import { portfolioCommand } from './commands/portfolio.js';
+import { accountCommand } from './commands/account.js';
+import { makeDeprecatedAlias } from './utils/deprecated-alias.js';
 
 // Swap / DEX
 import { swapCommand } from './commands/swap.js';
@@ -197,8 +194,8 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
     commands: [docsCommand, skillsCommand, resourcesCommand, doctorCommand]
   },
   {
-    title: 'Address & lookup utilities',
-    commands: [addressCommand, aliasCommand, lookupCommand, portfolioCommand, genListIdCommand, amountCommand, urlCommand]
+    title: 'Account & lookup',
+    commands: [accountCommand, amountCommand, urlCommand]
   },
   {
     title: 'Swap & DEX',
@@ -233,6 +230,65 @@ for (const group of HELP_GROUPS) {
     program.addCommand(cmd);
   }
 }
+
+// ── v2 deprecated aliases — old top-level forms → new `account` home ────────
+//
+// Each old top-level verb (`portfolio`, `address`, `lookup`, `alias`,
+// `gen-list-id`) still works for one release. Hidden from grouped help
+// to keep `bb --help` clean; reachable when users / scripts type the
+// v1 form. Banner emits via `emitDeprecation` from utils/deprecation.ts.
+//
+// Forwarding rules:
+//   - `bb portfolio <sub> [args]`        → `bb account <sub> [args]`
+//   - `bb address <sub> [args]`          → `bb account <sub> [args]`
+//                                           (address.convert / address.validate
+//                                            live as flat `account convert /
+//                                            account validate` subcommands)
+//   - `bb lookup [symbol]`               → `bb account lookup [symbol]`
+//   - `bb alias <sub> [args]`            → `bb account alias <sub> [args]`
+//   - `bb gen-list-id <addrs...>`        → `bb account gen-list-id <addrs...>`
+
+const portfolioAlias = makeDeprecatedAlias({
+  oldName: 'portfolio',
+  newPath: 'bb account',
+  description: 'Deprecated — use `bb account` instead.',
+  forward: (args) => ['account', ...args],
+  target: program,
+});
+const addressAlias = makeDeprecatedAlias({
+  oldName: 'address',
+  newPath: 'bb account',
+  description: 'Deprecated — `convert` / `validate` are now `bb account convert` / `bb account validate`.',
+  forward: (args) => ['account', ...args],
+  target: program,
+});
+const lookupAlias = makeDeprecatedAlias({
+  oldName: 'lookup',
+  newPath: 'bb account lookup',
+  description: 'Deprecated — use `bb account lookup` instead.',
+  forward: (args) => ['account', 'lookup', ...args],
+  target: program,
+});
+const aliasAlias = makeDeprecatedAlias({
+  oldName: 'alias',
+  newPath: 'bb account alias',
+  description: 'Deprecated — use `bb account alias` instead.',
+  forward: (args) => ['account', 'alias', ...args],
+  target: program,
+});
+const genListIdAlias = makeDeprecatedAlias({
+  oldName: 'gen-list-id',
+  newPath: 'bb account gen-list-id',
+  description: 'Deprecated — use `bb account gen-list-id` instead.',
+  forward: (args) => ['account', 'gen-list-id', ...args],
+  target: program,
+});
+
+program.addCommand(portfolioAlias);
+program.addCommand(addressAlias);
+program.addCommand(lookupAlias);
+program.addCommand(aliasAlias);
+program.addCommand(genListIdAlias);
 
 // ── `cli` umbrella — back-compat alias for the v1 `bb cli <cmd>` shape ──────
 //
