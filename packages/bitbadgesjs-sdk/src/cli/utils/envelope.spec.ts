@@ -1,58 +1,19 @@
 /**
  * Tests for envelope.ts — uniform output envelope helpers.
  *
- * Covers:
- *   - resolveFormat (precedence: --format > --json/--json-only > TTY detection)
- *   - successEnvelope / errorEnvelope (shape)
- *   - isQuiet (flag / env var)
- *   - writeJsonEnvelope (indent vs condensed)
+ * `resolveFormat` and the `--format json|text` switching machinery were
+ * removed in #0398: every data-emitting command now always emits JSON.
+ * The tests below cover what's left — envelope shape constructors,
+ * isQuiet resolution, and writeJsonEnvelope's indent/condensed branches.
  */
 
 import {
-  resolveFormat,
   successEnvelope,
   errorEnvelope,
   isQuiet,
   writeJsonEnvelope
 } from './envelope.js';
 import { Writable } from 'node:stream';
-
-// Stub stream that pretends to be a TTY (or not) on demand.
-function fakeStream(isTTY: boolean): NodeJS.WriteStream {
-  const s = new Writable({ write(_c, _e, cb) { cb(); } }) as unknown as NodeJS.WriteStream;
-  Object.defineProperty(s, 'isTTY', { value: isTTY, configurable: true });
-  return s;
-}
-
-describe('resolveFormat', () => {
-  it('honors explicit --format json', () => {
-    expect(resolveFormat({ format: 'json' }, fakeStream(true))).toBe('json');
-  });
-
-  it('honors explicit --format text', () => {
-    expect(resolveFormat({ format: 'text' }, fakeStream(false))).toBe('text');
-  });
-
-  it('--json legacy alias coerces to json', () => {
-    expect(resolveFormat({ json: true }, fakeStream(true))).toBe('json');
-  });
-
-  it('--json-only legacy alias coerces to json', () => {
-    expect(resolveFormat({ jsonOnly: true }, fakeStream(true))).toBe('json');
-  });
-
-  it('TTY default is text', () => {
-    expect(resolveFormat({}, fakeStream(true))).toBe('text');
-  });
-
-  it('non-TTY (pipe) default is json', () => {
-    expect(resolveFormat({}, fakeStream(false))).toBe('json');
-  });
-
-  it('--format wins over --json', () => {
-    expect(resolveFormat({ format: 'text', json: true }, fakeStream(false))).toBe('text');
-  });
-});
 
 describe('successEnvelope', () => {
   it('wraps data with ok=true and empty warnings/null error', () => {
@@ -148,5 +109,12 @@ describe('writeJsonEnvelope', () => {
     const text = chunks.join('');
     expect(text).not.toContain('\n  ');
     expect(text).toContain('"a":1');
+  });
+
+  it('BigInt values are stringified safely', () => {
+    const chunks: string[] = [];
+    const sink = new Writable({ write(c, _e, cb) { chunks.push(c.toString()); cb(); } }) as unknown as NodeJS.WriteStream;
+    writeJsonEnvelope(successEnvelope({ n: 123n }), { condensed: true }, sink);
+    expect(chunks.join('')).toContain('"n":"123"');
   });
 });

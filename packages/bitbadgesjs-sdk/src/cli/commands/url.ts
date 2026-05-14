@@ -14,6 +14,7 @@
 
 import { Command } from 'commander';
 import * as fs from 'node:fs';
+import { emit as emitEnvelope, emitError } from '../utils/envelope.js';
 
 interface OutputFlags { outputFile?: string; condensed?: boolean; raw?: boolean; }
 interface NetworkFlags { testnet?: boolean; }
@@ -25,8 +26,12 @@ function addOutputFlags(cmd: Command): Command {
   return cmd
     .option('--output-file <path>', 'Write output to file')
     .option('--condensed', 'Single-line JSON', false)
-    .option('--raw', 'Emit only the URL on stdout (no JSON envelope) — useful for piping into `open` / `xdg-open`.', false);
+    .option('--raw', 'Emit only the URL string (no envelope) — useful for piping into `open` / `xdg-open`.', false);
 }
+// `bb url` keeps a `--raw` escape hatch because pipelines like
+// `bb url tx 0xabc | open` expect a bare URL string, and the
+// `| jq -r .data.url` alternative is awkward. Otherwise the envelope is
+// emitted exactly like every other CLI verb.
 function emit(url: string, payload: Record<string, unknown>, opts: OutputFlags): void {
   if (opts.raw) {
     if (opts.outputFile) {
@@ -37,17 +42,10 @@ function emit(url: string, payload: Record<string, unknown>, opts: OutputFlags):
     }
     return;
   }
-  const formatted = opts.condensed ? JSON.stringify(payload) : JSON.stringify(payload, null, 2);
-  if (opts.outputFile) {
-    fs.writeFileSync(opts.outputFile, formatted + '\n', 'utf-8');
-    process.stderr.write(`Written to ${opts.outputFile}\n`);
-  } else {
-    process.stdout.write(formatted + '\n');
-  }
+  emitEnvelope(payload, opts);
 }
 function fail(code: number, message: string): never {
-  process.stderr.write(`Error: ${message}\n`);
-  process.exit(code);
+  emitError(new Error(message), { code: 'url_error', exitCode: code });
 }
 
 const APP_BASE = (testnet: boolean) => (testnet ? 'https://testnet.bitbadges.io' : 'https://bitbadges.io');

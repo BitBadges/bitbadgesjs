@@ -192,7 +192,21 @@ function readMsgInput(opts: { msgFile?: string; msgStdin?: boolean; input?: stri
     }
   }
   try {
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    // Envelope unwrap: if stdin / file is the CLI envelope shape (e.g.
+    // the direct output of `bb build` post-#0398), extract the msg from
+    // envelope.data. Older inputs that are already `{typeUrl, value}` or
+    // `{messages: [...]}` keep working untouched.
+    if (parsed && typeof parsed === 'object' && 'ok' in parsed && 'data' in parsed) {
+      if (parsed.ok === false) {
+        const code = parsed.error?.code ? `[${parsed.error.code}] ` : '';
+        throw new Error(
+          `Deploy input is an error envelope from a prior CLI step — refusing to broadcast. ${code}${parsed.error?.message ?? 'unknown error'}`
+        );
+      }
+      return parsed.data;
+    }
+    return parsed;
   } catch (err: any) {
     throw new Error(`Failed to parse msg JSON: ${err?.message || err}`);
   }

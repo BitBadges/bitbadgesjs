@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { addNetworkOptions } from '../utils/io.js';
-import { addFormatOptions, resolveFormat, successEnvelope } from '../utils/envelope.js';
+import { emit, addOutputOptions } from '../utils/envelope.js';
 
 /**
  * Plain-English explanation of a transaction body or a collection.
@@ -9,15 +9,14 @@ import { addFormatOptions, resolveFormat, successEnvelope } from '../utils/envel
  * interpretCollection(). Numeric input is treated as a collection id and
  * fetched from the API.
  */
-export const explainCommand = addFormatOptions(
+export const explainCommand = addOutputOptions(
   addNetworkOptions(
     new Command('explain')
       .description('Explain a transaction or collection in plain English. Input: JSON file, inline JSON, numeric collection ID, or - for stdin.')
       .argument('<input>', 'Tx / collection JSON file path, inline JSON, numeric collection id, or "-" for stdin')
-      .option('--output-file <path>', 'Write output to file instead of stdout')
   )
 ).action(
-  async (input: string, opts: { network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string; outputFile?: string; format?: string; json?: boolean }) => {
+  async (input: string, opts: { network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string; outputFile?: string; condensed?: boolean }) => {
     const { readJsonInput, getApiUrl, getApiKeyForNetwork } = await import('../utils/io.js');
     let data: any;
     let fetchedCollection = false;
@@ -119,17 +118,6 @@ export const explainCommand = addFormatOptions(
       process.exit(2);
     }
 
-    const format = resolveFormat({ format: opts.format, json: opts.json });
-    const output = format === 'json'
-      ? JSON.stringify(successEnvelope({ kind, messages, fullText: text }), null, 2) + '\n'
-      : text + '\n';
-
-    if (opts.outputFile) {
-      const fsMod = await import('fs');
-      fsMod.writeFileSync(opts.outputFile, output, 'utf-8');
-      process.stderr.write(`Written to ${opts.outputFile}\n`);
-    } else {
-      process.stdout.write(output);
-    }
+    emit({ kind, messages, fullText: text }, opts);
   }
 );

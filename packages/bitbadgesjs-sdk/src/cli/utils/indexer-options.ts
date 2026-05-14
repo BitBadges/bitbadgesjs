@@ -30,9 +30,9 @@
  * New commands SHOULD prefer the envelope helpers — but migration is out
  * of scope for this sweep, which is purely about flag consistency.
  */
-import * as fs from 'node:fs';
 import type { Command } from 'commander';
 import { apiRequest, resolveApiKey, resolveBaseUrl } from './api-client.js';
+import { emit, emitError } from './envelope.js';
 
 export interface IndexerNetworkFlags {
   testnet?: boolean;
@@ -95,61 +95,27 @@ export function addIndexerOptions(cmd: Command): Command {
   return addIndexerOutputOptions(addIndexerNetworkOptions(cmd));
 }
 
-/** JSON replacer that stringifies BigInt values — every command emitting
- * SDK-converted docs (auctions, credit-tokens, intents, nfts,
- * prediction-markets, subscriptions) hits BigInt fields in the
- * convert(BigIntify) payload and would otherwise throw
- * "Do not know how to serialize a BigInt". */
-function bigIntReplacer(_key: string, value: unknown): unknown {
-  return typeof value === 'bigint' ? value.toString() : value;
-}
-
 /**
- * Emit a result as JSON. Honors `--condensed` and `--output-file`.
- * Mirrors the inline `emit()` every command file used to define. By
- * default uses the BigInt-safe replacer so SDK doc payloads never throw
- * on serialization — pass `bigInt: false` to opt out for the few
- * commands that pre-stringify their values.
+ * Emit a result as the envelope-wrapped JSON. Thin shim over `emit()` —
+ * kept under the indexer-options name so every existing indexer-command
+ * callsite (assets, balances, intents, nfts, portfolio, swap, …)
+ * automatically gets the envelope shape without per-file edits.
+ *
+ * The legacy `bigInt: false` opt-out is gone: `emit()` always uses a
+ * BigInt-safe replacer, and the handful of pre-stringified callers
+ * (none today after the sweep) wouldn't gain anything from skipping it.
  */
-export function emitIndexerResult(
-  result: unknown,
-  opts: IndexerOutputFlags & { bigInt?: boolean } = {}
-): void {
-  const replacer = opts.bigInt === false ? undefined : bigIntReplacer;
-  const formatted = opts.condensed
-    ? JSON.stringify(result, replacer)
-    : JSON.stringify(result, replacer, 2);
-  if (opts.outputFile) {
-    fs.writeFileSync(opts.outputFile, formatted + '\n', 'utf-8');
-    process.stderr.write(`Written to ${opts.outputFile}\n`);
-  } else {
-    process.stdout.write(formatted + '\n');
-  }
-}
-
-interface ApiErrorShape {
-  message?: string;
-  response?: unknown;
-  hint?: string;
+export function emitIndexerResult(result: unknown, opts: IndexerOutputFlags = {}): void {
+  emit(result, opts);
 }
 
 /**
- * Error emitter for indexer-call failures. Surfaces `response` when the
- * indexer returned a structured error body, otherwise falls back to the
- * raw message. Any attached `hint` (network-error helper from
- * `api-client.ts`) gets written to stderr too. Exits non-zero.
+ * Error emitter for indexer-call failures. Thin shim over `emitError()`
+ * — the envelope contract is identical, and centralizing here means an
+ * indexer 4xx/5xx surfaces the same JSON shape as any other CLI error.
  */
 export function emitIndexerError(err: unknown, exitCode = 1): never {
-  const e = err as ApiErrorShape;
-  if (e?.response !== undefined) {
-    process.stderr.write(JSON.stringify(e.response, null, 2) + '\n');
-  } else {
-    process.stderr.write(`Error: ${e?.message ?? String(err)}\n`);
-  }
-  if (e?.hint) {
-    process.stderr.write(`Hint: ${e.hint}\n`);
-  }
-  process.exit(exitCode);
+  emitError(err, { exitCode });
 }
 
 /**

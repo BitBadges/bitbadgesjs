@@ -24,12 +24,13 @@ interface DoctorCheck {
 export const doctorCommand = addNetworkOptions(
   new Command('doctor')
     .description("Environment + connectivity health check. Verifies Node/SDK/config/API key/MCP bin/session integrity. Pass --with-preview to also probe the indexer's shareable-preview upload + fetch roundtrip.")
-    .option('--json', 'Output the full DoctorReport as JSON')
+    .option('--condensed', 'Single-line JSON (smaller pipe payload)', false)
+    .option('--output-file <path>', 'Write the envelope to file instead of stdout')
     .option(
       '--with-preview',
       'Add a preview-roundtrip probe: builds a minimal tx, POSTs it to /api/v0/builder/preview, GETs it back by code, and asserts the round trip is byte-equivalent.'
     )
-).action(async (opts: { json?: boolean; withPreview?: boolean; network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string }) => {
+).action(async (opts: { condensed?: boolean; outputFile?: string; withPreview?: boolean; network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string }) => {
   const checks: DoctorCheck[] = [];
 
   // 1. Node version
@@ -306,14 +307,13 @@ export const doctorCommand = addNetworkOptions(
     }
   }
 
-  // Render
-  if (opts.json) {
-    const { output: outputFn } = await import('../utils/io.js');
-    outputFn(checks, { ...opts, human: false });
-  } else {
+  // Render: scorecard to stderr as commentary (unless --quiet); envelope
+  // to stdout always so pipes always see structured data.
+  const { isQuiet } = await import('../utils/envelope.js');
+  if (!isQuiet()) {
     const { makeColor, rule } = await import('../utils/terminal.js');
-    const { c } = makeColor(process.stdout);
-    const width = Math.min(80, (process.stdout as any).columns || 80);
+    const { c } = makeColor(process.stderr);
+    const width = Math.min(80, (process.stderr as any).columns || 80);
     const lines: string[] = [];
     lines.push(c('gray', rule('━', width, 'Doctor')));
     lines.push('');
@@ -343,8 +343,10 @@ export const doctorCommand = addNetworkOptions(
       } skip`
     );
     lines.push(c('gray', rule('━', width)));
-    console.log(lines.join('\n'));
+    process.stderr.write(lines.join('\n') + '\n');
   }
+  const { output: outputFn } = await import('../utils/io.js');
+  outputFn(checks, { ...opts });
 
   if (checks.some((ch) => ch.status === 'fail')) process.exit(2);
 });

@@ -123,7 +123,7 @@ export const checkCommand = addNetworkOptions(
           ]
         };
         if (opts.json) {
-          output(result, { ...opts, human: false });
+          output(result, { ...opts });
         } else {
           process.stderr.write('▲ WARNING  messages: Transaction has an empty messages array.\n');
         }
@@ -135,7 +135,7 @@ export const checkCommand = addNetworkOptions(
       const result = validateTransaction(wrapped);
 
       if (opts.json) {
-        output(result, { ...opts, human: false });
+        output(result, { ...opts });
       } else {
         const { renderValidate } = await import('../utils/terminal.js');
         const text = renderValidate(result, { stream: process.stdout });
@@ -168,7 +168,7 @@ export const checkCommand = addNetworkOptions(
       }
 
       if (opts.json) {
-        output(result, { ...opts, human: false });
+        output(result, { ...opts });
       } else {
         const { renderReview } = await import('../utils/terminal.js');
         const text = renderReview(result, { stream: process.stdout });
@@ -241,7 +241,7 @@ export const checkCommand = addNetworkOptions(
             filled: firstMsg?.value?._meta?.metadataPlaceholders || {}
           }
         },
-        { ...opts, human: false }
+        { ...opts }
       );
     } else {
       const lines: string[] = [];

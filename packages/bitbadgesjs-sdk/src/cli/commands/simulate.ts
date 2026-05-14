@@ -18,15 +18,17 @@ export const simulateCommand = addNetworkOptions(
   new Command('simulate')
     .description('Dry-run a built tx against the BitBadges API simulate endpoint. Returns gas + per-address net balance changes. Input: JSON file, inline JSON, or - for stdin.')
     .argument('<input>', 'Tx JSON file path, inline JSON, or "-" for stdin')
-    .option('--json', 'Output the structured SimulateResult as JSON instead of a rendered section')
     .option('--creator <address>', 'Override the simulation context address (default: bb1simulation)')
     .option('--events', 'Dump the full raw chain events array in the rendered output (default: just the count)')
+    .option('--condensed', 'Single-line JSON (smaller pipe payload)', false)
+    .option('--output-file <path>', 'Write the envelope to file instead of stdout')
 ).action(async (
   input: string,
   opts: {
-    json?: boolean;
     creator?: string;
     events?: boolean;
+    condensed?: boolean;
+    outputFile?: string;
     network?: 'mainnet' | 'local' | 'testnet';
     testnet?: boolean;
     local?: boolean;
@@ -110,21 +112,23 @@ export const simulateCommand = addNetworkOptions(
     apiUrl: getApiUrl(opts)
   });
 
-  if (opts.json) {
-    output(result, { ...opts, human: false });
-  } else {
+  // Per-msg breakdown to stderr as commentary (unless --quiet); envelope
+  // to stdout always so pipes always see structured data.
+  const { isQuiet } = await import('../utils/envelope.js');
+  if (!isQuiet()) {
     const collectionCache = await prefetchSimulateCollections(result, {
       apiKey,
       apiUrl: getApiUrl(opts)
     });
-    console.log(
+    process.stderr.write(
       renderSimulate(result, {
-        stream: process.stdout,
+        stream: process.stderr,
         events: opts.events ? 'full' : 'count',
         collectionCache
-      })
+      }) + '\n'
     );
   }
+  output(result, { ...opts });
 
   if (!result.success || result.valid === false) process.exit(2);
 });

@@ -16,7 +16,7 @@
  */
 
 import { Command } from 'commander';
-import { addFormatOptions, resolveFormat, successEnvelope, errorEnvelope, writeJsonEnvelope } from '../utils/envelope.js';
+import { addOutputOptions, emit, errorEnvelope, writeJsonEnvelope } from '../utils/envelope.js';
 import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
 
 interface PriceFlags {
@@ -24,9 +24,8 @@ interface PriceFlags {
   local?: boolean;
   url?: string;
   apiKey?: string;
-  format?: 'json' | 'text';
-  json?: boolean;
   outputFile?: string;
+  condensed?: boolean;
 }
 
 interface AssetPairRow {
@@ -74,25 +73,7 @@ async function resolveDenoms(inputs: string[], opts: PriceFlags): Promise<{ inpu
   return out;
 }
 
-function renderText(rows: { input: string; denom?: string; symbol?: string; price?: number; percentageChange24h?: number; volume24h?: number; error?: string }[]): string {
-  const lines: string[] = [];
-  for (const r of rows) {
-    if (r.error) {
-      lines.push(`${r.input}\t(${r.error})`);
-      continue;
-    }
-    const pieces = [`${r.symbol ?? r.denom ?? r.input}\t${r.price ?? '?'} usd`];
-    if (r.percentageChange24h !== undefined) {
-      const change = r.percentageChange24h;
-      pieces.push(`24h: ${change >= 0 ? '+' : ''}${change.toFixed(2)}%`);
-    }
-    if (r.volume24h !== undefined) pieces.push(`vol: ${Math.round(r.volume24h).toLocaleString()}`);
-    lines.push(pieces.join('\t'));
-  }
-  return lines.join('\n') + '\n';
-}
-
-export const priceCommand = addFormatOptions(
+export const priceCommand = addOutputOptions(
   new Command('price')
     .description('Indexer-served USD price lookup for BitBadges-chain assets. Accepts denoms (ubadge, ibc/...) or symbols (BADGE) — symbols resolve via /assetPairs/search. Cross-chain prices live in `bb swap` (Skip:Go).')
     .argument('<denoms-or-symbols...>', 'Repeated args or comma-separated. e.g. ubadge, BADGE, ibc/F082B65C...')
@@ -100,7 +81,6 @@ export const priceCommand = addFormatOptions(
     .option('--local', 'Use local API (localhost:3001)', false)
     .option('--url <url>', 'Custom API base URL')
     .option('--api-key <key>', 'BitBadges API key')
-    .option('--output-file <path>', 'Write output to file instead of stdout.')
 )
   .addHelpText(
     'after',
@@ -170,26 +150,13 @@ cross-chain assets not on BitBadges chain, use \`bb swap\` (Skip:Go-backed).
     });
 
     const unresolved = rows.filter((r) => r.error).map((r) => r.input);
-    const env = successEnvelope(
+    emit(
       { prices: rows, ...(unresolved.length > 0 ? { unresolved } : {}) },
       {
+        ...opts,
         hint: unresolved.length > 0
           ? `Some inputs returned no data. Cross-chain assets aren't on the BitBadges indexer — use \`bb swap\` for those.`
           : undefined
       }
     );
-
-    if (opts.outputFile) {
-      const fs = await import('node:fs');
-      fs.writeFileSync(opts.outputFile, JSON.stringify(env, null, 2) + '\n', 'utf-8');
-      process.stderr.write(`Written to ${opts.outputFile}\n`);
-      return;
-    }
-
-    const format = resolveFormat(opts);
-    if (format === 'text') {
-      process.stdout.write(renderText(rows));
-    } else {
-      writeJsonEnvelope(env);
-    }
   });

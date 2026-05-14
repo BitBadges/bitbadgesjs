@@ -14,11 +14,12 @@ describe('doctorCommand shape', () => {
     expect(doctorCommand.commands.length).toBe(0);
   });
 
-  it('exposes --json + --with-preview + network selectors', () => {
+  it('exposes envelope output flags + --with-preview + network selectors', () => {
     const longs = (doctorCommand.options as any[]).map((o) => o.long);
     expect(longs).toEqual(
       expect.arrayContaining([
-        '--json',
+        '--condensed',
+        '--output-file',
         '--with-preview',
         '--network',
         '--mainnet',

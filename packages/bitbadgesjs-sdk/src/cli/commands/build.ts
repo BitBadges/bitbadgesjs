@@ -1,8 +1,8 @@
 import { Command } from 'commander';
-import { output, readJsonInput, addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
-import { isQuiet } from '../utils/envelope.js';
+import { readJsonInput, addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
+import { emit as emitEnvelope, isQuiet, type EnvelopeWarning } from '../utils/envelope.js';
 import { tagHelpGroups } from '../utils/help-groups.js';
-import { renderReview, renderValidate, renderResolvedMetadata, renderSimulate } from '../utils/terminal.js';
+import { renderReview, renderValidate, renderResolvedMetadata, renderSimulate, collectResolvedEntries, type ResolvedEntry } from '../utils/terminal.js';
 import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMsg.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import { runBurnerCreate, pickBurner, type BurnerNetwork } from '../utils/burner.js';
@@ -129,83 +129,113 @@ async function emit(
     }
   }
 
-  // Emit the JSON payload FIRST. Scroll order on an interactive terminal
-  // naturally puts the most recently-written bytes at the bottom, so the
-  // review summary appearing *after* the JSON means the user's final
-  // eyeline lands on the review verdict — the most actionable bit.
-  //
-  // Stdout flushes synchronously for pipes/files and line-buffered for
-  // TTYs, so writing JSON before the stderr review keeps the visible
-  // order stable across both cases.
-  //
   // Narrow Universal → MsgCreateCollection / MsgUpdateCollection right at
-  // the write boundary. Agents and humans see the proto's real per-intent
+  // the emit boundary. Agents and humans see the proto's real per-intent
   // message type; only legacy internal tooling sees the Universal superset.
   const outData = isCollectionTx ? normalizeToCreateOrUpdate(data) : data;
-  output(outData, { condensed: opts.condensed, outputFile: opts.outputFile });
 
-  // --explain: run interpretTransaction and print human-readable summary.
-  // Printed to stderr so it doesn't pollute the JSON pipe; shown above the
-  // auto-review so the narrative ("what this tx does") precedes the
-  // critique ("what might be wrong with it").
-  if (opts.explain && isCollectionTx && !isQuiet()) {
-    const { interpretTransaction } = await import('../../core/interpret-transaction.js');
-    const explanation = interpretTransaction(data.value);
-    process.stderr.write('\n── Explanation ──\n' + explanation + '\n');
-  }
-
-  // Auto-review every produced collection tx. Runs both the design-level
-  // `reviewCollection()` checks (audit, standards, UX) and the low-level
-  // structural `validateTransaction()` checks so templates can't silently
-  // produce JSON that the chain would reject. Findings go to stderr so
-  // stdout stays pure JSON for sign/broadcast pipelines; --json-only
-  // suppresses both for callers that want zero stderr noise.
+  // Build the envelope's `meta` payload + `warnings` array as we run
+  // each auto-check. Stderr commentary still streams for human UX (gated
+  // by --quiet / --json-only); the structured equivalents land in the
+  // envelope so agents don't have to scrape stderr text.
   //
-  // Auto-validate runs for BOTH collection and user-approval templates
-  // (both produce structurally validatable txs). Auto-review and
-  // metadata + simulate are gated below — review only fires for
-  // collection txs (collection-specific rules), and simulate is
-  // refused for approval-style msgs entirely.
   // `--quiet` (and `BB_QUIET=1`) suppresses commentary streams just like
   // `--json-only`, but stays scoped to commentary — actual errors still
   // emit. Use the same gate so the four banners below follow one rule.
   const suppressCommentary = !!opts.jsonOnly || isQuiet();
+  const meta: Record<string, unknown> = {};
+  const warnings: EnvelopeWarning[] = [];
 
-  if (!suppressCommentary && (isCollectionTx || isUserApprovalTx || isTransferTx)) {
-    // Static validation FIRST — if the JSON is structurally broken, the
-    // design review below is much less meaningful.
+  // --explain: run interpretTransaction and surface plain-English text.
+  // Always computed when applicable so agents see the explanation in
+  // meta.explanation; the stderr render is gated by --quiet for humans.
+  if (opts.explain && isCollectionTx) {
+    try {
+      const { interpretTransaction } = await import('../../core/interpret-transaction.js');
+      const explanation = interpretTransaction(data.value);
+      meta.explanation = explanation;
+      if (!isQuiet()) {
+        process.stderr.write('\n── Explanation ──\n' + explanation + '\n');
+      }
+    } catch (err) {
+      if (!suppressCommentary) {
+        process.stderr.write(`Explain skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+      }
+    }
+  }
+
+  // Auto-validate runs for collection / user-approval / transfer msgs
+  // — anything structurally validatable. Always computed (so agents see
+  // validation results in meta.validation); stderr render gated by quiet.
+  if (isCollectionTx || isUserApprovalTx || isTransferTx) {
     try {
       const { validateTransaction } = await import('../../core/validate.js');
       const wrapped = { messages: [data] };
       const vResult = validateTransaction(wrapped);
-      process.stderr.write('\n' + renderValidate(vResult, { stream: process.stderr, title: 'Auto-Validate' }) + '\n');
+      meta.validation = vResult;
+      for (const issue of vResult?.issues ?? []) {
+        warnings.push({
+          code: `validate.${(issue as any).code ?? 'issue'}`,
+          message: (issue as any).message ?? 'validation issue',
+          details: issue
+        });
+      }
+      if (!suppressCommentary) {
+        process.stderr.write('\n' + renderValidate(vResult, { stream: process.stderr, title: 'Auto-Validate' }) + '\n');
+      }
     } catch (err) {
-      process.stderr.write(`Validation skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+      if (!suppressCommentary) {
+        process.stderr.write(`Validation skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+      }
     }
   }
 
-  if (!suppressCommentary && isCollectionTx) {
+  if (isCollectionTx) {
     try {
       const { reviewCollection } = await import('../../core/review.js');
       // reviewCollection wants either a raw collection or a tx body with
       // messages[]. Templates emit a single Msg, so wrap it.
       const result = reviewCollection({ messages: [data] });
-      process.stderr.write('\n' + renderReview(result, { stream: process.stderr, title: 'Auto-Review' }) + '\n');
+      meta.review = result;
+      // Map each finding into the envelope's warnings array so callers
+      // that only inspect `.warnings` see the design review surface too.
+      for (const finding of result?.findings ?? []) {
+        warnings.push({
+          code: finding.code,
+          message: (finding.title?.en ?? finding.code),
+          details: finding
+        });
+      }
+      if (!suppressCommentary) {
+        process.stderr.write('\n' + renderReview(result, { stream: process.stderr, title: 'Auto-Review' }) + '\n');
+      }
     } catch (err) {
-      process.stderr.write(`Review skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+      if (!suppressCommentary) {
+        process.stderr.write(`Review skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+      }
     }
 
-    // Resolved Metadata — the final on-chain `(uri, customData)` pairs
-    // for every metadata-bearing entity in this tx, after the two-mode
-    // resolution. Helps the user verify they got the mode they expected
-    // (URI mode keeps customData empty; inline mode keeps uri empty and
-    // surfaces a parsed name/image preview from customData).
+    // Resolved Metadata — final on-chain (uri, customData) pairs for
+    // every metadata-bearing entity. We also surface a `metadataToUpload`
+    // list (URI-mode entries only) — that's the actionable subset agents
+    // need to push to IPFS *before* deploy. Per
+    // [[feedback_ai_cli_first_exposure]] off-chain storage stays
+    // website-only, so an agent can't IPFS-upload directly; the list
+    // tells them exactly which URIs to feed through the upload UI.
     try {
-      process.stderr.write('\n' + renderResolvedMetadata(data, { stream: process.stderr }) + '\n');
+      const entries: ResolvedEntry[] = collectResolvedEntries(data);
+      meta.resolvedMetadata = entries;
+      meta.metadataToUpload = entries
+        .filter((e) => e.uri.length > 0)
+        .map((e) => ({ kind: e.kind, location: e.location, uri: e.uri }));
+      if (!suppressCommentary) {
+        process.stderr.write('\n' + renderResolvedMetadata(data, { stream: process.stderr }) + '\n');
+      }
     } catch (err) {
-      process.stderr.write(`Resolved-metadata preview skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+      if (!suppressCommentary) {
+        process.stderr.write(`Resolved-metadata preview skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+      }
     }
-
   }
 
   // Auto-Simulate — opt-in via --simulate. Posts to the BitBadges API's
@@ -220,23 +250,26 @@ async function emit(
   // Lives OUTSIDE the collection-only block so transfers (which can't
   // be reviewed but CAN be simulated end-to-end) reach it. User-approval
   // txs get a skip note further down.
-  if (!suppressCommentary && opts.simulate && (isCollectionTx || isTransferTx)) {
+  if (opts.simulate && (isCollectionTx || isTransferTx)) {
     try {
       const { getApiUrl, getApiKeyForNetwork } = await import('../utils/io.js');
       const apiKey = getApiKeyForNetwork(opts);
       if (!apiKey) {
-        process.stderr.write(
-          '\n' +
-            renderSimulate(
-              {
-                success: false,
-                error:
-                  'Auto-Simulate skipped — no API key. Set BITBADGES_API_KEY or run `bitbadges-cli config set apiKey <key>`.'
-              },
-              { stream: process.stderr, title: 'Auto-Simulate' }
-            ) +
-            '\n'
-        );
+        const skipResult = {
+          success: false,
+          error:
+            'Auto-Simulate skipped — no API key. Set BITBADGES_API_KEY or run `bitbadges-cli config set apiKey <key>`.'
+        };
+        meta.simulate = skipResult;
+        warnings.push({
+          code: 'simulate.skipped',
+          message: skipResult.error
+        });
+        if (!suppressCommentary) {
+          process.stderr.write(
+            '\n' + renderSimulate(skipResult, { stream: process.stderr, title: 'Auto-Simulate' }) + '\n'
+          );
+        }
       } else {
         const { simulateMessages } = await import('../../builder/tools/queries/simulateTransaction.js');
         const { prefetchSimulateCollections } = await import('../utils/simulateSymbols.js');
@@ -249,23 +282,28 @@ async function emit(
           apiKey,
           apiUrl: getApiUrl(opts)
         });
-        const collectionCache = await prefetchSimulateCollections(result, {
-          apiKey,
-          apiUrl: getApiUrl(opts)
-        });
-        process.stderr.write(
-          '\n' +
-            renderSimulate(result, {
-              stream: process.stderr,
-              title: 'Auto-Simulate',
-              events: opts.events ? 'full' : 'count',
-              collectionCache
-            }) +
-            '\n'
-        );
+        meta.simulate = result;
+        if (!suppressCommentary) {
+          const collectionCache = await prefetchSimulateCollections(result, {
+            apiKey,
+            apiUrl: getApiUrl(opts)
+          });
+          process.stderr.write(
+            '\n' +
+              renderSimulate(result, {
+                stream: process.stderr,
+                title: 'Auto-Simulate',
+                events: opts.events ? 'full' : 'count',
+                collectionCache
+              }) +
+              '\n'
+          );
+        }
       }
     } catch (err) {
-      process.stderr.write(`Simulation skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+      if (!suppressCommentary) {
+        process.stderr.write(`Simulation skipped: ${err instanceof Error ? err.message : String(err)}\n`);
+      }
     }
   }
 
@@ -274,11 +312,31 @@ async function emit(
   // false. Approval msgs already get the Auto-Validate run above; we
   // print the skip note once so the user understands why no gas is
   // shown.
-  if (!opts.jsonOnly && opts.simulate && isUserApprovalTx) {
-    process.stderr.write(
-      '\nAuto-Simulate skipped — wrap user-level approvals inside an alternative approval message to simulate end-to-end. Auto-Validate ran above.\n'
-    );
+  if (opts.simulate && isUserApprovalTx) {
+    warnings.push({
+      code: 'simulate.unsupported',
+      message:
+        'Auto-Simulate skipped — wrap user-level approvals inside an alternative approval message to simulate end-to-end.'
+    });
+    if (!suppressCommentary) {
+      process.stderr.write(
+        '\nAuto-Simulate skipped — wrap user-level approvals inside an alternative approval message to simulate end-to-end. Auto-Validate ran above.\n'
+      );
+    }
   }
+
+  // Emit the single envelope last so the human-eye lands on the JSON
+  // verdict after the streamed commentary. Stdout flushes synchronously
+  // for pipes/files and line-buffered for TTYs, so the visible order
+  // stays stable across both cases. The data slot remains the unmodified
+  // {typeUrl, value} msg so `bb build | bb deploy` keeps working with
+  // zero envelope-aware parsing on the deploy side.
+  emitEnvelope(outData, {
+    condensed: opts.condensed,
+    outputFile: opts.outputFile,
+    warnings: warnings.length > 0 ? warnings : undefined,
+    meta: Object.keys(meta).length > 0 ? meta : undefined
+  });
 
   // ── --deploy-with-browser ───────────────────────────────────────────────
   // Composes build + browser-bridge broadcast in one step. Equivalent
