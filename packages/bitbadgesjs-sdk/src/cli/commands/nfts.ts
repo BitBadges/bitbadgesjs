@@ -27,6 +27,8 @@ import {
 } from '../utils/indexer-options.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 import { requireBbDenom } from '../utils/denom.js';
+import { resolveAmount } from '../utils/amount.js';
+import { parseTimeFlag } from '../utils/time.js';
 import {
   buildOrderbookBidApproval,
   buildOrderbookListingApproval,
@@ -49,12 +51,13 @@ addOutputFlags(
         'Emit MsgSetIncomingApproval that places a bid on a token. Omit --token-id for a collection-wide bid (any token in the collection).'
       )
       .argument('<collection-id>', 'Collection ID')
-      .requiredOption('--creator <address>', 'Bidder address (bb1.../0x — auto-normalized)')
-      .requiredOption('--price <amount>', 'Bid amount in base units')
+      .requiredOption('--creator <address>', 'Bidder address (bb1...) — strict; run `bb account convert` for 0x')
+      .requiredOption('--price <amount>', 'Bid amount. Display units for symbol denoms (USDC → 1.5 USDC), base units for chain denoms (ubadge / ibc/...). Use --base-units to force base-units.')
       .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+      .option('--base-units', 'Treat --price as already-in-base-units')
       .option('--token-id <n>', 'Specific token ID to bid on (omit for collection-wide bid)')
       .option('--token-amount <n>', 'Number of tokens (default 1)', '1')
-      .option('--expiry <ms>', 'Bid expiry ms-since-epoch (default: 7 days from now)')
+      .option('--expiry <when>', 'Bid expiry: ms-since-epoch (1748140800000) or duration (7d, 24h, monthly). Default 7d.')
       .option('--approval-id <id>', 'Override the random approval id')
       .option('--max-fills <n>', 'Cap on partial fills (default 1)', '1')
   )
@@ -62,20 +65,25 @@ addOutputFlags(
   async (
     collectionId: string,
     opts: NetworkFlags & OutputFlags & {
-      creator: string; price: string; denom: string;
+      creator: string; price: string; denom: string; baseUnits?: boolean;
       tokenId?: string; tokenAmount?: string; expiry?: string; approvalId?: string; maxFills?: string;
     }
   ) => {
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
-      const paymentDenom = requireBbDenom(opts.denom, '--denom');
-      const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const { denom: paymentDenom, amount: paymentAmountStr } = resolveAmount(
+        opts.price,
+        opts.denom,
+        Boolean(opts.baseUnits),
+        { amountFlag: '--price', denomFlag: '--denom' }
+      );
+      const end = opts.expiry ? parseTimeFlag(opts.expiry, '--expiry') : BigInt(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
       const approval = buildOrderbookBidApproval({
         address: creator,
         tokenId: opts.tokenId ? BigInt(opts.tokenId) : undefined,
         tokenAmount: BigInt(opts.tokenAmount ?? '1'),
-        paymentAmount: BigInt(opts.price),
+        paymentAmount: BigInt(paymentAmountStr),
         paymentDenom,
         transferTimes: UintRangeArray.From([{ start: 1n, end }]),
         approvalId,
@@ -94,33 +102,39 @@ addOutputFlags(
       .command('list')
       .description('Emit MsgSetOutgoingApproval that lists a token for sale.')
       .argument('<collection-id>', 'Collection ID')
-      .requiredOption('--creator <address>', 'Seller address (bb1.../0x — auto-normalized)')
+      .requiredOption('--creator <address>', 'Seller address (bb1...) — strict; run `bb account convert` for 0x')
       .requiredOption('--token-id <n>', 'Token ID to list')
-      .requiredOption('--price <amount>', 'Asking price in base units')
+      .requiredOption('--price <amount>', 'Asking price. Display units for symbol denoms, base units for chain denoms. Use --base-units to force base-units.')
       .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+      .option('--base-units', 'Treat --price as already-in-base-units')
       .option('--token-amount <n>', 'Number of tokens (default 1)', '1')
       .option('--max-sales <n>', 'Allow multiple fills of this listing (default 1)', '1')
-      .option('--expiry <ms>', 'Listing expiry ms-since-epoch (default: 30 days from now)')
+      .option('--expiry <when>', 'Listing expiry: ms-since-epoch or duration (7d, 30d, monthly). Default 30d.')
       .option('--approval-id <id>', 'Override the random approval id')
   )
 ).action(
   async (
     collectionId: string,
     opts: NetworkFlags & OutputFlags & {
-      creator: string; tokenId: string; price: string; denom: string;
+      creator: string; tokenId: string; price: string; denom: string; baseUnits?: boolean;
       tokenAmount?: string; maxSales?: string; expiry?: string; approvalId?: string;
     }
   ) => {
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
-      const paymentDenom = requireBbDenom(opts.denom, '--denom');
-      const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      const { denom: paymentDenom, amount: paymentAmountStr } = resolveAmount(
+        opts.price,
+        opts.denom,
+        Boolean(opts.baseUnits),
+        { amountFlag: '--price', denomFlag: '--denom' }
+      );
+      const end = opts.expiry ? parseTimeFlag(opts.expiry, '--expiry') : BigInt(Date.now() + 30 * 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
       const approval = buildOrderbookListingApproval({
         address: creator,
         tokenId: BigInt(opts.tokenId),
         tokenAmount: BigInt(opts.tokenAmount ?? '1'),
-        paymentAmount: BigInt(opts.price),
+        paymentAmount: BigInt(paymentAmountStr),
         paymentDenom,
         transferTimes: UintRangeArray.From([{ start: 1n, end }]),
         approvalId,

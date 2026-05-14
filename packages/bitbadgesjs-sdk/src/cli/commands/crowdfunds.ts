@@ -11,6 +11,7 @@
 import { Command } from 'commander';
 import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
+import { resolveAmount } from '../utils/amount.js';
 import { emit, emitError } from '../utils/envelope.js';
 import {
   doesCollectionFollowCrowdfundProtocol,
@@ -206,16 +207,23 @@ addOutputFlags(
       .command('contribute')
       .description('Emit a 2-msg tx that contributes <amount> to the crowdfund. Pipe to `bb deploy`.')
       .argument('<collection-id>', 'Crowdfund collection ID')
-      .requiredOption('--creator <address>', 'Contributor address (bb1.../0x — auto-normalized)')
-      .requiredOption('--amount <n>', 'Amount to contribute in base units (denom is the crowdfund\'s configured deposit denom)')
+      .requiredOption('--creator <address>', 'Contributor address (bb1...) — strict; run `bb account convert` for 0x')
+      .requiredOption('--amount <n>', 'Amount to contribute. Display units when the crowdfund\'s deposit denom is a registered symbol; base units when it\'s a chain denom. Use --base-units to force base-units.')
+      .option('--base-units', 'Treat --amount as already-in-base-units')
   )
-).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; amount: string }) => {
+).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; amount: string; baseUnits?: boolean }) => {
   try {
     const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'crowdfund contribute');
     const details = extractCrowdfundDetails(collection.collectionApprovals)!;
-    const tx = buildContributeCrowdfundTx(creator, String(collectionId), details, BigInt(opts.amount));
+    const { amount: amountStr } = resolveAmount(
+      opts.amount,
+      details.depositDenom,
+      Boolean(opts.baseUnits),
+      { amountFlag: '--amount', denomFlag: 'crowdfund deposit denom' }
+    );
+    const tx = buildContributeCrowdfundTx(creator, String(collectionId), details, BigInt(amountStr));
     // Single-msg per the helper output; bb deploy will accept either shape.
     emit(tx.messages[0], opts);
   } catch (err) { emitError(err); }
@@ -260,20 +268,27 @@ addOutputFlags(
       .command('refund')
       .description('Contributor refund (after deadline if goal not met): emit single MsgTransferTokens. Pipe to `bb deploy`.')
       .argument('<collection-id>', 'Crowdfund collection ID')
-      .requiredOption('--creator <address>', 'Contributor address (bb1.../0x — auto-normalized)')
-      .requiredOption('--amount <n>', 'Amount to refund in base units')
+      .requiredOption('--creator <address>', 'Contributor address (bb1...) — strict; run `bb account convert` for 0x')
+      .requiredOption('--amount <n>', 'Amount to refund. Display units when the crowdfund\'s deposit denom is a registered symbol; base units when it\'s a chain denom. Use --base-units to force base-units.')
+      .option('--base-units', 'Treat --amount as already-in-base-units')
   )
-).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; amount: string }) => {
+).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; amount: string; baseUnits?: boolean }) => {
   try {
     const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'crowdfund refund');
     const details = extractCrowdfundDetails(collection.collectionApprovals)!;
+    const { amount: amountStr } = resolveAmount(
+      opts.amount,
+      details.depositDenom,
+      Boolean(opts.baseUnits),
+      { amountFlag: '--amount', denomFlag: 'crowdfund deposit denom' }
+    );
     const now = BigInt(Date.now());
     if (now <= details.deadlineTime) {
       process.stderr.write(`Warning: deadline not yet passed (deadline=${details.deadlineTime}, now=${now}). Refund will be rejected.\n`);
     }
-    emit(buildRefundCrowdfundMsg(creator, String(collectionId), details, BigInt(opts.amount)), opts);
+    emit(buildRefundCrowdfundMsg(creator, String(collectionId), details, BigInt(amountStr)), opts);
   } catch (err) { emitError(err); }
 });
 

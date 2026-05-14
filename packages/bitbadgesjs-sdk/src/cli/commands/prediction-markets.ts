@@ -24,7 +24,8 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
-import { requireBbDenom } from '../utils/denom.js';
+import { resolveAmount } from '../utils/amount.js';
+import { parseTimeFlag } from '../utils/time.js';
 import {
   validatePredictionMarketCollection,
   classifySettlementApproval,
@@ -188,13 +189,18 @@ addOutputFlags(
 function buyAction(side: 'yes' | 'no') {
   return async (
     collectionId: string,
-    opts: NetworkFlags & OutputFlags & { creator: string; tokenAmount: string; paymentAmount: string; denom: string; expiry?: string; approvalId?: string }
+    opts: NetworkFlags & OutputFlags & { creator: string; tokenAmount: string; paymentAmount: string; denom: string; baseUnits?: boolean; expiry?: string; approvalId?: string }
   ) => {
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
-      const paymentDenom = requireBbDenom(opts.denom, '--denom');
+      const { denom: paymentDenom, amount: paymentAmountStr } = resolveAmount(
+        opts.paymentAmount,
+        opts.denom,
+        Boolean(opts.baseUnits),
+        { amountFlag: '--payment-amount', denomFlag: '--denom' }
+      );
       await fetchCollection(collectionId, opts).then((c) => validateOrExit(c, `prediction-markets buy-${side}`));
-      const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 24 * 60 * 60 * 1000);
+      const end = opts.expiry ? parseTimeFlag(opts.expiry, '--expiry') : BigInt(Date.now() + 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
       const approval = buildPredictionMarketBuyIntent({
         address: creator,
@@ -202,7 +208,7 @@ function buyAction(side: 'yes' | 'no') {
         tokenId: side === 'yes' ? 1n : 2n,
         tokenAmount: BigInt(opts.tokenAmount),
         paymentDenom,
-        paymentAmount: BigInt(opts.paymentAmount),
+        paymentAmount: BigInt(paymentAmountStr),
         transferTimes: UintRangeArray.From([{ start: 1n, end }]),
         approvalId
       });
@@ -214,13 +220,18 @@ function buyAction(side: 'yes' | 'no') {
 function sellAction(side: 'yes' | 'no') {
   return async (
     collectionId: string,
-    opts: NetworkFlags & OutputFlags & { creator: string; tokenAmount: string; paymentAmount: string; denom: string; expiry?: string; approvalId?: string }
+    opts: NetworkFlags & OutputFlags & { creator: string; tokenAmount: string; paymentAmount: string; denom: string; baseUnits?: boolean; expiry?: string; approvalId?: string }
   ) => {
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
-      const paymentDenom = requireBbDenom(opts.denom, '--denom');
+      const { denom: paymentDenom, amount: paymentAmountStr } = resolveAmount(
+        opts.paymentAmount,
+        opts.denom,
+        Boolean(opts.baseUnits),
+        { amountFlag: '--payment-amount', denomFlag: '--denom' }
+      );
       await fetchCollection(collectionId, opts).then((c) => validateOrExit(c, `prediction-markets sell-${side}`));
-      const end = opts.expiry ? BigInt(opts.expiry) : BigInt(Date.now() + 24 * 60 * 60 * 1000);
+      const end = opts.expiry ? parseTimeFlag(opts.expiry, '--expiry') : BigInt(Date.now() + 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
       const approval = buildPredictionMarketSellIntent({
         address: creator,
@@ -228,7 +239,7 @@ function sellAction(side: 'yes' | 'no') {
         tokenId: side === 'yes' ? 1n : 2n,
         tokenAmount: BigInt(opts.tokenAmount),
         paymentDenom,
-        paymentAmount: BigInt(opts.paymentAmount),
+        paymentAmount: BigInt(paymentAmountStr),
         transferTimes: UintRangeArray.From([{ start: 1n, end }]),
         approvalId
       });
@@ -243,11 +254,12 @@ const tradeOpts = (cmd: Command, side: 'yes' | 'no', dir: 'buy' | 'sell') =>
       `Emit Msg${dir === 'buy' ? 'SetIncomingApproval' : 'SetOutgoingApproval'} that ${dir === 'buy' ? 'buys' : 'sells'} ${side.toUpperCase()} tokens (token-id ${side === 'yes' ? '1' : '2'}). Pipe to \`bb deploy\`.`
     )
     .argument('<collection-id>', 'Prediction Market collection ID')
-    .requiredOption('--creator <address>', 'Trader address (bb1.../0x — auto-normalized)')
-    .requiredOption('--token-amount <n>', `Quantity of ${side.toUpperCase()} tokens to ${dir}`)
-    .requiredOption('--payment-amount <n>', 'Payment side amount in base units')
+    .requiredOption('--creator <address>', 'Trader address (bb1...) — strict; run `bb account convert` for 0x')
+    .requiredOption('--token-amount <n>', `Quantity of ${side.toUpperCase()} tokens to ${dir} (always base units of the on-chain token id)`)
+    .requiredOption('--payment-amount <n>', 'Payment side amount. Display units for symbol denoms, base units for chain denoms. Use --base-units to force base-units.')
     .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...) or badgeslp:* alias.')
-    .option('--expiry <ms>', 'Approval expiry (ms-since-epoch). Defaults to 24h from now.')
+    .option('--base-units', 'Treat --payment-amount as already-in-base-units')
+    .option('--expiry <when>', 'Approval expiry: ms-since-epoch or duration (24h, 7d). Default 24h.')
     .option('--approval-id <id>', 'Override the random approval id');
 
 addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-yes'), 'yes', 'buy'))).action(buyAction('yes'));

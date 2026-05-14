@@ -15,7 +15,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
-import { requireBbDenom } from '../utils/denom.js';
+import { resolveAmount } from '../utils/amount.js';
 import {
   doesCollectionFollowAuctionProtocol,
   validateAuctionCollection,
@@ -140,19 +140,25 @@ addOutputFlags(
       .command('place-bid')
       .description('Emit MsgSetIncomingApproval that places a bid on the auction. Pipe to `bb deploy`.')
       .argument('<collection-id>', 'Auction collection ID')
-      .requiredOption('--creator <address>', 'Bidder address (bb1.../0x — auto-normalized)')
-      .requiredOption('--amount <n>', 'Bid amount in base units')
+      .requiredOption('--creator <address>', 'Bidder address (bb1...) — strict; run `bb account convert` for 0x')
+      .requiredOption('--amount <n>', 'Bid amount. Display units when --denom is a symbol (BADGE → 1.5 BADGE), base units when --denom is a chain denom (ubadge / ibc/...). Use --base-units to force base-units.')
       .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+      .option('--base-units', 'Treat --amount as already-in-base-units')
       .option('--approval-id <id>', 'Approval id for the bid (random by default)')
   )
 ).action(
   async (
     collectionId: string,
-    opts: NetworkFlags & OutputFlags & { creator: string; amount: string; denom: string; approvalId?: string }
+    opts: NetworkFlags & OutputFlags & { creator: string; amount: string; denom: string; baseUnits?: boolean; approvalId?: string }
   ) => {
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
-      const paymentDenom = requireBbDenom(opts.denom, '--denom');
+      const { denom: paymentDenom, amount: paymentAmountStr } = resolveAmount(
+        opts.amount,
+        opts.denom,
+        Boolean(opts.baseUnits),
+        { amountFlag: '--amount', denomFlag: '--denom' }
+      );
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'auctions place-bid');
       const details = extractAuctionDetails(collection.collectionApprovals);
@@ -169,7 +175,7 @@ addOutputFlags(
         tokenId: 1n,
         tokenAmount: 1n,
         paymentDenom,
-        paymentAmount: BigInt(opts.amount),
+        paymentAmount: BigInt(paymentAmountStr),
         transferTimes,
         approvalId
       });

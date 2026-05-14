@@ -32,6 +32,8 @@ import {
 } from '../utils/indexer-options.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 import { requireBbDenom } from '../utils/denom.js';
+import { resolveAmount } from '../utils/amount.js';
+import { parseTimeFlag } from '../utils/time.js';
 import {
   buildIntentApproval,
   buildIntentFillTx,
@@ -165,12 +167,13 @@ addOutputFlags(
         )
         .requiredOption('--creator <address>', 'Intent creator address (bb1.../0x — auto-normalized)')
         .requiredOption('--pay-denom <symbol|denom>', 'Denom you OFFER. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
-        .requiredOption('--pay-amount <amount>', 'Amount of pay denom in base units')
+        .requiredOption('--pay-amount <amount>', 'Amount of pay denom. Display units for symbol denoms, base units for chain denoms. Use --base-units to force base-units.')
         .requiredOption('--receive-denom <symbol|denom>', 'Denom you EXPECT in return. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
-        .requiredOption('--receive-amount <amount>', 'Amount of receive denom in base units')
+        .requiredOption('--receive-amount <amount>', 'Amount of receive denom. Display units for symbol denoms, base units for chain denoms.')
+        .option('--base-units', 'Treat --pay-amount and --receive-amount as already-in-base-units')
         .option(
-          '--valid-until <ms>',
-          'Optional expiration as ms-since-epoch (default: ~30 days from now)'
+          '--valid-until <when>',
+          'Optional expiration: ms-since-epoch or duration (24h, 7d, 30d, monthly). Default 30d.'
         )
         .option('--approval-id <id>', 'Override the auto-generated approval id (random hex by default)')
     )
@@ -185,20 +188,32 @@ addOutputFlags(
         payAmount: string;
         receiveDenom: string;
         receiveAmount: string;
+        baseUnits?: boolean;
         validUntil?: string;
         approvalId?: string;
       }
   ) => {
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
-      const payDenom = requireBbDenom(opts.payDenom, '--pay-denom');
-      const receiveDenom = requireBbDenom(opts.receiveDenom, '--receive-denom');
+      const baseUnits = Boolean(opts.baseUnits);
+      const { denom: payDenom, amount: payAmountStr } = resolveAmount(
+        opts.payAmount,
+        opts.payDenom,
+        baseUnits,
+        { amountFlag: '--pay-amount', denomFlag: '--pay-denom' }
+      );
+      const { denom: receiveDenom, amount: receiveAmountStr } = resolveAmount(
+        opts.receiveAmount,
+        opts.receiveDenom,
+        baseUnits,
+        { amountFlag: '--receive-amount', denomFlag: '--receive-denom' }
+      );
       if (payDenom === receiveDenom) {
         process.stderr.write('Error: --pay-denom and --receive-denom must differ.\n');
         process.exit(2);
       }
       const validUntil = opts.validUntil
-        ? BigInt(opts.validUntil)
+        ? parseTimeFlag(opts.validUntil, '--valid-until')
         : BigInt(Date.now() + 30 * 24 * 60 * 60 * 1000);
       const collectionId = resolveCollectionId(opts);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
@@ -206,9 +221,9 @@ addOutputFlags(
       const approval = buildIntentApproval({
         address: creator,
         payDenom,
-        payAmount: BigInt(opts.payAmount),
+        payAmount: BigInt(payAmountStr),
         receiveDenom,
-        receiveAmount: BigInt(opts.receiveAmount),
+        receiveAmount: BigInt(receiveAmountStr),
         transferTimes: UintRangeArray.From([{ start: 1n, end: validUntil }]),
         approvalId
       });
