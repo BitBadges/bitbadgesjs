@@ -84,7 +84,8 @@ describe('handleLookupTokenInfo', () => {
       const denom = 'ibc/0123456789ABCDEF';
       const res = handleLookupTokenInfo({ query: denom });
       expect(res.success).toBe(true);
-      expect(res.tokenInfo!.backingAddress.length).toBeGreaterThan(4);
+      expect(res.tokenInfo!.backingAddress).toBeDefined();
+      expect(res.tokenInfo!.backingAddress!.length).toBeGreaterThan(4);
     });
   });
 

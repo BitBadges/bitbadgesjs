@@ -23,7 +23,7 @@ describe('priceCommand shape', () => {
   it('exposes network + output flags', () => {
     const longFlags = (priceCommand.options as any[]).map((o) => o.long);
     expect(longFlags).toEqual(
-      expect.arrayContaining(['--testnet', '--local', '--url', '--api-key', '--output-file', '--format', '--json'])
+      expect.arrayContaining(['--testnet', '--local', '--url', '--api-key', '--output-file', '--condensed'])
     );
   });
 

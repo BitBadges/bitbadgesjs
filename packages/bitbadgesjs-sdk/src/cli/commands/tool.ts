@@ -60,20 +60,21 @@ export const toolCommand = new Command('tool')
       process.env.BITBADGES_API_URL = 'https://api-testnet.bitbadges.io';
     }
 
+    const { emit, emitError } = await import('../utils/envelope.js');
+
     if (!toolRegistry[toolName]) {
       const available = Object.keys(toolRegistry).sort().join(', ');
-      process.stderr.write(`Unknown tool: ${toolName}\nAvailable tools: ${available}\n`);
-      process.exitCode = 1;
-      return;
+      emitError(new Error(`Unknown tool: ${toolName}. Available tools: ${available}`), {
+        code: 'unknown_tool',
+        exitCode: 1
+      });
     }
 
     let parsedArgs: any;
     try {
       parsedArgs = parseArgs(opts.args, opts.argsFile);
     } catch (err) {
-      process.stderr.write(`${(err as Error).message}\n`);
-      process.exitCode = 1;
-      return;
+      emitError(err, { code: 'invalid_args', exitCode: 1 });
     }
 
     const sessionId = resolveSessionId(parsedArgs, opts.session);
@@ -82,9 +83,7 @@ export const toolCommand = new Command('tool')
       try {
         loadSessionFromDisk(sessionId);
       } catch (err) {
-        process.stderr.write(`${(err as Error).message}\n`);
-        process.exitCode = 1;
-        return;
+        emitError(err, { code: 'session_load_failed', exitCode: 1 });
       }
       if (parsedArgs && typeof parsedArgs === 'object' && parsedArgs.sessionId === undefined) {
         parsedArgs.sessionId = sessionId;
@@ -101,11 +100,16 @@ export const toolCommand = new Command('tool')
       }
     }
 
-    if (opts.raw) {
-      process.stdout.write(JSON.stringify(result.result, null, 2) + '\n');
-    } else {
-      process.stdout.write(result.text + '\n');
-    }
+    // The tool wraps its return value in `{result, text, isError}`. We
+    // surface the structured `result` as the envelope's `data` payload
+    // and stash the human-readable `text` on `meta.text` so agents that
+    // want either flavor have one shape to parse. `--raw` is preserved
+    // as a no-op flag (deprecated; envelope.data IS the structured
+    // result now) — keep it accepted for one release to avoid breaking
+    // scripts that pass it.
+    emit(result.result, {
+      meta: result.text ? { text: result.text } : undefined
+    });
 
     // Tools may surface failures two ways:
     //   1. `result.isError = true` (the wrapper throws / rejects)

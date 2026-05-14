@@ -11,10 +11,8 @@ import { Command } from 'commander';
 import { addNetworkOptions, resolveNetwork, type NetworkOptions } from '../utils/io.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import {
-  Envelope,
-  addFormatOptions,
+  addOutputOptions,
   errorEnvelope,
-  resolveFormat,
   successEnvelope,
   writeJsonEnvelope
 } from '../utils/envelope.js';
@@ -218,30 +216,6 @@ function dataFromResult(hash: string, result: FetchResult): TxStatusData {
   return shapeTxData(hash, result.txResponse);
 }
 
-function renderText(data: TxStatusData): string {
-  const lines: string[] = [];
-  const status = data.code === 0 ? 'committed' : 'failed';
-  lines.push(`Status:    ${status}  (code ${data.code}${data.codespace ? `, ${data.codespace}` : ''})`);
-  lines.push(`Via:       ${data.via === 'evm' ? 'EVM RPC' : 'Cosmos LCD'}`);
-  lines.push(`Hash:      ${data.hash}`);
-  if (data.height) lines.push(`Height:    ${data.height}`);
-  if (data.gasUsed) lines.push(`Gas used:  ${data.gasUsed}${data.gasWanted ? ` / ${data.gasWanted}` : ''}`);
-  if (data.timestamp) lines.push(`Timestamp: ${data.timestamp}`);
-  if (data.collectionId) lines.push(`Collection: ${data.collectionId}`);
-  if (data.code !== 0 && data.log) lines.push('', `Log: ${data.log}`);
-  return lines.join('\n');
-}
-
-function emitEnvelope(env: Envelope<unknown>, format: 'json' | 'text', textRender?: () => string): void {
-  if (format === 'json') {
-    writeJsonEnvelope(env);
-  } else if (env.ok && textRender) {
-    process.stdout.write(textRender() + '\n');
-  } else if (!env.ok) {
-    process.stderr.write(`Error: ${env.error?.message ?? 'unknown'}\n`);
-  }
-}
-
 // ── tx (parent) ────────────────────────────────────────────────────────
 
 export const txCommand = new Command('tx').description(
@@ -250,23 +224,22 @@ export const txCommand = new Command('tx').description(
 
 // ── tx status ──────────────────────────────────────────────────────────
 
-addFormatOptions(
+addOutputOptions(
   addNetworkOptions(txCommand.command('status'))
     .description('Fetch one tx by hash. Tries Cosmos LCD first, falls through to EVM RPC for keccak256 hashes. Exit 0 on commit, 1 on chain-fail, 2 on RPC error / tx-not-found.')
     .argument('<hash>', 'Tx hash (Cosmos sha256 or EVM keccak256; with or without 0x prefix; case-insensitive)')
     .option('--node-url <url>', 'Chain LCD URL override (defaults to NETWORK_CONFIGS[network].nodeUrl)')
     .option('--evm-rpc-url <url>', 'EVM JSON-RPC URL override (defaults to NETWORK_CONFIGS[network].evmRpcUrl)')
-).action(async (hash: string, opts: NodeUrlOptions & { format?: string; json?: boolean }) => {
+).action(async (hash: string, opts: NodeUrlOptions & { condensed?: boolean; outputFile?: string }) => {
   const nodeUrl = getNodeUrl(opts);
   const evmRpcUrl = getEvmRpcUrl(opts);
-  const format = resolveFormat({ format: opts.format, json: opts.json });
   const normalized = normalizeHash(hash);
 
   let result: FetchResult;
   try {
     result = await fetchTxStatus(nodeUrl, evmRpcUrl, normalized);
   } catch (err: any) {
-    emitEnvelope(errorEnvelope('rpc_error', err?.message || String(err)), format);
+    writeJsonEnvelope(errorEnvelope('rpc_error', err?.message || String(err)), opts);
     process.exit(2);
   }
 
@@ -279,19 +252,18 @@ addFormatOptions(
     const hint = result.httpStatus === 404
       ? `Tx may not be indexed yet — try \`tx wait ${normalized} --timeout 60\`.`
       : undefined;
-    emitEnvelope(errorEnvelope(code, msg, result.errorBody, hint), format);
+    writeJsonEnvelope(errorEnvelope(code, msg, result.errorBody, hint), opts);
     process.exit(2);
   }
 
   const data = dataFromResult(normalized, result);
-  const env = successEnvelope(data);
-  emitEnvelope(env, format, () => renderText(data));
+  writeJsonEnvelope(successEnvelope(data), opts);
   process.exit(data.code === 0 ? 0 : 1);
 });
 
 // ── tx wait ────────────────────────────────────────────────────────────
 
-addFormatOptions(
+addOutputOptions(
   addNetworkOptions(txCommand.command('wait'))
     .description('Poll until a tx commits or fails. Tries Cosmos LCD first, falls through to EVM RPC. Exit 0 on commit, 1 on chain-fail, 2 on timeout.')
     .argument('<hash>', 'Tx hash (Cosmos sha256 or EVM keccak256; with or without 0x prefix; case-insensitive)')
@@ -302,11 +274,10 @@ addFormatOptions(
 ).action(
   async (
     hash: string,
-    opts: NodeUrlOptions & { format?: string; json?: boolean; timeout?: string; interval?: string }
+    opts: NodeUrlOptions & { condensed?: boolean; outputFile?: string; timeout?: string; interval?: string }
   ) => {
     const nodeUrl = getNodeUrl(opts);
     const evmRpcUrl = getEvmRpcUrl(opts);
-    const format = resolveFormat({ format: opts.format, json: opts.json });
     const normalized = normalizeHash(hash);
     const timeoutMs = Math.max(1, Number(opts.timeout || '60')) * 1000;
     const intervalMs = Math.max(500, Number(opts.interval || '2') * 1000);
@@ -324,7 +295,7 @@ addFormatOptions(
       }
       if (result.found) {
         const data = dataFromResult(normalized, result);
-        emitEnvelope(successEnvelope(data), format, () => renderText(data));
+        writeJsonEnvelope(successEnvelope(data), opts);
         process.exit(data.code === 0 ? 0 : 1);
       }
       // 404 = tx not yet indexed (on either side) → keep waiting.
@@ -334,13 +305,15 @@ addFormatOptions(
     }
 
     const msg = `Timed out after ${opts.timeout || '60'}s waiting for ${normalized}.${lastFetchErr ? ` Last error: ${lastFetchErr}` : ''}`;
-    const env = errorEnvelope(
-      'timeout',
-      msg,
-      { hash: normalized, timeoutSeconds: Number(opts.timeout || '60') },
-      `Re-run \`tx status ${normalized}\` later, or extend with --timeout <seconds>.`
+    writeJsonEnvelope(
+      errorEnvelope(
+        'timeout',
+        msg,
+        { hash: normalized, timeoutSeconds: Number(opts.timeout || '60') },
+        `Re-run \`tx status ${normalized}\` later, or extend with --timeout <seconds>.`
+      ),
+      opts
     );
-    emitEnvelope(env, format);
     process.exit(2);
   }
 );

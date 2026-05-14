@@ -30,6 +30,7 @@ import { Command } from 'commander';
 import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
 import { NETWORK_CONFIGS } from '../../signing/types.js';
 import { convertToBitBadgesAddress, convertToEthAddress, cosmosAddressFromPublicKey } from '../../address-converter/converter.js';
+import { emit, emitError } from '../utils/envelope.js';
 
 /**
  * Canonical message used for the recovery flow. Distinct from any
@@ -193,7 +194,7 @@ addNetworkOptions(genPubKeyCommand);
 genPubKeyCommand.action(async (opts) => {
   // --print-message: tell the user exactly what to sign.
   if (opts.printMessage) {
-    process.stdout.write(PUBKEY_DERIVATION_MESSAGE + '\n');
+    emit({ message: PUBKEY_DERIVATION_MESSAGE });
     return;
   }
 
@@ -203,8 +204,7 @@ genPubKeyCommand.action(async (opts) => {
     address = convertToBitBadgesAddress(String(opts.address));
     if (!address) throw new Error('not a valid address');
   } catch (err: any) {
-    process.stderr.write(`Invalid --address: ${err?.message || err}\n`);
-    process.exit(2);
+    emitError(err, { code: 'invalid_address', exitCode: 2 });
   }
 
   const networkName = resolveNetwork(opts);
@@ -242,26 +242,27 @@ genPubKeyCommand.action(async (opts) => {
       const warnSection = warnings.length > 0
         ? `Lookup warnings:\n${warnings.map((w) => `  - ${w}`).join('\n')}\n\n`
         : '';
-      process.stderr.write(
-        `Public key not found in the indexer (${baseUrl}) or chain LCD (${nodeUrl}).\n` +
-          'This typically means the address has never broadcast a tx or signed in.\n\n' +
-          warnSection +
-          'To derive the pub key offline:\n' +
-          '  1. Sign this exact message with your wallet (Keplr signArbitrary, hardware wallet, or any ADR-36-capable signer):\n\n' +
-          `    ${PUBKEY_DERIVATION_MESSAGE}\n\n` +
-          '  2. Re-run with the resulting base64 signature:\n' +
-          `     bitbadges-cli gen-pub-key --address ${address} --signature <base64>\n\n` +
-          '  Print the message verbatim with: bitbadges-cli gen-pub-key --print-message\n'
+      emitError(
+        new Error(
+          `Public key not found in the indexer (${baseUrl}) or chain LCD (${nodeUrl}).\n` +
+            'This typically means the address has never broadcast a tx or signed in.\n\n' +
+            warnSection +
+            'To derive the pub key offline:\n' +
+            '  1. Sign this exact message with your wallet (Keplr signArbitrary, hardware wallet, or any ADR-36-capable signer):\n\n' +
+            `    ${PUBKEY_DERIVATION_MESSAGE}\n\n` +
+            '  2. Re-run with the resulting base64 signature:\n' +
+            `     bitbadges-cli gen-pub-key --address ${address} --signature <base64>\n\n` +
+            '  Print the message verbatim with: bitbadges-cli gen-pub-key --print-message'
+        ),
+        { code: 'pubkey_not_found', exitCode: 2 }
       );
-      process.exit(2);
     }
     const message = String(opts.message ?? PUBKEY_DERIVATION_MESSAGE);
     try {
       pubKey = await recoverPubKey(message, String(opts.signature), address);
       source = 'signature';
     } catch (err: any) {
-      process.stderr.write(`${err?.message || err}\n`);
-      process.exit(1);
+      emitError(err, { code: 'pubkey_recovery_failed', exitCode: 1 });
     }
   }
 
@@ -275,10 +276,5 @@ genPubKeyCommand.action(async (opts) => {
     // Some addresses (e.g. derived from non-secp256k1 keys) don't have a stable EVM form. Best effort.
   }
 
-  process.stdout.write(JSON.stringify({
-    pubKey,
-    bb1Address,
-    ethAddress,
-    source,
-  }, null, 2) + '\n');
+  emit({ pubKey, bb1Address, ethAddress, source });
 });

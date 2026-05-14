@@ -13,6 +13,7 @@ import * as fs from 'fs';
 import { Command } from 'commander';
 import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
 import { bridgeSign, resolveFrontendUrl } from '../auth/browser-bridge.js';
+import { emit, emitError, commentary } from '../utils/envelope.js';
 
 function readMessage(opts: { message?: string; messageFile?: string; positional?: string }): string {
   if (opts.message) return opts.message;
@@ -46,8 +47,7 @@ signWithBrowserCommand.action(async (positional: string | undefined, opts: any) 
   try {
     message = readMessage({ message: opts.message, messageFile: opts.messageFile, positional });
   } catch (err: any) {
-    process.stderr.write(`${err?.message || err}\n`);
-    process.exit(2);
+    emitError(err, { code: 'invalid_input', exitCode: 2 });
   }
 
   const networkName = resolveNetwork(opts);
@@ -56,12 +56,12 @@ signWithBrowserCommand.action(async (positional: string | undefined, opts: any) 
   const frontendUrl = resolveFrontendUrl(networkName, opts.frontendUrl);
   const requestedTimeoutSec = opts.timeout ? Math.min(1800, Math.max(60, Number(opts.timeout))) : 300;
 
-  process.stderr.write(`\nOpening browser to ${frontendUrl}/sign for wallet signature...\n`);
+  commentary(`\nOpening browser to ${frontendUrl}/sign for wallet signature...`);
 
   try {
     const result = await bridgeSign({
       mode: 'msg',
-      payload: { message, expectedAddress: opts.expectedAddress },
+      payload: { message: message!, expectedAddress: opts.expectedAddress },
       baseUrl,
       frontendUrl,
       apiKey,
@@ -70,21 +70,24 @@ signWithBrowserCommand.action(async (positional: string | undefined, opts: any) 
       port: opts.port ? Number(opts.port) : undefined,
     });
     if (result.error) {
-      process.stderr.write(`Sign cancelled or rejected: ${result.error}\n`);
-      process.exit(1);
+      emitError(new Error(`Sign cancelled or rejected: ${result.error}`), {
+        code: 'sign_rejected',
+        exitCode: 1
+      });
     }
     if (!result.signature) {
-      process.stderr.write('Browser bridge returned no signature.\n');
-      process.exit(1);
+      emitError(new Error('Browser bridge returned no signature.'), {
+        code: 'sign_failed',
+        exitCode: 1
+      });
     }
-    process.stdout.write(JSON.stringify({
+    emit({
       signature: result.signature,
       address: result.address,
       publicKey: result.publicKey,
-      chain: result.chain,
-    }, null, 2) + '\n');
+      chain: result.chain
+    });
   } catch (err: any) {
-    process.stderr.write(`Browser sign failed: ${err?.message || err}\n`);
-    process.exit(1);
+    emitError(err, { code: 'browser_sign_failed', exitCode: 1 });
   }
 });

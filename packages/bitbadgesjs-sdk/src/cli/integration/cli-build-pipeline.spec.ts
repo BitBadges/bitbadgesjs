@@ -245,7 +245,7 @@ describe('cli build pipeline integration', () => {
       // Use --depth structural; full check on a default smart-token flags
       // a CRITICAL "forceful transfers not locked" review finding which
       // would exit 2 even though the validate section is clean.
-      const out = runCli(['check', tmp, '--json', '--depth', 'structural']);
+      const out = runCli(['check', tmp, '--depth', 'structural']);
       expect(out.exitCode).toBe(0);
       // structural depth returns the validate section directly (not wrapped).
       expect(out.json.valid).toBe(true);
@@ -259,7 +259,7 @@ describe('cli build pipeline integration', () => {
         '--name', 'T', '--image', IMG, '--description', 'D', '--creator', CREATOR
       ]).json;
       const tmp = writeTmp(built);
-      const out = runCli(['check', tmp, '--json'], { throwOnError: false });
+      const out = runCli(['check', tmp], { throwOnError: false });
       // Validate section must be clean — the noForcefulPostMintTransfers
       // critical comes from the review section, not validate.
       expect(out.json.validate.valid).toBe(true);
@@ -271,7 +271,7 @@ describe('cli build pipeline integration', () => {
         '--name', 'T', '--image', IMG, '--description', 'D', '--creator', CREATOR
       ]).json;
       const tmp = writeTmp(built);
-      const out = runCli(['check', tmp, '--json', '--depth', 'structural']);
+      const out = runCli(['check', tmp, '--depth', 'structural']);
       expect(out.exitCode).toBe(0);
     });
 

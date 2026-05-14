@@ -837,14 +837,14 @@ export function renderMetadataPlaceholders(
 // pair, classifying each as URI mode or INLINE mode.
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface ResolvedEntry {
+export interface ResolvedEntry {
   kind: string;
   location: string;
   uri: string;
   customData: string;
 }
 
-function collectResolvedEntries(input: any): ResolvedEntry[] {
+export function collectResolvedEntries(input: any): ResolvedEntry[] {
   const out: ResolvedEntry[] = [];
   let value: any = null;
   if (Array.isArray(input?.messages)) {

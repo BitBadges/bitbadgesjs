@@ -4,31 +4,30 @@ import {
   listResources,
   readResource
 } from '../../builder/tools/registry.js';
+import { addOutputOptions, emit } from '../utils/envelope.js';
 
 export const resourcesCommand = new Command('resources')
   .description('Read static builder resources (token registry, recipes, skills, docs, error patterns, ...).');
 
-resourcesCommand
-  .command('list')
-  .description('List every resource with its metadata as JSON.')
-  .option('--uris', 'Print only resource URIs, one per line')
-  .action((opts: { uris?: boolean }) => {
-    if (opts.uris) {
-      for (const uri of Object.keys(resourceRegistry)) {
-        process.stdout.write(`${uri}\n`);
-      }
-      return;
-    }
-    process.stdout.write(JSON.stringify(listResources(), null, 2) + '\n');
-  });
+addOutputOptions(
+  resourcesCommand
+    .command('list')
+    .description('List every resource with its metadata as JSON.')
+    .option('--uris', 'Surface only resource URIs in envelope.data.uris (one entry per resource)')
+).action((opts: { uris?: boolean; condensed?: boolean; outputFile?: string }) => {
+  if (opts.uris) {
+    emit({ uris: Object.keys(resourceRegistry) }, opts);
+    return;
+  }
+  emit({ resources: listResources() }, opts);
+});
 
-resourcesCommand
-  .command('read <uri>')
-  .description('Read a resource body by URI (e.g. bitbadges://recipes/all).')
-  .action((uri: string) => {
-    const result = readResource(uri);
-    process.stdout.write(result.text + '\n');
-    if (result.isError) {
-      process.exitCode = 1;
-    }
-  });
+addOutputOptions(
+  resourcesCommand
+    .command('read <uri>')
+    .description('Read a resource body by URI (e.g. bitbadges://recipes/all). The body text lives at envelope.data.text.')
+).action((uri: string, opts: { condensed?: boolean; outputFile?: string }) => {
+  const result = readResource(uri);
+  emit({ uri, text: result.text, isError: !!result.isError }, opts);
+  if (result.isError) process.exitCode = 1;
+});

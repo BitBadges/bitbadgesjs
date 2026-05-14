@@ -44,17 +44,19 @@ describe('resourcesCommand behavior', () => {
     };
   };
 
-  it('list --uris prints one URI per line, all bitbadges:// prefixed', async () => {
+  it('list --uris surfaces every URI in envelope.data.uris', async () => {
     const cap = captureStdout();
     try {
       await resourcesCommand.parseAsync(['list', '--uris'], { from: 'user' });
     } finally {
       cap.restore();
     }
-    const lines = cap.chunks.join('').trim().split('\n');
-    expect(lines.length).toBeGreaterThan(0);
-    for (const line of lines) {
-      expect(line).toMatch(/^bitbadges:\/\//);
+    const env = JSON.parse(cap.chunks.join(''));
+    expect(env.ok).toBe(true);
+    expect(Array.isArray(env.data.uris)).toBe(true);
+    expect(env.data.uris.length).toBeGreaterThan(0);
+    for (const uri of env.data.uris) {
+      expect(uri).toMatch(/^bitbadges:\/\//);
     }
   });
 

@@ -6,13 +6,22 @@
  *
  *   { ok, data, warnings, hint, error }
  *
- * Format selection: `--format json|text`. Default is `text` on a TTY and
- * `json` on a pipe — agents pipe stdout, humans read it. `--json` is kept
- * as a one-release alias.
+ * As of #0398's rollout there is no `--format text` switch — every
+ * data-emitting command always writes JSON. The dual-mode design from
+ * the pilot didn't survive contact with 40 commands: a single shape is
+ * far cheaper for agents than a TTY-aware format-resolver and a parallel
+ * text renderer per verb. Humans can pipe through `jq -r` when they need
+ * a plain value.
  *
- * Each command provides its own text rendering; this module owns the JSON
- * shape and the format-resolution rules.
+ * Universal flags every data-emitting command should accept:
+ *   --condensed       single-line JSON (smaller pipe payload)
+ *   --output-file     write to file instead of stdout
+ *
+ * Shell-integration verbs (`completion`, parts of `docs`) and pure
+ * interactive flows (`auth login` prompts) are intentional exceptions —
+ * their stdout isn't agent-parseable data.
  */
+import * as fs from 'node:fs';
 import type { Command } from 'commander';
 
 export interface EnvelopeWarning {
@@ -32,43 +41,41 @@ export interface Envelope<T = unknown> {
   data: T | null;
   warnings: EnvelopeWarning[];
   hint?: string;
+  /**
+   * Structured sidecar metadata. Use when a command has additional
+   * payload-adjacent context that doesn't belong inside `data` (so pipe
+   * consumers reading `data` see the unpolluted primary payload) and
+   * isn't a warning either. Example: `bb build` puts the review /
+   * validation / simulate / resolved-metadata reports here, alongside
+   * the raw msg that lives in `data`.
+   */
+  meta?: Record<string, unknown>;
   error: EnvelopeError | null;
 }
 
-export type Format = 'json' | 'text';
-
-export interface FormatOptions {
-  /** Resolved format (`json` | `text`). */
-  format?: string;
-  /** Legacy `--json` flag — coerces to `format=json`. */
-  json?: boolean;
-  /** Legacy `--json-only` flag (used by `build`) — coerces to `format=json`. */
-  jsonOnly?: boolean;
-  /** `--condensed` — JSON without indentation. Only honored when format=json. */
+export interface EmitOptions {
+  /** Emit single-line JSON (no whitespace). */
   condensed?: boolean;
+  /** Write to file instead of stdout. */
+  outputFile?: string;
+  /** Optional warnings to surface alongside the data. */
+  warnings?: EnvelopeWarning[];
+  /** Optional hint string (machine-readable next-step). */
+  hint?: string;
+  /** Optional structured sidecar metadata — see {@link Envelope.meta}. */
+  meta?: Record<string, unknown>;
 }
 
-/**
- * Resolve the effective output format from a mix of new and legacy flags.
- *
- * Priority:
- *   1. `--format <json|text>` — explicit wins.
- *   2. `--json` / `--json-only` — legacy aliases.
- *   3. TTY detection — pipes default to JSON, terminals to text.
- */
-export function resolveFormat(opts: FormatOptions, stream: NodeJS.WriteStream = process.stdout): Format {
-  if (opts.format === 'json') return 'json';
-  if (opts.format === 'text') return 'text';
-  if (opts.json || opts.jsonOnly) return 'json';
-  return stream.isTTY ? 'text' : 'json';
-}
-
-export function successEnvelope<T>(data: T, opts: { warnings?: EnvelopeWarning[]; hint?: string } = {}): Envelope<T> {
+export function successEnvelope<T>(
+  data: T,
+  opts: { warnings?: EnvelopeWarning[]; hint?: string; meta?: Record<string, unknown> } = {}
+): Envelope<T> {
   return {
     ok: true,
     data,
     warnings: opts.warnings ?? [],
     ...(opts.hint ? { hint: opts.hint } : {}),
+    ...(opts.meta && Object.keys(opts.meta).length > 0 ? { meta: opts.meta } : {}),
     error: null
   };
 }
@@ -81,6 +88,77 @@ export function errorEnvelope(code: string, message: string, details?: unknown, 
     ...(hint ? { hint } : {}),
     error: { code, message, ...(details !== undefined ? { details } : {}) }
   };
+}
+
+/** JSON.stringify replacer that turns BigInt into its string form. SDK
+ * payloads converted through BigIntify carry bigints in many fields;
+ * without this, JSON.stringify throws "Do not know how to serialize a
+ * BigInt". Centralizing here so every emitter benefits. */
+function bigIntReplacer(_key: string, value: unknown): unknown {
+  return typeof value === 'bigint' ? value.toString() : value;
+}
+
+/**
+ * The single entry point for command output. Wraps `data` in a success
+ * envelope, JSON-stringifies (with BigInt support), honors --condensed /
+ * --output-file, and writes to stdout (or the named file).
+ *
+ * Use this from every data-emitting command — including indexer wrappers
+ * (via `emitIndexerResult`, which now delegates here). The only callers
+ * that should NOT use this are shell-integration scripts (`completion`),
+ * interactive prompts (`auth login`'s input phase), and the doc-tree
+ * renderer (`docs`) — those are UX surfaces, not data.
+ */
+export function emit(data: unknown, opts: EmitOptions = {}): void {
+  const env = successEnvelope(data, { warnings: opts.warnings, hint: opts.hint, meta: opts.meta });
+  const text = opts.condensed
+    ? JSON.stringify(env, bigIntReplacer)
+    : JSON.stringify(env, bigIntReplacer, 2);
+  if (opts.outputFile) {
+    fs.writeFileSync(opts.outputFile, text + '\n', 'utf-8');
+    process.stderr.write(`Written to ${opts.outputFile}\n`);
+  } else {
+    process.stdout.write(text + '\n');
+  }
+}
+
+interface ApiErrorShape {
+  message?: string;
+  response?: unknown;
+  hint?: string;
+  code?: string;
+}
+
+/**
+ * Emit an error envelope and exit non-zero. Mirrors `emit()`'s output
+ * contract — stdout JSON, never plaintext — so agents that pipe `bb foo |
+ * jq` see a valid envelope on both success AND failure paths.
+ *
+ * The error envelope's `code` defaults to the HTTP-style status if the
+ * thrown error carries `.response.errorMessage`; otherwise falls back to
+ * a generic `cli_error`. Callers passing a domain code should construct
+ * the envelope directly via `errorEnvelope()` and write it themselves.
+ */
+export function emitError(err: unknown, opts: EmitOptions & { exitCode?: number; code?: string } = {}): never {
+  const e = err as ApiErrorShape;
+  const message = (() => {
+    if (e?.response !== undefined) {
+      if (typeof e.response === 'string') return e.response;
+      try {
+        return JSON.stringify(e.response);
+      } catch {
+        return String(e.response);
+      }
+    }
+    return e?.message ?? String(err);
+  })();
+  const code = opts.code ?? e?.code ?? 'cli_error';
+  const env = errorEnvelope(code, message, e?.response, e?.hint);
+  const text = opts.condensed
+    ? JSON.stringify(env, bigIntReplacer)
+    : JSON.stringify(env, bigIntReplacer, 2);
+  process.stdout.write(text + '\n');
+  process.exit(opts.exitCode ?? 1);
 }
 
 /**
@@ -106,20 +184,34 @@ export function commentary(message: string, opts: { quiet?: boolean } = {}, stre
 }
 
 /**
- * Write an envelope as JSON. Indented by default; condensed strips
- * whitespace for piping.
+ * Write an envelope directly. Used by callers (like `tx`) that build
+ * their own envelope to attach domain-specific warnings. Honors
+ * --condensed; respects --output-file via the optional path.
  */
-export function writeJsonEnvelope(env: Envelope<unknown>, opts: { condensed?: boolean } = {}, stream: NodeJS.WriteStream = process.stdout): void {
-  const text = opts.condensed ? JSON.stringify(env) : JSON.stringify(env, null, 2);
+export function writeJsonEnvelope(
+  env: Envelope<unknown>,
+  opts: { condensed?: boolean; outputFile?: string } = {},
+  stream: NodeJS.WriteStream = process.stdout
+): void {
+  const text = opts.condensed
+    ? JSON.stringify(env, bigIntReplacer)
+    : JSON.stringify(env, bigIntReplacer, 2);
+  if (opts.outputFile) {
+    fs.writeFileSync(opts.outputFile, text + '\n', 'utf-8');
+    process.stderr.write(`Written to ${opts.outputFile}\n`);
+    return;
+  }
   stream.write(text + '\n');
 }
 
 /**
- * Add `--format` (and the legacy `--json` alias) to a Command. Use on every
- * command that produces parseable output.
+ * Add the two universal output flags every data-emitting command should
+ * accept: `--condensed` and `--output-file`. Replaces the previous
+ * `addFormatOptions` (which exposed --format / --json) — those flags are
+ * gone now that there's only one output mode.
  */
-export function addFormatOptions(cmd: Command): Command {
+export function addOutputOptions(cmd: Command): Command {
   return cmd
-    .option('--format <fmt>', 'Output format: json | text. Default: text on TTY, json on pipe.')
-    .option('--json', '(Deprecated) Alias for --format json.');
+    .option('--condensed', 'Single-line JSON (smaller pipe payload)', false)
+    .option('--output-file <path>', 'Write the envelope to file instead of stdout');
 }

@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { addNetworkOptions } from '../utils/io.js';
+import { addOutputOptions, emit, emitError, commentary } from '../utils/envelope.js';
 
 function ensureTxWrapper(input: any): any {
   if (!input || typeof input !== 'object') return input;
@@ -8,20 +9,21 @@ function ensureTxWrapper(input: any): any {
   return input;
 }
 
-export const previewCommand = addNetworkOptions(
-  new Command('preview')
-    .description('Upload a tx to the indexer and print a shareable bitbadges.io preview URL. Input: JSON file, inline JSON, or - for stdin.')
-    .argument('<input>', 'Tx JSON file path, inline JSON, or "-" for stdin')
-    .option(
-      '--frontend-url <url>',
-      'Override the bitbadges.io frontend base for the printed preview URL',
-      'https://bitbadges.io'
-    )
-    .option('--json', 'Output the structured upload result as JSON instead of just the URL')
+export const previewCommand = addOutputOptions(
+  addNetworkOptions(
+    new Command('preview')
+      .description('Upload a tx to the indexer and print a shareable bitbadges.io preview URL. Input: JSON file, inline JSON, or - for stdin.')
+      .argument('<input>', 'Tx JSON file path, inline JSON, or "-" for stdin')
+      .option(
+        '--frontend-url <url>',
+        'Override the bitbadges.io frontend base for the printed preview URL',
+        'https://bitbadges.io'
+      )
+  )
 ).action(
   async (
     input: string,
-    opts: { network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string; frontendUrl?: string; json?: boolean }
+    opts: { network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string; frontendUrl?: string; condensed?: boolean; outputFile?: string }
   ) => {
     const { readJsonInput, getApiUrl } = await import('../utils/io.js');
 
@@ -39,11 +41,12 @@ export const previewCommand = addNetworkOptions(
             : typeof wrapped === 'object'
               ? `object with keys [${Object.keys(wrapped).join(', ')}]`
               : typeof wrapped;
-      process.stderr.write(
-        `Preview input has an unexpected shape — expected \`{messages: [{typeUrl, value}, ...]}\` or a single Msg \`{typeUrl, value}\`.\n` +
-          `Got: ${got}.\n`
+      emitError(
+        new Error(
+          `Preview input has an unexpected shape — expected \`{messages: [{typeUrl, value}, ...]}\` or a single Msg \`{typeUrl, value}\`. Got: ${got}.`
+        ),
+        { code: 'invalid_shape', exitCode: 2 }
       );
-      process.exit(2);
     }
 
     // Normalize msg type (Universal → Create/Update). The placeholder
@@ -72,17 +75,18 @@ export const previewCommand = addNetworkOptions(
         body: JSON.stringify(payload)
       });
     } catch (err) {
-      process.stderr.write(`Preview upload failed: ${err instanceof Error ? err.message : String(err)}\n`);
-      process.exit(2);
+      emitError(err, { code: 'preview_upload_failed', exitCode: 2 });
     }
 
-    if (!response.ok) {
-      const text = await response.text().catch(() => '');
-      process.stderr.write(`Preview upload failed: HTTP ${response.status} ${text}\n`);
-      process.exit(2);
+    if (!response!.ok) {
+      const text = await response!.text().catch(() => '');
+      emitError(
+        new Error(`Preview upload failed: HTTP ${response!.status} ${text}`),
+        { code: 'preview_upload_failed', exitCode: 2 }
+      );
     }
 
-    const result = (await response.json()) as {
+    const result = (await response!.json()) as {
       success: boolean;
       code: string;
       expiresAt: number;
@@ -92,22 +96,10 @@ export const previewCommand = addNetworkOptions(
     const frontendBase = opts.frontendUrl || 'https://bitbadges.io';
     const previewUrl = `${frontendBase.replace(/\/$/, '')}/builder/preview?code=${encodeURIComponent(result.code)}`;
 
-    if (opts.json) {
-      process.stdout.write(
-        JSON.stringify(
-          {
-            code: result.code,
-            url: previewUrl,
-            expiresAt: result.expiresAt,
-            expiresIn: result.expiresIn
-          },
-          null,
-          2
-        ) + '\n'
-      );
-    } else {
-      process.stdout.write(previewUrl + '\n');
-      process.stderr.write(`Expires in ${result.expiresIn}.\n`);
-    }
+    commentary(`Expires in ${result.expiresIn}.`);
+    emit(
+      { code: result.code, url: previewUrl, expiresAt: result.expiresAt, expiresIn: result.expiresIn },
+      opts
+    );
   }
 );

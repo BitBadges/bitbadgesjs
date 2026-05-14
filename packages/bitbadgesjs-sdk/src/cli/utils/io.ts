@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import type { Command } from 'commander';
 import { getConfigBaseUrl, getConfigApiKey } from './config.js';
 import { assertNetworkAvailable } from '../../signing/types.js';
+import { emit } from './envelope.js';
 
 /**
  * Read JSON input from multiple sources:
@@ -34,54 +35,16 @@ export function readJsonInput(input: string): any {
 }
 
 /**
- * Output data as JSON (pretty-printed by default) or human-readable text.
+ * Output data as an envelope-wrapped JSON payload. Thin shim over
+ * `emit()` — kept here so the few `output()` callers (build.ts and the
+ * existing test fakes) don't have to be touched in this sweep.
  *
- * --condensed: no whitespace (for piping/scripts)
- * --human: human-readable tree format
- * --output-file: write to file instead of stdout
- * default: pretty-printed JSON (2-space indent)
+ * Per #0398 there is no `--human` mode anymore: every data-emitting
+ * command speaks the same envelope JSON, and humans pipe through `jq -r`
+ * when they need a plain value. The previous tree-renderer is gone.
  */
-export function output(data: any, options: { human?: boolean; condensed?: boolean; outputFile?: string }): void {
-  let text: string;
-
-  if (options.human) {
-    text = typeof data === 'string' ? data : formatHuman(data);
-  } else if (options.condensed) {
-    text = JSON.stringify(data);
-  } else {
-    text = JSON.stringify(data, null, 2);
-  }
-
-  if (options.outputFile) {
-    fs.writeFileSync(options.outputFile, text + '\n', 'utf-8');
-    process.stderr.write(`Written to ${options.outputFile}\n`);
-  } else {
-    console.log(text);
-  }
-}
-
-function formatHuman(obj: any, indent = 0): string {
-  if (obj === null || obj === undefined) return 'null';
-  if (typeof obj === 'string') return obj;
-  if (typeof obj === 'number' || typeof obj === 'boolean') return String(obj);
-
-  if (Array.isArray(obj)) {
-    if (obj.length === 0) return '(empty)';
-    return obj.map((item, i) => `${' '.repeat(indent)}[${i}] ${formatHuman(item, indent + 2)}`).join('\n');
-  }
-
-  if (typeof obj === 'object') {
-    const entries = Object.entries(obj);
-    if (entries.length === 0) return '{}';
-    return entries
-      .map(([key, val]) => {
-        const valStr = typeof val === 'object' && val !== null ? '\n' + formatHuman(val, indent + 2) : ` ${formatHuman(val, indent + 2)}`;
-        return `${' '.repeat(indent)}${key}:${valStr}`;
-      })
-      .join('\n');
-  }
-
-  return String(obj);
+export function output(data: any, options: { condensed?: boolean; outputFile?: string }): void {
+  emit(data, { condensed: options.condensed, outputFile: options.outputFile });
 }
 
 /**

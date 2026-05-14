@@ -17,7 +17,14 @@ export interface RunCliResult {
   stdout: string;
   stderr: string;
   exitCode: number;
+  /**
+   * Parsed stdout, automatically unwrapped from the envelope shape
+   * (`{ok, data, ...}`) so existing tests that look at `.json.<field>`
+   * keep working post-#0398. The envelope is preserved on `.envelope`.
+   */
   json?: any;
+  /** Raw envelope (full {ok, data, warnings, error, hint?}) when stdout was JSON. */
+  envelope?: any;
 }
 
 export interface RunCliOptions {
@@ -62,7 +69,18 @@ export function runCli(args: string[], opts: RunCliOptions = {}): RunCliResult {
 
   if (opts.parseJson !== false && stdout.trim()) {
     try {
-      result.json = JSON.parse(stdout);
+      const parsed = JSON.parse(stdout);
+      // Post-#0398, every data-emitting command emits `{ok, data, ...}`.
+      // Unwrap automatically so tests can keep writing `out.json.<field>`
+      // without each one having to .data-step through the envelope.
+      // Preserve the raw envelope on `.envelope` for tests that need to
+      // inspect warnings / error.code / hint.
+      if (parsed && typeof parsed === 'object' && 'ok' in parsed && 'data' in parsed) {
+        result.envelope = parsed;
+        result.json = parsed.data;
+      } else {
+        result.json = parsed;
+      }
     } catch {
       // Non-JSON output is OK for some commands (build prints a review block).
     }

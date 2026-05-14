@@ -192,7 +192,21 @@ function readMsgInput(opts: { msgFile?: string; msgStdin?: boolean; input?: stri
     }
   }
   try {
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    // Envelope unwrap: if stdin / file is the CLI envelope shape (e.g.
+    // the direct output of `bb build` post-#0398), extract the msg from
+    // envelope.data. Older inputs that are already `{typeUrl, value}` or
+    // `{messages: [...]}` keep working untouched.
+    if (parsed && typeof parsed === 'object' && 'ok' in parsed && 'data' in parsed) {
+      if (parsed.ok === false) {
+        const code = parsed.error?.code ? `[${parsed.error.code}] ` : '';
+        throw new Error(
+          `Deploy input is an error envelope from a prior CLI step — refusing to broadcast. ${code}${parsed.error?.message ?? 'unknown error'}`
+        );
+      }
+      return parsed.data;
+    }
+    return parsed;
   } catch (err: any) {
     throw new Error(`Failed to parse msg JSON: ${err?.message || err}`);
   }
@@ -467,19 +481,17 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
         apiKey: apiKey || '',
         apiUrl
       });
-      if (process.stdout.isTTY) {
+      const { emit, commentary, isQuiet } = await import('../utils/envelope.js');
+      if (!isQuiet()) {
         const collectionCache = await prefetchSimulateCollections(result, { apiKey: apiKey || '', apiUrl });
-        process.stdout.write(
-          renderSimulate(result, { stream: process.stdout, events: 'count', collectionCache }) + '\n'
-        );
-      } else {
-        process.stdout.write(JSON.stringify({ dryRun: true, ...result }, null, 2) + '\n');
+        commentary(renderSimulate(result, { stream: process.stderr, events: 'count', collectionCache }));
       }
+      emit({ dryRun: true, ...result });
       if (!result.success || result.valid === false) process.exit(1);
       process.exit(0);
     } catch (err: any) {
-      process.stderr.write(`Dry-run simulate failed: ${err?.message || err}\n`);
-      process.exit(1);
+      const { emitError } = await import('../utils/envelope.js');
+      emitError(err, { code: 'dry_run_failed', exitCode: 1 });
     }
   }
 
@@ -581,11 +593,14 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
         }
       }
 
-      process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
+      const { emit, emitError } = await import('../utils/envelope.js');
+      emit(payload);
       process.exit(payload.success ? 0 : 1);
+      // (emitError unreachable below; reserved for catch.)
+      void emitError;
     } catch (err: any) {
-      process.stderr.write(`Browser broadcast failed: ${err?.message || err}\n`);
-      process.exit(1);
+      const { emitError } = await import('../utils/envelope.js');
+      emitError(err, { code: 'browser_broadcast_failed', exitCode: 1 });
     }
   }
 
@@ -631,27 +646,24 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
     // Print-only path (legacy default): emit the command + helper notes
     // and exit. The user copy/pastes to broadcast.
     if (!useExec) {
-      if (!process.env.BB_QUIET) {
-        if (isMultiMsg) {
-          const filesNote =
-            msgFilePaths.length > 0
-              ? `Wrote ${msgFilePaths.length} msg JSON file(s):\n  ${msgFilePaths.join('\n  ')}\n`
-              : '';
-          process.stderr.write(`\n${filesNote}Multi-msg tx — chain-binary's tx subcommands only take one msg, so the\nbelow runs them in sequence with a 6s sleep between blocks to avoid\nsequence-skew. NOT atomic: if a later step fails, earlier steps remain\non-chain. For atomic multi-msg, use --burner or --browser.\n\nRun:\n\n`);
-        } else {
-          process.stderr.write(`\nWrote msg JSON to ${msgFilePaths[0]}\nRun:\n\n`);
-        }
+      const { emit, commentary } = await import('../utils/envelope.js');
+      if (isMultiMsg) {
+        const filesNote =
+          msgFilePaths.length > 0
+            ? `Wrote ${msgFilePaths.length} msg JSON file(s):\n  ${msgFilePaths.join('\n  ')}\n`
+            : '';
+        commentary(`\n${filesNote}Multi-msg tx — chain-binary's tx subcommands only take one msg, so the\nbelow runs them in sequence with a 6s sleep between blocks to avoid\nsequence-skew. NOT atomic: if a later step fails, earlier steps remain\non-chain. For atomic multi-msg, use --burner or --browser.\n\nRun:`);
+      } else {
+        commentary(`\nWrote msg JSON to ${msgFilePaths[0]}\nRun:`);
       }
-      process.stdout.write(commandLine + '\n');
-      if (!process.env.BB_QUIET) {
-        const flagsHint = isMultiMsg
-          ? '\n  Append extra flags inside any step (e.g. --fees 5000ubadge --memo "...").\n'
-          : '\n  Append extra flags after the line (e.g. --fees 5000ubadge --memo "...").\n';
-        process.stderr.write(
-          flagsHint + '  Use --keyring-backend test for non-interactive CI signing.\n' +
-            '  Or pass --exec to run the command in place (TTY-friendly).\n'
-        );
-      }
+      const flagsHint = isMultiMsg
+        ? 'Append extra flags inside any step (e.g. --fees 5000ubadge --memo "...").'
+        : 'Append extra flags after the line (e.g. --fees 5000ubadge --memo "...").';
+      commentary(commandLine);
+      commentary(
+        `  ${flagsHint}\n  Use --keyring-backend test for non-interactive CI signing.\n  Or pass --exec to run the command in place (TTY-friendly).`
+      );
+      emit({ commandLine, msgFilePaths, mode: 'print-only', multiMsg: isMultiMsg });
       process.exit(0);
     }
 
@@ -750,7 +762,8 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       }
     }
 
-    process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
+    const { emit } = await import('../utils/envelope.js');
+    emit(payload);
     process.exit(payload.success ? 0 : 1);
   }
 
@@ -846,11 +859,12 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
         ...(waited.ok ? { body: waited.body } : { lastStatus: waited.lastStatus })
       };
     }
-    process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
+    const { emit } = await import('../utils/envelope.js');
+    emit(payload);
     if (!result.success && !result.paused) process.exit(1);
     if (result.paused) process.exit(0);
   } catch (err: any) {
-    process.stderr.write(`Broadcast failed: ${err?.message || err}\n`);
-    process.exit(1);
+    const { emitError } = await import('../utils/envelope.js');
+    emitError(err, { code: 'broadcast_failed', exitCode: 1 });
   }
 });

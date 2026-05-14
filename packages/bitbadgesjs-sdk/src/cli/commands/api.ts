@@ -25,6 +25,7 @@ import {
   addIndexerNetworkOptions,
   addIndexerOutputOptions,
 } from '../utils/indexer-options.js';
+import { emit, emitError } from '../utils/envelope.js';
 import { ROUTES, TAG_DESCRIPTIONS, type ApiRoute } from './api-routes.js';
 
 // ---------------------------------------------------------------------------
@@ -191,22 +192,23 @@ function buildRouteCommand(route: ApiRoute): Command {
     // Agents get a deterministic shape they can consume; full JSONSchema
     // generation can land alongside the OpenAPI pipeline upgrade.
     if (opts.schema) {
-      const schemaPayload = {
-        name: route.name,
-        method: route.method,
-        path: route.path,
-        description: route.description,
-        pathParams: route.pathParams,
-        hasBody: route.hasBody,
-        sdkLinks: route.sdkLinks ?? null,
-        queryParams: route.queryParams ?? [],
-        bodyFields: route.bodyFields ?? [],
-        requestSchema: route.requestSchema ?? null,
-        responseSchema: route.responseSchema ?? null,
-        example: route.example ?? null
-      };
-      const out = opts.condensed ? JSON.stringify(schemaPayload) : JSON.stringify(schemaPayload, null, 2);
-      process.stdout.write(out + '\n');
+      emit(
+        {
+          name: route.name,
+          method: route.method,
+          path: route.path,
+          description: route.description,
+          pathParams: route.pathParams,
+          hasBody: route.hasBody,
+          sdkLinks: route.sdkLinks ?? null,
+          queryParams: route.queryParams ?? [],
+          bodyFields: route.bodyFields ?? [],
+          requestSchema: route.requestSchema ?? null,
+          responseSchema: route.responseSchema ?? null,
+          example: route.example ?? null
+        },
+        opts
+      );
       return;
     }
 
@@ -323,17 +325,19 @@ function buildRouteCommand(route: ApiRoute): Command {
 
       // Dry-run: show request details and exit
       if (opts.dryRun) {
-        const dryOutput = {
-          method: route.method,
-          url: `${baseUrl}${resolvedPath}`,
-          headers: {
-            'x-api-key': apiKey ? apiKey.slice(0, 4) + '****' : '(none)',
-            ...(cookie ? { Cookie: cookie.split('=')[0] + '=****' } : {}),
-            ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+        emit(
+          {
+            method: route.method,
+            url: `${baseUrl}${resolvedPath}`,
+            headers: {
+              'x-api-key': apiKey ? apiKey.slice(0, 4) + '****' : '(none)',
+              ...(cookie ? { Cookie: cookie.split('=')[0] + '=****' } : {}),
+              ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+            },
+            body: body ?? null,
           },
-          body: body ?? null,
-        };
-        process.stdout.write(JSON.stringify(dryOutput, null, 2) + '\n');
+          opts
+        );
         return;
       }
 
@@ -347,30 +351,9 @@ function buildRouteCommand(route: ApiRoute): Command {
         cookieRef,
       });
 
-      const formatted = opts.condensed
-        ? JSON.stringify(result)
-        : JSON.stringify(result, null, 2);
-
-      if (opts.outputFile) {
-        fs.writeFileSync(opts.outputFile, formatted + '\n', 'utf-8');
-        process.stderr.write(`Written to ${opts.outputFile}\n`);
-      } else {
-        process.stdout.write(formatted + '\n');
-      }
+      emit(result, opts);
     } catch (err: any) {
-      // If the error has a response body, print it
-      if (err.response) {
-        process.stderr.write(JSON.stringify(err.response, null, 2) + '\n');
-      } else {
-        process.stderr.write(`Error: ${err.message}\n`);
-      }
-      // Surface the targeted auth hint surfaced by api-client.ts for
-      // 401/403 paths. Keeps the on-error UX one line longer than the
-      // raw response body, but cuts the agent's retry-loop in half.
-      if (err.hint) {
-        process.stderr.write(`Hint: ${err.hint}\n`);
-      }
-      process.exitCode = 1;
+      emitError(err, { exitCode: 1 });
     }
   });
 
@@ -395,8 +378,7 @@ export function createApiCommand(): Command {
   // of the `api` command's raw-passthrough contract.
   api
     .option('--search <kw>', 'Search routes by keyword (matches name, path, tag, description). Case-insensitive substring.')
-    .option('--format <fmt>', 'Output format for --search: json | text', 'text')
-    .action((opts: { search?: string; format?: string }) => {
+    .action((opts: { search?: string }) => {
       if (!opts.search) {
         api.outputHelp();
         return;
@@ -412,21 +394,7 @@ export function createApiCommand(): Command {
         tag: r.tag,
         description: r.description
       }));
-      if (opts.format === 'json') {
-        process.stdout.write(JSON.stringify(matches, null, 2) + '\n');
-        return;
-      }
-      if (matches.length === 0) {
-        process.stdout.write(`No routes match "${opts.search}".\n`);
-        return;
-      }
-      const nameW = Math.max(...matches.map((m) => m.name.length));
-      const methodW = Math.max(...matches.map((m) => m.method.length));
-      for (const m of matches) {
-        process.stdout.write(
-          `${m.name.padEnd(nameW)}  ${m.method.padEnd(methodW)}  ${m.path}\n      ${m.description}\n\n`
-        );
-      }
+      emit({ search: opts.search, matches });
     });
 
   // Create tag-based group commands
