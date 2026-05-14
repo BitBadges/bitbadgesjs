@@ -31,10 +31,11 @@ describe('coinRegistry', () => {
   });
 
   describe('buildSymbolToTokenInfoMap', () => {
-    it('only includes IBC-denom entries (not native ubadge/badges:*)', () => {
+    it('includes every coin in MAINNET_COINS_REGISTRY (native + chain-internal + IBC)', () => {
       const map = buildSymbolToTokenInfoMap();
-      for (const token of map.values()) {
-        expect(token.ibcDenom.startsWith('ibc/')).toBe(true);
+      const symbols = Array.from(map.keys());
+      for (const required of ['BADGE', 'CHAOS', 'USDC', 'ATOM', 'OSMO']) {
+        expect(symbols).toContain(required);
       }
     });
 
@@ -44,11 +45,18 @@ describe('coinRegistry', () => {
       expect(a).toBe(b);
     });
 
-    it('each entry has a well-formed bb1 backing address', () => {
+    it('every IBC entry has a well-formed bb1 backing address; native + chain-internal entries omit it', () => {
       const map = buildSymbolToTokenInfoMap();
       for (const token of map.values()) {
-        expect(token.backingAddress).toMatch(/^bb1/);
-        expect(token.backingAddress.length).toBeGreaterThan(10);
+        if (token.ibcDenom.startsWith('ibc/')) {
+          expect(token.backingAddress).toMatch(/^bb1/);
+          expect(token.backingAddress!.length).toBeGreaterThan(10);
+        } else {
+          // Native (BADGE @ ubadge) and chain-internal (CHAOS @
+          // badges:49:chaosnet) denoms are queryable but can't have a
+          // backing alias — the wrapper flow only applies to IBC sources.
+          expect(token.backingAddress).toBeUndefined();
+        }
       }
     });
   });
@@ -89,6 +97,23 @@ describe('coinRegistry', () => {
 
     it('returns null for an empty query (no symbol, no ibc/ prefix)', () => {
       expect(lookupTokenInfo('')).toBeNull();
+    });
+
+    it('finds native BADGE (ubadge) and reports no backingAddress', () => {
+      const badge = lookupTokenInfo('BADGE');
+      expect(badge).not.toBeNull();
+      expect(badge!.symbol).toBe('BADGE');
+      expect(badge!.ibcDenom).toBe('ubadge');
+      expect(badge!.decimals).toBe('9');
+      expect(badge!.backingAddress).toBeUndefined();
+    });
+
+    it('finds chain-internal CHAOS (badges:49:chaosnet) and reports no backingAddress', () => {
+      const chaos = lookupTokenInfo('CHAOS');
+      expect(chaos).not.toBeNull();
+      expect(chaos!.symbol).toBe('CHAOS');
+      expect(chaos!.ibcDenom).toBe('badges:49:chaosnet');
+      expect(chaos!.backingAddress).toBeUndefined();
     });
   });
 

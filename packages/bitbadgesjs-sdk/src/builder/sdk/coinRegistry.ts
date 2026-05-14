@@ -18,13 +18,24 @@ export interface CoinDetails {
 }
 
 /**
- * Token info with pre-generated backing address
+ * Token info exposed by `lookup_token_info` and `getAllTokens`.
+ *
+ * `ibcDenom` is misnamed for historical reasons — it holds the *primary*
+ * denom for the token (e.g. `ubadge`, `badges:49:chaosnet`, `ibc/...`),
+ * not just IBC denoms. We keep the name to avoid breaking the
+ * agent-facing contract; consumers should treat it as "the canonical
+ * denom string for this symbol."
+ *
+ * `backingAddress` is only set when the denom is IBC-backed — that's
+ * the Smart Token wrapping path's prerequisite. Native chain coins
+ * (BADGE) and chain-internal denoms (CHAOS at badges:49:chaosnet) leave
+ * it undefined.
  */
 export interface TokenInfo {
   symbol: string;
   ibcDenom: string;
   decimals: string;
-  backingAddress: string;
+  backingAddress?: string;
   displayName: string;
 }
 
@@ -85,25 +96,37 @@ export function buildSymbolToTokenInfoMap(): Map<string, TokenInfo> {
 
   const symbolMap = new Map<string, TokenInfo>();
 
+  // Every coin in the registry is queryable. We used to filter to IBC
+  // denoms only — that was historically scoped to the Smart Token
+  // backing path — but agents reasonably ask `lookup_token_info BADGE`
+  // for decimals / denom resolution and need a useful answer. Compute
+  // `backingAddress` only for IBC entries (since the alias generator
+  // expects an `ibc/...` denom); leave it undefined for native (BADGE)
+  // and chain-internal (CHAOS at `badges:49:chaosnet`) denoms.
   Object.entries(MAINNET_COINS_REGISTRY).forEach(([baseDenom, coinDetails]) => {
-    // Only include IBC denoms for Smart Token backing
+    const symbol = coinDetails.symbol.toUpperCase();
+    if (symbolMap.has(symbol)) return;
+
+    let backingAddress: string | undefined;
     if (baseDenom.startsWith('ibc/')) {
-      const symbol = coinDetails.symbol.toUpperCase();
-      if (!symbolMap.has(symbol)) {
-        try {
-          const backingAddress = generateAliasAddressForIBCBackedDenom(baseDenom);
-          symbolMap.set(symbol, {
-            symbol,
-            ibcDenom: baseDenom,
-            decimals: coinDetails.decimals,
-            backingAddress,
-            displayName: coinDetails.label
-          });
-        } catch (error) {
-          console.warn(`Failed to generate backing address for ${baseDenom}:`, error);
-        }
+      try {
+        backingAddress = generateAliasAddressForIBCBackedDenom(baseDenom);
+      } catch (error) {
+        console.warn(`Failed to generate backing address for ${baseDenom}:`, error);
+        // Skip IBC denoms that can't generate an alias — these are
+        // unusable for Smart Token backing AND we don't want to surface
+        // them without the canonical address.
+        return;
       }
     }
+
+    symbolMap.set(symbol, {
+      symbol,
+      ibcDenom: baseDenom,
+      decimals: coinDetails.decimals,
+      ...(backingAddress ? { backingAddress } : {}),
+      displayName: coinDetails.label
+    });
   });
 
   symbolToTokenInfoCache = symbolMap;

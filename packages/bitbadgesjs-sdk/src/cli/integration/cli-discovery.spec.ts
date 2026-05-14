@@ -41,11 +41,10 @@ describe('bb tools', () => {
 describe('bb tool <name>', () => {
   it('lookup_token_info returns the token registry shape', () => {
     // Schema field name is `query` (free-form symbol/denom), not `symbol`.
-    // Query USDC (not BADGE): the builder's coinRegistry only stocks
-    // IBC-backed denoms — see buildSymbolToTokenInfoMap in
-    // src/builder/sdk/coinRegistry.ts. BADGE is the native ubadge denom
-    // and isn't in this lookup table.
-    const out = runCli(['tool', 'lookup_token_info', '--args', '{"query":"USDC"}']);
+    // BADGE (native ubadge) MUST be queryable post-#0398 — the registry
+    // filter that excluded it was removed because agents reasonably ask
+    // for the native token's decimals / denom resolution.
+    const out = runCli(['tool', 'lookup_token_info', '--args', '{"query":"BADGE"}']);
     expect(out.exitCode).toBe(0);
     expect(out.json).toBeDefined();
   });
