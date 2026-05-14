@@ -18,15 +18,15 @@
  * PaymentRequestView).
  */
 
-import { Command, Option } from 'commander';
+import { Command } from 'commander';
 import {
   addIndexerNetworkOptions as addNetworkFlags,
-  addIndexerOutputOptions,
+  addIndexerOutputOptions as addOutputFlags,
   callIndexer as callApi,
   emitIndexerResult as emit,
   emitIndexerError as emitError,
   type IndexerNetworkFlags as NetworkFlags,
-  type IndexerOutputFlags,
+  type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 import {
@@ -38,17 +38,6 @@ import {
   buildPaymentRequestDenyMsg,
   type PaymentRequestStatus
 } from '../../core/payment-requests.js';
-
-// `pay-requests` historically declared a `--json` flag that was never read
-// (output already defaults to JSON). Keep it as a hidden alias so any
-// script passing it doesn't break, but stop documenting it.
-type OutputFlags = IndexerOutputFlags & { json?: boolean };
-
-function addOutputFlags(cmd: Command): Command {
-  return addIndexerOutputOptions(cmd).addOption(
-    new Option('--json', 'Legacy alias — output is JSON by default. Retained for backwards compat.').hideHelp()
-  );
-}
 
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
   const res = await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts);

@@ -13,6 +13,7 @@ import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.j
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 import { resolveAmount } from '../utils/amount.js';
 import { emit, emitError } from '../utils/envelope.js';
+import { addIndexerOutputOptions as addOutputFlags } from '../utils/indexer-options.js';
 import {
   doesCollectionFollowCrowdfundProtocol,
   validateCrowdfundCollection,
@@ -36,9 +37,6 @@ function addNetworkFlags(cmd: Command): Command {
     .option('--local', 'Use local API (localhost:3001)', false)
     .option('--url <url>', 'Custom API base URL')
     .option('--api-key <key>', 'BitBadges API key');
-}
-function addOutputFlags(cmd: Command): Command {
-  return cmd.option('--output-file <path>', 'Write to file').option('--condensed', 'Single-line JSON', false);
 }
 async function callApi(method: 'GET' | 'POST', path: string, opts: NetworkFlags, body?: unknown): Promise<any> {
   const network = opts.testnet ? 'testnet' : opts.local ? 'local' : 'mainnet';
