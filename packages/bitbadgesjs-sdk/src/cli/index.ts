@@ -2,6 +2,7 @@
 import * as fs from 'node:fs';
 import { Command, Help } from 'commander';
 import { HELP_GROUP_ORDER } from './utils/help-groups.js';
+import { emitDeprecation } from './utils/deprecation.js';
 
 // Apply a custom Help subclass globally so every command + sub-subcommand
 // inherits the "Required: / Options:" split, not just the root. Commander
@@ -88,8 +89,6 @@ class GroupedHelp extends Help {
 
 // Build & ship a transaction
 import { buildCommand } from './commands/build.js';
-import { toolsCommand } from './commands/tools.js';
-import { toolCommand } from './commands/tool.js';
 import { checkCommand } from './commands/check.js';
 import { explainCommand } from './commands/explain.js';
 import { simulateCommand } from './commands/simulate.js';
@@ -98,38 +97,36 @@ import { deployCommand } from './commands/deploy.js';
 import { txCommand } from './commands/tx.js';
 import { signWithBrowserCommand } from './commands/sign-with-browser.js';
 import { genTxPayloadCommand } from './commands/gen-tx-payload.js';
-import { genPubKeyCommand } from './commands/gen-pub-key.js';
 
 // Indexer access
 import { createApiCommand } from './commands/api.js';
 import { authCommand } from './commands/auth.js';
 
 // Local state
-import { configCommand } from './commands/config.js';
+import { settingsCommand } from './commands/settings.js';
 import { burnerCommand } from './commands/burner.js';
 import { sessionCommand } from './commands/session.js';
 
 // Discovery
-import { docsCommand } from './commands/docs.js';
-import { skillsCommand } from './commands/skills.js';
-import { resourcesCommand } from './commands/resources.js';
 import { doctorCommand } from './commands/doctor.js';
 
+// Dev / agent surface (v2: tools/tool/resources/docs/skills/gen-pub-key)
+import { devCommand } from './commands/dev.js';
+
 // Address & lookup utilities
-import { addressCommand } from './commands/address.js';
-import { aliasCommand } from './commands/alias.js';
-import { lookupCommand } from './commands/lookup.js';
-import { genListIdCommand } from './commands/gen-list-id.js';
 import { amountCommand } from './commands/amount.js';
 import { urlCommand } from './commands/url.js';
 import { dynamicStoresCommand } from './commands/dynamic-stores.js';
-import { portfolioCommand } from './commands/portfolio.js';
+import { accountCommand } from './commands/account.js';
+import { makeDeprecatedAlias } from './utils/deprecated-alias.js';
 
 // Swap / DEX
 import { swapCommand } from './commands/swap.js';
 import { balancesCommand } from './commands/balances.js';
 import { priceCommand } from './commands/price.js';
 import { assetsCommand } from './commands/assets.js';
+import { poolsCommand } from './commands/pools.js';
+import { pairsCommand } from './commands/pairs.js';
 
 // Standard-specific end-user surfaces
 import { payRequestsCommand } from './commands/pay-requests.js';
@@ -181,27 +178,31 @@ if (process.argv.includes('--quiet')) {
 const HELP_GROUPS: { title: string; commands: Command[] }[] = [
   {
     title: 'Build & ship a transaction',
-    commands: [buildCommand, toolsCommand, toolCommand, checkCommand, explainCommand, simulateCommand, previewCommand, genTxPayloadCommand, deployCommand, txCommand]
+    commands: [buildCommand, checkCommand, explainCommand, simulateCommand, previewCommand, deployCommand, txCommand]
   },
   {
     title: 'Indexer access',
-    commands: [createApiCommand(), authCommand, signWithBrowserCommand, genPubKeyCommand]
+    commands: [createApiCommand(), authCommand]
   },
   {
     title: 'Local state',
-    commands: [configCommand, burnerCommand, sessionCommand]
+    commands: [settingsCommand, burnerCommand, sessionCommand]
   },
   {
     title: 'Discovery',
-    commands: [docsCommand, skillsCommand, resourcesCommand, doctorCommand]
+    commands: [doctorCommand]
   },
   {
-    title: 'Address & lookup utilities',
-    commands: [addressCommand, aliasCommand, lookupCommand, portfolioCommand, genListIdCommand, amountCommand, urlCommand]
+    title: 'Dev / agent surface',
+    commands: [devCommand]
+  },
+  {
+    title: 'Account & lookup',
+    commands: [accountCommand, amountCommand, urlCommand]
   },
   {
     title: 'Swap & DEX',
-    commands: [swapCommand, balancesCommand, priceCommand, assetsCommand]
+    commands: [swapCommand, poolsCommand, pairsCommand, balancesCommand, priceCommand, assetsCommand]
   },
   {
     title: 'Standards (end-user actions)',
@@ -232,6 +233,176 @@ for (const group of HELP_GROUPS) {
     program.addCommand(cmd);
   }
 }
+
+// ── v2 deprecated aliases — old top-level forms → new `account` home ────────
+//
+// Each old top-level verb (`portfolio`, `address`, `lookup`, `alias`,
+// `gen-list-id`) still works for one release. Hidden from grouped help
+// to keep `bb --help` clean; reachable when users / scripts type the
+// v1 form. Banner emits via `emitDeprecation` from utils/deprecation.ts.
+//
+// Forwarding rules:
+//   - `bb portfolio <sub> [args]`        → `bb account <sub> [args]`
+//   - `bb address <sub> [args]`          → `bb account <sub> [args]`
+//                                           (address.convert / address.validate
+//                                            live as flat `account convert /
+//                                            account validate` subcommands)
+//   - `bb lookup [symbol]`               → `bb account lookup [symbol]`
+//   - `bb alias <sub> [args]`            → `bb account alias <sub> [args]`
+//   - `bb gen-list-id <addrs...>`        → `bb account gen-list-id <addrs...>`
+
+const portfolioAlias = makeDeprecatedAlias({
+  oldName: 'portfolio',
+  newPath: 'bb account',
+  description: 'Deprecated — use `bb account` instead.',
+  forward: (args) => ['account', ...args],
+  target: program,
+});
+const addressAlias = makeDeprecatedAlias({
+  oldName: 'address',
+  newPath: 'bb account',
+  description: 'Deprecated — `convert` / `validate` are now `bb account convert` / `bb account validate`.',
+  forward: (args) => ['account', ...args],
+  target: program,
+});
+const lookupAlias = makeDeprecatedAlias({
+  oldName: 'lookup',
+  newPath: 'bb account lookup',
+  description: 'Deprecated — use `bb account lookup` instead.',
+  forward: (args) => ['account', 'lookup', ...args],
+  target: program,
+});
+const aliasAlias = makeDeprecatedAlias({
+  oldName: 'alias',
+  newPath: 'bb account alias',
+  description: 'Deprecated — use `bb account alias` instead.',
+  forward: (args) => ['account', 'alias', ...args],
+  target: program,
+});
+const genListIdAlias = makeDeprecatedAlias({
+  oldName: 'gen-list-id',
+  newPath: 'bb account gen-list-id',
+  description: 'Deprecated — use `bb account gen-list-id` instead.',
+  forward: (args) => ['account', 'gen-list-id', ...args],
+  target: program,
+});
+
+program.addCommand(portfolioAlias);
+program.addCommand(addressAlias);
+program.addCommand(lookupAlias);
+program.addCommand(aliasAlias);
+program.addCommand(genListIdAlias);
+
+// Signing commands absorbed into `deploy` flags. The standalone commands
+// still work for one release — they emit the deprecation banner from
+// inside their action handlers (see sign-with-browser.ts / gen-tx-payload.ts),
+// so we just register them at top level without putting them in the
+// grouped help.
+program.addCommand(signWithBrowserCommand);
+program.addCommand(genTxPayloadCommand);
+
+// Dev/agent surface aliases. Old top-level forms (`tools`, `tool`,
+// `resources`, `docs`, `skills`, `gen-pub-key`) all lived at the root
+// of the v1 CLI. v2 nests them under `bb dev`. Each old form stays
+// reachable for one release; banner emits via `makeDeprecatedAlias`.
+const toolsAlias = makeDeprecatedAlias({
+  oldName: 'tools',
+  newPath: 'bb dev tools list',
+  description: 'Deprecated — use `bb dev tools list` instead.',
+  forward: (args) => ['dev', 'tools', 'list', ...args],
+  target: program,
+});
+const toolAlias = makeDeprecatedAlias({
+  oldName: 'tool',
+  newPath: 'bb dev tools call',
+  description: 'Deprecated — use `bb dev tools call <name>` instead.',
+  forward: (args) => ['dev', 'tools', 'call', ...args],
+  target: program,
+});
+const resourcesAlias = makeDeprecatedAlias({
+  oldName: 'resources',
+  newPath: 'bb dev resources',
+  description: 'Deprecated — use `bb dev resources` instead.',
+  forward: (args) => ['dev', 'resources', ...args],
+  target: program,
+});
+const docsAlias = makeDeprecatedAlias({
+  oldName: 'docs',
+  newPath: 'bb dev docs',
+  description: 'Deprecated — use `bb dev docs` instead.',
+  forward: (args) => ['dev', 'docs', ...args],
+  target: program,
+});
+const skillsAlias = makeDeprecatedAlias({
+  oldName: 'skills',
+  newPath: 'bb dev skills',
+  description: 'Deprecated — use `bb dev skills` instead.',
+  forward: (args) => ['dev', 'skills', ...args],
+  target: program,
+});
+const genPubKeyAlias = makeDeprecatedAlias({
+  oldName: 'gen-pub-key',
+  newPath: 'bb dev gen-pub-key',
+  description: 'Deprecated — use `bb dev gen-pub-key` instead.',
+  forward: (args) => ['dev', 'gen-pub-key', ...args],
+  target: program,
+});
+
+program.addCommand(toolsAlias);
+program.addCommand(toolAlias);
+program.addCommand(resourcesAlias);
+program.addCommand(docsAlias);
+program.addCommand(skillsAlias);
+program.addCommand(genPubKeyAlias);
+
+// `config` → `settings` rename. Frees `bb config` for the chain binary
+// (client.toml management) once the flat namespace ships chain-side.
+// Old `bb config ...` form works for one release with the banner.
+const configAlias = makeDeprecatedAlias({
+  oldName: 'config',
+  newPath: 'bb settings',
+  description: 'Deprecated — use `bb settings` instead.',
+  forward: (args) => ['settings', ...args],
+  target: program,
+});
+program.addCommand(configAlias);
+
+// ── `cli` umbrella — back-compat alias for the v1 `bb cli <cmd>` shape ──────
+//
+// Pre-v2 the chain-binary forwarder routed every Node CLI invocation as
+// `bb cli <subcmd> [args...]`. v2 flattens to `bb <subcmd>`. To avoid
+// breaking existing scripts / docs / muscle memory, this `cli` parent
+// catches the v1 form, prints a one-line deprecation banner, then
+// re-dispatches the remaining argv through the root program.
+//
+// Reached when:
+//   1. The user invokes `bitbadges-cli cli <subcmd>` directly (rare today,
+//      but the chain wrapper will start passing `cli` through in a
+//      companion bitbadgeschain PR).
+//   2. Anyone has scripted against the v1 layout and explicitly types
+//      `bitbadges-cli cli build vault`.
+//
+// Banner is suppressed when `BB_QUIET=1`. The actual dispatch uses
+// `parseAsync(..., { from: 'user' })` so positional args + flags reach
+// the target command exactly as written.
+
+const cliAliasCommand = new Command('cli')
+  .description('Deprecated alias: every command is now top-level. `bb cli <cmd>` → `bb <cmd>`.')
+  .helpOption(false)
+  .allowUnknownOption()
+  .allowExcessArguments()
+  .argument('[args...]', 'Forwarded to the corresponding top-level command')
+  .action(async (args: string[]) => {
+    if (!args || args.length === 0) {
+      // `bb cli` with no subcommand: show root --help and emit the banner.
+      emitDeprecation('bb cli', 'bb <cmd>');
+      program.outputHelp();
+      return;
+    }
+    emitDeprecation(`bb cli ${args[0]}`, `bb ${args[0]}`);
+    await program.parseAsync(args, { from: 'user' });
+  });
+program.addCommand(cliAliasCommand);
 
 // ── Grouped --help override ─────────────────────────────────────────────────
 //

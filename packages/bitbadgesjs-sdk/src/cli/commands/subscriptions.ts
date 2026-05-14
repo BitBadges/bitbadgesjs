@@ -8,7 +8,9 @@
  *   subscriptions enable-renewal   — single MsgUpdateUserApprovals (add recurring consent)
  *   subscriptions cancel           — single MsgUpdateUserApprovals (remove recurring consent)
  *   subscriptions subscribe        — multi-msg: claim + enable-renewal in one wrapper
- *   subscriptions build            — alias for `bb build subscription`
+ *
+ * Creator-side construction lives at `bb build subscription` — the
+ * per-standard `build` subcommand was removed in CLI v2 (#0399).
  *
  * Every subcommand validates conformance via the SDK validators before
  * emitting anything. enable-renewal / cancel additionally fetch the user's
@@ -201,7 +203,7 @@ function buildUpdateApprovalsMsg(
 // ── subscriptions (parent) ────────────────────────────────────────────────
 
 export const subscriptionsCommand = new Command('subscriptions').description(
-  'End-user surface for the Subscriptions standard — list tiers, check status, claim, enable / cancel renewal, build.'
+  'End-user surface for the Subscriptions standard — list tiers, check status, claim, enable / cancel renewal. Build new via `bb build subscription`.'
 );
 
 // ── subscriptions list ───────────────────────────────────────────────────
@@ -690,20 +692,5 @@ addOutputFlags(
   }
 );
 
-// ── subscriptions build (alias) ──────────────────────────────────────────
-
-subscriptionsCommand
-  .command('build')
-  .description(
-    'Alias for `bb build subscription` — creator-side: construct a CREATE-COLLECTION tx for a new subscription. All flags pass through (including --help).'
-  )
-  .helpOption(false)
-  .allowUnknownOption()
-  .allowExcessArguments()
-  .action(async () => {
-    const { buildCommand } = await import('./build.js');
-    const argv = process.argv;
-    const startIdx = argv.findIndex((a, i) => a === 'build' && argv[i - 1] === 'subscriptions');
-    const forward = startIdx >= 0 ? argv.slice(startIdx + 1) : [];
-    await buildCommand.parseAsync(['subscription', ...forward], { from: 'user' });
-  });
+// Per-standard `build` subcommand removed in CLI v2 (#0399).
+// Use `bb build subscription ...` (the canonical builder) instead.

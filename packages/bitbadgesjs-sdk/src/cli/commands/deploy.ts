@@ -346,9 +346,64 @@ export const deployCommand = new Command('deploy')
     '--wait-for-indexer [timeout-ms]',
     'After broadcast: poll the indexer until the created entity (collection / dynamic store) is visible, or until [timeout-ms] elapses (default 30000ms). Skipped when the tx has no recognizable entity id.'
   )
-  .option('--dry-run', 'Simulate the tx and print expected gas + balance changes; never broadcast.');
+  .option('--dry-run', 'Simulate the tx and print expected gas + balance changes; never broadcast.')
+  // --message + --gen-payload: absorbed modes from the v1 standalone
+  // `sign-with-browser` and `gen-tx-payload` commands (#0399). The former
+  // hands an arbitrary message to a browser wallet for personal-sign;
+  // the latter produces a signable tx payload from a msg JSON without
+  // signing or broadcasting. Both stay registered as deprecated
+  // top-level aliases for one release.
+  .option('--message <text>', 'With --browser: hand this message to the wallet for personal sign (no tx). Use with --message-file or a stdin pipe for long messages.')
+  .option('--message-file <path>', 'With --browser --message: read the message text from a file ("-" for stdin)')
+  .option('--gen-payload', 'Produce a signable tx payload (signDirect / legacyAmino / evmTx) without signing or broadcasting. Output mirrors createTransactionPayload() — pipe into any external signer (ethers, viem, hardware).')
+  // gen-payload-specific knobs. Mostly mirror gen-tx-payload's surface;
+  // duplication is intentional — keeps `deploy --gen-payload` self-contained
+  // and discoverable from one --help.
+  .option('--evm-from <0x...>', 'With --gen-payload: use this EVM address for the evmTx payload alongside a bb1 sender. Implies --with-evm-tx.')
+  .option('--with-evm-tx', 'With --gen-payload: force-emit the evmTx precompile call alongside Cosmos payloads.')
+  .option('--public-key <b64>', 'With --gen-payload: base64 compressed pubkey. Required if --no-fetch or account not yet on-chain.')
+  .option('--account-number <n>', 'With --gen-payload: override account number (skip indexer round-trip).')
+  .option('--sequence <n>', 'With --gen-payload: override sequence (skip indexer round-trip).')
+  .option('--chain-id <id>', 'With --gen-payload: Cosmos chain ID override (default per network).')
+  .option('--memo <text>', 'With --gen-payload: optional tx memo', '')
+  .option('--no-fetch', 'With --gen-payload: skip the indexer account-info round-trip; require --account-number, --sequence, and --public-key.');
 addNetworkOptions(deployCommand);
 deployCommand.action(async (input: string | undefined, opts: any) => {
+  // 0a. --gen-payload mode (absorbed from v1 `gen-tx-payload`) — produce
+  // a fully-populated signable tx payload from a msg JSON and exit. No
+  // wallet, no broadcast. Forwards to the gen-tx-payload action below so
+  // the implementation stays in one place.
+  if (opts.genPayload) {
+    if (opts.burner || opts.browser || opts.withKeyring) {
+      process.stderr.write('Error: --gen-payload does not sign or broadcast; cannot combine with --burner / --browser / --with-keyring.\n');
+      process.exit(2);
+    }
+    if (!opts.from) {
+      process.stderr.write('Error: --gen-payload requires --from <address>. Pass a bb1.../0x... signer; account info is auto-fetched from the indexer.\n');
+      process.exit(2);
+    }
+    const { runGenPayload } = await import('./gen-tx-payload.js');
+    await runGenPayload(input, opts);
+    return;
+  }
+
+  // 0b. --browser --message mode (absorbed from v1 `sign-with-browser`)
+  // — hand an arbitrary message to a connected wallet for personal-sign
+  // and return the signature/address as JSON. No tx, no chain side-effect.
+  if (opts.message || opts.messageFile) {
+    if (!opts.browser) {
+      process.stderr.write('Error: --message / --message-file require --browser. Personal-sign is the browser-bridge path.\n');
+      process.exit(2);
+    }
+    if (opts.burner || opts.withKeyring) {
+      process.stderr.write('Error: --message combined with --browser is mutually exclusive with --burner / --with-keyring.\n');
+      process.exit(2);
+    }
+    const { runBrowserPersonalSign } = await import('./sign-with-browser.js');
+    await runBrowserPersonalSign(input, opts);
+    return;
+  }
+
   // 0. Path selection — exactly one of --burner / --browser / --with-keyring.
   const useBurner = Boolean(opts.burner);
   const useBrowser = Boolean(opts.browser);
@@ -360,7 +415,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
   }
   if (pathsPicked === 0 && !opts.dryRun) {
     process.stderr.write(
-      'Error: pick a deploy path — --burner (throwaway signer), --browser (connected wallet via /sign), or --with-keyring --from <name> (chain-binary keyring).\n'
+      'Error: pick a deploy path — --burner (throwaway signer), --browser (connected wallet via /sign), --with-keyring --from <name> (chain-binary keyring), or --gen-payload (offline signing).\n'
     );
     process.exit(2);
   }

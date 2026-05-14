@@ -14,6 +14,11 @@
  * EVM payload is generated when `--evm-from <0x...>` is set, OR when
  * `--from` is itself a 0x-address (in which case the bb1-equivalent is
  * auto-derived for the Cosmos sender).
+ *
+ * v2 (#0399): absorbed into `bb deploy --gen-payload`. The standalone
+ * command stays registered as a deprecated alias for one release
+ * (wired in cli/index.ts); the shared `runGenPayload` helper is the
+ * single implementation invoked by both entry points.
  */
 
 import * as fs from 'fs';
@@ -24,6 +29,7 @@ import { createTransactionPayload } from '../../transactions/messages/base.js';
 import { encodeTokenizationMsgFromJson, supportedTokenizationTypeUrls } from '../../transactions/messages/bitbadges/tokenization/fromJson.js';
 import { evmToCosmosAddress } from '../../transactions/precompile/helpers.js';
 import { emit, emitError } from '../utils/envelope.js';
+import { emitDeprecation } from '../utils/deprecation.js';
 
 interface MsgEntry {
   typeUrl: string;
@@ -119,7 +125,19 @@ export const genTxPayloadCommand = new Command('gen-tx-payload')
   .option('--gas <number>', 'Gas limit', '400000')
   .option('--no-fetch', 'Skip the indexer account-info round-trip; require --account-number, --sequence, and --public-key via flags. Useful for offline / air-gapped flows.');
 addNetworkOptions(genTxPayloadCommand);
-genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => {
+/**
+ * Shared implementation invoked by both:
+ *   - `bb gen-tx-payload <input>` (legacy top-level alias)
+ *   - `bb deploy --gen-payload <input>` (v2 canonical home)
+ *
+ * Both entry points hand off identical opts; this function does the
+ * indexer-fetch + payload build + emit. Exported so deploy.ts can call
+ * it without duplicating the (long) implementation.
+ */
+export async function runGenPayload(
+  positional: string | undefined,
+  opts: any
+): Promise<void> {
   let messagesInput: MsgEntry[];
   try {
     const raw = readMsgInput({ input: positional, msgFile: opts.msgFile, msgStdin: opts.msgStdin });
@@ -308,4 +326,9 @@ genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => 
   ];
 
   emit(envelope);
+}
+
+genTxPayloadCommand.action(async (positional: string | undefined, opts: any) => {
+  emitDeprecation('bb gen-tx-payload', 'bb deploy --gen-payload');
+  await runGenPayload(positional, opts);
 });

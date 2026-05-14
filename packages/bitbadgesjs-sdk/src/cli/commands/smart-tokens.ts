@@ -68,8 +68,8 @@ function validateOrExit(collection: any, ctx: string): void {
 // ── smart-tokens (parent) ────────────────────────────────────────────────────
 
 export const smartTokensCommand = new Command('smart-tokens').description(
-  'End-user surface for the Smart Token standard — list / show / status / deposit / withdraw / build. ' +
-    'Smart Tokens are the unified primitive behind vaults, AI agent vaults, and tradable wrapped tokens.'
+  'End-user surface for the Smart Token standard — list / show / status / deposit / withdraw. ' +
+    'Build new via `bb build smart-token`. Smart Tokens are the unified primitive behind vaults, AI agent vaults, and tradable wrapped tokens.'
 );
 
 // ── smart-tokens list ────────────────────────────────────────────────────────
@@ -264,15 +264,5 @@ addOutputFlags(
   }
 );
 
-// ── smart-tokens build (alias for `bb build smart-token`) ────────────────────
-
-smartTokensCommand
-  .command('build')
-  .description('Alias — forwards to `bb build smart-token`. Use that for the full flag surface.')
-  .allowUnknownOption(true)
-  .action(() => {
-    process.stderr.write(
-      'smart-tokens build is an alias for `bb build smart-token`. Run that command directly for the full flag surface and review/simulate options.\n'
-    );
-    process.exit(0);
-  });
+// Per-standard `build` subcommand removed in CLI v2 (#0399).
+// Use `bb build smart-token ...` (the canonical builder) instead.

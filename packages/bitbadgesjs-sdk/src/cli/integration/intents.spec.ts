@@ -101,7 +101,10 @@ describe('intents integration', () => {
     );
     expect(fs.existsSync(tmp)).toBe(true);
 
-    const msg = JSON.parse(fs.readFileSync(tmp, 'utf-8'));
+    // Post-v2: build --output-file writes the universal envelope. Unwrap
+    // to get the raw msg. Tolerant of pre-envelope writers too.
+    const parsed = JSON.parse(fs.readFileSync(tmp, 'utf-8'));
+    const msg = parsed?.data ?? parsed;
     expect(msg.typeUrl).toBe('/tokenization.MsgSetOutgoingApproval');
     expect(msg.value.creator).toBe(creator.address);
     expect(msg.value.collectionId).toBe(LOCAL_INTENT_COLLECTION_ID);

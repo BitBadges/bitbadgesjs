@@ -52,8 +52,8 @@ describe('products integration', () => {
 
     runCli(
       [
-        'products',
         'build',
+        'product-catalog',
         '--store-address', store.address,
         '--products', PRODUCTS_JSON,
         '--name', 'Test Shop',

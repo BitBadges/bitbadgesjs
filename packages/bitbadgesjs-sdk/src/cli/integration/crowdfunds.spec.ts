@@ -75,8 +75,8 @@ describe('crowdfunds integration', () => {
 
     runCli(
       [
-        'crowdfunds',
         'build',
+        'crowdfund',
         '--goal', String(GOAL_DISPLAY),
         '--denom', 'USDC',
         '--crowdfunder', crowdfunder.address,

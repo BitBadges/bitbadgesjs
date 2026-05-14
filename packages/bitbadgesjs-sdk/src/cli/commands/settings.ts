@@ -8,13 +8,20 @@ import {
 } from '../utils/config.js';
 import { assertNetworkAvailable } from '../../signing/types.js';
 
-export const configCommand = new Command('config').description(
-  'Manage CLI configuration (~/.bitbadges/config.json)'
+// CLI v2 (#0399) renamed `bb config` → `bb settings` to free the
+// `config` slot for the chain binary's client.toml management once the
+// flat namespace ships. The internal export name `settingsCommand` and
+// the public command name `settings` mirror the docs; the old top-level
+// `bb config ...` form is registered as a deprecated alias in
+// cli/index.ts for one release.
+
+export const settingsCommand = new Command('settings').description(
+  'Manage CLI settings (~/.bitbadges/config.json)'
 );
 
-// ── config show ──────────────────────────────────────────────────────────────
+// ── settings show ───────────────────────────────────────────────────────────
 
-configCommand
+settingsCommand
   .command('show')
   .description('Print current configuration')
   .action(() => {
@@ -36,9 +43,9 @@ configCommand
     }
   });
 
-// ── config set <key> <value> ─────────────────────────────────────────────────
+// ── settings set <key> <value> ─────────────────────────────────────────────────
 
-configCommand
+settingsCommand
   .command('set <key> <value>')
   .description(`Set a config value. Supported keys: ${SUPPORTED_CONFIG_KEYS.join(', ')}`)
   .action((key: string, value: string) => {
@@ -75,9 +82,9 @@ configCommand
     console.log(`Set ${key} = ${key.startsWith('apiKey') ? maskKey(value) : value}`);
   });
 
-// ── config unset <key> ───────────────────────────────────────────────────────
+// ── settings unset <key> ───────────────────────────────────────────────────────
 
-configCommand
+settingsCommand
   .command('unset <key>')
   .description('Remove a config value')
   .action((key: string) => {

@@ -10,7 +10,8 @@ import { creditTokensCommand } from './credit-tokens.js';
 describe('creditTokensCommand shape', () => {
   it('exposes the documented subcommand verbs', () => {
     const names = creditTokensCommand.commands.map((c) => c.name()).sort();
-    expect(names).toEqual(['build', 'list', 'purchase', 'show']);
+    // Per-standard `build` removed in CLI v2 (#0399); use `bb build credit-token`.
+    expect(names).toEqual(['list', 'purchase', 'show']);
   });
 
   it('purchase requires --creator and --units', () => {
@@ -34,10 +35,9 @@ describe('creditTokensCommand shape', () => {
     }
   });
 
-  it('build alias is registered and points at `bb build credit-token`', () => {
+  it('no longer registers a `build` subcommand — use `bb build credit-token` instead', () => {
     const build = creditTokensCommand.commands.find((c) => c.name() === 'build');
-    expect(build).toBeDefined();
-    expect(build!.description()).toMatch(/Alias for `bb build credit-token`/);
+    expect(build).toBeUndefined();
   });
 
   it('every verb supports the network + output flags', () => {

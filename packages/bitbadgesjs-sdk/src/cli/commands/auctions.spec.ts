@@ -10,9 +10,9 @@ import { auctionsCommand } from './auctions.js';
 describe('auctionsCommand shape', () => {
   it('exposes the documented subcommand verbs', () => {
     const names = auctionsCommand.commands.map((c) => c.name()).sort();
+    // Per-standard `build` removed in CLI v2 (#0399); use `bb build auction`.
     expect(names).toEqual([
       'accept-bid',
-      'build',
       'cancel-bid',
       'list',
       'place-bid',
@@ -62,9 +62,8 @@ describe('auctionsCommand shape', () => {
     }
   });
 
-  it('build alias is registered and points at `bb build auction`', () => {
+  it('no longer registers a `build` subcommand — use `bb build auction` instead', () => {
     const build = auctionsCommand.commands.find((c) => c.name() === 'build');
-    expect(build).toBeDefined();
-    expect(build!.description()).toMatch(/Alias for `bb build auction`/);
+    expect(build).toBeUndefined();
   });
 });

@@ -54,7 +54,7 @@ function validateOrExit(collection: any, ctx: string): void {
 }
 
 export const auctionsCommand = new Command('auctions').description(
-  'End-user surface for the Auction standard — list / show / status / place-bid / cancel-bid / accept-bid / build.'
+  'End-user surface for the Auction standard — list / show / status / place-bid / cancel-bid / accept-bid. Build new via `bb build auction`.'
 );
 
 addOutputFlags(
@@ -237,14 +237,5 @@ addOutputFlags(
   }
 );
 
-auctionsCommand
-  .command('build')
-  .description('Alias for `bb build auction` — creator-side: construct a CREATE-COLLECTION tx for a new auction.')
-  .helpOption(false).allowUnknownOption().allowExcessArguments()
-  .action(async () => {
-    const { buildCommand } = await import('./build.js');
-    const argv = process.argv;
-    const startIdx = argv.findIndex((a, i) => a === 'build' && argv[i - 1] === 'auctions');
-    const forward = startIdx >= 0 ? argv.slice(startIdx + 1) : [];
-    await buildCommand.parseAsync(['auction', ...forward], { from: 'user' });
-  });
+// Per-standard `build` subcommand removed in CLI v2 (#0399).
+// Use `bb build auction ...` (the canonical builder) instead.

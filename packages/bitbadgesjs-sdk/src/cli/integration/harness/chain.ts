@@ -45,13 +45,32 @@ export async function deployMsgViaKeyring(
   const cliEntry = path.resolve(__dirname, '../../../../dist/cjs/cli/index.js');
   const networkFlag = `--${network}`;
 
-  // 1. Print the chain-binary command.
+  // 1. Print the chain-binary command. Post-#0398 the deploy command emits
+  // the universal envelope JSON; extract `data.commandLine` and write it
+  // to the script file for bash to execute.
   const scriptPath = path.join(os.tmpdir(), `bb-deploy-${crypto.randomBytes(4).toString('hex')}.sh`);
-  execFileSync(
+  const printStdout = execFileSync(
     'node',
     [cliEntry, 'deploy', '--with-keyring', '--from', signerName, '--keyring-backend', env.keyringBackend, '--msg-file', msgFilePath, networkFlag, ...extraDeployFlags],
-    { stdio: ['ignore', fs.openSync(scriptPath, 'w'), 'pipe'], encoding: 'utf-8', env: { ...process.env, BB_QUIET: '1' }, timeout: 15000 }
+    { encoding: 'utf-8', env: { ...process.env, BB_QUIET: '1' }, timeout: 15000 }
   );
+  let commandLine: string;
+  try {
+    const env0398 = JSON.parse(printStdout);
+    if (!env0398?.ok || typeof env0398?.data?.commandLine !== 'string') {
+      throw new Error(`deploy --with-keyring envelope missing data.commandLine:\n${printStdout.slice(0, 800)}`);
+    }
+    commandLine = env0398.data.commandLine;
+  } catch (e) {
+    // Pre-#0398 fallback: stdout was the raw shell command. Keep working
+    // if the envelope is ever disabled.
+    if (printStdout.trim().startsWith('bitbadgeschaind ')) {
+      commandLine = printStdout;
+    } else {
+      throw e;
+    }
+  }
+  fs.writeFileSync(scriptPath, commandLine + '\n');
 
   // 2. Execute the printed command. Retry once on "account sequence
   // mismatch" — concurrent specs under --runInBand can still see stale

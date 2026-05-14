@@ -1,24 +1,36 @@
 /**
- * `bitbadges-cli portfolio` — read-only user-snapshot surface that mirrors
- * the FE `/account/[addressOrUsername]` page.
+ * `bitbadges-cli account` — read-only user-snapshot surface that mirrors
+ * the FE `/account/[addressOrUsername]` page, plus the address-utility
+ * subcommands absorbed under v2 (`convert`, `validate`, `lookup`,
+ * `alias`, `gen-list-id`).
  *
- *   bb portfolio all        — bundle of every section (parallel fetch)
- *   bb portfolio account    — /user
- *   bb portfolio tokens     — /account/:addr/tokens (collected/created/managing)
- *   bb portfolio balances   — /account/:addr/balances (lean balance docs)
- *   bb portfolio assets     — POST /swap/balances (Skip:Go + verified BB)
- *   bb portfolio activity   — /account/:addr/activity/{tokens,claims,points}
- *   bb portfolio approvals  — POST /collection/:id/filterApprovals
+ *   bb account all         — bundle of every section (parallel fetch)
+ *   bb account me          — `all` against the active auth-session address
+ *   bb account profile     — /user
+ *   bb account tokens      — /account/:addr/tokens (collected/created/managing)
+ *   bb account balances    — /account/:addr/balances (lean balance docs)
+ *   bb account assets      — POST /swap/balances (Skip:Go + verified BB)
+ *   bb account activity    — /account/:addr/activity/{tokens,claims,points}
+ *   bb account approvals   — POST /collection/:id/filterApprovals
  *                              (the "Approvals" tab — subscriptions,
  *                              listings, bids, payments, etc.)
+ *   bb account convert     — address conversion (bb1 ↔ 0x)
+ *   bb account validate    — address validation + chain detection
+ *   bb account lookup      — token symbol lookup
+ *   bb account alias       — protocol-derived alias addresses
+ *   bb account gen-list-id — reserved address list id
  *
- * Every subcommand is a thin wrapper over an indexer route that already
- * has a CLI surface elsewhere; the value-add is the verb-shape: a single
- * verb tree where you don't have to know which API noun owns which view.
+ * Every read-only subcommand is a thin wrapper over an indexer route
+ * that already has a CLI surface elsewhere; the value-add is the
+ * verb-shape: a single verb tree where you don't have to know which
+ * API noun owns which view.
  *
- * The `all` aggregator parallels everything and folds per-section failures
- * to `{error: "..."}` rather than aborting — partial data beats no data
- * for read-only inspection.
+ * The `all` aggregator parallels everything and folds per-section
+ * failures to `{error: "..."}` rather than aborting — partial data
+ * beats no data for read-only inspection.
+ *
+ * Renamed from `portfolio` for v2 (#0399). The old top-level
+ * `bb portfolio ...` form is kept as a deprecated alias for one release.
  */
 
 import { Command } from 'commander';
@@ -32,6 +44,11 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1Address } from '../utils/address.js';
+import {
+  addOutputOptions as addOutputOptionsEnv,
+  emit as emitEnv,
+  emitError as emitErrorEnv,
+} from '../utils/envelope.js';
 
 // ── shared section fetchers ─────────────────────────────────────────────────
 //
@@ -211,27 +228,32 @@ async function safeCall<T>(label: string, fn: () => Promise<T>): Promise<T | { e
 
 // ── parent ──────────────────────────────────────────────────────────────────
 
-export const portfolioCommand = new Command('portfolio').description(
+export const accountCommand = new Command('account').description(
   [
-    'Read-only user-snapshot views — mirrors what bitbadges.io/account/<addressOrUsername> shows.',
-    'Use `all` for a single-call bundle, or pick a subcommand for one section.'
+    'Read-only user views (mirrors bitbadges.io/account/<addr>) + address utilities.',
+    'Use `all` / `me` for a bundle, or pick a subcommand for one section.'
   ].join('\n  ')
 );
 
-// ── account ─────────────────────────────────────────────────────────────────
+// ── profile ─────────────────────────────────────────────────────────────────
+//
+// Renamed from `account` (v1: `bb portfolio account`) to disambiguate
+// against the new parent. Wraps GET /user — returns the user profile
+// document plus LCD bank balances.
 
-interface AccountFlags extends NetworkFlags, OutputFlags {
+interface ProfileFlags extends NetworkFlags, OutputFlags {
   address: string;
 }
 
 addOutputFlags(
   addNetworkFlags(
-    portfolioCommand
-      .command('account')
+    accountCommand
+      .command('profile')
+      .aliases(['account'])
       .description('Fetch profile + on-chain LCD bank balances. Wraps GET /user.')
       .requiredOption('--address <addr>', 'Address to look up (bb1.../0x — auto-normalized to bb1)')
   )
-).action(async (opts: AccountFlags) => {
+).action(async (opts: ProfileFlags) => {
   try {
     const address = requireBb1Address(opts.address, '--address');
     const res = await fetchAccount(address, opts);
@@ -252,7 +274,7 @@ interface TokensFlags extends NetworkFlags, OutputFlags {
 
 addOutputFlags(
   addNetworkFlags(
-    portfolioCommand
+    accountCommand
       .command('tokens')
       .description(
         [
@@ -302,7 +324,7 @@ interface BalancesFlags extends NetworkFlags, OutputFlags {
 
 addOutputFlags(
   addNetworkFlags(
-    portfolioCommand
+    accountCommand
       .command('balances')
       .description(
         [
@@ -334,7 +356,7 @@ interface AssetsFlags extends NetworkFlags, OutputFlags {
 
 addOutputFlags(
   addNetworkFlags(
-    portfolioCommand
+    accountCommand
       .command('assets')
       .description(
         [
@@ -371,7 +393,7 @@ interface ActivityFlags extends NetworkFlags, OutputFlags {
 
 addOutputFlags(
   addNetworkFlags(
-    portfolioCommand
+    accountCommand
       .command('activity')
       .description(
         [
@@ -419,7 +441,7 @@ interface ApprovalsFlags extends NetworkFlags, OutputFlags, ApprovalsFilterFlags
 
 addOutputFlags(
   addNetworkFlags(
-    portfolioCommand
+    accountCommand
       .command('approvals')
       .description(
         [
@@ -490,7 +512,7 @@ function parseSectionList(value: string | undefined, flag: string): Set<Section>
 
 addOutputFlags(
   addNetworkFlags(
-    portfolioCommand
+    accountCommand
       .command('all')
       .description(
         [
@@ -576,5 +598,239 @@ addOutputFlags(
   } catch (err) {
     emitError(err);
   }
+});
+
+// ── me (active-session shortcut) ────────────────────────────────────────────
+//
+// Resolves the active auth session's address (from `bb auth login`) and
+// runs the `all` aggregator against it. Saves copy-pasting one's own
+// address into every read-only command. Errors crisply when there's no
+// session — `bb auth login` is the obvious next step.
+
+addOutputFlags(
+  addNetworkFlags(
+    accountCommand
+      .command('me')
+      .description('`all` against the active auth-session address. Run `bb auth login` first.')
+      .option('--include <list>', 'Comma-separated subset of sections (default: all)')
+      .option('--exclude <list>', 'Comma-separated sections to skip')
+      .option('--chain <id>', "Chain ID for the 'assets' section (default: bitbadges-1)")
+      .option('--all-chains', "Query a broad Skip:Go chain set for 'assets'", false)
+  )
+).action(async (opts: any) => {
+  try {
+    const { resolveNetwork } = await import('../utils/io.js');
+    const { getActiveSession } = await import('../utils/auth-store.js');
+    const network = resolveNetwork(opts);
+    const session = getActiveSession(network);
+    if (!session) {
+      process.stderr.write(
+        `Error: no active auth session on ${network}. Run \`bb auth login\` first, or pass --address explicitly to \`bb account all\`.\n`
+      );
+      process.exit(2);
+    }
+    // Delegate to the `all` subcommand with the resolved address injected.
+    const all = accountCommand.commands.find((c) => c.name() === 'all');
+    if (!all) {
+      throw new Error('internal: account `all` subcommand missing');
+    }
+    // Build a fresh argv slice: --address <session.address> plus passthrough flags
+    const argv: string[] = ['--address', session.address];
+    if (opts.include) argv.push('--include', String(opts.include));
+    if (opts.exclude) argv.push('--exclude', String(opts.exclude));
+    if (opts.chain) argv.push('--chain', String(opts.chain));
+    if (opts.allChains) argv.push('--all-chains');
+    // Preserve indexer + output flags. Commander stores them on `opts` as
+    // camelCase; the parser accepts the dasherized long-form, so this
+    // just walks the explicit list of flags we want forwarded.
+    if (opts.network) argv.push('--network', String(opts.network));
+    if (opts.testnet) argv.push('--testnet');
+    if (opts.local) argv.push('--local');
+    if (opts.url) argv.push('--url', String(opts.url));
+    if (opts.apiKey) argv.push('--api-key', String(opts.apiKey));
+    if (opts.outputFile) argv.push('--output-file', String(opts.outputFile));
+    if (opts.condensed) argv.push('--condensed');
+    await all.parseAsync(argv, { from: 'user' });
+  } catch (err) {
+    emitError(err);
+  }
+});
+
+// ── convert / validate (absorbed from `bb address`) ─────────────────────────
+
+addOutputOptionsEnv(
+  accountCommand
+    .command('convert <address>')
+    .description('Convert an address between bb1 and 0x formats. Auto-detects target from input if --to omitted.')
+    .option('--to <format>', 'Target format: bb1 or 0x. Default: opposite of the input.')
+).action(async (address: string, opts: { to?: string; condensed?: boolean; outputFile?: string }) => {
+  const { convertToBitBadgesAddress, convertToEthAddress } = await import('../../address-converter/converter.js');
+
+  const to = opts.to ?? (address.startsWith('0x') ? 'bb1' : address.startsWith('bb') ? '0x' : '');
+  if (to !== 'bb1' && to !== '0x') {
+    emitErrorEnv(new Error(`Could not infer target format from "${address}". Pass --to bb1 or --to 0x.`), {
+      code: 'invalid_target',
+      exitCode: 2
+    });
+  }
+
+  const result = to === 'bb1' ? convertToBitBadgesAddress(address) : convertToEthAddress(address);
+  if (!result) {
+    emitErrorEnv(new Error(`Could not convert "${address}". Verify it is a well-formed bb1.../0x... address.`), {
+      code: 'invalid_address',
+      exitCode: 2
+    });
+  }
+  emitEnv({ result, source: address, target: to }, opts);
+});
+
+addOutputOptionsEnv(
+  accountCommand
+    .command('validate <address>')
+    .description('Validate an address and detect its chain. Exits 0 when valid, 2 when invalid.')
+).action(async (address: string, opts: { condensed?: boolean; outputFile?: string }) => {
+  const { isAddressValid, getChainForAddress } = await import('../../address-converter/converter.js');
+  const valid = isAddressValid(address);
+  const chain = getChainForAddress(address);
+  const chainLabel = chain === 'Cosmos' ? 'BitBadges' : chain === 'ETH' ? 'Ethereum' : 'Unknown';
+  emitEnv({ valid, chain: chainLabel, address }, opts);
+  if (!valid) process.exit(2);
+});
+
+// ── lookup (absorbed from top-level) ────────────────────────────────────────
+
+addOutputOptionsEnv(
+  accountCommand
+    .command('lookup')
+    .description('Look up token info by symbol — IBC denom, decimals, backing address. Omit symbol to list all.')
+    .argument('[symbol]', 'Token symbol (e.g. USDC, BADGE). Omit to list all known tokens.')
+).action(async (symbol: string | undefined, opts: { outputFile?: string; condensed?: boolean }) => {
+  const { MAINNET_COINS_REGISTRY, TESTNET_COINS_REGISTRY } = await import('../../common/constants.js');
+
+  const allSymbols = new Map<string, { symbol: string; ibcDenom: string; decimals: number; networks: string[] }>();
+
+  for (const [denom, coin] of Object.entries(MAINNET_COINS_REGISTRY)) {
+    const key = coin.symbol.toUpperCase();
+    const existing = allSymbols.get(key);
+    if (existing) {
+      if (!existing.networks.includes('mainnet')) existing.networks.push('mainnet');
+    } else {
+      allSymbols.set(key, { symbol: coin.symbol, ibcDenom: denom, decimals: Number(coin.decimals), networks: ['mainnet'] });
+    }
+  }
+
+  for (const [denom, coin] of Object.entries(TESTNET_COINS_REGISTRY)) {
+    const key = coin.symbol.toUpperCase();
+    const existing = allSymbols.get(key);
+    if (existing) {
+      if (!existing.networks.includes('testnet')) existing.networks.push('testnet');
+    } else {
+      allSymbols.set(key, { symbol: coin.symbol, ibcDenom: denom, decimals: Number(coin.decimals), networks: ['testnet'] });
+    }
+  }
+
+  if (!symbol) {
+    const tokens = Array.from(allSymbols.values()).map((t) => ({
+      symbol: t.symbol,
+      ibcDenom: t.ibcDenom,
+      decimals: t.decimals,
+      networks: t.networks
+    }));
+    emitEnv({ tokens }, opts);
+    return;
+  }
+
+  const entry = allSymbols.get(symbol.toUpperCase());
+  if (!entry) {
+    emitErrorEnv(
+      new Error(`Unknown token "${symbol}". Known tokens: ${Array.from(allSymbols.keys()).join(', ')}`),
+      { code: 'unknown_token', exitCode: 1 }
+    );
+  }
+
+  let backingAddress = '';
+  if (entry!.ibcDenom.startsWith('ibc/')) {
+    const { generateAliasAddressForIBCBackedDenom } = await import('../../core/aliases.js');
+    backingAddress = generateAliasAddressForIBCBackedDenom(entry!.ibcDenom);
+  }
+
+  emitEnv(
+    {
+      symbol: entry!.symbol,
+      ibcDenom: entry!.ibcDenom,
+      decimals: entry!.decimals,
+      networks: entry!.networks,
+      ...(backingAddress ? { backingAddress } : {})
+    },
+    opts
+  );
+});
+
+// ── alias (absorbed from top-level) ─────────────────────────────────────────
+//
+// Three sub-subcommands mirror the standalone `alias` command exactly.
+
+const aliasSubCommand = accountCommand.command('alias').description('Generate protocol-derived alias addresses.');
+
+addOutputOptionsEnv(
+  aliasSubCommand
+    .command('for-ibc-backing <ibcDenom>')
+    .description('Generate backing address for an IBC-backed smart token (uses BackedPathGenerationPrefix)')
+).action(async (ibcDenom: string, opts: { condensed?: boolean; outputFile?: string }) => {
+  const { generateAliasAddressForIBCBackedDenom } = await import('../../core/aliases.js');
+  const address = generateAliasAddressForIBCBackedDenom(ibcDenom);
+  emitEnv({ address, kind: 'ibc-backing', source: ibcDenom }, opts);
+});
+
+addOutputOptionsEnv(
+  aliasSubCommand
+    .command('for-wrapper <denom>')
+    .description('Generate wrapper path address for a cosmos coin wrapper (uses DenomGenerationPrefix)')
+).action(async (denom: string, opts: { condensed?: boolean; outputFile?: string }) => {
+  const { generateAliasAddressForDenom } = await import('../../core/aliases.js');
+  const address = generateAliasAddressForDenom(denom);
+  emitEnv({ address, kind: 'wrapper', source: denom }, opts);
+});
+
+addOutputOptionsEnv(
+  aliasSubCommand
+    .command('for-mint-escrow <collectionId>')
+    .description('Generate mint escrow address for a collection')
+).action(async (collectionId: string, opts: { condensed?: boolean; outputFile?: string }) => {
+  const { getAliasDerivationKeysForCollection, generateAlias } = await import('../../core/aliases.js');
+  const derivationKeys = getAliasDerivationKeysForCollection(collectionId);
+  const address = generateAlias('badges', derivationKeys);
+  emitEnv({ address, kind: 'mint-escrow', source: collectionId }, opts);
+});
+
+// ── gen-list-id (absorbed from top-level) ───────────────────────────────────
+
+addOutputOptionsEnv(
+  accountCommand
+    .command('gen-list-id')
+    .description('Generate a reserved address list ID from a set of addresses.')
+    .argument('<addresses...>', 'One or more addresses to include in the list')
+    .option('--blacklist', 'Treat as blacklist (default is whitelist)')
+).action(async (addresses: string[], opts: { blacklist?: boolean; condensed?: boolean; outputFile?: string }) => {
+  const { generateReservedListId } = await import('../../core/addressLists.js');
+  const { isAddressValid } = await import('../../address-converter/converter.js');
+
+  const invalid = addresses.filter((a) => !isAddressValid(a));
+  if (invalid.length > 0) {
+    emitErrorEnv(
+      new Error(`invalid address(es): ${invalid.join(', ')}. Expected bb1... or 0x... format.`),
+      { code: 'invalid_address', exitCode: 2 }
+    );
+  }
+
+  const whitelist = !opts.blacklist;
+  const listId = generateReservedListId({
+    listId: '',
+    addresses,
+    whitelist,
+    uri: '',
+    customData: ''
+  });
+  emitEnv({ listId, mode: whitelist ? 'whitelist' : 'blacklist', addresses }, opts);
 });
 

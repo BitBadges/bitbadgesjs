@@ -50,8 +50,8 @@ describe('subscriptions integration', () => {
 
     runCli(
       [
-        'subscriptions',
         'build',
+        'subscription',
         '--interval', 'monthly',
         '--price', '10',
         '--denom', 'USDC',

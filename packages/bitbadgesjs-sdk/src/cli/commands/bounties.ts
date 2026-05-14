@@ -8,7 +8,9 @@
  *   bounties deny          — verifier action: same 2-msg shape targeting the deny approval
  *   bounties claim-refund  — single MsgTransferTokens against the expire approval (post-deadline)
  *   bounties status        — resolve accepted / denied / pending / expired
- *   bounties build         — alias for `bb build bounty`
+ *
+ * Creator-side construction lives at `bb build bounty` — the
+ * per-standard `build` subcommand was removed in CLI v2 (#0399).
  *
  * Every subcommand validates conformance via the SDK validators before
  * emitting anything. Accept/deny output is a multi-msg tx wrapper
@@ -73,7 +75,7 @@ function resolveStatus(collection: any, expirationTime: bigint): BountyStatus {
 // ── bounties (parent) ────────────────────────────────────────────────────
 
 export const bountiesCommand = new Command('bounties').description(
-  'End-user surface for the Bounty standard — list / show / accept / deny / claim-refund / status / build. Accept and deny emit a {messages:[vote, transfer]} multi-msg tx wrapper.'
+  'End-user surface for the Bounty standard — list / show / accept / deny / claim-refund / status. Build new via `bb build bounty`. Accept and deny emit a {messages:[vote, transfer]} multi-msg tx wrapper.'
 );
 
 // ── bounties list ────────────────────────────────────────────────────────
@@ -284,18 +286,5 @@ addOutputFlags(
   }
 });
 
-// ── bounties build (alias) ───────────────────────────────────────────────
-
-bountiesCommand
-  .command('build')
-  .description('Alias for `bb build bounty` — creator-side: construct a CREATE-COLLECTION tx for a new Bounty. All flags pass through (including --help).')
-  .helpOption(false)
-  .allowUnknownOption()
-  .allowExcessArguments()
-  .action(async () => {
-    const { buildCommand } = await import('./build.js');
-    const argv = process.argv;
-    const startIdx = argv.findIndex((a, i) => a === 'build' && argv[i - 1] === 'bounties');
-    const forward = startIdx >= 0 ? argv.slice(startIdx + 1) : [];
-    await buildCommand.parseAsync(['bounty', ...forward], { from: 'user' });
-  });
+// Per-standard `build` subcommand removed in CLI v2 (#0399).
+// Use `bb build bounty ...` (the canonical builder) instead.
