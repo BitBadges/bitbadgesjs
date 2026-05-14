@@ -58,9 +58,10 @@ describe('integration harness sanity', () => {
     }
     // throwOnError: false → should NOT throw, return result with exitCode possibly 0 or non-zero.
     expect(threw).toBe(false);
-    // With invalid input, the validator returns valid=false but exit code is 0.
+    // With invalid input, the validator emits {valid: false} on stdout AND
+    // exits 2 — by design, so shell scripts can `if bb account validate $x`.
     const out = runCli(['address', 'validate', 'garbage'], { throwOnError: false });
-    expect(out.exitCode).toBe(0);
+    expect(out.exitCode).toBe(2);
     expect(out.json).toMatchObject({ valid: false });
   });
 });
