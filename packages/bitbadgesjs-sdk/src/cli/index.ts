@@ -151,6 +151,19 @@ program
   .description('BitBadges CLI — flat verb-first surface for building, inspecting, and shipping token transactions')
   .version('0.1.0');
 
+// ── Policies disclaimer ──────────────────────────────────────────────────────
+//
+// Every `--help` invocation ends with a link to the published terms /
+// privacy / acceptable-use policies. Required for production CLIs that
+// emit user-attributable content (feedback submissions, on-chain txs,
+// hosted-API calls). Mirrored copy lives at bitbadges-frontend's
+// pages/policies.tsx.
+program.addHelpText(
+  'after',
+  '\nTerms, privacy, and acceptable-use policies: https://bitbadges.io/policies\n' +
+  'By using `bitbadges-cli` you agree to the policies linked above.\n'
+);
+
 // ── Global options ───────────────────────────────────────────────────────────
 //
 // --help-json is parsed below by inspecting argv directly (Commander
