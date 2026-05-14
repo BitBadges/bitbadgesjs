@@ -301,6 +301,36 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
 const completionCommand = makeCompletionCommand(program);
 HELP_GROUPS.push({ title: 'Misc', commands: [completionCommand] });
 
+// ── Per-standard `build` alias subcommands ──────────────────────────────────
+//
+// Each standard parent gains a `build` subcommand that forwards to the
+// canonical `bb build <type>`. Restores v1 ergonomics (`bb auctions build
+// ...` works the same as `bb build auction ...`) while keeping the
+// single source of truth for build logic. Standards without a 1:1 build
+// counterpart (nfts, dynamic-stores) are skipped.
+import { makeBuildAlias } from './utils/build-alias.js';
+const STANDARD_BUILD_ALIASES: Record<string, string> = {
+  auctions: 'auction',
+  bounties: 'bounty',
+  crowdfunds: 'crowdfund',
+  'credit-tokens': 'credit-token',
+  intents: 'intent',
+  'pay-requests': 'payment-request',
+  'prediction-markets': 'prediction-market',
+  products: 'product-catalog',
+  'smart-tokens': 'smart-token',
+  subscriptions: 'subscription'
+};
+const standardsByName = new Map<string, Command>();
+for (const group of HELP_GROUPS) {
+  for (const cmd of group.commands) standardsByName.set(cmd.name(), cmd);
+}
+for (const [standardName, buildSubtype] of Object.entries(STANDARD_BUILD_ALIASES)) {
+  const parent = standardsByName.get(standardName);
+  if (!parent) continue;
+  parent.addCommand(makeBuildAlias(buildSubtype, buildCommand));
+}
+
 // ── Register every command at the top level ─────────────────────────────────
 
 for (const group of HELP_GROUPS) {
