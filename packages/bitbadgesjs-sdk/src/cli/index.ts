@@ -615,7 +615,22 @@ if (process.argv.includes('--help-json')) {
   const buf = Buffer.from(json, 'utf-8');
   let written = 0;
   while (written < buf.length) {
-    written += fs.writeSync(1, buf, written, buf.length - written);
+    try {
+      written += fs.writeSync(1, buf, written, buf.length - written);
+    } catch (err: any) {
+      // The parent (e.g. spawnSync, test harness) may not have drained
+      // its pipe buffer yet for a large JSON tree. EAGAIN means the
+      // pipe is momentarily full — yield once with a short sleep so
+      // the reader can catch up, then retry.
+      if (err?.code === 'EAGAIN') {
+        // Synchronous-yield via Atomics.wait so we don't fall through
+        // to the rest of the module before retrying.
+        const sab = new SharedArrayBuffer(4);
+        Atomics.wait(new Int32Array(sab), 0, 0, 10);
+        continue;
+      }
+      throw err;
+    }
   }
   process.exit(0);
 }
