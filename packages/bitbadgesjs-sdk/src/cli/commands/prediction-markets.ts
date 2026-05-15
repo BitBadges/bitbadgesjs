@@ -27,7 +27,7 @@ import { requireBb1AddressStrict } from '../utils/address.js';
 import { bbError, BBErrorCode } from '../utils/envelope.js';
 import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import { resolveAmount } from '../utils/amount.js';
-import { resolveExpiry } from '../utils/expiry-options.js';
+import { addExpiryOption, resolveExpiry } from '../utils/expiry-options.js';
 import {
   validatePredictionMarketCollection,
   classifySettlementApproval,
@@ -191,7 +191,7 @@ addOutputFlags(
 function buyAction(side: 'yes' | 'no') {
   return async (
     collectionId: string,
-    opts: NetworkFlags & OutputFlags & { creator: string; tokenAmount: string; paymentAmount: string; denom: string; baseUnits?: boolean; expiry?: string; approvalId?: string }
+    opts: NetworkFlags & OutputFlags & { creator: string; tokenAmount: string; paymentAmount: string; denom: string; baseUnits?: boolean; expiration?: string; expiry?: string; approvalId?: string }
   ) => {
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
@@ -222,7 +222,7 @@ function buyAction(side: 'yes' | 'no') {
 function sellAction(side: 'yes' | 'no') {
   return async (
     collectionId: string,
-    opts: NetworkFlags & OutputFlags & { creator: string; tokenAmount: string; paymentAmount: string; denom: string; baseUnits?: boolean; expiry?: string; approvalId?: string }
+    opts: NetworkFlags & OutputFlags & { creator: string; tokenAmount: string; paymentAmount: string; denom: string; baseUnits?: boolean; expiration?: string; expiry?: string; approvalId?: string }
   ) => {
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
@@ -251,6 +251,7 @@ function sellAction(side: 'yes' | 'no') {
 }
 
 const tradeOpts = (cmd: Command, side: 'yes' | 'no', dir: 'buy' | 'sell') =>
+  addExpiryOption(
   cmd
     .description(
       `Emit Msg${dir === 'buy' ? 'SetIncomingApproval' : 'SetOutgoingApproval'} that ${dir === 'buy' ? 'buys' : 'sells'} ${side.toUpperCase()} tokens (token-id ${side === 'yes' ? '1' : '2'}). Pipe to \`bb deploy\`.`
@@ -261,13 +262,13 @@ const tradeOpts = (cmd: Command, side: 'yes' | 'no', dir: 'buy' | 'sell') =>
     .requiredOption('--payment-amount <n>', 'Payment side amount. Display units for symbol denoms, base units for chain denoms. Use --base-units to force base-units.')
     .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...) or badgeslp:* alias.')
     .option('--base-units', 'Treat --payment-amount as already-in-base-units')
-    .option('--expiry <when>', 'Approval expiry: ms-since-epoch or duration (24h, 7d). Default 24h.')
-    .option('--approval-id <id>', 'Override the random approval id');
+    .option('--approval-id <id>', 'Override the random approval id'),
+  { description: 'Approval expiry: ms-since-epoch or duration (24h, 7d). Default 24h.' });
 
 addDeployOptions(addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-yes'), 'yes', 'buy')))).action(buyAction('yes')).addHelpText('after', `
 Examples:
   $ bb prediction-markets buy-yes 55 --creator bb1trader...xyz --token-amount 100 --payment-amount 40 --denom USDC | bb deploy
-  $ bb prediction-markets buy-yes 55 --creator bb1trader...xyz --token-amount 100 --payment-amount 40 --denom USDC --expiry 7d | bb deploy
+  $ bb prediction-markets buy-yes 55 --creator bb1trader...xyz --token-amount 100 --payment-amount 40 --denom USDC --expiration 7d | bb deploy
 `);
 addDeployOptions(addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-no'), 'no', 'buy')))).action(buyAction('no')).addHelpText('after', `
 Examples:

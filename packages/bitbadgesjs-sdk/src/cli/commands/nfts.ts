@@ -29,7 +29,7 @@ import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js'
 import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import { requireBbDenom } from '../utils/denom.js';
 import { resolveAmount } from '../utils/amount.js';
-import { resolveExpiry } from '../utils/expiry-options.js';
+import { addExpiryOption, resolveExpiry } from '../utils/expiry-options.js';
 import {
   buildOrderbookBidApproval,
   buildOrderbookListingApproval,
@@ -47,6 +47,7 @@ export const nftsCommand = new Command('nfts').description(
 addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
+    addExpiryOption(
     nftsCommand
       .command('bid')
       .description(
@@ -59,16 +60,16 @@ addOutputFlags(
       .option('--base-units', 'Treat --price as already-in-base-units')
       .option('--token-id <n>', 'Specific token ID to bid on (omit for collection-wide bid)')
       .option('--token-amount <n>', 'Number of tokens (default 1)', '1')
-      .option('--expiry <when>', 'Bid expiry: ms-since-epoch (1748140800000) or duration (7d, 24h, monthly). Default 7d.')
       .option('--approval-id <id>', 'Override the random approval id')
       .option('--max-fills <n>', 'Cap on partial fills (default 1)', '1')
+    , { description: 'Bid expiry: ms-since-epoch (1748140800000) or duration (7d, 24h, monthly). Default 7d.' })
   )
 )).action(
   async (
     collectionId: string,
     opts: NetworkFlags & OutputFlags & {
       creator: string; price: string; denom: string; baseUnits?: boolean;
-      tokenId?: string; tokenAmount?: string; expiry?: string; approvalId?: string; maxFills?: string;
+      tokenId?: string; tokenAmount?: string; expiration?: string; expiry?: string; approvalId?: string; maxFills?: string;
     }
   ) => {
     try {
@@ -97,7 +98,7 @@ addOutputFlags(
 ).addHelpText('after', `
 Examples:
   $ bb nfts bid 42 --creator bb1bidder...xyz --price 1.5 --denom USDC --token-id 7 | bb deploy
-  $ bb nfts bid 42 --creator bb1bidder...xyz --price 1.5 --denom USDC --expiry 24h | bb deploy
+  $ bb nfts bid 42 --creator bb1bidder...xyz --price 1.5 --denom USDC --expiration 24h | bb deploy
 `);
 
 // ── list (sell-side outgoing approval) ───────────────────────────────────
@@ -105,6 +106,7 @@ Examples:
 addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
+    addExpiryOption(
     nftsCommand
       .command('list')
       .description('Emit MsgSetOutgoingApproval that lists a token for sale.')
@@ -116,15 +118,15 @@ addOutputFlags(
       .option('--base-units', 'Treat --price as already-in-base-units')
       .option('--token-amount <n>', 'Number of tokens (default 1)', '1')
       .option('--max-sales <n>', 'Allow multiple fills of this listing (default 1)', '1')
-      .option('--expiry <when>', 'Listing expiry: ms-since-epoch or duration (7d, 30d, monthly). Default 30d.')
       .option('--approval-id <id>', 'Override the random approval id')
+    , { description: 'Listing expiry: ms-since-epoch or duration (7d, 30d, monthly). Default 30d.' })
   )
 )).action(
   async (
     collectionId: string,
     opts: NetworkFlags & OutputFlags & {
       creator: string; tokenId: string; price: string; denom: string; baseUnits?: boolean;
-      tokenAmount?: string; maxSales?: string; expiry?: string; approvalId?: string;
+      tokenAmount?: string; maxSales?: string; expiration?: string; expiry?: string; approvalId?: string;
     }
   ) => {
     try {

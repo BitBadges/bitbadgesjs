@@ -39,11 +39,12 @@ describe('predictionMarketsCommand shape', () => {
     }
   });
 
-  it('buy/sell verbs accept --expiry + --approval-id', () => {
+  it('buy/sell verbs expose --expiration (canonical) + hidden --expiry alias + --approval-id', () => {
     for (const verb of ['buy-yes', 'buy-no', 'sell-yes', 'sell-no']) {
       const cmd = predictionMarketsCommand.commands.find((c) => c.name() === verb);
       const flagNames = (cmd! as any).options.map((o: any) => o.long);
-      expect(flagNames).toContain('--expiry');
+      expect(flagNames).toContain('--expiration');
+      expect(flagNames).toContain('--expiry'); // deprecated hidden alias, still functional
       expect(flagNames).toContain('--approval-id');
     }
   });

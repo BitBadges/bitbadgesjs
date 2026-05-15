@@ -16,7 +16,12 @@ import { buildProductCatalog } from './product-catalog.js';
 import { buildPredictionMarket } from './prediction-market.js';
 import { buildSmartToken } from './smart-token.js';
 import { buildCreditToken } from './credit-token.js';
-import { buildCustom2FA } from './custom-2fa.js';
+import {
+  buildCustom2FA,
+  mintCustom2FA,
+  getCustom2FAOwnershipTimes,
+  CUSTOM_2FA_TOKEN_EXPIRATION_MS
+} from './custom-2fa.js';
 import { buildQuests } from './quests.js';
 import { buildAddressList } from './address-list.js';
 import { buildIntent } from './intent.js';
@@ -25,6 +30,7 @@ import { buildBid } from './bid.js';
 import { buildPmSellIntent } from './pm-sell-intent.js';
 import { buildPmBuyIntent } from './pm-buy-intent.js';
 import { resolveCoin, parseDuration, toBaseUnits, sanitizeCosmosPathName } from './shared.js';
+import { buildPredictionMarketBuyIntent, buildPredictionMarketSellIntent } from '../prediction-markets.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -528,6 +534,45 @@ describe('custom-2fa builder', () => {
   });
 });
 
+describe('mintCustom2FA (mint-side expiry helper, ticket 0407)', () => {
+  test('default lifetime window is exactly 5 minutes (300000ms)', () => {
+    const msg = mintCustom2FA({ creator: 'bb1mgr', collectionId: '84', recipients: ['bb1user'] });
+    expect(msg.typeUrl).toBe('/tokenization.MsgTransferTokens');
+    const ot = msg.value.transfers[0].balances[0].ownershipTimes[0];
+    expect(Number(ot.end) - Number(ot.start)).toBe(CUSTOM_2FA_TOKEN_EXPIRATION_MS);
+    expect(CUSTOM_2FA_TOKEN_EXPIRATION_MS).toBe(300000);
+  });
+  test('custom lifetime is honored', () => {
+    const msg = mintCustom2FA({ creator: 'bb1mgr', collectionId: '84', recipients: ['bb1user'], expirationMs: 600000 });
+    const ot = msg.value.transfers[0].balances[0].ownershipTimes[0];
+    expect(Number(ot.end) - Number(ot.start)).toBe(600000);
+  });
+  test('getCustom2FAOwnershipTimes round-trips the FE window', () => {
+    const [t] = getCustom2FAOwnershipTimes();
+    expect(Number(t.end) - Number(t.start)).toBe(300000);
+  });
+  test('mints token id 1, amount 1, from Mint', () => {
+    const t = mintCustom2FA({ creator: 'bb1mgr', collectionId: '84', recipients: ['bb1a', 'bb1b'] }).value.transfers[0];
+    expect(t.from).toBe('Mint');
+    expect(t.toAddresses).toEqual(['bb1a', 'bb1b']);
+    expect(t.balances[0].amount).toBe('1');
+    expect(t.balances[0].tokenIds).toEqual([{ start: '1', end: '1' }]);
+  });
+  test('de-dupes recipients', () => {
+    const t = mintCustom2FA({ creator: 'bb1mgr', collectionId: '84', recipients: ['bb1a', 'bb1a', 'bb1b'] }).value.transfers[0];
+    expect(t.toAddresses).toEqual(['bb1a', 'bb1b']);
+  });
+  test('throws without a manager (creator)', () => {
+    expect(() => mintCustom2FA({ creator: '', collectionId: '84', recipients: ['bb1a'] })).toThrow(/manager/i);
+  });
+  test('throws without recipients', () => {
+    expect(() => mintCustom2FA({ creator: 'bb1mgr', collectionId: '84', recipients: [] })).toThrow(/recipient/i);
+  });
+  test('throws on non-positive lifetime', () => {
+    expect(() => mintCustom2FA({ creator: 'bb1mgr', collectionId: '84', recipients: ['bb1a'], expirationMs: 0 })).toThrow(/positive/i);
+  });
+});
+
 describe('quests builder', () => {
   const msg = buildQuests({ reward: 10, denom: 'BADGE', maxClaims: 100, ...META });
   const r = val(msg);
@@ -653,30 +698,70 @@ describe('bid builder', () => {
   });
 });
 
-describe('pm-sell-intent builder', () => {
+describe('pm-sell-intent builder (delegates to canonical)', () => {
   const msg = buildPmSellIntent({ address: 'bb1seller', collectionId: '42', token: 'yes', amount: 100, price: 50, denom: 'USDC' });
 
-  test('outgoing approval', () => { expect(msg.value.updateOutgoingApprovals).toBe(true); });
-  test('YES = token ID 1', () => { expect(msg.value.outgoingApprovals[0].tokenIds).toEqual([{ start: '1', end: '1' }]); });
+  test('emits MsgSetOutgoingApproval — same envelope as bb prediction-markets sell-yes', () => {
+    expect(msg.typeUrl).toBe('/tokenization.MsgSetOutgoingApproval');
+    expect(msg.value.creator).toBe('bb1seller');
+    expect(msg.value.collectionId).toBe('42');
+  });
+  test('YES = token ID 1 (canonical bigint shape)', () => {
+    expect(msg.value.approval.tokenIds).toEqual([{ start: 1n, end: 1n }]);
+    expect(msg.value.approval.toListId).toBe('All');
+  });
   test('NO = token ID 2', () => {
     const no = buildPmSellIntent({ address: 'bb1', collectionId: '42', token: 'no', amount: 1, price: 1, denom: 'USDC' });
-    expect(no.value.outgoingApprovals[0].tokenIds).toEqual([{ start: '2', end: '2' }]);
+    expect(no.value.approval.tokenIds).toEqual([{ start: 2n, end: 2n }]);
   });
-  test('pays seller', () => { expect(msg.value.outgoingApprovals[0].approvalCriteria.coinTransfers[0].to).toBe('bb1seller'); });
-  test('meta', () => { expect(msg._meta.collectionId).toBe('42'); expect(msg._meta.token).toBe('yes'); });
+  test('pays seller', () => { expect(msg.value.approval.approvalCriteria.coinTransfers[0].to).toBe('bb1seller'); });
+  test('no _meta — byte-identical to the prediction-markets path', () => {
+    expect((msg as any)._meta).toBeUndefined();
+  });
+  test('approval == buildPredictionMarketSellIntent for equivalent args (delegation parity)', () => {
+    const a = msg.value.approval;
+    const canonical = buildPredictionMarketSellIntent({
+      address: 'bb1seller', collectionId: '42', tokenId: 1n, tokenAmount: 100n,
+      paymentDenom: a.approvalCriteria.coinTransfers[0].coins[0].denom,
+      paymentAmount: BigInt(a.approvalCriteria.coinTransfers[0].coins[0].amount),
+      transferTimes: a.transferTimes, approvalId: a.approvalId
+    });
+    expect(a).toEqual(canonical);
+  });
+  test('deterministic approval id for identical params', () => {
+    const a = buildPmSellIntent({ address: 'bb1s', collectionId: '7', token: 'yes', amount: 3, price: 9, denom: 'USDC' });
+    const b = buildPmSellIntent({ address: 'bb1s', collectionId: '7', token: 'yes', amount: 3, price: 9, denom: 'USDC' });
+    expect(a.value.approval.approvalId).toBe(b.value.approval.approvalId);
+  });
 });
 
-describe('pm-buy-intent builder', () => {
+describe('pm-buy-intent builder (delegates to canonical)', () => {
   const msg = buildPmBuyIntent({ address: 'bb1buyer', collectionId: '42', token: 'no', amount: 200, price: 30, denom: 'USDC' });
 
-  test('incoming approval', () => { expect(msg.value.updateIncomingApprovals).toBe(true); });
-  test('NO = token ID 2', () => { expect(msg.value.incomingApprovals[0].tokenIds).toEqual([{ start: '2', end: '2' }]); });
+  test('emits MsgSetIncomingApproval — same envelope as bb prediction-markets buy-no', () => {
+    expect(msg.typeUrl).toBe('/tokenization.MsgSetIncomingApproval');
+    expect(msg.value.creator).toBe('bb1buyer');
+    expect(msg.value.collectionId).toBe('42');
+  });
+  test('NO = token ID 2 (canonical bigint shape)', () => {
+    expect(msg.value.approval.tokenIds).toEqual([{ start: 2n, end: 2n }]);
+    expect(msg.value.approval.fromListId).toBe('All');
+  });
   test('escrow-funded', () => {
-    const ct = msg.value.incomingApprovals[0].approvalCriteria.coinTransfers[0];
+    const ct = msg.value.approval.approvalCriteria.coinTransfers[0];
     expect(ct.overrideFromWithApproverAddress).toBe(true);
     expect(ct.overrideToWithInitiator).toBe(true);
   });
-  test('meta', () => { expect(msg._meta.collectionId).toBe('42'); expect(msg._meta.escrowCoins.length).toBe(1); });
+  test('approval == buildPredictionMarketBuyIntent for equivalent args (delegation parity)', () => {
+    const a = msg.value.approval;
+    const canonical = buildPredictionMarketBuyIntent({
+      address: 'bb1buyer', collectionId: '42', tokenId: 2n, tokenAmount: 200n,
+      paymentDenom: a.approvalCriteria.coinTransfers[0].coins[0].denom,
+      paymentAmount: BigInt(a.approvalCriteria.coinTransfers[0].coins[0].amount),
+      transferTimes: a.transferTimes, approvalId: a.approvalId
+    });
+    expect(a).toEqual(canonical);
+  });
 });
 
 // ── Zero-violations suite: every builder must pass ALL standard checks ───────
@@ -773,9 +858,8 @@ describe('error handling', () => {
     expect(msg.value.outgoingApprovals[0].tokenIds).toEqual([{ start: '42', end: '42' }]);
   });
 
-  test('buildPmSellIntent invalid token value still works', () => {
-    // TypeScript would catch this, but runtime should not crash
+  test('buildPmSellIntent emits canonical token ids', () => {
     const msg = buildPmSellIntent({ address: 'bb1a', collectionId: '1', token: 'yes', amount: 1, price: 1, denom: 'BADGE' });
-    expect(msg.value.outgoingApprovals[0].tokenIds).toEqual([{ start: '1', end: '1' }]);
+    expect(msg.value.approval.tokenIds).toEqual([{ start: 1n, end: 1n }]);
   });
 });
