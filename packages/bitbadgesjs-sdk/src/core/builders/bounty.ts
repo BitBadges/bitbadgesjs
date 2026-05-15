@@ -9,7 +9,7 @@ import {
   resolveCoin,
   toBaseUnits,
   durationToTimestamp,
-  uniqueId,
+  stableHashId,
   buildMsg,
   frozenPermissions,
   defaultBalances,
@@ -57,6 +57,17 @@ export function buildBounty(params: BountyParams): any {
   const coin = resolveCoin(params.denom);
   const baseAmount = toBaseUnits(params.amount, coin.decimals);
   const expirationTs = durationToTimestamp(params.expiration || '30d');
+  // Deterministic votingChallenges proposalIds (was uniqueId — the last
+  // 0405/0406 straggler). Seed on the bounty params, NOT the Date.now()-
+  // based expirationTs, so identical params replay byte-identical.
+  const proposalSeed = {
+    amount: params.amount,
+    denom: coin.denom,
+    verifier: params.verifier,
+    recipient: params.recipient,
+    submitter: params.submitter,
+    expiration: params.expiration || '30d'
+  };
 
   const collectionApprovals = [
     // Accept — verifier approves, pays recipient
@@ -81,7 +92,7 @@ export function buildBounty(params: BountyParams): any {
         },
         votingChallenges: [
           {
-            proposalId: uniqueId('bounty-accept'),
+            proposalId: stableHashId('bounty-accept', proposalSeed),
             quorumThreshold: '100',
             voters: [{ address: params.verifier, weight: '1' }]
           }
@@ -120,7 +131,7 @@ export function buildBounty(params: BountyParams): any {
         },
         votingChallenges: [
           {
-            proposalId: uniqueId('bounty-deny'),
+            proposalId: stableHashId('bounty-deny', proposalSeed),
             quorumThreshold: '100',
             voters: [{ address: params.verifier, weight: '1' }]
           }

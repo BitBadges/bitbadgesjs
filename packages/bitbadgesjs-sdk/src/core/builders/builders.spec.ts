@@ -31,6 +31,8 @@ import { buildPmSellIntent } from './pm-sell-intent.js';
 import { buildPmBuyIntent } from './pm-buy-intent.js';
 import { resolveCoin, parseDuration, toBaseUnits, sanitizeCosmosPathName } from './shared.js';
 import { buildPredictionMarketBuyIntent, buildPredictionMarketSellIntent } from '../prediction-markets.js';
+import { buildIntentApproval } from '../intents.js';
+import { buildOrderbookBidApproval, buildOrderbookListingApproval } from '../bids.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -235,8 +237,11 @@ describe('smart-token builder', () => {
     const t = val(buildSmartToken({ backingCoin: 'USDC', aiAgentVault: true, ...META }));
     expect(t.standards).toContain('AI Agent Vault');
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Smart Token')).toEqual([]);
+  test('deterministic — identical params produce byte-identical msg', () => {
+    expect(buildSmartToken({ backingCoin: 'USDC', ...META })).toEqual(buildSmartToken({ backingCoin: 'USDC', ...META }));
+  });
+  test('passes verification with zero violations (any standard)', () => {
+    expectCleanVerification(msg);
   });
 });
 
@@ -288,8 +293,12 @@ describe('subscription builder', () => {
       })
     ).toThrow(/single denom/);
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Subscription')).toEqual([]);
+  test('deterministic — identical params produce byte-identical msg', () => {
+    expect(buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', ...META }))
+      .toEqual(buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', ...META }));
+  });
+  test('passes verification with zero violations (any standard)', () => {
+    expectCleanVerification(msg);
   });
 });
 
@@ -313,8 +322,22 @@ describe('bounty builder', () => {
   test('escrow coins', () => {
     expect(r.mintEscrowCoinsToTransfer[0].amount).toBe('100000000');
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Bounty')).toEqual([]);
+  test('deterministic votingChallenges proposalIds (no uniqueId)', () => {
+    const p = { amount: 100, denom: 'USDC', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', ...META };
+    const a = val(buildBounty(p)).collectionApprovals;
+    const b = val(buildBounty(p)).collectionApprovals;
+    const pid = (c: any[], id: string) =>
+      c.find((x: any) => x.approvalId === id).approvalCriteria.votingChallenges[0].proposalId;
+    expect(pid(a, 'bounty-accept')).toBe(pid(b, 'bounty-accept'));
+    expect(pid(a, 'bounty-deny')).toBe(pid(b, 'bounty-deny'));
+    expect(pid(a, 'bounty-accept')).not.toBe(pid(a, 'bounty-deny'));
+    expect(pid(a, 'bounty-accept').startsWith('bounty-accept-')).toBe(true);
+    // distinct params → distinct proposalId
+    expect(pid(val(buildBounty({ ...p, amount: 101 })).collectionApprovals, 'bounty-accept'))
+      .not.toBe(pid(a, 'bounty-accept'));
+  });
+  test('passes verification with zero violations (any standard)', () => {
+    expectCleanVerification(msg);
   });
 });
 
@@ -357,8 +380,13 @@ describe('payment-request builder', () => {
       expect(a.approvalCriteria.votingChallenges).toBeUndefined();
     }
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'PaymentRequest')).toEqual([]);
+  test('deterministic approval ids (no random ids; time window aside)', () => {
+    const prParams = { amount: 10, denom: 'USDC', payer: 'bb1payer', recipient: 'bb1recipient', context: 'ctx', name: 'Test', image: 'ipfs://test-image' };
+    const ids = (m: any) => m.value.collectionApprovals.map((a: any) => a.approvalId);
+    expect(ids(buildPaymentRequest(prParams))).toEqual(ids(buildPaymentRequest(prParams)));
+  });
+  test('passes verification with zero violations (any standard)', () => {
+    expectCleanVerification(msg);
   });
 });
 
@@ -504,8 +532,12 @@ describe('credit-token builder', () => {
   test('amount scaling', () => {
     expect(r.collectionApprovals[0].approvalCriteria.predeterminedBalances.incrementedBalances.allowAmountScaling).toBe(true);
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Credit Token')).toEqual([]);
+  test('deterministic — identical params produce byte-identical msg', () => {
+    expect(buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1recipient', ...META }))
+      .toEqual(buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1recipient', ...META }));
+  });
+  test('passes verification with zero violations (any standard)', () => {
+    expectCleanVerification(msg);
   });
 });
 
@@ -611,48 +643,64 @@ describe('address-list builder', () => {
     expect(ids).toContain('manager-add');
     expect(ids).toContain('manager-remove');
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Address List')).toEqual([]);
+  test('deterministic — identical params produce byte-identical msg', () => {
+    expect(buildAddressList({ name: 'My List', description: 'A test list.', image: 'ipfs://test-image' }))
+      .toEqual(buildAddressList({ name: 'My List', description: 'A test list.', image: 'ipfs://test-image' }));
+  });
+  test('passes verification with zero violations (any standard)', () => {
+    expectCleanVerification(msg);
   });
 });
 
 // ── Approval builder tests ───────────────────────────────────────────────────
 
-describe('intent builder', () => {
+describe('intent builder (delegates to canonical)', () => {
   const msg = buildIntent({ address: 'bb1creator', collectionId: '99', payDenom: 'USDC', payAmount: 100, receiveDenom: 'BADGE', receiveAmount: 50 });
 
-  test('has MsgUpdateUserApprovals typeUrl', () => {
-    expect(msg.typeUrl).toBe('/tokenization.MsgUpdateUserApprovals');
+  test('emits MsgSetOutgoingApproval — same envelope as bb intents create', () => {
+    expect(msg.typeUrl).toBe('/tokenization.MsgSetOutgoingApproval');
+    expect(msg.value.creator).toBe('bb1creator');
+    expect(msg.value.collectionId).toBe('99');
   });
-  test('outgoing approval', () => { expect(msg.value.updateOutgoingApprovals).toBe(true); });
-  test('dual coin transfers', () => {
-    expect(msg.value.outgoingApprovals[0].approvalCriteria.coinTransfers.length).toBe(2);
+  test('fromListId scoped to creator (FE-canonical — old slim builder omitted it)', () => {
+    expect(msg.value.approval.fromListId).toBe('bb1creator');
   });
-  test('first transfer pays creator', () => {
-    expect(msg.value.outgoingApprovals[0].approvalCriteria.coinTransfers[0].to).toBe('bb1creator');
+  test('dual coin transfers; first pays creator, second is escrow', () => {
+    const cts = msg.value.approval.approvalCriteria.coinTransfers;
+    expect(cts.length).toBe(2);
+    expect(cts[0].to).toBe('bb1creator');
+    expect(cts[1].overrideFromWithApproverAddress).toBe(true);
+    expect(cts[1].overrideToWithInitiator).toBe(true);
   });
-  test('second from escrow to filler', () => {
-    const ct = msg.value.outgoingApprovals[0].approvalCriteria.coinTransfers[1];
-    expect(ct.overrideFromWithApproverAddress).toBe(true);
-    expect(ct.overrideToWithInitiator).toBe(true);
-  });
-  test('auto-deletes', () => { expect(msg.value.outgoingApprovals[0].approvalCriteria.autoDeletionOptions.afterOneUse).toBe(true); });
-  test('collectionId in meta', () => { expect(msg._meta.collectionId).toBe('99'); });
-
   test('no requireToEqualsInitiatedBy — must stay fillable', () => {
-    // `true` here made the approval structurally unfillable; the
-    // canonical core/intents.ts path omits it.
-    expect(msg.value.outgoingApprovals[0].approvalCriteria.requireToEqualsInitiatedBy).toBeUndefined();
+    expect(msg.value.approval.approvalCriteria.requireToEqualsInitiatedBy).toBeUndefined();
+  });
+  test('no _meta — byte-identical to the intents-create path', () => {
+    expect((msg as any)._meta).toBeUndefined();
+  });
+  test('approval == buildIntentApproval for equivalent args (delegation parity)', () => {
+    const a = msg.value.approval;
+    const cts = a.approvalCriteria.coinTransfers;
+    const canonical = buildIntentApproval({
+      address: 'bb1creator',
+      payDenom: cts[1].coins[0].denom,
+      payAmount: BigInt(cts[1].coins[0].amount),
+      receiveDenom: cts[0].coins[0].denom,
+      receiveAmount: BigInt(cts[0].coins[0].amount),
+      transferTimes: a.transferTimes,
+      approvalId: a.approvalId
+    });
+    expect(a).toEqual(canonical);
+  });
+  test('deterministic approval id for identical params', () => {
+    const p = { address: 'bb1c', collectionId: '5', payDenom: 'USDC', payAmount: 7, receiveDenom: 'BADGE', receiveAmount: 3 };
+    expect(buildIntent(p).value.approval.approvalId).toBe(buildIntent(p).value.approval.approvalId);
   });
   test('throws on same pay/receive denom', () => {
     expect(() => buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'BADGE', payAmount: 10, receiveDenom: 'BADGE', receiveAmount: 5 }))
       .toThrow(/denoms must differ/);
-    // resolved-denom comparison also catches case variants
     expect(() => buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'USDC', payAmount: 10, receiveDenom: 'usdc', receiveAmount: 5 }))
       .toThrow(/denoms must differ/);
-  });
-  test('passes verification with zero violations', () => {
-    expectCleanVerification(msg);
   });
 });
 
@@ -661,40 +709,87 @@ describe('intent builder', () => {
 // canonical subscriber-side recurring approval is `userRecurringApproval`
 // in core/subscriptions.ts (covered by subscriptions tests).
 
-describe('listing builder', () => {
-  const msg = buildListing({ address: 'bb1seller', collectionId: '1', tokenIds: '1-5', price: 50, denom: 'USDC' });
+describe('listing builder (delegates to canonical)', () => {
+  const msg = buildListing({ address: 'bb1seller', collectionId: '1', tokenIds: '4', price: 50, denom: 'USDC' });
 
-  test('outgoing approval', () => { expect(msg.value.updateOutgoingApprovals).toBe(true); });
-  test('token range', () => { expect(msg.value.outgoingApprovals[0].tokenIds).toEqual([{ start: '1', end: '5' }]); });
-  test('pays seller', () => { expect(msg.value.outgoingApprovals[0].approvalCriteria.coinTransfers[0].to).toBe('bb1seller'); });
-  test('auto-deletes after max', () => { expect(msg.value.outgoingApprovals[0].approvalCriteria.autoDeletionOptions.afterOverallMaxNumTransfers).toBe(true); });
+  test('emits MsgSetOutgoingApproval — same envelope as bb nfts list', () => {
+    expect(msg.typeUrl).toBe('/tokenization.MsgSetOutgoingApproval');
+    expect(msg.value.creator).toBe('bb1seller');
+    expect(msg.value.collectionId).toBe('1');
+  });
+  test('single token id (canonical bigint shape)', () => {
+    expect(msg.value.approval.tokenIds).toEqual([{ start: 4n, end: 4n }]);
+  });
+  test('pays seller', () => {
+    expect(msg.value.approval.approvalCriteria.coinTransfers[0].to).toBe('bb1seller');
+  });
+  test('rejects a true token range (orderbook listings are single-token)', () => {
+    expect(() => buildListing({ address: 'bb1s', collectionId: '1', tokenIds: '1-5', price: 1, denom: 'USDC' }))
+      .toThrow(/single token id/);
+  });
+  test('approval == buildOrderbookListingApproval for equivalent args (delegation parity)', () => {
+    const a = msg.value.approval;
+    const canonical = buildOrderbookListingApproval({
+      address: 'bb1seller',
+      tokenId: 4n,
+      paymentAmount: BigInt(a.approvalCriteria.coinTransfers[0].coins[0].amount),
+      paymentDenom: a.approvalCriteria.coinTransfers[0].coins[0].denom,
+      tokenAmount: 1n,
+      transferTimes: a.transferTimes,
+      approvalId: a.approvalId,
+      maxNumTransfers: 1n
+    });
+    expect(a).toEqual(canonical);
+  });
+  test('deterministic approval id; no _meta', () => {
+    const p = { address: 'bb1seller', collectionId: '1', tokenIds: '4', price: 50, denom: 'USDC' };
+    expect(buildListing(p).value.approval.approvalId).toBe(buildListing(p).value.approval.approvalId);
+    expect((msg as any)._meta).toBeUndefined();
+  });
 });
 
-describe('bid builder', () => {
+describe('bid builder (delegates to canonical)', () => {
   const msg = buildBid({ address: 'bb1bidder', collectionId: '1', tokenIds: '3', price: 25, denom: 'BADGE' });
 
-  test('incoming approval', () => { expect(msg.value.updateIncomingApprovals).toBe(true); });
-  test('single token ID', () => { expect(msg.value.incomingApprovals[0].tokenIds).toEqual([{ start: '3', end: '3' }]); });
+  test('emits MsgSetIncomingApproval — same envelope as bb nfts bid', () => {
+    expect(msg.typeUrl).toBe('/tokenization.MsgSetIncomingApproval');
+    expect(msg.value.creator).toBe('bb1bidder');
+    expect(msg.value.collectionId).toBe('1');
+  });
+  test('single token id (canonical bigint shape)', () => {
+    expect(msg.value.approval.tokenIds).toEqual([{ start: 3n, end: 3n }]);
+  });
   test('escrow-funded', () => {
-    const ct = msg.value.incomingApprovals[0].approvalCriteria.coinTransfers[0];
+    const ct = msg.value.approval.approvalCriteria.coinTransfers[0];
     expect(ct.overrideFromWithApproverAddress).toBe(true);
     expect(ct.overrideToWithInitiator).toBe(true);
   });
-  test('auto-deletes', () => { expect(msg.value.incomingApprovals[0].approvalCriteria.autoDeletionOptions.afterOneUse).toBe(true); });
-
-  test('deterministic approval id — no Math.random/uniqueId', () => {
+  test('rejects a true token range', () => {
+    expect(() => buildBid({ address: 'bb1b', collectionId: '1', tokenIds: '1-5', price: 1, denom: 'BADGE' }))
+      .toThrow(/single token id/);
+  });
+  test('deterministic approval id for identical params', () => {
     const p = { address: 'bb1bidder', collectionId: '1', tokenIds: '3', price: 25, denom: 'BADGE' };
-    const a = buildBid({ ...p }).value.incomingApprovals[0];
-    const b = buildBid({ ...p }).value.incomingApprovals[0];
+    const a = buildBid({ ...p }).value.approval;
+    const b = buildBid({ ...p }).value.approval;
     expect(a.approvalId).toBe(b.approvalId);
     expect(a.approvalId.startsWith('bid-')).toBe(true);
-    // amountTrackerId stays in lockstep with approvalId
     expect(a.approvalCriteria.maxNumTransfers.amountTrackerId).toBe(a.approvalId);
-    // distinct bids on the same collection get distinct ids
-    expect(buildBid({ ...p, price: 26 }).value.incomingApprovals[0].approvalId).not.toBe(a.approvalId);
+    expect(buildBid({ ...p, price: 26 }).value.approval.approvalId).not.toBe(a.approvalId);
   });
-  test('passes verification with zero violations', () => {
-    expectCleanVerification(msg);
+  test('approval == buildOrderbookBidApproval for equivalent args (delegation parity)', () => {
+    const a = msg.value.approval;
+    const canonical = buildOrderbookBidApproval({
+      address: 'bb1bidder',
+      tokenId: 3n,
+      paymentAmount: BigInt(a.approvalCriteria.coinTransfers[0].coins[0].amount),
+      paymentDenom: a.approvalCriteria.coinTransfers[0].coins[0].denom,
+      tokenAmount: 1n,
+      transferTimes: a.transferTimes,
+      approvalId: a.approvalId,
+      maxNumTransfers: 1n
+    });
+    expect(a).toEqual(canonical);
   });
 });
 
@@ -826,26 +921,44 @@ describe('error handling', () => {
     expect(() => buildSubscription({ interval: 'monthly' } as any)).toThrow();
   });
 
-  test('buildBounty with zero amount still produces valid structure', () => {
+  test('buildBounty with zero amount: the zero propagates (not silently dropped) + verifier-clean', () => {
     const msg = buildBounty({ amount: 0, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', ...META });
     expect(msg.typeUrl).toBe('/tokenization.MsgUniversalUpdateCollection');
     expect(msg.value.collectionApprovals.length).toBe(3);
+    // Proves amount:0 flowed through to the escrow coin rather than being
+    // silently coerced/dropped (the masking-bug class).
+    expect(val(msg).mintEscrowCoinsToTransfer[0].amount).toBe('0');
+    expectCleanVerification(msg);
   });
 
-  test('buildProductCatalog with empty products produces burn-only collection', () => {
+  test('buildProductCatalog with empty products: burn-only, well-formed, verifier-clean', () => {
     const msg = buildProductCatalog({ products: [], storeAddress: 'bb1s', ...META });
-    // Only burn approval, no purchase approvals
     expect(msg.value.collectionApprovals.length).toBe(1);
+    // The lone approval must be a real burn approval, not a mangled
+    // placeholder a silent-drop bug would also yield length 1.
+    const only = msg.value.collectionApprovals[0];
+    expect(typeof only.approvalId).toBe('string');
+    expect(only.approvalId.length).toBeGreaterThan(0);
+    expect(only.toListId).toBeTruthy();
+    expectCleanVerification(msg);
   });
 
-  test('buildCrowdfund goal of 1 base unit works', () => {
+  test('buildCrowdfund goal of 1 base unit: goal converts to 1 base unit + verifier-clean', () => {
     const msg = buildCrowdfund({ goal: 0.000001, denom: 'USDC', crowdfunder: 'bb1fund', ...META });
     expect(msg.value.collectionApprovals.length).toBeGreaterThanOrEqual(4);
+    // USDC has 6 decimals → 0.000001 must resolve to exactly "1" base
+    // unit somewhere in the emitted coin amounts (not 0 from a silent
+    // truncation, not display-units).
+    const coinAmounts = JSON.stringify(msg).match(/"amount":"\d+"/g) ?? [];
+    expect(coinAmounts).toContain('"amount":"1"');
+    expectCleanVerification(msg);
   });
 
-  test('buildAuction with very short windows works', () => {
+  test('buildAuction with very short windows: well-formed + verifier-clean', () => {
     const msg = buildAuction({ bidDeadline: '1m', acceptWindow: '1m', ...META });
     expect(msg.typeUrl).toBe('/tokenization.MsgUniversalUpdateCollection');
+    expect(msg.value.collectionApprovals.length).toBeGreaterThan(0);
+    expectCleanVerification(msg);
   });
 
   test('buildIntent rejects same pay/receive denom (no-op approval)', () => {
@@ -853,9 +966,9 @@ describe('error handling', () => {
       .toThrow(/denoms must differ/);
   });
 
-  test('buildListing parses single token ID', () => {
+  test('buildListing parses single token ID (canonical shape)', () => {
     const msg = buildListing({ address: 'bb1a', collectionId: '1', tokenIds: '42', price: 10, denom: 'BADGE' });
-    expect(msg.value.outgoingApprovals[0].tokenIds).toEqual([{ start: '42', end: '42' }]);
+    expect(msg.value.approval.tokenIds).toEqual([{ start: 42n, end: 42n }]);
   });
 
   test('buildPmSellIntent emits canonical token ids', () => {

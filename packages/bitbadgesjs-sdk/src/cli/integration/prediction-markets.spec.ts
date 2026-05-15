@@ -126,7 +126,7 @@ describe('prediction-markets integration', () => {
     expect(tx.code).toBe(0);
   }, 90000);
 
-  it('charlie places a SELL-NO intent → MsgSetOutgoingApproval (chain may reject)', async () => {
+  it('charlie places a SELL-NO intent → MsgSetOutgoingApproval accepted (code 0)', async () => {
     if (!ready || !collectionId) return;
     const trader = charlie();
 
@@ -142,9 +142,11 @@ describe('prediction-markets integration', () => {
 
     const tmp = writeMsgToTmp(sellMsg.json, 'pm-sell-no');
     const tx = await deployMsgViaKeyring(tmp, trader.name);
-    // Chain accepts the intent-set msg even if charlie has no NO tokens to
-    // sell — the actual fill only happens when a counterparty matches.
-    expect([0, tx.code]).toContain(tx.code);
+    // Setting an OUTGOING approval does not require holding the token —
+    // the chain accepts it (the actual fill only happens when a
+    // counterparty matches). `expect([0, tx.code]).toContain(tx.code)`
+    // was a tautology; assert the real accepted code.
+    expect(tx.code).toBe(0);
   }, 90000);
 
   it('cancel emits MsgDeleteIncomingApproval with the supplied approval id', async () => {

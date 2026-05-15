@@ -1,112 +1,68 @@
 /**
- * Listing builder — creates a user outgoing approval for a marketplace listing.
- *
- * The seller lists tokens for sale at a fixed price. Buyers transfer tokens
- * and pay the seller via coinTransfers.
+ * Listing builder — thin display-unit wrapper over the canonical
+ * `buildOrderbookListingApproval` (core/bids.ts), the same builder
+ * `bb nfts list` uses. `bb build listing` and `bb nfts list` now emit the
+ * identical `MsgSetOutgoingApproval` shape (incl. the FE-canonical
+ * seller-scoped `fromListId` the old slim builder omitted).
  *
  * @module core/builders/listing
  */
-import {
-  FOREVER,
-  resolveCoin,
-  toBaseUnits,
-  durationToTimestamp,
-  uniqueId,
-  buildUserApprovalMsg,
-  approvalMetadata
-} from './shared.js';
+import { resolveCoin, toBaseUnits, durationToTimestamp, stableHashId } from './shared.js';
+import { buildOrderbookListingApproval, type OrderbookOrderArgs } from '../bids.js';
+import { UintRangeArray } from '../uintRanges.js';
 
 export interface ListingParams {
   address: string; // seller bb1... address
   collectionId: string; // collection to list from
-  tokenIds: string; // "1-5" or "1"
+  tokenIds: string; // single token id (orderbook listings are single-token)
   price: number; // asking price (display units)
   denom: string; // price coin (USDC, BADGE)
   maxSales?: number; // max number of sales, default 1
   expiration?: string; // listing duration, default "30d"
 }
 
-function parseTokenIdRange(input: string): any[] {
-  if (input.includes('-')) {
-    const [start, end] = input.split('-').map((s) => s.trim());
-    return [{ start, end }];
+/** Orderbook listings are single-token. Accept "5" or "5-5"; reject a true range. */
+function singleTokenId(input: string, ctx: string): bigint {
+  const parts = String(input).split('-').map((s) => s.trim());
+  if (parts.length === 2 && parts[0] !== parts[1]) {
+    throw new Error(
+      `${ctx} supports a single token id (got range "${input}"). List/bid per token id.`
+    );
   }
-  return [{ start: input, end: input }];
+  return BigInt(parts[0]);
 }
 
-export function buildListing(params: ListingParams): any {
+export function buildListing(params: ListingParams): { typeUrl: string; value: any } {
   const coin = resolveCoin(params.denom);
-  const basePrice = toBaseUnits(params.price, coin.decimals);
-  const expirationTs = durationToTimestamp(params.expiration || '30d');
-  const maxSales = params.maxSales || 1;
-  const id = uniqueId('listing');
-  const tokenIds = parseTokenIdRange(params.tokenIds);
-
-  const approval = {
-    approvalId: id,
-    ...approvalMetadata(
-      'Listing',
-      'This approval is a conditional offer to transfer a token from this address if certain conditions are met.'
-    ),
-    toListId: 'All',
-    initiatedByListId: 'All',
-    transferTimes: [{ start: '1', end: expirationTs }],
-    tokenIds,
-    ownershipTimes: FOREVER,
-    version: '0',
-    approvalCriteria: {
-      predeterminedBalances: {
-        manualBalances: [],
-        incrementedBalances: {
-          startBalances: [{ amount: '1', tokenIds, ownershipTimes: FOREVER }],
-          incrementTokenIdsBy: '0',
-          incrementOwnershipTimesBy: '0',
-          durationFromTimestamp: '0',
-          allowOverrideTimestamp: false,
-          recurringOwnershipTimes: { startTime: '0', intervalLength: '0', chargePeriodLength: '0' },
-          allowOverrideWithAnyValidToken: false,
-          allowAmountScaling: false,
-          maxScalingMultiplier: '0'
-        },
-        orderCalculationMethod: {
-          useOverallNumTransfers: true,
-          usePerToAddressNumTransfers: false,
-          usePerFromAddressNumTransfers: false,
-          usePerInitiatedByAddressNumTransfers: false,
-          useMerkleChallengeLeafIndex: false,
-          challengeTrackerId: ''
-        }
-      },
-      maxNumTransfers: {
-        overallMaxNumTransfers: String(maxSales),
-        perToAddressMaxNumTransfers: '0',
-        perFromAddressMaxNumTransfers: '0',
-        perInitiatedByAddressMaxNumTransfers: '0',
-        amountTrackerId: id,
-        resetTimeIntervals: { startTime: '0', intervalLength: '0' }
-      },
-      coinTransfers: [
-        {
-          to: params.address,
-          coins: [{ amount: basePrice, denom: coin.denom }],
-          overrideFromWithApproverAddress: false,
-          overrideToWithInitiator: false
-        }
-      ],
-      autoDeletionOptions: {
-        afterOneUse: false,
-        afterOverallMaxNumTransfers: true,
-        allowCounterpartyPurge: false,
-        allowPurgeIfExpired: true
-      }
-    }
+  const tokenId = singleTokenId(params.tokenIds, 'listing');
+  const end = BigInt(durationToTimestamp(params.expiration || '30d'));
+  const maxNumTransfers = BigInt(params.maxSales || 1);
+  const approvalId = stableHashId('listing', {
+    address: params.address,
+    collectionId: params.collectionId,
+    tokenIds: params.tokenIds,
+    price: params.price,
+    denom: coin.denom,
+    maxSales: params.maxSales || 1,
+    expiration: params.expiration || '30d'
+  });
+  const args: OrderbookOrderArgs = {
+    address: params.address,
+    tokenId,
+    paymentAmount: BigInt(toBaseUnits(params.price, coin.decimals)),
+    paymentDenom: coin.denom,
+    tokenAmount: 1n,
+    transferTimes: UintRangeArray.From([{ start: 1n, end }]),
+    approvalId,
+    maxNumTransfers
   };
-
+  const approval = buildOrderbookListingApproval(args);
   return {
-    ...buildUserApprovalMsg({ collectionId: params.collectionId, outgoingApprovals: [approval] }),
-    _meta: {
-      description: `Listing: ${params.tokenIds} from collection ${params.collectionId} for ${params.price} ${coin.symbol}`,
-      collectionId: params.collectionId
+    typeUrl: '/tokenization.MsgSetOutgoingApproval',
+    value: {
+      creator: params.address,
+      collectionId: String(params.collectionId),
+      approval
     }
   };
 }

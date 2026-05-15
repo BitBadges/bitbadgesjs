@@ -745,7 +745,7 @@ sharedOpts(
     .requiredOption('--pay-amount <n>', 'Amount you send (display units)')
     .requiredOption('--receive-denom <symbol|denom>', 'What you receive. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .requiredOption('--receive-amount <n>', 'Amount you receive (display units)')
-    .option('--expiration <duration>', 'How long intent stays open', '7d')
+    .option('--expiration <duration>', 'How long intent stays open (default 30d, matches `bb intents create`)', '30d')
 ).action(async (opts) => {
   const { buildIntent } = await import('../../core/builders/intent.js');
   if (opts.json) { emit(buildIntent(readJsonInput(opts.json)), opts); return; }
@@ -890,14 +890,13 @@ sharedOpts(
           amount: [{ denom, amount }]
         }
       };
-      const text = opts.condensed ? JSON.stringify(msg) : JSON.stringify(msg, null, 2);
-      if (opts.outputFile) {
-        const fs = await import('node:fs');
-        fs.writeFileSync(opts.outputFile, text + '\n', 'utf-8');
-        if (!isQuiet({})) process.stderr.write(`Written to ${opts.outputFile}\n`);
-      } else {
-        process.stdout.write(text + '\n');
-      }
+      // Route through the shared emit() like every sibling build
+      // subcommand so --condensed/--output-file AND the deploy gate
+      // (--browser/--burner/--simulate) actually work. MsgSend is
+      // envelope-safe: not a collection / approval / transfer tx, so
+      // emit() skips all the collection-specific backfill and falls
+      // straight to output + the deploy gate.
+      emit(msg, opts);
     } catch (err: any) {
       process.stderr.write(`Error: ${err?.message || err}\n`);
       process.exit(1);

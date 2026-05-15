@@ -19,7 +19,7 @@
  */
 
 import { Command } from 'commander';
-import * as crypto from 'node:crypto';
+import { resolveApprovalId } from '../utils/approval-id-options.js';
 import {
   addIndexerNetworkOptions as addNetworkFlags,
   addIndexerOutputOptions as addOutputFlags,
@@ -350,11 +350,12 @@ addOutputFlags(
       .requiredOption('--creator <address>', 'Subscriber address (bb1.../0x — auto-normalized)')
       .option('--tier <approvalId>', 'Which faucet to renew (required for multi-tier collections)')
       .option('--tip <ubadge>', 'Optional tip per interval on top of the base subscription amount (in base denom units)', '0')
+      .option('--approval-id <id>', 'Override the auto-generated recurring-approval id (random hex by default)')
   )
 )).action(
   async (
     collectionId: string,
-    opts: NetworkFlags & OutputFlags & { creator: string; tier?: string; tip?: string }
+    opts: NetworkFlags & OutputFlags & { creator: string; tier?: string; tip?: string; approvalId?: string }
   ) => {
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
@@ -369,7 +370,7 @@ addOutputFlags(
         firstIntervalStartTime: BigInt(Date.now()),
         ubadgeTipAmount: tip,
         transferTimes: UintRangeArray.FullRanges(),
-        approvalId: crypto.randomBytes(16).toString('hex'),
+        approvalId: resolveApprovalId(opts),
         tokenIds: faucet.tokenIds,
         denom
       });
@@ -454,11 +455,12 @@ addOutputFlags(
       .requiredOption('--creator <address>', 'Subscriber address (bb1.../0x — auto-normalized)')
       .option('--tier <approvalId>', 'Which faucet to subscribe to (required for multi-tier collections)')
       .option('--tip <ubadge>', 'Optional tip per interval on top of the base subscription amount', '0')
+      .option('--approval-id <id>', 'Override the auto-generated recurring-approval id (random hex by default)')
   )
 ).action(
   async (
     collectionId: string,
-    opts: NetworkFlags & OutputFlags & { creator: string; tier?: string; tip?: string }
+    opts: NetworkFlags & OutputFlags & { creator: string; tier?: string; tip?: string; approvalId?: string }
   ) => {
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
@@ -475,7 +477,7 @@ addOutputFlags(
         firstIntervalStartTime: BigInt(Date.now()),
         ubadgeTipAmount: tip,
         transferTimes: UintRangeArray.FullRanges(),
-        approvalId: crypto.randomBytes(16).toString('hex'),
+        approvalId: resolveApprovalId(opts),
         tokenIds: faucet.tokenIds,
         denom
       });
