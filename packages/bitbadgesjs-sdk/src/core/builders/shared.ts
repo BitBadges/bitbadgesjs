@@ -647,21 +647,26 @@ export function scalingBalances(amount: string, maxMultiplier?: string) {
  *   through the metadata placeholder system.
  */
 /**
- * Strip any character not in `[a-zA-Z_{}-]` from a candidate cosmos
- * wrapper path denom or symbol. The chain regex
- * `^[a-zA-Z_{}-]+$` is enforced by `ValidateCosmosWrapperPathSymbol`
- * (chain side at validate_basic.go:80-94). Digits are common in
- * user-supplied symbols (e.g. "vUSDC9", "BADGE2") and must be removed
- * before they reach the chain.
+ * Validate a candidate cosmos wrapper path denom or symbol against the
+ * chain regex `^[a-zA-Z_{}-]+$` (enforced by
+ * `ValidateCosmosWrapperPathSymbol`, chain side validate_basic.go:80-94).
  *
- * Throws if the result is empty so callers don't accidentally produce
- * a wrapper path with no name.
+ * THROWS if the input contains any disallowed character (e.g. a digit in
+ * "vUSDC9"). Previously this silently stripped them, so `--symbol vUSDC1`
+ * became `vUSDC` with no warning — a band-aid coercion that produced a
+ * wrapper denom the user never asked for. Per the throw-not-bandaid
+ * rule, surface a clear error and let the user fix the input.
  */
 export function sanitizeCosmosPathName(input: string, label: 'denom' | 'symbol' = 'symbol'): string {
   const cleaned = input.replace(/[^a-zA-Z_{}\-]/g, '');
   if (cleaned.length === 0) {
     throw new Error(
-      `sanitizeCosmosPathName: input "${input}" produced an empty ${label} after stripping invalid characters. Provide a value containing at least one letter (a-zA-Z), underscore, brace, or dash.`
+      `${label} "${input}" has no valid characters. Provide a value containing at least one letter (a-zA-Z), underscore, brace, or dash — no digits or other symbols.`
+    );
+  }
+  if (cleaned !== input) {
+    throw new Error(
+      `${label} "${input}" contains characters the chain rejects (only a-zA-Z, _, {, }, - are allowed — no digits). Did you mean "${cleaned}"? Pass that explicitly if so.`
     );
   }
   return cleaned;

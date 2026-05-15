@@ -24,7 +24,7 @@ import { buildListing } from './listing.js';
 import { buildBid } from './bid.js';
 import { buildPmSellIntent } from './pm-sell-intent.js';
 import { buildPmBuyIntent } from './pm-buy-intent.js';
-import { resolveCoin, parseDuration, toBaseUnits } from './shared.js';
+import { resolveCoin, parseDuration, toBaseUnits, sanitizeCosmosPathName } from './shared.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -107,6 +107,16 @@ describe('shared utilities', () => {
 
   test('parseDuration throws for invalid input', () => {
     expect(() => parseDuration('invalid')).toThrow('Invalid duration');
+  });
+
+  test('sanitizeCosmosPathName passes clean input through', () => {
+    expect(sanitizeCosmosPathName('vUSDC', 'symbol')).toBe('vUSDC');
+    expect(sanitizeCosmosPathName('CREDIT', 'symbol')).toBe('CREDIT');
+  });
+  test('sanitizeCosmosPathName throws on disallowed chars (no silent strip)', () => {
+    expect(() => sanitizeCosmosPathName('vUSDC1', 'symbol')).toThrow(/contains characters the chain rejects/);
+    expect(() => sanitizeCosmosPathName('vUSDC1', 'symbol')).toThrow(/vUSDC/); // suggests the cleaned form
+    expect(() => sanitizeCosmosPathName('123', 'symbol')).toThrow(/no valid characters/);
   });
 });
 

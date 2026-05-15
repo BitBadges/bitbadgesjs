@@ -142,6 +142,21 @@ addOutputFlags(
         process.exit(2);
       }
       const units = BigInt(opts.units);
+      // Legacy (per-tier, non-scaled) approvals can't carry a multiplier
+      // — buildPurchaseCreditTokenMsg emits exactly one unit and the CLI
+      // emits one msg per invocation. Silently honoring `--units 5` here
+      // would emit a single purchase while the user thinks they bought 5.
+      // Reject instead and point at a scaled tier.
+      if (!tier.isScaled && units > 1n) {
+        const scaled = tiers.find((t) => t.isScaled);
+        process.stderr.write(
+          `Error: tier "${tier.approvalId}" is a legacy per-tier approval and can't buy ${units} units in one msg. ` +
+          (scaled
+            ? `Use --tier ${scaled.approvalId} (scaled) for multi-unit purchases, or run --units 1 ${units} times.\n`
+            : `This collection has no scaled tier; run the command with --units 1, ${units} times.\n`)
+        );
+        process.exit(2);
+      }
       emit(buildPurchaseCreditTokenMsg(creator, String(collectionId), tier, units), opts);
     } catch (err) {
       emitError(err);

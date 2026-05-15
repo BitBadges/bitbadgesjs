@@ -24,6 +24,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
+import { bbError, BBErrorCode } from '../utils/envelope.js';
 import { resolveAmount } from '../utils/amount.js';
 import { parseTimeFlag } from '../utils/time.js';
 import {
@@ -382,9 +383,14 @@ addOutputFlags(
         pushNoApprovalId: settle.pushNoApprovalId
       });
       if (tx.messages.length === 0) {
-        process.stderr.write('No redeemable balance for the given state and inputs.\n');
-        emit({ messages: [] }, opts);
-        return;
+        // Was: emit({ messages: [] }) + return (exit 0) — `bb deploy`
+        // then choked on an empty messages array or treated it as a
+        // no-op success. Surface a real error + non-zero exit instead.
+        throw bbError(
+          BBErrorCode.INVALID_INPUT,
+          'No redeemable balance for the given state and inputs.',
+          'Check --state matches the market outcome and that the --*-balance / --pair-amount you passed is > 0.'
+        );
       }
       emit(tx.messages.length === 1 ? tx.messages[0] : tx, opts);
     } catch (err) { emitError(err); }

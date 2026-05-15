@@ -38,10 +38,11 @@ export interface VaultParams {
 export function buildVault(params: VaultParams): any {
   const coin = resolveCoin(params.backingCoin);
   const backingAddr = generateAliasAddressForIBCBackedDenom(coin.denom);
-  // Sanitize the symbol to the chain's wrapper-path regex
-  // (`[a-zA-Z_{}-]+`) — see sanitizeCosmosPathName for the rule. Users
-  // commonly include digits ("vUSDC9", "BADGE2") that would be rejected
-  // at simulate time with "symbol contains invalid characters".
+  // Validate the symbol against the chain's wrapper-path regex
+  // (`[a-zA-Z_{}-]+`). sanitizeCosmosPathName THROWS on a bad symbol
+  // (e.g. a digit in "vUSDC9") rather than silently mangling it — the
+  // default `v<coin>` is always clean, so this only fires on an explicit
+  // invalid --symbol, which is exactly when the user wants a clear error.
   const symbol = sanitizeCosmosPathName(params.symbol || 'v' + coin.symbol, 'symbol');
 
   const collectionApprovals: any[] = [
