@@ -1,4 +1,8 @@
 #!/bin/bash
+# fail-fast: any assembly step erroring must abort (never publish a
+# partial/raw spec). -u omitted on purpose — the sourced legacy
+# scripts use unset vars in find/while loops. #0408
+set -eo pipefail
 
 echo "No changes found. Proceeding..."
 

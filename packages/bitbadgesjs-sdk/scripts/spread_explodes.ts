@@ -22,10 +22,11 @@ interface Parameter {
   required?: boolean;
 }
 
-function resolveReference(ref: string, document: any): Schema {
+function resolveReference(ref: string, document: any): Schema | undefined {
   const path = ref.replace('#/', '').split('/');
   let current = document;
   for (const segment of path) {
+    if (current == null) return undefined;
     current = current[segment];
   }
   return current;
@@ -37,6 +38,12 @@ function expandParameter(param: Parameter, document: any): Parameter[] {
   }
 
   const referencedSchema = resolveReference(param.schema.$ref, document);
+  if (!referencedSchema) {
+    // Dangling $ref — target schema was removed upstream (e.g. a
+    // deprecated payload typeconv no longer emits). Keep the param
+    // unexpanded instead of crashing the whole publish. #0408
+    return [param];
+  }
   if (!referencedSchema.properties || Object.keys(referencedSchema.properties).length === 0) {
     return [];
   }
@@ -59,6 +66,15 @@ function processYaml() {
     // Read and parse YAML
     const fileContent = readFileSync(inputPath, 'utf8');
     const document: any = yaml.load(fileContent);
+
+    // Guard: no paths means upstream assembly failed and combined.yaml
+    // is the raw typeconv output (typeconv emits an empty `paths: {}`,
+    // so the loop below would otherwise complete silently and overwrite
+    // the good file). Refuse to propagate it. #0408
+    if (!document || !document.paths || Object.keys(document.paths).length === 0) {
+      console.error('Error processing YAML: spec has no paths — upstream assembly failed, refusing to write.');
+      process.exit(1);
+    }
 
     // Process all paths
     for (const path of Object.values(document.paths)) {
@@ -91,6 +107,7 @@ function processYaml() {
     console.log(newYaml);
   } catch (error) {
     console.error('Error processing YAML:', error);
+    process.exit(1);
   }
 }
 

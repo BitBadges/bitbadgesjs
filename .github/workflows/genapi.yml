@@ -53,7 +53,22 @@ jobs:
           echo "Starting documentation generation..."
           echo "PYPI_TOKEN is set: $([[ ! -z "$PYPI_TOKEN" ]] && echo "true" || echo "false")"
           chmod +x ./scripts/gen_api_docs_ci.sh
-          source ./scripts/gen_api_docs_ci.sh
+          bash ./scripts/gen_api_docs_ci.sh
+
+      - name: Validate assembled spec before publish
+        run: |
+          bun -e '
+            const yaml = require("js-yaml");
+            const fs = require("fs");
+            const f = "./openapitypes/combined_processed.yaml";
+            if (!fs.existsSync(f)) { console.error(`FAIL: ${f} missing — assembly did not produce a spec.`); process.exit(1); }
+            const doc = yaml.load(fs.readFileSync(f, "utf8"));
+            const title = doc && doc.info && doc.info.title;
+            const n = doc && doc.paths ? Object.keys(doc.paths).length : 0;
+            if (title !== "BitBadges API") { console.error(`FAIL: info.title is ${JSON.stringify(title)} (expected "BitBadges API") — raw typeconv/partial spec, refusing to publish. See ticket 0408.`); process.exit(1); }
+            if (n < 90) { console.error(`FAIL: only ${n} paths (expected >= 90) — refusing to publish.`); process.exit(1); }
+            console.log(`Spec OK: title="${title}", paths=${n}`);
+          '
 
       - name: Push to Stoplight
         env:
