@@ -29,6 +29,7 @@ import {
 } from '../utils/indexer-options.js';
 import { requireBbDenom } from '../utils/denom.js';
 import { appendQuery } from '../utils/list-options.js';
+import { splitCsv } from '../utils/csv-options.js';
 
 /**
  * Mount the pool browser subcommand tree under `parent`. Used by both:
@@ -108,7 +109,7 @@ export function registerPools(parent: Command): void {
       .argument('<pool-ids...>', 'Pool IDs')
   ).action(async (poolIds: string[], opts: any) => {
     try {
-      const ids = poolIds.flatMap((v) => v.split(',')).map((v) => v.trim()).filter(Boolean);
+      const ids = splitCsv(poolIds);
       if (ids.length === 0) {
         process.stderr.write('Error: at least one pool ID required.\n');
         process.exit(2);

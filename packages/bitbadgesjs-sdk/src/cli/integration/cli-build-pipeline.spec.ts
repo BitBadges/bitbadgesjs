@@ -187,6 +187,17 @@ describe('cli build pipeline integration', () => {
       expect(out.json.value.creator).toBe(CREATOR);
       expect(out.json.value.approval.fromListId).toBe('All');
     });
+    it('omitting --token-ids yields a collection-wide bid (parity with bb nfts bid)', () => {
+      const out = runCli([
+        'build', 'bid',
+        '--address', CREATOR, '--collection-id', '1',
+        '--price', '5', '--denom', 'USDC'
+      ]);
+      expect(out.json.typeUrl).toBe('/tokenization.MsgSetIncomingApproval');
+      expect(
+        out.json.value.approval.approvalCriteria.predeterminedBalances.incrementedBalances.allowOverrideWithAnyValidToken
+      ).toBe(true);
+    });
   });
 
   describe('bb build intent', () => {

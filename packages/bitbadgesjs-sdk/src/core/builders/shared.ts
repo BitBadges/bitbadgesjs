@@ -64,7 +64,19 @@ export function resolveCoin(symbolOrDenom: string): ResolvedCoin {
  * Convert a display-unit amount (e.g. 10 USDC) to base units (e.g. 10000000 uusdc).
  */
 export function toBaseUnits(displayAmount: number, decimals: number): string {
-  return String(Math.round(displayAmount * 10 ** decimals));
+  const num = Number(displayAmount);
+  if (!Number.isFinite(num) || num < 0) {
+    throw new Error(
+      `Invalid amount "${displayAmount}": must be a finite, non-negative number.`
+    );
+  }
+  const base = Math.round(num * 10 ** decimals);
+  if (!Number.isSafeInteger(base)) {
+    throw new Error(
+      `Amount "${displayAmount}" is too large to convert to base units without precision loss.`
+    );
+  }
+  return String(base);
 }
 
 // ── Duration parsing ─────────────────────────────────────────────────────────
@@ -98,6 +110,22 @@ export function parseDuration(input: string): string {
 export function durationToTimestamp(input: string): string {
   const ms = Number(parseDuration(input));
   return String(Date.now() + ms);
+}
+
+/**
+ * Resolve an order-expiry input to an absolute ms-since-epoch timestamp
+ * (bigint). Accepts the same forms as the CLI's `parseTimeFlag` so a
+ * builder reached via `bb build *` behaves identically to its end-user
+ * `bb <noun> <verb>` sibling: a pure-digit string ≥10 chars is raw
+ * ms-since-epoch; anything else is duration shorthand (now + duration);
+ * an omitted/empty input falls back to `now + defaultMs`. Invalid
+ * durations throw (producer-side, consistent with the no-band-aid rule).
+ */
+export function resolveExpiration(input: string | undefined, defaultMs: number): bigint {
+  const trimmed = (input ?? '').trim();
+  if (trimmed.length === 0) return BigInt(Date.now() + defaultMs);
+  if (/^\d+$/.test(trimmed) && trimmed.length >= 10) return BigInt(trimmed);
+  return BigInt(Date.now()) + BigInt(parseDuration(trimmed));
 }
 
 // ── Unique ID generation ─────────────────────────────────────────────────────

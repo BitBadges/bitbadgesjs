@@ -28,6 +28,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
+import { splitCsv } from '../utils/csv-options.js';
 
 function fail(code: number, msg: string): never {
   process.stderr.write(`Error: ${msg}\n`);
@@ -144,7 +145,7 @@ addOutputFlags(
   )
 ).action(async (rawInputs: string[], opts: NetworkFlags & OutputFlags) => {
   try {
-    const inputs = rawInputs.flatMap((v) => v.split(',')).map((v) => v.trim()).filter(Boolean);
+    const inputs = splitCsv(rawInputs);
     if (inputs.length === 0) fail(2, 'at least one denom or symbol required');
 
     const denoms: { input: string; denom?: string }[] = [];

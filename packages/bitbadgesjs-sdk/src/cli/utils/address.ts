@@ -22,6 +22,7 @@
  */
 
 import { convertToBitBadgesAddress } from '../../address-converter/converter.js';
+import { splitCsv } from './csv-options.js';
 
 /**
  * Convert any supported address form (0x, bb1, bbvaloper) to its canonical
@@ -127,4 +128,17 @@ export function requireBb1AddressStrict(address: string, flagName: string): stri
     );
   }
   process.exit(1);
+}
+
+/**
+ * Split a comma-joined (and/or repeatable) recipient input into a list
+ * of canonical bb1 addresses, strictly validating each element via
+ * {@link requireBb1AddressStrict}. Replaces the
+ * split→trim→filter→map(requireBb1AddressStrict) sequence reimplemented
+ * in `custom-2fa` and `dynamic-stores` (ticket 0423). Does not dedupe —
+ * downstream builders own that where it matters (e.g. custom-2fa mint).
+ */
+export function resolveRecipientList(raw: string | string[], flagName: string): string[] {
+  const values = Array.isArray(raw) ? raw : [String(raw ?? '')];
+  return splitCsv(values).map((tok) => requireBb1AddressStrict(tok, flagName));
 }

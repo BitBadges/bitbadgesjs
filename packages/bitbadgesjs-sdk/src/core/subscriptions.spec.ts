@@ -21,6 +21,8 @@ import {
 } from './subscriptions.js';
 import { GO_MAX_UINT_64 } from '../common/math.js';
 import { UintRangeArray } from './uintRanges.js';
+import { buildSubscription } from './builders/subscription.js';
+import { normalizeForReview } from './review-normalize.js';
 
 // ---- fixture helpers -----------------------------------------------------
 
@@ -784,5 +786,42 @@ describe('userRecurringApproval', () => {
     expect((result as any).initiatedByList).toBeUndefined();
     expect((result as any).details).toBeUndefined();
     expect((result.approvalCriteria as any).requireToEqualsInitiatedBy).toBeUndefined();
+  });
+});
+
+// ===========================================================================
+// Producer ↔ recognizer drift guard (ticket 0425)
+//
+// `bb build subscription` is the SOLE producer of subscription-faucet
+// collections; `isSubscriptionFaucetApproval` /
+// `doesCollectionFollowSubscriptionProtocol` are the consumers behind
+// `bb subscriptions status|claim|charge-due`. The rest of this file only
+// tests the recognizer against hand-built fixtures — so the two 25+-field
+// shapes can silently drift apart. These tests run the real
+// `buildSubscription` output through the same bigint normalization the
+// indexer/verifier uses and assert the recognizer still accepts it.
+// ===========================================================================
+
+const SUB_META = { name: 'Sub', description: 'A subscription collection for the drift guard.', image: 'ipfs://sub' };
+
+describe('buildSubscription is recognized by isSubscriptionFaucetApproval (0425 drift guard)', () => {
+  it('single-tier built collection round-trips through the recognizer', () => {
+    const built = normalizeForReview(
+      buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', ...SUB_META })
+    );
+    const faucets = built.collectionApprovals.filter((a: any) => a.fromListId === 'Mint');
+    expect(faucets.length).toBe(1);
+    for (const a of faucets) expect(isSubscriptionFaucetApproval(a)).toBe(true);
+    expect(doesCollectionFollowSubscriptionProtocol(built as any)).toBe(true);
+  });
+
+  it('multi-tier built collection round-trips through the recognizer', () => {
+    const built = normalizeForReview(
+      buildSubscription({ interval: 'daily', price: 5, denom: 'BADGE', recipient: 'bb1r', tiers: 3, ...SUB_META })
+    );
+    const faucets = built.collectionApprovals.filter((a: any) => a.fromListId === 'Mint');
+    expect(faucets.length).toBe(3);
+    for (const a of faucets) expect(isSubscriptionFaucetApproval(a)).toBe(true);
+    expect(doesCollectionFollowSubscriptionProtocol(built as any)).toBe(true);
   });
 });

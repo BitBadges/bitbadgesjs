@@ -37,16 +37,13 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
+import { requireBb1Address, requireBb1AddressStrict, resolveRecipientList } from '../utils/address.js';
 import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
+import { splitCsv } from '../utils/csv-options.js';
 
 function fail(code: number, msg: string): never {
   process.stderr.write(`Error: ${msg}\n`);
   process.exit(code);
-}
-
-function splitCsv(values: string[]): string[] {
-  return values.flatMap((v) => v.split(',')).map((v) => v.trim()).filter(Boolean);
 }
 
 function parseBool(v: string, flagName: string): boolean {
@@ -190,7 +187,7 @@ Examples:
 function bulkSetValue(value: boolean) {
   return (storeId: string, rawAddresses: string[], opts: OutputFlags & { creator: string }) => {
     const creator = requireBb1AddressStrict(opts.creator, '--creator');
-    const addresses = splitCsv(rawAddresses).map((a) => requireBb1AddressStrict(a, '<addresses> argument'));
+    const addresses = resolveRecipientList(rawAddresses, '<addresses> argument');
     if (addresses.length === 0) fail(2, 'at least one address required');
     const messages = addresses.map((address) => ({
       typeUrl: '/tokenization.MsgSetDynamicStoreValue',

@@ -61,6 +61,14 @@ describe('subscriptionsCommand shape', () => {
     }
   });
 
+  it('enable-renewal + subscribe expose --approval-id (#0418 pinnable recurring id)', () => {
+    for (const verb of ['enable-renewal', 'subscribe']) {
+      const c = subscriptionsCommand.commands.find((cmd) => cmd.name() === verb);
+      const flagNames = (c! as any).options.map((o: any) => o.long);
+      expect(flagNames).toContain('--approval-id');
+    }
+  });
+
   it('no longer registers a `build` subcommand — use `bb build subscription` instead', () => {
     const build = subscriptionsCommand.commands.find((c) => c.name() === 'build');
     expect(build).toBeUndefined();
