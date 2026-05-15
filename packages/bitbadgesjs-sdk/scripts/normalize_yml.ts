@@ -3,14 +3,11 @@ import * as yaml from 'js-yaml';
 
 // Read the YAML file
 const filePath = process.argv[2];
-fs.readFile(filePath, 'utf8', (err, data) => {
-  if (err) {
-    console.error('Error reading the file:', err);
-    return;
-  }
 
-  // Parse YAML content
-  try {
+// Synchronous + fail-fast. A swallowed error here previously let CI
+// publish the raw typeconv spec (no paths, wrong title) — see #0408.
+try {
+    const data = fs.readFileSync(filePath, 'utf8');
     const yamlData = yaml.load(data);
 
     // Remove all 'title' properties from the YAML data
@@ -95,10 +92,10 @@ fs.readFile(filePath, 'utf8', (err, data) => {
 
     // Write the modified content back to the file
     fs.writeFileSync(filePath, modifiedYamlContent, 'utf8');
-  } catch (e) {
+} catch (e) {
     console.error('Error parsing or modifying YAML:', e);
-  }
-});
+    process.exit(1);
+}
 
 // Function to remove all 'title' properties recursively
 function removeTitleProperties(obj: any, parentKey: string) {
@@ -283,11 +280,15 @@ function addExamples(obj: any) {
     if (example.keys) {
       let temp = obj.components.schemas;
       for (const key of example.keys) {
-        temp = temp[key];
+        temp = temp?.[key];
       }
-      temp.examples = example.example ? [example.example] : example.examples;
+      if (temp) temp.examples = example.example ? [example.example] : example.examples;
     } else {
-      obj.components.schemas[`${example.key}`].examples = example.example ? [example.example] : example.examples;
+      // Schema may be absent if typeconv didn't emit it (env/dep
+      // dependent — node 18 vs 22). Skip the example rather than
+      // abort the whole merge. #0408
+      const target = obj.components.schemas[`${example.key}`];
+      if (target) target.examples = example.example ? [example.example] : example.examples;
     }
   }
 }
@@ -310,5 +311,7 @@ function orderDescriptionsAndRefs(obj: any) {
 }
 
 function removeTimestampLinks(obj: any) {
-  obj.components.schemas.UNIXMilliTimestamp.$ref = undefined;
+  if (obj.components.schemas.UNIXMilliTimestamp) {
+    obj.components.schemas.UNIXMilliTimestamp.$ref = undefined;
+  }
 }
