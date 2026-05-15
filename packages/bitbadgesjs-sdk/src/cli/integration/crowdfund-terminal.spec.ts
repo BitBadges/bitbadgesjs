@@ -21,7 +21,7 @@ import { preflightIntegration } from './harness/preflight.js';
 import { alice, bob, dave } from './harness/personas.js';
 import { runCli } from './harness/cli.js';
 import {
-  deployMsgViaKeyring, fundMany, waitForIndexerCollection, writeMsgToTmp, sleep
+  deployMsgViaKeyring, fundMany, waitForIndexerCollection, writeMsgToTmp, sleep, getBankBalance
 } from './harness/chain.js';
 
 const USDC = 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349';
@@ -39,17 +39,19 @@ function contribute(id: string, who: { address: string; name: string }, baseAmt:
     '--amount', baseAmt, '--base-units', '--local']);
   return deployMsgViaKeyring(writeMsgToTmp(m.json, 'cf-contrib'), who.name);
 }
-// NOTE (ticket 0437): the withdraw/refund economic happy-paths were
-// dropped from this spec. The `success` payout failed on-chain with
-// "insufficient <USDC> balance to complete transfer" — the crowdfund
-// mint-escrow did not hold enough of the deposit denom to satisfy the
-// crowdfunder payout for a single full-goal contribution. Whether that
-// is a test-calibration issue (contribution units / multi-contributor
-// escrow accumulation) or a real crowdfund escrow-accounting bug needs
-// a focused investigation against core/builders/crowdfund.ts +
-// the contribute→escrow path. Filed 0437. The status-transition,
-// contribute-after-deadline, and refund-when-goal-met security-guard
-// branches below ARE verified green and retained.
+// FINDING 0438 (root-caused — CONFIRMED real fund-safety bug, NOT
+// calibration): `contribute --amount N` mints N token-2 (=> `raised`)
+// but the deposit-refund coinTransfer escrows N − ~0.1% (consistent
+// with a chain coin-transfer tax; at tiny N the 0.1% rounds to 0,
+// which is why micro-amounts looked 1:1). `success`/`refund` then pay
+// out the GROSS `raised` from the escrow, which is perpetually short →
+// **a fully-funded crowdfund cannot be withdrawn or refunded**.
+// Reproduced deterministically below (escrow < raised; withdraw does
+// not succeed). The fix is design/chain-ambiguous (gate on escrow
+// balance vs token-2 / pay escrow-available / exempt escrow transfers
+// from the tax) so it is NOT auto-fixed here — 0438 stays open for a
+// decision. Status / contribute-after-deadline / refund-when-met
+// security-guard branches remain green.
 
 describe('crowdfund terminal-state integration', () => {
   let ready = false;
@@ -93,9 +95,28 @@ describe('crowdfund terminal-state integration', () => {
     expect(['expired-refunding', 'active']).toContain(sb);
   }, 60000);
 
-  // withdraw(A) / refund(B) economic happy-paths deferred — see ticket
-  // 0437 (success payout hit "insufficient escrow USDC"; investigate the
-  // contribute→mint-escrow funding path + config.yml genesis personas).
+  it('FINDING 0438: escrow ends up SHORT of raised → a fully-funded crowdfund cannot be withdrawn', async () => {
+    if (!ready || !A) return;
+    // A was built --goal 10 and bob contributed 10_000_000 base in
+    // beforeAll. token-2 raised == 10_000_000 but the escrow received
+    // ~0.1% less (the bug). Pin both halves so this flips green→fail
+    // when 0438 is fixed.
+    const show = runCli(['crowdfunds', 'show', A, '--local']).json;
+    const escrowAddr = show.mintEscrowAddress;
+    expect(typeof escrowAddr).toBe('string');
+    const escrow = getBankBalance(escrowAddr, USDC);
+    expect(escrow).toBeGreaterThan(0n);            // contribute DID fund the escrow …
+    expect(escrow).toBeLessThan(10_000_000n);      // … but SHORT of raised (the 0438 bug)
+    // …so withdrawing a fully-met goal does NOT succeed (insufficient escrow).
+    let withdrew = false;
+    const w = runCli(['crowdfunds', 'withdraw', A, '--creator', alice().address, '--local'],
+      { throwOnError: false });
+    if (w.exitCode === 0 && w.json && (w.json.messages || w.json.typeUrl)) {
+      try { withdrew = (await deployMsgViaKeyring(writeMsgToTmp(w.json, 'cf-wd-0438'), alice().name)).code === 0; }
+      catch { withdrew = false; }
+    }
+    expect(withdrew).toBe(false);
+  }, 90000);
 
   it('contribute-after-deadline is REJECTED (B)', async () => {
     if (!ready || !B) return;
