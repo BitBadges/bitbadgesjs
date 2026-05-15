@@ -214,7 +214,10 @@ export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>,
   }
 
   const intervalLength = BigInt(subscriptionApproval.approvalCriteria?.predeterminedBalances?.incrementedBalances.durationFromTimestamp ?? 0);
-  const chargePeriodLength = BigInt(Math.min(Number(intervalLength), 604800000));
+  // Bigint-exact cap (matches the producer at userRecurringApproval); the
+  // old `Number(intervalLength)` round-trip was lossy for absurd intervals.
+  const chargePeriodLength =
+    intervalLength < RECURRING_CHARGE_PERIOD_CAP_MS ? intervalLength : RECURRING_CHARGE_PERIOD_CAP_MS;
   const subscriptionAmount = subscriptionApproval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount ?? 0n;
   const approvalAmount = approval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount ?? 0n;
 

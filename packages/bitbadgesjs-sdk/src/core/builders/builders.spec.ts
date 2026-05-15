@@ -29,9 +29,10 @@ import { buildListing } from './listing.js';
 import { buildBid } from './bid.js';
 import { buildPmSellIntent } from './pm-sell-intent.js';
 import { buildPmBuyIntent } from './pm-buy-intent.js';
-import { resolveCoin, parseDuration, toBaseUnits, sanitizeCosmosPathName } from './shared.js';
+import { resolveCoin, parseDuration, toBaseUnits, sanitizeCosmosPathName, resolveExpiration } from './shared.js';
 import { buildPredictionMarketBuyIntent, buildPredictionMarketSellIntent } from '../prediction-markets.js';
 import { buildIntentApproval } from '../intents.js';
+import { UintRangeArray } from '../uintRanges.js';
 import { buildOrderbookBidApproval, buildOrderbookListingApproval } from '../bids.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -128,6 +129,32 @@ describe('shared utilities', () => {
 
   test('parseDuration throws for invalid input', () => {
     expect(() => parseDuration('invalid')).toThrow('Invalid duration');
+  });
+
+  describe('resolveExpiration (#0432 — direct spec; the duration branch was only tested indirectly)', () => {
+    test('empty/undefined → now + defaultMs', () => {
+      const before = Date.now();
+      const got = Number(resolveExpiration(undefined, 30 * 24 * 60 * 60 * 1000));
+      expect(got).toBeGreaterThanOrEqual(before + 30 * 24 * 60 * 60 * 1000 - 50);
+      expect(got).toBeLessThanOrEqual(Date.now() + 30 * 24 * 60 * 60 * 1000 + 50);
+      expect(Number(resolveExpiration('', 1000))).toBeGreaterThan(Date.now());
+    });
+    test('pure-digit ≥10 chars → raw ms-since-epoch (no now offset)', () => {
+      expect(resolveExpiration('1798765432000', 1000)).toBe(1798765432000n);
+    });
+    test('duration shorthand → now + parseDuration', () => {
+      const got = Number(resolveExpiration('30d', 1000));
+      const exp = Date.now() + 2592000000;
+      expect(Math.abs(got - exp)).toBeLessThan(2000);
+      const h = Number(resolveExpiration('24h', 1000));
+      expect(Math.abs(h - (Date.now() + 86400000))).toBeLessThan(2000);
+    });
+    test('a <10-digit numeric string is treated as duration (→ throws), NOT raw ms', () => {
+      expect(() => resolveExpiration('123456789', 1000)).toThrow('Invalid duration');
+    });
+    test('unparseable input throws', () => {
+      expect(() => resolveExpiration('nope', 1000)).toThrow('Invalid duration');
+    });
   });
 
   test('sanitizeCosmosPathName passes clean input through', () => {
@@ -973,6 +1000,27 @@ describe('pm-buy-intent builder (delegates to canonical)', () => {
     const span = Number(def.transferTimes[0].end) - Date.now();
     expect(span).toBeGreaterThan(23 * 60 * 60 * 1000);
     expect(span).toBeLessThanOrEqual(24 * 60 * 60 * 1000 + 5000);
+  });
+});
+
+describe('canonical PM intent tokenAmount guard (#0431 — bb prediction-markets buy/sell parity)', () => {
+  const base = {
+    address: 'bb1t', collectionId: '9', tokenId: 1n,
+    paymentDenom: 'uusdc', paymentAmount: 1000n,
+    transferTimes: UintRangeArray.From([{ start: 1n, end: 9999999999999n }]),
+    approvalId: 'pm-guard'
+  };
+  test('buildPredictionMarketBuyIntent throws on 0n / negative tokenAmount', () => {
+    expect(() => buildPredictionMarketBuyIntent({ ...base, tokenAmount: 0n })).toThrow(/positive integer/i);
+    expect(() => buildPredictionMarketBuyIntent({ ...base, tokenAmount: -5n })).toThrow(/positive integer/i);
+  });
+  test('buildPredictionMarketSellIntent throws on 0n / negative tokenAmount', () => {
+    expect(() => buildPredictionMarketSellIntent({ ...base, tokenAmount: 0n })).toThrow(/positive integer/i);
+    expect(() => buildPredictionMarketSellIntent({ ...base, tokenAmount: -1n })).toThrow(/positive integer/i);
+  });
+  test('a positive tokenAmount still builds', () => {
+    expect(buildPredictionMarketBuyIntent({ ...base, tokenAmount: 200n }).approvalId).toBe('pm-guard');
+    expect(buildPredictionMarketSellIntent({ ...base, tokenAmount: 1n }).approvalId).toBe('pm-guard');
   });
 });
 

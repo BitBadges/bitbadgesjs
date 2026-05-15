@@ -844,6 +844,9 @@ export interface PredictionMarketSideArgs {
  * is misleading — it's an incoming approval, posted via MsgSetIncomingApproval).
  */
 export function buildPredictionMarketBuyIntent(args: PredictionMarketSideArgs): Record<string, unknown> {
+  if (args.tokenAmount <= 0n) {
+    throw new Error(`Prediction market intent tokenAmount must be a positive integer (got ${args.tokenAmount}).`);
+  }
   const tokenIds = [{ start: args.tokenId, end: args.tokenId }];
   return {
     fromListId: 'All',
@@ -923,6 +926,9 @@ export function buildPredictionMarketBuyIntent(args: PredictionMarketSideArgs): 
  * receive `paymentAmount` of `paymentDenom`. Proto-shape only.
  */
 export function buildPredictionMarketSellIntent(args: PredictionMarketSideArgs): Record<string, unknown> {
+  if (args.tokenAmount <= 0n) {
+    throw new Error(`Prediction market intent tokenAmount must be a positive integer (got ${args.tokenAmount}).`);
+  }
   const tokenIds = [{ start: args.tokenId, end: args.tokenId }];
   return {
     toListId: 'All',
