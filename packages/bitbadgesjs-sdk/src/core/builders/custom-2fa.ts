@@ -174,3 +174,79 @@ export function buildCustom2FA(params: Custom2FAParams): any {
     tokenMetadata: [tokenMetadataEntry([{ start: '1', end: '1' }], collectionSource, '2FA token')]
   });
 }
+
+/**
+ * 5-minute default 2FA token lifetime. Mirrors the FE constant
+ * `CUSTOM_2FA_TOKEN_EXPIRATION_MS` in
+ * `bitbadges-frontend/src/bitbadges-api/utils/custom-2fa-protocol.ts`.
+ */
+export const CUSTOM_2FA_TOKEN_EXPIRATION_MS = 300000;
+
+/**
+ * The mint-time ownership window `[now, now + expirationMs]` — string ms.
+ * The collection approval uses FOREVER + `allowPurgeIfExpired`, so the
+ * short lifetime MUST be encoded here at mint time (exactly what the FE
+ * `getCustom2FAOwnershipTimes()` does). Without it the minted token gets
+ * full ownership and never expires, silently breaking the 2FA guarantee.
+ */
+export function getCustom2FAOwnershipTimes(
+  expirationMs: number = CUSTOM_2FA_TOKEN_EXPIRATION_MS
+): { start: string; end: string }[] {
+  const now = Date.now();
+  return [{ start: String(now), end: String(now + expirationMs) }];
+}
+
+export interface MintCustom2FAParams {
+  /** Manager address — the only address allowed to mint (matches the
+   *  collection's `custom-2fa-mint` approval `initiatedByListId`). */
+  creator: string;
+  collectionId: string;
+  /** bb1... recipients to issue a 2FA token to (token id 1, amount 1). */
+  recipients: string[];
+  /** Token lifetime in ms. Default 5 min (`CUSTOM_2FA_TOKEN_EXPIRATION_MS`). */
+  expirationMs?: number;
+}
+
+/**
+ * Build the mint `MsgTransferTokens` for custom-2fa tokens, encoding the
+ * short lifetime at mint time via `ownershipTimes` — the SDK/CLI mirror of
+ * the FE `Custom2FALayout` mint. A CLI user who broadcasts their own mint
+ * without this gets forever-tokens.
+ */
+export function mintCustom2FA(params: MintCustom2FAParams): { typeUrl: string; value: any } {
+  if (!params.creator) {
+    throw new Error(
+      'mintCustom2FA requires --creator <bb1...> (the manager; only the manager may mint 2FA tokens).'
+    );
+  }
+  const recipients = (params.recipients ?? []).filter(Boolean);
+  const toAddresses = recipients.filter((a, i) => recipients.indexOf(a) === i);
+  if (toAddresses.length === 0) {
+    throw new Error('mintCustom2FA requires at least one recipient (--to <bb1...>).');
+  }
+  const expirationMs = params.expirationMs ?? CUSTOM_2FA_TOKEN_EXPIRATION_MS;
+  if (!Number.isFinite(expirationMs) || expirationMs <= 0) {
+    throw new Error('mintCustom2FA: token lifetime must be a positive duration.');
+  }
+  return {
+    typeUrl: '/tokenization.MsgTransferTokens',
+    value: {
+      creator: params.creator,
+      collectionId: String(params.collectionId),
+      transfers: [
+        {
+          from: 'Mint',
+          toAddresses,
+          balances: [
+            {
+              amount: '1',
+              tokenIds: [{ start: '1', end: '1' }],
+              ownershipTimes: getCustom2FAOwnershipTimes(expirationMs)
+            }
+          ],
+          memo: ''
+        }
+      ]
+    }
+  };
+}

@@ -25,7 +25,14 @@ export {
   SMART_TOKEN_TRANSFERABLE_APPROVAL_ID
 } from './smart-token.js';
 export { buildCreditToken, type CreditTokenParams } from './credit-token.js';
-export { buildCustom2FA, type Custom2FAParams } from './custom-2fa.js';
+export {
+  buildCustom2FA,
+  type Custom2FAParams,
+  mintCustom2FA,
+  getCustom2FAOwnershipTimes,
+  CUSTOM_2FA_TOKEN_EXPIRATION_MS,
+  type MintCustom2FAParams
+} from './custom-2fa.js';
 export { buildQuests, type QuestsParams } from './quests.js';
 export { buildAddressList, type AddressListParams } from './address-list.js';
 

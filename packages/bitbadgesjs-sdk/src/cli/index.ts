@@ -195,6 +195,7 @@ import { auctionsCommand } from './commands/auctions.js';
 import { predictionMarketsCommand } from './commands/prediction-markets.js';
 import { smartTokensCommand } from './commands/smart-tokens.js';
 import { nftsCommand } from './commands/nfts.js';
+import { custom2faCommand } from './commands/custom-2fa.js';
 
 // Misc
 import { makeCompletionCommand } from './commands/completion.js';
@@ -302,6 +303,7 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
       predictionMarketsCommand,
       smartTokensCommand,
       nftsCommand,
+      custom2faCommand,
       dynamicStoresCommand
     ]
   }
