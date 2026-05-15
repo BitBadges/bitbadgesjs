@@ -701,22 +701,14 @@ sharedOpts(
   }), opts);
 });
 
-sharedOpts(
-  buildCommand
-    .command('quests')
-    .description('Create a quest/reward collection. Metadata: pass --uri OR --name + --image + --description.')
-    .requiredOption('--reward <n>', 'Reward per claim (display units)')
-    .requiredOption('--denom <symbol|denom>', 'Reward coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
-    .requiredOption('--max-claims <n>', 'Maximum number of claims')
-).action(async (opts) => {
-  const { buildQuests } = await import('../../core/builders/quests.js');
-  if (opts.json) { emit(buildQuests(readJsonInput(opts.json)), opts); return; }
-  const denom = requireBbDenom(opts.denom, '--denom');
-  emit(buildQuests({
-    reward: Number(opts.reward), denom, maxClaims: Number(opts.maxClaims),
-    uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
-  }), opts);
-});
+// NOTE: `bb build quests` was removed (ticket 0435). The builder emitted
+// a merkleChallenge with an empty root, which the chain rejects
+// (challenges.go:58 — "challenge is nil or has empty root"), so a quest
+// built via the CLI was not claimable on-chain; the working quest claim
+// path is the off-chain BitBadges claims system, which the CLI does not
+// wire. The SDK `buildQuests` + isQuestApproval recognizers are retained
+// for the FE/claims path; the CLI surface is removed pending a decision
+// on the intended on-chain quest mechanic (0435).
 
 sharedOpts(
   buildCommand

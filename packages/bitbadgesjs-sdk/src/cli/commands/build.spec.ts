@@ -31,7 +31,6 @@ describe('buildCommand shape', () => {
       'pm-sell-intent',
       'prediction-market',
       'product-catalog',
-      'quests',
       'send',
       'smart-token',
       'subscription',
@@ -40,7 +39,7 @@ describe('buildCommand shape', () => {
     ]);
   });
 
-  it('every collection-creating verb (except address-list / custom-2fa / quests / approval verbs / send / transfer) requires a coin-related flag', () => {
+  it('every collection-creating verb (except address-list / custom-2fa / approval verbs / send / transfer) requires a coin-related flag', () => {
     // Sanity check that the required-option contract isn't lost. Each
     // verb listed here MUST have at least one required option besides
     // metadata — otherwise an agent calling `bb build vault` with no
@@ -70,7 +69,6 @@ describe('buildCommand shape', () => {
       'smart-token',
       'credit-token',
       'custom-2fa',
-      'quests',
       'address-list',
       'intent',
       'listing',
