@@ -139,16 +139,9 @@ describe('cli build pipeline integration', () => {
     });
   });
 
-  describe('bb build quests', () => {
-    it('emits MsgCreateCollection with the quest standard', () => {
-      const out = runCli([
-        'build', 'quests',
-        '--reward', '10', '--denom', 'BADGE', '--max-claims', '100',
-        '--name', 'Q', '--image', IMG, '--description', 'D', '--creator', CREATOR
-      ]);
-      expect(out.json.typeUrl).toBe('/tokenization.MsgCreateCollection');
-    });
-  });
+  // `bb build quests` removed (ticket 0435 — empty-root merkleChallenge
+  // is rejected on-chain; the working claim path is the off-chain
+  // claims system the CLI doesn't wire). SDK builder retained.
 
   describe('bb build address-list', () => {
     it('emits a create-style msg', () => {
