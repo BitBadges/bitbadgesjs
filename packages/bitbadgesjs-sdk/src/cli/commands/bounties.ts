@@ -29,6 +29,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
+import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import {
   doesCollectionFollowBountyProtocol,
   validateBountyCollection,
@@ -260,15 +261,17 @@ Examples:
 
 // ── bounties claim-refund ────────────────────────────────────────────────
 
-addOutputFlags(
-  addNetworkFlags(
-    bountiesCommand
-      .command('claim-refund')
-      .description(
-        'Post-deadline refund: emit MsgTransferTokens against the expire approval. Pipe to `bb deploy`. The bounty is callable by anyone after the window closes, but funds always flow to the submitter.'
-      )
-      .argument('<collection-id>', 'Bounty collection ID')
-      .requiredOption('--creator <address>', 'Address signing the refund tx (bb1.../0x — auto-normalized)')
+addDeployOptions(
+  addOutputFlags(
+    addNetworkFlags(
+      bountiesCommand
+        .command('claim-refund')
+        .description(
+          'Post-deadline refund: MsgTransferTokens against the expire approval. Emit (pipe to `bb deploy`) or broadcast inline with --browser/--burner. Callable by anyone after the window closes; funds always flow to the submitter.'
+        )
+        .argument('<collection-id>', 'Bounty collection ID')
+        .requiredOption('--creator <address>', 'Address signing the refund tx (bb1.../0x — auto-normalized)')
+    )
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
   try {
@@ -286,7 +289,7 @@ addOutputFlags(
       process.stderr.write('Warning: the expire approval has already been executed. Submitting again will be rejected on-chain.\n');
     }
     const msg = buildBountyRefundMsg(creator, String(collectionId), details.expireApproval);
-    emit(msg, opts);
+    await runEmitOrDeploy(msg, opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
   } catch (err) {
     emitError(err);
   }
