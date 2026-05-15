@@ -83,6 +83,62 @@ describe('cli build pipeline integration', () => {
     });
   });
 
+  // `bb custom-2fa mint` parse/guard coverage (ticket 0420) — emit-only,
+  // no devnet. The on-chain broadcast is in integration/custom-2fa.spec.ts.
+  describe('bb custom-2fa mint (parse + guards)', () => {
+    const BURN = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
+
+    it('emits MsgTransferTokens with a default 5-minute (300000ms) ownership window', () => {
+      const out = runCli(['custom-2fa', 'mint', '84', '--creator', CREATOR, '--to', BURN, '--local']);
+      expect(out.json.typeUrl).toBe('/tokenization.MsgTransferTokens');
+      const t = out.json.value.transfers[0];
+      expect(t.from).toBe('Mint');
+      expect(t.toAddresses).toEqual([BURN]);
+      const ot = t.balances[0].ownershipTimes[0];
+      expect(Number(ot.end) - Number(ot.start)).toBe(300000);
+    });
+
+    it('honors a custom --expiration duration (10m → 600000ms)', () => {
+      const out = runCli(['custom-2fa', 'mint', '84', '--creator', CREATOR, '--to', BURN, '--expiration', '10m', '--local']);
+      const ot = out.json.value.transfers[0].balances[0].ownershipTimes[0];
+      expect(Number(ot.end) - Number(ot.start)).toBe(600000);
+    });
+
+    it('comma-splits + de-dupes recipients', () => {
+      const out = runCli(['custom-2fa', 'mint', '84', '--creator', CREATOR, '--to', `${CREATOR},${CREATOR},${BURN}`, '--local']);
+      expect(out.json.value.transfers[0].toAddresses).toEqual([CREATOR, BURN]);
+    });
+
+    it('rejects a non-bb1 recipient (strict)', () => {
+      const out = runCli(
+        ['custom-2fa', 'mint', '84', '--creator', CREATOR, '--to', '0x0000000000000000000000000000000000000000', '--local'],
+        { throwOnError: false, parseJson: false }
+      );
+      expect(out.exitCode).not.toBe(0);
+    });
+
+    it('rejects a valid-but-past --expiration (future-window guard)', () => {
+      // 1577836800000 = 2020-01-01 UTC: a valid ms-since-epoch (parses
+      // fine) that is firmly in the past, so it reaches and trips the
+      // command's `expirationMs <= 0` guard.
+      const out = runCli(
+        ['custom-2fa', 'mint', '84', '--creator', CREATOR, '--to', BURN, '--expiration', '1577836800000', '--local'],
+        { throwOnError: false, parseJson: false }
+      );
+      expect(out.exitCode).not.toBe(0);
+      expect(out.stderr + out.stdout).toMatch(/future/i);
+    });
+
+    it('rejects an unparseable --expiration value', () => {
+      const out = runCli(
+        ['custom-2fa', 'mint', '84', '--creator', CREATOR, '--to', BURN, '--expiration', 'not-a-time', '--local'],
+        { throwOnError: false, parseJson: false }
+      );
+      expect(out.exitCode).not.toBe(0);
+      expect(out.stderr + out.stdout).toMatch(/invalid (time|duration)/i);
+    });
+  });
+
   describe('bb build quests', () => {
     it('emits MsgCreateCollection with the quest standard', () => {
       const out = runCli([
@@ -107,38 +163,43 @@ describe('cli build pipeline integration', () => {
   // ── Approval builders (user-level) ─────────────────────────────────────
 
   describe('bb build listing', () => {
-    it('emits MsgUpdateUserApprovals with one outgoing approval', () => {
+    it('emits MsgSetOutgoingApproval — identical shape to bb nfts list', () => {
       const out = runCli([
         'build', 'listing',
         '--address', CREATOR, '--collection-id', '1', '--token-ids', '1',
         '--price', '10', '--denom', 'USDC'
       ]);
-      expect(out.json.typeUrl).toBe('/tokenization.MsgUpdateUserApprovals');
-      expect(out.json.value.outgoingApprovals?.length ?? 0).toBeGreaterThan(0);
+      expect(out.json.typeUrl).toBe('/tokenization.MsgSetOutgoingApproval');
+      expect(out.json.value.creator).toBe(CREATOR);
+      expect(out.json.value.collectionId).toBe('1');
+      expect(out.json.value.approval.toListId).toBe('All');
     });
   });
 
   describe('bb build bid', () => {
-    it('emits MsgUpdateUserApprovals with one incoming approval', () => {
+    it('emits MsgSetIncomingApproval — identical shape to bb nfts bid', () => {
       const out = runCli([
         'build', 'bid',
         '--address', CREATOR, '--collection-id', '1', '--token-ids', '1',
         '--price', '5', '--denom', 'USDC'
       ]);
-      expect(out.json.typeUrl).toBe('/tokenization.MsgUpdateUserApprovals');
-      expect(out.json.value.incomingApprovals?.length ?? 0).toBeGreaterThan(0);
+      expect(out.json.typeUrl).toBe('/tokenization.MsgSetIncomingApproval');
+      expect(out.json.value.creator).toBe(CREATOR);
+      expect(out.json.value.approval.fromListId).toBe('All');
     });
   });
 
   describe('bb build intent', () => {
-    it('emits MsgUpdateUserApprovals (outgoing) for an OTC swap intent', () => {
+    it('emits MsgSetOutgoingApproval — identical shape to bb intents create', () => {
       const out = runCli([
         'build', 'intent',
         '--address', CREATOR, '--collection-id', '24',
         '--pay-denom', 'USDC', '--pay-amount', '10',
         '--receive-denom', 'BADGE', '--receive-amount', '100'
       ]);
-      expect(out.json.typeUrl).toBe('/tokenization.MsgUpdateUserApprovals');
+      expect(out.json.typeUrl).toBe('/tokenization.MsgSetOutgoingApproval');
+      expect(out.json.value.creator).toBe(CREATOR);
+      expect(out.json.value.approval.fromListId).toBe(CREATOR);
     });
   });
 

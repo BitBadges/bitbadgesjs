@@ -15,7 +15,7 @@
  */
 
 import { Command } from 'commander';
-import * as crypto from 'node:crypto';
+import { resolveApprovalId } from '../utils/approval-id-options.js';
 import {
   addIndexerNetworkOptions as addNetworkFlags,
   addIndexerOutputOptions as addOutputFlags,
@@ -81,7 +81,7 @@ addOutputFlags(
         { amountFlag: '--price', denomFlag: '--denom' }
       );
       const end = resolveExpiry(opts, 7 * 24 * 60 * 60 * 1000);
-      const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
+      const approvalId = resolveApprovalId(opts);
       const approval = buildOrderbookBidApproval({
         address: creator,
         tokenId: opts.tokenId ? BigInt(opts.tokenId) : undefined,
@@ -138,7 +138,7 @@ addOutputFlags(
         { amountFlag: '--price', denomFlag: '--denom' }
       );
       const end = resolveExpiry(opts, 30 * 24 * 60 * 60 * 1000);
-      const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
+      const approvalId = resolveApprovalId(opts);
       const approval = buildOrderbookListingApproval({
         address: creator,
         tokenId: BigInt(opts.tokenId),

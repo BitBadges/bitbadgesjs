@@ -13,7 +13,7 @@
  */
 
 import { Command } from 'commander';
-import * as crypto from 'node:crypto';
+import { resolveApprovalId } from '../utils/approval-id-options.js';
 import {
   addIndexerNetworkOptions as addNetworkFlags,
   addIndexerOutputOptions as addOutputFlags,
@@ -203,7 +203,7 @@ function buyAction(side: 'yes' | 'no') {
       );
       await fetchCollection(collectionId, opts).then((c) => validateOrExit(c, `prediction-markets buy-${side}`));
       const end = resolveExpiry(opts, 24 * 60 * 60 * 1000);
-      const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
+      const approvalId = resolveApprovalId(opts);
       const approval = buildPredictionMarketBuyIntent({
         address: creator,
         collectionId: String(collectionId),
@@ -234,7 +234,7 @@ function sellAction(side: 'yes' | 'no') {
       );
       await fetchCollection(collectionId, opts).then((c) => validateOrExit(c, `prediction-markets sell-${side}`));
       const end = resolveExpiry(opts, 24 * 60 * 60 * 1000);
-      const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
+      const approvalId = resolveApprovalId(opts);
       const approval = buildPredictionMarketSellIntent({
         address: creator,
         collectionId: String(collectionId),

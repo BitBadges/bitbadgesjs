@@ -4,7 +4,7 @@
  */
 
 import { Command } from 'commander';
-import * as crypto from 'node:crypto';
+import { resolveApprovalId } from '../utils/approval-id-options.js';
 import {
   addIndexerNetworkOptions as addNetworkFlags,
   addIndexerOutputOptions as addOutputFlags,
@@ -171,7 +171,7 @@ addOutputFlags(
       const transferTimes = details.acceptDeadline > 0n
         ? UintRangeArray.From([{ start: 1n, end: details.acceptDeadline }])
         : UintRangeArray.FullRanges();
-      const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
+      const approvalId = resolveApprovalId(opts);
       const approval = buildAuctionBidApproval({
         bidderAddress: creator,
         tokenId: 1n,

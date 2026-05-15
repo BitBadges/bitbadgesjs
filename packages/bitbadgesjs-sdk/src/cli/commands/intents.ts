@@ -18,8 +18,8 @@
  * SDK helpers.
  */
 
-import { Command } from 'commander';
-import * as crypto from 'node:crypto';
+import { Command, Option } from 'commander';
+import { resolveApprovalId } from '../utils/approval-id-options.js';
 import {
   addIndexerNetworkOptions as addNetworkFlags,
   addIndexerOutputOptions as addOutputFlags,
@@ -35,7 +35,8 @@ import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import { appendQuery } from '../utils/list-options.js';
 import { requireBbDenom } from '../utils/denom.js';
 import { resolveAmount } from '../utils/amount.js';
-import { parseTimeFlag } from '../utils/time.js';
+import { resolveExpiry } from '../utils/expiry-options.js';
+import { emitDeprecation } from '../utils/deprecation.js';
 import {
   buildIntentApproval,
   buildIntentFillTx,
@@ -167,9 +168,11 @@ addOutputFlags(
         .requiredOption('--receive-amount <amount>', 'Amount of receive denom. Display units for symbol denoms, base units for chain denoms.')
         .option('--base-units', 'Treat --pay-amount and --receive-amount as already-in-base-units')
         .option(
-          '--valid-until <when>',
-          'Optional expiration: ms-since-epoch or duration (24h, 7d, 30d, monthly). Default 30d.'
+          '--expiration <when>',
+          'Expiration: ms-since-epoch (1748140800000) or duration (24h, 7d, 30d, monthly). Default 30d.'
         )
+        .addOption(new Option('--expiry <when>', 'Deprecated alias for --expiration').hideHelp())
+        .addOption(new Option('--valid-until <when>', 'Deprecated alias for --expiration').hideHelp())
         .option('--approval-id <id>', 'Override the auto-generated approval id (random hex by default)')
     )
   )
@@ -184,6 +187,8 @@ addOutputFlags(
         receiveDenom: string;
         receiveAmount: string;
         baseUnits?: boolean;
+        expiration?: string;
+        expiry?: string;
         validUntil?: string;
         approvalId?: string;
       }
@@ -207,11 +212,13 @@ addOutputFlags(
         process.stderr.write('Error: --pay-denom and --receive-denom must differ.\n');
         process.exit(2);
       }
-      const validUntil = opts.validUntil
-        ? parseTimeFlag(opts.validUntil, '--valid-until')
-        : BigInt(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      if (opts.validUntil && !opts.expiration) emitDeprecation('--valid-until', '--expiration');
+      const validUntil = resolveExpiry(
+        { expiration: opts.expiration ?? opts.validUntil, expiry: opts.expiry },
+        30 * 24 * 60 * 60 * 1000
+      );
       const collectionId = resolveCollectionId(opts);
-      const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
+      const approvalId = resolveApprovalId(opts);
 
       const approval = buildIntentApproval({
         address: creator,
