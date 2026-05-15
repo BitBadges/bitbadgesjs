@@ -15,6 +15,35 @@
 import type { iCollectionApproval } from '@/interfaces/types/approvals.js';
 import type { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 
+/**
+ * Per-network collection ID for **BitBadges' own** API-credits token
+ * (the "APITOKEN" collection that meters the BitBadges AI Builder and
+ * the main API-key middleware; 1 USDC = 100,000 APITOKEN).
+ *
+ * This is NOT "the" credit token — the Credit Token standard is generic
+ * and anyone can deploy their own collection. This constant is purely a
+ * convenience so callers topping up *BitBadges'* API don't have to look
+ * the id up. Mirrors `API_CREDITS_COLLECTION_ID` in the FE constants.
+ * `testnet: null` — the APITOKEN collection is not deployed on testnet.
+ */
+export const BITBADGES_API_CREDITS_COLLECTION_IDS: Record<'mainnet' | 'testnet' | 'local', string | null> = {
+  mainnet: '84',
+  testnet: null,
+  local: '23'
+};
+
+export function bitbadgesApiCreditsCollectionId(network: 'mainnet' | 'testnet' | 'local'): string {
+  const id = BITBADGES_API_CREDITS_COLLECTION_IDS[network];
+  if (!id) {
+    throw new Error(
+      `BitBadges' API-credits collection is not deployed on ${network}. ` +
+      `It exists on mainnet and local only. (Any Credit Token collection works with ` +
+      `\`credit-tokens purchase <collection-id>\` — this shortcut is just for BitBadges' own API.)`
+    );
+  }
+  return id;
+}
+
 export interface CreditTokenTier {
   /** Approval id — `credit-scaled` or `credit-<N>`. */
   approvalId: string;
