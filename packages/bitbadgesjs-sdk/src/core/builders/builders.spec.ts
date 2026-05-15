@@ -188,6 +188,13 @@ describe('vault builder', () => {
     expect(a.approvalId.startsWith('vault-withdraw-')).toBe(true);
   });
 
+  test('withdraw approval is locked — canUpdateCollectionApprovals frozen', () => {
+    // Was baselinePermissions() (mutable): the manager could revoke the
+    // withdraw approval post-deposit and trap funds. Must match the FE
+    // vaultHelpers.buildVaultPermissions() fully-frozen shape.
+    expect(r.collectionPermissions.canUpdateCollectionApprovals.length).toBeGreaterThan(0);
+    expect(r.collectionPermissions.canUpdateManager.length).toBeGreaterThan(0);
+  });
   test('passes verification with zero violations', () => {
     expectCleanVerification(msg);
   });
@@ -522,8 +529,20 @@ describe('quests builder', () => {
     expect(q.approvalCriteria.coinTransfers[0].overrideFromWithApproverAddress).toBe(true);
     expect(q.approvalCriteria.coinTransfers[0].overrideToWithInitiator).toBe(true);
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Quest')).toEqual([]);
+  test('emits exactly one classifiable merkleChallenge', () => {
+    // `merkleChallenges: []` made the approval unrecognizable as a quest
+    // (isQuestApproval requires exactly one challenge, maxUsesPerLeaf 1,
+    // useCreatorAddressAsLeaf false). Open challenge (empty root) keeps
+    // the streamlined "anyone can claim, capped by maxClaims" behavior.
+    const q = r.collectionApprovals.find((a: any) => a.approvalId === 'quests-approval');
+    const mc = q.approvalCriteria.merkleChallenges;
+    expect(mc.length).toBe(1);
+    expect(mc[0].maxUsesPerLeaf).toBe('1');
+    expect(mc[0].useCreatorAddressAsLeaf).toBe(false);
+    expect(mc[0].challengeTrackerId).toBe('quests-approval');
+  });
+  test('passes verification with zero violations', () => {
+    expectCleanVerification(msg);
   });
 });
 

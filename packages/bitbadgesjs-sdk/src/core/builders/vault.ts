@@ -14,7 +14,7 @@ import {
   sanitizeCosmosPathName,
   ibcBackedInvariants,
   generateAliasAddressForIBCBackedDenom,
-  baselinePermissions,
+  frozenPermissions,
   tokenMetadataEntry,
   metadataFromFlat,
   MetadataMissingError,
@@ -180,7 +180,11 @@ export function buildVault(params: VaultParams): any {
     aliasPathsToAdd: [aliasPath],
     collectionMetadata: collectionSource,
     tokenMetadata: [tokenMetadataEntry(FOREVER, collectionSource, 'vault token')],
-    collectionPermissions: baselinePermissions()
+    // Fully frozen — matches the FE vaultHelpers.buildVaultPermissions().
+    // Critically locks canUpdateCollectionApprovals: with the old
+    // baselinePermissions() the vault manager could revoke/edit the
+    // withdraw approval post-deposit and trap depositor funds.
+    collectionPermissions: frozenPermissions()
   });
 }
 

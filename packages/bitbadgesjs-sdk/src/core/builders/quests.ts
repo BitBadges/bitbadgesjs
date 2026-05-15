@@ -73,7 +73,24 @@ export function buildQuests(params: QuestsParams): any {
           }
         ],
         overridesFromOutgoingApprovals: true,
-        merkleChallenges: []
+        // A quest approval MUST carry exactly one merkleChallenge with
+        // maxUsesPerLeaf:1 and useCreatorAddressAsLeaf:false, or
+        // `isQuestApproval` (and the FE quests page) won't recognize it
+        // as a quest. An empty root + empty leafSigner is an open
+        // challenge — keeps the streamlined "anyone can claim, capped by
+        // overallMaxNumTransfers" behavior while staying classifiable.
+        merkleChallenges: [
+          {
+            root: '',
+            expectedProofLength: '0',
+            useCreatorAddressAsLeaf: false,
+            maxUsesPerLeaf: '1',
+            uri: '',
+            customData: '',
+            challengeTrackerId: questApprovalId,
+            leafSigner: ''
+          }
+        ]
       }
     },
     // Burn approval
