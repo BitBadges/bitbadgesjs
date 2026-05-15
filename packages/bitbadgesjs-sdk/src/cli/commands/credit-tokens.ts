@@ -23,6 +23,7 @@ import {
 import { requireBb1AddressStrict } from '../utils/address.js';
 import { resolveNetwork } from '../utils/io.js';
 import { addDeployOptions, runEmitOrDeploy, type DeployOpts } from '../utils/deploy-options.js';
+import { normalizeCollection } from '../utils/collection-options.js';
 import {
   doesCollectionFollowCreditTokenProtocol,
   extractCreditTokenTiers,
@@ -31,8 +32,7 @@ import {
 } from '../../core/credit-tokens.js';
 
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
-  const res = await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts);
-  return res?.collection ?? res;
+  return normalizeCollection(await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts));
 }
 
 function validateOrExit(collection: any, ctx: string): void {

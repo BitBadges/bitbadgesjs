@@ -31,6 +31,7 @@ import {
 } from '../utils/indexer-options.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
+import { normalizeCollection } from '../utils/collection-options.js';
 import {
   doesCollectionFollowSubscriptionProtocol,
   isSubscriptionFaucetApproval,
@@ -40,7 +41,6 @@ import {
 } from '../../core/subscriptions.js';
 import { getBalanceForIdAndTime } from '../../core/balances.js';
 import { UintRangeArray } from '../../core/uintRanges.js';
-import { BitBadgesCollection } from '../../api-indexer/BitBadgesCollection.js';
 import { BalanceDoc } from '../../api-indexer/docs-types/docs.js';
 import { BigIntify } from '../../common/string-numbers.js';
 
@@ -59,16 +59,7 @@ function parseNonNegativeIntFlag(value: string | undefined, flagName: string): b
 }
 
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
-  const res = await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts);
-  const raw = res?.collection ?? res;
-  if (!raw) return raw;
-  // Indexer ships uint64s as strings; validators below expect bigints.
-  // Convert at the boundary so downstream protocol checks compare like-for-like.
-  try {
-    return new BitBadgesCollection(raw).convert(BigIntify);
-  } catch {
-    return raw;
-  }
+  return normalizeCollection(await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts));
 }
 
 async function fetchUserBalances(collectionId: string, address: string, opts: NetworkFlags): Promise<any> {

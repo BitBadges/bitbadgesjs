@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { addNetworkOptions } from '../utils/io.js';
 import { addOutputOptions, emit, emitError, commentary } from '../utils/envelope.js';
 
-function ensureTxWrapper(input: any): any {
+export function ensureTxWrapper(input: any): any {
   if (!input || typeof input !== 'object') return input;
   if (Array.isArray(input.messages)) return input;
   if (typeof input.typeUrl === 'string' && input.value) return { messages: [input] };

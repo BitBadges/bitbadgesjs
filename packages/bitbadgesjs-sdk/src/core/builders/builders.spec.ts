@@ -759,6 +759,10 @@ describe('intent builder (delegates to canonical)', () => {
     expect(() => buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'USDC', payAmount: 10, receiveDenom: 'usdc', receiveAmount: 5 }))
       .toThrow(/denoms must differ/);
   });
+  test('accepts ms-since-epoch expiration (parity with bb intents create; durationToTimestamp rejected it)', () => {
+    const a = buildIntent({ address: 'bb1c', collectionId: '5', payDenom: 'USDC', payAmount: 7, receiveDenom: 'BADGE', receiveAmount: 3, expiration: '1798765432000' }).value.approval;
+    expect(a.transferTimes).toEqual([{ start: 1n, end: 1798765432000n }]);
+  });
 });
 
 // `recurring-payment builder` block removed — buildRecurringPayment was
@@ -802,6 +806,10 @@ describe('listing builder (delegates to canonical)', () => {
     const p = { address: 'bb1seller', collectionId: '1', tokenIds: '4', price: 50, denom: 'USDC' };
     expect(buildListing(p).value.approval.approvalId).toBe(buildListing(p).value.approval.approvalId);
     expect((msg as any)._meta).toBeUndefined();
+  });
+  test('accepts ms-since-epoch expiration (parity with bb nfts list; durationToTimestamp rejected it)', () => {
+    const a = buildListing({ address: 'bb1seller', collectionId: '1', tokenIds: '4', price: 50, denom: 'USDC', expiration: '1798765432000' }).value.approval;
+    expect(a.transferTimes).toEqual([{ start: 1n, end: 1798765432000n }]);
   });
 });
 
@@ -914,6 +922,14 @@ describe('pm-sell-intent builder (delegates to canonical)', () => {
     const b = buildPmSellIntent({ address: 'bb1s', collectionId: '7', token: 'yes', amount: 3, price: 9, denom: 'USDC' });
     expect(a.value.approval.approvalId).toBe(b.value.approval.approvalId);
   });
+  test('accepts ms-since-epoch expiration; defaults to a 24h window (parity with bb prediction-markets sell)', () => {
+    const fixed = buildPmSellIntent({ address: 'bb1s', collectionId: '7', token: 'yes', amount: 3, price: 9, denom: 'USDC', expiration: '1798765432000' }).value.approval;
+    expect(fixed.transferTimes).toEqual([{ start: 1n, end: 1798765432000n }]);
+    const def = buildPmSellIntent({ address: 'bb1s', collectionId: '7', token: 'yes', amount: 3, price: 9, denom: 'USDC' }).value.approval;
+    const span = Number(def.transferTimes[0].end) - Date.now();
+    expect(span).toBeGreaterThan(23 * 60 * 60 * 1000);
+    expect(span).toBeLessThanOrEqual(24 * 60 * 60 * 1000 + 5000);
+  });
 });
 
 describe('pm-buy-intent builder (delegates to canonical)', () => {
@@ -949,6 +965,14 @@ describe('pm-buy-intent builder (delegates to canonical)', () => {
     const b = buildPmBuyIntent({ ...p });
     expect(a.value.approval.approvalId).toBe(b.value.approval.approvalId);
     expect(buildPmBuyIntent({ ...p, price: 31 }).value.approval.approvalId).not.toBe(a.value.approval.approvalId);
+  });
+  test('accepts ms-since-epoch expiration; defaults to a 24h window (parity with bb prediction-markets buy)', () => {
+    const fixed = buildPmBuyIntent({ address: 'bb1buyer', collectionId: '42', token: 'no', amount: 200, price: 30, denom: 'USDC', expiration: '1798765432000' }).value.approval;
+    expect(fixed.transferTimes).toEqual([{ start: 1n, end: 1798765432000n }]);
+    const def = buildPmBuyIntent({ address: 'bb1buyer', collectionId: '42', token: 'no', amount: 200, price: 30, denom: 'USDC' }).value.approval;
+    const span = Number(def.transferTimes[0].end) - Date.now();
+    expect(span).toBeGreaterThan(23 * 60 * 60 * 1000);
+    expect(span).toBeLessThanOrEqual(24 * 60 * 60 * 1000 + 5000);
   });
 });
 

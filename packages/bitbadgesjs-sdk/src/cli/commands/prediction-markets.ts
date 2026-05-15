@@ -26,6 +26,7 @@ import {
 import { requireBb1AddressStrict } from '../utils/address.js';
 import { bbError, BBErrorCode } from '../utils/envelope.js';
 import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
+import { normalizeCollection, validateCollectionOrExit } from '../utils/collection-options.js';
 import { resolveAmount } from '../utils/amount.js';
 import { addExpiryOption, resolveExpiry } from '../utils/expiry-options.js';
 import {
@@ -40,28 +41,10 @@ import {
 } from '../../core/prediction-markets.js';
 import { UintRangeArray } from '../../core/uintRanges.js';
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
-  const res = await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts);
-  return res?.collection ?? res;
+  return normalizeCollection(await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts));
 }
 function validateOrExit(collection: any, ctx: string): void {
-  if (!collection) {
-    process.stderr.write(`Error: collection not found while running ${ctx}.\n`);
-    process.exit(2);
-  }
-  const result = validatePredictionMarketCollection(collection);
-  if (!result.valid) {
-    process.stderr.write(`Error: collection is not a valid Prediction Market (failed in ${ctx}):\n`);
-    for (const e of result.errors) process.stderr.write(`  - ${e}\n`);
-    if (result.warnings.length > 0) {
-      process.stderr.write('Warnings:\n');
-      for (const w of result.warnings) process.stderr.write(`  - ${w}\n`);
-    }
-    process.exit(2);
-  }
-  if (result.warnings.length > 0 && process.env.BB_QUIET !== '1') {
-    process.stderr.write(`Warnings for ${ctx}:\n`);
-    for (const w of result.warnings) process.stderr.write(`  - ${w}\n`);
-  }
+  validateCollectionOrExit(collection, ctx, validatePredictionMarketCollection, 'Prediction Market');
 }
 
 /** Resolve settlement approval ids by inspecting collection approvals. */

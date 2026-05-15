@@ -30,6 +30,7 @@ import {
 } from '../utils/indexer-options.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
+import { normalizeCollection, validateCollectionOrExit } from '../utils/collection-options.js';
 import {
   doesCollectionFollowBountyProtocol,
   validateBountyCollection,
@@ -43,29 +44,11 @@ import {
 } from '../../core/bounties.js';
 
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
-  const res = await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts);
-  return res?.collection ?? res;
+  return normalizeCollection(await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts));
 }
 
 function validateOrExit(collection: any, ctx: string): void {
-  if (!collection) {
-    process.stderr.write(`Error: collection not found while running ${ctx}.\n`);
-    process.exit(2);
-  }
-  const result = validateBountyCollection(collection);
-  if (!result.valid) {
-    process.stderr.write(`Error: collection is not a valid Bounty (failed in ${ctx}):\n`);
-    for (const e of result.errors) process.stderr.write(`  - ${e}\n`);
-    if (result.warnings.length > 0) {
-      process.stderr.write('Warnings:\n');
-      for (const w of result.warnings) process.stderr.write(`  - ${w}\n`);
-    }
-    process.exit(2);
-  }
-  if (result.warnings.length > 0 && process.env.BB_QUIET !== '1') {
-    process.stderr.write(`Warnings for ${ctx}:\n`);
-    for (const w of result.warnings) process.stderr.write(`  - ${w}\n`);
-  }
+  validateCollectionOrExit(collection, ctx, validateBountyCollection, 'Bounty');
 }
 
 function resolveStatus(collection: any, expirationTime: bigint): BountyStatus {
