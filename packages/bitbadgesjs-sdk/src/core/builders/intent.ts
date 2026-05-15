@@ -31,6 +31,14 @@ export interface IntentParams {
 export function buildIntent(params: IntentParams): any {
   const payCoin = resolveCoin(params.payDenom);
   const receiveCoin = resolveCoin(params.receiveDenom);
+  // A same-denom intent is a no-op approval the chain accepts but with
+  // no economic effect. The canonical `bb intents create` path already
+  // rejects this (cli/commands/intents.ts); enforce it in the builder so
+  // `bb build intent` inherits the same guard. Compare resolved denoms
+  // so 'USDC' vs 'usdc' is also caught.
+  if (payCoin.denom === receiveCoin.denom) {
+    throw new Error('Intent pay and receive denoms must differ.');
+  }
   const payBase = toBaseUnits(params.payAmount, payCoin.decimals);
   const receiveBase = toBaseUnits(params.receiveAmount, receiveCoin.decimals);
   const expirationTs = durationToTimestamp(params.expiration || '7d');
@@ -79,8 +87,11 @@ export function buildIntent(params: IntentParams): any {
         afterOverallMaxNumTransfers: true,
         allowCounterpartyPurge: false,
         allowPurgeIfExpired: true
-      },
-      requireToEqualsInitiatedBy: true
+      }
+      // No `requireToEqualsInitiatedBy` — the vehicle-token `to` is the
+      // creator while the fill initiator is the filler, so `true` made
+      // the approval structurally unfillable. The canonical
+      // core/intents.ts (the `bb intents create` path) omits it too.
     }
   };
 

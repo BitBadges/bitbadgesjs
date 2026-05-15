@@ -555,6 +555,22 @@ describe('intent builder', () => {
   });
   test('auto-deletes', () => { expect(msg.value.outgoingApprovals[0].approvalCriteria.autoDeletionOptions.afterOneUse).toBe(true); });
   test('collectionId in meta', () => { expect(msg._meta.collectionId).toBe('99'); });
+
+  test('no requireToEqualsInitiatedBy — must stay fillable', () => {
+    // `true` here made the approval structurally unfillable; the
+    // canonical core/intents.ts path omits it.
+    expect(msg.value.outgoingApprovals[0].approvalCriteria.requireToEqualsInitiatedBy).toBeUndefined();
+  });
+  test('throws on same pay/receive denom', () => {
+    expect(() => buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'BADGE', payAmount: 10, receiveDenom: 'BADGE', receiveAmount: 5 }))
+      .toThrow(/denoms must differ/);
+    // resolved-denom comparison also catches case variants
+    expect(() => buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'USDC', payAmount: 10, receiveDenom: 'usdc', receiveAmount: 5 }))
+      .toThrow(/denoms must differ/);
+  });
+  test('passes verification with zero violations', () => {
+    expectCleanVerification(msg);
+  });
 });
 
 describe('recurring-payment builder', () => {
@@ -719,9 +735,9 @@ describe('error handling', () => {
     expect(msg.typeUrl).toBe('/tokenization.MsgUniversalUpdateCollection');
   });
 
-  test('buildIntent with same pay/receive denom works', () => {
-    const msg = buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'BADGE', payAmount: 10, receiveDenom: 'BADGE', receiveAmount: 5 });
-    expect(msg.typeUrl).toBe('/tokenization.MsgUpdateUserApprovals');
+  test('buildIntent rejects same pay/receive denom (no-op approval)', () => {
+    expect(() => buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'BADGE', payAmount: 10, receiveDenom: 'BADGE', receiveAmount: 5 }))
+      .toThrow(/denoms must differ/);
   });
 
   test('buildListing parses single token ID', () => {
