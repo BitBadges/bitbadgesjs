@@ -1,11 +1,10 @@
 import { Command } from 'commander';
-import { readJsonInput, addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
+import { readJsonInput, addNetworkOptions } from '../utils/io.js';
 import { emit as emitEnvelope, isQuiet, type EnvelopeWarning } from '../utils/envelope.js';
 import { tagHelpGroups } from '../utils/help-groups.js';
 import { renderReview, renderValidate, renderResolvedMetadata, renderSimulate, collectResolvedEntries, type ResolvedEntry } from '../utils/terminal.js';
 import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMsg.js';
-import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
-import { runBurnerCreate, pickBurner, type BurnerNetwork } from '../utils/burner.js';
+import { addDeployOptions, isDeployRequested, executeDeploy } from '../utils/deploy-options.js';
 import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
 
@@ -340,135 +339,15 @@ async function emit(
     meta: Object.keys(meta).length > 0 ? meta : undefined
   });
 
-  // ── --deploy-with-browser ───────────────────────────────────────────────
-  // Composes build + browser-bridge broadcast in one step. Equivalent
-  // to piping the JSON output to `bb cli deploy --browser --msg-stdin
-  // --manager <addr>`. The connected wallet on /sign page signs and
-  // broadcasts; account number / sequence / gas / fees are auto-handled
-  // frontend-side by TxModal.
-  if (opts.deployWithBrowser) {
-    if (opts.deployWithBurner) {
-      process.stderr.write(
-        '\nError: --deploy-with-browser and --deploy-with-burner are mutually exclusive.\n'
-      );
-      process.exit(2);
-    }
-    const networkName = resolveNetwork(opts);
-    const apiUrl = getApiUrl(opts);
-    const apiKey = getApiKeyForNetwork(opts);
-    const { bridgeSign, resolveFrontendUrl } = await import('../auth/browser-bridge.js');
-    const frontendUrl = resolveFrontendUrl(networkName, opts.frontendUrl);
-    const expectedAddress = opts.expectedAddress ?? opts.manager ?? opts.creator;
-    const requestedTimeoutSec = opts.timeout ? Math.min(1800, Math.max(60, Number(opts.timeout))) : 300;
-    process.stderr.write(`\nOpening browser to ${frontendUrl}/sign for wallet signature + broadcast...\n`);
-    try {
-      const result = await bridgeSign({
-        mode: 'tx',
-        payload: {
-          chain: 'cosmos',
-          txsInfo: [{ type: outData.typeUrl, msg: outData.value }],
-          expectedAddress,
-          signOnly: !!opts.signOnly,
-        },
-        baseUrl: apiUrl,
-        frontendUrl,
-        apiKey,
-        timeoutMs: requestedTimeoutSec * 1000,
-        noOpen: opts.open === false,
-      });
-      if (result.error) {
-        process.stderr.write(`Browser broadcast cancelled or rejected: ${result.error}\n`);
-        process.exit(1);
-      }
-      const payload: any = opts.signOnly
-        ? {
-            success: !!result.signedTx,
-            path: 'browser',
-            mode: 'sign-only',
-            signedTx: result.signedTx ?? null,
-            chain: result.chain ?? 'cosmos',
-          }
-        : {
-            success: !!result.hash,
-            path: 'browser',
-            mode: 'sign-and-broadcast',
-            txHash: result.hash ?? null,
-            chain: result.chain ?? 'cosmos',
-          };
-      process.stdout.write('\n' + JSON.stringify(payload, null, 2) + '\n');
-      if (!payload.success) process.exit(1);
-      return;
-    } catch (err: any) {
-      process.stderr.write(`Browser broadcast failed: ${err?.message || err}\n`);
-      process.exit(1);
-    }
-  }
-
-  // ── --deploy-with-burner ────────────────────────────────────────────────
-  // Composes the build + burner-deploy pipeline into one step.
-  // Equivalent to piping the JSON output to `bb cli deploy --burner
-  // --msg-stdin --manager <addr>`. CREATE-ONLY: the burner flow rejects
-  // updates, transfers, approvals — runBurnerCreate throws a clear error
-  // if the resolved msg isn't MsgCreateCollection (or
-  // MsgUniversalUpdateCollection with collectionId=0).
-  if (opts.deployWithBurner) {
-    if (!opts.manager) {
-      process.stderr.write(
-        '\nError: --deploy-with-burner requires --manager <bb1...>. The burner is a throwaway signer; the manager address captures lasting collection ownership.\n'
-      );
-      process.exit(2);
-    }
-
-    const networkName = resolveNetwork(opts);
-    const network: BurnerNetwork = networkName as NetworkMode;
-    const apiUrl = getApiUrl(opts);
-    const nodeUrl = (opts as any).nodeUrl || NETWORK_CONFIGS[network].nodeUrl;
-    const apiKey = getApiKeyForNetwork(opts);
-
-    if ((opts.fund ?? 'faucet') === 'faucet' && !apiKey && network !== 'local') {
-      process.stderr.write(
-        'Warning: --fund faucet requires an API key on non-local networks. Pass --api-key or run `bb settings set apiKey <key>`.\n'
-      );
-    }
-
-    const choice = await pickBurner({
-      network,
-      nodeUrl,
-      forceNew: Boolean(opts.new),
-      reuseSelector: opts.reuse
+  // Optionally broadcast the just-built msg inline. The envelope above
+  // is always emitted first (so `bb build … | bb deploy` and review
+  // tooling are unaffected); a deploy flag additionally executes the
+  // shared browser/burner path. Flags + executor live in
+  // cli/utils/deploy-options.ts and are identical across every command.
+  if (isDeployRequested(opts as any)) {
+    await executeDeploy(outData, opts as any, {
+      expectedAddress: opts.expectedAddress ?? opts.manager ?? opts.creator
     });
-
-    try {
-      const result = await runBurnerCreate({
-        msg: outData,
-        network,
-        apiUrl,
-        nodeUrl,
-        manager: opts.manager,
-        fund: opts.fund === 'manual' ? 'manual' : 'faucet',
-        apiKey,
-        fee: { amount: String(opts.fee ?? '0'), denom: requireBbDenom(String(opts.feeDenom ?? DEFAULT_FEE_DENOM), '--fee-denom') },
-        gas: Number(opts.gas ?? 400000),
-        reuseRecord: choice.kind === 'reuse' ? choice.record : undefined,
-        nonInteractive: Boolean(opts.nonInteractive) || !process.stdout.isTTY,
-        pollTimeoutMs: Number(opts.pollTimeout ?? 60) * 1000
-      });
-
-      const payload = {
-        success: result.success,
-        ephemeralAddress: result.ephemeralAddress,
-        recoveryPath: result.recoveryPath,
-        txHash: result.txHash,
-        collectionId: result.collectionId ?? null,
-        paused: result.paused,
-        error: result.error
-      };
-      process.stdout.write('\n' + JSON.stringify(payload, null, 2) + '\n');
-      if (!result.success && !result.paused) process.exit(1);
-    } catch (err: any) {
-      process.stderr.write(`Burner deploy failed: ${err?.message || err}\n`);
-      process.exit(1);
-    }
   }
 }
 
@@ -513,30 +392,14 @@ const sharedOpts = (cmd: Command) => {
   addOptionIfMissing(cmd, '--name <name>', 'Mode 2: collection name (required with --image + --description if --uri not set)');
   addOptionIfMissing(cmd, '--description <text>', 'Mode 2: collection description (required with --name + --image if --uri not set)');
   addOptionIfMissing(cmd, '--image <url>', 'Mode 2: collection image URI (required with --name + --description if --uri not set)');
-  // --deploy-with-burner — collapses the build + burner-deploy
-  // pipeline into a single command. CREATE-ONLY: rejects updates,
-  // transfers, approvals (the burner is a one-shot signer; ownership
-  // lives on --manager). Equivalent to:
-  //   bb cli build <preset> ... | bb cli deploy --burner --msg-stdin --manager <addr>
-  cmd.option('--deploy-with-burner', 'After building, broadcast via the throwaway burner flow (CREATE-ONLY). Requires --manager.');
-  cmd.option('--deploy-with-browser', 'After building, hand off to the BitBadges /sign page for wallet signature + broadcast. Pairs with your connected wallet (Keplr, MetaMask, etc.).');
-  cmd.option('--sign-only', 'With --deploy-with-browser: have the wallet sign but not broadcast — returns the signed tx bytes for caller-controlled broadcast.');
-  cmd.option('--frontend-url <url>', 'With --deploy-with-browser: override the frontend base URL.');
-  cmd.option('--no-open', 'With --deploy-with-browser: print the sign URL instead of auto-launching the browser.');
-  cmd.option('--timeout <seconds>', 'With --deploy-with-browser: how long to wait for the wallet to confirm (default 300, max 1800).');
-  cmd.option('--expected-address <addr>', 'With --deploy-with-browser: bb1.../0x... that the connected wallet must match. Defaults to --manager / --creator.');
-  cmd.option('--fund <mode>', 'With --deploy-with-burner: funding source for the burner (faucet | manual)', 'faucet');
-  cmd.option('--fee <amount>', 'When deploying: fee amount in base units', '0');
-  cmd.option('--fee-denom <symbol|denom>', 'When deploying: fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', DEFAULT_FEE_DENOM);
-  cmd.option('--gas <number>', 'When deploying: gas limit', '400000');
-  cmd.option('--new', 'With --deploy-with-burner: skip the burner picker and always create a fresh wallet');
-  cmd.option('--reuse <selector>', 'With --deploy-with-burner: reuse a specific saved burner by address or recovery file path');
-  cmd.option('--non-interactive', 'With --deploy-with-burner: never prompt; on any prompt point save state and exit for later resume');
-  cmd.option('--poll-timeout <seconds>', 'With --deploy-with-burner: seconds to wait for funding to land before prompting/exiting', '60');
+  // Standardized deploy flags (--browser / --burner / …) + their
+  // "Deploy" help-group tags. Identical across every tx-emitting
+  // command — see cli/utils/deploy-options.ts.
+  addDeployOptions(cmd);
 
-  // Tag every shared flag with a help group so --help renders them in
-  // categories under "Options:" (per-command flags stay ungrouped at the
-  // top). See cli/utils/help-groups.ts for the rendered order.
+  // Tag the remaining shared flags with a help group so --help renders
+  // them in categories under "Options:" (per-command flags stay
+  // ungrouped at the top). Deploy flags are tagged by addDeployOptions.
   tagHelpGroups(cmd, {
     '--uri': 'Metadata',
     '--name': 'Metadata',
@@ -555,22 +418,7 @@ const sharedOpts = (cmd: Command) => {
     '--creator': 'Builder',
     '--manager': 'Builder',
     '--simulate': 'Builder',
-    '--events': 'Builder',
-    '--deploy-with-burner': 'Deploy',
-    '--deploy-with-browser': 'Deploy',
-    '--sign-only': 'Deploy',
-    '--frontend-url': 'Deploy',
-    '--no-open': 'Deploy',
-    '--timeout': 'Deploy',
-    '--expected-address': 'Deploy',
-    '--fund': 'Deploy',
-    '--fee': 'Deploy',
-    '--fee-denom': 'Deploy',
-    '--gas': 'Deploy',
-    '--new': 'Deploy',
-    '--reuse': 'Deploy',
-    '--non-interactive': 'Deploy',
-    '--poll-timeout': 'Deploy'
+    '--events': 'Builder'
   });
 
   return cmd;
