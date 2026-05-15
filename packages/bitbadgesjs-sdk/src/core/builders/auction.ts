@@ -38,7 +38,6 @@ export function buildAuction(params: AuctionParams): any {
   const bidDeadlineTs = durationToTimestamp(params.bidDeadline || '7d');
   const acceptEndTs = String(Number(bidDeadlineTs) + Number(parseDuration(params.acceptWindow || '7d')));
   const sellerAddr = params.seller || params.creator || '';
-  const randomId = () => Math.random().toString(16).slice(2, 18);
 
   // Mint the auction NFT (1x token 1) on settlement. The frontend
   // AuctionRegistry calls this `mintToSellerBalances`, but the actual
@@ -76,7 +75,7 @@ export function buildAuction(params: AuctionParams): any {
       fromListId: 'Mint',
       toListId: 'All',
       initiatedByListId: sellerAddr,
-      approvalId: `auction-mint-to-winner-${randomId()}`,
+      approvalId: 'auction-mint-to-winner',
       ...approvalMetadata(
         'Accept Bid',
         'Seller mints the NFT directly to the winning bidder during the accept window'
@@ -109,7 +108,7 @@ export function buildAuction(params: AuctionParams): any {
       fromListId: '!Mint',
       toListId: BURN_ADDRESS,
       initiatedByListId: 'All',
-      approvalId: `auction-burn-${randomId()}`,
+      approvalId: 'auction-burn',
       ...approvalMetadata('Burn', 'Burn the auction token'),
       transferTimes: FOREVER,
       tokenIds: [{ start: '1', end: '1' }],

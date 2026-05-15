@@ -36,6 +36,32 @@ function verifyBuilder(msg: any) {
   return verifyStandardsCompliance({ messages: [msg] });
 }
 
+/** Every approvalId + amountTrackerId in a built msg, in document order. */
+function trackedIds(msg: any): string[] {
+  const v = msg.value ?? msg;
+  const approvals = [
+    ...(v.collectionApprovals ?? []),
+    ...(v.incomingApprovals ?? []),
+    ...(v.outgoingApprovals ?? [])
+  ];
+  const ids: string[] = [];
+  for (const a of approvals) {
+    if (a?.approvalId) ids.push(a.approvalId);
+    const t = a?.approvalCriteria?.maxNumTransfers?.amountTrackerId;
+    if (t) ids.push(t);
+  }
+  return ids;
+}
+
+/**
+ * Asserts the verifier returns zero violations of any kind (not just the
+ * builder's own standard). Surfaces the violation list on failure.
+ */
+function expectCleanVerification(msg: any) {
+  const vr = verifyBuilder(msg);
+  expect({ valid: vr.valid, violations: vr.violations }).toEqual({ valid: true, violations: [] });
+}
+
 /** Required metadata fields for collection-style builders (post-#0371). */
 const META = { name: 'Test', description: 'Test description for the spec.', image: 'ipfs://test-image' };
 
@@ -110,8 +136,9 @@ describe('vault builder', () => {
   test('has deposit and withdrawal approvals', () => {
     expect(r.collectionApprovals.length).toBe(2);
     const ids = r.collectionApprovals.map((a: any) => a.approvalId);
-    // Vault uses `vault-deposit` + a randomized `vault-withdraw-<hex>`
-    // id to match VaultApprovalRegistry's collision-avoidance pattern.
+    // Vault uses `vault-deposit` + a deterministic `vault-withdraw-<hex>`
+    // id. The `vault-withdraw-` prefix is required: the frontend's
+    // `isVaultWithdrawalTier` does `startsWith('vault-withdraw-')`.
     expect(ids).toContain('vault-deposit');
     expect(ids.some((id: string) => id.startsWith('vault-withdraw-'))).toBe(true);
   });
@@ -123,8 +150,8 @@ describe('vault builder', () => {
     }
   });
 
-  // Helper: the withdraw approval has a random suffix, so tests find it
-  // by prefix rather than exact match.
+  // The withdraw approval has a deterministic hash suffix, so tests find
+  // it by the (FE-required) `vault-withdraw-` prefix, not exact match.
   const findWithdraw = (approvals: any[]) =>
     approvals.find((a: any) => typeof a.approvalId === 'string' && a.approvalId.startsWith('vault-withdraw-'));
 
@@ -149,10 +176,21 @@ describe('vault builder', () => {
     expect(migration.toListId).toBe('bb1recovery');
   });
 
-  test('passes verification', () => {
-    const vr = verifyBuilder(msg);
-    expect(vr.violations.filter((vi: any) => vi.standard === 'Vault')).toEqual([]);
-    expect(vr.violations.filter((vi: any) => vi.standard === 'Smart Token')).toEqual([]);
+  test('deterministic — identical params produce a byte-identical msg', () => {
+    expect(buildVault({ backingCoin: 'USDC', ...META })).toEqual(
+      buildVault({ backingCoin: 'USDC', ...META })
+    );
+  });
+
+  test('withdraw id is a stable hash, not Math.random', () => {
+    const a = findWithdraw(val(buildVault({ backingCoin: 'USDC', ...META })).collectionApprovals);
+    const b = findWithdraw(val(buildVault({ backingCoin: 'USDC', ...META })).collectionApprovals);
+    expect(a.approvalId).toBe(b.approvalId);
+    expect(a.approvalId.startsWith('vault-withdraw-')).toBe(true);
+  });
+
+  test('passes verification with zero violations', () => {
+    expectCleanVerification(msg);
   });
 });
 
@@ -332,8 +370,16 @@ describe('auction builder', () => {
     const mint = r.collectionApprovals.find((a: any) => a.fromListId === 'Mint');
     expect(mint.approvalCriteria.maxNumTransfers.overallMaxNumTransfers).toBe('1');
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Auction')).toEqual([]);
+  test('deterministic approval ids — no Math.random', () => {
+    // transferTimes are Date.now()-relative (pre-existing, out of scope),
+    // so assert id determinism rather than full-msg deep-equal.
+    expect(trackedIds(buildAuction({ ...META }))).toEqual(trackedIds(buildAuction({ ...META })));
+    expect(r.collectionApprovals.map((a: any) => a.approvalId)).toEqual([
+      'auction-mint-to-winner', 'auction-burn'
+    ]);
+  });
+  test('passes verification with zero violations', () => {
+    expectCleanVerification(msg);
   });
 });
 
@@ -353,8 +399,21 @@ describe('product-catalog builder', () => {
       expect(p.approvalCriteria.coinTransfers[0].to).toBe('bb1store');
     }
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Products')).toEqual([]);
+  test('deterministic — identical params produce a byte-identical msg', () => {
+    const p = {
+      products: [{ name: 'T-Shirt', price: 25, denom: 'USDC' }, { name: 'Mug', price: 15, denom: 'USDC', maxSupply: 50 }],
+      storeAddress: 'bb1store',
+      ...META
+    };
+    expect(buildProductCatalog(p)).toEqual(buildProductCatalog(p));
+  });
+  test('purchase ids are 1-based index, burn id is stable', () => {
+    expect(r.collectionApprovals.map((a: any) => a.approvalId)).toEqual([
+      'product-purchase-1', 'product-purchase-2', 'product-burn'
+    ]);
+  });
+  test('passes verification with zero violations', () => {
+    expectCleanVerification(msg);
   });
 });
 
@@ -372,8 +431,19 @@ describe('prediction-market builder', () => {
   test('settlement voting challenges', () => {
     expect(r.collectionApprovals.filter((a: any) => a.approvalCriteria?.votingChallenges?.length > 0).length).toBeGreaterThanOrEqual(2);
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Prediction Market')).toEqual([]);
+  test('deterministic — identical params produce a byte-identical msg', () => {
+    expect(buildPredictionMarket({ verifier: 'bb1verifier', ...META })).toEqual(
+      buildPredictionMarket({ verifier: 'bb1verifier', ...META })
+    );
+  });
+  test('seven distinct pm-<role>-<hash> approval ids, stable across calls', () => {
+    const ids = r.collectionApprovals.map((a: any) => a.approvalId);
+    expect(ids.length).toBe(7);
+    expect(new Set(ids).size).toBe(7);
+    expect(ids.every((id: string) => /^pm-(mint|transfer|redeem|settle-(yes|no|push-yes|push-no))-[0-9a-f]{16}$/.test(id))).toBe(true);
+  });
+  test('passes verification with zero violations', () => {
+    expectCleanVerification(msg);
   });
 });
 
@@ -495,6 +565,21 @@ describe('bid builder', () => {
     expect(ct.overrideToWithInitiator).toBe(true);
   });
   test('auto-deletes', () => { expect(msg.value.incomingApprovals[0].approvalCriteria.autoDeletionOptions.afterOneUse).toBe(true); });
+
+  test('deterministic approval id — no Math.random/uniqueId', () => {
+    const p = { address: 'bb1bidder', collectionId: '1', tokenIds: '3', price: 25, denom: 'BADGE' };
+    const a = buildBid({ ...p }).value.incomingApprovals[0];
+    const b = buildBid({ ...p }).value.incomingApprovals[0];
+    expect(a.approvalId).toBe(b.approvalId);
+    expect(a.approvalId.startsWith('bid-')).toBe(true);
+    // amountTrackerId stays in lockstep with approvalId
+    expect(a.approvalCriteria.maxNumTransfers.amountTrackerId).toBe(a.approvalId);
+    // distinct bids on the same collection get distinct ids
+    expect(buildBid({ ...p, price: 26 }).value.incomingApprovals[0].approvalId).not.toBe(a.approvalId);
+  });
+  test('passes verification with zero violations', () => {
+    expectCleanVerification(msg);
+  });
 });
 
 describe('pm-sell-intent builder', () => {
