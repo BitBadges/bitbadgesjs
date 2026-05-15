@@ -25,6 +25,7 @@ import {
 } from '../utils/indexer-options.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
 import { bbError, BBErrorCode } from '../utils/envelope.js';
+import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import { resolveAmount } from '../utils/amount.js';
 import { parseTimeFlag } from '../utils/time.js';
 import {
@@ -213,7 +214,7 @@ function buyAction(side: 'yes' | 'no') {
         transferTimes: UintRangeArray.From([{ start: 1n, end }]),
         approvalId
       });
-      emit({ typeUrl: '/tokenization.MsgSetIncomingApproval', value: { creator, collectionId: String(collectionId), approval } }, opts);
+      await runEmitOrDeploy({ typeUrl: '/tokenization.MsgSetIncomingApproval', value: { creator, collectionId: String(collectionId), approval } }, opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
     } catch (err) { emitError(err); }
   };
 }
@@ -244,7 +245,7 @@ function sellAction(side: 'yes' | 'no') {
         transferTimes: UintRangeArray.From([{ start: 1n, end }]),
         approvalId
       });
-      emit({ typeUrl: '/tokenization.MsgSetOutgoingApproval', value: { creator, collectionId: String(collectionId), approval } }, opts);
+      await runEmitOrDeploy({ typeUrl: '/tokenization.MsgSetOutgoingApproval', value: { creator, collectionId: String(collectionId), approval } }, opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
     } catch (err) { emitError(err); }
   };
 }
@@ -263,26 +264,27 @@ const tradeOpts = (cmd: Command, side: 'yes' | 'no', dir: 'buy' | 'sell') =>
     .option('--expiry <when>', 'Approval expiry: ms-since-epoch or duration (24h, 7d). Default 24h.')
     .option('--approval-id <id>', 'Override the random approval id');
 
-addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-yes'), 'yes', 'buy'))).action(buyAction('yes')).addHelpText('after', `
+addDeployOptions(addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-yes'), 'yes', 'buy')))).action(buyAction('yes')).addHelpText('after', `
 Examples:
   $ bb prediction-markets buy-yes 55 --creator bb1trader...xyz --token-amount 100 --payment-amount 40 --denom USDC | bb deploy
   $ bb prediction-markets buy-yes 55 --creator bb1trader...xyz --token-amount 100 --payment-amount 40 --denom USDC --expiry 7d | bb deploy
 `);
-addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-no'), 'no', 'buy'))).action(buyAction('no')).addHelpText('after', `
+addDeployOptions(addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('buy-no'), 'no', 'buy')))).action(buyAction('no')).addHelpText('after', `
 Examples:
   $ bb prediction-markets buy-no 55 --creator bb1trader...xyz --token-amount 100 --payment-amount 60 --denom USDC | bb deploy
 `);
-addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('sell-yes'), 'yes', 'sell'))).action(sellAction('yes')).addHelpText('after', `
+addDeployOptions(addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('sell-yes'), 'yes', 'sell')))).action(sellAction('yes')).addHelpText('after', `
 Examples:
   $ bb prediction-markets sell-yes 55 --creator bb1trader...xyz --token-amount 50 --payment-amount 25 --denom USDC | bb deploy
 `);
-addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('sell-no'), 'no', 'sell'))).action(sellAction('no')).addHelpText('after', `
+addDeployOptions(addOutputFlags(addNetworkFlags(tradeOpts(predictionMarketsCommand.command('sell-no'), 'no', 'sell')))).action(sellAction('no')).addHelpText('after', `
 Examples:
   $ bb prediction-markets sell-no 55 --creator bb1trader...xyz --token-amount 50 --payment-amount 30 --denom USDC | bb deploy
 `);
 
 // ── Cancel ───────────────────────────────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     predictionMarketsCommand
@@ -293,7 +295,7 @@ addOutputFlags(
       .requiredOption('--creator <address>', 'Order owner (bb1.../0x — auto-normalized)')
       .requiredOption('--side <buy|sell>', 'Whether the order is a buy (incoming approval) or sell (outgoing approval)')
   )
-).action(async (collectionId: string, approvalId: string, opts: NetworkFlags & OutputFlags & { creator: string; side: string }) => {
+)).action(async (collectionId: string, approvalId: string, opts: NetworkFlags & OutputFlags & { creator: string; side: string }) => {
   try {
     const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const isBuy = opts.side === 'buy';
@@ -301,10 +303,10 @@ addOutputFlags(
       process.stderr.write(`Error: --side must be "buy" or "sell" (got "${opts.side}").\n`);
       process.exit(2);
     }
-    emit({
+    await runEmitOrDeploy({
       typeUrl: isBuy ? '/tokenization.MsgDeleteIncomingApproval' : '/tokenization.MsgDeleteOutgoingApproval',
       value: { creator, collectionId: String(collectionId), approvalId }
-    }, opts);
+    }, opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
   } catch (err) { emitError(err); }
 }).addHelpText('after', `
 Examples:
@@ -314,6 +316,7 @@ Examples:
 
 // ── Deposit ──────────────────────────────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     predictionMarketsCommand
@@ -323,7 +326,7 @@ addOutputFlags(
       .requiredOption('--creator <address>', 'Depositor address (bb1.../0x — auto-normalized)')
       .requiredOption('--amount <n>', 'Number of YES+NO pairs to mint (in base units of the deposit denom)')
   )
-).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; amount: string }) => {
+)).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; amount: string }) => {
   try {
     const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
@@ -333,7 +336,7 @@ addOutputFlags(
       process.stderr.write('Error: no mint approval found on this prediction market.\n');
       process.exit(2);
     }
-    emit(buildPredictionMarketDepositMsg(creator, String(collectionId), BigInt(opts.amount), settle.mintApprovalId), opts);
+    await runEmitOrDeploy(buildPredictionMarketDepositMsg(creator, String(collectionId), BigInt(opts.amount), settle.mintApprovalId), opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
   } catch (err) { emitError(err); }
 }).addHelpText('after', `
 Examples:

@@ -26,6 +26,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
+import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import { requireBbDenom } from '../utils/denom.js';
 import { resolveAmount } from '../utils/amount.js';
 import { parseTimeFlag } from '../utils/time.js';
@@ -43,6 +44,7 @@ export const nftsCommand = new Command('nfts').description(
 
 // ── bid (token-id OR collection-wide) ────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     nftsCommand
@@ -61,7 +63,7 @@ addOutputFlags(
       .option('--approval-id <id>', 'Override the random approval id')
       .option('--max-fills <n>', 'Cap on partial fills (default 1)', '1')
   )
-).action(
+)).action(
   async (
     collectionId: string,
     opts: NetworkFlags & OutputFlags & {
@@ -89,7 +91,7 @@ addOutputFlags(
         approvalId,
         maxNumTransfers: BigInt(opts.maxFills ?? '1')
       });
-      emit({ typeUrl: '/tokenization.MsgSetIncomingApproval', value: { creator, collectionId: String(collectionId), approval } }, opts);
+      await runEmitOrDeploy({ typeUrl: '/tokenization.MsgSetIncomingApproval', value: { creator, collectionId: String(collectionId), approval } }, opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
     } catch (err) { emitError(err); }
   }
 ).addHelpText('after', `
@@ -100,6 +102,7 @@ Examples:
 
 // ── list (sell-side outgoing approval) ───────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     nftsCommand
@@ -116,7 +119,7 @@ addOutputFlags(
       .option('--expiry <when>', 'Listing expiry: ms-since-epoch or duration (7d, 30d, monthly). Default 30d.')
       .option('--approval-id <id>', 'Override the random approval id')
   )
-).action(
+)).action(
   async (
     collectionId: string,
     opts: NetworkFlags & OutputFlags & {
@@ -144,7 +147,7 @@ addOutputFlags(
         approvalId,
         maxNumTransfers: BigInt(opts.maxSales ?? '1')
       });
-      emit({ typeUrl: '/tokenization.MsgSetOutgoingApproval', value: { creator, collectionId: String(collectionId), approval } }, opts);
+      await runEmitOrDeploy({ typeUrl: '/tokenization.MsgSetOutgoingApproval', value: { creator, collectionId: String(collectionId), approval } }, opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
     } catch (err) { emitError(err); }
   }
 ).addHelpText('after', `
@@ -155,6 +158,7 @@ Examples:
 
 // ── cancel ───────────────────────────────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     nftsCommand
@@ -165,7 +169,7 @@ addOutputFlags(
       .requiredOption('--creator <address>', 'Order owner address (bb1.../0x — auto-normalized)')
       .requiredOption('--side <bid|listing>', 'Whether the approval is a bid (incoming) or listing (outgoing)')
   )
-).action(
+)).action(
   async (
     collectionId: string,
     approvalId: string,
@@ -180,7 +184,7 @@ addOutputFlags(
       const typeUrl = opts.side === 'bid'
         ? '/tokenization.MsgDeleteIncomingApproval'
         : '/tokenization.MsgDeleteOutgoingApproval';
-      emit({ typeUrl, value: { creator, collectionId: String(collectionId), approvalId } }, opts);
+      await runEmitOrDeploy({ typeUrl, value: { creator, collectionId: String(collectionId), approvalId } }, opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
     } catch (err) { emitError(err); }
   }
 ).addHelpText('after', `
@@ -191,6 +195,7 @@ Examples:
 
 // ── buy (fill a listing) ─────────────────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     nftsCommand
@@ -203,7 +208,7 @@ addOutputFlags(
       .requiredOption('--seller <address>', 'Listing owner address')
       .option('--token-amount <n>', 'How many to buy (default 1)', '1')
   )
-).action(
+)).action(
   async (
     collectionId: string,
     tokenId: string,
@@ -212,14 +217,15 @@ addOutputFlags(
     try {
       const buyer = requireBb1AddressStrict(opts.creator, '--creator');
       const seller = requireBb1AddressStrict(opts.seller, '--seller');
-      emit(
+      await runEmitOrDeploy(
         buildFillListingMsg(buyer, String(collectionId), {
           approvalId: opts.approvalId,
           approverAddress: seller,
           tokenId: BigInt(tokenId),
           tokenAmount: BigInt(opts.tokenAmount ?? '1')
         }),
-        opts
+        opts,
+        { emit: (m) => emit(m, opts), expectedAddress: buyer }
       );
     } catch (err) { emitError(err); }
   }
@@ -230,6 +236,7 @@ Examples:
 
 // ── sell (fill a bid) ────────────────────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     nftsCommand
@@ -242,7 +249,7 @@ addOutputFlags(
       .requiredOption('--bidder <address>', 'Bid owner address')
       .option('--token-amount <n>', 'How many to sell (default 1)', '1')
   )
-).action(
+)).action(
   async (
     collectionId: string,
     tokenId: string,
@@ -251,14 +258,15 @@ addOutputFlags(
     try {
       const seller = requireBb1AddressStrict(opts.creator, '--creator');
       const bidder = requireBb1AddressStrict(opts.bidder, '--bidder');
-      emit(
+      await runEmitOrDeploy(
         buildFillBidMsg(seller, String(collectionId), {
           approvalId: opts.approvalId,
           approverAddress: bidder,
           tokenId: BigInt(tokenId),
           tokenAmount: BigInt(opts.tokenAmount ?? '1')
         }),
-        opts
+        opts,
+        { emit: (m) => emit(m, opts), expectedAddress: seller }
       );
     } catch (err) { emitError(err); }
   }

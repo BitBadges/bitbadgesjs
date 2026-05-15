@@ -27,6 +27,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
+import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import {
   doesCollectionFollowSmartTokenProtocol,
   validateSmartTokenCollection,
@@ -162,6 +163,7 @@ addOutputFlags(
 
 // ── smart-tokens deposit ─────────────────────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     smartTokensCommand
@@ -178,7 +180,7 @@ addOutputFlags(
       )
       .option('--base-units', 'Treat --amount as already-in-base-units')
   )
-).action(
+)).action(
   async (
     collectionId: string,
     opts: NetworkFlags & OutputFlags & { creator: string; amount: string; baseUnits?: boolean }
@@ -205,7 +207,7 @@ addOutputFlags(
         amount,
         details
       });
-      emit(msg, opts);
+      await runEmitOrDeploy(msg, opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
     } catch (err) {
       emitError(err);
     }
@@ -218,6 +220,7 @@ Examples:
 
 // ── smart-tokens withdraw ────────────────────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     smartTokensCommand
@@ -234,7 +237,7 @@ addOutputFlags(
       )
       .option('--base-units', 'Treat --amount as already-in-base-units')
   )
-).action(
+)).action(
   async (
     collectionId: string,
     opts: NetworkFlags & OutputFlags & { creator: string; amount: string; baseUnits?: boolean }
@@ -261,7 +264,7 @@ addOutputFlags(
         amount,
         details
       });
-      emit(msg, opts);
+      await runEmitOrDeploy(msg, opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
     } catch (err) {
       emitError(err);
     }

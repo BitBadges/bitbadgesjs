@@ -31,6 +31,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
+import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import { requireBbDenom } from '../utils/denom.js';
 import { resolveAmount } from '../utils/amount.js';
 import { parseTimeFlag } from '../utils/time.js';
@@ -157,6 +158,7 @@ addOutputFlags(
 
 // ── intents create ────────────────────────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addCollectionFlag(
     addNetworkFlags(
@@ -178,7 +180,7 @@ addOutputFlags(
         .option('--approval-id <id>', 'Override the auto-generated approval id (random hex by default)')
     )
   )
-).action(
+)).action(
   async (
     opts: NetworkFlags &
       OutputFlags &
@@ -228,7 +230,7 @@ addOutputFlags(
         approvalId
       });
 
-      emit(
+      await runEmitOrDeploy(
         {
           typeUrl: '/tokenization.MsgSetOutgoingApproval',
           value: {
@@ -237,7 +239,8 @@ addOutputFlags(
             approval
           }
         },
-        opts
+        opts,
+        { emit: (m) => emit(m, opts), expectedAddress: creator }
       );
     } catch (err) {
       emitError(err);
@@ -311,6 +314,7 @@ Examples:
 
 // ── intents cancel ────────────────────────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addCollectionFlag(
     addNetworkFlags(
@@ -323,7 +327,7 @@ addOutputFlags(
         .requiredOption('--creator <address>', 'Address that owns the intent (bb1.../0x — auto-normalized)')
     )
   )
-).action(
+)).action(
   async (
     approvalId: string,
     opts: NetworkFlags & OutputFlags & CollectionFlag & { creator: string }
@@ -331,7 +335,7 @@ addOutputFlags(
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collectionId = resolveCollectionId(opts);
-      emit(
+      await runEmitOrDeploy(
         {
           typeUrl: '/tokenization.MsgDeleteOutgoingApproval',
           value: {
@@ -340,7 +344,8 @@ addOutputFlags(
             approvalId
           }
         },
-        opts
+        opts,
+        { emit: (m) => emit(m, opts), expectedAddress: creator }
       );
     } catch (err) {
       emitError(err);

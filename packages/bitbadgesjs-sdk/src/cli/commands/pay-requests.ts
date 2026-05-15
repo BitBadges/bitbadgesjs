@@ -29,6 +29,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
+import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import {
   doesCollectionFollowPaymentRequestProtocol,
   validatePaymentRequestCollection,
@@ -186,17 +187,18 @@ addOutputFlags(
 
 // ── pay-requests pay ──────────────────────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     payRequestsCommand
       .command('pay')
       .description(
-        'Emit MsgTransferTokens targeting the pay approval. Pipe the output to `bb deploy` to sign + broadcast.'
+        'MsgTransferTokens targeting the pay approval. Emit (pipe to `bb deploy`) or broadcast inline with --browser/--burner.'
       )
       .argument('<collection-id>', 'PaymentRequest collection ID')
       .requiredOption('--creator <address>', 'Payer address (bb1.../0x — auto-normalized)')
   )
-).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
+)).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
   try {
     const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
@@ -208,7 +210,7 @@ addOutputFlags(
       );
     }
     const msg = buildPaymentRequestPayMsg(creator, String(collectionId), details.payApproval);
-    emit(msg, opts);
+    await runEmitOrDeploy(msg, opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
   } catch (err) {
     emitError(err);
   }
@@ -219,17 +221,18 @@ Examples:
 
 // ── pay-requests deny ─────────────────────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     payRequestsCommand
       .command('deny')
       .description(
-        'Emit MsgTransferTokens targeting the deny approval. Pipe the output to `bb deploy` to sign + broadcast.'
+        'MsgTransferTokens targeting the deny approval. Emit (pipe to `bb deploy`) or broadcast inline with --browser/--burner.'
       )
       .argument('<collection-id>', 'PaymentRequest collection ID')
       .requiredOption('--creator <address>', 'Payer address (bb1.../0x — auto-normalized)')
   )
-).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
+)).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
   try {
     const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
@@ -241,7 +244,7 @@ addOutputFlags(
       );
     }
     const msg = buildPaymentRequestDenyMsg(creator, String(collectionId), details.denyApproval);
-    emit(msg, opts);
+    await runEmitOrDeploy(msg, opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
   } catch (err) {
     emitError(err);
   }

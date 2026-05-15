@@ -30,6 +30,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
+import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import {
   doesCollectionFollowSubscriptionProtocol,
   isSubscriptionFaucetApproval,
@@ -305,6 +306,7 @@ addOutputFlags(
 
 // ── subscriptions claim ──────────────────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     subscriptionsCommand
@@ -316,14 +318,14 @@ addOutputFlags(
       .requiredOption('--creator <address>', 'Subscriber address (bb1.../0x — auto-normalized)')
       .option('--tier <approvalId>', 'Which faucet to claim from (required for multi-tier collections)')
   )
-).action(
+)).action(
   async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; tier?: string }) => {
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'subscriptions claim');
       const faucet = pickFaucet(listFaucets(collection), opts.tier, 'subscriptions claim');
-      emit(buildClaimMsg(creator, String(collectionId), faucet), opts);
+      await runEmitOrDeploy(buildClaimMsg(creator, String(collectionId), faucet), opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
     } catch (err) {
       emitError(err);
     }
@@ -336,6 +338,7 @@ Examples:
 
 // ── subscriptions enable-renewal ─────────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     subscriptionsCommand
@@ -348,7 +351,7 @@ addOutputFlags(
       .option('--tier <approvalId>', 'Which faucet to renew (required for multi-tier collections)')
       .option('--tip <ubadge>', 'Optional tip per interval on top of the base subscription amount (in base denom units)', '0')
   )
-).action(
+)).action(
   async (
     collectionId: string,
     opts: NetworkFlags & OutputFlags & { creator: string; tier?: string; tip?: string }
@@ -382,9 +385,10 @@ addOutputFlags(
       }
       const otherApprovals = existing.filter((a: any) => !isUserRecurringApproval(a, faucet));
 
-      emit(
+      await runEmitOrDeploy(
         buildUpdateApprovalsMsg(creator, String(collectionId), [...otherApprovals, newApproval]),
-        opts
+        opts,
+        { emit: (m) => emit(m, opts), expectedAddress: creator }
       );
     } catch (err) {
       emitError(err);
@@ -398,6 +402,7 @@ Examples:
 
 // ── subscriptions cancel ─────────────────────────────────────────────────
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     subscriptionsCommand
@@ -409,7 +414,7 @@ addOutputFlags(
       .requiredOption('--creator <address>', 'Subscriber address (bb1.../0x — auto-normalized)')
       .option('--tier <approvalId>', 'Which faucet to cancel (required for multi-tier collections)')
   )
-).action(
+)).action(
   async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; tier?: string }) => {
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
@@ -425,7 +430,7 @@ addOutputFlags(
           'Warning: no matching user recurring approval found for this tier — cancel is a no-op.\n'
         );
       }
-      emit(buildUpdateApprovalsMsg(creator, String(collectionId), remaining), opts);
+      await runEmitOrDeploy(buildUpdateApprovalsMsg(creator, String(collectionId), remaining), opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
     } catch (err) {
       emitError(err);
     }
