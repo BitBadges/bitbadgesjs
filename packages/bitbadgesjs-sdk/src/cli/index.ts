@@ -221,8 +221,16 @@ program
 // emit user-attributable content (feedback submissions, on-chain txs,
 // hosted-API calls). Mirrored copy lives at bitbadges-frontend's
 // pages/policies.tsx.
+// The chaosnet warning mirrors the frontend ChaosnetWarningModal copy
+// (bitbadges-frontend public/locales/en/common.json `Chaosnet_Warning_*`).
+// The CLI talks to the live network by default and has no acknowledge
+// modal, so the warning rides in the always-shown policies footer.
 program.addHelpText(
   'after',
+  '\nChaosnet warning: BitBadges is running on Chaosnet, a beta testing\n' +
+  'period for the protocol. The software is unaudited, transactions use\n' +
+  'real tokens (any losses are permanent), and the network may have\n' +
+  'downtime or unexpected behavior. Use at your own risk.\n' +
   '\nTerms, privacy, and acceptable-use policies: https://bitbadges.io/policies\n' +
   'By using `bitbadges-cli` you agree to the policies linked above.\n'
 );
