@@ -30,17 +30,7 @@ import {
 } from '../utils/indexer-options.js';
 import { requireBb1Address } from '../utils/address.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
-
-function appendQuery(path: string, params: Record<string, string | number | boolean | undefined>): string {
-  const search = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === null || v === '') continue;
-    search.set(k, String(v));
-  }
-  const qs = search.toString();
-  if (!qs) return path;
-  return path + (path.includes('?') ? '&' : '?') + qs;
-}
+import { appendQuery } from '../utils/list-options.js';
 
 // ── balances (parent) ──────────────────────────────────────────────────────
 
