@@ -7,7 +7,7 @@ import { addNetworkOptions } from '../utils/io.js';
  * Msg (wrapped into a single-message tx body), or anything else (passed
  * through untouched).
  */
-function ensureTxWrapper(input: any): any {
+export function ensureTxWrapper(input: any): any {
   if (!input || typeof input !== 'object') return input;
   if (Array.isArray(input.messages)) return input;
   if (typeof input.typeUrl === 'string' && input.value) return { messages: [input] };

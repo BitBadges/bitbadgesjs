@@ -8,9 +8,11 @@
  *
  * @module core/builders/intent
  */
-import { resolveCoin, toBaseUnits, durationToTimestamp, stableHashId } from './shared.js';
+import { resolveCoin, toBaseUnits, resolveExpiration, stableHashId } from './shared.js';
 import { buildIntentApproval, type IntentApprovalArgs } from '../intents.js';
 import { UintRangeArray } from '../uintRanges.js';
+
+const INTENT_DEFAULT_EXPIRY_MS = 30 * 24 * 60 * 60 * 1000;
 
 export interface IntentParams {
   address: string; // creator bb1... address
@@ -19,7 +21,7 @@ export interface IntentParams {
   payAmount: number; // display units
   receiveDenom: string; // what creator receives
   receiveAmount: number; // display units
-  expiration?: string; // duration shorthand, default "30d"
+  expiration?: string; // ms-since-epoch or duration shorthand, default "30d"
 }
 
 export function buildIntent(params: IntentParams): { typeUrl: string; value: any } {
@@ -30,7 +32,7 @@ export function buildIntent(params: IntentParams): { typeUrl: string; value: any
   if (payCoin.denom === receiveCoin.denom) {
     throw new Error('Intent pay and receive denoms must differ.');
   }
-  const end = BigInt(durationToTimestamp(params.expiration || '30d'));
+  const end = resolveExpiration(params.expiration, INTENT_DEFAULT_EXPIRY_MS);
   const approvalId = stableHashId('intent', {
     address: params.address,
     collectionId: params.collectionId,

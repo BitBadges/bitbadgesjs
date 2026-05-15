@@ -10,9 +10,12 @@
  *
  * @module core/builders/pm-sell-intent
  */
-import { resolveCoin, toBaseUnits, durationToTimestamp, stableHashId } from './shared.js';
+import { resolveCoin, toBaseUnits, resolveExpiration, stableHashId } from './shared.js';
 import { buildPredictionMarketSellIntent, type PredictionMarketSideArgs } from '../prediction-markets.js';
 import { UintRangeArray } from '../uintRanges.js';
+
+// Matches the end-user `bb prediction-markets sell-*` default (24h).
+const PM_INTENT_DEFAULT_EXPIRY_MS = 24 * 60 * 60 * 1000;
 
 export interface PmSellIntentParams {
   address: string; // seller bb1... address
@@ -21,7 +24,7 @@ export interface PmSellIntentParams {
   amount: number; // number of tokens to sell (unitless count)
   price: number; // total payment amount (display units)
   denom: string; // payment coin (USDC, BADGE)
-  expiration?: string; // duration shorthand, default "7d"
+  expiration?: string; // ms-since-epoch or duration shorthand, default "24h"
 }
 
 export function buildPmSellIntent(params: PmSellIntentParams): { typeUrl: string; value: any } {
@@ -32,7 +35,7 @@ export function buildPmSellIntent(params: PmSellIntentParams): { typeUrl: string
   }
   const coin = resolveCoin(params.denom);
   const tokenId = params.token === 'yes' ? 1n : 2n;
-  const end = BigInt(durationToTimestamp(params.expiration || '7d'));
+  const end = resolveExpiration(params.expiration, PM_INTENT_DEFAULT_EXPIRY_MS);
   const approvalId = stableHashId('pm-sell', {
     address: params.address,
     collectionId: params.collectionId,

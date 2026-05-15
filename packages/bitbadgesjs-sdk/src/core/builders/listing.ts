@@ -7,9 +7,11 @@
  *
  * @module core/builders/listing
  */
-import { resolveCoin, toBaseUnits, durationToTimestamp, stableHashId } from './shared.js';
+import { resolveCoin, toBaseUnits, resolveExpiration, stableHashId } from './shared.js';
 import { buildOrderbookListingApproval, type OrderbookOrderArgs } from '../bids.js';
 import { UintRangeArray } from '../uintRanges.js';
+
+const LISTING_DEFAULT_EXPIRY_MS = 30 * 24 * 60 * 60 * 1000;
 
 export interface ListingParams {
   address: string; // seller bb1... address
@@ -18,7 +20,7 @@ export interface ListingParams {
   price: number; // asking price (display units)
   denom: string; // price coin (USDC, BADGE)
   maxSales?: number; // max number of sales, default 1
-  expiration?: string; // listing duration, default "30d"
+  expiration?: string; // ms-since-epoch or duration shorthand, default "30d"
 }
 
 /** Orderbook listings are single-token. Accept "5" or "5-5"; reject a true range. */
@@ -35,7 +37,7 @@ function singleTokenId(input: string, ctx: string): bigint {
 export function buildListing(params: ListingParams): { typeUrl: string; value: any } {
   const coin = resolveCoin(params.denom);
   const tokenId = singleTokenId(params.tokenIds, 'listing');
-  const end = BigInt(durationToTimestamp(params.expiration || '30d'));
+  const end = resolveExpiration(params.expiration, LISTING_DEFAULT_EXPIRY_MS);
   const maxNumTransfers = BigInt(params.maxSales || 1);
   const approvalId = stableHashId('listing', {
     address: params.address,

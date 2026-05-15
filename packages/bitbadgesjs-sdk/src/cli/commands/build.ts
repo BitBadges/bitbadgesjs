@@ -745,7 +745,7 @@ sharedOpts(
     .requiredOption('--pay-amount <n>', 'Amount you send (display units)')
     .requiredOption('--receive-denom <symbol|denom>', 'What you receive. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .requiredOption('--receive-amount <n>', 'Amount you receive (display units)')
-    .option('--expiration <duration>', 'How long intent stays open (default 30d, matches `bb intents create`)', '30d')
+    .option('--expiration <when>', 'Intent expiry: ms-since-epoch (1748140800000) or duration (30d, 24h, monthly). Default 30d, matches `bb intents create`.', '30d')
 ).action(async (opts) => {
   const { buildIntent } = await import('../../core/builders/intent.js');
   if (opts.json) { emit(buildIntent(readJsonInput(opts.json)), opts); return; }
@@ -771,7 +771,7 @@ sharedOpts(
     .requiredOption('--price <n>', 'Asking price (display units)')
     .requiredOption('--denom <symbol|denom>', 'Price coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .option('--max-sales <n>', 'Maximum number of sales', '1')
-    .option('--expiration <duration>', 'Listing duration', '30d')
+    .option('--expiration <when>', 'Listing expiry: ms-since-epoch (1748140800000) or duration (30d, 24h, monthly). Default 30d.', '30d')
 ).action(async (opts) => {
   const { buildListing } = await import('../../core/builders/listing.js');
   if (opts.json) { emit(buildListing(readJsonInput(opts.json)), opts); return; }
@@ -809,7 +809,7 @@ sharedOpts(
     .requiredOption('--amount <n>', 'Number of tokens to sell')
     .requiredOption('--price <n>', 'Total payment amount (display units)')
     .requiredOption('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
-    .option('--expiration <duration>', 'How long intent stays open', '7d')
+    .option('--expiration <when>', 'Intent expiry: ms-since-epoch (1748140800000) or duration (24h, 7d, monthly). Default 24h, matches `bb prediction-markets buy/sell`.', '24h')
 ).action(async (opts) => {
   const { buildPmSellIntent } = await import('../../core/builders/pm-sell-intent.js');
   if (opts.json) { emit(buildPmSellIntent(readJsonInput(opts.json)), opts); return; }
@@ -828,7 +828,7 @@ sharedOpts(
     .requiredOption('--amount <n>', 'Number of tokens to buy')
     .requiredOption('--price <n>', 'Total payment amount (display units)')
     .requiredOption('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
-    .option('--expiration <duration>', 'How long intent stays open', '7d')
+    .option('--expiration <when>', 'Intent expiry: ms-since-epoch (1748140800000) or duration (24h, 7d, monthly). Default 24h, matches `bb prediction-markets buy/sell`.', '24h')
 ).action(async (opts) => {
   const { buildPmBuyIntent } = await import('../../core/builders/pm-buy-intent.js');
   if (opts.json) { emit(buildPmBuyIntent(readJsonInput(opts.json)), opts); return; }
