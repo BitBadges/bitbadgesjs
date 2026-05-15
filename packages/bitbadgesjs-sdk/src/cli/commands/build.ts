@@ -867,30 +867,21 @@ sharedOpts(
   .action(async (opts) => {
     try {
       const { requireBb1AddressStrict } = await import('../utils/address.js');
-      const { resolveCoin, toBaseUnits } = await import('../../core/builders/shared.js');
+      const { resolveAmount } = await import('../utils/amount.js');
       const fromAddress = requireBb1AddressStrict(opts.from, '--from');
       const toAddress = requireBb1AddressStrict(opts.to, '--to');
-      let denom: string;
-      let amount: string;
-      if (opts.baseUnits) {
-        // Caller wants raw base units regardless of how --denom resolves.
-        denom = requireBbDenom(opts.denom, '--denom');
-        amount = String(opts.amount).replace(/[_,]/g, '');
-        if (!/^\d+$/.test(amount)) {
-          process.stderr.write(`Error: --amount must be a non-negative integer when --base-units is set, got "${opts.amount}"\n`);
-          process.exit(2);
-        }
-      } else {
-        // requireBbDenom catches uusdc/uatom/uosmo before resolveCoin
-        // even sees them; resolveCoin then handles the canonical
-        // baseDenom path.
-        const validated = requireBbDenom(opts.denom, '--denom');
-        const resolved = resolveCoin(validated);
-        denom = resolved.denom;
-        // Resolved symbol → display units + decimals. Resolved raw denom
-        // → resolveCoin returns decimals from registry; same path.
-        amount = toBaseUnits(Number(opts.amount), resolved.decimals);
-      }
+      // Canonical amount/denom resolution — shared with auctions /
+      // crowdfunds / nfts / intents / prediction-markets (0410). This
+      // replaces a re-rolled branch whose else-path display-converted
+      // even canonical chain denoms, contradicting this command's own
+      // "base units when --denom is a raw chain denom" help text;
+      // resolveAmount is the help-text-correct, canonical behavior.
+      const { denom, amount } = resolveAmount(
+        String(opts.amount),
+        opts.denom,
+        !!opts.baseUnits,
+        { amountFlag: '--amount', denomFlag: '--denom' }
+      );
       const msg = {
         typeUrl: '/cosmos.bank.v1beta1.MsgSend',
         value: {
