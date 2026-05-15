@@ -11,6 +11,7 @@
 import { Command } from 'commander';
 import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
+import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import { resolveAmount } from '../utils/amount.js';
 import { emit, emitError } from '../utils/envelope.js';
 import { addIndexerOutputOptions as addOutputFlags } from '../utils/indexer-options.js';
@@ -199,6 +200,7 @@ addOutputFlags(
   } catch (err) { emitError(err); }
 });
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     crowdfundsCommand
@@ -209,7 +211,7 @@ addOutputFlags(
       .requiredOption('--amount <n>', 'Amount to contribute. Display units when the crowdfund\'s deposit denom is a registered symbol; base units when it\'s a chain denom. Use --base-units to force base-units.')
       .option('--base-units', 'Treat --amount as already-in-base-units')
   )
-).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; amount: string; baseUnits?: boolean }) => {
+)).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; amount: string; baseUnits?: boolean }) => {
   try {
     const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
@@ -222,8 +224,8 @@ addOutputFlags(
       { amountFlag: '--amount', denomFlag: 'crowdfund deposit denom' }
     );
     const tx = buildContributeCrowdfundTx(creator, String(collectionId), details, BigInt(amountStr));
-    // Single-msg per the helper output; bb deploy will accept either shape.
-    emit(tx.messages[0], opts);
+    // Single-msg per the helper output.
+    await runEmitOrDeploy(tx.messages[0], opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
   } catch (err) { emitError(err); }
 }).addHelpText('after', `
 Examples:
@@ -267,6 +269,7 @@ Examples:
   $ bb crowdfunds withdraw 7 --creator bb1crowdfunder...xyz | bb deploy
 `);
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     crowdfundsCommand
@@ -277,7 +280,7 @@ addOutputFlags(
       .requiredOption('--amount <n>', 'Amount to refund. Display units when the crowdfund\'s deposit denom is a registered symbol; base units when it\'s a chain denom. Use --base-units to force base-units.')
       .option('--base-units', 'Treat --amount as already-in-base-units')
   )
-).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; amount: string; baseUnits?: boolean }) => {
+)).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; amount: string; baseUnits?: boolean }) => {
   try {
     const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
@@ -293,7 +296,7 @@ addOutputFlags(
     if (now <= details.deadlineTime) {
       process.stderr.write(`Warning: deadline not yet passed (deadline=${details.deadlineTime}, now=${now}). Refund will be rejected.\n`);
     }
-    emit(buildRefundCrowdfundMsg(creator, String(collectionId), details, BigInt(amountStr)), opts);
+    await runEmitOrDeploy(buildRefundCrowdfundMsg(creator, String(collectionId), details, BigInt(amountStr)), opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
   } catch (err) { emitError(err); }
 }).addHelpText('after', `
 Examples:

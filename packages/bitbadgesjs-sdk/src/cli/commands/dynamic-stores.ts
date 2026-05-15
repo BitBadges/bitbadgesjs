@@ -38,6 +38,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
+import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 
 function fail(code: number, msg: string): never {
   process.stderr.write(`Error: ${msg}\n`);
@@ -63,6 +64,8 @@ export const dynamicStoresCommand = new Command('dynamic-stores').description(
 
 // ── create ───────────────────────────────────────────────────────────────────
 
+addDeployOptions(
+addNetworkFlags(
 addOutputFlags(
   dynamicStoresCommand
     .command('create')
@@ -71,10 +74,10 @@ addOutputFlags(
     .option('--default-value <bool>', 'Default value for addresses not explicitly set. true|false (default false)', 'false')
     .option('--uri <uri>', 'Optional metadata URI')
     .option('--custom-data <text>', 'Optional custom data string')
-).action((opts: OutputFlags & { creator: string; defaultValue: string; uri?: string; customData?: string }) => {
+))).action(async (opts: NetworkFlags & OutputFlags & { creator: string; defaultValue: string; uri?: string; customData?: string }) => {
   const creator = requireBb1AddressStrict(opts.creator, '--creator');
   const defaultValue = parseBool(opts.defaultValue, '--default-value');
-  emit(
+  await runEmitOrDeploy(
     {
       typeUrl: '/tokenization.MsgCreateDynamicStore',
       value: {
@@ -84,7 +87,8 @@ addOutputFlags(
         ...(opts.customData !== undefined ? { customData: opts.customData } : {})
       }
     },
-    opts
+    opts as any,
+    { emit: (m) => emit(m, opts), expectedAddress: creator }
   );
 }).addHelpText('after', `
 Examples:
@@ -94,6 +98,8 @@ Examples:
 
 // ── update ───────────────────────────────────────────────────────────────────
 
+addDeployOptions(
+addNetworkFlags(
 addOutputFlags(
   dynamicStoresCommand
     .command('update')
@@ -104,10 +110,10 @@ addOutputFlags(
     .option('--global-enabled <bool>', 'Kill-switch state (true=enabled, false=halted)')
     .option('--uri <uri>', 'New metadata URI')
     .option('--custom-data <text>', 'New custom data')
-).action(
-  (
+))).action(
+  async (
     storeId: string,
-    opts: OutputFlags & { creator: string; defaultValue?: string; globalEnabled?: string; uri?: string; customData?: string }
+    opts: NetworkFlags & OutputFlags & { creator: string; defaultValue?: string; globalEnabled?: string; uri?: string; customData?: string }
   ) => {
     const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const value: Record<string, unknown> = { creator, storeId: String(storeId) };
@@ -115,7 +121,7 @@ addOutputFlags(
     if (opts.globalEnabled !== undefined) value.globalEnabled = parseBool(opts.globalEnabled, '--global-enabled');
     if (opts.uri !== undefined) value.uri = opts.uri;
     if (opts.customData !== undefined) value.customData = opts.customData;
-    emit({ typeUrl: '/tokenization.MsgUpdateDynamicStore', value }, opts);
+    await runEmitOrDeploy({ typeUrl: '/tokenization.MsgUpdateDynamicStore', value }, opts as any, { emit: (m) => emit(m, opts), expectedAddress: creator });
   }
 ).addHelpText('after', `
 Examples:
@@ -125,20 +131,23 @@ Examples:
 
 // ── delete ───────────────────────────────────────────────────────────────────
 
+addDeployOptions(
+addNetworkFlags(
 addOutputFlags(
   dynamicStoresCommand
     .command('delete')
     .description('Emit MsgDeleteDynamicStore.')
     .argument('<store-id>', 'Dynamic store ID')
     .requiredOption('--creator <address>', 'Tx creator')
-).action((storeId: string, opts: OutputFlags & { creator: string }) => {
+))).action(async (storeId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
   const creator = requireBb1AddressStrict(opts.creator, '--creator');
-  emit(
+  await runEmitOrDeploy(
     {
       typeUrl: '/tokenization.MsgDeleteDynamicStore',
       value: { creator, storeId: String(storeId) }
     },
-    opts
+    opts as any,
+    { emit: (m) => emit(m, opts), expectedAddress: creator }
   );
 }).addHelpText('after', `
 Examples:
@@ -147,6 +156,8 @@ Examples:
 
 // ── set-value (single) ───────────────────────────────────────────────────────
 
+addDeployOptions(
+addNetworkFlags(
 addOutputFlags(
   dynamicStoresCommand
     .command('set-value')
@@ -155,17 +166,18 @@ addOutputFlags(
     .argument('<address>', 'Target address (bb1.../0x — auto-normalized)')
     .argument('<value>', 'Boolean value (true|false)')
     .requiredOption('--creator <address>', 'Tx creator')
-).action(
-  (storeId: string, address: string, valueStr: string, opts: OutputFlags & { creator: string }) => {
+))).action(
+  async (storeId: string, address: string, valueStr: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
     const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const target = requireBb1AddressStrict(address, '<address> argument');
     const value = parseBool(valueStr, 'value');
-    emit(
+    await runEmitOrDeploy(
       {
         typeUrl: '/tokenization.MsgSetDynamicStoreValue',
         value: { creator, storeId: String(storeId), address: target, value }
       },
-      opts
+      opts as any,
+      { emit: (m) => emit(m, opts), expectedAddress: creator }
     );
   }
 ).addHelpText('after', `

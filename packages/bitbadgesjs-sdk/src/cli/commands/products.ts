@@ -14,6 +14,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
+import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import {
   doesCollectionFollowProductCatalogProtocol,
   validateProductCatalogCollection,
@@ -107,14 +108,16 @@ addOutputFlags(
   }
 });
 
-addOutputFlags(
-  addNetworkFlags(
-    productsCommand
-      .command('purchase')
-      .description('Emit MsgTransferTokens that buys 1 unit of a product. Pipe to `bb deploy`.')
-      .argument('<collection-id>', 'Product Catalog collection ID')
-      .requiredOption('--creator <address>', 'Buyer address (bb1.../0x — auto-normalized)')
-      .requiredOption('--token-id <n>', 'Product token ID to purchase')
+addDeployOptions(
+  addOutputFlags(
+    addNetworkFlags(
+      productsCommand
+        .command('purchase')
+        .description('Buy 1 unit of a product. Emits MsgTransferTokens (pipe to `bb deploy`) or broadcast inline with --browser/--burner.')
+        .argument('<collection-id>', 'Product Catalog collection ID')
+        .requiredOption('--creator <address>', 'Buyer address (bb1.../0x — auto-normalized)')
+        .requiredOption('--token-id <n>', 'Product token ID to purchase')
+    )
   )
 ).action(
   async (
@@ -140,7 +143,10 @@ addOutputFlags(
         );
         process.exit(2);
       }
-      emit(buildPurchaseProductMsg(creator, String(collectionId), product), opts);
+      await runEmitOrDeploy(buildPurchaseProductMsg(creator, String(collectionId), product), opts, {
+        emit: (m) => emit(m, opts),
+        expectedAddress: creator
+      });
     } catch (err) {
       emitError(err);
     }

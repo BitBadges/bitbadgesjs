@@ -15,6 +15,7 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
+import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import { resolveAmount } from '../utils/amount.js';
 import {
   doesCollectionFollowAuctionProtocol,
@@ -134,6 +135,7 @@ addOutputFlags(
   } catch (err) { emitError(err); }
 });
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     auctionsCommand
@@ -146,7 +148,7 @@ addOutputFlags(
       .option('--base-units', 'Treat --amount as already-in-base-units')
       .option('--approval-id <id>', 'Approval id for the bid (random by default)')
   )
-).action(
+)).action(
   async (
     collectionId: string,
     opts: NetworkFlags & OutputFlags & { creator: string; amount: string; denom: string; baseUnits?: boolean; approvalId?: string }
@@ -179,10 +181,10 @@ addOutputFlags(
         transferTimes,
         approvalId
       });
-      emit({
+      await runEmitOrDeploy({
         typeUrl: '/tokenization.MsgSetIncomingApproval',
         value: { creator, collectionId: String(collectionId), approval }
-      }, opts);
+      }, opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
     } catch (err) { emitError(err); }
   }
 ).addHelpText('after', `
@@ -191,6 +193,7 @@ Examples:
   $ bb auctions place-bid 42 --creator bb1abc...xyz --amount 25000000 --denom USDC --base-units | bb deploy
 `);
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     auctionsCommand
@@ -200,19 +203,20 @@ addOutputFlags(
       .argument('<approval-id>', 'Bid approval id to cancel')
       .requiredOption('--creator <address>', 'Bidder address (bb1.../0x — auto-normalized)')
   )
-).action(async (collectionId: string, approvalId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
+)).action(async (collectionId: string, approvalId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
   try {
     const creator = requireBb1AddressStrict(opts.creator, '--creator');
-    emit({
+    await runEmitOrDeploy({
       typeUrl: '/tokenization.MsgDeleteIncomingApproval',
       value: { creator, collectionId: String(collectionId), approvalId }
-    }, opts);
+    }, opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
   } catch (err) { emitError(err); }
 }).addHelpText('after', `
 Examples:
   $ bb auctions cancel-bid 42 a1b2c3d4e5f6 --creator bb1abc...xyz | bb deploy
 `);
 
+addDeployOptions(
 addOutputFlags(
   addNetworkFlags(
     auctionsCommand
@@ -223,7 +227,7 @@ addOutputFlags(
       .requiredOption('--creator <address>', 'Seller address (bb1.../0x — auto-normalized)')
       .requiredOption('--bidder <address>', 'Bidder address (the bid approval\'s owner)')
   )
-).action(
+)).action(
   async (
     collectionId: string,
     bidApprovalId: string,
@@ -244,9 +248,10 @@ addOutputFlags(
           `Warning: --creator ${seller} does not match seller ${details.sellerAddress}. The mint approval will reject this tx.\n`
         );
       }
-      emit(
+      await runEmitOrDeploy(
         buildAcceptAuctionBidMsg(seller, String(collectionId), bidApprovalId, bidder, details.mintApproval.approvalId),
-        opts
+        opts,
+        { emit: (m) => emit(m, opts), expectedAddress: seller }
       );
     } catch (err) { emitError(err); }
   }
