@@ -20,13 +20,13 @@ import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } fro
 import { bridgeSign, resolveFrontendUrl } from '../auth/browser-bridge.js';
 import { emit, emitError, commentary, bbError, BBErrorCode } from '../utils/envelope.js';
 import { emitDeprecation } from '../utils/deprecation.js';
+import { readStringOrFile } from '../utils/message-options.js';
 
 function readMessage(opts: { message?: string; messageFile?: string; positional?: string }): string {
-  if (opts.message) return opts.message;
-  if (opts.messageFile) {
-    if (opts.messageFile === '-') return fs.readFileSync(0, 'utf-8');
-    return fs.readFileSync(opts.messageFile, 'utf-8');
-  }
+  // Shared --message/--message-file resolution (0411). The positional /
+  // stdin-fallback / required-error tail is sign-with-browser-specific.
+  const fromInlineOrFile = readStringOrFile(opts.message, opts.messageFile);
+  if (fromInlineOrFile !== undefined) return fromInlineOrFile;
   if (opts.positional) {
     if (opts.positional === '-') return fs.readFileSync(0, 'utf-8');
     if (opts.positional.startsWith('@')) return fs.readFileSync(opts.positional.slice(1), 'utf-8');

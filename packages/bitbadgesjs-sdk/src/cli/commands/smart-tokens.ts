@@ -66,6 +66,30 @@ function validateOrExit(collection: any, ctx: string): void {
   }
 }
 
+/**
+ * Resolve the smart-token `--amount` into base units of the backing
+ * coin. Was duplicated byte-identically in `deposit` and `withdraw`.
+ *
+ * Intentionally NOT utils/amount.ts `resolveAmount` (0410): the denom
+ * is collection-derived (`details.backingDenom`, always canonical) and
+ * the amount is ALWAYS display-units of the backing coin —
+ * resolveAmount's auto-rule treats a canonical denom as a base-units
+ * passthrough, which would change behavior. `--base-units` overrides
+ * to a raw integer passthrough.
+ */
+function resolveBackingAmount(rawAmount: string, baseUnits: boolean, backingDenom: string): string {
+  if (baseUnits) {
+    const a = String(rawAmount).replace(/[_,]/g, '');
+    if (!/^\d+$/.test(a)) {
+      process.stderr.write(`Error: --amount must be a non-negative integer when --base-units is set, got "${rawAmount}"\n`);
+      process.exit(2);
+    }
+    return a;
+  }
+  const resolved = resolveCoin(backingDenom);
+  return toBaseUnits(Number(rawAmount), resolved.decimals);
+}
+
 // ── smart-tokens (parent) ────────────────────────────────────────────────────
 
 export const smartTokensCommand = new Command('smart-tokens').description(
@@ -190,17 +214,7 @@ addOutputFlags(
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'smart-tokens deposit');
       const details = extractSmartTokenDetails(collection)!;
-      let amount: string;
-      if (opts.baseUnits) {
-        amount = String(opts.amount).replace(/[_,]/g, '');
-        if (!/^\d+$/.test(amount)) {
-          process.stderr.write(`Error: --amount must be a non-negative integer when --base-units is set, got "${opts.amount}"\n`);
-          process.exit(2);
-        }
-      } else {
-        const resolved = resolveCoin(details.backingDenom);
-        amount = toBaseUnits(Number(opts.amount), resolved.decimals);
-      }
+      const amount = resolveBackingAmount(opts.amount, !!opts.baseUnits, details.backingDenom);
       const msg = buildSmartTokenDepositMsg({
         creator,
         collectionId: String(collectionId),
@@ -247,17 +261,7 @@ addOutputFlags(
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'smart-tokens withdraw');
       const details = extractSmartTokenDetails(collection)!;
-      let amount: string;
-      if (opts.baseUnits) {
-        amount = String(opts.amount).replace(/[_,]/g, '');
-        if (!/^\d+$/.test(amount)) {
-          process.stderr.write(`Error: --amount must be a non-negative integer when --base-units is set, got "${opts.amount}"\n`);
-          process.exit(2);
-        }
-      } else {
-        const resolved = resolveCoin(details.backingDenom);
-        amount = toBaseUnits(Number(opts.amount), resolved.decimals);
-      }
+      const amount = resolveBackingAmount(opts.amount, !!opts.baseUnits, details.backingDenom);
       const msg = buildSmartTokenWithdrawMsg({
         creator,
         collectionId: String(collectionId),

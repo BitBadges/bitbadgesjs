@@ -27,7 +27,7 @@ import { requireBb1AddressStrict } from '../utils/address.js';
 import { bbError, BBErrorCode } from '../utils/envelope.js';
 import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import { resolveAmount } from '../utils/amount.js';
-import { parseTimeFlag } from '../utils/time.js';
+import { resolveExpiry } from '../utils/expiry-options.js';
 import {
   validatePredictionMarketCollection,
   classifySettlementApproval,
@@ -202,7 +202,7 @@ function buyAction(side: 'yes' | 'no') {
         { amountFlag: '--payment-amount', denomFlag: '--denom' }
       );
       await fetchCollection(collectionId, opts).then((c) => validateOrExit(c, `prediction-markets buy-${side}`));
-      const end = opts.expiry ? parseTimeFlag(opts.expiry, '--expiry') : BigInt(Date.now() + 24 * 60 * 60 * 1000);
+      const end = resolveExpiry(opts, 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
       const approval = buildPredictionMarketBuyIntent({
         address: creator,
@@ -233,7 +233,7 @@ function sellAction(side: 'yes' | 'no') {
         { amountFlag: '--payment-amount', denomFlag: '--denom' }
       );
       await fetchCollection(collectionId, opts).then((c) => validateOrExit(c, `prediction-markets sell-${side}`));
-      const end = opts.expiry ? parseTimeFlag(opts.expiry, '--expiry') : BigInt(Date.now() + 24 * 60 * 60 * 1000);
+      const end = resolveExpiry(opts, 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
       const approval = buildPredictionMarketSellIntent({
         address: creator,

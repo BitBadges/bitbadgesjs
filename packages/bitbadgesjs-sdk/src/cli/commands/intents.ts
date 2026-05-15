@@ -32,6 +32,7 @@ import {
 } from '../utils/indexer-options.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
+import { appendQuery } from '../utils/list-options.js';
 import { requireBbDenom } from '../utils/denom.js';
 import { resolveAmount } from '../utils/amount.js';
 import { parseTimeFlag } from '../utils/time.js';
@@ -58,15 +59,7 @@ function addCollectionFlag(cmd: Command): Command {
   );
 }
 
-function appendQuery(path: string, params: Record<string, string | number | boolean | undefined>): string {
-  const search = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === null || v === '') continue;
-    search.set(k, String(v));
-  }
-  const qs = search.toString();
-  return qs ? path + (path.includes('?') ? '&' : '?') + qs : path;
-}
+// appendQuery is now shared — see utils/list-options.ts (ticket 0409).
 
 // ── intents (parent) ──────────────────────────────────────────────────────
 

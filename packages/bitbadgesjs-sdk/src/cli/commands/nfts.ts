@@ -29,7 +29,7 @@ import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js'
 import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import { requireBbDenom } from '../utils/denom.js';
 import { resolveAmount } from '../utils/amount.js';
-import { parseTimeFlag } from '../utils/time.js';
+import { resolveExpiry } from '../utils/expiry-options.js';
 import {
   buildOrderbookBidApproval,
   buildOrderbookListingApproval,
@@ -79,7 +79,7 @@ addOutputFlags(
         Boolean(opts.baseUnits),
         { amountFlag: '--price', denomFlag: '--denom' }
       );
-      const end = opts.expiry ? parseTimeFlag(opts.expiry, '--expiry') : BigInt(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const end = resolveExpiry(opts, 7 * 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
       const approval = buildOrderbookBidApproval({
         address: creator,
@@ -135,7 +135,7 @@ addOutputFlags(
         Boolean(opts.baseUnits),
         { amountFlag: '--price', denomFlag: '--denom' }
       );
-      const end = opts.expiry ? parseTimeFlag(opts.expiry, '--expiry') : BigInt(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      const end = resolveExpiry(opts, 30 * 24 * 60 * 60 * 1000);
       const approvalId = opts.approvalId ?? crypto.randomBytes(16).toString('hex');
       const approval = buildOrderbookListingApproval({
         address: creator,

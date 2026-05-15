@@ -28,17 +28,7 @@ import {
   emitIndexerResult as emit,
   emitIndexerError as emitError,
 } from '../utils/indexer-options.js';
-
-function appendQuery(path: string, params: Record<string, string | number | boolean | undefined>): string {
-  const search = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === null || v === '') continue;
-    search.set(k, String(v));
-  }
-  const qs = search.toString();
-  if (!qs) return path;
-  return path + (path.includes('?') ? '&' : '?') + qs;
-}
+import { appendQuery } from '../utils/list-options.js';
 
 const ANALYTICS_VERBS: ReadonlyArray<readonly [string, string, string]> = [
   ['top-gainers', '/assetPairs/topGainers', 'Top-gaining asset pairs in the last 24h.'],

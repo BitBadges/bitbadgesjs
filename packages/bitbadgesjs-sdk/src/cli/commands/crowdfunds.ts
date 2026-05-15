@@ -12,6 +12,7 @@ import { Command } from 'commander';
 import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
 import { requireBb1Address, requireBb1AddressStrict } from '../utils/address.js';
 import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
+import { addUnifiedNetworkOptions } from '../utils/network-options.js';
 import { resolveAmount } from '../utils/amount.js';
 import { emit, emitError } from '../utils/envelope.js';
 import { addIndexerOutputOptions as addOutputFlags } from '../utils/indexer-options.js';
@@ -32,12 +33,11 @@ const BURN_ADDRESS = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
 interface NetworkFlags { testnet?: boolean; local?: boolean; url?: string; apiKey?: string; }
 interface OutputFlags { outputFile?: string; condensed?: boolean; }
 
+// Repointed onto the unified helper (0412) — was a local re-declaration
+// of the same --testnet/--local/--url/--api-key surface. Network
+// resolution still reads opts.testnet/local/url/apiKey, unchanged.
 function addNetworkFlags(cmd: Command): Command {
-  return cmd
-    .option('--testnet', 'Use testnet API', false)
-    .option('--local', 'Use local API (localhost:3001)', false)
-    .option('--url <url>', 'Custom API base URL')
-    .option('--api-key <key>', 'BitBadges API key');
+  return addUnifiedNetworkOptions(cmd, { includeNetworkFlag: false, includeMainnetFlag: false });
 }
 async function callApi(method: 'GET' | 'POST', path: string, opts: NetworkFlags, body?: unknown): Promise<any> {
   const network = opts.testnet ? 'testnet' : opts.local ? 'local' : 'mainnet';

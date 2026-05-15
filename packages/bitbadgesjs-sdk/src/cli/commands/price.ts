@@ -18,6 +18,7 @@
 import { Command } from 'commander';
 import { addOutputOptions, emit, errorEnvelope, writeJsonEnvelope } from '../utils/envelope.js';
 import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
+import { addUnifiedNetworkOptions } from '../utils/network-options.js';
 
 interface PriceFlags {
   testnet?: boolean;
@@ -73,14 +74,17 @@ async function resolveDenoms(inputs: string[], opts: PriceFlags): Promise<{ inpu
   return out;
 }
 
-export const priceCommand = addOutputOptions(
-  new Command('price')
-    .description('Indexer-served USD price lookup for BitBadges-chain assets. Accepts denoms (ubadge, ibc/...) or symbols (BADGE) — symbols resolve via /assetPairs/search. Cross-chain prices live in `bb swap` (Skip:Go).')
-    .argument('<denoms-or-symbols...>', 'Repeated args or comma-separated. e.g. ubadge, BADGE, ibc/F082B65C...')
-    .option('--testnet', 'Use testnet API', false)
-    .option('--local', 'Use local API (localhost:3001)', false)
-    .option('--url <url>', 'Custom API base URL')
-    .option('--api-key <key>', 'BitBadges API key')
+// Network flags via the unified helper (0412) — was an inline
+// re-declaration of --testnet/--local/--url/--api-key. Resolution
+// still reads opts.testnet/local/url/apiKey, unchanged. --network /
+// --mainnet are config'd off to keep this command's flag set as-is.
+export const priceCommand = addUnifiedNetworkOptions(
+  addOutputOptions(
+    new Command('price')
+      .description('Indexer-served USD price lookup for BitBadges-chain assets. Accepts denoms (ubadge, ibc/...) or symbols (BADGE) — symbols resolve via /assetPairs/search. Cross-chain prices live in `bb swap` (Skip:Go).')
+      .argument('<denoms-or-symbols...>', 'Repeated args or comma-separated. e.g. ubadge, BADGE, ibc/F082B65C...')
+  ),
+  { includeNetworkFlag: false, includeMainnetFlag: false }
 )
   .addHelpText(
     'after',
