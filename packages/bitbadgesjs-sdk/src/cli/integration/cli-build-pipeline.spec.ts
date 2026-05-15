@@ -143,14 +143,17 @@ describe('cli build pipeline integration', () => {
   });
 
   describe('bb build pm-buy-intent', () => {
-    it('emits MsgUpdateUserApprovals (incoming)', () => {
+    it('emits MsgSetIncomingApproval — identical shape to bb prediction-markets buy-yes', () => {
       const out = runCli([
         'build', 'pm-buy-intent',
         '--address', CREATOR, '--collection-id', '1',
         '--token', 'yes', '--amount', '10',
         '--price', '5', '--denom', 'USDC'
       ]);
-      expect(out.json.typeUrl).toBe('/tokenization.MsgUpdateUserApprovals');
+      expect(out.json.typeUrl).toBe('/tokenization.MsgSetIncomingApproval');
+      expect(out.json.value.creator).toBe(CREATOR);
+      expect(out.json.value.collectionId).toBe('1');
+      expect(out.json.value.approval.fromListId).toBe('All');
     });
   });
 
@@ -241,14 +244,17 @@ describe('cli build pipeline integration', () => {
   });
 
   describe('bb build pm-sell-intent', () => {
-    it('emits MsgUpdateUserApprovals (outgoing)', () => {
+    it('emits MsgSetOutgoingApproval — identical shape to bb prediction-markets sell-no', () => {
       const out = runCli([
         'build', 'pm-sell-intent',
         '--address', CREATOR, '--collection-id', '1',
         '--token', 'no', '--amount', '10',
         '--price', '5', '--denom', 'USDC'
       ]);
-      expect(out.json.typeUrl).toBe('/tokenization.MsgUpdateUserApprovals');
+      expect(out.json.typeUrl).toBe('/tokenization.MsgSetOutgoingApproval');
+      expect(out.json.value.creator).toBe(CREATOR);
+      expect(out.json.value.collectionId).toBe('1');
+      expect(out.json.value.approval.toListId).toBe('All');
     });
   });
 
