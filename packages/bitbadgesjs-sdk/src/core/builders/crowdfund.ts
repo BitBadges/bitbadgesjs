@@ -43,12 +43,19 @@ export function buildCrowdfund(params: CrowdfundParams): any {
   const coin = resolveCoin(params.denom);
   const goalBase = toBaseUnits(params.goal, coin.decimals);
   const deadlineTs = durationToTimestamp(params.deadline || '30d');
-  // Resolve the crowdfunder destination once. Falling back to 'All'
-  // would produce an unsigned-payout-target collection that the chain
-  // would accept but no one could practically use. Prefer the explicit
-  // flag, then the creator (passed through from CLI --creator), and
-  // only as a last resort use 'All' (which the reviewer flags).
-  const crowdfunderAddr = params.crowdfunder || params.creator || 'All';
+  // The crowdfunder is the escrow payout target AND the party whose
+  // Token-2 progress balance gates success/refund (ownershipCheckParty
+  // below). It must be a concrete address — falling back to 'All' would
+  // build a collection the chain accepts but that pays out to no one and
+  // whose goal gate checks the wrong party. The frontend
+  // CrowdfundRegistry takes `crowdfunderAddress` as a required param;
+  // mirror that here. Prefer the explicit flag, then CLI --creator.
+  const crowdfunderAddr = params.crowdfunder || params.creator;
+  if (!crowdfunderAddr) {
+    throw new Error(
+      'Crowdfund requires a payout address. Pass --crowdfunder <bb1...> (it otherwise inherits --creator).'
+    );
+  }
 
   const collectionApprovals = [
     // Deposit-Refund — public deposit, mints refund receipt (token 1)
@@ -85,9 +92,8 @@ export function buildCrowdfund(params: CrowdfundParams): any {
         overridesToIncomingApprovals: false
       }
     },
-    // Deposit-Progress — tracks total deposits via token 2 to creator.
-    // toListId falls back to 'All' if --crowdfunder isn't set; the reviewer
-    // will flag the ambiguity so callers pass a concrete address.
+    // Deposit-Progress — tracks total deposits via token 2 to the
+    // crowdfunder (a concrete address; the 'All' fallback was removed).
     {
       fromListId: 'Mint',
       toListId: crowdfunderAddr,
@@ -157,7 +163,10 @@ export function buildCrowdfund(params: CrowdfundParams): any {
             ownershipTimes: FOREVER,
             tokenIds: [{ start: '2', end: '2' }],
             overrideWithCurrentTime: true,
-            mustSatisfyForAllAssets: true
+            mustSatisfyForAllAssets: true,
+            // Gate on the crowdfunder's Token-2 progress balance, not the
+            // initiator's. Matches CrowdfundRegistry.successApproval.
+            ownershipCheckParty: crowdfunderAddr
           }
         ],
         coinTransfers: [
@@ -206,7 +215,13 @@ export function buildCrowdfund(params: CrowdfundParams): any {
             ownershipTimes: FOREVER,
             tokenIds: [{ start: '2', end: '2' }],
             overrideWithCurrentTime: true,
-            mustSatisfyForAllAssets: true
+            mustSatisfyForAllAssets: true,
+            // Refund is gated on the crowdfunder's Token-2 progress being
+            // BELOW goal (campaign failed). Without ownershipCheckParty
+            // the chain checks the backer's own (always-0) Token-2
+            // balance, so refunds would pass even on a met goal — backers
+            // could drain the escrow. Matches CrowdfundRegistry.refundApproval.
+            ownershipCheckParty: crowdfunderAddr
           }
         ],
         coinTransfers: [

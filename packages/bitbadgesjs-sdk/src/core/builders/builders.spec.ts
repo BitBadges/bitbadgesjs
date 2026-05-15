@@ -341,19 +341,46 @@ describe('payment-request builder', () => {
 });
 
 describe('crowdfund builder', () => {
-  const msg = buildCrowdfund({ goal: 1000, denom: 'USDC', ...META });
+  const params = { goal: 1000, denom: 'USDC', crowdfunder: 'bb1fund', ...META };
+  const msg = buildCrowdfund(params);
   const r = val(msg);
 
   test('has Crowdfund standard', () => { expect(r.standards).toEqual(['Crowdfund']); });
   test('2 token IDs', () => { expect(r.validTokenIds).toEqual([{ start: '1', end: '2' }]); });
   test('at least 4 approvals', () => { expect(r.collectionApprovals.length).toBeGreaterThanOrEqual(4); });
   test('crowdfunder address used', () => {
-    const cf = val(buildCrowdfund({ goal: 1000, denom: 'USDC', crowdfunder: 'bb1fund', ...META }));
-    const progress = cf.collectionApprovals.find((a: any) => a.approvalId === 'deposit-progress');
+    const progress = r.collectionApprovals.find((a: any) => a.approvalId === 'deposit-progress');
     expect(progress.toListId).toBe('bb1fund');
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Crowdfund')).toEqual([]);
+
+  test('throws without a payout address (no crowdfunder/creator)', () => {
+    expect(() => buildCrowdfund({ goal: 1000, denom: 'USDC', ...META })).toThrow(
+      /requires a payout address/
+    );
+  });
+  test('falls back to creator when crowdfunder omitted', () => {
+    const viaCreator = val(buildCrowdfund({ goal: 1000, denom: 'USDC', creator: 'bb1creator', ...META }));
+    const progress = viaCreator.collectionApprovals.find((a: any) => a.approvalId === 'deposit-progress');
+    expect(progress.toListId).toBe('bb1creator');
+  });
+  test('success + refund gate on the crowdfunder via ownershipCheckParty', () => {
+    for (const idName of ['success', 'refund']) {
+      const a = r.collectionApprovals.find((x: any) => x.approvalId === idName);
+      expect(a.approvalCriteria.mustOwnTokens[0].ownershipCheckParty).toBe('bb1fund');
+    }
+  });
+  test('deterministic — stable ids + payout gate across calls', () => {
+    // deadlineTs is Date.now()-relative (pre-existing), so compare the
+    // parts the builder controls deterministically.
+    const a = val(buildCrowdfund(params));
+    const b = val(buildCrowdfund(params));
+    expect(a.collectionApprovals.map((x: any) => x.approvalId))
+      .toEqual(b.collectionApprovals.map((x: any) => x.approvalId));
+    expect(a.collectionApprovals.find((x: any) => x.approvalId === 'refund').approvalCriteria.mustOwnTokens[0].ownershipCheckParty)
+      .toBe(b.collectionApprovals.find((x: any) => x.approvalId === 'refund').approvalCriteria.mustOwnTokens[0].ownershipCheckParty);
+  });
+  test('passes verification with zero violations', () => {
+    expectCleanVerification(msg);
   });
 });
 
@@ -627,7 +654,7 @@ describe('all collection builders pass verifyStandardsCompliance with zero viola
     ['subscription (multi-payout)', buildSubscription({ interval: 'monthly', payouts: [{ recipient: 'bb1a', amount: 5, denom: 'USDC' }, { recipient: 'bb1b', amount: 3, denom: 'USDC' }], ...META })],
     ['bounty', buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', ...META })],
     ['bounty (BADGE)', buildBounty({ amount: 50, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', expiration: '7d', ...META })],
-    ['crowdfund', buildCrowdfund({ goal: 1000, denom: 'USDC', ...META })],
+    ['crowdfund', buildCrowdfund({ goal: 1000, denom: 'USDC', crowdfunder: 'bb1fund', ...META })],
     ['crowdfund (with crowdfunder)', buildCrowdfund({ goal: 500, denom: 'BADGE', crowdfunder: 'bb1fund', deadline: '14d', ...META })],
     ['auction', buildAuction({ ...META })],
     ['auction (custom times)', buildAuction({ bidDeadline: '3d', acceptWindow: '1d', ...META })],
@@ -683,7 +710,7 @@ describe('error handling', () => {
   });
 
   test('buildCrowdfund goal of 1 base unit works', () => {
-    const msg = buildCrowdfund({ goal: 0.000001, denom: 'USDC', ...META });
+    const msg = buildCrowdfund({ goal: 0.000001, denom: 'USDC', crowdfunder: 'bb1fund', ...META });
     expect(msg.value.collectionApprovals.length).toBeGreaterThanOrEqual(4);
   });
 
