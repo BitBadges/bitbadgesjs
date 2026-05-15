@@ -18,7 +18,7 @@ import {
   type IndexerNetworkFlags as NetworkFlags,
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
-import { requireBb1AddressStrict } from '../utils/address.js';
+import { requireBb1AddressStrict, resolveRecipientList } from '../utils/address.js';
 import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import { addExpiryOption, resolveExpiry } from '../utils/expiry-options.js';
 import { mintCustom2FA, CUSTOM_2FA_TOKEN_EXPIRATION_MS } from '../../core/builders/custom-2fa.js';
@@ -50,11 +50,7 @@ addDeployOptions(
   ) => {
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
-      const recipients = String(opts.to)
-        .split(',')
-        .map((a) => a.trim())
-        .filter(Boolean)
-        .map((a) => requireBb1AddressStrict(a, '--to'));
+      const recipients = resolveRecipientList(opts.to, '--to');
       const endMs = resolveExpiry(opts, CUSTOM_2FA_TOKEN_EXPIRATION_MS);
       const expirationMs = Number(endMs - BigInt(Date.now()));
       if (expirationMs <= 0) {

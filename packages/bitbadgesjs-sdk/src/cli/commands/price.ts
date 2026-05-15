@@ -19,6 +19,7 @@ import { Command } from 'commander';
 import { addOutputOptions, emit, errorEnvelope, writeJsonEnvelope } from '../utils/envelope.js';
 import { apiRequest, resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
 import { addUnifiedNetworkOptions } from '../utils/network-options.js';
+import { splitCsv } from '../utils/csv-options.js';
 
 interface PriceFlags {
   testnet?: boolean;
@@ -36,10 +37,6 @@ interface AssetPairRow {
   percentageChange24h?: number;
   volume24h?: number;
   lastUpdated?: string;
-}
-
-function splitCsv(values: string[]): string[] {
-  return values.flatMap((v) => v.split(',')).map((v) => v.trim()).filter(Boolean);
 }
 
 async function callApi(method: 'GET' | 'POST', path: string, opts: PriceFlags, body?: unknown): Promise<any> {

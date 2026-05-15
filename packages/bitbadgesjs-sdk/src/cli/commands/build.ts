@@ -786,16 +786,17 @@ sharedOpts(
     .description('Create a marketplace bid (user incoming approval)')
     .requiredOption('--address <address>', 'Bidder address (bb1...)')
     .requiredOption('--collection-id <id>', 'Collection ID to bid on')
-    .requiredOption('--token-ids <range>', 'Token ID range (e.g. "1-5" or "1")')
+    .option('--token-ids <id>', 'Single token ID to bid on (e.g. "1" or "1-1"). Omit for a collection-wide bid (parity with `bb nfts bid`).')
+    .option('--token-amount <n>', 'Number of tokens (default 1)', '1')
     .requiredOption('--price <n>', 'Bid price (display units)')
     .requiredOption('--denom <symbol|denom>', 'Price coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
-    .option('--expiration <duration>', 'Bid duration', '7d')
+    .option('--expiration <when>', 'Bid expiry: ms-since-epoch (1748140800000) or duration (7d, 24h, monthly). Default 7d.', '7d')
 ).action(async (opts) => {
   const { buildBid } = await import('../../core/builders/bid.js');
   if (opts.json) { emit(buildBid(readJsonInput(opts.json)), opts); return; }
   const denom = requireBbDenom(opts.denom, '--denom');
   const address = requireBb1AddressStrict(opts.address, '--address');
-  emit(buildBid({ address, collectionId: opts.collectionId, tokenIds: opts.tokenIds, price: Number(opts.price), denom, expiration: opts.expiration }), opts);
+  emit(buildBid({ address, collectionId: opts.collectionId, tokenIds: opts.tokenIds, tokenAmount: Number(opts.tokenAmount), price: Number(opts.price), denom, expiration: opts.expiration }), opts);
 });
 
 sharedOpts(

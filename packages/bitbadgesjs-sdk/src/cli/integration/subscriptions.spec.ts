@@ -155,16 +155,24 @@ describe('subscriptions integration', () => {
     if (!ready || !collectionId || !approvalId) return;
     const subscriber = charlie();
 
+    // #0427: pin the recurring-approval id via --approval-id and prove it
+    // flows through to the emitted MsgUpdateUserApprovals (the point of
+    // #0418 — without a pin the id is random and not replayable).
+    const PINNED_RENEWAL_ID = 'pinned-renewal-0427';
     const msg = runCli([
       'subscriptions', 'enable-renewal', collectionId,
       '--creator', subscriber.address,
       '--tier', approvalId,
+      '--approval-id', PINNED_RENEWAL_ID,
       '--local'
     ]);
     expect(msg.json.typeUrl).toBe('/tokenization.MsgUpdateUserApprovals');
     expect(msg.json.value.updateIncomingApprovals).toBe(true);
     expect(Array.isArray(msg.json.value.incomingApprovals)).toBe(true);
     expect(msg.json.value.incomingApprovals.length).toBeGreaterThan(0);
+    expect(
+      msg.json.value.incomingApprovals.some((a: any) => a.approvalId === PINNED_RENEWAL_ID)
+    ).toBe(true);
 
     const tmp = writeMsgToTmp(msg.json, 'sub-enable');
     const tx = await deployMsgViaKeyring(tmp, subscriber.name);

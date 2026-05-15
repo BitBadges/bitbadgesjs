@@ -105,6 +105,19 @@ describe('shared utilities', () => {
     expect(toBaseUnits(0.5, 6)).toBe('500000');
   });
 
+  test('toBaseUnits throws on invalid amounts instead of silently coercing', () => {
+    expect(() => toBaseUnits(-1, 6)).toThrow(/non-negative/i);
+    expect(() => toBaseUnits(Infinity, 6)).toThrow(/finite/i);
+    expect(() => toBaseUnits(NaN, 6)).toThrow(/finite/i);
+    // Numeric-string tolerance (the old implicit-coercion path) is preserved.
+    expect(toBaseUnits('10' as any, 6)).toBe('10000000');
+    // Non-numeric / undefined no longer silently become "NaN".
+    expect(() => toBaseUnits('abc' as any, 6)).toThrow(/finite/i);
+    expect(() => toBaseUnits(undefined as any, 6)).toThrow(/finite/i);
+    // Precision-losing magnitudes throw rather than emit a lossy integer.
+    expect(() => toBaseUnits(1e30, 18)).toThrow(/precision/i);
+  });
+
   test('parseDuration parses various formats', () => {
     expect(parseDuration('30d')).toBe('2592000000');
     expect(parseDuration('1h')).toBe('3600000');
@@ -336,6 +349,19 @@ describe('bounty builder', () => {
     expect(pid(val(buildBounty({ ...p, amount: 101 })).collectionApprovals, 'bounty-accept'))
       .not.toBe(pid(a, 'bounty-accept'));
   });
+  test('deterministic — whole msg byte-identical with the Date.now expiry window normalized out', () => {
+    // bounty's `transferTimes.end` is `durationToTimestamp` (Date.now-
+    // relative), so a bare toEqual would flake; everything else the
+    // builder controls must be byte-identical across calls.
+    const p = { amount: 100, denom: 'USDC', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', ...META };
+    const stripTimes = (v: any): any =>
+      Array.isArray(v)
+        ? v.map(stripTimes)
+        : v && typeof v === 'object'
+        ? Object.fromEntries(Object.entries(v).map(([k, val]) => [k, k === 'transferTimes' ? 'WINDOW' : stripTimes(val)]))
+        : v;
+    expect(stripTimes(buildBounty(p))).toEqual(stripTimes(buildBounty(p)));
+  });
   test('passes verification with zero violations (any standard)', () => {
     expectCleanVerification(msg);
   });
@@ -492,6 +518,29 @@ describe('product-catalog builder', () => {
   test('passes verification with zero violations', () => {
     expectCleanVerification(msg);
   });
+  test('maxSupply: present cap emits overallMaxNumTransfers; omitted = unlimited', () => {
+    const cap = val(buildProductCatalog({
+      products: [{ name: 'Capped', price: 1, denom: 'USDC', maxSupply: 50 }],
+      storeAddress: 'bb1store', ...META
+    })).collectionApprovals.find((a: any) => a.approvalId === 'product-purchase-1');
+    expect(cap.approvalCriteria.maxNumTransfers.overallMaxNumTransfers).toBe('50');
+
+    const unlimited = val(buildProductCatalog({
+      products: [{ name: 'Unl', price: 1, denom: 'USDC' }],
+      storeAddress: 'bb1store', ...META
+    })).collectionApprovals.find((a: any) => a.approvalId === 'product-purchase-1');
+    expect(unlimited.approvalCriteria.maxNumTransfers.overallMaxNumTransfers).toBe('0');
+  });
+  test('maxSupply: rejects negative / non-integer instead of silently going unlimited', () => {
+    expect(() => buildProductCatalog({
+      products: [{ name: 'Bad', price: 1, denom: 'USDC', maxSupply: -1 }],
+      storeAddress: 'bb1store', ...META
+    })).toThrow(/maxSupply/i);
+    expect(() => buildProductCatalog({
+      products: [{ name: 'Bad', price: 1, denom: 'USDC', maxSupply: 1.5 }],
+      storeAddress: 'bb1store', ...META
+    })).toThrow(/maxSupply/i);
+  });
 });
 
 describe('prediction-market builder', () => {
@@ -561,6 +610,10 @@ describe('custom-2fa builder', () => {
   test('throws without a manager address (no creator)', () => {
     expect(() => buildCustom2FA({ ...META2FA })).toThrow(/requires a manager address/);
   });
+  test('deterministic — identical params produce a byte-identical msg', () => {
+    const p = { ...META2FA, creator: 'bb1manager' };
+    expect(buildCustom2FA(p)).toEqual(buildCustom2FA(p));
+  });
   test('passes verification with zero violations', () => {
     expectCleanVerification(msg);
   });
@@ -627,6 +680,10 @@ describe('quests builder', () => {
     expect(mc[0].maxUsesPerLeaf).toBe('1');
     expect(mc[0].useCreatorAddressAsLeaf).toBe(false);
     expect(mc[0].challengeTrackerId).toBe('quests-approval');
+  });
+  test('deterministic — identical params produce a byte-identical msg', () => {
+    const p = { reward: 10, denom: 'BADGE', maxClaims: 100, ...META };
+    expect(buildQuests(p)).toEqual(buildQuests(p));
   });
   test('passes verification with zero violations', () => {
     expectCleanVerification(msg);
@@ -791,6 +848,35 @@ describe('bid builder (delegates to canonical)', () => {
     });
     expect(a).toEqual(canonical);
   });
+  test('collection-wide bid when token-ids omitted (parity with bb nfts bid)', () => {
+    const cw = buildBid({ address: 'bb1bidder', collectionId: '1', price: 25, denom: 'BADGE' }).value.approval;
+    const inc = cw.approvalCriteria.predeterminedBalances.incrementedBalances;
+    expect(inc.allowOverrideWithAnyValidToken).toBe(true);
+    expect(cw.approvalCriteria.autoDeletionOptions.afterOneUse).toBe(false);
+    const canonical = buildOrderbookBidApproval({
+      address: 'bb1bidder',
+      tokenId: undefined,
+      paymentAmount: BigInt(cw.approvalCriteria.coinTransfers[0].coins[0].amount),
+      paymentDenom: cw.approvalCriteria.coinTransfers[0].coins[0].denom,
+      tokenAmount: 1n,
+      transferTimes: cw.transferTimes,
+      approvalId: cw.approvalId,
+      maxNumTransfers: 1n
+    });
+    expect(cw).toEqual(canonical);
+  });
+  test('--token-amount flows into the canonical start balance', () => {
+    const a = buildBid({ address: 'bb1bidder', collectionId: '1', tokenIds: '3', tokenAmount: 5, price: 25, denom: 'BADGE' }).value.approval;
+    expect(a.approvalCriteria.predeterminedBalances.incrementedBalances.startBalances[0].amount).toBe(5n);
+  });
+  test('accepts ms-since-epoch expiration (parity with bb nfts bid; durationToTimestamp rejected it)', () => {
+    const a = buildBid({ address: 'bb1bidder', collectionId: '1', tokenIds: '3', price: 25, denom: 'BADGE', expiration: '1798765432000' }).value.approval;
+    expect(a.transferTimes).toEqual([{ start: 1n, end: 1798765432000n }]);
+  });
+  test('deterministic — byte-identical msg for identical params (fixed ms expiry)', () => {
+    const p = { address: 'bb1bidder', collectionId: '1', tokenIds: '3', price: 25, denom: 'BADGE', expiration: '1798765432000' };
+    expect(buildBid({ ...p })).toEqual(buildBid({ ...p }));
+  });
 });
 
 describe('pm-sell-intent builder (delegates to canonical)', () => {
@@ -856,6 +942,13 @@ describe('pm-buy-intent builder (delegates to canonical)', () => {
       transferTimes: a.transferTimes, approvalId: a.approvalId
     });
     expect(a).toEqual(canonical);
+  });
+  test('deterministic approval id for identical params', () => {
+    const p = { address: 'bb1buyer', collectionId: '42', token: 'no' as const, amount: 200, price: 30, denom: 'USDC' };
+    const a = buildPmBuyIntent({ ...p });
+    const b = buildPmBuyIntent({ ...p });
+    expect(a.value.approval.approvalId).toBe(b.value.approval.approvalId);
+    expect(buildPmBuyIntent({ ...p, price: 31 }).value.approval.approvalId).not.toBe(a.value.approval.approvalId);
   });
 });
 
@@ -929,6 +1022,12 @@ describe('error handling', () => {
     // silently coerced/dropped (the masking-bug class).
     expect(val(msg).mintEscrowCoinsToTransfer[0].amount).toBe('0');
     expectCleanVerification(msg);
+  });
+
+  test('amount-taking builders reject negative / non-finite amounts at the producer', () => {
+    expect(() => buildBounty({ amount: -5, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', ...META })).toThrow(/non-negative/i);
+    expect(() => buildCrowdfund({ goal: Infinity, denom: 'USDC', crowdfunder: 'bb1fund', ...META } as any)).toThrow(/finite/i);
+    expect(() => buildPaymentRequest({ amount: NaN, denom: 'USDC', payer: 'bb1p', recipient: 'bb1r', ...META } as any)).toThrow(/finite/i);
   });
 
   test('buildProductCatalog with empty products: burn-only, well-formed, verifier-clean', () => {

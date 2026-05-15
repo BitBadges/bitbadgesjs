@@ -29,6 +29,7 @@ import {
   emitIndexerError as emitError,
 } from '../utils/indexer-options.js';
 import { appendQuery } from '../utils/list-options.js';
+import { splitCsv } from '../utils/csv-options.js';
 
 const ANALYTICS_VERBS: ReadonlyArray<readonly [string, string, string]> = [
   ['top-gainers', '/assetPairs/topGainers', 'Top-gaining asset pairs in the last 24h.'],
@@ -95,7 +96,7 @@ export function registerPairs(parent: Command): void {
       .argument('<denoms...>', 'Denoms (repeated or comma-separated)')
   ).action(async (denoms: string[], opts: any) => {
     try {
-      const list = denoms.flatMap((v) => v.split(',')).map((v) => v.trim()).filter(Boolean);
+      const list = splitCsv(denoms);
       const res = await callApi('POST', '/assetPairs/byDenoms', opts, { denoms: list });
       emit(res, opts);
     } catch (err) {

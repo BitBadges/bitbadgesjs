@@ -5,7 +5,7 @@
  * malformed input, stderr normalization notice gating).
  */
 
-import { tryBb1Address, requireBb1Address, requireBb1AddressStrict } from './address.js';
+import { tryBb1Address, requireBb1Address, requireBb1AddressStrict, resolveRecipientList } from './address.js';
 
 // Zero-address pair — deterministic and stable across SDK versions.
 // 0x000...000 ↔ bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv.
@@ -135,5 +135,46 @@ describe('requireBb1AddressStrict', () => {
 
   it('does NOT silently convert when env var is unset', () => {
     expect(() => requireBb1AddressStrict(ZERO_ETH, '--creator')).toThrow('process.exit');
+  });
+});
+
+describe('resolveRecipientList', () => {
+  let exitSpy: jest.SpyInstance;
+  let stderrSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    exitSpy = jest.spyOn(process, 'exit').mockImplementation(((_code?: number) => {
+      throw new Error('process.exit');
+    }) as never);
+    stderrSpy = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+  });
+
+  afterEach(() => {
+    exitSpy.mockRestore();
+    stderrSpy.mockRestore();
+  });
+
+  it('splits a comma-joined string and strictly validates each element', () => {
+    expect(resolveRecipientList(`${ZERO_BB1}, ${ZERO_BB1}`, '--to')).toEqual([ZERO_BB1, ZERO_BB1]);
+  });
+
+  it('accepts the repeatable-argument (string[]) form', () => {
+    expect(resolveRecipientList([ZERO_BB1, `${ZERO_BB1},${ZERO_BB1}`], '--to')).toEqual([
+      ZERO_BB1, ZERO_BB1, ZERO_BB1
+    ]);
+  });
+
+  it('does not dedupe (downstream builders own that)', () => {
+    expect(resolveRecipientList(`${ZERO_BB1},${ZERO_BB1}`, '--to')).toHaveLength(2);
+  });
+
+  it('rejects a malformed element via requireBb1AddressStrict', () => {
+    expect(() => resolveRecipientList(`${ZERO_BB1},bb1garbage`, '--to')).toThrow('process.exit');
+    const stderrText = stderrSpy.mock.calls.map((c) => c[0]).join('');
+    expect(stderrText).toContain('invalid bb1 address');
+  });
+
+  it('rejects a non-bb1 (0x) element', () => {
+    expect(() => resolveRecipientList(ZERO_ETH, '--to')).toThrow('process.exit');
   });
 });

@@ -40,6 +40,25 @@ export interface ProductCatalogParams {
   image?: string;
 }
 
+/** A present maxSupply must be a non-negative integer; 0 or omitted = unlimited (documented). */
+function productMaxNumTransfers(maxSupply: number | undefined, approvalId: string) {
+  if (maxSupply !== undefined && (!Number.isInteger(maxSupply) || maxSupply < 0)) {
+    throw new Error(
+      `Invalid product maxSupply "${maxSupply}": must be a non-negative integer (0 or omitted = unlimited).`
+    );
+  }
+  return maxSupply
+    ? {
+        overallMaxNumTransfers: String(maxSupply),
+        perToAddressMaxNumTransfers: '0',
+        perFromAddressMaxNumTransfers: '0',
+        perInitiatedByAddressMaxNumTransfers: '0',
+        amountTrackerId: approvalId,
+        resetTimeIntervals: { startTime: '0', intervalLength: '0' }
+      }
+    : zeroMaxTransfers();
+}
+
 export function buildProductCatalog(params: ProductCatalogParams): any {
   const { products, storeAddress } = params;
 
@@ -81,16 +100,7 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
             overrideToWithInitiator: false
           }
         ],
-        maxNumTransfers: product.maxSupply
-          ? {
-              overallMaxNumTransfers: String(product.maxSupply),
-              perToAddressMaxNumTransfers: '0',
-              perFromAddressMaxNumTransfers: '0',
-              perInitiatedByAddressMaxNumTransfers: '0',
-              amountTrackerId: approvalId,
-              resetTimeIntervals: { startTime: '0', intervalLength: '0' }
-            }
-          : zeroMaxTransfers(),
+        maxNumTransfers: productMaxNumTransfers(product.maxSupply, approvalId),
         approvalAmounts: zeroAmounts(),
         overridesFromOutgoingApprovals: true,
         overridesToIncomingApprovals: true
