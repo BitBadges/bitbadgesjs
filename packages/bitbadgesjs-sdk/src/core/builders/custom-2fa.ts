@@ -23,15 +23,33 @@ export interface Custom2FAParams {
   description?: string;
   burnable?: boolean;
   transferable?: boolean; // allow post-mint P2P transfers of 2FA tokens
+  /**
+   * Manager address allowed to initiate mints. The CLI passes this
+   * through from --creator. Required: the FE-canonical preset
+   * (builder/presets/custom-2fa.ts) sets the mint approval's
+   * `initiatedByListId` to this address. Without it, anyone could mint a
+   * 2FA token to anyone, breaking the standard's security model.
+   */
+  creator?: string;
 }
 
 export function buildCustom2FA(params: Custom2FAParams): any {
+  const managerAddr = params.creator;
+  if (!managerAddr) {
+    throw new Error(
+      'Custom 2FA requires a manager address. Pass --creator <bb1...> (only the manager may mint 2FA tokens).'
+    );
+  }
+
   const collectionApprovals: any[] = [
     // 2FA Mint — 5-minute expiration via durationFromTimestamp
     {
       fromListId: 'Mint',
       toListId: 'All',
-      initiatedByListId: 'All',
+      // Only the manager may mint 2FA tokens — matches the FE-canonical
+      // preset (builder/presets/custom-2fa.ts). 'All' here let anyone
+      // issue a valid 2FA token to anyone, breaking the standard.
+      initiatedByListId: managerAddr,
       approvalId: 'custom-2fa-mint',
       ...approvalMetadata(
         'Issue 2FA token',

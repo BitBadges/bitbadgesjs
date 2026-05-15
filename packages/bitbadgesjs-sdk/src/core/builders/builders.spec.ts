@@ -488,17 +488,27 @@ describe('credit-token builder', () => {
 });
 
 describe('custom-2fa builder', () => {
-  const msg = buildCustom2FA({ name: 'My 2FA Token', description: 'A 2FA token for testing.', image: 'ipfs://test-image' });
+  const META2FA = { name: 'My 2FA Token', description: 'A 2FA token for testing.', image: 'ipfs://test-image' };
+  const msg = buildCustom2FA({ ...META2FA, creator: 'bb1manager' });
   const r = val(msg);
 
   test('has Custom-2FA standard', () => { expect(r.standards).toEqual(['Custom-2FA']); });
   test('allowPurgeIfExpired', () => { expect(r.collectionApprovals[0].approvalCriteria.autoDeletionOptions.allowPurgeIfExpired).toBe(true); });
   test('disablePoolCreation', () => { expect(r.invariants.disablePoolCreation).toBe(true); });
   test('burnable adds burn approval', () => {
-    expect(val(buildCustom2FA({ name: 'Test', description: 'A 2FA token for testing.', image: 'ipfs://test-image', burnable: true })).collectionApprovals.length).toBe(2);
+    expect(val(buildCustom2FA({ ...META2FA, creator: 'bb1manager', burnable: true })).collectionApprovals.length).toBe(2);
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Custom-2FA')).toEqual([]);
+
+  test('mint approval restricted to manager (not All)', () => {
+    const mint = r.collectionApprovals.find((a: any) => a.approvalId === 'custom-2fa-mint');
+    expect(mint.initiatedByListId).toBe('bb1manager');
+    expect(mint.initiatedByListId).not.toBe('All');
+  });
+  test('throws without a manager address (no creator)', () => {
+    expect(() => buildCustom2FA({ ...META2FA })).toThrow(/requires a manager address/);
+  });
+  test('passes verification with zero violations', () => {
+    expectCleanVerification(msg);
   });
 });
 
@@ -679,8 +689,8 @@ describe('all collection builders pass verifyStandardsCompliance with zero viola
     ['prediction-market', buildPredictionMarket({ verifier: 'bb1v', ...META })],
     ['credit-token', buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1r', ...META })],
     ['credit-token (custom)', buildCreditToken({ paymentDenom: 'BADGE', recipient: 'bb1r', symbol: 'CRED', tokensPerUnit: 50, ...META })],
-    ['custom-2fa', buildCustom2FA({ name: 'My 2FA', description: 'A 2FA token.', image: 'ipfs://test-image' })],
-    ['custom-2fa (burnable)', buildCustom2FA({ name: 'Burnable 2FA', burnable: true, description: 'A burnable 2FA token.', image: 'ipfs://test-image' })],
+    ['custom-2fa', buildCustom2FA({ name: 'My 2FA', description: 'A 2FA token.', image: 'ipfs://test-image', creator: 'bb1manager' })],
+    ['custom-2fa (burnable)', buildCustom2FA({ name: 'Burnable 2FA', burnable: true, description: 'A burnable 2FA token.', image: 'ipfs://test-image', creator: 'bb1manager' })],
     ['quests', buildQuests({ reward: 10, denom: 'BADGE', maxClaims: 100, ...META })],
     ['address-list', buildAddressList({ name: 'My List', description: 'A test list.', image: 'ipfs://test-image' })],
   ];

@@ -849,7 +849,7 @@ sharedOpts(
   if (opts.json) { emit(buildCustom2FA(readJsonInput(opts.json)), opts); return; }
   emit(buildCustom2FA({
     uri: opts.uri, name: opts.name, image: opts.image, description: opts.description,
-    burnable: !!opts.burnable, transferable: !!opts.transferable
+    burnable: !!opts.burnable, transferable: !!opts.transferable, creator: opts.creator
   }), opts);
 });
 
