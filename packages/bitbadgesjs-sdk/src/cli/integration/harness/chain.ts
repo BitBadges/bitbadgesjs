@@ -33,7 +33,9 @@ export interface DeployedTx {
  * --local` and execute the printed command synchronously. Returns the
  * tx hash + result extracted from the RPC.
  */
-const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
+/** Shared real-time sleep. Use sparingly — see pollBalance/poll helpers
+ *  which early-exit and are almost always preferable to a fixed sleep. */
+export const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 
 export async function deployMsgViaKeyring(
   msgFilePath: string,
@@ -225,6 +227,129 @@ export async function waitForIndexerCollection(collectionId: string, timeoutMs =
       `This usually means the indexer is lagging — check that it's running and processing blocks ` +
       `(curl ${env.indexerUrl}/api/v0/status), or bump timeoutMs if the chain is slow.`
   );
+}
+
+/**
+ * Read an account's on-chain bank balance for one denom (base units,
+ * bigint; 0n if absent). Queries the chain binary like fundPersona so
+ * it reflects committed state. This is the economic-outcome primitive:
+ * status strings / tx.code can't catch a payout that credited the wrong
+ * party or an escrow that never drained — a balance read can.
+ */
+export function getBankBalance(
+  address: string,
+  denom: string,
+  network: 'mainnet' | 'testnet' | 'local' = 'local'
+): bigint {
+  const env = loadIntegrationEnv();
+  const nodeUrl = network === 'local' ? 'http://localhost:26657' : env.rpcUrl;
+  try {
+    const out = execFileSync(
+      env.chainBin,
+      ['query', 'bank', 'balances', address, '--node', nodeUrl, '--output', 'json'],
+      { encoding: 'utf-8', timeout: 15000 }
+    ).toString();
+    const parsed = JSON.parse(out);
+    const row = (parsed.balances ?? []).find((b: any) => b.denom === denom);
+    return BigInt(row?.amount ?? '0');
+  } catch {
+    return 0n;
+  }
+}
+
+/**
+ * Poll an account's balance until `predicate(amount)` holds or timeout,
+ * then return the final amount. EARLY-EXIT — returns the instant the
+ * condition is met (don't replace with a fixed sleep). Use to assert a
+ * payout landed / escrow drained / refund received despite indexer or
+ * block lag. Throws with the last-seen value on timeout.
+ */
+export async function pollBalance(
+  address: string,
+  denom: string,
+  predicate: (amount: bigint) => boolean,
+  opts: { timeoutMs?: number; intervalMs?: number; network?: 'mainnet' | 'testnet' | 'local'; label?: string } = {}
+): Promise<bigint> {
+  const timeoutMs = opts.timeoutMs ?? 30000;
+  const intervalMs = opts.intervalMs ?? 1500;
+  const start = Date.now();
+  let last = 0n;
+  while (Date.now() - start < timeoutMs) {
+    last = getBankBalance(address, denom, opts.network ?? 'local');
+    if (predicate(last)) return last;
+    await sleep(intervalMs);
+  }
+  throw new Error(
+    `pollBalance timed out after ${timeoutMs}ms for ${opts.label ?? `${address} ${denom}`}: ` +
+      `last seen ${last} (predicate never satisfied)`
+  );
+}
+
+/**
+ * Read how many of `tokenId` (default 1) `address` holds in a collection,
+ * via the indexer balance doc (base units, bigint; 0n if none/absent).
+ * The token-holding analogue of getBankBalance — for membership tokens,
+ * quest-token receipt, custom-2fa holdings (no coin denom involved).
+ */
+export function getCollectionTokenAmount(
+  collectionId: string,
+  address: string,
+  tokenId = 1
+): bigint {
+  const env = loadIntegrationEnv();
+  try {
+    const out = execFileSync(
+      'curl',
+      ['-sS', `${env.indexerUrl}/api/v0/collection/${collectionId}/balance/${address}`],
+      { encoding: 'utf-8', timeout: 5000 }
+    ).toString();
+    const doc = JSON.parse(out);
+    const balances: any[] = (doc?.balance?.balances ?? doc?.balances ?? []) as any[];
+    let total = 0n;
+    for (const b of balances) {
+      const inRange = (b.tokenIds ?? []).some(
+        (r: any) => BigInt(r.start) <= BigInt(tokenId) && BigInt(tokenId) <= BigInt(r.end)
+      );
+      if (inRange) total += BigInt(b.amount ?? '0');
+    }
+    return total;
+  } catch {
+    return 0n;
+  }
+}
+
+/** Early-exit poll of getCollectionTokenAmount (indexer lag tolerant). */
+export async function pollTokenAmount(
+  collectionId: string,
+  address: string,
+  predicate: (amount: bigint) => boolean,
+  opts: { tokenId?: number; timeoutMs?: number; intervalMs?: number; label?: string } = {}
+): Promise<bigint> {
+  const timeoutMs = opts.timeoutMs ?? 30000;
+  const intervalMs = opts.intervalMs ?? 1500;
+  const start = Date.now();
+  let last = 0n;
+  while (Date.now() - start < timeoutMs) {
+    last = getCollectionTokenAmount(collectionId, address, opts.tokenId ?? 1);
+    if (predicate(last)) return last;
+    await sleep(intervalMs);
+  }
+  throw new Error(
+    `pollTokenAmount timed out after ${timeoutMs}ms for ${opts.label ?? `${address}@${collectionId}#${opts.tokenId ?? 1}`}: last seen ${last}`
+  );
+}
+
+/** Fund several personas from one rich signer (sequential — fundPersona
+ *  already retries on sequence mismatch). Convenience for multi-party
+ *  cluster setup (alice → bob/dave/charlie funding in one call). */
+export async function fundMany(
+  fromName: string,
+  items: Array<{ toAddress: string; amount: string; denom: string }>,
+  options: { network?: 'mainnet' | 'testnet' | 'local'; fees?: string } = {}
+): Promise<void> {
+  for (const it of items) {
+    await fundPersona(fromName, it.toAddress, it.amount, it.denom, options);
+  }
 }
 
 /**

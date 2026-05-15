@@ -50,6 +50,10 @@ export function allPersonas(): Persona[] {
 export const alice = (): Persona => persona('alice');
 export const charlie = (): Persona => persona('charlie');
 export const burn = (): Persona => persona('burn');
+/** Multi-party roles (added to the devnet keyring for ≥3-party flows:
+ *  outbid, multi-contributor, manager-only rejection, PM winner-vs-loser). */
+export const bob = (): Persona => persona('bob');
+export const dave = (): Persona => persona('dave');
 
 /** A persona that exists OR a fallback. Useful for optional roles like bob. */
 export function personaOr(name: string, fallback: Persona): Persona {
