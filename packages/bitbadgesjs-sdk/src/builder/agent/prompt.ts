@@ -293,7 +293,7 @@ Call \`flag_review_item\` WHENEVER you are not fully confident in a decision. Yo
 
 Call \`flag_review_item\` INLINE at the moment of the decision, not at the end.
 
-**Subscription / recurring-payment specific flags to ALWAYS consider:**
+**Subscription-specific flags to ALWAYS consider:**
 - If the user didn't specify who receives payment → flag: "Payments go to you (the creator). Alternative: a separate treasury address."
 - If the user said "per month" without a day-count → flag: "Treated 'month' as 30 days. Alternative: 28 or 31 days."
 - If the user didn't specify who can buy → flag: "Anyone can subscribe. Alternative: restrict to a whitelist."

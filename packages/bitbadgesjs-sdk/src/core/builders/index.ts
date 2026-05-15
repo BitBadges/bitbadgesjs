@@ -32,7 +32,6 @@ export { buildAddressList, type AddressListParams } from './address-list.js';
 // ── Approval builders (user-level) ──────────────────────────────────────────
 
 export { buildIntent, type IntentParams } from './intent.js';
-export { buildRecurringPayment, type RecurringPaymentParams } from './recurring-payment.js';
 export { buildListing, type ListingParams } from './listing.js';
 export { buildBid, type BidParams } from './bid.js';
 export { buildPmSellIntent, type PmSellIntentParams } from './pm-sell-intent.js';

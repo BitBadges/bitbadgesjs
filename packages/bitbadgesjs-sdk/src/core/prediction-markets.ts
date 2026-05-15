@@ -790,11 +790,28 @@ export function isPredictionMarketValid(collection: any): boolean {
 
 import { UintRangeArray } from './uintRanges.js';
 
-export type PredictionMarketStatus = 'active' | 'closed' | 'resolved-yes' | 'resolved-no' | 'resolved-push';
+export type PredictionMarketStatus =
+  | 'active'
+  | 'closed'
+  | 'resolved-yes'
+  | 'resolved-no'
+  | 'resolved-push'
+  | 'unknown';
 
-/** Conservative status fallback when the indexer hasn't enriched standardsInfo yet. */
+/**
+ * Conservative status fallback when the indexer hasn't enriched
+ * standardsInfo yet.
+ *
+ * Pre-deadline the market is genuinely `active` (trading open) — safe to
+ * assert. Past-deadline it could be `closed` OR `resolved-yes/no/push`;
+ * the fallback CANNOT tell which without the indexer, so it returns
+ * `unknown` rather than the misleading `closed`. Returning `closed` here
+ * let `bb prediction-markets status` show a resolved market as closed,
+ * which a user could act on with `redeem --state ...` against the wrong
+ * actual outcome.
+ */
 export function derivePredictionMarketStatusFallback(deadlineMs: bigint): PredictionMarketStatus {
-  if (deadlineMs > 0n && BigInt(Date.now()) > deadlineMs) return 'closed';
+  if (deadlineMs > 0n && BigInt(Date.now()) > deadlineMs) return 'unknown';
   return 'active';
 }
 

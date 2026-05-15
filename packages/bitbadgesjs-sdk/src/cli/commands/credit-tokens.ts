@@ -21,10 +21,12 @@ import {
   type IndexerOutputFlags as OutputFlags,
 } from '../utils/indexer-options.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
+import { resolveNetwork } from '../utils/io.js';
 import {
   doesCollectionFollowCreditTokenProtocol,
   extractCreditTokenTiers,
-  buildPurchaseCreditTokenMsg
+  buildPurchaseCreditTokenMsg,
+  bitbadgesApiCreditsCollectionId
 } from '../../core/credit-tokens.js';
 
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
@@ -105,21 +107,51 @@ addOutputFlags(
   addNetworkFlags(
     creditTokensCommand
       .command('purchase')
-      .description('Emit MsgTransferTokens that buys N units of credit tokens. Pipe to `bb deploy`.')
-      .argument('<collection-id>', 'Credit Token collection ID')
-      .requiredOption('--creator <address>', 'Buyer address (bb1.../0x — auto-normalized)')
+      .description(
+        'Buy N units from ANY Credit Token collection by paying the payment denom. The standard is ' +
+        'generic — anyone can deploy one; pass its <collection-id>. As a convenience, --api-credits ' +
+        "targets BitBadges' OWN API-credits collection (one real example). Emits MsgTransferTokens to " +
+        'pipe to `bb deploy`, or use --deploy-with-browser for a one-shot. Credits are ' +
+        'NON-TRANSFERABLE: sign with the wallet that should hold them — there is no burner path.'
+      )
+      .argument('[collection-id]', 'Credit Token collection ID. Omit and pass --api-credits to use BitBadges’ own API-credits collection.')
+      .requiredOption('--creator <address>', 'Buyer address — the wallet that will HOLD the (non-transferable) credits (bb1.../0x)')
       .requiredOption('--units <n>', 'Number of units to purchase (integer)')
       .option(
         '--tier <approvalId>',
         'Tier approval id (default: the credit-scaled tier; required if only legacy per-tier approvals exist)'
       )
+      .option('--api-credits', "Shortcut for BitBadges’ OWN API-credits collection on this network (mainnet/local; not on testnet). Mutually exclusive with <collection-id>. Any Credit Token collection works via the positional arg — this is just BitBadges’ real instance.")
+      .option('--deploy-with-browser', 'After building, hand off to the BitBadges /sign page for wallet signature + broadcast. Sign with the --creator wallet (credits are non-transferable).')
+      .option('--sign-only', 'With --deploy-with-browser: have the wallet sign but not broadcast — returns the signed tx bytes.')
+      .option('--frontend-url <url>', 'With --deploy-with-browser: override the frontend base URL.')
+      .option('--no-open', 'With --deploy-with-browser: print the sign URL instead of auto-launching the browser.')
+      .option('--timeout <seconds>', 'With --deploy-with-browser: how long to wait for the wallet to confirm (default 300, max 1800).')
   )
 ).action(
   async (
-    collectionId: string,
-    opts: NetworkFlags & OutputFlags & { creator: string; units: string; tier?: string }
+    collectionIdArg: string | undefined,
+    opts: NetworkFlags & OutputFlags & {
+      creator: string; units: string; tier?: string; apiCredits?: boolean;
+      deployWithBrowser?: boolean; signOnly?: boolean; frontendUrl?: string; open?: boolean; timeout?: string;
+    }
   ) => {
     try {
+      // Resolve which collection: the generic positional, or the
+      // --api-credits shortcut for BitBadges' own instance. Exactly one.
+      if (opts.apiCredits && collectionIdArg) {
+        process.stderr.write('Error: pass either <collection-id> or --api-credits, not both.\n');
+        process.exit(2);
+      }
+      if (!opts.apiCredits && !collectionIdArg) {
+        process.stderr.write(
+          'Error: pass a <collection-id> (any Credit Token collection), or --api-credits for BitBadges’ own API-credits collection.\n'
+        );
+        process.exit(2);
+      }
+      const collectionId = opts.apiCredits
+        ? bitbadgesApiCreditsCollectionId(resolveNetwork(opts as any))
+        : (collectionIdArg as string);
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'credit-tokens purchase');
@@ -142,15 +174,87 @@ addOutputFlags(
         process.exit(2);
       }
       const units = BigInt(opts.units);
-      emit(buildPurchaseCreditTokenMsg(creator, String(collectionId), tier, units), opts);
+      // Legacy (per-tier, non-scaled) approvals can't carry a multiplier
+      // — buildPurchaseCreditTokenMsg emits exactly one unit and the CLI
+      // emits one msg per invocation. Silently honoring `--units 5` here
+      // would emit a single purchase while the user thinks they bought 5.
+      // Reject instead and point at a scaled tier.
+      if (!tier.isScaled && units > 1n) {
+        const scaled = tiers.find((t) => t.isScaled);
+        process.stderr.write(
+          `Error: tier "${tier.approvalId}" is a legacy per-tier approval and can't buy ${units} units in one msg. ` +
+          (scaled
+            ? `Use --tier ${scaled.approvalId} (scaled) for multi-unit purchases, or run --units 1 ${units} times.\n`
+            : `This collection has no scaled tier; run the command with --units 1, ${units} times.\n`)
+        );
+        process.exit(2);
+      }
+      const purchaseMsg = buildPurchaseCreditTokenMsg(creator, String(collectionId), tier, units);
+
+      // One-shot browser-sign path. Credits are non-transferable, so the
+      // signer MUST be the wallet that should hold them — we pin
+      // expectedAddress to --creator and deliberately offer NO burner
+      // path (a throwaway signer would mint credits it can never move
+      // out, permanently stranding the payment). Mirrors the
+      // build.ts --deploy-with-browser bridge flow.
+      if (opts.deployWithBrowser) {
+        const { getApiUrl, getApiKeyForNetwork, resolveNetwork } = await import('../utils/io.js');
+        const { bridgeSign, resolveFrontendUrl } = await import('../auth/browser-bridge.js');
+        const networkName = resolveNetwork(opts as any);
+        const frontendUrl = resolveFrontendUrl(networkName, opts.frontendUrl);
+        const timeoutSec = opts.timeout ? Math.min(1800, Math.max(60, Number(opts.timeout))) : 300;
+        process.stderr.write(
+          `\nOpening ${frontendUrl}/sign — sign with ${creator} (credits are non-transferable; ` +
+          `they land in whatever wallet signs)...\n`
+        );
+        try {
+          const result = await bridgeSign({
+            mode: 'tx',
+            payload: {
+              chain: 'cosmos',
+              txsInfo: [{ type: purchaseMsg.typeUrl, msg: purchaseMsg.value }],
+              expectedAddress: creator,
+              signOnly: !!opts.signOnly,
+            },
+            baseUrl: getApiUrl(opts as any),
+            frontendUrl,
+            apiKey: getApiKeyForNetwork(opts as any),
+            timeoutMs: timeoutSec * 1000,
+            noOpen: opts.open === false,
+          });
+          if (result.error) {
+            process.stderr.write(`Browser broadcast cancelled or rejected: ${result.error}\n`);
+            process.exit(1);
+          }
+          const payload: any = opts.signOnly
+            ? { success: !!result.signedTx, path: 'browser', mode: 'sign-only', signedTx: result.signedTx ?? null, chain: result.chain ?? 'cosmos' }
+            : { success: !!result.hash, path: 'browser', mode: 'sign-and-broadcast', txHash: result.hash ?? null, chain: result.chain ?? 'cosmos' };
+          process.stdout.write('\n' + JSON.stringify(payload, null, 2) + '\n');
+          if (!payload.success) process.exit(1);
+          return;
+        } catch (err: any) {
+          process.stderr.write(`Browser broadcast failed: ${err?.message || err}\n`);
+          process.exit(1);
+        }
+      }
+
+      emit(purchaseMsg, opts);
     } catch (err) {
       emitError(err);
     }
   }
 ).addHelpText('after', `
 Examples:
-  $ bb credit-tokens purchase 23 --creator bb1buyer...xyz --units 10 | bb deploy
-  $ bb credit-tokens purchase 23 --creator bb1buyer...xyz --units 10 --tier premium-tier | bb deploy
+  # Any Credit Token collection (the standard is generic — anyone can deploy one):
+  $ bb credit-tokens purchase 42 --creator bb1buyer...xyz --units 10 | bb deploy
+  $ bb credit-tokens purchase 42 --creator bb1buyer...xyz --units 10 --tier premium-tier | bb deploy
+  # BitBadges' own API-credits collection (one real example), id resolved per network:
+  $ bb credit-tokens purchase --api-credits --creator bb1buyer...xyz --units 10 --deploy-with-browser
+
+Credits are NON-TRANSFERABLE: whatever wallet signs is where they live.
+With --deploy-with-browser, sign with the --creator wallet. There is
+intentionally no burner deploy path. The --api-credits shortcut is just
+a convenience for BitBadges' own API — it is NOT the only credit token.
 `);
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).

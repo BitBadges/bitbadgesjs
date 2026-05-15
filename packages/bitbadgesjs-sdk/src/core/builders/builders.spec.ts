@@ -20,12 +20,11 @@ import { buildCustom2FA } from './custom-2fa.js';
 import { buildQuests } from './quests.js';
 import { buildAddressList } from './address-list.js';
 import { buildIntent } from './intent.js';
-import { buildRecurringPayment } from './recurring-payment.js';
 import { buildListing } from './listing.js';
 import { buildBid } from './bid.js';
 import { buildPmSellIntent } from './pm-sell-intent.js';
 import { buildPmBuyIntent } from './pm-buy-intent.js';
-import { resolveCoin, parseDuration, toBaseUnits } from './shared.js';
+import { resolveCoin, parseDuration, toBaseUnits, sanitizeCosmosPathName } from './shared.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -109,6 +108,16 @@ describe('shared utilities', () => {
   test('parseDuration throws for invalid input', () => {
     expect(() => parseDuration('invalid')).toThrow('Invalid duration');
   });
+
+  test('sanitizeCosmosPathName passes clean input through', () => {
+    expect(sanitizeCosmosPathName('vUSDC', 'symbol')).toBe('vUSDC');
+    expect(sanitizeCosmosPathName('CREDIT', 'symbol')).toBe('CREDIT');
+  });
+  test('sanitizeCosmosPathName throws on disallowed chars (no silent strip)', () => {
+    expect(() => sanitizeCosmosPathName('vUSDC1', 'symbol')).toThrow(/contains characters the chain rejects/);
+    expect(() => sanitizeCosmosPathName('vUSDC1', 'symbol')).toThrow(/vUSDC/); // suggests the cleaned form
+    expect(() => sanitizeCosmosPathName('123', 'symbol')).toThrow(/no valid characters/);
+  });
 });
 
 // ── Collection builder tests ─────────────────────────────────────────────────
@@ -189,6 +198,13 @@ describe('vault builder', () => {
     expect(a.approvalId.startsWith('vault-withdraw-')).toBe(true);
   });
 
+  test('withdraw approval is locked — canUpdateCollectionApprovals frozen', () => {
+    // Was baselinePermissions() (mutable): the manager could revoke the
+    // withdraw approval post-deposit and trap funds. Must match the FE
+    // vaultHelpers.buildVaultPermissions() fully-frozen shape.
+    expect(r.collectionPermissions.canUpdateCollectionApprovals.length).toBeGreaterThan(0);
+    expect(r.collectionPermissions.canUpdateManager.length).toBeGreaterThan(0);
+  });
   test('passes verification with zero violations', () => {
     expectCleanVerification(msg);
   });
@@ -341,19 +357,46 @@ describe('payment-request builder', () => {
 });
 
 describe('crowdfund builder', () => {
-  const msg = buildCrowdfund({ goal: 1000, denom: 'USDC', ...META });
+  const params = { goal: 1000, denom: 'USDC', crowdfunder: 'bb1fund', ...META };
+  const msg = buildCrowdfund(params);
   const r = val(msg);
 
   test('has Crowdfund standard', () => { expect(r.standards).toEqual(['Crowdfund']); });
   test('2 token IDs', () => { expect(r.validTokenIds).toEqual([{ start: '1', end: '2' }]); });
   test('at least 4 approvals', () => { expect(r.collectionApprovals.length).toBeGreaterThanOrEqual(4); });
   test('crowdfunder address used', () => {
-    const cf = val(buildCrowdfund({ goal: 1000, denom: 'USDC', crowdfunder: 'bb1fund', ...META }));
-    const progress = cf.collectionApprovals.find((a: any) => a.approvalId === 'deposit-progress');
+    const progress = r.collectionApprovals.find((a: any) => a.approvalId === 'deposit-progress');
     expect(progress.toListId).toBe('bb1fund');
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Crowdfund')).toEqual([]);
+
+  test('throws without a payout address (no crowdfunder/creator)', () => {
+    expect(() => buildCrowdfund({ goal: 1000, denom: 'USDC', ...META })).toThrow(
+      /requires a payout address/
+    );
+  });
+  test('falls back to creator when crowdfunder omitted', () => {
+    const viaCreator = val(buildCrowdfund({ goal: 1000, denom: 'USDC', creator: 'bb1creator', ...META }));
+    const progress = viaCreator.collectionApprovals.find((a: any) => a.approvalId === 'deposit-progress');
+    expect(progress.toListId).toBe('bb1creator');
+  });
+  test('success + refund gate on the crowdfunder via ownershipCheckParty', () => {
+    for (const idName of ['success', 'refund']) {
+      const a = r.collectionApprovals.find((x: any) => x.approvalId === idName);
+      expect(a.approvalCriteria.mustOwnTokens[0].ownershipCheckParty).toBe('bb1fund');
+    }
+  });
+  test('deterministic — stable ids + payout gate across calls', () => {
+    // deadlineTs is Date.now()-relative (pre-existing), so compare the
+    // parts the builder controls deterministically.
+    const a = val(buildCrowdfund(params));
+    const b = val(buildCrowdfund(params));
+    expect(a.collectionApprovals.map((x: any) => x.approvalId))
+      .toEqual(b.collectionApprovals.map((x: any) => x.approvalId));
+    expect(a.collectionApprovals.find((x: any) => x.approvalId === 'refund').approvalCriteria.mustOwnTokens[0].ownershipCheckParty)
+      .toBe(b.collectionApprovals.find((x: any) => x.approvalId === 'refund').approvalCriteria.mustOwnTokens[0].ownershipCheckParty);
+  });
+  test('passes verification with zero violations', () => {
+    expectCleanVerification(msg);
   });
 });
 
@@ -461,17 +504,27 @@ describe('credit-token builder', () => {
 });
 
 describe('custom-2fa builder', () => {
-  const msg = buildCustom2FA({ name: 'My 2FA Token', description: 'A 2FA token for testing.', image: 'ipfs://test-image' });
+  const META2FA = { name: 'My 2FA Token', description: 'A 2FA token for testing.', image: 'ipfs://test-image' };
+  const msg = buildCustom2FA({ ...META2FA, creator: 'bb1manager' });
   const r = val(msg);
 
   test('has Custom-2FA standard', () => { expect(r.standards).toEqual(['Custom-2FA']); });
   test('allowPurgeIfExpired', () => { expect(r.collectionApprovals[0].approvalCriteria.autoDeletionOptions.allowPurgeIfExpired).toBe(true); });
   test('disablePoolCreation', () => { expect(r.invariants.disablePoolCreation).toBe(true); });
   test('burnable adds burn approval', () => {
-    expect(val(buildCustom2FA({ name: 'Test', description: 'A 2FA token for testing.', image: 'ipfs://test-image', burnable: true })).collectionApprovals.length).toBe(2);
+    expect(val(buildCustom2FA({ ...META2FA, creator: 'bb1manager', burnable: true })).collectionApprovals.length).toBe(2);
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Custom-2FA')).toEqual([]);
+
+  test('mint approval restricted to manager (not All)', () => {
+    const mint = r.collectionApprovals.find((a: any) => a.approvalId === 'custom-2fa-mint');
+    expect(mint.initiatedByListId).toBe('bb1manager');
+    expect(mint.initiatedByListId).not.toBe('All');
+  });
+  test('throws without a manager address (no creator)', () => {
+    expect(() => buildCustom2FA({ ...META2FA })).toThrow(/requires a manager address/);
+  });
+  test('passes verification with zero violations', () => {
+    expectCleanVerification(msg);
   });
 });
 
@@ -486,8 +539,20 @@ describe('quests builder', () => {
     expect(q.approvalCriteria.coinTransfers[0].overrideFromWithApproverAddress).toBe(true);
     expect(q.approvalCriteria.coinTransfers[0].overrideToWithInitiator).toBe(true);
   });
-  test('passes verification', () => {
-    expect(verifyBuilder(msg).violations.filter((vi: any) => vi.standard === 'Quest')).toEqual([]);
+  test('emits exactly one classifiable merkleChallenge', () => {
+    // `merkleChallenges: []` made the approval unrecognizable as a quest
+    // (isQuestApproval requires exactly one challenge, maxUsesPerLeaf 1,
+    // useCreatorAddressAsLeaf false). Open challenge (empty root) keeps
+    // the streamlined "anyone can claim, capped by maxClaims" behavior.
+    const q = r.collectionApprovals.find((a: any) => a.approvalId === 'quests-approval');
+    const mc = q.approvalCriteria.merkleChallenges;
+    expect(mc.length).toBe(1);
+    expect(mc[0].maxUsesPerLeaf).toBe('1');
+    expect(mc[0].useCreatorAddressAsLeaf).toBe(false);
+    expect(mc[0].challengeTrackerId).toBe('quests-approval');
+  });
+  test('passes verification with zero violations', () => {
+    expectCleanVerification(msg);
   });
 });
 
@@ -528,22 +593,28 @@ describe('intent builder', () => {
   });
   test('auto-deletes', () => { expect(msg.value.outgoingApprovals[0].approvalCriteria.autoDeletionOptions.afterOneUse).toBe(true); });
   test('collectionId in meta', () => { expect(msg._meta.collectionId).toBe('99'); });
+
+  test('no requireToEqualsInitiatedBy — must stay fillable', () => {
+    // `true` here made the approval structurally unfillable; the
+    // canonical core/intents.ts path omits it.
+    expect(msg.value.outgoingApprovals[0].approvalCriteria.requireToEqualsInitiatedBy).toBeUndefined();
+  });
+  test('throws on same pay/receive denom', () => {
+    expect(() => buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'BADGE', payAmount: 10, receiveDenom: 'BADGE', receiveAmount: 5 }))
+      .toThrow(/denoms must differ/);
+    // resolved-denom comparison also catches case variants
+    expect(() => buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'USDC', payAmount: 10, receiveDenom: 'usdc', receiveAmount: 5 }))
+      .toThrow(/denoms must differ/);
+  });
+  test('passes verification with zero violations', () => {
+    expectCleanVerification(msg);
+  });
 });
 
-describe('recurring-payment builder', () => {
-  const msg = buildRecurringPayment({ collectionId: '42', amount: 10, denom: 'USDC', interval: 'monthly', recipient: 'bb1recipient' });
-
-  test('incoming approval', () => { expect(msg.value.updateIncomingApprovals).toBe(true); });
-  test('recurring times', () => {
-    const ib = msg.value.incomingApprovals[0].approvalCriteria.predeterminedBalances.incrementedBalances;
-    expect(ib.durationFromTimestamp).toBe('2592000000');
-    expect(ib.allowOverrideTimestamp).toBe(true);
-  });
-  test('coin transfer to recipient', () => {
-    expect(msg.value.incomingApprovals[0].approvalCriteria.coinTransfers[0].to).toBe('bb1recipient');
-  });
-  test('collectionId in meta', () => { expect(msg._meta.collectionId).toBe('42'); });
-});
+// `recurring-payment builder` block removed — buildRecurringPayment was
+// an orphan that emitted a shape `isUserRecurringApproval` rejects. The
+// canonical subscriber-side recurring approval is `userRecurringApproval`
+// in core/subscriptions.ts (covered by subscriptions tests).
 
 describe('listing builder', () => {
   const msg = buildListing({ address: 'bb1seller', collectionId: '1', tokenIds: '1-5', price: 50, denom: 'USDC' });
@@ -627,7 +698,7 @@ describe('all collection builders pass verifyStandardsCompliance with zero viola
     ['subscription (multi-payout)', buildSubscription({ interval: 'monthly', payouts: [{ recipient: 'bb1a', amount: 5, denom: 'USDC' }, { recipient: 'bb1b', amount: 3, denom: 'USDC' }], ...META })],
     ['bounty', buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', ...META })],
     ['bounty (BADGE)', buildBounty({ amount: 50, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', expiration: '7d', ...META })],
-    ['crowdfund', buildCrowdfund({ goal: 1000, denom: 'USDC', ...META })],
+    ['crowdfund', buildCrowdfund({ goal: 1000, denom: 'USDC', crowdfunder: 'bb1fund', ...META })],
     ['crowdfund (with crowdfunder)', buildCrowdfund({ goal: 500, denom: 'BADGE', crowdfunder: 'bb1fund', deadline: '14d', ...META })],
     ['auction', buildAuction({ ...META })],
     ['auction (custom times)', buildAuction({ bidDeadline: '3d', acceptWindow: '1d', ...META })],
@@ -636,8 +707,8 @@ describe('all collection builders pass verifyStandardsCompliance with zero viola
     ['prediction-market', buildPredictionMarket({ verifier: 'bb1v', ...META })],
     ['credit-token', buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1r', ...META })],
     ['credit-token (custom)', buildCreditToken({ paymentDenom: 'BADGE', recipient: 'bb1r', symbol: 'CRED', tokensPerUnit: 50, ...META })],
-    ['custom-2fa', buildCustom2FA({ name: 'My 2FA', description: 'A 2FA token.', image: 'ipfs://test-image' })],
-    ['custom-2fa (burnable)', buildCustom2FA({ name: 'Burnable 2FA', burnable: true, description: 'A burnable 2FA token.', image: 'ipfs://test-image' })],
+    ['custom-2fa', buildCustom2FA({ name: 'My 2FA', description: 'A 2FA token.', image: 'ipfs://test-image', creator: 'bb1manager' })],
+    ['custom-2fa (burnable)', buildCustom2FA({ name: 'Burnable 2FA', burnable: true, description: 'A burnable 2FA token.', image: 'ipfs://test-image', creator: 'bb1manager' })],
     ['quests', buildQuests({ reward: 10, denom: 'BADGE', maxClaims: 100, ...META })],
     ['address-list', buildAddressList({ name: 'My List', description: 'A test list.', image: 'ipfs://test-image' })],
   ];
@@ -683,7 +754,7 @@ describe('error handling', () => {
   });
 
   test('buildCrowdfund goal of 1 base unit works', () => {
-    const msg = buildCrowdfund({ goal: 0.000001, denom: 'USDC', ...META });
+    const msg = buildCrowdfund({ goal: 0.000001, denom: 'USDC', crowdfunder: 'bb1fund', ...META });
     expect(msg.value.collectionApprovals.length).toBeGreaterThanOrEqual(4);
   });
 
@@ -692,9 +763,9 @@ describe('error handling', () => {
     expect(msg.typeUrl).toBe('/tokenization.MsgUniversalUpdateCollection');
   });
 
-  test('buildIntent with same pay/receive denom works', () => {
-    const msg = buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'BADGE', payAmount: 10, receiveDenom: 'BADGE', receiveAmount: 5 });
-    expect(msg.typeUrl).toBe('/tokenization.MsgUpdateUserApprovals');
+  test('buildIntent rejects same pay/receive denom (no-op approval)', () => {
+    expect(() => buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'BADGE', payAmount: 10, receiveDenom: 'BADGE', receiveAmount: 5 }))
+      .toThrow(/denoms must differ/);
   });
 
   test('buildListing parses single token ID', () => {

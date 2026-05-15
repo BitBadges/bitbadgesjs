@@ -1,8 +1,22 @@
 import {
   doesCollectionFollowCreditTokenProtocol,
   extractCreditTokenTiers,
-  buildPurchaseCreditTokenMsg
+  buildPurchaseCreditTokenMsg,
+  bitbadgesApiCreditsCollectionId,
+  BITBADGES_API_CREDITS_COLLECTION_IDS
 } from './credit-tokens.js';
+
+describe('bitbadgesApiCreditsCollectionId (BitBadges-own convenience id)', () => {
+  test('resolves mainnet + local; mirrors FE constants', () => {
+    expect(bitbadgesApiCreditsCollectionId('mainnet')).toBe('84');
+    expect(bitbadgesApiCreditsCollectionId('local')).toBe('23');
+    expect(BITBADGES_API_CREDITS_COLLECTION_IDS.mainnet).toBe('84');
+  });
+  test('testnet is not deployed — throws a clear error', () => {
+    expect(BITBADGES_API_CREDITS_COLLECTION_IDS.testnet).toBeNull();
+    expect(() => bitbadgesApiCreditsCollectionId('testnet')).toThrow(/not deployed on testnet/);
+  });
+});
 
 const SELLER = 'bb1seller';
 const BUYER = 'bb1buyer';
