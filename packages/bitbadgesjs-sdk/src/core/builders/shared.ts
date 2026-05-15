@@ -107,6 +107,20 @@ export function uniqueId(prefix?: string): string {
   return prefix ? `${prefix}-${rand}` : rand;
 }
 
+/**
+ * Deterministic id derived from a seed: identical seeds always yield the
+ * identical id. Use this — never `Math.random()` or `uniqueId()` — for
+ * any approval/tracker id, so two builder calls with the same params
+ * produce byte-identical, diff-able, replayable on-chain artifacts.
+ * Distinct seeds yield distinct ids, so multiple instances targeting the
+ * same collection don't collide.
+ */
+export function stableHashId(prefix: string, seed: string | object): string {
+  const data = typeof seed === 'string' ? seed : JSON.stringify(seed);
+  const hash = crypto.createHash('sha256').update(data).digest('hex').slice(0, 16);
+  return `${prefix}-${hash}`;
+}
+
 // ── Common builder helpers ───────────────────────────────────────────────────
 
 /**

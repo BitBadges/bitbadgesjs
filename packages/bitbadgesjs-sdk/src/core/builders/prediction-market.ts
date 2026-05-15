@@ -14,7 +14,8 @@ import {
   tokenMetadataEntry,
   metadataFromFlat,
   MetadataMissingError,
-  approvalMetadata
+  approvalMetadata,
+  stableHashId
 } from './shared.js';
 
 export interface PredictionMarketParams {
@@ -33,18 +34,30 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
   const yesTokenIds = [{ start: '1', end: '1' }];
   const noTokenIds = [{ start: '2', end: '2' }];
 
-  const randomId = () => Math.random().toString(16).slice(2, 18);
-  const mintId = randomId();
-  const transferId = randomId();
-  const redeemId = randomId();
-  const settleYesId = randomId();
-  const settleNoId = randomId();
-  const settlePushYesId = randomId();
-  const settlePushNoId = randomId();
+  // Deterministic, replayable ids derived from the market's params. The
+  // `pm-<role>-` prefix shape matches the frontend PredictionMarketRegistry
+  // and the review-ux known-prefix list; only the suffix changed (was
+  // Math.random). Each role keeps a distinct prefix so the seven ids stay
+  // distinct within the collection.
+  const pmSeed = {
+    verifier: params.verifier,
+    denom: coin.denom,
+    uri: params.uri || '',
+    name: params.name || '',
+    description: params.description || '',
+    image: params.image || ''
+  };
+  const mintId = stableHashId('pm-mint', pmSeed);
+  const transferId = stableHashId('pm-transfer', pmSeed);
+  const redeemId = stableHashId('pm-redeem', pmSeed);
+  const settleYesId = stableHashId('pm-settle-yes', pmSeed);
+  const settleNoId = stableHashId('pm-settle-no', pmSeed);
+  const settlePushYesId = stableHashId('pm-settle-push-yes', pmSeed);
+  const settlePushNoId = stableHashId('pm-settle-push-no', pmSeed);
 
   // 1. Paired Mint — mint both YES and NO by depositing USDC
   const pairedMint = {
-    approvalId: `pm-mint-${mintId}`,
+    approvalId: mintId,
     ...approvalMetadata(
       'Deposit',
       'Deposit to receive equal YES and NO outcome tokens'
@@ -83,7 +96,7 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
 
   // 2. Free transfer — tokens are freely transferable
   const freeTransfer = {
-    approvalId: `pm-transfer-${transferId}`,
+    approvalId: transferId,
     ...approvalMetadata(
       'Transferable',
       'Freely trade YES and NO tokens between any addresses'
@@ -100,7 +113,7 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
 
   // 3. Pre-Settlement Redeem — burn both YES+NO to get USDC back
   const preRedeem = {
-    approvalId: `pm-redeem-${redeemId}`,
+    approvalId: redeemId,
     ...approvalMetadata(
       'Redeem Pair',
       'Burn equal YES and NO tokens to reclaim your deposit before settlement'
@@ -138,7 +151,7 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
         perToAddressMaxNumTransfers: '0',
         perFromAddressMaxNumTransfers: '0',
         perInitiatedByAddressMaxNumTransfers: '0',
-        amountTrackerId: `pm-redeem-${redeemId}`,
+        amountTrackerId: redeemId,
         resetTimeIntervals: { startTime: '0', intervalLength: '0' }
       },
       // No overrides: holder self-initiates their own pair burn and
@@ -230,22 +243,22 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
 
   // Win: burn 1 token → 1 coin. Push: burn 2 tokens → 1 coin.
   const settleYes = settlementApproval(
-    `pm-settle-yes-${settleYesId}`, yesTokenIds, `pm-settle-yes-${settleYesId}`, '1', '1',
+    settleYesId, yesTokenIds, settleYesId, '1', '1',
     'YES wins',
     'Burn YES tokens to claim full payout after YES outcome is confirmed'
   );
   const settleNo = settlementApproval(
-    `pm-settle-no-${settleNoId}`, noTokenIds, `pm-settle-no-${settleNoId}`, '1', '1',
+    settleNoId, noTokenIds, settleNoId, '1', '1',
     'NO wins',
     'Burn NO tokens to claim full payout after NO outcome is confirmed'
   );
   const settlePushYes = settlementApproval(
-    `pm-settle-push-yes-${settlePushYesId}`, yesTokenIds, `pm-settle-push-yes-${settlePushYesId}`, '2', '1',
+    settlePushYesId, yesTokenIds, settlePushYesId, '2', '1',
     'Push (YES side)',
     'Burn YES tokens to claim half payout after push (draw) outcome'
   );
   const settlePushNo = settlementApproval(
-    `pm-settle-push-no-${settlePushNoId}`, noTokenIds, `pm-settle-push-no-${settlePushNoId}`, '2', '1',
+    settlePushNoId, noTokenIds, settlePushNoId, '2', '1',
     'Push (NO side)',
     'Burn NO tokens to claim half payout after push (draw) outcome'
   );

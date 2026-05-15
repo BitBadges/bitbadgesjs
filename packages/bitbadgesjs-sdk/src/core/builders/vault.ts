@@ -18,7 +18,8 @@ import {
   tokenMetadataEntry,
   metadataFromFlat,
   MetadataMissingError,
-  approvalMetadata
+  approvalMetadata,
+  stableHashId
 } from './shared.js';
 
 export interface VaultParams {
@@ -73,7 +74,18 @@ export function buildVault(params: VaultParams): any {
       fromListId: '!Mint',
       toListId: backingAddr,
       initiatedByListId: 'All',
-      approvalId: `vault-withdraw-${Math.random().toString(16).slice(2, 10)}`,
+      // Deterministic suffix (not Math.random) for replayable, diff-able
+      // builds. The `vault-withdraw-` prefix is load-bearing: the
+      // frontend's `isVaultWithdrawalTier` does
+      // `approvalId.startsWith('vault-withdraw-')`, so a bare constant
+      // would make the website fail to classify CLI-built vaults.
+      approvalId: stableHashId('vault-withdraw', {
+        backing: coin.denom,
+        symbol,
+        dailyWithdrawLimit: params.dailyWithdrawLimit || 0,
+        require2fa: params.require2fa || '',
+        emergencyRecovery: params.emergencyRecovery || ''
+      }),
       ...approvalMetadata(
         'Withdrawal',
         'Burn vault tokens to withdraw backing coins.'

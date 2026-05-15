@@ -11,7 +11,7 @@ import {
   resolveCoin,
   toBaseUnits,
   durationToTimestamp,
-  uniqueId,
+  stableHashId,
   buildUserApprovalMsg,
   approvalMetadata
 } from './shared.js';
@@ -37,7 +37,18 @@ export function buildBid(params: BidParams): any {
   const coin = resolveCoin(params.denom);
   const basePrice = toBaseUnits(params.price, coin.decimals);
   const expirationTs = durationToTimestamp(params.expiration || '7d');
-  const id = uniqueId('bid');
+  // Deterministic id so re-running the same bid is replayable/diff-able.
+  // Seeded on the shorthand params (not the resolved expiration
+  // timestamp, which is Date.now()-based); distinct bids on the same
+  // collection still get distinct ids because the seed differs.
+  const id = stableHashId('bid', {
+    address: params.address,
+    collectionId: params.collectionId,
+    tokenIds: params.tokenIds,
+    price: params.price,
+    denom: params.denom,
+    expiration: params.expiration || '7d'
+  });
   const tokenIds = parseTokenIdRange(params.tokenIds);
 
   const approval = {
