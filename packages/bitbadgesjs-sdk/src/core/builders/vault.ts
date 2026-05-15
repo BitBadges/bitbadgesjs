@@ -63,11 +63,17 @@ export function buildVault(params: VaultParams): any {
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
       version: '0',
+      // NOTE (ticket 0436): NO overridesFrom/ToApprovals here. The
+      // backing alias is a reserved protocol address; an approval that
+      // overrides its outgoing approvals is a "forceful transfer that
+      // bypasses user approvals from a reserved protocol address",
+      // which the chain globally disallows
+      // (custom-hooks ReservedProtocolAddress rule). Mirror the working
+      // smart-token-deposit criteria ({mustPrioritize, allowBackedMinting})
+      // — backed-minting is what authorizes the mint, not an override.
       approvalCriteria: {
         mustPrioritize: true,
-        allowBackedMinting: true,
-        overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true
+        allowBackedMinting: true
       }
     },
     // Withdrawal (unbacking) — with optional daily limit and 2FA
@@ -95,11 +101,12 @@ export function buildVault(params: VaultParams): any {
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
       version: '0',
+      // NOTE (ticket 0436): NO overridesFrom/ToApprovals — see the
+      // deposit-approval note above (reserved-protocol-address forceful-
+      // transfer rule). Daily-limit + 2FA gating still apply below.
       approvalCriteria: {
         mustPrioritize: true,
         allowBackedMinting: true,
-        overridesFromOutgoingApprovals: true,
-        overridesToIncomingApprovals: true,
         ...(params.dailyWithdrawLimit ? {
           approvalAmounts: {
             overallApprovalAmount: '0',
