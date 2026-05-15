@@ -20,7 +20,6 @@ import { buildCustom2FA } from './custom-2fa.js';
 import { buildQuests } from './quests.js';
 import { buildAddressList } from './address-list.js';
 import { buildIntent } from './intent.js';
-import { buildRecurringPayment } from './recurring-payment.js';
 import { buildListing } from './listing.js';
 import { buildBid } from './bid.js';
 import { buildPmSellIntent } from './pm-sell-intent.js';
@@ -583,20 +582,10 @@ describe('intent builder', () => {
   });
 });
 
-describe('recurring-payment builder', () => {
-  const msg = buildRecurringPayment({ collectionId: '42', amount: 10, denom: 'USDC', interval: 'monthly', recipient: 'bb1recipient' });
-
-  test('incoming approval', () => { expect(msg.value.updateIncomingApprovals).toBe(true); });
-  test('recurring times', () => {
-    const ib = msg.value.incomingApprovals[0].approvalCriteria.predeterminedBalances.incrementedBalances;
-    expect(ib.durationFromTimestamp).toBe('2592000000');
-    expect(ib.allowOverrideTimestamp).toBe(true);
-  });
-  test('coin transfer to recipient', () => {
-    expect(msg.value.incomingApprovals[0].approvalCriteria.coinTransfers[0].to).toBe('bb1recipient');
-  });
-  test('collectionId in meta', () => { expect(msg._meta.collectionId).toBe('42'); });
-});
+// `recurring-payment builder` block removed — buildRecurringPayment was
+// an orphan that emitted a shape `isUserRecurringApproval` rejects. The
+// canonical subscriber-side recurring approval is `userRecurringApproval`
+// in core/subscriptions.ts (covered by subscriptions tests).
 
 describe('listing builder', () => {
   const msg = buildListing({ address: 'bb1seller', collectionId: '1', tokenIds: '1-5', price: 50, denom: 'USDC' });

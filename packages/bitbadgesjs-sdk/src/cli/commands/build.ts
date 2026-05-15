@@ -84,8 +84,8 @@ async function emit(
   // end of emit(), right before we write the JSON out.
   const isCollectionTx = isCollectionMsg(data);
   if ((isCollectionTx || isUserApprovalTx || isTransferTx) && data.value) {
-    // Approval-style builders (intent / listing / bid / recurring-payment /
-    // pm-buy-intent / pm-sell-intent) require --address (the user-of-record
+    // Approval-style builders (intent / listing / bid / pm-buy-intent /
+    // pm-sell-intent) require --address (the user-of-record
     // who owns the approval). The chain also requires a non-empty `creator`
     // on the wrapping MsgUpdateUserApprovals — without it the deploy step
     // emits `creator: ""` and broadcast fails with "creator is required".
@@ -907,23 +907,11 @@ sharedOpts(
   emit(buildIntent({ address, collectionId: opts.collectionId, payDenom, payAmount: Number(opts.payAmount), receiveDenom, receiveAmount: Number(opts.receiveAmount), expiration: opts.expiration }), opts);
 });
 
-sharedOpts(
-  buildCommand
-    .command('recurring-payment')
-    .description('Create a recurring payment approval (user incoming)')
-    .requiredOption('--collection-id <id>', 'Subscription collection ID')
-    .requiredOption('--amount <n>', 'Payment amount per interval (display units)')
-    .requiredOption('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
-    .requiredOption('--interval <duration>', 'Payment interval (daily, monthly, annually)')
-    .requiredOption('--recipient <address>', 'Who receives payments (bb1...)')
-    .option('--expiration <duration>', 'How long subscription lasts', '365d')
-).action(async (opts) => {
-  const { buildRecurringPayment } = await import('../../core/builders/recurring-payment.js');
-  if (opts.json) { emit(buildRecurringPayment(readJsonInput(opts.json)), opts); return; }
-  const denom = requireBbDenom(opts.denom, '--denom');
-  const recipient = requireBb1AddressStrict(opts.recipient, '--recipient');
-  emit(buildRecurringPayment({ collectionId: opts.collectionId, amount: Number(opts.amount), denom, interval: opts.interval, recipient, expiration: opts.expiration }), opts);
-});
+// `bb build recurring-payment` removed: it emitted a recurring approval
+// shape `isUserRecurringApproval` rejects (so the poller never charged
+// it). The correct subscriber-side recurring approval is created by
+// `bb subscriptions claim <id>` / `bb subscriptions subscribe`, which
+// read the real subscription approval and call `userRecurringApproval`.
 
 sharedOpts(
   buildCommand
