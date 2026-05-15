@@ -6,6 +6,7 @@ import {
   saveSessionToDisk
 } from '../../builder/session/fileStore.js';
 import { bbError, BBErrorCode } from '../utils/envelope.js';
+import { addUnifiedNetworkOptions } from '../utils/network-options.js';
 
 function parseArgs(argsJson: string | undefined, argsFile: string | undefined): any {
   if (argsJson && argsFile) {
@@ -46,9 +47,6 @@ export const toolCommand = new Command('tool')
     'Session id for stateful tools. Stored under ~/.bitbadges/sessions/<id>.json. Defaults to the id inside --args.sessionId, or the builtin default session.'
   )
   .option('--raw', 'Print the structured result instead of the formatted text block')
-  .option('--local', 'Point indexer-backed tools at localhost:3001', false)
-  .option('--testnet', 'Point indexer-backed tools at the testnet API', false)
-  .option('--url <url>', 'Custom indexer base URL for this invocation (overrides --local/--testnet)')
   .action(async (toolName: string, opts: { args?: string; argsFile?: string; session?: string; raw?: boolean; local?: boolean; testnet?: boolean; url?: string }) => {
     // Resolve indexer URL — tools read BITBADGES_API_URL from env, so we
     // set it for the lifetime of this CLI invocation. Explicit --url wins,
@@ -123,3 +121,13 @@ export const toolCommand = new Command('tool')
       process.exitCode = 1;
     }
   });
+
+// Network flags via the unified helper (0412) — replaces the inline
+// --local/--testnet/--url re-declaration. --network/--mainnet/--api-key
+// are config'd off so `bb tool`'s flag set is unchanged (tools read
+// BITBADGES_API_URL from env; resolution still reads opts.url/local/testnet).
+addUnifiedNetworkOptions(toolCommand, {
+  includeApiKey: false,
+  includeNetworkFlag: false,
+  includeMainnetFlag: false
+});
