@@ -30,9 +30,11 @@ import { buildBid } from './bid.js';
 import { buildPmSellIntent } from './pm-sell-intent.js';
 import { buildPmBuyIntent } from './pm-buy-intent.js';
 import { resolveCoin, parseDuration, toBaseUnits, sanitizeCosmosPathName, resolveExpiration } from './shared.js';
-import { buildPredictionMarketBuyIntent, buildPredictionMarketSellIntent } from '../prediction-markets.js';
+import { buildPredictionMarketBuyIntent, buildPredictionMarketSellIntent, isPredictionMarketValid, validatePredictionMarketCollection } from '../prediction-markets.js';
 import { buildIntentApproval } from '../intents.js';
 import { UintRangeArray } from '../uintRanges.js';
+import { isQuestApproval, doesCollectionFollowQuestProtocol } from '../quests.js';
+import { normalizeForReview } from '../review-normalize.js';
 import { buildOrderbookBidApproval, buildOrderbookListingApproval } from '../bids.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -589,6 +591,13 @@ describe('prediction-market builder', () => {
       buildPredictionMarket({ verifier: 'bb1verifier', ...META })
     );
   });
+  test('producer↔recognizer drift guard — built collection satisfies isPredictionMarketValid (#0434)', () => {
+    const built = normalizeForReview(buildPredictionMarket({ verifier: 'bb1verifier', ...META }));
+    const res = validatePredictionMarketCollection(built);
+    expect(res.valid).toBe(true);
+    expect(res.errors).toEqual([]);
+    expect(isPredictionMarketValid(built)).toBe(true);
+  });
   test('seven distinct pm-<role>-<hash> approval ids, stable across calls', () => {
     const ids = r.collectionApprovals.map((a: any) => a.approvalId);
     expect(ids.length).toBe(7);
@@ -711,6 +720,13 @@ describe('quests builder', () => {
   test('deterministic — identical params produce a byte-identical msg', () => {
     const p = { reward: 10, denom: 'BADGE', maxClaims: 100, ...META };
     expect(buildQuests(p)).toEqual(buildQuests(p));
+  });
+  test('producer↔recognizer drift guard — built quest is recognized by isQuestApproval (#0434)', () => {
+    const built = normalizeForReview(buildQuests({ reward: 10, denom: 'BADGE', maxClaims: 100, ...META }));
+    const questApproval = built.collectionApprovals.find((a: any) => a.approvalId === 'quests-approval');
+    expect(questApproval).toBeTruthy();
+    expect(isQuestApproval(questApproval)).toBe(true);
+    expect(doesCollectionFollowQuestProtocol(built as any)).toBe(true);
   });
   test('passes verification with zero violations', () => {
     expectCleanVerification(msg);
