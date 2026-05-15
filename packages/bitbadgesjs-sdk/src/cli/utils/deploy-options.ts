@@ -39,6 +39,7 @@ export interface DeployOpts {
   manager?: string;
   creator?: string;
   nodeUrl?: string;
+  port?: string; // --browser loopback port pin (standalone `bb deploy` only)
 }
 
 /** Add `--option` only if the command hasn't already declared it. */
@@ -101,6 +102,112 @@ export function isDeployRequested(opts: DeployOpts): boolean {
  * `--browser`, etc.). Process-exits on completion/failure like the
  * original (does not return on the deploy paths).
  */
+/**
+ * The single source of truth for the **browser** broadcast mechanic
+ * (bridgeSign handoff to the /sign page). Multi-msg capable. Does NOT
+ * process.exit or emit — returns `{ payload, result }` so callers can
+ * layer their own post-processing (the standalone `bb deploy` adds
+ * --wait-for-indexer; the inline `executeDeploy` just prints + exits).
+ *
+ * On a cancelled/rejected sign it writes the stderr notice and returns
+ * a `payload.success === false` (caller decides the exit code). A
+ * thrown bridge error propagates to the caller's catch.
+ */
+export async function browserBroadcast(
+  messages: { typeUrl: string; value: any }[],
+  opts: DeployOpts,
+  ctx: { expectedAddress?: string } = {}
+): Promise<{ payload: any; result: any }> {
+  const networkName = resolveNetwork(opts as any);
+  const apiUrl = getApiUrl(opts as any);
+  const apiKey = getApiKeyForNetwork(opts as any);
+  const { bridgeSign, resolveFrontendUrl } = await import('../auth/browser-bridge.js');
+  const frontendUrl = resolveFrontendUrl(networkName, opts.frontendUrl);
+  const expectedAddress = opts.expectedAddress ?? ctx.expectedAddress ?? opts.manager ?? opts.creator;
+  const requestedTimeoutSec = opts.timeout ? Math.min(1800, Math.max(60, Number(opts.timeout))) : 300;
+  process.stderr.write(`\nOpening browser to ${frontendUrl}/sign for wallet signature + broadcast...\n`);
+  const result = await bridgeSign({
+    mode: 'tx',
+    payload: {
+      chain: 'cosmos',
+      txsInfo: messages.map((m) => ({ type: m.typeUrl, msg: m.value })),
+      expectedAddress,
+      signOnly: !!opts.signOnly,
+    },
+    baseUrl: apiUrl,
+    frontendUrl,
+    apiKey,
+    timeoutMs: requestedTimeoutSec * 1000,
+    noOpen: opts.open === false,
+    port: opts.port ? Number(opts.port) : undefined,
+  });
+  if (result.error) {
+    process.stderr.write(`Browser broadcast cancelled or rejected: ${result.error}\n`);
+    return { payload: { success: false, path: 'browser', error: result.error }, result };
+  }
+  const payload: any = opts.signOnly
+    ? { success: !!result.signedTx, path: 'browser', mode: 'sign-only', signedTx: result.signedTx ?? null, chain: result.chain ?? 'cosmos' }
+    : { success: !!result.hash, path: 'browser', mode: 'sign-and-broadcast', txHash: result.hash ?? null, chain: result.chain ?? 'cosmos' };
+  return { payload, result };
+}
+
+/**
+ * The single source of truth for the **burner** broadcast mechanic
+ * (pickBurner + runBurnerCreate). CREATE-ONLY. Returns
+ * `{ payload, result }`; no process.exit/emit (caller layers the
+ * dust-recovery hint / --wait-for-indexer / exit). Caller is
+ * responsible for the `--manager` guard before calling.
+ */
+export async function burnerBroadcast(
+  builtMsg: { typeUrl: string; value: any },
+  opts: DeployOpts
+): Promise<{ payload: any; result: any }> {
+  const networkName = resolveNetwork(opts as any);
+  const network: BurnerNetwork = networkName as NetworkMode;
+  const apiUrl = getApiUrl(opts as any);
+  const nodeUrl = opts.nodeUrl || NETWORK_CONFIGS[network].nodeUrl;
+  const apiKey = getApiKeyForNetwork(opts as any);
+
+  if ((opts.fund ?? 'faucet') === 'faucet' && !apiKey && network !== 'local') {
+    process.stderr.write(
+      'Warning: --fund faucet requires an API key on non-local networks. Pass --api-key or run `bb settings set apiKey <key>`.\n'
+    );
+  }
+
+  const choice = await pickBurner({
+    network,
+    nodeUrl,
+    forceNew: Boolean(opts.new),
+    reuseSelector: opts.reuse
+  });
+
+  const result = await runBurnerCreate({
+    msg: builtMsg,
+    network,
+    apiUrl,
+    nodeUrl,
+    manager: opts.manager!,
+    fund: opts.fund === 'manual' ? 'manual' : 'faucet',
+    apiKey,
+    fee: { amount: String(opts.fee ?? '0'), denom: requireBbDenom(String(opts.feeDenom ?? DEFAULT_FEE_DENOM), '--fee-denom') },
+    gas: Number(opts.gas ?? 400000),
+    reuseRecord: choice.kind === 'reuse' ? choice.record : undefined,
+    nonInteractive: Boolean(opts.nonInteractive) || !process.stdout.isTTY,
+    pollTimeoutMs: Number(opts.pollTimeout ?? 60) * 1000
+  });
+
+  const payload = {
+    success: result.success,
+    ephemeralAddress: result.ephemeralAddress,
+    recoveryPath: result.recoveryPath,
+    txHash: result.txHash,
+    collectionId: result.collectionId ?? null,
+    paused: result.paused,
+    error: result.error
+  };
+  return { payload, result };
+}
+
 export async function executeDeploy(
   builtMsg: { typeUrl: string; value: any },
   opts: DeployOpts,
@@ -111,50 +218,10 @@ export async function executeDeploy(
     process.exit(2);
   }
 
-  // ── --browser ───────────────────────────────────────────────────────
   if (opts.browser) {
-    const networkName = resolveNetwork(opts as any);
-    const apiUrl = getApiUrl(opts as any);
-    const apiKey = getApiKeyForNetwork(opts as any);
-    const { bridgeSign, resolveFrontendUrl } = await import('../auth/browser-bridge.js');
-    const frontendUrl = resolveFrontendUrl(networkName, opts.frontendUrl);
-    const expectedAddress = opts.expectedAddress ?? ctx.expectedAddress ?? opts.manager ?? opts.creator;
-    const requestedTimeoutSec = opts.timeout ? Math.min(1800, Math.max(60, Number(opts.timeout))) : 300;
-    process.stderr.write(`\nOpening browser to ${frontendUrl}/sign for wallet signature + broadcast...\n`);
     try {
-      const result = await bridgeSign({
-        mode: 'tx',
-        payload: {
-          chain: 'cosmos',
-          txsInfo: [{ type: builtMsg.typeUrl, msg: builtMsg.value }],
-          expectedAddress,
-          signOnly: !!opts.signOnly,
-        },
-        baseUrl: apiUrl,
-        frontendUrl,
-        apiKey,
-        timeoutMs: requestedTimeoutSec * 1000,
-        noOpen: opts.open === false,
-      });
-      if (result.error) {
-        process.stderr.write(`Browser broadcast cancelled or rejected: ${result.error}\n`);
-        process.exit(1);
-      }
-      const payload: any = opts.signOnly
-        ? {
-            success: !!result.signedTx,
-            path: 'browser',
-            mode: 'sign-only',
-            signedTx: result.signedTx ?? null,
-            chain: result.chain ?? 'cosmos',
-          }
-        : {
-            success: !!result.hash,
-            path: 'browser',
-            mode: 'sign-and-broadcast',
-            txHash: result.hash ?? null,
-            chain: result.chain ?? 'cosmos',
-          };
+      const { payload } = await browserBroadcast([builtMsg], opts, ctx);
+      if (payload.error) process.exit(1); // browserBroadcast already wrote the stderr notice
       process.stdout.write('\n' + JSON.stringify(payload, null, 2) + '\n');
       process.exit(payload.success ? 0 : 1);
     } catch (err: any) {
@@ -163,7 +230,6 @@ export async function executeDeploy(
     }
   }
 
-  // ── --burner (CREATE-ONLY) ──────────────────────────────────────────
   if (opts.burner) {
     if (!opts.manager) {
       process.stderr.write(
@@ -171,50 +237,8 @@ export async function executeDeploy(
       );
       process.exit(2);
     }
-    const networkName = resolveNetwork(opts as any);
-    const network: BurnerNetwork = networkName as NetworkMode;
-    const apiUrl = getApiUrl(opts as any);
-    const nodeUrl = opts.nodeUrl || NETWORK_CONFIGS[network].nodeUrl;
-    const apiKey = getApiKeyForNetwork(opts as any);
-
-    if ((opts.fund ?? 'faucet') === 'faucet' && !apiKey && network !== 'local') {
-      process.stderr.write(
-        'Warning: --fund faucet requires an API key on non-local networks. Pass --api-key or run `bb settings set apiKey <key>`.\n'
-      );
-    }
-
-    const choice = await pickBurner({
-      network,
-      nodeUrl,
-      forceNew: Boolean(opts.new),
-      reuseSelector: opts.reuse
-    });
-
     try {
-      const result = await runBurnerCreate({
-        msg: builtMsg,
-        network,
-        apiUrl,
-        nodeUrl,
-        manager: opts.manager,
-        fund: opts.fund === 'manual' ? 'manual' : 'faucet',
-        apiKey,
-        fee: { amount: String(opts.fee ?? '0'), denom: requireBbDenom(String(opts.feeDenom ?? DEFAULT_FEE_DENOM), '--fee-denom') },
-        gas: Number(opts.gas ?? 400000),
-        reuseRecord: choice.kind === 'reuse' ? choice.record : undefined,
-        nonInteractive: Boolean(opts.nonInteractive) || !process.stdout.isTTY,
-        pollTimeoutMs: Number(opts.pollTimeout ?? 60) * 1000
-      });
-
-      const payload = {
-        success: result.success,
-        ephemeralAddress: result.ephemeralAddress,
-        recoveryPath: result.recoveryPath,
-        txHash: result.txHash,
-        collectionId: result.collectionId ?? null,
-        paused: result.paused,
-        error: result.error
-      };
+      const { payload, result } = await burnerBroadcast(builtMsg, opts);
       process.stdout.write('\n' + JSON.stringify(payload, null, 2) + '\n');
       if (!result.success && !result.paused) process.exit(1);
       process.exit(0);

@@ -33,7 +33,8 @@ import * as crypto from 'node:crypto';
 
 import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
-import { runBurnerCreate, pickBurner, type BurnerNetwork } from '../utils/burner.js';
+import { type BurnerNetwork } from '../utils/burner.js';
+import { browserBroadcast, burnerBroadcast } from '../utils/deploy-options.js';
 import { buildKeyringCommand, buildKeyringMultiCommand } from '../utils/keyring-command.js';
 import {
   extractEntityFromEvents,
@@ -41,7 +42,7 @@ import {
   type ExtractedEntity,
   type WaitForIndexerResult
 } from '../utils/wait-for-indexer.js';
-import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
+import { DEFAULT_FEE_DENOM } from '../utils/denom.js';
 
 /**
  * Parse the `--wait-for-indexer` flag value. The flag is optional and may
@@ -563,46 +564,14 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
     if (!isMultiMsg && msg && msg.value && opts.manager && !msg.value.manager) {
       msg.value.manager = opts.manager;
     }
-    const { bridgeSign, resolveFrontendUrl } = await import('../auth/browser-bridge.js');
-    const frontendUrl = resolveFrontendUrl(networkName, opts.frontendUrl);
-    const expectedAddress = opts.expectedAddress ?? opts.manager;
-    const requestedTimeoutSec = opts.timeout ? Math.min(1800, Math.max(60, Number(opts.timeout))) : 300;
-    process.stderr.write(`\nOpening browser to ${frontendUrl}/sign for wallet signature + broadcast...\n`);
     try {
-      const result = await bridgeSign({
-        mode: 'tx',
-        payload: {
-          chain: 'cosmos',
-          txsInfo: messages.map((m: any) => ({ type: m.typeUrl, msg: m.value })),
-          expectedAddress,
-          signOnly: !!opts.signOnly,
-        },
-        baseUrl: apiUrl,
-        frontendUrl,
-        apiKey,
-        timeoutMs: requestedTimeoutSec * 1000,
-        noOpen: opts.open === false,
-        port: opts.port ? Number(opts.port) : undefined,
+      // Shared broadcast primitive (single source of truth for the
+      // bridgeSign handoff — see cli/utils/deploy-options.ts). deploy.ts
+      // keeps the richer post-processing below (--wait-for-indexer).
+      const { payload, result } = await browserBroadcast(messages, opts, {
+        expectedAddress: opts.expectedAddress ?? opts.manager
       });
-      if (result.error) {
-        process.stderr.write(`Browser broadcast cancelled or rejected: ${result.error}\n`);
-        process.exit(1);
-      }
-      const payload: any = opts.signOnly
-        ? {
-            success: !!result.signedTx,
-            path: 'browser',
-            mode: 'sign-only',
-            signedTx: result.signedTx ?? null,
-            chain: result.chain ?? 'cosmos',
-          }
-        : {
-            success: !!result.hash,
-            path: 'browser',
-            mode: 'sign-and-broadcast',
-            txHash: result.hash ?? null,
-            chain: result.chain ?? 'cosmos',
-          };
+      if (payload.error) process.exit(1); // browserBroadcast wrote the cancel notice
 
       // Optional: hold the CLI open until the indexer surfaces whatever
       // the tx created. Browser flow doesn't return tx events inline, so
@@ -835,30 +804,11 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
     process.exit(2);
   }
 
-  // 3. Wallet picker (interactive on TTY, bypassed otherwise or via flags)
-  const choice = await pickBurner({
-    network,
-    nodeUrl,
-    forceNew: Boolean(opts.new),
-    reuseSelector: opts.reuse
-  });
-
-  // 4. Drive the orchestrator
+  // Shared burner broadcast primitive (single source of truth for
+  // pickBurner + runBurnerCreate — see cli/utils/deploy-options.ts).
+  // deploy.ts keeps the dust-recovery hint + --wait-for-indexer below.
   try {
-    const result = await runBurnerCreate({
-      msg,
-      network,
-      apiUrl,
-      nodeUrl,
-      manager: opts.manager,
-      fund: opts.fund === 'manual' ? 'manual' : 'faucet',
-      apiKey,
-      fee: { amount: String(opts.fee), denom: requireBbDenom(String(opts.feeDenom || DEFAULT_FEE_DENOM), '--fee-denom') },
-      gas: Number(opts.gas),
-      reuseRecord: choice.kind === 'reuse' ? choice.record : undefined,
-      nonInteractive: Boolean(opts.nonInteractive) || !process.stdout.isTTY,
-      pollTimeoutMs: Number(opts.pollTimeout) * 1000
-    });
+    const { payload, result } = await burnerBroadcast(msg, opts);
 
     // Targeted hint:" — when the burner failed because the hot wallet
     // came up short on dust (faucet refused, manual funding too small,
@@ -895,16 +845,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       }
     }
 
-    const payload: any = {
-      success: result.success,
-      ephemeralAddress: result.ephemeralAddress,
-      recoveryPath: result.recoveryPath,
-      txHash: result.txHash,
-      collectionId: result.collectionId ?? null,
-      paused: result.paused,
-      error: result.error,
-      ...(hint ? { hint } : {})
-    };
+    if (hint) (payload as any).hint = hint;
     if (waited) {
       payload.waited = {
         entity: waited.entity,
