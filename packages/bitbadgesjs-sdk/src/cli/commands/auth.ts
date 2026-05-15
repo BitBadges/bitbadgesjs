@@ -9,7 +9,7 @@
  * MetaMask, Keplr, hardware wallet, custodial signer, ...).
  */
 
-import * as fs from 'fs';
+import { readStringOrFile } from '../utils/message-options.js';
 import { Command } from 'commander';
 import { resolveApiKey, resolveBaseUrl } from '../utils/api-client.js';
 import {
@@ -75,14 +75,7 @@ function detectChain(address: string): 'Cosmos' | 'ETH' {
   throw new Error(`Cannot detect chain from address ${address}: must start with 'bb1' or '0x'`);
 }
 
-function readMessage(opts: { message?: string; messageFile?: string }): string | undefined {
-  if (opts.message) return opts.message;
-  if (opts.messageFile) {
-    if (opts.messageFile === '-') return fs.readFileSync(0, 'utf-8');
-    return fs.readFileSync(opts.messageFile, 'utf-8');
-  }
-  return undefined;
-}
+// readMessage is now the shared readStringOrFile — see utils/message-options.ts (0411).
 
 interface FetchResult {
   status: number;
@@ -222,7 +215,7 @@ addNetworkOptions(authCommand.command('login'))
       throw new Error('--public-key is required for Cosmos signatures (CosmosDriver verifier needs it). Get it from `sign-arbitrary` output, or use --browser.');
     }
 
-    let message = readMessage({ message: opts.message, messageFile: opts.messageFile });
+    let message = readStringOrFile(opts.message, opts.messageFile);
 
     // The /auth/verify nonce check is bound to the cookie the indexer set
     // when it issued the challenge. Two paths to obtain that cookie:
