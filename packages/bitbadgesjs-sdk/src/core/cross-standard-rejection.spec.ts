@@ -16,7 +16,6 @@
 import { validateBountyCollection } from './bounties.js';
 import { validateProductCatalogCollection } from './products.js';
 import { validateAuctionCollection } from './auctions.js';
-import { validateCrowdfundCollection } from './crowdfunds.js';
 import { validatePaymentRequestCollection } from './payment-requests.js';
 import { validatePredictionMarketCollection, isPredictionMarketValid } from './prediction-markets.js';
 import { doesCollectionFollowSubscriptionProtocol } from './subscriptions.js';
@@ -39,7 +38,6 @@ const ALL_STANDARDS = [
   'Bounty',
   'Products',
   'Auction',
-  'Crowdfund',
   'PaymentRequest',
   'Prediction Market',
   'Subscriptions',
@@ -78,16 +76,6 @@ describe('cross-standard rejection', () => {
         const r = validateAuctionCollection(stubWithStandard(wrong));
         expect(r.valid).toBe(false);
         expect(r.errors).toContain('Missing "Auction" standard');
-      });
-    }
-  });
-
-  describe('validateCrowdfundCollection', () => {
-    for (const wrong of otherStandards('Crowdfund')) {
-      it(`rejects a "${wrong}" collection`, () => {
-        const r = validateCrowdfundCollection(stubWithStandard(wrong));
-        expect(r.valid).toBe(false);
-        expect(r.errors).toContain('Missing "Crowdfund" standard');
       });
     }
   });

@@ -109,7 +109,7 @@ async function emit(
     //     the chain to substitute `to` with the initiator at runtime
     //     (correct for quest rewards, bounty payouts to claimants, etc.).
     //     The empty `to` without the override means "refund the creator"
-    //     — typical for deny/expire branches in bounty/crowdfund/etc. where
+    //     — typical for deny/expire branches in bounty/etc. where
     //     the builder couldn't know the creator at build time.
     const creatorForFallback = data.value.creator;
     if (Array.isArray(data.value.collectionApprovals) && creatorForFallback) {
@@ -546,25 +546,6 @@ sharedOpts(
 
 sharedOpts(
   buildCommand
-    .command('crowdfund')
-    .description('Create a crowdfunding collection. Metadata: pass --uri OR --name + --image + --description.')
-    .requiredOption('--goal <n>', 'Funding goal (display units)')
-    .requiredOption('--denom <symbol|denom>', 'Coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
-    .option('--crowdfunder <address>', 'Who receives funds on success (bb1...)')
-    .option('--deadline <duration>', 'Deadline duration', '30d')
-).action(async (opts) => {
-  const { buildCrowdfund } = await import('../../core/builders/crowdfund.js');
-  if (opts.json) { emit(buildCrowdfund(readJsonInput(opts.json)), opts); return; }
-  const denom = requireBbDenom(opts.denom, '--denom');
-  const crowdfunder = opts.crowdfunder ? requireBb1AddressStrict(opts.crowdfunder, '--crowdfunder') : opts.crowdfunder;
-  emit(buildCrowdfund({
-    goal: Number(opts.goal), denom, crowdfunder, deadline: opts.deadline,
-    uri: opts.uri, name: opts.name, description: opts.description, image: opts.image, creator: opts.creator
-  }), opts);
-});
-
-sharedOpts(
-  buildCommand
     .command('auction')
     .description('Create an auction collection. Metadata: pass --uri OR --name + --image + --description.')
     .option('--bid-deadline <duration>', 'Bidding window', '7d')
@@ -864,7 +845,7 @@ sharedOpts(
       const fromAddress = requireBb1AddressStrict(opts.from, '--from');
       const toAddress = requireBb1AddressStrict(opts.to, '--to');
       // Canonical amount/denom resolution — shared with auctions /
-      // crowdfunds / nfts / intents / prediction-markets (0410). This
+      // nfts / intents / prediction-markets (0410). This
       // replaces a re-rolled branch whose else-path display-converted
       // even canonical chain denoms, contradicting this command's own
       // "base units when --denom is a raw chain denom" help text;

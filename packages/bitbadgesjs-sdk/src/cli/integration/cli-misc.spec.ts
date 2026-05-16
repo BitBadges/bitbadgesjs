@@ -34,7 +34,7 @@ describe('bb completion', () => {
     // v2 of the generator walks the full tree, so `auctions create` (or
     // any other 2-level subcommand) should appear as a quoted case key.
     const out = runCli(['completion'], { parseJson: false });
-    expect(out.stdout).toMatch(/'(auctions|bounties|subscriptions|crowdfunds|smart-tokens|nfts) [a-z-]+'\)/);
+    expect(out.stdout).toMatch(/'(auctions|bounties|subscriptions|smart-tokens|nfts) [a-z-]+'\)/);
   });
 });
 

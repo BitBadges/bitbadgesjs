@@ -35,20 +35,6 @@ export interface iPaymentRequestInfo {
 }
 
 /**
- * Core details for the Crowdfund standard.
- *
- * `funded` is derived from the success tracker (the on-chain handler having
- * run). `expired` covers any post-deadline state where success hasn't
- * executed — without an escrow read we can't distinguish "goal met but not
- * yet withdrawn" from "goal not met".
- *
- * @category Standards Info
- */
-export interface iCrowdfundInfo {
-  status: 'active' | 'expired' | 'funded';
-}
-
-/**
  * Core details for the Auction standard.
  *
  * @category Standards Info
@@ -80,7 +66,6 @@ export interface iPredictionMarketInfo {
 export interface iStandardsInfo {
   Bounty?: iBountyInfo;
   PaymentRequest?: iPaymentRequestInfo;
-  Crowdfund?: iCrowdfundInfo;
   Auction?: iAuctionInfo;
   'Prediction Market'?: iPredictionMarketInfo;
 }

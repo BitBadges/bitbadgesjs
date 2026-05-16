@@ -21,7 +21,6 @@ export * from './bids.js';
 export * from './quests.js';
 export * from './invoices.js';
 export * from './products.js';
-export * from './crowdfunds.js';
 export * from './scheduled-payments.js';
 export * from './ibc-wrappers.js';
 
