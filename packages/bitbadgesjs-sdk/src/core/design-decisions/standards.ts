@@ -22,7 +22,6 @@ import { doesCollectionFollowBountyProtocol } from '../bounties.js';
 import { doesCollectionFollowPaymentRequestProtocol } from '../payment-requests.js';
 import { doesCollectionFollowAuctionProtocol } from '../auctions.js';
 import { doesCollectionFollowInvoiceProtocol } from '../invoices.js';
-import { doesCollectionFollowCrowdfundProtocol } from '../crowdfunds.js';
 import { doesCollectionFollowQuestProtocol } from '../quests.js';
 import { doesCollectionFollowProductProtocol, doesCollectionFollowProductCatalogProtocol } from '../products.js';
 
@@ -39,7 +38,6 @@ const ENTRIES: StandardEntry[] = [
   { code: 'design.standards.payment_request', label: 'PaymentRequest protocol', standard: 'PaymentRequest', check: (c) => doesCollectionFollowPaymentRequestProtocol(c) },
   { code: 'design.standards.auction', label: 'Auction protocol', standard: 'Auctions', check: (c) => doesCollectionFollowAuctionProtocol(c) },
   { code: 'design.standards.invoice', label: 'Invoice protocol', standard: 'Invoices', check: (c) => doesCollectionFollowInvoiceProtocol(c) },
-  { code: 'design.standards.crowdfund', label: 'Crowdfund protocol', standard: 'Crowdfunds', check: (c) => doesCollectionFollowCrowdfundProtocol(c) },
   { code: 'design.standards.quest', label: 'Quest protocol', standard: 'Quests', check: (c) => doesCollectionFollowQuestProtocol(c) },
   { code: 'design.standards.product', label: 'Product protocol', standard: 'Products', check: (c) => doesCollectionFollowProductProtocol(c) },
   { code: 'design.standards.product_catalog', label: 'Product Catalog protocol', standard: 'ProductCatalogs', check: (c) => doesCollectionFollowProductCatalogProtocol(c) }

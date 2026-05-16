@@ -13,7 +13,7 @@ import { buildProductCatalog } from '../../core/builders/product-catalog.js';
 
 describe('buildCommand shape', () => {
   it('exposes every documented standard preset', () => {
-    // The 17 verbs that `bb build --help` advertises. If a verb is added
+    // The 16 verbs that `bb build --help` advertises. If a verb is added
     // or removed, this test must be updated in lockstep with --help text.
     const names = buildCommand.commands.map((c) => c.name()).sort();
     expect(names).toEqual([
@@ -22,7 +22,6 @@ describe('buildCommand shape', () => {
       'bid',
       'bounty',
       'credit-token',
-      'crowdfund',
       'custom-2fa',
       'intent',
       'listing',
@@ -62,7 +61,6 @@ describe('buildCommand shape', () => {
       'subscription',
       'bounty',
       'payment-request',
-      'crowdfund',
       'auction',
       'product-catalog',
       'prediction-market',

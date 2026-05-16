@@ -132,7 +132,7 @@ function entry(tool: any, run: (args: any) => any, formatText?: (result: any) =>
 // `SKILL_INSTRUCTIONS` array at module init — see backlog #0241. A previous
 // hard-coded list drifted: it advertised two IDs that no longer existed and
 // omitted six that did, leading agents to request nonexistent skills and miss
-// curated ones (auto-mint, prediction-market, bounty, crowdfund, auction,
+// curated ones (auto-mint, prediction-market, bounty, auction,
 // product-catalog). Computing the list here means every future skill addition
 // appears in the tool description automatically — no manual sync required.
 const availableSkillIds = getAllSkillInstructions()

@@ -24,7 +24,6 @@ import { TRADABLE_PRESETS } from './tradable.js';
 import { AUCTION_PRESETS } from './auction.js';
 import { PRODUCTS_PRESETS } from './products.js';
 import { PAYMENT_PROTOCOL_PRESETS } from './payment-protocol.js';
-import { CROWDFUND_PRESETS } from './crowdfund.js';
 
 /**
  * Aggregate every preset in the SDK. Add a new skill's presets by
@@ -43,7 +42,6 @@ const ALL_PRESETS: Preset<any>[] = [
   ...AUCTION_PRESETS,
   ...PRODUCTS_PRESETS,
   ...PAYMENT_PROTOCOL_PRESETS,
-  ...CROWDFUND_PRESETS
 ];
 
 // Duplicate-id guard — surfaces at import time, not runtime, so preset

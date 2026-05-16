@@ -29,7 +29,7 @@ const KNOWN_SYSTEM_APPROVAL_PREFIXES = [
   'smart-token-unbacking',
   'quests-approval',
   'credit-scaled',
-  // AuctionRegistry / PredictionMarketRegistry / CrowdfundRegistry /
+  // AuctionRegistry / PredictionMarketRegistry /
   // VaultApprovalRegistry approvals all use the prefix-<hex> pattern.
   'auction-mint-to-winner',
   'auction-burn',
@@ -40,11 +40,6 @@ const KNOWN_SYSTEM_APPROVAL_PREFIXES = [
   'pm-settle-push-yes',
   'pm-settle-push-no',
   'pm-transfer',
-  'crowdfund-deposit-refund',
-  'crowdfund-deposit-progress',
-  'crowdfund-success',
-  'crowdfund-refund',
-  'crowdfund-burn',
   'vault-deposit',
   'vault-withdraw',
   'vault-internal-transfer',
