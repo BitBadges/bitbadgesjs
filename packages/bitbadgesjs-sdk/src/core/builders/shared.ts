@@ -51,6 +51,25 @@ export function resolveCoin(symbolOrDenom: string): ResolvedCoin {
     }
   }
 
+  // Cosmos micro-denom convention ("uatom"/"uusdc"/"uosmo"): on BitBadges
+  // the on-chain denom is the IBC hash, not the u<symbol> spelling, and
+  // "uatom" could mean a different chain's coin entirely. We deliberately
+  // do NOT silently coerce it to a registry entry — guessing is a
+  // band-aid. Detect the pattern and throw with the canonical denom +
+  // symbol so the caller fixes the input at the source.
+  // (ubadge is already caught by the direct-match above.)
+  if (/^u[a-z0-9]+$/.test(symbolOrDenom)) {
+    const aliasSymbol = symbolOrDenom.slice(1).toUpperCase();
+    const match = Object.values(registry).find((d) => d.symbol.toUpperCase() === aliasSymbol);
+    if (match) {
+      throw new Error(
+        `Unknown coin "${symbolOrDenom}". On BitBadges, ${match.symbol} is the denom ` +
+          `"${match.baseDenom}", not the Cosmos micro-denom spelling. ` +
+          `Pass "${match.symbol}" or the full denom "${match.baseDenom}".`
+      );
+    }
+  }
+
   const supported = Object.values(registry)
     .map((c) => c.symbol)
     .filter((s, i, a) => a.indexOf(s) === i)

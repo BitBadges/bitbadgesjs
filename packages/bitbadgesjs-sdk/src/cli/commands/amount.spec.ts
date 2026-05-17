@@ -67,3 +67,47 @@ describe('amountCommand shape', () => {
     expect((unwrap.options as any[]).filter((o) => o.required).map((o) => o.long)).toContain('--token-amount');
   });
 });
+
+describe('amount to-raw negative guard (#0443)', () => {
+  it('rejects a negative display amount with exit 2', async () => {
+    const exitSpy = jest
+      .spyOn(process, 'exit')
+      .mockImplementation(((code?: number) => {
+        throw new Error(`__exit_${code}`);
+      }) as any);
+    const errSpy = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    const outSpy = jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    try {
+      await expect(
+        amountCommand.parseAsync(['to-raw', '-5', '--denom', 'BADGE'], { from: 'user' })
+      ).rejects.toThrow('__exit_2');
+      expect(errSpy).toHaveBeenCalledWith(expect.stringContaining('must be non-negative'));
+    } finally {
+      exitSpy.mockRestore();
+      errSpy.mockRestore();
+      outSpy.mockRestore();
+    }
+  });
+
+  it('still accepts a valid non-negative amount', async () => {
+    const exitSpy = jest
+      .spyOn(process, 'exit')
+      .mockImplementation(((code?: number) => {
+        throw new Error(`__exit_${code}`);
+      }) as any);
+    const writes: string[] = [];
+    const outSpy = jest.spyOn(process.stdout, 'write').mockImplementation((s: any) => {
+      writes.push(String(s));
+      return true;
+    });
+    const errSpy = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    try {
+      await amountCommand.parseAsync(['to-raw', '5', '--denom', 'BADGE'], { from: 'user' });
+      expect(writes.join('')).toContain('"raw"');
+    } finally {
+      exitSpy.mockRestore();
+      outSpy.mockRestore();
+      errSpy.mockRestore();
+    }
+  });
+});

@@ -101,6 +101,23 @@ describe('shared utilities', () => {
     expect(() => resolveCoin('DOGECOIN')).toThrow('Unknown coin');
   });
 
+  test('resolveCoin detects Cosmos u<symbol> denoms and throws toward the canonical form (#0443)', () => {
+    // Principle: do not silently coerce an ambiguous micro-denom to a
+    // registry entry — throw and point at the canonical symbol + denom.
+    expect(() => resolveCoin('uatom')).toThrow(
+      /On BitBadges, ATOM is the denom "ibc\/.*"/
+    );
+    expect(() => resolveCoin('uatom')).toThrow(/Pass "ATOM" or the full denom/);
+    expect(() => resolveCoin('uusdc')).toThrow(/USDC is the denom "ibc\/.*"/);
+    expect(() => resolveCoin('uosmo')).toThrow(/OSMO is the denom "ibc\/.*"/);
+
+    // ubadge still resolves via the direct registry-key match (its
+    // on-chain denom genuinely IS "ubadge").
+    expect(resolveCoin('ubadge').symbol).toBe('BADGE');
+    // A bogus u-prefixed string falls through to the generic message.
+    expect(() => resolveCoin('ufakecoin')).toThrow('Unknown coin');
+  });
+
   test('toBaseUnits converts correctly', () => {
     expect(toBaseUnits(10, 6)).toBe('10000000');
     expect(toBaseUnits(1, 9)).toBe('1000000000');

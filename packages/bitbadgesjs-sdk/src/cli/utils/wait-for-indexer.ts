@@ -64,6 +64,42 @@ export function extractEntityFromEvents(events: any[] | undefined): ExtractedEnt
   return null;
 }
 
+/**
+ * Surface-only entity-id extractor — DISTINCT from
+ * `extractEntityFromEvents` above.
+ *
+ * `extractEntityFromEvents` is deliberately narrow: it only returns ids
+ * the poller has a known indexer endpoint for (collection, dynamic
+ * store), because returning an id with no endpoint would cause a
+ * forever-404 poll. This function has the opposite goal: it does NOT
+ * poll anything, it just hoists *every* recognizable id attribute out
+ * of the raw tx events into a flat `{ collectionId, storeId, bidId,
+ * ... }` map so callers (`tx status`, `deploy --exec`) don't have to
+ * hand-parse `events[]`. Adding a key here is safe — there is no
+ * endpoint lookup, so no 404 risk.
+ *
+ * An attribute is treated as an entity id when its key ends in `_id`
+ * (snake) or `<lower>Id` (camel) with a non-empty, non-zero value.
+ * Keys are normalized to camelCase; first non-zero occurrence wins.
+ */
+export function extractEntityIds(events: any[] | undefined): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!Array.isArray(events)) return out;
+  for (const ev of events) {
+    const attrs: Array<{ key?: string; value?: string }> = ev?.attributes || [];
+    for (const a of attrs) {
+      if (!a?.key) continue;
+      const rawKey = a.key.replace(/"/g, '');
+      if (!/(_id$|[a-z]Id$)/.test(rawKey)) continue;
+      const v = a.value != null ? String(a.value).replace(/"/g, '') : '';
+      if (!v || v === '0') continue;
+      const camelKey = rawKey.replace(/_([a-z0-9])/g, (_m, c: string) => c.toUpperCase());
+      if (!(camelKey in out)) out[camelKey] = v;
+    }
+  }
+  return out;
+}
+
 /** Indexer path each waitable entity is fetched from. */
 export function indexerPathFor(entity: ExtractedEntity): string {
   switch (entity.entity) {
