@@ -18,6 +18,7 @@ import {
   successEnvelope,
   writeJsonEnvelope
 } from '../utils/envelope.js';
+import { extractEntityIds } from '../utils/wait-for-indexer.js';
 
 interface TxStatusData {
   /** Which RPC family found the tx. `cosmos` = LCD; `evm` = JSON-RPC. */
@@ -31,7 +32,13 @@ interface TxStatusData {
   gasUsed?: string;
   timestamp?: string;
   events?: Array<{ type: string; attributes: Array<{ key: string; value: string }> }>;
+  /** Kept for backward compat — equivalent to `entityIds.collectionId`. */
   collectionId?: string;
+  /**
+   * All recognizable id attributes hoisted out of `events` (collectionId,
+   * storeId, bidId, ...) so callers don't hand-parse the events array.
+   */
+  entityIds?: Record<string, string>;
 }
 
 interface NodeUrlOptions extends NetworkOptions {
@@ -181,23 +188,8 @@ async function fetchTxStatus(nodeUrl: string, evmRpcUrl: string, hash: string): 
   }
 }
 
-function extractCollectionId(events: any[] | undefined): string | undefined {
-  if (!Array.isArray(events)) return undefined;
-  for (const ev of events) {
-    const attrs: Array<{ key?: string; value?: string }> = ev?.attributes || [];
-    for (const a of attrs) {
-      if (!a?.key) continue;
-      const k = a.key.replace(/"/g, '');
-      if (k === 'collectionId' || k === 'collection_id') {
-        const v = a.value?.replace(/"/g, '');
-        if (v && v !== '0') return v;
-      }
-    }
-  }
-  return undefined;
-}
-
 function shapeTxData(hash: string, txResponse: any): TxStatusData {
+  const entityIds = extractEntityIds(txResponse.events);
   return {
     via: 'cosmos',
     hash,
@@ -209,7 +201,8 @@ function shapeTxData(hash: string, txResponse: any): TxStatusData {
     gasUsed: txResponse.gas_used ? String(txResponse.gas_used) : undefined,
     timestamp: txResponse.timestamp || undefined,
     events: txResponse.events || undefined,
-    collectionId: extractCollectionId(txResponse.events)
+    collectionId: entityIds.collectionId,
+    ...(Object.keys(entityIds).length > 0 ? { entityIds } : {})
   };
 }
 

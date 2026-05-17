@@ -38,6 +38,7 @@ import { browserBroadcast, burnerBroadcast } from '../utils/deploy-options.js';
 import { buildKeyringCommand, buildKeyringMultiCommand } from '../utils/keyring-command.js';
 import {
   extractEntityFromEvents,
+  extractEntityIds,
   waitForIndexer,
   type ExtractedEntity,
   type WaitForIndexerResult
@@ -748,6 +749,15 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       rawLog: primaryResult?.rawLog,
       ...(additionalTxs.length > 0 ? { additionalTxs } : {})
     };
+
+    // Hoist every recognizable id (collectionId, storeId, bidId, ...)
+    // out of the primary tx events so callers don't hand-parse events[].
+    // Surface-only — independent of the optional --wait-for-indexer poll
+    // below (which is intentionally limited to poll-able entities).
+    const execEntityIds = extractEntityIds(primaryResult?.events);
+    if (Object.keys(execEntityIds).length > 0) {
+      payload.entityIds = execEntityIds;
+    }
 
     // Optional indexer wait (matches burner/browser parity). Uses events
     // from the primary tx to extract the entity id.
