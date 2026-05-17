@@ -88,6 +88,14 @@ addOutputFlags(
 ).action((display: string, opts: any) => {
   const { denom, decimals, symbol } = resolveDecimals(opts.denom, opts.decimals);
   const mode = parseRoundingMode(opts.round);
+  // `fromDisplayAmount` is a general-purpose helper that intentionally
+  // supports signed amounts; the CLI is the trust boundary. A negative
+  // amount is never valid in a mint/deposit/transfer/trade context, so
+  // reject it here rather than silently emitting a negative raw value.
+  const displayNum = Number(display);
+  if (Number.isFinite(displayNum) && displayNum < 0) {
+    fail(2, `amount must be non-negative (got "${display}"). A negative amount is invalid for mint/deposit/transfer/trade.`);
+  }
   const c = CosmosCoinUtils.fromDisplayAmount(display, denom, decimals, undefined, mode);
   emit({ denom, decimals, ...(symbol ? { symbol } : {}), display, raw: c.getRawAmountString() }, opts);
 });
