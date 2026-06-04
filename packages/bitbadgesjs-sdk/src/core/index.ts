@@ -31,6 +31,7 @@ export * from './bounties.js';
 export * from './payment-requests.js';
 export * from './auctions.js';
 export * from './smart-tokens.js';
+export * from './agent-vaults.js';
 export * from './credit-tokens.js';
 // NOTE: interpret.js was moved to ../api-indexer/interpret.js to avoid a circular import
 // (interpretCollection depends on the BitBadgesCollection runtime class, whose module graph

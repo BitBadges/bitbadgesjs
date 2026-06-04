@@ -994,6 +994,41 @@ function verifyVault(value: any): StandardViolation[] {
 }
 
 // ============================================================
+// Agent Vault Validator
+// ============================================================
+
+function verifyAgentVault(value: any): StandardViolation[] {
+  const violations: StandardViolation[] = [];
+  const std = 'Agent Vault';
+  const standards: string[] = value?.standards ?? [];
+  const approvals = getApprovals(value);
+  const invariants = getInvariants(value);
+
+  // Agent Vaults are Smart Tokens — the base tag must be present too.
+  if (!standards.includes('Smart Token')) {
+    violations.push({ standard: std, field: 'standards', message: 'Agent Vault collections MUST also carry the "Smart Token" standard.' });
+  }
+
+  // Must have the IBC backing path.
+  if (!invariants.cosmosCoinBackedPath) {
+    violations.push({ standard: std, field: 'invariants.cosmosCoinBackedPath', message: 'Agent Vault collections MUST have a cosmosCoinBackedPath defining the IBC backing.' });
+  }
+
+  // Must have a backing approval (deposit/withdraw), mustPrioritize'd.
+  const backingApprovals = approvals.filter((a: any) => a.approvalCriteria?.allowBackedMinting === true || a.approvalCriteria?.allowBackedMinting === 'true');
+  if (backingApprovals.length === 0) {
+    violations.push({ standard: std, field: 'collectionApprovals', message: 'Agent Vault MUST have at least one approval with allowBackedMinting: true.' });
+  }
+  for (const ba of backingApprovals) {
+    if (ba.approvalCriteria?.mustPrioritize !== true && ba.approvalCriteria?.mustPrioritize !== 'true') {
+      violations.push({ standard: std, field: `collectionApprovals[${ba.approvalId}].mustPrioritize`, message: `Agent Vault backing approval "${ba.approvalId}" MUST have mustPrioritize: true.` });
+    }
+  }
+
+  return violations;
+}
+
+// ============================================================
 // Standard → Validator Map
 // ============================================================
 
@@ -1014,7 +1049,8 @@ const STANDARD_VALIDATORS: Record<string, (value: any) => StandardViolation[]> =
   Auction: verifyAuction,
   Products: verifyProducts,
   'Prediction Market': verifyPredictionMarket,
-  Vault: verifyVault
+  Vault: verifyVault,
+  'Agent Vault': verifyAgentVault
 };
 
 // Also match common alternative names
@@ -1045,7 +1081,8 @@ const STANDARD_ALIASES: Record<string, string> = {
   Products: 'Products',
   'Product Catalog': 'Products',
   'Prediction Market': 'Prediction Market',
-  Vault: 'Vault'
+  Vault: 'Vault',
+  'Agent Vault': 'Agent Vault'
 };
 
 // ============================================================
