@@ -100,11 +100,13 @@ export interface KeyringCommandResult {
 export function buildKeyringCommand(opts: KeyringCommandOptions): KeyringCommandResult {
   const jsonArgSubcommand = TYPE_URL_TO_SUBCOMMAND[opts.msg.typeUrl];
   const positionalBuilder = POSITIONAL_BUILDERS[opts.msg.typeUrl];
+  const fullTxBuilder = FULL_TX_BUILDERS[opts.msg.typeUrl];
 
-  if (!jsonArgSubcommand && !positionalBuilder) {
+  if (!jsonArgSubcommand && !positionalBuilder && !fullTxBuilder) {
     const supported = [
       ...Object.keys(TYPE_URL_TO_SUBCOMMAND),
-      ...Object.keys(POSITIONAL_BUILDERS)
+      ...Object.keys(POSITIONAL_BUILDERS),
+      ...Object.keys(FULL_TX_BUILDERS)
     ].sort().join('\n  - ');
     throw new Error(
       `--with-keyring does not support typeUrl "${opts.msg.typeUrl}" — no chain-binary subcommand mapping.\n` +
@@ -145,8 +147,13 @@ export function buildKeyringCommand(opts: KeyringCommandOptions): KeyringCommand
       if (!msgFilePath) msgFilePath = p;
       return p;
     };
-    const parts = positionalBuilder!(value, writeJson);
-    head = `${opts.binary} tx tokenization ${parts.join(' ')}`;
+    const builder = positionalBuilder ?? fullTxBuilder!;
+    const parts = builder(value, writeJson);
+    // POSITIONAL_BUILDERS live under `tx tokenization`; FULL_TX_BUILDERS own
+    // their module segment (e.g. `bank send`) and slot directly after `tx`.
+    head = opts.msg.typeUrl in POSITIONAL_BUILDERS
+      ? `${opts.binary} tx tokenization ${parts.join(' ')}`
+      : `${opts.binary} tx ${parts.join(' ')}`;
     subcommand = parts[0];
   }
 
@@ -284,6 +291,28 @@ const POSITIONAL_BUILDERS: Record<string, PositionalBuilder> = {
   }
 };
 
+/**
+ * Full-`tx`-line builders for msgs that live OUTSIDE the `tx tokenization`
+ * module. Unlike POSITIONAL_BUILDERS (appended after a hardcoded
+ * `tx tokenization`), these OWN the module segment, so they return the args
+ * after `${binary} tx` (e.g. `['bank', 'send', ...]` → `tx bank send ...`).
+ *
+ * Needed by multi-msg flows that mix a tokenization msg with a native cosmos
+ * msg — e.g. `bb agent-vaults pay` emits `[MsgTransferTokens(withdraw),
+ * bank MsgSend]`. Note these chain as SEPARATE sequential txs (see the
+ * atomicity caveat above); use `--browser`/`--burner` for a single atomic tx.
+ */
+const FULL_TX_BUILDERS: Record<string, PositionalBuilder> = {
+  '/cosmos.bank.v1beta1.MsgSend': (v) => {
+    // Use: tx bank send [from_key_or_address] [to_address] [amount]
+    const from = String(v.fromAddress ?? v.from_address ?? '');
+    const to = String(v.toAddress ?? v.to_address ?? '');
+    const coins = (v.amount as Array<{ denom: string; amount: string }> | undefined) ?? [];
+    const amountArg = coins.map((c) => `${String(c.amount)}${String(c.denom)}`).join(',');
+    return ['bank', 'send', shellQuote(from), shellQuote(to), shellQuote(amountArg)];
+  }
+};
+
 /** Conservative shell-quote for positional args. Wraps in single quotes if any non-safe char is present. */
 function shellQuote(s: string): string {
   if (s === '') return "''";
@@ -329,6 +358,7 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
     const m = opts.messages[i];
     const jsonArgSubcommand = TYPE_URL_TO_SUBCOMMAND[m.typeUrl];
     const positionalBuilder = POSITIONAL_BUILDERS[m.typeUrl];
+    const fullTxBuilder = FULL_TX_BUILDERS[m.typeUrl];
 
     let head: string;
     if (jsonArgSubcommand) {
@@ -351,8 +381,21 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
       };
       const parts = positionalBuilder((m.value ?? {}) as Record<string, unknown>, writeJson);
       head = `${opts.binary} tx tokenization ${parts.join(' ')}`;
+    } else if (fullTxBuilder) {
+      const writeJson = (data: unknown): string => {
+        const p = path.join(os.tmpdir(), `bb-msg-${crypto.randomBytes(4).toString('hex')}.json`);
+        fs.writeFileSync(p, JSON.stringify(data, null, 2) + '\n', { mode: 0o600 });
+        msgFilePaths.push(p);
+        return p;
+      };
+      const parts = fullTxBuilder((m.value ?? {}) as Record<string, unknown>, writeJson);
+      head = `${opts.binary} tx ${parts.join(' ')}`;
     } else {
-      const supported = [...Object.keys(TYPE_URL_TO_SUBCOMMAND), ...Object.keys(POSITIONAL_BUILDERS)].sort();
+      const supported = [
+        ...Object.keys(TYPE_URL_TO_SUBCOMMAND),
+        ...Object.keys(POSITIONAL_BUILDERS),
+        ...Object.keys(FULL_TX_BUILDERS)
+      ].sort();
       throw new Error(
         `--with-keyring: message[${i}] typeUrl "${m.typeUrl}" has no chain-binary subcommand mapping.\n` +
           `Supported:\n  - ${supported.join('\n  - ')}`

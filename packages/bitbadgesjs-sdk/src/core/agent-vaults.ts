@@ -210,10 +210,16 @@ export function buildAgentVaultWithdrawMsg(args: AgentVaultLifecycleArgs): Agent
 }
 
 /**
- * Pay: atomically withdraw (gated unback) then bank-send the released backing
- * coin to a recipient. Two msgs in one tx — if the gated leg fails, the send
- * never executes. The recipient is never named in any approval; the gating
- * constrains the spend rate, not the destination.
+ * Pay: withdraw (gated unback) then bank-send the released backing coin to a
+ * recipient. Emits `[withdraw, MsgSend]`. The recipient is never named in any
+ * approval; the gating constrains the spend rate, not the destination.
+ *
+ * Atomicity is path-dependent: broadcast as a SINGLE tx (the `bb deploy`
+ * --browser/--burner signing-client paths) the send never executes if the
+ * gated withdraw fails. The `--with-keyring` path chains them as two
+ * sequential txs (the chain binary's tx subcommands take one msg each), so a
+ * post-withdraw send failure leaves the agent holding the withdrawn coin —
+ * it can re-run just the send.
  */
 export function buildAgentVaultPayMsgs(
   args: AgentVaultLifecycleArgs & { to: string }
