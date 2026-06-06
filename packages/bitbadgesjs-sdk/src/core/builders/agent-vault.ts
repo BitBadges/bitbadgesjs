@@ -62,7 +62,14 @@ export interface AgentVaultParams {
 /** Stable IDs, matched by `extractAgentVaultDetails` (substring "deposit"/"withdraw"). */
 export const AGENT_VAULT_DEPOSIT_APPROVAL_ID = 'agent-vault-deposit';
 export const AGENT_VAULT_WITHDRAW_APPROVAL_PREFIX = 'agent-vault-withdraw';
-export const AGENT_VAULT_WITHDRAW_PROPOSAL_ID = 'agent-vault-withdraw-vote';
+/**
+ * Prefix for the multisig withdraw proposal id. The actual proposalId is
+ * `stableHashId(this, withdrawSeed)` so it is UNIQUE per vault — the indexer
+ * keys VoteDocs by the bare proposalId (handleMsgCastVote `_docId = proposalId`),
+ * so a constant would make two multisig vaults collide on one vote doc. Matches
+ * the deterministic-proposalId convention in `bounty.ts`.
+ */
+export const AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX = 'agent-vault-withdraw-vote';
 
 const PERIOD_MS: Record<AgentVaultPeriod, number> = {
   daily: 86_400_000,
@@ -85,9 +92,23 @@ export function buildAgentVault(params: AgentVaultParams): any {
   const symbol = sanitizeCosmosPathName(params.symbol || 'av' + coin.symbol, 'symbol');
   const period = params.period ?? 'daily';
 
-  // Withdrawal gating → approvalCriteria. No overridesFrom/To (reserved-protocol-
-  // address forceful-transfer rule, ticket 0436); the holder (agent) must own
-  // the tokens to withdraw, and the gating below caps the rate.
+  // Single deterministic seed shared by the withdraw approvalId AND the multisig
+  // proposalId, so both are stable across replays yet unique per distinct vault
+  // (the proposalId MUST be unique — the indexer keys VoteDocs by it).
+  const withdrawSeed = {
+    backing: coin.denom,
+    symbol,
+    withdrawLimit: params.withdrawLimit || 0,
+    period,
+    unlockAt: params.unlockAt || 0,
+    expiresAt: params.expiresAt || 0,
+    signers: (params.signers ?? []).map((s) => `${s.address}:${s.weight ?? 1}`).join(','),
+    threshold: params.threshold || 0
+  };
+
+  // Withdrawal gating → approvalCriteria. No overridesFrom/To: the holder (agent)
+  // must own the tokens to withdraw and the gating below caps the rate. (An
+  // optional manager kill-switch adds its own forceful approval separately.)
   const withdrawCriteria: any = { mustPrioritize: true, allowBackedMinting: true };
 
   // Amount cap → per-initiator running tally, reset every `period`.
@@ -128,7 +149,7 @@ export function buildAgentVault(params: AgentVaultParams): any {
     const quorumPct = Math.max(1, Math.min(100, Math.floor((threshold / totalWeight) * 100)));
     withdrawCriteria.votingChallenges = [
       {
-        proposalId: AGENT_VAULT_WITHDRAW_PROPOSAL_ID,
+        proposalId: stableHashId(AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX, withdrawSeed),
         quorumThreshold: String(quorumPct),
         voters,
         uri: '',
@@ -166,16 +187,7 @@ export function buildAgentVault(params: AgentVaultParams): any {
       initiatedByListId: 'All',
       // Deterministic suffix (not random) for replayable, diff-able builds.
       // The `agent-vault-withdraw-` prefix is load-bearing for detection.
-      approvalId: stableHashId(AGENT_VAULT_WITHDRAW_APPROVAL_PREFIX, {
-        backing: coin.denom,
-        symbol,
-        withdrawLimit: params.withdrawLimit || 0,
-        period,
-        unlockAt: params.unlockAt || 0,
-        expiresAt: params.expiresAt || 0,
-        signers: (params.signers ?? []).map((s) => `${s.address}:${s.weight ?? 1}`).join(','),
-        threshold: params.threshold || 0
-      }),
+      approvalId: stableHashId(AGENT_VAULT_WITHDRAW_APPROVAL_PREFIX, withdrawSeed),
       ...approvalMetadata(
         'Withdrawal',
         "Burn agent-vault tokens to withdraw backing coins, within the vault's gating (cap / time window / multisig)."

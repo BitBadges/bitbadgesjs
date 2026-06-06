@@ -87,13 +87,16 @@ describe('agent-vaults integration', () => {
       expect(out.json.standards).toEqual(['Smart Token', 'Agent Vault']);
     }, 30000);
 
-    it('status returns active + the correct backing denom and cap', () => {
+    it('status reports withdrawable + correct denom/cap (no time/multisig gating)', () => {
       if (!ready || !collectionId) return;
       const out = runCli(['agent-vaults', 'status', collectionId, '--local']);
-      expect(out.json.status).toBe('active');
       expect(out.json.backingDenom).toBe(USDC_DENOM);
       expect(out.json.cap).toEqual({ perPeriodBaseUnits: '5000000', period: 'daily' });
+      expect(out.json.timeWindow.state).toBe('always-open');
       expect(out.json.multisig).toBeNull();
+      // No time/multisig gating → withdrawable right now.
+      expect(out.json.withdrawable).toBe(true);
+      expect(out.json.status).toBe('withdrawable');
     }, 30000);
 
     it('list runs and returns a (curated) Agent Vault array', () => {
@@ -179,10 +182,16 @@ describe('agent-vaults integration', () => {
       if (!ready) return;
       const manager = alice();
       const tmp = path.join(os.tmpdir(), `av-ms-build-${crypto.randomBytes(4).toString('hex')}.json`);
+      // Unique alpha symbol per run → unique proposalId → a fresh indexer
+      // VoteDoc. (The indexer keys VoteDocs by the bare proposalId, so reusing
+      // identical vault params across runs would otherwise read a prior run's
+      // already-passed vote. Symbols must be digit-free per the chain regex.)
+      const sym = 'avms' + Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('');
       runCli(
         [
           'build', 'agent-vault',
           '--backing-coin', 'USDC',
+          '--symbol', sym,
           '--name', 'Multisig Agent Vault',
           '--image', 'https://example.com/av-ms.png',
           '--description', 'A 2-of-2 vote-gated Agent Vault',
@@ -199,11 +208,14 @@ describe('agent-vaults integration', () => {
       collectionId = tx.collectionId!;
       await waitForIndexerCollection(collectionId);
 
-      // status surfaces the 2-voter multisig.
+      // status surfaces the 2-voter multisig and reports it locked (no votes yet).
       const status = runCli(['agent-vaults', 'status', collectionId, '--local']);
       expect(status.json.multisig).not.toBeNull();
       expect(status.json.multisig.voters).toBe(2);
       expect(status.json.multisig.quorumThreshold).toBe('100'); // 2-of-2 → 100%
+      expect(status.json.multisig.quorumMet).toBe(false);
+      expect(status.json.withdrawable).toBe(false);
+      expect(status.json.status).toBe('locked-pending-multisig');
 
       // alice deposits 6 USDC so there are tokens to withdraw later.
       try { await fundPersona('alice', manager.address, '10000000', USDC_DENOM); } catch { /* ok */ }
@@ -240,6 +252,21 @@ describe('agent-vaults integration', () => {
         const tx = await deployMsgViaKeyring(writeMsgToTmp(voteMsg.json, 'av-vote'), voter.name);
         expect(tx.code).toBe(0);
       }
+      // status now reflects quorum reached → withdrawable. Poll: the indexer
+      // needs a moment to process the MsgCastVote txs into its VoteModel after
+      // they commit on-chain.
+      let quorumMet = false;
+      for (let i = 0; i < 15 && !quorumMet; i++) {
+        const s = runCli(['agent-vaults', 'status', collectionId!, '--local']);
+        quorumMet = s.json.multisig?.quorumMet === true;
+        if (quorumMet) {
+          expect(s.json.withdrawable).toBe(true);
+          expect(s.json.status).toBe('withdrawable');
+        } else {
+          await new Promise((r) => setTimeout(r, 1500));
+        }
+      }
+      expect(quorumMet).toBe(true);
     }, 150000);
 
     it('withdraw AFTER quorum succeeds (sticky one-time unlock)', async () => {

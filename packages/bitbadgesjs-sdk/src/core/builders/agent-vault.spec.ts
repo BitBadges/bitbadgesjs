@@ -6,7 +6,7 @@
  * multisig → votingChallenges), determinism, and standards-compliance.
  */
 import { verifyStandardsCompliance } from '../../api-indexer/verify-standards.js';
-import { buildAgentVault, AGENT_VAULT_DEPOSIT_APPROVAL_ID, AGENT_VAULT_WITHDRAW_PROPOSAL_ID } from './agent-vault.js';
+import { buildAgentVault, AGENT_VAULT_DEPOSIT_APPROVAL_ID, AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX } from './agent-vault.js';
 
 const val = (msg: any) => msg.value;
 const META = { name: 'Agent Vault', description: 'An agent budget vault.', image: 'ipfs://test-image' };
@@ -59,7 +59,8 @@ describe('buildAgentVault', () => {
       })
     );
     const vc = w.approvalCriteria.votingChallenges[0];
-    expect(vc.proposalId).toBe(AGENT_VAULT_WITHDRAW_PROPOSAL_ID);
+    // proposalId is hashed (unique per vault), prefixed for readability.
+    expect(vc.proposalId.startsWith(AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX + '-')).toBe(true);
     // 2 of 3 equal-weight voters → floor(2/3 * 100) = 66
     expect(vc.quorumThreshold).toBe('66');
     expect(vc.voters).toHaveLength(3);
@@ -94,6 +95,17 @@ describe('buildAgentVault', () => {
   test('deterministic — identical params produce byte-identical msg', () => {
     const p = { backingCoin: 'USDC', withdrawLimit: 5, period: 'daily' as const, ...META };
     expect(buildAgentVault(p)).toEqual(buildAgentVault(p));
+  });
+
+  test('distinct vaults get distinct proposalIds (no indexer VoteDoc collision)', () => {
+    // The indexer keys VoteDocs by the bare proposalId, so two multisig vaults
+    // with different params MUST NOT share one. (Identical params intentionally
+    // collide — same as the withdraw approvalId — which is the replay case.)
+    const a = withdrawApproval(buildAgentVault({ backingCoin: 'USDC', signers: [{ address: 'bb1aaa' }], ...META }));
+    const b = withdrawApproval(buildAgentVault({ backingCoin: 'BADGE', signers: [{ address: 'bb1aaa' }], ...META }));
+    const pidA = a.approvalCriteria.votingChallenges[0].proposalId;
+    const pidB = b.approvalCriteria.votingChallenges[0].proposalId;
+    expect(pidA).not.toBe(pidB);
   });
 
   test('passes standards-compliance verification', () => {

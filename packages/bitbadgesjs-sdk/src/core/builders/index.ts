@@ -17,7 +17,7 @@ export {
   type AgentVaultPeriod,
   AGENT_VAULT_DEPOSIT_APPROVAL_ID,
   AGENT_VAULT_WITHDRAW_APPROVAL_PREFIX,
-  AGENT_VAULT_WITHDRAW_PROPOSAL_ID
+  AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX
 } from './agent-vault.js';
 export { buildSubscription, type SubscriptionParams, type SubscriptionPayout } from './subscription.js';
 export { buildBounty, type BountyParams } from './bounty.js';

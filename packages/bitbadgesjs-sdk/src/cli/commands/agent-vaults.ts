@@ -38,7 +38,8 @@ import {
   buildAgentVaultDepositMsg,
   buildAgentVaultWithdrawMsg,
   buildAgentVaultPayMsgs,
-  buildAgentVaultVoteMsg
+  buildAgentVaultVoteMsg,
+  type AgentVaultDetails
 } from '../../core/agent-vaults.js';
 import { resolveCoin, toBaseUnits } from '../../core/builders/shared.js';
 
@@ -66,6 +67,84 @@ function resolveBackingAmount(rawAmount: string, baseUnits: boolean, backingDeno
   }
   const resolved = resolveCoin(backingDenom);
   return toBaseUnits(Number(rawAmount), resolved.decimals);
+}
+
+/** The chain id used by /swap/balances + vote scoping for the current network. */
+function chainIdFor(opts: NetworkFlags): string {
+  return opts.testnet ? 'bitbadges-2' : 'bitbadges-1';
+}
+
+/**
+ * Backing alias' on-chain balance of the backing denom (base units, the vault's
+ * TVL). Best-effort: returns null if the balance route is unavailable (e.g. a
+ * local devnet without the swap balance providers).
+ */
+async function fetchBackingBalance(details: AgentVaultDetails, opts: NetworkFlags): Promise<string | null> {
+  try {
+    const chainId = chainIdFor(opts);
+    const res = await callApi('POST', '/swap/balances', opts, { chains: { [chainId]: [details.backingAddress] } });
+    const rows: any[] = res?.balances?.[chainId]?.[details.backingAddress] ?? [];
+    const row = rows.find((r: any) => r.denom === details.backingDenom);
+    return row ? String(row.amount) : '0';
+  } catch {
+    return null;
+  }
+}
+
+/** Compute the time-window state from the parsed gating + now. */
+function timeWindowState(details: AgentVaultDetails, nowMs: number): {
+  state: 'always-open' | 'before-unlock' | 'open' | 'expired';
+  unlockAt: string | null;
+  expiresAt: string | null;
+} {
+  const tw = details.gating.timeWindow;
+  if (!tw) return { state: 'always-open', unlockAt: null, expiresAt: null };
+  const start = Number(tw.unlockAt);
+  const end = Number(tw.expiresAt);
+  const state = nowMs < start ? 'before-unlock' : nowMs > end ? 'expired' : 'open';
+  return { state, unlockAt: tw.unlockAt, expiresAt: tw.expiresAt };
+}
+
+/**
+ * Live multisig tally for the withdraw proposal. Returns the configured quorum
+ * + current weighted yes total + whether quorum is met (mirrors the chain's
+ * `floor(yesWeight*100/totalWeight) >= quorumThreshold`). Best-effort: an
+ * un-voted proposal has no vote doc yet (404) → 0 yes, quorum not met.
+ */
+async function fetchMultisigState(details: AgentVaultDetails, opts: NetworkFlags): Promise<{
+  quorumThreshold: string;
+  totalPossibleWeight: string;
+  totalYesWeight: string;
+  yesPercent: number;
+  quorumMet: boolean;
+  votesCast: number;
+  voters: number;
+} | null> {
+  const ms = details.gating.multisig;
+  if (!ms) return null;
+  const totalPossibleWeight = ms.voters.reduce((n, v) => n + Number(v.weight || '1'), 0);
+  let totalYesWeight = 0;
+  let votesCast = 0;
+  try {
+    const res = await callApi('GET', `/vote/${encodeURIComponent(ms.proposalId)}`, opts);
+    const v = res?.vote;
+    if (v) {
+      totalYesWeight = Number(v.totalYesWeight ?? '0');
+      votesCast = Array.isArray(v.votes) ? v.votes.length : 0;
+    }
+  } catch {
+    // No vote doc yet (nobody has voted) — leave totals at 0.
+  }
+  const yesPercent = totalPossibleWeight > 0 ? Math.floor((totalYesWeight * 100) / totalPossibleWeight) : 0;
+  return {
+    quorumThreshold: ms.quorumThreshold,
+    totalPossibleWeight: String(totalPossibleWeight),
+    totalYesWeight: String(totalYesWeight),
+    yesPercent,
+    quorumMet: yesPercent >= Number(ms.quorumThreshold),
+    votesCast,
+    voters: ms.voters.length
+  };
 }
 
 // ── agent-vaults (parent) ─────────────────────────────────────────────────────
@@ -140,7 +219,10 @@ addOutputFlags(
   addNetworkFlags(
     agentVaultsCommand
       .command('status')
-      .description('Compact status — collection id, backing denom, and a gating summary.')
+      .description(
+        'Live status — backing TVL, the per-period cap, time-window state, the current multisig tally, ' +
+          'and whether the vault is withdrawable right now.'
+      )
       .argument('<collection-id>', 'Agent Vault collection ID')
   )
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags) => {
@@ -148,14 +230,38 @@ addOutputFlags(
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'agent-vaults status');
     const d = extractAgentVaultDetails(collection)!;
+
+    // Live state (best-effort; each degrades to null/0 if its route is down).
+    const [backingBalance, multisig] = await Promise.all([
+      fetchBackingBalance(d, opts),
+      fetchMultisigState(d, opts)
+    ]);
+    const time = timeWindowState(d, Date.now());
+
+    // Withdrawable right now = the time window is open AND (no multisig OR
+    // quorum already reached). The per-period cap bounds the AMOUNT, not
+    // whether a withdraw is possible at all, so it doesn't gate this flag.
+    const timeOpen = time.state === 'always-open' || time.state === 'open';
+    const multisigOpen = !multisig || multisig.quorumMet;
+    const withdrawable = timeOpen && multisigOpen;
+    const status = withdrawable
+      ? 'withdrawable'
+      : time.state === 'before-unlock'
+        ? 'locked-until-unlock'
+        : time.state === 'expired'
+          ? 'expired'
+          : 'locked-pending-multisig';
+
     emit(
       {
         collectionId: String(collectionId),
         backingDenom: d.backingDenom,
+        backingBalance, // base units held by the backing alias (TVL); null if unavailable
         cap: d.gating.cap ?? null,
-        timeWindow: d.gating.timeWindow ?? null,
-        multisig: d.gating.multisig ? { quorumThreshold: d.gating.multisig.quorumThreshold, voters: d.gating.multisig.voters.length } : null,
-        status: 'active'
+        timeWindow: time,
+        multisig,
+        withdrawable,
+        status
       },
       opts
     );

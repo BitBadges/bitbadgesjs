@@ -14,7 +14,7 @@
 import type { iCollectionApproval } from '@/interfaces/types/approvals.js';
 import type { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 import { findDepositApproval, findWithdrawApproval } from './smart-tokens.js';
-import { AGENT_VAULT_WITHDRAW_PROPOSAL_ID } from './builders/agent-vault.js';
+import { AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX } from './builders/agent-vault.js';
 
 const AV_MAX_UINT64 = '18446744073709551615';
 
@@ -255,7 +255,7 @@ export function buildAgentVaultVoteMsg(args: {
   const { creator, collectionId, details, yesWeight = '100' } = args;
   const proposalId =
     details.withdrawApproval.approvalCriteria?.votingChallenges?.[0]?.proposalId ??
-    AGENT_VAULT_WITHDRAW_PROPOSAL_ID;
+    AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX;
   return {
     typeUrl: '/tokenization.MsgCastVote',
     value: {
