@@ -316,6 +316,12 @@ describe('agent-vaults integration', () => {
       const depTx = await deployMsgViaKeyring(writeMsgToTmp(dep.json, 'av-ks-deposit'), manager.name);
       expect(depTx.code).toBe(0);
       await pollTokenAmount(collectionId, manager.address, (n) => n >= 5n, { label: 'alice kill-switch vault tokens' });
+
+      // Transparency: show/status must surface the kill-switch recovery address.
+      const shown = runCli(['agent-vaults', 'show', collectionId, '--local']);
+      expect(shown.json.recovery).toBe(recovery.address);
+      const stat = runCli(['agent-vaults', 'status', collectionId, '--local']);
+      expect(stat.json.recovery).toBe(recovery.address);
     }, 150000);
 
     it("agent's normal withdraw is blocked (time-locked)", async () => {

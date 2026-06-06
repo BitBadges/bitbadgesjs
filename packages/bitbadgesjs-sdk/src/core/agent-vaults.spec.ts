@@ -113,6 +113,13 @@ describe('buildAgentVaultRecoverMsgs (admin kill-switch)', () => {
   });
 });
 
+describe('buildAgentVaultVoteMsg', () => {
+  it('throws (does not fall back to a constant) when the vault has no multisig proposal', () => {
+    const details = extractAgentVaultDetails(asCollection(buildAgentVault({ backingCoin: 'USDC', ...META })))!;
+    expect(() => buildAgentVaultVoteMsg({ creator: 'bb1signer', collectionId: '42', details })).toThrow(/no multisig proposal/);
+  });
+});
+
 describe('lifecycle msg builders', () => {
   const c = asCollection(buildAgentVault({ backingCoin: 'USDC', withdrawLimit: 5, signers: [{ address: 'bb1signer' }], ...META }));
   const details = extractAgentVaultDetails(c)!;

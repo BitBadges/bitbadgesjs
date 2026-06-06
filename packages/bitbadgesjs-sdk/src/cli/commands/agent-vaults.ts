@@ -207,6 +207,9 @@ addOutputFlags(
         depositApprovalId: d.depositApproval.approvalId,
         withdrawApprovalId: d.withdrawApproval.approvalId,
         gating: d.gating,
+        // Surface the admin kill-switch so depositors can see whether a recovery
+        // address can claw back + drain the vault (null = no kill-switch).
+        recovery: d.recovery?.address ?? null,
         standards: collection.standards
       },
       opts
@@ -261,6 +264,7 @@ addOutputFlags(
         cap: d.gating.cap ?? null,
         timeWindow: time,
         multisig,
+        recovery: d.recovery?.address ?? null, // kill-switch admin (null = none)
         withdrawable,
         status
       },
@@ -344,8 +348,8 @@ addOutputFlags(
     agentVaultsCommand
       .command('pay')
       .description(
-        'Emit {messages:[MsgTransferTokens(withdraw), bank MsgSend]} — atomically withdraw (gated) and send the released backing coin to a recipient. ' +
-          'If the gated leg fails, the send never executes. Pipe to `bb deploy`.'
+        'Emit {messages:[MsgTransferTokens(withdraw), bank MsgSend]} — withdraw (gated) then send the released backing coin to a recipient. ' +
+          'Atomic only when broadcast as a single tx (bb deploy --browser/--burner); via --with-keyring the two legs run sequentially. Pipe to `bb deploy`.'
       )
       .argument('<collection-id>', 'Agent Vault collection ID')
       .requiredOption('--creator <address>', 'Caller address (the agent holding the vault tokens)')
@@ -410,8 +414,10 @@ addOutputFlags(
       }
       if (creator !== details.recovery.address) {
         process.stderr.write(
-          `Warning: --creator ${creator} is not the vault's recovery address (${details.recovery.address}). The chain will reject this.\n`
+          `Error: --creator ${creator} is not the vault's recovery address (${details.recovery.address}). ` +
+            'Only the recovery address can invoke the kill-switch; the chain would reject this.\n'
         );
+        process.exit(2);
       }
       const amount = resolveBackingAmount(opts.amount, !!opts.baseUnits, details.backingDenom);
       const messages = buildAgentVaultRecoverMsgs({ creator, collectionId: String(collectionId), from, amount, details });

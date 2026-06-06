@@ -85,6 +85,18 @@ describe('buildAgentVault', () => {
     ).toThrow(/threshold must be between 1 and the total signer weight/);
   });
 
+  test('throws on duplicate signer addresses', () => {
+    expect(() =>
+      buildAgentVault({ backingCoin: 'USDC', signers: [{ address: 'bb1aaa' }, { address: 'bb1aaa' }], ...META })
+    ).toThrow(/duplicate addresses/);
+  });
+
+  test('throws when --unlock-at is not before --expires-at', () => {
+    expect(() =>
+      buildAgentVault({ backingCoin: 'USDC', unlockAt: 2000, expiresAt: 1000, ...META })
+    ).toThrow(/must be before/);
+  });
+
   test('threshold defaults to unanimous (100%)', () => {
     const w = withdrawApproval(
       buildAgentVault({ backingCoin: 'USDC', signers: [{ address: 'bb1aaa' }, { address: 'bb1bbb' }], ...META })
@@ -151,5 +163,26 @@ describe('buildAgentVault', () => {
     const msg = buildAgentVault({ backingCoin: 'USDC', withdrawLimit: 5, recovery: 'bb1recovery', ...META });
     const vr = verifyStandardsCompliance({ messages: [msg] });
     expect({ valid: vr.valid, violations: vr.violations }).toEqual({ valid: true, violations: [] });
+  });
+
+  test('verifyAgentVault rejects a deposit-only vault (fund trap)', () => {
+    const msg = buildAgentVault({ backingCoin: 'USDC', ...META });
+    // Drop the withdraw approval — depositors could mint but never get coins back.
+    msg.value.collectionApprovals = msg.value.collectionApprovals.filter(
+      (a: any) => !a.approvalId.includes('withdraw')
+    );
+    const vr = verifyStandardsCompliance({ messages: [msg] });
+    expect(vr.valid).toBe(false);
+    expect(JSON.stringify(vr.violations)).toMatch(/withdraw approval/i);
+  });
+
+  test('verifyAgentVault rejects a forceful approval that anyone can initiate', () => {
+    const msg = buildAgentVault({ backingCoin: 'USDC', recovery: 'bb1recovery', ...META });
+    // Open the kill-switch freeze to "All" — anyone could seize vault tokens.
+    const freeze = msg.value.collectionApprovals.find((a: any) => a.approvalId === 'agent-vault-emergency-freeze');
+    freeze.initiatedByListId = 'All';
+    const vr = verifyStandardsCompliance({ messages: [msg] });
+    expect(vr.valid).toBe(false);
+    expect(JSON.stringify(vr.violations)).toMatch(/admin-scoped/i);
   });
 });

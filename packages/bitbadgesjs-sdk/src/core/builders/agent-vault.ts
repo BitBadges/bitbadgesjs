@@ -145,6 +145,13 @@ export function buildAgentVault(params: AgentVaultParams): any {
   // Multisig → one-time voting-challenge unlock.
   if (params.signers && params.signers.length) {
     const voters = params.signers.map((s) => ({ address: s.address, weight: String(s.weight ?? 1) }));
+    // Reject duplicate signer addresses — they inflate totalWeight (so the
+    // quorum % is computed against a total the chain won't actually tally),
+    // which can make quorum unreachable.
+    const addrs = voters.map((v) => v.address);
+    if (new Set(addrs).size !== addrs.length) {
+      throw new Error('agent-vault: --signers contains duplicate addresses; each signer must be listed once.');
+    }
     const totalWeight = voters.reduce((n, v) => n + Number(v.weight), 0);
     const threshold = params.threshold ?? totalWeight; // default: unanimous
     // Chain semantics (verified against x/tokenization/keeper/msg_server_cast_vote.go):
@@ -177,6 +184,12 @@ export function buildAgentVault(params: AgentVaultParams): any {
   }
 
   // Time window → restrict the withdraw approval's transferTimes.
+  if (params.unlockAt && params.expiresAt && params.unlockAt >= params.expiresAt) {
+    throw new Error(
+      `agent-vault: --unlock-at (${params.unlockAt}) must be before --expires-at (${params.expiresAt}); ` +
+        'otherwise withdrawals are permanently locked.'
+    );
+  }
   const withdrawTransferTimes =
     params.unlockAt || params.expiresAt
       ? [{ start: String(params.unlockAt ?? 1), end: String(params.expiresAt ?? MAX_UINT64) }]

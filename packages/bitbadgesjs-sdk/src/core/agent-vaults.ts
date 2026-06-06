@@ -15,7 +15,6 @@ import type { iCollectionApproval } from '@/interfaces/types/approvals.js';
 import type { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 import { findDepositApproval, findWithdrawApproval } from './smart-tokens.js';
 import {
-  AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX,
   AGENT_VAULT_EMERGENCY_FREEZE_APPROVAL_ID,
   AGENT_VAULT_EMERGENCY_EXIT_APPROVAL_ID
 } from './builders/agent-vault.js';
@@ -301,9 +300,17 @@ export function buildAgentVaultVoteMsg(args: {
   yesWeight?: string;
 }): AgentVaultVoteMsg {
   const { creator, collectionId, details, yesWeight = '100' } = args;
+  // Resolve the real on-chain proposalId (a per-vault hash). Do NOT fall back to
+  // a constant — the bare prefix is never an actual proposalId, so a vote cast
+  // against it would silently miss the real proposal and never advance quorum.
   const proposalId =
-    details.withdrawApproval.approvalCriteria?.votingChallenges?.[0]?.proposalId ??
-    AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX;
+    details.gating.multisig?.proposalId ??
+    details.withdrawApproval.approvalCriteria?.votingChallenges?.[0]?.proposalId;
+  if (!proposalId) {
+    throw new Error(
+      'Cannot cast vote: this Agent Vault has no multisig proposal (no votingChallenge on the withdraw approval).'
+    );
+  }
   return {
     typeUrl: '/tokenization.MsgCastVote',
     value: {
