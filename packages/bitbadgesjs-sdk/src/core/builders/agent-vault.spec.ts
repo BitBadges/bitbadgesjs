@@ -1,0 +1,188 @@
+/**
+ * Tests for the Agent Vault builder.
+ *
+ * Verifies the standards tag, deposit/withdraw approvals, the gating
+ * compilation (per-period cap → approvalAmounts, time window → transferTimes,
+ * multisig → votingChallenges), determinism, and standards-compliance.
+ */
+import { verifyStandardsCompliance } from '../../api-indexer/verify-standards.js';
+import { buildAgentVault, AGENT_VAULT_DEPOSIT_APPROVAL_ID, AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX } from './agent-vault.js';
+
+const val = (msg: any) => msg.value;
+const META = { name: 'Agent Vault', description: 'An agent budget vault.', image: 'ipfs://test-image' };
+
+function withdrawApproval(msg: any): any {
+  return val(msg).collectionApprovals.find((a: any) => a.approvalId.includes('withdraw'));
+}
+
+describe('buildAgentVault', () => {
+  test('carries the Smart Token + Agent Vault standards', () => {
+    const r = val(buildAgentVault({ backingCoin: 'USDC', ...META }));
+    expect(r.standards).toEqual(['Smart Token', 'Agent Vault']);
+  });
+
+  test('has a deposit approval and a prefixed withdraw approval', () => {
+    const r = val(buildAgentVault({ backingCoin: 'USDC', ...META }));
+    const ids = r.collectionApprovals.map((a: any) => a.approvalId);
+    expect(ids).toContain(AGENT_VAULT_DEPOSIT_APPROVAL_ID);
+    expect(ids.some((id: string) => id.startsWith('agent-vault-withdraw-'))).toBe(true);
+  });
+
+  test('ungated by default — withdraw approval has no cap/time/multisig', () => {
+    const w = withdrawApproval(buildAgentVault({ backingCoin: 'USDC', ...META }));
+    expect(w.approvalCriteria.approvalAmounts).toBeUndefined();
+    expect(w.approvalCriteria.votingChallenges).toBeUndefined();
+    // FOREVER transfer window
+    expect(w.transferTimes).toEqual([{ start: '1', end: '18446744073709551615' }]);
+  });
+
+  test('withdrawLimit + period → approvalAmounts (per-initiator, periodic reset)', () => {
+    const w = withdrawApproval(buildAgentVault({ backingCoin: 'USDC', withdrawLimit: 5, period: 'weekly', ...META }));
+    const aa = w.approvalCriteria.approvalAmounts;
+    expect(aa.perInitiatedByAddressApprovalAmount).toBe('5000000'); // 5 USDC @ 6dp
+    expect(aa.amountTrackerId).toBe('withdrawal-weekly');
+    expect(aa.resetTimeIntervals.intervalLength).toBe('604800000');
+  });
+
+  test('unlockAt/expiresAt → restricted transferTimes window', () => {
+    const w = withdrawApproval(buildAgentVault({ backingCoin: 'USDC', unlockAt: 1700000000000, expiresAt: 1800000000000, ...META }));
+    expect(w.transferTimes).toEqual([{ start: '1700000000000', end: '1800000000000' }]);
+  });
+
+  test('signers + threshold → votingChallenges (N-of-M → percentage quorum)', () => {
+    const w = withdrawApproval(
+      buildAgentVault({
+        backingCoin: 'USDC',
+        signers: [{ address: 'bb1aaa' }, { address: 'bb1bbb' }, { address: 'bb1ccc' }],
+        threshold: 2,
+        ...META
+      })
+    );
+    const vc = w.approvalCriteria.votingChallenges[0];
+    // proposalId is hashed (unique per vault), prefixed for readability.
+    expect(vc.proposalId.startsWith(AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX + '-')).toBe(true);
+    // 2 of 3 equal-weight voters → floor(2/3 * 100) = 66
+    expect(vc.quorumThreshold).toBe('66');
+    expect(vc.voters).toHaveLength(3);
+    expect(vc.voters[0]).toEqual({ address: 'bb1aaa', weight: '1' });
+    expect(vc.resetAfterExecution).toBe(false);
+  });
+
+  test('throws when --threshold exceeds the total signer weight (e.g. 5-of-3)', () => {
+    expect(() =>
+      buildAgentVault({
+        backingCoin: 'USDC',
+        signers: [{ address: 'bb1aaa' }, { address: 'bb1bbb' }, { address: 'bb1ccc' }],
+        threshold: 5,
+        ...META
+      })
+    ).toThrow(/threshold must be between 1 and the total signer weight/);
+  });
+
+  test('throws when --threshold is below 1', () => {
+    expect(() =>
+      buildAgentVault({ backingCoin: 'USDC', signers: [{ address: 'bb1aaa' }], threshold: 0, ...META })
+    ).toThrow(/threshold must be between 1 and the total signer weight/);
+  });
+
+  test('throws on duplicate signer addresses', () => {
+    expect(() =>
+      buildAgentVault({ backingCoin: 'USDC', signers: [{ address: 'bb1aaa' }, { address: 'bb1aaa' }], ...META })
+    ).toThrow(/duplicate addresses/);
+  });
+
+  test('throws when --unlock-at is not before --expires-at', () => {
+    expect(() =>
+      buildAgentVault({ backingCoin: 'USDC', unlockAt: 2000, expiresAt: 1000, ...META })
+    ).toThrow(/must be before/);
+  });
+
+  test('threshold defaults to unanimous (100%)', () => {
+    const w = withdrawApproval(
+      buildAgentVault({ backingCoin: 'USDC', signers: [{ address: 'bb1aaa' }, { address: 'bb1bbb' }], ...META })
+    );
+    expect(w.approvalCriteria.votingChallenges[0].quorumThreshold).toBe('100');
+  });
+
+  test('deterministic — identical params produce byte-identical msg', () => {
+    const p = { backingCoin: 'USDC', withdrawLimit: 5, period: 'daily' as const, ...META };
+    expect(buildAgentVault(p)).toEqual(buildAgentVault(p));
+  });
+
+  test('distinct vaults get distinct proposalIds (no indexer VoteDoc collision)', () => {
+    // The indexer keys VoteDocs by the bare proposalId, so two multisig vaults
+    // with different params MUST NOT share one. (Identical params intentionally
+    // collide — same as the withdraw approvalId — which is the replay case.)
+    const a = withdrawApproval(buildAgentVault({ backingCoin: 'USDC', signers: [{ address: 'bb1aaa' }], ...META }));
+    const b = withdrawApproval(buildAgentVault({ backingCoin: 'BADGE', signers: [{ address: 'bb1aaa' }], ...META }));
+    const pidA = a.approvalCriteria.votingChallenges[0].proposalId;
+    const pidB = b.approvalCriteria.votingChallenges[0].proposalId;
+    expect(pidA).not.toBe(pidB);
+  });
+
+  test('passes standards-compliance verification', () => {
+    const msg = buildAgentVault({ backingCoin: 'USDC', withdrawLimit: 5, period: 'daily', ...META });
+    const vr = verifyStandardsCompliance({ messages: [msg] });
+    expect({ valid: vr.valid, violations: vr.violations }).toEqual({ valid: true, violations: [] });
+  });
+
+  test('no kill-switch by default — forceful transfers locked, no emergency approvals', () => {
+    const r = val(buildAgentVault({ backingCoin: 'USDC', ...META }));
+    expect(r.invariants.noForcefulPostMintTransfers).toBe(true);
+    const ids = r.collectionApprovals.map((a: any) => a.approvalId);
+    expect(ids).not.toContain('agent-vault-emergency-freeze');
+    expect(ids).not.toContain('agent-vault-emergency-exit');
+  });
+
+  test('--recovery bakes the freeze + exit approvals and unlocks forceful transfers', () => {
+    const r = val(buildAgentVault({ backingCoin: 'USDC', recovery: 'bb1recovery', ...META }));
+    // The freeze is forceful, which the chain only allows when the invariant is off.
+    expect(r.invariants.noForcefulPostMintTransfers).toBe(false);
+
+    const freeze = r.collectionApprovals.find((a: any) => a.approvalId === 'agent-vault-emergency-freeze');
+    const exit = r.collectionApprovals.find((a: any) => a.approvalId === 'agent-vault-emergency-exit');
+    expect(freeze).toBeDefined();
+    expect(exit).toBeDefined();
+
+    // Freeze: recovery-scoped forceful clawback; never from the backing alias.
+    expect(freeze.toListId).toBe('bb1recovery');
+    expect(freeze.initiatedByListId).toBe('bb1recovery');
+    expect(freeze.fromListId.startsWith('!Mint')).toBe(true);
+    expect(freeze.approvalCriteria.overridesFromOutgoingApprovals).toBe(true);
+    expect(freeze.approvalCriteria.overridesToIncomingApprovals).toBe(true);
+
+    // Exit: recovery-only, ungated (no cap/time/multisig), unbacks to recovery.
+    expect(exit.fromListId).toBe('bb1recovery');
+    expect(exit.initiatedByListId).toBe('bb1recovery');
+    expect(exit.approvalCriteria.allowBackedMinting).toBe(true);
+    expect(exit.approvalCriteria.approvalAmounts).toBeUndefined();
+    expect(exit.approvalCriteria.votingChallenges).toBeUndefined();
+  });
+
+  test('a kill-switch vault still passes standards-compliance verification', () => {
+    const msg = buildAgentVault({ backingCoin: 'USDC', withdrawLimit: 5, recovery: 'bb1recovery', ...META });
+    const vr = verifyStandardsCompliance({ messages: [msg] });
+    expect({ valid: vr.valid, violations: vr.violations }).toEqual({ valid: true, violations: [] });
+  });
+
+  test('verifyAgentVault rejects a deposit-only vault (fund trap)', () => {
+    const msg = buildAgentVault({ backingCoin: 'USDC', ...META });
+    // Drop the withdraw approval — depositors could mint but never get coins back.
+    msg.value.collectionApprovals = msg.value.collectionApprovals.filter(
+      (a: any) => !a.approvalId.includes('withdraw')
+    );
+    const vr = verifyStandardsCompliance({ messages: [msg] });
+    expect(vr.valid).toBe(false);
+    expect(JSON.stringify(vr.violations)).toMatch(/withdraw approval/i);
+  });
+
+  test('verifyAgentVault rejects a forceful approval that anyone can initiate', () => {
+    const msg = buildAgentVault({ backingCoin: 'USDC', recovery: 'bb1recovery', ...META });
+    // Open the kill-switch freeze to "All" — anyone could seize vault tokens.
+    const freeze = msg.value.collectionApprovals.find((a: any) => a.approvalId === 'agent-vault-emergency-freeze');
+    freeze.initiatedByListId = 'All';
+    const vr = verifyStandardsCompliance({ messages: [msg] });
+    expect(vr.valid).toBe(false);
+    expect(JSON.stringify(vr.violations)).toMatch(/admin-scoped/i);
+  });
+});

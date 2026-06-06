@@ -994,6 +994,79 @@ function verifyVault(value: any): StandardViolation[] {
 }
 
 // ============================================================
+// Agent Vault Validator
+// ============================================================
+
+function verifyAgentVault(value: any): StandardViolation[] {
+  const violations: StandardViolation[] = [];
+  const std = 'Agent Vault';
+  const standards: string[] = value?.standards ?? [];
+  const approvals = getApprovals(value);
+  const invariants = getInvariants(value);
+  const isTrue = (v: any) => v === true || v === 'true';
+
+  // Agent Vaults are Smart Tokens — the base tag must be present too.
+  if (!standards.includes('Smart Token')) {
+    violations.push({ standard: std, field: 'standards', message: 'Agent Vault collections MUST also carry the "Smart Token" standard.' });
+  }
+
+  // Must have the IBC backing path.
+  if (!invariants.cosmosCoinBackedPath) {
+    violations.push({ standard: std, field: 'invariants.cosmosCoinBackedPath', message: 'Agent Vault collections MUST have a cosmosCoinBackedPath defining the IBC backing.' });
+  }
+
+  // validTokenIds must be exactly [{1,1}] (kept in lockstep with the consumer
+  // validator in core/agent-vaults.ts).
+  const vt = value?.validTokenIds ?? [];
+  const vtOk = vt.length === 1 && String(vt[0]?.start) === '1' && String(vt[0]?.end) === '1';
+  if (!vtOk) {
+    violations.push({ standard: std, field: 'validTokenIds', message: 'Agent Vault validTokenIds MUST be exactly [{start: 1, end: 1}].' });
+  }
+
+  // Must have BOTH a deposit and a withdraw approval — a deposit-only vault is
+  // a fund trap (you can mint but never release the backing coin). Match by id
+  // substring, the same heuristic as findDepositApproval/findWithdrawApproval.
+  const idOf = (a: any) => String(a.approvalId ?? '').toLowerCase();
+  const hasDeposit = approvals.some((a: any) => idOf(a).includes('deposit') || (idOf(a).includes('back') && !idOf(a).includes('unback')));
+  const hasWithdraw = approvals.some((a: any) => idOf(a).includes('withdraw') || idOf(a).includes('unback'));
+  if (!hasDeposit) {
+    violations.push({ standard: std, field: 'collectionApprovals', message: 'Agent Vault MUST have a deposit approval (approvalId containing "deposit" or "back").' });
+  }
+  if (!hasWithdraw) {
+    violations.push({ standard: std, field: 'collectionApprovals', message: 'Agent Vault MUST have a withdraw approval (approvalId containing "withdraw" or "unback").' });
+  }
+
+  // Backing approvals (allowBackedMinting) must be mustPrioritize'd.
+  const backingApprovals = approvals.filter((a: any) => isTrue(a.approvalCriteria?.allowBackedMinting));
+  if (backingApprovals.length === 0) {
+    violations.push({ standard: std, field: 'collectionApprovals', message: 'Agent Vault MUST have at least one approval with allowBackedMinting: true.' });
+  }
+  for (const ba of backingApprovals) {
+    if (!isTrue(ba.approvalCriteria?.mustPrioritize)) {
+      violations.push({ standard: std, field: `collectionApprovals[${ba.approvalId}].mustPrioritize`, message: `Agent Vault backing approval "${ba.approvalId}" MUST have mustPrioritize: true.` });
+    }
+  }
+
+  // Admin kill-switch consistency: any forceful approval (overridesFrom/To with
+  // a non-Mint source) requires noForcefulPostMintTransfers === false (else the
+  // chain rejects creation) AND must be admin-scoped — never initiatedBy "All"
+  // (that would let anyone forcibly seize vault tokens).
+  const forceful = approvals.filter(
+    (a: any) => isTrue(a.approvalCriteria?.overridesFromOutgoingApprovals) || isTrue(a.approvalCriteria?.overridesToIncomingApprovals)
+  );
+  if (forceful.length > 0 && isTrue(invariants.noForcefulPostMintTransfers)) {
+    violations.push({ standard: std, field: 'invariants.noForcefulPostMintTransfers', message: 'Agent Vault has a forceful (override) approval but noForcefulPostMintTransfers is true — the chain will reject this; set it to false.' });
+  }
+  for (const fa of forceful) {
+    if (String(fa.initiatedByListId ?? '') === 'All') {
+      violations.push({ standard: std, field: `collectionApprovals[${fa.approvalId}].initiatedByListId`, message: `Agent Vault forceful approval "${fa.approvalId}" MUST be admin-scoped (initiatedByListId cannot be "All").` });
+    }
+  }
+
+  return violations;
+}
+
+// ============================================================
 // Standard → Validator Map
 // ============================================================
 
@@ -1014,7 +1087,8 @@ const STANDARD_VALIDATORS: Record<string, (value: any) => StandardViolation[]> =
   Auction: verifyAuction,
   Products: verifyProducts,
   'Prediction Market': verifyPredictionMarket,
-  Vault: verifyVault
+  Vault: verifyVault,
+  'Agent Vault': verifyAgentVault
 };
 
 // Also match common alternative names
@@ -1045,7 +1119,8 @@ const STANDARD_ALIASES: Record<string, string> = {
   Products: 'Products',
   'Product Catalog': 'Products',
   'Prediction Market': 'Prediction Market',
-  Vault: 'Vault'
+  Vault: 'Vault',
+  'Agent Vault': 'Agent Vault'
 };
 
 // ============================================================

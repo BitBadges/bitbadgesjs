@@ -296,6 +296,30 @@ describe('buildKeyringMultiCommand', () => {
     expect(result.commandLine.trim().endsWith('--yes')).toBe(true);
   });
 
+  it('maps a cosmos bank MsgSend to `tx bank send` (agent-vaults pay envelope)', () => {
+    const bankSendMsg = {
+      typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+      value: {
+        fromAddress: 'bb1agent',
+        toAddress: 'bb1vendor',
+        amount: [{ denom: 'ibc/ABC', amount: '1000000' }]
+      }
+    };
+    const result = buildKeyringMultiCommand({
+      messages: [transferMsg, bankSendMsg],
+      from: 'alice',
+      network: 'local',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'test',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    });
+    // Withdraw leg → tokenization; send leg → the bank module (NOT tokenization).
+    expect(result.commandLine).toMatch(/bitbadgeschaind tx tokenization transfer-tokens \/[^ \n]+\.json/);
+    expect(result.commandLine).toContain('bitbadgeschaind tx bank send bb1agent bb1vendor 1000000ibc/ABC');
+    expect(result.commandLine).not.toContain('tx tokenization bank');
+  });
+
   it('writes only the inner value of JSON-arg msgs (not the typeUrl wrapper)', () => {
     const result = buildKeyringMultiCommand({
       messages: [voteMsg, transferMsg],

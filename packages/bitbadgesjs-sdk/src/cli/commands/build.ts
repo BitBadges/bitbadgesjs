@@ -449,6 +449,45 @@ sharedOpts(
 
 sharedOpts(
   buildCommand
+    .command('agent-vault')
+    .description(
+      'Create an IBC-backed Agent Vault — a Smart Token whose withdrawal is gated for an agent ' +
+        '(per-period cap / time window / multisig unlock). Set --manager to the human. ' +
+        'Metadata: pass --uri OR --name + --image + --description.'
+    )
+    .requiredOption('--backing-coin <symbol>', 'Backing coin symbol (USDC, BADGE, ATOM, OSMO)')
+    .option('--symbol <symbol>', 'Display symbol (e.g. avUSDC)')
+    .option('--withdraw-limit <n>', 'Max withdrawal per --period (display units)')
+    .option('--period <period>', 'Reset window for --withdraw-limit: daily | weekly | monthly (default daily)')
+    .option('--unlock-at <ms>', 'Withdrawals invalid before this epoch-ms')
+    .option('--expires-at <ms>', 'Withdrawals invalid after this epoch-ms')
+    .option('--signers <list>', 'Comma-separated multisig signers (bb1addr or bb1addr:weight) whose votes unlock withdrawals')
+    .option('--threshold <n>', 'Required yes-weight to unlock (N in N-of-M); defaults to unanimous')
+    .option('--recovery <address>', 'Optional admin kill-switch: a bb1... recovery address that can claw back + fully exit the vault anytime, bypassing all gating')
+).action(async (opts) => {
+  const { buildAgentVault } = await import('../../core/builders/agent-vault.js');
+  if (opts.json) { emit(buildAgentVault(readJsonInput(opts.json)), opts); return; }
+  const signers = typeof opts.signers === 'string' && opts.signers.trim()
+    ? opts.signers.split(',').map((s: string) => {
+        const [address, weight] = s.trim().split(':');
+        return { address: address.trim(), weight: weight ? Number(weight) : undefined };
+      })
+    : undefined;
+  emit(buildAgentVault({
+    backingCoin: opts.backingCoin, uri: opts.uri, name: opts.name, symbol: opts.symbol, image: opts.image,
+    description: opts.description,
+    withdrawLimit: opts.withdrawLimit ? Number(opts.withdrawLimit) : undefined,
+    period: opts.period as ('daily' | 'weekly' | 'monthly' | undefined),
+    unlockAt: opts.unlockAt ? Number(opts.unlockAt) : undefined,
+    expiresAt: opts.expiresAt ? Number(opts.expiresAt) : undefined,
+    signers,
+    threshold: opts.threshold ? Number(opts.threshold) : undefined,
+    recovery: opts.recovery
+  }), opts);
+});
+
+sharedOpts(
+  buildCommand
     .command('subscription')
     .description('Create a recurring subscription collection. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--interval <duration>', 'Interval: daily, monthly, annually, or shorthand (30d)')

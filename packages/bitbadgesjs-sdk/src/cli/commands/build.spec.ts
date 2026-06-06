@@ -13,11 +13,12 @@ import { buildProductCatalog } from '../../core/builders/product-catalog.js';
 
 describe('buildCommand shape', () => {
   it('exposes every documented standard preset', () => {
-    // The 16 verbs that `bb build --help` advertises. If a verb is added
+    // The verbs that `bb build --help` advertises. If a verb is added
     // or removed, this test must be updated in lockstep with --help text.
     const names = buildCommand.commands.map((c) => c.name()).sort();
     expect(names).toEqual([
       'address-list',
+      'agent-vault',
       'auction',
       'bid',
       'bounty',
@@ -44,7 +45,7 @@ describe('buildCommand shape', () => {
     // metadata — otherwise an agent calling `bb build vault` with no
     // flags hits a confusing builder-level error instead of commander's
     // standard "missing required option" message.
-    const verbsThatRequireCoinFlag = ['vault', 'smart-token'];
+    const verbsThatRequireCoinFlag = ['vault', 'agent-vault', 'smart-token'];
     for (const verb of verbsThatRequireCoinFlag) {
       const c = buildCommand.commands.find((cmd) => cmd.name() === verb)!;
       const required = (c.options as any[]).filter((o) => o.required).map((o) => o.long);

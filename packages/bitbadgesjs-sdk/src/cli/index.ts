@@ -193,6 +193,7 @@ import { productsCommand } from './commands/products.js';
 import { auctionsCommand } from './commands/auctions.js';
 import { predictionMarketsCommand } from './commands/prediction-markets.js';
 import { smartTokensCommand } from './commands/smart-tokens.js';
+import { agentVaultsCommand } from './commands/agent-vaults.js';
 import { nftsCommand } from './commands/nfts.js';
 import { custom2faCommand } from './commands/custom-2fa.js';
 
@@ -300,6 +301,7 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
       auctionsCommand,
       predictionMarketsCommand,
       smartTokensCommand,
+      agentVaultsCommand,
       nftsCommand,
       custom2faCommand,
       dynamicStoresCommand
@@ -327,6 +329,7 @@ const STANDARD_BUILD_ALIASES: Record<string, string> = {
   'prediction-markets': 'prediction-market',
   products: 'product-catalog',
   'smart-tokens': 'smart-token',
+  'agent-vaults': 'agent-vault',
   subscriptions: 'subscription'
 };
 const standardsByName = new Map<string, Command>();

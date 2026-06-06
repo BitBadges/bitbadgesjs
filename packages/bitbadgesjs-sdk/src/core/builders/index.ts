@@ -10,6 +10,17 @@
 // ── Collection builders ──────────────────────────────────────────────────────
 
 export { buildVault, type VaultParams } from './vault.js';
+export {
+  buildAgentVault,
+  type AgentVaultParams,
+  type AgentVaultSigner,
+  type AgentVaultPeriod,
+  AGENT_VAULT_DEPOSIT_APPROVAL_ID,
+  AGENT_VAULT_WITHDRAW_APPROVAL_PREFIX,
+  AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX,
+  AGENT_VAULT_EMERGENCY_FREEZE_APPROVAL_ID,
+  AGENT_VAULT_EMERGENCY_EXIT_APPROVAL_ID
+} from './agent-vault.js';
 export { buildSubscription, type SubscriptionParams, type SubscriptionPayout } from './subscription.js';
 export { buildBounty, type BountyParams } from './bounty.js';
 export { buildPaymentRequest, type PaymentRequestParams } from './payment-request.js';
