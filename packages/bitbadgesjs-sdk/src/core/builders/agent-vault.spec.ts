@@ -113,4 +113,43 @@ describe('buildAgentVault', () => {
     const vr = verifyStandardsCompliance({ messages: [msg] });
     expect({ valid: vr.valid, violations: vr.violations }).toEqual({ valid: true, violations: [] });
   });
+
+  test('no kill-switch by default — forceful transfers locked, no emergency approvals', () => {
+    const r = val(buildAgentVault({ backingCoin: 'USDC', ...META }));
+    expect(r.invariants.noForcefulPostMintTransfers).toBe(true);
+    const ids = r.collectionApprovals.map((a: any) => a.approvalId);
+    expect(ids).not.toContain('agent-vault-emergency-freeze');
+    expect(ids).not.toContain('agent-vault-emergency-exit');
+  });
+
+  test('--recovery bakes the freeze + exit approvals and unlocks forceful transfers', () => {
+    const r = val(buildAgentVault({ backingCoin: 'USDC', recovery: 'bb1recovery', ...META }));
+    // The freeze is forceful, which the chain only allows when the invariant is off.
+    expect(r.invariants.noForcefulPostMintTransfers).toBe(false);
+
+    const freeze = r.collectionApprovals.find((a: any) => a.approvalId === 'agent-vault-emergency-freeze');
+    const exit = r.collectionApprovals.find((a: any) => a.approvalId === 'agent-vault-emergency-exit');
+    expect(freeze).toBeDefined();
+    expect(exit).toBeDefined();
+
+    // Freeze: recovery-scoped forceful clawback; never from the backing alias.
+    expect(freeze.toListId).toBe('bb1recovery');
+    expect(freeze.initiatedByListId).toBe('bb1recovery');
+    expect(freeze.fromListId.startsWith('!Mint')).toBe(true);
+    expect(freeze.approvalCriteria.overridesFromOutgoingApprovals).toBe(true);
+    expect(freeze.approvalCriteria.overridesToIncomingApprovals).toBe(true);
+
+    // Exit: recovery-only, ungated (no cap/time/multisig), unbacks to recovery.
+    expect(exit.fromListId).toBe('bb1recovery');
+    expect(exit.initiatedByListId).toBe('bb1recovery');
+    expect(exit.approvalCriteria.allowBackedMinting).toBe(true);
+    expect(exit.approvalCriteria.approvalAmounts).toBeUndefined();
+    expect(exit.approvalCriteria.votingChallenges).toBeUndefined();
+  });
+
+  test('a kill-switch vault still passes standards-compliance verification', () => {
+    const msg = buildAgentVault({ backingCoin: 'USDC', withdrawLimit: 5, recovery: 'bb1recovery', ...META });
+    const vr = verifyStandardsCompliance({ messages: [msg] });
+    expect({ valid: vr.valid, violations: vr.violations }).toEqual({ valid: true, violations: [] });
+  });
 });

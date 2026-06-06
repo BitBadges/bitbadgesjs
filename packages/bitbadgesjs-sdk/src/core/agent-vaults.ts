@@ -14,7 +14,11 @@
 import type { iCollectionApproval } from '@/interfaces/types/approvals.js';
 import type { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 import { findDepositApproval, findWithdrawApproval } from './smart-tokens.js';
-import { AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX } from './builders/agent-vault.js';
+import {
+  AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX,
+  AGENT_VAULT_EMERGENCY_FREEZE_APPROVAL_ID,
+  AGENT_VAULT_EMERGENCY_EXIT_APPROVAL_ID
+} from './builders/agent-vault.js';
 
 const AV_MAX_UINT64 = '18446744073709551615';
 
@@ -40,6 +44,13 @@ export interface AgentVaultDetails {
   withdrawApproval: iCollectionApproval<bigint>;
   /** Gating parsed from the withdraw approval's criteria. */
   gating: AgentVaultGating;
+  /** Admin kill-switch (present only when the vault was built with a recovery address). */
+  recovery?: {
+    /** bb1... recovery address the kill-switch is scoped to. */
+    address: string;
+    freezeApproval: iCollectionApproval<bigint>;
+    exitApproval: iCollectionApproval<bigint>;
+  };
 }
 
 export interface AgentVaultValidationResult {
@@ -124,12 +135,21 @@ export function extractAgentVaultDetails(
   const backingAddress = String(backed?.address ?? '') || String(depositApproval.fromListId ?? '');
   const backingDenom = String(backed?.conversion?.sideA?.denom ?? '');
 
+  // Optional admin kill-switch — present only when both emergency approvals exist.
+  const freezeApproval = approvals.find((a) => a.approvalId === AGENT_VAULT_EMERGENCY_FREEZE_APPROVAL_ID);
+  const exitApproval = approvals.find((a) => a.approvalId === AGENT_VAULT_EMERGENCY_EXIT_APPROVAL_ID);
+  const recovery =
+    freezeApproval && exitApproval
+      ? { address: String(freezeApproval.toListId ?? ''), freezeApproval, exitApproval }
+      : undefined;
+
   return {
     backingAddress,
     backingDenom,
     depositApproval,
     withdrawApproval,
-    gating: parseGating(withdrawApproval)
+    gating: parseGating(withdrawApproval),
+    recovery
   };
 }
 
@@ -207,6 +227,34 @@ export function buildAgentVaultDepositMsg(args: AgentVaultLifecycleArgs): AgentV
 export function buildAgentVaultWithdrawMsg(args: AgentVaultLifecycleArgs): AgentVaultTransferMsg {
   const { creator, collectionId, amount, details } = args;
   return transfer(creator, collectionId, creator, details.backingAddress, amount, details.withdrawApproval);
+}
+
+/**
+ * Recover (admin kill-switch): the recovery address forcibly claws back vault
+ * tokens from a holder (the agent) and then unbacks them to the backing coin,
+ * bypassing the cap / time window / multisig. Emits `[freeze, exit]`:
+ *   1. freeze — `from` (holder) → recovery, prioritizing the forceful freeze
+ *      approval (overrides the holder's outgoing + recovery's incoming).
+ *   2. exit   — recovery → backing alias, prioritizing the ungated exit lane;
+ *      releases the backing coin to recovery.
+ * `creator` is the recovery address. Throws if the vault has no kill-switch.
+ * Atomicity is path-dependent (same caveat as `pay`).
+ */
+export function buildAgentVaultRecoverMsgs(args: {
+  creator: string;
+  collectionId: string;
+  /** Holder to claw back from (the agent). */
+  from: string;
+  amount: string;
+  details: AgentVaultDetails;
+}): [AgentVaultTransferMsg, AgentVaultTransferMsg] {
+  const { creator, collectionId, from, amount, details } = args;
+  if (!details.recovery) {
+    throw new Error('This Agent Vault has no admin kill-switch (built without a recovery address).');
+  }
+  const freeze = transfer(creator, collectionId, from, creator, amount, details.recovery.freezeApproval);
+  const exit = transfer(creator, collectionId, creator, details.backingAddress, amount, details.recovery.exitApproval);
+  return [freeze, exit];
 }
 
 /**

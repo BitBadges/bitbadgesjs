@@ -276,4 +276,86 @@ describe('agent-vaults integration', () => {
       expect(tx.code).toBe(0);
     }, 90000);
   });
+
+  // ─── C) Admin kill-switch — recovery fully drains a gated vault ──────────────
+  // The vault is time-locked far in the future so the agent's normal withdraw is
+  // blocked; the recovery address (charlie) must still be able to claw back +
+  // exit, proving the kill-switch bypasses the gating.
+  describe('admin kill-switch (recovery drain bypasses gating)', () => {
+    let collectionId: string | undefined;
+    const FAR_FUTURE = '4102444800000'; // 2100-01-01, well past any test run
+
+    it('build + deploy a time-locked vault with a recovery kill-switch; agent deposits', async () => {
+      if (!ready) return;
+      const manager = alice();
+      const recovery = charlie();
+      const sym = 'avks' + Array.from({ length: 6 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join('');
+      const tmp = path.join(os.tmpdir(), `av-ks-build-${crypto.randomBytes(4).toString('hex')}.json`);
+      runCli(
+        [
+          'build', 'agent-vault',
+          '--backing-coin', 'USDC',
+          '--symbol', sym,
+          '--name', 'Kill-switch Agent Vault',
+          '--image', 'https://example.com/av-ks.png',
+          '--description', 'Time-locked vault with a recovery kill-switch',
+          '--unlock-at', FAR_FUTURE,
+          '--recovery', recovery.address,
+          '--creator', manager.address,
+          '--output-file', tmp
+        ],
+        { parseJson: false }
+      );
+      const tx = await deployMsgViaKeyring(tmp, manager.name);
+      expect(tx.code).toBe(0);
+      collectionId = tx.collectionId!;
+      await waitForIndexerCollection(collectionId);
+
+      try { await fundPersona('alice', manager.address, '10000000', USDC_DENOM); } catch { /* ok */ }
+      const dep = runCli(['agent-vaults', 'deposit', collectionId, '--creator', manager.address, '--amount', '5', '--local']);
+      const depTx = await deployMsgViaKeyring(writeMsgToTmp(dep.json, 'av-ks-deposit'), manager.name);
+      expect(depTx.code).toBe(0);
+      await pollTokenAmount(collectionId, manager.address, (n) => n >= 5n, { label: 'alice kill-switch vault tokens' });
+    }, 150000);
+
+    it("agent's normal withdraw is blocked (time-locked)", async () => {
+      if (!ready || !collectionId) return;
+      const w = runCli(['agent-vaults', 'withdraw', collectionId, '--creator', alice().address, '--amount', '2', '--local']);
+      let rejected = false;
+      try {
+        const tx = await deployMsgViaKeyring(writeMsgToTmp(w.json, 'av-ks-blocked'), alice().name);
+        rejected = tx.code !== 0;
+      } catch {
+        rejected = true;
+      }
+      expect(rejected).toBe(true);
+    }, 90000);
+
+    it('recovery (charlie) claws back + fully exits, bypassing the time lock', async () => {
+      if (!ready || !collectionId) return;
+      const recovery = charlie();
+      const before = getBankBalance(recovery.address, USDC_DENOM);
+
+      const rec = runCli([
+        'agent-vaults', 'recover', collectionId,
+        '--creator', recovery.address, '--from', alice().address, '--amount', '5', '--local'
+      ]);
+      expect(Array.isArray(rec.json.messages)).toBe(true);
+      expect(rec.json.messages).toHaveLength(2);
+      expect(rec.json.messages[0].value.transfers[0].prioritizedApprovals[0].approvalId).toBe('agent-vault-emergency-freeze');
+      expect(rec.json.messages[1].value.transfers[0].prioritizedApprovals[0].approvalId).toBe('agent-vault-emergency-exit');
+
+      const tx = await deployMsgViaKeyring(writeMsgToTmp(rec.json, 'av-ks-recover'), recovery.name);
+      expect(tx.code).toBe(0);
+      for (const sub of tx.additionalTxs) expect(sub.code).toBe(0);
+
+      // charlie received the 5 USDC, and alice's vault tokens were clawed to zero.
+      const after = await pollBalance(recovery.address, USDC_DENOM, (n) => n >= before + 5_000_000n, {
+        label: 'charlie USDC after recovery drain'
+      });
+      expect(after - before).toBeGreaterThanOrEqual(5_000_000n);
+      const aliceLeft = await pollTokenAmount(collectionId, alice().address, (n) => n === 0n, { label: 'alice tokens after clawback' });
+      expect(aliceLeft).toBe(0n);
+    }, 150000);
+  });
 });

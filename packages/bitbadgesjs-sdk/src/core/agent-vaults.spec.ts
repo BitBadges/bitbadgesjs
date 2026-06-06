@@ -11,6 +11,7 @@ import {
   buildAgentVaultDepositMsg,
   buildAgentVaultWithdrawMsg,
   buildAgentVaultPayMsgs,
+  buildAgentVaultRecoverMsgs,
   buildAgentVaultVoteMsg
 } from './agent-vaults.js';
 import { buildAgentVault } from './builders/agent-vault.js';
@@ -69,6 +70,46 @@ describe('extractAgentVaultDetails', () => {
     const c = asCollection(buildAgentVault({ backingCoin: 'USDC', ...META }));
     const d = extractAgentVaultDetails(c)!;
     expect(d.gating).toEqual({});
+  });
+
+  it('exposes the kill-switch recovery approvals only when built with --recovery', () => {
+    const without = extractAgentVaultDetails(asCollection(buildAgentVault({ backingCoin: 'USDC', ...META })))!;
+    expect(without.recovery).toBeUndefined();
+
+    const withRec = extractAgentVaultDetails(asCollection(buildAgentVault({ backingCoin: 'USDC', recovery: 'bb1recovery', ...META })))!;
+    expect(withRec.recovery?.address).toBe('bb1recovery');
+    expect(withRec.recovery?.freezeApproval.approvalId).toBe('agent-vault-emergency-freeze');
+    expect(withRec.recovery?.exitApproval.approvalId).toBe('agent-vault-emergency-exit');
+  });
+});
+
+describe('buildAgentVaultRecoverMsgs (admin kill-switch)', () => {
+  it('emits [freeze (holder→recovery), exit (recovery→backing)]', () => {
+    const c = asCollection(buildAgentVault({ backingCoin: 'USDC', recovery: 'bb1recovery', ...META }));
+    const details = extractAgentVaultDetails(c)!;
+    const [freeze, exit] = buildAgentVaultRecoverMsgs({
+      creator: 'bb1recovery',
+      collectionId: '42',
+      from: 'bb1agent',
+      amount: '1000000',
+      details
+    });
+    const f = (freeze.value as any).transfers[0];
+    expect(f.from).toBe('bb1agent');
+    expect(f.toAddresses).toEqual(['bb1recovery']);
+    expect(f.prioritizedApprovals[0].approvalId).toBe('agent-vault-emergency-freeze');
+    const e = (exit.value as any).transfers[0];
+    expect(e.from).toBe('bb1recovery');
+    expect(e.toAddresses).toEqual([details.backingAddress]);
+    expect(e.prioritizedApprovals[0].approvalId).toBe('agent-vault-emergency-exit');
+  });
+
+  it('throws for a vault with no kill-switch', () => {
+    const c = asCollection(buildAgentVault({ backingCoin: 'USDC', ...META }));
+    const details = extractAgentVaultDetails(c)!;
+    expect(() =>
+      buildAgentVaultRecoverMsgs({ creator: 'bb1r', collectionId: '42', from: 'bb1agent', amount: '1', details })
+    ).toThrow(/no admin kill-switch/);
   });
 });
 

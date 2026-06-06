@@ -463,6 +463,7 @@ sharedOpts(
     .option('--expires-at <ms>', 'Withdrawals invalid after this epoch-ms')
     .option('--signers <list>', 'Comma-separated multisig signers (bb1addr or bb1addr:weight) whose votes unlock withdrawals')
     .option('--threshold <n>', 'Required yes-weight to unlock (N in N-of-M); defaults to unanimous')
+    .option('--recovery <address>', 'Optional admin kill-switch: a bb1... recovery address that can claw back + fully exit the vault anytime, bypassing all gating')
 ).action(async (opts) => {
   const { buildAgentVault } = await import('../../core/builders/agent-vault.js');
   if (opts.json) { emit(buildAgentVault(readJsonInput(opts.json)), opts); return; }
@@ -480,7 +481,8 @@ sharedOpts(
     unlockAt: opts.unlockAt ? Number(opts.unlockAt) : undefined,
     expiresAt: opts.expiresAt ? Number(opts.expiresAt) : undefined,
     signers,
-    threshold: opts.threshold ? Number(opts.threshold) : undefined
+    threshold: opts.threshold ? Number(opts.threshold) : undefined,
+    recovery: opts.recovery
   }), opts);
 });
 

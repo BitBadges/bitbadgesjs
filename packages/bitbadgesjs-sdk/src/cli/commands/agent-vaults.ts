@@ -38,6 +38,7 @@ import {
   buildAgentVaultDepositMsg,
   buildAgentVaultWithdrawMsg,
   buildAgentVaultPayMsgs,
+  buildAgentVaultRecoverMsgs,
   buildAgentVaultVoteMsg,
   type AgentVaultDetails
 } from '../../core/agent-vaults.js';
@@ -373,6 +374,55 @@ addOutputFlags(
 ).addHelpText('after', `
 Examples:
   $ bb agent-vaults pay 42 --creator bb1agent...xyz --amount 5 --to bb1vendor...abc | bb deploy
+`);
+
+// ── agent-vaults recover ────────────────────────────────────────────────────────
+
+addOutputFlags(
+  addNetworkFlags(
+    agentVaultsCommand
+      .command('recover')
+      .description(
+        'Admin kill-switch — emit {messages:[freeze, exit]} that force-claws-back vault tokens from a holder ' +
+          '(the agent) to the recovery address and withdraws the backing coin, bypassing the cap/time/multisig gating. ' +
+          'Only for vaults built with --recovery. Pipe to `bb deploy`.'
+      )
+      .argument('<collection-id>', 'Agent Vault collection ID')
+      .requiredOption('--creator <address>', 'Recovery address (the configured kill-switch admin)')
+      .requiredOption('--from <address>', 'Holder to claw back from (typically the agent)')
+      .requiredOption('--amount <n>', 'Amount to recover. Display units; use --base-units for raw base units.')
+      .option('--base-units', 'Treat --amount as already-in-base-units')
+  )
+).action(
+  async (
+    collectionId: string,
+    opts: NetworkFlags & OutputFlags & { creator: string; from: string; amount: string; baseUnits?: boolean }
+  ) => {
+    try {
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
+      const from = requireBb1AddressStrict(opts.from, '--from');
+      const collection = await fetchCollection(collectionId, opts);
+      validateOrExit(collection, 'agent-vaults recover');
+      const details = extractAgentVaultDetails(collection)!;
+      if (!details.recovery) {
+        process.stderr.write('Error: this Agent Vault has no admin kill-switch (built without --recovery).\n');
+        process.exit(2);
+      }
+      if (creator !== details.recovery.address) {
+        process.stderr.write(
+          `Warning: --creator ${creator} is not the vault's recovery address (${details.recovery.address}). The chain will reject this.\n`
+        );
+      }
+      const amount = resolveBackingAmount(opts.amount, !!opts.baseUnits, details.backingDenom);
+      const messages = buildAgentVaultRecoverMsgs({ creator, collectionId: String(collectionId), from, amount, details });
+      emit({ messages }, opts);
+    } catch (err) {
+      emitError(err);
+    }
+  }
+).addHelpText('after', `
+Examples:
+  $ bb agent-vaults recover 42 --creator bb1recovery...xyz --from bb1agent...abc --amount 100 | bb deploy
 `);
 
 // ── agent-vaults vote ─────────────────────────────────────────────────────────────

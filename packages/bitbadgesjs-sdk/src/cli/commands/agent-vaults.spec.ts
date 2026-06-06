@@ -12,7 +12,13 @@ import { agentVaultsCommand } from './agent-vaults.js';
 describe('agentVaultsCommand shape', () => {
   it('exposes the documented subcommand verbs', () => {
     const names = agentVaultsCommand.commands.map((c) => c.name()).sort();
-    expect(names).toEqual(['deposit', 'list', 'pay', 'show', 'status', 'vote', 'withdraw']);
+    expect(names).toEqual(['deposit', 'list', 'pay', 'recover', 'show', 'status', 'vote', 'withdraw']);
+  });
+
+  it('recover requires --creator, --from, --amount', () => {
+    const cmd = agentVaultsCommand.commands.find((c) => c.name() === 'recover')!;
+    const required = (cmd as any).options.filter((o: any) => o.required).map((o: any) => o.long);
+    for (const f of ['--creator', '--from', '--amount']) expect(required).toContain(f);
   });
 
   it('deposit + withdraw require --creator and --amount', () => {
@@ -36,7 +42,7 @@ describe('agentVaultsCommand shape', () => {
   });
 
   it('every subcommand takes <collection-id> as the first positional', () => {
-    for (const verb of ['show', 'status', 'deposit', 'withdraw', 'pay', 'vote']) {
+    for (const verb of ['show', 'status', 'deposit', 'withdraw', 'pay', 'recover', 'vote']) {
       const c = agentVaultsCommand.commands.find((cmd) => cmd.name() === verb)!;
       expect((c as any)._args[0].name()).toBe('collection-id');
     }

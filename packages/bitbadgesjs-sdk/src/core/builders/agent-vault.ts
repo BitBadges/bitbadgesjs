@@ -57,6 +57,19 @@ export interface AgentVaultParams {
   signers?: AgentVaultSigner[];
   /** Required yes-weight to unlock (N in N-of-M when weights are 1). Defaults to unanimous. Requires `signers`. */
   threshold?: number;
+  /**
+   * Optional admin kill-switch (off by default). A bb1... recovery address the
+   * human controls. When set, two baked approvals let recovery FULLY exit the
+   * vault at any time, bypassing the cap / time window / multisig:
+   *   1. a forceful "freeze" — recovery claws back vault tokens from any holder
+   *      (the agent) to itself, and
+   *   2. an ungated recovery-only withdraw lane — recovery unbacks to the coin.
+   * This necessarily enables forceful post-mint transfers (the freeze), so it
+   * flips `noForcefulPostMintTransfers` to false; without it the vault stays
+   * fully locked. The recovery address must be known at build time (approvals
+   * are frozen at creation).
+   */
+  recovery?: string;
 }
 
 /** Stable IDs, matched by `extractAgentVaultDetails` (substring "deposit"/"withdraw"). */
@@ -70,6 +83,9 @@ export const AGENT_VAULT_WITHDRAW_APPROVAL_PREFIX = 'agent-vault-withdraw';
  * the deterministic-proposalId convention in `bounty.ts`.
  */
 export const AGENT_VAULT_WITHDRAW_PROPOSAL_PREFIX = 'agent-vault-withdraw-vote';
+/** Admin kill-switch approval ids (present only when `recovery` is set). */
+export const AGENT_VAULT_EMERGENCY_FREEZE_APPROVAL_ID = 'agent-vault-emergency-freeze';
+export const AGENT_VAULT_EMERGENCY_EXIT_APPROVAL_ID = 'agent-vault-emergency-exit';
 
 const PERIOD_MS: Record<AgentVaultPeriod, number> = {
   daily: 86_400_000,
@@ -200,15 +216,60 @@ export function buildAgentVault(params: AgentVaultParams): any {
     }
   ];
 
+  // Optional admin kill-switch — two approvals that let `recovery` fully exit
+  // the vault at any time, bypassing all gating. Recovery-scoped, so only the
+  // recovery address can invoke them. Requires forceful transfers (the freeze),
+  // hence the invariant flip below.
+  if (params.recovery) {
+    collectionApprovals.push(
+      // Freeze: recovery forcibly claws back vault tokens from any holder (the
+      // agent) to itself. Excludes the backing alias from `from` — forceful
+      // transfers FROM a reserved protocol address are globally disallowed
+      // (ticket 0436). overrides bypass the agent's outgoing + recovery's
+      // incoming approvals so no agent cooperation is needed.
+      {
+        fromListId: `!Mint:${backingAddr}`,
+        toListId: params.recovery,
+        initiatedByListId: params.recovery,
+        approvalId: AGENT_VAULT_EMERGENCY_FREEZE_APPROVAL_ID,
+        ...approvalMetadata('Emergency Freeze', 'Recovery address claws back vault tokens from any holder.'),
+        transferTimes: FOREVER,
+        tokenIds: FOREVER,
+        ownershipTimes: FOREVER,
+        version: '0',
+        approvalCriteria: {
+          overridesFromOutgoingApprovals: true,
+          overridesToIncomingApprovals: true
+        }
+      },
+      // Exit: recovery unbacks its (clawed-back) tokens → releases the backing
+      // coin to recovery. Recovery-initiated outgoing, so no overrides needed;
+      // NO cap / time window / multisig — this is the ungated emergency exit.
+      {
+        fromListId: params.recovery,
+        toListId: backingAddr,
+        initiatedByListId: params.recovery,
+        approvalId: AGENT_VAULT_EMERGENCY_EXIT_APPROVAL_ID,
+        ...approvalMetadata('Emergency Exit', 'Recovery address withdraws the backing coin, bypassing the vault gating.'),
+        transferTimes: FOREVER,
+        tokenIds: FOREVER,
+        ownershipTimes: FOREVER,
+        version: '0',
+        approvalCriteria: { mustPrioritize: true, allowBackedMinting: true }
+      }
+    );
+  }
+
   const invariants = {
     ...ibcBackedInvariants(coin.denom),
     disablePoolCreation: true,
     // An Agent Vault is a wallet-like Smart Token holding an agent's funds, so
-    // lock forceful post-mint transfers (matches buildSmartToken). The shared
-    // ibcBackedInvariants() leaves this false, which `bb check` flags as
-    // CRITICAL — and combined with frozenPermissions() below it ensures no
-    // approval can ever forcibly move the agent's vault tokens out of band.
-    noForcefulPostMintTransfers: true
+    // forceful post-mint transfers are locked by default — combined with
+    // frozenPermissions() below, nothing can move the agent's tokens out of
+    // band. The opt-in kill-switch deliberately bakes a forceful "freeze"
+    // approval, which the chain only permits when this invariant is false, so
+    // we unlock it precisely (and only) when a recovery lane is configured.
+    noForcefulPostMintTransfers: !params.recovery
   };
 
   const collectionSource = metadataFromFlat({
