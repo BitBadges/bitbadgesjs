@@ -102,12 +102,20 @@ describe('lifecycle msg builders', () => {
     expect((send.value as any).amount).toEqual([{ denom: details.backingDenom, amount: '1000000' }]);
   });
 
-  it('vote: MsgCastVote on the withdraw approval proposal (snake_case fields)', () => {
+  it('vote: MsgCastVote on the withdraw approval proposal (camelCase, matching the MsgCastVote encoder)', () => {
     const m = buildAgentVaultVoteMsg({ creator: 'bb1signer', collectionId: '42', details });
     expect(m.typeUrl).toBe('/tokenization.MsgCastVote');
     const v = m.value as any;
-    expect(v.approval_id).toBe(details.withdrawApproval.approvalId);
-    expect(v.proposal_id).toBe(details.gating.multisig?.proposalId);
-    expect(v.yes_weight).toBe('100');
+    expect(v.creator).toBe('bb1signer');
+    expect(v.collectionId).toBe('42');
+    expect(v.approvalLevel).toBe('collection');
+    expect(v.approverAddress).toBe('');
+    expect(v.approvalId).toBe(details.withdrawApproval.approvalId);
+    expect(v.proposalId).toBe(details.gating.multisig?.proposalId);
+    expect(v.yesWeight).toBe('100');
+    // Guard against a snake_case regression — the `new MsgCastVote(v)` encoder
+    // in `bb deploy` reads camelCase only and would drop these.
+    expect(v.collection_id).toBeUndefined();
+    expect(v.yes_weight).toBeUndefined();
   });
 });

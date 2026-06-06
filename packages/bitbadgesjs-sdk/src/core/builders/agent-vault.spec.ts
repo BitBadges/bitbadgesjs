@@ -67,6 +67,23 @@ describe('buildAgentVault', () => {
     expect(vc.resetAfterExecution).toBe(false);
   });
 
+  test('throws when --threshold exceeds the total signer weight (e.g. 5-of-3)', () => {
+    expect(() =>
+      buildAgentVault({
+        backingCoin: 'USDC',
+        signers: [{ address: 'bb1aaa' }, { address: 'bb1bbb' }, { address: 'bb1ccc' }],
+        threshold: 5,
+        ...META
+      })
+    ).toThrow(/threshold must be between 1 and the total signer weight/);
+  });
+
+  test('throws when --threshold is below 1', () => {
+    expect(() =>
+      buildAgentVault({ backingCoin: 'USDC', signers: [{ address: 'bb1aaa' }], threshold: 0, ...META })
+    ).toThrow(/threshold must be between 1 and the total signer weight/);
+  });
+
   test('threshold defaults to unanimous (100%)', () => {
     const w = withdrawApproval(
       buildAgentVault({ backingCoin: 'USDC', signers: [{ address: 'bb1aaa' }, { address: 'bb1bbb' }], ...META })

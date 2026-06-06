@@ -110,11 +110,21 @@ export function buildAgentVault(params: AgentVaultParams): any {
     const voters = params.signers.map((s) => ({ address: s.address, weight: String(s.weight ?? 1) }));
     const totalWeight = voters.reduce((n, v) => n + Number(v.weight), 0);
     const threshold = params.threshold ?? totalWeight; // default: unanimous
-    // ⚠️ REVIEW (chain semantics): the SDK's `quorumThreshold` is a PERCENTAGE
-    // (0–100) of total voter weight that must vote yes. We map an N-of-M (or
-    // required yes-weight) threshold → floor(threshold / totalWeight * 100),
-    // which requires strictly more than the (threshold-1) share. Confirm this is
-    // the intended N-of-M → percentage convention before merge.
+    // Chain semantics (verified against x/tokenization/keeper/msg_server_cast_vote.go):
+    // `quorumThreshold` is a PERCENTAGE (0–100) of total voter weight, and the
+    // pass check is `floor(yesWeight*100/total) >= quorumThreshold` (GTE, integer
+    // division). We map a required yes-weight `threshold` → floor(threshold /
+    // totalWeight * 100). Because the chain ALSO floors, this is exact for any
+    // total weight ≤ 100 (the floored percentages are strictly increasing, so
+    // `threshold-1` weight always lands below the bar and N-of-M never passes
+    // with fewer than N). Guard the input range — a threshold above the total
+    // weight (e.g. a typo'd 5-of-3) or < 1 would otherwise silently clamp to
+    // unanimous / 1%, hiding a misconfiguration.
+    if (threshold < 1 || threshold > totalWeight) {
+      throw new Error(
+        `agent-vault: --threshold must be between 1 and the total signer weight (${totalWeight}), got ${threshold}.`
+      );
+    }
     const quorumPct = Math.max(1, Math.min(100, Math.floor((threshold / totalWeight) * 100)));
     withdrawCriteria.votingChallenges = [
       {
@@ -180,7 +190,13 @@ export function buildAgentVault(params: AgentVaultParams): any {
 
   const invariants = {
     ...ibcBackedInvariants(coin.denom),
-    disablePoolCreation: true
+    disablePoolCreation: true,
+    // An Agent Vault is a wallet-like Smart Token holding an agent's funds, so
+    // lock forceful post-mint transfers (matches buildSmartToken). The shared
+    // ibcBackedInvariants() leaves this false, which `bb check` flags as
+    // CRITICAL — and combined with frozenPermissions() below it ensures no
+    // approval can ever forcibly move the agent's vault tokens out of band.
+    noForcefulPostMintTransfers: true
   };
 
   const collectionSource = metadataFromFlat({

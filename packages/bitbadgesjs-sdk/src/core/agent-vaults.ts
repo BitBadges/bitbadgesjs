@@ -233,8 +233,12 @@ export function buildAgentVaultPayMsgs(
 
 /**
  * Vote: cast a weighted yes toward the withdraw approval's multisig unlock.
- * Mirrors the SDK's MsgCastVote shape (snake_case fields). `yesWeight` is a
- * 0–100 percent of this voter's assigned weight (default 100 = full yes).
+ * Mirrors the SDK's MsgCastVote shape — camelCase fields, exactly as the
+ * `MsgCastVote` wrapper class (transactions/.../msgCastVote.ts) and the
+ * deposit/withdraw transfer builders above expect. (Earlier this emitted
+ * snake_case, which the `new MsgCastVote(v)` encoder in `bb deploy` drops,
+ * leaving every field but `creator` undefined and crashing on broadcast.)
+ * `yesWeight` is a 0–100 percent of this voter's assigned weight (default 100).
  */
 export function buildAgentVaultVoteMsg(args: {
   creator: string;
@@ -250,12 +254,12 @@ export function buildAgentVaultVoteMsg(args: {
     typeUrl: '/tokenization.MsgCastVote',
     value: {
       creator,
-      collection_id: String(collectionId),
-      approval_level: 'collection',
-      approver_address: '',
-      approval_id: details.withdrawApproval.approvalId,
-      proposal_id: proposalId,
-      yes_weight: String(yesWeight)
+      collectionId: String(collectionId),
+      approvalLevel: 'collection',
+      approverAddress: '',
+      approvalId: details.withdrawApproval.approvalId,
+      proposalId,
+      yesWeight: String(yesWeight)
     }
   };
 }
