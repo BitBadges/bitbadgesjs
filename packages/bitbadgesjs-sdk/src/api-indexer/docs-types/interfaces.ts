@@ -273,6 +273,85 @@ export interface iCollectionStatsDoc<T extends NumberType> extends iBaseStats<T>
 }
 
 /**
+ * Per-standard extras the pay dashboard renders in its columns. Superset of
+ * all four pay standards' fields (all optional). Money amounts are kept as
+ * strings (exact, denom paired separately); counts are plain numbers.
+ *
+ * @category Interfaces
+ */
+export interface iPayIndexExtras {
+  // PaymentRequest
+  payer?: string;
+  recipient?: string;
+  // Subscriptions
+  intervalMs?: string;
+  tierCount?: number;
+  activeSubscribers?: number;
+  mrrAmount?: string;
+  mrrDenom?: string;
+  // Products
+  productCount?: number;
+  unitsSold?: number;
+  revenueAmount?: string;
+  revenueDenom?: string;
+  soldOut?: number;
+  // Vault
+  backingDenom?: string;
+  tvlAmount?: string;
+  depositors?: number;
+  wrapperSupply?: string;
+}
+
+/**
+ * Denormalized, indexed per-collection record powering the server-side /pay
+ * dashboard (filter/sort/search/facets/paginate over Mongo). One doc per pay
+ * collection (PaymentRequest / Subscriptions / Products / Vault), maintained in
+ * real time by the indexer's tx-handlers. Carries everything the dashboard row
+ * needs so the client derives nothing.
+ *
+ * @category Interfaces
+ */
+export interface iPayIndexDoc<T extends NumberType> extends Doc {
+  /** The collection ID (also the _docId). */
+  collectionId: CollectionId;
+  /** Creator/merchant bech32 address — the dashboard is scoped per-merchant. */
+  createdBy: string;
+  /** Pay standard: 'PaymentRequest' | 'Subscriptions' | 'Products' | 'Vault'. */
+  standard: string;
+  /** Collection display name (from metadata; '' until the async fetch lands). */
+  name: string;
+  /** Lowercased name for case-insensitive search/sort. */
+  nameLower: string;
+  /** Collection image URI (for the dashboard avatar; '' until metadata lands). */
+  image: string;
+  /** Merchant filter tags (collection metadata `tags`). */
+  tags: string[];
+  /**
+   * Persisted status key. For PaymentRequest this is the NON-time status
+   * (`paid`|`denied`|`pending`); `expired` is computed at query time from
+   * `expirationMs` so it never goes stale without a tx. Other standards:
+   * `active`/`inactive`/`available`/`sold-out`/`empty`.
+   */
+  statusKey: string;
+  /** Headline money amount (exact bigint string), denom paired below. */
+  amountStr?: string;
+  /** Headline denom (invoice/sub price/product 'from'/vault backing). */
+  denom?: string;
+  /** Best-effort numeric headline amount for Mongo range filter + sort. */
+  amountNum: number;
+  /** Expiration in unix ms (0/absent = none); used for query-time expiry. */
+  expirationMs?: number;
+  /** Per-standard column extras. */
+  extras: iPayIndexExtras;
+  /** Creation block (cursor sort key, mirrors createdTokens). */
+  createdBlock: T;
+  /** Creation timestamp (unix ms). */
+  createdTimestamp: T;
+  /** Block this record was last rebuilt at (reorg/idempotency guard). */
+  lastSyncedBlock: T;
+}
+
+/**
  * @category Interfaces
  */
 export interface iFloorPriceHistory<T extends NumberType> {
