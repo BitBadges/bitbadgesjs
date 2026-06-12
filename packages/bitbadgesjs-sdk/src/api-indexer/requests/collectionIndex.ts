@@ -33,6 +33,10 @@ export interface iGetCollectionIndexPayload {
   status?: string[];
   /** Case-insensitive name search. */
   name?: string;
+  /** Exact-match payer address (e.g. invoices where the connected user is the payer → "sending"). */
+  payerAddress?: string;
+  /** Exact-match recipient address (e.g. invoices where the connected user is the recipient → "receiving"). */
+  recipientAddress?: string;
   /** Pagination bookmark ("" / omitted for first page). */
   bookmark?: string;
 }
@@ -45,6 +49,8 @@ export class GetCollectionIndexPayload extends CustomTypeClass<GetCollectionInde
   standard?: string;
   status?: string[];
   name?: string;
+  payerAddress?: string;
+  recipientAddress?: string;
   bookmark?: string;
 
   constructor(payload: iGetCollectionIndexPayload) {
@@ -53,6 +59,8 @@ export class GetCollectionIndexPayload extends CustomTypeClass<GetCollectionInde
     this.standard = payload.standard;
     this.status = payload.status;
     this.name = payload.name;
+    this.payerAddress = payload.payerAddress;
+    this.recipientAddress = payload.recipientAddress;
     this.bookmark = payload.bookmark;
   }
 
@@ -67,6 +75,8 @@ export class GetCollectionIndexPayload extends CustomTypeClass<GetCollectionInde
       standard: query.standard?.toString(),
       status: csv(query.status),
       name: query.name?.toString(),
+      payerAddress: query.payerAddress?.toString(),
+      recipientAddress: query.recipientAddress?.toString(),
       bookmark: query.bookmark?.toString()
     });
   }

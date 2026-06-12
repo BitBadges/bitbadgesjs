@@ -312,6 +312,9 @@ export interface iCollectionIndexDoc<T extends NumberType> extends Doc {
   denom?: string;
   /** Deadline in unix ms (0/absent = none); used for the query-time expiry rule. */
   endTime?: number;
+  /** Counterparty addresses (e.g. PaymentRequest payer/recipient) for role filtering. */
+  payerAddress?: string;
+  recipientAddress?: string;
   /** The standard's full computed `standardsInfo` blob, carried for display. */
   extras?: unknown;
   /** Creation block (cursor sort key, mirrors createdTokens). */

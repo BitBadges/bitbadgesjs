@@ -185,6 +185,8 @@ export class CollectionIndexDoc<T extends NumberType> extends BaseNumberTypeClas
   amountStr?: string;
   denom?: string;
   endTime?: number;
+  payerAddress?: string;
+  recipientAddress?: string;
   extras?: unknown;
   createdBlock: T;
   createdTimestamp: T;
@@ -205,6 +207,8 @@ export class CollectionIndexDoc<T extends NumberType> extends BaseNumberTypeClas
     this.amountStr = data.amountStr;
     this.denom = data.denom;
     this.endTime = data.endTime;
+    this.payerAddress = data.payerAddress;
+    this.recipientAddress = data.recipientAddress;
     this.extras = data.extras;
     this.createdBlock = data.createdBlock;
     this.createdTimestamp = data.createdTimestamp;

@@ -36,6 +36,9 @@ export interface CollectionIndexProjection {
   denom?: string;
   /** Deadline in ms, for the query-time clock transition (see `expiry` below). */
   endTime?: number;
+  /** Counterparty addresses for role filtering (e.g. PaymentRequest payer/recipient). Indexed for exact-match. */
+  payerAddress?: string;
+  recipientAddress?: string;
   /** The full computed `info` blob, carried verbatim for client display. */
   extras?: unknown;
 }
