@@ -184,7 +184,6 @@ export class CollectionIndexDoc<T extends NumberType> extends BaseNumberTypeClas
   status?: string;
   amountStr?: string;
   denom?: string;
-  amountNum?: number;
   endTime?: number;
   extras?: unknown;
   createdBlock: T;
@@ -205,7 +204,6 @@ export class CollectionIndexDoc<T extends NumberType> extends BaseNumberTypeClas
     this.status = data.status;
     this.amountStr = data.amountStr;
     this.denom = data.denom;
-    this.amountNum = data.amountNum;
     this.endTime = data.endTime;
     this.extras = data.extras;
     this.createdBlock = data.createdBlock;
@@ -213,8 +211,8 @@ export class CollectionIndexDoc<T extends NumberType> extends BaseNumberTypeClas
     this.lastSyncedBlock = data.lastSyncedBlock;
   }
 
-  // amountNum / endTime stay plain JS numbers (Mongo range/sort keys) — only
-  // the chain-block fields ride the NumberType<T> generic.
+  // endTime stays a plain JS number (Mongo query-time expiry key) — only the
+  // chain-block fields ride the NumberType<T> generic.
   getNumberFieldNames(): string[] {
     return ['createdBlock', 'createdTimestamp', 'lastSyncedBlock'];
   }

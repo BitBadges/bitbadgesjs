@@ -13,15 +13,14 @@ export interface iCollectionIndexFacet {
 /** Facet options for the active query — computed server-side over the FULL match set. */
 export interface iCollectionIndexFacets {
   statuses: iCollectionIndexFacet[];
-  denoms: iCollectionIndexFacet[];
 }
 
 /**
- * Server-side query over the CollectionIndex. ALL filtering/sorting/searching/
- * faceting/pagination happens in the indexer over the indexed docs — the client
- * sends this and renders the page. Standard-agnostic: scope to one `standard`
- * (the dashboard case — pay, prediction markets, auctions, …) or omit it for a
- * cross-standard query.
+ * Server-side query over the CollectionIndex. ALL filtering/searching/faceting/
+ * pagination happens in the indexer over the indexed docs — the client sends this
+ * and renders the page. Results are ordered newest-first. Standard-agnostic: scope
+ * to one `standard` (the dashboard case — pay, prediction markets, auctions, …) or
+ * omit it for a cross-standard query.
  *
  * @category API Requests / Responses
  */
@@ -32,18 +31,8 @@ export interface iGetCollectionIndexPayload {
   standard?: string;
   /** Status keys to include (OR). Clock-only statuses (e.g. 'expired') are resolved at query time. */
   status?: string[];
-  /** Denoms to include (OR). */
-  denom?: string[];
   /** Case-insensitive name search. */
   name?: string;
-  /** Inclusive headline-amount lower bound (pair with a single denom to be meaningful). */
-  amountMin?: number;
-  /** Inclusive headline-amount upper bound. */
-  amountMax?: number;
-  /** Sort key. Default 'date'. */
-  sortBy?: 'date' | 'amount';
-  /** Sort direction. Default 'desc'. */
-  sortDir?: 'asc' | 'desc';
   /** Pagination bookmark ("" / omitted for first page). */
   bookmark?: string;
 }
@@ -55,12 +44,7 @@ export class GetCollectionIndexPayload extends CustomTypeClass<GetCollectionInde
   createdBy?: string;
   standard?: string;
   status?: string[];
-  denom?: string[];
   name?: string;
-  amountMin?: number;
-  amountMax?: number;
-  sortBy?: 'date' | 'amount';
-  sortDir?: 'asc' | 'desc';
   bookmark?: string;
 
   constructor(payload: iGetCollectionIndexPayload) {
@@ -68,12 +52,7 @@ export class GetCollectionIndexPayload extends CustomTypeClass<GetCollectionInde
     this.createdBy = payload.createdBy;
     this.standard = payload.standard;
     this.status = payload.status;
-    this.denom = payload.denom;
     this.name = payload.name;
-    this.amountMin = payload.amountMin;
-    this.amountMax = payload.amountMax;
-    this.sortBy = payload.sortBy;
-    this.sortDir = payload.sortDir;
     this.bookmark = payload.bookmark;
   }
 
@@ -87,12 +66,7 @@ export class GetCollectionIndexPayload extends CustomTypeClass<GetCollectionInde
       createdBy: query.createdBy?.toString(),
       standard: query.standard?.toString(),
       status: csv(query.status),
-      denom: csv(query.denom),
       name: query.name?.toString(),
-      amountMin: query.amountMin !== undefined ? Number(query.amountMin) : undefined,
-      amountMax: query.amountMax !== undefined ? Number(query.amountMax) : undefined,
-      sortBy: query.sortBy === 'amount' ? 'amount' : query.sortBy === 'date' ? 'date' : undefined,
-      sortDir: query.sortDir === 'asc' ? 'asc' : query.sortDir === 'desc' ? 'desc' : undefined,
       bookmark: query.bookmark?.toString()
     });
   }

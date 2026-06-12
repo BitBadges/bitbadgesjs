@@ -21,7 +21,7 @@ export interface StandardInfoCtx {
 /**
  * The small, flat, indexable projection of a standard's computed `info`.
  * Materialized into the persisted `CollectionIndex` so the server-side
- * collection-index query can filter/sort/facet by these scalars. Anything
+ * collection-index query can filter + facet by these scalars. Anything
  * heavy (approvals, metadata) stays off this — the full `info` rides along
  * as `extras` purely for display.
  *
@@ -30,11 +30,9 @@ export interface StandardInfoCtx {
 export interface CollectionIndexProjection {
   /** Durable, tx-derived status enum for this standard (filterable/facetable). */
   status?: string;
-  /** Primary numeric sort/range key — the standard's headline amount (price, TVL, …). */
-  amountNum?: number;
-  /** Exact bigint string companion to `amountNum` (range math stays lossless). */
+  /** The standard's headline amount (price, TVL, …) — exact bigint string, for display. */
   amountStr?: string;
-  /** Denom paired with the amount (range filters are only meaningful per-denom). */
+  /** Denom paired with the headline amount. */
   denom?: string;
   /** Deadline in ms, for the query-time clock transition (see `expiry` below). */
   endTime?: number;

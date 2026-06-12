@@ -306,12 +306,10 @@ export interface iCollectionIndexDoc<T extends NumberType> extends Doc {
    * standard's expiry rule so they never go stale without a tx.
    */
   status?: string;
-  /** Headline money amount (exact bigint string), denom paired below. */
+  /** Headline money amount (exact bigint string), denom paired below — for display. */
   amountStr?: string;
   /** Headline denom (invoice/sub price/product 'from'/vault backing). */
   denom?: string;
-  /** Best-effort numeric headline amount for Mongo range filter + sort. */
-  amountNum?: number;
   /** Deadline in unix ms (0/absent = none); used for the query-time expiry rule. */
   endTime?: number;
   /** The standard's full computed `standardsInfo` blob, carried for display. */
