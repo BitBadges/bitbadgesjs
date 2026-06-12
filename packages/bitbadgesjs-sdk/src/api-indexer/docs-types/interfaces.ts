@@ -273,51 +273,26 @@ export interface iCollectionStatsDoc<T extends NumberType> extends iBaseStats<T>
 }
 
 /**
- * Per-standard extras the pay dashboard renders in its columns. Superset of
- * all four pay standards' fields (all optional). Money amounts are kept as
- * strings (exact, denom paired separately); counts are plain numbers.
+ * Denormalized, indexed record powering the server-side collection-index query
+ * (filter/sort/search/facets/paginate over Mongo). ONE doc per
+ * (collection × indexed standard); `_docId = `${collectionId}:${standard}``. A
+ * collection declaring N indexable standards has N rows. Maintained in real time
+ * by the indexer's tx-handlers from the standards-info builder projections, so
+ * the client derives nothing. The `/pay` dashboard is the first consumer
+ * (scopes by `standard`); prediction-market/auction/etc. dashboards reuse the
+ * same shape.
  *
  * @category Interfaces
  */
-export interface iPayIndexExtras {
-  // PaymentRequest
-  payer?: string;
-  recipient?: string;
-  // Subscriptions
-  intervalMs?: string;
-  tierCount?: number;
-  activeSubscribers?: number;
-  mrrAmount?: string;
-  mrrDenom?: string;
-  // Products
-  productCount?: number;
-  unitsSold?: number;
-  revenueAmount?: string;
-  revenueDenom?: string;
-  soldOut?: number;
-  // Vault
-  backingDenom?: string;
-  tvlAmount?: string;
-  depositors?: number;
-  wrapperSupply?: string;
-}
-
-/**
- * Denormalized, indexed per-collection record powering the server-side /pay
- * dashboard (filter/sort/search/facets/paginate over Mongo). One doc per pay
- * collection (PaymentRequest / Subscriptions / Products / Vault), maintained in
- * real time by the indexer's tx-handlers. Carries everything the dashboard row
- * needs so the client derives nothing.
- *
- * @category Interfaces
- */
-export interface iPayIndexDoc<T extends NumberType> extends Doc {
-  /** The collection ID (also the _docId). */
+export interface iCollectionIndexDoc<T extends NumberType> extends Doc {
+  /** The collection ID (this row is one of the collection's indexed standards). */
   collectionId: CollectionId;
-  /** Creator/merchant bech32 address — the dashboard is scoped per-merchant. */
+  /** Creator bech32 address — dashboards scope per-creator. */
   createdBy: string;
-  /** Pay standard: 'PaymentRequest' | 'Subscriptions' | 'Products' | 'Vault'. */
+  /** THE standard this row represents (the row's primary filter key). */
   standard: string;
+  /** ALL standards the collection declares (for "is also an X" cross-filtering). */
+  standards: string[];
   /** Collection display name (from metadata; '' until the async fetch lands). */
   name: string;
   /** Lowercased name for case-insensitive search/sort. */
@@ -327,22 +302,22 @@ export interface iPayIndexDoc<T extends NumberType> extends Doc {
   /** Merchant filter tags (collection metadata `tags`). */
   tags: string[];
   /**
-   * Persisted status key. For PaymentRequest this is the NON-time status
-   * (`paid`|`denied`|`pending`); `expired` is computed at query time from
-   * `expirationMs` so it never goes stale without a tx. Other standards:
-   * `active`/`inactive`/`available`/`sold-out`/`empty`.
+   * Durable, tx-derived status enum (per standard). Clock-only transitions
+   * (e.g. PaymentRequest `pending` → `expired` past its deadline) are NOT
+   * persisted here — they are applied at query time from `endTime` + the
+   * standard's expiry rule so they never go stale without a tx.
    */
-  statusKey: string;
+  status?: string;
   /** Headline money amount (exact bigint string), denom paired below. */
   amountStr?: string;
   /** Headline denom (invoice/sub price/product 'from'/vault backing). */
   denom?: string;
   /** Best-effort numeric headline amount for Mongo range filter + sort. */
-  amountNum: number;
-  /** Expiration in unix ms (0/absent = none); used for query-time expiry. */
-  expirationMs?: number;
-  /** Per-standard column extras. */
-  extras: iPayIndexExtras;
+  amountNum?: number;
+  /** Deadline in unix ms (0/absent = none); used for the query-time expiry rule. */
+  endTime?: number;
+  /** The standard's full computed `standardsInfo` blob, carried for display. */
+  extras?: unknown;
   /** Creation block (cursor sort key, mirrors createdTokens). */
   createdBlock: T;
   /** Creation timestamp (unix ms). */

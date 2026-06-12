@@ -37,13 +37,12 @@ import {
   iApiKeyDoc,
   iApprovalItemDoc,
   iBaseStats,
+  iCollectionIndexDoc,
   iCollectionStatsDoc,
   iCreatorCreditsDoc,
   iDynamicDataDoc,
   iEstimatedCost,
   iFloorPriceHistory,
-  iPayIndexDoc,
-  iPayIndexExtras,
   iInheritMetadataFrom,
   iLinkedTo,
   iListingViewsDoc,
@@ -169,59 +168,61 @@ export class CollectionStatsDoc<T extends NumberType> extends BaseStatsDoc<T> im
 }
 
 /**
- * @inheritDoc iPayIndexDoc
+ * @inheritDoc iCollectionIndexDoc
  * @category Collections
  */
-export class PayIndexDoc<T extends NumberType> extends BaseNumberTypeClass<PayIndexDoc<T>> implements iPayIndexDoc<T> {
+export class CollectionIndexDoc<T extends NumberType> extends BaseNumberTypeClass<CollectionIndexDoc<T>> implements iCollectionIndexDoc<T> {
   _docId: string;
   _id?: string;
   collectionId: CollectionId;
   createdBy: string;
   standard: string;
+  standards: string[];
   name: string;
   nameLower: string;
   image: string;
   tags: string[];
-  statusKey: string;
+  status?: string;
   amountStr?: string;
   denom?: string;
-  amountNum: number;
-  expirationMs?: number;
-  extras: iPayIndexExtras;
+  amountNum?: number;
+  endTime?: number;
+  extras?: unknown;
   createdBlock: T;
   createdTimestamp: T;
   lastSyncedBlock: T;
 
-  constructor(data: iPayIndexDoc<T>) {
+  constructor(data: iCollectionIndexDoc<T>) {
     super();
     this._docId = data._docId;
     this._id = data._id;
     this.collectionId = data.collectionId;
     this.createdBy = data.createdBy;
     this.standard = data.standard;
+    this.standards = data.standards;
     this.name = data.name;
     this.nameLower = data.nameLower;
     this.image = data.image;
     this.tags = data.tags;
-    this.statusKey = data.statusKey;
+    this.status = data.status;
     this.amountStr = data.amountStr;
     this.denom = data.denom;
     this.amountNum = data.amountNum;
-    this.expirationMs = data.expirationMs;
+    this.endTime = data.endTime;
     this.extras = data.extras;
     this.createdBlock = data.createdBlock;
     this.createdTimestamp = data.createdTimestamp;
     this.lastSyncedBlock = data.lastSyncedBlock;
   }
 
-  // amountNum / expirationMs stay plain JS numbers (Mongo range/sort keys) — only
+  // amountNum / endTime stay plain JS numbers (Mongo range/sort keys) — only
   // the chain-block fields ride the NumberType<T> generic.
   getNumberFieldNames(): string[] {
     return ['createdBlock', 'createdTimestamp', 'lastSyncedBlock'];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): PayIndexDoc<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as PayIndexDoc<U>;
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): CollectionIndexDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionIndexDoc<U>;
   }
 }
 
