@@ -37,6 +37,7 @@ import {
   iApiKeyDoc,
   iApprovalItemDoc,
   iBaseStats,
+  iCollectionIndexDoc,
   iCollectionStatsDoc,
   iCreatorCreditsDoc,
   iDynamicDataDoc,
@@ -163,6 +164,65 @@ export class CollectionStatsDoc<T extends NumberType> extends BaseStatsDoc<T> im
 
   convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): CollectionStatsDoc<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionStatsDoc<U>;
+  }
+}
+
+/**
+ * @inheritDoc iCollectionIndexDoc
+ * @category Collections
+ */
+export class CollectionIndexDoc<T extends NumberType> extends BaseNumberTypeClass<CollectionIndexDoc<T>> implements iCollectionIndexDoc<T> {
+  _docId: string;
+  _id?: string;
+  collectionId: CollectionId;
+  createdBy: string;
+  standard: string;
+  standards: string[];
+  name: string;
+  nameLower: string;
+  image: string;
+  status?: string;
+  amountStr?: string;
+  denom?: string;
+  endTime?: number;
+  payerAddress?: string;
+  recipientAddress?: string;
+  extras?: unknown;
+  createdBlock: T;
+  createdTimestamp: T;
+  lastSyncedBlock: T;
+
+  constructor(data: iCollectionIndexDoc<T>) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.collectionId = data.collectionId;
+    this.createdBy = data.createdBy;
+    this.standard = data.standard;
+    this.standards = data.standards;
+    this.name = data.name;
+    this.nameLower = data.nameLower;
+    this.image = data.image;
+    this.status = data.status;
+    this.amountStr = data.amountStr;
+    this.denom = data.denom;
+    this.endTime = data.endTime;
+    this.payerAddress = data.payerAddress;
+    this.recipientAddress = data.recipientAddress;
+    this.extras = data.extras;
+    this.createdBlock = data.createdBlock;
+    this.createdTimestamp = data.createdTimestamp;
+    this.lastSyncedBlock = data.lastSyncedBlock;
+  }
+
+  // endTime stays a plain JS number (Mongo query-time expiry key) — only the
+  // chain-block fields ride the NumberType<T> generic.
+  getNumberFieldNames(): string[] {
+    return ['createdBlock', 'createdTimestamp', 'lastSyncedBlock'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): CollectionIndexDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as CollectionIndexDoc<U>;
   }
 }
 

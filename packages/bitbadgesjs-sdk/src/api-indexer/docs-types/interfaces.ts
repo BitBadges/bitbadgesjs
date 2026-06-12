@@ -273,6 +273,59 @@ export interface iCollectionStatsDoc<T extends NumberType> extends iBaseStats<T>
 }
 
 /**
+ * Denormalized, indexed record powering the server-side collection-index query
+ * (filter/sort/search/facets/paginate over Mongo). ONE doc per
+ * (collection × indexed standard); `_docId = `${collectionId}:${standard}``. A
+ * collection declaring N indexable standards has N rows. Maintained in real time
+ * by the indexer's tx-handlers from the standards-info builder projections, so
+ * the client derives nothing. The `/pay` dashboard is the first consumer
+ * (scopes by `standard`); prediction-market/auction/etc. dashboards reuse the
+ * same shape.
+ *
+ * @category Interfaces
+ */
+export interface iCollectionIndexDoc<T extends NumberType> extends Doc {
+  /** The collection ID (this row is one of the collection's indexed standards). */
+  collectionId: CollectionId;
+  /** Creator bech32 address — dashboards scope per-creator. */
+  createdBy: string;
+  /** THE standard this row represents (the row's primary filter key). */
+  standard: string;
+  /** ALL standards the collection declares (for "is also an X" cross-filtering). */
+  standards: string[];
+  /** Collection display name (from metadata; '' until the async fetch lands). */
+  name: string;
+  /** Lowercased name for case-insensitive search/sort. */
+  nameLower: string;
+  /** Collection image URI (for the dashboard avatar; '' until metadata lands). */
+  image: string;
+  /**
+   * Durable, tx-derived status enum (per standard). Clock-only transitions
+   * (e.g. PaymentRequest `pending` → `expired` past its deadline) are NOT
+   * persisted here — they are applied at query time from `endTime` + the
+   * standard's expiry rule so they never go stale without a tx.
+   */
+  status?: string;
+  /** Headline money amount (exact bigint string), denom paired below — for display. */
+  amountStr?: string;
+  /** Headline denom (invoice/sub price/product 'from'/vault backing). */
+  denom?: string;
+  /** Deadline in unix ms (0/absent = none); used for the query-time expiry rule. */
+  endTime?: number;
+  /** Counterparty addresses (e.g. PaymentRequest payer/recipient) for role filtering. */
+  payerAddress?: string;
+  recipientAddress?: string;
+  /** The standard's full computed `standardsInfo` blob, carried for display. */
+  extras?: unknown;
+  /** Creation block (cursor sort key, mirrors createdTokens). */
+  createdBlock: T;
+  /** Creation timestamp (unix ms). */
+  createdTimestamp: T;
+  /** Block this record was last rebuilt at (reorg/idempotency guard). */
+  lastSyncedBlock: T;
+}
+
+/**
  * @category Interfaces
  */
 export interface iFloorPriceHistory<T extends NumberType> {

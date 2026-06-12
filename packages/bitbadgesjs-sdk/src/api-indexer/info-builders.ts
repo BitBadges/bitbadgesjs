@@ -19,15 +19,83 @@ export interface StandardInfoCtx {
 }
 
 /**
+ * The small, flat, indexable projection of a standard's computed `info`.
+ * Materialized into the persisted `CollectionIndex` so the server-side
+ * collection-index query can filter + facet by these scalars. Anything
+ * heavy (approvals, metadata) stays off this — the full `info` rides along
+ * as `extras` purely for display.
+ *
+ * @category Standards Info
+ */
+export interface CollectionIndexProjection {
+  /** Durable, tx-derived status enum for this standard (filterable/facetable). */
+  status?: string;
+  /** The standard's headline amount (price, TVL, …) — exact bigint string, for display. */
+  amountStr?: string;
+  /** Denom paired with the headline amount. */
+  denom?: string;
+  /** Deadline in ms, for the query-time clock transition (see `expiry` below). */
+  endTime?: number;
+  /** Counterparty addresses for role filtering (e.g. PaymentRequest payer/recipient). Indexed for exact-match. */
+  payerAddress?: string;
+  recipientAddress?: string;
+  /** The full computed `info` blob, carried verbatim for client display. */
+  extras?: unknown;
+}
+
+/**
+ * A clock-only status transition: a row whose status is `activeStatus` and
+ * whose `endTime` has passed is treated as `expiredStatus` at query time —
+ * no tx fires for this (e.g. a PaymentRequest auto-expiring). Standards that
+ * only transition via on-chain tx (which already triggers a rebuild) omit it.
+ *
+ * @category Standards Info
+ */
+export interface StandardExpiryRule {
+  activeStatus: string;
+  expiredStatus: string;
+}
+
+/**
  * Contract for a per-standard info builder. Implementations live in the
  * indexer (where extra fetches are available) and are registered into the
  * builders map passed to `buildStandardsInfo`.
+ *
+ * A builder owns EVERYTHING about its standard:
+ *  - `build()` produces the live `standardsInfo` (fetch-time, attached to the
+ *    collection response).
+ *  - `index()` maps that same computed `info` into the persisted, indexable
+ *    {@link CollectionIndexProjection}. Omit it to fall back to a
+ *    status-only projection (`{ status: info.status, extras: info }`).
+ *  - `expiry` declares the standard's clock-only status transition, if any.
  *
  * @category Standards Info
  */
 export interface StandardInfoBuilder<TInfo> {
   readonly standardName: string;
   build(collection: BitBadgesCollection<bigint>, ctx: StandardInfoCtx): Promise<TInfo | null>;
+  /** Map the built `info` → persisted, indexable projection. */
+  index?(collection: BitBadgesCollection<bigint>, info: TInfo, ctx: StandardInfoCtx): CollectionIndexProjection;
+  /** Clock-only status transition for the query layer, if this standard has one. */
+  readonly expiry?: StandardExpiryRule;
+}
+
+/**
+ * Project a standard's computed `info` into its {@link CollectionIndexProjection},
+ * using the builder's `index()` when present and a status-only default otherwise.
+ * Single source of the default so every indexed standard behaves consistently.
+ *
+ * @category Standards Info
+ */
+export function projectStandardIndex(
+  builder: StandardInfoBuilder<unknown>,
+  collection: BitBadgesCollection<bigint>,
+  info: unknown,
+  ctx: StandardInfoCtx
+): CollectionIndexProjection {
+  if (builder.index) return builder.index(collection, info, ctx);
+  const status = (info as { status?: string } | null)?.status;
+  return { status, extras: info };
 }
 
 /**

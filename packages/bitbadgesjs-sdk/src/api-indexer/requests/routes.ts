@@ -195,6 +195,9 @@ export class BitBadgesApiRoutes {
   static BroadcastTxEvmRoute = () => '/api/v0/broadcast-evm';
   static SimulateTxEvmRoute = () => '/api/v0/simulate-evm';
 
+  // ── CollectionIndex: server-side filter/sort/search/facets over any standard. ──
+  static GetCollectionIndexRoute = () => '/api/v0/collections/index';
+
   // ── PromptSkill CRUD + discovery. ──
   static GetPromptSkillRoute = (promptSkillId: string) => `/api/v0/promptSkill/${promptSkillId}`;
   static SearchPromptSkillsRoute = () => '/api/v0/promptSkills/search';
