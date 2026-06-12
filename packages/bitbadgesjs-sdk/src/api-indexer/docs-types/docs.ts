@@ -181,7 +181,6 @@ export class CollectionIndexDoc<T extends NumberType> extends BaseNumberTypeClas
   name: string;
   nameLower: string;
   image: string;
-  tags: string[];
   status?: string;
   amountStr?: string;
   denom?: string;
@@ -203,7 +202,6 @@ export class CollectionIndexDoc<T extends NumberType> extends BaseNumberTypeClas
     this.name = data.name;
     this.nameLower = data.nameLower;
     this.image = data.image;
-    this.tags = data.tags;
     this.status = data.status;
     this.amountStr = data.amountStr;
     this.denom = data.denom;

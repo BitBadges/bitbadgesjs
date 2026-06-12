@@ -14,7 +14,6 @@ export interface iCollectionIndexFacet {
 export interface iCollectionIndexFacets {
   statuses: iCollectionIndexFacet[];
   denoms: iCollectionIndexFacet[];
-  tags: iCollectionIndexFacet[];
 }
 
 /**
@@ -35,8 +34,6 @@ export interface iGetCollectionIndexPayload {
   status?: string[];
   /** Denoms to include (OR). */
   denom?: string[];
-  /** Tags to include (ANY match). */
-  tags?: string[];
   /** Case-insensitive name search. */
   name?: string;
   /** Inclusive headline-amount lower bound (pair with a single denom to be meaningful). */
@@ -59,7 +56,6 @@ export class GetCollectionIndexPayload extends CustomTypeClass<GetCollectionInde
   standard?: string;
   status?: string[];
   denom?: string[];
-  tags?: string[];
   name?: string;
   amountMin?: number;
   amountMax?: number;
@@ -73,7 +69,6 @@ export class GetCollectionIndexPayload extends CustomTypeClass<GetCollectionInde
     this.standard = payload.standard;
     this.status = payload.status;
     this.denom = payload.denom;
-    this.tags = payload.tags;
     this.name = payload.name;
     this.amountMin = payload.amountMin;
     this.amountMax = payload.amountMax;
@@ -93,7 +88,6 @@ export class GetCollectionIndexPayload extends CustomTypeClass<GetCollectionInde
       standard: query.standard?.toString(),
       status: csv(query.status),
       denom: csv(query.denom),
-      tags: csv(query.tags),
       name: query.name?.toString(),
       amountMin: query.amountMin !== undefined ? Number(query.amountMin) : undefined,
       amountMax: query.amountMax !== undefined ? Number(query.amountMax) : undefined,

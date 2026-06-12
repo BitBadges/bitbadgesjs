@@ -299,8 +299,6 @@ export interface iCollectionIndexDoc<T extends NumberType> extends Doc {
   nameLower: string;
   /** Collection image URI (for the dashboard avatar; '' until metadata lands). */
   image: string;
-  /** Merchant filter tags (collection metadata `tags`). */
-  tags: string[];
   /**
    * Durable, tx-derived status enum (per standard). Clock-only transitions
    * (e.g. PaymentRequest `pending` → `expired` past its deadline) are NOT
