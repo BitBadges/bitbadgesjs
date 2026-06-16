@@ -143,6 +143,35 @@ describe('validatePaymentRequestCollection — no-escrow inversion invariants', 
   });
 });
 
+describe('validatePaymentRequestCollection — open-ended payer-eligibility gates', () => {
+  // The mint form lets creators gate WHO may pay (badge ownership / KYC
+  // allowlist) by layering mustOwnTokens / dynamicStoreChallenges onto the
+  // PAY approval. The protocol check deliberately ignores those fields —
+  // adding them must NOT invalidate the collection (the Create button gates
+  // on this). votingChallenges stays the only forbidden gate.
+  it('still valid with mustOwnTokens on the pay approval', () => {
+    const c = fresh();
+    c.collectionApprovals[0].approvalCriteria.mustOwnTokens = [
+      {
+        collectionId: 1n,
+        amountRange: { start: 1n, end: 1n },
+        tokenIds: [{ start: 1n, end: 1n }],
+        ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],
+        overrideWithCurrentTime: true,
+        mustSatisfyForAllAssets: true,
+        ownershipCheckParty: 'initiator'
+      }
+    ];
+    expect(validatePaymentRequestCollection(c).valid).toBe(true);
+  });
+
+  it('still valid with dynamicStoreChallenges on the pay approval', () => {
+    const c = fresh();
+    c.collectionApprovals[0].approvalCriteria.dynamicStoreChallenges = [{ storeId: 9n, ownershipCheckParty: 'initiator' }];
+    expect(validatePaymentRequestCollection(c).valid).toBe(true);
+  });
+});
+
 describe('validatePaymentRequestCollection — approval shape', () => {
   it('rejects when fewer than 2 approvals', () => {
     const c = fresh();

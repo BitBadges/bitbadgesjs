@@ -298,3 +298,54 @@ describe('isInvoiceApproval — misc', () => {
     expect(isInvoiceApproval(a)).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Eligibility criteria (mustOwnTokens / dynamicStoreChallenges)
+//
+// The mint forms let invoice creators gate WHO may pay (e.g. "only badge
+// holders" or "only addresses on a KYC allowlist"). These are layered onto
+// the pay approval's approvalCriteria. isInvoiceApproval MUST keep
+// recognizing the approval — it deliberately doesn't inspect these fields,
+// so the gate stays open-ended. These cases lock that contract in.
+// ---------------------------------------------------------------------------
+
+describe('isInvoiceApproval — open-ended eligibility criteria', () => {
+  it('still recognizes an invoice carrying mustOwnTokens (badge-ownership gate)', () => {
+    const a = makeValidInvoiceApproval();
+    a.approvalCriteria.mustOwnTokens = [
+      {
+        collectionId: 1n,
+        amountRange: { start: 1n, end: 1n },
+        tokenIds: [{ start: 1n, end: 1n }],
+        ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],
+        overrideWithCurrentTime: true,
+        mustSatisfyForAllAssets: true,
+        ownershipCheckParty: 'initiator'
+      }
+    ];
+    expect(isInvoiceApproval(a)).toBe(true);
+  });
+
+  it('still recognizes an invoice carrying dynamicStoreChallenges (allowlist gate)', () => {
+    const a = makeValidInvoiceApproval();
+    a.approvalCriteria.dynamicStoreChallenges = [{ storeId: 7n, ownershipCheckParty: 'initiator' }];
+    expect(isInvoiceApproval(a)).toBe(true);
+  });
+
+  it('still recognizes an invoice carrying both gates at once', () => {
+    const a = makeValidInvoiceApproval();
+    a.approvalCriteria.mustOwnTokens = [
+      {
+        collectionId: 2n,
+        amountRange: { start: 1n, end: 1n },
+        tokenIds: [{ start: 1n, end: 1n }],
+        ownershipTimes: [{ start: 1n, end: 18446744073709551615n }],
+        overrideWithCurrentTime: true,
+        mustSatisfyForAllAssets: true,
+        ownershipCheckParty: 'initiator'
+      }
+    ];
+    a.approvalCriteria.dynamicStoreChallenges = [{ storeId: 3n, ownershipCheckParty: 'initiator' }];
+    expect(isInvoiceApproval(a)).toBe(true);
+  });
+});
