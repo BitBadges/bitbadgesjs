@@ -33,6 +33,18 @@ import { iMetadata, Metadata } from '../metadata/metadata.js';
 export interface iGetCollectionOwnersPayload {
   bookmark?: string;
   oldestFirst?: boolean;
+  /**
+   * If set, filter owners to holders of this token ID (tier) server-side and
+   * include per-tier `counts` in the response. Enables tier-scoped views
+   * (e.g. subscriber management) to scale without paging every holder.
+   */
+  tokenId?: NumberType;
+  /**
+   * Only meaningful alongside `tokenId`. When true, the returned page is
+   * restricted to holders whose ownership currently covers now (active),
+   * excluding expired holders.
+   */
+  onlyActive?: boolean;
 }
 
 /**
@@ -41,6 +53,12 @@ export interface iGetCollectionOwnersPayload {
 export interface iGetCollectionOwnersSuccessResponse<T extends NumberType> {
   owners: Array<iBalanceDoc<T>>;
   pagination: PaginationInfo;
+  /**
+   * Present only when `tokenId` was provided. Holder counts for that tier.
+   * Plain integers (holder counts, well within safe-integer range) — not
+   * NumberType, so they aren't affected by number-type conversion.
+   */
+  counts?: { total: number; active: number; expired: number };
 }
 
 /**
@@ -52,11 +70,13 @@ export class GetCollectionOwnersSuccessResponse<T extends NumberType>
 {
   owners: BalanceDoc<T>[];
   pagination: PaginationInfo;
+  counts?: { total: number; active: number; expired: number };
 
   constructor(data: iGetCollectionOwnersSuccessResponse<T>) {
     super();
     this.owners = data.owners.map((owner) => new BalanceDoc(owner));
     this.pagination = data.pagination;
+    this.counts = data.counts;
   }
 
   getNumberFieldNames(): string[] {
