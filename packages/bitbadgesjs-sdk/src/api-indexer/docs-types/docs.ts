@@ -4,6 +4,7 @@ import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintain
 import type { NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
 import { AddressList } from '@/core/addressLists.js';
+import { TransferActivityDoc } from '@/api-indexer/docs-types/activity.js';
 import {
   ApprovalInfoDetails,
   ChallengeDetails,
@@ -80,6 +81,7 @@ import {
   type iFetchDoc,
   type iIPFSTotalsDoc,
   type iNotificationDoc,
+  type iTransferActivityDoc,
   type NotificationType,
   type iLatestBlockStatus,
   type iMerkleChallengeTrackerDoc,
@@ -510,6 +512,7 @@ export class NotificationDoc<T extends NumberType> extends BaseNumberTypeClass<N
   title?: string;
   message?: string;
   link?: string;
+  activity?: TransferActivityDoc<T>;
   data?: {
     amount?: string;
     denom?: string;
@@ -535,6 +538,7 @@ export class NotificationDoc<T extends NumberType> extends BaseNumberTypeClass<N
     this.title = data.title;
     this.message = data.message;
     this.link = data.link;
+    this.activity = data.activity ? new TransferActivityDoc(data.activity) : undefined;
     this.data = data.data;
   }
 

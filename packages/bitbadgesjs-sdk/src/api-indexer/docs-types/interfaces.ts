@@ -143,6 +143,12 @@ export interface iNotificationDoc<T extends NumberType> extends Doc {
   message?: string;
   /** Optional in-app link to navigate to when clicked. */
   link?: string;
+  /**
+   * The source transfer activity this notification was generated from, embedded so the
+   * frontend can render it with the standard transfer-activity components without a refetch.
+   * Only set for `type: 'transfer'` notifications.
+   */
+  activity?: iTransferActivityDoc<T>;
   /** Denormalized, display-ready payload for rich rendering (no number-type fields). */
   data?: {
     amount?: string;
