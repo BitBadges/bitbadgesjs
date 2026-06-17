@@ -81,6 +81,7 @@ import {
   type iFetchDoc,
   type iIPFSTotalsDoc,
   type iNotificationDoc,
+  type iNotificationPayload,
   type iTransferActivityDoc,
   type NotificationType,
   type iLatestBlockStatus,
@@ -505,23 +506,12 @@ export class NotificationDoc<T extends NumberType> extends BaseNumberTypeClass<N
   type: NotificationType;
   read: boolean;
   createdAt: T;
-  collectionId?: CollectionId;
-  txHash?: string;
-  from?: BitBadgesAddress;
-  initiatedBy?: BitBadgesAddress;
-  title?: string;
+  title: string;
   message?: string;
   link?: string;
-  activity?: TransferActivityDoc<T>;
-  data?: {
-    amount?: string;
-    denom?: string;
-    tokenIds?: string;
-    collectionName?: string;
-    counterparty?: BitBadgesAddress;
-    claimId?: string;
-    points?: string;
-  };
+  collectionId?: CollectionId;
+  address?: BitBadgesAddress;
+  payload?: iNotificationPayload<T>;
 
   constructor(data: iNotificationDoc<T>) {
     super();
@@ -531,15 +521,16 @@ export class NotificationDoc<T extends NumberType> extends BaseNumberTypeClass<N
     this.type = data.type;
     this.read = data.read;
     this.createdAt = data.createdAt;
-    this.collectionId = data.collectionId;
-    this.txHash = data.txHash;
-    this.from = data.from;
-    this.initiatedBy = data.initiatedBy;
     this.title = data.title;
     this.message = data.message;
     this.link = data.link;
-    this.activity = data.activity ? new TransferActivityDoc(data.activity) : undefined;
-    this.data = data.data;
+    this.collectionId = data.collectionId;
+    this.address = data.address;
+    // Rebuild the embedded activity as a real class instance so convert() recurses into
+    // its number fields; the rest of the payload is display-ready and passes through as-is.
+    this.payload = data.payload
+      ? { ...data.payload, activity: data.payload.activity ? new TransferActivityDoc(data.payload.activity) : undefined }
+      : undefined;
   }
 
   getNumberFieldNames(): string[] {

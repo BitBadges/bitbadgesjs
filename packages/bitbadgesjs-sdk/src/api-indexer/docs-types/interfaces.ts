@@ -109,56 +109,80 @@ export interface iNotificationPreferences<T extends NumberType> {
 }
 
 /**
- * The in-app notification categories (inbox event types).
+ * The in-app notification categories (inbox event types). This is the discriminator
+ * for {@link iNotificationDoc} — every type shares the same presentation envelope and
+ * carries its own structured detail in {@link iNotificationPayload}. New event types
+ * (e.g. swaps, votes) are added here + given a `payload` shape + a frontend renderer.
  *
  * @category Interfaces
  */
-export type NotificationType = 'transfer' | 'claim' | 'points' | 'list' | 'system';
+export type NotificationType = 'transfer' | 'bank_send' | 'claim' | 'points' | 'list' | 'system';
+
+/**
+ * A coin (denom) amount, as display-ready strings (no number-type conversion needed).
+ *
+ * @category Interfaces
+ */
+export interface iNotificationCoin {
+  amount: string;
+  denom: string;
+}
+
+/**
+ * Type-specific detail for a notification's drilldown view. The populated key is
+ * determined by {@link iNotificationDoc.type}; renderers narrow on `type`. This is the
+ * extension point: a new notification type adds its structured detail here.
+ *
+ * @category Interfaces
+ */
+export interface iNotificationPayload<T extends NumberType> {
+  /** `transfer`: the source on-chain token transfer activity (embedded for rich rendering). */
+  activity?: iTransferActivityDoc<T>;
+  /** `bank_send`: a native coin (denom) transfer. */
+  bankSend?: {
+    fromAddress: BitBadgesAddress;
+    toAddress: BitBadgesAddress;
+    amount: iNotificationCoin[];
+    txHash?: string;
+  };
+  /** Misc display-ready scalars for any type (tokenIds, claimId, points, …). */
+  extra?: Record<string, string>;
+}
 
 /**
  * An in-app notification (inbox entry). One document per recipient per event.
+ *
+ * Shape = a **standardized envelope** (rendered identically for every type in the inbox
+ * list) + a **type-specific `payload`** surfaced only in the drilldown. `type` is the
+ * discriminator (see {@link NotificationType}).
  *
  * @category Interfaces
  */
 export interface iNotificationDoc<T extends NumberType> extends Doc {
   /** The recipient of this notification. */
   bitbadgesAddress: BitBadgesAddress;
-  /** The category of the notification (drives icon + rendering). */
+  /** The category of the notification — the discriminator for `payload` + rendering. */
   type: NotificationType;
   /** Whether the recipient has read this notification. */
   read: boolean;
   /** When the notification was created (UNIX ms). */
   createdAt: UNIXMilliTimestamp<T>;
-  /** The collection this notification relates to, if any. */
-  collectionId?: CollectionId;
-  /** The on-chain transaction hash that produced this notification, if any. */
-  txHash?: string;
-  /** The counterparty / sender, if any. */
-  from?: BitBadgesAddress;
-  /** The address that initiated the underlying transaction, if any. */
-  initiatedBy?: BitBadgesAddress;
-  /** Short headline for the notification. */
-  title?: string;
-  /** Body text for the notification. */
+
+  // --- Standardized presentation envelope (consistent across all types) ---
+  /** Headline for the inbox row. */
+  title: string;
+  /** Optional one-line body for the inbox row. */
   message?: string;
-  /** Optional in-app link to navigate to when clicked. */
+  /** Optional in-app link to navigate to (e.g. "view source"). */
   link?: string;
-  /**
-   * The source transfer activity this notification was generated from, embedded so the
-   * frontend can render it with the standard transfer-activity components without a refetch.
-   * Only set for `type: 'transfer'` notifications.
-   */
-  activity?: iTransferActivityDoc<T>;
-  /** Denormalized, display-ready payload for rich rendering (no number-type fields). */
-  data?: {
-    amount?: string;
-    denom?: string;
-    tokenIds?: string;
-    collectionName?: string;
-    counterparty?: BitBadgesAddress;
-    claimId?: string;
-    points?: string;
-  };
+  /** Subject for the row's leading avatar: a collection (token avatar). */
+  collectionId?: CollectionId;
+  /** Subject for the row's leading avatar: an address (user avatar / counterparty). */
+  address?: BitBadgesAddress;
+
+  // --- Type-specific drilldown detail (shape determined by `type`) ---
+  /** Structured detail surfaced when the row is expanded/drilled into. */
+  payload?: iNotificationPayload<T>;
 }
 
 /**
