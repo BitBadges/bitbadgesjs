@@ -79,6 +79,8 @@ import {
   type iEmailVerificationStatus,
   type iFetchDoc,
   type iIPFSTotalsDoc,
+  type iNotificationDoc,
+  type NotificationType,
   type iLatestBlockStatus,
   type iMerkleChallengeTrackerDoc,
   type iNotificationPreferences,
@@ -472,6 +474,9 @@ export class NotificationPreferences<T extends NumberType>
     claimActivity?: boolean;
     ignoreIfInitiator?: boolean;
     signInAlertsEnabled?: boolean;
+    inAppEnabled?: boolean;
+    inAppTransferActivity?: boolean;
+    inAppClaimActivity?: boolean;
   };
 
   constructor(data: iNotificationPreferences<T>) {
@@ -484,6 +489,61 @@ export class NotificationPreferences<T extends NumberType>
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): NotificationPreferences<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as NotificationPreferences<U>;
+  }
+}
+
+/**
+ * @inheritDoc iNotificationDoc
+ * @category Indexer
+ */
+export class NotificationDoc<T extends NumberType> extends BaseNumberTypeClass<NotificationDoc<T>> implements iNotificationDoc<T> {
+  _docId: string;
+  _id?: string;
+  bitbadgesAddress: BitBadgesAddress;
+  type: NotificationType;
+  read: boolean;
+  createdAt: T;
+  collectionId?: CollectionId;
+  txHash?: string;
+  from?: BitBadgesAddress;
+  initiatedBy?: BitBadgesAddress;
+  title?: string;
+  message?: string;
+  link?: string;
+  data?: {
+    amount?: string;
+    denom?: string;
+    tokenIds?: string;
+    collectionName?: string;
+    counterparty?: BitBadgesAddress;
+    claimId?: string;
+    points?: string;
+  };
+
+  constructor(data: iNotificationDoc<T>) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.bitbadgesAddress = data.bitbadgesAddress;
+    this.type = data.type;
+    this.read = data.read;
+    this.createdAt = data.createdAt;
+    this.collectionId = data.collectionId;
+    this.txHash = data.txHash;
+    this.from = data.from;
+    this.initiatedBy = data.initiatedBy;
+    this.title = data.title;
+    this.message = data.message;
+    this.link = data.link;
+    this.data = data.data;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['createdAt'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): NotificationDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as NotificationDoc<U>;
   }
 }
 

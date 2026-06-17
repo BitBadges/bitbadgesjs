@@ -99,6 +99,59 @@ export interface iNotificationPreferences<T extends NumberType> {
     claimActivity?: boolean;
     ignoreIfInitiator?: boolean;
     signInAlertsEnabled?: boolean;
+    /** Master toggle for the in-app notification inbox. Defaults to enabled when undefined. */
+    inAppEnabled?: boolean;
+    /** In-app inbox: receive transfer notifications. Defaults to enabled when undefined. */
+    inAppTransferActivity?: boolean;
+    /** In-app inbox: receive claim notifications. Defaults to enabled when undefined. */
+    inAppClaimActivity?: boolean;
+  };
+}
+
+/**
+ * The in-app notification categories (inbox event types).
+ *
+ * @category Interfaces
+ */
+export type NotificationType = 'transfer' | 'claim' | 'points' | 'list' | 'system';
+
+/**
+ * An in-app notification (inbox entry). One document per recipient per event.
+ *
+ * @category Interfaces
+ */
+export interface iNotificationDoc<T extends NumberType> extends Doc {
+  /** The recipient of this notification. */
+  bitbadgesAddress: BitBadgesAddress;
+  /** The category of the notification (drives icon + rendering). */
+  type: NotificationType;
+  /** Whether the recipient has read this notification. */
+  read: boolean;
+  /** When the notification was created (UNIX ms). */
+  createdAt: UNIXMilliTimestamp<T>;
+  /** The collection this notification relates to, if any. */
+  collectionId?: CollectionId;
+  /** The on-chain transaction hash that produced this notification, if any. */
+  txHash?: string;
+  /** The counterparty / sender, if any. */
+  from?: BitBadgesAddress;
+  /** The address that initiated the underlying transaction, if any. */
+  initiatedBy?: BitBadgesAddress;
+  /** Short headline for the notification. */
+  title?: string;
+  /** Body text for the notification. */
+  message?: string;
+  /** Optional in-app link to navigate to when clicked. */
+  link?: string;
+  /** Denormalized, display-ready payload for rich rendering (no number-type fields). */
+  data?: {
+    amount?: string;
+    denom?: string;
+    tokenIds?: string;
+    collectionName?: string;
+    counterparty?: BitBadgesAddress;
+    claimId?: string;
+    points?: string;
   };
 }
 
