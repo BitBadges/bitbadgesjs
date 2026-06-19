@@ -116,7 +116,7 @@ export interface iNotificationPreferences<T extends NumberType> {
  *
  * @category Interfaces
  */
-export type NotificationType = 'transfer' | 'bank_send' | 'claim' | 'points' | 'list' | 'system';
+export type NotificationType = 'transfer' | 'bank_send' | 'claim' | 'points' | 'list' | 'system' | 'intent_satisfied';
 
 /**
  * A coin (denom) amount, as display-ready strings (no number-type conversion needed).
@@ -144,6 +144,23 @@ export interface iNotificationPayload<T extends NumberType> {
     toAddress: BitBadgesAddress;
     amount: iNotificationCoin[];
     txHash?: string;
+  };
+  /** `intent_satisfied`: a standing intent (approval) was filled — multiple on-chain legs collapsed into one event. */
+  intentSatisfied?: {
+    /** The intent approval that was consumed. */
+    approvalId: string;
+    /** Who set up the intent (the maker / "my intent was satisfied" recipient). */
+    approverAddress: BitBadgesAddress;
+    /** Who filled the intent (the taker / initiator). */
+    filler: BitBadgesAddress;
+    collectionId: CollectionId;
+    txHash?: string;
+    /** Coins that moved as part of the fill (payment/payout), display-ready. */
+    coins: iNotificationCoin[];
+    /** Compact summary of token IDs involved, e.g. "1-3, 7". */
+    tokenIds?: string;
+    /** How many on-chain transfer legs were collapsed into this single notification. */
+    legCount: number;
   };
   /** Misc display-ready scalars for any type (tokenIds, claimId, points, …). */
   extra?: Record<string, string>;
@@ -701,7 +718,6 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
 
   /** The notifications of the account */
   notifications?: iNotificationPreferences<T>;
-
 }
 
 /**
@@ -876,14 +892,7 @@ export interface iBalanceDocWithDetails<T extends NumberType> extends iBalanceDo
 /**
  * @category Claims
  */
-export type ClaimIntegrationPluginType =
-  | 'codes'
-  | 'password'
-  | 'numUses'
-  | 'transferTimes'
-  | 'initiatedBy'
-  | 'whitelist'
-  | string;
+export type ClaimIntegrationPluginType = 'codes' | 'password' | 'numUses' | 'transferTimes' | 'initiatedBy' | 'whitelist' | string;
 
 /**
  * @category Claims
@@ -1761,16 +1770,12 @@ export type DynamicDataHandlerType = 'addresses';
 /**
  * @category Interfaces
  */
-export type DynamicDataHandlerData<Q extends DynamicDataHandlerType> = Q extends 'addresses'
-  ? { addresses: string[] }
-  : never;
+export type DynamicDataHandlerData<Q extends DynamicDataHandlerType> = Q extends 'addresses' ? { addresses: string[] } : never;
 
 /**
  * @category Interfaces
  */
-export type DynamicDataHandlerActionPayload<Q extends DynamicDataHandlerType> = Q extends 'addresses'
-  ? { address: string }
-  : never;
+export type DynamicDataHandlerActionPayload<Q extends DynamicDataHandlerType> = Q extends 'addresses' ? { address: string } : never;
 
 /**
  * @category Interfaces
