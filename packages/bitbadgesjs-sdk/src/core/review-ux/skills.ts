@@ -14,6 +14,7 @@ import { getApprovals, getAllApprovals } from './shared.js';
 import { doesCollectionFollowSubscriptionProtocol } from '../subscriptions.js';
 import { doesCollectionFollowQuestProtocol } from '../quests.js';
 import { doesCollectionFollowBountyProtocol } from '../bounties.js';
+import { doesCollectionFollowCrowdfundProtocol } from '../crowdfunds.js';
 import { doesCollectionFollowAuctionProtocol } from '../auctions.js';
 import { doesCollectionFollowProductProtocol } from '../products.js';
 
@@ -40,6 +41,12 @@ const PROTOCOL_COPY: Record<string, ProtocolCopy> = {
     title: 'Collection does not follow the bounty protocol',
     detail: 'This collection has the Bounty standard but does not meet all the requirements for a valid bounty.',
     recommendation: 'Fix the bounty setup to follow the bounty protocol requirements'
+  },
+  crowdfund: {
+    title: 'Collection does not follow the crowdfund protocol',
+    detail:
+      'This collection has the Crowdfund standard but does not meet all the requirements for a valid crowdfund.',
+    recommendation: 'Fix the crowdfund setup to follow the crowdfund protocol requirements'
   },
   auction: {
     title: 'Collection does not follow the auction protocol',
@@ -128,6 +135,7 @@ export const skillChecks: UxCheck[] = [
       { standard: 'Subscriptions', check: doesCollectionFollowSubscriptionProtocol as any, key: 'subscription' },
       { standard: 'Quests', check: doesCollectionFollowQuestProtocol as any, key: 'quest' },
       { standard: 'Bounty', check: doesCollectionFollowBountyProtocol as any, key: 'bounty' },
+      { standard: 'Crowdfund', check: doesCollectionFollowCrowdfundProtocol as any, key: 'crowdfund' },
       { standard: 'Auction', check: doesCollectionFollowAuctionProtocol as any, key: 'auction' },
       { standard: 'Products', check: doesCollectionFollowProductProtocol as any, key: 'product_catalog' }
     ];
@@ -247,7 +255,7 @@ export const skillChecks: UxCheck[] = [
   // TxTimelineContext and only attached to the Msg at the final
   // broadcast step in CreateTxMsgUniversalUpdateCollection.tsx.
   // That meant the warning fired on every quest / subscription /
-  // auction form no matter what the user set. Since the
+  // crowdfund / auction form no matter what the user set. Since the
   // mint escrow can also be topped up at any time post-creation, the
   // check was noise without a reliable signal. Removed.
 
