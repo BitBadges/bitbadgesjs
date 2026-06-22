@@ -62,9 +62,9 @@ describe('validateCollectionOrExit', () => {
 
   it('prints errors + warnings and exits 2 when invalid', () => {
     const bad = () => ({ valid: false, errors: ['e1', 'e2'], warnings: ['w1'] });
-    expect(() => validateCollectionOrExit({}, 'mint', bad, 'Auction')).toThrow('process.exit');
+    expect(() => validateCollectionOrExit({}, 'mint', bad, 'Crowdfund')).toThrow('process.exit');
     const txt = stderrSpy.mock.calls.map((c) => c[0]).join('');
-    expect(txt).toContain('not a valid Auction (failed in mint)');
+    expect(txt).toContain('not a valid Crowdfund (failed in mint)');
     expect(txt).toContain('- e1');
     expect(txt).toContain('- e2');
     expect(txt).toContain('- w1');

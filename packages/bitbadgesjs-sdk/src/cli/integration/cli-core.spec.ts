@@ -222,7 +222,7 @@ describe('cli-core integration', () => {
       const out = runCli(['--help-json'], { parseJson: false });
       const stdout = out.stdout;
       expect(stdout).toContain('"commands"');
-      for (const n of ['pay-requests', 'bounties', 'subscriptions', 'intents', 'credit-tokens', 'products', 'auctions', 'prediction-markets', 'nfts']) {
+      for (const n of ['pay-requests', 'bounties', 'subscriptions', 'intents', 'credit-tokens', 'products', 'crowdfunds', 'auctions', 'prediction-markets', 'nfts']) {
         expect(stdout).toContain(`"${n}"`);
       }
     });

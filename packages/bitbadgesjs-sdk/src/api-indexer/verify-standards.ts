@@ -856,6 +856,37 @@ function verifyBounty(value: any): StandardViolation[] {
 }
 
 // ============================================================
+// Crowdfund Validator
+// ============================================================
+
+function verifyCrowdfund(value: any): StandardViolation[] {
+  const violations: StandardViolation[] = [];
+  const std = 'Crowdfund';
+  const approvals = getApprovals(value);
+
+  // Must have 2 token IDs (refund + progress)
+  const tokenIds = value.validTokenIds;
+  if (!Array.isArray(tokenIds) || tokenIds.length !== 1 || tokenIds[0]?.start !== 1n || tokenIds[0]?.end !== 2n) {
+    violations.push({ standard: std, field: 'validTokenIds', message: 'Crowdfund collections MUST have validTokenIds = [{ start: "1", end: "2" }] (refund + progress tokens).' });
+  }
+
+  // Must have at least 4 approvals
+  if (approvals.length < 4) {
+    violations.push({ standard: std, field: 'collectionApprovals', message: `Crowdfund requires at least 4 approvals (deposit-refund, deposit-progress, success, refund). Found ${approvals.length}.` });
+  }
+
+  // Check mint approvals have overrides
+  for (const a of getMintApprovals(value)) {
+    const ac = a.approvalCriteria || {};
+    if (ac.overridesFromOutgoingApprovals !== true && ac.overridesFromOutgoingApprovals !== 'true') {
+      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].overridesFromOutgoingApprovals`, message: `Mint approval "${a.approvalId}" MUST have overridesFromOutgoingApprovals: true.` });
+    }
+  }
+
+  return violations;
+}
+
+// ============================================================
 // Auction Validator
 // ============================================================
 
@@ -1011,6 +1042,7 @@ const STANDARD_VALIDATORS: Record<string, (value: any) => StandardViolation[]> =
   'Non-Transferable': verifyNonTransferable,
   Bounty: verifyBounty,
   PaymentRequest: verifyPaymentRequest,
+  Crowdfund: verifyCrowdfund,
   Auction: verifyAuction,
   Products: verifyProducts,
   'Prediction Market': verifyPredictionMarket,
@@ -1041,6 +1073,7 @@ const STANDARD_ALIASES: Record<string, string> = {
   PaymentRequest: 'PaymentRequest',
   'Payment Request': 'PaymentRequest',
   Invoice: 'PaymentRequest',
+  Crowdfund: 'Crowdfund',
   Auction: 'Auction',
   Products: 'Products',
   'Product Catalog': 'Products',
