@@ -99,7 +99,107 @@ export interface iNotificationPreferences<T extends NumberType> {
     claimActivity?: boolean;
     ignoreIfInitiator?: boolean;
     signInAlertsEnabled?: boolean;
+    /** Master toggle for the in-app notification inbox. Defaults to enabled when undefined. */
+    inAppEnabled?: boolean;
+    /** In-app inbox: receive transfer notifications. Defaults to enabled when undefined. */
+    inAppTransferActivity?: boolean;
+    /** In-app inbox: receive claim notifications. Defaults to enabled when undefined. */
+    inAppClaimActivity?: boolean;
   };
+}
+
+/**
+ * The in-app notification categories (inbox event types). This is the discriminator
+ * for {@link iNotificationDoc} — every type shares the same presentation envelope and
+ * carries its own structured detail in {@link iNotificationPayload}. New event types
+ * (e.g. swaps, votes) are added here + given a `payload` shape + a frontend renderer.
+ *
+ * @category Interfaces
+ */
+export type NotificationType = 'transfer' | 'bank_send' | 'claim' | 'points' | 'list' | 'system' | 'intent_satisfied';
+
+/**
+ * A coin (denom) amount, as display-ready strings (no number-type conversion needed).
+ *
+ * @category Interfaces
+ */
+export interface iNotificationCoin {
+  amount: string;
+  denom: string;
+}
+
+/**
+ * Type-specific detail for a notification's drilldown view. The populated key is
+ * determined by {@link iNotificationDoc.type}; renderers narrow on `type`. This is the
+ * extension point: a new notification type adds its structured detail here.
+ *
+ * @category Interfaces
+ */
+export interface iNotificationPayload<T extends NumberType> {
+  /** `transfer`: the source on-chain token transfer activity (embedded for rich rendering). */
+  activity?: iTransferActivityDoc<T>;
+  /** `bank_send`: a native coin (denom) transfer. */
+  bankSend?: {
+    fromAddress: BitBadgesAddress;
+    toAddress: BitBadgesAddress;
+    amount: iNotificationCoin[];
+    txHash?: string;
+  };
+  /** `intent_satisfied`: a standing intent (approval) was filled — multiple on-chain legs collapsed into one event. */
+  intentSatisfied?: {
+    /** The intent approval that was consumed. */
+    approvalId: string;
+    /** Who set up the intent (the maker / "my intent was satisfied" recipient). */
+    approverAddress: BitBadgesAddress;
+    /** Who filled the intent (the taker / initiator). */
+    filler: BitBadgesAddress;
+    collectionId: CollectionId;
+    txHash?: string;
+    /** Coins that moved as part of the fill (payment/payout), display-ready. */
+    coins: iNotificationCoin[];
+    /** Compact summary of token IDs involved, e.g. "1-3, 7". */
+    tokenIds?: string;
+    /** How many on-chain transfer legs were collapsed into this single notification. */
+    legCount: number;
+  };
+  /** Misc display-ready scalars for any type (tokenIds, claimId, points, …). */
+  extra?: Record<string, string>;
+}
+
+/**
+ * An in-app notification (inbox entry). One document per recipient per event.
+ *
+ * Shape = a **standardized envelope** (rendered identically for every type in the inbox
+ * list) + a **type-specific `payload`** surfaced only in the drilldown. `type` is the
+ * discriminator (see {@link NotificationType}).
+ *
+ * @category Interfaces
+ */
+export interface iNotificationDoc<T extends NumberType> extends Doc {
+  /** The recipient of this notification. */
+  bitbadgesAddress: BitBadgesAddress;
+  /** The category of the notification — the discriminator for `payload` + rendering. */
+  type: NotificationType;
+  /** Whether the recipient has read this notification. */
+  read: boolean;
+  /** When the notification was created (UNIX ms). */
+  createdAt: UNIXMilliTimestamp<T>;
+
+  // --- Standardized presentation envelope (consistent across all types) ---
+  /** Headline for the inbox row. */
+  title: string;
+  /** Optional one-line body for the inbox row. */
+  message?: string;
+  /** Optional in-app link to navigate to (e.g. "view source"). */
+  link?: string;
+  /** Subject for the row's leading avatar: a collection (token avatar). */
+  collectionId?: CollectionId;
+  /** Subject for the row's leading avatar: an address (user avatar / counterparty). */
+  address?: BitBadgesAddress;
+
+  // --- Type-specific drilldown detail (shape determined by `type`) ---
+  /** Structured detail surfaced when the row is expanded/drilled into. */
+  payload?: iNotificationPayload<T>;
 }
 
 /**
@@ -618,7 +718,6 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
 
   /** The notifications of the account */
   notifications?: iNotificationPreferences<T>;
-
 }
 
 /**
@@ -793,14 +892,7 @@ export interface iBalanceDocWithDetails<T extends NumberType> extends iBalanceDo
 /**
  * @category Claims
  */
-export type ClaimIntegrationPluginType =
-  | 'codes'
-  | 'password'
-  | 'numUses'
-  | 'transferTimes'
-  | 'initiatedBy'
-  | 'whitelist'
-  | string;
+export type ClaimIntegrationPluginType = 'codes' | 'password' | 'numUses' | 'transferTimes' | 'initiatedBy' | 'whitelist' | string;
 
 /**
  * @category Claims
@@ -1678,16 +1770,12 @@ export type DynamicDataHandlerType = 'addresses';
 /**
  * @category Interfaces
  */
-export type DynamicDataHandlerData<Q extends DynamicDataHandlerType> = Q extends 'addresses'
-  ? { addresses: string[] }
-  : never;
+export type DynamicDataHandlerData<Q extends DynamicDataHandlerType> = Q extends 'addresses' ? { addresses: string[] } : never;
 
 /**
  * @category Interfaces
  */
-export type DynamicDataHandlerActionPayload<Q extends DynamicDataHandlerType> = Q extends 'addresses'
-  ? { address: string }
-  : never;
+export type DynamicDataHandlerActionPayload<Q extends DynamicDataHandlerType> = Q extends 'addresses' ? { address: string } : never;
 
 /**
  * @category Interfaces

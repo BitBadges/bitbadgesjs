@@ -16,6 +16,7 @@ import {
   DynamicDataDoc,
   DynamicStoreDocWithDetails,
   DynamicStoreValueDoc,
+  NotificationDoc,
   PluginDoc,
   SIWBBRequestDoc,
   StatusDoc,
@@ -38,6 +39,7 @@ import {
   iEstimatedCost,
   iInheritMetadataFrom,
   iLinkedTo,
+  iNotificationDoc,
   iPointsActivityDoc,
   iSIWBBRequestDoc,
   iUtilityPageContent,
@@ -49,6 +51,7 @@ import {
   type JsonBodyInputSchema,
   type JsonBodyInputWithValue,
   type NativeAddress,
+  type NotificationType,
   type OAuthScopeDetails,
   type PluginPresetType,
   type SiwbbMessage,
@@ -913,6 +916,148 @@ export class UpdateAccountInfoSuccessResponse extends CustomTypeClass<UpdateAcco
   constructor(data: iUpdateAccountInfoSuccessResponse) {
     super();
     this.verificationEmailSent = data.verificationEmailSent;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetNotificationsPayload {
+  /** Pagination bookmark from a prior response. */
+  bookmark?: string;
+  /** If true, only return unread notifications. */
+  unreadOnly?: boolean;
+  /** If set, only return notifications of these types. */
+  types?: NotificationType[];
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetNotificationsSuccessResponse<T extends NumberType> {
+  /** The notifications for the signed-in user, newest first. */
+  notifications: iNotificationDoc<T>[];
+  /** Pagination info for fetching the next page. */
+  pagination: PaginationInfo;
+}
+
+/**
+ * @inheritDoc iGetNotificationsSuccessResponse
+ * @category API Requests / Responses
+ */
+export class GetNotificationsSuccessResponse<T extends NumberType>
+  extends BaseNumberTypeClass<GetNotificationsSuccessResponse<T>>
+  implements iGetNotificationsSuccessResponse<T>
+{
+  notifications: NotificationDoc<T>[];
+  pagination: PaginationInfo;
+
+  constructor(data: iGetNotificationsSuccessResponse<T>) {
+    super();
+    this.notifications = data.notifications.map((doc) => new NotificationDoc(doc));
+    this.pagination = data.pagination;
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): GetNotificationsSuccessResponse<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetNotificationsSuccessResponse<U>;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetUnreadNotificationCountPayload {}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iGetUnreadNotificationCountSuccessResponse {
+  /** The number of unread notifications for the signed-in user. */
+  count: number;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class GetUnreadNotificationCountSuccessResponse
+  extends CustomTypeClass<GetUnreadNotificationCountSuccessResponse>
+  implements iGetUnreadNotificationCountSuccessResponse
+{
+  count: number;
+
+  constructor(data: iGetUnreadNotificationCountSuccessResponse) {
+    super();
+    this.count = data.count;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iMarkNotificationsReadPayload {
+  /** Specific notification ids to mark read. Ignored if `all` is true. */
+  notificationIds?: string[];
+  /** Mark every notification read. */
+  all?: boolean;
+  /** Mark as read (default true) or unread (false). */
+  read?: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iMarkNotificationsReadSuccessResponse {
+  /** The number of notifications updated. */
+  updated: number;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class MarkNotificationsReadSuccessResponse
+  extends CustomTypeClass<MarkNotificationsReadSuccessResponse>
+  implements iMarkNotificationsReadSuccessResponse
+{
+  updated: number;
+
+  constructor(data: iMarkNotificationsReadSuccessResponse) {
+    super();
+    this.updated = data.updated;
+  }
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateNotificationPreferencesPayload {
+  /** The in-app notification preferences to set. Only provided keys are updated. */
+  preferences: {
+    inAppEnabled?: boolean;
+    inAppTransferActivity?: boolean;
+    inAppClaimActivity?: boolean;
+    ignoreIfInitiator?: boolean;
+  };
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export interface iUpdateNotificationPreferencesSuccessResponse {
+  success: boolean;
+}
+
+/**
+ * @category API Requests / Responses
+ */
+export class UpdateNotificationPreferencesSuccessResponse
+  extends CustomTypeClass<UpdateNotificationPreferencesSuccessResponse>
+  implements iUpdateNotificationPreferencesSuccessResponse
+{
+  success: boolean;
+
+  constructor(data: iUpdateNotificationPreferencesSuccessResponse) {
+    super();
+    this.success = data.success;
   }
 }
 

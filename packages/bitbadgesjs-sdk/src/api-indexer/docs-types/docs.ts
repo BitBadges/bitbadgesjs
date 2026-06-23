@@ -4,6 +4,7 @@ import { BaseNumberTypeClass, CustomTypeClass, convertClassPropertiesAndMaintain
 import type { NumberType } from '@/common/string-numbers.js';
 import type { SupportedChain } from '@/common/types.js';
 import { AddressList } from '@/core/addressLists.js';
+import { TransferActivityDoc } from '@/api-indexer/docs-types/activity.js';
 import {
   ApprovalInfoDetails,
   ChallengeDetails,
@@ -79,6 +80,10 @@ import {
   type iEmailVerificationStatus,
   type iFetchDoc,
   type iIPFSTotalsDoc,
+  type iNotificationDoc,
+  type iNotificationPayload,
+  type iTransferActivityDoc,
+  type NotificationType,
   type iLatestBlockStatus,
   type iMerkleChallengeTrackerDoc,
   type iNotificationPreferences,
@@ -472,6 +477,9 @@ export class NotificationPreferences<T extends NumberType>
     claimActivity?: boolean;
     ignoreIfInitiator?: boolean;
     signInAlertsEnabled?: boolean;
+    inAppEnabled?: boolean;
+    inAppTransferActivity?: boolean;
+    inAppClaimActivity?: boolean;
   };
 
   constructor(data: iNotificationPreferences<T>) {
@@ -484,6 +492,53 @@ export class NotificationPreferences<T extends NumberType>
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): NotificationPreferences<U> {
     return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as NotificationPreferences<U>;
+  }
+}
+
+/**
+ * @inheritDoc iNotificationDoc
+ * @category Indexer
+ */
+export class NotificationDoc<T extends NumberType> extends BaseNumberTypeClass<NotificationDoc<T>> implements iNotificationDoc<T> {
+  _docId: string;
+  _id?: string;
+  bitbadgesAddress: BitBadgesAddress;
+  type: NotificationType;
+  read: boolean;
+  createdAt: T;
+  title: string;
+  message?: string;
+  link?: string;
+  collectionId?: CollectionId;
+  address?: BitBadgesAddress;
+  payload?: iNotificationPayload<T>;
+
+  constructor(data: iNotificationDoc<T>) {
+    super();
+    this._docId = data._docId;
+    this._id = data._id;
+    this.bitbadgesAddress = data.bitbadgesAddress;
+    this.type = data.type;
+    this.read = data.read;
+    this.createdAt = data.createdAt;
+    this.title = data.title;
+    this.message = data.message;
+    this.link = data.link;
+    this.collectionId = data.collectionId;
+    this.address = data.address;
+    // Rebuild the embedded activity as a real class instance so convert() recurses into
+    // its number fields; the rest of the payload is display-ready and passes through as-is.
+    this.payload = data.payload
+      ? { ...data.payload, activity: data.payload.activity ? new TransferActivityDoc(data.payload.activity) : undefined }
+      : undefined;
+  }
+
+  getNumberFieldNames(): string[] {
+    return ['createdAt'];
+  }
+
+  convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): NotificationDoc<U> {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as NotificationDoc<U>;
   }
 }
 
