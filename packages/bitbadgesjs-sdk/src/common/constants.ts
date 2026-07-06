@@ -150,7 +150,7 @@ export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
     decimals: '9',
     baseDenom: 'badges:49:chaosnet',
     image:
-      'https://bitbadges.io/_next/image?url=https%3A%2F%2Fbitbadges-ipfs.infura-ipfs.io%2Fipfs%2FQmdRQUvQBo6p24RQ7AS7RD6srqyUjoHJ5Cjs4p22zie9bQ&w=1920&q=75'
+      'https://bitbadges.io/_next/image?url=https%3A%2F%2Fipfs.bitbadges.io%2Fipfs%2FQmdRQUvQBo6p24RQ7AS7RD6srqyUjoHJ5Cjs4p22zie9bQ&w=1920&q=75'
   },
   'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349': {
     skipGoSupported: true,
