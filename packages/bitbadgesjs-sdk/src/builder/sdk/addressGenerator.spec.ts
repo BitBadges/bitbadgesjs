@@ -27,6 +27,7 @@ import {
   getAliasDerivationKeysForIBCBackedDenom,
   getAliasDerivationKeysForDenom
 } from './addressGenerator.js';
+import { USDC_DENOM, USDC_NOBLE_DENOM } from '../../common/constants.js';
 
 describe('addressGenerator', () => {
   describe('generateAlias — core derivation', () => {
@@ -135,6 +136,25 @@ describe('addressGenerator', () => {
       const viaIbc = generateAliasAddressForIBCBackedDenom('ibc/foo');
       const viaCoin = generateAliasAddressForDenom('ibc/foo');
       expect(viaIbc).not.toBe(viaCoin);
+    });
+  });
+
+  // Cross-repo parity. This generator and the chain's generatePathAddress are
+  // separate implementations of the same derivation, and a backed path's escrow
+  // lives at whatever the chain computes — so drift here silently sends backing
+  // to an address nothing references.
+  //
+  // Both expectations were produced by running the chain's own
+  // generatePathAddress(denom, BackedPathGenerationPrefix), not by copying this
+  // implementation's output back at itself.
+  describe('parity with the chain for the USDC routes', () => {
+    it('derives the escrow address the chain derives', () => {
+      expect(generateAliasAddressForIBCBackedDenom(USDC_NOBLE_DENOM)).toBe(
+        'bb1a7m8394e8u98w8uwle49dds8caexmcvqwgcadtp264gvt28uygmsdlgm0a'
+      );
+      expect(generateAliasAddressForIBCBackedDenom(USDC_DENOM)).toBe(
+        'bb18edxay8wcxt0wnf950uakxykw3h3m9puhdmv548qtj84vt0uxkjq243j5n'
+      );
     });
   });
 });
