@@ -118,6 +118,17 @@ export interface CoinDetails {
   decimals: string;
   baseDenom: string;
   image: string;
+  /**
+   * Set when the coin still works but should not be offered for new activity.
+   *
+   * Consumers should keep rendering balances and allow swapping *out*, while
+   * excluding it from pickers, defaults and quote destinations. It is not the
+   * same as hiding the coin — hiding a deprecated asset strands whoever holds
+   * it.
+   */
+  deprecated?: boolean;
+  /** Human-readable reason shown next to a deprecated coin. */
+  deprecationNote?: string;
 }
 
 /**
@@ -125,6 +136,35 @@ export interface CoinDetails {
  *
  * @category Coins Registry
  */
+/**
+ * Canonical USDC on BitBadges, routed through Injective.
+ *
+ * IBC denoms hash the *full* route, so the same underlying asset reaching the
+ * chain by a different path is a different denom. That is why USDC appears
+ * twice in this file.
+ *
+ *   trace: transfer/channel-40/transfer/channel-148/uusdc
+ *          channel-40  BitBadges -> Injective
+ *          channel-148 Injective -> Noble
+ *
+ * @category Coins Registry
+ */
+export const USDC_DENOM = 'ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB';
+
+/**
+ * Legacy Noble-direct USDC, displayed as `USDC.noble`.
+ *
+ *   trace: transfer/channel-2/uusdc
+ *
+ * Deprecated for new activity but fully supported: collections that declared a
+ * backed path against it cannot be repointed, because the backed-path escrow
+ * address is derived from the denom string itself. Balances stay spendable and
+ * swappable.
+ *
+ * @category Coins Registry
+ */
+export const USDC_NOBLE_DENOM = 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349';
+
 const BaseCoinsRegistry: Record<string, CoinDetails> = {
   ubadge: {
     skipGoSupported: true,
@@ -152,13 +192,25 @@ export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
     image:
       'https://bitbadges.io/_next/image?url=https%3A%2F%2Fipfs.bitbadges.io%2Fipfs%2FQmdRQUvQBo6p24RQ7AS7RD6srqyUjoHJ5Cjs4p22zie9bQ&w=1920&q=75'
   },
-  'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349': {
+  [USDC_DENOM]: {
     skipGoSupported: true,
     label: 'USDC',
     symbol: 'USDC',
     decimals: '6',
-    baseDenom: 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349',
+    baseDenom: USDC_DENOM,
     image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true'
+  },
+  [USDC_NOBLE_DENOM]: {
+    // Still Skip-supported on purpose: swapping *out* of the legacy denom is
+    // exactly how a holder converts to canonical USDC.
+    skipGoSupported: true,
+    label: 'USDC.noble',
+    symbol: 'USDC.noble',
+    decimals: '6',
+    baseDenom: USDC_NOBLE_DENOM,
+    image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true',
+    deprecated: true,
+    deprecationNote: 'Legacy Noble-routed USDC. Swap to USDC (via Injective) — balances remain fully usable.'
   },
   'ibc/A4DB47A9D3CF9A068D454513891B526702455D3EF08FB9EB558C561F9DC2B701': {
     skipGoSupported: true,

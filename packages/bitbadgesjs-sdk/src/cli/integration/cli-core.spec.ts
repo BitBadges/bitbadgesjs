@@ -92,7 +92,7 @@ describe('cli-core integration', () => {
 
     it('for-ibc-backing <denom> returns an alias address', () => {
       if (!ready) return;
-      const out = runCli(['alias', 'for-ibc-backing', 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349']);
+      const out = runCli(['alias', 'for-ibc-backing', 'ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB']);
       expect(out.json.address).toMatch(/^bb1/);
     });
   });

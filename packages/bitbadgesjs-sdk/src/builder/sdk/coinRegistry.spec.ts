@@ -7,6 +7,7 @@
  * permutation and denom resolution path must be covered.
  */
 
+import { USDC_DENOM, USDC_NOBLE_DENOM } from '../../common/constants.js';
 import {
   MAINNET_COINS_REGISTRY,
   buildSymbolToTokenInfoMap,
@@ -27,6 +28,43 @@ describe('coinRegistry', () => {
       expect(symbols).toContain('ATOM');
       expect(symbols).toContain('OSMO');
       expect(symbols).toContain('BADGE');
+    });
+  });
+
+  // USDC moved from the Noble-direct IBC route to the Injective-canonicalized
+  // one. Both denoms stay in the registry — the legacy route still backs live
+  // collections — so the thing worth pinning is which one a bare "USDC" means,
+  // and that the two never collapse into each other.
+  describe('USDC routes', () => {
+    it('registers both routes under distinct denoms', () => {
+      expect(USDC_DENOM).not.toBe(USDC_NOBLE_DENOM);
+      expect(MAINNET_COINS_REGISTRY).toHaveProperty(USDC_DENOM);
+      expect(MAINNET_COINS_REGISTRY).toHaveProperty(USDC_NOBLE_DENOM);
+    });
+
+    it('resolves the bare symbol "USDC" to the Injective route', () => {
+      // This is the default every caller inherits — the frontend's pickers, the
+      // indexer's origin-denom map, and the builder's approval generation all
+      // bottom out here.
+      expect(resolveIbcDenom('USDC')).toBe(USDC_DENOM);
+      expect(lookupTokenInfo('USDC')!.ibcDenom).toBe(USDC_DENOM);
+    });
+
+    it('gives the legacy route its own symbol so it is never mistaken for USDC', () => {
+      const legacy = lookupTokenInfo(USDC_NOBLE_DENOM);
+      expect(legacy).not.toBeNull();
+      expect(legacy!.symbol).toBe('USDC.NOBLE'); // the map upper-cases symbols
+      expect(legacy!.displayName).toBe('USDC.noble'); // what a user actually sees
+      expect(resolveIbcDenom('USDC.noble')).toBe(USDC_NOBLE_DENOM);
+    });
+
+    it('keeps the legacy route fully usable — same decimals, real registry entry', () => {
+      // Balances in it must still price and format correctly; deprecation is a
+      // routing decision, not a downgrade of the asset.
+      expect(getDecimals(USDC_NOBLE_DENOM)).toBe(6);
+      expect(getCoinDetails(USDC_NOBLE_DENOM)!.decimals).toBe('6');
+      expect(getCoinDetails(USDC_NOBLE_DENOM)!.deprecated).toBe(true);
+      expect(getCoinDetails(USDC_DENOM)!.deprecated).toBeUndefined();
     });
   });
 
@@ -71,14 +109,14 @@ describe('coinRegistry', () => {
     });
 
     it('finds a token by exact IBC denom', () => {
-      const denom = 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349';
+      const denom = 'ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB';
       const result = lookupTokenInfo(denom);
       expect(result).not.toBeNull();
       expect(result!.symbol).toBe('USDC');
     });
 
     it('IBC-denom lookup is case-insensitive on the hex portion', () => {
-      const lower = lookupTokenInfo('ibc/f082b65c88e4b6d5ef1db243cda1d331d002759e938a0f5cd3ffdc5d53b3e349');
+      const lower = lookupTokenInfo('ibc/0e485657aef4c39d551e7d53463734e4c445a96e6c814dc4c2ff0031470b40bb');
       expect(lower).not.toBeNull();
       expect(lower!.symbol).toBe('USDC');
     });
@@ -140,7 +178,7 @@ describe('coinRegistry', () => {
     });
 
     it('returns details for a known IBC denom', () => {
-      const d = getCoinDetails('ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349');
+      const d = getCoinDetails('ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB');
       expect(d).not.toBeNull();
       expect(d!.symbol).toBe('USDC');
     });

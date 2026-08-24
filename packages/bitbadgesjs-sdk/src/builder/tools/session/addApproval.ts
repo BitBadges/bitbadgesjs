@@ -556,7 +556,7 @@ export function handleAddApproval(input: AddApprovalInput) {
       for (const ct of coinTransfers) {
         for (const coin of ct.coins || []) {
           if (coin.denom?.startsWith('ibc/') && !getCoinDetails(coin.denom)) {
-            warnings.push(`WARNING: IBC denom "${coin.denom}" is not in the BitBadges coin registry. Use lookup_token_info to get the correct denom. Known denoms: ATOM=ibc/A4DB47A9D3CF9A068D454513891B526702455D3EF08FB9EB558C561F9DC2B701, USDC=ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349, OSMO=ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518`);
+            warnings.push(`WARNING: IBC denom "${coin.denom}" is not in the BitBadges coin registry. Use lookup_token_info to get the correct denom. Known denoms: ATOM=ibc/A4DB47A9D3CF9A068D454513891B526702455D3EF08FB9EB558C561F9DC2B701, USDC=ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB, USDC.noble(legacy)=ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349, OSMO=ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518`);
           }
         }
       }

@@ -28,7 +28,7 @@ import * as path from 'node:path';
 import * as crypto from 'node:crypto';
 
 // Local-chain USDC IBC denom — same value used by other integration specs.
-const USDC_DENOM = 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349';
+const USDC_DENOM = 'ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB';
 
 describe('smart-tokens integration', () => {
   let ready = false;

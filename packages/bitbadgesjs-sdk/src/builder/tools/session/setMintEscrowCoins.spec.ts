@@ -36,7 +36,7 @@ describe('handleSetMintEscrowCoins', () => {
 
     it('accepts an IBC denom', () => {
       const res = handleSetMintEscrowCoins({
-        coins: [{ denom: 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349', amount: '42' }]
+        coins: [{ denom: 'ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB', amount: '42' }]
       });
       expect(res.success).toBe(true);
     });

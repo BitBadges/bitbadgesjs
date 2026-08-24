@@ -3,6 +3,7 @@
  * Contains IBC denoms, symbols, decimals, and generates backing addresses
  */
 
+import { USDC_DENOM, USDC_NOBLE_DENOM } from '../../common/constants.js';
 import { generateAliasAddressForIBCBackedDenom } from './addressGenerator.js';
 
 /**
@@ -14,7 +15,10 @@ export interface CoinDetails {
   decimals: string;
   baseDenom: string;
   image?: string;
-  backingAddress?: string;
+  backingAddress?: string;  /** Still usable, but excluded from pickers, defaults and quote destinations. */
+  deprecated?: boolean;
+  /** Human-readable reason shown next to a deprecated coin. */
+  deprecationNote?: string;
 }
 
 /**
@@ -57,12 +61,21 @@ export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
     baseDenom: 'badges:49:chaosnet',
     image: 'https://bitbadges.io/_next/image?url=https%3A%2F%2Fipfs.bitbadges.io%2Fipfs%2FQmdRQUvQBo6p24RQ7AS7RD6srqyUjoHJ5Cjs4p22zie9bQ&w=1920&q=75'
   },
-  'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349': {
+  [USDC_DENOM]: {
     label: 'USDC',
     symbol: 'USDC',
     decimals: '6',
-    baseDenom: 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349',
+    baseDenom: USDC_DENOM,
     image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true'
+  },
+  [USDC_NOBLE_DENOM]: {
+    label: 'USDC.noble',
+    symbol: 'USDC.noble',
+    decimals: '6',
+    baseDenom: USDC_NOBLE_DENOM,
+    image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true',
+    deprecated: true,
+    deprecationNote: 'Legacy Noble-routed USDC. Swap to USDC (via Injective) — balances remain fully usable.'
   },
   'ibc/A4DB47A9D3CF9A068D454513891B526702455D3EF08FB9EB558C561F9DC2B701': {
     label: 'ATOM',
