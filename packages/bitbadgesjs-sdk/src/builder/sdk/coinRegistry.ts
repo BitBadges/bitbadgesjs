@@ -15,7 +15,8 @@ export interface CoinDetails {
   decimals: string;
   baseDenom: string;
   image?: string;
-  backingAddress?: string;  /** Still usable, but excluded from pickers, defaults and quote destinations. */
+  backingAddress?: string;
+  /** Still usable, but excluded from pickers, defaults and quote destinations. */
   deprecated?: boolean;
   /** Human-readable reason shown next to a deprecated coin. */
   deprecationNote?: string;

@@ -132,11 +132,6 @@ export interface CoinDetails {
 }
 
 /**
- * Base coins registry containing common coins available across all networks.
- *
- * @category Coins Registry
- */
-/**
  * Canonical USDC on BitBadges, routed through Injective.
  *
  * IBC denoms hash the *full* route, so the same underlying asset reaching the
@@ -165,6 +160,11 @@ export const USDC_DENOM = 'ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C
  */
 export const USDC_NOBLE_DENOM = 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349';
 
+/**
+ * Base coins registry containing common coins available across all networks.
+ *
+ * @category Coins Registry
+ */
 const BaseCoinsRegistry: Record<string, CoinDetails> = {
   ubadge: {
     skipGoSupported: true,
