@@ -17,11 +17,13 @@ route is a different denom — both are now first-class registry entries.
 | `ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349` | `transfer/channel-2/uusdc` | `USDC.noble` (deprecated) |
 
 **This change is additive, never substitutive.** The legacy Noble-direct denom
-stays in `MAINNET_COINS_REGISTRY`, stays `skipGoSupported: true` (swapping *out*
-of it is how a holder converts), and keeps its own separate balance. Existing
-collections with a backed path against it cannot be repointed — the backed-path
-escrow address is derived from the denom string itself — so nothing recomputes
-those addresses.
+stays in `MAINNET_COINS_REGISTRY`, stays `skipGoSupported: true`, and keeps its
+own separate balance. Note that the canonical denom has **zero supply** today —
+`channel-40` has never carried a transfer packet — so there is no conversion out
+of `USDC.noble` to perform yet; Skip support is kept on so that swap works the
+day the Injective route goes live. Existing collections with a backed path
+against it cannot be repointed — the backed-path escrow address is derived from
+the denom string itself — so nothing recomputes those addresses.
 
 **New exports** (`bitbadges/common/constants`):
 
@@ -35,6 +37,12 @@ those addresses.
   excluding it from pickers, defaults and quote destinations. Not the same as
   hiding: hiding a deprecated asset strands whoever holds it.
 - `deprecationNote?: string` — human-readable reason rendered next to the coin.
+
+**CLI default changed:** `bb build prediction-market --denom` now defaults to
+`USDC.noble` instead of `USDC`. The bare symbol resolves to the canonical denom
+from this release on, and a market defaulted into a zero-supply denom could
+never be settled. Flip the default back to `USDC` once the Injective route
+carries liquidity.
 
 Downstream consumers (indexer, frontend) must depend on `>=0.43.0` to see the
 canonical denom at all; a `^0.42.1` range will not resolve it.

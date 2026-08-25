@@ -7,7 +7,7 @@
  * permutation and denom resolution path must be covered.
  */
 
-import { USDC_DENOM, USDC_NOBLE_DENOM } from '../../common/constants.js';
+import { USDC_DENOM, USDC_NOBLE_DENOM, MAINNET_COINS_REGISTRY as SDK_COINS_REGISTRY } from '../../common/constants.js';
 import {
   MAINNET_COINS_REGISTRY,
   buildSymbolToTokenInfoMap,
@@ -56,6 +56,29 @@ describe('coinRegistry', () => {
       expect(legacy!.symbol).toBe('USDC.NOBLE'); // the map upper-cases symbols
       expect(legacy!.displayName).toBe('USDC.noble'); // what a user actually sees
       expect(resolveIbcDenom('USDC.noble')).toBe(USDC_NOBLE_DENOM);
+    });
+
+    // The deprecation copy is rendered verbatim to holders in the wallet UI,
+    // and three codebases have to agree on it: this registry, the SDK's own
+    // `common/constants` registry, and the frontend's pinned fallback copy
+    // (`src/utils/coinRegistry.ts`, `PendingSdkDeprecationNotes`) which exists
+    // until the frontend's `bitbadges` dependency carries the field. Byte
+    // identity is the actual requirement, so pin the bytes.
+    const DEPRECATION_NOTE =
+      'Legacy Noble-routed USDC. Fully usable and staying \u2014 new integrations should target canonical USDC (via Injective) once that route is live.';
+
+    it('carries the holder-facing deprecation note on the legacy route only', () => {
+      expect(MAINNET_COINS_REGISTRY[USDC_NOBLE_DENOM].deprecated).toBe(true);
+      expect(MAINNET_COINS_REGISTRY[USDC_NOBLE_DENOM].deprecationNote).toBe(DEPRECATION_NOTE);
+      expect(MAINNET_COINS_REGISTRY[USDC_DENOM].deprecated).toBeUndefined();
+      expect(MAINNET_COINS_REGISTRY[USDC_DENOM].deprecationNote).toBeUndefined();
+    });
+
+    it('keeps the builder registry and the SDK registry note byte-identical', () => {
+      expect(SDK_COINS_REGISTRY[USDC_NOBLE_DENOM].deprecationNote).toBe(DEPRECATION_NOTE);
+      expect(SDK_COINS_REGISTRY[USDC_NOBLE_DENOM].deprecationNote).toBe(
+        MAINNET_COINS_REGISTRY[USDC_NOBLE_DENOM].deprecationNote
+      );
     });
 
     it('keeps the legacy route fully usable — same decimals, real registry entry', () => {

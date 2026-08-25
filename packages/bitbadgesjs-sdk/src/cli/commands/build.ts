@@ -620,7 +620,11 @@ sharedOpts(
     .description('Create a binary prediction market (YES/NO). Metadata: pass --uri OR --name + --image + --description.')
     .option('--verifier <address>', 'Market resolver address (bb1...)')
     .option('--resolver <address>', 'Alias for --verifier — matches the help-text label.')
-    .option('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', 'USDC')
+    // Defaults to the Noble route, not the bare `USDC` symbol: from 0.43.0 the
+    // symbol resolves to the canonical Injective denom, which has zero supply —
+    // a market defaulted into it could never be settled. Flip to 'USDC' once
+    // the Injective route carries liquidity.
+    .option('--denom <symbol|denom>', 'Payment coin. BADGE, USDC.noble, … or canonical denom (ubadge, ibc/...)', 'USDC.noble')
 ).action(async (opts) => {
   const { buildPredictionMarket } = await import('../../core/builders/prediction-market.js');
   if (opts.json) { emit(buildPredictionMarket(readJsonInput(opts.json)), opts); return; }

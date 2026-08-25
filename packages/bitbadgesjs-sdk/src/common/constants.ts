@@ -151,10 +151,11 @@ export const USDC_DENOM = 'ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C
  *
  *   trace: transfer/channel-2/uusdc
  *
- * Deprecated for new activity but fully supported: collections that declared a
- * backed path against it cannot be repointed, because the backed-path escrow
- * address is derived from the denom string itself. Balances stay spendable and
- * swappable.
+ * Deprecated for new activity but fully supported, and where all circulating
+ * USDC on BitBadges lives today: collections that declared a backed path
+ * against it cannot be repointed, because the backed-path escrow address is
+ * derived from the denom string itself. Balances stay spendable. They are not
+ * convertible to {@link USDC_DENOM} yet — that route has no liquidity.
  *
  * @category Coins Registry
  */
@@ -201,8 +202,9 @@ export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
     image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true'
   },
   [USDC_NOBLE_DENOM]: {
-    // Still Skip-supported on purpose: swapping *out* of the legacy denom is
-    // exactly how a holder converts to canonical USDC.
+    // Still Skip-supported so the swap out of the legacy denom works the day
+    // the canonical Injective route carries liquidity. It carries none today,
+    // so there is no conversion to perform yet.
     skipGoSupported: true,
     label: 'USDC.noble',
     symbol: 'USDC.noble',
@@ -210,7 +212,8 @@ export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
     baseDenom: USDC_NOBLE_DENOM,
     image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true',
     deprecated: true,
-    deprecationNote: 'Legacy Noble-routed USDC. Swap to USDC (via Injective) — balances remain fully usable.'
+    deprecationNote:
+      'Legacy Noble-routed USDC. Fully usable and staying — new integrations should target canonical USDC (via Injective) once that route is live.'
   },
   'ibc/A4DB47A9D3CF9A068D454513891B526702455D3EF08FB9EB558C561F9DC2B701': {
     skipGoSupported: true,
