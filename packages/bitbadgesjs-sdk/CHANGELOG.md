@@ -41,8 +41,9 @@ the denom string itself — so nothing recomputes those addresses.
 **CLI default changed:** `bb build prediction-market --denom` now defaults to
 `USDC.noble` instead of `USDC`. The bare symbol resolves to the canonical denom
 from this release on, and a market defaulted into a zero-supply denom could
-never be settled. Flip the default back to `USDC` once the Injective route
-carries liquidity.
+never be settled. The programmatic `buildPredictionMarket` (also reached via
+`--json` with no `denom`) defaults to `USDC.noble` for the same reason. Flip
+both defaults back to `USDC` once the Injective route carries liquidity.
 
 Downstream consumers (indexer, frontend) must depend on `>=0.43.0` to see the
 canonical denom at all; a `^0.42.1` range will not resolve it.
