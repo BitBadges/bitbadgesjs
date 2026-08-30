@@ -21,7 +21,7 @@ import {
   getBankBalance, pollBalance, sleep
 } from './harness/chain.js';
 
-const USDC = 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349';
+const USDC = 'ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8';
 const AMOUNT_BASE = 100_000_000n; // 100 USDC, 6-dec
 const CTX = 'terminal payment request rationale context long enough to satisfy the minimum length requirement here ok';
 

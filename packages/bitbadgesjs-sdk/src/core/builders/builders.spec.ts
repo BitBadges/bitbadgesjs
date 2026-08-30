@@ -36,6 +36,7 @@ import { UintRangeArray } from '../uintRanges.js';
 import { isQuestApproval, doesCollectionFollowQuestProtocol } from '../quests.js';
 import { normalizeForReview } from '../review-normalize.js';
 import { buildOrderbookBidApproval, buildOrderbookListingApproval } from '../bids.js';
+import { USDC_DENOM, USDC_NOBLE_DENOM } from '../../common/constants.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -623,6 +624,14 @@ describe('prediction-market builder', () => {
   });
   test('passes verification with zero violations', () => {
     expectCleanVerification(msg);
+  });
+  test('defaults the payment denom to canonical USDC, matching the CLI flag default', () => {
+    // USDC.n exists only for backwards compatibility with existing balances
+    // and collections; nothing new is steered toward it. The CLI's --denom
+    // default and this programmatic/--json path must agree.
+    const s = JSON.stringify(buildPredictionMarket({ verifier: 'bb1verifier', ...META }));
+    expect(s).toContain(USDC_DENOM);
+    expect(s).not.toContain(USDC_NOBLE_DENOM);
   });
 });
 

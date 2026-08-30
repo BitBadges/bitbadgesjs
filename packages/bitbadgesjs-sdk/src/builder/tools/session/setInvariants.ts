@@ -64,7 +64,7 @@ export const setInvariantsTool = {
                     description: 'IBC coin side.',
                     properties: {
                       amount: { type: 'string', description: 'Usually "1".' },
-                      denom: { type: 'string', description: 'The IBC denom from generate_backing_address (e.g., "ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349").' }
+                      denom: { type: 'string', description: 'The IBC denom from generate_backing_address (e.g., "ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8").' }
                     },
                     required: ['amount', 'denom']
                   },

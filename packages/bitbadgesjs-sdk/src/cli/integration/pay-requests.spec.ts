@@ -27,7 +27,7 @@ import { deployMsgViaKeyring, fundPersona, waitForIndexerCollection, writeMsgToT
 // The IBC USDC denom on local chain. Both alice and charlie need this denom
 // for a pay-request to actually execute. alice has a genesis allocation;
 // charlie is funded inline via `fundPersona`.
-const USDC_DENOM = 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349';
+const USDC_DENOM = 'ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8';
 
 describe('pay-requests integration', () => {
   let ready = false;

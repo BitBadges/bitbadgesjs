@@ -23,6 +23,14 @@ describe('requireBbDenom', () => {
     expect(out.length).toBe(4 + 64); // ibc/ + 64 hex chars
   });
 
+  it('resolves the legacy USDC.n symbol — and the USDC.noble input alias — to the legacy denom', () => {
+    const LEGACY = 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349';
+    expect(requireBbDenom('USDC.n', 'place-bid')).toBe(LEGACY);
+    // Pre-release spelling stays accepted as typed input for forgiveness;
+    // displayed/emitted output is always USDC.n.
+    expect(requireBbDenom('USDC.noble', 'place-bid')).toBe(LEGACY);
+  });
+
   it('accepts an arbitrary ibc/<64-hex> form not in the registry', () => {
     const fake = 'ibc/' + 'A'.repeat(64);
     expect(requireBbDenom(fake, 'place-bid')).toBe(fake);

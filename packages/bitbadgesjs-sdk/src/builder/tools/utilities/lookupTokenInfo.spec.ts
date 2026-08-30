@@ -15,6 +15,7 @@
  */
 
 import { handleLookupTokenInfo } from './lookupTokenInfo.js';
+import { USDC_NOBLE_DENOM } from '../../../common/constants.js';
 
 describe('handleLookupTokenInfo', () => {
   describe('exact symbol lookup', () => {
@@ -53,7 +54,7 @@ describe('handleLookupTokenInfo', () => {
 
   describe('exact IBC denom lookup', () => {
     it('finds USDC by its full IBC denom', () => {
-      const denom = 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349';
+      const denom = 'ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8';
       const res = handleLookupTokenInfo({ query: denom });
       expect(res.success).toBe(true);
       expect(res.tokenInfo!.symbol).toBe('USDC');
@@ -62,10 +63,20 @@ describe('handleLookupTokenInfo', () => {
 
     it('IBC denom lookup is case-insensitive (lowercased hex)', () => {
       // Known USDC denom in lowercase
-      const denom = 'ibc/f082b65c88e4b6d5ef1db243cda1d331d002759e938a0f5cd3ffdc5d53b3e349';
+      const denom = 'ibc/e1116484b327aee59cdc3da73d319834781a13db2a7dfc1f38a30cd45abf58b8';
       const res = handleLookupTokenInfo({ query: denom });
       expect(res.success).toBe(true);
       expect(res.tokenInfo!.symbol).toBe('USDC');
+    });
+
+    it('reports the legacy Noble route under its own symbol', () => {
+      // The legacy route is still resolvable — collections are backed by it —
+      // but it must not answer to plain "USDC". USDC.n matches Skip Go's
+      // ecosystem-wide name for the Noble voucher.
+      const res = handleLookupTokenInfo({ query: USDC_NOBLE_DENOM });
+      expect(res.success).toBe(true);
+      expect(res.tokenInfo!.symbol).toBe('USDC.N');
+      expect(res.tokenInfo!.ibcDenom).toBe(USDC_NOBLE_DENOM);
     });
   });
 

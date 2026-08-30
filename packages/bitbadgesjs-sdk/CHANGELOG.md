@@ -3,6 +3,64 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.43.0]
+
+### Canonical USDC moves to the Injective route (BB-10)
+
+BitBadges now treats Circle's native USDC on Injective (CCTP-enabled, Injective
+bank denom `erc20:0xa00C59fF5a080D2b954d0c75e46E22a0c371235a`) as canonical,
+carried one IBC hop over the existing BitBadges <-> Injective channel. IBC
+denoms hash the *full* transfer path — with the erc20 segment checksummed
+exactly as Injective's bank module spells it, since the hash is case-sensitive
+— so the same underlying dollar arriving by a different route is a different
+denom. Both routes are first-class registry entries.
+
+| Denom | Trace | Registry label |
+|---|---|---|
+| `ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8` | `transfer/channel-40/erc20:0xa00C59fF5a080D2b954d0c75e46E22a0c371235a` | `USDC` (canonical) |
+| `ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349` | `transfer/channel-2/uusdc` | `USDC.n` (deprecated) |
+
+The legacy symbol is `USDC.n`, matching Skip Go's ecosystem-wide name for the
+Noble voucher (including Skip's own `bitbadges-1` registry entry). The
+pre-release `USDC.noble` spelling stays accepted as typed input
+(`SYMBOL_INPUT_ALIASES`), but everything displayed or emitted is `USDC.n`.
+
+**This change is additive, never substitutive.** The legacy Noble-direct denom
+stays in `MAINNET_COINS_REGISTRY`, stays `skipGoSupported: true`, and keeps its
+own separate balance. `USDC.n` exists only for backwards compatibility with
+existing balances and collections — nothing new should be steered toward it.
+There is no in-place migration: `USDC.n` holders reach canonical USDC by
+exiting to Noble and swapping/CCTP-ing into native USDC on Injective, then one
+IBC hop in — not IBC forwarding. Skip support is kept on for both so that swap
+works. Existing collections with a backed path against the legacy denom cannot
+be repointed — the backed-path escrow address is derived from the denom string
+itself — so nothing recomputes those addresses.
+
+**New exports** (`bitbadges/common/constants`):
+
+- `USDC_DENOM` — canonical, Injective-routed.
+- `USDC_NOBLE_DENOM` — legacy, Noble-direct.
+- `SYMBOL_INPUT_ALIASES` — accepted typed-input symbol aliases (upper-cased
+  alias → denom); currently maps the pre-release `USDC.noble` spelling to the
+  legacy denom.
+
+**New optional `CoinDetails` fields:**
+
+- `deprecated?: boolean` — the coin still works but should not be offered for
+  new activity. Consumers keep rendering balances and allow swapping out, while
+  excluding it from pickers, defaults and quote destinations. Not the same as
+  hiding: hiding a deprecated asset strands whoever holds it.
+- `deprecationNote?: string` — human-readable reason rendered next to the coin.
+
+**Defaults stay on canonical `USDC`.** Every default, example, and help text —
+including `bb build prediction-market --denom` and the programmatic
+`buildPredictionMarket` — targets canonical USDC. The Injective channel is
+proven on mainnet (native USDC bridged; the canonical denom minted), and the
+governance allowlist for it lands before this release publishes.
+
+Downstream consumers (indexer, frontend) must depend on `>=0.43.0` to see the
+canonical denom at all; a `^0.42.1` range will not resolve it.
+
 ## [0.36.0]
 
 ### Breaking Changes — `bitbadges-cli` flat verb-first redesign

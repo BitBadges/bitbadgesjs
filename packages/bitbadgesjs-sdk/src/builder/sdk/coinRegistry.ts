@@ -3,6 +3,7 @@
  * Contains IBC denoms, symbols, decimals, and generates backing addresses
  */
 
+import { SYMBOL_INPUT_ALIASES, USDC_DENOM, USDC_NOBLE_DENOM } from '../../common/constants.js';
 import { generateAliasAddressForIBCBackedDenom } from './addressGenerator.js';
 
 /**
@@ -15,6 +16,10 @@ export interface CoinDetails {
   baseDenom: string;
   image?: string;
   backingAddress?: string;
+  /** Still usable, but excluded from pickers, defaults and quote destinations. */
+  deprecated?: boolean;
+  /** Human-readable reason shown next to a deprecated coin. */
+  deprecationNote?: string;
 }
 
 /**
@@ -57,12 +62,23 @@ export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
     baseDenom: 'badges:49:chaosnet',
     image: 'https://bitbadges.io/_next/image?url=https%3A%2F%2Fipfs.bitbadges.io%2Fipfs%2FQmdRQUvQBo6p24RQ7AS7RD6srqyUjoHJ5Cjs4p22zie9bQ&w=1920&q=75'
   },
-  'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349': {
+  [USDC_DENOM]: {
     label: 'USDC',
     symbol: 'USDC',
     decimals: '6',
-    baseDenom: 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349',
+    baseDenom: USDC_DENOM,
     image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true'
+  },
+  [USDC_NOBLE_DENOM]: {
+    // `USDC.n` matches Skip Go's ecosystem-wide name for the Noble voucher.
+    label: 'USDC.n',
+    symbol: 'USDC.n',
+    decimals: '6',
+    baseDenom: USDC_NOBLE_DENOM,
+    image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true',
+    deprecated: true,
+    deprecationNote:
+      'Legacy Noble-routed USDC. Existing balances stay fully usable — use canonical USDC (via Injective) for everything new.'
   },
   'ibc/A4DB47A9D3CF9A068D454513891B526702455D3EF08FB9EB558C561F9DC2B701': {
     label: 'ATOM',
@@ -145,8 +161,13 @@ export function lookupTokenInfo(query: string): TokenInfo | null {
     return tokenMap.get(upperQuery)!;
   }
 
+  // Accepted typed-input aliases (e.g. the pre-release "USDC.noble"
+  // spelling) resolve to their denom's entry; output uses the registry
+  // symbol, never the alias.
+  const aliasedDenom = SYMBOL_INPUT_ALIASES[upperQuery];
+
   // Try IBC denom lookup
-  const lowerQuery = query.toLowerCase();
+  const lowerQuery = (aliasedDenom ?? query).toLowerCase();
   for (const tokenInfo of tokenMap.values()) {
     if (tokenInfo.ibcDenom.toLowerCase() === lowerQuery) {
       return tokenInfo;

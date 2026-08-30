@@ -30,7 +30,7 @@ import { deployMsgViaKeyring, fundPersona, waitForIndexerCollection, writeMsgToT
 
 // USDC on local chain. alice has a genesis allocation; charlie is funded
 // inline via `fundPersona` before contributing.
-const USDC_DENOM = 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349';
+const USDC_DENOM = 'ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8';
 // 1000 USDC at 6 decimals = 1e9 base units.
 const GOAL_DISPLAY = 1000;
 const GOAL_BASE = '1000000000';

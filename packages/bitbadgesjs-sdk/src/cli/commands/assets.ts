@@ -141,7 +141,7 @@ addOutputFlags(
     assetsCommand
       .command('price')
       .description('Indexer-served USD prices for one or more assets. Accepts denoms (ubadge) or symbols (BADGE — auto-resolved via /assetPairs/search).')
-      .argument('<denoms-or-symbols...>', 'Repeated args or comma-separated. e.g. ubadge, BADGE, ibc/F082B65C...')
+      .argument('<denoms-or-symbols...>', 'Repeated args or comma-separated. e.g. ubadge, BADGE, ibc/E1116484...')
   )
 ).action(async (rawInputs: string[], opts: NetworkFlags & OutputFlags) => {
   try {

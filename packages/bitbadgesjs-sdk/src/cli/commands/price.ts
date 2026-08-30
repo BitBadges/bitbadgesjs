@@ -79,7 +79,7 @@ export const priceCommand = addUnifiedNetworkOptions(
   addOutputOptions(
     new Command('price')
       .description('Indexer-served USD price lookup for BitBadges-chain assets. Accepts denoms (ubadge, ibc/...) or symbols (BADGE) — symbols resolve via /assetPairs/search. Cross-chain prices live in `bb swap` (Skip:Go).')
-      .argument('<denoms-or-symbols...>', 'Repeated args or comma-separated. e.g. ubadge, BADGE, ibc/F082B65C...')
+      .argument('<denoms-or-symbols...>', 'Repeated args or comma-separated. e.g. ubadge, BADGE, ibc/E1116484...')
   ),
   { includeNetworkFlag: false, includeMainnetFlag: false }
 )
@@ -89,7 +89,7 @@ export const priceCommand = addUnifiedNetworkOptions(
 Examples:
   bb price ubadge                     # native BADGE
   bb price BADGE                      # same — symbol resolved via /assetPairs/search
-  bb price ubadge,ibc/F082B65C...     # batch via CSV
+  bb price ubadge,ibc/E1116484...     # batch via CSV
   bb price BADGE USDC --local
 
 All prices come from the BitBadges indexer's AssetInfoDoc records. For

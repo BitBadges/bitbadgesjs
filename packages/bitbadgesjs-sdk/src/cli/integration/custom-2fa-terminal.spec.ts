@@ -22,7 +22,7 @@ import {
   getBankBalance, pollBalance, pollTokenAmount, sleep
 } from './harness/chain.js';
 
-const USDC = 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349';
+const USDC = 'ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8';
 const WINDOW_MS = 12000;
 
 function build(args: string[], signer: string) {
