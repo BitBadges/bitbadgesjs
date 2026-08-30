@@ -625,15 +625,13 @@ describe('prediction-market builder', () => {
   test('passes verification with zero violations', () => {
     expectCleanVerification(msg);
   });
-  test('defaults the payment denom to the Noble route, matching the CLI flag default', () => {
-    // From 0.43.0 the bare "USDC" symbol resolves to the canonical Injective
-    // denom, which carries zero supply on BitBadges — a market defaulted into
-    // it could never be settled. The CLI flag default was flipped to USDC.n;
-    // the programmatic/--json path bottoms out here and must agree. Flip both
-    // back to 'USDC' once canonical USDC circulates on BitBadges.
+  test('defaults the payment denom to canonical USDC, matching the CLI flag default', () => {
+    // USDC.n exists only for backwards compatibility with existing balances
+    // and collections; nothing new is steered toward it. The CLI's --denom
+    // default and this programmatic/--json path must agree.
     const s = JSON.stringify(buildPredictionMarket({ verifier: 'bb1verifier', ...META }));
-    expect(s).toContain(USDC_NOBLE_DENOM);
-    expect(s).not.toContain(USDC_DENOM);
+    expect(s).toContain(USDC_DENOM);
+    expect(s).not.toContain(USDC_NOBLE_DENOM);
   });
 });
 

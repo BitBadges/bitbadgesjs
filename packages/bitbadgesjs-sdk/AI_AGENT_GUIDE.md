@@ -572,7 +572,7 @@ Silences stderr commentary (auto-review banners, validation summaries,
 agent context windows.
 
 ```bash
-bitbadges-cli build vault --backing-coin USDC.n ... --json-only --quiet \
+bitbadges-cli build vault --backing-coin USDC ... --json-only --quiet \
   | bitbadges-cli deploy --burner --manager bb1... --msg-stdin
 ```
 

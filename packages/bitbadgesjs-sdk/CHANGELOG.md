@@ -27,8 +27,8 @@ pre-release `USDC.noble` spelling stays accepted as typed input
 
 **This change is additive, never substitutive.** The legacy Noble-direct denom
 stays in `MAINNET_COINS_REGISTRY`, stays `skipGoSupported: true`, and keeps its
-own separate balance. Note that the canonical denom has **zero supply** on
-BitBadges today, so there is no conversion out of `USDC.n` to perform yet.
+own separate balance. `USDC.n` exists only for backwards compatibility with
+existing balances and collections — nothing new should be steered toward it.
 There is no in-place migration: `USDC.n` holders reach canonical USDC by
 exiting to Noble and swapping/CCTP-ing into native USDC on Injective, then one
 IBC hop in — not IBC forwarding. Skip support is kept on for both so that swap
@@ -52,12 +52,11 @@ itself — so nothing recomputes those addresses.
   hiding: hiding a deprecated asset strands whoever holds it.
 - `deprecationNote?: string` — human-readable reason rendered next to the coin.
 
-**CLI default changed:** `bb build prediction-market --denom` now defaults to
-`USDC.n` instead of `USDC`. The bare symbol resolves to the canonical denom
-from this release on, and a market defaulted into a zero-supply denom could
-never be settled. The programmatic `buildPredictionMarket` (also reached via
-`--json` with no `denom`) defaults to `USDC.n` for the same reason. Flip
-both defaults back to `USDC` once canonical USDC circulates on BitBadges.
+**Defaults stay on canonical `USDC`.** Every default, example, and help text —
+including `bb build prediction-market --denom` and the programmatic
+`buildPredictionMarket` — targets canonical USDC. The Injective channel is
+proven on mainnet (native USDC bridged; the canonical denom minted), and the
+governance allowlist for it lands before this release publishes.
 
 Downstream consumers (indexer, frontend) must depend on `>=0.43.0` to see the
 canonical denom at all; a `^0.42.1` range will not resolve it.
