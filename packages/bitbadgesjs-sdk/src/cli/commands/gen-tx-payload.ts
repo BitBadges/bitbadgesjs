@@ -26,6 +26,7 @@ import { Command } from 'commander';
 import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
 import { NETWORK_CONFIGS } from '../../signing/types.js';
 import { createTransactionPayload } from '../../transactions/messages/base.js';
+import { toUint64 } from '../../transactions/messages/common.js';
 import { encodeTokenizationMsgFromJson, supportedTokenizationTypeUrls } from '../../transactions/messages/bitbadges/tokenization/fromJson.js';
 import { evmToCosmosAddress } from '../../transactions/precompile/helpers.js';
 import { emit, emitError, bbError, BBErrorCode } from '../utils/envelope.js';
@@ -69,9 +70,12 @@ function normalizeMessages(input: unknown): MsgEntry[] {
   return arr as MsgEntry[];
 }
 
+// account_number / sequence stay decimal strings end-to-end: post-v34 both
+// can exceed 2^53 (hash-derived account numbers; nanosecond unordered-tx
+// nonces), and Number()-ifying them corrupts every signature (BB-34).
 interface FetchedAccountInfo {
-  accountNumber: number;
-  sequence: number;
+  accountNumber: string;
+  sequence: string;
   publicKey?: string;
 }
 
@@ -97,8 +101,8 @@ async function fetchAccountInfo(baseUrl: string, apiKey: string | undefined, add
     throw bbError(BBErrorCode.NETWORK_ERROR, `Indexer returned no account for ${address}. Has it been seen onchain yet?`);
   }
   return {
-    accountNumber: Number(acct.accountNumber ?? 0),
-    sequence: Number(acct.sequence ?? 0),
+    accountNumber: toUint64(acct.accountNumber ?? 0, 'accountNumber').toString(),
+    sequence: toUint64(acct.sequence ?? 0, 'sequence').toString(),
     publicKey: acct.publicKey?.key ?? acct.publicKey,
   };
 }
@@ -181,8 +185,8 @@ export async function runGenPayload(
 
   // Account number + sequence — either fetched or provided. Always keyed by
   // the bb1 sender, even when the user passed --from 0x...
-  let accountNumber: number | undefined = opts.accountNumber !== undefined ? Number(opts.accountNumber) : undefined;
-  let sequence: number | undefined = opts.sequence !== undefined ? Number(opts.sequence) : undefined;
+  let accountNumber: string | undefined = opts.accountNumber !== undefined ? toUint64(opts.accountNumber, '--account-number').toString() : undefined;
+  let sequence: string | undefined = opts.sequence !== undefined ? toUint64(opts.sequence, '--sequence').toString() : undefined;
   let publicKey: string | undefined = opts.publicKey;
 
   if (opts.fetch !== false) {

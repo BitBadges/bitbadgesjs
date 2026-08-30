@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+import { toUint64, type Uint64Like } from './common.js';
+
 export function toUtf8(str: string): Uint8Array {
   return new TextEncoder().encode(str);
 }
@@ -64,16 +66,17 @@ export function makeSignDoc(
   fee: StdFee,
   chainId: string,
   memo: string | undefined,
-  accountNumber: number | string,
-  sequence: number | string,
+  accountNumber: Uint64Like,
+  sequence: Uint64Like,
   timeout_height?: bigint
 ): StdSignDoc {
   return {
     chain_id: chainId,
-    // account_number: Uint53.fromString(accountNumber.toString()).toString(),
-    // sequence: Uint53.fromString(sequence.toString()).toString(),
-    account_number: BigInt(accountNumber).toString(),
-    sequence: BigInt(sequence).toString(),
+    // toUint64 rejects numbers above 2^53 loudly — a hash-derived post-v34
+    // account number reaching here as a JS number has already lost precision,
+    // and the amino JSON must carry the chain's exact decimal string.
+    account_number: toUint64(accountNumber, 'accountNumber').toString(),
+    sequence: toUint64(sequence, 'sequence').toString(),
     fee: fee,
     msgs: msgs,
     memo: memo || '',

@@ -10,10 +10,16 @@ import type { SimulationEvent, ParsedSimulationEvents, NetBalanceChanges } from 
  * @category Signing
  */
 export interface AccountInfo {
-  /** Account number on the blockchain */
-  accountNumber: number;
-  /** Current sequence (nonce) for the account */
-  sequence: number;
+  /**
+   * Account number on the blockchain. Post-v34 accounts get hash-derived
+   * numbers above 2^53, so this is a bigint at runtime — never Number() it.
+   */
+  accountNumber: number | bigint;
+  /**
+   * Current sequence (nonce) for the account. Post-v34 unordered-tx nonces
+   * can be nanosecond timestamps above 2^53, so this is a bigint at runtime.
+   */
+  sequence: number | bigint;
   /** Public key in base64 format */
   publicKey: string;
   /** BitBadges address (bb-prefixed) */
@@ -297,7 +303,7 @@ export interface WalletAdapterInterface {
   getPublicKey(): Promise<string>;
 
   /** Sign a transaction using Cosmos SignDirect (for Cosmos wallets) */
-  signDirect?(payload: any, accountNumber: number): Promise<SigningResult>;
+  signDirect?(payload: any, accountNumber: number | string | bigint): Promise<SigningResult>;
 
   /** Send an EVM transaction (for EVM wallets) */
   sendEvmTransaction?(tx: EvmTransaction): Promise<string>;

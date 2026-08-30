@@ -1754,8 +1754,10 @@ export class GetTokensFromFaucetSuccessResponse extends EmptyResponseClass {}
  * @category API Requests / Responses
  */
 export interface CosmosAccountResponse {
-  account_number: number;
-  sequence: number;
+  /** The node REST API serves this as a decimal string; post-v34 it can exceed 2^53 — never Number() it. */
+  account_number: number | string;
+  /** The node REST API serves this as a decimal string; post-v34 unordered-tx nonces can exceed 2^53. */
+  sequence: number | string;
   pub_key: {
     key: string;
   };
