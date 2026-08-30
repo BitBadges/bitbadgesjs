@@ -28,10 +28,12 @@ export interface WalletAdapter {
    * Only implemented by Cosmos wallet adapters.
    *
    * @param payload - The transaction payload containing signBytes
-   * @param accountNumber - The account number on the blockchain
+   * @param accountNumber - The account number on the blockchain. Post-v34
+   *   accounts get hash-derived numbers above 2^53 — pass the chain's string
+   *   value or a bigint; never Number() it.
    * @returns The signature and public key
    */
-  signDirect?(payload: TransactionPayload, accountNumber: number): Promise<SigningResult>;
+  signDirect?(payload: TransactionPayload, accountNumber: number | string | bigint): Promise<SigningResult>;
 
   /**
    * Send an EVM transaction.
@@ -69,7 +71,7 @@ export abstract class BaseWalletAdapter implements WalletAdapter {
 
   abstract getPublicKey(): Promise<string>;
 
-  signDirect?(payload: TransactionPayload, accountNumber: number): Promise<SigningResult>;
+  signDirect?(payload: TransactionPayload, accountNumber: number | string | bigint): Promise<SigningResult>;
   sendEvmTransaction?(tx: EvmTransaction): Promise<string>;
   estimateEvmGas?(tx: EvmTransaction): Promise<bigint>;
 

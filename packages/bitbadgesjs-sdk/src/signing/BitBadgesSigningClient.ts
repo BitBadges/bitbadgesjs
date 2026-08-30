@@ -1,7 +1,7 @@
 import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
 import { generateEndpointAccount, type AccountResponse } from '@/node-rest-api/account.js';
 import { createTransactionPayload, createTxBroadcastBody, type TxContext } from '@/transactions/messages/base.js';
-import type { Fee } from '@/transactions/messages/common.js';
+import { toUint64, type Fee } from '@/transactions/messages/common.js';
 import type { Message } from '@bufbuild/protobuf';
 import axios, { type AxiosInstance } from 'axios';
 import type { WalletAdapter } from './adapters/WalletAdapter.js';
@@ -226,10 +226,14 @@ export class BitBadgesSigningClient {
       }
     }
 
+    // The LCD serves account_number/sequence as JSON strings. Post-v34 both
+    // can exceed 2^53 (hash-derived account numbers; nanosecond unordered-tx
+    // nonces), so parse them as bigints — parseInt/Number silently corrupts
+    // them and every resulting signature would be invalid (BB-34).
     this.cachedAccountInfo = {
       address: bbAddress,
-      accountNumber: parseInt(baseAccount.account_number || '0', 10),
-      sequence: parseInt(baseAccount.sequence || '0', 10),
+      accountNumber: toUint64(baseAccount.account_number || '0', 'account_number'),
+      sequence: toUint64(baseAccount.sequence || '0', 'sequence'),
       publicKey
     };
 
@@ -574,9 +578,10 @@ export class BitBadgesSigningClient {
         }
       }
 
-      // Increment cached sequence on success
+      // Increment cached sequence on success (bigint-safe — post-v34
+      // sequences can exceed 2^53)
       if (code === 0 && this.cachedAccountInfo) {
-        this.cachedAccountInfo.sequence += 1;
+        this.cachedAccountInfo.sequence = toUint64(this.cachedAccountInfo.sequence, 'sequence') + 1n;
       }
 
       return {

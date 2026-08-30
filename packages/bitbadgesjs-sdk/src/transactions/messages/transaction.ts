@@ -6,6 +6,7 @@ import { convertProtoMessageToObject } from '@/transactions/amino/objectConverte
 import { AminoTypes } from '@/transactions/amino/registry.js';
 import type { Any } from '@bufbuild/protobuf';
 import { Keccak } from 'sha3';
+import { toUint64, type Uint64Like } from './common.js';
 import { makeSignDoc, serializeSignDoc, StdFee } from './signDoc.js';
 import type { MessageGenerated } from './utils.js';
 import { createAnyMessage } from './utils.js';
@@ -61,7 +62,7 @@ export function createFee(fee: string, denom: string, gasLimit: number) {
   });
 }
 
-export function createSignerInfo(publicKey: Uint8Array, sequence: number, mode: number) {
+export function createSignerInfo(publicKey: Uint8Array, sequence: Uint64Like, mode: number) {
   const pubkey: MessageGenerated = {
     message: new SECP256k1({
       key: publicKey as Uint8Array<ArrayBuffer>
@@ -79,7 +80,7 @@ export function createSignerInfo(publicKey: Uint8Array, sequence: number, mode: 
         case: 'single'
       }
     }),
-    sequence: BigInt(sequence)
+    sequence: toUint64(sequence, 'sequence')
   });
 
   return signerInfo;
@@ -92,12 +93,12 @@ export function createAuthInfo(signerInfo: SignerInfo, fee: Fee) {
   });
 }
 
-export function createSignDoc(bodyBytes: Uint8Array, authInfoBytes: Uint8Array, chainId: string, accountNumber: number) {
+export function createSignDoc(bodyBytes: Uint8Array, authInfoBytes: Uint8Array, chainId: string, accountNumber: Uint64Like) {
   return new SignDoc({
     bodyBytes: bodyBytes as Uint8Array<ArrayBuffer>,
     authInfoBytes: authInfoBytes as Uint8Array<ArrayBuffer>,
     chainId,
-    accountNumber: BigInt(accountNumber)
+    accountNumber: toUint64(accountNumber, 'accountNumber')
   });
 }
 
@@ -113,7 +114,7 @@ export function createStdFee(amount: string, denom: string, gasLimit: number) {
   };
 }
 
-export function createStdSignDocFromProto(protoMessages: any[], fee: StdFee, chainId: string, memo: string, sequence: number, accountNumber: number) {
+export function createStdSignDocFromProto(protoMessages: any[], fee: StdFee, chainId: string, memo: string, sequence: Uint64Like, accountNumber: Uint64Like) {
   const aminoMsgs = convertProtoMessagesToAmino(protoMessages);
   return makeSignDoc(aminoMsgs, fee, chainId, memo, accountNumber, sequence);
 }
@@ -127,8 +128,8 @@ export function createStdSignDigestFromProto(
   fee: string,
   denom: string,
   gasLimit: number,
-  sequence: number,
-  accountNumber: number,
+  sequence: Uint64Like,
+  accountNumber: Uint64Like,
   chainId: string
 ) {
   try {
@@ -148,8 +149,8 @@ export function createTransactionWithMultipleMessages(
   denom: string,
   gasLimit: number,
   pubKey: string,
-  sequence: number,
-  accountNumber: number,
+  sequence: Uint64Like,
+  accountNumber: Uint64Like,
   chainId: string
 ) {
   const body = createBodyWithMultipleMessages(messages, memo);
@@ -187,8 +188,8 @@ export function createTransaction(
   denom: string,
   gasLimit: number,
   pubKey: string,
-  sequence: number,
-  accountNumber: number,
+  sequence: Uint64Like,
+  accountNumber: Uint64Like,
   chainId: string
 ) {
   return createTransactionWithMultipleMessages([message], memo, fee, denom, gasLimit, pubKey, sequence, accountNumber, chainId);

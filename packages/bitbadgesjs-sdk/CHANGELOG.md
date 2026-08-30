@@ -3,6 +3,42 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.43.1]
+
+### Account numbers and sequences larger than 2^53 (BB-34)
+
+Chain v34 (cosmos-sdk 0.54) assigns every NEW account a hash-derived account
+number — e.g. `11715262360359940575`, larger than `Number.MAX_SAFE_INTEGER` —
+and unordered-tx sequence nonces can be nanosecond timestamps. The signing
+pipeline typed both as JS `number`, so `Number()`/`parseInt` silently corrupted
+them and every post-v34 account produced invalid signatures (pre-v34 accounts,
+with small numbers, kept working and masked the bug).
+
+**Fix — the whole pipeline is widened to `number | string | bigint`:**
+
+- `TxContext.sender` / `Sender`: `accountNumber` and `sequence` accept
+  `number | string | bigint` (new `Uint64Like` type).
+- `createSignDoc`, `createStdSignDocFromProto`, `createStdSignDigestFromProto`,
+  `createTransactionWithMultipleMessages`, `createTransaction`,
+  `createSignerInfo`, and the amino `makeSignDoc` all accept `Uint64Like` and
+  normalize exactly once via the new exported `toUint64()` helper.
+- `WalletAdapter.signDirect` / `GenericCosmosAdapter.signDirect` accept
+  `Uint64Like`.
+- `BitBadgesSigningClient.getAccountInfo` parses the LCD's string
+  `account_number`/`sequence` as bigints (was `parseInt`); `AccountInfo`
+  fields are now `number | bigint` and are bigints at runtime.
+- `bb gen-tx-payload` keeps account numbers/sequences as decimal strings
+  end-to-end (was `Number()`), including the `--account-number`/`--sequence`
+  flags.
+- `CosmosAccountResponse.account_number`/`sequence` typed `number | string`
+  (the node REST API serves strings).
+
+**Loud rejection instead of silent corruption:** a `number` above 2^53 (or any
+non-integer/malformed input) now throws with a message telling you to pass the
+chain's string value unchanged. **Consumers passing ordinary small numbers keep
+working. Consumers must stop pre-`Number()`-ifying chain values** — pass the
+LCD/indexer string (or a bigint) straight through.
+
 ## [0.43.0]
 
 ### Canonical USDC moves to the Injective route (BB-10)

@@ -132,6 +132,35 @@ describe('BitBadgesSigningClient', () => {
     });
   });
 
+  describe('getAccountInfo (BB-34 — hash-derived account numbers > 2^53)', () => {
+    it('carries an oversized LCD account_number exactly, without Number() corruption', async () => {
+      const adapter = new MockCosmosAdapter();
+      const client = new BitBadgesSigningClient({ adapter });
+
+      // LCD serves account_number/sequence as JSON strings. Post-v34 both can
+      // exceed 2^53 (hash-derived account numbers; nanosecond unordered-tx
+      // nonces) — parseInt/Number would silently corrupt them.
+      (client as any).axiosInstance.get = jest.fn().mockResolvedValue({
+        data: {
+          account: {
+            base_account: {
+              address: adapter.address,
+              account_number: '11715262360359940575',
+              sequence: '1756500000000000123',
+              pub_key: { key: 'A1B2' }
+            }
+          }
+        }
+      });
+
+      const info = await client.getAccountInfo(true);
+      expect(BigInt(info.accountNumber)).toBe(11715262360359940575n);
+      expect(BigInt(info.sequence)).toBe(1756500000000000123n);
+      // The corrupted values the old parseInt path produced must not appear.
+      expect(BigInt(info.accountNumber)).not.toBe(11715262360359940096n);
+    });
+  });
+
   describe('clearCache', () => {
     it('should clear cached account info', () => {
       const adapter = new MockCosmosAdapter();

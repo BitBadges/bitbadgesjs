@@ -5,7 +5,8 @@ import { SupportedChain } from '@/common/types.js';
 import { generatePostBodyBroadcast } from '@/node-rest-api/broadcast.js';
 import { type AuthInfo, type TxBody } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
 import type { AnyMessage, Message } from '@bufbuild/protobuf';
-import type { Chain, Fee, Sender } from './common.js';
+import type { Chain, Fee, Sender, Uint64Like } from './common.js';
+import { toUint64 } from './common.js';
 import { createTransactionWithMultipleMessages } from './transaction.js';
 import { createTxRaw } from './txRaw.js';
 import type { MessageGenerated } from './utils.js';
@@ -40,8 +41,18 @@ export interface TxContext {
    */
   sender?: {
     address: NativeAddress;
-    sequence: number;
-    accountNumber: number;
+    /**
+     * Sequence (nonce). Post-v34 unordered-tx nonces can be nanosecond
+     * timestamps above 2^53 — pass the chain's string value (or a bigint)
+     * unchanged; never convert it with Number().
+     */
+    sequence: Uint64Like;
+    /**
+     * Account number. Post-v34 accounts get hash-derived numbers above 2^53
+     * — pass the chain's string value (or a bigint) unchanged; never convert
+     * it with Number(). Unsafe `number` inputs are rejected loudly.
+     */
+    accountNumber: Uint64Like;
     publicKey: string;
   };
 
@@ -146,13 +157,19 @@ const wrapExternalTxContext = (context: TxContext): LegacyTxContext | null => {
     cosmosChainId = context.chainIdOverride;
   }
 
+  // Normalize once at this boundary. toUint64 rejects unsafe/non-integer
+  // inputs loudly (BB-34: post-v34 hash-derived account numbers exceed 2^53,
+  // so a Number()-ified value has already lost precision).
+  const accountNumber = toUint64(context.sender.accountNumber, 'accountNumber');
+  const sequence = toUint64(context.sender.sequence, 'sequence');
+
   const txContext: LegacyTxContext = {
     chain: { chain, cosmosChainId, chainId },
     sender: {
       accountAddress: convertToBitBadgesAddress(context.sender.address),
       pubkey: context.sender.publicKey || '',
-      sequence: context.sender.sequence,
-      accountNumber: context.sender.accountNumber
+      sequence,
+      accountNumber
     },
     fee: context.fee,
     memo: context.memo || ''
@@ -162,14 +179,10 @@ const wrapExternalTxContext = (context: TxContext): LegacyTxContext | null => {
     throw new Error('Account address must be a validly formatted BitBadges address');
   }
 
-  if (txContext.sender.accountNumber <= 0) {
+  if (accountNumber <= 0n) {
     throw new Error(
       'Account number must be greater than 0. This means the user is unregistered on the blockchain. Users can be registered by sending them any amount of BADGE.'
     );
-  }
-
-  if (txContext.sender.sequence < 0) {
-    throw new Error('Sequence must be greater than or equal to 0');
   }
 
   return txContext;
