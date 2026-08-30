@@ -112,6 +112,10 @@ import {
   SignOutSuccessResponse,
   SimulateClaimSuccessResponse,
   SimulateTxSuccessResponse,
+  GetNotificationsSuccessResponse,
+  GetUnreadNotificationCountSuccessResponse,
+  MarkNotificationsReadSuccessResponse,
+  UpdateNotificationPreferencesSuccessResponse,
   UpdateAccountInfoSuccessResponse,
   UpdateClaimSuccessResponse,
   UpdateDeveloperAppSuccessResponse,
@@ -310,6 +314,14 @@ import {
   iSimulateClaimSuccessResponse,
   iSimulateTxPayload,
   iSimulateTxSuccessResponse,
+  iGetNotificationsPayload,
+  iGetNotificationsSuccessResponse,
+  iGetUnreadNotificationCountPayload,
+  iGetUnreadNotificationCountSuccessResponse,
+  iMarkNotificationsReadPayload,
+  iMarkNotificationsReadSuccessResponse,
+  iUpdateNotificationPreferencesPayload,
+  iUpdateNotificationPreferencesSuccessResponse,
   iUpdateAccountInfoPayload,
   iUpdateAccountInfoSuccessResponse,
   iUpdateClaimPayload,
@@ -3422,6 +3434,106 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         payload
       );
       return new UpdateAccountInfoSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets the signed-in user's in-app notifications (inbox), newest first.
+   *
+   * **API Route**: `GET /api/v0/notifications`
+   *
+   * **Authentication**: Must be signed in.
+   */
+  public async getNotifications(payload?: iGetNotificationsPayload): Promise<GetNotificationsSuccessResponse<T>> {
+    try {
+      const validateRes: typia.IValidation<iGetNotificationsPayload> = typia.validate<iGetNotificationsPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.get<iGetNotificationsSuccessResponse<string>>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetNotificationsRoute()}`,
+        { params: payload }
+      );
+      return new GetNotificationsSuccessResponse(response.data).convert(this.ConvertFunction);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Gets the signed-in user's unread notification count.
+   *
+   * **API Route**: `GET /api/v0/notifications/unreadCount`
+   *
+   * **Authentication**: Must be signed in.
+   */
+  public async getUnreadNotificationCount(
+    payload?: iGetUnreadNotificationCountPayload
+  ): Promise<GetUnreadNotificationCountSuccessResponse> {
+    try {
+      const response = await this.axios.get<iGetUnreadNotificationCountSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetUnreadNotificationCountRoute()}`,
+        { params: payload ?? {} }
+      );
+      return new GetUnreadNotificationCountSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Marks notifications as read/unread for the signed-in user.
+   *
+   * **API Route**: `POST /api/v0/notifications/read`
+   *
+   * **Authentication**: Must be signed in.
+   */
+  public async markNotificationsRead(payload: iMarkNotificationsReadPayload): Promise<MarkNotificationsReadSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iMarkNotificationsReadPayload> = typia.validate<iMarkNotificationsReadPayload>(payload ?? {});
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iMarkNotificationsReadSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.MarkNotificationsReadRoute()}`,
+        payload
+      );
+      return new MarkNotificationsReadSuccessResponse(response.data);
+    } catch (error) {
+      await this.handleApiError(error);
+      return Promise.reject(error);
+    }
+  }
+
+  /**
+   * Updates the signed-in user's in-app notification preferences.
+   *
+   * **API Route**: `POST /api/v0/notifications/preferences`
+   *
+   * **Authentication**: Must be signed in.
+   */
+  public async updateNotificationPreferences(
+    payload: iUpdateNotificationPreferencesPayload
+  ): Promise<UpdateNotificationPreferencesSuccessResponse> {
+    try {
+      const validateRes: typia.IValidation<iUpdateNotificationPreferencesPayload> =
+        typia.validate<iUpdateNotificationPreferencesPayload>(payload ?? ({} as iUpdateNotificationPreferencesPayload));
+      if (!validateRes.success) {
+        throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
+      }
+
+      const response = await this.axios.post<iUpdateNotificationPreferencesSuccessResponse>(
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.UpdateNotificationPreferencesRoute()}`,
+        payload
+      );
+      return new UpdateNotificationPreferencesSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
