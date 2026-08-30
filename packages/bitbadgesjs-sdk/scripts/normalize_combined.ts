@@ -99,13 +99,17 @@ function removeClasses(data: string): string {
       if (lines[i].trim().endsWith('{}') || lines[i].trim().endsWith(';')) {
         //skip (one-liner)
       } else {
-        //go until the end of the class
-        while (!(lines[i].replace('};', '}').startsWith('}') && lines[i].replace('};', '}').endsWith('}'))) {
+        //go until the end of the class. The scan looks for a flush-left `}`
+        //(or `};`) line; a construct whose closing brace never appears later
+        //in the combined stream (e.g. the file lands last in `find` order —
+        //which is filesystem-dependent, so this is order-fragile) must stop
+        //at EOF instead of reading past the end of the array.
+        while (i < lines.length && !(lines[i].replace('};', '}').startsWith('}') && lines[i].replace('};', '}').endsWith('}'))) {
           // console.log('removing class:', lines[i]);
           i++;
         }
 
-        console.log(lines[i]);
+        if (i < lines.length) console.log(lines[i]);
       }
     } else {
       newLines.push(lines[i]);
@@ -438,18 +442,23 @@ const getInBetweenBraces = (startLineSubstring: string, lines: string[]) => {
   let i = lines.findIndex((line) => line.includes(startLineSubstring));
   let innerLines: string[] = [];
 
+  // Not found — nothing to extract (findIndex returns -1).
+  if (i < 0) {
+    return [];
+  }
+
   if (lines[i].trim().endsWith('{}') || lines[i].trim().endsWith(';')) {
     return [];
   } else {
     i++;
-    //go until the end of the class
-    while (!(lines[i].replace('};', '}').startsWith('}') && lines[i].replace('};', '}').endsWith('}'))) {
+    //go until the end of the class — bounded, same EOF rule as removeClasses.
+    while (i < lines.length && !(lines[i].replace('};', '}').startsWith('}') && lines[i].replace('};', '}').endsWith('}'))) {
       // console.log('removing class:', lines[i]);
       innerLines.push(lines[i]);
       i++;
     }
 
-    console.log(lines[i]);
+    if (i < lines.length) console.log(lines[i]);
   }
 
   return innerLines;
