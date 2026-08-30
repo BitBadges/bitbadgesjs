@@ -18,7 +18,8 @@ import { Block } from "../../../tendermint/types/block_pb.js";
  */
 export enum OrderBy {
   /**
-   * ORDER_BY_UNSPECIFIED specifies an unknown sorting order. OrderBy defaults to ASC in this case.
+   * ORDER_BY_UNSPECIFIED specifies an unknown sorting order. OrderBy defaults
+   * to ASC in this case.
    *
    * @generated from enum value: ORDER_BY_UNSPECIFIED = 0;
    */
@@ -46,7 +47,8 @@ proto3.util.setEnumType(OrderBy, "cosmos.tx.v1beta1.OrderBy", [
 ]);
 
 /**
- * BroadcastMode specifies the broadcast mode for the TxService.Broadcast RPC method.
+ * BroadcastMode specifies the broadcast mode for the TxService.Broadcast RPC
+ * method.
  *
  * @generated from enum cosmos.tx.v1beta1.BroadcastMode
  */
@@ -68,16 +70,16 @@ export enum BroadcastMode {
   BLOCK = 1,
 
   /**
-   * BROADCAST_MODE_SYNC defines a tx broadcasting mode where the client waits for
-   * a CheckTx execution response only.
+   * BROADCAST_MODE_SYNC defines a tx broadcasting mode where the client waits
+   * for a CheckTx execution response only.
    *
    * @generated from enum value: BROADCAST_MODE_SYNC = 2;
    */
   SYNC = 2,
 
   /**
-   * BROADCAST_MODE_ASYNC defines a tx broadcasting mode where the client returns
-   * immediately.
+   * BROADCAST_MODE_ASYNC defines a tx broadcasting mode where the client
+   * returns immediately.
    *
    * @generated from enum value: BROADCAST_MODE_ASYNC = 3;
    */
@@ -100,8 +102,11 @@ proto3.util.setEnumType(BroadcastMode, "cosmos.tx.v1beta1.BroadcastMode", [
 export class GetTxsEventRequest extends Message<GetTxsEventRequest> {
   /**
    * events is the list of transaction event type.
+   * Deprecated post v0.47.x: use query instead, which should contain a valid
+   * events query.
    *
-   * @generated from field: repeated string events = 1;
+   * @generated from field: repeated string events = 1 [deprecated = true];
+   * @deprecated
    */
   events: string[] = [];
 
@@ -120,7 +125,8 @@ export class GetTxsEventRequest extends Message<GetTxsEventRequest> {
   orderBy = OrderBy.UNSPECIFIED;
 
   /**
-   * page is the page number to query, starts at 1. If not provided, will default to first page.
+   * page is the page number to query, starts at 1. If not provided, will
+   * default to first page.
    *
    * @generated from field: uint64 page = 4;
    */
@@ -133,6 +139,14 @@ export class GetTxsEventRequest extends Message<GetTxsEventRequest> {
    * @generated from field: uint64 limit = 5;
    */
   limit = protoInt64.zero;
+
+  /**
+   * query defines the transaction event query that is proxied to Tendermint's
+   * TxSearch RPC method. The query must be valid.
+   *
+   * @generated from field: string query = 6;
+   */
+  query = "";
 
   constructor(data?: PartialMessage<GetTxsEventRequest>) {
     super();
@@ -147,6 +161,7 @@ export class GetTxsEventRequest extends Message<GetTxsEventRequest> {
     { no: 3, name: "order_by", kind: "enum", T: proto3.getEnumType(OrderBy) },
     { no: 4, name: "page", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
     { no: 5, name: "limit", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 6, name: "query", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetTxsEventRequest {
@@ -343,8 +358,6 @@ export class SimulateRequest extends Message<SimulateRequest> {
   /**
    * tx_bytes is the raw transaction.
    *
-   * Since: cosmos-sdk 0.43
-   *
    * @generated from field: bytes tx_bytes = 2;
    */
   txBytes = new Uint8Array(0);
@@ -523,8 +536,6 @@ export class GetTxResponse extends Message<GetTxResponse> {
  * GetBlockWithTxsRequest is the request type for the Service.GetBlockWithTxs
  * RPC method.
  *
- * Since: cosmos-sdk 0.45.2
- *
  * @generated from message cosmos.tx.v1beta1.GetBlockWithTxsRequest
  */
 export class GetBlockWithTxsRequest extends Message<GetBlockWithTxsRequest> {
@@ -572,9 +583,8 @@ export class GetBlockWithTxsRequest extends Message<GetBlockWithTxsRequest> {
 }
 
 /**
- * GetBlockWithTxsResponse is the response type for the Service.GetBlockWithTxs method.
- *
- * Since: cosmos-sdk 0.45.2
+ * GetBlockWithTxsResponse is the response type for the Service.GetBlockWithTxs
+ * method.
  *
  * @generated from message cosmos.tx.v1beta1.GetBlockWithTxsResponse
  */
@@ -638,8 +648,6 @@ export class GetBlockWithTxsResponse extends Message<GetBlockWithTxsResponse> {
  * TxDecodeRequest is the request type for the Service.TxDecode
  * RPC method.
  *
- * Since: cosmos-sdk 0.47
- *
  * @generated from message cosmos.tx.v1beta1.TxDecodeRequest
  */
 export class TxDecodeRequest extends Message<TxDecodeRequest> {
@@ -681,8 +689,6 @@ export class TxDecodeRequest extends Message<TxDecodeRequest> {
 /**
  * TxDecodeResponse is the response type for the
  * Service.TxDecode method.
- *
- * Since: cosmos-sdk 0.47
  *
  * @generated from message cosmos.tx.v1beta1.TxDecodeResponse
  */
@@ -726,8 +732,6 @@ export class TxDecodeResponse extends Message<TxDecodeResponse> {
  * TxEncodeRequest is the request type for the Service.TxEncode
  * RPC method.
  *
- * Since: cosmos-sdk 0.47
- *
  * @generated from message cosmos.tx.v1beta1.TxEncodeRequest
  */
 export class TxEncodeRequest extends Message<TxEncodeRequest> {
@@ -769,8 +773,6 @@ export class TxEncodeRequest extends Message<TxEncodeRequest> {
 /**
  * TxEncodeResponse is the response type for the
  * Service.TxEncode method.
- *
- * Since: cosmos-sdk 0.47
  *
  * @generated from message cosmos.tx.v1beta1.TxEncodeResponse
  */
@@ -814,8 +816,6 @@ export class TxEncodeResponse extends Message<TxEncodeResponse> {
  * TxEncodeAminoRequest is the request type for the Service.TxEncodeAmino
  * RPC method.
  *
- * Since: cosmos-sdk 0.47
- *
  * @generated from message cosmos.tx.v1beta1.TxEncodeAminoRequest
  */
 export class TxEncodeAminoRequest extends Message<TxEncodeAminoRequest> {
@@ -855,8 +855,6 @@ export class TxEncodeAminoRequest extends Message<TxEncodeAminoRequest> {
 /**
  * TxEncodeAminoResponse is the response type for the Service.TxEncodeAmino
  * RPC method.
- *
- * Since: cosmos-sdk 0.47
  *
  * @generated from message cosmos.tx.v1beta1.TxEncodeAminoResponse
  */
@@ -898,8 +896,6 @@ export class TxEncodeAminoResponse extends Message<TxEncodeAminoResponse> {
  * TxDecodeAminoRequest is the request type for the Service.TxDecodeAmino
  * RPC method.
  *
- * Since: cosmos-sdk 0.47
- *
  * @generated from message cosmos.tx.v1beta1.TxDecodeAminoRequest
  */
 export class TxDecodeAminoRequest extends Message<TxDecodeAminoRequest> {
@@ -939,8 +935,6 @@ export class TxDecodeAminoRequest extends Message<TxDecodeAminoRequest> {
 /**
  * TxDecodeAminoResponse is the response type for the Service.TxDecodeAmino
  * RPC method.
- *
- * Since: cosmos-sdk 0.47
  *
  * @generated from message cosmos.tx.v1beta1.TxDecodeAminoResponse
  */

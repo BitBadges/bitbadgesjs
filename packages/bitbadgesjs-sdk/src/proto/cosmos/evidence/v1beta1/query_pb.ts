@@ -25,8 +25,6 @@ export class QueryEvidenceRequest extends Message<QueryEvidenceRequest> {
   /**
    * hash defines the evidence hash of the requested evidence.
    *
-   * Since: cosmos-sdk 0.47
-   *
    * @generated from field: string hash = 2;
    */
   hash = "";

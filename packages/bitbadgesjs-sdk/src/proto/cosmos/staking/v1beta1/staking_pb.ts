@@ -52,7 +52,7 @@ proto3.util.setEnumType(BondStatus, "cosmos.staking.v1beta1.BondStatus", [
 ]);
 
 /**
- * Infraction indicates the infraction a validator commited.
+ * Infraction indicates the infraction a validator committed.
  *
  * @generated from enum cosmos.staking.v1beta1.Infraction
  */
@@ -399,8 +399,6 @@ export class Validator extends Message<Validator> {
   /**
    * min_self_delegation is the validator's self declared minimum self delegation.
    *
-   * Since: cosmos-sdk 0.46
-   *
    * @generated from field: string min_self_delegation = 11;
    */
   minSelfDelegation = "";
@@ -413,7 +411,7 @@ export class Validator extends Message<Validator> {
   unbondingOnHoldRefCount = protoInt64.zero;
 
   /**
-   * list of unbonding ids, each uniquely identifing an unbonding of this validator
+   * list of unbonding ids, each uniquely identifying an unbonding of this validator
    *
    * @generated from field: repeated uint64 unbonding_ids = 13;
    */
@@ -686,14 +684,14 @@ export class DVVTriplets extends Message<DVVTriplets> {
  */
 export class Delegation extends Message<Delegation> {
   /**
-   * delegator_address is the bech32-encoded address of the delegator.
+   * delegator_address is the encoded address of the delegator.
    *
    * @generated from field: string delegator_address = 1;
    */
   delegatorAddress = "";
 
   /**
-   * validator_address is the bech32-encoded address of the validator.
+   * validator_address is the encoded address of the validator.
    *
    * @generated from field: string validator_address = 2;
    */
@@ -744,14 +742,14 @@ export class Delegation extends Message<Delegation> {
  */
 export class UnbondingDelegation extends Message<UnbondingDelegation> {
   /**
-   * delegator_address is the bech32-encoded address of the delegator.
+   * delegator_address is the encoded address of the delegator.
    *
    * @generated from field: string delegator_address = 1;
    */
   delegatorAddress = "";
 
   /**
-   * validator_address is the bech32-encoded address of the validator.
+   * validator_address is the encoded address of the validator.
    *
    * @generated from field: string validator_address = 2;
    */

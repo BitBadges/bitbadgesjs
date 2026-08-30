@@ -41,7 +41,7 @@ export class QueryConfigRequest extends Message<QueryConfigRequest> {
 }
 
 /**
- * QueryConfigRequest is the Query/Config response type.
+ * QueryConfigResponse is the Query/Config response type.
  *
  * @generated from message cosmos.app.v1alpha1.QueryConfigResponse
  */

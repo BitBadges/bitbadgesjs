@@ -103,6 +103,15 @@ export class Params extends Message<Params> {
    */
   blocksPerYear = protoInt64.zero;
 
+  /**
+   * maximum supply for the token.
+   *
+   * A value of "0" indicates an unlimited (infinite) maximum supply.
+   *
+   * @generated from field: string max_supply = 7;
+   */
+  maxSupply = "";
+
   constructor(data?: PartialMessage<Params>) {
     super();
     proto3.util.initPartial(data, this);
@@ -117,6 +126,7 @@ export class Params extends Message<Params> {
     { no: 4, name: "inflation_min", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "goal_bonded", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "blocks_per_year", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+    { no: 7, name: "max_supply", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Params {

@@ -1417,7 +1417,7 @@ export class QueryNextSequenceReceiveRequest extends Message<QueryNextSequenceRe
 }
 
 /**
- * QuerySequenceResponse is the request type for the
+ * QuerySequenceResponse is the response type for the
  * Query/QueryNextSequenceReceiveResponse RPC method
  *
  * @generated from message ibc.core.channel.v1.QueryNextSequenceReceiveResponse

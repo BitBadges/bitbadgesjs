@@ -3,6 +3,44 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.44.0]
+
+### Generated protos regenerated against the v34 dependency set (BB-40)
+
+The generated `src/proto` tree now matches the chain's v34 stack: cosmos-sdk
+v0.54.4, ibc-go v11.2.0, cosmos/evm v0.7.2, plus current bitbadgeschain
+master modules (tokenization/gamm/poolmanager/managersplitter). Same pipeline
+as before: vendored `proto/` tree → `buf generate` with protoc-gen-es v1.10.1.
+
+**New surface (the point of the regen):**
+
+- `TxBody.unordered` (field 4) and `TxBody.timeoutTimestamp` (field 5) —
+  cosmos-sdk 0.53+ unordered transactions. Both default to unset; a default
+  `TxBody` still serializes to zero bytes, so ordinary txs are wire-identical.
+- ibc-go v11 additions: transfer `Denoms`/`Denom` query surface, `token_pb`,
+  `denomtrace_pb`; new (unexported) trees for channel/client/commitment v2,
+  rate-limiting, packet-forward-middleware, gmp, wasm/attestations light
+  clients; cosmos-sdk `epochs`/`protocolpool`/`counter`/`store` protos.
+- Tokenization genesis gains `votingChallengeTrackers`,
+  `votingChallengeTrackerStoreKeys`, `nextAddressListCounter`,
+  `reservedProtocolAddresses` (chain master).
+
+**BREAKING — removed by upstream, hence the minor bump (semver-0):**
+
+- `QueryDenomTrace{,s}Request/Response` are gone from
+  `proto/ibc/applications/transfer/v1` (ibc-go v11 removed the queries; the
+  chain LCD already returns Not Implemented for them). Use the new
+  `QueryDenoms`/`QueryDenom` surface.
+- The deprecated `DenomTrace` *type* moved to `denomtrace_pb.ts` and is still
+  re-exported from the transfer/v1 barrel — slated for deletion when upstream
+  drops it.
+- ibc-go v11 also removed the legacy `ClientUpdateProposal`,
+  `UpgradeProposal`, `MsgSubmitMisbehaviour(Response)`, and commitment-v1
+  `MerklePath` types, and the CometBFT 0.38 protos removed the ABCI
+  `Request/ResponseBeginBlock`, `Request/ResponseEndBlock`, and
+  `Request/ResponseDeliverTx` types. Nothing in the SDK/CLI/MCP referenced
+  any of these.
+
 ## [0.43.1]
 
 ### Account numbers and sequences larger than 2^53 (BB-34)

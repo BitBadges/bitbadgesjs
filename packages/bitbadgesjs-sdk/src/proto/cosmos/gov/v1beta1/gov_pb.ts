@@ -123,8 +123,6 @@ proto3.util.setEnumType(ProposalStatus, "cosmos.gov.v1beta1.ProposalStatus", [
 /**
  * WeightedVoteOption defines a unit of vote for vote split.
  *
- * Since: cosmos-sdk 0.43
- *
  * @generated from message cosmos.gov.v1beta1.WeightedVoteOption
  */
 export class WeightedVoteOption extends Message<WeightedVoteOption> {
@@ -136,7 +134,7 @@ export class WeightedVoteOption extends Message<WeightedVoteOption> {
   option = VoteOption.UNSPECIFIED;
 
   /**
-   * weight is the vote weight associated with the vote option. 
+   * weight is the vote weight associated with the vote option.
    *
    * @generated from field: string weight = 2;
    */
@@ -484,8 +482,6 @@ export class Vote extends Message<Vote> {
 
   /**
    * options is the weighted vote options.
-   *
-   * Since: cosmos-sdk 0.43
    *
    * @generated from field: repeated cosmos.gov.v1beta1.WeightedVoteOption options = 4;
    */

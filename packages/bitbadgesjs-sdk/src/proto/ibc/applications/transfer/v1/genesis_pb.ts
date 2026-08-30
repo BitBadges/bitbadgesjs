@@ -5,7 +5,8 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
-import { DenomTrace, Params } from "./transfer_pb.js";
+import { Denom } from "./token_pb.js";
+import { Params } from "./transfer_pb.js";
 import { Coin } from "../../../../cosmos/base/v1beta1/coin_pb.js";
 
 /**
@@ -20,9 +21,9 @@ export class GenesisState extends Message<GenesisState> {
   portId = "";
 
   /**
-   * @generated from field: repeated ibc.applications.transfer.v1.DenomTrace denom_traces = 2;
+   * @generated from field: repeated ibc.applications.transfer.v1.Denom denoms = 2;
    */
-  denomTraces: DenomTrace[] = [];
+  denoms: Denom[] = [];
 
   /**
    * @generated from field: ibc.applications.transfer.v1.Params params = 3;
@@ -46,7 +47,7 @@ export class GenesisState extends Message<GenesisState> {
   static readonly typeName = "ibc.applications.transfer.v1.GenesisState";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "port_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "denom_traces", kind: "message", T: DenomTrace, repeated: true },
+    { no: 2, name: "denoms", kind: "message", T: Denom, repeated: true },
     { no: 3, name: "params", kind: "message", T: Params },
     { no: 4, name: "total_escrowed", kind: "message", T: Coin, repeated: true },
   ]);

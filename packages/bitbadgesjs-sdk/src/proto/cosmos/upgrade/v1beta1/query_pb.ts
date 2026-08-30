@@ -220,8 +220,6 @@ export class QueryUpgradedConsensusStateRequest extends Message<QueryUpgradedCon
  */
 export class QueryUpgradedConsensusStateResponse extends Message<QueryUpgradedConsensusStateResponse> {
   /**
-   * Since: cosmos-sdk 0.43
-   *
    * @generated from field: bytes upgraded_consensus_state = 2;
    */
   upgradedConsensusState = new Uint8Array(0);
@@ -257,8 +255,6 @@ export class QueryUpgradedConsensusStateResponse extends Message<QueryUpgradedCo
 /**
  * QueryModuleVersionsRequest is the request type for the Query/ModuleVersions
  * RPC method.
- *
- * Since: cosmos-sdk 0.43
  *
  * @generated from message cosmos.upgrade.v1beta1.QueryModuleVersionsRequest
  */
@@ -304,8 +300,6 @@ export class QueryModuleVersionsRequest extends Message<QueryModuleVersionsReque
  * QueryModuleVersionsResponse is the response type for the Query/ModuleVersions
  * RPC method.
  *
- * Since: cosmos-sdk 0.43
- *
  * @generated from message cosmos.upgrade.v1beta1.QueryModuleVersionsResponse
  */
 export class QueryModuleVersionsResponse extends Message<QueryModuleVersionsResponse> {
@@ -347,8 +341,6 @@ export class QueryModuleVersionsResponse extends Message<QueryModuleVersionsResp
 /**
  * QueryAuthorityRequest is the request type for Query/Authority
  *
- * Since: cosmos-sdk 0.46
- *
  * @generated from message cosmos.upgrade.v1beta1.QueryAuthorityRequest
  */
 export class QueryAuthorityRequest extends Message<QueryAuthorityRequest> {
@@ -381,8 +373,6 @@ export class QueryAuthorityRequest extends Message<QueryAuthorityRequest> {
 
 /**
  * QueryAuthorityResponse is the response type for Query/Authority
- *
- * Since: cosmos-sdk 0.46
  *
  * @generated from message cosmos.upgrade.v1beta1.QueryAuthorityResponse
  */

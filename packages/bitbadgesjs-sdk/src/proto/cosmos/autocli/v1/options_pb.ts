@@ -13,14 +13,14 @@ import { Message, proto3 } from "@bufbuild/protobuf";
  */
 export class ModuleOptions extends Message<ModuleOptions> {
   /**
-   * tx describes the tx command for the module.
+   * tx describes the tx commands for the module.
    *
    * @generated from field: cosmos.autocli.v1.ServiceCommandDescriptor tx = 1;
    */
   tx?: ServiceCommandDescriptor;
 
   /**
-   * query describes the tx command for the module.
+   * query describes the queries commands for the module.
    *
    * @generated from field: cosmos.autocli.v1.ServiceCommandDescriptor query = 2;
    */
@@ -88,6 +88,22 @@ export class ServiceCommandDescriptor extends Message<ServiceCommandDescriptor> 
    */
   subCommands: { [key: string]: ServiceCommandDescriptor } = {};
 
+  /**
+   * enhance_custom_commands specifies whether to skip the service when generating commands, if a custom command already
+   * exists, or enhance the existing command. If set to true, the custom command will be enhanced with the services from
+   * gRPC. otherwise when a custom command exists, no commands will be generated for the service.
+   *
+   * @generated from field: bool enhance_custom_command = 4;
+   */
+  enhanceCustomCommand = false;
+
+  /**
+   * short is an optional parameter used to override the short description of the auto generated command.
+   *
+   * @generated from field: string short = 5;
+   */
+  short = "";
+
   constructor(data?: PartialMessage<ServiceCommandDescriptor>) {
     super();
     proto3.util.initPartial(data, this);
@@ -99,6 +115,8 @@ export class ServiceCommandDescriptor extends Message<ServiceCommandDescriptor> 
     { no: 1, name: "service", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "rpc_command_options", kind: "message", T: RpcCommandOptions, repeated: true },
     { no: 3, name: "sub_commands", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: ServiceCommandDescriptor} },
+    { no: 4, name: "enhance_custom_command", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 5, name: "short", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ServiceCommandDescriptor {
@@ -220,6 +238,16 @@ export class RpcCommandOptions extends Message<RpcCommandOptions> {
    */
   skip = false;
 
+  /**
+   * gov_proposal specifies whether autocli should generate a gov proposal transaction for this rpc method.
+   * Normally autocli generates a transaction containing the message and broadcast it.
+   * However, when true, autocli generates a proposal transaction containing the message and broadcast it.
+   * This option is ineffective for query commands.
+   *
+   * @generated from field: bool gov_proposal = 13;
+   */
+  govProposal = false;
+
   constructor(data?: PartialMessage<RpcCommandOptions>) {
     super();
     proto3.util.initPartial(data, this);
@@ -240,6 +268,7 @@ export class RpcCommandOptions extends Message<RpcCommandOptions> {
     { no: 10, name: "flag_options", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "message", T: FlagOptions} },
     { no: 11, name: "positional_args", kind: "message", T: PositionalArgDescriptor, repeated: true },
     { no: 12, name: "skip", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 13, name: "gov_proposal", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RpcCommandOptions {
@@ -297,13 +326,6 @@ export class FlagOptions extends Message<FlagOptions> {
   defaultValue = "";
 
   /**
-   * default value is the default value as text if the flag is used without any value.
-   *
-   * @generated from field: string no_opt_default_value = 5;
-   */
-  noOptDefaultValue = "";
-
-  /**
    * deprecated is the usage text to show if this flag is deprecated.
    *
    * @generated from field: string deprecated = 6;
@@ -336,7 +358,6 @@ export class FlagOptions extends Message<FlagOptions> {
     { no: 2, name: "shorthand", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "usage", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "default_value", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "no_opt_default_value", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "deprecated", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 7, name: "shorthand_deprecated", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 8, name: "hidden", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
@@ -376,11 +397,19 @@ export class PositionalArgDescriptor extends Message<PositionalArgDescriptor> {
   /**
    * varargs makes a positional parameter a varargs parameter. This can only be
    * applied to last positional parameter and the proto_field must a repeated
-   * field.
+   * field. Note: It is mutually exclusive with optional.
    *
    * @generated from field: bool varargs = 2;
    */
   varargs = false;
+
+  /**
+   * optional makes the last positional parameter optional.
+   * Note: It is mutually exclusive with varargs.
+   *
+   * @generated from field: bool optional = 3;
+   */
+  optional = false;
 
   constructor(data?: PartialMessage<PositionalArgDescriptor>) {
     super();
@@ -392,6 +421,7 @@ export class PositionalArgDescriptor extends Message<PositionalArgDescriptor> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "proto_field", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "varargs", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 3, name: "optional", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PositionalArgDescriptor {

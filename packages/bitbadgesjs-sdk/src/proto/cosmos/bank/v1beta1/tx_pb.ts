@@ -176,8 +176,6 @@ export class MsgMultiSendResponse extends Message<MsgMultiSendResponse> {
 /**
  * MsgUpdateParams is the Msg/UpdateParams request type.
  *
- * Since: cosmos-sdk 0.47
- *
  * @generated from message cosmos.bank.v1beta1.MsgUpdateParams
  */
 export class MsgUpdateParams extends Message<MsgUpdateParams> {
@@ -230,8 +228,6 @@ export class MsgUpdateParams extends Message<MsgUpdateParams> {
  * MsgUpdateParamsResponse defines the response structure for executing a
  * MsgUpdateParams message.
  *
- * Since: cosmos-sdk 0.47
- *
  * @generated from message cosmos.bank.v1beta1.MsgUpdateParamsResponse
  */
 export class MsgUpdateParamsResponse extends Message<MsgUpdateParamsResponse> {
@@ -269,12 +265,12 @@ export class MsgUpdateParamsResponse extends Message<MsgUpdateParamsResponse> {
  * Existing SendEnabled entries that are not included in this
  * message are left unchanged.
  *
- * Since: cosmos-sdk 0.47
- *
  * @generated from message cosmos.bank.v1beta1.MsgSetSendEnabled
  */
 export class MsgSetSendEnabled extends Message<MsgSetSendEnabled> {
   /**
+   * authority is the address that controls the module.
+   *
    * @generated from field: string authority = 1;
    */
   authority = "";
@@ -328,8 +324,6 @@ export class MsgSetSendEnabled extends Message<MsgSetSendEnabled> {
 
 /**
  * MsgSetSendEnabledResponse defines the Msg/SetSendEnabled response type.
- *
- * Since: cosmos-sdk 0.47
  *
  * @generated from message cosmos.bank.v1beta1.MsgSetSendEnabledResponse
  */

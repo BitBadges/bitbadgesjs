@@ -124,7 +124,7 @@ export class ContinuousVestingAccount extends Message<ContinuousVestingAccount> 
 
 /**
  * DelayedVestingAccount implements the VestingAccount interface. It vests all
- * coins after a specific time, but non prior. In other words, it keeps them
+ * coins after a specific time, but not prior. In other words, it keeps them
  * locked until a specified time.
  *
  * @generated from message cosmos.vesting.v1beta1.DelayedVestingAccount
@@ -266,8 +266,6 @@ export class PeriodicVestingAccount extends Message<PeriodicVestingAccount> {
  * PermanentLockedAccount implements the VestingAccount interface. It does
  * not ever release coins, locking them indefinitely. Coins in this account can
  * still be used for delegating and for governance votes even while locked.
- *
- * Since: cosmos-sdk 0.43
  *
  * @generated from message cosmos.vesting.v1beta1.PermanentLockedAccount
  */

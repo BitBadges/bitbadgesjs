@@ -8,6 +8,8 @@ import { Message, proto3 } from "@bufbuild/protobuf";
 import { GenesisState as GenesisState$1 } from "../../client/v1/genesis_pb.js";
 import { GenesisState as GenesisState$2 } from "../../connection/v1/genesis_pb.js";
 import { GenesisState as GenesisState$3 } from "../../channel/v1/genesis_pb.js";
+import { GenesisState as GenesisState$4 } from "../../client/v2/genesis_pb.js";
+import { GenesisState as GenesisState$5 } from "../../channel/v2/genesis_pb.js";
 
 /**
  * GenesisState defines the ibc module's genesis state.
@@ -36,6 +38,20 @@ export class GenesisState extends Message<GenesisState> {
    */
   channelGenesis?: GenesisState$3;
 
+  /**
+   * ICS002 - Clients/v2 genesis state
+   *
+   * @generated from field: ibc.core.client.v2.GenesisState client_v2_genesis = 4;
+   */
+  clientV2Genesis?: GenesisState$4;
+
+  /**
+   * ICS004 - Channel/v2 genesis state
+   *
+   * @generated from field: ibc.core.channel.v2.GenesisState channel_v2_genesis = 5;
+   */
+  channelV2Genesis?: GenesisState$5;
+
   constructor(data?: PartialMessage<GenesisState>) {
     super();
     proto3.util.initPartial(data, this);
@@ -47,6 +63,8 @@ export class GenesisState extends Message<GenesisState> {
     { no: 1, name: "client_genesis", kind: "message", T: GenesisState$1 },
     { no: 2, name: "connection_genesis", kind: "message", T: GenesisState$2 },
     { no: 3, name: "channel_genesis", kind: "message", T: GenesisState$3 },
+    { no: 4, name: "client_v2_genesis", kind: "message", T: GenesisState$4 },
+    { no: 5, name: "channel_v2_genesis", kind: "message", T: GenesisState$5 },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenesisState {

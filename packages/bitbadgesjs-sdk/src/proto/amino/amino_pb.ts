@@ -111,3 +111,16 @@ export const dont_omitempty = proto3.makeExtension<FieldOptions, boolean>(
   { no: 11110005, kind: "scalar", T: 8 /* ScalarType.BOOL */ },
 );
 
+/**
+ * oneof_name sets the type name for the given field oneof field.  This is used
+ * by the Amino JSON encoder to encode the type of the oneof field, and must be the same string in
+ * the RegisterConcrete() method usage used to register the concrete type.
+ *
+ * @generated from extension: string oneof_name = 11110006;
+ */
+export const oneof_name = proto3.makeExtension<FieldOptions, string>(
+  "amino.oneof_name", 
+  FieldOptions, 
+  { no: 11110006, kind: "scalar", T: 9 /* ScalarType.STRING */ },
+);
+

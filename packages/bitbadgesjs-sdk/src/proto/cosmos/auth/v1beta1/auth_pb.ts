@@ -119,8 +119,6 @@ export class ModuleAccount extends Message<ModuleAccount> {
 /**
  * ModuleCredential represents a unclaimable pubkey for base accounts controlled by modules.
  *
- * Since: cosmos-sdk 0.47
- *
  * @generated from message cosmos.auth.v1beta1.ModuleCredential
  */
 export class ModuleCredential extends Message<ModuleCredential> {

@@ -72,6 +72,11 @@ export class MsgCreateClient extends Message<MsgCreateClient> {
  * @generated from message ibc.core.client.v1.MsgCreateClientResponse
  */
 export class MsgCreateClientResponse extends Message<MsgCreateClientResponse> {
+  /**
+   * @generated from field: string client_id = 1;
+   */
+  clientId = "";
+
   constructor(data?: PartialMessage<MsgCreateClientResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -80,6 +85,7 @@ export class MsgCreateClientResponse extends Message<MsgCreateClientResponse> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "ibc.core.client.v1.MsgCreateClientResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "client_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgCreateClientResponse {
@@ -303,100 +309,6 @@ export class MsgUpgradeClientResponse extends Message<MsgUpgradeClientResponse> 
 
   static equals(a: MsgUpgradeClientResponse | PlainMessage<MsgUpgradeClientResponse> | undefined, b: MsgUpgradeClientResponse | PlainMessage<MsgUpgradeClientResponse> | undefined): boolean {
     return proto3.util.equals(MsgUpgradeClientResponse, a, b);
-  }
-}
-
-/**
- * MsgSubmitMisbehaviour defines an sdk.Msg type that submits Evidence for
- * light client misbehaviour.
- * This message has been deprecated. Use MsgUpdateClient instead.
- *
- * @generated from message ibc.core.client.v1.MsgSubmitMisbehaviour
- * @deprecated
- */
-export class MsgSubmitMisbehaviour extends Message<MsgSubmitMisbehaviour> {
-  /**
-   * client unique identifier
-   *
-   * @generated from field: string client_id = 1;
-   */
-  clientId = "";
-
-  /**
-   * misbehaviour used for freezing the light client
-   *
-   * @generated from field: google.protobuf.Any misbehaviour = 2;
-   */
-  misbehaviour?: Any;
-
-  /**
-   * signer address
-   *
-   * @generated from field: string signer = 3;
-   */
-  signer = "";
-
-  constructor(data?: PartialMessage<MsgSubmitMisbehaviour>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.client.v1.MsgSubmitMisbehaviour";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "client_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "misbehaviour", kind: "message", T: Any },
-    { no: 3, name: "signer", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSubmitMisbehaviour {
-    return new MsgSubmitMisbehaviour().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSubmitMisbehaviour {
-    return new MsgSubmitMisbehaviour().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSubmitMisbehaviour {
-    return new MsgSubmitMisbehaviour().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: MsgSubmitMisbehaviour | PlainMessage<MsgSubmitMisbehaviour> | undefined, b: MsgSubmitMisbehaviour | PlainMessage<MsgSubmitMisbehaviour> | undefined): boolean {
-    return proto3.util.equals(MsgSubmitMisbehaviour, a, b);
-  }
-}
-
-/**
- * MsgSubmitMisbehaviourResponse defines the Msg/SubmitMisbehaviour response
- * type.
- *
- * @generated from message ibc.core.client.v1.MsgSubmitMisbehaviourResponse
- */
-export class MsgSubmitMisbehaviourResponse extends Message<MsgSubmitMisbehaviourResponse> {
-  constructor(data?: PartialMessage<MsgSubmitMisbehaviourResponse>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.core.client.v1.MsgSubmitMisbehaviourResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgSubmitMisbehaviourResponse {
-    return new MsgSubmitMisbehaviourResponse().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgSubmitMisbehaviourResponse {
-    return new MsgSubmitMisbehaviourResponse().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgSubmitMisbehaviourResponse {
-    return new MsgSubmitMisbehaviourResponse().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: MsgSubmitMisbehaviourResponse | PlainMessage<MsgSubmitMisbehaviourResponse> | undefined, b: MsgSubmitMisbehaviourResponse | PlainMessage<MsgSubmitMisbehaviourResponse> | undefined): boolean {
-    return proto3.util.equals(MsgSubmitMisbehaviourResponse, a, b);
   }
 }
 
@@ -667,6 +579,88 @@ export class MsgUpdateParamsResponse extends Message<MsgUpdateParamsResponse> {
 
   static equals(a: MsgUpdateParamsResponse | PlainMessage<MsgUpdateParamsResponse> | undefined, b: MsgUpdateParamsResponse | PlainMessage<MsgUpdateParamsResponse> | undefined): boolean {
     return proto3.util.equals(MsgUpdateParamsResponse, a, b);
+  }
+}
+
+/**
+ * MsgDeleteClientCreator defines a message to delete the client creator of a client
+ *
+ * @generated from message ibc.core.client.v1.MsgDeleteClientCreator
+ */
+export class MsgDeleteClientCreator extends Message<MsgDeleteClientCreator> {
+  /**
+   * client identifier
+   *
+   * @generated from field: string client_id = 1;
+   */
+  clientId = "";
+
+  /**
+   * signer address
+   *
+   * @generated from field: string signer = 2;
+   */
+  signer = "";
+
+  constructor(data?: PartialMessage<MsgDeleteClientCreator>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "ibc.core.client.v1.MsgDeleteClientCreator";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "client_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "signer", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDeleteClientCreator {
+    return new MsgDeleteClientCreator().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDeleteClientCreator {
+    return new MsgDeleteClientCreator().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDeleteClientCreator {
+    return new MsgDeleteClientCreator().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgDeleteClientCreator | PlainMessage<MsgDeleteClientCreator> | undefined, b: MsgDeleteClientCreator | PlainMessage<MsgDeleteClientCreator> | undefined): boolean {
+    return proto3.util.equals(MsgDeleteClientCreator, a, b);
+  }
+}
+
+/**
+ * MsgDeleteClientCreatorResponse defines the Msg/DeleteClientCreator response type.
+ *
+ * @generated from message ibc.core.client.v1.MsgDeleteClientCreatorResponse
+ */
+export class MsgDeleteClientCreatorResponse extends Message<MsgDeleteClientCreatorResponse> {
+  constructor(data?: PartialMessage<MsgDeleteClientCreatorResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "ibc.core.client.v1.MsgDeleteClientCreatorResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgDeleteClientCreatorResponse {
+    return new MsgDeleteClientCreatorResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): MsgDeleteClientCreatorResponse {
+    return new MsgDeleteClientCreatorResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): MsgDeleteClientCreatorResponse {
+    return new MsgDeleteClientCreatorResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: MsgDeleteClientCreatorResponse | PlainMessage<MsgDeleteClientCreatorResponse> | undefined, b: MsgDeleteClientCreatorResponse | PlainMessage<MsgDeleteClientCreatorResponse> | undefined): boolean {
+    return proto3.util.equals(MsgDeleteClientCreatorResponse, a, b);
   }
 }
 

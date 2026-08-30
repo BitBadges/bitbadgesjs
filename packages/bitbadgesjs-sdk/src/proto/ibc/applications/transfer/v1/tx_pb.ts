@@ -32,7 +32,7 @@ export class MsgTransfer extends Message<MsgTransfer> {
   sourceChannel = "";
 
   /**
-   * the tokens to be transferred
+   * token to be transferred
    *
    * @generated from field: cosmos.base.v1beta1.Coin token = 3;
    */
@@ -54,7 +54,8 @@ export class MsgTransfer extends Message<MsgTransfer> {
 
   /**
    * Timeout height relative to the current block height.
-   * The timeout is disabled when set to 0.
+   * If you are sending with IBC v1 protocol, either timeout_height or timeout_timestamp must be set.
+   * If you are sending with IBC v2 protocol, timeout_timestamp must be set, and timeout_height must be omitted.
    *
    * @generated from field: ibc.core.client.v1.Height timeout_height = 6;
    */
@@ -62,7 +63,8 @@ export class MsgTransfer extends Message<MsgTransfer> {
 
   /**
    * Timeout timestamp in absolute nanoseconds since unix epoch.
-   * The timeout is disabled when set to 0.
+   * If you are sending with IBC v1 protocol, either timeout_height or timeout_timestamp must be set.
+   * If you are sending with IBC v2 protocol, timeout_timestamp must be set.
    *
    * @generated from field: uint64 timeout_timestamp = 7;
    */
@@ -74,6 +76,13 @@ export class MsgTransfer extends Message<MsgTransfer> {
    * @generated from field: string memo = 8;
    */
   memo = "";
+
+  /**
+   * optional encoding
+   *
+   * @generated from field: string encoding = 9;
+   */
+  encoding = "";
 
   constructor(data?: PartialMessage<MsgTransfer>) {
     super();
@@ -91,6 +100,7 @@ export class MsgTransfer extends Message<MsgTransfer> {
     { no: 6, name: "timeout_height", kind: "message", T: Height },
     { no: 7, name: "timeout_timestamp", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
     { no: 8, name: "memo", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: "encoding", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): MsgTransfer {

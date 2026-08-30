@@ -33,6 +33,15 @@ export class Module extends Message<Module> {
    */
   authority = "";
 
+  /**
+   * enable_unordered_transactions determines whether unordered transactions should be supported or not.
+   * When true, unordered transactions will be validated and processed.
+   * When false, unordered transactions will be rejected.
+   *
+   * @generated from field: bool enable_unordered_transactions = 4;
+   */
+  enableUnorderedTransactions = false;
+
   constructor(data?: PartialMessage<Module>) {
     super();
     proto3.util.initPartial(data, this);
@@ -44,6 +53,7 @@ export class Module extends Message<Module> {
     { no: 1, name: "bech32_prefix", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "module_account_permissions", kind: "message", T: ModuleAccountPermission, repeated: true },
     { no: 3, name: "authority", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "enable_unordered_transactions", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Module {

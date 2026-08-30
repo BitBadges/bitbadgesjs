@@ -8,7 +8,7 @@ import { Message, proto3 } from "@bufbuild/protobuf";
 
 /**
  * MultiSignature wraps the signatures from a multisig.LegacyAminoPubKey.
- * See cosmos.tx.v1betata1.ModeInfo.Multi for how to specify which signers
+ * See cosmos.tx.v1beta1.ModeInfo.Multi for how to specify which signers
  * signed and with which modes.
  *
  * @generated from message cosmos.crypto.multisig.v1beta1.MultiSignature

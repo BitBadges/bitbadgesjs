@@ -33,6 +33,16 @@ export class ConsensusParams extends Message<ConsensusParams> {
    */
   version?: VersionParams;
 
+  /**
+   * @generated from field: tendermint.types.ABCIParams abci = 5;
+   */
+  abci?: ABCIParams;
+
+  /**
+   * @generated from field: tendermint.types.AuthorityParams authority = 6;
+   */
+  authority?: AuthorityParams;
+
   constructor(data?: PartialMessage<ConsensusParams>) {
     super();
     proto3.util.initPartial(data, this);
@@ -45,6 +55,8 @@ export class ConsensusParams extends Message<ConsensusParams> {
     { no: 2, name: "evidence", kind: "message", T: EvidenceParams },
     { no: 3, name: "validator", kind: "message", T: ValidatorParams },
     { no: 4, name: "version", kind: "message", T: VersionParams },
+    { no: 5, name: "abci", kind: "message", T: ABCIParams },
+    { no: 6, name: "authority", kind: "message", T: AuthorityParams },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ConsensusParams {
@@ -304,6 +316,92 @@ export class HashedParams extends Message<HashedParams> {
 
   static equals(a: HashedParams | PlainMessage<HashedParams> | undefined, b: HashedParams | PlainMessage<HashedParams> | undefined): boolean {
     return proto3.util.equals(HashedParams, a, b);
+  }
+}
+
+/**
+ * ABCIParams configure functionality specific to the Application Blockchain Interface.
+ *
+ * @generated from message tendermint.types.ABCIParams
+ */
+export class ABCIParams extends Message<ABCIParams> {
+  /**
+   * vote_extensions_enable_height configures the first height during which
+   * vote extensions will be enabled. During this specified height, and for all
+   * subsequent heights, precommit messages that do not contain valid extension data
+   * will be considered invalid. Prior to this height, vote extensions will not
+   * be used or accepted by validators on the network.
+   *
+   * Once enabled, vote extensions will be created by the application in ExtendVote,
+   * passed to the application for validation in VerifyVoteExtension and given
+   * to the application to use when proposing a block during PrepareProposal.
+   *
+   * @generated from field: int64 vote_extensions_enable_height = 1;
+   */
+  voteExtensionsEnableHeight = protoInt64.zero;
+
+  constructor(data?: PartialMessage<ABCIParams>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "tendermint.types.ABCIParams";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "vote_extensions_enable_height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ABCIParams {
+    return new ABCIParams().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ABCIParams {
+    return new ABCIParams().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ABCIParams {
+    return new ABCIParams().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ABCIParams | PlainMessage<ABCIParams> | undefined, b: ABCIParams | PlainMessage<ABCIParams> | undefined): boolean {
+    return proto3.util.equals(ABCIParams, a, b);
+  }
+}
+
+/**
+ * @generated from message tendermint.types.AuthorityParams
+ */
+export class AuthorityParams extends Message<AuthorityParams> {
+  /**
+   * @generated from field: string authority = 1;
+   */
+  authority = "";
+
+  constructor(data?: PartialMessage<AuthorityParams>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "tendermint.types.AuthorityParams";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "authority", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AuthorityParams {
+    return new AuthorityParams().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AuthorityParams {
+    return new AuthorityParams().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AuthorityParams {
+    return new AuthorityParams().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AuthorityParams | PlainMessage<AuthorityParams> | undefined, b: AuthorityParams | PlainMessage<AuthorityParams> | undefined): boolean {
+    return proto3.util.equals(AuthorityParams, a, b);
   }
 }
 

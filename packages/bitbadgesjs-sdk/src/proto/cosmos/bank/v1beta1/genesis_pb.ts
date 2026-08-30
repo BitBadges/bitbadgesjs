@@ -46,8 +46,6 @@ export class GenesisState extends Message<GenesisState> {
   /**
    * send_enabled defines the denoms where send is enabled or disabled.
    *
-   * Since: cosmos-sdk 0.47
-   *
    * @generated from field: repeated cosmos.bank.v1beta1.SendEnabled send_enabled = 5;
    */
   sendEnabled: SendEnabled[] = [];

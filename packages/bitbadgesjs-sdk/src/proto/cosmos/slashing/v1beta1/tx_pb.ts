@@ -82,8 +82,6 @@ export class MsgUnjailResponse extends Message<MsgUnjailResponse> {
 /**
  * MsgUpdateParams is the Msg/UpdateParams request type.
  *
- * Since: cosmos-sdk 0.47
- *
  * @generated from message cosmos.slashing.v1beta1.MsgUpdateParams
  */
 export class MsgUpdateParams extends Message<MsgUpdateParams> {
@@ -135,8 +133,6 @@ export class MsgUpdateParams extends Message<MsgUpdateParams> {
 /**
  * MsgUpdateParamsResponse defines the response structure for executing a
  * MsgUpdateParams message.
- *
- * Since: cosmos-sdk 0.47
  *
  * @generated from message cosmos.slashing.v1beta1.MsgUpdateParamsResponse
  */

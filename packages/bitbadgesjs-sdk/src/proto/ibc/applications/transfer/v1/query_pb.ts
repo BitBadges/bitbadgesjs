@@ -5,185 +5,10 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
-import { DenomTrace, Params } from "./transfer_pb.js";
+import { Params } from "./transfer_pb.js";
+import { Denom } from "./token_pb.js";
 import { PageRequest, PageResponse } from "../../../../cosmos/base/query/v1beta1/pagination_pb.js";
 import { Coin } from "../../../../cosmos/base/v1beta1/coin_pb.js";
-
-/**
- * QueryDenomTraceRequest is the request type for the Query/DenomTrace RPC
- * method
- *
- * @generated from message ibc.applications.transfer.v1.QueryDenomTraceRequest
- */
-export class QueryDenomTraceRequest extends Message<QueryDenomTraceRequest> {
-  /**
-   * hash (in hex format) or denom (full denom with ibc prefix) of the denomination trace information.
-   *
-   * @generated from field: string hash = 1;
-   */
-  hash = "";
-
-  constructor(data?: PartialMessage<QueryDenomTraceRequest>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.applications.transfer.v1.QueryDenomTraceRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "hash", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDenomTraceRequest {
-    return new QueryDenomTraceRequest().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryDenomTraceRequest {
-    return new QueryDenomTraceRequest().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryDenomTraceRequest {
-    return new QueryDenomTraceRequest().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: QueryDenomTraceRequest | PlainMessage<QueryDenomTraceRequest> | undefined, b: QueryDenomTraceRequest | PlainMessage<QueryDenomTraceRequest> | undefined): boolean {
-    return proto3.util.equals(QueryDenomTraceRequest, a, b);
-  }
-}
-
-/**
- * QueryDenomTraceResponse is the response type for the Query/DenomTrace RPC
- * method.
- *
- * @generated from message ibc.applications.transfer.v1.QueryDenomTraceResponse
- */
-export class QueryDenomTraceResponse extends Message<QueryDenomTraceResponse> {
-  /**
-   * denom_trace returns the requested denomination trace information.
-   *
-   * @generated from field: ibc.applications.transfer.v1.DenomTrace denom_trace = 1;
-   */
-  denomTrace?: DenomTrace;
-
-  constructor(data?: PartialMessage<QueryDenomTraceResponse>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.applications.transfer.v1.QueryDenomTraceResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "denom_trace", kind: "message", T: DenomTrace },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDenomTraceResponse {
-    return new QueryDenomTraceResponse().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryDenomTraceResponse {
-    return new QueryDenomTraceResponse().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryDenomTraceResponse {
-    return new QueryDenomTraceResponse().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: QueryDenomTraceResponse | PlainMessage<QueryDenomTraceResponse> | undefined, b: QueryDenomTraceResponse | PlainMessage<QueryDenomTraceResponse> | undefined): boolean {
-    return proto3.util.equals(QueryDenomTraceResponse, a, b);
-  }
-}
-
-/**
- * QueryConnectionsRequest is the request type for the Query/DenomTraces RPC
- * method
- *
- * @generated from message ibc.applications.transfer.v1.QueryDenomTracesRequest
- */
-export class QueryDenomTracesRequest extends Message<QueryDenomTracesRequest> {
-  /**
-   * pagination defines an optional pagination for the request.
-   *
-   * @generated from field: cosmos.base.query.v1beta1.PageRequest pagination = 1;
-   */
-  pagination?: PageRequest;
-
-  constructor(data?: PartialMessage<QueryDenomTracesRequest>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.applications.transfer.v1.QueryDenomTracesRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "pagination", kind: "message", T: PageRequest },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDenomTracesRequest {
-    return new QueryDenomTracesRequest().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryDenomTracesRequest {
-    return new QueryDenomTracesRequest().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryDenomTracesRequest {
-    return new QueryDenomTracesRequest().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: QueryDenomTracesRequest | PlainMessage<QueryDenomTracesRequest> | undefined, b: QueryDenomTracesRequest | PlainMessage<QueryDenomTracesRequest> | undefined): boolean {
-    return proto3.util.equals(QueryDenomTracesRequest, a, b);
-  }
-}
-
-/**
- * QueryConnectionsResponse is the response type for the Query/DenomTraces RPC
- * method.
- *
- * @generated from message ibc.applications.transfer.v1.QueryDenomTracesResponse
- */
-export class QueryDenomTracesResponse extends Message<QueryDenomTracesResponse> {
-  /**
-   * denom_traces returns all denominations trace information.
-   *
-   * @generated from field: repeated ibc.applications.transfer.v1.DenomTrace denom_traces = 1;
-   */
-  denomTraces: DenomTrace[] = [];
-
-  /**
-   * pagination defines the pagination in the response.
-   *
-   * @generated from field: cosmos.base.query.v1beta1.PageResponse pagination = 2;
-   */
-  pagination?: PageResponse;
-
-  constructor(data?: PartialMessage<QueryDenomTracesResponse>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "ibc.applications.transfer.v1.QueryDenomTracesResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "denom_traces", kind: "message", T: DenomTrace, repeated: true },
-    { no: 2, name: "pagination", kind: "message", T: PageResponse },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDenomTracesResponse {
-    return new QueryDenomTracesResponse().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryDenomTracesResponse {
-    return new QueryDenomTracesResponse().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryDenomTracesResponse {
-    return new QueryDenomTracesResponse().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: QueryDenomTracesResponse | PlainMessage<QueryDenomTracesResponse> | undefined, b: QueryDenomTracesResponse | PlainMessage<QueryDenomTracesResponse> | undefined): boolean {
-    return proto3.util.equals(QueryDenomTracesResponse, a, b);
-  }
-}
 
 /**
  * QueryParamsRequest is the request type for the Query/Params RPC method.
@@ -256,6 +81,182 @@ export class QueryParamsResponse extends Message<QueryParamsResponse> {
 
   static equals(a: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined, b: QueryParamsResponse | PlainMessage<QueryParamsResponse> | undefined): boolean {
     return proto3.util.equals(QueryParamsResponse, a, b);
+  }
+}
+
+/**
+ * QueryDenomRequest is the request type for the Query/Denom RPC
+ * method
+ *
+ * @generated from message ibc.applications.transfer.v1.QueryDenomRequest
+ */
+export class QueryDenomRequest extends Message<QueryDenomRequest> {
+  /**
+   * hash (in hex format) or denom (full denom with ibc prefix) of the on chain denomination.
+   *
+   * @generated from field: string hash = 1;
+   */
+  hash = "";
+
+  constructor(data?: PartialMessage<QueryDenomRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "ibc.applications.transfer.v1.QueryDenomRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "hash", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDenomRequest {
+    return new QueryDenomRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryDenomRequest {
+    return new QueryDenomRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryDenomRequest {
+    return new QueryDenomRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryDenomRequest | PlainMessage<QueryDenomRequest> | undefined, b: QueryDenomRequest | PlainMessage<QueryDenomRequest> | undefined): boolean {
+    return proto3.util.equals(QueryDenomRequest, a, b);
+  }
+}
+
+/**
+ * QueryDenomResponse is the response type for the Query/Denom RPC
+ * method.
+ *
+ * @generated from message ibc.applications.transfer.v1.QueryDenomResponse
+ */
+export class QueryDenomResponse extends Message<QueryDenomResponse> {
+  /**
+   * denom returns the requested denomination.
+   *
+   * @generated from field: ibc.applications.transfer.v1.Denom denom = 1;
+   */
+  denom?: Denom;
+
+  constructor(data?: PartialMessage<QueryDenomResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "ibc.applications.transfer.v1.QueryDenomResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "denom", kind: "message", T: Denom },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDenomResponse {
+    return new QueryDenomResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryDenomResponse {
+    return new QueryDenomResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryDenomResponse {
+    return new QueryDenomResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryDenomResponse | PlainMessage<QueryDenomResponse> | undefined, b: QueryDenomResponse | PlainMessage<QueryDenomResponse> | undefined): boolean {
+    return proto3.util.equals(QueryDenomResponse, a, b);
+  }
+}
+
+/**
+ * QueryDenomsRequest is the request type for the Query/Denoms RPC
+ * method
+ *
+ * @generated from message ibc.applications.transfer.v1.QueryDenomsRequest
+ */
+export class QueryDenomsRequest extends Message<QueryDenomsRequest> {
+  /**
+   * pagination defines an optional pagination for the request.
+   *
+   * @generated from field: cosmos.base.query.v1beta1.PageRequest pagination = 1;
+   */
+  pagination?: PageRequest;
+
+  constructor(data?: PartialMessage<QueryDenomsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "ibc.applications.transfer.v1.QueryDenomsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "pagination", kind: "message", T: PageRequest },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDenomsRequest {
+    return new QueryDenomsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryDenomsRequest {
+    return new QueryDenomsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryDenomsRequest {
+    return new QueryDenomsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryDenomsRequest | PlainMessage<QueryDenomsRequest> | undefined, b: QueryDenomsRequest | PlainMessage<QueryDenomsRequest> | undefined): boolean {
+    return proto3.util.equals(QueryDenomsRequest, a, b);
+  }
+}
+
+/**
+ * QueryDenomsResponse is the response type for the Query/Denoms RPC
+ * method.
+ *
+ * @generated from message ibc.applications.transfer.v1.QueryDenomsResponse
+ */
+export class QueryDenomsResponse extends Message<QueryDenomsResponse> {
+  /**
+   * denoms returns all denominations.
+   *
+   * @generated from field: repeated ibc.applications.transfer.v1.Denom denoms = 1;
+   */
+  denoms: Denom[] = [];
+
+  /**
+   * pagination defines the pagination in the response.
+   *
+   * @generated from field: cosmos.base.query.v1beta1.PageResponse pagination = 2;
+   */
+  pagination?: PageResponse;
+
+  constructor(data?: PartialMessage<QueryDenomsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "ibc.applications.transfer.v1.QueryDenomsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "denoms", kind: "message", T: Denom, repeated: true },
+    { no: 2, name: "pagination", kind: "message", T: PageResponse },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDenomsResponse {
+    return new QueryDenomsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryDenomsResponse {
+    return new QueryDenomsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryDenomsResponse {
+    return new QueryDenomsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryDenomsResponse | PlainMessage<QueryDenomsResponse> | undefined, b: QueryDenomsResponse | PlainMessage<QueryDenomsResponse> | undefined): boolean {
+    return proto3.util.equals(QueryDenomsResponse, a, b);
   }
 }
 
