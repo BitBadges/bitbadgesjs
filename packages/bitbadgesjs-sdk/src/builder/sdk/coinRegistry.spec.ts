@@ -49,7 +49,7 @@ describe('coinRegistry', () => {
     // constants — an edit to USDC_DENOM / USDC_NOBLE_DENOM themselves must
     // fail here too, in BOTH registries (builder and common/constants).
     it('never drops either USDC denom string from either registry (additive contract)', () => {
-      const CANONICAL = 'ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB';
+      const CANONICAL = 'ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8';
       const LEGACY = 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349';
       for (const registry of [MAINNET_COINS_REGISTRY, SDK_COINS_REGISTRY]) {
         expect(Object.keys(registry)).toEqual(expect.arrayContaining([CANONICAL, LEGACY]));
@@ -69,9 +69,17 @@ describe('coinRegistry', () => {
     it('gives the legacy route its own symbol so it is never mistaken for USDC', () => {
       const legacy = lookupTokenInfo(USDC_NOBLE_DENOM);
       expect(legacy).not.toBeNull();
-      expect(legacy!.symbol).toBe('USDC.NOBLE'); // the map upper-cases symbols
-      expect(legacy!.displayName).toBe('USDC.noble'); // what a user actually sees
+      // USDC.n is Skip Go's ecosystem-wide name for the Noble voucher,
+      // including Skip's own bitbadges-1 registry entry.
+      expect(legacy!.symbol).toBe('USDC.N'); // the map upper-cases symbols
+      expect(legacy!.displayName).toBe('USDC.n'); // what a user actually sees
+      expect(resolveIbcDenom('USDC.n')).toBe(USDC_NOBLE_DENOM);
+    });
+
+    it('keeps the pre-release "USDC.noble" spelling as an accepted input alias', () => {
+      // Displayed/emitted everywhere as USDC.n; typed input stays forgiving.
       expect(resolveIbcDenom('USDC.noble')).toBe(USDC_NOBLE_DENOM);
+      expect(lookupTokenInfo('USDC.noble')!.symbol).toBe('USDC.N');
     });
 
     // The deprecation copy is rendered verbatim to holders in the wallet UI,
@@ -148,14 +156,14 @@ describe('coinRegistry', () => {
     });
 
     it('finds a token by exact IBC denom', () => {
-      const denom = 'ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB';
+      const denom = 'ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8';
       const result = lookupTokenInfo(denom);
       expect(result).not.toBeNull();
       expect(result!.symbol).toBe('USDC');
     });
 
     it('IBC-denom lookup is case-insensitive on the hex portion', () => {
-      const lower = lookupTokenInfo('ibc/0e485657aef4c39d551e7d53463734e4c445a96e6c814dc4c2ff0031470b40bb');
+      const lower = lookupTokenInfo('ibc/e1116484b327aee59cdc3da73d319834781a13db2a7dfc1f38a30cd45abf58b8');
       expect(lower).not.toBeNull();
       expect(lower!.symbol).toBe('USDC');
     });
@@ -217,7 +225,7 @@ describe('coinRegistry', () => {
     });
 
     it('returns details for a known IBC denom', () => {
-      const d = getCoinDetails('ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB');
+      const d = getCoinDetails('ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8');
       expect(d).not.toBeNull();
       expect(d!.symbol).toBe('USDC');
     });

@@ -3,7 +3,7 @@
  * @module core/builders/shared
  */
 import crypto from 'crypto';
-import { MAINNET_COINS_REGISTRY, type CoinDetails } from '../../common/constants.js';
+import { MAINNET_COINS_REGISTRY, SYMBOL_INPUT_ALIASES, type CoinDetails } from '../../common/constants.js';
 import { generateAliasAddressForIBCBackedDenom } from '../aliases.js';
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -49,6 +49,14 @@ export function resolveCoin(symbolOrDenom: string): ResolvedCoin {
     if (details.symbol.toUpperCase() === upper) {
       return { denom: details.baseDenom, symbol: details.symbol, decimals: Number(details.decimals), image: details.image };
     }
+  }
+
+  // Accepted typed-input aliases (e.g. the pre-release "USDC.noble"
+  // spelling of USDC.n) resolve for forgiveness; the returned symbol is
+  // always the registry's, never the alias.
+  const aliased = SYMBOL_INPUT_ALIASES[upper] && registry[SYMBOL_INPUT_ALIASES[upper]];
+  if (aliased) {
+    return { denom: aliased.baseDenom, symbol: aliased.symbol, decimals: Number(aliased.decimals), image: aliased.image };
   }
 
   // Cosmos micro-denom convention ("uatom"/"uusdc"/"uosmo"): on BitBadges

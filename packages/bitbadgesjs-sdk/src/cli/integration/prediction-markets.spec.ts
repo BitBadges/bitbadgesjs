@@ -34,7 +34,7 @@ import { deployMsgViaKeyring, fundPersona, waitForIndexerCollection, writeMsgToT
 // The IBC USDC denom on local chain — matches the denom resolveCoin('USDC')
 // produces inside the prediction-market builder. Buy/sell intents must use
 // the same denom as the on-chain depositDenom.
-const USDC_DENOM = 'ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB';
+const USDC_DENOM = 'ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8';
 
 describe('prediction-markets integration', () => {
   let ready = false;

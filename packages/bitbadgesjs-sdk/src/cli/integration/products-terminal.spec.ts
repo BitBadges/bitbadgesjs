@@ -24,7 +24,7 @@ import {
   getBankBalance, pollBalance, pollTokenAmount
 } from './harness/chain.js';
 
-const USDC = 'ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB';
+const USDC = 'ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8';
 const U = 1_000_000n; // 1 USDC, 6-dec
 const BURN = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
 // price - 5% tolerates rounding/decimals without being flaky on exact base units

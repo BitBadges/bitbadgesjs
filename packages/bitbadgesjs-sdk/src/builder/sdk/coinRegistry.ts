@@ -3,7 +3,7 @@
  * Contains IBC denoms, symbols, decimals, and generates backing addresses
  */
 
-import { USDC_DENOM, USDC_NOBLE_DENOM } from '../../common/constants.js';
+import { SYMBOL_INPUT_ALIASES, USDC_DENOM, USDC_NOBLE_DENOM } from '../../common/constants.js';
 import { generateAliasAddressForIBCBackedDenom } from './addressGenerator.js';
 
 /**
@@ -70,8 +70,9 @@ export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
     image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true'
   },
   [USDC_NOBLE_DENOM]: {
-    label: 'USDC.noble',
-    symbol: 'USDC.noble',
+    // `USDC.n` matches Skip Go's ecosystem-wide name for the Noble voucher.
+    label: 'USDC.n',
+    symbol: 'USDC.n',
     decimals: '6',
     baseDenom: USDC_NOBLE_DENOM,
     image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true',
@@ -160,8 +161,13 @@ export function lookupTokenInfo(query: string): TokenInfo | null {
     return tokenMap.get(upperQuery)!;
   }
 
+  // Accepted typed-input aliases (e.g. the pre-release "USDC.noble"
+  // spelling) resolve to their denom's entry; output uses the registry
+  // symbol, never the alias.
+  const aliasedDenom = SYMBOL_INPUT_ALIASES[upperQuery];
+
   // Try IBC denom lookup
-  const lowerQuery = query.toLowerCase();
+  const lowerQuery = (aliasedDenom ?? query).toLowerCase();
   for (const tokenInfo of tokenMap.values()) {
     if (tokenInfo.ibcDenom.toLowerCase() === lowerQuery) {
       return tokenInfo;

@@ -36,7 +36,7 @@ export const generateBackingAddressTool = {
     properties: {
       ibcDenom: {
         type: 'string',
-        description: 'Full IBC denom (e.g., "ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB") or token symbol (e.g., "USDC", "ATOM")'
+        description: 'Full IBC denom (e.g., "ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8") or token symbol (e.g., "USDC", "ATOM")'
       }
     },
     required: ['ibcDenom']

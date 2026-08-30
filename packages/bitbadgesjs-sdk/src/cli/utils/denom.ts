@@ -22,7 +22,7 @@
  * registry stays the single source of truth.
  */
 import { resolveCoin } from '../../core/builders/shared.js';
-import { MAINNET_COINS_REGISTRY } from '../../common/constants.js';
+import { MAINNET_COINS_REGISTRY, SYMBOL_INPUT_ALIASES } from '../../common/constants.js';
 import { bbError, BBErrorCode } from './envelope.js';
 
 /**
@@ -79,6 +79,13 @@ export function requireBbDenom(input: string, ctx: string): string {
     if (details.symbol.toUpperCase() === upper) {
       return details.baseDenom;
     }
+  }
+
+  // Accepted typed-input aliases (e.g. the pre-release "USDC.noble"
+  // spelling of USDC.n) resolve for forgiveness; output is always the
+  // registry's canonical denom.
+  if (SYMBOL_INPUT_ALIASES[upper]) {
+    return SYMBOL_INPUT_ALIASES[upper];
   }
 
   // Accept canonical forms even if not in the registry yet.

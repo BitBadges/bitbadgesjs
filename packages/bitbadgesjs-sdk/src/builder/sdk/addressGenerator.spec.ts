@@ -96,7 +96,7 @@ describe('addressGenerator', () => {
 
   describe('generateAliasAddressForIBCBackedDenom', () => {
     it('is deterministic for the same IBC denom', () => {
-      const denom = 'ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB';
+      const denom = 'ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8';
       expect(generateAliasAddressForIBCBackedDenom(denom))
         .toBe(generateAliasAddressForIBCBackedDenom(denom));
     });
@@ -153,7 +153,7 @@ describe('addressGenerator', () => {
         'bb1a7m8394e8u98w8uwle49dds8caexmcvqwgcadtp264gvt28uygmsdlgm0a'
       );
       expect(generateAliasAddressForIBCBackedDenom(USDC_DENOM)).toBe(
-        'bb18edxay8wcxt0wnf950uakxykw3h3m9puhdmv548qtj84vt0uxkjq243j5n'
+        'bb1xx5h3l85tnxgj07vef2cjtqzpg2qc9jt52z2q0lptjasajez3cgs5hklra'
       );
     });
   });

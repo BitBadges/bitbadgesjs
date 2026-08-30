@@ -132,34 +132,53 @@ export interface CoinDetails {
 }
 
 /**
- * Canonical USDC on BitBadges, routed through Injective.
+ * Canonical USDC on BitBadges: Circle's native USDC on Injective (CCTP-enabled),
+ * carried one IBC hop over the existing BitBadges <-> Injective channel.
  *
  * IBC denoms hash the *full* route, so the same underlying asset reaching the
  * chain by a different path is a different denom. That is why USDC appears
  * twice in this file.
  *
- *   trace: transfer/channel-40/transfer/channel-148/uusdc
- *          channel-40  BitBadges -> Injective
- *          channel-148 Injective -> Noble
+ *   trace: transfer/channel-40/erc20:0xa00C59fF5a080D2b954d0c75e46E22a0c371235a
+ *          channel-40 is BitBadges -> Injective; the erc20:0x... segment is
+ *          Injective's bank denom for Circle native USDC, checksummed exactly
+ *          as Injective's bank module spells it — the IBC hash is
+ *          case-sensitive.
  *
  * @category Coins Registry
  */
-export const USDC_DENOM = 'ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB';
+export const USDC_DENOM = 'ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8';
 
 /**
- * Legacy Noble-direct USDC, displayed as `USDC.noble`.
+ * Legacy Noble-direct USDC, displayed as `USDC.n` — Skip Go's ecosystem-wide
+ * name for the Noble voucher, including Skip's own bitbadges-1 registry entry.
  *
  *   trace: transfer/channel-2/uusdc
  *
  * Deprecated for new activity but fully supported, and where all circulating
  * USDC on BitBadges lives today: collections that declared a backed path
  * against it cannot be repointed, because the backed-path escrow address is
- * derived from the denom string itself. Balances stay spendable. They are not
- * convertible to {@link USDC_DENOM} yet — that route has no liquidity.
+ * derived from the denom string itself. Balances stay spendable. There is no
+ * in-place migration to {@link USDC_DENOM}: reaching canonical USDC means
+ * exiting to Noble and swapping/CCTP-ing into native USDC on Injective, then
+ * one IBC hop in — not IBC forwarding.
  *
  * @category Coins Registry
  */
 export const USDC_NOBLE_DENOM = 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349';
+
+/**
+ * Accepted typed-input aliases for registry symbols (upper-cased alias →
+ * denom). Everything displayed or emitted uses the registry symbol; these
+ * exist only so older spellings keep resolving. `USDC.noble` was the
+ * pre-release name for {@link USDC_NOBLE_DENOM} before it was renamed to
+ * `USDC.n` to match Skip Go.
+ *
+ * @category Coins Registry
+ */
+export const SYMBOL_INPUT_ALIASES: Record<string, string> = {
+  'USDC.NOBLE': USDC_NOBLE_DENOM
+};
 
 /**
  * Base coins registry containing common coins available across all networks.
@@ -202,12 +221,13 @@ export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
     image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true'
   },
   [USDC_NOBLE_DENOM]: {
-    // Still Skip-supported so the swap out of the legacy denom works the day
-    // the canonical Injective route carries liquidity. It carries none today,
-    // so there is no conversion to perform yet.
+    // Still Skip-supported so the swap out of the legacy denom works once
+    // canonical USDC circulates on BitBadges. It has zero supply here today,
+    // so there is no conversion to perform yet. `USDC.n` matches Skip Go's
+    // ecosystem-wide name for the Noble voucher.
     skipGoSupported: true,
-    label: 'USDC.noble',
-    symbol: 'USDC.noble',
+    label: 'USDC.n',
+    symbol: 'USDC.n',
     decimals: '6',
     baseDenom: USDC_NOBLE_DENOM,
     image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true',
