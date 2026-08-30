@@ -11,8 +11,6 @@ import { BaseAccount, Params } from "./auth_pb.js";
 /**
  * QueryAccountsRequest is the request type for the Query/Accounts RPC method.
  *
- * Since: cosmos-sdk 0.43
- *
  * @generated from message cosmos.auth.v1beta1.QueryAccountsRequest
  */
 export class QueryAccountsRequest extends Message<QueryAccountsRequest> {
@@ -53,8 +51,6 @@ export class QueryAccountsRequest extends Message<QueryAccountsRequest> {
 
 /**
  * QueryAccountsResponse is the response type for the Query/Accounts RPC method.
- *
- * Since: cosmos-sdk 0.43
  *
  * @generated from message cosmos.auth.v1beta1.QueryAccountsResponse
  */
@@ -261,8 +257,6 @@ export class QueryParamsResponse extends Message<QueryParamsResponse> {
 /**
  * QueryModuleAccountsRequest is the request type for the Query/ModuleAccounts RPC method.
  *
- * Since: cosmos-sdk 0.46
- *
  * @generated from message cosmos.auth.v1beta1.QueryModuleAccountsRequest
  */
 export class QueryModuleAccountsRequest extends Message<QueryModuleAccountsRequest> {
@@ -295,8 +289,6 @@ export class QueryModuleAccountsRequest extends Message<QueryModuleAccountsReque
 
 /**
  * QueryModuleAccountsResponse is the response type for the Query/ModuleAccounts RPC method.
- *
- * Since: cosmos-sdk 0.46
  *
  * @generated from message cosmos.auth.v1beta1.QueryModuleAccountsResponse
  */
@@ -415,8 +407,6 @@ export class QueryModuleAccountByNameResponse extends Message<QueryModuleAccount
 /**
  * Bech32PrefixRequest is the request type for Bech32Prefix rpc method.
  *
- * Since: cosmos-sdk 0.46
- *
  * @generated from message cosmos.auth.v1beta1.Bech32PrefixRequest
  */
 export class Bech32PrefixRequest extends Message<Bech32PrefixRequest> {
@@ -449,8 +439,6 @@ export class Bech32PrefixRequest extends Message<Bech32PrefixRequest> {
 
 /**
  * Bech32PrefixResponse is the response type for Bech32Prefix rpc method.
- *
- * Since: cosmos-sdk 0.46
  *
  * @generated from message cosmos.auth.v1beta1.Bech32PrefixResponse
  */
@@ -491,8 +479,6 @@ export class Bech32PrefixResponse extends Message<Bech32PrefixResponse> {
 /**
  * AddressBytesToStringRequest is the request type for AddressString rpc method.
  *
- * Since: cosmos-sdk 0.46
- *
  * @generated from message cosmos.auth.v1beta1.AddressBytesToStringRequest
  */
 export class AddressBytesToStringRequest extends Message<AddressBytesToStringRequest> {
@@ -531,8 +517,6 @@ export class AddressBytesToStringRequest extends Message<AddressBytesToStringReq
 
 /**
  * AddressBytesToStringResponse is the response type for AddressString rpc method.
- *
- * Since: cosmos-sdk 0.46
  *
  * @generated from message cosmos.auth.v1beta1.AddressBytesToStringResponse
  */
@@ -573,8 +557,6 @@ export class AddressBytesToStringResponse extends Message<AddressBytesToStringRe
 /**
  * AddressStringToBytesRequest is the request type for AccountBytes rpc method.
  *
- * Since: cosmos-sdk 0.46
- *
  * @generated from message cosmos.auth.v1beta1.AddressStringToBytesRequest
  */
 export class AddressStringToBytesRequest extends Message<AddressStringToBytesRequest> {
@@ -613,8 +595,6 @@ export class AddressStringToBytesRequest extends Message<AddressStringToBytesReq
 
 /**
  * AddressStringToBytesResponse is the response type for AddressBytes rpc method.
- *
- * Since: cosmos-sdk 0.46
  *
  * @generated from message cosmos.auth.v1beta1.AddressStringToBytesResponse
  */
@@ -655,8 +635,6 @@ export class AddressStringToBytesResponse extends Message<AddressStringToBytesRe
 /**
  * QueryAccountAddressByIDRequest is the request type for AccountAddressByID rpc method
  *
- * Since: cosmos-sdk 0.46.2
- *
  * @generated from message cosmos.auth.v1beta1.QueryAccountAddressByIDRequest
  */
 export class QueryAccountAddressByIDRequest extends Message<QueryAccountAddressByIDRequest> {
@@ -674,8 +652,6 @@ export class QueryAccountAddressByIDRequest extends Message<QueryAccountAddressB
 
   /**
    * account_id is the account number of the address to be queried.
-   *
-   * Since: cosmos-sdk 0.47
    *
    * @generated from field: uint64 account_id = 2;
    */
@@ -712,8 +688,6 @@ export class QueryAccountAddressByIDRequest extends Message<QueryAccountAddressB
 
 /**
  * QueryAccountAddressByIDResponse is the response type for AccountAddressByID rpc method
- *
- * Since: cosmos-sdk 0.46.2
  *
  * @generated from message cosmos.auth.v1beta1.QueryAccountAddressByIDResponse
  */
@@ -753,8 +727,6 @@ export class QueryAccountAddressByIDResponse extends Message<QueryAccountAddress
 
 /**
  * QueryAccountInfoRequest is the Query/AccountInfo request type.
- *
- * Since: cosmos-sdk 0.47
  *
  * @generated from message cosmos.auth.v1beta1.QueryAccountInfoRequest
  */
@@ -796,8 +768,6 @@ export class QueryAccountInfoRequest extends Message<QueryAccountInfoRequest> {
 
 /**
  * QueryAccountInfoResponse is the Query/AccountInfo response type.
- *
- * Since: cosmos-sdk 0.47
  *
  * @generated from message cosmos.auth.v1beta1.QueryAccountInfoResponse
  */

@@ -57,8 +57,6 @@ export class PageRequest extends Message<PageRequest> {
   /**
    * reverse is set to true if results are to be returned in the descending order.
    *
-   * Since: cosmos-sdk 0.43
-   *
    * @generated from field: bool reverse = 5;
    */
   reverse = false;

@@ -111,8 +111,6 @@ export class MsgCreateVestingAccountResponse extends Message<MsgCreateVestingAcc
  * MsgCreatePermanentLockedAccount defines a message that enables creating a permanent
  * locked account.
  *
- * Since: cosmos-sdk 0.46
- *
  * @generated from message cosmos.vesting.v1beta1.MsgCreatePermanentLockedAccount
  */
 export class MsgCreatePermanentLockedAccount extends Message<MsgCreatePermanentLockedAccount> {
@@ -164,8 +162,6 @@ export class MsgCreatePermanentLockedAccount extends Message<MsgCreatePermanentL
 /**
  * MsgCreatePermanentLockedAccountResponse defines the Msg/CreatePermanentLockedAccount response type.
  *
- * Since: cosmos-sdk 0.46
- *
  * @generated from message cosmos.vesting.v1beta1.MsgCreatePermanentLockedAccountResponse
  */
 export class MsgCreatePermanentLockedAccountResponse extends Message<MsgCreatePermanentLockedAccountResponse> {
@@ -199,8 +195,6 @@ export class MsgCreatePermanentLockedAccountResponse extends Message<MsgCreatePe
 /**
  * MsgCreateVestingAccount defines a message that enables creating a vesting
  * account.
- *
- * Since: cosmos-sdk 0.46
  *
  * @generated from message cosmos.vesting.v1beta1.MsgCreatePeriodicVestingAccount
  */
@@ -261,8 +255,6 @@ export class MsgCreatePeriodicVestingAccount extends Message<MsgCreatePeriodicVe
 /**
  * MsgCreateVestingAccountResponse defines the Msg/CreatePeriodicVestingAccount
  * response type.
- *
- * Since: cosmos-sdk 0.46
  *
  * @generated from message cosmos.vesting.v1beta1.MsgCreatePeriodicVestingAccountResponse
  */

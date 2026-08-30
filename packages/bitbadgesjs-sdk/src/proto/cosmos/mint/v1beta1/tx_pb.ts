@@ -10,8 +10,6 @@ import { Params } from "./mint_pb.js";
 /**
  * MsgUpdateParams is the Msg/UpdateParams request type.
  *
- * Since: cosmos-sdk 0.47
- *
  * @generated from message cosmos.mint.v1beta1.MsgUpdateParams
  */
 export class MsgUpdateParams extends Message<MsgUpdateParams> {
@@ -63,8 +61,6 @@ export class MsgUpdateParams extends Message<MsgUpdateParams> {
 /**
  * MsgUpdateParamsResponse defines the response structure for executing a
  * MsgUpdateParams message.
- *
- * Since: cosmos-sdk 0.47
  *
  * @generated from message cosmos.mint.v1beta1.MsgUpdateParamsResponse
  */

@@ -10,8 +10,6 @@ import { Coin } from "../../base/v1beta1/coin_pb.js";
 /**
  * AuthorizationType defines the type of staking module authorization type
  *
- * Since: cosmos-sdk 0.43
- *
  * @generated from enum cosmos.staking.v1beta1.AuthorizationType
  */
 export enum AuthorizationType {
@@ -42,6 +40,13 @@ export enum AuthorizationType {
    * @generated from enum value: AUTHORIZATION_TYPE_REDELEGATE = 3;
    */
   REDELEGATE = 3,
+
+  /**
+   * AUTHORIZATION_TYPE_CANCEL_UNBONDING_DELEGATION defines an authorization type for Msg/MsgCancelUnbondingDelegation
+   *
+   * @generated from enum value: AUTHORIZATION_TYPE_CANCEL_UNBONDING_DELEGATION = 4;
+   */
+  CANCEL_UNBONDING_DELEGATION = 4,
 }
 // Retrieve enum metadata with: proto3.getEnumType(AuthorizationType)
 proto3.util.setEnumType(AuthorizationType, "cosmos.staking.v1beta1.AuthorizationType", [
@@ -49,12 +54,11 @@ proto3.util.setEnumType(AuthorizationType, "cosmos.staking.v1beta1.Authorization
   { no: 1, name: "AUTHORIZATION_TYPE_DELEGATE" },
   { no: 2, name: "AUTHORIZATION_TYPE_UNDELEGATE" },
   { no: 3, name: "AUTHORIZATION_TYPE_REDELEGATE" },
+  { no: 4, name: "AUTHORIZATION_TYPE_CANCEL_UNBONDING_DELEGATION" },
 ]);
 
 /**
  * StakeAuthorization defines authorization for delegate/undelegate/redelegate.
- *
- * Since: cosmos-sdk 0.43
  *
  * @generated from message cosmos.staking.v1beta1.StakeAuthorization
  */

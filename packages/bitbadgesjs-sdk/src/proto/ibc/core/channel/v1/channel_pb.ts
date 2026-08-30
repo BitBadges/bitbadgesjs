@@ -9,7 +9,7 @@ import { Height } from "../../client/v1/client_pb.js";
 
 /**
  * State defines if a channel is in one of the following states:
- * CLOSED, INIT, TRYOPEN, OPEN or UNINITIALIZED.
+ * CLOSED, INIT, TRYOPEN, OPEN, or UNINITIALIZED.
  *
  * @generated from enum ibc.core.channel.v1.State
  */
@@ -479,7 +479,7 @@ export class PacketState extends Message<PacketState> {
 }
 
 /**
- * PacketId is an identifer for a unique Packet
+ * PacketId is an identifier for a unique Packet
  * Source chains refer to packets by source port/channel
  * Destination chains refer to packets by destination port/channel
  *
@@ -599,21 +599,21 @@ export class Acknowledgement extends Message<Acknowledgement> {
 
 /**
  * Timeout defines an execution deadline structure for 04-channel handlers.
- * This includes packet lifecycle handlers as well as the upgrade handshake handlers.
+ * This includes packet lifecycle handlers.
  * A valid Timeout contains either one or both of a timestamp and block height (sequence).
  *
  * @generated from message ibc.core.channel.v1.Timeout
  */
 export class Timeout extends Message<Timeout> {
   /**
-   * block height after which the packet or upgrade times out
+   * block height after which the packet times out
    *
    * @generated from field: ibc.core.client.v1.Height height = 1;
    */
   height?: Height;
 
   /**
-   * block timestamp (in nanoseconds) after which the packet or upgrade times out
+   * block timestamp (in nanoseconds) after which the packet times out
    *
    * @generated from field: uint64 timestamp = 2;
    */

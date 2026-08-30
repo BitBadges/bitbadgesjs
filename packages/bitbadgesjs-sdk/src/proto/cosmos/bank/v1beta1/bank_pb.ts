@@ -336,8 +336,6 @@ export class Metadata extends Message<Metadata> {
   /**
    * name defines the name of the token (eg: Cosmos Atom)
    *
-   * Since: cosmos-sdk 0.43
-   *
    * @generated from field: string name = 5;
    */
   name = "";
@@ -346,16 +344,12 @@ export class Metadata extends Message<Metadata> {
    * symbol is the token symbol usually shown on exchanges (eg: ATOM). This can
    * be the same as the display.
    *
-   * Since: cosmos-sdk 0.43
-   *
    * @generated from field: string symbol = 6;
    */
   symbol = "";
 
   /**
    * URI to a document (on or off-chain) that contains additional information. Optional.
-   *
-   * Since: cosmos-sdk 0.46
    *
    * @generated from field: string uri = 7;
    */
@@ -364,8 +358,6 @@ export class Metadata extends Message<Metadata> {
   /**
    * URIHash is a sha256 hash of a document pointed by URI. It's used to verify that
    * the document didn't change. Optional.
-   *
-   * Since: cosmos-sdk 0.46
    *
    * @generated from field: string uri_hash = 8;
    */

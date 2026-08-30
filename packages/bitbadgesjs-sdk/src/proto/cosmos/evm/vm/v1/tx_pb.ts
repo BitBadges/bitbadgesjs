@@ -137,7 +137,8 @@ export class MsgEthereumTxResponse extends Message<MsgEthereumTxResponse> {
   gasUsed = protoInt64.zero;
 
   /**
-   * max_used_gas specifies the gas consumed by the transaction, not including refunds
+   * max_used_gas specifies the gas consumed by the transaction, not including
+   * refunds
    *
    * @generated from field: uint64 max_used_gas = 6;
    */

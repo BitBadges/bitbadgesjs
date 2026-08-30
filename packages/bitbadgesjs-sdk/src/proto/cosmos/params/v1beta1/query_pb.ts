@@ -101,8 +101,6 @@ export class QueryParamsResponse extends Message<QueryParamsResponse> {
  * QuerySubspacesRequest defines a request type for querying for all registered
  * subspaces and all keys for a subspace.
  *
- * Since: cosmos-sdk 0.46
- *
  * @generated from message cosmos.params.v1beta1.QuerySubspacesRequest
  */
 export class QuerySubspacesRequest extends Message<QuerySubspacesRequest> {
@@ -136,8 +134,6 @@ export class QuerySubspacesRequest extends Message<QuerySubspacesRequest> {
 /**
  * QuerySubspacesResponse defines the response types for querying for all
  * registered subspaces and all keys for a subspace.
- *
- * Since: cosmos-sdk 0.46
  *
  * @generated from message cosmos.params.v1beta1.QuerySubspacesResponse
  */
@@ -178,8 +174,6 @@ export class QuerySubspacesResponse extends Message<QuerySubspacesResponse> {
 /**
  * Subspace defines a parameter subspace name and all the keys that exist for
  * the subspace.
- *
- * Since: cosmos-sdk 0.46
  *
  * @generated from message cosmos.params.v1beta1.Subspace
  */

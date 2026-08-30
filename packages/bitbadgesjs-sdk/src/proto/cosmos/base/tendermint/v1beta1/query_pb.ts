@@ -10,6 +10,8 @@ import { BlockID } from "../../../../tendermint/types/types_pb.js";
 import { Block } from "../../../../tendermint/types/block_pb.js";
 import { Block as Block$1 } from "./types_pb.js";
 import { DefaultNodeInfo } from "../../../../tendermint/p2p/types_pb.js";
+import { Event, ExecTxResult, ValidatorUpdate } from "../../../../tendermint/abci/types_pb.js";
+import { ConsensusParams } from "../../../../tendermint/types/params_pb.js";
 
 /**
  * GetValidatorSetByHeightRequest is the request type for the Query/GetValidatorSetByHeight RPC method.
@@ -320,8 +322,6 @@ export class GetBlockByHeightResponse extends Message<GetBlockByHeightResponse> 
   block?: Block;
 
   /**
-   * Since: cosmos-sdk 0.47
-   *
    * @generated from field: cosmos.base.tendermint.v1beta1.Block sdk_block = 3;
    */
   sdkBlock?: Block$1;
@@ -408,8 +408,6 @@ export class GetLatestBlockResponse extends Message<GetLatestBlockResponse> {
   block?: Block;
 
   /**
-   * Since: cosmos-sdk 0.47
-   *
    * @generated from field: cosmos.base.tendermint.v1beta1.Block sdk_block = 3;
    */
   sdkBlock?: Block$1;
@@ -488,6 +486,20 @@ export class GetSyncingResponse extends Message<GetSyncingResponse> {
    */
   syncing = false;
 
+  /**
+   * earliest_block_height is the earliest block height available on this node.
+   *
+   * @generated from field: int64 earliest_block_height = 2;
+   */
+  earliestBlockHeight = protoInt64.zero;
+
+  /**
+   * latest_block_height is the latest block height available on this node.
+   *
+   * @generated from field: int64 latest_block_height = 3;
+   */
+  latestBlockHeight = protoInt64.zero;
+
   constructor(data?: PartialMessage<GetSyncingResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -497,6 +509,8 @@ export class GetSyncingResponse extends Message<GetSyncingResponse> {
   static readonly typeName = "cosmos.base.tendermint.v1beta1.GetSyncingResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "syncing", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: "earliest_block_height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 3, name: "latest_block_height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetSyncingResponse {
@@ -636,8 +650,6 @@ export class VersionInfo extends Message<VersionInfo> {
   buildDeps: Module[] = [];
 
   /**
-   * Since: cosmos-sdk 0.43
-   *
    * @generated from field: string cosmos_sdk_version = 8;
    */
   cosmosSdkVersion = "";
@@ -978,6 +990,242 @@ export class ProofOps extends Message<ProofOps> {
 
   static equals(a: ProofOps | PlainMessage<ProofOps> | undefined, b: ProofOps | PlainMessage<ProofOps> | undefined): boolean {
     return proto3.util.equals(ProofOps, a, b);
+  }
+}
+
+/**
+ * GetBlockResultsRequest is the request type for the Query/GetBlockResults RPC method.
+ *
+ * @generated from message cosmos.base.tendermint.v1beta1.GetBlockResultsRequest
+ */
+export class GetBlockResultsRequest extends Message<GetBlockResultsRequest> {
+  /**
+   * @generated from field: int64 height = 1;
+   */
+  height = protoInt64.zero;
+
+  constructor(data?: PartialMessage<GetBlockResultsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.base.tendermint.v1beta1.GetBlockResultsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetBlockResultsRequest {
+    return new GetBlockResultsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetBlockResultsRequest {
+    return new GetBlockResultsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetBlockResultsRequest {
+    return new GetBlockResultsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetBlockResultsRequest | PlainMessage<GetBlockResultsRequest> | undefined, b: GetBlockResultsRequest | PlainMessage<GetBlockResultsRequest> | undefined): boolean {
+    return proto3.util.equals(GetBlockResultsRequest, a, b);
+  }
+}
+
+/**
+ * GetLatestBlockResultsRequest is the request type for the Query/GetLatestBlockResults RPC method.
+ *
+ * @generated from message cosmos.base.tendermint.v1beta1.GetLatestBlockResultsRequest
+ */
+export class GetLatestBlockResultsRequest extends Message<GetLatestBlockResultsRequest> {
+  constructor(data?: PartialMessage<GetLatestBlockResultsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.base.tendermint.v1beta1.GetLatestBlockResultsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetLatestBlockResultsRequest {
+    return new GetLatestBlockResultsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetLatestBlockResultsRequest {
+    return new GetLatestBlockResultsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetLatestBlockResultsRequest {
+    return new GetLatestBlockResultsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetLatestBlockResultsRequest | PlainMessage<GetLatestBlockResultsRequest> | undefined, b: GetLatestBlockResultsRequest | PlainMessage<GetLatestBlockResultsRequest> | undefined): boolean {
+    return proto3.util.equals(GetLatestBlockResultsRequest, a, b);
+  }
+}
+
+/**
+ * GetBlockResultsResponse is the response type for the Query/GetBlockResults RPC method.
+ *
+ * @generated from message cosmos.base.tendermint.v1beta1.GetBlockResultsResponse
+ */
+export class GetBlockResultsResponse extends Message<GetBlockResultsResponse> {
+  /**
+   * height is the block height.
+   *
+   * @generated from field: int64 height = 1;
+   */
+  height = protoInt64.zero;
+
+  /**
+   * txs_results contains the results of each transaction execution.
+   *
+   * @generated from field: repeated tendermint.abci.ExecTxResult txs_results = 2;
+   */
+  txsResults: ExecTxResult[] = [];
+
+  /**
+   * finalize_block_events contains consensus-level events emitted during block
+   * finalization, including slashing, jailing, and validator set updates.
+   *
+   * @generated from field: repeated tendermint.abci.Event finalize_block_events = 3;
+   */
+  finalizeBlockEvents: Event[] = [];
+
+  /**
+   * validator_updates contains the validator updates for this block.
+   *
+   * @generated from field: repeated tendermint.abci.ValidatorUpdate validator_updates = 4;
+   */
+  validatorUpdates: ValidatorUpdate[] = [];
+
+  /**
+   * consensus_param_updates contains any consensus parameter updates for this block.
+   *
+   * @generated from field: tendermint.types.ConsensusParams consensus_param_updates = 5;
+   */
+  consensusParamUpdates?: ConsensusParams;
+
+  /**
+   * app_hash is the app hash after processing this block.
+   *
+   * @generated from field: bytes app_hash = 6;
+   */
+  appHash = new Uint8Array(0);
+
+  constructor(data?: PartialMessage<GetBlockResultsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.base.tendermint.v1beta1.GetBlockResultsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 2, name: "txs_results", kind: "message", T: ExecTxResult, repeated: true },
+    { no: 3, name: "finalize_block_events", kind: "message", T: Event, repeated: true },
+    { no: 4, name: "validator_updates", kind: "message", T: ValidatorUpdate, repeated: true },
+    { no: 5, name: "consensus_param_updates", kind: "message", T: ConsensusParams },
+    { no: 6, name: "app_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetBlockResultsResponse {
+    return new GetBlockResultsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetBlockResultsResponse {
+    return new GetBlockResultsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetBlockResultsResponse {
+    return new GetBlockResultsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetBlockResultsResponse | PlainMessage<GetBlockResultsResponse> | undefined, b: GetBlockResultsResponse | PlainMessage<GetBlockResultsResponse> | undefined): boolean {
+    return proto3.util.equals(GetBlockResultsResponse, a, b);
+  }
+}
+
+/**
+ * GetLatestBlockResultsResponse is the response type for the Query/GetLatestBlockResults RPC method.
+ *
+ * @generated from message cosmos.base.tendermint.v1beta1.GetLatestBlockResultsResponse
+ */
+export class GetLatestBlockResultsResponse extends Message<GetLatestBlockResultsResponse> {
+  /**
+   * height is the block height.
+   *
+   * @generated from field: int64 height = 1;
+   */
+  height = protoInt64.zero;
+
+  /**
+   * txs_results contains the results of each transaction execution.
+   *
+   * @generated from field: repeated tendermint.abci.ExecTxResult txs_results = 2;
+   */
+  txsResults: ExecTxResult[] = [];
+
+  /**
+   * finalize_block_events contains consensus-level events emitted during block
+   * finalization, including slashing, jailing, and validator set updates.
+   *
+   * @generated from field: repeated tendermint.abci.Event finalize_block_events = 3;
+   */
+  finalizeBlockEvents: Event[] = [];
+
+  /**
+   * validator_updates contains the validator updates for this block.
+   *
+   * @generated from field: repeated tendermint.abci.ValidatorUpdate validator_updates = 4;
+   */
+  validatorUpdates: ValidatorUpdate[] = [];
+
+  /**
+   * consensus_param_updates contains any consensus parameter updates for this block.
+   *
+   * @generated from field: tendermint.types.ConsensusParams consensus_param_updates = 5;
+   */
+  consensusParamUpdates?: ConsensusParams;
+
+  /**
+   * app_hash is the app hash after processing this block.
+   *
+   * @generated from field: bytes app_hash = 6;
+   */
+  appHash = new Uint8Array(0);
+
+  constructor(data?: PartialMessage<GetLatestBlockResultsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.base.tendermint.v1beta1.GetLatestBlockResultsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "height", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 2, name: "txs_results", kind: "message", T: ExecTxResult, repeated: true },
+    { no: 3, name: "finalize_block_events", kind: "message", T: Event, repeated: true },
+    { no: 4, name: "validator_updates", kind: "message", T: ValidatorUpdate, repeated: true },
+    { no: 5, name: "consensus_param_updates", kind: "message", T: ConsensusParams },
+    { no: 6, name: "app_hash", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetLatestBlockResultsResponse {
+    return new GetLatestBlockResultsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetLatestBlockResultsResponse {
+    return new GetLatestBlockResultsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetLatestBlockResultsResponse {
+    return new GetLatestBlockResultsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetLatestBlockResultsResponse | PlainMessage<GetLatestBlockResultsResponse> | undefined, b: GetLatestBlockResultsResponse | PlainMessage<GetLatestBlockResultsResponse> | undefined): boolean {
+    return proto3.util.equals(GetLatestBlockResultsResponse, a, b);
   }
 }
 

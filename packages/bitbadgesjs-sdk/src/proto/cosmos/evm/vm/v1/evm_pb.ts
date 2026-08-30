@@ -1058,7 +1058,11 @@ export class EvmCoinInfo extends Message<EvmCoinInfo> {
   displayDenom = "";
 
   /**
-   * @generated from field: uint32 decimals = 4;
+   * decimals is now deprecated and will be removed in a future release. When it
+   * is removed we will assume the evm token denom is 18 decimal precision.
+   *
+   * @generated from field: uint32 decimals = 4 [deprecated = true];
+   * @deprecated
    */
   decimals = 0;
 

@@ -200,8 +200,6 @@ export class MsgVoteResponse extends Message<MsgVoteResponse> {
 /**
  * MsgVoteWeighted defines a message to cast a vote.
  *
- * Since: cosmos-sdk 0.43
- *
  * @generated from message cosmos.gov.v1beta1.MsgVoteWeighted
  */
 export class MsgVoteWeighted extends Message<MsgVoteWeighted> {
@@ -220,7 +218,7 @@ export class MsgVoteWeighted extends Message<MsgVoteWeighted> {
   voter = "";
 
   /**
-   * options defines the weighted vote options. 
+   * options defines the weighted vote options.
    *
    * @generated from field: repeated cosmos.gov.v1beta1.WeightedVoteOption options = 3;
    */
@@ -258,8 +256,6 @@ export class MsgVoteWeighted extends Message<MsgVoteWeighted> {
 
 /**
  * MsgVoteWeightedResponse defines the Msg/VoteWeighted response type.
- *
- * Since: cosmos-sdk 0.43
  *
  * @generated from message cosmos.gov.v1beta1.MsgVoteWeightedResponse
  */

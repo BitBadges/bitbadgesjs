@@ -42,8 +42,9 @@ proto3.util.setEnumType(Owner, "cosmos.evm.erc20.v1.Owner", [
 ]);
 
 /**
- * TokenPair defines an instance that records a pairing (mapping) consisting of a native
- * Cosmos Coin and an ERC20 token address. The "pair" does not imply an asset swap exchange.
+ * TokenPair defines an instance that records a pairing (mapping) consisting of
+ * a native Cosmos Coin and an ERC20 token address. The "pair" does not imply an
+ * asset swap exchange.
  *
  * @generated from message cosmos.evm.erc20.v1.TokenPair
  */

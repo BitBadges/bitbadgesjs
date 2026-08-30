@@ -4,7 +4,7 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { FieldOptions, FileOptions, Message, MessageOptions, proto3 } from "@bufbuild/protobuf";
+import { FieldOptions, FileOptions, Message, MessageOptions, MethodOptions, proto3 } from "@bufbuild/protobuf";
 
 /**
  * @generated from enum cosmos_proto.ScalarType
@@ -158,6 +158,17 @@ export class ScalarDescriptor extends Message<ScalarDescriptor> {
 }
 
 /**
+ * method_added_in is used to indicate from which version the method was added.
+ *
+ * @generated from extension: string method_added_in = 93001;
+ */
+export const method_added_in = proto3.makeExtension<MethodOptions, string>(
+  "cosmos_proto.method_added_in", 
+  MethodOptions, 
+  { no: 93001, kind: "scalar", T: 9 /* ScalarType.STRING */ },
+);
+
+/**
  * implements_interface is used to indicate the type name of the interface
  * that a message implements so that it can be used in google.protobuf.Any
  * fields that accept that interface. A message can implement multiple
@@ -170,6 +181,17 @@ export const implements_interface = proto3.makeExtension<MessageOptions, string[
   "cosmos_proto.implements_interface", 
   MessageOptions, 
   { no: 93001, kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+);
+
+/**
+ * message_added_in is used to indicate from which version the message was added.
+ *
+ * @generated from extension: string message_added_in = 93002;
+ */
+export const message_added_in = proto3.makeExtension<MessageOptions, string>(
+  "cosmos_proto.message_added_in", 
+  MessageOptions, 
+  { no: 93002, kind: "scalar", T: 9 /* ScalarType.STRING */ },
 );
 
 /**
@@ -197,6 +219,17 @@ export const scalar = proto3.makeExtension<FieldOptions, string>(
   "cosmos_proto.scalar", 
   FieldOptions, 
   { no: 93002, kind: "scalar", T: 9 /* ScalarType.STRING */ },
+);
+
+/**
+ * field_added_in is used to indicate from which version the field was added.
+ *
+ * @generated from extension: string field_added_in = 93003;
+ */
+export const field_added_in = proto3.makeExtension<FieldOptions, string>(
+  "cosmos_proto.field_added_in", 
+  FieldOptions, 
+  { no: 93003, kind: "scalar", T: 9 /* ScalarType.STRING */ },
 );
 
 /**
@@ -229,5 +262,16 @@ export const declare_scalar = proto3.makeExtension<FileOptions, ScalarDescriptor
   "cosmos_proto.declare_scalar", 
   FileOptions, 
   () => ({ no: 793022, kind: "message", T: ScalarDescriptor, repeated: true }),
+);
+
+/**
+ * file_added_in is used to indicate from which the version the file was added.
+ *
+ * @generated from extension: string file_added_in = 793023;
+ */
+export const file_added_in = proto3.makeExtension<FileOptions, string>(
+  "cosmos_proto.file_added_in", 
+  FileOptions, 
+  { no: 793023, kind: "scalar", T: 9 /* ScalarType.STRING */ },
 );
 

@@ -209,8 +209,6 @@ export class CancelSoftwareUpgradeProposal extends Message<CancelSoftwareUpgrade
 /**
  * ModuleVersion specifies a module and its consensus version.
  *
- * Since: cosmos-sdk 0.43
- *
  * @generated from message cosmos.upgrade.v1beta1.ModuleVersion
  */
 export class ModuleVersion extends Message<ModuleVersion> {

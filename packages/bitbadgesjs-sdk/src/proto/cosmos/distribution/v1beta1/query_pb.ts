@@ -5,7 +5,7 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { DelegationDelegatorReward, Params, ValidatorAccumulatedCommission, ValidatorOutstandingRewards, ValidatorSlashEvent } from "./distribution_pb.js";
+import { DelegationDelegatorReward, DelegatorStartingInfo, Params, ValidatorAccumulatedCommission, ValidatorCurrentRewards, ValidatorHistoricalRewards, ValidatorOutstandingRewards, ValidatorSlashEvent } from "./distribution_pb.js";
 import { DecCoin } from "../../base/v1beta1/coin_pb.js";
 import { PageRequest, PageResponse } from "../../base/query/v1beta1/pagination_pb.js";
 
@@ -888,6 +888,274 @@ export class QueryCommunityPoolResponse extends Message<QueryCommunityPoolRespon
 
   static equals(a: QueryCommunityPoolResponse | PlainMessage<QueryCommunityPoolResponse> | undefined, b: QueryCommunityPoolResponse | PlainMessage<QueryCommunityPoolResponse> | undefined): boolean {
     return proto3.util.equals(QueryCommunityPoolResponse, a, b);
+  }
+}
+
+/**
+ * QueryValidatorHistoricalRewardsRequest is the request type for the
+ * Query/ValidatorHistoricalRewards RPC method.
+ *
+ * @generated from message cosmos.distribution.v1beta1.QueryValidatorHistoricalRewardsRequest
+ */
+export class QueryValidatorHistoricalRewardsRequest extends Message<QueryValidatorHistoricalRewardsRequest> {
+  /**
+   * validator_address defines the validator address to query for.
+   *
+   * @generated from field: string validator_address = 1;
+   */
+  validatorAddress = "";
+
+  /**
+   * period defines the period to query historical rewards for.
+   *
+   * @generated from field: uint64 period = 2;
+   */
+  period = protoInt64.zero;
+
+  constructor(data?: PartialMessage<QueryValidatorHistoricalRewardsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.distribution.v1beta1.QueryValidatorHistoricalRewardsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "validator_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "period", kind: "scalar", T: 4 /* ScalarType.UINT64 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryValidatorHistoricalRewardsRequest {
+    return new QueryValidatorHistoricalRewardsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryValidatorHistoricalRewardsRequest {
+    return new QueryValidatorHistoricalRewardsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryValidatorHistoricalRewardsRequest {
+    return new QueryValidatorHistoricalRewardsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryValidatorHistoricalRewardsRequest | PlainMessage<QueryValidatorHistoricalRewardsRequest> | undefined, b: QueryValidatorHistoricalRewardsRequest | PlainMessage<QueryValidatorHistoricalRewardsRequest> | undefined): boolean {
+    return proto3.util.equals(QueryValidatorHistoricalRewardsRequest, a, b);
+  }
+}
+
+/**
+ * QueryValidatorHistoricalRewardsResponse is the response type for the
+ * Query/ValidatorHistoricalRewards RPC method.
+ *
+ * @generated from message cosmos.distribution.v1beta1.QueryValidatorHistoricalRewardsResponse
+ */
+export class QueryValidatorHistoricalRewardsResponse extends Message<QueryValidatorHistoricalRewardsResponse> {
+  /**
+   * rewards defines the historical rewards of a validator.
+   *
+   * @generated from field: cosmos.distribution.v1beta1.ValidatorHistoricalRewards rewards = 1;
+   */
+  rewards?: ValidatorHistoricalRewards;
+
+  constructor(data?: PartialMessage<QueryValidatorHistoricalRewardsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.distribution.v1beta1.QueryValidatorHistoricalRewardsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "rewards", kind: "message", T: ValidatorHistoricalRewards },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryValidatorHistoricalRewardsResponse {
+    return new QueryValidatorHistoricalRewardsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryValidatorHistoricalRewardsResponse {
+    return new QueryValidatorHistoricalRewardsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryValidatorHistoricalRewardsResponse {
+    return new QueryValidatorHistoricalRewardsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryValidatorHistoricalRewardsResponse | PlainMessage<QueryValidatorHistoricalRewardsResponse> | undefined, b: QueryValidatorHistoricalRewardsResponse | PlainMessage<QueryValidatorHistoricalRewardsResponse> | undefined): boolean {
+    return proto3.util.equals(QueryValidatorHistoricalRewardsResponse, a, b);
+  }
+}
+
+/**
+ * QueryValidatorCurrentRewardsRequest is the request type for the
+ * Query/ValidatorCurrentRewards RPC method.
+ *
+ * @generated from message cosmos.distribution.v1beta1.QueryValidatorCurrentRewardsRequest
+ */
+export class QueryValidatorCurrentRewardsRequest extends Message<QueryValidatorCurrentRewardsRequest> {
+  /**
+   * validator_address defines the validator address to query for.
+   *
+   * @generated from field: string validator_address = 1;
+   */
+  validatorAddress = "";
+
+  constructor(data?: PartialMessage<QueryValidatorCurrentRewardsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.distribution.v1beta1.QueryValidatorCurrentRewardsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "validator_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryValidatorCurrentRewardsRequest {
+    return new QueryValidatorCurrentRewardsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryValidatorCurrentRewardsRequest {
+    return new QueryValidatorCurrentRewardsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryValidatorCurrentRewardsRequest {
+    return new QueryValidatorCurrentRewardsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryValidatorCurrentRewardsRequest | PlainMessage<QueryValidatorCurrentRewardsRequest> | undefined, b: QueryValidatorCurrentRewardsRequest | PlainMessage<QueryValidatorCurrentRewardsRequest> | undefined): boolean {
+    return proto3.util.equals(QueryValidatorCurrentRewardsRequest, a, b);
+  }
+}
+
+/**
+ * QueryValidatorCurrentRewardsResponse is the response type for the
+ * Query/ValidatorCurrentRewards RPC method.
+ *
+ * @generated from message cosmos.distribution.v1beta1.QueryValidatorCurrentRewardsResponse
+ */
+export class QueryValidatorCurrentRewardsResponse extends Message<QueryValidatorCurrentRewardsResponse> {
+  /**
+   * rewards defines the current rewards of a validator.
+   *
+   * @generated from field: cosmos.distribution.v1beta1.ValidatorCurrentRewards rewards = 1;
+   */
+  rewards?: ValidatorCurrentRewards;
+
+  constructor(data?: PartialMessage<QueryValidatorCurrentRewardsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.distribution.v1beta1.QueryValidatorCurrentRewardsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "rewards", kind: "message", T: ValidatorCurrentRewards },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryValidatorCurrentRewardsResponse {
+    return new QueryValidatorCurrentRewardsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryValidatorCurrentRewardsResponse {
+    return new QueryValidatorCurrentRewardsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryValidatorCurrentRewardsResponse {
+    return new QueryValidatorCurrentRewardsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryValidatorCurrentRewardsResponse | PlainMessage<QueryValidatorCurrentRewardsResponse> | undefined, b: QueryValidatorCurrentRewardsResponse | PlainMessage<QueryValidatorCurrentRewardsResponse> | undefined): boolean {
+    return proto3.util.equals(QueryValidatorCurrentRewardsResponse, a, b);
+  }
+}
+
+/**
+ * QueryDelegatorStartingInfoRequest is the request type for the
+ * Query/DelegatorStartingInfo RPC method.
+ *
+ * @generated from message cosmos.distribution.v1beta1.QueryDelegatorStartingInfoRequest
+ */
+export class QueryDelegatorStartingInfoRequest extends Message<QueryDelegatorStartingInfoRequest> {
+  /**
+   * delegator_address defines the delegator address to query for.
+   *
+   * @generated from field: string delegator_address = 1;
+   */
+  delegatorAddress = "";
+
+  /**
+   * validator_address defines the validator address to query for.
+   *
+   * @generated from field: string validator_address = 2;
+   */
+  validatorAddress = "";
+
+  constructor(data?: PartialMessage<QueryDelegatorStartingInfoRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.distribution.v1beta1.QueryDelegatorStartingInfoRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "delegator_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "validator_address", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDelegatorStartingInfoRequest {
+    return new QueryDelegatorStartingInfoRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryDelegatorStartingInfoRequest {
+    return new QueryDelegatorStartingInfoRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryDelegatorStartingInfoRequest {
+    return new QueryDelegatorStartingInfoRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryDelegatorStartingInfoRequest | PlainMessage<QueryDelegatorStartingInfoRequest> | undefined, b: QueryDelegatorStartingInfoRequest | PlainMessage<QueryDelegatorStartingInfoRequest> | undefined): boolean {
+    return proto3.util.equals(QueryDelegatorStartingInfoRequest, a, b);
+  }
+}
+
+/**
+ * QueryDelegatorStartingInfoResponse is the response type for the
+ * Query/DelegatorStartingInfo RPC method.
+ *
+ * @generated from message cosmos.distribution.v1beta1.QueryDelegatorStartingInfoResponse
+ */
+export class QueryDelegatorStartingInfoResponse extends Message<QueryDelegatorStartingInfoResponse> {
+  /**
+   * starting_info defines the starting info of a delegator.
+   *
+   * @generated from field: cosmos.distribution.v1beta1.DelegatorStartingInfo starting_info = 1;
+   */
+  startingInfo?: DelegatorStartingInfo;
+
+  constructor(data?: PartialMessage<QueryDelegatorStartingInfoResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "cosmos.distribution.v1beta1.QueryDelegatorStartingInfoResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "starting_info", kind: "message", T: DelegatorStartingInfo },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): QueryDelegatorStartingInfoResponse {
+    return new QueryDelegatorStartingInfoResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): QueryDelegatorStartingInfoResponse {
+    return new QueryDelegatorStartingInfoResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): QueryDelegatorStartingInfoResponse {
+    return new QueryDelegatorStartingInfoResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: QueryDelegatorStartingInfoResponse | PlainMessage<QueryDelegatorStartingInfoResponse> | undefined, b: QueryDelegatorStartingInfoResponse | PlainMessage<QueryDelegatorStartingInfoResponse> | undefined): boolean {
+    return proto3.util.equals(QueryDelegatorStartingInfoResponse, a, b);
   }
 }
 

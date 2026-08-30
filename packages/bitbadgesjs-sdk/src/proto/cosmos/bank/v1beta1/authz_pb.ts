@@ -11,8 +11,6 @@ import { Coin } from "../../base/v1beta1/coin_pb.js";
  * SendAuthorization allows the grantee to spend up to spend_limit coins from
  * the granter's account.
  *
- * Since: cosmos-sdk 0.43
- *
  * @generated from message cosmos.bank.v1beta1.SendAuthorization
  */
 export class SendAuthorization extends Message<SendAuthorization> {
@@ -24,8 +22,6 @@ export class SendAuthorization extends Message<SendAuthorization> {
   /**
    * allow_list specifies an optional list of addresses to whom the grantee can send tokens on behalf of the
    * granter. If omitted, any recipient is allowed.
-   *
-   * Since: cosmos-sdk 0.47
    *
    * @generated from field: repeated string allow_list = 2;
    */

@@ -107,7 +107,7 @@ export class QueryValidatorsResponse extends Message<QueryValidatorsResponse> {
 }
 
 /**
- * QueryValidatorRequest is response type for the Query/Validator RPC method
+ * QueryValidatorRequest is request type for the Query/Validator RPC method
  *
  * @generated from message cosmos.staking.v1beta1.QueryValidatorRequest
  */

@@ -34,12 +34,20 @@ export enum ResponseResultType {
    * @generated from enum value: RESPONSE_RESULT_TYPE_SUCCESS = 2;
    */
   SUCCESS = 2,
+
+  /**
+   * The message was executed unsuccessfully
+   *
+   * @generated from enum value: RESPONSE_RESULT_TYPE_FAILURE = 3;
+   */
+  FAILURE = 3,
 }
 // Retrieve enum metadata with: proto3.getEnumType(ResponseResultType)
 proto3.util.setEnumType(ResponseResultType, "ibc.core.channel.v1.ResponseResultType", [
   { no: 0, name: "RESPONSE_RESULT_TYPE_UNSPECIFIED" },
   { no: 1, name: "RESPONSE_RESULT_TYPE_NOOP" },
   { no: 2, name: "RESPONSE_RESULT_TYPE_SUCCESS" },
+  { no: 3, name: "RESPONSE_RESULT_TYPE_FAILURE" },
 ]);
 
 /**
