@@ -234,7 +234,7 @@ export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
     image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true',
     deprecated: true,
     deprecationNote:
-      'Legacy Noble-routed USDC. Fully usable and staying — new integrations should target canonical USDC (via Injective) once that route is live.'
+      'Legacy Noble-routed USDC. Existing balances stay fully usable — use canonical USDC (via Injective) for everything new.'
   },
   'ibc/A4DB47A9D3CF9A068D454513891B526702455D3EF08FB9EB558C561F9DC2B701': {
     skipGoSupported: true,

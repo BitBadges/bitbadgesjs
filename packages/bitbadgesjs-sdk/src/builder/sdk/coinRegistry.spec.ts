@@ -89,7 +89,7 @@ describe('coinRegistry', () => {
     // until the frontend's `bitbadges` dependency carries the field. Byte
     // identity is the actual requirement, so pin the bytes.
     const DEPRECATION_NOTE =
-      'Legacy Noble-routed USDC. Fully usable and staying \u2014 new integrations should target canonical USDC (via Injective) once that route is live.';
+      'Legacy Noble-routed USDC. Existing balances stay fully usable \u2014 use canonical USDC (via Injective) for everything new.';
 
     it('carries the holder-facing deprecation note on the legacy route only', () => {
       expect(MAINNET_COINS_REGISTRY[USDC_NOBLE_DENOM].deprecated).toBe(true);
