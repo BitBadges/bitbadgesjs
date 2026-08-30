@@ -35,7 +35,6 @@ const TAG_MAP: Record<string, string> = {
   'Maps and Protocols': 'maps',
   'Assets': 'assets',
   'Miscellaneous': 'misc',
-  'Miscellanous': 'misc', // handle typo in spec
 };
 
 const TAG_DESCRIPTIONS: Record<string, string> = {
