@@ -20,7 +20,7 @@ import {
 
 export interface PredictionMarketParams {
   verifier: string; // bb1... resolver address
-  denom?: string; // payment coin, defaults to USDC (use BADGE for testnet)
+  denom?: string; // payment coin, defaults to USDC.noble (use BADGE for testnet)
   /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
   uri?: string;
   name?: string;
@@ -29,7 +29,12 @@ export interface PredictionMarketParams {
 }
 
 export function buildPredictionMarket(params: PredictionMarketParams): any {
-  const coin = resolveCoin(params.denom || 'USDC');
+  // Defaults to the Noble route, not the bare `USDC` symbol: from 0.43.0 the
+  // symbol resolves to the canonical Injective denom, which has zero supply —
+  // a market defaulted into it could never be settled. Must stay in lockstep
+  // with the CLI's `--denom` default (cli/commands/build.ts). Flip both to
+  // 'USDC' once the Injective route carries liquidity.
+  const coin = resolveCoin(params.denom || 'USDC.noble');
   const bothTokenIds = [{ start: '1', end: '2' }];
   const yesTokenIds = [{ start: '1', end: '1' }];
   const noTokenIds = [{ start: '2', end: '2' }];
