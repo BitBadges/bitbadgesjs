@@ -208,8 +208,6 @@ tags:
     description: Authentication and authorization endpoints for Sign In with BitBadges
   - name: Transactions
     description: Endpoints for submitting and simulating blockchain transactions
-  - name: Applications
-    description: Endpoints for managing applications (points, tiers, quests)
   - name: Plugins
     description: Endpoints for the plugins for claims
   - name: Dynamic Stores
