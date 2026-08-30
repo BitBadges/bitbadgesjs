@@ -42,6 +42,22 @@ describe('coinRegistry', () => {
       expect(MAINNET_COINS_REGISTRY).toHaveProperty(USDC_NOBLE_DENOM);
     });
 
+    // The migration contract is ADDITIVE, NEVER SUBSTITUTIVE: three earlier
+    // passes each "helpfully" replaced the legacy denom instead of adding the
+    // canonical one next to it. Enforce the rule mechanically instead of
+    // remembering it. Deliberately literal strings, not the exported
+    // constants — an edit to USDC_DENOM / USDC_NOBLE_DENOM themselves must
+    // fail here too, in BOTH registries (builder and common/constants).
+    it('never drops either USDC denom string from either registry (additive contract)', () => {
+      const CANONICAL = 'ibc/0E485657AEF4C39D551E7D53463734E4C445A96E6C814DC4C2FF0031470B40BB';
+      const LEGACY = 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349';
+      for (const registry of [MAINNET_COINS_REGISTRY, SDK_COINS_REGISTRY]) {
+        expect(Object.keys(registry)).toEqual(expect.arrayContaining([CANONICAL, LEGACY]));
+        expect(registry[CANONICAL].baseDenom).toBe(CANONICAL);
+        expect(registry[LEGACY].baseDenom).toBe(LEGACY);
+      }
+    });
+
     it('resolves the bare symbol "USDC" to the Injective route', () => {
       // This is the default every caller inherits — the frontend's pickers, the
       // indexer's origin-denom map, and the builder's approval generation all
