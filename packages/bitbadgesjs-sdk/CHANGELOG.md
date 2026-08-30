@@ -39,6 +39,15 @@ chain's string value unchanged. **Consumers passing ordinary small numbers keep
 working. Consumers must stop pre-`Number()`-ifying chain values** — pass the
 LCD/indexer string (or a bigint) straight through.
 
+**API/type-conversion layer (audited, docs + tests):** `accountNumber` and
+`sequence` are NumberType generics on `iAccountDoc` / `AccountDoc` /
+`BitBadgesUserInfo` — converting those docs with `Numberify` silently corrupts
+post-v34 values (a pre-existing, now-documented property of `Numberify`, which
+is lossy above 2^53 for anything, uint64 range sentinels included). Use
+`BigIntify`, `Stringify`, or `NumberifyIfPossible`; tests pin that those three
+round-trip `11715262360359940575` exactly. The SDK itself no longer
+`Number()`s any account number or sequence anywhere.
+
 ## [0.43.0]
 
 ### Canonical USDC moves to the Injective route (BB-10)

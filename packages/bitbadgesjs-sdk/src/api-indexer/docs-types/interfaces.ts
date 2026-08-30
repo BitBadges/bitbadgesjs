@@ -553,7 +553,13 @@ export interface iPoolInfoVolume<T extends NumberType> {
 export interface iAccountDoc<T extends NumberType> extends Doc {
   /** The public key of the account */
   publicKey: string;
-  /** The account number of the account. This is the account number registered on the BitBadges blockchain.*/
+  /**
+   * The account number of the account. This is the account number registered on the BitBadges blockchain.
+   *
+   * WARNING (BB-34): post-v34 accounts get hash-derived account numbers larger than 2^53, which a JS
+   * `number` cannot hold. Use `BigIntify` or `Stringify` when converting docs that carry this field —
+   * `Numberify` silently corrupts it and the corrupted value is rejected by the signing pipeline.
+   */
   accountNumber: T;
   /** The public key type of the account */
   pubKeyType: string;
@@ -561,7 +567,12 @@ export interface iAccountDoc<T extends NumberType> extends Doc {
   bitbadgesAddress: BitBadgesAddress;
   /** The Eth address of the account */
   ethAddress: string;
-  /** The sequence of the account. This is the nonce for the blockchain for this account */
+  /**
+   * The sequence of the account. This is the nonce for the blockchain for this account.
+   *
+   * WARNING (BB-34): post-v34 unordered-tx nonces can be nanosecond timestamps larger than 2^53 —
+   * same rule as `accountNumber`: convert with `BigIntify`/`Stringify`, never `Numberify`.
+   */
   sequence?: T;
   /** The BADGE balance of the account and other sdk.coin balances */
   balances?: iCosmosCoin<T>[];
