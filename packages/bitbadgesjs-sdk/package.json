@@ -165,7 +165,8 @@
     "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^3.15.0",
     "tsoa": "^6.6.0",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "yaml": "2.8.1"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^1.10.1",

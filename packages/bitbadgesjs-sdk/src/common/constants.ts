@@ -45,7 +45,7 @@ export const BitBadgesKeplrSuggestMainnetChainInfo = {
   chainId: 'bitbadges-1',
   chainName: 'BitBadges',
   chainSymbolImageUrl: 'https://avatars.githubusercontent.com/u/86890740',
-  coinImageUrl: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true',
+  coinImageUrl: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png',
   rpc: 'https://rpc.bitbadges.io',
   rest: 'https://lcd.bitbadges.io',
   bip44: {
@@ -64,8 +64,8 @@ export const BitBadgesKeplrSuggestMainnetChainInfo = {
       coinDenom: 'BADGE',
       coinMinimalDenom: 'ubadge',
       coinDecimals: 9,
-      coinImageUrl: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true',
-      icon: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true'
+      coinImageUrl: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png',
+      icon: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png'
     }
   ],
   feeCurrencies: [
@@ -78,16 +78,16 @@ export const BitBadgesKeplrSuggestMainnetChainInfo = {
         average: 0.025,
         high: 0.03
       },
-      coinImageUrl: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true',
-      icon: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true'
+      coinImageUrl: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png',
+      icon: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png'
     }
   ],
   stakeCurrency: {
     coinDenom: 'BADGE',
     coinMinimalDenom: 'ubadge',
     coinDecimals: 9,
-    coinImageUrl: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true',
-    icon: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true'
+    coinImageUrl: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png',
+    icon: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png'
   },
   image: 'https://avatars.githubusercontent.com/u/86890740'
 };
@@ -193,7 +193,7 @@ const BaseCoinsRegistry: Record<string, CoinDetails> = {
     symbol: 'BADGE',
     decimals: '9',
     baseDenom: 'ubadge',
-    image: 'https://github.com/cosmos/chain-registry/blob/master/bitbadges/images/badge_logo.png?raw=true'
+    image: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png'
   }
 };
 
@@ -219,7 +219,7 @@ export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
     symbol: 'USDC',
     decimals: '6',
     baseDenom: USDC_DENOM,
-    image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true'
+    image: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/_non-cosmos/ethereum/images/usdc.png'
   },
   [USDC_NOBLE_DENOM]: {
     // Still Skip-supported so holders can swap out of the legacy denom.
@@ -231,7 +231,7 @@ export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
     symbol: 'USDC.n',
     decimals: '6',
     baseDenom: USDC_NOBLE_DENOM,
-    image: 'https://github.com/cosmos/chain-registry/blob/master/noble/images/USDCoin.png?raw=true',
+    image: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/_non-cosmos/ethereum/images/usdc.png',
     deprecated: true,
     deprecationNote:
       'Legacy Noble-routed USDC. Existing balances stay fully usable — use canonical USDC (via Injective) for everything new.'
@@ -242,7 +242,7 @@ export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
     symbol: 'ATOM',
     decimals: '6',
     baseDenom: 'ibc/A4DB47A9D3CF9A068D454513891B526702455D3EF08FB9EB558C561F9DC2B701',
-    image: 'https://github.com/cosmos/chain-registry/blob/master/cosmoshub/images/atom.png?raw=true'
+    image: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/cosmoshub/images/atom.png'
   },
   'ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518': {
     skipGoSupported: true,
@@ -250,7 +250,7 @@ export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
     symbol: 'OSMO',
     decimals: '6',
     baseDenom: 'ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518',
-    image: 'https://github.com/cosmos/chain-registry/blob/master/osmosis/images/osmo.png?raw=true'
+    image: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/osmosis/images/osmo.png'
   }
 };
 

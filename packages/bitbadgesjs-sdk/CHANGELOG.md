@@ -5,6 +5,16 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## [0.44.0]
 
+### Registry image URLs fixed (BB-45)
+
+Both USDC registry entries (and BADGE/ATOM/OSMO) shipped
+`github.com/...blob...?raw=true` image URLs; the USDC one now 404s because
+the file moved in chain-registry, so consumers falling back to the SDK image
+(e.g. the indexer's swap asset list for denoms Skip doesn't serve) rendered a
+broken icon. All registry images now use direct, verified-200
+`raw.githubusercontent.com` URLs, and a spec forbids the rot-prone
+`blob/...?raw=true` style from reappearing in any registry.
+
 ### Generated protos regenerated against the v34 dependency set (BB-40)
 
 The generated `src/proto` tree now matches the chain's v34 stack: cosmos-sdk
