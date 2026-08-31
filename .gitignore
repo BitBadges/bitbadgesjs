@@ -32,3 +32,6 @@ build/Release
 test/
 coverage
 .gitignored
+
+# CI-only checkout of the indexer, used by the internal-route publish guard
+.indexer-checkout

@@ -3,8 +3,8 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   setupFiles: ['./jest.setup.js'],
-  roots: ['<rootDir>/src'],
-  testMatch: ['<rootDir>/src/**/*.spec.ts'],
+  roots: ['<rootDir>/src', '<rootDir>/scripts'],
+  testMatch: ['<rootDir>/src/**/*.spec.ts', '<rootDir>/scripts/**/*.spec.ts'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
