@@ -34,9 +34,14 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Install dependencies
         working-directory: packages/bitbadgesjs-sdk
-        run: npm install
+        run: bun install --frozen-lockfile
 
       - name: Generate documentation
         run: |

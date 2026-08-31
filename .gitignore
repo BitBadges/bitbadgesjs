@@ -35,3 +35,8 @@ coverage
 
 # CI-only checkout of the indexer, used by the internal-route publish guard
 .indexer-checkout
+
+# bun.lock is the only committed lockfile. A stray `npm install` must not
+# resurrect a second, silently-diverging dependency tree.
+package-lock.json
+bun.lockb
