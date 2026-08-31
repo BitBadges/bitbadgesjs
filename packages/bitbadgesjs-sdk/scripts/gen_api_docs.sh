@@ -23,6 +23,10 @@ else
     source ./scripts/create_yml_schemas.sh
     npm run format-ci
     bun ./scripts/normalize_yml.ts ./openapitypes/combined.yaml
+    bun ./scripts/strip_internal_routes.ts ./openapitypes/combined.yaml || exit 1
+    # Hard gate (this script has no `set -e`): internal routes must never
+    # reach the docs, so this one aborts rather than warning.
+    bun ./scripts/assert_no_internal_routes.ts ./openapitypes/combined.yaml --indexer ../../../bitbadges-indexer/src/indexer.ts || exit 1
     rm ./src/combined.ts
     git add ./openapitypes/combined.yaml
     #discard all other changes

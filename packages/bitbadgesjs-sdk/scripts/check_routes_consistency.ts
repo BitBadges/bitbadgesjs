@@ -1,89 +1,12 @@
-import fs from 'fs';
-import yaml from 'js-yaml';
 import { BitBadgesApiRoutes } from '../src/api-indexer/requests/routes';
-
-interface Route {
-  method: string;
-  path: string;
-  hasWebsiteOnlyCors: boolean;
-}
-
-interface OpenAPIRoute {
-  method: string;
-  path: string;
-  internal: boolean;
-}
-
-function normalizePathParams(path: string): string {
-  // Convert OpenAPI {param} to Express :param
-  return path.replace(/\{([^}]+)\}/g, ':$1');
-}
-
-function parseExpressRoutes(filePath: string): Route[] {
-  const content = fs.readFileSync(filePath, 'utf8');
-  const lines = content.split('\n');
-  const routes: Route[] = [];
-  const routeRegex = /app\.(get|post|put|delete)\(['"]([^'"]+)['"]/;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    const match = line.match(routeRegex);
-
-    if (match) {
-      const [_, method, path] = match;
-      let hasWebsiteOnlyCors = false;
-      let j = i;
-      const searchLimit = Math.min(i + 3, lines.length);
-
-      while (j < searchLimit) {
-        if (lines[j].includes('websiteOnlyCors')) {
-          hasWebsiteOnlyCors = true;
-          break;
-        }
-        j++;
-      }
-
-      routes.push({
-        method: method.toUpperCase(),
-        path,
-        hasWebsiteOnlyCors
-      });
-    }
-  }
-
-  return routes;
-}
-
-function parseOpenAPIRoutes(filePath: string): OpenAPIRoute[] {
-  const content = fs.readFileSync(filePath, 'utf8');
-  const spec = yaml.load(content) as any;
-  const routes: OpenAPIRoute[] = [];
-
-  for (const [path, pathObj] of Object.entries(spec.paths)) {
-    // Handle all HTTP methods for this path
-    const methodsObj = pathObj as Record<string, any>;
-    for (const method of ['get', 'post', 'put', 'delete']) {
-      if (methodsObj[method]) {
-        routes.push({
-          method: method.toUpperCase(),
-          path: normalizePathParams(`/api/v0${path}`),
-          internal: methodsObj[method]['x-internal'] === true
-        });
-      }
-    }
-  }
-
-  return routes;
-}
-
-function normalizePathForComparison(path: string): string {
-  // Replace both Express :param and OpenAPI {param} with a generic placeholder
-  return path.replace(/:[a-zA-Z]+|{[a-zA-Z]+}/g, ':PARAM');
-}
-
-function arePathsEquivalent(path1: string, path2: string): boolean {
-  return normalizePathForComparison(path1) === normalizePathForComparison(path2);
-}
+import {
+  arePathsEquivalent,
+  normalizePathForComparison,
+  parseExpressRoutes,
+  parseOpenAPIRoutes,
+  type ExpressRoute as Route,
+  type OpenAPIRoute
+} from './lib/routeAnalysis';
 
 // Main execution
 const indexerPath = process.argv[2] || './indexer.ts';

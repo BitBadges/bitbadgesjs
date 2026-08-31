@@ -29,7 +29,9 @@
     ],
     "strictNullChecks": true
   },
-  "exclude": ["node_modules", "dist", "docs", "./dist"],
+  // `scripts` is build tooling, never shipped in dist — its specs are
+  // typechecked by ts-jest instead (see jest.config.cjs roots).
+  "exclude": ["node_modules", "dist", "docs", "./dist", "scripts"],
   "include": ["src", "**/*.test.ts", "**/*.spec.ts"],
   "ts-node": {
     "esm": true,

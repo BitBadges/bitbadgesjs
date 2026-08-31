@@ -70,6 +70,30 @@ jobs:
             console.log(`Spec OK: title="${title}", paths=${n}`);
           '
 
+      - name: Check out indexer for the website-only cross-check
+        id: indexer
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          repository: BitBadges/bitbadges-indexer
+          token: ${{ secrets.INDEXER_READ_TOKEN || secrets.GITHUB_TOKEN }}
+          path: .indexer-checkout
+
+      - name: Assert no internal routes reach the published docs
+        run: |
+          # Hard gate. Assertion A (zero x-internal operations) always runs.
+          # Assertion B (nothing behind websiteOnlyCors documented as public)
+          # runs whenever the indexer checkout above succeeded; when it runs,
+          # a violation fails the job.
+          INDEXER=../../.indexer-checkout/src/indexer.ts
+          if [ -f "$INDEXER" ]; then
+            bun ./scripts/assert_no_internal_routes.ts ./openapitypes/combined_processed.yaml --indexer "$INDEXER"
+          else
+            echo "::warning::indexer checkout unavailable — running the x-internal assertion only"
+            bun ./scripts/assert_no_internal_routes.ts ./openapitypes/combined_processed.yaml
+          fi
+          bun ./scripts/assert_no_internal_routes.ts ./openapi-hosted/openapi.json
+
       - name: Push to Stoplight
         env:
           STOPLIGHT_TOKEN: ${{ secrets.STOPLIGHT_TOKEN }}
