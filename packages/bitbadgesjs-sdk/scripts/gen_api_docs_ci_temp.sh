@@ -10,5 +10,5 @@ sed -i 's/"sideEffects": false,/"sideEffects": false,\n  "type": "module",/' pac
 
 source ./scripts/combine_ts_files.sh
 bun ./scripts/normalize_combined.ts ./src/combined.ts
-npm run format-ci || echo "Format failed, continuing anyway..."
+bun run format-ci || echo "Format failed, continuing anyway..."
 source ./scripts/create_yml_schemas.sh

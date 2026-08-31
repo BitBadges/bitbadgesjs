@@ -19,9 +19,9 @@ else
 
     source ./scripts/combine_ts_files.sh
     bun ./scripts/normalize_combined.ts ./src/combined.ts
-    npm run format-ci
+    bun run format-ci
     source ./scripts/create_yml_schemas.sh
-    npm run format-ci
+    bun run format-ci
     bun ./scripts/normalize_yml.ts ./openapitypes/combined.yaml
     bun ./scripts/strip_internal_routes.ts ./openapitypes/combined.yaml || exit 1
     # Hard gate (this script has no `set -e`): internal routes must never
