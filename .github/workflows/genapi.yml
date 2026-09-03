@@ -23,17 +23,17 @@ jobs:
         working-directory: packages/bitbadgesjs-sdk
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 18
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
@@ -73,7 +73,7 @@ jobs:
       - name: Check out indexer for the website-only cross-check
         id: indexer
         continue-on-error: true
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: BitBadges/bitbadges-indexer
           token: ${{ secrets.INDEXER_READ_TOKEN || secrets.GITHUB_TOKEN }}
@@ -131,7 +131,7 @@ jobs:
           git status --short
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update hosted OpenAPI spec for LLMs"
