@@ -8,6 +8,9 @@ The official TypeScript SDK for interacting with the BitBadges blockchain, API, 
 
 ## Installation
 
+For the v35 release, see the [coordinated rollout runbook](../../docs/runbooks/v35-downstream-rollout.md)
+for gas defaults, explicit signing overrides, and nonce-based ETH proof tracker queries.
+
 ```bash
 npm install bitbadges
 # or

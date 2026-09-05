@@ -161,10 +161,10 @@ export function assertNetworkAvailable(network: string): void {
     throw new Error(
       'BitBadges testnet is temporarily offline as of 2026-04-25 to reduce hosting costs. ' +
         'Mainnet now serves as a chaosnet — fully live, but safe to experiment on: ' +
-        'network gas fees can be set to zero while activity is low, and you can transact ' +
+        'network gas fees must meet the current chain minimum, and you can transact ' +
         'with worthless tokens like CHAOS instead of real-value assets. ' +
         "Switch to mainnet (network: 'mainnet') to test contracts, transactions, and " +
-        'integrations on the live network without spending anything real — just choose ' +
+        'integrations on the live network — just choose ' +
         'your assets accordingly. ' +
         'To override this guard for local dev (e.g. a private chain at the testnet chain ID), ' +
         'set BITBADGES_TESTNET_OFFLINE=false. ' +
@@ -207,11 +207,11 @@ export interface SigningClientOptions {
   sequenceRetryEnabled?: boolean;
   /** Maximum sequence retry attempts. Default: 3 */
   maxSequenceRetries?: number;
-  /** Gas multiplier for estimation. Default: 1.3 */
+  /** Gas multiplier for estimation (finite and >= 1). Default: 1.3 */
   gasMultiplier?: number;
-  /** Default gas limit when not simulating. Default: 400000 */
+  /** Gas limit for explicit simulate: false (1..100000000). Default: 400000 */
   defaultGasLimit?: number;
-  /** Gas limit for EVM precompile transactions. Default: 2000000 */
+  /** EVM gas limit for explicit simulate: false (1..100000000). Default: 2000000 */
   evmPrecompileGasLimit?: number;
   /** BitBadges API key for authenticated requests */
   apiKey?: string;
@@ -225,9 +225,9 @@ export interface SigningClientOptions {
 export interface SignAndBroadcastOptions {
   /** Transaction memo */
   memo?: string;
-  /** Custom fee (overrides auto-calculation) */
+  /** Custom Cosmos fee (overrides auto-calculation); EVM pricing is managed by the wallet. */
   fee?: SigningFee;
-  /** Whether to simulate first for gas estimation. Default: true for Cosmos, false for EVM */
+  /** Simulate first for gas estimation (both chains). Default: true; failure does not fall back to a fixed limit. */
   simulate?: boolean;
   /** Gas multiplier for simulation result. Default: uses client's gasMultiplier */
   gasMultiplier?: number;

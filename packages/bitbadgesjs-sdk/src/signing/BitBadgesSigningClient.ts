@@ -36,7 +36,26 @@ const DEFAULT_MAX_SEQUENCE_RETRIES = 3;
 /** Default fee denomination */
 const DEFAULT_FEE_DENOM = 'ubadge';
 /** Default gas price in ubadge */
-const DEFAULT_GAS_PRICE = 0.025;
+const DEFAULT_GAS_PRICE = 10;
+const MAX_GAS_LIMIT = 100_000_000;
+
+function validateGasLimit(gasLimit: number): number {
+  if (!Number.isSafeInteger(gasLimit) || gasLimit <= 0 || gasLimit > MAX_GAS_LIMIT) {
+    throw new Error(`Gas must be a positive integer no greater than ${MAX_GAS_LIMIT}`);
+  }
+  return gasLimit;
+}
+
+function validateGasMultiplier(multiplier: number): number {
+  if (!Number.isFinite(multiplier) || multiplier < 1) {
+    throw new Error('Gas multiplier must be finite and at least 1');
+  }
+  return multiplier;
+}
+
+function bufferedGasLimit(gasUsed: number, multiplier: number): number {
+  return validateGasLimit(Math.ceil(validateGasLimit(gasUsed) * validateGasMultiplier(multiplier)));
+}
 
 /**
  * BitBadgesSigningClient provides a wallet-agnostic interface for signing and broadcasting
@@ -106,9 +125,9 @@ export class BitBadgesSigningClient {
 
     this.sequenceRetryEnabled = options.sequenceRetryEnabled !== false; // Default: true
     this.maxSequenceRetries = options.maxSequenceRetries || DEFAULT_MAX_SEQUENCE_RETRIES;
-    this.gasMultiplier = options.gasMultiplier || DEFAULT_GAS_MULTIPLIER;
-    this.defaultGasLimit = options.defaultGasLimit || DEFAULT_GAS_LIMIT;
-    this.evmPrecompileGasLimit = options.evmPrecompileGasLimit || DEFAULT_EVM_PRECOMPILE_GAS_LIMIT;
+    this.gasMultiplier = validateGasMultiplier(options.gasMultiplier ?? DEFAULT_GAS_MULTIPLIER);
+    this.defaultGasLimit = validateGasLimit(options.defaultGasLimit ?? DEFAULT_GAS_LIMIT);
+    this.evmPrecompileGasLimit = validateGasLimit(options.evmPrecompileGasLimit ?? DEFAULT_EVM_PRECOMPILE_GAS_LIMIT);
 
     this.apiKey = options.apiKey;
 
@@ -251,7 +270,7 @@ export class BitBadgesSigningClient {
    * Calculate a fee based on gas limit.
    */
   private calculateFee(gasLimit: number): Fee {
-    const amount = Math.ceil(gasLimit * DEFAULT_GAS_PRICE);
+    const amount = BigInt(validateGasLimit(gasLimit)) * BigInt(DEFAULT_GAS_PRICE);
     return {
       amount: amount.toString(),
       denom: DEFAULT_FEE_DENOM,
@@ -266,7 +285,7 @@ export class BitBadgesSigningClient {
    * @param options - Optional memo
    * @returns Simulation result with gas estimates
    */
-  async simulate(messages: TransactionMessage[], options?: { memo?: string }): Promise<SimulateResult> {
+  async simulate(messages: TransactionMessage[], options?: { memo?: string; gasMultiplier?: number }): Promise<SimulateResult> {
     // EVM path: use eth_estimateGas via the adapter's provider
     if (this.adapter.chainType === 'evm') {
       return this.simulateEvm(messages, options);
@@ -279,7 +298,7 @@ export class BitBadgesSigningClient {
   /**
    * Simulate via Cosmos SDK endpoint.
    */
-  private async simulateCosmos(messages: TransactionMessage[], options?: { memo?: string }): Promise<SimulateResult> {
+  private async simulateCosmos(messages: TransactionMessage[], options?: { memo?: string; gasMultiplier?: number }): Promise<SimulateResult> {
     const accountInfo = await this.getAccountInfo();
 
     if (!accountInfo.publicKey) {
@@ -309,8 +328,12 @@ export class BitBadgesSigningClient {
     // Send to simulate endpoint
     const response = await this.axiosInstance.post(`${this.apiUrl}/api/v0/simulate`, JSON.parse(broadcastBody));
 
-    const gasUsed = parseInt(response.data.gas_info?.gas_used || '0', 10);
-    const gasLimit = Math.ceil(gasUsed * this.gasMultiplier);
+    const rawGasUsed = response.data.gas_info?.gas_used;
+    if (typeof rawGasUsed !== 'string' || !/^\d+$/.test(rawGasUsed)) {
+      throw new Error('Simulation gas must be an unsigned decimal string');
+    }
+    const gasUsed = Number(rawGasUsed);
+    const gasLimit = bufferedGasLimit(gasUsed, options?.gasMultiplier ?? this.gasMultiplier);
     const events: SimulationEvent[] = response.data.result?.events || [];
 
     return {
@@ -324,7 +347,7 @@ export class BitBadgesSigningClient {
   /**
    * Simulate via EVM eth_estimateGas.
    */
-  private async simulateEvm(messages: TransactionMessage[], options?: { memo?: string }): Promise<SimulateResult> {
+  private async simulateEvm(messages: TransactionMessage[], options?: { memo?: string; gasMultiplier?: number }): Promise<SimulateResult> {
     if (!this.adapter.estimateEvmGas) {
       throw new Error('EVM adapter does not support gas estimation. Ensure a provider is connected.');
     }
@@ -351,7 +374,7 @@ export class BitBadgesSigningClient {
       value: payload.evmTx.value
     }));
 
-    const gasLimit = Math.ceil(gasUsed * this.gasMultiplier);
+    const gasLimit = bufferedGasLimit(gasUsed, options?.gasMultiplier ?? this.gasMultiplier);
 
     return {
       gasUsed,
@@ -519,17 +542,16 @@ export class BitBadgesSigningClient {
     let fee: Fee;
     if (options?.fee) {
       fee = options.fee;
+      if (!/^\d+$/.test(fee.gas) || !/^\d+$/.test(fee.amount) || fee.denom !== DEFAULT_FEE_DENOM) {
+        throw new Error('Cosmos fee must use integer gas and amount in ubadge');
+      }
+      const minimumFee = this.calculateFee(Number(fee.gas));
+      if (BigInt(fee.amount) < BigInt(minimumFee.amount)) {
+        throw new Error(`Cosmos fee must be at least ${DEFAULT_GAS_PRICE} ubadge per gas`);
+      }
     } else if (options?.simulate !== false) {
       // Simulate to get gas estimate (default behavior)
-      try {
-        const simResult = await this.simulate(messages, { memo: options?.memo });
-        const multiplier = options?.gasMultiplier || this.gasMultiplier;
-        const adjustedGas = Math.ceil(simResult.gasUsed * multiplier);
-        fee = this.calculateFee(adjustedGas);
-      } catch {
-        // Fallback to default gas if simulation fails
-        fee = this.calculateFee(this.defaultGasLimit);
-      }
+      fee = (await this.simulate(messages, options)).fee;
     } else {
       fee = this.calculateFee(this.defaultGasLimit);
     }
@@ -648,11 +670,14 @@ export class BitBadgesSigningClient {
 
     // Send via EVM
     try {
+      const gasLimit = options?.simulate === false
+        ? this.evmPrecompileGasLimit
+        : (await this.simulateEvm(messages, options)).gasLimit;
       const txHash = await this.adapter.sendEvmTransaction({
         to: payload.evmTx.to,
         data: payload.evmTx.data,
         value: payload.evmTx.value,
-        gasLimit: this.evmPrecompileGasLimit
+        gasLimit
       });
 
       return {
