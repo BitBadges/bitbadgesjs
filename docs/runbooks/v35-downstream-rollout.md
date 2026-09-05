@@ -11,7 +11,7 @@ Companion drafts:
 
 - [Frontend #324](https://github.com/BitBadges/bitbadges-frontend/pull/324)
 - [Indexer #238](https://github.com/BitBadges/bitbadges-indexer/pull/238)
-- SDK draft: linked from the chain and companion PR descriptions.
+- [SDK #287](https://github.com/BitBadges/bitbadgesjs/pull/287)
 
 This runbook covers
 frontend signing, indexer simulation/faucet/event handling, and SDK signing/query
