@@ -96,9 +96,9 @@ After EVERY collection build, follow this pipeline:
 2. **Review** → review_collection, validate_transaction
 3. **Fix** → Address findings, re-review if needed
 4. **Present** → Show review results to user with plain-language explanations
-5. **Deploy** → get_transaction to retrieve the final transaction, return for user review and submission
+5. **Hand off** → get_transaction to retrieve the final transaction, then get_review_url and give the user the \`reviewUrl\`. It opens bitbadges.io in the review-and-sign flow (wallet signature happens there — you never sign). Prefer the link over pasting JSON: it is short and cannot be corrupted by terminal output.
 
-**IMPORTANT: JSON Output Format** — When returning the final transaction JSON, do NOT just print it inline in the terminal. Terminal output often introduces formatting artifacts (line wrapping, ANSI codes, truncation) that break JSON parsing. Instead:
+**IMPORTANT: JSON Output Format** — Only if the user explicitly asks for the raw JSON (or get_review_url fails), do NOT just print it inline in the terminal. Terminal output often introduces formatting artifacts (line wrapping, ANSI codes, truncation) that break JSON parsing. Instead:
 - **Preferred**: Save the JSON to a file (e.g., \`transaction.json\`) so the user can copy clean JSON
 - **Alternative**: Copy the JSON to the user's clipboard if your environment supports it
 - **If printing inline**: Wrap in a markdown code fence (\\\`\\\`\\\`json ... \\\`\\\`\\\`) and ensure no truncation
