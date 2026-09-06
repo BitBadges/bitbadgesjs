@@ -1,3 +1,4 @@
+import type { Uint64Like } from '../transactions/messages/common.js';
 /**
  * Build a broadcast-ready TxRaw from an EIP-712 signature.
  *
@@ -27,7 +28,7 @@ export interface BuildEip712TxRawArgs {
   /** 33-byte compressed pubkey of the EVM signer (recovered from the signature). */
   compressedPubKey: Uint8Array;
   /** Cosmos sequence at the time of signing. */
-  sequence: number;
+  sequence: Uint64Like;
   /** Fee parameters that match what the user signed in the EIP-712 typed-data. */
   fee: { amount: string; denom: string; gas: number };
   memo?: string;

@@ -1,3 +1,4 @@
+import type { Uint64Like } from '../transactions/messages/common.js';
 import { EVMChainIDMainnet, EVMChainIDTestnet, MAINNET_CHAIN_DETAILS, TESTNET_CHAIN_DETAILS } from '../common/constants.js';
 import { convertProtoMessagesToAmino, createStdFee } from '../transactions/messages/transaction.js';
 import { makeSignDoc } from '../transactions/messages/signDoc.js';
@@ -23,8 +24,8 @@ export interface BuildEIP712Args {
   eip155ChainId: number;
   fee: { amount: string; denom: string; gas: number };
   memo?: string;
-  sequence: number;
-  accountNumber: number;
+  sequence: Uint64Like;
+  accountNumber: Uint64Like;
 }
 
 export function buildEIP712TypedData(args: BuildEIP712Args): EIP712TypedData {

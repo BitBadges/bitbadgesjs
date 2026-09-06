@@ -12,7 +12,7 @@
 import { computeAddress, ethers, getBytes, hexlify, SigningKey, Wallet } from 'ethers';
 import { MsgSend } from '../proto/cosmos/bank/v1beta1/tx_pb.js';
 import { MsgTransferTokens } from '../proto/tokenization/tx_pb.js';
-import { TxRaw } from '../proto/cosmos/tx/v1beta1/tx_pb.js';
+import { AuthInfo, TxRaw } from '../proto/cosmos/tx/v1beta1/tx_pb.js';
 import { createProtoMsg } from '../transactions/messages/utils.js';
 import { buildEIP712TypedData } from './build.js';
 import { buildEip712TxBroadcastBody, buildEip712TxRaw } from './broadcast.js';
@@ -187,5 +187,24 @@ describe('eip712/broadcast', () => {
     });
 
     expect(txRaw.signatures[0].length).toBe(64);
+  });
+});
+
+
+describe('EIP-712 uint64 compatibility', () => {
+  it('preserves large account numbers and sequences through signing and broadcast', () => {
+    const value = 11715262360359940575n;
+    const messages = [createProtoMsg(new MsgSend({ fromAddress: 'bb1from', toAddress: 'bb1to', amount: [] }))];
+    const args = { messages, cosmosChainId: COSMOS_CHAIN_ID, eip155ChainId: EIP155_CHAIN_ID, fee: FEE, accountNumber: value, sequence: value };
+    const typed = buildEIP712TypedData(args);
+    expect(typed.message.account_number).toBe(value.toString());
+    expect(typed.message.sequence).toBe(value.toString());
+    expect(() => buildEIP712TypedData({ ...args, accountNumber: Number(value) })).toThrow(/safe integer/);
+    const signer = new Wallet('0x' + '1'.padStart(64, '0'));
+    const signatureHex = signer.signingKey.sign(hashTypedData(typed)).serialized;
+    const compressedPubKey = recoverEvmPublicKey(typed, signatureHex).compressedPubKeyBytes;
+    const raw = buildEip712TxRaw({ ...args, compressedPubKey, signatureHex });
+    const auth = AuthInfo.fromBinary(raw.authInfoBytes);
+    expect(auth.signerInfos[0].sequence).toBe(value);
   });
 });

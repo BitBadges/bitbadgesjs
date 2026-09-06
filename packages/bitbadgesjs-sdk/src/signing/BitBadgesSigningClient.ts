@@ -741,7 +741,7 @@ export class BitBadgesSigningClient {
       }
 
       if (code === 0 && this.cachedAccountInfo) {
-        this.cachedAccountInfo.sequence += 1;
+        this.cachedAccountInfo.sequence = toUint64(this.cachedAccountInfo.sequence, 'sequence') + 1n;
       }
 
       return {

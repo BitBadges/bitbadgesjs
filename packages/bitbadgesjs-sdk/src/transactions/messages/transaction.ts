@@ -158,7 +158,7 @@ export function createSignerInfo(publicKey: Uint8Array, sequence: Uint64Like, mo
  * recognizes signatures over the typed-data hash instead of the raw
  * sign bytes.
  */
-export function createSignerInfoEthsecp256k1(publicKey: Uint8Array, sequence: number, mode: number) {
+export function createSignerInfoEthsecp256k1(publicKey: Uint8Array, sequence: Uint64Like, mode: number) {
   const pubkey: MessageGenerated = {
     message: new ETHSECP256k1({
       key: publicKey as Uint8Array<ArrayBuffer>
@@ -176,7 +176,7 @@ export function createSignerInfoEthsecp256k1(publicKey: Uint8Array, sequence: nu
         case: 'single'
       }
     }),
-    sequence: BigInt(sequence)
+    sequence: toUint64(sequence, 'sequence')
   });
 }
 

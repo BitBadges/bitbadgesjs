@@ -31,6 +31,7 @@ function setup(chainType: 'cosmos' | 'evm' = 'cosmos', options = {}) {
     estimateEvmGas: jest.fn().mockResolvedValue(6_000_001n),
     supportsSignDirect: () => chainType === 'cosmos',
     supportsSignAmino: () => false,
+    supportsSignTypedData: () => false,
     supportsEvmTransaction: () => chainType === 'evm'
   } satisfies WalletAdapter;
   return { client: new BitBadgesSigningClient({ adapter, ...options }), adapter, post };
