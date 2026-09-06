@@ -13,8 +13,15 @@
 
 const COLLECTION_MSG_RE = /\.Msg(Universal)?(Create|Update)Collection$/;
 
+/** Strip trailing `ch` characters with a loop (avoids the `x+$` regex CodeQL flags as polynomial). */
+function trimTrailing(s: string, ch: string): string {
+  let end = s.length;
+  while (end > 0 && s[end - 1] === ch) end--;
+  return s.slice(0, end);
+}
+
 function toBase64Url(json: string): string {
-  return Buffer.from(json, 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return trimTrailing(Buffer.from(json, 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_'), '=');
 }
 
 export function encodeTxForHash(tx: object): string {
@@ -43,7 +50,7 @@ function reviewPath(tx: any): string {
 }
 
 function trimBase(frontendBase: string): string {
-  return frontendBase.replace(/\/+$/, '');
+  return trimTrailing(frontendBase, '/');
 }
 
 /** Review-and-sign URL carrying the whole transaction in the URL hash. */
