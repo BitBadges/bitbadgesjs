@@ -1880,40 +1880,6 @@ export interface iPluginVersionConfig<T extends NumberType> {
 /**
  * @category Interfaces
  */
-export interface iPromptSkillDoc extends Doc {
-  /** The unique prompt skill ID */
-  promptSkillId: string;
-  /** The prompt text */
-  promptText: string;
-  /** The BitBadges address of the creator */
-  createdBy: string;
-  /** Name of the prompt skill */
-  name: string;
-  /** Image URL for the prompt skill */
-  image: string;
-  /** Description of what the prompt does */
-  description: string;
-  /** Category for organization */
-  category: string;
-  /** Tags for searchability */
-  tags: string[];
-  /** Number of times used */
-  numUses: number;
-  /** Whether the skill is published to the public directory */
-  toPublish: boolean;
-  /** Approval status */
-  approvalStatus: 'approved' | 'pending' | 'rejected';
-  /** Version number */
-  version: number;
-  /** Creation timestamp (ms) */
-  createdAt: number;
-  /** Last update timestamp (ms) */
-  updatedAt: number;
-}
-
-/**
- * @category Interfaces
- */
 export interface iDepositBalanceDoc<T extends NumberType> extends Doc {
   /** The BitBadges address of the user */
   bitbadgesAddress: BitBadgesAddress;

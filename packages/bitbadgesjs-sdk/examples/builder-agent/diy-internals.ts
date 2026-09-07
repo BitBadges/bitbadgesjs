@@ -31,7 +31,6 @@ async function main() {
     prompt: 'Create an NFT collection with 50 pieces',
     creatorAddress: 'bb1examplecreator000000000000000000000000',
     selectedSkills: ['nft'],
-    promptSkillIds: [],
     isRefinement: false,
     isUpdate: false
   });

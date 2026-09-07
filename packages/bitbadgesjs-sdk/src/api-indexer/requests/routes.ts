@@ -197,10 +197,4 @@ export class BitBadgesApiRoutes {
 
   // ── CollectionIndex: server-side filter/sort/search/facets over any standard. ──
   static GetCollectionIndexRoute = () => '/api/v0/collections/index';
-
-  // ── PromptSkill CRUD + discovery. ──
-  static GetPromptSkillRoute = (promptSkillId: string) => `/api/v0/promptSkill/${promptSkillId}`;
-  static SearchPromptSkillsRoute = () => '/api/v0/promptSkills/search';
-  static FetchPromptSkillsRoute = () => '/api/v0/promptSkills/fetch';
-  static CRUDPromptSkillsRoute = () => '/api/v0/promptSkills';
 }
