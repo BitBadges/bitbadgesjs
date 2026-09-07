@@ -9,3 +9,4 @@ export * as tendermint from './tendermint/index.js';
 export * as maps from './maps/index.js';
 export * as ibc from './ibc/index.js';
 export * as gamm from './gamm/index.js';
+export * as sendmanager from './sendmanager/index.js';

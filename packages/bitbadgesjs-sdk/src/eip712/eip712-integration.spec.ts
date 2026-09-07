@@ -16,6 +16,7 @@
  */
 
 import { ethers } from 'ethers';
+import { MsgSendWithAliasRouting } from '../proto/sendmanager/v1/tx_pb.js';
 import { MsgSend } from '../proto/cosmos/bank/v1beta1/tx_pb.js';
 import { MsgDelegate } from '../proto/cosmos/staking/v1beta1/tx_pb.js';
 import { MsgTransfer } from '../proto/ibc/applications/transfer/v1/tx_pb.js';
@@ -141,4 +142,11 @@ describe('eip712 integration — real proto Msg pipeline', () => {
     const digest = hashTypedData(typed);
     expect(digest.length).toBe(32);
   });
+});
+
+it('sendmanager alias-routing transfer supports typed-data signing', () => {
+  buildAndAssert(
+    [new MsgSendWithAliasRouting({ fromAddress: 'bb1sender', toAddress: 'bb1receiver', amount: [{ denom: 'ubadge', amount: '100' }] })],
+    /^TypeMsgSendWithAliasRouting\d+$/
+  );
 });
