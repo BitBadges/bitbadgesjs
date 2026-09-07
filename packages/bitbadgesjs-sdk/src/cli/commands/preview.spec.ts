@@ -16,6 +16,25 @@ describe('preview ensureTxWrapper', () => {
     const msg = { typeUrl: '/x.Msg', value: { a: 1 } };
     expect(ensureTxWrapper(msg)).toEqual({ messages: [msg] });
   });
+  it('unwraps a `bb build` envelope so the printed next-step command works', () => {
+    // `bb build … --output-file tx.json` writes {ok, data, hint, …}, and the
+    // hint tells the user to run `bb preview tx.json`. Without this the very
+    // command we print fails with invalid_shape.
+    const msg = { typeUrl: '/tokenization.MsgCreateCollection', value: { a: 1 } };
+    const envelope = { ok: true, data: msg, warnings: [], hint: 'Next: …', error: null };
+    expect(ensureTxWrapper(envelope)).toEqual({ messages: [msg] });
+  });
+
+  it('unwraps an envelope that already holds a full tx body', () => {
+    const tx = { messages: [{ typeUrl: '/x.Msg', value: { a: 1 } }] };
+    expect(ensureTxWrapper({ ok: true, data: tx, error: null })).toEqual(tx);
+  });
+
+  it('leaves a failed envelope alone rather than previewing null data', () => {
+    const failed = { ok: false, data: null, error: { code: 'boom', message: 'no' } };
+    expect(ensureTxWrapper(failed)).toBe(failed);
+  });
+
   it('passes non-object / non-Msg input through (→ invalid_shape downstream)', () => {
     expect(ensureTxWrapper(undefined)).toBeUndefined();
     const weird = { not: 'a tx' };

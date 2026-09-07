@@ -6,6 +6,14 @@ export function ensureTxWrapper(input: any): any {
   if (!input || typeof input !== 'object') return input;
   if (Array.isArray(input.messages)) return input;
   if (typeof input.typeUrl === 'string' && input.value) return { messages: [input] };
+  // A universal envelope from `bb build … --output-file tx.json`
+  // ({ok, data, warnings, hint, error}). The build's next-step hint tells the
+  // user to run `bb preview tx.json`, so accept what we told them to produce.
+  // A failed envelope falls through to the shape error rather than previewing
+  // its null data.
+  if (input.ok === true && input.data && typeof input.data === 'object') {
+    return ensureTxWrapper(input.data);
+  }
   return input;
 }
 
