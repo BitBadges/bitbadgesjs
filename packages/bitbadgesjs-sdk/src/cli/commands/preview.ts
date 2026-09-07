@@ -22,17 +22,24 @@ export const previewCommand = addOutputOptions(
     new Command('preview')
       .description('Upload a tx to the indexer and print a shareable bitbadges.io preview URL. Input: JSON file, inline JSON, or - for stdin.')
       .argument('<input>', 'Tx JSON file path, inline JSON, or "-" for stdin')
-      .option(
-        '--frontend-url <url>',
-        'Override the bitbadges.io frontend base for the printed preview URL',
-        'https://bitbadges.io'
-      )
-      .option('--open', 'Open the review-and-sign URL in your default browser', false)
+      .option('--frontend-url <url>', 'Override the bitbadges.io frontend base for the printed preview URL', 'https://bitbadges.io')
+      .option('--open', 'Open the printed URL in your default browser', false)
+      .option('--read-only', 'Print the read-only preview link (no signing) instead of the review-and-sign link. For sharing with a reviewer.', false)
   )
 ).action(
   async (
     input: string,
-    opts: { network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string; frontendUrl?: string; open?: boolean; condensed?: boolean; outputFile?: string }
+    opts: {
+      network?: 'mainnet' | 'local' | 'testnet';
+      testnet?: boolean;
+      local?: boolean;
+      url?: string;
+      frontendUrl?: string;
+      open?: boolean;
+      readOnly?: boolean;
+      condensed?: boolean;
+      outputFile?: string;
+    }
   ) => {
     const { readJsonInput, getApiUrl } = await import('../utils/io.js');
 
@@ -89,10 +96,7 @@ export const previewCommand = addOutputOptions(
 
     if (!response!.ok) {
       const text = await response!.text().catch(() => '');
-      emitError(
-        new Error(`Preview upload failed: HTTP ${response!.status} ${text}`),
-        { code: 'preview_upload_failed', exitCode: 2 }
-      );
+      emitError(new Error(`Preview upload failed: HTTP ${response!.status} ${text}`), { code: 'preview_upload_failed', exitCode: 2 });
     }
 
     const result = (await response!.json()) as {
@@ -109,18 +113,20 @@ export const previewCommand = addOutputOptions(
     // `prv_` payload and continues straight into review + wallet signing.
     const reviewUrl = buildReviewUrlFromCode(frontendBase, result.code, payload.transaction);
 
-    commentary(`Expires in ${result.expiresIn}. Review + sign: ${reviewUrl}`);
+    // One link, not two. Review-and-sign is what a builder wants; --read-only
+    // swaps in the shareable view-only page. Both stay in the envelope for
+    // machine consumers.
+    const primaryUrl = opts.readOnly ? previewUrl : reviewUrl;
+    const label = opts.readOnly ? 'Read-only preview' : 'Review + sign';
+    commentary(`${label}: ${primaryUrl}\nExpires in ${result.expiresIn}.`);
     if (opts.open) {
       try {
         const mod = await import('open');
-        await ((mod as any).default ?? mod)(reviewUrl);
+        await ((mod as any).default ?? mod)(primaryUrl);
       } catch (err: any) {
         commentary(`(could not auto-launch browser: ${err?.message || err})`);
       }
     }
-    emit(
-      { code: result.code, url: previewUrl, reviewUrl, expiresAt: result.expiresAt, expiresIn: result.expiresIn },
-      opts
-    );
+    emit({ code: result.code, url: previewUrl, reviewUrl, expiresAt: result.expiresAt, expiresIn: result.expiresIn }, opts);
   }
 );
