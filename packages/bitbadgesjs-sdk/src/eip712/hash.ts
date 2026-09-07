@@ -76,8 +76,19 @@ function collectReferencedTypes(primaryType: string, types: EIP712Types, found: 
 
 /** Returns the base struct type if `type` is a struct (or array of struct), otherwise null. */
 function baseStructType(type: string): string | null {
-  const stripped = type.replace(/(\[\d*\])+$/g, '');
-  return stripped;
+  const start = type.indexOf('[');
+  if (start === -1) {
+    if (type.includes(']')) throw new Error('Invalid array type');
+    return type;
+  }
+  if (start === 0 || type.slice(0, start).includes(']')) throw new Error('Invalid array type');
+  let offset = start;
+  while (offset < type.length) {
+    if (type[offset++] !== '[') throw new Error('Invalid array type');
+    while (offset < type.length && type[offset] >= '0' && type[offset] <= '9') offset++;
+    if (type[offset++] !== ']') throw new Error('Invalid array type');
+  }
+  return type.slice(0, start);
 }
 
 function encodeData(primaryType: string, value: Record<string, unknown>, types: EIP712Types): Uint8Array {
@@ -100,9 +111,9 @@ function encodeField(type: string, value: unknown, types: EIP712Types): Uint8Arr
   }
   // Array (T[] or fixed-size T[N]). EIP-712 hashes arrays as
   // keccak256(concat(encodeField(T, v_i)) for i in 0..n).
-  const arrayMatch = type.match(/^(.*)\[(\d*)\]$/);
-  if (arrayMatch) {
-    const elemType = arrayMatch[1];
+  const arrayStart = type.lastIndexOf('[');
+  if (arrayStart !== -1 && type.endsWith(']')) {
+    const elemType = type.slice(0, arrayStart);
     const arr = (value ?? []) as unknown[];
     if (!Array.isArray(arr)) {
       throw new Error(`eip712/hash: expected array at field of type ${type}, got ${typeof arr}`);
