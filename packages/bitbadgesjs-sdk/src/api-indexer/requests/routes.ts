@@ -79,7 +79,7 @@ export class BitBadgesApiRoutes {
   static CRUDDeveloperAppRoute = () => '/api/v0/developerApps';
   static GetSIWBBRequestsForDeveloperAppRoute = () => '/api/v0/developerApps/siwbbRequests';
 
-  static GetPluginRoute = (pluginId: string) => `/api/v0/plugins/${pluginId.toString()}`;
+  static GetPluginRoute = (pluginId: string) => `/api/v0/plugin/${pluginId.toString()}`;
   static GetPluginsRoute = () => '/api/v0/plugins/fetch';
   static SearchPluginsRoute = () => '/api/v0/plugins/search';
   static GetCreatorPluginsRoute = () => '/api/v0/plugins/creator';
@@ -109,7 +109,6 @@ export class BitBadgesApiRoutes {
 
   static ScheduleTokenRefreshRoute = () => '/api/v0/oauth-token-refresh-schedule';
 
-  static CheckClaimSuccessRoute = (claimId: string, address: NativeAddress) => `/api/v0/claims/success/${claimId}/${address}`;
 
   static GetSiwbbRequestsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/requests/siwbb`;
   static GetTransferActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/tokens`;
