@@ -5,7 +5,7 @@
  * territory; no runCli in unit specs, per project convention).
  */
 
-import { previewCommand, ensureTxWrapper } from './preview.js';
+import { previewCommand, ensureTxWrapper, resolveFrontendBaseForCli } from './preview.js';
 
 describe('preview ensureTxWrapper', () => {
   it('returns a {messages:[...]} body unchanged', () => {
@@ -47,10 +47,10 @@ describe('previewCommand shape', () => {
     expect(previewCommand.name()).toBe('preview');
     expect((previewCommand as any)._args.map((a: any) => a.name())).toEqual(['input']);
   });
-  it('exposes --frontend-url with the bitbadges.io default', () => {
+  it('exposes --frontend-url with no hard default, so the network can decide', () => {
     const opt = (previewCommand as any).options.find((o: any) => o.long === '--frontend-url');
     expect(opt).toBeDefined();
-    expect(opt.defaultValue).toBe('https://bitbadges.io');
+    expect(opt.defaultValue).toBeUndefined();
   });
   it('exposes --open (review-and-sign in the browser), default off', () => {
     const opt = (previewCommand as any).options.find((o: any) => o.long === '--open');
@@ -58,3 +58,28 @@ describe('previewCommand shape', () => {
     expect(opt.defaultValue).toBe(false);
   });
 });
+
+describe('frontend base follows the network', () => {
+  // The tx is uploaded to whichever indexer --network selects, but the printed
+  // link was hard-defaulted to https://bitbadges.io. So `bb preview --local`
+  // uploaded locally and handed back a mainnet URL whose prv_ code does not
+  // exist there — a dead link, with no error to tell anyone.
+  it('points local uploads at the local frontend', () => {
+    expect(resolveFrontendBaseForCli({ local: true })).toBe('http://localhost:3000');
+    expect(resolveFrontendBaseForCli({ network: 'local' })).toBe('http://localhost:3000');
+  });
+
+  it('points testnet uploads at the testnet frontend', () => {
+    expect(resolveFrontendBaseForCli({ testnet: true })).toBe('https://testnet.bitbadges.io');
+    expect(resolveFrontendBaseForCli({ network: 'testnet' })).toBe('https://testnet.bitbadges.io');
+  });
+
+  it('defaults to mainnet', () => {
+    expect(resolveFrontendBaseForCli({})).toBe('https://bitbadges.io');
+  });
+
+  it('always honors an explicit --frontend-url', () => {
+    expect(resolveFrontendBaseForCli({ local: true, frontendUrl: 'https://staging.bitbadges.io' })).toBe('https://staging.bitbadges.io');
+  });
+});
+

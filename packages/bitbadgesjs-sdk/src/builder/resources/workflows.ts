@@ -36,7 +36,7 @@ Step 4: Build the transfer to obtain tokens
   → Or for smart tokens: build_transfer(collectionId, backingAddr, yourAddress, intent: "deposit")
 
 Step 5: Sign and broadcast
-  → Return transaction JSON for user to sign with their wallet and broadcast
+  → get_review_url → give the user the returned reviewUrl. They open bitbadges.io, review it, and sign with their own wallet. You never sign.
 
 Step 6: Retry the original request with proof
   → Sign the server's challenge message
@@ -96,7 +96,7 @@ Step 4: If payment-related error
 
 Step 5: Validate and retry
   → validate_transaction(newTransactionJson)
-  → Return transaction JSON for user to sign with their wallet and broadcast
+  → get_review_url → give the user the returned reviewUrl. They open bitbadges.io, review it, and sign with their own wallet. You never sign.
 \`\`\``,
 
   smartTokenVault: `## Smart Token Vault: Deposit and Withdraw
@@ -134,7 +134,7 @@ Step 1: Define your off-chain criteria
 Step 2: For each verified user, create an on-chain attestation
   Option A — Mint an NFT to them:
     → build_transfer(collectionId, "Mint", userAddress, intent: "mint")
-    → Return transaction JSON for user to sign and broadcast    → User now holds an on-chain proof of verification
+    → get_review_url → give the user the returned reviewUrl. They open bitbadges.io, review it, and sign with their own wallet. You never sign. Once signed, the user holds an on-chain proof of verification.
 
   Option B — Add to a dynamic store (via claims API):
     → POST to claims API to add address to a dynamic store
@@ -147,7 +147,7 @@ Step 3: Use the on-chain primitive everywhere
   → Any on-chain logic can now reference the AI's off-chain decision
 \`\`\`
 
-See get_skill_instructions("ai-criteria-gate") for full details.`,
+See get_skill_instructions("bb-402") for the token-gated access pattern; get_skill_instructions lists every valid id.`,
 
   exploreCollection: `## Explore an Unknown Collection
 
@@ -173,7 +173,7 @@ Step 4: Determine what you can do
 
 Step 5: Act
   → build_transfer with the appropriate intent
-  → Return transaction JSON for user to sign with their wallet and broadcast
+  → get_review_url → give the user the returned reviewUrl. They open bitbadges.io, review it, and sign with their own wallet. You never sign.
 \`\`\``,
 
   dynamicStoreAllowlist: `## Dynamic Store: Create and Manage an Allowlist
@@ -183,7 +183,7 @@ Set up an on-chain allowlist that gates token transfers:
 \`\`\`
 Step 1: Create the store
   → build_dynamic_store(action: "create", creator: yourAddress, defaultValue: false)
-  → Return transaction JSON for user to sign and broadcast → note the storeId from events
+  → get_review_url → give the user the returned reviewUrl. They open bitbadges.io, review it, and sign with their own wallet. You never sign. Note the storeId from the events once it lands.
 
 Step 2: Add approved addresses
   → build_dynamic_store(action: "batch_set_values", storeId, entries: [{address, value: true}, ...])
@@ -214,7 +214,7 @@ Step 1: Build the collection
   → Use get_transaction to retrieve the built transaction
 
 Step 2: Review
-  → review_collection(collection: result.transaction, context: "nft art collection")
+  → review_collection(collection: result.transaction)
   → Review all CRITICAL findings — these MUST be fixed
   → Review all WARNING findings — decide if they're intentional
 
@@ -229,13 +229,13 @@ Step 4: Re-review
 
 Step 5: Deploy
   → validate_transaction(transaction)
-  → Return transaction JSON for user to sign with their wallet and broadcast
+  → get_review_url → give the user the returned reviewUrl. They open bitbadges.io, review it, and sign with their own wallet. You never sign.
 \`\`\`
 
 Can also review existing on-chain collections:
 \`\`\`
 Step 1: → query_collection(collectionId)
-Step 2: → review_collection(collection: queryResult, context: "description")
+Step 2: → review_collection(collection: queryResult)
 Step 3: → Present findings to user
 \`\`\``
 };

@@ -48,7 +48,7 @@ Happy path for a new collection:
 
 Session state is global and survives across builds. Call reset_session before starting a second collection in the same conversation, or you will inherit the first one's approvals and metadata.
 
-Conventions: every number is a string. Ranges are {start, end} with string bounds. Leave an image as "" when the user gave you no art and get_transaction fills it. Collection messages are always /tokenization.MsgUniversalUpdateCollection.`;
+Conventions: every number is a string. Ranges are {start, end} with string bounds. Leave an image as "" when the user gave you no art and get_transaction fills it. You describe collections as MsgUniversalUpdateCollection, but get_transaction narrows the output to /tokenization.MsgCreateCollection for a new collection and MsgUpdateCollection for an edit. That is expected.`;
 }
 
 export function createServer(): Server {

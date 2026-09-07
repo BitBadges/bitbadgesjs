@@ -164,7 +164,7 @@ const MustOwnTokensSchema = z.object({
 export const addApprovalSchema = z.object({
   sessionId: z.string().optional().describe("Session ID for per-request isolation."),
   creatorAddress: z.string().optional().describe('Creator bb1... address. Used to auto-create session if needed.'),
-  approvalId: z.string().describe('Unique ID for this approval. Use descriptive names: "public-mint", "manager-mint", "subscription-mint", "transferable", "smart-token-backing", "smart-token-unbacking". Frontend displays this to users.'),
+  approvalId: z.string().describe('Unique approval ID. For a NEW approval, get it from generate_unique_id with a descriptive prefix ("public-mint", "manager-mint", "transferable", "smart-token-backing") — never hand-write one, ids must not collide. For an EXISTING approval you are editing, reuse its original id exactly: on-chain trackers are keyed by it. Shown to users in the frontend.'),
   fromListId: z.string().describe('Who can send. "Mint" for minting. "!Mint" for post-mint transfers. "All" for anyone. bb1... for specific address. "!Mint:bb1..." for exclusion syntax (smart token unbacking).'),
   toListId: z.string().optional().default('All').describe('Who can receive. "All" for anyone. bb1... for specific address (e.g., backing address for unbacking).'),
   initiatedByListId: z.string().optional().default('All').describe('Who can initiate. "All" for public. bb1... for manager-only. Must be a reserved list ID.'),
@@ -232,7 +232,7 @@ export const addApprovalTool = {
     properties: {
       sessionId: { type: 'string', description: 'Session ID.' },
       creatorAddress: { type: 'string', description: 'Creator address (bb1... or 0x...).' },
-      approvalId: { type: 'string', description: 'Unique approval ID. Use descriptive names: "public-mint", "manager-mint", "subscription-mint", "transferable", "smart-token-backing", "smart-token-unbacking".' },
+      approvalId: { type: 'string', description: 'Unique approval ID. For a NEW approval, get it from generate_unique_id with a descriptive prefix ("public-mint", "manager-mint", "transferable", "smart-token-backing") — never hand-write one, ids must not collide. For an EXISTING approval you are editing, reuse its original id exactly: on-chain trackers are keyed by it. Shown to users in the frontend.' },
       fromListId: { type: 'string', description: 'Who can send. "Mint" for minting. "!Mint" for post-mint transfers. bb1... or 0x... for specific address.' },
       toListId: { type: 'string', description: 'Who can receive. Default "All".' },
       initiatedByListId: { type: 'string', description: 'Who can initiate. "All" for public, bb1... or 0x... for manager-only.' },

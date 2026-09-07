@@ -19,7 +19,7 @@ export type ResetSessionInput = z.infer<typeof resetSessionSchema>;
 export const resetSessionTool = {
   name: 'reset_session',
   description:
-    'Clear all session state and start from a blank collection. Call this BEFORE building a second collection in the same conversation: session state is global and persists, so without it the new collection inherits the previous one\'s approvals, metadata, alias paths, and transfers. Takes an optional sessionId; omit it for the default session.',
+    "Clear all session state and start from a blank collection. Call this BEFORE building a second collection in the same conversation: session state is global and persists, so without it the new collection inherits the previous one's approvals, metadata, alias paths, and transfers. Takes an optional sessionId; omit it for the default session.",
   inputSchema: {
     type: 'object' as const,
     properties: {
