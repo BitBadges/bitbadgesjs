@@ -28,7 +28,6 @@ function baseCtx(overrides: Partial<PromptContext> = {}): PromptContext {
     creatorAddress: 'bb1test',
     prompt: 'make an NFT collection',
     selectedSkills: [],
-    promptSkillIds: [],
     isRefinement: false,
     isUpdate: false,
     ...overrides
@@ -172,7 +171,6 @@ describe('assemblePromptParts', () => {
     expect(parts.userContent.length).toBe(1);
     expect(parts.userContent[0].cache_control).toBeUndefined();
     expect(parts.userContent[0].text.length).toBeGreaterThan(0);
-    expect(parts.communitySkillsIncluded).toEqual([]);
   });
 
   it('create mode with selectedSkills returns 2 blocks with cache_control on the first', async () => {
@@ -216,11 +214,9 @@ describe('assemblePromptParts', () => {
 });
 
 describe('assembleExportPrompt', () => {
-  it('returns { prompt, communitySkillsIncluded }', async () => {
+  it('returns { prompt }', async () => {
     const result = await assembleExportPrompt(baseCtx());
     expect(result).toHaveProperty('prompt');
-    expect(result).toHaveProperty('communitySkillsIncluded');
-    expect(Array.isArray(result.communitySkillsIncluded)).toBe(true);
   });
 
   it('prompt contains both the export system prompt AND the user request', async () => {

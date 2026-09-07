@@ -77,7 +77,7 @@ export const TAG_DESCRIPTIONS: Record<string, string> = {
 };
 
 // ---------------------------------------------------------------------------
-// Routes (140 total)
+// Routes (134 total)
 // ---------------------------------------------------------------------------
 
 export const ROUTES: ApiRoute[] = [
@@ -1909,89 +1909,6 @@ export const ROUTES: ApiRoute[] = [
       request: 'iGetStatusPayload',
       response: 'iGetStatusSuccessResponse',
       function: 'BitBadgesAPI.getStatus',
-    },
-  },
-  {
-    name: 'get-prompt-skill',
-    tag: 'misc',
-    method: 'GET',
-    path: '/promptSkill/{promptSkillId}',
-    description: 'Get Prompt Skill',
-    pathParams: ['promptSkillId'],
-    hasBody: false,
-    sdkLinks: {
-      response: 'iGetPromptSkillSuccessResponse',
-      function: 'BitBadgesAPI.getPromptSkill',
-    },
-  },
-  {
-    name: 'search-prompt-skills',
-    tag: 'misc',
-    method: 'GET',
-    path: '/promptSkills/search',
-    description: 'Search Prompt Skills',
-    pathParams: [],
-    hasBody: false,
-    sdkLinks: {
-      request: 'iSearchPromptSkillsPayload',
-      response: 'iSearchPromptSkillsSuccessResponse',
-      function: 'BitBadgesAPI.searchPromptSkills',
-    },
-  },
-  {
-    name: 'fetch-prompt-skills',
-    tag: 'misc',
-    method: 'POST',
-    path: '/promptSkills/fetch',
-    description: 'Fetch Prompt Skills (Batch)',
-    pathParams: [],
-    hasBody: true,
-    sdkLinks: {
-      request: 'iFetchPromptSkillsPayload',
-      response: 'iFetchPromptSkillsSuccessResponse',
-      function: 'BitBadgesAPI.fetchPromptSkills',
-    },
-  },
-  {
-    name: 'create-prompt-skill',
-    tag: 'misc',
-    method: 'POST',
-    path: '/promptSkills',
-    description: 'Create Prompt Skill',
-    pathParams: [],
-    hasBody: true,
-    sdkLinks: {
-      request: 'iCreatePromptSkillPayload',
-      response: 'iCreatePromptSkillSuccessResponse',
-      function: 'BitBadgesAPI.createPromptSkill',
-    },
-  },
-  {
-    name: 'update-prompt-skill',
-    tag: 'misc',
-    method: 'PUT',
-    path: '/promptSkills',
-    description: 'Update Prompt Skill',
-    pathParams: [],
-    hasBody: true,
-    sdkLinks: {
-      request: 'iUpdatePromptSkillPayload',
-      response: 'iUpdatePromptSkillSuccessResponse',
-      function: 'BitBadgesAPI.updatePromptSkill',
-    },
-  },
-  {
-    name: 'delete-prompt-skill',
-    tag: 'misc',
-    method: 'DELETE',
-    path: '/promptSkills',
-    description: 'Delete Prompt Skill',
-    pathParams: [],
-    hasBody: true,
-    sdkLinks: {
-      request: 'iDeletePromptSkillPayload',
-      response: 'iDeletePromptSkillSuccessResponse',
-      function: 'BitBadgesAPI.deletePromptSkill',
     },
   },
   {

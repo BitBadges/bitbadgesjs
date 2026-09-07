@@ -299,7 +299,7 @@ export class BitBadgesBuilderAgent {
   async exportPrompt(
     prompt: string,
     options?: BuildOptions
-  ): Promise<{ prompt: string; communitySkillsIncluded: string[] }> {
+  ): Promise<{ prompt: string }> {
     if (!prompt || typeof prompt !== 'string') {
       throw new BitBadgesBuilderAgentError('`prompt` is required and must be a string', 'INVALID_PROMPT');
     }
@@ -315,7 +315,6 @@ export class BitBadgesBuilderAgent {
         prompt,
         creatorAddress,
         selectedSkills: effectiveSkills,
-        promptSkillIds: options?.promptSkillIds ?? [],
         contextHelpers: options?.contextHelpers,
         metadata: options?.metadata,
         availableImagePlaceholders: options?.availableImagePlaceholders,
@@ -328,7 +327,6 @@ export class BitBadgesBuilderAgent {
         diffLog: options?.diffLog
       },
       {
-        communitySkillsFetcher: this.options.communitySkillsFetcher,
         // Thread the ctor's append slot through so exportPrompt produces
         // the same system-prompt shape as build(). Previously missed —
         // users setting systemPromptAppend saw their customization land
@@ -348,8 +346,7 @@ export class BitBadgesBuilderAgent {
    * bots with well-formed prompts). Server-side consumers that expose
    * this agent to untrusted users (e.g. the BitBadges indexer) apply
    * `containsInjection` at their trust boundary before calling
-   * `build()`. Community-skill text coming from third parties IS
-   * sanitized here — see `prompt.ts` `fetchCommunitySkillsSection`.
+   * `build()`.
    */
   async build(prompt: string, options?: BuildOptions): Promise<BuildResult> {
     if (!prompt || typeof prompt !== 'string') {
@@ -599,7 +596,6 @@ export class BitBadgesBuilderAgent {
         prompt,
         creatorAddress,
         selectedSkills: finalSkills,
-        promptSkillIds: options?.promptSkillIds ?? [],
         contextHelpers: options?.contextHelpers,
         metadata: options?.metadata,
         availableImagePlaceholders: options?.availableImagePlaceholders,
@@ -612,7 +608,6 @@ export class BitBadgesBuilderAgent {
         diffLog: options?.diffLog
       },
       {
-        communitySkillsFetcher: this.options.communitySkillsFetcher,
         systemPromptOverride: this.options.systemPrompt,
         systemPromptAppend: this.options.systemPromptAppend
       }

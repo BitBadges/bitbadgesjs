@@ -85,7 +85,6 @@ import {
   type iPluginDoc,
   type iPluginVersionConfig,
   type iProfileDoc,
-  type iPromptSkillDoc,
   type iQueueDoc,
   type iRefreshDoc,
   type iSIWBBRequestDoc,
@@ -1917,49 +1916,6 @@ export class DeveloperAppDoc<T extends NumberType> extends BaseNumberTypeClass<D
 
   clone(): DeveloperAppDoc<T> {
     return super.clone() as DeveloperAppDoc<T>;
-  }
-}
-
-/**
- * @inheritDoc iPromptSkillDoc
- * @category Plugins
- */
-export class PromptSkillDoc extends CustomTypeClass<PromptSkillDoc> implements iPromptSkillDoc {
-  _docId: string;
-  _id?: string;
-  promptSkillId: string;
-  promptText: string;
-  createdBy: string;
-  name: string;
-  image: string;
-  description: string;
-  category: string;
-  tags: string[];
-  numUses: number;
-  toPublish: boolean;
-  approvalStatus: 'approved' | 'pending' | 'rejected';
-  version: number;
-  createdAt: number;
-  updatedAt: number;
-
-  constructor(data: iPromptSkillDoc) {
-    super();
-    this._docId = data._docId;
-    this._id = data._id;
-    this.promptSkillId = data.promptSkillId;
-    this.promptText = data.promptText;
-    this.createdBy = data.createdBy;
-    this.name = data.name;
-    this.image = data.image;
-    this.description = data.description;
-    this.category = data.category;
-    this.tags = data.tags;
-    this.numUses = data.numUses;
-    this.toPublish = data.toPublish;
-    this.approvalStatus = data.approvalStatus;
-    this.version = data.version;
-    this.createdAt = data.createdAt;
-    this.updatedAt = data.updatedAt;
   }
 }
 

@@ -292,15 +292,13 @@ describe('BitBadgesBuilderAgent — skill introspection', () => {
 });
 
 describe('BitBadgesBuilderAgent — exportPrompt', () => {
-  it('returns { prompt, communitySkillsIncluded } with Output Format in the prompt', async () => {
+  it('returns { prompt } with Output Format in the prompt', async () => {
     const agent = new BitBadgesBuilderAgent({
       anthropicKey: 'k',
       defaultCreatorAddress: 'bb1test'
     });
     const res = await agent.exportPrompt('mint 100 nfts', { selectedSkills: ['nft-collection'] });
     expect(res).toHaveProperty('prompt');
-    expect(res).toHaveProperty('communitySkillsIncluded');
-    expect(Array.isArray(res.communitySkillsIncluded)).toBe(true);
     expect(res.prompt).toContain('Output Format');
     expect(res.prompt).toContain('mint 100 nfts');
   });
@@ -529,33 +527,7 @@ describe('BitBadgesBuilderAgent — onCompletion always fires', () => {
 });
 
 describe('BitBadgesBuilderAgent — community skills fetcher localhost bypass', () => {
-  it('skips API key requirement when API URL is localhost', async () => {
-    const { createBitBadgesCommunitySkillsFetcher } = await import('./communitySkills.js');
-    const mockFetch = jest.fn(async () =>
-      ({ ok: true, json: async () => ({ skills: [{ name: 'x', promptText: 'y' }] }) } as any)
-    );
-    const fetcher = createBitBadgesCommunitySkillsFetcher({
-      apiUrl: 'http://localhost:3001',
-      // apiKey intentionally omitted — should still fetch under localhost mode
-      fetchFn: mockFetch
-    });
-    const result = await fetcher(['some-id'], 'bb1caller');
-    expect(mockFetch).toHaveBeenCalled();
-    expect(result.length).toBe(1);
-  });
 
-  it('still requires API key for non-localhost URLs', async () => {
-    const { createBitBadgesCommunitySkillsFetcher } = await import('./communitySkills.js');
-    const mockFetch = jest.fn();
-    const fetcher = createBitBadgesCommunitySkillsFetcher({
-      apiUrl: 'https://api.bitbadges.io',
-      // apiKey intentionally omitted
-      fetchFn: mockFetch
-    });
-    const result = await fetcher(['some-id'], 'bb1caller');
-    expect(mockFetch).not.toHaveBeenCalled();
-    expect(result).toEqual([]);
-  });
 });
 
 describe('toolAdapter — mergeDefaults undefined filter', () => {

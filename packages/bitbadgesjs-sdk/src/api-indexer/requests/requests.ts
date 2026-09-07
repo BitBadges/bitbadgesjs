@@ -58,7 +58,6 @@ import {
   type iClaimReward,
   type iDeveloperAppDoc,
   type iPluginDoc,
-  type iPromptSkillDoc,
   type iStatusDoc,
   type iTransferActivityDoc
 } from '@/api-indexer/docs-types/interfaces.js';
@@ -4234,110 +4233,6 @@ export class GetOnChainDynamicStoreValuesPaginatedSuccessResponse<T extends Numb
   }
 }
 
-/**
- * @category API Requests / Responses
- */
-export interface iCreatePromptSkillPayload {
-  promptText: string;
-  name: string;
-  image: string;
-  description: string;
-  category: string;
-  tags: string[];
-  toPublish?: boolean;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iCreatePromptSkillSuccessResponse {
-  promptSkillId: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class CreatePromptSkillSuccessResponse extends CustomTypeClass<CreatePromptSkillSuccessResponse> implements iCreatePromptSkillSuccessResponse {
-  promptSkillId: string;
-  constructor(data: iCreatePromptSkillSuccessResponse) {
-    super();
-    this.promptSkillId = data.promptSkillId;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iUpdatePromptSkillPayload {
-  promptSkillId: string;
-  promptText?: string;
-  name?: string;
-  image?: string;
-  description?: string;
-  category?: string;
-  tags?: string[];
-  toPublish?: boolean;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iUpdatePromptSkillSuccessResponse {}
-
-/**
- * @category API Requests / Responses
- */
-export class UpdatePromptSkillSuccessResponse extends EmptyResponseClass {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iDeletePromptSkillPayload {
-  promptSkillId: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iDeletePromptSkillSuccessResponse {}
-
-/**
- * @category API Requests / Responses
- */
-export class DeletePromptSkillSuccessResponse extends EmptyResponseClass {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iSearchPromptSkillsPayload {
-  searchValue?: string;
-  category?: string;
-  bookmark?: string;
-  creatorAddress?: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iSearchPromptSkillsSuccessResponse {
-  promptSkills: iPromptSkillDoc[];
-  bookmark?: string;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class SearchPromptSkillsSuccessResponse extends CustomTypeClass<SearchPromptSkillsSuccessResponse> implements iSearchPromptSkillsSuccessResponse {
-  promptSkills: iPromptSkillDoc[];
-  bookmark?: string;
-
-  constructor(data: iSearchPromptSkillsSuccessResponse) {
-    super();
-    this.promptSkills = data.promptSkills;
-    this.bookmark = data.bookmark;
-  }
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Skip:Go passthrough types (cross-chain swap routing).
 //
@@ -5636,64 +5531,5 @@ export class SimulateTxEvmSuccessResponse
     super();
     this.gas_used = data.gas_used;
     this.success = data.success;
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// PromptSkill — individual GET + batch fetch.
-// Create / update / delete / search types already exist above.
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetPromptSkillPayload {}
-
-/**
- * @category API Requests / Responses
- */
-export interface iGetPromptSkillSuccessResponse {
-  promptSkill: iPromptSkillDoc;
-}
-
-/**
- * @category API Requests / Responses
- */
-export class GetPromptSkillSuccessResponse extends CustomTypeClass<GetPromptSkillSuccessResponse> implements iGetPromptSkillSuccessResponse {
-  promptSkill: iPromptSkillDoc;
-
-  constructor(data: iGetPromptSkillSuccessResponse) {
-    super();
-    this.promptSkill = data.promptSkill;
-  }
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iFetchPromptSkillsPayload {
-  /** IDs to fetch (1–25). */
-  promptSkillIds: string[];
-}
-
-/**
- * @category API Requests / Responses
- */
-export interface iFetchPromptSkillsSuccessResponse {
-  promptSkills: iPromptSkillDoc[];
-}
-
-/**
- * @category API Requests / Responses
- */
-export class FetchPromptSkillsSuccessResponse
-  extends CustomTypeClass<FetchPromptSkillsSuccessResponse>
-  implements iFetchPromptSkillsSuccessResponse
-{
-  promptSkills: iPromptSkillDoc[];
-
-  constructor(data: iFetchPromptSkillsSuccessResponse) {
-    super();
-    this.promptSkills = data.promptSkills;
   }
 }

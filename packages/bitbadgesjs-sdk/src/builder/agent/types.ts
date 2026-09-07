@@ -99,7 +99,6 @@ export interface PromptContext {
   creatorAddress: string;
   prompt: string;
   selectedSkills: string[];
-  promptSkillIds: string[];
   contextHelpers?: any;
   metadata?: any;
   /** Names of uploaded image placeholders (e.g. ["IMAGE_1", "IMAGE_2"]). */
@@ -133,18 +132,7 @@ export interface PromptParts {
    * loop reads `userContent` to get the cache boundaries.
    */
   userContent: Array<{ type: 'text'; text: string; cache_control?: { type: 'ephemeral' } }>;
-  communitySkillsIncluded: string[];
 }
-
-/**
- * Pluggable community-skill fetcher. The SDK has no DB dependency —
- * callers (e.g. the indexer) wire a Mongo/Redis/file-backed fetcher here.
- * Returning an empty array is fine and fully supported (zero-config mode).
- */
-export type CommunitySkillsFetcher = (
-  promptSkillIds: string[],
-  creatorAddress: string
-) => Promise<Array<{ name: string; promptText: string }>>;
 
 /**
  * Pluggable on-chain snapshot resolver for update flows.
@@ -481,9 +469,6 @@ export interface BitBadgesBuilderAgentOptions {
    */
   sessionTtlSeconds?: number;
 
-  /** Pluggable community-skills fetcher (indexer plugs in Mongo; default no-op). */
-  communitySkillsFetcher?: CommunitySkillsFetcher;
-
   /** Pluggable on-chain snapshot resolver for update-mode diff review. */
   onChainSnapshotFetcher?: OnChainSnapshotFetcher;
 
@@ -533,7 +518,6 @@ export interface BuildOptions {
   sessionId?: string;
   mode?: BuildMode;
   selectedSkills?: string[];
-  promptSkillIds?: string[];
   contextHelpers?: ContextHelpers;
   metadata?: any;
   availableImagePlaceholders?: string[];

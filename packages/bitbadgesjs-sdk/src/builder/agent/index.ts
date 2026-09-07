@@ -21,10 +21,6 @@ export { MODELS, resolveModel, computeCostUsd } from './models.js';
 // Exposed so third-party devs writing custom tools can type `agent.tools`
 // (returned from `agent.tools` getter) and implement their own registries.
 export type { AgentToolRegistry, AgentTool, AnthropicTool } from './toolAdapter.js';
-export {
-  createBitBadgesCommunitySkillsFetcher,
-  type BitBadgesCommunitySkillsFetcherOptions
-} from './communitySkills.js';
 export { getAllSkillInstructions, type SkillInstruction } from '../resources/skillInstructions.js';
 export {
   inferTokenTypeFromPrompt,
@@ -92,7 +88,6 @@ export type {
   // Custom tools / injectables
   CustomTool,
   ToolExecutionContext,
-  CommunitySkillsFetcher,
   OnChainSnapshotFetcher,
   TransactionSimulator,
   PromptContext,
