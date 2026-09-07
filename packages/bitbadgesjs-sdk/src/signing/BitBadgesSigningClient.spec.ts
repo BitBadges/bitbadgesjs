@@ -51,6 +51,10 @@ class MockCosmosAdapter implements WalletAdapter {
   supportsEvmTransaction(): boolean {
     return false;
   }
+
+  supportsSignTypedData(): boolean {
+    return false;
+  }
 }
 
 /**
@@ -78,6 +82,10 @@ class MockEvmAdapter implements WalletAdapter {
 
   supportsEvmTransaction(): boolean {
     return true;
+  }
+
+  supportsSignTypedData(): boolean {
+    return false;
   }
 }
 
