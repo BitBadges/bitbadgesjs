@@ -1,7 +1,9 @@
 import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
+import { buildEIP712TypedData, buildEip712TxBroadcastBody, recoverEvmPublicKey } from '@/eip712/index.js';
 import { generateEndpointAccount, type AccountResponse } from '@/node-rest-api/account.js';
 import { createTransactionPayload, createTxBroadcastBody, type TxContext } from '@/transactions/messages/base.js';
 import { toUint64, type Fee } from '@/transactions/messages/common.js';
+import { createProtoMsg } from '@/transactions/messages/utils.js';
 import type { Message } from '@bufbuild/protobuf';
 import axios, { type AxiosInstance } from 'axios';
 import type { WalletAdapter } from './adapters/WalletAdapter.js';
@@ -18,12 +20,7 @@ import {
   type SimulateResult,
   type TransactionMessage
 } from './types.js';
-import {
-  parseSimulationEvents,
-  calculateNetChanges,
-  type SimulationEvent,
-  type TxMessageInfo
-} from '@/core/simulation.js';
+import { parseSimulationEvents, calculateNetChanges, type SimulationEvent, type TxMessageInfo } from '@/core/simulation.js';
 
 /** Default gas limit for Cosmos transactions */
 const DEFAULT_GAS_LIMIT = 400000;
@@ -36,7 +33,26 @@ const DEFAULT_MAX_SEQUENCE_RETRIES = 3;
 /** Default fee denomination */
 const DEFAULT_FEE_DENOM = 'ubadge';
 /** Default gas price in ubadge */
-const DEFAULT_GAS_PRICE = 0.025;
+const DEFAULT_GAS_PRICE = 10;
+const MAX_GAS_LIMIT = 100_000_000;
+
+function validateGasLimit(gasLimit: number): number {
+  if (!Number.isSafeInteger(gasLimit) || gasLimit <= 0 || gasLimit > MAX_GAS_LIMIT) {
+    throw new Error(`Gas must be a positive integer no greater than ${MAX_GAS_LIMIT}`);
+  }
+  return gasLimit;
+}
+
+function validateGasMultiplier(multiplier: number): number {
+  if (!Number.isFinite(multiplier) || multiplier < 1) {
+    throw new Error('Gas multiplier must be finite and at least 1');
+  }
+  return multiplier;
+}
+
+function bufferedGasLimit(gasUsed: number, multiplier: number): number {
+  return validateGasLimit(Math.ceil(validateGasLimit(gasUsed) * validateGasMultiplier(multiplier)));
+}
 
 /**
  * BitBadgesSigningClient provides a wallet-agnostic interface for signing and broadcasting
@@ -106,9 +122,9 @@ export class BitBadgesSigningClient {
 
     this.sequenceRetryEnabled = options.sequenceRetryEnabled !== false; // Default: true
     this.maxSequenceRetries = options.maxSequenceRetries || DEFAULT_MAX_SEQUENCE_RETRIES;
-    this.gasMultiplier = options.gasMultiplier || DEFAULT_GAS_MULTIPLIER;
-    this.defaultGasLimit = options.defaultGasLimit || DEFAULT_GAS_LIMIT;
-    this.evmPrecompileGasLimit = options.evmPrecompileGasLimit || DEFAULT_EVM_PRECOMPILE_GAS_LIMIT;
+    this.gasMultiplier = validateGasMultiplier(options.gasMultiplier ?? DEFAULT_GAS_MULTIPLIER);
+    this.defaultGasLimit = validateGasLimit(options.defaultGasLimit ?? DEFAULT_GAS_LIMIT);
+    this.evmPrecompileGasLimit = validateGasLimit(options.evmPrecompileGasLimit ?? DEFAULT_EVM_PRECOMPILE_GAS_LIMIT);
 
     this.apiKey = options.apiKey;
 
@@ -251,7 +267,7 @@ export class BitBadgesSigningClient {
    * Calculate a fee based on gas limit.
    */
   private calculateFee(gasLimit: number): Fee {
-    const amount = Math.ceil(gasLimit * DEFAULT_GAS_PRICE);
+    const amount = BigInt(validateGasLimit(gasLimit)) * BigInt(DEFAULT_GAS_PRICE);
     return {
       amount: amount.toString(),
       denom: DEFAULT_FEE_DENOM,
@@ -266,7 +282,7 @@ export class BitBadgesSigningClient {
    * @param options - Optional memo
    * @returns Simulation result with gas estimates
    */
-  async simulate(messages: TransactionMessage[], options?: { memo?: string }): Promise<SimulateResult> {
+  async simulate(messages: TransactionMessage[], options?: { memo?: string; gasMultiplier?: number }): Promise<SimulateResult> {
     // EVM path: use eth_estimateGas via the adapter's provider
     if (this.adapter.chainType === 'evm') {
       return this.simulateEvm(messages, options);
@@ -279,10 +295,14 @@ export class BitBadgesSigningClient {
   /**
    * Simulate via Cosmos SDK endpoint.
    */
-  private async simulateCosmos(messages: TransactionMessage[], options?: { memo?: string }): Promise<SimulateResult> {
+  private async simulateCosmos(
+    messages: TransactionMessage[],
+    options?: { memo?: string; gasMultiplier?: number },
+    eip712 = false
+  ): Promise<SimulateResult> {
     const accountInfo = await this.getAccountInfo();
 
-    if (!accountInfo.publicKey) {
+    if (!eip712 && !accountInfo.publicKey) {
       throw new Error('Public key is required for simulation. Sign a transaction first to register the public key on chain.');
     }
 
@@ -304,13 +324,28 @@ export class BitBadgesSigningClient {
       memo: options?.memo || ''
     };
 
-    const broadcastBody = createTxBroadcastBody(txContext, protoMessages, dummySignature);
+    const broadcastBody = eip712
+      ? buildEip712TxBroadcastBody({
+          messages: protoMessages.map((m) => createProtoMsg(m)),
+          compressedPubKey: accountInfo.publicKey
+            ? Buffer.from(accountInfo.publicKey, 'base64')
+            : Buffer.from('0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798', 'hex'),
+          sequence: accountInfo.sequence,
+          fee: { ...txContext.fee!, gas: Number(txContext.fee!.gas) },
+          memo: options?.memo,
+          signatureHex: '0x' + '00'.repeat(65)
+        })
+      : createTxBroadcastBody(txContext, protoMessages, dummySignature);
 
     // Send to simulate endpoint
     const response = await this.axiosInstance.post(`${this.apiUrl}/api/v0/simulate`, JSON.parse(broadcastBody));
 
-    const gasUsed = parseInt(response.data.gas_info?.gas_used || '0', 10);
-    const gasLimit = Math.ceil(gasUsed * this.gasMultiplier);
+    const rawGasUsed = response.data.gas_info?.gas_used;
+    if (typeof rawGasUsed !== 'string' || !/^\d+$/.test(rawGasUsed)) {
+      throw new Error('Simulation gas must be an unsigned decimal string');
+    }
+    const gasUsed = Number(rawGasUsed);
+    const gasLimit = bufferedGasLimit(gasUsed, options?.gasMultiplier ?? this.gasMultiplier);
     const events: SimulationEvent[] = response.data.result?.events || [];
 
     return {
@@ -324,7 +359,7 @@ export class BitBadgesSigningClient {
   /**
    * Simulate via EVM eth_estimateGas.
    */
-  private async simulateEvm(messages: TransactionMessage[], options?: { memo?: string }): Promise<SimulateResult> {
+  private async simulateEvm(messages: TransactionMessage[], options?: { memo?: string; gasMultiplier?: number }): Promise<SimulateResult> {
     if (!this.adapter.estimateEvmGas) {
       throw new Error('EVM adapter does not support gas estimation. Ensure a provider is connected.');
     }
@@ -345,13 +380,15 @@ export class BitBadgesSigningClient {
       throw new Error('Messages are not supported for EVM precompile simulation');
     }
 
-    const gasUsed = Number(await this.adapter.estimateEvmGas({
-      to: payload.evmTx.to,
-      data: payload.evmTx.data,
-      value: payload.evmTx.value
-    }));
+    const gasUsed = Number(
+      await this.adapter.estimateEvmGas({
+        to: payload.evmTx.to,
+        data: payload.evmTx.data,
+        value: payload.evmTx.value
+      })
+    );
 
-    const gasLimit = Math.ceil(gasUsed * this.gasMultiplier);
+    const gasLimit = bufferedGasLimit(gasUsed, options?.gasMultiplier ?? this.gasMultiplier);
 
     return {
       gasUsed,
@@ -430,10 +467,7 @@ export class BitBadgesSigningClient {
    * console.log('Badge changes:', review.netChanges.badgeChanges);
    * ```
    */
-  async simulateAndReview(
-    messages: TransactionMessage[],
-    options?: { memo?: string; txsInfo?: TxMessageInfo[] }
-  ): Promise<SimulateAndReviewResult> {
+  async simulateAndReview(messages: TransactionMessage[], options?: { memo?: string; txsInfo?: TxMessageInfo[] }): Promise<SimulateAndReviewResult> {
     const txsInfo = options?.txsInfo || [];
 
     // Get gas estimation via the standard path
@@ -452,11 +486,7 @@ export class BitBadgesSigningClient {
     const parsed = parseSimulationEvents(events, txsInfo);
 
     // Calculate net changes per address
-    const netChanges = calculateNetChanges(
-      parsed,
-      { amount: simResult.fee.amount, denom: simResult.fee.denom },
-      this.address
-    );
+    const netChanges = calculateNetChanges(parsed, { amount: simResult.fee.amount, denom: simResult.fee.denom }, this.address);
 
     return {
       gasUsed: simResult.gasUsed,
@@ -488,18 +518,47 @@ export class BitBadgesSigningClient {
    * @returns Broadcast result including transaction hash
    */
   async signAndBroadcast(messages: TransactionMessage[], options?: SignAndBroadcastOptions): Promise<BroadcastResult> {
-    // EVM path
-    if (this.adapter.chainType === 'evm') {
+    // Explicit mode override beats adapter-based dispatch.
+    if (options?.mode === 'eip712') {
+      return this.signAndBroadcastEip712(messages, options);
+    }
+    if (options?.mode === 'cosmos') {
+      return this.signAndBroadcastCosmos(messages, options);
+    }
+    if (options?.mode === 'precompile') {
       return this.signAndBroadcastEvm(messages, options);
     }
 
-    // Cosmos path
+    // Default dispatch: chainType decides.
+    if (this.adapter.chainType === 'evm') {
+      return this.signAndBroadcastEvm(messages, options);
+    }
     return this.signAndBroadcastCosmos(messages, options);
   }
 
   /**
    * Sign and broadcast using Cosmos signing.
    */
+  private async resolveCosmosFee(messages: TransactionMessage[], options?: SignAndBroadcastOptions, eip712 = false): Promise<Fee> {
+    validateGasMultiplier(options?.gasMultiplier ?? this.gasMultiplier);
+    if (options?.fee) {
+      const fee = options.fee;
+      if (
+        typeof fee.gas !== 'string' ||
+        typeof fee.amount !== 'string' ||
+        !/^\d+$/.test(fee.gas) ||
+        !/^\d+$/.test(fee.amount) ||
+        fee.denom !== DEFAULT_FEE_DENOM
+      ) {
+        throw new Error('Cosmos fee must use integer gas and amount in ubadge');
+      }
+      const minimumFee = this.calculateFee(Number(fee.gas));
+      if (BigInt(fee.amount) < BigInt(minimumFee.amount)) throw new Error(`Cosmos fee must be at least ${DEFAULT_GAS_PRICE} ubadge per gas`);
+      return fee;
+    }
+    return options?.simulate === false ? this.calculateFee(this.defaultGasLimit) : (await this.simulateCosmos(messages, options, eip712)).fee;
+  }
+
   private async signAndBroadcastCosmos(messages: TransactionMessage[], options?: SignAndBroadcastOptions, retryCount = 0): Promise<BroadcastResult> {
     const accountInfo = await this.getAccountInfo();
 
@@ -515,24 +574,7 @@ export class BitBadgesSigningClient {
 
     const protoMessages = this.normalizeMessages(messages);
 
-    // Determine fee
-    let fee: Fee;
-    if (options?.fee) {
-      fee = options.fee;
-    } else if (options?.simulate !== false) {
-      // Simulate to get gas estimate (default behavior)
-      try {
-        const simResult = await this.simulate(messages, { memo: options?.memo });
-        const multiplier = options?.gasMultiplier || this.gasMultiplier;
-        const adjustedGas = Math.ceil(simResult.gasUsed * multiplier);
-        fee = this.calculateFee(adjustedGas);
-      } catch {
-        // Fallback to default gas if simulation fails
-        fee = this.calculateFee(this.defaultGasLimit);
-      }
-    } else {
-      fee = this.calculateFee(this.defaultGasLimit);
-    }
+    const fee = await this.resolveCosmosFee(messages, options);
 
     // Create transaction context
     const txContext: TxContext = {
@@ -620,6 +662,104 @@ export class BitBadgesSigningClient {
   }
 
   /**
+   * Sign and broadcast a Cosmos message via EIP-712 typed-data signed
+   * by an EVM wallet.
+   *
+   * The EVM wallet signs the EIP-712 hash of the Amino StdSignDoc; the
+   * resulting signature attaches to a regular legacyAmino-mode TxRaw
+   * with an `ethsecp256k1.PubKey` SignerInfo. The chain's
+   * `cosmos/evm` ante handler dispatches on PubKey type and uses the
+   * EIP-712 fallback inside `ethsecp256k1.VerifySignature` to accept
+   * the signature without any special tx envelope.
+   *
+   * @param messages - Cosmos messages to include in the tx.
+   * @param options - Standard sign-and-broadcast options. `mode` is
+   *   ignored here (this method is the eip712 mode).
+   */
+  private async signAndBroadcastEip712(messages: TransactionMessage[], options?: SignAndBroadcastOptions, retryCount = 0): Promise<BroadcastResult> {
+    if (!this.adapter.signTypedData) {
+      throw new Error('Adapter does not support EIP-712 typed-data signing (signTypedData missing)');
+    }
+
+    const accountInfo = await this.getAccountInfo();
+    const protoMessages = this.normalizeMessages(messages);
+    const generated = protoMessages.map((m) => createProtoMsg(m));
+
+    const fee = await this.resolveCosmosFee(messages, options, true);
+
+    // Build the EIP-712 typed-data the wallet will sign.
+    const typed = buildEIP712TypedData({
+      messages: generated,
+      cosmosChainId: this.chainId,
+      eip155ChainId: this.evmChainId,
+      fee: { amount: fee.amount, denom: fee.denom, gas: parseInt(fee.gas, 10) },
+      memo: options?.memo,
+      sequence: accountInfo.sequence,
+      accountNumber: accountInfo.accountNumber
+    });
+
+    // Sign via the EVM wallet (eth_signTypedData_v4 / Signer.signTypedData).
+    const signatureHex = await this.adapter.signTypedData(typed);
+
+    // Recover the compressed pubkey from the signature so we can
+    // populate the AuthInfo's SignerInfo with the right key. Most EVM
+    // wallets don't expose `eth_getPublicKey`, so this is the canonical
+    // way to obtain it.
+    const { compressedPubKeyBytes } = recoverEvmPublicKey(typed, signatureHex);
+
+    // Build the broadcast body using the SAME (sequence, fee, memo,
+    // messages) the user signed. Drift here = ante handler rejects.
+    const broadcastBody = buildEip712TxBroadcastBody({
+      messages: generated,
+      compressedPubKey: compressedPubKeyBytes,
+      sequence: accountInfo.sequence,
+      fee: { amount: fee.amount, denom: fee.denom, gas: parseInt(fee.gas, 10) },
+      memo: options?.memo,
+      signatureHex
+    });
+
+    try {
+      const response = await this.axiosInstance.post(`${this.apiUrl}/api/v0/broadcast`, JSON.parse(broadcastBody));
+      const txResponse = response.data.tx_response;
+      const code = txResponse?.code || 0;
+
+      if (code !== 0 && this.isSequenceMismatchError(txResponse?.raw_log)) {
+        if (this.sequenceRetryEnabled && retryCount < this.maxSequenceRetries) {
+          this.clearCache();
+          return this.signAndBroadcastEip712(messages, options, retryCount + 1);
+        }
+      }
+
+      if (code === 0 && this.cachedAccountInfo) {
+        this.cachedAccountInfo.sequence = toUint64(this.cachedAccountInfo.sequence, 'sequence') + 1n;
+      }
+
+      return {
+        txHash: txResponse?.txhash || '',
+        rawResponse: response.data,
+        success: code === 0,
+        error: code !== 0 ? txResponse?.raw_log : undefined,
+        code
+      };
+    } catch (error: any) {
+      const rawLog = error?.response?.data?.tx_response?.raw_log || error?.message || '';
+      if (this.isSequenceMismatchError(rawLog)) {
+        if (this.sequenceRetryEnabled && retryCount < this.maxSequenceRetries) {
+          this.clearCache();
+          return this.signAndBroadcastEip712(messages, options, retryCount + 1);
+        }
+      }
+      return {
+        txHash: '',
+        rawResponse: error?.response?.data || null,
+        success: false,
+        error: rawLog || 'EIP-712 broadcast failed',
+        code: -1
+      };
+    }
+  }
+
+  /**
    * Sign and broadcast using EVM precompile path.
    */
   private async signAndBroadcastEvm(messages: TransactionMessage[], options?: SignAndBroadcastOptions): Promise<BroadcastResult> {
@@ -648,11 +788,12 @@ export class BitBadgesSigningClient {
 
     // Send via EVM
     try {
+      const gasLimit = options?.simulate === false ? this.evmPrecompileGasLimit : (await this.simulateEvm(messages, options)).gasLimit;
       const txHash = await this.adapter.sendEvmTransaction({
         to: payload.evmTx.to,
         data: payload.evmTx.data,
         value: payload.evmTx.value,
-        gasLimit: this.evmPrecompileGasLimit
+        gasLimit
       });
 
       return {

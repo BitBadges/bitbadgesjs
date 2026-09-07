@@ -1,5 +1,6 @@
 import { BaseWalletAdapter, type WalletAdapter } from './WalletAdapter.js';
 import type { EvmTransaction } from '../types.js';
+import type { EIP712TypedData } from '@/eip712/types.js';
 
 /**
  * Minimal ethers.js Signer interface (v6).
@@ -7,6 +8,18 @@ import type { EvmTransaction } from '../types.js';
  */
 interface EthersSigner {
   getAddress(): Promise<string>;
+  /**
+   * EIP-712 typed-data signing. Optional on the type because the
+   * subset of ethers' Signer interface we want here is small; both
+   * ethers v6 `Signer` and any `JsonRpcSigner` produced by
+   * `BrowserProvider.getSigner()` ship this. We narrow it for our
+   * own `signTypedData` path below.
+   */
+  signTypedData?(
+    domain: any,
+    types: Record<string, { name: string; type: string }[]>,
+    value: Record<string, unknown>
+  ): Promise<string>;
   sendTransaction(tx: {
     to: string;
     data: string;
@@ -266,6 +279,53 @@ export class GenericEvmAdapter extends BaseWalletAdapter implements WalletAdapte
   }
 
   /**
+   * Sign EIP-712 typed-data with the connected EVM wallet.
+   *
+   * The output is a `0x...`-prefixed 65-byte hex signature (r || s || v).
+   * Pair with `recoverEvmPublicKey()` from `@/eip712` to derive the
+   * pubkey used in the Cosmos AuthInfo, or strip the trailing recovery
+   * byte to feed the chain's ethsecp256k1 verifier directly.
+   *
+   * Routes through the wallet's `eth_signTypedData_v4` (EIP-1193) when
+   * available, otherwise through ethers' `Signer.signTypedData`. Native
+   * MetaMask / Privy / Coinbase Smart Wallet take the canonical Cosmos
+   * EVM domain (`verifyingContract: "cosmos"`, `salt: "0"`) without
+   * complaint; ethers v6 hard-rejects it, so prefer the EIP-1193 path
+   * when both are wired.
+   */
+  async signTypedData(typed: EIP712TypedData): Promise<string> {
+    const wireTyped = serializeTypedDataForJsonRpc(typed);
+
+    if (this.provider) {
+      const sig = await this.provider.request({
+        method: 'eth_signTypedData_v4',
+        params: [this.address, JSON.stringify(wireTyped)]
+      });
+      if (typeof sig !== 'string' || !sig.startsWith('0x')) {
+        throw new Error(`signTypedData: provider returned unexpected value: ${String(sig)}`);
+      }
+      return sig;
+    }
+
+    if (this.signer && this.signer.signTypedData) {
+      const { EIP712Domain: _drop, ...typesWithoutDomain } = typed.types;
+      void _drop;
+      // ethers will reject the canonical Cosmos EVM domain — callers
+      // who use the ethers path are expected to provide a domain with
+      // a real `0x...` verifyingContract and bytes32 salt. Surface the
+      // problem early rather than letting it fail at hash time.
+      assertEthersDomainCompatible(typed.domain);
+      return await this.signer.signTypedData(
+        { ...typed.domain, chainId: Number(typed.domain.chainId) },
+        typesWithoutDomain as any,
+        typed.message as any
+      );
+    }
+
+    throw new Error('signTypedData: no signer or provider available on this adapter');
+  }
+
+  /**
    * Send an EVM transaction to a precompile contract.
    *
    * @param tx - The EVM transaction to send
@@ -355,5 +415,55 @@ export class GenericEvmAdapter extends BaseWalletAdapter implements WalletAdapte
 
   supportsEvmTransaction(): boolean {
     return true;
+  }
+
+  supportsSignTypedData(): boolean {
+    return Boolean(this.provider) || Boolean(this.signer && this.signer.signTypedData);
+  }
+}
+
+/**
+ * Convert our `EIP712TypedData` (with `chainId: bigint` and a
+ * user-supplied EIP712Domain entry) into the JSON shape that
+ * `eth_signTypedData_v4` expects when serialized as a string. Wallets
+ * accept the user-supplied domain types and treat `verifyingContract`
+ * as bytes20 / `salt` as bytes32 even when the values are plain
+ * strings — this is what makes the canonical Cosmos EVM domain
+ * (`"cosmos"` + `"0"`) signable by MetaMask et al.
+ */
+function serializeTypedDataForJsonRpc(typed: EIP712TypedData): any {
+  return {
+    types: typed.types,
+    primaryType: typed.primaryType,
+    domain: {
+      name: typed.domain.name,
+      version: typed.domain.version,
+      // `eth_signTypedData_v4` accepts chainId as decimal string.
+      chainId: typed.domain.chainId.toString(),
+      verifyingContract: typed.domain.verifyingContract,
+      salt: typed.domain.salt
+    },
+    message: typed.message
+  };
+}
+
+/**
+ * The ethers v6 typed-data path strictly validates `verifyingContract`
+ * as a 0x-prefixed 20-byte hex string and `salt` as a 32-byte hex
+ * string. The canonical Cosmos EVM domain violates both. Callers who
+ * route through ethers must override the domain to supply spec-shaped
+ * values; we surface the violation immediately rather than letting it
+ * fail at hashing time inside ethers.
+ */
+function assertEthersDomainCompatible(domain: EIP712TypedData['domain']): void {
+  const isHexAddress = /^0x[0-9a-fA-F]{40}$/.test(domain.verifyingContract);
+  const isHexBytes32 = /^0x[0-9a-fA-F]{64}$/.test(domain.salt);
+  if (!isHexAddress || !isHexBytes32) {
+    throw new Error(
+      'signTypedData: ethers Signer path cannot sign the canonical Cosmos EVM domain ' +
+        `(verifyingContract="${domain.verifyingContract}", salt="${domain.salt}"). ` +
+        'Use the EIP-1193 provider path (window.ethereum / Privy / Coinbase) for byte-exact ' +
+        'compatibility with the chain\'s ante handler, or supply a 0x-shaped domain override.'
+    );
   }
 }

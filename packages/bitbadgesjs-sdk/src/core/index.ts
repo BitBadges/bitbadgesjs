@@ -74,3 +74,5 @@ export { runDesignChecks, standardsDecisions, supplyDecisions, transferabilityDe
 export type { DesignDecision, DesignDecisionsResult, DesignDecisionStatus } from './review-types.js';
 
 export * from './builders/index.js';
+
+export * from './eth-signature-message.js';
