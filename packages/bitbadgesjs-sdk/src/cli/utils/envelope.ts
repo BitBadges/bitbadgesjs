@@ -208,7 +208,10 @@ export function emitError(
     return e?.message ?? String(err);
   })();
   const code = opts.code ?? e?.code ?? BBErrorCode.CLI_ERROR;
-  const env = errorEnvelope(code, message, e?.response, e?.hint);
+  // `opts.hint` is the caller's next-step advice and is what an agent uses to
+  // recover. It was being dropped: only the error object's own hint was read,
+  // so every `emitError(err, { hint })` call site silently lost it.
+  const env = errorEnvelope(code, message, opts.meta ?? e?.response, opts.hint ?? e?.hint);
   const text = opts.condensed
     ? JSON.stringify(env, bigIntReplacer)
     : JSON.stringify(env, bigIntReplacer, 2);

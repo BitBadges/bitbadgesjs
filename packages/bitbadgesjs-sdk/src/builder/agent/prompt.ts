@@ -234,7 +234,7 @@ export const TOKEN_EFFICIENCY = `## Token Efficiency & Round Budget
 - Round 1: lookup_token_info + generate_unique_id (parallel; placeholder art is auto-filled server-side — no tool call needed)
 - Round 2: set_standards + set_valid_token_ids + set_invariants + set_permissions + set_default_balances + set_collection_metadata + set_token_metadata + add_approval + set_approval_metadata + add_alias_path (all parallel, single round)
 - Round 3: validate_transaction + review_collection + simulate_transaction (all parallel)
-- Round 4: get_transaction + flag_review_item calls + stop
+- Round 4: get_transaction + stop (flag_review_item goes inline, at the decision — see Self-Review)
 
 **Do NOT call get_transaction before verification.** validate_transaction, review_collection, and simulate_transaction read session state directly — they do not need the tx JSON as input.
 
@@ -332,7 +332,7 @@ export const WORKFLOW_NEW_BUILD = `## Workflow
 1. UNDERSTAND: Read the request and inlined skill instructions. If the request involves features not covered by skills, call search_knowledge_base. Take best interpretation — do not ask clarifying questions.
 2. BUILD: First call generate_unique_id to get unique IDs for all new approvals. Then express the entire collection as parallel tool calls:
    - set_standards, set_valid_token_ids, set_invariants — collection structure
-   - add_approval — one call per approval, using the generated unique IDs
+   - add_approval — one call per approval. Prefer add_preset_approval when a canonical preset fits: call list_presets once first to see them. Presets are far cheaper than hand-writing approvalCriteria and are pre-reviewed., using the generated unique IDs
    - set_permissions — use preset "locked-approvals" (recommended) or custom
    - set_default_balances — almost always: empty balances, all auto-approve flags true
    - set_collection_metadata, set_token_metadata, set_approval_metadata — descriptive content

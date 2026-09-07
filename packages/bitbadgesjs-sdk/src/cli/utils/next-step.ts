@@ -18,6 +18,10 @@ export interface NextStepContext {
 
 export function buildNextStepHint(ctx: NextStepContext): string | undefined {
   if (ctx.deployRequested || ctx.quiet) return undefined;
-  const source = ctx.outputFile ? ctx.outputFile : '-';
-  return `Next: bb preview ${source} --open — opens bitbadges.io to review and sign with your wallet. Audit first with: bb check ${source}`;
+  // Without --output-file the tx only exists on stdout, so naming `-` as a
+  // standalone argument produced a command that hangs on empty stdin. Tell the
+  // caller how to actually re-run it instead.
+  return ctx.outputFile
+    ? `Next: bb check ${ctx.outputFile} && bb preview ${ctx.outputFile} --open — audits it, then opens the browser to review and sign.`
+    : 'Next: pipe it — `bb build … | bb preview - --open` — or re-run with --output-file tx.json and then `bb check tx.json && bb preview tx.json --open`.';
 }

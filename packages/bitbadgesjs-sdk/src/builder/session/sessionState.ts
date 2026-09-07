@@ -137,7 +137,7 @@ export function getOrCreateSession(sessionId?: string, creatorAddress?: string):
             }
           },
           updateManager: true,
-          manager: creatorAddress || '',
+          manager: resolvedCreator || '',
           updateCustomData: false,
           customData: '',
           mintEscrowCoinsToTransfer: [],
@@ -147,6 +147,14 @@ export function getOrCreateSession(sessionId?: string, creatorAddress?: string):
       }]
     };
     sessions.set(sid, session);
+  } else if (resolvedCreator) {
+    // `creatorAddress` is optional on every session tool, so an agent whose
+    // first call omitted it used to be stuck with an empty creator forever —
+    // every later address was silently discarded and get_transaction returned
+    // `creator: ""`. Backfill instead, but never overwrite one already set.
+    const value = session.messages[0].value as Record<string, any>;
+    if (!value.creator) value.creator = resolvedCreator;
+    if (!value.manager) value.manager = resolvedCreator;
   }
   return session;
 }

@@ -6,7 +6,7 @@ export const setCollectionMetadataSchema = z.object({
   creatorAddress: z.string().optional(),
   name: z.string().describe('Collection name. Must be specific and user-facing (e.g., "Premium Membership", "5 ATOM Monthly Subscription").'),
   description: z.string().describe('Collection description. 1-2 sentences, specific, ends with a period.'),
-  image: z.string().describe('Image value. Accepts any of: IMAGE_N placeholder (when user uploaded images), https:// URL, ipfs:// URI, or data:image/svg+xml;base64,... URI from generate_placeholder_art. If no image is available, prefer calling generate_placeholder_art and pasting its imageUri here; an IMAGE_N string you leave unresolved will be auto-filled with generated art at get_transaction time.')
+  image: z.string().describe('Image. Leave it as an empty string "" when the user gave you no art — get_transaction fills blanks with a deterministic SVG seeded by the collection name. Otherwise: IMAGE_N (only if the request listed IMAGE_N placeholders), an https:// URL, an ipfs:// URI, or a data:image/... URI.')
 });
 
 export type SetCollectionMetadataInput = z.infer<typeof setCollectionMetadataSchema>;
@@ -21,7 +21,7 @@ export const setCollectionMetadataTool = {
       creatorAddress: { type: 'string' },
       name: { type: 'string', description: 'Collection name. Specific and user-facing.' },
       description: { type: 'string', description: '1-2 sentences, ends with period.' },
-      image: { type: 'string', description: 'IMAGE_N, https://, ipfs://, or data:image/svg+xml;base64,... (from generate_placeholder_art).' }
+      image: { type: 'string', allowEmpty: true, description: 'Image. Leave it as an empty string "" when the user gave you no art — get_transaction fills blanks with a deterministic SVG seeded by the collection name. Otherwise: IMAGE_N (only if the request listed IMAGE_N placeholders), an https:// URL, an ipfs:// URI, or a data:image/... URI.' }
     },
     required: ['name', 'description', 'image']
   }

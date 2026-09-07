@@ -2,19 +2,24 @@ import { Command } from 'commander';
 import { addNetworkOptions } from '../utils/io.js';
 import { addOutputOptions, emit, emitError, commentary } from '../utils/envelope.js';
 
-export function ensureTxWrapper(input: any): any {
-  if (!input || typeof input !== 'object') return input;
-  if (Array.isArray(input.messages)) return input;
-  if (typeof input.typeUrl === 'string' && input.value) return { messages: [input] };
-  // A universal envelope from `bb build … --output-file tx.json`
-  // ({ok, data, warnings, hint, error}). The build's next-step hint tells the
-  // user to run `bb preview tx.json`, so accept what we told them to produce.
-  // A failed envelope falls through to the shape error rather than previewing
-  // its null data.
-  if (input.ok === true && input.data && typeof input.data === 'object') {
-    return ensureTxWrapper(input.data);
-  }
-  return input;
+import { ensureTxWrapper } from '../utils/txInput.js';
+export { ensureTxWrapper };
+
+/**
+ * Frontend base for the printed link, following the same network the tx was
+ * uploaded to.
+ *
+ * This used to be a commander default of `https://bitbadges.io`, which is
+ * always truthy — so the network flags never influenced it and
+ * `bb preview --testnet` handed back a mainnet URL whose `prv_` code only
+ * existed on testnet. A dead link with no error.
+ */
+export function resolveFrontendBaseForCli(opts: { network?: string; local?: boolean; testnet?: boolean; frontendUrl?: string }): string {
+  if (opts.frontendUrl) return opts.frontendUrl;
+  if (process.env.BITBADGES_FRONTEND_URL) return process.env.BITBADGES_FRONTEND_URL;
+  if (opts.network === 'local' || opts.local) return 'http://localhost:3000';
+  if (opts.network === 'testnet' || opts.testnet) return 'https://testnet.bitbadges.io';
+  return 'https://bitbadges.io';
 }
 
 export const previewCommand = addOutputOptions(
@@ -22,7 +27,7 @@ export const previewCommand = addOutputOptions(
     new Command('preview')
       .description('Upload a tx to the indexer and print a shareable bitbadges.io preview URL. Input: JSON file, inline JSON, or - for stdin.')
       .argument('<input>', 'Tx JSON file path, inline JSON, or "-" for stdin')
-      .option('--frontend-url <url>', 'Override the bitbadges.io frontend base for the printed preview URL', 'https://bitbadges.io')
+      .option('--frontend-url <url>', 'Override the frontend base for the printed link (defaults follow --network)')
       .option('--open', 'Open the review-and-sign URL in your default browser', false)
   )
 ).action(
@@ -104,7 +109,7 @@ export const previewCommand = addOutputOptions(
       expiresIn: string;
     };
 
-    const frontendBase = opts.frontendUrl || 'https://bitbadges.io';
+    const frontendBase = resolveFrontendBaseForCli(opts);
     const { buildReviewUrlFromCode } = await import('../../builder/handoff.js');
     // Review-and-sign: the frontend's local-builder page loads the same
     // `prv_` payload and continues straight into review + wallet signing.

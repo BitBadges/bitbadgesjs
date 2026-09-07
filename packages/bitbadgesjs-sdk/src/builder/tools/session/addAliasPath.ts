@@ -10,12 +10,12 @@ export const addAliasPathSchema = z.object({
   // sidecar entries as off-chain JSON and substitutes the placeholder URIs.
   pathName: z.string().optional().describe('Display name for this alias path (off-chain metadata). Stored in metadataPlaceholders sidecar.'),
   pathDescription: z.string().optional().describe('1-2 sentence description for this alias path (off-chain metadata).'),
-  pathImage: z.string().optional().describe('Image value for this alias path (off-chain metadata). Accepts IMAGE_N, https://, ipfs://, or data:image/svg+xml;base64,... (from generate_placeholder_art). Reusing the collection image here is fine.'),
+  pathImage: z.string().optional().describe('Image value for this alias path (off-chain metadata). Accepts IMAGE_N, https://, ipfs://, or data:image/svg+xml;base64,... URI. Reusing the collection image here is fine; leave it empty to let get_transaction fill it.'),
   // Optional per-denomUnit display content. Indexed by unit position. Same
   // routing — sidecar only, not the proto.
   denomUnitName: z.string().optional().describe('Display name for the default denom unit (off-chain).'),
   denomUnitDescription: z.string().optional().describe('Description for the default denom unit (off-chain).'),
-  denomUnitImage: z.string().optional().describe('Image value for the default denom unit (off-chain). Accepts IMAGE_N, https://, ipfs://, or data:image/svg+xml;base64,... (from generate_placeholder_art). Reusing the collection image here is fine.'),
+  denomUnitImage: z.string().optional().describe('Image value for the default denom unit (off-chain). Accepts IMAGE_N, https://, ipfs://, or data:image/svg+xml;base64,... URI. Reusing the collection image here is fine; leave it empty to let get_transaction fill it.'),
   aliasPath: z.object({
     denom: z.string().describe('Base denom symbol (e.g., "uvatom", "uwusdc"). Must only contain a-zA-Z, _, {, }, -. NEVER use raw IBC denom (ibc/...).'),
     symbol: z.string().describe('Same as denom for the base unit.'),

@@ -1,3 +1,4 @@
+import { ensureTxWrapper } from '../utils/txInput.js';
 import { Command } from 'commander';
 import { addNetworkOptions } from '../utils/io.js';
 
@@ -18,12 +19,6 @@ import { addNetworkOptions } from '../utils/io.js';
  * (`review`).
  */
 
-function ensureTxWrapper(input: any): any {
-  if (!input || typeof input !== 'object') return input;
-  if (Array.isArray(input.messages)) return input;
-  if (typeof input.typeUrl === 'string' && input.value) return { messages: [input] };
-  return input;
-}
 
 export const checkCommand = addNetworkOptions(
   new Command('check')
@@ -168,9 +163,17 @@ export const checkCommand = addNetworkOptions(
         const { renderReview } = await import('../utils/terminal.js');
         process.stderr.write(renderReview(result!, { stream: process.stderr }) + '\n');
       }
+      // Critical findings are an error envelope, not `ok: true` with a
+      // buried verdict. Agents branch on `ok`; it must agree with the exit code.
+      if (result!.summary.critical > 0) {
+        emitError(new Error(`Review verdict: fail (${result!.summary.critical} critical).`), {
+          code: 'review_critical',
+          meta: { review: result },
+          hint: 'Each critical finding carries a recommendation. Fix those, re-run `bb check`, and only then preview or deploy. Warnings are advisory.',
+          exitCode: 2
+        });
+      }
       emit(result, opts);
-
-      if (result!.summary.critical > 0) process.exit(2);
       if (opts.strict && result!.summary.warning > 0) process.exit(1);
       return;
     }
@@ -242,22 +245,30 @@ export const checkCommand = addNetworkOptions(
       const text = lines.join('\n');
       if (text) process.stderr.write(text + '\n');
     }
-    emit(
-      {
-        validate: validation,
-        review,
-        design,
-        metadata: {
-          placeholders,
-          filled: firstMsg?.value?._meta?.metadataPlaceholders || {}
-        }
-      },
-      opts
-    );
-
+    const payload = {
+      validate: validation,
+      review,
+      design,
+      metadata: {
+        placeholders,
+        filled: firstMsg?.value?._meta?.metadataPlaceholders || {}
+      }
+    };
     const hasValidationErrors = validation && validation.issues?.some((i: any) => i.severity === 'error');
     const hasCritical = review && review.summary?.critical > 0;
-    if (hasValidationErrors || hasCritical) process.exit(2);
+    if (hasValidationErrors || hasCritical) {
+      const why = [
+        hasValidationErrors ? 'validation errors' : null,
+        hasCritical ? `${review.summary.critical} critical review finding(s)` : null
+      ].filter(Boolean).join(' and ');
+      emitError(new Error(`Check failed: ${why}.`), {
+        code: hasValidationErrors ? 'validation_failed' : 'review_critical',
+        meta: payload,
+        hint: 'Fix the reported errors and critical findings (each carries a recommendation), then re-run `bb check`. Do not preview or deploy a transaction that fails here.',
+        exitCode: 2
+      });
+    }
+    emit(payload, opts);
     const hasValidationWarnings = validation && validation.issues?.some((i: any) => i.severity === 'warning');
     const hasReviewWarnings = review && review.summary?.warning > 0;
     if (opts.strict && (hasValidationWarnings || hasReviewWarnings)) process.exit(1);

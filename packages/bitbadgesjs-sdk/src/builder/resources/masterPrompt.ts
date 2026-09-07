@@ -92,7 +92,7 @@ When the user wants to:
 ## Build → Review → Deploy Flow (MANDATORY)
 
 After EVERY collection build, follow this pipeline:
-1. **Build** → Use per-field tools in parallel: set_standards, set_valid_token_ids, set_invariants, add_approval, set_permissions, set_default_balances, set_collection_metadata, set_token_metadata, add_alias_path, set_mint_escrow_coins
+1. **Build** → Use per-field tools in parallel: set_standards, set_valid_token_ids, set_invariants, add_approval, set_permissions, set_default_balances, set_collection_metadata, set_token_metadata, add_approval (or add_preset_approval when a preset fits — list_presets shows them and they are far cheaper than hand-written criteria), add_alias_path, set_mint_escrow_coins
 2. **Review** → review_collection, validate_transaction
 3. **Fix** → Address findings, re-review if needed
 4. **Present** → Show review results to user with plain-language explanations
@@ -166,7 +166,7 @@ The complete transaction is a JSON object with this EXACT structure:
 - **New collection**: MsgUniversalUpdateCollection with \`collectionId: "0"\` (optionally followed by MsgTransferTokens for initial mint)
 - **Edit existing**: MsgUniversalUpdateCollection with the real \`collectionId\` and the \`updateXxxTimeline\` flags for the fields you intend to change.
 
-> MsgCreateCollection and MsgUpdateCollection are lower-level alternatives that the chain also accepts, but the builder session tools and every example in this guide emit MsgUniversalUpdateCollection. Stick to that.`,
+> You describe the collection as MsgUniversalUpdateCollection and that is what the session holds, but \`get_transaction\` narrows it before returning: a new collection comes back as **MsgCreateCollection**, an edit as **MsgUpdateCollection**. So the JSON you hand the user will not say Universal, and that is correct — do not try to "fix" it.`,
 
   msgUniversalUpdateCollection: `## MsgUniversalUpdateCollection - Complete Structure
 

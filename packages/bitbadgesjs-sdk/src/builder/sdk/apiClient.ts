@@ -53,6 +53,23 @@ export function getApiUrl(testnet: boolean = false): string {
 /**
  * Make an API request to BitBadges
  */
+/**
+ * True when the API base points at a local indexer.
+ *
+ * A local indexer serves reads and `/simulate` with no API key, so requiring
+ * one there blocks local development for the CLI and every MCP query tool.
+ * Matched on the parsed hostname so `localhost.evil.com` does not slip through.
+ */
+export function isLocalApiUrl(apiUrl: string | undefined): boolean {
+  if (!apiUrl) return false;
+  try {
+    const host = new URL(apiUrl).hostname.replace(/^\[|\]$/g, '');
+    return host === 'localhost' || host === '127.0.0.1' || host === '::1';
+  } catch {
+    return false;
+  }
+}
+
 export async function apiRequest<T>(
   endpoint: string,
   method: 'GET' | 'POST' = 'POST',
@@ -62,10 +79,11 @@ export async function apiRequest<T>(
   const apiKey = config.apiKey || getApiKey();
   const apiUrl = config.apiUrl || getApiUrl(config.testnet);
 
-  if (!apiKey) {
+  if (!apiKey && !isLocalApiUrl(apiUrl)) {
     return {
       success: false,
-      error: 'BITBADGES_API_KEY environment variable not set. Set it to use API query tools.'
+      error:
+        'No BitBadges API key. Get one at https://bitbadges.io/developer, then set BITBADGES_API_KEY or run `bb settings set apiKey <key>`. A local indexer needs no key. You do NOT need a key to build: every set_*/add_* session tool, validate_transaction, review_collection, get_transaction, and get_review_url work without one.'
     };
   }
 
@@ -73,7 +91,9 @@ export async function apiRequest<T>(
     const url = `${apiUrl}${endpoint}`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'x-api-key': apiKey
+      // Local indexers accept requests with no key; omit the header entirely
+      // rather than sending an empty one.
+      ...(apiKey ? { 'x-api-key': apiKey } : {})
     };
 
     const response = await fetch(url, {
@@ -90,7 +110,7 @@ export async function apiRequest<T>(
       };
     }
 
-    const data = await response.json() as T;
+    const data = (await response.json()) as T;
     return {
       success: true,
       data
@@ -140,10 +160,7 @@ export interface CollectionResponse {
   hasMore?: boolean;
 }
 
-export async function getCollections(
-  request: GetCollectionsRequest,
-  config?: ApiClientConfig
-): Promise<ApiResponse<CollectionResponse>> {
+export async function getCollections(request: GetCollectionsRequest, config?: ApiClientConfig): Promise<ApiResponse<CollectionResponse>> {
   return apiRequest<CollectionResponse>('/api/v0/collections', 'POST', request, config);
 }
 
@@ -162,17 +179,8 @@ export interface BalanceResponse {
   };
 }
 
-export async function getBalance(
-  collectionId: string,
-  address: string,
-  config?: ApiClientConfig
-): Promise<ApiResponse<BalanceResponse>> {
-  return apiRequest<BalanceResponse>(
-    `/api/v0/collections/${collectionId}/balance/${address}`,
-    'POST',
-    {},
-    config
-  );
+export async function getBalance(collectionId: string, address: string, config?: ApiClientConfig): Promise<ApiResponse<BalanceResponse>> {
+  return apiRequest<BalanceResponse>(`/api/v0/collections/${collectionId}/balance/${address}`, 'POST', {}, config);
 }
 
 export interface TokenBalanceResponse {
@@ -185,12 +193,7 @@ export async function getBalanceForToken(
   address: string,
   config?: ApiClientConfig
 ): Promise<ApiResponse<TokenBalanceResponse>> {
-  return apiRequest<TokenBalanceResponse>(
-    `/api/v0/collection/${collectionId}/${tokenId}/balance/${address}`,
-    'GET',
-    undefined,
-    config
-  );
+  return apiRequest<TokenBalanceResponse>(`/api/v0/collection/${collectionId}/${tokenId}/balance/${address}`, 'GET', undefined, config);
 }
 
 // ============================================
@@ -229,10 +232,7 @@ export interface SimulateResponse {
   error?: string;
 }
 
-export async function simulateTx(
-  request: SimulateRequest,
-  config?: ApiClientConfig
-): Promise<ApiResponse<SimulateResponse>> {
+export async function simulateTx(request: SimulateRequest, config?: ApiClientConfig): Promise<ApiResponse<SimulateResponse>> {
   return apiRequest<SimulateResponse>('/api/v0/simulate', 'POST', request, config);
 }
 
@@ -261,10 +261,7 @@ export interface VerifyOwnershipResponse {
   details?: unknown;
 }
 
-export async function verifyOwnership(
-  request: VerifyOwnershipRequest,
-  config?: ApiClientConfig
-): Promise<ApiResponse<VerifyOwnershipResponse>> {
+export async function verifyOwnership(request: VerifyOwnershipRequest, config?: ApiClientConfig): Promise<ApiResponse<VerifyOwnershipResponse>> {
   return apiRequest<VerifyOwnershipResponse>('/api/v0/verifyOwnershipRequirements', 'POST', request, config);
 }
 
@@ -289,10 +286,7 @@ export interface SearchResponse {
   [key: string]: unknown;
 }
 
-export async function search(
-  request: SearchRequest,
-  config?: ApiClientConfig
-): Promise<ApiResponse<SearchResponse>> {
+export async function search(request: SearchRequest, config?: ApiClientConfig): Promise<ApiResponse<SearchResponse>> {
   return apiRequest<SearchResponse>('/api/v0/search', 'POST', request, config);
 }
 
@@ -337,10 +331,7 @@ export interface SearchPluginsResponse {
   bookmark?: string;
 }
 
-export async function searchPlugins(
-  request: SearchPluginsRequest,
-  config?: ApiClientConfig
-): Promise<ApiResponse<SearchPluginsResponse>> {
+export async function searchPlugins(request: SearchPluginsRequest, config?: ApiClientConfig): Promise<ApiResponse<SearchPluginsResponse>> {
   if (request.pluginIds && request.pluginIds.length > 0) {
     return apiRequest<SearchPluginsResponse>('/api/v0/plugins', 'POST', { pluginIds: request.pluginIds }, config);
   }

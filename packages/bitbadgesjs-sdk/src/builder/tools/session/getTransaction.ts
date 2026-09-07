@@ -134,7 +134,7 @@ function extractArtHints(tx: any): { symbol?: string; style?: string; vibe?: str
  * reuse the result — matches the common real-world pattern where
  * a collection uses one image across collection + tokens + alias
  * paths + denom units. Callers that want per-asset variety should
- * invoke `generate_placeholder_art` directly before setting
+ * pass a real image URI to the set_*_metadata tools before setting
  * metadata; this post-step only fills what the LLM left unresolved.
  *
  * Real URIs (https://, ipfs://, data:) are NEVER touched EXCEPT the

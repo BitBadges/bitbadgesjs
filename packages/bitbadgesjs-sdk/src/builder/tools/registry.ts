@@ -75,6 +75,7 @@ import {
   removeTransferTool, handleRemoveTransfer,
   getTransactionTool, handleGetTransaction,
   getReviewUrlTool, handleGetReviewUrl,
+  resetSessionTool, handleResetSession,
   setIsArchivedTool, handleSetIsArchived,
   generateUniqueIdTool, handleGenerateUniqueId,
   generateWrapperAddressTool, handleGenerateWrapperAddress
@@ -245,6 +246,7 @@ export const toolRegistry: Record<string, ToolEntry> = {
   remove_transfer: entry(removeTransferTool, handleRemoveTransfer),
   get_transaction: entry(getTransactionTool, handleGetTransaction),
   get_review_url: entry(getReviewUrlTool, async (args: any) => await handleGetReviewUrl(args)),
+  reset_session: entry(resetSessionTool, handleResetSession),
   // NOTE: `generate_placeholder_art` removed from the LLM tool catalog.
   // The builder agent no longer calls it — get_transaction auto-fills
   // any blank `image` field with a deterministic SVG seeded by the
@@ -298,7 +300,15 @@ function preflightArgs(tool: any, args: any): { ok: true } | { ok: false; error:
   if (Array.isArray(schema.required) && schema.required.length > 0) {
     const missing: string[] = [];
     for (const key of schema.required) {
-      if (argsObj[key] === undefined || argsObj[key] === null || argsObj[key] === '') {
+      // A property marked `allowEmpty` accepts "" as a real value rather than
+      // a gap. `image` is the case that matters: the system prompt tells the
+      // model to send `image: ""` when the user uploaded no art, and
+      // get_transaction fills blanks with generated art. Rejecting "" made the
+      // documented happy path fail on the two most-called tools with an error
+      // that contradicted the prompt. Everything else still rejects "".
+      const allowEmpty = schema.properties?.[key]?.allowEmpty === true;
+      const value = argsObj[key];
+      if (value === undefined || value === null || (value === '' && !allowEmpty)) {
         missing.push(key);
       }
     }

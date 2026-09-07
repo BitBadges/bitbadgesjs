@@ -10,7 +10,7 @@ export const setTokenMetadataSchema = z.object({
   })).describe('Token ID ranges this metadata applies to.'),
   name: z.string().describe('Token name. Must be specific (e.g., "Subscription Pass", "MYCOIN Token"). Do NOT use "{id}" in names.'),
   description: z.string().describe('Token description. 1-2 sentences, specific, ends with period. Do NOT use "{id}" in descriptions.'),
-  image: z.string().describe('Image value. Accepts any of: IMAGE_N placeholder, https:// URL, ipfs:// URI, or data:image/svg+xml;base64,... URI from generate_placeholder_art. If no image is available, generate_placeholder_art output is preferred — reusing one generated image across all tokens in the same collection is fine. Do NOT use "{id}" in image values.')
+  image: z.string().describe('Image. Leave it as an empty string "" when the user gave you no art — get_transaction fills blanks with a deterministic SVG seeded by the collection name. Otherwise: IMAGE_N (only if the request listed IMAGE_N placeholders), an https:// URL, an ipfs:// URI, or a data:image/... URI. Never use "{id}" here.')
 });
 
 export type SetTokenMetadataInput = z.infer<typeof setTokenMetadataSchema>;
@@ -26,7 +26,7 @@ export const setTokenMetadataTool = {
       tokenIds: { type: 'array', items: { type: 'object', properties: { start: { type: 'string' }, end: { type: 'string' } }, required: ['start', 'end'] } },
       name: { type: 'string', description: 'Token name. No {id} placeholder.' },
       description: { type: 'string', description: 'Token description. No {id} placeholder.' },
-      image: { type: 'string', description: 'IMAGE_N, https://, ipfs://, or data:image/svg+xml;base64,... (from generate_placeholder_art). No {id} placeholder.' }
+      image: { type: 'string', allowEmpty: true, description: 'Image. Leave it as an empty string "" when the user gave you no art — get_transaction fills blanks with a deterministic SVG seeded by the collection name. Otherwise: IMAGE_N (only if the request listed IMAGE_N placeholders), an https:// URL, an ipfs:// URI, or a data:image/... URI. Never use "{id}" here.' }
     },
     required: ['tokenIds', 'name', 'description', 'image']
   }
