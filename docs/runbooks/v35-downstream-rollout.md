@@ -179,3 +179,24 @@ to a missing indexer script; check the new en/es key directly until that unrelat
 tooling issue is resolved. Indexer full lint has preexisting violations outside
 this change. No dependency audit was performed (explicitly out of scope), no new
 dependencies were added, and automated SAST was unavailable locally.
+
+
+## ETH voucher format v2
+
+Chain PR119 now rejects pre-v35 ETH claim vouchers. Reissue any outstanding
+vouchers with `getETHSignatureChallengeMessage` from bitbadges 0.45.0, then use
+EIP-191 `signMessage` on that exact string. The helper length-prefixes the chain
+ID, nonce, initiator, collection ID, approver, approval level, approval ID and
+challenge tracker ID using UTF-8 byte lengths. This removes delimiter ambiguity
+and binds the voucher to the execution chain. No legacy fallback is permitted.
+
+Nonce format: 1–256 ASCII letters/digits/underscores/hyphens. A nonce is single-use
+within the collection/approver/level/approval/challenge scope, across recipients.
+The legacy-named tracker query `signature` field carries this nonce. This change
+is independent of EIP-712 transaction signing and automatic transaction sign-in.
+
+The captured mainnet height 11,979,578 had no consumed ETH tracker and no usable
+configured voucher signer, but external issuer inventory and a fresh state scan
+remain prerequisites. Chain release gates also require full-snapshot migration
+rehearsal and validator-hardware gas-capacity measurements; see chain
+`docs/runbooks/v35-release-gates.md`.
