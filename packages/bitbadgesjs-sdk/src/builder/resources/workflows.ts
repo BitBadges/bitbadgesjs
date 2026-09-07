@@ -62,9 +62,9 @@ Step 3: Validate
   → validate_transaction(transactionJson)
   → Fix any issues
 
-Step 4: Deploy
-  → Return transaction JSON for user to sign with their wallet and broadcast
-  → Note the collectionId from the response
+Step 4: Hand off
+  → get_review_url → give the user reviewUrl (opens bitbadges.io review + wallet signing; you never sign)
+  → Note the collectionId from the response once it lands
 
 Step 5: Set up BB-402 on your server
   → Define ownershipRequirements using the new collectionId

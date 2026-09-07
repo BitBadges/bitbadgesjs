@@ -1,3 +1,4 @@
+import { MsgSendWithAliasRouting, MsgUpdateParams as MsgUpdateSendmanagerParams } from '@/proto/sendmanager/v1/tx_pb.js';
 import {
   MsgCastVote,
   MsgCreateAddressLists,
@@ -339,6 +340,8 @@ export function createGAMMAminoConverters(): AminoConverters {
 export function createDefaultAminoConverters() {
   return {
     ...createDefaultCosmosAminoConverters(),
+    ...createAminoConverter(MsgSendWithAliasRouting, 'bitbadgeschain/x/sendmanager/MsgSendWithAliasRouting'),
+    ...createAminoConverter(MsgUpdateSendmanagerParams, 'bitbadgeschain/x/sendmanager/MsgUpdateParams'),
     ...createTokenizationAminoConverters(),
     ...createWasmXAminoConverters(),
     ...createMapsAminoConverters(),

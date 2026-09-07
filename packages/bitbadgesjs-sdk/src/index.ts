@@ -64,3 +64,4 @@ export type {
   PlaceholderArtVibe,
   Palette
 } from './builder/generators/placeholder-art/index.js';
+export * from './eip712/index.js';

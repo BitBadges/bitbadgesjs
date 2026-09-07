@@ -53,6 +53,13 @@ export interface ChallengeParams<T extends NumberType> {
   issuedAt?: string;
   expirationDate?: string;
   notBefore?: string;
+  /**
+   * Optional EIP-4361 §3 Request ID. Lets the relying party correlate
+   * this challenge with a server-side request. SIWE-aware libraries
+   * parse `Request ID: <value>` between Not Before and Resources.
+   * Mirrors the field added to the underlying `blockin` package.
+   */
+  requestId?: string;
   resources?: string[];
   assetOwnershipRequirements?: AssetConditionGroup<T>;
 }

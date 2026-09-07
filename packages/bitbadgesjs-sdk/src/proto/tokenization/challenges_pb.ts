@@ -119,7 +119,7 @@ export class MerkleChallenge extends Message<MerkleChallenge> {
  * ETHSignatureChallenge defines a rule for the approval in the form of an Ethereum signature challenge.
  *
  * An ETH signature challenge is a challenge where the user must provide a valid Ethereum signature for a specific nonce.
- * The signature scheme is ETHSign(nonce + "-" + initiatorAddress + "-" + collectionId + "-" + approverAddress + "-" + approvalLevel + "-" + approvalId + "-" + challengeId) and each signature can only be used once.
+ * For v35+, sign the domain-separated, UTF-8 byte-length-prefixed message produced by getETHSignatureChallengeMessage and each signature can only be used once.
  * All challenges must be met with valid solutions for the transfer to be approved.
  *
  * IMPORTANT: We track the usage of each signature to prevent replay attacks. Each signature can only be used once.
@@ -301,7 +301,7 @@ export class MerkleProof extends Message<MerkleProof> {
  */
 export class ETHSignatureProof extends Message<ETHSignatureProof> {
   /**
-   * The nonce that was signed. The signature scheme is ETHSign(nonce + "-" + initiatorAddress + "-" + collectionId + "-" + approverAddress + "-" + approvalLevel + "-" + approvalId + "-" + challengeId).
+   * The nonce that was signed. For v35+, sign the domain-separated, UTF-8 byte-length-prefixed message produced by getETHSignatureChallengeMessage.
    *
    * @generated from field: string nonce = 1;
    */

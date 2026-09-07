@@ -30,6 +30,12 @@ export function maybePrintFirstRunBanner(argv: readonly string[]): void {
       'Terms, privacy, and acceptable-use policies: https://bitbadges.io/policies\n' +
       'By using `bb` you agree to the policies linked above.\n' +
       '\n' +
+      'Typical flow — you build, a browser wallet signs:\n' +
+      '  bb build subscription --name "Pro" --price 10 --denom USDC > tx.json\n' +
+      '  bb check tx.json                       # audit before you sign\n' +
+      '  bb preview tx.json --open              # review + sign at bitbadges.io\n' +
+      'Docs: https://docs.bitbadges.io/for-developers/ai-agents\n' +
+      '\n' +
       'Tip — install tab completion for faster discovery:\n' +
       '  bb completion bash >> ~/.bashrc        # bash\n' +
       '  bb completion zsh  >> ~/.zshrc         # zsh\n' +

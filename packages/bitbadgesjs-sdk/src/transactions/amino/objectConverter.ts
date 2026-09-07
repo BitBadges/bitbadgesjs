@@ -1,3 +1,4 @@
+import { MsgSendWithAliasRouting, MsgUpdateParams as MsgUpdateSendmanagerParams } from '@/proto/sendmanager/v1/tx_pb.js';
 import { MsgExec, MsgGrant, MsgRevoke, GenericAuthorization } from '@/proto/cosmos/authz/v1beta1/index.js';
 import { MsgSend, MsgMultiSend, SendAuthorization } from '@/proto/cosmos/bank/v1beta1/index.js';
 import {
@@ -109,6 +110,8 @@ import {
 import { MsgCreateBalancerPool, MsgCreateBalancerPoolResponse } from '@/proto/gamm/poolmodels/balancer/tx_pb.js';
 
 export const ProtoTypeRegistry: ReturnType<typeof createRegistry> = createRegistry(
+  MsgSendWithAliasRouting,
+  MsgUpdateSendmanagerParams,
   MsgSend,
   MsgMultiSend,
   MsgFundCommunityPool,

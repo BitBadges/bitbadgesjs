@@ -14,6 +14,7 @@
  */
 
 export { BitBadgesBuilderAgent } from './BitBadgesBuilderAgent.js';
+export { buildHandoffUrl, buildReviewUrlFromCode, detectExistingCollectionId, encodeTxForHash } from '../handoff.js';
 export { MemoryStore, FileStore, type KVStore, type KVStoreSetOptions, type FileStoreOptions } from './sessionStore.js';
 export { substituteImages, collectImageReferences, type ImageMap } from './images.js';
 export { MODELS, resolveModel, computeCostUsd } from './models.js';

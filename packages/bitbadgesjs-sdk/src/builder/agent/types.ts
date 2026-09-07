@@ -335,6 +335,12 @@ export interface BuildResult {
   valid: boolean;
   /** The final composed transaction (parsed JSON object, not a string). */
   transaction: any;
+  /**
+   * bitbadges.io link that opens this transaction in the review-and-sign
+   * flow (`#tx=` hash carrier; nothing is uploaded). Base from
+   * `BITBADGES_FRONTEND_URL`, default `https://bitbadges.io`.
+   */
+  reviewUrl: string;
   /** Structured errors, empty if valid. */
   errors: StructuredError[];
   /** Non-fatal warnings / advisory notes. */
