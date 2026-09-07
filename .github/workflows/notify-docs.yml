@@ -1,0 +1,126 @@
+# Tells BitBadges/bitbadges-docs to re-sync. Two independent signals:
+#
+#   openapi-updated — the hosted OpenAPI spec changed on main. genapi.yml
+#                     opens a PR that lands openapi-hosted/openapi.json, so the
+#                     signal we care about is the PUSH that merges it, not the
+#                     genapi run itself. Watching the path on main catches both
+#                     the merged PR and any direct edit.
+#
+#   sdk-updated     — SDK source changed on main, so the TypeDoc reference in
+#                     the docs repo is stale.
+#
+# Both fire at most once per push and are cheap no-ops downstream when nothing
+# actually changed (the docs workflows open no PR without a diff).
+#
+# Requires the DOCS_DISPATCH_PAT secret: GITHUB_TOKEN cannot dispatch into
+# another repository.
+
+name: Notify docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/bitbadgesjs-sdk/openapi-hosted/openapi.json'
+      - 'packages/bitbadgesjs-sdk/src/**'
+      - '.github/workflows/notify-docs.yml'
+  workflow_dispatch:
+    inputs:
+      event_type:
+        description: 'Which dispatch to fire at the docs repo'
+        required: true
+        default: openapi-updated
+        type: choice
+        options:
+          - openapi-updated
+          - sdk-updated
+
+permissions:
+  contents: read
+
+concurrency:
+  group: notify-docs-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need the previous commit to diff this push against.
+          fetch-depth: 0
+
+      - name: Decide which dispatches to fire
+        id: what
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_EVENT_TYPE: ${{ inputs.event_type }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          openapi=false
+          sdk=false
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            case "$INPUT_EVENT_TYPE" in
+              openapi-updated) openapi=true ;;
+              sdk-updated)     sdk=true ;;
+            esac
+          else
+            # A new branch or a force-push can leave `before` as the null SHA.
+            if [ -z "${BEFORE:-}" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] \
+               || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+              echo "No usable base commit — firing both dispatches to be safe."
+              openapi=true
+              sdk=true
+            else
+              CHANGED=$(git diff --name-only "$BEFORE" "$SHA")
+              echo "$CHANGED"
+              if echo "$CHANGED" | grep -qx 'packages/bitbadgesjs-sdk/openapi-hosted/openapi.json'; then
+                openapi=true
+              fi
+              if echo "$CHANGED" | grep -q '^packages/bitbadgesjs-sdk/src/'; then
+                sdk=true
+              fi
+            fi
+          fi
+
+          echo "openapi=$openapi" >> "$GITHUB_OUTPUT"
+          echo "sdk=$sdk" >> "$GITHUB_OUTPUT"
+          echo "openapi-updated: $openapi / sdk-updated: $sdk"
+
+      - name: Fire openapi-updated
+        if: steps.what.outputs.openapi == 'true'
+        uses: peter-evans/repository-dispatch@v4
+        with:
+          # DOCS_DISPATCH_PAT: fine-grained PAT on BitBadges/bitbadges-docs with
+          # Contents: read-write and Pull requests: read-write. `contents` is
+          # what actually authorizes repository_dispatch; pull-requests is
+          # needed because the workflow it triggers opens a PR.
+          token: ${{ secrets.DOCS_DISPATCH_PAT }}
+          repository: BitBadges/bitbadges-docs
+          event-type: openapi-updated
+          client-payload: |
+            {
+              "sha": "${{ github.sha }}",
+              "ref": "${{ github.ref }}",
+              "source": "${{ github.repository }}",
+              "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }
+
+      - name: Fire sdk-updated
+        if: steps.what.outputs.sdk == 'true'
+        uses: peter-evans/repository-dispatch@v4
+        with:
+          token: ${{ secrets.DOCS_DISPATCH_PAT }}
+          repository: BitBadges/bitbadges-docs
+          event-type: sdk-updated
+          client-payload: |
+            {
+              "sha": "${{ github.sha }}",
+              "ref": "${{ github.ref }}",
+              "source": "${{ github.repository }}",
+              "run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }
