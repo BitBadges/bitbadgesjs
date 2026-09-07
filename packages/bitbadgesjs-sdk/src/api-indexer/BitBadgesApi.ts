@@ -1453,18 +1453,30 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Checks if a claim has been successfully completed.
+   * Checks whether one address has completed a claim, and which claim numbers it won.
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/claims/success/:claimId/:address`
+   * - **API Route**: `GET /api/v0/claims/:claimId/attempts?address=`
    * - **SDK Function Call**: `await BitBadgesApi.checkClaimSuccess(claimId, address);`
+   *
+   * This used to call `/api/v0/claims/success/:claimId/:address`, which the
+   * indexer removed in a deprecation sweep, so every call 404'd. The successful
+   * attempts for one address answer the same question, so the method keeps its
+   * shape and reads them instead: `total` is the success count and each
+   * attempt carries its claim number.
+   *
+   * One caveat the old route did not have: a claim whose `numUses` plugin sets
+   * `hideCurrentState` rejects this for anyone but the claim's manager, rather
+   * than reporting zero.
    */
   public async checkClaimSuccess(claimId: string, address: NativeAddress): Promise<CheckClaimSuccessSuccessResponse> {
     try {
-      const response = await this.axios.get<CheckClaimSuccessSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.CheckClaimSuccessRoute(claimId, address)}`
-      );
-      return new CheckClaimSuccessSuccessResponse(response.data);
+      const attempts = await this.getClaimAttempts(claimId, { address });
+      const claimNumbers = attempts.docs.map((doc) => Number(doc.claimNumber)).filter((n) => Number.isFinite(n));
+      return new CheckClaimSuccessSuccessResponse({
+        successCount: attempts.total !== undefined ? Number(attempts.total) : claimNumbers.length,
+        claimNumbers
+      });
     } catch (error) {
       await this.handleApiError(error);
       return Promise.reject(error);
