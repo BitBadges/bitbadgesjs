@@ -74,6 +74,7 @@ import {
   addTransferTool, handleAddTransfer,
   removeTransferTool, handleRemoveTransfer,
   getTransactionTool, handleGetTransaction,
+  getReviewUrlTool, handleGetReviewUrl,
   setIsArchivedTool, handleSetIsArchived,
   generateUniqueIdTool, handleGenerateUniqueId,
   generateWrapperAddressTool, handleGenerateWrapperAddress
@@ -243,6 +244,7 @@ export const toolRegistry: Record<string, ToolEntry> = {
   add_transfer: entry(addTransferTool, handleAddTransfer),
   remove_transfer: entry(removeTransferTool, handleRemoveTransfer),
   get_transaction: entry(getTransactionTool, handleGetTransaction),
+  get_review_url: entry(getReviewUrlTool, async (args: any) => await handleGetReviewUrl(args)),
   // NOTE: `generate_placeholder_art` removed from the LLM tool catalog.
   // The builder agent no longer calls it — get_transaction auto-fills
   // any blank `image` field with a deterministic SVG seeded by the

@@ -24,6 +24,7 @@
 
 import { randomUUID } from 'crypto';
 import { handleGetTransaction } from '../tools/index.js';
+import { buildHandoffUrl } from '../handoff.js';
 import { getOrCreateSession, drainReviewFlags, getReviewFlags } from '../session/sessionState.js';
 import { getAllSkillInstructions, type SkillInstruction } from '../resources/skillInstructions.js';
 import { getProvider, type LLMProvider, type ProviderName } from './providers/index.js';
@@ -896,6 +897,7 @@ export class BitBadgesBuilderAgent {
     const result: BuildResult = {
       valid: gate ? gate.valid : true,
       transaction,
+      reviewUrl: buildHandoffUrl(process.env.BITBADGES_FRONTEND_URL || 'https://bitbadges.io', transaction),
       errors: structuredErrors,
       warnings,
       hardErrors: gate?.hardErrors ?? [],

@@ -19,11 +19,12 @@ export const previewCommand = addOutputOptions(
         'Override the bitbadges.io frontend base for the printed preview URL',
         'https://bitbadges.io'
       )
+      .option('--open', 'Open the review-and-sign URL in your default browser', false)
   )
 ).action(
   async (
     input: string,
-    opts: { network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string; frontendUrl?: string; condensed?: boolean; outputFile?: string }
+    opts: { network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string; frontendUrl?: string; open?: boolean; condensed?: boolean; outputFile?: string }
   ) => {
     const { readJsonInput, getApiUrl } = await import('../utils/io.js');
 
@@ -94,11 +95,23 @@ export const previewCommand = addOutputOptions(
     };
 
     const frontendBase = opts.frontendUrl || 'https://bitbadges.io';
-    const previewUrl = `${frontendBase.replace(/\/$/, '')}/builder/preview?code=${encodeURIComponent(result.code)}`;
+    const { buildPreviewUrlFromCode, buildReviewUrlFromCode } = await import('../../builder/handoff.js');
+    const previewUrl = buildPreviewUrlFromCode(frontendBase, result.code);
+    // Review-and-sign: the frontend's local-builder page loads the same
+    // `prv_` payload and continues straight into review + wallet signing.
+    const reviewUrl = buildReviewUrlFromCode(frontendBase, result.code, payload.transaction);
 
-    commentary(`Expires in ${result.expiresIn}.`);
+    commentary(`Expires in ${result.expiresIn}. Review + sign: ${reviewUrl}`);
+    if (opts.open) {
+      try {
+        const mod = await import('open');
+        await ((mod as any).default ?? mod)(reviewUrl);
+      } catch (err: any) {
+        commentary(`(could not auto-launch browser: ${err?.message || err})`);
+      }
+    }
     emit(
-      { code: result.code, url: previewUrl, expiresAt: result.expiresAt, expiresIn: result.expiresIn },
+      { code: result.code, url: previewUrl, reviewUrl, expiresAt: result.expiresAt, expiresIn: result.expiresIn },
       opts
     );
   }
