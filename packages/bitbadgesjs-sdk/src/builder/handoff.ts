@@ -62,8 +62,3 @@ export function buildHandoffUrl(frontendBase: string, tx: any): string {
 export function buildReviewUrlFromCode(frontendBase: string, code: string, tx: any): string {
   return `${trimBase(frontendBase)}${reviewPath(tx)}?code=${encodeURIComponent(code)}`;
 }
-
-/** Read-only preview URL (no signing) for a `prv_` code. */
-export function buildPreviewUrlFromCode(frontendBase: string, code: string): string {
-  return `${trimBase(frontendBase)}/builder/preview?code=${encodeURIComponent(code)}`;
-}

@@ -6,6 +6,14 @@ export function ensureTxWrapper(input: any): any {
   if (!input || typeof input !== 'object') return input;
   if (Array.isArray(input.messages)) return input;
   if (typeof input.typeUrl === 'string' && input.value) return { messages: [input] };
+  // A universal envelope from `bb build … --output-file tx.json`
+  // ({ok, data, warnings, hint, error}). The build's next-step hint tells the
+  // user to run `bb preview tx.json`, so accept what we told them to produce.
+  // A failed envelope falls through to the shape error rather than previewing
+  // its null data.
+  if (input.ok === true && input.data && typeof input.data === 'object') {
+    return ensureTxWrapper(input.data);
+  }
   return input;
 }
 
@@ -14,17 +22,22 @@ export const previewCommand = addOutputOptions(
     new Command('preview')
       .description('Upload a tx to the indexer and print a shareable bitbadges.io preview URL. Input: JSON file, inline JSON, or - for stdin.')
       .argument('<input>', 'Tx JSON file path, inline JSON, or "-" for stdin')
-      .option(
-        '--frontend-url <url>',
-        'Override the bitbadges.io frontend base for the printed preview URL',
-        'https://bitbadges.io'
-      )
+      .option('--frontend-url <url>', 'Override the bitbadges.io frontend base for the printed preview URL', 'https://bitbadges.io')
       .option('--open', 'Open the review-and-sign URL in your default browser', false)
   )
 ).action(
   async (
     input: string,
-    opts: { network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string; frontendUrl?: string; open?: boolean; condensed?: boolean; outputFile?: string }
+    opts: {
+      network?: 'mainnet' | 'local' | 'testnet';
+      testnet?: boolean;
+      local?: boolean;
+      url?: string;
+      frontendUrl?: string;
+      open?: boolean;
+      condensed?: boolean;
+      outputFile?: string;
+    }
   ) => {
     const { readJsonInput, getApiUrl } = await import('../utils/io.js');
 
@@ -81,10 +94,7 @@ export const previewCommand = addOutputOptions(
 
     if (!response!.ok) {
       const text = await response!.text().catch(() => '');
-      emitError(
-        new Error(`Preview upload failed: HTTP ${response!.status} ${text}`),
-        { code: 'preview_upload_failed', exitCode: 2 }
-      );
+      emitError(new Error(`Preview upload failed: HTTP ${response!.status} ${text}`), { code: 'preview_upload_failed', exitCode: 2 });
     }
 
     const result = (await response!.json()) as {
@@ -95,13 +105,12 @@ export const previewCommand = addOutputOptions(
     };
 
     const frontendBase = opts.frontendUrl || 'https://bitbadges.io';
-    const { buildPreviewUrlFromCode, buildReviewUrlFromCode } = await import('../../builder/handoff.js');
-    const previewUrl = buildPreviewUrlFromCode(frontendBase, result.code);
+    const { buildReviewUrlFromCode } = await import('../../builder/handoff.js');
     // Review-and-sign: the frontend's local-builder page loads the same
     // `prv_` payload and continues straight into review + wallet signing.
     const reviewUrl = buildReviewUrlFromCode(frontendBase, result.code, payload.transaction);
 
-    commentary(`Expires in ${result.expiresIn}. Review + sign: ${reviewUrl}`);
+    commentary(`Review + sign: ${reviewUrl}\nExpires in ${result.expiresIn}.`);
     if (opts.open) {
       try {
         const mod = await import('open');
@@ -110,9 +119,8 @@ export const previewCommand = addOutputOptions(
         commentary(`(could not auto-launch browser: ${err?.message || err})`);
       }
     }
-    emit(
-      { code: result.code, url: previewUrl, reviewUrl, expiresAt: result.expiresAt, expiresIn: result.expiresIn },
-      opts
-    );
+    // `url` is the long-standing envelope field; it and `reviewUrl` now name the
+    // same single destination.
+    emit({ code: result.code, url: reviewUrl, reviewUrl, expiresAt: result.expiresAt, expiresIn: result.expiresIn }, opts);
   }
 );

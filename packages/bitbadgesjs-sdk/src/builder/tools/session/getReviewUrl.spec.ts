@@ -44,7 +44,6 @@ describe('handleGetReviewUrl', () => {
     expect(body.transaction.messages[0].typeUrl).toMatch(/MsgCreateCollection$/);
     expect(res.code).toBe('prv_a1b2c3d4');
     expect(res.reviewUrl).toBe('https://bitbadges.io/mint/local-builder?code=prv_a1b2c3d4');
-    expect(res.previewUrl).toBe('https://bitbadges.io/builder/preview?code=prv_a1b2c3d4');
     expect(res.expiresIn).toBe('1h');
   });
 
