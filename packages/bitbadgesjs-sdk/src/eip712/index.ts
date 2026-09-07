@@ -23,3 +23,5 @@ export * from './sanitize.js';
 export * from './types.js';
 export * from './types-builder.js';
 export * from './wrap.js';
+
+export * from './verify.js';

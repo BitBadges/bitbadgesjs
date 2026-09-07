@@ -1,7 +1,7 @@
 ---
 title: "v35 downstream gas and ETH proof rollout"
-last-verified: 2026-09-05
-verification: "Source and local regression tests; live upgrade checks pending"
+last-verified: 2026-09-06
+verification: "Local suites, v35 rehearsal and EIP-712 HTTP/chain integration; production rollout pending"
 ---
 
 ## [1] Scope and coordination
@@ -90,12 +90,14 @@ the chain PR documents the accepted once-more behavior.
 
 1. Human reviewers approve and merge the companion PRs. Keep them draft until
    local checks and cross-repo integration verification are acceptable.
-2. Build and test the SDK, then have the release owner publish an exact new
-   `bitbadges` version. This PR does not publish or bump package versions. External
-   SDK consumers must explicitly adopt that release; merging does not upgrade them.
+2. Build and test the SDK, then have the release owner publish `bitbadges@0.45.0`.
+   Version 0.44.0 is already published and does not contain these fixes. The PR
+   prepares the version but does not publish it. Pin 0.45.0 in both consumers and
+   regenerate their lockfiles after publication; rerun CI with the installed package.
 3. Build and deploy the backend and frontend fixes together with the v35 rollout.
-   Their direct fixes do not require waiting for the SDK publication, but consumers
-   using the signing client need the new release. Deploying native fee changes
+   EIP-712 session verification now requires the new SDK export, so publication
+   and consumer pins are release gates. Deploy the indexer before the frontend.
+   Deploying native fee changes
    early increases fees before the upgrade; choose the activation window explicitly.
 4. Confirm the upgraded chain's parameters and run the checks below against an
    authorized rehearsal/staging node. Do not use production for trial writes.
@@ -131,6 +133,33 @@ does not authorize chain rollback, DB deletion, publishing, or deployment.
 
 Local regression tests establish client behavior, not live-chain compatibility.
 Unchecked items remain release gates, not completed verification.
+
+## [7] EIP-712 signing and session verification
+
+An Ethereum wallet can return either a native EVM transaction hash or EIP-712-signed
+Cosmos transaction bytes. The frontend selects the proof from the returned envelope,
+not the wallet type. The indexer verifies EIP-712 bytes against trusted chain IDs and
+the on-chain account number, recovers the signer, and consumes the existing
+session-bound challenge atomically. Unsupported envelope fields fail closed.
+
+EIP-712 gas simulation uses the Cosmos envelope and buffers once. Failed simulation
+stops signing. Explicit fees remain deliberate overrides, validated against the
+native floor and block gas cap. If the frontend falls back to a precompile after
+the wallet rejects typed-data support, it estimates that precompile including the
+sign-in calldata before submitting.
+
+The local HTTP smoke script in the indexer, `scripts/eip712-tx-sign-in-smoke.ts`,
+uses public fixture key 1 and fixed isolated local ports (API 3005, LCD 1318,
+EVM 8547, frontend origin 3004). It verifies simulation, foreign-session and
+tampering rejection, atomic replay protection, cookie rotation, private-claim
+access before/after sign-in, and execution of the same signed transaction on v35.
+It requires a funded fixture account, Mongo replica set with initialized status,
+Redis, and a development-only local IPFS cache. It must never target production.
+
+The generated legacy `cosmos.base.store.v1beta1` listening module referred to
+ABCI types removed from the current proto tree and prevented ESM import. Its stale
+export is removed; the current module is `cosmos.store.v1beta1`. SDK builds now
+import both built ESM and CommonJS entry points to catch this class of error.
 
 ## [6] Local checks
 
