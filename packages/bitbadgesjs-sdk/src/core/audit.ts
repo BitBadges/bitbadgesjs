@@ -311,29 +311,31 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     const hasScopedMintLock = approvalPerms.some(
       (p) => (p.fromListId === 'Mint' || p.fromListId === 'All') && isForever(p.permanentlyForbiddenTimes)
     );
-    // Blanket lock: every one of the 8 CollectionApprovalPermission
-    // scope fields is set to its wildcard value AND
-    // permanentlyForbiddenTimes covers forever. Partial locks (e.g.
-    // "Mint scope forbidden forever") don't count — they only freeze
-    // a subset of the approval space. A blanket lock means no approval
-    // can ever be added / removed / modified post-creation, so
-    // transferability is permanently fixed.
+    // Blanket lock: every scope field the CollectionApprovalPermission
+    // proto defines (fromListId, toListId, initiatedByListId,
+    // transferTimes, tokenIds, ownershipTimes, approvalId) is set to its
+    // wildcard value AND permanentlyForbiddenTimes covers forever.
+    // Partial locks (e.g. "Mint scope forbidden forever") don't count —
+    // they only freeze a subset of the approval space. A blanket lock
+    // means no approval can ever be added / removed / modified
+    // post-creation, so transferability is permanently fixed.
     const hasBlanketLock = approvalPerms.some((p: any) => {
       if (p.fromListId !== 'All') return false;
       if (p.toListId !== 'All') return false;
       if (p.initiatedByListId !== 'All') return false;
       if (!isForever(p.transferTimes)) return false;
       if (!isForever(p.tokenIds)) return false;
+      if (!isForever(p.ownershipTimes)) return false;
       if (p.approvalId !== 'All') return false;
-      if (p.amountTrackerId !== 'All') return false;
-      if (p.challengeTrackerId !== 'All') return false;
       return isForever(p.permanentlyForbiddenTimes);
     });
 
-    const mintMutable =
-      approvalPermState === 'PERMITTED' || (approvalPermState === 'NEUTRAL' && !hasScopedMintLock);
-    const transferMutable =
-      approvalPermState === 'PERMITTED' || (approvalPermState === 'NEUTRAL' && !hasBlanketLock);
+    // Mutability is decided per flow by the lock that covers it, not by
+    // the aggregate permission state: a single Mint-scoped lock makes the
+    // aggregate read FORBIDDEN while every transfer approval stays
+    // editable, and a transfer-scoped lock leaves Mint editable.
+    const mintMutable = !hasScopedMintLock;
+    const transferMutable = !hasBlanketLock;
 
     const hasMintApproval = approvals.some((a) => a.fromListId === 'Mint');
     const hasBackingApproval2 = approvals.some((a) => {
