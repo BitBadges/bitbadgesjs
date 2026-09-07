@@ -104,7 +104,7 @@ export async function simulateMessages(params: {
       {
         messages: params.messages,
         memo: params.memo || '',
-        fee: params.fee || { amount: [{ denom: 'ubadge', amount: '5000' }], gas: '500000' },
+        fee: params.fee || { amount: [{ denom: 'ubadge', amount: '0' }], gas: '500000' },
         creatorAddress: params.creatorAddress
       },
       // Pass per-call override config through to apiRequest so the

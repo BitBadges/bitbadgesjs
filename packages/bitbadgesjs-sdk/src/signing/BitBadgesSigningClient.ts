@@ -320,7 +320,8 @@ export class BitBadgesSigningClient {
         accountNumber: accountInfo.accountNumber,
         publicKey: accountInfo.publicKey
       },
-      fee: this.calculateFee(this.defaultGasLimit),
+      // Simulation skips the fee floor; a guessed fee can falsely reject balance sweeps.
+      fee: { ...this.calculateFee(this.defaultGasLimit), amount: '0' },
       memo: options?.memo || ''
     };
 

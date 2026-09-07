@@ -184,7 +184,7 @@ export async function fundPersona(
           '--node', nodeUrl,
           '--keyring-backend', env.keyringBackend,
           '--gas', 'auto', '--gas-adjustment', '1.3',
-          '--fees', options.fees ?? '0ubadge',
+          ...(options.fees ? ['--fees', options.fees] : ['--gas-prices', '10ubadge']),
           '--yes',
           '--output', 'json'
         ],

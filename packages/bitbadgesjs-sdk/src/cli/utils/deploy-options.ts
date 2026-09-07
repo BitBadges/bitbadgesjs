@@ -63,8 +63,8 @@ export function addDeployOptions(cmd: Command): Command {
   addOptionIfMissing(cmd, '--timeout <seconds>', 'With --browser: how long to wait for the wallet to confirm (default 300, max 1800).');
   addOptionIfMissing(cmd, '--expected-address <addr>', 'With --browser: bb1.../0x... the connected wallet must match. Defaults to --manager / --creator.');
   addOptionIfMissing(cmd, '--fund <mode>', 'With --burner: funding source for the burner (faucet | manual)', 'faucet');
-  addOptionIfMissing(cmd, '--fee <amount>', 'When deploying: fee amount in base units', '0');
-  addOptionIfMissing(cmd, '--fee-denom <symbol|denom>', 'When deploying: fee denom. BADGE, USDC, … or canonical denom', DEFAULT_FEE_DENOM);
+  addOptionIfMissing(cmd, '--fee <amount>', 'When deploying: fee in ubadge (0 = automatic)', '0');
+  addOptionIfMissing(cmd, '--fee-denom <symbol|denom>', 'When deploying: fee denom: BADGE or ubadge', DEFAULT_FEE_DENOM);
   addOptionIfMissing(cmd, '--gas <number>', 'When deploying: gas limit', '400000');
   addOptionIfMissing(cmd, '--new', 'With --burner: skip the picker and always create a fresh wallet');
   addOptionIfMissing(cmd, '--reuse <selector>', 'With --burner: reuse a specific saved burner by address or recovery file path');

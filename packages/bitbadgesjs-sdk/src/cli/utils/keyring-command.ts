@@ -159,7 +159,7 @@ export function buildKeyringCommand(opts: KeyringCommandOptions): KeyringCommand
     `    --chain-id ${chainId} \\`,
     `    --node ${nodeUrl} \\`,
     `    --keyring-backend ${opts.keyringBackend} \\`,
-    `    --gas ${opts.gas} --gas-adjustment ${opts.gasAdjustment} \\`,
+    `    --gas ${opts.gas} --gas-adjustment ${opts.gasAdjustment} --gas-prices 10ubadge \\`,
     `    --yes`
   ].join('\n');
 
@@ -366,7 +366,7 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
       `    --chain-id ${chainId} \\`,
       `    --node ${nodeUrl} \\`,
       `    --keyring-backend ${opts.keyringBackend} \\`,
-      `    --gas ${opts.gas} --gas-adjustment ${opts.gasAdjustment} \\`,
+      `    --gas ${opts.gas} --gas-adjustment ${opts.gasAdjustment} --gas-prices 10ubadge \\`,
       // Between blocks: insert `sleep 6 &&` so the next tx's sequence
       // lookup happens after the previous one has committed. Without
       // this, the second tx hits "account sequence mismatch" because

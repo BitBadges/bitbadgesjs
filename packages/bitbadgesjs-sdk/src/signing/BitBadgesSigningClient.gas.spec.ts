@@ -3,6 +3,7 @@ import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
 import { BitBadgesKeplrSuggestMainnetChainInfo, BitBadgesKeplrSuggestTestnetChainInfo } from '@/common/constants.js';
 import { MsgSend } from '@/proto/cosmos/bank/v1beta1/tx_pb.js';
 import { MsgSetCustomData } from '@/proto/tokenization/tx_pb.js';
+import { TxRaw, AuthInfo } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
 import { BitBadgesSigningClient } from './BitBadgesSigningClient.js';
 import type { WalletAdapter } from './adapters/WalletAdapter.js';
 
@@ -38,6 +39,14 @@ function setup(chainType: 'cosmos' | 'evm' = 'cosmos', options = {}) {
 }
 
 describe('v35 signing gas', () => {
+  it('does not deduct a guessed fee when simulating a balance sweep', async () => {
+    const { client, adapter, post } = setup();
+    await client.simulate(cosmosMessages);
+    const body = (post.mock.calls[0] as unknown as [string, { tx_bytes: string }])[1];
+    const tx = TxRaw.fromBinary(Buffer.from(body.tx_bytes, 'base64'));
+    expect(AuthInfo.fromBinary(tx.authInfoBytes).fee?.amount[0].amount).toBe('0');
+    expect(adapter.signDirect).not.toHaveBeenCalled();
+  });
   it('prices the final buffered Cosmos gas at 10 ubadge/gas', async () => {
     const { client, adapter } = setup();
     const result = await client.signAndBroadcast(cosmosMessages);

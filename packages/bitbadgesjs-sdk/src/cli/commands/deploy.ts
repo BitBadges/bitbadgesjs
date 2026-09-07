@@ -338,8 +338,8 @@ export const deployCommand = new Command('deploy')
   .option('--msg-stdin', 'Read msg JSON from stdin')
   .option('--manager <address>', 'Address that will own the created collection (bb1...). Required for --burner; recommended for --browser.')
   .option('--fund <mode>', 'With --burner: funding source for the burner (faucet | manual)', 'faucet')
-  .option('--fee <amount>', 'Fee amount in base units (e.g. "0" or "5000")', '0')
-  .option('--fee-denom <symbol|denom>', 'Fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', DEFAULT_FEE_DENOM)
+  .option('--fee <amount>', 'Fee in ubadge (0 = estimate automatically at 10ubadge/gas)', '0')
+  .option('--fee-denom <symbol|denom>', 'Fee denom: BADGE or ubadge', DEFAULT_FEE_DENOM)
   .option('--gas <number>', 'Gas limit', '400000')
   .option('--new', 'With --burner: skip the picker and always create a fresh burner')
   .option('--reuse <selector>', 'With --burner: reuse a specific saved burner by address or recovery file path')
@@ -683,8 +683,8 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
         commentary(`\nWrote msg JSON to ${msgFilePaths[0]}\nRun:`);
       }
       const flagsHint = isMultiMsg
-        ? 'Append extra flags inside any step (e.g. --fees 5000ubadge --memo "...").'
-        : 'Append extra flags after the line (e.g. --fees 5000ubadge --memo "...").';
+        ? 'Append extra flags inside any step (e.g. --memo "...").'
+        : 'Append extra flags after the line (e.g. --memo "...").';
       commentary(commandLine);
       commentary(
         `  ${flagsHint}\n  Use --keyring-backend test for non-interactive CI signing.\n  Or pass --exec to run the command in place (TTY-friendly).`
