@@ -1,0 +1,58 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Moved to docs.bitbadges.io/sdk/reference</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://docs.bitbadges.io/sdk/reference">
+<p>The BitBadges SDK reference has moved to
+<a id="target" href="https://docs.bitbadges.io/sdk/reference">docs.bitbadges.io/sdk/reference</a>.
+Redirecting&hellip;</p>
+<script>
+// Mirrors kebab() in bitbadges-docs site/scripts/gen-sdk-reference.ts.
+function kebab(name) {
+  return name
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
+    .replace(/[^A-Za-z0-9]+/g, "-")
+    .toLowerCase()
+    .replace(/^-+|-+$/g, "");
+}
+// TypeDoc's old directory names vs the in-site ones. Anything absent here
+// (modules, assets) has no equivalent and falls back to the index.
+var DIRS = {
+  classes: "classes",
+  interfaces: "interfaces",
+  functions: "functions",
+  variables: "variables",
+  enums: "enumerations",
+  types: "type-aliases"
+};
+var BASE = "https://docs.bitbadges.io/sdk/reference";
+
+var PAGES = null; // Set from pages.json below; null disables deep linking.
+
+function target() {
+  if (!PAGES) return BASE;
+  // Pages serves this repo under /bitbadgesjs/.
+  var path = location.pathname.replace(/^\/bitbadgesjs\/?/, "").replace(/^\//, "");
+  var parts = path.split("/").filter(Boolean);
+  if (parts.length !== 2) return BASE;
+  var dir = DIRS[parts[0]];
+  if (!dir) return BASE;
+  var slug = kebab(parts[1].replace(/\.html$/i, ""));
+  if (!slug) return BASE;
+  // 55% of the old pages have no counterpart. Never send a reader from one
+  // 404 to another - if it is not in the manifest, land on the index.
+  if (PAGES.indexOf(dir + "/" + slug) === -1) return BASE;
+  return BASE + "/" + dir + "/" + slug + location.hash;
+}
+
+fetch("/bitbadgesjs/pages.json")
+  .then(function (r) { return r.ok ? r.json() : null; })
+  .catch(function () { return null; })
+  .then(function (list) {
+    PAGES = list;
+    var url = target();
+    document.getElementById("target").href = url;
+    location.replace(url);
+  });
+</script>
