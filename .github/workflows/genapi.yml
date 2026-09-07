@@ -40,7 +40,7 @@ jobs:
       - name: Install dependencies
         run: |
           bun install
-          bun install -g typescript ts-node @stoplight/cli
+          bun install -g typescript ts-node
           bun install -d @types/node
           python -m pip install --upgrade pip
           python -m pip install --upgrade build twine setuptools wheel
@@ -93,12 +93,6 @@ jobs:
             bun ./scripts/assert_no_internal_routes.ts ./openapitypes/combined_processed.yaml
           fi
           bun ./scripts/assert_no_internal_routes.ts ./openapi-hosted/openapi.json
-
-      - name: Push to Stoplight
-        env:
-          STOPLIGHT_TOKEN: ${{ secrets.STOPLIGHT_TOKEN }}
-        run: |
-          bunx @stoplight/cli@6 push --ci-token "$STOPLIGHT_TOKEN" --branch main --directory ./openapitypes
 
       - name: Host OpenAPI spec for LLMs
         run: |
