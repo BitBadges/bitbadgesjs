@@ -5,6 +5,7 @@ import { tagHelpGroups } from '../utils/help-groups.js';
 import { renderReview, renderValidate, renderResolvedMetadata, renderSimulate, collectResolvedEntries, type ResolvedEntry } from '../utils/terminal.js';
 import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMsg.js';
 import { addDeployOptions, isDeployRequested, executeDeploy } from '../utils/deploy-options.js';
+import { buildNextStepHint } from '../utils/next-step.js';
 import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
 
@@ -336,7 +337,12 @@ async function emit(
     condensed: opts.condensed,
     outputFile: opts.outputFile,
     warnings: warnings.length > 0 ? warnings : undefined,
-    meta: Object.keys(meta).length > 0 ? meta : undefined
+    meta: Object.keys(meta).length > 0 ? meta : undefined,
+    hint: buildNextStepHint({
+      deployRequested: isDeployRequested(opts as any),
+      outputFile: opts.outputFile,
+      quiet: isQuiet(opts as any)
+    })
   });
 
   // Optionally broadcast the just-built msg inline. The envelope above
