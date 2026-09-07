@@ -123,7 +123,7 @@ function buildCreateMsg(input: BuildDynamicStoreInput): BuildDynamicStoreResult 
     transaction: {
       messages: [msg],
       memo: '',
-      fee: { amount: [{ denom: 'ubadge', amount: '0' }], gas: '300000' }
+      fee: { amount: [{ denom: 'ubadge', amount: '3000000' }], gas: '300000' }
     },
     explanation: {
       action: 'create',
@@ -164,7 +164,7 @@ function buildUpdateMsg(input: BuildDynamicStoreInput): BuildDynamicStoreResult 
     transaction: {
       messages: [msg],
       memo: '',
-      fee: { amount: [{ denom: 'ubadge', amount: '0' }], gas: '200000' }
+      fee: { amount: [{ denom: 'ubadge', amount: '2000000' }], gas: '200000' }
     },
     explanation: {
       action: 'update',
@@ -188,7 +188,7 @@ function buildDeleteMsg(input: BuildDynamicStoreInput): BuildDynamicStoreResult 
         storeId: input.storeId
       }],
       memo: '',
-      fee: { amount: [{ denom: 'ubadge', amount: '0' }], gas: '200000' }
+      fee: { amount: [{ denom: 'ubadge', amount: '2000000' }], gas: '200000' }
     },
     explanation: {
       action: 'delete',
@@ -220,7 +220,7 @@ function buildSetValueMsg(input: BuildDynamicStoreInput): BuildDynamicStoreResul
         value: input.value
       }],
       memo: '',
-      fee: { amount: [{ denom: 'ubadge', amount: '0' }], gas: '200000' }
+      fee: { amount: [{ denom: 'ubadge', amount: '2000000' }], gas: '200000' }
     },
     explanation: {
       action: 'set_value',
@@ -251,7 +251,7 @@ function buildBatchSetValuesMsg(input: BuildDynamicStoreInput): BuildDynamicStor
     transaction: {
       messages,
       memo: '',
-      fee: { amount: [{ denom: 'ubadge', amount: '0' }], gas: String(200000 + (input.entries.length * 50000)) }
+      fee: { amount: [{ denom: 'ubadge', amount: String((200000n + BigInt(input.entries.length) * 50000n) * 10n) }], gas: String(200000 + (input.entries.length * 50000)) }
     },
     explanation: {
       action: 'batch_set_values',

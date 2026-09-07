@@ -113,8 +113,8 @@ const resumeCmd = burnerCommand
   .requiredOption('--msg-file <path>', 'Path to the msg JSON to broadcast (same msg you originally intended)')
   .requiredOption('--manager <address>', 'Collection manager address (bb1...)')
   .option('--fund <mode>', 'Funding mode if the wallet is still unfunded', 'faucet')
-  .option('--fee <amount>', 'Fee amount in base units', '0')
-  .option('--fee-denom <symbol|denom>', 'Fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', DEFAULT_FEE_DENOM)
+  .option('--fee <amount>', 'Fee in ubadge (0 = estimate automatically at 10ubadge/gas)', '0')
+  .option('--fee-denom <symbol|denom>', 'Fee denom: BADGE or ubadge', DEFAULT_FEE_DENOM)
   .option('--gas <number>', 'Gas limit', '400000')
   .option('--poll-timeout <seconds>', 'Seconds to wait for funding', '60');
 addNetworkOptions(resumeCmd);
@@ -168,7 +168,7 @@ const sweepCmd = burnerCommand
   .argument('<selector>', 'Address or recovery file path')
   .requiredOption('--to <address>', 'Recipient address (bb1...)')
   .option('--denom <symbol|denom>', 'Coin denom to sweep. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', DEFAULT_FEE_DENOM)
-  .option('--fee <amount>', 'Fee amount', '0')
+  .option('--fee <amount>', 'Fee in ubadge (0 = estimate automatically at 10ubadge/gas)', '0')
   .option('--gas <number>', 'Gas limit', '200000');
 addNetworkOptions(sweepCmd);
 sweepCmd.action(async (selector: string, opts: any) => {
@@ -188,16 +188,6 @@ sweepCmd.action(async (selector: string, opts: any) => {
     process.stderr.write(`Hot wallet ${rec.address} has zero ${denom} balance — nothing to sweep.\n`);
     return;
   }
-  // Reserve the fee from the swept amount.
-  const feeAmount = BigInt(opts.fee || '0');
-  const sendAmount = balance - feeAmount;
-  if (sendAmount <= 0n) {
-    process.stderr.write(
-      `Balance (${balance}) is not enough to cover fee (${feeAmount}) — refusing to sweep.\n`
-    );
-    process.exit(1);
-  }
-
   const adapter = await loadBurnerAdapter(rec);
   const client = new BitBadgesSigningClient({
     adapter,
@@ -223,7 +213,7 @@ sweepCmd.action(async (selector: string, opts: any) => {
       value: {
         fromAddress: rec.address,
         toAddress,
-        amount: [{ denom, amount: sendAmount.toString() }]
+        amount: [{ denom, amount: '1' }]
       }
     });
   } catch (err: any) {
@@ -234,8 +224,19 @@ sweepCmd.action(async (selector: string, opts: any) => {
     process.exit(1);
   }
 
+  const { resolveCliFee, sweepAmount } = await import('../utils/fees.js');
+  const estimate = await client.simulate([protoMsg]);
+  const fee = resolveCliFee(estimate.gasLimit, Number(opts.gas), opts.fee);
+  const badgeBalance = denom === DEFAULT_FEE_DENOM ? balance : await fetchBalance(nodeUrl, rec.address, DEFAULT_FEE_DENOM);
+  const sendAmount = sweepAmount(denom, balance, badgeBalance, fee.amount);
+  protoMsg = encodeMsgFromJson({
+    typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+    value: { fromAddress: rec.address, toAddress: requireBb1AddressStrict(opts.to, '--to'), amount: [{ denom, amount: sendAmount.toString() }] }
+  });
+  const finalEstimate = await client.simulate([protoMsg]);
+  if (finalEstimate.gasUsed > Number(fee.gas)) throw new Error('Sweep gas increased; retry with a higher --gas limit');
   const result = await client.signAndBroadcast([protoMsg], {
-    fee: { amount: opts.fee || '0', denom, gas: String(opts.gas) },
+    fee,
     simulate: false
   });
   if (!result.success) {

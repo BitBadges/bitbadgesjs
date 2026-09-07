@@ -375,7 +375,7 @@ export async function runBurnerCreate(
       }
     } else {
       process.stderr.write(
-        `\nManual funding required. Send any amount of tokens to:\n  ${record.address}\non network "${opts.network}".\n`
+        `\nManual funding required. Send BADGE to cover transaction fees (10ubadge per gas) to:\n  ${record.address}\non network "${opts.network}".\n`
       );
       if (opts.nonInteractive) {
         process.stderr.write(
@@ -468,16 +468,21 @@ export async function runBurnerCreate(
   // earlier `accountIsFunded()` check that ran before the faucet landed.
   signingClient.clearCache();
 
-  const fee = {
-    amount: opts.fee?.amount ?? '0',
-    denom: opts.fee?.denom ?? DEFAULT_FEE_DENOM,
-    gas: String(opts.gas ?? DEFAULT_GAS)
-  };
+  const { resolveCliFee } = await import('./fees.js');
+  if (opts.fee?.denom && opts.fee.denom !== DEFAULT_FEE_DENOM) throw new Error('Transaction fees must be paid in ubadge');
+  const estimate = await signingClient.simulate([protoMsg]);
+  const fee = resolveCliFee(estimate.gasLimit, Number(opts.gas ?? DEFAULT_GAS), opts.fee?.amount);
+  const balance = await fetchBalance(opts.nodeUrl, record.address);
+  if (balance < BigInt(fee.amount)) {
+    const error = `Fund ${record.address} with at least ${BigInt(fee.amount) - balance} more ubadge, then resume this burner.`;
+    updateBurner(recoveryPath, { status: 'failed', error });
+    return { success: false, ephemeralAddress: record.address, recoveryPath, error, paused: true };
+  }
 
   process.stderr.write(`Broadcasting tx (fee=${fee.amount}${fee.denom}, gas=${fee.gas})...\n`);
   const result = await signingClient.signAndBroadcast([protoMsg], {
     fee,
-    simulate: false // skip auto-simulate: we want the deterministic zero-fee path
+    simulate: false // The final fee above already includes simulated gas and its buffer.
   });
 
   if (!result.success) {

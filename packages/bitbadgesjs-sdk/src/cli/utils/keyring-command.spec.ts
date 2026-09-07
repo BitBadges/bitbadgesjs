@@ -43,6 +43,7 @@ describe('buildKeyringCommand', () => {
     expect(result.commandLine).toContain('--keyring-backend os');
     expect(result.commandLine).toContain('--gas auto --gas-adjustment 1.3');
     expect(result.commandLine).toContain('--yes');
+    expect(result.commandLine.match(/--gas-prices 10ubadge/g)?.length).toBe(result.commandLine.match(/--gas /g)?.length);
   });
 
   it('writes the message value (NOT the {typeUrl,value} wrapper) to disk', () => {

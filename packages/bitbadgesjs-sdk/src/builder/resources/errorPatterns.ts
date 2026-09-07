@@ -111,8 +111,8 @@ export const ERROR_PATTERNS: ErrorPattern[] = [
       'missing fee denom',
       'Pass the denom the caller intends to pay fees in'
     ],
-    explanation: 'The transaction fee object is missing `amount[0].denom`. `jsonToTxBytes` requires the caller to explicitly name the denom the fee is paid in (e.g. "ubadge") — the chain does not assume a default. This typically happens when a builder emits `fee: { amount: [{ amount: "5000" }], gas: "500000" }` without a `denom` field, or constructs `fee.amount` as an empty array.',
-    fix: 'Set the full fee object on the transaction: `fee: { amount: [{ denom: "ubadge", amount: "5000" }], gas: "500000" }`. On BitBadges mainnet/testnet the fee denom is always `ubadge`. Do NOT use `abadge` (that is the 18-decimal EVM-side denom) and do NOT leave `amount` empty — include at least one `{ denom, amount }` entry.',
+    explanation: 'The transaction fee object is missing `amount[0].denom`. `jsonToTxBytes` requires the caller to explicitly name the denom the fee is paid in (e.g. "ubadge") — the chain does not assume a default. This typically happens when a builder emits `fee: { amount: [{ amount: "5000000" }], gas: "500000" }` without a `denom` field, or constructs `fee.amount` as an empty array.',
+    fix: 'Set the full fee object on the transaction: `fee: { amount: [{ denom: "ubadge", amount: "5000000" }], gas: "500000" }`. On BitBadges mainnet/testnet the fee denom is always `ubadge`. Do NOT use `abadge` (that is the 18-decimal EVM-side denom) and do NOT leave `amount` empty — include at least one `{ denom, amount }` entry.',
     example: '{ "fee": { "amount": [{ "denom": "ubadge", "amount": "5000" }], "gas": "500000" } }'
   },
   {
