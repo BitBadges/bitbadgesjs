@@ -8,6 +8,7 @@ import { verifyStandardsCompliance } from '../../api-indexer/verify-standards.js
 
 import { buildVault } from './vault.js';
 import { buildSubscription } from './subscription.js';
+import { reviewCollection } from '../review.js';
 import { buildBounty } from './bounty.js';
 import { buildPaymentRequest } from './payment-request.js';
 import { buildCrowdfund } from './crowdfund.js';
@@ -16,12 +17,7 @@ import { buildProductCatalog } from './product-catalog.js';
 import { buildPredictionMarket } from './prediction-market.js';
 import { buildSmartToken } from './smart-token.js';
 import { buildCreditToken } from './credit-token.js';
-import {
-  buildCustom2FA,
-  mintCustom2FA,
-  getCustom2FAOwnershipTimes,
-  CUSTOM_2FA_TOKEN_EXPIRATION_MS
-} from './custom-2fa.js';
+import { buildCustom2FA, mintCustom2FA, getCustom2FAOwnershipTimes, CUSTOM_2FA_TOKEN_EXPIRATION_MS } from './custom-2fa.js';
 import { buildQuests } from './quests.js';
 import { buildAddressList } from './address-list.js';
 import { buildIntent } from './intent.js';
@@ -30,7 +26,12 @@ import { buildBid } from './bid.js';
 import { buildPmSellIntent } from './pm-sell-intent.js';
 import { buildPmBuyIntent } from './pm-buy-intent.js';
 import { resolveCoin, parseDuration, toBaseUnits, sanitizeCosmosPathName, resolveExpiration } from './shared.js';
-import { buildPredictionMarketBuyIntent, buildPredictionMarketSellIntent, isPredictionMarketValid, validatePredictionMarketCollection } from '../prediction-markets.js';
+import {
+  buildPredictionMarketBuyIntent,
+  buildPredictionMarketSellIntent,
+  isPredictionMarketValid,
+  validatePredictionMarketCollection
+} from '../prediction-markets.js';
 import { buildIntentApproval } from '../intents.js';
 import { UintRangeArray } from '../uintRanges.js';
 import { isQuestApproval, doesCollectionFollowQuestProtocol } from '../quests.js';
@@ -50,11 +51,7 @@ function verifyBuilder(msg: any) {
 /** Every approvalId + amountTrackerId in a built msg, in document order. */
 function trackedIds(msg: any): string[] {
   const v = msg.value ?? msg;
-  const approvals = [
-    ...(v.collectionApprovals ?? []),
-    ...(v.incomingApprovals ?? []),
-    ...(v.outgoingApprovals ?? [])
-  ];
+  const approvals = [...(v.collectionApprovals ?? []), ...(v.incomingApprovals ?? []), ...(v.outgoingApprovals ?? [])];
   const ids: string[] = [];
   for (const a of approvals) {
     if (a?.approvalId) ids.push(a.approvalId);
@@ -106,9 +103,7 @@ describe('shared utilities', () => {
   test('resolveCoin detects Cosmos u<symbol> denoms and throws toward the canonical form (#0443)', () => {
     // Principle: do not silently coerce an ambiguous micro-denom to a
     // registry entry — throw and point at the canonical symbol + denom.
-    expect(() => resolveCoin('uatom')).toThrow(
-      /On BitBadges, ATOM is the denom "ibc\/.*"/
-    );
+    expect(() => resolveCoin('uatom')).toThrow(/On BitBadges, ATOM is the denom "ibc\/.*"/);
     expect(() => resolveCoin('uatom')).toThrow(/Pass "ATOM" or the full denom/);
     expect(() => resolveCoin('uusdc')).toThrow(/USDC is the denom "ibc\/.*"/);
     expect(() => resolveCoin('uosmo')).toThrow(/OSMO is the denom "ibc\/.*"/);
@@ -254,9 +249,7 @@ describe('vault builder', () => {
   });
 
   test('deterministic — identical params produce a byte-identical msg', () => {
-    expect(buildVault({ backingCoin: 'USDC', ...META })).toEqual(
-      buildVault({ backingCoin: 'USDC', ...META })
-    );
+    expect(buildVault({ backingCoin: 'USDC', ...META })).toEqual(buildVault({ backingCoin: 'USDC', ...META }));
   });
 
   test('withdraw id is a stable hash, not Math.random', () => {
@@ -282,7 +275,9 @@ describe('smart-token builder', () => {
   const msg = buildSmartToken({ backingCoin: 'USDC', ...META });
   const r = val(msg);
 
-  test('has Smart Token standard', () => { expect(r.standards).toContain('Smart Token'); });
+  test('has Smart Token standard', () => {
+    expect(r.standards).toContain('Smart Token');
+  });
   test('has deposit and withdraw approvals', () => {
     const ids = r.collectionApprovals.map((a: any) => a.approvalId);
     expect(ids).toContain('smart-token-deposit');
@@ -309,7 +304,51 @@ describe('subscription builder', () => {
   const msg = buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', ...META });
   const r = val(msg);
 
-  test('has Subscriptions standard', () => { expect(r.standards).toEqual(['Subscriptions']); });
+  // A fresh build used to fail its own `bb check` with two critical findings:
+  // mint approvals were mutable (manager could re-point the faucet or mint to
+  // themselves for free) and forceful post-mint transfers were not blocked.
+  // Safe by default now; managers who need to change price later opt out.
+  describe('passes its own review by default', () => {
+    test('locks the Mint-scoped approval permission forever, leaving other approvals editable', () => {
+      const perms = r.collectionPermissions.canUpdateCollectionApprovals;
+      const mintLock = perms.find((p: any) => p.fromListId === 'Mint');
+      expect(mintLock).toBeDefined();
+      expect(mintLock.permanentlyForbiddenTimes).toEqual([{ start: '1', end: '18446744073709551615' }]);
+      expect(mintLock.permanentlyPermittedTimes).toEqual([]);
+      // No blanket lock: a manager can still add or edit non-mint approvals.
+      expect(perms.some((p: any) => p.fromListId === 'All')).toBe(false);
+    });
+    test('blocks forceful post-mint transfers at creation', () => {
+      expect(r.invariants.noForcefulPostMintTransfers).toBe(true);
+    });
+    test('review reports zero critical findings', () => {
+      const review = reviewCollection(msg);
+      const criticals = review.findings.filter((f: any) => f.severity === 'critical').map((f: any) => f.code);
+      expect(criticals).toEqual([]);
+    });
+  });
+
+  describe('updatableMint opt-out', () => {
+    const open = val(buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', updatableMint: true, ...META }));
+    test('leaves mint approvals neutral so the price can change later', () => {
+      expect(open.collectionPermissions.canUpdateCollectionApprovals.some((p: any) => p.fromListId === 'Mint')).toBe(false);
+    });
+    test('still blocks forceful transfers; that is a separate concern', () => {
+      expect(open.invariants.noForcefulPostMintTransfers).toBe(true);
+    });
+    test('the review surfaces the choice as the critical it is', () => {
+      const criticals = reviewCollection(
+        buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', updatableMint: true, ...META })
+      )
+        .findings.filter((f: any) => f.severity === 'critical')
+        .map((f: any) => f.code);
+      expect(criticals.some((c: string) => /mint_approvals/.test(c))).toBe(true);
+    });
+  });
+
+  test('has Subscriptions standard', () => {
+    expect(r.standards).toEqual(['Subscriptions']);
+  });
   test('has durationFromTimestamp', () => {
     const ib = r.collectionApprovals[0].approvalCriteria.predeterminedBalances.incrementedBalances;
     expect(ib.durationFromTimestamp).toBe('2592000000');
@@ -318,7 +357,9 @@ describe('subscription builder', () => {
   test('coin transfer to recipient', () => {
     expect(r.collectionApprovals[0].approvalCriteria.coinTransfers[0].to).toBe('bb1test');
   });
-  test('noCustomOwnershipTimes is false', () => { expect(r.invariants.noCustomOwnershipTimes).toBe(false); });
+  test('noCustomOwnershipTimes is false', () => {
+    expect(r.invariants.noCustomOwnershipTimes).toBe(false);
+  });
   test('multi-tier', () => {
     const mt = val(buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', tiers: 3, ...META }));
     expect(mt.validTokenIds).toEqual([{ start: '1', end: '3' }]);
@@ -328,14 +369,16 @@ describe('subscription builder', () => {
     // Subscription protocol requires all coin transfers to share a denom.
     // Treasury splits across multiple recipients with the same coin are
     // legitimate; mixed denoms throw at build time (see builder.ts).
-    const mp = val(buildSubscription({
-      interval: 'monthly',
-      payouts: [
-        { recipient: 'bb1a', amount: 5, denom: 'USDC' },
-        { recipient: 'bb1b', amount: 3, denom: 'USDC' }
-      ],
-      ...META
-    }));
+    const mp = val(
+      buildSubscription({
+        interval: 'monthly',
+        payouts: [
+          { recipient: 'bb1a', amount: 5, denom: 'USDC' },
+          { recipient: 'bb1b', amount: 3, denom: 'USDC' }
+        ],
+        ...META
+      })
+    );
     const cts = mp.collectionApprovals[0].approvalCriteria.coinTransfers;
     expect(cts.length).toBe(2);
     expect(cts[0].to).toBe('bb1a');
@@ -354,8 +397,9 @@ describe('subscription builder', () => {
     ).toThrow(/single denom/);
   });
   test('deterministic — identical params produce byte-identical msg', () => {
-    expect(buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', ...META }))
-      .toEqual(buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', ...META }));
+    expect(buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', ...META })).toEqual(
+      buildSubscription({ interval: 'monthly', price: 10, denom: 'USDC', recipient: 'bb1test', ...META })
+    );
   });
   test('passes verification with zero violations (any standard)', () => {
     expectCleanVerification(msg);
@@ -366,7 +410,9 @@ describe('bounty builder', () => {
   const msg = buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1verifier', recipient: 'bb1recipient', submitter: 'bb1submitter', ...META });
   const r = val(msg);
 
-  test('has Bounty standard', () => { expect(r.standards).toEqual(['Bounty']); });
+  test('has Bounty standard', () => {
+    expect(r.standards).toEqual(['Bounty']);
+  });
   test('3 approvals', () => {
     expect(r.collectionApprovals.length).toBe(3);
     const ids = r.collectionApprovals.map((a: any) => a.approvalId);
@@ -386,15 +432,13 @@ describe('bounty builder', () => {
     const p = { amount: 100, denom: 'USDC', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', ...META };
     const a = val(buildBounty(p)).collectionApprovals;
     const b = val(buildBounty(p)).collectionApprovals;
-    const pid = (c: any[], id: string) =>
-      c.find((x: any) => x.approvalId === id).approvalCriteria.votingChallenges[0].proposalId;
+    const pid = (c: any[], id: string) => c.find((x: any) => x.approvalId === id).approvalCriteria.votingChallenges[0].proposalId;
     expect(pid(a, 'bounty-accept')).toBe(pid(b, 'bounty-accept'));
     expect(pid(a, 'bounty-deny')).toBe(pid(b, 'bounty-deny'));
     expect(pid(a, 'bounty-accept')).not.toBe(pid(a, 'bounty-deny'));
     expect(pid(a, 'bounty-accept').startsWith('bounty-accept-')).toBe(true);
     // distinct params → distinct proposalId
-    expect(pid(val(buildBounty({ ...p, amount: 101 })).collectionApprovals, 'bounty-accept'))
-      .not.toBe(pid(a, 'bounty-accept'));
+    expect(pid(val(buildBounty({ ...p, amount: 101 })).collectionApprovals, 'bounty-accept')).not.toBe(pid(a, 'bounty-accept'));
   });
   test('deterministic — whole msg byte-identical with the Date.now expiry window normalized out', () => {
     // bounty's `transferTimes.end` is `durationToTimestamp` (Date.now-
@@ -405,8 +449,8 @@ describe('bounty builder', () => {
       Array.isArray(v)
         ? v.map(stripTimes)
         : v && typeof v === 'object'
-        ? Object.fromEntries(Object.entries(v).map(([k, val]) => [k, k === 'transferTimes' ? 'WINDOW' : stripTimes(val)]))
-        : v;
+          ? Object.fromEntries(Object.entries(v).map(([k, val]) => [k, k === 'transferTimes' ? 'WINDOW' : stripTimes(val)]))
+          : v;
     expect(stripTimes(buildBounty(p))).toEqual(stripTimes(buildBounty(p)));
   });
   test('passes verification with zero violations (any standard)', () => {
@@ -426,7 +470,9 @@ describe('payment-request builder', () => {
   });
   const r = val(msg);
 
-  test('has PaymentRequest standard', () => { expect(r.standards).toEqual(['PaymentRequest']); });
+  test('has PaymentRequest standard', () => {
+    expect(r.standards).toEqual(['PaymentRequest']);
+  });
   test('2 approvals (pay + deny — no expire branch)', () => {
     expect(r.collectionApprovals.length).toBe(2);
     const ids = r.collectionApprovals.map((a: any) => a.approvalId);
@@ -454,7 +500,15 @@ describe('payment-request builder', () => {
     }
   });
   test('deterministic approval ids (no random ids; time window aside)', () => {
-    const prParams = { amount: 10, denom: 'USDC', payer: 'bb1payer', recipient: 'bb1recipient', context: 'ctx', name: 'Test', image: 'ipfs://test-image' };
+    const prParams = {
+      amount: 10,
+      denom: 'USDC',
+      payer: 'bb1payer',
+      recipient: 'bb1recipient',
+      context: 'ctx',
+      name: 'Test',
+      image: 'ipfs://test-image'
+    };
     const ids = (m: any) => m.value.collectionApprovals.map((a: any) => a.approvalId);
     expect(ids(buildPaymentRequest(prParams))).toEqual(ids(buildPaymentRequest(prParams)));
   });
@@ -468,18 +522,22 @@ describe('crowdfund builder', () => {
   const msg = buildCrowdfund(params);
   const r = val(msg);
 
-  test('has Crowdfund standard', () => { expect(r.standards).toEqual(['Crowdfund']); });
-  test('2 token IDs', () => { expect(r.validTokenIds).toEqual([{ start: '1', end: '2' }]); });
-  test('at least 4 approvals', () => { expect(r.collectionApprovals.length).toBeGreaterThanOrEqual(4); });
+  test('has Crowdfund standard', () => {
+    expect(r.standards).toEqual(['Crowdfund']);
+  });
+  test('2 token IDs', () => {
+    expect(r.validTokenIds).toEqual([{ start: '1', end: '2' }]);
+  });
+  test('at least 4 approvals', () => {
+    expect(r.collectionApprovals.length).toBeGreaterThanOrEqual(4);
+  });
   test('crowdfunder address used', () => {
     const progress = r.collectionApprovals.find((a: any) => a.approvalId === 'deposit-progress');
     expect(progress.toListId).toBe('bb1fund');
   });
 
   test('throws without a payout address (no crowdfunder/creator)', () => {
-    expect(() => buildCrowdfund({ goal: 1000, denom: 'USDC', ...META })).toThrow(
-      /requires a payout address/
-    );
+    expect(() => buildCrowdfund({ goal: 1000, denom: 'USDC', ...META })).toThrow(/requires a payout address/);
   });
   test('falls back to creator when crowdfunder omitted', () => {
     const viaCreator = val(buildCrowdfund({ goal: 1000, denom: 'USDC', creator: 'bb1creator', ...META }));
@@ -497,10 +555,10 @@ describe('crowdfund builder', () => {
     // parts the builder controls deterministically.
     const a = val(buildCrowdfund(params));
     const b = val(buildCrowdfund(params));
-    expect(a.collectionApprovals.map((x: any) => x.approvalId))
-      .toEqual(b.collectionApprovals.map((x: any) => x.approvalId));
-    expect(a.collectionApprovals.find((x: any) => x.approvalId === 'refund').approvalCriteria.mustOwnTokens[0].ownershipCheckParty)
-      .toBe(b.collectionApprovals.find((x: any) => x.approvalId === 'refund').approvalCriteria.mustOwnTokens[0].ownershipCheckParty);
+    expect(a.collectionApprovals.map((x: any) => x.approvalId)).toEqual(b.collectionApprovals.map((x: any) => x.approvalId));
+    expect(a.collectionApprovals.find((x: any) => x.approvalId === 'refund').approvalCriteria.mustOwnTokens[0].ownershipCheckParty).toBe(
+      b.collectionApprovals.find((x: any) => x.approvalId === 'refund').approvalCriteria.mustOwnTokens[0].ownershipCheckParty
+    );
   });
   test('passes verification with zero violations', () => {
     expectCleanVerification(msg);
@@ -511,7 +569,9 @@ describe('auction builder', () => {
   const msg = buildAuction({ ...META });
   const r = val(msg);
 
-  test('has Auction standard', () => { expect(r.standards).toEqual(['Auction']); });
+  test('has Auction standard', () => {
+    expect(r.standards).toEqual(['Auction']);
+  });
   test('bounded transfer times', () => {
     const mint = r.collectionApprovals.find((a: any) => a.fromListId === 'Mint');
     expect(mint.transferTimes[0].start).not.toBe('1');
@@ -524,9 +584,7 @@ describe('auction builder', () => {
     // transferTimes are Date.now()-relative (pre-existing, out of scope),
     // so assert id determinism rather than full-msg deep-equal.
     expect(trackedIds(buildAuction({ ...META }))).toEqual(trackedIds(buildAuction({ ...META })));
-    expect(r.collectionApprovals.map((a: any) => a.approvalId)).toEqual([
-      'auction-mint-to-winner', 'auction-burn'
-    ]);
+    expect(r.collectionApprovals.map((a: any) => a.approvalId)).toEqual(['auction-mint-to-winner', 'auction-burn']);
   });
   test('passes verification with zero violations', () => {
     expectCleanVerification(msg);
@@ -535,15 +593,24 @@ describe('auction builder', () => {
 
 describe('product-catalog builder', () => {
   const msg = buildProductCatalog({
-    products: [{ name: 'T-Shirt', price: 25, denom: 'USDC' }, { name: 'Mug', price: 15, denom: 'USDC', maxSupply: 50 }],
+    products: [
+      { name: 'T-Shirt', price: 25, denom: 'USDC' },
+      { name: 'Mug', price: 15, denom: 'USDC', maxSupply: 50 }
+    ],
     storeAddress: 'bb1store',
     ...META
   });
   const r = val(msg);
 
-  test('has Products standard', () => { expect(r.standards).toEqual(['Products']); });
-  test('correct token IDs', () => { expect(r.validTokenIds).toEqual([{ start: '1', end: '2' }]); });
-  test('purchase + burn approvals', () => { expect(r.collectionApprovals.length).toBe(3); });
+  test('has Products standard', () => {
+    expect(r.standards).toEqual(['Products']);
+  });
+  test('correct token IDs', () => {
+    expect(r.validTokenIds).toEqual([{ start: '1', end: '2' }]);
+  });
+  test('purchase + burn approvals', () => {
+    expect(r.collectionApprovals.length).toBe(3);
+  });
   test('coin transfers to store', () => {
     for (const p of r.collectionApprovals.filter((a: any) => a.fromListId === 'Mint')) {
       expect(p.approvalCriteria.coinTransfers[0].to).toBe('bb1store');
@@ -551,42 +618,55 @@ describe('product-catalog builder', () => {
   });
   test('deterministic — identical params produce a byte-identical msg', () => {
     const p = {
-      products: [{ name: 'T-Shirt', price: 25, denom: 'USDC' }, { name: 'Mug', price: 15, denom: 'USDC', maxSupply: 50 }],
+      products: [
+        { name: 'T-Shirt', price: 25, denom: 'USDC' },
+        { name: 'Mug', price: 15, denom: 'USDC', maxSupply: 50 }
+      ],
       storeAddress: 'bb1store',
       ...META
     };
     expect(buildProductCatalog(p)).toEqual(buildProductCatalog(p));
   });
   test('purchase ids are 1-based index, burn id is stable', () => {
-    expect(r.collectionApprovals.map((a: any) => a.approvalId)).toEqual([
-      'product-purchase-1', 'product-purchase-2', 'product-burn'
-    ]);
+    expect(r.collectionApprovals.map((a: any) => a.approvalId)).toEqual(['product-purchase-1', 'product-purchase-2', 'product-burn']);
   });
   test('passes verification with zero violations', () => {
     expectCleanVerification(msg);
   });
   test('maxSupply: present cap emits overallMaxNumTransfers; omitted = unlimited', () => {
-    const cap = val(buildProductCatalog({
-      products: [{ name: 'Capped', price: 1, denom: 'USDC', maxSupply: 50 }],
-      storeAddress: 'bb1store', ...META
-    })).collectionApprovals.find((a: any) => a.approvalId === 'product-purchase-1');
+    const cap = val(
+      buildProductCatalog({
+        products: [{ name: 'Capped', price: 1, denom: 'USDC', maxSupply: 50 }],
+        storeAddress: 'bb1store',
+        ...META
+      })
+    ).collectionApprovals.find((a: any) => a.approvalId === 'product-purchase-1');
     expect(cap.approvalCriteria.maxNumTransfers.overallMaxNumTransfers).toBe('50');
 
-    const unlimited = val(buildProductCatalog({
-      products: [{ name: 'Unl', price: 1, denom: 'USDC' }],
-      storeAddress: 'bb1store', ...META
-    })).collectionApprovals.find((a: any) => a.approvalId === 'product-purchase-1');
+    const unlimited = val(
+      buildProductCatalog({
+        products: [{ name: 'Unl', price: 1, denom: 'USDC' }],
+        storeAddress: 'bb1store',
+        ...META
+      })
+    ).collectionApprovals.find((a: any) => a.approvalId === 'product-purchase-1');
     expect(unlimited.approvalCriteria.maxNumTransfers.overallMaxNumTransfers).toBe('0');
   });
   test('maxSupply: rejects negative / non-integer instead of silently going unlimited', () => {
-    expect(() => buildProductCatalog({
-      products: [{ name: 'Bad', price: 1, denom: 'USDC', maxSupply: -1 }],
-      storeAddress: 'bb1store', ...META
-    })).toThrow(/maxSupply/i);
-    expect(() => buildProductCatalog({
-      products: [{ name: 'Bad', price: 1, denom: 'USDC', maxSupply: 1.5 }],
-      storeAddress: 'bb1store', ...META
-    })).toThrow(/maxSupply/i);
+    expect(() =>
+      buildProductCatalog({
+        products: [{ name: 'Bad', price: 1, denom: 'USDC', maxSupply: -1 }],
+        storeAddress: 'bb1store',
+        ...META
+      })
+    ).toThrow(/maxSupply/i);
+    expect(() =>
+      buildProductCatalog({
+        products: [{ name: 'Bad', price: 1, denom: 'USDC', maxSupply: 1.5 }],
+        storeAddress: 'bb1store',
+        ...META
+      })
+    ).toThrow(/maxSupply/i);
   });
 });
 
@@ -594,8 +674,12 @@ describe('prediction-market builder', () => {
   const msg = buildPredictionMarket({ verifier: 'bb1verifier', ...META });
   const r = val(msg);
 
-  test('has Prediction Market standard', () => { expect(r.standards).toEqual(['Prediction Market']); });
-  test('YES/NO tokens', () => { expect(r.validTokenIds).toEqual([{ start: '1', end: '2' }]); });
+  test('has Prediction Market standard', () => {
+    expect(r.standards).toEqual(['Prediction Market']);
+  });
+  test('YES/NO tokens', () => {
+    expect(r.validTokenIds).toEqual([{ start: '1', end: '2' }]);
+  });
   test('alias paths', () => {
     expect(r.aliasPathsToAdd.length).toBe(2);
     expect(r.aliasPathsToAdd.map((a: any) => a.denom)).toContain('uyes');
@@ -605,9 +689,7 @@ describe('prediction-market builder', () => {
     expect(r.collectionApprovals.filter((a: any) => a.approvalCriteria?.votingChallenges?.length > 0).length).toBeGreaterThanOrEqual(2);
   });
   test('deterministic — identical params produce a byte-identical msg', () => {
-    expect(buildPredictionMarket({ verifier: 'bb1verifier', ...META })).toEqual(
-      buildPredictionMarket({ verifier: 'bb1verifier', ...META })
-    );
+    expect(buildPredictionMarket({ verifier: 'bb1verifier', ...META })).toEqual(buildPredictionMarket({ verifier: 'bb1verifier', ...META }));
   });
   test('producer↔recognizer drift guard — built collection satisfies isPredictionMarketValid (#0434)', () => {
     const built = normalizeForReview(buildPredictionMarket({ verifier: 'bb1verifier', ...META }));
@@ -639,13 +721,16 @@ describe('credit-token builder', () => {
   const msg = buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1recipient', ...META });
   const r = val(msg);
 
-  test('has Credit Token standard', () => { expect(r.standards).toEqual(['Credit Token']); });
+  test('has Credit Token standard', () => {
+    expect(r.standards).toEqual(['Credit Token']);
+  });
   test('amount scaling', () => {
     expect(r.collectionApprovals[0].approvalCriteria.predeterminedBalances.incrementedBalances.allowAmountScaling).toBe(true);
   });
   test('deterministic — identical params produce byte-identical msg', () => {
-    expect(buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1recipient', ...META }))
-      .toEqual(buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1recipient', ...META }));
+    expect(buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1recipient', ...META })).toEqual(
+      buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1recipient', ...META })
+    );
   });
   test('passes verification with zero violations (any standard)', () => {
     expectCleanVerification(msg);
@@ -657,9 +742,15 @@ describe('custom-2fa builder', () => {
   const msg = buildCustom2FA({ ...META2FA, creator: 'bb1manager' });
   const r = val(msg);
 
-  test('has Custom-2FA standard', () => { expect(r.standards).toEqual(['Custom-2FA']); });
-  test('allowPurgeIfExpired', () => { expect(r.collectionApprovals[0].approvalCriteria.autoDeletionOptions.allowPurgeIfExpired).toBe(true); });
-  test('disablePoolCreation', () => { expect(r.invariants.disablePoolCreation).toBe(true); });
+  test('has Custom-2FA standard', () => {
+    expect(r.standards).toEqual(['Custom-2FA']);
+  });
+  test('allowPurgeIfExpired', () => {
+    expect(r.collectionApprovals[0].approvalCriteria.autoDeletionOptions.allowPurgeIfExpired).toBe(true);
+  });
+  test('disablePoolCreation', () => {
+    expect(r.invariants.disablePoolCreation).toBe(true);
+  });
   test('burnable adds burn approval', () => {
     expect(val(buildCustom2FA({ ...META2FA, creator: 'bb1manager', burnable: true })).collectionApprovals.length).toBe(2);
   });
@@ -724,8 +815,12 @@ describe('quests builder', () => {
   const msg = buildQuests({ reward: 10, denom: 'BADGE', maxClaims: 100, ...META });
   const r = val(msg);
 
-  test('has Quests standard', () => { expect(r.standards).toEqual(['Quests']); });
-  test('correct escrow', () => { expect(r.mintEscrowCoinsToTransfer[0].amount).toBe('1000000000000'); });
+  test('has Quests standard', () => {
+    expect(r.standards).toEqual(['Quests']);
+  });
+  test('correct escrow', () => {
+    expect(r.mintEscrowCoinsToTransfer[0].amount).toBe('1000000000000');
+  });
   test('quest approval with escrow payout', () => {
     const q = r.collectionApprovals.find((a: any) => a.approvalId === 'quests-approval');
     expect(q.approvalCriteria.coinTransfers[0].overrideFromWithApproverAddress).toBe(true);
@@ -763,15 +858,18 @@ describe('address-list builder', () => {
   const msg = buildAddressList({ name: 'My List', description: 'A test list.', image: 'ipfs://test-image' });
   const r = val(msg);
 
-  test('has Address List standard', () => { expect(r.standards).toEqual(['Address List']); });
+  test('has Address List standard', () => {
+    expect(r.standards).toEqual(['Address List']);
+  });
   test('manager-add and manager-remove', () => {
     const ids = r.collectionApprovals.map((a: any) => a.approvalId);
     expect(ids).toContain('manager-add');
     expect(ids).toContain('manager-remove');
   });
   test('deterministic — identical params produce byte-identical msg', () => {
-    expect(buildAddressList({ name: 'My List', description: 'A test list.', image: 'ipfs://test-image' }))
-      .toEqual(buildAddressList({ name: 'My List', description: 'A test list.', image: 'ipfs://test-image' }));
+    expect(buildAddressList({ name: 'My List', description: 'A test list.', image: 'ipfs://test-image' })).toEqual(
+      buildAddressList({ name: 'My List', description: 'A test list.', image: 'ipfs://test-image' })
+    );
   });
   test('passes verification with zero violations (any standard)', () => {
     expectCleanVerification(msg);
@@ -823,13 +921,23 @@ describe('intent builder (delegates to canonical)', () => {
     expect(buildIntent(p).value.approval.approvalId).toBe(buildIntent(p).value.approval.approvalId);
   });
   test('throws on same pay/receive denom', () => {
-    expect(() => buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'BADGE', payAmount: 10, receiveDenom: 'BADGE', receiveAmount: 5 }))
-      .toThrow(/denoms must differ/);
-    expect(() => buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'USDC', payAmount: 10, receiveDenom: 'usdc', receiveAmount: 5 }))
-      .toThrow(/denoms must differ/);
+    expect(() =>
+      buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'BADGE', payAmount: 10, receiveDenom: 'BADGE', receiveAmount: 5 })
+    ).toThrow(/denoms must differ/);
+    expect(() =>
+      buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'USDC', payAmount: 10, receiveDenom: 'usdc', receiveAmount: 5 })
+    ).toThrow(/denoms must differ/);
   });
   test('accepts ms-since-epoch expiration (parity with bb intents create; durationToTimestamp rejected it)', () => {
-    const a = buildIntent({ address: 'bb1c', collectionId: '5', payDenom: 'USDC', payAmount: 7, receiveDenom: 'BADGE', receiveAmount: 3, expiration: '1798765432000' }).value.approval;
+    const a = buildIntent({
+      address: 'bb1c',
+      collectionId: '5',
+      payDenom: 'USDC',
+      payAmount: 7,
+      receiveDenom: 'BADGE',
+      receiveAmount: 3,
+      expiration: '1798765432000'
+    }).value.approval;
     expect(a.transferTimes).toEqual([{ start: 1n, end: 1798765432000n }]);
   });
 });
@@ -854,8 +962,7 @@ describe('listing builder (delegates to canonical)', () => {
     expect(msg.value.approval.approvalCriteria.coinTransfers[0].to).toBe('bb1seller');
   });
   test('rejects a true token range (orderbook listings are single-token)', () => {
-    expect(() => buildListing({ address: 'bb1s', collectionId: '1', tokenIds: '1-5', price: 1, denom: 'USDC' }))
-      .toThrow(/single token id/);
+    expect(() => buildListing({ address: 'bb1s', collectionId: '1', tokenIds: '1-5', price: 1, denom: 'USDC' })).toThrow(/single token id/);
   });
   test('approval == buildOrderbookListingApproval for equivalent args (delegation parity)', () => {
     const a = msg.value.approval;
@@ -877,7 +984,8 @@ describe('listing builder (delegates to canonical)', () => {
     expect((msg as any)._meta).toBeUndefined();
   });
   test('accepts ms-since-epoch expiration (parity with bb nfts list; durationToTimestamp rejected it)', () => {
-    const a = buildListing({ address: 'bb1seller', collectionId: '1', tokenIds: '4', price: 50, denom: 'USDC', expiration: '1798765432000' }).value.approval;
+    const a = buildListing({ address: 'bb1seller', collectionId: '1', tokenIds: '4', price: 50, denom: 'USDC', expiration: '1798765432000' }).value
+      .approval;
     expect(a.transferTimes).toEqual([{ start: 1n, end: 1798765432000n }]);
   });
 });
@@ -899,8 +1007,7 @@ describe('bid builder (delegates to canonical)', () => {
     expect(ct.overrideToWithInitiator).toBe(true);
   });
   test('rejects a true token range', () => {
-    expect(() => buildBid({ address: 'bb1b', collectionId: '1', tokenIds: '1-5', price: 1, denom: 'BADGE' }))
-      .toThrow(/single token id/);
+    expect(() => buildBid({ address: 'bb1b', collectionId: '1', tokenIds: '1-5', price: 1, denom: 'BADGE' })).toThrow(/single token id/);
   });
   test('deterministic approval id for identical params', () => {
     const p = { address: 'bb1bidder', collectionId: '1', tokenIds: '3', price: 25, denom: 'BADGE' };
@@ -947,7 +1054,8 @@ describe('bid builder (delegates to canonical)', () => {
     expect(a.approvalCriteria.predeterminedBalances.incrementedBalances.startBalances[0].amount).toBe(5n);
   });
   test('accepts ms-since-epoch expiration (parity with bb nfts bid; durationToTimestamp rejected it)', () => {
-    const a = buildBid({ address: 'bb1bidder', collectionId: '1', tokenIds: '3', price: 25, denom: 'BADGE', expiration: '1798765432000' }).value.approval;
+    const a = buildBid({ address: 'bb1bidder', collectionId: '1', tokenIds: '3', price: 25, denom: 'BADGE', expiration: '1798765432000' }).value
+      .approval;
     expect(a.transferTimes).toEqual([{ start: 1n, end: 1798765432000n }]);
   });
   test('deterministic — byte-identical msg for identical params (fixed ms expiry)', () => {
@@ -972,17 +1080,23 @@ describe('pm-sell-intent builder (delegates to canonical)', () => {
     const no = buildPmSellIntent({ address: 'bb1', collectionId: '42', token: 'no', amount: 1, price: 1, denom: 'USDC' });
     expect(no.value.approval.tokenIds).toEqual([{ start: 2n, end: 2n }]);
   });
-  test('pays seller', () => { expect(msg.value.approval.approvalCriteria.coinTransfers[0].to).toBe('bb1seller'); });
+  test('pays seller', () => {
+    expect(msg.value.approval.approvalCriteria.coinTransfers[0].to).toBe('bb1seller');
+  });
   test('no _meta — byte-identical to the prediction-markets path', () => {
     expect((msg as any)._meta).toBeUndefined();
   });
   test('approval == buildPredictionMarketSellIntent for equivalent args (delegation parity)', () => {
     const a = msg.value.approval;
     const canonical = buildPredictionMarketSellIntent({
-      address: 'bb1seller', collectionId: '42', tokenId: 1n, tokenAmount: 100n,
+      address: 'bb1seller',
+      collectionId: '42',
+      tokenId: 1n,
+      tokenAmount: 100n,
       paymentDenom: a.approvalCriteria.coinTransfers[0].coins[0].denom,
       paymentAmount: BigInt(a.approvalCriteria.coinTransfers[0].coins[0].amount),
-      transferTimes: a.transferTimes, approvalId: a.approvalId
+      transferTimes: a.transferTimes,
+      approvalId: a.approvalId
     });
     expect(a).toEqual(canonical);
   });
@@ -992,7 +1106,15 @@ describe('pm-sell-intent builder (delegates to canonical)', () => {
     expect(a.value.approval.approvalId).toBe(b.value.approval.approvalId);
   });
   test('accepts ms-since-epoch expiration; defaults to a 24h window (parity with bb prediction-markets sell)', () => {
-    const fixed = buildPmSellIntent({ address: 'bb1s', collectionId: '7', token: 'yes', amount: 3, price: 9, denom: 'USDC', expiration: '1798765432000' }).value.approval;
+    const fixed = buildPmSellIntent({
+      address: 'bb1s',
+      collectionId: '7',
+      token: 'yes',
+      amount: 3,
+      price: 9,
+      denom: 'USDC',
+      expiration: '1798765432000'
+    }).value.approval;
     expect(fixed.transferTimes).toEqual([{ start: 1n, end: 1798765432000n }]);
     const def = buildPmSellIntent({ address: 'bb1s', collectionId: '7', token: 'yes', amount: 3, price: 9, denom: 'USDC' }).value.approval;
     const span = Number(def.transferTimes[0].end) - Date.now();
@@ -1021,10 +1143,14 @@ describe('pm-buy-intent builder (delegates to canonical)', () => {
   test('approval == buildPredictionMarketBuyIntent for equivalent args (delegation parity)', () => {
     const a = msg.value.approval;
     const canonical = buildPredictionMarketBuyIntent({
-      address: 'bb1buyer', collectionId: '42', tokenId: 2n, tokenAmount: 200n,
+      address: 'bb1buyer',
+      collectionId: '42',
+      tokenId: 2n,
+      tokenAmount: 200n,
       paymentDenom: a.approvalCriteria.coinTransfers[0].coins[0].denom,
       paymentAmount: BigInt(a.approvalCriteria.coinTransfers[0].coins[0].amount),
-      transferTimes: a.transferTimes, approvalId: a.approvalId
+      transferTimes: a.transferTimes,
+      approvalId: a.approvalId
     });
     expect(a).toEqual(canonical);
   });
@@ -1036,7 +1162,15 @@ describe('pm-buy-intent builder (delegates to canonical)', () => {
     expect(buildPmBuyIntent({ ...p, price: 31 }).value.approval.approvalId).not.toBe(a.value.approval.approvalId);
   });
   test('accepts ms-since-epoch expiration; defaults to a 24h window (parity with bb prediction-markets buy)', () => {
-    const fixed = buildPmBuyIntent({ address: 'bb1buyer', collectionId: '42', token: 'no', amount: 200, price: 30, denom: 'USDC', expiration: '1798765432000' }).value.approval;
+    const fixed = buildPmBuyIntent({
+      address: 'bb1buyer',
+      collectionId: '42',
+      token: 'no',
+      amount: 200,
+      price: 30,
+      denom: 'USDC',
+      expiration: '1798765432000'
+    }).value.approval;
     expect(fixed.transferTimes).toEqual([{ start: 1n, end: 1798765432000n }]);
     const def = buildPmBuyIntent({ address: 'bb1buyer', collectionId: '42', token: 'no', amount: 200, price: 30, denom: 'USDC' }).value.approval;
     const span = Number(def.transferTimes[0].end) - Date.now();
@@ -1047,8 +1181,11 @@ describe('pm-buy-intent builder (delegates to canonical)', () => {
 
 describe('canonical PM intent tokenAmount guard (#0431 — bb prediction-markets buy/sell parity)', () => {
   const base = {
-    address: 'bb1t', collectionId: '9', tokenId: 1n,
-    paymentDenom: 'uusdc', paymentAmount: 1000n,
+    address: 'bb1t',
+    collectionId: '9',
+    tokenId: 1n,
+    paymentDenom: 'uusdc',
+    paymentAmount: 1000n,
     transferTimes: UintRangeArray.From([{ start: 1n, end: 9999999999999n }]),
     approvalId: 'pm-guard'
   };
@@ -1071,7 +1208,10 @@ describe('canonical PM intent tokenAmount guard (#0431 — bb prediction-markets
 describe('all collection builders pass verifyStandardsCompliance with zero violations', () => {
   const builders: [string, any][] = [
     ['vault', buildVault({ backingCoin: 'USDC', ...META })],
-    ['vault (with limits)', buildVault({ backingCoin: 'USDC', dailyWithdrawLimit: 100, require2fa: '74', emergencyRecovery: 'bb1recovery', ...META })],
+    [
+      'vault (with limits)',
+      buildVault({ backingCoin: 'USDC', dailyWithdrawLimit: 100, require2fa: '74', emergencyRecovery: 'bb1recovery', ...META })
+    ],
     ['smart-token', buildSmartToken({ backingCoin: 'USDC', ...META })],
     ['smart-token (tradable)', buildSmartToken({ backingCoin: 'USDC', tradable: true, ...META })],
     ['smart-token (ai-agent)', buildSmartToken({ backingCoin: 'BADGE', aiAgentVault: true, ...META })],
@@ -1082,22 +1222,54 @@ describe('all collection builders pass verifyStandardsCompliance with zero viola
     // `doesCollectionFollowSubscriptionProtocol()` rule. Multiple
     // recipients sharing one denom is valid (treasury split); mixing
     // denoms is not.
-    ['subscription (multi-payout)', buildSubscription({ interval: 'monthly', payouts: [{ recipient: 'bb1a', amount: 5, denom: 'USDC' }, { recipient: 'bb1b', amount: 3, denom: 'USDC' }], ...META })],
+    [
+      'subscription (multi-payout)',
+      buildSubscription({
+        interval: 'monthly',
+        payouts: [
+          { recipient: 'bb1a', amount: 5, denom: 'USDC' },
+          { recipient: 'bb1b', amount: 3, denom: 'USDC' }
+        ],
+        ...META
+      })
+    ],
     ['bounty', buildBounty({ amount: 100, denom: 'USDC', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', ...META })],
-    ['bounty (BADGE)', buildBounty({ amount: 50, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', expiration: '7d', ...META })],
+    [
+      'bounty (BADGE)',
+      buildBounty({ amount: 50, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', expiration: '7d', ...META })
+    ],
     ['crowdfund', buildCrowdfund({ goal: 1000, denom: 'USDC', crowdfunder: 'bb1fund', ...META })],
     ['crowdfund (with crowdfunder)', buildCrowdfund({ goal: 500, denom: 'BADGE', crowdfunder: 'bb1fund', deadline: '14d', ...META })],
     ['auction', buildAuction({ ...META })],
     ['auction (custom times)', buildAuction({ bidDeadline: '3d', acceptWindow: '1d', ...META })],
     ['product-catalog', buildProductCatalog({ products: [{ name: 'Item', price: 10, denom: 'USDC' }], storeAddress: 'bb1s', ...META })],
-    ['product-catalog (multi)', buildProductCatalog({ products: [{ name: 'A', price: 5, denom: 'BADGE' }, { name: 'B', price: 10, denom: 'USDC', maxSupply: 50, burn: true }], storeAddress: 'bb1s', ...META })],
+    [
+      'product-catalog (multi)',
+      buildProductCatalog({
+        products: [
+          { name: 'A', price: 5, denom: 'BADGE' },
+          { name: 'B', price: 10, denom: 'USDC', maxSupply: 50, burn: true }
+        ],
+        storeAddress: 'bb1s',
+        ...META
+      })
+    ],
     ['prediction-market', buildPredictionMarket({ verifier: 'bb1v', ...META })],
     ['credit-token', buildCreditToken({ paymentDenom: 'USDC', recipient: 'bb1r', ...META })],
     ['credit-token (custom)', buildCreditToken({ paymentDenom: 'BADGE', recipient: 'bb1r', symbol: 'CRED', tokensPerUnit: 50, ...META })],
     ['custom-2fa', buildCustom2FA({ name: 'My 2FA', description: 'A 2FA token.', image: 'ipfs://test-image', creator: 'bb1manager' })],
-    ['custom-2fa (burnable)', buildCustom2FA({ name: 'Burnable 2FA', burnable: true, description: 'A burnable 2FA token.', image: 'ipfs://test-image', creator: 'bb1manager' })],
+    [
+      'custom-2fa (burnable)',
+      buildCustom2FA({
+        name: 'Burnable 2FA',
+        burnable: true,
+        description: 'A burnable 2FA token.',
+        image: 'ipfs://test-image',
+        creator: 'bb1manager'
+      })
+    ],
     ['quests', buildQuests({ reward: 10, denom: 'BADGE', maxClaims: 100, ...META })],
-    ['address-list', buildAddressList({ name: 'My List', description: 'A test list.', image: 'ipfs://test-image' })],
+    ['address-list', buildAddressList({ name: 'My List', description: 'A test list.', image: 'ipfs://test-image' })]
   ];
 
   for (const [name, msg] of builders) {
@@ -1139,7 +1311,9 @@ describe('error handling', () => {
   });
 
   test('amount-taking builders reject negative / non-finite amounts at the producer', () => {
-    expect(() => buildBounty({ amount: -5, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', ...META })).toThrow(/non-negative/i);
+    expect(() => buildBounty({ amount: -5, denom: 'BADGE', verifier: 'bb1v', recipient: 'bb1r', submitter: 'bb1s', ...META })).toThrow(
+      /non-negative/i
+    );
     expect(() => buildCrowdfund({ goal: Infinity, denom: 'USDC', crowdfunder: 'bb1fund', ...META } as any)).toThrow(/finite/i);
     expect(() => buildPaymentRequest({ amount: NaN, denom: 'USDC', payer: 'bb1p', recipient: 'bb1r', ...META } as any)).toThrow(/finite/i);
   });
@@ -1175,8 +1349,9 @@ describe('error handling', () => {
   });
 
   test('buildIntent rejects same pay/receive denom (no-op approval)', () => {
-    expect(() => buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'BADGE', payAmount: 10, receiveDenom: 'BADGE', receiveAmount: 5 }))
-      .toThrow(/denoms must differ/);
+    expect(() =>
+      buildIntent({ address: 'bb1a', collectionId: '1', payDenom: 'BADGE', payAmount: 10, receiveDenom: 'BADGE', receiveAmount: 5 })
+    ).toThrow(/denoms must differ/);
   });
 
   test('buildListing parses single token ID (canonical shape)', () => {

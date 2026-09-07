@@ -2,17 +2,25 @@ import { Command } from 'commander';
 import { readJsonInput, addNetworkOptions } from '../utils/io.js';
 import { emit as emitEnvelope, isQuiet, type EnvelopeWarning } from '../utils/envelope.js';
 import { tagHelpGroups } from '../utils/help-groups.js';
-import { renderReview, renderValidate, renderResolvedMetadata, renderSimulate, collectResolvedEntries, type ResolvedEntry } from '../utils/terminal.js';
+import {
+  renderReview,
+  renderValidate,
+  renderResolvedMetadata,
+  renderSimulate,
+  collectResolvedEntries,
+  type ResolvedEntry
+} from '../utils/terminal.js';
 import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMsg.js';
 import { addDeployOptions, isDeployRequested, executeDeploy } from '../utils/deploy-options.js';
 import { buildNextStepHint } from '../utils/next-step.js';
 import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
 
-export const buildCommand = new Command('build').description('Deterministic transaction builders — flag-based generators for vaults, NFTs, subscriptions, bounties, and more. Output: ready-to-sign JSON. To broadcast, pipe into `bb deploy --burner`.');
+export const buildCommand = new Command('build').description(
+  'Deterministic transaction builders — flag-based generators for vaults, NFTs, subscriptions, bounties, and more. Output: ready-to-sign JSON. To broadcast, pipe into `bb deploy --burner`.'
+);
 
 // ── Output helper ────────────────────────────────────────────────────────────
-
 
 async function emit(
   data: any,
@@ -75,8 +83,7 @@ async function emit(
   // Transfer txs (`bb cli build transfer`) flow through here too. They
   // get auto-validate + auto-simulate, but skip review/metadata/explain
   // (those are collection-specific).
-  const isTransferTx =
-    typeof data?.typeUrl === 'string' && data.typeUrl === '/tokenization.MsgTransferTokens';
+  const isTransferTx = typeof data?.typeUrl === 'string' && data.typeUrl === '/tokenization.MsgTransferTokens';
 
   // Apply --creator / --manager overrides to collection msgs. Builders emit
   // MsgUniversalUpdateCollection internally (superset) — the normalization
@@ -204,7 +211,7 @@ async function emit(
       for (const finding of result?.findings ?? []) {
         warnings.push({
           code: finding.code,
-          message: (finding.title?.en ?? finding.code),
+          message: finding.title?.en ?? finding.code,
           details: finding
         });
       }
@@ -227,9 +234,7 @@ async function emit(
     try {
       const entries: ResolvedEntry[] = collectResolvedEntries(data);
       meta.resolvedMetadata = entries;
-      meta.metadataToUpload = entries
-        .filter((e) => e.uri.length > 0)
-        .map((e) => ({ kind: e.kind, location: e.location, uri: e.uri }));
+      meta.metadataToUpload = entries.filter((e) => e.uri.length > 0).map((e) => ({ kind: e.kind, location: e.location, uri: e.uri }));
       if (!suppressCommentary) {
         process.stderr.write('\n' + renderResolvedMetadata(data, { stream: process.stderr }) + '\n');
       }
@@ -259,8 +264,7 @@ async function emit(
       if (!apiKey) {
         const skipResult = {
           success: false,
-          error:
-            'Auto-Simulate skipped — no API key. Pass --api-key or run `bb settings set apiKey <key>`.'
+          error: 'Auto-Simulate skipped — no API key. Pass --api-key or run `bb settings set apiKey <key>`.'
         };
         meta.simulate = skipResult;
         warnings.push({
@@ -268,9 +272,7 @@ async function emit(
           message: skipResult.error
         });
         if (!suppressCommentary) {
-          process.stderr.write(
-            '\n' + renderSimulate(skipResult, { stream: process.stderr, title: 'Auto-Simulate' }) + '\n'
-          );
+          process.stderr.write('\n' + renderSimulate(skipResult, { stream: process.stderr, title: 'Auto-Simulate' }) + '\n');
         }
       } else {
         const { simulateMessages } = await import('../../builder/tools/queries/simulateTransaction.js');
@@ -317,8 +319,7 @@ async function emit(
   if (opts.simulate && isUserApprovalTx) {
     warnings.push({
       code: 'simulate.unsupported',
-      message:
-        'Auto-Simulate skipped — wrap user-level approvals inside an alternative approval message to simulate end-to-end.'
+      message: 'Auto-Simulate skipped — wrap user-level approvals inside an alternative approval message to simulate end-to-end.'
     });
     if (!suppressCommentary) {
       process.stderr.write(
@@ -380,7 +381,10 @@ const sharedOpts = (cmd: Command) => {
     .option('--explain', 'Print a human-readable explanation of the output to stderr (in addition to the auto-review)')
     .option('--creator <address>', 'Creator/sender address (bb1... or 0x...)')
     .option('--manager <address>', 'Collection manager address (bb1...)')
-    .option('--simulate', 'After building, additionally call the BitBadges API simulate endpoint and render gas + net changes (requires BITBADGES_API_KEY). Distinct from `bb deploy --dry-run`, which simulates then exits without broadcasting.')
+    .option(
+      '--simulate',
+      'After building, additionally call the BitBadges API simulate endpoint and render gas + net changes (requires BITBADGES_API_KEY). Distinct from `bb deploy --dry-run`, which simulates then exits without broadcasting.'
+    )
     .option('--events', 'When --simulate is set, dump the full raw chain events array (default: just the count)');
   // Network selection — only the --simulate path actually hits the
   // API, but we add the flags universally so `templates vault
@@ -445,12 +449,24 @@ sharedOpts(
     .option('--emergency-recovery <address>', 'Recovery address for emergency migration')
 ).action(async (opts) => {
   const { buildVault } = await import('../../core/builders/vault.js');
-  if (opts.json) { emit(buildVault(readJsonInput(opts.json)), opts); return; }
-  emit(buildVault({
-    backingCoin: opts.backingCoin, uri: opts.uri, name: opts.name, symbol: opts.symbol, image: opts.image,
-    description: opts.description, dailyWithdrawLimit: opts.dailyWithdrawLimit ? Number(opts.dailyWithdrawLimit) : undefined,
-    require2fa: opts.require2fa, emergencyRecovery: opts.emergencyRecovery
-  }), opts);
+  if (opts.json) {
+    emit(buildVault(readJsonInput(opts.json)), opts);
+    return;
+  }
+  emit(
+    buildVault({
+      backingCoin: opts.backingCoin,
+      uri: opts.uri,
+      name: opts.name,
+      symbol: opts.symbol,
+      image: opts.image,
+      description: opts.description,
+      dailyWithdrawLimit: opts.dailyWithdrawLimit ? Number(opts.dailyWithdrawLimit) : undefined,
+      require2fa: opts.require2fa,
+      emergencyRecovery: opts.emergencyRecovery
+    }),
+    opts
+  );
 });
 
 sharedOpts(
@@ -464,13 +480,21 @@ sharedOpts(
     .option('--payouts <json>', 'Multiple payouts JSON: [{"recipient","amount","denom"}]')
     .option('--tiers <n>', 'Number of tiers', '1')
     .option('--transferable', 'Allow post-mint P2P transfers')
+    .option(
+      '--updatable-mint',
+      'Keep the mint (faucet) approval editable so you can change the price later. Default locks it forever, which is what `bb check` requires. Opting in shows a critical review finding on purpose.'
+    )
 ).action(async (opts) => {
   const { buildSubscription } = await import('../../core/builders/subscription.js');
-  if (opts.json) { emit(buildSubscription(readJsonInput(opts.json)), opts); return; }
+  if (opts.json) {
+    emit(buildSubscription(readJsonInput(opts.json)), opts);
+    return;
+  }
   const params: any = {
     interval: opts.interval,
     tiers: Number(opts.tiers),
     transferable: !!opts.transferable,
+    updatableMint: !!opts.updatableMint,
     uri: opts.uri,
     name: opts.name,
     description: opts.description,
@@ -509,45 +533,69 @@ sharedOpts(
     .option('--expiration <duration>', 'Expiration duration', '30d')
 ).action(async (opts) => {
   const { buildBounty } = await import('../../core/builders/bounty.js');
-  if (opts.json) { emit(buildBounty(readJsonInput(opts.json)), opts); return; }
+  if (opts.json) {
+    emit(buildBounty(readJsonInput(opts.json)), opts);
+    return;
+  }
   const denom = requireBbDenom(opts.denom, '--denom');
   const verifier = requireBb1AddressStrict(opts.verifier, '--verifier');
   const recipient = requireBb1AddressStrict(opts.recipient, '--recipient');
   const submitter = requireBb1AddressStrict(opts.submitter, '--submitter');
-  emit(buildBounty({
-    amount: Number(opts.amount), denom, verifier, recipient,
-    submitter,
-    expiration: opts.expiration, uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
-  }), opts);
+  emit(
+    buildBounty({
+      amount: Number(opts.amount),
+      denom,
+      verifier,
+      recipient,
+      submitter,
+      expiration: opts.expiration,
+      uri: opts.uri,
+      name: opts.name,
+      description: opts.description,
+      image: opts.image
+    }),
+    opts
+  );
 });
 
 sharedOpts(
   buildCommand
     .command('payment-request')
-    .description('Create an agent-initiated payment request (no-escrow inverse of bounty). Metadata: pass --uri OR --name + --image + (--description OR --context).')
+    .description(
+      'Create an agent-initiated payment request (no-escrow inverse of bounty). Metadata: pass --uri OR --name + --image + (--description OR --context).'
+    )
     .requiredOption('--amount <n>', 'Payment amount (display units)')
     .requiredOption('--denom <symbol|denom>', 'Coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .requiredOption('--payer <address>', 'Payer address (bb1...) — the human approver')
     .requiredOption('--recipient <address>', 'Recipient address (bb1...) — agent/merchant')
     .option('--expiration <duration>', 'Expiration duration', '30d')
-    .option('--context <text>', 'Rationale shown to the payer at approval time (≥100 chars recommended). Used as the inline description if --description not set.')
+    .option(
+      '--context <text>',
+      'Rationale shown to the payer at approval time (≥100 chars recommended). Used as the inline description if --description not set.'
+    )
 ).action(async (opts) => {
   const { buildPaymentRequest } = await import('../../core/builders/payment-request.js');
-  if (opts.json) { emit(buildPaymentRequest(readJsonInput(opts.json)), opts); return; }
+  if (opts.json) {
+    emit(buildPaymentRequest(readJsonInput(opts.json)), opts);
+    return;
+  }
   const denom = requireBbDenom(opts.denom, '--denom');
   const payer = requireBb1AddressStrict(opts.payer, '--payer');
   const recipient = requireBb1AddressStrict(opts.recipient, '--recipient');
-  emit(buildPaymentRequest({
-    amount: Number(opts.amount),
-    denom,
-    payer,
-    recipient,
-    expiration: opts.expiration,
-    uri: opts.uri,
-    name: opts.name,
-    image: opts.image,
-    context: opts.context || opts.description
-  }), opts);
+  emit(
+    buildPaymentRequest({
+      amount: Number(opts.amount),
+      denom,
+      payer,
+      recipient,
+      expiration: opts.expiration,
+      uri: opts.uri,
+      name: opts.name,
+      image: opts.image,
+      context: opts.context || opts.description
+    }),
+    opts
+  );
 });
 
 sharedOpts(
@@ -560,13 +608,26 @@ sharedOpts(
     .option('--deadline <duration>', 'Deadline duration', '30d')
 ).action(async (opts) => {
   const { buildCrowdfund } = await import('../../core/builders/crowdfund.js');
-  if (opts.json) { emit(buildCrowdfund(readJsonInput(opts.json)), opts); return; }
+  if (opts.json) {
+    emit(buildCrowdfund(readJsonInput(opts.json)), opts);
+    return;
+  }
   const denom = requireBbDenom(opts.denom, '--denom');
   const crowdfunder = opts.crowdfunder ? requireBb1AddressStrict(opts.crowdfunder, '--crowdfunder') : opts.crowdfunder;
-  emit(buildCrowdfund({
-    goal: Number(opts.goal), denom, crowdfunder, deadline: opts.deadline,
-    uri: opts.uri, name: opts.name, description: opts.description, image: opts.image, creator: opts.creator
-  }), opts);
+  emit(
+    buildCrowdfund({
+      goal: Number(opts.goal),
+      denom,
+      crowdfunder,
+      deadline: opts.deadline,
+      uri: opts.uri,
+      name: opts.name,
+      description: opts.description,
+      image: opts.image,
+      creator: opts.creator
+    }),
+    opts
+  );
 });
 
 sharedOpts(
@@ -578,12 +639,23 @@ sharedOpts(
     .option('--seller <address>', 'Seller address — only this address can accept the winning bid (defaults to --creator)')
 ).action(async (opts) => {
   const { buildAuction } = await import('../../core/builders/auction.js');
-  if (opts.json) { emit(buildAuction(readJsonInput(opts.json)), opts); return; }
-  emit(buildAuction({
-    bidDeadline: opts.bidDeadline, acceptWindow: opts.acceptWindow,
-    uri: opts.uri, name: opts.name, description: opts.description, image: opts.image,
-    seller: opts.seller, creator: opts.creator
-  }), opts);
+  if (opts.json) {
+    emit(buildAuction(readJsonInput(opts.json)), opts);
+    return;
+  }
+  emit(
+    buildAuction({
+      bidDeadline: opts.bidDeadline,
+      acceptWindow: opts.acceptWindow,
+      uri: opts.uri,
+      name: opts.name,
+      description: opts.description,
+      image: opts.image,
+      seller: opts.seller,
+      creator: opts.creator
+    }),
+    opts
+  );
 });
 
 sharedOpts(
@@ -605,19 +677,26 @@ sharedOpts(
         '  uri (string, optional)         — pre-hosted per-product metadata URI\n' +
         '  image, description (optional)  — inline metadata; used when uri is absent'
     )
-    .requiredOption(
-      '--store-address <address>',
-      'Payment recipient (bb1.../0x — auto-normalized). Every purchase routes its `price * denom` here.'
-    )
+    .requiredOption('--store-address <address>', 'Payment recipient (bb1.../0x — auto-normalized). Every purchase routes its `price * denom` here.')
 ).action(async (opts) => {
   const { buildProductCatalog } = await import('../../core/builders/product-catalog.js');
-  if (opts.json) { emit(buildProductCatalog(readJsonInput(opts.json)), opts); return; }
+  if (opts.json) {
+    emit(buildProductCatalog(readJsonInput(opts.json)), opts);
+    return;
+  }
   const products = JSON.parse(opts.products);
   const storeAddress = requireBb1AddressStrict(opts.storeAddress, '--store-address');
-  emit(buildProductCatalog({
-    products, storeAddress,
-    uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
-  }), opts);
+  emit(
+    buildProductCatalog({
+      products,
+      storeAddress,
+      uri: opts.uri,
+      name: opts.name,
+      description: opts.description,
+      image: opts.image
+    }),
+    opts
+  );
 });
 
 sharedOpts(
@@ -629,7 +708,10 @@ sharedOpts(
     .option('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', 'USDC')
 ).action(async (opts) => {
   const { buildPredictionMarket } = await import('../../core/builders/prediction-market.js');
-  if (opts.json) { emit(buildPredictionMarket(readJsonInput(opts.json)), opts); return; }
+  if (opts.json) {
+    emit(buildPredictionMarket(readJsonInput(opts.json)), opts);
+    return;
+  }
   const verifierRaw = opts.verifier ?? opts.resolver;
   if (!verifierRaw) {
     process.stderr.write('Error: --verifier (or --resolver) is required.\n');
@@ -637,10 +719,17 @@ sharedOpts(
   }
   const verifier = requireBb1AddressStrict(verifierRaw, opts.verifier ? '--verifier' : '--resolver');
   const denom = requireBbDenom(opts.denom, '--denom');
-  emit(buildPredictionMarket({
-    verifier, denom,
-    uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
-  }), opts);
+  emit(
+    buildPredictionMarket({
+      verifier,
+      denom,
+      uri: opts.uri,
+      name: opts.name,
+      description: opts.description,
+      image: opts.image
+    }),
+    opts
+  );
 });
 
 sharedOpts(
@@ -658,12 +747,24 @@ sharedOpts(
     .option('--allow-forceful-transfers', 'Allow forceful post-mint transfers (default: locked off — the safe default for vault-like Smart Tokens)')
 ).action(async (opts) => {
   const { buildSmartToken } = await import('../../core/builders/smart-token.js');
-  if (opts.json) { emit(buildSmartToken(readJsonInput(opts.json)), opts); return; }
-  emit(buildSmartToken({
-    backingCoin: opts.backingCoin, symbol: opts.symbol, tradable: !!opts.tradable, aiAgentVault: !!opts.aiAgentVault,
-    allowForcefulPostMintTransfers: !!opts.allowForcefulTransfers,
-    uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
-  }), opts);
+  if (opts.json) {
+    emit(buildSmartToken(readJsonInput(opts.json)), opts);
+    return;
+  }
+  emit(
+    buildSmartToken({
+      backingCoin: opts.backingCoin,
+      symbol: opts.symbol,
+      tradable: !!opts.tradable,
+      aiAgentVault: !!opts.aiAgentVault,
+      allowForcefulPostMintTransfers: !!opts.allowForcefulTransfers,
+      uri: opts.uri,
+      name: opts.name,
+      description: opts.description,
+      image: opts.image
+    }),
+    opts
+  );
 });
 
 sharedOpts(
@@ -677,7 +778,10 @@ sharedOpts(
     .option('--tokens-per-unit <n>', 'Tokens per 1 display unit of payment', '100')
 ).action(async (opts) => {
   const { buildCreditToken } = await import('../../core/builders/credit-token.js');
-  if (opts.json) { emit(buildCreditToken(readJsonInput(opts.json)), opts); return; }
+  if (opts.json) {
+    emit(buildCreditToken(readJsonInput(opts.json)), opts);
+    return;
+  }
   const paymentDenomRaw = opts.paymentDenom ?? opts.denom;
   if (!paymentDenomRaw) {
     process.stderr.write('Error: --payment-denom (or --denom) is required.\n');
@@ -685,11 +789,19 @@ sharedOpts(
   }
   const paymentDenom = requireBbDenom(paymentDenomRaw, opts.paymentDenom ? '--payment-denom' : '--denom');
   const recipient = requireBb1AddressStrict(opts.recipient, '--recipient');
-  emit(buildCreditToken({
-    paymentDenom, recipient, symbol: opts.symbol,
-    tokensPerUnit: Number(opts.tokensPerUnit),
-    uri: opts.uri, name: opts.name, description: opts.description, image: opts.image
-  }), opts);
+  emit(
+    buildCreditToken({
+      paymentDenom,
+      recipient,
+      symbol: opts.symbol,
+      tokensPerUnit: Number(opts.tokensPerUnit),
+      uri: opts.uri,
+      name: opts.name,
+      description: opts.description,
+      image: opts.image
+    }),
+    opts
+  );
 });
 
 sharedOpts(
@@ -700,11 +812,22 @@ sharedOpts(
     .option('--transferable', 'Allow post-mint P2P transfers')
 ).action(async (opts) => {
   const { buildCustom2FA } = await import('../../core/builders/custom-2fa.js');
-  if (opts.json) { emit(buildCustom2FA(readJsonInput(opts.json)), opts); return; }
-  emit(buildCustom2FA({
-    uri: opts.uri, name: opts.name, image: opts.image, description: opts.description,
-    burnable: !!opts.burnable, transferable: !!opts.transferable, creator: opts.creator
-  }), opts);
+  if (opts.json) {
+    emit(buildCustom2FA(readJsonInput(opts.json)), opts);
+    return;
+  }
+  emit(
+    buildCustom2FA({
+      uri: opts.uri,
+      name: opts.name,
+      image: opts.image,
+      description: opts.description,
+      burnable: !!opts.burnable,
+      transferable: !!opts.transferable,
+      creator: opts.creator
+    }),
+    opts
+  );
 });
 
 // NOTE: `bb build quests` was removed (ticket 0435). The builder emitted
@@ -717,16 +840,24 @@ sharedOpts(
 // on the intended on-chain quest mechanic (0435).
 
 sharedOpts(
-  buildCommand
-    .command('address-list')
-    .description('Create an on-chain address list. Metadata: pass --uri OR --name + --image + --description.')
+  buildCommand.command('address-list').description('Create an on-chain address list. Metadata: pass --uri OR --name + --image + --description.')
 ).action(async (opts) => {
   const { buildAddressList } = await import('../../core/builders/address-list.js');
-  if (opts.json) { emit(buildAddressList(readJsonInput(opts.json)), opts); return; }
-  emit(buildAddressList({
-    uri: opts.uri, name: opts.name, image: opts.image, description: opts.description,
-    manager: opts.manager, creator: opts.creator
-  }), opts);
+  if (opts.json) {
+    emit(buildAddressList(readJsonInput(opts.json)), opts);
+    return;
+  }
+  emit(
+    buildAddressList({
+      uri: opts.uri,
+      name: opts.name,
+      image: opts.image,
+      description: opts.description,
+      manager: opts.manager,
+      creator: opts.creator
+    }),
+    opts
+  );
 });
 
 // ============================================================
@@ -743,14 +874,32 @@ sharedOpts(
     .requiredOption('--pay-amount <n>', 'Amount you send (display units)')
     .requiredOption('--receive-denom <symbol|denom>', 'What you receive. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .requiredOption('--receive-amount <n>', 'Amount you receive (display units)')
-    .option('--expiration <when>', 'Intent expiry: ms-since-epoch (1748140800000) or duration (30d, 24h, monthly). Default 30d, matches `bb intents create`.', '30d')
+    .option(
+      '--expiration <when>',
+      'Intent expiry: ms-since-epoch (1748140800000) or duration (30d, 24h, monthly). Default 30d, matches `bb intents create`.',
+      '30d'
+    )
 ).action(async (opts) => {
   const { buildIntent } = await import('../../core/builders/intent.js');
-  if (opts.json) { emit(buildIntent(readJsonInput(opts.json)), opts); return; }
+  if (opts.json) {
+    emit(buildIntent(readJsonInput(opts.json)), opts);
+    return;
+  }
   const payDenom = requireBbDenom(opts.payDenom, '--pay-denom');
   const receiveDenom = requireBbDenom(opts.receiveDenom, '--receive-denom');
   const address = requireBb1AddressStrict(opts.address, '--address');
-  emit(buildIntent({ address, collectionId: opts.collectionId, payDenom, payAmount: Number(opts.payAmount), receiveDenom, receiveAmount: Number(opts.receiveAmount), expiration: opts.expiration }), opts);
+  emit(
+    buildIntent({
+      address,
+      collectionId: opts.collectionId,
+      payDenom,
+      payAmount: Number(opts.payAmount),
+      receiveDenom,
+      receiveAmount: Number(opts.receiveAmount),
+      expiration: opts.expiration
+    }),
+    opts
+  );
 });
 
 // `bb build recurring-payment` removed: it emitted a recurring approval
@@ -772,10 +921,24 @@ sharedOpts(
     .option('--expiration <when>', 'Listing expiry: ms-since-epoch (1748140800000) or duration (30d, 24h, monthly). Default 30d.', '30d')
 ).action(async (opts) => {
   const { buildListing } = await import('../../core/builders/listing.js');
-  if (opts.json) { emit(buildListing(readJsonInput(opts.json)), opts); return; }
+  if (opts.json) {
+    emit(buildListing(readJsonInput(opts.json)), opts);
+    return;
+  }
   const denom = requireBbDenom(opts.denom, '--denom');
   const address = requireBb1AddressStrict(opts.address, '--address');
-  emit(buildListing({ address, collectionId: opts.collectionId, tokenIds: opts.tokenIds, price: Number(opts.price), denom, maxSales: Number(opts.maxSales), expiration: opts.expiration }), opts);
+  emit(
+    buildListing({
+      address,
+      collectionId: opts.collectionId,
+      tokenIds: opts.tokenIds,
+      price: Number(opts.price),
+      denom,
+      maxSales: Number(opts.maxSales),
+      expiration: opts.expiration
+    }),
+    opts
+  );
 });
 
 sharedOpts(
@@ -791,10 +954,24 @@ sharedOpts(
     .option('--expiration <when>', 'Bid expiry: ms-since-epoch (1748140800000) or duration (7d, 24h, monthly). Default 7d.', '7d')
 ).action(async (opts) => {
   const { buildBid } = await import('../../core/builders/bid.js');
-  if (opts.json) { emit(buildBid(readJsonInput(opts.json)), opts); return; }
+  if (opts.json) {
+    emit(buildBid(readJsonInput(opts.json)), opts);
+    return;
+  }
   const denom = requireBbDenom(opts.denom, '--denom');
   const address = requireBb1AddressStrict(opts.address, '--address');
-  emit(buildBid({ address, collectionId: opts.collectionId, tokenIds: opts.tokenIds, tokenAmount: Number(opts.tokenAmount), price: Number(opts.price), denom, expiration: opts.expiration }), opts);
+  emit(
+    buildBid({
+      address,
+      collectionId: opts.collectionId,
+      tokenIds: opts.tokenIds,
+      tokenAmount: Number(opts.tokenAmount),
+      price: Number(opts.price),
+      denom,
+      expiration: opts.expiration
+    }),
+    opts
+  );
 });
 
 sharedOpts(
@@ -807,13 +984,31 @@ sharedOpts(
     .requiredOption('--amount <n>', 'Number of tokens to sell')
     .requiredOption('--price <n>', 'Total payment amount (display units)')
     .requiredOption('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
-    .option('--expiration <when>', 'Intent expiry: ms-since-epoch (1748140800000) or duration (24h, 7d, monthly). Default 24h, matches `bb prediction-markets buy/sell`.', '24h')
+    .option(
+      '--expiration <when>',
+      'Intent expiry: ms-since-epoch (1748140800000) or duration (24h, 7d, monthly). Default 24h, matches `bb prediction-markets buy/sell`.',
+      '24h'
+    )
 ).action(async (opts) => {
   const { buildPmSellIntent } = await import('../../core/builders/pm-sell-intent.js');
-  if (opts.json) { emit(buildPmSellIntent(readJsonInput(opts.json)), opts); return; }
+  if (opts.json) {
+    emit(buildPmSellIntent(readJsonInput(opts.json)), opts);
+    return;
+  }
   const denom = requireBbDenom(opts.denom, '--denom');
   const address = requireBb1AddressStrict(opts.address, '--address');
-  emit(buildPmSellIntent({ address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom, expiration: opts.expiration }), opts);
+  emit(
+    buildPmSellIntent({
+      address,
+      collectionId: opts.collectionId,
+      token: opts.token,
+      amount: Number(opts.amount),
+      price: Number(opts.price),
+      denom,
+      expiration: opts.expiration
+    }),
+    opts
+  );
 });
 
 sharedOpts(
@@ -826,13 +1021,31 @@ sharedOpts(
     .requiredOption('--amount <n>', 'Number of tokens to buy')
     .requiredOption('--price <n>', 'Total payment amount (display units)')
     .requiredOption('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
-    .option('--expiration <when>', 'Intent expiry: ms-since-epoch (1748140800000) or duration (24h, 7d, monthly). Default 24h, matches `bb prediction-markets buy/sell`.', '24h')
+    .option(
+      '--expiration <when>',
+      'Intent expiry: ms-since-epoch (1748140800000) or duration (24h, 7d, monthly). Default 24h, matches `bb prediction-markets buy/sell`.',
+      '24h'
+    )
 ).action(async (opts) => {
   const { buildPmBuyIntent } = await import('../../core/builders/pm-buy-intent.js');
-  if (opts.json) { emit(buildPmBuyIntent(readJsonInput(opts.json)), opts); return; }
+  if (opts.json) {
+    emit(buildPmBuyIntent(readJsonInput(opts.json)), opts);
+    return;
+  }
   const denom = requireBbDenom(opts.denom, '--denom');
   const address = requireBb1AddressStrict(opts.address, '--address');
-  emit(buildPmBuyIntent({ address, collectionId: opts.collectionId, token: opts.token, amount: Number(opts.amount), price: Number(opts.price), denom, expiration: opts.expiration }), opts);
+  emit(
+    buildPmBuyIntent({
+      address,
+      collectionId: opts.collectionId,
+      token: opts.token,
+      amount: Number(opts.amount),
+      price: Number(opts.price),
+      denom,
+      expiration: opts.expiration
+    }),
+    opts
+  );
 });
 
 // ============================================================
@@ -862,45 +1075,39 @@ sharedOpts(
     )
     .requiredOption('--denom <symbol-or-denom>', 'Coin symbol (USDC, BADGE) or raw chain denom (ubadge, ibc/...)')
     .option('--base-units', 'Treat --amount as already-in-base-units, skipping the symbol→decimals conversion')
-)
-  .action(async (opts) => {
-    try {
-      const { requireBb1AddressStrict } = await import('../utils/address.js');
-      const { resolveAmount } = await import('../utils/amount.js');
-      const fromAddress = requireBb1AddressStrict(opts.from, '--from');
-      const toAddress = requireBb1AddressStrict(opts.to, '--to');
-      // Canonical amount/denom resolution — shared with auctions /
-      // crowdfunds / nfts / intents / prediction-markets (0410). This
-      // replaces a re-rolled branch whose else-path display-converted
-      // even canonical chain denoms, contradicting this command's own
-      // "base units when --denom is a raw chain denom" help text;
-      // resolveAmount is the help-text-correct, canonical behavior.
-      const { denom, amount } = resolveAmount(
-        String(opts.amount),
-        opts.denom,
-        !!opts.baseUnits,
-        { amountFlag: '--amount', denomFlag: '--denom' }
-      );
-      const msg = {
-        typeUrl: '/cosmos.bank.v1beta1.MsgSend',
-        value: {
-          fromAddress,
-          toAddress,
-          amount: [{ denom, amount }]
-        }
-      };
-      // Route through the shared emit() like every sibling build
-      // subcommand so --condensed/--output-file AND the deploy gate
-      // (--browser/--burner/--simulate) actually work. MsgSend is
-      // envelope-safe: not a collection / approval / transfer tx, so
-      // emit() skips all the collection-specific backfill and falls
-      // straight to output + the deploy gate.
-      emit(msg, opts);
-    } catch (err: any) {
-      process.stderr.write(`Error: ${err?.message || err}\n`);
-      process.exit(1);
-    }
-  });
+).action(async (opts) => {
+  try {
+    const { requireBb1AddressStrict } = await import('../utils/address.js');
+    const { resolveAmount } = await import('../utils/amount.js');
+    const fromAddress = requireBb1AddressStrict(opts.from, '--from');
+    const toAddress = requireBb1AddressStrict(opts.to, '--to');
+    // Canonical amount/denom resolution — shared with auctions /
+    // crowdfunds / nfts / intents / prediction-markets (0410). This
+    // replaces a re-rolled branch whose else-path display-converted
+    // even canonical chain denoms, contradicting this command's own
+    // "base units when --denom is a raw chain denom" help text;
+    // resolveAmount is the help-text-correct, canonical behavior.
+    const { denom, amount } = resolveAmount(String(opts.amount), opts.denom, !!opts.baseUnits, { amountFlag: '--amount', denomFlag: '--denom' });
+    const msg = {
+      typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+      value: {
+        fromAddress,
+        toAddress,
+        amount: [{ denom, amount }]
+      }
+    };
+    // Route through the shared emit() like every sibling build
+    // subcommand so --condensed/--output-file AND the deploy gate
+    // (--browser/--burner/--simulate) actually work. MsgSend is
+    // envelope-safe: not a collection / approval / transfer tx, so
+    // emit() skips all the collection-specific backfill and falls
+    // straight to output + the deploy gate.
+    emit(msg, opts);
+  } catch (err: any) {
+    process.stderr.write(`Error: ${err?.message || err}\n`);
+    process.exit(1);
+  }
+});
 
 // ============================================================
 // Transfer walkthrough (interactive)
@@ -909,13 +1116,18 @@ sharedOpts(
 sharedOpts(
   buildCommand
     .command('transfer')
-    .description('Interactive walkthrough for MsgTransferTokens — fetches the collection + sender outgoing + recipient incoming approvals and walks you through picking prioritizedApprovals, only-check scopes, precalculation, and balances. Any flag can short-circuit the prompt for that step. Requires BITBADGES_API_KEY.')
+    .description(
+      'Interactive walkthrough for MsgTransferTokens — fetches the collection + sender outgoing + recipient incoming approvals and walks you through picking prioritizedApprovals, only-check scopes, precalculation, and balances. Any flag can short-circuit the prompt for that step. Requires BITBADGES_API_KEY.'
+    )
     .option('--collection-id <id>', 'Collection ID')
     .option('--from <address>', 'Sender address (bb1.../0x...) — use "Mint" for minting')
     .option('--to <address>', 'Recipient address (bb1.../0x...)')
     .option('--amount <n>', 'Per-recipient amount (used when not precalculated)')
     .option('--token-ids <spec>', 'Token IDs (e.g. "1-5", "1,3,5", "all")')
-    .option('-y, --yes', 'Non-interactive: skip all prompts. Picks no prioritized approvals, no precalc, default amount=1, default tokenIds=all valid. Use for scripts/CI.')
+    .option(
+      '-y, --yes',
+      'Non-interactive: skip all prompts. Picks no prioritized approvals, no precalc, default amount=1, default tokenIds=all valid. Use for scripts/CI.'
+    )
 ).action(async (opts) => {
   if (!process.env.BITBADGES_API_KEY) {
     // Fall through to runtime API-key resolution; the apiClient will

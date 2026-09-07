@@ -82,9 +82,7 @@ export function resolveCoin(symbolOrDenom: string): ResolvedCoin {
     .map((c) => c.symbol)
     .filter((s, i, a) => a.indexOf(s) === i)
     .join(', ');
-  throw new Error(
-    `Unknown coin "${symbolOrDenom}". Supported: ${supported}`
-  );
+  throw new Error(`Unknown coin "${symbolOrDenom}". Supported: ${supported}`);
 }
 
 /**
@@ -93,15 +91,11 @@ export function resolveCoin(symbolOrDenom: string): ResolvedCoin {
 export function toBaseUnits(displayAmount: number, decimals: number): string {
   const num = Number(displayAmount);
   if (!Number.isFinite(num) || num < 0) {
-    throw new Error(
-      `Invalid amount "${displayAmount}": must be a finite, non-negative number.`
-    );
+    throw new Error(`Invalid amount "${displayAmount}": must be a finite, non-negative number.`);
   }
   const base = Math.round(num * 10 ** decimals);
   if (!Number.isSafeInteger(base)) {
-    throw new Error(
-      `Amount "${displayAmount}" is too large to convert to base units without precision loss.`
-    );
+    throw new Error(`Amount "${displayAmount}" is too large to convert to base units without precision loss.`);
   }
   return String(base);
 }
@@ -111,7 +105,7 @@ export function toBaseUnits(displayAmount: number, decimals: number): string {
 const DURATION_MAP: Record<string, number> = {
   daily: 86400000,
   monthly: 2592000000, // 30 days
-  annually: 31536000000, // 365 days
+  annually: 31536000000 // 365 days
 };
 
 /**
@@ -182,14 +176,7 @@ export function stableHashId(prefix: string, seed: string | object): string {
  * Per-preset metadata field shape. Approvals are functional/text-based and
  * MUST NOT carry an image; everything else requires name + image + description.
  */
-export type MetadataPreset =
-  | 'collection'
-  | 'token'
-  | 'aliasPath'
-  | 'wrapperPath'
-  | 'addressList'
-  | 'dynamicStore'
-  | 'approval';
+export type MetadataPreset = 'collection' | 'token' | 'aliasPath' | 'wrapperPath' | 'addressList' | 'dynamicStore' | 'approval';
 
 /**
  * Inline metadata input for the two-mode builder contract. Approvals
@@ -217,16 +204,12 @@ export interface InlineMetadataInput {
  *   2. `{ inlineMetadata }` — serialized to JSON and stashed in
  *      customData; on-chain `uri` stays empty.
  */
-export type MetadataSource =
-  | { uri: string; inlineMetadata?: undefined }
-  | { uri?: undefined; inlineMetadata: InlineMetadataInput };
+export type MetadataSource = { uri: string; inlineMetadata?: undefined } | { uri?: undefined; inlineMetadata: InlineMetadataInput };
 
 /** Thrown when neither mode is satisfied for a required metadata entity. */
 export class MetadataMissingError extends Error {
   constructor(label: string, requiredFields: string[]) {
-    super(
-      `${label}: metadata is required. Pass either { uri: "..." } or { inlineMetadata: { ${requiredFields.join(', ')} } }.`
-    );
+    super(`${label}: metadata is required. Pass either { uri: "..." } or { inlineMetadata: { ${requiredFields.join(', ')} } }.`);
     this.name = 'MetadataMissingError';
   }
 }
@@ -260,11 +243,7 @@ function validateInlineMetadata(meta: InlineMetadataInput, preset: MetadataPrese
  * mode serializes the validated metadata into customData; URI mode
  * leaves customData empty.
  */
-export function resolveMetadataPair(
-  source: MetadataSource | undefined,
-  preset: MetadataPreset,
-  label: string
-): { uri: string; customData: string } {
+export function resolveMetadataPair(source: MetadataSource | undefined, preset: MetadataPreset, label: string): { uri: string; customData: string } {
   if (!source) throw new MetadataMissingError(label, requiredFieldsFor(preset));
   if (source.uri !== undefined) {
     if (typeof source.uri !== 'string' || source.uri.length === 0) {
@@ -275,8 +254,7 @@ export function resolveMetadataPair(
   validateInlineMetadata(source.inlineMetadata, preset, label);
   // Serialize only the known fields — drop anything caller passes that
   // isn't part of InlineMetadataInput so customData stays predictable.
-  const { name, description, image, bannerImage, category, externalUrl, tags, socials, attributes } =
-    source.inlineMetadata;
+  const { name, description, image, bannerImage, category, externalUrl, tags, socials, attributes } = source.inlineMetadata;
   const payload: Record<string, unknown> = { name, description };
   if (preset !== 'approval' && image) payload.image = image;
   if (bannerImage) payload.bannerImage = bannerImage;
@@ -293,11 +271,7 @@ export function resolveMetadataPair(
  * (or range) and a metadata source; the returned entry is ready to
  * push into `tokenMetadata: [...]`.
  */
-export function tokenMetadataEntry(
-  tokenIds: { start: string; end: string }[] | string,
-  source: MetadataSource,
-  label?: string
-) {
+export function tokenMetadataEntry(tokenIds: { start: string; end: string }[] | string, source: MetadataSource, label?: string) {
   const ids = typeof tokenIds === 'string' ? [{ start: tokenIds, end: tokenIds }] : tokenIds;
   const display = label || (typeof tokenIds === 'string' ? `token ${tokenIds}` : 'token');
   const { uri, customData } = resolveMetadataPair(source, 'token', display);
@@ -424,12 +398,7 @@ export function approvalMetadata(name: string, description: string): { customDat
  * `{uri}` if a uri is given, `{inlineMetadata}` otherwise. Throws via
  * resolveMetadataPair downstream when neither is satisfied.
  */
-export function metadataFromFlat(params: {
-  uri?: string;
-  name?: string;
-  description?: string;
-  image?: string;
-}): MetadataSource | undefined {
+export function metadataFromFlat(params: { uri?: string; name?: string; description?: string; image?: string }): MetadataSource | undefined {
   if (params.uri && params.uri.length > 0) return { uri: params.uri };
   if (params.name || params.description || params.image) {
     return {
@@ -510,6 +479,18 @@ export function alwaysLockedTokenIdsPermission() {
  * the chain binary's strict JSON parser rejects them with
  * `unknown field "amountTrackerId" in types.CollectionApprovalPermission`.
  */
+/**
+ * Mint-scoped approval lock: the manager can never edit or remove approvals
+ * whose `fromListId` is "Mint", but may still add or change transfer-side
+ * approvals. This is what the reviewer's `mint_approvals_can_be_modified`
+ * rule looks for (`hasScopedMintLock` in core/audit.ts), and it is the
+ * safe default for any collection with a public faucet: without it, a
+ * manager could re-point the mint to themselves for free after launch.
+ */
+export function mintLockedCollectionApprovalPermission() {
+  return { ...alwaysLockedCollectionApprovalPermission(), fromListId: 'Mint' };
+}
+
 export function alwaysLockedCollectionApprovalPermission() {
   return {
     fromListId: 'All',
@@ -590,11 +571,13 @@ export function frozenPermissions() {
 
 // ── Default balances ─────────────────────────────────────────────────────────
 
-export function defaultBalances(overrides?: Partial<{
-  autoApproveAllIncomingTransfers: boolean;
-  autoApproveSelfInitiatedOutgoingTransfers: boolean;
-  autoApproveSelfInitiatedIncomingTransfers: boolean;
-}>) {
+export function defaultBalances(
+  overrides?: Partial<{
+    autoApproveAllIncomingTransfers: boolean;
+    autoApproveSelfInitiatedOutgoingTransfers: boolean;
+    autoApproveSelfInitiatedIncomingTransfers: boolean;
+  }>
+) {
   return {
     balances: [],
     outgoingApprovals: [],
