@@ -106,20 +106,32 @@ export const toolCommand = new Command('tool')
     // as a no-op flag (deprecated; envelope.data IS the structured
     // result now) — keep it accepted for one release to avoid breaking
     // scripts that pass it.
+    // Tools surface failures two ways:
+    //   1. `result.isError = true` (the wrapper threw / rejected)
+    //   2. `result.result.success === false` (structured failure, no throw —
+    //      common for validate_transaction et al)
+    // Both must produce an ERROR envelope. Emitting `ok: true` with the real
+    // message buried in `meta.text` meant an agent branching on `ok` — which
+    // is the documented contract — read a failure as a success.
+    const structuredFail =
+      result.result && typeof result.result === 'object' && (result.result as any).success === false;
+
+    if (result.isError || structuredFail) {
+      const message =
+        (result.text || '').replace(/^Error:\s*/, '') ||
+        (result.result as any)?.error ||
+        `Tool "${name}" failed.`;
+      emitError(new Error(message), {
+        code: result.isError ? 'tool_error' : 'tool_failed',
+        meta: result.result ?? undefined,
+        hint: `Run \`bb dev tools list --names\` to confirm the tool name, or \`bb dev tools list\` for its input schema.`,
+        exitCode: 1
+      });
+    }
+
     emit(result.result, {
       meta: result.text ? { text: result.text } : undefined
     });
-
-    // Tools may surface failures two ways:
-    //   1. `result.isError = true` (the wrapper throws / rejects)
-    //   2. `result.result.success === false` (validator returns a structured
-    //      failure but doesn't throw — common for validate_transaction et al)
-    // Honor both so `bb tool ... && next` and `set -e` scripts can branch.
-    const structuredFail =
-      result.result && typeof result.result === 'object' && (result.result as any).success === false;
-    if (result.isError || structuredFail) {
-      process.exitCode = 1;
-    }
   });
 
 // Network flags via the unified helper (0412) — replaces the inline

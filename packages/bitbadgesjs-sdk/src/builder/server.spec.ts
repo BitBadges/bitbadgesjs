@@ -7,7 +7,7 @@
  * is the only consumer of `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` etc.;
  * the MCP transport itself must not reach for them.
  */
-import { createServer } from './server.js';
+import { createServer, getServerInstructions } from './server.js';
 import { listTools, callTool, toolRegistry } from './tools/registry.js';
 
 const MODEL_ENV_VARS = [
@@ -64,3 +64,35 @@ describe('MCP server boot is model-agnostic', () => {
     expect(result.text.length).toBeGreaterThan(0);
   });
 });
+
+describe('MCP server instructions', () => {
+  // MCP clients inject `instructions` into the model's context on initialize.
+  // Shipping none meant a cold agent saw 53 tool names, 11 resource URIs, and
+  // no statement of the build order, the stateful session, or the fact that
+  // the agent never signs. All of that steering existed only in the
+  // programmatic agent's prompt, which the MCP surface never reads.
+  it('ships instructions that name the happy path and the handoff', () => {
+    const instructions = getServerInstructions();
+    expect(instructions.length).toBeGreaterThan(400);
+    for (const anchor of [
+      'get_skill_instructions',
+      'validate_transaction',
+      'review_collection',
+      'get_review_url',
+      'reset_session',
+      'bitbadges://master-prompt'
+    ]) {
+      expect(instructions).toContain(anchor);
+    }
+  });
+
+  it('names only tools that actually exist', () => {
+    const instructions = getServerInstructions();
+    const named = instructions.match(/\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g) ?? [];
+    const toolLike = named.filter((n) => n in toolRegistry || /^(set|add|get|remove|list|validate|review|simulate|generate|reset|query|build|explain|search|lookup|verify|flag|analyze)_/.test(n));
+    for (const name of new Set(toolLike)) {
+      expect(Object.keys(toolRegistry)).toContain(name);
+    }
+  });
+});
+

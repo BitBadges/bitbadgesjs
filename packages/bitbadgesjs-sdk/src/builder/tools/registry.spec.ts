@@ -189,3 +189,38 @@ describe('callTool — pre-flight arg validation', () => {
     });
   });
 });
+
+describe('required-field preflight treats "" as a value, not a gap', () => {
+  // The system prompt tells the model to send image: "" when the user
+  // uploaded no art (agent/prompt.ts IMAGES_SECTION), and get_transaction
+  // auto-fills blanks with generated SVG art. Rejecting "" made the
+  // documented happy path fail on the two most-called tools, with an error
+  // that contradicted the prompt.
+  it('accepts an empty image on set_collection_metadata', async () => {
+    const res = await callTool('set_collection_metadata', {
+      sessionId: 'ses_preflight_1',
+      name: 'Demo',
+      description: 'A demo collection.',
+      image: ''
+    });
+    expect(res.isError).toBeFalsy();
+  });
+
+  it('accepts an empty image on set_token_metadata', async () => {
+    const res = await callTool('set_token_metadata', {
+      sessionId: 'ses_preflight_2',
+      tokenIds: [{ start: '1', end: '1' }],
+      name: 'Token',
+      description: 'A token.',
+      image: ''
+    });
+    expect(res.isError).toBeFalsy();
+  });
+
+  it('still rejects a genuinely absent required field', async () => {
+    const res = await callTool('set_collection_metadata', { sessionId: 'ses_preflight_3', name: 'Demo', description: 'd' });
+    expect(res.isError).toBe(true);
+    expect(res.text).toContain('image');
+  });
+});
+

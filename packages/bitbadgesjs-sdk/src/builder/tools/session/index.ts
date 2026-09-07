@@ -20,6 +20,7 @@ export * from './removeCosmosWrapperPath.js';
 export * from './addTransfer.js';
 export * from './removeTransfer.js';
 export * from './getTransaction.js';
+export * from './resetSession.js';
 export * from './getReviewUrl.js';
 export * from './generatePlaceholderArt.js';
 export { resetSession, getOrCreateSession } from '../../session/sessionState.js';
