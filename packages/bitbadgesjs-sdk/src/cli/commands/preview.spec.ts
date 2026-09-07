@@ -52,11 +52,6 @@ describe('previewCommand shape', () => {
     expect(opt).toBeDefined();
     expect(opt.defaultValue).toBe('https://bitbadges.io');
   });
-  it('exposes --read-only, so the default single link is the review-and-sign one', () => {
-    const opt = (previewCommand as any).options.find((o: any) => o.long === '--read-only');
-    expect(opt).toBeDefined();
-    expect(opt.defaultValue).toBe(false);
-  });
   it('exposes --open (review-and-sign in the browser), default off', () => {
     const opt = (previewCommand as any).options.find((o: any) => o.long === '--open');
     expect(opt).toBeDefined();

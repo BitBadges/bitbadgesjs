@@ -23,8 +23,7 @@ export const previewCommand = addOutputOptions(
       .description('Upload a tx to the indexer and print a shareable bitbadges.io preview URL. Input: JSON file, inline JSON, or - for stdin.')
       .argument('<input>', 'Tx JSON file path, inline JSON, or "-" for stdin')
       .option('--frontend-url <url>', 'Override the bitbadges.io frontend base for the printed preview URL', 'https://bitbadges.io')
-      .option('--open', 'Open the printed URL in your default browser', false)
-      .option('--read-only', 'Print the read-only preview link (no signing) instead of the review-and-sign link. For sharing with a reviewer.', false)
+      .option('--open', 'Open the review-and-sign URL in your default browser', false)
   )
 ).action(
   async (
@@ -36,7 +35,6 @@ export const previewCommand = addOutputOptions(
       url?: string;
       frontendUrl?: string;
       open?: boolean;
-      readOnly?: boolean;
       condensed?: boolean;
       outputFile?: string;
     }
@@ -107,26 +105,22 @@ export const previewCommand = addOutputOptions(
     };
 
     const frontendBase = opts.frontendUrl || 'https://bitbadges.io';
-    const { buildPreviewUrlFromCode, buildReviewUrlFromCode } = await import('../../builder/handoff.js');
-    const previewUrl = buildPreviewUrlFromCode(frontendBase, result.code);
+    const { buildReviewUrlFromCode } = await import('../../builder/handoff.js');
     // Review-and-sign: the frontend's local-builder page loads the same
     // `prv_` payload and continues straight into review + wallet signing.
     const reviewUrl = buildReviewUrlFromCode(frontendBase, result.code, payload.transaction);
 
-    // One link, not two. Review-and-sign is what a builder wants; --read-only
-    // swaps in the shareable view-only page. Both stay in the envelope for
-    // machine consumers.
-    const primaryUrl = opts.readOnly ? previewUrl : reviewUrl;
-    const label = opts.readOnly ? 'Read-only preview' : 'Review + sign';
-    commentary(`${label}: ${primaryUrl}\nExpires in ${result.expiresIn}.`);
+    commentary(`Review + sign: ${reviewUrl}\nExpires in ${result.expiresIn}.`);
     if (opts.open) {
       try {
         const mod = await import('open');
-        await ((mod as any).default ?? mod)(primaryUrl);
+        await ((mod as any).default ?? mod)(reviewUrl);
       } catch (err: any) {
         commentary(`(could not auto-launch browser: ${err?.message || err})`);
       }
     }
-    emit({ code: result.code, url: previewUrl, reviewUrl, expiresAt: result.expiresAt, expiresIn: result.expiresIn }, opts);
+    // `url` is the long-standing envelope field; it and `reviewUrl` now name the
+    // same single destination.
+    emit({ code: result.code, url: reviewUrl, reviewUrl, expiresAt: result.expiresAt, expiresIn: result.expiresIn }, opts);
   }
 );

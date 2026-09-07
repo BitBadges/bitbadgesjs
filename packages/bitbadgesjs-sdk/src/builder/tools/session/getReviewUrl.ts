@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { getApiUrl } from '../../sdk/apiClient.js';
 import { getTransaction as getTransactionFromSession, ensureStringNumbers } from '../../session/sessionState.js';
 import { normalizeTxMessages } from '../../../cli/utils/normalizeMsg.js';
-import { buildPreviewUrlFromCode, buildReviewUrlFromCode } from '../../handoff.js';
+import { buildReviewUrlFromCode } from '../../handoff.js';
 
 export const getReviewUrlSchema = z.object({
   transaction: z.object({}).passthrough().optional().describe('Transaction object to hand off. If omitted, the current session transaction is used.'),
@@ -28,8 +28,6 @@ export interface GetReviewUrlResult {
   code?: string;
   /** Open this to review AND sign in the browser (wallet required). */
   reviewUrl?: string;
-  /** Read-only preview (no signing). Safe to share with a reviewer. */
-  previewUrl?: string;
   expiresAt?: number;
   expiresIn?: string;
   error?: string;
@@ -89,7 +87,6 @@ export async function handleGetReviewUrl(input: GetReviewUrlInput): Promise<GetR
     success: true,
     code: data.code,
     reviewUrl: buildReviewUrlFromCode(frontendBase, data.code, transaction),
-    previewUrl: buildPreviewUrlFromCode(frontendBase, data.code),
     expiresAt: data.expiresAt,
     expiresIn: data.expiresIn
   };
