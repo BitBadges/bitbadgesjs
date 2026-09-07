@@ -7,8 +7,7 @@ The frontend payload factory exposes EIP-712 for the ten routed GAMM messages
 and both sendmanager messages. GAMM converters already existed; sendmanager
 requires the chain companion's LegacyAmino registration and this SDK's generated
 proto classes, Amino converters and ProtoTypeRegistry entries. No frontend
-signing-selection change is needed. The published SDK 0.45.0 and v35 binaries
-are unchanged by these PRs.
+signing-selection change is needed. SDK 0.45.0 does not include the new sendmanager converters.
 
 From packages/bitbadgesjs-sdk, run `bun run test --runInBand src/eip712/module-messages.spec.ts`.
 It covers payload generation, signature verification and tampered memo rejection.
@@ -20,5 +19,6 @@ pool/IBC execution for every message.
 
 Use scaled integer strings for balancer protobuf fee fields. Stableswap message
 services remain disabled in the chain; signing support does not enable them.
-Publish/adopt this SDK with the subsequent chain release that enables sendmanager
-EIP-712. Keep the already published v35 tag/assets immutable.
+v35 has not rolled out. After human merge, retag v35 at the merged chain commit
+and regenerate binaries and checksums. Publish/adopt this SDK in coordination
+with the updated v35 binary that enables sendmanager EIP-712.
