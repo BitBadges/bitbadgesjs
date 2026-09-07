@@ -13,7 +13,8 @@ import {
   tokenMetadataEntry,
   metadataFromFlat,
   MetadataMissingError,
-  approvalMetadata
+  approvalMetadata,
+  mintLockedCollectionApprovalPermission
 } from './shared.js';
 
 export interface SubscriptionPayout {
@@ -32,6 +33,13 @@ export interface SubscriptionParams {
   payouts?: SubscriptionPayout[];
   tiers?: number; // number of tiers, default 1
   transferable?: boolean; // allow post-mint P2P transfers of subscription tokens
+  /**
+   * Leave the mint (faucet) approval editable so the manager can change the
+   * price later. Default false: the faucet is locked forever, which is what
+   * `bb check` requires to pass. Opting in surfaces a critical review
+   * finding, on purpose, so the choice is visible to whoever signs.
+   */
+  updatableMint?: boolean;
   /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
   uri?: string;
   name?: string;
@@ -79,10 +87,7 @@ export function buildSubscription(params: SubscriptionParams): any {
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: `subscription-tier-${tier}`,
-      ...approvalMetadata(
-        'Subscription Faucet',
-        'This is the minting faucet for subscriptions. This sets the price on the collection-level.'
-      ),
+      ...approvalMetadata('Subscription Faucet', 'This is the minting faucet for subscriptions. This sets the price on the collection-level.'),
       transferTimes: FOREVER,
       tokenIds: [{ start: String(tier), end: String(tier) }],
       ownershipTimes: FOREVER,
@@ -91,9 +96,7 @@ export function buildSubscription(params: SubscriptionParams): any {
         predeterminedBalances: {
           manualBalances: [],
           incrementedBalances: {
-            startBalances: [
-              { amount: '1', tokenIds: [{ start: String(tier), end: String(tier) }], ownershipTimes: FOREVER }
-            ],
+            startBalances: [{ amount: '1', tokenIds: [{ start: String(tier), end: String(tier) }], ownershipTimes: FOREVER }],
             incrementTokenIdsBy: '0',
             incrementOwnershipTimesBy: '0',
             durationFromTimestamp: intervalMs,
@@ -135,10 +138,7 @@ export function buildSubscription(params: SubscriptionParams): any {
       toListId: 'All',
       initiatedByListId: 'All',
       approvalId: 'free-transfer',
-      ...approvalMetadata(
-        'Transferable',
-        'Allow holders to transfer subscription tokens between addresses.'
-      ),
+      ...approvalMetadata('Transferable', 'Allow holders to transfer subscription tokens between addresses.'),
       transferTimes: FOREVER,
       tokenIds: FOREVER,
       ownershipTimes: FOREVER,
@@ -161,11 +161,20 @@ export function buildSubscription(params: SubscriptionParams): any {
     collectionApprovals,
     standards: ['Subscriptions'],
     validTokenIds: [{ start: '1', end: String(tiers) }],
-    collectionPermissions: baselinePermissions(),
+    collectionPermissions: {
+      ...baselinePermissions(),
+      // Safe by default: lock the faucet so supply cannot be re-pointed after
+      // launch. Non-mint approvals stay editable. See mintLockedCollectionApprovalPermission.
+      canUpdateCollectionApprovals: params.updatableMint ? [] : [mintLockedCollectionApprovalPermission()]
+    },
     invariants: {
       noCustomOwnershipTimes: false,
       maxSupplyPerId: '0',
-      noForcefulPostMintTransfers: false,
+      // Subscriptions end by ownership-time expiry, not by the manager
+      // pulling tokens back, so forceful post-mint transfers are never needed.
+      // This invariant is locked at creation and the reviewer treats "unset"
+      // as critical.
+      noForcefulPostMintTransfers: true,
       disablePoolCreation: false
     },
     defaultBalances: defaultBalances({ autoApproveAllIncomingTransfers: true }),
