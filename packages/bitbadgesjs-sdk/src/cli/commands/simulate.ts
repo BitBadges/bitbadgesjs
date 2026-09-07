@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { addNetworkOptions } from '../utils/io.js';
+import { emitError } from '../utils/envelope.js';
 
 /**
  * Normalize loose CLI input into a transaction body with a `messages` array.
@@ -7,11 +8,21 @@ import { addNetworkOptions } from '../utils/io.js';
  * Msg (wrapped into a single-message tx body), or anything else (passed
  * through untouched).
  */
-export function ensureTxWrapper(input: any): any {
-  if (!input || typeof input !== 'object') return input;
-  if (Array.isArray(input.messages)) return input;
-  if (typeof input.typeUrl === 'string' && input.value) return { messages: [input] };
-  return input;
+import { ensureTxWrapper } from '../utils/txInput.js';
+export { ensureTxWrapper };
+
+/**
+ * Whether this invocation needs a BitBadges API key.
+ *
+ * The local indexer serves `/api/v0/simulate` without one, so requiring a key
+ * there made the command impossible to run locally — and its own error text
+ * pointed at `--network local`, so following the advice reproduced the error.
+ * An agent cannot recover from a loop like that.
+ */
+export function requiresApiKey(opts: { network?: string; local?: boolean; testnet?: boolean; url?: string }): boolean {
+  if (opts.network === 'local' || opts.local) return false;
+  if (opts.url && /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?(\/|$)/i.test(opts.url)) return false;
+  return true;
 }
 
 export const simulateCommand = addNetworkOptions(
@@ -42,7 +53,7 @@ export const simulateCommand = addNetworkOptions(
 
   // Network-aware API key + URL resolution.
   const apiKey = getApiKeyForNetwork(opts);
-  if (!apiKey) {
+  if (!apiKey && requiresApiKey(opts)) {
     process.stderr.write(
       renderSimulate(
         {
@@ -128,7 +139,18 @@ export const simulateCommand = addNetworkOptions(
       }) + '\n'
     );
   }
-  output(result, { ...opts });
+  // A failed simulation is an envelope error, not `ok: true` with a buried
+  // `success: false`. Agents branch on `ok` and on the exit code; both must
+  // agree with each other.
+  const simulationFailed = !result.success || result.valid === false;
+  if (simulationFailed) {
+    emitError(new Error(result.error || result.simulationError || 'Simulation reported the transaction as invalid.'), {
+      code: 'simulation_failed',
+      meta: { simulation: result },
+      hint: 'Fix the reported error and re-run. `bb check <input>` explains the transaction without touching the network.',
+      exitCode: 2
+    });
+  }
 
-  if (!result.success || result.valid === false) process.exit(2);
+  output(result, { ...opts });
 });

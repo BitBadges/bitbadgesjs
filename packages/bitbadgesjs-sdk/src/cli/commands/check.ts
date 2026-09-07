@@ -1,3 +1,4 @@
+import { ensureTxWrapper } from '../utils/txInput.js';
 import { Command } from 'commander';
 import { addNetworkOptions } from '../utils/io.js';
 
@@ -18,12 +19,6 @@ import { addNetworkOptions } from '../utils/io.js';
  * (`review`).
  */
 
-function ensureTxWrapper(input: any): any {
-  if (!input || typeof input !== 'object') return input;
-  if (Array.isArray(input.messages)) return input;
-  if (typeof input.typeUrl === 'string' && input.value) return { messages: [input] };
-  return input;
-}
 
 export const checkCommand = addNetworkOptions(
   new Command('check')

@@ -53,6 +53,23 @@ export function getApiUrl(testnet: boolean = false): string {
 /**
  * Make an API request to BitBadges
  */
+/**
+ * True when the API base points at a local indexer.
+ *
+ * A local indexer serves reads and `/simulate` with no API key, so requiring
+ * one there blocks local development for the CLI and every MCP query tool.
+ * Matched on the parsed hostname so `localhost.evil.com` does not slip through.
+ */
+export function isLocalApiUrl(apiUrl: string | undefined): boolean {
+  if (!apiUrl) return false;
+  try {
+    const host = new URL(apiUrl).hostname.replace(/^\[|\]$/g, '');
+    return host === 'localhost' || host === '127.0.0.1' || host === '::1';
+  } catch {
+    return false;
+  }
+}
+
 export async function apiRequest<T>(
   endpoint: string,
   method: 'GET' | 'POST' = 'POST',
@@ -62,10 +79,11 @@ export async function apiRequest<T>(
   const apiKey = config.apiKey || getApiKey();
   const apiUrl = config.apiUrl || getApiUrl(config.testnet);
 
-  if (!apiKey) {
+  if (!apiKey && !isLocalApiUrl(apiUrl)) {
     return {
       success: false,
-      error: 'BITBADGES_API_KEY environment variable not set. Set it to use API query tools.'
+      error:
+        'No BitBadges API key. Set BITBADGES_API_KEY, run `bb settings set apiKey <key>`, or pass --api-key. Get a key at https://bitbadges.io/developer. A local indexer (--local) needs no key.'
     };
   }
 
@@ -73,7 +91,9 @@ export async function apiRequest<T>(
     const url = `${apiUrl}${endpoint}`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'x-api-key': apiKey
+      // Local indexers accept requests with no key; omit the header entirely
+      // rather than sending an empty one.
+      ...(apiKey ? { 'x-api-key': apiKey } : {})
     };
 
     const response = await fetch(url, {

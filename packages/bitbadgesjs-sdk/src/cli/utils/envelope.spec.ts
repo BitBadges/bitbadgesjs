@@ -153,3 +153,20 @@ describe('writeJsonEnvelope', () => {
     expect(chunks.join('')).toContain('"n":"123"');
   });
 });
+
+describe('errorEnvelope hint plumbing', () => {
+  // emitError accepts a `hint` in its options and used to drop it, reading only
+  // the error object's own hint. Hints are how an agent recovers from a
+  // failure, so losing them silently degraded every failure path.
+  it('carries a caller-supplied hint into the envelope', () => {
+    const env = errorEnvelope('simulation_failed', 'boom', undefined, 'Run `bb check tx.json` first.');
+    expect(env.ok).toBe(false);
+    expect((env as any).hint).toBe('Run `bb check tx.json` first.');
+  });
+
+  it('omits the hint key entirely when there is none', () => {
+    const env = errorEnvelope('x', 'boom');
+    expect('hint' in env).toBe(false);
+  });
+});
+
