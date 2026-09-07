@@ -83,8 +83,8 @@ This prevents new incorrect records; it does **not** repair existing Mongo data.
 If a collection already has incorrect indexed usage, inspect chain events and
 plan a scoped replay/rebuild with backups and separate operational approval.
 ETH events currently omit the nonce, so do not infer a complete nonce usage
-mirror from those events. Historical pre-v35 signature-keyed usage is not migrated;
-the chain PR documents the accepted once-more behavior.
+mirror from those events. Historical pre-v35 signature-keyed usage is not migrated; the chain now rejects
+legacy voucher messages entirely, so old vouchers must be reissued.
 
 ## [4] Release order and gates
 
@@ -197,6 +197,6 @@ is independent of EIP-712 transaction signing and automatic transaction sign-in.
 
 The captured mainnet height 11,979,578 had no consumed ETH tracker and no usable
 configured voucher signer, but external issuer inventory and a fresh state scan
-remain prerequisites. Chain release gates also require full-snapshot migration
-rehearsal and validator-hardware gas-capacity measurements; see chain
+remain prerequisites. The release owner excluded a full-mainnet snapshot rehearsal on 2026-09-06.
+Local upgrade rehearsal and gas-capacity checks remain in scope; see chain
 `docs/runbooks/v35-release-gates.md`.
