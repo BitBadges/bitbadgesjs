@@ -2091,7 +2091,7 @@ For expiring tokens, calculate timestamps:
 - validTokenIds: MUST be exactly [{ "start": "1", "end": "1" }]
 - TWO collection approvals required with EXACT approvalIds (frontend depends on these):
   1. "manager-add": fromListId "Mint", toListId "All", initiatedByListId = creator. Mints token to add address.
-  2. "manager-remove": fromListId "All", toListId burn address (bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv), initiatedByListId = creator. Burns token to remove address.
+  2. "manager-remove": fromListId "!Mint", toListId burn address (bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv), initiatedByListId = creator. Burns token to remove address.
 - BOTH approvals MUST have overridesFromOutgoingApprovals: true
 - NO peer-to-peer transfer approval — only manager can modify the list
 - Standard is "Address List" (NOT "Non-Transferable")
@@ -3313,7 +3313,7 @@ add_preset_approval({ presetId: "crowdfund.refund",           params: { denom, d
 - Mint-to-winner: seller mints NFT directly to winning bidder during accept window (bidDeadline → bidDeadline + acceptWindow)
 - No separate mint-at-creation step — token doesn't exist until seller accepts a bid
 - Burn: anyone can burn token to burn address (permanent cleanup)
-- Bidding via user-level outgoing approval intents (not collection approvals)
+- Bidding via user-level incoming approval intents (not collection approvals)
 - Bids must have transferTimes valid through end of accept window (not just bid deadline)
 - initiatedByListId on mint-to-winner = seller address (only seller can accept)
 - maxNumTransfers = 1 on all approvals (one-shot)
@@ -3344,7 +3344,7 @@ A single-item auction where the seller creates a collection, bidders place inten
 
 ### Bidding Mechanism
 
-Bidders set user-level outgoing approvals on their own accounts that say "I will pay X coins for token 1 from this collection." The seller then accepts the best bid by minting the token directly to the winning bidder during the accept window. The bidder's outgoing approval handles the coin payment side via intent matching.
+Bidders set user-level incoming approvals on their own accounts that say "I will pay X coins for token 1 from this collection." The seller then accepts the best bid by minting the token directly to the winning bidder during the accept window. The bidder's incoming approval handles the coin payment side via intent matching.
 
 Bids must have transferTimes that stay valid through the END of the accept window (not just the bid deadline), so the seller can match them during the entire accept period.
 
@@ -3410,8 +3410,8 @@ add_preset_approval({ presetId: "auction.burn", params: {} })
 ### Auction Flow
 
 1. **Create**: Seller creates auction collection with 2 approvals. No token is minted yet.
-2. **Bid**: Bidders place intent-based bids (user-level outgoing approvals with coin payment offers). Bids must have transferTimes valid through end of accept window.
-3. **Accept**: After bid deadline, seller mints token 1 directly to the winning bidder's address. The bidder's outgoing approval triggers coin payment via intent matching. One action: mint + payment.
+2. **Bid**: Bidders place intent-based bids (user-level incoming approvals with coin payment offers). Bids must have transferTimes valid through end of accept window.
+3. **Accept**: After bid deadline, seller mints token 1 directly to the winning bidder's address. The bidder's incoming approval triggers coin payment via intent matching. One action: mint + payment.
 4. **Cleanup**: If unsold, burn approval allows cleanup.
 
 ### Creation Flow (Tool Calls)
