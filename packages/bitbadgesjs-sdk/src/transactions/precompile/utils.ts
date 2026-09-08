@@ -168,11 +168,16 @@ export class PrecompileEncodingError extends Error {
  *
  * @example
  * ```typescript
- * const msg = new MsgCreateCollection({...});
- * const result = convertMessageToPrecompileCall(msg, '0x1234...');
- * // result.functionName = 'createCollection'
- * // result.data = '0x...' (encoded function call with JSON string)
- * // result.precompileAddress = '0x1001' (tokenization precompile)
+ * import { MsgDeleteCollection, convertMessageToPrecompileCall, convertToBitBadgesAddress } from 'bitbadges';
+ *
+ * const evmAddress = '0x0bc63cfe31d5218eb414b142c799e20964a54a1a';
+ * const msg = new MsgDeleteCollection({
+ *   creator: convertToBitBadgesAddress(evmAddress),
+ *   collectionId: '1'
+ * });
+ * const result = convertMessageToPrecompileCall(msg, evmAddress);
+ * console.log(result.functionName); // 'deleteCollection'
+ * console.log(result.precompileAddress, result.data); // destination and ABI-encoded call; nothing is broadcast
  * ```
  */
 export function convertMessageToPrecompileCall(

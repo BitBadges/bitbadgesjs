@@ -6,16 +6,16 @@
  *
  * @example
  * ```typescript
- * import { convertMessageToPrecompileCall, TOKENIZATION_PRECOMPILE_ADDRESS } from 'bitbadges';
+ * import { MsgDeleteCollection, convertMessageToPrecompileCall, convertToBitBadgesAddress } from 'bitbadges';
  *
- * const msg = new MsgCreateCollection({...});
- * const { functionName, data, jsonMsg } = convertMessageToPrecompileCall(msg, evmAddress);
- *
- * // Send transaction
- * await provider.sendTransaction({
- *   to: TOKENIZATION_PRECOMPILE_ADDRESS,
- *   data: data
+ * const evmAddress = '0x0bc63cfe31d5218eb414b142c799e20964a54a1a';
+ * const msg = new MsgDeleteCollection({
+ *   creator: convertToBitBadgesAddress(evmAddress),
+ *   collectionId: '1'
  * });
+ * const result = convertMessageToPrecompileCall(msg, evmAddress);
+ * console.log(result.functionName); // 'deleteCollection'
+ * console.log(result.precompileAddress, result.data); // destination and ABI-encoded call; nothing is broadcast
  * ```
  */
 

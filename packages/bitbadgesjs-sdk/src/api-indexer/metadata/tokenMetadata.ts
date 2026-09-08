@@ -279,7 +279,21 @@ export class TokenMetadataDetails<T extends NumberType> extends BaseNumberTypeCl
    * This is typically used when customizing or creating a token.
    *
    * @example
-   * Use this function to set the "name" property of all tokens to "test" via setMetadataPropertyForAll(metadataArr, tokenIds, uri, "name", "test")
+   * ```ts
+   * import { TokenMetadataDetails, UintRangeArray } from 'bitbadges';
+   * const updated = TokenMetadataDetails.setMetadataPropertyForSpecificIds<bigint>(
+   *   [new TokenMetadataDetails<bigint>({
+   *     tokenIds: [{ start: 1n, end: 3n }],
+   *     uri: 'https://example.com/token.json',
+   *     customData: '',
+   *     metadata: { name: 'Original name', description: 'Shared token metadata', image: 'https://example.com/token.png' }
+   *   })],
+   *   UintRangeArray.From<bigint>([{ start: 1n, end: 3n }]),
+   *   'name',
+   *   'test'
+   * );
+   * console.log(updated.map((entry) => entry.metadata?.name)); // ['test'] (one entry covering token IDs 1 to 3)
+   * ```
    */
   static setMetadataPropertyForSpecificIds = <T extends NumberType>(
     metadataArr: TokenMetadataDetails<T>[],
