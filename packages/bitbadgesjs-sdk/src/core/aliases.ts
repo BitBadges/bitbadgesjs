@@ -1,6 +1,6 @@
 import { CollectionId } from '@/interfaces/index.js';
 import { bech32 } from 'bech32';
-import crypto from 'crypto';
+import { concat, getBytes, sha256 as ethersSha256, toUtf8Bytes } from 'ethers';
 import type { NumberType } from '../common/string-numbers.js';
 
 const AddressGenerationPrefix = 0x09;
@@ -26,15 +26,9 @@ function Module(moduleName: string, ...derivationKeys: Buffer[]) {
 }
 
 function Hash(typ: string | Buffer, key: Buffer) {
-  const hasher = crypto.createHash('sha256');
-  hasher.update(typ);
-  const th = hasher.digest();
-
-  const hasher2 = crypto.createHash('sha256');
-  hasher2.update(th);
-  hasher2.update(key);
-  const finalDigest = hasher2.digest().toString('hex');
-  return finalDigest;
+  // sha256(sha256(typ) || key), hex — ethers' sha256 is browser-safe, unlike node:crypto.
+  const th = getBytes(ethersSha256(typeof typ === 'string' ? toUtf8Bytes(typ) : typ));
+  return ethersSha256(concat([th, key])).slice(2);
 }
 
 function Derive(address: string, key: Buffer) {
@@ -141,13 +135,11 @@ export function generateAliasAddressForIBCBackedDenom(ibcDenom: string) {
 const SenderPrefix = 'ibc-hook-intermediary';
 
 /**
- * SHA256 hash function using Node.js crypto.
+ * SHA256 hash function (browser-safe).
  * Takes a Uint8Array and returns a Uint8Array of the hash.
  */
 function sha256(data: Uint8Array): Uint8Array {
-  const hash = crypto.createHash('sha256');
-  hash.update(Buffer.from(data));
-  return new Uint8Array(hash.digest());
+  return getBytes(ethersSha256(data));
 }
 
 /**

@@ -5,7 +5,7 @@
  * All precompile methods accept a single JSON string parameter.
  */
 
-import { ethers } from 'ethers';
+import { Interface } from 'ethers';
 import {
   TOKENIZATION_PRECOMPILE_ADDRESS,
   BANK_PRECOMPILE_ADDRESS,
@@ -97,10 +97,7 @@ const STAKING_MESSAGE_TYPES = new Set<MessageType>([
  * Set of Distribution message types that use the Distribution precompile (0x801)
  * These use typed ABI parameters, not JSON string encoding
  */
-const DISTRIBUTION_MESSAGE_TYPES = new Set<MessageType>([
-  MessageType.MsgWithdrawDelegatorReward,
-  MessageType.MsgClaimRewards
-]);
+const DISTRIBUTION_MESSAGE_TYPES = new Set<MessageType>([MessageType.MsgWithdrawDelegatorReward, MessageType.MsgClaimRewards]);
 
 /**
  * Check if a message type is a Gamm message (uses Gamm precompile)
@@ -155,12 +152,8 @@ export class PrecompileEncodingError extends Error {
     public readonly originalError: Error,
     public readonly messageData?: string
   ) {
-    const dataPreview = messageData
-      ? ` (data preview: ${messageData.substring(0, 100)}...)`
-      : '';
-    super(
-      `Failed to encode precompile call for ${functionName}: ${originalError.message}${dataPreview}`
-    );
+    const dataPreview = messageData ? ` (data preview: ${messageData.substring(0, 100)}...)` : '';
+    super(`Failed to encode precompile call for ${functionName}: ${originalError.message}${dataPreview}`);
     this.name = 'PrecompileEncodingError';
   }
 }
@@ -237,7 +230,7 @@ export function convertMessageToPrecompileCall(
   try {
     const jsonMsg = JSON.stringify(jsonObject);
     const functionSignature = `function ${functionName}(string)`;
-    const iface = new ethers.Interface([functionSignature]);
+    const iface = new Interface([functionSignature]);
     const data = iface.encodeFunctionData(functionName, [jsonMsg]);
 
     return {
@@ -279,8 +272,7 @@ function encodeStakingPrecompileCall(
       break;
     case MessageType.MsgBeginRedelegate:
       params = convertMsgBeginRedelegate(message, evmAddress);
-      functionSignature =
-        'function redelegate(address delegatorAddress, string validatorSrcAddress, string validatorDstAddress, uint256 amount)';
+      functionSignature = 'function redelegate(address delegatorAddress, string validatorSrcAddress, string validatorDstAddress, uint256 amount)';
       args = [params.delegatorAddress, params.validatorSrcAddress!, params.validatorDstAddress!, params.amount];
       break;
     case MessageType.MsgCancelUnbondingDelegation:
@@ -294,7 +286,7 @@ function encodeStakingPrecompileCall(
   }
 
   try {
-    const iface = new ethers.Interface([functionSignature]);
+    const iface = new Interface([functionSignature]);
     const data = iface.encodeFunctionData(functionName, args);
 
     return {
@@ -339,7 +331,7 @@ function encodeDistributionPrecompileCall(
   }
 
   try {
-    const iface = new ethers.Interface([functionSignature]);
+    const iface = new Interface([functionSignature]);
     const data = iface.encodeFunctionData(functionName, args);
 
     return {
@@ -371,12 +363,7 @@ export function areAllTokenizationMessages(messages: unknown[]): boolean {
       const messageType = detectMessageType(message as SupportedSdkMessage);
 
       // Check if message uses tokenization precompile (not SendManager, Gamm, Staking, or Distribution)
-      if (
-        messageType === MessageType.MsgSend ||
-        isGammMessage(messageType) ||
-        isStakingMessage(messageType) ||
-        isDistributionMessage(messageType)
-      ) {
+      if (messageType === MessageType.MsgSend || isGammMessage(messageType) || isStakingMessage(messageType) || isDistributionMessage(messageType)) {
         return false;
       }
     } catch {
@@ -450,7 +437,7 @@ export function convertMessagesToExecuteMultiple(
   // The struct is encoded as a tuple array
   try {
     const functionSignature = 'function executeMultiple((string,string)[])';
-    const iface = new ethers.Interface([functionSignature]);
+    const iface = new Interface([functionSignature]);
 
     // Convert MessageInput[] to tuple array format for encoding
     const tupleArray = messageInputs.map((input) => [input.messageType, input.msgJson]);

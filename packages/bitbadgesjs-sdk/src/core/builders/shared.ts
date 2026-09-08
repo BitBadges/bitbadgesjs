@@ -2,7 +2,7 @@
  * Shared utilities for CLI template builders.
  * @module core/builders/shared
  */
-import crypto from 'crypto';
+import { hexlify, randomBytes, sha256, toUtf8Bytes } from 'ethers';
 import { MAINNET_COINS_REGISTRY, SYMBOL_INPUT_ALIASES, type CoinDetails } from '../../common/constants.js';
 import { generateAliasAddressForIBCBackedDenom } from '../aliases.js';
 
@@ -152,7 +152,7 @@ export function resolveExpiration(input: string | undefined, defaultMs: number):
 // ── Unique ID generation ─────────────────────────────────────────────────────
 
 export function uniqueId(prefix?: string): string {
-  const rand = crypto.randomBytes(8).toString('hex');
+  const rand = hexlify(randomBytes(8)).slice(2);
   return prefix ? `${prefix}-${rand}` : rand;
 }
 
@@ -166,7 +166,7 @@ export function uniqueId(prefix?: string): string {
  */
 export function stableHashId(prefix: string, seed: string | object): string {
   const data = typeof seed === 'string' ? seed : JSON.stringify(seed);
-  const hash = crypto.createHash('sha256').update(data).digest('hex').slice(0, 16);
+  const hash = sha256(toUtf8Bytes(data)).slice(2, 18);
   return `${prefix}-${hash}`;
 }
 
