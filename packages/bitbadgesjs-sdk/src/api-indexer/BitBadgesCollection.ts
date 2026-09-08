@@ -295,9 +295,11 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * @example
    * ```ts
-   * const collection: BitBadgesCollection<bigint> = { ... }
+   * import type { BitBadgesCollection } from 'bitbadges';
+   * // A collection already fetched through BitBadgesAPI.
+   * declare const collection: BitBadgesCollection<bigint>;
    * const metadata = collection.getCollectionMetadata()
-   * const metadataImage = metadata.image
+   * const metadataImage = metadata?.image
    * ```
    */
   getCollectionMetadata() {
@@ -325,10 +327,12 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * @example
    * ```ts
-   * const collection: BitBadgesCollection<bigint> = { ... }
+   * import type { BitBadgesCollection } from 'bitbadges';
+   * // A collection already fetched through BitBadgesAPI.
+   * declare const collection: BitBadgesCollection<bigint>;
    * const tokenId = 123n
    * const metadata = collection.getTokenMetadataForTokenId(tokenId)
-   * const metadataImage = metadata.image
+   * const metadataImage = metadata?.image
    * ```
    */
   getTokenMetadataForTokenId(tokenId: T) {
@@ -391,9 +395,11 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * @example
    * ```ts
-   * const collection: BitBadgesCollection<bigint> = { ... }
-   * const address = 'bb1...'
-   * const balance = collection.getBalance(address)
+   * import type { BitBadgesCollection } from 'bitbadges';
+   * // A collection already fetched through BitBadgesAPI.
+   * declare const collection: BitBadgesCollection<bigint>;
+   * const address = 'bb1py4mfpg6uf59qkyzg0nmau322c5873eeysp5ue'
+   * const balance = collection.getBalanceInfo(address)
    * console.log(balance?.balances)
    * console.log(balance?.outgoingApprovals)
    * ```
@@ -421,8 +427,10 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * @example
    * ```ts
-   * const collection: BitBadgesCollection<bigint> = { ... }
-   * const address = 'bb1...'
+   * import type { BitBadgesCollection } from 'bitbadges';
+   * // A collection already fetched through BitBadgesAPI.
+   * declare const collection: BitBadgesCollection<bigint>;
+   * const address = 'bb1py4mfpg6uf59qkyzg0nmau322c5873eeysp5ue'
    * const balances = collection.getBalances(address)
    * console.log(balances)
    * ```
@@ -472,7 +480,9 @@ export class BitBadgesCollection<T extends NumberType>
    *
    * @example
    * ```ts
-   * const collection: BitBadgesCollection<bigint> = { ... }
+   * import type { BitBadgesCollection } from 'bitbadges';
+   * // A collection already fetched through BitBadgesAPI.
+   * declare const collection: BitBadgesCollection<bigint>;
    * const metadataToFetch = collection.pruneMetadataToFetch({ tokenIds: [1n, 2n, 3n], uris: ['ipfs://...'] })
    * console.log(metadataToFetch)
    * ```

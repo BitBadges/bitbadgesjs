@@ -253,9 +253,9 @@ export const createBalanceMapForOffChainBalances = <T extends NumberType>(transf
 
 /**
  * Gets the token IDs to be transferred for a given transfer with increments.
- * @example
- * For a transfer with balances: [{ tokenIds: [{ start: 1n, end: 1n }], amount: 1n }], incrementIdsBy: 1n, toAddressesLength: 1000
- * We return { tokenIds: [{ start: 1n, end: 1000n }] because we increment the tokenIds by 1 each time.
+ * @remarks
+ * For a transfer with balances: [{ tokenIds: [{ start: 1n, end: 1n }], amount: 1n }], incrementTokenIdsBy: 1n, toAddressesLength: 1000
+ * We return the range [{ start: 1n, end: 1000n }] because we increment the tokenIds by 1 each time.
  *
  * @category Balances
  */
@@ -301,8 +301,8 @@ export const getAllTokenIdsToBeTransferred = <T extends NumberType>(transfers: i
 
 /**
  * Gets the balances to be transferred for a given transfer with increments.
- * @example
- * For a transfer with balances: [{ tokenIds: [{ start: 1n, end: 1n }], amount: 1n }], incrementIdsBy: 1n, toAddressesLength: 1000
+ * @remarks
+ * For a transfer with balances: [{ tokenIds: [{ start: 1n, end: 1n }], amount: 1n }], incrementTokenIdsBy: 1n, toAddressesLength: 1000
  * We return [{ tokenIds: [{ start: 1n, end: 1000n }], amount: 1n }] because we transfer x1 token to 1000 addresses
  * and increment the tokenIds by 1 each time.
  *

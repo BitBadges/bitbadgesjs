@@ -6,29 +6,23 @@
  *
  * @example
  * ```typescript
- * // Browser wallet (Keplr)
- * import { BitBadgesSigningClient, GenericCosmosAdapter } from 'bitbadges';
+ * import { BitBadgesSigningClient, GenericCosmosAdapter, GenericEvmAdapter, MsgTransferTokens } from 'bitbadges';
  *
  * const adapter = await GenericCosmosAdapter.fromKeplr('bitbadges-1');
+ * // For an EVM wallet, replace the adapter above with:
+ * // const adapter = await GenericEvmAdapter.fromBrowserWallet({ expectedChainId: 50024 });
  * const client = new BitBadgesSigningClient({ adapter });
- *
- * const result = await client.signAndBroadcast([
- *   MsgTransferBadges.create({ ... }).toProto()
- * ]);
- * console.log('TX Hash:', result.txHash);
- *
- * // Server-side with mnemonic
- * const adapter = await GenericCosmosAdapter.fromMnemonic('word1 word2 ...', 'bitbadges-1');
- * const client = new BitBadgesSigningClient({ adapter });
- *
- * // EVM wallet (ethers.js)
- * import { BitBadgesSigningClient, GenericEvmAdapter } from 'bitbadges';
- * import { BrowserProvider } from 'ethers';
- *
- * const provider = new BrowserProvider(window.ethereum);
- * const signer = await provider.getSigner();
- * const adapter = await GenericEvmAdapter.fromSigner(signer);
- * const client = new BitBadgesSigningClient({ adapter });
+ * const msg = new MsgTransferTokens({
+ *   creator: client.address,
+ *   collectionId: '1',
+ *   transfers: [{
+ *     from: client.address,
+ *     toAddresses: ['bb1py4mfpg6uf59qkyzg0nmau322c5873eeysp5ue'],
+ *     balances: [{ amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: [{ start: '1', end: '18446744073709551615' }] }]
+ *   }]
+ * });
+ * const result = await client.signAndBroadcast([msg]);
+ * console.log(result.success ? result.txHash : result.error);
  * ```
  *
  * @module signing

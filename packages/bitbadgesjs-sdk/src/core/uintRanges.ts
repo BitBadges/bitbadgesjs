@@ -338,7 +338,12 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
    * Sorts and merges a list of UintRanges. If ranges overlap, they are merged.
    *
    * @example
-   * [{start: 1, end: 3}, {start: 2, end: 4}] => [{start: 1, end: 4}]
+   * ```ts
+   * import { UintRangeArray } from 'bitbadges';
+   * const ranges = UintRangeArray.From<bigint>([{ start: 1n, end: 3n }, { start: 2n, end: 4n }]);
+   * ranges.sortAndMerge();
+   * console.log(ranges); // [{ start: 1n, end: 4n }]
+   * ```
    *
    * @remarks
    * Does not return a new list. Modifies the list in place. To get a new list, use `clone().sortAndMerge()`.

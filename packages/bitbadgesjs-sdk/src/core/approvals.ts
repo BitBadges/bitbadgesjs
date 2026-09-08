@@ -1931,13 +1931,14 @@ export class UserIncomingApprovalWithDetails<T extends NumberType> extends UserI
 }
 
 /**
- * @example Codes
+ * @remarks
+ * **Codes**
  * 1. Generate N codes privately
  * 2. Hash each code
  * 3. Store the hashed codes publicly on IPFS via this struct
  * 4. When a user enters a code, we hash it and check if it matches any of the hashed codes. This way, the codes are never stored publicly on IPFS and only known by the generator of the codes.
  *
- * @example Whitelist
+ * **Whitelist**
  * For storing a public whitelist of addresses (with useCreatorAddressAsLeaf = true), hashing complicates everything because the whitelist can be stored publicly.
  * 1. Generate N whitelist addresses
  * 2. Store the addresses publicly on IPFS via this struct

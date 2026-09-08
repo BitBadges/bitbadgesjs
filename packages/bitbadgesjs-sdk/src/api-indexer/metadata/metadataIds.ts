@@ -10,24 +10,29 @@ import { getConverterFunction } from '@/common/base.js';
  * for a specific token ID. Returns -1 if not found.
  *
  * @remarks
- * The token metadata array is the timeline values (TokenMetadataTimeline.tokenMetadata), not the cached fetched values
- * from the API.
+ * The token metadata array contains URI-to-token mappings, as returned by `collection.getTokenMetadata()`.
+ * These helpers use the mappings rather than the fetched metadata JSON.
  *
  * @example
  * ```ts
- * import { getMetadataIdForTokenId } from 'bitbadges'
- * const collection: BitBadgesCollection<bigint> = { ... }
- * const tokenId = 123n
- * const metadataId = getMetadataIdForTokenId(tokenId, collection.getTokenMetadataTimelineValue())
+ * import { getMetadataIdForTokenId, TokenMetadata } from 'bitbadges';
+ * const tokenMetadata = [
+ *   new TokenMetadata<bigint>({
+ *     uri: 'https://example.com/{id}.json',
+ *     customData: '',
+ *     tokenIds: [{ start: 100n, end: 102n }]
+ *   })
+ * ];
+ * const result = getMetadataIdForTokenId(101n, tokenMetadata);
+ * console.log(result); // 2n
  * ```
  *
  * @example
- * This can also be used with the BitBadges collection interface
+ * Use the token metadata already loaded on a collection.
  * ```ts
- * import { BitBadgesCollection } from 'bitbadges'
- * const collection: BitBadgesCollection<bigint> = { ... }
- * const tokenId = 123n
- * const metadataId = collection.getMetadataIdForTokenId(tokenId)
+ * import { getMetadataIdForTokenId, type BitBadgesCollection } from 'bitbadges';
+ * declare const collection: BitBadgesCollection<bigint>; // fetched through BitBadgesAPI
+ * const result = getMetadataIdForTokenId(101n, collection.getTokenMetadata());
  * ```
  *
  * @category Metadata IDs
@@ -61,24 +66,29 @@ export const getMetadataIdForTokenId = <T extends NumberType>(tokenId: T, tokenM
  * for a specific token URI. Returns an empty array if not found.
  *
  * @remarks
- * The token metadata array is the timeline values (TokenMetadataTimeline.tokenMetadata), not the cached fetched values
- * from the API.
+ * The token metadata array contains URI-to-token mappings, as returned by `collection.getTokenMetadata()`.
+ * These helpers use the mappings rather than the fetched metadata JSON.
  *
  * @example
  * ```ts
- * import { getMetadataIdsForUri } from 'bitbadges'
- * const collection: BitBadgesCollection<bigint> = { ... }
- * const uri = 'https://bitbadges.io/collection/1/badge/1'
- * const metadataIds = getMetadataIdsForUri(uri, collection.getTokenMetadataTimelineValue())
+ * import { getMetadataIdsForUri, TokenMetadata } from 'bitbadges';
+ * const tokenMetadata = [
+ *   new TokenMetadata<bigint>({
+ *     uri: 'https://example.com/{id}.json',
+ *     customData: '',
+ *     tokenIds: [{ start: 100n, end: 102n }]
+ *   })
+ * ];
+ * const result = getMetadataIdsForUri('https://example.com/101.json', tokenMetadata);
+ * console.log(result); // [2n]
  * ```
  *
  * @example
- * This can also be used with the BitBadges collection interface
+ * Use the token metadata already loaded on a collection.
  * ```ts
- * import { BitBadgesCollection } from 'bitbadges'
- * const collection: BitBadgesCollection<bigint> = { ... }
- * const uri = 'https://bitbadges.io/collection/1/badge/1'
- * const metadataIds = collection.getMetadataIdsForUri(uri)
+ * import { getMetadataIdsForUri, type BitBadgesCollection } from 'bitbadges';
+ * declare const collection: BitBadgesCollection<bigint>; // fetched through BitBadgesAPI
+ * const result = getMetadataIdsForUri('https://example.com/101.json', collection.getTokenMetadata());
  * ```
  *
  * @category Metadata IDs
@@ -169,24 +179,29 @@ export function getMaxMetadataId<T extends NumberType>(tokenMetadata: TokenMetad
  * Returns an empty array if not found.
  *
  * @remarks
- * The token metadata array is the timeline values (TokenMetadataTimeline.tokenMetadata), not the cached fetched values
- * from the API.
+ * The token metadata array contains URI-to-token mappings, as returned by `collection.getTokenMetadata()`.
+ * These helpers use the mappings rather than the fetched metadata JSON.
  *
  * @example
  * ```ts
- * import { getUrisForMetadataId } from 'bitbadges'
- * const collection: BitBadgesCollection<bigint> = { ... }
- * const metadataId = 123n
- * const uris = getUrisForMetadataId(metadataId, collection.getTokenMetadataTimelineValue())
+ * import { getUrisForMetadataIds, TokenMetadata } from 'bitbadges';
+ * const tokenMetadata = [
+ *   new TokenMetadata<bigint>({
+ *     uri: 'https://example.com/{id}.json',
+ *     customData: '',
+ *     tokenIds: [{ start: 100n, end: 102n }]
+ *   })
+ * ];
+ * const result = getUrisForMetadataIds([2n], 'https://example.com/collection.json', tokenMetadata);
+ * console.log(result); // ['https://example.com/101.json']
  * ```
  *
  * @example
- * This can also be used with the BitBadges collection interface
+ * Use the token metadata already loaded on a collection.
  * ```ts
- * import { BitBadgesCollection } from 'bitbadges'
- * const collection: BitBadgesCollection<bigint> = { ... }
- * const metadataId = 123n
- * const uris = collection.getUrisForMetadataId(metadataId)
+ * import { getUrisForMetadataIds, type BitBadgesCollection } from 'bitbadges';
+ * declare const collection: BitBadgesCollection<bigint>; // fetched through BitBadgesAPI
+ * const result = getUrisForMetadataIds([2n], collection.getCollectionMetadataDetails().uri, collection.getTokenMetadata());
  * ```
  *
  * @category Metadata IDs
@@ -230,24 +245,29 @@ export function getUrisForMetadataIds<T extends NumberType>(metadataIds: T[], co
  * Returns an empty array if not found.
  *
  * @remarks
- * The token metadata array is the timeline values (TokenMetadataTimeline.tokenMetadata), not the cached fetched values
- * from the API.
+ * The token metadata array contains URI-to-token mappings, as returned by `collection.getTokenMetadata()`.
+ * These helpers use the mappings rather than the fetched metadata JSON.
  *
  * @example
  * ```ts
- * import { getTokenIdsForMetadataId } from 'bitbadges'
- * const collection: BitBadgesCollection<bigint> = { ... }
- * const metadataId = 123n
- * const tokenIds = getTokenIdsForMetadataId(metadataId, collection.getTokenMetadataTimelineValue())
+ * import { getTokenIdsForMetadataId, TokenMetadata } from 'bitbadges';
+ * const tokenMetadata = [
+ *   new TokenMetadata<bigint>({
+ *     uri: 'https://example.com/{id}.json',
+ *     customData: '',
+ *     tokenIds: [{ start: 100n, end: 102n }]
+ *   })
+ * ];
+ * const result = getTokenIdsForMetadataId(2n, tokenMetadata);
+ * console.log(result); // [{ start: 101n, end: 101n }]
  * ```
  *
  * @example
- * This can also be used with the BitBadges collection interface
+ * Use the token metadata already loaded on a collection.
  * ```ts
- * import { BitBadgesCollection } from 'bitbadges'
- * const collection: BitBadgesCollection<bigint> = { ... }
- * const metadataId = 123n
- * const tokenIds = collection.getTokenIdsForMetadataId(metadataId)
+ * import { getTokenIdsForMetadataId, type BitBadgesCollection } from 'bitbadges';
+ * declare const collection: BitBadgesCollection<bigint>; // fetched through BitBadgesAPI
+ * const result = getTokenIdsForMetadataId(2n, collection.getTokenMetadata());
  * ```
  *
  * @category Metadata IDs

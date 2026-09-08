@@ -160,7 +160,9 @@ For safety, backing approvals enforce that the initiator must be the recipient (
 Add "AI Agent Vault" to the standards array to enable an AI Prompt tab in the frontend. This is **display-only** and has no impact on on-chain logic.
 
 \`\`\`json
+{
 "standards": ["Smart Token", "AI Agent Vault"]
+}
 \`\`\`
 
 ### Optional: DEX Tradability (Liquidity Pools)
@@ -1778,11 +1780,11 @@ add_preset_approval({ presetId: "tradable.transferable", params: {} })
 - Increment-only, non-transferable (soulbound) fungible token purchased with ICS20 denom
 - validTokenIds: [{ "start": "1", "end": "1" }] (single token ID)
 - ONE Mint approval with approvalId "credit-scaled" using allowAmountScaling (single scaled approval supersedes the legacy 8-10 tier approach; legacy tiers still supported for backward compat but deprecated)
-- Lock canUpdateCollectionApprovals (empty array = frozen)
+- Lock canUpdateCollectionApprovals (use \`permanentlyForbiddenTimes\`)
 - defaultBalances: autoApproveAllIncomingTransfers: true, autoApproveSelfInitiatedOutgoingTransfers: true, autoApproveSelfInitiatedIncomingTransfers: true
 - Credit-scaled approval: overridesFromOutgoingApprovals: true, mustPrioritize: true, coinTransfers[0].coins[0].amount = "1" (micro-payment unit)
 - MUST include alias path for display
-- All permissions locked (empty arrays)
+- All permissions locked with full-range \`permanentlyForbiddenTimes\`
 - Key difference from Smart Token: one-way minting only, no backing/unbacking, no transferability`,
     instructions: `## Credit Token Configuration
 
@@ -1816,7 +1818,7 @@ Credit tokens are designed for systems that track consumption off-chain. The on-
    - \`"autoApproveSelfInitiatedOutgoingTransfers": true\`
    - \`"autoApproveSelfInitiatedIncomingTransfers": true\`
 5. **Alias path REQUIRED** for display (see below).
-6. **All permissions frozen** (every \`collectionPermissions\` field = \`[]\`).
+6. **All permissions frozen** (full-range \`permanentlyForbiddenTimes\` on every permission, with the appropriate scope).
 
 ### The Scaled Credit Approval (single approval — replaces tiers)
 
@@ -1919,6 +1921,7 @@ For mismatched decimals: call \`lookup_token_info\` to confirm both decimals, th
 
 MUST include an alias path so tokens display nicely. The alias path REQUIRES at least one \`denomUnits\` entry with \`decimals > 0\` — the chain rejects an empty or zero-decimal denom units array with "denom unit decimals cannot be 0". Pick a sensible display exponent (6 is typical for fungible tokens):
 \`\`\`json
+{
 "aliasPathsToAdd": [{
   "denom": "u<symbol_lowercase>",
   "conversion": {
@@ -1929,24 +1932,27 @@ MUST include an alias path so tokens display nicely. The alias path REQUIRES at 
   "denomUnits": [{ "decimals": "6", "symbol": "<SYMBOL>", "isDefaultDisplay": true, "metadata": { "uri": "ipfs://METADATA_ALIAS_<symbol_lowercase>_UNIT", "customData": "" } }],
   "metadata": { "uri": "ipfs://METADATA_ALIAS_u<symbol_lowercase>", "customData": "" }
 }]
+}
 \`\`\`
 
 ### Permissions (All Locked)
 
-All permissions should be locked (empty arrays = frozen):
+All permissions should be locked (set \`permanentlyForbiddenTimes\` to the full range):
 \`\`\`json
-"collectionPermissions": {
-  "canDeleteCollection": [],
-  "canArchiveCollection": [],
-  "canUpdateStandards": [],
-  "canUpdateCustomData": [],
-  "canUpdateManager": [],
-  "canUpdateCollectionMetadata": [],
-  "canUpdateValidTokenIds": [],
-  "canUpdateTokenMetadata": [],
-  "canUpdateCollectionApprovals": [],
-  "canAddMoreAliasPaths": [],
-  "canAddMoreCosmosCoinWrapperPaths": []
+{
+  "collectionPermissions": {
+    "canDeleteCollection": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canArchiveCollection": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canUpdateStandards": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canUpdateCustomData": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canUpdateManager": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canUpdateCollectionMetadata": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canUpdateValidTokenIds": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}], "tokenIds": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canUpdateTokenMetadata": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}], "tokenIds": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canUpdateCollectionApprovals": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}], "fromListId": "All", "toListId": "All", "initiatedByListId": "All", "transferTimes": [{"start": "1", "end": "18446744073709551615"}], "tokenIds": [{"start": "1", "end": "18446744073709551615"}], "ownershipTimes": [{"start": "1", "end": "18446744073709551615"}], "approvalId": "All"}],
+    "canAddMoreAliasPaths": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canAddMoreCosmosCoinWrapperPaths": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}]
+  }
 }
 \`\`\`
 
@@ -2057,10 +2063,12 @@ For expiring tokens, calculate timestamps:
 - Example: 5 minutes from now = current timestamp + (5 * 60 * 1000)
 
 \`\`\`json
+{
 "ownershipTimes": [{
   "start": "1706000000000",
   "end": "1706000300000"
 }]
+}
 \`\`\`
 
 ### Session-based patch operations
@@ -2083,7 +2091,7 @@ For expiring tokens, calculate timestamps:
 - validTokenIds: MUST be exactly [{ "start": "1", "end": "1" }]
 - TWO collection approvals required with EXACT approvalIds (frontend depends on these):
   1. "manager-add": fromListId "Mint", toListId "All", initiatedByListId = creator. Mints token to add address.
-  2. "manager-remove": fromListId "All", toListId burn address (bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv), initiatedByListId = creator. Burns token to remove address.
+  2. "manager-remove": fromListId "!Mint", toListId burn address (bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv), initiatedByListId = creator. Burns token to remove address.
 - BOTH approvals MUST have overridesFromOutgoingApprovals: true
 - NO peer-to-peer transfer approval — only manager can modify the list
 - Standard is "Address List" (NOT "Non-Transferable")
@@ -3305,7 +3313,7 @@ add_preset_approval({ presetId: "crowdfund.refund",           params: { denom, d
 - Mint-to-winner: seller mints NFT directly to winning bidder during accept window (bidDeadline → bidDeadline + acceptWindow)
 - No separate mint-at-creation step — token doesn't exist until seller accepts a bid
 - Burn: anyone can burn token to burn address (permanent cleanup)
-- Bidding via user-level outgoing approval intents (not collection approvals)
+- Bidding via user-level incoming approval intents (not collection approvals)
 - Bids must have transferTimes valid through end of accept window (not just bid deadline)
 - initiatedByListId on mint-to-winner = seller address (only seller can accept)
 - maxNumTransfers = 1 on all approvals (one-shot)
@@ -3336,7 +3344,7 @@ A single-item auction where the seller creates a collection, bidders place inten
 
 ### Bidding Mechanism
 
-Bidders set user-level outgoing approvals on their own accounts that say "I will pay X coins for token 1 from this collection." The seller then accepts the best bid by minting the token directly to the winning bidder during the accept window. The bidder's outgoing approval handles the coin payment side via intent matching.
+Bidders set user-level incoming approvals on their own accounts that say "I will pay X coins for token 1 from this collection." The seller then accepts the best bid by minting the token directly to the winning bidder during the accept window. The bidder's incoming approval handles the coin payment side via intent matching.
 
 Bids must have transferTimes that stay valid through the END of the accept window (not just the bid deadline), so the seller can match them during the entire accept period.
 
@@ -3402,8 +3410,8 @@ add_preset_approval({ presetId: "auction.burn", params: {} })
 ### Auction Flow
 
 1. **Create**: Seller creates auction collection with 2 approvals. No token is minted yet.
-2. **Bid**: Bidders place intent-based bids (user-level outgoing approvals with coin payment offers). Bids must have transferTimes valid through end of accept window.
-3. **Accept**: After bid deadline, seller mints token 1 directly to the winning bidder's address. The bidder's outgoing approval triggers coin payment via intent matching. One action: mint + payment.
+2. **Bid**: Bidders place intent-based bids (user-level incoming approvals with coin payment offers). Bids must have transferTimes valid through end of accept window.
+3. **Accept**: After bid deadline, seller mints token 1 directly to the winning bidder's address. The bidder's incoming approval triggers coin payment via intent matching. One action: mint + payment.
 4. **Cleanup**: If unsold, burn approval allows cleanup.
 
 ### Creation Flow (Tool Calls)
@@ -3487,7 +3495,7 @@ add_preset_approval({
 })
 
 // Optional:
-add_preset_approval({ presetId: "products.burn", params: { numProducts: <N> } })
+add_preset_approval({ presetId: "products.burn", params: { numProducts: 3 } })
 \`\`\`
 
 #### Purchase Approval (per product)

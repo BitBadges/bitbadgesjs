@@ -63,21 +63,23 @@ function bufferedGasLimit(gasUsed: number, multiplier: number): number {
  *
  * @example
  * ```typescript
- * // With a Cosmos wallet (Keplr)
+ * import { BitBadgesSigningClient, GenericCosmosAdapter, GenericEvmAdapter, MsgTransferTokens } from 'bitbadges';
+ *
  * const adapter = await GenericCosmosAdapter.fromKeplr('bitbadges-1');
+ * // For an EVM wallet, replace the adapter above with:
+ * // const adapter = await GenericEvmAdapter.fromBrowserWallet({ expectedChainId: 50024 });
  * const client = new BitBadgesSigningClient({ adapter });
- *
- * const result = await client.signAndBroadcast([
- *   MsgTransferBadges.create({ ... }).toProto()
- * ]);
- *
- * // With an EVM wallet (ethers.js)
- * const provider = new BrowserProvider(window.ethereum);
- * const signer = await provider.getSigner();
- * const adapter = await GenericEvmAdapter.fromSigner(signer);
- * const client = new BitBadgesSigningClient({ adapter });
- *
- * const result = await client.signAndBroadcast([msg]); // Uses precompile path
+ * const msg = new MsgTransferTokens({
+ *   creator: client.address,
+ *   collectionId: '1',
+ *   transfers: [{
+ *     from: client.address,
+ *     toAddresses: ['bb1py4mfpg6uf59qkyzg0nmau322c5873eeysp5ue'],
+ *     balances: [{ amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: [{ start: '1', end: '18446744073709551615' }] }]
+ *   }]
+ * });
+ * const result = await client.signAndBroadcast([msg]);
+ * console.log(result.success ? result.txHash : result.error);
  * ```
  *
  * @category Signing
@@ -459,8 +461,11 @@ export class BitBadgesSigningClient {
    *
    * @example
    * ```typescript
+   * import type { BitBadgesSigningClient, MsgTransferTokens } from 'bitbadges';
+   * declare const client: BitBadgesSigningClient; // configured with a wallet adapter
+   * declare const msg: MsgTransferTokens<bigint>; // transfer to simulate
    * const review = await client.simulateAndReview([msg], {
-   *   txsInfo: [{ type: 'MsgTransferBadges', msg: { ... } }]
+   *   txsInfo: [{ type: 'MsgTransferTokens', msg: msg.toJson() }]
    * });
    *
    * console.log('Gas:', review.gasUsed);

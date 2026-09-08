@@ -352,7 +352,7 @@ import {
  * ```typescript
  * import { BigIntify, Stringify, Numberify, BitBadgesAPI } from "bitbadges";
  * const BitBadgesApi = new BitBadgesAPI({ convertFunction: BigIntify, apiKey: '...' });
- * const collections = await BitBadgesApi.getCollections(...);
+ * const collections = await BitBadgesApi.getCollections({ collectionsToFetch: [{ collectionId: '1' }] });
  * ```
  *
  * By default, we use the official API URL (https://api.bitbadges.io). You can override this by passing in a custom apiUrl.
@@ -1633,7 +1633,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getPointsActivityForUser("bb1...", { ... });
+   * import type { BitBadgesAPI } from 'bitbadges';
+   * declare const BitBadgesApi: BitBadgesAPI<bigint>; // configured client
+   * const res = await BitBadgesApi.getPointsActivityForUser('bb1py4mfpg6uf59qkyzg0nmau322c5873eeysp5ue', { bookmark: '' });
    * console.log(res);
    * ```
    * */
@@ -1920,7 +1922,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getClaim("123", { ... });
+   * import type { BitBadgesAPI } from 'bitbadges';
+   * declare const BitBadgesApi: BitBadgesAPI<bigint>; // configured client
+   * const res = await BitBadgesApi.getClaim('claim_demo_01', {});
    * console.log(res);
    * ```
    */
@@ -1950,7 +1954,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getDynamicDataStore("store123", { ... });
+   * import type { BitBadgesAPI } from 'bitbadges';
+   * declare const BitBadgesApi: BitBadgesAPI<bigint>; // configured client
+   * const res = await BitBadgesApi.getDynamicDataStore('store_demo_01', {});
    * console.log(res);
    * ```
    */
@@ -2042,7 +2048,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getPlugin("plugin123", { ... });
+   * import type { BitBadgesAPI } from 'bitbadges';
+   * declare const BitBadgesApi: BitBadgesAPI<bigint>; // configured client
+   * const res = await BitBadgesApi.getPlugin('must-own-badges', {});
    * console.log(res);
    * ```
    */
@@ -2099,7 +2107,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @example
    * ```typescript
-   * const res = await BitBadgesApi.getDeveloperApp("developerApp123", { ... });
+   * import type { BitBadgesAPI } from 'bitbadges';
+   * declare const BitBadgesApi: BitBadgesAPI<bigint>; // configured client
+   * const res = await BitBadgesApi.getDeveloperApp('app_demo_01', {});
    * console.log(res);
    * ```
    */
