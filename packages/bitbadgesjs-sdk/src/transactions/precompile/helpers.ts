@@ -4,7 +4,7 @@
  * Shared helper functions for converting between SDK types and precompile formats.
  */
 
-import { ethers } from 'ethers';
+import { getAddress, getBytes, hexlify, isAddress } from 'ethers';
 import { bech32 } from 'bech32';
 import type { UintRange } from '@/core/uintRanges.js';
 
@@ -25,7 +25,7 @@ export class ValidationError extends Error {
  * @throws {ValidationError} If address is provided but invalid
  */
 export function validateEvmAddress(address: string | undefined): void {
-  if (address && !ethers.isAddress(address)) {
+  if (address && !isAddress(address)) {
     throw new ValidationError(`Invalid EVM address: ${address}`);
   }
 }
@@ -57,7 +57,7 @@ export function validateMessage(message: unknown): void {
  */
 export function evmToCosmosAddress(evmAddress: string, prefix: string = 'bb'): string {
   try {
-    const addressBytes = ethers.getBytes(evmAddress);
+    const addressBytes = getBytes(evmAddress);
     const words = bech32.toWords(addressBytes);
     return bech32.encode(prefix, words);
   } catch (error) {
@@ -76,7 +76,7 @@ export function cosmosToEvmAddress(cosmosAddress: string): string {
   try {
     const { words } = bech32.decode(cosmosAddress);
     const addressBytes = new Uint8Array(bech32.fromWords(words));
-    return ethers.getAddress(ethers.hexlify(addressBytes));
+    return getAddress(hexlify(addressBytes));
   } catch (error) {
     throw new Error(`Failed to convert Cosmos address to EVM: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -88,10 +88,8 @@ export function cosmosToEvmAddress(cosmosAddress: string): string {
  * @param ranges - Array of UintRange from SDK (can be string or bigint)
  * @returns Array of {start: string, end: string} for JSON serialization
  */
-export function convertUintRanges(
-  ranges: UintRange<string | bigint>[]
-): Array<{ start: string; end: string }> {
-  return ranges.map(range => ({
+export function convertUintRanges(ranges: UintRange<string | bigint>[]): Array<{ start: string; end: string }> {
+  return ranges.map((range) => ({
     start: bigintToString(range.start),
     end: bigintToString(range.end)
   }));
