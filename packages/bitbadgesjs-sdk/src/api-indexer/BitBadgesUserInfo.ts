@@ -286,6 +286,7 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
    * ```ts
    * const res = user.mustGetBalances(123n);
    * console.log(res); // [{ ... }] Balances
+   * ```
    */
   mustGetBalances(collectionId: CollectionId) {
     return this.mustGetBalanceInfo(collectionId).balances;

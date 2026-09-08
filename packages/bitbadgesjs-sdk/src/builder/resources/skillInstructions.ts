@@ -160,7 +160,9 @@ For safety, backing approvals enforce that the initiator must be the recipient (
 Add "AI Agent Vault" to the standards array to enable an AI Prompt tab in the frontend. This is **display-only** and has no impact on on-chain logic.
 
 \`\`\`json
+{
 "standards": ["Smart Token", "AI Agent Vault"]
+}
 \`\`\`
 
 ### Optional: DEX Tradability (Liquidity Pools)
@@ -1778,11 +1780,11 @@ add_preset_approval({ presetId: "tradable.transferable", params: {} })
 - Increment-only, non-transferable (soulbound) fungible token purchased with ICS20 denom
 - validTokenIds: [{ "start": "1", "end": "1" }] (single token ID)
 - ONE Mint approval with approvalId "credit-scaled" using allowAmountScaling (single scaled approval supersedes the legacy 8-10 tier approach; legacy tiers still supported for backward compat but deprecated)
-- Lock canUpdateCollectionApprovals (empty array = frozen)
+- Lock canUpdateCollectionApprovals (use \`permanentlyForbiddenTimes\`)
 - defaultBalances: autoApproveAllIncomingTransfers: true, autoApproveSelfInitiatedOutgoingTransfers: true, autoApproveSelfInitiatedIncomingTransfers: true
 - Credit-scaled approval: overridesFromOutgoingApprovals: true, mustPrioritize: true, coinTransfers[0].coins[0].amount = "1" (micro-payment unit)
 - MUST include alias path for display
-- All permissions locked (empty arrays)
+- All permissions locked with full-range \`permanentlyForbiddenTimes\`
 - Key difference from Smart Token: one-way minting only, no backing/unbacking, no transferability`,
     instructions: `## Credit Token Configuration
 
@@ -1816,7 +1818,7 @@ Credit tokens are designed for systems that track consumption off-chain. The on-
    - \`"autoApproveSelfInitiatedOutgoingTransfers": true\`
    - \`"autoApproveSelfInitiatedIncomingTransfers": true\`
 5. **Alias path REQUIRED** for display (see below).
-6. **All permissions frozen** (every \`collectionPermissions\` field = \`[]\`).
+6. **All permissions frozen** (full-range \`permanentlyForbiddenTimes\` on every permission, with the appropriate scope).
 
 ### The Scaled Credit Approval (single approval — replaces tiers)
 
@@ -1919,6 +1921,7 @@ For mismatched decimals: call \`lookup_token_info\` to confirm both decimals, th
 
 MUST include an alias path so tokens display nicely. The alias path REQUIRES at least one \`denomUnits\` entry with \`decimals > 0\` — the chain rejects an empty or zero-decimal denom units array with "denom unit decimals cannot be 0". Pick a sensible display exponent (6 is typical for fungible tokens):
 \`\`\`json
+{
 "aliasPathsToAdd": [{
   "denom": "u<symbol_lowercase>",
   "conversion": {
@@ -1929,24 +1932,27 @@ MUST include an alias path so tokens display nicely. The alias path REQUIRES at 
   "denomUnits": [{ "decimals": "6", "symbol": "<SYMBOL>", "isDefaultDisplay": true, "metadata": { "uri": "ipfs://METADATA_ALIAS_<symbol_lowercase>_UNIT", "customData": "" } }],
   "metadata": { "uri": "ipfs://METADATA_ALIAS_u<symbol_lowercase>", "customData": "" }
 }]
+}
 \`\`\`
 
 ### Permissions (All Locked)
 
-All permissions should be locked (empty arrays = frozen):
+All permissions should be locked (set \`permanentlyForbiddenTimes\` to the full range):
 \`\`\`json
-"collectionPermissions": {
-  "canDeleteCollection": [],
-  "canArchiveCollection": [],
-  "canUpdateStandards": [],
-  "canUpdateCustomData": [],
-  "canUpdateManager": [],
-  "canUpdateCollectionMetadata": [],
-  "canUpdateValidTokenIds": [],
-  "canUpdateTokenMetadata": [],
-  "canUpdateCollectionApprovals": [],
-  "canAddMoreAliasPaths": [],
-  "canAddMoreCosmosCoinWrapperPaths": []
+{
+  "collectionPermissions": {
+    "canDeleteCollection": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canArchiveCollection": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canUpdateStandards": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canUpdateCustomData": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canUpdateManager": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canUpdateCollectionMetadata": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canUpdateValidTokenIds": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}], "tokenIds": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canUpdateTokenMetadata": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}], "tokenIds": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canUpdateCollectionApprovals": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}], "fromListId": "All", "toListId": "All", "initiatedByListId": "All", "transferTimes": [{"start": "1", "end": "18446744073709551615"}], "tokenIds": [{"start": "1", "end": "18446744073709551615"}], "ownershipTimes": [{"start": "1", "end": "18446744073709551615"}], "approvalId": "All"}],
+    "canAddMoreAliasPaths": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}],
+    "canAddMoreCosmosCoinWrapperPaths": [{"permanentlyPermittedTimes": [], "permanentlyForbiddenTimes": [{"start": "1", "end": "18446744073709551615"}]}]
+  }
 }
 \`\`\`
 
@@ -2057,10 +2063,12 @@ For expiring tokens, calculate timestamps:
 - Example: 5 minutes from now = current timestamp + (5 * 60 * 1000)
 
 \`\`\`json
+{
 "ownershipTimes": [{
   "start": "1706000000000",
   "end": "1706000300000"
 }]
+}
 \`\`\`
 
 ### Session-based patch operations
@@ -3487,7 +3495,7 @@ add_preset_approval({
 })
 
 // Optional:
-add_preset_approval({ presetId: "products.burn", params: { numProducts: <N> } })
+add_preset_approval({ presetId: "products.burn", params: { numProducts: 3 } })
 \`\`\`
 
 #### Purchase Approval (per product)
