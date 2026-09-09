@@ -48,8 +48,9 @@ CI Run Tests: Node 18 + Bun, then bun install and bun run test in packages/bitba
 
 Public CI validates the generated OpenAPI spec without checking out private source.
 The monorepo CI owns the additional website-only indexer route cross-check.
-Docs notifications dispatch to the private monorepo; scope DOCS_DISPATCH_PAT to
-that destination before merging the routing change.
+Docs generation runs in the private monorepo after its public SDK pin updates.
+Keep private-parent credentials out of public workflows. Land and activate the
+parent's replacement sync before retiring the old public notifier.
 
 Local generators locate private checkouts in the monorepo or the older sibling
 layout. Set `INDEXER_DIR` / `DOCS_DIR` for another location; skill generation also
