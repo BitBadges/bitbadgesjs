@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import { resolveRelatedRepo } from './related-repo';
 
 const addJsExtensionToImports = (filePath: string) => {
   const fileContent = fs.readFileSync(filePath, 'utf-8');
@@ -29,7 +30,6 @@ const processDirectory = (dirPath: string) => {
   });
 };
 
-// Replace this with the path to your root directory
-const rootDir = '/home/trevormil/CompSci/bitbadges/bitbadges-indexer/src';
+const rootDir = process.argv[2] ?? path.join(resolveRelatedRepo('indexer', process.env.INDEXER_DIR), 'src');
 
 processDirectory(rootDir);

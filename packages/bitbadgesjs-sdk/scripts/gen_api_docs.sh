@@ -1,5 +1,7 @@
 #!/bin/bash
 
+INDEXER_ROOT=$(bun ./scripts/related-repo.ts indexer) || exit 1
+
 # throw if we have git changes ( they can be staged though)
 if [ -n "$(git diff --exit-code)" ]; then
     echo "Please commit your changes before running this script."
@@ -11,7 +13,7 @@ else
 
     nvm use 18
 
-    bun ./scripts/check_routes_consistency.ts ../../../bitbadges-indexer/src/indexer.ts  ./openapitypes-helpers/routes.yaml
+    bun ./scripts/check_routes_consistency.ts "$INDEXER_ROOT/src/indexer.ts" ./openapitypes-helpers/routes.yaml
     if [ $? -ne 0 ]; then
         echo "Route consistency check failed!"
         # exit 0
@@ -26,7 +28,7 @@ else
     bun ./scripts/strip_internal_routes.ts ./openapitypes/combined.yaml || exit 1
     # Hard gate (this script has no `set -e`): internal routes must never
     # reach the docs, so this one aborts rather than warning.
-    bun ./scripts/assert_no_internal_routes.ts ./openapitypes/combined.yaml --indexer ../../../bitbadges-indexer/src/indexer.ts || exit 1
+    bun ./scripts/assert_no_internal_routes.ts ./openapitypes/combined.yaml --indexer "$INDEXER_ROOT/src/indexer.ts" || exit 1
     rm ./src/combined.ts
     git add ./openapitypes/combined.yaml
     #discard all other changes

@@ -50,3 +50,8 @@ Public CI validates the generated OpenAPI spec without checking out private sour
 The monorepo CI owns the additional website-only indexer route cross-check.
 Docs notifications dispatch to the private monorepo; scope DOCS_DISPATCH_PAT to
 that destination before merging the routing change.
+
+Local generators locate private checkouts in the monorepo or the older sibling
+layout. Set `INDEXER_DIR` / `DOCS_DIR` for another location; skill generation also
+accepts `DOCS_OUTPUT_DIR`. Missing checkouts fail before generation starts.
+Run script tooling with Bun, including `bun scripts/gen-skill-docs.ts`.
