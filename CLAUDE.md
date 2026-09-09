@@ -43,7 +43,10 @@ CI Run Tests: Node 18 + Bun, then bun install and bun run test in packages/bitba
 
 ## Related Repos
 
-- BitBadges/bitbadges-frontend
-- BitBadges/bitbadges-indexer
-- BitBadges/bitbadgeschain
-- trevormil/bitbadges-docs
+- BitBadges/bitbadges-monorepo (private frontend, indexer, gateway and docs)
+- BitBadges/bitbadgeschain (public chain)
+
+Public CI validates the generated OpenAPI spec without checking out private source.
+The monorepo CI owns the additional website-only indexer route cross-check.
+Docs notifications dispatch to the private monorepo; scope DOCS_DISPATCH_PAT to
+that destination before merging the routing change.

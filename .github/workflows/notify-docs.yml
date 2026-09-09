@@ -1,4 +1,4 @@
-# Tells BitBadges/bitbadges-docs to re-sync. Two independent signals:
+# Tells BitBadges/bitbadges-monorepo to re-sync. Two independent signals:
 #
 #   openapi-updated — the hosted OpenAPI spec changed on main. genapi.yml
 #                     opens a PR that lands openapi-hosted/openapi.json, so the
@@ -95,12 +95,12 @@ jobs:
         if: steps.what.outputs.openapi == 'true'
         uses: peter-evans/repository-dispatch@v4
         with:
-          # DOCS_DISPATCH_PAT: fine-grained PAT on BitBadges/bitbadges-docs with
+          # DOCS_DISPATCH_PAT: fine-grained PAT on BitBadges/bitbadges-monorepo with
           # Contents: read-write and Pull requests: read-write. `contents` is
           # what actually authorizes repository_dispatch; pull-requests is
           # needed because the workflow it triggers opens a PR.
           token: ${{ secrets.DOCS_DISPATCH_PAT }}
-          repository: BitBadges/bitbadges-docs
+          repository: BitBadges/bitbadges-monorepo
           event-type: openapi-updated
           client-payload: |
             {
@@ -115,7 +115,7 @@ jobs:
         uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.DOCS_DISPATCH_PAT }}
-          repository: BitBadges/bitbadges-docs
+          repository: BitBadges/bitbadges-monorepo
           event-type: sdk-updated
           client-payload: |
             {
