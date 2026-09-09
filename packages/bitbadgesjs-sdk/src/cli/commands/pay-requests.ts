@@ -186,7 +186,7 @@ addOutputFlags(
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'pay-requests pay');
     const details = extractPaymentRequestDetails(collection.collectionApprovals)!;
-    if (creator !== details.payerAddress) {
+    if (details.payerAddress !== 'All' && creator !== details.payerAddress) {
       process.stderr.write(
         `Warning: --creator ${creator} does not match the request's payer ${details.payerAddress}. The on-chain approval will reject this tx.\n`
       );
@@ -220,6 +220,7 @@ addOutputFlags(
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'pay-requests deny');
     const details = extractPaymentRequestDetails(collection.collectionApprovals)!;
+    if (!details.denyApproval) throw new Error('Public payment requests cannot be denied; they remain open until paid or expired.');
     if (creator !== details.payerAddress) {
       process.stderr.write(
         `Warning: --creator ${creator} does not match the request's payer ${details.payerAddress}. The on-chain approval will reject this tx.\n`

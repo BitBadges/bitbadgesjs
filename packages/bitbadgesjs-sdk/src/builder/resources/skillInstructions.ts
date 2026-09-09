@@ -2945,7 +2945,7 @@ For bounties that require the verifier or submitter to hold a token from THIS co
     summary: `Required standards: ["PaymentRequest"]
 
 - 1 token ID (vehicle for approval engine — minted directly to burn)
-- 2 collection-level approvals: pay, deny
+- Specific payer: 2 approvals (pay, deny). Public payer All: exactly 1 approval (pay only).
 - Each approval: Mint → burn 1x token ID 1
 - Pay approval triggers a coinTransfer FROM the payer's wallet TO the recipient
 - NO mintEscrowCoinsToTransfer — payment debits the payer's wallet at execution time
@@ -2974,11 +2974,15 @@ This is the on-chain equivalent of Stripe Link's spend-request flow: the agent p
 - validTokenIds: [{ start: "1", end: "1" }]
 - No alias path needed (1-of-1 receipt-style token)
 
-## 2 Required Approvals
+## Required Approvals
+
+For a public invoice, use payer "All" and create ONLY the pay approval. There is no denial or cancellation action; the request stays pending until paid or expired. Do not add a deny approval, even one restricted to the requester. The pay-only shape is validated by the SDK and indexer.
+
+The following pay+deny pair applies only to specific-payer requests.
 
 Both approvals share: Mint → burn address, 1x token ID 1, maxNumTransfers = 1, overridesFromOutgoingApprovals=true, overridesToIncomingApprovals=true. NO votingChallenges (gating is via initiatedByListId, not voting). Both are time-gated to \`[1, expirationTimestamp]\` — once that window closes, neither can fire and the request is implicitly expired (no separate expire approval is needed because there's no escrow to refund).
 
-### Preferred path: presets (two short tool calls)
+### Preferred path: presets (omit the deny call when payer is "All")
 
 \`\`\`
 add_preset_approval({
@@ -2999,13 +3003,13 @@ Payer approves → mint-to-burn → coins move from payer to recipient.
 Key fields:
 - fromListId: "Mint"
 - toListId: burn address (bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv)
-- initiatedByListId: payer's bb1... address (NOT "All" — gates approval to just the payer)
+- initiatedByListId: payer's bb1... address, or "All" for a public pay-only request
 - coinTransfers: [{ to: recipientAddress, overrideFromWithApproverAddress: FALSE, overrideToWithInitiator: false, coins: [{ denom, amount }] }]
   - **CRITICAL**: \`overrideFromWithApproverAddress\` MUST be false. The chain default routes "from" to the initiator (the payer). Setting true would attempt to debit a non-existent escrow → tx fails.
 - transferTimes: [{ start: "1", end: expirationTimestamp }]
 - maxNumTransfers.overallMaxNumTransfers: "1"
 
-### 2. Deny (payment-request-deny-*)
+### 2. Deny (payment-request-deny-*, specific payer only)
 Payer rejects → mint-to-burn → no coin transfer. Records denial state for indexers/UIs.
 
 Same as Pay but:
@@ -3029,7 +3033,7 @@ Same as Pay but:
 - **No votingChallenges** — gating is via initiatedByListId scoped to payer
 - **Deny has no coinTransfers** — no funds need to be returned (no escrow to refund)
 - **No expire approval** — Bounty needs one to refund escrow, but there's no escrow here. Expiration is implicit via the shared \`transferTimes[0].end\`.
-- **2 approvals** instead of Bounty's 3
+- **1 public pay approval, or 2 specific-payer approvals**, instead of Bounty's 3
 - Same mint-to-burn vehicle, same frozen permissions
 
 ## Creation Flow (Tool Calls)
@@ -3039,7 +3043,7 @@ Same as Pay but:
 3. \`set_standards\` — set ["PaymentRequest"]
 4. \`set_invariants\` — set { noCustomOwnershipTimes: true, disablePoolCreation: true, noForcefulPostMintTransfers: true }
 5. **DO NOT** call set_mint_escrow_coins — there's no escrow
-6. \`add_preset_approval\` x2 — pay, deny (or \`add_approval\` for raw)
+6. \`add_preset_approval\` — pay only for All; pay + deny for a specific payer (or \`add_approval\` for raw)
 7. \`set_permissions\` — freeze all permissions
 8. \`set_collection_metadata\` — name + the rationale (≥100 chars recommended; mirror Stripe Link's bar)
 9. \`set_token_metadata\` — token 1 metadata
@@ -3055,14 +3059,14 @@ All permissions MUST be frozen (same set as Bounty).
 - **DON'T set overrideFromWithApproverAddress=true on the pay approval** — that's the Bounty pattern. PaymentRequest needs false so the chain debits the payer (initiator), not a non-existent escrow.
 - **DON'T add votingChallenges** — PaymentRequest gating is via initiatedByListId, not voting. Voting is a Bounty construct.
 - **DON'T fund mintEscrowCoinsToTransfer** — there is no escrow. The payer pays at execution time.
-- **DON'T set initiatedByListId to "All" on pay/deny** — that would let anyone approve. Lock to the specific payer's address.
+- **DON'T add a deny approval to an All-payer request** — public invoices have only a pay approval. Specific-payer invoices keep both approvals scoped to that payer.
 - **DON'T add a third "expire" approval** — Bounty needs one to refund escrow. PaymentRequest has no escrow, so an expire branch would just be a no-op marker. Validator rejects collections with more than 2 approvals.
 - **DON'T forget the rationale** in collection metadata description — it's what the human reads to decide.
 - **DON'T use overrideToWithInitiator** on the coinTransfer — the recipient is hardcoded.
 
 ## Relationship to the Invoices Standard
 
-The existing \`Invoices\` standard validates a single payer-as-initiator approval — useful as a building block, but it has no deny branch and no targeted-payer scoping. PaymentRequest is a more constrained, agent-payments-specific subset: same payment direction (initiator → address), but with an explicit pay+deny pair so the payer's "no" is captured on-chain rather than being indistinguishable from "hasn't acted yet". Consumers that want any payer-initiated payment can match \`Invoices\`; consumers that want the agent-payments artifact specifically should match \`PaymentRequest\`.`
+The existing \`Invoices\` standard validates a single payer-as-initiator approval — useful as a building block, but it has no deny branch and no targeted-payer scoping. PaymentRequest is a more constrained, agent-payments-specific subset: same payment direction (initiator → address), but with an explicit pay+deny pair for specific payers, or a pay-only public invoice that remains open until paid or expired. Consumers that want any payer-initiated payment can match \`Invoices\`; consumers that want the agent-payments artifact specifically should match \`PaymentRequest\`.`
   },
   {
     id: 'crowdfund',

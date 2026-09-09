@@ -459,6 +459,15 @@ describe('bounty builder', () => {
 });
 
 describe('payment-request builder', () => {
+  test('builds a conforming public request with only a pay approval', () => {
+    const publicRequest = buildPaymentRequest({
+      amount: 10, denom: 'USDC', payer: 'All', recipient: 'bb1recipient',
+      context: 'Public invoice', name: 'Invoice', image: 'ipfs://test-image'
+    });
+    expect(publicRequest.value.collectionApprovals).toHaveLength(1);
+    expect(publicRequest.value.collectionApprovals[0].initiatedByListId).toBe('All');
+    expectCleanVerification(publicRequest);
+  });
   const msg = buildPaymentRequest({
     amount: 10,
     denom: 'USDC',
@@ -472,6 +481,11 @@ describe('payment-request builder', () => {
 
   test('has PaymentRequest standard', () => {
     expect(r.standards).toEqual(['PaymentRequest']);
+  });
+  test('verification rejects public requests that retain a deny approval', () => {
+    const publicWithDeny = structuredClone(msg);
+    publicWithDeny.value.collectionApprovals.forEach((a: any) => { a.initiatedByListId = 'All'; });
+    expect(verifyBuilder(publicWithDeny).violations.some((v: any) => v.standard === 'PaymentRequest')).toBe(true);
   });
   test('2 approvals (pay + deny — no expire branch)', () => {
     expect(r.collectionApprovals.length).toBe(2);
