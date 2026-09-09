@@ -1,13 +1,4 @@
-/**
- * Tests for payment-requests.ts — PaymentRequest standard protocol validator.
- *
- * Covers validatePaymentRequestCollection +
- * doesCollectionFollowPaymentRequestProtocol. A valid PaymentRequest has
- * 3 approvals (pay, deny, expire) where pay and deny share the payer's
- * initiatedByListId and the active window, expire starts after that
- * window, and only pay carries a coinTransfer (with
- * overrideFromWithApproverAddress=false so the chain debits the payer).
- */
+/** Tests for specific-payer pay/deny and public pay-only payment requests. */
 
 import {
   validatePaymentRequestCollection,
@@ -68,6 +59,37 @@ const makeValidCollection = (): any => ({
 // JSON-based clone loses bigints; build fresh fixtures and override
 // individual fields directly instead.
 const fresh = makeValidCollection;
+
+describe('public payment requests', () => {
+  const publicCollection = () => {
+    const c = fresh();
+    c.collectionApprovals = [makePayApproval()];
+    c.collectionApprovals[0].initiatedByListId = 'All';
+    return c;
+  };
+
+  it('accepts a public pay-only request and extracts its details', () => {
+    const c = publicCollection();
+    expect(validatePaymentRequestCollection(c)).toEqual({ valid: true, errors: [], warnings: [] });
+    const details = extractPaymentRequestDetails(c.collectionApprovals);
+    expect(details?.payerAddress).toBe('All');
+    expect(details?.denyApproval).toBeUndefined();
+    expect(details?.paymentCoins).toEqual([{ denom: 'uusdc', amount: 10000000n }]);
+  });
+
+  it('rejects a public request with a deny approval', () => {
+    const c = publicCollection();
+    c.collectionApprovals.push({ ...makeDenyApproval(), initiatedByListId: 'All' });
+    expect(validatePaymentRequestCollection(c).valid).toBe(false);
+    expect(extractPaymentRequestDetails(c.collectionApprovals)).toBeNull();
+  });
+
+  it('still requires a public payment to start at 1', () => {
+    const c = publicCollection();
+    c.collectionApprovals[0].transferTimes[0].start = 2n;
+    expect(validatePaymentRequestCollection(c).valid).toBe(false);
+  });
+});
 
 describe('validatePaymentRequestCollection — happy path', () => {
   it('accepts a minimal valid PaymentRequest collection', () => {
@@ -224,7 +246,7 @@ describe('extractPaymentRequestDetails', () => {
     const details = extractPaymentRequestDetails(c.collectionApprovals);
     expect(details).not.toBeNull();
     expect(details!.payApproval.approvalId).toBe('payment-request-pay');
-    expect(details!.denyApproval.approvalId).toBe('payment-request-deny');
+    expect(details!.denyApproval!.approvalId).toBe('payment-request-deny');
     expect(details!.payerAddress).toBe(PAYER);
     expect(details!.recipientAddress).toBe(RECIPIENT);
     expect(details!.expirationTime).toBe(1000n);

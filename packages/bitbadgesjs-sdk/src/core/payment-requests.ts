@@ -12,7 +12,7 @@ export interface PaymentRequestValidationResult {
  * the collection requesting payment, the targeted payer approves and pays
  * from their own wallet in a single action — no escrow up front.
  *
- * Approval shape (2 approvals):
+ * Specific-payer approval shape (2 approvals; public All requests use pay only):
  *   - pay: initiatedByListId scoped to payer; coinTransfer to recipient with
  *     overrideFromWithApproverAddress=false so the chain defaults the
  *     coin-transfer "from" to the initiator (the payer).
@@ -46,11 +46,23 @@ export const validatePaymentRequestCollection = (
     errors.push('validTokenIds must be exactly [{start: 1, end: 1}]');
   }
 
-  // 3. Exactly 2 collection approvals (pay + deny)
+  // Public requests are pay-only; a public denial has no authorized owner.
   const approvals = collection.collectionApprovals;
-  if (approvals.length !== 2) {
-    errors.push(`Expected exactly 2 approvals (pay, deny), found ${approvals.length}`);
+  const pay = approvals.find((a) => (a.approvalCriteria?.coinTransfers?.length ?? 0) > 0);
+  const isPublic = pay?.initiatedByListId === 'All';
+  const expectedCount = isPublic ? 1 : 2;
+  if (approvals.length !== expectedCount) {
+    errors.push(isPublic
+      ? 'Public payment requests must have exactly 1 approval (pay only; no deny)'
+      : `Expected exactly 2 approvals (pay, deny), found ${approvals.length}`);
     return { valid: false, errors, warnings };
+  }
+
+  for (const a of approvals) {
+    if (a.transferTimes?.length !== 1 || BigInt(a.transferTimes[0]?.start ?? 0) !== 1n ||
+        BigInt(a.transferTimes[0]?.end ?? 0) < 1n) {
+      errors.push('Payment request transferTimes must contain one window starting at 1 with a positive expiration');
+    }
   }
 
   // 4. Both: fromListId="Mint", toListId=burn address
@@ -146,7 +158,7 @@ export type PaymentRequestStatus = 'pending' | 'paid' | 'denied' | 'expired';
 
 export interface PaymentRequestDetails {
   payApproval: iCollectionApproval<bigint>;
-  denyApproval: iCollectionApproval<bigint>;
+  denyApproval?: iCollectionApproval<bigint>;
   payerAddress: string;
   recipientAddress: string;
   paymentCoins: { denom: string; amount: bigint }[];
@@ -154,8 +166,8 @@ export interface PaymentRequestDetails {
 }
 
 /**
- * Split a PaymentRequest collection's 2 approvals into pay (has coinTransfer)
- * and deny (no coinTransfer, matched by transferTimes window). Returns null
+ * Split a PaymentRequest collection's approvals into pay (has coinTransfer)
+ * and optional deny (specific payer only, matched by transferTimes window). Returns null
  * if the shape doesn't match — caller should treat that as a non-conformant
  * collection (same outcome as `validatePaymentRequestCollection` failing).
  */
@@ -164,6 +176,8 @@ export function extractPaymentRequestDetails(
 ): PaymentRequestDetails | null {
   const payApproval = approvals.find((a) => (a.approvalCriteria?.coinTransfers?.length ?? 0) > 0);
   if (!payApproval) return null;
+  const isPublic = payApproval.initiatedByListId === 'All';
+  if (approvals.length !== (isPublic ? 1 : 2)) return null;
 
   const payEnd = BigInt(payApproval.transferTimes?.[0]?.end ?? 0);
   const denyApproval = approvals.find(
@@ -172,7 +186,7 @@ export function extractPaymentRequestDetails(
       BigInt(a.transferTimes?.[0]?.start ?? 0) === 1n &&
       BigInt(a.transferTimes?.[0]?.end ?? 0) === payEnd
   );
-  if (!denyApproval) return null;
+  if (!isPublic && !denyApproval) return null;
 
   const payerAddress = payApproval.initiatedByListId ?? '';
   const recipientAddress = payApproval.approvalCriteria?.coinTransfers?.[0]?.to ?? '';

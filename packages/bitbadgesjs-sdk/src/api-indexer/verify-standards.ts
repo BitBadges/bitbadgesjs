@@ -764,9 +764,12 @@ function verifyPaymentRequest(value: any): StandardViolation[] {
     violations.push({ standard: std, field: 'validTokenIds', message: 'PaymentRequest collections MUST have validTokenIds = [{ start: "1", end: "1" }].' });
   }
 
-  // Must have 2 approvals: pay, deny
-  if (approvals.length < 2) {
-    violations.push({ standard: std, field: 'collectionApprovals', message: `PaymentRequest requires at least 2 approvals (pay, deny). Found ${approvals.length}.` });
+  const pay = approvals.find((a: any) => a.approvalCriteria?.coinTransfers?.length > 0);
+  const isPublic = pay?.initiatedByListId === 'All';
+  if (approvals.length !== (isPublic ? 1 : 2)) {
+    violations.push({ standard: std, field: 'collectionApprovals', message: isPublic
+      ? 'Public PaymentRequest requires exactly 1 approval (pay only; no deny).'
+      : `PaymentRequest requires exactly 2 approvals (pay, deny). Found ${approvals.length}.` });
   }
 
   const mintApprovals = approvals.filter((a: any) => a.fromListId === 'Mint');
