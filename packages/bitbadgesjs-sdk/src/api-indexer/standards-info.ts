@@ -77,7 +77,24 @@ export interface iPredictionMarketInfo {
  *
  * @category Standards Info
  */
+export type AgentVaultInfo = {
+  version: number;
+  status: 'unknown' | 'funded' | 'empty';
+  agent: string;
+  manager: string;
+  recovery?: string;
+  backingDenom: string;
+  tvl?: string;
+  agentBalance?: string;
+  execution: import('../core/agent-vaults.js').AgentVaultStatus;
+  indexedHeight?: string;
+  indexedAt?: string;
+  evaluatedAt: string;
+  freshness: 'unverified';
+};
+
 export interface iStandardsInfo {
+  'Agent Vault'?: AgentVaultInfo;
   Bounty?: iBountyInfo;
   PaymentRequest?: iPaymentRequestInfo;
   Crowdfund?: iCrowdfundInfo;

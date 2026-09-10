@@ -18,6 +18,33 @@ export interface SkillInstruction {
 
 export const SKILL_INSTRUCTIONS: SkillInstruction[] = [
   {
+    id: 'agent-vault', name: 'Agent Vault', category: 'standard',
+    description: 'A designated-agent coin budget with immutable limits, weighted activation and optional recovery.',
+    summary: 'One agent, exact base-unit budgets, fixed resets, one-time authorization to operate, explicit custody recovery.',
+    instructions: `Use build_agent_vault to construct this profile in the current creation session.
+Ask for agent, human manager, backing coin, and either a hosted metadata URI or name/image/description.
+Pass these as params. Agent must differ from manager, recovery and activation voters.
+Optional cap is {amount,startTime,intervalLength}: all unsigned integer strings; amount is positive BASE UNITS.
+Omit cap for unlimited; never interpret zero as unlimited. Reset start is explicit epoch milliseconds.
+Intervals are fixed: 86400000 = 24h, 604800000 = 7d, 2592000000 = 30d, not a calendar month or rolling window.
+Optional window is {start,end}, inclusive epoch-millisecond strings.
+Optional activation is {voters:[{address,weight}],threshold}; weights are positive integers totaling <=100.
+Votes authorize ongoing operation, NOT a particular payment, amount or recipient. Limits continue to apply.
+Optional recovery is a human account with unrestricted receipt clawback and redemption authority.
+Disclose that recovery bypasses cap/time/activation and transfers custody; it does not pause future funding.
+Do not infer permission to add recovery. Policy is frozen; changing agent or policy requires a new collection.
+The builder writes Smart Token + Agent Vault standards and a versioned customData policy.
+Do not add generic receipt-transfer or redemption approvals or relax permissions after construction.
+Run audit_collection and validate_transaction, then review_collection before handing the unsigned draft to the user.
+Creation does not deploy. Signing and deployment remain explicit actions.
+Lifecycle SDK buildAgentVaultTransaction supports deposit/withdraw/pay/vote/recover after structural verification.
+Deposit debits the funder and gives receipts directly to the named agent. Pay and recover require atomic submission.
+Sequential keyring signing is rejected for these multi-message operations; use the supported browser signing flow.
+Receipt balances are per collection/holder; the shared backing pool is never an individual vault balance.
+Missing or stale status data does not prove readiness. Simulate the complete transaction before signing.
+Redeemed coins are unrestricted: this standard does not enforce payment recipients or per-payment consent.`
+  },
+  {
     id: 'smart-token',
     name: 'Smart Token',
     category: 'token-type',

@@ -44,6 +44,7 @@ import {
   buildTransferTool, handleBuildTransfer,
   // Dynamic store
   buildDynamicStoreTool, handleBuildDynamicStore,
+  buildAgentVaultTool, handleBuildAgentVault,
   queryDynamicStoreTool, handleQueryDynamicStore,
   // Explain
   explainCollectionTool, handleExplainCollection,
@@ -209,6 +210,7 @@ export const toolRegistry: Record<string, ToolEntry> = {
 
   // Dynamic store
   build_dynamic_store: entry(buildDynamicStoreTool, handleBuildDynamicStore),
+  build_agent_vault: entry(buildAgentVaultTool, handleBuildAgentVault),
   query_dynamic_store: entry(queryDynamicStoreTool, async (args: any) => await handleQueryDynamicStore(args)),
 
   // Unified review (preferred)

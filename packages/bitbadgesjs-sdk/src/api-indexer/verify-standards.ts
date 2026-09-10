@@ -1,3 +1,4 @@
+import { validateAgentVaultCollection } from '../core/agent-vaults.js';
 /**
  * Deterministic skill/standard verification.
  *
@@ -1046,7 +1047,8 @@ const STANDARD_VALIDATORS: Record<string, (value: any) => StandardViolation[]> =
   Auction: verifyAuction,
   Products: verifyProducts,
   'Prediction Market': verifyPredictionMarket,
-  Vault: verifyVault
+  Vault: verifyVault,
+  'Agent Vault': (value) => validateAgentVaultCollection(value).errors.map((message) => ({ standard: 'Agent Vault', field: 'collectionApprovals', message }))
 };
 
 // Also match common alternative names
@@ -1078,7 +1080,8 @@ const STANDARD_ALIASES: Record<string, string> = {
   Products: 'Products',
   'Product Catalog': 'Products',
   'Prediction Market': 'Prediction Market',
-  Vault: 'Vault'
+  Vault: 'Vault',
+  'Agent Vault': 'Agent Vault'
 };
 
 // ============================================================
