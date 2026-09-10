@@ -32,4 +32,4 @@ jobs:
 
       - name: Run tests
         working-directory: packages/bitbadgesjs-sdk
-        run: bun run test
+        run: bun test scripts/related-repo.test.ts && bun run test

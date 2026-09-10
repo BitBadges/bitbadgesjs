@@ -3,7 +3,7 @@
  * Generate docs pages from builder skill instructions.
  *
  * Source of truth: src/builder/resources/skillInstructions.ts
- * Output: ../bitbadges-docs/x-tokenization/examples/skills/
+ * Output: docs checkout's x-tokenization/examples/skills/ (or DOCS_OUTPUT_DIR).
  *
  * Ported from the old bitbadges-builder-mcp/scripts/gen-skill-docs.ts
  * when the MCP server was folded into the SDK. The only real change is
@@ -11,28 +11,18 @@
  * subpath. Output shape + docs destination are unchanged so the existing
  * SUMMARY.md entries and any review diffs stay stable.
  *
- * Usage: npx tsx scripts/gen-skill-docs.ts
- *        (optional) DOCS_OUTPUT_DIR=/path/to/override npx tsx scripts/gen-skill-docs.ts
+ * Usage: bun scripts/gen-skill-docs.ts
+ *        (optional) DOCS_OUTPUT_DIR=/path/to/override bun scripts/gen-skill-docs.ts
  */
 
 import { SKILL_INSTRUCTIONS } from '../src/builder/resources/skillInstructions.js';
 import { writeFileSync, mkdirSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
-
-// Resolve __dirname in a way that works both when tsx runs this file as
-// ESM (import.meta.url present) and when it transpiles to CJS (falls
-// back to __dirname if already defined). The docs output path is
-// resolved relative to this script's location so running from any cwd
-// produces the same result.
-const here =
-  typeof __dirname !== 'undefined'
-    ? __dirname
-    : dirname(fileURLToPath(import.meta.url));
+import { join } from 'path';
+import { resolveRelatedRepo } from './related-repo';
 
 const DOCS_DIR =
   process.env.DOCS_OUTPUT_DIR ||
-  join(here, '../../../../bitbadges-docs/x-tokenization/examples/skills');
+  join(resolveRelatedRepo('docs', process.env.DOCS_DIR), 'x-tokenization/examples/skills');
 
 mkdirSync(DOCS_DIR, { recursive: true });
 

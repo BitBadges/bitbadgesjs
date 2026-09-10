@@ -43,7 +43,16 @@ CI Run Tests: Node 18 + Bun, then bun install and bun run test in packages/bitba
 
 ## Related Repos
 
-- BitBadges/bitbadges-frontend
-- BitBadges/bitbadges-indexer
-- BitBadges/bitbadgeschain
-- trevormil/bitbadges-docs
+- BitBadges/bitbadges-monorepo (private frontend, indexer, gateway and docs)
+- BitBadges/bitbadgeschain (public chain)
+
+Public CI validates the generated OpenAPI spec without checking out private source.
+The monorepo CI owns the additional website-only indexer route cross-check.
+Docs generation runs in the private monorepo after its public SDK pin updates.
+Keep private-parent credentials out of public workflows. Land and activate the
+parent's replacement sync before retiring the old public notifier.
+
+Local generators locate private checkouts in the monorepo or the older sibling
+layout. Set `INDEXER_DIR` / `DOCS_DIR` for another location; skill generation also
+accepts `DOCS_OUTPUT_DIR`. Missing checkouts fail before generation starts.
+Run script tooling with Bun, including `bun scripts/gen-skill-docs.ts`.
