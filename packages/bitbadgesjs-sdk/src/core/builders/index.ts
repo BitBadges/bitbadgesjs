@@ -47,3 +47,5 @@ export { buildPmBuyIntent, type PmBuyIntentParams } from './pm-buy-intent.js';
 // ── Shared utilities ─────────────────────────────────────────────────────────
 
 export { resolveCoin, toBaseUnits, parseDuration, type ResolvedCoin } from './shared.js';
+
+export * from './agent-vault.js';

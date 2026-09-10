@@ -438,6 +438,37 @@ const sharedOpts = (cmd: Command) => {
 // Collection builders
 // ============================================================
 
+
+sharedOpts(buildCommand.command('agent-vault')
+  .description('Create a designated-agent budget. Amounts use exact base units; activation authorizes ongoing operation.')
+  .option('--symbol <symbol>', 'Receipt symbol; default AV')
+  .option('--agent <address>', 'Designated agent account')
+  .option('--backing-coin <symbol>', 'Backing denomination or registered coin symbol')
+  .option('--cap <integer>', 'Withdrawal cap in base units; omit for unlimited')
+  .option('--reset-start <milliseconds>', 'Explicit first reset timestamp')
+  .option('--reset-interval <milliseconds>', 'Fixed reset interval; 86400000 = 24 hours')
+  .option('--unlock-at <milliseconds>', 'Inclusive withdrawal window start')
+  .option('--expires-at <milliseconds>', 'Inclusive withdrawal window end')
+  .option('--activation <json>', 'Activation policy JSON: {voters:[{address,weight}],threshold}')
+  .option('--recovery <address>', 'Optional account with unrestricted recovery authority')
+).action(async (opts) => {
+  const { buildAgentVault } = await import('../../core/builders/agent-vault.js');
+  if (opts.json) { await emit(buildAgentVault(readJsonInput(opts.json)), opts); return; }
+  if (!opts.cap && (opts.resetStart || opts.resetInterval)) throw new Error('Reset settings require --cap');
+  const msg = buildAgentVault({
+    agent: requireBb1AddressStrict(opts.agent, '--agent'),
+    manager: requireBb1AddressStrict(opts.manager, '--manager'),
+    backingCoin: opts.backingCoin,
+    symbol: opts.symbol,
+    uri: opts.uri, name: opts.name, image: opts.image, description: opts.description,
+    cap: opts.cap ? { amount: opts.cap, startTime: opts.resetStart, intervalLength: opts.resetInterval } : undefined,
+    window: opts.unlockAt || opts.expiresAt ? { start: opts.unlockAt ?? '1', end: opts.expiresAt ?? '18446744073709551615' } : undefined,
+    activation: opts.activation ? JSON.parse(opts.activation) : undefined,
+    recovery: opts.recovery ? requireBb1AddressStrict(opts.recovery, '--recovery') : undefined
+  });
+  await emit(msg, opts);
+});
+
 sharedOpts(
   buildCommand
     .command('vault')

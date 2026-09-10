@@ -1,3 +1,4 @@
+import { assertAgentVaultAtomicSigning } from '../utils/agent-vault-signing.js';
 /**
  * `bitbadges-cli deploy --burner`
  *
@@ -513,6 +514,10 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
   // handles the full array.
   const msg: any = messages[0];
   const isMultiMsg = messages.length > 1;
+  try { assertAgentVaultAtomicSigning(messages, useKeyring); } catch (error: any) {
+    process.stderr.write(`${error.message}\n`);
+    process.exit(2);
+  }
 
   // 2.5 --dry-run short-circuit: simulate the tx and exit before any
   // wallet is generated, funding is requested, or broadcast happens.

@@ -18,6 +18,7 @@ describe('buildCommand shape', () => {
     const names = buildCommand.commands.map((c) => c.name()).sort();
     expect(names).toEqual([
       'address-list',
+      'agent-vault',
       'auction',
       'bid',
       'bounty',

@@ -13,3 +13,5 @@ export * from './buildTransfer.js';
 export * from './buildDynamicStore.js';
 export * from './queryDynamicStore.js';
 export * from './searchPlugins.js';
+
+export * from './buildAgentVault.js';
