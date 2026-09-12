@@ -21,18 +21,39 @@ const requestIdentity = {
   expiresAt: z.number().int().safe().positive(),
   signOnly: z.boolean()
 };
-const requestSchema = z.discriminatedUnion('chain', [
-  z.object({ ...requestIdentity, chain: z.literal('cosmos'), txsInfo: z.array(z.object({
+const txsInfo = z.array(z.object({
     type: z.string().min(1).max(256), msg: z.record(jsonValue)
-  }).strict()).min(1).max(100) }).strict(),
-  z.object({ ...requestIdentity, chain: z.literal('evm'), tx: z.object({
+  }).strict()).min(1).max(100);
+const evmTx = z.object({
     to: z.string().regex(/^0x[0-9a-fA-F]{40}$/),
     value: z.string().regex(/^(0|[1-9][0-9]*)$/).optional(),
     data: z.string().regex(/^0x([0-9a-fA-F]{2})*$/).optional()
-  }).strict() }).strict()
+  }).strict();
+const requestSchema = z.discriminatedUnion('chain', [
+  z.object({ ...requestIdentity, chain: z.literal('cosmos'), txsInfo }).strict(),
+  z.object({ ...requestIdentity, chain: z.literal('evm'), tx: evmTx }).strict()
 ]);
 
 export type BrowserTxRequestV2 = z.infer<typeof requestSchema>;
+
+const legacyIdentity = {
+  expectedAddress: address.optional(),
+  chainId: z.string().min(1).optional(),
+  signOnly: z.boolean().optional(),
+  chainHint: z.enum(['cosmos', 'evm']).optional(),
+  mode: z.literal('tx').optional()
+};
+const legacyRequestSchema = z.discriminatedUnion('chain', [
+  z.object({ ...legacyIdentity, chain: z.literal('cosmos'), txsInfo }).strict(),
+  z.object({ ...legacyIdentity, chain: z.literal('evm'), tx: evmTx }).strict()
+]);
+export type LegacyBrowserTxRequest = z.infer<typeof legacyRequestSchema>;
+
+export function parseLegacyBrowserTxRequest(input: unknown): LegacyBrowserTxRequest {
+  const request = legacyRequestSchema.parse(input);
+  if (request.chain === 'evm' && request.signOnly) throw new Error('Sign-only is unsupported for EVM transactions');
+  return request;
+}
 
 /** Validate the transport contract; supported message semantics are checked by the signing adapter. */
 export function parseBrowserTxRequest(input: unknown, now = Date.now()): BrowserTxRequestV2 {

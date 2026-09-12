@@ -15,6 +15,8 @@ Transaction mode uses the version 2 contract exported from `core/browser-signing
 
 Browser fees and gas are selected in the frontend/wallet review. CLI `--fee`, `--fee-denom` and `--gas` are not applied to the browser path. The handoff prints this distinction. Payment amount and fees must be reviewed separately.
 
+`parseLegacyBrowserTxRequest` separately validates transaction envelopes from older CLI versions. It never infers an omitted signer or deployment and rejects versioned payloads. A compatible frontend must pin those missing values from its displayed deployment and connected wallet once when opening the review, then apply the same message and wallet checks. Such a legacy request cannot attest which network the originating CLI selected when that information was omitted. Login and personal-message payloads do not use this transaction parser.
+
 ## Results and retry
 
 Callbacks must echo the request identity and successful outcomes must match the signer, deployment and chain. The CLI distinguishes `signed`, `submitted`, `cancelled` and `error`. A browser hash is reported as `outcome: submitted`, `confirmed: false`, `verification: unverified`; it is not independent proof of execution. A successful signing callback likewise does not independently verify the signature or compare decoded transaction bytes against the request. Confirm execution through the selected chain's transaction lookup before treating a payment as complete.
