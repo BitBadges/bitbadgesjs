@@ -19,10 +19,16 @@ import http from 'http';
 import { AddressInfo } from 'net';
 import crypto from 'crypto';
 import { bbError, BBErrorCode } from '../utils/envelope.js';
+import { parseBrowserTxRequest, parseBrowserTxResult } from '../../core/browser-signing.js';
 
 export type BridgeMode = 'login' | 'msg' | 'tx';
 
 export interface BridgePayload {
+  version?: 2;
+  requestId?: string;
+  network?: 'mainnet' | 'testnet' | 'local';
+  evmChainId?: string;
+  expiresAt?: number;
   /** Required for login/msg; cosmos uses txsInfo, evm uses tx. */
   message?: string;
   chain?: 'cosmos' | 'evm';
@@ -42,6 +48,10 @@ export interface BridgePayload {
 }
 
 export interface BridgeResult {
+  requestId?: string;
+  network?: 'mainnet' | 'testnet' | 'local';
+  chainId?: string;
+  outcome?: 'signed' | 'submitted' | 'cancelled' | 'error';
   signature?: string;
   address?: string;
   publicKey?: string;
@@ -183,14 +193,16 @@ export interface BridgeStartOptions extends BridgeOptions {
 export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult> {
   const state = randomState();
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0 || timeoutMs > 1800000) throw new Error('Invalid signing timeout');
+  const txRequest = opts.mode === 'tx' ? parseBrowserTxRequest(opts.payload) : undefined;
 
   // Encode payload — inline base64 for small, short-code upload for large.
-  const inlineEncoded = base64UrlEncodeJson(opts.payload);
+  const inlineEncoded = base64UrlEncodeJson(txRequest ?? opts.payload);
   const useUpload = inlineEncoded.length > INLINE_PAYLOAD_THRESHOLD;
   let payloadParam: string;
   let payloadKind: 'inline' | 'code';
   if (useUpload) {
-    const code = await uploadPayload(opts.baseUrl, opts.apiKey, opts.payload);
+    const code = await uploadPayload(opts.baseUrl, opts.apiKey, txRequest ?? opts.payload);
     payloadParam = `payload=${encodeURIComponent(code)}`;
     payloadKind = 'code';
   } else {
@@ -204,6 +216,7 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
     let timer: NodeJS.Timeout | undefined;
 
     const server = http.createServer((req, res) => {
+      res.setHeader('Connection', 'close');
       const reqUrl = new URL(req.url ?? '/', `http://127.0.0.1`);
 
       // Single-shot: any subsequent request after we've resolved gets 410.
@@ -228,6 +241,28 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
         res.statusCode = 403;
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.end(errorPage('State nonce did not match. The request may have come from a different CLI session.'));
+        return;
+      }
+
+      if (txRequest) {
+        try {
+          const fields: Record<string, string> = {};
+          for (const [key, value] of params) {
+            if (key === 'state') continue;
+            if (key in fields) throw new Error('Duplicate result field');
+            fields[key] = value;
+          }
+          const result = parseBrowserTxResult(fields, txRequest);
+          resolved = true;
+          res.setHeader('Content-Type', 'text/html; charset=utf-8');
+          const error = result.outcome === 'cancelled' ? result.error || 'User cancelled signing' : result.outcome === 'error' ? result.error : undefined;
+          res.end(error ? errorPage(error) : successPage());
+          cleanup();
+          resolve({ ...result, ...(error ? { error } : {}) });
+        } catch {
+          res.statusCode = 400;
+          res.end(errorPage('Invalid result: request, signer, network and outcome must match.'));
+        }
         return;
       }
 
@@ -290,8 +325,10 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
         if (resolved) return;
         resolved = true;
         cleanup();
-        reject(new Error(`Sign request timed out after ${Math.round(timeoutMs / 1000)}s. Re-run the command.`));
-      }, timeoutMs);
+        reject(new Error(txRequest
+          ? 'Signing timed out. Submission status is unknown; a transaction may already have been submitted. Check wallet activity and chain status before retrying.'
+          : `Sign request timed out after ${Math.round(timeoutMs / 1000)}s. Re-run the command.`));
+      }, txRequest ? Math.min(timeoutMs, Math.max(1, txRequest.expiresAt - Date.now())) : timeoutMs);
 
       if (!opts.noOpen) {
         await tryOpen(fullUrl);

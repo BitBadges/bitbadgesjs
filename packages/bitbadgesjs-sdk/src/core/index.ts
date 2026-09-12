@@ -77,3 +77,4 @@ export type { DesignDecision, DesignDecisionsResult, DesignDecisionStatus } from
 export * from './builders/index.js';
 
 export * from './eth-signature-message.js';
+export * from './browser-signing.js';

@@ -354,7 +354,8 @@ async function emit(
   // cli/utils/deploy-options.ts and are identical across every command.
   if (isDeployRequested(opts as any)) {
     await executeDeploy(outData, opts as any, {
-      expectedAddress: opts.expectedAddress ?? opts.manager ?? opts.creator
+      expectedAddress: opts.expectedAddress ?? opts.manager ?? opts.creator ??
+        (outData.typeUrl === '/cosmos.bank.v1beta1.MsgSend' ? outData.value?.fromAddress : undefined)
     });
   }
 }
@@ -1159,7 +1160,7 @@ sharedOpts(
     // envelope-safe: not a collection / approval / transfer tx, so
     // emit() skips all the collection-specific backfill and falls
     // straight to output + the deploy gate.
-    emit(msg, opts);
+    await emit(msg, opts);
   } catch (err: any) {
     process.stderr.write(`Error: ${err?.message || err}\n`);
     process.exit(1);

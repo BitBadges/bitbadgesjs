@@ -14,6 +14,8 @@
  * everywhere.
  */
 import type { Command } from 'commander';
+import crypto from 'crypto';
+import { parseBrowserTxRequest, parseBrowserTxResult } from '../../core/browser-signing.js';
 import { getApiUrl, getApiKeyForNetwork, resolveNetwork } from './io.js';
 import { tagHelpGroups } from './help-groups.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
@@ -63,9 +65,9 @@ export function addDeployOptions(cmd: Command): Command {
   addOptionIfMissing(cmd, '--timeout <seconds>', 'With --browser: how long to wait for the wallet to confirm (default 300, max 1800).');
   addOptionIfMissing(cmd, '--expected-address <addr>', 'With --browser: bb1.../0x... the connected wallet must match. Defaults to --manager / --creator.');
   addOptionIfMissing(cmd, '--fund <mode>', 'With --burner: funding source for the burner (faucet | manual)', 'faucet');
-  addOptionIfMissing(cmd, '--fee <amount>', 'When deploying: fee in ubadge (0 = automatic)', '0');
-  addOptionIfMissing(cmd, '--fee-denom <symbol|denom>', 'When deploying: fee denom: BADGE or ubadge', DEFAULT_FEE_DENOM);
-  addOptionIfMissing(cmd, '--gas <number>', 'When deploying: gas limit', '400000');
+  addOptionIfMissing(cmd, '--fee <amount>', 'With --burner: fee in ubadge (0 = automatic). Browser fees are set in wallet review.', '0');
+  addOptionIfMissing(cmd, '--fee-denom <symbol|denom>', 'With --burner: fee denom: BADGE or ubadge.', DEFAULT_FEE_DENOM);
+  addOptionIfMissing(cmd, '--gas <number>', 'With --burner: gas limit. Browser gas is set in wallet review.', '400000');
   addOptionIfMissing(cmd, '--new', 'With --burner: skip the picker and always create a fresh wallet');
   addOptionIfMissing(cmd, '--reuse <selector>', 'With --burner: reuse a specific saved burner by address or recovery file path');
   addOptionIfMissing(cmd, '--non-interactive', 'With --burner: never prompt; on any prompt point save state and exit for later resume');
@@ -124,30 +126,42 @@ export async function browserBroadcast(
   const { bridgeSign, resolveFrontendUrl } = await import('../auth/browser-bridge.js');
   const frontendUrl = resolveFrontendUrl(networkName, opts.frontendUrl);
   const expectedAddress = opts.expectedAddress ?? ctx.expectedAddress ?? opts.manager ?? opts.creator;
-  const requestedTimeoutSec = opts.timeout ? Math.min(1800, Math.max(60, Number(opts.timeout))) : 300;
-  process.stderr.write(`\nOpening browser to ${frontendUrl}/sign for wallet signature + broadcast...\n`);
-  const result = await bridgeSign({
+  if (!expectedAddress) throw new Error('Browser signing requires --expected-address, --creator or --manager to identify the signer.');
+  const rawTimeout = opts.timeout === undefined ? 300 : Number(opts.timeout);
+  if (!Number.isFinite(rawTimeout) || rawTimeout <= 0) throw new Error('Invalid browser signing timeout');
+  const requestedTimeoutSec = Math.min(1800, Math.max(60, rawTimeout));
+  const config = NETWORK_CONFIGS[networkName];
+  const request = parseBrowserTxRequest({
+    version: 2, requestId: crypto.randomBytes(16).toString('hex'),
+    network: networkName, chain: 'cosmos', chainId: config.cosmosChainId,
+    evmChainId: String(config.evmChainId), expiresAt: Date.now() + requestedTimeoutSec * 1000,
+    txsInfo: messages.map((m) => ({ type: m.typeUrl, msg: m.value })),
+    expectedAddress, signOnly: !!opts.signOnly
+  });
+  process.stderr.write(`\nOpening browser to ${frontendUrl}/sign for ${opts.signOnly ? 'signing without broadcast (supported Cosmos wallets only)' : 'wallet signature and submission'}...\n`);
+  process.stderr.write('Browser fees and gas are chosen in wallet review; CLI --fee, --fee-denom and --gas are not applied.\n');
+  const result = parseBrowserTxResult(await bridgeSign({
     mode: 'tx',
-    payload: {
-      chain: 'cosmos',
-      txsInfo: messages.map((m) => ({ type: m.typeUrl, msg: m.value })),
-      expectedAddress,
-      signOnly: !!opts.signOnly,
-    },
+    payload: request,
     baseUrl: apiUrl,
     frontendUrl,
     apiKey,
     timeoutMs: requestedTimeoutSec * 1000,
     noOpen: opts.open === false,
     port: opts.port ? Number(opts.port) : undefined,
-  });
-  if (result.error) {
-    process.stderr.write(`Browser broadcast cancelled or rejected: ${result.error}\n`);
-    return { payload: { success: false, path: 'browser', error: result.error }, result };
+  }), request);
+  if (result.outcome === 'cancelled' || result.outcome === 'error') {
+    const error = result.error || 'User cancelled signing';
+    process.stderr.write(`Browser signing ended: ${error}\n`);
+    return { payload: { success: false, path: 'browser', outcome: result.outcome, error }, result };
   }
-  const payload: any = opts.signOnly
-    ? { success: !!result.signedTx, path: 'browser', mode: 'sign-only', signedTx: result.signedTx ?? null, chain: result.chain ?? 'cosmos' }
-    : { success: !!result.hash, path: 'browser', mode: 'sign-and-broadcast', txHash: result.hash ?? null, chain: result.chain ?? 'cosmos' };
+  const payload: any = {
+    success: true, path: 'browser', outcome: result.outcome, confirmed: false, verification: 'unverified',
+    requestId: request.requestId, address: result.address, network: request.network, chainId: request.chainId, chain: result.chain,
+    ...(result.outcome === 'signed'
+      ? { mode: 'sign-only', signedTx: result.signedTx }
+      : { mode: 'sign-and-broadcast', txHash: result.hash })
+  };
   return { payload, result };
 }
 
