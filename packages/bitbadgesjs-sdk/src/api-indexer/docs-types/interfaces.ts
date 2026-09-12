@@ -640,6 +640,12 @@ export interface iProfileDoc<T extends NumberType> extends Doc {
  * @category Interfaces
  */
 export interface iQueueDoc<T extends NumberType> extends Doc {
+  /** Identity of the current requested queue work. */
+  queueGeneration?: string;
+  /** Identity of the worker claim for this generation. */
+  queueClaimId?: string;
+  /** Expiration of the worker lease in milliseconds since epoch. */
+  queueLeaseUntil?: UNIXMilliTimestamp<T>;
   /** The URI of the metadata to be fetched. If {id} is present, it will be replaced with each individual ID in tokenIds */
   uri: string;
   /** The collection ID of the metadata to be fetched */

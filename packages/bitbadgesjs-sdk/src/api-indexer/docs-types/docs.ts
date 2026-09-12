@@ -603,6 +603,9 @@ export class ProfileDoc<T extends NumberType> extends BaseNumberTypeClass<Profil
  * @category Indexer
  */
 export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc<T>> implements iQueueDoc<T> {
+  queueGeneration?: string;
+  queueClaimId?: string;
+  queueLeaseUntil?: UNIXMilliTimestamp<T>;
   _docId: string;
   _id?: string;
   uri: string;
@@ -635,6 +638,9 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
 
   constructor(data: iQueueDoc<T>) {
     super();
+    this.queueGeneration = data.queueGeneration;
+    this.queueClaimId = data.queueClaimId;
+    this.queueLeaseUntil = data.queueLeaseUntil;
     this._docId = data._docId;
     this._id = data._id;
     this.uri = data.uri;
@@ -658,7 +664,7 @@ export class QueueDoc<T extends NumberType> extends BaseNumberTypeClass<QueueDoc
   }
 
   getNumberFieldNames(): string[] {
-    return ['loadBalanceId', 'refreshRequestTime', 'numRetries', 'lastFetchedAt', 'deletedAt', 'nextFetchTime'];
+    return ['loadBalanceId', 'refreshRequestTime', 'numRetries', 'lastFetchedAt', 'deletedAt', 'nextFetchTime', 'queueLeaseUntil'];
   }
 
   convert<U extends NumberType>(convertFunction: (item: NumberType) => U, options?: ConvertOptions): QueueDoc<U> {
