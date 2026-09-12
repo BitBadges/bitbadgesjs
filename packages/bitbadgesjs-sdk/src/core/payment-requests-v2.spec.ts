@@ -9,6 +9,8 @@ import { MsgUniversalUpdateCollection } from '../transactions/messages/bitbadges
 import chainFixture from './payment-requests-v2.chain-fixture.json';
 import { handleBuildPaymentRequestV2 } from '../builder/tools/builders/buildPaymentRequestV2.js';
 import { verifyStandardsCompliance as verifyStandards } from '../api-indexer/verify-standards.js';
+import { BitBadgesCollection } from '../api-indexer/BitBadgesCollection.js';
+import { AddressList } from './addressLists.js';
 
 const alice = convertToBitBadgesAddress('0x1111111111111111111111111111111111111111');
 const bob = convertToBitBadgesAddress('0x2222222222222222222222222222222222222222');
@@ -31,6 +33,20 @@ const params = (): any => ({
 });
 
 describe('payment obligations v2', () => {
+  it('does not mistake indexed collection update history for transaction flags', () => {
+    expect(validatePaymentRequestV2Collection({ ...chainFixture, updateHistory: [] } as any).valid).toBe(true);
+  });
+  it('accepts the real SDK indexed collection class with enrichment and update history', () => {
+    function enrich(value: any): any {
+      if (Array.isArray(value)) return value.map(enrich);
+      if (!value || typeof value !== 'object') return value;
+      const result = Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, enrich(entry)]));
+      for (const list of ['fromList', 'toList', 'initiatedByList']) if (typeof value[`${list}Id`] === 'string') result[list] = AddressList.getReservedAddressList(value[`${list}Id`]);
+      return result;
+    }
+    const collection = new BitBadgesCollection({ ...enrich(chainFixture), _docId: '1', createdBlock: '1', createdTimestamp: '1', updateHistory: [], activity: [], owners: [], challengeTrackers: [], approvalTrackers: [], listings: [], claims: [], views: {} }).convert(BigInt);
+    expect(validatePaymentRequestV2Collection(collection).errors).toEqual([]);
+  });
   it.each(['updateCollectionApprovals', 'updateCollectionPermissions', 'updateCustomData', 'updateStandards', 'updateValidTokenIds'])('rejects creation message with ineffective %s', (flag) => {
     const c = buildPaymentRequestV2(params()).value;
     c[flag] = false;

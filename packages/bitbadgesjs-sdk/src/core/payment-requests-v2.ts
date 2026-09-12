@@ -194,7 +194,7 @@ export function validatePaymentRequestV2Collection(collection: PaymentRequestV2C
   const errors: string[] = [];
   try {
     const updateFlags = ['updateCollectionApprovals', 'updateCollectionPermissions', 'updateCustomData', 'updateStandards', 'updateValidTokenIds'];
-    if (Object.keys(collection).some((key) => key.startsWith('update'))) {
+    if (updateFlags.some((flag) => Object.prototype.hasOwnProperty.call(collection, flag))) {
       if (String(collection.collectionId) !== '0') errors.push('Frozen payment terms cannot be updated; create a new collection');
       for (const flag of updateFlags) if ((collection as any)[flag] !== true) errors.push(`Payment creation requires ${flag}`);
     }
