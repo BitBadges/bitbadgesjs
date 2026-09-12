@@ -204,7 +204,9 @@ async function runSwapExecute(estimateInput: any, opts: any): Promise<void> {
 
   // --browser → reuse the canonical /sign handoff. Multi-msg capable; its
   // messageTypes registry already maps gamm/SwapExactAmountIn.
-  const { payload } = await browserBroadcast([cls.built], opts as DeployOpts);
+  const { payload } = await browserBroadcast([cls.built], opts as DeployOpts, {
+    expectedAddress: cls.built.value?.sender
+  });
   if (payload?.error) {
     emit(payload, opts);
     throw new SwapExecuteError('BROADCAST_FAILED', `Browser broadcast cancelled or rejected: ${payload.error}`);

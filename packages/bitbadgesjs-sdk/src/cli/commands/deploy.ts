@@ -572,7 +572,6 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       const { payload, result } = await browserBroadcast(messages, opts, {
         expectedAddress: opts.expectedAddress ?? opts.manager
       });
-      if (payload.error) process.exit(1); // browserBroadcast wrote the cancel notice
 
       // Optional: hold the CLI open until the indexer surfaces whatever
       // the tx created. Browser flow doesn't return tx events inline, so

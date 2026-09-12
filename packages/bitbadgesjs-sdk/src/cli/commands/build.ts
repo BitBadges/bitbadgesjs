@@ -15,6 +15,7 @@ import { addDeployOptions, isDeployRequested, executeDeploy } from '../utils/dep
 import { buildNextStepHint } from '../utils/next-step.js';
 import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
+import { PAYMENT_REQUEST_EXAMPLES, paymentRequestExample, withPaymentMetadata } from '../utils/payment-request-examples.js';
 
 export const buildCommand = new Command('build').description(
   'Deterministic transaction builders — flag-based generators for vaults, NFTs, subscriptions, bounties, and more. Output: ready-to-sign JSON. To broadcast, pipe into `bb deploy --burner`.'
@@ -353,7 +354,8 @@ async function emit(
   // cli/utils/deploy-options.ts and are identical across every command.
   if (isDeployRequested(opts as any)) {
     await executeDeploy(outData, opts as any, {
-      expectedAddress: opts.expectedAddress ?? opts.manager ?? opts.creator
+      expectedAddress: opts.expectedAddress ?? opts.manager ?? opts.creator ??
+        (outData.typeUrl === '/cosmos.bank.v1beta1.MsgSend' ? outData.value?.fromAddress : undefined)
     });
   }
 }
@@ -558,11 +560,60 @@ sharedOpts(
   );
 });
 
-sharedOpts(buildCommand.command('payment-request-v2').description('Build invoice obligations or reusable payment links from --json. All amounts are base-unit integer strings.'))
-  .action(async (opts) => {
-    if (!opts.json) throw new Error('payment-request-v2 requires --json <file|->');
+sharedOpts(
+  buildCommand
+    .command('payment-request-v2')
+    .description('Build invoice obligations or reusable payment links. JSON amounts are exact base-unit integer strings.')
+)
+  .option('--schema', 'Print the structural input schema and runtime validation limits without building')
+  .option('--list-examples', 'List the nine supported payment example modes without building')
+  .option('--example <mode>', 'Print complete editable example parameters; extract envelope.data and pass them to --json')
+  .addHelpText(
+    'after',
+    `
+Examples (discovery never signs, simulates or deploys):
+  bb build payment-request-v2 --list-examples
+  bb build payment-request-v2 --schema
+  bb build payment-request-v2 --example all | jq '.data' > payment.json
+  bb build payment-request-v2 --json payment.json --json-only
+  bb pay-requests build-v2 --json payment.json --name "Team invoice"
+
+Metadata: --uri replaces JSON metadata with URI mode. Inline flags override matching
+JSON fields and switch to inline mode (name, image and description must be complete).
+Do not combine --uri with inline metadata flags. Without metadata flags, JSON wins.
+Pay existing collections with pay-requests pay --obligation <id> --units <integer>.
+Units count payout quanta, not display coins. Subscriptions retain their own standard.
+`
+  )
+  .action(async (opts, command: Command) => {
+    const discovery = [opts.schema, opts.listExamples, opts.example !== undefined].filter(Boolean).length;
+    if (discovery) {
+      if (discovery !== 1) throw new Error('Choose one of --schema, --list-examples or --example');
+      const allowed = new Set(['schema', 'listExamples', 'example', 'condensed', 'outputFile', 'jsonOnly']);
+      for (const key of Object.keys(opts)) {
+        if (command.getOptionValueSource(key) === 'cli' && !allowed.has(key))
+          throw new Error(`Discovery cannot be combined with --${key.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase())}`);
+      }
+      if (opts.schema) {
+        const { buildPaymentRequestV2Tool } = await import('../../builder/tools/builders/buildPaymentRequestV2.js');
+        emitEnvelope(
+          {
+            schema: buildPaymentRequestV2Tool.inputSchema,
+            limitations:
+              'Structural schema only. Runtime paymentRequestV2TermsSchema additionally enforces cross-field constraints, canonical addresses, exact integer bounds, payout totals and incompatible modes.',
+            units:
+              'Payout amounts are positive base-unit integer strings. Times are inclusive Unix milliseconds. Partial units multiply every payout leg.',
+            limits: { obligations: 100, payersPerObligation: 100, payoutsPerObligation: 50 }
+          },
+          opts
+        );
+      } else if (opts.listExamples) emitEnvelope({ examples: PAYMENT_REQUEST_EXAMPLES }, opts);
+      else emitEnvelope(paymentRequestExample(opts.example), opts);
+      return;
+    }
+    if (!opts.json) throw new Error('payment-request-v2 requires --json <file|->; use --list-examples or --schema to get started');
     const { buildPaymentRequestV2 } = await import('../../core/payment-requests-v2.js');
-    await emit(buildPaymentRequestV2(readJsonInput(opts.json)), opts);
+    await emit(buildPaymentRequestV2(withPaymentMetadata(readJsonInput(opts.json), opts)), opts);
   });
 
 sharedOpts(
@@ -1109,7 +1160,7 @@ sharedOpts(
     // envelope-safe: not a collection / approval / transfer tx, so
     // emit() skips all the collection-specific backfill and falls
     // straight to output + the deploy gate.
-    emit(msg, opts);
+    await emit(msg, opts);
   } catch (err: any) {
     process.stderr.write(`Error: ${err?.message || err}\n`);
     process.exit(1);
