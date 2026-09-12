@@ -2947,6 +2947,15 @@ For bounties that require the verifier or submitter to hold a token from THIS co
 
 Use the build_payment_request_v2 tool or SDK buildPaymentRequestV2 with version: 2, kind: invoice or payment-link, and obligations. Metadata requires uri or name/image/description. All amounts are positive base-unit integer strings, never display-unit floating point numbers. Times are inclusive Unix milliseconds.
 
+CLI discovery is offline and never signs, simulates or deploys:
+- \`bb build payment-request-v2 --list-examples\` lists specific, anyone, one, all, threshold, installments, partial, target and link.
+- \`bb build payment-request-v2 --schema\` exposes the structural tool schema, limits and its cross-field validation limitations. The SDK runtime terms schema remains authoritative.
+- \`bb build payment-request-v2 --example all | jq '.data' > payment.json\` creates complete editable parameters. Replace demo addresses, amounts, metadata and dates before use. The first finite window ends 30 days after generation; installments add a second future window, and links have no cutoff.
+- \`bb build payment-request-v2 --json payment.json --json-only\` builds the edited terms. JSON also accepts inline input or \`-\` for stdin. \`bb pay-requests build-v2\` is an alias; \`bb pay-requests build\` remains the legacy builder.
+- Metadata flags explicitly override JSON metadata: \`--uri\` selects hosted mode; any of \`--name/--image/--description\` switches to inline mode and retains other inline JSON values, with all three required. Do not combine URI and inline flags. No metadata flags means JSON metadata is preserved.
+- Discovery flags cannot be mixed with JSON build inputs, simulation or signing/deployment flags. Output stays in the normal envelope; extract \`data\` to reuse an example as builder input.
+- Pay an existing collection with \`bb pay-requests pay <collection-id> --creator <address> --obligation <id> --units <integer>\`. Units are payout quanta, not coin display amounts. Obligation may be omitted only for single-obligation collections. Current chain state and simulation still determine whether a payment can execute.
+
 Each obligation has id, payer, payouts, startTime and endTime. payer is {kind: anyone} or {kind: addresses, addresses: [...]}. Anyone excludes all payout recipients on chain to prevent self-payment. Named rosters are immutable inline lists with unique canonical bb1 addresses.
 
 - Specific or one-of-list: one obligation, one eligible address or a roster, default requiredPayments 1.
@@ -2961,7 +2970,7 @@ The builder freezes terms, roster, approvals, collection invariants and conversi
 
 These direct payments are final transfers with no escrow and no cancellation or refund branch. Unsupported fields are rejected. Refusable legacy PaymentRequest deny is only a recorded refusal: its independent counter does not disable pay. Escrow/refundable pooled funding, conditional release, alternative-currency settlement and cancellable requests need a separately verified state machine; do not simulate them with metadata flags or unrelated trackers. Subscriptions already provide recurring user consent, period counters and incoming approvals: reuse that standard rather than treating a reusable payment link as automatic billing.
 
-Before publication, review and validate the generated collection and simulate actual payments. Building never signs or publishes.`
+Before publication, review and validate the generated collection and simulate actual payments. The SDK/tool builder emits an unsigned message. CLI build emits unsigned output unless explicit signing/deployment flags are supplied; CLI discovery never invokes those paths.`
   },
   {
     id: 'payment-request',

@@ -342,6 +342,8 @@ for (const [standardName, buildSubtype] of Object.entries(STANDARD_BUILD_ALIASES
   parent.addCommand(makeBuildAlias(buildSubtype, buildCommand));
 }
 
+payRequestsCommand.addCommand(makeBuildAlias('payment-request-v2', buildCommand).name('build-v2'));
+
 // ── Register every command at the top level ─────────────────────────────────
 
 for (const group of HELP_GROUPS) {
