@@ -3,6 +3,7 @@ import * as fs from 'node:fs';
 import { Command, Help } from 'commander';
 import { HELP_GROUP_ORDER } from './utils/help-groups.js';
 import { emitDeprecation } from './utils/deprecation.js';
+import { getCliPackageVersion } from './utils/package-version.js';
 
 // Apply a custom Help subclass globally so every command + sub-subcommand
 // inherits the "Required: / Options:" split, not just the root. Commander
@@ -213,7 +214,7 @@ const program = new Command();
 program
   .name('bitbadges-cli')
   .description('BitBadges CLI — flat verb-first surface for building, inspecting, and shipping token transactions')
-  .version('0.1.0');
+  .version(getCliPackageVersion(process.argv[1]));
 
 // ── Policies disclaimer ──────────────────────────────────────────────────────
 //

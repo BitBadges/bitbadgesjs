@@ -13,6 +13,30 @@
  */
 
 import { extractCollectionValue, normalizeForReview } from './review-normalize.js';
+import { buildPaymentRequestV2, validatePaymentRequestV2Collection } from './payment-requests-v2.js';
+import { paymentRequestExample } from '../cli/utils/payment-request-examples.js';
+import { normalizeToCreateOrUpdate } from '../cli/utils/normalizeMsg.js';
+
+describe('payment creation context', () => {
+  it.each(['msg', 'tx', 'array', 'whitespace'])('retains immutable creation semantics through %s review normalization', (shape) => {
+    const msg = normalizeToCreateOrUpdate(buildPaymentRequestV2(paymentRequestExample('all')));
+    if (shape === 'whitespace') msg.typeUrl = ` ${msg.typeUrl} `;
+    const before = JSON.stringify(msg);
+    const input = shape === 'tx' ? { messages: [msg] } : shape === 'array' ? [msg] : msg;
+    const normalized = normalizeForReview(input);
+    expect(validatePaymentRequestV2Collection(normalized).valid).toBe(true);
+    expect(validatePaymentRequestV2Collection(normalizeForReview(normalized)).valid).toBe(true);
+    expect(JSON.stringify(msg)).toBe(before);
+  });
+
+  it.each(['19', undefined, 'invalid'])('does not invent creation context for updates with ID %s', (collectionId) => {
+    const msg = buildPaymentRequestV2(paymentRequestExample('all'));
+    const input = { typeUrl: '/tokenization.MsgUpdateCollection', value: { ...msg.value, collectionId } };
+    expect(validatePaymentRequestV2Collection(normalizeForReview(input)).errors).toContain(
+      'Frozen payment terms cannot be updated; create a new collection'
+    );
+  });
+});
 
 // ---------------------------------------------------------------------------
 // extractCollectionValue
