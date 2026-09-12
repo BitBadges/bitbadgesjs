@@ -1,4 +1,4 @@
-import { browserBroadcast } from './deploy-options.js';
+import { browserBroadcast, executeDeploy } from './deploy-options.js';
 import { bridgeSign } from '../auth/browser-bridge.js';
 
 jest.mock('../auth/browser-bridge.js', () => ({
@@ -40,5 +40,15 @@ describe('browser broadcast contract', () => {
   test('states that browser fee review determines fees rather than silently applying flags', async () => {
     await browserBroadcast(messages, { expectedAddress: signer, fee: '123', gas: '123' });
     expect(process.stderr.write).toHaveBeenCalledWith(expect.stringMatching(/fees.*gas.*review/i));
+  });
+  test('emits unknown as explicitly unsafe to retry, including inline failure stdout', async () => {
+    (bridgeSign as jest.Mock).mockImplementation(async ({ payload }) => ({ requestId: payload.requestId, outcome: 'unknown', error: 'Check wallet activity' }));
+    const { payload } = await browserBroadcast(messages, { expectedAddress: signer });
+    expect(payload).toMatchObject({ success: false, outcome: 'unknown', confirmed: false, verification: 'unverified', retrySafe: false });
+    const stdout = jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
+    const exit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    await executeDeploy(messages[0], { browser: true, expectedAddress: signer });
+    expect(stdout).toHaveBeenCalledWith(expect.stringContaining('"retrySafe": false'));
+    expect(exit).toHaveBeenCalledWith(1);
   });
 });

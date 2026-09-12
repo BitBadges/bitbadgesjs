@@ -150,10 +150,13 @@ export async function browserBroadcast(
     noOpen: opts.open === false,
     port: opts.port ? Number(opts.port) : undefined,
   }), request);
-  if (result.outcome === 'cancelled' || result.outcome === 'error') {
+  if (result.outcome === 'cancelled' || result.outcome === 'error' || result.outcome === 'unknown') {
     const error = result.error || 'User cancelled signing';
     process.stderr.write(`Browser signing ended: ${error}\n`);
-    return { payload: { success: false, path: 'browser', outcome: result.outcome, error }, result };
+    return { payload: {
+      success: false, path: 'browser', outcome: result.outcome, error,
+      ...(result.outcome === 'unknown' ? { requestId: result.requestId, confirmed: false, verification: 'unverified', retrySafe: false } : {})
+    }, result };
   }
   const payload: any = {
     success: true, path: 'browser', outcome: result.outcome, confirmed: false, verification: 'unverified',
@@ -235,7 +238,6 @@ export async function executeDeploy(
   if (opts.browser) {
     try {
       const { payload } = await browserBroadcast([builtMsg], opts, ctx);
-      if (payload.error) process.exit(1); // browserBroadcast already wrote the stderr notice
       process.stdout.write('\n' + JSON.stringify(payload, null, 2) + '\n');
       process.exit(payload.success ? 0 : 1);
     } catch (err: any) {

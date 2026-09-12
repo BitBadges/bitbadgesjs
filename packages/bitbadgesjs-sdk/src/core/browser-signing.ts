@@ -62,6 +62,7 @@ const resultSchema = z.discriminatedUnion('outcome', [
   z.object({ ...resultIdentity, outcome: z.literal('submitted'), hash: z.string().regex(/^(0x)?[0-9a-fA-F]{64}$/) }).strict(),
   z.object({ ...resultIdentity, outcome: z.literal('signed'), signedTx: z.string().min(4).max(BROWSER_SIGNED_TX_MAX_BASE64_LENGTH, 'Signed bytes exceed the browser callback size limit; use another signing flow.').regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/) }).strict(),
   z.object({ requestId: requestIdentity.requestId, outcome: z.literal('cancelled'), error: z.string().max(500).optional() }).strict(),
+  z.object({ requestId: requestIdentity.requestId, outcome: z.literal('unknown'), error: z.string().min(1).max(500) }).strict(),
   z.object({ requestId: requestIdentity.requestId, outcome: z.literal('error'), error: z.string().min(1).max(500) }).strict()
 ]);
 export type BrowserTxResultV2 = z.infer<typeof resultSchema>;
@@ -70,7 +71,7 @@ export type BrowserTxResultV2 = z.infer<typeof resultSchema>;
 export function parseBrowserTxResult(input: unknown, request: BrowserTxRequestV2): BrowserTxResultV2 {
   const result = resultSchema.parse(input);
   if (result.requestId !== request.requestId) throw new Error('Browser result belongs to a different request');
-  if (result.outcome === 'cancelled' || result.outcome === 'error') return result;
+  if (result.outcome === 'cancelled' || result.outcome === 'error' || result.outcome === 'unknown') return result;
   if (result.address !== request.expectedAddress || result.network !== request.network || result.chainId !== request.chainId || result.chain !== request.chain) throw new Error('Browser result does not match the requested signer or network');
   if ((result.outcome === 'signed') !== request.signOnly) throw new Error('Browser result does not match the requested signing mode');
   return result;

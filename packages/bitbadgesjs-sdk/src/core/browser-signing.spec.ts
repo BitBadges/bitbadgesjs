@@ -63,6 +63,13 @@ describe('browser transaction outcomes', () => {
       expect(parseBrowserTxResult({ requestId: request().requestId, outcome, error: 'Wallet closed' }, parseBrowserTxRequest(request(), now)).outcome).toBe(outcome);
     }
   });
+  test('unknown is request-bound and cannot carry a success claim', () => {
+    const parsed = parseBrowserTxRequest(request(), now);
+    const result = { requestId: parsed.requestId, outcome: 'unknown', error: 'Check wallet activity before retrying' };
+    expect(parseBrowserTxResult(result, parsed)).toEqual(result);
+    expect(() => parseBrowserTxResult({ ...result, requestId: 'b'.repeat(32) }, parsed)).toThrow();
+    expect(() => parseBrowserTxResult({ ...result, hash: 'A'.repeat(64) }, parsed)).toThrow();
+  });
   test('sign-only rejects a submitted result, and broadcast rejects signed bytes', () => {
     const signOnly = parseBrowserTxRequest({ ...request(), signOnly: true }, now);
     expect(() => parseBrowserTxResult(successful(), signOnly)).toThrow();

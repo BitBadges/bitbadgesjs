@@ -51,7 +51,7 @@ export interface BridgeResult {
   requestId?: string;
   network?: 'mainnet' | 'testnet' | 'local';
   chainId?: string;
-  outcome?: 'signed' | 'submitted' | 'cancelled' | 'error';
+  outcome?: 'signed' | 'submitted' | 'cancelled' | 'error' | 'unknown';
   signature?: string;
   address?: string;
   publicKey?: string;
@@ -171,9 +171,9 @@ function successPage(): string {
   return pageHtml('BitBadges CLI', 'ok', 'Signed', '<p>The result was returned to the terminal that opened this tab.</p>');
 }
 
-function errorPage(msg: string): string {
+function errorPage(msg: string, statusText = 'Sign request rejected'): string {
   const safe = msg.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' } as Record<string, string>)[c]);
-  return pageHtml('BitBadges CLI — error', 'err', 'Sign request rejected', `<p>${safe}</p>`);
+  return pageHtml('BitBadges CLI — error', 'err', statusText, `<p>${safe}</p>`);
 }
 
 function gonePage(): string {
@@ -271,8 +271,8 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
           const result = parseBrowserTxResult(fields, txRequest);
           resolved = true;
           res.setHeader('Content-Type', 'text/html; charset=utf-8');
-          const error = result.outcome === 'cancelled' ? result.error || 'User cancelled signing' : result.outcome === 'error' ? result.error : undefined;
-          res.end(error ? errorPage(error) : successPage());
+          const error = result.outcome === 'cancelled' ? result.error || 'User cancelled signing' : result.outcome === 'error' || result.outcome === 'unknown' ? result.error : undefined;
+          res.end(error ? errorPage(error, result.outcome === 'unknown' ? 'Submission status unknown' : undefined) : successPage());
           cleanup();
           resolve({ ...result, ...(error ? { error } : {}) });
         } catch {
@@ -341,9 +341,11 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
         if (resolved) return;
         resolved = true;
         cleanup();
-        reject(new Error(txRequest
-          ? 'Signing timed out. Submission status is unknown; a transaction may already have been submitted. Check wallet activity and chain status before retrying.'
-          : `Sign request timed out after ${Math.round(timeoutMs / 1000)}s. Re-run the command.`));
+        if (txRequest) resolve({
+          requestId: txRequest.requestId, outcome: 'unknown',
+          error: 'Signing timed out. Submission status is unknown; a transaction may already have been submitted. Check wallet activity and chain status before retrying.'
+        });
+        else reject(new Error(`Sign request timed out after ${Math.round(timeoutMs / 1000)}s. Re-run the command.`));
       }, Math.max(1, deadline - Date.now()));
 
       if (!opts.noOpen) {

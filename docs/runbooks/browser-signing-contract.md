@@ -19,7 +19,7 @@ Browser fees and gas are selected in the frontend/wallet review. CLI `--fee`, `-
 
 Callbacks must echo the request identity and successful outcomes must match the signer, deployment and chain. The CLI distinguishes `signed`, `submitted`, `cancelled` and `error`. A browser hash is reported as `outcome: submitted`, `confirmed: false`, `verification: unverified`; it is not independent proof of execution. A successful signing callback likewise does not independently verify the signature or compare decoded transaction bytes against the request. Confirm execution through the selected chain's transaction lookup before treating a payment as complete.
 
-Timeout means submission status is unknown. A wallet may already have submitted the transaction. Check wallet activity and transaction status before building another payment; closing the CLI listener cannot revoke a transaction. The browser must settle a request only once and report cancellation separately from an uncertain submission.
+Timeout after the browser launches, or a browser-reported uncertain submission, produces `outcome: unknown`, `success: false`, `confirmed: false`, `verification: unverified`, and `retrySafe: false`. A wallet may already have submitted the transaction. Check wallet activity and transaction status before building another payment; closing the CLI listener cannot revoke a transaction. The browser must settle a request only once and report cancellation separately from an uncertain submission. Other failure outcomes do not imply that an automatic retry is safe.
 
 ## Sign-only capability and size limits
 
