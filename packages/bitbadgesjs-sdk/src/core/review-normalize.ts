@@ -22,21 +22,24 @@
 
 import { BigIntify } from '../common/string-numbers.js';
 import { MsgUniversalUpdateCollection } from '../transactions/messages/bitbadges/tokenization/msgUniversalUpdateCollection.js';
+import { coerceToUniversal } from '../cli/utils/normalizeMsg.js';
 
 /**
  * Unwrap any of: transaction (`{ messages: [...] }`), raw message
  * (`{ typeUrl, value }`), or a bare collection value object. Ported from
  * the frontend `extractValue` helper in `reviewItems.ts`.
+ * Explicit create messages retain their creation context before losing
+ * the type URL, so immutable standards are not mistaken for updates.
  */
 export function extractCollectionValue(input: unknown): any {
   if (!input || typeof input !== 'object') return input;
   const obj = input as any;
   const messages = obj.messages || (Array.isArray(obj) ? obj : undefined);
   if (messages && Array.isArray(messages) && messages.length > 0) {
-    const msg = messages[0];
+    const msg = coerceToUniversal(messages[0]);
     return msg?.value || msg || input;
   }
-  if (obj.value && typeof obj.value === 'object') return obj.value;
+  if (obj.value && typeof obj.value === 'object') return coerceToUniversal(obj).value;
   return obj;
 }
 
