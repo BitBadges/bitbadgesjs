@@ -13,6 +13,7 @@ import {
 } from './builders/shared.js';
 
 const MAX_UINT64 = (1n << 64n) - 1n;
+const COIN_AMOUNT_LIMIT = 1n << 255n;
 const integer = z
   .string()
   .regex(/^[1-9][0-9]*$/, 'Expected a positive base-unit integer string')
@@ -20,7 +21,7 @@ const integer = z
 const coinAmount = z
   .string()
   .regex(/^[1-9][0-9]*$/, 'Expected a positive base-unit integer string')
-  .refine((v) => BigInt(v) < 1n << 255n, 'Coin amount exceeds supported range');
+  .refine((v) => BigInt(v) < COIN_AMOUNT_LIMIT, 'Coin amount exceeds supported range');
 const address = z
   .string()
   .refine((v) => isAddressValid(v) && convertToBitBadgesAddress(v) === v && v !== BURN_ADDRESS, 'Expected a canonical spendable BitBadges address');
@@ -77,8 +78,13 @@ export const paymentRequestV2TermsSchema = z
       if (o.payer.kind === 'addresses' && o.payer.addresses.some((payer) => o.payouts.some((p) => p.recipient === payer)))
         fail('Eligible payers cannot also receive a payout');
       for (const p of o.payouts)
-        if (BigInt(p.amount) * BigInt(o.partial?.targetUnits ?? o.requiredPayments ?? '1') >= 1n << 255n)
+        if (BigInt(p.amount) * BigInt(o.partial?.targetUnits ?? o.requiredPayments ?? '1') >= COIN_AMOUNT_LIMIT)
           fail('Total payout exceeds supported coin range');
+      const totals = new Map<string, bigint>();
+      for (const payout of o.payouts) totals.set(payout.denom, (totals.get(payout.denom) ?? 0n) + BigInt(payout.amount));
+      const maxPaymentUnits = BigInt(o.partial?.targetUnits ?? '1');
+      for (const total of totals.values())
+        if (total * maxPaymentUnits >= COIN_AMOUNT_LIMIT) fail('Aggregate denomination payout exceeds supported coin range');
     }
   });
 
