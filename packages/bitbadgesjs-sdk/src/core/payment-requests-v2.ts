@@ -90,6 +90,29 @@ export const paymentRequestV2TermsSchema = z
 
 export type PaymentObligation = z.infer<typeof paymentObligationSchema>;
 export type PaymentRequestV2Terms = z.infer<typeof paymentRequestV2TermsSchema>;
+export type PaymentRequestV2Type = 'specific' | 'anyone' | 'one' | 'all' | 'threshold' | 'installments' | 'partial' | 'target' | 'link' | 'custom';
+
+/** Infer the display category of validated terms without changing their payment semantics. */
+export function getPaymentRequestV2Type({ kind, obligations: terms }: PaymentRequestV2Terms): PaymentRequestV2Type {
+  if (kind === 'payment-link') return 'link';
+  if (terms.length === 1) {
+    const term = terms[0];
+    if (term.partial) return term.payer.kind === 'anyone' ? 'target' : term.payer.addresses.length === 1 ? 'partial' : 'custom';
+    if (BigInt(term.requiredPayments ?? '1') > 1n) return term.distinctPayers ? 'threshold' : 'custom';
+    return term.payer.kind === 'anyone' ? 'anyone' : term.payer.addresses.length === 1 ? 'specific' : 'one';
+  }
+  if (
+    !terms.every(
+      (term) => !term.partial && (term.requiredPayments ?? '1') === '1' && term.payer.kind === 'addresses' && term.payer.addresses.length === 1
+    )
+  )
+    return 'custom';
+  const payoutShape = (term: PaymentObligation) => [...new Set(term.payouts.map((p) => `${p.recipient}:${p.denom}`))].sort().join('|');
+  if (!terms.every((term) => payoutShape(term) === payoutShape(terms[0]))) return 'custom';
+  const payers = new Set(terms.flatMap((term) => (term.payer.kind === 'addresses' ? term.payer.addresses : [])));
+  return payers.size === 1 ? 'installments' : payers.size === terms.length ? 'all' : 'custom';
+}
+
 export type PaymentRequestV2Params = PaymentRequestV2Terms & { uri?: string; name?: string; image?: string; description?: string };
 export type PaymentRequestV2Validation = { valid: boolean; errors: string[]; warnings: string[]; terms?: PaymentRequestV2Terms };
 export type PaymentRequestV2Collection = {

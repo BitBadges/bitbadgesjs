@@ -1,3 +1,5 @@
+import type { PaymentRequestV2Type } from '../core/payment-requests-v2.js';
+
 /**
  * Per-standard "core details" types attached to a collection response under
  * `standardsInfo`. Companion to `standardsConformance` — for each declared
@@ -111,6 +113,8 @@ export type PaymentObligationInfo = {
 };
 export type PaymentRequestV2Info = {
   version: 2;
+  paymentType?: PaymentRequestV2Type;
+  hasPublicPayers?: boolean;
   kind: 'invoice' | 'payment-link';
   progress: PaymentRequestV2Progress;
   lifecycle: PaymentRequestV2Lifecycle;
