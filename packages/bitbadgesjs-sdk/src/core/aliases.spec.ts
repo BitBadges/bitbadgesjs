@@ -1,4 +1,10 @@
-import { deriveIntermediateSender, generateAlias } from './aliases.js';
+import {
+  deriveIntermediateSender,
+  generateAlias,
+  getAliasDerivationKeysForCollection,
+  getAliasDerivationKeysForBadge,
+  getAliasDerivationKeysForList
+} from './aliases.js';
 import { createHash } from 'crypto';
 import { bech32 } from 'bech32';
 
@@ -8,6 +14,12 @@ it('preserves binary module derivation across multiple keys', () => {
   const first = hash(Buffer.concat([hash(Buffer.from('module')), Buffer.from('tokenization\0'), keys[0]]));
   const expected = hash(Buffer.concat([hash(first), keys[1]]));
   expect(Buffer.from(bech32.fromWords(bech32.decode(generateAlias('tokenization', keys)).words))).toEqual(expected);
+});
+
+it('preserves uint64 identifiers beyond the safe number range', () => {
+  expect(getAliasDerivationKeysForCollection('9007199254740993')[1].toString('hex')).toBe('0020000000000001');
+  expect(getAliasDerivationKeysForBadge('9007199254740993', '18446744073709551615')[2].toString('hex')).toBe('ffffffffffffffff');
+  expect(getAliasDerivationKeysForList(9007199254740993n)[1].toString('hex')).toBe('0020000000000001');
 });
 
 describe('deriveIntermediateSender', () => {
