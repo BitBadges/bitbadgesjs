@@ -99,7 +99,7 @@ function normalizeIndexerBase(baseUrl: string): string {
   return /\/api\/v\d+$/.test(trimmed) ? trimmed : `${trimmed}/api/v0`;
 }
 
-async function uploadPayload(baseUrl: string, apiKey: string | undefined, payload: BridgePayload): Promise<string> {
+async function uploadPayload(baseUrl: string, apiKey: string | undefined, payload: BridgePayload, deadline: number): Promise<string> {
   if (!apiKey) {
     throw bbError(
       BBErrorCode.MISSING_API_KEY,
@@ -107,21 +107,31 @@ async function uploadPayload(baseUrl: string, apiKey: string | undefined, payloa
     );
   }
   const url = `${normalizeIndexerBase(baseUrl)}/sign/payload`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-    },
-    body: JSON.stringify({ payload }),
-  });
-  const text = await res.text();
-  let body: any;
-  try { body = JSON.parse(text); } catch { body = { raw: text }; }
-  if (!res.ok || typeof body?.code !== 'string') {
-    throw new Error(`Failed to upload sign payload: ${body?.errorMessage || body?.error || `HTTP ${res.status}`}`);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), Math.max(1, deadline - Date.now()));
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+      },
+      body: JSON.stringify({ payload }),
+    });
+    const text = await res.text();
+    let body: any;
+    try { body = JSON.parse(text); } catch { body = { raw: text }; }
+    if (!res.ok || typeof body?.code !== 'string') {
+      throw new Error(`Failed to upload sign payload: ${body?.errorMessage || body?.error || `HTTP ${res.status}`}`);
+    }
+    return body.code as string;
+  } catch (error) {
+    if (controller.signal.aborted) throw new Error('Signing payload upload timed out; the browser was not opened.');
+    throw error;
+  } finally {
+    clearTimeout(timer);
   }
-  return body.code as string;
 }
 
 // Theme-aware HTML pages served by the loopback listener. Uses
@@ -194,21 +204,27 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
   const state = randomState();
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0 || timeoutMs > 1800000) throw new Error('Invalid signing timeout');
+  const startedAt = Date.now();
   const txRequest = opts.mode === 'tx' ? parseBrowserTxRequest(opts.payload) : undefined;
+  const deadline = Math.min(startedAt + timeoutMs, txRequest?.expiresAt ?? Infinity);
 
   // Encode payload — inline base64 for small, short-code upload for large.
   const inlineEncoded = base64UrlEncodeJson(txRequest ?? opts.payload);
+  if (Buffer.byteLength(JSON.stringify(txRequest ?? opts.payload), 'utf8') > 64 * 1024) {
+    throw new Error('Signing payload exceeds the 64 KiB size limit.');
+  }
   const useUpload = inlineEncoded.length > INLINE_PAYLOAD_THRESHOLD;
   let payloadParam: string;
   let payloadKind: 'inline' | 'code';
   if (useUpload) {
-    const code = await uploadPayload(opts.baseUrl, opts.apiKey, txRequest ?? opts.payload);
+    const code = await uploadPayload(opts.baseUrl, opts.apiKey, txRequest ?? opts.payload, deadline);
     payloadParam = `payload=${encodeURIComponent(code)}`;
     payloadKind = 'code';
   } else {
     payloadParam = `payload_inline=${encodeURIComponent(inlineEncoded)}`;
     payloadKind = 'inline';
   }
+  if (Date.now() >= deadline) throw new Error('Signing request expired before the browser was opened.');
 
   // Spin up loopback listener.
   return new Promise<BridgeResult>((resolve, reject) => {
@@ -328,7 +344,7 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
         reject(new Error(txRequest
           ? 'Signing timed out. Submission status is unknown; a transaction may already have been submitted. Check wallet activity and chain status before retrying.'
           : `Sign request timed out after ${Math.round(timeoutMs / 1000)}s. Re-run the command.`));
-      }, txRequest ? Math.min(timeoutMs, Math.max(1, txRequest.expiresAt - Date.now())) : timeoutMs);
+      }, Math.max(1, deadline - Date.now()));
 
       if (!opts.noOpen) {
         await tryOpen(fullUrl);

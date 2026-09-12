@@ -7,7 +7,7 @@ const get = (url: string) => new Promise<number>((resolve, reject) => {
   http.get(url, res => { res.resume(); res.on('end', () => resolve(res.statusCode!)); }).on('error', reject);
 });
 
-async function launch(mode: 'tx' | 'msg' = 'tx', timeoutMs = 3000) {
+async function launch(mode: 'tx' | 'msg' | 'login' = 'tx', timeoutMs = 3000) {
   let announce!: (url: URL) => void;
   const announced = new Promise<URL>(resolve => { announce = resolve; });
   const spy = jest.spyOn(process.stderr, 'write').mockImplementation(((chunk: string) => {
@@ -24,6 +24,42 @@ async function launch(mode: 'tx' | 'msg' = 'tx', timeoutMs = 3000) {
 }
 
 describe('browser bridge loopback transport', () => {
+  test('rejects oversized UTF-8 payloads before upload or listener creation', async () => {
+    const fetchSpy = jest.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Unexpected upload'));
+    const serverSpy = jest.spyOn(http, 'createServer');
+    try {
+      await expect(bridgeSign({ mode: 'tx', payload: { ...payload(), txsInfo: [{ type: 'MsgSend', msg: { memo: '界'.repeat(23000) } }] }, apiKey: 'local-test', frontendUrl: 'https://example.invalid', baseUrl: 'https://example.invalid', noOpen: true })).rejects.toThrow(/64.*KiB|payload.*size/i);
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(serverSpy).not.toHaveBeenCalled();
+    } finally { fetchSpy.mockRestore(); serverSpy.mockRestore(); }
+  });
+  test('upload is aborted by the signing deadline without starting a listener', async () => {
+    const serverSpy = jest.spyOn(http, 'createServer');
+    const fetchSpy = jest.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
+      if (!init?.signal) throw new Error('Missing upload deadline');
+      return await new Promise((_resolve, reject) => {
+        init.signal!.addEventListener('abort', () => reject(new Error('Signing upload timed out')), { once: true });
+      });
+    });
+    try {
+      await expect(bridgeSign({ mode: 'tx', payload: { ...payload(), txsInfo: [{ type: 'MsgSend', msg: { memo: 'x'.repeat(3000) } }] }, apiKey: 'local-test', frontendUrl: 'https://example.invalid', baseUrl: 'https://example.invalid', timeoutMs: 20, noOpen: true })).rejects.toThrow(/timed out/i);
+      expect(serverSpy).not.toHaveBeenCalled();
+    } finally { fetchSpy.mockRestore(); serverSpy.mockRestore(); }
+  });
+  test('a delayed successful upload cannot launch an expired request', async () => {
+    const request = payload();
+    const now = Date.now();
+    const clock = jest.spyOn(Date, 'now').mockReturnValue(now);
+    const serverSpy = jest.spyOn(http, 'createServer');
+    const fetchSpy = jest.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      clock.mockReturnValue(now + 60001);
+      return { ok: true, text: async () => JSON.stringify({ code: 'local-test' }) } as Response;
+    });
+    try {
+      await expect(bridgeSign({ mode: 'tx', payload: { ...request, txsInfo: [{ type: 'MsgSend', msg: { memo: 'x'.repeat(3000) } }] }, apiKey: 'local-test', frontendUrl: 'https://example.invalid', baseUrl: 'https://example.invalid', noOpen: true })).rejects.toThrow(/expired.*before.*browser/i);
+      expect(serverSpy).not.toHaveBeenCalled();
+    } finally { fetchSpy.mockRestore(); serverSpy.mockRestore(); clock.mockRestore(); }
+  });
   test('rejects wrong nonce and malformed outcome without settling, then accepts a bound submission', async () => {
     const { callback, result, request } = await launch();
     const wrong = new URL(callback);
@@ -41,8 +77,8 @@ describe('browser bridge loopback transport', () => {
     expect(await get(callback.toString())).toBe(200);
     expect(await result).toMatchObject({ outcome: 'cancelled', error: 'User cancelled signing' });
   });
-  test('legacy personal-sign callback remains compatible', async () => {
-    const { callback, result } = await launch('msg');
+  test.each(['msg', 'login'] as const)('legacy %s callback remains compatible', async mode => {
+    const { callback, result } = await launch(mode);
     callback.searchParams.set('signature', 'legacy-signature');
     callback.searchParams.set('address', signer);
     expect(await get(callback.toString())).toBe(200);
