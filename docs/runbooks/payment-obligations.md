@@ -1,6 +1,6 @@
 ---
 title: Payment obligation standards and verification
-last-verified: 2026-09-11
+last-verified: 2026-09-12
 ---
 
 `PaymentRequestV2` represents a finite invoice with independently enforced obligations. `PaymentLinkV1` represents reusable fixed payments. Both use `buildPaymentRequestV2`, with `version: 2` and `kind: 'invoice' | 'payment-link'`. Existing `PaymentRequest`, `Invoices` and `Subscriptions` parsers remain separate and backward compatible.
@@ -30,3 +30,5 @@ Use `bb build payment-request-v2 --json terms.json` to emit an unsigned collecti
 Cancellation, refunds, escrow, conditional release and alternative-currency choices are deliberately rejected by these strict terms. An independent legacy deny tracker records refusal; it does not cancel the payment approval. Recurring billing continues through the existing `Subscriptions` standard and user recurring approvals. Reusable links are not recurring debit consent. Escrow requires a separately verified balance-based state machine; unrelated payment and progress approvals do not establish atomic funding evidence.
 
 Run the focused SDK tests and build before integration. The private application/indexer must consume the published SDK version together; never deploy a local package symlink. No chain migration is introduced by these standards.
+
+Compatibility corrections in this release: subscription intervals end at `start + interval - 1`, matching the chain's inclusive ranges; the next interval begins at `start + interval`. Numeric alias identifiers preserve the full uint64 range when supplied as strings or bigint. Invalid, negative, out-of-range, and unsafe numeric identifiers now throw instead of silently rounding or coercing to zero. Supply decimal strings for identifiers beyond JavaScript's safe integer range.
