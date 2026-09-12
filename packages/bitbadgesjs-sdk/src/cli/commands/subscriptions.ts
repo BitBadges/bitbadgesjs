@@ -648,12 +648,12 @@ addOutputFlags(
             predetermined?.incrementedBalances?.recurringOwnershipTimes?.chargePeriodLength ?? 0
           );
           const withinCurrentInterval =
-            now > nextChargeTime && now < nextChargeTime + gracePeriod;
+            now >= nextChargeTime && now < nextChargeTime + gracePeriod;
           if (!withinCurrentInterval) continue;
 
           // Skip if this interval is already fulfilled — the subscriber
           // already owns the token for the upcoming window.
-          const startOfNextInterval = nextChargeTime + gracePeriod - 1n;
+          const startOfNextInterval = nextChargeTime + gracePeriod;
           const approvalTokenId = BigInt(userApproval.tokenIds?.[0]?.start ?? 0);
           const existing = getBalanceForIdAndTime(
             approvalTokenId,

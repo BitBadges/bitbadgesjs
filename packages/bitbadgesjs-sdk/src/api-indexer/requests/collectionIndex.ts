@@ -31,6 +31,8 @@ export interface iGetCollectionIndexPayload {
   standard?: string;
   /** Status keys to include (OR). Clock-only statuses (e.g. 'expired') are resolved at query time. */
   status?: string[];
+  progress?: string[];
+  lifecycle?: string[];
   /** Case-insensitive name search. */
   name?: string;
   /** Exact-match payer address (e.g. invoices where the connected user is the payer → "sending"). */
@@ -48,6 +50,8 @@ export class GetCollectionIndexPayload extends CustomTypeClass<GetCollectionInde
   createdBy?: string;
   standard?: string;
   status?: string[];
+  progress?: string[];
+  lifecycle?: string[];
   name?: string;
   payerAddress?: string;
   recipientAddress?: string;
@@ -58,6 +62,8 @@ export class GetCollectionIndexPayload extends CustomTypeClass<GetCollectionInde
     this.createdBy = payload.createdBy;
     this.standard = payload.standard;
     this.status = payload.status;
+    this.progress = payload.progress;
+    this.lifecycle = payload.lifecycle;
     this.name = payload.name;
     this.payerAddress = payload.payerAddress;
     this.recipientAddress = payload.recipientAddress;
@@ -74,6 +80,8 @@ export class GetCollectionIndexPayload extends CustomTypeClass<GetCollectionInde
       createdBy: query.createdBy?.toString(),
       standard: query.standard?.toString(),
       status: csv(query.status),
+      progress: csv(query.progress),
+      lifecycle: csv(query.lifecycle),
       name: query.name?.toString(),
       payerAddress: query.payerAddress?.toString(),
       recipientAddress: query.recipientAddress?.toString(),

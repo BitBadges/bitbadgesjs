@@ -1,4 +1,30 @@
-import { deriveIntermediateSender } from './aliases.js';
+import {
+  deriveIntermediateSender,
+  generateAlias,
+  getAliasDerivationKeysForCollection,
+  getAliasDerivationKeysForBadge,
+  getAliasDerivationKeysForList
+} from './aliases.js';
+import { createHash } from 'crypto';
+import { bech32 } from 'bech32';
+
+it('preserves binary module derivation across multiple keys', () => {
+  const keys = [Buffer.from([0x12]), Buffer.from([0, 0xff, 0x80, 1])];
+  const hash = (value: Buffer) => createHash('sha256').update(value).digest();
+  const first = hash(Buffer.concat([hash(Buffer.from('module')), Buffer.from('tokenization\0'), keys[0]]));
+  const expected = hash(Buffer.concat([hash(first), keys[1]]));
+  expect(Buffer.from(bech32.fromWords(bech32.decode(generateAlias('tokenization', keys)).words))).toEqual(expected);
+});
+
+it('preserves uint64 identifiers beyond the safe number range', () => {
+  expect(getAliasDerivationKeysForCollection('9007199254740993')[1].toString('hex')).toBe('0020000000000001');
+  expect(getAliasDerivationKeysForBadge('9007199254740993', '18446744073709551615')[2].toString('hex')).toBe('ffffffffffffffff');
+  expect(getAliasDerivationKeysForList(9007199254740993n)[1].toString('hex')).toBe('0020000000000001');
+});
+
+it.each(['my-list', '-1', '18446744073709551616', 9007199254740992])('rejects an inexact or invalid alias identifier %s', (id) => {
+  expect(() => getAliasDerivationKeysForList(id)).toThrow();
+});
 
 describe('deriveIntermediateSender', () => {
   it('should produce consistent bech32 addresses', () => {

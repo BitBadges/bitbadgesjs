@@ -31,7 +31,7 @@ const BURN_ADDRESS = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
 
 const PaymentRequestPayParams = z.object({
   approvalId: z.string().describe('Pre-generated unique id (typically "payment-request-pay_<random>"). Use generate_unique_id for the suffix.'),
-  payer: z.string().describe('bb1... address of the human approver/payer. Used as initiatedByListId so only this address can execute the approval, and as the implicit coinTransfer "from" via the chain default.'),
+  payer: z.string().describe('bb1... payer address, or All for a public pay-only request. Omit the deny preset when payer is All. The initiator funds the payment.'),
   recipient: z.string().describe('bb1... address that receives the funds when the payer approves.'),
   denom: z.string().describe('ICS20 denom of the payment amount.'),
   amount: z.string().describe('Payment amount in BASE units of the denom (e.g. 10000000 for 10 USDC at 6 decimals).'),
@@ -41,7 +41,7 @@ type PaymentRequestPayParams = z.infer<typeof PaymentRequestPayParams>;
 
 const PaymentRequestDenyParams = z.object({
   approvalId: z.string().describe('Pre-generated unique id (typically "payment-request-deny_<random>").'),
-  payer: z.string().describe('bb1... address of the payer. Same as the pay approval — both must share the same initiatedByListId.'),
+  payer: z.string().refine((payer) => payer !== 'All', 'Public payment requests cannot have a deny approval').describe('bb1... address of the payer. Same as the pay approval — both must share the same initiatedByListId.'),
   expirationMs: z.string().describe('Unix millisecond timestamp. transferTimes runs [1, expirationMs] (same window as pay).')
 });
 type PaymentRequestDenyParams = z.infer<typeof PaymentRequestDenyParams>;
@@ -151,7 +151,7 @@ export const PAYMENT_REQUEST_PRESETS: Preset<any>[] = [
     skillId: 'payment-request',
     name: 'PaymentRequest — pay approval',
     description:
-      'Payer initiates → mints 1x token ID 1 to burn, fires coinTransfer from payer to recipient. transferTimes [1, expiration]; initiatedByListId locks execution to the payer. overrideFromWithApproverAddress=false so the chain debits the initiator (payer) directly — no escrow. Pair with payment-request.deny.',
+      'Payer initiates → mints 1x token ID 1 to burn, fires coinTransfer from payer to recipient. transferTimes [1, expiration]; initiatedByListId locks execution to the payer. overrideFromWithApproverAddress=false so the chain debits the initiator (payer) directly — no escrow. Pair with payment-request.deny only for a specific payer; omit deny for All.',
     paramsSchema: PaymentRequestPayParams,
     render: renderPay
   },

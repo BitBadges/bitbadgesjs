@@ -13,6 +13,7 @@
 
 import { CollectionDoc } from './docs-types/docs.js';
 import { doesCollectionFollowSubscriptionProtocol } from '../core/subscriptions.js';
+import { validatePaymentRequestV2Collection } from '../core/payment-requests-v2.js';
 import { normalizeForReview } from '../core/review-normalize.js';
 import { parseInlineCustomData } from './metadata/inlineCustomData.js';
 
@@ -764,9 +765,12 @@ function verifyPaymentRequest(value: any): StandardViolation[] {
     violations.push({ standard: std, field: 'validTokenIds', message: 'PaymentRequest collections MUST have validTokenIds = [{ start: "1", end: "1" }].' });
   }
 
-  // Must have 2 approvals: pay, deny
-  if (approvals.length < 2) {
-    violations.push({ standard: std, field: 'collectionApprovals', message: `PaymentRequest requires at least 2 approvals (pay, deny). Found ${approvals.length}.` });
+  const pay = approvals.find((a: any) => a.approvalCriteria?.coinTransfers?.length > 0);
+  const isPublic = pay?.initiatedByListId === 'All';
+  if (approvals.length !== (isPublic ? 1 : 2)) {
+    violations.push({ standard: std, field: 'collectionApprovals', message: isPublic
+      ? 'Public PaymentRequest requires exactly 1 approval (pay only; no deny).'
+      : `PaymentRequest requires exactly 2 approvals (pay, deny). Found ${approvals.length}.` });
   }
 
   const mintApprovals = approvals.filter((a: any) => a.fromListId === 'Mint');
@@ -1042,6 +1046,8 @@ const STANDARD_VALIDATORS: Record<string, (value: any) => StandardViolation[]> =
   'Non-Transferable': verifyNonTransferable,
   Bounty: verifyBounty,
   PaymentRequest: verifyPaymentRequest,
+  PaymentRequestV2: (value) => validatePaymentRequestV2Collection(value).errors.map((message) => ({ standard: 'PaymentRequestV2', field: 'paymentRequest', message })),
+  PaymentLinkV1: (value) => validatePaymentRequestV2Collection(value).errors.map((message) => ({ standard: 'PaymentLinkV1', field: 'paymentRequest', message })),
   Crowdfund: verifyCrowdfund,
   Auction: verifyAuction,
   Products: verifyProducts,
@@ -1071,6 +1077,8 @@ const STANDARD_ALIASES: Record<string, string> = {
   'Non-Transferable': 'Non-Transferable',
   Bounty: 'Bounty',
   PaymentRequest: 'PaymentRequest',
+  PaymentRequestV2: 'PaymentRequestV2',
+  PaymentLinkV1: 'PaymentLinkV1',
   'Payment Request': 'PaymentRequest',
   Invoice: 'PaymentRequest',
   Crowdfund: 'Crowdfund',

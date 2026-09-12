@@ -1,0 +1,481 @@
+{
+  "collectionId": "1",
+  "collectionMetadata": {
+    "uri": "https://example.invalid/invoice",
+    "customData": ""
+  },
+  "tokenMetadata": [
+    {
+      "uri": "https://example.invalid/invoice",
+      "customData": "",
+      "tokenIds": [
+        {
+          "start": "1",
+          "end": "2"
+        }
+      ]
+    }
+  ],
+  "customData": "{\"paymentRequest\":{\"version\":2,\"kind\":\"invoice\",\"obligations\":[{\"id\":\"bob\",\"payer\":{\"kind\":\"addresses\",\"addresses\":[\"bb1jmjfq0tplp9tmx4v9uemw72y4d2wa5nrjmmk3q\"]},\"payouts\":[{\"recipient\":\"bb1e0w5t53nrq7p66fye6c8p0ynyhf6y24lke5430\",\"denom\":\"ubadge\",\"amount\":\"100\"}],\"startTime\":\"1\",\"endTime\":\"18446744073709551615\"},{\"id\":\"charlie\",\"payer\":{\"kind\":\"addresses\",\"addresses\":[\"bb1xyxs3skf3f4jfqeuv89yyaqvjc6lffav9altme\"]},\"payouts\":[{\"recipient\":\"bb1e0w5t53nrq7p66fye6c8p0ynyhf6y24lke5430\",\"denom\":\"ubadge\",\"amount\":\"150\"}],\"startTime\":\"1\",\"endTime\":\"18446744073709551615\"}]}}",
+  "manager": "",
+  "collectionPermissions": {
+    "canDeleteCollection": [
+      {
+        "permanentlyPermittedTimes": [],
+        "permanentlyForbiddenTimes": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ]
+      }
+    ],
+    "canArchiveCollection": [
+      {
+        "permanentlyPermittedTimes": [],
+        "permanentlyForbiddenTimes": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ]
+      }
+    ],
+    "canUpdateStandards": [
+      {
+        "permanentlyPermittedTimes": [],
+        "permanentlyForbiddenTimes": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ]
+      }
+    ],
+    "canUpdateCustomData": [
+      {
+        "permanentlyPermittedTimes": [],
+        "permanentlyForbiddenTimes": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ]
+      }
+    ],
+    "canUpdateManager": [
+      {
+        "permanentlyPermittedTimes": [],
+        "permanentlyForbiddenTimes": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ]
+      }
+    ],
+    "canUpdateCollectionMetadata": [
+      {
+        "permanentlyPermittedTimes": [],
+        "permanentlyForbiddenTimes": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ]
+      }
+    ],
+    "canUpdateValidTokenIds": [
+      {
+        "tokenIds": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ],
+        "permanentlyPermittedTimes": [],
+        "permanentlyForbiddenTimes": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ]
+      }
+    ],
+    "canUpdateTokenMetadata": [
+      {
+        "tokenIds": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ],
+        "permanentlyPermittedTimes": [],
+        "permanentlyForbiddenTimes": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ]
+      }
+    ],
+    "canUpdateCollectionApprovals": [
+      {
+        "fromListId": "All",
+        "toListId": "All",
+        "initiatedByListId": "All",
+        "transferTimes": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ],
+        "tokenIds": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ],
+        "ownershipTimes": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ],
+        "approvalId": "All",
+        "permanentlyPermittedTimes": [],
+        "permanentlyForbiddenTimes": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ]
+      }
+    ],
+    "canAddMoreAliasPaths": [
+      {
+        "permanentlyPermittedTimes": [],
+        "permanentlyForbiddenTimes": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ]
+      }
+    ],
+    "canAddMoreCosmosCoinWrapperPaths": [
+      {
+        "permanentlyPermittedTimes": [],
+        "permanentlyForbiddenTimes": [
+          {
+            "start": "1",
+            "end": "18446744073709551615"
+          }
+        ]
+      }
+    ]
+  },
+  "collectionApprovals": [
+    {
+      "fromListId": "Mint",
+      "toListId": "bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv",
+      "initiatedByListId": "bb1jmjfq0tplp9tmx4v9uemw72y4d2wa5nrjmmk3q",
+      "transferTimes": [
+        {
+          "start": "1",
+          "end": "18446744073709551615"
+        }
+      ],
+      "tokenIds": [
+        {
+          "start": "1",
+          "end": "1"
+        }
+      ],
+      "ownershipTimes": [
+        {
+          "start": "1",
+          "end": "18446744073709551615"
+        }
+      ],
+      "uri": "",
+      "customData": "",
+      "approvalId": "payment-v2-bob",
+      "approvalCriteria": {
+        "merkleChallenges": [],
+        "predeterminedBalances": {
+          "manualBalances": [],
+          "incrementedBalances": {
+            "startBalances": [
+              {
+                "amount": "1",
+                "ownershipTimes": [
+                  {
+                    "start": "1",
+                    "end": "18446744073709551615"
+                  }
+                ],
+                "tokenIds": [
+                  {
+                    "start": "1",
+                    "end": "1"
+                  }
+                ]
+              }
+            ],
+            "incrementTokenIdsBy": "0",
+            "incrementOwnershipTimesBy": "0",
+            "durationFromTimestamp": "0",
+            "allowOverrideTimestamp": false,
+            "recurringOwnershipTimes": {
+              "startTime": "0",
+              "intervalLength": "0",
+              "chargePeriodLength": "0"
+            },
+            "allowOverrideWithAnyValidToken": false,
+            "allowAmountScaling": false,
+            "maxScalingMultiplier": "0"
+          },
+          "orderCalculationMethod": {
+            "useOverallNumTransfers": true,
+            "usePerToAddressNumTransfers": false,
+            "usePerFromAddressNumTransfers": false,
+            "usePerInitiatedByAddressNumTransfers": false,
+            "useMerkleChallengeLeafIndex": false,
+            "challengeTrackerId": ""
+          }
+        },
+        "approvalAmounts": {
+          "overallApprovalAmount": "0",
+          "perToAddressApprovalAmount": "0",
+          "perFromAddressApprovalAmount": "0",
+          "perInitiatedByAddressApprovalAmount": "0",
+          "amountTrackerId": "payment-v2-bob",
+          "resetTimeIntervals": {
+            "startTime": "0",
+            "intervalLength": "0"
+          }
+        },
+        "maxNumTransfers": {
+          "overallMaxNumTransfers": "1",
+          "perToAddressMaxNumTransfers": "0",
+          "perFromAddressMaxNumTransfers": "0",
+          "perInitiatedByAddressMaxNumTransfers": "0",
+          "amountTrackerId": "payment-v2-bob",
+          "resetTimeIntervals": {
+            "startTime": "0",
+            "intervalLength": "0"
+          }
+        },
+        "coinTransfers": [
+          {
+            "to": "bb1e0w5t53nrq7p66fye6c8p0ynyhf6y24lke5430",
+            "coins": [
+              {
+                "denom": "ubadge",
+                "amount": "100"
+              }
+            ],
+            "overrideFromWithApproverAddress": false,
+            "overrideToWithInitiator": false
+          }
+        ],
+        "requireToEqualsInitiatedBy": false,
+        "requireFromEqualsInitiatedBy": false,
+        "requireToDoesNotEqualInitiatedBy": false,
+        "requireFromDoesNotEqualInitiatedBy": false,
+        "overridesFromOutgoingApprovals": true,
+        "overridesToIncomingApprovals": true,
+        "autoDeletionOptions": {
+          "afterOneUse": false,
+          "afterOverallMaxNumTransfers": false,
+          "allowCounterpartyPurge": false,
+          "allowPurgeIfExpired": false
+        },
+        "mustOwnTokens": [],
+        "dynamicStoreChallenges": [],
+        "ethSignatureChallenges": [],
+        "senderChecks": null,
+        "recipientChecks": null,
+        "initiatorChecks": null,
+        "altTimeChecks": null,
+        "mustPrioritize": true,
+        "votingChallenges": [],
+        "allowBackedMinting": false,
+        "allowSpecialWrapping": false,
+        "evmQueryChallenges": [],
+        "userApprovalSettings": null
+      },
+      "version": "0"
+    },
+    {
+      "fromListId": "Mint",
+      "toListId": "bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv",
+      "initiatedByListId": "bb1xyxs3skf3f4jfqeuv89yyaqvjc6lffav9altme",
+      "transferTimes": [
+        {
+          "start": "1",
+          "end": "18446744073709551615"
+        }
+      ],
+      "tokenIds": [
+        {
+          "start": "2",
+          "end": "2"
+        }
+      ],
+      "ownershipTimes": [
+        {
+          "start": "1",
+          "end": "18446744073709551615"
+        }
+      ],
+      "uri": "",
+      "customData": "",
+      "approvalId": "payment-v2-charlie",
+      "approvalCriteria": {
+        "merkleChallenges": [],
+        "predeterminedBalances": {
+          "manualBalances": [],
+          "incrementedBalances": {
+            "startBalances": [
+              {
+                "amount": "1",
+                "ownershipTimes": [
+                  {
+                    "start": "1",
+                    "end": "18446744073709551615"
+                  }
+                ],
+                "tokenIds": [
+                  {
+                    "start": "2",
+                    "end": "2"
+                  }
+                ]
+              }
+            ],
+            "incrementTokenIdsBy": "0",
+            "incrementOwnershipTimesBy": "0",
+            "durationFromTimestamp": "0",
+            "allowOverrideTimestamp": false,
+            "recurringOwnershipTimes": {
+              "startTime": "0",
+              "intervalLength": "0",
+              "chargePeriodLength": "0"
+            },
+            "allowOverrideWithAnyValidToken": false,
+            "allowAmountScaling": false,
+            "maxScalingMultiplier": "0"
+          },
+          "orderCalculationMethod": {
+            "useOverallNumTransfers": true,
+            "usePerToAddressNumTransfers": false,
+            "usePerFromAddressNumTransfers": false,
+            "usePerInitiatedByAddressNumTransfers": false,
+            "useMerkleChallengeLeafIndex": false,
+            "challengeTrackerId": ""
+          }
+        },
+        "approvalAmounts": {
+          "overallApprovalAmount": "0",
+          "perToAddressApprovalAmount": "0",
+          "perFromAddressApprovalAmount": "0",
+          "perInitiatedByAddressApprovalAmount": "0",
+          "amountTrackerId": "payment-v2-charlie",
+          "resetTimeIntervals": {
+            "startTime": "0",
+            "intervalLength": "0"
+          }
+        },
+        "maxNumTransfers": {
+          "overallMaxNumTransfers": "1",
+          "perToAddressMaxNumTransfers": "0",
+          "perFromAddressMaxNumTransfers": "0",
+          "perInitiatedByAddressMaxNumTransfers": "0",
+          "amountTrackerId": "payment-v2-charlie",
+          "resetTimeIntervals": {
+            "startTime": "0",
+            "intervalLength": "0"
+          }
+        },
+        "coinTransfers": [
+          {
+            "to": "bb1e0w5t53nrq7p66fye6c8p0ynyhf6y24lke5430",
+            "coins": [
+              {
+                "denom": "ubadge",
+                "amount": "150"
+              }
+            ],
+            "overrideFromWithApproverAddress": false,
+            "overrideToWithInitiator": false
+          }
+        ],
+        "requireToEqualsInitiatedBy": false,
+        "requireFromEqualsInitiatedBy": false,
+        "requireToDoesNotEqualInitiatedBy": false,
+        "requireFromDoesNotEqualInitiatedBy": false,
+        "overridesFromOutgoingApprovals": true,
+        "overridesToIncomingApprovals": true,
+        "autoDeletionOptions": {
+          "afterOneUse": false,
+          "afterOverallMaxNumTransfers": false,
+          "allowCounterpartyPurge": false,
+          "allowPurgeIfExpired": false
+        },
+        "mustOwnTokens": [],
+        "dynamicStoreChallenges": [],
+        "ethSignatureChallenges": [],
+        "senderChecks": null,
+        "recipientChecks": null,
+        "initiatorChecks": null,
+        "altTimeChecks": null,
+        "mustPrioritize": true,
+        "votingChallenges": [],
+        "allowBackedMinting": false,
+        "allowSpecialWrapping": false,
+        "evmQueryChallenges": [],
+        "userApprovalSettings": null
+      },
+      "version": "0"
+    }
+  ],
+  "standards": [
+    "PaymentRequestV2"
+  ],
+  "isArchived": false,
+  "defaultBalances": {
+    "balances": [],
+    "outgoingApprovals": [],
+    "incomingApprovals": [],
+    "autoApproveSelfInitiatedOutgoingTransfers": true,
+    "autoApproveSelfInitiatedIncomingTransfers": true,
+    "autoApproveAllIncomingTransfers": true,
+    "userPermissions": {
+      "canUpdateOutgoingApprovals": [],
+      "canUpdateIncomingApprovals": [],
+      "canUpdateAutoApproveSelfInitiatedOutgoingTransfers": [],
+      "canUpdateAutoApproveSelfInitiatedIncomingTransfers": [],
+      "canUpdateAutoApproveAllIncomingTransfers": []
+    }
+  },
+  "createdBy": "bb1jmjfq0tplp9tmx4v9uemw72y4d2wa5nrjmmk3q",
+  "validTokenIds": [
+    {
+      "start": "1",
+      "end": "2"
+    }
+  ],
+  "mintEscrowAddress": "bb19gy5mk8p0k7tuvwmlsz2df46j6fltk3urd2slkmfczn202yl7urqkjf96s",
+  "cosmosCoinWrapperPaths": [],
+  "invariants": {
+    "noCustomOwnershipTimes": true,
+    "maxSupplyPerId": "0",
+    "cosmosCoinBackedPath": null,
+    "noForcefulPostMintTransfers": true,
+    "disablePoolCreation": true,
+    "evmQueryChallenges": []
+  },
+  "aliasPaths": []
+}

@@ -27,6 +27,7 @@ describe('buildCommand shape', () => {
       'intent',
       'listing',
       'payment-request',
+      'payment-request-v2',
       'pm-buy-intent',
       'pm-sell-intent',
       'prediction-market',

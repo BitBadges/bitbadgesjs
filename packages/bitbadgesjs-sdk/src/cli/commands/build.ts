@@ -558,6 +558,13 @@ sharedOpts(
   );
 });
 
+sharedOpts(buildCommand.command('payment-request-v2').description('Build invoice obligations or reusable payment links from --json. All amounts are base-unit integer strings.'))
+  .action(async (opts) => {
+    if (!opts.json) throw new Error('payment-request-v2 requires --json <file|->');
+    const { buildPaymentRequestV2 } = await import('../../core/payment-requests-v2.js');
+    await emit(buildPaymentRequestV2(readJsonInput(opts.json)), opts);
+  });
+
 sharedOpts(
   buildCommand
     .command('payment-request')
@@ -566,7 +573,7 @@ sharedOpts(
     )
     .requiredOption('--amount <n>', 'Payment amount (display units)')
     .requiredOption('--denom <symbol|denom>', 'Coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
-    .requiredOption('--payer <address>', 'Payer address (bb1...) — the human approver')
+    .requiredOption('--payer <address>', 'Payer address (bb1...) or All for a public pay-only invoice')
     .requiredOption('--recipient <address>', 'Recipient address (bb1...) — agent/merchant')
     .option('--expiration <duration>', 'Expiration duration', '30d')
     .option(
@@ -580,7 +587,7 @@ sharedOpts(
     return;
   }
   const denom = requireBbDenom(opts.denom, '--denom');
-  const payer = requireBb1AddressStrict(opts.payer, '--payer');
+  const payer = opts.payer === 'All' ? 'All' : requireBb1AddressStrict(opts.payer, '--payer');
   const recipient = requireBb1AddressStrict(opts.recipient, '--recipient');
   emit(
     buildPaymentRequest({

@@ -1,6 +1,6 @@
 {
   "name": "bitbadges",
-  "description": "BitBadges — programmable tokens on Cosmos. SDK, CLI, and builder tools for humans and agents. (Previously published as 'bitbadgesjs-sdk'.)",
+  "description": "BitBadges \u2014 programmable tokens on Cosmos. SDK, CLI, and builder tools for humans and agents. (Previously published as 'bitbadgesjs-sdk'.)",
   "version": "0.45.2",
   "license": "MIT",
   "keywords": [
@@ -167,7 +167,7 @@
     "tsconfig-paths": "^3.15.0",
     "tsoa": "^6.6.0",
     "typescript": "~5.8.3",
-    "yaml": "2.8.1"
+    "yaml": "2.8.3"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^1.10.1",
@@ -193,6 +193,13 @@
     },
     "openai": {
       "optional": true
+    }
+  },
+  "overrides": {
+    "bn.js@4.11.6": "4.12.3",
+    "qs": "6.16.0",
+    "@tsoa/cli": {
+      "ts-deepmerge": "8.0.0"
     }
   }
 }

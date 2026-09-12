@@ -40,6 +40,30 @@ import {
   buildPaymentRequestDenyMsg,
   type PaymentRequestStatus
 } from '../../core/payment-requests.js';
+import { validatePaymentRequestV2Collection, extractPaymentRequestV2Details, buildPaymentRequestV2PayMsg } from '../../core/payment-requests-v2.js';
+
+const isV2 = (collection: any) => collection?.standards?.some((s: string) => s === 'PaymentRequestV2' || s === 'PaymentLinkV1');
+function v2Summary(collection: any) {
+  const terms = extractPaymentRequestV2Details(collection);
+  if (!terms) throw new Error('Invalid payment obligation collection');
+  const marker = terms.kind === 'invoice' ? 'PaymentRequestV2' : 'PaymentLinkV1';
+  return { collectionId: String(collection.collectionId ?? collection._docId ?? ''), ...terms, state: collection.standardsInfo?.[marker] ?? { progress: 'unknown', lifecycle: 'unknown', status: 'unknown' } };
+}
+
+export function matchesPaymentRequestPayer(collection: any, payer: string): boolean {
+  if (isV2(collection)) return !!extractPaymentRequestV2Details(collection)?.obligations.some((o) => !o.payouts.some((p) => p.recipient === payer) && (o.payer.kind === 'anyone' || o.payer.addresses.includes(payer)));
+  const details = extractPaymentRequestDetails(collection.collectionApprovals);
+  return !!details && details.recipientAddress !== payer && (details.payerAddress === 'All' || details.payerAddress === payer);
+}
+
+export function hasOpenPaymentRequest(collection: any): boolean {
+  if (isV2(collection)) {
+    const info = collection.standardsInfo?.[collection.standards.includes('PaymentLinkV1') ? 'PaymentLinkV1' : 'PaymentRequestV2'];
+    return !!info?.obligations?.some((o: any) => o.lifecycle === 'open' && (o.progress === 'unpaid' || o.progress === 'partial'));
+  }
+  const details = extractPaymentRequestDetails(collection.collectionApprovals);
+  return !!details && resolveStatus(collection, details.expirationTime) === 'pending';
+}
 
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
   return normalizeCollection(await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts));
@@ -51,7 +75,7 @@ async function fetchCollection(collectionId: string, opts: NetworkFlags): Promis
  * same gate as the frontend view's short-circuit.
  */
 function validateOrExit(collection: any, ctx: string): void {
-  validateCollectionOrExit(collection, ctx, validatePaymentRequestCollection, 'PaymentRequest');
+  validateCollectionOrExit(collection, ctx, isV2(collection) ? validatePaymentRequestV2Collection : validatePaymentRequestCollection, 'PaymentRequest');
 }
 
 function resolveStatus(collection: any, expirationTime: bigint): PaymentRequestStatus {
@@ -79,24 +103,18 @@ addOutputFlags(
   try {
     const res = await callApi('POST', '/browse', opts, { type: 'collections', category: 'paymentRequest' });
     const all: any[] = res?.collections?.paymentRequest ?? res?.collections ?? [];
-    let collections = all.filter((c: any) => doesCollectionFollowPaymentRequestProtocol(c));
+    let collections = all.filter((c: any) => isV2(c) ? validatePaymentRequestV2Collection(c).valid : doesCollectionFollowPaymentRequestProtocol(c));
 
     if (opts.mine) {
       const bb1 = requireBb1Address(opts.mine, '--mine');
-      collections = collections.filter((c: any) => {
-        const details = extractPaymentRequestDetails(c.collectionApprovals);
-        return details?.payerAddress === bb1;
-      });
+      collections = collections.filter((c: any) => matchesPaymentRequestPayer(c, bb1));
     }
     if (opts.open) {
-      collections = collections.filter((c: any) => {
-        const details = extractPaymentRequestDetails(c.collectionApprovals);
-        if (!details) return false;
-        return resolveStatus(c, details.expirationTime) === 'pending';
-      });
+      collections = collections.filter(hasOpenPaymentRequest);
     }
 
     const summary = collections.map((c: any) => {
+      if (isV2(c)) return v2Summary(c);
       const details = extractPaymentRequestDetails(c.collectionApprovals)!;
       return {
         collectionId: String(c.collectionId ?? c._docId ?? ''),
@@ -126,6 +144,7 @@ addOutputFlags(
   try {
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'pay-requests show');
+    if (isV2(collection)) { emit(v2Summary(collection), opts); return; }
     const details = extractPaymentRequestDetails(collection.collectionApprovals)!;
     emit(
       {
@@ -159,6 +178,7 @@ addOutputFlags(
   try {
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'pay-requests status');
+    if (isV2(collection)) { emit({ collectionId, ...v2Summary(collection).state }, opts); return; }
     const details = extractPaymentRequestDetails(collection.collectionApprovals)!;
     const status = resolveStatus(collection, details.expirationTime);
     emit({ collectionId: String(collectionId), status }, opts);
@@ -178,15 +198,25 @@ addOutputFlags(
         'MsgTransferTokens targeting the pay approval. Emit (pipe to `bb deploy`) or broadcast inline with --browser/--burner.'
       )
       .argument('<collection-id>', 'PaymentRequest collection ID')
+      .option('--obligation <id>', 'V2 obligation ID (required for a collection with multiple obligations)')
+      .option('--units <integer>', 'V2 partial-payment quanta (default 1)', '1')
       .requiredOption('--creator <address>', 'Payer address (bb1.../0x — auto-normalized)')
   )
-)).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string }) => {
+)).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; obligation?: string; units?: string }) => {
   try {
     const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'pay-requests pay');
+    if (isV2(collection)) {
+      const terms = extractPaymentRequestV2Details(collection)!;
+      const obligationId = opts.obligation ?? (terms.obligations.length === 1 ? terms.obligations[0].id : undefined);
+      if (!obligationId) throw new Error('Specify --obligation for a collection with multiple obligations');
+      const msg = buildPaymentRequestV2PayMsg(creator, collectionId, collection, obligationId, opts.units ?? '1');
+      await runEmitOrDeploy(msg, opts, { emit: (m) => emit(m, opts), expectedAddress: creator });
+      return;
+    }
     const details = extractPaymentRequestDetails(collection.collectionApprovals)!;
-    if (creator !== details.payerAddress) {
+    if (details.payerAddress !== 'All' && creator !== details.payerAddress) {
       process.stderr.write(
         `Warning: --creator ${creator} does not match the request's payer ${details.payerAddress}. The on-chain approval will reject this tx.\n`
       );
@@ -219,7 +249,9 @@ addOutputFlags(
     const creator = requireBb1AddressStrict(opts.creator, '--creator');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'pay-requests deny');
+    if (isV2(collection)) throw new Error('V2 direct payments do not have a deny or cancellation action');
     const details = extractPaymentRequestDetails(collection.collectionApprovals)!;
+    if (!details.denyApproval) throw new Error('Public payment requests cannot be denied; they remain open until paid or expired.');
     if (creator !== details.payerAddress) {
       process.stderr.write(
         `Warning: --creator ${creator} does not match the request's payer ${details.payerAddress}. The on-chain approval will reject this tx.\n`

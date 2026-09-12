@@ -52,7 +52,7 @@ describe('alias derivation stays byte-identical', () => {
     expect(generateAlias('tokenization', getAliasDerivationKeysForBadge('1', 1n))).toBe(
       'bb1j2wtm5ww5pex2syvcdacjdmxp8t2y0fdx3vmz3qc6anqpug6jqjs5x4dk6'
     );
-    expect(generateAlias('tokenization', getAliasDerivationKeysForList('my-list'))).toBe(
+    expect(generateAlias('tokenization', getAliasDerivationKeysForList('0'))).toBe(
       'bb1f86qt4rpwxaagkcpskrhdt6gyjyc38fr68vwpxphjfhfl8j8ja7s9ulw2a'
     );
     expect(generateAliasAddressForDenom('ubadge')).toBe('bb1gycvn0nc50lh753dgk4qys5p2sdws8aw7ec9v9gg65pkhm6hqq3qjd3t3n');

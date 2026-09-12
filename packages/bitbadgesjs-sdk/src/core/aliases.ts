@@ -36,10 +36,9 @@ function Derive(address: string, key: Buffer) {
 }
 
 function uint64ToBufferBE(number: NumberType): Buffer {
-  number = Number(number);
+  if (typeof number === 'number' && !Number.isSafeInteger(number)) throw new Error('Use a string or bigint for an exact uint64 identifier');
   const buffer = Buffer.alloc(8);
-  buffer.writeUInt32BE(Math.floor(number / 0x100000000), 0);
-  buffer.writeUInt32BE(number >>> 0, 4);
+  buffer.writeBigUInt64BE(BigInt(number));
   return buffer;
 }
 
@@ -63,7 +62,7 @@ export function generateAlias(moduleName: string, derivationKeys: Buffer[]) {
  * @category Aliases
  */
 export function getAliasDerivationKeysForBadge(collectionId: CollectionId, tokenId: NumberType) {
-  const collectionIdNum = Number(collectionId.split('-')[0]);
+  const collectionIdNum = collectionId.split('-')[0];
 
   const derivationKey = [Buffer.from([AccountGenerationPrefix]), uint64ToBufferBE(collectionIdNum), uint64ToBufferBE(tokenId)];
   return derivationKey;
@@ -75,7 +74,7 @@ export function getAliasDerivationKeysForBadge(collectionId: CollectionId, token
  * @category Aliases
  */
 export function getAliasDerivationKeysForCollection(collectionId: CollectionId) {
-  const collectionIdNum = Number(collectionId.split('-')[0]);
+  const collectionIdNum = collectionId.split('-')[0];
   const derivationKey = [Buffer.from([AccountGenerationPrefix]), uint64ToBufferBE(collectionIdNum)];
   return derivationKey;
 }

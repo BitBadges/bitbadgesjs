@@ -1,3 +1,5 @@
+import type { PaymentRequestV2Type } from '../core/payment-requests-v2.js';
+
 /**
  * Per-standard "core details" types attached to a collection response under
  * `standardsInfo`. Companion to `standardsConformance` — for each declared
@@ -80,7 +82,45 @@ export interface iPredictionMarketInfo {
 export interface iStandardsInfo {
   Bounty?: iBountyInfo;
   PaymentRequest?: iPaymentRequestInfo;
+  PaymentRequestV2?: PaymentRequestV2Info;
+  PaymentLinkV1?: PaymentRequestV2Info;
   Crowdfund?: iCrowdfundInfo;
   Auction?: iAuctionInfo;
   'Prediction Market'?: iPredictionMarketInfo;
 }
+
+/** Integer payment quantities are base-unit strings and never mixed across denoms. */
+export type PaymentRequestV2Coin = { recipient: string; denom: string; amount: string };
+export type PaymentRequestV2Progress = 'unpaid' | 'partial' | 'paid' | 'unknown';
+export type PaymentRequestV2Lifecycle = 'scheduled' | 'open' | 'expired' | 'unknown';
+export type PaymentObligationInfo = {
+  id: string;
+  progress: PaymentRequestV2Progress;
+  lifecycle: PaymentRequestV2Lifecycle;
+  startTime: string;
+  endTime: string;
+  dueAt?: string;
+  overdue: boolean;
+  completedUnits?: string;
+  requiredUnits?: string;
+  remainingUnits?: string;
+  completedPayments?: string;
+  requiredPayments?: string;
+  paidCoins?: PaymentRequestV2Coin[];
+  remainingCoins?: PaymentRequestV2Coin[];
+  paidPayers?: string[];
+  payerTrackingComplete: boolean;
+};
+export type PaymentRequestV2Info = {
+  version: 2;
+  paymentType?: PaymentRequestV2Type;
+  hasPublicPayers?: boolean;
+  kind: 'invoice' | 'payment-link';
+  progress: PaymentRequestV2Progress;
+  lifecycle: PaymentRequestV2Lifecycle;
+  status: string;
+  obligations: PaymentObligationInfo[];
+  payerAddresses: string[];
+  recipientAddresses: string[];
+  endTime?: string;
+};

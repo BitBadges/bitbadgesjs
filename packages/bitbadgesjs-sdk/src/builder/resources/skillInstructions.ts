@@ -1703,7 +1703,7 @@ The primitives (mustOwnTokens, transferTimes, votingChallenges, amount caps, bal
 - DON'T forget timeout fallbacks on every path — funds can be locked forever if a party ghosts.
 - DON'T make verifier fee conditional on outcome — use flat fee with two vote-gated fee approvals for neutral incentives.
 - DON'T forget to lock ALL permissions for escrow — any unlocked permission lets someone change the rules.
-- DON'T use the same amountTrackerId across multiple approvals unless you want them to share a counter.
+- Approval trackers include approvalId in their identity. Reusing amountTrackerId across different approvals does NOT share a counter; use one approval for a shared cap or a separately enforced state-token mechanism.
 - DON'T forget mustOwnBadges for deposit verification — this is how you on-chain gate releases on deposits.`
   },
   {
@@ -2938,6 +2938,32 @@ All permissions MUST be frozen (permanentlyForbiddenTimes: fullRange):
 For bounties that require the verifier or submitter to hold a token from THIS collection (e.g., a reputation badge), use collectionId "0" in mustOwnTokens. The chain resolves "0" to the current collection ID at runtime, which is especially useful at creation time when the real ID is not yet known.`
   },
   {
+    id: 'payment-obligations',
+    name: 'Payment obligations and reusable links',
+    category: 'token-type',
+    description: 'Versioned invoice obligations, payer groups, installments, partial targets, split payouts and reusable payment links built from native approvals.',
+    summary: `Use build_payment_request_v2 for PaymentRequestV2 invoices or PaymentLinkV1 reusable links. Every obligation has an independent on-chain approval and tracker. Keep recurring consent and charging in the existing Subscriptions standard.`,
+    instructions: `# Payment obligations
+
+Use the build_payment_request_v2 tool or SDK buildPaymentRequestV2 with version: 2, kind: invoice or payment-link, and obligations. Metadata requires uri or name/image/description. All amounts are positive base-unit integer strings, never display-unit floating point numbers. Times are inclusive Unix milliseconds.
+
+Each obligation has id, payer, payouts, startTime and endTime. payer is {kind: anyone} or {kind: addresses, addresses: [...]}. Anyone excludes all payout recipients on chain to prevent self-payment. Named rosters are immutable inline lists with unique canonical bb1 addresses.
+
+- Specific or one-of-list: one obligation, one eligible address or a roster, default requiredPayments 1.
+- All-of-list with custom shares: one independent obligation per payer. Do not use total amount alone as proof that everyone paid.
+- K-of-N with equal payment terms: one roster obligation, requiredPayments K, distinctPayers true. The shared overall cap and per-initiator cap are enforced on chain.
+- Installments: separate obligations with their own windows and optional informational dueAt. Windows enforce when each installment may be paid; these are not conditional milestone approvals.
+- Partial payments/shared targets: partial: {targetUnits: N}; each payout.amount is the base-unit amount per quantum. A transfer of U receipt units transfers U times EVERY payout and consumes U of the cumulative target. maxScalingMultiplier is only a per-transaction cap; overallApprovalAmount enforces the cumulative target. Never round split payouts silently.
+- Multiple payouts: all are charged atomically by the same approval. Multiple denominations mean ALL listed currencies are due, not a choice between currencies.
+- Reusable links: kind payment-link; omit requiredPayments, partial and distinctPayers. Each use is a separate receipt event, with an unlimited tracked payment count until the hard cutoff.
+
+The builder freezes terms, roster, approvals, collection invariants and conversion paths. Never hand-edit customData without regenerating approvals. extractPaymentRequestV2Details validates the actual on-chain shape against the declared terms before returning details. Indexers must use the full configured tracker identity, retain per-obligation progress separately from lifecycle, and report unknown when evidence is missing. Never sum mixed denomination amounts or use one paid flag for a collection of obligations.
+
+These direct payments are final transfers with no escrow and no cancellation or refund branch. Unsupported fields are rejected. Refusable legacy PaymentRequest deny is only a recorded refusal: its independent counter does not disable pay. Escrow/refundable pooled funding, conditional release, alternative-currency settlement and cancellable requests need a separately verified state machine; do not simulate them with metadata flags or unrelated trackers. Subscriptions already provide recurring user consent, period counters and incoming approvals: reuse that standard rather than treating a reusable payment link as automatic billing.
+
+Before publication, review and validate the generated collection and simulate actual payments. Building never signs or publishes.`
+  },
+  {
     id: 'payment-request',
     name: 'PaymentRequest',
     category: 'token-type',
@@ -2945,7 +2971,7 @@ For bounties that require the verifier or submitter to hold a token from THIS co
     summary: `Required standards: ["PaymentRequest"]
 
 - 1 token ID (vehicle for approval engine — minted directly to burn)
-- 2 collection-level approvals: pay, deny
+- Specific payer: 2 approvals (pay, deny). Public payer All: exactly 1 approval (pay only).
 - Each approval: Mint → burn 1x token ID 1
 - Pay approval triggers a coinTransfer FROM the payer's wallet TO the recipient
 - NO mintEscrowCoinsToTransfer — payment debits the payer's wallet at execution time
@@ -2974,11 +3000,15 @@ This is the on-chain equivalent of Stripe Link's spend-request flow: the agent p
 - validTokenIds: [{ start: "1", end: "1" }]
 - No alias path needed (1-of-1 receipt-style token)
 
-## 2 Required Approvals
+## Required Approvals
+
+For a public invoice, use payer "All" and create ONLY the pay approval. There is no denial or cancellation action; the request stays pending until paid or expired. Do not add a deny approval, even one restricted to the requester. The pay-only shape is validated by the SDK and indexer.
+
+The following pay+deny pair applies only to specific-payer requests.
 
 Both approvals share: Mint → burn address, 1x token ID 1, maxNumTransfers = 1, overridesFromOutgoingApprovals=true, overridesToIncomingApprovals=true. NO votingChallenges (gating is via initiatedByListId, not voting). Both are time-gated to \`[1, expirationTimestamp]\` — once that window closes, neither can fire and the request is implicitly expired (no separate expire approval is needed because there's no escrow to refund).
 
-### Preferred path: presets (two short tool calls)
+### Preferred path: presets (omit the deny call when payer is "All")
 
 \`\`\`
 add_preset_approval({
@@ -2991,7 +3021,7 @@ add_preset_approval({
 })
 \`\`\`
 
-\`list_presets({skill: "payment-request"})\` lists params. For non-standard variants (multi-payer quorum, partial payments, line items), use raw \`add_approval\`.
+\`list_presets({skill: "payment-request"})\` lists legacy params. For payer groups, installments, partial targets, splits and reusable links, use \`build_payment_request_v2\` and the payment-obligations skill; do not create unverified variants with raw approvals.
 
 ### 1. Pay (payment-request-pay-*)
 Payer approves → mint-to-burn → coins move from payer to recipient.
@@ -2999,13 +3029,13 @@ Payer approves → mint-to-burn → coins move from payer to recipient.
 Key fields:
 - fromListId: "Mint"
 - toListId: burn address (bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv)
-- initiatedByListId: payer's bb1... address (NOT "All" — gates approval to just the payer)
+- initiatedByListId: payer's bb1... address, or "All" for a public pay-only request
 - coinTransfers: [{ to: recipientAddress, overrideFromWithApproverAddress: FALSE, overrideToWithInitiator: false, coins: [{ denom, amount }] }]
   - **CRITICAL**: \`overrideFromWithApproverAddress\` MUST be false. The chain default routes "from" to the initiator (the payer). Setting true would attempt to debit a non-existent escrow → tx fails.
 - transferTimes: [{ start: "1", end: expirationTimestamp }]
 - maxNumTransfers.overallMaxNumTransfers: "1"
 
-### 2. Deny (payment-request-deny-*)
+### 2. Deny (payment-request-deny-*, specific payer only)
 Payer rejects → mint-to-burn → no coin transfer. Records denial state for indexers/UIs.
 
 Same as Pay but:
@@ -3029,7 +3059,7 @@ Same as Pay but:
 - **No votingChallenges** — gating is via initiatedByListId scoped to payer
 - **Deny has no coinTransfers** — no funds need to be returned (no escrow to refund)
 - **No expire approval** — Bounty needs one to refund escrow, but there's no escrow here. Expiration is implicit via the shared \`transferTimes[0].end\`.
-- **2 approvals** instead of Bounty's 3
+- **1 public pay approval, or 2 specific-payer approvals**, instead of Bounty's 3
 - Same mint-to-burn vehicle, same frozen permissions
 
 ## Creation Flow (Tool Calls)
@@ -3039,7 +3069,7 @@ Same as Pay but:
 3. \`set_standards\` — set ["PaymentRequest"]
 4. \`set_invariants\` — set { noCustomOwnershipTimes: true, disablePoolCreation: true, noForcefulPostMintTransfers: true }
 5. **DO NOT** call set_mint_escrow_coins — there's no escrow
-6. \`add_preset_approval\` x2 — pay, deny (or \`add_approval\` for raw)
+6. \`add_preset_approval\` — pay only for All; pay + deny for a specific payer (or \`add_approval\` for raw)
 7. \`set_permissions\` — freeze all permissions
 8. \`set_collection_metadata\` — name + the rationale (≥100 chars recommended; mirror Stripe Link's bar)
 9. \`set_token_metadata\` — token 1 metadata
@@ -3055,14 +3085,14 @@ All permissions MUST be frozen (same set as Bounty).
 - **DON'T set overrideFromWithApproverAddress=true on the pay approval** — that's the Bounty pattern. PaymentRequest needs false so the chain debits the payer (initiator), not a non-existent escrow.
 - **DON'T add votingChallenges** — PaymentRequest gating is via initiatedByListId, not voting. Voting is a Bounty construct.
 - **DON'T fund mintEscrowCoinsToTransfer** — there is no escrow. The payer pays at execution time.
-- **DON'T set initiatedByListId to "All" on pay/deny** — that would let anyone approve. Lock to the specific payer's address.
+- **DON'T add a deny approval to an All-payer request** — public invoices have only a pay approval. Specific-payer invoices keep both approvals scoped to that payer.
 - **DON'T add a third "expire" approval** — Bounty needs one to refund escrow. PaymentRequest has no escrow, so an expire branch would just be a no-op marker. Validator rejects collections with more than 2 approvals.
 - **DON'T forget the rationale** in collection metadata description — it's what the human reads to decide.
 - **DON'T use overrideToWithInitiator** on the coinTransfer — the recipient is hardcoded.
 
 ## Relationship to the Invoices Standard
 
-The existing \`Invoices\` standard validates a single payer-as-initiator approval — useful as a building block, but it has no deny branch and no targeted-payer scoping. PaymentRequest is a more constrained, agent-payments-specific subset: same payment direction (initiator → address), but with an explicit pay+deny pair so the payer's "no" is captured on-chain rather than being indistinguishable from "hasn't acted yet". Consumers that want any payer-initiated payment can match \`Invoices\`; consumers that want the agent-payments artifact specifically should match \`PaymentRequest\`.`
+The existing \`Invoices\` standard validates a single payer-as-initiator approval — useful as a building block, but it has no deny branch and no targeted-payer scoping. PaymentRequest is a more constrained, agent-payments-specific subset: same payment direction (initiator → address), but with an explicit pay+deny pair for specific payers, or a pay-only public invoice that remains open until paid or expired. Consumers that want any payer-initiated payment can match \`Invoices\`; consumers that want the agent-payments artifact specifically should match \`PaymentRequest\`.`
   },
   {
     id: 'crowdfund',

@@ -30,7 +30,7 @@ export const getCurrentInterval = (resetTimeIntervals: iResetTimeIntervals<bigin
 
   const currInterval = (currTime - startTime) / intervalLength;
   const currIntervalStart = startTime + currInterval * intervalLength;
-  const currIntervalEnd = currIntervalStart + intervalLength;
+  const currIntervalEnd = currIntervalStart + intervalLength - 1n;
 
   return {
     start: currIntervalStart,

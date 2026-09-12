@@ -39,6 +39,10 @@ export interface CollectionIndexProjection {
   /** Counterparty addresses for role filtering (e.g. PaymentRequest payer/recipient). Indexed for exact-match. */
   payerAddress?: string;
   recipientAddress?: string;
+  payerAddresses?: string[];
+  recipientAddresses?: string[];
+  progress?: string;
+  lifecycle?: string;
   /** The full computed `info` blob, carried verbatim for client display. */
   extras?: unknown;
 }

@@ -32,7 +32,7 @@ import {
 export interface PaymentRequestParams {
   amount: number; // display units
   denom: string; // USDC, BADGE, etc.
-  payer: string; // bb1... address — the human approver/payer
+  payer: string; // bb1... address, or All for a public pay-only request
   recipient: string; // bb1... address — agent/merchant receiving funds
   expiration?: string; // duration shorthand, default "30d"
   /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
@@ -125,6 +125,8 @@ export function buildPaymentRequest(params: PaymentRequestParams): any {
     // Expiration is implicit; clients compute "expired" from the
     // current time vs. transferTimes[0].end.
   ];
+
+  if (params.payer === 'All') collectionApprovals.splice(1, 1);
 
   // PaymentRequest's description has a special semantic: --context is
   // the payer-facing rationale that the standard requires. If the
