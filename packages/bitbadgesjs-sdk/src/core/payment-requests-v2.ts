@@ -88,6 +88,8 @@ export type PaymentRequestV2Params = PaymentRequestV2Terms & { uri?: string; nam
 export type PaymentRequestV2Validation = { valid: boolean; errors: string[]; warnings: string[]; terms?: PaymentRequestV2Terms };
 export type PaymentRequestV2Collection = {
   collectionId?: unknown;
+  isArchived?: boolean;
+  mintEscrowCoinsToTransfer?: readonly unknown[];
   customData?: string;
   standards?: readonly string[];
   collectionApprovals?: readonly unknown[];
@@ -193,6 +195,12 @@ const onChainApproval = (value: any) => {
 export function validatePaymentRequestV2Collection(collection: PaymentRequestV2Collection): PaymentRequestV2Validation {
   const errors: string[] = [];
   try {
+    if (collection.isArchived !== undefined && collection.isArchived !== false) errors.push('Payment collections cannot be archived');
+    if (
+      collection.mintEscrowCoinsToTransfer !== undefined &&
+      (!Array.isArray(collection.mintEscrowCoinsToTransfer) || collection.mintEscrowCoinsToTransfer.length > 0)
+    )
+      errors.push('Direct payment collections cannot fund mint escrow');
     const updateFlags = ['updateCollectionApprovals', 'updateCollectionPermissions', 'updateCustomData', 'updateStandards', 'updateValidTokenIds'];
     if (updateFlags.some((flag) => Object.prototype.hasOwnProperty.call(collection, flag))) {
       if (String(collection.collectionId) !== '0') errors.push('Frozen payment terms cannot be updated; create a new collection');
@@ -238,6 +246,14 @@ export function buildPaymentRequestV2PayMsg(
   if (!terms) throw new Error('Invalid payment collection');
   address.parse(creator);
   integer.parse(collectionId);
+  const sourceId = collection.collectionId;
+  if (
+    !['string', 'number', 'bigint'].includes(typeof sourceId) ||
+    (typeof sourceId === 'number' && !Number.isSafeInteger(sourceId)) ||
+    !integer.safeParse(String(sourceId)).success ||
+    String(sourceId) !== collectionId
+  )
+    throw new Error('Payment collection ID must match the existing target collection ID');
   integer.parse(units);
   const index = terms.obligations.findIndex((o) => o.id === obligationId);
   if (index < 0) throw new Error('Unknown payment obligation');

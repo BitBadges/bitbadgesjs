@@ -116,6 +116,8 @@ describe('payment obligations v2', () => {
       partial: { targetUnits: '100' }
     };
     const c = buildPaymentRequestV2(p).value;
+    for (const key of Object.keys(c)) if (key.startsWith('update')) delete c[key];
+    c.collectionId = '42';
     const criteria = c.collectionApprovals[0].approvalCriteria;
     expect(criteria.approvalAmounts.overallApprovalAmount).toBe('100');
     expect(criteria.predeterminedBalances.incrementedBalances).toMatchObject({ allowAmountScaling: true, maxScalingMultiplier: '100' });
@@ -161,6 +163,8 @@ describe('payment obligations v2', () => {
   });
   it('rejects unauthorized payer and fractional pay units', () => {
     const c = buildPaymentRequestV2(params()).value;
+    for (const key of Object.keys(c)) if (key.startsWith('update')) delete c[key];
+    c.collectionId = '42';
     expect(() => buildPaymentRequestV2PayMsg(merchant, '42', c, 'share')).toThrow();
     expect(() => buildPaymentRequestV2PayMsg(alice, '42', c, 'share', '1.1')).toThrow();
   });
