@@ -558,6 +558,13 @@ sharedOpts(
   );
 });
 
+sharedOpts(buildCommand.command('payment-request-v2').description('Build invoice obligations or reusable payment links from --json. All amounts are base-unit integer strings.'))
+  .action(async (opts) => {
+    if (!opts.json) throw new Error('payment-request-v2 requires --json <file|->');
+    const { buildPaymentRequestV2 } = await import('../../core/payment-requests-v2.js');
+    emit(buildPaymentRequestV2(readJsonInput(opts.json)), opts);
+  });
+
 sharedOpts(
   buildCommand
     .command('payment-request')

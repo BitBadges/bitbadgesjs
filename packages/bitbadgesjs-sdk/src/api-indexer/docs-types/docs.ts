@@ -186,6 +186,10 @@ export class CollectionIndexDoc<T extends NumberType> extends BaseNumberTypeClas
   endTime?: number;
   payerAddress?: string;
   recipientAddress?: string;
+  payerAddresses?: string[];
+  recipientAddresses?: string[];
+  progress?: string;
+  lifecycle?: string;
   extras?: unknown;
   createdBlock: T;
   createdTimestamp: T;
@@ -208,6 +212,10 @@ export class CollectionIndexDoc<T extends NumberType> extends BaseNumberTypeClas
     this.endTime = data.endTime;
     this.payerAddress = data.payerAddress;
     this.recipientAddress = data.recipientAddress;
+    this.payerAddresses = data.payerAddresses;
+    this.recipientAddresses = data.recipientAddresses;
+    this.progress = data.progress;
+    this.lifecycle = data.lifecycle;
     this.extras = data.extras;
     this.createdBlock = data.createdBlock;
     this.createdTimestamp = data.createdTimestamp;

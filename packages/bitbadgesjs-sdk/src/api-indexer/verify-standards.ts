@@ -13,6 +13,7 @@
 
 import { CollectionDoc } from './docs-types/docs.js';
 import { doesCollectionFollowSubscriptionProtocol } from '../core/subscriptions.js';
+import { validatePaymentRequestV2Collection } from '../core/payment-requests-v2.js';
 import { normalizeForReview } from '../core/review-normalize.js';
 import { parseInlineCustomData } from './metadata/inlineCustomData.js';
 
@@ -1045,6 +1046,8 @@ const STANDARD_VALIDATORS: Record<string, (value: any) => StandardViolation[]> =
   'Non-Transferable': verifyNonTransferable,
   Bounty: verifyBounty,
   PaymentRequest: verifyPaymentRequest,
+  PaymentRequestV2: (value) => validatePaymentRequestV2Collection(value).errors.map((message) => ({ standard: 'PaymentRequestV2', field: 'paymentRequest', message })),
+  PaymentLinkV1: (value) => validatePaymentRequestV2Collection(value).errors.map((message) => ({ standard: 'PaymentLinkV1', field: 'paymentRequest', message })),
   Crowdfund: verifyCrowdfund,
   Auction: verifyAuction,
   Products: verifyProducts,
@@ -1074,6 +1077,8 @@ const STANDARD_ALIASES: Record<string, string> = {
   'Non-Transferable': 'Non-Transferable',
   Bounty: 'Bounty',
   PaymentRequest: 'PaymentRequest',
+  PaymentRequestV2: 'PaymentRequestV2',
+  PaymentLinkV1: 'PaymentLinkV1',
   'Payment Request': 'PaymentRequest',
   Invoice: 'PaymentRequest',
   Crowdfund: 'Crowdfund',

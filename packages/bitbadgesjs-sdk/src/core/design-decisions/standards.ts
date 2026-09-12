@@ -20,6 +20,7 @@ import type { DesignDecision } from '../review-types.js';
 import { doesCollectionFollowSubscriptionProtocol } from '../subscriptions.js';
 import { doesCollectionFollowBountyProtocol } from '../bounties.js';
 import { doesCollectionFollowPaymentRequestProtocol } from '../payment-requests.js';
+import { validatePaymentRequestV2Collection } from '../payment-requests-v2.js';
 import { doesCollectionFollowAuctionProtocol } from '../auctions.js';
 import { doesCollectionFollowInvoiceProtocol } from '../invoices.js';
 import { doesCollectionFollowCrowdfundProtocol } from '../crowdfunds.js';
@@ -34,6 +35,8 @@ interface StandardEntry {
 }
 
 const ENTRIES: StandardEntry[] = [
+  { code: 'design.standards.payment_request_v2', label: 'Payment obligations protocol', standard: 'PaymentRequestV2', check: (c) => validatePaymentRequestV2Collection(c).valid },
+  { code: 'design.standards.payment_link_v1', label: 'Reusable payment link protocol', standard: 'PaymentLinkV1', check: (c) => validatePaymentRequestV2Collection(c).valid },
   { code: 'design.standards.subscription', label: 'Subscription protocol', standard: 'Subscriptions', check: (c) => doesCollectionFollowSubscriptionProtocol(c) },
   { code: 'design.standards.bounty', label: 'Bounty protocol', standard: 'Bounties', check: (c) => doesCollectionFollowBountyProtocol(c) },
   { code: 'design.standards.payment_request', label: 'PaymentRequest protocol', standard: 'PaymentRequest', check: (c) => doesCollectionFollowPaymentRequestProtocol(c) },

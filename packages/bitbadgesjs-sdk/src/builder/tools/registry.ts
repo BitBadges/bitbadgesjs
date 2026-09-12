@@ -82,6 +82,7 @@ import {
 } from './index.js';
 
 import { getSkillInstructions, getAllSkillInstructions } from '../resources/index.js';
+import { buildPaymentRequestV2Tool, handleBuildPaymentRequestV2 } from './builders/buildPaymentRequestV2.js';
 
 // Re-export session persistence helpers so external consumers (e.g.
 // bitbadges-cli) can snapshot / restore session state across process
@@ -161,6 +162,7 @@ const getSkillInstructionsTool: ToolSchema = {
  * The tool registry. Keys are builder tool names.
  */
 export const toolRegistry: Record<string, ToolEntry> = {
+  build_payment_request_v2: entry(buildPaymentRequestV2Tool, handleBuildPaymentRequestV2),
   // Utilities
   lookup_token_info: entry(lookupTokenInfoTool, handleLookupTokenInfo),
   validate_transaction: entry(validateTransactionTool, handleValidateTransaction),

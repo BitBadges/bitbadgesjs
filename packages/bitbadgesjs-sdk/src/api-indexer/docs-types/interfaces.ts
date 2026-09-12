@@ -315,6 +315,10 @@ export interface iCollectionIndexDoc<T extends NumberType> extends Doc {
   /** Counterparty addresses (e.g. PaymentRequest payer/recipient) for role filtering. */
   payerAddress?: string;
   recipientAddress?: string;
+  payerAddresses?: string[];
+  recipientAddresses?: string[];
+  progress?: string;
+  lifecycle?: string;
   /** The standard's full computed `standardsInfo` blob, carried for display. */
   extras?: unknown;
   /** Creation block (cursor sort key, mirrors createdTokens). */

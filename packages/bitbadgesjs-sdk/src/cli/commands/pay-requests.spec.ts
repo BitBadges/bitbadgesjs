@@ -25,6 +25,10 @@ describe('payRequestsCommand shape', () => {
     const required = (pay! as any).options.filter((o: any) => o.required).map((o: any) => o.long);
     expect(required).toContain('--creator');
   });
+  it('pay accepts explicit obligation IDs and integer quantum amounts for v2', () => {
+    const pay = payRequestsCommand.commands.find((c) => c.name() === 'pay')!;
+    expect(pay.options.map((o) => o.long)).toEqual(expect.arrayContaining(['--obligation', '--units']));
+  });
 
   it('deny requires --creator', () => {
     const deny = payRequestsCommand.commands.find((c) => c.name() === 'deny');

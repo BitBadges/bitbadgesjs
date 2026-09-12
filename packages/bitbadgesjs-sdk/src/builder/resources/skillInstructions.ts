@@ -1703,7 +1703,7 @@ The primitives (mustOwnTokens, transferTimes, votingChallenges, amount caps, bal
 - DON'T forget timeout fallbacks on every path — funds can be locked forever if a party ghosts.
 - DON'T make verifier fee conditional on outcome — use flat fee with two vote-gated fee approvals for neutral incentives.
 - DON'T forget to lock ALL permissions for escrow — any unlocked permission lets someone change the rules.
-- DON'T use the same amountTrackerId across multiple approvals unless you want them to share a counter.
+- Approval trackers include approvalId in their identity. Reusing amountTrackerId across different approvals does NOT share a counter; use one approval for a shared cap or a separately enforced state-token mechanism.
 - DON'T forget mustOwnBadges for deposit verification — this is how you on-chain gate releases on deposits.`
   },
   {
@@ -2938,6 +2938,32 @@ All permissions MUST be frozen (permanentlyForbiddenTimes: fullRange):
 For bounties that require the verifier or submitter to hold a token from THIS collection (e.g., a reputation badge), use collectionId "0" in mustOwnTokens. The chain resolves "0" to the current collection ID at runtime, which is especially useful at creation time when the real ID is not yet known.`
   },
   {
+    id: 'payment-obligations',
+    name: 'Payment obligations and reusable links',
+    category: 'token-type',
+    description: 'Versioned invoice obligations, payer groups, installments, partial targets, split payouts and reusable payment links built from native approvals.',
+    summary: `Use build_payment_request_v2 for PaymentRequestV2 invoices or PaymentLinkV1 reusable links. Every obligation has an independent on-chain approval and tracker. Keep recurring consent and charging in the existing Subscriptions standard.`,
+    instructions: `# Payment obligations
+
+Use the build_payment_request_v2 tool or SDK buildPaymentRequestV2 with version: 2, kind: invoice or payment-link, and obligations. Metadata requires uri or name/image/description. All amounts are positive base-unit integer strings, never display-unit floating point numbers. Times are inclusive Unix milliseconds.
+
+Each obligation has id, payer, payouts, startTime and endTime. payer is {kind: anyone} or {kind: addresses, addresses: [...]}. Anyone excludes all payout recipients on chain to prevent self-payment. Named rosters are immutable inline lists with unique canonical bb1 addresses.
+
+- Specific or one-of-list: one obligation, one eligible address or a roster, default requiredPayments 1.
+- All-of-list with custom shares: one independent obligation per payer. Do not use total amount alone as proof that everyone paid.
+- K-of-N with equal payment terms: one roster obligation, requiredPayments K, distinctPayers true. The shared overall cap and per-initiator cap are enforced on chain.
+- Installments: separate obligations with their own windows and optional informational dueAt. Windows enforce when each installment may be paid; these are not conditional milestone approvals.
+- Partial payments/shared targets: partial: {targetUnits: N}; each payout.amount is the base-unit amount per quantum. A transfer of U receipt units transfers U times EVERY payout and consumes U of the cumulative target. maxScalingMultiplier is only a per-transaction cap; overallApprovalAmount enforces the cumulative target. Never round split payouts silently.
+- Multiple payouts: all are charged atomically by the same approval. Multiple denominations mean ALL listed currencies are due, not a choice between currencies.
+- Reusable links: kind payment-link; omit requiredPayments, partial and distinctPayers. Each use is a separate receipt event, with an unlimited tracked payment count until the hard cutoff.
+
+The builder freezes terms, roster, approvals, collection invariants and conversion paths. Never hand-edit customData without regenerating approvals. extractPaymentRequestV2Details validates the actual on-chain shape against the declared terms before returning details. Indexers must use the full configured tracker identity, retain per-obligation progress separately from lifecycle, and report unknown when evidence is missing. Never sum mixed denomination amounts or use one paid flag for a collection of obligations.
+
+These direct payments are final transfers with no escrow and no cancellation or refund branch. Unsupported fields are rejected. Refusable legacy PaymentRequest deny is only a recorded refusal: its independent counter does not disable pay. Escrow/refundable pooled funding, conditional release, alternative-currency settlement and cancellable requests need a separately verified state machine; do not simulate them with metadata flags or unrelated trackers. Subscriptions already provide recurring user consent, period counters and incoming approvals: reuse that standard rather than treating a reusable payment link as automatic billing.
+
+Before publication, review and validate the generated collection and simulate actual payments. Building never signs or publishes.`
+  },
+  {
     id: 'payment-request',
     name: 'PaymentRequest',
     category: 'token-type',
@@ -2995,7 +3021,7 @@ add_preset_approval({
 })
 \`\`\`
 
-\`list_presets({skill: "payment-request"})\` lists params. For non-standard variants (multi-payer quorum, partial payments, line items), use raw \`add_approval\`.
+\`list_presets({skill: "payment-request"})\` lists legacy params. For payer groups, installments, partial targets, splits and reusable links, use \`build_payment_request_v2\` and the payment-obligations skill; do not create unverified variants with raw approvals.
 
 ### 1. Pay (payment-request-pay-*)
 Payer approves → mint-to-burn → coins move from payer to recipient.

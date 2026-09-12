@@ -30,6 +30,7 @@ export * from './simulation.js';
 export * from './prediction-markets.js';
 export * from './bounties.js';
 export * from './payment-requests.js';
+export * from './payment-requests-v2.js';
 export * from './auctions.js';
 export * from './smart-tokens.js';
 export * from './credit-tokens.js';
