@@ -1,4 +1,14 @@
-import { deriveIntermediateSender } from './aliases.js';
+import { deriveIntermediateSender, generateAlias } from './aliases.js';
+import { createHash } from 'crypto';
+import { bech32 } from 'bech32';
+
+it('preserves binary module derivation across multiple keys', () => {
+  const keys = [Buffer.from([0x12]), Buffer.from([0, 0xff, 0x80, 1])];
+  const hash = (value: Buffer) => createHash('sha256').update(value).digest();
+  const first = hash(Buffer.concat([hash(Buffer.from('module')), Buffer.from('tokenization\0'), keys[0]]));
+  const expected = hash(Buffer.concat([hash(first), keys[1]]));
+  expect(Buffer.from(bech32.fromWords(bech32.decode(generateAlias('tokenization', keys)).words))).toEqual(expected);
+});
 
 describe('deriveIntermediateSender', () => {
   it('should produce consistent bech32 addresses', () => {
