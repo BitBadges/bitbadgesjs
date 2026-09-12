@@ -169,15 +169,15 @@ describe('getCurrentInterval', () => {
     // currInterval = (now - startTime) / intervalLength — integer division.
     const currIntervalIdx = (now - startTime) / intervalLength;
     expect(r.start).toBe(startTime + currIntervalIdx * intervalLength);
-    expect(r.end).toBe(r.start + intervalLength);
+    expect(r.end).toBe(r.start + intervalLength - 1n);
   });
 
-  it('start+intervalLength == end (interval is exactly intervalLength wide)', () => {
+  it('inclusive interval contains exactly intervalLength milliseconds', () => {
     const now = BigInt(Date.now());
     const startTime = now - 10_000n; // just past startTime
     const intervalLength = 60_000n;
     const r = getCurrentInterval({ startTime, intervalLength } as any);
-    expect(r.end - r.start).toBe(intervalLength);
+    expect(r.end - r.start + 1n).toBe(intervalLength);
   });
 });
 
@@ -823,5 +823,30 @@ describe('buildSubscription is recognized by isSubscriptionFaucetApproval (0425 
     expect(faucets.length).toBe(3);
     for (const a of faucets) expect(isSubscriptionFaucetApproval(a)).toBe(true);
     expect(doesCollectionFollowSubscriptionProtocol(built as any)).toBe(true);
+  });
+});
+
+
+describe('subscription inclusive interval boundaries', () => {
+  afterEach(() => jest.restoreAllMocks());
+  it.each([[999, 1n, 999n, 900n], [1000, 1000n, 1999n, 1900n], [1899, 1000n, 1999n, 1900n], [1900, 1000n, 1999n, 1900n], [1999, 1000n, 1999n, 1900n], [2000, 2000n, 2999n, 2900n]])(
+    'matches the chain window at timestamp %s', (now, start, end, charge) => {
+      jest.spyOn(Date, 'now').mockReturnValue(Number(now));
+      const schedule = { startTime: 1000n, intervalLength: 1000n, chargePeriodLength: 100n };
+      expect(getCurrentInterval(schedule)).toEqual({ start, end });
+      expect(getNextChargeTime({ incrementedBalances: { recurringOwnershipTimes: schedule } } as any)).toBe(charge);
+    }
+  );
+  it('resets the tracker exactly at the next interval start', () => {
+    const clock = jest.spyOn(Date, 'now').mockReturnValue(1999);
+    const schedule = { startTime: 1000n, intervalLength: 1000n };
+    expect(trackerNeedsReset(schedule, 1000n)).toBe(false);
+    clock.mockReturnValue(2000);
+    expect(trackerNeedsReset(schedule, 1999n)).toBe(true);
+    expect(trackerNeedsReset(schedule, 2000n)).toBe(false);
+  });
+  it('supports a one-millisecond inclusive interval', () => {
+    jest.spyOn(Date, 'now').mockReturnValue(1000);
+    expect(getCurrentInterval({ startTime: 1n, intervalLength: 1n })).toEqual({ start: 1000n, end: 1000n });
   });
 });
