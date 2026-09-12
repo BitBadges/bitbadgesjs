@@ -87,6 +87,7 @@ export type PaymentRequestV2Terms = z.infer<typeof paymentRequestV2TermsSchema>;
 export type PaymentRequestV2Params = PaymentRequestV2Terms & { uri?: string; name?: string; image?: string; description?: string };
 export type PaymentRequestV2Validation = { valid: boolean; errors: string[]; warnings: string[]; terms?: PaymentRequestV2Terms };
 export type PaymentRequestV2Collection = {
+  collectionId?: unknown;
   customData?: string;
   standards?: readonly string[];
   collectionApprovals?: readonly unknown[];
@@ -185,13 +186,18 @@ function normalized(value: any): any {
 const same = (a: unknown, b: unknown) => JSON.stringify(normalized(a)) === JSON.stringify(normalized(b));
 const onChainApproval = (value: any) => {
   const approval = { ...value };
-  for (const key of ['details', 'fromList', 'toList', 'initiatedByList']) delete approval[key];
+  for (const key of ['uri', 'customData', 'details', 'fromList', 'toList', 'initiatedByList']) delete approval[key];
   return approval;
 };
 
 export function validatePaymentRequestV2Collection(collection: PaymentRequestV2Collection): PaymentRequestV2Validation {
   const errors: string[] = [];
   try {
+    const updateFlags = ['updateCollectionApprovals', 'updateCollectionPermissions', 'updateCustomData', 'updateStandards', 'updateValidTokenIds'];
+    if (Object.keys(collection).some((key) => key.startsWith('update'))) {
+      if (String(collection.collectionId) !== '0') errors.push('Frozen payment terms cannot be updated; create a new collection');
+      for (const flag of updateFlags) if ((collection as any)[flag] !== true) errors.push(`Payment creation requires ${flag}`);
+    }
     const envelope = z
       .object({ paymentRequest: paymentRequestV2TermsSchema })
       .strict()
@@ -200,7 +206,7 @@ export function validatePaymentRequestV2Collection(collection: PaymentRequestV2C
     if (!same(collection.standards, [terms.kind === 'invoice' ? 'PaymentRequestV2' : 'PaymentLinkV1'])) errors.push('Unexpected payment standard');
     if (!same(collection.validTokenIds, [{ start: '1', end: String(terms.obligations.length) }])) errors.push('Invalid obligation token IDs');
     if (!same(collection.invariants, invariants)) errors.push('Unsupported payment invariants');
-    if (!same((collection.collectionApprovals ?? []).map(onChainApproval), paymentRequestV2Approvals(terms)))
+    if (!same((collection.collectionApprovals ?? []).map(onChainApproval), paymentRequestV2Approvals(terms).map(onChainApproval)))
       errors.push('Approvals differ from payment terms');
     const permissions = { ...(collection.collectionPermissions as any) };
     permissions.canUpdateCollectionApprovals = permissions.canUpdateCollectionApprovals?.map(onChainApproval);

@@ -31,6 +31,23 @@ const params = (): any => ({
 });
 
 describe('payment obligations v2', () => {
+  it.each(['updateCollectionApprovals', 'updateCollectionPermissions', 'updateCustomData', 'updateStandards', 'updateValidTokenIds'])('rejects creation message with ineffective %s', (flag) => {
+    const c = buildPaymentRequestV2(params()).value;
+    c[flag] = false;
+    expect(validatePaymentRequestV2Collection(c).valid).toBe(false);
+    expect(verifyStandards(c).valid).toBe(false);
+  });
+  it('rejects attempts to update frozen payment terms as though creating a new invoice', () => {
+    const c = buildPaymentRequestV2(params()).value;
+    c.collectionId = '42';
+    expect(validatePaymentRequestV2Collection(c).valid).toBe(false);
+  });
+  it('accepts decorative approval metadata added by the frontend storage flow', () => {
+    const c = buildPaymentRequestV2(params()).value;
+    c.collectionApprovals[0].uri = 'ipfs://approval-metadata';
+    c.collectionApprovals[0].customData = JSON.stringify({ name: 'Payment details' });
+    expect(validatePaymentRequestV2Collection(c).valid).toBe(true);
+  });
   it('recognizes actual chain-materialized collections including chain-added defaults', () => {
     expect(validatePaymentRequestV2Collection(chainFixture).errors).toEqual([]);
   });

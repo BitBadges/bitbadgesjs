@@ -50,6 +50,21 @@ function v2Summary(collection: any) {
   return { collectionId: String(collection.collectionId ?? collection._docId ?? ''), ...terms, state: collection.standardsInfo?.[marker] ?? { progress: 'unknown', lifecycle: 'unknown', status: 'unknown' } };
 }
 
+export function matchesPaymentRequestPayer(collection: any, payer: string): boolean {
+  if (isV2(collection)) return !!extractPaymentRequestV2Details(collection)?.obligations.some((o) => !o.payouts.some((p) => p.recipient === payer) && (o.payer.kind === 'anyone' || o.payer.addresses.includes(payer)));
+  const details = extractPaymentRequestDetails(collection.collectionApprovals);
+  return !!details && details.recipientAddress !== payer && (details.payerAddress === 'All' || details.payerAddress === payer);
+}
+
+export function hasOpenPaymentRequest(collection: any): boolean {
+  if (isV2(collection)) {
+    const info = collection.standardsInfo?.[collection.standards.includes('PaymentLinkV1') ? 'PaymentLinkV1' : 'PaymentRequestV2'];
+    return !!info?.obligations?.some((o: any) => o.lifecycle === 'open' && (o.progress === 'unpaid' || o.progress === 'partial'));
+  }
+  const details = extractPaymentRequestDetails(collection.collectionApprovals);
+  return !!details && resolveStatus(collection, details.expirationTime) === 'pending';
+}
+
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
   return normalizeCollection(await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts));
 }
@@ -92,19 +107,10 @@ addOutputFlags(
 
     if (opts.mine) {
       const bb1 = requireBb1Address(opts.mine, '--mine');
-      collections = collections.filter((c: any) => {
-        if (isV2(c)) return extractPaymentRequestV2Details(c)!.obligations.some((o) => !o.payouts.some((p) => p.recipient === bb1) && (o.payer.kind === 'anyone' || o.payer.addresses.includes(bb1)));
-        const details = extractPaymentRequestDetails(c.collectionApprovals);
-        return details?.payerAddress === bb1;
-      });
+      collections = collections.filter((c: any) => matchesPaymentRequestPayer(c, bb1));
     }
     if (opts.open) {
-      collections = collections.filter((c: any) => {
-        if (isV2(c)) { const state = v2Summary(c).state; return state.lifecycle === 'open' && state.progress !== 'paid' && state.progress !== 'unknown'; }
-        const details = extractPaymentRequestDetails(c.collectionApprovals);
-        if (!details) return false;
-        return resolveStatus(c, details.expirationTime) === 'pending';
-      });
+      collections = collections.filter(hasOpenPaymentRequest);
     }
 
     const summary = collections.map((c: any) => {

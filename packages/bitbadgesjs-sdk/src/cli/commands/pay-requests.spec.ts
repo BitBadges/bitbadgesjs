@@ -10,7 +10,21 @@
  *   - That `build` subcommand exists for the alias contract
  */
 
-import { payRequestsCommand } from './pay-requests.js';
+import { payRequestsCommand, matchesPaymentRequestPayer, hasOpenPaymentRequest } from './pay-requests.js';
+
+describe('payment request list eligibility', () => {
+  it('includes legacy public invoices for eligible payers', () => {
+    const c: any = { collectionApprovals: [{ initiatedByListId: 'All', transferTimes: [{ start: 1n, end: 1000n }], approvalCriteria: { coinTransfers: [{ to: 'merchant', coins: [{ amount: 1n, denom: 'ubadge' }] }] } }] };
+    expect(matchesPaymentRequestPayer(c, 'payer')).toBe(true);
+    expect(matchesPaymentRequestPayer(c, 'merchant')).toBe(false);
+  });
+  it('requires an outstanding open obligation rather than aggregate partial progress', () => {
+    const c: any = { standards: ['PaymentRequestV2'], standardsInfo: { PaymentRequestV2: { lifecycle: 'open', progress: 'partial', obligations: [{ lifecycle: 'open', progress: 'paid' }, { lifecycle: 'scheduled', progress: 'unpaid' }] } } };
+    expect(hasOpenPaymentRequest(c)).toBe(false);
+    c.standardsInfo.PaymentRequestV2.obligations[1].lifecycle = 'open';
+    expect(hasOpenPaymentRequest(c)).toBe(true);
+  });
+});
 
 describe('payRequestsCommand shape', () => {
   it('exposes the documented subcommand verbs', () => {
