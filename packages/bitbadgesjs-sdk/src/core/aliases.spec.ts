@@ -22,6 +22,10 @@ it('preserves uint64 identifiers beyond the safe number range', () => {
   expect(getAliasDerivationKeysForList(9007199254740993n)[1].toString('hex')).toBe('0020000000000001');
 });
 
+it.each(['my-list', '-1', '18446744073709551616', 9007199254740992])('rejects an inexact or invalid alias identifier %s', (id) => {
+  expect(() => getAliasDerivationKeysForList(id)).toThrow();
+});
+
 describe('deriveIntermediateSender', () => {
   it('should produce consistent bech32 addresses', () => {
     const channel = 'channel-0';
