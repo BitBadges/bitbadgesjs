@@ -244,7 +244,7 @@ addDeployOptions(
 Examples:
   # Any Credit Token collection (the standard is generic — anyone can deploy one):
   $ bb credit-tokens purchase 42 --creator bb1buyer...xyz --units 10 | bb deploy
-  $ bb credit-tokens purchase 42 --creator bb1buyer...xyz --units 10 --tier premium-tier | bb deploy
+  $ bb credit-tokens purchase 42 --creator bb1buyer...xyz --units 10 --tier credit-scaled | bb deploy
   # BitBadges' own API-credits collection (one real example), id resolved per network:
   $ bb credit-tokens purchase --api-credits --creator bb1buyer...xyz --units 10 --browser
 

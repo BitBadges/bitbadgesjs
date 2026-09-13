@@ -1806,7 +1806,7 @@ Quotes do not establish eligibility, reserve capacity, include fees, or authoriz
 
 Credit tokens are designed for systems that track consumption off-chain. The on-chain token balance represents \`totalCreditsPaidFor\` — the total credits ever purchased. An off-chain system tracks \`totalUsed\`. The remaining budget is simply \`balance - totalUsed\`.
 
-**Example: BitBadges API Credits (Collection 23 / 80, APITOKEN)**
+**Example: BitBadges API Credits (mainnet collection 84; local collection 23, APITOKEN)**
 - User purchases 10 USDC → receives 1,000,000 APITOKEN (on-chain balance = 1,000,000)
 - User makes API calls (including the AI Builder) → backend tracks \`totalUsed\` (e.g., 250,000 APITOKEN used)
 - Remaining budget = on-chain balance (1,000,000) - totalUsed (250,000) = 750,000
