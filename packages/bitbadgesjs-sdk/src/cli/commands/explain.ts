@@ -49,6 +49,12 @@ export const explainCommand = addOutputOptions(
     } else {
       try {
         data = readJsonInput(input);
+        while (data && typeof data === 'object' && 'ok' in data) {
+          if (data.ok !== true || data.error || !data.data || typeof data.data !== 'object' || Array.isArray(data.data)) {
+            throw new Error('Expected a successful CLI envelope with object data and no error');
+          }
+          data = data.data;
+        }
       } catch (err: any) {
         process.stderr.write(
           `Failed to parse input JSON: ${err?.message || err}.\n` +
@@ -71,6 +77,12 @@ export const explainCommand = addOutputOptions(
     const firstCollectionMsg = hasMessages ? data.messages.find((m: any) => isCollectionMsg(m)) : null;
 
     try {
+      if (hasMessages || data?.typeUrl) {
+        const entries = hasMessages ? data.messages : [data];
+        if (entries.length === 0 || entries.some((m: any) => !isCollectionMsg(m) || !m.value || typeof m.value !== 'object' || Array.isArray(m.value))) {
+          throw new Error('Unsupported transaction messages: explain currently supports collection create/update messages');
+        }
+      }
       if (
         fetchedCollection ||
         (data && typeof data === 'object' && !data.typeUrl && !hasMessages && !data.value)
@@ -79,9 +91,17 @@ export const explainCommand = addOutputOptions(
         text = interpretCollection(data);
         kind = 'collection';
       } else {
-        const txBody = firstCollectionMsg?.value ?? data.value ?? data;
         const { interpretTransaction } = await import('../../core/interpret-transaction.js');
-        text = interpretTransaction(txBody);
+        const explainMessage = (msg: any): string => {
+          const value = msg?.value ?? msg;
+          const typeUrl = String(msg?.typeUrl ?? '').trim();
+          const id = String(value.collectionId ?? '0').trim();
+          const isUpdate = typeUrl.endsWith('.MsgUpdateCollection') ||
+            (typeUrl.endsWith('.MsgUniversalUpdateCollection') && id !== '' && id !== '0');
+          const flags = Object.keys(value).filter((key) => key.startsWith('update') && value[key] === true);
+          return interpretTransaction(value, isUpdate, flags);
+        };
+        text = explainMessage(firstCollectionMsg ?? data);
         // Populate the per-message array so JSON callers can branch on shape.
         // Each entry's `summary` is the same prose interpretation run against
         // that single message's value — agents that want a per-msg breakdown
@@ -89,11 +109,10 @@ export const explainCommand = addOutputOptions(
         if (hasMessages) {
           kind = 'tx';
           for (const m of data.messages) {
-            const value = m?.value ?? m;
             const typeUrl = String(m?.typeUrl ?? '');
             let summary = '';
             try {
-              summary = interpretTransaction(value);
+              summary = explainMessage(m);
             } catch {
               summary = '(could not interpret message)';
             }

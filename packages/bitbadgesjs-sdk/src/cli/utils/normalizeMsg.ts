@@ -74,7 +74,7 @@ export function isCollectionMsg(msg: any): boolean {
  */
 export function coerceToUniversal(msg: any): any {
   if (!isCollectionMsg(msg)) return msg;
-  const t = msg.typeUrl as string;
+  const t = (msg.typeUrl as string).trim();
   const value = { ...(msg.value || {}) };
 
   if (t.endsWith('.MsgCreateCollection')) {
