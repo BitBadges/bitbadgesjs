@@ -1,11 +1,11 @@
 # BitBadges SDK - AI Agent Guide
 
-This guide provides comprehensive information for AI agents working with the BitBadges TypeScript SDK. It covers high-level architecture, common patterns, and practical examples.
+Use the `bb` CLI as the primary agent entry point, including Cosmos chain commands. MCP is an optional adapter; TypeScript APIs are available for applications embedding the SDK. This guide starts with the agent workflow and keeps class-based examples as an advanced reference.
 
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [MCP Builder — Recommended Path](#mcp-builder--recommended-path)
+2. [CLI Workflow](#cli-workflow)
 3. [Installation & Setup](#installation--setup)
 4. [Core Concepts](#core-concepts)
 5. [API Client Usage](#api-client-usage)
@@ -49,26 +49,41 @@ The SDK is versioned to match BitBadges chain versions:
 | v23                     | 0.28.x            |
 | v27+                    | 0.34.x            |
 
-**Current SDK Version**: 0.34.3 (compatible with BitBadges v27+). The package is published as `bitbadges` on npm — the old `bitbadgesjs-sdk` name is deprecated.
+The table above is historical. Read the installed release with `bitbadges-cli --version` rather than inferring it from this guide. The package is published as `bitbadges` on npm; the old `bitbadgesjs-sdk` name is deprecated.
 
 ---
 
-## MCP Builder — Recommended Path
+## CLI Workflow
 
-If you are an AI agent building a BitBadges transaction, the MCP builder server is the default entry point. It is bundled with this package as the `bitbadges-builder` bin (source: `src/builder/`) and exposes per-field tools, built-in validation, a review pass, and a recipe library for common token shapes.
+The full BitBadges installation provides `bb`, which includes native Cosmos chain commands and SDK commands. An SDK-only installation provides `bitbadges-cli` for SDK operations. Inspect the installed commands; do not guess flags from older examples.
 
-### Why use it
+```bash
+bb --help-json
+bb build --help
+bb dev skills
+bb dev skills payment-obligations
+bb build payment-request-v2 --schema
+bb build payment-request-v2 --list-examples
+bb build payment-request-v2 --example all | jq '.data' > payment.json
+```
 
-- One tool per field (e.g. `set_valid_token_ids`, `add_approval`, `set_permissions`) keeps prompts small and errors localized.
-- `review_collection` and `validate_transaction` run a static audit before you ship a transaction.
-- Skill instructions, example transactions, and the master prompt are all loaded as MCP resources — no need to scrape docs.
-- The builder emits `MsgUniversalUpdateCollection` throughout, which is what every in-repo example and the chain's `tokenization` module expect.
+Replace demonstration addresses, metadata and payment terms before using an example. Use decimal strings for exact base-unit payment amounts and millisecond timestamps, following the selected schema. Do not infer token decimals from a symbol or use floating-point arithmetic for payments.
+
+Build with `bb build <preset> --json <file>`; complete JSON does not require duplicate preset flags. Flag-only construction still checks mandatory options. Save the output envelope and preserve its review metadata. Run `bb check <proposal>` and `bb simulate <proposal> --creator <signer>` on the intended network. Treat an unsupported simulation as a limitation, not a pass.
+
+For the user's wallet, `bb deploy --browser --msg-file <proposal> --expected-address <signer>` requests review and signing. The manager, payer and signer can be different addresses. For an agent-owned keyring, `bb deploy --with-keyring --from <key>` prints commands; `--exec` executes within granted authority. Multiple keyring messages are sequential, not atomic. Browser wallet fees are not constrained by CLI fee flags, and browser sign-only support is limited to Cosmos wallets.
+
+Proposed, signed, submitted, confirmed and indexed are distinct states. Inspect the result's confirmation and verification fields; a transaction hash alone is not confirmation. Reconcile unknown results before retrying. Never put private keys or mnemonics in prompts. Skill instructions describe a policy but do not enforce it. Direct invoice payments do not provide cancellation, refunds, escrow or prorations.
+
+### MCP Adapter
+
+The bundled `bitbadges-builder` server exposes installed skills, unsigned construction, queries, validation, review and simulation. Call `list_skills` then `get_skill_instructions` with `{"skillId":"<id>"}`. Prefer a high-level builder where exposed; otherwise use the CLI preset. Do not assume complete CLI/MCP operation parity. Use distinct session IDs for independent advanced builds.
 
 ### Register with your MCP client
 
 ```bash
 # Claude Code
-claude mcp add bitbadges-builder bitbadges-builder
+claude mcp add bitbadges-builder -- bitbadges-builder
 ```
 
 For other MCP clients, point at the `bitbadges-builder` executable installed alongside this package and speak stdio.
@@ -85,7 +100,11 @@ Use direct class-based transaction construction when:
 - You are writing server-side code that cannot run an MCP client.
 - You are building non-transaction flows (API-only usage, read paths, balance math).
 
-For every new-collection / update-collection / subscription flow, prefer the MCP builder.
+For new collections and standard workflows, start with the CLI preset. Use SDK classes when embedding construction in an application or when the preset cannot express the requested operation.
+
+### Verify Agent Contracts
+
+Maintainers run `bun run build` followed by `bun run test:agent-contracts`. The gate exercises the built CLI and MCP artifacts offline, checks canonical skill parity, builds shipped payment examples and rejects unsupported fields. It does not sign or broadcast. These deterministic checks do not establish fresh-model task success or complete operation coverage.
 
 ---
 
