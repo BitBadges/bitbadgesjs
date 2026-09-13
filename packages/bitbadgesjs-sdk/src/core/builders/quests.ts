@@ -2,6 +2,7 @@
  * Quests builder — creates a MsgUniversalUpdateCollection for quest reward tokens.
  * @module core/builders/quests
  */
+import { parseBuilderInput } from './input-schemas.js';
 import {
   FOREVER,
   BURN_ADDRESS,
@@ -28,6 +29,7 @@ export interface QuestsParams {
 }
 
 export function buildQuests(params: QuestsParams): any {
+  params = parseBuilderInput('quests', params);
   const coin = resolveCoin(params.denom);
   const rewardBase = toBaseUnits(params.reward, coin.decimals);
 

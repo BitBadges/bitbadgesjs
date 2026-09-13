@@ -2,6 +2,7 @@
  * Subscription builder — creates a MsgUniversalUpdateCollection for recurring subscription tokens.
  * @module core/builders/subscription
  */
+import { parseBuilderInput } from './input-schemas.js';
 import {
   FOREVER,
   resolveCoin,
@@ -48,6 +49,7 @@ export interface SubscriptionParams {
 }
 
 export function buildSubscription(params: SubscriptionParams): any {
+  params = parseBuilderInput('subscription', params);
   const intervalMs = parseDuration(params.interval);
   const tiers = params.tiers || 1;
 

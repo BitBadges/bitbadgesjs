@@ -2,6 +2,7 @@
  * Crowdfund builder — creates a MsgUniversalUpdateCollection for a crowdfund campaign.
  * @module core/builders/crowdfund
  */
+import { parseBuilderInput } from './input-schemas.js';
 import {
   MAX_UINT64,
   FOREVER,
@@ -40,6 +41,7 @@ export interface CrowdfundParams {
 }
 
 export function buildCrowdfund(params: CrowdfundParams): any {
+  params = parseBuilderInput('crowdfund', params);
   const coin = resolveCoin(params.denom);
   const goalBase = toBaseUnits(params.goal, coin.decimals);
   const deadlineTs = durationToTimestamp(params.deadline || '30d');

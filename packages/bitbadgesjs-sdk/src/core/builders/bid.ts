@@ -6,6 +6,7 @@
  *
  * @module core/builders/bid
  */
+import { parseBuilderInput } from './input-schemas.js';
 import { resolveCoin, toBaseUnits, resolveExpiration, stableHashId } from './shared.js';
 import { buildOrderbookBidApproval, type OrderbookOrderArgs } from '../bids.js';
 import { UintRangeArray } from '../uintRanges.js';
@@ -34,6 +35,7 @@ function singleTokenId(input: string, ctx: string): bigint {
 }
 
 export function buildBid(params: BidParams): { typeUrl: string; value: any } {
+  params = parseBuilderInput('bid', params);
   const coin = resolveCoin(params.denom);
   const hasTokenId = typeof params.tokenIds === 'string' && params.tokenIds.trim().length > 0;
   const tokenId = hasTokenId ? singleTokenId(params.tokenIds as string, 'bid') : undefined;

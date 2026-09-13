@@ -55,6 +55,10 @@ The table above is historical. Read the installed release with `bitbadges-cli --
 
 ## CLI Workflow
 
+For compact operation discovery, run `bb dev capabilities`; supply an ID such as `build_subscription` to receive its installed input schema and example. The response has a `schemaVersion` and `catalogHash`; MCP's `get_capabilities` returns the same catalog. The shared tool adapter includes 18 standard builders as well as PaymentRequestV2 and existing review/query tools. Standard-specific CLI actions and native Cosmos commands remain separate discovery surfaces.
+
+Builder inputs are checked against schemas generated from their TypeScript parameter declarations. Unknown fields and wrong JSON types fail; they are never interpreted as additional on-chain guarantees. These are structural checks, supplemented by each builder's runtime rules. Review and simulation are still required. Existing display-unit numeric fields remain numbers, while PaymentRequestV2 integer base units remain decimal strings. Do not change units to fit a guessed schema.
+
 The full BitBadges installation provides `bb`, which includes native Cosmos chain commands and SDK commands. An SDK-only installation provides `bitbadges-cli` for SDK operations. Inspect the installed commands; do not guess flags from older examples.
 
 ```bash

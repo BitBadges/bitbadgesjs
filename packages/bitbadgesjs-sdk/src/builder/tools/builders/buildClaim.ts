@@ -10,19 +10,19 @@ import { ensureBb1 } from '../../sdk/addressUtils.js';
 
 export const buildClaimSchema = z.object({
   claimType: z.enum(['code-gated', 'password-gated', 'whitelist-gated', 'open']).describe('Type of claim gating'),
-  name: z.string().describe('Claim name'),
+  name: z.string().min(1).describe('Claim name'),
   description: z.string().optional().describe('Claim description'),
-  maxUses: z.number().describe('Maximum total number of claims allowed'),
+  maxUses: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).describe('Maximum total number of claims allowed'),
 
   // code-gated
-  numCodes: z.number().optional().describe('Number of codes to generate (defaults to maxUses)'),
+  numCodes: z.number().int().positive().max(10000).optional().describe('Number of codes to generate (defaults to maxUses; builder limit 10000)'),
 
   // password-gated
   password: z.string().optional().describe('Shared password for password-gated claims'),
 
   // whitelist-gated
   whitelist: z.array(z.string()).optional().describe('Array of addresses (bb1... or 0x...) for whitelist-gated claims'),
-  maxUsesPerAddress: z.number().optional().describe('Max claims per address (default 1)'),
+  maxUsesPerAddress: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).optional().describe('Max claims per address (default 1)'),
 
   // optional action (links claim to a collection approval)
   action: z.object({
@@ -34,7 +34,7 @@ export const buildClaimSchema = z.object({
   // optional features
   showInSearchResults: z.boolean().optional().describe('Whether to show this claim in search results'),
   categories: z.array(z.string()).optional().describe('Categories for the claim')
-});
+}).strict();
 
 export type BuildClaimInput = z.infer<typeof buildClaimSchema>;
 
@@ -53,23 +53,24 @@ export const buildClaimTool = {
     'Build a claim document for the BitBadges API. Supports code-gated, password-gated, whitelist-gated, and open claims. Returns JSON ready for POST /api/v0/claims.',
   inputSchema: {
     type: 'object' as const,
+    additionalProperties: false,
     properties: {
       claimType: {
         type: 'string',
         enum: ['code-gated', 'password-gated', 'whitelist-gated', 'open'],
         description: 'Type of claim gating'
       },
-      name: { type: 'string', description: 'Claim name' },
+      name: { type: 'string', minLength: 1, description: 'Claim name' },
       description: { type: 'string', description: 'Claim description' },
-      maxUses: { type: 'number', description: 'Maximum total number of claims allowed' },
-      numCodes: { type: 'number', description: 'Number of codes to generate (defaults to maxUses, code-gated only)' },
+      maxUses: { type: 'integer', minimum: 1, maximum: Number.MAX_SAFE_INTEGER, description: 'Maximum total number of claims allowed' },
+      numCodes: { type: 'integer', minimum: 1, maximum: 10000, description: 'Number of codes to generate (defaults to maxUses, code-gated only; builder limit 10000)' },
       password: { type: 'string', description: 'Shared password (password-gated only)' },
       whitelist: {
         type: 'array',
         items: { type: 'string' },
         description: 'Array of addresses (bb1... or 0x..., whitelist-gated only)'
       },
-      maxUsesPerAddress: { type: 'number', description: 'Max claims per address (default 1, whitelist-gated only)' },
+      maxUsesPerAddress: { type: 'integer', minimum: 1, maximum: Number.MAX_SAFE_INTEGER, description: 'Max claims per address (default 1, whitelist-gated only)' },
       action: {
         type: 'object',
         description: 'Action object to include in the claim — links to a collection approval. Pass collectionId, badgeIds, ownershipTimes, or any other fields needed. For code-gated claims, seedCode is merged in automatically.',
@@ -108,6 +109,18 @@ function generateCodesFromSeed(seedCode: string, count: number): string[] {
 }
 
 export function handleBuildClaim(input: BuildClaimInput): BuildClaimResult {
+  const parsed = buildClaimSchema.safeParse(input);
+  if (!parsed.success) return { success: false, error: parsed.error.issues.map((issue) => `${issue.path.join('.') || 'input'}: ${issue.message}`).join('; ') };
+  input = parsed.data;
+  const modeFields = { password: 'password-gated', whitelist: 'whitelist-gated', maxUsesPerAddress: 'whitelist-gated', numCodes: 'code-gated' } as const;
+  for (const [field, mode] of Object.entries(modeFields)) {
+    if (input[field as keyof BuildClaimInput] !== undefined && input.claimType !== mode) {
+      return { success: false, error: `${field} is only supported for ${mode} claims` };
+    }
+  }
+  if (input.claimType === 'code-gated' && (input.numCodes ?? input.maxUses) > 10000) {
+    return { success: false, error: 'The claim builder generates at most 10000 codes per request; specify numCodes within this limit.' };
+  }
   // Auto-convert 0x addresses in whitelist
   if (input.whitelist) {
     input.whitelist = input.whitelist.map(addr => ensureBb1(addr));

@@ -2,6 +2,7 @@
  * Custom 2FA builder — creates a MsgUniversalUpdateCollection for 2FA tokens with 5-minute expiry.
  * @module core/builders/custom-2fa
  */
+import { parseBuilderInput } from './input-schemas.js';
 import {
   FOREVER,
   BURN_ADDRESS,
@@ -34,6 +35,7 @@ export interface Custom2FAParams {
 }
 
 export function buildCustom2FA(params: Custom2FAParams): any {
+  params = parseBuilderInput('custom-2fa', params);
   const managerAddr = params.creator;
   if (!managerAddr) {
     throw new Error(

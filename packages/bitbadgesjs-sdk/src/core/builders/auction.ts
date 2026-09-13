@@ -2,6 +2,7 @@
  * Auction builder — creates a MsgUniversalUpdateCollection for a single-item auction.
  * @module core/builders/auction
  */
+import { parseBuilderInput } from './input-schemas.js';
 import {
   FOREVER,
   BURN_ADDRESS,
@@ -35,6 +36,7 @@ export interface AuctionParams {
 }
 
 export function buildAuction(params: AuctionParams): any {
+  params = parseBuilderInput('auction', params);
   const bidDeadlineTs = durationToTimestamp(params.bidDeadline || '7d');
   const acceptEndTs = String(Number(bidDeadlineTs) + Number(parseDuration(params.acceptWindow || '7d')));
   const sellerAddr = params.seller || params.creator || '';

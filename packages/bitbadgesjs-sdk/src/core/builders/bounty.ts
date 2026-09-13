@@ -2,6 +2,7 @@
  * Bounty builder — creates a MsgUniversalUpdateCollection for a bounty escrow.
  * @module core/builders/bounty
  */
+import { parseBuilderInput } from './input-schemas.js';
 import {
   MAX_UINT64,
   FOREVER,
@@ -44,6 +45,7 @@ export interface BountyParams {
 }
 
 export function buildBounty(params: BountyParams): any {
+  params = parseBuilderInput('bounty', params);
   if (!params.submitter) {
     throw new Error(
       'buildBounty: --submitter is required (receives the refund on deny / expire).'

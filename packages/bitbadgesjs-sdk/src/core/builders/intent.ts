@@ -8,6 +8,7 @@
  *
  * @module core/builders/intent
  */
+import { parseBuilderInput } from './input-schemas.js';
 import { resolveCoin, toBaseUnits, resolveExpiration, stableHashId } from './shared.js';
 import { buildIntentApproval, type IntentApprovalArgs } from '../intents.js';
 import { UintRangeArray } from '../uintRanges.js';
@@ -25,6 +26,7 @@ export interface IntentParams {
 }
 
 export function buildIntent(params: IntentParams): { typeUrl: string; value: any } {
+  params = parseBuilderInput('intent', params);
   const payCoin = resolveCoin(params.payDenom);
   const receiveCoin = resolveCoin(params.receiveDenom);
   // A same-denom intent is a no-op approval the chain accepts but with no

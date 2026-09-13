@@ -1,16 +1,21 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 const entry = path.resolve('dist/cjs/cli/index.js');
 const sandbox = mkdtempSync(path.join(tmpdir(), 'bb-agent-contracts-'));
 const { callTool } = await import('../dist/esm/builder/tools/registry.js');
+const { listStandardBuilders } = await import('../dist/esm/core/builders/input-schemas.js');
+const originalNow = Date.now;
+const clockFile = path.join(sandbox, 'clock.cjs');
+writeFileSync(clockFile, 'Date.now = () => 1893456000000;\n');
+Date.now = () => 1893456000000;
 let checks = 0;
 
 function cli(args: string[], expectedStatus = 0) {
-  const response = spawnSync(process.execPath, [entry, ...args], {
+  const response = spawnSync(process.execPath, ['--require', clockFile, entry, ...args], {
     cwd: sandbox,
     env: { PATH: process.env.PATH, HOME: sandbox, NODE_ENV: 'test' },
     encoding: 'utf8',
@@ -26,6 +31,24 @@ function cli(args: string[], expectedStatus = 0) {
 }
 
 try {
+  const capabilities = cli(['dev', 'capabilities']).data;
+  assert.equal(capabilities.schemaVersion, 1);
+  assert.deepEqual((await callTool('get_capabilities', {})).result, capabilities);
+  const claimCapability = cli(['dev', 'capabilities', 'build_claim']).data;
+  assert.deepEqual((await callTool('get_capabilities', { id: 'build_claim' })).result, claimCapability);
+  assert.ok(claimCapability.capabilities[0].inputSchema);
+  assert.equal(cli(['dev', 'capabilities', 'unknown_operation'], 1).error.code, 'invalid_input');
+  for (const { id, example } of listStandardBuilders()) {
+    const name = `build_${id.replace(/-/g, '_')}`;
+    const result = await callTool(name, example);
+    assert.ok(!result.isError, `${name}: ${result.text}`);
+    const viaTool = cli(['dev', 'tools', 'call', name, '--args', JSON.stringify(example)]);
+    assert.deepEqual(viaTool.data, result.result, `${id} tool CLI/MCP proposal parity`);
+    if (id !== 'quests') {
+      const native = cli(['build', id, '--json', JSON.stringify(example), '--json-only']);
+      assert.deepEqual(native.data, result.result, `${id} CLI/MCP proposal parity`);
+    }
+  }
   for (const args of [
     ['build', 'subscription'],
     ['build', 'subscription', '--json', '{broken'],
@@ -38,6 +61,11 @@ try {
     assert.ok(failure.error.message);
   }
   const skills = cli(['dev', 'skills']).data;
+  const claimInput = { claimType: 'open', name: 'Agent example', maxUses: 2 };
+  const claim = cli(['dev', 'tools', 'call', 'build_claim', '--args', JSON.stringify(claimInput)]);
+  assert.ok(claim.ok);
+  const invalidClaim = await callTool('build_claim', { ...claimInput, claimType: 'unsupported' });
+  assert.equal(invalidClaim.isError, true);
   assert.ok(skills.length > 0);
   const mcpSkills = await callTool('list_skills', {});
   assert.deepEqual(mcpSkills.result, skills);
@@ -82,5 +110,6 @@ try {
     `Agent artifact contracts passed: ${checks} CLI invocations, ${skills.length} skills, ${examples.length} payment examples. No signing or broadcast.`
   );
 } finally {
+  Date.now = originalNow;
   rmSync(sandbox, { recursive: true, force: true });
 }

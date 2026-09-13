@@ -2,6 +2,7 @@
  * Prediction Market builder — creates a MsgUniversalUpdateCollection for a binary prediction market.
  * @module core/builders/prediction-market
  */
+import { parseBuilderInput } from './input-schemas.js';
 import {
   MAX_UINT64,
   BURN_ADDRESS,
@@ -29,6 +30,7 @@ export interface PredictionMarketParams {
 }
 
 export function buildPredictionMarket(params: PredictionMarketParams): any {
+  params = parseBuilderInput('prediction-market', params);
   const coin = resolveCoin(params.denom || 'USDC');
   const bothTokenIds = [{ start: '1', end: '2' }];
   const yesTokenIds = [{ start: '1', end: '1' }];

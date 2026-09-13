@@ -83,6 +83,8 @@ import {
 
 import { getSkillInstructions, getAllSkillInstructions } from '../resources/index.js';
 import { buildPaymentRequestV2Tool, handleBuildPaymentRequestV2 } from './builders/buildPaymentRequestV2.js';
+import { createHash } from 'node:crypto';
+import { standardBuilderTools } from './builders/buildStandard.js';
 
 // Re-export session persistence helpers so external consumers (e.g.
 // bitbadges-cli) can snapshot / restore session state across process
@@ -162,6 +164,15 @@ const getSkillInstructionsTool: ToolSchema = {
  * The tool registry. Keys are builder tool names.
  */
 export const toolRegistry: Record<string, ToolEntry> = {
+  ...standardBuilderTools,
+  get_capabilities: entry(
+    {
+      name: 'get_capabilities',
+      description: 'Discover installed CLI/MCP operations without fetching full schemas. Supply id for one operation schema. Equivalent to bb dev capabilities [id].',
+      inputSchema: { type: 'object', additionalProperties: false, properties: { id: { type: 'string' } } }
+    },
+    (args) => getCapabilityCatalog(args.id)
+  ),
   list_skills: entry(
     {
       name: 'list_skills',
@@ -268,6 +279,27 @@ export const toolRegistry: Record<string, ToolEntry> = {
   generate_unique_id: entry(generateUniqueIdTool, handleGenerateUniqueId),
   generate_wrapper_address: entry(generateWrapperAddressTool, handleGenerateWrapperAddress)
 };
+
+export function getCapabilityCatalog(id?: string) {
+  if (id !== undefined && (typeof id !== 'string' || !Object.prototype.hasOwnProperty.call(toolRegistry, id))) {
+    throw new Error(`Unknown capability: ${String(id)}. Run bb dev capabilities to list installed operations.`);
+  }
+  const entries = Object.entries(toolRegistry).sort(([left], [right]) => left.localeCompare(right));
+  const catalogHash = createHash('sha256').update(JSON.stringify(entries.map(([, entry]) => entry.tool))).digest('hex');
+  return {
+    schemaVersion: 1,
+    catalogHash,
+    primaryInterface: 'cli',
+    scope: 'Shared builder tools. Standard-specific CLI commands and native Cosmos commands remain discoverable with bb --help-json and bb tx --help.',
+    capabilities: entries.filter(([name]) => id === undefined || name === id).map(([name, entry]) => ({
+      id: name,
+      description: entry.tool.description,
+      cli: ['bb', 'dev', 'tools', 'call', name],
+      mcp: name,
+      ...(id !== undefined ? { inputSchema: entry.tool.inputSchema } : {})
+    }))
+  };
+}
 
 /** List every registered tool schema in registry order. */
 export function listTools(): ToolSchema[] {

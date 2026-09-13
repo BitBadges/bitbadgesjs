@@ -12,6 +12,7 @@
  *
  * @module core/builders/payment-request
  */
+import { parseBuilderInput } from './input-schemas.js';
 import {
   FOREVER,
   BURN_ADDRESS,
@@ -49,6 +50,7 @@ export interface PaymentRequestParams {
 }
 
 export function buildPaymentRequest(params: PaymentRequestParams): any {
+  params = parseBuilderInput('payment-request', params);
   // Self-payments are a no-op that bypass the standard's intent. The
   // SDK validator + indexer-side verifier both enforce this; failing
   // fast at build time gives callers a clearer error than the chain

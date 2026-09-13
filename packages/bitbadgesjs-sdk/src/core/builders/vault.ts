@@ -2,6 +2,7 @@
  * Vault builder — creates a MsgUniversalUpdateCollection for a backed vault token.
  * @module core/builders/vault
  */
+import { parseBuilderInput } from './input-schemas.js';
 import {
   FOREVER,
   MAX_UINT64,
@@ -36,6 +37,7 @@ export interface VaultParams {
 }
 
 export function buildVault(params: VaultParams): any {
+  params = parseBuilderInput('vault', params);
   const coin = resolveCoin(params.backingCoin);
   const backingAddr = generateAliasAddressForIBCBackedDenom(coin.denom);
   // Validate the symbol against the chain's wrapper-path regex

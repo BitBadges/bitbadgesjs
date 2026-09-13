@@ -1,0 +1,128 @@
+{
+  "address-list": {
+    "uri": "https://example.com/metadata.json",
+    "creator": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm"
+  },
+  "auction": {
+    "uri": "https://example.com/metadata.json",
+    "seller": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+    "bidDeadline": "7d",
+    "acceptWindow": "7d"
+  },
+  "bid": {
+    "address": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+    "collectionId": "1",
+    "tokenIds": "1",
+    "price": 1,
+    "denom": "BADGE",
+    "expiration": "24h"
+  },
+  "bounty": {
+    "uri": "https://example.com/metadata.json",
+    "amount": 1,
+    "denom": "BADGE",
+    "verifier": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+    "recipient": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7",
+    "submitter": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+    "expiration": "30d"
+  },
+  "credit-token": {
+    "uri": "https://example.com/metadata.json",
+    "paymentDenom": "BADGE",
+    "recipient": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7"
+  },
+  "crowdfund": {
+    "uri": "https://example.com/metadata.json",
+    "goal": 10,
+    "denom": "BADGE",
+    "crowdfunder": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+    "deadline": "30d"
+  },
+  "custom-2fa": {
+    "uri": "https://example.com/metadata.json",
+    "creator": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm"
+  },
+  "intent": {
+    "address": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+    "collectionId": "1",
+    "payDenom": "BADGE",
+    "payAmount": 1,
+    "receiveDenom": "USDC",
+    "receiveAmount": 1,
+    "expiration": "24h"
+  },
+  "listing": {
+    "address": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+    "collectionId": "1",
+    "tokenIds": "1",
+    "price": 1,
+    "denom": "BADGE",
+    "expiration": "24h"
+  },
+  "payment-request": {
+    "uri": "https://example.com/metadata.json",
+    "amount": 1,
+    "denom": "BADGE",
+    "payer": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+    "recipient": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7",
+    "expiration": "30d"
+  },
+  "pm-buy-intent": {
+    "address": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+    "collectionId": "1",
+    "token": "yes",
+    "amount": 1,
+    "price": 1,
+    "denom": "BADGE",
+    "expiration": "24h"
+  },
+  "pm-sell-intent": {
+    "address": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+    "collectionId": "1",
+    "token": "yes",
+    "amount": 1,
+    "price": 1,
+    "denom": "BADGE",
+    "expiration": "24h"
+  },
+  "prediction-market": {
+    "uri": "https://example.com/metadata.json",
+    "verifier": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+    "denom": "BADGE"
+  },
+  "product-catalog": {
+    "uri": "https://example.com/metadata.json",
+    "storeAddress": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7",
+    "products": [
+      {
+        "name": "Example product",
+        "price": 1,
+        "denom": "BADGE",
+        "uri": "https://example.com/metadata.json"
+      }
+    ]
+  },
+  "quests": {
+    "uri": "https://example.com/metadata.json",
+    "reward": 1,
+    "denom": "BADGE",
+    "maxClaims": 2
+  },
+  "smart-token": {
+    "uri": "https://example.com/metadata.json",
+    "backingCoin": "BADGE",
+    "symbol": "vBADGE"
+  },
+  "subscription": {
+    "uri": "https://example.com/metadata.json",
+    "interval": "monthly",
+    "price": 5,
+    "denom": "BADGE",
+    "recipient": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7"
+  },
+  "vault": {
+    "uri": "https://example.com/metadata.json",
+    "backingCoin": "BADGE",
+    "symbol": "vBADGE"
+  }
+}
