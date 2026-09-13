@@ -22,7 +22,8 @@ function privateDirectory(create = false): string {
   const dir = directory();
   if (create) fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   const stat = fs.lstatSync(dir);
-  if (!stat.isDirectory() || (stat.mode & 0o077) !== 0) throw new Error('Signing request directory must be a private directory (mode 0700).');
+  if (!stat.isDirectory() || (process.platform !== 'win32' && (stat.mode & 0o077) !== 0))
+    throw new Error('Signing request directory must be a private directory (mode 0700).');
   return dir;
 }
 
@@ -32,10 +33,12 @@ function recordPath(id: string, create = false): string {
 }
 
 function readRecord(id: string): RecordData {
-  const fd = fs.openSync(recordPath(id), fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
+  const file = recordPath(id);
+  if (fs.lstatSync(file).isSymbolicLink()) throw new Error('Signing request record cannot be a symbolic link.');
+  const fd = fs.openSync(file, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
   try {
     const stat = fs.fstatSync(fd);
-    if (!stat.isFile() || stat.size > 128 * 1024 || (stat.mode & 0o077) !== 0)
+    if (!stat.isFile() || stat.size > 128 * 1024 || (process.platform !== 'win32' && (stat.mode & 0o077) !== 0))
       throw new Error('Signing request record must be a private, bounded file.');
     const raw = recordSchema.parse(JSON.parse(fs.readFileSync(fd, 'utf8')));
     const request = parseBrowserTxRequest(raw.request, raw.createdAt);

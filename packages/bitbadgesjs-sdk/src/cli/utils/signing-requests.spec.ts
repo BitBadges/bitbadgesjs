@@ -33,8 +33,10 @@ test('persists a private request and refuses overwriting its identity', async ()
   const value = request();
   saveSigningRequest(value);
   const file = path.join(directory, 'signing-requests', `${value.requestId}.json`);
-  expect(fs.statSync(file).mode & 0o777).toBe(0o600);
-  expect(fs.statSync(path.dirname(file)).mode & 0o777).toBe(0o700);
+  if (process.platform !== 'win32') {
+    expect(fs.statSync(file).mode & 0o777).toBe(0o600);
+    expect(fs.statSync(path.dirname(file)).mode & 0o777).toBe(0o700);
+  }
   expect(JSON.parse(fs.readFileSync(file, 'utf8')).request).toEqual(value);
   expect(() => saveSigningRequest(value)).toThrow();
   expect(listSigningRequests()).toEqual([value.requestId]);
@@ -113,4 +115,22 @@ test('expired requests cannot resume, and symlink records are refused', async ()
   fs.renameSync(file, `${file}.saved`);
   fs.symlinkSync(`${file}.saved`, file);
   await expect(getSigningRequestStatus(value.requestId)).rejects.toThrow();
+});
+
+test('uses OS permissions on Windows rather than rejecting synthetic POSIX mode bits', async () => {
+  const value = request();
+  saveSigningRequest(value);
+  const file = path.join(directory, 'signing-requests', `${value.requestId}.json`);
+  fs.chmodSync(file, 0o644);
+  if (process.platform !== 'win32') await expect(getSigningRequestStatus(value.requestId)).rejects.toThrow(/private/);
+  const platform = Object.getOwnPropertyDescriptor(process, 'platform')!;
+  Object.defineProperty(process, 'platform', { value: 'win32' });
+  try {
+    expect(await getSigningRequestStatus(value.requestId)).toMatchObject({ outcome: 'unknown' });
+    fs.renameSync(file, `${file}.saved`);
+    fs.symlinkSync(`${file}.saved`, file);
+    await expect(getSigningRequestStatus(value.requestId)).rejects.toThrow();
+  } finally {
+    Object.defineProperty(process, 'platform', platform);
+  }
 });
