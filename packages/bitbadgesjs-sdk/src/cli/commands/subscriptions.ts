@@ -37,11 +37,14 @@ import {
   isSubscriptionFaucetApproval,
   isUserRecurringApproval,
   getNextChargeTime,
+  getSubscriptionAccessStatus,
+  getSubscriptionRenewalConsentStatus,
   userRecurringApproval
 } from '../../core/subscriptions.js';
 import { getBalanceForIdAndTime } from '../../core/balances.js';
 import { UintRangeArray } from '../../core/uintRanges.js';
 import { BalanceDoc } from '../../api-indexer/docs-types/docs.js';
+import { UserIncomingApproval } from '../../core/approvals.js';
 import { BigIntify } from '../../common/string-numbers.js';
 
 /**
@@ -248,7 +251,7 @@ addOutputFlags(
   addNetworkFlags(
     subscriptionsCommand
       .command('status')
-      .description('Per-tier subscription state for an address: is-subscribed, has-future-approval, next charge time.')
+      .description('Per-tier owned access and renewal consent. Consent is not proof of payment; failed lookups return an error.')
       .argument('<collection-id>', 'Subscription collection ID')
       .requiredOption('--address <a>', 'Address to query (bb1.../0x — auto-normalized)')
   )
@@ -259,39 +262,39 @@ addOutputFlags(
     validateOrExit(collection, 'subscriptions status');
     const faucets = listFaucets(collection);
 
-    let balances: any = null;
-    try {
-      balances = await fetchUserBalances(String(collectionId), address, opts);
-    } catch {
-      // Address may not have a balance doc yet — treat as zero state.
+    const response = await fetchUserBalances(String(collectionId), address, opts);
+    const state = response?.balance ?? response;
+    if (!Array.isArray(state?.balances) || !Array.isArray(state?.incomingApprovals)) {
+      throw new Error('Subscription status is unavailable: balance response omitted ownership or recurring approval state. Retry the lookup.');
     }
-    const userBalances = balances?.balance?.balances ?? balances?.balances ?? [];
-    const userIncomingApprovals = balances?.balance?.incomingApprovals ?? balances?.incomingApprovals ?? [];
+    const userBalances = state.balances;
+    const userIncomingApprovals = state.incomingApprovals.map((approval: any) => new UserIncomingApproval(approval).convert(BigIntify));
     const now = BigInt(Date.now());
 
     const tiers = faucets.map((faucet: any) => {
       const tokenId = BigInt(faucet.tokenIds?.[0]?.start ?? 1);
-      const balanceForToken = userBalances.find((b: any) =>
-        (b.tokenIds ?? []).some((r: any) => BigInt(r.start) <= tokenId && tokenId <= BigInt(r.end))
-      );
-      const subscribedTimes: { start: bigint; end: bigint }[] =
-        balanceForToken?.ownershipTimes?.map((r: any) => ({ start: BigInt(r.start), end: BigInt(r.end) })) ?? [];
-      const isSubscribed = subscribedTimes.some((r) => r.start <= now && now <= r.end);
+      const access = getSubscriptionAccessStatus(tokenId, userBalances, now);
 
       const futureApproval = userIncomingApprovals.find((a: any) => isUserRecurringApproval(a, faucet));
       const hasFutureApproval = !!futureApproval;
+      const renewalConsentStatus = getSubscriptionRenewalConsentStatus(faucet, futureApproval, now);
 
       const incremented =
         futureApproval?.approvalCriteria?.predeterminedBalances?.incrementedBalances;
-      const nextCharge = incremented
-        ? getNextChargeTime(futureApproval.approvalCriteria.predeterminedBalances)
+      const nextCharge = incremented && renewalConsentStatus === 'recorded'
+        ? getNextChargeTime(futureApproval.approvalCriteria?.predeterminedBalances)
         : null;
 
       return {
         approvalId: faucet.approvalId,
-        isSubscribed,
-        subscribedTimes: subscribedTimes.map((r) => ({ start: r.start.toString(), end: r.end.toString() })),
+        status: access.status,
+        isSubscribed: access.isSubscribed,
+        subscribedTimes: access.subscribedTimes?.map((r) => ({ start: r.start.toString(), end: r.end.toString() })),
+        currentAccessEndsAt: access.currentAccessEndsAt?.toString() ?? null,
+        futureAccessTimes: access.futureAccessTimes?.map((r) => ({ start: r.start.toString(), end: r.end.toString() })),
+        nextAccessStartsAt: access.nextAccessStartsAt?.toString() ?? null,
         hasFutureApproval,
+        renewalConsentStatus,
         nextChargeTime: nextCharge ? nextCharge.toString() : null
       };
     });

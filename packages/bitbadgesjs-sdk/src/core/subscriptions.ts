@@ -12,6 +12,48 @@ import { UintRangeArray } from './uintRanges.js';
 import { AddressList } from './addressLists.js';
 import type { iCollectionApprovalWithDetails } from './approvals.js';
 
+type SubscriptionAccessBalance = {
+  amount: bigint | string | number;
+  tokenIds: { start: bigint | string | number; end: bigint | string | number }[];
+  ownershipTimes: { start: bigint | string | number; end: bigint | string | number }[];
+};
+
+/** Ownership is independent of recurring consent; missing lookup state never means no access. */
+export function getSubscriptionAccessStatus(tokenId: bigint, balances: readonly SubscriptionAccessBalance[] | undefined, now = BigInt(Date.now())) {
+  if (!balances) {
+    return {
+      status: 'unavailable' as const, isSubscribed: null, subscribedTimes: null,
+      currentAccessEndsAt: null, futureAccessTimes: null, nextAccessStartsAt: null
+    };
+  }
+  const subscribedTimes = UintRangeArray.From(balances
+    .filter(balance => BigInt(balance.amount) > 0n && balance.tokenIds.some(range => BigInt(range.start) <= tokenId && tokenId <= BigInt(range.end)))
+    .flatMap(balance => balance.ownershipTimes.map(range => ({ start: BigInt(range.start), end: BigInt(range.end) }))))
+    .sortAndMerge().map(range => ({ start: range.start, end: range.end }));
+  const current = subscribedTimes.find(range => range.start <= now && now <= range.end);
+  return {
+    status: 'available' as const,
+    isSubscribed: !!current,
+    subscribedTimes,
+    currentAccessEndsAt: current?.end ?? null,
+    futureAccessTimes: subscribedTimes.filter(range => range.end > now).map(range => ({ start: range.start > now ? range.start : now + 1n, end: range.end })),
+    nextAccessStartsAt: subscribedTimes.find(range => range.start > now)?.start ?? null
+  };
+}
+
+/** A recorded consent is not evidence of a successful or guaranteed future charge. */
+export function getSubscriptionRenewalConsentStatus(
+  faucet: Pick<iCollectionApproval<bigint>, 'transferTimes'>,
+  approval: Pick<iUserIncomingApproval<bigint>, 'transferTimes'> | undefined,
+  now = BigInt(Date.now())
+) {
+  if (!approval) return 'none' as const;
+  const hasFutureIntersection = approval.transferTimes.some(userWindow => faucet.transferTimes.some(faucetWindow =>
+    userWindow.end >= now && faucetWindow.end >= now && userWindow.start <= faucetWindow.end && faucetWindow.start <= userWindow.end
+  ));
+  return hasFutureIntersection ? 'recorded' as const : 'expired' as const;
+}
+
 export const getCurrentInterval = (resetTimeIntervals: iResetTimeIntervals<bigint> | undefined) => {
   // If no resets, we just treat it as one big interval
   if (!resetTimeIntervals || resetTimeIntervals.startTime === 0n || resetTimeIntervals.intervalLength === 0n) {

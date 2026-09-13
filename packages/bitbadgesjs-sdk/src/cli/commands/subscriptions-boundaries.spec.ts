@@ -74,6 +74,39 @@ describe('subscription charge-due boundaries', () => {
     expect(indexer.emitIndexerResult).not.toHaveBeenCalled();
     expect(indexer.emitIndexerError).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringMatching(/Indexer unavailable/) }));
   });
+  it('does not report unsubscribed when status lookup fails', async () => {
+    const collection = normalizeForReview(buildSubscription({ interval: 'daily', price: 1, denom: 'BADGE', recipient: address, uri: 'https://example.com/sub.json' }));
+    (indexer.callIndexer as jest.Mock).mockImplementation(async (_method, path) => {
+      if (path.includes('/balance/')) throw new Error('Indexer unavailable');
+      return collection;
+    });
+    await subscriptionsCommand.parseAsync(['status', '1', '--address', address], { from: 'user' });
+    expect(indexer.emitIndexerResult).not.toHaveBeenCalled();
+    expect(indexer.emitIndexerError).toHaveBeenCalled();
+  });
+  it('reports all confirmed access ranges separately from renewal consent', async () => {
+    jest.spyOn(Date, 'now').mockReturnValue(100);
+    const collection = normalizeForReview(buildSubscription({ interval: 'daily', price: 1, denom: 'BADGE', recipient: address, uri: 'https://example.com/sub.json' }));
+    (indexer.callIndexer as jest.Mock).mockImplementation(async (_method, path) => path.includes('/balance/')
+      ? { balances: [
+        { amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: [{ start: '1', end: '20' }] },
+        { amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: [{ start: '90', end: '120' }, { start: '200', end: '299' }] }
+      ], incomingApprovals: [] }
+      : collection);
+    await subscriptionsCommand.parseAsync(['status', '1', '--address', address], { from: 'user' });
+    expect(indexer.emitIndexerError).not.toHaveBeenCalled();
+    expect((indexer.emitIndexerResult as jest.Mock).mock.calls[0][0].tiers[0]).toMatchObject({
+      isSubscribed: true, hasFutureApproval: false, currentAccessEndsAt: '120', nextAccessStartsAt: '200',
+      futureAccessTimes: [{ start: '101', end: '120' }, { start: '200', end: '299' }]
+    });
+  });
+  it.each([{ balances: [] }, { incomingApprovals: [] }])('rejects incomplete status state: %j', async state => {
+    const collection = normalizeForReview(buildSubscription({ interval: 'daily', price: 1, denom: 'BADGE', recipient: address, uri: 'https://example.com/sub.json' }));
+    (indexer.callIndexer as jest.Mock).mockImplementation(async (_method, path) => path.includes('/balance/') ? state : collection);
+    await subscriptionsCommand.parseAsync(['status', '1', '--address', address], { from: 'user' });
+    expect(indexer.emitIndexerResult).not.toHaveBeenCalled();
+    expect(indexer.emitIndexerError).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringMatching(/status is unavailable/) }));
+  });
   it.each(['enable-renewal', 'subscribe', 'cancel'])('refuses %s when the balance response omits approval state', async action => {
     const collection = normalizeForReview(buildSubscription({ interval: 'daily', price: 1, denom: 'BADGE', recipient: address, uri: 'https://example.com/sub.json' }));
     (indexer.callIndexer as jest.Mock).mockImplementation(async (_method, path) => path.includes('/balance/') ? {} : collection);
