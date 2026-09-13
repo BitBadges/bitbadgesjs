@@ -76,12 +76,11 @@ Usage:
   docs --refresh                    Force refresh the cached docs
 
 Section Navigation (use slugs from the tree view, separated by /):
-  docs learn                        All learning material
-  docs learn/approval-criteria      Just the approval criteria section
-  docs learn/approval-criteria/merkle-challenges   A specific sub-topic
-  docs messages                     All message type docs
-  docs messages/msg-transfer-tokens A specific message
-  docs examples                     Code examples and snippets
+  docs standards                    All standard guides
+  docs standards/payments           Invoice and payment-link contracts
+  docs token-standard/approval-criteria/merkle-challenges   A specific sub-topic
+  docs token-standard/messages      All token message docs
+  docs token-standard/messages/msg-transfer-tokens   A specific message
   skills                            Installed skill catalog (offline)
   skills smart-token                Installed smart-token instructions
 
@@ -102,7 +101,7 @@ Cache: ~/.bitbadges/docs-cache.json | Refresh: docs --refresh`)
     if (!section) {
       console.log('BitBadges Documentation\n');
       console.log(printTree(docs.tree));
-      console.log('\nNavigate with slashes: docs learn/approval-criteria/merkle-challenges');
+      console.log('\nNavigate with slashes: docs standards/payments');
       console.log('Dump everything: docs all');
       console.log('Partial match: docs approvals (finds first match)');
       return;
