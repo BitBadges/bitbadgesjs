@@ -55,7 +55,7 @@ The table above is historical. Read the installed release with `bitbadges-cli --
 
 ## CLI Workflow
 
-For compact operation discovery, run `bb dev capabilities`; supply an ID such as `build_subscription` to receive its installed input schema and example. The response has a `schemaVersion` and `catalogHash`; MCP's `get_capabilities` returns the same catalog. The shared tool adapter includes 18 standard builders as well as PaymentRequestV2 and existing review/query tools. Standard-specific CLI actions and native Cosmos commands remain separate discovery surfaces.
+For compact operation discovery, run `bb dev capabilities`; supply an ID such as `build_subscription` to receive its installed input schema and example. The response has a `schemaVersion` and `catalogHash`; MCP's `get_capabilities` returns the same catalog. The shared tool adapter includes 18 standard builders, PaymentRequestV2, 52 standard actions, local signing-request inspection, and existing review/query tools. Native Cosmos commands remain CLI-only.
 
 Builder inputs are checked against schemas generated from their TypeScript parameter declarations. Unknown fields and wrong JSON types fail; they are never interpreted as additional on-chain guarantees. These are structural checks, supplemented by each builder's runtime rules. Review and simulation are still required. Existing display-unit numeric fields remain numbers, while PaymentRequestV2 integer base units remain decimal strings. Do not change units to fit a guessed schema.
 
@@ -79,9 +79,13 @@ For the user's wallet, `bb deploy --browser --msg-file <proposal> --expected-add
 
 Proposed, signed, submitted, confirmed and indexed are distinct states. Inspect the result's confirmation and verification fields; a transaction hash alone is not confirmation. Reconcile unknown results before retrying. Never put private keys or mnemonics in prompts. Skill instructions describe a policy but do not enforce it. Direct invoice payments do not provide cancellation, refunds, escrow or prorations.
 
+Browser transaction requests are saved locally before dispatch. Use `bb dev requests list`, `bb dev requests status <requestId>`, and `bb dev requests resume <requestId>`. Resume returns the original URL only while the original CLI listener remains alive and the request is unexpired and incomplete; keep that process running. It never creates or submits a replacement. Listener loss is `unknown` with `retrySafe: false`. Saved callbacks remain unverified; inspect a hash with `bb tx status` / `bb tx wait` on the original network, then reconcile invoice or subscription progress. Keep request files and links private. `BITBADGES_CONFIG_DIR` selects a separate configuration directory for an isolated agent environment.
+
 ### MCP Adapter
 
 The bundled `bitbadges-builder` server exposes installed skills, unsigned construction, queries, validation, review and simulation. Call `list_skills` then `get_skill_instructions` with `{"skillId":"<id>"}`. Prefer a high-level builder where exposed; otherwise use the CLI preset. Do not assume complete CLI/MCP operation parity. Use distinct session IDs for independent advanced builds.
+
+Discover action inputs with `get_capabilities`, for example `{"id":"standard_pay_requests_pay"}`. Standard actions execute the corresponding installed CLI command with literal arguments and return its JSON envelope. They expose only business inputs and network selection, never signing flags, credentials, endpoints, shell commands, or output files. Amount strings follow CLI units. Install CLI and MCP from the same SDK version; mismatched catalogs are rejected. `BITBADGES_CLI_PATH` is an optional trusted executable path configured by the operator. Signing handoff stays in the CLI; MCP can inspect saved requests with `list_signing_requests` and `signing_request_status`.
 
 ### Register with your MCP client
 
@@ -108,7 +112,7 @@ For new collections and standard workflows, start with the CLI preset. Use SDK c
 
 ### Verify Agent Contracts
 
-Maintainers run `bun run build` followed by `bun run test:agent-contracts`. The gate exercises the built CLI and MCP artifacts offline, checks canonical skill parity, builds shipped payment examples and rejects unsupported fields. It does not sign or broadcast. These deterministic checks do not establish fresh-model task success or complete operation coverage.
+Maintainers run `bun run build`, `bun run test:agent-contracts`, and `bun run test:agent-workflows`. The gates exercise built CLI/MCP artifacts, canonical skill parity, shipped payment examples, unsupported inputs, unsigned actions across nine standard families, and local request recovery. Workflow API responses come from a loopback fixture. They do not sign or broadcast. These deterministic checks complement independent fresh-agent tasks; they do not prove live chain execution.
 
 ---
 
