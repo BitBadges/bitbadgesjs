@@ -47,6 +47,7 @@ export function bitbadgesApiCreditsCollectionId(network: 'mainnet' | 'testnet' |
 export interface CreditTokenTier {
   /** Approval id — `credit-scaled` or `credit-<N>`. */
   approvalId: string;
+  version?: bigint;
   /** Display-units-per-tier (1 for scaled, N for `credit-<N>`). */
   value: number;
   /** Payment denom (chain-side; ibc/... or ubadge). */
@@ -87,7 +88,9 @@ export function extractCreditTokenTiers(
   for (const approval of approvals) {
     if (!approval.approvalId?.startsWith('credit-')) continue;
 
-    const coinTransfer = approval.approvalCriteria?.coinTransfers?.[0];
+    const transfers = approval.approvalCriteria?.coinTransfers ?? [];
+    if (transfers.length !== 1 || transfers[0].coins.length !== 1 || transfers[0].overrideToWithInitiator || transfers[0].overrideFromWithApproverAddress) continue;
+    const coinTransfer = transfers[0];
     if (!coinTransfer) continue;
     const paymentDenom = coinTransfer.coins[0]?.denom ?? '';
     const paymentAmount = BigInt(coinTransfer.coins[0]?.amount ?? '0');
@@ -105,6 +108,7 @@ export function extractCreditTokenTiers(
       );
       tiers.push({
         approvalId: approval.approvalId,
+        version: BigInt(approval.version ?? 0),
         value: 1,
         paymentDenom,
         paymentAmount,
@@ -122,6 +126,7 @@ export function extractCreditTokenTiers(
     if (!Number.isFinite(value) || value <= 0) continue;
     tiers.push({
       approvalId: approval.approvalId,
+      version: BigInt(approval.version ?? 0),
       value,
       paymentDenom,
       paymentAmount,
@@ -143,6 +148,45 @@ export interface PurchaseCreditTokenMsg {
   value: Record<string, unknown>;
 }
 
+export type CreditPurchaseDecimals = { paymentDecimals?: number; creditDecimals?: number };
+
+function creditDisplayAmount(amount: bigint, decimals?: number): string | null {
+  if (decimals === undefined) return null;
+  if (!Number.isInteger(decimals) || decimals < 0 || decimals > 255) throw new Error('Invalid asset decimals.');
+  if (decimals === 0) return amount.toString();
+  const digits = amount.toString().padStart(decimals + 1, '0');
+  const fraction = digits.slice(-decimals).replace(/0+$/, '');
+  return digits.slice(0, -decimals) + (fraction ? `.${fraction}` : '');
+}
+
+/** Exact terms quote; balances, eligibility, network fees and external consumption are not inferred. */
+export function quoteCreditTokenPurchase(tier: CreditTokenTier, units: bigint, decimals: CreditPurchaseDecimals = {}) {
+  if (units <= 0n) throw new Error('Purchase multiplier must be a positive integer.');
+  if (tier.paymentAmount <= 0n || tier.mintAmount <= 0n || !tier.paymentDenom || !tier.recipient) {
+    throw new Error('Credit tier must have a positive payment, positive mint amount, denomination and recipient.');
+  }
+  if (!tier.isScaled && units !== 1n) throw new Error('Legacy credit tiers support exactly one pack per transaction.');
+  if (tier.isScaled && tier.maxMultiplier && tier.maxMultiplier > 0n && units > tier.maxMultiplier) {
+    throw new Error(`Requested multiplier ${units} exceeds the maximum ${tier.maxMultiplier}. Choose a smaller quantity explicitly.`);
+  }
+  const payment = tier.paymentAmount * units;
+  const minted = tier.mintAmount * units;
+  return {
+    approvalId: tier.approvalId,
+    requestedMultiplier: units,
+    actualMultiplier: units,
+    maximumMultiplier: tier.isScaled ? (tier.maxMultiplier && tier.maxMultiplier > 0n ? tier.maxMultiplier : null) : 1n,
+    limitingRule: tier.isScaled ? 'maxScalingMultiplier' : 'oneLegacyPack',
+    payment: { denom: tier.paymentDenom, recipient: tier.recipient, baseAmount: payment, decimals: decimals.paymentDecimals ?? null, displayAmount: creditDisplayAmount(payment, decimals.paymentDecimals) },
+    minted: { tokenId: '1', baseAmount: minted, decimals: decimals.creditDecimals ?? null, displayAmount: creditDisplayAmount(minted, decimals.creditDecimals) },
+    ratio: { paymentBaseAmount: tier.paymentAmount, mintedBaseAmount: tier.mintAmount },
+    remainingCredits: null,
+    consumptionTracking: 'external-ledger',
+    feesIncluded: false,
+    eligibility: 'not-checked'
+  };
+}
+
 /**
  * Build the MsgTransferTokens for purchasing N credit-token units from a
  * scaled tier. The chain handles the rate math via the approval's
@@ -150,8 +194,7 @@ export interface PurchaseCreditTokenMsg {
  * `mintAmount × multiplier` and prioritize the approval.
  *
  * For legacy (per-tier) approvals, pass `tier.isScaled === false` and we
- * fall back to the precalculate-from-approval flow (one tx per unit).
- * Caller can repeat the same msg N times for N units.
+ * fall back to the precalculate-from-approval flow (exactly one pack).
  */
 export function buildPurchaseCreditTokenMsg(
   creator: string,
@@ -159,16 +202,10 @@ export function buildPurchaseCreditTokenMsg(
   tier: CreditTokenTier,
   units: bigint
 ): PurchaseCreditTokenMsg {
-  if (units <= 0n) {
-    throw new Error('buildPurchaseCreditTokenMsg: --units must be > 0');
-  }
+  const quote = quoteCreditTokenPurchase(tier, units);
 
   if (tier.isScaled) {
-    const multiplier =
-      tier.maxMultiplier !== undefined && tier.maxMultiplier > 0n && units > tier.maxMultiplier
-        ? tier.maxMultiplier
-        : units;
-    const mintTotal = tier.mintAmount * multiplier;
+    const mintTotal = quote.minted.baseAmount;
     return {
       typeUrl: '/tokenization.MsgTransferTokens',
       value: {
@@ -190,7 +227,7 @@ export function buildPurchaseCreditTokenMsg(
                 approvalId: tier.approvalId,
                 approvalLevel: 'collection',
                 approverAddress: '',
-                version: '0'
+                version: (tier.version ?? 0n).toString()
               }
             ],
             onlyCheckPrioritizedCollectionApprovals: true,
@@ -218,7 +255,7 @@ export function buildPurchaseCreditTokenMsg(
             approvalId: tier.approvalId,
             approvalLevel: 'collection',
             approverAddress: '',
-            version: '0',
+            version: (tier.version ?? 0n).toString(),
             precalculationOptions: { overrideTimestamp: '0', tokenIdsOverride: [] }
           },
           prioritizedApprovals: [
@@ -226,7 +263,7 @@ export function buildPurchaseCreditTokenMsg(
               approvalId: tier.approvalId,
               approvalLevel: 'collection',
               approverAddress: '',
-              version: '0'
+              version: (tier.version ?? 0n).toString()
             }
           ],
           onlyCheckPrioritizedCollectionApprovals: true,

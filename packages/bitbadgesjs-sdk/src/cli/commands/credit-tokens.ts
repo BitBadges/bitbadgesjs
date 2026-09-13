@@ -28,8 +28,22 @@ import {
   doesCollectionFollowCreditTokenProtocol,
   extractCreditTokenTiers,
   buildPurchaseCreditTokenMsg,
+  quoteCreditTokenPurchase,
+  type CreditTokenTier,
   bitbadgesApiCreditsCollectionId
 } from '../../core/credit-tokens.js';
+import { MAINNET_COINS_REGISTRY, TESTNET_COINS_REGISTRY } from '../../common/constants.js';
+
+function selectPurchaseTier(tiers: CreditTokenTier[], approvalId?: string): CreditTokenTier {
+  const tier = approvalId ? tiers.find((item) => item.approvalId === approvalId) : tiers.length === 1 ? tiers[0] : undefined;
+  if (!tier) throw new Error(`Choose --tier explicitly. Available tiers: ${tiers.map((item) => item.approvalId).join(', ') || 'none'}.`);
+  return tier;
+}
+
+function parsePurchaseUnits(input: string): bigint {
+  if (!/^\d+$/.test(input.trim()) || BigInt(input) <= 0n) throw new Error('--units must be a positive integer multiplier.');
+  return BigInt(input);
+}
 
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
   return normalizeCollection(await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts));
@@ -104,6 +118,29 @@ addOutputFlags(
   }
 });
 
+addOutputFlags(addNetworkFlags(creditTokensCommand.command('quote')
+  .description('Quote exact payment and minted units. Does not reserve inventory, check eligibility, or submit a transaction.')
+  .argument('<collection-id>', 'Credit Token collection ID')
+  .requiredOption('--units <n>', 'Integer purchase multiplier; legacy tiers require 1 pack')
+  .option('--tier <approvalId>', 'Required when more than one purchase tier exists')
+)).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { units: string; tier?: string }) => {
+  try {
+    const collection = await fetchCollection(collectionId, opts);
+    validateOrExit(collection, 'credit-tokens quote');
+    const tier = selectPurchaseTier(extractCreditTokenTiers(collection.collectionApprovals), opts.tier);
+    const registry = resolveNetwork(opts as any) === 'mainnet' ? MAINNET_COINS_REGISTRY : TESTNET_COINS_REGISTRY;
+    const paymentCoin = Object.values(registry).find((coin) => coin.baseDenom === tier.paymentDenom);
+    const alias = (collection.aliasPaths ?? collection.aliasPathsToAdd ?? [])[0];
+    const quote = quoteCreditTokenPurchase(tier, parsePurchaseUnits(opts.units), {
+      paymentDecimals: paymentCoin ? Number(paymentCoin.decimals) : undefined,
+      creditDecimals: alias?.decimals === undefined ? undefined : Number(alias.decimals)
+    });
+    emit({ collectionId, observedAt: new Date().toISOString(), ...quote }, opts);
+  } catch (err) {
+    emitError(err);
+  }
+});
+
 addDeployOptions(
   addOutputFlags(
     addNetworkFlags(
@@ -119,10 +156,10 @@ addDeployOptions(
         )
         .argument('[collection-id]', 'Credit Token collection ID. Omit and pass --api-credits to use BitBadges’ own API-credits collection.')
         .requiredOption('--creator <address>', 'Buyer address — the wallet that will HOLD the (non-transferable) credits (bb1.../0x)')
-        .requiredOption('--units <n>', 'Number of units to purchase (integer)')
+        .requiredOption('--units <n>', 'Integer purchase multiplier, not display credits; quote first. Legacy tiers require 1 pack.')
         .option(
           '--tier <approvalId>',
-          'Tier approval id (default: the credit-scaled tier; required if only legacy per-tier approvals exist)'
+          'Tier approval id; required when more than one purchase tier exists'
         )
         .option('--api-credits', "Shortcut for BitBadges’ OWN API-credits collection on this network (mainnet/local; not on testnet). Mutually exclusive with <collection-id>. Any Credit Token collection works via the positional arg — this is just BitBadges’ real instance.")
     )
@@ -158,7 +195,7 @@ addDeployOptions(
         process.stderr.write('Error: collection has no credit-* approvals.\n');
         process.exit(2);
       }
-      let tier = opts.tier ? tiers.find((t) => t.approvalId === opts.tier) : tiers.find((t) => t.isScaled) ?? tiers[0];
+      const tier = selectPurchaseTier(tiers, opts.tier);
       if (!tier) {
         process.stderr.write(
           `Error: no matching tier. Available: ${tiers.map((t) => t.approvalId).join(', ')}.\n`
