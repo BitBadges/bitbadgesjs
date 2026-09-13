@@ -7,6 +7,7 @@
  *
  * @module core/builders/listing
  */
+import { parseBuilderInput } from './input-schemas.js';
 import { resolveCoin, toBaseUnits, resolveExpiration, stableHashId } from './shared.js';
 import { buildOrderbookListingApproval, type OrderbookOrderArgs } from '../bids.js';
 import { UintRangeArray } from '../uintRanges.js';
@@ -35,6 +36,7 @@ function singleTokenId(input: string, ctx: string): bigint {
 }
 
 export function buildListing(params: ListingParams): { typeUrl: string; value: any } {
+  params = parseBuilderInput('listing', params);
   const coin = resolveCoin(params.denom);
   const tokenId = singleTokenId(params.tokenIds, 'listing');
   const end = resolveExpiration(params.expiration, LISTING_DEFAULT_EXPIRY_MS);

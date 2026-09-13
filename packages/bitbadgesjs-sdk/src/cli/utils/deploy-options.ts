@@ -21,6 +21,7 @@ import { tagHelpGroups } from './help-groups.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import { runBurnerCreate, pickBurner, type BurnerNetwork } from './burner.js';
 import { requireBbDenom, DEFAULT_FEE_DENOM } from './denom.js';
+import { saveSigningRequest, setSigningRequestUrl, finishSigningRequest } from './signing-requests.js';
 
 export interface DeployOpts {
   browser?: boolean;
@@ -138,9 +139,12 @@ export async function browserBroadcast(
     txsInfo: messages.map((m) => ({ type: m.typeUrl, msg: m.value })),
     expectedAddress, signOnly: !!opts.signOnly
   });
+  saveSigningRequest(request);
+  process.stderr.write(`Signing request ${request.requestId}. Inspect with bb dev requests status ${request.requestId}.\n`);
   process.stderr.write(`\nOpening browser to ${frontendUrl}/sign for ${opts.signOnly ? 'signing without broadcast (supported Cosmos wallets only)' : 'wallet signature and submission'}...\n`);
   process.stderr.write('Browser fees and gas are chosen in wallet review; CLI --fee, --fee-denom and --gas are not applied.\n');
-  const result = parseBrowserTxResult(await bridgeSign({
+  let result;
+  try { result = parseBrowserTxResult(await bridgeSign({
     mode: 'tx',
     payload: request,
     baseUrl: apiUrl,
@@ -149,12 +153,20 @@ export async function browserBroadcast(
     timeoutMs: requestedTimeoutSec * 1000,
     noOpen: opts.open === false,
     port: opts.port ? Number(opts.port) : undefined,
-  }), request);
+    onReady: url => setSigningRequestUrl(request.requestId, url),
+  }), request); }
+  catch (error) {
+    try { finishSigningRequest(request.requestId, { requestId: request.requestId, outcome: 'unknown', error: 'Handoff ended without a valid callback. Check wallet activity and chain status before retrying.' }); }
+    catch { process.stderr.write('Could not record signing outcome; preserve the request ID and reconcile before retrying.\n'); }
+    throw error;
+  }
+  try { finishSigningRequest(request.requestId, result); }
+  catch { process.stderr.write('Could not save the signing result. Preserve the result returned below for reconciliation.\n'); }
   if (result.outcome === 'cancelled' || result.outcome === 'error' || result.outcome === 'unknown') {
     const error = result.error || 'User cancelled signing';
     process.stderr.write(`Browser signing ended: ${error}\n`);
     return { payload: {
-      success: false, path: 'browser', outcome: result.outcome, error,
+      success: false, path: 'browser', requestId: request.requestId, outcome: result.outcome, error,
       ...(result.outcome === 'unknown' ? { requestId: result.requestId, confirmed: false, verification: 'unverified', retrySafe: false } : {})
     }, result };
   }

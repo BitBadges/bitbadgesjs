@@ -2,6 +2,7 @@
  * Credit Token builder — creates a MsgUniversalUpdateCollection for a purchasable credit/point token.
  * @module core/builders/credit-token
  */
+import { parseBuilderInput } from './input-schemas.js';
 import {
   MAX_UINT64,
   FOREVER,
@@ -31,6 +32,7 @@ export interface CreditTokenParams {
 }
 
 export function buildCreditToken(params: CreditTokenParams): any {
+  params = parseBuilderInput('credit-token', params);
   const coin = resolveCoin(params.paymentDenom);
   const tokensPerUnit = params.tokensPerUnit ?? 100;
   // Same chain regex as smart-account / vault — strip non-allowed

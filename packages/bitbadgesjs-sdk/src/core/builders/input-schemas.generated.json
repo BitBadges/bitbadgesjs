@@ -1,0 +1,757 @@
+{
+  "address-list": {
+    "builder": "buildAddressList",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "Pre-hosted collection metadata URI. If provided, name/image/description are ignored."
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "manager": {
+          "type": "string"
+        },
+        "creator": {
+          "type": "string",
+          "description": "Creator address — used as the default manager when `manager` isn't\n    specified. The CLI passes this through from `--creator`. If neither\n    `manager` nor `creator` is provided, the builder leaves the field\n    empty and the CLI emit()'s defensive pass will fill it in from the\n    post-build `creator` it sets on the message itself."
+        }
+      },
+      "required": []
+    }
+  },
+  "auction": {
+    "builder": "buildAuction",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bidDeadline": {
+          "type": "string"
+        },
+        "acceptWindow": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Pre-hosted collection metadata URI. If provided, name/image/description are ignored."
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "seller": {
+          "type": "string",
+          "description": "Seller address — used as `initiatedByListId` on the mint-to-winner\n    approval so only the seller can accept the winning bid. Falls back\n    to the CLI-passed `creator` when not set."
+        },
+        "creator": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  },
+  "bid": {
+    "builder": "buildBid",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "collectionId": {
+          "type": "string"
+        },
+        "tokenIds": {
+          "type": "string"
+        },
+        "tokenAmount": {
+          "type": "number"
+        },
+        "price": {
+          "type": "number"
+        },
+        "denom": {
+          "type": "string"
+        },
+        "expiration": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "address",
+        "collectionId",
+        "price",
+        "denom"
+      ]
+    }
+  },
+  "bounty": {
+    "builder": "buildBounty",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "type": "number"
+        },
+        "denom": {
+          "type": "string"
+        },
+        "verifier": {
+          "type": "string"
+        },
+        "recipient": {
+          "type": "string"
+        },
+        "submitter": {
+          "type": "string",
+          "description": "Submitter address (bb1...) — receives the refund on deny / expire.\n    Required: the chain rejects empty `to` when `overrideToWithInitiator`\n    is false (which it must be for these branches, since the verifier is\n    the initiator on deny — we want refunds to go to the submitter, not\n    to the verifier who triggers them)."
+        },
+        "expiration": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Pre-hosted collection metadata URI. If provided, name/image/description are ignored."
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount",
+        "denom",
+        "verifier",
+        "recipient",
+        "submitter"
+      ]
+    }
+  },
+  "credit-token": {
+    "builder": "buildCreditToken",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "paymentDenom": {
+          "type": "string"
+        },
+        "recipient": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "tokensPerUnit": {
+          "type": "number"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Pre-hosted collection metadata URI. If provided, name/image/description are ignored."
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "paymentDenom",
+        "recipient"
+      ]
+    }
+  },
+  "crowdfund": {
+    "builder": "buildCrowdfund",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "goal": {
+          "type": "number"
+        },
+        "denom": {
+          "type": "string"
+        },
+        "crowdfunder": {
+          "type": "string"
+        },
+        "deadline": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Pre-hosted collection metadata URI. If provided, name/image/description are ignored."
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "creator": {
+          "type": "string",
+          "description": "Creator address — used as the default crowdfunder when `crowdfunder`\n    isn't specified. The CLI passes this through from `--creator`.\n    Without a real address the resulting tx is broken (the success/refund\n    approvals would have `toListId: 'All'` which is meaningless for an\n    escrow payout)."
+        }
+      },
+      "required": [
+        "goal",
+        "denom"
+      ]
+    }
+  },
+  "custom-2fa": {
+    "builder": "buildCustom2FA",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "Pre-hosted collection metadata URI. If provided, name/image/description are ignored."
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "burnable": {
+          "type": "boolean"
+        },
+        "transferable": {
+          "type": "boolean"
+        },
+        "creator": {
+          "type": "string",
+          "description": "Manager address allowed to initiate mints. The CLI passes this\n    through from --creator. Required: the FE-canonical preset\n    (builder/presets/custom-2fa.ts) sets the mint approval's\n    `initiatedByListId` to this address. Without it, anyone could mint a\n    2FA token to anyone, breaking the standard's security model."
+        }
+      },
+      "required": []
+    }
+  },
+  "intent": {
+    "builder": "buildIntent",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "collectionId": {
+          "type": "string"
+        },
+        "payDenom": {
+          "type": "string"
+        },
+        "payAmount": {
+          "type": "number"
+        },
+        "receiveDenom": {
+          "type": "string"
+        },
+        "receiveAmount": {
+          "type": "number"
+        },
+        "expiration": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "address",
+        "collectionId",
+        "payDenom",
+        "payAmount",
+        "receiveDenom",
+        "receiveAmount"
+      ]
+    }
+  },
+  "listing": {
+    "builder": "buildListing",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "collectionId": {
+          "type": "string"
+        },
+        "tokenIds": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number"
+        },
+        "denom": {
+          "type": "string"
+        },
+        "maxSales": {
+          "type": "number"
+        },
+        "expiration": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "address",
+        "collectionId",
+        "tokenIds",
+        "price",
+        "denom"
+      ]
+    }
+  },
+  "payment-request": {
+    "builder": "buildPaymentRequest",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "type": "number"
+        },
+        "denom": {
+          "type": "string"
+        },
+        "payer": {
+          "type": "string"
+        },
+        "recipient": {
+          "type": "string"
+        },
+        "expiration": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Pre-hosted collection metadata URI. If provided, name/image/description are ignored."
+        },
+        "name": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "context": {
+          "type": "string",
+          "description": "Free-form rationale shown to the payer at approval time. Mirrors\n    Stripe Link's ≥100 char `context` requirement — agents must justify\n    the spend in human-readable terms. Used as the collection description\n    (in inline mode) or appended to the auto-generated default."
+        }
+      },
+      "required": [
+        "amount",
+        "denom",
+        "payer",
+        "recipient"
+      ]
+    }
+  },
+  "pm-buy-intent": {
+    "builder": "buildPmBuyIntent",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "collectionId": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string",
+          "enum": [
+            "yes",
+            "no"
+          ]
+        },
+        "amount": {
+          "type": "number"
+        },
+        "price": {
+          "type": "number"
+        },
+        "denom": {
+          "type": "string"
+        },
+        "expiration": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "address",
+        "collectionId",
+        "token",
+        "amount",
+        "price",
+        "denom"
+      ]
+    }
+  },
+  "pm-sell-intent": {
+    "builder": "buildPmSellIntent",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "collectionId": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string",
+          "enum": [
+            "yes",
+            "no"
+          ]
+        },
+        "amount": {
+          "type": "number"
+        },
+        "price": {
+          "type": "number"
+        },
+        "denom": {
+          "type": "string"
+        },
+        "expiration": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "address",
+        "collectionId",
+        "token",
+        "amount",
+        "price",
+        "denom"
+      ]
+    }
+  },
+  "prediction-market": {
+    "builder": "buildPredictionMarket",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "verifier": {
+          "type": "string"
+        },
+        "denom": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Pre-hosted collection metadata URI. If provided, name/image/description are ignored."
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "verifier"
+      ]
+    }
+  },
+  "product-catalog": {
+    "builder": "buildProductCatalog",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "products": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "price": {
+                "type": "number"
+              },
+              "denom": {
+                "type": "string"
+              },
+              "maxSupply": {
+                "type": "number"
+              },
+              "burn": {
+                "type": "boolean"
+              },
+              "uri": {
+                "type": "string",
+                "description": "Optional pre-hosted per-product metadata URI."
+              },
+              "description": {
+                "type": "string"
+              },
+              "image": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "price",
+              "denom"
+            ]
+          }
+        },
+        "storeAddress": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Pre-hosted collection metadata URI. If provided, name/image/description are ignored."
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "products",
+        "storeAddress"
+      ]
+    }
+  },
+  "quests": {
+    "builder": "buildQuests",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reward": {
+          "type": "number"
+        },
+        "denom": {
+          "type": "string"
+        },
+        "maxClaims": {
+          "type": "number"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Pre-hosted collection metadata URI. If provided, name/image/description are ignored."
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "reward",
+        "denom",
+        "maxClaims"
+      ]
+    }
+  },
+  "smart-token": {
+    "builder": "buildSmartToken",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "backingCoin": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Pre-hosted collection metadata URI. If provided, name/image/description are ignored."
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "tradable": {
+          "type": "boolean"
+        },
+        "aiAgentVault": {
+          "type": "boolean",
+          "description": "Adds the 'AI Agent Vault' standard tag — purely a discovery hint."
+        },
+        "allowForcefulPostMintTransfers": {
+          "type": "boolean",
+          "description": "Override the chain-level invariant. Smart Tokens default to LOCKED forceful\n    post-mint transfers (the safer default for vault-like wallets) — set this\n    to `true` only if you need a delegated approval flow that uses\n    `force=true` in MsgTransferTokens."
+        }
+      },
+      "required": [
+        "backingCoin"
+      ]
+    }
+  },
+  "subscription": {
+    "builder": "buildSubscription",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "interval": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "description": "Single payout — use this OR payouts[]"
+        },
+        "denom": {
+          "type": "string"
+        },
+        "recipient": {
+          "type": "string"
+        },
+        "payouts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "recipient": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "number"
+              },
+              "denom": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "recipient",
+              "amount",
+              "denom"
+            ]
+          },
+          "description": "Multiple payouts per interval — use this OR price/denom/recipient"
+        },
+        "tiers": {
+          "type": "number"
+        },
+        "transferable": {
+          "type": "boolean"
+        },
+        "updatableMint": {
+          "type": "boolean",
+          "description": "Leave the mint (faucet) approval editable so the manager can change the\n    price later. Default false: the faucet is locked forever, which is what\n    `bb check` requires to pass. Opting in surfaces a critical review\n    finding, on purpose, so the choice is visible to whoever signs."
+        },
+        "uri": {
+          "type": "string",
+          "description": "Pre-hosted collection metadata URI. If provided, name/image/description are ignored."
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "interval"
+      ]
+    }
+  },
+  "vault": {
+    "builder": "buildVault",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "backingCoin": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Pre-hosted collection metadata URI. If provided, `name`/`image`/`description` are ignored."
+        },
+        "name": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "dailyWithdrawLimit": {
+          "type": "number"
+        },
+        "require2fa": {
+          "type": "string"
+        },
+        "emergencyRecovery": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "backingCoin"
+      ]
+    }
+  }
+}

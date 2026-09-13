@@ -10,6 +10,7 @@
  *
  * @module core/builders/pm-sell-intent
  */
+import { parseBuilderInput } from './input-schemas.js';
 import { resolveCoin, toBaseUnits, resolveExpiration, stableHashId } from './shared.js';
 import { buildPredictionMarketSellIntent, type PredictionMarketSideArgs } from '../prediction-markets.js';
 import { UintRangeArray } from '../uintRanges.js';
@@ -28,6 +29,7 @@ export interface PmSellIntentParams {
 }
 
 export function buildPmSellIntent(params: PmSellIntentParams): { typeUrl: string; value: any } {
+  params = parseBuilderInput('pm-sell-intent', params);
   if (!Number.isInteger(params.amount) || params.amount <= 0) {
     throw new Error(
       `buildPmSellIntent: amount must be a positive integer (got ${params.amount}). Prediction market tokens are unitless counts, not fractional.`

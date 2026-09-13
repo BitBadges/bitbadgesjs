@@ -16,6 +16,7 @@
  *
  * @module core/builders/smart-token
  */
+import { parseBuilderInput } from './input-schemas.js';
 import {
   FOREVER,
   resolveCoin,
@@ -59,6 +60,7 @@ export const SMART_TOKEN_WITHDRAW_APPROVAL_ID = 'smart-token-withdraw';
 export const SMART_TOKEN_TRANSFERABLE_APPROVAL_ID = 'smart-token-transferable';
 
 export function buildSmartToken(params: SmartTokenParams): any {
+  params = parseBuilderInput('smart-token', params);
   const coin = resolveCoin(params.backingCoin);
   const backingAddr = generateAliasAddressForIBCBackedDenom(coin.denom);
   const symbol = params.symbol || ('v' + coin.symbol);

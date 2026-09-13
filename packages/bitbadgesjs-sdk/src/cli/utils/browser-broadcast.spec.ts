@@ -1,5 +1,9 @@
 import { browserBroadcast, executeDeploy } from './deploy-options.js';
 import { bridgeSign } from '../auth/browser-bridge.js';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { getSigningRequestStatus } from './signing-requests.js';
 
 jest.mock('../auth/browser-bridge.js', () => ({
   bridgeSign: jest.fn(), resolveFrontendUrl: () => 'https://example.invalid'
@@ -8,12 +12,19 @@ const signer = 'bb1p0rrel3365scadq5k9pv0x0zp9j22js6dnw70d';
 const messages = [{ typeUrl: '/cosmos.bank.v1beta1.MsgSend', value: { fromAddress: signer, toAddress: signer, amount: [{ denom: 'ubadge', amount: '5' }] } }];
 
 describe('browser broadcast contract', () => {
+  let directory: string;
+  const original = process.env.BITBADGES_CONFIG_DIR;
   beforeEach(() => {
+    directory = mkdtempSync(join(tmpdir(), 'bb-broadcast-record-'));
+    process.env.BITBADGES_CONFIG_DIR = directory;
     jest.clearAllMocks();
     jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
     (bridgeSign as jest.Mock).mockImplementation(async ({ payload }) => ({ requestId: payload.requestId, address: payload.expectedAddress, network: payload.network, chainId: payload.chainId, chain: payload.chain, outcome: 'submitted', hash: 'A'.repeat(64) }));
   });
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => {
+    jest.restoreAllMocks(); rmSync(directory, { recursive: true, force: true });
+    if (original === undefined) delete process.env.BITBADGES_CONFIG_DIR; else process.env.BITBADGES_CONFIG_DIR = original;
+  });
   test('pins signer, deployment, chain IDs and finite deadline', async () => {
     const before = Date.now();
     const { payload } = await browserBroadcast(messages, { expectedAddress: signer, local: true } as any);
@@ -24,6 +35,7 @@ describe('browser broadcast contract', () => {
     expect(request.expiresAt).toBeLessThanOrEqual(Date.now() + 300000);
     expect(request.txsInfo[0].msg).toEqual(messages[0].value);
     expect(payload).toMatchObject({ success: true, outcome: 'submitted', confirmed: false, verification: 'unverified' });
+    expect(await getSigningRequestStatus(request.requestId)).toMatchObject({ outcome: 'submitted', txHash: 'A'.repeat(64), canResume: false });
   });
   test('rejects absent signer rather than choosing the active browser wallet', async () => {
     await expect(browserBroadcast(messages, {})).rejects.toThrow(/expected-address|signer/i);

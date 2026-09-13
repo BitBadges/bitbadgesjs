@@ -10,6 +10,7 @@
  */
 import { GO_MAX_UINT_64 } from '../common/math.js';
 import { CoinsRegistry } from '../common/constants.js';
+import { parseInlineCustomData } from '../api-indexer/metadata/inlineCustomData.js';
 
 const MAX_UINT64 = GO_MAX_UINT_64;
 
@@ -420,7 +421,7 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
   md += `### ${label}: "${approval.approvalId}"\n\n`;
 
   // Approval metadata (creator-provided)
-  const approvalDetails = approval.details;
+  const approvalDetails = approval.details || (!approval.uri && parseInlineCustomData(approval.customData));
   if (approvalDetails?.name) {
     md += `**"${approvalDetails.name}"** (creator-provided approval name)`;
     if (approvalDetails.description) {
@@ -655,11 +656,15 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
 
   // Overrides (forceful behavior)
   if (criteria.overridesFromOutgoingApprovals || criteria.overridesToIncomingApprovals) {
-    md += '**Forceful Behavior**: ';
-    if (criteria.overridesFromOutgoingApprovals) {
+    md += approval.fromListId === 'Mint' ? '**Mint Approval Overrides**: ' : '**Forceful Behavior**: ';
+    if (criteria.overridesFromOutgoingApprovals && approval.fromListId === 'Mint') {
+      md += 'The outgoing approval override applies to Mint, which creates new tokens; it does not move existing tokens from a holder. This override does not authorize debiting the payer. Coin payment authorization is separate. ';
+    } else if (criteria.overridesFromOutgoingApprovals) {
       md += 'This approval **overrides the sender\'s personal outgoing approval**. This means the sender\'s personal outgoing approval tier is skipped — the sender does NOT need to consent to this specific transfer. Normally, the sender must approve their own outgoing transfers, but this override bypasses that check. Tokens can be moved from a holder without their explicit per-transfer consent. ';
     }
-    if (criteria.overridesToIncomingApprovals) {
+    if (criteria.overridesToIncomingApprovals && approval.toListId === 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv') {
+      md += 'The incoming approval override applies only to the burn address that receives these tokens. It does not bypass another holder\'s incoming approvals. ';
+    } else if (criteria.overridesToIncomingApprovals) {
       md += 'This approval **overrides the recipient\'s personal incoming approval**. This means the recipient\'s incoming approval tier is skipped — the recipient does NOT need to consent to receiving these tokens. Normally, the recipient can control which incoming transfers they accept, but this override bypasses that check. Tokens can be deposited into any address without the recipient opting in. ';
     }
     md += '\n\n';

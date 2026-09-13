@@ -31,9 +31,13 @@ export function maybePrintFirstRunBanner(argv: readonly string[]): void {
       'By using `bb` you agree to the policies linked above.\n' +
       '\n' +
       'Typical flow — you build, a browser wallet signs:\n' +
-      '  bb build subscription --name "Pro" --price 10 --denom USDC > tx.json\n' +
-      '  bb check tx.json                       # audit before you sign\n' +
-      '  bb preview tx.json --open              # review + sign at bitbadges.io\n' +
+      '  bb build subscription --help           # discover required fields and amount units\n' +
+      '  bb build subscription --uri <metadata-url> --interval monthly --price 10 --denom BADGE --recipient <recipient> --creator <signer> --output-file tx.json\n' +
+      '  bb check tx.json                       # validate and review the saved proposal\n' +
+      '  bb explain tx.json                     # inspect payments and recurring authority\n' +
+      '  bb simulate tx.json --creator <signer>  # use the intended network\n' +
+      '  bb deploy --browser --msg-file tx.json --expected-address <signer>\n' +
+      'Replace angle-bracket placeholders; select the same network for every step.\n' +
       'Docs: https://docs.bitbadges.io/for-developers/ai-agents\n' +
       '\n' +
       'Tip — install tab completion for faster discovery:\n' +

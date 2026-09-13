@@ -816,11 +816,11 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     if (context.includes('subscription') || standards.includes('Subscriptions')) {
       if (approvalPermState === 'FORBIDDEN') {
         findings.push({
-          severity: 'warning',
+          severity: 'info',
           category: 'context',
           title: 'Subscription with frozen approvals',
-          detail: 'Subscriptions may need approval updates for price/duration changes. Approval permission is FORBIDDEN.',
-          recommendation: 'Consider using PERMITTED for canUpdateCollectionApprovals if pricing may change.'
+          detail: 'Subscription approval terms are permanently frozen. The manager cannot change the price or duration.',
+          recommendation: 'Keep these terms frozen to preserve subscriber guarantees. Changed pricing requires a new offering and fresh consent.'
         });
       }
     }

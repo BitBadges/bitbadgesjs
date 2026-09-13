@@ -17,9 +17,11 @@ npm install bitbadges
 bun add bitbadges
 ```
 
-## AI agents — three ways to build
+## AI agents — start with the CLI
 
-Pick the path that fits your use case. All three produce the same on-chain collection transactions.
+Use `bb` as the primary entry point, including native Cosmos commands. An SDK-only installation exposes SDK commands through `bitbadges-cli`. Start with `bb --help-json`, `bb build --help`, and `bb dev skills`; load detailed instructions with `bb dev skills <id>`. Use a shipped preset and its JSON input, then check, simulate, and choose an authorized signing path. See [AI Agent Guide](AI_AGENT_GUIDE.md) for browser signing, agent-owned wallets, confirmation and recovery constraints.
+
+MCP and programmatic APIs are optional integrations. The CLI does not require an LLM-provider API key. The following sections describe those integrations.
 
 ### 1. Programmatic agent (BYO Anthropic key)
 
@@ -53,7 +55,7 @@ Zero-code path for human-in-the-loop builds. Point your MCP client at the
 bundled `bitbadges-builder` stdio server:
 
 ```bash
-claude mcp add bitbadges-builder bitbadges-builder
+claude mcp add bitbadges-builder -- bitbadges-builder
 ```
 
 Full walkthrough, tool reference, and skill instructions:
@@ -64,11 +66,9 @@ Full walkthrough, tool reference, and skill instructions:
 For non-AI workflows, import the message builders directly — see the Quick Start below.
 
 The package ships three bins:
-- `bitbadges` / `bitbadges-cli` — flat verb-first CLI: `build`, `check`,
-  `explain`, `simulate`, `preview`, `deploy`, `tool`, `tools`, plus
-  `api`, `auth`, `config`, `burner`, `session`, `docs`, `skills`,
-  `resources`, `doctor`, `address`, `alias`, `lookup`, `gen-list-id`.
-  Run `bitbadges-cli --help` for the grouped overview.
+- `bitbadges` / `bitbadges-cli` — CLI for builds, standard actions, checks,
+  simulation, signing requests, API access and developer discovery.
+  Run `bitbadges-cli --help-json` for the installed command tree.
 - `bitbadges-builder` — the stdio MCP server (entry point: `src/builder/index.ts`)
 
 ## CLI authentication (headless / agentic)

@@ -2,6 +2,7 @@
  * Address List builder — creates a MsgUniversalUpdateCollection for on-chain address lists.
  * @module core/builders/address-list
  */
+import { parseBuilderInput } from './input-schemas.js';
 import {
   FOREVER,
   BURN_ADDRESS,
@@ -32,6 +33,7 @@ export interface AddressListParams {
 }
 
 export function buildAddressList(params: AddressListParams): any {
+  params = parseBuilderInput('address-list', params);
   // Default the list manager to the creator when not explicitly set.
   // An address-list MUST have a non-empty initiatedByListId on its
   // approvals — the chain rejects "" with "initiated by list id is

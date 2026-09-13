@@ -16,6 +16,7 @@ import { buildNextStepHint } from '../utils/next-step.js';
 import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
 import { PAYMENT_REQUEST_EXAMPLES, paymentRequestExample, withPaymentMetadata } from '../utils/payment-request-examples.js';
+import { allowJsonInsteadOfRequiredOptions } from '../utils/json-options.js';
 
 export const buildCommand = new Command('build').description(
   'Deterministic transaction builders — flag-based generators for vaults, NFTs, subscriptions, bounties, and more. Output: ready-to-sign JSON. To broadcast, pipe into `bb deploy --burner`.'
@@ -408,6 +409,7 @@ const sharedOpts = (cmd: Command) => {
   // "Deploy" help-group tags. Identical across every tx-emitting
   // command — see cli/utils/deploy-options.ts.
   addDeployOptions(cmd);
+  allowJsonInsteadOfRequiredOptions(cmd);
 
   // Tag the remaining shared flags with a help group so --help renders
   // them in categories under "Options:" (per-command flags stay

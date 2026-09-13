@@ -69,6 +69,13 @@ async function fetchUserBalances(collectionId: string, address: string, opts: Ne
   return callApi('POST', path, opts, {});
 }
 
+async function fetchIncomingApprovals(collectionId: string, address: string, opts: NetworkFlags): Promise<any[]> {
+  const balances = await fetchUserBalances(collectionId, address, opts);
+  const approvals = balances?.balance?.incomingApprovals ?? balances?.incomingApprovals;
+  if (!Array.isArray(approvals)) throw new Error('Balance response omitted incoming approval state. Retry the lookup before changing recurring consent.');
+  return approvals;
+}
+
 function validateOrExit(collection: any, ctx: string): void {
   if (!collection) {
     process.stderr.write(`Error: collection not found while running ${ctx}.\n`);
@@ -367,14 +374,7 @@ addOutputFlags(
       });
 
       // Fetch + preserve existing recurring approvals from other tiers.
-      let existing: any[] = [];
-      try {
-        const balances = await fetchUserBalances(String(collectionId), creator, opts);
-        existing = balances?.balance?.incomingApprovals ?? balances?.incomingApprovals ?? [];
-      } catch {
-        // No balance doc yet → no existing approvals. The new one is the
-        // user's first.
-      }
+      const existing = await fetchIncomingApprovals(String(collectionId), creator, opts);
       const otherApprovals = existing.filter((a: any) => !isUserRecurringApproval(a, faucet));
 
       await runEmitOrDeploy(
@@ -414,8 +414,7 @@ addOutputFlags(
       validateOrExit(collection, 'subscriptions cancel');
       const faucet = pickFaucet(listFaucets(collection), opts.tier, 'subscriptions cancel');
 
-      const balances = await fetchUserBalances(String(collectionId), creator, opts);
-      const existing: any[] = balances?.balance?.incomingApprovals ?? balances?.incomingApprovals ?? [];
+      const existing = await fetchIncomingApprovals(String(collectionId), creator, opts);
       const remaining = existing.filter((a: any) => !isUserRecurringApproval(a, faucet));
       if (remaining.length === existing.length) {
         process.stderr.write(
@@ -472,13 +471,7 @@ addOutputFlags(
         tokenIds: faucet.tokenIds,
         denom
       });
-      let existing: any[] = [];
-      try {
-        const balances = await fetchUserBalances(String(collectionId), creator, opts);
-        existing = balances?.balance?.incomingApprovals ?? balances?.incomingApprovals ?? [];
-      } catch {
-        existing = [];
-      }
+      const existing = await fetchIncomingApprovals(String(collectionId), creator, opts);
       const otherApprovals = existing.filter((a: any) => !isUserRecurringApproval(a, faucet));
       const enableRenewal = buildUpdateApprovalsMsg(
         creator,
@@ -537,9 +530,10 @@ async function fetchAllCollectionOwners(
       }
     }
     bookmark = res?.pagination?.bookmark;
-    if (!bookmark || !res?.pagination?.hasMore) break;
+    if (!res?.pagination?.hasMore) return owners;
+    if (!bookmark) throw new Error('Owner pagination is incomplete: missing next-page cursor. No charge batch was prepared.');
   }
-  return owners;
+  throw new Error('Owner pagination exceeded the page limit. No partial charge batch was prepared. Use the indexer recurring-charge service for larger collections.');
 }
 
 function buildChargeMsg(

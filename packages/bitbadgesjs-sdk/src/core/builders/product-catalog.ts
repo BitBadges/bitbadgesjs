@@ -2,6 +2,7 @@
  * Product Catalog builder — creates a MsgUniversalUpdateCollection for a purchasable product catalog.
  * @module core/builders/product-catalog
  */
+import { parseBuilderInput } from './input-schemas.js';
 import {
   BURN_ADDRESS,
   FOREVER,
@@ -60,6 +61,7 @@ function productMaxNumTransfers(maxSupply: number | undefined, approvalId: strin
 }
 
 export function buildProductCatalog(params: ProductCatalogParams): any {
+  params = parseBuilderInput('product-catalog', params);
   const { products, storeAddress } = params;
 
   const purchaseApprovals = products.map((product, i) => {

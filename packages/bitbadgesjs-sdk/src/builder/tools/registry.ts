@@ -83,6 +83,11 @@ import {
 
 import { getSkillInstructions, getAllSkillInstructions } from '../resources/index.js';
 import { buildPaymentRequestV2Tool, handleBuildPaymentRequestV2 } from './builders/buildPaymentRequestV2.js';
+import { createHash } from 'node:crypto';
+import { standardBuilderTools } from './builders/buildStandard.js';
+import { createStandardActionTools, executeInstalledCli } from './standardActions.js';
+import { getSigningRequestStatus, listSigningRequests } from '../../cli/utils/signing-requests.js';
+import { z } from 'zod';
 
 // Re-export session persistence helpers so external consumers (e.g.
 // bitbadges-cli) can snapshot / restore session state across process
@@ -162,6 +167,32 @@ const getSkillInstructionsTool: ToolSchema = {
  * The tool registry. Keys are builder tool names.
  */
 export const toolRegistry: Record<string, ToolEntry> = {
+  ...standardBuilderTools,
+  ...createStandardActionTools(executeInstalledCli, () => getCapabilityCatalog().catalogHash),
+  list_signing_requests: {
+    tool: { name: 'list_signing_requests', description: 'List saved local browser request IDs. Does not sign or submit.', inputSchema: { type: 'object', properties: {}, additionalProperties: false } } as ToolSchema,
+    run: (args: unknown) => { z.object({}).strict().parse(args); return { requestIds: listSigningRequests() }; }
+  },
+  signing_request_status: {
+    tool: { name: 'signing_request_status', description: 'Inspect a saved browser request. With resume=true, returns the same URL only while its original listener is live. Never creates or submits another transaction; unknown outcomes require reconciliation.', inputSchema: { type: 'object', properties: { requestId: { type: 'string', pattern: '^[a-f0-9]{32}$' }, resume: { type: 'boolean' } }, required: ['requestId'], additionalProperties: false } } as ToolSchema,
+    run: (args: unknown) => { const input = z.object({ requestId: z.string().regex(/^[a-f0-9]{32}$/), resume: z.boolean().optional() }).strict().parse(args); return getSigningRequestStatus(input.requestId, input.resume); }
+  },
+  get_capabilities: entry(
+    {
+      name: 'get_capabilities',
+      description: 'Discover installed CLI/MCP operations without fetching full schemas. Supply id for one operation schema. Equivalent to bb dev capabilities [id].',
+      inputSchema: { type: 'object', additionalProperties: false, properties: { id: { type: 'string' } } }
+    },
+    (args) => getCapabilityCatalog(args.id)
+  ),
+  list_skills: entry(
+    {
+      name: 'list_skills',
+      description: 'List installed canonical skill summaries. Equivalent to bb dev skills; read details with get_skill_instructions using skillId.',
+      inputSchema: { type: 'object', additionalProperties: false, properties: {} }
+    },
+    () => getAllSkillInstructions().map(({ instructions: _instructions, ...summary }) => summary)
+  ),
   build_payment_request_v2: entry(buildPaymentRequestV2Tool, handleBuildPaymentRequestV2),
   // Utilities
   lookup_token_info: entry(lookupTokenInfoTool, handleLookupTokenInfo),
@@ -260,6 +291,27 @@ export const toolRegistry: Record<string, ToolEntry> = {
   generate_unique_id: entry(generateUniqueIdTool, handleGenerateUniqueId),
   generate_wrapper_address: entry(generateWrapperAddressTool, handleGenerateWrapperAddress)
 };
+
+export function getCapabilityCatalog(id?: string) {
+  if (id !== undefined && (typeof id !== 'string' || !Object.prototype.hasOwnProperty.call(toolRegistry, id))) {
+    throw new Error(`Unknown capability: ${String(id)}. Run bb dev capabilities to list installed operations.`);
+  }
+  const entries = Object.entries(toolRegistry).sort(([left], [right]) => left.localeCompare(right));
+  const catalogHash = createHash('sha256').update(JSON.stringify(entries.map(([, entry]) => entry.tool))).digest('hex');
+  return {
+    schemaVersion: 1,
+    catalogHash,
+    primaryInterface: 'cli',
+    scope: 'Shared builders, supported standard actions, and local signing-request recovery. Other CLI commands and native Cosmos commands remain discoverable with bb --help-json and bb tx --help.',
+    capabilities: entries.filter(([name]) => id === undefined || name === id).map(([name, entry]) => ({
+      id: name,
+      description: entry.tool.description,
+      cli: ['bb', 'dev', 'tools', 'call', name],
+      mcp: name,
+      ...(id !== undefined ? { inputSchema: entry.tool.inputSchema } : {})
+    }))
+  };
+}
 
 /** List every registered tool schema in registry order. */
 export function listTools(): ToolSchema[] {
@@ -376,7 +428,7 @@ export async function callTool(name: string, args: any): Promise<CallToolResult>
   try {
     const result = await tool.run(args);
     const text = tool.formatText ? tool.formatText(result) : JSON.stringify(result, null, 2);
-    return { text, result };
+    return { text, result, ...(result?.success === false || result?.ok === false ? { isError: true } : {}) };
   } catch (error) {
     return {
       text: `Error: ${formatToolError(error)}`,
