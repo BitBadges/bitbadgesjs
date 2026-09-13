@@ -56,6 +56,16 @@ describe('subscription charge-due boundaries', () => {
     expect(result.messages).toHaveLength(1);
     expect(result.messages[0].value.transfers[0].precalculateBalancesFromApproval.precalculationOptions.overrideTimestamp).toBe('2000');
   });
+  it('requires the selected collection and subscriber consent approvals for a renewal proposal', async () => {
+    const result = await run(1000, []);
+    const transfer = result.messages[0].value.transfers[0];
+    expect(transfer.onlyCheckPrioritizedCollectionApprovals).toBe(true);
+    expect(transfer.onlyCheckPrioritizedIncomingApprovals).toBe(true);
+    expect(transfer.prioritizedApprovals).toEqual([
+      { approvalId: 'subscription-tier-1', approvalLevel: 'collection', approverAddress: '', version: '0' },
+      { approvalId: 'renew', approvalLevel: 'incoming', approverAddress: address, version: '0' }
+    ]);
+  });
   it('does not mistake the current interval for an already fulfilled next interval', async () => {
     const result = await run(1999, [{ start: 1000n, end: 1999n }]);
     expect(result.messages).toHaveLength(1);

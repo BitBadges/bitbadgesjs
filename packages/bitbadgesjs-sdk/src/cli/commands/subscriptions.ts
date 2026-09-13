@@ -580,6 +580,8 @@ function buildChargeMsg(
               version: String(userApproval.version ?? '0')
             }
           ],
+          onlyCheckPrioritizedCollectionApprovals: true,
+          onlyCheckPrioritizedIncomingApprovals: true,
           memo: ''
         }
       ]
