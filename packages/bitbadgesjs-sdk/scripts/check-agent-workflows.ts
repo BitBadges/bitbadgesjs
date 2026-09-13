@@ -141,6 +141,21 @@ try {
     native.push('--', collectionId);
     if ('approvalId' in extra) native.push(extra.approvalId);
     await action(`standard_${family}_${verb}`.replace(/-/g, '_'), input, native);
+    if (builder === 'credit-token') {
+      const units = '9007199254740993';
+      const quote = await action('standard_credit_tokens_quote', { collectionId, units }, ['credit-tokens', 'quote', collectionId, '--units', units]);
+      assert.equal(quote.requestedMultiplier, units);
+      assert.equal(quote.actualMultiplier, units);
+      assert.equal(quote.payment.baseAmount, units);
+      assert.equal(quote.remainingCredits, null);
+      const approval = collections.get(collectionId).collectionApprovals[0];
+      approval.approvalCriteria.predeterminedBalances.incrementedBalances.maxScalingMultiplier = '2';
+      const rejected = await client.callTool({ name: 'standard_credit_tokens_purchase', arguments: { collectionId, creator, units: '3' } });
+      assert.equal(rejected.isError, true, 'over-limit purchase must fail rather than shrink');
+      const cliRejected = await executeInstalledCli(['credit-tokens', 'purchase', collectionId, '--creator', creator, '--units', '3']);
+      assert.equal(cliRejected.ok, false);
+      assert.match(cliRejected.error.message, /maximum 2/);
+    }
   }
   for (const verb of ['enable-renewal', 'subscribe']) {
     await action(`standard_subscriptions_${verb.replace(/-/g, '_')}`, { collectionId: subscriptionId, creator, approvalId: 'fixture-renewal' }, [

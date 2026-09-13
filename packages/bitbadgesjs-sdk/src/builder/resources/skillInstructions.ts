@@ -1798,14 +1798,20 @@ When a user mints credit tokens, the payment (coinTransfers) goes directly to a 
 
 ### Usage Pattern: totalUsed / totalCreditsPaidFor
 
+### Exact Purchase Quotes
+
+Use \`bb credit-tokens quote <id> --units <integer>\` before \`bb credit-tokens purchase\`. Units are an integer multiplier of raw approval terms, not display credits. Quotes show exact payment and mint base amounts, recipient, ratio, and display amounts when decimal metadata is known. Unknown display metadata is null. Oversized requests are rejected, never capped silently; legacy tiers require exactly one pack. Multiple tiers require explicit \`--tier\` selection. MCP exposes the same operation as \`standard_credit_tokens_quote\`.
+
+Quotes do not establish eligibility, reserve capacity, include fees, or authorize spending. Re-read and simulate before signing. Purchased credits are not remaining credits: the service provider owns authenticated usage accounting, and the generic quote returns remainingCredits: null.
+
 Credit tokens are designed for systems that track consumption off-chain. The on-chain token balance represents \`totalCreditsPaidFor\` — the total credits ever purchased. An off-chain system tracks \`totalUsed\`. The remaining budget is simply \`balance - totalUsed\`.
 
 **Example: BitBadges API Credits (Collection 23 / 80, APITOKEN)**
 - User purchases 10 USDC → receives 1,000,000 APITOKEN (on-chain balance = 1,000,000)
 - User makes API calls (including the AI Builder) → backend tracks \`totalUsed\` (e.g., 250,000 APITOKEN used)
 - Remaining budget = on-chain balance (1,000,000) - totalUsed (250,000) = 750,000
-- User purchases 5 more USDC → on-chain balance increments to 2,000,000
-- Remaining budget = 2,000,000 - 250,000 = 1,750,000
+- User purchases 5 more USDC → on-chain balance increments to 1,500,000
+- Remaining budget = 1,500,000 - 250,000 = 1,250,000
 - The balance only ever goes up (increment-only). The off-chain \`totalUsed\` only ever goes up. Budget = balance - totalUsed.
 
 ### Required Structure

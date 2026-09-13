@@ -517,6 +517,10 @@
               "denom": {
                 "type": "string"
               },
+              "storeAddress": {
+                "type": "string",
+                "description": "Payment recipient override for this product; defaults to the catalog storeAddress."
+              },
               "maxSupply": {
                 "type": "number"
               },

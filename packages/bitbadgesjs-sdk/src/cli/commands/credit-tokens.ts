@@ -135,7 +135,7 @@ addOutputFlags(addNetworkFlags(creditTokensCommand.command('quote')
       paymentDecimals: paymentCoin ? Number(paymentCoin.decimals) : undefined,
       creditDecimals: alias?.decimals === undefined ? undefined : Number(alias.decimals)
     });
-    emit({ collectionId, observedAt: new Date().toISOString(), ...quote }, opts);
+    emit({ collectionId, observedAt: new Date(Date.now()).toISOString(), ...quote }, opts);
   } catch (err) {
     emitError(err);
   }

@@ -48,7 +48,7 @@ export interface CreditTokenTier {
   /** Approval id — `credit-scaled` or `credit-<N>`. */
   approvalId: string;
   version?: bigint;
-  /** Display-units-per-tier (1 for scaled, N for `credit-<N>`). */
+  /** Legacy tier label (N for `credit-<N>`); not an asset display quantity. */
   value: number;
   /** Payment denom (chain-side; ibc/... or ubadge). */
   paymentDenom: string;
@@ -60,7 +60,7 @@ export interface CreditTokenTier {
   recipient: string;
   /** True for the scaled-balances variant (buyer picks multiplier). */
   isScaled: boolean;
-  /** For scaled tier: max multiplier (chain-enforced upper bound). */
+  /** For scaled tier: positive per-transaction multiplier cap. */
   maxMultiplier?: bigint;
 }
 
@@ -76,9 +76,8 @@ export function doesCollectionFollowCreditTokenProtocol(collection: Readonly<iCo
 }
 
 /**
- * Extract every credit-* mint tier from a collection's approvals. Skips
- * non-credit approvals silently. Returns [] if none match. Mirrors the
- * FE `CreditTokenLayout` extraction (lines 70-95).
+ * Extract fixed token-1 credit mint terms supported by the exact purchase helpers.
+ * Discovery of a standard tag is separate from support for its custom approvals.
  */
 export function extractCreditTokenTiers(
   approvals: ReadonlyArray<iCollectionApproval<bigint>>
@@ -96,7 +95,15 @@ export function extractCreditTokenTiers(
     const paymentAmount = BigInt(coinTransfer.coins[0]?.amount ?? '0');
     const recipient = coinTransfer.to ?? '';
 
-    const startBalance = approval.approvalCriteria?.predeterminedBalances?.incrementedBalances?.startBalances?.[0];
+    const predetermined = approval.approvalCriteria?.predeterminedBalances;
+    const incremented = predetermined?.incrementedBalances;
+    const startBalance = incremented?.startBalances?.[0];
+    if (approval.fromListId !== 'Mint' || predetermined?.manualBalances?.length || incremented?.startBalances?.length !== 1 ||
+      startBalance?.tokenIds?.length !== 1 || BigInt(startBalance.tokenIds[0].start) !== 1n || BigInt(startBalance.tokenIds[0].end) !== 1n ||
+      startBalance?.ownershipTimes?.length !== 1 || BigInt(startBalance.ownershipTimes[0].start) !== 1n || BigInt(startBalance.ownershipTimes[0].end) !== BigInt(MAX_UINT64) ||
+      BigInt(incremented.incrementTokenIdsBy ?? 0) !== 0n || BigInt(incremented.incrementOwnershipTimesBy ?? 0) !== 0n ||
+      BigInt(incremented.durationFromTimestamp ?? 0) !== 0n || BigInt(incremented.recurringOwnershipTimes?.intervalLength ?? 0) !== 0n ||
+      incremented.allowOverrideTimestamp || incremented.allowOverrideWithAnyValidToken) continue;
     const mintAmount = BigInt(startBalance?.amount ?? '0');
 
     const allowAmountScaling =
@@ -106,6 +113,7 @@ export function extractCreditTokenTiers(
       const maxMultiplier = BigInt(
         approval.approvalCriteria?.predeterminedBalances?.incrementedBalances?.maxScalingMultiplier ?? '0'
       );
+      if (maxMultiplier <= 0n) continue;
       tiers.push({
         approvalId: approval.approvalId,
         version: BigInt(approval.version ?? 0),
@@ -123,7 +131,7 @@ export function extractCreditTokenTiers(
     // Legacy tiered: `credit-1`, `credit-10`, etc.
     const numStr = approval.approvalId.replace('credit-', '');
     const value = Number(numStr);
-    if (!Number.isFinite(value) || value <= 0) continue;
+    if (!Number.isSafeInteger(value) || value <= 0) continue;
     tiers.push({
       approvalId: approval.approvalId,
       version: BigInt(approval.version ?? 0),
@@ -166,6 +174,7 @@ export function quoteCreditTokenPurchase(tier: CreditTokenTier, units: bigint, d
     throw new Error('Credit tier must have a positive payment, positive mint amount, denomination and recipient.');
   }
   if (!tier.isScaled && units !== 1n) throw new Error('Legacy credit tiers support exactly one pack per transaction.');
+  if (tier.isScaled && (!tier.maxMultiplier || tier.maxMultiplier <= 0n)) throw new Error('Scaled credit tiers require a positive maximum multiplier.');
   if (tier.isScaled && tier.maxMultiplier && tier.maxMultiplier > 0n && units > tier.maxMultiplier) {
     throw new Error(`Requested multiplier ${units} exceeds the maximum ${tier.maxMultiplier}. Choose a smaller quantity explicitly.`);
   }

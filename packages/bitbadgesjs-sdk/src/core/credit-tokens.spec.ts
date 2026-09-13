@@ -33,9 +33,9 @@ const scaledTier = () => ({
     coinTransfers: [{ to: SELLER, coins: [{ denom: 'uusdc', amount: '1000000' }], overrideFromWithApproverAddress: false }],
     predeterminedBalances: {
       incrementedBalances: {
-        startBalances: [{ amount: '100', tokenIds: [{ start: 1n, end: 1n }], ownershipTimes: [] }],
+        startBalances: [{ amount: '100', tokenIds: [{ start: 1n, end: 1n }], ownershipTimes: [{ start: 1n, end: 18446744073709551615n }] }],
         allowAmountScaling: true,
-        maxScalingMultiplier: '0'
+        maxScalingMultiplier: '18446744073709551615'
       }
     }
   }
@@ -52,7 +52,7 @@ const legacyTier = (n: number) => ({
     coinTransfers: [{ to: SELLER, coins: [{ denom: 'uusdc', amount: String(n * 1000000) }], overrideFromWithApproverAddress: false }],
     predeterminedBalances: {
       incrementedBalances: {
-        startBalances: [{ amount: String(n * 100), tokenIds: [{ start: 1n, end: 1n }], ownershipTimes: [] }],
+        startBalances: [{ amount: String(n * 100), tokenIds: [{ start: 1n, end: 1n }], ownershipTimes: [{ start: 1n, end: 18446744073709551615n }] }],
         allowAmountScaling: false
       }
     }
@@ -112,6 +112,17 @@ describe('extractCreditTokenTiers', () => {
     const approval = scaledTier();
     approval.approvalCriteria.coinTransfers.push({ ...approval.approvalCriteria.coinTransfers[0] });
     expect(extractCreditTokenTiers([approval as any])).toEqual([]);
+  });
+
+  it.each(['source', 'multipleBalances', 'differentToken', 'limitedOwnership', 'dynamicToken'])('does not quote incomplete %s mint terms', (variant) => {
+    const approval: any = scaledTier();
+    const incremented = approval.approvalCriteria.predeterminedBalances.incrementedBalances;
+    if (variant === 'source') approval.fromListId = 'All';
+    if (variant === 'multipleBalances') incremented.startBalances.push({ ...incremented.startBalances[0] });
+    if (variant === 'differentToken') incremented.startBalances[0].tokenIds = [{ start: 2n, end: 2n }];
+    if (variant === 'limitedOwnership') incremented.startBalances[0].ownershipTimes = [{ start: 1n, end: 100n }];
+    if (variant === 'dynamicToken') incremented.incrementTokenIdsBy = 1n;
+    expect(extractCreditTokenTiers([approval])).toEqual([]);
   });
 });
 
