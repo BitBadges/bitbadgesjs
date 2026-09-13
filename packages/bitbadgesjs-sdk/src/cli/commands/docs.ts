@@ -63,7 +63,7 @@ function printTree(sections: DocSection[], indent = 0, maxDepth = 4): string {
 }
 
 export const docsCommand = new Command('docs')
-  .description('Browse BitBadges documentation (fetched from GitHub, cached 24h).')
+  .description('Browse BitBadges documentation (fetched from docs.bitbadges.io, cached 24h).')
   .argument('[section]', 'Section slug (use slashes for nested), or "all" for the full dump')
   .option('--refresh', 'Force refresh the docs cache')
   .addHelpText('after', `
@@ -82,12 +82,12 @@ Section Navigation (use slugs from the tree view, separated by /):
   docs messages                     All message type docs
   docs messages/msg-transfer-tokens A specific message
   docs examples                     Code examples and snippets
-  docs builder-skills               All builder skills (same as "skills")
-  docs builder-skills/smart-token   A specific skill
+  skills                            Installed skill catalog (offline)
+  skills smart-token                Installed smart-token instructions
 
 Partial matching: "docs approvals" finds the first section containing "approvals".
 
-Docs are fetched from GitHub on first use and cached locally for 24 hours.
+Docs are fetched from docs.bitbadges.io on first use and cached locally for 24 hours.
 Cache: ~/.bitbadges/docs-cache.json | Refresh: docs --refresh`)
   .action(async (section: string | undefined, opts: { refresh?: boolean }) => {
     const { loadDocs, clearDocsCache } = await import('../utils/docs-cache.js');
