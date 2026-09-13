@@ -3516,7 +3516,32 @@ A multi-product storefront where each product is a separate token ID. Buyers pay
 
 Each product gets its own purchase approval. There's also an optional global burn approval.
 
-### Preferred path: presets (one call per product + optional burn)
+### Preferred path: CLI
+
+Use \`bb build product-catalog --json catalog.json --creator <address> --output-file proposal.json\`.
+Inspect \`bb dev capabilities build_product_catalog\` for the current input schema. Each products entry accepts
+name, price (display units), denom, maxSupply, burn and metadata. Optional product.storeAddress
+overrides the catalog's default storeAddress for that product only; BitBadges and EVM account
+addresses are accepted. One purchase still pays exactly one recipient.
+
+Use \`bb products show <collectionId>\` to inspect the deployed catalog, then
+\`bb products purchase <collectionId> --token-id <id> --creator <buyer>\` to build a purchase.
+Review, simulate and explicitly request browser signing as documented by the CLI lifecycle.
+
+### Catalog lifecycle
+
+Catalogs created by this builder freeze products, prices, recipients, supply caps and metadata.
+Publish a new collection for new terms. Do not rebuild an existing catalog using this creation
+builder: changing token IDs, approval IDs or tracker IDs can detach receipts and purchase counts.
+The frontend catalog form is creation-only; its reorder/delete actions apply only to unsigned drafts
+and move each product's metadata with its terms. Custom mutable collections require an advanced
+update that preserves identities and obeys their existing permissions.
+
+Payments are direct to the seller, not held for conditional release. Burning a product receipt
+does not refund payment, restock the product or prove delivery. Cancellations, refunds and timed
+licenses are not built-in catalog actions; they need a separately reviewed design before creation.
+
+### Advanced path: presets (one call per product + optional burn)
 
 Call \`products.purchase\` once per product (productIndex 1..N). Add \`products.burn\` once if you need the global burn/redeem:
 
