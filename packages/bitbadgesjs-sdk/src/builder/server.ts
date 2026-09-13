@@ -34,21 +34,17 @@ import { listResources, readResource } from './resources/registry.js';
  * every conversation, and the depth lives in `bitbadges://master-prompt`.
  */
 export function getServerInstructions(): string {
-  return `BitBadges builder. You assemble a token collection in a stateful session, then hand the user a link to review and sign. You never sign or broadcast, and you never need their keys.
+  return `BitBadges MCP adapter. The bb CLI is the primary entry point, including Cosmos chain commands. This server provides unsigned construction, inspection and query tools; it does not sign or broadcast and never needs private keys.
 
-Read the resource bitbadges://master-prompt once per conversation before your first build, then call get_skill_instructions for the closest skill (its description lists every id).
+Start with list_skills, then get_skill_instructions with {"skillId":"<id>"}. CLI equivalents are bb dev skills and bb dev skills <id>. Load only the instructions needed for the task. Prefer shipped high-level builders: build_payment_request_v2 supports frozen invoice obligations and repeatable payment links. Other CLI presets are discoverable with bb build --help; do not assume every CLI action has an MCP equivalent.
 
-Happy path for a new collection:
-1. get_skill_instructions(<skill>) — read before building.
-2. generate_unique_id — one per approval you intend to add. Never hand-write an approvalId for a new approval.
-3. Build, in one parallel round: set_standards, set_valid_token_ids, set_invariants, set_permissions, set_default_balances, set_collection_metadata, set_token_metadata, add_approval (or add_preset_approval when a preset fits — call list_presets first, presets are far cheaper than hand-written criteria). Pass creatorAddress on your FIRST session call; it sets creator and manager, and later calls reuse the stored value.
-4. Verify, in parallel and with no arguments — they read the session: validate_transaction, review_collection, simulate_transaction.
-5. Fix findings the review marks critical, then re-verify. Warnings are advisory.
-6. get_transaction for the final JSON, then get_review_url. Give the user the returned reviewUrl and stop. That link is the handoff: they open bitbadges.io, review it, and sign with their own wallet. Do not paste raw transaction JSON unless they ask for it.
+For advanced session-based construction, read bitbadges://master-prompt. Use a distinct sessionId for each independent build, pass creatorAddress explicitly, and apply mutations in dependency order. Calls without a sessionId share a default session; reset_session before reusing it. Do not reset another build's session.
 
-Session state is global and survives across builds. Call reset_session before starting a second collection in the same conversation, or you will inherit the first one's approvals and metadata.
+After construction, use validate_transaction, review_collection and simulate_transaction for the exact proposal and signer. Correct errors and assess warnings. If simulation is unavailable or unsupported, report that instead of claiming success. Export with get_transaction; get_review_url creates a user review handoff, not a confirmed payment. CLI users can continue with bb check, bb simulate and bb deploy --browser with the expected signer. Browser wallet signing requires the user's wallet; agent-owned wallets are a separate authorized CLI signing path.
 
-Conventions: every number is a string. Ranges are {start, end} with string bounds. Leave an image as "" when the user gave you no art and get_transaction fills it. You describe collections as MsgUniversalUpdateCollection, but get_transaction narrows the output to /tokenization.MsgCreateCollection for a new collection and MsgUpdateCollection for an edit. That is expected.`;
+Inspect isError and structured results. Proposed, signed, submitted, confirmed and indexed are different states. A returned hash is not confirmation, and unknown outcomes must be reconciled before retries.
+
+Follow each tool's schema exactly. Integer amounts, IDs and timestamp bounds generally use decimal strings; schema literals such as PaymentRequestV2 version: 2 are numeric. Direct invoice payments do not provide cancellation, refunds, escrow or prorations. Never imply that descriptive metadata or skill prose enforces a guardrail.`;
 }
 
 export function createServer(): Server {
@@ -76,9 +72,12 @@ export function createServer(): Server {
   // wire protocol.
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
-    const { text, isError } = await callTool(name, args);
+    const { text, result, isError } = await callTool(name, args);
     const response: any = {
-      content: [{ type: 'text', text }]
+      content: [{ type: 'text', text }],
+      ...(result !== null && result !== undefined
+        ? { structuredContent: typeof result === 'object' && !Array.isArray(result) ? result : { data: result } }
+        : {})
     };
     if (isError) response.isError = true;
     return response;

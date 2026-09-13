@@ -19,6 +19,28 @@
 import { callTool, toolRegistry } from './registry.js';
 import { getAllSkillInstructions, getSkillInstructions } from '../resources/index.js';
 
+describe('agent result contracts', () => {
+  it('lists canonical skill summaries for progressive discovery', async () => {
+    const response = await callTool('list_skills', {});
+    expect(response.isError).toBeFalsy();
+    expect(response.result.map((skill: any) => skill.id)).toEqual(getAllSkillInstructions().map((skill) => skill.id));
+    expect(response.result.every((skill: any) => skill.description && !skill.instructions)).toBe(true);
+  });
+
+  it('marks a handler-reported failure as an error without losing its recovery context', async () => {
+    const failure = { success: false, error: 'Unavailable', retrySafe: false, requestId: 'request-test' };
+    const original = toolRegistry.get_current_timestamp.run;
+    toolRegistry.get_current_timestamp.run = () => failure;
+    try {
+      const response = await callTool('get_current_timestamp', {});
+      expect(response.isError).toBe(true);
+      expect(response.result).toEqual(failure);
+    } finally {
+      toolRegistry.get_current_timestamp.run = original;
+    }
+  });
+});
+
 describe('callTool — pre-flight arg validation', () => {
   describe('missing required field', () => {
     it('generate_unique_id with no prefix → friendly error, not "undefined_xxx"', async () => {
@@ -104,22 +126,16 @@ describe('callTool — pre-flight arg validation', () => {
         address: 'bb1abcxyzabcxyzabcxyzabcxyzabcxyz',
         collectionId: '42'
       });
-      // Not a preflight error — either the handler ran (returning an API-key
-      // error) or it succeeded. In either case, `isError` is false at the
-      // registry level; errors surface in `result.error`.
-      expect(res.isError).toBeFalsy();
       expect(res.result).not.toBeNull();
       expect(typeof (res.result as any).success).toBe('boolean');
+      expect(Boolean(res.isError)).toBe((res.result as any).success === false);
     });
 
     it('missing both `collectionId` and `requirements` → handler-level error (not preflight)', async () => {
       const res = await callTool('verify_ownership', {
         address: 'bb1abcxyzabcxyzabcxyzabcxyzabcxyz'
       });
-      // Preflight only enforces `required: ['address']` — the either/or check
-      // lives in the handler + Zod refine, so the error surfaces via the
-      // handler's result, not the registry's isError path.
-      expect(res.isError).toBeFalsy();
+      expect(res.isError).toBe(true);
       expect((res.result as any).success).toBe(false);
       expect((res.result as any).error).toMatch(/collectionId.*requirements|requirements.*collectionId/);
     });
@@ -223,4 +239,3 @@ describe('required-field preflight treats "" as a value, not a gap', () => {
     expect(res.text).toContain('image');
   });
 });
-

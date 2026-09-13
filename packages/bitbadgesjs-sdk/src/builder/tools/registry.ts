@@ -162,6 +162,14 @@ const getSkillInstructionsTool: ToolSchema = {
  * The tool registry. Keys are builder tool names.
  */
 export const toolRegistry: Record<string, ToolEntry> = {
+  list_skills: entry(
+    {
+      name: 'list_skills',
+      description: 'List installed canonical skill summaries. Equivalent to bb dev skills; read details with get_skill_instructions using skillId.',
+      inputSchema: { type: 'object', additionalProperties: false, properties: {} }
+    },
+    () => getAllSkillInstructions().map(({ instructions: _instructions, ...summary }) => summary)
+  ),
   build_payment_request_v2: entry(buildPaymentRequestV2Tool, handleBuildPaymentRequestV2),
   // Utilities
   lookup_token_info: entry(lookupTokenInfoTool, handleLookupTokenInfo),
@@ -376,7 +384,7 @@ export async function callTool(name: string, args: any): Promise<CallToolResult>
   try {
     const result = await tool.run(args);
     const text = tool.formatText ? tool.formatText(result) : JSON.stringify(result, null, 2);
-    return { text, result };
+    return { text, result, ...(result?.success === false || result?.ok === false ? { isError: true } : {}) };
   } catch (error) {
     return {
       text: `Error: ${formatToolError(error)}`,
