@@ -23,6 +23,7 @@
 import { BigIntify } from '../common/string-numbers.js';
 import { MsgUniversalUpdateCollection } from '../transactions/messages/bitbadges/tokenization/msgUniversalUpdateCollection.js';
 import { coerceToUniversal } from '../cli/utils/normalizeMsg.js';
+import { parseInlineCustomData } from '../api-indexer/metadata/inlineCustomData.js';
 
 /**
  * Unwrap any of: transaction (`{ messages: [...] }`), raw message
@@ -78,8 +79,9 @@ function mirrorPathFieldNames(value: Record<string, any>): Record<string, any> {
 function reattachInlineMetadata(converted: any, raw: any): void {
   // Collection metadata
   const rawCm = raw?.collectionMetadata;
-  if (rawCm?.metadata && converted?.collectionMetadata) {
-    converted.collectionMetadata.metadata = rawCm.metadata;
+  const collectionMetadata = rawCm?.metadata || (!rawCm?.uri && parseInlineCustomData(rawCm?.customData));
+  if (collectionMetadata && converted?.collectionMetadata) {
+    converted.collectionMetadata.metadata = collectionMetadata;
   }
   // Alias paths (both field names may exist after mirroring)
   for (const field of ['aliasPathsToAdd', 'aliasPaths'] as const) {
@@ -105,7 +107,8 @@ function reattachInlineMetadata(converted: any, raw: any): void {
   const outApprovals = converted?.collectionApprovals;
   if (Array.isArray(rawApprovals) && Array.isArray(outApprovals)) {
     for (let i = 0; i < Math.min(rawApprovals.length, outApprovals.length); i++) {
-      const rawDetails = rawApprovals[i]?.details;
+      const rawDetails = rawApprovals[i]?.details ||
+        (!rawApprovals[i]?.uri && parseInlineCustomData(rawApprovals[i]?.customData));
       if (rawDetails && outApprovals[i] !== undefined && outApprovals[i] !== null) {
         outApprovals[i].details = rawDetails;
       }

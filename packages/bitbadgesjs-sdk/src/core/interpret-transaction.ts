@@ -28,6 +28,7 @@ import {
   denomToHuman,
   aOrAn
 } from './interpret-shared.js';
+import { parseInlineCustomData } from '../api-indexer/metadata/inlineCustomData.js';
 
 // ---------------------------------------------------------------------------
 // Flag-to-section mapping for update mode
@@ -57,7 +58,8 @@ function buildTransactionSummary(txBody: Record<string, any>, isUpdate: boolean,
   let md = '## Transaction Summary\n\n';
 
   const type = detectType(txBody.standards || [], !!txBody.invariants?.cosmosCoinBackedPath);
-  const meta = txBody.collectionMetadata?.metadata || txBody.collectionMetadata || {};
+  const meta = txBody.collectionMetadata?.metadata ||
+    (!txBody.collectionMetadata?.uri && parseInlineCustomData(txBody.collectionMetadata?.customData)) || txBody.collectionMetadata || {};
   const name = meta.name || 'Unnamed Collection';
 
   if (isUpdate) {
@@ -114,7 +116,8 @@ function buildCollectionOverview(txBody: Record<string, any>): string {
   const tokenCount = countTokenIds(txBody.validTokenIds);
   const inv = txBody.invariants || {};
   const maxSupply = big(inv.maxSupplyPerId);
-  const meta = txBody.collectionMetadata?.metadata || txBody.collectionMetadata || {};
+  const meta = txBody.collectionMetadata?.metadata ||
+    (!txBody.collectionMetadata?.uri && parseInlineCustomData(txBody.collectionMetadata?.customData)) || txBody.collectionMetadata || {};
 
   let md = '## Collection Overview\n\n';
 
@@ -154,7 +157,7 @@ function buildCollectionOverview(txBody: Record<string, any>): string {
   if (txBody.tokenMetadata && txBody.tokenMetadata.length > 0) {
     md += '\n\n### Per-Token Metadata\n\n';
     for (const tm of txBody.tokenMetadata) {
-      const tmMeta = tm.metadata?.metadata || tm.metadata || {};
+      const tmMeta = tm.metadata?.metadata || tm.metadata || (!tm.uri && parseInlineCustomData(tm.customData)) || {};
       const tmName = tmMeta.name || 'unnamed';
       const tmDesc = tmMeta.description || '';
       const tokenIds = rangeStr(tm.tokenIds);
