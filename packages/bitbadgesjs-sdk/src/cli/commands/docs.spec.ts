@@ -36,6 +36,8 @@ describe('docsCommand shape', () => {
     }
     const help = chunks.join('');
     expect(help).toMatch(/docs <section>\/<subsection>/);
-    expect(help).toMatch(/builder-skills/);
+    expect(help).toMatch(/skills smart-token/);
+    expect(help).toMatch(/docs standards\/payments/);
+    expect(help).not.toMatch(/builder-skills/);
   });
 });
