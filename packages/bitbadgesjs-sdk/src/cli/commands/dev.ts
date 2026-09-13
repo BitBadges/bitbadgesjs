@@ -38,6 +38,7 @@ import { skillsCommand } from './skills.js';
 import { genPubKeyCommand } from './gen-pub-key.js';
 import { devFeedbackCommand } from './dev-feedback.js';
 import { capabilitiesCommand } from './capabilities.js';
+import { requestsCommand } from './requests.js';
 
 export const devCommand = new Command('dev').description(
   'Builder primitives, resources, docs, skills, pubkey derivation — agent-facing surface.'
@@ -71,5 +72,6 @@ devCommand.addCommand(resourcesCommand);
 devCommand.addCommand(docsCommand);
 devCommand.addCommand(skillsCommand);
 devCommand.addCommand(capabilitiesCommand);
+devCommand.addCommand(requestsCommand);
 devCommand.addCommand(genPubKeyCommand);
 devCommand.addCommand(devFeedbackCommand);

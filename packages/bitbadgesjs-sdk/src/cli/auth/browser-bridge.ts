@@ -198,6 +198,7 @@ async function tryOpen(url: string): Promise<void> {
 export interface BridgeStartOptions extends BridgeOptions {
   /** Stream the launch URL to stderr before opening. Default true. */
   printUrl?: boolean;
+  onReady?: (url: string) => void;
 }
 
 export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult> {
@@ -243,8 +244,15 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
         return;
       }
 
-      // Only accept the /callback path. Everything else is 404 to keep
-      // the surface tiny.
+      if (reqUrl.pathname === '/status' && txRequest && req.method === 'GET') {
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'no-store');
+        if (reqUrl.searchParams.get('state') !== state) {
+          res.statusCode = 403;
+          res.end('{}');
+        } else res.end(JSON.stringify({ requestId: txRequest.requestId, pending: !resolved }));
+        return;
+      }
       if (reqUrl.pathname !== '/callback') {
         res.statusCode = 404;
         res.end();
@@ -332,6 +340,9 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
         `&${payloadParam}` +
         `&return=${encodeURIComponent(returnUrl)}` +
         `&state=${encodeURIComponent(state)}`;
+
+      try { opts.onReady?.(fullUrl); }
+      catch (error) { resolved = true; cleanup(); reject(error); return; }
 
       if (opts.printUrl !== false) {
         process.stderr.write(`\nOpening browser to sign. If it doesn't open, paste this URL manually:\n${fullUrl}\n\n`);

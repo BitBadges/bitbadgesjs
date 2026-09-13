@@ -117,6 +117,7 @@
     "test:unit": "jest --setupFiles ./jest.setup.js --testPathIgnorePatterns='/dist/' --testPathIgnorePatterns='src/cli/integration/'",
     "test:integration": "jest --setupFiles ./jest.setup.js --testMatch='<rootDir>/src/cli/integration/**/*.spec.ts' --runInBand",
     "test:agent-contracts": "bun scripts/check-agent-contracts.ts",
+    "test:agent-workflows": "bun scripts/check-agent-workflows.ts",
     "test:watch": "jest --watch",
     "test:ci": "jest --coverage --ci --reporters='jest-junit'",
     "coverage": "jest --coverage",

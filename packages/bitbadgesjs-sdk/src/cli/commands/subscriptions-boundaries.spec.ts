@@ -64,4 +64,31 @@ describe('subscription charge-due boundaries', () => {
     const result = await run(1999, [{ start: 2000n, end: 2999n }]);
     expect(result.messages).toEqual([]);
   });
+  it.each(['enable-renewal', 'subscribe'])('refuses %s when existing approvals cannot be read', async action => {
+    const collection = normalizeForReview(buildSubscription({ interval: 'daily', price: 1, denom: 'BADGE', recipient: address, uri: 'https://example.com/sub.json' }));
+    (indexer.callIndexer as jest.Mock).mockImplementation(async (_method, path) => {
+      if (path.includes('/balance/')) throw new Error('Indexer unavailable');
+      return collection;
+    });
+    await subscriptionsCommand.parseAsync([action, '1', '--creator', address], { from: 'user' });
+    expect(indexer.emitIndexerResult).not.toHaveBeenCalled();
+    expect(indexer.emitIndexerError).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringMatching(/Indexer unavailable/) }));
+  });
+  it.each(['enable-renewal', 'subscribe', 'cancel'])('refuses %s when the balance response omits approval state', async action => {
+    const collection = normalizeForReview(buildSubscription({ interval: 'daily', price: 1, denom: 'BADGE', recipient: address, uri: 'https://example.com/sub.json' }));
+    (indexer.callIndexer as jest.Mock).mockImplementation(async (_method, path) => path.includes('/balance/') ? {} : collection);
+    await subscriptionsCommand.parseAsync([action, '1', '--creator', address], { from: 'user' });
+    expect(indexer.emitIndexerResult).not.toHaveBeenCalled();
+    expect(indexer.emitIndexerError).toHaveBeenCalled();
+  });
+  it.each(['missing-cursor', 'page-limit'])('does not report a complete charge batch for incomplete pagination: %s', async failure => {
+    const collection = normalizeForReview(buildSubscription({ interval: 'daily', price: 1, denom: 'BADGE', recipient: address, uri: 'https://example.com/sub.json' }));
+    let page = 0;
+    (indexer.callIndexer as jest.Mock).mockImplementation(async (_method, path) => path.includes('/owners')
+      ? { owners: [], pagination: { hasMore: true, bookmark: failure === 'page-limit' ? String(++page) : undefined } }
+      : collection);
+    await subscriptionsCommand.parseAsync(['charge-due', '1', '--creator', address], { from: 'user' });
+    expect(indexer.emitIndexerResult).not.toHaveBeenCalled();
+    expect(indexer.emitIndexerError).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringMatching(/pagination|page limit/i) }));
+  });
 });

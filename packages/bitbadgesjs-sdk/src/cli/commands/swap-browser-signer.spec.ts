@@ -16,10 +16,14 @@ const estimate = (address: unknown = sender) => ({ estimate: { skipGoMsgs: [{ mu
 } }] } });
 
 describe('swap browser signer', () => {
+  let requestDirectory: string;
+  const original = process.env.BITBADGES_CONFIG_DIR;
   let command: any;
   let bridge: jest.Mock;
   let api: jest.Mock;
   beforeEach(() => {
+    requestDirectory = mkdtempSync(join(tmpdir(), 'swap-request-'));
+    process.env.BITBADGES_CONFIG_DIR = requestDirectory;
     jest.resetModules();
     command = require('./swap.js').swapCommand;
     bridge = require('../auth/browser-bridge.js').bridgeSign;
@@ -27,7 +31,10 @@ describe('swap browser signer', () => {
     jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
     bridge.mockImplementation(async ({ payload }) => ({ requestId: payload.requestId, address: payload.expectedAddress, network: payload.network, chain: payload.chain, chainId: payload.chainId, outcome: 'submitted', hash: 'A'.repeat(64) }));
   });
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => {
+    jest.restoreAllMocks(); rmSync(requestDirectory, { recursive: true, force: true });
+    if (original === undefined) delete process.env.BITBADGES_CONFIG_DIR; else process.env.BITBADGES_CONFIG_DIR = original;
+  });
 
   test('saved estimate binds the actual native message sender', async () => {
     const directory = mkdtempSync(join(tmpdir(), 'swap-signer-'));

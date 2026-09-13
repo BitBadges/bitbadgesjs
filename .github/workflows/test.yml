@@ -39,3 +39,7 @@ jobs:
       - name: Check offline agent workflows against built artifacts
         working-directory: packages/bitbadgesjs-sdk
         run: bun run test:agent-contracts
+
+      - name: Check CLI and MCP actions against local API fixtures
+        working-directory: packages/bitbadgesjs-sdk
+        run: bun run test:agent-workflows

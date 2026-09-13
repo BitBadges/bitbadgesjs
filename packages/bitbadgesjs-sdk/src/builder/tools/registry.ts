@@ -85,6 +85,9 @@ import { getSkillInstructions, getAllSkillInstructions } from '../resources/inde
 import { buildPaymentRequestV2Tool, handleBuildPaymentRequestV2 } from './builders/buildPaymentRequestV2.js';
 import { createHash } from 'node:crypto';
 import { standardBuilderTools } from './builders/buildStandard.js';
+import { createStandardActionTools, executeInstalledCli } from './standardActions.js';
+import { getSigningRequestStatus, listSigningRequests } from '../../cli/utils/signing-requests.js';
+import { z } from 'zod';
 
 // Re-export session persistence helpers so external consumers (e.g.
 // bitbadges-cli) can snapshot / restore session state across process
@@ -165,6 +168,15 @@ const getSkillInstructionsTool: ToolSchema = {
  */
 export const toolRegistry: Record<string, ToolEntry> = {
   ...standardBuilderTools,
+  ...createStandardActionTools(executeInstalledCli, () => getCapabilityCatalog().catalogHash),
+  list_signing_requests: {
+    tool: { name: 'list_signing_requests', description: 'List saved local browser request IDs. Does not sign or submit.', inputSchema: { type: 'object', properties: {}, additionalProperties: false } } as ToolSchema,
+    run: (args: unknown) => { z.object({}).strict().parse(args); return { requestIds: listSigningRequests() }; }
+  },
+  signing_request_status: {
+    tool: { name: 'signing_request_status', description: 'Inspect a saved browser request. With resume=true, returns the same URL only while its original listener is live. Never creates or submits another transaction; unknown outcomes require reconciliation.', inputSchema: { type: 'object', properties: { requestId: { type: 'string', pattern: '^[a-f0-9]{32}$' }, resume: { type: 'boolean' } }, required: ['requestId'], additionalProperties: false } } as ToolSchema,
+    run: (args: unknown) => { const input = z.object({ requestId: z.string().regex(/^[a-f0-9]{32}$/), resume: z.boolean().optional() }).strict().parse(args); return getSigningRequestStatus(input.requestId, input.resume); }
+  },
   get_capabilities: entry(
     {
       name: 'get_capabilities',
@@ -290,7 +302,7 @@ export function getCapabilityCatalog(id?: string) {
     schemaVersion: 1,
     catalogHash,
     primaryInterface: 'cli',
-    scope: 'Shared builder tools. Standard-specific CLI commands and native Cosmos commands remain discoverable with bb --help-json and bb tx --help.',
+    scope: 'Shared builders, supported standard actions, and local signing-request recovery. Other CLI commands and native Cosmos commands remain discoverable with bb --help-json and bb tx --help.',
     capabilities: entries.filter(([name]) => id === undefined || name === id).map(([name, entry]) => ({
       id: name,
       description: entry.tool.description,
