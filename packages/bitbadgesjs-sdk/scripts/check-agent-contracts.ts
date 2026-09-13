@@ -26,6 +26,17 @@ function cli(args: string[], expectedStatus = 0) {
 }
 
 try {
+  for (const args of [
+    ['build', 'subscription'],
+    ['build', 'subscription', '--json', '{broken'],
+    ['build', 'subscription', '--not-a-real-option'],
+    ['not-a-real-command']
+  ]) {
+    const failure = cli(args, 1);
+    assert.equal(failure.data, null);
+    assert.ok(failure.error.code);
+    assert.ok(failure.error.message);
+  }
   const skills = cli(['dev', 'skills']).data;
   assert.ok(skills.length > 0);
   const mcpSkills = await callTool('list_skills', {});

@@ -4,6 +4,7 @@ import { Command, Help } from 'commander';
 import { HELP_GROUP_ORDER } from './utils/help-groups.js';
 import { emitDeprecation } from './utils/deprecation.js';
 import { getCliPackageVersion } from './utils/package-version.js';
+import { emitError } from './utils/envelope.js';
 
 // Apply a custom Help subclass globally so every command + sub-subcommand
 // inherits the "Required: / Options:" split, not just the root. Commander
@@ -692,26 +693,24 @@ if (process.argv.includes('--help-json')) {
   });
 }
 
-// ── Top-level error handler ─────────────────────────────────────────────────
-//
-// Commander itself prints a friendly "error: required option ..." line and
-// exits non-zero on flag-shape errors, but anything thrown from inside an
-// .action() handler (e.g. SDK validation errors from `bb build *`) hits
-// Node's default uncaughtException printer, which dumps a 5-line stack
-// trace. That noise drowns out the actual error message and is useless for
-// agents reading stderr. Install handlers that print a single clean
-// "Error: <message>" line and exit 1. Stacks are still available via
-// `BB_DEBUG=1` for humans debugging the CLI itself.
 function reportFatal(err: unknown): void {
-  const msg = err instanceof Error ? err.message : String(err);
-  process.stderr.write(`Error: ${msg}\n`);
   if (process.env.BB_DEBUG === '1' && err instanceof Error && err.stack) {
     process.stderr.write(err.stack + '\n');
   }
-  process.exit(1);
+  emitError(err, { condensed: process.argv.includes('--condensed') });
 }
 process.on('uncaughtException', reportFatal);
 process.on('unhandledRejection', reportFatal);
+
+function configureCommandErrors(command: Command): void {
+  command.configureOutput({ writeErr: () => {} });
+  command.exitOverride((err) => {
+    if (err.exitCode === 0) process.exit(0);
+    emitError(err, { code: 'invalid_input', condensed: process.argv.includes('--condensed') });
+  });
+  for (const child of command.commands) configureCommandErrors(child);
+}
+configureCommandErrors(program);
 
 // When invoked with no args, show the full grouped --help by default.
 // Commander's stock behavior prints a minimal "Usage:" stanza and exits —
@@ -727,5 +726,5 @@ if (process.argv.length <= 2 || onlyGlobalFlags) {
 // --help-json has its own emit path (above). Skip Commander's parse so
 // it doesn't fall back to printing help text alongside the JSON.
 if (!process.argv.includes('--help-json')) {
-  program.parse();
+  program.parseAsync().catch(reportFatal);
 }
