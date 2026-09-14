@@ -50,7 +50,7 @@ describe('position-consuming prediction redemptions', () => {
     expect(quotePredictionMarketRedemption(c, { ...args, trackerUses: { [a.approvalId]: 1n } }).legs[0].eligibility).toBe('exhausted');
   });
   test('invalid inputs and absent payout approvals fail closed', () => {
-    for (const yesAmount of [-1n, 0n]) expect(() => quotePredictionMarketRedemption(market(), { state: 'yes-wins', yesAmount })).toThrow();
+    for (const yesAmount of [-1n]) expect(() => quotePredictionMarketRedemption(market(), { state: 'yes-wins', yesAmount })).toThrow();
     expect(() => quotePredictionMarketRedemption(market(), { state: 'yes-wins', yesAmount: 3n, yesBalance: 2n })).toThrow(/balance/);
     expect(() => buildPredictionMarketRedeemTx({ creator: 'a', collectionId: '1', state: 'yes-wins', yesBalance: 1n })).toThrow(/approval/i);
   });
@@ -99,6 +99,14 @@ describe('position-consuming prediction redemptions', () => {
     a.approvalCriteria.maxNumTransfers.perInitiatedByAddressMaxNumTransfers='1';
     a.approvalCriteria.maxNumTransfers.resetTimeIntervals={startTime:'1',intervalLength:'1000'};
     expect(quotePredictionMarketRedemption(c,{state:'yes-wins',yesAmount:1n,trackerUses:{[a.approvalId]:1n}}).legs[0]).toMatchObject({policy:'limited',eligibility:'unknown'});
+  });
+
+  test('explicit zero skips a push side while keeping observed balances intact', () => {
+    const q=quotePredictionMarketRedemption(market(),{state:'push',yesAmount:2n,noAmount:0n,yesBalance:5n,noBalance:7n});
+    expect(q.legs).toHaveLength(1);expect(q.payout.baseAmount).toBe('1');
+    expect(q.remaining).toEqual({yes:'3',no:'7'});
+    expect(quotePredictionMarketRedemption(market(),{state:'push',yesAmount:0n,noAmount:0n}).legs).toEqual([]);
+    expect(()=>quotePredictionMarketRedemption(market(),{state:'active',pairAmount:0n})).toThrow(/positive/);
   });
 
 });

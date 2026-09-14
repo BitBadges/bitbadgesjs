@@ -1078,8 +1078,8 @@ export function quotePredictionMarketRedemption(collection: any, request: Predic
   if (!['active', 'push', 'yes-wins', 'no-wins'].includes(request.state)) throw new Error('Invalid prediction redemption state');
   for (const [key, value] of Object.entries(request)) {
     if (['pairAmount', 'yesAmount', 'noAmount', 'yesBalance', 'noBalance'].includes(key) && value !== undefined) {
-      if (typeof value !== 'bigint' || value < 0n || (key.endsWith('Amount') && value === 0n))
-        throw new Error(`${key} must be ${key.endsWith('Amount') ? 'positive' : 'nonnegative'} base units`);
+      if (typeof value !== 'bigint' || value < 0n || (key === 'pairAmount' && value === 0n))
+        throw new Error(`${key} must be ${key === 'pairAmount' ? 'positive' : 'nonnegative'} base units`);
     }
   }
   if (

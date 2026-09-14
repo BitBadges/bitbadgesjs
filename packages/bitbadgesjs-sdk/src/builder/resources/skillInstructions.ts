@@ -2354,7 +2354,7 @@ bb prediction-markets quote "$COLLECTION_ID" --state push --yes-balance 5 --no-b
 bb prediction-markets redeem "$COLLECTION_ID" --creator "$HOLDER" --state active --pair-amount 1 > pair.json
 ~~~
 
-Explicit --yes-amount / --no-amount selects a partial redemption. It must match a whole payout lot and fit the supplied balance. Without an explicit amount, a supplied balance selects the maximum complete lots. The push example burns 4 YES and 2 NO, receives 3 collateral base units and retains one raw unit of each side. Explicit --yes-amount 5 for push fails; it is never rounded. Retained complementary YES/NO dust can be paired and redeemed for one collateral unit. A single unmatched raw unit cannot pay half a collateral base unit and remains transferable.
+Explicit --yes-amount / --no-amount selects a partial redemption. It must match a whole payout lot and fit the supplied balance. An explicit side amount of 0 skips that side, retaining its full balance. Pair amounts must be positive. Without an explicit amount, a supplied balance selects the maximum complete lots. The push example burns 4 YES and 2 NO, receives 3 collateral base units and retains one raw unit of each side. Explicit --yes-amount 5 for push fails; it is never rounded. Retained complementary YES/NO dust can be paired and redeemed for one collateral unit. A single unmatched raw unit cannot pay half a collateral base unit and remains transferable.
 
 Winner redemption leaves losing positions untouched. Pair redemption is an independently available consuming route; the canonical frozen recipe does not stop pair deposits or pair redemptions at resolution. Do not describe this as an enforced trading deadline.
 
