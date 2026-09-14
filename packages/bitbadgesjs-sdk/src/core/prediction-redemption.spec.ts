@@ -109,4 +109,13 @@ describe('position-consuming prediction redemptions', () => {
     expect(()=>quotePredictionMarketRedemption(market(),{state:'active',pairAmount:0n})).toThrow(/positive/);
   });
 
+  test('accepts legacy frontend separate equal YES and NO pair balances', () => {
+    const c=market();const a=c.collectionApprovals.find((a:any)=>a.approvalId.includes('pm-redeem'));
+    const start=a.approvalCriteria.predeterminedBalances.incrementedBalances.startBalances[0];
+    a.approvalCriteria.predeterminedBalances.incrementedBalances.startBalances=[{...start,tokenIds:[{start:'1',end:'1'}]},{...start,tokenIds:[{start:'2',end:'2'}]}];
+    expect(quotePredictionMarketRedemption(c,{state:'active',pairAmount:3n}).payout.baseAmount).toBe('3');
+    a.approvalCriteria.predeterminedBalances.incrementedBalances.startBalances[1].amount='2';
+    expect(()=>quotePredictionMarketRedemption(c,{state:'active',pairAmount:3n})).toThrow(/Unsupported/);
+  });
+
 });

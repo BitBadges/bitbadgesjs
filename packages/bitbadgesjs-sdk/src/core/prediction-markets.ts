@@ -1121,7 +1121,11 @@ export function quotePredictionMarketRedemption(collection: any, request: Predic
     const inc = predetermined?.incrementedBalances;
     const order = predetermined?.orderCalculationMethod;
     const coins = criteria?.coinTransfers;
-    const start = inc?.startBalances;
+    const rawStart = inc?.startBalances;
+    const separatePair = side === 'pair' && rawStart?.length === 2 &&
+      rawStart.every((balance: any) => String(balance.amount) === String(rawStart[0].amount) && isExactRange(balance.ownershipTimes, '1', MAX_UINT64)) &&
+      rawStart.some((balance: any) => isExactRange(balance.tokenIds, '1', '1')) && rawStart.some((balance: any) => isExactRange(balance.tokenIds, '2', '2'));
+    const start = separatePair ? [{ ...rawStart[0], tokenIds: [{ start: '1', end: '2' }] }] : rawStart;
     if (
       !approval.approvalId ||
       !inc?.allowAmountScaling ||
