@@ -1045,7 +1045,159 @@ export function buildPredictionMarketDepositMsg(
   };
 }
 
+export type PredictionRedemptionRequest = {
+  state: 'active' | 'push' | 'yes-wins' | 'no-wins';
+  pairAmount?: bigint;
+  yesAmount?: bigint;
+  noAmount?: bigint;
+  yesBalance?: bigint;
+  noBalance?: bigint;
+  /** Observed per-initiator transfer count, keyed by approval ID. */
+  trackerUses?: Record<string, bigint>;
+};
+
+export type PredictionRedemptionQuote = {
+  state: PredictionRedemptionRequest['state'];
+  payout: { denom: string; baseAmount: string };
+  legs: {
+    tokenIds: { start: string; end: string }[];
+    burnAmount: string;
+    payoutAmount: string;
+    approvalId: string;
+    version: string;
+    policy: 'repeated' | 'one-shot' | 'limited';
+    eligibility: 'unknown' | 'available' | 'exhausted';
+  }[];
+  remaining: { yes: string | null; no: string | null };
+  warnings: string[];
+  outcomeFinality: 'verifier-controlled';
+};
+
+/** Quote exact consuming transfers. This does not certify outcome finality or current chain eligibility. */
+export function quotePredictionMarketRedemption(collection: any, request: PredictionRedemptionRequest): PredictionRedemptionQuote {
+  if (!['active', 'push', 'yes-wins', 'no-wins'].includes(request.state)) throw new Error('Invalid prediction redemption state');
+  for (const [key, value] of Object.entries(request)) {
+    if (['pairAmount', 'yesAmount', 'noAmount', 'yesBalance', 'noBalance'].includes(key) && value !== undefined) {
+      if (typeof value !== 'bigint' || value < 0n || (key.endsWith('Amount') && value === 0n))
+        throw new Error(`${key} must be ${key.endsWith('Amount') ? 'positive' : 'nonnegative'} base units`);
+    }
+  }
+  if (
+    (request.state !== 'active' && request.pairAmount !== undefined) ||
+    (request.state === 'active' && (request.yesAmount !== undefined || request.noAmount !== undefined)) ||
+    (request.state === 'yes-wins' && request.noAmount !== undefined) ||
+    (request.state === 'no-wins' && request.yesAmount !== undefined)
+  )
+    throw new Error('Requested amount does not match redemption state');
+  const approvals = collection?.collectionApprovals ?? [];
+  const quote: PredictionRedemptionQuote = {
+    state: request.state,
+    payout: { denom: '', baseAmount: '0' },
+    legs: [],
+    remaining: { yes: request.yesBalance?.toString() ?? null, no: request.noBalance?.toString() ?? null },
+    warnings: [
+      'Voting challenges are verifier-controlled; this quote does not establish an immutable, mutually exclusive outcome.',
+      'Fees, current votes, escrow liquidity and all approval eligibility must be checked before signing.',
+    ],
+    outcomeFinality: 'verifier-controlled',
+  };
+  const sides: ('pair' | 'yes' | 'no')[] =
+    request.state === 'active' ? ['pair'] : request.state === 'push' ? ['yes', 'no'] : [request.state === 'yes-wins' ? 'yes' : 'no'];
+  for (const side of sides) {
+    const matches = approvals.filter((a: any) => {
+      if (a.fromListId !== '!Mint' || a.toListId !== BURN_ADDRESS) return false;
+      const cls = classifySettlementApproval(a);
+      if (side === 'pair') return !a.approvalCriteria?.votingChallenges?.length && isExactRange(a.tokenIds, '1', '2');
+      return request.state === 'push'
+        ? cls === 'push' && isExactRange(a.tokenIds, side === 'yes' ? '1' : '2', side === 'yes' ? '1' : '2')
+        : cls === `wins-${side}`;
+    });
+    if (matches.length !== 1) throw new Error(`Expected one unambiguous ${side} redemption approval`);
+    const approval = matches[0];
+    const criteria = approval.approvalCriteria;
+    const predetermined = criteria?.predeterminedBalances;
+    const inc = predetermined?.incrementedBalances;
+    const coins = criteria?.coinTransfers;
+    const start = inc?.startBalances;
+    if (
+      !approval.approvalId ||
+      !inc?.allowAmountScaling ||
+      predetermined.manualBalances?.length ||
+      start?.length !== 1 ||
+      ['incrementTokenIdsBy', 'incrementOwnershipTimesBy', 'durationFromTimestamp'].some((k) => BigInt(inc[k] ?? 0) !== 0n) ||
+      inc.allowOverrideTimestamp ||
+      inc.allowOverrideWithAnyValidToken ||
+      BigInt(inc.recurringOwnershipTimes?.intervalLength ?? 0) !== 0n ||
+      !isExactRange(start[0].ownershipTimes, '1', MAX_UINT64) ||
+      !isExactRange(start[0].tokenIds, side === 'no' ? '2' : '1', side === 'pair' || side === 'no' ? '2' : '1') ||
+      coins?.length !== 1 ||
+      coins[0].coins?.length !== 1 ||
+      !coins[0].overrideFromWithApproverAddress ||
+      !coins[0].overrideToWithInitiator
+    )
+      throw new Error('Unsupported prediction redemption terms');
+    const lot = BigInt(start[0].amount);
+    const coin = coins[0].coins[0];
+    const payoutLot = BigInt(coin.amount);
+    const maximum = BigInt(inc.maxScalingMultiplier ?? 0);
+    if (lot <= 0n || payoutLot <= 0n || maximum <= 0n || !coin.denom) throw new Error('Invalid prediction redemption ratio');
+    if (quote.payout.denom && quote.payout.denom !== coin.denom) throw new Error('Inconsistent prediction payout denomination');
+    quote.payout.denom = coin.denom;
+    const requested = side === 'pair' ? request.pairAmount : side === 'yes' ? request.yesAmount : request.noAmount;
+    const balance =
+      side === 'pair'
+        ? request.yesBalance !== undefined && request.noBalance !== undefined
+          ? request.yesBalance < request.noBalance
+            ? request.yesBalance
+            : request.noBalance
+          : undefined
+        : side === 'yes'
+          ? request.yesBalance
+          : request.noBalance;
+    const amount = requested ?? (balance === undefined ? 0n : (balance / lot) * lot);
+    if (amount % lot !== 0n) throw new Error(`${side} amount must be a multiple of ${lot} base units; retain incomplete lots as dust`);
+    if (balance !== undefined && amount > balance) throw new Error(`${side} amount exceeds available balance`);
+    if (amount / lot > maximum) throw new Error(`${side} amount exceeds scaling limit`);
+    if (!amount) continue;
+    const limits = criteria.maxNumTransfers;
+    if (!hasAnyNonZeroTransferLimit(limits)) throw new Error('Payout approval needs a tracked transfer limit');
+    const perUser = BigInt(limits?.perInitiatedByAddressMaxNumTransfers ?? 0);
+    const policy =
+      perUser === 1n && BigInt(limits?.resetTimeIntervals?.intervalLength ?? 0) === 0n
+        ? 'one-shot'
+        : perUser > 1n || BigInt(limits?.perFromAddressMaxNumTransfers ?? 0) > 0n || BigInt(limits?.perToAddressMaxNumTransfers ?? 0) > 0n
+          ? 'limited'
+          : 'repeated';
+    const used = request.trackerUses?.[approval.approvalId];
+    if (used !== undefined && used < 0n) throw new Error('Tracker use count cannot be negative');
+    const eligibility = perUser > 0n && used !== undefined && used >= perUser ? 'exhausted' : 'unknown';
+    if (policy === 'one-shot')
+      quote.warnings.push(
+        'Legacy one-shot settlement: a prior claim consumes the per-initiator allowance; later acquired positions may not be redeemable by this address.',
+      );
+    const payout = (amount / lot) * payoutLot;
+    quote.legs.push({
+      tokenIds: start[0].tokenIds.map((r: any) => ({ start: String(r.start), end: String(r.end) })),
+      burnAmount: amount.toString(),
+      payoutAmount: payout.toString(),
+      approvalId: approval.approvalId,
+      version: String(approval.version ?? 0),
+      policy,
+      eligibility,
+    });
+    quote.payout.baseAmount = (BigInt(quote.payout.baseAmount) + payout).toString();
+    for (const token of side === 'pair' ? (['yes', 'no'] as const) : [side]) {
+      if (quote.remaining[token] !== null) quote.remaining[token] = (BigInt(quote.remaining[token]!) - amount).toString();
+    }
+  }
+  return quote;
+}
+
 export interface RedeemArgs {
+  collection?: any;
+  yesAmount?: bigint;
+  noAmount?: bigint;
+  trackerUses?: Record<string, bigint>;
   creator: string;
   collectionId: string;
   state: 'active' | 'push' | 'yes-wins' | 'no-wins';
@@ -1063,16 +1215,35 @@ export interface RedeemArgs {
  * Build redeem msgs by state. Mirrors `PredictionRedeemPanel.tsx`:
  *   - active: burn YES+NO pairs to reclaim depositDenom 1:1.
  *   - push: burn YES + NO separately, each gets half payout.
- *   - yes-wins / no-wins: redeem winner 1:1, burn loser without payout.
+ *   - yes-wins / no-wins: redeem winner 1:1, leave losing positions untouched.
  *
  * Returns `{messages: [...]}` ready for `bb deploy`. Emits empty array
  * when nothing is redeemable.
  */
 export function buildPredictionMarketRedeemTx(args: RedeemArgs): { messages: MsgEnvelope[] } {
+  if (args.collection) {
+    const quote = quotePredictionMarketRedemption(args.collection, args);
+    if (quote.legs.some(leg => leg.eligibility === 'exhausted')) throw new Error('Redemption allowance is exhausted');
+    return { messages: quote.legs.map(leg => ({
+      typeUrl: '/tokenization.MsgTransferTokens',
+      value: { creator: args.creator, collectionId: String(args.collectionId), transfers: [{
+        from: args.creator, toAddresses: [BURN_ADDRESS],
+        balances: [{ amount: leg.burnAmount, tokenIds: leg.tokenIds, ownershipTimes: PM_FULL_OWNERSHIP }],
+        prioritizedApprovals: [{ approvalId:leg.approvalId, version:leg.version, approvalLevel:'collection', approverAddress:'' }],
+        onlyCheckPrioritizedCollectionApprovals:true,
+        onlyCheckPrioritizedOutgoingApprovals:false, onlyCheckPrioritizedIncomingApprovals:false, memo:''
+      }] }
+    })) };
+  }
+  if (!['active','push','yes-wins','no-wins'].includes(args.state)) throw new Error('Invalid prediction redemption state');
+  for (const amount of [args.pairAmount,args.yesBalance,args.noBalance]) if (amount !== undefined && amount < 0n) throw new Error('Redemption amounts cannot be negative');
+  if (args.state === 'push' && ((args.yesBalance ?? 0n) % 2n || (args.noBalance ?? 0n) % 2n)) throw new Error('Push redemption requires even base units; retain odd dust');
   const msgs: MsgEnvelope[] = [];
   const cid = String(args.collectionId);
 
-  const burn = (amount: bigint, start: string, end: string, approvalId?: string): MsgEnvelope => ({
+  const burn = (amount: bigint, start: string, end: string, approvalId?: string): MsgEnvelope => {
+    if (!approvalId) throw new Error('Missing redemption approval ID');
+    return ({
     typeUrl: '/tokenization.MsgTransferTokens',
     value: {
       creator: args.creator,
@@ -1095,6 +1266,7 @@ export function buildPredictionMarketRedeemTx(args: RedeemArgs): { messages: Msg
       ]
     }
   });
+  };
 
   if (args.state === 'active') {
     const pairs = args.pairAmount ?? 0n;
@@ -1104,11 +1276,9 @@ export function buildPredictionMarketRedeemTx(args: RedeemArgs): { messages: Msg
     if ((args.noBalance ?? 0n) > 0n) msgs.push(burn(args.noBalance!, '2', '2', args.pushNoApprovalId));
   } else if (args.state === 'yes-wins') {
     if ((args.yesBalance ?? 0n) > 0n) msgs.push(burn(args.yesBalance!, '1', '1', args.yesWinsApprovalId));
-    if ((args.noBalance ?? 0n) > 0n) msgs.push(burn(args.noBalance!, '2', '2'));
   } else {
     // no-wins
     if ((args.noBalance ?? 0n) > 0n) msgs.push(burn(args.noBalance!, '2', '2', args.noWinsApprovalId));
-    if ((args.yesBalance ?? 0n) > 0n) msgs.push(burn(args.yesBalance!, '1', '1'));
   }
 
   return { messages: msgs };

@@ -23,7 +23,7 @@ const surfaces: [Command, string[]][] = [
   [auctionsCommand, ['list', 'show', 'status', 'place-bid', 'cancel-bid', 'accept-bid']],
   [crowdfundsCommand, ['list', 'show', 'status', 'contribute', 'withdraw', 'refund']],
   [bountiesCommand, ['list', 'show', 'status', 'accept', 'deny', 'claim-refund']],
-  [predictionMarketsCommand, ['list', 'show', 'status', 'buy-yes', 'buy-no', 'sell-yes', 'sell-no', 'cancel', 'deposit', 'redeem', 'resolve']]
+  [predictionMarketsCommand, ['list', 'show', 'status', 'quote', 'buy-yes', 'buy-no', 'sell-yes', 'sell-no', 'cancel', 'deposit', 'redeem', 'resolve']]
 ];
 const allowedOptions = new Set([
   '--family',
@@ -48,6 +48,8 @@ const allowedOptions = new Set([
   '--side',
   '--state',
   '--pair-amount',
+  '--yes-amount',
+  '--no-amount',
   '--yes-balance',
   '--no-balance',
   '--outcome',
