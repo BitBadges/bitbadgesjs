@@ -1090,6 +1090,8 @@ export function quotePredictionMarketRedemption(collection: any, request: Predic
   )
     throw new Error('Requested amount does not match redemption state');
   const approvals = collection?.collectionApprovals ?? [];
+  const ids = approvals.map((approval: any) => approval.approvalId);
+  if (ids.some((id: any) => typeof id !== 'string' || !id) || new Set(ids).size !== ids.length) throw new Error('Ambiguous approval identities');
   const quote: PredictionRedemptionQuote = {
     state: request.state,
     payout: { denom: '', baseAmount: '0' },
@@ -1117,11 +1119,15 @@ export function quotePredictionMarketRedemption(collection: any, request: Predic
     const criteria = approval.approvalCriteria;
     const predetermined = criteria?.predeterminedBalances;
     const inc = predetermined?.incrementedBalances;
+    const order = predetermined?.orderCalculationMethod;
     const coins = criteria?.coinTransfers;
     const start = inc?.startBalances;
     if (
       !approval.approvalId ||
       !inc?.allowAmountScaling ||
+      !order?.useOverallNumTransfers ||
+      ['usePerToAddressNumTransfers','usePerFromAddressNumTransfers','usePerInitiatedByAddressNumTransfers','useMerkleChallengeLeafIndex'].some(k => order[k]) ||
+      ['overallApprovalAmount','perToAddressApprovalAmount','perFromAddressApprovalAmount','perInitiatedByAddressApprovalAmount'].some(k => BigInt(criteria.approvalAmounts?.[k] ?? 0) !== 0n) ||
       predetermined.manualBalances?.length ||
       start?.length !== 1 ||
       ['incrementTokenIdsBy', 'incrementOwnershipTimesBy', 'durationFromTimestamp'].some((k) => BigInt(inc[k] ?? 0) !== 0n) ||
@@ -1141,6 +1147,7 @@ export function quotePredictionMarketRedemption(collection: any, request: Predic
     const payoutLot = BigInt(coin.amount);
     const maximum = BigInt(inc.maxScalingMultiplier ?? 0);
     if (lot <= 0n || payoutLot <= 0n || maximum <= 0n || !coin.denom) throw new Error('Invalid prediction redemption ratio');
+    if (lot !== payoutLot * (request.state === 'push' ? 2n : 1n)) throw new Error('Unsupported prediction payout ratio');
     if (quote.payout.denom && quote.payout.denom !== coin.denom) throw new Error('Inconsistent prediction payout denomination');
     quote.payout.denom = coin.denom;
     const requested = side === 'pair' ? request.pairAmount : side === 'yes' ? request.yesAmount : request.noAmount;
@@ -1162,15 +1169,16 @@ export function quotePredictionMarketRedemption(collection: any, request: Predic
     const limits = criteria.maxNumTransfers;
     if (!hasAnyNonZeroTransferLimit(limits)) throw new Error('Payout approval needs a tracked transfer limit');
     const perUser = BigInt(limits?.perInitiatedByAddressMaxNumTransfers ?? 0);
+    const resets = BigInt(limits?.resetTimeIntervals?.intervalLength ?? 0) > 0n;
     const policy =
-      perUser === 1n && BigInt(limits?.resetTimeIntervals?.intervalLength ?? 0) === 0n
+      perUser === 1n && !resets
         ? 'one-shot'
-        : perUser > 1n || BigInt(limits?.perFromAddressMaxNumTransfers ?? 0) > 0n || BigInt(limits?.perToAddressMaxNumTransfers ?? 0) > 0n
+        : resets || perUser > 1n || BigInt(limits?.perFromAddressMaxNumTransfers ?? 0) > 0n || BigInt(limits?.perToAddressMaxNumTransfers ?? 0) > 0n
           ? 'limited'
           : 'repeated';
     const used = request.trackerUses?.[approval.approvalId];
     if (used !== undefined && used < 0n) throw new Error('Tracker use count cannot be negative');
-    const eligibility = perUser > 0n && used !== undefined && used >= perUser ? 'exhausted' : 'unknown';
+    const eligibility = !resets && perUser > 0n && used !== undefined && used >= perUser ? 'exhausted' : 'unknown';
     if (policy === 'one-shot')
       quote.warnings.push(
         'Legacy one-shot settlement: a prior claim consumes the per-initiator allowance; later acquired positions may not be redeemable by this address.',

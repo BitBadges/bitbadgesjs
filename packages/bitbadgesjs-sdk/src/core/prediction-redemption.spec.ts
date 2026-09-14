@@ -72,7 +72,7 @@ describe('position-consuming prediction redemptions', () => {
     expect(() => quotePredictionMarketRedemption(c, args)).toThrow(/Unsupported/);
     c.collectionApprovals = market().collectionApprovals;
     c.collectionApprovals.push(c.collectionApprovals.find((a: any) => a.approvalCriteria.votingChallenges?.length));
-    expect(() => quotePredictionMarketRedemption(c, args)).toThrow(/unambiguous/);
+    expect(() => quotePredictionMarketRedemption(c, args)).toThrow(/[Aa]mbiguous/);
     expect(() => quotePredictionMarketRedemption(market(), { ...args, noAmount: 1n })).toThrow(/state/);
   });
   test('preserves precision above the safe Number range and enforces scaling cap', () => {
@@ -83,4 +83,22 @@ describe('position-consuming prediction redemptions', () => {
     a.approvalCriteria.predeterminedBalances.incrementedBalances.maxScalingMultiplier = '2';
     expect(() => quotePredictionMarketRedemption(c, { state: 'yes-wins', yesAmount: 3n })).toThrow(/limit/);
   });
+  test('quotes reject unmodeled ordering, amount bounds, duplicate identities and fractional push ratios', () => {
+    const mutate = (fn:(c:any,a:any)=>void,state:'yes-wins'|'push'='yes-wins') => {
+      const c=market();const a=c.collectionApprovals.find((a:any)=>a.approvalCriteria.votingChallenges?.length && (state==='push' ? a.approvalId.includes('push-yes') : a.approvalId.includes('settle-yes')));
+      fn(c,a);
+      expect(()=>quotePredictionMarketRedemption(c,{state,yesAmount:6n})).toThrow();
+    };
+    mutate((c,a)=>{a.approvalCriteria.predeterminedBalances.orderCalculationMethod.usePerToAddressNumTransfers=true;});
+    mutate((c,a)=>{a.approvalCriteria.approvalAmounts={overallApprovalAmount:'1'};});
+    mutate((c,a)=>{c.collectionApprovals[0].approvalId=a.approvalId;});
+    mutate((c,a)=>{a.approvalCriteria.predeterminedBalances.incrementedBalances.startBalances[0].amount='3';},'push');
+  });
+  test('resettable tracker observations remain unknown without an epoch', () => {
+    const c=market();const a=c.collectionApprovals.find((a:any)=>a.approvalCriteria.votingChallenges?.length);
+    a.approvalCriteria.maxNumTransfers.perInitiatedByAddressMaxNumTransfers='1';
+    a.approvalCriteria.maxNumTransfers.resetTimeIntervals={startTime:'1',intervalLength:'1000'};
+    expect(quotePredictionMarketRedemption(c,{state:'yes-wins',yesAmount:1n,trackerUses:{[a.approvalId]:1n}}).legs[0]).toMatchObject({policy:'limited',eligibility:'unknown'});
+  });
+
 });
