@@ -275,7 +275,8 @@ addOutputFlags(
       const tokenId = BigInt(faucet.tokenIds?.[0]?.start ?? 1);
       const access = getSubscriptionAccessStatus(tokenId, userBalances, now);
 
-      const futureApproval = userIncomingApprovals.find((a: any) => isUserRecurringApproval(a, faucet));
+      const matchingApprovals = userIncomingApprovals.filter((a: any) => isUserRecurringApproval(a, faucet));
+      const futureApproval = matchingApprovals.find((a: any) => getSubscriptionRenewalConsentStatus(faucet, a, now) === 'recorded') ?? matchingApprovals[0];
       const hasFutureApproval = !!futureApproval;
       const renewalConsentStatus = getSubscriptionRenewalConsentStatus(faucet, futureApproval, now);
 
@@ -634,46 +635,47 @@ addOutputFlags(
           const recipientAddress = ownerDoc.bitbadgesAddress;
           if (!recipientAddress) continue;
 
-          const userApproval = (ownerDoc.incomingApprovals ?? []).find((a: any) =>
-            isUserRecurringApproval(a, faucet)
-          );
-          if (!userApproval) continue;
+          for (const userApproval of ownerDoc.incomingApprovals ?? []) {
+            if (!isUserRecurringApproval(userApproval, faucet)) continue;
+            if (!UintRangeArray.From(userApproval.transferTimes).searchIfExists(now) || !UintRangeArray.From(faucet.transferTimes).searchIfExists(now)) continue;
 
-          const predetermined = userApproval.approvalCriteria?.predeterminedBalances;
-          const nextChargeTime = getNextChargeTime(predetermined);
-          if (!nextChargeTime) continue;
+            const predetermined = userApproval.approvalCriteria?.predeterminedBalances;
+            const nextChargeTime = getNextChargeTime(predetermined);
+            if (!nextChargeTime) continue;
 
-          const gracePeriod = BigInt(
-            predetermined?.incrementedBalances?.recurringOwnershipTimes?.chargePeriodLength ?? 0
-          );
-          const withinCurrentInterval =
-            now >= nextChargeTime && now < nextChargeTime + gracePeriod;
-          if (!withinCurrentInterval) continue;
+            const gracePeriod = BigInt(
+              predetermined?.incrementedBalances?.recurringOwnershipTimes?.chargePeriodLength ?? 0
+            );
+            const withinCurrentInterval =
+              now >= nextChargeTime && now < nextChargeTime + gracePeriod;
+            if (!withinCurrentInterval) continue;
 
-          // Skip if this interval is already fulfilled — the subscriber
-          // already owns the token for the upcoming window.
-          const startOfNextInterval = nextChargeTime + gracePeriod;
-          const approvalTokenId = BigInt(userApproval.tokenIds?.[0]?.start ?? 0);
-          const existing = getBalanceForIdAndTime(
-            approvalTokenId,
-            startOfNextInterval,
-            (ownerDoc.balances ?? []) as any
-          );
-          if (existing > 0n) continue;
+            // Skip if this interval is already fulfilled — the subscriber
+            // already owns the token for the upcoming window.
+            const startOfNextInterval = nextChargeTime + gracePeriod;
+            const approvalTokenId = BigInt(userApproval.tokenIds?.[0]?.start ?? 0);
+            const existing = getBalanceForIdAndTime(
+              approvalTokenId,
+              startOfNextInterval,
+              (ownerDoc.balances ?? []) as any
+            );
+            if (existing > 0n) continue;
 
-          due.push({
-            msg: buildChargeMsg(
-              creator,
-              String(collectionId),
-              faucet,
-              userApproval,
+            due.push({
+              msg: buildChargeMsg(
+                creator,
+                String(collectionId),
+                faucet,
+                userApproval,
+                recipientAddress,
+                startOfNextInterval
+              ),
               recipientAddress,
-              startOfNextInterval
-            ),
-            recipientAddress,
-            approvalId: faucet.approvalId,
-            chargePeriodStartMs: nextChargeTime.toString()
-          });
+              approvalId: faucet.approvalId,
+              chargePeriodStartMs: nextChargeTime.toString()
+            });
+            break;
+          }
         }
       }
 

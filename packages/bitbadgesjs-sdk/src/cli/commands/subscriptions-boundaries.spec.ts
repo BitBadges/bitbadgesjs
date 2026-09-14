@@ -18,7 +18,7 @@ describe('subscription charge-due boundaries', () => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
   });
-  async function run(now: number, ownershipTimes: { start: bigint; end: bigint }[]) {
+  async function run(now: number, ownershipTimes: { start: bigint; end: bigint }[], consentCase?: 'expired-first' | 'expired-only' | 'future-first', action = 'charge-due') {
     jest.spyOn(Date, 'now').mockReturnValue(now);
     const collection = normalizeForReview(
       buildSubscription({ interval: 'daily', price: 1, denom: 'BADGE', recipient: address, uri: 'https://example.com/sub.json' })
@@ -34,23 +34,39 @@ describe('subscription charge-due boundaries', () => {
       tokenIds: [{ start: 1n, end: 1n }],
       denom: 'ubadge'
     });
+    const expired = { ...incoming, approvalId: 'expired', transferTimes: UintRangeArray.From([{ start: 1n, end: 999n }]) };
+    const future = userRecurringApproval({ subscriptionApproval: faucet, firstIntervalStartTime: 5000n, ubadgeTipAmount: 0n, transferTimes: UintRangeArray.FullRanges(), approvalId: 'future', tokenIds: incoming.tokenIds, denom: 'ubadge' });
+    const incomingApprovals = consentCase === 'expired-only' ? [expired] : consentCase === 'expired-first' ? [expired, incoming] : consentCase === 'future-first' ? [future, incoming] : [incoming];
     (indexer.callIndexer as jest.Mock).mockImplementation(async (_method, path) =>
-      path.endsWith('/owners')
+      path.includes('/balance/') ? { balances: [], incomingApprovals } : path.endsWith('/owners')
         ? {
             owners: [
               {
                 bitbadgesAddress: address,
-                incomingApprovals: [incoming],
+                incomingApprovals,
                 balances: ownershipTimes.length ? [{ amount: 1n, tokenIds: [{ start: 1n, end: 1n }], ownershipTimes }] : []
               }
             ]
           }
         : collection
     );
-    await subscriptionsCommand.parseAsync(['charge-due', '1', '--creator', address], { from: 'user' });
+    await subscriptionsCommand.parseAsync([action, '1', action === 'status' ? '--address' : '--creator', address], { from: 'user' });
     expect(indexer.emitIndexerError).not.toHaveBeenCalled();
     return (indexer.emitIndexerResult as jest.Mock).mock.calls[0][0];
   }
+  it('reports recorded live consent even when an expired approval appears first', async () => {
+    const result = await run(1000, [], 'expired-first', 'status');
+    expect(result.tiers[0].renewalConsentStatus).toBe('recorded');
+    expect(result.tiers[0].nextChargeTime).toBe('1000');
+  });
+  it('does not prepare expired consent for renewal', async () => {
+    expect((await run(1000, [], 'expired-only')).messages).toEqual([]);
+  });
+  it.each(['expired-first', 'future-first'] as const)('selects a due live consent past an unusable first match: %s', async consentCase => {
+    const result = await run(1000, [], consentCase);
+    expect(result.messages).toHaveLength(1);
+    expect(result.messages[0].value.transfers[0].prioritizedApprovals[1].approvalId).toBe('renew');
+  });
   it('includes the first charge millisecond and emits the exact upcoming ownership start', async () => {
     const result = await run(1000, []);
     expect(result.messages).toHaveLength(1);
