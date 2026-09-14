@@ -7,6 +7,7 @@
  */
 
 import {
+  inspectSmartTokenCollection,
   validateSmartTokenCollection,
   doesCollectionFollowSmartTokenProtocol,
   findDepositApproval,
@@ -43,9 +44,7 @@ describe('validateSmartTokenCollection (happy path via buildSmartToken)', () => 
   });
 
   it('emits a warning when forceful transfers are allowed', () => {
-    const c = asCollection(
-      buildSmartToken({ backingCoin: 'USDC', allowForcefulPostMintTransfers: true, ...META })
-    );
+    const c = asCollection(buildSmartToken({ backingCoin: 'USDC', allowForcefulPostMintTransfers: true, ...META }));
     const r = validateSmartTokenCollection(c);
     expect(r.valid).toBe(true);
     expect(r.warnings.join('|')).toMatch(/noForcefulPostMintTransfers/);
@@ -85,17 +84,13 @@ describe('validateSmartTokenCollection — rejection paths', () => {
   it('rejects when deposit approval is missing', () => {
     const c = asCollection(buildSmartToken({ backingCoin: 'USDC', ...META }));
     // Drop the deposit approval (substring "deposit" OR "back")
-    c.collectionApprovals = c.collectionApprovals.filter(
-      (a: any) => !a.approvalId.toLowerCase().includes('deposit')
-    );
+    c.collectionApprovals = c.collectionApprovals.filter((a: any) => !a.approvalId.toLowerCase().includes('deposit'));
     expect(validateSmartTokenCollection(c).errors.join('|')).toMatch(/Missing deposit/);
   });
 
   it('rejects when withdraw approval is missing', () => {
     const c = asCollection(buildSmartToken({ backingCoin: 'USDC', ...META }));
-    c.collectionApprovals = c.collectionApprovals.filter(
-      (a: any) => !a.approvalId.toLowerCase().includes('withdraw')
-    );
+    c.collectionApprovals = c.collectionApprovals.filter((a: any) => !a.approvalId.toLowerCase().includes('withdraw'));
     expect(validateSmartTokenCollection(c).errors.join('|')).toMatch(/Missing withdraw/);
   });
 });
@@ -149,9 +144,7 @@ describe('extractSmartTokenDetails', () => {
   });
 
   it('flags tradable + aiAgentVault when those standards are present', () => {
-    const c = asCollection(
-      buildSmartToken({ backingCoin: 'USDC', tradable: true, aiAgentVault: true, ...META })
-    );
+    const c = asCollection(buildSmartToken({ backingCoin: 'USDC', tradable: true, aiAgentVault: true, ...META }));
     const d = extractSmartTokenDetails(c)!;
     expect(d.tradable).toBe(true);
     expect(d.aiAgentVault).toBe(true);
@@ -201,5 +194,45 @@ describe('buildSmartTokenWithdrawMsg', () => {
     expect(v.transfers[0].from).toBe('bb1user');
     expect(v.transfers[0].toAddresses).toEqual([details.backingAddress]);
     expect(v.transfers[0].prioritizedApprovals[0].approvalId).toBe('smart-token-withdraw');
+  });
+});
+
+describe('semantic Smart Token inspection', () => {
+  it.each(['denom', 'ratio', 'extra-balance', 'address', 'routing', 'payment', 'dynamic'])(
+    'rejects unsupported %s while preserving recognized discovery',
+    (change) => {
+      const c = asCollection(buildSmartToken({ backingCoin: 'USDC', ...META }));
+      const path = c.invariants.cosmosCoinBackedPath;
+      if (change === 'denom') path.conversion.sideA.denom = '';
+      if (change === 'ratio') path.conversion.sideA.amount = '2';
+      if (change === 'extra-balance') path.conversion.sideB.push(path.conversion.sideB[0]);
+      if (change === 'address') path.address = 'bb1wrong';
+      if (change === 'routing') c.collectionApprovals[0].fromListId = 'All';
+      if (change === 'payment')
+        c.collectionApprovals[0].approvalCriteria.coinTransfers = [{ to: 'bb1other', coins: [{ denom: 'ubadge', amount: '1' }] }];
+      if (change === 'dynamic') c.collectionApprovals[0].approvalCriteria.predeterminedBalances = { manualBalances: [{ balances: [] }] };
+      const result = inspectSmartTokenCollection(c);
+      expect(result.recognized).toBe(true);
+      expect(result.configurationSupported).toBe(false);
+      expect(extractSmartTokenDetails(c)).toBeNull();
+    }
+  );
+
+  it('does not silently choose among multiple deposit approvals', () => {
+    const c = asCollection(buildSmartToken({ backingCoin: 'USDC', ...META }));
+    c.collectionApprovals.push({ ...c.collectionApprovals[0], approvalId: 'alternate-deposit', version: '7' });
+    expect(inspectSmartTokenCollection(c).actions.deposit.requiresSelection).toBe(true);
+    expect(extractSmartTokenDetails(c)).toBeNull();
+    expect(extractSmartTokenDetails(c, { depositApprovalId: 'alternate-deposit' })?.depositApproval.version).toBe('7');
+    expect(extractSmartTokenDetails(c, { depositApprovalId: 'missing' })).toBeNull();
+  });
+
+  it('rejects duplicate approval identities and malformed numeric input without throwing', () => {
+    const c = asCollection(buildSmartToken({ backingCoin: 'USDC', ...META }));
+    c.collectionApprovals.push({ ...c.collectionApprovals[0] });
+    expect(inspectSmartTokenCollection(c).configurationSupported).toBe(false);
+    c.validTokenIds[0].start = 'invalid';
+    expect(() => inspectSmartTokenCollection(c)).not.toThrow();
+    expect(inspectSmartTokenCollection(c).configurationSupported).toBe(false);
   });
 });

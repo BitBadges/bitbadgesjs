@@ -32,7 +32,13 @@ import {
   type CreditTokenTier,
   bitbadgesApiCreditsCollectionId
 } from '../../core/credit-tokens.js';
+import { inspectStandardCollection } from '../../core/standard-inspection.js';
 import { MAINNET_COINS_REGISTRY, TESTNET_COINS_REGISTRY } from '../../common/constants.js';
+
+function requireSupportedPurchase(collection: any): void {
+  const inspection = inspectStandardCollection(collection, 'credit-token');
+  if (!inspection.configurationSupported) throw new Error(`Unsupported credit purchase configuration: ${inspection.issues.join('; ')}`);
+}
 
 function selectPurchaseTier(tiers: CreditTokenTier[], approvalId?: string): CreditTokenTier {
   const tier = approvalId ? tiers.find((item) => item.approvalId === approvalId) : tiers.length === 1 ? tiers[0] : undefined;
@@ -79,8 +85,8 @@ addOutputFlags(
   try {
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'credit-tokens list');
-    const tiers = extractCreditTokenTiers(collection.collectionApprovals);
-    emit({ collectionId: String(collectionId), tiers }, opts);
+    const tiers = inspectStandardCollection(collection, 'credit-token').configurationSupported ? extractCreditTokenTiers(collection.collectionApprovals) : [];
+    emit({ collectionId: String(collectionId), tiers, inspection: inspectStandardCollection(collection, 'credit-token') }, opts);
   } catch (err) {
     emitError(err);
   }
@@ -97,17 +103,19 @@ addOutputFlags(
   try {
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'credit-tokens show');
-    const tiers = extractCreditTokenTiers(collection.collectionApprovals);
+    const tiers = inspectStandardCollection(collection, 'credit-token').configurationSupported ? extractCreditTokenTiers(collection.collectionApprovals) : [];
     // `aliasPath.{symbol,decimals}` are the FE-build-time metadata; the
     // indexer's collection doc exposes paths via `aliasPaths[].denom`
     // only (chain proto doesn't carry symbol/decimals through). Use the
     // denom for display; let the caller resolve symbol+decimals via
     // `bb lookup <denom>` if needed.
-    const aliasPath = (collection.aliasPaths ?? collection.aliasPathsToAdd ?? [])[0];
+    const aliases = collection.aliasPaths ?? collection.aliasPathsToAdd ?? [];
+    const aliasPath = aliases.length === 1 ? aliases[0] : undefined;
     emit(
       {
         collectionId: String(collectionId),
         standards: collection.standards ?? [],
+        inspection: inspectStandardCollection(collection, 'credit-token'),
         denom: aliasPath?.denom ?? null,
         tiers
       },
@@ -127,10 +135,12 @@ addOutputFlags(addNetworkFlags(creditTokensCommand.command('quote')
   try {
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'credit-tokens quote');
+    requireSupportedPurchase(collection);
     const tier = selectPurchaseTier(extractCreditTokenTiers(collection.collectionApprovals), opts.tier);
     const registry = resolveNetwork(opts as any) === 'mainnet' ? MAINNET_COINS_REGISTRY : TESTNET_COINS_REGISTRY;
     const paymentCoin = Object.values(registry).find((coin) => coin.baseDenom === tier.paymentDenom);
-    const alias = (collection.aliasPaths ?? collection.aliasPathsToAdd ?? [])[0];
+    const aliases = collection.aliasPaths ?? collection.aliasPathsToAdd ?? [];
+    const alias = aliases.length === 1 ? aliases[0] : undefined;
     const quote = quoteCreditTokenPurchase(tier, parsePurchaseUnits(opts.units), {
       paymentDecimals: paymentCoin ? Number(paymentCoin.decimals) : undefined,
       creditDecimals: alias?.decimals === undefined ? undefined : Number(alias.decimals)
@@ -190,7 +200,8 @@ addDeployOptions(
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'credit-tokens purchase');
-      const tiers = extractCreditTokenTiers(collection.collectionApprovals);
+      requireSupportedPurchase(collection);
+      const tiers = inspectStandardCollection(collection, 'credit-token').configurationSupported ? extractCreditTokenTiers(collection.collectionApprovals) : [];
       if (tiers.length === 0) {
         process.stderr.write('Error: collection has no credit-* approvals.\n');
         process.exit(2);

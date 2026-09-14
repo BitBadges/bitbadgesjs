@@ -141,6 +141,53 @@ try {
     native.push('--', collectionId);
     if ('approvalId' in extra) native.push(extra.approvalId);
     await action(`standard_${family}_${verb}`.replace(/-/g, '_'), input, native);
+    if (builder === 'smart-token') {
+      const inspected = await action('standard_standards_inspect', { collectionId, family: 'smart-token' }, [
+        'standards',
+        'inspect',
+        collectionId,
+        '--family',
+        'smart-token'
+      ]);
+      assert.equal(inspected.configurationSupported, true);
+      assert.equal(inspected.eligibility, 'not-checked');
+      const c = collections.get(collectionId);
+      c.collectionApprovals.push({ ...c.collectionApprovals[0], approvalId: 'alternate-deposit', version: '7' });
+      const ambiguous = await executeInstalledCli(['smart-tokens', 'deposit', collectionId, '--creator', creator, '--amount', '1', '--base-units']);
+      assert.equal(ambiguous.ok, false);
+      assert.match(ambiguous.error.message, /approval-id/);
+      const exact = await action(
+        'standard_smart_tokens_deposit',
+        { collectionId, creator, amount: '9007199.254740993', approvalId: 'alternate-deposit' },
+        ['smart-tokens', 'deposit', collectionId, '--creator', creator, '--amount', '9007199.254740993', '--approval-id', 'alternate-deposit']
+      );
+      assert.equal(exact.value.transfers[0].balances[0].amount, '9007199254740993');
+      assert.equal(exact.value.transfers[0].prioritizedApprovals[0].version, '7');
+      for (const amount of ['0', '-1', '1e3', '1.0000000001']) {
+        const invalid = await executeInstalledCli([
+          'smart-tokens',
+          'deposit',
+          collectionId,
+          '--creator',
+          creator,
+          '--amount',
+          amount,
+          '--approval-id',
+          'alternate-deposit'
+        ]);
+        assert.equal(invalid.ok, false, amount);
+      }
+      c.invariants.cosmosCoinBackedPath.conversion.sideA.amount = '2';
+      const unsupported = await action('standard_standards_inspect', { collectionId, family: 'smart-token' }, [
+        'standards',
+        'inspect',
+        collectionId,
+        '--family',
+        'smart-token'
+      ]);
+      assert.equal(unsupported.recognized, true);
+      assert.equal(unsupported.configurationSupported, false);
+    }
     if (builder === 'credit-token') {
       const units = '9007199254740993';
       const quote = await action('standard_credit_tokens_quote', { collectionId, units }, ['credit-tokens', 'quote', collectionId, '--units', units]);

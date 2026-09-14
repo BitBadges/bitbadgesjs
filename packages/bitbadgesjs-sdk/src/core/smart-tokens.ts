@@ -1,23 +1,7 @@
-/**
- * Smart Token helpers — consumer-side validator + extractor + deposit/withdraw msg builders.
- *
- * A Smart Token collection is the unified primitive behind:
- *   - Vault-style wrappers (1:1 IBC-backed tokens)
- *   - AI agent vaults
- *   - Tradable Smart Tokens (with Liquidity Pools standard)
- *
- * It has at minimum two collection approvals (deposit + withdraw)
- * routing through an alias address derived from the backing IBC denom.
- * Users deposit by sending the IBC coin to that alias (chain auto-mints
- * the corresponding token to them); users withdraw by transferring the
- * token back to the alias (chain releases the IBC coin).
- *
- * Source of truth for the shape is `core/builders/smart-token.ts`.
- * FE uses pattern-matching (substring "deposit"|"back" / "withdraw"|"unback")
- * to find these approvals, so we match the same way for backwards
- * compatibility with collections built before the rename.
- */
+import { isAddressValid } from '../address-converter/converter.js';
+/** Supported 1:1 wrapper profiles; see docs/runbooks/standard-inspection.md for limits. */
 
+import { generateAliasAddressForIBCBackedDenom } from './builders/shared.js';
 import type { iCollectionApproval } from '@/interfaces/types/approvals.js';
 import type { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 
@@ -40,86 +24,194 @@ export interface SmartTokenDetails {
   aiAgentVault: boolean;
 }
 
-export const validateSmartTokenCollection = (
-  collection: Readonly<iCollectionDoc<bigint>>
-): SmartTokenValidationResult => {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-
-  // 1. Standard includes "Smart Token"
-  if (!collection.standards?.includes('Smart Token')) {
-    errors.push('Missing "Smart Token" standard');
-  }
-
-  // 2. cosmosCoinBackedPath invariant must be present — this is what
-  //    distinguishes a Smart Token from a plain collection.
-  const backed = (collection.invariants as any)?.cosmosCoinBackedPath;
-  if (!backed) {
-    errors.push('Missing invariants.cosmosCoinBackedPath — Smart Tokens require an IBC backing path');
-  }
-
-  // 3. validTokenIds = [{1,1}]
-  const vt = collection.validTokenIds;
-  if (!vt || vt.length !== 1 || BigInt(vt[0].start) !== 1n || BigInt(vt[0].end) !== 1n) {
-    errors.push('validTokenIds must be exactly [{start: 1, end: 1}]');
-  }
-
-  // 4. At least one deposit approval and one withdraw approval.
-  //    Match by substring (same heuristic as FE).
-  const approvals = collection.collectionApprovals ?? [];
-  const deposit = findDepositApproval(approvals);
-  const withdraw = findWithdrawApproval(approvals);
-  if (!deposit) errors.push('Missing deposit approval (approvalId must contain "deposit" or "back")');
-  if (!withdraw) errors.push('Missing withdraw approval (approvalId must contain "withdraw" or "unback")');
-
-  // 5. Soft check: noForcefulPostMintTransfers should be true for
-  //    wallet-like Smart Tokens. The new builder sets this; legacy
-  //    collections may not. Warning, not error — caller can choose to
-  //    upgrade.
-  if (collection.invariants && (collection.invariants as any).noForcefulPostMintTransfers === false) {
-    warnings.push('noForcefulPostMintTransfers is false; forceful transfers may be possible if a future approval enables them');
-  }
-
-  return { valid: errors.length === 0, errors, warnings };
+export type SmartTokenInspection = {
+  recognized: boolean;
+  configurationSupported: boolean;
+  backingAddress: string;
+  backingDenom: string;
+  actions: Record<'deposit' | 'withdraw', { approvalIds: string[]; requiresSelection: boolean }>;
+  issues: string[];
+  warnings: string[];
+  eligibility: 'not-checked';
+  authority: { manager: string; approvalUpdates: 'not-evaluated'; overrideApprovalIds: string[] };
 };
 
-export const doesCollectionFollowSmartTokenProtocol = (
-  collection: Readonly<iCollectionDoc<bigint>>
-): boolean => {
+const maximum = '18446744073709551615';
+const exactRange = (ranges: any, start: string, end: string) =>
+  Array.isArray(ranges) && ranges.length === 1 && String(ranges[0]?.start) === start && String(ranges[0]?.end) === end;
+const active = (value: any): boolean => {
+  if (value === undefined || value === null || value === false || value === '' || value === '0' || value === 0 || value === 0n) return false;
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === 'object') return Object.values(value).some(active);
+  return true;
+};
+const depositName = (id: string) => id.includes('deposit') || (id.includes('back') && !id.includes('unback'));
+const withdrawName = (id: string) => id.includes('withdraw') || id.includes('unback');
+
+/** Checks the supported 1:1 wrapper profile, not balances, tracker capacity or signer eligibility. */
+export function inspectSmartTokenCollection(collection: Readonly<iCollectionDoc<bigint>>): SmartTokenInspection {
+  const issues: string[] = [];
+  const warnings: string[] = [];
+  const recognized = !!collection.standards?.includes('Smart Token');
+  if (collection.isArchived) issues.push('Collection is archived');
+  if (!recognized) issues.push('Missing "Smart Token" standard');
+  const path = collection.invariants?.cosmosCoinBackedPath;
+  const conversion = path?.conversion;
+  const backingDenom = String(conversion?.sideA?.denom ?? '');
+  let backingAddress = '';
+  if (!path) issues.push('Missing invariants.cosmosCoinBackedPath');
+  if (
+    !backingDenom ||
+    String(conversion?.sideA?.amount) !== '1' ||
+    conversion?.sideB?.length !== 1 ||
+    String(conversion.sideB[0]?.amount) !== '1' ||
+    !exactRange(conversion.sideB[0]?.tokenIds, '1', '1') ||
+    !exactRange(conversion.sideB[0]?.ownershipTimes, '1', maximum)
+  ) {
+    issues.push('Backing conversion must exchange exactly one coin base unit for token 1 with full ownership times');
+  }
+  if (backingDenom) {
+    try {
+      backingAddress = generateAliasAddressForIBCBackedDenom(backingDenom);
+    } catch {
+      issues.push('Backing denomination cannot be resolved');
+    }
+  }
+  if (path?.address && path.address !== backingAddress) issues.push('Backing path address disagrees with its denomination');
+  if (!exactRange(collection.validTokenIds, '1', '1')) issues.push('validTokenIds must be exactly [{start: 1, end: 1}]');
+  const actions: SmartTokenInspection['actions'] = {
+    deposit: { approvalIds: [], requiresSelection: false },
+    withdraw: { approvalIds: [], requiresSelection: false }
+  };
+  const approvals = collection.collectionApprovals ?? [];
+  const ids = approvals.map((a) => a.approvalId);
+  if (new Set(ids).size !== ids.length) issues.push('Duplicate approval identities are unsupported');
+  for (const approval of approvals) {
+    const name = String(approval.approvalId ?? '').toLowerCase();
+    const direction = depositName(name) ? 'deposit' : withdrawName(name) ? 'withdraw' : undefined;
+    const criteria = approval.approvalCriteria;
+    if (criteria?.overridesFromOutgoingApprovals || criteria?.overridesToIncomingApprovals) {
+      warnings.push(`Approval ${approval.approvalId} can override user approvals`);
+    }
+    if (!direction) {
+      warnings.push(`Additional approval ${approval.approvalId} is outside the deposit/withdraw profile`);
+      continue;
+    }
+    const routeMatches =
+      direction === 'deposit'
+        ? approval.fromListId === backingAddress &&
+          (approval.toListId === `!${backingAddress}` || (isAddressValid(approval.toListId) && approval.toListId !== backingAddress))
+        : approval.toListId === backingAddress &&
+          (['!Mint', 'AllWithoutMint', `!Mint:${backingAddress}`].includes(approval.fromListId) ||
+            (isAddressValid(approval.fromListId) && approval.fromListId !== backingAddress));
+    const knownCriteria = new Set([
+      'coinTransfers',
+      'predeterminedBalances',
+      'overridesFromOutgoingApprovals',
+      'overridesToIncomingApprovals',
+      'merkleChallenges',
+      'ethSignatureChallenges',
+      'userApprovalSettings',
+      'mustPrioritize',
+      'allowBackedMinting',
+      'allowSpecialWrapping',
+      'approvalAmounts',
+      'maxNumTransfers',
+      'mustOwnTokens',
+      'autoDeletionOptions',
+      'requireToEqualsInitiatedBy',
+      'requireFromEqualsInitiatedBy',
+      'requireToDoesNotEqualInitiatedBy',
+      'requireFromDoesNotEqualInitiatedBy',
+      'dynamicStoreChallenges',
+      'senderChecks',
+      'recipientChecks',
+      'initiatorChecks',
+      'altTimeChecks',
+      'votingChallenges',
+      'evmQueryChallenges'
+    ]);
+    const unknownCriteria = Object.entries(criteria ?? {}).some(([key, value]) => !knownCriteria.has(key) && active(value));
+    const unsupportedEconomics = [
+      'coinTransfers',
+      'predeterminedBalances',
+      'overridesFromOutgoingApprovals',
+      'overridesToIncomingApprovals',
+      'merkleChallenges',
+      'ethSignatureChallenges',
+      'userApprovalSettings'
+    ].some((key) => active((criteria as any)?.[key]));
+    const rangesMatch =
+      (exactRange(approval.tokenIds, '1', '1') || exactRange(approval.tokenIds, '1', maximum)) && exactRange(approval.ownershipTimes, '1', maximum);
+    if (
+      !routeMatches ||
+      !rangesMatch ||
+      !approval.initiatedByListId ||
+      !criteria?.allowBackedMinting ||
+      !criteria.mustPrioritize ||
+      unsupportedEconomics ||
+      unknownCriteria ||
+      !approval.approvalId
+    ) {
+      issues.push(`Approval ${approval.approvalId} has unsupported ${direction} routing, ranges, or economic requirements`);
+      continue;
+    }
+    actions[direction].approvalIds.push(approval.approvalId);
+    if (
+      !exactRange(approval.transferTimes, '1', maximum) ||
+      active(criteria.approvalAmounts) ||
+      active(criteria.maxNumTransfers) ||
+      active(criteria.mustOwnTokens)
+    ) {
+      warnings.push(`Approval ${approval.approvalId} has time, ownership, or tracker conditions; eligibility must be checked before execution`);
+    }
+  }
+  for (const direction of ['deposit', 'withdraw'] as const) {
+    actions[direction].requiresSelection = actions[direction].approvalIds.length > 1;
+    if (!actions[direction].approvalIds.length) issues.push(`Missing ${direction} approval with supported semantics`);
+  }
+  if (collection.invariants?.noForcefulPostMintTransfers === false)
+    warnings.push('noForcefulPostMintTransfers is false; forceful transfers may be possible');
+  if (issues.length) for (const action of Object.values(actions)) { action.approvalIds = []; action.requiresSelection = false; }
+  return {
+    recognized,
+    configurationSupported: issues.length === 0,
+    backingAddress,
+    backingDenom,
+    actions,
+    issues,
+    warnings,
+    eligibility: 'not-checked',
+    authority: {
+      manager: String(collection.manager ?? ''),
+      approvalUpdates: 'not-evaluated',
+      overrideApprovalIds: approvals
+        .filter((a) => a.approvalCriteria?.overridesFromOutgoingApprovals || a.approvalCriteria?.overridesToIncomingApprovals)
+        .map((a) => a.approvalId)
+    }
+  };
+}
+
+export const validateSmartTokenCollection = (collection: Readonly<iCollectionDoc<bigint>>): SmartTokenValidationResult => {
+  const result = inspectSmartTokenCollection(collection);
+  return { valid: result.configurationSupported, errors: result.issues, warnings: result.warnings };
+};
+
+export const doesCollectionFollowSmartTokenProtocol = (collection: Readonly<iCollectionDoc<bigint>>): boolean => {
   return validateSmartTokenCollection(collection).valid;
 };
 
-/**
- * Find the deposit approval in a collection. Uses substring match
- * (deposit | back) to handle both the new naming (`smart-token-deposit`)
- * and legacy collections (`smart-account-backing`, `smart-token-backing`).
- *
- * Order matters: we check 'deposit' first (most specific) before falling
- * back to 'back' to avoid matching 'unbacking' (which contains 'back').
- */
-export function findDepositApproval(
-  approvals: ReadonlyArray<iCollectionApproval<bigint>>
-): iCollectionApproval<bigint> | undefined {
+/** Legacy name discovery only; ambiguous names do not select an approval. */
+export function findDepositApproval(approvals: ReadonlyArray<iCollectionApproval<bigint>>): iCollectionApproval<bigint> | undefined {
   // First pass: prefer the explicit "deposit" naming.
-  const explicit = approvals.find((a) => a.approvalId?.toLowerCase().includes('deposit'));
-  if (explicit) return explicit;
-  // Fallback: legacy "*-backing" approvals. Skip anything that contains
-  // "unback" so withdraw approvals don't match deposit.
-  return approvals.find(
-    (a) => a.approvalId?.toLowerCase().includes('back') && !a.approvalId?.toLowerCase().includes('unback')
-  );
+  const candidates = approvals.filter((a) => depositName(String(a.approvalId ?? '').toLowerCase()));
+  return candidates.length === 1 ? candidates[0] : undefined;
 }
 
-/**
- * Find the withdraw approval in a collection. Mirrors findDepositApproval
- * — checks 'withdraw' first, then falls back to 'unback'.
- */
-export function findWithdrawApproval(
-  approvals: ReadonlyArray<iCollectionApproval<bigint>>
-): iCollectionApproval<bigint> | undefined {
-  const explicit = approvals.find((a) => a.approvalId?.toLowerCase().includes('withdraw'));
-  if (explicit) return explicit;
-  return approvals.find((a) => a.approvalId?.toLowerCase().includes('unback'));
+/** Legacy name discovery only; use semantic inspection before proposing actions. */
+export function findWithdrawApproval(approvals: ReadonlyArray<iCollectionApproval<bigint>>): iCollectionApproval<bigint> | undefined {
+  const candidates = approvals.filter((a) => withdrawName(String(a.approvalId ?? '').toLowerCase()));
+  return candidates.length === 1 ? candidates[0] : undefined;
 }
 
 /**
@@ -128,22 +220,15 @@ export function findWithdrawApproval(
  * treat that as non-conformant.
  */
 export function extractSmartTokenDetails(
-  collection: Readonly<iCollectionDoc<bigint>>
+  collection: Readonly<iCollectionDoc<bigint>>,
+  selection: { depositApprovalId?: string; withdrawApprovalId?: string } = {}
 ): SmartTokenDetails | null {
-  const backed = (collection.invariants as any)?.cosmosCoinBackedPath;
-  if (!backed) return null;
-  const approvals = collection.collectionApprovals ?? [];
-  const depositApproval = findDepositApproval(approvals);
-  const withdrawApproval = findWithdrawApproval(approvals);
+  const inspection = inspectSmartTokenCollection(collection);
+  if (!inspection.configurationSupported) return null;
+  const depositApproval = selectSmartTokenApproval(collection, 'deposit', selection.depositApprovalId);
+  const withdrawApproval = selectSmartTokenApproval(collection, 'withdraw', selection.withdrawApprovalId);
   if (!depositApproval || !withdrawApproval) return null;
-
-  // Backing address can come from invariants.cosmosCoinBackedPath.address
-  // when the indexer populates it, OR from the deposit approval's
-  // fromListId (which is exactly the backing address by construction).
-  const backingAddress =
-    String(backed?.address ?? '') || String(depositApproval.fromListId ?? '');
-  const backingDenom = String(backed?.conversion?.sideA?.denom ?? '');
-
+  const { backingAddress, backingDenom } = inspection;
   return {
     backingAddress,
     backingDenom,
@@ -152,6 +237,19 @@ export function extractSmartTokenDetails(
     tradable: !!collection.standards?.includes('Liquidity Pools'),
     aiAgentVault: !!collection.standards?.includes('AI Agent Vault')
   };
+}
+
+/** Resolves one action without selecting any approval for the opposite action. */
+export function selectSmartTokenApproval(
+  collection: Readonly<iCollectionDoc<bigint>>,
+  direction: 'deposit' | 'withdraw',
+  approvalId?: string
+): iCollectionApproval<bigint> | undefined {
+  const inspection = inspectSmartTokenCollection(collection);
+  if (!inspection.configurationSupported) return undefined;
+  const candidates = inspection.actions[direction].approvalIds;
+  const selected = approvalId ?? (candidates.length === 1 ? candidates[0] : undefined);
+  return selected && candidates.includes(selected) ? collection.collectionApprovals.find((a) => a.approvalId === selected) : undefined;
 }
 
 // ── Msg builders ───────────────────────────────────────────────────────────
@@ -170,8 +268,8 @@ export interface SmartTokenDepositArgs {
   collectionId: string;
   /** Smart Token units to mint to the caller (equal to backing-coin units sent). */
   amount: string;
-  /** Resolved from `extractSmartTokenDetails`. */
-  details: SmartTokenDetails;
+  /** Resolved from semantic inspection and explicit approval selection. */
+  details: Pick<SmartTokenDetails, 'backingAddress' | 'backingDenom' | 'depositApproval'>;
 }
 
 /**
@@ -183,6 +281,7 @@ export interface SmartTokenDepositArgs {
  */
 export function buildSmartTokenDepositMsg(args: SmartTokenDepositArgs): SmartTokenTransferMsg {
   const { creator, collectionId, amount, details } = args;
+  if (!/^[1-9][0-9]*$/.test(amount)) throw new Error('Amount must be a positive base-unit integer');
   return {
     typeUrl: '/tokenization.MsgTransferTokens',
     value: {
@@ -224,8 +323,8 @@ export interface SmartTokenWithdrawArgs {
   collectionId: string;
   /** Smart Token units to burn (equal to backing-coin units released). */
   amount: string;
-  /** Resolved from `extractSmartTokenDetails`. */
-  details: SmartTokenDetails;
+  /** Resolved from semantic inspection and explicit approval selection. */
+  details: Pick<SmartTokenDetails, 'backingAddress' | 'backingDenom' | 'withdrawApproval'>;
 }
 
 /**
@@ -236,6 +335,7 @@ export interface SmartTokenWithdrawArgs {
  */
 export function buildSmartTokenWithdrawMsg(args: SmartTokenWithdrawArgs): SmartTokenTransferMsg {
   const { creator, collectionId, amount, details } = args;
+  if (!/^[1-9][0-9]*$/.test(amount)) throw new Error('Amount must be a positive base-unit integer');
   return {
     typeUrl: '/tokenization.MsgTransferTokens',
     value: {
