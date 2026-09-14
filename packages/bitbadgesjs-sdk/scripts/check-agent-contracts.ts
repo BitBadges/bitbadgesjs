@@ -31,6 +31,15 @@ function cli(args: string[], expectedStatus = 0) {
 }
 
 try {
+  const standards = cli(['dev', 'standards']).data;
+  assert.equal(standards.schemaVersion, 1);
+  assert.deepEqual((await callTool('get_standards', {})).result, standards);
+  for (const id of ['subscription', 'payment-request-v2', 'quests']) {
+    const detail = cli(['dev', 'standards', id]).data;
+    assert.deepEqual((await callTool('get_standards', { id })).result, detail);
+    assert.equal(detail.standards[0].eligibility, 'not-evaluated');
+  }
+  assert.equal(cli(['dev', 'standards', 'unknown_standard'], 1).error.code, 'invalid_input');
   const capabilities = cli(['dev', 'capabilities']).data;
   assert.equal(capabilities.schemaVersion, 1);
   assert.deepEqual((await callTool('get_capabilities', {})).result, capabilities);
