@@ -151,6 +151,11 @@ try {
       ]);
       assert.equal(inspected.configurationSupported, true);
       assert.equal(inspected.eligibility, 'not-checked');
+      const shown = await action('standard_smart_tokens_show', {collectionId}, ['smart-tokens','show',collectionId]);
+      assert.equal(shown.depositApprovalId, 'smart-token-deposit');
+      assert.equal(typeof shown.tradable, 'boolean');
+      assert.equal(shown.status, undefined);
+
       const c = collections.get(collectionId);
       c.collectionApprovals.push({ ...c.collectionApprovals[0], approvalId: 'alternate-deposit', version: '7' });
       const ambiguous = await executeInstalledCli(['smart-tokens', 'deposit', collectionId, '--creator', creator, '--amount', '1', '--base-units']);

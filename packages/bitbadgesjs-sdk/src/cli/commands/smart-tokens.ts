@@ -41,6 +41,17 @@ async function fetchCollection(collectionId: string, opts: NetworkFlags): Promis
   return normalizeCollection(await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts));
 }
 
+function describeCollection(collection: any) {
+  const inspection = inspectSmartTokenCollection(collection);
+  return {
+    ...inspection,
+    depositApprovalId: inspection.actions.deposit.approvalIds.length === 1 ? inspection.actions.deposit.approvalIds[0] : null,
+    withdrawApprovalId: inspection.actions.withdraw.approvalIds.length === 1 ? inspection.actions.withdraw.approvalIds[0] : null,
+    tradable: !!collection.standards?.includes('Liquidity Pools'),
+    aiAgentVault: !!collection.standards?.includes('AI Agent Vault')
+  };
+}
+
 function validateOrExit(collection: any, ctx: string): void {
   validateCollectionOrExit(collection, ctx, validateSmartTokenCollection, 'Smart Token');
 }
@@ -89,7 +100,7 @@ addOutputFlags(
       .filter((c) => c.standards?.includes('Smart Token'))
       .map((c) => ({
         collectionId: String(c.collectionId ?? c._docId ?? ''),
-        ...inspectSmartTokenCollection(c)
+        ...describeCollection(c)
       }));
     emit(summary, opts);
   } catch (err) {
@@ -109,7 +120,7 @@ addOutputFlags(
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags) => {
   try {
     const collection = await fetchCollection(collectionId, opts);
-    emit({ collectionId: String(collectionId), standards: collection.standards, ...inspectSmartTokenCollection(collection) }, opts);
+    emit({ collectionId: String(collectionId), standards: collection.standards, ...describeCollection(collection) }, opts);
   } catch (err) {
     emitError(err);
   }
@@ -125,7 +136,7 @@ addOutputFlags(
 ).action(async (collectionId: string, opts: NetworkFlags & OutputFlags) => {
   try {
     const collection = await fetchCollection(collectionId, opts);
-    emit({ collectionId: String(collectionId), ...inspectSmartTokenCollection(collection) }, opts);
+    emit({ collectionId: String(collectionId), ...describeCollection(collection) }, opts);
   } catch (err) {
     emitError(err);
   }
