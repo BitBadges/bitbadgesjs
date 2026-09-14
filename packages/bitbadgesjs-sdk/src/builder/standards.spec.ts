@@ -46,6 +46,24 @@ describe('standard lifecycle discovery', () => {
     }
     expect(getStandardCatalog('quests').standards[0].builders![0].cli).toEqual(['bb', 'dev', 'tools', 'call', 'build_quests']);
   });
+  it.each([
+    ['address-list', 'address-list'],
+    ['credit-token', 'credit-token'],
+    ['smart-token', 'smart-token'],
+    ['vault', 'smart-token']
+  ])('discovers shared inspection for %s using the supported %s family', (id, family) => {
+    const detail = getStandardCatalog(id).standards[0];
+    const inspection = detail.actions?.find((action) => action.id === 'standard_standards_inspect');
+    expect(inspection).toBeDefined();
+    expect(inspection?.cli).toEqual(['bb', 'standards', 'inspect', '--family', family]);
+    const schema = toolRegistry.standard_standards_inspect.tool.inputSchema;
+    expect(inspection?.requiredInputs).toEqual(schema.required);
+    expect(schema.required).toEqual(expect.arrayContaining(['collectionId', 'family']));
+    expect((schema.properties!.family as { enum: string[] }).enum).toContain(family);
+    expect((schema.properties!.family as { enum: string[] }).enum).not.toContain('vault');
+    expect(inspection?.schemaCommand).toEqual(['bb', 'dev', 'capabilities', 'standard_standards_inspect']);
+    expect(detail.validation?.semanticConformance).toBe('not-evaluated');
+  });
   it('documents all invoice categories without inventing a custom example', () => {
     const detail = getStandardCatalog('payment-request-v2').standards[0];
     expect(detail.substandards?.map((entry) => entry.id)).toEqual([

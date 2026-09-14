@@ -21,7 +21,14 @@ export type StandardDescriptor = {
   cliHelp?: string[];
   substandards?: { id: string; description: string; exampleCommand?: string[] }[];
 };
-type Lifecycle = { summary: string; actionGroup?: string; constraints: string[]; unsupported: string[]; cliHelp?: string[] };
+type Lifecycle = {
+  summary: string;
+  actionGroup?: string;
+  inspectionFamily?: 'smart-token' | 'credit-token' | 'address-list';
+  constraints: string[];
+  unsupported: string[];
+  cliHelp?: string[];
+};
 const frontendFamilies: Record<string, string> = {
   'custom-2fa': 'custom-2fa',
   quests: 'quests',
@@ -85,6 +92,7 @@ const lifecycle: Record<string, Lifecycle> = {
   },
   'credit-token': {
     summary: 'Purchase exact credit quantities using fixed or scaled tiers.',
+    inspectionFamily: 'credit-token',
     actionGroup: 'credit_tokens',
     constraints: [
       'Select a tier explicitly when multiple tiers exist. Scaled purchases obey integer increments and maximum multipliers.',
@@ -144,12 +152,14 @@ const lifecycle: Record<string, Lifecycle> = {
   },
   'smart-token': {
     summary: 'Programmable deposit and withdrawal relationships.',
+    inspectionFamily: 'smart-token',
     actionGroup: 'smart_tokens',
     constraints: ['Configured approvals determine backing and transfer eligibility; a standard tag is not proof of collateral or conformance.'],
     unsupported: ['Native interest accrual, lending liquidation, and yield guarantees.']
   },
   vault: {
     summary: 'A vault builder using existing smart-token primitives.',
+    inspectionFamily: 'smart-token',
     constraints: [
       'Review exact spend approvals, recipients, limits, and permissions. Builder availability is not a certification of agent custody safety.'
     ],
@@ -162,6 +172,7 @@ const lifecycle: Record<string, Lifecycle> = {
   },
   'address-list': {
     summary: 'Membership and address-list collection configuration.',
+    inspectionFamily: 'address-list',
     constraints: ['Membership rules and manager permissions determine eligibility.'],
     unsupported: ['Identity uniqueness or proof of personhood from an address alone.']
   },
@@ -242,19 +253,33 @@ export function describeStandards(registry: Record<string, { tool: OperationSche
           builders: registry[builderName]
             ? [operation(builderName, name === 'quests' ? ['bb', 'dev', 'tools', 'call', builderName] : ['bb', 'build', name])]
             : [],
-          actions: facts.actionGroup
-            ? Object.keys(registry)
-                .filter(
-                  (key) =>
-                    key.startsWith(`standard_${facts.actionGroup}_`) && !(name === 'payment-request-v2' && key === 'standard_pay_requests_deny')
-                )
-                .sort()
-                .map((key) =>
-                  operation(key, ['bb', facts.actionGroup!.replace(/_/g, '-'), key.slice(`standard_${facts.actionGroup}_`.length).replace(/_/g, '-')])
-                )
-            : [],
+          actions: [
+            ...(facts.inspectionFamily
+              ? [operation('standard_standards_inspect', ['bb', 'standards', 'inspect', '--family', facts.inspectionFamily])]
+              : []),
+            ...(facts.actionGroup
+              ? Object.keys(registry)
+                  .filter(
+                    (key) =>
+                      key.startsWith(`standard_${facts.actionGroup}_`) && !(name === 'payment-request-v2' && key === 'standard_pay_requests_deny')
+                  )
+                  .sort()
+                  .map((key) =>
+                    operation(key, [
+                      'bb',
+                      facts.actionGroup!.replace(/_/g, '-'),
+                      key.slice(`standard_${facts.actionGroup}_`.length).replace(/_/g, '-')
+                    ])
+                  )
+              : [])
+          ],
           constraints: [
             ...facts.constraints,
+            ...(facts.inspectionFamily
+              ? [
+                  `Shared inspection requires family=${facts.inspectionFamily} and a collectionId. It reports bounded configuration support, not balances, permissions, or live eligibility.`
+                ]
+              : []),
             'Unsigned proposals do not sign or broadcast. Permission to create does not imply permission to manage an existing collection.'
           ],
           unsupported: [...facts.unsupported],
