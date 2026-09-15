@@ -94,15 +94,9 @@ async function fetchIncomingApprovals(collectionId: string, address: string, opt
 }
 
 function validateOrExit(collection: any, ctx: string): void {
-  if (!collection) {
-    process.stderr.write(`Error: collection not found while running ${ctx}.\n`);
-    process.exit(2);
-  }
+  if (!collection) throw new Error(`Collection not found while running ${ctx}. Re-read the collection before retrying.`);
   if (!doesCollectionFollowSubscriptionProtocol(collection)) {
-    process.stderr.write(
-      `Error: collection is not a valid Subscriptions collection (failed in ${ctx}). Pass a collection whose standards include "Subscriptions".\n`
-    );
-    process.exit(2);
+    throw new Error(`Collection is not a valid Subscriptions collection (failed in ${ctx}). Inspect the collection and choose a supported standard action.`);
   }
 }
 

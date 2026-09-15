@@ -296,7 +296,9 @@ export function buildAcceptAuctionBidMsg(
   bidApprovalId: string,
   bidderAddress: string,
   mintApprovalId: string,
-  tokenAmount: bigint = 1n
+  tokenAmount: bigint = 1n,
+  mintApprovalVersion: bigint = 0n,
+  bidApprovalVersion: bigint = 0n
 ): AcceptAuctionBidMsg {
   return {
     typeUrl: '/tokenization.MsgTransferTokens',
@@ -319,13 +321,13 @@ export function buildAcceptAuctionBidMsg(
               approvalId: mintApprovalId,
               approvalLevel: 'collection',
               approverAddress: '',
-              version: '0'
+              version: String(mintApprovalVersion)
             },
             {
               approvalId: bidApprovalId,
               approvalLevel: 'incoming',
               approverAddress: bidderAddress,
-              version: '0'
+              version: String(bidApprovalVersion)
             }
           ],
           onlyCheckPrioritizedCollectionApprovals: true,

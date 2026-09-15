@@ -56,15 +56,9 @@ async function fetchCollection(collectionId: string, opts: NetworkFlags): Promis
 }
 
 function validateOrExit(collection: any, ctx: string): void {
-  if (!collection) {
-    process.stderr.write(`Error: collection not found while running ${ctx}.\n`);
-    process.exit(2);
-  }
+  if (!collection) throw new Error(`Collection not found while running ${ctx}. Re-read the collection before retrying.`);
   if (!doesCollectionFollowCreditTokenProtocol(collection)) {
-    process.stderr.write(
-      `Error: collection is not a valid Credit Token collection (failed in ${ctx}). Pass a collection whose standards include "Credit Token" or has credit-* approvals.\n`
-    );
-    process.exit(2);
+    throw new Error(`Collection is not a valid Credit Token collection (failed in ${ctx}). Inspect the collection and choose a supported standard action.`);
   }
 }
 

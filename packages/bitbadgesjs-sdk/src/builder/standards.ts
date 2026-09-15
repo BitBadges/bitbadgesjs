@@ -123,7 +123,7 @@ const lifecycle: Record<string, Lifecycle> = {
   'payment-request': {
     summary: 'Legacy single-payment request.',
     actionGroup: 'pay_requests',
-    constraints: ['Legacy payment requests differ structurally from invoice v2 and reusable payment links.'],
+    constraints: ['Legacy payment requests differ structurally from invoice v2 and reusable payment links.', 'A public invoice uses payer All and exactly one Pay approval; any connected payer may pay. Deny is only available for a specific payer invoice. Public Pay/Deny configurations are unsupported.'],
     unsupported: ['Invoice v2 multi-payer and partial-payment behavior in the legacy builder.']
   },
   auction: {

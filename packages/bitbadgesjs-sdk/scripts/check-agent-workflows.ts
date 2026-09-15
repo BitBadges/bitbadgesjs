@@ -123,7 +123,25 @@ try {
     ['bounty', 'bounties', 'accept', {}],
     ['prediction-market', 'prediction-markets', 'cancel', { approvalId: 'example-order', side: 'buy' }]
   ] as const;
+  const publicDefinition = listStandardBuilders().find((item) => item.id === 'payment-request')!;
+  const publicInvoice = await callTool('build_payment_request', { ...publicDefinition.example, payer: 'All' });
+  assert.ok(!publicInvoice.isError, publicInvoice.text);
+  collections.set('90001', collectionFixture(publicInvoice.result.value, '90001'));
+  const publicCollection = collections.get('90001');
+  assert.equal(publicCollection.collectionApprovals.length, 1);
+  publicCollection.collectionApprovals[0].version = '7';
+  const payment = await action('standard_pay_requests_pay', { collectionId: '90001', creator }, ['pay-requests', 'pay', '90001', '--creator', creator]);
+  assert.equal(payment.value.transfers[0].prioritizedApprovals[0].version, '7');
+  for (const [family, tool] of [['products', 'standard_products_show'], ['credit-tokens', 'standard_credit_tokens_show'], ['subscriptions', 'standard_subscriptions_list']]) {
+    const native = await executeInstalledCli([family, family === 'subscriptions' ? 'list' : 'show', '90001']);
+    assert.equal(native.ok, false);
+    assert.match(native.error.message, /not a valid/i);
+    const mcp = await client.callTool({ name: tool, arguments: { collectionId: '90001' } });
+    assert.equal(mcp.isError, true);
+    assert.deepEqual(mcp.structuredContent, native);
+  }
   let subscriptionId = '';
+
   for (const [builder, family, verb, extra] of families) {
     const definition = listStandardBuilders().find((item) => item.id === builder)!;
     const proposal = await callTool(`build_${builder.replace(/-/g, '_')}`, definition.example);
