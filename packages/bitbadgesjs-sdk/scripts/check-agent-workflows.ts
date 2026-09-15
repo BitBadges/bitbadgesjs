@@ -123,7 +123,25 @@ try {
     ['bounty', 'bounties', 'accept', {}],
     ['prediction-market', 'prediction-markets', 'cancel', { approvalId: 'example-order', side: 'buy' }]
   ] as const;
+  const publicDefinition = listStandardBuilders().find((item) => item.id === 'payment-request')!;
+  const publicInvoice = await callTool('build_payment_request', { ...publicDefinition.example, payer: 'All' });
+  assert.ok(!publicInvoice.isError, publicInvoice.text);
+  collections.set('90001', collectionFixture(publicInvoice.result.value, '90001'));
+  const publicCollection = collections.get('90001');
+  assert.equal(publicCollection.collectionApprovals.length, 1);
+  publicCollection.collectionApprovals[0].version = '7';
+  const payment = await action('standard_pay_requests_pay', { collectionId: '90001', creator }, ['pay-requests', 'pay', '90001', '--creator', creator]);
+  assert.equal(payment.value.transfers[0].prioritizedApprovals[0].version, '7');
+  for (const [family, tool] of [['products', 'standard_products_show'], ['credit-tokens', 'standard_credit_tokens_show'], ['subscriptions', 'standard_subscriptions_list']]) {
+    const native = await executeInstalledCli([family, family === 'subscriptions' ? 'list' : 'show', '90001']);
+    assert.equal(native.ok, false);
+    assert.match(native.error.message, /not a valid/i);
+    const mcp = await client.callTool({ name: tool, arguments: { collectionId: '90001' } });
+    assert.equal(mcp.isError, true);
+    assert.deepEqual(mcp.structuredContent, native);
+  }
   let subscriptionId = '';
+
   for (const [builder, family, verb, extra] of families) {
     const definition = listStandardBuilders().find((item) => item.id === builder)!;
     const proposal = await callTool(`build_${builder.replace(/-/g, '_')}`, definition.example);
@@ -141,6 +159,73 @@ try {
     native.push('--', collectionId);
     if ('approvalId' in extra) native.push(extra.approvalId);
     await action(`standard_${family}_${verb}`.replace(/-/g, '_'), input, native);
+    if (builder === 'smart-token') {
+      const inspected = await action('standard_standards_inspect', { collectionId, family: 'smart-token' }, [
+        'standards',
+        'inspect',
+        collectionId,
+        '--family',
+        'smart-token'
+      ]);
+      assert.equal(inspected.configurationSupported, true);
+      assert.equal(inspected.eligibility, 'not-checked');
+      const shown = await action('standard_smart_tokens_show', {collectionId}, ['smart-tokens','show',collectionId]);
+      assert.equal(shown.depositApprovalId, 'smart-token-deposit');
+      assert.equal(typeof shown.tradable, 'boolean');
+      assert.equal(shown.status, undefined);
+
+      const c = collections.get(collectionId);
+      c.collectionApprovals.push({ ...c.collectionApprovals[0], approvalId: 'alternate-deposit', version: '7' });
+      const ambiguous = await executeInstalledCli(['smart-tokens', 'deposit', collectionId, '--creator', creator, '--amount', '1', '--base-units']);
+      assert.equal(ambiguous.ok, false);
+      assert.match(ambiguous.error.message, /approval-id/);
+      const exact = await action(
+        'standard_smart_tokens_deposit',
+        { collectionId, creator, amount: '9007199.254740993', approvalId: 'alternate-deposit' },
+        ['smart-tokens', 'deposit', collectionId, '--creator', creator, '--amount', '9007199.254740993', '--approval-id', 'alternate-deposit']
+      );
+      assert.equal(exact.value.transfers[0].balances[0].amount, '9007199254740993');
+      assert.equal(exact.value.transfers[0].prioritizedApprovals[0].version, '7');
+      for (const amount of ['0', '-1', '1e3', '1.0000000001']) {
+        const invalid = await executeInstalledCli([
+          'smart-tokens',
+          'deposit',
+          collectionId,
+          '--creator',
+          creator,
+          '--amount',
+          amount,
+          '--approval-id',
+          'alternate-deposit'
+        ]);
+        assert.equal(invalid.ok, false, amount);
+      }
+      c.invariants.cosmosCoinBackedPath.conversion.sideA.amount = '2';
+      const unsupported = await action('standard_standards_inspect', { collectionId, family: 'smart-token' }, [
+        'standards',
+        'inspect',
+        collectionId,
+        '--family',
+        'smart-token'
+      ]);
+      assert.equal(unsupported.recognized, true);
+      assert.equal(unsupported.configurationSupported, false);
+    }
+    if (builder === 'credit-token') {
+      const units = '9007199254740993';
+      const quote = await action('standard_credit_tokens_quote', { collectionId, units }, ['credit-tokens', 'quote', collectionId, '--units', units]);
+      assert.equal(quote.requestedMultiplier, units);
+      assert.equal(quote.actualMultiplier, units);
+      assert.equal(quote.payment.baseAmount, units);
+      assert.equal(quote.remainingCredits, null);
+      const approval = collections.get(collectionId).collectionApprovals[0];
+      approval.approvalCriteria.predeterminedBalances.incrementedBalances.maxScalingMultiplier = '2';
+      const rejected = await client.callTool({ name: 'standard_credit_tokens_purchase', arguments: { collectionId, creator, units: '3' } });
+      assert.equal(rejected.isError, true, 'over-limit purchase must fail rather than shrink');
+      const cliRejected = await executeInstalledCli(['credit-tokens', 'purchase', collectionId, '--creator', creator, '--units', '3']);
+      assert.equal(cliRejected.ok, false);
+      assert.match(cliRejected.error.message, /maximum 2/);
+    }
   }
   for (const verb of ['enable-renewal', 'subscribe']) {
     await action(`standard_subscriptions_${verb.replace(/-/g, '_')}`, { collectionId: subscriptionId, creator, approvalId: 'fixture-renewal' }, [

@@ -1,3 +1,5 @@
+export type { StandardDescriptor, StandardOperation } from '../standards.js';
+import { describeStandards } from '../standards.js';
 /**
  * Central tool registry.
  *
@@ -177,6 +179,14 @@ export const toolRegistry: Record<string, ToolEntry> = {
     tool: { name: 'signing_request_status', description: 'Inspect a saved browser request. With resume=true, returns the same URL only while its original listener is live. Never creates or submits another transaction; unknown outcomes require reconciliation.', inputSchema: { type: 'object', properties: { requestId: { type: 'string', pattern: '^[a-f0-9]{32}$' }, resume: { type: 'boolean' } }, required: ['requestId'], additionalProperties: false } } as ToolSchema,
     run: (args: unknown) => { const input = z.object({ requestId: z.string().regex(/^[a-f0-9]{32}$/), resume: z.boolean().optional() }).strict().parse(args); return getSigningRequestStatus(input.requestId, input.resume); }
   },
+  get_standards: entry(
+    {
+      name: 'get_standards',
+      description: 'Discover installed standard lifecycle support and limitations. Supply id for builders, actions, required inputs, and unsupported operations. Equivalent to bb dev standards [id]. Offline; does not evaluate live eligibility.',
+      inputSchema: { type: 'object', additionalProperties: false, properties: { id: { type: 'string' } } }
+    },
+    (args) => getStandardCatalog(args.id)
+  ),
   get_capabilities: entry(
     {
       name: 'get_capabilities',
@@ -291,6 +301,10 @@ export const toolRegistry: Record<string, ToolEntry> = {
   generate_unique_id: entry(generateUniqueIdTool, handleGenerateUniqueId),
   generate_wrapper_address: entry(generateWrapperAddressTool, handleGenerateWrapperAddress)
 };
+
+export function getStandardCatalog(id?: string) {
+  return describeStandards(toolRegistry, id);
+}
 
 export function getCapabilityCatalog(id?: string) {
   if (id !== undefined && (typeof id !== 'string' || !Object.prototype.hasOwnProperty.call(toolRegistry, id))) {

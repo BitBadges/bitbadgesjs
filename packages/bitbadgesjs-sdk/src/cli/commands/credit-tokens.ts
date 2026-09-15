@@ -28,23 +28,37 @@ import {
   doesCollectionFollowCreditTokenProtocol,
   extractCreditTokenTiers,
   buildPurchaseCreditTokenMsg,
+  quoteCreditTokenPurchase,
+  type CreditTokenTier,
   bitbadgesApiCreditsCollectionId
 } from '../../core/credit-tokens.js';
+import { inspectStandardCollection } from '../../core/standard-inspection.js';
+import { MAINNET_COINS_REGISTRY, TESTNET_COINS_REGISTRY } from '../../common/constants.js';
+
+function requireSupportedPurchase(collection: any): void {
+  const inspection = inspectStandardCollection(collection, 'credit-token');
+  if (!inspection.configurationSupported) throw new Error(`Unsupported credit purchase configuration: ${inspection.issues.join('; ')}`);
+}
+
+function selectPurchaseTier(tiers: CreditTokenTier[], approvalId?: string): CreditTokenTier {
+  const tier = approvalId ? tiers.find((item) => item.approvalId === approvalId) : tiers.length === 1 ? tiers[0] : undefined;
+  if (!tier) throw new Error(`Choose --tier explicitly. Available tiers: ${tiers.map((item) => item.approvalId).join(', ') || 'none'}.`);
+  return tier;
+}
+
+function parsePurchaseUnits(input: string): bigint {
+  if (!/^\d+$/.test(input.trim()) || BigInt(input) <= 0n) throw new Error('--units must be a positive integer multiplier.');
+  return BigInt(input);
+}
 
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
   return normalizeCollection(await callApi('GET', `/collection/${encodeURIComponent(collectionId)}`, opts));
 }
 
 function validateOrExit(collection: any, ctx: string): void {
-  if (!collection) {
-    process.stderr.write(`Error: collection not found while running ${ctx}.\n`);
-    process.exit(2);
-  }
+  if (!collection) throw new Error(`Collection not found while running ${ctx}. Re-read the collection before retrying.`);
   if (!doesCollectionFollowCreditTokenProtocol(collection)) {
-    process.stderr.write(
-      `Error: collection is not a valid Credit Token collection (failed in ${ctx}). Pass a collection whose standards include "Credit Token" or has credit-* approvals.\n`
-    );
-    process.exit(2);
+    throw new Error(`Collection is not a valid Credit Token collection (failed in ${ctx}). Inspect the collection and choose a supported standard action.`);
   }
 }
 
@@ -65,8 +79,8 @@ addOutputFlags(
   try {
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'credit-tokens list');
-    const tiers = extractCreditTokenTiers(collection.collectionApprovals);
-    emit({ collectionId: String(collectionId), tiers }, opts);
+    const tiers = inspectStandardCollection(collection, 'credit-token').configurationSupported ? extractCreditTokenTiers(collection.collectionApprovals) : [];
+    emit({ collectionId: String(collectionId), tiers, inspection: inspectStandardCollection(collection, 'credit-token') }, opts);
   } catch (err) {
     emitError(err);
   }
@@ -83,22 +97,49 @@ addOutputFlags(
   try {
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'credit-tokens show');
-    const tiers = extractCreditTokenTiers(collection.collectionApprovals);
+    const tiers = inspectStandardCollection(collection, 'credit-token').configurationSupported ? extractCreditTokenTiers(collection.collectionApprovals) : [];
     // `aliasPath.{symbol,decimals}` are the FE-build-time metadata; the
     // indexer's collection doc exposes paths via `aliasPaths[].denom`
     // only (chain proto doesn't carry symbol/decimals through). Use the
     // denom for display; let the caller resolve symbol+decimals via
     // `bb lookup <denom>` if needed.
-    const aliasPath = (collection.aliasPaths ?? collection.aliasPathsToAdd ?? [])[0];
+    const aliases = collection.aliasPaths ?? collection.aliasPathsToAdd ?? [];
+    const aliasPath = aliases.length === 1 ? aliases[0] : undefined;
     emit(
       {
         collectionId: String(collectionId),
         standards: collection.standards ?? [],
+        inspection: inspectStandardCollection(collection, 'credit-token'),
         denom: aliasPath?.denom ?? null,
         tiers
       },
       opts
     );
+  } catch (err) {
+    emitError(err);
+  }
+});
+
+addOutputFlags(addNetworkFlags(creditTokensCommand.command('quote')
+  .description('Quote exact payment and minted units. Does not reserve inventory, check eligibility, or submit a transaction.')
+  .argument('<collection-id>', 'Credit Token collection ID')
+  .requiredOption('--units <n>', 'Integer purchase multiplier; legacy tiers require 1 pack')
+  .option('--tier <approvalId>', 'Required when more than one purchase tier exists')
+)).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { units: string; tier?: string }) => {
+  try {
+    const collection = await fetchCollection(collectionId, opts);
+    validateOrExit(collection, 'credit-tokens quote');
+    requireSupportedPurchase(collection);
+    const tier = selectPurchaseTier(extractCreditTokenTiers(collection.collectionApprovals), opts.tier);
+    const registry = resolveNetwork(opts as any) === 'mainnet' ? MAINNET_COINS_REGISTRY : TESTNET_COINS_REGISTRY;
+    const paymentCoin = Object.values(registry).find((coin) => coin.baseDenom === tier.paymentDenom);
+    const aliases = collection.aliasPaths ?? collection.aliasPathsToAdd ?? [];
+    const alias = aliases.length === 1 ? aliases[0] : undefined;
+    const quote = quoteCreditTokenPurchase(tier, parsePurchaseUnits(opts.units), {
+      paymentDecimals: paymentCoin ? Number(paymentCoin.decimals) : undefined,
+      creditDecimals: alias?.decimals === undefined ? undefined : Number(alias.decimals)
+    });
+    emit({ collectionId, observedAt: new Date(Date.now()).toISOString(), ...quote }, opts);
   } catch (err) {
     emitError(err);
   }
@@ -119,10 +160,10 @@ addDeployOptions(
         )
         .argument('[collection-id]', 'Credit Token collection ID. Omit and pass --api-credits to use BitBadges’ own API-credits collection.')
         .requiredOption('--creator <address>', 'Buyer address — the wallet that will HOLD the (non-transferable) credits (bb1.../0x)')
-        .requiredOption('--units <n>', 'Number of units to purchase (integer)')
+        .requiredOption('--units <n>', 'Integer purchase multiplier, not display credits; quote first. Legacy tiers require 1 pack.')
         .option(
           '--tier <approvalId>',
-          'Tier approval id (default: the credit-scaled tier; required if only legacy per-tier approvals exist)'
+          'Tier approval id; required when more than one purchase tier exists'
         )
         .option('--api-credits', "Shortcut for BitBadges’ OWN API-credits collection on this network (mainnet/local; not on testnet). Mutually exclusive with <collection-id>. Any Credit Token collection works via the positional arg — this is just BitBadges’ real instance.")
     )
@@ -153,12 +194,13 @@ addDeployOptions(
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
       const collection = await fetchCollection(collectionId, opts);
       validateOrExit(collection, 'credit-tokens purchase');
-      const tiers = extractCreditTokenTiers(collection.collectionApprovals);
+      requireSupportedPurchase(collection);
+      const tiers = inspectStandardCollection(collection, 'credit-token').configurationSupported ? extractCreditTokenTiers(collection.collectionApprovals) : [];
       if (tiers.length === 0) {
         process.stderr.write('Error: collection has no credit-* approvals.\n');
         process.exit(2);
       }
-      let tier = opts.tier ? tiers.find((t) => t.approvalId === opts.tier) : tiers.find((t) => t.isScaled) ?? tiers[0];
+      const tier = selectPurchaseTier(tiers, opts.tier);
       if (!tier) {
         process.stderr.write(
           `Error: no matching tier. Available: ${tiers.map((t) => t.approvalId).join(', ')}.\n`
@@ -207,7 +249,7 @@ addDeployOptions(
 Examples:
   # Any Credit Token collection (the standard is generic — anyone can deploy one):
   $ bb credit-tokens purchase 42 --creator bb1buyer...xyz --units 10 | bb deploy
-  $ bb credit-tokens purchase 42 --creator bb1buyer...xyz --units 10 --tier premium-tier | bb deploy
+  $ bb credit-tokens purchase 42 --creator bb1buyer...xyz --units 10 --tier credit-scaled | bb deploy
   # BitBadges' own API-credits collection (one real example), id resolved per network:
   $ bb credit-tokens purchase --api-credits --creator bb1buyer...xyz --units 10 --browser
 

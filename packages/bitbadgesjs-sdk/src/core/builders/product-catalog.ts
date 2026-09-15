@@ -3,6 +3,7 @@
  * @module core/builders/product-catalog
  */
 import { parseBuilderInput } from './input-schemas.js';
+import { convertToBitBadgesAddress, isAddressValid } from '../../address-converter/converter.js';
 import {
   BURN_ADDRESS,
   FOREVER,
@@ -23,6 +24,8 @@ export interface ProductItem {
   name: string;
   price: number; // display units
   denom: string; // USDC, BADGE
+  /** Payment recipient override for this product; defaults to the catalog storeAddress. */
+  storeAddress?: string;
   maxSupply?: number; // 0 = unlimited
   burn?: boolean; // burn on purchase
   /** Optional pre-hosted per-product metadata URI. */
@@ -66,6 +69,10 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
 
   const purchaseApprovals = products.map((product, i) => {
     const idx = i + 1;
+    const recipient = product.storeAddress === undefined ? storeAddress : convertToBitBadgesAddress(product.storeAddress);
+    if (product.storeAddress !== undefined && (!recipient.startsWith('bb1') || !isAddressValid(recipient))) {
+      throw new Error(`Invalid product ${idx} storeAddress: expected a valid BitBadges or EVM account address.`);
+    }
     const coin = resolveCoin(product.denom);
     const basePrice = toBaseUnits(product.price, coin.decimals);
     const tokenIds = [{ start: String(idx), end: String(idx) }];
@@ -96,7 +103,7 @@ export function buildProductCatalog(params: ProductCatalogParams): any {
         predeterminedBalances,
         coinTransfers: [
           {
-            to: storeAddress,
+            to: recipient,
             coins: [{ amount: basePrice, denom: coin.denom }],
             overrideFromWithApproverAddress: false,
             overrideToWithInitiator: false

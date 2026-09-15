@@ -4,6 +4,7 @@ import type { Command } from 'commander';
 import { z } from 'zod';
 import { payRequestsCommand } from '../../cli/commands/pay-requests.js';
 import { subscriptionsCommand } from '../../cli/commands/subscriptions.js';
+import { standardsCommand } from '../../cli/commands/standards.js';
 import { smartTokensCommand } from '../../cli/commands/smart-tokens.js';
 import { creditTokensCommand } from '../../cli/commands/credit-tokens.js';
 import { productsCommand } from '../../cli/commands/products.js';
@@ -15,15 +16,17 @@ import { predictionMarketsCommand } from '../../cli/commands/prediction-markets.
 const surfaces: [Command, string[]][] = [
   [payRequestsCommand, ['list', 'show', 'status', 'pay', 'deny']],
   [subscriptionsCommand, ['list', 'status', 'claim', 'enable-renewal', 'cancel', 'subscribe', 'charge-due']],
+  [standardsCommand, ['inspect']],
   [smartTokensCommand, ['list', 'show', 'status', 'deposit', 'withdraw']],
-  [creditTokensCommand, ['list', 'show', 'purchase']],
+  [creditTokensCommand, ['list', 'show', 'quote', 'purchase']],
   [productsCommand, ['list', 'show', 'purchase']],
   [auctionsCommand, ['list', 'show', 'status', 'place-bid', 'cancel-bid', 'accept-bid']],
   [crowdfundsCommand, ['list', 'show', 'status', 'contribute', 'withdraw', 'refund']],
   [bountiesCommand, ['list', 'show', 'status', 'accept', 'deny', 'claim-refund']],
-  [predictionMarketsCommand, ['list', 'show', 'status', 'buy-yes', 'buy-no', 'sell-yes', 'sell-no', 'cancel', 'deposit', 'redeem', 'resolve']]
+  [predictionMarketsCommand, ['list', 'show', 'status', 'quote', 'buy-yes', 'buy-no', 'sell-yes', 'sell-no', 'cancel', 'deposit', 'redeem', 'resolve']]
 ];
 const allowedOptions = new Set([
+  '--family',
   '--creator',
   '--tier',
   '--tip',
@@ -45,6 +48,8 @@ const allowedOptions = new Set([
   '--side',
   '--state',
   '--pair-amount',
+  '--yes-amount',
+  '--no-amount',
   '--yes-balance',
   '--no-balance',
   '--outcome',

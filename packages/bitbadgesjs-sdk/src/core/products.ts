@@ -283,6 +283,7 @@ export const isProductApproval = (approval: iCollectionApproval<bigint>) => {
 // ── End-user helpers (lifted from frontend ProductCatalogView) ────────────
 
 export interface ExtractedProduct {
+  version?: bigint;
   tokenId: bigint;
   approvalId: string;
   storeAddress: string;
@@ -321,6 +322,7 @@ export function extractAllProducts(approvals: ReadonlyArray<iCollectionApproval<
     .map((a) => ({
       tokenId: BigInt(a.tokenIds?.[0]?.start ?? 1),
       approvalId: a.approvalId ?? '',
+      version: BigInt(a.version ?? 0),
       storeAddress: a.approvalCriteria?.coinTransfers?.[0]?.to ?? '',
       priceCoins: (a.approvalCriteria?.coinTransfers?.[0]?.coins ?? []).map((c: any) => ({
         denom: String(c.denom),
@@ -366,7 +368,7 @@ export function buildPurchaseProductMsg(
             approvalId: product.approvalId,
             approvalLevel: 'collection',
             approverAddress: '',
-            version: '0',
+            version: String(product.version ?? 0),
             precalculationOptions: { overrideTimestamp: '0', tokenIdsOverride: [] }
           },
           prioritizedApprovals: [
@@ -374,7 +376,7 @@ export function buildPurchaseProductMsg(
               approvalId: product.approvalId,
               approvalLevel: 'collection',
               approverAddress: '',
-              version: '0'
+              version: String(product.version ?? 0)
             }
           ],
           onlyCheckPrioritizedCollectionApprovals: true,

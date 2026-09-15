@@ -38,6 +38,7 @@ import { skillsCommand } from './skills.js';
 import { genPubKeyCommand } from './gen-pub-key.js';
 import { devFeedbackCommand } from './dev-feedback.js';
 import { capabilitiesCommand } from './capabilities.js';
+import { standardsCatalogCommand } from './standards-catalog.js';
 import { requestsCommand } from './requests.js';
 
 export const devCommand = new Command('dev').description(
@@ -72,6 +73,7 @@ devCommand.addCommand(resourcesCommand);
 devCommand.addCommand(docsCommand);
 devCommand.addCommand(skillsCommand);
 devCommand.addCommand(capabilitiesCommand);
+devCommand.addCommand(standardsCatalogCommand);
 devCommand.addCommand(requestsCommand);
 devCommand.addCommand(genPubKeyCommand);
 devCommand.addCommand(devFeedbackCommand);

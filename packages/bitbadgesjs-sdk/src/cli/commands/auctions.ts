@@ -228,7 +228,7 @@ addOutputFlags(
         );
       }
       await runEmitOrDeploy(
-        buildAcceptAuctionBidMsg(seller, String(collectionId), bidApprovalId, bidder, details.mintApproval.approvalId),
+        buildAcceptAuctionBidMsg(seller, String(collectionId), bidApprovalId, bidder, details.mintApproval.approvalId, 1n, BigInt(details.mintApproval.version ?? 0)),
         opts,
         { emit: (m) => emit(m, opts), expectedAddress: seller }
       );
