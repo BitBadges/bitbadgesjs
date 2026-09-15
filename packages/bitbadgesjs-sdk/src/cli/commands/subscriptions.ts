@@ -76,6 +76,20 @@ async function fetchIncomingApprovals(collectionId: string, address: string, opt
   const balances = await fetchUserBalances(collectionId, address, opts);
   const approvals = balances?.balance?.incomingApprovals ?? balances?.incomingApprovals;
   if (!Array.isArray(approvals)) throw new Error('Balance response omitted incoming approval state. Retry the lookup before changing recurring consent.');
+  const identities = new Set<string>();
+  for (const approval of approvals) {
+    const rangesValid = ['tokenIds', 'transferTimes', 'ownershipTimes'].every((key) =>
+      Array.isArray(approval?.[key]) && approval[key].every((range: any) =>
+        /^\d+$/.test(String(range?.start)) && /^\d+$/.test(String(range?.end)) && BigInt(range.start) <= BigInt(range.end))
+    );
+    if (!approval || typeof approval.approvalId !== 'string' || !approval.approvalId ||
+        typeof approval.fromListId !== 'string' || !approval.fromListId ||
+        typeof approval.initiatedByListId !== 'string' || !approval.initiatedByListId || !rangesValid) {
+      throw new Error('Malformed incoming approval state. Re-read valid approval state before changing recurring consent.');
+    }
+    if (identities.has(approval.approvalId)) throw new Error('Duplicate incoming approval identities. Resolve the ambiguity before changing recurring consent.');
+    identities.add(approval.approvalId);
+  }
   return approvals;
 }
 
@@ -380,6 +394,9 @@ addOutputFlags(
       // Fetch + preserve existing recurring approvals from other tiers.
       const existing = await fetchIncomingApprovals(String(collectionId), creator, opts);
       const otherApprovals = existing.filter((a: any) => !isUserRecurringApproval(a, faucet));
+      if (otherApprovals.some((approval) => approval.approvalId === newApproval.approvalId)) {
+        throw new Error('Approval ID already belongs to unrelated consent. Choose a different --approval-id and rebuild.');
+      }
 
       await runEmitOrDeploy(
         buildUpdateApprovalsMsg(creator, String(collectionId), [...otherApprovals, newApproval]),
@@ -477,6 +494,9 @@ addOutputFlags(
       });
       const existing = await fetchIncomingApprovals(String(collectionId), creator, opts);
       const otherApprovals = existing.filter((a: any) => !isUserRecurringApproval(a, faucet));
+      if (otherApprovals.some((approval) => approval.approvalId === newApproval.approvalId)) {
+        throw new Error('Approval ID already belongs to unrelated consent. Choose a different --approval-id and rebuild.');
+      }
       const enableRenewal = buildUpdateApprovalsMsg(
         creator,
         String(collectionId),

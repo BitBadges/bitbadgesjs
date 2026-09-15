@@ -318,3 +318,12 @@ describe('buildPaymentRequestPayMsg / DenyMsg', () => {
     expect(typeof transfer.prioritizedApprovals[0].version).toBe('string');
   });
 });
+
+
+describe('payment request approval identity', () => {
+  it.each(['pay', 'deny'])('preserves the selected %s approval version', (action) => {
+    const selected = { ...(action === 'pay' ? makePayApproval() : makeDenyApproval()), version: 7n };
+    const build = action === 'pay' ? buildPaymentRequestPayMsg : buildPaymentRequestDenyMsg;
+    expect((build(PAYER, '42', selected as any).value as any).transfers[0].prioritizedApprovals[0].version).toBe('7');
+  });
+});

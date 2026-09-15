@@ -58,4 +58,30 @@ describe('subscription approval replacement read safety', () => {
     expect(messages[1].value.incomingApprovals).toHaveLength(2);
     expect(messages[1].value.incomingApprovals[0]).toEqual(unrelated);
   });
+  it.each(['enable-renewal', 'subscribe', 'cancel'])('rejects malformed and duplicate current approvals for %s', async (action) => {
+    for (const incomingApprovals of [[null], [{}], [{ approvalId: 'same' }, { approvalId: 'same' }]]) {
+      jest.clearAllMocks();
+      (indexer.callIndexer as jest.Mock).mockImplementation(async (_method, path) =>
+        path.includes('/balance/') ? { incomingApprovals } : collection()
+      );
+      await subscriptionsCommand.parseAsync([action, '1', '--creator', address], { from: 'user' });
+      expect(indexer.emitIndexerResult).not.toHaveBeenCalled();
+      expect(indexer.emitIndexerError).toHaveBeenCalled();
+    }
+  });
+  it.each(['enable-renewal', 'subscribe'])('rejects a requested approval ID colliding with unrelated consent in %s', async (action) => {
+    const unrelated = {
+      approvalId: 'friend', fromListId: address, initiatedByListId: 'All',
+      tokenIds: [{ start: '1', end: '1' }],
+      transferTimes: [{ start: '1', end: '18446744073709551615' }],
+      ownershipTimes: [{ start: '1', end: '18446744073709551615' }]
+    };
+    (indexer.callIndexer as jest.Mock).mockImplementation(async (_method, path) =>
+      path.includes('/balance/') ? { incomingApprovals: [unrelated] } : collection()
+    );
+    await subscriptionsCommand.parseAsync([action, '1', '--creator', address, '--approval-id', 'friend'], { from: 'user' });
+    expect(indexer.emitIndexerResult).not.toHaveBeenCalled();
+    expect(indexer.emitIndexerError).toHaveBeenCalled();
+  });
+
 });
