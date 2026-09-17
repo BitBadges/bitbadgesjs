@@ -1,3 +1,4 @@
+import { createServer } from 'node:http';
 import { BitBadgesAdminAPI } from './BitBadgesApi.js';
 import { NotificationDoc } from './docs-types/docs.js';
 
@@ -24,7 +25,8 @@ describe('authenticated notification API', () => {
     });
     const response = await api.getNotifications({ types: ['bank_send'], unreadOnly: true, bookmark: 'previous' });
     expect(get).toHaveBeenCalledWith(expect.stringContaining('/api/v0/notifications'), {
-      params: { types: ['bank_send'], unreadOnly: true, bookmark: 'previous' }
+      params: { types: ['bank_send'], unreadOnly: true, bookmark: 'previous' },
+      paramsSerializer: { indexes: null }
     });
     expect(response.notifications[0]).toBeInstanceOf(NotificationDoc);
     expect(response.notifications[0].createdAt).toBe(123n);
@@ -41,4 +43,25 @@ describe('authenticated notification API', () => {
       preferences: { inAppEnabled: false, ignoreIfInitiator: true }
     });
   });
+});
+
+it('sends repeated plain type keys over actual HTTP', async () => {
+  let received = '';
+  const server = createServer((req, res) => {
+    received = req.url ?? '';
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ notifications: [], pagination: { hasMore: false, bookmark: '' } }));
+  });
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  try {
+    const address = server.address();
+    if (!address || typeof address === 'string') throw new Error('Missing local server');
+    const client = new BitBadgesAdminAPI<bigint>({ apiKey: 'test', convertFunction: BigInt, apiUrl: `http://127.0.0.1:${address.port}` });
+    await client.getNotifications({ types: ['bank_send', 'claim'], unreadOnly: true });
+    const query = new URL(received, 'http://localhost').searchParams;
+    expect(query.getAll('types')).toEqual(['bank_send', 'claim']);
+    expect(query.has('types[]')).toBe(false);
+  } finally {
+    await new Promise<void>((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+  }
 });

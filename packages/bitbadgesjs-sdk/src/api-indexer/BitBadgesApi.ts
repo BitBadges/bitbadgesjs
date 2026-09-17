@@ -3460,7 +3460,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
 
       const response = await this.axios.get<iGetNotificationsSuccessResponse<string>>(
         `${this.BACKEND_URL}${BitBadgesApiRoutes.GetNotificationsRoute()}`,
-        { params: payload }
+        { params: payload, paramsSerializer: { indexes: null } }
       );
       return new GetNotificationsSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
