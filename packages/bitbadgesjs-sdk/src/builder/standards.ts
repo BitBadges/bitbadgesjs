@@ -86,9 +86,10 @@ const lifecycle: Record<string, Lifecycle> = {
     actionGroup: 'subscriptions',
     constraints: [
       'Paid access and renewal consent are independent. Future access is not current access.',
-      'Recorded consent does not guarantee balance, executor availability, or successful renewal.'
+      'Recorded consent does not guarantee balance, executor availability, or successful renewal.',
+      'Reviewed renewal changes preserve paid access and use a fixed new start; a concurrent old renewal can overlap the new tier.'
     ],
-    unsupported: ['Automatic plan switching, prorations, and refunds of paid access.']
+    unsupported: ['Immediate entitlement exchange, prorations, and refunds of paid access.']
   },
   'credit-token': {
     summary: 'Purchase exact credit quantities using fixed or scaled tiers.',
