@@ -12,6 +12,48 @@ import { UintRangeArray } from './uintRanges.js';
 import { AddressList } from './addressLists.js';
 import type { iCollectionApprovalWithDetails } from './approvals.js';
 
+type SubscriptionAccessBalance = {
+  amount: bigint | string | number;
+  tokenIds: { start: bigint | string | number; end: bigint | string | number }[];
+  ownershipTimes: { start: bigint | string | number; end: bigint | string | number }[];
+};
+
+/** Ownership is independent of recurring consent; missing lookup state never means no access. */
+export function getSubscriptionAccessStatus(tokenId: bigint, balances: readonly SubscriptionAccessBalance[] | undefined, now = BigInt(Date.now())) {
+  if (!balances) {
+    return {
+      status: 'unavailable' as const, isSubscribed: null, subscribedTimes: null,
+      currentAccessEndsAt: null, futureAccessTimes: null, nextAccessStartsAt: null
+    };
+  }
+  const subscribedTimes = UintRangeArray.From(balances
+    .filter(balance => BigInt(balance.amount) > 0n && balance.tokenIds.some(range => BigInt(range.start) <= tokenId && tokenId <= BigInt(range.end)))
+    .flatMap(balance => balance.ownershipTimes.map(range => ({ start: BigInt(range.start), end: BigInt(range.end) }))))
+    .sortAndMerge().map(range => ({ start: range.start, end: range.end }));
+  const current = subscribedTimes.find(range => range.start <= now && now <= range.end);
+  return {
+    status: 'available' as const,
+    isSubscribed: !!current,
+    subscribedTimes,
+    currentAccessEndsAt: current?.end ?? null,
+    futureAccessTimes: subscribedTimes.filter(range => range.end > now).map(range => ({ start: range.start > now ? range.start : now + 1n, end: range.end })),
+    nextAccessStartsAt: subscribedTimes.find(range => range.start > now)?.start ?? null
+  };
+}
+
+/** A recorded consent is not evidence of a successful or guaranteed future charge. */
+export function getSubscriptionRenewalConsentStatus(
+  faucet: Pick<iCollectionApproval<bigint>, 'transferTimes'>,
+  approval: Pick<iUserIncomingApproval<bigint>, 'transferTimes'> | undefined,
+  now = BigInt(Date.now())
+) {
+  if (!approval) return 'none' as const;
+  const hasFutureIntersection = approval.transferTimes.some(userWindow => faucet.transferTimes.some(faucetWindow =>
+    userWindow.end >= now && faucetWindow.end >= now && userWindow.start <= faucetWindow.end && faucetWindow.start <= userWindow.end
+  ));
+  return hasFutureIntersection ? 'recorded' as const : 'expired' as const;
+}
+
 export const getCurrentInterval = (resetTimeIntervals: iResetTimeIntervals<bigint> | undefined) => {
   // If no resets, we just treat it as one big interval
   if (!resetTimeIntervals || resetTimeIntervals.startTime === 0n || resetTimeIntervals.intervalLength === 0n) {
@@ -208,17 +250,29 @@ export const isSubscriptionFaucetApproval = (approval: iCollectionApproval<bigin
   return true;
 };
 
-export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>, subscriptionApproval: iCollectionApproval<bigint>) => {
+/** Checks execution compatibility with the current subscription terms. */
+export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>, subscriptionApproval: iCollectionApproval<bigint>) =>
+  matchesRecurringApproval(approval, subscriptionApproval, true);
+
+/** Identifies consent for management/revocation, even after terms change. Never use for charge eligibility. */
+export const isUserRecurringApprovalForTier = (approval: iUserIncomingApproval<bigint>, subscriptionApproval: iCollectionApproval<bigint>) =>
+  matchesRecurringApproval(approval, subscriptionApproval, false);
+
+const matchesRecurringApproval = (approval: iUserIncomingApproval<bigint>, subscriptionApproval: iCollectionApproval<bigint>, matchTerms: boolean) => {
   if (approval.fromListId !== 'Mint') {
     return false;
   }
 
-  const intervalLength = BigInt(subscriptionApproval.approvalCriteria?.predeterminedBalances?.incrementedBalances.durationFromTimestamp ?? 0);
+  const intervalLength = BigInt(matchTerms
+    ? subscriptionApproval.approvalCriteria?.predeterminedBalances?.incrementedBalances.durationFromTimestamp ?? 0
+    : approval.approvalCriteria?.predeterminedBalances?.incrementedBalances.recurringOwnershipTimes.intervalLength ?? 0);
+  if (intervalLength <= 0n) return false;
   // Bigint-exact cap (matches the producer at userRecurringApproval); the
   // old `Number(intervalLength)` round-trip was lossy for absurd intervals.
   const chargePeriodLength =
     intervalLength < RECURRING_CHARGE_PERIOD_CAP_MS ? intervalLength : RECURRING_CHARGE_PERIOD_CAP_MS;
-  const subscriptionAmount = subscriptionApproval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount ?? 0n;
+  const subscriptionAmount = (subscriptionApproval.approvalCriteria?.coinTransfers ?? []).reduce(
+    (total, transfer) => total + transfer.coins.reduce((sum, coin) => sum + BigInt(coin.amount), 0n), 0n);
   const approvalAmount = approval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount ?? 0n;
 
   //Ensure token IDs match
@@ -235,7 +289,7 @@ export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>,
     }
   }
 
-  if (approvalAmount < subscriptionAmount) {
+  if (matchTerms && approvalAmount < subscriptionAmount) {
     return false;
   }
 
@@ -254,7 +308,7 @@ export const isUserRecurringApproval = (approval: iUserIncomingApproval<bigint>,
   }
 
   //ensure denom is correct
-  if (coinTransfer.coins[0].denom !== subscriptionApproval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.denom) {
+  if (matchTerms && (subscriptionApproval.approvalCriteria?.coinTransfers ?? []).some(transfer => transfer.coins.some(coin => coin.denom !== coinTransfer.coins[0].denom))) {
     return false;
   }
 

@@ -20,6 +20,7 @@ describe('predictionMarketsCommand shape', () => {
       'cancel',
       'deposit',
       'list',
+      'quote',
       'redeem',
       'resolve',
       'sell-no',
@@ -88,4 +89,15 @@ describe('predictionMarketsCommand shape', () => {
     const build = predictionMarketsCommand.commands.find((c) => c.name() === 'build');
     expect(build).toBeUndefined();
   });
+  it('NO quantities are valued options rather than negated booleans', () => {
+    for (const verb of ['quote', 'redeem']) {
+      const cmd=predictionMarketsCommand.commands.find(c=>c.name()===verb)!;
+      for (const [flag,name] of [['--no-amount','noAmount'],['--no-balance','noBalance']]) {
+        const option=cmd.options.find(o=>o.long===flag)!;
+        expect(option.attributeName()).toBe(name);
+        expect(option.negate).toBe(false);
+      }
+    }
+  });
+
 });

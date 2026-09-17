@@ -36,12 +36,16 @@ import {
   doesCollectionFollowSubscriptionProtocol,
   isSubscriptionFaucetApproval,
   isUserRecurringApproval,
+  isUserRecurringApprovalForTier,
   getNextChargeTime,
+  getSubscriptionAccessStatus,
+  getSubscriptionRenewalConsentStatus,
   userRecurringApproval
 } from '../../core/subscriptions.js';
 import { getBalanceForIdAndTime } from '../../core/balances.js';
 import { UintRangeArray } from '../../core/uintRanges.js';
 import { BalanceDoc } from '../../api-indexer/docs-types/docs.js';
+import { UserIncomingApproval } from '../../core/approvals.js';
 import { BigIntify } from '../../common/string-numbers.js';
 
 /**
@@ -73,19 +77,27 @@ async function fetchIncomingApprovals(collectionId: string, address: string, opt
   const balances = await fetchUserBalances(collectionId, address, opts);
   const approvals = balances?.balance?.incomingApprovals ?? balances?.incomingApprovals;
   if (!Array.isArray(approvals)) throw new Error('Balance response omitted incoming approval state. Retry the lookup before changing recurring consent.');
+  const identities = new Set<string>();
+  for (const approval of approvals) {
+    const rangesValid = ['tokenIds', 'transferTimes', 'ownershipTimes'].every((key) =>
+      Array.isArray(approval?.[key]) && approval[key].every((range: any) =>
+        /^\d+$/.test(String(range?.start)) && /^\d+$/.test(String(range?.end)) && BigInt(range.start) <= BigInt(range.end))
+    );
+    if (!approval || typeof approval.approvalId !== 'string' || !approval.approvalId ||
+        typeof approval.fromListId !== 'string' || !approval.fromListId ||
+        typeof approval.initiatedByListId !== 'string' || !approval.initiatedByListId || !rangesValid) {
+      throw new Error('Malformed incoming approval state. Re-read valid approval state before changing recurring consent.');
+    }
+    if (identities.has(approval.approvalId)) throw new Error('Duplicate incoming approval identities. Resolve the ambiguity before changing recurring consent.');
+    identities.add(approval.approvalId);
+  }
   return approvals;
 }
 
 function validateOrExit(collection: any, ctx: string): void {
-  if (!collection) {
-    process.stderr.write(`Error: collection not found while running ${ctx}.\n`);
-    process.exit(2);
-  }
+  if (!collection) throw new Error(`Collection not found while running ${ctx}. Re-read the collection before retrying.`);
   if (!doesCollectionFollowSubscriptionProtocol(collection)) {
-    process.stderr.write(
-      `Error: collection is not a valid Subscriptions collection (failed in ${ctx}). Pass a collection whose standards include "Subscriptions".\n`
-    );
-    process.exit(2);
+    throw new Error(`Collection is not a valid Subscriptions collection (failed in ${ctx}). Inspect the collection and choose a supported standard action.`);
   }
 }
 
@@ -248,7 +260,7 @@ addOutputFlags(
   addNetworkFlags(
     subscriptionsCommand
       .command('status')
-      .description('Per-tier subscription state for an address: is-subscribed, has-future-approval, next charge time.')
+      .description('Per-tier owned access and renewal consent. Consent is not proof of payment; failed lookups return an error.')
       .argument('<collection-id>', 'Subscription collection ID')
       .requiredOption('--address <a>', 'Address to query (bb1.../0x — auto-normalized)')
   )
@@ -259,39 +271,40 @@ addOutputFlags(
     validateOrExit(collection, 'subscriptions status');
     const faucets = listFaucets(collection);
 
-    let balances: any = null;
-    try {
-      balances = await fetchUserBalances(String(collectionId), address, opts);
-    } catch {
-      // Address may not have a balance doc yet — treat as zero state.
+    const response = await fetchUserBalances(String(collectionId), address, opts);
+    const state = response?.balance ?? response;
+    if (!Array.isArray(state?.balances) || !Array.isArray(state?.incomingApprovals)) {
+      throw new Error('Subscription status is unavailable: balance response omitted ownership or recurring approval state. Retry the lookup.');
     }
-    const userBalances = balances?.balance?.balances ?? balances?.balances ?? [];
-    const userIncomingApprovals = balances?.balance?.incomingApprovals ?? balances?.incomingApprovals ?? [];
+    const userBalances = state.balances;
+    const userIncomingApprovals = state.incomingApprovals.map((approval: any) => new UserIncomingApproval(approval).convert(BigIntify));
     const now = BigInt(Date.now());
 
     const tiers = faucets.map((faucet: any) => {
       const tokenId = BigInt(faucet.tokenIds?.[0]?.start ?? 1);
-      const balanceForToken = userBalances.find((b: any) =>
-        (b.tokenIds ?? []).some((r: any) => BigInt(r.start) <= tokenId && tokenId <= BigInt(r.end))
-      );
-      const subscribedTimes: { start: bigint; end: bigint }[] =
-        balanceForToken?.ownershipTimes?.map((r: any) => ({ start: BigInt(r.start), end: BigInt(r.end) })) ?? [];
-      const isSubscribed = subscribedTimes.some((r) => r.start <= now && now <= r.end);
+      const access = getSubscriptionAccessStatus(tokenId, userBalances, now);
 
-      const futureApproval = userIncomingApprovals.find((a: any) => isUserRecurringApproval(a, faucet));
+      const matchingApprovals = userIncomingApprovals.filter((a: any) => isUserRecurringApproval(a, faucet));
+      const futureApproval = matchingApprovals.find((a: any) => getSubscriptionRenewalConsentStatus(faucet, a, now) === 'recorded') ?? matchingApprovals[0];
       const hasFutureApproval = !!futureApproval;
+      const renewalConsentStatus = getSubscriptionRenewalConsentStatus(faucet, futureApproval, now);
 
       const incremented =
         futureApproval?.approvalCriteria?.predeterminedBalances?.incrementedBalances;
-      const nextCharge = incremented
-        ? getNextChargeTime(futureApproval.approvalCriteria.predeterminedBalances)
+      const nextCharge = incremented && renewalConsentStatus === 'recorded'
+        ? getNextChargeTime(futureApproval.approvalCriteria?.predeterminedBalances)
         : null;
 
       return {
         approvalId: faucet.approvalId,
-        isSubscribed,
-        subscribedTimes: subscribedTimes.map((r) => ({ start: r.start.toString(), end: r.end.toString() })),
+        status: access.status,
+        isSubscribed: access.isSubscribed,
+        subscribedTimes: access.subscribedTimes?.map((r) => ({ start: r.start.toString(), end: r.end.toString() })),
+        currentAccessEndsAt: access.currentAccessEndsAt?.toString() ?? null,
+        futureAccessTimes: access.futureAccessTimes?.map((r) => ({ start: r.start.toString(), end: r.end.toString() })),
+        nextAccessStartsAt: access.nextAccessStartsAt?.toString() ?? null,
         hasFutureApproval,
+        renewalConsentStatus,
         nextChargeTime: nextCharge ? nextCharge.toString() : null
       };
     });
@@ -375,7 +388,10 @@ addOutputFlags(
 
       // Fetch + preserve existing recurring approvals from other tiers.
       const existing = await fetchIncomingApprovals(String(collectionId), creator, opts);
-      const otherApprovals = existing.filter((a: any) => !isUserRecurringApproval(a, faucet));
+      const otherApprovals = existing.filter((a: any) => !isUserRecurringApprovalForTier(a, faucet));
+      if (otherApprovals.some((approval) => approval.approvalId === newApproval.approvalId)) {
+        throw new Error('Approval ID already belongs to unrelated consent. Choose a different --approval-id and rebuild.');
+      }
 
       await runEmitOrDeploy(
         buildUpdateApprovalsMsg(creator, String(collectionId), [...otherApprovals, newApproval]),
@@ -415,7 +431,7 @@ addOutputFlags(
       const faucet = pickFaucet(listFaucets(collection), opts.tier, 'subscriptions cancel');
 
       const existing = await fetchIncomingApprovals(String(collectionId), creator, opts);
-      const remaining = existing.filter((a: any) => !isUserRecurringApproval(a, faucet));
+      const remaining = existing.filter((a: any) => !isUserRecurringApprovalForTier(a, faucet));
       if (remaining.length === existing.length) {
         process.stderr.write(
           'Warning: no matching user recurring approval found for this tier — cancel is a no-op.\n'
@@ -472,7 +488,10 @@ addOutputFlags(
         denom
       });
       const existing = await fetchIncomingApprovals(String(collectionId), creator, opts);
-      const otherApprovals = existing.filter((a: any) => !isUserRecurringApproval(a, faucet));
+      const otherApprovals = existing.filter((a: any) => !isUserRecurringApprovalForTier(a, faucet));
+      if (otherApprovals.some((approval) => approval.approvalId === newApproval.approvalId)) {
+        throw new Error('Approval ID already belongs to unrelated consent. Choose a different --approval-id and rebuild.');
+      }
       const enableRenewal = buildUpdateApprovalsMsg(
         creator,
         String(collectionId),
@@ -577,6 +596,8 @@ function buildChargeMsg(
               version: String(userApproval.version ?? '0')
             }
           ],
+          onlyCheckPrioritizedCollectionApprovals: true,
+          onlyCheckPrioritizedIncomingApprovals: true,
           memo: ''
         }
       ]
@@ -629,46 +650,47 @@ addOutputFlags(
           const recipientAddress = ownerDoc.bitbadgesAddress;
           if (!recipientAddress) continue;
 
-          const userApproval = (ownerDoc.incomingApprovals ?? []).find((a: any) =>
-            isUserRecurringApproval(a, faucet)
-          );
-          if (!userApproval) continue;
+          for (const userApproval of ownerDoc.incomingApprovals ?? []) {
+            if (!isUserRecurringApproval(userApproval, faucet)) continue;
+            if (!UintRangeArray.From(userApproval.transferTimes).searchIfExists(now) || !UintRangeArray.From(faucet.transferTimes).searchIfExists(now)) continue;
 
-          const predetermined = userApproval.approvalCriteria?.predeterminedBalances;
-          const nextChargeTime = getNextChargeTime(predetermined);
-          if (!nextChargeTime) continue;
+            const predetermined = userApproval.approvalCriteria?.predeterminedBalances;
+            const nextChargeTime = getNextChargeTime(predetermined);
+            if (!nextChargeTime) continue;
 
-          const gracePeriod = BigInt(
-            predetermined?.incrementedBalances?.recurringOwnershipTimes?.chargePeriodLength ?? 0
-          );
-          const withinCurrentInterval =
-            now >= nextChargeTime && now < nextChargeTime + gracePeriod;
-          if (!withinCurrentInterval) continue;
+            const gracePeriod = BigInt(
+              predetermined?.incrementedBalances?.recurringOwnershipTimes?.chargePeriodLength ?? 0
+            );
+            const withinCurrentInterval =
+              now >= nextChargeTime && now < nextChargeTime + gracePeriod;
+            if (!withinCurrentInterval) continue;
 
-          // Skip if this interval is already fulfilled — the subscriber
-          // already owns the token for the upcoming window.
-          const startOfNextInterval = nextChargeTime + gracePeriod;
-          const approvalTokenId = BigInt(userApproval.tokenIds?.[0]?.start ?? 0);
-          const existing = getBalanceForIdAndTime(
-            approvalTokenId,
-            startOfNextInterval,
-            (ownerDoc.balances ?? []) as any
-          );
-          if (existing > 0n) continue;
+            // Skip if this interval is already fulfilled — the subscriber
+            // already owns the token for the upcoming window.
+            const startOfNextInterval = nextChargeTime + gracePeriod;
+            const approvalTokenId = BigInt(userApproval.tokenIds?.[0]?.start ?? 0);
+            const existing = getBalanceForIdAndTime(
+              approvalTokenId,
+              startOfNextInterval,
+              (ownerDoc.balances ?? []) as any
+            );
+            if (existing > 0n) continue;
 
-          due.push({
-            msg: buildChargeMsg(
-              creator,
-              String(collectionId),
-              faucet,
-              userApproval,
+            due.push({
+              msg: buildChargeMsg(
+                creator,
+                String(collectionId),
+                faucet,
+                userApproval,
+                recipientAddress,
+                startOfNextInterval
+              ),
               recipientAddress,
-              startOfNextInterval
-            ),
-            recipientAddress,
-            approvalId: faucet.approvalId,
-            chargePeriodStartMs: nextChargeTime.toString()
-          });
+              approvalId: faucet.approvalId,
+              chargePeriodStartMs: nextChargeTime.toString()
+            });
+            break;
+          }
         }
       }
 

@@ -236,13 +236,13 @@ addOutputFlags(
       process.stderr.write(`Warning: raised (${raised}) < goal (${details.goalAmount}). Withdraw will be rejected — wait for goal to be met.\n`);
     }
     // Find the optional burn approval used for token-2 burn (FE: `fromListId === '!Mint' && toListId === burn && no coinTransfers`)
-    const burnApprovalId = (collection.collectionApprovals ?? []).find(
+    const burnApproval = (collection.collectionApprovals ?? []).find(
       (a: any) =>
         a.fromListId === '!Mint' &&
         a.toListId === BURN_ADDRESS &&
         (a.approvalCriteria?.coinTransfers?.length ?? 0) === 0
-    )?.approvalId;
-    const tx = buildWithdrawCrowdfundTx(creator, String(collectionId), details, raised, burnApprovalId);
+    );
+    const tx = buildWithdrawCrowdfundTx(creator, String(collectionId), details, raised, burnApproval?.approvalId, BigInt(burnApproval?.version ?? 0));
     emit(tx, opts);
   } catch (err) { emitError(err); }
 }).addHelpText('after', `

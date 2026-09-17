@@ -11,7 +11,7 @@ describe('creditTokensCommand shape', () => {
   it('exposes the documented subcommand verbs', () => {
     const names = creditTokensCommand.commands.map((c) => c.name()).sort();
     // Per-standard `build` removed in CLI v2 (#0399); use `bb build credit-token`.
-    expect(names).toEqual(['list', 'purchase', 'show']);
+    expect(names).toEqual(['list', 'purchase', 'quote', 'show']);
   });
 
   it('purchase requires --creator and --units', () => {

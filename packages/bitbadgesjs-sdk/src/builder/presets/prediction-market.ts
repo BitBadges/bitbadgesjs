@@ -49,11 +49,13 @@ function incrementedBalances(startBalances: Array<Record<string, unknown>>): Rec
     durationFromTimestamp: '0',
     allowOverrideTimestamp: false,
     recurringOwnershipTimes: { startTime: '0', intervalLength: '0', chargePeriodLength: '0' },
-    allowOverrideWithAnyValidToken: false
+    allowOverrideWithAnyValidToken: false,
+    allowAmountScaling: true,
+    maxScalingMultiplier: MAX_UINT64
   };
 }
 
-function maxOneShotTrackedAs(id: string, overall = MAX_UINT64): Record<string, unknown> {
+function trackedTransfers(id: string, overall = MAX_UINT64): Record<string, unknown> {
   return {
     overallMaxNumTransfers: overall,
     perFromAddressMaxNumTransfers: '0',
@@ -87,11 +89,11 @@ function renderPairedMint(p: PairedMintParams): RenderedApproval {
       overridesFromOutgoingApprovals: true,
       overridesToIncomingApprovals: false,
       mustPrioritize: true,
+      requireToEqualsInitiatedBy: true,
       predeterminedBalances: {
         manualBalances: [],
         incrementedBalances: incrementedBalances([
-          { amount: '1', tokenIds: TOKEN_1, ownershipTimes: FOREVER },
-          { amount: '1', tokenIds: TOKEN_2, ownershipTimes: FOREVER }
+          { amount: '1', tokenIds: TOKEN_1_TO_2, ownershipTimes: FOREVER }
         ]),
         orderCalculationMethod: orderCalc()
       },
@@ -100,13 +102,13 @@ function renderPairedMint(p: PairedMintParams): RenderedApproval {
           to: 'Mint',
           overrideFromWithApproverAddress: false,
           overrideToWithInitiator: false,
-          coins: [{ amount: '1000000', denom: p.usdcDenom }]
+          coins: [{ amount: '1', denom: p.usdcDenom }]
         }
       ],
       merkleChallenges: [],
       mustOwnTokens: [],
       votingChallenges: [],
-      maxNumTransfers: maxOneShotTrackedAs('paired-mint'),
+      maxNumTransfers: trackedTransfers('paired-mint', '0'),
       approvalAmounts: {
         overallApprovalAmount: '0',
         perFromAddressApprovalAmount: '0',
@@ -150,7 +152,7 @@ function renderTransferable(_: Record<string, never>): RenderedApproval {
  * Settlement approvals all look the same modulo:
  *   - approvalId / amountTrackerId
  *   - tokenIds (1 for YES, 2 for NO, both for pre-settlement-redeem)
- *   - coinTransfers amount (1M for full-payout, 500K for push)
+ *   - burn ratio (1:1 for full payout, 2:1 for push)
  *   - votingChallenges presence + proposalId + verifierAddress
  */
 interface SettlementConfig {
@@ -185,7 +187,7 @@ function renderSettlement(p: SettlementConfig, usdcDenom: string): RenderedAppro
     customData: '',
     version: '0',
     approvalCriteria: {
-      overridesFromOutgoingApprovals: true,
+      overridesFromOutgoingApprovals: false,
       overridesToIncomingApprovals: false,
       mustPrioritize: true,
       predeterminedBalances: {
@@ -204,7 +206,7 @@ function renderSettlement(p: SettlementConfig, usdcDenom: string): RenderedAppro
       merkleChallenges: [],
       mustOwnTokens: [],
       votingChallenges,
-      maxNumTransfers: maxOneShotTrackedAs(p.approvalId),
+      maxNumTransfers: trackedTransfers(p.approvalId),
       approvalAmounts: {
         overallApprovalAmount: '0',
         perFromAddressApprovalAmount: '0',
@@ -228,10 +230,9 @@ function renderPreSettlement(p: UsdcOnlyParams): RenderedApproval {
       approvalId: 'pre-settlement-redeem',
       tokenIds: TOKEN_1_TO_2,
       startBalances: [
-        { amount: '1', tokenIds: TOKEN_1, ownershipTimes: FOREVER },
-        { amount: '1', tokenIds: TOKEN_2, ownershipTimes: FOREVER }
+        { amount: '1', tokenIds: TOKEN_1_TO_2, ownershipTimes: FOREVER }
       ],
-      payoutAmount: '1000000'
+      payoutAmount: '1'
     },
     p.usdcDenom
   );
@@ -249,8 +250,8 @@ function renderYesWins(p: OutcomeParams): RenderedApproval {
       approvalId: 'yes-wins',
       tokenIds: TOKEN_1,
       startBalances: [{ amount: '1', tokenIds: TOKEN_1, ownershipTimes: FOREVER }],
-      payoutAmount: '1000000',
-      proposalId: 'yes-wins-proposal',
+      payoutAmount: '1',
+      proposalId: 'yes-wins',
       verifierAddress: p.verifierAddress
     },
     p.usdcDenom
@@ -263,8 +264,8 @@ function renderNoWins(p: OutcomeParams): RenderedApproval {
       approvalId: 'no-wins',
       tokenIds: TOKEN_2,
       startBalances: [{ amount: '1', tokenIds: TOKEN_2, ownershipTimes: FOREVER }],
-      payoutAmount: '1000000',
-      proposalId: 'no-wins-proposal',
+      payoutAmount: '1',
+      proposalId: 'no-wins',
       verifierAddress: p.verifierAddress
     },
     p.usdcDenom
@@ -276,9 +277,9 @@ function renderPushYes(p: OutcomeParams): RenderedApproval {
     {
       approvalId: 'push-yes',
       tokenIds: TOKEN_1,
-      startBalances: [{ amount: '1', tokenIds: TOKEN_1, ownershipTimes: FOREVER }],
-      payoutAmount: '500000',
-      proposalId: 'push-yes-proposal',
+      startBalances: [{ amount: '2', tokenIds: TOKEN_1, ownershipTimes: FOREVER }],
+      payoutAmount: '1',
+      proposalId: 'push-yes',
       verifierAddress: p.verifierAddress
     },
     p.usdcDenom
@@ -290,9 +291,9 @@ function renderPushNo(p: OutcomeParams): RenderedApproval {
     {
       approvalId: 'push-no',
       tokenIds: TOKEN_2,
-      startBalances: [{ amount: '1', tokenIds: TOKEN_2, ownershipTimes: FOREVER }],
-      payoutAmount: '500000',
-      proposalId: 'push-no-proposal',
+      startBalances: [{ amount: '2', tokenIds: TOKEN_2, ownershipTimes: FOREVER }],
+      payoutAmount: '1',
+      proposalId: 'push-no',
       verifierAddress: p.verifierAddress
     },
     p.usdcDenom

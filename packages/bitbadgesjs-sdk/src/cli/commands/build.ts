@@ -732,12 +732,13 @@ sharedOpts(
         '  name (string, required)        — display name\n' +
         '  price (number, required)       — display units (e.g. 9.99 for $9.99 USDC)\n' +
         '  denom (string, required)       — payment coin symbol (USDC, BADGE, ...) or full denom\n' +
+        '  storeAddress (optional)        — per-product payment recipient; defaults to --store-address\n' +
         '  maxSupply (number, optional)   — cap on units sold; omit/0 = unlimited\n' +
         '  burn (boolean, optional)       — true → burn-on-purchase (consumable); false/omit → buyer keeps the SKU (collectible)\n' +
         '  uri (string, optional)         — pre-hosted per-product metadata URI\n' +
         '  image, description (optional)  — inline metadata; used when uri is absent'
     )
-    .requiredOption('--store-address <address>', 'Payment recipient (bb1.../0x — auto-normalized). Every purchase routes its `price * denom` here.')
+    .requiredOption('--store-address <address>', 'Default payment recipient (bb1.../0x — auto-normalized). A product storeAddress overrides this recipient.')
 ).action(async (opts) => {
   const { buildProductCatalog } = await import('../../core/builders/product-catalog.js');
   if (opts.json) {

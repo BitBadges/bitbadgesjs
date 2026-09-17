@@ -247,7 +247,7 @@ function buildBountyTransferMsg(
               approvalId: approval.approvalId,
               approvalLevel: 'collection',
               approverAddress: '',
-              version: '0'
+              version: String(approval.version ?? 0)
             }
           ],
           onlyCheckPrioritizedCollectionApprovals: true,

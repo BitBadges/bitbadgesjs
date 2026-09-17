@@ -2,6 +2,7 @@ import {
   doesCollectionFollowCreditTokenProtocol,
   extractCreditTokenTiers,
   buildPurchaseCreditTokenMsg,
+  quoteCreditTokenPurchase,
   bitbadgesApiCreditsCollectionId,
   BITBADGES_API_CREDITS_COLLECTION_IDS
 } from './credit-tokens.js';
@@ -32,9 +33,9 @@ const scaledTier = () => ({
     coinTransfers: [{ to: SELLER, coins: [{ denom: 'uusdc', amount: '1000000' }], overrideFromWithApproverAddress: false }],
     predeterminedBalances: {
       incrementedBalances: {
-        startBalances: [{ amount: '100', tokenIds: [{ start: 1n, end: 1n }], ownershipTimes: [] }],
+        startBalances: [{ amount: '100', tokenIds: [{ start: 1n, end: 1n }], ownershipTimes: [{ start: 1n, end: 18446744073709551615n }] }],
         allowAmountScaling: true,
-        maxScalingMultiplier: '0'
+        maxScalingMultiplier: '18446744073709551615'
       }
     }
   }
@@ -51,7 +52,7 @@ const legacyTier = (n: number) => ({
     coinTransfers: [{ to: SELLER, coins: [{ denom: 'uusdc', amount: String(n * 1000000) }], overrideFromWithApproverAddress: false }],
     predeterminedBalances: {
       incrementedBalances: {
-        startBalances: [{ amount: String(n * 100), tokenIds: [{ start: 1n, end: 1n }], ownershipTimes: [] }],
+        startBalances: [{ amount: String(n * 100), tokenIds: [{ start: 1n, end: 1n }], ownershipTimes: [{ start: 1n, end: 18446744073709551615n }] }],
         allowAmountScaling: false
       }
     }
@@ -106,6 +107,23 @@ describe('extractCreditTokenTiers', () => {
     ]);
     expect(tiers).toHaveLength(1);
   });
+
+  it('does not quote only the first payout of an unsupported tier', () => {
+    const approval = scaledTier();
+    approval.approvalCriteria.coinTransfers.push({ ...approval.approvalCriteria.coinTransfers[0] });
+    expect(extractCreditTokenTiers([approval as any])).toEqual([]);
+  });
+
+  it.each(['source', 'multipleBalances', 'differentToken', 'limitedOwnership', 'dynamicToken'])('does not quote incomplete %s mint terms', (variant) => {
+    const approval: any = scaledTier();
+    const incremented = approval.approvalCriteria.predeterminedBalances.incrementedBalances;
+    if (variant === 'source') approval.fromListId = 'All';
+    if (variant === 'multipleBalances') incremented.startBalances.push({ ...incremented.startBalances[0] });
+    if (variant === 'differentToken') incremented.startBalances[0].tokenIds = [{ start: 2n, end: 2n }];
+    if (variant === 'limitedOwnership') incremented.startBalances[0].ownershipTimes = [{ start: 1n, end: 100n }];
+    if (variant === 'dynamicToken') incremented.incrementTokenIdsBy = 1n;
+    expect(extractCreditTokenTiers([approval])).toEqual([]);
+  });
 });
 
 describe('buildPurchaseCreditTokenMsg', () => {
@@ -118,6 +136,12 @@ describe('buildPurchaseCreditTokenMsg', () => {
     expect(() => JSON.stringify(msg)).not.toThrow();
   });
 
+  it('uses the observed approval version', () => {
+    const tier = extractCreditTokenTiers([{ ...scaledTier(), version: 3n } as any])[0];
+    const transfer = (buildPurchaseCreditTokenMsg(BUYER, '42', tier, 1n).value as any).transfers[0];
+    expect(transfer.prioritizedApprovals[0].version).toBe('3');
+  });
+
   it('emits legacy MsgTransferTokens with precalculateBalancesFromApproval', () => {
     const tier = extractCreditTokenTiers([legacyTier(5) as any])[0];
     const msg = buildPurchaseCreditTokenMsg(BUYER, '42', tier, 1n);
@@ -126,18 +150,60 @@ describe('buildPurchaseCreditTokenMsg', () => {
     expect(transfer.precalculateBalancesFromApproval.approvalId).toBe('credit-5');
   });
 
-  it('clamps to maxScalingMultiplier when set', () => {
+  it('rejects over-limit purchases without silently reducing quantity', () => {
     const tierData: any = scaledTier();
     tierData.approvalCriteria.predeterminedBalances.incrementedBalances.maxScalingMultiplier = '5';
     const tier = extractCreditTokenTiers([tierData])[0];
-    const msg = buildPurchaseCreditTokenMsg(BUYER, '42', tier, 100n);
-    const transfer = (msg.value as any).transfers[0];
-    expect(transfer.balances[0].amount).toBe('500'); // 100 × min(100, 5)
+    expect(() => buildPurchaseCreditTokenMsg(BUYER, '42', tier, 100n)).toThrow(/maximum.*5/i);
+    expect((buildPurchaseCreditTokenMsg(BUYER, '42', tier, 5n).value as any).transfers[0].balances[0].amount).toBe('500');
   });
 
   it('throws on zero or negative units', () => {
     const tier = extractCreditTokenTiers([scaledTier() as any])[0];
     expect(() => buildPurchaseCreditTokenMsg(BUYER, '42', tier, 0n)).toThrow();
     expect(() => buildPurchaseCreditTokenMsg(BUYER, '42', tier, -1n)).toThrow();
+  });
+});
+
+describe('quoteCreditTokenPurchase', () => {
+  const tier = () => extractCreditTokenTiers([scaledTier() as any])[0];
+
+  it('quotes exact base and display amounts without floating point loss', () => {
+    const quantity = 9007199254740993n;
+    const quote = quoteCreditTokenPurchase(tier(), quantity, { paymentDecimals: 6, creditDecimals: 2 });
+    expect(quote.requestedMultiplier).toBe(quantity);
+    expect(quote.actualMultiplier).toBe(quantity);
+    expect(quote.payment.baseAmount).toBe(quantity * 1000000n);
+    expect(quote.payment.displayAmount).toBe('9007199254740993');
+    expect(quote.minted.baseAmount).toBe(quantity * 100n);
+    expect(quote.minted.displayAmount).toBe('9007199254740993');
+  });
+
+  it('keeps unknown decimal metadata unknown', () => {
+    const quote = quoteCreditTokenPurchase(tier(), 1n);
+    expect(quote.payment.displayAmount).toBeNull();
+    expect(quote.minted.displayAmount).toBeNull();
+    expect(quote.remainingCredits).toBeNull();
+  });
+
+  it('supports fractional display units and differing asset precisions', () => {
+    const quote = quoteCreditTokenPurchase({ ...tier(), paymentAmount: 1n, mintAmount: 123n }, 3n, { paymentDecimals: 6, creditDecimals: 4 });
+    expect(quote.payment.displayAmount).toBe('0.000003');
+    expect(quote.minted.displayAmount).toBe('0.0369');
+    expect(quote.ratio).toEqual({ paymentBaseAmount: 1n, mintedBaseAmount: 123n });
+  });
+
+  it('rejects multi-unit legacy purchases in the SDK too', () => {
+    const legacy = extractCreditTokenTiers([legacyTier(5) as any])[0];
+    expect(quoteCreditTokenPurchase(legacy, 1n).minted.baseAmount).toBe(500n);
+    expect(() => quoteCreditTokenPurchase(legacy, 2n)).toThrow(/legacy/i);
+    expect(() => buildPurchaseCreditTokenMsg(BUYER, '42', legacy, 2n)).toThrow(/legacy/i);
+  });
+
+  it('rejects invalid economics and invalid display precision', () => {
+    expect(() => quoteCreditTokenPurchase({ ...tier(), paymentAmount: 0n }, 1n)).toThrow();
+    expect(() => quoteCreditTokenPurchase({ ...tier(), mintAmount: 0n }, 1n)).toThrow();
+    expect(() => quoteCreditTokenPurchase(tier(), 1n, { paymentDecimals: -1 })).toThrow();
+    expect(() => quoteCreditTokenPurchase(tier(), 0n)).toThrow();
   });
 });

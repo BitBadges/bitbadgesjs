@@ -23,7 +23,7 @@ export interface CreditTokenParams {
   paymentDenom: string; // USDC, BADGE
   recipient: string; // bb1... payment recipient
   symbol?: string; // default "CREDIT"
-  tokensPerUnit?: number; // tokens per 1 display unit of payment, default 100
+  tokensPerUnit?: number; // minted base units per payment base unit, default 100
   /** Pre-hosted collection metadata URI. If provided, name/image/description are ignored. */
   uri?: string;
   name?: string;

@@ -261,7 +261,7 @@ export function buildContributeCrowdfundTx(
                   approvalId: details.depositRefundApproval.approvalId,
                   approvalLevel: 'collection',
                   approverAddress: '',
-                  version: '0'
+                  version: String(details.depositRefundApproval.version ?? 0)
                 }
               ],
               onlyCheckPrioritizedCollectionApprovals: true,
@@ -284,7 +284,7 @@ export function buildContributeCrowdfundTx(
                   approvalId: details.depositProgressApproval.approvalId,
                   approvalLevel: 'collection',
                   approverAddress: '',
-                  version: '0'
+                  version: String(details.depositProgressApproval.version ?? 0)
                 }
               ],
               onlyCheckPrioritizedCollectionApprovals: true,
@@ -309,7 +309,8 @@ export function buildWithdrawCrowdfundTx(
   collectionId: string,
   details: CrowdfundDetails,
   raised: bigint,
-  burnApprovalId?: string
+  burnApprovalId?: string,
+  burnApprovalVersion: bigint = 0n
 ): { messages: MsgEnvelope[] } {
   const messages: MsgEnvelope[] = [
     {
@@ -333,7 +334,7 @@ export function buildWithdrawCrowdfundTx(
                 approvalId: details.successApproval.approvalId,
                 approvalLevel: 'collection',
                 approverAddress: '',
-                version: '0'
+                version: String(details.successApproval.version ?? 0)
               }
             ],
             onlyCheckPrioritizedCollectionApprovals: true,
@@ -366,7 +367,7 @@ export function buildWithdrawCrowdfundTx(
                     approvalId: burnApprovalId,
                     approvalLevel: 'collection',
                     approverAddress: '',
-                    version: '0'
+                    version: String(burnApprovalVersion)
                   }
                 ]
               : [],
@@ -414,7 +415,7 @@ export function buildRefundCrowdfundMsg(
               approvalId: details.refundApproval.approvalId,
               approvalLevel: 'collection',
               approverAddress: '',
-              version: '0'
+              version: String(details.refundApproval.version ?? 0)
             }
           ],
           onlyCheckPrioritizedCollectionApprovals: true,

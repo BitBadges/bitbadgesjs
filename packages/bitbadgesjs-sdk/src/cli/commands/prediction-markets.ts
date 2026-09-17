@@ -12,7 +12,7 @@
  *   build                               — alias for `bb build prediction-market`
  */
 
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { resolveApprovalId } from '../utils/approval-id-options.js';
 import {
   addIndexerNetworkOptions as addNetworkFlags,
@@ -37,7 +37,8 @@ import {
   buildPredictionMarketSellIntent,
   buildPredictionMarketDepositMsg,
   buildPredictionMarketRedeemTx,
-  buildPredictionMarketResolveTx
+  buildPredictionMarketResolveTx,
+  quotePredictionMarketRedemption
 } from '../../core/prediction-markets.js';
 import { UintRangeArray } from '../../core/uintRanges.js';
 async function fetchCollection(collectionId: string, opts: NetworkFlags): Promise<any> {
@@ -140,7 +141,9 @@ addOutputFlags(
       mintEscrowAddress: collection.mintEscrowAddress ?? null,
       settlementApprovals: settle,
       market: marketData ?? null,
-      status: indexerStatus ?? derivePredictionMarketStatusFallback(BigInt(marketData?.resolutionDate ?? 0))
+      status: indexerStatus ?? derivePredictionMarketStatusFallback(BigInt(marketData?.resolutionDate ?? 0)),
+      settlementPolicy: 'Inspect quote for per-approval limits. Legacy one-shot markets remain one-shot.',
+      outcomeFinality: 'verifier-controlled'
     }, opts);
   } catch (err) { emitError(err); }
 });
@@ -327,6 +330,31 @@ Examples:
   $ bb prediction-markets deposit 55 --creator bb1lp...xyz --amount 1000000 | bb deploy
 `);
 
+// ── Quote ────────────────────────────────────────────────────────────────
+addOutputFlags(addNetworkFlags(predictionMarketsCommand.command('quote')
+  .description('Quote exact redemption base units, retained positions and observed approval policy. Does not certify outcome or eligibility.')
+  .argument('<collection-id>', 'Prediction Market collection ID')
+  .requiredOption('--state <state>', 'active | push | yes-wins | no-wins')
+  .option('--pair-amount <n>', 'Exact YES+NO pairs to burn')
+  .option('--yes-amount <n>', 'Exact YES base units to redeem; push requires complete even units')
+  .addOption(Object.assign(new Option('--no-amount <n>', 'Exact NO base units to redeem; push requires complete even units'), { negate: false }))
+  .option('--yes-balance <n>', 'Observed YES balance; without --yes-amount quotes maximum complete lots')
+  .addOption(Object.assign(new Option('--no-balance <n>', 'Observed NO balance; without --no-amount quotes maximum complete lots'), { negate: false }))
+)).action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { state: string; pairAmount?:string;yesAmount?:string;noAmount?:string;yesBalance?:string;noBalance?:string }) => {
+  try {
+    const collection = await fetchCollection(collectionId,opts);
+    validateOrExit(collection,'prediction-markets quote');
+    emit(quotePredictionMarketRedemption(collection, {
+      state: opts.state as 'active'|'push'|'yes-wins'|'no-wins',
+      pairAmount: opts.pairAmount === undefined ? undefined : BigInt(opts.pairAmount),
+      yesAmount: opts.yesAmount === undefined ? undefined : BigInt(opts.yesAmount),
+      noAmount: opts.noAmount === undefined ? undefined : BigInt(opts.noAmount),
+      yesBalance: opts.yesBalance === undefined ? undefined : BigInt(opts.yesBalance),
+      noBalance: opts.noBalance === undefined ? undefined : BigInt(opts.noBalance)
+    }),opts);
+  } catch (error) { emitError(error); }
+});
+
 // ── Redeem ───────────────────────────────────────────────────────────────
 
 addOutputFlags(
@@ -338,13 +366,15 @@ addOutputFlags(
       .requiredOption('--creator <address>', 'Holder address (bb1.../0x — auto-normalized)')
       .requiredOption('--state <state>', 'Redeem state: active | push | yes-wins | no-wins')
       .option('--pair-amount <n>', 'Active-state: number of YES+NO pairs to burn (base units)')
-      .option('--yes-balance <n>', 'Push/wins-state: caller-known YES balance')
-      .option('--no-balance <n>', 'Push/wins-state: caller-known NO balance')
+      .option('--yes-amount <n>', 'Exact YES units to redeem; push must be even')
+      .addOption(Object.assign(new Option('--no-amount <n>', 'Exact NO units to redeem; push must be even'), { negate: false }))
+      .option('--yes-balance <n>', 'Observed YES balance; omitted amount redeems maximum complete lots and retains dust')
+      .addOption(Object.assign(new Option('--no-balance <n>', 'Push/wins-state: caller-known NO balance'), { negate: false }))
   )
 ).action(
   async (
     collectionId: string,
-    opts: NetworkFlags & OutputFlags & { creator: string; state: string; pairAmount?: string; yesBalance?: string; noBalance?: string }
+    opts: NetworkFlags & OutputFlags & { creator: string; state: string; pairAmount?: string; yesAmount?:string; noAmount?:string; yesBalance?: string; noBalance?: string }
   ) => {
     try {
       const creator = requireBb1AddressStrict(opts.creator, '--creator');
@@ -358,8 +388,11 @@ addOutputFlags(
       }
       const tx = buildPredictionMarketRedeemTx({
         creator,
+        collection,
         collectionId: String(collectionId),
         state,
+        yesAmount: opts.yesAmount === undefined ? undefined : BigInt(opts.yesAmount),
+        noAmount: opts.noAmount === undefined ? undefined : BigInt(opts.noAmount),
         pairAmount: opts.pairAmount ? BigInt(opts.pairAmount) : undefined,
         yesBalance: opts.yesBalance ? BigInt(opts.yesBalance) : undefined,
         noBalance: opts.noBalance ? BigInt(opts.noBalance) : undefined,

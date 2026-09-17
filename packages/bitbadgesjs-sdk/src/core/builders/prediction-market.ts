@@ -216,13 +216,13 @@ export function buildPredictionMarket(params: PredictionMarketParams): any {
           }
         ],
         // Chain rule: overrideFromWithApproverAddress requires
-        // maxNumTransfers to set at least one non-zero limit. Each
-        // settlement claim per holder.
+        // maxNumTransfers to set at least one non-zero limit. The
+        // bounded overall lifetime; positions are consumed on every claim.
         maxNumTransfers: {
-          overallMaxNumTransfers: '0',
+          overallMaxNumTransfers: MAX_UINT64,
           perToAddressMaxNumTransfers: '0',
           perFromAddressMaxNumTransfers: '0',
-          perInitiatedByAddressMaxNumTransfers: '1',
+          perInitiatedByAddressMaxNumTransfers: '0',
           amountTrackerId: approvalId,
           resetTimeIntervals: { startTime: '0', intervalLength: '0' }
         },
