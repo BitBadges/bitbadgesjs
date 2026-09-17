@@ -17,6 +17,7 @@ import {
   doesCollectionFollowSubscriptionProtocol,
   isSubscriptionFaucetApproval,
   isUserRecurringApproval,
+  isUserRecurringApprovalForTier,
   userRecurringApproval
 } from './subscriptions.js';
 import { GO_MAX_UINT_64 } from '../common/math.js';
@@ -848,5 +849,33 @@ describe('subscription inclusive interval boundaries', () => {
   it('supports a one-millisecond inclusive interval', () => {
     jest.spyOn(Date, 'now').mockReturnValue(1000);
     expect(getCurrentInterval({ startTime: 1n, intervalLength: 1n })).toEqual({ start: 1000n, end: 1000n });
+  });
+});
+
+describe('renewal consent across term changes', () => {
+  function fixture() {
+    const faucet = normalizeForReview(buildSubscription({ interval: 'monthly', price: 5, denom: 'BADGE', recipient: 'bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm', uri: 'ipfs://test' }).value).collectionApprovals[0];
+    const user = userRecurringApproval({ subscriptionApproval: faucet, firstIntervalStartTime: 1n, ubadgeTipAmount: 0n, transferTimes: UintRangeArray.FullRanges(), approvalId: 'consent', tokenIds: faucet.tokenIds, denom: 'ubadge' });
+    return { faucet, user };
+  }
+  it('keeps changed-price consent identifiable for revocation but rejects it for charging', () => {
+    const { faucet, user } = fixture();
+    faucet.approvalCriteria.coinTransfers[0].coins[0].amount += 1n;
+    expect(isUserRecurringApprovalForTier(user, faucet)).toBe(true);
+    expect(isUserRecurringApproval(user, faucet)).toBe(false);
+  });
+  it('retains identity across denomination and interval changes, never across token IDs', () => {
+    const { faucet, user } = fixture();
+    faucet.approvalCriteria.coinTransfers[0].coins[0].denom = 'other';
+    faucet.approvalCriteria.predeterminedBalances.incrementedBalances.durationFromTimestamp *= 2n;
+    expect(isUserRecurringApprovalForTier(user, faucet)).toBe(true);
+    expect(isUserRecurringApproval(user, faucet)).toBe(false);
+    faucet.tokenIds = [{ start: 2n, end: 2n }];
+    expect(isUserRecurringApprovalForTier(user, faucet)).toBe(false);
+  });
+  it('requires coverage of every payout, not just the first recipient', () => {
+    const { faucet, user } = fixture();
+    faucet.approvalCriteria.coinTransfers.push({ ...faucet.approvalCriteria.coinTransfers[0], coins: [{ denom: 'ubadge', amount: 1n }] });
+    expect(isUserRecurringApproval(user, faucet)).toBe(false);
   });
 });

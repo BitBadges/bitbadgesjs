@@ -36,6 +36,7 @@ import {
   doesCollectionFollowSubscriptionProtocol,
   isSubscriptionFaucetApproval,
   isUserRecurringApproval,
+  isUserRecurringApprovalForTier,
   getNextChargeTime,
   getSubscriptionAccessStatus,
   getSubscriptionRenewalConsentStatus,
@@ -387,7 +388,7 @@ addOutputFlags(
 
       // Fetch + preserve existing recurring approvals from other tiers.
       const existing = await fetchIncomingApprovals(String(collectionId), creator, opts);
-      const otherApprovals = existing.filter((a: any) => !isUserRecurringApproval(a, faucet));
+      const otherApprovals = existing.filter((a: any) => !isUserRecurringApprovalForTier(a, faucet));
       if (otherApprovals.some((approval) => approval.approvalId === newApproval.approvalId)) {
         throw new Error('Approval ID already belongs to unrelated consent. Choose a different --approval-id and rebuild.');
       }
@@ -430,7 +431,7 @@ addOutputFlags(
       const faucet = pickFaucet(listFaucets(collection), opts.tier, 'subscriptions cancel');
 
       const existing = await fetchIncomingApprovals(String(collectionId), creator, opts);
-      const remaining = existing.filter((a: any) => !isUserRecurringApproval(a, faucet));
+      const remaining = existing.filter((a: any) => !isUserRecurringApprovalForTier(a, faucet));
       if (remaining.length === existing.length) {
         process.stderr.write(
           'Warning: no matching user recurring approval found for this tier — cancel is a no-op.\n'
@@ -487,7 +488,7 @@ addOutputFlags(
         denom
       });
       const existing = await fetchIncomingApprovals(String(collectionId), creator, opts);
-      const otherApprovals = existing.filter((a: any) => !isUserRecurringApproval(a, faucet));
+      const otherApprovals = existing.filter((a: any) => !isUserRecurringApprovalForTier(a, faucet));
       if (otherApprovals.some((approval) => approval.approvalId === newApproval.approvalId)) {
         throw new Error('Approval ID already belongs to unrelated consent. Choose a different --approval-id and rebuild.');
       }
