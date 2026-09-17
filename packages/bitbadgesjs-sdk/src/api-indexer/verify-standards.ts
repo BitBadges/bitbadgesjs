@@ -14,6 +14,7 @@
 import { CollectionDoc } from './docs-types/docs.js';
 import { doesCollectionFollowSubscriptionProtocol } from '../core/subscriptions.js';
 import { validatePaymentRequestV2Collection } from '../core/payment-requests-v2.js';
+import { inspectSpendableCredit } from '../core/spendable-credits.js';
 import { normalizeForReview } from '../core/review-normalize.js';
 import { parseInlineCustomData } from './metadata/inlineCustomData.js';
 
@@ -1041,6 +1042,10 @@ const STANDARD_VALIDATORS: Record<string, (value: any) => StandardViolation[]> =
   'Custom-2FA': verifyCustom2FA,
   'Liquidity Pools': verifyLiquidityPools,
   'Credit Token': verifyCreditToken,
+  'Spendable Credit': (value) => {
+    try { inspectSpendableCredit(value); return []; }
+    catch (error) { return [{ standard: 'Spendable Credit', field: 'collection', message: error instanceof Error ? error.message : 'Invalid spendable credit profile.' }]; }
+  },
   Quests: verifyQuest,
   NFTMarketplace: verifyTradableNFT,
   'Non-Transferable': verifyNonTransferable,
@@ -1070,6 +1075,7 @@ const STANDARD_ALIASES: Record<string, string> = {
   'Custom-2FA': 'Custom-2FA',
   'Liquidity Pools': 'Liquidity Pools',
   'Credit Token': 'Credit Token',
+  'Spendable Credit': 'Spendable Credit',
   Quests: 'Quests',
   Quest: 'Quests',
   NFTMarketplace: 'NFTMarketplace',

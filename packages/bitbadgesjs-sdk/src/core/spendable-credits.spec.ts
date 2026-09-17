@@ -1,3 +1,4 @@
+import { verifyStandardsCompliance } from '../api-indexer/verify-standards.js';
 import { BitBadgesCollection } from '../api-indexer/BitBadgesCollection.js';
 import { AddressList } from './addressLists.js';
 import { buildSpendableCredit } from './builders/spendable-credit.js';
@@ -110,4 +111,11 @@ describe('spendable consumption', () => {
   test('rejects purchase multiplication that overflows payment units', () => {
     expect(() => buildPurchaseSpendableCreditsMsg(collection(), BURN_ADDRESS, '1844674407370955')).toThrow();
   });
+});
+
+test('standards audit enforces spendable terms instead of treating the profile as unchecked', () => {
+  const value = collection();
+  expect(verifyStandardsCompliance(value).standardsChecked).toContain('Spendable Credit');
+  value.collectionPermissions.canUpdateCollectionApprovals = [];
+  expect(verifyStandardsCompliance(value).valid).toBe(false);
 });
