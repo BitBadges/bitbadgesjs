@@ -1,0 +1,113 @@
+import { BitBadgesCollection } from '../api-indexer/BitBadgesCollection.js';
+import { AddressList } from './addressLists.js';
+import { buildSpendableCredit } from './builders/spendable-credit.js';
+import { BURN_ADDRESS } from './builders/shared.js';
+import {
+  inspectSpendableCredit,
+  buildConsumeSpendableCreditsMsg,
+  buildPurchaseSpendableCreditsMsg,
+  verifySpendableCreditReceipt
+} from './spendable-credits.js';
+
+const collection = () => ({
+  ...buildSpendableCredit({
+    paymentDenom: 'USDC',
+    provider: BURN_ADDRESS,
+    serviceId: 'images',
+    pricePerPack: '1000000',
+    creditsPerPack: '10',
+    name: 'Credits',
+    description: 'Images',
+    image: 'ipfs://image'
+  }).value,
+  collectionId: '9'
+});
+const context = { provider: BURN_ADDRESS, serviceId: 'images', wallet: BURN_ADDRESS, requestId: 'request-123', units: '2' };
+const receipt = () => ({
+  height: '12',
+  txhash: 'A'.repeat(64),
+  code: 0,
+  tx: {
+    body: {
+      messages: [buildConsumeSpendableCreditsMsg(collection(), context).value].map((value) => ({
+        '@type': '/tokenization.MsgTransferTokens',
+        ...value
+      }))
+    }
+  }
+});
+
+describe('spendable consumption', () => {
+  test('accepts indexed SDK collection enrichment without relaxing economic terms', () => {
+    function enrich(value: any): any {
+      if (Array.isArray(value)) return value.map(enrich);
+      if (!value || typeof value !== 'object') return value;
+      const result = Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, enrich(entry)]));
+      for (const list of ['fromList', 'toList', 'initiatedByList'])
+        if (typeof value[`${list}Id`] === 'string') result[list] = AddressList.getReservedAddressList(value[`${list}Id`]);
+      return result;
+    }
+    const indexed = new BitBadgesCollection({
+      ...enrich(collection()),
+      cosmosCoinWrapperPaths: [],
+      aliasPaths: [],
+      _docId: '9',
+      createdBlock: '1',
+      createdTimestamp: '1',
+      updateHistory: [],
+      activity: [],
+      owners: [],
+      challengeTrackers: [],
+      approvalTrackers: [],
+      listings: [],
+      claims: [],
+      views: {}
+    }).convert(BigInt);
+    expect(inspectSpendableCredit(indexed).creditsPerPack).toBe('10');
+  });
+  test('rejects collections that add a peer-transfer or free mint path', () => {
+    const value = collection();
+    value.collectionApprovals.push({ ...value.collectionApprovals[1], approvalId: 'extra', toListId: 'All' });
+    expect(() => inspectSpendableCredit(value)).toThrow();
+  });
+  test('rejects mutable approval permissions', () => {
+    const value = collection();
+    value.collectionPermissions.canUpdateCollectionApprovals = [];
+    expect(() => inspectSpendableCredit(value)).toThrow();
+  });
+  test('binds a consumption to a wallet, service and request', () => {
+    const msg = buildConsumeSpendableCreditsMsg(collection(), context);
+    expect(msg.value.transfers[0].balances[0].amount).toBe('2');
+    expect(JSON.parse(msg.value.transfers[0].memo)).toMatchObject({ requestId: 'request-123', serviceId: 'images', provider: BURN_ADDRESS });
+    expect(verifySpendableCreditReceipt(collection(), receipt(), context).receiptId).toBe(`${'A'.repeat(64)}:0:0`);
+  });
+  test.each(['wallet', 'provider', 'serviceId', 'requestId', 'units'])('rejects receipt with wrong %s', (key) => {
+    expect(() => verifySpendableCreditReceipt(collection(), receipt(), { ...context, [key]: 'different' })).toThrow();
+  });
+  test('never treats failed, pending or malformed transactions as consumption', () => {
+    for (const tx of [
+      { ...receipt(), code: 7 },
+      { ...receipt(), height: '0' },
+      { ...receipt(), code: undefined },
+      { ...receipt(), txhash: '' }
+    ]) {
+      expect(() => verifySpendableCreditReceipt(collection(), tx, context)).toThrow();
+    }
+  });
+  test('rejects extra recipients, balances, and ambiguous duplicate transfers', () => {
+    for (const mutate of [
+      (transfer: any) => transfer.toAddresses.push(BURN_ADDRESS),
+      (transfer: any) => transfer.balances.push(transfer.balances[0])
+    ]) {
+      const tx = receipt();
+      mutate(tx.tx.body.messages[0].transfers[0]);
+      expect(() => verifySpendableCreditReceipt(collection(), tx, context)).toThrow();
+    }
+    const duplicate = receipt();
+    duplicate.tx.body.messages[0].transfers.push(duplicate.tx.body.messages[0].transfers[0]);
+    expect(() => verifySpendableCreditReceipt(collection(), duplicate, context)).toThrow();
+  });
+  test('rejects purchase multiplication that overflows payment units', () => {
+    expect(() => buildPurchaseSpendableCreditsMsg(collection(), BURN_ADDRESS, '1844674407370955')).toThrow();
+  });
+});

@@ -36,6 +36,7 @@ const frontendFamilies: Record<string, string> = {
   'ibc-token': 'ibc-token',
   'smart-token': 'smart-token',
   'credit-token': 'credit-token',
+  'spendable-credit': 'spendable-credit',
   'address-list': 'address-list',
   'prediction-market': 'prediction-market',
   bounty: 'bounty',
@@ -90,6 +91,15 @@ const lifecycle: Record<string, Lifecycle> = {
     ],
     unsupported: ['Automatic plan switching, prorations, and refunds of paid access.']
   },
+  'spendable-credit': {
+    summary: 'Paid whole credits with holder-authorized on-chain consumption and provider receipt verification.',
+    actionGroup: 'spendable_credits',
+    constraints: [
+      'Immutable pricing and service identity; peer transfers are disabled.',
+      'Only a confirmed consumption receipt can authorize service; providers must atomically deduplicate requests and receipts.'
+    ],
+    unsupported: ['Automatic refunds, delegated merchant debits, and exactly-once external service delivery.']
+  },
   'credit-token': {
     summary: 'Purchase exact credit quantities using fixed or scaled tiers.',
     inspectionFamily: 'credit-token',
@@ -123,7 +133,10 @@ const lifecycle: Record<string, Lifecycle> = {
   'payment-request': {
     summary: 'Legacy single-payment request.',
     actionGroup: 'pay_requests',
-    constraints: ['Legacy payment requests differ structurally from invoice v2 and reusable payment links.', 'A public invoice uses payer All and exactly one Pay approval; any connected payer may pay. Deny is only available for a specific payer invoice. Public Pay/Deny configurations are unsupported.'],
+    constraints: [
+      'Legacy payment requests differ structurally from invoice v2 and reusable payment links.',
+      'A public invoice uses payer All and exactly one Pay approval; any connected payer may pay. Deny is only available for a specific payer invoice. Public Pay/Deny configurations are unsupported.'
+    ],
     unsupported: ['Invoice v2 multi-payer and partial-payment behavior in the legacy builder.']
   },
   auction: {

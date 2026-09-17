@@ -646,6 +646,55 @@
       ]
     }
   },
+  "spendable-credit": {
+    "builder": "buildSpendableCredit",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "paymentDenom": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "serviceId": {
+          "type": "string"
+        },
+        "pricePerPack": {
+          "type": "string",
+          "description": "Positive integer payment base units per pack."
+        },
+        "creditsPerPack": {
+          "type": "string",
+          "description": "Positive whole service units per pack."
+        },
+        "expiresAt": {
+          "type": "string",
+          "description": "Inclusive Unix milliseconds; omitted means no expiry."
+        },
+        "uri": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "paymentDenom",
+        "provider",
+        "serviceId",
+        "pricePerPack",
+        "creditsPerPack"
+      ]
+    }
+  },
   "subscription": {
     "builder": "buildSubscription",
     "inputSchema": {
