@@ -1,3 +1,4 @@
+import { GO_MAX_UINT_64 } from '../common/math.js';
 import { AddressList } from './addressLists.js';
 import { BigIntify } from '../common/string-numbers.js';
 import { CollectionApprovalWithDetails } from './approvals.js';
@@ -85,4 +86,18 @@ it('rejects a target whose transfer window cannot cover the first charge', () =>
   expect(() =>
     planSubscriptionChange({ ...args, target: new CollectionApprovalWithDetails({ ...target, transferTimes: [{ start: 1n, end: 2n }] }) })
   ).toThrow('Subscription_Change_Target_Expired');
+});
+
+it('rejects invalid clock bounds and reimbursement overflow before emitting consent', () => {
+  for (const invalidNow of [0n, -1n, GO_MAX_UINT_64 + 1n]) {
+    expect(() => planSubscriptionChange({ ...args, now: invalidNow })).toThrow('Invalid_format');
+  }
+  expect(() => planSubscriptionChange({ ...args, tip: GO_MAX_UINT_64 })).toThrow('Invalid_format');
+  const split = target.clone();
+  split.approvalCriteria!.coinTransfers![0].coins[0].amount = GO_MAX_UINT_64;
+  split.approvalCriteria!.coinTransfers![0].coins.push({ amount: 1n, denom: 'ubadge' } as any);
+  expect(() => planSubscriptionChange({ ...args, target: split })).toThrow('Invalid_format');
+  expect(() =>
+    planSubscriptionChange({ ...args, balances: [{ ...balances[0], ownershipTimes: [{ start: 1n, end: GO_MAX_UINT_64 - 1n }] }] })
+  ).toThrow('Subscription_Change_No_Paid_Access');
 });

@@ -21,9 +21,15 @@ export function planSubscriptionChange({
   tip?: bigint;
   now?: bigint;
 }) {
+  if (now < 1n || now > GO_MAX_UINT_64 || tip < 0n || tip > GO_MAX_UINT_64) throw new Error('Invalid_format');
   if (!balances || !incomingApprovals) throw new Error('Subscription_Change_Unavailable');
   if (new Set(incomingApprovals.map((a) => a.approvalId)).size !== incomingApprovals.length) throw new Error('Invalid_format');
-  if (!isSubscriptionFaucetApproval(source) || !isSubscriptionFaucetApproval(target) || tip < 0n) throw new Error('Invalid_format');
+  if (!isSubscriptionFaucetApproval(source) || !isSubscriptionFaucetApproval(target)) throw new Error('Invalid_format');
+  const reimbursement = target.approvalCriteria!.coinTransfers!.reduce(
+    (total, payout) => total + payout.coins.reduce((sum, coin) => sum + coin.amount, 0n),
+    tip
+  );
+  if (reimbursement > GO_MAX_UINT_64) throw new Error('Invalid_format');
   const sourceToken = source.tokenIds[0].start;
   const targetToken = target.tokenIds[0].start;
   if (sourceToken === targetToken) throw new Error('Subscription_Change_Different_Tier');
