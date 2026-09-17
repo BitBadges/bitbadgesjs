@@ -11,6 +11,7 @@ describe('subscriptionsCommand shape', () => {
     // Per-standard `build` removed in CLI v2 (#0399); use `bb build subscription`.
     expect(names).toEqual([
       'cancel',
+      'change-renewal',
       'charge-due',
       'claim',
       'enable-renewal',

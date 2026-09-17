@@ -15,7 +15,7 @@ import { predictionMarketsCommand } from '../../cli/commands/prediction-markets.
 
 const surfaces: [Command, string[]][] = [
   [payRequestsCommand, ['list', 'show', 'status', 'pay', 'deny']],
-  [subscriptionsCommand, ['list', 'status', 'claim', 'enable-renewal', 'cancel', 'subscribe', 'charge-due']],
+  [subscriptionsCommand, ['list', 'status', 'claim', 'enable-renewal', 'change-renewal', 'cancel', 'subscribe', 'charge-due']],
   [standardsCommand, ['inspect']],
   [smartTokensCommand, ['list', 'show', 'status', 'deposit', 'withdraw']],
   [creditTokensCommand, ['list', 'show', 'quote', 'purchase']],
@@ -29,6 +29,7 @@ const allowedOptions = new Set([
   '--family',
   '--creator',
   '--tier',
+  '--to-tier',
   '--tip',
   '--approval-id',
   '--obligation',

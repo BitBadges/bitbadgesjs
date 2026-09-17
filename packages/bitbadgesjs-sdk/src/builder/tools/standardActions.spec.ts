@@ -49,3 +49,11 @@ test('rejects incompatible networks and missing business fields before invoking 
   await expect(tools.standard_pay_requests_pay.run({ collectionId: '1', creator: 'payer', mainnet: true, testnet: true })).rejects.toThrow();
   expect(execute).not.toHaveBeenCalled();
 });
+
+test('renewal changes require both tiers and expose the same CLI proposal', async () => {
+  const execute = jest.fn().mockResolvedValueOnce({ ok: true, data: { catalogHash: 'catalog' } }).mockResolvedValueOnce({ ok: true, data: { messages: [], renewalChange: { effectiveAt: '1000' } } });
+  const tools = createStandardActionTools(execute, () => 'catalog');
+  await expect(tools.standard_subscriptions_change_renewal.run({ collectionId: '1', creator: 'payer', tier: 'old' })).rejects.toThrow();
+  await expect(tools.standard_subscriptions_change_renewal.run({ collectionId: '1', creator: 'payer', tier: 'old', toTier: 'new' })).resolves.toMatchObject({ ok: true });
+  expect(execute.mock.calls[1][0]).toEqual(expect.arrayContaining(['subscriptions', 'change-renewal', '--to-tier=new']));
+});

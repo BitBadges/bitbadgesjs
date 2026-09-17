@@ -80,3 +80,5 @@ export * from './eth-signature-message.js';
 export * from './browser-signing.js';
 
 export * from './standard-inspection.js';
+
+export * from './subscriptionPlanChange.js';

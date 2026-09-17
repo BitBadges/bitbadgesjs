@@ -47,6 +47,8 @@ import { UintRangeArray } from '../../core/uintRanges.js';
 import { BalanceDoc } from '../../api-indexer/docs-types/docs.js';
 import { UserIncomingApproval } from '../../core/approvals.js';
 import { BigIntify } from '../../common/string-numbers.js';
+import { planSubscriptionChange } from '../../core/subscriptionPlanChange.js';
+import { BalanceArray } from '../../core/balances.js';
 
 /**
  * Parse a non-negative integer CLI flag into a bigint. Throws via
@@ -409,6 +411,33 @@ Examples:
 `);
 
 // ── subscriptions cancel ─────────────────────────────────────────────────
+
+addOutputFlags(addNetworkFlags(subscriptionsCommand.command('change-renewal')
+  .description('Prepare a future renewal tier change, preserving paid access. No proration or refund. Review the effective date and payment window before deploying; a concurrent prior renewal can overlap.')
+  .argument('<collection-id>', 'Subscription collection ID')
+  .requiredOption('--creator <address>', 'Subscriber who owns the access and authorizes payment')
+  .requiredOption('--tier <approvalId>', 'Current tier')
+  .requiredOption('--to-tier <approvalId>', 'New tier')
+  .option('--tip <base-units>', 'Tip per renewal in target payment denomination base units', '0')
+  .option('--approval-id <id>', 'Fresh consent identity')))
+  .action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; tier: string; toTier: string; tip?: string; approvalId?: string }) => {
+    try {
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
+      const collection = await fetchCollection(collectionId, opts);
+      validateOrExit(collection, 'subscriptions change-renewal');
+      const source = pickFaucet(listFaucets(collection), opts.tier, 'subscriptions change-renewal');
+      const target = pickFaucet(listFaucets(collection), opts.toTier, 'subscriptions change-renewal');
+      const result = await fetchUserBalances(collectionId, creator, opts);
+      const balance = result?.balance ?? result;
+      if (!Array.isArray(balance?.balances) || !Array.isArray(balance?.incomingApprovals)) throw new Error('Missing access or incoming approval state. Retry before changing renewal consent.');
+      const now = BigInt(Date.now());
+      const plan = planSubscriptionChange({ source, target, balances: BalanceArray.From(balance.balances).convert(BigIntify), incomingApprovals: balance.incomingApprovals.map((a: any) => new UserIncomingApproval(a).convert(BigIntify)), approvalId: resolveApprovalId(opts), tip: parseNonNegativeIntFlag(opts.tip, '--tip'), now });
+      emit({ messages: [buildUpdateApprovalsMsg(creator, collectionId, plan.incomingApprovals)], renewalChange: {
+        effectiveAt: plan.effectiveAt.toString(), chargeStartsAt: plan.chargeStartsAt.toString(), reviewExpiresAt: (now + 60000n).toString(),
+        warning: 'Consent only: no refund or proration. Existing paid access remains. A prior renewal mined first may overlap. Rebuild against fresh state before signing; review expiry is not enforced by MsgUpdateUserApprovals.'
+      } }, opts);
+    } catch (err) { emitError(err); }
+  });
 
 addDeployOptions(
 addOutputFlags(
