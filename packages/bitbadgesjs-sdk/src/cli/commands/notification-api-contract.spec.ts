@@ -2,6 +2,7 @@ import { readFileSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { createServer } from 'node:http';
+import type { Socket } from 'node:net';
 import path from 'node:path';
 import YAML from 'yaml';
 import { parseRoutes } from './api-routes-generator.js';
@@ -96,6 +97,7 @@ it('keeps hosted JSON/YAML notification paths and response schemas in sync', () 
 
 it('sends repeated filters and JSON mutations over real local HTTP without implicit cookies', async () => {
   const seen: { url: string; body: string; cookie: string | undefined }[] = [];
+  const sockets = new Set<Socket>();
   const server = createServer((req, res) => {
     let body = '';
     req.on('data', (chunk) => {
@@ -106,6 +108,11 @@ it('sends repeated filters and JSON mutations over real local HTTP without impli
       res.setHeader('content-type', 'application/json');
       res.end(JSON.stringify({ updated: 1 }));
     });
+  });
+  server.keepAliveTimeout = 60_000;
+  server.on('connection', (socket) => {
+    sockets.add(socket);
+    socket.on('close', () => sockets.delete(socket));
   });
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const port = (server.address() as { port: number }).port;
@@ -125,6 +132,10 @@ it('sends repeated filters and JSON mutations over real local HTTP without impli
     expect(seen.every((request) => request.cookie === undefined)).toBe(true);
   } finally {
     write.mockRestore();
-    await new Promise<void>((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+    await new Promise<void>((resolve, reject) => {
+      server.close((error) => (error ? reject(error) : resolve()));
+      // Node 18 leaves fetch's pooled idle sockets open when closing the server.
+      for (const socket of sockets) socket.destroy();
+    });
   }
 });
