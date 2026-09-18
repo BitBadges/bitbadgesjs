@@ -11,4 +11,5 @@ export * from './interpret.js';
 export * from './verify-standards.js';
 export * from './standards-info.js';
 export * from './info-builders.js';
+export * from './subscriptions.js';
 export * from './requests/index.js';

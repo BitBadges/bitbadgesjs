@@ -14,6 +14,11 @@ import { CollectionId } from '@/interfaces/index.js';
  * @category API
  */
 export class BitBadgesApiRoutes {
+  static SubscriptionConfigRoute = () => '/api/v0/subscriptions/config';
+  static SubscriptionQuotesRoute = () => '/api/v0/subscriptions/quotes';
+  static SubscriptionQuoteRoute = (quoteId: string) => `/api/v0/subscriptions/quotes/${encodeURIComponent(quoteId)}`;
+  static SubscriptionQuoteSubmissionRoute = (quoteId: string) => `${BitBadgesApiRoutes.SubscriptionQuoteRoute(quoteId)}/submission`;
+  static SubscriptionPeriodsRoute = () => '/api/v0/subscriptions/periods';
   static GetStatusRoute = () => '/api/v0/status';
   static SearchRoute = (searchValue: string) => `/api/v0/search/${searchValue}`;
   static GetCollectionsRoute = () => '/api/v0/collections';
@@ -108,7 +113,6 @@ export class BitBadgesApiRoutes {
   static CRUDUtilityPagesRoute = () => '/api/v0/utilityPages';
 
   static ScheduleTokenRefreshRoute = () => '/api/v0/oauth-token-refresh-schedule';
-
 
   static GetSiwbbRequestsForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/requests/siwbb`;
   static GetTransferActivityForUserRoute = (address: NativeAddress) => `/api/v0/account/${address}/activity/tokens`;

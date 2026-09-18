@@ -1,4 +1,12 @@
 import type { NumberType } from '@/common/string-numbers.js';
+import {
+  assertSubscriptionIdentifier,
+  assertSubscriptionRequestId,
+  type SubscriptionOperatorConfig,
+  type SubscriptionPeriodResponse,
+  type SubscriptionQuoteRequest,
+  type SubscriptionQuoteResponse
+} from './subscriptions.js';
 import { BitBadgesCollection, GetCollectionsSuccessResponse, iGetCollectionsPayload } from './BitBadgesCollection.js';
 
 import type { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/index.js';
@@ -371,6 +379,49 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
 
   constructor(apiDetails: iBitBadgesApi<T>) {
     super(apiDetails);
+  }
+
+  private async subscriptionRequest<R>(request: () => Promise<{ data: R }>): Promise<R> {
+    try {
+      return (await request()).data;
+    } catch (error) {
+      await this.handleApiError(error);
+      throw error;
+    }
+  }
+
+  public async getSubscriptionConfig(): Promise<SubscriptionOperatorConfig> {
+    return this.subscriptionRequest(() => this.axios.get(`${this.BACKEND_URL}${BitBadgesApiRoutes.SubscriptionConfigRoute()}`));
+  }
+
+  /** Requests an exact offer. This does not authorize payment or submit a transaction. */
+  public async createSubscriptionQuote(payload: SubscriptionQuoteRequest): Promise<SubscriptionQuoteResponse> {
+    assertSubscriptionIdentifier(payload.collectionId);
+    assertSubscriptionIdentifier(payload.targetTokenId);
+    assertSubscriptionRequestId(payload.requestId);
+    if (payload.kind !== 'purchase' && payload.kind !== 'upgrade') throw new Error('Invalid subscription quote kind.');
+    return this.subscriptionRequest(() => this.axios.post(`${this.BACKEND_URL}${BitBadgesApiRoutes.SubscriptionQuotesRoute()}`, payload));
+  }
+
+  public async getSubscriptionQuote(quoteId: string): Promise<SubscriptionQuoteResponse> {
+    assertSubscriptionRequestId(quoteId);
+    return this.subscriptionRequest(() => this.axios.get(`${this.BACKEND_URL}${BitBadgesApiRoutes.SubscriptionQuoteRoute(quoteId)}`));
+  }
+
+  public async getSubscriptionPeriods(collectionId: string): Promise<{ periods: SubscriptionPeriodResponse[] }> {
+    assertSubscriptionIdentifier(collectionId);
+    return this.subscriptionRequest(() =>
+      this.axios.get(`${this.BACKEND_URL}${BitBadgesApiRoutes.SubscriptionPeriodsRoute()}`, { params: { collectionId } })
+    );
+  }
+
+  /** Supplies a transaction hash for verification; an accepted hint is not payment confirmation. */
+  public async submitSubscriptionQuote(quoteId: string, txHash: string): Promise<SubscriptionQuoteResponse> {
+    assertSubscriptionRequestId(quoteId);
+    if (!/^(?:0x)?[a-fA-F0-9]{64}$/.test(txHash)) throw new Error('Invalid subscription transaction hash.');
+    return this.subscriptionRequest(() =>
+      this.axios.post(`${this.BACKEND_URL}${BitBadgesApiRoutes.SubscriptionQuoteSubmissionRoute(quoteId)}`, { txHash })
+    );
   }
 
   /**
@@ -2476,10 +2527,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.get<iGetSwapAssetsSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSwapAssetsRoute()}`,
-        { params: payload }
-      );
+      const response = await this.axios.get<iGetSwapAssetsSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetSwapAssetsRoute()}`, {
+        params: payload
+      });
       return new GetSwapAssetsSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
@@ -2502,10 +2552,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.get<iGetSwapChainsSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSwapChainsRoute()}`,
-        { params: payload }
-      );
+      const response = await this.axios.get<iGetSwapChainsSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetSwapChainsRoute()}`, {
+        params: payload
+      });
       return new GetSwapChainsSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
@@ -2554,10 +2603,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<iEstimateSwapSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.EstimateSwapRoute()}`,
-        payload
-      );
+      const response = await this.axios.post<iEstimateSwapSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.EstimateSwapRoute()}`, payload);
       return response.data;
     } catch (error) {
       await this.handleApiError(error);
@@ -2593,10 +2639,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<iTrackSwapSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.TrackSwapRoute()}`,
-        payload
-      );
+      const response = await this.axios.post<iTrackSwapSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.TrackSwapRoute()}`, payload);
       return new TrackSwapSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
@@ -2619,10 +2662,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.get<iGetSwapStatusSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetSwapStatusRoute()}`,
-        { params: payload }
-      );
+      const response = await this.axios.get<iGetSwapStatusSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetSwapStatusRoute()}`, {
+        params: payload
+      });
       return new GetSwapStatusSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
@@ -2733,10 +2775,9 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.get<iGetIntentsSuccessResponse<string>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetIntentsRoute(address)}`,
-        { params: payload }
-      );
+      const response = await this.axios.get<iGetIntentsSuccessResponse<string>>(`${this.BACKEND_URL}${BitBadgesApiRoutes.GetIntentsRoute(address)}`, {
+        params: payload
+      });
       return new GetIntentsSuccessResponse(response.data).convert(this.ConvertFunction);
     } catch (error) {
       await this.handleApiError(error);
@@ -3493,10 +3534,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * - **API Route**: `GET /api/v0/collection/:collectionId/collectionOffers`
    * - **SDK Function Call**: `await BitBadgesApi.getCollectionOffers(collectionId, { denom: 'ubadge' });`
    */
-  public async getCollectionOffers(
-    collectionId: CollectionId,
-    payload: iGetCollectionOffersPayload
-  ): Promise<GetCollectionOffersSuccessResponse<T>> {
+  public async getCollectionOffers(collectionId: CollectionId, payload: iGetCollectionOffersPayload): Promise<GetCollectionOffersSuccessResponse<T>> {
     try {
       const validateRes: typia.IValidation<iGetCollectionOffersPayload> = typia.validate<iGetCollectionOffersPayload>(payload);
       if (!validateRes.success) {
@@ -3639,9 +3677,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * - **API Route**: `GET /api/v0/liquidityPairPriceHistory`
    * - **SDK Function Call**: `await BitBadgesApi.getLiquidityPairPriceHistory({ asset: 'ubadge', timeframe: '10m' });`
    */
-  public async getLiquidityPairPriceHistory(
-    payload: iGetLiquidityPairPriceHistoryPayload
-  ): Promise<GetLiquidityPairPriceHistorySuccessResponse<T>> {
+  public async getLiquidityPairPriceHistory(payload: iGetLiquidityPairPriceHistoryPayload): Promise<GetLiquidityPairPriceHistorySuccessResponse<T>> {
     try {
       const validateRes: typia.IValidation<iGetLiquidityPairPriceHistoryPayload> = typia.validate<iGetLiquidityPairPriceHistoryPayload>(payload);
       if (!validateRes.success) {
@@ -3696,10 +3732,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * - **API Route**: `GET /api/v0/vote/:proposalId`
    * - **SDK Function Call**: `await BitBadgesApi.getVoteByProposalId(proposalId);`
    */
-  public async getVoteByProposalId(
-    proposalId: string,
-    payload?: iGetVoteByProposalIdPayload
-  ): Promise<GetVoteByProposalIdSuccessResponse<T>> {
+  public async getVoteByProposalId(proposalId: string, payload?: iGetVoteByProposalIdPayload): Promise<GetVoteByProposalIdSuccessResponse<T>> {
     try {
       const validateRes: typia.IValidation<iGetVoteByProposalIdPayload> = typia.validate<iGetVoteByProposalIdPayload>(payload ?? {});
       if (!validateRes.success) {
@@ -3751,10 +3784,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * - **API Route**: `GET /api/v0/voter/:voter/votes`
    * - **SDK Function Call**: `await BitBadgesApi.getVotesByVoter(voterAddress, { bookmark });`
    */
-  public async getVotesByVoter(
-    voter: NativeAddress,
-    payload?: iGetVotesByVoterPayload
-  ): Promise<GetVotesByVoterSuccessResponse<T>> {
+  public async getVotesByVoter(voter: NativeAddress, payload?: iGetVotesByVoterPayload): Promise<GetVotesByVoterSuccessResponse<T>> {
     try {
       const validateRes: typia.IValidation<iGetVotesByVoterPayload> = typia.validate<iGetVotesByVoterPayload>(payload ?? {});
       if (!validateRes.success) {
@@ -3802,10 +3832,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * - **API Route**: `GET /api/v0/predictions/:collectionId`
    * - **SDK Function Call**: `await BitBadgesApi.getPredictionDetail(collectionId);`
    */
-  public async getPredictionDetail(
-    collectionId: CollectionId,
-    payload?: iGetPredictionDetailPayload
-  ): Promise<GetPredictionDetailSuccessResponse> {
+  public async getPredictionDetail(collectionId: CollectionId, payload?: iGetPredictionDetailPayload): Promise<GetPredictionDetailSuccessResponse> {
     try {
       const validateRes: typia.IValidation<iGetPredictionDetailPayload> = typia.validate<iGetPredictionDetailPayload>(payload ?? {});
       if (!validateRes.success) {
@@ -3829,10 +3856,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * - **API Route**: `GET /api/v0/predictions/:collectionId/prices`
    * - **SDK Function Call**: `await BitBadgesApi.getPredictionPrices(collectionId, { timeframe: '1h' });`
    */
-  public async getPredictionPrices(
-    collectionId: CollectionId,
-    payload?: iGetPredictionPricesPayload
-  ): Promise<GetPredictionPricesSuccessResponse> {
+  public async getPredictionPrices(collectionId: CollectionId, payload?: iGetPredictionPricesPayload): Promise<GetPredictionPricesSuccessResponse> {
     try {
       const validateRes: typia.IValidation<iGetPredictionPricesPayload> = typia.validate<iGetPredictionPricesPayload>(payload ?? {});
       if (!validateRes.success) {
@@ -3890,10 +3914,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    * - **API Route**: `POST /api/v0/collection/:collectionId/filterSuggestions`
    * - **SDK Function Call**: `await BitBadgesApi.getFilterSuggestions(collectionId);`
    */
-  public async getFilterSuggestions(
-    collectionId: CollectionId,
-    payload?: iFilterSuggestionsPayload
-  ): Promise<FilterSuggestionsSuccessResponse> {
+  public async getFilterSuggestions(collectionId: CollectionId, payload?: iFilterSuggestionsPayload): Promise<FilterSuggestionsSuccessResponse> {
     return this.filterSuggestions(collectionId, payload);
   }
 
@@ -3943,10 +3964,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
         throw new Error('Invalid payload: ' + JSON.stringify(validateRes.errors));
       }
 
-      const response = await this.axios.post<iSimulateTxEvmSuccessResponse>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.SimulateTxEvmRoute()}`,
-        payload
-      );
+      const response = await this.axios.post<iSimulateTxEvmSuccessResponse>(`${this.BACKEND_URL}${BitBadgesApiRoutes.SimulateTxEvmRoute()}`, payload);
       return new SimulateTxEvmSuccessResponse(response.data);
     } catch (error) {
       await this.handleApiError(error);
