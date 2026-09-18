@@ -1,3 +1,4 @@
+import { inspectSubscriptionUpgradeCollection } from './subscriptionUpgradeNative.js';
 import { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
 import type {
@@ -104,6 +105,7 @@ export const doesCollectionFollowSubscriptionProtocol = (collection?: Readonly<i
     return false;
   }
 
+  if (inspectSubscriptionUpgradeCollection(collection)) return true;
   const subscriptionApprovals = collection.collectionApprovals.filter((approval) => isSubscriptionFaucetApproval(approval));
   if (subscriptionApprovals.length < 1) {
     return false;

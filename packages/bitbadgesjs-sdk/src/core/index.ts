@@ -86,3 +86,5 @@ export * from './subscriptionUpgrade.js';
 export * from './subscriptionUpgradeNative.js';
 export * from './subscriptionUpgradeRenewal.js';
 export * from './spendable-credits.js';
+
+export * from './subscriptionUpgradeAcceptance.js';

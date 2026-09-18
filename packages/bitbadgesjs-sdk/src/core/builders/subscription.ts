@@ -2,12 +2,14 @@
  * Subscription builder — creates a MsgUniversalUpdateCollection for recurring subscription tokens.
  * @module core/builders/subscription
  */
+import { buildSubscriptionUpgradeCollection } from '../subscriptionUpgradeNative.js';
 import { parseBuilderInput } from './input-schemas.js';
 import {
   FOREVER,
   resolveCoin,
   toBaseUnits,
   parseDuration,
+  resolveMetadataPair,
   buildMsg,
   baselinePermissions,
   defaultBalances,
@@ -24,8 +26,27 @@ export interface SubscriptionPayout {
   denom: string; // USDC, BADGE
 }
 
+export interface SubscriptionOperatorTierInput {
+  tokenId: string;
+  price: string;
+}
+export interface SubscriptionOperatorPayoutInput {
+  recipient: string;
+  weightBps: string;
+}
+export interface SubscriptionOperatorProfileInput {
+  operator: string;
+  escrowStoreId: string;
+  denom: string;
+  duration: string;
+  tiers: SubscriptionOperatorTierInput[];
+  payouts: SubscriptionOperatorPayoutInput[];
+}
 export interface SubscriptionParams {
-  interval: string; // "daily", "monthly", "annually", or duration shorthand
+  /** Version 2 uses exact operator offers and full-period price differences for upgrades. */
+  version?: '1' | '2';
+  operatorProfile?: SubscriptionOperatorProfileInput;
+  interval?: string; // "daily", "monthly", "annually", or duration shorthand
   /** Single payout — use this OR payouts[] */
   price?: number;
   denom?: string;
@@ -50,6 +71,40 @@ export interface SubscriptionParams {
 
 export function buildSubscription(params: SubscriptionParams): any {
   params = parseBuilderInput('subscription', params);
+  if (params.version === '2') {
+    if (
+      !params.operatorProfile ||
+      params.transferable ||
+      params.updatableMint ||
+      params.price !== undefined ||
+      params.payouts ||
+      params.interval ||
+      params.tiers ||
+      params.denom ||
+      params.recipient
+    ) {
+      throw new Error('Version 2 requires operatorProfile without legacy faucet settings.');
+    }
+    const p = params.operatorProfile;
+    const metadata = resolveMetadataPair(metadataFromFlat(params), 'collection', 'subscription collectionMetadata');
+    const result = buildSubscriptionUpgradeCollection({
+      profile: {
+        version: 2,
+        operator: p.operator,
+        escrowStoreId: BigInt(p.escrowStoreId),
+        denom: p.denom,
+        duration: BigInt(p.duration),
+        tiers: p.tiers.map((t) => ({ tokenId: BigInt(t.tokenId), price: BigInt(t.price) })),
+        payouts: p.payouts.map((x) => ({ recipient: x.recipient, weightBps: BigInt(x.weightBps) }))
+      },
+      uri: metadata.uri
+    });
+    result.value.collectionMetadata = metadata;
+    result.value.tokenMetadata = result.value.tokenMetadata.map((entry: any) => ({ ...entry, ...metadata }));
+    return result;
+  }
+  if (params.operatorProfile) throw new Error('operatorProfile requires version 2.');
+  if (!params.interval) throw new Error('Subscription interval is required.');
   const intervalMs = parseDuration(params.interval);
   const tiers = params.tiers || 1;
 

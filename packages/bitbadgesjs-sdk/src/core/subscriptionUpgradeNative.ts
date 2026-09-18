@@ -141,12 +141,8 @@ const exact = (balances: ReturnType<typeof balance>[]) => ({
   }
 });
 
-export function buildSubscriptionUpgradeCollection({ profile, uri }: { profile: SubscriptionUpgradeNativeProfile; uri: string }) {
-  validateProfile(profile);
-  if (!uri) throw new Error('Collection metadata URI is required.');
-  const ids = [{ start: 1n, end: BigInt(profile.tiers.length) }];
-  const base = { transferTimes: full(), ownershipTimes: full(), tokenIds: ids, version: 0n };
-  const criteria = {
+function criteriaDefaults() {
+  return {
     approvalAmounts: {
       overallApprovalAmount: 0n,
       perToAddressApprovalAmount: 0n,
@@ -158,6 +154,14 @@ export function buildSubscriptionUpgradeCollection({ profile, uri }: { profile: 
     maxNumTransfers: { ...once(''), overallMaxNumTransfers: 0n },
     autoDeletionOptions: { afterOneUse: false, afterOverallMaxNumTransfers: false, allowCounterpartyPurge: false, allowPurgeIfExpired: false }
   };
+}
+
+export function buildSubscriptionUpgradeCollection({ profile, uri }: { profile: SubscriptionUpgradeNativeProfile; uri: string }) {
+  validateProfile(profile);
+  if (!uri) throw new Error('Collection metadata URI is required.');
+  const ids = [{ start: 1n, end: BigInt(profile.tiers.length) }];
+  const base = { transferTimes: full(), ownershipTimes: full(), tokenIds: ids, version: 0n };
+  const criteria = criteriaDefaults();
   const inventory = { amount: MAX, tokenIds: ids, ownershipTimes: full() };
   return buildMsg({
     standards: ['Subscriptions'],
@@ -306,7 +310,12 @@ export function buildSubscriptionUpgradeEscrow(o: SubscriptionUpgradeNativeOffer
   } as any);
 }
 function exactIntake(o: SubscriptionUpgradeNativeOffer) {
-  return { predeterminedBalances: exact([balance(o.source!.tokenId, o.source!.ownershipTimes)]), maxNumTransfers: once('subscription-v2-intake') };
+  return {
+    ...criteriaDefaults(),
+    mustPrioritize: true,
+    predeterminedBalances: exact([balance(o.source!.tokenId, o.source!.ownershipTimes)]),
+    maxNumTransfers: once('subscription-v2-intake')
+  };
 }
 
 export function buildSubscriptionUpgradeOffer(o: SubscriptionUpgradeNativeOffer) {
@@ -340,6 +349,8 @@ export function buildSubscriptionUpgradeOffer(o: SubscriptionUpgradeNativeOffer)
       ownershipTimes: o.ownershipTimes,
       transferTimes: [{ start: o.createdAt, end: o.expiresAt }],
       approvalCriteria: {
+        ...criteriaDefaults(),
+        mustPrioritize: true,
         predeterminedBalances: exact([balance(o.targetTokenId, o.ownershipTimes)]),
         maxNumTransfers: once(o.approvalId),
         mustOwnTokens,

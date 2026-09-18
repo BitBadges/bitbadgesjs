@@ -1,3 +1,4 @@
+import { doesCollectionFollowSubscriptionProtocol } from './subscriptions.js';
 import { convertToBitBadgesAddress } from '../address-converter/converter.js';
 import {
   buildSubscriptionUpgradeCollection,
@@ -49,6 +50,7 @@ const offer = {
 it('recognizes only frozen v2 profiles and rejects added transfer escapes', () => {
   const built = buildSubscriptionUpgradeCollection({ profile, uri: 'ipfs://membership' }).value;
   expect(inspectSubscriptionUpgradeCollection(built)).toEqual(profile);
+  expect(doesCollectionFollowSubscriptionProtocol(built as any)).toBe(true);
   built.collectionApprovals.push({ ...built.collectionApprovals[1], approvalId: 'escape', fromListId: 'All' });
   expect(inspectSubscriptionUpgradeCollection(built)).toBeNull();
 });
