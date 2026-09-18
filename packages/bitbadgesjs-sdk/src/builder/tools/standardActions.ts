@@ -16,7 +16,7 @@ import { predictionMarketsCommand } from '../../cli/commands/prediction-markets.
 
 const surfaces: [Command, string[]][] = [
   [payRequestsCommand, ['list', 'show', 'status', 'pay', 'deny']],
-  [subscriptionsCommand, ['list', 'status', 'claim', 'enable-renewal', 'change-renewal', 'cancel', 'subscribe', 'charge-due']],
+  [subscriptionsCommand, ['list', 'status', 'claim', 'enable-renewal', 'change-renewal', 'cancel', 'subscribe', 'charge-due', 'config', 'quote', 'quote-status', 'periods', 'accept', 'record-submission', 'renewal', 'cancel-renewal']],
   [standardsCommand, ['inspect']],
   [smartTokensCommand, ['list', 'show', 'status', 'deposit', 'withdraw']],
   [spendableCreditsCommand, ['show', 'quote', 'purchase', 'consume']],
@@ -31,6 +31,10 @@ const surfaces: [Command, string[]][] = [
   ]
 ];
 const allowedOptions = new Set([
+  '--renewal',
+  '--kind',
+  '--with-session',
+  '--expires-at',
   '--request-id',
   '--family',
   '--creator',
@@ -153,7 +157,7 @@ export function createStandardActionTools(execute: Execute, expectedCatalogHash:
       entries[name] = {
         tool: {
           name,
-          description: `Run bb ${parent.name()} ${action} using the matching installed CLI. Returns read-only state or an unsigned transaction proposal. Never signs or broadcasts. Business rules and units match CLI help; string amount inputs retain exact decimal text. Requires configured API access for remote reads. CLI signing, credential, endpoint, and file options are not exposed.`,
+          description: `Run bb ${parent.name()} ${action} using the matching installed CLI. Returns state, creates an operator quote, records a submitted transaction hash for verification, or prepares an unsigned transaction proposal. Never signs or broadcasts. Business rules and units match CLI help; string amount inputs retain exact decimal text. Requires configured API access for remote reads. CLI signing, raw credential, endpoint, and file options are not exposed. Subscription quote operations require explicit withSession to use an existing authenticated local session.`,
           inputSchema: { type: 'object', additionalProperties: false, properties, required }
         },
         run: async (input) => {

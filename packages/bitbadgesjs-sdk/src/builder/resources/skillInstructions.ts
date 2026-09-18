@@ -849,6 +849,14 @@ When creating a subscription collection, you MUST follow these EXACT requirement
 
 ### Preferred path: preset (one short tool call)
 
+For immediate upgrades, use the same \`build_subscription\` tool with \`version: "2"\` and \`operatorProfile\` (operator, escrowStoreId, denom, duration, tiers with tokenId/price, payouts with recipient/weightBps; numeric values are base-unit strings). Obtain the configured operator using \`standard_subscriptions_config\` before creating the collection. This freezes an operator-managed exact-offer profile rather than the legacy faucet below.
+
+Use \`standard_subscriptions_quote\`, \`standard_subscriptions_quote_status\`, \`standard_subscriptions_periods\`, and \`standard_subscriptions_accept\` for v2 purchases/upgrades. Quote actions require an authenticated session and explicit \`withSession: true\`. Acceptance reads current chain state and recomputes price, payout, ownership, escrow and approval constraints locally; it emits unsigned messages only. It removes previous v2 renewal consent; explicit \`renewal: "target"\` plus a new \`approvalId\` and \`expiresAt\` adds target consent in the same proposal. Otherwise enable the next billing boundary with \`standard_subscriptions_renewal\`; revoke with \`standard_subscriptions_cancel_renewal\`. After an independently signed transaction, \`standard_subscriptions_record_submission\` supplies a hash hint for operator verification, not confirmation.
+
+Upgrades charge the FULL period price difference for every preserved paid period, retain its identity and end time, and exchange old access atomically. There is no time-prorated discount. Service usage must share the same period ledger; possession alone must not reset quotas. The quote operator is trusted for receipt provenance and escrow admission and must remain available. V1 collections keep their existing faucets and consent flow; do not retrofit a v2 offer onto a v1 collection.
+
+The following preset is for **legacy v1** creation only.
+
 The faucet approval is fully canonical. Use \`subscription.faucet\`:
 
 \`\`\`

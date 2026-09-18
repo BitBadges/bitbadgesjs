@@ -74,3 +74,13 @@ test('spendable quote exposes unsigned exact tier selection through MCP', async 
   expect(execute.mock.calls[1][0]).toContain('--approval-id=spendable-purchase-2');
   expect(execute.mock.calls[1][0].slice(0, 2)).toEqual(['spendable-credits', 'quote']);
 });
+
+ test('operator subscriptions expose all quote, period, consent and unsigned acceptance actions',async()=>{
+ const execute=jest.fn().mockResolvedValue({ok:true,data:{catalogHash:'catalog'}});const tools=createStandardActionTools(execute,()=> 'catalog');
+ for(const action of ['config','quote','quote_status','periods','accept','record_submission','renewal','cancel_renewal'])expect(tools).toHaveProperty(`standard_subscriptions_${action}`);
+ const accept=tools.standard_subscriptions_accept;
+ expect(accept.tool.inputSchema.properties).toHaveProperty('withSession');
+ for(const key of ['rpc','lcd','url','apiKey'])expect(accept.tool.inputSchema.properties).not.toHaveProperty(key);
+ await tools.standard_subscriptions_quote.run({collectionId:'1',creator:'payer',withSession:true,kind:'upgrade',tokenId:'2',requestId:'stable'});
+ expect(execute.mock.calls[1][0]).toEqual(expect.arrayContaining(['subscriptions','quote','--with-session','--kind=upgrade','--token-id=2']));
+ });

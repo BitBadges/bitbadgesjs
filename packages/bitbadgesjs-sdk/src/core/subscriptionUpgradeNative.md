@@ -42,3 +42,34 @@ unlock a whole new quota: services need stable billing-period IDs and shared
 usage accounting across tier changes. Full-period price differences, allowed
 durations and legitimate source receipts are checked by the billing planner,
 not inferred from possession or a caller-provided payment amount here.
+
+## SDK, CLI and MCP workflow
+
+Creation uses the existing `buildSubscription` / `build_subscription` entry point.
+Set `version: "2"` and `operatorProfile` with operator address, escrow store ID,
+payment denomination, period duration, consecutive tier IDs/prices and payout
+basis-point weights totaling 10000. Builder input numbers are strings in base
+units. Use `bb build subscription --json '<input>'`; legacy interval/faucet flags
+must not be combined with v2. Fetch `bb subscriptions config` first to select the
+configured service. The creator must explicitly opt into that operator trust.
+
+1. Sign in using the existing CLI auth flow.
+2. `bb subscriptions quote <collection-id> --creator <wallet> --with-session --kind purchase --token-id 1 --request-id <stable-id>` requests preparation. Use `upgrade` for higher-priced access.
+3. `quote-status <quote-id>` and `periods <collection-id>` use the same creator/session flags. A prepared quote is not payment or confirmation.
+4. `accept <quote-id>` reads a fresh, pinned LCD/RPC snapshot, recomputes the receipt-backed economics and emits unsigned messages. It removes previous v2 renewal consent. Explicit `--renewal target --approval-id subscription-v2-renewal-<new-id> --expires-at <ms>` adds the target tier consent atomically for the next billing boundary. It never signs or broadcasts. CLI-only `--lcd` / `--rpc` can target a disposable local node; defaults follow the selected network.
+5. Independently review/sign/broadcast the proposal. `record-submission <quote-id> <tx-hash>` submits a verification hint; only confirmed reconciliation changes billing records.
+6. `renewal <collection-id> --token-id <tier> --approval-id subscription-v2-renewal-<unique-id> --expires-at <ms>` emits consent beginning after the last paid period. A lower tier starts at that boundary. `cancel-renewal` deletes a selected consent and retains paid access. These commands require `--creator`; renewal reads the authenticated period ledger with `--with-session`.
+
+The MCP tools have the same names prefixed `standard_subscriptions_` with hyphens
+changed to underscores. They require explicit `withSession` for authenticated
+operations and never expose raw credentials, signing, endpoints or file options.
+`list` and `status` recognize both versions; legacy faucet actions direct v2
+users to the quote flow. All price differences are full-period differences,
+including near-expiry upgrades, not elapsed-time proration.
+
+`verifySubscriptionQuoteAcceptance` accepts current chain state and an authenticated
+receipt ledger separately, then reconstructs the unsigned transfer locally.
+`readSubscriptionQuoteChainState` supplies same-height LCD/protobuf ABCI reads;
+`readSubscriptionChainState` supplies account state for consent changes. Cross-origin
+LCD gateways must expose `x-cosmos-block-height` to browsers. Missing/stale reads
+fail closed. These are reads from the configured trusted node, not light-client proofs.

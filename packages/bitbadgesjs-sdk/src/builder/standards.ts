@@ -88,9 +88,11 @@ const lifecycle: Record<string, Lifecycle> = {
     constraints: [
       'Paid access and renewal consent are independent. Future access is not current access.',
       'Recorded consent does not guarantee balance, executor availability, or successful renewal.',
-      'Reviewed renewal changes preserve paid access and use a fixed new start; a concurrent old renewal can overlap the new tier.'
+      'V1 renewal changes preserve paid access and use a fixed new start; a concurrent old renewal can overlap the new tier.',
+      'V2 exact offers enforce nonoverlapping access and atomic source surrender. Upgrades charge the full-period price difference, preserve billing identities, and require the configured operator for receipt provenance and escrow admission.',
+      'Service usage must remain keyed to the same billing period across upgrades; ownership alone must not reset quotas.'
     ],
-    unsupported: ['Immediate entitlement exchange, prorations, and refunds of paid access.']
+    unsupported: ['Time-prorated discounts and refunds. V1 cannot exchange paid access immediately; v2 requires the configured quote operator and full-period price difference.']
   },
   'spendable-credit': {
     inspectionFamily: 'spendable-credit',

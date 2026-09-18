@@ -1,3 +1,6 @@
+import { registerSubscriptionV2Commands } from './subscriptions-v2.js';
+import { inspectSubscriptionUpgradeCollection } from '../../core/subscriptionUpgradeNative.js';
+import { inspectSubscriptionV2RenewalApproval } from '../../core/subscriptionUpgradeRenewal.js';
 /**
  * `bitbadges-cli subscriptions` — end-user surface for the Subscriptions
  * standard, mirroring the frontend's `SubscriptionLayout`.
@@ -104,6 +107,7 @@ function validateOrExit(collection: any, ctx: string): void {
 }
 
 function listFaucets(collection: any): any[] {
+  if(inspectSubscriptionUpgradeCollection(collection))throw new Error('Operator subscriptions use quote / accept, renewal, and cancel-renewal actions.');
   return (collection.collectionApprovals ?? []).filter((a: any) => isSubscriptionFaucetApproval(a));
 }
 
@@ -232,6 +236,8 @@ addOutputFlags(
   try {
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'subscriptions list');
+    const profile=inspectSubscriptionUpgradeCollection(collection);
+    if(profile){emit({collectionId:String(collectionId),...profile},opts);return;}
     const faucets = listFaucets(collection);
     const tiers = faucets.map((f: any) => {
       const coinTransfer = f.approvalCriteria?.coinTransfers?.[0];
@@ -271,7 +277,6 @@ addOutputFlags(
     const address = requireBb1Address(opts.address, '--address');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'subscriptions status');
-    const faucets = listFaucets(collection);
 
     const response = await fetchUserBalances(String(collectionId), address, opts);
     const state = response?.balance ?? response;
@@ -282,6 +287,9 @@ addOutputFlags(
     const userIncomingApprovals = state.incomingApprovals.map((approval: any) => new UserIncomingApproval(approval).convert(BigIntify));
     const now = BigInt(Date.now());
 
+    const profile=inspectSubscriptionUpgradeCollection(collection);
+    if(profile){emit({collectionId:String(collectionId),address,version:2,tiers:profile.tiers.map(t=>({...t,...getSubscriptionAccessStatus(t.tokenId,userBalances,now)})),renewalConsents:userIncomingApprovals.map((a:any)=>({approvalId:a.approvalId,terms:inspectSubscriptionV2RenewalApproval(a,profile)})).filter((a:any)=>a.terms)},opts);return;}
+    const faucets=listFaucets(collection);
     const tiers = faucets.map((faucet: any) => {
       const tokenId = BigInt(faucet.tokenIds?.[0]?.start ?? 1);
       const access = getSubscriptionAccessStatus(tokenId, userBalances, now);
@@ -757,3 +765,5 @@ Examples:
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build subscription ...` (the canonical builder) instead.
+
+registerSubscriptionV2Commands(subscriptionsCommand);
