@@ -1,3 +1,8 @@
+import { UserBalanceStore } from './userBalances.js';
+import { CollectionApproval } from './approvals.js';
+import { CollectionPermissions } from './permissions.js';
+import { CollectionInvariants } from './misc.js';
+import { UintRangeArray } from './uintRanges.js';
 import type { SubscriptionQuoteResponse } from '../api-indexer/subscriptions.js';
 import { QueryGetApprovalTrackerRequest, QueryGetApprovalTrackerResponse } from '../proto/tokenization/query_pb.js';
 import { assertSubscriptionIdentifier } from '../api-indexer/subscriptions.js';
@@ -23,9 +28,21 @@ export async function readSubscriptionChainState(collectionId: string, creator: 
   if (Math.abs(Date.now() - Number(now)) > 60000) throw new Error('Subscription node is stale.');
   const prefix = '/bitbadges/bitbadgeschain/tokenization/';
   const readBalance = async (address: string) =>
-    (await node(prefix + `get_balance/${collectionId}/${encodeURIComponent(address)}`, opts, header.height)).balance;
+    new UserBalanceStore((await node(prefix + `get_balance/${collectionId}/${encodeURIComponent(address)}`, opts, header.height)).balance).convert(
+      BigInt
+    );
   const [result, subscriberBalance] = await Promise.all([node(prefix + `get_collection/${collectionId}`, opts, header.height), readBalance(creator)]);
-  return { collection: result.collection, subscriberBalance, now, height: header.height, readBalance };
+  const raw = result.collection;
+  const collection = {
+    ...raw,
+    collectionId: BigInt(raw.collectionId),
+    validTokenIds: UintRangeArray.From(raw.validTokenIds).convert(BigInt),
+    collectionApprovals: raw.collectionApprovals.map((a: any) => new CollectionApproval(a).convert(BigInt)),
+    collectionPermissions: new CollectionPermissions(raw.collectionPermissions).convert(BigInt),
+    invariants: new CollectionInvariants(raw.invariants).convert(BigInt),
+    defaultBalances: new UserBalanceStore(raw.defaultBalances).convert(BigInt)
+  };
+  return { collection, subscriberBalance, now, height: header.height, readBalance };
 }
 async function tracker(quote: SubscriptionQuoteResponse, opts: ReadOptions, height: string) {
   if (!opts.rpcUrl) throw new Error('Pass --rpc for a fresh offer tracker query.');
@@ -59,7 +76,12 @@ async function tracker(quote: SubscriptionQuoteResponse, opts: ReadOptions, heig
   const value = body.result?.response;
   if (!value || String(value.height) !== height) throw new Error('Subscription tracker snapshot is unavailable.');
   if (Number(value.code ?? 0) !== 0) {
-    if (Number(value.code) === 18 && value.codespace === 'sdk' && value.log === 'rpc error: code = InvalidArgument desc = invalid request: invalid request') return 0n;
+    if (
+      Number(value.code) === 18 &&
+      value.codespace === 'sdk' &&
+      value.log === 'rpc error: code = InvalidArgument desc = invalid request: invalid request'
+    )
+      return 0n;
     throw new Error('Subscription tracker lookup failed.');
   }
   const decoded = QueryGetApprovalTrackerResponse.fromBinary(Uint8Array.from(atob(value.value), (c) => c.charCodeAt(0)));
