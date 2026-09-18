@@ -149,6 +149,15 @@ function buildAfterHelpText(route: ApiRoute): string {
 // Command builder
 // ---------------------------------------------------------------------------
 
+function setQueryValue(params: URLSearchParams, key: string, value: unknown, route: ApiRoute, jsonObjects = false) {
+  if (Array.isArray(value) && route.queryParams?.some((param) => param.name === key && param.repeat)) {
+    params.delete(key);
+    for (const item of value) params.append(key, String(item));
+  } else {
+    params.set(key, jsonObjects && typeof value === 'object' ? JSON.stringify(value) : String(value));
+  }
+}
+
 function buildRouteCommand(route: ApiRoute): Command {
   let cmd = new Command(route.name).description(
     `[${route.method}] ${route.path} -- ${route.description}`
@@ -275,7 +284,7 @@ function buildRouteCommand(route: ApiRoute): Command {
         const queryObj = JSON.parse(opts.query);
         const searchParams = new URLSearchParams();
         for (const [k, v] of Object.entries(queryObj)) {
-          searchParams.set(k, String(v));
+          setQueryValue(searchParams, k, v, route);
         }
         const qs = searchParams.toString();
         if (qs) {
@@ -297,20 +306,18 @@ function buildRouteCommand(route: ApiRoute): Command {
         if (opts.query) {
           const queryObj = JSON.parse(opts.query);
           for (const [k, v] of Object.entries(queryObj)) {
-            searchParams.set(k, String(v));
+            setQueryValue(searchParams, k, v, route);
           }
         }
         // Then explode the body fields as query params
         for (const [k, v] of Object.entries(body)) {
           if (v !== undefined && v !== null) {
-            // For objects/arrays, JSON-encode them
-            searchParams.set(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+            // Preserve JSON encoding unless the schema explicitly requires repeated query keys.
+            setQueryValue(searchParams, k, v, route, true);
           }
         }
         const qs = searchParams.toString();
-        if (qs) {
-          resolvedPath += (resolvedPath.includes('?') ? '&' : '?') + qs;
-        }
+        resolvedPath = interpolatePath(route.path, pathParamValues) + (qs ? `?${qs}` : '');
         body = undefined; // Don't send body on GET
       }
 
