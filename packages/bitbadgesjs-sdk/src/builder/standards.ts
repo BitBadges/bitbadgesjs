@@ -188,6 +188,7 @@ const lifecycle: Record<string, Lifecycle> = {
     unsupported: ['Automatic verification of arbitrary off-chain tasks.']
   },
   'address-list': {
+    actionGroup: 'address_lists',
     summary: 'Membership and address-list collection configuration.',
     inspectionFamily: 'address-list',
     constraints: ['Membership rules and manager permissions determine eligibility.'],

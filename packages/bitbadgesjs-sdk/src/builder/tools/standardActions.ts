@@ -1,3 +1,4 @@
+import { addressListsCommand } from '../../cli/commands/address-lists.js';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import type { Command } from 'commander';
@@ -18,6 +19,7 @@ const surfaces: [Command, string[]][] = [
   [payRequestsCommand, ['list', 'show', 'status', 'pay', 'deny']],
   [subscriptionsCommand, ['list', 'status', 'claim', 'enable-renewal', 'change-renewal', 'cancel', 'subscribe', 'charge-due', 'config', 'quote', 'quote-status', 'periods', 'accept', 'record-submission', 'renewal', 'cancel-renewal']],
   [standardsCommand, ['inspect']],
+  [addressListsCommand, ['add', 'remove']],
   [smartTokensCommand, ['list', 'show', 'status', 'deposit', 'withdraw']],
   [spendableCreditsCommand, ['show', 'quote', 'purchase', 'consume']],
   [creditTokensCommand, ['list', 'show', 'quote', 'purchase']],

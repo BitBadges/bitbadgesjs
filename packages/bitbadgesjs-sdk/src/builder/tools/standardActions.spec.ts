@@ -84,3 +84,5 @@ test('spendable quote exposes unsigned exact tier selection through MCP', async 
  await tools.standard_subscriptions_quote.run({collectionId:'1',creator:'payer',withSession:true,kind:'upgrade',tokenId:'2',requestId:'stable'});
  expect(execute.mock.calls[1][0]).toEqual(expect.arrayContaining(['subscriptions','quote','--with-session','--kind=upgrade','--token-id=2']));
  });
+
+test('membership actions expose explicit Manager and member inputs',()=>{const tools=createStandardActionTools(jest.fn(),()=> 'catalog');for(const action of ['add','remove'])expect(tools[`standard_address_lists_${action}`].tool.inputSchema.required).toEqual(expect.arrayContaining(['collectionId','creator','address']));});

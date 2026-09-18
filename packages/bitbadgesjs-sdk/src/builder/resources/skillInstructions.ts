@@ -2211,6 +2211,8 @@ The frontend identifies address list approvals by their EXACT approvalIds. Using
 
 ### Invariants
 
+Manage supported lists with \`bb address-lists add COLLECTION --creator MANAGER --address MEMBER\` and \`bb address-lists remove COLLECTION --creator MANAGER --address MEMBER\` (MCP: \`standard_address_lists_add\` / \`standard_address_lists_remove\`). These read membership balances, reject duplicate additions, and remove the entire canonical membership amount, including legacy duplicates. Custom membership rules or partial-time balances require manual token-view management. Proposals remain unsigned; re-read state after review before signing. Recipient incoming approval requirements still apply.
+
 DO NOT set \`noForcefulPostMintTransfers: true\` on address-list collections. That invariant would block manager-remove from burning tokens (since its \`overridesFromOutgoingApprovals: true\` is only chain-allowed when \`fromListId\` is exactly "Mint"). The manager MUST be able to forcibly burn a list member's token, so leave that invariant off. Other default invariants (e.g. \`noCustomOwnershipTimes\`) are fine.
 
 ### Default Balances

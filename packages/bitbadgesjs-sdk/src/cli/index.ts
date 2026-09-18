@@ -196,6 +196,7 @@ import { productsCommand } from './commands/products.js';
 import { crowdfundsCommand } from './commands/crowdfunds.js';
 import { auctionsCommand } from './commands/auctions.js';
 import { predictionMarketsCommand } from './commands/prediction-markets.js';
+import { addressListsCommand } from './commands/address-lists.js';
 import { standardsCommand } from './commands/standards.js';
 import { smartTokensCommand } from './commands/smart-tokens.js';
 import { nftsCommand } from './commands/nfts.js';
@@ -308,6 +309,7 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
       predictionMarketsCommand,
       smartTokensCommand,
       standardsCommand,
+      addressListsCommand,
       nftsCommand,
       custom2faCommand,
       dynamicStoresCommand

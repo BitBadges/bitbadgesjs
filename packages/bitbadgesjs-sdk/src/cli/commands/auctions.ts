@@ -227,8 +227,16 @@ addOutputFlags(
           `Warning: --creator ${seller} does not match seller ${details.sellerAddress}. The mint approval will reject this tx.\n`
         );
       }
+      const bidderState = await callApi('POST', `/collection/${encodeURIComponent(collectionId)}/balance/${encodeURIComponent(bidder)}`, opts, {});
+      const bids = bidderState?.balance?.incomingApprovals ?? bidderState?.incomingApprovals;
+      const matches = Array.isArray(bids) ? bids.filter((approval: any) => approval.approvalId === bidApprovalId) : [];
+      if (matches.length !== 1 || !/^(0|[1-9]\d*)$/.test(String(matches[0].version ?? ''))) {
+        throw new Error('The selected bid is missing or its current version is unavailable. Refresh bids before accepting.');
+      }
+      const bidVersion = BigInt(matches[0].version);
+      if (bidVersion > 18446744073709551615n) throw new Error('The selected bid version is invalid.');
       await runEmitOrDeploy(
-        buildAcceptAuctionBidMsg(seller, String(collectionId), bidApprovalId, bidder, details.mintApproval.approvalId, 1n, BigInt(details.mintApproval.version ?? 0)),
+        buildAcceptAuctionBidMsg(seller, String(collectionId), bidApprovalId, bidder, details.mintApproval.approvalId, 1n, BigInt(details.mintApproval.version ?? 0), bidVersion),
         opts,
         { emit: (m) => emit(m, opts), expectedAddress: seller }
       );
