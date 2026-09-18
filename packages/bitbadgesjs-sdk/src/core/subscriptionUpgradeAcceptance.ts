@@ -25,7 +25,7 @@ function requireEqual(a: unknown, b: unknown, label: string) {
   if (json(a) !== json(b)) throw new Error(`Subscription ${label} changed. Refresh the quote.`);
 }
 function number(value: string) {
-  if (!/^(0|[1-9]\d*)$/.test(value) || BigInt(value) > MAX) throw new Error('Invalid subscription number.');
+  if (typeof value !== 'string' || !/^(0|[1-9]\d*)$/.test(value) || BigInt(value) > MAX) throw new Error('Invalid subscription number.');
   return BigInt(value);
 }
 const ranges = (values: { start: string; end: string }[]) => values.map((v) => ({ start: number(v.start), end: number(v.end) }));
