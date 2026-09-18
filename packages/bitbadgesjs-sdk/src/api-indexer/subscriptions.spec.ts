@@ -36,3 +36,11 @@ it('rejects malformed identifiers before a network request', async () => {
   await expect(client.submitSubscriptionQuote('q', 'not-a-hash')).rejects.toThrow();
   expect(post).not.toHaveBeenCalled();
 });
+
+it('checks whether a specific collection is enrolled without changing global configuration reads', async () => {
+  const client = api();
+  const get = jest.spyOn(client.axios, 'get').mockResolvedValue({ data: { enabled: true, enrolled: false } });
+  expect(await client.getSubscriptionConfig('1')).toMatchObject({ enrolled: false });
+  expect(get).toHaveBeenLastCalledWith('http://localhost:1234/api/v0/subscriptions/config', { params: { collectionId: '1' } });
+  await expect(client.getSubscriptionConfig('0')).rejects.toThrow();
+});

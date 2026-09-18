@@ -1,4 +1,4 @@
-export type SubscriptionOperatorConfig = { enabled: boolean; operator: string; escrowStoreId: string };
+export type SubscriptionOperatorConfig = { enabled: boolean; operator: string; escrowStoreId: string; enrolled?: boolean };
 
 export type SubscriptionPeriodResponse = {
   periodId: string;

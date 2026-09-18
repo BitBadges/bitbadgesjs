@@ -390,8 +390,11 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
     }
   }
 
-  public async getSubscriptionConfig(): Promise<SubscriptionOperatorConfig> {
-    return this.subscriptionRequest(() => this.axios.get(`${this.BACKEND_URL}${BitBadgesApiRoutes.SubscriptionConfigRoute()}`));
+  public async getSubscriptionConfig(collectionId?: string): Promise<SubscriptionOperatorConfig> {
+    if (collectionId !== undefined) assertSubscriptionIdentifier(collectionId);
+    return this.subscriptionRequest(() =>
+      this.axios.get(`${this.BACKEND_URL}${BitBadgesApiRoutes.SubscriptionConfigRoute()}`, collectionId ? { params: { collectionId } } : undefined)
+    );
   }
 
   /** Requests an exact offer. This does not authorize payment or submit a transaction. */
