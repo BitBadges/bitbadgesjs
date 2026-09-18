@@ -90,3 +90,5 @@ export * from './spendable-credits.js';
 export * from './subscriptionUpgradeAcceptance.js';
 
 export * from './subscriptionUpgradeReader.js';
+
+export * from './address-list-membership.js';
