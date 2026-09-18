@@ -646,6 +646,83 @@
       ]
     }
   },
+  "spendable-credit": {
+    "builder": "buildSpendableCredit",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "paymentDenom": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "serviceId": {
+          "type": "string"
+        },
+        "pricePerPack": {
+          "type": "string",
+          "description": "Positive integer payment base units per pack."
+        },
+        "creditsPerPack": {
+          "type": "string",
+          "description": "Positive whole service units per pack."
+        },
+        "purchaseOptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "pricePerPack": {
+                "type": "string"
+              },
+              "creditsPerPack": {
+                "type": "string"
+              },
+              "purchaseType": {
+                "type": "string",
+                "enum": [
+                  "fixed",
+                  "scaled"
+                ]
+              },
+              "maxPacks": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "pricePerPack",
+              "creditsPerPack",
+              "purchaseType"
+            ]
+          }
+        },
+        "expiresAt": {
+          "type": "string",
+          "description": "Inclusive Unix milliseconds; omitted means no expiry."
+        },
+        "uri": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "paymentDenom",
+        "provider",
+        "serviceId"
+      ]
+    }
+  },
   "subscription": {
     "builder": "buildSubscription",
     "inputSchema": {

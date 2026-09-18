@@ -308,6 +308,7 @@ export function detectType(standards: string[], hasBackingPath: boolean): string
   if (s.some((x) => x.toLowerCase().includes('ai agent stablecoin'))) return 'AI Agent Stablecoin';
   if (s.some((x) => x.toLowerCase().includes('smart token')) || hasBackingPath) return 'Smart Token (IBC-backed)';
   if (s.includes('Address List')) return 'Address List';
+  if (s.includes('Spendable Credit')) return 'Spendable Credit';
   if (s.some((x) => x.toLowerCase().includes('credit'))) return 'Credit Token';
   if (s.some((x) => x.toLowerCase().includes('membership'))) return 'Membership Token';
   if (s.some((x) => x.toLowerCase().includes('liquidity pool'))) return 'Liquidity Pool';
@@ -348,6 +349,8 @@ export function buildTypeExplanation(type: string, maxSupply: bigint, backingDen
     return 'This is an AI agent-managed stablecoin vault. An AI agent (an automated program) manages the vault and controls when new tokens are created or destroyed, typically to maintain a stable value.';
   } else if (type === 'Address List') {
     return 'This is an address list — essentially a membership roster stored on the blockchain. Tokens represent membership status and cannot be traded or transferred. If you hold a token, you are on the list; if not, you are not a member.';
+  } else if (type === 'Spendable Credit') {
+    return 'These are nontransferable whole service credits. The holder must consume credits on chain; the provider verifies and durably accepts the confirmed receipt before service delivery. Holding a balance alone does not pay for a service request.';
   } else if (type === 'Credit Token') {
     return 'This is a credit token — a non-transferable balance representing points, credits, or reputation. These are permanently bound to the holder and cannot be traded, sold, or given away. Think of it like loyalty points or a reputation score.';
   } else if (type === 'Membership Token') {
@@ -366,7 +369,9 @@ export function buildStandardExplanations(standards: string[]): string[] {
   const explanations: string[] = [];
   for (const std of standards) {
     const lower = std.toLowerCase();
-    if (std === 'NFTs') {
+    if (std === 'Spendable Credit') {
+      explanations.push(`"${std}" — paid whole service credits consumed by the holder; service delivery requires a confirmed receipt and provider deduplication`);
+    } else if (std === 'NFTs') {
       explanations.push(`"${std}" — each token ID is a distinct asset with its own name, image, and description, similar to how collectibles or artwork each have unique properties`);
     } else if (std === 'Fungible Tokens') {
       explanations.push(`"${std}" — all tokens of the same ID are identical and interchangeable, similar to how units of a currency are all the same`);

@@ -355,7 +355,10 @@ async function emit(
   // cli/utils/deploy-options.ts and are identical across every command.
   if (isDeployRequested(opts as any)) {
     await executeDeploy(outData, opts as any, {
-      expectedAddress: opts.expectedAddress ?? opts.manager ?? opts.creator ??
+      expectedAddress:
+        opts.expectedAddress ??
+        opts.manager ??
+        opts.creator ??
         (outData.typeUrl === '/cosmos.bank.v1beta1.MsgSend' ? outData.value?.fromAddress : undefined)
     });
   }
@@ -738,7 +741,10 @@ sharedOpts(
         '  uri (string, optional)         — pre-hosted per-product metadata URI\n' +
         '  image, description (optional)  — inline metadata; used when uri is absent'
     )
-    .requiredOption('--store-address <address>', 'Default payment recipient (bb1.../0x — auto-normalized). A product storeAddress overrides this recipient.')
+    .requiredOption(
+      '--store-address <address>',
+      'Default payment recipient (bb1.../0x — auto-normalized). A product storeAddress overrides this recipient.'
+    )
 ).action(async (opts) => {
   const { buildProductCatalog } = await import('../../core/builders/product-catalog.js');
   if (opts.json) {
@@ -824,6 +830,41 @@ sharedOpts(
       description: opts.description,
       image: opts.image
     }),
+    opts
+  );
+});
+
+sharedOpts(
+  buildCommand
+    .command('spendable-credit')
+    .description('Create immutable whole service credits with holder-authorized consumption.')
+    .requiredOption('--payment-denom <denom>', 'Payment asset')
+    .requiredOption('--provider <address>', 'Provider payment address')
+    .requiredOption('--service-id <id>', 'Immutable provider service identifier')
+    .option('--price-per-pack <amount>', 'Legacy single scaled option payment base units')
+    .option('--credits-per-pack <units>', 'Legacy single scaled option whole service units')
+    .option('--purchase-options <json>', 'JSON array of fixed or scaled purchase options')
+    .option('--expires-at <timestamp>', 'Inclusive Unix milliseconds; omitted means no expiry')
+).action(async (opts) => {
+  const { buildSpendableCredit } = await import('../../core/builders/spendable-credit.js');
+  emit(
+    buildSpendableCredit(
+      opts.json
+        ? readJsonInput(opts.json)
+        : {
+            paymentDenom: opts.paymentDenom,
+            provider: opts.provider,
+            serviceId: opts.serviceId,
+            pricePerPack: opts.pricePerPack,
+            creditsPerPack: opts.creditsPerPack,
+            purchaseOptions: opts.purchaseOptions ? JSON.parse(opts.purchaseOptions) : undefined,
+            expiresAt: opts.expiresAt,
+            uri: opts.uri,
+            name: opts.name,
+            description: opts.description,
+            image: opts.image
+          }
+    ),
     opts
   );
 });

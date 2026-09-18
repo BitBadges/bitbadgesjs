@@ -1,10 +1,11 @@
+import { inspectSpendableCredit } from './spendable-credits.js';
 import { isAddressValid } from '../address-converter/converter.js';
 import type { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 import { inspectSmartTokenCollection } from './smart-tokens.js';
 import { doesCollectionFollowCreditTokenProtocol, extractCreditTokenTiers } from './credit-tokens.js';
 import { BURN_ADDRESS } from './builders/shared.js';
 
-export type InspectableStandard = 'smart-token' | 'credit-token' | 'address-list';
+export type InspectableStandard = 'smart-token' | 'credit-token' | 'address-list' | 'spendable-credit';
 export type StandardInspection = {
   recognized: boolean;
   configurationSupported: boolean;
@@ -27,6 +28,38 @@ const active = (value: any): boolean => {
 /** A bounded consumer profile check. It does not certify collection-wide safety or prove execution eligibility. */
 export function inspectStandardCollection(collection: Readonly<iCollectionDoc<bigint>>, family: InspectableStandard): StandardInspection {
   if (family === 'smart-token') return inspectSmartTokenCollection(collection);
+  if (family === 'spendable-credit') {
+    const recognized = !!collection.standards?.includes('Spendable Credit');
+    const issues: string[] = [];
+    const actions: StandardInspection['actions'] = {};
+    try {
+      const config = inspectSpendableCredit(collection);
+      const approvalIds = config.purchaseOptions.map((option) => option.approvalId);
+      actions.quote = { approvalIds, requiresSelection: approvalIds.length > 1 };
+      actions.purchase = { ...actions.quote };
+      actions.consume = { approvalIds: [config.consume.approvalId], requiresSelection: false };
+    } catch (error) {
+      issues.push(error instanceof Error ? error.message : 'Unsupported spendable credit configuration');
+    }
+    return {
+      recognized,
+      configurationSupported: issues.length === 0,
+      actions,
+      issues,
+      warnings: [
+        'Live balance, expiry, account approvals and fees require separate review. Service requires authenticated durable receipt acceptance; a balance alone does not authorize delivery.'
+      ],
+      eligibility: 'not-checked',
+      authority: {
+        manager: String(collection.manager ?? ''),
+        approvalUpdates: 'not-evaluated',
+        overrideApprovalIds: (collection.collectionApprovals ?? [])
+          .filter((a) => a.approvalCriteria?.overridesFromOutgoingApprovals || a.approvalCriteria?.overridesToIncomingApprovals)
+          .map((a) => a.approvalId)
+      }
+    };
+  }
+
   const recognized =
     family === 'credit-token' ? doesCollectionFollowCreditTokenProtocol(collection) : !!collection.standards?.includes('Address List');
   const issues: string[] = recognized ? [] : [`Missing recognized ${family} standard`];

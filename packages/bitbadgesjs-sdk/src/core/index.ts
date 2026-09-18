@@ -82,3 +82,4 @@ export * from './browser-signing.js';
 export * from './standard-inspection.js';
 
 export * from './subscriptionPlanChange.js';
+export * from './spendable-credits.js';
