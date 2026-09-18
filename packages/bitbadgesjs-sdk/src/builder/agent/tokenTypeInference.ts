@@ -91,6 +91,7 @@ export const STANDARD_TO_TOKEN_TYPE: ReadonlyArray<{ standard: string; skillId: 
   { standard: 'Subscription', skillId: 'subscription' },
   { standard: 'Custom 2FA', skillId: 'custom-2fa' },
   { standard: 'Payment Protocol', skillId: 'payment-protocol' },
+  { standard: 'Spendable Credit', skillId: 'spendable-credit' },
   { standard: 'Credit Token', skillId: 'credit-token' },
   { standard: 'Address List', skillId: 'address-list' },
   { standard: 'Quest', skillId: 'quest' },

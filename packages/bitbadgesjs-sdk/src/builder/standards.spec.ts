@@ -17,7 +17,12 @@ describe('standard lifecycle discovery', () => {
           .standards.map((entry) => entry.frontendFamily)
           .filter(Boolean)
       ).size
-    ).toBe(18);
+    ).toBe(19);
+    const spendable = getStandardCatalog('spendable-credit').standards[0];
+    expect(spendable.builders?.some((builder) => builder.mcp === 'build_spendable_credit')).toBe(true);
+    expect(spendable.actions?.map((action) => action.id)).toEqual(
+      expect.arrayContaining(['standard_spendable_credits_show', 'standard_spendable_credits_purchase', 'standard_spendable_credits_consume'])
+    );
     const nft = getStandardCatalog('nft').standards[0];
     expect(nft.builders).toEqual([]);
     expect(nft.actions).toEqual([]);

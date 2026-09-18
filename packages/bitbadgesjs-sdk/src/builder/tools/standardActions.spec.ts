@@ -49,3 +49,20 @@ test('rejects incompatible networks and missing business fields before invoking 
   await expect(tools.standard_pay_requests_pay.run({ collectionId: '1', creator: 'payer', mainnet: true, testnet: true })).rejects.toThrow();
   expect(execute).not.toHaveBeenCalled();
 });
+
+test('spendable purchase tools expose explicit tier selection', () => {
+  const tools = createStandardActionTools(jest.fn(), () => 'catalog');
+  expect(tools.standard_spendable_credits_purchase.tool.inputSchema.properties).toHaveProperty('approvalId');
+});
+
+test('spendable quote exposes unsigned exact tier selection through MCP', async () => {
+  const execute = jest
+    .fn()
+    .mockResolvedValueOnce({ ok: true, data: { catalogHash: 'catalog' } })
+    .mockResolvedValueOnce({ ok: true, data: { paymentAmount: '20', creditsAmount: '6' } });
+  const tools = createStandardActionTools(execute, () => 'catalog');
+  expect(tools.standard_spendable_credits_quote.tool.inputSchema.required).toContain('units');
+  await tools.standard_spendable_credits_quote.run({ collectionId: '3', units: '2', approvalId: 'spendable-purchase-2' });
+  expect(execute.mock.calls[1][0]).toContain('--approval-id=spendable-purchase-2');
+  expect(execute.mock.calls[1][0].slice(0, 2)).toEqual(['spendable-credits', 'quote']);
+});

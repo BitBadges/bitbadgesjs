@@ -79,6 +79,8 @@ export interface iPredictionMarketInfo {
  *
  * @category Standards Info
  */
+export type SpendableCreditInfo = { status: 'active' | 'expired' };
+
 export interface iStandardsInfo {
   Bounty?: iBountyInfo;
   PaymentRequest?: iPaymentRequestInfo;
@@ -87,6 +89,7 @@ export interface iStandardsInfo {
   Crowdfund?: iCrowdfundInfo;
   Auction?: iAuctionInfo;
   'Prediction Market'?: iPredictionMarketInfo;
+  'Spendable Credit'?: SpendableCreditInfo;
 }
 
 /** Integer payment quantities are base-unit strings and never mixed across denoms. */

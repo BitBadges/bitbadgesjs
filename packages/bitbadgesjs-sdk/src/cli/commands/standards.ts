@@ -21,7 +21,7 @@ addIndexerOutputOptions(
       .argument('<collection-id>', 'Collection to inspect')
       .addOption(
         new Option('--family <family>', 'Bounded consumer profile to inspect')
-          .choices(['smart-token', 'credit-token', 'address-list'])
+          .choices(['smart-token', 'credit-token', 'address-list', 'spendable-credit'])
           .makeOptionMandatory()
       )
       .description(
