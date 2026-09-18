@@ -190,6 +190,7 @@ import { payRequestsCommand } from './commands/pay-requests.js';
 import { bountiesCommand } from './commands/bounties.js';
 import { subscriptionsCommand } from './commands/subscriptions.js';
 import { intentsCommand } from './commands/intents.js';
+import { spendableCreditsCommand } from './commands/spendable-credits.js';
 import { creditTokensCommand } from './commands/credit-tokens.js';
 import { productsCommand } from './commands/products.js';
 import { crowdfundsCommand } from './commands/crowdfunds.js';
@@ -300,6 +301,7 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
       subscriptionsCommand,
       intentsCommand,
       creditTokensCommand,
+      spendableCreditsCommand,
       productsCommand,
       crowdfundsCommand,
       auctionsCommand,
@@ -329,6 +331,7 @@ const STANDARD_BUILD_ALIASES: Record<string, string> = {
   bounties: 'bounty',
   crowdfunds: 'crowdfund',
   'credit-tokens': 'credit-token',
+  'spendable-credits': 'spendable-credit',
   intents: 'intent',
   'pay-requests': 'payment-request',
   'prediction-markets': 'prediction-market',

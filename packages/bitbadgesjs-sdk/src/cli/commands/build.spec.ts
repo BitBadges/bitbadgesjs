@@ -34,6 +34,7 @@ describe('buildCommand shape', () => {
       'product-catalog',
       'send',
       'smart-token',
+      'spendable-credit',
       'subscription',
       'transfer',
       'vault'
@@ -68,6 +69,7 @@ describe('buildCommand shape', () => {
       'product-catalog',
       'prediction-market',
       'smart-token',
+      'spendable-credit',
       'credit-token',
       'custom-2fa',
       'address-list',

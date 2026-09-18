@@ -124,5 +124,13 @@
     "uri": "https://example.com/metadata.json",
     "backingCoin": "BADGE",
     "symbol": "vBADGE"
+  },
+  "spendable-credit": {
+    "paymentDenom": "USDC",
+    "provider": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+    "serviceId": "image-generation",
+    "pricePerPack": "1000000",
+    "creditsPerPack": "10",
+    "uri": "https://example.com/metadata.json"
   }
 }
