@@ -1,4 +1,8 @@
-import { buildSubscriptionV2RenewalApproval, inspectSubscriptionV2RenewalApproval } from './subscriptionUpgradeRenewal.js';
+import {
+  buildSubscriptionV2RenewalApproval,
+  inspectSubscriptionV2RenewalApproval,
+  buildSubscriptionV2RenewalChange
+} from './subscriptionUpgradeRenewal.js';
 import type { SubscriptionUpgradeNativeProfile } from './subscriptionUpgradeNative.js';
 import { UserIncomingApproval } from './approvals.js';
 
@@ -74,4 +78,30 @@ it('recognizes the canonical default objects populated by the native chain', () 
     autoDeletionOptions: { afterOneUse: false, afterOverallMaxNumTransfers: false, allowCounterpartyPurge: false, allowPurgeIfExpired: false }
   };
   expect(inspectSubscriptionV2RenewalApproval(approval, profile)).not.toBeNull();
+});
+
+it('uses individual deletes before new consent without rewriting unrelated approvals', () => {
+  const old = buildSubscriptionV2RenewalApproval(args);
+  const unrelated = { ...old, approvalId: 'unrelated' };
+  const messages = buildSubscriptionV2RenewalChange({
+    creator: profile.operator,
+    collectionId: '1',
+    profile,
+    incomingApprovals: [old, unrelated],
+    target: { ...args, approvalId: 'subscription-v2-renewal-new' }
+  });
+  expect(messages.map((m) => m.toProto().getType().typeName)).toEqual([
+    'tokenization.MsgDeleteIncomingApproval',
+    'tokenization.MsgSetIncomingApproval'
+  ]);
+  expect(messages[0]).toMatchObject({ approvalId: old.approvalId });
+  expect(messages[1]).toMatchObject({ approval: { approvalId: 'subscription-v2-renewal-new' } });
+  expect(buildSubscriptionV2RenewalChange({ creator: profile.operator, collectionId: '1', profile, incomingApprovals: [old] })).toHaveLength(1);
+});
+
+it('refuses reused consent identity and unrecognized reserved approvals', () => {
+  const old = buildSubscriptionV2RenewalApproval(args);
+  const base = { creator: profile.operator, collectionId: '1', profile, incomingApprovals: [old] };
+  expect(() => buildSubscriptionV2RenewalChange({ ...base, target: args })).toThrow();
+  expect(() => buildSubscriptionV2RenewalChange({ ...base, incomingApprovals: [{ ...old, fromListId: 'All' }] })).toThrow();
 });

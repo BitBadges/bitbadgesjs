@@ -1,3 +1,5 @@
+import { MsgDeleteIncomingApproval } from '../transactions/messages/bitbadges/tokenization/msgDeleteIncomingApproval.js';
+import { MsgSetIncomingApproval } from '../transactions/messages/bitbadges/tokenization/msgSetIncomingApproval.js';
 import { GO_MAX_UINT_64 } from '../common/math.js';
 import type { iUserIncomingApproval } from '../interfaces/types/approvals.js';
 import type { iUintRange } from '../interfaces/types/core.js';
@@ -127,4 +129,32 @@ export function inspectSubscriptionV2RenewalApproval(approval: iUserIncomingAppr
   } catch {
     return null;
   }
+}
+
+export function buildSubscriptionV2RenewalChange({
+  creator,
+  collectionId,
+  profile,
+  incomingApprovals,
+  target
+}: {
+  creator: string;
+  collectionId: string;
+  profile: SubscriptionUpgradeNativeProfile;
+  incomingApprovals: readonly iUserIncomingApproval<bigint>[];
+  target?: Omit<Parameters<typeof buildSubscriptionV2RenewalApproval>[0], 'profile'>;
+}): (MsgDeleteIncomingApproval | MsgSetIncomingApproval<bigint>)[] {
+  const renewals = incomingApprovals.filter((approval) => approval.approvalId.startsWith(SUBSCRIPTION_V2_RENEWAL_PREFIX));
+  if (renewals.some((approval) => !inspectSubscriptionV2RenewalApproval(approval, profile))) {
+    throw new Error('Custom subscription renewal rules require manual review.');
+  }
+  if (target && incomingApprovals.some((approval) => approval.approvalId === target.approvalId)) {
+    throw new Error('Use a new subscription renewal approval ID.');
+  }
+  const messages: (MsgDeleteIncomingApproval | MsgSetIncomingApproval<bigint>)[] = renewals.map(
+    (approval) => new MsgDeleteIncomingApproval({ creator, collectionId, approvalId: approval.approvalId })
+  );
+  if (target)
+    messages.push(new MsgSetIncomingApproval({ creator, collectionId, approval: buildSubscriptionV2RenewalApproval({ ...target, profile }) }));
+  return messages;
 }
