@@ -60,3 +60,28 @@ The service must implement idempotent delivery/reconciliation and disclose its
 failure/support policy before consumption. Never accept client-supplied receipts,
 infer payment from an arbitrary burn, or return private fulfillment data to a
 caller who merely knows a public transaction hash.
+
+
+## Purchase options
+
+Creators can offer up to 20 immutable purchase options. Each option sets
+`pricePerPack` (payment base units), `creditsPerPack` (whole service units), and
+`purchaseType` (`fixed` or `scaled`). A fixed option purchases exactly one pack.
+A scaled option accepts positive whole packs and may set `maxPacks`; omitting
+it means unlimited within the protocol's uint64 limits on both payment and credit
+totals. Limits apply per purchase, not per wallet or lifetime sales. Fractional
+packs are not supported; purchases never round fractional service units.
+
+Pass `purchaseOptions` to `buildSpendableCredit`, or `--purchase-options` with a
+JSON array to `bb build spendable-credit`. Do not combine it with the legacy
+single-option `pricePerPack` / `creditsPerPack` fields. Existing single-option
+collections and calls remain supported as unlimited scaled purchases.
+
+`inspectSpendableCredit` returns `purchaseOptions` with approval IDs and exact
+limits. For multiple options, select an approval ID explicitly:
+`bb spendable-credits purchase COLLECTION_ID --creator bb1YOUR_WALLET --units 2 --approval-id spendable-purchase-2`.
+SDK callers use `quoteSpendableCreditPurchase(collection, packs, approvalId)`
+for exact payment and credit totals, then
+`buildPurchaseSpendableCreditsMsg(collection, wallet, packs, approvalId)`.
+All options share the immutable provider, service, payment asset, and expiry;
+consumption authorization and receipt verification are unchanged.

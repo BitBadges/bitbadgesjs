@@ -841,8 +841,9 @@ sharedOpts(
     .requiredOption('--payment-denom <denom>', 'Payment asset')
     .requiredOption('--provider <address>', 'Provider payment address')
     .requiredOption('--service-id <id>', 'Immutable provider service identifier')
-    .requiredOption('--price-per-pack <amount>', 'Payment base units per pack')
-    .requiredOption('--credits-per-pack <units>', 'Whole service units per pack')
+    .option('--price-per-pack <amount>', 'Legacy single scaled option payment base units')
+    .option('--credits-per-pack <units>', 'Legacy single scaled option whole service units')
+    .option('--purchase-options <json>', 'JSON array of fixed or scaled purchase options')
     .option('--expires-at <timestamp>', 'Inclusive Unix milliseconds; omitted means no expiry')
 ).action(async (opts) => {
   const { buildSpendableCredit } = await import('../../core/builders/spendable-credit.js');
@@ -856,6 +857,7 @@ sharedOpts(
             serviceId: opts.serviceId,
             pricePerPack: opts.pricePerPack,
             creditsPerPack: opts.creditsPerPack,
+            purchaseOptions: opts.purchaseOptions ? JSON.parse(opts.purchaseOptions) : undefined,
             expiresAt: opts.expiresAt,
             uri: opts.uri,
             name: opts.name,

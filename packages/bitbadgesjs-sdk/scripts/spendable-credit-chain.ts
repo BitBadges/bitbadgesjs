@@ -326,9 +326,52 @@ try {
   );
   await send('transfer-tokens', buildPurchaseSpendableCreditsMsg(expiredCollection, accounts.holder, '1').value, 'holder', false);
   assert.equal(expiryBalance(), 10n);
+  const tiered = buildSpendableCredit({
+    provider: accounts.operator,
+    serviceId: 'tiers',
+    paymentDenom: 'USDC',
+    uri: 'ipfs://tiers',
+    purchaseOptions: [
+      { purchaseType: 'fixed', pricePerPack: '1000000', creditsPerPack: '3' },
+      { purchaseType: 'scaled', pricePerPack: '2000000', creditsPerPack: '8', maxPacks: '4' }
+    ]
+  });
+  await send('universal-update-collection', { ...tiered.value, creator: accounts.operator }, 'operator');
+  const tierCollection = query(['tokenization', 'collection', '3']).collection;
+  const tierBalance = () =>
+    (query(['tokenization', 'balance', '3', accounts.holder]).balance.balances as any[]).reduce((sum, b) => sum + BigInt(b.amount), 0n);
+  const paymentBalance = () => BigInt(query(['bank', 'balances', accounts.holder]).balances.find((coin: any) => coin.denom === denom).amount);
+  const providerPaymentBalance = () =>
+    BigInt(query(['bank', 'balances', accounts.operator]).balances.find((coin: any) => coin.denom === denom).amount);
+  const beforeTierPayment = paymentBalance();
+  const beforeProviderPayment = providerPaymentBalance();
+  const fixedPurchase = buildPurchaseSpendableCreditsMsg(tierCollection, accounts.holder, '1', 'spendable-purchase');
+  await send('transfer-tokens', fixedPurchase.value, 'holder');
+  assert.equal(tierBalance(), 3n);
+  assert.equal(providerPaymentBalance(), beforeProviderPayment + 1000000n);
+  assert(paymentBalance() <= beforeTierPayment - 1000000n);
+  const afterFixedPayment = paymentBalance();
+  const badFixed = structuredClone(fixedPurchase.value);
+  badFixed.transfers[0].balances[0].amount = '6';
+  await send('transfer-tokens', badFixed, 'holder', false);
+  assert.equal(tierBalance(), 3n);
+  assert.equal(paymentBalance(), afterFixedPayment);
+  const scaledPurchase = buildPurchaseSpendableCreditsMsg(tierCollection, accounts.holder, '4', 'spendable-purchase-2');
+  await send('transfer-tokens', scaledPurchase.value, 'holder');
+  assert.equal(tierBalance(), 35n);
+  assert.equal(providerPaymentBalance(), beforeProviderPayment + 9000000n);
+  assert(paymentBalance() <= afterFixedPayment - 8000000n);
+  const afterScaledPayment = paymentBalance();
+  const badScaled = structuredClone(scaledPurchase.value);
+  badScaled.transfers[0].balances[0].amount = '40';
+  await send('transfer-tokens', badScaled, 'holder', false);
+  assert.equal(tierBalance(), 35n);
+  assert.equal(paymentBalance(), afterScaledPayment);
+  assert.equal(providerPaymentBalance(), beforeProviderPayment + 9000000n);
   console.log(
     json({
       receipt,
+      tieredFixedAndCappedPurchases: true,
       holderConsumption: true,
       merchantUnauthorized: true,
       peerTransferBlocked: true,

@@ -32,11 +32,12 @@ addDeployOptions(
       .description('Prepare a paid purchase. Units are whole packs; credits remain nontransferable.')
       .requiredOption('--creator <address>', 'Buyer wallet')
       .requiredOption('--units <packs>', 'Positive whole packs')
+      .option('--approval-id <id>', 'Purchase option approval ID; required when multiple options exist')
   )
 ).action(async (id: string, opts: any) => {
   try {
     const wallet = requireBb1AddressStrict(opts.creator, '--creator');
-    const message = buildPurchaseSpendableCreditsMsg(await load(id, opts), wallet, opts.units);
+    const message = buildPurchaseSpendableCreditsMsg(await load(id, opts), wallet, opts.units, opts.approvalId);
     await runEmitOrDeploy(message, opts, { emit: (m) => emitIndexerResult(m, opts), expectedAddress: wallet });
   } catch (error) {
     emitIndexerError(error);

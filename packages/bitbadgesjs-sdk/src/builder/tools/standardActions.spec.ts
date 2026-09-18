@@ -49,3 +49,8 @@ test('rejects incompatible networks and missing business fields before invoking 
   await expect(tools.standard_pay_requests_pay.run({ collectionId: '1', creator: 'payer', mainnet: true, testnet: true })).rejects.toThrow();
   expect(execute).not.toHaveBeenCalled();
 });
+
+test('spendable purchase tools expose explicit tier selection', () => {
+  const tools = createStandardActionTools(jest.fn(), () => 'catalog');
+  expect(tools.standard_spendable_credits_purchase.tool.inputSchema.properties).toHaveProperty('approvalId');
+});

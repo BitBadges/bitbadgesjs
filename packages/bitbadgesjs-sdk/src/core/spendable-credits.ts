@@ -29,24 +29,49 @@ export function inspectSpendableCredit(collection: any) {
   const config = JSON.parse(collection.customData ?? '{}').spendableCredit;
   if (config?.version !== 1 || !collection.standards?.includes('Spendable Credit') || collection.isArchived)
     throw new Error('Unsupported spendable credit collection.');
-  const mint = collection.collectionApprovals?.find((a: any) => a.approvalId === 'spendable-purchase');
+  const mints: any[] = (collection.collectionApprovals ?? []).filter((a: any) =>
+    /^spendable-purchase(?:-[2-9][0-9]*|-[1-9][0-9]+)?$/.test(a.approvalId)
+  );
+  const mint = mints[0];
   const consume = collection.collectionApprovals?.find((a: any) => a.approvalId === 'spendable-consume');
   const coin = mint?.approvalCriteria?.coinTransfers?.[0]?.coins?.[0];
-  const creditsPerPack = String(mint?.approvalCriteria?.predeterminedBalances?.incrementedBalances?.startBalances?.[0]?.amount ?? '');
   const expiresAt = String(mint?.transferTimes?.[0]?.end ?? '');
+  const purchaseOptions = mints.map((approval: any) => {
+    const balances = approval.approvalCriteria?.predeterminedBalances?.incrementedBalances;
+    const pricePerPack = String(approval.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount ?? '');
+    const creditsPerPack = String(balances?.startBalances?.[0]?.amount ?? '');
+    const purchaseType = balances?.allowAmountScaling ? ('scaled' as const) : ('fixed' as const);
+    const maxPacks = purchaseType === 'fixed' ? '1' : String(balances?.maxScalingMultiplier ?? '');
+    const ceiling =
+      /^[1-9][0-9]*$/.test(pricePerPack) && /^[1-9][0-9]*$/.test(creditsPerPack)
+        ? BigInt(MAX_UINT64) / (BigInt(pricePerPack) > BigInt(creditsPerPack) ? BigInt(pricePerPack) : BigInt(creditsPerPack))
+        : 0n;
+    return {
+      approvalId: approval.approvalId as string,
+      mint: approval,
+      pricePerPack,
+      creditsPerPack,
+      purchaseType,
+      maxPacks,
+      unlimited: purchaseType === 'scaled' && maxPacks === String(ceiling)
+    };
+  });
   const expected = buildSpendableCredit({
     provider: config.provider,
     serviceId: config.serviceId,
     paymentDenom: coin?.denom,
-    pricePerPack: String(coin?.amount ?? ''),
-    creditsPerPack,
+    purchaseOptions: purchaseOptions.map(({ pricePerPack, creditsPerPack, purchaseType, maxPacks }: any) => ({
+      pricePerPack,
+      creditsPerPack,
+      purchaseType,
+      maxPacks
+    })),
     expiresAt,
     uri: 'ipfs://validation'
   }).value;
   if (
-    collection.collectionApprovals.length !== 2 ||
-    !same(approvalTerms(mint), approvalTerms(expected.collectionApprovals[0])) ||
-    !same(approvalTerms(consume), approvalTerms(expected.collectionApprovals[1]))
+    collection.collectionApprovals.length !== expected.collectionApprovals.length ||
+    !same(collection.collectionApprovals.map(approvalTerms), expected.collectionApprovals.map(approvalTerms))
   )
     throw new Error('Custom spendable credit approvals are unsupported.');
   for (const field of ['collectionPermissions', 'invariants', 'validTokenIds', 'defaultBalances']) {
@@ -71,7 +96,8 @@ export function inspectSpendableCredit(collection: any) {
     serviceId: config.serviceId as string,
     paymentDenom: coin.denom as string,
     pricePerPack: String(coin.amount),
-    creditsPerPack,
+    creditsPerPack: purchaseOptions[0].creditsPerPack,
+    purchaseOptions,
     expiresAt,
     mint,
     consume
@@ -105,11 +131,31 @@ function transfer(collection: any, creator: string, from: string, to: string, am
   };
 }
 
-export function buildPurchaseSpendableCreditsMsg(collection: any, wallet: string, packs: string) {
+export function quoteSpendableCreditPurchase(collection: any, packs: string, approvalId?: string) {
   const config = inspectSpendableCredit(collection);
+  if (!approvalId && config.purchaseOptions.length !== 1) throw new Error('Select a purchase option.');
+  const option = config.purchaseOptions.find((item: any) => !approvalId || item.approvalId === approvalId);
+  if (!option) throw new Error('Unknown purchase option.');
   if (!/^[1-9][0-9]*$/.test(packs)) throw new Error('Packs must be a positive whole number.');
-  if (BigInt(packs) * BigInt(config.pricePerPack) > BigInt(MAX_UINT64)) throw new Error('Payment total exceeds uint64 range.');
-  return transfer(collection, wallet, 'Mint', wallet, String(BigInt(packs) * BigInt(config.creditsPerPack)), config.mint, '');
+  const paymentAmount = BigInt(packs) * BigInt(option.pricePerPack);
+  const creditsAmount = BigInt(packs) * BigInt(option.creditsPerPack);
+  if (paymentAmount > BigInt(MAX_UINT64)) throw new Error('Payment total exceeds uint64 range.');
+  if (creditsAmount > BigInt(MAX_UINT64)) throw new Error('Credit total exceeds uint64 range.');
+  if (BigInt(packs) > BigInt(option.maxPacks)) throw new Error('Purchase exceeds maximum packs.');
+  return {
+    approvalId: option.approvalId,
+    packs,
+    paymentAmount: String(paymentAmount),
+    creditsAmount: String(creditsAmount),
+    maxPacks: option.maxPacks,
+    unlimited: option.unlimited
+  };
+}
+
+export function buildPurchaseSpendableCreditsMsg(collection: any, wallet: string, packs: string, approvalId?: string) {
+  const quote = quoteSpendableCreditPurchase(collection, packs, approvalId);
+  const mint = collection.collectionApprovals.find((item: any) => item.approvalId === quote.approvalId);
+  return transfer(collection, wallet, 'Mint', wallet, quote.creditsAmount, mint, '');
 }
 
 export function buildConsumeSpendableCreditsMsg(collection: any, request: SpendableCreditRequest) {

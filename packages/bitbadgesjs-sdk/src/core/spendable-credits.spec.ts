@@ -7,6 +7,7 @@ import {
   inspectSpendableCredit,
   buildConsumeSpendableCreditsMsg,
   buildPurchaseSpendableCreditsMsg,
+  quoteSpendableCreditPurchase,
   verifySpendableCreditReceipt
 } from './spendable-credits.js';
 
@@ -118,4 +119,32 @@ test('standards audit enforces spendable terms instead of treating the profile a
   expect(verifyStandardsCompliance(value).standardsChecked).toContain('Spendable Credit');
   value.collectionPermissions.canUpdateCollectionApprovals = [];
   expect(verifyStandardsCompliance(value).valid).toBe(false);
+});
+
+test('quotes and selects immutable fixed and scaled purchase tiers', () => {
+  const c = {
+    ...buildSpendableCredit({
+      provider: BURN_ADDRESS,
+      serviceId: 'test',
+      paymentDenom: 'USDC',
+      uri: 'ipfs://test',
+      purchaseOptions: [
+        { pricePerPack: '10', creditsPerPack: '3', purchaseType: 'fixed' },
+        { pricePerPack: '20', creditsPerPack: '8', purchaseType: 'scaled', maxPacks: '4' }
+      ]
+    }).value,
+    collectionId: '9'
+  };
+  expect(inspectSpendableCredit(c).purchaseOptions).toHaveLength(2);
+  expect(() => quoteSpendableCreditPurchase(c, '1')).toThrow('Select');
+  expect(() => quoteSpendableCreditPurchase(c, '2', 'spendable-purchase')).toThrow('maximum');
+  expect(() => quoteSpendableCreditPurchase(c, '5', 'spendable-purchase-2')).toThrow('maximum');
+  expect(() => quoteSpendableCreditPurchase(c, '0.5', 'spendable-purchase-2')).toThrow('whole');
+  expect(quoteSpendableCreditPurchase(c, '4', 'spendable-purchase-2')).toMatchObject({ paymentAmount: '80', creditsAmount: '32', unlimited: false });
+  expect(buildPurchaseSpendableCreditsMsg(c, BURN_ADDRESS, '2', 'spendable-purchase-2').value.transfers[0].prioritizedApprovals[0].approvalId).toBe(
+    'spendable-purchase-2'
+  );
+  const bad = structuredClone(c);
+  bad.collectionApprovals[1].approvalCriteria.coinTransfers[0].to = 'All';
+  expect(() => inspectSpendableCredit(bad)).toThrow();
 });

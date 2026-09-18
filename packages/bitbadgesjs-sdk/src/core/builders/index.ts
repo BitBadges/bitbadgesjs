@@ -49,4 +49,4 @@ export { buildPmBuyIntent, type PmBuyIntentParams } from './pm-buy-intent.js';
 export { resolveCoin, toBaseUnits, parseDuration, type ResolvedCoin } from './shared.js';
 export { getBuilderInputSchema, parseBuilderInput, listStandardBuilders } from './input-schemas.js';
 
-export { buildSpendableCredit, type SpendableCreditParams } from './spendable-credit.js';
+export { buildSpendableCredit, type SpendableCreditParams, type SpendableCreditPurchaseOption } from './spendable-credit.js';

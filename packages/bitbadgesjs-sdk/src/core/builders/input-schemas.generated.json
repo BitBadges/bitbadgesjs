@@ -669,6 +669,36 @@
           "type": "string",
           "description": "Positive whole service units per pack."
         },
+        "purchaseOptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "pricePerPack": {
+                "type": "string"
+              },
+              "creditsPerPack": {
+                "type": "string"
+              },
+              "purchaseType": {
+                "type": "string",
+                "enum": [
+                  "fixed",
+                  "scaled"
+                ]
+              },
+              "maxPacks": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "pricePerPack",
+              "creditsPerPack",
+              "purchaseType"
+            ]
+          }
+        },
         "expiresAt": {
           "type": "string",
           "description": "Inclusive Unix milliseconds; omitted means no expiry."
@@ -689,9 +719,7 @@
       "required": [
         "paymentDenom",
         "provider",
-        "serviceId",
-        "pricePerPack",
-        "creditsPerPack"
+        "serviceId"
       ]
     }
   },

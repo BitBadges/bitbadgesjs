@@ -49,3 +49,35 @@ describe('spendable credits', () => {
     expect(value.collectionApprovals[0].approvalCriteria.predeterminedBalances.incrementedBalances.maxScalingMultiplier).toBe('1');
   });
 });
+
+test('multiple purchase options bind exact packs and capped scaling independently', () => {
+  const { pricePerPack, creditsPerPack, ...base } = params;
+  const value = buildSpendableCredit({
+    ...base,
+    purchaseOptions: [
+      { pricePerPack: '10', creditsPerPack: '3', purchaseType: 'fixed' },
+      { pricePerPack: '20', creditsPerPack: '8', purchaseType: 'scaled', maxPacks: '4' }
+    ]
+  }).value;
+  expect(value.collectionApprovals).toHaveLength(3);
+  const [fixed, scaled, consume] = value.collectionApprovals;
+  expect(fixed.approvalCriteria.predeterminedBalances.incrementedBalances.allowAmountScaling).toBe(false);
+  expect(scaled.approvalCriteria.predeterminedBalances.incrementedBalances.maxScalingMultiplier).toBe('4');
+  expect(scaled.approvalId).toBe('spendable-purchase-2');
+  expect(consume.approvalId).toBe('spendable-consume');
+});
+
+test('rejects ambiguous, empty, fractional and overflowing purchase options', () => {
+  const { pricePerPack, creditsPerPack, ...base } = params;
+  const option = { pricePerPack: '10', creditsPerPack: '3', purchaseType: 'scaled' as const };
+  for (const purchaseOptions of [
+    [],
+    [{ ...option, maxPacks: '0' }],
+    [{ ...option, maxPacks: '1.5' }],
+    [{ ...option, maxPacks: MAX_UINT64 }],
+    [{ ...option, purchaseType: 'fixed', maxPacks: '2' }]
+  ]) {
+    expect(() => buildSpendableCredit({ ...base, purchaseOptions } as any)).toThrow();
+  }
+  expect(() => buildSpendableCredit({ ...params, purchaseOptions: [option] })).toThrow();
+});
