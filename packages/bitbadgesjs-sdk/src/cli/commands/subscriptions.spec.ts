@@ -10,14 +10,23 @@ describe('subscriptionsCommand shape', () => {
     const names = subscriptionsCommand.commands.map((c) => c.name()).sort();
     // Per-standard `build` removed in CLI v2 (#0399); use `bb build subscription`.
     expect(names).toEqual([
+      'accept',
+      'cancel-renewal',
+      'config',
+      'periods',
+      'quote',
+      'quote-status',
+      'record-submission',
+      'renewal',
       'cancel',
+      'change-renewal',
       'charge-due',
       'claim',
       'enable-renewal',
       'list',
       'status',
       'subscribe'
-    ]);
+    ].sort());
   });
 
   it('charge-due requires --creator and accepts --tier + --dry-run', () => {

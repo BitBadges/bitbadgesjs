@@ -1,3 +1,4 @@
+import { inspectSubscriptionUpgradeCollection } from './subscriptionUpgradeNative.js';
 import { iCollectionDoc } from '@/api-indexer/docs-types/interfaces.js';
 import { GO_MAX_UINT_64 } from '@/common/math.js';
 import type {
@@ -104,6 +105,7 @@ export const doesCollectionFollowSubscriptionProtocol = (collection?: Readonly<i
     return false;
   }
 
+  if (inspectSubscriptionUpgradeCollection(collection)) return true;
   const subscriptionApprovals = collection.collectionApprovals.filter((approval) => isSubscriptionFaucetApproval(approval));
   if (subscriptionApprovals.length < 1) {
     return false;
@@ -411,8 +413,8 @@ const RECURRING_CHARGE_PERIOD_CAP_MS = 604800000n; // 1 week — caps short-inte
 
 export interface UserRecurringApprovalArgs {
   /** The faucet (collection-side) subscription approval this recurring approval consents to. */
-  subscriptionApproval: iCollectionApprovalWithDetails<bigint>;
-  /** First charge window's start time, in ms since epoch. */
+  subscriptionApproval: iCollectionApproval<bigint>;
+  /** First ownership interval's start time, in ms since epoch. Payment may occur before this time. */
   firstIntervalStartTime: bigint;
   /** Optional tip added on top of the base subscription amount each interval. Pass 0n for no tip. */
   ubadgeTipAmount: bigint;
@@ -458,7 +460,7 @@ export function userRecurringApproval(args: UserRecurringApprovalArgs): iUserInc
 
   let subscriptionAmount = 0n;
   for (const coinTransfer of subscriptionApproval.approvalCriteria?.coinTransfers ?? []) {
-    subscriptionAmount += BigInt(coinTransfer.coins[0].amount);
+    for (const coin of coinTransfer.coins) subscriptionAmount += BigInt(coin.amount);
   }
 
   // Return proto-shape iUserIncomingApproval (no fromList / initiatedByList

@@ -50,6 +50,14 @@ test('rejects incompatible networks and missing business fields before invoking 
   expect(execute).not.toHaveBeenCalled();
 });
 
+test('renewal changes require both tiers and expose the same CLI proposal', async () => {
+  const execute = jest.fn().mockResolvedValueOnce({ ok: true, data: { catalogHash: 'catalog' } }).mockResolvedValueOnce({ ok: true, data: { messages: [], renewalChange: { effectiveAt: '1000' } } });
+  const tools = createStandardActionTools(execute, () => 'catalog');
+  await expect(tools.standard_subscriptions_change_renewal.run({ collectionId: '1', creator: 'payer', tier: 'old' })).rejects.toThrow();
+  await expect(tools.standard_subscriptions_change_renewal.run({ collectionId: '1', creator: 'payer', tier: 'old', toTier: 'new' })).resolves.toMatchObject({ ok: true });
+  expect(execute.mock.calls[1][0]).toEqual(expect.arrayContaining(['subscriptions', 'change-renewal', '--to-tier=new']));
+});
+
 test('spendable purchase tools expose explicit tier selection', () => {
   const tools = createStandardActionTools(jest.fn(), () => 'catalog');
   expect(tools.standard_spendable_credits_purchase.tool.inputSchema.properties).toHaveProperty('approvalId');
@@ -66,3 +74,15 @@ test('spendable quote exposes unsigned exact tier selection through MCP', async 
   expect(execute.mock.calls[1][0]).toContain('--approval-id=spendable-purchase-2');
   expect(execute.mock.calls[1][0].slice(0, 2)).toEqual(['spendable-credits', 'quote']);
 });
+
+ test('operator subscriptions expose all quote, period, consent and unsigned acceptance actions',async()=>{
+ const execute=jest.fn().mockResolvedValue({ok:true,data:{catalogHash:'catalog'}});const tools=createStandardActionTools(execute,()=> 'catalog');
+ for(const action of ['config','quote','quote_status','periods','accept','record_submission','renewal','cancel_renewal'])expect(tools).toHaveProperty(`standard_subscriptions_${action}`);
+ const accept=tools.standard_subscriptions_accept;
+ expect(accept.tool.inputSchema.properties).toHaveProperty('withSession');
+ for(const key of ['rpc','lcd','url','apiKey'])expect(accept.tool.inputSchema.properties).not.toHaveProperty(key);
+ await tools.standard_subscriptions_quote.run({collectionId:'1',creator:'payer',withSession:true,kind:'upgrade',tokenId:'2',requestId:'stable'});
+ expect(execute.mock.calls[1][0]).toEqual(expect.arrayContaining(['subscriptions','quote','--with-session','--kind=upgrade','--token-id=2']));
+ });
+
+test('membership actions expose explicit Manager and member inputs',()=>{const tools=createStandardActionTools(jest.fn(),()=> 'catalog');for(const action of ['add','remove'])expect(tools[`standard_address_lists_${action}`].tool.inputSchema.required).toEqual(expect.arrayContaining(['collectionId','creator','address']));});

@@ -1,3 +1,6 @@
+import { registerSubscriptionV2Commands } from './subscriptions-v2.js';
+import { inspectSubscriptionUpgradeCollection } from '../../core/subscriptionUpgradeNative.js';
+import { inspectSubscriptionV2RenewalApproval } from '../../core/subscriptionUpgradeRenewal.js';
 /**
  * `bitbadges-cli subscriptions` — end-user surface for the Subscriptions
  * standard, mirroring the frontend's `SubscriptionLayout`.
@@ -47,6 +50,8 @@ import { UintRangeArray } from '../../core/uintRanges.js';
 import { BalanceDoc } from '../../api-indexer/docs-types/docs.js';
 import { UserIncomingApproval } from '../../core/approvals.js';
 import { BigIntify } from '../../common/string-numbers.js';
+import { planSubscriptionChange } from '../../core/subscriptionPlanChange.js';
+import { BalanceArray } from '../../core/balances.js';
 
 /**
  * Parse a non-negative integer CLI flag into a bigint. Throws via
@@ -102,6 +107,7 @@ function validateOrExit(collection: any, ctx: string): void {
 }
 
 function listFaucets(collection: any): any[] {
+  if(inspectSubscriptionUpgradeCollection(collection))throw new Error('Operator subscriptions use quote / accept, renewal, and cancel-renewal actions.');
   return (collection.collectionApprovals ?? []).filter((a: any) => isSubscriptionFaucetApproval(a));
 }
 
@@ -230,6 +236,8 @@ addOutputFlags(
   try {
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'subscriptions list');
+    const profile=inspectSubscriptionUpgradeCollection(collection);
+    if(profile){emit({collectionId:String(collectionId),...profile},opts);return;}
     const faucets = listFaucets(collection);
     const tiers = faucets.map((f: any) => {
       const coinTransfer = f.approvalCriteria?.coinTransfers?.[0];
@@ -269,7 +277,6 @@ addOutputFlags(
     const address = requireBb1Address(opts.address, '--address');
     const collection = await fetchCollection(collectionId, opts);
     validateOrExit(collection, 'subscriptions status');
-    const faucets = listFaucets(collection);
 
     const response = await fetchUserBalances(String(collectionId), address, opts);
     const state = response?.balance ?? response;
@@ -280,6 +287,9 @@ addOutputFlags(
     const userIncomingApprovals = state.incomingApprovals.map((approval: any) => new UserIncomingApproval(approval).convert(BigIntify));
     const now = BigInt(Date.now());
 
+    const profile=inspectSubscriptionUpgradeCollection(collection);
+    if(profile){emit({collectionId:String(collectionId),address,version:2,tiers:profile.tiers.map(t=>({...t,...getSubscriptionAccessStatus(t.tokenId,userBalances,now)})),renewalConsents:userIncomingApprovals.map((a:any)=>({approvalId:a.approvalId,terms:inspectSubscriptionV2RenewalApproval(a,profile)})).filter((a:any)=>a.terms)},opts);return;}
+    const faucets=listFaucets(collection);
     const tiers = faucets.map((faucet: any) => {
       const tokenId = BigInt(faucet.tokenIds?.[0]?.start ?? 1);
       const access = getSubscriptionAccessStatus(tokenId, userBalances, now);
@@ -409,6 +419,33 @@ Examples:
 `);
 
 // ── subscriptions cancel ─────────────────────────────────────────────────
+
+addOutputFlags(addNetworkFlags(subscriptionsCommand.command('change-renewal')
+  .description('Prepare a future renewal tier change, preserving paid access. No proration or refund. Review the effective date and payment window before deploying; a concurrent prior renewal can overlap.')
+  .argument('<collection-id>', 'Subscription collection ID')
+  .requiredOption('--creator <address>', 'Subscriber who owns the access and authorizes payment')
+  .requiredOption('--tier <approvalId>', 'Current tier')
+  .requiredOption('--to-tier <approvalId>', 'New tier')
+  .option('--tip <base-units>', 'Tip per renewal in target payment denomination base units', '0')
+  .option('--approval-id <id>', 'Fresh consent identity')))
+  .action(async (collectionId: string, opts: NetworkFlags & OutputFlags & { creator: string; tier: string; toTier: string; tip?: string; approvalId?: string }) => {
+    try {
+      const creator = requireBb1AddressStrict(opts.creator, '--creator');
+      const collection = await fetchCollection(collectionId, opts);
+      validateOrExit(collection, 'subscriptions change-renewal');
+      const source = pickFaucet(listFaucets(collection), opts.tier, 'subscriptions change-renewal');
+      const target = pickFaucet(listFaucets(collection), opts.toTier, 'subscriptions change-renewal');
+      const result = await fetchUserBalances(collectionId, creator, opts);
+      const balance = result?.balance ?? result;
+      if (!Array.isArray(balance?.balances) || !Array.isArray(balance?.incomingApprovals)) throw new Error('Missing access or incoming approval state. Retry before changing renewal consent.');
+      const now = BigInt(Date.now());
+      const plan = planSubscriptionChange({ source, target, balances: BalanceArray.From(balance.balances).convert(BigIntify), incomingApprovals: balance.incomingApprovals.map((a: any) => new UserIncomingApproval(a).convert(BigIntify)), approvalId: resolveApprovalId(opts), tip: parseNonNegativeIntFlag(opts.tip, '--tip'), now });
+      emit({ messages: [buildUpdateApprovalsMsg(creator, collectionId, plan.incomingApprovals)], renewalChange: {
+        effectiveAt: plan.effectiveAt.toString(), chargeStartsAt: plan.chargeStartsAt.toString(), reviewExpiresAt: (now + 60000n).toString(),
+        warning: 'Consent only: no refund or proration. Existing paid access remains. A prior renewal mined first may overlap. Rebuild against fresh state before signing; review expiry is not enforced by MsgUpdateUserApprovals.'
+      } }, opts);
+    } catch (err) { emitError(err); }
+  });
 
 addDeployOptions(
 addOutputFlags(
@@ -728,3 +765,5 @@ Examples:
 
 // Per-standard `build` subcommand removed in CLI v2 (#0399).
 // Use `bb build subscription ...` (the canonical builder) instead.
+
+registerSubscriptionV2Commands(subscriptionsCommand);

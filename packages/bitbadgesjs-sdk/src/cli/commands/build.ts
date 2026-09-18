@@ -480,7 +480,7 @@ sharedOpts(
   buildCommand
     .command('subscription')
     .description('Create a recurring subscription collection. Metadata: pass --uri OR --name + --image + --description.')
-    .requiredOption('--interval <duration>', 'Interval: daily, monthly, annually, or shorthand (30d)')
+    .option('--interval <duration>', 'Interval: daily, monthly, annually, or shorthand (30d)')
     .option('--price <amount>', 'Price per interval (display units) — use with --denom/--recipient')
     .option('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
     .option('--recipient <address>', 'Payout address (bb1...)')

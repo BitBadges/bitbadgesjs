@@ -116,6 +116,10 @@ describe('extractStandards', () => {
 describe('inferFromStandards (deterministic fast-path)', () => {
   const allowedAll = new Set(getTokenTypeSkillIds());
 
+  it.each([['Subscriptions','subscription'],['Custom-2FA','custom-2fa'],['Quests','quest'],['Spendable Credit','spendable-credit']])('recognizes canonical builder standard %s', (standard,skill)=>{
+    expect(inferFromStandards([standard],allowedAll)).toBe(skill);
+  });
+
   it('maps Smart Token → smart-token', () => {
     expect(inferFromStandards(['Smart Token'], allowedAll)).toBe('smart-token');
   });

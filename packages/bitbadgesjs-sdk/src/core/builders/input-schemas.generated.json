@@ -729,6 +729,78 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "version": {
+          "type": "string",
+          "enum": [
+            "1",
+            "2"
+          ],
+          "description": "Version 2 uses exact operator offers and full-period price differences for upgrades."
+        },
+        "operatorProfile": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "operator": {
+              "type": "string"
+            },
+            "escrowStoreId": {
+              "type": "string"
+            },
+            "denom": {
+              "type": "string"
+            },
+            "duration": {
+              "type": "string"
+            },
+            "tiers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "tokenId": {
+                    "type": "string"
+                  },
+                  "price": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "tokenId",
+                  "price"
+                ]
+              }
+            },
+            "payouts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "recipient": {
+                    "type": "string"
+                  },
+                  "weightBps": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "recipient",
+                  "weightBps"
+                ]
+              }
+            }
+          },
+          "required": [
+            "operator",
+            "escrowStoreId",
+            "denom",
+            "duration",
+            "tiers",
+            "payouts"
+          ]
+        },
         "interval": {
           "type": "string"
         },
@@ -790,9 +862,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "interval"
-      ]
+      "required": []
     }
   },
   "vault": {

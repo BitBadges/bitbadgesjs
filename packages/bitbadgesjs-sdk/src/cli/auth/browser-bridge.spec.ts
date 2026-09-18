@@ -1,4 +1,5 @@
 import http from 'http';
+import { jest as clock } from '@jest/globals';
 import { bridgeSign } from './browser-bridge.js';
 
 const signer = 'bb1p0rrel3365scadq5k9pv0x0zp9j22js6dnw70d';
@@ -85,8 +86,19 @@ describe('browser bridge loopback transport', () => {
     expect(await result).toMatchObject({ signature: 'legacy-signature', address: signer });
   });
   test('timeout reports uncertainty and closes listener', async () => {
-    const { result } = await launch('tx', 30);
-    await expect(result).resolves.toMatchObject({ outcome: 'unknown', requestId: 'a'.repeat(32), error: expect.stringMatching(/may.*submitted|submission.*unknown/i) });
+    clock.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+    try {
+      const { callback, result } = await launch();
+      const status = new URL(callback);
+      status.pathname = '/status';
+      expect(await get(status.toString())).toBe(200);
+      clock.advanceTimersByTime(3000);
+      await expect(result).resolves.toMatchObject({ outcome: 'unknown', requestId: 'a'.repeat(32), error: expect.stringMatching(/may.*submitted|submission.*unknown/i) });
+      await expect(get(status.toString())).rejects.toMatchObject({ code: 'ECONNREFUSED' });
+    } finally {
+      clock.runOnlyPendingTimers();
+      clock.useRealTimers();
+    }
   });
   test('transaction mode refuses old unbound requests before opening a listener', async () => {
     await expect(bridgeSign({ mode: 'tx', payload: { chain: 'cosmos', txsInfo: [] }, frontendUrl: 'https://example.invalid', baseUrl: 'https://example.invalid', noOpen: true })).rejects.toThrow();

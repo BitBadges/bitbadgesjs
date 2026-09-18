@@ -849,6 +849,14 @@ When creating a subscription collection, you MUST follow these EXACT requirement
 
 ### Preferred path: preset (one short tool call)
 
+For immediate upgrades, use the same \`build_subscription\` tool with \`version: "2"\` and \`operatorProfile\` (operator, escrowStoreId, denom, duration, tiers with tokenId/price, payouts with recipient/weightBps; numeric values are base-unit strings). Obtain the configured operator using \`standard_subscriptions_config\` before creating the collection. This freezes an operator-managed exact-offer profile rather than the legacy faucet below.
+
+Use \`standard_subscriptions_quote\`, \`standard_subscriptions_quote_status\`, \`standard_subscriptions_periods\`, and \`standard_subscriptions_accept\` for v2 purchases/upgrades. Quote actions require an authenticated session and explicit \`withSession: true\`. Acceptance reads current chain state and recomputes price, payout, ownership, escrow and approval constraints locally; it emits unsigned messages only. It removes previous v2 renewal consent; explicit \`renewal: "target"\` plus a new \`approvalId\` and \`expiresAt\` adds target consent in the same proposal. Otherwise enable the next billing boundary with \`standard_subscriptions_renewal\`; revoke with \`standard_subscriptions_cancel_renewal\`. After an independently signed transaction, \`standard_subscriptions_record_submission\` supplies a hash hint for operator verification, not confirmation.
+
+Upgrades charge the FULL period price difference for every preserved paid period, retain its identity and end time, and exchange old access atomically. There is no time-prorated discount. Service usage must share the same period ledger; possession alone must not reset quotas. The quote operator is trusted for receipt provenance and escrow admission and must remain available. V1 collections keep their existing faucets and consent flow; do not retrofit a v2 offer onto a v1 collection.
+
+The following preset is for **legacy v1** creation only.
+
 The faucet approval is fully canonical. Use \`subscription.faucet\`:
 
 \`\`\`
@@ -2202,6 +2210,8 @@ The frontend identifies address list approvals by their EXACT approvalIds. Using
 \`\`\`
 
 ### Invariants
+
+Manage supported lists with \`bb address-lists add COLLECTION --creator MANAGER --address MEMBER\` and \`bb address-lists remove COLLECTION --creator MANAGER --address MEMBER\` (MCP: \`standard_address_lists_add\` / \`standard_address_lists_remove\`). These read membership balances, reject duplicate additions, and remove the entire canonical membership amount, including legacy duplicates. Custom membership rules or partial-time balances require manual token-view management. Proposals remain unsigned; re-read state after review before signing. Recipient incoming approval requirements still apply.
 
 DO NOT set \`noForcefulPostMintTransfers: true\` on address-list collections. That invariant would block manager-remove from burning tokens (since its \`overridesFromOutgoingApprovals: true\` is only chain-allowed when \`fromListId\` is exactly "Mint"). The manager MUST be able to forcibly burn a list member's token, so leave that invariant off. Other default invariants (e.g. \`noCustomOwnershipTimes\`) are fine.
 
