@@ -41,6 +41,21 @@ export function buildSubscriptionV2RenewalApproval({
     ownershipTimes: full,
     transferTimes,
     approvalCriteria: {
+      mustPrioritize: true,
+      approvalAmounts: {
+        overallApprovalAmount: 0n,
+        perToAddressApprovalAmount: 0n,
+        perFromAddressApprovalAmount: 0n,
+        perInitiatedByAddressApprovalAmount: 0n,
+        amountTrackerId: '',
+        resetTimeIntervals: { startTime: 0n, intervalLength: 0n }
+      },
+      autoDeletionOptions: {
+        afterOneUse: false,
+        afterOverallMaxNumTransfers: false,
+        allowCounterpartyPurge: false,
+        allowPurgeIfExpired: false
+      },
       coinTransfers: [
         {
           to: '',

@@ -57,3 +57,21 @@ it('rejects invalid tiers, reused generic identifiers and overflowing periods', 
   expect(() => buildSubscriptionV2RenewalApproval({ ...args, approvalId: 'generic' })).toThrow();
   expect(() => buildSubscriptionV2RenewalApproval({ ...args, firstIntervalStartTime: 18446744073709551615n })).toThrow();
 });
+
+it('recognizes the canonical default objects populated by the native chain', () => {
+  const approval = buildSubscriptionV2RenewalApproval(args);
+  approval.approvalCriteria = {
+    ...approval.approvalCriteria,
+    mustPrioritize: true,
+    approvalAmounts: {
+      overallApprovalAmount: 0n,
+      perToAddressApprovalAmount: 0n,
+      perFromAddressApprovalAmount: 0n,
+      perInitiatedByAddressApprovalAmount: 0n,
+      amountTrackerId: '',
+      resetTimeIntervals: { startTime: 0n, intervalLength: 0n }
+    },
+    autoDeletionOptions: { afterOneUse: false, afterOverallMaxNumTransfers: false, allowCounterpartyPurge: false, allowPurgeIfExpired: false }
+  };
+  expect(inspectSubscriptionV2RenewalApproval(approval, profile)).not.toBeNull();
+});
