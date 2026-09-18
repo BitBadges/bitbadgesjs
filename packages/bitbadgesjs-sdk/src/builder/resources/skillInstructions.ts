@@ -1770,6 +1770,35 @@ add_preset_approval({ presetId: "tradable.transferable", params: {} })
 - Legacy names "Tradable" and "DefaultDisplayCurrency" still work for existing collections`
   },
   {
+    id: 'spendable-credit',
+    name: 'Spendable Credit',
+    category: 'token-type',
+    description:
+      'Immutable whole service credits: purchase fixed or scaled packs, then consume on chain for a provider-issued request. Nontransferable; requires provider receipt verification.',
+    referenceCollectionIds: [],
+    summary: `Required standards: ["Spendable Credit"]
+
+- Build with build_standard type spendable-credit or bb build spendable-credit.
+- Provider, serviceId, payment asset, expiry and approvals are immutable.
+- Purchase options are fixed or scaled whole packs, with optional per-purchase maximum; omitted maximum uses safe uint64 limits.
+- Only the holder may consume whole credits. No peer transfer, wrapper, merchant debit or automatic refund.
+- Service requires confirmed receipt verification and durable authenticated request deduplication, never a sign-in balance.`,
+    instructions: `## Spendable Credit Configuration
+
+Use the dedicated builder; do not retrofit consumption into Credit Token collections.
+Set provider (valid bb1 address), serviceId, paymentDenom and metadata. Supply purchaseOptions with pricePerPack (payment base units), creditsPerPack (whole credits), purchaseType (fixed or scaled), and optional maxPacks. Legacy top-level pricePerPack and creditsPerPack represent one unlimited scaled option; do not combine both forms. Optional expiresAt is inclusive Unix milliseconds and limits purchase and consumption.
+
+The profile freezes approvals, uses only token 1 and permanent ownership times, prevents peer transfers and wrappers, and permits only paid mint plus holder-authorized burn. Do not add custom approvals or permission overrides: strict inspection must reject them.
+
+Read terms with bb spendable-credits show. Quote with bb spendable-credits quote COLLECTION --units PACKS, and purchase with bb spendable-credits purchase COLLECTION --creator WALLET --units PACKS. Multiple options require --approval-id. Packs must be whole; do not round user payments or fractional service units. Per-purchase caps do not limit lifetime purchases.
+
+Consume with bb spendable-credits consume COLLECTION --creator WALLET --units CREDITS --request-id REQUEST. First obtain an authenticated provider-issued request. The provider must fetch a successful confirmed native execution, verify holder, collection, provider, service, exact units and request ID, and atomically deduplicate request and receipt. EVM receipt status alone is insufficient; verified native tokenization execution is required. Never put private request credentials in transaction memos or public URLs.
+
+After ambiguous submission, reconcile the same transaction rather than burn again. A burn does not atomically deliver an external service: providers need idempotent fulfillment, durable retries and a disclosed failure policy. Expired credits cannot be spent, but prior confirmed receipts remain claimable. There is no standing debit consent to revoke.
+
+See docs/spendable-credits.md and examples/spendable-credit-provider for the authenticated durable integration. The increment-only Credit Token standard remains available when the provider tracks usage separately.`
+  },
+  {
     id: 'credit-token',
     name: 'Credit Token',
     category: 'token-type',
@@ -1790,7 +1819,7 @@ add_preset_approval({ presetId: "tradable.transferable", params: {} })
 
 ### Concept
 
-A Credit Token is an increment-only, non-transferable fungible token that users purchase with an ICS20 denom (USDC, ATOM, BADGE, etc.). Tokens serve as both proof of payment and consumable credits. This is a one-way system — tokens can only be minted (incremented), never sold back, burned, or transferred between users. For a 1:1 backed token with on-chain transferability, use the Smart Token standard instead.
+A Credit Token is an increment-only, non-transferable fungible token that users purchase with an ICS20 denom (USDC, ATOM, BADGE, etc.). Tokens serve as cumulative proof of payment; remaining usage is tracked separately by the provider. For holder-authorized on-chain consumption with verified service receipts, use Spendable Credit. This is a one-way system — tokens can only be minted (incremented), never sold back, burned, or transferred between users. For a 1:1 backed token with on-chain transferability, use the Smart Token standard instead.
 
 ### Payment Flow
 

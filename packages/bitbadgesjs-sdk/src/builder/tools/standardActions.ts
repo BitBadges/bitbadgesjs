@@ -19,7 +19,7 @@ const surfaces: [Command, string[]][] = [
   [subscriptionsCommand, ['list', 'status', 'claim', 'enable-renewal', 'cancel', 'subscribe', 'charge-due']],
   [standardsCommand, ['inspect']],
   [smartTokensCommand, ['list', 'show', 'status', 'deposit', 'withdraw']],
-  [spendableCreditsCommand, ['show', 'purchase', 'consume']],
+  [spendableCreditsCommand, ['show', 'quote', 'purchase', 'consume']],
   [creditTokensCommand, ['list', 'show', 'quote', 'purchase']],
   [productsCommand, ['list', 'show', 'purchase']],
   [auctionsCommand, ['list', 'show', 'status', 'place-bid', 'cancel-bid', 'accept-bid']],

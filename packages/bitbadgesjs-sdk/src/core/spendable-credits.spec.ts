@@ -1,3 +1,6 @@
+import { detectType, buildTypeExplanation, buildStandardExplanations } from './interpret-shared.js';
+import { getTokenTypeSkillIds, inferFromStandards } from '../builder/agent/tokenTypeInference.js';
+import { inspectStandardCollection } from './standard-inspection.js';
 import { verifyStandardsCompliance } from '../api-indexer/verify-standards.js';
 import { BitBadgesCollection } from '../api-indexer/BitBadgesCollection.js';
 import { AddressList } from './addressLists.js';
@@ -147,4 +150,18 @@ test('quotes and selects immutable fixed and scaled purchase tiers', () => {
   const bad = structuredClone(c);
   bad.collectionApprovals[1].approvalCriteria.coinTransfers[0].to = 'All';
   expect(() => inspectSpendableCredit(bad)).toThrow();
+});
+
+test('spendable credits have distinct discovery, interpretation and inspection', () => {
+  expect(getTokenTypeSkillIds()).toContain('spendable-credit');
+  expect(JSON.stringify(inferFromStandards(['Spendable Credit'], new Set(getTokenTypeSkillIds())))).toContain('spendable-credit');
+  expect(detectType(['Spendable Credit'], false)).toBe('Spendable Credit');
+  expect(buildTypeExplanation('Spendable Credit', 0n)).toContain('consume');
+  expect(buildStandardExplanations(['Spendable Credit'])[0]).toContain('receipt');
+  const result = inspectStandardCollection(collection() as any, 'spendable-credit');
+  expect(result.configurationSupported).toBe(true);
+  expect(result.actions.consume.approvalIds).toEqual(['spendable-consume']);
+  const malformed = collection();
+  malformed.collectionApprovals.push({ ...malformed.collectionApprovals[0], approvalId: 'free-mint' });
+  expect(inspectStandardCollection(malformed as any, 'spendable-credit').configurationSupported).toBe(false);
 });

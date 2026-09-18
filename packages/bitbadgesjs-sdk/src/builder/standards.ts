@@ -24,7 +24,7 @@ export type StandardDescriptor = {
 type Lifecycle = {
   summary: string;
   actionGroup?: string;
-  inspectionFamily?: 'smart-token' | 'credit-token' | 'address-list';
+  inspectionFamily?: 'smart-token' | 'credit-token' | 'address-list' | 'spendable-credit';
   constraints: string[];
   unsupported: string[];
   cliHelp?: string[];
@@ -92,6 +92,7 @@ const lifecycle: Record<string, Lifecycle> = {
     unsupported: ['Automatic plan switching, prorations, and refunds of paid access.']
   },
   'spendable-credit': {
+    inspectionFamily: 'spendable-credit',
     summary: 'Paid whole credits with holder-authorized on-chain consumption and provider receipt verification.',
     actionGroup: 'spendable_credits',
     constraints: [

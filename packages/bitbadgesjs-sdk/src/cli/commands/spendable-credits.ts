@@ -3,7 +3,12 @@ import { addIndexerNetworkOptions, addIndexerOutputOptions, callIndexer, emitInd
 import { normalizeCollection } from '../utils/collection-options.js';
 import { addDeployOptions, runEmitOrDeploy } from '../utils/deploy-options.js';
 import { requireBb1AddressStrict } from '../utils/address.js';
-import { inspectSpendableCredit, buildPurchaseSpendableCreditsMsg, buildConsumeSpendableCreditsMsg } from '../../core/spendable-credits.js';
+import {
+  inspectSpendableCredit,
+  quoteSpendableCreditPurchase,
+  buildPurchaseSpendableCreditsMsg,
+  buildConsumeSpendableCreditsMsg
+} from '../../core/spendable-credits.js';
 
 export const spendableCreditsCommand = new Command('spendable-credits').description(
   'Inspect, purchase, or consume whole service credits. Consumption is irreversible; delivery requires provider receipt acceptance.'
@@ -19,6 +24,26 @@ common(
 ).action(async (id: string, opts: any) => {
   try {
     emitIndexerResult({ collectionId: id, ...inspectSpendableCredit(await load(id, opts)) }, opts);
+  } catch (error) {
+    emitIndexerError(error);
+  }
+});
+
+common(
+  spendableCreditsCommand
+    .command('quote')
+    .argument('<collection-id>', 'Collection ID')
+    .description('Quote exact whole-pack payment and credits without signing.')
+    .requiredOption('--units <packs>', 'Positive whole packs')
+    .option('--approval-id <id>', 'Purchase option approval ID; required for multiple options')
+).action(async (id: string, opts: any) => {
+  try {
+    const collection = await load(id, opts);
+    const { paymentDenom, provider, serviceId } = inspectSpendableCredit(collection);
+    emitIndexerResult(
+      { collectionId: id, paymentDenom, provider, serviceId, ...quoteSpendableCreditPurchase(collection, opts.units, opts.approvalId) },
+      opts
+    );
   } catch (error) {
     emitIndexerError(error);
   }

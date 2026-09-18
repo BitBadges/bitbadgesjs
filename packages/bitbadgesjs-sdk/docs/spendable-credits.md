@@ -12,6 +12,8 @@ bb build spendable-credit --payment-denom USDC \
   --provider bb1YOUR_PROVIDER --service-id images \
   --price-per-pack 1000000 --credits-per-pack 10 --uri ipfs://YOUR_METADATA
 bb spendable-credits show COLLECTION_ID
+bb standards inspect COLLECTION_ID --family spendable-credit
+bb spendable-credits quote COLLECTION_ID --units 2
 bb spendable-credits purchase COLLECTION_ID --creator bb1YOUR_WALLET --units 2
 bb spendable-credits consume COLLECTION_ID --creator bb1YOUR_WALLET \
   --units 3 --request-id PROVIDER_ISSUED_REQUEST_ID
@@ -85,3 +87,5 @@ for exact payment and credit totals, then
 `buildPurchaseSpendableCreditsMsg(collection, wallet, packs, approvalId)`.
 All options share the immutable provider, service, payment asset, and expiry;
 consumption authorization and receipt verification are unchanged.
+
+The agent skill `spendable-credit` is discoverable through the token-type skill catalog and standard inference. `bb standards inspect --family spendable-credit` validates the complete immutable profile and reports supported purchase/consume approval IDs; it does not prove live eligibility. MCP quote uses `standard_spendable_credits_quote`.
