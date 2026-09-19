@@ -1,0 +1,20 @@
+{
+  "typeUrl": "/tokenization.MsgUpdateCollection",
+  "value": {
+    "creator": "bb1e0w5t53nrq7p66fye6c8p0ynyhf6y24lke5430",
+    "collectionId": "1",
+    "updateCollectionMetadata": true,
+    "mintEscrowCoinsToTransfer": [],
+    "cosmosCoinWrapperPathsToAdd": [],
+    "aliasPathsToAdd": [],
+    "collectionMetadata": {"uri": "ipfs://METADATA_REVISED", "customData": ""},
+    "updateManager": false,
+    "updateCollectionApprovals": false,
+    "updateCollectionPermissions": false,
+    "updateValidTokenIds": false,
+    "updateTokenMetadata": false,
+    "updateStandards": false,
+    "updateCustomData": false,
+    "updateIsArchived": false
+  }
+}

@@ -1,4 +1,4 @@
-import { compareReports, summarizeTrials, redactTrace } from './reports.js';
+import { compareReports, summarizeTrials, redactTrace, compareTrialReports } from './reports.js';
 
 const report = (passed = true) => ({
   version: 1,
@@ -86,6 +86,25 @@ describe('repeated-trial metrics', () => {
     outputTokens: 5,
     costUsd: 0.001,
     ...patch
+  });
+  it('compares identical repeated case sets and rejects missing or contradictory evidence', () => {
+    const make = (trials: unknown[]) => ({
+      version: 1,
+      scope: 'fresh-agent-behavior',
+      trials,
+      metrics: summarizeTrials(trials),
+      provenance: { caseSetSha256: 'a'.repeat(64), provider: 'fixture', model: 'fixture-v1', settings: { maxAttempts: 2 } }
+    });
+    const before = make([trial()]);
+    const after = make([trial({ status: 'fail', firstAttemptPassed: false })]);
+    expect(compareTrialReports(before, after)).toMatchObject({ compatible: true, passed: false, successRateDelta: -1 });
+    expect(compareTrialReports(before, make([trial({ caseId: 'other' })])).compatible).toBe(false);
+    const forged = make([trial()]);
+    forged.metrics.successRate = 0;
+    expect(() => compareTrialReports(before, forged)).toThrow();
+  });
+  it('retains observed false assurances even when a later infrastructure error ends the trial', () => {
+    expect(summarizeTrials([trial({ status: 'infrastructure-error', falseAssurance: true })]).falseAssurances).toBe(1);
   });
   it('separates product failures and infrastructure errors while retaining all attempts', () => {
     const metrics = summarizeTrials([

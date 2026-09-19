@@ -121,6 +121,8 @@
     "test:agent-golden": "bun scripts/check-agent-golden.ts",
     "test:agent-auditor": "bun scripts/check-agent-auditor.ts",
     "eval:compare": "bun scripts/compare-agent-evals.ts",
+    "test:agent-behavior": "bun scripts/check-agent-behavior.ts",
+    "eval:agents": "bun scripts/run-agent-evals.ts",
     "test:watch": "jest --watch",
     "test:ci": "jest --coverage --ci --reporters='jest-junit'",
     "coverage": "jest --coverage",
@@ -135,6 +137,7 @@
     "gen:customtypes": "bun scripts/generate-customtype-fields.ts"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "0.126.0",
     "@babel/core": "^7.29.0",
     "@babel/preset-typescript": "^7.28.5",
     "@bufbuild/buf": "^1.67.0",

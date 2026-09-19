@@ -1,0 +1,17 @@
+{
+  "executable": "current-runtime",
+  "args": ["builtin-worker"],
+  "provider": "anthropic",
+  "model": "SET_EXPLICIT_MODEL_VERSION",
+  "credentialEnv": ["ANTHROPIC_API_KEY"],
+  "repetitions": 3,
+  "maxAttempts": 2,
+  "timeoutMs": 120000,
+  "maxOutputBytes": 2000000,
+  "maxInputTokens": 200000,
+  "maxOutputTokens": 12000,
+  "maxRunMs": 1800000,
+  "maxCostUsd": 0,
+  "inputUsdPerMillion": 0,
+  "outputUsdPerMillion": 0
+}

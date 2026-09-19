@@ -149,7 +149,7 @@ export function summarizeTrials(input: unknown) {
     completionRate: rate(successes, trials.length),
     firstPassRate: rate(evaluated.filter((trial) => trial.firstAttemptPassed).length, n),
     repairSuccessRate: rate(initialFailures.filter((trial) => trial.status === 'pass' && trial.repairs > 0).length, initialFailures.length),
-    falseAssurances: evaluated.filter((trial) => trial.falseAssurance).length,
+    falseAssurances: trials.filter((trial) => trial.falseAssurance).length,
     successInterval95: n ? [Math.max(0, center - margin), Math.min(1, center + margin)] : [null, null],
     latencyMs: {
       total: trials.reduce((sum, trial) => sum + trial.latencyMs, 0),
@@ -159,6 +159,42 @@ export function summarizeTrials(input: unknown) {
       )
     },
     usage: { inputTokens: usage('inputTokens'), outputTokens: usage('outputTokens'), toolCalls: usage('toolCalls'), costUsd: usage('costUsd') }
+  };
+}
+
+export function compareTrialReports(baseline: unknown, candidate: unknown) {
+  const schema = z
+    .object({
+      version: z.literal(1),
+      scope: z.literal('fresh-agent-behavior'),
+      trials: z.array(trialSchema).min(1),
+      metrics: z.unknown(),
+      provenance: z
+        .object({ caseSetSha256: z.string().regex(/^[a-f0-9]{64}$/), provider: z.string(), model: z.string(), settings: z.record(z.unknown()) })
+        .passthrough()
+    })
+    .passthrough();
+  const before = schema.parse(baseline);
+  const after = schema.parse(candidate);
+  const oldMetrics = summarizeTrials(before.trials);
+  const newMetrics = summarizeTrials(after.trials);
+  if (!isDeepStrictEqual(before.metrics, oldMetrics) || !isDeepStrictEqual(after.metrics, newMetrics))
+    throw new Error('Trial metrics contradict evidence');
+  const keys = (trials: Trial[]) => trials.map((trial) => JSON.stringify([trial.caseId, trial.trial])).sort();
+  const compatible =
+    before.provenance.caseSetSha256 === after.provenance.caseSetSha256 &&
+    before.provenance.provider === after.provenance.provider &&
+    before.provenance.model === after.provenance.model &&
+    isDeepStrictEqual(before.provenance.settings, after.provenance.settings) &&
+    isDeepStrictEqual(keys(before.trials), keys(after.trials));
+  const successRateDelta =
+    compatible && oldMetrics.successRate !== null && newMetrics.successRate !== null ? newMetrics.successRate - oldMetrics.successRate : null;
+  return {
+    compatible,
+    passed: compatible && newMetrics.infrastructureErrors === 0 && newMetrics.falseAssurances === 0 && newMetrics.successRate === 1,
+    successRateDelta,
+    before: oldMetrics,
+    after: newMetrics
   };
 }
 
