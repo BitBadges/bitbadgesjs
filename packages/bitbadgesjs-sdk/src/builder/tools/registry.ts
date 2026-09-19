@@ -96,6 +96,7 @@ import { getSessionBinding } from '../session/artifactBinding.js';
 import { getTransaction, ensureStringNumbers } from '../session/sessionState.js';
 import { toolFailure, type ToolFailure } from './errors.js';
 import { runLifecycle, getLifecycleSchema, lifecycleDiagnostics } from '../lifecycle.js';
+import { verifyLifecycleIntent } from '../lifecycleIntent.js';
 import { requestBrowserReview } from '../../cli/utils/browser-review.js';
 
 // Re-export session persistence helpers so external consumers (e.g.
@@ -177,6 +178,7 @@ const getSkillInstructionsTool: ToolSchema = {
  */
 export const toolRegistry: Record<string, ToolEntry> = {
   request_browser_review: entry({ name: 'request_browser_review', description: 'Create a pending general transaction request using the existing browser signing bridge. Returns request ID, URL, expiry and recovery instructions immediately. Human wallet signing is separate. Collection preview links alone are not transaction requests.', inputSchema: { type: 'object', properties: { artifact: { type: 'object', description: 'Explicit {messages:[{typeUrl,value}]} transaction.' }, expectedAddress: { type: 'string' }, network: { type: 'string', enum: ['mainnet', 'testnet', 'local'] }, signOnly: { type: 'boolean' }, timeoutSeconds: { type: 'integer', minimum: 60, maximum: 1800 }, review: { type: 'object', description: 'Optional version1 intent/evidence sidecar bound to artifact and signer/network.' } }, required: ['artifact', 'expectedAddress', 'network'] } }, requestBrowserReview),
+  verify_lifecycle_intent: entry({ name: 'verify_lifecycle_intent', description: 'Execute a scenario bound to the exact artifact and retain per-requirement static findings beside observed lifecycle evidence. Supplied assertions cannot prove complete intent coverage; unmatched requirements remain unverified. Read lifecycle_schema first.', inputSchema: { type: 'object', properties: { artifact: { type: 'object' }, intent: { type: 'object' }, scenario: { type: 'object' }, requiredCoverage: { type: 'array', items: { type: 'string' }, maxItems: 30 } }, required: ['artifact', 'intent', 'scenario'] } }, args => verifyLifecycleIntent(args)),
   run_lifecycle: entry({ name: 'run_lifecycle', description: 'Execute an isolated local module lifecycle using an installed bitbadges-lifecycle runner. Never signs or broadcasts; requiredCoverage reports unverified external/IBC checks. Read lifecycle_schema first.', inputSchema: { type: 'object', properties: { scenario: { type: 'object' }, requiredCoverage: { type: 'array', items: { type: 'string' }, maxItems: 30 } }, required: ['scenario'] } },
     (args) => runLifecycle(z.object({ scenario: z.record(z.unknown()), requiredCoverage: z.array(z.string().max(100)).max(30).optional() }).strict().parse(args))),
   lifecycle_schema: entry({ name: 'lifecycle_schema', description: 'Read installed local runner scenario schema, including exact assertions and time controls. Offline; requires the optional runner executable.', inputSchema: { type: 'object', properties: {} } },
