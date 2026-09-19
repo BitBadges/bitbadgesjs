@@ -16,9 +16,16 @@
  */
 
 import { SKILL_INSTRUCTIONS } from '../src/builder/resources/skillInstructions.js';
-import { writeFileSync, mkdirSync } from 'fs';
+import { renderSkillContract } from '../src/builder/resources/taskBundles.js';
+import { writeFileSync as writeOutput, readFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { resolveRelatedRepo } from './related-repo';
+
+function writeFileSync(path: string, content: string): void {
+  if (process.argv.includes('--check')) {
+    if (readFileSync(path, 'utf8') !== content) throw new Error('Generated skill documentation drift: ' + path);
+  } else writeOutput(path, content);
+}
 
 const DOCS_DIR =
   process.env.DOCS_OUTPUT_DIR ||
@@ -63,7 +70,7 @@ ${skill.summary}
 
 ## Instructions
 
-${skill.instructions}${refs}
+${skill.instructions}${renderSkillContract(skill)}${refs}
 `;
 
   writeFileSync(join(DOCS_DIR, filename), content);
