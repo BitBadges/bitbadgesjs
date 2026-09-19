@@ -6,7 +6,18 @@
  * Consumers (indexer, frontend, CLI tools) can import these programmatically.
  */
 
+export type SkillContract = {
+  version: 1;
+  prerequisites: string[];
+  postconditions: string[];
+  clarifications: string[];
+  unsupported: string[];
+  goldenScenarioIds: string[];
+  example: { tool: string; input: Record<string, unknown> };
+};
+
 export interface SkillInstruction {
+  contract?: SkillContract;
   id: string;
   name: string;
   description: string;
@@ -19,6 +30,43 @@ export interface SkillInstruction {
 export const SKILL_INSTRUCTIONS: SkillInstruction[] = [
   {
     id: 'smart-token',
+    contract: {
+      "version": 1,
+      "prerequisites": [
+            "Confirm signer and network before handoff.",
+            "Record exact user requirements separately from external metadata."
+      ],
+      "postconditions": [
+            "Prepare a new collection",
+            "Disallow forceful post-mint transfers",
+            "Only deposit and withdrawal approvals",
+            "One backing base unit converts to one token unit",
+            "No pool creation",
+            "Deposit uses backed-minting path",
+            "Withdrawal uses backed path",
+            "Deposit and withdrawal rules are immutable"
+      ],
+      "clarifications": [
+            "Confirm recipient, asset identity and intended manager powers."
+      ],
+      "unsupported": [
+            "Unsigned builder proposal only; signer and manager must be bound before deployment.",
+            "Artifact constraints only. No chain execution, wallet signing, live balance checks or external service verification.",
+            "Recipient payment excludes protocol fees and transaction gas."
+      ],
+      "goldenScenarioIds": [
+            "backed-token"
+      ],
+      "example": {
+            "tool": "build_smart_token",
+            "input": {
+                  "uri": "ipfs://METADATA_COLLECTION",
+                  "backingCoin": "BADGE",
+                  "symbol": "vBADGE",
+                  "tradable": false
+            }
+      }
+},
     name: 'Smart Token',
     category: 'token-type',
     description: 'IBC-backed smart token with 1:1 backing and two required approvals (backing + unbacking)',
@@ -827,6 +875,48 @@ IMPORTANT: predeterminedBalances and approvalAmounts are INCOMPATIBLE — use on
   },
   {
     id: 'subscription',
+    contract: {
+      "version": 1,
+      "prerequisites": [
+            "Confirm signer and network before handoff.",
+            "Record exact user requirements separately from external metadata."
+      ],
+      "postconditions": [
+            "Prepare a new collection",
+            "Disallow forceful post-mint transfers",
+            "No initial holder-transfer approval",
+            "Membership originates at Mint",
+            "Exactly 5 BADGE to the merchant; initiator pays",
+            "Exactly 30 days in milliseconds",
+            "One period per mint",
+            "Mint approval permissions remain locked for every token and time",
+            "Do not bypass recipient incoming approvals"
+      ],
+      "clarifications": [
+            "Calendar month or 30 days?"
+      ],
+      "unsupported": [
+            "Unsigned builder proposal only; signer and manager must be bound before deployment.",
+            "Artifact constraints only. No chain execution, wallet signing, live balance checks or external service verification.",
+            "Initial holder-transfer restriction is checked; the builder retains manager ability to add non-mint transfer approvals. This is not immutable non-transferability.",
+            "Recipient payment excludes protocol fees and transaction gas."
+      ],
+      "goldenScenarioIds": [
+            "subscription-fixed-price"
+      ],
+      "example": {
+            "tool": "build_subscription",
+            "input": {
+                  "uri": "ipfs://METADATA_COLLECTION",
+                  "interval": "30d",
+                  "price": 5,
+                  "denom": "BADGE",
+                  "recipient": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7",
+                  "transferable": false,
+                  "updatableMint": false
+            }
+      }
+},
     name: 'Subscription',
     category: 'token-type',
     description: 'Time-based subscription token with recurring payment approvals and auto-deletion on expiry',
@@ -1771,6 +1861,55 @@ add_preset_approval({ presetId: "tradable.transferable", params: {} })
   },
   {
     id: 'spendable-credit',
+    contract: {
+      "version": 1,
+      "prerequisites": [
+            "Confirm signer and network before handoff.",
+            "Record exact user requirements separately from external metadata."
+      ],
+      "postconditions": [
+            "Prepare a new collection",
+            "Disallow forceful post-mint transfers",
+            "Only purchase and consumption paths",
+            "Payment goes to the service provider",
+            "Ten credits per pack",
+            "At most three packs per purchase",
+            "Only holder-initiated consumption",
+            "Consumption sends credits to burn address",
+            "Purchase expiry is inclusive",
+            "Consumption shares expiry",
+            "Purchase and consumption terms cannot be changed"
+      ],
+      "clarifications": [
+            "Confirm recipient, asset identity and intended manager powers."
+      ],
+      "unsupported": [
+            "Unsigned builder proposal only; signer and manager must be bound before deployment.",
+            "Artifact constraints only. No chain execution, wallet signing, live balance checks or external service verification.",
+            "Recipient payment excludes protocol fees and transaction gas."
+      ],
+      "goldenScenarioIds": [
+            "spendable-service-credits"
+      ],
+      "example": {
+            "tool": "build_spendable_credit",
+            "input": {
+                  "uri": "ipfs://METADATA_COLLECTION",
+                  "paymentDenom": "BADGE",
+                  "provider": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+                  "serviceId": "image-generation",
+                  "purchaseOptions": [
+                        {
+                              "pricePerPack": "1000000",
+                              "creditsPerPack": "10",
+                              "purchaseType": "scaled",
+                              "maxPacks": "3"
+                        }
+                  ],
+                  "expiresAt": "1896048000000"
+            }
+      }
+},
     name: 'Spendable Credit',
     category: 'token-type',
     description:
@@ -1800,6 +1939,43 @@ See docs/spendable-credits.md and examples/spendable-credit-provider for the aut
   },
   {
     id: 'credit-token',
+    contract: {
+      "version": 1,
+      "prerequisites": [
+            "Confirm signer and network before handoff.",
+            "Record exact user requirements separately from external metadata."
+      ],
+      "postconditions": [
+            "Prepare a new collection",
+            "Disallow forceful post-mint transfers",
+            "Only the purchase approval exists",
+            "One BADGE base unit per multiplier",
+            "37 credit units per multiplier",
+            "Allow whole multiples of the purchase",
+            "Purchase terms cannot be changed",
+            "Credits cannot enter liquidity pools"
+      ],
+      "clarifications": [
+            "Confirm recipient, asset identity and intended manager powers."
+      ],
+      "unsupported": [
+            "Unsigned builder proposal only; signer and manager must be bound before deployment.",
+            "Artifact constraints only. No chain execution, wallet signing, live balance checks or external service verification.",
+            "Recipient payment excludes protocol fees and transaction gas."
+      ],
+      "goldenScenarioIds": [
+            "purchasable-credits"
+      ],
+      "example": {
+            "tool": "build_credit_token",
+            "input": {
+                  "uri": "ipfs://METADATA_COLLECTION",
+                  "paymentDenom": "BADGE",
+                  "recipient": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7",
+                  "tokensPerUnit": 37
+            }
+      }
+},
     name: 'Credit Token',
     category: 'token-type',
     description: 'Increment-only, non-transferable credit token purchased with any ICS20 denom. Users pay X of a denom and receive Y tokens as credits/proof of payment. For a 1:1 backed token with on-chain transferability, use the Smart Token standard instead.',
@@ -2607,6 +2783,46 @@ Before publication, review and validate the generated collection and simulate ac
   },
   {
     id: 'payment-request',
+    contract: {
+      "version": 1,
+      "prerequisites": [
+            "Confirm signer and network before handoff.",
+            "Record exact user requirements separately from external metadata."
+      ],
+      "postconditions": [
+            "Prepare a new collection",
+            "Disallow forceful post-mint transfers",
+            "Only pay and deny paths",
+            "Only the specified payer initiates payment",
+            "Exactly 7 BADGE paid directly to merchant",
+            "One fulfillment allowed",
+            "Payment deadline is fixed time plus 30 days",
+            "No escrow funded on creation",
+            "Approval terms cannot be changed"
+      ],
+      "clarifications": [
+            "Confirm recipient, asset identity and intended manager powers."
+      ],
+      "unsupported": [
+            "Unsigned builder proposal only; signer and manager must be bound before deployment.",
+            "Artifact constraints only. No chain execution, wallet signing, live balance checks or external service verification.",
+            "Recipient payment excludes protocol fees and transaction gas."
+      ],
+      "goldenScenarioIds": [
+            "invoice-direct-payment"
+      ],
+      "example": {
+            "tool": "build_payment_request",
+            "input": {
+                  "uri": "ipfs://METADATA_COLLECTION",
+                  "amount": 7,
+                  "denom": "BADGE",
+                  "payer": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+                  "recipient": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7",
+                  "expiration": "30d"
+            }
+      }
+},
     name: 'PaymentRequest',
     category: 'token-type',
     description: 'Agent-initiated payment request with no escrow. The agent (or any address) creates a collection requesting payment from a targeted human payer. The payer approves AND pays from their own wallet in a single action. Inverse of Bounty.',

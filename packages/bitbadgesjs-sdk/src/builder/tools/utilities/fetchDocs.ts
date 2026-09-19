@@ -14,6 +14,7 @@
  * unchanged.
  */
 import { z } from 'zod';
+import { getTaskBundle } from '../../resources/taskBundles.js';
 
 export const fetchDocsSchema = z.object({
   topic: z
@@ -34,7 +35,7 @@ export interface FetchDocsResult {
 export const fetchDocsTool = {
   name: 'fetch_docs',
   description:
-    'Search live BitBadges documentation by keyword. Ranks sections from the curated llms-full.txt export on docs.bitbadges.io and returns the top matches.',
+    'Use topic="task:<skill-id>" for a bounded installed offline bundle with executable example, exact schema and lifecycle limits (subscription, payment-request, smart-token, credit-token, spendable-credit). Other topics search live documentation.',
   inputSchema: {
     type: 'object' as const,
     properties: {
@@ -110,6 +111,7 @@ export function __resetFetchDocsCache(): void {
 export async function handleFetchDocs(input: FetchDocsInput): Promise<FetchDocsResult> {
   const { topic } = input;
   try {
+    if (topic.startsWith('task:')) return { success: true, topic, content: JSON.stringify(getTaskBundle(topic.slice(5))), url: 'bitbadges://skills/' + topic.slice(5) };
     const text = await loadLlmsFull();
     const sections = text.split(/(?=^#{1,3}\s)/m);
     const terms = topic
