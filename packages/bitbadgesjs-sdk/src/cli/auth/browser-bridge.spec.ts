@@ -85,8 +85,11 @@ describe('browser bridge loopback transport', () => {
     expect(await result).toMatchObject({ signature: 'legacy-signature', address: signer });
   });
   test('timeout reports uncertainty and closes listener', async () => {
-    const { result } = await launch('tx', 30);
-    await expect(result).resolves.toMatchObject({ outcome: 'unknown', requestId: 'a'.repeat(32), error: expect.stringMatching(/may.*submitted|submission.*unknown/i) });
+    const clock = jest.spyOn(Date, 'now').mockReturnValue(Date.now());
+    try {
+      const { result } = await launch('tx', 30);
+      await expect(result).resolves.toMatchObject({ outcome: 'unknown', requestId: 'a'.repeat(32), error: expect.stringMatching(/may.*submitted|submission.*unknown/i) });
+    } finally { clock.mockRestore(); }
   });
   test('transaction mode refuses old unbound requests before opening a listener', async () => {
     await expect(bridgeSign({ mode: 'tx', payload: { chain: 'cosmos', txsInfo: [] }, frontendUrl: 'https://example.invalid', baseUrl: 'https://example.invalid', noOpen: true })).rejects.toThrow();
