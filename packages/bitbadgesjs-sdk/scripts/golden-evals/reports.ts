@@ -1,11 +1,25 @@
 import { z } from 'zod';
+import { isDeepStrictEqual } from 'node:util';
+
+const assertionSchema = z
+  .object({
+    id: z.string(),
+    passed: z.boolean(),
+    path: z.string(),
+    operator: z.enum(['equals', 'length', 'contains']),
+    expected: z.unknown(),
+    requirement: z.string(),
+    found: z.boolean(),
+    actual: z.unknown().optional()
+  })
+  .passthrough();
 
 const resultSchema = z
   .object({
     id: z.string().min(1),
     passed: z.boolean(),
     error: z.string().optional(),
-    assertions: z.array(z.object({ id: z.string(), passed: z.boolean() }).passthrough()),
+    assertions: z.array(assertionSchema),
     mutations: z.array(z.object({ id: z.string(), caught: z.boolean() }).passthrough())
   })
   .passthrough();
@@ -26,6 +40,17 @@ function parseReport(input: unknown) {
   const report = reportSchema.parse(input);
   if (new Set(report.results.map((row) => row.id)).size !== report.results.length) throw new Error('Duplicate result IDs');
   for (const row of report.results) {
+    for (const check of row.assertions) {
+      if (!Object.hasOwn(check, 'expected') || (check.found && !Object.hasOwn(check, 'actual'))) throw new Error('Missing assertion evidence');
+      const passed =
+        check.found &&
+        (check.operator === 'equals'
+          ? isDeepStrictEqual(check.actual, check.expected)
+          : check.operator === 'length'
+            ? Array.isArray(check.actual) && check.actual.length === check.expected
+            : Array.isArray(check.actual) && check.actual.some((value) => isDeepStrictEqual(value, check.expected)));
+      if (passed !== check.passed) throw new Error('Assertion verdict contradicts evidence');
+    }
     for (const checks of [row.assertions, row.mutations]) {
       if (new Set(checks.map((check) => check.id)).size !== checks.length) throw new Error('Duplicate check IDs');
     }
@@ -54,8 +79,15 @@ export function compareReports(baseline: unknown, candidate: unknown) {
   const removed = [...previous.keys()].filter((id) => !current.has(id));
   const sameChecks = after.results.every((row) => {
     const prior = previous.get(row.id);
-    return prior && (['assertions', 'mutations'] as const).every((key) =>
-      JSON.stringify(prior[key].map((check) => check.id).sort()) === JSON.stringify(row[key].map((check) => check.id).sort()));
+    const contracts = (checks: z.infer<typeof assertionSchema>[]) =>
+      checks
+        .map(({ id, path, operator, expected, requirement }) => ({ id, path, operator, expected, requirement }))
+        .sort((a, b) => a.id.localeCompare(b.id));
+    return (
+      prior &&
+      isDeepStrictEqual(contracts(prior.assertions), contracts(row.assertions)) &&
+      isDeepStrictEqual(prior.mutations.map((check) => check.id).sort(), row.mutations.map((check) => check.id).sort())
+    );
   });
   const compatible =
     sameChecks &&

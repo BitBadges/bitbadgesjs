@@ -8,13 +8,41 @@ const report = (passed = true) => ({
   passed,
   summary: { total: 1, passed: passed ? 1 : 0, failed: passed ? 0 : 1 },
   provenance: { caseSetSha256: 'a'.repeat(64), fixtureTime: 1893456000000 },
-  results: [{ id: 'case-a', passed, assertions: [{ id: 'recipient', passed }], mutations: [{ id: 'divert', caught: true }] }]
+  results: [
+    {
+      id: 'case-a',
+      passed,
+      assertions: [
+        {
+          id: 'recipient',
+          passed,
+          path: '/value/recipient',
+          operator: 'equals',
+          expected: 7,
+          actual: passed ? 7 : 999,
+          found: true,
+          requirement: 'Pay recipient 7'
+        }
+      ],
+      mutations: [{ id: 'divert', caught: true }]
+    }
+  ]
 });
 
 describe('evaluation comparison', () => {
+  it('rejects forged passing evidence and incompatible assertion contracts', () => {
+    const forged = report();
+    forged.results[0].assertions[0].actual = 999;
+    expect(() => compareReports(report(), forged)).toThrow();
+    forged.results[0].assertions[0].expected = 999;
+    expect(compareReports(report(), forged).compatible).toBe(false);
+    const changed = report();
+    changed.results[0].assertions[0].path = '/value/other';
+    expect(compareReports(report(), changed).compatible).toBe(false);
+  });
   it('rejects silently removed assertion or mutation checks under an unchanged claimed hash', () => {
     const before = report();
-    before.results[0].assertions.push({ id: 'authority', passed: true });
+    before.results[0].assertions.push({ ...before.results[0].assertions[0], id: 'authority' });
     expect(compareReports(before, report()).compatible).toBe(false);
     const after = report();
     after.results[0].mutations = [];
