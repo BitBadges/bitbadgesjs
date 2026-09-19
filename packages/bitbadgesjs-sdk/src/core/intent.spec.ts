@@ -39,4 +39,20 @@ describe('intent evidence', () => {
     const manifest = { ...intent, requirements: [{ id: 'lock', source: 'user', kind: 'managerPowers', value: { canUpdateApprovals: false } }] };
     expect(verifyIntent(build(), manifest).requirements[0].status).not.toBe('satisfied');
   });
+  it('rejects repairs that fix payment while violating the original duration', () => {
+    const requirements = { ...intent, requirements: [...intent.requirements, { id: 'duration', source: 'user', kind: 'duration', value: { milliseconds: '2592000000' } }] };
+    const original = build();
+    original.messages[0].value.collectionApprovals[0].approvalCriteria.coinTransfers[0].coins[0].amount = '1';
+    const tradedOff = build();
+    tradedOff.messages[0].value.collectionApprovals[0].approvalCriteria.predeterminedBalances.incrementedBalances.durationFromTimestamp = '1';
+    const failed = repairArtifact({ intent: requirements, original, candidates: [tradedOff] });
+    expect(failed.status).toBe('violated');
+    expect(failed.history[0].evidence.requirements.map(item => item.status)).toEqual(['violated', 'satisfied']);
+    expect(failed.history[1].evidence.requirements.map(item => item.status)).toEqual(['satisfied', 'violated']);
+    expect(failed.intentId).toBe(artifactIdentity(parseIntent(requirements)));
+    const repaired = repairArtifact({ intent: requirements, original, candidates: [tradedOff, build()] });
+    expect(repaired.status).toBe('satisfied');
+    expect(repaired.history).toHaveLength(3);
+    expect(repaired.history[1].evidence.status).toBe('violated');
+  });
 });

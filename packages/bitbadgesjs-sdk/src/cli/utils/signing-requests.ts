@@ -1,3 +1,4 @@
+import { getApiUrl, getApiKeyForNetwork } from './io.js';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { randomBytes } from 'node:crypto';
@@ -128,7 +129,7 @@ export async function getSigningRequestStatus(id: string, resume = false, verify
   const canResume = active && !record.result;
   const result = record.result;
   const outcome = result?.outcome ?? (canResume ? 'pending' : 'unknown');
-  const receipt = verify && result && (result.outcome === 'submitted' || result.outcome === 'signed') ? await verifyBrowserReceipt(record.request, result) : undefined;
+  const receipt = verify && result && (result.outcome === 'submitted' || result.outcome === 'signed') ? await verifyBrowserReceipt(record.request, result, { indexerUrl: getApiUrl({ network: record.request.network }), apiKey: getApiKeyForNetwork({ network: record.request.network }) }) : undefined;
   return {
     requestId: id,
     outcome: receipt?.status ?? outcome,

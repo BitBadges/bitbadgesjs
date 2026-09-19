@@ -22,9 +22,36 @@ describe('independent browser completion receipts', () => {
     expect(cancelled).toBe(true);
     expect(bytes).toBeLessThan(4 * 1024 * 1024);
   });
-  it('confirms only matching executed transactions and never claims indexed state', async () => {
+  it('preserves confirmation when indexing evidence is unavailable', async () => {
     const receipt = await verifyBrowserReceipt(request, result, { fetch: rpc(chainResponse()) as any });
-    expect(receipt.status).toBe('confirmed'); expect(receipt.indexing).toBe('not-checked');
+    expect(receipt.status).toBe('confirmed'); expect(receipt.indexing).toBe('unknown');
+  });
+  it('checks an independently fetched network-bound completed block watermark', async () => {
+    const checkpoint = { version: 1, network: request.network, chainId: request.chainId, evmChainId: request.evmChainId, completedThroughHeight: '1' };
+    const fetcher = jest.fn(async (url: any, options: any) => {
+      if (String(url).endsWith('/api/v0/status')) {
+        expect(options.headers['x-api-key']).toBe('fixture-key');
+        return new Response(JSON.stringify({ indexing: checkpoint }));
+      }
+      expect(options.headers?.['x-api-key']).toBeUndefined();
+      return rpc(chainResponse())(url);
+    });
+    const options = { fetch: fetcher as any, indexerUrl: 'http://indexer.invalid', apiKey: 'fixture-key' };
+    expect(await verifyBrowserReceipt(request, result, options)).toMatchObject({ status: 'indexed', confirmed: true, indexing: 'indexed', indexedHeight: '1', indexingScope: 'block-watermark' });
+    checkpoint.completedThroughHeight = '0';
+    expect(await verifyBrowserReceipt(request, result, options)).toMatchObject({ status: 'confirmed', indexing: 'pending' });
+    for (const patch of [{ network: 'testnet' }, { chainId: 'wrong' }, { evmChainId: '1' }, { completedThroughHeight: '-1' }, { completedThroughHeight: 1 }, { version: 2 }]) {
+      Object.assign(checkpoint, { version: 1, network: request.network, chainId: request.chainId, evmChainId: request.evmChainId, completedThroughHeight: '1' }, patch);
+      expect(await verifyBrowserReceipt(request, result, options)).toMatchObject({ status: 'confirmed', confirmed: true, indexing: 'unknown' });
+    }
+  });
+  it('does not query indexing for unsuccessful execution and can explicitly skip it', async () => {
+    const failed = rpc(chainResponse({ code: 5 }));
+    expect((await verifyBrowserReceipt(request, result, { fetch: failed as any })).indexing).toBe('not-checked');
+    expect(failed).toHaveBeenCalledTimes(2);
+    const successful = rpc(chainResponse());
+    expect((await verifyBrowserReceipt(request, result, { fetch: successful as any, checkIndexer: false })).indexing).toBe('not-checked');
+    expect(successful).toHaveBeenCalledTimes(2);
   });
   it('rejects matching-hash replies with changed messages, missing code or wrong network', async () => {
     const changed = chainResponse(); changed.tx.body.messages[0].amount[0].amount = '2';
@@ -45,11 +72,12 @@ describe('independent browser completion receipts', () => {
     const callback = { ...result, chain: 'evm', chainId: evm.chainId, hash: '0x' + hash };
     const transaction = { hash: '0x' + hash, from: '0x' + '11'.repeat(20), to: evm.tx.to, value: '0x1', input: '0x1234' };
     const fetcher = jest.fn(async (_url, opts: any) => {
+      if (!opts.body) return new Response(JSON.stringify({ indexing: { version: 1, network: 'local', chainId: request.chainId, evmChainId: request.evmChainId, completedThroughHeight: '1' } }));
       const method = JSON.parse(opts.body).method;
       const result = method === 'eth_chainId' ? '0x' + BigInt(evm.evmChainId).toString(16) : method === 'eth_getTransactionByHash' ? transaction : { transactionHash: '0x' + hash, status: '0x1', blockNumber: '0x1' };
       return new Response(JSON.stringify({ result }), { status: 200 });
     });
-    expect((await verifyBrowserReceipt(evm, callback, { fetch: fetcher as any })).status).toBe('confirmed');
+    expect((await verifyBrowserReceipt(evm, callback, { fetch: fetcher as any })).status).toBe('indexed');
     transaction.input = '0x';
     expect((await verifyBrowserReceipt(evm, callback, { fetch: fetcher as any })).status).toBe('unknown');
   });

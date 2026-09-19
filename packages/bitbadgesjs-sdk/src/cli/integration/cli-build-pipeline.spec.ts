@@ -343,7 +343,7 @@ describe('cli build pipeline integration', () => {
       expect(out.json.issues).toEqual([]);
     });
 
-    it('full check returns valid:true even when review flags critical', () => {
+    it('full check preserves valid structure in a failing critical-review envelope', () => {
       const built = runCli([
         'build', 'smart-token',
         '--backing-coin', 'USDC',
@@ -353,7 +353,10 @@ describe('cli build pipeline integration', () => {
       const out = runCli(['check', tmp], { throwOnError: false });
       // Validate section must be clean — the noForcefulPostMintTransfers
       // critical comes from the review section, not validate.
-      expect(out.json.validate.valid).toBe(true);
+      expect(out.exitCode).toBe(2);
+      expect(out.envelope.ok).toBe(false);
+      expect(out.envelope.error.code).toBe('review_critical');
+      expect(out.envelope.error.details.validate.valid).toBe(true);
     });
 
     it('--depth structural runs the lightweight check', () => {

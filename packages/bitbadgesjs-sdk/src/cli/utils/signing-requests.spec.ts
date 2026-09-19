@@ -134,3 +134,19 @@ test('uses OS permissions on Windows rather than rejecting synthetic POSIX mode 
     Object.defineProperty(process, 'platform', platform);
   }
 });
+
+ test('status verification exposes independently checked indexing for the stored exact artifact', async () => {
+  const value = request();
+  value.txsInfo = [{ type: '/cosmos.bank.v1beta1.MsgSend', msg: { fromAddress: signer, toAddress: signer, amount: [{ denom: 'ubadge', amount: '1' }] } }];
+  saveSigningRequest(value);
+  finishSigningRequest(value.requestId, { requestId: value.requestId, outcome: 'submitted', address: signer, network: value.network, chain: value.chain, chainId: value.chainId, hash: 'A'.repeat(64) });
+  const fetcher = jest.spyOn(globalThis, 'fetch').mockImplementation(async (url) => new Response(JSON.stringify(
+    String(url).includes('node_info') ? { default_node_info: { network: value.chainId } } : String(url).endsWith('/api/v0/status') ?
+      { indexing: { version: 1, network: value.network, chainId: value.chainId, evmChainId: value.evmChainId, completedThroughHeight: '25' } } :
+      { tx: { body: { messages: [{ '@type': value.txsInfo[0].type, ...value.txsInfo[0].msg }] } }, tx_response: { txhash: 'A'.repeat(64), height: '25', code: 0 } }
+  )));
+  try {
+    expect(await getSigningRequestStatus(value.requestId, false, true)).toMatchObject({ outcome: 'indexed', confirmed: true, receipt: { indexing: 'indexed', height: '25', indexedHeight: '25' } });
+    expect(fetcher).toHaveBeenCalledTimes(3);
+  } finally { fetcher.mockRestore(); }
+});
