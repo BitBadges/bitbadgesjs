@@ -6,11 +6,11 @@ import { artifactIdentity } from './intent.js';
 
 export type BrowserReceipt = {
   version: 1; requestId: string; artifactId: string; chainId: string;
-  status: 'signed' | 'submitted' | 'confirmed' | 'failed' | 'unknown';
-  indexing: 'not-checked'; confirmed: boolean; retrySafe: false;
+  status: 'signed' | 'submitted' | 'confirmed' | 'indexed' | 'failed' | 'unknown';
+  indexing: 'not-checked' | 'pending' | 'indexed' | 'unknown'; indexedHeight?: string; indexingScope?: 'block-watermark'; confirmed: boolean; retrySafe: false;
   txHash?: string; height?: string; code?: number; createdCollectionIds: string[]; reason: string;
 };
-export type ReceiptOptions = { fetch?: typeof fetch; nodeUrl?: string; evmRpcUrl?: string; timeoutMs?: number };
+export type ReceiptOptions = { fetch?: typeof fetch; nodeUrl?: string; evmRpcUrl?: string; timeoutMs?: number; indexerUrl?: string; apiKey?: string; checkIndexer?: boolean };
 const normalizedHash = (hash: string) => hash.replace(/^0x/i, '').toLowerCase();
 
 export async function verifyBrowserReceipt(input: BrowserTxRequestV2, callback: unknown, options: ReceiptOptions = {}): Promise<BrowserReceipt> {
@@ -26,8 +26,8 @@ export async function verifyBrowserReceipt(input: BrowserTxRequestV2, callback: 
   if (!Number.isInteger(timeout) || timeout < 1 || timeout > 30_000) throw new Error('Invalid receipt verification timeout.');
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
-  const get = async (url: string, body?: object) => {
-    const response = await (options.fetch ?? fetch)(url, { signal: controller.signal, redirect: 'error', ...(body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {}) });
+  const get = async (url: string, body?: object, headers?: Record<string, string>) => {
+    const response = await (options.fetch ?? fetch)(url, { signal: controller.signal, redirect: 'error', headers, ...(body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {}) });
     if (response.status === 404) return null;
     if (!response.ok) throw new Error('RPC unavailable');
     if (!response.body) throw new Error('Missing RPC body');
@@ -49,6 +49,22 @@ export async function verifyBrowserReceipt(input: BrowserTxRequestV2, callback: 
       text += decoder.decode();
     } finally { reader.releaseLock(); }
     return JSON.parse(text);
+  };
+  const checkIndexed = async (receipt: BrowserReceipt): Promise<BrowserReceipt> => {
+    if (!receipt.confirmed || options.checkIndexer === false) return receipt;
+    try {
+      const url = (options.indexerUrl ?? config.apiUrl).replace(/\/$/, '');
+      const data = await get(url + '/api/v0/status', undefined, options.apiKey ? { 'x-api-key': options.apiKey } : undefined);
+      const checkpoint = data?.indexing;
+      if (checkpoint?.version !== 1 || checkpoint.network !== request.network || checkpoint.chainId !== config.cosmosChainId ||
+          checkpoint.evmChainId !== String(config.evmChainId) || typeof checkpoint.completedThroughHeight !== 'string' ||
+          !/^(0|[1-9][0-9]{0,19})$/.test(checkpoint.completedThroughHeight)) throw new Error('Unverified indexing checkpoint');
+      const indexed = BigInt(checkpoint.completedThroughHeight) >= BigInt(receipt.height!);
+      return { ...receipt, status: indexed ? 'indexed' : 'confirmed', indexing: indexed ? 'indexed' : 'pending', indexedHeight: checkpoint.completedThroughHeight,
+        indexingScope: 'block-watermark', reason: indexed ? 'Exact transaction confirmed; configured indexer has durably completed its block. This does not verify every downstream view.' : 'Exact transaction confirmed; configured indexer has not yet completed its block.' };
+    } catch {
+      return { ...receipt, indexing: 'unknown', reason: 'Exact transaction confirmed; indexer completion could not be independently verified.' };
+    }
   };
   try {
     if (request.chain === 'cosmos') {
@@ -83,8 +99,8 @@ export async function verifyBrowserReceipt(input: BrowserTxRequestV2, callback: 
         try { original = JSON.parse(attrs.msg); } catch { continue; }
         if (original.collectionId === '0' && typeof attrs.collectionId === 'string' && /^[1-9][0-9]*$/.test(attrs.collectionId)) createdCollectionIds.push(attrs.collectionId);
       }
-      return { ...submitted, status: execution.code === 0 ? 'confirmed' : 'failed', confirmed: execution.code === 0, height: String(execution.height), code: execution.code,
-        createdCollectionIds: [...new Set(createdCollectionIds)], reason: execution.code === 0 ? 'Configured chain reports successful execution of the exact requested messages. Indexer state is not checked.' : 'Configured chain reports failed execution of the requested transaction.' };
+      return await checkIndexed({ ...submitted, status: execution.code === 0 ? 'confirmed' : 'failed', confirmed: execution.code === 0, height: String(execution.height), code: execution.code,
+        createdCollectionIds: [...new Set(createdCollectionIds)], reason: execution.code === 0 ? 'Configured chain reports successful execution of the exact requested messages. Indexer state is not checked.' : 'Configured chain reports failed execution of the requested transaction.' });
     }
     const rpc = options.evmRpcUrl ?? config.evmRpcUrl;
     const query = async (method: string, params: string[]) => { const data = await get(rpc, { jsonrpc: '2.0', id: 1, method, params }); if (data?.error) throw new Error('RPC error'); return data?.result; };
@@ -99,8 +115,8 @@ export async function verifyBrowserReceipt(input: BrowserTxRequestV2, callback: 
       BigInt(tx.value) !== BigInt(request.tx.value ?? '0') || (tx.input ?? '0x').toLowerCase() !== (request.tx.data ?? '0x').toLowerCase() ||
       !['0x0', '0x1'].includes(receipt.status) || BigInt(receipt.blockNumber) <= 0n) throw new Error('EVM request/result mismatch');
     const confirmed = receipt.status === '0x1';
-    return { ...submitted, status: confirmed ? 'confirmed' : 'failed', confirmed, height: BigInt(receipt.blockNumber).toString(), code: confirmed ? 0 : 1,
-      reason: 'Configured EVM chain execution checked against requested signer, destination, value and calldata. Indexer state is not checked.' };
+    return await checkIndexed({ ...submitted, status: confirmed ? 'confirmed' : 'failed', confirmed, height: BigInt(receipt.blockNumber).toString(), code: confirmed ? 0 : 1,
+      reason: 'Configured EVM chain execution checked against requested signer, destination, value and calldata. Indexer state is not checked.' });
   } catch {
     return { ...submitted, status: 'unknown', reason: 'Execution could not be independently bound to the exact request and chain. Check wallet activity and chain status before retrying.' };
   } finally { clearTimeout(timer); }
