@@ -111,7 +111,7 @@ export function __resetFetchDocsCache(): void {
 export async function handleFetchDocs(input: FetchDocsInput): Promise<FetchDocsResult> {
   const { topic } = input;
   try {
-    if (topic.startsWith('task:')) return { success: true, topic, content: JSON.stringify(getTaskBundle(topic.slice(5))), url: 'bitbadges://skills/' + topic.slice(5) };
+    if (topic.startsWith('task:')) return { success: true, topic, content: JSON.stringify(getTaskBundle(topic.slice(5))), url: 'bitbadges://skills/all' };
     const text = await loadLlmsFull();
     const sections = text.split(/(?=^#{1,3}\s)/m);
     const terms = topic
