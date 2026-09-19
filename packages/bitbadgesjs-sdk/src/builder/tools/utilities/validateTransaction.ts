@@ -69,7 +69,7 @@ export function handleValidateTransaction(input: ValidateTransactionInput): Vali
 
   if (input.transaction !== undefined) {
     tx = input.transaction;
-  } else if (input.transactionJson !== undefined && input.transactionJson !== '') {
+  } else if (input.transactionJson !== undefined) {
     try {
       tx = JSON.parse(input.transactionJson);
     } catch (error) {

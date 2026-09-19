@@ -72,9 +72,10 @@ export function createServer(): Server {
   // wire protocol.
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
-    const { text, result, isError } = await callTool(name, args);
+    const { text, result, isError, error } = await callTool(name, args);
     const response: any = {
       content: [{ type: 'text', text }],
+      ...(error ? { structuredContent: { error } } : {}),
       ...(result !== null && result !== undefined
         ? { structuredContent: typeof result === 'object' && !Array.isArray(result) ? result : { data: result } }
         : {})
