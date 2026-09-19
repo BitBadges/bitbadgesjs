@@ -84,3 +84,5 @@ export * from './standard-inspection.js';
 export * from './spendable-credits.js';
 
 export * from './intent.js';
+
+export * from './browser-receipt.js';

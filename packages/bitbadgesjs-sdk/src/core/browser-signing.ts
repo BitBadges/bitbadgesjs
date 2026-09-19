@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { convertToBitBadgesAddress, isAddressValid } from '../address-converter/converter.js';
 import { NETWORK_CONFIGS } from '../signing/types.js';
+import { artifactIdentity, intentSchema, parseIntent } from './intent.js';
 
 export type BrowserJsonValue = null | boolean | string | number | BrowserJsonValue[] | { [key: string]: BrowserJsonValue };
 const jsonValue: z.ZodType<BrowserJsonValue> = z.lazy(() => z.union([
@@ -11,6 +12,17 @@ const network = z.enum(['mainnet', 'testnet', 'local']);
 const address = z.string().refine(value => isAddressValid(value), 'Invalid signer address')
   .transform(value => convertToBitBadgesAddress(value))
   .refine(value => value.startsWith('bb1') && isAddressValid(value), 'A wallet account address is required');
+const evidenceStatus = z.enum(['satisfied', 'violated', 'unverified']);
+export const browserReviewSchema = z.object({
+  version: z.literal(1), artifactId: z.string().regex(/^[a-f0-9]{64}$/), intent: intentSchema,
+  binding: z.object({ expectedAddress: address, network, chainId: z.string().min(1) }).strict(),
+  stateHeight: z.string().regex(/^[0-9]+$/).optional(),
+  evidence: z.object({ version: z.literal(1), artifactId: z.string(), intentId: z.string(), checkedAt: z.string().regex(/^[0-9]+$/), status: evidenceStatus,
+    requirements: z.array(z.object({ requirementId: z.string(), status: evidenceStatus, source: z.enum(['static', 'lifecycle', 'none']), paths: z.array(z.string()), reason: z.string() }).strict()).max(100),
+    coverage: z.object({ executed: z.array(z.string()), unverified: z.array(z.string()) }).strict()
+  }).strict().optional()
+}).strict();
+export type BrowserReviewSidecar = z.infer<typeof browserReviewSchema>;
 const requestIdentity = {
   version: z.literal(2),
   requestId: z.string().regex(/^[a-f0-9]{32}$/),
@@ -19,7 +31,8 @@ const requestIdentity = {
   chainId: z.string().min(1),
   evmChainId: z.string().regex(/^[1-9][0-9]*$/),
   expiresAt: z.number().int().safe().positive(),
-  signOnly: z.boolean()
+  signOnly: z.boolean(),
+  review: browserReviewSchema.optional()
 };
 const txsInfo = z.array(z.object({
     type: z.string().min(1).max(256), msg: z.record(jsonValue)
@@ -35,6 +48,9 @@ const requestSchema = z.discriminatedUnion('chain', [
 ]);
 
 export type BrowserTxRequestV2 = z.infer<typeof requestSchema>;
+export function browserRequestArtifact(request: BrowserTxRequestV2) {
+  return request.chain === 'cosmos' ? { messages: request.txsInfo.map(message => ({ typeUrl: message.type, value: message.msg })) } : { tx: request.tx };
+}
 
 const legacyIdentity = {
   expectedAddress: address.optional(),
@@ -52,6 +68,7 @@ export type LegacyBrowserTxRequest = z.infer<typeof legacyRequestSchema>;
 export function parseLegacyBrowserTxRequest(input: unknown): LegacyBrowserTxRequest {
   const request = legacyRequestSchema.parse(input);
   if (request.chain === 'evm' && request.signOnly) throw new Error('Sign-only is unsupported for EVM transactions');
+
   return request;
 }
 
@@ -64,6 +81,13 @@ export function parseBrowserTxRequest(input: unknown, now = Date.now()): Browser
     throw new Error('Browser signing request network and chain IDs disagree');
   }
   if (request.chain === 'evm' && request.signOnly) throw new Error('Sign-only is unsupported for EVM transactions');
+  if (request.review) {
+    const review = request.review;
+    parseIntent(review.intent);
+    if (JSON.stringify(review).length > 32 * 1024) throw new Error('Browser review sidecar exceeds 32 KiB.');
+    if (review.artifactId !== artifactIdentity(browserRequestArtifact(request)) || review.binding.expectedAddress !== request.expectedAddress || review.binding.network !== request.network || review.binding.chainId !== request.chainId) throw new Error('Browser review is stale or belongs to another artifact, signer or network.');
+    if (review.evidence && (review.evidence.artifactId !== review.artifactId || review.evidence.intentId !== artifactIdentity(review.intent))) throw new Error('Browser evidence is not bound to the reviewed artifact and intent.');
+  }
   return request;
 }
 
