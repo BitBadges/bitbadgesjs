@@ -36,7 +36,9 @@ Signed-only, submitted, confirmed, failed and unknown are distinct.
 The exported `verifyBrowserReceipt` supports browser consumers with bounded
 network timeout and injectable fetch for controlled tests. RPC responses are
 trusted as observations of the configured chain, not cryptographic light-client
-proofs. Indexer visibility remains explicitly not-checked. Created collection IDs
+proofs. After successful chain verification, `/api/v0/status` is checked independently. Its `indexing` checkpoint must contain version 1, the configured network, Cosmos `chainId`, decimal `evmChainId`, and decimal `completedThroughHeight`. A checkpoint covering the transaction height produces `status: indexed`, `indexing: indexed`, `indexedHeight`, and `indexingScope: block-watermark`. A lagging checkpoint remains confirmed/pending; unavailable or mismatched evidence remains confirmed/unknown. This proves the configured indexer completed the block, not every downstream view or business postcondition. Failed or unconfirmed transactions never receive indexed status. `ReceiptOptions` accepts `indexerUrl`, `apiKey` (sent only to that indexer), or explicit `checkIndexer: false`. The CLI uses its configured API URL/key. Older indexers preserve confirmed/unknown until the checkpoint endpoint is available.
+
+Receipt states are `signed` (signed-only, no submission claim), `submitted`, `confirmed`, `indexed`, `failed`, and `unknown`. Created collection IDs
 are taken only from creation-specific tokenization events, not transfer/update
 events containing a collection ID.
 
