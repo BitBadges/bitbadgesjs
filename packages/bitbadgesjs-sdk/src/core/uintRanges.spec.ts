@@ -80,6 +80,27 @@ describe('UintRange and UintRangeArray', () => {
     expect(index === 0n).toBe(true);
   });
 
+  test('string ranges use numeric ordering and subtraction', () => {
+    const ranges = UintRangeArray.From([
+      { start: '2', end: '2' },
+      { start: '10', end: '10' }
+    ]).sortAndMerge();
+    expect(ranges.map((range) => ({ start: range.start, end: range.end }))).toEqual([
+      { start: '2', end: '2' },
+      { start: '10', end: '10' }
+    ]);
+
+    const [remaining, removed] = new UintRange<string>({ start: '1', end: '20' }).getOverlapDetails({
+      start: '2',
+      end: '3'
+    });
+    expect(remaining.map((range) => ({ start: range.start, end: range.end }))).toEqual([
+      { start: '1', end: '1' },
+      { start: '4', end: '20' }
+    ]);
+    expect(removed.map((range) => ({ start: range.start, end: range.end }))).toEqual([{ start: '2', end: '3' }]);
+  });
+
   describe('UintRangeArray.From defensive guards', () => {
     it('null/undefined → empty array', () => {
       expect(UintRangeArray.From(null).length).toBe(0);
@@ -96,24 +117,14 @@ describe('UintRange and UintRangeArray', () => {
       // Round 4 sweep: subagent caught that From([null]) crashed with
       // "Cannot read properties of null (reading 'start')". The
       // top-level guard wasn't enough — element-level filtering needed.
-      const arr = UintRangeArray.From([
-        null as any,
-        undefined as any,
-        { start: '1', end: '5' },
-        null as any,
-        { start: '7', end: '9' }
-      ]);
+      const arr = UintRangeArray.From([null as any, undefined as any, { start: '1', end: '5' }, null as any, { start: '7', end: '9' }]);
       expect(arr.length).toBe(2);
       expect(String(arr[0].start)).toBe('1');
       expect(String(arr[1].start)).toBe('7');
     });
 
     it('non-object elements (numbers, strings) filtered out', () => {
-      const arr = UintRangeArray.From([
-        123 as any,
-        'string' as any,
-        { start: '1', end: '5' }
-      ]);
+      const arr = UintRangeArray.From([123 as any, 'string' as any, { start: '1', end: '5' }]);
       expect(arr.length).toBe(1);
       expect(String(arr[0].start)).toBe('1');
     });

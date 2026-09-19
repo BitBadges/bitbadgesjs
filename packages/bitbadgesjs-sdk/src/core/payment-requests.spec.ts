@@ -140,6 +140,26 @@ describe('validatePaymentRequestCollection — no-escrow inversion invariants', 
     expect(r.errors.some((e: string) => e.includes('Expected exactly 1 approval with a coinTransfer'))).toBe(true);
   });
 
+  it('rejects multiple coin transfers on the pay approval', () => {
+    const c = fresh();
+    c.collectionApprovals[0].approvalCriteria.coinTransfers.push({
+      to: 'bb1other',
+      overrideFromWithApproverAddress: false,
+      overrideToWithInitiator: false,
+      coins: [{ denom: 'uusdc', amount: 1n }]
+    });
+    expect(validatePaymentRequestCollection(c).valid).toBe(false);
+  });
+
+  it('rejects recipient redirection on the pay approval', () => {
+    const c = fresh();
+    c.collectionApprovals[0].approvalCriteria.coinTransfers[0].overrideToWithInitiator = true;
+    const r = validatePaymentRequestCollection(c);
+    expect(r.valid).toBe(false);
+    expect(r.errors.some((e: string) => e.includes('overrideToWithInitiator=false'))).toBe(true);
+    expect(extractPaymentRequestDetails(c.collectionApprovals)).toBeNull();
+  });
+
   it('rejects votingChallenges (gating must be via initiatedByListId, not voting)', () => {
     const c = fresh();
     c.collectionApprovals[0].approvalCriteria.votingChallenges = [{ voters: [{ address: PAYER }] }];
