@@ -27,9 +27,7 @@ export interface PaymentRequestValidationResult {
  * NO mintEscrowCoinsToTransfer at the top level — that's the key
  * inversion vs. Bounty.
  */
-export const validatePaymentRequestCollection = (
-  collection: Readonly<iCollectionDoc<bigint>>
-): PaymentRequestValidationResult => {
+export const validatePaymentRequestCollection = (collection: Readonly<iCollectionDoc<bigint>>): PaymentRequestValidationResult => {
   const errors: string[] = [];
   const warnings: string[] = [];
   const BURN_ADDRESS = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
@@ -94,9 +92,16 @@ export const validatePaymentRequestCollection = (
   if (withCoinTransfer.length !== 1) {
     errors.push(`Expected exactly 1 approval with a coinTransfer (pay), found ${withCoinTransfer.length}`);
   } else {
-    const ct = withCoinTransfer[0].approvalCriteria!.coinTransfers![0];
+    const coinTransfers = withCoinTransfer[0].approvalCriteria!.coinTransfers!;
+    if (coinTransfers.length !== 1) {
+      errors.push('Pay approval must have exactly 1 coinTransfer');
+    }
+    const ct = coinTransfers[0];
     if (ct.overrideFromWithApproverAddress) {
       errors.push('Pay approval must have overrideFromWithApproverAddress=false (debit initiator/payer, not escrow)');
+    }
+    if (ct.overrideToWithInitiator) {
+      errors.push('Pay approval must have overrideToWithInitiator=false (credit the declared recipient)');
     }
     if (!ct.to) errors.push('Pay approval coinTransfer must specify recipient address');
     // Payer (the initiator scoped via initiatedByListId) MUST NOT be the
@@ -139,9 +144,7 @@ export const validatePaymentRequestCollection = (
   return { valid: errors.length === 0, errors, warnings };
 };
 
-export const doesCollectionFollowPaymentRequestProtocol = (
-  collection: Readonly<iCollectionDoc<bigint>>
-): boolean => {
+export const doesCollectionFollowPaymentRequestProtocol = (collection: Readonly<iCollectionDoc<bigint>>): boolean => {
   return validatePaymentRequestCollection(collection).valid;
 };
 
@@ -171,26 +174,23 @@ export interface PaymentRequestDetails {
  * if the shape doesn't match — caller should treat that as a non-conformant
  * collection (same outcome as `validatePaymentRequestCollection` failing).
  */
-export function extractPaymentRequestDetails(
-  approvals: ReadonlyArray<iCollectionApproval<bigint>>
-): PaymentRequestDetails | null {
+export function extractPaymentRequestDetails(approvals: ReadonlyArray<iCollectionApproval<bigint>>): PaymentRequestDetails | null {
   const payApproval = approvals.find((a) => (a.approvalCriteria?.coinTransfers?.length ?? 0) > 0);
   if (!payApproval) return null;
   const isPublic = payApproval.initiatedByListId === 'All';
   if (approvals.length !== (isPublic ? 1 : 2)) return null;
+  const coinTransfers = payApproval.approvalCriteria?.coinTransfers;
+  if (coinTransfers?.length !== 1 || coinTransfers[0].overrideFromWithApproverAddress || coinTransfers[0].overrideToWithInitiator) return null;
 
   const payEnd = BigInt(payApproval.transferTimes?.[0]?.end ?? 0);
   const denyApproval = approvals.find(
-    (a) =>
-      a !== payApproval &&
-      BigInt(a.transferTimes?.[0]?.start ?? 0) === 1n &&
-      BigInt(a.transferTimes?.[0]?.end ?? 0) === payEnd
+    (a) => a !== payApproval && BigInt(a.transferTimes?.[0]?.start ?? 0) === 1n && BigInt(a.transferTimes?.[0]?.end ?? 0) === payEnd
   );
   if (!isPublic && !denyApproval) return null;
 
   const payerAddress = payApproval.initiatedByListId ?? '';
-  const recipientAddress = payApproval.approvalCriteria?.coinTransfers?.[0]?.to ?? '';
-  const paymentCoins = (payApproval.approvalCriteria?.coinTransfers?.[0]?.coins ?? []).map((c: any) => ({
+  const recipientAddress = coinTransfers[0].to ?? '';
+  const paymentCoins = (coinTransfers[0].coins ?? []).map((c: any) => ({
     denom: String(c.denom),
     amount: BigInt(c.amount)
   }));
@@ -223,11 +223,7 @@ export interface PaymentRequestActionMsg {
  * payer's wallet at execution time (no escrow); the deny approval has
  * no coinTransfer, just records the denial on-chain.
  */
-function buildPaymentRequestSingleApprovalMsg(
-  creator: string,
-  collectionId: string,
-  approval: iCollectionApproval<bigint>
-): PaymentRequestActionMsg {
+function buildPaymentRequestSingleApprovalMsg(creator: string, collectionId: string, approval: iCollectionApproval<bigint>): PaymentRequestActionMsg {
   return {
     typeUrl: '/tokenization.MsgTransferTokens',
     value: {
@@ -262,11 +258,7 @@ function buildPaymentRequestSingleApprovalMsg(
   };
 }
 
-export function buildPaymentRequestPayMsg(
-  creator: string,
-  collectionId: string,
-  payApproval: iCollectionApproval<bigint>
-): PaymentRequestActionMsg {
+export function buildPaymentRequestPayMsg(creator: string, collectionId: string, payApproval: iCollectionApproval<bigint>): PaymentRequestActionMsg {
   return buildPaymentRequestSingleApprovalMsg(creator, collectionId, payApproval);
 }
 

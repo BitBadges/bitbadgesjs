@@ -51,13 +51,18 @@ export const validateBountyCollection = (collection: Readonly<iCollectionDoc<big
     if (!ac?.overridesToIncomingApprovals) errors.push(`Approval "${a.approvalId}": overridesToIncomingApprovals must be true`);
   }
 
-  // 7. All 3: coinTransfers.length=1, overrideFromWithApproverAddress=true
+  // 7. All 3: one fixed payout sourced from the approver address.
   for (const a of approvals) {
     const ct = a.approvalCriteria?.coinTransfers;
     if (!ct || ct.length !== 1) {
       errors.push(`Approval "${a.approvalId}": must have exactly 1 coinTransfer`);
-    } else if (!ct[0].overrideFromWithApproverAddress) {
-      errors.push(`Approval "${a.approvalId}": coinTransfer must have overrideFromWithApproverAddress=true`);
+    } else {
+      if (!ct[0].overrideFromWithApproverAddress) {
+        errors.push(`Approval "${a.approvalId}": coinTransfer must have overrideFromWithApproverAddress=true`);
+      }
+      if (ct[0].overrideToWithInitiator) {
+        errors.push(`Approval "${a.approvalId}": coinTransfer must have overrideToWithInitiator=false`);
+      }
     }
   }
 
@@ -98,9 +103,7 @@ export const validateBountyCollection = (collection: Readonly<iCollectionDoc<big
   // 11. All coinTransfers use same denom and amount
   const denoms = new Set(approvals.map((a) => a.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.denom).filter(Boolean));
   if (denoms.size > 1) errors.push('All approvals must use the same coin denom');
-  const amounts = new Set(
-    approvals.map((a) => String(a.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount)).filter((a) => a !== 'undefined')
-  );
+  const amounts = new Set(approvals.map((a) => String(a.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.amount)).filter((a) => a !== 'undefined'));
   if (amounts.size > 1) errors.push('All approvals must transfer the same amount');
 
   return { valid: errors.length === 0, errors, warnings };
@@ -142,12 +145,11 @@ export interface BountyDetails {
  *
  * Returns null on shape mismatch; caller should treat that as non-conformant.
  */
-export function extractBountyDetails(
-  approvals: ReadonlyArray<iCollectionApproval<bigint>>
-): BountyDetails | null {
+export function extractBountyDetails(approvals: ReadonlyArray<iCollectionApproval<bigint>>): BountyDetails | null {
   const withVoting = approvals.filter((a) => (a.approvalCriteria?.votingChallenges?.length ?? 0) > 0);
   const withoutVoting = approvals.filter((a) => (a.approvalCriteria?.votingChallenges?.length ?? 0) === 0);
   if (withVoting.length !== 2 || withoutVoting.length !== 1) return null;
+  if (approvals.some((a) => a.approvalCriteria?.coinTransfers?.[0]?.overrideToWithInitiator)) return null;
 
   const expireApproval = withoutVoting[0];
   const submitterAddress = expireApproval.approvalCriteria?.coinTransfers?.[0]?.to ?? '';
@@ -182,14 +184,9 @@ export function extractBountyDetails(
  * must come from the local approvalTracker. Used for the expire branch only —
  * accept/deny use the indexer status directly.
  */
-export function isExpireApprovalExecuted(
-  approval: iCollectionApproval<bigint>,
-  collection: Readonly<iCollectionDoc<bigint>>
-): boolean {
+export function isExpireApprovalExecuted(approval: iCollectionApproval<bigint>, collection: Readonly<iCollectionDoc<bigint>>): boolean {
   const trackers = (collection as any)?.approvalTrackers ?? [];
-  const tracker = trackers.find(
-    (t: any) => t.approvalId === approval.approvalId && t.trackerType === 'overall'
-  );
+  const tracker = trackers.find((t: any) => t.approvalId === approval.approvalId && t.trackerType === 'overall');
   return !!tracker && BigInt(tracker.numTransfers ?? 0) > 0n;
 }
 
@@ -221,11 +218,7 @@ export interface BountyTxWrapper {
   messages: [BountyVoteMsg, BountyTransferMsg];
 }
 
-function buildBountyTransferMsg(
-  creator: string,
-  collectionId: string,
-  approval: iCollectionApproval<bigint>
-): BountyTransferMsg {
+function buildBountyTransferMsg(creator: string, collectionId: string, approval: iCollectionApproval<bigint>): BountyTransferMsg {
   return {
     typeUrl: '/tokenization.MsgTransferTokens',
     value: {
@@ -260,12 +253,7 @@ function buildBountyTransferMsg(
   };
 }
 
-function buildBountyVoteMsg(
-  creator: string,
-  collectionId: string,
-  approval: iCollectionApproval<bigint>,
-  yesWeight: string = '100'
-): BountyVoteMsg {
+function buildBountyVoteMsg(creator: string, collectionId: string, approval: iCollectionApproval<bigint>, yesWeight: string = '100'): BountyVoteMsg {
   const proposalId = approval.approvalCriteria?.votingChallenges?.[0]?.proposalId ?? '';
   return {
     typeUrl: '/tokenization.MsgCastVote',
@@ -286,16 +274,9 @@ function buildBountyVoteMsg(
  * MsgCastVote(yes_weight=100) on the accept approval's proposal, then
  * MsgTransferTokens that fires the accept approval (payout to recipient).
  */
-export function buildBountyAcceptTx(
-  creator: string,
-  collectionId: string,
-  acceptApproval: iCollectionApproval<bigint>
-): BountyTxWrapper {
+export function buildBountyAcceptTx(creator: string, collectionId: string, acceptApproval: iCollectionApproval<bigint>): BountyTxWrapper {
   return {
-    messages: [
-      buildBountyVoteMsg(creator, collectionId, acceptApproval),
-      buildBountyTransferMsg(creator, collectionId, acceptApproval)
-    ]
+    messages: [buildBountyVoteMsg(creator, collectionId, acceptApproval), buildBountyTransferMsg(creator, collectionId, acceptApproval)]
   };
 }
 
@@ -303,16 +284,9 @@ export function buildBountyAcceptTx(
  * Build the 2-msg tx wrapper the verifier signs to DENY a bounty:
  * same shape as accept, but targeting the deny approval (payout to submitter).
  */
-export function buildBountyDenyTx(
-  creator: string,
-  collectionId: string,
-  denyApproval: iCollectionApproval<bigint>
-): BountyTxWrapper {
+export function buildBountyDenyTx(creator: string, collectionId: string, denyApproval: iCollectionApproval<bigint>): BountyTxWrapper {
   return {
-    messages: [
-      buildBountyVoteMsg(creator, collectionId, denyApproval),
-      buildBountyTransferMsg(creator, collectionId, denyApproval)
-    ]
+    messages: [buildBountyVoteMsg(creator, collectionId, denyApproval), buildBountyTransferMsg(creator, collectionId, denyApproval)]
   };
 }
 
@@ -321,10 +295,6 @@ export function buildBountyDenyTx(
  * available to anyone after the deadline passes; refunds the submitter
  * from escrow.
  */
-export function buildBountyRefundMsg(
-  creator: string,
-  collectionId: string,
-  expireApproval: iCollectionApproval<bigint>
-): BountyTransferMsg {
+export function buildBountyRefundMsg(creator: string, collectionId: string, expireApproval: iCollectionApproval<bigint>): BountyTransferMsg {
   return buildBountyTransferMsg(creator, collectionId, expireApproval);
 }

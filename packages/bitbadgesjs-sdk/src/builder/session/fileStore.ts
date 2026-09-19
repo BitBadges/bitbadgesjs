@@ -27,6 +27,9 @@ export const DEFAULT_SESSIONS_DIR = path.join(os.homedir(), '.bitbadges', 'sessi
 
 /** Resolve the JSON file path for a session id under the given directory. */
 export function sessionFilePath(id: string, dir: string = DEFAULT_SESSIONS_DIR): string {
+  if (!/^[A-Za-z0-9_-]+$/.test(id)) {
+    throw new Error('Invalid session ID');
+  }
   return path.join(dir, `${id}.json`);
 }
 

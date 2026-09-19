@@ -154,19 +154,19 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
 
     const rangeObject = new UintRange({ start: this.start, end: this.end });
     const idxsToRemove = toCheck;
-    if (idxsToRemove.end < rangeObject.start || idxsToRemove.start > rangeObject.end) {
+    if (BigInt(idxsToRemove.end) < BigInt(rangeObject.start) || BigInt(idxsToRemove.start) > BigInt(rangeObject.end)) {
       // idxsToRemove doesn't overlap with rangeObject, so nothing is removed
       return [UintRangeArray.From([rangeObject]), UintRangeArray.From([])];
     }
 
     const newRanges = UintRangeArray.From<T>([]);
     let removedRanges = UintRangeArray.From<T>([]);
-    if (idxsToRemove.start <= rangeObject.start && idxsToRemove.end >= rangeObject.end) {
+    if (BigInt(idxsToRemove.start) <= BigInt(rangeObject.start) && BigInt(idxsToRemove.end) >= BigInt(rangeObject.end)) {
       // idxsToRemove fully contains rangeObject, so nothing is left
       return [newRanges, UintRangeArray.From([rangeObject])];
     }
 
-    if (idxsToRemove.start > rangeObject.start) {
+    if (BigInt(idxsToRemove.start) > BigInt(rangeObject.start)) {
       // There's a range before idxsToRemove
       // Underflow is not possible because idxsToRemove.start > rangeObject.start
       newRanges.push(
@@ -187,7 +187,7 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
       );
     }
 
-    if (idxsToRemove.end < rangeObject.end) {
+    if (BigInt(idxsToRemove.end) < BigInt(rangeObject.end)) {
       // There's a range after idxsToRemove
       // Overflow is not possible because idxsToRemove.end < rangeObject.end
       newRanges.push(
@@ -207,7 +207,7 @@ export class UintRange<T extends NumberType> extends BaseNumberTypeClass<UintRan
       );
     }
 
-    if (idxsToRemove.end < rangeObject.end && idxsToRemove.start > rangeObject.start) {
+    if (BigInt(idxsToRemove.end) < BigInt(rangeObject.end) && BigInt(idxsToRemove.start) > BigInt(rangeObject.start)) {
       // idxsToRemove is in the middle of rangeObject
       removedRanges = UintRangeArray.From([idxsToRemove]);
     }
@@ -238,9 +238,7 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
     return new UintRangeArray(UintRange.FullRange());
   }
 
-  static From<T extends NumberType>(
-    arr: iUintRange<T>[] | iUintRange<T> | UintRangeArray<T> | null | undefined
-  ): UintRangeArray<T> {
+  static From<T extends NumberType>(arr: iUintRange<T>[] | iUintRange<T> | UintRangeArray<T> | null | undefined): UintRangeArray<T> {
     // Defend against missing optional fields. Many wrapper-class
     // constructors blindly call `UintRangeArray.From(msg.ownershipTimes)`
     // (or similar) without checking presence first; passing undefined
@@ -254,9 +252,7 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
     // UintRange. Without this, `From([null])` crashes inside
     // `new UintRange(null)` reading `.start` on null. Same defensive
     // posture as the top-level guard above; just at the element level.
-    const safeElements = wrappedArr.filter(
-      (i): i is iUintRange<T> => i !== null && i !== undefined && typeof i === 'object'
-    );
+    const safeElements = wrappedArr.filter((i): i is iUintRange<T> => i !== null && i !== undefined && typeof i === 'object');
     return new UintRangeArray(...safeElements.map((i) => new UintRange(i)));
   }
 
@@ -355,7 +351,7 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
     for (let i = 1; i < this.length; i++) {
       const uintRange = this[i];
       let j = i - 1;
-      while (j >= 0 && this[j].start > uintRange.start) {
+      while (j >= 0 && BigInt(this[j].start) > BigInt(uintRange.start)) {
         this[j + 1] = this[j];
         j--;
       }
@@ -488,7 +484,7 @@ export class UintRangeArray<T extends NumberType> extends BaseTypedArray<UintRan
 
       if (currRange.search(id)) {
         return [BigInt(median), true];
-      } else if (currRange.start > id) {
+      } else if (BigInt(currRange.start) > BigInt(id)) {
         high = median - 1;
       } else {
         low = median + 1;

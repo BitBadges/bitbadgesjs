@@ -97,10 +97,13 @@ const makeValidCollection = (): any => ({
 });
 
 const clone = (obj: any) =>
-  JSON.parse(JSON.stringify(obj, (_k, v) => (typeof v === 'bigint' ? v.toString() + 'n' : v)), (_k, v) => {
-    if (typeof v === 'string' && /^\d+n$/.test(v)) return BigInt(v.slice(0, -1));
-    return v;
-  });
+  JSON.parse(
+    JSON.stringify(obj, (_k, v) => (typeof v === 'bigint' ? v.toString() + 'n' : v)),
+    (_k, v) => {
+      if (typeof v === 'string' && /^\d+n$/.test(v)) return BigInt(v.slice(0, -1));
+      return v;
+    }
+  );
 
 // ---- tests ---------------------------------------------------------------
 
@@ -113,6 +116,19 @@ describe('validateBountyCollection — happy path', () => {
 
   it('doesCollectionFollowBountyProtocol returns true for a valid collection', () => {
     expect(doesCollectionFollowBountyProtocol(makeValidCollection())).toBe(true);
+  });
+});
+
+describe('validateBountyCollection — effective payout routing', () => {
+  it('rejects recipient redirection on every payout branch', () => {
+    const c = makeValidCollection();
+    for (const approval of c.collectionApprovals) {
+      approval.approvalCriteria.coinTransfers[0].overrideToWithInitiator = true;
+    }
+    const result = validateBountyCollection(c);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((error: string) => error.includes('overrideToWithInitiator=false'))).toBe(true);
+    expect(extractBountyDetails(c.collectionApprovals)).toBeNull();
   });
 });
 
@@ -183,12 +199,7 @@ describe('validateBountyCollection — approval count', () => {
 
   it('rejects when more than 3 approvals', () => {
     const c = clone(makeValidCollection());
-    c.collectionApprovals = [
-      makeAcceptApproval(),
-      makeDenyApproval(),
-      makeExpireApproval(),
-      makeExpireApproval()
-    ];
+    c.collectionApprovals = [makeAcceptApproval(), makeDenyApproval(), makeExpireApproval(), makeExpireApproval()];
     expect(validateBountyCollection(c).errors.some((e: string) => e.includes('found 4'))).toBe(true);
   });
 
@@ -236,17 +247,13 @@ describe('validateBountyCollection — override flags', () => {
   it('rejects when overridesFromOutgoingApprovals is false', () => {
     const c = clone(makeValidCollection());
     c.collectionApprovals[0].approvalCriteria.overridesFromOutgoingApprovals = false;
-    expect(
-      validateBountyCollection(c).errors.some((e: string) => e.includes('overridesFromOutgoingApprovals must be true'))
-    ).toBe(true);
+    expect(validateBountyCollection(c).errors.some((e: string) => e.includes('overridesFromOutgoingApprovals must be true'))).toBe(true);
   });
 
   it('rejects when overridesToIncomingApprovals is false', () => {
     const c = clone(makeValidCollection());
     c.collectionApprovals[0].approvalCriteria.overridesToIncomingApprovals = false;
-    expect(
-      validateBountyCollection(c).errors.some((e: string) => e.includes('overridesToIncomingApprovals must be true'))
-    ).toBe(true);
+    expect(validateBountyCollection(c).errors.some((e: string) => e.includes('overridesToIncomingApprovals must be true'))).toBe(true);
   });
 });
 
@@ -261,11 +268,9 @@ describe('validateBountyCollection — coinTransfers', () => {
   it('rejects when coinTransfer.overrideFromWithApproverAddress is false', () => {
     const c = clone(makeValidCollection());
     c.collectionApprovals[0].approvalCriteria.coinTransfers[0].overrideFromWithApproverAddress = false;
-    expect(
-      validateBountyCollection(c).errors.some((e: string) =>
-        e.includes('coinTransfer must have overrideFromWithApproverAddress=true')
-      )
-    ).toBe(true);
+    expect(validateBountyCollection(c).errors.some((e: string) => e.includes('coinTransfer must have overrideFromWithApproverAddress=true'))).toBe(
+      true
+    );
   });
 
   it('rejects when denoms do not match across approvals', () => {
@@ -284,9 +289,7 @@ describe('validateBountyCollection — coinTransfers', () => {
 describe('validateBountyCollection — voting structure', () => {
   it('rejects when 3 approvals have voting (expected 2)', () => {
     const c = clone(makeValidCollection());
-    c.collectionApprovals[2].approvalCriteria.votingChallenges = [
-      { voters: [{ address: VERIFIER }] }
-    ];
+    c.collectionApprovals[2].approvalCriteria.votingChallenges = [{ voters: [{ address: VERIFIER }] }];
     expect(validateBountyCollection(c).errors.some((e: string) => e.includes('Expected 2 approvals with votingChallenges'))).toBe(true);
   });
 
@@ -307,9 +310,7 @@ describe('validateBountyCollection — voting structure', () => {
   it('rejects when accept and deny pay to the same address', () => {
     const c = clone(makeValidCollection());
     c.collectionApprovals[1].approvalCriteria.coinTransfers[0].to = 'bb1recipient'; // match accept payout
-    expect(
-      validateBountyCollection(c).errors
-    ).toContain('Accept and deny must pay out to different addresses (recipient vs submitter)');
+    expect(validateBountyCollection(c).errors).toContain('Accept and deny must pay out to different addresses (recipient vs submitter)');
   });
 
   it('rejects when accept and deny expirations differ', () => {
@@ -364,17 +365,11 @@ describe('extractBountyDetails', () => {
 
   it('returns null when there are not exactly 2 voting approvals + 1 non-voting', () => {
     expect(extractBountyDetails([makeAcceptApproval()] as any)).toBeNull();
-    expect(
-      extractBountyDetails([makeAcceptApproval(), makeDenyApproval()] as any)
-    ).toBeNull();
+    expect(extractBountyDetails([makeAcceptApproval(), makeDenyApproval()] as any)).toBeNull();
   });
 
   it('is order-independent (shuffled input)', () => {
-    const details = extractBountyDetails([
-      makeExpireApproval(),
-      makeDenyApproval(),
-      makeAcceptApproval()
-    ] as any);
+    const details = extractBountyDetails([makeExpireApproval(), makeDenyApproval(), makeAcceptApproval()] as any);
     expect(details).not.toBeNull();
     expect(details!.acceptApproval.approvalId).toBe('accept');
   });
