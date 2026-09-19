@@ -61,6 +61,39 @@ const payment = (recipient: string, amount: string) => ({
   overrideFromWithApproverAddress: false,
   overrideToWithInitiator: false
 });
+const fullRange = [{ start: '1', end: '18446744073709551615' }];
+const holderTransfer = (index: number) => [
+  check('holder-source', `/value/collectionApprovals/${index}/fromListId`, '!Mint'),
+  check('holder-destination', `/value/collectionApprovals/${index}/toListId`, 'All'),
+  check('holder-initiators', `/value/collectionApprovals/${index}/initiatedByListId`, 'All'),
+  check('holder-criteria', `/value/collectionApprovals/${index}/approvalCriteria`, {}),
+  ...['tokenIds', 'ownershipTimes', 'transferTimes'].map((field) =>
+    check('holder-' + field.toLowerCase(), `/value/collectionApprovals/${index}/${field}`, fullRange)
+  )
+];
+const tierChecks = [0, 1].flatMap((index) => {
+  const prefix = `/value/collectionApprovals/${index}`;
+  const tokenIds = [{ start: String(index + 1), end: String(index + 1) }];
+  return [
+    ...parsed
+      .find((test) => test.id === 'subscription-fixed-price')!
+      .assertions.filter((assertion) => assertion.path.startsWith('/value/collectionApprovals/0/'))
+      .map((assertion) => ({ ...assertion, id: `tier-${index + 1}-${assertion.id}`, path: assertion.path.replace('/0/', `/${index}/`) })),
+    check(`tier-${index + 1}-scope`, prefix + '/tokenIds', tokenIds),
+    check(`tier-${index + 1}-balances`, prefix + '/approvalCriteria/predeterminedBalances/incrementedBalances/startBalances', [
+      { amount: '1', tokenIds, ownershipTimes: fullRange }
+    ]),
+    check(
+      `tier-${index + 1}-fixed-token`,
+      prefix + '/approvalCriteria/predeterminedBalances/incrementedBalances/allowOverrideWithAnyValidToken',
+      false
+    ),
+    check(`tier-${index + 1}-destination`, prefix + '/toListId', 'All'),
+    check(`tier-${index + 1}-initiators`, prefix + '/initiatedByListId', 'All'),
+    check(`tier-${index + 1}-transfer-times`, prefix + '/transferTimes', fullRange),
+    check(`tier-${index + 1}-ownership-times`, prefix + '/ownershipTimes', fullRange)
+  ];
+});
 const variants = [
   variant(
     'subscription-holder-transfer',
@@ -68,7 +101,7 @@ const variants = [
     'Create 5 BADGE per 30-day membership payable to merchant with holder transfers enabled. Lock mint pricing.',
     { transferable: true },
     { 'only-faucet': 2 },
-    [check('holder-source', '/value/collectionApprovals/1/fromListId', '!Mint')]
+    holderTransfer(1)
   ),
   variant(
     'subscription-split-payment',
@@ -91,7 +124,7 @@ const variants = [
     'Create two 30-day membership tiers, each costing 5 BADGE to merchant, without holder transfers. Lock mint pricing.',
     { tiers: 2 },
     { 'only-faucet': 2 },
-    [check('tier-range', '/value/validTokenIds', [{ start: '1', end: '2' }])]
+    [check('tier-range', '/value/validTokenIds', [{ start: '1', end: '2' }]), ...tierChecks]
   ),
   variant(
     'subscription-week-boundary',
@@ -105,7 +138,8 @@ const variants = [
     'backed-token',
     'Create BADGE-backed token with one-to-one base-unit conversion and immutable deposit/withdraw approvals. Enable holder transfers and pools.',
     { tradable: true },
-    { 'deposit-withdraw': 3, 'no-pools': false }
+    { 'deposit-withdraw': 3, 'no-pools': false },
+    holderTransfer(2)
   ),
   variant(
     'credit-base-unit-ratio',
@@ -123,6 +157,43 @@ const variants = [
     [check('fixed-pack', '/value/collectionApprovals/0/approvalCriteria/predeterminedBalances/incrementedBalances/allowAmountScaling', false)]
   )
 ];
+for (const index of [0, 1]) {
+  variants
+    .find((test) => test.id === 'subscription-two-tiers')!
+    .mutations.push(
+      {
+        id: `tier-${index + 1}-free`,
+        path: `/value/collectionApprovals/${index}/approvalCriteria/coinTransfers`,
+        value: [],
+        mustFail: [`tier-${index + 1}-payment`]
+      },
+      {
+        id: `tier-${index + 1}-short`,
+        path: `/value/collectionApprovals/${index}/approvalCriteria/predeterminedBalances/incrementedBalances/durationFromTimestamp`,
+        value: '1',
+        mustFail: [`tier-${index + 1}-duration`]
+      },
+      {
+        id: `tier-${index + 1}-cross-tier`,
+        path: `/value/collectionApprovals/${index}/tokenIds`,
+        value: [{ start: '1', end: '2' }],
+        mustFail: [`tier-${index + 1}-scope`]
+      }
+    );
+}
+for (const [id, index] of [
+  ['subscription-holder-transfer', 1],
+  ['backed-token-tradable', 2]
+] as const) {
+  variants
+    .find((test) => test.id === id)!
+    .mutations.push({
+      id: 'disable-holder-transfers',
+      path: `/value/collectionApprovals/${index}/toListId`,
+      value: 'None',
+      mustFail: ['holder-destination']
+    });
+}
 variants.find((test) => test.id === 'backed-token-tradable')!.mutations.find((mutation) => mutation.id === 'allow-pools')!.value = true;
 variants.find((test) => test.id === 'service-credit-fixed-pack')!.mutations[0] = {
   id: 'enable-scaling',
@@ -181,7 +252,12 @@ const metadataUpdate: GoldenCase = {
   mutations: [
     { id: 'change-authority', path: '/value/updateManager', value: true, mustFail: ['preserve-manager'] },
     { id: 'wrong-collection', path: '/value/collectionId', value: '2', mustFail: ['collection'] },
-    { id: 'hidden-escrow', path: '/value/mintEscrowCoinsToTransfer', value: [{ denom: 'ubadge', amount: '1000000' }], mustFail: ['no-escrow-funding'] }
+    {
+      id: 'hidden-escrow',
+      path: '/value/mintEscrowCoinsToTransfer',
+      value: [{ denom: 'ubadge', amount: '1000000' }],
+      mustFail: ['no-escrow-funding']
+    }
   ]
 };
 function decision(

@@ -129,11 +129,13 @@ export async function runAgentTrials(cases: BehavioralCase[], input: AgentEvalCo
       const record: (typeof evidence)[number] = { caseId: test.id, trial, attempts: [] };
       const history: unknown[] = [];
       let observedUsage = false;
+      let awaitingUsage = false;
       try {
         for (let attempt = 0; attempt < config.maxAttempts; attempt++) {
           if (Date.now() - start >= config.maxRunMs) throw new Error('Run time budget exhausted');
           if (reservedCostUsd + reservation > config.maxCostUsd) throw new Error('Cost reservation budget exhausted');
           reservedCostUsd += reservation;
+          awaitingUsage = true;
           const raw = await invokeWorker(
             { ...config, timeoutMs: Math.min(config.timeoutMs, config.maxRunMs - (Date.now() - start)) },
             {
@@ -149,6 +151,7 @@ export async function runAgentTrials(cases: BehavioralCase[], input: AgentEvalCo
             }
           );
           const result = workerResult.parse(raw);
+          awaitingUsage = false;
           observedUsage = true;
           for (const key of ['inputTokens', 'outputTokens', 'toolCalls'] as const) {
             row[key] = row[key] === null || result.usage[key] === null ? null : row[key]! + result.usage[key]!;
@@ -185,7 +188,7 @@ export async function runAgentTrials(cases: BehavioralCase[], input: AgentEvalCo
         row.status = 'infrastructure-error';
         record.error = String(redactTrace(error instanceof Error ? error.message : String(error), Object.values(config.environment)));
       }
-      if (!observedUsage) {
+      if (!observedUsage || awaitingUsage) {
         row.inputTokens = null;
         row.outputTokens = null;
         row.toolCalls = null;

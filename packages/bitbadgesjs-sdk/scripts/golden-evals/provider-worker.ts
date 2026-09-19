@@ -72,17 +72,20 @@ export async function runProviderWorker(
     usage.outputTokens += answer.usage.outputTokens;
     if (usage.inputTokens > request.settings.maxInputTokens || usage.outputTokens > request.settings.maxOutputTokens)
       throw new Error('Provider exceeded token budget');
-    if (!answer.toolCalls.length)
-      return {
-        response: JSON.parse(
+    if (!answer.toolCalls.length) {
+      let response: unknown = null;
+      try {
+        response = JSON.parse(
           answer.text
             .trim()
             .replace(/^```json\s*/, '')
             .replace(/\s*```$/, '')
-        ),
-        usage,
-        trace
-      };
+        );
+      } catch {
+        // A completed model response still consumes usage and is eligible for repair.
+      }
+      return { response, usage, trace };
+    }
     messages.push(answer.rawAssistantMessage);
     const results = [];
     for (const tool of answer.toolCalls) {

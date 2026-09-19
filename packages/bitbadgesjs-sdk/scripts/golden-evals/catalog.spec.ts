@@ -1,4 +1,35 @@
 import { behavioralCases, gradeBehavior, publicCase } from './catalog.js';
+import { callTool } from '../../src/builder/tools/registry.js';
+
+it('rejects independently corrupted terms in every composed membership tier', async () => {
+  const test = behavioralCases.find((item) => item.id === 'subscription-two-tiers')!;
+  if (!('assertions' in test.oracle)) throw new Error('Expected artifact oracle');
+  const built = await callTool(test.oracle.tool, test.oracle.input);
+  expect(built.isError).not.toBe(true);
+  const proposal = { disposition: 'propose', explanation: 'Two paid tiers.', artifact: built.result, assured: true };
+  expect(gradeBehavior(test, proposal).passed).toBe(true);
+  for (const index of [0, 1]) {
+    for (const corrupt of [
+      (a: any) => {
+        a.approvalCriteria.coinTransfers = [];
+      },
+      (a: any) => {
+        a.approvalCriteria.predeterminedBalances.incrementedBalances.durationFromTimestamp = '1';
+      },
+      (a: any) => {
+        a.tokenIds = [{ start: '1', end: '2' }];
+      },
+      (a: any) => {
+        a.approvalCriteria.overridesToIncomingApprovals = true;
+      }
+    ]) {
+      const altered = JSON.parse(JSON.stringify(proposal));
+      expect(gradeBehavior(test, altered).passed).toBe(true);
+      corrupt(altered.artifact.value.collectionApprovals[index]);
+      expect(gradeBehavior(test, altered)).toMatchObject({ passed: false, falseAssurance: true });
+    }
+  }
+});
 
 describe('behavioral golden catalog', () => {
   it('checks each decision oracle independently and rejects a contradictory proposal', () => {

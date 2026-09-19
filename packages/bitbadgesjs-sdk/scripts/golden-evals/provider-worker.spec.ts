@@ -1,15 +1,32 @@
 import { runProviderWorker } from './provider-worker.js';
 
+it('returns malformed model replies as gradable failures with their measured usage', async () => {
+  const result = await runProviderWorker(
+    {
+      version: 1,
+      task: { id: 'one', prompt: 'Build', context: {} },
+      history: [],
+      settings: { model: 'fixture', provider: 'fixture', maxInputTokens: 10000, maxOutputTokens: 100 }
+    },
+    {
+      chat: jest.fn().mockResolvedValue({ text: 'not JSON', toolCalls: [], usage: { inputTokens: 10, outputTokens: 5 } }),
+      toolsForRequest: () => []
+    },
+    [],
+    jest.fn()
+  );
+  expect(result.response).toBeNull();
+  expect(result.usage).toEqual({ inputTokens: 10, outputTokens: 5, toolCalls: 0 });
+});
+
 it('never executes a model-requested network or signing tool', async () => {
   const call = jest.fn();
-  const chat = jest
-    .fn()
-    .mockResolvedValue({
-      toolCalls: [{ id: '1', name: 'get_review_url', arguments: {} }],
-      usage: { inputTokens: 1, outputTokens: 1 },
-      rawAssistantMessage: { role: 'assistant', content: [] },
-      text: ''
-    });
+  const chat = jest.fn().mockResolvedValue({
+    toolCalls: [{ id: '1', name: 'get_review_url', arguments: {} }],
+    usage: { inputTokens: 1, outputTokens: 1 },
+    rawAssistantMessage: { role: 'assistant', content: [] },
+    text: ''
+  });
   const provider = { chat, toolsForRequest: (tools: unknown) => tools };
   await expect(
     runProviderWorker(
