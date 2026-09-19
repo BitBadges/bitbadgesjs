@@ -95,6 +95,7 @@ import { getSessionBinding } from '../session/artifactBinding.js';
 import { getTransaction, ensureStringNumbers } from '../session/sessionState.js';
 import { toolFailure, type ToolFailure } from './errors.js';
 import { runLifecycle, getLifecycleSchema, lifecycleDiagnostics } from '../lifecycle.js';
+import { requestBrowserReview } from '../../cli/utils/browser-review.js';
 
 // Re-export session persistence helpers so external consumers (e.g.
 // bitbadges-cli) can snapshot / restore session state across process
@@ -174,6 +175,7 @@ const getSkillInstructionsTool: ToolSchema = {
  * The tool registry. Keys are builder tool names.
  */
 export const toolRegistry: Record<string, ToolEntry> = {
+  request_browser_review: entry({ name: 'request_browser_review', description: 'Create a pending general transaction request using the existing browser signing bridge. Returns request ID, URL, expiry and recovery instructions immediately. Human wallet signing is separate. Collection preview links alone are not transaction requests.', inputSchema: { type: 'object', properties: { artifact: { type: 'object', description: 'Explicit {messages:[{typeUrl,value}]} transaction.' }, expectedAddress: { type: 'string' }, network: { type: 'string', enum: ['mainnet', 'testnet', 'local'] }, signOnly: { type: 'boolean' }, timeoutSeconds: { type: 'integer', minimum: 60, maximum: 1800 }, review: { type: 'object', description: 'Optional version1 intent/evidence sidecar bound to artifact and signer/network.' } }, required: ['artifact', 'expectedAddress', 'network'] } }, requestBrowserReview),
   run_lifecycle: entry({ name: 'run_lifecycle', description: 'Execute an isolated local module lifecycle using an installed bitbadges-lifecycle runner. Never signs or broadcasts; requiredCoverage reports unverified external/IBC checks. Read lifecycle_schema first.', inputSchema: { type: 'object', properties: { scenario: { type: 'object' }, requiredCoverage: { type: 'array', items: { type: 'string' }, maxItems: 30 } }, required: ['scenario'] } },
     (args) => runLifecycle(z.object({ scenario: z.record(z.unknown()), requiredCoverage: z.array(z.string().max(100)).max(30).optional() }).strict().parse(args))),
   lifecycle_schema: entry({ name: 'lifecycle_schema', description: 'Read installed local runner scenario schema, including exact assertions and time controls. Offline; requires the optional runner executable.', inputSchema: { type: 'object', properties: {} } },
@@ -193,8 +195,8 @@ export const toolRegistry: Record<string, ToolEntry> = {
     run: (args: unknown) => { z.object({}).strict().parse(args); return { requestIds: listSigningRequests() }; }
   },
   signing_request_status: {
-    tool: { name: 'signing_request_status', description: 'Inspect a saved browser request. With resume=true, returns the same URL only while its original listener is live. Never creates or submits another transaction; unknown outcomes require reconciliation.', inputSchema: { type: 'object', properties: { requestId: { type: 'string', pattern: '^[a-f0-9]{32}$' }, resume: { type: 'boolean' } }, required: ['requestId'], additionalProperties: false } } as ToolSchema,
-    run: (args: unknown) => { const input = z.object({ requestId: z.string().regex(/^[a-f0-9]{32}$/), resume: z.boolean().optional() }).strict().parse(args); return getSigningRequestStatus(input.requestId, input.resume); }
+    tool: { name: 'signing_request_status', description: 'Inspect a saved browser request. With resume=true, returns the same URL only while its original listener is live. Never creates or submits another transaction; unknown outcomes require reconciliation.', inputSchema: { type: 'object', properties: { requestId: { type: 'string', pattern: '^[a-f0-9]{32}$' }, resume: { type: 'boolean' }, verify: { type: 'boolean', description: 'Verify configured chain execution and request message binding.' } }, required: ['requestId'], additionalProperties: false } } as ToolSchema,
+    run: (args: unknown) => { const input = z.object({ requestId: z.string().regex(/^[a-f0-9]{32}$/), resume: z.boolean().optional(), verify: z.boolean().optional() }).strict().parse(args); return getSigningRequestStatus(input.requestId, input.resume, input.verify); }
   },
   get_standards: entry(
     {

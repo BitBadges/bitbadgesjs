@@ -4,6 +4,7 @@ import { randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import { parseBrowserTxRequest, parseBrowserTxResult, type BrowserTxRequestV2, type BrowserTxResultV2 } from '../../core/browser-signing.js';
 import { getConfigPath } from './config.js';
+import { verifyBrowserReceipt } from '../../core/browser-receipt.js';
 
 type RecordData = { version: 1; createdAt: number; request: BrowserTxRequestV2; url?: string; result?: BrowserTxResultV2 };
 const recordSchema = z
@@ -119,7 +120,7 @@ async function listenerIsActive(record: RecordData): Promise<boolean> {
   }
 }
 
-export async function getSigningRequestStatus(id: string, resume = false) {
+export async function getSigningRequestStatus(id: string, resume = false, verify = false) {
   let record = readRecord(id);
   const active = !record.result && (await listenerIsActive(record));
   // A callback may arrive while the listener probe is in flight.
@@ -127,14 +128,16 @@ export async function getSigningRequestStatus(id: string, resume = false) {
   const canResume = active && !record.result;
   const result = record.result;
   const outcome = result?.outcome ?? (canResume ? 'pending' : 'unknown');
+  const receipt = verify && result && (result.outcome === 'submitted' || result.outcome === 'signed') ? await verifyBrowserReceipt(record.request, result) : undefined;
   return {
     requestId: id,
-    outcome,
+    outcome: receipt?.status ?? outcome,
     expectedAddress: record.request.expectedAddress,
     network: record.request.network,
     expiresAt: record.request.expiresAt,
-    confirmed: false,
-    verification: 'unverified',
+    confirmed: receipt?.confirmed ?? false,
+    verification: receipt?.confirmed ? 'chain-confirmed' : 'unverified',
+    ...(receipt ? { receipt } : {}),
     retrySafe: false,
     canResume,
     ...(result ? { result } : {}),
