@@ -94,6 +94,7 @@ import { artifactIdentity, parseIntent, verifyIntent, repairArtifact } from '../
 import { getSessionBinding } from '../session/artifactBinding.js';
 import { getTransaction, ensureStringNumbers } from '../session/sessionState.js';
 import { toolFailure, type ToolFailure } from './errors.js';
+import { runLifecycle, getLifecycleSchema, lifecycleDiagnostics } from '../lifecycle.js';
 
 // Re-export session persistence helpers so external consumers (e.g.
 // bitbadges-cli) can snapshot / restore session state across process
@@ -173,6 +174,12 @@ const getSkillInstructionsTool: ToolSchema = {
  * The tool registry. Keys are builder tool names.
  */
 export const toolRegistry: Record<string, ToolEntry> = {
+  run_lifecycle: entry({ name: 'run_lifecycle', description: 'Execute an isolated local module lifecycle using an installed bitbadges-lifecycle runner. Never signs or broadcasts; requiredCoverage reports unverified external/IBC checks. Read lifecycle_schema first.', inputSchema: { type: 'object', properties: { scenario: { type: 'object' }, requiredCoverage: { type: 'array', items: { type: 'string' }, maxItems: 30 } }, required: ['scenario'] } },
+    (args) => runLifecycle(z.object({ scenario: z.record(z.unknown()), requiredCoverage: z.array(z.string().max(100)).max(30).optional() }).strict().parse(args))),
+  lifecycle_schema: entry({ name: 'lifecycle_schema', description: 'Read installed local runner scenario schema, including exact assertions and time controls. Offline; requires the optional runner executable.', inputSchema: { type: 'object', properties: {} } },
+    (args) => { z.object({}).strict().parse(args); return getLifecycleSchema(); }),
+  environment_diagnostics: entry({ name: 'environment_diagnostics', description: 'Inspect installed schema versions, local lifecycle runner, and configured service readiness without returning credentials or making network calls.', inputSchema: { type: 'object', properties: {} } },
+    async (args) => { z.object({}).strict().parse(args); return { version: 1, catalogHash: getCapabilityCatalog().catalogHash, schemas: { intent: 1, lifecycle: 1, browserRequest: 2 }, offline: ['discovery', 'skills', 'build', 'static-review', 'intent-check'], runner: await lifecycleDiagnostics(), services: { simulation: process.env.BITBADGES_API_KEY ? 'configured-not-probed' : 'credentials-required', signing: 'wallet-and-browser-required', model: 'optional-not-probed' } }; }),
   verify_intent: entry({ name: 'verify_intent', description: 'Compare exact user requirements against an explicit artifact. Returns satisfied, violated or unverified per requirement. Static evidence never establishes lifecycle or external-service success.', inputSchema: { type: 'object', properties: { artifact: { type: 'object' }, intent: { type: 'object', description: 'Version1 requirements and unresolvedDecisions. See installed task bundles.' } }, required: ['artifact', 'intent'] } },
     (args) => { const input = z.object({ artifact: z.record(z.unknown()), intent: z.unknown() }).strict().parse(args); return verifyIntent(input.artifact, input.intent); }),
   validate_intent: entry({ name: 'validate_intent', description: 'Validate an intent sidecar, reject contradictory constraints, and list decisions requiring clarification.', inputSchema: { type: 'object', properties: { intent: { type: 'object' } }, required: ['intent'] } },

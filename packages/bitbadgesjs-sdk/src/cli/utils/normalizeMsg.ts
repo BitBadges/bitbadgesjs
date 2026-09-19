@@ -116,6 +116,7 @@ export function normalizeToCreateOrUpdate(msg: any): any {
   //                                       so downstream proto encoders that
   //                                       expect strings don't barf)
   const rawId = value.collectionId;
+  delete value.updateDefaultBalances;
   let isNew: boolean;
   if (rawId === undefined || rawId === null) {
     isNew = true;

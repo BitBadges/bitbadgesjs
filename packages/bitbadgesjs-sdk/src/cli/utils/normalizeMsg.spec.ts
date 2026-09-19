@@ -279,3 +279,11 @@ describe('normalizeTxMessages', () => {
     expect(normalizeTxMessages({} as any)).toEqual({});
   });
 });
+describe('session default balance normalization', () => {
+  it('drops the non-protobuf updateDefaultBalances flag while preserving defaults', () => {
+    const defaults = { balances: [], autoApproveAllIncomingTransfers: true };
+    const result = normalizeToCreateOrUpdate({ typeUrl: '/tokenization.MsgUniversalUpdateCollection', value: { collectionId: '0', updateDefaultBalances: true, defaultBalances: defaults } });
+    expect(result.value).not.toHaveProperty('updateDefaultBalances');
+    expect(result.value.defaultBalances).toEqual(defaults);
+  });
+});

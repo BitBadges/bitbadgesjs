@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { sha256, toUtf8Bytes } from 'ethers';
+import { coerceToUniversal } from '../cli/utils/normalizeMsg.js';
 
 const uint = z.string().regex(/^(0|[1-9][0-9]*)$/).max(78);
 const identity = { id: z.string().min(1).max(100), source: z.enum(['user', 'agent']), approvalId: z.string().min(1).max(256).optional() };
@@ -55,7 +56,7 @@ export function verifyIntent(artifact: unknown, input: unknown): IntentEvidence 
   const intent = parseIntent(input);
   const tx = artifact as any;
   const messages = Array.isArray(tx?.messages) ? tx.messages : tx?.typeUrl ? [tx] : [];
-  const collections = messages.map((msg: any, index: number) => ({ msg, index })).filter(({ msg }: any) =>
+  const collections = messages.map((msg: any, index: number) => ({ msg: coerceToUniversal(msg), index })).filter(({ msg }: any) =>
     msg?.typeUrl === '/tokenization.MsgUniversalUpdateCollection' || msg?.typeUrl === '/tokenization.MsgCreateCollection');
   const requirements = intent.requirements.map((req): RequirementEvidence => {
     const base = { requirementId: req.id, status: 'unverified' as IntentStatus, source: 'none' as RequirementEvidence['source'], paths: [] as string[] };
