@@ -7,6 +7,8 @@ describe('installed executable skill contracts', () => {
     expect(Buffer.byteLength(JSON.stringify(bundle))).toBeLessThan(16000);
     expect(bundle.contract.goldenScenarioIds.length).toBeGreaterThan(0);
     expect(bundle.contract.clarifications.length).toBeGreaterThan(0);
+    expect(bundle.contract.postconditions.join(' ')).not.toMatch(/Exactly 5 BADGE|Exactly 30 days/);
+    expect(bundle.contract.examplePostconditions.length).toBeGreaterThan(0);
     const result = await callTool(bundle.contract.example.tool, bundle.contract.example.input);
     expect(result.isError).not.toBe(true);
     expect(result.result.typeUrl).toBe('/tokenization.MsgCreateCollection');

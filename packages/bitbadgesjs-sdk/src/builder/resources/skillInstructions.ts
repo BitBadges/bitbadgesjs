@@ -10,6 +10,7 @@ export type SkillContract = {
   version: 1;
   prerequisites: string[];
   postconditions: string[];
+  examplePostconditions: string[];
   clarifications: string[];
   unsupported: string[];
   goldenScenarioIds: string[];
@@ -36,7 +37,8 @@ export const SKILL_INSTRUCTIONS: SkillInstruction[] = [
             "Confirm signer and network before handoff.",
             "Record exact user requirements separately from external metadata."
       ],
-      "postconditions": [
+      "postconditions": ["Generated artifact matches the confirmed input parameters and explicit user intent.", "Structural checks and lifecycle evidence remain separately scoped; unsigned output is not deployed."],
+      "examplePostconditions": [
             "Prepare a new collection",
             "Disallow forceful post-mint transfers",
             "Only deposit and withdrawal approvals",
@@ -881,7 +883,8 @@ IMPORTANT: predeterminedBalances and approvalAmounts are INCOMPATIBLE — use on
             "Confirm signer and network before handoff.",
             "Record exact user requirements separately from external metadata."
       ],
-      "postconditions": [
+      "postconditions": ["Generated artifact matches the confirmed input parameters and explicit user intent.", "Structural checks and lifecycle evidence remain separately scoped; unsigned output is not deployed."],
+      "examplePostconditions": [
             "Prepare a new collection",
             "Disallow forceful post-mint transfers",
             "No initial holder-transfer approval",
@@ -1867,7 +1870,8 @@ add_preset_approval({ presetId: "tradable.transferable", params: {} })
             "Confirm signer and network before handoff.",
             "Record exact user requirements separately from external metadata."
       ],
-      "postconditions": [
+      "postconditions": ["Generated artifact matches the confirmed input parameters and explicit user intent.", "Structural checks and lifecycle evidence remain separately scoped; unsigned output is not deployed."],
+      "examplePostconditions": [
             "Prepare a new collection",
             "Disallow forceful post-mint transfers",
             "Only purchase and consumption paths",
@@ -1945,7 +1949,8 @@ See docs/spendable-credits.md and examples/spendable-credit-provider for the aut
             "Confirm signer and network before handoff.",
             "Record exact user requirements separately from external metadata."
       ],
-      "postconditions": [
+      "postconditions": ["Generated artifact matches the confirmed input parameters and explicit user intent.", "Structural checks and lifecycle evidence remain separately scoped; unsigned output is not deployed."],
+      "examplePostconditions": [
             "Prepare a new collection",
             "Disallow forceful post-mint transfers",
             "Only the purchase approval exists",
@@ -2789,7 +2794,8 @@ Before publication, review and validate the generated collection and simulate ac
             "Confirm signer and network before handoff.",
             "Record exact user requirements separately from external metadata."
       ],
-      "postconditions": [
+      "postconditions": ["Generated artifact matches the confirmed input parameters and explicit user intent.", "Structural checks and lifecycle evidence remain separately scoped; unsigned output is not deployed."],
+      "examplePostconditions": [
             "Prepare a new collection",
             "Disallow forceful post-mint transfers",
             "Only pay and deny paths",
