@@ -30,8 +30,24 @@ export async function verifyBrowserReceipt(input: BrowserTxRequestV2, callback: 
     const response = await (options.fetch ?? fetch)(url, { signal: controller.signal, redirect: 'error', ...(body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {}) });
     if (response.status === 404) return null;
     if (!response.ok) throw new Error('RPC unavailable');
-    const text = await response.text();
-    if (text.length > 2 * 1024 * 1024) throw new Error('RPC output exceeds bound');
+    if (!response.body) throw new Error('Missing RPC body');
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8', { fatal: true });
+    let text = '';
+    let bytes = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        bytes += value.byteLength;
+        if (bytes > 2 * 1024 * 1024) {
+          await reader.cancel();
+          throw new Error('RPC output exceeds bound');
+        }
+        text += decoder.decode(value, { stream: true });
+      }
+      text += decoder.decode();
+    } finally { reader.releaseLock(); }
     return JSON.parse(text);
   };
   try {

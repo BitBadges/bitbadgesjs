@@ -10,6 +10,18 @@ const result = { requestId: request.requestId, outcome: 'submitted', hash, addre
 function chainResponse(overrides: any = {}) { return { tx: { body: { messages: [{ '@type': request.txsInfo[0].type, ...JSON.parse(JSON.stringify(request.txsInfo[0].msg)) }] } }, tx_response: { txhash: hash, height: '1', code: 0, events: [], ...overrides } }; }
 function rpc(tx: any, chainId = request.chainId) { return jest.fn(async (url: any) => new Response(JSON.stringify(String(url).includes('node_info') ? { default_node_info: { network: chainId } } : tx), { status: 200 })); }
 describe('independent browser completion receipts', () => {
+  it('cancels oversized chunked responses before buffering the entire stream', async () => {
+    let bytes = 0;
+    let cancelled = false;
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) { bytes += 65536; controller.enqueue(new Uint8Array(65536)); if (bytes === 4 * 1024 * 1024) controller.close(); },
+      cancel() { cancelled = true; }
+    });
+    const receipt = await verifyBrowserReceipt(request, result, { fetch: jest.fn(async () => new Response(body)) as any });
+    expect(receipt.status).toBe('unknown');
+    expect(cancelled).toBe(true);
+    expect(bytes).toBeLessThan(4 * 1024 * 1024);
+  });
   it('confirms only matching executed transactions and never claims indexed state', async () => {
     const receipt = await verifyBrowserReceipt(request, result, { fetch: rpc(chainResponse()) as any });
     expect(receipt.status).toBe('confirmed'); expect(receipt.indexing).toBe('not-checked');
