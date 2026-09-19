@@ -1,5 +1,6 @@
 export type { StandardDescriptor, StandardOperation } from '../standards.js';
 import { describeStandards } from '../standards.js';
+import { normalizeTxMessages } from '../../cli/utils/normalizeMsg.js';
 /**
  * Central tool registry.
  *
@@ -465,7 +466,7 @@ export async function callTool(name: string, args: any): Promise<CallToolResult>
       if (args.transaction === undefined && args.transactionJson === undefined) {
         const snapshot = JSON.parse(JSON.stringify(ensureStringNumbers({ messages: getTransaction(args.sessionId, args.creatorAddress).messages })));
         binding = getSessionBinding(args.sessionId);
-        args = { ...args, transaction: snapshot };
+        args = { ...args, transaction: name === 'simulate_transaction' ? normalizeTxMessages(snapshot) : snapshot };
       }
     }
     let result = await tool.run(args);

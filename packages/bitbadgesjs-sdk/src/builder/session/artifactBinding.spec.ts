@@ -2,7 +2,20 @@ import { callTool } from '../tools/registry.js';
 import { getSessionBinding, assertSessionBinding } from './artifactBinding.js';
 import { setCustomData, resetSession } from './sessionState.js';
 import { handleValidateTransaction } from '../tools/utilities/validateTransaction.js';
+import * as api from '../sdk/apiClient.js';
+import { artifactIdentity } from '../../core/intent.js';
 describe('artifact-bound tool checks', () => {
+  it('binds simulation evidence to the normalized messages actually sent', async () => {
+    const simulate = jest.spyOn(api, 'simulateTx').mockResolvedValue({ success: true, data: { gas_info: { gas_used: '1' }, result: { events: [] } } } as any);
+    try {
+      const before = getSessionBinding('first');
+      const result = await callTool('simulate_transaction', { sessionId: 'first' });
+      expect(result.isError).toBeUndefined();
+      const sent = simulate.mock.calls[0][0] as any;
+      expect(sent.messages[0].typeUrl).toBe('/tokenization.MsgCreateCollection');
+      expect(result.result.evidenceBinding).toMatchObject({ artifactId: artifactIdentity({ messages: sent.messages }), sessionId: 'first', revision: before.revision });
+    } finally { simulate.mockRestore(); }
+  });
   afterEach(() => { resetSession('first'); resetSession('second'); });
   it('isolates interleaved builds and rejects stale identity after direct mutation', () => {
     setCustomData('first', 'a'); setCustomData('second', 'b');
