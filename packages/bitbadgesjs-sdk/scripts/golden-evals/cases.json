@@ -1,0 +1,801 @@
+[
+  {
+    "version": 1,
+    "id": "subscription-fixed-price",
+    "prompt": "Create one membership tier costing 5 BADGE per 30-day period, payable to the merchant. Lock mint pricing; start without holder-to-holder transfers.",
+    "tool": "build_subscription",
+    "input": {
+      "uri": "https://example.com/golden-metadata.json",
+      "interval": "30d",
+      "price": 5,
+      "denom": "BADGE",
+      "recipient": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7",
+      "transferable": false,
+      "updatableMint": false
+    },
+    "clarifications": [
+      {
+        "question": "Calendar month or 30 days?",
+        "answer": "Exactly 30 days; no claim of automatic renewal."
+      }
+    ],
+    "limitations": [
+      "Unsigned builder proposal only; signer and manager must be bound before deployment.",
+      "Artifact constraints only. No chain execution, wallet signing, live balance checks or external service verification.",
+      "Initial holder-transfer restriction is checked; the builder retains manager ability to add non-mint transfer approvals. This is not immutable non-transferability."
+    ],
+    "assertions": [
+      {
+        "id": "create-message",
+        "path": "/typeUrl",
+        "operator": "equals",
+        "expected": "/tokenization.MsgCreateCollection",
+        "requirement": "Prepare a new collection"
+      },
+      {
+        "id": "no-forceful-transfer",
+        "path": "/value/invariants/noForcefulPostMintTransfers",
+        "operator": "equals",
+        "expected": true,
+        "requirement": "Disallow forceful post-mint transfers"
+      },
+      {
+        "id": "only-faucet",
+        "path": "/value/collectionApprovals",
+        "operator": "length",
+        "expected": 1,
+        "requirement": "No initial holder-transfer approval"
+      },
+      {
+        "id": "mint-source",
+        "path": "/value/collectionApprovals/0/fromListId",
+        "operator": "equals",
+        "expected": "Mint",
+        "requirement": "Membership originates at Mint"
+      },
+      {
+        "id": "payment",
+        "path": "/value/collectionApprovals/0/approvalCriteria/coinTransfers",
+        "operator": "equals",
+        "expected": [
+          {
+            "to": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7",
+            "coins": [
+              {
+                "amount": "5000000000",
+                "denom": "ubadge"
+              }
+            ],
+            "overrideFromWithApproverAddress": false,
+            "overrideToWithInitiator": false
+          }
+        ],
+        "requirement": "Exactly 5 BADGE to the merchant; initiator pays"
+      },
+      {
+        "id": "duration",
+        "path": "/value/collectionApprovals/0/approvalCriteria/predeterminedBalances/incrementedBalances/durationFromTimestamp",
+        "operator": "equals",
+        "expected": "2592000000",
+        "requirement": "Exactly 30 days in milliseconds"
+      },
+      {
+        "id": "one-period",
+        "path": "/value/collectionApprovals/0/approvalCriteria/predeterminedBalances/incrementedBalances/allowAmountScaling",
+        "operator": "equals",
+        "expected": false,
+        "requirement": "One period per mint"
+      },
+      {
+        "id": "mint-lock",
+        "path": "/value/collectionPermissions/canUpdateCollectionApprovals",
+        "operator": "equals",
+        "expected": [
+          {
+            "fromListId": "Mint",
+            "toListId": "All",
+            "initiatedByListId": "All",
+            "transferTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "tokenIds": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "ownershipTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "approvalId": "All",
+            "permanentlyPermittedTimes": [],
+            "permanentlyForbiddenTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ]
+          }
+        ],
+        "requirement": "Mint approval permissions remain locked for every token and time"
+      },
+      {
+        "id": "recipient-consent",
+        "path": "/value/collectionApprovals/0/approvalCriteria/overridesToIncomingApprovals",
+        "operator": "equals",
+        "expected": false,
+        "requirement": "Do not bypass recipient incoming approvals"
+      }
+    ],
+    "mutations": [
+      {
+        "id": "wrong-recipient",
+        "path": "/value/collectionApprovals/0/approvalCriteria/coinTransfers/0/to",
+        "value": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+        "mustFail": ["payment"]
+      },
+      {
+        "id": "wrong-duration",
+        "path": "/value/collectionApprovals/0/approvalCriteria/predeterminedBalances/incrementedBalances/durationFromTimestamp",
+        "value": "2592000001",
+        "mustFail": ["duration"]
+      },
+      {
+        "id": "unlock-price",
+        "path": "/value/collectionPermissions/canUpdateCollectionApprovals",
+        "value": [],
+        "mustFail": ["mint-lock"]
+      },
+      {
+        "id": "bypass-consent",
+        "path": "/value/collectionApprovals/0/approvalCriteria/overridesToIncomingApprovals",
+        "value": true,
+        "mustFail": ["recipient-consent"]
+      }
+    ]
+  },
+  {
+    "version": 1,
+    "id": "invoice-direct-payment",
+    "prompt": "Request a one-time payment of 7 BADGE from the specified payer to the merchant. Expire after 30 days; no escrow or refund promise.",
+    "tool": "build_payment_request",
+    "input": {
+      "uri": "https://example.com/golden-metadata.json",
+      "amount": 7,
+      "denom": "BADGE",
+      "payer": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+      "recipient": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7",
+      "expiration": "30d"
+    },
+    "clarifications": [],
+    "limitations": [
+      "Unsigned builder proposal only; signer and manager must be bound before deployment.",
+      "Artifact constraints only. No chain execution, wallet signing, live balance checks or external service verification."
+    ],
+    "assertions": [
+      {
+        "id": "create-message",
+        "path": "/typeUrl",
+        "operator": "equals",
+        "expected": "/tokenization.MsgCreateCollection",
+        "requirement": "Prepare a new collection"
+      },
+      {
+        "id": "no-forceful-transfer",
+        "path": "/value/invariants/noForcefulPostMintTransfers",
+        "operator": "equals",
+        "expected": true,
+        "requirement": "Disallow forceful post-mint transfers"
+      },
+      {
+        "id": "pay-and-deny",
+        "path": "/value/collectionApprovals",
+        "operator": "length",
+        "expected": 2,
+        "requirement": "Only pay and deny paths"
+      },
+      {
+        "id": "payer",
+        "path": "/value/collectionApprovals/0/initiatedByListId",
+        "operator": "equals",
+        "expected": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+        "requirement": "Only the specified payer initiates payment"
+      },
+      {
+        "id": "payment",
+        "path": "/value/collectionApprovals/0/approvalCriteria/coinTransfers",
+        "operator": "equals",
+        "expected": [
+          {
+            "to": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7",
+            "coins": [
+              {
+                "amount": "7000000000",
+                "denom": "ubadge"
+              }
+            ],
+            "overrideFromWithApproverAddress": false,
+            "overrideToWithInitiator": false
+          }
+        ],
+        "requirement": "Exactly 7 BADGE paid directly to merchant"
+      },
+      {
+        "id": "one-payment",
+        "path": "/value/collectionApprovals/0/approvalCriteria/maxNumTransfers/overallMaxNumTransfers",
+        "operator": "equals",
+        "expected": "1",
+        "requirement": "One fulfillment allowed"
+      },
+      {
+        "id": "deadline",
+        "path": "/value/collectionApprovals/0/transferTimes",
+        "operator": "equals",
+        "expected": [
+          {
+            "start": "1",
+            "end": "1896048000000"
+          }
+        ],
+        "requirement": "Payment deadline is fixed time plus 30 days"
+      },
+      {
+        "id": "no-prefunding",
+        "path": "/value/mintEscrowCoinsToTransfer",
+        "operator": "equals",
+        "expected": [],
+        "requirement": "No escrow funded on creation"
+      },
+      {
+        "id": "terms-lock",
+        "path": "/value/collectionPermissions/canUpdateCollectionApprovals",
+        "operator": "equals",
+        "expected": [
+          {
+            "fromListId": "All",
+            "toListId": "All",
+            "initiatedByListId": "All",
+            "transferTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "tokenIds": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "ownershipTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "approvalId": "All",
+            "permanentlyPermittedTimes": [],
+            "permanentlyForbiddenTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ]
+          }
+        ],
+        "requirement": "Approval terms cannot be changed"
+      }
+    ],
+    "mutations": [
+      {
+        "id": "public-payer",
+        "path": "/value/collectionApprovals/0/initiatedByListId",
+        "value": "All",
+        "mustFail": ["payer"]
+      },
+      {
+        "id": "repeat-payment",
+        "path": "/value/collectionApprovals/0/approvalCriteria/maxNumTransfers/overallMaxNumTransfers",
+        "value": "0",
+        "mustFail": ["one-payment"]
+      },
+      {
+        "id": "wrong-amount",
+        "path": "/value/collectionApprovals/0/approvalCriteria/coinTransfers/0/coins/0/amount",
+        "value": "7000000001",
+        "mustFail": ["payment"]
+      },
+      {
+        "id": "late-payment",
+        "path": "/value/collectionApprovals/0/transferTimes/0/end",
+        "value": "1896048000001",
+        "mustFail": ["deadline"]
+      }
+    ]
+  },
+  {
+    "version": 1,
+    "id": "backed-token",
+    "prompt": "Create a non-tradable BADGE-backed token with a one-to-one conversion and immutable deposit/withdraw approvals.",
+    "tool": "build_smart_token",
+    "input": {
+      "uri": "https://example.com/golden-metadata.json",
+      "backingCoin": "BADGE",
+      "symbol": "vBADGE",
+      "tradable": false
+    },
+    "clarifications": [],
+    "limitations": [
+      "Unsigned builder proposal only; signer and manager must be bound before deployment.",
+      "Artifact constraints only. No chain execution, wallet signing, live balance checks or external service verification."
+    ],
+    "assertions": [
+      {
+        "id": "create-message",
+        "path": "/typeUrl",
+        "operator": "equals",
+        "expected": "/tokenization.MsgCreateCollection",
+        "requirement": "Prepare a new collection"
+      },
+      {
+        "id": "no-forceful-transfer",
+        "path": "/value/invariants/noForcefulPostMintTransfers",
+        "operator": "equals",
+        "expected": true,
+        "requirement": "Disallow forceful post-mint transfers"
+      },
+      {
+        "id": "deposit-withdraw",
+        "path": "/value/collectionApprovals",
+        "operator": "length",
+        "expected": 2,
+        "requirement": "Only deposit and withdrawal approvals"
+      },
+      {
+        "id": "backing",
+        "path": "/value/invariants/cosmosCoinBackedPath/conversion",
+        "operator": "equals",
+        "expected": {
+          "sideA": {
+            "amount": "1",
+            "denom": "ubadge"
+          },
+          "sideB": [
+            {
+              "amount": "1",
+              "tokenIds": [
+                {
+                  "start": "1",
+                  "end": "1"
+                }
+              ],
+              "ownershipTimes": [
+                {
+                  "start": "1",
+                  "end": "18446744073709551615"
+                }
+              ]
+            }
+          ]
+        },
+        "requirement": "One backing base unit converts to one token unit"
+      },
+      {
+        "id": "no-pools",
+        "path": "/value/invariants/disablePoolCreation",
+        "operator": "equals",
+        "expected": true,
+        "requirement": "No pool creation"
+      },
+      {
+        "id": "deposit-backed",
+        "path": "/value/collectionApprovals/0/approvalCriteria/allowBackedMinting",
+        "operator": "equals",
+        "expected": true,
+        "requirement": "Deposit uses backed-minting path"
+      },
+      {
+        "id": "withdraw-backed",
+        "path": "/value/collectionApprovals/1/approvalCriteria/allowBackedMinting",
+        "operator": "equals",
+        "expected": true,
+        "requirement": "Withdrawal uses backed path"
+      },
+      {
+        "id": "terms-lock",
+        "path": "/value/collectionPermissions/canUpdateCollectionApprovals",
+        "operator": "equals",
+        "expected": [
+          {
+            "fromListId": "All",
+            "toListId": "All",
+            "initiatedByListId": "All",
+            "transferTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "tokenIds": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "ownershipTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "approvalId": "All",
+            "permanentlyPermittedTimes": [],
+            "permanentlyForbiddenTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ]
+          }
+        ],
+        "requirement": "Deposit and withdrawal rules are immutable"
+      }
+    ],
+    "mutations": [
+      {
+        "id": "wrong-ratio",
+        "path": "/value/invariants/cosmosCoinBackedPath/conversion/sideA/amount",
+        "value": "2",
+        "mustFail": ["backing"]
+      },
+      {
+        "id": "wrong-backing",
+        "path": "/value/invariants/cosmosCoinBackedPath/conversion/sideA/denom",
+        "value": "uatom",
+        "mustFail": ["backing"]
+      },
+      {
+        "id": "allow-pools",
+        "path": "/value/invariants/disablePoolCreation",
+        "value": false,
+        "mustFail": ["no-pools"]
+      },
+      {
+        "id": "unlock-withdraw",
+        "path": "/value/collectionPermissions/canUpdateCollectionApprovals",
+        "value": [],
+        "mustFail": ["terms-lock"]
+      }
+    ]
+  },
+  {
+    "version": 1,
+    "id": "purchasable-credits",
+    "prompt": "Create credits at 37 token base units per BADGE base unit paid to the merchant. Freeze purchase terms and disallow holder transfers.",
+    "tool": "build_credit_token",
+    "input": {
+      "uri": "https://example.com/golden-metadata.json",
+      "paymentDenom": "BADGE",
+      "recipient": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7",
+      "tokensPerUnit": 37
+    },
+    "clarifications": [],
+    "limitations": [
+      "Unsigned builder proposal only; signer and manager must be bound before deployment.",
+      "Artifact constraints only. No chain execution, wallet signing, live balance checks or external service verification."
+    ],
+    "assertions": [
+      {
+        "id": "create-message",
+        "path": "/typeUrl",
+        "operator": "equals",
+        "expected": "/tokenization.MsgCreateCollection",
+        "requirement": "Prepare a new collection"
+      },
+      {
+        "id": "no-forceful-transfer",
+        "path": "/value/invariants/noForcefulPostMintTransfers",
+        "operator": "equals",
+        "expected": true,
+        "requirement": "Disallow forceful post-mint transfers"
+      },
+      {
+        "id": "purchase-only",
+        "path": "/value/collectionApprovals",
+        "operator": "length",
+        "expected": 1,
+        "requirement": "Only the purchase approval exists"
+      },
+      {
+        "id": "payment",
+        "path": "/value/collectionApprovals/0/approvalCriteria/coinTransfers",
+        "operator": "equals",
+        "expected": [
+          {
+            "to": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7",
+            "coins": [
+              {
+                "amount": "1",
+                "denom": "ubadge"
+              }
+            ],
+            "overrideFromWithApproverAddress": false,
+            "overrideToWithInitiator": false
+          }
+        ],
+        "requirement": "One BADGE base unit per multiplier"
+      },
+      {
+        "id": "credit-ratio",
+        "path": "/value/collectionApprovals/0/approvalCriteria/predeterminedBalances/incrementedBalances/startBalances/0/amount",
+        "operator": "equals",
+        "expected": "37",
+        "requirement": "37 credit units per multiplier"
+      },
+      {
+        "id": "scaled-purchase",
+        "path": "/value/collectionApprovals/0/approvalCriteria/predeterminedBalances/incrementedBalances/allowAmountScaling",
+        "operator": "equals",
+        "expected": true,
+        "requirement": "Allow whole multiples of the purchase"
+      },
+      {
+        "id": "terms-lock",
+        "path": "/value/collectionPermissions/canUpdateCollectionApprovals",
+        "operator": "equals",
+        "expected": [
+          {
+            "fromListId": "All",
+            "toListId": "All",
+            "initiatedByListId": "All",
+            "transferTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "tokenIds": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "ownershipTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "approvalId": "All",
+            "permanentlyPermittedTimes": [],
+            "permanentlyForbiddenTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ]
+          }
+        ],
+        "requirement": "Purchase terms cannot be changed"
+      },
+      {
+        "id": "no-pools",
+        "path": "/value/invariants/disablePoolCreation",
+        "operator": "equals",
+        "expected": true,
+        "requirement": "Credits cannot enter liquidity pools"
+      }
+    ],
+    "mutations": [
+      {
+        "id": "wrong-ratio",
+        "path": "/value/collectionApprovals/0/approvalCriteria/predeterminedBalances/incrementedBalances/startBalances/0/amount",
+        "value": "38",
+        "mustFail": ["credit-ratio"]
+      },
+      {
+        "id": "divert-payment",
+        "path": "/value/collectionApprovals/0/approvalCriteria/coinTransfers/0/to",
+        "value": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+        "mustFail": ["payment"]
+      },
+      {
+        "id": "unlock-terms",
+        "path": "/value/collectionPermissions/canUpdateCollectionApprovals",
+        "value": [],
+        "mustFail": ["terms-lock"]
+      }
+    ]
+  },
+  {
+    "version": 1,
+    "id": "spendable-service-credits",
+    "prompt": "Sell packs of 10 image-generation credits for 1000000 ubadge base units. Allow at most 3 packs per purchase; consumption must be holder-initiated. Expire at 1896048000000 inclusive.",
+    "tool": "build_spendable_credit",
+    "input": {
+      "uri": "https://example.com/golden-metadata.json",
+      "paymentDenom": "BADGE",
+      "provider": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+      "serviceId": "image-generation",
+      "purchaseOptions": [
+        {
+          "pricePerPack": "1000000",
+          "creditsPerPack": "10",
+          "purchaseType": "scaled",
+          "maxPacks": "3"
+        }
+      ],
+      "expiresAt": "1896048000000"
+    },
+    "clarifications": [],
+    "limitations": [
+      "Unsigned builder proposal only; signer and manager must be bound before deployment.",
+      "Artifact constraints only. No chain execution, wallet signing, live balance checks or external service verification."
+    ],
+    "assertions": [
+      {
+        "id": "create-message",
+        "path": "/typeUrl",
+        "operator": "equals",
+        "expected": "/tokenization.MsgCreateCollection",
+        "requirement": "Prepare a new collection"
+      },
+      {
+        "id": "no-forceful-transfer",
+        "path": "/value/invariants/noForcefulPostMintTransfers",
+        "operator": "equals",
+        "expected": true,
+        "requirement": "Disallow forceful post-mint transfers"
+      },
+      {
+        "id": "purchase-consume",
+        "path": "/value/collectionApprovals",
+        "operator": "length",
+        "expected": 2,
+        "requirement": "Only purchase and consumption paths"
+      },
+      {
+        "id": "payment",
+        "path": "/value/collectionApprovals/0/approvalCriteria/coinTransfers",
+        "operator": "equals",
+        "expected": [
+          {
+            "to": "bb1xvenxvenxvenxvenxvenxvenxvenxvenlrd2nm",
+            "coins": [
+              {
+                "amount": "1000000",
+                "denom": "ubadge"
+              }
+            ],
+            "overrideFromWithApproverAddress": false,
+            "overrideToWithInitiator": false
+          }
+        ],
+        "requirement": "Payment goes to the service provider"
+      },
+      {
+        "id": "pack-size",
+        "path": "/value/collectionApprovals/0/approvalCriteria/predeterminedBalances/incrementedBalances/startBalances/0/amount",
+        "operator": "equals",
+        "expected": "10",
+        "requirement": "Ten credits per pack"
+      },
+      {
+        "id": "purchase-cap",
+        "path": "/value/collectionApprovals/0/approvalCriteria/predeterminedBalances/incrementedBalances/maxScalingMultiplier",
+        "operator": "equals",
+        "expected": "3",
+        "requirement": "At most three packs per purchase"
+      },
+      {
+        "id": "holder-consent",
+        "path": "/value/collectionApprovals/1/approvalCriteria/requireFromEqualsInitiatedBy",
+        "operator": "equals",
+        "expected": true,
+        "requirement": "Only holder-initiated consumption"
+      },
+      {
+        "id": "consume-destination",
+        "path": "/value/collectionApprovals/1/toListId",
+        "operator": "equals",
+        "expected": "bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv",
+        "requirement": "Consumption sends credits to burn address"
+      },
+      {
+        "id": "purchase-deadline",
+        "path": "/value/collectionApprovals/0/transferTimes",
+        "operator": "equals",
+        "expected": [
+          {
+            "start": "1",
+            "end": "1896048000000"
+          }
+        ],
+        "requirement": "Purchase expiry is inclusive"
+      },
+      {
+        "id": "consume-deadline",
+        "path": "/value/collectionApprovals/1/transferTimes",
+        "operator": "equals",
+        "expected": [
+          {
+            "start": "1",
+            "end": "1896048000000"
+          }
+        ],
+        "requirement": "Consumption shares expiry"
+      },
+      {
+        "id": "terms-lock",
+        "path": "/value/collectionPermissions/canUpdateCollectionApprovals",
+        "operator": "equals",
+        "expected": [
+          {
+            "fromListId": "All",
+            "toListId": "All",
+            "initiatedByListId": "All",
+            "transferTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "tokenIds": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "ownershipTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ],
+            "approvalId": "All",
+            "permanentlyPermittedTimes": [],
+            "permanentlyForbiddenTimes": [
+              {
+                "start": "1",
+                "end": "18446744073709551615"
+              }
+            ]
+          }
+        ],
+        "requirement": "Purchase and consumption terms cannot be changed"
+      }
+    ],
+    "mutations": [
+      {
+        "id": "unbounded-packs",
+        "path": "/value/collectionApprovals/0/approvalCriteria/predeterminedBalances/incrementedBalances/maxScalingMultiplier",
+        "value": "0",
+        "mustFail": ["purchase-cap"]
+      },
+      {
+        "id": "third-party-consume",
+        "path": "/value/collectionApprovals/1/approvalCriteria/requireFromEqualsInitiatedBy",
+        "value": false,
+        "mustFail": ["holder-consent"]
+      },
+      {
+        "id": "wrong-pack",
+        "path": "/value/collectionApprovals/0/approvalCriteria/predeterminedBalances/incrementedBalances/startBalances/0/amount",
+        "value": "11",
+        "mustFail": ["pack-size"]
+      },
+      {
+        "id": "late-consume",
+        "path": "/value/collectionApprovals/1/transferTimes/0/end",
+        "value": "1896048000001",
+        "mustFail": ["consume-deadline"]
+      }
+    ]
+  }
+]
