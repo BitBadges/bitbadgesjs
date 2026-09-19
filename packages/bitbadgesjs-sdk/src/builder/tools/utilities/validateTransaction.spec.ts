@@ -48,20 +48,10 @@ describe('handleValidateTransaction — input normalization', () => {
       expect(res.issues[0].message).toMatch(/Invalid JSON/);
     });
 
-    it('treats an empty-string transactionJson as "no input" and auto-fills from session (NOT "Unexpected EOF")', () => {
-      // Previously this returned "Invalid JSON: Unexpected EOF" — an
-      // unrecoverable error that agents loop on. Post-#0326, an empty
-      // string is treated like "no input provided" — the wrapper
-      // auto-fills from session state and returns the real validation
-      // issues (e.g. "missing creator") from the SDK validator, which
-      // the agent CAN act on.
+    it('rejects explicitly empty JSON instead of checking unrelated session state', () => {
       const res = handleValidateTransaction({ transactionJson: '' });
       expect(res.valid).toBe(false);
-      expect(res.issues.length).toBeGreaterThan(0);
-      for (const issue of res.issues) {
-        expect(issue.message).not.toMatch(/Unexpected EOF/);
-        expect(issue.message).not.toMatch(/Invalid JSON/);
-      }
+      expect(res.issues[0].message).toMatch(/Invalid JSON/);
     });
 
     it('rejects top-level JSON values that are not objects (arrays)', () => {
