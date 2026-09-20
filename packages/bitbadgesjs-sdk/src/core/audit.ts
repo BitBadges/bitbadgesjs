@@ -8,6 +8,7 @@
 
 import { normalizeForReview } from './review-normalize.js';
 import { parseInlineCustomData } from '../api-indexer/metadata/inlineCustomData.js';
+import { generateAliasAddressForIBCBackedDenom } from './aliases.js';
 
 const MAX_UINT64 = 18446744073709551615n;
 
@@ -196,6 +197,9 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     const perms = col.collectionPermissions || {};
     const approvals = col.collectionApprovals || [];
     const invariants = (col.invariants || {}) as Record<string, unknown>;
+    const backingPath = invariants.cosmosCoinBackedPath as { address?: string; conversion?: { sideA?: { denom?: string } } } | undefined;
+    const backingDenom = backingPath?.conversion?.sideA?.denom;
+    const backingAddress = backingDenom ? generateAliasAddressForIBCBackedDenom(backingDenom) : backingPath?.address;
 
     // ========================================
     // 1. MANAGER & CENTRALIZATION ANALYSIS
@@ -449,10 +453,7 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
         }
 
         // Exact backing address guardrail
-        const backingPath = invariants.cosmosCoinBackedPath as Record<string, unknown> | undefined;
-        const backingAddr: string | undefined =
-          (backingPath?.address as string | undefined) ||
-          (col.cosmosCoinWrapperPathsToAdd as { address?: string }[] | undefined)?.[0]?.address;
+        const backingAddr = backingAddress;
 
         if (backingAddr) {
           const fromIsExact = fromId === backingAddr;
@@ -554,27 +555,13 @@ export function auditCollection(input: { collection: Record<string, unknown>; co
     //   - unbacking (withdrawal) when allowBackedMinting && toListId   == backingAddr
     // This is more reliable than guessing based on '!' prefixes on the
     // opposite list, which misses valid shapes like `fromListId: 'AllWithoutMint'`.
-    const backingAddr = (invariants.cosmosCoinBackedPath as any)?.address as string | undefined;
-    const addrMatches = (listId: string | undefined, addr: string | undefined): boolean => {
-      if (!listId || !addr) return false;
-      if (listId === addr) return true;
-      // compound/negated lists containing the backing address also count
-      return listId.includes(addr);
-    };
-
     const hasBackingApproval = approvals.some((a) => {
       const crit = a.approvalCriteria as Record<string, unknown> | undefined;
-      if (crit?.allowBackedMinting && addrMatches(a.fromListId, backingAddr)) return true;
-      if (a.approvalId && /backing/i.test(a.approvalId) && !/unbacking/i.test(a.approvalId)) return true;
-      if (a.approvalId && /vault-deposit/i.test(a.approvalId)) return true;
-      return false;
+      return !!backingAddress && !!crit?.allowBackedMinting && a.fromListId === backingAddress && a.toListId !== backingAddress;
     });
     const hasUnbackingApproval = approvals.some((a) => {
       const crit = a.approvalCriteria as Record<string, unknown> | undefined;
-      if (crit?.allowBackedMinting && addrMatches(a.toListId, backingAddr)) return true;
-      if (a.approvalId && /unbacking/i.test(a.approvalId)) return true;
-      if (a.approvalId && /vault-withdraw/i.test(a.approvalId)) return true;
-      return false;
+      return !!backingAddress && !!crit?.allowBackedMinting && a.toListId === backingAddress && a.fromListId !== backingAddress;
     });
 
     if (isSmartToken || invariants.cosmosCoinBackedPath) {

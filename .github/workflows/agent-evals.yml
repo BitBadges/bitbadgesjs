@@ -28,3 +28,16 @@ jobs:
           name: agent-golden-report
           path: packages/bitbadgesjs-sdk/agent-golden-report.json
           if-no-files-found: error
+
+      - name: Benchmark static reviewer mutations and intentional configurations
+        if: success() || failure()
+        working-directory: packages/bitbadgesjs-sdk
+        run: bun run test:agent-auditor > agent-auditor-report.json
+
+      - name: Upload static review benchmark
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: agent-auditor-report
+          path: packages/bitbadgesjs-sdk/agent-auditor-report.json
+          if-no-files-found: error

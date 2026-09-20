@@ -119,6 +119,8 @@
     "test:agent-contracts": "bun scripts/check-agent-contracts.ts",
     "test:agent-workflows": "bun scripts/check-agent-workflows.ts",
     "test:agent-golden": "bun scripts/check-agent-golden.ts",
+    "test:agent-auditor": "bun scripts/check-agent-auditor.ts",
+    "eval:compare": "bun scripts/compare-agent-evals.ts",
     "test:watch": "jest --watch",
     "test:ci": "jest --coverage --ci --reporters='jest-junit'",
     "coverage": "jest --coverage",
