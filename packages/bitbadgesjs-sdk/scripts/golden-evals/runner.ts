@@ -127,6 +127,8 @@ export async function runCases(cases: GoldenCase[], produce: (testCase: GoldenCa
   return {
     version: 1,
     scope: 'artifact-contracts',
+    maturity: 'experimental',
+    interpretation: 'Diagnostic only; not a source of truth or proof of correctness.',
     chainExecution: 'not-run',
     passed: results.every((result) => result.passed),
     summary: {
