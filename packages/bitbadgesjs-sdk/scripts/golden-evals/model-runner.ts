@@ -12,7 +12,7 @@ export const configSchema = z
   .object({
     executable: z.string().refine(isAbsolute, 'Executable must be an absolute path'),
     args: z.array(z.string()),
-    provider: z.string().min(1),
+    provider: z.enum(['openrouter', 'fixture']),
     model: z.string().min(1),
     repetitions: positive.max(20),
     maxAttempts: positive.max(5),
@@ -203,6 +203,8 @@ export async function runAgentTrials(cases: BehavioralCase[], input: AgentEvalCo
   return {
     version: 1,
     scope: 'fresh-agent-behavior',
+    maturity: 'experimental',
+    interpretation: 'Diagnostic only; not a source of truth or proof of correctness.',
     passed: trials.every((trial) => trial.status === 'pass') && metrics.falseAssurances === 0,
     provenance: {
       caseSetSha256,

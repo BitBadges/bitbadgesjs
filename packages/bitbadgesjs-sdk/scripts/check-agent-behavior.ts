@@ -66,6 +66,8 @@ try {
   const report = {
     version: 1,
     scope: 'behavioral-reference-contracts',
+    maturity: 'experimental',
+    interpretation: 'Diagnostic only; not a source of truth or proof of correctness.',
     modelExecution: 'not-run',
     passed: results.every((result) => result.passed),
     provenance: {

@@ -4,6 +4,27 @@ import { behavioralCases, fixtureTime, gradeBehavior } from './catalog.js';
 import { runCases } from './runner.js';
 import { callTool } from '../../src/builder/tools/registry.js';
 
+it.each(['subscription-week-boundary', 'subscription-split-payment', 'credit-base-unit-ratio', 'service-credit-fixed-pack'])(
+  'rejects an impossible purchase and false assurance in %s',
+  async (id) => {
+    const test = behavioralCases.find((item) => item.id === id)!;
+    if (!('assertions' in test.oracle)) throw new Error('Missing oracle');
+    const now = jest.spyOn(Date, 'now').mockReturnValue(fixtureTime);
+    try {
+      const built = await callTool(test.oracle.tool, test.oracle.input);
+      expect(built.isError).toBeFalsy();
+      const artifact: any = built.result;
+      artifact.value.collectionApprovals[0].toListId = 'None';
+      expect(gradeBehavior(test, { disposition: 'propose', artifact, explanation: 'Verified.', assured: true })).toMatchObject({
+        passed: false,
+        falseAssurance: true
+      });
+    } finally {
+      now.mockRestore();
+    }
+  }
+);
+
 it('rejects hidden escrow funding in a metadata-only update', () => {
   const test = behavioralCases.find((item) => item.id === 'update-metadata-only')!;
   const artifact = JSON.parse(readFileSync(join(__dirname, 'references/metadata-update.json'), 'utf8'));

@@ -137,7 +137,6 @@
     "gen:customtypes": "bun scripts/generate-customtype-fields.ts"
   },
   "devDependencies": {
-    "@anthropic-ai/sdk": "0.126.0",
     "@babel/core": "^7.29.0",
     "@babel/preset-typescript": "^7.28.5",
     "@bufbuild/buf": "^1.67.0",

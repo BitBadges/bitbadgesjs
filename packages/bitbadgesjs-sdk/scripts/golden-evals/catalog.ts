@@ -157,6 +157,25 @@ const variants = [
     [check('fixed-pack', '/value/collectionApprovals/0/approvalCriteria/predeterminedBalances/incrementedBalances/allowAmountScaling', false)]
   )
 ];
+for (const id of [
+  'subscription-holder-transfer',
+  'subscription-week-boundary',
+  'subscription-split-payment',
+  'credit-base-unit-ratio',
+  'service-credit-fixed-pack'
+]) {
+  const oracle = variants.find((test) => test.id === id)!;
+  oracle.assertions.push(
+    check('purchase-destination', '/value/collectionApprovals/0/toListId', 'All'),
+    check('purchase-initiators', '/value/collectionApprovals/0/initiatedByListId', 'All'),
+    check(
+      'purchase-times',
+      '/value/collectionApprovals/0/transferTimes',
+      id === 'service-credit-fixed-pack' ? [{ start: '1', end: '1896048000000' }] : fullRange
+    )
+  );
+  oracle.mutations.push({ id: 'disable-purchase', path: '/value/collectionApprovals/0/toListId', value: 'None', mustFail: ['purchase-destination'] });
+}
 for (const index of [0, 1]) {
   variants
     .find((test) => test.id === 'subscription-two-tiers')!

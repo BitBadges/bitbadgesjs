@@ -1,7 +1,7 @@
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { runAgentTrials, invokeWorker } from './model-runner.js';
+import { runAgentTrials, invokeWorker, configSchema } from './model-runner.js';
 import { behavioralCases } from './catalog.js';
 
 describe('fresh-process agent evaluations', () => {
@@ -11,7 +11,7 @@ describe('fresh-process agent evaluations', () => {
     executable: process.execPath,
     args: [worker],
     model: 'fixture-v1',
-    provider: 'fixture',
+    provider: 'fixture' as const,
     repetitions: 2,
     maxAttempts: 2,
     timeoutMs: 1500,
@@ -24,6 +24,12 @@ describe('fresh-process agent evaluations', () => {
     outputUsdPerMillion: 1,
     environment: {}
   };
+  it('allows OpenRouter live evaluations and rejects direct provider configurations', () => {
+    expect(configSchema.safeParse({ ...config, provider: 'openrouter' }).success).toBe(true);
+    for (const provider of ['anthropic', 'openai', 'unknown']) {
+      expect(configSchema.safeParse({ ...config, provider }).success).toBe(false);
+    }
+  });
   beforeAll(() =>
     writeFileSync(
       worker,
