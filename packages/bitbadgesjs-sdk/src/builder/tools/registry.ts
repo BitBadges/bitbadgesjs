@@ -90,6 +90,7 @@ import { standardBuilderTools } from './builders/buildStandard.js';
 import { createStandardActionTools, executeInstalledCli } from './standardActions.js';
 import { getSigningRequestStatus, listSigningRequests } from '../../cli/utils/signing-requests.js';
 import { z } from 'zod';
+import { runLifecycle, getLifecycleSchema, lifecycleDiagnostics } from '../lifecycle.js';
 
 // Re-export session persistence helpers so external consumers (e.g.
 // bitbadges-cli) can snapshot / restore session state across process
@@ -169,6 +170,32 @@ const getSkillInstructionsTool: ToolSchema = {
  * The tool registry. Keys are builder tool names.
  */
 export const toolRegistry: Record<string, ToolEntry> = {
+  run_lifecycle: entry(
+    {
+      name: 'run_lifecycle',
+      description: 'Execute an isolated local module lifecycle with an installed bitbadges-lifecycle runner. Never signs or broadcasts. Required external coverage remains unverified. Read lifecycle_schema first.',
+      inputSchema: { type: 'object', properties: { scenario: { type: 'object' }, requiredCoverage: { type: 'array', items: { type: 'string' }, maxItems: 30 } }, required: ['scenario'] }
+    },
+    (args) => runLifecycle(z.object({ scenario: z.record(z.unknown()), requiredCoverage: z.array(z.string().max(100)).max(30).optional() }).strict().parse(args))
+  ),
+  lifecycle_schema: entry(
+    { name: 'lifecycle_schema', description: 'Read the installed local runner scenario schema, including assertions and time controls. Offline; requires the optional runner executable.', inputSchema: { type: 'object', properties: {} } },
+    (args) => { z.object({}).strict().parse(args); return getLifecycleSchema(); }
+  ),
+  environment_diagnostics: entry(
+    { name: 'environment_diagnostics', description: 'Inspect local lifecycle runner availability and configured service readiness without returning credentials or making network calls.', inputSchema: { type: 'object', properties: {} } },
+    async (args) => {
+      z.object({}).strict().parse(args);
+      return {
+        version: 1,
+        catalogHash: getCapabilityCatalog().catalogHash,
+        schemas: { lifecycle: 1 },
+        offline: ['discovery', 'skills', 'build', 'static-review'],
+        runner: await lifecycleDiagnostics(),
+        services: { simulation: process.env.BITBADGES_API_KEY ? 'configured-not-probed' : 'credentials-required', signing: 'wallet-and-browser-required', model: 'optional-not-probed' }
+      };
+    }
+  ),
   ...standardBuilderTools,
   ...createStandardActionTools(executeInstalledCli, () => getCapabilityCatalog().catalogHash),
   list_signing_requests: {
