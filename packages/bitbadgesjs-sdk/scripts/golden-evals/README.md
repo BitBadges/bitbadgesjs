@@ -36,7 +36,9 @@ builder error, or failed assertion fails the run. Exit codes are 0 for pass,
 
 Reports include per-assertion evidence, mutation results, source commit and dirty
 flag, SDK version, fixture time, case hash and built-artifact or supplied-artifact
-hash. CI archives the report. Reports may contain supplied transaction values;
+hash. The manual `Golden builder evaluations` workflow archives the report.
+Evaluation runs require explicit `workflow_dispatch`; PR/push CI only runs
+ordinary regression tests, never these evaluation commands. Reports may contain supplied transaction values;
 use synthetic fixtures and keep private run artifacts out of public CI.
 
 Passing means **only the listed artifact constraints passed**. Chain execution,
