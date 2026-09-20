@@ -91,6 +91,7 @@ import { createStandardActionTools, executeInstalledCli } from './standardAction
 import { getSigningRequestStatus, listSigningRequests } from '../../cli/utils/signing-requests.js';
 import { z } from 'zod';
 import { runLifecycle, getLifecycleSchema, lifecycleDiagnostics } from '../lifecycle.js';
+import { getLifecycleCapabilities, getLifecycleTemplate } from '../lifecycle-catalog.js';
 
 // Re-export session persistence helpers so external consumers (e.g.
 // bitbadges-cli) can snapshot / restore session state across process
@@ -170,10 +171,18 @@ const getSkillInstructionsTool: ToolSchema = {
  * The tool registry. Keys are builder tool names.
  */
 export const toolRegistry: Record<string, ToolEntry> = {
+  get_lifecycle_capabilities: entry(
+    { name: 'get_lifecycle_capabilities', description: 'Discover experimental local lifecycle reference coverage for every installed standard, exclusions, and use/avoid guidance. Offline; no runner required. Not product certification.', inputSchema: { type: 'object', properties: {} } },
+    (args) => { z.object({}).strict().parse(args); return getLifecycleCapabilities(); }
+  ),
+  get_lifecycle_template: entry(
+    { name: 'get_lifecycle_template', description: 'Read a revision-pinned synthetic lifecycle reference and runnable input. Discover IDs with get_lifecycle_capabilities. Modified scenarios are caller-authored; references do not certify products.', inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] } },
+    (args) => getLifecycleTemplate(z.object({ id: z.string() }).strict().parse(args).id)
+  ),
   run_lifecycle: entry(
     {
       name: 'run_lifecycle',
-      description: 'Execute an isolated local module lifecycle with an installed bitbadges-lifecycle runner. Never signs or broadcasts. Required external coverage remains unverified. Read lifecycle_schema first.',
+      description: 'Experimental: execute supplied assertions in isolated local module state. Not product certification. Never signs or broadcasts. Required external coverage remains unverified. Read get_lifecycle_capabilities and lifecycle_schema first.',
       inputSchema: { type: 'object', properties: { scenario: { type: 'object' }, requiredCoverage: { type: 'array', items: { type: 'string' }, maxItems: 30 } }, required: ['scenario'] }
     },
     (args) => runLifecycle(z.object({ scenario: z.record(z.unknown()), requiredCoverage: z.array(z.string().max(100)).max(30).optional() }).strict().parse(args))
