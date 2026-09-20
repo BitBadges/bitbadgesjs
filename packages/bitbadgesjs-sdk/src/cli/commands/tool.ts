@@ -120,7 +120,7 @@ export const toolCommand = new Command('tool')
         const message = (result.text || '').replace(/^Error:\s*/, '') || (result.result as any)?.error || `Tool "${name}" failed.`;
         emitError(new Error(message), {
           code: result.isError ? 'tool_error' : 'tool_failed',
-          meta: result.result ?? undefined,
+          meta: { result: result.result, error: result.error },
           hint: `Run \`bb dev tools list --names\` to confirm the tool name, or \`bb dev tools list\` for its input schema.`,
           exitCode: 1
         });
