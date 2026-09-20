@@ -24,12 +24,24 @@ const report = (passed = true) => ({
           requirement: 'Pay recipient 7'
         }
       ],
-      mutations: [{ id: 'divert', caught: true }]
+      mutations: [{ id: 'divert', caught: passed, failedAssertions: passed ? ['recipient'] : [] }]
     }
   ]
 });
 
 describe('evaluation comparison', () => {
+  it('rejects caught mutations with missing, empty, unknown or errored evidence', () => {
+    for (const patch of [
+      { failedAssertions: [] },
+      { failedAssertions: undefined },
+      { failedAssertions: ['unknown'] },
+      { error: 'Mutation target does not exist' }
+    ]) {
+      const forged = report();
+      Object.assign(forged.results[0].mutations[0], patch);
+      expect(() => compareReports(report(), forged)).toThrow();
+    }
+  });
   it('rejects forged passing evidence and incompatible assertion contracts', () => {
     const forged = report();
     forged.results[0].assertions[0].actual = 999;

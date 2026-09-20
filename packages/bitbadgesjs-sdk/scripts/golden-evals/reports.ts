@@ -20,7 +20,7 @@ const resultSchema = z
     passed: z.boolean(),
     error: z.string().optional(),
     assertions: z.array(assertionSchema),
-    mutations: z.array(z.object({ id: z.string(), caught: z.boolean() }).passthrough())
+    mutations: z.array(z.object({ id: z.string(), caught: z.boolean(), failedAssertions: z.array(z.string()), error: z.string().optional() }).passthrough())
   })
   .passthrough();
 const reportSchema = z
@@ -53,6 +53,12 @@ function parseReport(input: unknown) {
     }
     for (const checks of [row.assertions, row.mutations]) {
       if (new Set(checks.map((check) => check.id)).size !== checks.length) throw new Error('Duplicate check IDs');
+    }
+    for (const mutation of row.mutations) {
+      if (
+        mutation.failedAssertions.some((id) => !row.assertions.some((check) => check.id === id)) ||
+        (mutation.caught && (mutation.error !== undefined || mutation.failedAssertions.length === 0 || !row.assertions.every((check) => check.passed)))
+      ) throw new Error('Mutation verdict contradicts evidence');
     }
     const passed =
       !row.error && row.assertions.length > 0 && row.assertions.every((check) => check.passed) && row.mutations.every((check) => check.caught);
