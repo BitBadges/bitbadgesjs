@@ -172,7 +172,7 @@ export async function handleSimulateTransaction(input: SimulateTransactionInput)
 
     if (input.transaction !== undefined) {
       tx = input.transaction as unknown as typeof tx;
-    } else if (input.transactionJson !== undefined && input.transactionJson !== '') {
+    } else if (input.transactionJson !== undefined) {
       try {
         tx = JSON.parse(input.transactionJson);
       } catch {
