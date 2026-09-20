@@ -5,6 +5,10 @@ import { handleValidateTransaction } from '../tools/utilities/validateTransactio
 import * as api from '../sdk/apiClient.js';
 import { artifactIdentity } from '../../core/intent.js';
 describe('artifact-bound tool checks', () => {
+  it('requires clarification for an empty intent', async () => {
+    const result = await callTool('validate_intent', { intent: { version: 1, requirements: [], unresolvedDecisions: [] } });
+    expect(result.result.clarificationRequired).toBe(true);
+  });
   it('binds explicit asynchronous checks before caller mutation', async () => {
     let complete!: (value: any) => void;
     const simulate = jest.spyOn(api, 'simulateTx').mockImplementation(

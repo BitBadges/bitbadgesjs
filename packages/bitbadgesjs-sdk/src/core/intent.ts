@@ -178,13 +178,14 @@ export function verifyIntent(artifact: unknown, input: unknown): IntentEvidence 
         'Immutable collection supply invariant; zero means unlimited.'
       );
     }
-    if (req.kind === 'asset')
+    if (req.kind === 'asset') {
+      if (!creating && value.updateValidTokenIds !== true) return { ...base, reason: 'Current token ID state is required.' };
       return result(
         (creating ? '0' : value.collectionId) === req.value.collectionId &&
-          (creating || value.updateValidTokenIds === true) &&
           canonicalJson(value.validTokenIds ?? []) === canonicalJson(req.value.tokenIds),
         'validTokenIds'
       );
+    }
     if (req.kind === 'transferability') {
       if (!creating && value.updateCollectionApprovals !== true) return { ...base, reason: 'Current approval state is required.' };
       const holderApprovals = approvals.filter((a) => a.fromListId !== 'Mint');

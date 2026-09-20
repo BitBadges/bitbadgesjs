@@ -9,6 +9,23 @@ const intent = {
   unresolvedDecisions: []
 };
 describe('intent evidence', () => {
+  it.each([
+    { kind: 'duration', value: { milliseconds: '2592000000' }, wrong: { milliseconds: '1' } },
+    { kind: 'transferability', value: false, wrong: true },
+    { kind: 'asset', value: { collectionId: '0', tokenIds: [{ start: '1', end: '1' }] }, wrong: { collectionId: '7', tokenIds: [{ start: '1', end: '1' }] } }
+  ])('checks supported $kind configuration and never approves a mismatch', ({ kind, value, wrong }) => {
+    const tx = normalizeTxMessages(build());
+    const requirements = [{ id: 'rule', source: 'user', kind, value }];
+    expect(verifyIntent(tx, { ...intent, requirements }).status).toBe('satisfied');
+    expect(verifyIntent(tx, { ...intent, requirements: [{ ...requirements[0], value: wrong }] }).status).not.toBe('satisfied');
+  });
+  it('requires live token ID state when updates are disabled', () => {
+    const tx = build();
+    tx.messages[0].value.collectionId = '7';
+    tx.messages[0].value.updateValidTokenIds = false;
+    const requirements = [{ id: 'asset', source: 'user', kind: 'asset', value: { collectionId: '7', tokenIds: [{ start: '1', end: '1' }] } }];
+    expect(verifyIntent(tx, { ...intent, requirements }).status).toBe('unverified');
+  });
   it('checks canonical create messages without universal-update flags', () => {
     const tx = normalizeTxMessages(build());
     expect(tx.messages[0].typeUrl).toBe('/tokenization.MsgCreateCollection');
