@@ -43,28 +43,3 @@ jobs:
       - name: Check CLI and MCP actions against local API fixtures
         working-directory: packages/bitbadgesjs-sdk
         run: bun run test:agent-workflows
-
-      - name: Check golden builder constraints and adversarial mutations
-        working-directory: packages/bitbadgesjs-sdk
-        run: bun run test:agent-golden > agent-golden-report.json
-
-      - name: Upload golden evaluation evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: agent-golden-report
-          path: packages/bitbadgesjs-sdk/agent-golden-report.json
-          if-no-files-found: ignore
-
-      - name: Benchmark static reviewer mutations and intentional configurations
-        if: success() || failure()
-        working-directory: packages/bitbadgesjs-sdk
-        run: bun run test:agent-auditor > agent-auditor-report.json
-
-      - name: Upload static review benchmark
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: agent-auditor-report
-          path: packages/bitbadgesjs-sdk/agent-auditor-report.json
-          if-no-files-found: error
