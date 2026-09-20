@@ -215,7 +215,7 @@ export function redactTrace(input: unknown, secrets: string[] = []): unknown {
   if (input !== null && typeof input === 'object') {
     return Object.fromEntries(
       Object.entries(input).map(([key, value]) => [
-        key,
+        String(redactTrace(key, secrets)),
         /api.?key|authorization|password|secret|private.?key|mnemonic|transaction|access.?token|refresh.?token/i.test(key)
           ? '[REDACTED]'
           : redactTrace(value, secrets)

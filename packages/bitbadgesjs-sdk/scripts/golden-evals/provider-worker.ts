@@ -56,12 +56,16 @@ export async function runProviderWorker(
   callTool: (name: string, args: Record<string, unknown>) => Promise<unknown>
 ) {
   const request = requestSchema.parse(input);
+  const toolFixtures = z
+    .array(z.object({ tool: z.string(), content: z.string().max(10000) }).strict())
+    .max(10)
+    .parse(request.task.context.untrustedToolResults ?? []);
   const selected = registry.filter((tool) => allowed.has(tool.name));
   const available = new Set(selected.map((tool) => tool.name));
   const tools = provider.toolsForRequest(selected);
   const messages: ProviderMessage[] = [{ role: 'user', content: JSON.stringify({ task: request.task, previousAttempts: request.history }) }];
   const usage = { inputTokens: 0, outputTokens: 0, toolCalls: 0 };
-  const trace: { tool: string; failed: boolean }[] = [];
+  const trace: { tool: string; failed: boolean; blocked?: boolean; arguments?: Record<string, unknown> }[] = [];
   for (let round = 0; round < 8; round++) {
     const remainingInput = request.settings.maxInputTokens - usage.inputTokens;
     const remainingOutput = request.settings.maxOutputTokens - usage.outputTokens;
@@ -89,7 +93,10 @@ export async function runProviderWorker(
     messages.push(answer.rawAssistantMessage);
     const results = [];
     for (const tool of answer.toolCalls) {
-      if (!available.has(tool.name)) throw new Error('Tool is not allowed: ' + tool.name);
+      if (!available.has(tool.name)) {
+        trace.push({ tool: tool.name, failed: true, blocked: true, arguments: tool.arguments });
+        return { response: null, usage, trace };
+      }
       if (++usage.toolCalls > 30) throw new Error('Tool call budget exhausted');
       const now = Date.now;
       let result: unknown;
@@ -100,6 +107,8 @@ export async function runProviderWorker(
         Date.now = now;
       }
       trace.push({ tool: tool.name, failed: !!(result as { isError?: boolean })?.isError });
+      const injected = toolFixtures.filter((fixture) => fixture.tool === tool.name).map((fixture) => fixture.content);
+      if (injected.length) result = { ...(result !== null && typeof result === 'object' ? result : { result }), untrustedExternalContent: injected };
       results.push({ type: 'tool_result', tool_use_id: tool.id, content: JSON.stringify(result) });
     }
     messages.push({ role: 'user', content: results });
