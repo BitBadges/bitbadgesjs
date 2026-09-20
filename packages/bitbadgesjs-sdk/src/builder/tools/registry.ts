@@ -1,5 +1,6 @@
 export type { StandardDescriptor, StandardOperation } from '../standards.js';
 import { describeStandards } from '../standards.js';
+import { normalizeTxMessages } from '../../cli/utils/normalizeMsg.js';
 /**
  * Central tool registry.
  *
@@ -92,6 +93,10 @@ import { getSigningRequestStatus, listSigningRequests } from '../../cli/utils/si
 import { z } from 'zod';
 import { runLifecycle, getLifecycleSchema, lifecycleDiagnostics } from '../lifecycle.js';
 import { getLifecycleCapabilities, getLifecycleTemplate } from '../lifecycle-catalog.js';
+import { artifactIdentity, parseIntent, verifyIntent, repairArtifact } from '../../core/intent.js';
+import { getSessionBinding } from '../session/artifactBinding.js';
+import { getTransaction, ensureStringNumbers } from '../session/sessionState.js';
+import { toolFailure, type ToolFailure } from './errors.js';
 
 // Re-export session persistence helpers so external consumers (e.g.
 // bitbadges-cli) can snapshot / restore session state across process
@@ -205,6 +210,12 @@ export const toolRegistry: Record<string, ToolEntry> = {
       };
     }
   ),
+  verify_intent: entry({ name: 'verify_intent', description: 'Compare exact user requirements against an explicit artifact. Returns satisfied, violated or unverified per requirement. Static evidence never establishes lifecycle or external-service success.', inputSchema: { type: 'object', properties: { artifact: { type: 'object' }, intent: { type: 'object', description: 'Version1 requirements and unresolvedDecisions. See installed task bundles.' } }, required: ['artifact', 'intent'] } },
+    (args) => { const input = z.object({ artifact: z.record(z.unknown()), intent: z.unknown() }).strict().parse(args); return verifyIntent(input.artifact, input.intent); }),
+  validate_intent: entry({ name: 'validate_intent', description: 'Validate an intent sidecar, reject contradictory constraints, and list decisions requiring clarification.', inputSchema: { type: 'object', properties: { intent: { type: 'object' } }, required: ['intent'] } },
+    (args) => { const { intent } = z.object({ intent: z.unknown() }).strict().parse(args); const parsed = parseIntent(intent); return { intent: parsed, intentId: artifactIdentity(parsed), clarificationRequired: parsed.unresolvedDecisions.length > 0 || parsed.requirements.some(r => r.value === null || r.kind === 'unsupported') }; }),
+  verify_repairs: entry({ name: 'verify_repairs', description: 'Check at most three candidate repairs against unchanged original intent. Preserve every attempted evidence revision. Unsupported requirements stop repair; never signs or submits.', inputSchema: { type: 'object', properties: { intent: { type: 'object' }, original: { type: 'object' }, candidates: { type: 'array', maxItems: 3, items: { type: 'object' } } }, required: ['intent', 'original', 'candidates'] } },
+    (args) => repairArtifact(z.object({ intent: z.record(z.unknown()), original: z.record(z.unknown()), candidates: z.array(z.record(z.unknown())).max(3) }).strict().parse(args))),
   ...standardBuilderTools,
   ...createStandardActionTools(executeInstalledCli, () => getCapabilityCatalog().catalogHash),
   list_signing_requests: {
@@ -375,6 +386,7 @@ export interface CallToolResult {
   result: any;
   /** True if the call threw. */
   isError?: boolean;
+  error?: ToolFailure;
 }
 
 /**
@@ -465,7 +477,7 @@ function formatToolError(err: unknown): string {
 export async function callTool(name: string, args: any): Promise<CallToolResult> {
   const tool = toolRegistry[name];
   if (!tool) {
-    return { text: `Unknown tool: ${name}`, result: null, isError: true };
+    return { text: `Unknown tool: ${name}`, result: null, isError: true, error: toolFailure(null, 'unknown_tool') };
   }
   // Centralized pre-flight: catches missing-required and unknown-field
   // mistakes BEFORE the handler runs. Without this, handlers dereferencing
@@ -473,17 +485,34 @@ export async function callTool(name: string, args: any): Promise<CallToolResult>
   // and agents would get a stack trace instead of a structured error.
   const pre = preflightArgs(tool.tool, args);
   if (!pre.ok) {
-    return { text: `Error: ${pre.error}`, result: null, isError: true };
+    return { text: `Error: ${pre.error}`, result: null, isError: true, error: { ...toolFailure(null, 'invalid_input'), issues: [{ path: '(root)', message: pre.error }] } };
   }
   try {
-    const result = await tool.run(args);
+    let binding: ReturnType<typeof getSessionBinding> | undefined;
+    const checking = name === 'validate_transaction' || name === 'simulate_transaction';
+    if (checking) {
+      if (args.transaction !== undefined && args.transactionJson !== undefined) throw new Error('Pass either transaction or transactionJson, never both.');
+      if (args.transaction === undefined && args.transactionJson === undefined) {
+        const snapshot = JSON.parse(JSON.stringify(ensureStringNumbers({ messages: getTransaction(args.sessionId, args.creatorAddress).messages })));
+        binding = getSessionBinding(args.sessionId);
+        args = { ...args, transaction: name === 'simulate_transaction' ? normalizeTxMessages(snapshot) : snapshot };
+      }
+    }
+    let result = await tool.run(args);
+    if (checking) {
+      const artifact = args.transaction !== undefined ? args.transaction : JSON.parse(args.transactionJson);
+      result = { ...result, evidenceBinding: { artifactId: artifactIdentity(artifact), ...(binding ? { sessionId: binding.sessionId, revision: binding.revision } : {}) } };
+    } else if (tool.tool.inputSchema.properties?.sessionId && name !== 'reset_session') {
+      result = { ...result, sessionBinding: getSessionBinding(args.sessionId) };
+    }
     const text = tool.formatText ? tool.formatText(result) : JSON.stringify(result, null, 2);
-    return { text, result, ...(result?.success === false || result?.ok === false ? { isError: true } : {}) };
+    return { text, result, ...(result?.success === false || result?.ok === false || result?.valid === false ? { isError: true } : {}) };
   } catch (error) {
     return {
       text: `Error: ${formatToolError(error)}`,
       result: null,
-      isError: true
+      isError: true,
+      error: toolFailure(error)
     };
   }
 }
