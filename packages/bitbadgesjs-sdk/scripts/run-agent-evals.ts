@@ -37,7 +37,7 @@ try {
     throw new Error('Expected --config FILE [--partition development|held-out|all]');
   const raw = JSON.parse(readFileSync(values.config, 'utf8'));
   const credentialEnv: string[] = raw.credentialEnv ?? [];
-  if (!Array.isArray(credentialEnv) || credentialEnv.some((key) => !['OPENAI_API_KEY', 'ANTHROPIC_API_KEY'].includes(key)))
+  if (!Array.isArray(credentialEnv) || credentialEnv.some((key) => key !== 'OPENROUTER_API_KEY'))
     throw new Error('Unsupported credential environment variable');
   delete raw.credentialEnv;
   if (raw.environment && Object.keys(raw.environment).length) throw new Error('Use credentialEnv names, not inline environment secrets');

@@ -1,8 +1,6 @@
 name: Agent behavioral lifecycle
 on:
-  pull_request:
-  push:
-    branches: [main]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -16,7 +14,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: BitBadges/bitbadgeschain
-          ref: 4e9c374a0e95ba119faaeb356cbc8e9696cbc37e
+          ref: 86ec7e8a8bcd67173e4b1ab2548c49c0be74df66
           path: .eval-chain
           persist-credentials: false
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
@@ -30,7 +28,7 @@ jobs:
         working-directory: .eval-chain
         env:
           GOTOOLCHAIN: auto
-        run: go build -tags=test -ldflags '-X github.com/bitbadges/bitbadgeschain/lifecycle.ChainCommit=4e9c374a0e95ba119faaeb356cbc8e9696cbc37e' -o "$RUNNER_TEMP/bitbadges-lifecycle" ./cmd/bitbadges-lifecycle
+        run: go build -tags=test -ldflags '-X github.com/bitbadges/bitbadgeschain/lifecycle.ChainCommit=86ec7e8a8bcd67173e4b1ab2548c49c0be74df66' -o "$RUNNER_TEMP/bitbadges-lifecycle" ./cmd/bitbadges-lifecycle
       - name: Install and build SDK
         working-directory: packages/bitbadgesjs-sdk
         run: bun install --frozen-lockfile && bun run build

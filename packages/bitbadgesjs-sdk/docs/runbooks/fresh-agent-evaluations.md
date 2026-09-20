@@ -3,6 +3,18 @@ title: Repeated agent evaluations against independent contracts
 last-verified: 2026-09-19
 ---
 
+**Experimental — not a source of truth.** Scores are diagnostic signals from a
+limited, evolving corpus, not proof of MCP/CLI correctness, security, or readiness
+to deploy. Passing results do not replace independent review or scenario-specific
+verification. Reference and fixture-worker runs are not real-model benchmarks.
+
+Revisit this label only after independently reviewing the oracles, validating
+known-good and known-bad outcomes, and establishing repeated live OpenRouter
+baselines with documented coverage and error rates. Record the evidence and an
+explicit maintainer decision before changing the maturity label; it does not
+expire automatically. Evaluations remain on-demand unless policy is explicitly
+changed.
+
 Run from the SDK package after `bun install --frozen-lockfile` and `bun run build`.
 
 ```sh
@@ -18,11 +30,14 @@ bun run eval:compare --baseline previous-agents.json --candidate agents.json --f
 Use `scripts/golden-evals/model-config.example.json` as the configuration shape.
 Its placeholder model and zero prices/budget intentionally cannot authorize a live
 run. Set an explicit model version, verified token prices and a finite budget.
-Use `credentialEnv` names; do not put keys in JSON. The built-in Anthropic adapter
-reuses the SDK's existing provider abstraction; its optional peer is pinned as a
-development dependency for this evaluator. OpenAI requires its supported optional
-peer installed, or use a trusted external harness executable with the same wire
-contract. No provider is contacted by deterministic reference checks.
+Use `credentialEnv: ["OPENROUTER_API_KEY"]`; do not put keys in JSON.
+All live evaluations use OpenRouter's chat-completions endpoint. The evaluation-only
+adapter reuses SDK message/tool conversion with native fetch, so no provider SDK
+installation is needed. Missing usage is an infrastructure failure, never zero cost.
+No provider is contacted by deterministic reference checks.
+
+OpenRouter API contract: https://openrouter.ai/docs/api/api-reference/chat/send-chat-completion-request
+
 
 The 30 cases comprise 15 artifact proposals and 15 clarification, unsupported and
 recovery decisions. They include composed payments, time boundaries, NFT/fungible
@@ -68,8 +83,9 @@ hash, per-case and aggregate counts, Wilson intervals, first-pass/repair rates,
 redacted tool traces and exact chain evidence. Stored report comparisons reject
 changed case/trial sets, budgets or models and contradictory metrics. They do not
 cryptographically attest the producer; retain reports in a controlled artifact
-store and review baseline changes explicitly. Private CI owns scheduled paid runs
-and dedicated credentials. Public CI runs credential-free references/lifecycles.
+store and review baseline changes explicitly. Private model runs and public reference/lifecycle evaluations are manual
+`workflow_dispatch` only. No schedules, PR, push or chained eval triggers are allowed.
+Ordinary harness regression tests remain in PR CI.
 
 Fixture-worker tests verify harness mechanics only. No live-model success score
 has been established by those tests or by the reference corpus.

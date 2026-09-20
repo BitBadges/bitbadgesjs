@@ -3,6 +3,12 @@ title: Agent evaluation comparisons and reviewer benchmark
 last-verified: 2026-09-19
 ---
 
+**Experimental — not a source of truth.** Passing comparisons and reviewer
+benchmarks do not establish correctness or production readiness. Run manually;
+never use these scores as automatic merge or deployment approval. See the
+[baseline runbook](agent-evaluation-baseline.md) for the evidence and maintainer
+review required before revisiting this label.
+
 Run from `packages/bitbadgesjs-sdk` after `bun run build`:
 
 ```sh

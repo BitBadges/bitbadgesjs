@@ -151,6 +151,8 @@ export async function runAuditorBenchmark(
   return {
     version: 1,
     scope: 'static-reviewer',
+    maturity: 'experimental',
+    interpretation: 'Diagnostic only; not a source of truth or proof of correctness.',
     chainExecution: 'not-run',
     passed: results.every((result) => result.passed),
     summary: {

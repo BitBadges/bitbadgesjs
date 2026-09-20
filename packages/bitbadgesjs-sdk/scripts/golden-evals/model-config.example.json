@@ -1,9 +1,9 @@
 {
   "executable": "current-runtime",
   "args": ["builtin-worker"],
-  "provider": "anthropic",
-  "model": "SET_EXPLICIT_MODEL_VERSION",
-  "credentialEnv": ["ANTHROPIC_API_KEY"],
+  "provider": "openrouter",
+  "model": "PROVIDER/EXPLICIT_MODEL_VERSION",
+  "credentialEnv": ["OPENROUTER_API_KEY"],
   "repetitions": 3,
   "maxAttempts": 2,
   "timeoutMs": 120000,
