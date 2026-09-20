@@ -1,0 +1,43 @@
+name: Agent behavioral lifecycle
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: BitBadges/bitbadgeschain
+          ref: 86ec7e8a8bcd67173e4b1ab2548c49c0be74df66
+          path: .eval-chain
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
+        with:
+          bun-version: 1.4.0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version-file: .eval-chain/go.mod
+          cache-dependency-path: .eval-chain/go.sum
+      - name: Build pinned public chain runner
+        working-directory: .eval-chain
+        env:
+          GOTOOLCHAIN: auto
+        run: go build -tags=test -ldflags '-X github.com/bitbadges/bitbadgeschain/lifecycle.ChainCommit=86ec7e8a8bcd67173e4b1ab2548c49c0be74df66' -o "$RUNNER_TEMP/bitbadges-lifecycle" ./cmd/bitbadges-lifecycle
+      - name: Install and build SDK
+        working-directory: packages/bitbadgesjs-sdk
+        run: bun install --frozen-lockfile && bun run build
+      - name: Evaluate 30 reference contracts and seven real lifecycles
+        working-directory: packages/bitbadgesjs-sdk
+        run: bun run test:agent-behavior --chain-binary "$RUNNER_TEMP/bitbadges-lifecycle" --chain-scenarios "$GITHUB_WORKSPACE/.eval-chain/lifecycle/testdata/scenarios" > agent-behavior-report.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: agent-behavior-report
+          path: packages/bitbadgesjs-sdk/agent-behavior-report.json
+          if-no-files-found: error

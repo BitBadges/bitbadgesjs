@@ -4,6 +4,10 @@ import { parse } from 'yaml';
 
 describe('evaluation workflow policy', () => {
   const root = resolve(__dirname, '../../..');
+  it('runs lifecycle evaluations only by explicit dispatch', () => {
+    const workflow = parse(readFileSync(resolve(root, '.github/workflows/agent-lifecycle.yml'), 'utf8'));
+    expect(Object.keys(workflow.on)).toEqual(['workflow_dispatch']);
+  });
   it('runs golden evaluations only by explicit dispatch', () => {
     const workflow = parse(readFileSync(resolve(root, '.github/workflows/agent-evals.yml'), 'utf8'));
     expect(Object.keys(workflow.on)).toEqual(['workflow_dispatch']);
