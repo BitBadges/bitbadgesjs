@@ -33,6 +33,26 @@ console.log(JSON.stringify({version:1,id:s.id,passed:true,execution:'module',cha
     return file;
   }
   const requested = { ...scenario, steps: [{ id: 'step', expect: { success: true }, assertions: [assertion] }] };
+  it('labels successful custom scenarios as experimental assertion evidence', async () => {
+    expect(await runLifecycle({ scenario: requested }, { executable: reportedRunner() })).toMatchObject({
+      maturity: 'experimental',
+      scope: 'supplied-scenario-assertions',
+      productVerification: 'not-established',
+      provenance: { origin: 'caller-authored' }
+    });
+  });
+  it('rejects an incorrect reported clock', async () => {
+    await expect(runLifecycle({ scenario: requested }, { executable: reportedRunner({ timeMs: '2' }) })).rejects.toThrow(/clock/);
+  });
+  it('checks the requested rejection reason', async () => {
+    const rejection = { ...requested, steps: [{ ...requested.steps[0], expect: { success: false, errorContains: 'permission denied' } }] };
+    await expect(runLifecycle({ scenario: rejection }, { executable: reportedRunner({ success: false, error: 'unrelated error' }) })).rejects.toThrow(
+      /outcome/
+    );
+    expect(await runLifecycle({ scenario: rejection }, { executable: reportedRunner({ success: false, error: 'permission denied' }) })).toMatchObject(
+      { status: 'satisfied' }
+    );
+  });
   it('accepts a complete matching report from the configured local runner', async () => {
     expect(await runLifecycle({ scenario: requested }, { executable: reportedRunner() })).toMatchObject({ passed: true, status: 'satisfied' });
   });
@@ -114,6 +134,8 @@ else { const input=require('fs').readFileSync(0,'utf8'); const s=JSON.parse(inpu
     expect(result.passed).toBe(true);
     expect(result.status).toBe('unverified');
     expect(result.coverage.missingRequired).toEqual(['IBC', 'plugins']);
-    await expect(runLifecycle({ scenario: { ...requested, steps: [{ ...requested.steps[0], id: 'different' }] } }, { executable: file })).rejects.toThrow(/bound/);
+    await expect(
+      runLifecycle({ scenario: { ...requested, steps: [{ ...requested.steps[0], id: 'different' }] } }, { executable: file })
+    ).rejects.toThrow(/bound/);
   });
 });

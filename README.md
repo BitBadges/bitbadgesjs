@@ -1,5 +1,7 @@
 # BitBadges SDK
 
+**Experimental local lifecycle checks:** isolated scenario assertions, not product certification. Seven product families have shipped references; other standards explicitly lack reference coverage. See [supported scope and usage](packages/bitbadgesjs-sdk/docs/runbooks/local-lifecycle.md).
+
 **Experimental evaluations — not a source of truth.** These checks provide
 limited diagnostic and comparison signals. A passing score is not proof of
 correctness, security, production readiness, or successful real-agent behavior.

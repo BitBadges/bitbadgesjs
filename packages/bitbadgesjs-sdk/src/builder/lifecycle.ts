@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import { z } from 'zod';
+import { lifecycleExcluded, lifecycleProvenance } from './lifecycle-catalog.js';
 
 const versionSchema = z.object({
   protocolVersion: z.literal(1),
@@ -34,11 +35,13 @@ const executable = (opts: RunnerOptions) => opts.executable || process.env.BITBA
 const hasSourceRevision = (commit: string) => /^[a-f0-9]{40}$/i.test(commit);
 const scenarioEvidenceSchema = z.object({
   id: z.string(),
+  timeMs: z.string().regex(/^\d+$/),
   steps: z
     .array(
       z.object({
         id: z.string(),
-        expect: z.object({ success: z.boolean() }).optional(),
+        advanceTimeMs: z.string().regex(/^\d+$/).optional(),
+        expect: z.object({ success: z.boolean(), errorContains: z.string().optional() }).optional(),
         assertions: z.array(z.object({ kind: z.string(), expected: z.unknown() }).refine((value) => Object.hasOwn(value, 'expected'))).min(1)
       })
     )
@@ -150,9 +153,12 @@ export async function runLifecycle(input: { scenario: unknown; requiredCoverage?
     scenario.steps.some((step, index) => step.id !== result.steps[index].id)
   )
     throw new Error('Local lifecycle result is not bound to the requested scenario/version.');
+  let clock = BigInt(scenario.timeMs);
   for (let index = 0; index < scenario.steps.length; index++) {
     const requested = scenario.steps[index];
     const observed = result.steps[index];
+    clock += BigInt(requested.advanceTimeMs ?? '0');
+    if (observed.timeMs !== clock.toString()) throw new Error('Local lifecycle result contradicts the requested clock.');
     if (
       requested.assertions.length !== observed.assertions.length ||
       requested.assertions.some(
@@ -164,7 +170,10 @@ export async function runLifecycle(input: { scenario: unknown; requiredCoverage?
       )
     )
       throw new Error('Local lifecycle result omitted or changed requested assertion evidence.');
-    const passed = observed.success === (requested.expect?.success ?? true) && observed.assertions.every((assertion) => assertion.passed);
+    const reasonMatches =
+      !requested.expect?.errorContains || (typeof observed.error === 'string' && observed.error.includes(requested.expect.errorContains));
+    const passed =
+      observed.success === (requested.expect?.success ?? true) && reasonMatches && observed.assertions.every((assertion) => assertion.passed);
     if (observed.passed !== passed) throw new Error('Local lifecycle result contradicts the expected step outcome.');
   }
   const executed = result.steps.every((step) => step.passed);
@@ -174,13 +183,19 @@ export async function runLifecycle(input: { scenario: unknown; requiredCoverage?
   const missing = (input.requiredCoverage ?? ['module']).filter((scope) => !supported.has(scope));
   return {
     ...result,
+    maturity: 'experimental',
+    scope: 'supplied-scenario-assertions',
+    productVerification: 'not-established',
+    interpretation:
+      'Status applies only to supplied assertions and required coverage. It does not certify a product, deployment, or arbitrary intent. Reported source revision is not binary attestation.',
+    provenance: lifecycleProvenance(input.scenario),
     localOnly: true,
     sourceVerified: hasSourceRevision(version.chainCommit),
     status: !result.passed ? 'violated' : missing.length > 0 || !hasSourceRevision(version.chainCommit) ? 'unverified' : 'satisfied',
     coverage: {
       version: 1,
       executed: ['module'],
-      excluded: [...new Set([...result.coverage.excluded, 'claims', 'plugins', 'indexer', 'IBC', 'external services'])],
+      excluded: [...new Set([...result.coverage.excluded, ...lifecycleExcluded])],
       missingRequired: missing
     },
     invocation: { executable: 'bitbadges-lifecycle', arguments: [], protocolVersion: 1, timeoutMs: opts.timeoutMs ?? 30_000 }
