@@ -94,6 +94,7 @@ import { z } from 'zod';
 import { runLifecycle, getLifecycleSchema, lifecycleDiagnostics } from '../lifecycle.js';
 import { getLifecycleCapabilities, getLifecycleTemplate } from '../lifecycle-catalog.js';
 import { verifyLifecycleIntent } from '../lifecycleIntent.js';
+import { requestBrowserReview } from '../../cli/utils/browser-review.js';
 import { artifactIdentity, canonicalJson, parseIntent, verifyIntent, repairArtifact } from '../../core/intent.js';
 import { getSessionBinding } from '../session/artifactBinding.js';
 import { getTransaction, ensureStringNumbers } from '../session/sessionState.js';
@@ -177,6 +178,7 @@ const getSkillInstructionsTool: ToolSchema = {
  * The tool registry. Keys are builder tool names.
  */
 export const toolRegistry: Record<string, ToolEntry> = {
+  request_browser_review: entry({ name: 'request_browser_review', description: 'Create a pending general transaction request using the existing browser signing bridge. Returns request ID, URL, expiry and recovery instructions immediately. Human wallet signing is separate. Collection preview links alone are not transaction requests.', inputSchema: { type: 'object', properties: { artifact: { type: 'object', description: 'Explicit {messages:[{typeUrl,value}]} transaction.' }, expectedAddress: { type: 'string' }, network: { type: 'string', enum: ['mainnet', 'testnet', 'local'] }, signOnly: { type: 'boolean' }, timeoutSeconds: { type: 'integer', minimum: 60, maximum: 1800 }, review: { type: 'object', description: 'Optional version1 intent/evidence sidecar bound to artifact and signer/network.' } }, required: ['artifact', 'expectedAddress', 'network'] } }, requestBrowserReview),
   verify_lifecycle_intent: entry({ name: 'verify_lifecycle_intent', description: 'Experimental: execute a scenario bound to the exact artifact and retain per-requirement static findings beside observed lifecycle evidence. Supplied assertions cannot prove complete intent coverage; unmatched requirements remain unverified. Read lifecycle_schema first.', inputSchema: { type: 'object', properties: { artifact: { type: 'object' }, intent: { type: 'object' }, scenario: { type: 'object' }, requiredCoverage: { type: 'array', items: { type: 'string' }, maxItems: 30 } }, required: ['artifact', 'intent', 'scenario'] } }, args => verifyLifecycleIntent(args)),
   get_lifecycle_capabilities: entry(
     { name: 'get_lifecycle_capabilities', description: 'Discover experimental local lifecycle reference coverage for every installed standard, exclusions, and use/avoid guidance. Offline; no runner required. Not product certification.', inputSchema: { type: 'object', properties: {} } },
@@ -225,8 +227,8 @@ export const toolRegistry: Record<string, ToolEntry> = {
     run: (args: unknown) => { z.object({}).strict().parse(args); return { requestIds: listSigningRequests() }; }
   },
   signing_request_status: {
-    tool: { name: 'signing_request_status', description: 'Inspect a saved browser request. With resume=true, returns the same URL only while its original listener is live. Never creates or submits another transaction; unknown outcomes require reconciliation.', inputSchema: { type: 'object', properties: { requestId: { type: 'string', pattern: '^[a-f0-9]{32}$' }, resume: { type: 'boolean' } }, required: ['requestId'], additionalProperties: false } } as ToolSchema,
-    run: (args: unknown) => { const input = z.object({ requestId: z.string().regex(/^[a-f0-9]{32}$/), resume: z.boolean().optional() }).strict().parse(args); return getSigningRequestStatus(input.requestId, input.resume); }
+    tool: { name: 'signing_request_status', description: 'Inspect a saved browser request. With resume=true, returns the same URL only while its original listener is live. Never creates or submits another transaction; unknown outcomes require reconciliation.', inputSchema: { type: 'object', properties: { requestId: { type: 'string', pattern: '^[a-f0-9]{32}$' }, resume: { type: 'boolean' }, verify: { type: 'boolean', description: 'Verify configured chain execution and request message binding.' } }, required: ['requestId'], additionalProperties: false } } as ToolSchema,
+    run: (args: unknown) => { const input = z.object({ requestId: z.string().regex(/^[a-f0-9]{32}$/), resume: z.boolean().optional(), verify: z.boolean().optional() }).strict().parse(args); return getSigningRequestStatus(input.requestId, input.resume, input.verify); }
   },
   get_standards: entry(
     {
