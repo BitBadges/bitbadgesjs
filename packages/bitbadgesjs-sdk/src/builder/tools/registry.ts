@@ -93,7 +93,8 @@ import { getSigningRequestStatus, listSigningRequests } from '../../cli/utils/si
 import { z } from 'zod';
 import { runLifecycle, getLifecycleSchema, lifecycleDiagnostics } from '../lifecycle.js';
 import { getLifecycleCapabilities, getLifecycleTemplate } from '../lifecycle-catalog.js';
-import { artifactIdentity, parseIntent, verifyIntent, repairArtifact } from '../../core/intent.js';
+import { verifyLifecycleIntent } from '../lifecycleIntent.js';
+import { artifactIdentity, canonicalJson, parseIntent, verifyIntent, repairArtifact } from '../../core/intent.js';
 import { getSessionBinding } from '../session/artifactBinding.js';
 import { getTransaction, ensureStringNumbers } from '../session/sessionState.js';
 import { toolFailure, type ToolFailure } from './errors.js';
@@ -176,6 +177,7 @@ const getSkillInstructionsTool: ToolSchema = {
  * The tool registry. Keys are builder tool names.
  */
 export const toolRegistry: Record<string, ToolEntry> = {
+  verify_lifecycle_intent: entry({ name: 'verify_lifecycle_intent', description: 'Experimental: execute a scenario bound to the exact artifact and retain per-requirement static findings beside observed lifecycle evidence. Supplied assertions cannot prove complete intent coverage; unmatched requirements remain unverified. Read lifecycle_schema first.', inputSchema: { type: 'object', properties: { artifact: { type: 'object' }, intent: { type: 'object' }, scenario: { type: 'object' }, requiredCoverage: { type: 'array', items: { type: 'string' }, maxItems: 30 } }, required: ['artifact', 'intent', 'scenario'] } }, args => verifyLifecycleIntent(args)),
   get_lifecycle_capabilities: entry(
     { name: 'get_lifecycle_capabilities', description: 'Discover experimental local lifecycle reference coverage for every installed standard, exclusions, and use/avoid guidance. Offline; no runner required. Not product certification.', inputSchema: { type: 'object', properties: {} } },
     (args) => { z.object({}).strict().parse(args); return getLifecycleCapabilities(); }
@@ -496,6 +498,9 @@ export async function callTool(name: string, args: any): Promise<CallToolResult>
         const snapshot = JSON.parse(JSON.stringify(ensureStringNumbers({ messages: getTransaction(args.sessionId, args.creatorAddress).messages })));
         binding = getSessionBinding(args.sessionId);
         args = { ...args, transaction: name === 'simulate_transaction' ? normalizeTxMessages(snapshot) : snapshot };
+      } else {
+        const snapshot = args.transaction !== undefined ? JSON.parse(canonicalJson(args.transaction)) : JSON.parse(args.transactionJson);
+        args = { ...args, transaction: snapshot, transactionJson: undefined };
       }
     }
     let result = await tool.run(args);

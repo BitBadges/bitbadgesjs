@@ -5,21 +5,55 @@ import { handleValidateTransaction } from '../tools/utilities/validateTransactio
 import * as api from '../sdk/apiClient.js';
 import { artifactIdentity } from '../../core/intent.js';
 describe('artifact-bound tool checks', () => {
+  it('binds explicit asynchronous checks before caller mutation', async () => {
+    let complete!: (value: any) => void;
+    const simulate = jest.spyOn(api, 'simulateTx').mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          complete = resolve;
+        })
+    );
+    const transaction = { messages: [{ typeUrl: '/cosmos.bank.v1beta1.MsgSend', value: { fromAddress: 'a', toAddress: 'b', amount: [] } }] };
+    const originalId = artifactIdentity(transaction);
+    try {
+      const pending = callTool('simulate_transaction', { transaction });
+      transaction.messages[0].value.toAddress = 'changed';
+      complete({ success: true, data: { gas_info: { gas_used: '1' }, result: { events: [] } } });
+      const result = await pending;
+      expect(result.result.evidenceBinding.artifactId).toBe(originalId);
+      expect((simulate.mock.calls[0][0] as any).messages[0].value.toAddress).toBe('b');
+    } finally {
+      simulate.mockRestore();
+    }
+  });
   it('binds simulation evidence to the normalized messages actually sent', async () => {
-    const simulate = jest.spyOn(api, 'simulateTx').mockResolvedValue({ success: true, data: { gas_info: { gas_used: '1' }, result: { events: [] } } } as any);
+    const simulate = jest
+      .spyOn(api, 'simulateTx')
+      .mockResolvedValue({ success: true, data: { gas_info: { gas_used: '1' }, result: { events: [] } } } as any);
     try {
       const before = getSessionBinding('first');
       const result = await callTool('simulate_transaction', { sessionId: 'first' });
       expect(result.isError).toBeUndefined();
       const sent = simulate.mock.calls[0][0] as any;
       expect(sent.messages[0].typeUrl).toBe('/tokenization.MsgCreateCollection');
-      expect(result.result.evidenceBinding).toMatchObject({ artifactId: artifactIdentity({ messages: sent.messages }), sessionId: 'first', revision: before.revision });
-    } finally { simulate.mockRestore(); }
+      expect(result.result.evidenceBinding).toMatchObject({
+        artifactId: artifactIdentity({ messages: sent.messages }),
+        sessionId: 'first',
+        revision: before.revision
+      });
+    } finally {
+      simulate.mockRestore();
+    }
   });
-  afterEach(() => { resetSession('first'); resetSession('second'); });
+  afterEach(() => {
+    resetSession('first');
+    resetSession('second');
+  });
   it('isolates interleaved builds and rejects stale identity after direct mutation', () => {
-    setCustomData('first', 'a'); setCustomData('second', 'b');
-    const first = getSessionBinding('first'); const second = getSessionBinding('second');
+    setCustomData('first', 'a');
+    setCustomData('second', 'b');
+    const first = getSessionBinding('first');
+    const second = getSessionBinding('second');
     expect(first.artifactId).not.toBe(second.artifactId);
     setCustomData('first', 'changed');
     expect(() => assertSessionBinding(first)).toThrow(/stale/i);
