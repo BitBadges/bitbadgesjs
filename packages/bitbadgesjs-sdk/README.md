@@ -1,5 +1,17 @@
 # BitBadges SDK
 
+**Experimental evaluations — not a source of truth.** These checks provide
+limited diagnostic and comparison signals. A passing score is not proof of
+correctness, security, production readiness, or successful real-agent behavior.
+Use independent review and scenario-specific verification for those decisions.
+Run evaluations on demand; they must not run on PRs, pushes, or schedules.
+
+Revisit this label only after independently reviewing the oracles, testing known
+good and bad outcomes, and establishing repeated live-model baselines with
+measured coverage and error rates. Document that evidence and an explicit
+maintainer decision before changing the label; it does not expire automatically.
+
+
 The official TypeScript SDK for interacting with the BitBadges blockchain, API, and indexer.
 
 [![npm version](https://badge.fury.io/js/bitbadges.svg)](https://www.npmjs.com/package/bitbadges)

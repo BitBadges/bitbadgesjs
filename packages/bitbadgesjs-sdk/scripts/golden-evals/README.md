@@ -1,5 +1,17 @@
 # Behavioral builder cases
 
+**Experimental evaluations — not a source of truth.** These checks provide
+limited diagnostic and comparison signals. A passing score is not proof of
+correctness, security, production readiness, or successful real-agent behavior.
+Use independent review and scenario-specific verification for those decisions.
+Run evaluations on demand; they must not run on PRs, pushes, or schedules.
+
+Revisit this label only after independently reviewing the oracles, testing known
+good and bad outcomes, and establishing repeated live-model baselines with
+measured coverage and error rates. Document that evidence and an explicit
+maintainer decision before changing the label; it does not expire automatically.
+
+
 These are independent, versioned constraints for canonical unsigned builder
 proposals. They extend the CLI/MCP parity checks with required properties and
 deliberately corrupted outputs. They are development tooling, not SDK exports.

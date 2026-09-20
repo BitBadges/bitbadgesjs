@@ -1,4 +1,4 @@
-name: Golden builder evaluations
+name: Experimental golden builder evaluations
 on:
   workflow_dispatch:
 permissions:
