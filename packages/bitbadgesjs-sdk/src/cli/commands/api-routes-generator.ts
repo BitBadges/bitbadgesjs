@@ -91,7 +91,7 @@ interface ParsedRoute {
   description: string;
   pathParams: string[];
   hasBody: boolean;
-  queryParams?: { name: string; description: string; required: boolean }[];
+  queryParams?: { name: string; description: string; required: boolean; repeat?: boolean }[];
   sdkLinks?: {
     request?: string;
     response?: string;
@@ -153,6 +153,7 @@ export function parseRoutes(yamlRaw: string): ParsedRoute[] {
           name: p.name as string,
           description: (p.description || '') as string,
           required: !!p.required,
+          ...(p.schema?.type === 'array' && p.explode === true ? { repeat: true } : {}),
         }));
 
       // Build description from summary
@@ -171,7 +172,8 @@ export function parseRoutes(yamlRaw: string): ParsedRoute[] {
 
       // Derive SDK function name from operationId
       // e.g. getAccount -> BitBadgesAPI.getAccount
-      const sdkFunctionName = `BitBadgesAPI.${operationId}`;
+      const sdkClass = spec['x-sdk-class'] === 'BitBadgesAdminAPI' ? 'BitBadgesAdminAPI' : 'BitBadgesAPI';
+      const sdkFunctionName = `${sdkClass}.${operationId}`;
 
       const sdkLinks: ParsedRoute['sdkLinks'] = {};
       if (requestType) sdkLinks.request = requestType;
@@ -209,10 +211,10 @@ export function parseRoutes(yamlRaw: string): ParsedRoute[] {
 // Code generation
 // ---------------------------------------------------------------------------
 
-function generateQueryParams(params: { name: string; description: string; required: boolean }[]): string {
+function generateQueryParams(params: { name: string; description: string; required: boolean; repeat?: boolean }[]): string {
   const lines = params.map((p) => {
     const desc = escapeForTemplate(p.description);
-    return `      { name: '${p.name}', description: '${desc}', required: ${p.required} },`;
+    return `      { name: '${p.name}', description: '${desc}', required: ${p.required}${p.repeat ? ', repeat: true' : ''} },`;
   });
   return `[\n${lines.join('\n')}\n    ]`;
 }
@@ -275,6 +277,7 @@ export interface ParamInfo {
   name: string;
   description: string;
   required: boolean;
+  repeat?: boolean;
 }
 
 export interface FieldInfo {

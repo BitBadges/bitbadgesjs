@@ -85,7 +85,7 @@ try {
     const routesYamlData = yaml.load(routesYamlContent) as any;
 
     // Add the new schemas to the routes.yaml file
-    routesYamlData.components.schemas = schemaYamlContent.components.schemas;
+    routesYamlData.components.schemas = { ...schemaYamlContent.components.schemas, ...routesYamlData.components.schemas };
 
     // Convert the modified YAML data back to string
     modifiedYamlContent = yaml.dump(routesYamlData);
