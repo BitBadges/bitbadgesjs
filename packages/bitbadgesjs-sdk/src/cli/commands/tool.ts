@@ -34,6 +34,13 @@ function resolveSessionId(parsedArgs: any, sessionFlag: string | undefined): str
   return undefined;
 }
 
+/** Only a bad tool name or bad input is fixed by the tool list; a tool that ran and failed needs a different next step. */
+export function toolFailureHint(message: string): string {
+  if (/unknown tool|no such tool|invalid input|invalid arguments|expected .*received|required/i.test(message))
+    return 'Run `bb dev tools list --names` to confirm the tool name, or `bb dev tools list` for its input schema.';
+  return 'Read the error and fix its cause. If a signing request or transaction may already have gone out, run `bb dev requests status <id>` before trying again.';
+}
+
 export const toolCommand = new Command('tool')
   .description('Invoke a single fine-grained builder tool by name. Use `tools` to list every tool.')
   .argument('<name>', 'Tool name (e.g. set_collection_metadata, query_collection)')
@@ -121,7 +128,7 @@ export const toolCommand = new Command('tool')
         emitError(new Error(message), {
           code: result.isError ? 'tool_error' : 'tool_failed',
           meta: { result: result.result, error: result.error },
-          hint: `Run \`bb dev tools list --names\` to confirm the tool name, or \`bb dev tools list\` for its input schema.`,
+          hint: toolFailureHint(message),
           exitCode: 1
         });
       }

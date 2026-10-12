@@ -15,6 +15,7 @@
  *     end too. RFC 8252 §7.3 native-app loopback exception.
  */
 
+import { BRAND_LOGO_SVG } from './brand.js';
 import http from 'http';
 import { AddressInfo } from 'net';
 import crypto from 'crypto';
@@ -139,36 +140,79 @@ async function uploadPayload(baseUrl: string, apiKey: string | undefined, payloa
 // readable text on a sensible background. No JS — no auto-close
 // (the user closes the tab themselves once they see the result).
 const PAGE_STYLES = `
-  :root { color-scheme: light dark; }
-  body {
-    font-family: system-ui, -apple-system, sans-serif;
-    max-width: 520px;
-    margin: 80px auto;
-    text-align: center;
-    padding: 0 16px;
-    background: #fff;
-    color: #111;
+  :root {
+    color-scheme: light dark;
+    --bg: #f4f6fb; --card: #ffffff; --border: #e4e7ef; --text: #0f1220; --muted: #5b6275;
+    --ok: #15803d; --ok-bg: #dcfce7; --err: #b42318; --err-bg: #fee4e2; --neutral: #475467; --neutral-bg: #eef0f6;
   }
-  h2 { margin-bottom: 12px; }
-  p { color: #444; }
-  .ok { color: #1e8a4a; }
-  .err { color: #c2360b; }
-  .muted { color: #777; font-size: 13px; margin-top: 24px; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--text);
+    background: radial-gradient(900px 420px at 15% -10%, rgba(2,173,238,.14), transparent 60%), radial-gradient(900px 420px at 95% 110%, rgba(235,1,140,.12), transparent 60%), var(--bg);
+  }
+  .card {
+    position: relative; overflow: hidden; width: min(440px, 100%); text-align: center; padding: 40px 32px 28px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 18px 50px rgba(15, 18, 32, .10);
+  }
+  .card::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 4px; background: linear-gradient(90deg, #02adee, #7c3aed, #eb018c); }
+  .brand { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 28px; }
+  .brand svg { width: 36px; height: 36px; }
+  .wordmark { font-size: 20px; font-weight: 700; letter-spacing: -.01em; background: linear-gradient(90deg, #02adee, #eb018c); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .icon { width: 56px; height: 56px; margin: 0 auto 18px; border-radius: 50%; display: grid; place-items: center; }
+  .icon svg { width: 28px; height: 28px; }
+  .icon.ok { background: var(--ok-bg); color: var(--ok); }
+  .icon.err { background: var(--err-bg); color: var(--err); }
+  .icon.neutral { background: var(--neutral-bg); color: var(--neutral); }
+  h1 { margin: 0 0 8px; font-size: 24px; letter-spacing: -.01em; }
+  p { margin: 0; color: var(--muted); line-height: 1.55; }
+  .link { display: inline-block; margin-top: 14px; padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); color: var(--text); font-size: 14px; font-weight: 600; text-decoration: none; }
+  .link:hover { border-color: #7c3aed; }
+  .hint { margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--border); font-size: 13px; }
   @media (prefers-color-scheme: dark) {
-    body { background: #15161a; color: #e8e8ec; }
-    p { color: #b8b8bf; }
-    .ok { color: #4ade80; }
-    .err { color: #f87171; }
-    .muted { color: #888; }
+    :root {
+      --bg: #080a12; --card: #12141d; --border: #232736; --text: #eceef6; --muted: #a3a9bc;
+      --ok: #4ade80; --ok-bg: rgba(74,222,128,.14); --err: #f87171; --err-bg: rgba(248,113,113,.14); --neutral: #b4bacb; --neutral-bg: rgba(180,186,203,.12);
+    }
+    .card { box-shadow: 0 18px 50px rgba(0, 0, 0, .45); }
   }
 `;
 
+const ICONS = {
+  ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  err: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 7v6.5M12 17.2v.1"/></svg>',
+  neutral: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 12h10"/></svg>'
+};
+
 function pageHtml(title: string, statusClass: string, statusText: string, body: string): string {
-  return `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>${PAGE_STYLES}</style></head><body><h2 class="${statusClass}">${statusText}</h2>${body}<p class="muted">You can close this tab.</p></body></html>`;
+  const tone = statusClass === 'ok' || statusClass === 'err' ? statusClass : 'neutral';
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title><style>${PAGE_STYLES}</style></head><body><main class="card"><div class="brand">${BRAND_LOGO_SVG}<span class="wordmark">BitBadges</span></div><div class="icon ${tone}">${ICONS[tone]}</div><h1>${statusText}</h1>${body}<p class="hint">You can close this tab.</p></main></body></html>`;
 }
 
-function successPage(): string {
+/**
+ * Public block-explorer link for a sent transaction. Local chains have no explorer, and anything that is
+ * not a plain hex hash gets no link at all, so the value is always safe to place in an attribute.
+ */
+export function explorerTxUrl(network: string, chain: string, hash: string | undefined): string | undefined {
+  const plain = hash?.replace(/^0x/i, '');
+  if (!plain || !/^[0-9a-fA-F]{16,128}$/.test(plain) || network === 'local') return undefined;
+  const testnet = network === 'testnet';
+  if (chain === 'evm') return `https://${testnet ? 'evm-testnet' : 'evm'}.explorer.bitbadges.io/tx/0x${plain.toLowerCase()}`;
+  if (chain === 'cosmos') return `https://explorer.bitbadges.io/${testnet ? 'BitBadges%20Testnet' : 'BitBadges%20Mainnet'}/tx/${plain.toUpperCase()}`;
+  return undefined;
+}
+
+function successPage(outcome?: string, explorerUrl?: string): string {
+  if (outcome === 'submitted') {
+    const link = explorerUrl ? `<p><a class="link" href="${explorerUrl}" target="_blank" rel="noopener noreferrer">View on explorer</a></p>` : '';
+    return pageHtml('BitBadges CLI', 'ok', 'Transaction sent', `<p>Your agent has it from here.</p>${link}`);
+  }
+  if (outcome === 'signed') return pageHtml('BitBadges CLI', 'ok', 'Signed', '<p>Nothing has been sent yet. Your agent has the signature.</p>');
   return pageHtml('BitBadges CLI', 'ok', 'Signed', '<p>The result was returned to the terminal that opened this tab.</p>');
+}
+
+function cancelledPage(): string {
+  return pageHtml('BitBadges CLI', '', 'Cancelled', '<p>Nothing was sent.</p>');
 }
 
 function errorPage(msg: string, statusText = 'Sign request rejected'): string {
@@ -280,7 +324,13 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
           resolved = true;
           res.setHeader('Content-Type', 'text/html; charset=utf-8');
           const error = result.outcome === 'cancelled' ? result.error || 'User cancelled signing' : result.outcome === 'error' || result.outcome === 'unknown' ? result.error : undefined;
-          res.end(error ? errorPage(error, result.outcome === 'unknown' ? 'Submission status unknown' : undefined) : successPage());
+          res.end(
+            result.outcome === 'cancelled'
+              ? cancelledPage()
+              : error
+                ? errorPage(error, result.outcome === 'unknown' ? 'Submission status unknown' : undefined)
+                : successPage(result.outcome, result.outcome === 'submitted' ? explorerTxUrl(txRequest.network, txRequest.chain, result.hash) : undefined)
+          );
           cleanup();
           resolve({ ...result, ...(error ? { error } : {}) });
         } catch {
