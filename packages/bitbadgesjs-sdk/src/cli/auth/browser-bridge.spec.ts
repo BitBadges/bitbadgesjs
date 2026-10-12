@@ -7,7 +7,11 @@ const get = (url: string) => new Promise<number>((resolve, reject) => {
   http.get(url, res => { res.resume(); res.on('end', () => resolve(res.statusCode!)); }).on('error', reject);
 });
 
-async function launch(mode: 'tx' | 'msg' | 'login' = 'tx', timeoutMs = 3000) {
+const getPage = (url: string) => new Promise<{ status: number; text: string }>((resolve, reject) => {
+  http.get(url, res => { let text = ''; res.on('data', d => (text += d)); res.on('end', () => resolve({ status: res.statusCode!, text })); }).on('error', reject);
+});
+
+async function launch(mode: 'tx' | 'msg' | 'login' = 'tx', timeoutMs = 3000, override: Record<string, unknown> = {}) {
   let announce!: (url: URL) => void;
   const announced = new Promise<URL>(resolve => { announce = resolve; });
   const spy = jest.spyOn(process.stderr, 'write').mockImplementation(((chunk: string) => {
@@ -15,7 +19,7 @@ async function launch(mode: 'tx' | 'msg' | 'login' = 'tx', timeoutMs = 3000) {
     if (match) announce(new URL(match[0]));
     return true;
   }) as any);
-  const result = bridgeSign({ mode, payload: mode === 'tx' ? payload() : { message: 'hello' }, baseUrl: 'https://example.invalid', frontendUrl: 'https://example.invalid', noOpen: true, timeoutMs });
+  const result = bridgeSign({ mode, payload: mode === 'tx' ? { ...payload(), ...override } : { message: 'hello' }, baseUrl: 'https://example.invalid', frontendUrl: 'https://example.invalid', noOpen: true, timeoutMs });
   const url = await announced;
   spy.mockRestore();
   const callback = new URL(url.searchParams.get('return')!);
@@ -93,5 +97,35 @@ describe('browser bridge loopback transport', () => {
   });
   test('transaction mode refuses old unbound requests before opening a listener', async () => {
     await expect(bridgeSign({ mode: 'tx', payload: { chain: 'cosmos', txsInfo: [] }, frontendUrl: 'https://example.invalid', baseUrl: 'https://example.invalid', noOpen: true })).rejects.toThrow();
+  });
+  describe('the page the user lands on after returning to the agent', () => {
+    const submit = (callback: URL, request: { requestId: string }, outcome: string, extra: Record<string, string> = {}) => {
+      callback.searchParams.set('requestId', request.requestId);
+      callback.searchParams.set('outcome', outcome);
+      for (const [key, value] of Object.entries(extra)) callback.searchParams.set(key, value);
+      return getPage(callback.toString());
+    };
+    const bound = { address: signer, network: 'mainnet', chain: 'cosmos', chainId: 'bitbadges-1' };
+    test('says a broadcast transaction was sent and speaks of the agent, not a terminal', async () => {
+      const { callback, request } = await launch();
+      const page = await submit(callback, request, 'submitted', { ...bound, hash: 'A'.repeat(64) });
+      expect(page.text).toContain('Transaction sent');
+      expect(page.text).toMatch(/your agent/i);
+      expect(page.text).not.toMatch(/terminal/i);
+      expect(page.text).not.toContain('>Signed<');
+    });
+    test('says nothing was sent when the user only signed', async () => {
+      const { callback, request } = await launch('tx', 3000, { signOnly: true });
+      const page = await submit(callback, request, 'signed', { ...bound, signedTx: Buffer.from('signed').toString('base64') });
+      expect(page.text).toContain('Signed');
+      expect(page.text).toMatch(/nothing has been sent/i);
+    });
+    test('shows a plain cancellation instead of a red rejection', async () => {
+      const { callback, request } = await launch();
+      const page = await submit(callback, request, 'cancelled');
+      expect(page.text).toContain('Cancelled');
+      expect(page.text).toMatch(/nothing was sent/i);
+      expect(page.text).not.toMatch(/rejected/i);
+    });
   });
 });

@@ -167,8 +167,14 @@ function pageHtml(title: string, statusClass: string, statusText: string, body: 
   return `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>${PAGE_STYLES}</style></head><body><h2 class="${statusClass}">${statusText}</h2>${body}<p class="muted">You can close this tab.</p></body></html>`;
 }
 
-function successPage(): string {
+function successPage(outcome?: string): string {
+  if (outcome === 'submitted') return pageHtml('BitBadges CLI', 'ok', 'Transaction sent', '<p>Your agent has the result and will confirm it on chain.</p>');
+  if (outcome === 'signed') return pageHtml('BitBadges CLI', 'ok', 'Signed', '<p>Nothing has been sent yet. Your agent has the signature.</p>');
   return pageHtml('BitBadges CLI', 'ok', 'Signed', '<p>The result was returned to the terminal that opened this tab.</p>');
+}
+
+function cancelledPage(): string {
+  return pageHtml('BitBadges CLI', '', 'Cancelled', '<p>Nothing was sent. Ask your agent for a new request if you change your mind.</p>');
 }
 
 function errorPage(msg: string, statusText = 'Sign request rejected'): string {
@@ -280,7 +286,13 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
           resolved = true;
           res.setHeader('Content-Type', 'text/html; charset=utf-8');
           const error = result.outcome === 'cancelled' ? result.error || 'User cancelled signing' : result.outcome === 'error' || result.outcome === 'unknown' ? result.error : undefined;
-          res.end(error ? errorPage(error, result.outcome === 'unknown' ? 'Submission status unknown' : undefined) : successPage());
+          res.end(
+            result.outcome === 'cancelled'
+              ? cancelledPage()
+              : error
+                ? errorPage(error, result.outcome === 'unknown' ? 'Submission status unknown' : undefined)
+                : successPage(result.outcome)
+          );
           cleanup();
           resolve({ ...result, ...(error ? { error } : {}) });
         } catch {

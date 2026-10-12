@@ -6,6 +6,7 @@ import { browserReviewSchema, parseBrowserTxRequest, parseBrowserTxResult, type 
 import { bridgeSign, resolveFrontendUrl } from '../auth/browser-bridge.js';
 import { getApiUrl, getApiKeyForNetwork } from './io.js';
 import { saveSigningRequest, setSigningRequestUrl, finishSigningRequest } from './signing-requests.js';
+import { BBErrorCode } from './envelope.js';
 
 export const browserReviewInputSchema = z.object({
   artifact: z.object({ messages: z.array(z.object({ typeUrl: z.string().min(1), value: z.record(z.unknown()) }).strict()).min(1).max(100) }).strict(),
@@ -45,6 +46,7 @@ export async function requestBrowserReview(input: unknown) {
       if (!output.includes('\n')) return;
       try {
         const pending = JSON.parse(output.slice(0, output.indexOf('\n')));
+        if (pending.outcome === 'error' && pending.requestId === request.requestId && typeof pending.message === 'string') return finish(new Error(pending.message.slice(0, 500)));
         if (pending.requestId !== request.requestId || pending.outcome !== 'pending' || typeof pending.signUrl !== 'string') throw new Error('Mismatched browser listener');
         finish();
         resolve({ ...pending, confirmed: false, retrySafe: false, nextStep: 'Open signUrl for human review and signing. Inspect signing_request_status; pending/browser-open is not completion. The original listener survives CLI exit until expiry.' });
@@ -57,17 +59,23 @@ export async function requestBrowserReview(input: unknown) {
 export async function listenForBrowserReview(input: unknown): Promise<void> {
   const request = parseBrowserTxRequest(input);
   saveSigningRequest(request);
+  let ready = false;
   try {
     const options = { network: request.network };
     const result = parseBrowserTxResult(await bridgeSign({ mode: 'tx', payload: request, baseUrl: getApiUrl(options), apiKey: getApiKeyForNetwork(options),
       frontendUrl: resolveFrontendUrl(request.network), timeoutMs: request.expiresAt - Date.now(), noOpen: true, printUrl: false,
       onReady: signUrl => {
+        ready = true;
         setSigningRequestUrl(request.requestId, signUrl);
         process.stdout.write(JSON.stringify({ requestId: request.requestId, outcome: 'pending', signUrl, expiresAt: request.expiresAt }) + '\n');
       }
     }), request);
     finishSigningRequest(request.requestId, result);
-  } catch {
+  } catch (error) {
+    if (!ready && (error as { code?: string }).code === BBErrorCode.MISSING_API_KEY) {
+      process.stdout.write(JSON.stringify({ requestId: request.requestId, outcome: 'error', code: BBErrorCode.MISSING_API_KEY,
+        message: 'A collection this size needs an API key to open the browser review. Run `bb settings set apiKey <key>` (or set BITBADGES_API_KEY), then request the review again.' }) + '\n');
+    }
     try { finishSigningRequest(request.requestId, { requestId: request.requestId, outcome: 'unknown', error: 'Listener ended without a verified result. Reconcile wallet and chain state before retrying.' }); } catch { /* Existing final result is authoritative. */ }
     process.exitCode = 1;
   }
