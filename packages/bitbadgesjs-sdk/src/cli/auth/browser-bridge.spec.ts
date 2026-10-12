@@ -1,5 +1,5 @@
 import http from 'http';
-import { bridgeSign } from './browser-bridge.js';
+import { bridgeSign, explorerTxUrl } from './browser-bridge.js';
 
 const signer = 'bb1p0rrel3365scadq5k9pv0x0zp9j22js6dnw70d';
 const payload = () => ({ version: 2 as const, requestId: 'a'.repeat(32), expectedAddress: signer, network: 'mainnet' as const, chain: 'cosmos' as const, chainId: 'bitbadges-1', evmChainId: '50024', expiresAt: Date.now() + 60000, signOnly: false, txsInfo: [{ type: 'MsgSend', msg: {} }] });
@@ -120,14 +120,38 @@ describe('browser bridge loopback transport', () => {
       expect(page.text).toContain('Signed');
       expect(page.text).toMatch(/nothing has been sent/i);
     });
-    test('is branded and fully self-contained so it works offline and leaks nothing', async () => {
+    test('is branded and loads nothing from the network, so it works offline and leaks nothing', async () => {
       const { callback, request } = await launch();
       const page = await submit(callback, request, 'submitted', { ...bound, hash: 'A'.repeat(64) });
       expect(page.text).toContain('<svg');
       expect(page.text).toContain('BitBadges');
       expect(page.text).toContain('prefers-color-scheme: dark');
       expect(page.text).not.toMatch(/<script|<link|<img|@import|url\(\s*['"]?https?:/i);
-      expect(page.text.replace(/http:\/\/www\.w3\.org\/2000\/svg/g, '')).not.toMatch(/https?:\/\//);
+      // the only external address allowed is the explorer link the user may click
+      const withoutLink = page.text.replace(/<a [^>]*href="https:\/\/explorer\.bitbadges\.io\/[^"]*"[^>]*>/g, '').replace(/http:\/\/www\.w3\.org\/2000\/svg/g, '');
+      expect(withoutLink).not.toMatch(/https?:\/\//);
+    });
+    test('a sent transaction links to the block explorer and says nothing more', async () => {
+      const { callback, request } = await launch();
+      const page = await submit(callback, request, 'submitted', { ...bound, hash: 'ABCDEF0123456789'.repeat(4) });
+      expect(page.text).toContain('href="https://explorer.bitbadges.io/BitBadges%20Mainnet/tx/' + 'ABCDEF0123456789'.repeat(4) + '"');
+      expect(page.text).toContain('rel="noopener noreferrer"');
+      expect(page.text).toContain('target="_blank"');
+      expect(page.text).toMatch(/View on explorer/);
+    });
+    test('a local chain has no explorer, so no link is shown', async () => {
+      const { callback, request } = await launch('tx', 3000, { network: 'local', chainId: 'bitbadges-1', evmChainId: '90123' });
+      const page = await submit(callback, request, 'submitted', { ...bound, network: 'local', hash: 'A'.repeat(64) });
+      expect(page.text).toContain('Transaction sent');
+      expect(page.text).not.toMatch(/explorer/i);
+    });
+    test('sign-only and cancelled results never show an explorer link', async () => {
+      const first = await launch('tx', 3000, { signOnly: true });
+      const signed = await submit(first.callback, first.request, 'signed', { ...bound, signedTx: Buffer.from('signed').toString('base64') });
+      expect(signed.text).not.toMatch(/explorer/i);
+      const second = await launch();
+      const cancelled = await submit(second.callback, second.request, 'cancelled');
+      expect(cancelled.text).not.toMatch(/explorer/i);
     });
     test('shows a plain cancellation instead of a red rejection', async () => {
       const { callback, request } = await launch();
@@ -136,5 +160,22 @@ describe('browser bridge loopback transport', () => {
       expect(page.text).toMatch(/nothing was sent/i);
       expect(page.text).not.toMatch(/rejected/i);
     });
+  });
+});
+
+describe('explorerTxUrl', () => {
+  const hash = 'ab12'.repeat(16);
+  test('cosmos transactions use the BitBadges explorer for the right network', () => {
+    expect(explorerTxUrl('mainnet', 'cosmos', hash)).toBe(`https://explorer.bitbadges.io/BitBadges%20Mainnet/tx/${hash.toUpperCase()}`);
+    expect(explorerTxUrl('testnet', 'cosmos', hash)).toBe(`https://explorer.bitbadges.io/BitBadges%20Testnet/tx/${hash.toUpperCase()}`);
+  });
+  test('evm transactions use the EVM explorer with a 0x hash', () => {
+    expect(explorerTxUrl('mainnet', 'evm', hash)).toBe(`https://evm.explorer.bitbadges.io/tx/0x${hash}`);
+    expect(explorerTxUrl('testnet', 'evm', '0x' + hash)).toBe(`https://evm-testnet.explorer.bitbadges.io/tx/0x${hash}`);
+  });
+  test('local has no explorer and anything that is not a plain hash gets no link', () => {
+    expect(explorerTxUrl('local', 'cosmos', hash)).toBeUndefined();
+    expect(explorerTxUrl('mainnet', 'cosmos', '../evil"><script>')).toBeUndefined();
+    expect(explorerTxUrl('mainnet', 'cosmos', undefined)).toBeUndefined();
   });
 });

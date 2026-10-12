@@ -166,6 +166,8 @@ const PAGE_STYLES = `
   .icon.neutral { background: var(--neutral-bg); color: var(--neutral); }
   h1 { margin: 0 0 8px; font-size: 24px; letter-spacing: -.01em; }
   p { margin: 0; color: var(--muted); line-height: 1.55; }
+  .link { display: inline-block; margin-top: 14px; padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); color: var(--text); font-size: 14px; font-weight: 600; text-decoration: none; }
+  .link:hover { border-color: #7c3aed; }
   .hint { margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--border); font-size: 13px; }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -187,14 +189,30 @@ function pageHtml(title: string, statusClass: string, statusText: string, body: 
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title><style>${PAGE_STYLES}</style></head><body><main class="card"><div class="brand">${BRAND_LOGO_SVG}<span class="wordmark">BitBadges</span></div><div class="icon ${tone}">${ICONS[tone]}</div><h1>${statusText}</h1>${body}<p class="hint">You can close this tab.</p></main></body></html>`;
 }
 
-function successPage(outcome?: string): string {
-  if (outcome === 'submitted') return pageHtml('BitBadges CLI', 'ok', 'Transaction sent', '<p>Your agent has the result and will confirm it on chain.</p>');
+/**
+ * Public block-explorer link for a sent transaction. Local chains have no explorer, and anything that is
+ * not a plain hex hash gets no link at all, so the value is always safe to place in an attribute.
+ */
+export function explorerTxUrl(network: string, chain: string, hash: string | undefined): string | undefined {
+  const plain = hash?.replace(/^0x/i, '');
+  if (!plain || !/^[0-9a-fA-F]{16,128}$/.test(plain) || network === 'local') return undefined;
+  const testnet = network === 'testnet';
+  if (chain === 'evm') return `https://${testnet ? 'evm-testnet' : 'evm'}.explorer.bitbadges.io/tx/0x${plain.toLowerCase()}`;
+  if (chain === 'cosmos') return `https://explorer.bitbadges.io/${testnet ? 'BitBadges%20Testnet' : 'BitBadges%20Mainnet'}/tx/${plain.toUpperCase()}`;
+  return undefined;
+}
+
+function successPage(outcome?: string, explorerUrl?: string): string {
+  if (outcome === 'submitted') {
+    const link = explorerUrl ? `<p><a class="link" href="${explorerUrl}" target="_blank" rel="noopener noreferrer">View on explorer</a></p>` : '';
+    return pageHtml('BitBadges CLI', 'ok', 'Transaction sent', `<p>Your agent has it from here.</p>${link}`);
+  }
   if (outcome === 'signed') return pageHtml('BitBadges CLI', 'ok', 'Signed', '<p>Nothing has been sent yet. Your agent has the signature.</p>');
   return pageHtml('BitBadges CLI', 'ok', 'Signed', '<p>The result was returned to the terminal that opened this tab.</p>');
 }
 
 function cancelledPage(): string {
-  return pageHtml('BitBadges CLI', '', 'Cancelled', '<p>Nothing was sent. Ask your agent for a new request if you change your mind.</p>');
+  return pageHtml('BitBadges CLI', '', 'Cancelled', '<p>Nothing was sent.</p>');
 }
 
 function errorPage(msg: string, statusText = 'Sign request rejected'): string {
@@ -311,7 +329,7 @@ export async function bridgeSign(opts: BridgeStartOptions): Promise<BridgeResult
               ? cancelledPage()
               : error
                 ? errorPage(error, result.outcome === 'unknown' ? 'Submission status unknown' : undefined)
-                : successPage(result.outcome)
+                : successPage(result.outcome, result.outcome === 'submitted' ? explorerTxUrl(txRequest.network, txRequest.chain, result.hash) : undefined)
           );
           cleanup();
           resolve({ ...result, ...(error ? { error } : {}) });
