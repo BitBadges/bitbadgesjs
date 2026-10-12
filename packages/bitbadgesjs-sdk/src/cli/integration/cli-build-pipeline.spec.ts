@@ -343,16 +343,31 @@ describe('cli build pipeline integration', () => {
       expect(out.json.issues).toEqual([]);
     });
 
+    it('full check passes a freshly built smart-token with no critical findings', () => {
+      const built = runCli([
+        'build', 'smart-token',
+        '--backing-coin', 'USDC',
+        '--name', 'T', '--image', IMG, '--description', 'D', '--creator', CREATOR
+      ]).json;
+      const out = runCli(['check', writeTmp(built)]);
+      expect(out.exitCode).toBe(0);
+      expect(out.envelope.ok).toBe(true);
+      expect(out.json.review.summary.critical).toBe(0);
+    });
+
     it('full check preserves valid structure in a failing critical-review envelope', () => {
       const built = runCli([
         'build', 'smart-token',
         '--backing-coin', 'USDC',
         '--name', 'T', '--image', IMG, '--description', 'D', '--creator', CREATOR
       ]).json;
+      // Leave approval updates unlocked so the mint/backing approvals stay mutable. That is a critical
+      // review finding by construction, so this test does not depend on what the builder defaults to.
+      built.value.collectionPermissions.canUpdateCollectionApprovals = [];
       const tmp = writeTmp(built);
       const out = runCli(['check', tmp], { throwOnError: false });
-      // Validate section must be clean — the noForcefulPostMintTransfers
-      // critical comes from the review section, not validate.
+      // Validate section must be clean — the unlocked-approvals critical
+      // comes from the review section, not validate.
       expect(out.exitCode).toBe(2);
       expect(out.envelope.ok).toBe(false);
       expect(out.envelope.error.code).toBe('review_critical');
