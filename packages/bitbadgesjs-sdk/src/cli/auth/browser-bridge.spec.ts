@@ -120,6 +120,15 @@ describe('browser bridge loopback transport', () => {
       expect(page.text).toContain('Signed');
       expect(page.text).toMatch(/nothing has been sent/i);
     });
+    test('is branded and fully self-contained so it works offline and leaks nothing', async () => {
+      const { callback, request } = await launch();
+      const page = await submit(callback, request, 'submitted', { ...bound, hash: 'A'.repeat(64) });
+      expect(page.text).toContain('<svg');
+      expect(page.text).toContain('BitBadges');
+      expect(page.text).toContain('prefers-color-scheme: dark');
+      expect(page.text).not.toMatch(/<script|<link|<img|@import|url\(\s*['"]?https?:/i);
+      expect(page.text.replace(/http:\/\/www\.w3\.org\/2000\/svg/g, '')).not.toMatch(/https?:\/\//);
+    });
     test('shows a plain cancellation instead of a red rejection', async () => {
       const { callback, request } = await launch();
       const page = await submit(callback, request, 'cancelled');
