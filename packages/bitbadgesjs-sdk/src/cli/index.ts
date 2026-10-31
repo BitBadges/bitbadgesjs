@@ -216,7 +216,7 @@ const program = new Command();
 
 program
   .name('bitbadges-cli')
-  .description('BitBadges CLI — flat verb-first surface for building, inspecting, and shipping token transactions')
+  .description('BitBadges CLI — flat verb-first surface for building, inspecting, and shipping token transactions. Output is JSON by default (no --json flag needed). On npm-only installs, run `bb ...` examples as `bitbadges-cli ...`.')
   .version(getCliPackageVersion(process.argv[1]));
 
 // ── Policies disclaimer ──────────────────────────────────────────────────────

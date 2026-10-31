@@ -54,7 +54,7 @@ async function resolveDenom(input: string, opts: NetworkFlags): Promise<string |
 // ── assets (parent) ──────────────────────────────────────────────────────────
 
 export const assetsCommand = new Command('assets').description(
-  'Browse the BitBadges chain assets via the indexer. Source-of-truth: /assetPairs (same as BrowseAssetsTab).'
+  'Browse the BitBadges chain assets via the indexer. Source-of-truth: /assetPairs (same as BrowseAssetsTab). Requires API key.'
 );
 
 // ── assets list ──────────────────────────────────────────────────────────────

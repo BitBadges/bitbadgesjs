@@ -78,7 +78,7 @@ async function resolveDenoms(inputs: string[], opts: PriceFlags): Promise<{ inpu
 export const priceCommand = addUnifiedNetworkOptions(
   addOutputOptions(
     new Command('price')
-      .description('Indexer-served USD price lookup for BitBadges-chain assets. Accepts denoms (ubadge, ibc/...) or symbols (BADGE) — symbols resolve via /assetPairs/search. Cross-chain prices live in `bb swap` (Skip:Go).')
+      .description('Indexer-served USD price lookup for BitBadges-chain assets. Accepts denoms (ubadge, ibc/...) or symbols (BADGE) — symbols resolve via /assetPairs/search. Cross-chain prices live in `bb swap` (Skip:Go). Requires API key.')
       .argument('<denoms-or-symbols...>', 'Repeated args or comma-separated. e.g. ubadge, BADGE, ibc/E1116484...')
   ),
   { includeNetworkFlag: false, includeMainnetFlag: false }
