@@ -32,7 +32,7 @@ export const explainCommand = addOutputOptions(
         if (!response.ok) {
           process.stderr.write(
             `Could not fetch collection ${input} from ${baseUrl} — HTTP ${response.status}.\n` +
-              `Hint: the indexer's collection-by-id endpoint may not be wired on --network local.\n` +
+              `Hint: HTTP 401/403 usually means no API key — set BITBADGES_API_KEY or run \`bb settings set apiKey <key>\`.\n` +
               `Try passing the collection JSON directly (file or inline) instead of a numeric id.\n`
           );
           process.exit(2);

@@ -81,7 +81,7 @@ export const checkCommand = addNetworkOptions(
           emitError(
             new Error(
               `Could not fetch collection ${input} from ${baseUrl} — HTTP ${response.status}. ` +
-                'Hint: --network local may not have a wired collection-by-id endpoint.'
+                'Hint: HTTP 401/403 usually means no API key — set BITBADGES_API_KEY or run `bb settings set apiKey <key>`.'
             ),
             { code: 'fetch_failed', exitCode: 2 }
           );

@@ -123,6 +123,6 @@ export function registerPools(parent: Command): void {
 }
 
 export const poolsCommand = new Command('pools').description(
-  'Liquidity pool browser — list, show, by-denom, by-assets, batch.'
+  'Liquidity pool browser — list, show, by-denom, by-assets, batch. Requires API key.'
 );
 registerPools(poolsCommand);
