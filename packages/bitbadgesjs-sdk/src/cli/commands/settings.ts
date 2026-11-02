@@ -39,9 +39,21 @@ function emitOpts(opts: OutputFlags): EmitOptions {
   };
 }
 
-export const settingsCommand = new Command('settings').description(
-  'Manage CLI settings (~/.bitbadges/config.json)'
-);
+export const settingsCommand = new Command('settings')
+  .description('Manage CLI settings (~/.bitbadges/config.json)')
+  .addHelpText(
+    'after',
+    `
+Environment variables (take precedence over config-file values):
+  BITBADGES_API_KEY          Default API key (all networks)
+  BITBADGES_API_KEY_TESTNET  Testnet API key (checked before BITBADGES_API_KEY on --testnet)
+  BITBADGES_API_KEY_LOCAL    Local API key (checked before BITBADGES_API_KEY on --local)
+  BITBADGES_API_URL          Custom API base URL (overrides config url)
+  BITBADGES_CONFIG_DIR       Override the ~/.bitbadges config directory
+
+API key resolution: --api-key > network env var > BITBADGES_API_KEY > config file.
+Docs: https://docs.bitbadges.io/cli`
+  );
 
 // ── settings show ───────────────────────────────────────────────────────────
 
