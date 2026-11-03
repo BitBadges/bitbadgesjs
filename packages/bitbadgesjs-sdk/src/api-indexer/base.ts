@@ -50,6 +50,64 @@ export interface iBitBadgesApi<T extends NumberType> {
   appendedHeaders?: Record<string, string>;
 }
 
+const SENSITIVE_HEADERS = ['x-api-key', 'authorization', 'cookie', 'set-cookie', 'proxy-authorization'];
+
+function redactHeaderBag(headers: any) {
+  if (!headers || typeof headers !== 'object') return;
+  for (const key of Object.keys(headers)) {
+    const value = headers[key];
+    if (SENSITIVE_HEADERS.includes(key.toLowerCase())) {
+      headers[key] = '[REDACTED]';
+    } else if (value && typeof value === 'object' && ['common', 'get', 'post', 'put', 'patch', 'delete', 'head'].includes(key)) {
+      redactHeaderBag(value);
+    }
+  }
+}
+
+/**
+ * Redacts credentials from an axios-style error in place so it is safe to rethrow or log.
+ */
+export function redactErrorHeaders(error: any): void {
+  if (!error || typeof error !== 'object') return;
+  for (const holder of [error, error.response]) {
+    if (!holder || typeof holder !== 'object') continue;
+    if (holder.config) redactHeaderBag(holder.config.headers);
+    if ('request' in holder) {
+      try {
+        holder.request = undefined;
+      } catch {
+        // ignore non-writable
+      }
+    }
+  }
+  if (error.response) redactHeaderBag(error.response.headers);
+}
+
+function urlPath(url: unknown, baseURL?: unknown): string | undefined {
+  if (typeof url !== 'string') return undefined;
+  try {
+    return new URL(url, typeof baseURL === 'string' ? baseURL : 'http://localhost').pathname;
+  } catch {
+    return url.split('?')[0].split('#')[0];
+  }
+}
+
+/**
+ * Returns a minimal, credential-free summary of a failed API call.
+ */
+export function summarizeApiError(error: any): { status?: number; method?: string; path?: string; message: string } {
+  const config = error?.config ?? error?.response?.config;
+  const data = error?.response?.data;
+  const message =
+    (data && typeof data.errorMessage === 'string' && data.errorMessage) || (typeof error?.message === 'string' ? error.message : String(error));
+  return {
+    status: error?.response?.status,
+    method: typeof config?.method === 'string' ? config.method.toUpperCase() : undefined,
+    path: urlPath(config?.url, config?.baseURL),
+    message
+  };
+}
+
 /**
  * Base class for the BitBadges API. It provides a base axios instance and methods for handling API errors.
  *
@@ -93,7 +151,8 @@ export class BaseBitBadgesApi<T extends NumberType> {
   }
 
   async handleApiError(error: any): Promise<void> {
-    console.error(error);
+    redactErrorHeaders(error);
+    console.error(summarizeApiError(error));
 
     if (error && error.response && error.response.data) {
       const data: ErrorResponse = error.response.data;
