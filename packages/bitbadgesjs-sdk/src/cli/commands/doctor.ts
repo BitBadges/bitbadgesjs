@@ -53,7 +53,11 @@ export const doctorCommand = addNetworkOptions(
   try {
     const pathMod = await import('path');
     const fsMod = await import('fs');
-    const startFrom = pathMod.dirname(process.argv[1] || process.cwd());
+    // Resolve symlinks: npm/bun global installs invoke the CLI through a
+    // symlink in <prefix>/bin, which has no package.json above it.
+    const startFrom = pathMod.dirname(
+      process.argv[1] ? fsMod.realpathSync(process.argv[1]) : process.cwd()
+    );
     let dir = startFrom;
     let pkgPath: string | null = null;
     for (let i = 0; i < 8; i++) {
@@ -151,7 +155,11 @@ export const doctorCommand = addNetworkOptions(
   try {
     const fsMod = await import('fs');
     const pathMod = await import('path');
-    const startFrom = pathMod.dirname(process.argv[1] || process.cwd());
+    // Resolve symlinks: npm/bun global installs invoke the CLI through a
+    // symlink in <prefix>/bin, which has no package.json above it.
+    const startFrom = pathMod.dirname(
+      process.argv[1] ? fsMod.realpathSync(process.argv[1]) : process.cwd()
+    );
     let dir = startFrom;
     let pkgRoot: string | null = null;
     for (let i = 0; i < 8; i++) {
