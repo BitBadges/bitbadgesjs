@@ -32,6 +32,7 @@ import { evmToCosmosAddress } from '../../transactions/precompile/helpers.js';
 import { emit, emitError, bbError, BBErrorCode } from '../utils/envelope.js';
 import { emitDeprecation } from '../utils/deprecation.js';
 import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
+import { ensureTxWrapper } from '../utils/txInput.js';
 
 interface MsgEntry {
   typeUrl: string;
@@ -60,8 +61,26 @@ function readMsgInput(opts: { input?: string; msgFile?: string; msgStdin?: boole
   }
 }
 
-function normalizeMessages(input: unknown): MsgEntry[] {
-  const arr = Array.isArray(input) ? input : [input];
+/**
+ * Accept the same shapes as every other tx-taking command (see
+ * `ensureTxWrapper`): a bare Msg, an array of Msgs, a `{ messages: [...] }`
+ * tx body, or a `bb build` envelope. Previously only the first two worked, so
+ * `bb deploy --gen-payload --msg-file tx.json` rejected the exact file that
+ * `bb build … --output-file tx.json` writes.
+ */
+export function normalizeMessages(input: unknown): MsgEntry[] {
+  if (input && typeof input === 'object' && !Array.isArray(input) && (input as any).ok === false && 'error' in (input as any)) {
+    const e = (input as any).error;
+    throw bbError(
+      BBErrorCode.INVALID_INPUT,
+      `Input is an error envelope from a prior CLI step; refusing to build a payload. ${e?.code ? `[${e.code}] ` : ''}${e?.message ?? 'unknown error'}`
+    );
+  }
+  const wrapped = Array.isArray(input) ? input : ensureTxWrapper(input);
+  const arr = Array.isArray(wrapped) ? wrapped : Array.isArray(wrapped?.messages) ? wrapped.messages : [wrapped];
+  if (arr.length === 0) {
+    throw bbError(BBErrorCode.INVALID_INPUT, 'Input has an empty `messages` array; nothing to build a payload for.');
+  }
   for (const m of arr) {
     if (!m || typeof m !== 'object' || typeof (m as any).typeUrl !== 'string' || !(m as any).value) {
       throw bbError(BBErrorCode.INVALID_INPUT, 'Each message must be `{typeUrl: string, value: object}`. Received: ' + JSON.stringify(m));
