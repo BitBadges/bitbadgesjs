@@ -264,9 +264,12 @@ export const doctorCommand = addNetworkOptions(
           ]
         }
       };
+      const { resolveOptionalApiKey } = await import('./preview.js');
+      const previewKey = resolveOptionalApiKey(opts as any);
+      const keyHeader: Record<string, string> = previewKey ? { 'x-api-key': previewKey } : {};
       const postRes = await fetch(`${baseUrl}/api/v0/builder/preview`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...keyHeader },
         body: JSON.stringify(probeTx)
       });
       if (!postRes.ok) {
@@ -277,7 +280,7 @@ export const doctorCommand = addNetworkOptions(
         });
       } else {
         const { code } = (await postRes.json()) as { code: string };
-        const getRes = await fetch(`${baseUrl}/api/v0/builder/preview?code=${encodeURIComponent(code)}`);
+        const getRes = await fetch(`${baseUrl}/api/v0/builder/preview?code=${encodeURIComponent(code)}`, { headers: keyHeader });
         if (!getRes.ok) {
           checks.push({
             name: `Preview roundtrip (${network})`,

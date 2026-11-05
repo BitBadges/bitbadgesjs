@@ -5,7 +5,7 @@
  * territory; no runCli in unit specs, per project convention).
  */
 
-import { previewCommand, ensureTxWrapper, resolveFrontendBaseForCli } from './preview.js';
+import { previewCommand, ensureTxWrapper, resolveFrontendBaseForCli, resolveOptionalApiKey } from './preview.js';
 
 describe('preview ensureTxWrapper', () => {
   it('returns a {messages:[...]} body unchanged', () => {
@@ -83,3 +83,27 @@ describe('frontend base follows the network', () => {
   });
 });
 
+
+describe('preview upload API key', () => {
+  const originalEnv = { ...process.env };
+  afterEach(() => {
+    process.env = { ...originalEnv };
+  });
+
+  it('prefers an explicit --api-key', () => {
+    process.env.BITBADGES_API_KEY = 'env-key';
+    expect(resolveOptionalApiKey({ apiKey: 'flag-key' })).toBe('flag-key');
+  });
+
+  it('falls back to BITBADGES_API_KEY', () => {
+    process.env.BITBADGES_API_KEY = 'env-key';
+    expect(resolveOptionalApiKey({})).toBe('env-key');
+  });
+
+  it('returns undefined instead of throwing when no key is configured', () => {
+    delete process.env.BITBADGES_API_KEY;
+    delete process.env.BITBADGES_API_KEY_LOCAL;
+    process.env.BITBADGES_CONFIG_DIR = require('fs').mkdtempSync(require('path').join(require('os').tmpdir(), 'bb-noconfig-'));
+    expect(resolveOptionalApiKey({ network: 'local' })).toBeUndefined();
+  });
+});

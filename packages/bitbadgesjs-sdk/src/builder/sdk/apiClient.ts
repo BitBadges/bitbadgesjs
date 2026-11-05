@@ -83,7 +83,7 @@ export async function apiRequest<T>(
     return {
       success: false,
       error:
-        'No BitBadges API key. Get one at https://bitbadges.io/developer, then set BITBADGES_API_KEY or run `bb settings set apiKey <key>`. A local indexer needs no key. You do NOT need a key to build: every set_*/add_* session tool, validate_transaction, review_collection, get_transaction, and get_review_url work without one.'
+        'No BitBadges API key. Get one at https://bitbadges.io/developer, then set BITBADGES_API_KEY or run `bb settings set apiKey <key>`. A local indexer needs no key. You do NOT need a key to build: every set_*/add_* session tool, validate_transaction, review_collection, and get_transaction work without one (get_review_url needs a key to upload).'
     };
   }
 

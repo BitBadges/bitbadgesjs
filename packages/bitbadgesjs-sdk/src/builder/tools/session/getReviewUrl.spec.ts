@@ -1,6 +1,6 @@
 /**
  * `get_review_url` — the last step of an agent build. Uploads the session
- * transaction to the open preview endpoint and returns a SHORT link the
+ * transaction to the preview endpoint (API key required except locally) and returns a SHORT link the
  * user opens to review + sign on bitbadges.io. Short on purpose: an LLM
  * relaying a multi-KB `#tx=` hash URL would corrupt it.
  */
@@ -17,6 +17,7 @@ describe('handleGetReviewUrl', () => {
     calls = [];
     delete process.env.BITBADGES_API_URL;
     delete process.env.BITBADGES_FRONTEND_URL;
+    process.env.BITBADGES_API_KEY = 'test-key';
     (global as any).fetch = jest.fn(async (url: string, init: any) => {
       calls.push({ url, init });
       return {
@@ -67,6 +68,30 @@ describe('handleGetReviewUrl', () => {
     const res = await handleGetReviewUrl({ transaction: { messages: [{ typeUrl: '/tokenization.MsgCreateCollection', value: {} }] } });
     expect(res.success).toBe(false);
     expect(res.error).toMatch(/503/);
+  });
+
+  it('sends the configured API key, since the indexer gates /builder/preview', async () => {
+    const res = await handleGetReviewUrl({ transaction: { messages: [{ typeUrl: '/tokenization.MsgCreateCollection', value: {} }] } });
+    expect(res.success).toBe(true);
+    expect(calls[0].init.headers['x-api-key']).toBe('test-key');
+  });
+
+  it('explains the missing key without calling the network when no key is configured', async () => {
+    delete process.env.BITBADGES_API_KEY;
+    process.env.BITBADGES_CONFIG_DIR = require('fs').mkdtempSync(require('path').join(require('os').tmpdir(), 'bb-noconfig-'));
+    const res = await handleGetReviewUrl({ transaction: { messages: [{ typeUrl: '/tokenization.MsgCreateCollection', value: {} }] } });
+    expect(res.success).toBe(false);
+    expect(res.error).toMatch(/needs a BitBadges API key/);
+    expect(calls).toHaveLength(0);
+  });
+
+  it('uploads to a local indexer without a key', async () => {
+    delete process.env.BITBADGES_API_KEY;
+    process.env.BITBADGES_CONFIG_DIR = require('fs').mkdtempSync(require('path').join(require('os').tmpdir(), 'bb-noconfig-'));
+    process.env.BITBADGES_API_URL = 'http://localhost:3001';
+    const res = await handleGetReviewUrl({ transaction: { messages: [{ typeUrl: '/tokenization.MsgCreateCollection', value: {} }] } });
+    expect(res.success).toBe(true);
+    expect(calls[0].init.headers['x-api-key']).toBeUndefined();
   });
 
   it('rejects an empty transaction without calling the network', async () => {
