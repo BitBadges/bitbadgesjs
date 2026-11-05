@@ -30,3 +30,17 @@ describe('doctorCommand shape', () => {
     );
   });
 });
+
+describe('doctor config file path', () => {
+  const originalDir = process.env.BITBADGES_CONFIG_DIR;
+  afterEach(() => {
+    if (originalDir === undefined) delete process.env.BITBADGES_CONFIG_DIR;
+    else process.env.BITBADGES_CONFIG_DIR = originalDir;
+  });
+
+  it('resolves the config path from BITBADGES_CONFIG_DIR, like every config read', async () => {
+    process.env.BITBADGES_CONFIG_DIR = '/tmp/bb-isolated-agent';
+    const { configPath } = await import('../utils/config.js');
+    expect(configPath()).toBe('/tmp/bb-isolated-agent/config.json');
+  });
+});
