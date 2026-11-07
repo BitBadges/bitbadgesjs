@@ -79,8 +79,8 @@ Full walkthrough, tool reference, and skill instructions:
 
 For non-AI workflows, import the message builders directly — see the Quick Start below.
 
-The package ships three bins:
-- `bitbadges` / `bitbadges-cli` — CLI for builds, standard actions, checks,
+The package ships these bins:
+- `bitbadges` / `bitbadges-cli` / `bb` — CLI for builds, standard actions, checks,
   simulation, signing requests, API access and developer discovery.
   Run `bitbadges-cli --help-json` for the installed command tree.
 - `bitbadges-builder` — the stdio MCP server (entry point: `src/builder/index.ts`)

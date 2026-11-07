@@ -70,6 +70,7 @@
   "bin": {
     "bitbadges": "dist/cjs/cli/index.js",
     "bitbadges-cli": "dist/cjs/cli/index.js",
+    "bb": "dist/cjs/cli/index.js",
     "bitbadges-builder": "dist/cjs/builder/index.js"
   },
   "typesVersions": {
