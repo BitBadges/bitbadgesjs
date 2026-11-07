@@ -287,7 +287,9 @@ export interface SearchResponse {
 }
 
 export async function search(request: SearchRequest, config?: ApiClientConfig): Promise<ApiResponse<SearchResponse>> {
-  return apiRequest<SearchResponse>('/api/v0/search', 'POST', request, config);
+  // Indexer route is POST /api/v0/search/:searchValue (BitBadgesApiRoutes.SearchRoute).
+  // POST /api/v0/search with searchValue only in the body 404s.
+  return apiRequest<SearchResponse>(`/api/v0/search/${request.searchValue}`, 'POST', request, config);
 }
 
 // ============================================
