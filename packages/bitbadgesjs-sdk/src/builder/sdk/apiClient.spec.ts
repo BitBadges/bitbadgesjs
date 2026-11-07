@@ -4,7 +4,7 @@
  * query tools, and the error text pointed at a local flag that did not help —
  * a loop an agent cannot break out of.
  */
-import { isLocalApiUrl } from './apiClient.js';
+import { isLocalApiUrl, search } from './apiClient.js';
 
 describe('isLocalApiUrl', () => {
   it('recognises the local indexer', () => {
@@ -24,5 +24,36 @@ describe('isLocalApiUrl', () => {
   it('is not fooled by a hostname that merely contains localhost', () => {
     expect(isLocalApiUrl('https://localhost.evil.com')).toBe(false);
     expect(isLocalApiUrl('https://notlocalhost:3001')).toBe(false);
+  });
+});
+
+describe('search', () => {
+  const originalFetch = global.fetch;
+  let calls: Array<{ url: string; init: any }> = [];
+
+  beforeEach(() => {
+    calls = [];
+    (global as any).fetch = jest.fn(async (url: string, init: any) => {
+      calls.push({ url, init });
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ collections: [] }),
+        text: async () => ''
+      };
+    });
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it('POSTs to /api/v0/search/:searchValue, the indexer route', async () => {
+    const res = await search({ searchValue: 'BitBadges' }, { apiKey: 'test-key', apiUrl: 'https://api.bitbadges.io' });
+
+    expect(res.success).toBe(true);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toBe('https://api.bitbadges.io/api/v0/search/BitBadges');
+    expect(calls[0].init.method).toBe('POST');
   });
 });
