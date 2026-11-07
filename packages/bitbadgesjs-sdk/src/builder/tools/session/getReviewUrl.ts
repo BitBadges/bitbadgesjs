@@ -1,11 +1,11 @@
 /**
  * Tool: get_review_url
- * Upload the built transaction to the open preview endpoint and return a
+ * Upload the built transaction to the preview endpoint and return a
  * short bitbadges.io link where the user reviews and signs it. This is the
  * dev-first handoff: the agent builds, the site only reviews + signs.
  */
 import { z } from 'zod';
-import { getApiUrl } from '../../sdk/apiClient.js';
+import { getApiKey, getApiUrl, isLocalApiUrl } from '../../sdk/apiClient.js';
 import { getTransaction as getTransactionFromSession, ensureStringNumbers } from '../../session/sessionState.js';
 import { normalizeTxMessages } from '../../../cli/utils/normalizeMsg.js';
 import { buildReviewUrlFromCode } from '../../handoff.js';
@@ -36,7 +36,7 @@ export interface GetReviewUrlResult {
 export const getReviewUrlTool = {
   name: 'get_review_url',
   description:
-    'FINAL STEP after building: upload the transaction and get a short bitbadges.io link the user opens to review and sign it with their wallet. Give the user `reviewUrl`. Uses the current session transaction unless `transaction` is passed. No API key needed. Links expire after 1 hour.',
+    'FINAL STEP after building: upload the transaction and get a short bitbadges.io link the user opens to review and sign it with their wallet. Give the user `reviewUrl`. Uses the current session transaction unless `transaction` is passed. Uploading needs a BitBadges API key (BITBADGES_API_KEY or `bb settings set apiKey`) except against a local indexer; the person opening the link needs none. Links expire after 1 hour.',
   inputSchema: {
     type: 'object' as const,
     properties: {
@@ -66,12 +66,23 @@ export async function handleGetReviewUrl(input: GetReviewUrlInput): Promise<GetR
     };
   }
 
-  const url = `${getApiUrl()}/api/v0/builder/preview`;
+  const apiUrl = getApiUrl();
+  const url = `${apiUrl}/api/v0/builder/preview`;
+  // The indexer gates /builder/preview behind an API key (premiumOnlyHandler).
+  // Send the configured key; without one only a local indexer accepts the upload.
+  const apiKey = getApiKey();
+  if (!apiKey && !isLocalApiUrl(apiUrl)) {
+    return {
+      success: false,
+      error:
+        'get_review_url needs a BitBadges API key to upload the preview. Get one at https://bitbadges.io/developer, then set BITBADGES_API_KEY or run `bb settings set apiKey <key>`. Without a key, hand off with get_transaction and paste the JSON at https://bitbadges.io/mint/local-builder.'
+    };
+  }
   let res: Response;
   try {
     res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(apiKey ? { 'x-api-key': apiKey } : {}) },
       body: JSON.stringify({ transaction: { messages, ...(transaction.memo ? { memo: transaction.memo } : {}) } })
     });
   } catch (err: any) {

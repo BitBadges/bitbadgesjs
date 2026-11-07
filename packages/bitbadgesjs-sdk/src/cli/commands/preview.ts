@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { addNetworkOptions } from '../utils/io.js';
 import { addOutputOptions, emit, emitError, commentary } from '../utils/envelope.js';
+import { resolveApiKey } from '../utils/api-client.js';
 
 import { ensureTxWrapper } from '../utils/txInput.js';
 export { ensureTxWrapper };
@@ -20,6 +21,20 @@ export function resolveFrontendBaseForCli(opts: { network?: string; local?: bool
   if (opts.network === 'local' || opts.local) return 'http://localhost:3000';
   if (opts.network === 'testnet' || opts.testnet) return 'https://testnet.bitbadges.io';
   return 'https://bitbadges.io';
+}
+
+/**
+ * API key for the preview upload, or undefined when none is configured.
+ * Same resolution order as every other keyed command (flag, network env var,
+ * BITBADGES_API_KEY, config), but never throws: a local indexer needs no key.
+ */
+export function resolveOptionalApiKey(opts: { apiKey?: string; network?: string; local?: boolean; testnet?: boolean }): string | undefined {
+  const network = opts.network === 'local' || opts.local ? 'local' : opts.network === 'testnet' || opts.testnet ? 'testnet' : 'mainnet';
+  try {
+    return resolveApiKey(opts.apiKey, network) || undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export const previewCommand = addOutputOptions(
@@ -82,15 +97,17 @@ export const previewCommand = addOutputOptions(
       }
     };
 
-    // Direct fetch — apiRequest() requires an API key, but the preview
-    // endpoint is intentionally open.
+    // Direct fetch. The indexer gates /builder/preview behind an API key
+    // (premiumOnlyHandler), so send the configured key when there is one.
+    // A local indexer accepts the upload without a key.
     const apiUrl = getApiUrl(opts);
     const url = `${apiUrl}/api/v0/builder/preview`;
+    const apiKey = resolveOptionalApiKey(opts);
     let response: Response;
     try {
       response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(apiKey ? { 'x-api-key': apiKey } : {}) },
         body: JSON.stringify(payload)
       });
     } catch (err) {
@@ -99,6 +116,14 @@ export const previewCommand = addOutputOptions(
 
     if (!response!.ok) {
       const text = await response!.text().catch(() => '');
+      if (response!.status === 401 && !apiKey) {
+        emitError(
+          new Error(
+            'Preview upload needs a BitBadges API key. Pass --api-key, run `bb settings set apiKey <key>`, or set BITBADGES_API_KEY. Without a key, paste the tx JSON at https://bitbadges.io/mint/local-builder instead.'
+          ),
+          { code: 'missing_api_key', exitCode: 2 }
+        );
+      }
       emitError(new Error(`Preview upload failed: HTTP ${response!.status} ${text}`), { code: 'preview_upload_failed', exitCode: 2 });
     }
 
