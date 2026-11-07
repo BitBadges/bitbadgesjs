@@ -19,11 +19,11 @@ export interface Config {
 // fight ts-jest's process.env / os.homedir() coupling (which doesn't
 // re-read HOME inside the worker after import). Production callers leave
 // the env var unset and pick up ~/.bitbadges.
-function configDir(): string {
+export function configDir(): string {
   if (process.env.BITBADGES_CONFIG_DIR) return process.env.BITBADGES_CONFIG_DIR;
   return path.join(os.homedir(), '.bitbadges');
 }
-function configPath(): string {
+export function configPath(): string {
   return path.join(configDir(), 'config.json');
 }
 

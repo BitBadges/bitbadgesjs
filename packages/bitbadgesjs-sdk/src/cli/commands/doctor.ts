@@ -94,9 +94,9 @@ export const doctorCommand = addNetworkOptions(
   // 3. Config file
   try {
     const fsMod = await import('fs');
-    const pathMod = await import('path');
-    const osMod = await import('os');
-    const configPath = pathMod.join(osMod.homedir(), '.bitbadges', 'config.json');
+    // Same resolution as every config read/write (honors BITBADGES_CONFIG_DIR).
+    const { configPath: resolveConfigPath } = await import('../utils/config.js');
+    const configPath = resolveConfigPath();
     if (fsMod.existsSync(configPath)) {
       try {
         JSON.parse(fsMod.readFileSync(configPath, 'utf-8'));
@@ -105,7 +105,7 @@ export const doctorCommand = addNetworkOptions(
         checks.push({ name: 'Config file', status: 'fail', detail: `${configPath} exists but is not valid JSON` });
       }
     } else {
-      checks.push({ name: 'Config file', status: 'skip', detail: 'no ~/.bitbadges/config.json (env vars also OK)' });
+      checks.push({ name: 'Config file', status: 'skip', detail: `no ${configPath} (env vars also OK)` });
     }
   } catch (err) {
     checks.push({ name: 'Config file', status: 'fail', detail: (err as Error).message });
