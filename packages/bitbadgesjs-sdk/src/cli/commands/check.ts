@@ -97,11 +97,12 @@ export const checkCommand = addNetworkOptions(
       try {
         raw = readJsonInput(input);
       } catch (err: any) {
+        // readJsonInput already ends its parse error with its own "Accepts:"
+        // hint; drop it so the message names the accepted inputs once.
+        const detail = String(err?.message || err).replace(/\s*Accepts:[\s\S]*$/, '').replace(/\.+$/, '');
+        const reason = detail.startsWith('Failed to parse') ? detail : `Failed to parse input JSON: ${detail}`;
         emitError(
-          new Error(
-            `Failed to parse input JSON: ${err?.message || err}. ` +
-              'Accepts: file path, @file.json, inline JSON, numeric collection id, or - for stdin.'
-          ),
+          new Error(`${reason}. Accepts: file path, @file.json, inline JSON, numeric collection id, or - for stdin.`),
           { code: 'invalid_input', exitCode: 2 }
         );
       }

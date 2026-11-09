@@ -56,9 +56,11 @@ export const explainCommand = addOutputOptions(
           data = data.data;
         }
       } catch (err: any) {
+        // See check.ts: strip readJsonInput's own "Accepts:" hint before adding ours.
+        const detail = String(err?.message || err).replace(/\s*Accepts:[\s\S]*$/, '').replace(/\.+$/, '');
+        const reason = detail.startsWith('Failed to parse') ? detail : `Failed to parse input JSON: ${detail}`;
         process.stderr.write(
-          `Failed to parse input JSON: ${err?.message || err}.\n` +
-            `Accepts: file path, @file.json, inline JSON, numeric collection id, or - for stdin.\n`
+          `${reason}.\n` + `Accepts: file path, @file.json, inline JSON, numeric collection id, or - for stdin.\n`
         );
         process.exit(2);
       }
