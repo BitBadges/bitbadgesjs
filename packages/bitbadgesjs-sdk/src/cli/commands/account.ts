@@ -213,19 +213,40 @@ const DEFAULT_ALL_CHAIN_IDS: readonly string[] = [
   '137'
 ];
 
-async function safeCall<T>(label: string, fn: () => Promise<T>): Promise<T | { error: string }> {
+async function safeCall<T>(label: string, fn: () => Promise<T>): Promise<T | { error: string; code?: string }> {
   try {
     return await fn();
   } catch (err) {
-    const e = err as { response?: unknown; message?: string };
+    const e = err as { response?: unknown; message?: string; code?: string };
     const msg =
       e?.response !== undefined
         ? typeof e.response === 'string'
           ? e.response
           : JSON.stringify(e.response)
         : (e?.message ?? String(err));
-    return { error: `${label}: ${msg}` };
+    return typeof e?.code === 'string' ? { error: `${label}: ${msg}`, code: e.code } : { error: `${label}: ${msg}` };
   }
+}
+
+function isSectionError(v: unknown): v is { error: string; code?: string } {
+  return !!v && typeof v === 'object' && typeof (v as { error?: unknown }).error === 'string';
+}
+
+/**
+ * Flatten the `all` aggregator's results into leaf sections (tokens and
+ * activity fan out into three each) and split the failed ones out, so the
+ * caller can fail loudly when nothing succeeded and warn when some did.
+ */
+export function summarizeSectionErrors(results: unknown[]): { total: number; failed: { error: string; code?: string }[] } {
+  const leaves: unknown[] = [];
+  for (const r of results) {
+    if (r && typeof r === 'object' && !isSectionError(r) && ('collected' in r || 'transfers' in r)) {
+      leaves.push(...Object.values(r as Record<string, unknown>));
+    } else {
+      leaves.push(r);
+    }
+  }
+  return { total: leaves.length, failed: leaves.filter(isSectionError) };
 }
 
 // ── parent ──────────────────────────────────────────────────────────────────
@@ -331,7 +352,7 @@ addOutputFlags(
       .description(
         [
           'Lean BitBadges-standard balance docs. Wraps GET /account/:addr/balances.',
-          "Use 'bb portfolio assets' for fungible / swap-merged balances."
+          "Use 'bb account assets' for fungible / swap-merged balances."
         ].join('\n  ')
       )
       .requiredOption('--address <addr>', 'Address to look up (bb1.../0x — auto-normalized to bb1)')
@@ -596,7 +617,23 @@ addOutputFlags(
     for (let i = 0; i < work.length; i++) {
       out[work[i].key] = results[i];
     }
-    emit(out, opts);
+    const { total, failed } = summarizeSectionErrors(results);
+    if (total > 0 && failed.length === total) {
+      // Every section failed (e.g. no API key): an ok:true envelope with
+      // exit 0 reads as success to an agent, so fail like the single-section
+      // subcommands do. Keep the per-section errors in meta for debugging.
+      const codes = [...new Set(failed.map((f) => f.code).filter(Boolean))];
+      emitErrorEnv(
+        { message: `every section failed. First error: ${failed[0].error}`, code: codes.length === 1 ? codes[0] : undefined },
+        { condensed: opts.condensed, meta: out }
+      );
+    }
+    emitEnv(out, {
+      ...opts,
+      warnings: failed.length
+        ? failed.map((f) => ({ code: f.code ?? 'section_failed', message: f.error }))
+        : undefined
+    });
   } catch (err) {
     emitError(err);
   }
