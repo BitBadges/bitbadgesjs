@@ -4,7 +4,7 @@
  * query tools, and the error text pointed at a local flag that did not help —
  * a loop an agent cannot break out of.
  */
-import { isLocalApiUrl, search } from './apiClient.js';
+import { getBalance, isLocalApiUrl, search } from './apiClient.js';
 
 describe('isLocalApiUrl', () => {
   it('recognises the local indexer', () => {
@@ -55,5 +55,33 @@ describe('search', () => {
     expect(calls).toHaveLength(1);
     expect(calls[0].url).toBe('https://api.bitbadges.io/api/v0/search/BitBadges');
     expect(calls[0].init.method).toBe('POST');
+  });
+});
+
+describe('getBalance', () => {
+  const originalFetch = global.fetch;
+  let calls: Array<{ url: string; init: any }> = [];
+  const doc = { balances: [{ amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: [] }], collectionId: '1' };
+
+  beforeEach(() => {
+    calls = [];
+    (global as any).fetch = jest.fn(async (url: string, init: any) => {
+      calls.push({ url, init });
+      return { ok: true, status: 200, json: async () => doc, text: async () => JSON.stringify(doc) };
+    });
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it('GETs /api/v0/collection/:id/balance/:address and wraps the doc as { balance }', async () => {
+    const res = await getBalance('1', 'bb1abc', { apiKey: 'test-key', apiUrl: 'https://api.bitbadges.io' });
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url).toBe('https://api.bitbadges.io/api/v0/collection/1/balance/bb1abc');
+    expect(calls[0].init.method).toBe('GET');
+    expect(res.success).toBe(true);
+    expect(res.data?.balance.balances[0].amount).toBe('1');
   });
 });

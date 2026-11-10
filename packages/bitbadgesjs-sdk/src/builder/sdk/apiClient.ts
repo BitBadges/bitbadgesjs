@@ -180,7 +180,17 @@ export interface BalanceResponse {
 }
 
 export async function getBalance(collectionId: string, address: string, config?: ApiClientConfig): Promise<ApiResponse<BalanceResponse>> {
-  return apiRequest<BalanceResponse>(`/api/v0/collections/${collectionId}/balance/${address}`, 'POST', {}, config);
+  // The indexer serves this as GET /collection/{id}/balance/{address} and
+  // returns the balance document itself. The old POST /collections/... path
+  // does not exist and 404'd on every call, so wrap the doc in the
+  // `{ balance }` shape callers (query_balance) already expect.
+  const res = await apiRequest<BalanceResponse['balance']>(
+    `/api/v0/collection/${encodeURIComponent(collectionId)}/balance/${encodeURIComponent(address)}`,
+    'GET',
+    undefined,
+    config
+  );
+  return res.success ? { ...res, data: { balance: res.data as BalanceResponse['balance'] } } : { success: false, error: res.error };
 }
 
 export interface TokenBalanceResponse {
