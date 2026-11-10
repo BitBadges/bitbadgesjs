@@ -9,7 +9,7 @@
  * `cli/index.ts` and verified in cli-core / cli-discovery specs.
  */
 
-import { accountCommand } from './account.js';
+import { accountCommand, summarizeSectionErrors } from './account.js';
 
 function getSub(name: string) {
   const sub = accountCommand.commands.find((c) => c.name() === name);
@@ -138,5 +138,19 @@ describe('accountCommand shape', () => {
         expect(flags).toContain(f);
       }
     }
+  });
+});
+
+describe('summarizeSectionErrors (bb account all)', () => {
+  it('counts nested tokens/activity leaves and flags all-failed', () => {
+    const err = { error: 'x: No API key', code: 'missing_api_key' };
+    const r = summarizeSectionErrors([err, { collected: err, created: err, managing: err }, { transfers: err, claims: err, points: err }]);
+    expect(r.total).toBe(7);
+    expect(r.failed).toHaveLength(7);
+  });
+  it('reports partial failures without counting successes', () => {
+    const r = summarizeSectionErrors([{ user: {} }, { collected: { tokens: [] }, created: { error: 'created: 500' }, managing: { tokens: [] } }]);
+    expect(r.total).toBe(4);
+    expect(r.failed.map((f) => f.error)).toEqual(['created: 500']);
   });
 });
