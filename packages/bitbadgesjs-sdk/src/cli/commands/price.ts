@@ -59,14 +59,13 @@ async function resolveDenoms(inputs: string[], opts: PriceFlags): Promise<{ inpu
       out.push({ input, denom: input });
       continue;
     }
-    try {
-      const res = await callApi('GET', `/assetPairs/search?query=${encodeURIComponent(input)}`, opts);
-      const arr: AssetPairRow[] = Array.isArray(res?.assetPairs) ? res.assetPairs : [];
-      const exact = arr.find((p) => p.symbol?.toUpperCase() === input.toUpperCase());
-      out.push({ input, denom: (exact ?? arr[0])?.asset });
-    } catch {
-      out.push({ input, denom: undefined });
-    }
+    // Let request failures (no API key, network, 5xx) reach the caller's
+    // catch. Swallowing them here reported "unresolved" with ok:true, which
+    // sent agents hunting for a different symbol instead of fixing the key.
+    const res = await callApi('GET', `/assetPairs/search?query=${encodeURIComponent(input)}`, opts);
+    const arr: AssetPairRow[] = Array.isArray(res?.assetPairs) ? res.assetPairs : [];
+    const exact = arr.find((p) => p.symbol?.toUpperCase() === input.toUpperCase());
+    out.push({ input, denom: (exact ?? arr[0])?.asset });
   }
   return out;
 }
@@ -113,7 +112,7 @@ cross-chain assets not on BitBadges chain, use \`bb swap\` (Skip:Go-backed).
     try {
       resolved = await resolveDenoms(inputs, opts);
     } catch (err: any) {
-      const env = errorEnvelope('INDEXER_ERROR', `indexer search failed: ${err?.message ?? 'unknown error'}`);
+      const env = errorEnvelope(err?.code ?? 'INDEXER_ERROR', `indexer search failed: ${err?.message ?? 'unknown error'}`);
       writeJsonEnvelope(env);
       process.exit(1);
     }
@@ -126,7 +125,7 @@ cross-chain assets not on BitBadges chain, use \`bb swap\` (Skip:Go-backed).
         const res = await callApi('POST', '/assetPairs/byDenoms', opts, { denoms: denomsToFetch });
         pairs = Array.isArray(res?.assetPairs) ? res.assetPairs : [];
       } catch (err: any) {
-        const env = errorEnvelope('INDEXER_ERROR', `byDenoms failed: ${err?.message ?? 'unknown error'}`);
+        const env = errorEnvelope(err?.code ?? 'INDEXER_ERROR', `byDenoms failed: ${err?.message ?? 'unknown error'}`);
         writeJsonEnvelope(env);
         process.exit(1);
       }
