@@ -4,6 +4,7 @@ import { Command, Help } from 'commander';
 import { HELP_GROUP_ORDER } from './utils/help-groups.js';
 import { emitDeprecation } from './utils/deprecation.js';
 import { getCliPackageVersion } from './utils/package-version.js';
+import { resolveHelpJsonScope } from './utils/help-json-scope.js';
 import { emitError } from './utils/envelope.js';
 
 // Apply a custom Help subclass globally so every command + sub-subcommand
@@ -665,9 +666,11 @@ function extractCommandTree(cmd: Command): any {
 }
 
 if (process.argv.includes('--help-json')) {
-  const tree = {
-    commands: program.commands.map((cmd) => extractCommandTree(cmd))
-  };
+  const scope = resolveHelpJsonScope(program, process.argv.slice(2));
+  const target = scope[scope.length - 1];
+  const tree = target
+    ? { path: scope.map((c) => c.name()).join(' '), commands: [extractCommandTree(target)] }
+    : { commands: program.commands.map((cmd) => extractCommandTree(cmd)) };
   // Pretty-print only for interactive readers (humans on a TTY). Pipes,
   // spawnSync collectors, agentic shells get the compact form so the
   // output fits in standard maxBuffer (~1MB). Pretty-printed tree is
