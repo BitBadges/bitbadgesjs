@@ -7277,6 +7277,170 @@ paths:
         - apiKey: []
       x-internal: false
 
+  /notifications:
+    get:
+      operationId: getNotifications
+      summary: Get my notification inbox
+      tags:
+        - Accounts
+      description: Requires an API key and a signed-in session or supported bearer
+        token with Full Access scope. Every read and mutation is scoped to the
+        authenticated wallet; no caller-supplied recipient can access another
+        inbox. API key alone is insufficient. CLI users must explicitly opt in
+        with --with-session. Returns up to 25 entries, newest first by creation
+        time and event ID. Pass the opaque returned bookmark unchanged for the
+        next page; stop when hasMore is false. Private transfer source activity is
+        omitted.
+      x-sdk-class: BitBadgesAdminAPI
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/iGetNotificationsSuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
+      security:
+        - apiKey: []
+          userSignedIn: []
+      x-internal: false
+      parameters:
+        - in: query
+          name: bookmark
+          required: false
+          description: Opaque base64url bookmark from the preceding response.
+          schema:
+            type: string
+            maxLength: 2048
+        - in: query
+          name: unreadOnly
+          required: false
+          description: Only return unread entries when true.
+          schema:
+            type: boolean
+            default: false
+        - in: query
+          name: types
+          required: false
+          description: "Repeat the key for multiple categories: types=bank_send&types=claim."
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - transfer
+                - bank_send
+                - claim
+                - list
+                - system
+                - intent_satisfied
+  /notifications/unreadCount:
+    get:
+      operationId: getUnreadNotificationCount
+      summary: Get my unread notification count
+      tags:
+        - Accounts
+      description: Requires an API key and a signed-in session or supported bearer
+        token with Full Access scope. Every read and mutation is scoped to the
+        authenticated wallet; no caller-supplied recipient can access another
+        inbox. API key alone is insufficient. CLI users must explicitly opt in
+        with --with-session.
+      x-sdk-class: BitBadgesAdminAPI
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/iGetUnreadNotificationCountSuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
+      security:
+        - apiKey: []
+          userSignedIn: []
+      x-internal: false
+  /notifications/read:
+    post:
+      operationId: markNotificationsRead
+      summary: Update my notification read state
+      tags:
+        - Accounts
+      description: Requires an API key and a signed-in session or supported bearer
+        token with Full Access scope. Every read and mutation is scoped to the
+        authenticated wallet; no caller-supplied recipient can access another
+        inbox. API key alone is insufficient. CLI users must explicitly opt in
+        with --with-session.
+      x-sdk-class: BitBadgesAdminAPI
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/iMarkNotificationsReadSuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
+      security:
+        - apiKey: []
+          userSignedIn: []
+      x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/iMarkNotificationsReadPayload"
+  /notifications/preferences:
+    post:
+      operationId: updateNotificationPreferences
+      summary: Update my notification preferences
+      tags:
+        - Accounts
+      description: Requires an API key and a signed-in session or supported bearer
+        token with Full Access scope. Every read and mutation is scoped to the
+        authenticated wallet; no caller-supplied recipient can access another
+        inbox. API key alone is insufficient. CLI users must explicitly opt in
+        with --with-session.
+      x-sdk-class: BitBadgesAdminAPI
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/iUpdateNotificationPreferencesSuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerErrorResponse"
+      security:
+        - apiKey: []
+          userSignedIn: []
+      x-internal: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/iUpdateNotificationPreferencesPayload"
+
 components:
   responses:
     ErrorResponse:
@@ -7331,3 +7495,200 @@ components:
       type: http
       scheme: cookie
       description: User must be signed in with correct OAuth scopes and must be the owner of the requested object.
+
+  schemas:
+    iNotificationDoc:
+      type: object
+      properties:
+        _docId:
+          type: string
+        _id:
+          type: string
+        bitbadgesAddress:
+          type: string
+        type:
+          type: string
+          enum:
+            - transfer
+            - bank_send
+            - claim
+            - list
+            - system
+            - intent_satisfied
+        read:
+          type: boolean
+        createdAt:
+          $ref: "#/components/schemas/NumberType"
+        title:
+          type: string
+        message:
+          type: string
+        link:
+          type: string
+        collectionId:
+          $ref: "#/components/schemas/NumberType"
+        address:
+          type: string
+        payload:
+          type: object
+          properties:
+            activity:
+              $ref: "#/components/schemas/iTransferActivityDoc"
+            bankSend:
+              type: object
+              properties:
+                fromAddress:
+                  type: string
+                toAddress:
+                  type: string
+                amount:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      amount:
+                        type: string
+                        pattern: ^[0-9]+$
+                      denom:
+                        type: string
+                    required:
+                      - amount
+                      - denom
+                txHash:
+                  type: string
+              required:
+                - fromAddress
+                - toAddress
+                - amount
+            intentSatisfied:
+              type: object
+              properties:
+                approvalId:
+                  type: string
+                approverAddress:
+                  type: string
+                filler:
+                  type: string
+                collectionId:
+                  $ref: "#/components/schemas/NumberType"
+                txHash:
+                  type: string
+                coins:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      amount:
+                        type: string
+                        pattern: ^[0-9]+$
+                      denom:
+                        type: string
+                    required:
+                      - amount
+                      - denom
+                tokenIds:
+                  type: string
+                legCount:
+                  type: integer
+                  minimum: 0
+              required:
+                - approvalId
+                - approverAddress
+                - filler
+                - collectionId
+                - coins
+                - legCount
+            extra:
+              type: object
+              additionalProperties:
+                type: string
+      required:
+        - _docId
+        - bitbadgesAddress
+        - type
+        - read
+        - createdAt
+        - title
+    iGetNotificationsSuccessResponse:
+      type: object
+      properties:
+        notifications:
+          type: array
+          maxItems: 25
+          items:
+            $ref: "#/components/schemas/iNotificationDoc"
+        pagination:
+          type: object
+          properties:
+            bookmark:
+              type: string
+            hasMore:
+              type: boolean
+          required:
+            - bookmark
+            - hasMore
+      required:
+        - notifications
+        - pagination
+    iGetUnreadNotificationCountSuccessResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+          minimum: 0
+      required:
+        - count
+    iMarkNotificationsReadPayload:
+      type: object
+      properties:
+        notificationIds:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            maxLength: 1024
+          description: IDs in your inbox. Ignored when all is true. An empty or absent
+            list updates zero entries.
+        all:
+          type: boolean
+          default: false
+          description: Apply read state to every entry in your own inbox.
+        read:
+          type: boolean
+          default: true
+          description: False marks entries unread, including when all is true.
+    iMarkNotificationsReadSuccessResponse:
+      type: object
+      properties:
+        updated:
+          type: integer
+          minimum: 0
+      required:
+        - updated
+    iUpdateNotificationPreferencesPayload:
+      type: object
+      properties:
+        preferences:
+          type: object
+          properties:
+            inAppEnabled:
+              type: boolean
+            inAppTransferActivity:
+              type: boolean
+            inAppClaimActivity:
+              type: boolean
+            ignoreIfInitiator:
+              type: boolean
+          additionalProperties: false
+          description: Only provided keys change. Empty object is accepted. Ignore
+            initiator applies only to events with a known actor; it does not
+            suppress all claim or invoice status updates.
+      required:
+        - preferences
+    iUpdateNotificationPreferencesSuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required:
+        - success
