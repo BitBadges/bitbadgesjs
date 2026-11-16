@@ -3,6 +3,8 @@
  * Lightweight wrapper for BitBadges API calls
  */
 
+import { getConfigApiKey } from '../../cli/utils/config.js';
+
 export interface ApiClientConfig {
   apiKey?: string;
   apiUrl?: string;
@@ -23,17 +25,16 @@ export interface ApiResponse<T> {
  *      `bitbadges-cli config set apiKey <key>`. Persistent default for
  *      day-to-day use.
  *
- * Imported lazily so this module stays usable in environments where the
- * filesystem helper isn't available (e.g. browser bundles via the SDK).
+ * On-disk lookup uses the CLI config helper (source of truth for the file
+ * format). Static import is safe: this module is not on the SDK root graph
+ * (`src/index.ts` does not export it), so CLI `fs`/`os` stay out of
+ * `import { ... } from 'bitbadges'`. A runtime `require()` here is undefined
+ * in the ESM build and silently returned `undefined` for every ESM consumer.
  */
 export function getApiKey(): string | undefined {
   const envKey = process.env.BITBADGES_API_KEY;
   if (envKey) return envKey;
   try {
-    // Lazy require to avoid pulling fs/os into non-Node consumers of the SDK.
-    // The CLI config helper is the source of truth for the on-disk format.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getConfigApiKey } = require('../../cli/utils/config.js');
     return getConfigApiKey();
   } catch {
     return undefined;

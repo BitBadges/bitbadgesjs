@@ -1,6 +1,7 @@
 import { SupportedChain } from '@/common/types.js';
 import { bech32 } from 'bech32';
 import { isValidChecksumAddress, stripHexPrefix, toChecksumAddress } from 'crypto-addr-codec';
+import { getBytes, ripemd160, sha256 } from 'ethers';
 import { isAddress } from 'web3-validator';
 
 function makeBech32Decoder(currentPrefix: string) {
@@ -75,11 +76,10 @@ const bitbadgesToEth = (bitbadgesAddress: string) => {
  * @category Address Utils
  */
 export function cosmosAddressFromPublicKey(compressedPubKeyHex: string, prefix = 'bb'): string {
-  const crypto = require('crypto');
-  const pubKeyBytes = Buffer.from(compressedPubKeyHex, 'hex');
-  const sha256Hash = crypto.createHash('sha256').update(pubKeyBytes).digest();
-  const ripemd160Hash = crypto.createHash('ripemd160').update(sha256Hash).digest();
-  const words = bech32.toWords(ripemd160Hash);
+  // Named ethers hashes (BB-58/BB-59): no node:crypto polyfill, no `ethers` namespace import.
+  // `require('crypto')` is undefined in the ESM build and throws in type:module consumers.
+  const pubKeyBytes = getBytes(`0x${compressedPubKeyHex}`);
+  const words = bech32.toWords(getBytes(ripemd160(sha256(pubKeyBytes))));
   return bech32.encode(prefix, words);
 }
 
