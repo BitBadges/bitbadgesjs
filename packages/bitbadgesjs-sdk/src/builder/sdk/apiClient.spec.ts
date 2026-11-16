@@ -4,7 +4,11 @@
  * query tools, and the error text pointed at a local flag that did not help —
  * a loop an agent cannot break out of.
  */
-import { getBalance, isLocalApiUrl, search } from './apiClient.js';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import * as crypto from 'node:crypto';
+import { getApiKey, getBalance, isLocalApiUrl, search } from './apiClient.js';
 
 describe('isLocalApiUrl', () => {
   it('recognises the local indexer', () => {
@@ -83,5 +87,35 @@ describe('getBalance', () => {
     expect(calls[0].init.method).toBe('GET');
     expect(res.success).toBe(true);
     expect(res.data?.balance.balances[0].amount).toBe('1');
+  });
+});
+
+describe('getApiKey', () => {
+  const origKey = process.env.BITBADGES_API_KEY;
+  const origDir = process.env.BITBADGES_CONFIG_DIR;
+
+  afterEach(() => {
+    if (origKey === undefined) delete process.env.BITBADGES_API_KEY;
+    else process.env.BITBADGES_API_KEY = origKey;
+    if (origDir === undefined) delete process.env.BITBADGES_CONFIG_DIR;
+    else process.env.BITBADGES_CONFIG_DIR = origDir;
+  });
+
+  it('prefers BITBADGES_API_KEY over the on-disk config', () => {
+    const tmp = path.join(os.tmpdir(), `bb-apikey-${crypto.randomBytes(4).toString('hex')}`);
+    fs.mkdirSync(tmp, { recursive: true });
+    fs.writeFileSync(path.join(tmp, 'config.json'), JSON.stringify({ apiKey: 'disk-key' }) + '\n');
+    process.env.BITBADGES_CONFIG_DIR = tmp;
+    process.env.BITBADGES_API_KEY = 'env-key';
+    expect(getApiKey()).toBe('env-key');
+  });
+
+  it('falls back to ~/.bitbadges/config.json apiKey when env is unset', () => {
+    const tmp = path.join(os.tmpdir(), `bb-apikey-${crypto.randomBytes(4).toString('hex')}`);
+    fs.mkdirSync(tmp, { recursive: true });
+    fs.writeFileSync(path.join(tmp, 'config.json'), JSON.stringify({ apiKey: 'disk-key' }) + '\n');
+    process.env.BITBADGES_CONFIG_DIR = tmp;
+    delete process.env.BITBADGES_API_KEY;
+    expect(getApiKey()).toBe('disk-key');
   });
 });
