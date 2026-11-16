@@ -213,7 +213,7 @@ export interface SigningClientOptions {
   defaultGasLimit?: number;
   /** EVM gas limit for explicit simulate: false (1..100000000). Default: 2000000 */
   evmPrecompileGasLimit?: number;
-  /** BitBadges API key for authenticated requests */
+  /** BitBadges API key for authenticated requests. Defaults to `BITBADGES_API_KEY`. */
   apiKey?: string;
 }
 

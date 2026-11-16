@@ -128,7 +128,7 @@ export class BitBadgesSigningClient {
     this.defaultGasLimit = validateGasLimit(options.defaultGasLimit ?? DEFAULT_GAS_LIMIT);
     this.evmPrecompileGasLimit = validateGasLimit(options.evmPrecompileGasLimit ?? DEFAULT_EVM_PRECOMPILE_GAS_LIMIT);
 
-    this.apiKey = options.apiKey;
+    this.apiKey = options.apiKey || (typeof process !== 'undefined' ? process.env?.BITBADGES_API_KEY : undefined);
 
     this.axiosInstance = axios.create({
       headers: {
@@ -136,6 +136,18 @@ export class BitBadgesSigningClient {
         ...(this.apiKey && { 'x-api-key': this.apiKey })
       }
     });
+  }
+
+  /**
+   * If simulate/broadcast returned HTTP 401 and no API key was configured, throw a
+   * clearer error. Other errors are left unchanged so existing shapes stay intact.
+   */
+  private throwIfUnauthorizedWithoutApiKey(error: any): void {
+    if (error?.response?.status === 401 && !this.apiKey) {
+      throw new Error(
+        'Unauthorized request. Pass `apiKey` to BitBadgesSigningClient or set BITBADGES_API_KEY. POST /api/v0/simulate and /api/v0/broadcast require an API key.'
+      );
+    }
   }
 
   /**
@@ -341,7 +353,13 @@ export class BitBadgesSigningClient {
       : createTxBroadcastBody(txContext, protoMessages, dummySignature);
 
     // Send to simulate endpoint
-    const response = await this.axiosInstance.post(`${this.apiUrl}/api/v0/simulate`, JSON.parse(broadcastBody));
+    let response;
+    try {
+      response = await this.axiosInstance.post(`${this.apiUrl}/api/v0/simulate`, JSON.parse(broadcastBody));
+    } catch (error: any) {
+      this.throwIfUnauthorizedWithoutApiKey(error);
+      throw error;
+    }
 
     const rawGasUsed = response.data.gas_info?.gas_used;
     if (typeof rawGasUsed !== 'string' || !/^\d+$/.test(rawGasUsed)) {
