@@ -373,7 +373,7 @@
         }
       }
     },
-    "/collection/{collectionId}/balance/{address}/{tokenId}": {
+    "/collection/{collectionId}/{tokenId}/balance/{address}": {
       "get": {
         "operationId": "getBalanceByAddressSpecificToken",
         "summary": "Get Balance By Address - Specific Token",
@@ -392,21 +392,21 @@
             }
           },
           {
-            "name": "address",
-            "in": "path",
-            "description": "The address for which the balance is to be retrieved. Can be \"Total\" for the circulating supply.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "tokenId",
             "in": "path",
             "description": "The ID for which the balance is to be retrieved.",
             "required": true,
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "name": "address",
+            "in": "path",
+            "description": "The address for which the balance is to be retrieved. Can be \"Total\" for the circulating supply.",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -4942,7 +4942,7 @@
         "x-internal": false
       }
     },
-    "/api/v0/collection/amountTracker": {
+    "/collection/{collectionId}/amountTracker": {
       "get": {
         "operationId": "getCollectionAmountTrackerById",
         "summary": "Get Collection Amount Tracker By ID",
@@ -4952,13 +4952,14 @@
         "description": "Gets an amount tracker by ID for a collection.\n\n```tsx\nawait BitBadgesApi.getCollectionAmountTrackerById({ ... });\n```\n\nSDK Links:\n- **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iAmountTrackerIdDetails)**\n- **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionAmountTrackerByIdSuccessResponse)**\n- **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getcollectionamounttrackerbyid)**",
         "parameters": [
           {
-            "in": "query",
+            "in": "path",
             "name": "collectionId",
             "required": true,
             "schema": {
               "description": "The collection ID for the approval.",
               "$ref": "#/components/schemas/CollectionId"
-            }
+            },
+            "description": "The collection ID for the approval."
           },
           {
             "in": "query",
@@ -5046,7 +5047,7 @@
         "x-internal": false
       }
     },
-    "/api/v0/collection/challengeTracker": {
+    "/collection/{collectionId}/challengeTracker": {
       "get": {
         "operationId": "getCollectionChallengeTrackerById",
         "summary": "Get Collection Challenge Tracker By ID",
@@ -5056,13 +5057,14 @@
         "description": "Gets a challenge tracker by ID for a collection.\n\n```tsx\nawait BitBadgesApi.getCollectionChallengeTrackerById({ ... });\n```\n\nSDK Links:\n- **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iChallengeTrackerIdDetails)**\n- **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetCollectionChallengeTrackerByIdSuccessResponse)**\n- **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getcollectionchallengetrackerbyid)**",
         "parameters": [
           {
-            "in": "query",
+            "in": "path",
             "name": "collectionId",
             "required": true,
             "schema": {
               "description": "The collection ID",
               "$ref": "#/components/schemas/CollectionId"
-            }
+            },
+            "description": "The collection ID"
           },
           {
             "in": "query",
@@ -5333,7 +5335,7 @@
         "x-internal": false
       }
     },
-    "/api/{version}/pools": {
+    "/pools": {
       "get": {
         "operationId": "getAllPools",
         "summary": "Get All Pools",
@@ -5342,14 +5344,6 @@
           "Assets"
         ],
         "parameters": [
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "x-api-key",
             "in": "header",
@@ -5424,7 +5418,7 @@
         "x-internal": false
       }
     },
-    "/api/{version}/pools/byDenom": {
+    "/pools/byDenom": {
       "get": {
         "operationId": "getPoolInfosByDenom",
         "summary": "Get Pool Infos by Denom",
@@ -5433,14 +5427,6 @@
           "Assets"
         ],
         "parameters": [
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "x-api-key",
             "in": "header",
@@ -5485,7 +5471,7 @@
         "x-internal": false
       }
     },
-    "/api/{version}/pools/byAssets": {
+    "/pools/byAssets": {
       "get": {
         "operationId": "getPoolInfosByAssets",
         "summary": "Get Pool Infos by Assets",
@@ -5494,14 +5480,6 @@
           "Assets"
         ],
         "parameters": [
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "x-api-key",
             "in": "header",
@@ -5554,7 +5532,7 @@
         "x-internal": false
       }
     },
-    "/api/{version}/pools/{poolId}": {
+    "/pools/{poolId}": {
       "get": {
         "operationId": "getPoolInfoById",
         "summary": "Get Pool Info by ID",
@@ -5563,14 +5541,6 @@
           "Assets"
         ],
         "parameters": [
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "poolId",
             "in": "path",
@@ -5623,7 +5593,7 @@
         "x-internal": false
       }
     },
-    "/api/{version}/swaps/estimate": {
+    "/swaps/estimate": {
       "post": {
         "operationId": "estimateSwap",
         "summary": "Estimate Swap",
@@ -5632,14 +5602,6 @@
           "Assets"
         ],
         "parameters": [
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "x-api-key",
             "in": "header",
@@ -5686,7 +5648,7 @@
         "x-internal": false
       }
     },
-    "/api/{version}/assetPairs": {
+    "/assetPairs": {
       "get": {
         "operationId": "getAssetPairs",
         "summary": "Get Asset Pairs",
@@ -5695,14 +5657,6 @@
           "Assets"
         ],
         "parameters": [
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "x-api-key",
             "in": "header",
@@ -5774,7 +5728,7 @@
         "x-internal": false
       }
     },
-    "/api/{version}/assetPairs/topGainers": {
+    "/assetPairs/topGainers": {
       "get": {
         "operationId": "getTopGainers",
         "summary": "Get Top Gainers",
@@ -5783,14 +5737,6 @@
           "Assets"
         ],
         "parameters": [
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "x-api-key",
             "in": "header",
@@ -5835,7 +5781,7 @@
         "x-internal": false
       }
     },
-    "/api/{version}/assetPairs/topLosers": {
+    "/assetPairs/topLosers": {
       "get": {
         "operationId": "getTopLosers",
         "summary": "Get Top Losers",
@@ -5844,14 +5790,6 @@
           "Assets"
         ],
         "parameters": [
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "x-api-key",
             "in": "header",
@@ -5896,7 +5834,7 @@
         "x-internal": false
       }
     },
-    "/api/{version}/assetPairs/highestVolume": {
+    "/assetPairs/highestVolume": {
       "get": {
         "operationId": "getHighestVolume",
         "summary": "Get Highest Volume",
@@ -5905,14 +5843,6 @@
           "Assets"
         ],
         "parameters": [
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "x-api-key",
             "in": "header",
@@ -5957,7 +5887,7 @@
         "x-internal": false
       }
     },
-    "/api/{version}/assetPairs/priceSorted": {
+    "/assetPairs/priceSorted": {
       "get": {
         "operationId": "getByPrice",
         "summary": "Get by Price",
@@ -5966,14 +5896,6 @@
           "Assets"
         ],
         "parameters": [
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "x-api-key",
             "in": "header",
@@ -6030,7 +5952,7 @@
         "x-internal": false
       }
     },
-    "/api/{version}/assetPairs/weeklyTopGainers": {
+    "/assetPairs/weeklyTopGainers": {
       "get": {
         "operationId": "getWeeklyTopGainers",
         "summary": "Get Weekly Top Gainers",
@@ -6039,14 +5961,6 @@
           "Assets"
         ],
         "parameters": [
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "x-api-key",
             "in": "header",
@@ -6091,7 +6005,7 @@
         "x-internal": false
       }
     },
-    "/api/{version}/assetPairs/weeklyTopLosers": {
+    "/assetPairs/weeklyTopLosers": {
       "get": {
         "operationId": "getWeeklyTopLosers",
         "summary": "Get Weekly Top Losers",
@@ -6100,14 +6014,6 @@
           "Assets"
         ],
         "parameters": [
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "x-api-key",
             "in": "header",
@@ -6152,7 +6058,7 @@
         "x-internal": false
       }
     },
-    "/api/{version}/assetPairs/search": {
+    "/assetPairs/search": {
       "get": {
         "operationId": "searchAssetPairsByText",
         "summary": "Search Asset Pairs by Text",
@@ -6161,14 +6067,6 @@
           "Assets"
         ],
         "parameters": [
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "x-api-key",
             "in": "header",
@@ -6213,7 +6111,7 @@
         "x-internal": false
       }
     },
-    "/api/{version}/assetPairs/byDenoms": {
+    "/assetPairs/byDenoms": {
       "post": {
         "operationId": "getByDenoms",
         "summary": "Get Asset Pairs by Denoms",
@@ -6222,14 +6120,6 @@
           "Assets"
         ],
         "parameters": [
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "x-api-key",
             "in": "header",
@@ -10708,6 +10598,10 @@
           },
           "readme": {
             "description": "The readme of the account",
+            "type": "string"
+          },
+          "affiliateCode": {
+            "description": "Affiliate code",
             "type": "string"
           },
           "hiddenTokens": {
@@ -16305,6 +16199,10 @@
             "description": "The Bluesky username.",
             "type": "string"
           },
+          "affiliateCode": {
+            "description": "The affiliate code of the referrer  that sent them?",
+            "type": "string"
+          },
           "seenActivity": {
             "description": "The last seen activity timestamp.",
             "$ref": "#/components/schemas/UNIXMilliTimestamp"
@@ -18953,6 +18851,10 @@
             ],
             "description": "Purpose of the payment",
             "type": "string"
+          },
+          "affiliateCode": {
+            "description": "The affiliate code to use for the payment",
+            "type": "string"
           }
         },
         "required": [
@@ -21504,6 +21406,10 @@
           },
           "readme": {
             "description": "The readme of the account",
+            "type": "string"
+          },
+          "affiliateCode": {
+            "description": "Affiliate code",
             "type": "string"
           },
           "hiddenTokens": {

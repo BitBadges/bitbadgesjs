@@ -4119,7 +4119,7 @@ paths:
       x-internal: false
 
 
-  /api/{version}/pools:
+  /pools:
     get:
       operationId: getAllPools
       summary: Get All Pools
@@ -4132,11 +4132,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -4165,7 +4160,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/pools/byDenom:
+  /pools/byDenom:
     get:
       operationId: getPoolInfosByDenom
       summary: Get Pool Infos by Denom
@@ -4178,11 +4173,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -4211,7 +4201,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/pools/byAssets:
+  /pools/byAssets:
     get:
       operationId: getPoolInfosByAssets
       summary: Get Pool Infos by Assets
@@ -4224,11 +4214,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -4257,7 +4242,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/pools/{poolId}:
+  /pools/{poolId}:
     get:
       operationId: getPoolInfoById
       summary: Get Pool Info by ID
@@ -4270,11 +4255,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: poolId
           in: path
           required: true
@@ -4308,7 +4288,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/swap/estimate:
+  /swap/estimate:
     post:
       operationId: estimateSwap
       summary: Estimate Swap
@@ -4322,11 +4302,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -4354,7 +4329,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/swaps/estimate:
+  /swaps/estimate:
     post:
       operationId: estimateSwapLegacy
       deprecated: true
@@ -4364,11 +4339,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -4396,7 +4366,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/assetPairs:
+  /assetPairs:
     get:
       operationId: getAssetPairs
       summary: Get Asset Pairs
@@ -4409,11 +4379,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -4442,7 +4407,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/assetPairs/topGainers:
+  /assetPairs/topGainers:
     get:
       operationId: getTopGainers
       summary: Get Top Gainers
@@ -4455,11 +4420,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -4488,7 +4448,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/assetPairs/topLosers:
+  /assetPairs/topLosers:
     get:
       operationId: getTopLosers
       summary: Get Top Losers
@@ -4501,11 +4461,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -4534,7 +4489,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/assetPairs/highestVolume:
+  /assetPairs/highestVolume:
     get:
       operationId: getHighestVolume
       summary: Get Highest Volume
@@ -4547,11 +4502,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -4580,7 +4530,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/assetPairs/priceSorted:
+  /assetPairs/priceSorted:
     get:
       operationId: getByPrice
       summary: Get by Price
@@ -4593,11 +4543,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -4626,7 +4571,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/assetPairs/weeklyTopGainers:
+  /assetPairs/weeklyTopGainers:
     get:
       operationId: getWeeklyTopGainers
       summary: Get Weekly Top Gainers
@@ -4639,11 +4584,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -4672,7 +4612,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/assetPairs/weeklyTopLosers:
+  /assetPairs/weeklyTopLosers:
     get:
       operationId: getWeeklyTopLosers
       summary: Get Weekly Top Losers
@@ -4685,11 +4625,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -4718,7 +4653,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/assetPairs/search:
+  /assetPairs/search:
     get:
       operationId: searchAssetPairsByText
       summary: Search Asset Pairs by Text
@@ -4731,11 +4666,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -4764,7 +4694,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/assetPairs/byDenoms:
+  /assetPairs/byDenoms:
     post:
       operationId: getByDenoms
       summary: Get Asset Pairs by Denoms
@@ -4777,11 +4707,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -5308,7 +5233,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/swap/assets:
+  /swap/assets:
     get:
       operationId: getSwapAssets
       summary: Get Swap Assets
@@ -5328,11 +5253,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -5361,7 +5281,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/swap/chains:
+  /swap/chains:
     get:
       operationId: getSwapChains
       summary: Get Swap Chains
@@ -5379,11 +5299,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -5412,7 +5327,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/swap/balances:
+  /swap/balances:
     post:
       operationId: getSwapBalances
       summary: Get Swap Balances
@@ -5430,11 +5345,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -5462,7 +5372,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/swap/track:
+  /swap/track:
     post:
       operationId: trackSwap
       summary: Track Swap Transaction
@@ -5480,11 +5390,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -5512,7 +5417,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/swap/status:
+  /swap/status:
     get:
       operationId: getSwapStatus
       summary: Get Swap Transaction Status
@@ -5530,11 +5435,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -5563,7 +5463,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/skip/assets:
+  /skip/assets:
     get:
       operationId: getSkipAssets
       deprecated: true
@@ -5578,11 +5478,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -5611,7 +5506,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/skip/chains:
+  /skip/chains:
     get:
       operationId: getSkipChains
       deprecated: true
@@ -5626,11 +5521,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -5659,7 +5549,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/skip/balances:
+  /skip/balances:
     post:
       operationId: getSkipBalances
       deprecated: true
@@ -5674,11 +5564,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -5706,7 +5591,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/skip/v2/tx/track:
+  /skip/v2/tx/track:
     post:
       operationId: trackSkipTx
       deprecated: true
@@ -5721,11 +5606,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
@@ -5753,7 +5633,7 @@ paths:
         - apiKey: []
       x-internal: false
 
-  /api/{version}/skip/v2/tx/status:
+  /skip/v2/tx/status:
     get:
       operationId: getSkipTxStatus
       deprecated: true
@@ -5768,11 +5648,6 @@ paths:
       tags:
         - Assets
       parameters:
-        - name: version
-          in: path
-          required: true
-          schema:
-            type: string
         - name: x-api-key
           in: header
           description: BitBadges API Key for authentication
