@@ -32,7 +32,9 @@ const TransferSchema = z.object({
   balances: z.array(BalanceSchema).describe('What to transfer: amount × tokenIds × ownershipTimes.'),
   prioritizedApprovals: z.array(z.object({
     approvalId: z.string().describe('The approvalId from the collection that authorizes this transfer.'),
-    approverAddress: z.string().optional().default('').describe('Address of the approver. Usually empty string for collection-level approvals.')
+    approverAddress: z.string().optional().default('').describe('Address of the approver. Usually empty string for collection-level approvals.'),
+    approvalLevel: z.string().optional().describe('Approval level: "collection" (default), "incoming", or "outgoing".'),
+    version: z.string().optional().describe('Approval version. Default "0" (a just-created collection).')
   })).optional().default([]).describe('Which approval(s) to use. Required for minting — reference the mint approval by ID.'),
   merkleProofs: z.array(z.any()).optional().default([]),
   memo: z.string().optional().default('')
@@ -81,7 +83,9 @@ export const addTransferTool = {
                 type: 'object',
                 properties: {
                   approvalId: { type: 'string' },
-                  approverAddress: { type: 'string' }
+                  approverAddress: { type: 'string' },
+                  approvalLevel: { type: 'string', description: 'Default "collection".' },
+                  version: { type: 'string', description: 'Default "0".' }
                 },
                 required: ['approvalId']
               }
@@ -105,7 +109,16 @@ export function handleAddTransfer(input: Record<string, any>): Record<string, an
         from: t.from === 'Mint' ? 'Mint' : ensureBb1(t.from),
         toAddresses: t.toAddresses.map((a: string) => ensureBb1(a)),
         balances: t.balances,
-        prioritizedApprovals: t.prioritizedApprovals || [],
+        // The chain decodes `version` as a required Uint and `approvalLevel`
+        // as the approval scope; the JSON-arg chain-binary path
+        // (`bb deploy --with-keyring`) rejects the transfer with
+        // "version is uninitialized" when they are omitted.
+        prioritizedApprovals: (t.prioritizedApprovals || []).map((p: Record<string, any>) => ({
+          approvalId: p.approvalId,
+          approvalLevel: p.approvalLevel || 'collection',
+          approverAddress: p.approverAddress ?? '',
+          version: p.version ?? '0'
+        })),
         merkleProofs: t.merkleProofs || [],
         memo: t.memo || ''
       }))

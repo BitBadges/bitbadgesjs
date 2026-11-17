@@ -64,6 +64,29 @@ describe('buildKeyringCommand', () => {
     fs.unlinkSync(out);
   });
 
+  it('strips builder sidecar keys like _meta before writing the msg file (chain rejects unknown fields)', () => {
+    const out = tmpPath();
+    const msg = {
+      typeUrl: '/tokenization.MsgCreateCollection',
+      value: { ...baseMsg.value, _meta: { metadataPlaceholders: { 'ipfs://METADATA_COLLECTION': { name: 'x' } } } }
+    };
+    buildKeyringCommand({
+      msg,
+      from: 'alice',
+      network: 'local',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'test',
+      gas: 'auto',
+      gasAdjustment: '1.3',
+      msgFilePath: out
+    });
+    const written = JSON.parse(fs.readFileSync(out, 'utf-8'));
+    expect(written._meta).toBeUndefined();
+    expect(written).toEqual(baseMsg.value);
+    expect((msg.value as any)._meta).toBeDefined();
+    fs.unlinkSync(out);
+  });
+
   it('backfills manager on create-collection when missing', () => {
     const out = tmpPath();
     const msg = { typeUrl: '/tokenization.MsgCreateCollection', value: { creator: 'bb1qqq...' } };
@@ -344,5 +367,30 @@ describe('buildKeyringMultiCommand', () => {
     expect(result.commandLine).toContain('--node http://localhost:26657');
     expect(result.commandLine).toContain('--keyring-backend test');
     expect(result.commandLine).toContain('--chain-id bitbadges-1');
+  });
+});
+
+describe('buildKeyringMultiCommand sidecar stripping', () => {
+  it('strips _meta from every JSON-arg msg file', () => {
+    const res = buildKeyringMultiCommand({
+      messages: [
+        {
+          typeUrl: '/tokenization.MsgCreateCollection',
+          value: { creator: 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv', _meta: { metadataPlaceholders: {} } }
+        },
+        { typeUrl: '/tokenization.MsgTransferTokens', value: { creator: 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv', collectionId: '0', transfers: [] } }
+      ],
+      from: 'alice',
+      network: 'local',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'test',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    } as any);
+    for (const p of res.msgFilePaths) {
+      const written = JSON.parse(fs.readFileSync(p, 'utf-8'));
+      expect(written._meta).toBeUndefined();
+      fs.unlinkSync(p);
+    }
   });
 });
