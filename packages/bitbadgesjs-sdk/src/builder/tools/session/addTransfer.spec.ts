@@ -176,7 +176,18 @@ describe('handleAddTransfer', () => {
         }] as any
       });
       const pa = getOrCreateSession().messages[1].value.transfers[0].prioritizedApprovals;
-      expect(pa[0]).toEqual({ approvalId: 'only-id', approverAddress: '' });
+      expect(pa[0]).toEqual({ approvalId: 'only-id', approvalLevel: 'collection', approverAddress: '', version: '0' });
+    });
+
+    it('preserves explicit approvalLevel / version on prioritizedApprovals', () => {
+      handleAddTransfer({
+        transfers: [{
+          ...BASE_TRANSFER,
+          prioritizedApprovals: [{ approvalId: 'x', approvalLevel: 'outgoing', approverAddress: 'bb1abc', version: '3' }]
+        }] as any
+      });
+      const pa = getOrCreateSession().messages[1].value.transfers[0].prioritizedApprovals;
+      expect(pa[0]).toEqual({ approvalId: 'x', approvalLevel: 'outgoing', approverAddress: 'bb1abc', version: '3' });
     });
   });
 

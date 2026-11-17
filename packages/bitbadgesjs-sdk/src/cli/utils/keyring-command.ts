@@ -63,6 +63,19 @@ const CHAIN_BINARY_NETWORK: Record<'mainnet' | 'testnet' | 'local', { rpc: strin
   local: { rpc: 'http://localhost:26657', chainId: 'bitbadges-1' }
 };
 
+/**
+ * Builder sidecars such as `_meta` (metadata placeholders emitted by the MCP
+ * session's get_transaction) are not proto fields. The burner/browser paths
+ * drop them during protobuf encoding, but the chain binary parses the msg
+ * JSON strictly and fails with `unknown field "_meta"`. Strip top-level
+ * `_`-prefixed keys (no tokenization proto field starts with `_`).
+ */
+function stripBuilderSidecars(value: Record<string, unknown>): void {
+  for (const key of Object.keys(value)) {
+    if (key.startsWith('_')) delete value[key];
+  }
+}
+
 export interface KeyringCommandOptions {
   msg: { typeUrl: string; value: unknown };
   from: string;
@@ -116,6 +129,7 @@ export function buildKeyringCommand(opts: KeyringCommandOptions): KeyringCommand
   // Backfill manager on create-collection to match the burner/browser path.
   const value: Record<string, unknown> =
     opts.msg.value && typeof opts.msg.value === 'object' ? { ...(opts.msg.value as Record<string, unknown>) } : {};
+  stripBuilderSidecars(value);
   if (opts.manager && !value.manager && opts.msg.typeUrl === '/tokenization.MsgCreateCollection') {
     value.manager = opts.manager;
   }
@@ -335,6 +349,7 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
       // Backfill manager on create-collection (mirrors single-msg path).
       const value: Record<string, unknown> =
         m.value && typeof m.value === 'object' ? { ...(m.value as Record<string, unknown>) } : {};
+      stripBuilderSidecars(value);
       if (opts.manager && !value.manager && m.typeUrl === '/tokenization.MsgCreateCollection') {
         value.manager = opts.manager;
       }
