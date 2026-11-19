@@ -5,7 +5,8 @@ import {
   buildKeyringCommand,
   buildKeyringMultiCommand,
   KEYRING_SUPPORTED_TYPE_URLS,
-  KEYRING_POSITIONAL_TYPE_URLS
+  KEYRING_POSITIONAL_TYPE_URLS,
+  parseKeyringBroadcastStdout
 } from './keyring-command.js';
 
 function tmpPath(): string {
@@ -392,5 +393,40 @@ describe('buildKeyringMultiCommand sidecar stripping', () => {
       expect(written._meta).toBeUndefined();
       fs.unlinkSync(p);
     }
+  });
+});
+
+describe('parseKeyringBroadcastStdout', () => {
+  it('captures a CheckTx rejection (binary exits 0, code 4) with its multi-line raw_log', () => {
+    const stdout = [
+      'code: 4',
+      'codespace: sdk',
+      'data: ""',
+      'events: []',
+      'gas_used: "0"',
+      'height: "0"',
+      "raw_log: 'signature verification failed; please verify account number (0) and chain-id",
+      "  (bitbadges-local-7): (unable to verify single signer signature): unauthorized'",
+      'timestamp: ""',
+      'tx: null',
+      'txhash: 654B5970585C35832FEAD964972A1ABDBBA3990BC18B1EE921E23D7B337A0118',
+      ''
+    ].join('\n');
+    expect(parseKeyringBroadcastStdout(stdout)).toEqual([
+      {
+        txHash: '654B5970585C35832FEAD964972A1ABDBBA3990BC18B1EE921E23D7B337A0118',
+        checkTxCode: 4,
+        rawLog:
+          'signature verification failed; please verify account number (0) and chain-id (bitbadges-local-7): (unable to verify single signer signature): unauthorized'
+      }
+    ]);
+  });
+
+  it('returns one entry per broadcast for sequential multi-msg output', () => {
+    const stdout = ['gas estimate: 1', 'code: 0', "raw_log: ''", 'txhash: AA11', 'code: 13', 'raw_log: insufficient fee', 'txhash: BB22'].join('\n');
+    expect(parseKeyringBroadcastStdout(stdout)).toEqual([
+      { txHash: 'AA11', checkTxCode: 0, rawLog: '' },
+      { txHash: 'BB22', checkTxCode: 13, rawLog: 'insufficient fee' }
+    ]);
   });
 });
