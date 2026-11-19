@@ -398,3 +398,42 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
 
 /** Positional-arg msg types the keyring path can handle in multi-msg mode. */
 export const KEYRING_POSITIONAL_TYPE_URLS: readonly string[] = Object.freeze(Object.keys(POSITIONAL_BUILDERS));
+
+/**
+ * Parse the chain binary's default (YAML) `tx ... --yes` output into one
+ * entry per broadcast. The binary exits 0 even when CheckTx rejects the tx
+ * (bad signature, wrong chain-id, insufficient fee): the rejection is only
+ * in the printed `code:` / `raw_log:` fields, and the tx never lands, so the
+ * LCD lookup can't recover it later.
+ */
+export function parseKeyringBroadcastStdout(stdout: string): Array<{ txHash: string; checkTxCode?: number; rawLog?: string }> {
+  const out: Array<{ txHash: string; checkTxCode?: number; rawLog?: string }> = [];
+  let code: number | undefined;
+  let rawLog: string | undefined;
+  const lines = stdout.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const codeM = /^code:\s*(\d+)\s*$/.exec(line);
+    if (codeM) {
+      code = Number(codeM[1]);
+      continue;
+    }
+    const rawM = /^raw_log:\s?(.*)$/.exec(line);
+    if (rawM) {
+      // YAML scalars may wrap onto indented continuation lines.
+      let v = rawM[1];
+      while (i + 1 < lines.length && /^\s+\S/.test(lines[i + 1])) v += ' ' + lines[++i].trim();
+      v = v.trim();
+      if ((v.startsWith("'") && v.endsWith("'")) || (v.startsWith('"') && v.endsWith('"'))) v = v.slice(1, -1).replace(/''/g, "'");
+      rawLog = v;
+      continue;
+    }
+    const hashM = /^txhash:\s*([A-F0-9]+)\s*$/i.exec(line);
+    if (hashM) {
+      out.push({ txHash: hashM[1], checkTxCode: code, rawLog });
+      code = undefined;
+      rawLog = undefined;
+    }
+  }
+  return out;
+}

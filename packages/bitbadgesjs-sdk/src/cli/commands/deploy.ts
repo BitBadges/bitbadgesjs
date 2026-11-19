@@ -35,7 +35,7 @@ import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } fro
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
 import { type BurnerNetwork } from '../utils/burner.js';
 import { browserBroadcast, burnerBroadcast } from '../utils/deploy-options.js';
-import { buildKeyringCommand, buildKeyringMultiCommand } from '../utils/keyring-command.js';
+import { buildKeyringCommand, buildKeyringMultiCommand, parseKeyringBroadcastStdout } from '../utils/keyring-command.js';
 import {
   extractEntityFromEvents,
   extractEntityIds,
@@ -716,18 +716,36 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
         `\n--exec failed (chain-binary exit ${execResult.status}, ${hashes.length} txhash(es) parsed from stdout).\n` +
           (execResult.stdout ? `--- stdout (first 800 chars) ---\n${execResult.stdout.slice(0, 800)}\n` : '')
       );
-      process.exit(1);
+      // Keep the stdout contract: agents always get an envelope.
+      const { emitError, BBErrorCode } = await import('../utils/envelope.js');
+      emitError(new Error(`--exec failed: chain binary exited ${execResult.status} with ${hashes.length} txhash(es) in its output.`), {
+        code: BBErrorCode.BROADCAST_FAILED,
+        meta: { path: 'keyring', mode: 'sign-and-broadcast', binaryExitStatus: execResult.status, stdoutExcerpt: execResult.stdout.slice(0, 800) },
+        hint: 'Re-run the printed command without --exec to see the full chain-binary error (keyring name, --home, chain-id, fees).',
+        exitCode: 1
+      });
     }
+    const parsedBroadcasts = parseKeyringBroadcastStdout(execResult.stdout);
+    const checkTxFor = (h: string) => parsedBroadcasts.find((b) => b.txHash.toUpperCase() === h.toUpperCase());
+    // A non-zero CheckTx code means the tx was rejected before inclusion; don't
+    // poll the LCD for it (it will never exist), report the code + raw_log.
+    const resolveTxResult = async (h: string): Promise<ChainTxResult | undefined> => {
+      const ct = checkTxFor(h);
+      if (ct?.checkTxCode !== undefined && ct.checkTxCode !== 0) {
+        return { code: ct.checkTxCode, height: 0, rawLog: ct.rawLog, events: [] };
+      }
+      return fetchTxResult(nodeUrl, h);
+    };
 
     // Fetch the full tx result for each broadcasted tx so the envelope
     // carries code / height / events. The chain-binary's exit code only
     // reflects broadcast success — the tx itself may still have a
     // non-zero on-chain `code`.
     const [primaryHash, ...extraHashes] = hashes;
-    const primaryResult = await fetchTxResult(nodeUrl, primaryHash);
+    const primaryResult = await resolveTxResult(primaryHash);
     const additionalTxs: Array<{ txHash: string; code: number; height: number; rawLog?: string }> = [];
     for (const h of extraHashes) {
-      const r = await fetchTxResult(nodeUrl, h);
+      const r = await resolveTxResult(h);
       additionalTxs.push({
         txHash: h,
         code: r?.code ?? -1,
@@ -796,9 +814,23 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       }
     }
 
-    const { emit } = await import('../utils/envelope.js');
+    const { emit, emitError, BBErrorCode } = await import('../utils/envelope.js');
+    if (!payload.success) {
+      // Failed or unconfirmed broadcasts must not print ok:true. The full
+      // payload (txHash, code, rawLog, additionalTxs) rides in error.details.
+      const failed = [{ txHash: primaryHash, code: primaryResult?.code, rawLog: primaryResult?.rawLog }, ...additionalTxs].find((t) => t.code !== 0);
+      const why =
+        failed?.code === undefined
+          ? `could not confirm tx ${failed?.txHash ?? primaryHash} via ${nodeUrl} (no tx result found)`
+          : `tx ${failed.txHash} failed with code ${failed.code}${failed.rawLog ? `: ${failed.rawLog}` : ''}`;
+      emitError(new Error(`--exec broadcast did not succeed: ${why}`), {
+        code: BBErrorCode.BROADCAST_FAILED,
+        meta: payload,
+        exitCode: 1
+      });
+    }
     emit(payload);
-    process.exit(payload.success ? 0 : 1);
+    process.exit(0);
   }
 
   // Burner path is CREATE-ONLY (the wallet is throwaway and dust-funded
