@@ -5,13 +5,7 @@
  * logic the prompt loop depends on.
  */
 
-import {
-  parseTokenIdSpec,
-  parseIndexList,
-  toCandidate,
-  summarize,
-  isYes
-} from './walkthrough-transfer.js';
+import { parseTokenIdSpec, parseIndexList, toCandidate, summarize, isYes } from './walkthrough-transfer.js';
 
 describe('isYes', () => {
   it('accepts y/Y/yes/YES (any case, with whitespace)', () => {
@@ -115,5 +109,34 @@ describe('toCandidate / summarize', () => {
     expect(s).toContain('from=All');
     expect(s).toContain('to=All');
     expect(s).not.toContain('[');
+  });
+});
+
+describe('runTransferWalkthrough non-interactive guards', () => {
+  // Imported lazily so the pure-helper tests above don't pay for it.
+  const load = () => require('./walkthrough-transfer.js') as typeof import('./walkthrough-transfer.js');
+
+  it('fails fast under -y when a required flag is missing (no prompt, no hang)', async () => {
+    const { runTransferWalkthrough, WalkthroughInputError } = load();
+    await expect(runTransferWalkthrough({ yes: true })).rejects.toBeInstanceOf(WalkthroughInputError);
+    await expect(runTransferWalkthrough({ yes: true })).rejects.toThrow(/--collection-id/);
+    await expect(runTransferWalkthrough({ yes: true, collectionId: '1' })).rejects.toThrow(/--from/);
+    await expect(runTransferWalkthrough({ yes: true, collectionId: '1', from: 'Mint' })).rejects.toThrow(/--to/);
+  });
+
+  it('rejects with an invalid_input error when stdin closes before a prompt is answered', async () => {
+    const { Readable } = require('stream');
+    const original = Object.getOwnPropertyDescriptor(process, 'stdin')!;
+    const stderrWrite = jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+    Object.defineProperty(process, 'stdin', { value: Readable.from([]), configurable: true });
+    try {
+      const { runTransferWalkthrough } = load();
+      const p = runTransferWalkthrough({});
+      await expect(p).rejects.toMatchObject({ code: 'invalid_input' });
+      await expect(p).rejects.toThrow(/stdin closed before "Collection ID" was answered.*--collection-id/);
+    } finally {
+      Object.defineProperty(process, 'stdin', original);
+      stderrWrite.mockRestore();
+    }
   });
 });

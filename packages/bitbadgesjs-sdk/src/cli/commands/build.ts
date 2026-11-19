@@ -1247,7 +1247,13 @@ sharedOpts(
     });
     emit(msg, opts);
   } catch (err: any) {
-    process.stderr.write(`\nTransfer walkthrough failed: ${err?.message || err}\n`);
-    process.exit(1);
+    // Same stdout JSON envelope + non-zero exit as every other command, so
+    // agents piping `bb build transfer | jq` see ok:false instead of nothing.
+    const { emitError } = await import('../utils/envelope.js');
+    emitError(new Error(`Transfer walkthrough failed: ${err?.message || err}`), {
+      code: err?.code && typeof err.code === 'string' ? err.code : 'cli_error',
+      condensed: opts.condensed,
+      exitCode: 1
+    });
   }
 });
