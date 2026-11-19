@@ -54,14 +54,70 @@ interface ApprovalCandidate {
   raw: any;
 }
 
-function prompt(question: string): Promise<string> {
+/**
+ * Error thrown when the walkthrough needs an answer it cannot get:
+ * `-y` was passed but a required flag is missing, or stdin hit EOF
+ * (non-TTY / piped / closed) before the question was answered.
+ * Carries `code: 'invalid_input'` so the caller's error envelope is
+ * dispatchable by agents.
+ */
+export class WalkthroughInputError extends Error {
+  code = 'invalid_input';
+  constructor(message: string) {
+    super(message);
+    this.name = 'WalkthroughInputError';
+  }
+}
+
+/**
+ * Prompt on stderr and read one line from stdin. Rejects (instead of
+ * hanging forever) when stdin closes before an answer arrives — without
+ * this, a non-TTY run (`</dev/null`, CI, an agent's subprocess) left the
+ * promise pending, the event loop drained, and the process exited 0 with
+ * an empty stdout.
+ */
+function prompt(question: string, flagHint?: string): Promise<string> {
+  const label = question.replace(/[:?]?\s*(\[[^\]]*\])?\s*$/, '').trim();
+  const closedError = () =>
+    new WalkthroughInputError(
+      `stdin closed before "${label}" was answered (stdin is ${process.stdin.isTTY ? 'a TTY' : 'not a TTY'}). ` +
+        (flagHint ? `Pass ${flagHint} to run non-interactively.` : 'Pass -y/--yes to skip optional prompts and use the defaults.')
+    );
+  // A previous prompt may already have consumed EOF (e.g. `printf '1\n' | bb build transfer`):
+  // a fresh readline on an ended stream never emits 'close', so check up front.
+  if (process.stdin.readableEnded || process.stdin.destroyed) {
+    process.stderr.write(question + '\n');
+    return Promise.reject(closedError());
+  }
   const rl = readline.createInterface({ input: process.stdin, output: process.stderr });
-  return new Promise<string>((resolve) => {
+  return new Promise<string>((resolve, reject) => {
+    let settled = false;
+    const fail = () => {
+      if (settled) return;
+      settled = true;
+      process.removeListener('beforeExit', fail);
+      rl.close();
+      reject(closedError());
+    };
+    // Last-resort guard: if nothing can ever answer (event loop drained
+    // with the question pending), fail instead of exiting 0 silently.
+    process.once('beforeExit', fail);
+    rl.on('close', fail);
     rl.question(question, (a) => {
+      if (settled) return;
+      settled = true;
+      process.removeListener('beforeExit', fail);
       rl.close();
       resolve(a.trim());
     });
   });
+}
+
+/** Required value: use the flag, else fail fast under -y, else prompt. */
+async function requireValue(value: string | undefined, yes: boolean | undefined, question: string, flag: string): Promise<string> {
+  if (value) return value;
+  if (yes) throw new WalkthroughInputError(`${flag} is required with -y/--yes (no prompts in non-interactive mode).`);
+  return prompt(question, flag);
 }
 
 export function toCandidate(level: 'collection' | 'outgoing' | 'incoming', approverAddress: string, raw: any): ApprovalCandidate {
@@ -121,14 +177,14 @@ export interface TransferWalkthroughResult {
 }
 
 export async function runTransferWalkthrough(input: TransferWalkthroughInput): Promise<TransferWalkthroughResult> {
-  const collectionId = input.collectionId || (await prompt('Collection ID: '));
+  const collectionId = await requireValue(input.collectionId, input.yes, 'Collection ID: ', '--collection-id <id>');
   if (!collectionId) throw new Error('Collection ID is required');
 
-  const fromRaw = input.from || (await prompt('From address (bb1... / 0x... / "Mint"): '));
+  const fromRaw = await requireValue(input.from, input.yes, 'From address (bb1... / 0x... / "Mint"): ', '--from <address|Mint>');
   if (!fromRaw) throw new Error('From address is required');
   const from = fromRaw === 'Mint' ? 'Mint' : ensureBb1(fromRaw);
 
-  const toRaw = input.to || (await prompt('To address (bb1... / 0x...): '));
+  const toRaw = await requireValue(input.to, input.yes, 'To address (bb1... / 0x...): ', '--to <address>');
   if (!toRaw) throw new Error('To address is required');
   if (toRaw === 'Mint') throw new Error('To address cannot be "Mint" — that\'s only valid as the From address.');
   const to = ensureBb1(toRaw);
@@ -295,7 +351,8 @@ export async function runTransferWalkthrough(input: TransferWalkthroughInput): P
   let balances: Array<{ amount: string; tokenIds: any[]; ownershipTimes: any[] }> | undefined;
   if (!precalculateBalancesFromApproval) {
     const amount = input.amount ?? (input.yes ? '1' : (await prompt('Amount per recipient [1]: ')) || '1');
-    const tokenSpec = input.tokenIds ?? (input.yes ? 'all' : (await prompt('Token IDs (e.g. 1-5, 1,3,5, or "all" for collection valid range) [all]: ')) || 'all');
+    const tokenSpec =
+      input.tokenIds ?? (input.yes ? 'all' : (await prompt('Token IDs (e.g. 1-5, 1,3,5, or "all" for collection valid range) [all]: ')) || 'all');
     const tokenIds = tokenSpec === 'all' ? validBadgeIds : parseTokenIdSpec(tokenSpec);
     balances = [{ amount, tokenIds, ownershipTimes: FOREVER }];
   }
