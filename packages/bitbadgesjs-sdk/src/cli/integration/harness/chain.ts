@@ -47,64 +47,28 @@ export async function deployMsgViaKeyring(
   const cliEntry = path.resolve(__dirname, '../../../../dist/cjs/cli/index.js');
   const networkFlag = `--${network}`;
 
-  // 1. Print the chain-binary command. Post-#0398 the deploy command emits
-  // the universal envelope JSON; extract `data.commandLine` and write it
-  // to the script file for bash to execute.
-  const scriptPath = path.join(os.tmpdir(), `bb-deploy-${crypto.randomBytes(4).toString('hex')}.sh`);
-  const printStdout = execFileSync(
+  // 1. Broadcast via `bb deploy --with-keyring --exec` so a create +
+  // later collectionId "0" is rewritten with the new collection id
+  // between txs. Print-only is refused for that bundle. Timeout is
+  // generous: each step may sleep 6s plus an LCD poll.
+  const stdout = execFileSync(
     'node',
-    [cliEntry, 'deploy', '--with-keyring', '--from', signerName, '--keyring-backend', env.keyringBackend, '--msg-file', msgFilePath, networkFlag, ...extraDeployFlags],
-    { encoding: 'utf-8', env: { ...process.env, BB_QUIET: '1' }, timeout: 15000 }
+    [cliEntry, 'deploy', '--with-keyring', '--exec', '--from', signerName, '--keyring-backend', env.keyringBackend, '--msg-file', msgFilePath, networkFlag, ...extraDeployFlags],
+    { encoding: 'utf-8', env: { ...process.env, BB_QUIET: '1' }, timeout: 180000 }
   );
-  let commandLine: string;
+  let primary: string;
+  let extras: string[] = [];
   try {
-    const env0398 = JSON.parse(printStdout);
-    if (!env0398?.ok || typeof env0398?.data?.commandLine !== 'string') {
-      throw new Error(`deploy --with-keyring envelope missing data.commandLine:\n${printStdout.slice(0, 800)}`);
+    const env0398 = JSON.parse(stdout);
+    if (!env0398?.ok || typeof env0398?.data?.txHash !== 'string') {
+      throw new Error(`deploy --with-keyring --exec envelope missing data.txHash:\n${stdout.slice(0, 800)}`);
     }
-    commandLine = env0398.data.commandLine;
+    primary = env0398.data.txHash;
+    const additional = Array.isArray(env0398.data.additionalTxs) ? env0398.data.additionalTxs : [];
+    extras = additional.map((t: { txHash?: string }) => t.txHash).filter((h: unknown): h is string => typeof h === 'string');
   } catch (e) {
-    // Pre-#0398 fallback: stdout was the raw shell command. Keep working
-    // if the envelope is ever disabled.
-    if (printStdout.trim().startsWith('bitbadgeschaind ')) {
-      commandLine = printStdout;
-    } else {
-      throw e;
-    }
+    throw new Error(`deployMsgViaKeyring failed to parse --exec envelope:\n${String(stdout).slice(0, 800)}\n${e}`);
   }
-  fs.writeFileSync(scriptPath, commandLine + '\n');
-
-  // 2. Execute the printed command. Retry once on "account sequence
-  // mismatch" — concurrent specs under --runInBand can still see stale
-  // sequence numbers when txs land back-to-back without the indexer
-  // catching up. A 2s pause + retry is the cheapest fix.
-  let out: string;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      out = execFileSync('bash', [scriptPath], { encoding: 'utf-8', timeout: 60000 }).toString();
-      break;
-    } catch (err: any) {
-      const stderr = String(err?.stderr ?? '') + String(err?.stdout ?? '');
-      const isSequenceMismatch = /account sequence mismatch/i.test(stderr);
-      if (isSequenceMismatch && attempt < 2) {
-        await sleep(2000);
-        continue;
-      }
-      // Truncate the chain-binary's noisy `Usage:` dump in the error
-      // message so the test failure is readable.
-      const trimmed = stderr.split(/\n/).filter((l) => !l.startsWith('  ') && !l.startsWith('     ')).join('\n').slice(0, 800);
-      throw new Error(`deployMsgViaKeyring failed (attempt ${attempt + 1}):\n${trimmed}`);
-    }
-  }
-  // Multi-msg envelopes produce N "txhash: <hex>" lines (one per msg
-  // sub-tx, since the chain-binary's tx subcommands only take one msg
-  // each — see deploy.ts `buildKeyringMultiCommand`). Capture them all
-  // so callers can assert on every sub-tx.
-  const matches = [...out!.matchAll(/txhash: ([A-F0-9]+)/g)];
-  if (matches.length === 0) {
-    throw new Error(`Could not extract txhash from chain-binary output:\n${out!.slice(0, 800)}`);
-  }
-  const [primary, ...extras] = matches.map((m) => m[1]);
 
   // 3. Poll the RPC for each tx result.
   const primaryTx = await waitForTx(primary);

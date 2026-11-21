@@ -306,11 +306,23 @@ function shellQuote(s: string): string {
   return `'${s.replace(/'/g, `'\\''`)}'`;
 }
 
+export interface KeyringMultiCommandStep {
+  /** Single-tx command ending in `--yes` (no `sleep` / `&&` chaining). */
+  commandLine: string;
+  /** JSON files this step wrote (empty for purely positional verbs). */
+  msgFilePaths: string[];
+  typeUrl: string;
+  /** Sidecar-stripped value used to build this step. */
+  value: Record<string, unknown>;
+}
+
 export interface KeyringMultiCommandResult {
   /** Absolute paths of any JSON files written (for JSON-arg msgs in the chain). */
   msgFilePaths: string[];
   /** Multi-line command string. Each msg becomes a `bitbadgeschaind tx ...` block; blocks are chained with `&&`. */
   commandLine: string;
+  /** Per-msg steps, used by `--exec` so each tx can run (and be rewritten) separately. */
+  steps: KeyringMultiCommandStep[];
 }
 
 export interface KeyringMultiCommandOptions {
@@ -339,16 +351,19 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
   const msgFilePaths: string[] = [];
 
   const blocks: string[] = [];
+  const steps: KeyringMultiCommandStep[] = [];
   for (let i = 0; i < opts.messages.length; i++) {
     const m = opts.messages[i];
     const jsonArgSubcommand = TYPE_URL_TO_SUBCOMMAND[m.typeUrl];
     const positionalBuilder = POSITIONAL_BUILDERS[m.typeUrl];
 
     let head: string;
+    let stepValue: Record<string, unknown> =
+      m.value && typeof m.value === 'object' ? { ...(m.value as Record<string, unknown>) } : {};
+    const stepFiles: string[] = [];
     if (jsonArgSubcommand) {
       // Backfill manager on create-collection (mirrors single-msg path).
-      const value: Record<string, unknown> =
-        m.value && typeof m.value === 'object' ? { ...(m.value as Record<string, unknown>) } : {};
+      const value = stepValue;
       stripBuilderSidecars(value);
       if (opts.manager && !value.manager && m.typeUrl === '/tokenization.MsgCreateCollection') {
         value.manager = opts.manager;
@@ -356,15 +371,17 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
       const msgFilePath = path.join(os.tmpdir(), `bb-msg-${crypto.randomBytes(4).toString('hex')}.json`);
       fs.writeFileSync(msgFilePath, JSON.stringify(value, null, 2) + '\n', { mode: 0o600 });
       msgFilePaths.push(msgFilePath);
+      stepFiles.push(msgFilePath);
       head = `${opts.binary} tx tokenization ${jsonArgSubcommand} ${msgFilePath}`;
     } else if (positionalBuilder) {
       const writeJson = (data: unknown): string => {
         const p = path.join(os.tmpdir(), `bb-msg-${crypto.randomBytes(4).toString('hex')}.json`);
         fs.writeFileSync(p, JSON.stringify(data, null, 2) + '\n', { mode: 0o600 });
         msgFilePaths.push(p);
+        stepFiles.push(p);
         return p;
       };
-      const parts = positionalBuilder((m.value ?? {}) as Record<string, unknown>, writeJson);
+      const parts = positionalBuilder(stepValue, writeJson);
       head = `${opts.binary} tx tokenization ${parts.join(' ')}`;
     } else {
       const supported = [...Object.keys(TYPE_URL_TO_SUBCOMMAND), ...Object.keys(POSITIONAL_BUILDERS)].sort();
@@ -374,26 +391,36 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
       );
     }
 
-    const isLast = i === opts.messages.length - 1;
-    const block = [
+    const flagLines = [
       `${head} \\`,
       `    --from ${opts.from} \\`,
       `    --chain-id ${chainId} \\`,
       `    --node ${nodeUrl} \\`,
       `    --keyring-backend ${opts.keyringBackend} \\`,
       `    --gas ${opts.gas} --gas-adjustment ${opts.gasAdjustment} --gas-prices 10ubadge \\`,
-      // Between blocks: insert `sleep 6 &&` so the next tx's sequence
-      // lookup happens after the previous one has committed. Without
-      // this, the second tx hits "account sequence mismatch" because
-      // the chain binary fetches the sequence at start-of-tx, and the
-      // first tx is still in the mempool when the second one fires.
-      // Block time is ~5s on BitBadges; 6s is the safe minimum.
-      isLast ? '    --yes' : '    --yes && sleep 6 && \\'
-    ].join('\n');
-    blocks.push(block);
+      '    --yes'
+    ];
+    steps.push({
+      commandLine: flagLines.join('\n'),
+      msgFilePaths: stepFiles,
+      typeUrl: m.typeUrl,
+      value: stepValue
+    });
+
+    const isLast = i === opts.messages.length - 1;
+    // Between blocks in the printable script: insert `sleep 6 &&` so the
+    // next tx's sequence lookup happens after the previous one has
+    // committed. Without this, the second tx hits "account sequence
+    // mismatch" because the chain binary fetches the sequence at
+    // start-of-tx, and the first tx is still in the mempool when the
+    // second one fires. Block time is ~5s on BitBadges; 6s is the safe
+    // minimum. `--exec` runs `steps` one at a time and sleeps in process.
+    const block = flagLines.slice();
+    if (!isLast) block[block.length - 1] = '    --yes && sleep 6 && \\';
+    blocks.push(block.join('\n'));
   }
 
-  return { msgFilePaths, commandLine: blocks.join('\n') };
+  return { msgFilePaths, commandLine: blocks.join('\n'), steps };
 }
 
 /** Positional-arg msg types the keyring path can handle in multi-msg mode. */

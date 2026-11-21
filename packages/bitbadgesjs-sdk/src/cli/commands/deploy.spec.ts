@@ -16,7 +16,12 @@ import {
   extractEntityFromEvents,
   waitForIndexer
 } from '../utils/wait-for-indexer.js';
-import { deployCommand } from './deploy.js';
+import { spawnSync } from 'node:child_process';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { deployCommand, executeKeyringMultiSteps, KeyringBindError } from './deploy.js';
+import { buildKeyringMultiCommand } from '../utils/keyring-command.js';
 
 describe('extractEntityFromEvents', () => {
   it('pulls collectionId from a tx_response events array', () => {
@@ -247,5 +252,250 @@ describe('deployCommand surface', () => {
     // assert the flag string carries brackets so future code doesn't
     // accidentally swap it to `<required>`.
     expect(String(opt.flags)).toMatch(/\[/);
+  });
+});
+
+
+describe('keyring multi-tx collection binding', () => {
+  it('refuses print-only mode when a create is followed by collectionId "0"', () => {
+    const tmpFile = path.join(os.tmpdir(), `bb-deploy-print-${Date.now()}.json`);
+    fs.writeFileSync(
+      tmpFile,
+      JSON.stringify({
+        messages: [
+          { typeUrl: '/tokenization.MsgUniversalUpdateCollection', value: { creator: 'bb1alice', collectionId: '0' } },
+          { typeUrl: '/tokenization.MsgTransferTokens', value: { creator: 'bb1alice', collectionId: '0', transfers: [] } }
+        ]
+      })
+    );
+    try {
+      const cliTs = path.resolve(__dirname, '../index.ts');
+      const res = spawnSync(
+        'bun',
+        [cliTs, 'deploy', '--with-keyring', '--from', 'alice', '--msg-file', tmpFile, '--local'],
+        { encoding: 'utf-8', timeout: 15_000 }
+      );
+      expect(res.status).toBe(2);
+      expect(res.stderr).toContain('collectionId "0"');
+      expect(res.stderr).toContain('--exec');
+      expect(res.stdout).toBe('');
+    } finally {
+      fs.unlinkSync(tmpFile);
+    }
+  });
+
+  it('binds created collectionId from tx1 events into follow-up msg file before step 2 runs', async () => {
+    const built = buildKeyringMultiCommand({
+      messages: [
+        { typeUrl: '/tokenization.MsgUniversalUpdateCollection', value: { creator: 'bb1alice', collectionId: '0' } },
+        { typeUrl: '/tokenization.MsgTransferTokens', value: { creator: 'bb1alice', collectionId: '0', transfers: [] } }
+      ],
+      from: 'alice',
+      network: 'local',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'test',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    });
+    const seenTransferIds: string[] = [];
+    const sleeps: number[] = [];
+    try {
+      let stepIdx = 0;
+      const results = await executeKeyringMultiSteps(built.steps, {
+        quiet: true,
+        sleepImpl: async (ms) => {
+          sleeps.push(ms);
+        },
+        runStep: async () => {
+          if (stepIdx++ === 0) {
+            return {
+              hash: 'TX_CREATE_1',
+              result: {
+                code: 0,
+                height: 10,
+                events: [
+                  {
+                    type: 'message',
+                    attributes: [
+                      { key: 'msg_type', value: 'universal_update_collection' },
+                      { key: 'collectionId', value: '77' }
+                    ]
+                  }
+                ]
+              }
+            };
+          }
+          const transferJson = JSON.parse(fs.readFileSync(built.steps[1].msgFilePaths[0], 'utf-8'));
+          seenTransferIds.push(transferJson.collectionId);
+          return { hash: 'TX_TRANSFER_2', result: { code: 0, height: 11, events: [] } };
+        }
+      });
+
+      expect(seenTransferIds).toEqual(['77']);
+      expect(sleeps).toEqual([6000]);
+      expect(results.map((r) => r.txHash)).toEqual(['TX_CREATE_1', 'TX_TRANSFER_2']);
+    } finally {
+      for (const f of built.msgFilePaths) {
+        if (fs.existsSync(f)) fs.unlinkSync(f);
+      }
+    }
+  });
+
+  it('fails closed when create tx events lack a non-zero collectionId', async () => {
+    const built = buildKeyringMultiCommand({
+      messages: [
+        { typeUrl: '/tokenization.MsgCreateCollection', value: { creator: 'bb1alice' } },
+        { typeUrl: '/tokenization.MsgTransferTokens', value: { creator: 'bb1alice', collectionId: '0', transfers: [] } }
+      ],
+      from: 'alice',
+      network: 'local',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'test',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    });
+    let calls = 0;
+    try {
+      await expect(
+        executeKeyringMultiSteps(built.steps, {
+          quiet: true,
+          sleepImpl: async () => undefined,
+          runStep: async () => {
+            calls++;
+            return { hash: 'TX_CREATE_NO_ID', result: { code: 0, height: 10, events: [] } };
+          }
+        })
+      ).rejects.toThrow(KeyringBindError);
+      expect(calls).toBe(1);
+    } finally {
+      for (const f of built.msgFilePaths) {
+        if (fs.existsSync(f)) fs.unlinkSync(f);
+      }
+    }
+  });
+
+  it('fails closed when follow-up message uses a positional verb whose collectionId cannot be rewritten', async () => {
+    const built = buildKeyringMultiCommand({
+      messages: [
+        { typeUrl: '/tokenization.MsgCreateCollection', value: { creator: 'bb1alice' } },
+        { typeUrl: '/tokenization.MsgDeleteOutgoingApproval', value: { creator: 'bb1alice', collectionId: '0', approvalId: 'a1' } }
+      ],
+      from: 'alice',
+      network: 'local',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'test',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    });
+    let calls = 0;
+    try {
+      await expect(
+        executeKeyringMultiSteps(built.steps, {
+          quiet: true,
+          sleepImpl: async () => undefined,
+          runStep: async () => {
+            calls++;
+            return {
+              hash: 'TX_CREATE_1',
+              result: {
+                code: 0,
+                height: 10,
+                events: [{ type: 'message', attributes: [{ key: 'collectionId', value: '55' }] }]
+              }
+            };
+          }
+        })
+      ).rejects.toThrow(KeyringBindError);
+      expect(calls).toBe(1);
+    } finally {
+      for (const f of built.msgFilePaths) {
+        if (fs.existsSync(f)) fs.unlinkSync(f);
+      }
+    }
+  });
+
+  it('stops immediately before step 2 when step 1 fails on-chain', async () => {
+    const built = buildKeyringMultiCommand({
+      messages: [
+        { typeUrl: '/tokenization.MsgCreateCollection', value: { creator: 'bb1alice' } },
+        { typeUrl: '/tokenization.MsgTransferTokens', value: { creator: 'bb1alice', collectionId: '0', transfers: [] } }
+      ],
+      from: 'alice',
+      network: 'local',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'test',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    });
+    let calls = 0;
+    try {
+      const results = await executeKeyringMultiSteps(built.steps, {
+        quiet: true,
+        sleepImpl: async () => undefined,
+        runStep: async () => {
+          calls++;
+          return { hash: 'TX_FAIL_1', result: { code: 4, height: 0, rawLog: 'unauthorized', events: [] } };
+        }
+      });
+      expect(calls).toBe(1);
+      expect(results).toEqual([
+        { txHash: 'TX_FAIL_1', result: { code: 4, height: 0, rawLog: 'unauthorized', events: [] } }
+      ]);
+    } finally {
+      for (const f of built.msgFilePaths) {
+        if (fs.existsSync(f)) fs.unlinkSync(f);
+      }
+    }
+  });
+
+  it('scopes each create collectionId to the following messages before the next create', async () => {
+    const built = buildKeyringMultiCommand({
+      messages: [
+        { typeUrl: '/tokenization.MsgCreateCollection', value: { creator: 'bb1alice' } },
+        { typeUrl: '/tokenization.MsgTransferTokens', value: { creator: 'bb1alice', collectionId: '0', transfers: [] } },
+        { typeUrl: '/tokenization.MsgUniversalUpdateCollection', value: { creator: 'bb1alice', collectionId: '0' } },
+        { typeUrl: '/tokenization.MsgTransferTokens', value: { creator: 'bb1alice', collectionId: '0', transfers: [] } }
+      ],
+      from: 'alice',
+      network: 'local',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'test',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    });
+    const seenIds: string[] = [];
+    try {
+      let stepIdx = 0;
+      await executeKeyringMultiSteps(built.steps, {
+        quiet: true,
+        sleepImpl: async () => undefined,
+        runStep: async () => {
+          const cur = stepIdx++;
+          if (cur === 0) {
+            return {
+              hash: 'TX1',
+              result: { code: 0, height: 1, events: [{ type: 'message', attributes: [{ key: 'collectionId', value: '10' }] }] }
+            };
+          }
+          if (cur === 1) {
+            seenIds.push(JSON.parse(fs.readFileSync(built.steps[1].msgFilePaths[0], 'utf-8')).collectionId);
+            return { hash: 'TX2', result: { code: 0, height: 2, events: [] } };
+          }
+          if (cur === 2) {
+            return {
+              hash: 'TX3',
+              result: { code: 0, height: 3, events: [{ type: 'message', attributes: [{ key: 'collectionId', value: '11' }] }] }
+            };
+          }
+          seenIds.push(JSON.parse(fs.readFileSync(built.steps[3].msgFilePaths[0], 'utf-8')).collectionId);
+          return { hash: 'TX4', result: { code: 0, height: 4, events: [] } };
+        }
+      });
+      expect(seenIds).toEqual(['10', '11']);
+    } finally {
+      for (const f of built.msgFilePaths) {
+        if (fs.existsSync(f)) fs.unlinkSync(f);
+      }
+    }
   });
 });
