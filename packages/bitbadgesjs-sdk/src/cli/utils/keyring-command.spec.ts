@@ -369,6 +369,26 @@ describe('buildKeyringMultiCommand', () => {
     expect(result.commandLine).toContain('--keyring-backend test');
     expect(result.commandLine).toContain('--chain-id bitbadges-1');
   });
+
+  it('exposes per-step command lines without the sleep chain', () => {
+    const result = buildKeyringMultiCommand({
+      messages: [voteMsg, transferMsg],
+      from: 'alice',
+      network: 'mainnet',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'os',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    });
+    expect(result.steps).toHaveLength(2);
+    expect(result.steps[0].commandLine).toContain('cast-vote');
+    expect(result.steps[0].commandLine).not.toContain('sleep 6');
+    expect(result.steps[1].commandLine).toMatch(/transfer-tokens \/[^ \n]+\.json/);
+    expect(result.steps[1].commandLine.trim().endsWith('--yes')).toBe(true);
+    // The printable combined script still chains with a sleep for copy/paste.
+    expect(result.commandLine).toContain('--yes && sleep 6 && \\');
+    for (const f of result.msgFilePaths) fs.unlinkSync(f);
+  });
 });
 
 describe('buildKeyringMultiCommand sidecar stripping', () => {
