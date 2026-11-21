@@ -1,16 +1,23 @@
+import axios from 'axios';
 import { BitBadgesSigningClient } from './BitBadgesSigningClient.js';
 import type { WalletAdapter } from './adapters/WalletAdapter.js';
 import type { SigningResult, EvmTransaction } from './types.js';
 import type { TransactionPayload } from '@/transactions/messages/base.js';
 
-// Restore env between tests so the BITBADGES_TESTNET_OFFLINE override doesn't
-// leak across test cases.
+// Restore env between tests so BITBADGES_TESTNET_OFFLINE / BITBADGES_API_KEY
+// overrides don't leak across test cases.
 const ORIGINAL_TESTNET_OFFLINE = process.env.BITBADGES_TESTNET_OFFLINE;
+const ORIGINAL_API_KEY = process.env.BITBADGES_API_KEY;
 afterEach(() => {
   if (ORIGINAL_TESTNET_OFFLINE === undefined) {
     delete process.env.BITBADGES_TESTNET_OFFLINE;
   } else {
     process.env.BITBADGES_TESTNET_OFFLINE = ORIGINAL_TESTNET_OFFLINE;
+  }
+  if (ORIGINAL_API_KEY === undefined) {
+    delete process.env.BITBADGES_API_KEY;
+  } else {
+    process.env.BITBADGES_API_KEY = ORIGINAL_API_KEY;
   }
 });
 
@@ -21,6 +28,12 @@ jest.mock('axios', () => ({
     post: jest.fn()
   }))
 }));
+
+function lastCreateHeaders(): Record<string, unknown> {
+  const mock = axios.create as jest.Mock;
+  const config = mock.mock.calls[mock.mock.calls.length - 1]?.[0];
+  return config?.headers ?? {};
+}
 
 /**
  * Mock Cosmos wallet adapter for testing.
@@ -137,6 +150,30 @@ describe('BitBadgesSigningClient', () => {
       // The address should be converted to bb format
       expect(client.chainType).toBe('evm');
       // Note: actual conversion depends on the address converter
+    });
+
+    it('falls back to BITBADGES_API_KEY when apiKey option is omitted', () => {
+      process.env.BITBADGES_API_KEY = 'env-dummy-key';
+      const adapter = new MockCosmosAdapter();
+      new BitBadgesSigningClient({ adapter });
+
+      expect(lastCreateHeaders()['x-api-key']).toBe('env-dummy-key');
+    });
+
+    it('prefers explicit apiKey over BITBADGES_API_KEY', () => {
+      process.env.BITBADGES_API_KEY = 'env-dummy-key';
+      const adapter = new MockCosmosAdapter();
+      new BitBadgesSigningClient({ adapter, apiKey: 'option-dummy-key' });
+
+      expect(lastCreateHeaders()['x-api-key']).toBe('option-dummy-key');
+    });
+
+    it('does not send x-api-key when neither option nor env is set', () => {
+      delete process.env.BITBADGES_API_KEY;
+      const adapter = new MockCosmosAdapter();
+      new BitBadgesSigningClient({ adapter });
+
+      expect(lastCreateHeaders()['x-api-key']).toBeUndefined();
     });
   });
 
