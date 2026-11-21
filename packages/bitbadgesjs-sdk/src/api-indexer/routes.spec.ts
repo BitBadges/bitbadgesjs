@@ -16,6 +16,18 @@ describe('BitBadgesApiRoutes', () => {
   it('no longer exposes a builder for the removed claim-success route', () => {
     expect((BitBadgesApiRoutes as unknown as Record<string, unknown>).CheckClaimSuccessRoute).toBeUndefined();
   });
+
+  it('puts collectionId in the path for amount and challenge tracker-by-id routes', () => {
+    // The indexer serves GET /api/:version/collection/:collectionId/amountTracker
+    // and .../challengeTracker. A collection-less /collection/amountTracker path 404s.
+    expect(BitBadgesApiRoutes.GetCollectionAmountTrackerByIdRoute('123')).toBe('/api/v0/collection/123/amountTracker');
+    expect(BitBadgesApiRoutes.GetCollectionChallengeTrackerByIdRoute('123')).toBe(
+      '/api/v0/collection/123/challengeTracker'
+    );
+    // No-arg form stays valid for existing callers of the route helper.
+    expect(BitBadgesApiRoutes.GetCollectionAmountTrackerByIdRoute()).toBe('/api/v0/collection/amountTracker');
+    expect(BitBadgesApiRoutes.GetCollectionChallengeTrackerByIdRoute()).toBe('/api/v0/collection/challengeTracker');
+  });
 });
 
 describe('checkClaimSuccess', () => {

@@ -2389,16 +2389,17 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Gets a specific amount tracker by ID for a collection
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/collection/amountTracker`
+   * - **API Route**: `GET /api/v0/collection/{collectionId}/amountTracker`
    * - **SDK Function Call**: `await BitBadgesApi.getCollectionAmountTrackerById(...);`
    */
   public async getCollectionAmountTrackerById<T extends NumberType>(
     trackerDetails: iAmountTrackerIdDetails<T>
   ): Promise<GetCollectionAmountTrackerByIdSuccessResponse<T>> {
     try {
+      const { collectionId, ...query } = trackerDetails;
       const response = await this.axios.get<iGetCollectionAmountTrackerByIdSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionAmountTrackerByIdRoute()}`,
-        { params: trackerDetails }
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionAmountTrackerByIdRoute(collectionId)}`,
+        { params: query }
       );
       return new GetCollectionAmountTrackerByIdSuccessResponse(response.data);
     } catch (error) {
@@ -2411,16 +2412,17 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * Gets a specific challenge tracker by ID for a collection
    *
    * @remarks
-   * - **API Route**: `GET /api/v0/collection/challengeTracker`
+   * - **API Route**: `GET /api/v0/collection/{collectionId}/challengeTracker`
    * - **SDK Function Call**: `await BitBadgesApi.getCollectionChallengeTrackerById(...);`
    */
   public async getCollectionChallengeTrackerById<T extends NumberType>(
     trackerDetails: iChallengeTrackerIdDetails<T>
   ): Promise<GetCollectionChallengeTrackerByIdSuccessResponse<T>> {
     try {
+      const { collectionId, ...query } = trackerDetails;
       const response = await this.axios.get<iGetCollectionChallengeTrackerByIdSuccessResponse<T>>(
-        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionChallengeTrackerByIdRoute()}`,
-        { params: trackerDetails }
+        `${this.BACKEND_URL}${BitBadgesApiRoutes.GetCollectionChallengeTrackerByIdRoute(collectionId)}`,
+        { params: query }
       );
       return new GetCollectionChallengeTrackerByIdSuccessResponse(response.data);
     } catch (error) {

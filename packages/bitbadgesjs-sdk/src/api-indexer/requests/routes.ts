@@ -129,8 +129,14 @@ export class BitBadgesApiRoutes {
   static GetCollectionAmountTrackersRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/amountTrackers`;
   static GetCollectionListingsRoute = (collectionId: CollectionId) => `/api/v0/collection/${collectionId.toString()}/listings`;
 
-  static GetCollectionAmountTrackerByIdRoute = () => `/api/v0/collection/amountTracker`;
-  static GetCollectionChallengeTrackerByIdRoute = () => `/api/v0/collection/challengeTracker`;
+  static GetCollectionAmountTrackerByIdRoute = (collectionId?: CollectionId) =>
+    collectionId != null
+      ? `/api/v0/collection/${collectionId.toString()}/amountTracker`
+      : `/api/v0/collection/amountTracker`;
+  static GetCollectionChallengeTrackerByIdRoute = (collectionId?: CollectionId) =>
+    collectionId != null
+      ? `/api/v0/collection/${collectionId.toString()}/challengeTracker`
+      : `/api/v0/collection/challengeTracker`;
 
   static GetSwapActivitiesRoute = () => '/api/v0/swapActivities';
 
