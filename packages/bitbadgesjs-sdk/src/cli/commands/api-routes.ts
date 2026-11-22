@@ -18,6 +18,7 @@ export interface ParamInfo {
   name: string;
   description: string;
   required: boolean;
+  repeat?: boolean;
 }
 
 export interface FieldInfo {
@@ -77,7 +78,7 @@ export const TAG_DESCRIPTIONS: Record<string, string> = {
 };
 
 // ---------------------------------------------------------------------------
-// Routes (134 total)
+// Routes (138 total)
 // ---------------------------------------------------------------------------
 
 export const ROUTES: ApiRoute[] = [
@@ -208,6 +209,65 @@ export const ROUTES: ApiRoute[] = [
       request: 'iGetVotesByVoterPayload',
       response: 'iGetVotesByVoterSuccessResponse',
       function: 'BitBadgesAPI.getVotesByVoter',
+    },
+  },
+  {
+    name: 'get-notifications',
+    tag: 'accounts',
+    method: 'GET',
+    path: '/notifications',
+    description: 'Get my notification inbox',
+    pathParams: [],
+    hasBody: false,
+    queryParams: [
+      { name: 'bookmark', description: 'Opaque base64url bookmark from the preceding response.', required: false },
+      { name: 'unreadOnly', description: 'Only return unread entries when true.', required: false },
+      { name: 'types', description: 'Repeat the key for multiple categories: types=bank_send&types=claim.', required: false, repeat: true },
+    ],
+    sdkLinks: {
+      response: 'iGetNotificationsSuccessResponse',
+      function: 'BitBadgesAdminAPI.getNotifications',
+    },
+  },
+  {
+    name: 'get-unread-notification-count',
+    tag: 'accounts',
+    method: 'GET',
+    path: '/notifications/unreadCount',
+    description: 'Get my unread notification count',
+    pathParams: [],
+    hasBody: false,
+    sdkLinks: {
+      response: 'iGetUnreadNotificationCountSuccessResponse',
+      function: 'BitBadgesAdminAPI.getUnreadNotificationCount',
+    },
+  },
+  {
+    name: 'mark-notifications-read',
+    tag: 'accounts',
+    method: 'POST',
+    path: '/notifications/read',
+    description: 'Update my notification read state',
+    pathParams: [],
+    hasBody: true,
+    sdkLinks: {
+      request: 'iMarkNotificationsReadPayload',
+      response: 'iMarkNotificationsReadSuccessResponse',
+      function: 'BitBadgesAdminAPI.markNotificationsRead',
+    },
+  },
+  {
+    name: 'update-notification-preferences',
+    tag: 'accounts',
+    method: 'POST',
+    path: '/notifications/preferences',
+    description: 'Update my notification preferences',
+    pathParams: [],
+    hasBody: true,
+    sdkLinks: {
+      request: 'iUpdateNotificationPreferencesPayload',
+      response: 'iUpdateNotificationPreferencesSuccessResponse',
+      function: 'BitBadgesAdminAPI.updateNotificationPreferences',
     },
   },
   // =========================================================================

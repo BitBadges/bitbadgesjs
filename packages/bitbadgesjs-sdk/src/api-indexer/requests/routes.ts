@@ -50,6 +50,11 @@ export class BitBadgesApiRoutes {
   static GetAccountRoute = () => '/api/v0/user';
   static UpdateAccountInfoRoute = () => '/api/v0/user/updateAccount';
 
+  static GetNotificationsRoute = () => '/api/v0/notifications';
+  static GetUnreadNotificationCountRoute = () => '/api/v0/notifications/unreadCount';
+  static MarkNotificationsReadRoute = () => '/api/v0/notifications/read';
+  static UpdateNotificationPreferencesRoute = () => '/api/v0/notifications/preferences';
+
   static GetApiKeysRoute = () => '/api/v0/apiKeys/fetch';
   static CRUDApiKeysRoute = () => '/api/v0/apiKeys';
   static RotateApiKeyRoute = () => '/api/v0/apiKeys/rotate';
