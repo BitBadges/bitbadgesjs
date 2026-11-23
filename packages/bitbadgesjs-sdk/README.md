@@ -1,6 +1,6 @@
 # BitBadges SDK
 
-**Experimental local lifecycle checks:** isolated scenario assertions, not product certification. Seven product families have shipped references; other standards explicitly lack reference coverage. See [supported scope and usage](docs/runbooks/local-lifecycle.md).
+**Experimental local lifecycle checks:** isolated scenario assertions, not product certification. Seven product families have shipped references; other standards explicitly lack reference coverage. See [supported scope and usage](https://github.com/BitBadges/bitbadgesjs/blob/main/packages/bitbadgesjs-sdk/docs/runbooks/local-lifecycle.md).
 
 **Experimental evaluations — not a source of truth.** These checks provide
 limited diagnostic and comparison signals. A passing score is not proof of
@@ -22,7 +22,7 @@ The official TypeScript SDK for interacting with the BitBadges blockchain, API, 
 
 ## Installation
 
-For the v35 release, see the [coordinated rollout runbook](../../docs/runbooks/v35-downstream-rollout.md)
+For the v35 release, see the [coordinated rollout runbook](https://github.com/BitBadges/bitbadgesjs/blob/main/docs/runbooks/v35-downstream-rollout.md)
 for gas defaults, explicit signing overrides, and nonce-based ETH proof tracker queries.
 
 ```bash
@@ -33,7 +33,7 @@ bun add bitbadges
 
 ## AI agents — start with the CLI
 
-Use `bb` as the primary entry point, including native Cosmos commands. An SDK-only installation exposes SDK commands through `bitbadges-cli`. Start with `bb --help-json`, `bb build --help`, and `bb dev skills`; load detailed instructions with `bb dev skills <id>`. Use a shipped preset and its JSON input, then check, simulate, and choose an authorized signing path. See [AI Agent Guide](AI_AGENT_GUIDE.md) for browser signing, agent-owned wallets, confirmation and recovery constraints.
+Use `bb` as the primary entry point, including native Cosmos commands. An SDK-only installation exposes SDK commands through `bitbadges-cli`. Start with `bb --help-json`, `bb build --help`, and `bb dev skills`; load detailed instructions with `bb dev skills <id>`. Use a shipped preset and its JSON input, then check, simulate, and choose an authorized signing path. See [AI Agent Guide](https://github.com/BitBadges/bitbadgesjs/blob/main/packages/bitbadgesjs-sdk/AI_AGENT_GUIDE.md) for browser signing, agent-owned wallets, confirmation and recovery constraints.
 
 MCP and programmatic APIs are optional integrations. The CLI does not require an LLM-provider API key. The following sections describe those integrations.
 
@@ -60,7 +60,7 @@ env), skills filter, system prompt additions, hooks, pluggable session store,
 typed errors, cost reporting, image placeholder substitution, health checks,
 and a `/internals` escape hatch for DIY loops.
 
-Examples: `examples/builder-agent/`. Full guide:
+Examples: [`examples/builder-agent/`](https://github.com/BitBadges/bitbadgesjs/tree/main/packages/bitbadgesjs-sdk/examples/builder-agent). Full guide:
 <https://docs.bitbadges.io/for-developers/ai-agents/programmatic-agent>
 
 ### 2. MCP builder (Claude Desktop / Cursor / Claude Code)
@@ -440,7 +440,7 @@ This shouldn't occur - the SDK checks for `process` existence. If it does, ensur
 
 ## Additional Resources
 
-- **Detailed Patterns & Examples**: See [AI_AGENT_GUIDE.md](./AI_AGENT_GUIDE.md) for comprehensive patterns
+- **Detailed Patterns & Examples**: See [AI_AGENT_GUIDE.md](https://github.com/BitBadges/bitbadgesjs/blob/main/packages/bitbadgesjs-sdk/AI_AGENT_GUIDE.md) for comprehensive patterns
 - **API Documentation**: https://docs.bitbadges.io/for-developers/bitbadges-api/api
 - **GitHub**: https://github.com/bitbadges/bitbadgesjs
 - **Broadcast Helper**: https://bitbadges.io/dev/broadcast
@@ -452,4 +452,4 @@ This shouldn't occur - the SDK checks for `process` existence. If it does, ensur
 
 ## License
 
-See [LICENSE](./LICENSE) for details.
+See [LICENSE](https://github.com/BitBadges/bitbadgesjs/blob/main/LICENSE) for details.
