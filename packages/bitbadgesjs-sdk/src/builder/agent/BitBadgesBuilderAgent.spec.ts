@@ -626,6 +626,25 @@ describe('BitBadgesBuilderAgent — validate()', () => {
     expect(fetcher).toHaveBeenCalledWith('42');
   });
 
+  it('accepts the bb build --output-file envelope, a bare Msg, and a Msg array like the CLI does', async () => {
+    const agent = new BitBadgesBuilderAgent({ anthropicKey: 'k', defaultCreatorAddress: 'bb1test' });
+    const msg = { typeUrl: '/tokenization.MsgUniversalUpdateCollection', value: { creator: 'bb1test', collectionId: '0' } };
+    const baseline = await agent.validate({ messages: [msg] });
+    const noMessages = (r: { errors: { message: string }[] }) => r.errors.some((e) => /no messages|"messages" array/.test(e.message));
+    expect(noMessages(baseline)).toBe(false);
+    for (const shape of [{ ok: true, data: msg, warnings: [], error: null }, msg, [msg]]) {
+      const result = await agent.validate(shape);
+      expect(noMessages(result)).toBe(false);
+      expect(result.valid).toBe(baseline.valid);
+    }
+  });
+
+  it('still reports a failed (ok:false) envelope as having no messages', async () => {
+    const agent = new BitBadgesBuilderAgent({ anthropicKey: 'k', defaultCreatorAddress: 'bb1test' });
+    const result = await agent.validate({ ok: false, data: null, error: { code: 'x', message: 'y' } });
+    expect(result.valid).toBe(false);
+  });
+
   it('does not call the snapshot fetcher when existingCollectionId is omitted', async () => {
     const fetcher = jest.fn(async () => null);
     const agent = new BitBadgesBuilderAgent({
