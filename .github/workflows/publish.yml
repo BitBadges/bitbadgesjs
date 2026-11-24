@@ -5,15 +5,14 @@ name: Publish to npm
 # environment before anything is published.
 #
 # Release flow: bump "version" in packages/bitbadgesjs-sdk/package.json on main,
-# then push a matching tag (e.g. `git tag v0.45.11 && git push origin v0.45.11`)
-# or publish a GitHub Release for that tag. Approve the deployment when asked.
+# then push a matching tag (e.g. `git tag v0.45.11 && git push origin v0.45.11`;
+# creating a GitHub Release with a new tag also pushes it). Approve the
+# deployment when asked.
 
 on:
   push:
     tags:
       - 'v*.*.*'
-  release:
-    types: [published]
 
 concurrency:
   group: npm-publish
@@ -33,21 +32,8 @@ jobs:
       run:
         working-directory: packages/bitbadgesjs-sdk
     steps:
-      - name: Resolve tag
-        id: tag
-        working-directory: .
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          REF_NAME: ${{ github.ref_name }}
-        run: |
-          if [ "$EVENT_NAME" = "release" ]; then TAG="$RELEASE_TAG"; else TAG="$REF_NAME"; fi
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-
       - name: Checkout tag
         uses: actions/checkout@v7
-        with:
-          ref: refs/tags/${{ steps.tag.outputs.tag }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -65,7 +51,7 @@ jobs:
 
       - name: Refuse if tag does not match package.json version
         env:
-          TAG: ${{ steps.tag.outputs.tag }}
+          TAG: ${{ github.ref_name }}
         run: |
           PKG_VERSION="$(node -p "require('./package.json').version")"
           if [ "${TAG#v}" != "$PKG_VERSION" ]; then
