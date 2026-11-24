@@ -482,7 +482,7 @@ sharedOpts(
     .description('Create a recurring subscription collection. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--interval <duration>', 'Interval: daily, monthly, annually, or shorthand (30d)')
     .option('--price <amount>', 'Price per interval (display units) — use with --denom/--recipient')
-    .option('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+    .option('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
     .option('--recipient <address>', 'Payout address (bb1...)')
     .option('--payouts <json>', 'Multiple payouts JSON: [{"recipient","amount","denom"}]')
     .option('--tiers <n>', 'Number of tiers', '1')
@@ -533,7 +533,7 @@ sharedOpts(
     .command('bounty')
     .description('Create a bounty escrow collection. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--amount <n>', 'Bounty amount (display units)')
-    .requiredOption('--denom <symbol|denom>', 'Coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+    .requiredOption('--denom <symbol|denom>', 'Coin. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
     .requiredOption('--verifier <address>', 'Verifier address (bb1...)')
     .requiredOption('--recipient <address>', 'Recipient address (bb1...)')
     .requiredOption('--submitter <address>', 'Submitter address (bb1...) — receives the refund on deny / expire. Typically the bounty creator.')
@@ -628,7 +628,7 @@ sharedOpts(
       'Create an agent-initiated payment request (no-escrow inverse of bounty). Metadata: pass --uri OR --name + --image + (--description OR --context).'
     )
     .requiredOption('--amount <n>', 'Payment amount (display units)')
-    .requiredOption('--denom <symbol|denom>', 'Coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+    .requiredOption('--denom <symbol|denom>', 'Coin. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
     .requiredOption('--payer <address>', 'Payer address (bb1...) or All for a public pay-only invoice')
     .requiredOption('--recipient <address>', 'Recipient address (bb1...) — agent/merchant')
     .option('--expiration <duration>', 'Expiration duration', '30d')
@@ -666,7 +666,7 @@ sharedOpts(
     .command('crowdfund')
     .description('Create a crowdfunding collection. Metadata: pass --uri OR --name + --image + --description.')
     .requiredOption('--goal <n>', 'Funding goal (display units)')
-    .requiredOption('--denom <symbol|denom>', 'Coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+    .requiredOption('--denom <symbol|denom>', 'Coin. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
     .option('--crowdfunder <address>', 'Who receives funds on success (bb1...)')
     .option('--deadline <duration>', 'Deadline duration', '30d')
 ).action(async (opts) => {
@@ -772,7 +772,7 @@ sharedOpts(
     .description('Create a binary prediction market (YES/NO). Metadata: pass --uri OR --name + --image + --description.')
     .option('--verifier <address>', 'Market resolver address (bb1...)')
     .option('--resolver <address>', 'Alias for --verifier — matches the help-text label.')
-    .option('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', 'USDC')
+    .option('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (abadge, ibc/...)', 'USDC')
 ).action(async (opts) => {
   const { buildPredictionMarket } = await import('../../core/builders/prediction-market.js');
   if (opts.json) {
@@ -873,7 +873,7 @@ sharedOpts(
   buildCommand
     .command('credit-token')
     .description('Create a credit/prepaid token. Metadata: pass --uri OR --name + --image + --description.')
-    .option('--payment-denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+    .option('--payment-denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
     .option('--denom <symbol|denom>', 'Alias for --payment-denom — for consistency with the other builders.')
     .requiredOption('--recipient <address>', 'Payment recipient (bb1...)')
     .option('--symbol <symbol>', 'Token symbol', 'CREDIT')
@@ -972,9 +972,9 @@ sharedOpts(
     .description('Create an OTC swap intent (user outgoing approval)')
     .requiredOption('--address <address>', 'Creator address (bb1...)')
     .requiredOption('--collection-id <id>', 'Intent Exchange collection ID')
-    .requiredOption('--pay-denom <symbol|denom>', 'What you send. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+    .requiredOption('--pay-denom <symbol|denom>', 'What you send. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
     .requiredOption('--pay-amount <n>', 'Amount you send (display units)')
-    .requiredOption('--receive-denom <symbol|denom>', 'What you receive. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+    .requiredOption('--receive-denom <symbol|denom>', 'What you receive. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
     .requiredOption('--receive-amount <n>', 'Amount you receive (display units)')
     .option(
       '--expiration <when>',
@@ -1018,7 +1018,7 @@ sharedOpts(
     .requiredOption('--collection-id <id>', 'Collection ID to list from')
     .requiredOption('--token-ids <range>', 'Token ID range (e.g. "1-5" or "1")')
     .requiredOption('--price <n>', 'Asking price (display units)')
-    .requiredOption('--denom <symbol|denom>', 'Price coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+    .requiredOption('--denom <symbol|denom>', 'Price coin. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
     .option('--max-sales <n>', 'Maximum number of sales', '1')
     .option('--expiration <when>', 'Listing expiry: ms-since-epoch (1748140800000) or duration (30d, 24h, monthly). Default 30d.', '30d')
 ).action(async (opts) => {
@@ -1052,7 +1052,7 @@ sharedOpts(
     .option('--token-ids <id>', 'Single token ID to bid on (e.g. "1" or "1-1"). Omit for a collection-wide bid (parity with `bb nfts bid`).')
     .option('--token-amount <n>', 'Number of tokens (default 1)', '1')
     .requiredOption('--price <n>', 'Bid price (display units)')
-    .requiredOption('--denom <symbol|denom>', 'Price coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+    .requiredOption('--denom <symbol|denom>', 'Price coin. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
     .option('--expiration <when>', 'Bid expiry: ms-since-epoch (1748140800000) or duration (7d, 24h, monthly). Default 7d.', '7d')
 ).action(async (opts) => {
   const { buildBid } = await import('../../core/builders/bid.js');
@@ -1085,7 +1085,7 @@ sharedOpts(
     .requiredOption('--token <yes|no>', 'Which outcome token to sell')
     .requiredOption('--amount <n>', 'Number of tokens to sell')
     .requiredOption('--price <n>', 'Total payment amount (display units)')
-    .requiredOption('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+    .requiredOption('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
     .option(
       '--expiration <when>',
       'Intent expiry: ms-since-epoch (1748140800000) or duration (24h, 7d, monthly). Default 24h, matches `bb prediction-markets buy/sell`.',
@@ -1122,7 +1122,7 @@ sharedOpts(
     .requiredOption('--token <yes|no>', 'Which outcome token to buy')
     .requiredOption('--amount <n>', 'Number of tokens to buy')
     .requiredOption('--price <n>', 'Total payment amount (display units)')
-    .requiredOption('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+    .requiredOption('--denom <symbol|denom>', 'Payment coin. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
     .option(
       '--expiration <when>',
       'Intent expiry: ms-since-epoch (1748140800000) or duration (24h, 7d, monthly). Default 24h, matches `bb prediction-markets buy/sell`.',
@@ -1155,7 +1155,7 @@ sharedOpts(
 // ============================================================
 //
 // MsgSend is the stock cosmos-sdk bank send — it moves a coin denom
-// (ubadge, ibc/...) between accounts and bypasses the BitBadges
+// (abadge, ibc/...) between accounts and bypasses the BitBadges
 // tokenization module entirely. Use this for fee top-ups, returning
 // dust, paying a verifier off-chain-arranged invoice, etc. For moving
 // a BitBadges tokenized token use `bb build transfer` instead, which
@@ -1173,9 +1173,9 @@ sharedOpts(
     .requiredOption(
       '--amount <n>',
       'Amount to send. Interpreted as display units when --denom is a known symbol (USDC, BADGE, ATOM, OSMO); ' +
-        'as base units when --denom is a raw chain denom (ubadge, ibc/...). Use --base-units to force base-unit interpretation either way.'
+        'as base units when --denom is a raw chain denom (abadge, ibc/...). Use --base-units to force base-unit interpretation either way.'
     )
-    .requiredOption('--denom <symbol-or-denom>', 'Coin symbol (USDC, BADGE) or raw chain denom (ubadge, ibc/...)')
+    .requiredOption('--denom <symbol-or-denom>', 'Coin symbol (USDC, BADGE) or raw chain denom (abadge, ibc/...)')
     .option('--base-units', 'Treat --amount as already-in-base-units, skipping the symbol→decimals conversion')
 ).action(async (opts) => {
   try {

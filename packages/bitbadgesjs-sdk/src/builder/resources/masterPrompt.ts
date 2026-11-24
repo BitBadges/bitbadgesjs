@@ -39,48 +39,39 @@ BitBadges is a Cosmos SDK blockchain for tokenization-as-a-service. It provides:
 - Explorer: https://explorer.bitbadges.io/BitBadges%20Mainnet
 - Docs: https://docs.bitbadges.io
 
-### Token Decimals & x/precisebank
+### Token Decimals (Unified 18-Decimal Native BADGE)
 
-**CRITICAL: BADGE has DIFFERENT decimals in Cosmos vs EVM contexts.**
+**BADGE uses \`abadge\` (18 decimals) uniformly in both Cosmos and EVM (\`1 abadge == 1 wei\`).**
 
-BitBadges uses the \`x/precisebank\` module to bridge the decimal gap between Cosmos (9 decimals) and EVM (18 decimals).
-
-#### Three denomination levels:
+#### Denomination levels:
 | Denom | Decimals | Context | Relationship |
 |-------|----------|---------|-------------|
-| **BADGE** | Display unit | Both | 1 BADGE = 10^9 ubadge = 10^18 abadge |
-| **ubadge** | 9 (Cosmos base) | Cosmos SDK, bank module, IBC | 1 ubadge = 10^9 abadge |
-| **abadge** | 0 (EVM base) | EVM, Solidity, MetaMask | Smallest unit (like wei) |
+| **BADGE** | Display unit | Both | 1 BADGE = 10^18 abadge |
+| **abadge** | 18 (base unit) | Cosmos SDK, bank, gas, IBC, EVM, Solidity, MetaMask | Smallest unit (1 abadge = 1 wei) |
+| **ubadge** | 9 (legacy) | Historical pre-upgrade records only | 1 legacy ubadge = 10^9 abadge |
 
-#### In Cosmos context:
-- Gas fees, bank sends, IBC transfers use \`ubadge\`
-- 1 BADGE = 1,000,000,000 ubadge (9 decimals)
-- ubadge is the base denom for Cosmos transactions
-
-#### In EVM context:
-- Solidity \`msg.value\`, MetaMask amounts, ERC-20 patterns use 18 decimal representation
-- 1 BADGE = 10^18 abadge (18 decimals, like ETH/wei)
-- ubadge in EVM = 10^9 abadge (ubadge has 9 decimals in EVM context)
-- \`x/precisebank\` handles the fractional conversion between ubadge and abadge automatically
+#### In Cosmos & EVM context:
+- Gas fees, bank sends, IBC transfers, SendManager precompile JSON, Solidity \`msg.value\`, and MetaMask native balances all use \`abadge\`
+- 1 BADGE = 1,000,000,000,000,000,000 abadge (18 decimals)
+- 1 abadge = 1 wei — do NOT rescale between Cosmos and EVM
+- Always use \`BigInt\` (\`10n ** 18n\`) for 18-decimal scaling since \`10^18 > Number.MAX_SAFE_INTEGER\`
 
 #### Conversion examples:
 \`\`\`
-1 BADGE    = 1,000,000,000 ubadge         (Cosmos)
-1 BADGE    = 1,000,000,000,000,000,000 abadge  (EVM, 18 decimals)
-1 ubadge   = 1,000,000,000 abadge         (EVM)
-0.5 ubadge = 500,000,000 abadge           (only possible via x/precisebank)
+1 BADGE     = 1,000,000,000,000,000,000 abadge  (Cosmos & EVM, 18 decimals)
+0.001 BADGE = 1,000,000,000,000,000 abadge
+1 abadge    = 1 wei
 \`\`\`
 
 #### Why this matters:
-- When writing Solidity that sends BADGE via SendManager precompile, amounts are in \`ubadge\` (Cosmos format)
-- When MetaMask displays native balance, it shows 18-decimal format (abadge as base)
-- When checking \`address(this).balance\` in Solidity, result is in abadge (18 decimals)
-- x/precisebank ensures sub-ubadge amounts (fractional) are tracked correctly in EVM
+- Cosmos coinTransfers, SendManager precompile JSON, and Solidity \`address(this).balance\` all share the exact same \`abadge\` unit
+- Never double-scale EVM wei amounts
+- Legacy \`ubadge\` (9 decimals) is only used for formatting historical pre-upgrade transactions/records
 
 #### Other tokens:
-- USDC (IBC): 6 decimals (1 USDC = 1,000,000 ibc/F082B65...)
+- USDC (IBC): 6 decimals (1 USDC = 1,000,000 ibc/E111648...)
 - ATOM (IBC): 6 decimals (1 ATOM = 1,000,000 ibc/A4DB47...)
-- IBC tokens do NOT have precisebank conversion — they use standard Cosmos decimals`,
+- IBC tokens use their standard Cosmos decimals`,
 
   workflow: `## Decision Tree
 
@@ -140,7 +131,7 @@ The complete transaction is a JSON object with this EXACT structure:
   ],
   "memo": "Optional memo text",
   "fee": {
-    "amount": [{ "denom": "ubadge", "amount": "5000" }],
+    "amount": [{ "denom": "abadge", "amount": "5000000000000000" }],
     "gas": "500000"
   }
 }
@@ -409,7 +400,7 @@ Here is the COMPLETE structure with ALL required fields and their types:
     "overridesFromOutgoingApprovals": true,
     "coinTransfers": [{
       "to": "bb1creator...",
-      "coins": [{ "denom": "ubadge", "amount": "5000000000" }]
+      "coins": [{ "denom": "abadge", "amount": "5000000000000000000" }]
     }]
   }
 }
@@ -471,12 +462,12 @@ For senderChecks/recipientChecks/initiatorChecks, ONLY these fields are valid:
 
 {
   "to": "bb1...",  // REQUIRED: Recipient address
-  "coins": [{ "denom": "ubadge", "amount": "5000000000" }],  // REQUIRED
+  "coins": [{ "denom": "abadge", "amount": "5000000000000000000" }],  // REQUIRED
   "overrideFromWithApproverAddress": false,  // REQUIRED: Boolean
   "overrideToWithInitiator": false  // REQUIRED: Boolean
 }
 
-**AllowedDenoms**: The chain enforces an allowed denoms list for coin transfers. If the allowlist is non-empty, every coin denom must be on the list or use the "badgeslp:" prefix (LP shares). Using an unlisted denom causes a rejection. Common allowed denoms: "ubadge", standard IBC denoms (ibc/...).
+**AllowedDenoms**: The chain enforces an allowed denoms list for coin transfers. If the allowlist is non-empty, every coin denom must be on the list or use the "badgeslp:" prefix (LP shares). Using an unlisted denom causes a rejection. Common allowed denoms: "abadge", standard IBC denoms (ibc/...).
 
 ### MustOwnTokens Structure
 
@@ -565,7 +556,7 @@ For senderChecks/recipientChecks/initiatorChecks, ONLY these fields are valid:
 \`\`\`json
 {
   "userApprovalSettings": {
-    "allowedDenoms": ["ubadge", "ibc/A4DB..."],  // Restrict which coin denoms users can use in their approval coinTransfers
+    "allowedDenoms": ["abadge", "ibc/A4DB..."],  // Restrict which coin denoms users can use in their approval coinTransfers
     "disableUserCoinTransfers": false  // If true, users cannot attach coinTransfers to their approvals
   }
 }

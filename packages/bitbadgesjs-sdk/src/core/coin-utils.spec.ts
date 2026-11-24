@@ -1,7 +1,8 @@
 import { CosmosCoinUtils, RoundingMode, cosmosDecToString, cosmosPercentToString, createCosmosCoin } from './coin-utils.js';
 
 const USDC_DETAILS = { symbol: 'USDC', decimals: 6 } as any;
-const BADGE_DETAILS = { symbol: 'BADGE', decimals: 6 } as any;
+const BADGE_DETAILS = { symbol: 'BADGE', decimals: '18' } as any;
+const LEGACY_BADGE_DETAILS = { symbol: 'BADGE', decimals: '9' } as any;
 
 describe('CosmosCoinUtils — display ↔ raw conversion', () => {
   it('integer raw amount converts cleanly to display', () => {
@@ -46,6 +47,61 @@ describe('CosmosCoinUtils — display ↔ raw conversion', () => {
   it('fromDisplayAmount rounds up when requested', () => {
     const c = CosmosCoinUtils.fromDisplayAmount('1.2345678', 'ibc/usdc', 6, USDC_DETAILS, RoundingMode.ROUND_UP);
     expect(c.getRawAmountString()).toBe('1234568');
+  });
+});
+
+describe('CosmosCoinUtils — 18-decimal abadge BigInt boundary & round-trip', () => {
+  it('round-trips 1 BADGE = 1000000000000000000 abadge exactly', () => {
+    const c = CosmosCoinUtils.fromDisplayAmount('1', 'abadge', 18, BADGE_DETAILS);
+    expect(c.amount).toBe(1_000_000_000_000_000_000n);
+    expect(c.getRawAmountString()).toBe('1000000000000000000');
+    expect(c.getDisplayAmountString()).toBe('1');
+    expect(c.getDisplayString(2)).toBe('1 BADGE');
+  });
+
+  it('round-trips smallest unit 0.000000000000000001 BADGE = 1 abadge without precision loss', () => {
+    const c = CosmosCoinUtils.fromDisplayAmount('0.000000000000000001', 'abadge', 18, BADGE_DETAILS);
+    expect(c.amount).toBe(1n);
+    expect(c.getRawAmountString()).toBe('1');
+    expect(c.getDisplayAmountString()).toBe('0.000000000000000001');
+
+    // Scientific notation number input 1e-18 also converts cleanly
+    const sci = CosmosCoinUtils.fromDisplayAmount(1e-18, 'abadge', 18, BADGE_DETAILS);
+    expect(sci.amount).toBe(1n);
+    expect(sci.getDisplayAmountString()).toBe('0.000000000000000001');
+  });
+
+  it('preserves exact digits for supplies far exceeding Number.MAX_SAFE_INTEGER', () => {
+    // 1 billion BADGE + 1 abadge = 10^27 + 1 abadge
+    const raw = '1000000000000000000000000001';
+    const c = CosmosCoinUtils.fromRawAmount(raw, 'abadge', BADGE_DETAILS);
+    expect(c.getDisplayAmountString()).toBe('1000000000.000000000000000001');
+    const roundTripped = CosmosCoinUtils.fromDisplayAmount(c.getDisplayAmountString(), 'abadge', 18, BADGE_DETAILS);
+    expect(roundTripped.getRawAmountString()).toBe(raw);
+  });
+
+  it('preserves all 18 fractional digits on 1.123456789012345678 BADGE', () => {
+    const c = CosmosCoinUtils.fromDisplayAmount('1.123456789012345678', 'abadge', 18, BADGE_DETAILS);
+    expect(c.amount).toBe(1123456789012345678n);
+    expect(c.getDisplayAmountString()).toBe('1.123456789012345678');
+    expect(c.getDisplayAmountString(17, RoundingMode.ROUND_UP)).toBe('1.12345678901234568');
+  });
+
+  it('handles carry on ROUND_UP across all 9s in fractional part', () => {
+    const c = CosmosCoinUtils.fromRawAmount('1999999999999999999', 'abadge', BADGE_DETAILS);
+    expect(c.getDisplayAmountString(2, RoundingMode.ROUND_UP)).toBe('2.00');
+  });
+
+  it('formats legacy 9-decimal ubadge accurately', () => {
+    const legacy = CosmosCoinUtils.fromRawAmount('1000000001', 'ubadge', LEGACY_BADGE_DETAILS);
+    expect(legacy.getDisplayAmountString()).toBe('1.000000001');
+  });
+
+  it('computes slippage and minAmount on 18-decimal BigInt amounts', () => {
+    const expected = 1_000_000_000_000_000_000n;
+    const actual = 995_000_000_000_000_000n;
+    expect(CosmosCoinUtils.calculateSlippage(expected, actual, 6)).toBeCloseTo(0.5, 6);
+    expect(CosmosCoinUtils.calculateMinAmount(expected, 0.005)).toBe(995_000_000_000_000_000n);
   });
 });
 

@@ -8,12 +8,13 @@
 import { requireBbDenom, requireSkipGoDenom } from './denom.js';
 
 describe('requireBbDenom', () => {
-  it('accepts the BADGE symbol and returns ubadge', () => {
-    expect(requireBbDenom('BADGE', 'place-bid')).toBe('ubadge');
-    expect(requireBbDenom('badge', 'place-bid')).toBe('ubadge'); // case-insensitive
+  it('accepts the BADGE symbol and returns abadge', () => {
+    expect(requireBbDenom('BADGE', 'place-bid')).toBe('abadge');
+    expect(requireBbDenom('badge', 'place-bid')).toBe('abadge'); // case-insensitive
   });
 
-  it('accepts the literal ubadge denom', () => {
+  it('accepts the literal abadge denom and legacy ubadge denom', () => {
+    expect(requireBbDenom('abadge', 'place-bid')).toBe('abadge');
     expect(requireBbDenom('ubadge', 'place-bid')).toBe('ubadge');
   });
 

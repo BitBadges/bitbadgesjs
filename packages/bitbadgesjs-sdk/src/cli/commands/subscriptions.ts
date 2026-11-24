@@ -360,7 +360,7 @@ addOutputFlags(
       .argument('<collection-id>', 'Subscription collection ID')
       .requiredOption('--creator <address>', 'Subscriber address (bb1.../0x — auto-normalized)')
       .option('--tier <approvalId>', 'Which faucet to renew (required for multi-tier collections)')
-      .option('--tip <ubadge>', 'Optional tip per interval on top of the base subscription amount (in base denom units)', '0')
+      .option('--tip <amount>', 'Optional tip per interval on top of the base subscription amount (in base denom units)', '0')
       .option('--approval-id <id>', 'Override the auto-generated recurring-approval id (random hex by default)')
   )
 )).action(
@@ -375,7 +375,7 @@ addOutputFlags(
       const faucet = pickFaucet(listFaucets(collection), opts.tier, 'subscriptions enable-renewal');
 
       const tip = parseNonNegativeIntFlag(opts.tip, '--tip');
-      const denom = faucet.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.denom ?? 'ubadge';
+      const denom = faucet.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.denom ?? 'abadge';
       const newApproval = userRecurringApproval({
         subscriptionApproval: faucet,
         firstIntervalStartTime: BigInt(Date.now()),
@@ -460,7 +460,7 @@ addOutputFlags(
       .argument('<collection-id>', 'Subscription collection ID')
       .requiredOption('--creator <address>', 'Subscriber address (bb1.../0x — auto-normalized)')
       .option('--tier <approvalId>', 'Which faucet to subscribe to (required for multi-tier collections)')
-      .option('--tip <ubadge>', 'Optional tip per interval on top of the base subscription amount', '0')
+      .option('--tip <amount>', 'Optional tip per interval on top of the base subscription amount', '0')
       .option('--approval-id <id>', 'Override the auto-generated recurring-approval id (random hex by default)')
   )
 ).action(
@@ -477,7 +477,7 @@ addOutputFlags(
       const claim = buildClaimMsg(creator, String(collectionId), faucet);
 
       const tip = parseNonNegativeIntFlag(opts.tip, '--tip');
-      const denom = faucet.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.denom ?? 'ubadge';
+      const denom = faucet.approvalCriteria?.coinTransfers?.[0]?.coins?.[0]?.denom ?? 'abadge';
       const newApproval = userRecurringApproval({
         subscriptionApproval: faucet,
         firstIntervalStartTime: BigInt(Date.now()),

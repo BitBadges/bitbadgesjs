@@ -14,7 +14,7 @@ export interface SmartTokenValidationResult {
 export interface SmartTokenDetails {
   /** Backing-address bb1... alias derived from the IBC denom. */
   backingAddress: string;
-  /** Full IBC denom string the collection wraps (`ibc/...` or `ubadge`). */
+  /** Full IBC denom string the collection wraps (`ibc/...` or `abadge`). */
   backingDenom: string;
   depositApproval: iCollectionApproval<bigint>;
   withdrawApproval: iCollectionApproval<bigint>;

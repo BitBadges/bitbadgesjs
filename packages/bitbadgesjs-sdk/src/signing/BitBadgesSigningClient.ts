@@ -31,9 +31,9 @@ const DEFAULT_GAS_MULTIPLIER = 1.3;
 /** Default maximum sequence retry attempts */
 const DEFAULT_MAX_SEQUENCE_RETRIES = 3;
 /** Default fee denomination */
-const DEFAULT_FEE_DENOM = 'ubadge';
-/** Default gas price in ubadge */
-const DEFAULT_GAS_PRICE = 10;
+const DEFAULT_FEE_DENOM = 'abadge';
+/** Default gas price in abadge (10 ubadge * 10^9) */
+const DEFAULT_GAS_PRICE = 10_000_000_000n;
 const MAX_GAS_LIMIT = 100_000_000;
 
 function validateGasLimit(gasLimit: number): number {
@@ -281,7 +281,7 @@ export class BitBadgesSigningClient {
    * Calculate a fee based on gas limit.
    */
   private calculateFee(gasLimit: number): Fee {
-    const amount = BigInt(validateGasLimit(gasLimit)) * BigInt(DEFAULT_GAS_PRICE);
+    const amount = BigInt(validateGasLimit(gasLimit)) * DEFAULT_GAS_PRICE;
     return {
       amount: amount.toString(),
       denom: DEFAULT_FEE_DENOM,
@@ -574,10 +574,10 @@ export class BitBadgesSigningClient {
         !/^\d+$/.test(fee.amount) ||
         fee.denom !== DEFAULT_FEE_DENOM
       ) {
-        throw new Error('Cosmos fee must use integer gas and amount in ubadge');
+        throw new Error('Cosmos fee must use integer gas and amount in abadge');
       }
       const minimumFee = this.calculateFee(Number(fee.gas));
-      if (BigInt(fee.amount) < BigInt(minimumFee.amount)) throw new Error(`Cosmos fee must be at least ${DEFAULT_GAS_PRICE} ubadge per gas`);
+      if (BigInt(fee.amount) < BigInt(minimumFee.amount)) throw new Error(`Cosmos fee must be at least ${DEFAULT_GAS_PRICE} abadge per gas`);
       return fee;
     }
     return options?.simulate === false ? this.calculateFee(this.defaultGasLimit) : (await this.simulateCosmos(messages, options, eip712)).fee;

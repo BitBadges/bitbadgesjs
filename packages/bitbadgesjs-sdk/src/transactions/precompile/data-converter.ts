@@ -291,7 +291,7 @@ export function convertUniversalUpdateCollection(
  * 
  * The SendManager precompile accepts MsgSendWithAliasRouting protobuf JSON format,
  * which is compatible with standard MsgSend format (to_address, amount).
- * Supports both standard denoms (e.g., "ubadge") and alias denoms (e.g., "badgeslp:...").
+ * Supports both standard denoms (e.g., "abadge") and alias denoms (e.g., "badgeslp:...").
  */
 export function convertMsgSend(
   msg: any,
@@ -699,7 +699,7 @@ export interface DistributionPrecompileParams {
 /**
  * Convert MsgDelegate to staking precompile parameters
  * Note: The staking precompile uses typed ABI parameters (not JSON string)
- * Amount should be in abadge (18 decimals via precisebank)
+ * Amount is in abadge (18 decimals, 1 abadge = 1 wei)
  */
 export function convertMsgDelegate(msg: any, evmAddress?: string): StakingPrecompileParams {
   let msgObj: any;
@@ -712,7 +712,7 @@ export function convertMsgDelegate(msg: any, evmAddress?: string): StakingPrecom
     msgObj = msg;
   }
 
-  // Get amount - convert from ubadge (9 decimals) to abadge (18 decimals) if needed
+  // Amount is already in abadge (18 decimals, 1 abadge = 1 wei)
   const amountStr = msgObj.amount?.amount || msgObj.amount || '0';
   const amount = BigInt(amountStr);
 

@@ -4362,7 +4362,7 @@ export interface iTrackSkipTxPayload {
   chain_id?: string;
   /** Source chain ID (camelCase SDK form). */
   chainId?: string;
-  /** Optional token in amount with denom (e.g. "1000ubadge"). Used to seed the swap event row in the indexer DB. */
+  /** Optional token in amount with denom (e.g. "1000abadge"). Used to seed the swap event row in the indexer DB. */
   tokenIn?: string;
 }
 
@@ -4445,7 +4445,7 @@ export class GetSkipTxStatusSuccessResponse extends CustomTypeClass<GetSkipTxSta
  *  - `skip` — upstream Skip:Go API
  *  - `coinregistry` — BitBadges SDK's CoinsRegistry (IBC-20 metadata)
  *  - `verified` — verified AssetInfoDoc (BB-native or wrapped badgeslp:/badges:)
- *  - `native` — chain-native denom (e.g. `ubadge`)
+ *  - `native` — chain-native denom (e.g. `abadge`)
  * @category API Requests / Responses
  */
 export type SwapAssetSource = 'skip' | 'coinregistry' | 'verified' | 'native';
@@ -4612,7 +4612,7 @@ export interface iTrackSwapPayload {
   chain_id?: string;
   /** Source chain ID (camelCase SDK form). */
   chainId?: string;
-  /** Optional token in amount with denom (e.g. "1000ubadge") — surfaces in the swap-activity row. */
+  /** Optional token in amount with denom (e.g. "1000abadge") — surfaces in the swap-activity row. */
   tokenIn?: string;
 }
 
@@ -4857,7 +4857,7 @@ export class GetUserBalancesSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface iGetAllListingsPayload {
-  /** Denom to filter listings by (e.g. `ubadge`). */
+  /** Denom to filter listings by (e.g. `abadge`). */
   denom: string;
 }
 
@@ -4891,7 +4891,7 @@ export class GetAllListingsSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface iGetCollectionOffersPayload {
-  /** Denom to filter offers by (e.g. `ubadge`). */
+  /** Denom to filter offers by (e.g. `abadge`). */
   denom: string;
 }
 
@@ -4925,7 +4925,7 @@ export class GetCollectionOffersSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface iGetListingsForTokenIdPayload {
-  /** Denom to filter listings by (e.g. `ubadge`). */
+  /** Denom to filter listings by (e.g. `abadge`). */
   denom: string;
 }
 
@@ -4959,7 +4959,7 @@ export class GetListingsForTokenIdSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface iGetOffersForTokenIdPayload {
-  /** Denom to filter offers by (e.g. `ubadge`). */
+  /** Denom to filter offers by (e.g. `abadge`). */
   denom: string;
 }
 
@@ -4999,7 +4999,7 @@ export class GetOffersForTokenIdSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface iGetOrderbookDepthPayload {
-  /** Denom to filter the orderbook by (e.g. `ubadge`). */
+  /** Denom to filter the orderbook by (e.g. `abadge`). */
   denom: string;
 }
 
@@ -5044,7 +5044,7 @@ export class GetOrderbookDepthSuccessResponse extends CustomTypeClass<GetOrderbo
  * @category API Requests / Responses
  */
 export interface iGetCandlestickDataPayload {
-  /** Denom for the candlestick price/volume aggregation (e.g. `ubadge`). */
+  /** Denom for the candlestick price/volume aggregation (e.g. `abadge`). */
   denom: string;
 }
 
@@ -5090,7 +5090,7 @@ export class GetCandlestickDataSuccessResponse<T extends NumberType>
  * @category API Requests / Responses
  */
 export interface iGetLiquidityPairPriceHistoryPayload {
-  /** Asset identifier (e.g. `badgeslp:123:uyes` or `ubadge`). */
+  /** Asset identifier (e.g. `badgeslp:123:uyes` or `abadge`). */
   asset: string;
   /** Aggregation timeframe. Defaults to `'10m'` on the indexer when omitted. */
   timeframe?: '10m' | '1h' | '1d' | string;

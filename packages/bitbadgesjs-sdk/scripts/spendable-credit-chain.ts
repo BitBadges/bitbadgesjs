@@ -66,7 +66,7 @@ try {
   });
   const denom = built.value.collectionApprovals[0].approvalCriteria.coinTransfers[0].coins[0].denom;
   for (const address of Object.values(accounts)) {
-    cli(['genesis', 'add-genesis-account', address, `100000000000000000ubadge,1000000000000000ustake,1000000000${denom}`]);
+    cli(['genesis', 'add-genesis-account', address, `100000000000000000000000000abadge,1000000000000000ustake,1000000000${denom}`]);
   }
   const genesisPath = join(chainHome, 'config/genesis.json');
   const genesis = JSON.parse(readFileSync(genesisPath, 'utf8'));
@@ -104,7 +104,7 @@ try {
       '--home',
       chainHome,
       '--minimum-gas-prices',
-      '0ubadge',
+      '0abadge',
       '--rpc.laddr',
       rpc.replace('http:', 'tcp:'),
       '--p2p.laddr',
@@ -157,7 +157,7 @@ try {
         '--gas',
         '10000000',
         '--fees',
-        '1000000ubadge',
+        '1000000000000000abadge',
         '--yes',
         '--output',
         'json'

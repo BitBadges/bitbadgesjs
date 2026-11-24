@@ -62,8 +62,8 @@
             "to": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7",
             "coins": [
               {
-                "amount": "5000000000",
-                "denom": "ubadge"
+                "amount": "5000000000000000000",
+                "denom": "abadge"
               }
             ],
             "overrideFromWithApproverAddress": false,
@@ -216,8 +216,8 @@
             "to": "bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7",
             "coins": [
               {
-                "amount": "7000000000",
-                "denom": "ubadge"
+                "amount": "7000000000000000000",
+                "denom": "abadge"
               }
             ],
             "overrideFromWithApproverAddress": false,
@@ -308,7 +308,7 @@
       {
         "id": "wrong-amount",
         "path": "/value/collectionApprovals/0/approvalCriteria/coinTransfers/0/coins/0/amount",
-        "value": "7000000001",
+        "value": "7000000000000000001",
         "mustFail": ["payment"]
       },
       {
@@ -364,7 +364,7 @@
         "expected": {
           "sideA": {
             "amount": "1",
-            "denom": "ubadge"
+            "denom": "abadge"
           },
           "sideB": [
             {
@@ -522,7 +522,7 @@
             "coins": [
               {
                 "amount": "1",
-                "denom": "ubadge"
+                "denom": "abadge"
               }
             ],
             "overrideFromWithApproverAddress": false,
@@ -616,7 +616,7 @@
   {
     "version": 1,
     "id": "spendable-service-credits",
-    "prompt": "Sell packs of 10 image-generation credits for 1000000 ubadge base units. Allow at most 3 packs per purchase; consumption must be holder-initiated. Expire at 1896048000000 inclusive.",
+    "prompt": "Sell packs of 10 image-generation credits for 1000000 abadge base units. Allow at most 3 packs per purchase; consumption must be holder-initiated. Expire at 1896048000000 inclusive.",
     "tool": "build_spendable_credit",
     "input": {
       "uri": "https://example.com/golden-metadata.json",
@@ -670,7 +670,7 @@
             "coins": [
               {
                 "amount": "1000000",
-                "denom": "ubadge"
+                "denom": "abadge"
               }
             ],
             "overrideFromWithApproverAddress": false,

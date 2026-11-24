@@ -173,7 +173,7 @@ export function buildKeyringCommand(opts: KeyringCommandOptions): KeyringCommand
     `    --chain-id ${chainId} \\`,
     `    --node ${nodeUrl} \\`,
     `    --keyring-backend ${opts.keyringBackend} \\`,
-    `    --gas ${opts.gas} --gas-adjustment ${opts.gasAdjustment} --gas-prices 10ubadge \\`,
+    `    --gas ${opts.gas} --gas-adjustment ${opts.gasAdjustment} --gas-prices 10000000000abadge \\`,
     `    --yes`
   ].join('\n');
 
@@ -397,7 +397,7 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
       `    --chain-id ${chainId} \\`,
       `    --node ${nodeUrl} \\`,
       `    --keyring-backend ${opts.keyringBackend} \\`,
-      `    --gas ${opts.gas} --gas-adjustment ${opts.gasAdjustment} --gas-prices 10ubadge \\`,
+      `    --gas ${opts.gas} --gas-adjustment ${opts.gasAdjustment} --gas-prices 10000000000abadge \\`,
       '    --yes'
     ];
     steps.push({

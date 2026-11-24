@@ -470,7 +470,8 @@ describe('durationToHuman', () => {
 });
 
 describe('denomToHuman', () => {
-  it('should map ubadge to BADGE', () => {
+  it('should map abadge and legacy ubadge to BADGE', () => {
+    expect(denomToHuman('abadge')).toBe('BADGE');
     expect(denomToHuman('ubadge')).toBe('BADGE');
   });
 
@@ -480,13 +481,19 @@ describe('denomToHuman', () => {
 });
 
 describe('amountToHuman', () => {
-  it('should convert ubadge amounts with 9 decimals', () => {
+  it('should convert abadge amounts with 18 decimals', () => {
+    expect(amountToHuman(1000000000000000000n, 'abadge')).toBe('1 BADGE');
+    expect(amountToHuman(1500000000000000000n, 'abadge')).toBe('1.5 BADGE');
+    expect(amountToHuman(1n, 'abadge')).toBe('0.000000000000000001 BADGE');
+  });
+
+  it('should convert legacy ubadge amounts with 9 decimals', () => {
     const result = amountToHuman(1000000000n, 'ubadge');
     expect(result).toContain('1');
     expect(result).toContain('BADGE');
   });
 
-  it('should handle fractional amounts', () => {
+  it('should handle fractional legacy ubadge amounts', () => {
     const result = amountToHuman(1500000000n, 'ubadge');
     expect(result).toContain('1.5');
     expect(result).toContain('BADGE');

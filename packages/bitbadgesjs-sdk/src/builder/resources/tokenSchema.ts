@@ -273,7 +273,7 @@ predeterminedBalances:
     maxScalingMultiplier: "1000000000000"     @rule MUST be > 0 when scaling is on (caps multiplier per transfer; use large value for micro-unit bases)
   orderCalculationMethod:
     useOverallNumTransfers: true
-coinTransfers: [{to: RECIPIENT, coins: [{amount: PRICE_PER_UNIT, denom: "ubadge"}]}]
+coinTransfers: [{to: RECIPIENT, coins: [{amount: PRICE_PER_UNIT, denom: "abadge"}]}]
                                                 @note coinTransfers scale by the same multiplier automatically
 
 @pattern Pay-per-token: user transfers N tokens, pays N * PRICE_PER_UNIT

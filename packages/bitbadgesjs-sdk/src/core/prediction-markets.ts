@@ -49,7 +49,7 @@ function isFrozen(permArr: any[] | undefined): boolean {
 
 /**
  * Extract the deposit denom from a prediction market collection's mint approval.
- * Returns the denom string (e.g., 'ubadge', 'ibc/F082B65...') or undefined if not found.
+ * Returns the denom string (e.g., 'abadge', 'ibc/F082B65...') or undefined if not found.
  */
 export function getDepositDenom(collection: any): string | undefined {
   const approvals: any[] = collection?.collectionApprovals ?? [];

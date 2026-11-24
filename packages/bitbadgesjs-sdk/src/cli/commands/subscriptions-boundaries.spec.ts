@@ -32,10 +32,10 @@ describe('subscription charge-due boundaries', () => {
       transferTimes: UintRangeArray.FullRanges(),
       approvalId: 'renew',
       tokenIds: [{ start: 1n, end: 1n }],
-      denom: 'ubadge'
+      denom: 'abadge'
     });
     const expired = { ...incoming, approvalId: 'expired', transferTimes: UintRangeArray.From([{ start: 1n, end: 999n }]) };
-    const future = userRecurringApproval({ subscriptionApproval: faucet, firstIntervalStartTime: 5000n, ubadgeTipAmount: 0n, transferTimes: UintRangeArray.FullRanges(), approvalId: 'future', tokenIds: incoming.tokenIds, denom: 'ubadge' });
+    const future = userRecurringApproval({ subscriptionApproval: faucet, firstIntervalStartTime: 5000n, ubadgeTipAmount: 0n, transferTimes: UintRangeArray.FullRanges(), approvalId: 'future', tokenIds: incoming.tokenIds, denom: 'abadge' });
     const incomingApprovals = consentCase === 'expired-only' ? [expired] : consentCase === 'expired-first' ? [expired, incoming] : consentCase === 'future-first' ? [future, incoming] : [incoming];
     (indexer.callIndexer as jest.Mock).mockImplementation(async (_method, path) =>
       path.includes('/balance/') ? { balances: [], incomingApprovals } : path.endsWith('/owners')

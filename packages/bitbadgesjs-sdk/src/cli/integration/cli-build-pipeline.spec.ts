@@ -235,17 +235,17 @@ describe('cli build pipeline integration', () => {
       expect(out.json.value.fromAddress).toBe(CREATOR);
       expect(out.json.value.toAddress).toBe(RECIPIENT);
       expect(out.json.value.amount).toHaveLength(1);
-      // BADGE has 9 decimals → 10 * 10^9 = 10000000000
-      expect(out.json.value.amount[0]).toEqual({ denom: 'ubadge', amount: '10000000000' });
+      // BADGE has 18 decimals → 10 * 10^18 = 10000000000000000000
+      expect(out.json.value.amount[0]).toEqual({ denom: 'abadge', amount: '10000000000000000000' });
     });
 
     it('--base-units treats amount as raw base units', () => {
       const out = runCli([
         'build', 'send',
         '--from', CREATOR, '--to', RECIPIENT,
-        '--amount', '42', '--denom', 'ubadge', '--base-units'
+        '--amount', '42', '--denom', 'abadge', '--base-units'
       ]);
-      expect(out.json.value.amount[0]).toEqual({ denom: 'ubadge', amount: '42' });
+      expect(out.json.value.amount[0]).toEqual({ denom: 'abadge', amount: '42' });
     });
 
     it('USDC symbol resolves to its IBC denom', () => {
@@ -300,7 +300,7 @@ describe('cli build pipeline integration', () => {
 
     it('rejects non-integer base-units amount', () => {
       const out = runCli(
-        ['build', 'send', '--from', CREATOR, '--to', RECIPIENT, '--amount', '1.5', '--denom', 'ubadge', '--base-units'],
+        ['build', 'send', '--from', CREATOR, '--to', RECIPIENT, '--amount', '1.5', '--denom', 'abadge', '--base-units'],
         { throwOnError: false, parseJson: false }
       );
       expect(out.exitCode).not.toBe(0);

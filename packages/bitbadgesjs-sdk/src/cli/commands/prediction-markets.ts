@@ -246,7 +246,7 @@ const tradeOpts = (cmd: Command, side: 'yes' | 'no', dir: 'buy' | 'sell') =>
     .requiredOption('--creator <address>', 'Trader address (bb1...) — strict; run `bb account convert` for 0x')
     .requiredOption('--token-amount <n>', `Quantity of ${side.toUpperCase()} tokens to ${dir} (always base units of the on-chain token id)`)
     .requiredOption('--payment-amount <n>', 'Payment side amount. Display units for symbol denoms, base units for chain denoms. Use --base-units to force base-units.')
-    .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...) or badgeslp:* alias.')
+    .requiredOption('--denom <symbol|denom>', 'Payment denom. BADGE, USDC, … or canonical denom (abadge, ibc/...) or badgeslp:* alias.')
     .option('--base-units', 'Treat --payment-amount as already-in-base-units')
     .option('--approval-id <id>', 'Override the random approval id'),
   { description: 'Approval expiry: ms-since-epoch or duration (24h, 7d). Default 24h.' });

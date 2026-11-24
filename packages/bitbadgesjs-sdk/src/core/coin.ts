@@ -7,12 +7,12 @@ import type { NumberType } from '../common/string-numbers.js';
 export interface iCosmosCoin<T extends NumberType> {
   /** The amount of the coin. */
   amount: T;
-  /** The denomination of the coin (e.g. "ubadge"). */
+  /** The denomination of the coin (e.g. "abadge"). */
   denom: string;
 }
 
 /**
- * Type for Cosmos SDK Coin information with support for bigint amounts (e.g. { amount: 1000000, denom: 'ubadge' }).
+ * Type for Cosmos SDK Coin information with support for bigint amounts (e.g. { amount: 1000000000000000000n, denom: 'abadge' }).
  *
  * @category Balances
  */

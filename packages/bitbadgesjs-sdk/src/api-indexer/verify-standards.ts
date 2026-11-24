@@ -617,7 +617,7 @@ function verifyTradableNFT(value: any): StandardViolation[] {
       field: 'standards',
       message:
         'Tradable NFT collections MUST include an "NFTPricingDenom:{denom}" standard to set the pricing currency for the orderbook.',
-      fix: 'Add "NFTPricingDenom:ubadge" (or desired denom) to the standards array.'
+      fix: 'Add "NFTPricingDenom:abadge" (or desired denom) to the standards array.'
     });
   }
 
@@ -1144,6 +1144,7 @@ const RESERVED_SYMBOLS = new Set([
   'uosmo',
   'BADGE',
   'badge',
+  'abadge',
   'ubadge',
   'ETH',
   'eth',

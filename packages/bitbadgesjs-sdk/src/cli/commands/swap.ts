@@ -304,9 +304,9 @@ addOutputFlags(
   addDeployOptions(
   addNetworkFlags(swapCommand.command('estimate'))
     .description('Estimate a swap from <from-denom> to <to-denom> for <amount>. Honors source/dest chain overrides. With --execute, sign+broadcast a BitBadges-only result via the deploy signing flags.')
-    .argument('<from>', 'Token in denom (e.g. "ubadge")')
+    .argument('<from>', 'Token in denom (e.g. "abadge")')
     .argument('<to>', 'Token out denom (e.g. "uusdc")')
-    .argument('<amount>', 'Integer amount of token in (e.g. "1000000" for 1 BADGE at 6 decimals)')
+    .argument('<amount>', 'Integer amount of token in (e.g. "1000000000000000000" for 1 BADGE at 18 decimals)')
     .option('--source-chain <id>', 'Source chain ID (defaults to "bitbadges-1")')
     .option('--dest-chain <id>', 'Destination chain ID (defaults to "bitbadges-1")')
     .option(
@@ -404,7 +404,7 @@ addOutputFlags(
     )
     .argument('<tx-hash>', 'Broadcast tx hash (Cosmos sha256 or EVM keccak256)')
     .option('--chain-id <id>', 'Source chain ID (e.g. "bitbadges-1", "1")')
-    .option('--token-in <amount-denom>', 'Optional token-in seed (e.g. "1000000ubadge") — surfaces in the swap activity row')
+    .option('--token-in <amount-denom>', 'Optional token-in seed (e.g. "1000000000000000000abadge") — surfaces in the swap activity row')
 ).action(
   async (
     txHash: string,

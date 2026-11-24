@@ -86,7 +86,7 @@ const BalanceSchema = z.object({
 const CoinTransferSchema = z.object({
   to: z.string().describe('Recipient address (bb1...). Who receives the payment.'),
   coins: z.array(z.object({
-    denom: z.string().describe('Token denomination. Use full IBC denom for ICS20 tokens (e.g., "ibc/A4DB..." for ATOM). Use "ubadge" for BADGE. Amounts use base units (e.g., 5 ATOM = "5000000" with 6 decimals).'),
+    denom: z.string().describe('Token denomination. Use full IBC denom for ICS20 tokens (e.g., "ibc/A4DB..." for ATOM). Use "abadge" for BADGE. Amounts use base units (e.g., 5 ATOM = "5000000" with 6 decimals).'),
     amount: z.string().describe('Amount in base units as string.')
   })).describe('Coins to transfer as payment.'),
   overrideFromWithApproverAddress: z.boolean().optional().default(false)
@@ -258,7 +258,7 @@ export const addApprovalTool = {
                   items: {
                     type: 'object',
                     properties: {
-                      denom: { type: 'string', description: 'Token denomination. Use full IBC denom (e.g., "ibc/A4DB..." for ATOM). "ubadge" for BADGE. Use lookup_token_info to resolve symbols.' },
+                      denom: { type: 'string', description: 'Token denomination. Use full IBC denom (e.g., "ibc/A4DB..." for ATOM). "abadge" for BADGE. Use lookup_token_info to resolve symbols.' },
                       amount: { type: 'string', description: 'Amount in base units as string (e.g., 5 ATOM = "5000000" with 6 decimals).' }
                     },
                     required: ['denom', 'amount']

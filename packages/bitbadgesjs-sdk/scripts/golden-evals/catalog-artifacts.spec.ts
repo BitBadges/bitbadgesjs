@@ -28,7 +28,7 @@ it.each(['subscription-week-boundary', 'subscription-split-payment', 'credit-bas
 it('rejects hidden escrow funding in a metadata-only update', () => {
   const test = behavioralCases.find((item) => item.id === 'update-metadata-only')!;
   const artifact = JSON.parse(readFileSync(join(__dirname, 'references/metadata-update.json'), 'utf8'));
-  artifact.value.mintEscrowCoinsToTransfer = [{ denom: 'ubadge', amount: '1000000' }];
+  artifact.value.mintEscrowCoinsToTransfer = [{ denom: 'abadge', amount: '1000000' }];
   expect(gradeBehavior(test, { disposition: 'propose', artifact, explanation: 'Metadata only.' }).passed).toBe(false);
 });
 

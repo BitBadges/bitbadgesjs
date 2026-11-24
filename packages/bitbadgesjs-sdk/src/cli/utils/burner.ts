@@ -375,7 +375,7 @@ export async function runBurnerCreate(
       }
     } else {
       process.stderr.write(
-        `\nManual funding required. Send BADGE to cover transaction fees (10ubadge per gas) to:\n  ${record.address}\non network "${opts.network}".\n`
+        `\nManual funding required. Send BADGE to cover transaction fees (10000000000abadge per gas) to:\n  ${record.address}\non network "${opts.network}".\n`
       );
       if (opts.nonInteractive) {
         process.stderr.write(
@@ -469,12 +469,12 @@ export async function runBurnerCreate(
   signingClient.clearCache();
 
   const { resolveCliFee } = await import('./fees.js');
-  if (opts.fee?.denom && opts.fee.denom !== DEFAULT_FEE_DENOM) throw new Error('Transaction fees must be paid in ubadge');
+  if (opts.fee?.denom && opts.fee.denom !== DEFAULT_FEE_DENOM) throw new Error('Transaction fees must be paid in abadge');
   const estimate = await signingClient.simulate([protoMsg]);
   const fee = resolveCliFee(estimate.gasLimit, Number(opts.gas ?? DEFAULT_GAS), opts.fee?.amount);
   const balance = await fetchBalance(opts.nodeUrl, record.address);
   if (balance < BigInt(fee.amount)) {
-    const error = `Fund ${record.address} with at least ${BigInt(fee.amount) - balance} more ubadge, then resume this burner.`;
+    const error = `Fund ${record.address} with at least ${BigInt(fee.amount) - balance} more abadge, then resume this burner.`;
     updateBurner(recoveryPath, { status: 'failed', error });
     return { success: false, ephemeralAddress: record.address, recoveryPath, error, paused: true };
   }
@@ -622,7 +622,7 @@ export async function pickBurner(opts: {
     const balStr = bal === 0n ? '0' : bal.toString();
     const status = r.status.padEnd(9);
     process.stderr.write(
-      `  [${i + 1}]  ${r.address}  bal: ${balStr}ubadge  status: ${status}  ${r.createdAt}\n`
+      `  [${i + 1}]  ${r.address}  bal: ${balStr}abadge  status: ${status}  ${r.createdAt}\n`
     );
   });
   process.stderr.write('\n');

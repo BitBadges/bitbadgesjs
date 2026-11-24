@@ -43,7 +43,7 @@ describe('bounties integration', () => {
     // Alice has a fat genesis allocation; top charlie up unconditionally
     // (idempotent — small amount, just enough for gas across both msgs).
     try {
-      await fundPersona('alice', charlie().address, '1000000000', 'ubadge');
+      await fundPersona('alice', charlie().address, '1000000000000000000', 'abadge');
     } catch (err) {
       process.stderr.write(`[integration] charlie gas top-up failed: ${(err as Error).message}\n`);
     }
@@ -90,10 +90,10 @@ describe('bounties integration', () => {
     expect(show.json.submitterAddress).toBe(alice().address);
     expect(show.json.status).toMatch(/pending|expired/);
     expect(Array.isArray(show.json.depositCoins)).toBe(true);
-    // --amount 50 in display units × 1e9 (BADGE has 9 decimals).
-    const badgeDeposit = show.json.depositCoins.find((c: any) => c.denom === 'ubadge');
+    // --amount 50 in display units × 10^18 (BADGE has 18 decimals).
+    const badgeDeposit = show.json.depositCoins.find((c: any) => c.denom === 'abadge');
     expect(badgeDeposit).toBeDefined();
-    expect(badgeDeposit.amount).toBe('50000000000');
+    expect(badgeDeposit.amount).toBe('50000000000000000000');
 
     const status = runCli(['bounties', 'status', collectionId, '--local']);
     expect(status.json.status).toMatch(/pending|expired/);

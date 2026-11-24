@@ -4,12 +4,12 @@
  * Two parallel validators because BitBadges-side msg flows and Skip:Go
  * cross-chain swap flows have DIFFERENT rules:
  *
- *   - {@link requireBbDenom} — strict on BitBadges-side flags. The only
- *     `u*`-prefix denom valid on BitBadges is `ubadge`. Every other token
- *     (USDC, ATOM, OSMO, …) lives as `ibc/<SHA>` because they're IBC'd in.
- *     A user typing `--denom uusdc` for an auction bid is a category error
- *     — `uusdc` is Noble's native USDC, NOT the form USDC takes on
- *     BitBadges. We reject with a hint pointing at the canonical form.
+ *   - {@link requireBbDenom} — strict on BitBadges-side flags. Native BADGE
+ *     uses `abadge` (18 decimals; legacy `ubadge` stays recognized for historical
+ *     lookups). Every other token (USDC, ATOM, OSMO, …) lives as `ibc/<SHA>`
+ *     because they're IBC'd in. A user typing `--denom uusdc` for an auction bid
+ *     is a category error — `uusdc` is Noble's native USDC, NOT the form USDC
+ *     takes on BitBadges. We reject with a hint pointing at the canonical form.
  *
  *   - {@link requireSkipGoDenom} — permissive on `bb swap *` and any other
  *     Skip:Go cross-chain command. Those commands accept the ORIGIN chain's
@@ -26,11 +26,10 @@ import { MAINNET_COINS_REGISTRY, SYMBOL_INPUT_ALIASES } from '../../common/const
 import { bbError, BBErrorCode } from './envelope.js';
 
 /**
- * The canonical default fee denom for BitBadges-side transactions. `ubadge`
- * is the only u-prefix denom valid on BitBadges (everything else lives as
- * `ibc/<SHA>`). Centralized here so CLI verbs don't drift on the default.
+ * The canonical default fee denom for BitBadges-side transactions (`abadge`, 18 decimals).
+ * Centralized here so CLI verbs don't drift on the default.
  */
-export const DEFAULT_FEE_DENOM = 'ubadge';
+export const DEFAULT_FEE_DENOM = 'abadge';
 
 const IBC_DENOM_RE = /^ibc\/[A-F0-9]{64}$/i;
 const FACTORY_DENOM_RE = /^factory\/[a-zA-Z0-9_:./-]+$/;
@@ -43,13 +42,13 @@ const U_PREFIX_RE = /^u[a-z][a-z0-9]*$/;
  * canonical baseDenom form. Accepts:
  *
  *   - registered symbols (`BADGE`, `USDC`, `ATOM`, `OSMO`, `CHAOS`, …)
- *   - the literal `ubadge`
+ *   - the literal `abadge` (and legacy `ubadge` via registry direct match)
  *   - `ibc/<64 hex chars>` IBC denoms
  *   - `badges:*` collection-token denoms
  *   - `badgeslp:*` LP-token aliases (prediction market deposit denoms)
  *   - `factory/*` token-factory denoms
  *
- * REJECTS `u*`-prefix denoms other than `ubadge` (so `uusdc`, `uatom`,
+ * REJECTS non-BitBadges `u*`-prefix denoms (so `uusdc`, `uatom`,
  * `uosmo`, etc. throw with a hint to use the symbol or the canonical
  * `ibc/...` form). The throw is loud on purpose — passing `uusdc` to a
  * BitBadges-side msg flow yields a tx the chain will never recognize.
@@ -61,24 +60,31 @@ export function requireBbDenom(input: string, ctx: string): string {
   if (!input || typeof input !== 'string' || input.trim().length === 0) {
     throw bbError(
       BBErrorCode.UNKNOWN_TOKEN,
-      `Missing denom for ${ctx}. Pass a symbol (BADGE, USDC, ATOM, …) or canonical denom (ubadge, ibc/...).`
+      `Missing denom for ${ctx}. Pass a symbol (BADGE, USDC, ATOM, …) or canonical denom (abadge, ibc/...).`
     );
   }
   const trimmed = input.trim();
 
-  // Direct match against registry baseDenoms (catches ubadge, ibc/...
-  // entries, badges:* entries already registered, etc.).
+  // Direct match against registry baseDenoms (catches abadge, legacy ubadge,
+  // ibc/... entries, badges:* entries already registered, etc.).
   if (MAINNET_COINS_REGISTRY[trimmed]) {
     return MAINNET_COINS_REGISTRY[trimmed].baseDenom;
   }
 
-  // Symbol lookup (case-insensitive) via resolveCoin — registry is the
-  // source of truth.
+  // Symbol lookup (case-insensitive) via registry, preferring non-deprecated
+  // canonical entries (e.g. BADGE -> abadge).
   const upper = trimmed.toUpperCase();
+  let deprecatedBaseDenom: string | undefined;
   for (const details of Object.values(MAINNET_COINS_REGISTRY)) {
     if (details.symbol.toUpperCase() === upper) {
-      return details.baseDenom;
+      if (!details.deprecated) {
+        return details.baseDenom;
+      }
+      if (!deprecatedBaseDenom) deprecatedBaseDenom = details.baseDenom;
     }
+  }
+  if (deprecatedBaseDenom) {
+    return deprecatedBaseDenom;
   }
 
   // Accepted typed-input aliases (e.g. the pre-release "USDC.noble"
@@ -95,12 +101,12 @@ export function requireBbDenom(input: string, ctx: string): string {
   if (BADGESLP_DENOM_RE.test(trimmed)) return trimmed;
 
   // The `u*` trap: anything starting with `u` followed by lowercase that
-  // isn't `ubadge` is almost certainly an origin-chain native denom that
+  // isn't in the registry is almost certainly an origin-chain native denom that
   // a user mistakenly thinks works on BitBadges.
-  if (U_PREFIX_RE.test(trimmed) && trimmed !== 'ubadge') {
+  if (U_PREFIX_RE.test(trimmed)) {
     throw bbError(
       BBErrorCode.UNKNOWN_TOKEN,
-      `"${trimmed}" is not a valid BitBadges denom for ${ctx}. On BitBadges, only "ubadge" uses the u-prefix; other tokens (USDC, ATOM, …) are "ibc/<SHA>" IBC denoms. Try the display symbol (e.g. "USDC") or run \`bb assets show <symbol>\` to see the canonical form.`
+      `"${trimmed}" is not a valid BitBadges denom for ${ctx}. On BitBadges, native BADGE uses "abadge" and other tokens (USDC, ATOM, …) are "ibc/<SHA>" IBC denoms. Try the display symbol (e.g. "USDC") or run \`bb assets show <symbol>\` to see the canonical form.`
     );
   }
 
@@ -112,7 +118,7 @@ export function requireBbDenom(input: string, ctx: string): string {
     .join(', ');
   throw bbError(
     BBErrorCode.UNKNOWN_TOKEN,
-    `Unknown denom "${trimmed}" for ${ctx}. Supported symbols: ${supported}. Or pass a canonical denom (ubadge, ibc/<SHA>).`
+    `Unknown denom "${trimmed}" for ${ctx}. Supported symbols: ${supported}. Or pass a canonical denom (abadge, ibc/<SHA>).`
   );
 }
 

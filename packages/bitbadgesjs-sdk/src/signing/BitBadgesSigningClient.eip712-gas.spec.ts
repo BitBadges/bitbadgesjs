@@ -30,7 +30,7 @@ it('simulates the EIP-712 Cosmos envelope without prompting for a public key and
   await client.signAndBroadcast(messages, { mode: 'eip712', gasMultiplier: 1.5 });
   expect(post.mock.calls[0][0]).toMatch(/\/simulate$/);
   expect(adapter.estimateEvmGas).not.toHaveBeenCalled();
-  expect(adapter.signTypedData.mock.calls[0][0].message.fee).toEqual({ amount: [{ denom: 'ubadge', amount: '1500020' }], gas: '150002' });
+  expect(adapter.signTypedData.mock.calls[0][0].message.fee).toEqual({ amount: [{ denom: 'abadge', amount: '1500020000000000' }], gas: '150002' });
 });
 it('does not sign or broadcast after simulation failure', async () => {
   const { client, adapter, post, messages } = setup();
@@ -41,8 +41,9 @@ it('does not sign or broadcast after simulation failure', async () => {
 });
 it.each([
   { gas: '100000001', amount: '0', denom: 'stake' },
-  { gas: '300000', amount: '1', denom: 'ubadge' },
-  { gas: '0', amount: '0', denom: 'ubadge' }
+  { gas: '300000', amount: '1', denom: 'abadge' },
+  { gas: '300000', amount: '3000000000000000', denom: 'ubadge' },
+  { gas: '0', amount: '0', denom: 'abadge' }
 ])('rejects invalid explicit fee before signing', async (fee) => {
   const { client, adapter, messages } = setup();
   await expect(client.signAndBroadcast(messages, { mode: 'eip712', fee })).rejects.toThrow();

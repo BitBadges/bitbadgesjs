@@ -4,14 +4,14 @@
  * Every msg-emit command that takes a `--amount / --price / --pay-amount /
  * --receive-amount / --token-amount / --payment-amount` flag PAIRED with
  * a `--denom` flag now accepts BOTH display-units (`10 BADGE` → auto-
- * converted via the registry's decimals) AND base-units (`10000000
- * ubadge`, with --base-units forcing base-units interpretation even for
+ * converted via the registry's decimals) AND base-units (`10000000000000000000
+ * abadge`, with --base-units forcing base-units interpretation even for
  * symbols).
  *
  * Auto-rule:
  *   - registered symbol (BADGE, USDC, …) → display units; multiply by
  *     10^decimals via toBaseUnits()
- *   - canonical baseDenom (ubadge, ibc/<SHA>, factory/*, badges:*,
+ *   - canonical baseDenom (abadge, ibc/<SHA>, factory/*, badges:*,
  *     badgeslp:*) → base units; pass through verbatim
  *   - --base-units flag → base-units interpretation regardless of denom
  *     form
@@ -25,7 +25,7 @@ import { MAINNET_COINS_REGISTRY } from '../../common/constants.js';
 import { requireBbDenom } from './denom.js';
 
 export interface ResolvedAmount {
-  /** Canonical baseDenom (`ubadge`, `ibc/...`, etc.) */
+  /** Canonical baseDenom (`abadge`, `ibc/...`, etc.) */
   denom: string;
   /** Amount in base units, as a decimal string */
   amount: string;
@@ -58,7 +58,7 @@ export function resolveAmount(
   // decimals when display units are needed.
   const trimmed = rawDenom.trim();
   const isDirectBaseDenom =
-    !!MAINNET_COINS_REGISTRY[trimmed] || // ubadge, ibc/... already in registry
+    !!MAINNET_COINS_REGISTRY[trimmed] || // abadge, legacy ubadge, ibc/... already in registry
     trimmed.startsWith('ibc/') ||
     trimmed.startsWith('factory/') ||
     trimmed.startsWith('badges:') ||
@@ -87,14 +87,14 @@ export function resolveAmount(
     return { denom: validated, amount: cleaned };
   }
 
-  // Symbol input → display units. resolveCoin gives us decimals; we
-  // accept decimal input (e.g. "1.5") and round to base units.
+  // Symbol input → display units. resolveCoin gives us decimals; pass the
+  // cleaned string directly to BigInt-based toBaseUnits to preserve full 18-decimal precision.
   const resolved = resolveCoin(validated);
   const num = Number(cleaned);
-  if (!Number.isFinite(num) || num < 0) {
+  if (cleaned.length === 0 || !Number.isFinite(num) || num < 0) {
     throw new Error(
       `${ctx.amountFlag} must be a non-negative number (got "${rawAmount}").`
     );
   }
-  return { denom: resolved.denom, amount: toBaseUnits(num, resolved.decimals) };
+  return { denom: resolved.denom, amount: toBaseUnits(cleaned, resolved.decimals) };
 }

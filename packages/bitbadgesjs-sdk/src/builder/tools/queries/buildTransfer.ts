@@ -287,7 +287,7 @@ export async function handleBuildTransfer(input: BuildTransferInput): Promise<Bu
       }],
       memo: '',
       fee: {
-        amount: [{ denom: 'ubadge', amount: '5000000' }],
+        amount: [{ denom: 'abadge', amount: '5000000000000000' }],
         gas: '500000'
       }
     };

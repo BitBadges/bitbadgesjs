@@ -19,7 +19,7 @@ const client = new Client({ name: 'browser-handoff-smoke', version: '1.0' });
 try {
   const address = 'bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7';
   const input = { expectedAddress: address, network: 'local', timeoutSeconds: 60,
-    artifact: { messages: [{ typeUrl: '/cosmos.bank.v1beta1.MsgSend', value: { fromAddress: address, toAddress: address, amount: [{ denom: 'ubadge', amount: '1' }] } }] } };
+    artifact: { messages: [{ typeUrl: '/cosmos.bank.v1beta1.MsgSend', value: { fromAddress: address, toAddress: address, amount: [{ denom: 'abadge', amount: '1' }] } }] } };
   const start = () => run(['dev', 'tools', 'call', 'request_browser_review', '--args', JSON.stringify(input)]);
   const pending = start();
   assert.equal(pending.outcome, 'pending'); assert.equal(pending.confirmed, false);

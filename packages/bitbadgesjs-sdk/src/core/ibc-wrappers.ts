@@ -296,7 +296,7 @@ export class DenomUnitWithDetails<T extends NumberType> extends DenomUnit<T> imp
 }
 
 /**
- * Type for Cosmos SDK Coin information with support for bigint amounts (e.g. { amount: 1000000, denom: 'ubadge' }).
+ * Type for Cosmos SDK Coin information with support for bigint amounts (e.g. { amount: 1000000000000000000n, denom: 'abadge' }).
  *
  * @category Balances
  */

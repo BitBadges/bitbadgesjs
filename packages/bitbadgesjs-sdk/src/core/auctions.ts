@@ -185,7 +185,7 @@ export interface AuctionBidArgs {
   tokenId: bigint;
   /** Number of tokens (almost always 1 for auctions). */
   tokenAmount: bigint;
-  /** Denom of payment (e.g. 'uusdc', 'ubadge'). */
+  /** Denom of payment (e.g. 'uusdc', 'abadge'). */
   paymentDenom: string;
   /** Amount of payment in base units. */
   paymentAmount: bigint;

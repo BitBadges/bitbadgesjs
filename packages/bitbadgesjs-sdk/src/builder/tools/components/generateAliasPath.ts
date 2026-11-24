@@ -10,7 +10,7 @@ const FOREVER_TIMES = [{ start: '1', end: MAX_UINT64 }];
 
 export const generateAliasPathSchema = z.object({
   symbol: z.string().describe('Display symbol (e.g., "wUSDC", "vATOM")'),
-  decimals: z.string().describe('Number of decimals (e.g., "6" for USDC, "9" for BADGE)'),
+  decimals: z.string().describe('Number of decimals (e.g., "6" for USDC, "18" for BADGE)'),
   tokenId: z.string().optional().describe('Token ID for conversion (defaults to "1")'),
   metadataUri: z.string().optional().describe('IPFS URI for metadata'),
   name: z.string().optional().describe('Display name for the token'),
@@ -57,7 +57,7 @@ export const generateAliasPathTool = {
       },
       decimals: {
         type: 'string',
-        description: 'Number of decimals (e.g., "6" for USDC, "9" for BADGE)'
+        description: 'Number of decimals (e.g., "6" for USDC, "18" for BADGE)'
       },
       tokenId: {
         type: 'string',

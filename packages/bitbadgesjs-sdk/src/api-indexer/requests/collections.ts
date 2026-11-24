@@ -72,7 +72,7 @@ export interface iFilterTokensInCollectionPayload {
 
   /** The listing prices */
   priceRange?: iUintRange<NumberType>;
-  /** Denom for the price range. Defaults to ubadge. */
+  /** Denom for the price range. Defaults to abadge. */
   denom?: string;
 }
 

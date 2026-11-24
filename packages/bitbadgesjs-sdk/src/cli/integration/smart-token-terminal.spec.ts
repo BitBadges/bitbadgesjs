@@ -92,7 +92,7 @@ describe('smart-token terminal-state integration', () => {
 
   it('BADGE-backed deposit/withdraw both commit (non-USDC backing)', async () => {
     if (!ready || !id.B) return;
-    expect(runCli(['smart-tokens', 'show', id.B, '--local']).json.backingDenom).toBe('ubadge');
+    expect(runCli(['smart-tokens', 'show', id.B, '--local']).json.backingDenom).toBe('abadge');
     expect(await st('deposit', id.B, alice(), 2)).toBe(0);
     await pollTokenAmount(id.B, alice().address, (a) => a >= 2n, { label: 'alice BADGE-ST' });
     expect(await st('withdraw', id.B, alice(), 1)).toBe(0);

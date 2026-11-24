@@ -844,8 +844,12 @@ describe('isProductApproval', () => {
     expect(isProductApproval(a)).toBe(false);
   });
 
-  it('returns false when coin denom is not "ubadge"', () => {
+  it('returns true for canonical abadge and legacy ubadge, false for other denoms', () => {
     const a = makeValidProductApproval();
+    a.approvalCriteria.coinTransfers[0].coins[0].denom = 'abadge';
+    expect(isProductApproval(a)).toBe(true);
+    a.approvalCriteria.coinTransfers[0].coins[0].denom = 'ubadge';
+    expect(isProductApproval(a)).toBe(true);
     a.approvalCriteria.coinTransfers[0].coins[0].denom = 'uusdc';
     expect(isProductApproval(a)).toBe(false);
   });

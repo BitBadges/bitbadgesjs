@@ -115,8 +115,8 @@ const LEARNINGS: LearningEntry[] = [
   },
   {
     topic: 'evm',
-    title: 'x/precisebank: BADGE is 9 decimals in Cosmos, 18 in EVM',
-    content: 'BADGE has three denoms: BADGE (display), ubadge (9 decimals, Cosmos base), abadge (18 decimals / 0 = EVM base). In Solidity, address.balance returns abadge (18 decimals like wei). SendManager precompile uses ubadge in JSON amounts. MetaMask shows 18-decimal native balance. x/precisebank handles fractional ubadge conversion. IBC tokens do NOT have precisebank.',
+    title: 'BADGE uses unified 18-decimal abadge in both Cosmos and EVM',
+    content: 'BADGE uses `abadge` (18 decimals, 1 BADGE = 10^18 abadge) uniformly in Cosmos SDK, SendManager precompile JSON, gas fees, and EVM (1 abadge == 1 wei). Always use BigInt arithmetic for 18-decimal scaling (10^18 exceeds JS Number.MAX_SAFE_INTEGER). Legacy `ubadge` (9 decimals) only exists for historical pre-upgrade records. IBC tokens use their own standard decimals (e.g. USDC/ATOM/OSMO = 6).',
     severity: 'critical'
   },
   {

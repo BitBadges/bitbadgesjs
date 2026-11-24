@@ -19,7 +19,7 @@ export const SUBSCRIPTION_DURATIONS = {
 
 const FaucetParams = z.object({
   paymentRecipient: z.string().describe('bb1... address that receives subscription payments.'),
-  paymentDenom: z.string().describe('ICS20 denom users pay in (e.g. ibc/... hash or native denom like "ubadge", "uatom").'),
+  paymentDenom: z.string().describe('ICS20 denom users pay in (e.g. ibc/... hash or native denom like "abadge", "uatom").'),
   paymentAmount: z.string().describe('Payment amount per period in BASE units of the denom (e.g. "5000000000" for 5 ATOM at 6 decimals).'),
   durationMs: z.string().describe('Subscription period in ms. Common: "86400000" (daily), "2592000000" (monthly, 30d), "31536000000" (annual, 365d).')
 });

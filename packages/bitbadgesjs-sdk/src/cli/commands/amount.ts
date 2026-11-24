@@ -82,7 +82,7 @@ addOutputFlags(
     .command('to-raw')
     .description('Convert a display amount (e.g. 1.5) to raw base units. Decimals come from the BitBadges coins registry via --denom, or pass --decimals explicitly.')
     .argument('<display>', 'Display amount (e.g. "1.5", "1234.567")')
-    .option('--denom <symbol-or-denom>', 'Coin symbol (USDC, ATOM, BADGE) or raw denom (ibc/..., ubadge)')
+    .option('--denom <symbol-or-denom>', 'Coin symbol (USDC, ATOM, BADGE) or raw denom (ibc/..., abadge)')
     .option('--decimals <n>', 'Explicit decimals (overrides --denom lookup)')
     .option('--round <mode>', 'Rounding mode for over-precision input: ROUND_DOWN | ROUND_UP. Default: ROUND_DOWN')
 ).action((display: string, opts: any) => {

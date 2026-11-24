@@ -52,25 +52,40 @@ export class CosmosCoinUtils {
     const actualPrecision = precision ?? this.decimals;
     if (this.decimals === 0) return this.amount.toString();
 
-    const divisor = BigInt(10 ** this.decimals);
-    const quotient = this.amount / divisor;
-    const remainder = this.amount % divisor;
+    const negative = this.amount < 0n;
+    const absAmount = negative ? -this.amount : this.amount;
+    const sign = negative ? '-' : '';
+    const divisor = 10n ** BigInt(this.decimals);
+    let quotient = absAmount / divisor;
+    const remainder = absAmount % divisor;
 
-    if (remainder === 0n) return quotient.toString();
+    if (remainder === 0n) return `${sign}${quotient.toString()}`;
 
     const remainderStr = remainder.toString().padStart(this.decimals, '0');
     const decimalPart = remainderStr.slice(0, actualPrecision);
 
     if (actualPrecision < this.decimals) {
-      const nextDigit = parseInt(remainderStr[actualPrecision] || '0');
+      const nextDigit = parseInt(remainderStr[actualPrecision] || '0', 10);
+      if (actualPrecision === 0) {
+        if (nextDigit >= 5 && roundingMode === RoundingMode.ROUND_UP) {
+          quotient += 1n;
+        }
+        return `${sign}${quotient.toString()}`;
+      }
       let roundedDecimal = decimalPart;
       if (nextDigit >= 5 && roundingMode === RoundingMode.ROUND_UP) {
-        const decimalNum = parseInt(decimalPart) + 1;
-        roundedDecimal = decimalNum.toString().padStart(actualPrecision, '0');
+        const decimalBig = BigInt(decimalPart) + 1n;
+        const overflow = 10n ** BigInt(actualPrecision);
+        if (decimalBig >= overflow) {
+          quotient += 1n;
+          roundedDecimal = '0'.repeat(actualPrecision);
+        } else {
+          roundedDecimal = decimalBig.toString().padStart(actualPrecision, '0');
+        }
       }
-      return `${quotient}.${roundedDecimal}`;
+      return `${sign}${quotient}.${roundedDecimal}`;
     }
-    return `${quotient}.${decimalPart}`;
+    return `${sign}${quotient}.${decimalPart}`;
   }
 
   /** Display amount with optional symbol. Default 2 dp, symbol on. */
@@ -151,7 +166,7 @@ export class CosmosCoinUtils {
     roundingMode: RoundingMode = RoundingMode.ROUND_DOWN
   ): CosmosCoinUtils {
     const actualDecimals = decimals ?? (coinDetails ? Number(coinDetails.decimals) : 0);
-    const displayStr = displayAmount.toString();
+    const displayStr = normalizeDecimalString(displayAmount);
     const negative = displayStr.startsWith('-');
     const unsigned = negative ? displayStr.slice(1) : displayStr;
     const [integerPart, decimalPart = ''] = unsigned.split('.');
@@ -161,7 +176,7 @@ export class CosmosCoinUtils {
     let rawAmount = BigInt(fullAmountStr);
 
     if (decimalPart.length > actualDecimals) {
-      const nextDigit = parseInt(decimalPart[actualDecimals] || '0');
+      const nextDigit = parseInt(decimalPart[actualDecimals] || '0', 10);
       if (nextDigit >= 5 && roundingMode === RoundingMode.ROUND_UP) {
         rawAmount = rawAmount + 1n;
       }
@@ -196,7 +211,7 @@ export class CosmosCoinUtils {
    */
   static calculateSlippage(expectedAmount: bigint, actualAmount: bigint, precision: number = 6): number {
     if (expectedAmount === 0n) return 0;
-    const PRECISION_MULTIPLIER = BigInt(10 ** precision);
+    const PRECISION_MULTIPLIER = 10n ** BigInt(precision);
     const diff = expectedAmount - actualAmount;
     return Number((diff * 100n * PRECISION_MULTIPLIER) / expectedAmount) / Number(PRECISION_MULTIPLIER);
   }
@@ -260,12 +275,35 @@ export function cosmosPercentToString(value: number, maxDecimals: number = 3): s
 
 // ───────────────────────── internal helpers ─────────────────────────
 
+/** Expand plain or scientific-notation decimal strings (e.g. "1e-18", "1.5e20") into fixed decimal form without float scaling. */
+function normalizeDecimalString(input: number | string): string {
+  const trimmed = String(input).trim();
+  const match = trimmed.match(/^([+-]?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
+  if (!match) return trimmed;
+  const [, signRaw, intPart, fracPart = '', expStr] = match;
+  const sign = signRaw === '-' ? '-' : '';
+  if (!expStr) {
+    return `${sign}${intPart}${fracPart ? `.${fracPart}` : ''}`;
+  }
+  const exp = parseInt(expStr, 10);
+  const digits = (intPart + fracPart).replace(/^0+/, '') || '0';
+  if (digits === '0') return '0';
+  const decimalPos = intPart.length + exp - (intPart.length + fracPart.length - digits.length);
+  if (decimalPos <= 0) {
+    return `${sign}0.${'0'.repeat(-decimalPos)}${digits}`;
+  }
+  if (decimalPos >= digits.length) {
+    return `${sign}${digits}${'0'.repeat(decimalPos - digits.length)}`;
+  }
+  return `${sign}${digits.slice(0, decimalPos)}.${digits.slice(decimalPos)}`;
+}
+
 function decomposeFactor(value: number): { factorBigInt: bigint; precisionMultiplier: bigint } {
-  const str = value.toString();
+  const str = normalizeDecimalString(value);
   const decimalPlaces = str.includes('.') ? str.split('.')[1].length : 0;
   return {
     factorBigInt: BigInt(str.replace('.', '')),
-    precisionMultiplier: BigInt(10 ** decimalPlaces)
+    precisionMultiplier: 10n ** BigInt(decimalPlaces)
   };
 }
 

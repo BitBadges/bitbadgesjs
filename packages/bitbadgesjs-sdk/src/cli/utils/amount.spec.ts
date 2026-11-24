@@ -7,22 +7,31 @@ const ctx = { amountFlag: '--amount', denomFlag: '--denom' };
 
 describe('resolveAmount', () => {
   it('converts a symbol amount to base units via the registry decimals', () => {
-    // BADGE has 9 decimals; 10 BADGE → 10_000_000_000 base units.
+    // BADGE has 18 decimals; 10 BADGE → 10_000_000_000_000_000_000 base units.
     const out = resolveAmount('10', 'BADGE', false, ctx);
-    expect(out.denom).toBe('ubadge');
-    expect(out.amount).toBe('10000000000');
+    expect(out.denom).toBe('abadge');
+    expect(out.amount).toBe('10000000000000000000');
+
+    // Smallest 18-decimal fractional unit
+    const dust = resolveAmount('0.000000000000000001', 'BADGE', false, ctx);
+    expect(dust.denom).toBe('abadge');
+    expect(dust.amount).toBe('1');
   });
 
-  it('passes a base-denom (ubadge) amount through verbatim', () => {
-    const out = resolveAmount('100000000', 'ubadge', false, ctx);
-    expect(out.denom).toBe('ubadge');
+  it('passes a base-denom (abadge or legacy ubadge) amount through verbatim', () => {
+    const out = resolveAmount('100000000', 'abadge', false, ctx);
+    expect(out.denom).toBe('abadge');
     expect(out.amount).toBe('100000000');
+
+    const legacy = resolveAmount('100000000', 'ubadge', false, ctx);
+    expect(legacy.denom).toBe('ubadge');
+    expect(legacy.amount).toBe('100000000');
   });
 
   it('honors --base-units with a symbol denom (no decimal multiply)', () => {
-    // 100000000 ubadge worth, expressed as base units with --base-units.
+    // 100000000 abadge worth, expressed as base units with --base-units.
     const out = resolveAmount('100000000', 'BADGE', true, ctx);
-    expect(out.denom).toBe('ubadge');
+    expect(out.denom).toBe('abadge');
     expect(out.amount).toBe('100000000');
   });
 

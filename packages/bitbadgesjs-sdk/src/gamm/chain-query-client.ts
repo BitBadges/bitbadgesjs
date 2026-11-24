@@ -165,7 +165,7 @@ export interface iCalcJoinPoolNoSwapSharesResponse<T extends NumberType> {
 export interface iEstimateSwapExactAmountInPayload<T extends NumberType> {
   sender: string;
   poolId: T;
-  /** Formatted Cosmos coin string, e.g. `"1000ubadge"`. */
+  /** Formatted Cosmos coin string, e.g. `"1000abadge"`. */
   tokenIn: string;
   routes: iSwapAmountInRoute<T>[];
 }
@@ -184,7 +184,7 @@ export interface iEstimateSwapExactAmountOutPayload<T extends NumberType> {
   sender: string;
   poolId: T;
   routes: iSwapAmountOutRoute<T>[];
-  /** Formatted Cosmos coin string, e.g. `"1000ubadge"`. */
+  /** Formatted Cosmos coin string, e.g. `"1000abadge"`. */
   tokenOut: string;
 }
 

@@ -356,7 +356,7 @@ export class BitBadgesCollection<T extends NumberType>
   }
 
   /**
-   * Gets default display currency, if set. Defaults to ubadge.
+   * Gets default display currency, if set. Defaults to abadge.
    */
   getDefaultDisplayCurrency() {
     return (
@@ -364,7 +364,7 @@ export class BitBadgesCollection<T extends NumberType>
         ?.find((x) => x.startsWith('NFTPricingDenom:') || x.startsWith('DefaultDisplayCurrency:'))
         ?.split(':')
         .slice(1)
-        .join(':') ?? 'ubadge'
+        .join(':') ?? 'abadge'
     );
   }
 

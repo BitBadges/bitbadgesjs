@@ -6,6 +6,6 @@ describe('dynamic store transaction fees', () => {
     const result = handleBuildDynamicStore({ action, creator, defaultValue: false, storeId: '1', address: creator, value: true, entries: [{ address: creator, value: true }] });
     expect(result.success).toBe(true);
     const fee = result.transaction!.fee;
-    expect(fee.amount).toEqual([{ denom: 'ubadge', amount: String(BigInt(fee.gas) * 10n) }]);
+    expect(fee.amount).toEqual([{ denom: 'abadge', amount: String(BigInt(fee.gas) * 10_000_000_000n) }]);
   });
 });
