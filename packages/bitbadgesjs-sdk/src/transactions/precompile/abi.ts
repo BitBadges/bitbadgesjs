@@ -47,7 +47,7 @@ export const GAMM_PRECOMPILE_ADDRESS = '0x00000000000000000000000000000000000010
  * Note: Uses typed ABI parameters (not JSON string encoding)
  *       delegatorAddress must equal msg.sender (enforced by precompile)
  *       validatorAddress can be either Ethereum hex or Cosmos bech32 format
- *       Amounts are in abadge (18 decimals via precisebank)
+ *       Amounts are in abadge (18 decimals, 1 abadge = 1 wei)
  */
 export const STAKING_PRECOMPILE_ADDRESS = '0x0000000000000000000000000000000000000800';
 

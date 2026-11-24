@@ -64,7 +64,7 @@ export const ERROR_PATTERNS: ErrorPattern[] = [
   {
     name: 'Insufficient funds',
     category: 'signing',
-    triggers: ['insufficient funds', 'insufficient balance', 'not enough', 'ubadge'],
+    triggers: ['insufficient funds', 'insufficient balance', 'not enough', 'abadge', 'ubadge'],
     explanation: 'The sending account doesn\'t have enough BADGE tokens for gas fees or coin transfers.',
     fix: 'Fund the account with BADGE tokens. On testnet, use the faucet. On mainnet, acquire BADGE from a DEX or the BitBadges app.',
   },
@@ -111,9 +111,9 @@ export const ERROR_PATTERNS: ErrorPattern[] = [
       'missing fee denom',
       'Pass the denom the caller intends to pay fees in'
     ],
-    explanation: 'The transaction fee object is missing `amount[0].denom`. `jsonToTxBytes` requires the caller to explicitly name the denom the fee is paid in (e.g. "ubadge") — the chain does not assume a default. This typically happens when a builder emits `fee: { amount: [{ amount: "5000000" }], gas: "500000" }` without a `denom` field, or constructs `fee.amount` as an empty array.',
-    fix: 'Set the full fee object on the transaction: `fee: { amount: [{ denom: "ubadge", amount: "5000000" }], gas: "500000" }`. On BitBadges mainnet/testnet the fee denom is always `ubadge`. Do NOT use `abadge` (that is the 18-decimal EVM-side denom) and do NOT leave `amount` empty — include at least one `{ denom, amount }` entry.',
-    example: '{ "fee": { "amount": [{ "denom": "ubadge", "amount": "5000" }], "gas": "500000" } }'
+    explanation: 'The transaction fee object is missing `amount[0].denom`. `jsonToTxBytes` requires the caller to explicitly name the denom the fee is paid in (e.g. "abadge") — the chain does not assume a default. This typically happens when a builder emits `fee: { amount: [{ amount: "5000000000000000" }], gas: "500000" }` without a `denom` field, or constructs `fee.amount` as an empty array.',
+    fix: 'Set the full fee object on the transaction: `fee: { amount: [{ denom: "abadge", amount: "5000000000000000" }], gas: "500000" }`. On BitBadges mainnet/testnet the fee denom is always `abadge` (18 decimals, 10000000000abadge per gas). Do NOT use legacy `ubadge` and do NOT leave `amount` empty — include at least one `{ denom, amount }` entry.',
+    example: '{ "fee": { "amount": [{ "denom": "abadge", "amount": "5000000000000000" }], "gas": "500000" } }'
   },
   {
     name: 'Smart token backing address mismatch',
@@ -188,11 +188,11 @@ export const ERROR_PATTERNS: ErrorPattern[] = [
     fix: 'Multiply block.timestamp by 1000 when passing to BitBadges precompiles: block.timestamp * 1000. When reading BitBadges timestamps, divide by 1000 for Solidity comparison.',
   },
   {
-    name: 'BADGE decimal mismatch between Cosmos and EVM (x/precisebank)',
+    name: 'BADGE 18-decimal denomination (abadge vs legacy ubadge)',
     category: 'evm',
     triggers: ['decimal', 'abadge', 'ubadge', 'precisebank', 'wrong amount', 'balance mismatch', '18 decimal', '9 decimal', 'wei'],
-    explanation: 'BADGE uses different decimal representations: ubadge (9 decimals) in Cosmos SDK and abadge (18 decimals, like wei) in EVM. address(this).balance in Solidity returns abadge. SendManager precompile JSON uses ubadge amounts. Mixing these up causes amount mismatches.',
-    fix: 'In Cosmos (API, gas, IBC): use ubadge (9 decimals). In Solidity native balance: abadge (18 decimals). SendManager.send() JSON: ubadge amounts. To convert: 1 ubadge = 1e9 abadge. x/precisebank handles sub-ubadge fractions automatically.',
+    explanation: 'BADGE uses a unified 18-decimal base denom `abadge` across both Cosmos SDK and EVM (1 BADGE = 10^18 abadge; 1 abadge = 1 wei). Using legacy 9-decimal `ubadge` or multiplying EVM amounts by 10^9 causes denom rejections or 10^9x scaling errors.',
+    fix: 'Use `abadge` (18 decimals) everywhere: Cosmos API, gas fees, IBC, SendManager.send() JSON, and Solidity native balances. 1 abadge == 1 wei — do not rescale between Cosmos and EVM. Legacy `ubadge` (9 decimals) only appears in historical pre-upgrade records.',
   },
   {
     name: 'Wrong precompile address',
@@ -229,7 +229,7 @@ export const ERROR_PATTERNS: ErrorPattern[] = [
     category: 'transfer',
     triggers: ['is not in the allowed denoms list', 'allowed denoms', 'denom not allowed', 'allowedDenoms'],
     explanation: 'The coin denom used in a coinTransfer is not on the chain\'s AllowedDenoms list. The chain enforces an allowlist for coin transfers — if the list is non-empty, every denom must either appear on it or use the "badgeslp:" prefix (liquidity pool shares).',
-    fix: 'Check the chain\'s allowed denoms list and use only approved denoms. Common allowed denoms include "ubadge" and standard IBC denoms (ibc/...). If you need a custom denom, it must be added to the chain\'s AllowedDenoms parameter via governance. Liquidity pool shares (badgeslp:*) are always allowed.',
+    fix: 'Check the chain\'s allowed denoms list and use only approved denoms. Common allowed denoms include "abadge" and standard IBC denoms (ibc/...). If you need a custom denom, it must be added to the chain\'s AllowedDenoms parameter via governance. Liquidity pool shares (badgeslp:*) are always allowed.',
   },
   {
     name: 'Duplicate approvalId',

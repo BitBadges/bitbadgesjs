@@ -12,7 +12,7 @@ jest.mock('axios', () => ({ create: jest.fn() }));
 const evmAddress = '0x1234567890123456789012345678901234567890';
 const address = convertToBitBadgesAddress(evmAddress);
 const publicKey = Buffer.from('02' + '11'.repeat(32), 'hex').toString('base64');
-const cosmosMessages = [new MsgSend({ fromAddress: address, toAddress: address, amount: [{ denom: 'ubadge', amount: '1' }] })];
+const cosmosMessages = [new MsgSend({ fromAddress: address, toAddress: address, amount: [{ denom: 'abadge', amount: '1' }] })];
 const evmMessages = [new MsgSetCustomData({ creator: address, collectionId: '1', customData: 'v35' })];
 
 function setup(chainType: 'cosmos' | 'evm' = 'cosmos', options = {}) {
@@ -47,13 +47,13 @@ describe('v35 signing gas', () => {
     expect(AuthInfo.fromBinary(tx.authInfoBytes).fee?.amount[0].amount).toBe('0');
     expect(adapter.signDirect).not.toHaveBeenCalled();
   });
-  it('prices the final buffered Cosmos gas at 10 ubadge/gas', async () => {
+  it('prices the final buffered Cosmos gas at 10000000000 abadge/gas', async () => {
     const { client, adapter } = setup();
     const result = await client.signAndBroadcast(cosmosMessages);
     expect(result.success).toBe(true);
     const fee = adapter.signDirect.mock.calls[0][0].signDirect.authInfo.fee;
     expect(fee.gasLimit).toBe(1_300_002n);
-    expect(fee.amount[0]).toMatchObject({ denom: 'ubadge', amount: '13000020' });
+    expect(fee.amount[0]).toMatchObject({ denom: 'abadge', amount: '13000020000000000' });
   });
 
   it('does not sign or broadcast when Cosmos simulation fails', async () => {
@@ -80,7 +80,7 @@ describe('v35 signing gas', () => {
     expect(post).toHaveBeenCalledTimes(1);
     const fee = adapter.signDirect.mock.calls[0][0].signDirect.authInfo.fee;
     expect(fee.gasLimit).toBe(800_000n);
-    expect(fee.amount[0].amount).toBe('8000000');
+    expect(fee.amount[0].amount).toBe('8000000000000000');
   });
 
   it('uses the actual buffered EVM estimate when broadcasting', async () => {
@@ -136,11 +136,12 @@ describe('v35 signing gas', () => {
   });
 
   it.each([
-    { amount: '0', denom: 'ubadge', gas: '400000' },
-    { amount: '4000000', denom: 'stake', gas: '400000' },
-    { amount: '4000000', denom: 'ubadge', gas: '0' },
-    { amount: '1000000010', denom: 'ubadge', gas: '100000001' },
-    { amount: '4000000', denom: 'ubadge', gas: '400000oops' }
+    { amount: '0', denom: 'abadge', gas: '400000' },
+    { amount: '4000000000000000', denom: 'stake', gas: '400000' },
+    { amount: '4000000000000000', denom: 'ubadge', gas: '400000' },
+    { amount: '4000000000000000', denom: 'abadge', gas: '0' },
+    { amount: '1000000010000000000', denom: 'abadge', gas: '100000001' },
+    { amount: '4000000000000000', denom: 'abadge', gas: '400000oops' }
   ])('rejects invalid custom Cosmos fees %j', async (fee) => {
     const { client, adapter } = setup();
     await expect(client.signAndBroadcast(cosmosMessages, { fee })).rejects.toThrow(/fee|gas/i);
@@ -149,9 +150,9 @@ describe('v35 signing gas', () => {
 
   it('preserves a valid caller-provided higher Cosmos fee', async () => {
     const { client, adapter, post } = setup();
-    await client.signAndBroadcast(cosmosMessages, { fee: { amount: '8000000', denom: 'ubadge', gas: '400000' } });
+    await client.signAndBroadcast(cosmosMessages, { fee: { amount: '8000000000000000', denom: 'abadge', gas: '400000' } });
     expect(post).toHaveBeenCalledTimes(1);
-    expect(adapter.signDirect.mock.calls[0][0].signDirect.authInfo.fee.amount[0].amount).toBe('8000000');
+    expect(adapter.signDirect.mock.calls[0][0].signDirect.authInfo.fee.amount[0].amount).toBe('8000000000000000');
   });
 
   it.each([0, -1, 0.5, NaN, Infinity])('rejects invalid multipliers %s', (gasMultiplier) => {
@@ -163,9 +164,11 @@ describe('v35 signing gas', () => {
     expect(() => setup('evm', { evmPrecompileGasLimit: limit })).toThrow(/gas/i);
   });
 
-  it('does not suggest wallet gas prices below the v35 floor', () => {
+  it('does not suggest wallet gas prices below the 18-decimal floor', () => {
     for (const config of [BitBadgesKeplrSuggestMainnetChainInfo, BitBadgesKeplrSuggestTestnetChainInfo]) {
-      expect(Object.values(config.feeCurrencies[0].gasPriceStep).every((price) => price >= 10)).toBe(true);
+      expect(config.feeCurrencies[0].coinMinimalDenom).toBe('abadge');
+      expect(config.feeCurrencies[0].coinDecimals).toBe(18);
+      expect(Object.values(config.feeCurrencies[0].gasPriceStep).every((price) => price >= 10_000_000_000)).toBe(true);
     }
   });
 });

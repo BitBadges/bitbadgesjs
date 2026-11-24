@@ -5,7 +5,7 @@ export const setMintEscrowCoinsSchema = z.object({
   sessionId: z.string().optional().describe("Session ID for per-request isolation."),
   creatorAddress: z.string().optional(),
   coins: z.array(z.object({
-    denom: z.string().describe('Coin denomination (e.g. "ubadge", "ibc/...")'),
+    denom: z.string().describe('Coin denomination (e.g. "abadge", "ibc/...")'),
     amount: z.string().describe('Amount in base units')
   })).describe('Coins to transfer to the mint escrow address on collection creation. Used to fund quest rewards, escrow payouts, etc.')
 });
@@ -25,7 +25,7 @@ export const setMintEscrowCoinsTool = {
         items: {
           type: 'object',
           properties: {
-            denom: { type: 'string', description: 'Coin denomination (e.g. "ubadge", "ibc/...")' },
+            denom: { type: 'string', description: 'Coin denomination (e.g. "abadge", "ibc/...")' },
             amount: { type: 'string', description: 'Amount in base units' }
           },
           required: ['denom', 'amount']

@@ -83,8 +83,8 @@ addOutputFlags(
           '--mine <address>',
           'Restrict to intents created by this address (bb1.../0x — auto-normalized). Also includes used/inactive.'
         )
-        .option('--pay-denom <symbol|denom>', 'Filter by the denom the intent pays out. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
-        .option('--receive-denom <symbol|denom>', 'Filter by the denom the intent expects to receive. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+        .option('--pay-denom <symbol|denom>', 'Filter by the denom the intent pays out. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
+        .option('--receive-denom <symbol|denom>', 'Filter by the denom the intent expects to receive. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
     )
   )
 ).action(
@@ -162,9 +162,9 @@ addOutputFlags(
           'Emit MsgSetOutgoingApproval for a new intent ("I pay X if you send me Y"). Pipe to `bb deploy`.'
         )
         .requiredOption('--creator <address>', 'Intent creator address (bb1.../0x — auto-normalized)')
-        .requiredOption('--pay-denom <symbol|denom>', 'Denom you OFFER. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+        .requiredOption('--pay-denom <symbol|denom>', 'Denom you OFFER. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
         .requiredOption('--pay-amount <amount>', 'Amount of pay denom. Display units for symbol denoms, base units for chain denoms. Use --base-units to force base-units.')
-        .requiredOption('--receive-denom <symbol|denom>', 'Denom you EXPECT in return. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+        .requiredOption('--receive-denom <symbol|denom>', 'Denom you EXPECT in return. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
         .requiredOption('--receive-amount <amount>', 'Amount of receive denom. Display units for symbol denoms, base units for chain denoms.')
         .option('--base-units', 'Treat --pay-amount and --receive-amount as already-in-base-units')
         .option(

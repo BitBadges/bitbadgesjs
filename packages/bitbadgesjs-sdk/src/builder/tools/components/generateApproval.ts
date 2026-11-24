@@ -101,7 +101,7 @@ export const generateApprovalTool = {
       },
       paymentDenom: {
         type: 'string',
-        description: 'Payment denomination (e.g., "ubadge")'
+        description: 'Payment denomination (e.g., "abadge")'
       },
       paymentRecipient: {
         type: 'string',

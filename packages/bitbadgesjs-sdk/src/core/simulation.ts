@@ -87,7 +87,7 @@ export interface NetBalanceChanges {
 }
 
 /**
- * Splits a Cosmos SDK amount+denom string (e.g. "100ubadge") into numeric amount and denom.
+ * Splits a Cosmos SDK amount+denom string (e.g. "100abadge") into numeric amount and denom.
  * Handles the edge case of EVM addresses starting with "0x" embedded in denom strings.
  *
  * @internal
@@ -363,7 +363,7 @@ export function calculateNetChanges(
   // Add fee deduction if provided
   if (fee && signerAddress) {
     const feeAmount = BigIntify(fee.amount);
-    const feeDenom = fee.denom || 'ubadge';
+    const feeDenom = fee.denom || 'abadge';
 
     ensureCoinEntry(signerAddress, feeDenom);
     coinChanges.get(signerAddress)!.set(feeDenom, coinChanges.get(signerAddress)!.get(feeDenom)! - feeAmount);

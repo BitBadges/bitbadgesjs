@@ -57,7 +57,7 @@ function variant(
 }
 const payment = (recipient: string, amount: string) => ({
   to: recipient,
-  coins: [{ amount, denom: 'ubadge' }],
+  coins: [{ amount, denom: 'abadge' }],
   overrideFromWithApproverAddress: false,
   overrideToWithInitiator: false
 });
@@ -116,7 +116,7 @@ const variants = [
         { recipient: payer, amount: 2, denom: 'BADGE' }
       ]
     },
-    { payment: [payment(merchant, '3000000000'), payment(payer, '2000000000')] }
+    { payment: [payment(merchant, '3000000000000000000'), payment(payer, '2000000000000000000')] }
   ),
   variant(
     'subscription-two-tiers',
@@ -151,7 +151,7 @@ const variants = [
   variant(
     'service-credit-fixed-pack',
     'spendable-service-credits',
-    'Sell exactly one pack of 10 image-generation credits per purchase for 1000000 ubadge to provider. Holder-initiated consumption only. Expire at 1896048000000 inclusive.',
+    'Sell exactly one pack of 10 image-generation credits per purchase for 1000000 abadge to provider. Holder-initiated consumption only. Expire at 1896048000000 inclusive.',
     { purchaseOptions: [{ pricePerPack: '1000000', creditsPerPack: '10', purchaseType: 'fixed' }] },
     { 'purchase-cap': '0' },
     [check('fixed-pack', '/value/collectionApprovals/0/approvalCriteria/predeterminedBalances/incrementedBalances/allowAmountScaling', false)]
@@ -274,7 +274,7 @@ const metadataUpdate: GoldenCase = {
     {
       id: 'hidden-escrow',
       path: '/value/mintEscrowCoinsToTransfer',
-      value: [{ denom: 'ubadge', amount: '1000000' }],
+      value: [{ denom: 'abadge', amount: '1000000' }],
       mustFail: ['no-escrow-funding']
     }
   ]

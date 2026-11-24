@@ -409,7 +409,7 @@ Use \`coinTransfers\` in approvalCriteria to require payment:
   "approvalCriteria": {
     "coinTransfers": [{
       "to": "bb1creator...",
-      "coins": [{ "denom": "ubadge", "amount": "5000000000" }],
+      "coins": [{ "denom": "abadge", "amount": "5000000000000000000" }],
       "overrideFromWithApproverAddress": false,
       "overrideToWithInitiator": false
     }]
@@ -511,7 +511,7 @@ The **Mint Escrow Address** is a special reserved address generated from the col
 \`\`\`json
 {
   "collectionId": "0",
-  "mintEscrowCoinsToTransfer": [{ "denom": "ubadge", "amount": "10000000000" }],
+  "mintEscrowCoinsToTransfer": [{ "denom": "abadge", "amount": "10000000000000000000" }],
   "collectionApprovals": [{
     "fromListId": "Mint",
     "toListId": "All",
@@ -520,7 +520,7 @@ The **Mint Escrow Address** is a special reserved address generated from the col
     "approvalCriteria": {
       "coinTransfers": [{
         "to": "bb1user...",
-        "coins": [{ "denom": "ubadge", "amount": "1000000000" }],
+        "coins": [{ "denom": "abadge", "amount": "1000000000000000000" }],
         "overrideFromWithApproverAddress": true,
         "overrideToWithInitiator": true
       }],
@@ -551,7 +551,7 @@ Key escrow rules:
       "overridesFromOutgoingApprovals": true,
       "coinTransfers": [{
         "to": "bb1creator...",
-        "coins": [{ "denom": "ubadge", "amount": "5000000000" }],
+        "coins": [{ "denom": "abadge", "amount": "5000000000000000000" }],
         "overrideFromWithApproverAddress": false,
         "overrideToWithInitiator": false
       }],
@@ -756,7 +756,7 @@ Fungible tokens use approvalAmounts (NOT predeterminedBalances) to track minting
     category: 'token-type',
     description: 'Non-fungible token collection with unique token IDs, metadata URIs, and badge-based ownership',
     summary: `Required standards: ["NFTs"]
-- For tradable NFTs: ["NFTs", "NFTMarketplace", "NFTPricingDenom:ubadge"]
+- For tradable NFTs: ["NFTs", "NFTMarketplace", "NFTPricingDenom:abadge"]
 
 - validTokenIds: set to the range of unique token IDs (e.g. [{ "start": "1", "end": "100" }])
 - Each token ID represents a unique NFT; amount in transfers is typically "1"
@@ -771,7 +771,7 @@ When creating an NFT collection, follow this pattern:
 
 1. **Standards**: Include "NFTs" in the standards array
    - Example: "standards": ["NFTs"]
-   - For tradable NFTs: "standards": ["NFTs", "NFTMarketplace", "NFTPricingDenom:ubadge"]
+   - For tradable NFTs: "standards": ["NFTs", "NFTMarketplace", "NFTPricingDenom:abadge"]
 
 2. **validTokenIds**: Set to the range of unique token IDs
    - Example for 100 NFTs: [{ "start": "1", "end": "100" }]
@@ -1005,7 +1005,7 @@ add_preset_approval({
     "approvalCriteria": {
       "coinTransfers": [{
         "to": "bb1creator...",
-        "coins": [{ "denom": "ubadge", "amount": "5000000000" }],
+        "coins": [{ "denom": "abadge", "amount": "5000000000000000000" }],
         "overrideFromWithApproverAddress": false,
         "overrideToWithInitiator": false
       }],
@@ -1666,7 +1666,7 @@ Call once per line item. For escrow / hold-and-release (Approach 2) use the smar
     "approvalCriteria": {
       "coinTransfers": [{
         "to": "bb1payee...",
-        "coins": [{ "denom": "ubadge", "amount": "10000000000" }],
+        "coins": [{ "denom": "abadge", "amount": "10000000000000000000" }],
         "overrideFromWithApproverAddress": false,
         "overrideToWithInitiator": false
       }],
@@ -1804,7 +1804,7 @@ The primitives (mustOwnTokens, transferTimes, votingChallenges, amount caps, bal
     name: 'Tradable NFTs',
     category: 'standard',
     description: 'NFT marketplace standard enabling peer-to-peer transfers with the "NFTMarketplace" standard tag and NFTPricingDenom',
-    summary: `Required standards: ["NFTMarketplace", "NFTs", "NFTPricingDenom:ubadge"]
+    summary: `Required standards: ["NFTMarketplace", "NFTs", "NFTPricingDenom:abadge"]
 
 - MUST include all three standards together
 - NFTPricingDenom format: "NFTPricingDenom:<denom>" (sets pricing denomination for orderbook)
@@ -1826,10 +1826,10 @@ add_preset_approval({ presetId: "tradable.transferable", params: {} })
 
 ### Required Structure
 
-1. **Standards**: MUST include "NFTMarketplace", "NFTs", and "NFTPricingDenom:ubadge"
-   - "standards": ["NFTMarketplace", "NFTs", "NFTPricingDenom:ubadge"]
+1. **Standards**: MUST include "NFTMarketplace", "NFTs", and "NFTPricingDenom:abadge"
+   - "standards": ["NFTMarketplace", "NFTs", "NFTPricingDenom:abadge"]
    - NFTPricingDenom sets the pricing denomination for orderbook display
-   - Replace "ubadge" with your desired currency denom if different
+   - Replace "abadge" with your desired currency denom if different
 
 2. **Free Transfer Approval**: Include a default collection approval for peer-to-peer transfers
    \`\`\`json
@@ -1849,7 +1849,7 @@ add_preset_approval({ presetId: "tradable.transferable", params: {} })
 \`\`\`json
 {
   "updateStandards": true,
-  "standards": ["NFTMarketplace", "NFTs", "NFTPricingDenom:ubadge"]
+  "standards": ["NFTMarketplace", "NFTs", "NFTPricingDenom:abadge"]
 }
 \`\`\`
 
@@ -2050,7 +2050,7 @@ The single approval's shape is fully canonical — use the preset instead of han
 add_preset_approval({
   presetId: "credit-token.scaled",
   params: {
-    paymentDenom: "<ics20 denom — native like 'ubadge', 'uatom', or an 'ibc/...' hash>",
+    paymentDenom: "<ics20 denom — native like 'abadge', 'uatom', or an 'ibc/...' hash>",
     paymentRecipient: "<bb1... creator or treasury address>",
     tokensPerUnit: "<base-unit ratio; see Conversion rate below>"
   }

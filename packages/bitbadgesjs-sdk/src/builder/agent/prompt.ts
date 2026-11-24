@@ -180,7 +180,7 @@ Collection-level constraints enforced on-chain (e.g., noCustomOwnershipTimes, ma
 ## Available ICS20 Coins
 | Symbol | Decimals | Denom |
 |--------|----------|-------|
-| BADGE | 9 | ubadge |
+| BADGE | 18 | abadge |
 | USDC | 6 | ibc/E1116484B327AEE59CDC3DA73D319834781A13DB2A7DFC1F38A30CD45ABF58B8 |
 | USDC.n | 6 | ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349 | *(legacy Noble route — supported, do not use for new collections)* |
 | ATOM | 6 | ibc/A4DB47A9D3CF9A068D454513891B526702455D3EF08FB9EB558C561F9DC2B701 |

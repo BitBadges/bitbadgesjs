@@ -86,13 +86,15 @@ describe('shared utilities', () => {
   test('resolveCoin resolves BADGE', () => {
     const coin = resolveCoin('BADGE');
     expect(coin.symbol).toBe('BADGE');
-    expect(coin.decimals).toBe(9);
-    expect(coin.denom).toBe('ubadge');
+    expect(coin.decimals).toBe(18);
+    expect(coin.denom).toBe('abadge');
   });
 
   test('resolveCoin resolves case-insensitively', () => {
     expect(resolveCoin('usdc').symbol).toBe('USDC');
     expect(resolveCoin('badge').symbol).toBe('BADGE');
+    expect(resolveCoin('badge').denom).toBe('abadge');
+    expect(resolveCoin('badge').decimals).toBe(18);
   });
 
   test('resolveCoin throws for unknown coin', () => {
@@ -108,17 +110,22 @@ describe('shared utilities', () => {
     expect(() => resolveCoin('uusdc')).toThrow(/USDC is the denom "ibc\/.*"/);
     expect(() => resolveCoin('uosmo')).toThrow(/OSMO is the denom "ibc\/.*"/);
 
-    // ubadge still resolves via the direct registry-key match (its
-    // on-chain denom genuinely IS "ubadge").
+    // abadge and legacy ubadge both resolve via direct registry-key match.
+    expect(resolveCoin('abadge').symbol).toBe('BADGE');
+    expect(resolveCoin('abadge').decimals).toBe(18);
     expect(resolveCoin('ubadge').symbol).toBe('BADGE');
+    expect(resolveCoin('ubadge').decimals).toBe(9);
     // A bogus u-prefixed string falls through to the generic message.
     expect(() => resolveCoin('ufakecoin')).toThrow('Unknown coin');
   });
 
-  test('toBaseUnits converts correctly', () => {
+  test('toBaseUnits converts correctly including 18-decimal BigInt values', () => {
     expect(toBaseUnits(10, 6)).toBe('10000000');
     expect(toBaseUnits(1, 9)).toBe('1000000000');
     expect(toBaseUnits(0.5, 6)).toBe('500000');
+    expect(toBaseUnits(1, 18)).toBe('1000000000000000000');
+    expect(toBaseUnits('0.000000000000000001', 18)).toBe('1');
+    expect(toBaseUnits('1000000000', 18)).toBe('1000000000000000000000000000');
   });
 
   test('toBaseUnits throws on invalid amounts instead of silently coercing', () => {
@@ -833,7 +840,8 @@ describe('quests builder', () => {
     expect(r.standards).toEqual(['Quests']);
   });
   test('correct escrow', () => {
-    expect(r.mintEscrowCoinsToTransfer[0].amount).toBe('1000000000000');
+    expect(r.mintEscrowCoinsToTransfer[0].denom).toBe('abadge');
+    expect(r.mintEscrowCoinsToTransfer[0].amount).toBe('1000000000000000000000');
   });
   test('quest approval with escrow payout', () => {
     const q = r.collectionApprovals.find((a: any) => a.approvalId === 'quests-approval');

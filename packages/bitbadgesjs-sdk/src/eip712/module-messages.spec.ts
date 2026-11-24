@@ -18,7 +18,7 @@ import { TxBody } from '../proto/cosmos/tx/v1beta1/tx_pb.js';
 
 const wallet = new Wallet('0x' + '1'.padStart(64, '0'));
 const sender = convertToBitBadgesAddress(wallet.address);
-const coin = { denom: 'ubadge', amount: '100' };
+const coin = { denom: 'abadge', amount: '100' };
 const pool = { sender, poolId: 1n };
 const swap = { sender, routes: [{ poolId: 1n, tokenOutDenom: 'other' }], tokenIn: coin, tokenOutMinAmount: '1' };
 const messages: AnyMessage[] = [
@@ -27,9 +27,9 @@ const messages: AnyMessage[] = [
   new gamm.MsgSwapExactAmountIn(swap),
   new gamm.MsgSwapExactAmountOut({ sender, routes: [{ poolId: 1n, tokenInDenom: 'other' }], tokenOut: coin, tokenInMaxAmount: '1000' }),
   new gamm.MsgJoinSwapExternAmountIn({ ...pool, tokenIn: coin, shareOutMinAmount: '1' }),
-  new gamm.MsgJoinSwapShareAmountOut({ ...pool, tokenInDenom: 'ubadge', shareOutAmount: '1', tokenInMaxAmount: '1000' }),
+  new gamm.MsgJoinSwapShareAmountOut({ ...pool, tokenInDenom: 'abadge', shareOutAmount: '1', tokenInMaxAmount: '1000' }),
   new gamm.MsgExitSwapExternAmountOut({ ...pool, tokenOut: coin, shareInMaxAmount: '1000' }),
-  new gamm.MsgExitSwapShareAmountIn({ ...pool, tokenOutDenom: 'ubadge', shareInAmount: '1', tokenOutMinAmount: '1' }),
+  new gamm.MsgExitSwapShareAmountIn({ ...pool, tokenOutDenom: 'abadge', shareInAmount: '1', tokenOutMinAmount: '1' }),
   new gamm.MsgSwapExactAmountInWithIBCTransfer({
     ...swap,
     ibcTransferInfo: { sourceChannel: 'channel-0', receiver: sender, timeoutTimestamp: 1900000000000000000n }
@@ -45,7 +45,7 @@ const messages: AnyMessage[] = [
   new MsgSendWithAliasRouting({ fromAddress: sender, toAddress: sender, amount: [coin] }),
   new MsgUpdateParams({ authority: sender, params: {} })
 ];
-const fee = { amount: '3000000', denom: 'ubadge', gas: 300000 };
+const fee = { amount: '3000000000000000', denom: 'abadge', gas: 300000 };
 it.each(messages.map((message) => ({ name: message.getType().typeName, message })))(
   '$name exposes typed data through the frontend payload factory',
   ({ message }) => {

@@ -25,7 +25,7 @@ export function paymentRequestExample(name: string, now = Date.now()): PaymentRe
   const first: PaymentObligation = {
     id: 'payment-1',
     payer: { kind: 'addresses', addresses: [alice] },
-    payouts: [{ recipient, denom: 'ubadge', amount: '1000000' }],
+    payouts: [{ recipient, denom: 'abadge', amount: '1000000000000000' }],
     startTime: '1',
     endTime: end.toString()
   };
@@ -42,7 +42,7 @@ export function paymentRequestExample(name: string, now = Date.now()): PaymentRe
         ...first,
         id: 'payment-2',
         payer: { kind: 'addresses', addresses: [bob] },
-        payouts: [{ recipient, denom: 'ubadge', amount: '2000000' }]
+        payouts: [{ recipient, denom: 'abadge', amount: '2000000000000000' }]
       });
       break;
     case 'threshold':

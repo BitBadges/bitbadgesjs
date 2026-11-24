@@ -215,7 +215,7 @@ interface SkipGoMessage {
 }
 
 export interface iEstimateSwapPayload {
-  /** The token in to swap. Formats accepted: "amount:1,denom:ubadge" or "1ubadge" */
+  /** The token in to swap. Formats accepted: "amount:1,denom:abadge" or "1abadge" */
   tokenIn: string;
   /** Optional chain ID for the token in. Defaults to "bitbadges-1" if not provided. */
   tokenInChainId?: string;

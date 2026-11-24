@@ -204,7 +204,7 @@ export const isProductApproval = (approval: iCollectionApproval<bigint>) => {
       return false;
     }
 
-    if (coinTransfer.coins[0].denom !== 'ubadge') {
+    if (coinTransfer.coins[0].denom !== 'abadge' && coinTransfer.coins[0].denom !== 'ubadge') {
       return false;
     }
 

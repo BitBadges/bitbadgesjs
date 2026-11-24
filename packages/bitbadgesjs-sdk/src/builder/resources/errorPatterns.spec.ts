@@ -19,12 +19,12 @@ describe('errorPatterns', () => {
     it('matches the fee-denom pattern for Session A\'s exact error string', () => {
       const err =
         '[simulation] jsonToTxBytes: fee.amount[0].denom is required. ' +
-        'Pass the denom the caller intends to pay fees in (e.g. "ubadge").';
+        'Pass the denom the caller intends to pay fees in (e.g. "abadge").';
       const hits = findMatchingErrorPatterns(err);
       expect(hits.length).toBeGreaterThan(0);
       const byName = hits.find((p) => p.name === 'Missing fee denom on transaction');
       expect(byName).toBeDefined();
-      expect(byName!.fix.toLowerCase()).toContain('ubadge');
+      expect(byName!.fix.toLowerCase()).toContain('abadge');
       expect(byName!.explanation.toLowerCase()).toContain('fee');
     });
 

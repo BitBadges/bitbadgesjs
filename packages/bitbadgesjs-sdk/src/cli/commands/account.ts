@@ -480,7 +480,7 @@ addOutputFlags(
       .option('--has-coin-transfers', 'Only approvals with a coin-transfer leg (subscriptions, listings, paid claims)', false)
       .option('--price-min <n>', 'Lower bound on approval.price (use with --denom)')
       .option('--price-max <n>', 'Upper bound on approval.price (use with --denom)')
-      .option('--denom <symbol|denom>', 'Restrict price filter to this denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)')
+      .option('--denom <symbol|denom>', 'Restrict price filter to this denom. BADGE, USDC, … or canonical denom (abadge, ibc/...)')
       .option('--sort <order>', 'price-asc | price-desc (default: server order)')
   )
 ).action(async (opts: ApprovalsFlags) => {

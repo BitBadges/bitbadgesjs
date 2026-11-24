@@ -83,7 +83,7 @@ export function denomToHuman(denom: string): string {
 
 /**
  * Convert a base-unit amount + denom into a human-readable display amount
- * (e.g., 5000000 ubadge -> "5 BADGE"). Unknown denoms show the raw amount.
+ * (e.g., 5000000000000000000 abadge -> "5 BADGE"). Unknown denoms show the raw amount.
  */
 export function amountToHuman(amount: bigint, denom: string): string {
   const symbol = denomToHuman(denom);
@@ -629,7 +629,7 @@ export function buildApprovalParagraph(approval: any, isForMint: boolean): strin
         if (maxMult > 0n) {
           md += `, up to ${maxMult.toLocaleString('en-US')}x`;
         }
-        md += `). Any associated coin transfer costs scale by the same multiplier. For example, if the base is 1 token for 1000 ubadge, transferring 5 tokens costs 5000 ubadge. `;
+        md += `). Any associated coin transfer costs scale by the same multiplier. For example, if the base is 1 token for 1000 abadge, transferring 5 tokens costs 5000 abadge. `;
       }
     }
 

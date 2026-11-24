@@ -50,7 +50,7 @@ export interface CreditTokenTier {
   version?: bigint;
   /** Legacy tier label (N for `credit-<N>`); not an asset display quantity. */
   value: number;
-  /** Payment denom (chain-side; ibc/... or ubadge). */
+  /** Payment denom (chain-side; ibc/... or abadge). */
   paymentDenom: string;
   /** Amount of paymentDenom per `value` units, in base units. */
   paymentAmount: bigint;

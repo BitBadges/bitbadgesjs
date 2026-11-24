@@ -113,8 +113,8 @@ const resumeCmd = burnerCommand
   .requiredOption('--msg-file <path>', 'Path to the msg JSON to broadcast (same msg you originally intended)')
   .requiredOption('--manager <address>', 'Collection manager address (bb1...)')
   .option('--fund <mode>', 'Funding mode if the wallet is still unfunded', 'faucet')
-  .option('--fee <amount>', 'Fee in ubadge (0 = estimate automatically at 10ubadge/gas)', '0')
-  .option('--fee-denom <symbol|denom>', 'Fee denom: BADGE or ubadge', DEFAULT_FEE_DENOM)
+  .option('--fee <amount>', 'Fee in abadge (0 = estimate automatically at 10000000000abadge/gas)', '0')
+  .option('--fee-denom <symbol|denom>', 'Fee denom: BADGE or abadge', DEFAULT_FEE_DENOM)
   .option('--gas <number>', 'Gas limit', '400000')
   .option('--poll-timeout <seconds>', 'Seconds to wait for funding', '60');
 addNetworkOptions(resumeCmd);
@@ -167,8 +167,8 @@ const sweepCmd = burnerCommand
   .description('Send the burner\'s remaining balance to another address and mark it swept.')
   .argument('<selector>', 'Address or recovery file path')
   .requiredOption('--to <address>', 'Recipient address (bb1...)')
-  .option('--denom <symbol|denom>', 'Coin denom to sweep. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', DEFAULT_FEE_DENOM)
-  .option('--fee <amount>', 'Fee in ubadge (0 = estimate automatically at 10ubadge/gas)', '0')
+  .option('--denom <symbol|denom>', 'Coin denom to sweep. BADGE, USDC, … or canonical denom (abadge, ibc/...)', DEFAULT_FEE_DENOM)
+  .option('--fee <amount>', 'Fee in abadge (0 = estimate automatically at 10000000000abadge/gas)', '0')
   .option('--gas <number>', 'Gas limit', '200000');
 addNetworkOptions(sweepCmd);
 sweepCmd.action(async (selector: string, opts: any) => {

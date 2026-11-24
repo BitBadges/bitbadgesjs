@@ -26,7 +26,7 @@ export interface CoinDetails {
  * Token info exposed by `lookup_token_info` and `getAllTokens`.
  *
  * `ibcDenom` is misnamed for historical reasons — it holds the *primary*
- * denom for the token (e.g. `ubadge`, `badges:49:chaosnet`, `ibc/...`),
+ * denom for the token (e.g. `abadge`, `badges:49:chaosnet`, `ibc/...`),
  * not just IBC denoms. We keep the name to avoid breaking the
  * agent-facing contract; consumers should treat it as "the canonical
  * denom string for this symbol."
@@ -48,12 +48,22 @@ export interface TokenInfo {
  * Mainnet coins registry
  */
 export const MAINNET_COINS_REGISTRY: Record<string, CoinDetails> = {
-  ubadge: {
+  abadge: {
     label: 'BADGE',
+    symbol: 'BADGE',
+    decimals: '18',
+    baseDenom: 'abadge',
+    image: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png'
+  },
+  ubadge: {
+    label: 'BADGE (legacy)',
     symbol: 'BADGE',
     decimals: '9',
     baseDenom: 'ubadge',
-    image: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png'
+    image: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png',
+    deprecated: true,
+    deprecationNote:
+      'Legacy 9-decimal BADGE denom prior to the 18-decimal migration. Use canonical abadge (18 decimals) for all new activity.'
   },
   'badges:49:chaosnet': {
     label: 'CHAOS',
@@ -119,7 +129,12 @@ export function buildSymbolToTokenInfoMap(): Map<string, TokenInfo> {
   // `backingAddress` only for IBC entries (since the alias generator
   // expects an `ibc/...` denom); leave it undefined for native (BADGE)
   // and chain-internal (CHAOS at `badges:49:chaosnet`) denoms.
-  Object.entries(MAINNET_COINS_REGISTRY).forEach(([baseDenom, coinDetails]) => {
+  // Process non-deprecated entries first so canonical entries (e.g. abadge for BADGE)
+  // always win symbol resolution over deprecated historical entries (e.g. ubadge).
+  const orderedEntries = Object.entries(MAINNET_COINS_REGISTRY).sort(
+    ([, a], [, b]) => Number(Boolean(a.deprecated)) - Number(Boolean(b.deprecated))
+  );
+  orderedEntries.forEach(([baseDenom, coinDetails]) => {
     const symbol = coinDetails.symbol.toUpperCase();
     if (symbolMap.has(symbol)) return;
 
@@ -166,11 +181,34 @@ export function lookupTokenInfo(query: string): TokenInfo | null {
   // symbol, never the alias.
   const aliasedDenom = SYMBOL_INPUT_ALIASES[upperQuery];
 
-  // Try IBC denom lookup
+  // Try IBC / canonical denom lookup in active symbol map
   const lowerQuery = (aliasedDenom ?? query).toLowerCase();
   for (const tokenInfo of tokenMap.values()) {
     if (tokenInfo.ibcDenom.toLowerCase() === lowerQuery) {
       return tokenInfo;
+    }
+  }
+
+  // Direct denom lookup against MAINNET_COINS_REGISTRY so deprecated legacy
+  // denoms sharing a canonical symbol (e.g. `ubadge` -> 9-decimal BADGE) remain
+  // resolvable by explicit denom for historical formatting.
+  for (const [baseDenom, coinDetails] of Object.entries(MAINNET_COINS_REGISTRY)) {
+    if (baseDenom.toLowerCase() === lowerQuery) {
+      let backingAddress: string | undefined;
+      if (baseDenom.startsWith('ibc/')) {
+        try {
+          backingAddress = generateAliasAddressForIBCBackedDenom(baseDenom);
+        } catch {
+          return null;
+        }
+      }
+      return {
+        symbol: coinDetails.symbol.toUpperCase(),
+        ibcDenom: baseDenom,
+        decimals: coinDetails.decimals,
+        ...(backingAddress ? { backingAddress } : {}),
+        displayName: coinDetails.label
+      };
     }
   }
 
@@ -246,6 +284,6 @@ export function getDecimals(denom: string): number {
     return 6;
   }
 
-  // Default to 9 for native tokens
-  return 9;
+  // Default to 18 for native tokens
+  return 18;
 }

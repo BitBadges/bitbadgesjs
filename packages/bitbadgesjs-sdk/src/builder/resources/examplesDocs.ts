@@ -111,7 +111,7 @@ Create a collection of 100 unique NFTs with a public mint approval.
               },
               "coinTransfers": [{
                 "to": "bb1creator...",
-                "coins": [{ "denom": "ubadge", "amount": "5000000000" }]
+                "coins": [{ "denom": "abadge", "amount": "5000000000000000000" }]
               }]
             },
             "version": "0"
@@ -155,7 +155,7 @@ Create a collection of 100 unique NFTs with a public mint approval.
   ],
   "memo": "",
   "fee": {
-    "amount": [{ "denom": "ubadge", "amount": "5000" }],
+    "amount": [{ "denom": "abadge", "amount": "5000000000000000" }],
     "gas": "500000"
   }
 }
@@ -285,7 +285,7 @@ Create a fungible token with unlimited supply.
   ],
   "memo": "",
   "fee": {
-    "amount": [{ "denom": "ubadge", "amount": "5000" }],
+    "amount": [{ "denom": "abadge", "amount": "5000000000000000" }],
     "gas": "500000"
   }
 }
@@ -439,7 +439,7 @@ Create a wrapped token backed 1:1 by IBC assets (e.g., USDC).
   ],
   "memo": "",
   "fee": {
-    "amount": [{ "denom": "ubadge", "amount": "5000" }],
+    "amount": [{ "denom": "abadge", "amount": "5000000000000000" }],
     "gas": "500000"
   }
 }
@@ -464,7 +464,7 @@ Create a wrapped token backed 1:1 by IBC assets (e.g., USDC).
     "overridesFromOutgoingApprovals": true,
     "coinTransfers": [{
       "to": "bb1recipient...",
-      "coins": [{ "denom": "ubadge", "amount": "5000000000" }]
+      "coins": [{ "denom": "abadge", "amount": "5000000000000000000" }]
     }]
   }
 }

@@ -21,7 +21,7 @@ const PurchaseParams = z.object({
     .describe('1-based index of the product (token ID). approvalId becomes "product-purchase-<N>".'),
   storeAddress: z.string().describe('bb1... store owner address — receives payments.'),
   priceAmount: z.string().describe('Price in BASE units of the denom.'),
-  denom: z.string().describe('Payment denom (e.g. "ubadge", "uatom", or an "ibc/..." hash).'),
+  denom: z.string().describe('Payment denom (e.g. "abadge", "uatom", or an "ibc/..." hash).'),
   supplyLimit: z
     .string()
     .describe('Max copies available ("0" for unlimited, else the cap as a string number).'),

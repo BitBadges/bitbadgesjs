@@ -7,7 +7,7 @@
  * price oracle.
  *
  * Input accepts:
- *   - Raw chain denoms (ubadge, ibc/..., badgeslp:N:utoken, factory/...)
+ *   - Raw chain denoms (abadge, ibc/..., badgeslp:N:utoken, factory/...)
  *   - Symbols (BADGE, USDC, etc) — resolved client-side via /assetPairs/search
  *
  * Cross-chain assets that aren't on the BitBadges chain (ETH on Ethereum,
@@ -48,14 +48,14 @@ async function callApi(method: 'GET' | 'POST', path: string, opts: PriceFlags, b
 
 /**
  * Resolve each input to a denom. Inputs that already look like a denom
- * (ubadge, ibc/..., badgeslp:..., factory/...) pass through. Symbols hit
+ * (abadge, legacy ubadge, ibc/..., badgeslp:..., factory/...) pass through. Symbols hit
  * /assetPairs/search.
  */
 async function resolveDenoms(inputs: string[], opts: PriceFlags): Promise<{ input: string; denom?: string }[]> {
   const out: { input: string; denom?: string }[] = [];
   for (const input of inputs) {
     // Chain denoms are lowercase by convention; uppercase strings are symbols.
-    if (/^(u[a-z]|ibc\/|badges|factory\/)/.test(input)) {
+    if (/^(abadge$|u[a-z]|ibc\/|badges|factory\/)/.test(input)) {
       out.push({ input, denom: input });
       continue;
     }
@@ -77,8 +77,8 @@ async function resolveDenoms(inputs: string[], opts: PriceFlags): Promise<{ inpu
 export const priceCommand = addUnifiedNetworkOptions(
   addOutputOptions(
     new Command('price')
-      .description('Indexer-served USD price lookup for BitBadges-chain assets. Accepts denoms (ubadge, ibc/...) or symbols (BADGE) — symbols resolve via /assetPairs/search. Cross-chain prices live in `bb swap` (Skip:Go). Requires API key.')
-      .argument('<denoms-or-symbols...>', 'Repeated args or comma-separated. e.g. ubadge, BADGE, ibc/E1116484...')
+      .description('Indexer-served USD price lookup for BitBadges-chain assets. Accepts denoms (abadge, ibc/...) or symbols (BADGE) — symbols resolve via /assetPairs/search. Cross-chain prices live in `bb swap` (Skip:Go). Requires API key.')
+      .argument('<denoms-or-symbols...>', 'Repeated args or comma-separated. e.g. abadge, BADGE, ibc/E1116484...')
   ),
   { includeNetworkFlag: false, includeMainnetFlag: false }
 )
@@ -86,9 +86,9 @@ export const priceCommand = addUnifiedNetworkOptions(
     'after',
     `
 Examples:
-  bb price ubadge                     # native BADGE
+  bb price abadge                     # native BADGE
   bb price BADGE                      # same — symbol resolved via /assetPairs/search
-  bb price ubadge,ibc/E1116484...     # batch via CSV
+  bb price abadge,ibc/E1116484...     # batch via CSV
   bb price BADGE USDC --local
 
 All prices come from the BitBadges indexer's AssetInfoDoc records. For
@@ -102,7 +102,7 @@ cross-chain assets not on BitBadges chain, use \`bb swap\` (Skip:Go-backed).
         'USAGE',
         'At least one denom or symbol required.',
         undefined,
-        'Try `bb price ubadge` or `bb price BADGE USDC`.'
+        'Try `bb price abadge` or `bb price BADGE USDC`.'
       );
       writeJsonEnvelope(env);
       process.exit(2);

@@ -72,7 +72,7 @@ export function registerPools(parent: Command): void {
   addOutputFlags(
     addNetworkFlags(parent.command('by-denom'))
       .description('Pools containing a given denom (BADGE, USDC, … or canonical denom).')
-      .argument('<symbol|denom>', 'Symbol (BADGE, USDC) or canonical denom (ubadge, ibc/...)')
+      .argument('<symbol|denom>', 'Symbol (BADGE, USDC) or canonical denom (abadge, ibc/...)')
       .option('--bookmark <b>', 'Pagination bookmark')
   ).action(async (denom: string, opts: any) => {
     try {

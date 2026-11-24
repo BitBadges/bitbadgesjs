@@ -62,8 +62,8 @@ export const BitBadgesKeplrSuggestMainnetChainInfo = {
   currencies: [
     {
       coinDenom: 'BADGE',
-      coinMinimalDenom: 'ubadge',
-      coinDecimals: 9,
+      coinMinimalDenom: 'abadge',
+      coinDecimals: 18,
       coinImageUrl: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png',
       icon: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png'
     }
@@ -71,12 +71,12 @@ export const BitBadgesKeplrSuggestMainnetChainInfo = {
   feeCurrencies: [
     {
       coinDenom: 'BADGE',
-      coinMinimalDenom: 'ubadge',
-      coinDecimals: 9,
+      coinMinimalDenom: 'abadge',
+      coinDecimals: 18,
       gasPriceStep: {
-        low: 10,
-        average: 10,
-        high: 12
+        low: 10000000000,
+        average: 10000000000,
+        high: 12000000000
       },
       coinImageUrl: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png',
       icon: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png'
@@ -84,8 +84,8 @@ export const BitBadgesKeplrSuggestMainnetChainInfo = {
   ],
   stakeCurrency: {
     coinDenom: 'BADGE',
-    coinMinimalDenom: 'ubadge',
-    coinDecimals: 9,
+    coinMinimalDenom: 'abadge',
+    coinDecimals: 18,
     coinImageUrl: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png',
     icon: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png'
   },
@@ -184,16 +184,31 @@ export const SYMBOL_INPUT_ALIASES: Record<string, string> = {
 /**
  * Base coins registry containing common coins available across all networks.
  *
+ * `abadge` (18 decimals) is the canonical native denom for BADGE. Legacy
+ * `ubadge` (9 decimals) is kept as a deprecated entry so historical pre-upgrade
+ * transactions and records continue to format accurately by explicit denom lookup.
+ *
  * @category Coins Registry
  */
 const BaseCoinsRegistry: Record<string, CoinDetails> = {
-  ubadge: {
+  abadge: {
     skipGoSupported: true,
     label: 'BADGE',
     symbol: 'BADGE',
+    decimals: '18',
+    baseDenom: 'abadge',
+    image: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png'
+  },
+  ubadge: {
+    skipGoSupported: false,
+    label: 'BADGE (legacy)',
+    symbol: 'BADGE',
     decimals: '9',
     baseDenom: 'ubadge',
-    image: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png'
+    image: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/bitbadges/images/badge_logo.png',
+    deprecated: true,
+    deprecationNote:
+      'Legacy 9-decimal BADGE denom prior to the 18-decimal migration. Use canonical abadge (18 decimals) for all new activity.'
   }
 };
 

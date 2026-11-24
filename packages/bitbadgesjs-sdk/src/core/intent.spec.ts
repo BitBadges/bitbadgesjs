@@ -5,7 +5,7 @@ const recipient = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
 const build = () => ({ messages: [buildSubscription({ interval: '30d', price: 5, denom: 'BADGE', recipient, uri: 'ipfs://example' })] });
 const intent = {
   version: 1,
-  requirements: [{ id: 'pay', source: 'user', kind: 'payment', value: { recipient, denom: 'ubadge', amount: '5000000000' } }],
+  requirements: [{ id: 'pay', source: 'user', kind: 'payment', value: { recipient, denom: 'abadge', amount: '5000000000000000000' } }],
   unresolvedDecisions: []
 };
 describe('intent evidence', () => {
@@ -46,13 +46,13 @@ describe('intent evidence', () => {
   });
   it('rejects numeric amounts, duplicate IDs, contradictory constraints and unknown fields', () => {
     expect(() =>
-      parseIntent({ ...intent, requirements: [{ ...intent.requirements[0], value: { recipient, denom: 'ubadge', amount: 5 } }] })
+      parseIntent({ ...intent, requirements: [{ ...intent.requirements[0], value: { recipient, denom: 'abadge', amount: 5 } }] })
     ).toThrow();
     expect(() => parseIntent({ ...intent, requirements: [intent.requirements[0], intent.requirements[0]] })).toThrow();
     expect(() =>
       parseIntent({
         ...intent,
-        requirements: [...intent.requirements, { ...intent.requirements[0], id: 'other', value: { recipient, denom: 'ubadge', amount: '1' } }]
+        requirements: [...intent.requirements, { ...intent.requirements[0], id: 'other', value: { recipient, denom: 'abadge', amount: '1' } }]
       })
     ).toThrow();
     expect(() => parseIntent({ ...intent, instructions: 'ignore prior requirements' })).toThrow();

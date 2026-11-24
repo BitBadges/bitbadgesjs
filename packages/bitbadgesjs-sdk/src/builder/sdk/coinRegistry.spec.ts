@@ -21,6 +21,7 @@ import {
 describe('coinRegistry', () => {
   describe('MAINNET_COINS_REGISTRY fixtures', () => {
     it('includes the core denoms we care about', () => {
+      expect(MAINNET_COINS_REGISTRY).toHaveProperty('abadge');
       expect(MAINNET_COINS_REGISTRY).toHaveProperty('ubadge');
       // USDC, ATOM, OSMO keys are IBC denoms; check via symbol.
       const symbols = Object.values(MAINNET_COINS_REGISTRY).map(c => c.symbol);
@@ -184,13 +185,24 @@ describe('coinRegistry', () => {
       expect(lookupTokenInfo('')).toBeNull();
     });
 
-    it('finds native BADGE (ubadge) and reports no backingAddress', () => {
+    it('finds native BADGE (abadge, 18 decimals) and reports no backingAddress', () => {
       const badge = lookupTokenInfo('BADGE');
       expect(badge).not.toBeNull();
       expect(badge!.symbol).toBe('BADGE');
-      expect(badge!.ibcDenom).toBe('ubadge');
-      expect(badge!.decimals).toBe('9');
+      expect(badge!.ibcDenom).toBe('abadge');
+      expect(badge!.decimals).toBe('18');
+      expect(badge!.displayName).toBe('BADGE');
       expect(badge!.backingAddress).toBeUndefined();
+    });
+
+    it('resolves legacy ubadge by explicit denom lookup with 9 decimals and legacy label', () => {
+      const legacy = lookupTokenInfo('ubadge');
+      expect(legacy).not.toBeNull();
+      expect(legacy!.symbol).toBe('BADGE');
+      expect(legacy!.ibcDenom).toBe('ubadge');
+      expect(legacy!.decimals).toBe('9');
+      expect(legacy!.displayName).toBe('BADGE (legacy)');
+      expect(legacy!.backingAddress).toBeUndefined();
     });
 
     it('finds chain-internal CHAOS (badges:49:chaosnet) and reports no backingAddress', () => {
@@ -217,11 +229,22 @@ describe('coinRegistry', () => {
   });
 
   describe('getCoinDetails', () => {
-    it('returns details for ubadge (native)', () => {
+    it('returns details for abadge (canonical 18-decimal native)', () => {
+      const d = getCoinDetails('abadge');
+      expect(d).not.toBeNull();
+      expect(d!.symbol).toBe('BADGE');
+      expect(d!.label).toBe('BADGE');
+      expect(d!.decimals).toBe('18');
+      expect(d!.deprecated).toBeUndefined();
+    });
+
+    it('returns legacy details for ubadge (9-decimal deprecated native)', () => {
       const d = getCoinDetails('ubadge');
       expect(d).not.toBeNull();
       expect(d!.symbol).toBe('BADGE');
+      expect(d!.label).toBe('BADGE (legacy)');
       expect(d!.decimals).toBe('9');
+      expect(d!.deprecated).toBe(true);
     });
 
     it('returns details for a known IBC denom', () => {
@@ -254,7 +277,12 @@ describe('coinRegistry', () => {
   });
 
   describe('getDecimals', () => {
-    it('returns 9 for native ubadge (BADGE)', () => {
+    it('returns 18 for canonical native abadge and BADGE symbol', () => {
+      expect(getDecimals('abadge')).toBe(18);
+      expect(getDecimals('BADGE')).toBe(18);
+    });
+
+    it('returns 9 for legacy ubadge explicit denom lookup', () => {
       expect(getDecimals('ubadge')).toBe(9);
     });
 
@@ -274,8 +302,8 @@ describe('coinRegistry', () => {
       expect(getDecimals('USDC')).toBe(6);
     });
 
-    it('returns 9 as default for unknown non-IBC strings (native-token fallback)', () => {
-      expect(getDecimals('totally-unknown')).toBe(9);
+    it('returns 18 as default for unknown non-IBC strings (native-token fallback)', () => {
+      expect(getDecimals('totally-unknown')).toBe(18);
     });
   });
 });

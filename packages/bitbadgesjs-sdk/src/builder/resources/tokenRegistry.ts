@@ -49,7 +49,7 @@ export function getTokenRegistryContent(): TokenRegistryContent {
       'All backing addresses are deterministic and pre-generated',
       'Use lookup_token_info tool to query by symbol or IBC denom',
       'Use generate_backing_address tool to compute backing address for custom IBC denoms',
-      'Token decimals: ubadge=9, USDC=6, ATOM=6, OSMO=6',
+      'Token decimals: abadge=18, USDC=6, ATOM=6, OSMO=6',
       'When creating Smart Tokens, use the backingAddress from this registry'
     ]
   };

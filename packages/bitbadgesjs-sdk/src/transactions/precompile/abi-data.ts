@@ -827,7 +827,7 @@ export const precompileAbiData = {
  *
  * Note: delegatorAddress must equal msg.sender (enforced by precompile)
  * Note: validatorAddress can be either Ethereum hex or Cosmos bech32 format
- * Note: Amounts are in abadge (18 decimals via precisebank)
+ * Note: Amounts are in abadge (18 decimals, 1 abadge = 1 wei)
  */
 export const stakingPrecompileAbiData = {
   _format: 'hh-sol-artifact-1',

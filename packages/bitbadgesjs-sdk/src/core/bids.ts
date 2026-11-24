@@ -161,7 +161,7 @@ export interface OrderbookOrderArgs {
   tokenId?: bigint;
   /** Coin amount in base units (bigint). */
   paymentAmount: bigint;
-  /** Coin denom (e.g. 'ubadge', 'ibc/...'). */
+  /** Coin denom (e.g. 'abadge', 'ibc/...'). */
   paymentDenom: string;
   /** Token quantity (almost always 1n for NFTs). */
   tokenAmount?: bigint;

@@ -25,30 +25,31 @@ export interface ResolvedCoin {
 
 /**
  * Resolve a coin symbol (USDC, BADGE, ATOM, OSMO) to its on-chain denom + metadata.
- * Also accepts raw denoms (ibc/..., ubadge) for pass-through.
- *
- * Pass `testnet: true` to use the testnet registry (only BADGE available).
- */
-/**
- * Resolve a coin symbol (USDC, BADGE, ATOM, OSMO) to its on-chain denom + metadata.
- * Also accepts raw denoms (ibc/..., ubadge) for pass-through.
+ * Also accepts raw denoms (ibc/..., abadge, legacy ubadge) for pass-through.
  * Uses mainnet registry. If a coin doesn't exist on your target chain, the tx will fail on-chain.
  */
 export function resolveCoin(symbolOrDenom: string): ResolvedCoin {
   const registry = MAINNET_COINS_REGISTRY;
 
-  // Try direct match first (raw denom like ubadge or ibc/...)
+  // Try direct match first (raw denom like abadge, legacy ubadge, or ibc/...)
   const direct = registry[symbolOrDenom];
   if (direct) {
     return { denom: direct.baseDenom, symbol: direct.symbol, decimals: Number(direct.decimals), image: direct.image };
   }
 
-  // Try symbol lookup (case-insensitive)
+  // Try symbol lookup (case-insensitive), preferring non-deprecated canonical entries
   const upper = symbolOrDenom.toUpperCase();
-  for (const [denom, details] of Object.entries(registry)) {
+  let deprecatedMatch: CoinDetails | undefined;
+  for (const [, details] of Object.entries(registry)) {
     if (details.symbol.toUpperCase() === upper) {
-      return { denom: details.baseDenom, symbol: details.symbol, decimals: Number(details.decimals), image: details.image };
+      if (!details.deprecated) {
+        return { denom: details.baseDenom, symbol: details.symbol, decimals: Number(details.decimals), image: details.image };
+      }
+      if (!deprecatedMatch) deprecatedMatch = details;
     }
+  }
+  if (deprecatedMatch) {
+    return { denom: deprecatedMatch.baseDenom, symbol: deprecatedMatch.symbol, decimals: Number(deprecatedMatch.decimals), image: deprecatedMatch.image };
   }
 
   // Accepted typed-input aliases (e.g. the pre-release "USDC.noble"
@@ -65,10 +66,10 @@ export function resolveCoin(symbolOrDenom: string): ResolvedCoin {
   // do NOT silently coerce it to a registry entry — guessing is a
   // band-aid. Detect the pattern and throw with the canonical denom +
   // symbol so the caller fixes the input at the source.
-  // (ubadge is already caught by the direct-match above.)
+  // (Legacy ubadge is already caught by the direct-match above.)
   if (/^u[a-z0-9]+$/.test(symbolOrDenom)) {
     const aliasSymbol = symbolOrDenom.slice(1).toUpperCase();
-    const match = Object.values(registry).find((d) => d.symbol.toUpperCase() === aliasSymbol);
+    const match = Object.values(registry).find((d) => !d.deprecated && d.symbol.toUpperCase() === aliasSymbol);
     if (match) {
       throw new Error(
         `Unknown coin "${symbolOrDenom}". On BitBadges, ${match.symbol} is the denom ` +
@@ -86,18 +87,65 @@ export function resolveCoin(symbolOrDenom: string): ResolvedCoin {
 }
 
 /**
- * Convert a display-unit amount (e.g. 10 USDC) to base units (e.g. 10000000 uusdc).
+ * Convert a display-unit amount (e.g. 10 USDC or 1 BADGE) to base units using
+ * exact BigInt decimal scaling (no float `10 ** decimals` multiplication).
  */
-export function toBaseUnits(displayAmount: number, decimals: number): string {
-  const num = Number(displayAmount);
-  if (!Number.isFinite(num) || num < 0) {
+export function toBaseUnits(displayAmount: number | string, decimals: number): string {
+  if (!Number.isInteger(decimals) || decimals < 0) {
+    throw new Error(`Invalid decimals "${decimals}": must be a non-negative integer.`);
+  }
+  if (typeof displayAmount === 'number') {
+    if (!Number.isFinite(displayAmount) || displayAmount < 0) {
+      throw new Error(`Invalid amount "${displayAmount}": must be a finite, non-negative number.`);
+    }
+    if (displayAmount > Number.MAX_SAFE_INTEGER) {
+      throw new Error(`Amount "${displayAmount}" is too large to convert to base units without precision loss.`);
+    }
+  } else if (typeof displayAmount === 'string') {
+    const trimmed = displayAmount.trim();
+    if (trimmed.length === 0) {
+      throw new Error(`Invalid amount "${displayAmount}": must be a finite, non-negative number.`);
+    }
+    if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(trimmed)) {
+      throw new Error(`Invalid amount "${displayAmount}": must be a finite, non-negative number.`);
+    }
+    if (trimmed.startsWith('-')) {
+      throw new Error(`Invalid amount "${displayAmount}": must be a finite, non-negative number.`);
+    }
+  } else {
     throw new Error(`Invalid amount "${displayAmount}": must be a finite, non-negative number.`);
   }
-  const base = Math.round(num * 10 ** decimals);
-  if (!Number.isSafeInteger(base)) {
-    throw new Error(`Amount "${displayAmount}" is too large to convert to base units without precision loss.`);
+
+  const rawStr = String(displayAmount).trim().replace(/^\+/, '');
+  const match = rawStr.match(/^(\d*)(?:\.(\d*))?(?:[eE]([+-]?\d+))?$/);
+  if (!match || (!match[1] && !match[2])) {
+    throw new Error(`Invalid amount "${displayAmount}": must be a finite, non-negative number.`);
   }
-  return String(base);
+  const [, intRaw = '', fracRaw = '', expStr] = match;
+  const exp = expStr ? parseInt(expStr, 10) : 0;
+  // Combine digits and shift decimal point by (exp + decimals).
+  const combined = intRaw + fracRaw;
+  const shift = exp + decimals - fracRaw.length;
+  if (shift >= 0) {
+    const scaled = (combined.replace(/^0+/, '') || '0') + '0'.repeat(shift);
+    return BigInt(scaled).toString();
+  }
+  // Fractional base units remaining: round half-up via BigInt.
+  const cut = combined.length + shift;
+  let intDigits: string;
+  let nextDigit: number;
+  if (cut <= 0) {
+    intDigits = '0';
+    nextDigit = cut === 0 ? parseInt(combined[0] || '0', 10) : 0;
+  } else {
+    intDigits = combined.slice(0, cut);
+    nextDigit = parseInt(combined[cut] || '0', 10);
+  }
+  let base = BigInt(intDigits || '0');
+  if (nextDigit >= 5) {
+    base += 1n;
+  }
+  return base.toString();
 }
 
 // ── Duration parsing ─────────────────────────────────────────────────────────

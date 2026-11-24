@@ -2,7 +2,7 @@
  * Symbol + alias resolution helpers for the simulate renderer.
  *
  * Two jobs:
- *  1. Map a Cosmos coin denom (`ubadge`, `ibc/…`) → human symbol via
+ *  1. Map a Cosmos coin denom (`abadge`, `ibc/…`) → human symbol via
  *     the SDK `MAINNET_COINS_REGISTRY`. Used to suffix net-change and
  *     transfer lines with `(BADGE)` / `(ATOM)` / etc.
  *  2. Given a balance array for a collection, detect whether it

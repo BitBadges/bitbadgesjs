@@ -162,7 +162,7 @@ export const genTxPayloadCommand = new Command('gen-tx-payload')
   .option('--chain-id <id>', 'Cosmos chain ID override (default per network: bitbadges-1 / etc)')
   .option('--memo <text>', 'Optional tx memo', '')
   .option('--fee <amount>', 'Fee amount in base units', '0')
-  .option('--fee-denom <symbol|denom>', 'Fee denom. BADGE, USDC, … or canonical denom (ubadge, ibc/...)', DEFAULT_FEE_DENOM)
+  .option('--fee-denom <symbol|denom>', 'Fee denom. BADGE, USDC, … or canonical denom (abadge, ibc/...)', DEFAULT_FEE_DENOM)
   .option('--gas <number>', 'Gas limit', '400000')
   .option('--no-fetch', 'Skip the indexer account-info round-trip; require --account-number, --sequence, and --public-key via flags. Useful for offline / air-gapped flows.');
 addNetworkOptions(genTxPayloadCommand);

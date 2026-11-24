@@ -37,9 +37,9 @@ function fail(code: number, msg: string): never {
 
 /** Resolve a user-supplied symbol-or-denom to the canonical denom via the indexer search. */
 async function resolveDenom(input: string, opts: NetworkFlags): Promise<string | undefined> {
-  // Inputs that look like chain denoms (ubadge, ibc/..., badgeslp:..., factory/...) pass through.
+  // Inputs that look like chain denoms (abadge, legacy ubadge, ibc/..., badgeslp:..., factory/...) pass through.
   // Lowercase-only on purpose — uppercase strings are symbols (USDC, BADGE) and need indexer search.
-  if (/^(u[a-z]|ibc\/|badges|factory\/)/.test(input)) return input;
+  if (/^(abadge$|u[a-z]|ibc\/|badges|factory\/)/.test(input)) return input;
   // Otherwise treat as a symbol — search the indexer.
   try {
     const res = await callApi('GET', `/assetPairs/search?query=${encodeURIComponent(input)}`, opts);
@@ -92,14 +92,14 @@ addOutputFlags(
   addNetworkFlags(
     assetsCommand
       .command('show')
-      .description('Show a single asset pair. Pass a denom (ubadge, ibc/...) or a symbol (BADGE) — symbols resolve via /assetPairs/search.')
+      .description('Show a single asset pair. Pass a denom (abadge, ibc/...) or a symbol (BADGE) — symbols resolve via /assetPairs/search.')
       .argument('<denom-or-symbol>', 'Asset denom or symbol')
   )
 ).action(async (input: string, opts: NetworkFlags & OutputFlags) => {
   try {
     const denom = await resolveDenom(input, opts);
     if (!denom) {
-      fail(2, `no asset matched "${input}". Try a denom (ubadge, ibc/...), or check 'bb assets list' for known symbols.`);
+      fail(2, `no asset matched "${input}". Try a denom (abadge, ibc/...), or check 'bb assets list' for known symbols.`);
     }
     const res = await callApi('POST', '/assetPairs/byDenoms', opts, { denoms: [denom] });
     const pair = res?.assetPairs?.[0];
@@ -140,8 +140,8 @@ addOutputFlags(
   addNetworkFlags(
     assetsCommand
       .command('price')
-      .description('Indexer-served USD prices for one or more assets. Accepts denoms (ubadge) or symbols (BADGE — auto-resolved via /assetPairs/search).')
-      .argument('<denoms-or-symbols...>', 'Repeated args or comma-separated. e.g. ubadge, BADGE, ibc/E1116484...')
+      .description('Indexer-served USD prices for one or more assets. Accepts denoms (abadge) or symbols (BADGE — auto-resolved via /assetPairs/search).')
+      .argument('<denoms-or-symbols...>', 'Repeated args or comma-separated. e.g. abadge, BADGE, ibc/E1116484...')
   )
 ).action(async (rawInputs: string[], opts: NetworkFlags & OutputFlags) => {
   try {
@@ -164,7 +164,7 @@ addOutputFlags(
     for (const pair of res.assetPairs ?? []) byDenom.set(pair.asset, pair);
 
     const prices = denoms.map(({ input, denom }) => {
-      if (!denom) return { input, error: 'unresolved — pass a denom (ubadge, ibc/...) or a known symbol' };
+      if (!denom) return { input, error: 'unresolved — pass a denom (abadge, ibc/...) or a known symbol' };
       const pair = byDenom.get(denom);
       if (!pair) return { input, denom, error: 'not indexed' };
       return {

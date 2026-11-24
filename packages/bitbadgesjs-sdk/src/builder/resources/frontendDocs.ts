@@ -32,8 +32,8 @@ const FRONTEND_DOCS_CONTENT = {
 - Display resolved names when available
 
 ### Amount Display
-- Never show raw base units (ubadge, uatom) to end users
-- Convert to display units using token decimals (e.g., ubadge has 9 decimals)
+- Never show raw base units (abadge, uatom) to end users
+- Convert to display units using token decimals (e.g., abadge has 18 decimals)
 - Show both the human-readable amount and denomination
 
 ### Transaction Flow

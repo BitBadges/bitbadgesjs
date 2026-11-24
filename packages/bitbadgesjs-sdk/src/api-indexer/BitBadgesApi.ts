@@ -2546,7 +2546,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/swap/estimate`
-   * - **SDK Function Call**: `await BitBadgesApi.estimateSwap({ tokenIn: '1000000ubadge', tokenOutDenom: 'uusdc', chainIdsToAddresses: { 'bitbadges-1': 'bb1...' }, slippageTolerancePercent: 1 });`
+   * - **SDK Function Call**: `await BitBadgesApi.estimateSwap({ tokenIn: '1000000abadge', tokenOutDenom: 'uusdc', chainIdsToAddresses: { 'bitbadges-1': 'bb1...' }, slippageTolerancePercent: 1 });`
    * - Honors a `--local-only` flag to restrict the route to BitBadges native pools (no Skip:Go rerouting).
    */
   public async estimateSwap(payload: iEstimateSwapPayload): Promise<iEstimateSwapSuccessResponse> {
@@ -2585,7 +2585,7 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/swap/track`
-   * - **SDK Function Call**: `await BitBadgesApi.trackSwap({ txHash, chainId, tokenIn: '1000ubadge' });`
+   * - **SDK Function Call**: `await BitBadgesApi.trackSwap({ txHash, chainId, tokenIn: '1000abadge' });`
    * - When called by an authenticated user, the indexer writes a tracking doc keyed by `${txHash}-${chainId}` so subsequent `getSwapStatus` calls can short-circuit.
    */
   public async trackSwap(payload: iTrackSwapPayload): Promise<TrackSwapSuccessResponse> {
@@ -3468,7 +3468,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    *
    * @remarks
    * - **API Route**: `GET /api/v0/collection/:collectionId/allListings`
-   * - **SDK Function Call**: `await BitBadgesApi.getAllListings(collectionId, { denom: 'ubadge' });`
+   * - **SDK Function Call**: `await BitBadgesApi.getAllListings(collectionId, { denom: 'abadge' });`
    */
   public async getAllListings(collectionId: CollectionId, payload: iGetAllListingsPayload): Promise<GetAllListingsSuccessResponse<T>> {
     try {
@@ -3493,7 +3493,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    *
    * @remarks
    * - **API Route**: `GET /api/v0/collection/:collectionId/collectionOffers`
-   * - **SDK Function Call**: `await BitBadgesApi.getCollectionOffers(collectionId, { denom: 'ubadge' });`
+   * - **SDK Function Call**: `await BitBadgesApi.getCollectionOffers(collectionId, { denom: 'abadge' });`
    */
   public async getCollectionOffers(
     collectionId: CollectionId,
@@ -3521,7 +3521,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    *
    * @remarks
    * - **API Route**: `GET /api/v0/collection/:collectionId/listings/:tokenId`
-   * - **SDK Function Call**: `await BitBadgesApi.getListingsForTokenId(collectionId, tokenId, { denom: 'ubadge' });`
+   * - **SDK Function Call**: `await BitBadgesApi.getListingsForTokenId(collectionId, tokenId, { denom: 'abadge' });`
    */
   public async getListingsForTokenId(
     collectionId: CollectionId,
@@ -3550,7 +3550,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    *
    * @remarks
    * - **API Route**: `GET /api/v0/collection/:collectionId/offers/:tokenId`
-   * - **SDK Function Call**: `await BitBadgesApi.getOffersForTokenId(collectionId, tokenId, { denom: 'ubadge' });`
+   * - **SDK Function Call**: `await BitBadgesApi.getOffersForTokenId(collectionId, tokenId, { denom: 'abadge' });`
    */
   public async getOffersForTokenId(
     collectionId: CollectionId,
@@ -3580,7 +3580,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    *
    * @remarks
    * - **API Route**: `GET /api/v0/collection/:collectionId/orderbook/:tokenId`
-   * - **SDK Function Call**: `await BitBadgesApi.getOrderbookDepth(collectionId, tokenId, { denom: 'ubadge' });`
+   * - **SDK Function Call**: `await BitBadgesApi.getOrderbookDepth(collectionId, tokenId, { denom: 'abadge' });`
    */
   public async getOrderbookDepth(
     collectionId: CollectionId,
@@ -3610,7 +3610,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    *
    * @remarks
    * - **API Route**: `POST /api/v0/collection/:collectionId/candlestick/:tokenId`
-   * - **SDK Function Call**: `await BitBadgesApi.getCandlestickData(collectionId, tokenId, { denom: 'ubadge' });`
+   * - **SDK Function Call**: `await BitBadgesApi.getCandlestickData(collectionId, tokenId, { denom: 'abadge' });`
    */
   public async getCandlestickData(
     collectionId: CollectionId,
@@ -3639,7 +3639,7 @@ export class BitBadgesAdminAPI<T extends NumberType> extends BitBadgesAPI<T> {
    *
    * @remarks
    * - **API Route**: `GET /api/v0/liquidityPairPriceHistory`
-   * - **SDK Function Call**: `await BitBadgesApi.getLiquidityPairPriceHistory({ asset: 'ubadge', timeframe: '10m' });`
+   * - **SDK Function Call**: `await BitBadgesApi.getLiquidityPairPriceHistory({ asset: 'abadge', timeframe: '10m' });`
    */
   public async getLiquidityPairPriceHistory(
     payload: iGetLiquidityPairPriceHistoryPayload

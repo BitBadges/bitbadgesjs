@@ -61,9 +61,9 @@ export interface EvmTransaction {
  * @category Signing
  */
 export interface SigningFee {
-  /** Amount in base units (e.g., "5000000000" for 5 BADGE) */
+  /** Amount in base units (e.g., "5000000000000000000" for 5 BADGE) */
   amount: string;
-  /** Denomination (e.g., "ubadge") */
+  /** Denomination (e.g., "abadge") */
   denom: string;
   /** Gas limit as string */
   gas: string;
