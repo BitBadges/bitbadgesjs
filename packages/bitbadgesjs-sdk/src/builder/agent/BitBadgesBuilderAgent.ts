@@ -1026,7 +1026,7 @@ export class BitBadgesBuilderAgent {
         ? await this.options.onChainSnapshotFetcher(options.existingCollectionId).catch(() => null)
         : undefined;
     const gate = await runValidationGate({
-      transaction,
+      transaction: toTxBody(transaction),
       creatorAddress: options?.creatorAddress ?? this.options.defaultCreatorAddress ?? '',
       simulate: this.options.simulate,
       abortSignal: options?.abortSignal,
@@ -1042,6 +1042,25 @@ export class BitBadgesBuilderAgent {
       designDecisions: gate.designDecisions
     };
   }
+}
+
+/**
+ * Accept the same transaction shapes as the CLI's tx-taking commands
+ * (`ensureTxWrapper` in cli/utils/txInput.ts): a `{ messages }` tx body, a
+ * single `{ typeUrl, value }` Msg, an array of Msgs, or a successful `bb build`
+ * envelope (`{ ok: true, data }`, which is what `bb build … --output-file
+ * tx.json` writes). Without this, `validate()` reported `valid: false`
+ * ("transaction has no messages") for the tx.json that `bb check` accepts.
+ * Failed envelopes (`ok: false`) and unknown shapes pass through unchanged
+ * so the validation gate reports them.
+ */
+function toTxBody(input: any): any {
+  if (!input || typeof input !== 'object') return input;
+  if (Array.isArray(input)) return { messages: input };
+  if (Array.isArray(input.messages)) return input;
+  if (typeof input.typeUrl === 'string' && input.value) return { messages: [input] };
+  if (input.ok === true && input.data && typeof input.data === 'object') return toTxBody(input.data);
+  return input;
 }
 
 function structureErrors(gate: ValidationGateResult): StructuredError[] {
