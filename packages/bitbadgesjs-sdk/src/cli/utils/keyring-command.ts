@@ -101,6 +101,69 @@ export interface KeyringCommandResult {
   msgFilePath: string;
   /** Multi-line command string suitable for `process.stderr.write`. */
   commandLine: string;
+  /** Chain binary executable name or path. */
+  binary: string;
+  /** Raw argv passed directly to the chain binary without a shell. */
+  args: string[];
+  /** Temporary directory created for generated message JSON files, if any. */
+  tmpDir?: string;
+}
+
+function createPrivateTempDir(): string {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bb-msg-'));
+  fs.chmodSync(dir, 0o700);
+  return dir;
+}
+
+function writePrivateJsonFile(filePath: string, data: unknown): void {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
+}
+
+function buildStepArgs(
+  subArgs: string[],
+  opts: { from: string; keyringBackend: string; gas: string; gasAdjustment: string },
+  chainId: string,
+  nodeUrl: string
+): string[] {
+  return [
+    'tx',
+    'tokenization',
+    ...subArgs,
+    '--from',
+    opts.from,
+    '--chain-id',
+    chainId,
+    '--node',
+    nodeUrl,
+    '--keyring-backend',
+    opts.keyringBackend,
+    '--gas',
+    opts.gas,
+    '--gas-adjustment',
+    opts.gasAdjustment,
+    '--gas-prices',
+    '10ubadge',
+    '--yes'
+  ];
+}
+
+function formatFlagLines(
+  binary: string,
+  subArgs: string[],
+  opts: { from: string; keyringBackend: string; gas: string; gasAdjustment: string },
+  chainId: string,
+  nodeUrl: string
+): string[] {
+  const head = [binary, 'tx', 'tokenization', ...subArgs].map(shellQuote).join(' ');
+  return [
+    `${head} \\`,
+    `    --from ${shellQuote(opts.from)} \\`,
+    `    --chain-id ${shellQuote(chainId)} \\`,
+    `    --node ${shellQuote(nodeUrl)} \\`,
+    `    --keyring-backend ${shellQuote(opts.keyringBackend)} \\`,
+    `    --gas ${shellQuote(opts.gas)} --gas-adjustment ${shellQuote(opts.gasAdjustment)} --gas-prices 10ubadge \\`,
+    '    --yes'
+  ];
 }
 
 /**
@@ -142,42 +205,39 @@ export function buildKeyringCommand(opts: KeyringCommandOptions): KeyringCommand
   // and passed as the lone positional. For positional msgs (set-*-approval
   // takes a sub-JSON for the approval field; others take only scalars),
   // the builder writes whatever JSON it needs via the `writeJson` callback.
+  let tmpDir: string | undefined;
+  const ensureTmpDir = (): string => {
+    if (!tmpDir) tmpDir = createPrivateTempDir();
+    return tmpDir;
+  };
   let msgFilePath = '';
-  let head: string;
+  let subArgs: string[];
   let subcommand: string;
   if (jsonArgSubcommand) {
     msgFilePath =
-      opts.msgFilePath ?? path.join(os.tmpdir(), `bb-msg-${crypto.randomBytes(4).toString('hex')}.json`);
-    fs.writeFileSync(msgFilePath, JSON.stringify(value, null, 2) + '\n', { mode: 0o600 });
-    head = `${opts.binary} tx tokenization ${jsonArgSubcommand} ${msgFilePath}`;
+      opts.msgFilePath ?? path.join(ensureTmpDir(), `bb-msg-${crypto.randomBytes(8).toString('hex')}.json`);
+    writePrivateJsonFile(msgFilePath, value);
+    subArgs = [jsonArgSubcommand, msgFilePath];
     subcommand = jsonArgSubcommand;
   } else {
     const writeJson = (data: unknown): string => {
-      const p = path.join(os.tmpdir(), `bb-msg-${crypto.randomBytes(4).toString('hex')}.json`);
-      fs.writeFileSync(p, JSON.stringify(data, null, 2) + '\n', { mode: 0o600 });
+      const p = path.join(ensureTmpDir(), `bb-msg-${crypto.randomBytes(8).toString('hex')}.json`);
+      writePrivateJsonFile(p, data);
       // Track the first-written path so callers / tests can see it.
       if (!msgFilePath) msgFilePath = p;
       return p;
     };
-    const parts = positionalBuilder!(value, writeJson);
-    head = `${opts.binary} tx tokenization ${parts.join(' ')}`;
-    subcommand = parts[0];
+    subArgs = positionalBuilder!(value, writeJson);
+    subcommand = subArgs[0];
   }
 
   // Multi-line for terminal readability. Each continuation line is
   // indented 4 spaces; the final --yes line has no trailing backslash
   // so an accidental extra newline doesn't break the paste.
-  const commandLine = [
-    `${head} \\`,
-    `    --from ${opts.from} \\`,
-    `    --chain-id ${chainId} \\`,
-    `    --node ${nodeUrl} \\`,
-    `    --keyring-backend ${opts.keyringBackend} \\`,
-    `    --gas ${opts.gas} --gas-adjustment ${opts.gasAdjustment} --gas-prices 10ubadge \\`,
-    `    --yes`
-  ].join('\n');
+  const commandLine = formatFlagLines(opts.binary, subArgs, opts, chainId, nodeUrl).join('\n');
+  const args = buildStepArgs(subArgs, opts, chainId, nodeUrl);
 
-  return { subcommand, msgFilePath, commandLine };
+  return { subcommand, msgFilePath, commandLine, binary: opts.binary, args, ...(tmpDir ? { tmpDir } : {}) };
 }
 
 /** Surface the supported set so tests + help text stay in sync. */
@@ -223,39 +283,31 @@ const POSITIONAL_BUILDERS: Record<string, PositionalBuilder> = {
     const approvalId = String(v.approval_id ?? v.approvalId ?? '');
     const proposalId = String(v.proposal_id ?? v.proposalId ?? '');
     const yesWeight = String(v.yes_weight ?? v.yesWeight ?? '');
-    return [
-      'cast-vote',
-      shellQuote(collectionId),
-      shellQuote(approvalLevel),
-      shellQuote(approverAddress),
-      shellQuote(approvalId),
-      shellQuote(proposalId),
-      shellQuote(yesWeight)
-    ];
+    return ['cast-vote', collectionId, approvalLevel, approverAddress, approvalId, proposalId, yesWeight];
   },
   '/tokenization.MsgSetOutgoingApproval': (v, writeJson) => {
     // Use: set-outgoing-approval [collection-id] [approval-json-or-file]
     const collectionId = String(v.collectionId ?? v.collection_id ?? '');
     const approvalJsonPath = writeJson(v.approval);
-    return ['set-outgoing-approval', shellQuote(collectionId), approvalJsonPath];
+    return ['set-outgoing-approval', collectionId, approvalJsonPath];
   },
   '/tokenization.MsgSetIncomingApproval': (v, writeJson) => {
     // Use: set-incoming-approval [collection-id] [approval-json-or-file]
     const collectionId = String(v.collectionId ?? v.collection_id ?? '');
     const approvalJsonPath = writeJson(v.approval);
-    return ['set-incoming-approval', shellQuote(collectionId), approvalJsonPath];
+    return ['set-incoming-approval', collectionId, approvalJsonPath];
   },
   '/tokenization.MsgDeleteOutgoingApproval': (v) => {
     // Use: delete-outgoing-approval [collection-id] [approval-id]
     const collectionId = String(v.collectionId ?? v.collection_id ?? '');
     const approvalId = String(v.approvalId ?? v.approval_id ?? '');
-    return ['delete-outgoing-approval', shellQuote(collectionId), shellQuote(approvalId)];
+    return ['delete-outgoing-approval', collectionId, approvalId];
   },
   '/tokenization.MsgDeleteIncomingApproval': (v) => {
     // Use: delete-incoming-approval [collection-id] [approval-id]
     const collectionId = String(v.collectionId ?? v.collection_id ?? '');
     const approvalId = String(v.approvalId ?? v.approval_id ?? '');
-    return ['delete-incoming-approval', shellQuote(collectionId), shellQuote(approvalId)];
+    return ['delete-incoming-approval', collectionId, approvalId];
   },
   '/tokenization.MsgCreateDynamicStore': (v) => {
     // Use: create-dynamic-store [default-value]
@@ -272,34 +324,24 @@ const POSITIONAL_BUILDERS: Record<string, PositionalBuilder> = {
     const storeId = String(v.storeId ?? v.store_id ?? '');
     const defaultValue = Boolean(v.defaultValue ?? v.default_value ?? false);
     const globalEnabled = Boolean(v.globalEnabled ?? v.global_enabled ?? true);
-    return [
-      'update-dynamic-store',
-      shellQuote(storeId),
-      String(defaultValue),
-      String(globalEnabled)
-    ];
+    return ['update-dynamic-store', storeId, String(defaultValue), String(globalEnabled)];
   },
   '/tokenization.MsgDeleteDynamicStore': (v) => {
     // Use: delete-dynamic-store [store-id]
     const storeId = String(v.storeId ?? v.store_id ?? '');
-    return ['delete-dynamic-store', shellQuote(storeId)];
+    return ['delete-dynamic-store', storeId];
   },
   '/tokenization.MsgSetDynamicStoreValue': (v) => {
     // Use: set-dynamic-store-value [store-id] [address] [value]
     const storeId = String(v.storeId ?? v.store_id ?? '');
     const address = String(v.address ?? '');
     const value = Boolean(v.value ?? false);
-    return [
-      'set-dynamic-store-value',
-      shellQuote(storeId),
-      shellQuote(address),
-      String(value)
-    ];
+    return ['set-dynamic-store-value', storeId, address, String(value)];
   }
 };
 
-/** Conservative shell-quote for positional args. Wraps in single quotes if any non-safe char is present. */
-function shellQuote(s: string): string {
+/** Conservative shell-quote for printed shell arguments. Wraps in single quotes if any non-safe char is present. */
+export function shellQuote(s: string): string {
   if (s === '') return "''";
   if (/^[A-Za-z0-9_\-./:@]+$/.test(s)) return s;
   // Escape single quotes via the standard bash idiom.
@@ -309,6 +351,10 @@ function shellQuote(s: string): string {
 export interface KeyringMultiCommandStep {
   /** Single-tx command ending in `--yes` (no `sleep` / `&&` chaining). */
   commandLine: string;
+  /** Chain binary executable name or path. */
+  binary: string;
+  /** Raw argv passed directly to the chain binary without a shell. */
+  args: string[];
   /** JSON files this step wrote (empty for purely positional verbs). */
   msgFilePaths: string[];
   typeUrl: string;
@@ -323,6 +369,8 @@ export interface KeyringMultiCommandResult {
   commandLine: string;
   /** Per-msg steps, used by `--exec` so each tx can run (and be rewritten) separately. */
   steps: KeyringMultiCommandStep[];
+  /** Temporary directory created for generated message JSON files, if any. */
+  tmpDir?: string;
 }
 
 export interface KeyringMultiCommandOptions {
@@ -349,6 +397,11 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
   const chainId = opts.chainId ?? network.chainId;
   const nodeUrl = opts.nodeUrl ?? network.rpc;
   const msgFilePaths: string[] = [];
+  let tmpDir: string | undefined;
+  const ensureTmpDir = (): string => {
+    if (!tmpDir) tmpDir = createPrivateTempDir();
+    return tmpDir;
+  };
 
   const blocks: string[] = [];
   const steps: KeyringMultiCommandStep[] = [];
@@ -357,8 +410,8 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
     const jsonArgSubcommand = TYPE_URL_TO_SUBCOMMAND[m.typeUrl];
     const positionalBuilder = POSITIONAL_BUILDERS[m.typeUrl];
 
-    let head: string;
-    let stepValue: Record<string, unknown> =
+    let subArgs: string[];
+    const stepValue: Record<string, unknown> =
       m.value && typeof m.value === 'object' ? { ...(m.value as Record<string, unknown>) } : {};
     const stepFiles: string[] = [];
     if (jsonArgSubcommand) {
@@ -368,21 +421,20 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
       if (opts.manager && !value.manager && m.typeUrl === '/tokenization.MsgCreateCollection') {
         value.manager = opts.manager;
       }
-      const msgFilePath = path.join(os.tmpdir(), `bb-msg-${crypto.randomBytes(4).toString('hex')}.json`);
-      fs.writeFileSync(msgFilePath, JSON.stringify(value, null, 2) + '\n', { mode: 0o600 });
+      const msgFilePath = path.join(ensureTmpDir(), `bb-msg-${crypto.randomBytes(8).toString('hex')}.json`);
+      writePrivateJsonFile(msgFilePath, value);
       msgFilePaths.push(msgFilePath);
       stepFiles.push(msgFilePath);
-      head = `${opts.binary} tx tokenization ${jsonArgSubcommand} ${msgFilePath}`;
+      subArgs = [jsonArgSubcommand, msgFilePath];
     } else if (positionalBuilder) {
       const writeJson = (data: unknown): string => {
-        const p = path.join(os.tmpdir(), `bb-msg-${crypto.randomBytes(4).toString('hex')}.json`);
-        fs.writeFileSync(p, JSON.stringify(data, null, 2) + '\n', { mode: 0o600 });
+        const p = path.join(ensureTmpDir(), `bb-msg-${crypto.randomBytes(8).toString('hex')}.json`);
+        writePrivateJsonFile(p, data);
         msgFilePaths.push(p);
         stepFiles.push(p);
         return p;
       };
-      const parts = positionalBuilder(stepValue, writeJson);
-      head = `${opts.binary} tx tokenization ${parts.join(' ')}`;
+      subArgs = positionalBuilder(stepValue, writeJson);
     } else {
       const supported = [...Object.keys(TYPE_URL_TO_SUBCOMMAND), ...Object.keys(POSITIONAL_BUILDERS)].sort();
       throw new Error(
@@ -391,17 +443,12 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
       );
     }
 
-    const flagLines = [
-      `${head} \\`,
-      `    --from ${opts.from} \\`,
-      `    --chain-id ${chainId} \\`,
-      `    --node ${nodeUrl} \\`,
-      `    --keyring-backend ${opts.keyringBackend} \\`,
-      `    --gas ${opts.gas} --gas-adjustment ${opts.gasAdjustment} --gas-prices 10ubadge \\`,
-      '    --yes'
-    ];
+    const flagLines = formatFlagLines(opts.binary, subArgs, opts, chainId, nodeUrl);
+    const args = buildStepArgs(subArgs, opts, chainId, nodeUrl);
     steps.push({
       commandLine: flagLines.join('\n'),
+      binary: opts.binary,
+      args,
       msgFilePaths: stepFiles,
       typeUrl: m.typeUrl,
       value: stepValue
@@ -420,7 +467,7 @@ export function buildKeyringMultiCommand(opts: KeyringMultiCommandOptions): Keyr
     blocks.push(block.join('\n'));
   }
 
-  return { msgFilePaths, commandLine: blocks.join('\n'), steps };
+  return { msgFilePaths, commandLine: blocks.join('\n'), steps, ...(tmpDir ? { tmpDir } : {}) };
 }
 
 /** Positional-arg msg types the keyring path can handle in multi-msg mode. */

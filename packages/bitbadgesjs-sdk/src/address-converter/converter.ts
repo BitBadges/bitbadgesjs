@@ -30,6 +30,25 @@ const bech32Chain = (name: string, prefix: string) => ({
 
 const BITBADGES = bech32Chain('BITBADGES', 'bb');
 
+function isValidValidatorOperatorAddress(address: string): boolean {
+  if (!address.startsWith('bbvaloper1') || address !== address.toLowerCase()) {
+    return false;
+  }
+  try {
+    const { prefix, words } = bech32.decode(address);
+    if (prefix !== 'bbvaloper') {
+      return false;
+    }
+    const bytes = Buffer.from(bech32.fromWords(words));
+    if (bytes.length !== 20) {
+      return false;
+    }
+    return bech32.encode('bbvaloper', bech32.toWords(bytes)) === address;
+  } catch {
+    return false;
+  }
+}
+
 function makeChecksummedHexDecoder(chainId?: number) {
   return (data: string) => {
     const stripped = stripHexPrefix(data);
@@ -93,7 +112,7 @@ export function convertToBitBadgesAddress(address: string) {
   let bech32Address = '';
 
   if (address.startsWith('bbvaloper')) {
-    return address;
+    return isValidValidatorOperatorAddress(address) ? address : '';
   }
 
   try {
@@ -239,7 +258,7 @@ export function isAddressValid(address: string, chain?: SupportedChain) {
   if (address === 'Mint') {
     isValidAddress = true;
   } else if (address.startsWith('bbvaloper')) {
-    isValidAddress = true;
+    isValidAddress = chain === SupportedChain.COSMOS && isValidValidatorOperatorAddress(address);
   }
 
   return isValidAddress;

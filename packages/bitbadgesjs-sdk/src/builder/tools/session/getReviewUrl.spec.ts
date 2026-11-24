@@ -4,7 +4,7 @@
  * user opens to review + sign on bitbadges.io. Short on purpose: an LLM
  * relaying a multi-KB `#tx=` hash URL would corrupt it.
  */
-import { handleGetReviewUrl } from './getReviewUrl.js';
+import { handleGetReviewUrl, resolveFrontendBase } from './getReviewUrl.js';
 import { getOrCreateSession, resetAllSessions, setCollectionMetadata } from '../../session/sessionState.js';
 
 describe('handleGetReviewUrl', () => {
@@ -98,5 +98,43 @@ describe('handleGetReviewUrl', () => {
     const res = await handleGetReviewUrl({ transaction: { messages: [] } });
     expect(res.success).toBe(false);
     expect(calls).toHaveLength(0);
+  });
+
+  it('allows official BitBadges origins and loopback http frontendUrl overrides', () => {
+    expect(resolveFrontendBase('https://bitbadges.io/')).toBe('https://bitbadges.io');
+    expect(resolveFrontendBase('https://testnet.bitbadges.io')).toBe('https://testnet.bitbadges.io');
+    expect(resolveFrontendBase('http://localhost:3000/')).toBe('http://localhost:3000');
+    expect(resolveFrontendBase('http://127.0.0.1:8080')).toBe('http://127.0.0.1:8080');
+  });
+
+  it('rejects untrusted or unsafe frontendUrl arguments without calling the network', async () => {
+    const badUrls = [
+      'https://evil.example.com',
+      'https://bitbadges.io.evil.com',
+      'http://bitbadges.io',
+      'javascript:alert(1)',
+      'data:text/html,<script>alert(1)</script>',
+      'https://user:pass@bitbadges.io',
+      'https://bitbadges.io?next=https://evil.example.com',
+      'https://bitbadges.io#frag'
+    ];
+    for (const frontendUrl of badUrls) {
+      const res = await handleGetReviewUrl({
+        transaction: { messages: [{ typeUrl: '/tokenization.MsgCreateCollection', value: {} }] },
+        frontendUrl
+      });
+      expect(res.success).toBe(false);
+      expect(res.error).toBeDefined();
+    }
+    expect(calls).toHaveLength(0);
+  });
+
+  it('permits an explicit https BITBADGES_FRONTEND_URL opt-in while rejecting non-loopback http', () => {
+    process.env.BITBADGES_FRONTEND_URL = 'https://preview.example.com/';
+    expect(resolveFrontendBase()).toBe('https://preview.example.com');
+    expect(resolveFrontendBase('https://preview.example.com')).toBe('https://preview.example.com');
+
+    process.env.BITBADGES_FRONTEND_URL = 'http://preview.example.com';
+    expect(() => resolveFrontendBase()).toThrow(/only https:\/\/ or http:\/\/localhost/);
   });
 });

@@ -878,4 +878,50 @@ describe('renewal consent across term changes', () => {
     faucet.approvalCriteria.coinTransfers.push({ ...faucet.approvalCriteria.coinTransfers[0], coins: [{ denom: 'ubadge', amount: 1n }] });
     expect(isUserRecurringApproval(user, faucet)).toBe(false);
   });
+
+  it('rejects faucet approvals with empty coins arrays or empty denom strings', () => {
+    const emptyCoins = makeFaucetApproval();
+    emptyCoins.approvalCriteria.coinTransfers = [
+      { to: 'bb1seller', coins: [], overrideFromWithApproverAddress: false, overrideToWithInitiator: false }
+    ];
+    expect(isSubscriptionFaucetApproval(emptyCoins)).toBe(false);
+
+    const emptyDenom = makeFaucetApproval();
+    emptyDenom.approvalCriteria.coinTransfers = [
+      { to: 'bb1seller', coins: [{ denom: '', amount: 100n }], overrideFromWithApproverAddress: false, overrideToWithInitiator: false }
+    ];
+    expect(isSubscriptionFaucetApproval(emptyDenom)).toBe(false);
+  });
+
+  it('userRecurringApproval sums all coins across multi-coin transfers and handles empty coins safely', () => {
+    const faucet = makeFaucetApproval();
+    faucet.approvalCriteria.coinTransfers = [
+      {
+        to: 'bb1seller',
+        coins: [
+          { denom: 'ubadge', amount: 100n },
+          { denom: 'ubadge', amount: 50n }
+        ],
+        overrideFromWithApproverAddress: false,
+        overrideToWithInitiator: false
+      },
+      {
+        to: 'bb1fee',
+        coins: [],
+        overrideFromWithApproverAddress: false,
+        overrideToWithInitiator: false
+      }
+    ];
+    const recurring = userRecurringApproval({
+      subscriptionApproval: faucet,
+      firstIntervalStartTime: 1n,
+      ubadgeTipAmount: 25n,
+      transferTimes: UintRangeArray.FullRanges(),
+      approvalId: 'multi-coin-sub',
+      tokenIds: [{ start: 1n, end: 1n }],
+      denom: 'ubadge'
+    });
+    expect(recurring.approvalCriteria!.coinTransfers![0].coins[0].amount).toBe(175n);
+    expect(isUserRecurringApproval(recurring, faucet)).toBe(true);
+  });
 });

@@ -71,6 +71,8 @@ export function buildBounty(params: BountyParams): any {
     expiration: params.expiration || '30d'
   };
 
+  const sharedTrackerId = 'bounty-settlement-tracker';
+
   const collectionApprovals = [
     // Accept — verifier approves, pays recipient
     {
@@ -89,7 +91,7 @@ export function buildBounty(params: BountyParams): any {
       approvalCriteria: {
         predeterminedBalances: mintToBurnBalances(),
         maxNumTransfers: {
-          ...zeroMaxTransfers('bounty-accept-tracker'),
+          ...zeroMaxTransfers(sharedTrackerId),
           overallMaxNumTransfers: '1'
         },
         votingChallenges: [
@@ -128,7 +130,7 @@ export function buildBounty(params: BountyParams): any {
       approvalCriteria: {
         predeterminedBalances: mintToBurnBalances(),
         maxNumTransfers: {
-          ...zeroMaxTransfers('bounty-deny-tracker'),
+          ...zeroMaxTransfers(sharedTrackerId),
           overallMaxNumTransfers: '1'
         },
         votingChallenges: [
@@ -167,7 +169,7 @@ export function buildBounty(params: BountyParams): any {
       approvalCriteria: {
         predeterminedBalances: mintToBurnBalances(),
         maxNumTransfers: {
-          ...zeroMaxTransfers('bounty-expire-tracker'),
+          ...zeroMaxTransfers(sharedTrackerId),
           overallMaxNumTransfers: '1'
         },
         coinTransfers: [
@@ -201,7 +203,7 @@ export function buildBounty(params: BountyParams): any {
     defaultBalances: defaultBalances(),
     invariants: {
       noCustomOwnershipTimes: true,
-      maxSupplyPerId: '0',
+      maxSupplyPerId: '1',
       noForcefulPostMintTransfers: true,
       disablePoolCreation: true
     },

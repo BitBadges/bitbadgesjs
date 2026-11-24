@@ -168,4 +168,18 @@ describe('payment obligations v2', () => {
     expect(() => buildPaymentRequestV2PayMsg(merchant, '42', c, 'share')).toThrow();
     expect(() => buildPaymentRequestV2PayMsg(alice, '42', c, 'share', '1.1')).toThrow();
   });
+  it('rejects validator operator addresses and non-canonical addresses', () => {
+    const { bech32 } = require('bech32');
+    const validValoper = bech32.encode('bbvaloper', bech32.toWords(Buffer.alloc(20, 0x22)));
+    const longModuleAddr = bech32.encode('bb', bech32.toWords(Buffer.alloc(32, 0x33)));
+    for (const badAddr of [validValoper, 'bbvaloper:evil)!(x', alice.toUpperCase(), 'Mint', longModuleAddr]) {
+      const pPayer = params();
+      pPayer.obligations[0].payer = { kind: 'addresses', addresses: [badAddr] };
+      expect(() => buildPaymentRequestV2(pPayer)).toThrow();
+
+      const pRecipient = params();
+      pRecipient.obligations[0].payouts[0].recipient = badAddr;
+      expect(() => buildPaymentRequestV2(pRecipient)).toThrow();
+    }
+  });
 });
