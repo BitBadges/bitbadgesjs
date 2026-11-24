@@ -5,8 +5,11 @@
  * signer) that isn't the chain binary or the browser-bridge.
  *
  * Output mirrors the SDK's `createTransactionPayload()` return shape:
- *   - signDirect.{bodyBytes, authInfoBytes, signBytes}     (Cosmos SIGN_MODE_DIRECT)
- *   - legacyAmino.{bodyBytes, authInfoBytes, signBytes}    (Cosmos SIGN_MODE_AMINO, hardware-wallet friendly)
+ *   - signDirect.{bodyBytes, authInfoBytes, signBytes, hashAlgorithm, signDocBytes}
+ *     SIGN_MODE_DIRECT. signBytes is sha256(SignDoc) for cosmos secp256k1 and
+ *     keccak256(SignDoc) for ethsecp256k1 — already hashed.
+ *   - legacyAmino.{bodyBytes, authInfoBytes, signBytes, hashAlgorithm, signDocBytes}
+ *     SIGN_MODE_AMINO, same hash rule, hardware-wallet friendly.
  *   - evmTx.{to, data, value, functionName}                (EVM precompile call, ready for ethers/viem)
  *
  * Cosmos payloads require `--from <bb1...>` plus the public key (auto-
@@ -26,7 +29,8 @@ import { Command } from 'commander';
 import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
 import { NETWORK_CONFIGS } from '../../signing/types.js';
 import { createTransactionPayload } from '../../transactions/messages/base.js';
-import { toUint64 } from '../../transactions/messages/common.js';
+import { toUint64, type SignerPubKeyType } from '../../transactions/messages/common.js';
+import { normalizeSignerPubKeyType, signerPubKeyTypeUrl } from '../../transactions/messages/transaction.js';
 import { encodeTokenizationMsgFromJson, supportedTokenizationTypeUrls } from '../../transactions/messages/bitbadges/tokenization/fromJson.js';
 import { evmToCosmosAddress } from '../../transactions/precompile/helpers.js';
 import { emit, emitError, bbError, BBErrorCode } from '../utils/envelope.js';
@@ -96,6 +100,17 @@ interface FetchedAccountInfo {
   accountNumber: string;
   sequence: string;
   publicKey?: string;
+  pubKeyType?: string;
+}
+
+function readAccountPubKeyType(acct: any): string | undefined {
+  if (typeof acct?.pubKeyType === 'string' && acct.pubKeyType.trim()) return acct.pubKeyType;
+  const pk = acct?.publicKey ?? acct?.pubKey;
+  if (pk && typeof pk === 'object') {
+    const t = pk.typeUrl ?? pk['@type'] ?? pk.type;
+    if (typeof t === 'string' && t.trim()) return t;
+  }
+  return undefined;
 }
 
 function normalizeIndexerBase(baseUrl: string): string {
@@ -123,6 +138,7 @@ async function fetchAccountInfo(baseUrl: string, apiKey: string | undefined, add
     accountNumber: toUint64(acct.accountNumber ?? 0, 'accountNumber').toString(),
     sequence: toUint64(acct.sequence ?? 0, 'sequence').toString(),
     publicKey: acct.publicKey?.key ?? acct.publicKey,
+    pubKeyType: readAccountPubKeyType(acct),
   };
 }
 
@@ -140,6 +156,7 @@ export const genTxPayloadCommand = new Command('gen-tx-payload')
   .option('--evm-from <0x...>', 'Use this EVM address for the evmTx payload alongside a bb1 sender. Implies --with-evm-tx.')
   .option('--with-evm-tx', 'Force-emit the evmTx precompile call alongside the Cosmos payloads. Useful when --from is bb1 and you also want a ready-to-send EVM tx.')
   .option('--public-key <b64>', 'Base64 compressed pubkey. Required if not fetched from indexer (--no-fetch) or if account is not yet onchain.')
+  .option('--pubkey-type <type>', 'Signer pubkey type: secp256k1 (sha256 signBytes) or ethsecp256k1 / eth_secp256k1 (keccak256). Default: secp256k1, or the indexer account pubKeyType when fetched.')
   .option('--account-number <n>', 'Override account number (skip indexer round-trip for this field)')
   .option('--sequence <n>', 'Override sequence (skip indexer round-trip for this field)')
   .option('--chain-id <id>', 'Cosmos chain ID override (default per network: bitbadges-1 / etc)')
@@ -207,6 +224,9 @@ export async function runGenPayload(
   let accountNumber: string | undefined = opts.accountNumber !== undefined ? toUint64(opts.accountNumber, '--account-number').toString() : undefined;
   let sequence: string | undefined = opts.sequence !== undefined ? toUint64(opts.sequence, '--sequence').toString() : undefined;
   let publicKey: string | undefined = opts.publicKey;
+  // --pubkey-type wins. Otherwise take the indexer account's pubKeyType
+  // when a fetch happens. Empty stays unset and normalizes to secp256k1.
+  let pubKeyTypeRaw: string | undefined = typeof opts.pubkeyType === 'string' ? opts.pubkeyType : undefined;
 
   if (opts.fetch !== false) {
     if (accountNumber === undefined || sequence === undefined || !publicKey) {
@@ -215,6 +235,7 @@ export async function runGenPayload(
         if (accountNumber === undefined) accountNumber = info.accountNumber;
         if (sequence === undefined) sequence = info.sequence;
         if (!publicKey && info.publicKey) publicKey = info.publicKey;
+        if (pubKeyTypeRaw === undefined && info.pubKeyType) pubKeyTypeRaw = info.pubKeyType;
       } catch (err: any) {
         emitError(
           new Error(
@@ -274,6 +295,15 @@ export async function runGenPayload(
   const gas = String(opts.gas ?? 400000);
   const memo = String(opts.memo ?? '');
 
+  let pubKeyType: SignerPubKeyType = 'secp256k1';
+  if (wantCosmosPayloads) {
+    try {
+      pubKeyType = normalizeSignerPubKeyType(pubKeyTypeRaw);
+    } catch (err: any) {
+      emitError(err, { code: 'invalid_input', exitCode: 2 });
+    }
+  }
+
   let payload;
   try {
     payload = createTransactionPayload(
@@ -285,6 +315,7 @@ export async function runGenPayload(
                 sequence: sequence,
                 accountNumber: accountNumber,
                 publicKey: publicKey!,
+                pubKeyType,
               },
             }
           : {}),
@@ -309,16 +340,27 @@ export async function runGenPayload(
     messages: messagesInput,
   };
   if (wantCosmosPayloads) {
-    envelope.sender = { address: senderAddress, accountNumber: String(accountNumber), sequence: String(sequence), publicKey };
+    const pubKeyTypeUrl = signerPubKeyTypeUrl(pubKeyType);
+    envelope.sender = {
+      address: senderAddress,
+      accountNumber: String(accountNumber),
+      sequence: String(sequence),
+      publicKey,
+      pubKeyType: pubKeyTypeUrl,
+    };
     envelope.signDirect = {
       bodyBytes: bytesToBase64(payload.signDirect.body.toBinary()),
       authInfoBytes: bytesToBase64(payload.signDirect.authInfo.toBinary()),
       signBytes: payload.signDirect.signBytes,
+      hashAlgorithm: payload.signDirect.hashAlgorithm,
+      signDocBytes: bytesToBase64(payload.signDirect.signDocBytes),
     };
     envelope.legacyAmino = {
       bodyBytes: bytesToBase64(payload.legacyAmino.body.toBinary()),
       authInfoBytes: bytesToBase64(payload.legacyAmino.authInfo.toBinary()),
       signBytes: payload.legacyAmino.signBytes,
+      hashAlgorithm: payload.legacyAmino.hashAlgorithm,
+      signDocBytes: bytesToBase64(payload.legacyAmino.signDocBytes),
     };
   }
   if (evmAddress) {
@@ -337,11 +379,13 @@ export async function runGenPayload(
   }
   // Broadcast endpoint hint so callers don't have to know our routes.
   envelope.broadcastEndpoint = `${normalizeIndexerBase(baseUrl)}/broadcast`;
+  const signAlgo = wantCosmosPayloads ? payload.signDirect.hashAlgorithm : undefined;
+  const signTypeUrl = wantCosmosPayloads ? signerPubKeyTypeUrl(pubKeyType) : undefined;
   envelope.instructions = [
     ...(wantCosmosPayloads ? [
-      'Cosmos signing — pick one mode:',
-      '  SIGN_MODE_DIRECT: sign signDirect.signBytes; assemble TxRaw{bodyBytes, authInfoBytes, [signature]} and POST to broadcastEndpoint.',
-      '  SIGN_MODE_AMINO:  sign legacyAmino.signBytes (for hardware wallets that already speak amino).',
+      `Cosmos signing — pick one mode. signBytes is the ${signAlgo} digest of the sign doc (32 bytes, already hashed). Sign those bytes directly; do not hash them again. authInfo declares ${signTypeUrl}, which verifies ${signAlgo}(sign doc).`,
+      `  SIGN_MODE_DIRECT: sign signDirect.signBytes (${signAlgo} of the protobuf SignDoc); assemble TxRaw{bodyBytes, authInfoBytes, [signature]} and POST to broadcastEndpoint.`,
+      `  SIGN_MODE_AMINO:  sign legacyAmino.signBytes (${signAlgo} of the amino JSON sign doc) the same way.`,
     ] : []),
     ...(payload.evmTx ? [
       'EVM signing — build an EIP-1559 tx with: { chainId: evmTx.chainId, to: evmTx.to, data: evmTx.data, value: evmTx.value, gasLimit: evmTx.gasLimit }, sign with your EVM key, send via any RPC.',

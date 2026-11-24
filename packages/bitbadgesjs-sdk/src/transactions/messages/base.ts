@@ -5,9 +5,9 @@ import { SupportedChain } from '@/common/types.js';
 import { generatePostBodyBroadcast } from '@/node-rest-api/broadcast.js';
 import { type AuthInfo, type TxBody } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
 import type { AnyMessage, Message } from '@bufbuild/protobuf';
-import type { Chain, Fee, Sender, Uint64Like } from './common.js';
+import type { Chain, Fee, Sender, SignHashAlgorithm, Uint64Like } from './common.js';
 import { toUint64 } from './common.js';
-import { createTransactionWithMultipleMessages } from './transaction.js';
+import { createTransactionWithMultipleMessages, normalizeSignerPubKeyType } from './transaction.js';
 import { createTxRaw } from './txRaw.js';
 import type { MessageGenerated } from './utils.js';
 import { normalizeMessagesIfNecessary, createProtoMsg } from './utils.js';
@@ -56,6 +56,13 @@ export interface TxContext {
      */
     accountNumber: Uint64Like;
     publicKey: string;
+    /**
+     * Pubkey type declared in AuthInfo, which selects the signBytes digest.
+     * `secp256k1` (default) → sha256. `ethsecp256k1` / `eth_secp256k1` → keccak256.
+     * Full type URLs (`/cosmos.crypto.secp256k1.PubKey`,
+     * `/cosmos.evm.crypto.v1.ethsecp256k1.PubKey`) are accepted too.
+     */
+    pubKeyType?: string;
   };
 
   fee: Fee;
@@ -101,7 +108,8 @@ const createCosmosPayload = (context: LegacyTxContext, cosmosPayload: any | any[
     sender.pubkey,
     sender.sequence,
     sender.accountNumber,
-    chain.cosmosChainId
+    chain.cosmosChainId,
+    sender.pubKeyType ?? 'secp256k1'
   );
 };
 
@@ -119,13 +127,28 @@ export interface TransactionPayload {
   signDirect: {
     body: TxBody;
     authInfo: AuthInfo;
+    /**
+     * Base64 digest of the protobuf SignDoc. Already hashed — sign these
+     * 32 bytes directly. `hashAlgorithm` names the hash, and it matches the
+     * pubkey type in `authInfo` (sha256 for cosmos secp256k1, keccak256 for ethsecp256k1).
+     */
     signBytes: string;
+    hashAlgorithm: SignHashAlgorithm;
+    /** Raw protobuf SignDoc bytes that were hashed into `signBytes`. */
+    signDocBytes: Uint8Array;
   };
   /** Cosmos Legacy Amino payload. Present when sender is provided in TxContext. */
   legacyAmino: {
     body: TxBody;
     authInfo: AuthInfo;
+    /**
+     * Base64 digest of the amino JSON sign doc. Same hash rule as
+     * `signDirect.signBytes`.
+     */
     signBytes: string;
+    hashAlgorithm: SignHashAlgorithm;
+    /** Raw amino JSON bytes that were hashed into `signBytes`. */
+    signDocBytes: Uint8Array;
   };
   /** Optional EVM transaction details. Present when evmAddress is provided in TxContext and messages are supported. */
   evmTx?: {
@@ -186,7 +209,8 @@ const wrapExternalTxContext = (context: TxContext): LegacyTxContext | null => {
       accountAddress: convertToBitBadgesAddress(context.sender.address),
       pubkey: context.sender.publicKey || '',
       sequence,
-      accountNumber
+      accountNumber,
+      pubKeyType: normalizeSignerPubKeyType(context.sender.pubKeyType)
     },
     fee: context.fee,
     memo: context.memo || ''
@@ -196,11 +220,8 @@ const wrapExternalTxContext = (context: TxContext): LegacyTxContext | null => {
     throw new Error('Account address must be a validly formatted BitBadges address');
   }
 
-  if (accountNumber <= 0n) {
-    throw new Error(
-      'Account number must be greater than 0. This means the user is unregistered on the blockchain. Users can be registered by sending them any amount of BADGE.'
-    );
-  }
+  // Account number 0 is valid: it is the first account on a chain (BB-337).
+  // toUint64 already rejects negatives. Do not treat 0 as "unregistered".
 
   return txContext;
 };
@@ -372,12 +393,16 @@ const createTransactionPayloadFromTxContext = (
       signDirect: {
         body: {} as TxBody,
         authInfo: {} as AuthInfo,
-        signBytes: ''
+        signBytes: '',
+        hashAlgorithm: 'sha256',
+        signDocBytes: new Uint8Array()
       },
       legacyAmino: {
         body: {} as TxBody,
         authInfo: {} as AuthInfo,
-        signBytes: ''
+        signBytes: '',
+        hashAlgorithm: 'sha256',
+        signDocBytes: new Uint8Array()
       },
       evmTx
     };

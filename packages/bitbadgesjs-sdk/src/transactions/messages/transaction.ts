@@ -6,8 +6,9 @@ import { AuthInfo, Fee, ModeInfo, ModeInfo_Single, SignDoc, SignerInfo, TxBody }
 import { convertProtoMessageToObject } from '@/transactions/amino/objectConverter.js';
 import { AminoTypes } from '@/transactions/amino/registry.js';
 import type { Any } from '@bufbuild/protobuf';
+import { getBytes, sha256 as sha256Hex } from 'ethers';
 import { Keccak } from 'sha3';
-import { toUint64, type Uint64Like } from './common.js';
+import { toUint64, type SignHashAlgorithm, type SignerPubKeyType, type Uint64Like } from './common.js';
 import { makeSignDoc, serializeSignDoc, StdFee } from './signDoc.js';
 import type { MessageGenerated } from './utils.js';
 import { createAnyMessage } from './utils.js';
@@ -23,6 +24,57 @@ export function keccak256ToBase64(content: Uint8Array) {
   hash.update(Buffer.from(content));
   const bytes = hash.digest('binary');
   return Buffer.from(bytes).toString('base64');
+}
+
+/** Type URL written into AuthInfo for a cosmos secp256k1 signer. Verifies sha256(signDoc). */
+export const COSMOS_SECP256K1_TYPE_URL = '/cosmos.crypto.secp256k1.PubKey';
+/** Type URL written into AuthInfo for an ethsecp256k1 signer. Verifies keccak256(signDoc). */
+export const ETH_SECP256K1_TYPE_URL = '/cosmos.evm.crypto.v1.ethsecp256k1.PubKey';
+
+// NIST SHA-256, base64. ethers is already a browser-safe dependency; node:crypto
+// is not, and this module is imported by the web SDK via createTransactionPayload.
+export function sha256ToBase64(content: Uint8Array) {
+  return Buffer.from(getBytes(sha256Hex(content))).toString('base64');
+}
+
+export function signHashAlgorithmForPubKey(pubKeyType: SignerPubKeyType): SignHashAlgorithm {
+  return pubKeyType === 'ethsecp256k1' ? 'keccak256' : 'sha256';
+}
+
+export function signerPubKeyTypeUrl(pubKeyType: SignerPubKeyType): string {
+  return pubKeyType === 'ethsecp256k1' ? ETH_SECP256K1_TYPE_URL : COSMOS_SECP256K1_TYPE_URL;
+}
+
+/**
+ * Digest of a sign document for the pubkey that will verify it.
+ * ethsecp256k1 goes through {@link keccak256ToBase64} unchanged.
+ * cosmos secp256k1 uses SHA-256, which is what `secp256k1.PubKey.VerifySignature` applies.
+ */
+export function digestForPubKeyType(content: Uint8Array, pubKeyType: SignerPubKeyType): string {
+  if (pubKeyType === 'ethsecp256k1') return keccak256ToBase64(content);
+  return sha256ToBase64(content);
+}
+
+/**
+ * Accept the short names and the AuthInfo type URLs. Empty means the
+ * historical default: cosmos secp256k1. Unknown values throw — guessing
+ * the wrong hash produces a signature the chain rejects with code 4.
+ */
+export function normalizeSignerPubKeyType(value: string | undefined | null): SignerPubKeyType {
+  if (value == null) return 'secp256k1';
+  const trimmed = value.trim();
+  if (!trimmed) return 'secp256k1';
+  const v = trimmed.replace(/^\//, '').toLowerCase();
+  // Check eth first: "ethsecp256k1.pubkey" also ends with "secp256k1.pubkey".
+  if (v === 'ethsecp256k1' || v === 'eth_secp256k1' || v.includes('eth_secp256k1') || v.endsWith('ethsecp256k1.pubkey')) {
+    return 'ethsecp256k1';
+  }
+  if (v === 'secp256k1' || v.endsWith('secp256k1.pubkey') || v === 'tendermint/pubkeysecp256k1') {
+    return 'secp256k1';
+  }
+  throw new Error(
+    `Unknown signer pubkey type "${value}". Expected secp256k1 (${COSMOS_SECP256K1_TYPE_URL}) or ethsecp256k1 (${ETH_SECP256K1_TYPE_URL}).`
+  );
 }
 
 // Canonical zero strings the chain emits for unset customtype fields.
@@ -213,10 +265,9 @@ export function createStdSignDocFromProto(protoMessages: any[], fee: StdFee, cha
   return makeSignDoc(aminoMsgs, fee, chainId, memo, accountNumber, sequence);
 }
 
-// Returns the hashed digest of the corresponding StdSignDoc.
-// If the StdSignDoc cannot be generated (e.g. types are not
-// supported), returns an empty string.
-export function createStdSignDigestFromProto(
+// Amino JSON bytes that legacyAmino.signBytes hashes. Null when the
+// StdSignDoc cannot be generated (types not supported).
+function aminoSignDocBytes(
   messages: any,
   memo: string,
   fee: string,
@@ -225,15 +276,35 @@ export function createStdSignDigestFromProto(
   sequence: Uint64Like,
   accountNumber: Uint64Like,
   chainId: string
-) {
+): Uint8Array | null {
   try {
     const stdFee = createStdFee(fee, denom, gasLimit);
     const stdSignDoc = createStdSignDocFromProto(messages, stdFee, chainId, memo, sequence, accountNumber);
-
-    return keccak256ToBase64(serializeSignDoc(stdSignDoc));
+    return serializeSignDoc(stdSignDoc);
   } catch {
-    return '';
+    return null;
   }
+}
+
+// Returns the hashed digest of the corresponding StdSignDoc.
+// If the StdSignDoc cannot be generated (e.g. types are not
+// supported), returns an empty string.
+// The hash follows the signer pubkey: sha256 for cosmos secp256k1,
+// keccak256 for ethsecp256k1 (BB-337).
+export function createStdSignDigestFromProto(
+  messages: any,
+  memo: string,
+  fee: string,
+  denom: string,
+  gasLimit: number,
+  sequence: Uint64Like,
+  accountNumber: Uint64Like,
+  chainId: string,
+  pubKeyType: SignerPubKeyType = 'secp256k1'
+) {
+  const bytes = aminoSignDocBytes(messages, memo, fee, denom, gasLimit, sequence, accountNumber, chainId);
+  if (!bytes) return '';
+  return digestForPubKeyType(bytes, pubKeyType);
 }
 
 export function createTransactionWithMultipleMessages(
@@ -245,32 +316,48 @@ export function createTransactionWithMultipleMessages(
   pubKey: string,
   sequence: Uint64Like,
   accountNumber: Uint64Like,
-  chainId: string
+  chainId: string,
+  // Default matches the AuthInfo this function has always emitted
+  // (cosmos.crypto.secp256k1.PubKey). That verifier checks sha256(signDoc).
+  // Pass 'ethsecp256k1' to keep the keccak digest and the eth pubkey type.
+  // EIP-712 / browser / EVM signing do not read these signBytes.
+  pubKeyType: SignerPubKeyType = 'secp256k1'
 ) {
   const body = createBodyWithMultipleMessages(messages, memo);
   const feeMessage = createFee(fee, denom, gasLimit);
   const pubKeyDecoded = Buffer.from(pubKey, 'base64');
+  const hashAlgorithm = signHashAlgorithmForPubKey(pubKeyType);
+  const makeSignerInfo = pubKeyType === 'ethsecp256k1' ? createSignerInfoEthsecp256k1 : createSignerInfo;
 
-  const aminoSignerInfo = createSignerInfo(new Uint8Array(pubKeyDecoded), sequence, LEGACY_AMINO);
+  const aminoRaw = aminoSignDocBytes(messages, memo, fee, denom, gasLimit, sequence, accountNumber, chainId);
+  const aminoSignDocBytesOut = aminoRaw ?? new Uint8Array();
+  const aminoSignDigest = aminoRaw ? digestForPubKeyType(aminoRaw, pubKeyType) : '';
+
+  const aminoSignerInfo = makeSignerInfo(new Uint8Array(pubKeyDecoded), sequence, LEGACY_AMINO);
   const aminoAuthInfo = createAuthInfo(aminoSignerInfo, feeMessage);
-  const aminoSignDigest = createStdSignDigestFromProto(messages, memo, fee, denom, gasLimit, sequence, accountNumber, chainId);
 
-  const directSignerInfo = createSignerInfo(new Uint8Array(pubKeyDecoded), sequence, SIGN_DIRECT);
+  const directSignerInfo = makeSignerInfo(new Uint8Array(pubKeyDecoded), sequence, SIGN_DIRECT);
   const directAuthInfo = createAuthInfo(directSignerInfo, feeMessage);
   const directSignDoc = createSignDoc(body.toBinary(), directAuthInfo.toBinary(), chainId, accountNumber);
-
-  const directSignDigest = keccak256ToBase64(directSignDoc.toBinary());
+  const directSignDocBytes = directSignDoc.toBinary();
+  const directSignDigest = digestForPubKeyType(directSignDocBytes, pubKeyType);
 
   return {
+    pubKeyType,
+    hashAlgorithm,
     legacyAmino: {
       body,
       authInfo: aminoAuthInfo,
-      signBytes: aminoSignDigest
+      signBytes: aminoSignDigest,
+      hashAlgorithm,
+      signDocBytes: aminoSignDocBytesOut
     },
     signDirect: {
       body,
       authInfo: directAuthInfo,
-      signBytes: directSignDigest
+      signBytes: directSignDigest,
+      hashAlgorithm,
+      signDocBytes: directSignDocBytes
     }
   };
 }
@@ -284,7 +371,8 @@ export function createTransaction(
   pubKey: string,
   sequence: Uint64Like,
   accountNumber: Uint64Like,
-  chainId: string
+  chainId: string,
+  pubKeyType: SignerPubKeyType = 'secp256k1'
 ) {
-  return createTransactionWithMultipleMessages([message], memo, fee, denom, gasLimit, pubKey, sequence, accountNumber, chainId);
+  return createTransactionWithMultipleMessages([message], memo, fee, denom, gasLimit, pubKey, sequence, accountNumber, chainId, pubKeyType);
 }
