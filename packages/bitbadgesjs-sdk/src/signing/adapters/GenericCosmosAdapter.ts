@@ -367,8 +367,11 @@ export class GenericCosmosAdapter extends BaseWalletAdapter implements WalletAda
     }
 
     // For direct key signing, construct the SignDoc and SHA256 hash it.
-    // The payload.signDirect.signBytes is keccak256-hashed (for ethermint compatibility),
-    // but cosmos.crypto.secp256k1.PubKey requires SHA256 verification.
+    // AuthInfo from createTransactionPayload declares cosmos.crypto.secp256k1.PubKey,
+    // whose VerifySignature hashes with SHA-256. signBytes is the digest
+    // gen-payload hands to external signers (sha256 or keccak256 per pubkey
+    // type) — this path does not use that field. The bytes signed here are
+    // sha256(SignDoc), unchanged from before BB-337.
     const { createHash } = await import('crypto');
     const { SignDoc } = await import('@/proto/cosmos/tx/v1beta1/tx_pb.js');
     const signDoc = new SignDoc({

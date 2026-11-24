@@ -17,7 +17,7 @@ import { Coin } from '@/proto/cosmos/base/v1beta1/coin_pb.js';
 import { MsgSend } from '@/proto/cosmos/bank/v1beta1/tx_pb.js';
 import { SignDoc } from '@/proto/cosmos/tx/v1beta1/tx_pb.js';
 import { toUint64 } from './common.js';
-import { createSignDoc, createStdSignDocFromProto, keccak256ToBase64 } from './transaction.js';
+import { createSignDoc, createStdSignDocFromProto, keccak256ToBase64, sha256ToBase64 } from './transaction.js';
 import { makeSignDoc, serializeSignDoc } from './signDoc.js';
 import { createTransactionPayload, type TxContext } from './base.js';
 import { createProtoMsg } from './utils.js';
@@ -124,13 +124,18 @@ describe('BB-34 — account numbers larger than 2^53', () => {
       const payload = createTransactionPayload(context, [msgSend().message]);
 
       // Independently rebuild the expected SignDoc with the exact bigint.
+      // BB-337: this authInfo declares cosmos.crypto.secp256k1.PubKey, so the
+      // digest is sha256(SignDoc). It used to be keccak256, which is what
+      // ethsecp256k1 verifies — signatures over that digest fail with code 4.
       const expectedDoc = new SignDoc({
         bodyBytes: payload.signDirect.body.toBinary() as Uint8Array<ArrayBuffer>,
         authInfoBytes: payload.signDirect.authInfo.toBinary() as Uint8Array<ArrayBuffer>,
         chainId: 'bitbadges-1',
         accountNumber: BIG_ACCOUNT_BIGINT
       });
-      expect(payload.signDirect.signBytes).toBe(keccak256ToBase64(expectedDoc.toBinary()));
+      expect(payload.signDirect.signBytes).toBe(sha256ToBase64(expectedDoc.toBinary()));
+      expect(payload.signDirect.hashAlgorithm).toBe('sha256');
+      expect(payload.signDirect.signBytes).not.toBe(keccak256ToBase64(expectedDoc.toBinary()));
 
       // And it must NOT equal the digest of the corrupted doc.
       const corruptedDoc = new SignDoc({
@@ -139,13 +144,16 @@ describe('BB-34 — account numbers larger than 2^53', () => {
         chainId: 'bitbadges-1',
         accountNumber: CORRUPTED
       });
+      expect(payload.signDirect.signBytes).not.toBe(sha256ToBase64(corruptedDoc.toBinary()));
       expect(payload.signDirect.signBytes).not.toBe(keccak256ToBase64(corruptedDoc.toBinary()));
     });
 
     it('legacyAmino signBytes hash the exact amino JSON', () => {
       const payload = createTransactionPayload(context, [msgSend().message]);
       const expectedAmino = createStdSignDocFromProto([msgSend()], { amount: [{ denom: 'ubadge', amount: '0' }], gas: '400000' }, 'bitbadges-1', '', BIG_SEQUENCE, BIG_ACCOUNT);
-      expect(payload.legacyAmino.signBytes).toBe(keccak256ToBase64(serializeSignDoc(expectedAmino)));
+      expect(payload.legacyAmino.signBytes).toBe(sha256ToBase64(serializeSignDoc(expectedAmino)));
+      expect(payload.legacyAmino.hashAlgorithm).toBe('sha256');
+      expect(payload.legacyAmino.signBytes).not.toBe(keccak256ToBase64(serializeSignDoc(expectedAmino)));
     });
 
     it('REJECTS a sender whose accountNumber was already Number()-corrupted', () => {

@@ -14,6 +14,23 @@ import type { BitBadgesAddress } from '@/api-indexer/docs-types/interfaces.js';
 export type Uint64Like = number | string | bigint;
 
 /**
+ * Pubkey type declared in AuthInfo. Selects the sign-doc digest:
+ * SHA-256 for `cosmos.crypto.secp256k1.PubKey`, keccak256 for
+ * `cosmos.evm.crypto.v1.ethsecp256k1.PubKey`.
+ *
+ * @category Transactions
+ */
+export type SignerPubKeyType = 'secp256k1' | 'ethsecp256k1';
+
+/**
+ * Hash already applied to produce `signBytes`. External signers sign
+ * those 32 bytes directly and must not hash again.
+ *
+ * @category Transactions
+ */
+export type SignHashAlgorithm = 'sha256' | 'keccak256';
+
+/**
  * Convert a {@link Uint64Like} to a bigint, rejecting anything that cannot
  * represent a uint64 exactly. This is the single conversion point for
  * account numbers and sequences — a `number` above 2^53 has ALREADY lost
@@ -74,6 +91,11 @@ export interface Sender {
   sequence: Uint64Like;
   accountNumber: Uint64Like;
   pubkey: string;
+  /**
+   * Key type written into AuthInfo. `secp256k1` (default) hashes the
+   * sign doc with SHA-256; `ethsecp256k1` hashes it with keccak256.
+   */
+  pubKeyType?: SignerPubKeyType;
 }
 
 /**
