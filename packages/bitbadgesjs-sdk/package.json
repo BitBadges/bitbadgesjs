@@ -14,7 +14,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/bitbadges/bitbadgesjs.git",
+    "url": "https://github.com/BitBadges/bitbadgesjs.git",
     "directory": "packages/bitbadgesjs-sdk"
   },
   "homepage": "https://github.com/bitbadges/bitbadgesjs#readme",

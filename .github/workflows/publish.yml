@@ -1,0 +1,77 @@
+name: Publish to npm
+
+# Publishes packages/bitbadgesjs-sdk to npm with npm trusted publishing (OIDC).
+# No NPM_TOKEN is stored. The job waits for approval on the `npm-publish`
+# environment before anything is published.
+#
+# Release flow: bump "version" in packages/bitbadgesjs-sdk/package.json on main,
+# then push a matching tag (e.g. `git tag v0.45.11 && git push origin v0.45.11`;
+# creating a GitHub Release with a new tag also pushes it). Approve the
+# deployment when asked.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing + provenance
+    defaults:
+      run:
+        working-directory: packages/bitbadgesjs-sdk
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Use npm with trusted publishing support (>= 11.5.1)
+        run: npm install -g npm@latest && npm --version
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Refuse if tag does not match package.json version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          if [ "${TAG#v}" != "$PKG_VERSION" ]; then
+            echo "::error::Tag $TAG does not match package.json version $PKG_VERSION; refusing to publish."
+            exit 1
+          fi
+          if npm view "bitbadges@$PKG_VERSION" version >/dev/null 2>&1; then
+            echo "::error::bitbadges@$PKG_VERSION is already on npm; refusing to publish."
+            exit 1
+          fi
+          echo "Publishing bitbadges@$PKG_VERSION from $TAG"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run tests
+        run: bun run test
+
+      - name: Build
+        run: bun run build
+
+      - name: Publish
+        run: npm publish --provenance --access public
