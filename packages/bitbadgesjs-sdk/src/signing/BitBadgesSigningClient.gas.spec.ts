@@ -22,7 +22,14 @@ function setup(chainType: 'cosmos' | 'evm' = 'cosmos', options = {}) {
     .mockImplementation(async (url: string) =>
       url.endsWith('/simulate') ? { data: { gas_info: { gas_used: '1000001' } } } : { data: { tx_response: { txhash: 'cosmos-hash', code: 0 } } }
     );
-  (axios.create as jest.Mock).mockReturnValue({ get, post });
+  (axios.create as jest.Mock).mockReturnValue({
+    get,
+    post,
+    interceptors: {
+      request: { use: jest.fn() },
+      response: { use: jest.fn() }
+    }
+  });
   const adapter = {
     chainType,
     address: chainType === 'evm' ? evmAddress : address,

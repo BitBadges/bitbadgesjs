@@ -1,9 +1,12 @@
 import type { CustomType } from '@/common/base.js';
 import { CustomTypeClass } from '@/common/base.js';
+import { attachScopedApiKey, redactErrorHeaders } from '@/common/axiosApiKey.js';
 import type { NumberType } from '@/common/string-numbers.js';
-import { CollectionId } from '@/interfaces/types/core.js';
+import type { CollectionId } from '@/interfaces/types/core.js';
 
 import axios from 'axios';
+
+export { redactErrorHeaders };
 
 /**
  * @category Indexer
@@ -48,39 +51,6 @@ export interface iBitBadgesApi<T extends NumberType> {
   apiKey?: string;
   convertFunction: (num: NumberType) => T;
   appendedHeaders?: Record<string, string>;
-}
-
-const SENSITIVE_HEADERS = ['x-api-key', 'authorization', 'cookie', 'set-cookie', 'proxy-authorization'];
-
-function redactHeaderBag(headers: any) {
-  if (!headers || typeof headers !== 'object') return;
-  for (const key of Object.keys(headers)) {
-    const value = headers[key];
-    if (SENSITIVE_HEADERS.includes(key.toLowerCase())) {
-      headers[key] = '[REDACTED]';
-    } else if (value && typeof value === 'object' && ['common', 'get', 'post', 'put', 'patch', 'delete', 'head'].includes(key)) {
-      redactHeaderBag(value);
-    }
-  }
-}
-
-/**
- * Redacts credentials from an axios-style error in place so it is safe to rethrow or log.
- */
-export function redactErrorHeaders(error: any): void {
-  if (!error || typeof error !== 'object') return;
-  for (const holder of [error, error.response]) {
-    if (!holder || typeof holder !== 'object') continue;
-    if (holder.config) redactHeaderBag(holder.config.headers);
-    if ('request' in holder) {
-      try {
-        holder.request = undefined;
-      } catch {
-        // ignore non-writable
-      }
-    }
-  }
-  if (error.response) redactHeaderBag(error.response.headers);
 }
 
 function urlPath(url: unknown, baseURL?: unknown): string | undefined {
@@ -138,6 +108,7 @@ export class BaseBitBadgesApi<T extends NumberType> {
         ...apiDetails.appendedHeaders
       }
     });
+    attachScopedApiKey(this.axios, { apiKey: this.apiKey, apiBaseUrl: this.BACKEND_URL });
   }
 
   setAccessToken(token: string) {
@@ -151,7 +122,7 @@ export class BaseBitBadgesApi<T extends NumberType> {
   }
 
   async handleApiError(error: any): Promise<void> {
-    redactErrorHeaders(error);
+    redactErrorHeaders(error, this.apiKey ? [this.apiKey] : undefined);
     console.error(summarizeApiError(error));
 
     if (error && error.response && error.response.data) {

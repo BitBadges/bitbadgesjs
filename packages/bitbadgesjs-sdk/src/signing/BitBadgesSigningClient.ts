@@ -1,4 +1,5 @@
 import { convertToBitBadgesAddress } from '@/address-converter/converter.js';
+import { attachScopedApiKey } from '@/common/axiosApiKey.js';
 import { buildEIP712TypedData, buildEip712TxBroadcastBody, recoverEvmPublicKey } from '@/eip712/index.js';
 import { generateEndpointAccount, type AccountResponse } from '@/node-rest-api/account.js';
 import { createTransactionPayload, createTxBroadcastBody, type TxContext } from '@/transactions/messages/base.js';
@@ -130,12 +131,16 @@ export class BitBadgesSigningClient {
 
     this.apiKey = options.apiKey || (typeof process !== 'undefined' ? process.env?.BITBADGES_API_KEY : undefined);
 
+    // The default header still carries the key. A request interceptor keeps it
+    // only when the resolved host matches apiUrl, and drops it for LCD, RPC,
+    // and custom node hosts. Error responses are redacted before they propagate.
     this.axiosInstance = axios.create({
       headers: {
         'Content-Type': 'application/json',
         ...(this.apiKey && { 'x-api-key': this.apiKey })
       }
     });
+    attachScopedApiKey(this.axiosInstance, { apiKey: this.apiKey, apiBaseUrl: this.networkConfig.apiUrl });
   }
 
   /**
