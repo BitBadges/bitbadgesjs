@@ -11,7 +11,14 @@ function setup() {
   const post = jest.fn(async (url: string) => ({
     data: url.endsWith('/simulate') ? { gas_info: { gas_used: '100001' } } : { tx_response: { code: 0, txhash: 'hash' } }
   }));
-  (axios.create as jest.Mock).mockReturnValue({ post, get: jest.fn(async () => ({ data: { account: { account_number: '1', sequence: '0' } } })) });
+  (axios.create as jest.Mock).mockReturnValue({
+    post,
+    get: jest.fn(async () => ({ data: { account: { account_number: '1', sequence: '0' } } })),
+    interceptors: {
+      request: { use: jest.fn() },
+      response: { use: jest.fn() }
+    }
+  });
   const signTypedData = jest.fn(async (typed: any) => wallet.signingKey.sign(hashTypedData(typed)).serialized);
   const adapter: any = {
     chainType: 'evm',
