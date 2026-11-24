@@ -124,6 +124,13 @@ export interface CodeGenQueryParams extends AdditionalQueryParams {
 /**
  * @category SIWBB Authentication
  */
+// Percent-encode a query value so `&`, `#`, `+`, `=`, `?`, `%` and spaces in it
+// survive the round trip (e.g. base64 `state`, redirect URIs with their own
+// query string). `:`, `/` and `,` stay literal so URLs and scope lists remain
+// readable; they are legal in a query value.
+const encodeQueryValue = (value: string) =>
+  encodeURIComponent(value).replace(/%3A/gi, ':').replace(/%2F/gi, '/').replace(/%2C/gi, ',');
+
 export const generateBitBadgesAuthUrl = (params: CodeGenQueryParams) => {
   let url = `https://bitbadges.io/siwbb/authorize?`;
   for (const [key, value] of Object.entries(params)) {
@@ -133,7 +140,7 @@ export const generateBitBadgesAuthUrl = (params: CodeGenQueryParams) => {
         const encodedValue = encodeURIComponent(valueString);
         url = url.concat(`${key}=${encodedValue}&`);
       } else {
-        url = url.concat(`${key}=${value}&`);
+        url = url.concat(`${key}=${encodeQueryValue(String(value))}&`);
       }
     }
   }
