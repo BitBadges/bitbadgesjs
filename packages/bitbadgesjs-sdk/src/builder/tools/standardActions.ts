@@ -82,11 +82,18 @@ export async function executeInstalledCli(argv: string[]) {
     }));
   } catch (error) {
     failedProcess = true;
-    const failed = error as { stdout?: string; code?: string };
-    if (!failed.stdout)
+    const failed = error as { stdout?: string; code?: string | number };
+    if (!failed.stdout) {
+      // Only a spawn failure means the CLI is missing. A non-zero exit with no
+      // JSON envelope is an input rejection (stderr is intentionally not forwarded).
+      if (failed.code === 'ENOENT' || failed.code === 'EACCES')
+        throw new Error(
+          `bitbadges-cli is not installed or not executable (${failed.code}). Install the bitbadges package or set BITBADGES_CLI_PATH.`
+        );
       throw new Error(
-        `CLI action unavailable or rejected. Ensure bitbadges-cli is installed and run bb ${argv.slice(0, 2).join(' ')} --help for input requirements.`
+        `CLI rejected the input without a JSON result (often a malformed address or option value). Check each argument against bb ${argv.slice(0, 2).join(' ')} --help and retry.`
       );
+    }
     stdout = failed.stdout;
   }
   let result: any;
