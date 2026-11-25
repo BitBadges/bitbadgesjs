@@ -17,7 +17,17 @@ test('returns structured CLI failures but rejects success from a failed process'
 });
 
 test('does not forward stderr into a tool response and requires a JSON envelope', async () => {
-  await expect(executeInstalledCli(['-e', 'console.error("private diagnostic");process.exit(1)'])).rejects.toThrow(/CLI action unavailable/);
+  const message = await executeInstalledCli(['-e', 'console.error("PRIVATE".toLowerCase() + "_diagnostic");process.exit(1)']).then(
+    () => '',
+    (error: Error) => error.message
+  );
+  expect(message).toMatch(/CLI rejected the input/);
+  expect(message).not.toMatch(/private_diagnostic|not installed/);
   await expect(executeInstalledCli(['-e', 'console.log("plain text")'])).rejects.toThrow(/invalid JSON/);
   await expect(executeInstalledCli(['-e', 'console.log("{}")'])).rejects.toThrow(/unsupported result/);
+});
+
+test('reports a missing CLI binary separately from rejected input', async () => {
+  process.env.BITBADGES_CLI_PATH = '/nonexistent/bitbadges-cli';
+  await expect(executeInstalledCli(['subscriptions', 'list'])).rejects.toThrow(/not installed or not executable \(ENOENT\)/);
 });
